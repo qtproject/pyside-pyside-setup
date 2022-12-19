@@ -22,7 +22,7 @@ class CVListUser
 {
 public:
     static const_ptr_value_list produce() { return const_ptr_value_list(); }
-    static void consume(const const_ptr_value_list& l) { (void)l; }
+    static void consume(const const_ptr_value_list &l) { (void)l; }
 };
 
 #endif // LIST_H

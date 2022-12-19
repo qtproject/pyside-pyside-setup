@@ -35,11 +35,13 @@ int Overload::differentReturnTypes(ParamEnum, int val)
 
 int Overload::intOverloads(const Point &, double)
 {
-    return 1; }
+    return 1;
+}
 
 int Overload::intOverloads(int, int)
 {
-    return 2; }
+    return 2;
+}
 
 int Overload::intOverloads(int, int, double)
 {

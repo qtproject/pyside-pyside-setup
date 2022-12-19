@@ -7,30 +7,24 @@ OtherDerived::OtherDerived(int id) : Abstract(id)
 {
 }
 
-OtherDerived::~OtherDerived()
-{
-}
+OtherDerived::~OtherDerived() = default;
 
-Abstract*
-OtherDerived::createObject()
+Abstract *OtherDerived::createObject()
 {
     static int id = 100;
     return new OtherDerived(id++);
 }
 
-void
-OtherDerived::pureVirtual()
+void OtherDerived::pureVirtual()
 {
 }
 
-void*
-OtherDerived::pureVirtualReturningVoidPtr()
+void *OtherDerived::pureVirtualReturningVoidPtr()
 {
     return nullptr;
 }
 
-void
-OtherDerived::unpureVirtual()
+void OtherDerived::unpureVirtual()
 {
 }
 

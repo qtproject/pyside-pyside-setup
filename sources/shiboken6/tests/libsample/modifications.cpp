@@ -1,9 +1,10 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
-#include <iostream>
 #include "modifications.h"
 #include "objecttype.h"
+
+#include <iostream>
 
 Modifications::Modifications()
 {
@@ -77,30 +78,26 @@ void Modifications::argRemoval5(int, bool, int, bool)
 {
 }
 
-std::pair<double, double>
-Modifications::pointToPair(Point pt, bool* ok)
+std::pair<double, double> Modifications::pointToPair(Point pt, bool *ok)
 {
     std::pair<double, double> retval(pt.x(), pt.y());
     *ok = true;
     return retval;
 }
 
-double
-Modifications::multiplyPointCoordsPlusValue(bool* ok, Point pt, double value)
+double Modifications::multiplyPointCoordsPlusValue(bool *ok, Point pt, double value)
 {
     double retval = (pt.x() * pt.y()) + value;
     *ok = true;
     return retval;
 }
 
-int
-Modifications::doublePlus(int value, int plus)
+int Modifications::doublePlus(int value, int plus)
 {
     return (2 * value) + plus;
 }
 
-int
-Modifications::power(int base, int exponent)
+int Modifications::power(int base, int exponent)
 {
     if (exponent == 0)
         return 1;
@@ -110,38 +107,32 @@ Modifications::power(int base, int exponent)
     return retval;
 }
 
-int
-Modifications::timesTen(int number)
+int Modifications::timesTen(int number)
 {
     return number * 10;
 }
 
-int
-Modifications::increment(int number)
+int Modifications::increment(int number)
 {
     return ++number;
 }
 
-void
-Modifications::exclusiveCppStuff()
+void Modifications::exclusiveCppStuff()
 {
     std::cout << __FUNCTION__ << std::endl;
 }
 
-int
-Modifications::cppMultiply(int a, int b)
+int Modifications::cppMultiply(int a, int b)
 {
     return a * b;
 }
 
-const char*
-Modifications::className()
+const char *Modifications::className()
 {
     return "Modifications";
 }
 
-Point
-Modifications::sumPointArray(int arraySize, const Point pointArray[])
+Point Modifications::sumPointArray(int arraySize, const Point pointArray[])
 {
     Point point;
     for (int i = 0; i < arraySize; ++i)
@@ -149,21 +140,18 @@ Modifications::sumPointArray(int arraySize, const Point pointArray[])
     return point;
 }
 
-int
-Modifications::getSize(const void* data, int size)
+int Modifications::getSize(const void *data, int size)
 {
     (void)data;
     return size;
 }
 
-int
-Modifications::sumPointCoordinates(const Point* point)
+int Modifications::sumPointCoordinates(const Point *point)
 {
     return point->x() + point->y();
 }
 
-double
-Modifications::differenceOfPointCoordinates(const Point* pt, bool* ok)
+double Modifications::differenceOfPointCoordinates(const Point *pt, bool *ok)
 {
     if (!pt) {
         *ok = false;
@@ -176,8 +164,7 @@ Modifications::differenceOfPointCoordinates(const Point* pt, bool* ok)
     return result;
 }
 
-bool
-Modifications::nonConversionRuleForArgumentWithDefaultValue(ObjectType** object)
+bool Modifications::nonConversionRuleForArgumentWithDefaultValue(ObjectType **object)
 {
     if (object)
         *object = m_object;

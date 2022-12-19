@@ -8,18 +8,17 @@ VirtualMethods OtherMultipleDerived::returnUselessClass()
     return VirtualMethods();
 }
 
-Base1* OtherMultipleDerived::createObject(const std::string& objName)
+Base1 *OtherMultipleDerived::createObject(const std::string &objName)
 {
     if (objName == "Base1")
         return new Base1;
-    else if (objName == "MDerived1")
+    if (objName == "MDerived1")
         return new MDerived1;
-    else if (objName == "SonOfMDerived1")
+    if (objName == "SonOfMDerived1")
         return new SonOfMDerived1;
-    else if (objName == "MDerived3")
+    if (objName == "MDerived3")
         return new MDerived3;
-    else if (objName == "OtherMultipleDerived")
+    if (objName == "OtherMultipleDerived")
         return new OtherMultipleDerived;
     return nullptr;
 }
-

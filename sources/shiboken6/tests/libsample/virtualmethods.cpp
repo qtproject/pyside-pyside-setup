@@ -5,14 +5,12 @@
 
 int VirtualDtor::dtor_called = 0;
 
-double
-VirtualMethods::virtualMethod0(Point pt, int val, Complex cpx, bool b)
+double VirtualMethods::virtualMethod0(Point pt, int val, Complex cpx, bool b)
 {
     return (pt.x() * pt.y() * val) + cpx.imag() + ((int) b);
 }
 
-bool
-VirtualMethods::createStr(const char* text, Str*& ret)
+bool VirtualMethods::createStr(const char *text, Str *&ret)
 {
     if (!text) {
         ret = nullptr;
@@ -23,8 +21,7 @@ VirtualMethods::createStr(const char* text, Str*& ret)
     return true;
 }
 
-void
-VirtualMethods::getMargins(int* left, int* top, int* right, int* bottom) const
+void VirtualMethods::getMargins(int *left, int *top, int *right, int *bottom) const
 {
     *left = m_left;
     *top = m_top;

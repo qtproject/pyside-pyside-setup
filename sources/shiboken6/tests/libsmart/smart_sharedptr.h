@@ -38,7 +38,7 @@ public:
         logCopyConstructor(typeid(T).name(), this, data());
     }
 
-    SharedPtr& operator=(const SharedPtr& other)
+    SharedPtr &operator=(const SharedPtr &other)
     {
         mPtr = other.mPtr;
         return *this;

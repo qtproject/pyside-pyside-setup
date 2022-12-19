@@ -15,6 +15,7 @@ public:
     Color(unsigned int arg);
 
     bool isNull() const;
+
 private:
     bool m_null = true;
 };
@@ -48,7 +49,7 @@ public:
 
     Pen();
     Pen(SampleNamespace::Option option);
-    Pen(const Color& color);
+    Pen(const Color &color);
     Pen(const Pen &pen);
     Pen(Pen &&);
     Pen &operator=(const Pen &pen);
@@ -63,7 +64,7 @@ public:
     void setRenderHints(RenderHints h);
 
 private:
-    int m_ctor;
+    int m_ctor = EmptyCtor;
     RenderHints m_renderHints = None;
 };
 

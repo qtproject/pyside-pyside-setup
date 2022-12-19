@@ -4,10 +4,10 @@
 #ifndef POLYGON_H
 #define POLYGON_H
 
-#include <list>
+#include "libsamplemacros.h"
 #include "point.h"
 
-#include "libsamplemacros.h"
+#include <list>
 
 class LIBSAMPLE_API Polygon
 {
@@ -22,20 +22,19 @@ public:
 
     void addPoint(Point point);
 
-    inline const PointList& points() const { return m_points; }
+    inline const PointList &points() const { return m_points; }
 
     // This method intentionally receives and returns copies of a Polygon object.
     static Polygon doublePolygonScale(Polygon polygon);
 
     // This method invalidates the argument to be used for Polygon(Point) implicit conversion.
-    static void stealOwnershipFromPython(Point* point);
+    static void stealOwnershipFromPython(Point *point);
 
     // This method invalidates the argument to be used in a call to doublePolygonScale(Polygon).
-    static void stealOwnershipFromPython(Polygon* polygon);
+    static void stealOwnershipFromPython(Polygon *polygon);
 
 private:
     PointList m_points;
 };
 
 #endif // POLYGON_H
-

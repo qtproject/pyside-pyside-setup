@@ -36,9 +36,9 @@ public:
     virtual ~Overload() {}
 
     FunctionEnum overloaded();
-    FunctionEnum overloaded(Size* size);
-    FunctionEnum overloaded(Point* point, ParamEnum param);
-    FunctionEnum overloaded(const Point& point);
+    FunctionEnum overloaded(Size *size);
+    FunctionEnum overloaded(Point *point, ParamEnum param);
+    FunctionEnum overloaded(const Point &point);
 
     void differentReturnTypes(ParamEnum param = Param0);
     int differentReturnTypes(ParamEnum param, int val);
@@ -51,7 +51,7 @@ public:
     FunctionEnum intDoubleOverloads(double a0, double a1) const;
 
     void singleOverload(Point *x);
-    Point* singleOverload() {return new Point();}
+    Point *singleOverload() { return new Point(); }
 
     // Similar to QImage::trueMatrix(QMatrix,int,int) and QImage::trueMatrix(QTransform,int,int)
     FunctionEnum wrapperIntIntOverloads(const Point &arg0, int arg1, int arg2);
@@ -60,7 +60,7 @@ public:
     // Similar to QImage constructor
     FunctionEnum strBufferOverloads(const Str &arg0, const char *arg1 = nullptr,
                                     bool arg2 = true);
-    FunctionEnum strBufferOverloads(unsigned char* arg0, int arg1);
+    FunctionEnum strBufferOverloads(unsigned char *arg0, int arg1);
     FunctionEnum strBufferOverloads() { return Function2; }
 
     // Similar to QPainter::drawText(...)
@@ -95,7 +95,7 @@ public:
     FunctionEnum acceptSequence(const Str &a0, ParamEnum a1 = Param0);
     FunctionEnum acceptSequence(const Size &a0);
     // The type must be changed to PySequence.
-    FunctionEnum acceptSequence(const char* const a0[]);
+    FunctionEnum acceptSequence(const char *const a0[]);
     FunctionEnum acceptSequence(void *a0);
 };
 

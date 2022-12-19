@@ -5,11 +5,12 @@
 #define FUNCTIONS_H
 
 #include "libsamplemacros.h"
-#include <list>
-#include <utility>
 #include "oddbool.h"
 #include "complex.h"
 #include "objecttype.h"
+
+#include <list>
+#include <utility>
 
 enum GlobalEnum {
     NoThing,
@@ -30,13 +31,13 @@ LIBSAMPLE_API double multiplyPair(std::pair<double, double> pair);
 LIBSAMPLE_API std::list<Complex> gimmeComplexList();
 LIBSAMPLE_API Complex sumComplexPair(std::pair<Complex, Complex> cpx_pair);
 
-LIBSAMPLE_API int countCharacters(const char* text);
-LIBSAMPLE_API char* makeCString();
-LIBSAMPLE_API const char* returnCString();
+LIBSAMPLE_API int countCharacters(const char *text);
+LIBSAMPLE_API char *makeCString();
+LIBSAMPLE_API const char *returnCString();
 
-LIBSAMPLE_API char* returnNullPrimitivePointer();
-LIBSAMPLE_API ObjectType* returnNullObjectTypePointer();
-LIBSAMPLE_API Event* returnNullValueTypePointer();
+LIBSAMPLE_API char *returnNullPrimitivePointer();
+LIBSAMPLE_API ObjectType *returnNullObjectTypePointer();
+LIBSAMPLE_API Event *returnNullValueTypePointer();
 
 // Tests overloading on functions (!methods)
 LIBSAMPLE_API GlobalOverloadFuncEnum overloadedFunc(int val);
@@ -53,8 +54,8 @@ LIBSAMPLE_API long acceptLong(long x);
 LIBSAMPLE_API unsigned long acceptULong(unsigned long x);
 LIBSAMPLE_API double acceptDouble(double x);
 
-LIBSAMPLE_API int acceptIntReference(int& x);
-LIBSAMPLE_API OddBool acceptOddBoolReference(OddBool& x);
+LIBSAMPLE_API int acceptIntReference(int &x);
+LIBSAMPLE_API OddBool acceptOddBoolReference(OddBool &x);
 
 LIBSAMPLE_API int sumIntArray(int array[4]);
 LIBSAMPLE_API double sumDoubleArray(double array[4]);

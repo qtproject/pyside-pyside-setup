@@ -23,21 +23,21 @@ public:
     class SomeInnerClass {
     public:
         void uselessMethod() {}
-        SomeInnerClass operator+(const SomeInnerClass& other) { return other; }
+        SomeInnerClass operator+(const SomeInnerClass &other) { return other; }
         bool operator==(const SomeInnerClass &) { return true; }
     };
 
-    Derived(int id = -1);
+    explicit Derived(int id = -1);
     ~Derived() override;
     void pureVirtual() override;
-    void* pureVirtualReturningVoidPtr() override;
+    void *pureVirtualReturningVoidPtr() override;
     void unpureVirtual() override;
 
     PrintFormat returnAnEnum()  override { return Short; }
     Type type() const override { return TpDerived; }
 
     // factory method
-    static Abstract* createObject();
+    static Abstract *createObject();
 
     // single argument
     bool singleArgument(bool b);
@@ -53,15 +53,15 @@ public:
     OtherOverloadedFuncEnum otherOverloaded(int a, int b, bool c, double d);
     OtherOverloadedFuncEnum otherOverloaded(int a, double b);
 
-    inline SomeInnerClass returnMyParameter(const SomeInnerClass& s) { return s; }
+    inline SomeInnerClass returnMyParameter(const SomeInnerClass &s) { return s; }
 
-    static Abstract* triggerImpossibleTypeDiscovery();
-    static Abstract* triggerAnotherImpossibleTypeDiscovery();
+    static Abstract *triggerImpossibleTypeDiscovery();
+    static Abstract *triggerAnotherImpossibleTypeDiscovery();
 
     void hideFunction(HideType*) override {}
 protected:
-    const char* getClassName() { return className(); }
-    virtual const char* className() override { return "Derived"; }
+    const char *getClassName() { return className(); }
+    virtual const char *className() const override { return "Derived"; }
 
 private:
     void pureVirtualPrivate() override;

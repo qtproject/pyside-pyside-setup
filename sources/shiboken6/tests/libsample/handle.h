@@ -24,13 +24,13 @@ public:
     explicit HandleHolder(Foo::SAMPLE_HANDLE val): m_handle2(val) {}
 
     void set(SAMPLE_HANDLE ptr);
-    inline void set(const Foo::SAMPLE_HANDLE& val) { m_handle2 = val; }
+    inline void set(const Foo::SAMPLE_HANDLE &val) { m_handle2 = val; }
     inline SAMPLE_HANDLE handle() { return m_handle; }
     inline Foo::SAMPLE_HANDLE handle2() { return m_handle2; }
 
     static SAMPLE_HANDLE createHandle();
-    bool compare(HandleHolder* other);
-    bool compare2(HandleHolder* other);
+    bool compare(HandleHolder *other);
+    bool compare2(HandleHolder *other);
 
 private:
     SAMPLE_HANDLE m_handle;

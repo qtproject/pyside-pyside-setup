@@ -4,15 +4,15 @@
 #ifndef POINTF_H
 #define POINTF_H
 
-#include "point.h"
-#include <utility>
-
 #include "libsamplemacros.h"
+#include "point.h"
+
+#include <utility>
 
 class LIBSAMPLE_API PointF
 {
 public:
-    PointF(const Point& point);
+    PointF(const Point &point);
     PointF(double x = 0.0, double y = 0.0);
     ~PointF() {}
 
@@ -25,39 +25,39 @@ public:
     // This method could simply return the midpoint,
     // but the interesting part of the test is to set the
     // result in the pointer argument.
-    void midpoint(const PointF& other, PointF* midpoint) const;
+    void midpoint(const PointF &other, PointF *midpoint) const;
 
     // The != operator is not implemented for the purpose of testing
     // for the absence of the __ne__ method in the Python binding.
-    bool operator==(const PointF& other);
+    bool operator==(const PointF &other);
 
-    PointF operator+(const PointF& other);
-    PointF operator-(const PointF& other);
+    PointF operator+(const PointF &other);
+    PointF operator-(const PointF &other);
 
-    friend LIBSAMPLE_API PointF operator*(const PointF& pt, double mult);
-    friend LIBSAMPLE_API PointF operator*(const PointF& pt, int mult);
-    friend LIBSAMPLE_API PointF operator*(double mult, const PointF& pt);
-    friend LIBSAMPLE_API PointF operator*(int mult, const PointF& pt);
-    friend LIBSAMPLE_API PointF operator-(const PointF& pt);
-    friend LIBSAMPLE_API bool operator!(const PointF& pt);
+    friend LIBSAMPLE_API PointF operator*(const PointF &pt, double mult);
+    friend LIBSAMPLE_API PointF operator*(const PointF &pt, int mult);
+    friend LIBSAMPLE_API PointF operator*(double mult, const PointF &pt);
+    friend LIBSAMPLE_API PointF operator*(int mult, const PointF &pt);
+    friend LIBSAMPLE_API PointF operator-(const PointF &pt);
+    friend LIBSAMPLE_API bool operator!(const PointF &pt);
 
-    PointF& operator+=(PointF &other);
-    PointF& operator-=(PointF &other);
+    PointF &operator+=(PointF &other);
+    PointF &operator-=(PointF &other);
 
-    void show();
+    void show() const;
 
 private:
     double m_x;
     double m_y;
 };
 
-LIBSAMPLE_API PointF operator*(const PointF& pt, double mult);
-LIBSAMPLE_API PointF operator*(const PointF& pt, int mult);
-LIBSAMPLE_API PointF operator*(double mult, const PointF& pt);
-LIBSAMPLE_API PointF operator*(int mult, const PointF& pt);
-LIBSAMPLE_API PointF operator-(const PointF& pt);
-LIBSAMPLE_API bool operator!(const PointF& pt);
+LIBSAMPLE_API PointF operator*(const PointF &pt, double mult);
+LIBSAMPLE_API PointF operator*(const PointF &pt, int mult);
+LIBSAMPLE_API PointF operator*(double mult, const PointF &pt);
+LIBSAMPLE_API PointF operator*(int mult, const PointF &pt);
+LIBSAMPLE_API PointF operator-(const PointF &pt);
+LIBSAMPLE_API bool operator!(const PointF &pt);
 
-LIBSAMPLE_API PointF operator*(const PointF& pt, double multiplier);
+LIBSAMPLE_API PointF operator*(const PointF &pt, double multiplier);
 
 #endif // POINTF_H

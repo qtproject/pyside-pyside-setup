@@ -13,21 +13,19 @@ class ObjectModel;
 class LIBSAMPLE_API ObjectView : public ObjectType
 {
 public:
-    ObjectView(ObjectModel *model = nullptr, ObjectType *parent = nullptr)
-        : ObjectType(parent), m_model(model)
-    {}
+    explicit ObjectView(ObjectModel *model = nullptr, ObjectType *parent = nullptr)
+        : ObjectType(parent), m_model(model) {}
 
-    inline void setModel(ObjectModel* model) { m_model = model; }
-    inline ObjectModel* model() const { return m_model; }
+    inline void setModel(ObjectModel *model) { m_model = model; }
+    inline ObjectModel *model() const { return m_model; }
 
     Str displayModelData();
-    void modifyModelData(Str& data);
+    void modifyModelData(Str &data);
 
-    ObjectType* getRawModelData();
+    ObjectType *getRawModelData();
 
 private:
-    ObjectModel* m_model;
+    ObjectModel *m_model;
 };
 
 #endif // OBJECTVIEW_H
-

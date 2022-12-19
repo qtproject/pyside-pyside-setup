@@ -3,17 +3,16 @@
 
 
 #include "expression.h"
+
 #include <sstream>
 
-Expression::Expression() : m_value(0), m_operation(None), m_operand1(nullptr), m_operand2(nullptr)
+Expression::Expression() = default;
+
+Expression::Expression(int number) : m_value(number)
 {
 }
 
-Expression::Expression(int number) : m_value(number), m_operation(None), m_operand1(nullptr), m_operand2(nullptr)
-{
-}
-
-Expression::Expression(const Expression& other)
+Expression::Expression(const Expression &other)
 {
     m_operand1 = other.m_operand1 ? new Expression(*other.m_operand1) : nullptr;
     m_operand2 = other.m_operand2 ? new Expression(*other.m_operand2) : nullptr;
@@ -21,7 +20,7 @@ Expression::Expression(const Expression& other)
     m_operation = other.m_operation;
 }
 
-Expression& Expression::operator=(const Expression& other)
+Expression &Expression::operator=(const Expression &other)
 {
     if (&other == this)
         return *this;
@@ -40,7 +39,7 @@ Expression::~Expression()
     delete m_operand2;
 }
 
-Expression Expression::operator+(const Expression& other)
+Expression Expression::operator+(const Expression &other)
 {
     Expression expr;
     expr.m_operation = Add;
@@ -49,7 +48,7 @@ Expression Expression::operator+(const Expression& other)
     return expr;
 }
 
-Expression Expression::operator-(const Expression& other)
+Expression Expression::operator-(const Expression &other)
 {
     Expression expr;
     expr.m_operation = Add;
@@ -58,7 +57,7 @@ Expression Expression::operator-(const Expression& other)
     return expr;
 }
 
-Expression Expression::operator<(const Expression& other)
+Expression Expression::operator<(const Expression &other)
 {
     Expression expr;
     expr.m_operation = LessThan;
@@ -67,7 +66,7 @@ Expression Expression::operator<(const Expression& other)
     return expr;
 }
 
-Expression Expression::operator>(const Expression& other)
+Expression Expression::operator>(const Expression &other)
 {
     Expression expr;
     expr.m_operation = GreaterThan;
@@ -111,4 +110,3 @@ std::string Expression::toString() const
     result += ')';
     return result;
 }
-

@@ -8,40 +8,32 @@ ImplicitConv::ImplicitConv(const Null &) :
 {
 }
 
-ImplicitConv
-ImplicitConv::implicitConvCommon(ImplicitConv implicit)
+ImplicitConv ImplicitConv::implicitConvCommon(ImplicitConv implicit)
 {
     return implicit;
 }
 
-ImplicitConv
-ImplicitConv::implicitConvDefault(ImplicitConv implicit)
+ImplicitConv ImplicitConv::implicitConvDefault(ImplicitConv implicit)
 {
     return implicit;
 }
 
-ImplicitConv::ICOverloadedFuncEnum
-ImplicitConv::implicitConvOverloading(ImplicitConv, int)
+ImplicitConv::ICOverloadedFuncEnum ImplicitConv::implicitConvOverloading(ImplicitConv, int)
 {
     return ImplicitConv::OverFunc_Ii;
 }
 
-ImplicitConv::ICOverloadedFuncEnum
-ImplicitConv::implicitConvOverloading(ImplicitConv, bool)
+ImplicitConv::ICOverloadedFuncEnum ImplicitConv::implicitConvOverloading(ImplicitConv, bool)
 {
     return ImplicitConv::OverFunc_Ib;
 }
 
-ImplicitConv::ICOverloadedFuncEnum
-ImplicitConv::implicitConvOverloading(int)
+ImplicitConv::ICOverloadedFuncEnum ImplicitConv::implicitConvOverloading(int)
 {
     return ImplicitConv::OverFunc_i;
 }
 
-ImplicitConv::ICOverloadedFuncEnum
-ImplicitConv::implicitConvOverloading(CtorEnum)
+ImplicitConv::ICOverloadedFuncEnum ImplicitConv::implicitConvOverloading(CtorEnum)
 {
     return ImplicitConv::OverFunc_C;
 }
-
-

@@ -5,8 +5,7 @@
 
 #include <cstdio>
 
-void
-Time::setTime()
+void Time::setTime()
 {
     m_hour = 0;
     m_minute = 0;
@@ -15,8 +14,7 @@ Time::setTime()
     m_is_null = true;
 }
 
-void
-Time::setTime(int h, int m, int s, int ms)
+void Time::setTime(int h, int m, int s, int ms)
 {
     m_hour = h;
     m_minute = m;
@@ -25,9 +23,7 @@ Time::setTime(int h, int m, int s, int ms)
     m_is_null = false;
 }
 
-
-Time::NumArgs
-Time::somethingCompletelyDifferent()
+Time::NumArgs Time::somethingCompletelyDifferent()
 {
     return ZeroArgs;
 }
@@ -41,8 +37,7 @@ Time::NumArgs Time::somethingCompletelyDifferent(int, int, ImplicitConv ic, Obje
     return ThreeArgs;
 }
 
-Str
-Time::toString() const
+Str Time::toString() const
 {
     if (m_is_null)
         return Str();
@@ -52,8 +47,7 @@ Time::toString() const
     return Str(buffer);
 }
 
-bool
-Time::operator==(const Time& other) const
+bool Time::operator==(const Time &other) const
 {
     return m_hour == other.m_hour
             && m_minute == other.m_minute
@@ -62,8 +56,7 @@ Time::operator==(const Time& other) const
             && m_is_null == other.m_is_null;
 }
 
-bool
-Time::operator!=(const Time& other) const
+bool Time::operator!=(const Time &other) const
 {
     return !operator==(other);
 }
@@ -72,4 +65,3 @@ Time::operator Str() const
 {
     return Time::toString();
 }
-

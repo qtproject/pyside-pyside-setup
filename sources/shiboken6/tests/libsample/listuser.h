@@ -4,12 +4,13 @@
 #ifndef LISTUSER_H
 #define LISTUSER_H
 
-#include <list>
 #include "complex.h"
 #include "point.h"
 #include "pointf.h"
 
 #include "libsamplemacros.h"
+
+#include <list>
 
 class LIBSAMPLE_API ListUser
 {
@@ -36,13 +37,13 @@ public:
     double sumList(std::list<int> vallist);
     double sumList(std::list<double> vallist);
 
-    static ListOfSomething listOfPoints(const std::list<Point>& pointlist);
-    static ListOfSomething listOfPoints(const std::list<PointF>& pointlist);
+    static ListOfSomething listOfPoints(const std::list<Point> &pointlist);
+    static ListOfSomething listOfPoints(const std::list<PointF> &pointlist);
 
-    static void multiplyPointList(PointList& points, double multiplier);
+    static void multiplyPointList(PointList &points, double multiplier);
 
     inline void setList(std::list<int> lst) { m_lst = lst; }
-    inline std::list<int> getList() { return m_lst; }
+    inline std::list<int> getList() const { return m_lst; }
 
 private:
     std::list<int> m_lst;

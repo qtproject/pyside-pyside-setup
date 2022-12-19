@@ -9,12 +9,13 @@
 class PointerHolder
 {
 public:
-    explicit PointerHolder(void* ptr) : m_pointer(ptr) {}
-    ~PointerHolder() {}
-    inline void* pointer() const { return m_pointer; }
+    explicit PointerHolder(void *ptr) : m_pointer(ptr) {}
+    ~PointerHolder() = default;
+
+    inline void *pointer() const { return m_pointer; }
+
 private:
-    void* m_pointer;
+    void *m_pointer;
 };
 
 #endif // POINTERHOLDER_H
-

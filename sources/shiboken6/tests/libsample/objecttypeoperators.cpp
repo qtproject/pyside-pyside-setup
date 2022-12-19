@@ -7,32 +7,32 @@ ObjectTypeOperators::ObjectTypeOperators(const std::string key) : m_key(key)
 {
 }
 
-bool ObjectTypeOperators::operator==(const ObjectTypeOperators& other) const
+bool ObjectTypeOperators::operator==(const ObjectTypeOperators &other) const
 {
     return m_key == other.m_key;
 }
 
-const ObjectTypeOperators& ObjectTypeOperators::operator<(const ObjectTypeOperators& other) const
+const ObjectTypeOperators &ObjectTypeOperators::operator<(const ObjectTypeOperators &other) const
 {
     return m_key < other.m_key ? *this : other;
 }
 
-bool operator==(const ObjectTypeOperators* obj, const std::string& str)
+bool operator==(const ObjectTypeOperators *obj, const std::string &str)
 {
     return obj->key() == str;
 }
 
-bool operator==(const std::string& str, const ObjectTypeOperators* obj)
+bool operator==(const std::string &str, const ObjectTypeOperators *obj)
 {
     return str == obj->key();
 }
 
-std::string operator+(const ObjectTypeOperators* obj, const std::string& str)
+std::string operator+(const ObjectTypeOperators *obj, const std::string &str)
 {
     return obj->key() + str;
 }
 
-std::string operator+(const std::string& str, const ObjectTypeOperators* obj)
+std::string operator+(const std::string &str, const ObjectTypeOperators *obj)
 {
     return str + obj->key();
 }

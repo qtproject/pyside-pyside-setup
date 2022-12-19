@@ -8,13 +8,14 @@
 
 class NonDefaultCtor
 {
-    int m_value;
 public:
     NonDefaultCtor(int value) : m_value(value)
     {
     }
 
-    inline  int value()
+    virtual ~NonDefaultCtor() = default;
+
+    inline int value() const
     {
         return m_value;
     }
@@ -44,7 +45,8 @@ public:
         return returnMyselfVirtual();
     }
 
-    virtual ~NonDefaultCtor() {}
+private:
+    int m_value;
 };
 
-#endif
+#endif // NONDEFAULTCTOR_H

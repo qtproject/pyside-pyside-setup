@@ -6,6 +6,7 @@
 
 #include "libsamplemacros.h"
 #include "objecttype.h"
+
 #include <list>
 
 class ObjectType;
@@ -13,19 +14,19 @@ class ObjectType;
 class LIBSAMPLE_API ObjectTypeLayout : public ObjectType
 {
 public:
-    void addObject(ObjectType* obj);
+    void addObject(ObjectType *obj);
     std::list<ObjectType*> objects() const;
 
     bool isLayoutType() override { return true; }
-    inline static ObjectTypeLayout* create() { return new ObjectTypeLayout(); }
+    inline static ObjectTypeLayout *create() { return new ObjectTypeLayout(); }
 
-    ObjectType* takeChild(const Str& name) override { return ObjectType::takeChild(name); }
+    ObjectType *takeChild(const Str &name) override { return ObjectType::takeChild(name); }
+
 private:
     std::list<ObjectType*> m_objects;
 
-    void reparentChildren(ObjectType* parent);
-    friend LIBSAMPLE_API void ObjectType::setLayout(ObjectTypeLayout* l);
+    void reparentChildren(ObjectType *parent);
+    friend LIBSAMPLE_API void ObjectType::setLayout(ObjectTypeLayout *l);
 };
 
 #endif // OBJECTTYPELAYOUT_H
-

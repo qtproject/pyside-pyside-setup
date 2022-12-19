@@ -4,26 +4,25 @@
 #ifndef VOIDHOLDER_H
 #define VOIDHOLDER_H
 
-#include "libsamplemacros.h"
-
 class VoidHolder
 {
 public:
     explicit VoidHolder(void *ptr = nullptr) : m_ptr(ptr) {}
-    ~VoidHolder() {}
-    inline void* voidPointer() { return m_ptr; }
-    inline static void* gimmeMeSomeVoidPointer()
+    ~VoidHolder() = default;
+
+    inline void *voidPointer() { return m_ptr; }
+    inline static void *gimmeMeSomeVoidPointer()
     {
-        static void* pointerToSomething = new VoidHolder();
+        static void *pointerToSomething = new VoidHolder();
         return pointerToSomething;
     }
     void *takeVoidPointer(void *item)
     {
         return item;
     }
+
 private:
-    void* m_ptr;
+    void *m_ptr;
 };
 
 #endif // VOIDHOLDER_H
-

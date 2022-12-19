@@ -1,42 +1,36 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
-#include <iostream>
 #include "derived.h"
+
+#include <iostream>
 
 Derived::Derived(int id) : Abstract(id)
 {
 }
 
-Derived::~Derived()
-{
-}
+Derived::~Derived() = default;
 
-Abstract*
-Derived::createObject()
+Abstract *Derived::createObject()
 {
     static int id = 100;
     return new Derived(id++);
 }
 
-void
-Derived::pureVirtual()
+void Derived::pureVirtual()
 {
 }
 
-void*
-Derived::pureVirtualReturningVoidPtr()
+void *Derived::pureVirtualReturningVoidPtr()
 {
     return nullptr;
 }
 
-void
-Derived::unpureVirtual()
+void Derived::unpureVirtual()
 {
 }
 
-bool
-Derived::singleArgument(bool b)
+bool Derived::singleArgument(bool b)
 {
     return !b;
 }
@@ -68,15 +62,15 @@ Derived::OtherOverloadedFuncEnum Derived::otherOverloaded(int, double)
 }
 
 struct SecretClass : public Abstract {
-    virtual void pureVirtual() {}
-    virtual void *pureVirtualReturningVoidPtr() { return nullptr; }
-    virtual PrintFormat returnAnEnum() { return Short; }
-    void hideFunction(HideType*){};
+    void pureVirtual() override {}
+    void *pureVirtualReturningVoidPtr() override { return nullptr; }
+    PrintFormat returnAnEnum() override { return Short; }
+    void hideFunction(HideType*) override {};
 private:
-    virtual void pureVirtualPrivate() {}
+    virtual void pureVirtualPrivate() override {}
 };
 
-Abstract* Derived::triggerImpossibleTypeDiscovery()
+Abstract *Derived::triggerImpossibleTypeDiscovery()
 {
     return new SecretClass;
 }
@@ -84,7 +78,7 @@ Abstract* Derived::triggerImpossibleTypeDiscovery()
 struct AnotherSecretClass : public Derived {
 };
 
-Abstract* Derived::triggerAnotherImpossibleTypeDiscovery()
+Abstract *Derived::triggerAnotherImpossibleTypeDiscovery()
 {
     return new AnotherSecretClass;
 }

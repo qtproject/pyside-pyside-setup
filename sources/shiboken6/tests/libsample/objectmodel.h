@@ -11,11 +11,10 @@ class LIBSAMPLE_API ObjectModel : public ObjectType
 {
 public:
     explicit ObjectModel(ObjectType *parent = nullptr)
-        : ObjectType(parent), m_data(nullptr)
-    {}
+        : ObjectType(parent) {}
 
-    void setData(ObjectType* data);
-    virtual ObjectType* data() const;
+    void setData(ObjectType *data);
+    virtual ObjectType *data() const;
 
     // The MethodCalled enum and related static methods were created to
     // test bug #630 [http://bugs.openbossa.org/show_bug.cgi?id=630]
@@ -26,8 +25,7 @@ public:
 private:
     // The model holds only one piece of data.
     // (This is just a test after all.)
-    ObjectType* m_data;
+    ObjectType *m_data = nullptr;
 };
 
 #endif // OBJECTMODEL_H
-

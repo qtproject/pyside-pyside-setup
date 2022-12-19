@@ -4,15 +4,11 @@
 #ifndef OTHEROBJECTTYPE_H
 #define OTHEROBJECTTYPE_H
 
-#include <list>
-#include "str.h"
-
 #include "libothermacros.h"
 #include "objecttype.h"
 #include "collector.h"
 #include "samplenamespace.h"
 #include "removednamespaces.h"
-
 
 class LIBOTHER_API OtherObjectType : public ObjectType
 {
@@ -21,8 +17,6 @@ public:
     static int enumAsIntForInvisibleNamespace(RemovedNamespace1::RemovedNamespace1_Enum value);
 };
 
-
-LIBOTHER_API Collector& operator<<(Collector&, const OtherObjectType&);
+LIBOTHER_API Collector &operator<<(Collector &, const OtherObjectType &);
 
 #endif // OTHEROBJECTTYPE_H
-

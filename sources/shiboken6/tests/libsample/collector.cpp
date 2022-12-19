@@ -8,13 +8,13 @@ void Collector::clear()
     m_items.clear();
 }
 
-Collector& Collector::operator<<(ObjectType::Identifier item)
+Collector &Collector::operator<<(ObjectType::Identifier item)
 {
     m_items.push_back(item);
     return *this;
 }
 
-Collector& Collector::operator<<(const ObjectType *obj)
+Collector &Collector::operator<<(const ObjectType *obj)
 {
     m_items.push_back(obj->identifier());
     return *this;
@@ -25,9 +25,9 @@ std::list<ObjectType::Identifier> Collector::items()
     return m_items;
 }
 
-int Collector::size()
+int Collector::size() const
 {
-    return (int) m_items.size();
+    return int(m_items.size());
 }
 
 Collector &operator<<(Collector &s, const IntWrapper &w)

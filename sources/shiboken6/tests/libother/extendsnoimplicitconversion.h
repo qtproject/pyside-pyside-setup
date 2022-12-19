@@ -13,8 +13,9 @@ public:
     explicit ExtendsNoImplicitConversion(int objId) : m_objId(objId) {};
     inline int objId() const { return m_objId; }
     inline operator NoImplicitConversion() const { return NoImplicitConversion(m_objId); }
+
 private:
     int m_objId;
 };
-#endif // EXTENDSNOIMPLICITCONVERSION_H
 
+#endif // EXTENDSNOIMPLICITCONVERSION_H

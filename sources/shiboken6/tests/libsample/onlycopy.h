@@ -5,6 +5,7 @@
 #define ONLYCOPYCLASS_H
 
 #include "libsamplemacros.h"
+
 #include <list>
 
 // These classes simulate a situation found in QWebEngineHistoryItem.
@@ -14,13 +15,14 @@ class OnlyCopyPrivate;
 class LIBSAMPLE_API OnlyCopy
 {
 public:
-    OnlyCopy(const OnlyCopy& other);
-    OnlyCopy& operator=(const OnlyCopy& other);
+    OnlyCopy(const OnlyCopy &other);
+    OnlyCopy &operator=(const OnlyCopy &other);
     ~OnlyCopy();
 
     int value() const;
     static int getValue(OnlyCopy onlyCopy) { return onlyCopy.value(); }
-    static int getValueFromReference(const OnlyCopy& onlyCopy) { return onlyCopy.value(); }
+    static int getValueFromReference(const OnlyCopy &onlyCopy) { return onlyCopy.value(); }
+
 private:
     OnlyCopyPrivate *d;
     explicit OnlyCopy(int value);
@@ -35,4 +37,4 @@ public:
     static std::list<OnlyCopy> createListOfOnlyCopy(int quantity);
 };
 
-#endif
+#endif // ONLYCOPYCLASS_H

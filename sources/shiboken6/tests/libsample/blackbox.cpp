@@ -6,80 +6,61 @@
 BlackBox::~BlackBox()
 {
     // Free all maps.
-    while (!m_objects.empty()) {
-        delete (*m_objects.begin()).second;
-        m_objects.erase(m_objects.begin());
-    }
-    while (!m_points.empty()) {
-        delete (*m_points.begin()).second;
-        m_points.erase(m_points.begin());
-    }
+    for (auto it = m_objects.begin(), end = m_objects.end(); it != end; ++it)
+        delete it->second;
+    for (auto it = m_points.begin(), end = m_points.end(); it != end; ++it)
+        delete it->second;
 }
 
-int
-BlackBox::keepObjectType(ObjectType* object)
+int BlackBox::keepObjectType(ObjectType *object)
 {
-    m_ticket++;
-    std::pair<int, ObjectType*> item(m_ticket, object);
-    m_objects.insert(item);
+    ++m_ticket;
+    m_objects.insert({m_ticket, object});
     object->setParent(nullptr);
 
     return m_ticket;
 }
 
-ObjectType*
-BlackBox::retrieveObjectType(int ticket)
+ObjectType *BlackBox::retrieveObjectType(int ticket)
 {
     const auto it = m_objects.find(ticket);
     if (it != m_objects.end()) {
-        ObjectType* second = it->second;
+        ObjectType *second = it->second;
         m_objects.erase(it);
         return second;
     }
     return nullptr;
 }
 
-void
-BlackBox::disposeObjectType(int ticket)
+void BlackBox::disposeObjectType(int ticket)
 {
-    ObjectType* object = retrieveObjectType(ticket);
-    if (object)
-        delete object;
+    delete retrieveObjectType(ticket);
 }
 
-int
-BlackBox::keepPoint(Point* point)
+int BlackBox::keepPoint(Point *point)
 {
-    m_ticket++;
-    std::pair<int, Point*> item(m_ticket, point);
-    m_points.insert(item);
-
+    ++m_ticket;
+    m_points.insert({m_ticket, point});
     return m_ticket;
 }
 
-Point*
-BlackBox::retrievePoint(int ticket)
+Point *BlackBox::retrievePoint(int ticket)
 {
     const auto it = m_points.find(ticket);
     if (it != m_points.end()) {
-        Point* second = it->second;
+        Point *second = it->second;
         m_points.erase(it);
         return second;
     }
     return nullptr;
 }
 
-void
-BlackBox::disposePoint(int ticket)
+void BlackBox::disposePoint(int ticket)
 {
-    Point* point = retrievePoint(ticket);
-    if (point)
-        delete point;
+    delete retrievePoint(ticket);
 }
 
-
-std::list<ObjectType*>
-BlackBox::objects()
+std::list<ObjectType*> BlackBox::objects()
 {
     std::list<ObjectType*> l;
 
@@ -89,8 +70,7 @@ BlackBox::objects()
     return l;
 }
 
-std::list<Point*>
-BlackBox::points()
+std::list<Point*> BlackBox::points()
 {
     std::list<Point*> l;
 
@@ -99,4 +79,3 @@ BlackBox::points()
 
     return l;
 }
-

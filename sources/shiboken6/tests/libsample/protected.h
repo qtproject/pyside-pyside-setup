@@ -7,6 +7,7 @@
 #include "libsamplemacros.h"
 #include "objecttype.h"
 #include "point.h"
+
 #include <string>
 #include <list>
 
@@ -14,17 +15,18 @@ class LIBSAMPLE_API ProtectedNonPolymorphic
 {
 public:
     explicit ProtectedNonPolymorphic(const char *name) : m_name(name) {}
-    ~ProtectedNonPolymorphic() {}
+    ~ProtectedNonPolymorphic() = default;
 
-    inline const char* publicName() { return m_name.c_str(); }
+    inline const char *publicName() { return m_name.c_str(); }
 
-    inline static ProtectedNonPolymorphic* create() { return new ProtectedNonPolymorphic("created"); }
+    inline static ProtectedNonPolymorphic *create()
+    { return new ProtectedNonPolymorphic("created"); }
 
 protected:
-    inline const char* protectedName() { return m_name.c_str(); }
+    inline const char *protectedName() { return m_name.c_str(); }
     inline int protectedSum(int a0, int a1) { return a0 + a1; }
     inline int modifiedProtectedSum(int a0, int a1) { return a0 + a1; }
-    inline static const char* protectedStatic() { return "protectedStatic"; }
+    inline static const char *protectedStatic() { return "protectedStatic"; }
     const char *dataTypeName(void *data = nullptr) const;
     const char *dataTypeName(int data) const;
 
@@ -38,12 +40,13 @@ public:
     explicit ProtectedPolymorphic(const char *name) : m_name(name) {}
     virtual ~ProtectedPolymorphic() {}
 
-    inline static ProtectedPolymorphic* create() { return new ProtectedPolymorphic("created"); }
-    inline const char* publicName() { return m_name.c_str(); }
-    inline const char* callProtectedName() { return protectedName(); }
+    inline static ProtectedPolymorphic *create()
+    { return new ProtectedPolymorphic("created"); }
+    inline const char *publicName() { return m_name.c_str(); }
+    inline const char *callProtectedName() { return protectedName(); }
 
 protected:
-    virtual const char* protectedName() { return m_name.c_str(); }
+    virtual const char *protectedName() { return m_name.c_str(); }
 
 private:
     std::string m_name;
@@ -52,22 +55,27 @@ private:
 class LIBSAMPLE_API ProtectedPolymorphicDaughter : public ProtectedPolymorphic
 {
 public:
-    explicit ProtectedPolymorphicDaughter(const char *name) : ProtectedPolymorphic(name) {}
-    inline static ProtectedPolymorphicDaughter* create() { return new ProtectedPolymorphicDaughter("created"); }
+    explicit ProtectedPolymorphicDaughter(const char *name) :
+        ProtectedPolymorphic(name) {}
+    inline static ProtectedPolymorphicDaughter *create()
+    { return new ProtectedPolymorphicDaughter("created"); }
 };
 
 class LIBSAMPLE_API ProtectedPolymorphicGrandDaughter: public ProtectedPolymorphicDaughter
 {
 public:
-    explicit ProtectedPolymorphicGrandDaughter(const char *name) : ProtectedPolymorphicDaughter(name) {}
-    inline static ProtectedPolymorphicGrandDaughter* create() { return new ProtectedPolymorphicGrandDaughter("created"); }
+    explicit ProtectedPolymorphicGrandDaughter(const char *name) :
+        ProtectedPolymorphicDaughter(name) {}
+    inline static ProtectedPolymorphicGrandDaughter *create()
+    { return new ProtectedPolymorphicGrandDaughter("created"); }
 };
 
 class LIBSAMPLE_API ProtectedVirtualDestructor
 {
 public:
     ProtectedVirtualDestructor() {}
-    inline static ProtectedVirtualDestructor* create() { return new ProtectedVirtualDestructor(); }
+    inline static ProtectedVirtualDestructor *create()
+    { return new ProtectedVirtualDestructor(); }
     inline static int dtorCalled() { return dtor_called; }
     inline static void resetDtorCounter() { dtor_called = 0; }
 protected:
@@ -90,36 +98,33 @@ protected:
         ProtectedItem0,
         ProtectedItem1
     };
-    ProtectedEnum callProtectedEnumMethod(ProtectedEnum in) { return protectedEnumMethod(in); }
-    inline PublicEnum callPublicEnumMethod(PublicEnum in) { return publicEnumMethod(in); }
+    ProtectedEnum callProtectedEnumMethod(ProtectedEnum in)
+    { return protectedEnumMethod(in); }
+    inline PublicEnum callPublicEnumMethod(PublicEnum in)
+    { return publicEnumMethod(in); }
 
     virtual ProtectedEnum protectedEnumMethod(ProtectedEnum in) { return in; }
     virtual PublicEnum publicEnumMethod(PublicEnum in) { return in; }
 };
 
-
 class LIBSAMPLE_API ProtectedProperty
 {
 public:
-    ProtectedProperty()
-        : protectedValueTypeProperty(Point(0, 0)),
-          protectedProperty(0),
-          protectedEnumProperty(Event::NO_EVENT),
-          protectedValueTypePointerProperty(nullptr),
-          protectedObjectTypeProperty(nullptr)
-    {}
+    ProtectedProperty() = default;
+
 protected:
     // This is deliberately the first member to test wrapper registration
     // for value type members sharing the same memory address.
-    Point protectedValueTypeProperty;
-    int protectedProperty;
+    Point protectedValueTypeProperty{0, 0};
+    int protectedProperty = 0;
     std::list<int> protectedContainerProperty;
-    Event::EventType protectedEnumProperty;
-    Point* protectedValueTypePointerProperty;
-    ObjectType* protectedObjectTypeProperty;
+    Event::EventType protectedEnumProperty = Event::NO_EVENT;
+    Point *protectedValueTypePointerProperty = nullptr;
+    ObjectType *protectedObjectTypeProperty = nullptr;
 };
 
-LIBSAMPLE_API inline ProtectedProperty* createProtectedProperty() {
+LIBSAMPLE_API inline ProtectedProperty *createProtectedProperty()
+{
     return new ProtectedProperty;
 }
 

@@ -9,23 +9,24 @@
 class LIBSAMPLE_API Size
 {
 public:
-    Size(double width = 0.0, double height = 0.0) : m_width(width), m_height(height) {}
-    ~Size() {}
+    explicit Size(double width = 0.0, double height = 0.0) :
+        m_width(width), m_height(height) {}
+    ~Size() = default;
 
-    inline double width() { return m_width; }
+    inline double width() const { return m_width; }
     inline void setWidth(double width) { m_width = width; }
-    inline double height() { return m_height; }
+    inline double height() const { return m_height; }
     inline void setHeight(double height) { m_height = height; }
 
     inline double calculateArea() const { return m_width * m_height; }
 
     // Comparison Operators
-    inline bool operator<(const Size& other)
+    inline bool operator<(const Size &other)
     {
         return calculateArea() < other.calculateArea();
     }
 
-    inline bool operator>(const Size& other)
+    inline bool operator>(const Size &other)
     {
         // On some x86 hardware and compiler combinations, floating point
         // comparisons may fail due to a hardware bug. One workaround is to
@@ -37,7 +38,7 @@ public:
         return a > b;
     }
 
-    inline bool operator<=(const Size& other)
+    inline bool operator<=(const Size &other)
     {
         // See comments for operator>()
         double a = calculateArea();
@@ -45,7 +46,7 @@ public:
         return a <= b;
     }
 
-    inline bool operator>=(const Size& other)
+    inline bool operator>=(const Size &other)
     {
         return calculateArea() >= other.calculateArea();
     }
@@ -56,28 +57,28 @@ public:
     inline bool operator>=(double area) { return calculateArea() >= area; }
 
     // Arithmetic Operators
-    inline Size& operator+=(const Size& s)
+    inline Size &operator+=(const Size &s)
     {
         m_width += s.m_width;
         m_height += s.m_height;
         return *this;
     }
 
-    inline Size& operator-=(const Size& s)
+    inline Size &operator-=(const Size &s)
     {
         m_width -= s.m_width;
         m_height -= s.m_height;
         return *this;
     }
 
-    inline Size& operator*=(double mult)
+    inline Size &operator*=(double mult)
     {
         m_width *= mult;
         m_height *= mult;
         return *this;
     }
 
-    inline Size& operator/=(double div)
+    inline Size &operator/=(double div)
     {
         m_width /= div;
         m_height /= div;
@@ -108,70 +109,71 @@ private:
 };
 
 // Comparison Operators
-inline bool operator!=(const Size& s1, const Size& s2)
+inline bool operator!=(const Size &s1, const Size &s2)
 {
     return s1.m_width != s2.m_width || s1.m_height != s2.m_height;
 }
 
-inline bool operator==(const Size& s1, const Size& s2)
+inline bool operator==(const Size &s1, const Size &s2)
 {
     return s1.m_width == s2.m_width && s1.m_height == s2.m_height;
 }
 
-inline bool operator<(double area, const Size& s)
+inline bool operator<(double area, const Size &s)
 {
     return area < s.calculateArea();
 }
 
-inline bool operator>(double area, const Size& s)
+inline bool operator>(double area, const Size &s)
 {
     return area > s.calculateArea();
 }
 
-inline bool operator<=(double area, const Size& s)
+inline bool operator<=(double area, const Size &s)
 {
     return area <= s.calculateArea();
 }
 
-inline bool operator>=(double area, const Size& s)
+inline bool operator>=(double area, const Size &s)
 {
     return area >= s.calculateArea();
 }
 
 // Arithmetic Operators
-inline const Size operator+(const Size& s1, const Size& s2)
+inline const Size operator+(const Size &s1, const Size &s2)
 {
     return Size(s1.m_width + s2.m_width, s1.m_height + s2.m_height);
 }
 
-inline const Size operator-(const Size& s1, const Size& s2)
+inline const Size operator-(const Size &s1, const Size &s2)
 {
     return Size(s1.m_width - s2.m_width, s1.m_height - s2.m_height);
 }
 
-inline const Size operator*(const Size& s, double mult)
+inline const Size operator*(const Size &s, double mult)
 {
     return Size(s.m_width * mult, s.m_height * mult);
 }
 
-inline const Size operator*(double mult, const Size& s)
+inline const Size operator*(double mult, const Size &s)
 {
     return Size(s.m_width * mult, s.m_height * mult);
 }
 
-inline const Size operator/(const Size& s, double div)
+inline const Size operator/(const Size &s, double div)
 {
     return Size(s.m_width / div, s.m_height / div);
 }
 
 using real = double;
 using ushort = unsigned short;
+
 class LIBSAMPLE_API SizeF
 {
 public:
-    SizeF(real width, real height) : m_width(width), m_height(height) {}
-    real width() { return m_width; }
-    real height() { return m_height; }
+    explicit SizeF(real width, real height) : m_width(width), m_height(height) {}
+    real width() const { return m_width; }
+    real height() const { return m_height; }
     static inline ushort passTypedefOfUnsignedShort(ushort value) { return value; }
 private:
     real m_width;
@@ -179,4 +181,3 @@ private:
 };
 
 #endif // SIZE_H
-

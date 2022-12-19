@@ -10,8 +10,8 @@ class LIBSAMPLE_API ModifiedConstructor
 {
 public:
 
-    ModifiedConstructor(int first_arg);
-    int retrieveValue();
+    explicit ModifiedConstructor(int first_arg);
+    int retrieveValue() const;
 
 private:
     int m_stored_value;

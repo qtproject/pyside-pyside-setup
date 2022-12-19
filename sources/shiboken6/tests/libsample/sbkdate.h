@@ -9,7 +9,7 @@
 class LIBSAMPLE_API SbkDate
 {
 public:
-    SbkDate(int d, int m, int y);
+    explicit SbkDate(int d, int m, int y);
 
     int day() const;
     int month() const;
@@ -22,4 +22,3 @@ private:
 };
 
 #endif // SBKDATE_H
-

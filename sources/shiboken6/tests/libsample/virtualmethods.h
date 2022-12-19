@@ -17,11 +17,8 @@
 class LIBSAMPLE_API VirtualMethods
 {
 public:
-    VirtualMethods(Str name = "VirtualMethods") : m_name(name)
-    {
-        m_left = m_top = m_right = m_bottom = 0;
-    }
-    virtual ~VirtualMethods() {}
+    explicit VirtualMethods(Str name = "VirtualMethods") : m_name(name) {}
+    virtual ~VirtualMethods() = default;
 
     virtual double virtualMethod0(Point pt, int val, Complex cpx, bool b);
     double callVirtualMethod0(Point pt, int val, Complex cpx, bool b)
@@ -61,12 +58,14 @@ public:
     void callCallMe() { callMe(); }
 
     // Passing reference to pointers.
-    virtual bool createStr(const char* text, Str*& ret);
-    bool callCreateStr(const char* text, Str*& ret) { return createStr(text, ret); }
+    virtual bool createStr(const char *text, Str *&ret);
+    bool callCreateStr(const char *text, Str *&ret) { return createStr(text, ret); }
 
     // Return a non-binded method
-    std::list<Str> callStrListToStdList(const StrList& strList) { return strListToStdList(strList); }
-    virtual std::list<Str> strListToStdList(const StrList& strList ) { return strList; }
+    std::list<Str> callStrListToStdList(const StrList &strList)
+    { return strListToStdList(strList); }
+    virtual std::list<Str> strListToStdList(const StrList &strList )
+    { return strList; }
 
     void setMargins(int left, int top, int right, int bottom)
     {
@@ -75,8 +74,8 @@ public:
         m_right = right;
         m_bottom = bottom;
     }
-    virtual void getMargins(int* left, int* top, int* right, int* bottom) const;
-    void callGetMargins(int* left, int* top, int* right, int* bottom) const
+    virtual void getMargins(int *left, int *top, int *right, int *bottom) const;
+    void callGetMargins(int *left, int *top, int *right, int *bottom) const
     {
         getMargins(left, top, right, bottom);
     }
@@ -84,7 +83,7 @@ public:
     virtual int recursionOnModifiedVirtual(Str arg) const;
     int callRecursionOnModifiedVirtual(Str arg) const { return recursionOnModifiedVirtual(arg); }
 
-    virtual const Str & returnConstRef() const;
+    virtual const Str &returnConstRef() const;
 
     virtual int stringViewLength(std::string_view in) const;
 
@@ -94,10 +93,10 @@ protected:
 
 private:
     Str m_name;
-    int m_left;
-    int m_top;
-    int m_right;
-    int m_bottom;
+    int m_left = 0;
+    int m_top = 0;
+    int m_right = 0;
+    int m_bottom = 0;
 };
 
 class LIBSAMPLE_API VirtualDaughter : public VirtualMethods
@@ -128,10 +127,10 @@ public:
 class LIBSAMPLE_API VirtualDtor
 {
 public:
-    VirtualDtor() {}
+    VirtualDtor() = default;
     virtual ~VirtualDtor() { dtor_called++; }
 
-    static VirtualDtor* create() { return new VirtualDtor(); }
+    static VirtualDtor *create() { return new VirtualDtor(); }
     static int dtorCalled() { return dtor_called; }
     static void resetDtorCounter() { dtor_called = 0; }
 
@@ -140,4 +139,3 @@ private:
 };
 
 #endif // VIRTUALMETHODS_H
-

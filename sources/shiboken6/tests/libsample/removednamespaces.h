@@ -46,4 +46,3 @@ namespace RemovedNamespace3
 } // namespace UnremovedNamespace
 
 #endif // REMOVEDNAMESPACE_H
-

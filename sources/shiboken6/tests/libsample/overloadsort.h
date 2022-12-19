@@ -11,13 +11,13 @@
 class ImplicitTarget
 {
 public:
-    ImplicitTarget(){}
+    ImplicitTarget() = default;
 };
 
 class ImplicitBase
 {
 public:
-    ImplicitBase(){}
+    ImplicitBase() = default;
     ImplicitBase(const ImplicitTarget &b);
 };
 
@@ -39,9 +39,9 @@ public:
 
     const char *overloadDeep(int x, ImplicitBase &y);
 
-    inline const char* pyObjOverload(int, int) { return "int,int"; }
-    inline const char* pyObjOverload(unsigned char*, int) { return "PyObject,int"; }
-
+    inline const char *pyObjOverload(int, int) { return "int,int"; }
+    inline const char *pyObjOverload(unsigned char *, int)
+    { return "PyObject,int"; }
 };
 
 class LIBSAMPLE_API CustomOverloadSequence
@@ -52,4 +52,3 @@ public:
 };
 
 #endif // OVERLOADSORT_H
-

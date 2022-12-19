@@ -4,8 +4,6 @@
 #ifndef MODELINDEX_H
 #define MODELINDEX_H
 
-#include "libsamplemacros.h"
-
 class ModelIndex
 {
 public:
@@ -13,7 +11,8 @@ public:
 
     inline void setValue(int value) { m_value = value; }
     inline int value() const { return m_value; }
-    static int getValue(const ModelIndex& index) { return index.value(); }
+    static int getValue(const ModelIndex &index) { return index.value(); }
+
 private:
     int m_value = 0;
 };
@@ -23,11 +22,12 @@ class ReferentModelIndex
 public:
     ReferentModelIndex() = default;
 
-    explicit ReferentModelIndex(const ModelIndex& index) : m_index(index) {}
+    explicit ReferentModelIndex(const ModelIndex &index) : m_index(index) {}
 
     inline void setValue(int value) { m_index.setValue(value); }
     inline int value() const { return m_index.value(); }
     operator const ModelIndex&() const { return m_index; }
+
 private:
     ModelIndex m_index;
 };
@@ -37,13 +37,14 @@ class PersistentModelIndex
 public:
     PersistentModelIndex() = default;
 
-    explicit PersistentModelIndex(const ModelIndex& index) : m_index(index) {}
+    explicit PersistentModelIndex(const ModelIndex &index) : m_index(index) {}
 
     inline void setValue(int value) { m_index.setValue(value); }
     inline int value() const { return m_index.value(); }
     operator ModelIndex() const { return m_index; }
+
 private:
     ModelIndex m_index;
 };
 
-#endif
+#endif // MODELINDEX_H

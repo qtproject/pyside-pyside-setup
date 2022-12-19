@@ -9,8 +9,7 @@ Obj::Obj(int objId) : m_objId(objId)
 
 Obj::~Obj() = default;
 
-bool
-Obj::virtualMethod(int val)
+bool Obj::virtualMethod(int val)
 {
     return !bool(val%2);
 }

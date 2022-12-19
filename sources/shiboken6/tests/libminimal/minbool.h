@@ -16,6 +16,7 @@ public:
         m_value = m_value | other.m_value;
         return *this;
     }
+
 private:
     bool m_value;
 };
@@ -31,11 +32,12 @@ class LIBMINIMAL_API MinBoolUser
 {
 public:
     MinBoolUser() : m_minbool(MinBool(false)) {}
-    virtual ~MinBoolUser() {}
+    virtual ~MinBoolUser() = default;
     inline MinBool minBool() { return m_minbool; }
     inline void setMinBool(MinBool minBool) { m_minbool = minBool; }
     virtual MinBool invertedMinBool() { return !m_minbool; }
     inline MinBool callInvertedMinBool() { return invertedMinBool(); }
+
 private:
     MinBool m_minbool;
 };

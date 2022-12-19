@@ -3,37 +3,22 @@
 
 #include "multiple_derived.h"
 
-MDerived1::MDerived1() : m_value(100)
+MDerived1::MDerived1() = default;
+
+MDerived2::MDerived2() = default;
+
+MDerived3::MDerived3() = default;
+
+MDerived4::MDerived4() = default;
+
+MDerived5::MDerived5() = default;
+
+MDerived1 *MDerived1::transformFromBase1(Base1 *self)
 {
+    return dynamic_cast<MDerived1*>(self);
 }
 
-MDerived2::MDerived2() : m_value(200)
+MDerived1 *MDerived1::transformFromBase2(Base2 *self)
 {
+    return dynamic_cast<MDerived1*>(self);
 }
-
-MDerived3::MDerived3() : m_value(3000)
-{
-}
-
-MDerived4::MDerived4()
-{
-}
-
-MDerived5::MDerived5()
-{
-}
-
-MDerived1*
-MDerived1::transformFromBase1(Base1* self)
-{
-    MDerived1* ptr = dynamic_cast<MDerived1*>(self);
-    return ptr;
-}
-
-MDerived1*
-MDerived1::transformFromBase2(Base2* self)
-{
-    MDerived1* ptr = dynamic_cast<MDerived1*>(self);
-    return ptr;
-}
-

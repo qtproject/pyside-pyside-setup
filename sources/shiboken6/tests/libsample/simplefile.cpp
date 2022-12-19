@@ -1,30 +1,29 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
+#include "simplefile.h"
+
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
-#include "simplefile.h"
 
 class SimpleFile_p
 {
 public:
-    SimpleFile_p(const char* filename) : m_descriptor(nullptr), m_size(0)
-    {
-        m_filename = strdup(filename);
-    }
+    SimpleFile_p(const char *filename) :
+        m_filename(strdup(filename)) {}
 
     ~SimpleFile_p()
     {
-        free(m_filename);
+        std::free(m_filename);
     }
 
-    char* m_filename;
-    FILE* m_descriptor;
-    long m_size;
+    char *m_filename;
+    FILE *m_descriptor = nullptr;
+    long m_size = 0;
 };
 
-SimpleFile::SimpleFile(const char* filename)
+SimpleFile::SimpleFile(const char *filename)
 {
     p = new SimpleFile_p(filename);
 }
@@ -35,7 +34,7 @@ SimpleFile::~SimpleFile()
     delete p;
 }
 
-const char* SimpleFile::filename()
+const char *SimpleFile::filename()
 {
     return p->m_filename;
 }
@@ -45,12 +44,13 @@ long SimpleFile::size()
     return p->m_size;
 }
 
-bool
-SimpleFile::open()
+bool SimpleFile::open()
 {
-    if ((p->m_descriptor = fopen(p->m_filename, "rb")) == nullptr)
+    auto *descriptor = fopen(p->m_filename, "rb");
+    if (descriptor == nullptr)
         return false;
 
+    p->m_descriptor = descriptor;
     std::fseek(p->m_descriptor, 0, SEEK_END);
     p->m_size = ftell(p->m_descriptor);
     std::rewind(p->m_descriptor);
@@ -58,8 +58,7 @@ SimpleFile::open()
     return true;
 }
 
-void
-SimpleFile::close()
+void SimpleFile::close()
 {
     if (p->m_descriptor) {
         std::fclose(p->m_descriptor);
@@ -67,17 +66,14 @@ SimpleFile::close()
     }
 }
 
-bool
-SimpleFile::exists() const
+bool SimpleFile::exists() const
 {
     std::ifstream ifile(p->m_filename);
     return !ifile.fail();
 }
 
-bool
-SimpleFile::exists(const char* filename)
+bool SimpleFile::exists(const char *filename)
 {
     std::ifstream ifile(filename);
     return !ifile.fail();
 }
-

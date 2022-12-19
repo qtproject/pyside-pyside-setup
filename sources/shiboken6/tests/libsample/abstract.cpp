@@ -1,60 +1,50 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
-#include <iostream>
 #include "abstract.h"
-#include "objecttype.h"
+
+#include <iostream>
 
 const int Abstract::staticPrimitiveField = 0;
 
 Abstract::Abstract(int id) : m_id(id)
 {
-    toBeRenamedField = readOnlyField = primitiveField = 123;
-    valueTypeField = Point(12, 34);
-    objectTypeField = nullptr;
     bitField = 0;
 }
 
-Abstract::~Abstract()
+Abstract::~Abstract() = default;
+
+void Abstract::unpureVirtual()
 {
 }
 
-void
-Abstract::unpureVirtual()
-{
-}
-
-void
-Abstract::callUnpureVirtual()
+void Abstract::callUnpureVirtual()
 {
     this->unpureVirtual();
 }
 
-
-void
-Abstract::callPureVirtual()
+void Abstract::callPureVirtual()
 {
     this->pureVirtual();
 }
 
-void
-Abstract::show(PrintFormat format)
+void Abstract::show(PrintFormat format) const
 {
     std::cout << '<';
     switch(format) {
-        case Short:
-            std::cout << this;
-            break;
-        case Verbose:
-            std::cout << "class " << className() << " | cptr: " << this
-                << ", id: " << m_id;
-            break;
-        case OnlyId:
-            std::cout << "id: " << m_id;
-            break;
-        case ClassNameAndId:
-            std::cout << className() << " - id: " << m_id;
-            break;
+    case Short:
+        std::cout << this;
+        break;
+    case Verbose:
+        std::cout << "class " << className() << " | cptr: " << this
+                  << ", id: " << m_id;
+        break;
+    case OnlyId:
+        std::cout << "id: " << m_id;
+        break;
+    case ClassNameAndId:
+        std::cout << className() << " - id: " << m_id;
+        break;
     }
     std::cout << '>';
 }
@@ -67,4 +57,3 @@ void Abstract::callVirtualGettingEnum(PrintFormat p)
 void Abstract::virtualGettingAEnum(Abstract::PrintFormat)
 {
 }
-

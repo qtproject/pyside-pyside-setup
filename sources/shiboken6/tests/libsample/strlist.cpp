@@ -5,15 +5,13 @@
 
 #include <algorithm>
 
-bool
-StrList::operator==(const std::list<Str>& other) const
+bool StrList::operator==(const std::list<Str> &other) const
 {
     return size() == other.size()
         && std::equal(begin(), end(), other.begin());
 }
 
-Str
-StrList::join(const Str& sep) const
+Str StrList::join(const Str &sep) const
 {
     Str result;
     const auto i1 = begin();

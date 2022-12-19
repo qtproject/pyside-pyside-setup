@@ -4,16 +4,16 @@
 #ifndef PAIRUSER_H
 #define PAIRUSER_H
 
-#include <utility>
+#include "libsamplemacros.h"
 #include "complex.h"
 
-#include "libsamplemacros.h"
+#include <utility>
 
 class LIBSAMPLE_API PairUser
 {
 public:
-    PairUser() {}
-    virtual ~PairUser() {}
+    PairUser() = default;
+    virtual ~PairUser() = default;
 
     virtual std::pair<int, int> createPair();
     std::pair<int, int> callCreatePair();
@@ -26,5 +26,5 @@ public:
 private:
     std::pair<int, int> m_pair;
 };
-#endif // PAIRUSER_H
 
+#endif // PAIRUSER_H

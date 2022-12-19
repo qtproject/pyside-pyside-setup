@@ -15,7 +15,7 @@ int sample::value() const
     return m_value;
 }
 
-bool operator==(const sample&s1, const sample&s2)
+bool operator==(const sample &s1, const sample &s2)
 {
     return s1.value() == s2.value();
 }

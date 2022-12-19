@@ -10,16 +10,16 @@ class LIBSAMPLE_API Complex
 {
 public:
     Complex(double real = 0.0, double imag = 0.0);
-    ~Complex() {}
+    ~Complex() = default;
 
     inline double real() const { return m_real; }
     inline void setReal(double real) { m_real = real; }
     inline double imag() const { return m_imag; }
     inline void setImaginary(double imag) { m_imag = imag; }
 
-    Complex operator+(Complex& other);
+    Complex operator+(const Complex &other);
 
-    void show();
+    void show() const;
 
 private:
     double m_real;

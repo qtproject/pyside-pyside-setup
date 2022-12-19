@@ -3,14 +3,12 @@
 
 #include "objectmodel.h"
 
-void
-ObjectModel::setData(ObjectType* data)
+void ObjectModel::setData(ObjectType *data)
 {
     m_data = data;
 }
 
-ObjectType*
-ObjectModel::data() const
+ObjectType *ObjectModel::data() const
 {
     return m_data;
 }

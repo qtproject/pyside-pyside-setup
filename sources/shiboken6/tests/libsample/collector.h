@@ -4,36 +4,35 @@
 #ifndef COLLECTOR_H
 #define COLLECTOR_H
 
-#include <list>
 #include "libsamplemacros.h"
-
 #include "intwrapper.h"
 #include "objecttype.h"
+
+#include <list>
 
 class LIBSAMPLE_API Collector
 {
 public:
-    Collector() {}
-    virtual ~Collector() {}
+    Collector() = default;
+    virtual ~Collector() = default;
+    Collector(const Collector &) = delete;
+    Collector &operator=(const Collector &) = delete;
 
     void clear();
 
-    Collector& operator<<(ObjectType::Identifier item);
+    Collector &operator<<(ObjectType::Identifier item);
 
-    Collector& operator<<(const ObjectType *);
+    Collector &operator<<(const ObjectType *);
 
     std::list<ObjectType::Identifier> items();
-    int size();
+    int size() const;
 
 private:
     std::list<ObjectType::Identifier> m_items;
-
-    Collector(const Collector&);
-    Collector& operator=(const Collector&);
 };
 
 /* Helper for testing external operators */
-LIBSAMPLE_API Collector &operator<<(Collector&, const IntWrapper&);
+LIBSAMPLE_API Collector &operator<<(Collector &, const IntWrapper &);
 
 #endif // COLLECTOR_H
 

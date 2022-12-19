@@ -8,22 +8,19 @@
 #include <algorithm>
 #include <numeric>
 
-std::list<int>
-ListUser::createIntList(int num)
+std::list<int> ListUser::createIntList(int num)
 {
     std::list<int> retval(num);
     std::iota(retval.begin(), retval.end(), 0);
     return retval;
 }
 
-int
-ListUser::sumIntList(std::list<int> intList)
+int ListUser::sumIntList(std::list<int> intList)
 {
     return std::accumulate(intList.begin(), intList.end(), 0);
 }
 
-std::list<MinBool>
-ListUser::createMinBoolList(MinBool mb1, MinBool mb2)
+std::list<MinBool> ListUser::createMinBoolList(MinBool mb1, MinBool mb2)
 {
     std::list<MinBool> retval;
     retval.push_back(mb1);
@@ -31,8 +28,7 @@ ListUser::createMinBoolList(MinBool mb1, MinBool mb2)
     return retval;
 }
 
-MinBool
-ListUser::oredMinBoolList(std::list<MinBool> minBoolList)
+MinBool ListUser::oredMinBoolList(std::list<MinBool> minBoolList)
 {
     MinBool result(false);
     for (const auto &m : minBoolList)
@@ -40,8 +36,7 @@ ListUser::oredMinBoolList(std::list<MinBool> minBoolList)
     return result;
 }
 
-std::list<Val>
-ListUser::createValList(int num)
+std::list<Val> ListUser::createValList(int num)
 {
     std::list<Val> retval;
     for (int i = 0; i < num; ++i)
@@ -49,17 +44,14 @@ ListUser::createValList(int num)
     return retval;
 }
 
-int
-ListUser::sumValList(std::list<Val> valList)
+int ListUser::sumValList(std::list<Val> valList)
 {
     int total = 0;
     for (const auto &v : valList)
         total += v.valId();
     return total;
 }
-
-std::list<Obj*>
-ListUser::createObjList(Obj* o1, Obj* o2)
+std::list<Obj*> ListUser::createObjList(Obj* o1, Obj* o2)
 {
     std::list<Obj*> retval;
     retval.push_back(o1);
@@ -67,8 +59,7 @@ ListUser::createObjList(Obj* o1, Obj* o2)
     return retval;
 }
 
-int
-ListUser::sumObjList(std::list<Obj*> objList)
+int ListUser::sumObjList(std::list<Obj*> objList)
 {
     int total = 0;
     for (const auto *obj : objList)
@@ -76,8 +67,7 @@ ListUser::sumObjList(std::list<Obj*> objList)
     return total;
 }
 
-std::list<std::list<int> >
-ListUser::createListOfIntLists(int num)
+std::list<std::list<int> > ListUser::createListOfIntLists(int num)
 {
     std::list<std::list<int> > retval;
     for (int i = 0; i < num; ++i)
@@ -85,8 +75,7 @@ ListUser::createListOfIntLists(int num)
     return retval;
 }
 
-int
-ListUser::sumListOfIntLists(std::list<std::list<int> > intListList)
+int ListUser::sumListOfIntLists(std::list<std::list<int> > intListList)
 {
     int total = 0;
     for (const auto &list : intListList)

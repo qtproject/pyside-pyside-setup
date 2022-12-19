@@ -26,8 +26,7 @@ main(int argv, char **argc)
     derived.callPureVirtual();
 
     std::cout << std::endl;
-    Abstract* abs;
-    abs = Abstract::createObject();
+    auto *abs = Abstract::createObject();
     std::cout << "Abstract::createObject(): " << abs << std::endl << std::endl;
     delete abs;
 
@@ -48,7 +47,7 @@ main(int argv, char **argc)
     std::cout << "\n-----------------------------------------\n";
 
     KinderGarten kg;
-    Derived* d[] = { 0, 0, 0 };
+    Derived *d[] = { 0, 0, 0 };
 
     for (int i = 0; i < 3; i++) {
         d[i] = new Derived(i);
@@ -70,7 +69,7 @@ main(int argv, char **argc)
     std::cout << "\n* release child ";
     d[1]->show();
     std::cout << " -------------\n";
-    Abstract* released = kg.releaseChild(d[1]);
+    Abstract *released = kg.releaseChild(d[1]);
     std::cout << "released: ";
     released->show();
     std::cout << std::endl;

@@ -4,12 +4,13 @@
 #ifndef LISTUSER_H
 #define LISTUSER_H
 
-#include <list>
 #include "obj.h"
 #include "val.h"
 #include "minbool.h"
 
 #include "libminimalmacros.h"
+
+#include <list>
 
 struct LIBMINIMAL_API ListUser
 {

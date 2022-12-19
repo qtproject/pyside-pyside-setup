@@ -18,26 +18,26 @@ public:
     OtherDerived(int id = -1);
     ~OtherDerived() override;
     void pureVirtual() override;
-    void* pureVirtualReturningVoidPtr() override;
+    void *pureVirtualReturningVoidPtr() override;
     void unpureVirtual() override;
     PrintFormat returnAnEnum()  override { return Short; }
 
-    inline void useObjectTypeFromOtherModule(ObjectType*) {}
-    inline Event useValueTypeFromOtherModule(const Event& e) { return e; }
-    inline Complex useValueTypeFromOtherModule(const Complex& c) { return c; }
+    inline void useObjectTypeFromOtherModule(ObjectType *) {}
+    inline Event useValueTypeFromOtherModule(const Event &e) { return e; }
+    inline Complex useValueTypeFromOtherModule(const Complex &c) { return c; }
     inline void useEnumTypeFromOtherModule(OverloadedFuncEnum) {}
 
     // factory method
-    static Abstract* createObject();
+    static Abstract *createObject();
 
     void hideFunction(HideType*) override {}
 
 protected:
-    inline const char* getClassName() { return className(); }
-    virtual const char* className()  override { return "OtherDerived"; }
+    inline const char *getClassName() { return className(); }
+    virtual const char *className() const override { return "OtherDerived"; }
 
 private:
     void pureVirtualPrivate() override;
 };
-#endif // OTHERDERIVED_H
 
+#endif // OTHERDERIVED_H

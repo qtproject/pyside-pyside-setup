@@ -9,27 +9,27 @@
 class PrivateDtor
 {
 public:
-    inline static PrivateDtor* instance()
+    inline static PrivateDtor *instance()
     {
         static PrivateDtor self;
-        self.m_instanciations++;
+        self.m_instantiations++;
         return &self;
     }
 
     inline int instanceCalls()
     {
-        return m_instanciations;
+        return m_instantiations;
     }
 
 protected:
-    inline int protectedInstanceCalls() { return m_instanciations; }
+    inline int protectedInstanceCalls() { return m_instantiations; }
 
 private:
-    int m_instanciations;
+    int m_instantiations = 0;
 
-    PrivateDtor() : m_instanciations(0) {}
-    PrivateDtor(const PrivateDtor&) {}
-    ~PrivateDtor() {}
+    PrivateDtor() = default;
+    PrivateDtor(const PrivateDtor &) = default;
+    ~PrivateDtor() = default;
 };
 
-#endif
+#endif // PRIVATEDTOR_H

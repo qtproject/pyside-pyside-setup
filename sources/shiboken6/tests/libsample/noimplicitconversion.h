@@ -13,9 +13,12 @@ class NoImplicitConversion
 public:
     explicit NoImplicitConversion(int objId) : m_objId(objId) {}
     inline int objId() const { return m_objId; }
-    inline static int receivesNoImplicitConversionByValue(NoImplicitConversion arg) { return arg.m_objId; }
-    inline static int receivesNoImplicitConversionByPointer(NoImplicitConversion* arg) { return arg->m_objId; }
-    inline static int receivesNoImplicitConversionByReference(NoImplicitConversion& arg) { return arg.m_objId; }
+    inline static int receivesNoImplicitConversionByValue(NoImplicitConversion arg)
+    { return arg.m_objId; }
+    inline static int receivesNoImplicitConversionByPointer(NoImplicitConversion *arg)
+    { return arg->m_objId; }
+    inline static int receivesNoImplicitConversionByReference(NoImplicitConversion &arg)
+    { return arg.m_objId; }
 private:
     int m_objId;
 };

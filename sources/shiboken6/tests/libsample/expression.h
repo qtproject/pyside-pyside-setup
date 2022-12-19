@@ -6,6 +6,7 @@
 #define EXPRESSION_H
 
 #include "libsamplemacros.h"
+
 #include <string>
 
 class LIBSAMPLE_API Expression
@@ -16,23 +17,22 @@ public:
     };
 
     Expression(int number);
-    Expression(const Expression& other);
-    Expression& operator=(const Expression& other);
+    Expression(const Expression &other);
+    Expression &operator=(const Expression &other);
 
     ~Expression();
 
-    Expression operator>(const Expression& other);
-    Expression operator<(const Expression& other);
-    Expression operator+(const Expression& other);
-    Expression operator-(const Expression& other);
+    Expression operator>(const Expression &other);
+    Expression operator<(const Expression &other);
+    Expression operator+(const Expression &other);
+    Expression operator-(const Expression &other);
 
     std::string toString() const;
 private:
-    int m_value;
-    Operation m_operation;
-    Expression* m_operand1;
-    Expression* m_operand2;
-
+    int m_value = 0;
+    Operation m_operation = None;
+    Expression *m_operand1 = nullptr;
+    Expression *m_operand2 = nullptr;
     Expression();
 };
 

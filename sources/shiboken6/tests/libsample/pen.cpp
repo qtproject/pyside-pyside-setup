@@ -45,9 +45,7 @@ void Brush::setColor(const Color &newColor)
     m_color = newColor;
 }
 
-Pen::Pen() : m_ctor(EmptyCtor)
-{
-}
+Pen::Pen() = default;
 
 Pen::Pen(SampleNamespace::Option) : m_ctor(EnumCtor)
 {
@@ -62,7 +60,7 @@ Pen::Pen(const Pen &) : m_ctor(CopyCtor)
 }
 
 Pen::Pen(Pen &&) = default;
-Pen &Pen::operator=(const Pen& pen) = default;
+Pen &Pen::operator=(const Pen &pen) = default;
 Pen &Pen::operator=(Pen &&) = default;
 
 int Pen::ctorType()

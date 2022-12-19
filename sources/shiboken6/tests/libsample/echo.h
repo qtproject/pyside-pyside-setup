@@ -12,19 +12,19 @@ class ObjectType;
 class Echo
 {
 public:
-    Echo(){}
-    ~Echo(){}
+    Echo() = default;
+    ~Echo() = default;
 
     void doNothingWithConstBool(const bool hi);
-    void methodWithNamedArg(const Str& string = Str(""));
+    void methodWithNamedArg(const Str &string = Str{});
 
-    Str operator()(const Str& s, const int i) { return s + i; }
+    Str operator()(const Str &s, const int i) { return s + i; }
 
     // These method are here just for compilation test purposes
-    Echo& operator<<(unsigned int item);
-    Echo& operator<<(signed int item);
-    Echo& operator<<(const ObjectType *item);
-    Echo& operator<<(Str str);
+    Echo &operator<<(unsigned int item);
+    Echo &operator<<(signed int item);
+    Echo &operator<<(const ObjectType *item);
+    Echo &operator<<(Str str);
 };
 
 inline void Echo::doNothingWithConstBool(const bool)

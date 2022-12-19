@@ -8,12 +8,12 @@ class Null
 {
 public:
     Null(bool value) : m_isNull(value) {}
-    Null() : m_isNull(false) {}
+    Null() = default;
+
     void setIsNull(bool flag) { m_isNull = flag; }
 
 private:
-    bool m_isNull;
+    bool m_isNull = false;
 };
 
-#endif // STR_H
-
+#endif // NULL_H

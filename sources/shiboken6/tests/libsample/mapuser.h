@@ -4,14 +4,15 @@
 #ifndef MAPUSER_H
 #define MAPUSER_H
 
+#include "libsamplemacros.h"
+
+#include "complex.h"
+#include "bytearray.h"
+
 #include <map>
 #include <list>
 #include <utility>
 #include <string>
-#include "complex.h"
-#include "bytearray.h"
-
-#include "libsamplemacros.h"
 
 class LIBSAMPLE_API MapUser
 {
@@ -31,7 +32,7 @@ public:
     static void pointerToMap(std::map<std::string, std::string> *arg);
     static void referenceToMap(std::map<std::string, std::string> &arg);
 
-    inline const std::map<int, ByteArray>& passMapIntValueType(const std::map<int, ByteArray>& arg) { return arg; }
+    inline const std::map<int, ByteArray> &passMapIntValueType(const std::map<int, ByteArray>& arg) { return arg; }
 
     std::map<int, std::list<std::list<double> > > foo() const;
 

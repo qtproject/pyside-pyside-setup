@@ -4,10 +4,10 @@
 #ifndef STRLIST_H
 #define STRLIST_H
 
-#include <list>
+#include "libsamplemacros.h"
 #include "str.h"
 
-#include "libsamplemacros.h"
+#include <list>
 
 class LIBSAMPLE_API StrList : public std::list<Str>
 {
@@ -19,24 +19,28 @@ public:
         ListOfStrCtor
     };
 
-    inline StrList() : m_ctorUsed(NoParamsCtor) {}
-    inline explicit StrList(const Str& str) : m_ctorUsed(StrCtor) { push_back(str); }
-    inline StrList(const std::list<Str>& lst) : std::list<Str>(lst), m_ctorUsed(ListOfStrCtor) {}
+    inline StrList() = default;
+    inline StrList(const std::list<Str> &lst) :
+        std::list<Str>(lst), m_ctorUsed(ListOfStrCtor) {}
+    inline explicit StrList(const Str &str) :
+        m_ctorUsed(StrCtor) { push_back(str); }
+    inline StrList(const StrList &lst) :
+        std::list<Str>(lst), m_ctorUsed(CopyCtor) {}
 
-    inline StrList(const StrList &lst) : std::list<Str>(lst), m_ctorUsed(CopyCtor) {}
     StrList(StrList &&) = default;
     StrList &operator=(const StrList &) = default;
     StrList &operator=(StrList &&) = default;
 
-    inline void append(Str str) { push_back(str); }
-    Str join(const Str& sep) const;
+    inline void append(const Str &str) { push_back(str); }
+    Str join(const Str &sep) const;
 
-    bool operator==(const std::list<Str>& other) const;
-    inline bool operator!=(const std::list<Str>& other) const { return !(*this == other); }
+    bool operator==(const std::list<Str> &other) const;
+    inline bool operator!=(const std::list<Str> &other) const { return !(*this == other); }
 
-    CtorEnum constructorUsed() { return m_ctorUsed; }
+    CtorEnum constructorUsed() const { return m_ctorUsed; }
+
 private:
-    CtorEnum m_ctorUsed;
+    CtorEnum m_ctorUsed = NoParamsCtor;
 };
 
 using PStrList = StrList;

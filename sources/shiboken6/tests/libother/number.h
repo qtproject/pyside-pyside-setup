@@ -18,7 +18,7 @@ public:
     Str toStr() const;
     inline operator Str() const { return toStr(); }
 
-    friend LIBOTHER_API Point operator*(const Point&, const Number&);
+    friend LIBOTHER_API Point operator*(const Point &, const Number &);
 
     Complex toComplex() const;
     static Number fromComplex(Complex cpx);
@@ -27,6 +27,6 @@ private:
     int m_value;
 };
 
-LIBOTHER_API Point operator*(const Point&, const Number&);
+LIBOTHER_API Point operator*(const Point &, const Number &);
 
 #endif // NUMBER_H

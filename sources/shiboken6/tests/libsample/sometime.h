@@ -19,14 +19,12 @@ public:
         FourArgs
     };
 
-    Time()
-        : m_hour(0), m_minute(0), m_second(0), m_msec(0), m_is_null(true)
-    {}
-    Time(int h, int m, int s = 0, int ms = 0)
-        : m_hour(h), m_minute(m), m_second(s), m_msec(ms), m_is_null(false)
+    Time() = default;
+    explicit Time(int h, int m, int s = 0, int ms = 0) :
+        m_hour(h), m_minute(m), m_second(s), m_msec(ms), m_is_null(false)
     {}
 
-    ~Time() {}
+    ~Time() = default;
 
     inline bool isNull() const { return m_is_null; }
 
@@ -48,20 +46,19 @@ public:
                                          ObjectType *type = nullptr);
 
     Str toString() const;
-    bool operator==(const Time& other) const;
-    bool operator!=(const Time& other) const;
+    bool operator==(const Time &other) const;
+    bool operator!=(const Time &other) const;
 
     // This cast operator must become an implicit conversion of Str.
     operator Str() const;
 
 private:
-    int m_hour;
-    int m_minute;
-    int m_second;
-    int m_msec;
+    int m_hour = 0;
+    int m_minute = 0;
+    int m_second = 0;
+    int m_msec = 0;
 
-    bool m_is_null;
+    bool m_is_null = true;
 };
 
 #endif // SOMETIME_H
-

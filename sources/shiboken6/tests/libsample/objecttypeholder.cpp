@@ -3,7 +3,7 @@
 
 #include "objecttypeholder.h"
 
-ObjectTypeHolder::ObjectTypeHolder(const char* objectName)
+ObjectTypeHolder::ObjectTypeHolder(const char *objectName)
 {
     auto object = new ObjectType();
     object->setObjectName(objectName);
@@ -20,14 +20,12 @@ ObjectTypeHolder::~ObjectTypeHolder()
     delete m_objectType;
 }
 
-Str
-ObjectTypeHolder::passObjectTypeAsReference(const ObjectType& objectType)
+Str ObjectTypeHolder::passObjectTypeAsReference(const ObjectType &objectType)
 {
     return objectType.objectName();
 }
 
-Str
-ObjectTypeHolder::callPassObjectTypeAsReference()
+Str ObjectTypeHolder::callPassObjectTypeAsReference()
 {
     return passObjectTypeAsReference(*m_objectType);
 }

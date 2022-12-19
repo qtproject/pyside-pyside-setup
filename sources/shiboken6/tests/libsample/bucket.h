@@ -6,6 +6,7 @@
 
 #include "libsamplemacros.h"
 #include "objecttype.h"
+
 #include <list>
 
 class ObjectType;
@@ -13,7 +14,7 @@ class ObjectType;
 class LIBSAMPLE_API Bucket : public ObjectType
 {
 public:
-    Bucket();
+    Bucket() = default;
     void push(int);
     int pop();
     bool empty();
@@ -27,8 +28,7 @@ public:
 private:
     std::list<int> m_data;
 
-    volatile bool m_locked;
+    volatile bool m_locked = false;
 };
 
 #endif // BUCKET_H
-

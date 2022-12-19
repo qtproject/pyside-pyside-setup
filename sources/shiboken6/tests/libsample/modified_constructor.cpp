@@ -8,8 +8,7 @@ ModifiedConstructor::ModifiedConstructor(int first_arg)
     m_stored_value = first_arg;
 }
 
-int
-ModifiedConstructor::retrieveValue()
+int ModifiedConstructor::retrieveValue() const
 {
     return m_stored_value;
 }

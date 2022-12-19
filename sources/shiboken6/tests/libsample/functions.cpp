@@ -2,35 +2,32 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "functions.h"
+
 #include <cstring>
 #include <algorithm>
 #include <iostream>
 #include <numeric>
 
-void
-printSomething()
+void printSomething()
 {
     std::cout << __FUNCTION__ << std::endl;
 }
 
-int
-gimmeInt()
+int gimmeInt()
 {
     static int val = 2;
     val = val * 1.3;
     return val;
 }
 
-double
-gimmeDouble()
+double gimmeDouble()
 {
     static double val = 7.77;
     val = val * 1.3;
     return val;
 }
 
-std::list<Complex>
-gimmeComplexList()
+std::list<Complex> gimmeComplexList()
 {
     std::list<Complex> lst;
     lst.push_back(Complex());
@@ -39,39 +36,31 @@ gimmeComplexList()
     return lst;
 }
 
-Complex
-sumComplexPair(std::pair<Complex, Complex> cpx_pair)
+Complex sumComplexPair(std::pair<Complex, Complex> cpx_pair)
 {
     return cpx_pair.first + cpx_pair.second;
 }
 
-double
-multiplyPair(std::pair<double, double> pair)
+double multiplyPair(std::pair<double, double> pair)
 {
     return pair.first * pair.second;
 }
 
-int
-countCharacters(const char* text)
+int countCharacters(const char *text)
 {
     if (!text)
         return -1;
-    int count;
-    for(count = 0; text[count] != '\0'; count++)
-        ;
-    return count;
+    return std::strlen(text);
 }
 
-char*
-makeCString()
+char *makeCString()
 {
-    char* string = new char[strlen(__FUNCTION__) + 1];
+    char *string = new char[strlen(__FUNCTION__) + 1];
     std::strcpy(string, __FUNCTION__);
     return string;
 }
 
-const char*
-returnCString()
+const char *returnCString()
 {
     return __FUNCTION__;
 }
@@ -86,86 +75,72 @@ GlobalOverloadFuncEnum overloadedFunc(double)
     return GlobalOverloadFunc_d;
 }
 
-char*
-returnNullPrimitivePointer()
+char *returnNullPrimitivePointer()
 {
     return nullptr;
 }
 
-ObjectType*
-returnNullObjectTypePointer()
+ObjectType *returnNullObjectTypePointer()
 {
     return nullptr;
 }
 
-Event*
-returnNullValueTypePointer()
+Event *returnNullValueTypePointer()
 {
     return nullptr;
 }
 
-unsigned int
-doubleUnsignedInt(unsigned int value)
+unsigned int doubleUnsignedInt(unsigned int value)
 {
     return value * 2;
 }
 
-long long
-doubleLongLong(long long value)
+long long doubleLongLong(long long value)
 {
     return value * 2;
 }
 
-unsigned long long
-doubleUnsignedLongLong(unsigned long long value)
+unsigned long long doubleUnsignedLongLong(unsigned long long value)
 {
     return value * 2;
 }
 
-short
-doubleShort(short value)
+short doubleShort(short value)
 {
     return value * 2;
 }
 
-int
-acceptInt(int x)
+int acceptInt(int x)
 {
     return x;
 }
 
-unsigned int
-acceptUInt(unsigned int x)
+unsigned int acceptUInt(unsigned int x)
 {
     return x;
 }
 
-long
-acceptLong(long x)
+long acceptLong(long x)
 {
     return x;
 }
 
-unsigned long
-acceptULong(unsigned long x)
+unsigned long acceptULong(unsigned long x)
 {
     return x;
 }
 
-double
-acceptDouble(double x)
+double acceptDouble(double x)
 {
     return x;
 }
 
-int
-acceptIntReference(int& x)
+int acceptIntReference(int &x)
 {
     return x;
 }
 
-OddBool
-acceptOddBoolReference(OddBool& x)
+OddBool acceptOddBoolReference(OddBool &x)
 {
     return x;
 }

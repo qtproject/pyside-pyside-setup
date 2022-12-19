@@ -8,12 +8,12 @@ SAMPLE_HANDLE HandleHolder::createHandle()
     return (SAMPLE_HANDLE) new OBJ;
 }
 
-bool HandleHolder::compare(HandleHolder* other)
+bool HandleHolder::compare(HandleHolder *other)
 {
     return other->m_handle == m_handle;
 }
 
-bool HandleHolder::compare2(HandleHolder* other)
+bool HandleHolder::compare2(HandleHolder *other)
 {
     return other->m_handle2 == m_handle2;
 }

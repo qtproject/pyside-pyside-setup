@@ -15,7 +15,7 @@ class LIBOTHER_API OtherMultipleDerived : public MDerived1
 public:
     // this will use CppCopier from other module (bug#142)
     VirtualMethods returnUselessClass();
-    static Base1* createObject(const std::string& objName);
+    static Base1 *createObject(const std::string &objName);
 };
 
-#endif
+#endif // OTHERMULTIPLEDERIVED_H

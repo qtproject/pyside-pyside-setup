@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "objecttypelayout.h"
+
 #include <iostream>
 
-void ObjectTypeLayout::addObject(ObjectType* obj)
+void ObjectTypeLayout::addObject(ObjectType *obj)
 {
     if (obj->isLayoutType()) {
-        ObjectTypeLayout* l = reinterpret_cast<ObjectTypeLayout*>(obj);
+        auto *l = reinterpret_cast<ObjectTypeLayout*>(obj);
         if (l->parent()) {
             std::cerr << "[WARNING] ObjectTypeLayout::addObject: layout '"
                 << l->objectName().cstring() << "' already has a parent.\n";
@@ -23,12 +24,12 @@ void ObjectTypeLayout::addObject(ObjectType* obj)
     m_objects.push_back(obj);
 }
 
-std::list< ObjectType* > ObjectTypeLayout::objects() const
+std::list<ObjectType*> ObjectTypeLayout::objects() const
 {
     return m_objects;
 }
 
-void ObjectTypeLayout::reparentChildren(ObjectType* parent)
+void ObjectTypeLayout::reparentChildren(ObjectType *parent)
 {
     for (auto *o : m_objects) {
         if (o->isLayoutType())
@@ -37,4 +38,3 @@ void ObjectTypeLayout::reparentChildren(ObjectType* parent)
             o->setParent(parent);
     }
 }
-

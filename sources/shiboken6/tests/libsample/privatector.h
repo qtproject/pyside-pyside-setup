@@ -9,22 +9,22 @@
 class PrivateCtor
 {
 public:
-    inline static PrivateCtor* instance()
+    inline static PrivateCtor *instance()
     {
         static PrivateCtor self;
-        self.m_instanciations++;
+        self.m_instantiations++;
         return &self;
     }
 
     inline int instanceCalls()
     {
-        return m_instanciations;
+        return m_instantiations;
     }
 
 private:
-    int m_instanciations;
+    int m_instantiations = 0;
 
-    PrivateCtor() : m_instanciations(0) {}
+    PrivateCtor() = default;
 };
 
 class DeletedDefaultCtor
@@ -39,4 +39,4 @@ public:
     ~DeletedDefaultCtor() = default;
 };
 
-#endif
+#endif // PRIVATECTOR_H

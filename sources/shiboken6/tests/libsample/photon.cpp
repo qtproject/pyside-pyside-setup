@@ -5,21 +5,27 @@
 
 namespace Photon
 {
+
 const ClassType Base::staticType;
-int callCalculateForValueDuplicatorPointer(ValueDuplicator* value)
+
+int callCalculateForValueDuplicatorPointer(ValueDuplicator *value)
 {
     return value->calculate();
 }
-int callCalculateForValueDuplicatorReference(ValueDuplicator& value)
+
+int callCalculateForValueDuplicatorReference(ValueDuplicator &value)
 {
     return value.calculate();
 }
-int countValueIdentities(const std::list<ValueIdentity>& values)
+
+int countValueIdentities(const std::list<ValueIdentity> &values)
 {
     return values.size();
 }
-int countValueDuplicators(const std::list<TemplateBase<DuplicatorType> >& values)
+
+int countValueDuplicators(const std::list<TemplateBase<DuplicatorType> > &values)
 {
     return values.size();
 }
+
 } // namespace Photon

@@ -28,17 +28,17 @@ public:
         OverFunc_C
     };
 
-    ImplicitConv() : m_ctorEnum(CtorNone), m_objId(-1), m_value(-1.0) {}
-    ImplicitConv(int objId) : m_ctorEnum(CtorOne), m_objId(objId), m_value(-1.0) {}
-    ImplicitConv(CtorEnum ctorEnum) : m_ctorEnum(ctorEnum), m_objId(-1), m_value(-1.0) {}
-    ImplicitConv(ObjectType&) : m_ctorEnum(CtorObjectTypeReference), m_objId(-1), m_value(-1.0) {}
+    ImplicitConv() = default;
+    ImplicitConv(int objId) : m_ctorEnum(CtorOne), m_objId(objId) {}
+    ImplicitConv(CtorEnum ctorEnum) : m_ctorEnum(ctorEnum) {}
+    ImplicitConv(ObjectType&) : m_ctorEnum(CtorObjectTypeReference) {}
     ImplicitConv(double value, bool=true) : m_ctorEnum(CtorNone), m_value(value) {}
     ImplicitConv(const Null &null);
-    ~ImplicitConv() {}
+    ~ImplicitConv() = default;
 
-    inline CtorEnum ctorEnum() { return m_ctorEnum; }
-    inline int objId() { return m_objId; }
-    inline double value() { return m_value; }
+    inline CtorEnum ctorEnum() const { return m_ctorEnum; }
+    inline int objId() const { return m_objId; }
+    inline double value() const { return m_value; }
 
     static ImplicitConv implicitConvCommon(ImplicitConv implicit);
 
@@ -50,9 +50,9 @@ public:
     static ICOverloadedFuncEnum implicitConvOverloading(CtorEnum dummyArg);
 
 private:
-    CtorEnum m_ctorEnum;
-    int m_objId;
-    double m_value;
+    CtorEnum m_ctorEnum = CtorNone;
+    int m_objId = -1;
+    double m_value = -1.0;
 };
 
 #endif // IMPLICITCONV_H

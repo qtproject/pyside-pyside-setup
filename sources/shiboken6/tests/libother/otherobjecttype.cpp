@@ -3,10 +3,9 @@
 
 #include "otherobjecttype.h"
 
-Collector&
-operator<<(Collector& collector, const OtherObjectType& obj)
+Collector &operator<<(Collector &collector, const OtherObjectType &obj)
 {
-    collector << obj.identifier()*2;
+    collector << obj.identifier() * 2;
     return collector;
 }
 

@@ -11,20 +11,19 @@ class SimpleFile_p;
 class LIBSAMPLE_API SimpleFile
 {
 public:
-    explicit SimpleFile(const char* filename);
+    explicit SimpleFile(const char *filename);
     ~SimpleFile();
 
-    const char* filename();
+    const char *filename();
     long size();
     bool open();
     void close();
 
     bool exists() const;
-    static bool exists(const char* filename);
+    static bool exists(const char *filename);
 
 private:
     SimpleFile_p *p;
 };
 
 #endif // SIMPLEFILE_H
-

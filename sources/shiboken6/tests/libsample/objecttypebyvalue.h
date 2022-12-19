@@ -3,8 +3,10 @@
 
 #ifndef OBJECTTYPEBYVALUE_H
 #define OBJECTTYPEBYVALUE_H
-#include <list>
+
 #include "protected.h"
+
+#include <list>
 
 class ObjectTypeByValue
 {

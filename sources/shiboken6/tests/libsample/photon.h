@@ -4,8 +4,9 @@
 #ifndef PHOTON_H
 #define PHOTON_H
 
-#include <list>
 #include "libsamplemacros.h"
+
+#include <list>
 
 // This namespace and classes simulate
 // situations found in Qt's phonon module.
@@ -23,7 +24,8 @@ class LIBSAMPLE_API Base
 {
 public:
     explicit Base(int value) : m_value(value) {}
-    virtual ~Base() {}
+    virtual ~Base() = default;
+
     inline void setValue(int value) { m_value = value; }
     inline int value() const { return m_value; }
 
@@ -42,12 +44,14 @@ class LIBSAMPLE_API TemplateBase : public Base
 {
 public:
     explicit TemplateBase(int value) : Base(value) {}
-    inline int multiplicator() const { return (int)CLASS_TYPE; }
-    inline int calculate() const { return m_value * ((int)CLASS_TYPE); }
+    inline int multiplicator() const { return int(CLASS_TYPE); }
+    inline int calculate() const { return m_value * (int(CLASS_TYPE)); }
     static inline ClassType classType() { return CLASS_TYPE; }
 
-    inline int sumValueUsingPointer(TemplateBase<CLASS_TYPE>* other) const { return m_value + other->m_value; }
-    inline int sumValueUsingReference(TemplateBase<CLASS_TYPE>& other) const { return m_value + other.m_value; }
+    inline int sumValueUsingPointer(TemplateBase<CLASS_TYPE> *other) const
+    { return m_value + other->m_value; }
+    inline int sumValueUsingReference(TemplateBase<CLASS_TYPE> &other) const
+    { return m_value + other.m_value; }
 
     inline std::list<TemplateBase<CLASS_TYPE> > getListOfThisTemplateBase()
     {
@@ -57,7 +61,8 @@ public:
         return objs;
     }
 
-    static inline TemplateBase<CLASS_TYPE>* passPointerThrough(TemplateBase<CLASS_TYPE>* obj) { return obj; }
+    static inline TemplateBase<CLASS_TYPE> *passPointerThrough(TemplateBase<CLASS_TYPE> *obj)
+    { return obj; }
 
     ClassType type() const override { return CLASS_TYPE; }
     static const ClassType staticType = CLASS_TYPE;
@@ -71,10 +76,10 @@ template class LIBSAMPLE_API TemplateBase<DuplicatorType>;
 using ValueIdentity = TemplateBase<IdentityType>;
 using ValueDuplicator = TemplateBase<DuplicatorType>;
 
-LIBSAMPLE_API int callCalculateForValueDuplicatorPointer(ValueDuplicator* value);
-LIBSAMPLE_API int callCalculateForValueDuplicatorReference(ValueDuplicator& value);
-LIBSAMPLE_API int countValueIdentities(const std::list<ValueIdentity>& values);
-LIBSAMPLE_API int countValueDuplicators(const std::list<TemplateBase<DuplicatorType> >& values);
+LIBSAMPLE_API int callCalculateForValueDuplicatorPointer(ValueDuplicator *value);
+LIBSAMPLE_API int callCalculateForValueDuplicatorReference(ValueDuplicator &value);
+LIBSAMPLE_API int countValueIdentities(const std::list<ValueIdentity> &values);
+LIBSAMPLE_API int countValueDuplicators(const std::list<TemplateBase<DuplicatorType> > &values);
 
 // This simulates an internal error (SEGV) caused by 'noexcept' in
 // boost::intrusive_ptr before support for 'noexcept' was added. The ENTIRE
@@ -91,23 +96,23 @@ LIBSAMPLE_API int countValueDuplicators(const std::list<TemplateBase<DuplicatorT
 class Pointer
 {
 public:
-    Pointer() PHOTON_NOEXCEPT : px(nullptr) {}
-    Pointer(int* p) : px(p) {}
+    Pointer() PHOTON_NOEXCEPT {}
+    explicit Pointer(int *p) : px(p) {}
 
     void reset() PHOTON_NOEXCEPT { Pointer().swap(*this); }
 
-    int* get() const PHOTON_NOEXCEPT { return px; }
-    int& operator*() const { return *px; }
+    int *get() const PHOTON_NOEXCEPT { return px; }
+    int &operator*() const { return *px; }
 
-    void swap(Pointer& rhs) PHOTON_NOEXCEPT
+    void swap(Pointer &rhs) PHOTON_NOEXCEPT
     {
-        int* tmp = px;
+        int *tmp = px;
         px = rhs.px;
         rhs.px = tmp;
     }
 
 private:
-    int* px;
+    int *px = nullptr;
 };
 
 } // namespace Photon

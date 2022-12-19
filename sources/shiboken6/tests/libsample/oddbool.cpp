@@ -7,7 +7,7 @@ ComparisonTester::ComparisonTester(int v) : m_value(v)
 {
 }
 
-ComparisonTester& ComparisonTester::operator=(int v)
+ComparisonTester &ComparisonTester::operator=(int v)
 {
     m_value = v;
     return *this;

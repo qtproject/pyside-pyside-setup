@@ -5,9 +5,10 @@
 #define MODIFICATIONS_H
 
 #include "libsamplemacros.h"
-#include <utility>
 #include "point.h"
 #include "oddbool.h"
+
+#include <utility>
 
 class ObjectType;
 
@@ -61,10 +62,10 @@ public:
     // 'ok' must be removed and the return value will be changed
     // to a tuple (PyObject*) containing the expected result plus
     // the 'ok' value as a Python boolean
-    std::pair<double, double> pointToPair(Point pt, bool* ok);
+    std::pair<double, double> pointToPair(Point pt, bool *ok);
 
     // same as 'pointToPair' except that this time 'ok' is the first argument
-    double multiplyPointCoordsPlusValue(bool* ok, Point pt, double value);
+    double multiplyPointCoordsPlusValue(bool *ok, Point pt, double value);
 
     // completely remove 'plus' from the Python side
     int doublePlus(int value, int plus = 0);
@@ -85,24 +86,25 @@ public:
     int cppMultiply(int a, int b);
 
     // change the name of this virtual method
-    virtual const char* className();
+    virtual const char *className();
 
     Point sumPointArray(int arraySize, const Point pointArray[]);
 
     // Replace 'const void*' by 'ByteArray&'.
-    int getSize(const void* data, int size);
+    int getSize(const void *data, int size);
 
     // Mark the argument with a <no-null-pointer/> tag;
     // the test implementation must expect point never to be null.
-    int sumPointCoordinates(const Point* point);
+    int sumPointCoordinates(const Point *point);
 
     // Modify the return value of a virtual method.
-    virtual double differenceOfPointCoordinates(const Point* pt, bool* ok);
-    double callDifferenceOfPointCoordinates(const Point* pt, bool* ok) { return differenceOfPointCoordinates(pt, ok); }
+    virtual double differenceOfPointCoordinates(const Point *pt, bool *ok);
+    double callDifferenceOfPointCoordinates(const Point *pt, bool *ok)
+    { return differenceOfPointCoordinates(pt, ok); }
 
     // Sets an ObjectType in the argument and returns true.
     bool nonConversionRuleForArgumentWithDefaultValue(ObjectType **object = nullptr);
-    ObjectType* getObject() const { return m_object; }
+    ObjectType *getObject() const { return m_object; }
 
     // Inject code with a %CONVERTTOPYTHON that receives an user's primitive type.
     static inline OddBool passOddBool(OddBool ob) { return ob; }
@@ -118,7 +120,7 @@ public:
     void notifySetAttroCalled();
 
 private:
-    ObjectType* m_object;
+    ObjectType *m_object;
     TestEnum m_enumValue = TestEnumValue1;
     bool m_getAttroCalled = false;
     bool m_setAttroCalled = false;

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "bucket.h"
+
 #include <iostream>
 
 #ifdef _WIN32 // _WIN32 is defined by all Windows 32 and 64 bit compilers, but not by others.
@@ -14,10 +15,6 @@
 #  include <unistd.h>
 #  define SLEEP(x) usleep(x)
 #endif
-
-Bucket::Bucket() : m_locked(false)
-{
-}
 
 void Bucket::push(int x)
 {
@@ -44,7 +41,9 @@ bool Bucket::empty()
 void Bucket::lock()
 {
     m_locked = true;
-    while (m_locked) { SLEEP(300); }
+    while (m_locked) {
+        SLEEP(300);
+    }
 }
 
 void Bucket::unlock()
@@ -58,4 +57,3 @@ bool Bucket::virtualBlockerMethod()
     // The return value was added just for diversity sake.
     return true;
 }
-

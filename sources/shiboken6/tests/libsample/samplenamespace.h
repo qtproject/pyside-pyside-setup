@@ -4,11 +4,12 @@
 #ifndef SAMPLENAMESPACE_H
 #define SAMPLENAMESPACE_H
 
-#include <list>
 #include "libsamplemacros.h"
 #include "str.h"
 #include "point.h"
 #include "objecttype.h"
+
+#include <list>
 
 // Anonymous global enum
 enum {
@@ -28,7 +29,7 @@ inline namespace InlineNamespace
         ClassWithinInlineNamespace() = default;
         ~ClassWithinInlineNamespace() = default;
         ClassWithinInlineNamespace(const ClassWithinInlineNamespace &) = default;
-        ClassWithinInlineNamespace& operator=(const ClassWithinInlineNamespace &) = default;
+        ClassWithinInlineNamespace &operator=(const ClassWithinInlineNamespace &) = default;
 
         void setValue(EnumWithinInlineNamespace v) { m_value = v; }
         EnumWithinInlineNamespace value() const { return m_value; }
@@ -74,7 +75,8 @@ inline double powerOfTwo(double num) {
     return num * num;
 }
 
-LIBSAMPLE_API void doSomethingWithArray(const unsigned char *data, unsigned int size, const char *format = nullptr);
+LIBSAMPLE_API void doSomethingWithArray(const unsigned char *data, unsigned int size,
+                                        const char *format = nullptr);
 
 LIBSAMPLE_API int enumItemAsDefaultValueToIntArgument(int value = ZeroIn);
 
@@ -98,8 +100,9 @@ public:
                 NiceClassValue1, NiceClassValue2
             };
 
-            inline int someMethod(SomeInnerClass*) { return 0; }
-            virtual OkThisIsRecursiveEnough* someVirtualMethod(OkThisIsRecursiveEnough* arg) { return arg; }
+            inline int someMethod(SomeInnerClass *) { return 0; }
+            virtual OkThisIsRecursiveEnough *someVirtualMethod(OkThisIsRecursiveEnough *arg)
+            { return arg; }
         };
     protected:
         enum ProtectedEnum {
@@ -119,7 +122,8 @@ protected:
     PublicScopedEnum protectedMethodReturningPublicScopedEnum() const;
 };
 
-LIBSAMPLE_API inline int enumAsInt(SomeClass::PublicScopedEnum value) { return static_cast<int>(value); }
+LIBSAMPLE_API inline int enumAsInt(SomeClass::PublicScopedEnum value)
+{ return static_cast<int>(value); }
 
 class DerivedFromNamespace : public SomeClass::SomeInnerClass::OkThisIsRecursiveEnough
 {
@@ -128,29 +132,30 @@ public:
     // only to cause namespace confusion
 //    enum SampleNamespace {
 //    };
-    virtual OkThisIsRecursiveEnough* someVirtualMethod(OkThisIsRecursiveEnough* arg) { return arg; }
+    virtual OkThisIsRecursiveEnough *someVirtualMethod(OkThisIsRecursiveEnough *arg) { return arg; }
     inline OkThisIsRecursiveEnough *methodReturningTypeFromParentScope() { return nullptr; }
 };
 
 // The combination of the following two overloaded methods could trigger a
 // problematic behaviour on the overload decisor, if it isn't working properly.
 LIBSAMPLE_API void forceDecisorSideA(ObjectType *object = nullptr);
-LIBSAMPLE_API void forceDecisorSideA(const Point& pt, const Str& text, ObjectType* object = 0);
+LIBSAMPLE_API void forceDecisorSideA(const Point &pt, const Str &text,
+                                     ObjectType *object = nullptr);
 
 // The combination of the following two overloaded methods could trigger a
 // problematic behaviour on the overload decisor, if it isn't working properly.
 // This is a variation of forceDecisorSideB.
 LIBSAMPLE_API void forceDecisorSideB(int a, ObjectType *object = nullptr);
-LIBSAMPLE_API void forceDecisorSideB(int a, const Point &pt, const Str &text, ObjectType *object = nullptr);
+LIBSAMPLE_API void forceDecisorSideB(int a, const Point &pt, const Str &text,
+                                     ObjectType *object = nullptr);
 
 // Add a new signature on type system with only a Point value as parameter.
-LIBSAMPLE_API double passReferenceToValueType(const Point& point, double multiplier);
+LIBSAMPLE_API double passReferenceToValueType(const Point &point, double multiplier);
 // Add a new signature on type system with only a ObjectType pointer as parameter.
-LIBSAMPLE_API int passReferenceToObjectType(const ObjectType& obj, int multiplier);
+LIBSAMPLE_API int passReferenceToObjectType(const ObjectType &obj, int multiplier);
 
 extern LIBSAMPLE_API int variableInNamespace;
 
 } // namespace SampleNamespace
 
 #endif // SAMPLENAMESPACE_H
-
