@@ -285,58 +285,6 @@ def run_process(args, initial_env=None):
     return exit_code
 
 
-def get_environment_from_batch_command(env_cmd, initial=None):
-    """
-    Take a command (either a single command or list of arguments)
-    and return the environment created after running that command.
-    Note that if the command must be a batch file or .cmd file, or the
-    changes to the environment will not be captured.
-
-    If initial is supplied, it is used as the initial environment passed
-    to the child process.
-    """
-
-    def validate_pair(ob):
-        if len(ob) != 2:
-            log.error(f"Unexpected result: {ob}")
-            return False
-        return True
-
-    def consume(it):
-        try:
-            while True:
-                next(it)
-        except StopIteration:
-            pass
-
-    if not isinstance(env_cmd, (list, tuple)):
-        env_cmd = [env_cmd]
-    # construct the command that will alter the environment
-    env_cmd = subprocess.list2cmdline(env_cmd)
-    # create a tag so we can tell in the output when the proc is done
-    tag = 'Done running command'
-    # construct a cmd.exe command to do accomplish this
-    cmd = f'cmd.exe /E:ON /V:ON /s /c "{env_cmd} && echo "{tag}" && set"'
-    # launch the process
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=initial)
-    # parse the output sent to stdout
-    lines = proc.stdout
-    # make sure the lines are strings
-    lines = [s.decode() for s in lines]
-    # consume whatever output occurs until the tag is reached
-    consume(itertools.takewhile(lambda l: tag not in l, lines))
-    # define a way to handle each KEY=VALUE line
-    # parse key/values into pairs
-    pairs = [l.rstrip().split('=', 1) for l in lines]
-    # make sure the pairs are valid
-    valid_pairs = filter(validate_pair, pairs)
-    # construct a dictionary of the pairs
-    result = dict(valid_pairs)
-    # let the process finish
-    proc.communicate()
-    return result
-
-
 def back_tick(cmd, ret_err=False):
     """
     Run command `cmd`, return stdout, or (stdout, stderr,
@@ -992,23 +940,6 @@ def get_python_dict(python_script_path):
         raise
 
 
-def install_pip_package_from_url_specifier(env_pip, url, upgrade=True):
-    args = [env_pip, "install", url]
-    if upgrade:
-        args.append("--upgrade")
-    args.append(url)
-    run_instruction(args, f"Failed to install {url}")
-
-
-def install_pip_dependencies(env_pip, packages, upgrade=True):
-    for p in packages:
-        args = [env_pip, "install"]
-        if upgrade:
-            args.append("--upgrade")
-        args.append(p)
-        run_instruction(args, f"Failed to install {p}")
-
-
 def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
     _pExe = "python"
     _env = f"env{python_ver}"
@@ -1059,23 +990,6 @@ def run_instruction(instruction, error, initial_env=None):
     if result != 0:
         log.error(f"ERROR : {error}")
         exit(result)
-
-
-def acceptCITestConfiguration(hostOS, hostOSVer, targetArch, compiler):
-    # Disable unsupported CI configs for now
-    # NOTE: String must match with QT CI's storagestruct thrift
-    if (hostOSVer in ["WinRT_10", "WebAssembly", "Ubuntu_18_04", "Android_ANY"]
-            or hostOSVer.startswith("SLES_")):
-        log.info("Disabled {hostOSVer} from Coin configuration")
-        return False
-    # With 5.11 CI will create two sets of release binaries,
-    # one with msvc 2015 and one with msvc 2017
-    # we shouldn't release the 2015 version.
-    # BUT, 32 bit build is done only on msvc 2015...
-    if compiler in ["MSVC2015"] and targetArch in ["X86_64"]:
-        log.warning(f"Disabled {compiler} to {targetArch} from Coin configuration")
-        return False
-    return True
 
 
 def get_ci_qtpaths_path(ci_install_dir, ci_host_os):
