@@ -271,11 +271,10 @@
   </object-type>
   <value-type name="QSurfaceDataItem"/>
   <object-type name="QSurfaceDataProxy">
-    <extra-includes>
-      <include file-name="sbknumpycheck.h" location="global"/>
-      <include file-name="qtdatavisualization_helper.h" location="global"/>
-    </extra-includes>
-
+    <inject-code class="native" position="beginning">
+      #include &lt;sbknumpycheck.h&gt;
+      #include &lt;qtdatavisualization_helper.h&gt;
+    </inject-code>
     <!-- PYSIDE-1438: Replace all add/set/insertRow() taking a 'QList*' by overloads
          taking 'const QList &' since an allocated list needs to be passed. -->
     <modify-function signature="addRow(QList&lt;QSurfaceDataItem&gt;*)" remove="all"/>
