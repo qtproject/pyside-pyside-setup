@@ -79,6 +79,8 @@ using **ninja** (instead of make), and considering only the **module subset** of
 :mod:`QtWidgets <PySide6.QtWidgets>`.
 
 Other important options to consider are:
+ * ``--unity``, Activates `CMake Unity Build Mode`_,  which speeds up the
+   build by concatenating source files,
  * ``--cmake``, to specify the path to the cmake binary,
  * ``--reuse-build``, to rebuild only the modified files,
  * ``--openssl=/path/to/openssl/bin``, to use a different path for OpenSSL,
@@ -527,3 +529,4 @@ A set of tools can be found under the ``tools/`` directory inside the ``pyside-s
 .. _repository: https://github.com/liyanage/macosx-shell-scripts/
 .. _`wiki page`: https://wiki.qt.io/Qt_for_Python_Missing_Bindings
 .. _BeautifulSoup: https://www.crummy.com/software/BeautifulSoup/
+.. _`CMake Unity Build Mode` : https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html
