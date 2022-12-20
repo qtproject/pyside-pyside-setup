@@ -73,10 +73,12 @@ class PythonExecutable:
         if config.qml_files:
             logging.info(f"[DEPLOY] Included QML files: {config.qml_files}")
 
-        self.nuitka.create_executable(
-            source_file=source_file,
-            extra_args=extra_args,
-            qml_files=config.qml_files,
-            dry_run=self.dry_run,
-        )
+        command_str = self.nuitka.create_executable(
+                        source_file=source_file,
+                        extra_args=extra_args,
+                        qml_files=config.qml_files,
+                        dry_run=self.dry_run,
+                    )
+
+        return command_str
 

@@ -79,6 +79,9 @@ def main(main_file: Path = None, config_file: Path = None, init: bool = False,
         else:
             config_file = Path.cwd() / "pysidedeploy.spec"
 
+    # Nuitka command to run
+    command_str = None
+
     logging.info("[DEPLOY] Start")
 
     try:
@@ -139,11 +142,11 @@ def main(main_file: Path = None, config_file: Path = None, init: bool = False,
         # create executable
         if not dry_run:
             print("[DEPLOY] Deploying application")
-        python.create_executable(
-            source_file=source_file,
-            extra_args=config.get_value("nuitka", "extra_args"),
-            config=config,
-        )
+        command_str = python.create_executable(
+                        source_file=source_file,
+                        extra_args=config.get_value("nuitka", "extra_args"),
+                        config=config,
+                     )
     except Exception:
         print(f"Exception occurred: {traceback.format_exc()}")
     finally:
@@ -160,6 +163,7 @@ def main(main_file: Path = None, config_file: Path = None, init: bool = False,
             clean(generated_files_path)
 
     logging.info("[DEPLOY] End")
+    return command_str
 
 
 if __name__ == "__main__":

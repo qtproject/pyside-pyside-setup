@@ -48,4 +48,5 @@ class Nuitka:
             linux_icon = str(Path(__file__).parent / "pyside_icon.jpg")
             command.append(f"--linux-onefile-icon={linux_icon}")
 
-        run_command(command=command, dry_run=dry_run)
+        command_str = run_command(command=command, dry_run=dry_run)
+        return command_str

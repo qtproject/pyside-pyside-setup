@@ -29,3 +29,4 @@ def run_command(command, dry_run: bool):
     except Exception as error:
         logging.exception(f"[DEPLOY]: Command {command_str} failed with error {error}")
         raise
+    return command_str
