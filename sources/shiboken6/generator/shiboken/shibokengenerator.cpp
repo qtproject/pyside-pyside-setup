@@ -294,6 +294,11 @@ QString ShibokenGenerator::fullPythonClassName(const AbstractMetaClassCPtr &meta
     return fullClassName;
 }
 
+QString ShibokenGenerator::headerFileNameForContext(const GeneratorContext &context)
+{
+    return fileNameForContextHelper(context, u"_wrapper.h"_s);
+}
+
 QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunctionCPtr &func, bool forceFunc)
 {
     QString funcName;

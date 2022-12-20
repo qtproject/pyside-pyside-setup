@@ -62,11 +62,6 @@ static bool alwaysGenerateDestructorDeclaration()
     return  clang::compiler() == Compiler::Msvc;
 }
 
-QString HeaderGenerator::headerFileNameForContext(const GeneratorContext &context)
-{
-    return fileNameForContextHelper(context, u"_wrapper.h"_s);
-}
-
 QString HeaderGenerator::fileNameForContext(const GeneratorContext &context) const
 {
     return headerFileNameForContext(context);
@@ -88,18 +83,15 @@ static void writeProtectedEnums(TextStream &s, const AbstractMetaClassCPtr &meta
     }
 }
 
-void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &classContextIn)
+void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &classContext)
 {
-    GeneratorContext classContext = classContextIn;
-    AbstractMetaClassCPtr metaClass = classContext.metaClass();
-    m_inheritedOverloads.clear();
+    const AbstractMetaClassCPtr metaClass = classContext.metaClass();
 
     // write license comment
     s << licenseComment();
 
     QString wrapperName = classContext.effectiveClassName();
     QString outerHeaderGuard = getFilteredCppSignatureString(wrapperName).toUpper();
-    QString innerHeaderGuard;
 
     // Header
     s << "#ifndef SBK_" << outerHeaderGuard << "_H\n";
@@ -109,113 +101,142 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
         s << "#define protected public\n\n";
 
     //Includes
-    auto typeEntry = metaClass->typeEntry();
-    s << typeEntry->include() << '\n';
+    s << metaClass->typeEntry()->include() << '\n';
     for (auto &inst : metaClass->templateBaseClassInstantiations())
         s << inst.typeEntry()->include();
 
-    if (classContext.useWrapper() && avoidProtectedHack()) {
-         const auto includeGroups = classIncludes(metaClass);
-         for( const auto &includeGroup : includeGroups)
-             s << includeGroup;
-    }
-
-    if (classContext.useWrapper() && usePySideExtensions() && isQObject(metaClass))
-        s << "namespace PySide { class DynamicQMetaObject; }\n\n";
-
-    while (classContext.useWrapper()) {
-        if (!innerHeaderGuard.isEmpty()) {
-            s << "#  ifndef SBK_" << innerHeaderGuard << "_H\n";
-            s << "#  define SBK_" << innerHeaderGuard << "_H\n\n";
-            s << "// Inherited base class:\n";
-        }
-
-        // Class
-        s << "class " << wrapperName
-           << " : public " << metaClass->qualifiedCppName()
-           << "\n{\npublic:\n" << indent;
-
-        // Make protected enums accessible
-        if (avoidProtectedHack()) {
-            recurseClassHierarchy(metaClass, [&s] (const AbstractMetaClassCPtr &metaClass) {
-                writeProtectedEnums(s, metaClass);
-                return false;
-            });
-        }
-
-        if (avoidProtectedHack() && metaClass->hasProtectedFields()) {
-            s << "\n// Make protected fields accessible\n";
-            const QString name = metaClass->qualifiedCppName();
-            for (const auto &f : metaClass->fields()) {
-                if (f.isProtected())
-                    s << "using " << name << "::" << f.originalName() << ";\n";
-            }
-            s << '\n';
-        }
-
-        int maxOverrides = 0;
-        for (const auto &func : metaClass->functions()) {
-            const auto generation = functionGeneration(func);
-            writeFunction(s, func, generation);
-            // PYSIDE-803: Build a boolean cache for unused overrides.
-            if (generation.testFlag(FunctionGenerationFlag::VirtualMethod))
-                maxOverrides++;
-        }
-        if (!maxOverrides)
-            maxOverrides = 1;
-
-        //destructor
-        // PYSIDE-504: When C++ 11 is used, then the destructor must always be declared.
-        if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor()
-            || alwaysGenerateDestructorDeclaration()) {
-            if (avoidProtectedHack() && metaClass->hasPrivateDestructor())
-                s << "// C++11: need to declare (unimplemented) destructor because "
-                     "the base class destructor is private.\n";
-            s << '~' << wrapperName << "();\n";
-        }
-
-        writeClassCodeSnips(s, typeEntry->codeSnips(),
-                            TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode,
-                            classContext);
-
-        if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
-            && usePySideExtensions() && isQObject(metaClass)) {
-            s << outdent << "public:\n" << indent <<
-R"(int qt_metacall(QMetaObject::Call call, int id, void **args) override;
-void *qt_metacast(const char *_clname) override;
-)";
-        }
-
-        if (!m_inheritedOverloads.isEmpty()) {
-            s << "// Inherited overloads, because the using keyword sux\n";
-            for (const auto &func : std::as_const(m_inheritedOverloads))
-                writeMemberFunctionWrapper(s, func);
-            m_inheritedOverloads.clear();
-        }
-
-        if (usePySideExtensions())
-            s << "static void pysideInitQtMetaTypes();\n";
-
-        s << "void resetPyMethodCache();\n"
-            << outdent << "private:\n" << indent
-            << "mutable bool m_PyMethodCache[" << maxOverrides << "];\n"
-            << outdent << "};\n\n";
-        if (!innerHeaderGuard.isEmpty())
-            s << "#  endif // SBK_" << innerHeaderGuard << "_H\n\n";
-
-        // PYSIDE-500: Use also includes for inherited wrapper classes, because
-        // without the protected hack, we sometimes need to cast inherited wrappers.
-        // But we don't use multiple include files. Instead, they are inserted as recursive
-        // headers. This keeps the file structure as simple as before the enhanced inheritance.
-        metaClass = metaClass->baseClass();
-        if (!metaClass || !avoidProtectedHack())
-            break;
-        classContext = contextForClass(metaClass);
-        wrapperName =  classContext.effectiveClassName();
-        innerHeaderGuard = getFilteredCppSignatureString(wrapperName).toUpper();
-    }
+    if (classContext.useWrapper())
+        writeWrapperClass(s, wrapperName, classContext);
 
     s << "#endif // SBK_" << outerHeaderGuard << "_H\n\n";
+}
+
+void HeaderGenerator::writeWrapperClass(TextStream &s,
+                                        const QString &wrapperName,
+                                        const GeneratorContext &classContext) const
+{
+    const auto metaClass = classContext.metaClass();
+
+    if (avoidProtectedHack()) {
+        const auto includeGroups = classIncludes(metaClass);
+        for( const auto &includeGroup : includeGroups)
+            s << includeGroup;
+    }
+
+    if (usePySideExtensions() && isQObject(metaClass))
+        s << "namespace PySide { class DynamicQMetaObject; }\n\n";
+
+    writeWrapperClassDeclaration(s, wrapperName, classContext);
+
+    // PYSIDE-500: Use also includes for inherited wrapper classes, because
+    // without the protected hack, we sometimes need to cast inherited wrappers.
+    // But we don't use multiple include files. Instead, they are inserted as recursive
+    // headers. This keeps the file structure as simple as before the enhanced inheritance.
+    if (avoidProtectedHack()) {
+        for (auto base = metaClass->baseClass(); !base.isNull(); base = base->baseClass()) {
+            const auto baseContext = contextForClass(base);
+            if (baseContext.useWrapper())
+                writeInheritedWrapperClassDeclaration(s, baseContext);
+        }
+    }
+}
+
+void HeaderGenerator::writeInheritedWrapperClassDeclaration(TextStream &s,
+                                                            const GeneratorContext &classContext) const
+{
+    const QString wrapperName = classContext.effectiveClassName();
+    const QString innerHeaderGuard =
+        getFilteredCppSignatureString(wrapperName).toUpper();
+
+    s << "#  ifndef SBK_" << innerHeaderGuard << "_H\n"
+      << "#  define SBK_" << innerHeaderGuard << "_H\n\n"
+      << "// Inherited base class:\n";
+
+    writeWrapperClassDeclaration(s, wrapperName, classContext);
+
+    s << "#  endif // SBK_" << innerHeaderGuard << "_H\n\n";
+}
+
+void HeaderGenerator::writeWrapperClassDeclaration(TextStream &s,
+                                                   const QString &wrapperName,
+                                                   const GeneratorContext &classContext) const
+{
+    const AbstractMetaClassCPtr metaClass = classContext.metaClass();
+    const auto typeEntry = metaClass->typeEntry();
+    InheritedOverloadSet inheritedOverloads;
+
+    // write license comment
+    s << licenseComment();
+
+    // Class
+    s << "class " << wrapperName
+      << " : public " << metaClass->qualifiedCppName()
+      << "\n{\npublic:\n" << indent;
+
+    // Make protected enums accessible
+    if (avoidProtectedHack()) {
+        recurseClassHierarchy(metaClass, [&s] (const AbstractMetaClassCPtr &metaClass) {
+            writeProtectedEnums(s, metaClass);
+            return false;
+        });
+    }
+
+    if (avoidProtectedHack() && metaClass->hasProtectedFields()) {
+        s << "\n// Make protected fields accessible\n";
+        const QString name = metaClass->qualifiedCppName();
+        for (const auto &f : metaClass->fields()) {
+            if (f.isProtected())
+                s << "using " << name << "::"  << f.originalName() << ";\n";
+        }
+        s << '\n';
+    }
+
+    int maxOverrides = 0;
+    for (const auto &func : metaClass->functions()) {
+        const auto generation = functionGeneration(func);
+        writeFunction(s, func, &inheritedOverloads, generation);
+        // PYSIDE-803: Build a boolean cache for unused overrides.
+        if (generation.testFlag(FunctionGenerationFlag::VirtualMethod))
+            maxOverrides++;
+    }
+    if (!maxOverrides)
+        maxOverrides = 1;
+
+    //destructor
+    // PYSIDE-504: When C++ 11 is used, then the destructor must always be declared.
+    if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor()
+        || alwaysGenerateDestructorDeclaration()) {
+        if (avoidProtectedHack() && metaClass->hasPrivateDestructor())
+            s << "// C++11: need to declare (unimplemented) destructor because "
+                 "the base class destructor is private.\n";
+        s << '~' << wrapperName << "();\n";
+    }
+
+    writeClassCodeSnips(s, typeEntry->codeSnips(),
+                        TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode,
+                        classContext);
+
+    if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
+        && usePySideExtensions() && isQObject(metaClass)) {
+        s << outdent << "public:\n" << indent <<
+            R"(int qt_metacall(QMetaObject::Call call, int id, void **args) override;
+void *qt_metacast(const char *_clname) override;
+)";
+    }
+
+    if (!inheritedOverloads.isEmpty()) {
+        s << "// Inherited overloads, because the using keyword sux\n";
+        for (const auto &func : std::as_const(inheritedOverloads))
+            writeMemberFunctionWrapper(s, func);
+    }
+
+    if (usePySideExtensions())
+        s << "static void pysideInitQtMetaTypes();\n";
+
+    s << "void resetPyMethodCache();\n"
+      << outdent << "private:\n" << indent
+      << "mutable bool m_PyMethodCache[" << maxOverrides << "];\n"
+      << outdent << "};\n\n";
 }
 
 // Write an inline wrapper around a function
@@ -264,7 +285,8 @@ void HeaderGenerator::writeMemberFunctionWrapper(TextStream &s,
 }
 
 void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                                    FunctionGeneration generation)
+                                    InheritedOverloadSet *inheritedOverloads,
+                                    FunctionGeneration generation) const
 {
 
     // do not write copy ctors here.
@@ -299,7 +321,7 @@ void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPt
                 && !f->isAbstract()
                 && !f->isStatic()
                 && f->name() == func->name()) {
-                m_inheritedOverloads << f;
+                inheritedOverloads->insert(f);
             }
         }
 

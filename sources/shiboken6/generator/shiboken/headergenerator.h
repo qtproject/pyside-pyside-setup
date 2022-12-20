@@ -22,17 +22,18 @@ public:
 
     const char *name() const override { return "Header generator"; }
 
-    static QString headerFileNameForContext(const GeneratorContext &context);
-
 protected:
     QString fileNameForContext(const GeneratorContext &context) const override;
     void generateClass(TextStream &s, const GeneratorContext &classContext) override;
     bool finishGeneration() override;
 
 private:
+    using InheritedOverloadSet = QSet<AbstractMetaFunctionCPtr>;
+
     void writeCopyCtor(TextStream &s, const AbstractMetaClassCPtr &metaClass) const;
     void writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                       FunctionGeneration generation);
+                       InheritedOverloadSet *inheritedOverloads,
+                       FunctionGeneration generation) const;
     void writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum) const;
     static void writeSbkTypeFunction(TextStream &s, const AbstractMetaClassCPtr &cppClass);
     static void writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType);
@@ -48,8 +49,13 @@ private:
                             const QString &publicIncludeShield,
                             const ModuleHeaderParameters &parameters);
     void writeTypeFunctions(TextStream &s, const QString &typeFunctions);
+    void writeWrapperClassDeclaration(TextStream &s,
+                                      const QString &wrapperName,
+                                      const GeneratorContext &classContext) const;
+    void writeWrapperClass(TextStream &s, const QString &wrapperName, const GeneratorContext &classContext) const;
+    void writeInheritedWrapperClassDeclaration(TextStream &s,
+                                               const GeneratorContext &classContext) const;
 
-    QSet<AbstractMetaFunctionCPtr> m_inheritedOverloads;
     AbstractMetaClassCList m_alternateTemplateIndexes;
 };
 

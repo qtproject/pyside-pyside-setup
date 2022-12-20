@@ -190,6 +190,9 @@ protected:
     QString wrapperName(const AbstractMetaClassCPtr &metaClass) const;
 
     static QString fullPythonClassName(const AbstractMetaClassCPtr &metaClass);
+
+    static QString headerFileNameForContext(const GeneratorContext &context);
+
     static QString fullPythonFunctionName(const AbstractMetaFunctionCPtr &func, bool forceFunc);
 
     bool wrapperDiagnostics() const { return m_wrapperDiagnostics; }
