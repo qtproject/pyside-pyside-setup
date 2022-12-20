@@ -4,6 +4,7 @@
 import fnmatch
 import functools
 import os
+import tempfile
 
 from pathlib import Path
 from ..config import config
@@ -192,19 +193,23 @@ def prepare_packages_win32(pyside_build, _vars):
     if config.is_internal_shiboken_module_build():
         # The C++ std library dlls need to be packaged with the
         # shiboken module, because libshiboken uses C++ code.
-        copy_msvc_redist_files(_vars, Path("{build_dir}/msvc_redist".format(**_vars)))
+        copy_msvc_redist_files(_vars, destination_dir)
 
     if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
         copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars)
-        copy_msvc_redist_files(_vars, Path("{build_dir}/msvc_redist".format(**_vars)))
+        copy_msvc_redist_files(_vars, destination_dir)
 
 
-def copy_msvc_redist_files(_vars, redist_target_path):
+def copy_msvc_redist_files(_vars, destination_dir):
+    in_coin = os.environ.get('COIN_LAUNCH_PARAMETERS', None)
+    if in_coin is None:
+        print("Qt dependency DLLs (MSVC redist) will not be copied.")
+        return
+
     # MSVC redistributable file list.
     msvc_redist = [
         "concrt140.dll",
         "msvcp140.dll",
-        "ucrtbase.dll",
         "vcamp140.dll",
         "vccorlib140.dll",
         "vcomp140.dll",
@@ -216,8 +221,29 @@ def copy_msvc_redist_files(_vars, redist_target_path):
     ]
 
     # Make a directory where the files should be extracted.
-    if not redist_target_path.exists():
-        redist_target_path.mkdir(parents=True)
+    if not destination_dir.exists():
+        destination_dir.mkdir(parents=True)
+
+    # Copy Qt dependency DLLs (MSVC) from PATH when building on Qt CI.
+    paths = os.environ["PATH"].split(os.pathsep)
+    for path in paths:
+        try:
+            for f in Path(path).glob("*140*.dll"):
+                if f.name in msvc_redist:
+                    copyfile(f, Path(destination_dir) / f.name)
+                    msvc_redist.remove(f.name)
+            if not msvc_redist:
+                break
+        except WindowsError:
+            continue
+
+    if msvc_redist:
+        msg = "The following Qt dependency DLLs (MSVC redist) were not found: {msvc_redist}"
+        raise FileNotFoundError(msg)
+
+
+def copy_qt_dependency_dlls(_vars, destination_qt_dir, artifacts):
+    temp_path = tempfile.TemporaryDirectory()
 
     # Extract Qt dependency dlls when building on Qt CI.
     in_coin = os.environ.get('COIN_LAUNCH_PARAMETERS', None)
@@ -227,18 +253,16 @@ def copy_msvc_redist_files(_vars, redist_target_path):
         if "{target_arch}".format(**_vars) == "32":
             zip_file = "pyside_qt_deps_32_2019.7z"
         try:
-            download_and_extract_7z(redist_url + zip_file, redist_target_path)
+            download_and_extract_7z(redist_url + zip_file, temp_path)
         except Exception as e:
             print(f"Download failed: {type(e).__name__}: {e}")
             print("download.qt.io is down, try with mirror")
             redist_url = "https://master.qt.io/development_releases/prebuilt/vcredist/"
-            download_and_extract_7z(redist_url + zip_file, redist_target_path)
+            download_and_extract_7z(redist_url + zip_file, temp_path)
     else:
-        print("Qt dependency DLLs (MSVC redist) will not be downloaded and extracted.")
+        print("Qt dependency DLLs will not be downloaded and extracted.")
 
-    copydir(redist_target_path,
-            "{st_build_dir}/{st_package_name}",
-            _filter=msvc_redist, recursive=False, _vars=_vars)
+    copydir(temp_path, destination_qt_dir, _filter=artifacts, recursive=False, _vars=_vars)
 
 
 def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
@@ -266,7 +290,6 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
     # <qt>/bin/*.dll and Qt *.exe -> <setup>/{st_package_name}
     qt_artifacts_permanent = [
         "opengl*.dll",
-        "d3d*.dll",
         "designer.exe",
         "linguist.exe",
         "lrelease.exe",
@@ -293,16 +316,8 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
         artifacts += qt_artifacts_permanent
         artifacts += qt_artifacts_egl
 
-    if copy_msvc_redist:
-        # The target path has to be qt_bin_dir at the moment,
-        # because the extracted archive also contains the opengl32sw
-        # and the d3dcompiler dlls, which are copied not by this
-        # function, but by the copydir below.
-        copy_msvc_redist_files(_vars, Path("{qt_bin_dir}".format(**_vars)))
-
-    if artifacts:
-        copydir("{qt_bin_dir}", destination_qt_dir,
-                _filter=artifacts, recursive=False, _vars=_vars)
+    if copy_msvc_redist and artifacts:
+        copy_qt_dependency_dlls(_vars, destination_qt_dir, artifacts)
 
     # <qt>/bin/*.dll and Qt *.pdbs -> <setup>/{st_package_name} part two
     # File filter to copy only debug or only release files.
