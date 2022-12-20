@@ -104,7 +104,7 @@ release = '@BINDING_API_VERSION_FULL@'
 # for source files.
 exclude_patterns = ['_build',
                     'extras',
-                    ]
+                    '**README.md']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
