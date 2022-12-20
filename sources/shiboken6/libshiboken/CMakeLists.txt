@@ -164,6 +164,7 @@ install(FILES
         threadstatesaver.h
         shibokenbuffer.h
         sbkpython.h
+        sbkwindows.h
         pep384impl.h
         voidptr.h
         bufferprocs_py37.h
