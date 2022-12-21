@@ -6670,6 +6670,7 @@ bool CppGenerator::finishGeneration()
     }
 
     for (auto &instantiatedContainer : api().instantiatedContainers()) {
+        includes.insert(instantiatedContainer.typeEntry()->include());
         for (const auto &inst : instantiatedContainer.instantiations())
             includes.insert(inst.typeEntry()->include());
     }
