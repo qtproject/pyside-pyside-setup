@@ -576,6 +576,7 @@ QString ShibokenGenerator::containerCpythonBaseName(const ContainerTypeEntryCPtr
         return u"PyDict"_s;
     case ContainerTypeEntry::ListContainer:
     case ContainerTypeEntry::PairContainer:
+    case ContainerTypeEntry::SpanContainer:
         break;
     default:
         Q_ASSERT(false);

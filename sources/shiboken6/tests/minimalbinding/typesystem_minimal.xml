@@ -38,6 +38,8 @@
             </modify-argument>
         </modify-function>
     </value-type>
+    <value-type name="SpanUser"/>
+
     <value-type name="MinBoolUser"/>
 
     <value-type name="ContainerUser">

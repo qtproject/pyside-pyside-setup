@@ -9,6 +9,7 @@ libminimalmacros.h
 listuser.cpp listuser.h
 minbool.h
 obj.cpp obj.h
+spanuser.cpp spanuser.h
 typedef.cpp typedef.h
 val.h
 )

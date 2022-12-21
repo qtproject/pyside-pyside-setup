@@ -1884,6 +1884,7 @@ qsizetype ContainerTypeEntry::templateParameterCount() const
     case MapContainer:
     case MultiMapContainer:
     case PairContainer:
+    case SpanContainer:
         result = 2;
         break;
     case ListContainer:

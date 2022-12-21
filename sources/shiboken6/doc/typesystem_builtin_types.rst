@@ -32,12 +32,13 @@ on platform.
 C++ Container Types
 ^^^^^^^^^^^^^^^^^^^
 
-Since version 6.3, some common standard containers (``std::list``,
-``std::vector``, ``std::pair``, ``std::map`` and ``std::unordered_map``)
-are built-in. They only need to be specified if :ref:`opaque-containers`
-should be generated. In this case, the appropriate
-:ref:`predefined conversion templates <predefined_templates>`
-should be specified.
+The C++ containers ``std::list``\, ``std::vector``\,
+``std::pair``\, ``std::map``\, ``std::span`` and ``std::unordered_map`` are
+built-in.
+To specify :ref:`opaque-containers`, use the :ref:`opaque-container` element.
+:ref:`container-type` can still be specified to modify the built-in behavior.
+For this case, a number of pre-defined conversion templates
+are provided (see :ref:`predefined_templates`).
 
 .. _cpython-types:
 

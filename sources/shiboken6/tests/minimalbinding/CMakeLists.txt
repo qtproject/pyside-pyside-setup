@@ -13,6 +13,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/minimal/containeruser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/minimal/obj_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/minimal/val_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/minimal/listuser_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/minimal/spanuser_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/minimal/minbooluser_wrapper.cpp
 )
 

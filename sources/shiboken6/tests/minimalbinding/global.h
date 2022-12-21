@@ -6,4 +6,5 @@
 #include "val.h"
 #include "minbool.h"
 #include "listuser.h"
+#include "spanuser.h"
 #include "typedef.h"

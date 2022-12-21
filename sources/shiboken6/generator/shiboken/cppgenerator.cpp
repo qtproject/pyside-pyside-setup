@@ -1143,6 +1143,7 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
         const auto cte = std::static_pointer_cast<const ContainerTypeEntry>(typeEntry);
         switch (cte->containerKind()) {
         case ContainerTypeEntry::ListContainer:
+        case ContainerTypeEntry::SpanContainer:
             break;
         case ContainerTypeEntry::SetContainer:
             return uR"("set")"_s;

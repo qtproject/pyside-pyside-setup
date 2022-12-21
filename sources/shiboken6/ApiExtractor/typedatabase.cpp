@@ -862,6 +862,7 @@ void TypeDatabasePrivate::addBuiltInContainerTypes(const TypeDatabaseParserConte
     const bool hasStdVector = findType(u"std::vector"_s) != nullptr;
     const bool hasStdMap = findType(u"std::map"_s) != nullptr;
     const bool hasStdUnorderedMap = findType(u"std::unordered_map"_s) != nullptr;
+    const bool hasStdSpan = findType(u"std::span"_s) != nullptr;
 
     if (hasStdPair && hasStdList && hasStdVector && hasStdMap && hasStdUnorderedMap)
         return;
@@ -906,6 +907,15 @@ void TypeDatabasePrivate::addBuiltInContainerTypes(const TypeDatabaseParserConte
                   "shiboken_conversion_stdmap_to_pydict",
                   "PyDict", "shiboken_conversion_pydict_to_stdmap");
     }
+    if (!hasStdSpan) {
+        auto spanSnip = containerTypeSystemSnippet(
+                            "std::span", "span", "span",
+                            "shiboken_conversion_cppsequence_to_pylist");
+        auto pos = spanSnip.indexOf('>');
+        spanSnip.insert(pos, R"( view-on="std::vector")");
+        ts += spanSnip;
+    }
+
     ts += "</typesystem>";
     QBuffer buffer(&ts);
     buffer.open(QIODevice::ReadOnly);

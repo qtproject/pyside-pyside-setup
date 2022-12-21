@@ -375,7 +375,8 @@ ENUM_LOOKUP_BEGIN(ContainerTypeEntry::ContainerKind, Qt::CaseSensitive,
         {u"multi-map", ContainerTypeEntry::MultiMapContainer},
         {u"hash", ContainerTypeEntry::MapContainer},
         {u"multi-hash", ContainerTypeEntry::MultiMapContainer},
-        {u"pair", ContainerTypeEntry::PairContainer}
+        {u"pair", ContainerTypeEntry::PairContainer},
+        {u"span", ContainerTypeEntry::SpanContainer}
     };
 ENUM_LOOKUP_LINEAR_SEARCH()
 

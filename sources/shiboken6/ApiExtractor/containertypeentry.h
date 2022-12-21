@@ -29,6 +29,7 @@ public:
         MapContainer,
         MultiMapContainer,
         PairContainer,
+        SpanContainer, // Fixed size
     };
 
     explicit ContainerTypeEntry(const QString &entryName, ContainerKind containerKind,
