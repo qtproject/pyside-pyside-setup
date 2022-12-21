@@ -1,6 +1,6 @@
 product_dependency:
   ../../qt/tqtc-qt5.git:
-    ref: "tqtc/lts-5.15"
+    ref: "6f699275d508af0c5d61c91914ca1e45fec6b7ef"
 dependency_source: supermodule
 dependencies: [
       "../../qt/qt3d",
