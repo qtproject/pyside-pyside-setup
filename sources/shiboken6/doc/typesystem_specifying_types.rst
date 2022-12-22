@@ -545,12 +545,10 @@ container-type
 
     The *optional*  **since** value is used to specify the API version of this container.
 
-    See :ref:`predefined_templates` for built-in templates for standard type
-    conversion rules.
+    Some common standard containers are :ref:`built-in <builtin-cpp-container-types>`,
+    and there are also a number of useful
+    :ref:`predefined conversion templates <predefined_templates>`.
 
-    Some common standard containers (``std::list``, ``std::vector``, ``std::pair``,
-    ``std::map`` and ``std::unordered_map``) are built-in. They only need to be
-    specified if :ref:`opaque-containers` should be generated.
 
 .. _typedef-type:
 

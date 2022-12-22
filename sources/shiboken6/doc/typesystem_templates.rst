@@ -73,6 +73,9 @@ Templates for :ref:`primitive-type`:
 
 Templates for :ref:`container-type`:
 
+Some container types are :ref:`built-in <builtin-cpp-container-types>`.
+In case they need to explicitly specified, the following templates can be used:
+
     +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
     | ``shiboken_conversion_pysequence_to_cpppair``                        | Convert a PySequence to a C++ pair (std::pair/QPair)                               |
     +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
@@ -126,9 +129,3 @@ An entry for the type ``std::list`` using these templates looks like:
             </target-to-native>
         </conversion-rule>
     </container-type>
-
-.. note:: From version 6.3, we do not have to explicitly specify the
-          `<container-type/>` for C++ containers ``std::list``\, ``std::vector``\,
-          ``std::pair``\, ``std::map`` and ``std::unordered_map``\. They are
-          now built-in. However, they still have to be added for opaque
-          containers or when modifying the built-in behavior.

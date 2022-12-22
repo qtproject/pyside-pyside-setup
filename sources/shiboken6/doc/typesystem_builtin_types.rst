@@ -26,6 +26,19 @@ on platform.
 `std::string`, `std::wstring` and their associated view types
 `std::string_view`, `std::wstring_view` are also supported.
 
+
+.. _builtin-cpp-container-types:
+
+C++ Container Types
+^^^^^^^^^^^^^^^^^^^
+
+Since version 6.3, some common standard containers (``std::list``,
+``std::vector``, ``std::pair``, ``std::map`` and ``std::unordered_map``)
+are built-in. They only need to be specified if :ref:`opaque-containers`
+should be generated. In this case, the appropriate
+:ref:`predefined conversion templates <predefined_templates>`
+should be specified.
+
 .. _cpython-types:
 
 CPython Types
