@@ -3515,6 +3515,18 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s,
     replaceCppToPythonVariables(code, getFullTypeName(ownerType), constRef);
     writeCppToPythonFunction(s, code, fixedCppTypeName(customConversion->ownerType()));
 }
+
+QString CppGenerator::containerNativeToTargetTypeName(const ContainerTypeEntryCPtr &type)
+{
+    QString result = type->targetLangApiName();
+    if (result != cPyObjectT()) {
+        result = containerCpythonBaseName(type);
+        if (result == cPySequenceT())
+            result = cPyListT();
+    }
+    return result;
+}
+
 void CppGenerator::writeCppToPythonFunction(TextStream &s, const AbstractMetaType &containerType) const
 {
     Q_ASSERT(containerType.typeEntry()->isContainer());
@@ -3537,7 +3549,8 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s, const AbstractMetaTyp
     }
     replaceCppToPythonVariables(code, getFullTypeNameWithoutModifiers(containerType), true);
     processCodeSnip(code);
-    writeCppToPythonFunction(s, code, fixedCppTypeName(containerType));
+    writeCppToPythonFunction(s, code, fixedCppTypeName(containerType),
+                             containerNativeToTargetTypeName(cte));
 }
 
 void CppGenerator::writePythonToCppFunction(TextStream &s, const QString &code, const QString &sourceTypeName,
@@ -3657,22 +3670,19 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
 void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const AbstractMetaType &containerType) const
 {
     Q_ASSERT(containerType.typeEntry()->isContainer());
-    auto cte = qSharedPointerCast<const ContainerTypeEntry>(containerType.typeEntry());
-    if (!cte->hasCustomConversion()) {
-        //qFatal
-        return;
-    }
-
+    const auto cte = qSharedPointerCast<const ContainerTypeEntry>(containerType.typeEntry());
     const auto customConversion = cte->customConversion();
-    const TargetToNativeConversions &toCppConversions =
-        customConversion->targetToNativeConversions();
-    if (toCppConversions.isEmpty()) {
-        //qFatal
-        return;
-    }
+    for (const auto &conv : customConversion->targetToNativeConversions())
+        writePythonToCppConversionFunction(s, containerType, conv);
+}
+
+void CppGenerator::writePythonToCppConversionFunction(TextStream &s,
+                                                      const AbstractMetaType &containerType,
+                                                      const TargetToNativeConversion &conv) const
+{
     // Python to C++ conversion function.
     QString cppTypeName = getFullTypeNameWithoutModifiers(containerType);
-    QString code = toCppConversions.constFirst().conversion();
+    QString code = conv.conversion();
     const QString line = u"auto &cppOutRef = *reinterpret_cast<"_s
         + cppTypeName + u" *>(cppOut);"_s;
     CodeSnipAbstract::prependCode(&code, line);
@@ -3700,7 +3710,8 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
     code.replace(u"%in"_s, u"pyIn"_s);
     code.replace(u"%out"_s, u"cppOutRef"_s);
     QString typeName = fixedCppTypeName(containerType);
-    writePythonToCppFunction(s, code, typeName, typeName);
+    const QString &sourceTypeName = conv.sourceTypeName();
+    writePythonToCppFunction(s, code, sourceTypeName, typeName);
 
     // Python to C++ convertible check function.
     QString typeCheck = cpythonCheckFunction(containerType);
@@ -3708,7 +3719,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s, const Abst
         typeCheck = u"false"_s;
     else
         typeCheck = typeCheck + u"pyIn)"_s;
-    writeIsPythonConvertibleToCppFunction(s, typeName, typeName, typeCheck);
+    writeIsPythonConvertibleToCppFunction(s, sourceTypeName, typeName, typeCheck);
     s << '\n';
 }
 
@@ -4506,27 +4517,36 @@ QString CppGenerator::writeContainerConverterInitialization(TextStream &s, const
     s << "// Register converter for type '" << cppSignature << "'.\n";
     QString converter = converterObject(type);
     s << converter << " = Shiboken::Conversions::createConverter(";
-    if (type.typeEntry()->targetLangApiName() == cPyObjectT()) {
+
+    Q_ASSERT(type.typeEntry()->isContainer());
+    const auto typeEntry = qSharedPointerCast<const ContainerTypeEntry>(type.typeEntry());
+
+    const QString targetTypeName = containerNativeToTargetTypeName(typeEntry);
+    if (targetTypeName == cPyObjectT()) {
         s << "&PyBaseObject_Type";
     } else {
-        QString baseName = cpythonBaseName(type.typeEntry());
-        if (baseName == cPySequenceT())
-            baseName = cPyListT();
-        s << '&' << baseName << "_Type";
+        s << '&' << targetTypeName << "_Type";
     }
-    QString typeName = fixedCppTypeName(type);
-    s << ", " << cppToPythonFunctionName(typeName, typeName) << ");\n";
-    QString toCpp = pythonToCppFunctionName(typeName, typeName);
-    QString isConv = convertibleToCppFunctionName(typeName, typeName);
-    s << "Shiboken::Conversions::registerConverterName(" << converter << ", \"" << cppSignature << "\");\n";
-    if (usePySideExtensions() && cppSignature.startsWith("const ") && cppSignature.endsWith("&")) {
-        cppSignature.chop(1);
-        cppSignature.remove(0, sizeof("const ") / sizeof(char) - 1);
-        s << "Shiboken::Conversions::registerConverterName(" << converter << ", \"" << cppSignature << "\");\n";
+
+    const QString typeName = fixedCppTypeName(type);
+    s << ", " << cppToPythonFunctionName(typeName, targetTypeName) << ");\n";
+
+    for (const auto &conv : typeEntry->customConversion()->targetToNativeConversions()) {
+        const QString &sourceTypeName = conv.sourceTypeName();
+        QString toCpp = pythonToCppFunctionName(sourceTypeName, typeName);
+        QString isConv = convertibleToCppFunctionName(sourceTypeName, typeName);
+        s << "Shiboken::Conversions::registerConverterName(" << converter
+            << ", \"" << cppSignature << "\");\n";
+        if (usePySideExtensions() && cppSignature.startsWith("const ")
+            && cppSignature.endsWith("&")) {
+            cppSignature.chop(1);
+            cppSignature.remove(0, sizeof("const ") / sizeof(char) - 1);
+            s << "Shiboken::Conversions::registerConverterName(" << converter
+                << ", \"" << cppSignature << "\");\n";
+        }
+        writeAddPythonToCppConversion(s, converter, toCpp, isConv);
     }
-    const QString converterObj = converterObject(type);
-    writeAddPythonToCppConversion(s, converterObj, toCpp, isConv);
-    return converterObj;
+    return converter;
 }
 
 void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s, const AbstractMetaType &type) const

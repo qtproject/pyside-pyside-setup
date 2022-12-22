@@ -306,6 +306,8 @@ private:
                                   QString targetTypeName = QString()) const;
     void writeCppToPythonFunction(TextStream &s, const CustomConversionPtr &customConversion) const;
     void writeCppToPythonFunction(TextStream &s, const AbstractMetaType &containerType) const;
+    /// Main target type name of a container (for naming the functions).
+    static QString containerNativeToTargetTypeName(const ContainerTypeEntryCPtr &type);
 
     /// Writes a Python to C++ conversion function.
     void writePythonToCppFunction(TextStream &s, const QString &code, const QString &sourceTypeName,
@@ -334,6 +336,10 @@ private:
     /// Writes a pair of Python to C++ conversion and check functions for instantiated container types.
     void writePythonToCppConversionFunctions(TextStream &s,
                                              const AbstractMetaType &containerType) const;
+
+    void writePythonToCppConversionFunction(TextStream &s,
+                                            const AbstractMetaType &containerType,
+                                            const TargetToNativeConversion &conv) const;
 
     static void writeAddPythonToCppConversion(TextStream &s, const QString &converterVar,
                                               const QString &pythonToCppFunc,

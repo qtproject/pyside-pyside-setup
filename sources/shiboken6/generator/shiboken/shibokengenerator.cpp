@@ -566,6 +566,23 @@ QString ShibokenGenerator::cpythonBaseName(const AbstractMetaClassCPtr &metaClas
     return cpythonBaseName(metaClass->typeEntry());
 }
 
+QString ShibokenGenerator::containerCpythonBaseName(const ContainerTypeEntryCPtr &ctype)
+{
+    switch (ctype->containerKind()) {
+    case ContainerTypeEntry::SetContainer:
+        return u"PySet"_s;
+    case ContainerTypeEntry::MapContainer:
+    case ContainerTypeEntry::MultiMapContainer:
+        return u"PyDict"_s;
+    case ContainerTypeEntry::ListContainer:
+    case ContainerTypeEntry::PairContainer:
+        break;
+    default:
+        Q_ASSERT(false);
+    }
+    return cPySequenceT();
+}
+
 QString ShibokenGenerator::cpythonBaseName(const TypeEntryCPtr &type)
 {
     QString baseName;
@@ -581,24 +598,7 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntryCPtr &type)
         baseName = cpythonFlagsName(qSharedPointerCast<const FlagsTypeEntry>(type));
     } else if (type->isContainer()) {
         const auto ctype = qSharedPointerCast<const ContainerTypeEntry>(type);
-        switch (ctype->containerKind()) {
-            case ContainerTypeEntry::ListContainer:
-                //baseName = "PyList";
-                //break;
-            case ContainerTypeEntry::PairContainer:
-                //baseName = "PyTuple";
-                baseName = cPySequenceT();
-                break;
-            case ContainerTypeEntry::SetContainer:
-                baseName = u"PySet"_s;
-                break;
-            case ContainerTypeEntry::MapContainer:
-            case ContainerTypeEntry::MultiMapContainer:
-                baseName = u"PyDict"_s;
-                break;
-            default:
-                Q_ASSERT(false);
-        }
+        baseName = containerCpythonBaseName(ctype);
     } else {
         baseName = cPyObjectT();
     }
