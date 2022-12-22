@@ -214,9 +214,10 @@ def module_QtCore() -> ModuleData:
         data.extra_files.append("qt.conf")
         data.extra_files.append("rcc.exe")
         data.extra_files.append("qtdiag.exe")
-        data.extra_files.append("d3dcompiler*")
         data.extra_files.append("pyside6.*.lib")
         data.extra_files.append("resources/icudtl.dat")
+        from build_scripts.platforms.windows_desktop import msvc_redist
+        data.extra_files.extend(msvc_redist)
     else:
         data.lib.append("libpyside6.*")
         if sys.platform == "darwin":

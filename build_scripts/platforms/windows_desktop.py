@@ -200,25 +200,26 @@ def prepare_packages_win32(pyside_build, _vars):
         copy_msvc_redist_files(destination_dir)
 
 
+# MSVC redistributable file list.
+msvc_redist = [
+    "concrt140.dll",
+    "msvcp140.dll",
+    "vcamp140.dll",
+    "vccorlib140.dll",
+    "vcomp140.dll",
+    "vcruntime140.dll",
+    "vcruntime140_1.dll",
+    "msvcp140_1.dll",
+    "msvcp140_2.dll",
+    "msvcp140_codecvt_ids.dll"
+]
+
+
 def copy_msvc_redist_files(destination_dir):
     in_coin = os.environ.get('COIN_LAUNCH_PARAMETERS', None)
     if in_coin is None:
         print("Qt dependency DLLs (MSVC redist) will not be copied.")
         return
-
-    # MSVC redistributable file list.
-    msvc_redist = [
-        "concrt140.dll",
-        "msvcp140.dll",
-        "vcamp140.dll",
-        "vccorlib140.dll",
-        "vcomp140.dll",
-        "vcruntime140.dll",
-        "vcruntime140_1.dll",
-        "msvcp140_1.dll",
-        "msvcp140_2.dll",
-        "msvcp140_codecvt_ids.dll"
-    ]
 
     # Make a directory where the files should be extracted.
     if not destination_dir.exists():
