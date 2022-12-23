@@ -193,14 +193,14 @@ def prepare_packages_win32(pyside_build, _vars):
     if config.is_internal_shiboken_module_build():
         # The C++ std library dlls need to be packaged with the
         # shiboken module, because libshiboken uses C++ code.
-        copy_msvc_redist_files(_vars, destination_dir)
+        copy_msvc_redist_files(destination_dir)
 
     if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
         copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars)
-        copy_msvc_redist_files(_vars, destination_dir)
+        copy_msvc_redist_files(destination_dir)
 
 
-def copy_msvc_redist_files(_vars, destination_dir):
+def copy_msvc_redist_files(destination_dir):
     in_coin = os.environ.get('COIN_LAUNCH_PARAMETERS', None)
     if in_coin is None:
         print("Qt dependency DLLs (MSVC redist) will not be copied.")
