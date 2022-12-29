@@ -98,7 +98,7 @@ def run_test_instructions():
 
     # In win machines, there are additional python versions to test with
     if CI_HOST_OS == "Windows":
-        if os.environ.get('HOST_OSVERSION_COIN') == 'windows_10_21h2':
+        if (os.environ.get('HOST_OSVERSION_COIN')).startswith('windows_10'):
             call_testrunner("3.10.0", str(testRun))
         else:
             call_testrunner("3.7.9", str(testRun))

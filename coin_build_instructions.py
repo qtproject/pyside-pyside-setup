@@ -155,7 +155,7 @@ if __name__ == "__main__":
         python_ver = "3.8"
     wheel_package_dir = "qfpa-p3.6"
     if CI_TARGET_OS in ["Windows"]:
-        if os.environ.get('HOST_OSVERSION_COIN') == 'windows_10_21h2':
+        if (os.environ.get('HOST_OSVERSION_COIN')).startswith('windows_10'):
             python_ver = "3.10.0"
             wheel_package_dir = "qfpa-p3.10"
         else:
