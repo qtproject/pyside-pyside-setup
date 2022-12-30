@@ -79,6 +79,17 @@ Documentation
         :text: Build Instructions
         :classes: btn-qt btn-block stretched-link
     ---
+    :img-top: images/Commercial.svg
+
+    Packages, installation, and details.
+
+    +++
+
+    .. link-button:: commercial-page
+        :type: ref
+        :text: Commercial
+        :classes: btn-qt btn-block stretched-link
+    ---
     :img-top: images/Dev.svg
 
     PySide API reference.
@@ -136,17 +147,6 @@ Documentation
         :text: Deployment
         :classes: btn-qt btn-block stretched-link
     ---
-    :img-top: images/stopwatch.svg
-
-    API differences and known issues.
-
-    +++
-
-    .. link-button:: considerations
-        :type: ref
-        :text: Considerations
-        :classes: btn-qt btn-block stretched-link
-    ---
     :img-top: images/cpp_python.svg
 
     Generate C++ to Python bindings.
@@ -157,6 +157,17 @@ Documentation
         :text: Shiboken
         :classes: btn-qt btn-block stretched-link
 
+    ---
+    :img-top: images/stopwatch.svg
+
+    API differences and known issues.
+
+    +++
+
+    .. link-button:: considerations
+        :type: ref
+        :text: Considerations
+        :classes: btn-qt btn-block stretched-link
     ---
     :img-top: images/Development.svg
 
@@ -169,17 +180,6 @@ Documentation
         :text: Developers
         :classes: btn-qt btn-block stretched-link
 
-    ---
-    :img-top: images/Commercial.svg
-
-    Packages, installation, and details.
-
-    +++
-
-    .. link-button:: commercial-page
-        :type: ref
-        :text: Commercial
-        :classes: btn-qt btn-block stretched-link
 
 
 We have also a `wiki page`_ where you can find how to report bugs, contribute or contact the community.
