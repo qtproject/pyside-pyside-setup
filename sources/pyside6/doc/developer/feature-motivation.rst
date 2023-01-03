@@ -284,7 +284,11 @@ a ``QtCore.pyi`` file next to ``QtCore.abi3.so`` or ``QtCore.pyd`` on Windows.
 
 When using ``__feature__`` often with common IDEs, you may want to provide
 a feature-aware version of ``.pyi`` files to get a correct display. The simplest
-way to change them all in-place is the command
+way to change them all in-place is the command:
+
+.. code-block:: python
+
+    pyside6-genpyi all --feature snake_case true_property
 
 
 Using __feature__ with UIC files
@@ -294,10 +298,6 @@ Features can be freely used together with generated UIC files. The UIC files
 are _not_ converted, intentionally. Mixing them with feature selections in other
 Python modules should always work, because switching will happen as needed, selected
 by the currently active module. (Please report to us if this fails for an example)
-
-.. code-block:: python
-
-    pyside6-genpyi all --feature snake_case true_property
 
 
 .. _`Import-Hooks`:  https://docs.python.org/3/reference/import.html#import-hooks
