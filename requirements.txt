@@ -4,7 +4,7 @@ setuptools>=59.5,<60; python_version < '3.10'
 setuptools>=62.3; python_version >= '3.10'
 packaging
 build==0.7
-sphinx
+sphinx==5.3
 sphinx-panels
 six
 wheel>=0.35
