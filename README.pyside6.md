@@ -66,7 +66,7 @@ then install the dependencies, and following the instructions per platform.
 A common build command will look like:
 
 ```
-python setup.py install --qmake=/path/to/bin/qmake --parallel=8 --build-tests
+python setup.py install --qtpaths=/path/to/bin/qtpaths6 --parallel=8 --build-tests
 ```
 
 You can obtain more information about the options to build PySide and Shiboken
