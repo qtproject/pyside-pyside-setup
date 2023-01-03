@@ -416,16 +416,16 @@ void QtXmlToSphinx::formatCurrentTable()
 
 void QtXmlToSphinx::pushOutputBuffer()
 {
-    m_buffers.append(StringSharedPtr(new QString{}));
-    m_output.setString(m_buffers.top().data());
+    m_buffers.append(std::make_shared<QString>());
+    m_output.setString(m_buffers.top().get());
 }
 
 QString QtXmlToSphinx::popOutputBuffer()
 {
     Q_ASSERT(!m_buffers.isEmpty());
-    QString result(*m_buffers.top().data());
+    QString result(*m_buffers.top().get());
     m_buffers.pop();
-    m_output.setString(m_buffers.isEmpty() ? nullptr : m_buffers.top().data());
+    m_output.setString(m_buffers.isEmpty() ? nullptr : m_buffers.top().get());
     return result;
 }
 

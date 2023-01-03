@@ -63,8 +63,8 @@ void ApiExtractorResult::setFlags(ApiExtractorFlags f)
 std::optional<AbstractMetaEnum>
     ApiExtractorResult::findAbstractMetaEnum(TypeEntryCPtr typeEntry) const
 {
-    if (!typeEntry.isNull() && typeEntry->isFlags())
-        typeEntry = qSharedPointerCast<const FlagsTypeEntry>(typeEntry)->originator();
+    if (typeEntry && typeEntry->isFlags())
+        typeEntry = std::static_pointer_cast<const FlagsTypeEntry>(typeEntry)->originator();
     const auto it = m_enums.constFind(typeEntry);
     if (it == m_enums.constEnd())
         return {};

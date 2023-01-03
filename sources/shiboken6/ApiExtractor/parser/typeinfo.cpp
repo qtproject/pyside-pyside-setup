@@ -287,14 +287,14 @@ TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, con
         otherType.setQualifiedName(__item->qualifiedName());
     }
 
-    if (TypeDefModelItem __typedef = qSharedPointerDynamicCast<_TypeDefModelItem>(__item)) {
+    if (TypeDefModelItem __typedef = std::dynamic_pointer_cast<_TypeDefModelItem>(__item)) {
         const TypeInfo combined = TypeInfo::combine(__typedef->type(), otherType);
         const CodeModelItem nextItem = __scope->model()->findItem(combined.qualifiedName(), __scope);
         if (!nextItem)
             return combined;
         // PYSIDE-362, prevent recursion on opaque structs like
         // typedef struct xcb_connection_t xcb_connection_t;
-        if (nextItem.data() ==__item.data()) {
+        if (nextItem.get() ==__item.get()) {
             std::cerr << "** WARNING Bailing out recursion of " << __FUNCTION__
                 << "() on " << qPrintable(__type.qualifiedName().join(u"::"_s))
                 << std::endl;
@@ -303,7 +303,7 @@ TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, con
         return resolveType(nextItem, combined, __scope);
     }
 
-    if (TemplateTypeAliasModelItem templateTypeAlias = qSharedPointerDynamicCast<_TemplateTypeAliasModelItem>(__item)) {
+    if (TemplateTypeAliasModelItem templateTypeAlias = std::dynamic_pointer_cast<_TemplateTypeAliasModelItem>(__item)) {
 
         TypeInfo combined = TypeInfo::combine(templateTypeAlias->type(), otherType);
         // For the alias "template<typename T> using QList = QVector<T>" with

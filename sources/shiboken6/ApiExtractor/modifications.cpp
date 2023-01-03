@@ -188,7 +188,7 @@ QDebug operator<<(QDebug d, const CodeSnip &s)
         if (i)
             d << ", ";
         d << '#' << i << ' ';
-        if (f.instance().isNull()) {
+        if (!f.instance()) {
             d << '"';
             const QString &code = f.code();
             const auto lines = QStringView{code}.split(u'\n');

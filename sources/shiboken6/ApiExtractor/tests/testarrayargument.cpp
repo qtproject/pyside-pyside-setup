@@ -35,7 +35,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     const auto classA = AbstractMetaClass::findClass(builder->classes(), u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
 
     const AbstractMetaArgument &arg = classA->functions().constLast()->arguments().constFirst();
     QVERIFY(arg.type().isArray());
@@ -46,7 +46,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByInteger()
 static QString functionMinimalSignature(const AbstractMetaClassCPtr &c, const QString &name)
 {
     const auto f = c->findFunction(name);
-    return f.isNull() ? QString() : f->minimalSignature();
+    return f ? f->minimalSignature() : QString();
 }
 
 void TestArrayArgument::testArraySignature()
@@ -109,7 +109,7 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValue()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(!builder.isNull());
     AbstractMetaClassPtr classA = AbstractMetaClass::findClass(builder->classes(), u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
 
     auto someEnum = classA->findEnum(u"SomeEnum"_s);
     QVERIFY(someEnum.has_value());
@@ -138,9 +138,9 @@ void TestArrayArgument::testArrayArgumentWithSizeDefinedByEnumValueFromGlobalEnu
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     const auto classA = AbstractMetaClass::findClass(builder->classes(), u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
 
     AbstractMetaEnum someEnum = builder->globalEnums().constFirst();
     auto nvalues = someEnum.findEnumValue(u"NValues");

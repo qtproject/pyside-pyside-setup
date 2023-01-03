@@ -44,7 +44,7 @@
 
 using namespace Qt::StringLiterals;
 
-using TypeDatabaseParserContextPtr = QSharedPointer<TypeDatabaseParserContext>;
+using TypeDatabaseParserContextPtr = std::shared_ptr<TypeDatabaseParserContext>;
 
 // package -> api-version
 
@@ -133,7 +133,7 @@ struct TypeDatabasePrivate
     template <class Predicate>
     TypeEntryCList findTypesHelper(const QString &name, Predicate pred) const;
     template <class Type, class Predicate>
-    QList<QSharedPointer<const Type> > findTypesByTypeHelper(Predicate pred) const;
+    QList<std::shared_ptr<const Type> > findTypesByTypeHelper(Predicate pred) const;
     TypeEntryPtr resolveTypeDefEntry(const TypedefEntryPtr &typedefEntry, QString *errorMessage);
     template <class String>
     bool isSuppressedWarningHelper(const String &s) const;
@@ -340,7 +340,7 @@ QStringList TypeDatabase::typesystemKeywords() const
 IncludeList TypeDatabase::extraIncludes(const QString& className) const
 {
     auto typeEntry = findComplexType(className);
-    return typeEntry.isNull() ? IncludeList() : typeEntry->extraIncludes();
+    return typeEntry ? typeEntry->extraIncludes() :  IncludeList();
 }
 
 const QStringList &TypeDatabase::systemIncludes() const
@@ -377,14 +377,14 @@ ContainerTypeEntryPtr TypeDatabase::findContainerType(const QString &name) const
 
     auto type_entry = findType(template_name);
     if (type_entry && type_entry->isContainer())
-        return qSharedPointerCast<ContainerTypeEntry>(type_entry);
+        return std::static_pointer_cast<ContainerTypeEntry>(type_entry);
     return {};
 }
 
 static bool inline useType(const TypeEntryCPtr &t)
 {
     return !t->isPrimitive()
-        || qSharedPointerCast<const PrimitiveTypeEntry>(t)->preferredTargetLangType();
+        || std::static_pointer_cast<const PrimitiveTypeEntry>(t)->preferredTargetLangType();
 }
 
 FunctionTypeEntryPtr TypeDatabase::findFunctionType(const QString &name) const
@@ -392,7 +392,7 @@ FunctionTypeEntryPtr TypeDatabase::findFunctionType(const QString &name) const
     const auto entries = d->findTypeRange(name);
     for (const TypeEntryPtr &entry : entries) {
         if (entry->type() == TypeEntry::FunctionType && useType(entry))
-            return qSharedPointerCast<FunctionTypeEntry>(entry);
+            return std::static_pointer_cast<FunctionTypeEntry>(entry);
     }
     return {};
 }
@@ -455,12 +455,12 @@ TypeEntryCList TypeDatabasePrivate::findTypesHelper(const QString &name, Predica
 }
 
 template<class Type, class Predicate>
-QList<QSharedPointer<const Type> > TypeDatabasePrivate::findTypesByTypeHelper(Predicate pred) const
+QList<std::shared_ptr<const Type> > TypeDatabasePrivate::findTypesByTypeHelper(Predicate pred) const
 {
-    QList<QSharedPointer<const Type> > result;
+    QList<std::shared_ptr<const Type> > result;
     for (const auto &entry : m_entries) {
         if (pred(entry))
-            result.append(qSharedPointerCast<const Type>(entry));
+            result.append(std::static_pointer_cast<const Type>(entry));
     }
     return result;
 }
@@ -605,8 +605,8 @@ TypeEntryPtr TypeDatabasePrivate::resolveTypeDefEntry(const TypedefEntryPtr &typ
         case TypeEntry::ContainerType:
         case TypeEntry::ObjectType:
         case TypeEntry::SmartPointerType:
-            source = qSharedPointerDynamicCast<ComplexTypeEntry>(e);
-            Q_ASSERT(!source.isNull());
+            source = std::dynamic_pointer_cast<ComplexTypeEntry>(e);
+            Q_ASSERT(source);
             break;
         default:
             break;
@@ -642,8 +642,8 @@ bool TypeDatabase::addType(const TypeEntryPtr &e, QString *errorMessage)
 bool TypeDatabasePrivate::addType(TypeEntryPtr e, QString *errorMessage)
 {
     if (e->type() == TypeEntry::TypedefType) {
-        e = resolveTypeDefEntry(qSharedPointerCast<TypedefEntry>(e), errorMessage);
-        if (Q_UNLIKELY(e.isNull()))
+        e = resolveTypeDefEntry(std::static_pointer_cast<TypedefEntry>(e), errorMessage);
+        if (Q_UNLIKELY(!e))
             return false;
     }
     m_entries.insert(e->qualifiedCppName(), e);
@@ -655,7 +655,7 @@ ConstantValueTypeEntryPtr
     TypeDatabase::addConstantValueTypeEntry(const QString &value,
                                             const TypeEntryCPtr &parent)
 {
-    ConstantValueTypeEntryPtr result(new ConstantValueTypeEntry(value, parent));
+    auto result = std::make_shared<ConstantValueTypeEntry>(value, parent);
     result->setCodeGeneration(TypeEntry::GenerateNothing);
     addType(result);
     return result;
@@ -688,7 +688,7 @@ bool TypeDatabase::isReturnTypeRejected(const QString& className, const QString&
 FlagsTypeEntryPtr TypeDatabase::findFlagsType(const QString &name) const
 {
     TypeEntryPtr fte = findType(name);
-    if (fte.isNull()) {
+    if (!fte) {
         fte = d->m_flagsEntries.value(name);
         if (!fte) {
             //last hope, search for flag without scope  inside of flags hash
@@ -701,7 +701,7 @@ FlagsTypeEntryPtr TypeDatabase::findFlagsType(const QString &name) const
             }
         }
     }
-    return qSharedPointerCast<FlagsTypeEntry>(fte);
+    return std::static_pointer_cast<FlagsTypeEntry>(fte);
 }
 
 void TypeDatabase::addFlagsType(FlagsTypeEntryPtr fte)
@@ -721,7 +721,7 @@ void TypeDatabase::addTemplate(const TemplateEntryPtr &t)
 
 void TypeDatabase::addTemplate(const QString &name, const QString &code)
 {
-    TemplateEntryPtr te(new TemplateEntry(name));
+    auto te = std::make_shared<TemplateEntry>(name);
     te->addCode(code);
     addTemplate(te);
 }
@@ -967,7 +967,7 @@ bool TypeDatabase::parseFile(QIODevice *device, bool generate)
 
 bool TypeDatabasePrivate::parseFile(QIODevice *device, TypeDatabase *db, bool generate)
 {
-    const TypeDatabaseParserContextPtr context(new TypeDatabaseParserContext);
+    const auto context = std::make_shared<TypeDatabaseParserContext>();
     context->db = db;
 
     if (!parseFile(context, device, generate))
@@ -1068,7 +1068,7 @@ PrimitiveTypeEntryPtr TypeDatabase::findPrimitiveType(const QString& name) const
     const auto entries = d->findTypeRange(name);
     for (const auto &entry : entries) {
         if (entry->isPrimitive()) {
-            auto pe = qSharedPointerCast<PrimitiveTypeEntry>(entry);
+            auto pe = std::static_pointer_cast<PrimitiveTypeEntry>(entry);
             if (pe->preferredTargetLangType())
                 return pe;
         }
@@ -1082,7 +1082,7 @@ ComplexTypeEntryPtr TypeDatabase::findComplexType(const QString& name) const
     const auto entries = d->findTypeRange(name);
     for (const auto &entry : entries) {
         if (entry->isComplex() && useType(entry))
-            return qSharedPointerCast<ComplexTypeEntry>(entry);
+            return std::static_pointer_cast<ComplexTypeEntry>(entry);
     }
     return nullptr;
 }
@@ -1091,8 +1091,8 @@ ObjectTypeEntryPtr TypeDatabase::findObjectType(const QString& name) const
 {
     const auto entries = d->findTypeRange(name);
     for (const auto &entry : entries) {
-        if (!entry.isNull() && entry->isObject() && useType(entry))
-            return qSharedPointerCast<ObjectTypeEntry>(entry);
+        if (entry && entry->isObject() && useType(entry))
+            return std::static_pointer_cast<ObjectTypeEntry>(entry);
     }
     return nullptr;
 }
@@ -1103,7 +1103,7 @@ NamespaceTypeEntryList TypeDatabase::findNamespaceTypes(const QString& name) con
     const auto entries = d->findTypeRange(name);
     for (const auto &entry : entries) {
         if (entry->isNamespace())
-            result.append(qSharedPointerCast<NamespaceTypeEntry>(entry));
+            result.append(std::static_pointer_cast<NamespaceTypeEntry>(entry));
     }
     return result;
 }
@@ -1356,7 +1356,7 @@ void TypeDatabase::formatBuiltinTypes(QDebug debug) const
     QList<PrimitiveFormatListEntry> primitiveEntries;
     for (auto &e : std::as_const(d->m_entries)) {
         if (e->isPrimitive()) {
-            auto pe = qSharedPointerCast<const PrimitiveTypeEntry>(e);
+            auto pe = std::static_pointer_cast<const PrimitiveTypeEntry>(e);
             auto basic = basicReferencedTypeEntry(pe);
             if (basic != pe) {
                 const auto idx = indexOf(primitiveEntries, basic);
@@ -1391,7 +1391,7 @@ PrimitiveTypeEntryPtr
                                           const QString &rootPackage,
                                           const CustomTypeEntryPtr &targetLang)
 {
-    PrimitiveTypeEntryPtr result(new PrimitiveTypeEntry(name, {}, root));
+    auto result = std::make_shared<PrimitiveTypeEntry>(name, QVersionNumber{}, root);
     result->setTargetLangApiType(targetLang);
     result->setTargetLangPackage(rootPackage);
     addBuiltInType(result);
@@ -1419,15 +1419,15 @@ void TypeDatabasePrivate::addBuiltInPrimitiveTypes()
 
     // C++ primitive types
     auto pyLongEntry = findType(u"PyLong"_s);
-    Q_ASSERT(!pyLongEntry.isNull() && pyLongEntry->isCustom());
-    auto pyLongCustomEntry = qSharedPointerCast<CustomTypeEntry>(pyLongEntry);
+    Q_ASSERT(pyLongEntry && pyLongEntry->isCustom());
+    auto pyLongCustomEntry = std::static_pointer_cast<CustomTypeEntry>(pyLongEntry);
     auto pyBoolEntry = findType(u"PyBool"_s);
-    Q_ASSERT(!pyBoolEntry.isNull() && pyBoolEntry->isCustom());
+    Q_ASSERT(pyBoolEntry && pyBoolEntry->isCustom());
     auto sbkCharEntry = findType(u"SbkChar"_s);
-    Q_ASSERT(!sbkCharEntry.isNull() && sbkCharEntry->isCustom());
-    auto sbkCharCustomEntry = qSharedPointerCast<CustomTypeEntry>(sbkCharEntry);
+    Q_ASSERT(sbkCharEntry && sbkCharEntry->isCustom());
+    auto sbkCharCustomEntry = std::static_pointer_cast<CustomTypeEntry>(sbkCharEntry);
 
-    auto pyBoolCustomEntry = qSharedPointerCast<CustomTypeEntry>(pyBoolEntry);
+    auto pyBoolCustomEntry = std::static_pointer_cast<CustomTypeEntry>(pyBoolEntry);
     for (const auto &t : AbstractMetaType::cppIntegralTypes()) {
         if (!m_entries.contains(t)) {
             CustomTypeEntryPtr targetLangApi = pyLongCustomEntry;
@@ -1440,16 +1440,16 @@ void TypeDatabasePrivate::addBuiltInPrimitiveTypes()
     }
 
     auto pyFloatEntry = findType(u"PyFloat"_s);
-    Q_ASSERT(!pyFloatEntry.isNull() && pyFloatEntry->isCustom());
-    auto pyFloatCustomEntry = qSharedPointerCast<CustomTypeEntry>(pyFloatEntry);
+    Q_ASSERT(pyFloatEntry && pyFloatEntry->isCustom());
+    auto pyFloatCustomEntry = std::static_pointer_cast<CustomTypeEntry>(pyFloatEntry);
     for (const auto &t : AbstractMetaType::cppFloatTypes()) {
         if (!m_entries.contains(t))
             addBuiltInPrimitiveType(t, root, rootPackage, pyFloatCustomEntry);
     }
 
     auto pyUnicodeEntry = findType(u"PyUnicode"_s);
-    Q_ASSERT(!pyUnicodeEntry.isNull() && pyUnicodeEntry->isCustom());
-    auto pyUnicodeCustomEntry = qSharedPointerCast<CustomTypeEntry>(pyUnicodeEntry);
+    Q_ASSERT(pyUnicodeEntry && pyUnicodeEntry->isCustom());
+    auto pyUnicodeCustomEntry = std::static_pointer_cast<CustomTypeEntry>(pyUnicodeEntry);
 
     const QString stdString = u"std::string"_s;
     if (!m_entries.contains(stdString)) {

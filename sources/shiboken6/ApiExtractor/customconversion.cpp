@@ -99,7 +99,7 @@ QString TargetToNativeConversion::sourceTypeCheck() const
         return m_sourceTypeCheck;
 
     if (m_sourceType != nullptr && m_sourceType->isCustom()) {
-        const auto cte = qSharedPointerCast<const CustomTypeEntry>(m_sourceType);
+        const auto cte = std::static_pointer_cast<const CustomTypeEntry>(m_sourceType);
         if (cte->hasCheckFunction()) {
             QString result = cte->checkFunction();
             if (result != u"true") // For PyObject, which is always true
@@ -134,11 +134,11 @@ void TargetToNativeConversion::formatDebug(QDebug &debug) const
 CustomConversionPtr CustomConversion::getCustomConversion(const TypeEntryCPtr &type)
 {
     if (type->isPrimitive())
-        return qSharedPointerCast<const PrimitiveTypeEntry>(type)->customConversion();
+        return std::static_pointer_cast<const PrimitiveTypeEntry>(type)->customConversion();
     if (type->isContainer())
-        return qSharedPointerCast<const ContainerTypeEntry>(type)->customConversion();
+        return std::static_pointer_cast<const ContainerTypeEntry>(type)->customConversion();
     if (type->isValue())
-        return qSharedPointerCast<const ValueTypeEntry>(type)->customConversion();
+        return std::static_pointer_cast<const ValueTypeEntry>(type)->customConversion();
     return {};
 }
 
@@ -188,7 +188,7 @@ QDebug operator<<(QDebug debug, const CustomConversionPtr &cptr)
     debug.noquote();
     debug.nospace();
     debug << "CustomConversionPtr";
-    if (auto *c = cptr.data()) {
+    if (auto *c = cptr.get()) {
         c->formatDebug(debug);
     } else {
         debug << "(0)";

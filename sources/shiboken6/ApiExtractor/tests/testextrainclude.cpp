@@ -21,10 +21,10 @@ void TestExtraInclude::testClassExtraInclude()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
 
     QList<Include> includes = classA->typeEntry()->extraIncludes();
     QCOMPARE(includes.size(), 1);
@@ -44,13 +44,13 @@ void TestExtraInclude::testGlobalExtraIncludes()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QVERIFY(AbstractMetaClass::findClass(classes, u"A"));
 
     auto *td = TypeDatabase::instance();
     TypeSystemTypeEntryCPtr module = td->defaultTypeSystemType();
-    QVERIFY(!module.isNull());
+    QVERIFY(module);
     QCOMPARE(module->name(), u"Foo");
 
     QList<Include> includes = module->extraIncludes();

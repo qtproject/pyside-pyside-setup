@@ -35,13 +35,13 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
         </value-type>\n\
     </typesystem>\n"_s;
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.toLocal8Bit().data()));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
     const auto typeEntry = classA->typeEntry();
     QVERIFY(typeEntry->isValue());
-    auto vte = qSharedPointerCast<const ValueTypeEntry>(typeEntry);
+    auto vte = std::static_pointer_cast<const ValueTypeEntry>(typeEntry);
     QVERIFY(vte->hasTargetConversionRule());
     QCOMPARE(vte->targetConversionRule(), QLatin1String(conversionData));
 }
@@ -85,10 +85,10 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     auto *typeDb = TypeDatabase::instance();
     auto typeA = typeDb->findPrimitiveType(u"A"_s);
-    QVERIFY(!typeA.isNull());
+    QVERIFY(typeA);
 
     QVERIFY(typeA->hasCustomConversion());
     auto conversion = typeA->customConversion();
@@ -115,7 +115,7 @@ void TestConversionRuleTag::testConversionRuleTagReplace()
     QCOMPARE(toNative.sourceTypeName(), u"B");
     QVERIFY(!toNative.isCustomType());
     auto typeB = typeDb->findType(u"B"_s);
-    QVERIFY(!typeB.isNull());
+    QVERIFY(typeB);
     QCOMPARE(toNative.sourceType(), typeB);
     QCOMPARE(toNative.sourceTypeCheck(), u"CheckIfInputObjectIsB(%IN)");
     QCOMPARE(toNative.conversion().trimmed(), u"%OUT = %IN.createA();");
@@ -153,12 +153,12 @@ if (!TargetDateTimeAPI) TargetDateTime_IMPORT;\n\
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     const auto classA = AbstractMetaClass::findClass(builder->classes(), u"Date");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
 
     QVERIFY(classA->typeEntry()->isValue());
-    auto vte = qSharedPointerCast<const ValueTypeEntry>(classA->typeEntry());
+    auto vte = std::static_pointer_cast<const ValueTypeEntry>(classA->typeEntry());
     QVERIFY(vte->hasCustomConversion());
     auto conversion = vte->customConversion();
 
@@ -216,10 +216,10 @@ void TestConversionRuleTag::testConversionRuleTagWithInsertTemplate()
     "// TEMPLATE - target_to_native - END";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     auto *typeDb = TypeDatabase::instance();
     auto typeA = typeDb->findPrimitiveType(u"A"_s);
-    QVERIFY(!typeA.isNull());
+    QVERIFY(typeA);
 
     QVERIFY(typeA->hasCustomConversion());
     auto conversion = typeA->customConversion();

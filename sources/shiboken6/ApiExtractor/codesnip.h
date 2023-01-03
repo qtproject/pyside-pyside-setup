@@ -9,8 +9,9 @@
 
 #include <QtCore/QList>
 #include <QtCore/QHash>
-#include <QtCore/QSharedPointer>
 #include <QtCore/QString>
+
+#include <memory>
 
 class TemplateInstance
 {
@@ -34,7 +35,7 @@ private:
     QHash<QString, QString> replaceRules;
 };
 
-using TemplateInstancePtr = QSharedPointer<TemplateInstance>;
+using TemplateInstancePtr = std::shared_ptr<TemplateInstance>;
 
 class CodeSnipFragment
 {
@@ -43,7 +44,7 @@ public:
     explicit CodeSnipFragment(const QString &code) : m_code(code) {}
     explicit CodeSnipFragment(const TemplateInstancePtr &instance) : m_instance(instance) {}
 
-    bool isEmpty() const { return m_code.isEmpty() && m_instance.isNull(); }
+    bool isEmpty() const { return m_code.isEmpty() && !m_instance; }
 
     QString code() const;
 
@@ -51,7 +52,7 @@ public:
 
 private:
     QString m_code;
-    QSharedPointer<TemplateInstance> m_instance;
+    std::shared_ptr<TemplateInstance> m_instance;
 };
 
 class CodeSnipAbstract : public CodeSnipHelpers

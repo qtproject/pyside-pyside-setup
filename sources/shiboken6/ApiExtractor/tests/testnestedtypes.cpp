@@ -43,14 +43,14 @@ void TestNestedTypes::testNestedTypesModifications()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
     const auto ons = AbstractMetaClass::findClass(classes, u"OuterNamespace");
-    QVERIFY(!ons.isNull());
+    QVERIFY(ons);
 
     const auto ins = AbstractMetaClass::findClass(classes, u"OuterNamespace::InnerNamespace");
-    QVERIFY(!ins.isNull());
+    QVERIFY(ins);
     QCOMPARE(ins->functions().size(), 1);
     QCOMPARE(ins->typeEntry()->codeSnips().size(), 1);
     CodeSnip snip = ins->typeEntry()->codeSnips().constFirst();
@@ -70,7 +70,7 @@ void TestNestedTypes::testNestedTypesModifications()
 
     const auto sc =
         AbstractMetaClass::findClass(classes, u"OuterNamespace::InnerNamespace::SomeClass");
-    QVERIFY(!sc.isNull());
+    QVERIFY(sc);
     QCOMPARE(sc->functions().size(), 2); // default constructor and removed method
     const auto removedFunc = sc->functions().constLast();
     QVERIFY(removedFunc->isModifiedRemoved());
@@ -93,23 +93,23 @@ void TestNestedTypes::testDuplicationOfNestedTypes()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     const auto nspace = AbstractMetaClass::findClass(classes, u"Namespace");
-    QVERIFY(!nspace.isNull());
+    QVERIFY(nspace);
     const auto cls1 = AbstractMetaClass::findClass(classes, u"SomeClass");
-    QVERIFY(!cls1.isNull());
+    QVERIFY(cls1);
     const auto cls2 = AbstractMetaClass::findClass(classes, u"Namespace::SomeClass");
-    QVERIFY(!cls2.isNull());
+    QVERIFY(cls2);
     QCOMPARE(cls1, cls2);
     QCOMPARE(cls1->name(), u"SomeClass");
     QCOMPARE(cls1->qualifiedCppName(), u"Namespace::SomeClass");
 
     auto t1 = TypeDatabase::instance()->findType(u"Namespace::SomeClass"_s);
-    QVERIFY(!t1.isNull());
+    QVERIFY(t1);
     auto t2 = TypeDatabase::instance()->findType(u"SomeClass"_s);
-    QVERIFY(t2.isNull());
+    QVERIFY(!t2);
 }
 
 QTEST_APPLESS_MAIN(TestNestedTypes)

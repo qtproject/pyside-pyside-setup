@@ -23,15 +23,15 @@ void TestPrimitiveTypeTag::testPrimitiveTypeDefaultConstructor()
         <object-type name='B'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(!classB.isNull());
+    QVERIFY(classB);
 
     auto typeEntry = TypeDatabase::instance()->findPrimitiveType(u"A"_s);
-    QVERIFY(!typeEntry.isNull());
+    QVERIFY(typeEntry);
     QVERIFY(typeEntry->hasDefaultConstructor());
     QCOMPARE(typeEntry->defaultConstructor(), u"A()");
 }

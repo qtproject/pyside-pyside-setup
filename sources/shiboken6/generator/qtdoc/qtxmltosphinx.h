@@ -8,8 +8,9 @@
 
 #include <QtCore/QList>
 #include <QtCore/QScopedPointer>
-#include <QtCore/QSharedPointer>
 #include <QtCore/QStack>
+
+#include <memory>
 
 QT_BEGIN_NAMESPACE
 class QDebug;
@@ -106,7 +107,7 @@ public:
     static void stripPythonQualifiers(QString *s);
 
 private:
-    using StringSharedPtr = QSharedPointer<QString>;
+    using StringSharedPtr = std::shared_ptr<QString>;
 
     QString transform(const QString& doc);
 

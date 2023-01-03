@@ -11,7 +11,8 @@
 
 #include <QtCore/QFlags>
 #include <QtCore/QHash>
-#include <QtCore/QSharedPointer>
+
+#include <memory>
 
 class OverloadDataNode;
 class OverloadDataRootNode;
@@ -176,7 +177,7 @@ private:
                                bool isNumber = false, bool rejectNull = false);
     static void writeTypeCheck(TextStream &s, const QString &customType,
                         const QString &argumentName);
-    static void writeTypeCheck(TextStream& s, const QSharedPointer<OverloadDataNode> &overloadData,
+    static void writeTypeCheck(TextStream& s, const std::shared_ptr<OverloadDataNode> &overloadData,
                         const QString &argumentName);
 
     static void writeTypeDiscoveryFunction(TextStream &s,

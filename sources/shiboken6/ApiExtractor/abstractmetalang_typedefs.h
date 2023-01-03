@@ -4,8 +4,9 @@
 #ifndef ABSTRACTMETALANG_TYPEDEFS_H
 #define ABSTRACTMETALANG_TYPEDEFS_H
 
-#include <QtCore/QSharedPointer>
 #include <QtCore/QList>
+
+#include <memory>
 
 class AbstractMetaClass;
 class AbstractMetaField;
@@ -16,10 +17,10 @@ class AbstractMetaFunction;
 class AbstractMetaType;
 struct UsingMember;
 
-using AbstractMetaFunctionPtr = QSharedPointer<AbstractMetaFunction>;
-using AbstractMetaFunctionCPtr = QSharedPointer<const AbstractMetaFunction>;
-using AbstractMetaClassPtr = QSharedPointer<AbstractMetaClass>;
-using AbstractMetaClassCPtr = QSharedPointer<const AbstractMetaClass>;
+using AbstractMetaFunctionPtr = std::shared_ptr<AbstractMetaFunction>;
+using AbstractMetaFunctionCPtr = std::shared_ptr<const AbstractMetaFunction>;
+using AbstractMetaClassPtr = std::shared_ptr<AbstractMetaClass>;
+using AbstractMetaClassCPtr = std::shared_ptr<const AbstractMetaClass>;
 
 using AbstractMetaArgumentList = QList<AbstractMetaArgument>;
 using AbstractMetaClassList = QList<AbstractMetaClassPtr>;

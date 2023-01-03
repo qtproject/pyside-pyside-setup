@@ -68,10 +68,10 @@ struct A {
         </object-type>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
     QCOMPARE(classA->functions().size(), 14);
     QStringList removedSignatures;
     removedSignatures.append(u"operator>>(char&)"_s);

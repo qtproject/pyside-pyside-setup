@@ -5,7 +5,8 @@
 #define MODIFICATIONS_TYPEDEFS_H
 
 #include <QtCore/QList>
-#include <QtCore/QSharedPointer>
+
+#include <memory>
 
 class CodeSnip;
 class DocModification;
@@ -14,7 +15,7 @@ struct AddedFunction;
 class FieldModification;
 class FunctionModification;
 
-using AddedFunctionPtr = QSharedPointer<AddedFunction>;
+using AddedFunctionPtr = std::shared_ptr<AddedFunction>;
 using AddedFunctionList = QList<AddedFunctionPtr>;
 using CodeSnipList = QList<CodeSnip>;
 using DocModificationList = QList<DocModification>;

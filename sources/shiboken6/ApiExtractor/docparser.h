@@ -7,7 +7,8 @@
 #include "modifications_typedefs.h"
 
 #include <QtCore/QString>
-#include <QtCore/QSharedPointer>
+
+#include <memory>
 
 class AbstractMetaClass;
 class DocModification;
@@ -22,7 +23,7 @@ class DocParser
 public:
     Q_DISABLE_COPY(DocParser)
 
-    using XQueryPtr = QSharedPointer<XQuery>;
+    using XQueryPtr = std::shared_ptr<XQuery>;
 
     DocParser();
     virtual ~DocParser();

@@ -7,7 +7,7 @@
 #include "abstractmetalang_typedefs.h"
 
 template <class MetaClass>
-QSharedPointer<MetaClass> findByName(const QList<QSharedPointer<MetaClass> > &haystack,
+std::shared_ptr<MetaClass> findByName(const QList<std::shared_ptr<MetaClass> > &haystack,
                                       QStringView needle)
 {
     for (const auto &c : haystack) {

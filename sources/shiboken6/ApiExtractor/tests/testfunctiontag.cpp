@@ -23,7 +23,7 @@ void TestFunctionTag::testFunctionTagForSpecificSignature()
         <function signature='globalFunction(int)'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     TypeEntryCPtr func = TypeDatabase::instance()->findType(u"globalFunction"_s);
     QVERIFY(func);
@@ -41,10 +41,10 @@ void TestFunctionTag::testFunctionTagForAllSignatures()
         <function signature='globalFunction(float)'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     TypeEntryCPtr func = TypeDatabase::instance()->findType(u"globalFunction"_s);
-    QVERIFY(!func.isNull());
+    QVERIFY(func);
     QCOMPARE(builder->globalFunctions().size(), 2);
 }
 
@@ -56,10 +56,10 @@ void TestFunctionTag::testRenameGlobalFunction()
         <function signature='global_function_with_ugly_name()' rename='smooth'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     TypeEntryCPtr func = TypeDatabase::instance()->findType(u"global_function_with_ugly_name"_s);
-    QVERIFY(!func.isNull());
+    QVERIFY(func);
 
     QCOMPARE(builder->globalFunctions().size(), 1);
     const auto metaFunc = builder->globalFunctions().constFirst();

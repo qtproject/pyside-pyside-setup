@@ -23,12 +23,12 @@ void TestReferenceToPointer::testReferenceToPointerArgument()
         <object-type name='B'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(!classB.isNull());
+    QVERIFY(classB);
     const auto func = classB->findFunction(u"dummy");
-    QVERIFY(!func.isNull());
+    QVERIFY(func);
     QCOMPARE(func->arguments().constFirst().type().minimalSignature(), u"A*&");
 }
 

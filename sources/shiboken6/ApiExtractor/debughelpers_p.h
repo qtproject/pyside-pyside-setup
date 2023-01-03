@@ -5,6 +5,16 @@
 #define DEBUGHELPERS_P_H
 
 #include <QtCore/QDebug>
+#include <memory>
+
+template <class T>
+inline QDebug operator<<(QDebug debug, const std::shared_ptr<T> &ptr)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace();
+    debug << "std::shared_ptr(" << ptr.get() << ")";
+    return debug;
+}
 
 template <class It>
 inline void formatSequence(QDebug &d, It i1, It i2,
@@ -24,7 +34,7 @@ inline static void formatPtrSequence(QDebug &d, It i1, It i2,
     for (It i = i1; i != i2; ++i) {
         if (i != i1)
             d << separator;
-        d << i->data();
+        d << i->get();
     }
 }
 

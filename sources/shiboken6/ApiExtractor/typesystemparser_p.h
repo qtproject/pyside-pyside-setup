@@ -12,7 +12,8 @@
 #include <QtCore/QStack>
 #include <QtCore/QHash>
 #include <QtCore/QScopedPointer>
-#include <QtCore/QSharedPointer>
+
+#include <memory>
 
 QT_FORWARD_DECLARE_CLASS(QVersionNumber)
 QT_FORWARD_DECLARE_CLASS(QXmlStreamAttributes)
@@ -130,10 +131,10 @@ class TypeSystemParser
 public:
     Q_DISABLE_COPY(TypeSystemParser)
 
-    using StackElementContextPtr = QSharedPointer<StackElementContext>;
+    using StackElementContextPtr = std::shared_ptr<StackElementContext>;
     using ContextStack = QStack<StackElementContextPtr>;
 
-    explicit TypeSystemParser(const QSharedPointer<TypeDatabaseParserContext> &context,
+    explicit TypeSystemParser(const std::shared_ptr<TypeDatabaseParserContext> &context,
                               bool generate);
     ~TypeSystemParser();
 
@@ -251,7 +252,7 @@ private:
      ParserState parserState(qsizetype offset = 0) const;
      CodeSnipAbstract *injectCodeTarget(qsizetype offset = 0) const;
 
-    QSharedPointer<TypeDatabaseParserContext> m_context;
+    std::shared_ptr<TypeDatabaseParserContext> m_context;
     QStack<StackElement> m_stack;
     int m_currentDroppedEntryDepth = 0;
     int m_ignoreDepth = 0;

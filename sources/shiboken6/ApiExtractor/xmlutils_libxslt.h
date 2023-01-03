@@ -4,11 +4,12 @@
 #define XMLUTILS_LIBXSLT_H
 
 #include <QtCore/QString>
-#include <QtCore/QSharedPointer>
+
+#include <memory>
 
 class XQuery;
 
-QSharedPointer<XQuery> libXml_createXQuery(const QString &focus, QString *errorMessage);
+std::shared_ptr<XQuery> libXml_createXQuery(const QString &focus, QString *errorMessage);
 
 QString libXslt_transform(const QString &xml, QString xsl, QString *errorMessage);
 

@@ -182,7 +182,7 @@ AddedFunction::AddedFunctionPtr
         arguments.append({type, p.name, p.defaultValue});
     }
 
-    AddedFunctionPtr result(new AddedFunction(name, arguments, returnType));
+    auto result = std::make_shared<AddedFunction>(name, arguments, returnType);
     result->setConstant(isConst);
     return result;
 }

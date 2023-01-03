@@ -11,7 +11,8 @@
 #include <QtCore/QRegularExpression>
 #include <QtCore/QStringList>
 #include <QtCore/QVersionNumber>
-#include <QtCore/QSharedPointer>
+
+#include <memory>
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 
@@ -163,12 +164,12 @@ public:
 
     // Top level file parsing
     bool parseFile(const QString &filename, bool generate = true);
-    bool parseFile(const QSharedPointer<TypeDatabaseParserContext> &context,
+    bool parseFile(const std::shared_ptr<TypeDatabaseParserContext> &context,
                    const QString &filename, const QString &currentPath, bool generate);
 
     // Top level QIODevice parsing for tests.
     bool parseFile(QIODevice *device, bool generate = true);
-    bool parseFile(const QSharedPointer<TypeDatabaseParserContext> &context,
+    bool parseFile(const std::shared_ptr<TypeDatabaseParserContext> &context,
                    QIODevice *device, bool generate = true);
 
     static bool setApiVersion(const QString &package, const QString &version);

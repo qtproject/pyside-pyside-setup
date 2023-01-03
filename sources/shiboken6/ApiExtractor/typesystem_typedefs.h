@@ -5,7 +5,8 @@
 #define TYPESYSTEM_TYPEDEFS_H
 
 #include <QtCore/QList>
-#include <QtCore/QSharedPointer>
+
+#include <memory>
 
 class ArrayTypeEntry;
 class ComplexTypeEntry;
@@ -26,43 +27,43 @@ class TypedefEntry;
 class TypeSystemTypeEntry;
 class ValueTypeEntry;
 
-using ArrayTypeEntryPtr = QSharedPointer<ArrayTypeEntry>;
-using ComplexTypeEntryPtr = QSharedPointer<ComplexTypeEntry>;
-using ConstantValueTypeEntryPtr = QSharedPointer<ConstantValueTypeEntry>;
-using ContainerTypeEntryPtr = QSharedPointer<ContainerTypeEntry>;
-using CustomTypeEntryPtr = QSharedPointer<CustomTypeEntry>;
-using EnumTypeEntryPtr = QSharedPointer<EnumTypeEntry>;
-using EnumValueTypeEntryPtr = QSharedPointer<EnumValueTypeEntry>;
-using FlagsTypeEntryPtr = QSharedPointer<FlagsTypeEntry>;
-using FunctionTypeEntryPtr = QSharedPointer<FunctionTypeEntry>;
-using NamespaceTypeEntryPtr = QSharedPointer<NamespaceTypeEntry>;
-using ObjectTypeEntryPtr = QSharedPointer<ObjectTypeEntry>;
-using PrimitiveTypeEntryPtr = QSharedPointer<PrimitiveTypeEntry>;
-using SmartPointerTypeEntryPtr = QSharedPointer<SmartPointerTypeEntry>;
-using TemplateEntryPtr = QSharedPointer<TemplateEntry>;
-using TypeEntryPtr = QSharedPointer<TypeEntry>;
-using TypedefEntryPtr = QSharedPointer<TypedefEntry>;
-using TypeSystemTypeEntryPtr = QSharedPointer<TypeSystemTypeEntry>;
-using ValueTypeEntryPtr = QSharedPointer<ValueTypeEntry>;
+using ArrayTypeEntryPtr = std::shared_ptr<ArrayTypeEntry>;
+using ComplexTypeEntryPtr = std::shared_ptr<ComplexTypeEntry>;
+using ConstantValueTypeEntryPtr = std::shared_ptr<ConstantValueTypeEntry>;
+using ContainerTypeEntryPtr = std::shared_ptr<ContainerTypeEntry>;
+using CustomTypeEntryPtr = std::shared_ptr<CustomTypeEntry>;
+using EnumTypeEntryPtr = std::shared_ptr<EnumTypeEntry>;
+using EnumValueTypeEntryPtr = std::shared_ptr<EnumValueTypeEntry>;
+using FlagsTypeEntryPtr = std::shared_ptr<FlagsTypeEntry>;
+using FunctionTypeEntryPtr = std::shared_ptr<FunctionTypeEntry>;
+using NamespaceTypeEntryPtr = std::shared_ptr<NamespaceTypeEntry>;
+using ObjectTypeEntryPtr = std::shared_ptr<ObjectTypeEntry>;
+using PrimitiveTypeEntryPtr = std::shared_ptr<PrimitiveTypeEntry>;
+using SmartPointerTypeEntryPtr = std::shared_ptr<SmartPointerTypeEntry>;
+using TemplateEntryPtr = std::shared_ptr<TemplateEntry>;
+using TypeEntryPtr = std::shared_ptr<TypeEntry>;
+using TypedefEntryPtr = std::shared_ptr<TypedefEntry>;
+using TypeSystemTypeEntryPtr = std::shared_ptr<TypeSystemTypeEntry>;
+using ValueTypeEntryPtr = std::shared_ptr<ValueTypeEntry>;
 
-using ArrayTypeEntryCPtr = QSharedPointer<const ArrayTypeEntry>;
-using ComplexTypeEntryCPtr = QSharedPointer<const ComplexTypeEntry>;
-using ConstantValueTypeEntryCPtr = QSharedPointer<const ConstantValueTypeEntry>;
-using ContainerTypeEntryCPtr = QSharedPointer<const ContainerTypeEntry>;
-using CustomTypeEntryCPtr = QSharedPointer<const CustomTypeEntry>;
-using EnumTypeEntryCPtr = QSharedPointer<const EnumTypeEntry>;
-using EnumValueTypeEntryCPtr = QSharedPointer<const EnumValueTypeEntry>;
-using FlagsTypeEntryCPtr = QSharedPointer<const FlagsTypeEntry>;
-using FunctionTypeEntryCPtr = QSharedPointer<const FunctionTypeEntry>;
-using NamespaceTypeEntryCPtr = QSharedPointer<const NamespaceTypeEntry>;
-using ObjectTypeEntryCPtr = QSharedPointer<const ObjectTypeEntry>;
-using PrimitiveTypeEntryCPtr = QSharedPointer<const PrimitiveTypeEntry>;
-using SmartPointerTypeEntryCPtr = QSharedPointer<const SmartPointerTypeEntry>;
-using TemplateEntryCPtr = QSharedPointer<const TemplateEntry>;
-using TypeEntryCPtr = QSharedPointer<const TypeEntry>;
-using TypedefEntryCPtr = QSharedPointer<const TypedefEntry>;
-using TypeSystemTypeEntryCPtr = QSharedPointer<const TypeSystemTypeEntry>;
-using ValueTypeEntryCPtr = QSharedPointer<const ValueTypeEntry>;
+using ArrayTypeEntryCPtr = std::shared_ptr<const ArrayTypeEntry>;
+using ComplexTypeEntryCPtr = std::shared_ptr<const ComplexTypeEntry>;
+using ConstantValueTypeEntryCPtr = std::shared_ptr<const ConstantValueTypeEntry>;
+using ContainerTypeEntryCPtr = std::shared_ptr<const ContainerTypeEntry>;
+using CustomTypeEntryCPtr = std::shared_ptr<const CustomTypeEntry>;
+using EnumTypeEntryCPtr = std::shared_ptr<const EnumTypeEntry>;
+using EnumValueTypeEntryCPtr = std::shared_ptr<const EnumValueTypeEntry>;
+using FlagsTypeEntryCPtr = std::shared_ptr<const FlagsTypeEntry>;
+using FunctionTypeEntryCPtr = std::shared_ptr<const FunctionTypeEntry>;
+using NamespaceTypeEntryCPtr = std::shared_ptr<const NamespaceTypeEntry>;
+using ObjectTypeEntryCPtr = std::shared_ptr<const ObjectTypeEntry>;
+using PrimitiveTypeEntryCPtr = std::shared_ptr<const PrimitiveTypeEntry>;
+using SmartPointerTypeEntryCPtr = std::shared_ptr<const SmartPointerTypeEntry>;
+using TemplateEntryCPtr = std::shared_ptr<const TemplateEntry>;
+using TypeEntryCPtr = std::shared_ptr<const TypeEntry>;
+using TypedefEntryCPtr = std::shared_ptr<const TypedefEntry>;
+using TypeSystemTypeEntryCPtr = std::shared_ptr<const TypeSystemTypeEntry>;
+using ValueTypeEntryCPtr = std::shared_ptr<const ValueTypeEntry>;
 
 using ContainerTypeEntryCList = QList<ContainerTypeEntryCPtr>;
 using NamespaceTypeEntryList = QList<NamespaceTypeEntryPtr>;

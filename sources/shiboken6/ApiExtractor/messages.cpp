@@ -77,7 +77,7 @@ QString msgTypeModificationFailed(const QString &type, int n,
         str << "type of argument " << n;
 
     str << " of ";
-    if (auto c = func->ownerClass(); !c.isNull())
+    if (auto c = func->ownerClass())
         str << c->name() << "::";
     str << func->signature() << " to \"" << type << "\": " << why;
     return result;
@@ -111,7 +111,7 @@ QString msgArgumentRemovalFailed(const AbstractMetaFunction *func, int n,
     QString result;
     QTextStream str(&result);
     str << "Unable to remove argument " << n << " of ";
-    if (auto c = func->ownerClass(); !c.isNull())
+    if (auto c = func->ownerClass())
         str << c->name() << "::";
     str << func->signature() << ":  " << why;
     return result;
@@ -732,7 +732,7 @@ QString msgCyclicDependency(const QString &funcName, const QString &graphName,
             if (i)
                 str << ", \"";
             str << involvedConversions.at(i)->signature() << '"';
-            if (const auto c = involvedConversions.at(i)->implementingClass(); !c.isNull())
+            if (const auto c = involvedConversions.at(i)->implementingClass())
                 str << '(' << c->name() << ')';
         }
     }
@@ -761,7 +761,7 @@ QString msgUnknownOperator(const AbstractMetaFunction *func)
 {
     QString result = u"Unknown operator: \""_s + func->originalName()
                      + u'"';
-    if (const auto c = func->implementingClass(); !c.isNull())
+    if (const auto c = func->implementingClass())
         result += u" in class: "_s + c->name();
     return result;
 }
@@ -772,7 +772,7 @@ QString msgWrongIndex(const char *varName, const QString &capture,
     QString result;
     QTextStream str(&result);
     str << "Wrong index for " << varName << " variable (" << capture << ") on ";
-    if (const auto c = func->implementingClass(); !c.isNull())
+    if (const auto c = func->implementingClass())
         str << c->name() << "::";
     str << func->signature();
     return  result;

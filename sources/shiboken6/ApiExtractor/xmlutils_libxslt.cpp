@@ -137,7 +137,7 @@ QString LibXmlXQuery::doEvaluate(const QString &xPathExpression, QString *errorM
     return result;
 }
 
-QSharedPointer<XQuery> libXml_createXQuery(const QString &focus, QString *errorMessage)
+std::shared_ptr<XQuery> libXml_createXQuery(const QString &focus, QString *errorMessage)
 {
     XmlDocUniquePtr doc(xmlParseFile(QFile::encodeName(focus).constData()));
     if (!doc) {
@@ -149,7 +149,7 @@ QSharedPointer<XQuery> libXml_createXQuery(const QString &focus, QString *errorM
         *errorMessage = u"libxml2: xmlXPathNewContext() failed"_s;
         return {};
     }
-    return QSharedPointer<XQuery>(new LibXmlXQuery(doc, xpathContext));
+    return std::shared_ptr<XQuery>(new LibXmlXQuery(doc, xpathContext));
 }
 
 // XSLT transformation

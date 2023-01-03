@@ -56,7 +56,7 @@ void TestDropTypeEntries::testDropEntries()
         u"Foo.NamespaceA.InnerNamespaceA"_s};
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false,
                                                                 QString(), droppedEntries));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
     QVERIFY(AbstractMetaClass::findClass(classes, u"ValueA"));
@@ -79,7 +79,7 @@ void TestDropTypeEntries::testDropEntries()
 void TestDropTypeEntries::testDontDropEntries()
 {
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
     QVERIFY(AbstractMetaClass::findClass(classes, u"ValueA"));
@@ -115,7 +115,7 @@ void TestDropTypeEntries::testDropEntryWithChildTags()
     QStringList droppedEntries(u"Foo.ValueA"_s);
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode2, xmlCode2, false,
                                                                 QString(), droppedEntries));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     QVERIFY(!AbstractMetaClass::findClass(builder->classes(), u"ValueA"));
 }
 
@@ -123,7 +123,7 @@ void TestDropTypeEntries::testDropEntryWithChildTags()
 void TestDropTypeEntries::testDontDropEntryWithChildTags()
 {
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode2, xmlCode2, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     QVERIFY(AbstractMetaClass::findClass(builder->classes(), u"ValueA"));
 }
 

@@ -304,7 +304,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     m_packages[metaClass->package()] << fileNameForContext(classContext);
 
     m_docParser->setPackageName(metaClass->package());
-    m_docParser->fillDocumentation(qSharedPointerConstCast<AbstractMetaClass>(metaClass));
+    m_docParser->fillDocumentation(std::const_pointer_cast<AbstractMetaClass>(metaClass));
 
     QString className = metaClass->name();
     s << ".. _" << className << ":" << "\n\n";
@@ -422,13 +422,13 @@ void QtDocGenerator::writeProperties(TextStream &s,
         if (!prop.documentation.isEmpty())
             writeFormattedText(s, prop.documentation.detailed(), Documentation::Native, cppClass);
         s << "**Access functions:**\n";
-        if (!prop.getter.isNull())
+        if (prop.getter)
             s << " * " << functionTocEntry(prop.getter, cppClass) << '\n';
-        if (!prop.setter.isNull())
+        if (prop.setter)
             s << " * " << functionTocEntry(prop.setter, cppClass) << '\n';
-        if (!prop.reset.isNull())
+        if (prop.reset)
             s << " * " << functionTocEntry(prop.reset, cppClass) << '\n';
-        if (!prop.notify.isNull())
+        if (prop.notify)
             s << " * Signal " << functionTocEntry(prop.notify, cppClass) << '\n';
         s << '\n';
     }
@@ -1251,10 +1251,10 @@ QString QtDocGenerator::expandFunction(const QString &function) const
         }
     }
 
-    return metaClass.isNull()
-        ? function
-        : metaClass->typeEntry()->qualifiedTargetLangName()
-          + function.right(function.size() - firstDot);
+    return metaClass
+        ? metaClass->typeEntry()->qualifiedTargetLangName()
+          + function.right(function.size() - firstDot)
+        : function;
 }
 
 QString QtDocGenerator::expandClass(const QString &context,
@@ -1286,7 +1286,7 @@ QString QtDocGenerator::resolveContextForMethod(const QString &context,
         }
     }
 
-    if (!metaClass.isNull()) {
+    if (metaClass) {
         AbstractMetaFunctionCList funcList;
         const auto &methods = metaClass->queryFunctionsByName(methodName);
         for (const auto &func : methods) {
@@ -1301,7 +1301,7 @@ QString QtDocGenerator::resolveContextForMethod(const QString &context,
                 break;
         }
 
-        if (!implementingClass.isNull())
+        if (implementingClass)
             return implementingClass->typeEntry()->qualifiedTargetLangName();
     }
 

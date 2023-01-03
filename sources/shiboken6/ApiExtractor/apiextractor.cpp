@@ -486,7 +486,7 @@ static void addOwnerModification(const AbstractMetaFunctionCList &functions,
     for (const auto &f : functions) {
         if (!f->arguments().isEmpty()
             && f->arguments().constFirst().type().indirections() > 0) {
-            qSharedPointerConstCast<AbstractMetaFunction>(f)->clearModificationsCache();
+            std::const_pointer_cast<AbstractMetaFunction>(f)->clearModificationsCache();
             typeEntry->addFunctionModification(invalidateArgMod(f));
         }
     }
@@ -502,7 +502,7 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
     Q_ASSERT(smp.smartPointer);
 
     const auto &instantiatedType = type.instantiations().constFirst();
-    const auto ste = qSharedPointerCast<const SmartPointerTypeEntry>(smp.smartPointer->typeEntry());
+    const auto ste = std::static_pointer_cast<const SmartPointerTypeEntry>(smp.smartPointer->typeEntry());
     QString name = ste->getTargetName(smp.type);
     auto parentTypeEntry = ste->parent();
     InheritTemplateFlags flags;
@@ -530,8 +530,8 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
     Q_ASSERT(smp.specialized);
     if (withinNameSpace) { // move class to desired namespace
         const auto enclClass = AbstractMetaClass::findClass(m_builder->classes(), parentTypeEntry);
-        Q_ASSERT(!enclClass.isNull());
-        auto specialized = qSharedPointerConstCast<AbstractMetaClass>(smp.specialized);
+        Q_ASSERT(enclClass);
+        auto specialized = std::const_pointer_cast<AbstractMetaClass>(smp.specialized);
         specialized->setEnclosingClass(enclClass);
         enclClass->addInnerClass(specialized);
     }
@@ -572,7 +572,7 @@ ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(Instantiation
     // instantiations are specified to be in namespaces.
     auto &innerClasses = metaClass->innerClasses();
     for (auto i = innerClasses.size() - 1; i >= 0; --i) {
-         const auto &innerClass = innerClasses.at(i);
+         const auto innerClass = innerClasses.at(i);
          if (!innerClass->typeEntry()->isSmartPointer())
              collectInstantiatedContainersAndSmartPointers(context, innerClass);
     }
@@ -632,12 +632,12 @@ static void getCode(QStringList &code, const CodeSnipList &codeSnips)
 static void getCode(QStringList &code, const TypeEntryCPtr &type)
 {
     if (type->isComplex())
-        getCode(code, qSharedPointerCast<const ComplexTypeEntry>(type)->codeSnips());
+        getCode(code, std::static_pointer_cast<const ComplexTypeEntry>(type)->codeSnips());
     else if (type->isTypeSystem())
-        getCode(code, qSharedPointerCast<const TypeSystemTypeEntry>(type)->codeSnips());
+        getCode(code, std::static_pointer_cast<const TypeSystemTypeEntry>(type)->codeSnips());
 
     auto customConversion = CustomConversion::getCustomConversion(type);
-    if (customConversion.isNull())
+    if (!customConversion)
         return;
 
     if (!customConversion->nativeToTargetConversion().isEmpty())
@@ -665,7 +665,7 @@ void ApiExtractorPrivate::collectContainerTypesFromSnippets(InstantiationCollect
         getCode(snips, metaClass->typeEntry());
 
     const auto moduleEntry = td->defaultTypeSystemType();
-    Q_ASSERT(!moduleEntry.isNull());
+    Q_ASSERT(moduleEntry);
     getCode(snips, moduleEntry);
 
     for (const auto &func : m_builder->globalFunctions())

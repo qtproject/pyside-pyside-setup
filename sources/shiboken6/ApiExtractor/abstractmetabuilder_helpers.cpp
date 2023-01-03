@@ -95,11 +95,11 @@ QString AbstractMetaBuilderPrivate::fixEnumDefault(const AbstractMetaType &type,
     EnumTypeEntryCPtr enumTypeEntry;
     FlagsTypeEntryCPtr flagsTypeEntry;
     if (typeEntry->isFlags()) {
-        flagsTypeEntry = qSharedPointerCast<const FlagsTypeEntry>(typeEntry);
+        flagsTypeEntry = std::static_pointer_cast<const FlagsTypeEntry>(typeEntry);
         enumTypeEntry = flagsTypeEntry->originator();
     } else {
         Q_ASSERT(typeEntry->isEnum());
-        enumTypeEntry = qSharedPointerCast<const EnumTypeEntry>(typeEntry);
+        enumTypeEntry = std::static_pointer_cast<const EnumTypeEntry>(typeEntry);
     }
     // Use the enum's qualified name (would otherwise be "QFlags<Enum>")
     if (!enumTypeEntry->qualifiedCppName().contains(u"::"))

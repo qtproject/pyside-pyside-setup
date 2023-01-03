@@ -475,13 +475,13 @@ OverloadDataNode *OverloadDataRootNode::addOverloadDataNode(const AbstractMetaFu
         }
     }
 
-    if (overloadData.isNull()) {
+    if (!overloadData) {
         const int argpos = argPos() + 1;
         overloadData.reset(new OverloadDataNode(func, this, arg, argpos));
         m_children.append(overloadData);
     }
 
-    return overloadData.data();
+    return overloadData.get();
 }
 
 bool OverloadData::hasNonVoidReturnType() const
@@ -604,7 +604,7 @@ const AbstractMetaArgument *OverloadDataNode::overloadArgument(const AbstractMet
 bool OverloadDataRootNode::nextArgumentHasDefaultValue() const
 {
     for (const auto &overloadData : m_children) {
-        if (!overloadData->getFunctionWithDefaultValue().isNull())
+        if (overloadData->getFunctionWithDefaultValue())
             return true;
     }
     return false;
@@ -612,13 +612,13 @@ bool OverloadDataRootNode::nextArgumentHasDefaultValue() const
 
 static const OverloadDataRootNode *_findNextArgWithDefault(const OverloadDataRootNode *overloadData)
 {
-    if (!overloadData->getFunctionWithDefaultValue().isNull())
+    if (overloadData->getFunctionWithDefaultValue())
         return overloadData;
 
     const OverloadDataRootNode *result = nullptr;
     const OverloadDataList &data = overloadData->children();
     for (const auto &odata : data) {
-        const auto *tmp = _findNextArgWithDefault(odata.data());
+        const auto *tmp = _findNextArgWithDefault(odata.get());
         if (!result || (tmp && result->argPos() > tmp->argPos()))
             result = tmp;
     }

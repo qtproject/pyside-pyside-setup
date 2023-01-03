@@ -281,7 +281,7 @@ QString Generator::getFullTypeName(TypeEntryCPtr type)
 {
     QString result = type->qualifiedCppName();
     if (type->isArray())
-        type = qSharedPointerCast<const ArrayTypeEntry>(type)->nestedTypeEntry();
+        type = std::static_pointer_cast<const ArrayTypeEntry>(type)->nestedTypeEntry();
     if (!isCppPrimitive(type))
         result.prepend(u"::"_s);
     return result;
@@ -366,7 +366,7 @@ std::optional<DefaultValue>
         return minimalConstructor(api, type.typeEntry());
 
     if (type.typeEntry()->isComplex()) {
-        auto cType = qSharedPointerCast<const ComplexTypeEntry>(type.typeEntry());
+        auto cType = std::static_pointer_cast<const ComplexTypeEntry>(type.typeEntry());
         if (cType->hasDefaultConstructor())
             return DefaultValue(DefaultValue::Custom, cType->defaultConstructor());
         auto klass = AbstractMetaClass::findClass(api.classes(), cType);
@@ -405,8 +405,8 @@ std::optional<DefaultValue>
     }
 
     if (type->isEnum()) {
-        const auto enumEntry = qSharedPointerCast<const EnumTypeEntry>(type);
-        if (const auto nullValue = enumEntry->nullValue(); !nullValue.isNull())
+        const auto enumEntry = std::static_pointer_cast<const EnumTypeEntry>(type);
+        if (const auto nullValue = enumEntry->nullValue())
             return DefaultValue(DefaultValue::Enum, nullValue->name());
         return DefaultValue(DefaultValue::Custom,
                             u"static_cast< ::"_s + type->qualifiedCppName()
@@ -419,7 +419,7 @@ std::optional<DefaultValue>
     }
 
     if (type->isPrimitive()) {
-        QString ctor = qSharedPointerCast<const PrimitiveTypeEntry>(type)->defaultConstructor();
+        QString ctor = std::static_pointer_cast<const PrimitiveTypeEntry>(type)->defaultConstructor();
         // If a non-C++ (i.e. defined by the user) primitive type does not have
         // a default constructor defined by the user, the empty constructor is
         // heuristically returned. If this is wrong the build of the generated
@@ -462,7 +462,7 @@ std::optional<DefaultValue>
     if (!metaClass)
         return {};
 
-    auto cType = qSharedPointerCast<const ComplexTypeEntry>(metaClass->typeEntry());
+    auto cType = std::static_pointer_cast<const ComplexTypeEntry>(metaClass->typeEntry());
     if (cType->hasDefaultConstructor())
         return DefaultValue(DefaultValue::Custom, cType->defaultConstructor());
 

@@ -4,11 +4,12 @@
 #define XMLUTILS_QT_H
 
 #include <QtCore/QString>
-#include <QtCore/QSharedPointer>
+
+#include <memory>
 
 class XQuery;
 
-QSharedPointer<XQuery> qt_createXQuery(const QString &focus, QString *errorMessage);
+std::shared_ptr<XQuery> qt_createXQuery(const QString &focus, QString *errorMessage);
 
 QString qt_xsl_transform(const QString &xml, QString xsl, QString *errorMessage);
 

@@ -76,7 +76,7 @@ void DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
 
     QString errorMessage;
     XQueryPtr xquery = XQuery::create(doxyFilePath, &errorMessage);
-    if (xquery.isNull()) {
+    if (!xquery) {
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return;
     }
@@ -154,13 +154,13 @@ void DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
                                            DocParser::getDocModifications(metaClass, func));
             if (doc.isEmpty()) {
                 qCWarning(lcShibokenDoc, "%s",
-                          qPrintable(msgCannotFindDocumentation(doxyFilePath, func.data(),
+                          qPrintable(msgCannotFindDocumentation(doxyFilePath, func.get(),
                                                                 funcQuery)));
             } else {
                 funcDoc.setValue(doc, tag.first);
             }
         }
-        qSharedPointerConstCast<AbstractMetaFunction>(func)->setDocumentation(funcDoc);
+        std::const_pointer_cast<AbstractMetaFunction>(func)->setDocumentation(funcDoc);
         isProperty = false;
     }
 
@@ -212,7 +212,7 @@ Documentation DoxygenParser::retrieveModuleDocumentation(const QString& name){
 
     QString errorMessage;
     XQueryPtr xquery = XQuery::create(sourceFile, &errorMessage);
-    if (xquery.isNull()) {
+    if (!xquery) {
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return {};
     }

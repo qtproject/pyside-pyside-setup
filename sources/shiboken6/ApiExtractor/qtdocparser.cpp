@@ -57,7 +57,7 @@ static void formatFunctionUnqualifiedArgTypeQuery(QTextStream &str,
     case AbstractMetaType::FlagsPattern: {
         // Modify qualified name "QFlags<Qt::AlignmentFlag>" with name "Alignment"
         // to "Qt::Alignment" as seen by qdoc.
-        const auto flagsEntry = qSharedPointerCast<const FlagsTypeEntry>(metaType.typeEntry());
+        const auto flagsEntry = std::static_pointer_cast<const FlagsTypeEntry>(metaType.typeEntry());
         QString name = flagsEntry->qualifiedCppName();
         if (name.endsWith(u'>') && name.startsWith(u"QFlags<")) {
             const int lastColon = name.lastIndexOf(u':');
@@ -127,7 +127,7 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
     FunctionDocumentationList candidates =
         classDocumentation.findFunctionCandidates(func->name(), func->isConstant());
     if (candidates.isEmpty()) {
-        *errorMessage = msgCannotFindDocumentation(sourceFileName, func.data())
+        *errorMessage = msgCannotFindDocumentation(sourceFileName, func.get())
                         + u" (no matches)"_s;
         return {};
     }
@@ -172,13 +172,13 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
     candidates.erase(pend, candidates.end());
     if (candidates.size() == 1) {
         const auto &match = candidates.constFirst();
-        QTextStream(errorMessage) << msgFallbackForDocumentation(sourceFileName, func.data())
+        QTextStream(errorMessage) << msgFallbackForDocumentation(sourceFileName, func.get())
             << "\n  Falling back to \"" << match.signature
             << "\" obtained by matching the argument count only.";
         return candidates.constFirst().description;
     }
 
-    QTextStream(errorMessage) << msgCannotFindDocumentation(sourceFileName, func.data())
+    QTextStream(errorMessage) << msgCannotFindDocumentation(sourceFileName, func.get())
         << " (" << candidates.size() << " candidates matching the argument count)";
     return {};
 }
@@ -204,12 +204,12 @@ static QString extractBrief(QString *value)
 
 void QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
 {
-    if (metaClass.isNull())
+    if (!metaClass)
         return;
 
     auto context = metaClass->enclosingClass();
-    while (!context.isNull()) {
-        if (context->enclosingClass().isNull())
+    while (context) {
+        if (!context->enclosingClass())
             break;
         context = context->enclosingClass();
     }
@@ -267,7 +267,7 @@ void QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
         if (!errorMessage.isEmpty())
             qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         const Documentation documentation(detailed, {});
-        qSharedPointerConstCast<AbstractMetaFunction>(func)->setDocumentation(documentation);
+        std::const_pointer_cast<AbstractMetaFunction>(func)->setDocumentation(documentation);
     }
 #if 0
     // Fields

@@ -3,8 +3,9 @@
 #ifndef XMLUTILS_H
 #define XMLUTILS_H
 
-#include <QtCore/QSharedPointer>
 #include <QtCore/QString>
+
+#include <memory>
 
 class XQuery
 {
@@ -15,7 +16,7 @@ public:
 
     QString evaluate(QString xPathExpression, QString *errorMessage);
 
-    static QSharedPointer<XQuery> create(const QString &focus, QString *errorMessage);
+    static std::shared_ptr<XQuery> create(const QString &focus, QString *errorMessage);
 
 protected:
     XQuery();

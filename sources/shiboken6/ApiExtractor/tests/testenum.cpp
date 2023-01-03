@@ -38,7 +38,7 @@ void TestEnum::testEnumCppSignature()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
 
@@ -93,7 +93,7 @@ void TestEnum::testEnumWithApiVersion()
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
                                                                 true, u"0.1"_s));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
     QCOMPARE(classes[0]->enums().size(), 1);
@@ -119,7 +119,7 @@ void TestEnum::testAnonymousEnum()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
     QCOMPARE(globalEnums.size(), 1);
@@ -174,7 +174,7 @@ void TestEnum::testGlobalEnums()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
     QCOMPARE(globalEnums.size(), 2);
@@ -222,7 +222,7 @@ void TestEnum::testEnumValueFromNeighbourEnum()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
@@ -284,10 +284,10 @@ void TestEnum::testEnumValueFromExpression()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaClassPtr classA = AbstractMetaClass::findClass(builder->classes(), u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
 
     auto enumA = classA->findEnum(u"EnumA"_s);
     QVERIFY(enumA.has_value());
@@ -362,10 +362,10 @@ void TestEnum::testPrivateEnum()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     const auto classA = AbstractMetaClass::findClass(builder->classes(), u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
     QCOMPARE(classA->enums().size(), 2);
 
     auto privateEnum = classA->findEnum(u"PrivateEnum"_s);
@@ -401,7 +401,7 @@ void TestEnum::testTypedefEnum()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
     QCOMPARE(globalEnums.size(), 1);
@@ -426,7 +426,7 @@ void TestEnum::testTypedefEnum()
 
 struct EnumDefaultValuesFixture
 {
-    QSharedPointer<AbstractMetaBuilder> builder;
+    std::shared_ptr<AbstractMetaBuilder> builder;
 
     AbstractMetaType globalEnum;
     AbstractMetaType testEnum;
@@ -462,7 +462,7 @@ namespace Test2
 )";
 
     fixture->builder.reset(TestUtil::parse(cppCode, xmlCode, false));
-    if (fixture->builder.isNull())
+    if (!fixture->builder)
         return -1;
 
     const auto globalEnums = fixture->builder->globalEnums();
@@ -479,15 +479,15 @@ namespace Test2
             break;
         }
     }
-    if (testNamespace.isNull())
+    if (!testNamespace)
         return -3;
 
     const auto namespaceEnums = testNamespace->enums();
     if (namespaceEnums.size() != 2)
         return -4;
     QList<EnumTypeEntryCPtr > enumTypeEntries{
-        qSharedPointerCast<const EnumTypeEntry>(namespaceEnums.at(0).typeEntry()),
-        qSharedPointerCast<const EnumTypeEntry>(namespaceEnums.at(1).typeEntry())};
+        std::static_pointer_cast<const EnumTypeEntry>(namespaceEnums.at(0).typeEntry()),
+        std::static_pointer_cast<const EnumTypeEntry>(namespaceEnums.at(1).typeEntry())};
     if (enumTypeEntries.constFirst()->flags())
         std::swap(enumTypeEntries[0], enumTypeEntries[1]);
     fixture->testEnum = AbstractMetaType(enumTypeEntries.at(0));

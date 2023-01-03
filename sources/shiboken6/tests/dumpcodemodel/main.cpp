@@ -38,7 +38,7 @@ static void formatDebugOutput(const FileModelItem &dom, bool verbose)
         QDebug debug(&output);
         if (verbose)
             debug.setVerbosity(3);
-        debug << dom.data();
+        debug << dom.get();
     }
     std::cout << qPrintable(output) << '\n';
 }
@@ -245,7 +245,7 @@ int main(int argc, char **argv)
     optJoinNamespaces = parser.isSet(joinNamespacesOption);
 
     const FileModelItem dom = AbstractMetaBuilderPrivate::buildDom(arguments, true, level, 0);
-    if (dom.isNull()) {
+    if (!dom) {
         QString message = u"Unable to parse "_s + positionalArguments.join(u' ');
         std::cerr << qPrintable(message) << '\n';
         return -2;

@@ -28,15 +28,15 @@ void TestContainer::testContainerType()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     //search for class A
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
     auto baseContainer = classA->typeEntry()->baseContainerType();
     QVERIFY(baseContainer);
-    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(baseContainer.data())->containerKind(),
+    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(baseContainer.get())->containerKind(),
              ContainerTypeEntry::ListContainer);
 }
 
@@ -61,12 +61,12 @@ void TestContainer::testListOfValueType()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
 
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
     QCOMPARE(classA->templateBaseClassInstantiations().size(), 1);
     const AbstractMetaType templateInstanceType =
         classA->templateBaseClassInstantiations().constFirst();

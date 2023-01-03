@@ -33,14 +33,14 @@ void TestConversionOperator::testConversionOperator()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
     const auto classC = AbstractMetaClass::findClass(classes, u"C");
-    QVERIFY(!classA.isNull());
-    QVERIFY(!classB.isNull());
-    QVERIFY(!classC.isNull());
+    QVERIFY(classA);
+    QVERIFY(classB);
+    QVERIFY(classC);
     QCOMPARE(classA->functions().size(), 2);
     QCOMPARE(classB->functions().size(), 3);
     QCOMPARE(classC->functions().size(), 3);
@@ -53,7 +53,7 @@ void TestConversionOperator::testConversionOperator()
             break;
         }
     }
-    QVERIFY(!convOp.isNull());
+    QVERIFY(convOp);
     QVERIFY(classA->externalConversionOperators().contains(convOp));
 }
 
@@ -71,10 +71,10 @@ void TestConversionOperator::testConversionOperatorOfDiscardedClass()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
     QCOMPARE(classA->externalConversionOperators().size(), 0);
 }
 
@@ -95,12 +95,12 @@ void TestConversionOperator::testRemovedConversionOperator()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(!classA.isNull());
-    QVERIFY(!classB.isNull());
+    QVERIFY(classA);
+    QVERIFY(classB);
     QCOMPARE(classA->functions().size(), 2);
     QCOMPARE(classB->functions().size(), 3);
     QCOMPARE(classA->externalConversionOperators().size(), 0);
@@ -121,12 +121,12 @@ void TestConversionOperator::testConversionOperatorReturningReference()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(!classA.isNull());
-    QVERIFY(!classB.isNull());
+    QVERIFY(classA);
+    QVERIFY(classB);
     QCOMPARE(classA->functions().size(), 2);
     QCOMPARE(classB->functions().size(), 3);
     QCOMPARE(classA->externalConversionOperators().size(), 1);
@@ -155,12 +155,12 @@ void TestConversionOperator::testConversionOperatorReturningConstReference()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(!classA.isNull());
-    QVERIFY(!classB.isNull());
+    QVERIFY(classA);
+    QVERIFY(classB);
     QCOMPARE(classA->functions().size(), 2);
     QCOMPARE(classB->functions().size(), 3);
     QCOMPARE(classA->externalConversionOperators().size(), 1);

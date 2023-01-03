@@ -29,7 +29,7 @@ void TestImplicitConversions::testWithPrivateCtors()
         <value-type name='C'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
 
@@ -59,7 +59,7 @@ void TestImplicitConversions::testWithModifiedVisibility()
 </typesystem>
 )";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
@@ -93,7 +93,7 @@ void TestImplicitConversions::testWithAddedCtor()
         <value-type name='C'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
 
@@ -120,7 +120,7 @@ void TestImplicitConversions::testWithExternalConversionOperator()
         <value-type name='B'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
@@ -135,7 +135,7 @@ void TestImplicitConversions::testWithExternalConversionOperator()
         if (func->isConversionOperator())
             convOp = func;
     }
-    QVERIFY(!convOp.isNull());
+    QVERIFY(convOp);
     QCOMPARE(implicitConvs.constFirst(), convOp);
 }
 

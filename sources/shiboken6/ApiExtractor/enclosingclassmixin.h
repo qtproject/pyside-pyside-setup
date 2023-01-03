@@ -12,13 +12,13 @@ class EnclosingClassMixin {
 public:
 
     const AbstractMetaClassCPtr enclosingClass() const
-        { return m_enclosingClass.toStrongRef(); }
+        { return m_enclosingClass.lock(); }
     void setEnclosingClass(const AbstractMetaClassCPtr &cls)
-        { m_enclosingClass = cls.toWeakRef(); }
+        { m_enclosingClass = cls; }
     AbstractMetaClassCPtr targetLangEnclosingClass() const;
 
 private:
-    QWeakPointer<const AbstractMetaClass> m_enclosingClass;
+    std::weak_ptr<const AbstractMetaClass> m_enclosingClass;
 };
 
 #endif // ENCLOSINGCLASSMIXIN_H

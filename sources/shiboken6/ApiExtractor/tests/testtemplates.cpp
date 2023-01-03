@@ -55,13 +55,13 @@ namespace Internet {
 </typesystem>)XML").arg(file.fileName());
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, qPrintable(xmlCode1), false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
     const auto classB = AbstractMetaClass::findClass(classes, u"Bookmarks");
-    QVERIFY(!classB.isNull());
+    QVERIFY(classB);
     const auto func = classB->findFunction(u"list");
-    QVERIFY(!func.isNull());
+    QVERIFY(func);
     AbstractMetaType funcType = func->type();
     QVERIFY(!funcType.isVoid());
     QCOMPARE(funcType.cppSignature(), u"QList<Internet::Url >");
@@ -93,15 +93,15 @@ namespace Namespace {
 </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(!classB.isNull());
+    QVERIFY(classB);
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
     const auto func = classB->findFunction(u"foo");
-    QVERIFY(!func.isNull());
+    QVERIFY(func);
     AbstractMetaType argType = func->arguments().constFirst().type();
     QCOMPARE(argType.instantiations().size(), 1);
     QCOMPARE(argType.typeEntry()->qualifiedCppName(), u"QList");
@@ -130,7 +130,7 @@ void func(List<int> arg) {}
 </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     const auto globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.size(), 1);
 
@@ -155,7 +155,7 @@ void func(List<int>* arg) {}
  </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaFunctionCList globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.size(), 1);
 
@@ -180,7 +180,7 @@ void func(List<int>& arg) {}
 </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     const auto globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.size(), 1);
 
@@ -209,19 +209,19 @@ struct List {
  </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     const AbstractMetaClassList templates = builder->templates();
 
     QCOMPARE(templates.size(), 1);
     AbstractMetaClassCPtr list = templates.constFirst();
     // Verify that the parameter of "void append(List l)" gets fixed to "List<T >"
     const auto append = list->findFunction(QStringLiteral("append"));
-    QVERIFY(!append.isNull());
+    QVERIFY(append);
     QCOMPARE(append->arguments().size(), 1);
     QCOMPARE(append->arguments().at(0).type().cppSignature(), u"List<T >");
     // Verify that the parameter of "void erase(Iterator)" is not modified
     const auto erase = list->findFunction(QStringLiteral("erase"));
-    QVERIFY(!erase.isNull());
+    QVERIFY(erase);
     QCOMPARE(erase->arguments().size(), 1);
     QEXPECT_FAIL("", "Clang: Some other code changes the parameter type", Abort);
     QCOMPARE(erase->arguments().at(0).type().cppSignature(), u"List::Iterator");
@@ -250,7 +250,7 @@ struct FooBars : public ListContainer<FooBar> {};
 </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     AbstractMetaClassList templates = builder->templates();
     QCOMPARE(classes.size(), 2);
@@ -287,11 +287,11 @@ template<SomeEnum type> struct Future {};
 </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(!classB.isNull());
+    QVERIFY(classB);
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
     // 3 functions: simple constructor, copy constructor and "method()".
@@ -326,11 +326,11 @@ template<SomeEnum type> struct Future {};
 </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
     const auto classB = AbstractMetaClass::findClass(classes, u"Namespace::B");
-    QVERIFY(!classB.isNull());
+    QVERIFY(classB);
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
     // 3 functions: simple constructor, copy constructor and "method()".
@@ -362,14 +362,14 @@ typedef BaseTemplateClass<TypeOne> TypeOneClass;
 </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
 
     const auto base = AbstractMetaClass::findClass(classes, u"BaseTemplateClass");
-    QVERIFY(!base.isNull());
+    QVERIFY(base);
     const auto one = AbstractMetaClass::findClass(classes, u"TypeOneClass");
-    QVERIFY(!one.isNull());
+    QVERIFY(one);
     QCOMPARE(one->templateBaseClass(), base);
     QCOMPARE(one->functions().size(), base->functions().size());
     QVERIFY(one->isTypeDef());
@@ -411,24 +411,24 @@ typedef Vector<int> IntVector;
 </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
 
     const auto vector = AbstractMetaClass::findClass(classes, u"IntVector");
-    QVERIFY(!vector.isNull());
+    QVERIFY(vector);
     auto baseContainer = vector->typeEntry()->baseContainerType();
-    QVERIFY(!baseContainer.isNull());
-    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(baseContainer.data())->containerKind(),
+    QVERIFY(baseContainer);
+    QCOMPARE(reinterpret_cast<const ContainerTypeEntry*>(baseContainer.get())->containerKind(),
              ContainerTypeEntry::ListContainer);
     QCOMPARE(vector->functions().size(), 4);
 
     const auto method = vector->findFunction(u"method");
-    QVERIFY(!method.isNull());
+    QVERIFY(method);
     QCOMPARE(method->signature(), u"method(const Vector<int > & vector)");
 
     const auto otherMethod = vector->findFunction(u"otherMethod");
-    QVERIFY(!otherMethod.isNull());
+    QVERIFY(otherMethod);
     QCOMPARE(otherMethod->signature(), u"otherMethod()");
     QVERIFY(!otherMethod->type().isVoid());
     QCOMPARE(otherMethod->type().cppSignature(), u"Vector<int >");
@@ -455,7 +455,7 @@ Array<int, 2> foo();
 </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     auto functions = builder->globalFunctions();
     QCOMPARE(functions.size(), 1);
     auto foo = functions.constFirst();
@@ -538,30 +538,30 @@ void TestTemplates::testTemplateTypeDefs()
     const QByteArray cppBa = cpp.toLocal8Bit();
     const QByteArray xmlBa = xml.toLocal8Bit();
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppBa.constData(), xmlBa.constData(), true));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
     const auto optional = AbstractMetaClass::findClass(classes, u"Optional");
-    QVERIFY(!optional.isNull());
+    QVERIFY(optional);
 
     // Find the typedef'ed class
     const auto optionalInt = AbstractMetaClass::findClass(classes, u"IntOptional");
-    QVERIFY(!optionalInt.isNull());
+    QVERIFY(optionalInt);
     QCOMPARE(optionalInt->templateBaseClass(), optional);
 
     // Find the class typedef'ed in the typesystem XML
     const auto xmlOptionalInt = AbstractMetaClass::findClass(classes, u"XmlIntOptional");
-    QVERIFY(!xmlOptionalInt.isNull());
+    QVERIFY(xmlOptionalInt);
     QCOMPARE(xmlOptionalInt->templateBaseClass(), optional);
 
     // Check whether the value() method now has an 'int' return
     const auto valueMethod = optionalInt->findFunction(u"value");
-    QVERIFY(!valueMethod.isNull());
+    QVERIFY(valueMethod);
     QCOMPARE(valueMethod->type().cppSignature(), u"int");
 
     // ditto for typesystem XML
     const auto xmlValueMethod = xmlOptionalInt->findFunction(u"value");
-    QVERIFY(!xmlValueMethod.isNull());
+    QVERIFY(xmlValueMethod);
     QCOMPARE(xmlValueMethod->type().cppSignature(), u"int");
 
     // Check whether the m_value field is of type 'int'
@@ -607,11 +607,11 @@ public:
 </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
     const auto testClass = AbstractMetaClass::findClass(classes, u"Test");
-    QVERIFY(!testClass.isNull());
+    QVERIFY(testClass);
 
     auto fields = testClass->fields();
     QCOMPARE(fields.size(), 1);
@@ -620,7 +620,7 @@ public:
     QCOMPARE(fieldType.instantiations().size(), 1);
 
     const auto derived = AbstractMetaClass::findClass(classes, u"Derived");
-    QVERIFY(!derived.isNull());
+    QVERIFY(derived);
     auto base = derived->templateBaseClass();
     QCOMPARE(base->name(), u"Container1");
 }

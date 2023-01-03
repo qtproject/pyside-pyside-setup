@@ -8,8 +8,9 @@
 #include "parser/typeinfo.h"
 
 #include <QtCore/QList>
-#include <QtCore/QSharedPointer>
 #include <QtCore/QString>
+
+#include <memory>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
@@ -19,7 +20,7 @@ QT_FORWARD_DECLARE_CLASS(QDebug)
 /// will be inserted into the right AbstractMetaClass.
 struct AddedFunction
 {
-    using AddedFunctionPtr = QSharedPointer<AddedFunction>;
+    using AddedFunctionPtr = std::shared_ptr<AddedFunction>;
 
     /// Function access types.
     enum Access {

@@ -22,17 +22,17 @@ void TestValueTypeDefaultCtorTag::testValueTypeDefaultCtorTagArgument()
         <value-type name='B' />\n\
     </typesystem>";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
 
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
     QVERIFY(classA->typeEntry()->hasDefaultConstructor());
     QCOMPARE(classA->typeEntry()->defaultConstructor(), u"A(0, 0)");
 
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(!classB.isNull());
+    QVERIFY(classB);
     QVERIFY(!classB->typeEntry()->hasDefaultConstructor());
 }
 

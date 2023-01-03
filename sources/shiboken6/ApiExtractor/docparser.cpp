@@ -90,7 +90,7 @@ DocModificationList DocParser::getDocModifications(const AbstractMetaClassCPtr &
                                                    const AbstractMetaFunctionCPtr &func)
 {
     auto te = cppClass->typeEntry();
-    if (func.isNull())
+    if (!func)
         return te->docModifications();
 
     if (func->isUserAdded())

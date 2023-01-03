@@ -21,13 +21,13 @@ QString XQuery::evaluate(QString xPathExpression, QString *errorMessage)
     return doEvaluate(xPathExpression, errorMessage);
 }
 
-QSharedPointer<XQuery> XQuery::create(const QString &focus, QString *errorMessage)
+std::shared_ptr<XQuery> XQuery::create(const QString &focus, QString *errorMessage)
 {
 #if defined(HAVE_LIBXSLT)
     return libXml_createXQuery(focus, errorMessage);
 #else
     *errorMessage = QLatin1StringView(__FUNCTION__) + u" is not implemented."_s;
-    return QSharedPointer<XQuery>();
+    return std::shared_ptr<XQuery>();
 #endif
 }
 

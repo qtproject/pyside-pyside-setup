@@ -6,10 +6,11 @@
 
 #include <abstractmetalang_typedefs.h>
 #include <typedatabase_typedefs.h>
-#include <QtCore/QSharedPointer>
 #include <QtCore/QList>
 
+#include <memory>
 #include <optional>
+
 
 class ApiExtractorResult;
 class GeneratorContext;
@@ -219,7 +220,7 @@ private:
 Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::Options)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::FileNameFlags)
 
-using GeneratorPtr = QSharedPointer<Generator>;
+using GeneratorPtr = std::shared_ptr<Generator>;
 using Generators = QList<GeneratorPtr>;
 
 #endif // GENERATOR_H

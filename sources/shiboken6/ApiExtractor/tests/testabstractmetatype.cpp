@@ -54,7 +54,7 @@ void TestAbstractMetaType::testConstCharPtrType()
         <function signature='justAtest()' />\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     QCOMPARE(builder->globalFunctions().size(), 1);
     const auto func = builder->globalFunctions().constFirst();
     AbstractMetaType rtype = func->type();
@@ -87,7 +87,7 @@ void TestAbstractMetaType::testApiVersionSupported()
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
                                                                 false, u"1.0"_s));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
@@ -105,7 +105,7 @@ void TestAbstractMetaType::testApiVersionNotSupported()
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
                                                                 true, u"0.1"_s));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
@@ -120,7 +120,7 @@ void TestAbstractMetaType::testCharType()
     <function signature='justAtest()'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
@@ -157,12 +157,12 @@ void TestAbstractMetaType::testTypedef()
     <value-type name='C' />\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
     const auto c = AbstractMetaClass::findClass(classes, u"C");
-    QVERIFY(!c.isNull());
+    QVERIFY(c);
     QVERIFY(c->isTypeDef());
 }
 
@@ -182,7 +182,7 @@ void TestAbstractMetaType::testTypedefWithTemplates()
     <function signature='func(A&lt;B&gt;)'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
@@ -207,12 +207,12 @@ void TestAbstractMetaType::testObjectTypeUsedAsValue()
     <object-type name='A'/>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
     const auto overloads = classA->queryFunctionsByName(u"method"_s);
     QCOMPARE(overloads.size(), 1);
     const auto method = overloads.constFirst();

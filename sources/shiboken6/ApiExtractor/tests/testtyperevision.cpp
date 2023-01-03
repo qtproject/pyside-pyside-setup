@@ -30,7 +30,7 @@ void TestTypeRevision::testRevisionAttr()
                         "</object-type>"
                         "</typesystem>";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto rev0 = AbstractMetaClass::findClass(classes, u"Rev_0");
     QCOMPARE(rev0->typeEntry()->revision(), 0);
@@ -82,7 +82,7 @@ class Bar20 {};
 )XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, true, version));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     QCOMPARE(builder->classes().size(), expectedClassCount);
 }

@@ -258,9 +258,9 @@ AbstractMetaFunctionCList ShibokenGenerator::implicitConversions(const TypeEntry
 {
     if (!generateImplicitConversions() || !t->isValue())
         return {};
-    auto vte = qSharedPointerCast<const ValueTypeEntry>(t);
+    auto vte = std::static_pointer_cast<const ValueTypeEntry>(t);
     auto customConversion = vte->customConversion();
-    if (!customConversion.isNull() && customConversion->replaceOriginalTargetToNativeConversions())
+    if (customConversion && customConversion->replaceOriginalTargetToNativeConversions())
         return {};
 
     auto result = api().implicitConversions(t);
@@ -285,7 +285,7 @@ QString ShibokenGenerator::fullPythonClassName(const AbstractMetaClassCPtr &meta
 {
     QString fullClassName = metaClass->name();
     auto enclosing = metaClass->enclosingClass();
-    while (!enclosing.isNull()) {
+    while (enclosing) {
         if (NamespaceTypeEntry::isVisibleScope(enclosing->typeEntry()))
             fullClassName.prepend(enclosing->name() + u'.');
         enclosing = enclosing->enclosingClass();
@@ -474,7 +474,7 @@ QString ShibokenGenerator::cpythonFlagsName(const FlagsTypeEntryCPtr &flagsEntry
 QString ShibokenGenerator::cpythonFlagsName(const AbstractMetaEnum *metaEnum)
 {
     const auto flags = metaEnum->typeEntry()->flags();
-    return flags.isNull() ? QString{} : cpythonFlagsName(flags);
+    return flags ? cpythonFlagsName(flags) : QString{};
 }
 
 QString ShibokenGenerator::cpythonSpecialCastFunctionName(const AbstractMetaClassCPtr &metaClass)
@@ -593,11 +593,11 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntryCPtr &type)
         baseName = ptype->hasTargetLangApiType()
                    ? ptype->targetLangApiName() : pythonPrimitiveTypeName(ptype->name());
     } else if (type->isEnum()) {
-        baseName = cpythonEnumName(qSharedPointerCast<const EnumTypeEntry>(type));
+        baseName = cpythonEnumName(std::static_pointer_cast<const EnumTypeEntry>(type));
     } else if (type->isFlags()) {
-        baseName = cpythonFlagsName(qSharedPointerCast<const FlagsTypeEntry>(type));
+        baseName = cpythonFlagsName(std::static_pointer_cast<const FlagsTypeEntry>(type));
     } else if (type->isContainer()) {
-        const auto ctype = qSharedPointerCast<const ContainerTypeEntry>(type);
+        const auto ctype = std::static_pointer_cast<const ContainerTypeEntry>(type);
         baseName = containerCpythonBaseName(ctype);
     } else {
         baseName = cPyObjectT();
@@ -664,8 +664,8 @@ QString ShibokenGenerator::converterObject(const TypeEntryCPtr &type)
     }
 
     /* the typedef'd primitive types case */
-    auto pte = qSharedPointerDynamicCast<const PrimitiveTypeEntry>(type);
-    if (pte.isNull()) {
+    auto pte = std::dynamic_pointer_cast<const PrimitiveTypeEntry>(type);
+    if (!pte) {
         qDebug() << "Warning: the Qt5 primitive type is unknown" << type->qualifiedCppName();
         return QString();
     }
@@ -734,7 +734,7 @@ QString ShibokenGenerator::pythonOperatorFunctionName(const AbstractMetaFunction
 {
     QString op = Generator::pythonOperatorFunctionName(func->originalName());
     if (op.isEmpty()) {
-        qCWarning(lcShiboken).noquote().nospace() << msgUnknownOperator(func.data());
+        qCWarning(lcShiboken).noquote().nospace() << msgUnknownOperator(func.get());
         return unknownOperator();
     }
     if (func->arguments().isEmpty()) {
@@ -764,7 +764,7 @@ static std::optional<TypeSystem::CPythonType>
     const auto cte = t->targetLangApiType();
     if (cte->type() != TypeEntry::PythonType)
         return {};
-    return qSharedPointerCast<const PythonTypeEntry>(cte)->cPythonType();
+    return std::static_pointer_cast<const PythonTypeEntry>(cte)->cPythonType();
 }
 
 bool ShibokenGenerator::isNumber(const TypeEntryCPtr &type)
@@ -820,7 +820,7 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType)
 {
     const auto typeEntry = metaType.typeEntry();
     if (typeEntry->isCustom()) {
-        const auto cte = qSharedPointerCast<const CustomTypeEntry>(typeEntry);
+        const auto cte = std::static_pointer_cast<const CustomTypeEntry>(typeEntry);
         if (cte->hasCheckFunction())
             return cte->checkFunction();
         throw Exception(msgUnknownCheckFunction(typeEntry));
@@ -837,7 +837,7 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType)
     if (typeEntry->isContainer()) {
         QString typeCheck = u"Shiboken::Conversions::"_s;
         ContainerTypeEntry::ContainerKind type =
-            qSharedPointerCast<const ContainerTypeEntry>(typeEntry)->containerKind();
+            std::static_pointer_cast<const ContainerTypeEntry>(typeEntry)->containerKind();
         if (type == ContainerTypeEntry::ListContainer
             || type == ContainerTypeEntry::SetContainer) {
             const QString containerType = type == ContainerTypeEntry::SetContainer
@@ -888,7 +888,7 @@ QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType)
 QString ShibokenGenerator::cpythonCheckFunction(TypeEntryCPtr type)
 {
     if (type->isCustom()) {
-        const auto cte = qSharedPointerCast<const CustomTypeEntry>(type);
+        const auto cte = std::static_pointer_cast<const CustomTypeEntry>(type);
         if (cte->hasCheckFunction())
             return cte->checkFunction();
         throw Exception(msgUnknownCheckFunction(type));
@@ -917,7 +917,7 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntryCPtr &typ
         QString result = u"Shiboken::Conversions::"_s;
         bool isValue = false;
         if (type->isValue()) {
-            const auto cte = qSharedPointerCast<const ComplexTypeEntry>(type);
+            const auto cte = std::static_pointer_cast<const ComplexTypeEntry>(type);
             isValue = !cte->isValueTypeWithCopyConstructorOnly();
         }
         result += isValue ? u"isPythonToCppValueConvertible"_s
@@ -933,7 +933,7 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaTyp
 {
     const auto typeEntry = metaType.typeEntry();
     if (typeEntry->isCustom()) {
-        const auto cte = qSharedPointerCast<const CustomTypeEntry>(typeEntry);
+        const auto cte = std::static_pointer_cast<const CustomTypeEntry>(typeEntry);
         if (cte->hasCheckFunction())
             return cte->checkFunction();
         throw Exception(msgUnknownCheckFunction(typeEntry));
@@ -1408,7 +1408,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
             const QRegularExpressionMatch match = pyArgsRegexCheck.match(code);
             if (match.hasMatch()) {
                 qCWarning(lcShiboken).noquote().nospace()
-                    << msgWrongIndex("%PYARG", match.captured(1), func.data());
+                    << msgWrongIndex("%PYARG", match.captured(1), func.get());
                 return;
             }
             code.replace(u"%PYARG_1"_s, PYTHON_ARG);
@@ -1439,7 +1439,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
     while (rit.hasNext()) {
         QRegularExpressionMatch match = rit.next();
         qCWarning(lcShiboken).noquote().nospace()
-            << msgWrongIndex("%ARG#_TYPE", match.captured(1), func.data());
+            << msgWrongIndex("%ARG#_TYPE", match.captured(1), func.get());
     }
 
     // Replace template variable for return variable name.
@@ -1900,7 +1900,7 @@ IncludeGroupList ShibokenGenerator::classIncludes(const AbstractMetaClassCPtr &m
     for (auto &f : implicitConvs) {
         if (f->isConversionOperator()) {
             const auto source = f->ownerClass();
-            Q_ASSERT(!source.isNull());
+            Q_ASSERT(source);
             result.back().append(source->typeEntry()->include());
         }
     }
@@ -1988,7 +1988,7 @@ static void removeConstOverloads(AbstractMetaFunctionCList *overloads)
         const auto &f = overloads->at(i);
         if (f->isConstant()) {
             for (qsizetype c = 0, size = overloads->size(); c < size; ++c) {
-                if (f->isConstOverloadOf(overloads->at(c).data())) {
+                if (f->isConstOverloadOf(overloads->at(c).get())) {
                     overloads->removeAt(i);
                     break;
                 }
@@ -2240,7 +2240,7 @@ QString
     ShibokenGenerator::getTypeAlternateTemplateIndexVariableName(const AbstractMetaClassCPtr &metaClass)
 {
     const auto templateBaseClass = metaClass->templateBaseClass();
-    Q_ASSERT(!templateBaseClass.isNull());
+    Q_ASSERT(templateBaseClass);
     QString result = u"SBK_"_s
         + _fixedCppTypeName(templateBaseClass->typeEntry()->qualifiedCppName()).toUpper();
     for (const auto &instantiation : metaClass->templateBaseClassInstantiations())
@@ -2334,7 +2334,7 @@ void ShibokenGenerator::replaceTemplateVariables(QString &code,
                                                  const AbstractMetaFunctionCPtr &func) const
 {
     const auto cpp_class = func->ownerClass();
-    if (!cpp_class.isNull())
+    if (cpp_class)
         code.replace(u"%TYPE"_s, cpp_class->name());
 
     const AbstractMetaArgumentList &argument = func->arguments();

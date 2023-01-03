@@ -9,13 +9,14 @@
 
 #include <QtCore/QBitArray>
 #include <QtCore/QList>
-#include <QtCore/QSharedPointer>
+
+#include <memory>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 QT_FORWARD_DECLARE_CLASS(QTextStream)
 
 class OverloadDataNode;
-using OverloadDataNodePtr = QSharedPointer<OverloadDataNode>;
+using OverloadDataNodePtr = std::shared_ptr<OverloadDataNode>;
 using OverloadDataList = QList<OverloadDataNodePtr>;
 
 /// The root node of OverloadData. It contains all functions

@@ -344,7 +344,7 @@ void QtXmlToSphinxTest::testTable()
     QCOMPARE(actual, expected);
 }
 
-using TablePtr = QSharedPointer<QtXmlToSphinx::Table>;
+using TablePtr = std::shared_ptr<QtXmlToSphinx::Table>;
 
 Q_DECLARE_METATYPE(TablePtr);
 

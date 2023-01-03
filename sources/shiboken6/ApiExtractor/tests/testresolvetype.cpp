@@ -45,12 +45,12 @@ void TestResolveType::testResolveReturnTypeFromParentScope()
         </namespace-type>
     </typesystem>)XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classD = AbstractMetaClass::findClass(classes, u"A::D");
-    QVERIFY(!classD.isNull());
+    QVERIFY(classD);
     const auto meth = classD->findFunction(u"method");
-    QVERIFY(!meth.isNull());
+    QVERIFY(meth);
     QVERIFY(meth);
 }
 
@@ -60,7 +60,7 @@ void TestResolveType::testResolveReturnTypeFromParentScope()
 
 struct DefaultValuesFixture
 {
-    QSharedPointer<AbstractMetaBuilder> builder;
+    std::shared_ptr<AbstractMetaBuilder> builder;
 
     AbstractMetaType intType;
     AbstractMetaType stringType;
@@ -106,7 +106,7 @@ public:
 )";
 
     fixture->builder.reset(TestUtil::parse(cppCode, xmlCode, false));
-    if (fixture->builder.isNull())
+    if (!fixture->builder)
         return -1;
 
     for (const auto &klass : fixture->builder->classes()) {
@@ -135,7 +135,7 @@ public:
         return -3;
 
     auto listFunc = fixture->klass->findFunction(u"listFunc"_s);
-    if (listFunc.isNull() || listFunc->arguments().size() != 1)
+    if (!listFunc || listFunc->arguments().size() != 1)
         return -3;
     fixture->listType = listFunc->arguments().constFirst().type();
 
@@ -251,16 +251,16 @@ public:
 )";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto testClass = AbstractMetaClass::findClass(classes, u"Test");
-    QVERIFY(!testClass.isNull());
+    QVERIFY(testClass);
 
     auto *tdb = TypeDatabase::instance();
     auto int32TEntry = tdb->findType(u"int32_t"_s);
-    QVERIFY2(!int32TEntry.isNull(), "int32_t not found");
+    QVERIFY2(int32TEntry, "int32_t not found");
     QVERIFY(int32TEntry->isPrimitive());
-    auto int32T = qSharedPointerCast<const PrimitiveTypeEntry>(int32TEntry);
+    auto int32T = std::static_pointer_cast<const PrimitiveTypeEntry>(int32TEntry);
     auto basicType = basicReferencedTypeEntry(int32T);
     QVERIFY2(basicType != int32T,
              "Typedef for int32_t not found. Check the system include paths.");

@@ -17,12 +17,13 @@
 
 #include <QtCore/QHash>
 #include <QtCore/QSharedData>
-#include <QtCore/QSharedPointer>
 #include <QtCore/QStack>
+
+#include <memory>
 
 using namespace Qt::StringLiterals;
 
-using AbstractMetaTypeCPtr = QSharedPointer<const AbstractMetaType>;
+using AbstractMetaTypeCPtr = std::shared_ptr<const AbstractMetaType>;
 
 const QSet<QString> &AbstractMetaType::cppFloatTypes()
 {
@@ -228,7 +229,7 @@ bool AbstractMetaType::applyArrayModification(QString *errorMessage)
         *errorMessage = u"<array> modification already applied."_s;
         return false;
     }
-    if (!d->m_arrayElementType.isNull())  {
+    if (d->m_arrayElementType)  {
         QTextStream(errorMessage) << "The type \"" << cppSignature()
             << "\" is an array of " << d->m_arrayElementType->name() << '.';
         return false;
@@ -276,13 +277,13 @@ QString AbstractMetaType::originalTypeDescription() const
 
 void AbstractMetaType::setOriginalTemplateType(const AbstractMetaType &type)
 {
-    if (d->m_originalTemplateType.isNull() || *d->m_originalTemplateType != type)
+    if (!d->m_originalTemplateType || *d->m_originalTemplateType != type)
         d->m_originalTemplateType.reset(new AbstractMetaType(type));
 }
 
 const AbstractMetaType *AbstractMetaType::originalTemplateType() const
 {
-    return d->m_originalTemplateType.data();
+    return d->m_originalTemplateType.get();
 }
 
 AbstractMetaType AbstractMetaType::getSmartPointerInnerType() const
@@ -311,7 +312,7 @@ AbstractMetaTypeList AbstractMetaType::nestedArrayTypes() const
         }
         break;
     case NativePointerAsArrayPattern:
-        result.append(*d->m_arrayElementType.data());
+        result.append(*d->m_arrayElementType.get());
         break;
     default:
         break;
@@ -417,12 +418,12 @@ int AbstractMetaType::arrayElementCount() const
 
 const AbstractMetaType *AbstractMetaType::arrayElementType() const
 {
-    return d->m_arrayElementType.data();
+    return d->m_arrayElementType.get();
 }
 
 void AbstractMetaType::setArrayElementType(const AbstractMetaType &t)
 {
-    if (d->m_arrayElementType.isNull() || *d->m_arrayElementType != t) {
+    if (!d->m_arrayElementType || *d->m_arrayElementType != t) {
         d->m_arrayElementType.reset(new AbstractMetaType(t));
         d->m_signaturesDirty = true;
     }
@@ -688,9 +689,9 @@ void AbstractMetaType::setVolatile(bool v)
 
 static bool equalsCPtr(const AbstractMetaTypeCPtr &t1, const AbstractMetaTypeCPtr &t2)
 {
-    if (t1.isNull() != t2.isNull())
+    if (bool(t1) != bool(t2))
         return false;
-    return t1.isNull() || *t1 == *t2;
+    return !t1 || *t1 == *t2;
 }
 
 bool AbstractMetaTypeData::isEquivalent(const AbstractMetaTypeData &rhs) const
@@ -730,12 +731,12 @@ bool AbstractMetaType::isEquivalent(const AbstractMetaType &rhs) const
 
 const AbstractMetaType *AbstractMetaType::viewOn() const
 {
-    return d->m_viewOn.data();
+    return d->m_viewOn.get();
 }
 
 void AbstractMetaType::setViewOn(const AbstractMetaType &v)
 {
-    if (d->m_viewOn.isNull() || *d->m_viewOn != v)
+    if (!d->m_viewOn || *d->m_viewOn != v)
         d->m_viewOn.reset(new AbstractMetaType(v));
 }
 
@@ -744,7 +745,7 @@ AbstractMetaType AbstractMetaType::createVoid()
     static QScopedPointer<AbstractMetaType> metaType;
     if (metaType.isNull()) {
         static TypeEntryCPtr voidTypeEntry = TypeDatabase::instance()->findType(u"void"_s);
-        Q_ASSERT(!voidTypeEntry.isNull());
+        Q_ASSERT(voidTypeEntry);
         metaType.reset(new AbstractMetaType(voidTypeEntry));
         metaType->decideUsagePattern();
     }
@@ -871,7 +872,7 @@ bool AbstractMetaType::isValueTypeWithCopyConstructorOnly() const
 {
     bool result = false;
     if (d->m_typeEntry->isComplex()) {
-        const auto cte = qSharedPointerCast<const ComplexTypeEntry>(d->m_typeEntry);
+        const auto cte = std::static_pointer_cast<const ComplexTypeEntry>(d->m_typeEntry);
         result = cte->isValueTypeWithCopyConstructorOnly();
     }
     return result;
@@ -940,7 +941,7 @@ bool AbstractMetaTypeData::generateOpaqueContainer(Predicate pred) const
         return false;
     if (m_indirections.size() > 1)
         return false;
-    auto containerTypeEntry = qSharedPointerCast<const ContainerTypeEntry>(m_typeEntry);
+    auto containerTypeEntry = std::static_pointer_cast<const ContainerTypeEntry>(m_typeEntry);
     auto kind = containerTypeEntry->containerKind();
     if (kind != ContainerTypeEntry::ListContainer)
         return false;

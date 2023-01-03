@@ -182,7 +182,7 @@ TypeSystemTypeEntryCPtr typeSystemTypeEntry(TypeEntryCPtr e)
 {
     for (; e; e = e->parent()) {
         if (e->type() == TypeEntry::TypeSystemType)
-            return qSharedPointerCast<const TypeSystemTypeEntry>(e);
+            return std::static_pointer_cast<const TypeSystemTypeEntry>(e);
     }
     return {};
 }
@@ -324,7 +324,7 @@ QString TypeEntryPrivate::shortName() const
         bool foundInlineNamespace = false;
         for (auto p = m_parent; p != nullptr && p->type() != TypeEntry::TypeSystemType; p = p->parent()) {
             if (p->type() == TypeEntry::NamespaceType
-                && qSharedPointerCast<const NamespaceTypeEntry>(p)->isInlineNamespace()) {
+                && std::static_pointer_cast<const NamespaceTypeEntry>(p)->isInlineNamespace()) {
                 foundInlineNamespace = true;
             } else {
                 parents.append(p);
@@ -893,7 +893,7 @@ PrimitiveTypeEntryCPtr basicReferencedTypeEntry(const PrimitiveTypeEntryCPtr &e)
 PrimitiveTypeEntryCPtr basicReferencedTypeEntry(const TypeEntryCPtr &e)
 {
     Q_ASSERT(e->isPrimitive());
-    return basicReferencedTypeEntry(qSharedPointerCast<const PrimitiveTypeEntry>(e));
+    return basicReferencedTypeEntry(std::static_pointer_cast<const PrimitiveTypeEntry>(e));
 }
 
 PrimitiveTypeEntryCPtr basicReferencedNonBuiltinTypeEntry(const PrimitiveTypeEntryCPtr &e)
@@ -927,7 +927,7 @@ void PrimitiveTypeEntry::setPreferredTargetLangType(bool b)
 bool PrimitiveTypeEntry::hasCustomConversion() const
 {
     S_D(const PrimitiveTypeEntry);
-    return !d->m_customConversion.isNull();
+    return bool(d->m_customConversion);
 }
 
 void PrimitiveTypeEntry::setCustomConversion(const CustomConversionPtr &customConversion)
@@ -1850,7 +1850,7 @@ QString ContainerTypeEntry::opaqueContainerName(const QString &instantiation) co
 bool ContainerTypeEntry::hasCustomConversion() const
 {
     S_D(const ContainerTypeEntry);
-    return !d->m_customConversion.isNull();
+    return bool(d->m_customConversion);
 }
 
 void ContainerTypeEntry::setCustomConversion(const CustomConversionPtr &customConversion)
@@ -2131,7 +2131,7 @@ void NamespaceTypeEntry::setInlineNamespace(bool i)
 
 bool NamespaceTypeEntry::isVisibleScope(const TypeEntryCPtr &e)
 {
-    return isVisibleScope(e.data());
+    return isVisibleScope(e.get());
 }
 
 bool NamespaceTypeEntry::isVisibleScope(const TypeEntry *e)
@@ -2172,7 +2172,7 @@ ValueTypeEntry::ValueTypeEntry(const QString &entryName, const QVersionNumber &v
 bool ValueTypeEntry::hasCustomConversion() const
 {
     S_D(const ValueTypeEntry);
-    return !d->m_customConversion.isNull();
+    return bool(d->m_customConversion);
 }
 
 void ValueTypeEntry::setCustomConversion(const CustomConversionPtr &customConversion)
@@ -2355,9 +2355,9 @@ void TypeEntry::formatDebug(QDebug &debug) const
 void PrimitiveTypeEntry::formatDebug(QDebug &debug) const
 {
     TypeEntry::formatDebug(debug);
-    if (auto e = referencedTypeEntry(); !e.isNull()) {
+    if (auto e = referencedTypeEntry()) {
         debug << ", references";
-        for (; e != nullptr; e = e->referencedTypeEntry())
+        for (; e ; e = e->referencedTypeEntry())
             debug << ":\"" << e->qualifiedCppName() <<'"';
     }
 }
@@ -2488,7 +2488,7 @@ QDebug operator<<(QDebug d, const TypeEntry *te)
 
 QDebug operator<<(QDebug d, const TypeEntryCPtr &te)
 {
-    d << te.data();
+    d << te.get();
     return d;
 }
 
@@ -2509,7 +2509,7 @@ QDebug operator<<(QDebug d, const TemplateEntry *te)
 
 QDebug operator<<(QDebug d, const TemplateEntryCPtr &te)
 {
-    d << te.data();
+    d << te.get();
     return d;
 }
 #endif // QT_NO_DEBUG_STREAM

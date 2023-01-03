@@ -32,11 +32,11 @@ void TestRefCountTag::testReferenceCountTag()
         </object-type>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
     const auto func = classB->findFunction(u"keepObject");
-    QVERIFY(!func.isNull());
+    QVERIFY(func);
     const auto refCount =
         func->modifications().constFirst().argument_mods().constFirst().referenceCounts().constFirst();
     QCOMPARE(refCount.action, ReferenceCount::Add);
@@ -66,11 +66,11 @@ void TestRefCountTag::testWithApiVersion()
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
                                                                 false, u"0.1"_s));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
     const auto func = classB->findFunction(u"keepObject");
-    QVERIFY(!func.isNull());
+    QVERIFY(func);
     const auto refCount =
         func->modifications().constFirst().argument_mods().constFirst().referenceCounts().constFirst();
     QCOMPARE(refCount.action, ReferenceCount::Add);

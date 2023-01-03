@@ -198,7 +198,7 @@ public:
 
     struct FindEnumByValueReturn
     {
-        operator bool() const { return !item.isNull(); }
+        operator bool() const { return bool(item); }
 
         EnumModelItem item;
         QString qualifiedName;

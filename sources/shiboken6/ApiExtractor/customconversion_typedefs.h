@@ -5,9 +5,10 @@
 #define CUSTOMCONVERSION_TYPEDEFS_H
 
 #include <QtCore/QList>
-#include <QtCore/QSharedPointer>
+
+#include <memory>
 
 class CustomConversion;
-using CustomConversionPtr = QSharedPointer<CustomConversion>;
+using CustomConversionPtr = std::shared_ptr<CustomConversion>;
 
 #endif // CUSTOMCONVERSION_TYPEDEFS_H

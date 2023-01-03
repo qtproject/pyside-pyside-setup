@@ -23,7 +23,7 @@ void TestAbstractMetaClass::testClassName()
     <value-type name="ClassName"/>
 </typesystem>)";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
     QCOMPARE(classes[0]->name(), u"ClassName");
@@ -39,7 +39,7 @@ void TestAbstractMetaClass::testClassNameUnderNamespace()
         </namespace-type>
     </typesystem>)XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2); // 1 namespace + 1 class
     if (classes.constFirst()->name() != u"ClassName")
@@ -110,14 +110,14 @@ public:
 </typesystem>
 )XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 4);
     const auto a = AbstractMetaClass::findClass(classes, u"A");
     const auto b = AbstractMetaClass::findClass(classes, u"B");
     const auto c = AbstractMetaClass::findClass(classes, u"C");
     const auto f = AbstractMetaClass::findClass(classes, u"F");
-    QVERIFY(!f.isNull());
+    QVERIFY(f);
 
     QCOMPARE(a->baseClass(), nullptr);
     QCOMPARE(b->baseClass(), a);
@@ -194,10 +194,10 @@ class Derived : public Base {};
 </typesystem>
 )XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto base = AbstractMetaClass::findClass(classes, u"Base");
-    QVERIFY(!base.isNull());
+    QVERIFY(base);
     QVERIFY(base->isPolymorphic());
     const auto derived = AbstractMetaClass::findClass(classes, u"Derived");
     QVERIFY(derived);
@@ -218,7 +218,7 @@ void TestAbstractMetaClass::testDefaultValues()
         </value-type>
     </typesystem>)XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
@@ -248,7 +248,7 @@ void TestAbstractMetaClass::testModifiedDefaultValues()
         </value-type>
     </typesystem>)XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
@@ -274,14 +274,14 @@ void TestAbstractMetaClass::testInnerClassOfAPolymorphicOne()
         </object-type>
     </typesystem>)XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
     QVERIFY(classA->isPolymorphic());
     const auto classB = AbstractMetaClass::findClass(classes, u"A::B");
-    QVERIFY(!classB.isNull());
+    QVERIFY(classB);
     QVERIFY(!classB->isPolymorphic());
 }
 
@@ -302,15 +302,15 @@ void TestAbstractMetaClass::testForwardDeclaredInnerClass()
         </value-type>
     </typesystem>)XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
     const auto classB = AbstractMetaClass::findClass(classes, u"A::B");
-    QVERIFY(!classB.isNull());
+    QVERIFY(classB);
     const auto fooF = classB->findFunction(u"foo");
-    QVERIFY(!fooF.isNull());
+    QVERIFY(fooF);
 }
 
 void TestAbstractMetaClass::testSpecialFunctions()
@@ -333,12 +333,12 @@ void TestAbstractMetaClass::testSpecialFunctions()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
 
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
     auto ctors = classA->queryFunctions(FunctionQueryOption::AnyConstructor);
     QCOMPARE(ctors.size(), 2);
     QCOMPARE(ctors.constFirst()->functionType(), AbstractMetaFunction::ConstructorFunction);
@@ -349,7 +349,7 @@ void TestAbstractMetaClass::testSpecialFunctions()
              AbstractMetaFunction::AssignmentOperatorFunction);
 
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(!classB.isNull());
+    QVERIFY(classB);
     ctors = classB->queryFunctions(FunctionQueryOption::AnyConstructor);
     QCOMPARE(ctors.size(), 2);
     QCOMPARE(ctors.constFirst()->functionType(), AbstractMetaFunction::ConstructorFunction);
@@ -399,7 +399,7 @@ void TestAbstractMetaClass::testClassDefaultConstructors()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 6);
 
@@ -418,28 +418,28 @@ void TestAbstractMetaClass::testClassDefaultConstructors()
     QCOMPARE(ctors[1]->minimalSignature(), u"A(A)");
 
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(!classB.isNull());
+    QVERIFY(classB);
     QCOMPARE(classB->functions().size(), 2);
     QCOMPARE(classB->functions().constFirst()->minimalSignature(), u"B()");
 
     const auto classC = AbstractMetaClass::findClass(classes, u"C");
-    QVERIFY(!classC.isNull());
+    QVERIFY(classC);
     QCOMPARE(classC->functions().size(), 1);
     QCOMPARE(classC->functions().constFirst()->minimalSignature(), u"C(C)");
 
     const auto classD = AbstractMetaClass::findClass(classes, u"D");
-    QVERIFY(!classD.isNull());
+    QVERIFY(classD);
     QCOMPARE(classD->functions().size(), 1);
     QCOMPARE(classD->functions().constFirst()->minimalSignature(), u"D(D)");
     QVERIFY(classD->functions().constFirst()->isPrivate());
 
     const auto classE = AbstractMetaClass::findClass(classes, u"E");
-    QVERIFY(!classE.isNull());
+    QVERIFY(classE);
     QVERIFY(classE->hasPrivateDestructor());
     QCOMPARE(classE->functions().size(), 0);
 
     const auto classF = AbstractMetaClass::findClass(classes, u"F");
-    QVERIFY(!classF.isNull());
+    QVERIFY(classF);
 
     ctors = classF->queryFunctions(FunctionQueryOption::AnyConstructor);
     QCOMPARE(ctors.size(), 2);
@@ -468,7 +468,7 @@ void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
@@ -486,7 +486,7 @@ void TestAbstractMetaClass::testClassInheritedDefaultConstructors()
     QVERIFY(ctors[1]->isPrivate());
 
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(!classB.isNull());
+    QVERIFY(classB);
 
     ctors = classB->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 1);
@@ -506,11 +506,11 @@ void TestAbstractMetaClass::testAbstractClassDefaultConstructors()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
 
     const auto ctors = classA->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 1);
@@ -527,11 +527,11 @@ void TestAbstractMetaClass::testObjectTypesMustNotHaveCopyConstructors()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
 
     const auto ctors = classA->queryFunctions(FunctionQueryOption::Constructors);
     QCOMPARE(ctors.size(), 1);
@@ -563,7 +563,7 @@ void TestAbstractMetaClass::testIsPolymorphic()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     const auto b = AbstractMetaClass::findClass(classes, u"A");
@@ -593,13 +593,13 @@ class Derived : public BaseAlias2 {
 )XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     const auto base = AbstractMetaClass::findClass(classes, u"Base");
-    QVERIFY(!base.isNull());
+    QVERIFY(base);
     const auto derived = AbstractMetaClass::findClass(classes, u"Derived");
-    QVERIFY(!derived.isNull());
+    QVERIFY(derived);
     QCOMPARE(derived->baseClasses().value(0), base);
 }
 
@@ -644,7 +644,7 @@ void TestAbstractMetaClass::testFreeOperators()
     </typesystem>)XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(code.constData(), xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     const auto classes = builder->classes();
     QCOMPARE(classes.size(), 1);
     QVERIFY(classes.constFirst()->hasArithmeticOperatorOverload());
@@ -678,13 +678,13 @@ public:
 )XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     const auto base = AbstractMetaClass::findClass(classes, u"Base");
-    QVERIFY(!base.isNull());
+    QVERIFY(base);
     const auto derived = AbstractMetaClass::findClass(classes, u"Derived");
-    QVERIFY(!derived.isNull());
+    QVERIFY(derived);
     const auto usingMembers = derived->usingMembers();
     QCOMPARE(usingMembers.size(), 2);
     for (const auto &um : usingMembers) {
@@ -733,10 +733,10 @@ void TestAbstractMetaClass::testUsingTemplateMembers()
 )XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(code.constData(), xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto valueList = AbstractMetaClass::findClass(classes, u"ValueList");
-    QVERIFY(!valueList.isNull());
+    QVERIFY(valueList);
     auto list = valueList->templateBaseClass();
     QVERIFY(valueList->isUsingMember(list, u"append"_s, Access::Public));
     QCOMPARE(valueList->queryFunctionsByName(u"append"_s).size(), 2);
@@ -763,7 +763,7 @@ public:
 )XML";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto tc = AbstractMetaClass::findClass(classes, u"TestClass");
     // Verify that the constructor and 2 functions are generated.

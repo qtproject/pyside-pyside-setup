@@ -274,7 +274,7 @@ void AbstractMetaFunction::setFlags(Flags f)
  */
 bool AbstractMetaFunction::isModifiedRemoved(AbstractMetaClassCPtr cls) const
 {
-    if (!isInGlobalScope() && cls.isNull())
+    if (!isInGlobalScope() && !cls)
         cls = d->m_implementingClass;
     for (const auto &mod : modifications(cls)) {
         if (mod.isRemoved())
@@ -482,7 +482,7 @@ bool AbstractMetaFunction::isWhiteListed() const
     case NormalFunction:
     case SignalFunction:
     case SlotFunction:
-        if (auto dc = declaringClass(); !dc.isNull()) {
+        if (auto dc = declaringClass()) {
             const QSet<QString> &whiteList = dc->typeEntry()->generateFunctions();
             return whiteList.isEmpty() || whiteList.contains(d->m_name)
                    || whiteList.contains(minimalSignature());
@@ -555,12 +555,12 @@ void AbstractMetaFunction::setConstant(bool constant)
 
 bool AbstractMetaFunction::isUserAdded() const
 {
-    return !d->m_addedFunction.isNull() && !d->m_addedFunction->isDeclaration();
+    return d->m_addedFunction && !d->m_addedFunction->isDeclaration();
 }
 
 bool AbstractMetaFunction::isUserDeclared() const
 {
-    return !d->m_addedFunction.isNull() && d->m_addedFunction->isDeclaration();
+    return d->m_addedFunction && d->m_addedFunction->isDeclaration();
 }
 
 int AbstractMetaFunction::actualMinimumArgumentCount() const
@@ -1030,7 +1030,7 @@ const FunctionModificationList &
     AbstractMetaFunctionPrivate::modifications(const AbstractMetaFunction *q,
                                                const AbstractMetaClassCPtr &implementor) const
 {
-    if (!m_addedFunction.isNull())
+    if (m_addedFunction)
         return m_addedFunction->modifications();
     for (const auto &ce : m_modificationCache) {
         if (ce.klass == implementor)
@@ -1047,7 +1047,7 @@ const FunctionModificationList &
 const FunctionModificationList &
     AbstractMetaFunction::modifications(AbstractMetaClassCPtr implementor) const
 {
-    if (implementor.isNull())
+    if (!implementor)
         implementor = d->m_class;
     return d->modifications(this, implementor);
 }
@@ -1059,8 +1059,8 @@ void AbstractMetaFunction::clearModificationsCache()
 
 const DocModificationList AbstractMetaFunction::addedFunctionDocModifications() const
 {
-    return d->m_addedFunction.isNull()
-           ? DocModificationList{} : d->m_addedFunction->docModifications();
+    return d->m_addedFunction
+        ? d->m_addedFunction->docModifications() : DocModificationList{};
 }
 
 QString AbstractMetaFunction::argumentName(int index,

@@ -25,11 +25,11 @@ void TestInsertTemplate::testInsertTemplateOnClassInjectCode()
         </value-type>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
     QCOMPARE(classA->typeEntry()->codeSnips().size(), 1);
     QString code = classA->typeEntry()->codeSnips().constFirst().code();
     QVERIFY(code.contains(u"code template content"));
@@ -48,12 +48,12 @@ void TestInsertTemplate::testInsertTemplateOnModuleInjectCode()
         </inject-code>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QVERIFY(classes.isEmpty());
 
     TypeSystemTypeEntryCPtr module = TypeDatabase::instance()->defaultTypeSystemType();
-    QVERIFY(!module.isNull());
+    QVERIFY(module);
     QCOMPARE(module->name(), u"Foo");
     QCOMPARE(module->codeSnips().size(), 1);
     QString code = module->codeSnips().constFirst().code().trimmed();

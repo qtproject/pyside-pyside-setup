@@ -106,7 +106,7 @@ class ExactEnumerator(object):
             return ret
         if "<" in class_name:
             # This is happening in QtQuick for some reason:
-            ## class QSharedPointer<QQuickItemGrabResult >:
+            ## class std::shared_ptr<QQuickItemGrabResult >:
             # We simply skip over this class.
             return ret
         bases_list = []

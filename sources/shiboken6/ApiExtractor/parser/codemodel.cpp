@@ -18,22 +18,22 @@
 
 using namespace Qt::StringLiterals;
 
-// Predicate to find an item by name in a list of QSharedPointer<Item>
+// Predicate to find an item by name in a list of std::shared_ptr<Item>
 template <class T> class ModelItemNamePredicate
 {
 public:
     explicit ModelItemNamePredicate(const QString &name) : m_name(name) {}
-    bool operator()(const QSharedPointer<T> &item) const { return item->name() == m_name; }
+    bool operator()(const std::shared_ptr<T> &item) const { return item->name() == m_name; }
 
 private:
     const QString m_name;
 };
 
 template <class T>
-static QSharedPointer<T> findModelItem(const QList<QSharedPointer<T> > &list, const QString &name)
+static std::shared_ptr<T> findModelItem(const QList<std::shared_ptr<T> > &list, const QString &name)
 {
     const auto it = std::find_if(list.cbegin(), list.cend(), ModelItemNamePredicate<T>(name));
-    return it != list.cend() ? *it : QSharedPointer<T>();
+    return it != list.cend() ? *it : std::shared_ptr<T>();
 }
 
 // ---------------------------------------------------------------------------
@@ -76,7 +76,7 @@ static CodeModelItem findRecursion(const ScopeModelItem &scope,
     }
     if (auto nestedClass = scope->findClass(nameSegment))
         return findRecursion(nestedClass, qualifiedName, segment + 1);
-    if (auto namespaceItem = qSharedPointerDynamicCast<_NamespaceModelItem>(scope)) {
+    if (auto namespaceItem = std::dynamic_pointer_cast<_NamespaceModelItem>(scope)) {
         for (const auto &nestedNamespace : namespaceItem->namespaces()) {
             if (nestedNamespace->name() == nameSegment) {
                 if (auto item = findRecursion(nestedNamespace, qualifiedName, segment + 1))
@@ -121,7 +121,7 @@ QDebug operator<<(QDebug d, const CodeModel *m)
     d << "CodeModel(";
     if (m) {
         const NamespaceModelItem globalNamespaceP = m->globalNamespace();
-        if (globalNamespaceP.data())
+        if (globalNamespaceP)
             globalNamespaceP->formatDebug(d);
     } else {
         d << '0';
@@ -705,8 +705,8 @@ _ScopeModelItem::FindEnumByValueReturn
         if (searchSiblingNamespaces && scope->kind() == Kind_Namespace) {
             if (auto *enclosingNamespace = dynamic_cast<const _NamespaceModelItem *>(enclosingScope)) {
                 for (const auto &sibling : enclosingNamespace->namespaces()) {
-                    if (sibling.data() != scope && sibling->name() == scope->name()) {
-                        if (const auto e = findEnumByValueRecursion(sibling.data(),
+                    if (sibling.get() != scope && sibling->name() == scope->name()) {
+                        if (const auto e = findEnumByValueRecursion(sibling.get(),
                                                                     fullValue, enumValue, false)) {
                             return e;
                         }
@@ -722,8 +722,8 @@ _ScopeModelItem::FindEnumByValueReturn
     // PYSIDE-331: We need to also search the base classes.
     if (auto *classItem = dynamic_cast<const _ClassModelItem *>(scope)) {
         for (const auto &base : classItem->baseClasses()) {
-            if (!base.klass.isNull()) {
-                auto *c = base.klass.data();
+            if (base.klass) {
+                auto *c = base.klass.get();
                 if (const auto e = findEnumByValueRecursion(c, fullValue, enumValue))
                     return e;
             }

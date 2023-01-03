@@ -25,14 +25,14 @@ private:
 </typesystem>)";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     auto klass = AbstractMetaClass::findClass(classes, u"Control");
-    QVERIFY(!klass.isNull());
+    QVERIFY(klass);
     QVERIFY(!klass->hasPrivateDestructor());
     klass = AbstractMetaClass::findClass(classes, u"Subject");
-    QVERIFY(!klass.isNull());
+    QVERIFY(klass);
     QVERIFY(klass->hasPrivateDestructor());
 }
 
@@ -53,14 +53,14 @@ protected:
 </typesystem>)";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     auto klass = AbstractMetaClass::findClass(classes, u"Control");
-    QVERIFY(!klass.isNull());
+    QVERIFY(klass);
     QVERIFY(!klass->hasProtectedDestructor());
     klass = AbstractMetaClass::findClass(classes, u"Subject");
-    QVERIFY(!klass.isNull());
+    QVERIFY(klass);
     QVERIFY(klass->hasProtectedDestructor());
 }
 
@@ -81,14 +81,14 @@ protected:
 </typesystem>)";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     auto klass = AbstractMetaClass::findClass(classes, u"Control");
-    QVERIFY(!klass.isNull());
+    QVERIFY(klass);
     QVERIFY(!klass->hasVirtualDestructor());
     klass = AbstractMetaClass::findClass(classes, u"Subject");
-    QVERIFY(!klass.isNull());
+    QVERIFY(klass);
     QVERIFY(klass->hasVirtualDestructor());
 }
 
@@ -106,22 +106,22 @@ class Subject : public SubjectBase {};
 </typesystem>
 )XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 4);
 
     auto klass = AbstractMetaClass::findClass(classes, u"ControlBase");
-    QVERIFY(!klass.isNull());
+    QVERIFY(klass);
     QVERIFY(!klass->hasVirtualDestructor());
     klass = AbstractMetaClass::findClass(classes, u"Control");
-    QVERIFY(!klass.isNull());
+    QVERIFY(klass);
     QVERIFY(!klass->hasVirtualDestructor());
 
     klass = AbstractMetaClass::findClass(classes, u"SubjectBase");
-    QVERIFY(!klass.isNull());
+    QVERIFY(klass);
     QVERIFY(klass->hasVirtualDestructor());
     klass = AbstractMetaClass::findClass(classes, u"Subject");
-    QVERIFY(!klass.isNull());
+    QVERIFY(klass);
     QVERIFY(klass->hasVirtualDestructor());
 }
 
@@ -142,14 +142,14 @@ protected:
 </typesystem>)";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
     auto klass = AbstractMetaClass::findClass(classes, u"Control");
-    QVERIFY(!klass.isNull());
+    QVERIFY(klass);
     QVERIFY(klass->isPolymorphic());
     klass = AbstractMetaClass::findClass(classes, u"Subject");
-    QVERIFY(!klass.isNull());
+    QVERIFY(klass);
     QVERIFY(klass->isPolymorphic());
 }
 

@@ -7,7 +7,7 @@
 
 AbstractMetaClassCPtr EnclosingClassMixin::targetLangEnclosingClass() const
 {
-    auto result = m_enclosingClass.toStrongRef();
+    auto result = m_enclosingClass.lock();
     while (result && !NamespaceTypeEntry::isVisibleScope(result->typeEntry()))
         result = result->enclosingClass();
     return result;

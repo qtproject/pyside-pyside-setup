@@ -11,6 +11,7 @@
 #include "typesystem_typedefs.h"
 #include "parser/codemodel_enums.h"
 
+#include <QtCore/QMetaObject>
 #include <QtCore/QScopedPointer>
 
 #include <optional>

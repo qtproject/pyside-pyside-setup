@@ -277,10 +277,10 @@ void HeaderGenerator::writeMemberFunctionWrapper(TextStream &s,
         const auto &type = arg.type();
         TypeEntryCPtr enumTypeEntry;
         if (type.isFlags())
-            enumTypeEntry = qSharedPointerCast<const FlagsTypeEntry>(type.typeEntry())->originator();
+            enumTypeEntry = std::static_pointer_cast<const FlagsTypeEntry>(type.typeEntry())->originator();
         else if (type.isEnum())
             enumTypeEntry = type.typeEntry();
-        if (!enumTypeEntry.isNull()) {
+        if (enumTypeEntry) {
             s << type.cppSignature() << '(' << arg.name() << ')';
         } else if (type.passByValue() && type.isUniquePointer()) {
             s << stdMove(arg.name());
@@ -381,7 +381,7 @@ void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const ApiExtractorR
         // For a typedef "using Foo=QList<int>", write a type index
         // SBK_QLIST_INT besides SBK_FOO which is then matched by function
         // argument. Check against duplicate typedefs for the same types.
-        const auto cType = qSharedPointerCast<const ComplexTypeEntry>(typeEntry);
+        const auto cType = std::static_pointer_cast<const ComplexTypeEntry>(typeEntry);
         if (cType->baseContainerType()) {
             auto metaClass = AbstractMetaClass::findClass(api.classes(), cType);
             Q_ASSERT(metaClass != nullptr);
@@ -397,7 +397,7 @@ void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const ApiExtractorR
         }
     }
     if (typeEntry->isEnum()) {
-        auto ete = qSharedPointerCast<const EnumTypeEntry>(typeEntry);
+        auto ete = std::static_pointer_cast<const EnumTypeEntry>(typeEntry);
         if (ete->flags())
             writeTypeIndexValueLine(s, api, ete->flags());
     }
@@ -453,7 +453,7 @@ static bool canForwardDeclare(const AbstractMetaClassCPtr &c)
         || !c->innerClasses().isEmpty() || c->isTypeDef()) {
         return false;
     }
-    if (auto encl = c->enclosingClass(); !encl.isNull())
+    if (auto encl = c->enclosingClass())
         return encl->isNamespace();
     return true;
 }
@@ -521,14 +521,14 @@ static void writeForwardDeclarations(TextStream &s,
     NameSpaces nameSpaces;
 
     for (const auto &c : classList) {
-        if (auto encl = c->enclosingClass(); !encl.isNull()) {
+        if (auto encl = c->enclosingClass()) {
             Q_ASSERT(encl->isNamespace());
             auto idx = indexOf(nameSpaces, encl);
             if (idx != -1) {
                 nameSpaces[idx].classes.append(c);
             } else {
                 nameSpaces.append(NameSpace{encl, {c}});
-                for (auto enclNsp = encl->enclosingClass(); !enclNsp.isNull();
+                for (auto enclNsp = encl->enclosingClass(); enclNsp;
                      enclNsp = enclNsp->enclosingClass()) {
                     idx = indexOf(nameSpaces, enclNsp);
                     if (idx == -1)
@@ -835,7 +835,7 @@ void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum
     s << "{ return " << cpythonTypeNameExt(cppEnum.typeEntry()) << "; }\n";
 
     const auto flag = cppEnum.typeEntry()->flags();
-    if (!flag.isNull()) {
+    if (flag) {
         s <<  "template<> inline PyTypeObject *SbkType< ::" << flag->name() << " >() "
           << "{ return " << cpythonTypeNameExt(flag) << "; }\n";
     }

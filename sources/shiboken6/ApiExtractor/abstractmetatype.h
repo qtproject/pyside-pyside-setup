@@ -262,7 +262,7 @@ inline bool operator!=(const AbstractMetaType &t1, const AbstractMetaType &t2)
 { return !t1.equals(t2); }
 
 inline size_t qHash(const AbstractMetaType &t, size_t seed)
-{ return qHash(t.typeEntry(), seed); }
+{ return qHash(t.typeEntry().get(), seed); }
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const AbstractMetaType &at);

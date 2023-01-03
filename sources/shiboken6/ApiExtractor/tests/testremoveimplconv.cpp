@@ -30,15 +30,15 @@ void TestRemoveImplConv::testRemoveImplConv()
         </value-type>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    QVERIFY(!classB.isNull());
+    QVERIFY(classB);
     const auto classC = AbstractMetaClass::findClass(classes, u"C");
-    QVERIFY(!classC.isNull());
+    QVERIFY(classC);
     const auto implConv = classC->implicitConversions();
     QCOMPARE(implConv.size(), 1);
     QCOMPARE(implConv.constFirst()->arguments().constFirst().type().typeEntry(),

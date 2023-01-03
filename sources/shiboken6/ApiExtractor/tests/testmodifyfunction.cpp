@@ -46,11 +46,11 @@ void TestModifyFunction::testRenameArgument()
 
     const QByteArray xmlCode = QByteArray(xmlCode1) + pattern + QByteArray(xmlCode2);
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.constData(), false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
     const auto func = classA->findFunction(u"method");
-    QVERIFY(!func.isNull());
+    QVERIFY(func);
 
     QCOMPARE(func->argumentName(1), u"otherArg");
 }
@@ -74,11 +74,11 @@ void TestModifyFunction::testOwnershipTransfer()
         </object-type>\n\
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
     const auto func = classB->findFunction(u"method");
-    QVERIFY(!func.isNull());
+    QVERIFY(func);
 
     QCOMPARE(func->argumentTargetOwnership(func->ownerClass(), 0),
              TypeSystem::CppOwnership);
@@ -124,7 +124,7 @@ void TestModifyFunction::invalidateAfterUse()
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
                                                                 false, u"0.1"_s));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
     auto func = classB->findFunction(u"call");
@@ -133,7 +133,7 @@ void TestModifyFunction::invalidateAfterUse()
     QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse());
 
     const auto classC = AbstractMetaClass::findClass(classes, u"C");
-    QVERIFY(!classC.isNull());
+    QVERIFY(classC);
     func = classC->findFunction(u"call");
     QCOMPARE(func->modifications().size(), 1);
     QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
@@ -157,7 +157,7 @@ void TestModifyFunction::invalidateAfterUse()
     QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse());
 
     const auto classE = AbstractMetaClass::findClass(classes, u"E");
-    QVERIFY(!classE.isNull());
+    QVERIFY(classE);
     func = classE->findFunction(u"call");
     QVERIFY(func);
     QCOMPARE(func->modifications().size(), 1);
@@ -197,7 +197,7 @@ void TestModifyFunction::testWithApiVersion()
     </typesystem>\n";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
                                                                 false, u"0.1"_s));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classB = AbstractMetaClass::findClass(classes, u"B");
     auto func = classB->findFunction(u"method");
@@ -236,34 +236,34 @@ struct A {
 )XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode,
                                                                 false, u"0.1"_s));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
 
     // Nothing specified, true
     const auto f1 = classA->findFunction(u"f1");
-    QVERIFY(!f1.isNull());
+    QVERIFY(f1);
     QVERIFY(!f1->allowThread());
 
     // 'auto' specified, should be false for nontrivial function
     const auto f2 = classA->findFunction(u"f2");
-    QVERIFY(!f2.isNull());
+    QVERIFY(f2);
     QVERIFY(f2->allowThread());
 
     // 'no' specified, should be false
     const auto f3 = classA->findFunction(u"f3");
-    QVERIFY(!f3.isNull());
+    QVERIFY(f3);
     QVERIFY(!f3->allowThread());
 
     // Nothing specified, should be false for simple getter
     const auto getter1 = classA->findFunction(u"getter1");
-    QVERIFY(!getter1.isNull());
+    QVERIFY(getter1);
     QVERIFY(!getter1->allowThread());
 
     // Forced to true simple getter
     const auto getter2 = classA->findFunction(u"getter2");
-    QVERIFY(!getter2.isNull());
+    QVERIFY(getter2);
     QVERIFY(getter2->allowThread()); // Forced to true simple getter
 }
 
@@ -286,7 +286,7 @@ void TestModifyFunction::testGlobalFunctionModification()
     </typesystem>\n";
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
     QCOMPARE(builder->globalFunctions().size(), 1);
 
     auto *td = TypeDatabase::instance();
@@ -434,24 +434,24 @@ void TestModifyFunction::testScopedModifications()
     QFETCH(bool, expectedAllowThread);
 
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode.constData(), xmlCode.constData(), false));
-    QVERIFY(!builder.isNull());
+    QVERIFY(builder);
 
     const auto classA = AbstractMetaClass::findClass(builder->classes(), u"A");
-    QVERIFY(!classA.isNull());
+    QVERIFY(classA);
 
     auto f = classA->findFunction(QStringLiteral("unspecified"));
-    QVERIFY(!f.isNull());
+    QVERIFY(f);
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::Unknown);
     QCOMPARE(f->generateExceptionHandling(), expectedGenerateUnspecified);
     QCOMPARE(f->allowThread(), expectedAllowThread);
 
     f = classA->findFunction(QStringLiteral("nonThrowing"));
-    QVERIFY(!f.isNull());
+    QVERIFY(f);
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::NoExcept);
     QCOMPARE(f->generateExceptionHandling(), expectedGenerateNonThrowing);
 
     f = classA->findFunction(QStringLiteral("throwing"));
-    QVERIFY(!f.isNull());
+    QVERIFY(f);
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::Throws);
     QCOMPARE(f->generateExceptionHandling(), expectedGenerateThrowing);
 }
