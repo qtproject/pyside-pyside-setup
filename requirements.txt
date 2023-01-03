@@ -1,7 +1,7 @@
 setuptools>=65
 packaging
 build==0.7
-sphinx
+sphinx==5.3
 sphinx-panels
 myst-parser
 six
