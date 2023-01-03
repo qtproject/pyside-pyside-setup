@@ -24,16 +24,16 @@ The same setup.py script is used to build all the components of the project:
  * PySide6
 
 Preferably, a Qt (build) environment should be used to automatically pick up
-the associated `qmake`, but optionally one can specify the location of `qmake`
+the associated `qtpaths6`, but optionally one can specify the location of `qtpaths6`
 and `cmake` if it is not in the current PATH with:
 
- * `--qmake=/path/to/qt/bin/qmake`, and
+ * `--qtpaths=/path/to/qt/bin/qtpaths6`, and
  * `--cmake=/path/to/bin/cmake`
 
 respectively.
 
 By default, all of the above is built when no special options are passed to the
-script. You can use the --build-type parameter to specify which things should
+script. You can use the `--build-type` parameter to specify which things should
 be built:
 
  * `--build-type=shiboken6`, build/package only the python module
@@ -68,27 +68,6 @@ package anyway, because there is no proper rpath support on the platform.
 You can use the option `--rpath=/path/to/lib/path` to specify which rpath
 values should be embedded into the PySide6 modules and shared libraries.  This
 overrides the automatically generated values when the option is not specified.
-
-You can use the option `--only-package` if you want to create more binary
-packages (bdist_wheel, bdist_egg, ...) without rebuilding the entire project
-every time:
-
-e.g.:
-
-* First, we create a bdist_wheel from a full PySide6 build:
-  ```
-  python setup.py bdist_wheel --qmake=c:\Qt\6.0\bin\qmake.exe
-        --cmake=c:\tools\cmake\bin\cmake.exe
-        --openssl=c:\libs\OpenSSL32bit\bin
-  ```
-* Then, we create a bdist_egg reusing the PySide6 build with option
-  `--only-package`:
-  ```
-  python setup.py bdist_egg --only-package
-        --qmake=c:\Qt\6.0\bin\qmake.exe
-        --cmake=c:\tools\cmake\bin\cmake.exe
-        --openssl=c:\libs\OpenSSL32bit\bin
-  ```
 
 You can use the option `--qt-conf-prefix` to pass a path relative to the
 PySide6 installed package, which will be embedded into an auto-generated
@@ -140,8 +119,8 @@ using `setup.py build`:
  * Python 3.7+ is supported,
  * CMake: Specify the path to cmake with `--cmake` option or add cmake to the
    system path.
- * Qt 6.0+ is supported. Specify the path to qmake with `--qmake` option or
-   add qmake to the system path.
+ * Qt 6.2+ is supported. Specify the path to qtpaths with `--qtpaths` option or
+   add `qtpaths6` to the system path.
 
 ### Optional
 
@@ -224,7 +203,7 @@ make sure to specify the following things:
  * `LLVM_INSTALL_DIR`, the environment variable should point to your libclang
    library location
  * `Qt`, either select a Qt Kit when configuring the project, or make sure that
-   the qmake binary is present in the PATH environment variable.
+   the `qtpaths6` binary is present in the PATH environment variable.
  * `Python`, the PATH environment variable should also point to the Python
    interpreter which you wish to use for building the projects (can either be
    a system interpreter, or a virtualenv one for example)
