@@ -1889,6 +1889,30 @@ static bool applyArrayArgumentModifications(const FunctionModificationList &func
     return true;
 }
 
+// Create the meta type for a view (std::string_view -> std::string)
+static AbstractMetaType createViewOnType(const AbstractMetaType &metaType,
+                                         const TypeEntryCPtr &viewOnTypeEntry)
+{
+    auto result = metaType;
+    result.setTypeEntry(viewOnTypeEntry);
+    if (!metaType.isContainer() || !viewOnTypeEntry->isContainer())
+        return result;
+    // For containers, when sth with several template parameters
+    // (std::span<T, int N>) is mapped onto a std::vector<T>,
+    // remove the superfluous template parameters and strip 'const'.
+    const auto vcte = std::static_pointer_cast<const ContainerTypeEntry>(viewOnTypeEntry);
+    const auto instantiations = metaType.instantiations();
+    AbstractMetaTypeList viewInstantiations;
+    const auto size = std::min(vcte->templateParameterCount(), instantiations.size());
+    for (qsizetype i = 0; i < size; ++i) {
+        auto ins = instantiations.at(i);
+        ins.setConstant(false);
+        viewInstantiations.append(ins);
+    }
+    result.setInstantiations(viewInstantiations);
+    return result;
+}
+
 AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const FunctionModelItem &functionItem,
                                                                    const AbstractMetaClassPtr &currentClass)
 {
@@ -2092,10 +2116,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         auto viewOnTypeEntry = metaType.typeEntry()->viewOn();
         if (viewOnTypeEntry != nullptr && metaType.indirections() == 0
             && metaType.arrayElementType() == nullptr
-            && !metaType.hasInstantiations()) {
-            auto viewOn = metaType;
-            viewOn.setTypeEntry(viewOnTypeEntry);
-            metaType.setViewOn(viewOn);
+            && (!metaType.hasInstantiations() || metaType.isContainer())) {
+            metaType.setViewOn(createViewOnType(metaType, viewOnTypeEntry));
         }
 
         AbstractMetaArgument metaArgument;

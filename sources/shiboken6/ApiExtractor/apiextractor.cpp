@@ -553,8 +553,11 @@ ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(Instantiation
                                                                    const AbstractMetaFunctionCPtr &func)
 {
     addInstantiatedContainersAndSmartPointers(context, func->type(), func->signature());
-    for (const AbstractMetaArgument &arg : func->arguments())
-        addInstantiatedContainersAndSmartPointers(context, arg.type(), func->signature());
+    for (const AbstractMetaArgument &arg : func->arguments()) {
+        const auto argType = arg.type();
+        const auto type = argType.viewOn() != nullptr ? *argType.viewOn() : argType;
+        addInstantiatedContainersAndSmartPointers(context, type, func->signature());
+    }
 }
 
 void

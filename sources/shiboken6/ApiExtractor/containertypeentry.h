@@ -32,6 +32,9 @@ public:
 
     ContainerKind containerKind() const;
 
+    /// Number of template parameters (except allocators)
+    qsizetype templateParameterCount() const;
+
     const OpaqueContainers &opaqueContainers() const;
     void addOpaqueContainer(OpaqueContainer r);
     bool generateOpaqueContainer(const QString &instantiation) const;

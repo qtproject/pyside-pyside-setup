@@ -1817,6 +1817,23 @@ ContainerTypeEntry::ContainerKind ContainerTypeEntry::containerKind() const
     return d->m_containerKind;
 }
 
+qsizetype ContainerTypeEntry::templateParameterCount() const
+{
+    S_D(const ContainerTypeEntry);
+    qsizetype result = 1;
+    switch (d->m_containerKind) {
+    case MapContainer:
+    case MultiMapContainer:
+    case PairContainer:
+        result = 2;
+        break;
+    case ListContainer:
+    case SetContainer:
+        break;
+    }
+    return result;
+}
+
 const ContainerTypeEntry::OpaqueContainers &ContainerTypeEntry::opaqueContainers() const
 {
     S_D(const ContainerTypeEntry);
