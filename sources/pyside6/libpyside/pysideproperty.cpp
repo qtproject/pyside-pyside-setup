@@ -137,20 +137,29 @@ void PySidePropertyPrivate::metaCall(PyObject *source, QMetaObject::Call call, v
 {
     switch (call) {
     case QMetaObject::ReadProperty: {
-        Shiboken::Conversions::SpecificConverter converter(typeName);
-        Q_ASSERT(converter);
-        if (PyObject *value = getValue(source)) {
-            converter.toCpp(value, args[0]);
-            Py_DECREF(value);
+        AutoDecRef value(getValue(source));
+        auto *obValue = value.object();
+        if (obValue) {
+            Conversions::SpecificConverter converter(typeName);
+            if (converter) {
+                converter.toCpp(obValue, args[0]);
+            } else {
+                // PYSIDE-2160: Report an unknown type name to the caller `qtPropertyMetacall`.
+                PyErr_SetObject(PyExc_StopIteration, obValue);
+            }
         }
     }
         break;
 
     case QMetaObject::WriteProperty: {
-        Shiboken::Conversions::SpecificConverter converter(typeName);
-        Q_ASSERT(converter);
-        Shiboken::AutoDecRef value(converter.toPython(args[0]));
-        setValue(source, value);
+        Conversions::SpecificConverter converter(typeName);
+        if (converter) {
+            AutoDecRef value(converter.toPython(args[0]));
+            setValue(source, value);
+        } else {
+            // PYSIDE-2160: Report an unknown type name to the caller `qtPropertyMetacall`.
+            PyErr_SetNone(PyExc_StopIteration);
+        }
     }
         break;
 
