@@ -141,6 +141,9 @@ public:
 
     AbstractMetaTypeList nestedArrayTypes() const;
 
+    /// Strip const/indirections/reference from the type
+    AbstractMetaType plainType() const;
+
     QString cppSignature() const;
 
     QString pythonSignature() const;

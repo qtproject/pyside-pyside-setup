@@ -429,6 +429,17 @@ void AbstractMetaType::setArrayElementType(const AbstractMetaType &t)
     }
 }
 
+AbstractMetaType AbstractMetaType::plainType() const
+{
+    AbstractMetaType result = *this;
+    result.clearIndirections();
+    result.setReferenceType(NoReference);
+    result.setConstant(false);
+    result.setVolatile(false);
+    result.decideUsagePattern();
+    return result;
+}
+
 QString AbstractMetaType::cppSignature() const
 {
     const AbstractMetaTypeData *cd = d.constData();
@@ -919,11 +930,7 @@ AbstractMetaType AbstractMetaType::fromTypeEntry(const TypeEntryCPtr &typeEntry)
     auto it = cache.find(typeName);
     if (it != cache.end())
         return it.value();
-    AbstractMetaType metaType(typeEntry);
-    metaType.clearIndirections();
-    metaType.setReferenceType(NoReference);
-    metaType.setConstant(false);
-    metaType.decideUsagePattern();
+    AbstractMetaType metaType = AbstractMetaType(typeEntry).plainType();
     cache.insert(typeName, metaType);
     return metaType;
 }

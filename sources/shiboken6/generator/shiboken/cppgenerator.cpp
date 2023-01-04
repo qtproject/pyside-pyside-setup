@@ -3900,6 +3900,11 @@ if (errorType != nullptr)
     PyErr_SetObject(errorType, errorString);
 )";
 
+static QString explicitConversion(QString v, const AbstractMetaType &t)
+{
+    return t.plainType().cppSignature() + u'(' + v + u')';
+}
+
 void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    const GeneratorContext &context, bool usesPyArgs,
                                    int maxArgs,
@@ -3989,6 +3994,8 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 auto type = arg.type();
                 if (type.isUniquePointer() && type.passByValue())
                     userArgs.last() = stdMove(userArgs.constLast());
+                else if (type.viewOn() != nullptr)
+                    userArgs.last() = explicitConversion(userArgs.constLast(), type);
             }
 
             // If any argument's default value was modified the method must be called
