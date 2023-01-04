@@ -568,6 +568,29 @@ static inline QString formatArraySize(int e)
     return result;
 }
 
+// Return the number of template parameters; remove the default
+// non template type parameter of std::span from the signature.
+static qsizetype stripDefaultTemplateArgs(const TypeEntryCPtr &te,
+                                          const AbstractMetaTypeList &instantiations)
+{
+    static const char16_t dynamicExtent64[] = u"18446744073709551615"; // size_t(-1)
+    static const char16_t dynamicExtent32[] = u"4294967295";
+
+    qsizetype result = instantiations.size();
+    if (result == 0 || !te->isContainer())
+        return result;
+    auto cte = std::static_pointer_cast<const ContainerTypeEntry>(te);
+    if (cte->containerKind() != ContainerTypeEntry::SpanContainer)
+        return result;
+    const auto lastTe = instantiations.constLast().typeEntry();
+    if (lastTe->type() == TypeEntry::ConstantValueType) {
+        const QString &name = lastTe->name();
+        if (name == dynamicExtent64 || name == dynamicExtent32)
+           --result;
+    }
+    return result;
+}
+
 QString AbstractMetaTypeData::formatSignature(bool minimal) const
 {
     QString result;
@@ -590,7 +613,8 @@ QString AbstractMetaTypeData::formatSignature(bool minimal) const
         result += u'<';
         if (minimal)
             result += u' ';
-        for (qsizetype i = 0, size = m_instantiations.size(); i < size; ++i) {
+        const auto size = stripDefaultTemplateArgs(m_typeEntry, m_instantiations);
+        for (qsizetype i = 0; i < size; ++i) {
             if (i > 0)
                 result += u',';
             result += m_instantiations.at(i).minimalSignature();
