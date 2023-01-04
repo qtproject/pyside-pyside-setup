@@ -21,9 +21,11 @@ class IntSpanTest(unittest.TestCase):
             return
         expected = [1, 2, 3]
         self.assertEqual(SpanUser.getIntSpan3(), expected)
+        self.assertEqual(SpanUser.getIntSpan(), expected)
         self.assertEqual(SpanUser.getConstIntSpan3(), expected)
 
         self.assertEqual(SpanUser.sumIntSpan3(expected), 6)
+        self.assertEqual(SpanUser.sumIntSpan(expected), 6)
         self.assertEqual(SpanUser.sumConstIntSpan3(expected), 6)
 
 

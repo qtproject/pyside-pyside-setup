@@ -23,6 +23,12 @@ IntSpan3 SpanUser::getIntSpan3()
     return IntSpan3(iv);
 }
 
+IntSpan SpanUser::getIntSpan()
+{
+    static int iv[] = {1, 2, 3};
+    return IntSpan(iv);
+}
+
 ConstIntSpan3 SpanUser::getConstIntSpan3()
 {
     static const int civ[] = {1, 2, 3};
@@ -32,6 +38,11 @@ ConstIntSpan3 SpanUser::getConstIntSpan3()
 int SpanUser::sumIntSpan3(IntSpan3 isp3)
 {
      return std::accumulate(isp3.begin(), isp3.end(), 0);
+}
+
+int SpanUser::sumIntSpan(IntSpan isp)
+{
+     return std::accumulate(isp.begin(), isp.end(), 0);
 }
 
 int SpanUser::sumConstIntSpan3(ConstIntSpan3 ispc3)

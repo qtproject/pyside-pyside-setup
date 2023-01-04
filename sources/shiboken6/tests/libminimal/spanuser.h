@@ -10,6 +10,7 @@
 #  include <span>
 
 using IntSpan3 = std::span<int, 3>;
+using IntSpan = std::span<int>;
 using ConstIntSpan3 = std::span<const int, 3>;
 #endif
 
@@ -21,9 +22,11 @@ struct LIBMINIMAL_API SpanUser
 
 #if __cplusplus >= 202002L
     static IntSpan3 getIntSpan3();
+    static IntSpan getIntSpan();
     static ConstIntSpan3 getConstIntSpan3();
 
     static int sumIntSpan3(IntSpan3 isp3);
+    static int sumIntSpan(IntSpan isp);
     static int sumConstIntSpan3(ConstIntSpan3 ispc3);
 #endif // C++ 20
 };
