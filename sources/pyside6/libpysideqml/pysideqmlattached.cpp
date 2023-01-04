@@ -173,10 +173,10 @@ void initQmlAttached(PyObject *module)
 }
 
 PySide::Qml::QmlExtensionInfo qmlAttachedInfo(PyTypeObject *t,
-                                              const QSharedPointer<QmlTypeInfo> &info)
+                                              const std::shared_ptr<QmlTypeInfo> &info)
 {
     PySide::Qml::QmlExtensionInfo result{nullptr, nullptr};
-    if (info.isNull() || info->attachedType == nullptr)
+    if (!info || info->attachedType == nullptr)
         return result;
 
     auto *name = reinterpret_cast<PyTypeObject *>(t)->tp_name;

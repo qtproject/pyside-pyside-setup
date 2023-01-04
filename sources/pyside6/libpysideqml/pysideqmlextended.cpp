@@ -92,7 +92,7 @@ static QObject *extensionFactory(QObject *o)
 
     auto *pyObjType = Py_TYPE(pyObj);
     const auto info = qmlTypeInfo(reinterpret_cast<PyObject *>(pyObjType));
-    if (info.isNull() || info->extensionType == nullptr) {
+    if (!info || info->extensionType == nullptr) {
         qWarning("QmlExtended: Cannot find extension of %s.", pyObjType->tp_name);
         return nullptr;
     }
@@ -128,10 +128,10 @@ void initQmlExtended(PyObject *module)
 }
 
 PySide::Qml::QmlExtensionInfo qmlExtendedInfo(PyObject *t,
-                                              const QSharedPointer<QmlTypeInfo> &info)
+                                              const std::shared_ptr<QmlTypeInfo> &info)
 {
     PySide::Qml::QmlExtensionInfo result{nullptr, nullptr};
-    if (!info.isNull() && info->extensionType) {
+    if (info && info->extensionType) {
         result.metaObject = PySide::retrieveMetaObject(info->extensionType);
         if (result.metaObject) {
             result.factory = extensionFactory;

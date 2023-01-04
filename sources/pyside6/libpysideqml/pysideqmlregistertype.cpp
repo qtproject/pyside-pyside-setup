@@ -436,7 +436,7 @@ PyObject *qmlElementMacro(PyObject *pyObj, const char *decoratorName,
     const char *noCreationReason = nullptr;
     const auto info = PySide::Qml::qmlTypeInfo(pyObj);
     auto *registerObject = pyObj;
-    if (!info.isNull()) {
+    if (info) {
         if (info->flags.testFlag(PySide::Qml::QmlTypeFlag::Singleton))
             mode = RegisterMode::Singleton;
         else if (info->flags.testFlag(PySide::Qml::QmlTypeFlag::Uncreatable))

@@ -38,13 +38,13 @@
 #include <QtCore/QDir>
 #include <QtCore/QFileInfo>
 #include <QtCore/QMutex>
-#include <QtCore/QSharedPointer>
 #include <QtCore/QStack>
 #include <QtCore/QThread>
 
 #include <algorithm>
 #include <cstring>
 #include <cctype>
+#include <memory>
 #include <typeinfo>
 
 static QStack<PySide::CleanupFunction> cleanupFunctionList;
@@ -632,11 +632,12 @@ void setNextQObjectMemoryAddr(void *addr)
 
 } // namespace PySide
 
-// A QSharedPointer is used with a deletion function to invalidate a pointer
+// A std::shared_ptr is used with a deletion function to invalidate a pointer
 // when the property value is cleared.  This should be a QSharedPointer with
 // a void *pointer, but that isn't allowed
 typedef char any_t;
-Q_DECLARE_METATYPE(QSharedPointer<any_t>);
+Q_DECLARE_METATYPE(std::shared_ptr<any_t>);
+
 
 namespace PySide
 {
@@ -698,7 +699,7 @@ PyObject *getWrapperForQObject(QObject *cppSelf, PyTypeObject *sbk_type)
     QVariant existing = cppSelf->property(invalidatePropertyName);
     if (!existing.isValid()) {
         if (cppSelf->thread() == QThread::currentThread()) {
-            QSharedPointer<any_t> shared_with_del(reinterpret_cast<any_t *>(cppSelf), invalidatePtr);
+            std::shared_ptr<any_t> shared_with_del(reinterpret_cast<any_t *>(cppSelf), invalidatePtr);
             cppSelf->setProperty(invalidatePropertyName, QVariant::fromValue(shared_with_del));
         }
         pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(cppSelf));

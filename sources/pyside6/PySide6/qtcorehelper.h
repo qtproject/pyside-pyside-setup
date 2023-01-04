@@ -4,10 +4,10 @@
 #ifndef QTCOREHELPER_H
 #define QTCOREHELPER_H
 
-#include <QtCore/qsharedpointer.h>
 #include <QtCore/qmutex.h>
 #include <QtCore/qobjectdefs.h>
 
+#include <memory>
 
 namespace QtCoreHelper {
 
@@ -88,7 +88,7 @@ namespace QtCoreHelper {
         const void *data() const;
 
     private:
-        QSharedPointer<QGenericArgumentData> d;
+        std::shared_ptr<QGenericArgumentData> d;
     };
 
     class QGenericReturnArgumentData;
@@ -110,7 +110,7 @@ namespace QtCoreHelper {
         const void *data() const;
 
     private:
-        QSharedPointer<QGenericReturnArgumentData> d;
+        std::shared_ptr<QGenericReturnArgumentData> d;
     };
 
 } // namespace QtCoreHelper

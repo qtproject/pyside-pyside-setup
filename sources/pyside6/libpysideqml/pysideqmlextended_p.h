@@ -6,7 +6,7 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/QSharedPointer>
+#include <memory>
 
 namespace PySide::Qml {
 struct QmlExtensionInfo;
@@ -15,7 +15,7 @@ struct QmlTypeInfo;
 void initQmlExtended(PyObject *module);
 
 PySide::Qml::QmlExtensionInfo qmlExtendedInfo(PyObject *t,
-                                              const QSharedPointer<QmlTypeInfo> &info);
+                                              const std::shared_ptr<QmlTypeInfo> &info);
 } // namespace PySide::Qml
 
 #endif // PYSIDEQMLEXTENDED_P_H

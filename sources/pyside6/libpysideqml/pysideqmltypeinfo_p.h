@@ -7,8 +7,8 @@
 #include <sbkpython.h>
 
 #include <QtCore/QFlags>
-#include <QtCore/QSharedPointer>
 
+#include <memory>
 #include <string>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
@@ -36,7 +36,7 @@ struct QmlTypeInfo
     PyTypeObject *extensionType = nullptr;
 };
 
-using QmlTypeInfoPtr = QSharedPointer<QmlTypeInfo>;
+using QmlTypeInfoPtr = std::shared_ptr<QmlTypeInfo>;
 
 QmlTypeInfoPtr ensureQmlTypeInfo(const PyObject *o);
 void insertQmlTypeInfoAlias(const PyObject *o, const QmlTypeInfoPtr &value);

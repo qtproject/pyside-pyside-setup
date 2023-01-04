@@ -50,7 +50,7 @@ QGenericArgumentHolder::QGenericArgumentHolder()
 }
 
 QGenericArgumentHolder::QGenericArgumentHolder(const QMetaType &type, const void *aData) :
-    d(new QGenericArgumentData(type, aData))
+    d(std::make_shared<QGenericArgumentData>(type, aData))
 {
 }
 
@@ -62,21 +62,21 @@ QGenericArgumentHolder::~QGenericArgumentHolder() = default;
 
 QGenericArgumentHolder::operator QGenericArgument() const
 {
-    return d.isNull() ? QGenericArgument{} : d->m_argument;
+    return d ? d->m_argument : QGenericArgument{};
 }
 
 QMetaType QGenericArgumentHolder::metaType() const
 {
-    return d.isNull() ? QMetaType{} : d->m_type;
+    return d ? d->m_type : QMetaType{};
 }
 
 const void *QGenericArgumentHolder::data() const
 {
-    return d.isNull() ? nullptr : d->m_argument.data();
+    return d ? d->m_argument.data() : nullptr;
 }
 
 QGenericReturnArgumentHolder::QGenericReturnArgumentHolder(const QMetaType &type, void *aData) :
-      d(new QGenericReturnArgumentData(type, aData))
+      d(std::make_shared<QGenericReturnArgumentData>(type, aData))
 {
 }
 

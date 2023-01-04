@@ -188,7 +188,7 @@ QDataStream &operator>>(QDataStream &in, PyObjectWrapper &myObj)
 };
 
 namespace PySide {
-using GlobalReceiverV2Ptr = QSharedPointer<GlobalReceiverV2>;
+using GlobalReceiverV2Ptr = std::shared_ptr<GlobalReceiverV2>;
 using GlobalReceiverV2Map = QHash<PySide::GlobalReceiverKey, GlobalReceiverV2Ptr>;
 }
 
@@ -283,13 +283,13 @@ QObject *SignalManager::globalReceiver(QObject *sender, PyObject *callback, QObj
     const GlobalReceiverKey key = GlobalReceiverV2::key(callback);
     auto it = globalReceivers.find(key);
     if (it == globalReceivers.end()) {
-        GlobalReceiverV2Ptr gr(new GlobalReceiverV2(callback, receiver));
+        auto gr = std::make_shared<GlobalReceiverV2>(callback, receiver);
         it = globalReceivers.insert(key, gr);
     }
     if (sender)
         it.value()->incRef(sender); // create a link reference
 
-    return it.value().data();
+    return it.value().get();
 }
 
 void SignalManager::notifyGlobalReceiver(QObject *receiver)
@@ -313,7 +313,7 @@ void SignalManager::deleteGobalReceiver(const QObject *gr)
 void SignalManager::SignalManagerPrivate::deleteGobalReceiver(const QObject *gr)
 {
     for (auto it = m_globalReceivers.begin(), end = m_globalReceivers.end(); it != end; ++it) {
-        if (it.value().data() == gr) {
+        if (it.value().get() == gr) {
             m_globalReceivers.erase(it);
             break;
         }

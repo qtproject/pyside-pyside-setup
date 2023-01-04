@@ -12,7 +12,8 @@
 #include <QtCore/QObject>
 #include <QtCore/QPointer>
 #include <QtCore/QMap>
-#include <QtCore/QSharedPointer>
+
+#include <memory>
 
 namespace PySide
 {

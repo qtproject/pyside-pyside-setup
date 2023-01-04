@@ -19,7 +19,7 @@ QmlTypeInfoPtr ensureQmlTypeInfo(const PyObject *o)
     auto *hash = qmlTypeInfoHashStatic();
     auto it = hash->find(o);
     if (it == hash->end())
-        it = hash->insert(o, QmlTypeInfoPtr(new QmlTypeInfo));
+        it = hash->insert(o, std::make_shared<QmlTypeInfo>());
     return it.value();
 }
 
