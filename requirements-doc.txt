@@ -1,0 +1,6 @@
+sphinx==5.3
+sphinx-panels
+sphinx-copybutton
+myst-parser
+furo
+graphviz

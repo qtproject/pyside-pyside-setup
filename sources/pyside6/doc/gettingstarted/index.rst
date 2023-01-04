@@ -397,6 +397,13 @@ Starting from 6.3, the documentation is not being built by default.
 When using the second option described in this section, make sure to use the
 ``--build-docs`` option.
 
+Install the specific documentation requirements in your Python virtual
+environment::
+
+    pip install -r requirements-doc.txt
+
+You can find the ``requirements-doc.txt`` file in the root of the repository.
+
 Starting from 5.15, there are two options to build the documentation:
 
 1. Building rst-only documentation (no API)
@@ -438,13 +445,9 @@ The documentation is being generated using **qdoc** to get the API information, 
 for the local Python related notes.
 
 The system requires the ``libxml2`` and ``libxslt`` libraries.
-In the Python environment, ``graphviz`` needs to be installed on top
-of the modules listed in ``requirements.txt`` before running the
-installation process::
 
-    pip install graphviz
-
-After installing ``graphviz``, the ``dot`` command needs to be in PATH, otherwise,
+After installing ``graphviz`` (included in the ``requirements-doc.txt`` file),
+the ``dot`` command needs to be in PATH, otherwise,
 the process will fail. Installing ``graphviz`` system-wide is also an option.
 
 Since the process relies on a Qt installation, you need to specify where the

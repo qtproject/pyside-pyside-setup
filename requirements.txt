@@ -4,15 +4,10 @@ setuptools>=59.5,<60; python_version < '3.10'
 setuptools>=62.3; python_version >= '3.10'
 packaging
 build==0.7
-sphinx==5.3
-sphinx-panels
 six
 wheel>=0.35
 PyOpenGL
 pyinstaller==3.6
 numpy
 nuitka
-dataclasses; python_version < '3.7'
-furo
-sphinx-copybutton
 distro; sys_platform == 'linux'
