@@ -41,20 +41,38 @@ Guides per platform
 
 You can refer to the following pages for platform specific instructions:
 
-.. raw:: html
+.. panels::
+    :body: align-items-center jutify-content-center text-center
+    :container: container-lg pb-3
+    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
+    :img-top-cls: d-flex align-self-center img-responsive card-img-top-main
 
-    <table class="special">
-        <colgroup>
-            <col style="width: 200px" />
-            <col style="width: 200px" />
-            <col style="width: 200px" />
-        </colgroup>
-        <tr>
-            <td><a href="gettingstarted-windows.html"><p><strong>Windows</strong></p></a></td>
-            <td><a href="gettingstarted-macOS.html"><p><strong>macOS</strong></p></a></td>
-            <td><a href="gettingstarted-linux.html"><p><strong>Linux</strong></p></a></td>
-        </tr>
-    </table>
+    :img-top: ../images/windows.svg
+
+    +++
+
+    .. link-button:: windows
+        :type: ref
+        :text: Windows
+        :classes: btn-qt btn-block stretched-link
+    ---
+    :img-top: ../images/macos.svg
+
+    +++
+
+    .. link-button:: macOS
+        :type: ref
+        :text: macOS
+        :classes: btn-qt btn-block stretched-link
+    ---
+    :img-top: ../images/linux.svg
+
+    +++
+
+    .. link-button:: linux
+        :type: ref
+        :text: Linux
+        :classes: btn-qt btn-block stretched-link
 
 .. important:: |project| does not yet support WebAssembly and the mobile operating systems (Android or iOS).
                Most Linux-based embedded OS provide PySide with their official
