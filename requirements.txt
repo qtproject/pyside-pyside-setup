@@ -1,17 +1,11 @@
 setuptools>=65
 packaging
 build==0.7
-sphinx==5.3
-sphinx-panels
-myst-parser
 six
 wheel>=0.35
 PyOpenGL
 pyinstaller==3.6
 numpy
 nuitka
-dataclasses; python_version < '3.7'
-furo
-sphinx-copybutton
 distro; sys_platform == 'linux'
 patchelf==0.15; sys_platform == 'linux'
