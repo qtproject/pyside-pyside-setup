@@ -19,6 +19,7 @@
 #include <sbkconverter.h>
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
+#include <sbkerrors.h>
 
 #include <QtCore/QByteArrayView>
 #include <QtCore/QDebug>
@@ -395,7 +396,6 @@ int SignalManager::SignalManagerPrivate::qtPropertyMetacall(QObject *object,
     auto *pySbkSelf = Shiboken::BindingManager::instance().retrieveWrapper(object);
     Q_ASSERT(pySbkSelf);
     auto *pySelf = reinterpret_cast<PyObject *>(pySbkSelf);
-    Q_ASSERT(pySelf);
     Shiboken::AutoDecRef pp_name(Shiboken::String::fromCString(mp.name()));
     PySideProperty *pp = Property::getObject(pySelf, pp_name);
     if (!pp) {
@@ -403,9 +403,25 @@ int SignalManager::SignalManagerPrivate::qtPropertyMetacall(QObject *object,
         return false;
     }
     pp->d->metaCall(pySelf, call, args);
-    Py_XDECREF(pp);
-
+    Py_DECREF(pp);
     if (PyErr_Occurred()) {
+        // PYSIDE-2160: An unknown type was reported. Indicated by StopIteration.
+        if (PyErr_ExceptionMatches(PyExc_StopIteration)) {
+            PyObject *excType, *excValue, *excTraceback;
+            PyErr_Fetch(&excType, &excValue, &excTraceback);
+            bool ign = call == QMetaObject::WriteProperty;
+            PyErr_WarnFormat(PyExc_RuntimeWarning, 0,
+                ign ? "Unknown property type '%s' of QObject '%s' used in fset"
+                    : "Unknown property type '%s' of QObject '%s' used in fget with %R",
+                pp->d->typeName.constData(), metaObject->className(), excValue);
+            if (PyErr_Occurred())
+                Shiboken::Errors::storeError();
+            Py_DECREF(excType);
+            Py_DECREF(excValue);
+            Py_XDECREF(excTraceback);
+            return result;
+        }
+
         qWarning().noquote().nospace()
             << "An error occurred executing the property metacall " << call
             << " on property \"" << mp.name() << "\" of " << object;
