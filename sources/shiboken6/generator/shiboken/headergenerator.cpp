@@ -132,7 +132,7 @@ void HeaderGenerator::writeWrapperClass(TextStream &s,
     // modules, because without the protected hack, we sometimes need to
     // cast inherited wrappers. CppGenerator generates include statements for
     // the classes of the current module. For other modules, we insert the
-    // declarations as recursive headers, since wrapper headers are not \
+    // declarations as recursive headers, since wrapper headers are not
     // installed. This keeps the file structure as simple as before the
     // enhanced inheritance.
     if (avoidProtectedHack()) {
