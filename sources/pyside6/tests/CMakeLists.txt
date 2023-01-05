@@ -51,7 +51,7 @@ add_subdirectory(support)
 add_subdirectory(tools/metaobjectdump)
 add_subdirectory(tools/pyside6-deploy)
 
-if (NOT DISABLE_QtQml)
+if (NOT DISABLE_QtQuick)
     add_subdirectory(tools/pyside6-qml)
 endif()
 
