@@ -342,6 +342,10 @@ public:
         while (level < m_parseStack.size())
             m_parseStack.pop();
         TypeInfo instantiation;
+        if (name.startsWith(u"const ")) {
+            instantiation.setConstant(true);
+            name = name.mid(6);
+        }
         instantiation.setQualifiedName(qualifiedName(name));
         top()->addInstantiation(instantiation);
    }
