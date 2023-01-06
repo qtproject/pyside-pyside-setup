@@ -9,15 +9,17 @@
 
 class ContainerTypeEntryPrivate;
 
+struct OpaqueContainer // Generate an opaque container for an instantiation under name
+{
+    QString instantiation;
+    QString name;
+};
+
+using OpaqueContainers = QList<OpaqueContainer>;
+
 class ContainerTypeEntry : public ComplexTypeEntry
 {
 public:
-    struct OpaqueContainer // Generate an opaque container for an instantiation under name
-    {
-        QString instantiation;
-        QString name;
-    };
-    using OpaqueContainers = QList<OpaqueContainer>;
 
     enum ContainerKind {
         ListContainer,
@@ -36,7 +38,7 @@ public:
     qsizetype templateParameterCount() const;
 
     const OpaqueContainers &opaqueContainers() const;
-    void addOpaqueContainer(OpaqueContainer r);
+    void appendOpaqueContainers(const OpaqueContainers &l);
     bool generateOpaqueContainer(const QString &instantiation) const;
     QString opaqueContainerName(const QString &instantiation) const;
 

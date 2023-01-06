@@ -4,6 +4,7 @@
 #define TYPESYSTEMPARSER_H
 
 #include "typesystem.h"
+#include "containertypeentry.h"
 #include "typedatabase.h"
 #include "typedatabase_p.h"
 #include "typesystem_typedefs.h"
@@ -167,6 +168,7 @@ private:
     CustomTypeEntryPtr
         parseCustomTypeEntry(const ConditionalStreamReader &, const QString &name,
                              const QVersionNumber &since, QXmlStreamAttributes *);
+    bool parseOpaqueContainers(QStringView s, OpaqueContainers *result);
     ContainerTypeEntryPtr
         parseContainerTypeEntry(const ConditionalStreamReader &, const QString &name,
                                  const QVersionNumber &since, QXmlStreamAttributes *);

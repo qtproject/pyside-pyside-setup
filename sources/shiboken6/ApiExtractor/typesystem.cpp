@@ -1778,9 +1778,6 @@ TypedefEntry::TypedefEntry(TypedefEntryPrivate *d) :
 class ContainerTypeEntryPrivate : public ComplexTypeEntryPrivate
 {
 public:
-    using OpaqueContainer = ContainerTypeEntry::OpaqueContainer;
-    using OpaqueContainers = ContainerTypeEntry::OpaqueContainers;
-
     ContainerTypeEntryPrivate(const QString &entryName,
                               ContainerTypeEntry::ContainerKind containerKind,
                               const QVersionNumber &vr,
@@ -1834,21 +1831,16 @@ qsizetype ContainerTypeEntry::templateParameterCount() const
     return result;
 }
 
-const ContainerTypeEntry::OpaqueContainers &ContainerTypeEntry::opaqueContainers() const
+const OpaqueContainers &ContainerTypeEntry::opaqueContainers() const
 {
     S_D(const ContainerTypeEntry);
     return d->m_opaqueContainers;
 }
 
-void ContainerTypeEntry::addOpaqueContainer(OpaqueContainer r)
+void ContainerTypeEntry::appendOpaqueContainers(const OpaqueContainers &l)
 {
     S_D(ContainerTypeEntry);
-    // Fix to match AbstractMetaType::signature() which is used for matching
-    // "Foo*" -> "Foo *"
-    const auto asteriskPos = r.instantiation.indexOf(u'*');
-    if (asteriskPos > 0 && !r.instantiation.at(asteriskPos - 1).isSpace())
-        r.instantiation.insert(asteriskPos, u' ');
-    d->m_opaqueContainers.append(r);
+    d->m_opaqueContainers.append(l);
 }
 
 bool ContainerTypeEntry::generateOpaqueContainer(const QString &instantiation) const

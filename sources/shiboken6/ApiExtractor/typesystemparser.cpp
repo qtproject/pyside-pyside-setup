@@ -79,6 +79,7 @@ static inline QString invalidateAfterUseAttribute() { return QStringLiteral("inv
 static inline QString isNullAttribute() { return QStringLiteral("isNull"); }
 static inline QString locationAttribute() { return QStringLiteral("location"); }
 static inline QString modifiedTypeAttribute() { return QStringLiteral("modified-type"); }
+static inline QString opaqueContainerAttribute() { return QStringLiteral("opaque-containers"); }
 static inline QString operatorBoolAttribute() { return QStringLiteral("operator-bool"); }
 static inline QString parentManagementAttribute() { return QStringLiteral("parent-management"); }
 static inline QString pyiTypeAttribute() { return QStringLiteral("pyi-type"); }
@@ -1477,16 +1478,24 @@ PrimitiveTypeEntryPtr
 }
 
 // "int:QList_int;QString:QList_QString"
-static bool parseOpaqueContainers(QStringView s, ContainerTypeEntryPtr cte)
+bool TypeSystemParser::parseOpaqueContainers(QStringView s, OpaqueContainers *result)
 {
     const auto entries = s.split(u';');
     for (const auto &entry : entries) {
         const auto values = entry.split(u':');
-        if (values.size() != 2)
-            return false;
+        if (values.size() != 2) {
+            m_error = u"Error parsing the opaque container attribute: \""_s
+                      + s.toString() + u"\"."_s;
+           return false;
+        }
         QString instantiation = values.at(0).trimmed().toString();
+        // Fix to match AbstractMetaType::signature() which is used for matching
+        // "Foo*" -> "Foo *"
+        const auto asteriskPos = instantiation.indexOf(u'*');
+        if (asteriskPos > 0 && !instantiation.at(asteriskPos - 1).isSpace())
+           instantiation.insert(asteriskPos, u' ');
         QString name = values.at(1).trimmed().toString();
-        cte->addOpaqueContainer({instantiation, name});
+        result->append({instantiation, name});
     }
     return true;
 }
@@ -1518,13 +1527,12 @@ ContainerTypeEntryPtr
 
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == u"opaque-containers") {
+        if (name == opaqueContainerAttribute()) {
             const auto attribute = attributes->takeAt(i);
-            if (!parseOpaqueContainers(attribute.value(), type)) {
-                m_error = u"Error parsing the opaque container attribute: \""_s
-                          + attribute.value().toString() + u"\"."_s;
+            OpaqueContainers oc;
+            if (!parseOpaqueContainers(attribute.value(), &oc))
                 return nullptr;
-            }
+            type->appendOpaqueContainers(oc);
         }
     }
 
