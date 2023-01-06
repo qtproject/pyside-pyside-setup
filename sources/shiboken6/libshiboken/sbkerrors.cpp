@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "sbkerrors.h"
+#include "sbkstring.h"
 #include "helper.h"
 
 namespace Shiboken
@@ -80,20 +81,28 @@ void storeError()
     // Therefore, we handle the error when we are error checking, anyway.
     PyErr_Fetch(&savedError.type, &savedError.exc, &savedError.traceback);
     PyErr_NormalizeException(&savedError.type, &savedError.exc, &savedError.traceback);
+
+    // In this error-free context, it is safe to call a string function.
+    static PyObject *const msg = PyUnicode_FromString("    Note: This exception was delayed.");
+    static PyObject *const _add_note = Shiboken::String::createStaticString("add_note");
+    static bool hasAddNote = PyObject_HasAttr(PyExc_BaseException, _add_note);
+    if (hasAddNote) {
+        PyObject_CallMethodObjArgs(savedError.exc, _add_note, msg, nullptr);
+    } else {
+        PyObject *type, *exc, *traceback;
+        PyErr_Format(PyExc_RuntimeError, "Delayed %s exception:",
+            reinterpret_cast<PyTypeObject *>(savedError.type)->tp_name);
+        PyErr_Fetch(&type, &exc, &traceback);
+        PyException_SetContext(savedError.exc, exc);
+        PyErr_NormalizeException(&type, &exc, &traceback);
+    }
 }
 
 PyObject *occurred()
 {
     // This error handler can be called in any Python context.
+
     if (savedError.type) {
-        PyErr_Format(PyExc_RuntimeError, "Delayed %s exception:",
-            reinterpret_cast<PyTypeObject *>(savedError.type)->tp_name);
-        PyObject *type;
-        PyObject *exc;
-        PyObject *traceback;
-        PyErr_Fetch(&type, &exc, &traceback);
-        PyErr_NormalizeException(&type, &exc, &traceback);
-        PyException_SetContext(savedError.exc, exc);
         PyErr_Restore(savedError.type, savedError.exc, savedError.traceback);
         savedError.type = nullptr;
     }
