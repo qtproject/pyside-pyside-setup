@@ -19,7 +19,8 @@ instead of a Python list. Manipulations like adding or removing elements
 can applied directly to them using the C++ container functions.
 
 This is achieved by specifying the name and the instantiated type
-in the ``opaque-containers`` attribute of :ref:`container-type`.
+in the ``opaque-containers`` attribute of :ref:`container-type`
+or using the :ref:`opaque-container` element for existing container types.
 
 A second use case are public fields of container types. In the normal case,
 they are converted to Python containers on read access. By a field modification,

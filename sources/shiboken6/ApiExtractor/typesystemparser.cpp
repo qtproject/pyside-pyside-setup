@@ -465,6 +465,7 @@ static const StackElementHash &stackElementHash()
         {u"native-to-target", StackElement::NativeToTarget},
         {u"no-null-pointer", StackElement::NoNullPointers},
         {u"object-type", StackElement::ObjectTypeEntry},
+        {u"opaque-container", StackElement::OpaqueContainer},
         {u"parent", StackElement::ParentOwner},
         {u"primitive-type", StackElement::PrimitiveTypeEntry},
         {u"property", StackElement::Property},
@@ -1542,6 +1543,28 @@ ContainerTypeEntryPtr
     }
 
     return type;
+}
+
+bool TypeSystemParser::parseOpaqueContainerElement(QXmlStreamAttributes *attributes)
+{
+    QString containerName;
+    OpaqueContainers oc;
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
+        const auto name = attributes->at(i).qualifiedName();
+        if (name == nameAttribute()) {
+            containerName = attributes->takeAt(i).value().toString();
+        } else if (name == opaqueContainerAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            if (!parseOpaqueContainers(attribute.value(), &oc))
+                return false;
+        }
+    }
+    if (containerName.isEmpty()) {
+        m_error = msgMissingAttribute(nameAttribute());
+        return false;
+    }
+    m_context->opaqueContainerHash[containerName].append(oc);
+    return true;
 }
 
 EnumTypeEntryPtr
@@ -3333,7 +3356,8 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                         || element == StackElement::ConversionRule
                         || element == StackElement::AddFunction
                         || element == StackElement::DeclareFunction
-                        || element == StackElement::Template;
+                        || element == StackElement::Template
+                        || element == StackElement::OpaqueContainer;
 
         if (!topLevel && m_stack.at(m_stack.size() - 2) == StackElement::Root) {
             m_error = u"Tag requires parent: '"_s + tagName.toString() + u'\'';
@@ -3501,6 +3525,10 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
             break;
         case StackElement::Replace:
             if (!parseReplace(reader, topElement, &attributes))
+                return false;
+            break;
+        case StackElement::OpaqueContainer:
+            if (!parseOpaqueContainerElement(&attributes))
                 return false;
             break;
         default:

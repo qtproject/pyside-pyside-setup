@@ -15,20 +15,7 @@
         </conversion-rule>
     </primitive-type>
 
-    <container-type name="std::list" type="list"
-                    opaque-containers="int:StdIntList">
-        <include file-name="list" location="global"/>
-        <conversion-rule>
-            <native-to-target>
-                <insert-template name="shiboken_conversion_cppsequence_to_pylist"/>
-            </native-to-target>
-            <target-to-native>
-                <add-conversion type="PySequence">
-                    <insert-template name="shiboken_conversion_pyiterable_to_cppsequentialcontainer"/>
-                </add-conversion>
-            </target-to-native>
-        </conversion-rule>
-    </container-type>
+    <opaque-container name="std::list" opaque-containers="int:StdIntList"/>
 
     <object-type name="Obj"/>
     <value-type name="Val">

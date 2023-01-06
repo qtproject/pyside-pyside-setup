@@ -3126,4 +3126,6 @@
       </object-type>
   </namespace-type>
 
+  <opaque-container name="QList" opaque-containers="QVector2D:QVector2DList;QVector3D:QVector3DList;QVector4D:QVector4DList"/>
+
 </typesystem>

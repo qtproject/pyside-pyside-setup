@@ -129,6 +129,7 @@ struct TypeDatabasePrivate
                                           const CustomTypeEntryPtr &targetLang);
     void addBuiltInPrimitiveTypes();
     void addBuiltInContainerTypes(const TypeDatabaseParserContextPtr &context);
+    bool addOpaqueContainers(const TypeDatabaseParserContextPtr &context);
     TypeEntryMultiMapConstIteratorRange findTypeRange(const QString &name) const;
     template <class Predicate>
     TypeEntryCList findTypesHelper(const QString &name, Predicate pred) const;
@@ -904,6 +905,22 @@ void TypeDatabasePrivate::addBuiltInContainerTypes(const TypeDatabaseParserConte
     Q_ASSERT(ok);
 }
 
+bool TypeDatabasePrivate::addOpaqueContainers(const TypeDatabaseParserContextPtr &context)
+{
+    const auto &och = context->opaqueContainerHash;
+    for (auto it = och.cbegin(), end = och.cend(); it != end; ++it) {
+        const QString &name = it.key();
+        auto te = findType(name);
+        if (!te || !te->isContainer()) {
+            qCWarning(lcShiboken, "No container \"%s\" found.", qPrintable(name));
+            return false;
+        }
+        auto cte = std::static_pointer_cast<ContainerTypeEntry>(te);
+        cte->appendOpaqueContainers(it.value());
+    }
+    return true;
+}
+
 bool TypeDatabase::parseFile(const QString &filename, bool generate)
 {
     QString filepath = modifiedTypesystemFilepath(filename, {});
@@ -975,7 +992,8 @@ bool TypeDatabasePrivate::parseFile(QIODevice *device, TypeDatabase *db, bool ge
 
     addBuiltInPrimitiveTypes();
     addBuiltInContainerTypes(context);
-    return resolveSmartPointerInstantiations(context);
+    return addOpaqueContainers(context)
+        && resolveSmartPointerInstantiations(context);
 }
 
 bool TypeDatabase::parseFile(const TypeDatabaseParserContextPtr &context,

@@ -34,6 +34,7 @@ typesystem
     It may contain :ref:`add-function`, :ref:`container-type`,
     :ref:`custom-type`, :ref:`enum-type`, :ref:`extra-includes`, :ref:`function`,
     :ref:`load-typesystem`, :ref:`namespace`, :ref:`object-type`,
+    :ref:`opaque-container`,
     :ref:`primitive-type`, :ref:`rejection`, :ref:`smart-pointer-type`,
     :ref:`suppress-warning`, :ref:`template`, :ref:`system_include`,
     :ref:`typedef-type` or :ref:`value-type` child nodes.
@@ -549,6 +550,24 @@ container-type
     and there are also a number of useful
     :ref:`predefined conversion templates <predefined_templates>`.
 
+.. _opaque-container:
+
+opaque-container
+^^^^^^^^^^^^^^^^
+
+    The ``opaque-container`` element can be used to  add further instantiations
+    of :ref:`opaque containers <opaque-containers>` to existing container types
+    (built-in or specified by :ref:`container-type` in included modules).
+    It is a child of the :ref:`typesystem` node.
+
+    .. code-block:: xml
+
+        <typesystem>
+            <oqaque-container name="..." opaque-containers ="..." />
+        </typesystem>
+
+    For the **name** and **opaque-containers** attributes,
+    see :ref:`container-type`.
 
 .. _typedef-type:
 

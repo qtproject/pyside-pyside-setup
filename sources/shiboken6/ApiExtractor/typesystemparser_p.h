@@ -103,6 +103,7 @@ enum class StackElement {
             ArgumentModifiers,
 
             ImportFile,
+            OpaqueContainer,
             Unimplemented
 };
 
@@ -172,6 +173,7 @@ private:
     ContainerTypeEntryPtr
         parseContainerTypeEntry(const ConditionalStreamReader &, const QString &name,
                                  const QVersionNumber &since, QXmlStreamAttributes *);
+    bool parseOpaqueContainerElement(QXmlStreamAttributes *attributes);
     EnumTypeEntryPtr
         parseEnumTypeEntry(const ConditionalStreamReader &, const QString &name,
                            const QVersionNumber &since, QXmlStreamAttributes *);
