@@ -9,6 +9,7 @@
 #include "abstractmetatype.h"
 #include "addedfunction.h"
 #include "graph.h"
+#include "debughelpers_p.h"
 #include "exception.h"
 #include "messages.h"
 #include "propertyspec.h"
