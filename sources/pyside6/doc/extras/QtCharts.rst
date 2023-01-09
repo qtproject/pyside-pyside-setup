@@ -15,3 +15,7 @@ directive:
         from PySide6 import QtCharts
 
 The module also provides `QML types <https://doc.qt.io/qt-6/qtcharts-qmlmodule.html>`_ .
+
+.. note:: An instance of QApplication is required for the QML types as the
+   module depends on Qt's \l{Graphics View Framework} for rendering.
+   QGuiApplication is not sufficient.
