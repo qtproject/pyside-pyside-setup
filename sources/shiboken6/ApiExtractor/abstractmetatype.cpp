@@ -117,6 +117,7 @@ public:
     QString formatPythonSignature() const;
     bool isEquivalent(const AbstractMetaTypeData &rhs) const;
     bool equals(const AbstractMetaTypeData &rhs) const;
+    QStringList instantiationCppSignatures() const;
 
     template <class Predicate>
     bool generateOpaqueContainer(Predicate p) const;
@@ -150,6 +151,14 @@ AbstractMetaTypeData::AbstractMetaTypeData(const TypeEntryCPtr &t) :
     m_signaturesDirty(true),
     m_reserved(0)
 {
+}
+
+QStringList AbstractMetaTypeData::instantiationCppSignatures() const
+{
+    QStringList result;
+    for (const auto &i : m_instantiations)
+        result.append(i.cppSignature());
+    return result;
 }
 
 AbstractMetaType::AbstractMetaType(const TypeEntryCPtr &t) :
@@ -218,6 +227,11 @@ void AbstractMetaType::setInstantiations(const AbstractMetaTypeList &insts)
 const AbstractMetaTypeList &AbstractMetaType::instantiations() const
 {
     return d->m_instantiations;
+}
+
+QStringList AbstractMetaType::instantiationCppSignatures() const
+{
+    return d->instantiationCppSignatures();
 }
 
 // For applying the <array> function argument modification: change into a type
@@ -952,33 +966,30 @@ bool AbstractMetaTypeData::generateOpaqueContainer(Predicate pred) const
     auto kind = containerTypeEntry->containerKind();
     if (kind != ContainerTypeEntry::ListContainer)
         return false;
-    const auto &instantation =  m_instantiations.constFirst();
-    if (instantation.referenceType() != NoReference)
-        return false;
-    const QString signature = instantation.cppSignature();
 
-    bool result = false;
-    auto instTypEntry = instantation.typeEntry();
-    switch (instTypEntry->type()) {
+    const auto &firstInstantiation = m_instantiations.constFirst();
+    if (firstInstantiation.referenceType() != NoReference)
+        return false;
+    switch (firstInstantiation.typeEntry()->type()) {
     case TypeEntry::PrimitiveType:
     case TypeEntry::FlagsType:
     case TypeEntry::EnumType:
     case TypeEntry::BasicValueType:
     case TypeEntry::ObjectType:
     case TypeEntry::CustomType:
-        result = pred(containerTypeEntry, signature);
         break;
     default:
-        break;
+        return false;
     }
-    return result;
+
+    return pred(containerTypeEntry, instantiationCppSignatures());
 }
 
 // Simple predicate for checking whether an opaque container should be generated
 static bool opaqueContainerPredicate(const ContainerTypeEntryCPtr &t,
-                                     const QString &signature)
+                                     const QStringList &instantiations)
 {
-    return t->generateOpaqueContainer(signature);
+    return t->generateOpaqueContainer(instantiations);
 }
 
 bool AbstractMetaType::generateOpaqueContainer() const
@@ -991,8 +1002,9 @@ bool AbstractMetaType::generateOpaqueContainer() const
 // (cf AbstractMetaFunction::generateOpaqueContainerReturn())
 bool AbstractMetaType::generateOpaqueContainerForGetter(const QString &modifiedType) const
 {
-    auto predicate = [&modifiedType](const ContainerTypeEntryCPtr &t, const QString &signature) {
-        return t->opaqueContainerName(signature) == modifiedType;
+    auto predicate = [&modifiedType](const ContainerTypeEntryCPtr &t,
+                                     const QStringList &instantiations) {
+        return t->opaqueContainerName(instantiations) == modifiedType;
     };
     return d->generateOpaqueContainer(predicate);
 }

@@ -614,8 +614,7 @@ void ApiExtractorPrivate::collectInstantiatedOpqaqueContainers(InstantiationColl
     for (const auto &container : containers) {
         for (const auto &oc : container->opaqueContainers()) {
             QString errorMessage;
-            const QString typeName = container->qualifiedCppName() + u'<'
-                                     + oc.instantiation + u'>';
+            const QString typeName = container->qualifiedCppName() + oc.templateParameters();
             auto typeOpt = AbstractMetaType::fromString(typeName, &errorMessage);
             if (typeOpt.has_value()
                 && generateOpaqueContainer(typeOpt.value(), moduleEntry)) {

@@ -88,7 +88,8 @@ CppGenerator::OpaqueContainerData
     OpaqueContainerData result;
     const auto &valueType = containerType.instantiations().constFirst();
     const auto containerTypeEntry = std::static_pointer_cast<const ContainerTypeEntry>(containerType.typeEntry());
-    result.name = containerTypeEntry->opaqueContainerName(valueType.typeEntry()->name());
+    result.name =
+        containerTypeEntry->opaqueContainerName(containerType.instantiationCppSignatures());
 
     const auto cppSignature = containerType.cppSignature();
     s << "\n// Binding for " << cppSignature << "\n\n";

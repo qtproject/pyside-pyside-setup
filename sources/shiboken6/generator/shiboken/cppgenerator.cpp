@@ -169,7 +169,7 @@ static QString opaqueContainerCreationFunc(const AbstractMetaType &type)
     QString result = u"create"_s;
     if (type.isConstant())
         result += u"Const"_s;
-    result += containerTypeEntry->opaqueContainerName(instantiationTypeEntry->name());
+    result += containerTypeEntry->opaqueContainerName(type.instantiationCppSignatures());
     return result;
 }
 

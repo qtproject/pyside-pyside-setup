@@ -1488,14 +1488,19 @@ bool TypeSystemParser::parseOpaqueContainers(QStringView s, OpaqueContainers *re
                       + s.toString() + u"\"."_s;
            return false;
         }
-        QString instantiation = values.at(0).trimmed().toString();
-        // Fix to match AbstractMetaType::signature() which is used for matching
-        // "Foo*" -> "Foo *"
-        const auto asteriskPos = instantiation.indexOf(u'*');
-        if (asteriskPos > 0 && !instantiation.at(asteriskPos - 1).isSpace())
-           instantiation.insert(asteriskPos, u' ');
-        QString name = values.at(1).trimmed().toString();
-        result->append({instantiation, name});
+        OpaqueContainer oc;
+        oc.name = values.at(1).trimmed().toString();
+        const auto instantiations = values.at(0).split(u',', Qt::SkipEmptyParts);
+        for (const auto &instantiationV : instantiations) {
+           QString instantiation = instantiationV.trimmed().toString();
+           // Fix to match AbstractMetaType::signature() which is used for matching
+           // "Foo*" -> "Foo *"
+           const auto asteriskPos = instantiation.indexOf(u'*');
+           if (asteriskPos > 0 && !instantiation.at(asteriskPos - 1).isSpace())
+                instantiation.insert(asteriskPos, u' ');
+           oc.instantiations.append(instantiation);
+        }
+        result->append(oc);
     }
     return true;
 }

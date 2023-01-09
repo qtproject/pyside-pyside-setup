@@ -67,6 +67,7 @@ public:
     const AbstractMetaTypeList &instantiations() const;
     void addInstantiation(const AbstractMetaType &inst);
     void setInstantiations(const AbstractMetaTypeList  &insts);
+    QStringList instantiationCppSignatures() const;
 
     QString minimalSignature() const { return formatSignature(true); }
 

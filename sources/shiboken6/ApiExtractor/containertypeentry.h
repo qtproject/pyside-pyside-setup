@@ -11,8 +11,10 @@ class ContainerTypeEntryPrivate;
 
 struct OpaqueContainer // Generate an opaque container for an instantiation under name
 {
-    QString instantiation;
+    QStringList instantiations;
     QString name;
+
+    QString templateParameters() const;
 };
 
 using OpaqueContainers = QList<OpaqueContainer>;
@@ -39,8 +41,8 @@ public:
 
     const OpaqueContainers &opaqueContainers() const;
     void appendOpaqueContainers(const OpaqueContainers &l);
-    bool generateOpaqueContainer(const QString &instantiation) const;
-    QString opaqueContainerName(const QString &instantiation) const;
+    bool generateOpaqueContainer(const QStringList &instantiations) const;
+    QString opaqueContainerName(const QStringList &instantiations) const;
 
     bool hasCustomConversion() const;
     void setCustomConversion(const CustomConversionPtr &customConversion);
@@ -54,5 +56,7 @@ public:
 protected:
     explicit ContainerTypeEntry(ContainerTypeEntryPrivate *d);
 };
+
+QDebug operator<<(QDebug d, const OpaqueContainer &oc);
 
 #endif // CONTAINERTYPEENTRY_H

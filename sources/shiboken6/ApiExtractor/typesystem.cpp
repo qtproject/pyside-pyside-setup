@@ -1787,11 +1787,11 @@ public:
     {
     }
 
-    OpaqueContainers::const_iterator findOpaqueContainer(const QString &instantiation) const
+    OpaqueContainers::const_iterator findOpaqueContainer(const QStringList &instantiations) const
     {
         return std::find_if(m_opaqueContainers.cbegin(), m_opaqueContainers.cend(),
-                            [&instantiation](const OpaqueContainer &r) {
-                                return r.instantiation == instantiation;
+                            [&instantiations](const OpaqueContainer &r) {
+                                return r.instantiations == instantiations;
                             });
     }
 
@@ -1799,6 +1799,19 @@ public:
     CustomConversionPtr m_customConversion;
     ContainerTypeEntry::ContainerKind m_containerKind;
 };
+
+QString OpaqueContainer::templateParameters() const
+{
+    QString result;
+    result += u'<';
+    for (qsizetype i = 0, size = instantiations.size(); i < size; ++i) {
+        if (i)
+            result += u',';
+        result += instantiations.at(i);
+    }
+    result += u'>';
+    return result;
+}
 
 ContainerTypeEntry::ContainerTypeEntry(const QString &entryName, ContainerKind containerKind,
                                        const QVersionNumber &vr,
@@ -1843,16 +1856,16 @@ void ContainerTypeEntry::appendOpaqueContainers(const OpaqueContainers &l)
     d->m_opaqueContainers.append(l);
 }
 
-bool ContainerTypeEntry::generateOpaqueContainer(const QString &instantiation) const
+bool ContainerTypeEntry::generateOpaqueContainer(const QStringList &instantiations) const
 {
     S_D(const ContainerTypeEntry);
-    return d->findOpaqueContainer(instantiation) != d->m_opaqueContainers.cend();
+    return d->findOpaqueContainer(instantiations) != d->m_opaqueContainers.cend();
 }
 
-QString ContainerTypeEntry::opaqueContainerName(const QString &instantiation) const
+QString ContainerTypeEntry::opaqueContainerName(const QStringList &instantiations) const
 {
     S_D(const ContainerTypeEntry);
-    const auto it = d->findOpaqueContainer(instantiation);
+    const auto it = d->findOpaqueContainer(instantiations);
     return it != d->m_opaqueContainers.cend() ? it->name : QString{};
 }
 
@@ -2450,18 +2463,23 @@ void NamespaceTypeEntry::formatDebug(QDebug &debug) const
         debug << "[inline]";
 }
 
+QDebug operator<<(QDebug d, const OpaqueContainer &oc)
+{
+    QDebugStateSaver saver(d);
+    d.noquote();
+    d.nospace();
+    d << "OpaqueContainer(\"" << oc.name << "\": " << oc.templateParameters() << ')';
+    return d;
+}
+
 void ContainerTypeEntry::formatDebug(QDebug &debug) const
 {
     S_D(const ContainerTypeEntry);
 
     ComplexTypeEntry::formatDebug(debug);
     debug << ", type=" << d->m_containerKind << '"';
-    if (!d->m_opaqueContainers.isEmpty()) {
-        debug << ", opaque-containers=[";
-        for (const auto &r : d->m_opaqueContainers)
-            debug << r.instantiation << "->" << r.name << ',';
-        debug << ']';
-    }
+    if (!d->m_opaqueContainers.isEmpty())
+        debug << ", opaque-containers=[" << d->m_opaqueContainers << ']';
 }
 
 void SmartPointerTypeEntry::formatDebug(QDebug &debug) const
