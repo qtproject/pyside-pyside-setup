@@ -52,6 +52,12 @@ class QLocaleTestToNumber(unittest.TestCase):
         value = en_locale.toCurrencyString(1234.56)
         self.assertEqual(value, "$1,234.56")
 
+    def testToString(self):
+        """PYSIDE-2168, check negative values"""
+        en_locale = QLocale("en_US")
+        value = en_locale.toString(-4)
+        self.assertEqual(value, "-4")
+
 
 if __name__ == '__main__':
     unittest.main()
