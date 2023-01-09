@@ -126,6 +126,7 @@ using OverloadGraph = Graph<QString>;
 void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
 {
     QHash<QString, OverloadDataList> typeToOverloads;
+    using Edge = std::pair<QString, QString>;
 
     bool checkPyObject = false;
     bool checkPySequence = false;
@@ -322,6 +323,17 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
     // QByteArray args need to be checked after QString args
     if (graph.hasNode(qStringT()) && graph.hasNode(qByteArrayT()))
         graph.addEdge(qStringT(), qByteArrayT());
+
+    static const Edge rangeOrder[] =
+        {{doubleT(), floatT()},
+         {longLongT(), longT()}, {longLongT(), intT()}, {intT(), shortT()},
+         {unsignedLongLongT(), unsignedLongT()}, {unsignedLongLongT(), unsignedT()},
+         {unsignedLongLongT(), unsignedIntT()}, {unsignedT(), unsignedShortT()}
+    };
+    for (const auto &r : rangeOrder) {
+        if (graph.hasNode(r.first) && graph.hasNode(r.second))
+            graph.addEdge(r.first, r.second);
+    }
 
     for (const auto &ov : std::as_const(m_children)) {
         const AbstractMetaType &targetType = ov->argType();
