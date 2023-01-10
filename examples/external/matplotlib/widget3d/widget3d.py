@@ -4,7 +4,7 @@
 import sys
 
 import numpy as np
-from matplotlib.backends.backend_qt5agg import FigureCanvas
+from matplotlib.backends.backend_qtagg import FigureCanvas
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import axes3d
 from PySide6.QtCore import Qt, Slot
