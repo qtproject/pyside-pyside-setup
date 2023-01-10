@@ -10,6 +10,7 @@
 #include "modifications_typedefs.h"
 
 #include <QtCore/QFlags>
+#include <QtCore/QSet>
 #include <QtCore/QHash>
 
 #include <memory>
@@ -123,7 +124,10 @@ private:
 
     OpaqueContainerData
         writeOpaqueContainerConverterFunctions(TextStream &s,
-                                               const AbstractMetaType &containerType) const;
+                                               const AbstractMetaType &containerType,
+                                               QSet<AbstractMetaType> *valueTypes) const;
+    void writeOpaqueContainerValueConverter(TextStream &s,
+                                            const AbstractMetaType &valueType) const;
 
     void writeSmartPointerConverterFunctions(TextStream &s,
                                              const AbstractMetaType &smartPointerType) const;

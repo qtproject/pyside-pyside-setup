@@ -80,20 +80,10 @@ static void writeContainerCreationFunc(TextStream &s,
         << "}\n\n";
 }
 
-// Generate code for a type wrapping a C++ container instantiation
-CppGenerator::OpaqueContainerData
-   CppGenerator::writeOpaqueContainerConverterFunctions(TextStream &s,
-                                                        const AbstractMetaType &containerType) const
+// Generate template specialization of value converter helper
+void CppGenerator::writeOpaqueContainerValueConverter(TextStream &s,
+                                                      const AbstractMetaType &valueType) const
 {
-    OpaqueContainerData result;
-    const auto &valueType = containerType.instantiations().constFirst();
-    const auto containerTypeEntry = std::static_pointer_cast<const ContainerTypeEntry>(containerType.typeEntry());
-    result.name =
-        containerTypeEntry->opaqueContainerName(containerType.instantiationCppSignatures());
-
-    const auto cppSignature = containerType.cppSignature();
-    s << "\n// Binding for " << cppSignature << "\n\n";
-
     // Generate template specialization of value converter helper unless it is already there
     const QString pyArg = u"pyArg"_s;
     const QString cppArg = u"cppArg"_s;
@@ -133,8 +123,29 @@ CppGenerator::OpaqueContainerData
     s << ")) {\n" << indent
         << "Shiboken::Errors::setWrongContainerType();\n"
         << "return {};\n" << outdent << "}\n";
-        writePythonToCppTypeConversion(s, valueType, pyArg, cppArg, nullptr, {});
+    writePythonToCppTypeConversion(s, valueType, pyArg, cppArg, nullptr, {});
     s << "return " << cppArg << ";\n" << outdent << "}\n" << outdent << "};\n\n";
+}
+
+// Generate code for a type wrapping a C++ container instantiation
+CppGenerator::OpaqueContainerData
+   CppGenerator::writeOpaqueContainerConverterFunctions(TextStream &s,
+                                                        const AbstractMetaType &containerType,
+                                                        QSet<AbstractMetaType> *valueTypes) const
+{
+    OpaqueContainerData result;
+    const auto &valueType = containerType.instantiations().constFirst();
+    const auto containerTypeEntry = std::static_pointer_cast<const ContainerTypeEntry>(containerType.typeEntry());
+    result.name =
+        containerTypeEntry->opaqueContainerName(containerType.instantiationCppSignatures());
+
+    const auto cppSignature = containerType.cppSignature();
+    s << "\n// Binding for " << cppSignature << "\n\n";
+
+    if (!valueTypes->contains(valueType)) {
+        valueTypes->insert(valueType);
+        writeOpaqueContainerValueConverter(s, valueType);
+    }
 
     const QString privateObjType = u"ShibokenSequenceContainerPrivate<"_s
         + cppSignature + u'>';
@@ -205,6 +216,7 @@ CppGenerator::OpaqueContainerData
 
     // Check function
     result.checkFunctionName = result.name + u"_Check"_s;
+    const QString pyArg = u"pyArg"_s;
     s << "extern \"C\" int " << result.checkFunctionName << "(PyObject *" << pyArg
         << ")\n{\n" << indent << "return " << pyArg << " != nullptr && "
         << pyArg << " != Py_None && " << pyArg << "->ob_type == "

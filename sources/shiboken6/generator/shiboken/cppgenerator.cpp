@@ -6846,14 +6846,17 @@ bool CppGenerator::finishGeneration()
 
     QHash<AbstractMetaType, OpaqueContainerData> opaqueContainers;
     const auto &containers = api().instantiatedContainers();
+    QSet<AbstractMetaType> valueConverters;
     if (!containers.isEmpty()) {
         s << "// Container Type converters.\n\n";
         for (const AbstractMetaType &container : containers) {
-            s << "// C++ to Python conversion for container type '" << container.cppSignature() << "'.\n";
+            s << "// C++ to Python conversion for container type '"
+                << container.cppSignature() << "'.\n";
             writeContainerConverterFunctions(s, container);
             if (container.generateOpaqueContainer()) {
-                opaqueContainers.insert(container,
-                                        writeOpaqueContainerConverterFunctions(s, container));
+                auto data = writeOpaqueContainerConverterFunctions(s, container,
+                                                                   &valueConverters);
+                opaqueContainers.insert(container, data);
             }
         }
         s << '\n';
