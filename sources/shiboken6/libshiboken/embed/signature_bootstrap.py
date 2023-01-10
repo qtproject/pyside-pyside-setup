@@ -26,6 +26,7 @@ recursion_trap = 0
 import base64
 import importlib
 import io
+import os
 import sys
 import traceback
 import zipfile
@@ -71,11 +72,44 @@ def bootstrap():
             sys.exit(-1)
         target.remove(support_path)
 
-    target, support_path = prepare_zipfile()
+    # Here we decide if re we-incarnate the embedded files or use embedding.
+    incarnated = re_incarnate_files()
+    if incarnated:
+        target, support_path = sys.path, os.fspath(incarnated)
+    else:
+        target, support_path = prepare_zipfile()
+    # PYSIDE-962: pre-load needed after re_incarnate_files [Windows, Py3.7.9]
+    ensure_shibokensupport(target, support_path)
     with ensure_shibokensupport(target, support_path):
         from shibokensupport.signature import loader
     return loader
 
+# Newer functionality:
+# This function checks if the support directory exist and returns it.
+# If does not exist, we try to create it and return it.
+# Otherwise, we return None.
+
+def re_incarnate_files():
+    import shiboken6 as root
+    files_dir = Path(root.__file__).resolve().parent / "files.dir"
+    if files_dir.exists():
+        return files_dir
+
+    target, zip = prepare_zipfile()
+    names = (_ for _ in zip.zfile.namelist() if _.endswith(".py"))
+    try:
+        # first check mkdir to get an error when we cannot write.
+        files_dir.mkdir()
+    except os.error:
+        return None
+    try:
+        # Then check for a real error when unpacking the zip file.
+        zip.zfile.extractall(path=files_dir, members=names)
+        return files_dir
+    except Exception as e:
+        print('Exception:', e)
+        traceback.print_exc(file=sys.stdout)
+        raise
 
 # New functionality: Loading from a zip archive.
 # There exists the zip importer, but as it is written, only real zip files are
