@@ -89,6 +89,8 @@ In case they need to explicitly specified, the following templates can be used:
     +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
     | ``shiboken_conversion_pyiterable_to_cppsequentialcontainer_reserve`` | Convert an iterable Python type to a C++ sequential container supporting reserve() |
     +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
+    | ``shiboken_conversion_pyiterable_to_cpparray``                       | Convert an iterable Python type to a fixed-size array (std::array, std::span)      |
+    +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
     | ``shiboken_conversion_pyiterable_to_cppsetcontainer``                | Convert a PySequence to a set-type C++ container (std::set/QSet)                   |
     +----------------------------------------------------------------------+------------------------------------------------------------------------------------+
     | ``shiboken_conversion_stdmap_to_pydict``                             | Convert a std::map/std::unordered_map to a PyDict                                  |

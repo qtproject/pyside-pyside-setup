@@ -151,22 +151,26 @@ CppGenerator::OpaqueContainerData
         + cppSignature + u'>';
 
     // methods
-    const bool isStdVector = containerType.name() == u"std::vector";
+    const QString &containerName = containerType.name();
+    const bool isStdVector = containerName  == u"std::vector";
+    const bool isFixed = containerName == u"std::array";
     const QString methods = result.name + u"_methods"_s;
     s << "static PyMethodDef " << methods << "[] = {\n" << indent;
-    writeMethod(s, privateObjType, "push_back");
-    writeMethod(s, privateObjType, "push_back", "append"); // Qt convention
-    writeNoArgsMethod(s, privateObjType, "clear");
-    writeNoArgsMethod(s, privateObjType, "pop_back");
-    writeNoArgsMethod(s, privateObjType, "pop_back", "removeLast"); // Qt convention
-    if (!isStdVector) {
-        writeMethod(s, privateObjType, "push_front");
-        writeMethod(s, privateObjType, "push_front", "prepend"); // Qt convention
-        writeNoArgsMethod(s, privateObjType, "pop_front");
-        writeMethod(s, privateObjType, "pop_front", "removeFirst"); // Qt convention
+    if (!isFixed) {
+        writeMethod(s, privateObjType, "push_back");
+        writeMethod(s, privateObjType, "push_back", "append"); // Qt convention
+        writeNoArgsMethod(s, privateObjType, "clear");
+        writeNoArgsMethod(s, privateObjType, "pop_back");
+        writeNoArgsMethod(s, privateObjType, "pop_back", "removeLast"); // Qt convention
+        if (!isStdVector) {
+            writeMethod(s, privateObjType, "push_front");
+            writeMethod(s, privateObjType, "push_front", "prepend"); // Qt convention
+            writeNoArgsMethod(s, privateObjType, "pop_front");
+            writeMethod(s, privateObjType, "pop_front", "removeFirst"); // Qt convention
+        }
+        writeMethod(s, privateObjType, "reserve"); // SFINAE'd out for list
+        writeNoArgsMethod(s, privateObjType, "capacity");
     }
-    writeMethod(s, privateObjType, "reserve");
-    writeNoArgsMethod(s, privateObjType, "capacity");
     writeNoArgsMethod(s, privateObjType, "data");
     writeNoArgsMethod(s, privateObjType, "constData");
     s << "{nullptr, nullptr, 0, nullptr} // Sentinel\n"

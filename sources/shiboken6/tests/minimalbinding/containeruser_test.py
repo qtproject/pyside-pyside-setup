@@ -28,6 +28,17 @@ class ContainerTest(unittest.TestCase):
         oc[0] = 42
         self.assertEqual(cu.intVector()[0], 42)
 
+    def testArrayConversion(self):
+        v = ContainerUser.createIntArray()
+        self.assertEqual(ContainerUser.sumIntArray(v), 6)
+
+    def testArrayOpaqueContainer(self):
+        cu = ContainerUser()
+        oc = cu.intArray()
+        self.assertEqual(oc[0], 1)
+        oc[0] = 42
+        self.assertEqual(cu.intArray()[0], 42)
+
 
 if __name__ == '__main__':
     unittest.main()

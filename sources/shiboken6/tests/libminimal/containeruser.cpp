@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <numeric>
 
-ContainerUser::ContainerUser() : m_intVector{1, 2, 3}
+ContainerUser::ContainerUser() : m_intVector{1, 2, 3}, m_intArray{1, 2, 3}
 {
 }
 
@@ -32,4 +32,24 @@ std::vector<int> &ContainerUser::intVector()
 void ContainerUser::setIntVector(const std::vector<int> &v)
 {
     m_intVector = v;
+}
+
+std::array<int, 3> ContainerUser::createIntArray()
+{
+    return {1, 2, 3};
+}
+
+int ContainerUser::sumIntArray(const std::array<int, 3> &intArray)
+{
+    return std::accumulate(intArray.cbegin(), intArray.cend(), 0);
+}
+
+std::array<int, 3> &ContainerUser::intArray()
+{
+    return m_intArray;
+}
+
+void ContainerUser::setIntArray(const std::array<int, 3> &a)
+{
+    m_intArray = a;
 }

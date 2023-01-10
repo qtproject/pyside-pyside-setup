@@ -856,6 +856,7 @@ void TypeDatabasePrivate::addBuiltInContainerTypes(const TypeDatabaseParserConte
 {
     // Unless the user has added the standard containers (potentially with
     // some opaque types), add them by default.
+    const bool hasStdArray = findType(u"std::array"_s) != nullptr;
     const bool hasStdPair = findType(u"std::pair"_s) != nullptr;
     const bool hasStdList = findType(u"std::list"_s) != nullptr;
     const bool hasStdVector = findType(u"std::vector"_s) != nullptr;
@@ -866,6 +867,13 @@ void TypeDatabasePrivate::addBuiltInContainerTypes(const TypeDatabaseParserConte
         return;
 
     QByteArray ts = R"(<?xml version="1.0" encoding="UTF-8"?><typesystem>)";
+    if (!hasStdArray) {
+        ts += containerTypeSystemSnippet(
+            "std::array", "list", "array",
+            "shiboken_conversion_cppsequence_to_pylist",
+            "PySequence",
+            "shiboken_conversion_pyiterable_to_cpparray");
+    }
     if (!hasStdPair) {
         ts += containerTypeSystemSnippet(
                   "std::pair", "pair", "utility",

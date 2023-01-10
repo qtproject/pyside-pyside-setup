@@ -6,6 +6,7 @@
 
 #include "libminimalmacros.h"
 
+#include <array>
 #include <vector>
 
 /// Exercise simple, sequential containers. More advanced tests are in ListUser
@@ -21,8 +22,15 @@ public:
     std::vector<int> &intVector();
     void setIntVector(const  std::vector<int> &);
 
+    static std::array<int, 3> createIntArray();
+    static int sumIntArray(const std::array<int, 3> &intArray);
+
+    std::array<int, 3> &intArray();
+    void setIntArray(const  std::array<int, 3> &);
+
 private:
     std::vector<int> m_intVector;
+    std::array<int, 3> m_intArray;
 };
 
 #endif // CONTAINERUSER_H

@@ -19,6 +19,8 @@
 
     <opaque-container name="std::vector" opaque-containers="int:StdIntVector"/>
 
+    <opaque-container name="std::array" opaque-containers="int,3:StdIntArray"/>
+
     <object-type name="Obj"/>
     <value-type name="Val">
         <enum-type name="ValEnum"/>
@@ -42,6 +44,11 @@
         <modify-function signature="intVector()">
             <modify-argument index="return">
                 <replace-type modified-type="StdIntVector"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="intArray()">
+            <modify-argument index="return">
+                <replace-type modified-type="StdIntArray"/>
             </modify-argument>
         </modify-function>
     </value-type>

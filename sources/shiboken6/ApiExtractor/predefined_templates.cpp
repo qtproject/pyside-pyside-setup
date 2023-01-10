@@ -39,6 +39,23 @@ while (true) {
     return result;
 }
 
+// Convert a sequence to a limited/fixed array
+static QString pySequenceToCppArray()
+{
+    return uR"(Shiboken::AutoDecRef it(PyObject_GetIter(%in));
+for (auto oit = std::begin(%out), oend = std::end(%out); oit != oend; ++oit) {
+    Shiboken::AutoDecRef pyItem(PyIter_Next(it.object()));
+    if (pyItem.isNull()) {
+        if (PyErr_Occurred() && PyErr_ExceptionMatches(PyExc_StopIteration))
+            PyErr_Clear();
+        break;
+    }
+    %OUTTYPE_0 cppItem = %CONVERTTOCPP[%OUTTYPE_0](pyItem);
+    *oit = cppItem;
+}
+)"_s;
+}
+
 static const char stlMapKeyAccessor[] = "->first";
 static const char stlMapValueAccessor[] = "->second";
 static const char qtMapKeyAccessor[] = ".key()";
@@ -192,6 +209,8 @@ return %out;)"_s},
      pySequenceToCppContainer(u"push_back"_s, false)},
     {u"shiboken_conversion_pyiterable_to_cppsequentialcontainer_reserve"_s,
      pySequenceToCppContainer(u"push_back"_s, true)},
+    {u"shiboken_conversion_pyiterable_to_cpparray"_s,
+     pySequenceToCppArray()},
     {u"shiboken_conversion_pyiterable_to_cppsetcontainer"_s,
      pySequenceToCppContainer(u"insert"_s, false)},
 

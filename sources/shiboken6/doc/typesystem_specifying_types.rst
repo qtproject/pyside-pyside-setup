@@ -541,8 +541,15 @@ container-type
     are equivalent to *map* and *multi-map*, respectively.
 
     The *optional* **opaque-containers** attribute specifies a semi-colon separated
-    list of colon separated pairs of instantiation and name for
-    :ref:`opaque-containers`.
+    list of mappings from instantiations to a type name for
+    :ref:`opaque-containers`:
+
+    .. code-block:: xml
+
+        <typesystem>
+            <container-type name="std::array"
+                            opaque-containers ="int,3:IntArray3;float,4:FloatArray4">
+
 
     The *optional*  **since** value is used to specify the API version of this container.
 
