@@ -17,6 +17,8 @@
 
     <opaque-container name="std::list" opaque-containers="int:StdIntList"/>
 
+    <opaque-container name="std::vector" opaque-containers="int:StdIntVector"/>
+
     <object-type name="Obj"/>
     <value-type name="Val">
         <enum-type name="ValEnum"/>
@@ -35,6 +37,14 @@
         </modify-function>
     </value-type>
     <value-type name="MinBoolUser"/>
+
+    <value-type name="ContainerUser">
+        <modify-function signature="intVector()">
+            <modify-argument index="return">
+                <replace-type modified-type="StdIntVector"/>
+            </modify-argument>
+        </modify-function>
+    </value-type>
 
     <!-- Test wrapping of a typedef -->
     <function signature="arrayFuncInt(std::vector&lt;int&gt;)" />

@@ -1,5 +1,6 @@
 {
     "files": ["brace_pattern_test.py",
+              "containeruser_test.py",
               "listuser_test.py",
               "minbool_test.py",
               "obj_test.py",

@@ -1,6 +1,7 @@
 project(libminimal)
 
 set(libminimal_SRC
+containeruser.cpp
 obj.cpp
 listuser.cpp
 typedef.cpp
