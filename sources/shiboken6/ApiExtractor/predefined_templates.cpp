@@ -47,7 +47,7 @@ static const char qtMapValueAccessor[] = ".value()";
 static QString cppMapToPyDict(bool isQMap)
 {
     return uR"(PyObject *%out = PyDict_New();
-for (auto it = %in.cbegin(), end = %in.cend(); it != end; ++it) {
+for (auto it = std::cbegin(%in), end = std::cend(%in); it != end; ++it) {
     const auto &key = it)"_s
         + QLatin1StringView(isQMap ? qtMapKeyAccessor : stlMapKeyAccessor)
         + uR"(;
@@ -84,7 +84,7 @@ while (PyDict_Next(%in, &pos, &key, &value)) {
 static QString cppMultiMapToPyDict(bool isQMultiMap)
 {
     return uR"(PyObject *%out = PyDict_New();
-    for (auto it = %in.cbegin(), end = %in.cend(); it != end; ) {
+    for (auto it = std::cbegin(%in), end = std::cend(%in); it != end; ) {
         const auto &key = it)"_s
         + QLatin1StringView(isQMultiMap ? qtMapKeyAccessor : stlMapKeyAccessor)
         + uR"(;
@@ -110,7 +110,7 @@ static QString cppMultiMapToPyDict(bool isQMultiMap)
 static QString cppMultiHashToPyDict(bool isQMultiHash)
 {
     return uR"(PyObject *%out = PyDict_New();
-    for (auto it = %in.cbegin(), end = %in.cend(); it != end; ) {
+    for (auto it = std::cbegin(%in), end = std::cend(%in); it != end; ) {
         const auto &key = it)"_s
            +  QLatin1StringView(isQMultiHash ? qtMapKeyAccessor : stlMapKeyAccessor)
            + uR"(;
@@ -174,7 +174,7 @@ return %out;
     {u"shiboken_conversion_cppsequence_to_pylist"_s,
      uR"(PyObject *%out = PyList_New(Py_ssize_t(%in.size()));
 Py_ssize_t idx = 0;
-for (auto it = %in.cbegin(), end = %in.cend(); it != end; ++it, ++idx) {
+for (auto it = std::cbegin(%in), end = std::cend(%in); it != end; ++it, ++idx) {
     const auto &cppItem = *it;
     PyList_SET_ITEM(%out, idx, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
 }

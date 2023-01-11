@@ -98,7 +98,7 @@ public:
             PyErr_SetString(PyExc_IndexError, "index out of bounds");
             return nullptr;
         }
-        auto it = d->m_list->cbegin();
+        auto it = std::cbegin(*d->m_list);
         std::advance(it, i);
         return ShibokenContainerValueConverter<value_type>::convertValueToPython(*it);
     }
@@ -110,7 +110,7 @@ public:
             PyErr_SetString(PyExc_IndexError, "index out of bounds");
             return -1;
         }
-        auto it = d->m_list->begin();
+        auto it = std::begin(*d->m_list);
         std::advance(it, i);
         OptionalValue value = ShibokenContainerValueConverter<value_type>::convertValueToCpp(pyArg);
         if (!value.has_value())
