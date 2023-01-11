@@ -152,6 +152,12 @@ def _mod_uses_pyside(module):
     except OSError:
         # this is a module withot source file
         return False
+    except SyntaxError:
+        # PYSIDE-2189: A UnicodeError happens in tokenize.py in find_cookie
+        #              which is then creating a SyntaxError in inspect.
+        # This is undocumented and a Python error, seen in Python 3.10.2 on Windows,
+        # importing `pythoncom` of the win32 package.
+        return False
     return "PySide6" in source
 
 
