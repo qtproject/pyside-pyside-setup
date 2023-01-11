@@ -71,6 +71,14 @@ public:
         return reinterpret_cast<PyObject *>(me);
     }
 
+    static PyObject *tpNewInvalid(PyTypeObject * /* subtype */, PyObject * /* args */, PyObject * /* kwds */)
+    {
+        PyErr_Format(PyExc_NotImplementedError,
+                     "Opaque containers of type '%s' cannot be instantiated.",
+                     typeid(SequenceContainer).name());
+        return nullptr;
+    }
+
     static int tpInit(PyObject * /* self */, PyObject * /* args */, PyObject * /* kwds */)
     {
         return 0;

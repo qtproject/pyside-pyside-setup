@@ -196,7 +196,8 @@ CppGenerator::OpaqueContainerData
     const QString slotsList = result.name + u"_slots"_s;
     s << "static PyType_Slot " << slotsList << "[] = {\n" << indent;
     writeSlot(s, privateObjType, "Py_tp_init", "tpInit");
-    writeSlot(s, privateObjType, "Py_tp_new", "tpNew");
+    const auto *tpNew = containerTypeEntry->viewOn() == nullptr ? "tpNew" : "tpNewInvalid";
+    writeSlot(s, privateObjType, "Py_tp_new", tpNew);
     writeSlot(s, privateObjType, "Py_tp_free", "tpFree");
     writeSlot(s, "Py_tp_dealloc", "Sbk_object_dealloc"); // FIXME?
     writeSlot(s, "Py_tp_methods", methods.toUtf8().constData());
