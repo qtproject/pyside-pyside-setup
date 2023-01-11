@@ -58,6 +58,28 @@
         <enum-type name="DescriptorType"/>
         <enum-type name="ProtocolUuid"/>
         <enum-type name="ServiceClassUuid"/>
+        <modify-function signature="toUInt16(bool*)const">
+            <modify-argument index="1">
+              <remove-argument/>
+            </modify-argument>
+            <modify-argument index="return">
+              <replace-type modified-type="PyTuple"/>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+              <insert-template name="fix_bool*"/>
+            </inject-code>
+        </modify-function>
+        <modify-function signature="toUInt32(bool*)const">
+            <modify-argument index="1">
+              <remove-argument/>
+            </modify-argument>
+            <modify-argument index="return">
+              <replace-type modified-type="PyTuple"/>
+            </modify-argument>
+            <inject-code class="target" position="beginning">
+              <insert-template name="fix_bool*"/>
+            </inject-code>
+        </modify-function>
     </value-type>
     <value-type name="QLowEnergyAdvertisingData">
         <enum-type name="Discoverability"/>
