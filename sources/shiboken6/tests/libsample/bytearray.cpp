@@ -4,6 +4,7 @@
 #include "bytearray.h"
 
 #include <algorithm>
+#include <iterator>
 #include <cstring>
 
 ByteArray::ByteArray() : m_data(1, '\0')
