@@ -40,6 +40,20 @@ instructions:
           equals_value: MacOS
     userMessageOnFailure: >
          Failed to execute build instructions on macOS
+  - type: EnvironmentVariable
+    variableName: PYSIDE_SIGNING_DIR
+    variableValue: "{{.AgentWorkingDir}}\\pyside\\pyside-setup\\build\\qfpa-p3.7\\package_for_wheels"
+    enable_if:
+        condition: property
+        property: host.osVersion
+        contains_value: "Windows_11"
+  - type: EnvironmentVariable
+    variableName: PYSIDE_SIGNING_DIR
+    variableValue: "{{.AgentWorkingDir}}\\pyside\\pyside-setup\\build\\qfpa-p3.10\\package_for_wheels"
+    enable_if:
+        condition: property
+        property: host.osVersion
+        contains_value: "Windows_10"
   - type: ExecuteCommand
     command: "python3 -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
     maxTimeInSeconds: 14400
@@ -61,7 +75,7 @@ instructions:
     userMessageOnFailure: >
          Failed to execute build instructions on Windows
   - type: SignPackage
-    directory: "{{.AgentWorkingDir}}\\pyside\\pyside-setup\\build\\qfpa-p3.6\\package_for_wheels"
+    directory: "{{.Env.PYSIDE_SIGNING_DIR}}"
     maxTimeInSeconds: 1200
     maxTimeBetweenOutput: 1200
     enable_if:

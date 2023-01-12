@@ -157,15 +157,13 @@ if __name__ == "__main__":
     if CI_TARGET_OS in ["Windows"]:
         if (os.environ.get('HOST_OSVERSION_COIN')).startswith('windows_10'):
             python_ver = "3.10.0"
-            wheel_package_dir = "qfpa-p3.10"
         else:
             python_ver = "3.7.9"
-            wheel_package_dir = "qfpa-p3.7"
     if CI_TEST_PHASE in ["ALL", "BUILD"]:
         call_setup(python_ver, "BUILD")
     # Until CI has a feature to set more dynamic signing dir, make sure it actually exist
     if os.environ.get("QTEST_ENVIRONMENT") == "ci" and sys.platform == "win32":
-        signing_dir = os.path.join(os.getcwd(), "build", wheel_package_dir, "package_for_wheels")
+        signing_dir = str(os.environ.get("PYSIDE_SIGNING_DIR"))
         print("Check for signing dir " + signing_dir)
         assert(os.path.isdir(signing_dir))
 
