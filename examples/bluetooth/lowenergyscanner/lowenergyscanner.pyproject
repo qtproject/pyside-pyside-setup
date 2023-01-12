@@ -1,0 +1,6 @@
+{
+    "files": ["main.py", "device.py", "deviceinfo.py", "serviceinfo.py", "characteristicinfo.py",
+              "assets/main.qml", "assets/Menu.qml","assets/Header.qml",
+              "assets/Characteristics.qml", "assets/Dialog.qml", "assets/Services.qml",
+              "assets/Label.qml", "assets/busy_dark.png", "resources.qrc"]
+}
