@@ -119,6 +119,8 @@ from shibokensupport.signature.lib import tool
 
 import enum
 
+post_init = lambda:None     # default
+
 if "PySide6" in sys.modules:
     # We publish everything under "PySide6.support", again.
     move_into_pyside_package()
@@ -129,13 +131,18 @@ if "PySide6" in sys.modules:
         print("PySide6.support could not be imported. "
               "This is a serious configuration error.", file=sys.stderr)
         raise
-    # PYSIDE-1019: Modify `__import__` to be `__feature__` aware.
-    # __feature__ is already in sys.modules as feature, so this is actually no import
-    if not is_pypy:
-        # PYSIDE-535: Cannot enable __feature__ for various reasons.
-        import PySide6.support.feature
-        sys.modules["__feature__"] = PySide6.support.feature
-        builtins.__orig_import__ = builtins.__import__
-        builtins.__import__ = builtins.__feature_import__
+
+    def post_init():
+        """
+        This function needs to be called explicitly when all function pointers are set.
+        Doing this during import has bad side-effects when preloading the loader.
+        """
+        # PYSIDE-1019: Modify `__import__` to be `__feature__` aware.
+        if not is_pypy:
+            # PYSIDE-535: Cannot enable __feature__ for various reasons.
+            import PySide6.support.feature
+            sys.modules["__feature__"] = PySide6.support.feature
+            builtins.__orig_import__ = builtins.__import__
+            builtins.__import__ = builtins.__feature_import__
 
 # end of file

@@ -189,6 +189,16 @@ static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
         p->feature_imported_func = PyObject_GetAttrString(loader, "feature_imported");
         if (p->feature_imported_func == nullptr)
             break;
+
+        // We call stuff like the feature initialization late,
+        // after all the function pointers are in place.
+        PyObject *post_init_func = PyObject_GetAttrString(loader, "post_init");
+        if (post_init_func == nullptr)
+            break;
+        PyObject *ret = PyObject_CallFunctionObjArgs(post_init_func, nullptr);
+        if (ret == nullptr)
+            break;
+
         return 0;
 
     } while (0);
