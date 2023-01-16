@@ -52,6 +52,13 @@
 #include <optional>
 #include <typeinfo>
 
+#ifdef Q_OS_WIN
+#  include <conio.h>
+#else
+#  include <QtCore/QDeadlineTimer>
+#  include <QtCore/private/qcore_unix_p.h>
+#endif
+
 using namespace Qt::StringLiterals;
 
 static QStack<PySide::CleanupFunction> cleanupFunctionList;
@@ -518,6 +525,36 @@ void initQObjectSubType(PyTypeObject *type, PyObject *args, PyObject * /* kwds *
     PySide::Feature::Enable(true);
 }
 
+extern "C" {
+static int qAppInputHook()
+{
+    auto *app = QCoreApplication::instance();
+    if (app == nullptr || app->thread() != QThread::currentThread())
+        return 0;
+#ifndef Q_OS_WIN
+    // Check for press on stdin (file descriptor 0)
+    pollfd stdinPfd =  qt_make_pollfd(0, POLLIN);
+    while (qt_safe_poll(&stdinPfd, 1, QDeadlineTimer{1}) == 0)
+        QCoreApplication::processEvents({}, 50000);
+#else
+    while (_kbhit() == 0)
+        QCoreApplication::processEvents({}, 50000);
+#endif
+    return 0;
+}
+} // extern "C"
+
+static void unregisterQAppInputHook()
+{
+    PyOS_InputHook = nullptr;
+}
+
+static void registerQAppInputHook()
+{
+    PyOS_InputHook = qAppInputHook;
+    qAddPostRoutine(unregisterQAppInputHook);
+}
+
 void initQApp()
 {
     /*
@@ -531,8 +568,10 @@ void initQApp()
      * I would appreciate very much if someone could explain or even fix
      * this issue. It exists only when a pre-existing application exists.
      */
-    if (!qApp)
+    if (qApp == nullptr) {
+        registerQAppInputHook();
         Py_DECREF(MakeQAppWrapper(nullptr));
+    }
 
     // PYSIDE-1470: Register a function to destroy an application from shiboken.
     setDestroyQApplication(destroyQCoreApplication);
