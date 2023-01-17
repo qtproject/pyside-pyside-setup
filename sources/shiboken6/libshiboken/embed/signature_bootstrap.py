@@ -63,17 +63,18 @@ def bootstrap():
             import shibokensupport
             yield
         except Exception as e:
-            print("Problem importing shibokensupport:")
-            print(f"{e.__class__.__name__}: {e}")
+            f = sys.stderr
+            print("Problem importing shibokensupport:", file=f)
+            print(f"{e.__class__.__name__}: {e}", file=f)
             traceback.print_exc()
-            print("sys.path:")
+            print("sys.path:", file=f)
             for p in sys.path:
-                print("  " + p)
-            sys.stdout.flush()
+                print("  " + p, file=f)
+            f.flush()
             sys.exit(-1)
         target.remove(support_path)
 
-    # Here we decide if re we-incarnate the embedded files or use embedding.
+    # Here we decide if we re-incarnate the embedded files or use embedding.
     incarnated = find_incarnated_files()
     if incarnated:
         target, support_path = sys.path, os.fspath(incarnated)
@@ -136,8 +137,8 @@ def reincarnate_files(files_dir):
         zip.zfile.extractall(path=files_dir, members=names)
         return files_dir
     except Exception as e:
-        print('Exception:', e)
-        traceback.print_exc(file=sys.stdout)
+        print(f"{e.__class__.__name__}: {e}", file=sys.stderr)
+        traceback.print_exc()
         raise
 
 # New functionality: Loading from a zip archive.
