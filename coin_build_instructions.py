@@ -137,11 +137,6 @@ def call_setup(python_ver, phase):
     env = os.environ
     run_instruction(cmd, "Failed to run setup.py for build", initial_env=env)
 
-    if phase in ["WHEEL"] or CI_RELEASE_CONF:
-        cmd = [env_python, "create_wheels.py"]
-        run_instruction(cmd, "Failed to create new wheels", initial_env=env)
-
-
 if __name__ == "__main__":
 
     # Remove some environment variables that impact cmake
@@ -166,6 +161,7 @@ if __name__ == "__main__":
         signing_dir = str(os.environ.get("PYSIDE_SIGNING_DIR"))
         print("Check for signing dir " + signing_dir)
         assert(os.path.isdir(signing_dir))
-
-    if CI_TEST_PHASE in ["ALL", "WHEEL"]:
+    if CI_TEST_PHASE in ["ALL", "WHEEL"] and sys.platform != "win32":
+        # "Old" Windows wheels won't be signed anyway so there is no need to
+        # create those, so that we don't accidentally release those.
         call_setup(python_ver, "WHEEL")

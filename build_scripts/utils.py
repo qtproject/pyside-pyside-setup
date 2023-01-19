@@ -943,7 +943,7 @@ def get_python_dict(python_script_path):
 
 def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
     _pExe = "python"
-    _env = f"env{python_ver}"
+    _env = f"{os.environ.get('PYSIDE_VIRTUALENV') or 'env'+python_ver}"
     env_python = f"{_env}/bin/python"
     env_pip = f"{_env}/bin/pip"
 
