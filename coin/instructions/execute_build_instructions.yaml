@@ -89,7 +89,7 @@ instructions:
         property: host.os
         equals_value: Windows
   - type: ExecuteCommand
-    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=WHEEL"
+    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYSIDE_VIRTUALENV}}\\Scripts\\python.exe create_wheels.py"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 300
     enable_if:
@@ -98,3 +98,18 @@ instructions:
         equals_value: Windows
     userMessageOnFailure: >
          Failed to create wheels for Windows
+  - type: ExecuteCommand
+    command: "{{.Env.PYSIDE_VIRTUALENV}}/bin/python create_wheels.py"
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 300
+    enable_if:
+      condition: or
+      conditions:
+        - condition: property
+          property: host.os
+          equals_value: MacOS
+        - condition: property
+          property: host.os
+          equals_value: Linux
+    userMessageOnFailure: >
+         Failed to create wheels
