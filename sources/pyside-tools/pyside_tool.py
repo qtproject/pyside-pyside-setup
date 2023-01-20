@@ -67,7 +67,12 @@ def uic():
 
 
 def rcc():
-    qt_tool_wrapper("rcc", ['-g', 'python'] + sys.argv[1:], True)
+    args = []
+    user_args = sys.argv[1:]
+    if "--binary" not in user_args:
+        args.extend(['-g', 'python'])
+    args.extend(user_args)
+    qt_tool_wrapper("rcc", args, True)
 
 
 def qmltyperegistrar():
