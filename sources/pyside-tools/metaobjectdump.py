@@ -158,12 +158,14 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
         q_object = False
         bases = []
         for b in node.bases:
-            base_name = _name(b)
-            if base_name in self._context.qobject_derived:
-                q_object = True
-                self._context.qobject_derived.append(name)
-            base_dict = {"access": "public", "name": base_name}
-            bases.append(base_dict)
+            # PYSIDE-2202: catch weird constructs like "class C(type(Base)):"
+            if isinstance(b, ast.Name):
+                base_name = _name(b)
+                if base_name in self._context.qobject_derived:
+                    q_object = True
+                    self._context.qobject_derived.append(name)
+                base_dict = {"access": "public", "name": base_name}
+                bases.append(base_dict)
 
         data["object"] = q_object
         if bases:
