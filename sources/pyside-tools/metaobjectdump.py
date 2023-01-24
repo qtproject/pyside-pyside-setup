@@ -269,7 +269,7 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
             return
 
         if isinstance(node, ast.Call):
-            name = node.func.id
+            name = _name(node.func)
             if name == "Property":  # Property getter
                 if node.args:  # 1st is type
                     type = _python_to_cpp_type(_name(node.args[0]))
