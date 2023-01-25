@@ -872,13 +872,7 @@ bool registerInternalQtConf()
 #ifdef PYSIDE_QT_CONF_PREFIX
     setupPrefix = QStringLiteral(PYSIDE_QT_CONF_PREFIX);
 #endif
-    const QString prefixPathStr = pysideDir.absoluteFilePath(setupPrefix);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    const QByteArray prefixPath = prefixPathStr.toLocal8Bit();
-#else
-    // PYSIDE-972, QSettings used by QtCore uses Latin1
-    const QByteArray prefixPath = prefixPathStr.toLatin1();
-#endif
+    const QByteArray prefixPath = pysideDir.absoluteFilePath(setupPrefix).toUtf8();
 
     // rccData needs to be static, otherwise when it goes out of scope, the Qt resource system
     // will point to invalid memory.
