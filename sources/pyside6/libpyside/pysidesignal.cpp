@@ -6,6 +6,7 @@
 #include "pysidesignal_p.h"
 #include "pysideutils.h"
 #include "pysidestaticstrings.h"
+#include "pysideweakref.h"
 #include "signalmanager.h"
 
 #include <shiboken.h>
@@ -342,6 +343,7 @@ static void signalInstanceFree(void *vself)
     }
     delete dataPvt;
     self->d = nullptr;
+    self->deleted = true;
     Py_TYPE(pySelf)->tp_base->tp_free(self);
 }
 
@@ -549,6 +551,13 @@ static int argCountInSignature(const char *signature)
 static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
 {
     PySideSignalInstance *source = reinterpret_cast<PySideSignalInstance *>(self);
+
+    // PYSIDE-2201: Check if the object has vanished meanwhile.
+    //              Tried to revive it without exception, but this gives problems.
+    if (source->deleted) {
+        PyErr_Format(PyExc_RuntimeError, "The SignalInstance object was already deleted");
+        return nullptr;
+    }
 
     Shiboken::AutoDecRef pyArgs(PyList_New(0));
     int numArgsGiven = PySequence_Fast_GET_SIZE(args);
@@ -930,9 +939,16 @@ static void appendSignature(PySideSignal *self, const SignalSignature &signature
     self->data->signatures.append({signature.m_parameterTypes, signature.m_attributes});
 }
 
+static void sourceGone(void *data)
+{
+    auto *self = reinterpret_cast<PySideSignalInstance *>(data);
+    self->deleted = true;
+}
+
 static void instanceInitialize(PySideSignalInstance *self, PyObject *name, PySideSignal *signal, PyObject *source, int index)
 {
     self->d = new PySideSignalInstancePrivate;
+    self->deleted = false;
     PySideSignalInstancePrivate *selfPvt = self->d;
     selfPvt->next = nullptr;
     if (signal->data->signalName.isEmpty())
@@ -948,6 +964,10 @@ static void instanceInitialize(PySideSignalInstance *self, PyObject *name, PySid
         selfPvt->homonymousMethod = signal->homonymousMethod;
         Py_INCREF(selfPvt->homonymousMethod);
     }
+    // PYSIDE-2201: We have no reference to source. Let's take a weakref to get
+    //              notified when source gets deleted.
+    PySide::WeakRef::create(source, sourceGone, self);
+
     index++;
 
     if (index < signal->data->signatures.size()) {
@@ -1007,6 +1027,7 @@ PySideSignalInstance *newObjectFromMethod(PyObject *source, const QList<QMetaMet
             previous->d->next = item;
 
         item->d = new PySideSignalInstancePrivate;
+        item->deleted = false;
         PySideSignalInstancePrivate *selfPvt = item->d;
         selfPvt->source = source;
         Py_INCREF(selfPvt->source); // PYSIDE-79: an INCREF is missing.

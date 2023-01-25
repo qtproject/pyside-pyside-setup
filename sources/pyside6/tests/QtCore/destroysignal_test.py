@@ -11,7 +11,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QTimer, QObject
+from PySide6.QtCore import QTimer, QObject, Signal
 
 
 class TestDestroySignal(unittest.TestCase):
@@ -41,6 +41,31 @@ class TestDestroySignal(unittest.TestCase):
         # PYSIDE-535: Why do I need to do it twice, here?
         gc.collect()
         self.assertTrue(self._destroyed)
+
+
+class Foo(QObject):
+    s = Signal(int)
+
+    def __init__(self):
+        QObject.__init__(self)
+        sys.stderr.write(f"__init__ {id(self):x}\n")
+
+    def __del__(self):
+        sys.stderr.write(f"__del__  {id(self):x}\n")
+
+    def send(self, i):
+        self.s.emit(i)
+
+
+# PYSIDE-2201: This crashed until we introduced a weak reference.
+class TestDestroyNoConnect(unittest.TestCase):
+
+    def testSignalDestroyedMissingReference(self):
+        # This works since it has one reference more to Foo
+        Foo().send(43)
+        # This crashed because we have no reference in the signal.
+        with self.assertRaises(RuntimeError):
+            Foo().s.emit(44)
 
 
 if __name__ == '__main__':
