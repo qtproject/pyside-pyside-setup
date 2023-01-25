@@ -250,18 +250,37 @@ def get_build_directory(options: Namespace):
                 return result
     if options.env:
         raise Exception(f'Invalid environment "{options.env}" passed')
+    # Try explicit build-dir
+    if options.build_dir and (Path(options.build_dir) / PACKAGE_FOR_WHEELS).is_dir():
+        return Path(options.build_dir)
     # Fallback to existing dirs (skip "config.tests")
     for d in build_dir.glob("*"):
         if (d / PACKAGE_FOR_WHEELS).is_dir():
+            print(
+                "No valid environment or build directory was specified, so create_wheels is using "
+                "the first valid directory it could find on its own. If this is not the one you "
+                "want, use the --env or --build-dir options to provide it explicitly."
+            )
             return d
     raise Exception("Unable to determine build directory, no matching virtual environment found")
 
 
 if __name__ == "__main__":
 
-    # Command line option to find the build/<envname>a/package_for_wheels
     parser = ArgumentParser()
-    parser.add_argument("--env", type=str, default=None)
+    # Command line option to find the build/<envname>a/package_for_wheels
+    parser.add_argument(
+        "--env", type=str, default=None,
+        help="The env's name from which PySide was built such that the "
+             "build directory is 'build/<envname>' (must contain a "
+             "'package_for_wheels' folder"
+    )
+    # Alternatively, <build-dir> (must contain "package_for_wheels")
+    parser.add_argument(
+        "--build-dir", type=str, default=None,
+        help="The directory where PySide was build (must contain a "
+             "'package_for_wheels' folder"
+    )
     options = parser.parse_args()
 
     build_directory = get_build_directory(options)
