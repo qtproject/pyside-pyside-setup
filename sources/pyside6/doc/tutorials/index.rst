@@ -137,6 +137,12 @@ Quick/QML: Basic tutorials
 
         QML, SQL and PySide Integration Tutorial
 
+    .. grid-item-card:: Extended Explorer
+        :class-item: cover-img
+        :link: extendedexplorer/extendedexplorer.html
+        :img-top: extendedexplorer/resources/extendedexplorer.webp
+
+        Extending an Qt Quick Controls example
 
 .. toctree::
     :maxdepth: 1
@@ -146,6 +152,7 @@ Quick/QML: Basic tutorials
     qmlintegration/qmlintegration.rst
     qmlapp/qmlapplication.rst
     qmlsqlintegration/qmlsqlintegration.rst
+    extendedexplorer/extendedexplorer.md
 
 General Applications
 --------------------
