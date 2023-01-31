@@ -802,7 +802,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             cmake_cmd.append(f"-DQFP_QT_HOST_PATH={self.qt_host_path}")
 
         if self.is_cross_compile and (not OPTION["SHIBOKEN_HOST_PATH"]
-                                      or not OPTION["SHIBOKEN_HOST_PATH"].exists()):
+                                      or not Path(OPTION["SHIBOKEN_HOST_PATH"]).exists()):
             raise SetupError("Please specify the location of host shiboken tools via "
                              "--shiboken-host-path=")
 

@@ -902,6 +902,7 @@ def linux_fix_rpaths_for_library(patchelf, executable_path, qt_rpath, override=F
         existing_rpaths = linux_get_rpaths(executable_path)
         rpaths.extend(existing_rpaths)
 
+    qt_rpath = str(qt_rpath)
     if linux_needs_qt_rpath(executable_path) and qt_rpath not in existing_rpaths:
         rpaths.append(qt_rpath)
 

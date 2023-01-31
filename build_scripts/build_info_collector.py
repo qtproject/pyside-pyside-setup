@@ -221,9 +221,9 @@ class BuildInfoCollectorMixin(object):
             # when cross-compiling.
             if 'prefix' in python_info:
                 py_prefix = python_info['prefix']
-                self.py_prefix = py_prefix
+                self.py_prefix = Path(py_prefix).resolve()
 
-                py_scripts_dir = py_prefix / 'bin'
+                py_scripts_dir = self.py_prefix / 'bin'
                 if py_scripts_dir.exists():
                     self.py_scripts_dir = py_scripts_dir
                 else:
@@ -284,7 +284,7 @@ class BuildInfoCollectorMixin(object):
         self.sources_dir = Path(sources_dir)
         self.build_dir = Path(build_dir)
         self.install_dir = Path(install_dir)
-        self.py_executable = Path(py_executable)
+        self.py_executable = Path(py_executable) if py_executable else None
         self.py_include_dir = Path(py_include_dir)
 
         if not self.is_cross_compile:
