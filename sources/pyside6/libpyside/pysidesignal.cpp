@@ -683,8 +683,18 @@ static PyObject *signalDescrGet(PyObject *self, PyObject *obj, PyObject * /*type
         Py_INCREF(self);
         return self;
     }
+
+    // PYSIDE-68-bis: It is important to respect the already cached instance.
     Shiboken::AutoDecRef name(Py_BuildValue("s", signal->data->signalName.data()));
-    return reinterpret_cast<PyObject *>(PySide::Signal::initialize(signal, name, obj));
+    auto *dict = SbkObject_GetDict_NoRef(obj);
+    auto *inst = PyDict_GetItem(dict, name);
+    if (inst) {
+        Py_INCREF(inst);
+        return inst;
+    }
+    inst = reinterpret_cast<PyObject *>(PySide::Signal::initialize(signal, name, obj));
+    PyObject_SetAttr(obj, name, inst);
+    return inst;
 }
 
 static PyObject *signalCall(PyObject *self, PyObject *args, PyObject *kw)
@@ -1032,10 +1042,9 @@ PySideSignalInstance *newObjectFromMethod(PyObject *source, const QList<QMetaMet
         item->deleted = false;
         PySideSignalInstancePrivate *selfPvt = item->d;
         selfPvt->source = source;
-        Py_INCREF(selfPvt->source); // PYSIDE-79: an INCREF is missing.
         QByteArray cppName(m.methodSignature());
         cppName.truncate(cppName.indexOf('('));
-        // separe SignalName
+        // separate SignalName
         selfPvt->signalName = cppName;
         selfPvt->signature = m.methodSignature();
         selfPvt->attributes = m.attributes();
