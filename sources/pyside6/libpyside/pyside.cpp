@@ -496,6 +496,7 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
 {
     using Shiboken::AutoDecRef;
 
+    // PYSIDE-68-bis: This getattr finds signals early by `signalDescrGet`.
     PyObject *attr = PyObject_GenericGetAttr(self, name);
     if (!Shiboken::Object::isValid(reinterpret_cast<SbkObject *>(self), false))
         return attr;
@@ -506,15 +507,6 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
         if (!value)
             return nullptr;
         attr = value;
-    }
-
-    // Mutate native signals to signal instance type
-    // Caution: This inserts the signal instance into the instance dict.
-    if (attr && PyObject_TypeCheck(attr, PySideSignal_TypeF())) {
-        auto *inst = Signal::initialize(reinterpret_cast<PySideSignal *>(attr), name, self);
-        PyObject *signalInst = reinterpret_cast<PyObject *>(inst);
-        PyObject_SetAttr(self, name, signalInst);
-        return signalInst;
     }
 
     // Search on metaobject (avoid internal attributes started with '__')

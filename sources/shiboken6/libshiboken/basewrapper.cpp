@@ -71,6 +71,7 @@ void setDestroyQApplication(DestroyQAppHook func)
 // PYSIDE-535: Use the C API in PyPy instead of `op->ob_dict`, directly
 LIBSHIBOKEN_API PyObject *SbkObject_GetDict_NoRef(PyObject *op)
 {
+    assert(Shiboken::Object::checkType(op));
 #ifdef PYPY_VERSION
     Shiboken::GilState state;
     auto *ret = PyObject_GenericGetDict(op, nullptr);

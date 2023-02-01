@@ -45,8 +45,6 @@
 # Unsolved Refcounting leaks in debug mode
 [pysidetest::property_python_test]
     debug
-[signals::bug_79]
-    debug
 
 # PYSIDE-535: These errors are still present. Please try to remove one :)
 [sample::mixed_mi]
