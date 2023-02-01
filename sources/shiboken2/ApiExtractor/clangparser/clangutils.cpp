@@ -1,11 +1,12 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
 **
-** $QT_BEGIN_LICENSE:GPL-EXCEPT$
+** $QT_BEGIN_LICENSE:COMM$
+**
 ** Commercial License Usage
 ** Licensees holding valid commercial Qt licenses may use this file in
 ** accordance with the commercial license agreement provided with the
@@ -13,14 +14,6 @@
 ** a written agreement between you and The Qt Company. For licensing terms
 ** and conditions see https://www.qt.io/terms-conditions. For further
 ** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
 ** $QT_END_LICENSE$
 **
@@ -139,8 +132,9 @@ QString getTypeName(const CXType &type)
 }
 
 Diagnostic::Diagnostic(const QString &m, const CXCursor &c, CXDiagnosticSeverity s)
-    : message(m), location(getCursorLocation(c)), source(Other), severity(s)
+    : message(m), source(Other), severity(s)
 {
+    setLocation(getCursorLocation(c));
 }
 
 Diagnostic Diagnostic::fromCXDiagnostic(CXDiagnostic cd)
@@ -151,7 +145,7 @@ Diagnostic Diagnostic::fromCXDiagnostic(CXDiagnostic cd)
     result.message = QString::fromUtf8(clang_getCString(spelling));
     clang_disposeString(spelling);
     result.severity = clang_getDiagnosticSeverity(cd);
-    result.location = getExpansionLocation(clang_getDiagnosticLocation(cd));
+    result.setLocation(getExpansionLocation(clang_getDiagnosticLocation(cd)));
 
     CXDiagnosticSet childDiagnostics = clang_getChildDiagnostics(cd);
     if (const unsigned childCount = clang_getNumDiagnosticsInSet(childDiagnostics)) {
@@ -167,6 +161,14 @@ Diagnostic Diagnostic::fromCXDiagnostic(CXDiagnostic cd)
     }
 
     return result;
+}
+
+void Diagnostic::setLocation(const SourceLocation &sourceLocation)
+{
+    file = getFileName(sourceLocation.file);
+    line = sourceLocation.line;
+    column = sourceLocation.column;
+    offset = sourceLocation.offset;
 }
 
 QVector<Diagnostic> getDiagnostics(CXTranslationUnit tu)
@@ -249,7 +251,7 @@ QDebug operator<<(QDebug s, const Diagnostic &d)
     QDebugStateSaver saver(s);
     s.nospace();
     s.noquote();
-    s << d.location << ": ";
+    s << d.file << ':'<< d.line << ':' << d.column << ": ";
     switch (d.severity) {
     case CXDiagnostic_Ignored:
         s << "ignored";

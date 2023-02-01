@@ -1,11 +1,12 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
 **
-** $QT_BEGIN_LICENSE:LGPL$
+** $QT_BEGIN_LICENSE:COMM$
+**
 ** Commercial License Usage
 ** Licensees holding valid commercial Qt licenses may use this file in
 ** accordance with the commercial license agreement provided with the
@@ -13,25 +14,6 @@
 ** a written agreement between you and The Qt Company. For licensing terms
 ** and conditions see https://www.qt.io/terms-conditions. For further
 ** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
 **
 ** $QT_END_LICENSE$
 **
@@ -46,13 +28,13 @@
 #include "sbkdbg.h"
 #include "autodecref.h"
 #include "sbkpython.h"
+#include "signature.h"
 
 #include <string.h>
 #include <cstring>
 #include <vector>
 
-#define SBK_ENUM(ENUM) reinterpret_cast<SbkEnumObject *>(ENUM)
-#define SBK_TYPE_CHECK(o) (strcmp(Py_TYPE(Py_TYPE(o))->tp_name, "Shiboken.EnumType") == 0)
+#define SbkEnumType_Check(o) (Py_TYPE(Py_TYPE(o)) == SbkEnumType_TypeF())
 typedef PyObject *(*enum_func)(PyObject *, PyObject *);
 
 extern "C"
@@ -77,9 +59,11 @@ struct SbkEnumObject
     PyObject *ob_name;
 };
 
+static PyTypeObject *SbkEnum_TypeF();   // forward
+
 static PyObject *SbkEnumObject_repr(PyObject *self)
 {
-    const SbkEnumObject *enumObj = SBK_ENUM(self);
+    const SbkEnumObject *enumObj = reinterpret_cast<SbkEnumObject *>(self);
     if (enumObj->ob_name)
         return Shiboken::String::fromFormat("%s.%s", (Py_TYPE(self))->tp_name, PyBytes_AS_STRING(enumObj->ob_name));
     else
@@ -88,7 +72,7 @@ static PyObject *SbkEnumObject_repr(PyObject *self)
 
 static PyObject *SbkEnumObject_name(PyObject *self, void *)
 {
-    auto *enum_self = SBK_ENUM(self);
+    auto *enum_self = reinterpret_cast<SbkEnumObject *>(self);
 
     if (enum_self->ob_name == nullptr)
         Py_RETURN_NONE;
@@ -103,6 +87,11 @@ static PyObject *SbkEnum_tp_new(PyTypeObject *type, PyObject *args, PyObject *)
     if (!PyArg_ParseTuple(args, "|l:__new__", &itemValue))
         return nullptr;
 
+    if (type == SbkEnum_TypeF()) {
+        PyErr_Format(PyExc_TypeError, "You cannot use %s directly", type->tp_name);
+        return nullptr;
+    }
+
     SbkEnumObject *self = PyObject_New(SbkEnumObject, type);
     if (!self)
         return nullptr;
@@ -111,6 +100,11 @@ static PyObject *SbkEnum_tp_new(PyTypeObject *type, PyObject *args, PyObject *)
     self->ob_name = item.object() ? SbkEnumObject_name(item, nullptr) : nullptr;
     return reinterpret_cast<PyObject *>(self);
 }
+
+static const char *SbkEnum_SignatureStrings[] = {
+    "Shiboken.Enum(self,itemValue:int=0)",
+    nullptr}; // Sentinel
+
 
 void enum_object_dealloc(PyObject *ob)
 {
@@ -129,12 +123,12 @@ static PyObject *enum_op(enum_func f, PyObject *a, PyObject *b) {
     // We are not allowing floats
     if (!PyFloat_Check(valA) && !PyFloat_Check(valB)) {
         // Check if both variables are SbkEnumObject
-        if (SBK_TYPE_CHECK(valA)) {
-            valA = PyLong_FromLong(SBK_ENUM(valA)->ob_value);
+        if (SbkEnumType_Check(valA)) {
+            valA = PyLong_FromLong(reinterpret_cast<SbkEnumObject *>(valA)->ob_value);
             enumA = true;
         }
-        if (SBK_TYPE_CHECK(valB)) {
-            valB = PyLong_FromLong(SBK_ENUM(valB)->ob_value);
+        if (SbkEnumType_Check(valB)) {
+            valB = PyLong_FromLong(reinterpret_cast<SbkEnumObject *>(valB)->ob_value);
             enumB = true;
         }
     }
@@ -152,7 +146,6 @@ static PyObject *enum_op(enum_func f, PyObject *a, PyObject *b) {
         Py_DECREF(valA);
     if (enumB)
         Py_DECREF(valB);
-
     return result;
 }
 
@@ -166,7 +159,7 @@ static PyObject *enum_op(enum_func f, PyObject *a, PyObject *b) {
  */
 static PyObject *enum_int(PyObject *v)
 {
-    return PyInt_FromLong(SBK_ENUM(v)->ob_value);
+    return PyInt_FromLong(reinterpret_cast<SbkEnumObject *>(v)->ob_value);
 }
 
 static PyObject *enum_and(PyObject *self, PyObject *b)
@@ -176,7 +169,7 @@ static PyObject *enum_and(PyObject *self, PyObject *b)
 
 static PyObject *enum_or(PyObject *self, PyObject *b)
 {
-return enum_op(PyNumber_Or, self, b);
+    return enum_op(PyNumber_Or, self, b);
 }
 
 static PyObject *enum_xor(PyObject *self, PyObject *b)
@@ -186,7 +179,7 @@ static PyObject *enum_xor(PyObject *self, PyObject *b)
 
 static int enum_bool(PyObject *v)
 {
-    return (SBK_ENUM(v)->ob_value > 0);
+    return (reinterpret_cast<SbkEnumObject *>(v)->ob_value > 0);
 }
 
 static PyObject *enum_add(PyObject *self, PyObject *v)
@@ -201,7 +194,7 @@ static PyObject *enum_subtract(PyObject *self, PyObject *v)
 
 static PyObject *enum_multiply(PyObject *self, PyObject *v)
 {
-return enum_op(PyNumber_Multiply, self, v);
+    return enum_op(PyNumber_Multiply, self, v);
 }
 
 #ifndef IS_PY3K
@@ -223,12 +216,12 @@ static PyObject *enum_richcompare(PyObject *self, PyObject *other, int op)
     if (!PyFloat_Check(valA) && !PyFloat_Check(valB)) {
 
         // Check if both variables are SbkEnumObject
-        if (SBK_TYPE_CHECK(valA)) {
-            valA = PyLong_FromLong(SBK_ENUM(valA)->ob_value);
+        if (SbkEnumType_Check(valA)) {
+            valA = PyLong_FromLong(reinterpret_cast<SbkEnumObject *>(valA)->ob_value);
             enumA = true;
         }
-        if (SBK_TYPE_CHECK(valB)) {
-            valB = PyLong_FromLong(SBK_ENUM(valB)->ob_value);
+        if (SbkEnumType_Check(valB)) {
+            valB = PyLong_FromLong(reinterpret_cast<SbkEnumObject *>(valB)->ob_value);
             enumB =true;
         }
     }
@@ -284,24 +277,6 @@ static PyObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObje
 
 static PyType_Slot SbkEnumType_Type_slots[] = {
     {Py_tp_dealloc, (void *)SbkEnumTypeDealloc},
-    {Py_nb_add, (void *)enum_add},
-    {Py_nb_subtract, (void *)enum_subtract},
-    {Py_nb_multiply, (void *)enum_multiply},
-#ifndef IS_PY3K
-    {Py_nb_divide, (void *)enum_divide},
-#endif
-    {Py_nb_positive, (void *)enum_int},
-#ifdef IS_PY3K
-    {Py_nb_bool, (void *)enum_bool},
-#else
-    {Py_nb_nonzero, (void *)enum_bool},
-    {Py_nb_long, (void *)enum_int},
-#endif
-    {Py_nb_and, (void *)enum_and},
-    {Py_nb_xor, (void *)enum_xor},
-    {Py_nb_or, (void *)enum_or},
-    {Py_nb_int, (void *)enum_int},
-    {Py_nb_index, (void *)enum_int},
     {Py_tp_base, (void *)&PyType_Type},
     {Py_tp_alloc, (void *)PyType_GenericAlloc},
     {Py_tp_new, (void *)SbkEnumTypeTpNew},
@@ -312,7 +287,7 @@ static PyType_Slot SbkEnumType_Type_slots[] = {
     {0, nullptr}
 };
 static PyType_Spec SbkEnumType_Type_spec = {
-    "1:Shiboken.EnumType",
+    "1:Shiboken.EnumMeta",
     0,    // filled in later
     sizeof(PyMemberDef),
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
@@ -369,8 +344,6 @@ PyObject *SbkEnumTypeTpNew(PyTypeObject *metatype, PyObject *args, PyObject *kwd
 //            This works very well and fixes the issue.
 //
 extern "C" {
-
-static void init_enum();  // forward
 
 static PyObject *enum_unpickler = nullptr;
 
@@ -441,16 +414,23 @@ static bool _init_enum()
         PyErr_Clear();
         mod = shibo.object();
     }
+    // publish Shiboken.Enum so that the signature gets initialized
+    if (PyObject_SetAttrString(mod, "Enum", reinterpret_cast<PyObject *>(SbkEnum_TypeF())) < 0)
+        return false;
+    if (InitSignatureStrings(SbkEnum_TypeF(), SbkEnum_SignatureStrings) < 0)
+        return false;
     enum_unpickler = PyObject_GetAttrString(mod, "_unpickle_enum");
     if (enum_unpickler == nullptr)
         return false;
     return true;
 }
 
-static void init_enum()
+void init_enum()
 {
-    if (!(enum_unpickler || _init_enum()))
+    static bool is_initialized = false;
+    if (!(is_initialized || enum_unpickler || _init_enum()))
         Py_FatalError("could not load enum pickling helper function");
+    is_initialized = true;
 }
 
 static PyMethodDef SbkEnumObject_Methods[] = {
@@ -624,7 +604,10 @@ newItem(PyTypeObject *enumType, long itemValue, const char *itemName)
     return reinterpret_cast<PyObject *>(enumObj);
 }
 
-static PyType_Slot SbkNewType_slots[] = {
+} // namespace Shiboken
+} // namespace Enum
+
+static PyType_Slot SbkNewEnum_slots[] = {
     {Py_tp_repr, (void *)SbkEnumObject_repr},
     {Py_tp_str, (void *)SbkEnumObject_repr},
     {Py_tp_getset, (void *)SbkEnumGetSetList},
@@ -653,13 +636,21 @@ static PyType_Slot SbkNewType_slots[] = {
     {Py_tp_dealloc, (void *)enum_object_dealloc},
     {0, nullptr}
 };
-static PyType_Spec SbkNewType_spec = {
-    "missing Enum name", // to be inserted later
+static PyType_Spec SbkNewEnum_spec = {
+    "1:Shiboken.Enum",
     sizeof(SbkEnumObject),
     0,
-    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_CHECKTYPES,
-    SbkNewType_slots,
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES,
+    SbkNewEnum_slots,
 };
+
+static PyTypeObject *SbkEnum_TypeF()
+{
+    static auto type = SbkType_FromSpec(&SbkNewEnum_spec);
+    return reinterpret_cast<PyTypeObject *>(type);
+}
+
+namespace Shiboken { namespace Enum {
 
 static void
 copyNumberMethods(PyTypeObject *flagsType,
@@ -726,20 +717,24 @@ newTypeWithName(const char *name,
     PyType_Slot newslots[99] = {};  // enough but not too big for the stack
     PyType_Spec newspec;
     newspec.name = strdup(name);
-    newspec.basicsize = SbkNewType_spec.basicsize;
-    newspec.itemsize = SbkNewType_spec.itemsize;
-    newspec.flags = SbkNewType_spec.flags;
+    newspec.basicsize = SbkNewEnum_spec.basicsize;
+    newspec.itemsize = SbkNewEnum_spec.itemsize;
+    newspec.flags = SbkNewEnum_spec.flags;
     // we must append all the number methods, so rebuild everything:
     int idx = 0;
-    while (SbkNewType_slots[idx].slot) {
-        newslots[idx].slot = SbkNewType_slots[idx].slot;
-        newslots[idx].pfunc = SbkNewType_slots[idx].pfunc;
+    while (SbkNewEnum_slots[idx].slot) {
+        newslots[idx].slot = SbkNewEnum_slots[idx].slot;
+        newslots[idx].pfunc = SbkNewEnum_slots[idx].pfunc;
         ++idx;
     }
     if (numbers_fromFlag)
         copyNumberMethods(numbers_fromFlag, newslots, &idx);
     newspec.slots = newslots;
-    auto *type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&newspec));
+    Shiboken::AutoDecRef bases(PyTuple_New(1));
+    static auto basetype = SbkEnum_TypeF();
+    PyTuple_SetItem(bases, 0, reinterpret_cast<PyObject *>(basetype));
+    auto *type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpecWithBases(&newspec, bases));
+    PyErr_Print();
     Py_TYPE(type) = SbkEnumType_TypeF();
 
     auto *enumType = reinterpret_cast<SbkEnumType *>(type);

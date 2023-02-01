@@ -55,14 +55,14 @@ upload_pyside: &upload_pyside
 
 instructions:
      LicenseCheck:
-      - !include "{{pyside/pyside-setup}}/execute_license_check.yaml"
+      - !include "{{pyside/tqtc-pyside-setup}}/execute_license_check.yaml"
      Build:
-      - !include "{{pyside/pyside-setup}}/common_environment.yaml"
-      - !include "{{pyside/pyside-setup}}/find_path_to_msvc_compiler.yaml"
-      - !include "{{pyside/pyside-setup}}/execute_build_instructions.yaml"
+      - !include "{{pyside/tqtc-pyside-setup}}/common_environment.yaml"
+      - !include "{{pyside/tqtc-pyside-setup}}/find_path_to_msvc_compiler.yaml"
+      - !include "{{pyside/tqtc-pyside-setup}}/execute_build_instructions.yaml"
       - *upload_pyside
      Test:
-      - !include "{{pyside/pyside-setup}}/common_environment.yaml"
-      - !include "{{pyside/pyside-setup}}/find_path_to_msvc_compiler.yaml"
-      - !include "{{pyside/pyside-setup}}/relocate_pyside.yaml"
-      - !include "{{pyside/pyside-setup}}/execute_test_instructions.yaml"
+      - !include "{{pyside/tqtc-pyside-setup}}/common_environment.yaml"
+      - !include "{{pyside/tqtc-pyside-setup}}/find_path_to_msvc_compiler.yaml"
+      - !include "{{pyside/tqtc-pyside-setup}}/relocate_pyside.yaml"
+      - !include "{{pyside/tqtc-pyside-setup}}/execute_test_instructions.yaml"

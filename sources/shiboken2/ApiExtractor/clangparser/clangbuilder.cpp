@@ -1,11 +1,12 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt for Python.
 **
-** $QT_BEGIN_LICENSE:GPL-EXCEPT$
+** $QT_BEGIN_LICENSE:COMM$
+**
 ** Commercial License Usage
 ** Licensees holding valid commercial Qt licenses may use this file in
 ** accordance with the commercial license agreement provided with the
@@ -13,14 +14,6 @@
 ** a written agreement between you and The Qt Company. For licensing terms
 ** and conditions see https://www.qt.io/terms-conditions. For further
 ** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
 **
 ** $QT_END_LICENSE$
 **
@@ -245,8 +238,16 @@ bool BuilderPrivate::addClass(const CXCursor &cursor, CodeModel::ClassType t)
     if (isClassCursor(semPar)) {
         const CursorClassHash::const_iterator it = m_cursorClassHash.constFind(semPar);
         if (it == m_cursorClassHash.constEnd()) {
-            const QString message = QStringLiteral("Unable to find parent of inner class ") + className;
-            const Diagnostic d(message, cursor, CXDiagnostic_Error);
+            QString message;
+            QTextStream(&message) << "Unable to find containing class \""
+                << getCursorSpelling(semPar) << "\" of inner class \""
+                << className << "\".";
+            // PYSIDE-1501: Has been observed to fail for inner class of
+            // template with separated implementation where a forward
+            // declaration of the outer template is reported (Boost).
+            const auto severity = semPar.kind == CXCursor_ClassTemplate
+                ? CXDiagnostic_Warning : CXDiagnostic_Error;
+            const Diagnostic d(message, cursor, severity);
             qWarning() << d;
             m_baseVisitor->appendDiagnostic(d);
             return false;
@@ -921,16 +922,17 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
     case CXCursor_ClassDecl:
     case CXCursor_UnionDecl:
     case CXCursor_StructDecl:
-        if (clang_isCursorDefinition(cursor) == 0)
+        if (clang_isCursorDefinition(cursor) == 0
+            || !d->addClass(cursor, codeModelClassTypeFromCursor(cursor.kind))) {
             return Skip;
-        if (!d->addClass(cursor, codeModelClassTypeFromCursor(cursor.kind)))
-            return Error;
+        }
         break;
     case CXCursor_ClassTemplate:
     case CXCursor_ClassTemplatePartialSpecialization:
-        if (clang_isCursorDefinition(cursor) == 0)
+        if (clang_isCursorDefinition(cursor) == 0
+            || !d->addClass(cursor, CodeModel::Class)) {
             return Skip;
-        d->addClass(cursor, CodeModel::Class);
+        }
         d->m_currentClass->setName(d->m_currentClass->name() + templateBrackets());
         d->m_scope.back() += templateBrackets();
         break;

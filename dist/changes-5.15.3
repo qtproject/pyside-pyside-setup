@@ -1,0 +1,46 @@
+Qt for Python 5.15.3 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide2                                 *
+****************************************************************************
+
+ - [PYSIDE-454]  namespace std is no longer rejected in the Qt typesystem
+                 files.
+ - [PYSIDE-807]  setup.py's 'clean' command has been fixed.
+ - [PYSIDE-1305] The error handling of constructor keyword arguments has been
+                 fixed.
+ - [PYSIDE-1422] A crash related to  Signal and __eq__ has been fixed.
+ - [PYSIDE-1432] An ownership issue in QLayout::replaceWidget() has been fixed.
+ - [PYSIDE-1442] QFlags operations have been fixed.
+ - [PYSIDE-1447] A crash related to qApp and Python 3.9 has been fixed.
+ - [PYSIDE-1449] QTestlib's QAbstractItemModelTester has been added.
+ - [PYSIDE-1460] An infinite loop changing up directories in the signature
+                 bootstrap code has been fixed.
+ - [PYSIDE-1466] The newly introduced overload QSetting.value() taking a type
+                 has been documentated.
+ - [PYSIDE-1478] A bug related to using QQmlContext.setContextProperty()
+                 with the snake case feature has been fixed.
+
+****************************************************************************
+*                                  Shiboken2                               *
+****************************************************************************
+
+ - [PYSIDE-1347] Inheritance for enum types has been fixed.
+ - [PYSIDE-1448] Code injected at target/end being invoked for multiple
+                 overload ids has been fixed.
+ - [PYSIDE-1470] shiboken.delete() can now be used to delete Q*Application.
+ - [PYSIDE-1501] The clang parser has been fixed to be able to handle some
+                 Boost headers.

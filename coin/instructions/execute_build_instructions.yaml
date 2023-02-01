@@ -39,7 +39,7 @@ instructions:
       property: host.os
       equals_value: Windows
   - type: ChangeDirectory
-    directory: "{{.AgentWorkingDir}}\\pyside\\pyside-setup"
+    directory: "{{.AgentWorkingDir}}\\pyside\\tqtc-pyside-setup"
     enable_if:
         condition: property
         property: host.os
