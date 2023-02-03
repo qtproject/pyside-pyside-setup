@@ -8,6 +8,7 @@ it's currently in a different repository (``qt/qtqa``):
   `qtqa repository <https://code.qt.io/cgit/qt/qtqa.git>`_.
 
 To test the wheels:
+
 - Create a virtual environment and activate it.
 - Install the dependencies listed on the ``requirements.txt`` file.
 - Install all the wheels: ``shiboken6``, ``shiboken6-generator``,

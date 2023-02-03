@@ -12,7 +12,7 @@
     deployment/index.rst
     considerations.rst
     developer/index.rst
-    commercial.rst
+    commercial/index.rst
 
 ..
     Intersphinx references in toctrees is not supported
