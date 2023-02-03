@@ -17,7 +17,7 @@ For the "shared" module approach to work with QML and rcc, you need:
 
 * A module definition *qmldir* file
 * A Qt Resource Collection file (.qrc) specifying all the QML files and other
-resources, plus the *qmldir* file
+  resources, plus the *qmldir* file
 
 The .qrc file is the input to rcc. This will generate a Python module (called
 *shared_rc* here) that can then be imported from the Python code. At runtime,
@@ -28,7 +28,7 @@ module.
 For the example, rcc needs:
 
 * A Qt Resource Collection file (.qrc) specifying all the QML files and other
-resources. There is no qmldir file here because this is not a module.
+  resources. There is no qmldir file here because this is not a module.
 
 This will generate a Python module (called *window_rc* here) that can then be
 imported from the Python code. Again, only the Python module is needed at
