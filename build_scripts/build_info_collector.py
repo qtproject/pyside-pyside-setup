@@ -111,7 +111,7 @@ def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
             if pypy_library.exists():
                 return pypy_library
             libs_tried.append(pypy_library)
-    _libs_tried = ', '.join(libs_tried)
+    _libs_tried = ', '.join(str(lib) for lib in libs_tried)
     raise SetupError(f"Failed to locate the Python library with {_libs_tried}")
 
 
