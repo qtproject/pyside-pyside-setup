@@ -47,6 +47,8 @@
 #include <memory>
 #include <typeinfo>
 
+using namespace Qt::StringLiterals;
+
 static QStack<PySide::CleanupFunction> cleanupFunctionList;
 static void *qobjectNextAddr;
 
@@ -805,9 +807,9 @@ bool registerInternalQtConf()
 {
     // Guard to ensure single registration.
 #ifdef PYSIDE_QT_CONF_PREFIX
-        static bool registrationAttempted = false;
+    static bool registrationAttempted = false;
 #else
-        static bool registrationAttempted = true;
+    static bool registrationAttempted = true;
 #endif
     static bool isRegistered = false;
     if (registrationAttempted)
@@ -819,22 +821,23 @@ bool registerInternalQtConf()
     // This will disable the internal qt.conf which points to the PySide6 subdirectory (due to the
     // subdirectory not existing anymore).
 #ifndef PYPY_VERSION
-    QString executablePath =
-    QString::fromWCharArray(Py_GetProgramFullPath());
+    QString executablePath = QString::fromWCharArray(Py_GetProgramFullPath());
 #else
     // PYSIDE-535: FIXME: Add this function when available.
     QString executablePath = QLatin1String("missing Py_GetProgramFullPath");
 #endif // PYPY_VERSION
+
     QString appDirPath = QFileInfo(executablePath).absolutePath();
-    QString maybeQtConfPath = QDir(appDirPath).filePath(QStringLiteral("qt.conf"));
-    bool executableQtConfAvailable = QFileInfo::exists(maybeQtConfPath);
+
+    QString maybeQtConfPath = QDir(appDirPath).filePath(u"qt.conf"_s);
     maybeQtConfPath = QDir::toNativeSeparators(maybeQtConfPath);
+    bool executableQtConfAvailable = QFileInfo::exists(maybeQtConfPath);
 
     // Allow disabling the usage of the internal qt.conf. This is necessary for tests to work,
     // because tests are executed before the package is installed, and thus the Prefix specified
     // in qt.conf would point to a not yet existing location.
     bool disableInternalQtConf =
-            qEnvironmentVariableIntValue("PYSIDE_DISABLE_INTERNAL_QT_CONF") > 0;
+        qEnvironmentVariableIntValue("PYSIDE_DISABLE_INTERNAL_QT_CONF") > 0;
     if (disableInternalQtConf || executableQtConfAvailable) {
         registrationAttempted = true;
         return false;
@@ -869,15 +872,13 @@ bool registerInternalQtConf()
 
     // rccData needs to be static, otherwise when it goes out of scope, the Qt resource system
     // will point to invalid memory.
-    static QByteArray rccData = QByteArrayLiteral("[Paths]\nPrefix = ") + prefixPath
+    static QByteArray rccData = QByteArrayLiteral("[Paths]\nPrefix = ") + prefixPath + "\n";
 #ifdef Q_OS_WIN
-            // LibraryExecutables needs to point to Prefix instead of ./bin because we don't
-            // currently conform to the Qt default directory layout on Windows. This is necessary
-            // for QtWebEngineCore to find the location of QtWebEngineProcess.exe.
-            + QByteArray("\nLibraryExecutables = ") + prefixPath
+    // LibraryExecutables needs to point to Prefix instead of ./bin because we don't
+    // currently conform to the Qt default directory layout on Windows. This is necessary
+    // for QtWebEngineCore to find the location of QtWebEngineProcess.exe.
+    rccData += QByteArrayLiteral("LibraryExecutables = ") + prefixPath + "\n";
 #endif
-            ;
-    rccData.append('\n');
 
     // The RCC data structure expects a 4-byte size value representing the actual data.
     qsizetype size = rccData.size();
