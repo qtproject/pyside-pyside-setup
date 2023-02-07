@@ -389,7 +389,7 @@ Shiboken::BindingManager &bm = Shiboken::BindingManager::instance();
 for (auto *item : items) {
     SbkObject *obj = bm.retrieveWrapper(item);
     if (obj) {
-        if (reinterpret_cast<PyObject *>(obj)->ob_refcnt > 1) // If the refcnt is 1 the object will vannish anyway.
+        if (Py_REFCNT(reinterpret_cast<PyObject *>(obj)) > 1) // If the refcnt is 1 the object will vannish anyway.
             Shiboken::Object::invalidate(obj);
         Shiboken::Object::removeParent(obj);
     }

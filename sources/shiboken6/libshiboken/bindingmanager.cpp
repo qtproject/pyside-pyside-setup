@@ -95,7 +95,7 @@ static void showWrapperMap(const WrapperMap &wrapperMap)
             fprintf(stderr, "key: %p, value: %p (%s, refcnt: %d)\n", it->first,
                     static_cast<const void *>(sbkObj),
                     (Py_TYPE(sbkObj))->tp_name,
-                    int(reinterpret_cast<const PyObject *>(sbkObj)->ob_refcnt));
+                    int(Py_REFCNT(reinterpret_cast<const PyObject *>(sbkObj))));
         }
         fprintf(stderr, "-------------------------------\n");
     }
@@ -256,7 +256,7 @@ PyObject *BindingManager::getOverride(const void *cptr,
     SbkObject *wrapper = retrieveWrapper(cptr);
     // The refcount can be 0 if the object is dieing and someone called
     // a virtual method from the destructor
-    if (!wrapper || reinterpret_cast<const PyObject *>(wrapper)->ob_refcnt == 0)
+    if (!wrapper || Py_REFCNT(reinterpret_cast<const PyObject *>(wrapper)) == 0)
         return nullptr;
 
     // PYSIDE-1626: Touch the type to initiate switching early.

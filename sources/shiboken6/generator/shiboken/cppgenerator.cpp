@@ -1308,8 +1308,8 @@ void CppGenerator::writeVirtualMethodNativeVectorCallArgs(TextStream &s,
     if (!invalidateArgs.isEmpty())
         s << '\n';
     for (int index : invalidateArgs) {
-        s << "const bool invalidateArg" << index << " = " << PYTHON_ARGS_ARRAY <<
-          '[' << index - 1 << "]->ob_refcnt == 1;\n";
+        s << "const bool invalidateArg" << index << " = Py_REFCNT(" << PYTHON_ARGS_ARRAY <<
+          '[' << index - 1 << "]) == 1;\n";
     }
 }
 
@@ -1336,8 +1336,8 @@ void CppGenerator::writeVirtualMethodNativeArgs(TextStream &s,
         << indent << argConversions.join(u",\n"_s) << outdent << "\n));\n";
 
     for (int index : std::as_const(invalidateArgs)) {
-        s << "bool invalidateArg" << index << " = PyTuple_GET_ITEM(" << PYTHON_ARGS
-            << ", " << index - 1 << ")->ob_refcnt == 1;\n";
+        s << "bool invalidateArg" << index << " = Py_REFCNT(PyTuple_GET_ITEM(" << PYTHON_ARGS
+            << ", " << index - 1 << ")) == 1;\n";
     }
 }
 
@@ -1538,7 +1538,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
         << "}\n";
 
         if (invalidateReturn) {
-            s << "bool invalidateArg0 = " << PYTHON_RETURN_VAR << "->ob_refcnt == 1;\n"
+            s << "bool invalidateArg0 = Py_REFCNT(" << PYTHON_RETURN_VAR << ") == 1;\n"
                 << "if (invalidateArg0)\n" << indent
                 << "Shiboken::Object::releaseOwnership(" << PYTHON_RETURN_VAR
                 << ".object());\n" << outdent;
