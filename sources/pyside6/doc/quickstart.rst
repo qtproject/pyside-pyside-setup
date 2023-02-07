@@ -56,6 +56,13 @@ Installation
 
       pip install --index-url=https://download.qt.io/snapshots/ci/pyside/6.0.0/latest pyside6 --trusted-host download.qt.io
 
+  .. note:: Starting with 6.4.3, PySide6 can be used from inside a conda
+     environment, but any manual changes you make to the qt.conf file will be
+     ignored. If you want to set custom values to the Qt configuration, set
+     them in a qt6.conf file instead. Read more about `qt.conf`_.
+
+.. _`qt.conf`: https://doc.qt.io/qt-6/qt-conf.html
+
 * **Test your installation**
 
   Now that you have |project| installed, test your setup by running the following Python
