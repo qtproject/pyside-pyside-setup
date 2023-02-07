@@ -76,6 +76,9 @@ static int const CALL_METHOD = 161;
 // Python 3.6
 static int const CALL_FUNCTION = 131;
 static int const LOAD_ATTR = 106;
+// NoGil (how long will this exist in this form?)
+static int const LOAD_METHOD_NOGIL = 55;
+static int const CALL_METHOD_NOGIL = 72;
 
 static int _getVersion()
 {
@@ -88,6 +91,11 @@ static int _getVersion()
 
 static bool currentOpcode_Is_CallMethNoArgs()
 {
+    // PYSIDE-2221: Special case for the NoGil version:
+    //              Find out if we have such a version.
+    //              We could also ask the variable `Py_NOGIL`.
+    static PyObject *flags = PySys_GetObject("flags");
+    static bool isNoGil = PyObject_HasAttrString(flags, "nogil");
     // We look into the currently active operation if we are going to call
     // a method with zero arguments.
     auto *frame = PyEval_GetFrame();
@@ -112,6 +120,11 @@ static bool currentOpcode_Is_CallMethNoArgs()
     char *co_code{};
     PyBytes_AsStringAndSize(dec_co_code, &co_code, &code_len);
     uint8_t opcode1 = co_code[f_lasti];
+    if (isNoGil) {
+        uint8_t opcode2 = co_code[f_lasti + 4];
+        uint8_t oparg2 = co_code[f_lasti + 6];
+        return opcode1 == LOAD_METHOD_NOGIL && opcode2 == CALL_METHOD_NOGIL && oparg2 == 1;
+    }
     uint8_t opcode2 = co_code[f_lasti + 2];
     uint8_t oparg2 = co_code[f_lasti + 3];
     static auto number = _getVersion();
