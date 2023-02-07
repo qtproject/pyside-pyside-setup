@@ -387,9 +387,7 @@ PyObject *PySide_BuildSignatureProps(PyObject *type_key)
 #ifdef PYPY_VERSION
 static bool get_lldebug_flag()
 {
-    PyObject *sysmodule = PyImport_AddModule("sys");
-    auto *dic = PyModule_GetDict(sysmodule);
-    dic = PyDict_GetItemString(dic, "pypy_translation_info");
+    auto *dic = PySys_GetObject("pypy_translation_info");
     int lldebug = PyObject_IsTrue(PyDict_GetItemString(dic, "translation.lldebug"));
     int lldebug0 = PyObject_IsTrue(PyDict_GetItemString(dic, "translation.lldebug0"));
     return lldebug || lldebug0;

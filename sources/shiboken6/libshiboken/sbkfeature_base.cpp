@@ -60,8 +60,7 @@ void disassembleFrame(const char *marker)
     fprintf(stdout, "\n%s BEGIN\n", marker);
     PyObject_CallFunctionObjArgs(disco, f_code.object(), f_lasti.object(), nullptr);
     fprintf(stdout, "%s END\n\n", marker);
-    static PyObject *sysmodule = PyImport_ImportModule("sys");
-    static PyObject *stdout_file = PyObject_GetAttrString(sysmodule, "stdout");
+    static PyObject *stdout_file = PySys_GetObject("stdout");
     PyObject_CallMethod(stdout_file, "flush", nullptr);
     PyErr_Restore(error_type, error_value, error_traceback);
 }
@@ -80,8 +79,7 @@ static int const LOAD_ATTR = 106;
 
 static int _getVersion()
 {
-    static PyObject *const sysmodule = PyImport_AddModule("sys");
-    static PyObject *const version = PyObject_GetAttrString(sysmodule, "version_info");
+    static PyObject *const version = PySys_GetObject("version_info");
     static PyObject *const major = PyTuple_GetItem(version, 0);
     static PyObject *const minor = PyTuple_GetItem(version, 1);
     static auto number = PyLong_AsLong(major) * 1000 + PyLong_AsLong(minor);

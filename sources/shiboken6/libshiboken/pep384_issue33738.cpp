@@ -79,9 +79,7 @@ typedef struct _oldtypeobject {
 
 static bool is_compatible_version()
 {
-    auto *sysmodule = PyImport_AddModule("sys");
-    auto *dic = PyModule_GetDict(sysmodule);
-    auto *version = PyDict_GetItemString(dic, "version_info");
+    auto *version = PySys_GetObject("version_info");
     auto *major = PyTuple_GetItem(version, 0);
     auto *minor = PyTuple_GetItem(version, 1);
     auto number = PyLong_AsLong(major) * 1000 + PyLong_AsLong(minor);

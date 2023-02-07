@@ -441,8 +441,7 @@ void init_enum()
     Py_AtExit(cleanupEnumTypes);
 
     // PYSIDE-1735: Determine whether we should use the old or the new enum implementation.
-    static PyObject *sysmodule = PyImport_AddModule("sys");
-    static PyObject *option = PyObject_GetAttrString(sysmodule, "pyside63_option_python_enum");
+    static PyObject *option = PySys_GetObject("pyside63_option_python_enum");
     if (!option || !PyLong_Check(option)) {
         PyErr_Clear();
         option = PyLong_FromLong(0);
@@ -973,9 +972,7 @@ static PyTypeObject *recordCurrentEnum(PyObject *scopeOrModule,
 
 static bool is_old_version()
 {
-    auto *sysmodule = PyImport_AddModule("sys");
-    auto *dic = PyModule_GetDict(sysmodule);
-    auto *version = PyDict_GetItemString(dic, "version_info");
+    auto *version = PySys_GetObject("version_info");
     auto *major = PyTuple_GetItem(version, 0);
     auto *minor = PyTuple_GetItem(version, 1);
     auto number = PyLong_AsLong(major) * 1000 + PyLong_AsLong(minor);
