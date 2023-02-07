@@ -840,12 +840,20 @@ bool registerInternalQtConf()
     maybeQtConfPath = QDir::toNativeSeparators(maybeQtConfPath);
     bool executableQtConfAvailable = QFileInfo::exists(maybeQtConfPath);
 
+    QString maybeQt6ConfPath = QDir(appDirPath).filePath(u"qt6.conf"_s);
+    maybeQt6ConfPath = QDir::toNativeSeparators(maybeQt6ConfPath);
+    bool executableQt6ConfAvailable = QFileInfo::exists(maybeQt6ConfPath);
+
     // Allow disabling the usage of the internal qt.conf. This is necessary for tests to work,
     // because tests are executed before the package is installed, and thus the Prefix specified
     // in qt.conf would point to a not yet existing location.
     bool disableInternalQtConf =
         qEnvironmentVariableIntValue("PYSIDE_DISABLE_INTERNAL_QT_CONF") > 0;
-    if (disableInternalQtConf || executableQtConfAvailable) {
+    bool runsInConda =
+        qEnvironmentVariableIsSet("CONDA_DEFAULT_ENV") || qEnvironmentVariableIsSet("CONDA_PREFIX");
+
+    if (!runsInConda && (disableInternalQtConf || executableQtConfAvailable) ||
+        runsInConda && executableQt6ConfAvailable) {
         registrationAttempted = true;
         return false;
     }

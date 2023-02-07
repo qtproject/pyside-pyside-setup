@@ -17,6 +17,9 @@ PYSIDE_API void init(PyObject *module);
 ///
 /// This is used in a standalone build, to inform QLibraryInfo of the Qt prefix
 /// (where Qt libraries are installed) so that plugins can be successfully loaded.
+///
+/// This is also used if PySide runs from inside a conda environment to solve
+/// conflicts with the qt.conf installed by Anaconda Qt packages.
 PYSIDE_API bool registerInternalQtConf();
 
 } //namespace PySide
