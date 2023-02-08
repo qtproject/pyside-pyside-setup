@@ -1,6 +1,7 @@
 # Copyright (C) 2018 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
+import sys
 from .log import log, LogLevel
 from pathlib import Path
 
@@ -201,11 +202,20 @@ class Config(object):
             ]
             if qt_install_path:
                 _pyside_tools = available_pyside_tools(qt_tools_path=qt_install_path)
-                setup_kwargs['entry_points'] = {
-                    'console_scripts': [f'{PYSIDE}-{tool} = {package_name}.scripts.pyside_tool:'
-                                        f'{tool}'
-                                        for tool in _pyside_tools]
-                }
+
+                # replacing pyside6-android_deploy by pyside6-android-deploy for consistency
+                # Also, the tool should not exist in any other platform than Linux
+                _console_scripts = []
+                if ("android_deploy" in _pyside_tools) and sys.platform.startswith("linux"):
+                    _console_scripts = [(f"{PYSIDE}-android-deploy ="
+                                        " PySide6.scripts.pyside_tool:android_deploy")]
+                _pyside_tools.remove("android_deploy")
+
+                _console_scripts.extend([f'{PYSIDE}-{tool} = {package_name}.scripts.pyside_tool:'
+                                         f'{tool}' for tool in _pyside_tools])
+
+                setup_kwargs['entry_points'] = {'console_scripts': _console_scripts}
+
         self.setup_kwargs = setup_kwargs
 
     def get_long_description(self):

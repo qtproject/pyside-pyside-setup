@@ -194,8 +194,17 @@ def wheel_shiboken_module() -> Tuple[SetupData, None]:
 
 def wheel_pyside6_essentials(packaged_qt_tools_path: Path) -> Tuple[SetupData, List[ModuleData]]:
     _pyside_tools = available_pyside_tools(packaged_qt_tools_path, package_for_wheels=True)
-    _console_scripts = [f"pyside6-{tool} = PySide6.scripts.pyside_tool:{tool}"
-                        for tool in _pyside_tools]
+
+    # replacing pyside6-android_deploy by pyside6-android-deploy for consistency
+    # Also, the tool should not exist in any other platform than Linux
+    _console_scripts = []
+    if ("android_deploy" in _pyside_tools) and sys.platform.startswith("linux"):
+        _console_scripts = ["pyside6-android-deploy = PySide6.scripts.pyside_tool:android_deploy"]
+    _pyside_tools.remove("android_deploy")
+
+    _console_scripts.extend([f"pyside6-{tool} = PySide6.scripts.pyside_tool:{tool}"
+                            for tool in _pyside_tools])
+
     setup = SetupData(
         name="PySide6_Essentials",
         version=get_version_from_package("PySide6"),  # we use 'PySide6' here

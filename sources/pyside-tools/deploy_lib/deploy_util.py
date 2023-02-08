@@ -19,7 +19,7 @@ def config_option_exists():
     return False
 
 
-def cleanup(generated_files_path: Path, config: Config):
+def cleanup(generated_files_path: Path, config: Config, is_android: bool = False):
     """
         Cleanup the generated build folders/files
     """
@@ -29,9 +29,20 @@ def cleanup(generated_files_path: Path, config: Config):
     elif not config.dry_run:
         logging.info(f"[DEPLOY] {generated_files_path} does not exist")
 
+    if is_android:
+        buildozer_spec: Path = config.project_dir / "buildozer.spec"
+        if buildozer_spec.exists():
+            buildozer_spec.unlink()
+            logging.info(f"[DEPLOY] {str(buildozer_spec)} removed")
+
+        buildozer_build: Path = config.project_dir / ".buildozer"
+        if buildozer_build.exists():
+            shutil.rmtree(buildozer_build)
+            logging.info(f"[DEPLOY] {str(buildozer_build)} removed")
+
 
 def get_config(python_exe: Path, dry_run: bool = False, config_file: Path = None, main_file:
-               Path = None):
+               Path = None, android_data = None, is_android: bool = False):
     """
         Sets up a new deployment configuration or use an existing config file
     """
@@ -42,7 +53,7 @@ def get_config(python_exe: Path, dry_run: bool = False, config_file: Path = None
             config_file = Path.cwd() / "pysidedeploy.spec"
 
     config = Config(config_file=config_file, source_file=main_file, python_exe=python_exe,
-                    dry_run=dry_run)
+                    dry_run=dry_run, android_data=android_data, is_android=is_android)
 
     return config
 
@@ -70,7 +81,7 @@ def setup_python(dry_run: bool, force: bool, init: bool):
 
 
 def install_python_dependencies(config: Config, python: PythonExecutable, init: bool,
-                                packages: str):
+                                packages: str, is_android: bool = False):
     """
         Installs the python package dependencies for the target deployment platform
     """
@@ -80,13 +91,14 @@ def install_python_dependencies(config: Config, python: PythonExecutable, init: 
         packages = config.get_value("python", packages).split(",")
         python.install(packages=packages)
         # nuitka requires patchelf to make patchelf rpath changes for some Qt files
-        if sys.platform.startswith("linux"):
+        if sys.platform.startswith("linux") and not is_android:
             python.install(packages=["patchelf"])
 
 
 def finalize(generated_files_path: Path, config: Config):
     """
         Copy the executable into the final location
+        For Android deployment, this is done through buildozer
     """
     generated_exec_path = generated_files_path / (config.source_file.stem + EXE_FORMAT)
     if generated_exec_path.exists() and config.exe_dir:
