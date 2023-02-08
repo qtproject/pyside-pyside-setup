@@ -224,7 +224,9 @@ PyDesignerCustomWidgets::PyDesignerCustomWidgets(QObject *parent) : QObject(pare
         qputenv(pythonPathVar, value);
     }
 
-    initPython();
+    // Might be initialized already, for example, when loaded from QUiLoader.
+    if (Py_IsInitialized() == 0)
+        initPython();
 
     // Run all register*py files
     QString errorMessage;
