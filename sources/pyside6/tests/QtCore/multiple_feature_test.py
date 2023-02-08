@@ -30,6 +30,10 @@ There is much more to come.
 
 MethodDescriptorType = type(str.split)
 
+def xprint(*args, **kw):
+    if "-v" in sys.argv:
+        print(*args, **kw)
+
 
 @unittest.skipIf(is_pypy, "__feature__ cannot yet be used with PyPy")
 class FeaturesTest(unittest.TestCase):
@@ -93,14 +97,14 @@ class FeaturesTest(unittest.TestCase):
         for idx in range(0x100):
             feature.reset()
             config = f"feature_{idx:02x}"
-            print()
-            print(f"--- Feature Test Config `{config}` ---")
-            print("Imports:")
+            xprint()
+            xprint(f"--- Feature Test Config `{config}` ---")
+            xprint("Imports:")
             for bit in range(8):
                 if idx & 1 << bit:
                     cur_feature = feature_list[bit]
                     text = f"from __feature__ import {cur_feature}"
-                    print(text)
+                    xprint(text)
                     eval(compile(text, "<string>", "exec"), globals(), edict)
             for bit in range(8):
                 value = idx & 1 << bit
