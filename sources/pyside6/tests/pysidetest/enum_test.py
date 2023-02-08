@@ -68,6 +68,8 @@ class InvestigateOpcodesTest(unittest.TestCase):
             res.append((ops[idx - 1][0], ops[idx][1] - ops[idx - 1][1]))
         return sorted(res, key=lambda x: (x[1], x[0]))
 
+    _sin = sys.implementation.name
+    @unittest.skipIf(hasattr(sys.flags, "nogil"), f"{_sin} has different opcodes")
     def testByteCode(self):
         # opname, opcode, arg
         result_1 = [('LOAD_GLOBAL', 116, 0),
