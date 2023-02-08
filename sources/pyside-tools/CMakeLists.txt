@@ -24,7 +24,8 @@ else()
             ${CMAKE_CURRENT_SOURCE_DIR}/project.py
             ${CMAKE_CURRENT_SOURCE_DIR}/qml.py
             ${CMAKE_CURRENT_SOURCE_DIR}/qtpy2cpp.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/deploy.py)
+            ${CMAKE_CURRENT_SOURCE_DIR}/deploy.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/android_deploy.py)
 
     set(directories ${CMAKE_CURRENT_SOURCE_DIR}/deploy_lib
                     ${CMAKE_CURRENT_SOURCE_DIR}/project)

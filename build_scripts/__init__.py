@@ -7,6 +7,7 @@ SHIBOKEN = 'shiboken6'
 
 PYSIDE_PYTHON_TOOLS = ["metaobjectdump",
                        "deploy",
+                       "android_deploy",
                        "project",
                        "qml",
                        "qtpy2cpp",

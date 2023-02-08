@@ -19,7 +19,7 @@ class BaseConfig:
 
     def __init__(self, config_file: Path, dry_run: bool, comment_prefixes: str = "/") -> None:
         self.config_file = config_file
-        self.parser = ConfigParser(comment_prefixes="/", allow_no_value=True)
+        self.parser = ConfigParser(comment_prefixes=comment_prefixes, allow_no_value=True)
         if not self.config_file.exists():
             if not dry_run:
                 logging.info(f"[DEPLOY] Creating config file {self.config_file}")
@@ -62,7 +62,8 @@ class Config(BaseConfig):
     creation
     """
 
-    def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool):
+    def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
+                 android_data, is_android: bool):
         super().__init__(config_file, dry_run)
 
         self._dry_run = dry_run
@@ -81,6 +82,7 @@ class Config(BaseConfig):
         )
 
         self.title = self.get_value("app", "title")
+
         self.project_dir = None
         if self.get_value("app", "project_dir"):
             self.project_dir = Path(self.get_value("app", "project_dir")).absolute()
@@ -112,6 +114,50 @@ class Config(BaseConfig):
             self.excluded_qml_plugins = self.get_value("qt", "excluded_qml_plugins").split(",")
         else:
             self._find_and_set_excluded_qml_plugins()
+
+        # Android
+        if is_android:
+            if android_data.wheel_pyside:
+                self.wheel_pyside = android_data.wheel_pyside
+            else:
+                wheel_pyside_temp = self.get_value("qt", "wheel_pyside")
+                self.wheel_pyside = Path(wheel_pyside_temp) if wheel_pyside_temp else None
+
+            if android_data.wheel_shiboken:
+                self.wheel_shiboken = android_data.wheel_shiboken
+            else:
+                wheel_shiboken_temp = self.get_value("qt", "wheel_shiboken")
+                self.wheel_shiboken = Path(wheel_shiboken_temp) if wheel_shiboken_temp else None
+
+            if android_data.ndk_path:
+                self.ndk_path = android_data.ndk_path
+            else:
+                ndk_path_temp = self.get_value("buildozer", "ndk_path")
+                self.ndk_path = Path(ndk_path_temp) if ndk_path_temp else None
+
+            if android_data.sdk_path:
+                self.sdk_path = android_data.sdk_path
+            else:
+                sdk_path_temp = self.get_value("buildozer", "sdk_path")
+                self.sdk_path = Path(sdk_path_temp) if sdk_path_temp else None
+
+            recipe_dir_temp = self.get_value("buildozer", "recipe_dir")
+            self.recipe_dir = Path(recipe_dir_temp) if recipe_dir_temp else None
+
+            jars_dir_temp = self.get_value("buildozer", "jars_dir")
+            self.jars_dir = Path(jars_dir_temp) if jars_dir_temp else None
+
+            self._modules = []
+            if self.get_value("buildozer", "modules"):
+                self.modules = self.get_value("buildozer", "modules").split(",")
+
+            self.arch = self.get_value("buildozer", "arch")
+
+            self._local_libs = []
+            if self.get_value("buildozer", "local_libs"):
+                self.local_libs = self.get_value("buildozer", "local_libs").split(",")
+
+            self._mode = self.get_value("buildozer", "mode")
 
     def set_or_fetch(self, config_property_val, config_property_key, config_property_group="app"):
         """
@@ -164,7 +210,7 @@ class Config(BaseConfig):
         return self._source_file
 
     @source_file.setter
-    def source_file(self, source_file):
+    def source_file(self, source_file: Path):
         self._source_file = source_file
 
     @property
@@ -172,7 +218,7 @@ class Config(BaseConfig):
         return self._python_path
 
     @python_path.setter
-    def python_path(self, python_path):
+    def python_path(self, python_path: Path):
         self._python_path = python_path
 
     @property
@@ -184,12 +230,112 @@ class Config(BaseConfig):
         self._excluded_qml_plugins = excluded_qml_plugins
 
     @property
+    def recipe_dir(self):
+        return self._recipe_dir
+
+    @recipe_dir.setter
+    def recipe_dir(self, recipe_dir: Path):
+        self._recipe_dir = recipe_dir.resolve() if recipe_dir else None
+        if self._recipe_dir:
+            self.set_value("buildozer", "recipe_dir", str(self._recipe_dir))
+
+    def recipes_exist(self):
+        if not self._recipe_dir:
+            return False
+
+        pyside_recipe_dir = Path(self.recipe_dir) / "PySide6"
+        shiboken_recipe_dir = Path(self.recipe_dir) / "shiboken6"
+
+        return pyside_recipe_dir.is_dir() and shiboken_recipe_dir.is_dir()
+
+    @property
+    def jars_dir(self) -> Path:
+        return self._jars_dir
+
+    @jars_dir.setter
+    def jars_dir(self, jars_dir: Path):
+        self._jars_dir = jars_dir.resolve() if jars_dir else None
+        if self._jars_dir:
+            self.set_value("buildozer", "jars_dir", str(self._jars_dir))
+
+    @property
+    def modules(self):
+        return self._modules
+
+    @modules.setter
+    def modules(self, modules):
+        self._modules = modules
+        self.set_value("buildozer", "modules", ",".join(modules))
+
+    @property
+    def local_libs(self):
+        return self._local_libs
+
+    @local_libs.setter
+    def local_libs(self, local_libs):
+        self._local_libs = local_libs
+        self.set_value("buildozer", "local_libs", ",".join(local_libs))
+
+    @property
+    def ndk_path(self):
+        return self._ndk_path
+
+    @ndk_path.setter
+    def ndk_path(self, ndk_path: Path):
+        self._ndk_path = ndk_path.resolve() if ndk_path else None
+        if self._ndk_path:
+            self.set_value("buildozer", "ndk_path", str(self._ndk_path))
+
+    @property
+    def sdk_path(self) -> Path:
+        return self._sdk_path
+
+    @sdk_path.setter
+    def sdk_path(self, sdk_path: Path):
+        self._sdk_path = sdk_path.resolve() if sdk_path else None
+        if self._sdk_path:
+            self.set_value("buildozer", "sdk_path", str(self._sdk_path))
+
+    @property
+    def arch(self):
+        return self._arch
+
+    @arch.setter
+    def arch(self, arch):
+        self._arch = arch
+        self.set_value("buildozer", "arch", arch)
+
+    @property
+    def mode(self):
+        return self._mode
+
+    @property
     def exe_dir(self):
         return self._exe_dir
 
     @exe_dir.setter
-    def exe_dir(self, exe_dir):
+    def exe_dir(self, exe_dir: Path):
         self._exe_dir = exe_dir
+
+    @property
+    def wheel_pyside(self) -> Path:
+        return self._wheel_pyside
+
+    @wheel_pyside.setter
+    def wheel_pyside(self, wheel_pyside: Path):
+        self._wheel_pyside = wheel_pyside.resolve() if wheel_pyside else None
+        if self._wheel_pyside:
+            self.set_value("qt", "wheel_pyside", str(self._wheel_pyside))
+
+    @property
+    def wheel_shiboken(self) -> Path:
+        return self._wheel_shiboken
+
+    @wheel_shiboken.setter
+    def wheel_shiboken(self, wheel_shiboken: Path):
+        self._wheel_shiboken = wheel_shiboken.resolve() if wheel_shiboken else None
+        if self._wheel_shiboken:
+            self.set_value("qt", "wheel_shiboken", str(self._wheel_shiboken))
 
     def _find_and_set_qml_files(self):
         """Fetches all the qml_files in the folder and sets them if the

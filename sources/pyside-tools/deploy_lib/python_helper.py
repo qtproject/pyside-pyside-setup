@@ -49,7 +49,6 @@ class PythonExecutable:
                 package_version = package_info[1]
             else:
                 raise ValueError(f"{package} should be of the format 'package_name'=='version'")
-
             if not self.is_installed(package=package_name):
                 logging.info(f"[DEPLOY] Installing package: {package}")
                 run_command(

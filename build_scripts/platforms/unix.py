@@ -119,14 +119,24 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
                 "{st_build_dir}/{st_package_name}/scripts/__init__.py",
                 _vars=_vars)
 
+            scripts = ["pyside_tool.py", "metaobjectdump.py", "project.py", "qml.py",
+                       "qtpy2cpp.py", "deploy.py"]
+
+            script_dirs = ["qtpy2cpp_lib", "deploy_lib",  "project"]
+
+            if sys.platform.startswith("linux"):
+                scripts.append("android_deploy.py")
+                script_dirs.extend(["deploy_lib/android",
+                                    "deploy_lib/android/recipes/PySide6",
+                                    "deploy_lib/android/recipes/shiboken6",])
+
             # For setting up setuptools entry points
-            for script in ("pyside_tool.py", "metaobjectdump.py", "project.py", "qml.py",
-                        "qtpy2cpp.py", "deploy.py"):
+            for script in scripts:
                 src = f"{{install_dir}}/bin/{script}"
                 target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script}"
                 copyfile(src, target, force=False, _vars=_vars)
 
-            for script_dir in ("qtpy2cpp_lib", "deploy_lib", "project"):
+            for script_dir in script_dirs:
                 src = f"{{install_dir}}/bin/{script_dir}"
                 target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script_dir}"
                 # Exclude subdirectory tests

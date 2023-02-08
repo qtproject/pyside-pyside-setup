@@ -199,5 +199,9 @@ def deploy():
     pyside_script_wrapper("deploy.py")
 
 
+def android_deploy():
+    pyside_script_wrapper("android_deploy.py")
+
+
 if __name__ == "__main__":
     main()

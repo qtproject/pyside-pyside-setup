@@ -10,3 +10,8 @@ nuitka==1.4.8
 distro; sys_platform == 'linux'
 patchelf==0.15; sys_platform == 'linux'
 importlib-metadata; python_version < '3.8'
+pkginfo; sys_platform == 'linux'
+jinja2;  sys_platform == 'linux'
+buildozer==1.5.0;  sys_platform == 'linux'
+tqdm; sys_platform == 'linux'
+gitpython; sys_platform == 'linux'

@@ -1,0 +1,9 @@
+{
+    "files": ["deploy.py", "deploy_lib/__init__.py", "deploy_lib/commands.py", "deploy_lib/config.py",
+              "deploy_lib/default.spec", "deploy_lib/python_helper.py", "deploy_lib/deploy_util.py",
+              "deploy_lib/android/recipes/PySide6/__init__.tmpl.py",
+              "deploy_lib/android/recipes/shiboken6/__init__.tmpl.py",
+              "deploy_lib/android/__init__.py", "deploy_lib/android/android_helper.py",
+              "deploy_lib/android/buildozer.py"
+              ]
+}
