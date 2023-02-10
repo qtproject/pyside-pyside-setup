@@ -152,6 +152,11 @@ if (FULLDOCSBUILD)
         endif()
     endforeach()
 
+    # There is no binding for the qtdoc repository, but it has some relevant documents.
+    set(qtdoc_doc_conf "qtmodules/pyside-qtdoc.qdocconf")
+    configure_file("${qtdoc_doc_conf}.in" "${CMAKE_CURRENT_LIST_DIR}/${qtdoc_doc_conf}" @ONLY)
+    file(APPEND "pyside.qdocconf.in" "\@CMAKE_CURRENT_LIST_DIR\@/${qtdoc_doc_conf}\n")
+
     configure_file("pyside.qdocconf.in" "pyside.qdocconf" @ONLY)
 
 
