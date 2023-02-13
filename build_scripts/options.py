@@ -475,7 +475,8 @@ class DistUtilsCommandMixin(object):
         # We also don't do auto-searching if qt-target-path is passed
         # explicitly. This is to help with the building of host tools
         # while cross-compiling.
-        if not self.is_cross_compile and not self.qt_target_path:
+        # Skip this process for the 'build_rst_docs' command
+        if not self.is_cross_compile and not self.qt_target_path and 'build_rst_docs' not in sys.argv:
             # Enforce usage of qmake in QtInfo if it was given explicitly.
             if self.qmake:
                 self.has_qmake_option = True
