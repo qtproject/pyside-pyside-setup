@@ -14,6 +14,9 @@
     linux
     darwin
     win32
+# Cannot create metal surface
+[QtMultimediaWidgets::qmultimediawidgets]
+    darwin ci
 # PYSIDE-474
 [QtWebEngineWidgets::pyside-474-qtwebengineview]
     py2
