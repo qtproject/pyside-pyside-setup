@@ -590,12 +590,6 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
     return attr;
 }
 
-// PYSIDE-1889: Keeping the old, misleading API for a while.
-PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name)
-{
-    return getHiddenDataFromQObject(cppSelf, self, name);
-}
-
 bool inherits(PyTypeObject *objType, const char *class_name)
 {
     if (strcmp(objType->tp_name, class_name) == 0)

@@ -48,8 +48,6 @@ PYSIDE_API QObject *convertToQObject(PyObject *object, bool raiseError);
 /// \return The Python object which contains the Data obtained in metaObject or the Python
 /// method pulled out of a Python property.
 PYSIDE_API PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name);
-/// This is an alias, meanwhile misleading:
-PYSIDE_API PyObject *getMetaDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name);
 
 /// Mutex for accessing QObject memory helpers from multiple threads
 PYSIDE_API QMutex &nextQObjectMemoryAddrMutex();

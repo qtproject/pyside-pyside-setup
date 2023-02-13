@@ -83,8 +83,6 @@ def _get_flag_enum_option():
     # PYSIDE-1735: Emit a warning when we should maybe evict forgiveness mode
     if ver[:2] >= (7, 0):
         warnings.warn(f"{q} Please drop Enum forgiveness mode in `mangled_type_getattro` ***")
-    if ver[:2] >= (6, 5):
-        warnings.warn(f"{q} Please drop the misleading function `getMetaDataFromQObject` ***")
     # normalize the sys attribute
     setattr(sys, sysname, flag)
     os.environ[envname] = str(flag)
