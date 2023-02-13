@@ -453,10 +453,8 @@ the ``dot`` command needs to be in PATH, otherwise,
 the process will fail. Installing ``graphviz`` system-wide is also an option.
 
 Since the process relies on a Qt installation, you need to specify where the
-``qtbase`` directory of a Qt source tree is located, either by using
-the command line option ``--qt-src-dir`` or setting the environment variable::
-
-    export QT_SRC_DIR=/path/to/qtbase
+``qtbase`` directory of a Qt source tree is located by passing it to
+the command line option ``--qt-src-dir``.
 
 Once the common ``setup.py`` build process finishes (remember to use
 ``--build-docs`` to enable the documentation build, and ``--doc-build-inline``
