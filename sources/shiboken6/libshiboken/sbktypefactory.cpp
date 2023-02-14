@@ -37,6 +37,37 @@ static PyObject *_PyType_FromSpecWithBases(PyType_Spec *, PyObject *);
 
 #endif // PYPY_VERSION
 
+// PYSIDE-2230: Temporary fix for Python 3.12.
+//              A tp_new is no longer allowed in a meta class.
+//              Hopefully, the Python devs will supply the missing support.
+// Note: Python 3.12 is the first version that grabs the metaclass from base classes.
+static PyObject *_PyType_FromSpecWithBasesHack(PyType_Spec *spec, PyObject *bases)
+{
+    PyTypeObject *keepMeta{};
+    newfunc keepNew{};
+
+    if (bases) {
+        Py_ssize_t n = PyTuple_GET_SIZE(bases);
+        for (auto idx = 0; idx < n; ++idx) {
+            PyTypeObject *base = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(bases, idx));
+            PyTypeObject *meta = Py_TYPE(base);
+            if (meta->tp_new != PyType_Type.tp_new) {
+                // make sure there is no second meta class
+                assert(keepMeta == nullptr);
+                keepMeta = meta;
+                keepNew = meta->tp_new;
+                meta->tp_new = PyType_Type.tp_new;
+            }
+        }
+    }
+
+    auto *ret = _PyType_FromSpecWithBases(spec, bases);
+
+    if (keepMeta)
+        keepMeta->tp_new = keepNew;
+    return ret;
+}
+
 PyTypeObject *SbkType_FromSpec_BMDWB(PyType_Spec *spec,
                                      PyObject *bases,
                                      PyTypeObject *meta,
@@ -61,7 +92,7 @@ PyTypeObject *SbkType_FromSpec_BMDWB(PyType_Spec *spec,
     int package_level = atoi(spec->name);
     const char *mod = new_spec.name = colon + 1;
 
-    PyObject *obType = _PyType_FromSpecWithBases(&new_spec, bases);
+    PyObject *obType = _PyType_FromSpecWithBasesHack(&new_spec, bases);
     if (obType == nullptr)
         return nullptr;
 
