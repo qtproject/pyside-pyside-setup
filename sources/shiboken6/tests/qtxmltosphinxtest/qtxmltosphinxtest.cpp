@@ -271,6 +271,43 @@ void QtXmlToSphinxTest::testTable_data()
     QTest::newRow("testRowSpan2")
         << QString::fromLatin1(xml) << QString::fromLatin1(expected);
 
+    // testNestedList
+    xml = R"(<table>
+    <row>
+        <item>
+            <list type="bullet">
+                <item>
+                    <para>I11</para>
+                </item>
+                <item>
+                    <para>I21</para>
+                </item>
+            </list>
+        </item>
+        <item>
+            <list type="bullet">
+                <item>
+                    <para>I12</para>
+                </item>
+                <item>
+                    <para>I22</para>
+                </item>
+            </list>
+        </item>
+    </row>
+</table>)";
+
+    expected = R"(
+    +---------+---------+
+    |    * I11|    * I12|
+    |    * I21|    * I22|
+    +---------+---------+
+
+)";
+
+    QTest::newRow("testNestedList")
+        << QString::fromLatin1(xml) << QString::fromLatin1(expected);
+
     // testBrokenTable
     xml = R"(<table>
     <header>
