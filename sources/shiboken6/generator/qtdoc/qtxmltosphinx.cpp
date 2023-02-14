@@ -63,6 +63,20 @@ static bool isHttpLink(const QString &ref)
     return ref.startsWith(u"http://") || ref.startsWith(u"https://");
 }
 
+static QString trimRight(QString s)
+{
+    while (!s.isEmpty() && s.crbegin()->isSpace())
+        s.chop(1);
+    return s;
+}
+
+static QString trimLeadingNewlines(QString s)
+{
+    while (!s.isEmpty() && s.at(0) == u'\n')
+        s.remove(0, 1);
+    return s;
+}
+
 QDebug operator<<(QDebug d, const QtXmlToSphinxLink &l)
 {
     static const QHash<QtXmlToSphinxLink::Type, const char *> typeName = {
@@ -407,11 +421,13 @@ void QtXmlToSphinx::callHandler(WebXmlTag t, QXmlStreamReader &r)
 
 void QtXmlToSphinx::formatCurrentTable()
 {
-    if (m_currentTable.isEmpty())
+    Q_ASSERT(!m_tables.isEmpty());
+    auto &table = m_tables.back();
+    if (table.isEmpty())
         return;
-    m_currentTable.normalize();
+    table.normalize();
     m_output << '\n';
-    m_currentTable.format(m_output);
+    table.format(m_output);
 }
 
 void QtXmlToSphinx::pushOutputBuffer()
@@ -938,11 +954,11 @@ void QtXmlToSphinx::handleTableTag(QXmlStreamReader& reader)
     if (token == QXmlStreamReader::StartElement) {
         if (parentTag() == WebXmlTag::para)
             handleParaTagEnd(); // End <para> to prevent the table from being rst-escaped
-        m_currentTable.clear();
+        m_tables.push({});
     } else if (token == QXmlStreamReader::EndElement) {
         // write the table on m_output
         formatCurrentTable();
-        m_currentTable.clear();
+        m_tables.pop();
         if (parentTag() == WebXmlTag::para)
             handleParaTagStart();
     }
@@ -958,7 +974,7 @@ void QtXmlToSphinx::handleTermTag(QXmlStreamReader& reader)
     } else if (token == QXmlStreamReader::EndElement) {
         TableCell cell;
         cell.data = popOutputBuffer().trimmed();
-        m_currentTable.appendRow(TableRow(1, cell));
+        m_tables.back().appendRow(TableRow(1, cell));
     }
 }
 
@@ -967,18 +983,20 @@ void QtXmlToSphinx::handleItemTag(QXmlStreamReader& reader)
 {
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        if (m_currentTable.isEmpty())
-            m_currentTable.appendRow({});
-        TableRow& row = m_currentTable.last();
+        auto &table = m_tables.back();
+        if (table.isEmpty())
+            table.appendRow({});
+        TableRow& row = table.last();
         TableCell cell;
         cell.colSpan = reader.attributes().value(u"colspan"_s).toShort();
         cell.rowSpan = reader.attributes().value(u"rowspan"_s).toShort();
         row << cell;
         pushOutputBuffer();
     } else if (token == QXmlStreamReader::EndElement) {
-        QString data = popOutputBuffer().trimmed();
-        if (!m_currentTable.isEmpty()) {
-            TableRow& row = m_currentTable.last();
+        QString data = trimLeadingNewlines(trimRight(popOutputBuffer()));
+        auto &table = m_tables.back();
+        if (!table.isEmpty()) {
+            TableRow& row = table.last();
             if (!row.isEmpty())
                 row.last().data = data;
         }
@@ -991,15 +1009,16 @@ void QtXmlToSphinx::handleHeaderTag(QXmlStreamReader &reader)
     // C++ header with "name"/"href" attributes.
     if (reader.tokenType() == QXmlStreamReader::StartElement
         && !reader.attributes().hasAttribute(u"name"_s)) {
-        m_currentTable.setHeaderEnabled(true);
-        m_currentTable.appendRow({});
+        auto &table = m_tables.back();
+        table.setHeaderEnabled(true);
+        table.appendRow({});
     }
 }
 
 void QtXmlToSphinx::handleRowTag(QXmlStreamReader& reader)
 {
     if (reader.tokenType() == QXmlStreamReader::StartElement)
-        m_currentTable.appendRow({});
+        m_tables.back().appendRow({});
 }
 
 enum ListType { BulletList, OrderedList, EnumeratedList };
@@ -1015,27 +1034,29 @@ static inline ListType webXmlListType(QStringView t)
 
 void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
 {
-    // BUG We do not support a list inside a table cell
     static ListType listType = BulletList;
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
+        m_tables.push({});
+        auto &table = m_tables.back();
         listType = webXmlListType(reader.attributes().value(u"type"_s));
         if (listType == EnumeratedList) {
-            m_currentTable.appendRow(TableRow{TableCell(u"Constant"_s),
-                                              TableCell(u"Description"_s)});
-            m_currentTable.setHeaderEnabled(true);
+            table.appendRow(TableRow{TableCell(u"Constant"_s),
+                                     TableCell(u"Description"_s)});
+            table.setHeaderEnabled(true);
         }
         m_output.indent();
     } else if (token == QXmlStreamReader::EndElement) {
         m_output.outdent();
-        if (!m_currentTable.isEmpty()) {
+        const auto &table = m_tables.back();
+        if (!table.isEmpty()) {
             switch (listType) {
             case BulletList:
             case OrderedList: {
                 m_output << '\n';
                 const char *separator = listType == BulletList ? "* " : "#. ";
                 const char *indentLine = listType == BulletList ? "  " : "   ";
-                for (const TableCell &cell : m_currentTable.constFirst()) {
+                for (const TableCell &cell : table.constFirst()) {
                     const auto itemLines = QStringView{cell.data}.split(u'\n');
                     m_output << separator << itemLines.constFirst() << '\n';
                     for (qsizetype i = 1, max = itemLines.size(); i < max; ++i)
@@ -1049,7 +1070,7 @@ void QtXmlToSphinx::handleListTag(QXmlStreamReader& reader)
                 break;
             }
         }
-        m_currentTable.clear();
+        m_tables.pop();
     }
 }
 

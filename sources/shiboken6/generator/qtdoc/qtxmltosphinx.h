@@ -69,14 +69,9 @@ public:
                 return m_normalized;
             }
 
-            void clear() {
-                m_normalized = false;
-                m_rows.clear();
-            }
-
             void appendRow(const TableRow &row) { m_rows.append(row); }
 
-            const TableRow &constFirst() { return m_rows.constFirst(); }
+            const TableRow &constFirst() const { return m_rows.constFirst(); }
             TableRow &first() { return m_rows.first(); }
             TableRow &last() { return m_rows.last(); }
 
@@ -160,7 +155,7 @@ private:
 
     QStack<StringSharedPtr> m_buffers; // Maintain address stability since it used in TextStream
 
-    Table m_currentTable;
+    QStack<Table> m_tables; // Stack of tables, used for <table><list> with nested <item>
     QScopedPointer<QtXmlToSphinxLink> m_linkContext; // for <link>
     QScopedPointer<QtXmlToSphinxLink> m_seeAlsoContext; // for <see-also>foo()</see-also>
     QString m_context;
