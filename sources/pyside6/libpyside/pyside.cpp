@@ -839,8 +839,8 @@ bool registerInternalQtConf()
     bool runsInConda =
         qEnvironmentVariableIsSet("CONDA_DEFAULT_ENV") || qEnvironmentVariableIsSet("CONDA_PREFIX");
 
-    if (!runsInConda && (disableInternalQtConf || executableQtConfAvailable) ||
-        runsInConda && executableQt6ConfAvailable) {
+    if ((!runsInConda && (disableInternalQtConf || executableQtConfAvailable))
+        || (runsInConda && executableQt6ConfAvailable)) {
         registrationAttempted = true;
         return false;
     }
