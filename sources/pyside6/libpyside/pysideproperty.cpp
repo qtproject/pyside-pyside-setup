@@ -181,7 +181,7 @@ static PyObject *qpropertyTpNew(PyTypeObject *subtype, PyObject * /* args */, Py
 
 static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 {
-    PyObject *type = nullptr;
+    PyObject *type{};
     auto data = reinterpret_cast<PySideProperty *>(self);
     PySidePropertyPrivate *pData = data->d;
 
@@ -189,6 +189,13 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                                    "designable", "scriptable", "stored",
                                    "user", "constant", "final", nullptr};
     char *doc{};
+
+    Py_CLEAR(pData->pyTypeObject);
+    Py_CLEAR(pData->fget);
+    Py_CLEAR(pData->fset);
+    Py_CLEAR(pData->freset);
+    Py_CLEAR(pData->fdel);
+    Py_CLEAR(pData->notify);
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
                                      "O|OOOOsObbbbbb:QtCore.Property",
@@ -409,6 +416,7 @@ static int qpropertyTraverse(PyObject *self, visitproc visit, void *arg)
     Py_VISIT(data->freset);
     Py_VISIT(data->fdel);
     Py_VISIT(data->notify);
+    Py_VISIT(data->pyTypeObject);
     return 0;
 }
 
@@ -423,7 +431,7 @@ static int qpropertyClear(PyObject *self)
     Py_CLEAR(data->freset);
     Py_CLEAR(data->fdel);
     Py_CLEAR(data->notify);
-    Py_XDECREF(data->pyTypeObject);
+    Py_CLEAR(data->pyTypeObject);
 
     delete data;
     reinterpret_cast<PySideProperty *>(self)->d = nullptr;
@@ -569,9 +577,8 @@ bool isFinal(const PySideProperty *self)
 const char *getNotifyName(PySideProperty *self)
 {
     if (self->d->notifySignature.isEmpty()) {
-        PyObject *str = PyObject_Str(self->d->notify);
+        AutoDecRef str(PyObject_Str(self->d->notify));
         self->d->notifySignature = Shiboken::String::toCString(str);
-        Py_DECREF(str);
     }
 
     return self->d->notifySignature.isEmpty()
