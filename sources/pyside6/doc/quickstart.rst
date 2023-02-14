@@ -79,8 +79,8 @@ Installation
 .. note:: For more information about what's included in the ``pyside6``
    package, check :ref:`package_details`.
 
-Create a Simple Application
----------------------------
+Create a Simple Qt Widgets Application
+--------------------------------------
 
 Your |project| setup is ready. You can explore it further by developing a simple application
 that prints "Hello World" in several languages. The following instructions will
@@ -144,6 +144,78 @@ guide you through the development process:
 
   .. image:: images/screenshot_hello.png
      :alt: Hello World application
+
+Create a Simple Quick Application
+---------------------------------
+
+To do the same using Qt Quick:
+
+* **Imports**
+
+  Create a new file named :code:`hello_world_quick.py`, and add the following imports to it.::
+
+    import sys
+    from PySide6.QtGui import QGuiApplication
+    from PySide6.QtQml import QQmlApplicationEngine
+
+* **Declarative UI**
+
+  The UI can be described in the QML language (assigned to a Python variable)::
+
+    QML = """
+    import QtQuick
+    import QtQuick.Controls
+    import QtQuick.Layouts
+
+    Window {
+        width: 300
+        height: 200
+        visible: true
+        title: "Hello World"
+
+        readonly property list<string> texts: ["Hallo Welt", "Hei maailma",
+                                               "Hola Mundo", "Привет мир"]
+
+        function setText() {
+            var i = Math.round(Math.random() * 3)
+            text.text = texts[i]
+        }
+
+        ColumnLayout {
+            anchors.fill:  parent
+
+            Text {
+                id: text
+                text: "Hello World"
+                Layout.alignment: Qt.AlignHCenter
+            }
+            Button {
+                text: "Click me"
+                Layout.alignment: Qt.AlignHCenter
+                onClicked:  setText()
+            }
+        }
+    }
+    """
+
+* **Application execution**
+
+  Now, add a main function where you instantiate a :code:`QQmlApplicationEngine` and
+  load the QML::
+
+    if __name__ == "__main__":
+        app = QGuiApplication(sys.argv)
+        engine = QQmlApplicationEngine()
+        engine.loadData(QML.encode('utf-8'))
+        if not engine.rootObjects():
+            sys.exit(-1)
+        exit_code = app.exec()
+        del engine
+        sys.exit(exit_code)
+
+
+  .. note:: This is a simplified example. Normally, the QML code should be in a separate
+     :code:`.qml` file, which can be edited by design tools.
 
 .. _faq-section:
 
