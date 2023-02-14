@@ -30,7 +30,8 @@ PyObject *dir(PyObject *pointer, PyObject *pointee)
         return PyList_New(0);
     // Get the pointer's dir entries. Note: PyObject_Dir() cannot be called on
     // self, will crash. Work around by using the type dict keys.
-    auto *result = PyMapping_Keys(Py_TYPE(pointer)->tp_dict);
+    AutoDecRef tpDict(PepType_GetDict(Py_TYPE(pointer)));
+    auto *result = PyMapping_Keys(tpDict);
 
     if (pointee != nullptr && pointee != Py_None) {
         // Add the entries of the pointee that do not exist in the pointer's list.

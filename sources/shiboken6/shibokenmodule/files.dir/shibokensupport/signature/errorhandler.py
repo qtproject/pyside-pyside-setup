@@ -87,6 +87,12 @@ def seterror_argument(args, func_name, info):
             msg = f"{func_name}(): {info}"
             err = AttributeError
         return err, msg
+    if isinstance(info, Exception):
+        # PYSIDE-2230: Python 3.12 seems to always do normalization.
+        err = type(info)
+        info = info.args[0]
+        msg = f"{func_name}(): {info}"
+        return err, msg
     if info and type(info) is dict:
         msg = f"{func_name}(): unsupported keyword '{tuple(info)[0]}'"
         return AttributeError, msg

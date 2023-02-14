@@ -534,7 +534,7 @@ static PyObject *adjustFuncName(const char *func_name)
 
     // Find the feature flags
     auto type = reinterpret_cast<PyTypeObject *>(obtype.object());
-    auto dict = type->tp_dict;
+    AutoDecRef dict(PepType_GetDict(type));
     int id = currentSelectId(type);
     id = id < 0 ? 0 : id;   // if undefined, set to zero
     auto lower = id & 0x01;

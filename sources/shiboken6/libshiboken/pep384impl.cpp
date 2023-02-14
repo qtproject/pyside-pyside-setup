@@ -1,4 +1,4 @@
-// Copyright (C) 2018 The Qt Company Ltd.
+// Copyright (C) 2023 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "sbkpython.h"
@@ -177,7 +177,7 @@ static PyObject *
 find_name_in_mro(PyTypeObject *type, PyObject *name, int *error)
 {
     Py_ssize_t i, n;
-    PyObject *mro, *res, *base, *dict;
+    PyObject *mro, *res, *base;
 
     /* Look in tp_dict of types in MRO */
     mro = type->tp_mro;
@@ -191,9 +191,10 @@ find_name_in_mro(PyTypeObject *type, PyObject *name, int *error)
     for (i = 0; i < n; i++) {
         base = PyTuple_GET_ITEM(mro, i);
         assert(PyType_Check(base));
-        dict = ((PyTypeObject *)base)->tp_dict;
-        assert(dict && PyDict_Check(dict));
-        res = PyDict_GetItem(dict, name);
+        auto *type = reinterpret_cast<PyTypeObject *>(base);
+        Shiboken::AutoDecRef dict(PepType_GetDict(type));
+        assert(!dict.isNull() && PyDict_Check(dict.object()));
+        res = PyDict_GetItem(dict.object(), name);
         if (res != nullptr)
             break;
         if (PyErr_Occurred()) {
@@ -1028,6 +1029,39 @@ void PepType_SETP_delete(SbkEnumType *enumType)
 {
     SETP_extender.erase(enumType);
     SETP_key = nullptr;
+}
+
+#ifdef Py_LIMITED_API
+static PyObject *emulatePyType_GetDict(PyTypeObject *type)
+{
+    if (_PepRuntimeVersion() < 0x030C00 || type->tp_dict) {
+        auto *res = type->tp_dict;
+        Py_XINCREF(res);
+        return res;
+    }
+    // PYSIDE-2230: Here we are really cheating. We don't know how to
+    //              access an internal dict, and so we simply pretend
+    //              it were an empty dict. This works great for our types.
+    // This was an unexpectedly simple solution :D
+    return PyDict_New();
+}
+#endif
+
+// PyType_GetDict: replacement for <static type>.tp_dict, which is
+// zero for builtin types since 3.12.
+PyObject *PepType_GetDict(PyTypeObject *type)
+{
+#if !defined(Py_LIMITED_API)
+#  if PY_VERSION_HEX >= 0x030C0000
+    return PyType_GetDict(type);
+#  else
+    // pre 3.12 fallback code, mimicking the addref-behavior.
+    Py_XINCREF(type->tp_dict);
+    return type->tp_dict;
+#  endif
+#else
+    return emulatePyType_GetDict(type);
+#endif // Py_LIMITED_API
 }
 
 /***************************************************************************

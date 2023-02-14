@@ -71,6 +71,7 @@ class InvestigateOpcodesTest(unittest.TestCase):
     _sin = sys.implementation.name
     @unittest.skipIf(hasattr(sys.flags, "nogil"), f"{_sin} has different opcodes")
     def testByteCode(self):
+        import dis
         # opname, opcode, arg
         result_1 = [('LOAD_GLOBAL', 116, 0),
                     ('LOAD_ATTR',   106, 1),
@@ -94,7 +95,7 @@ class InvestigateOpcodesTest(unittest.TestCase):
                         ('LOAD_CONST',    100, 0),
                         ('RETURN_VALUE',   83, None)]
 
-        if sys.version_info[:2] >= (3, 11):
+        if sys.version_info[:2] == (3, 11):
             # Note: Python 3.11 is a bit more complex because it can optimize itself.
             # Opcodes are a bit different, and a hidden second code object is used.
             # We investigate this a bit, because we want to be warned when things change.
@@ -157,6 +158,22 @@ class InvestigateOpcodesTest(unittest.TestCase):
             code_quicken(self.probe_function2, 1)
             self.assertEqual(self.read_code(self.probe_function2, adaptive=True), result_3)
             self.assertEqual(self.get_sizes(self.probe_function2, adaptive=True), sizes_3)
+
+        if sys.version_info[:2] >= (3, 12):
+
+            result_1 = [('RESUME', 151, 0),
+                        ('LOAD_GLOBAL', 116, 0),
+                        ('LOAD_ATTR', 106, 2),
+                        ('STORE_FAST', 125, 1),
+                        ('RETURN_CONST', 121, 0)]
+
+            result_2 = [('RESUME', 151, 0),
+                        ('LOAD_GLOBAL', 116, 1),
+                        ('LOAD_ATTR', 106, 2),
+                        ('CALL', 171, 0),
+                        ('STORE_FAST', 125, 1),
+                        ('RETURN_CONST', 121, 0)]
+
 
         self.assertEqual(self.read_code(self.probe_function1), result_1)
         self.assertEqual(self.read_code(self.probe_function2), result_2)

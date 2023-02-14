@@ -443,8 +443,8 @@ static int qpropertyClear(PyObject *self)
 
 static PyObject *getFromType(PyTypeObject *type, PyObject *name)
 {
-    PyObject *attr = nullptr;
-    attr = PyDict_GetItem(type->tp_dict, name);
+    AutoDecRef tpDict(PepType_GetDict(type));
+    auto *attr = PyDict_GetItem(tpDict.object(), name);
     if (!attr) {
         PyObject *bases = type->tp_bases;
         const Py_ssize_t size = PyTuple_GET_SIZE(bases);

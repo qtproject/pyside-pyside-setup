@@ -38,6 +38,11 @@ class ConnectTest(unittest.TestCase):
         gc.collect()
         # if this is no debug build, then we check at least that
         # we do not crash any longer.
+        for idx in range(200):
+            # PYSIDE-2230: Warm-up is necessary before measuring, because
+            # the code changes the constant parts after some time.
+            o.selectionModel().destroyed.connect(self.callback)
+            o.selectionModel().destroyed.disconnect(self.callback)
         if not skiptest:
             total = gettotalrefcount()
         for idx in range(1000):

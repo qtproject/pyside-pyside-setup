@@ -542,6 +542,14 @@ extern LIBSHIBOKEN_API int PepRuntime_38_flag;
 
 /*****************************************************************************
  *
+ * Runtime support for Python 3.12 incompatibility
+ *
+ */
+
+LIBSHIBOKEN_API PyObject *PepType_GetDict(PyTypeObject *type);
+
+/*****************************************************************************
+ *
  * Module Initialization
  *
  */

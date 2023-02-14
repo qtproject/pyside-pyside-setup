@@ -17,7 +17,8 @@ import sys
 
 
 class testQTextBlock(unittest.TestCase):
-    def tesIterator(self):
+
+    def testIterator(self):
         edit = QTextEdit()
         cursor = edit.textCursor()
         fmt = QTextCharFormat()

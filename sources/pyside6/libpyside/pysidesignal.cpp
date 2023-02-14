@@ -784,7 +784,8 @@ static PyObject *_getHomonymousMethod(PySideSignalInstance *inst)
 
     for (Py_ssize_t idx = 0; idx < n; idx++) {
         auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
-        auto *hom = PyDict_GetItem(sub_type->tp_dict, name);
+        AutoDecRef tpDict(PepType_GetDict(sub_type));
+        auto *hom = PyDict_GetItem(tpDict, name);
         PyObject *realFunc{};
         if (hom && PyCallable_Check(hom) && (realFunc = _getRealCallable(hom)))
             return realFunc;
@@ -891,8 +892,8 @@ void updateSourceObject(PyObject *source)
         Py_ssize_t pos = 0;
         PyObject *key, *value;
         auto *type = reinterpret_cast<PyTypeObject *>(mroItem.object());
-
-        while (PyDict_Next(type->tp_dict, &pos, &key, &value)) {
+        AutoDecRef tpDict(PepType_GetDict(type));
+        while (PyDict_Next(tpDict, &pos, &key, &value)) {
             if (PyObject_TypeCheck(value, PySideSignal_TypeF())) {
                 // PYSIDE-1751: We only insert an instance into the instance dict, if a signal
                 //              of the same name is in the mro. This is the equivalent action
