@@ -57,11 +57,12 @@ void disassembleFrame(const char *marker)
     auto *frame = reinterpret_cast<PyObject *>(PyEval_GetFrame());
     AutoDecRef f_lasti(PyObject_GetAttr(frame, _f_lasti));
     AutoDecRef f_code(PyObject_GetAttr(frame, _f_code));
+    AutoDecRef ignore{};
     fprintf(stdout, "\n%s BEGIN\n", marker);
-    PyObject_CallFunctionObjArgs(disco, f_code.object(), f_lasti.object(), nullptr);
+    ignore.reset(PyObject_CallFunctionObjArgs(disco, f_code.object(), f_lasti.object(), nullptr));
     fprintf(stdout, "%s END\n\n", marker);
     static PyObject *stdout_file = PySys_GetObject("stdout");
-    PyObject_CallMethod(stdout_file, "flush", nullptr);
+    ignore.reset(PyObject_CallMethod(stdout_file, "flush", nullptr));
     PyErr_Restore(error_type, error_value, error_traceback);
 }
 
