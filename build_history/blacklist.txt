@@ -42,9 +42,6 @@
     darwin ci
 [QtWidgets::qpicture_test]
     darwin ci
-# Unsolved Refcounting leaks in debug mode
-[pysidetest::property_python_test]
-    debug
 
 # PYSIDE-535: These errors are still present. Please try to remove one :)
 [sample::mixed_mi]
