@@ -66,6 +66,7 @@ class Config(object):
             'Programming Language :: Python :: 3.9',
             'Programming Language :: Python :: 3.10',
             'Programming Language :: Python :: 3.11',
+            'Programming Language :: Python :: 3.12',
         ]
 
         self.setup_script_dir = None

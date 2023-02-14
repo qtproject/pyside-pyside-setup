@@ -37,9 +37,10 @@ static PyObject *_PyType_FromSpecWithBases(PyType_Spec *, PyObject *);
 
 #endif // PYPY_VERSION
 
-// PYSIDE-2230: Temporary fix for Python 3.12.
+// PYSIDE-2230: Not so temporary fix for Python 3.12.
 //              A tp_new is no longer allowed in a meta class.
 //              Hopefully, the Python devs will supply the missing support.
+//              It turned out that they will not fix that, as expected.
 // Note: Python 3.12 is the first version that grabs the metaclass from base classes.
 static PyObject *_PyType_FromSpecWithBasesHack(PyType_Spec *spec, PyObject *bases)
 {

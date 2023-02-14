@@ -59,6 +59,7 @@ class Formatter(Writer):
     unrelated tasks of enumeration and formatting apart.
     """
     def __init__(self, outfile, options, *args):
+        # XXX Find out which of these patches is still necessary!
         self.options = options
         Writer.__init__(self, outfile, *args)
         # patching __repr__ to disable the __repr__ of typing.TypeVar:
@@ -74,8 +75,12 @@ class Formatter(Writer):
         """
         def _typevar__repr__(self):
             return f"typing.{self.__name__}"
-        typing.TypeVar.__repr__ = _typevar__repr__
-
+        # This is no longer necessary for modern typing versions.
+        # Ignore therefore if the repr is read-only and cannot be changed.
+        try:
+            typing.TypeVar.__repr__ = _typevar__repr__
+        except TypeError:
+            pass
         # Adding a pattern to substitute "Union[T, NoneType]" by "Optional[T]"
         # I tried hard to replace typing.Optional by a simple override, but
         # this became _way_ too much.

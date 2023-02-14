@@ -61,7 +61,7 @@ class EnumTest(unittest.TestCase):
 
     def testEnumConstructorWithTooManyParameters(self):
         '''Calling the constructor of non-extensible enum with the wrong number of parameters.'''
-        self.assertRaises(TypeError, SampleNamespace.InValue, 13, 14)
+        self.assertRaises((TypeError, ValueError), SampleNamespace.InValue, 13, 14)
 
     def testEnumConstructorWithNonNumberParameter(self):
         '''Calling the constructor of non-extensible enum with a string.'''
