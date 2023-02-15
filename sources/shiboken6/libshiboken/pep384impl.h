@@ -201,7 +201,9 @@ LIBSHIBOKEN_API int Pep_GetVerboseFlag(void);
 LIBSHIBOKEN_API const char *_PepUnicode_AsString(PyObject *);
 
 enum PepUnicode_Kind {
+#if PY_VERSION_HEX < 0x030C0000
     PepUnicode_WCHAR_KIND = 0,
+#endif
     PepUnicode_1BYTE_KIND = 1,
     PepUnicode_2BYTE_KIND = 2,
     PepUnicode_4BYTE_KIND = 4
@@ -216,7 +218,9 @@ LIBSHIBOKEN_API void *_PepUnicode_DATA(PyObject *str);
 #else
 
 enum PepUnicode_Kind {
+#if PY_VERSION_HEX < 0x030C0000
     PepUnicode_WCHAR_KIND = PyUnicode_WCHAR_KIND,
+#endif
     PepUnicode_1BYTE_KIND = PyUnicode_1BYTE_KIND,
     PepUnicode_2BYTE_KIND = PyUnicode_2BYTE_KIND,
     PepUnicode_4BYTE_KIND =  PyUnicode_4BYTE_KIND
