@@ -153,9 +153,11 @@ static void formatPyUnicode(PyObject *obj, std::ostream &str)
     str << " (" << PyUnicode_GetLength(obj) << ')';
     const auto kind = _PepUnicode_KIND(obj);
     switch (kind) {
+#if PY_VERSION_HEX < 0x030C0000
     case PepUnicode_WCHAR_KIND:
         str << " [wchar]";
         break;
+#endif
     case PepUnicode_1BYTE_KIND:
         str << " [1byte]";
         break;
@@ -176,8 +178,10 @@ static void formatPyUnicode(PyObject *obj, std::ostream &str)
     void *data =_PepUnicode_DATA(obj);
     str << ", data=";
     switch (kind) {
+#if PY_VERSION_HEX < 0x030C0000
     case PepUnicode_WCHAR_KIND:
         formatCharSequence(reinterpret_cast<const wchar_t *>(data), str);
+#endif
         break;
     case PepUnicode_1BYTE_KIND:
         formatCharSequence(reinterpret_cast<const Py_UCS1 *>(data), str);
