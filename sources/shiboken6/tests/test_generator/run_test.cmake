@@ -1,3 +1,6 @@
+# Copyright (C) 2023 The Qt Company Ltd.
+# SPDX-License-Identifier: BSD-3-Clause
+
 # The tests are run through this script due to a limitation
 # on versions of CMake lesser than 2.8, that prevent setting
 # environment variables for tests from working.

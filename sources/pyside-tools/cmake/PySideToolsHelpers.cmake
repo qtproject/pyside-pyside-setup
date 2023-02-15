@@ -1,3 +1,6 @@
+# Copyright (C) 2023 The Qt Company Ltd.
+# SPDX-License-Identifier: BSD-3-Clause
+
 function(pyside_tools_internal_detect_if_cross_building)
     if(CMAKE_CROSSCOMPILING OR QFP_SHIBOKEN_HOST_PATH)
         set(is_cross_build TRUE)

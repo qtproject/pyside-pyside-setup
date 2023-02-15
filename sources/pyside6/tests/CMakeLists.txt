@@ -1,3 +1,6 @@
+# Copyright (C) 2023 The Qt Company Ltd.
+# SPDX-License-Identifier: BSD-3-Clause
+
 if(PYSIDE_IS_CROSS_BUILD)
     # SHIBOKEN_PYTHON_INTERPRETER will be empty when cross-building.
     message(WARNING

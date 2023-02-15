@@ -1,3 +1,6 @@
+# Copyright (C) 2023 The Qt Company Ltd.
+# SPDX-License-Identifier: BSD-3-Clause
+
 PYSIDE_TEST(bug_446.py)
 PYSIDE_TEST(bug_1084.py)
 PYSIDE_TEST(accessManager_test.py)

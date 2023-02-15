@@ -1,3 +1,6 @@
+# Copyright (C) 2023 The Qt Company Ltd.
+# SPDX-License-Identifier: BSD-3-Clause
+
 include(CMakeParseArguments)
 
 # A version of cmake_parse_arguments that makes sure all arguments are processed and errors out

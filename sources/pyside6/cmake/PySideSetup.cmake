@@ -1,3 +1,6 @@
+# Copyright (C) 2023 The Qt Company Ltd.
+# SPDX-License-Identifier: BSD-3-Clause
+
 # Don't ignore targets that do not exist, inside add_dependencies calls.
 cmake_policy(SET CMP0046 NEW)
 

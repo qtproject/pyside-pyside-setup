@@ -1,3 +1,6 @@
+# Copyright (C) 2023 The Qt Company Ltd.
+# SPDX-License-Identifier: BSD-3-Clause
+
 find_program(SPHINX_BUILD sphinx-build DOC "Path to sphinx-build binary.")
 
 # graphviz dot appears to be used by sphinx and not by CMake directly. This is just found to check

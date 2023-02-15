@@ -1,3 +1,6 @@
+# Copyright (C) 2023 The Qt Company Ltd.
+# SPDX-License-Identifier: BSD-3-Clause
+
 PYSIDE_TEST(attr_cache_py3k.py)
 PYSIDE_TEST(bug_278_test.py)
 PYSIDE_TEST(bug_300_test.py)

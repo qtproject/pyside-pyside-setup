@@ -1,3 +1,6 @@
+# Copyright (C) 2023 The Qt Company Ltd.
+# SPDX-License-Identifier: BSD-3-Clause
+
 project(PySidePlugin)
 
 # Note: At runtime, the dependency to the shiboken library is resolved

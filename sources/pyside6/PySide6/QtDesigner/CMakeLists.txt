@@ -1,3 +1,6 @@
+# Copyright (C) 2023 The Qt Company Ltd.
+# SPDX-License-Identifier: BSD-3-Clause
+
 project(QtDesigner)
 
 qt_wrap_cpp(QtDesigner_static_src "${pyside6_SOURCE_DIR}/qpydesignerextensions.h")

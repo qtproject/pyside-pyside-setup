@@ -1,3 +1,6 @@
+# Copyright (C) 2023 The Qt Company Ltd.
+# SPDX-License-Identifier: BSD-3-Clause
+
 include(cmake/Macros/icecc.cmake) # this must be the first line!
 
 cmake_minimum_required(VERSION 3.18)
