@@ -9,6 +9,7 @@
   <object-type name="QSvgRenderer"/>
 
   <object-type name="QSvgGenerator">
+    <enum-type name="SvgVersion" since="6.5"/>
     <modify-function signature="setOutputDevice(QIODevice*)">
       <modify-argument index="1">
           <reference-count action="set"/>
