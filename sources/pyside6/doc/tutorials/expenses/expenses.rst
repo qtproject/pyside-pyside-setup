@@ -20,9 +20,9 @@ The requirements:
    (`QPushButton <https://doc.qt.io/qtforpython/PySide6/QtWidgets/QPushButton.html>`_).
  * A verification step to avoid invalid data entry.
  * A chart to visualize the expense data
-   (`QChart <https://doc.qt.io/qtforpython/PySide6/QtCharts/QtCharts.QChart.html>`_) that will
+   (`QChart <https://doc.qt.io/qtforpython/PySide6/QtCharts/QChart.html>`_) that will
    be embedded in a chart view
-   (`QChartView <https://doc.qt.io/qtforpython/PySide6/QtCharts/QtCharts.QChartView.html>`_).
+   (`QChartView <https://doc.qt.io/qtforpython/PySide6/QtCharts/QChartView.html>`_).
 
 Empty window
 ------------

@@ -17,7 +17,7 @@ Before you begin, install the following prerequisites:
 * The `PySide6 <https://pypi.org/project/PySide6/>`_ Python packages.
 * Qt Creator v4.9 beta1 or later from
   `https://download.qt.io
-  <https://download.qt.io/snapshots/qtcreator/4.9/4.9.0-beta1/>`_.
+  <https://download.qt.io/snapshots/qtcreator/>`_.
 
 
 The following step-by-step instructions guide you through application

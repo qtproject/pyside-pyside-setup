@@ -4,7 +4,7 @@ Getting Started
 .. important:: This page is focused on building |project| **from source**.
   If you just want to install |pymodname|, you need to run: :command:`pip install pyside6`.
 
-  For more details, refer to our `Quick Start`_ guide. Additionally, you can check the
+  For more details, refer to our :ref:`quick-start` guide. Additionally, you can check the
   :ref:`FAQ <faq>` related to the project.
 
 .. _Quick Start: quickstart.html

@@ -55,9 +55,9 @@ Cloning the official repository can be done by::
 
     git clone https://code.qt.io/pyside/pyside-setup
 
-Checking out the version that we want to build, for example, 6.2::
+Checking out the version that we want to build, for example, 6.4::
 
-    cd pyside-setup && git checkout 6.2
+    cd pyside-setup && git checkout 6.4
 
 Install the general dependencies::
 
@@ -69,7 +69,7 @@ Building PySide
 ~~~~~~~~~~~~~~~
 
 Check your Qt installation path, to specifically use that version of qtpaths to build PySide.
-for example, ``C:\Qt\6.4.0\msvc2019_64\bin\qtpaths.exe``.
+for example, ``C:\Qt\6.4.2\msvc2019_64\bin\qtpaths.exe``.
 
 Build can take a few minutes, so it is recommended to use more than one CPU core::
 

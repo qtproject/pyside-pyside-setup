@@ -8,8 +8,9 @@ platforms are Linux, macOS, Windows, FreeBSD, among others.
 
 You can read the `official documentation <https://cx-freeze.readthedocs.io/en/latest/index.html>`_
 to clarify any further question, and remember to contribute to
-the project by `filing issues <https://sourceforge.net/projects/cx-freeze/>`_
-if you find any, or contributing to `their development <https://bitbucket.org/anthony_tuininga/cx_freeze/src>`_.
+the project by `filing issues
+<https://github.com/marcelotduarte/cx_Freeze/issues>`_
+if you find any, or contributing to `their development <https://github.com/marcelotduarte/cx_Freeze>`_.
 
 Preparation
 ===========

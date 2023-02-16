@@ -54,7 +54,7 @@ Installation
   * It is also possible to install a specific snapshot from our servers.
     To do so, you can use the following command::
 
-      pip install --index-url=https://download.qt.io/snapshots/ci/pyside/6.0.0/latest pyside6 --trusted-host download.qt.io
+      pip install --index-url=https://download.qt.io/snapshots/ci/pyside/6.4/latest pyside6 --trusted-host download.qt.io
 
   .. note:: Starting with 6.4.3, PySide6 can be used from inside a conda
      environment, but any manual changes you make to the qt.conf file will be
