@@ -83,7 +83,7 @@ After the process completes, you see a message stating the location of your exec
 example::
 
     Done. You can now run `target/MyApp/MyApp`. If that doesn't work, see
-    https://build-system.fman.io/troubleshooting.
+    https://build-system.fman.io/troubleshooting
 
 
 Now, you can try to run the application. The result is the same window as the one you saw with the

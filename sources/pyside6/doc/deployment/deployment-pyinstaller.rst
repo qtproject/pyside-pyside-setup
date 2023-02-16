@@ -5,7 +5,7 @@
 stand-alone executable. This installer supports Linux, macOS, Windows, and more; and is also
 compatible with 3rd-party Python modules, such as |pymodname|.
 
-For more details, see the `official documentation <https://www.pyinstaller.org/documentation.html>`_.
+For more details, see the `official documentation <https://www.pyinstaller.org>`_.
 
 Status of Qt 6 Support
 ======================

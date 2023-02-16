@@ -10,7 +10,7 @@ One of the goals of |pymodname| is to be API compatible with PyQt,
 with certain exceptions.
 
 The latest considerations and known issues will be also reported
-in the `wiki <https://wiki.qt.io/Qt_for_Python/Considerations>`_.
+in the :ref:`developer-notes`.
 
 __hash__() function return value
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
