@@ -239,6 +239,23 @@ static bool needsClangBuiltinIncludes()
     return platform() != Platform::macOS;
 }
 
+static QString queryLlvmConfigDir(const QString &arg)
+{
+    static const QString llvmConfig = QStandardPaths::findExecutable(u"llvm-config"_s);
+    if (llvmConfig.isEmpty())
+        return {};
+    QByteArray stdOut;
+    if (!runProcess(llvmConfig, QStringList{arg}, &stdOut))
+        return {};
+    const QString path = QFile::decodeName(stdOut.trimmed());
+    if (!QFileInfo::exists(path)) {
+        qWarning(R"(%s: "%s" as returned by llvm-config "%s" does not exist.)",
+                 __FUNCTION__, qPrintable(QDir::toNativeSeparators(path)), qPrintable(arg));
+        return {};
+    }
+    return path;
+}
+
 static QString findClangLibDir()
 {
     for (const char *envVar : {"LLVM_INSTALL_DIR", "CLANG_INSTALL_DIR"}) {
@@ -249,18 +266,7 @@ static QString findClangLibDir()
             qWarning("%s: %s as pointed to by %s does not exist.", __FUNCTION__, qPrintable(path), envVar);
         }
     }
-    const QString llvmConfig =
-        QStandardPaths::findExecutable(u"llvm-config"_s);
-    if (!llvmConfig.isEmpty()) {
-        QByteArray stdOut;
-        if (runProcess(llvmConfig, QStringList{u"--libdir"_s}, &stdOut)) {
-            const QString path = QFile::decodeName(stdOut.trimmed());
-            if (QFileInfo::exists(path))
-                return path;
-            qWarning("%s: %s as returned by llvm-config does not exist.", __FUNCTION__, qPrintable(path));
-        }
-    }
-    return QString();
+    return queryLlvmConfigDir(u"--libdir"_s);
 }
 
 static QString findClangBuiltInIncludesDir()
@@ -289,7 +295,7 @@ static QString findClangBuiltInIncludesDir()
         if (!candidate.isEmpty())
             return candidate + QStringLiteral("/include");
     }
-    return QString();
+    return queryLlvmConfigDir(u"--includedir"_s);
 }
 
 static QString compilerFromCMake(const QString &defaultCompiler)
