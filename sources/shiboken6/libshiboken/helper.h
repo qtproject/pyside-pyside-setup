@@ -65,6 +65,8 @@ using ThreadId = unsigned long long;
 LIBSHIBOKEN_API ThreadId currentThreadId();
 LIBSHIBOKEN_API ThreadId mainThreadId();
 
+LIBSHIBOKEN_API int pyVerbose();
+
 /**
  * An utility function used to call PyErr_WarnEx with a formatted message.
  */

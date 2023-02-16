@@ -415,7 +415,7 @@ SbkConverter *getConverter(const char *typeName)
     ConvertersMap::const_iterator it = converters.find(typeName);
     if (it != converters.end())
         return it->second;
-    if (Py_VerboseFlag > 0) {
+    if (Shiboken::pyVerbose() > 0) {
         const std::string message =
             std::string("Can't find type resolver for type '") + typeName + "'.";
         PyErr_WarnEx(PyExc_RuntimeWarning, message.c_str(), 0);

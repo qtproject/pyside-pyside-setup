@@ -5,6 +5,7 @@
 #include "basewrapper_p.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
+#include "pep384impl.h"
 
 #include <algorithm>
 
@@ -464,6 +465,27 @@ const char *typeNameOf(const char *typeIdName)
     result[size] = '\0';
     std::memcpy(result, typeIdName, size);
     return result;
+}
+
+#if !defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030A0000
+static int _getPyVerbose()
+{
+    PyConfig config;
+    PyConfig_InitPythonConfig(&config);
+    return config.verbose;
+}
+#endif // !Py_LIMITED_API >= 3.10
+
+int pyVerbose()
+{
+#ifdef Py_LIMITED_API
+    return Pep_GetVerboseFlag();
+#elif PY_VERSION_HEX >= 0x030A0000
+    static const int result = _getPyVerbose();
+    return result;
+#else
+    return Py_VerboseFlag;
+#endif
 }
 
 } // namespace Shiboken

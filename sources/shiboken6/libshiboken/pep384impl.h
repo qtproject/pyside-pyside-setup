@@ -163,7 +163,6 @@ LIBSHIBOKEN_API const char *PepType_GetNameStr(PyTypeObject *type);
  */
 LIBSHIBOKEN_API int Pep_GetFlag(const char *name);
 LIBSHIBOKEN_API int Pep_GetVerboseFlag(void);
-#define Py_VerboseFlag              Pep_GetVerboseFlag()
 #endif
 
 /*****************************************************************************
