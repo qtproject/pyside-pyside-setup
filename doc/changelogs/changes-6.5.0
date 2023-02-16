@@ -1,0 +1,110 @@
+Qt for Python 6.5.0 is a minor release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - pyside6-project can now generate simple project templates.
+ - QtSerialBus has been added.
+ - Class QHashSeed has been added.
+ - [PYSIDE-510]  The non-standard __signature__ attribute of functions and
+                 classes has been removed in favor of get_signature().
+ - [PYSIDE-1019] A callback error when using true_property has been fixed.
+ - [PYSIDE-1713] A `signatures` attribute has been added to the Signal type
+                 in order to increase compatibility with other
+                 implementations.
+ - [PYSIDE-2029] __feature__ switching now works even with recursive imports
+                 like in the qasync module. In addition, a new efficient
+                 optimization has been implemented for __feature__ switching.
+                 Initial work towards PyPy support for __feature__ switching
+                 has been done.
+ - [PYSIDE-2101] Python 3.10 and up have an incompatibility to the
+                 __signature__ attribute. This is fixed by  a temporary patch
+                 until the final removal of that attribute.
+ - [PYSIDE-753]  The shared pointer types of Qt 3D have been added.
+ - [PYSIDE-769]  asyncio versions of the async examples
+                 have been added.
+ - [PYSIDE-841]  Examples networkx graph viewer, can bus, modbus client,
+                 charts lightMarker and selection, charts selected point
+                 configuration, graphgallery, qmlsurfacegallery,
+                 map view (QtLocation) and and Qt Quick custom geometry
+                 have been added.
+ - [PYSIDE-971]  QOpenGLContext.getProcAddress() has been added.
+ - [PYSIDE-1019] libpyside: The function `getMetaDataFromQObject`
+                 has been removed.
+ - [PYSIDE-1106] The documentation code snippet conversion has been
+                 improved.
+ - [PYSIDE-1295] QObject::sender() has been implemented for non-C++ slots.
+ - [PYSIDE-1345] QSGGeometry.vertexDataAsPoint2D()/setVertexDataAsPoint2D()
+                 has been added.
+ - [PYSIDE-1564] Cooperative multiple inheritance is now implemented for all
+                 __init__ methods.
+ - [PYSIDE-1603] Signals are now listed in the typing hints.
+ - [PYSIDE-1612] Initial support for Android Deployment has been added.
+ - [PYSIDE-1713] Compatibility of Qt signals has been improved
+                 by providing a signatures attribute.
+ - [PYSIDE-1735] Documentation: enum types are now indicated.
+ - [PYSIDE-2079] setuptools are now used instead of distutils.
+ - [PYSIDE-2098] dicts can now be passed as QVariantMap to QML.
+ - [PYSIDE-2136] An error calling deprecated functions with
+                 warning-as-error set has been fixed.
+ - [PYSIDE-2141] A crash when deleting QObject instances with connections
+                 in threads has been fixed.
+ - [PYSIDE-2155] CMake UNITY_BUILD (jumbo) builds are now supported, speeding
+                 up building. Pass --unity to setup.py.
+ - [PYSIDE-2160] The formatting of delayed errors in Python 3.11
+                 has been improved.
+ - [PYSIDE-2221] First changes for NoGIL support have been added.
+ - [PYSIDE-2206] Some examples have been updated.
+ - [PYSIDE-2230] First changes for Python 3.12 have been added.
+ - [PYSIDE-2234] QRunnable.create() has been added.
+ - [PYSIDE-2236] QMetaMethod.fromSignal() has been added.
+ - [PYSIDE-2247] Examples are not included in the wheels any more and the
+                 setup.py option --no-example was removed. Examples can now
+                 be downloaded as .zip files from the documentation.
+ - [PYSIDE-2251] Qt Designer Python plugins now work with non-
+                 activated virtual environments.
+ - [PYSIDE-2259] QtTextToSpeech has been added.
+ - [PYSIDE-2252] QAbstractTextDocumentLayout::PaintContext has been added.
+ - [PYSIDE-2169] A leak in Enum forgiveness mode has been fixed.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - shiboken6 now generates new calls to the new functions PyObject_Vectorcall()
+   or PyObject_CallNoArgs() for overridden virtual methods for newer Python
+   versions (not for Limited API).
+ - shiboken6 can now generate exclusions for classes based on preprocessor
+   conditions, for example by the Qt configure system.
+ - [PYSIDE-454]  It is now possible to specify names and namespaces for smart
+                 pointer instantiations.
+ - [PYSIDE-1019] Documentation for Qt properties is now generated.
+ - [PYSIDE-1106] Documentation for Qt signals is now generated.
+ - [PYSIDE-1106] shiboken6/Documentation: Use the py:method directives
+ - [PYSIDE-2088] An overflow of 64bit enumerations has been fixed.
+ - [PYSIDE-2099] An option --lean-header to generate forward declarations
+                 instead of includes into the module header has been added.
+                 This considerably reduces the dependencies but may require
+                 additional includes to be specified for injected code.
+ - [PYSIDE-2133] The sorting of overloads for integer/float types has been
+                 improved to avoid overflows.
+ - [PYSIDE-2256] The code generator no longer generates goto's.
+ - [PYSIDE-2174] A typesystem XML element for opaque containers has been
+                 added, removing the need repeat the container element.
+ - [PYSIDE-2174] Support for std::array (C++ 11) and std::span has been added.
+ - [PYSIDE-2255] Overriding abstract private virtual methods is now possible.
+ - [PYSIDE-2264] A PyPy problem with version 7.3.10 and up was fixed.
