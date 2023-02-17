@@ -54,23 +54,37 @@ static void writeSlot(TextStream &s, const QString &privateObjType,
 
 // Write creation function from C++ reference, used by field accessors
 // and getters which are within extern "C"
+
+enum ContainerCreationFlag
+{
+    None = 0,
+    Const = 0x1,
+    Allocate = 0x2
+};
+
+Q_DECLARE_FLAGS(ContainerCreationFlags, ContainerCreationFlag)
+Q_DECLARE_OPERATORS_FOR_FLAGS(ContainerCreationFlags)
+
 static void writeContainerCreationFunc(TextStream &s,
                                        const QString &funcName,
                                        const QString &typeFName,
                                        const QString &containerSignature,
-                                       bool isConst = false)
+                                       ContainerCreationFlags flags = {})
 {
 
     // creation function from C++ reference, used by field accessors
     // which are within extern "C"
     s << "extern \"C\" PyObject *" << funcName << '(';
-    if (isConst)
+    if (flags.testFlag(ContainerCreationFlag::Const))
         s << "const ";
     s << containerSignature << "* ct)\n{\n" << indent
         << "auto *container = PyObject_New(ShibokenContainer, " << typeFName << "());\n"
         << "auto *d = new ShibokenSequenceContainerPrivate<"
         << containerSignature << ">();\n";
-    if (isConst) {
+    if (flags.testFlag(ContainerCreationFlag::Allocate)) {
+        s << "d->m_list = new " << containerSignature << "(*ct);\n"
+            << "d->m_ownsList = true;\n";
+    } else if (flags.testFlag(ContainerCreationFlag::Const)) {
         s << "d->m_list = const_cast<" << containerSignature << " *>(ct);\n"
             << "d->m_const = true;\n";
     } else {
@@ -215,10 +229,15 @@ CppGenerator::OpaqueContainerData
         << "();\nreturn type;\n" << outdent << "}\n\n";
 
     // creation functions from C++ references
+    ContainerCreationFlags flags;
+    if (kind == ContainerTypeEntry::SpanContainer)
+        flags.setFlag(ContainerCreationFlag::Allocate);
+
     writeContainerCreationFunc(s, u"create"_s + result.name, typeFName,
-                               containerType.cppSignature());
+                               containerType.cppSignature(), flags);
+    flags.setFlag(ContainerCreationFlag::Const);
     writeContainerCreationFunc(s, u"createConst"_s + result.name, typeFName,
-                               containerType.cppSignature(), true);
+                               containerType.cppSignature(), flags);
 
     // Check function
     result.checkFunctionName = result.name + u"_Check"_s;
