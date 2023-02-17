@@ -6,10 +6,8 @@ from PySide6.QtGui import (QColor, QFont, QPalette)
 from PySide6.QtWidgets import (QApplication, QGridLayout, QLabel, QMainWindow, QVBoxLayout, QWidget)
 
 import asyncio
-import outcome
 import signal
 import sys
-import traceback
 from random import randint
 
 
@@ -61,7 +59,9 @@ class MainWindow(QMainWindow):
         widget.setPalette(palette)
 
 
-class Eratosthenes():
+class Eratosthenes(QObject):
+
+    done_signal = Signal()
 
     """ This Sieve of Eratosthenes runs on a configurable tick (default
         0.1 seconds). At each tick, a new subroutine will be created
@@ -69,6 +69,7 @@ class Eratosthenes():
         these subroutines also operates on the same tick. """
 
     def __init__(self, num, window, tick=0.1):
+        super().__init__()
         self.num = num
         self.sieve = [True] * self.num
         self.base = 0
@@ -119,15 +120,17 @@ class Eratosthenes():
             "🥳 Congratulations! You found all the prime numbers and solved mathematics. 🥳"
         )
 
+        # This signals to the guest run when there are no more asyncio tasks
+        # left so its event loop can finish.
+        self.done_signal.emit()
+
 
 class AsyncHelper(QObject):
 
-    trigger_signal = Signal()
-
     class ReenterQtObject(QObject):
         """ This is a QObject to which an event will be posted, allowing
-            Trio to resume when the event is handled. event.fn() is the
-            next entry point of the Trio event loop. """
+            asyncio to resume when the event is handled. event.fn() is
+            the next entry point of the asyncio event loop. """
         def event(self, event):
             if event.type() == QEvent.User + 1:
                 event.fn()
@@ -136,22 +139,26 @@ class AsyncHelper(QObject):
 
     class ReenterQtEvent(QEvent):
         """ This is the QEvent that will be handled by the ReenterQtObject.
-            self.fn is the next entry point of the Trio event loop. """
+            self.fn is the next entry point of the asyncio event loop. """
         def __init__(self, fn):
             super().__init__(QEvent.Type(QEvent.User + 1))
             self.fn = fn
 
-    def __init__(self, entry=None):
+    def __init__(self, worker, entry):
         super().__init__()
         self.reenter_qt = self.ReenterQtObject()
         self.entry = entry
         self.loop = asyncio.new_event_loop()
+        self.done = False
 
-    def set_entry(self, entry):
-        self.entry = entry
+        self.worker = worker
+        if hasattr(self.worker, "start_signal") and isinstance(self.worker.start_signal, Signal):
+            self.worker.start_signal.connect(self.on_worker_started)
+        if hasattr(self.worker, "done_signal") and isinstance(self.worker.done_signal, Signal):
+            self.worker.done_signal.connect(self.on_worker_done)
 
     @Slot()
-    def launch_guest_run(self):
+    def on_worker_started(self):
         """ To use asyncio and Qt together, one must run the asyncio
             event loop as a "guest" inside the Qt "host" event loop. """
         if not self.entry:
@@ -159,13 +166,23 @@ class AsyncHelper(QObject):
         asyncio.set_event_loop(self.loop)
         self.loop.create_task(self.entry())
         self.loop.call_soon(self.next_guest_run_schedule)
+        self.done = False  # Set this explicitly as we might want to restart the guest run.
         self.loop.run_forever()
+
+    @Slot()
+    def on_worker_done(self):
+        """ When all our current asyncio tasks are finished, we must end
+            the "guest run" lest we enter a quasi idle loop of switching
+            back and forth between the asyncio and Qt loops. We can
+            launch a new guest run by calling launch_guest_run() again. """
+        self.done = True
 
     def continue_loop(self):
         """ This function is called by an event posted to the Qt event
-            loop to restart the asyncio event loop. """
-        self.loop.call_soon(self.next_guest_run_schedule)
-        self.loop.run_forever()
+            loop to continue the asyncio event loop. """
+        if not self.done:
+            self.loop.call_soon(self.next_guest_run_schedule)
+            self.loop.run_forever()
 
     def next_guest_run_schedule(self):
         """ This function serves to pause and re-schedule the guest
@@ -189,13 +206,13 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     main_window = MainWindow(rows, cols)
     eratosthenes = Eratosthenes(num, main_window)
-    async_helper = AsyncHelper(entry=eratosthenes.start)
+    async_helper = AsyncHelper(eratosthenes, eratosthenes.start)
 
-    # This establishes the entry point for the Trio guest run. It varies
-    # depending on how and when its event loop is to be triggered, e.g.,
-    # from the beginning (as here) or rather at a specific moment like
-    # a button press.
-    QTimer.singleShot(0, async_helper.launch_guest_run)
+    # This establishes the entry point for the asyncio guest run. It
+    # varies depending on how and when its event loop is to be
+    # triggered, e.g., from the beginning (as here) or rather at a
+    # specific moment like a button press.
+    QTimer.singleShot(0, async_helper.on_worker_started)
 
     main_window.show()
 
