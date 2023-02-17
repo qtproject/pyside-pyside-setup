@@ -61,7 +61,7 @@ class MainWindow(QMainWindow):
         widget.setPalette(palette)
 
 
-class Eratosthenes():
+class Eratosthenes(QObject):
 
     """ This Sieve of Eratosthenes runs on a configurable tick (default
         0.1 seconds). At each tick, a new subroutine will be created
@@ -69,6 +69,7 @@ class Eratosthenes():
         these subroutines also operates on the same tick. """
 
     def __init__(self, num, window, tick=0.1):
+        super().__init__()
         self.num = num
         self.sieve = [True] * self.num
         self.base = 0
@@ -119,8 +120,6 @@ class Eratosthenes():
 
 class AsyncHelper(QObject):
 
-    trigger_signal = Signal()
-
     class ReenterQtObject(QObject):
         """ This is a QObject to which an event will be posted, allowing
             Trio to resume when the event is handled. event.fn() is the
@@ -138,13 +137,14 @@ class AsyncHelper(QObject):
             super().__init__(QEvent.Type(QEvent.User + 1))
             self.fn = fn
 
-    def __init__(self, entry=None):
+    def __init__(self, worker, entry):
         super().__init__()
         self.reenter_qt = self.ReenterQtObject()
         self.entry = entry
 
-    def set_entry(self, entry):
-        self.entry = entry
+        self.worker = worker
+        if hasattr(self.worker, "start_signal") and isinstance(self.worker.start_signal, Signal):
+            self.worker.start_signal.connect(self.launch_guest_run)
 
     @Slot()
     def launch_guest_run(self):
@@ -183,7 +183,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     main_window = MainWindow(rows, cols)
     eratosthenes = Eratosthenes(num, main_window)
-    async_helper = AsyncHelper(entry=eratosthenes.start)
+    async_helper = AsyncHelper(eratosthenes, eratosthenes.start)
 
     # This establishes the entry point for the Trio guest run. It varies
     # depending on how and when its event loop is to be triggered, e.g.,

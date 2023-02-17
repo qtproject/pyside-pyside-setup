@@ -13,10 +13,10 @@ import trio
 
 class MainWindow(QMainWindow):
 
-    def __init__(self, async_signal):
-        super().__init__()
+    start_signal = Signal()
 
-        self.async_signal = async_signal
+    def __init__(self):
+        super().__init__()
 
         widget = QWidget()
         self.setCentralWidget(widget)
@@ -32,7 +32,7 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def async_start(self):
-        self.async_signal.emit()
+        self.start_signal.emit()
 
     async def set_text(self):
         await trio.sleep(1)
@@ -40,8 +40,6 @@ class MainWindow(QMainWindow):
 
 
 class AsyncHelper(QObject):
-
-    trigger_signal = Signal()
 
     class ReenterQtObject(QObject):
         """ This is a QObject to which an event will be posted, allowing
@@ -60,13 +58,14 @@ class AsyncHelper(QObject):
             super().__init__(QEvent.Type(QEvent.User + 1))
             self.fn = fn
 
-    def __init__(self, entry=None):
+    def __init__(self, worker, entry):
         super().__init__()
         self.reenter_qt = self.ReenterQtObject()
         self.entry = entry
 
-    def set_entry(self, entry):
-        self.entry = entry
+        self.worker = worker
+        if hasattr(self.worker, "start_signal") and isinstance(self.worker.start_signal, Signal):
+            self.worker.start_signal.connect(self.launch_guest_run)
 
     @Slot()
     def launch_guest_run(self):
@@ -99,15 +98,8 @@ class AsyncHelper(QObject):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    async_helper = AsyncHelper()
-    main_window = MainWindow(async_helper.trigger_signal)
-    async_helper.set_entry(main_window.set_text)
-
-    # This establishes the entry point for the Trio guest run. It varies
-    # depending on how and when its event loop is to be triggered, e.g.,
-    # at a specific moment like a button press (as here) or rather from
-    # the beginning.
-    async_helper.trigger_signal.connect(async_helper.launch_guest_run)
+    main_window = MainWindow()
+    async_helper = AsyncHelper(main_window, main_window.set_text)
 
     main_window.show()
 
