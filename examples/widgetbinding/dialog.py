@@ -21,12 +21,13 @@ class Dialog(QDialog):
         layout.addWidget(wiggly_widget_py)
         layout.addWidget(wiggly_widget_cpp)
         layout.addWidget(lineEdit)
+        lineEdit.setClearButtonEnabled(True)
         wiggly_widget_py.running = True
         wiggly_widget_cpp.setRunning(True)
 
         lineEdit.textChanged.connect(wiggly_widget_py.setText)
         lineEdit.textChanged.connect(wiggly_widget_cpp.setText)
-        lineEdit.setText("Hello world!")
+        lineEdit.setText("🖖 Hello world!")
 
         self.setWindowTitle("Wiggly")
         self.resize(360, 145)
