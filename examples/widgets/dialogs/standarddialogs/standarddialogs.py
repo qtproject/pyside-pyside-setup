@@ -5,6 +5,8 @@
 """PySide6 port of the widgets/dialogs/standarddialogs example from Qt v5.x"""
 
 import sys
+from textwrap import dedent
+
 from PySide6.QtCore import QDir, Qt, Slot
 from PySide6.QtGui import QFont, QPalette
 from PySide6.QtWidgets import (QApplication, QColorDialog, QCheckBox, QDialog,
@@ -37,10 +39,6 @@ class DialogOptionsWidget(QGroupBox):
 
 
 class Dialog(QDialog):
-    MESSAGE = ("<p>Message boxes have a caption, a text, and up to three "
-               "buttons, each with standard or custom texts.</p>"
-               "<p>Click a button to close the message box. Pressing the Esc "
-               "button will activate the detected escape button (if any).</p>")
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -143,8 +141,6 @@ class Dialog(QDialog):
         self._warning_label.setFrameStyle(frame_style)
         self._warning_button = QPushButton("QMessageBox.&warning()")
 
-        self._error_label = QLabel()
-        self._error_label.setFrameStyle(frame_style)
         self._error_button = QPushButton("QErrorMessage.showM&essage()")
 
         self._integer_button.clicked.connect(self.set_integer)
@@ -230,7 +226,6 @@ class Dialog(QDialog):
         layout.addWidget(self._warning_button, 3, 0)
         layout.addWidget(self._warning_label, 3, 1)
         layout.addWidget(self._error_button, 4, 0)
-        layout.addWidget(self._error_label, 4, 1)
         spacer = QSpacerItem(0, 0, QSizePolicy.Ignored, QSizePolicy.MinimumExpanding)
         layout.addItem(spacer, 5, 0)
         toolbox.addItem(page, "Message Boxes")
@@ -351,9 +346,16 @@ class Dialog(QDialog):
 
     @Slot()
     def critical_message(self):
-        reply = QMessageBox.critical(self, "QMessageBox.critical()",
-                Dialog.MESSAGE,
-                QMessageBox.Abort | QMessageBox.Retry | QMessageBox.Ignore)
+        m = dedent("""\
+                   Activating the liquid oxygen stirring fans caused an
+                   explosion in one of the tanks. Liquid oxygen levels
+                   are getting low. This may jeopardize the moon landing mission.""")
+        msg_box = QMessageBox(QMessageBox.Critical, "QMessageBox.critical()",
+                              "Houston, we have a problem",
+                              QMessageBox.Abort | QMessageBox.Retry | QMessageBox.Ignore,
+                              self)
+        msg_box.setInformativeText(m)
+        reply = msg_box.exec()
         if reply == QMessageBox.Abort:
             self._critical_label.setText("Abort")
         elif reply == QMessageBox.Retry:
@@ -363,8 +365,16 @@ class Dialog(QDialog):
 
     @Slot()
     def information_message(self):
-        reply = QMessageBox.information(self,
-                "QMessageBox.information()", Dialog.MESSAGE)
+        m = dedent("""\
+                   This phrase was often used by public address announcers at
+                   the conclusion of Elvis Presley concerts in order to
+                   disperse audiences who lingered in hopes of an encore.
+                   It has since become a catchphrase and punchline.""")
+        msg_box = QMessageBox(QMessageBox.Information, "QMessageBox.information()",
+                              "Elvis has left the building.",
+                              QMessageBox.Ok, self)
+        msg_box.setInformativeText(m)
+        reply = msg_box.exec()
         if reply == QMessageBox.Ok:
             self._information_label.setText("OK")
         else:
@@ -372,9 +382,17 @@ class Dialog(QDialog):
 
     @Slot()
     def question_message(self):
-        reply = QMessageBox.question(self, "QMessageBox.question()",
-                Dialog.MESSAGE,
-                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+        m = dedent("""\
+                   A cheeseburger is a hamburger topped with cheese.
+                   Traditionally, the slice of cheese is placed on top of the
+                   meat patty. The cheese is usually added to the cooking
+                   hamburger patty shortly before serving, which allows the
+                   cheese to melt.""")
+        msg_box = QMessageBox(QMessageBox.Question, "QMessageBox.question()",
+                              "Would you like cheese with that?",
+                              QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+        msg_box.setInformativeText(m)
+        reply = msg_box.exec()
         if reply == QMessageBox.Yes:
             self._question_label.setText("Yes")
         elif reply == QMessageBox.No:
@@ -384,25 +402,34 @@ class Dialog(QDialog):
 
     @Slot()
     def warning_message(self):
-        msg_box = QMessageBox(QMessageBox.Warning,
-                "QMessageBox.warning()", Dialog.MESSAGE,
-                QMessageBox.NoButton, self)
-        msg_box.addButton("Save &Again", QMessageBox.AcceptRole)
-        msg_box.addButton("&Continue", QMessageBox.RejectRole)
+        msg_box = QMessageBox(QMessageBox.Warning, "QMessageBox.warning()",
+                              "Delete the only copy of your movie manuscript?",
+                              QMessageBox.NoButton, self)
+        m = "You've been working on this manuscript for 738 days now. Hang in there!"
+        msg_box.setInformativeText(m)
+        msg_box.setDetailedText('"A long time ago in a galaxy far, far away...."')
+        msg_box.addButton("&Keep", QMessageBox.AcceptRole)
+        msg_box.addButton("Delete", QMessageBox.RejectRole)
         if msg_box.exec() == QMessageBox.AcceptRole:
-            self._warning_label.setText("Save Again")
+            self._warning_label.setText("Keep")
         else:
-            self._warning_label.setText("Continue")
+            self._warning_label.setText("Delete")
 
     @Slot()
     def error_message(self):
-        self._error_message_dialog.showMessage("This dialog shows and remembers "
-                "error messages. If the checkbox is checked (as it is by "
-                "default), the shown message will be shown again, but if the "
-                "user unchecks the box the message will not appear again if "
-                "QErrorMessage.showMessage() is called with the same message.")
-        self._error_label.setText("If the box is unchecked, the message won't "
-                "appear again.")
+        m = dedent("""\
+                   This dialog shows and remembers error messages. If the
+                   user chooses to not  show the dialog again, the dialog
+                   will not appear again if QErrorMessage.showMessage()
+                   is called with the same message.""")
+        self._error_message_dialog.showMessage(m)
+        m = dedent("""\
+                   You can queue up error messages, and they will be
+                   shown one after each other. Each message maintains
+                   its own state for whether it will be shown again
+                   the next time QErrorMessage::showMessage() is called
+                   with the same message.""")
+        self._error_message_dialog.showMessage(m)
 
 
 if __name__ == '__main__':
