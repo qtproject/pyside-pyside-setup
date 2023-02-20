@@ -538,7 +538,7 @@
     </extra-includes>
     <enum-type name="AlignmentFlag" python-type="IntFlag" flags="Alignment"/>
     <enum-type name="AnchorPoint" since="4.6"/>
-    <enum-type name="Appearance" since="6.5"/>
+    <enum-type name="ColorScheme" since="6.5"/>
     <enum-type name="ApplicationAttribute"/>
     <enum-type name="ApplicationState" flags="ApplicationStates"/>
     <enum-type name="ArrowType"/>
