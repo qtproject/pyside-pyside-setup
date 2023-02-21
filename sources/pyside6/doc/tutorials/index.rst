@@ -185,6 +185,13 @@ General Applications
     datavisualize/index.rst
     expenses/expenses.rst
 
+Qt Overviews
+------------
+
+.. toctree::
+    :maxdepth: 1
+
+    ../overviews/overviews-main.rst
 
 C++ and Python
 --------------
