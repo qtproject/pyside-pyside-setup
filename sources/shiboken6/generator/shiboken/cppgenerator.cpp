@@ -1558,7 +1558,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                         << PYTHON_RETURN_VAR << ");\n" << outdent
                     << "if (!" << PYTHON_TO_CPP_VAR << ") {\n" << indent
                         << "Shiboken::Warnings::warnInvalidReturnValue(\""
-                        << func->ownerClass()->name() << "\", \"" << funcName << "\", "
+                        << func->ownerClass()->name() << "\", funcName, "
                         << getVirtualFunctionReturnTypeName(func) << ", "
                         << "Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);\n"
                         << returnStatement << '\n' << outdent
@@ -1580,7 +1580,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                         s << " && " << PYTHON_RETURN_VAR << " != Py_None";
                     s << ") {\n" << indent
                         << "Shiboken::Warnings::warnInvalidReturnValue(\""
-                        << func->ownerClass()->name() << "\", \"" << funcName << "\", "
+                        << func->ownerClass()->name() << "\", funcName, "
                         << getVirtualFunctionReturnTypeName(func) << ", "
                         << "Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);\n"
                         << returnStatement << '\n' << outdent
