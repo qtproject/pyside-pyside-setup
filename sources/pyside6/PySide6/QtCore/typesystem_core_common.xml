@@ -198,7 +198,14 @@
         </target-to-native>
     </conversion-rule>
   </primitive-type>
-
+  <primitive-type name="QFunctionPointer" target-lang-api-name="PyLong">
+    <conversion-rule>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-qfunctionpointer-pylong"/>
+        <target-to-native>
+            <add-conversion type="PyLong" file="../glue/qtcore.cpp" snippet="conversion-pylong-qfunctionpointer"/>
+        </target-to-native>
+    </conversion-rule>
+  </primitive-type>
   <primitive-type name="QString" target-lang-api-name="PyUnicode">
     <include file-name="QString" location="global"/>
     <conversion-rule>

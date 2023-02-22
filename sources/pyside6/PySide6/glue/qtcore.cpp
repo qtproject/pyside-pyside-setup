@@ -1453,6 +1453,14 @@ return PyLong_FromUnsignedLong(%in);
 #endif
 // @snippet return-pylong-quintptr
 
+// @snippet return-qfunctionpointer-pylong
+return PyLong_FromVoidPtr(reinterpret_cast<void *>(%in));
+// @snippet return-qfunctionpointer-pylong
+
+// @snippet conversion-pylong-qfunctionpointer
+%out = reinterpret_cast<QFunctionPointer>(PyLong_AsVoidPtr(%in));
+// @snippet conversion-pylong-qfunctionpointer
+
 // @snippet return-pyunicode
 return PySide::qStringToPyUnicode(%in);
 // @snippet return-pyunicode

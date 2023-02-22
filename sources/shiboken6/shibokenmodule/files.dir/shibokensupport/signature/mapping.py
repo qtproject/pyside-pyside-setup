@@ -217,6 +217,7 @@ type_map.update({
     "uintptr_t": int,
     "qintptr": int,
     "qsizetype": int,
+    "QFunctionPointer": int,
     "QList": ArrayLikeVariable,
     "qlonglong": int,
     "QMap": typing.Dict,
