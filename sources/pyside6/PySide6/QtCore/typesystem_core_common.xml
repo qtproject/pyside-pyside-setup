@@ -3234,6 +3234,9 @@
   <object-type name="QFactoryInterface"/>
   <object-type name="QRunnable">
     <configuration condition="QT_CONFIG(thread)"/>
+    <add-function signature="create(PyObject* @functionToRun@)" static="yes" return-type="QRunnable*">
+      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qrunnable_create"/>
+    </add-function>
   </object-type>
 
   <object-type name="QPluginLoader"/>

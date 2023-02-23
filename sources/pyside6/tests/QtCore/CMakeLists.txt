@@ -140,6 +140,7 @@ PYSIDE_TEST(unaryoperator_test.py)
 PYSIDE_TEST(unicode_test.py)
 PYSIDE_TEST(versioninfo_test.py)
 PYSIDE_TEST(loggingcategorymacros_test.py)
+PYSIDE_TEST(qrunnable_test.py)
 
 if(X11)
     PYSIDE_TEST(qhandle_test.py)

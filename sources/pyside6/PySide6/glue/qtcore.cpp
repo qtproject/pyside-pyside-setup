@@ -1767,3 +1767,20 @@ const auto index = mo->indexOfSignal(signature.constData());
 const auto result = index != -1 ? mo->method(index) : QMetaMethod{};
 %PYARG_0 = %CONVERTTOPYTHON[QMetaMethod](result);
 // @snippet qmetamethod-from-signal
+
+// @snippet qrunnable_create
+auto callable = %PYARG_1;
+auto callback = [callable]() -> void
+{
+    if (!PyCallable_Check(callable)) {
+        qWarning("Argument 1 of %FUNCTION_NAME must be a callable.");
+        return;
+    }
+    Shiboken::GilState state;
+    PyObject_CallObject(callable, nullptr);
+    Py_DECREF(callable);
+};
+Py_INCREF(callable);
+%RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(callback);
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+// @snipped qrunnable_create
