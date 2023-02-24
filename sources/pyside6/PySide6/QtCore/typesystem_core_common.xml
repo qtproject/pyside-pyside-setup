@@ -2981,8 +2981,20 @@
   <object-type name="QMessageLogContext"/>
 
   <value-type name="QMetaMethod">
+    <extra-includes>
+        <include file-name="pysidesignal.h" location="global"/>
+    </extra-includes>
     <enum-type name="Access"/>
     <enum-type name="MethodType"/>
+    <add-function signature="fromSignal(PySideSignalInstance@signal@)"
+                  return-type="QMetaMethod" static="true">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                     snippet="qmetamethod-from-signal"/>
+        <inject-documentation format="target" mode="append">
+        Returns the meta-method that corresponds to the given signal, or an invalid QMetaMethod
+        if signal is not a signal of the class.
+        </inject-documentation>
+    </add-function>
     <!-- This isn't part of Qt public API -->
     <modify-function signature="attributes()const" remove="all"/>
     <modify-function signature="getParameterTypes(int*)const" remove="all"/>

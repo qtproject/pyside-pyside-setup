@@ -1756,3 +1756,14 @@ cptr = new ::%TYPE(%1);
 // @snippet keycombination-from-modifier
 cptr = new ::%TYPE(%1, %2);
 // @snippet keycombination-from-modifier
+
+// @snippet qmetamethod-from-signal
+auto *signalInst = reinterpret_cast<PySideSignalInstance *>(%PYARG_1);
+PyObject *emitterPyObject = PySide::Signal::getObject(signalInst);
+QObject* emitter = %CONVERTTOCPP[QObject *](emitterPyObject);
+const QByteArray signature = PySide::Signal::getSignature(signalInst);
+const auto *mo = emitter->metaObject();
+const auto index = mo->indexOfSignal(signature.constData());
+const auto result = index != -1 ? mo->method(index) : QMetaMethod{};
+%PYARG_0 = %CONVERTTOPYTHON[QMetaMethod](result);
+// @snippet qmetamethod-from-signal

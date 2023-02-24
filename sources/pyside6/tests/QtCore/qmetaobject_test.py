@@ -13,8 +13,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import (QCoreApplication, QFile, QMetaObject, QObject,
-                            QModelIndex, QPoint, QTimer, QSemaphore,
+from PySide6.QtCore import (QCoreApplication, QFile, QMetaMethod, QMetaObject,
+                            QObject, QModelIndex, QPoint, QTimer, QSemaphore,
                             QStringListModel, Qt, Signal, Slot,
                             SIGNAL, Q_ARG, Q_RETURN_ARG)
 
@@ -189,6 +189,12 @@ class qmetaobject_test(unittest.TestCase):
                                  Q_ARG(QModelIndex, index),
                                  Q_ARG("QVariant", "bla"))
         self.assertEqual(model.data(index), "bla")
+
+    def test_QMetaMethod(self):
+        o = QObject()
+        m = QMetaMethod.fromSignal(o.destroyed)
+        self.assertTrue(m.isValid)
+        self.assertEqual(m.methodSignature(), b"destroyed()")
 
 
 if __name__ == '__main__':
