@@ -55,6 +55,13 @@
 
 using namespace Qt::StringLiterals;
 
+static QString mangleName(QString name)
+{
+    if (name == u"None" || name == u"False" || name == u"True" || name == u"from")
+        name += u'_';
+    return name;
+}
+
 struct sbkUnusedVariableCast
 {
     explicit sbkUnusedVariableCast(QString name) : m_name(name) {}
@@ -472,7 +479,7 @@ static QString BuildEnumFlagInfo(const AbstractMetaEnum &cppEnum)
 static void writePyGetSetDefEntry(TextStream &s, const QString &name,
                                   const QString &getFunc, const QString &setFunc)
 {
-    s << "{const_cast<char *>(\"" << name << "\"), " << getFunc << ", "
+    s << "{const_cast<char *>(\"" << mangleName(name) << "\"), " << getFunc << ", "
         << (setFunc.isEmpty() ? NULL_PTR : setFunc) << ", nullptr, nullptr},\n";
 }
 
@@ -5671,13 +5678,6 @@ void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList 
         ConfigurableScope configScope(s, cppEnum.typeEntry());
         writeEnumInitialization(s, cppEnum, errorReturn);
     }
-}
-
-static QString mangleName(QString name)
-{
-    if (name == u"None" || name == u"False" || name == u"True")
-        name += u'_';
-    return name;
 }
 
 void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum &cppEnum,
