@@ -28,6 +28,15 @@ class IntSpanTest(unittest.TestCase):
         self.assertEqual(SpanUser.sumIntSpan(expected), 6)
         self.assertEqual(SpanUser.sumConstIntSpan3(expected), 6)
 
+    def testSpanOpaqueContainer(self):
+        if not SpanUser.enabled():
+            return
+        oc = SpanUser.getIntSpan3_OpaqueContainer()  # 1,2,3
+        oc[1] = 10
+        oc = SpanUser.getIntSpan3_OpaqueContainer()
+        # note: This converts to std::vector
+        self.assertEqual(SpanUser.sumIntSpan3(oc), 14)
+
 
 if __name__ == '__main__':
     unittest.main()

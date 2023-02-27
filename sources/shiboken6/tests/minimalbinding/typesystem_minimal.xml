@@ -21,6 +21,10 @@
 
     <opaque-container name="std::array" opaque-containers="int,3:StdIntArray"/>
 
+    <?if c++20?> <!-- FIXME PYSIDE 7: Remove "if" -->
+    <opaque-container name="std::span" opaque-containers="int,3:StdIntSpan3"/>
+    <?endif?>
+
     <object-type name="Obj"/>
     <value-type name="Val">
         <enum-type name="ValEnum"/>
@@ -38,7 +42,16 @@
             </modify-argument>
         </modify-function>
     </value-type>
-    <value-type name="SpanUser"/>
+
+    <value-type name="SpanUser">
+        <?if c++20?> <!-- FIXME PYSIDE 7: Remove "if" -->
+        <modify-function signature="getIntSpan3_OpaqueContainer()">
+            <modify-argument index="return">
+                <replace-type modified-type="StdIntSpan3"/>
+            </modify-argument>
+        </modify-function>
+        <?endif?>
+    </value-type>
 
     <value-type name="MinBoolUser"/>
 

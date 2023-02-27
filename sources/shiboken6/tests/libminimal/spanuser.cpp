@@ -35,6 +35,12 @@ ConstIntSpan3 SpanUser::getConstIntSpan3()
     return ConstIntSpan3(civ);
 }
 
+IntSpan3 SpanUser::getIntSpan3_OpaqueContainer()
+{
+    static int iv[] = {1, 2, 3};
+    return IntSpan3(iv);
+}
+
 int SpanUser::sumIntSpan3(IntSpan3 isp3)
 {
      return std::accumulate(isp3.begin(), isp3.end(), 0);

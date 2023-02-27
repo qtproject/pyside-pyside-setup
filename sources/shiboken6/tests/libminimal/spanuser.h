@@ -24,6 +24,7 @@ struct LIBMINIMAL_API SpanUser
     static IntSpan3 getIntSpan3();
     static IntSpan getIntSpan();
     static ConstIntSpan3 getConstIntSpan3();
+    static IntSpan3 getIntSpan3_OpaqueContainer();
 
     static int sumIntSpan3(IntSpan3 isp3);
     static int sumIntSpan(IntSpan isp);
