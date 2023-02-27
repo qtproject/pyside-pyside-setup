@@ -71,6 +71,15 @@ the STL and the Qt naming convention (which resembles Python's) are supported:
     |                                           | the memory.                       |
     +-------------------------------------------+-----------------------------------+
 
+
+.. note:: ``std::span``, being a non-owning container, is currently replaced by a
+          ``std::vector`` for argument passing. This means that an opaque container
+          wrapping a ``std::span`` obtained from a function will be converted
+          to a ``std::vector`` by sequence conversion when passed to a function
+          taking a ``std::span``.
+          Opaque containers wrapping a ``std::vector`` can be passed without conversion.
+          This is currently experimental and subject to change.
+
 Following is an example on creating an opaque container named ``IntVector``
 from `std::vector<int>`, and using it in Python.
 
