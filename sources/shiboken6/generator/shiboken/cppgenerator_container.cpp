@@ -7,6 +7,7 @@
 #include "ctypenames.h"
 #include "containertypeentry.h"
 #include "textstream.h"
+#include "typedatabase.h"
 
 #include <QtCore/QDebug>
 
@@ -175,7 +176,8 @@ CppGenerator::OpaqueContainerData
 
     // spec
     const QString specName = result.name + u"_spec"_s;
-    const QString name = moduleName() + u'.' + result.name;
+    const QString name = TypeDatabase::instance()->defaultPackageName()
+        + u'.' + result.name;
     s << "static PyType_Spec " << specName << " = {\n" << indent
         << "\"" << name.count(u'.') << ':' << name << "\",\n"
         << "sizeof(ShibokenContainer),\n0,\nPy_TPFLAGS_DEFAULT,\n"
