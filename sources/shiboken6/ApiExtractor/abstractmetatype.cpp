@@ -988,7 +988,7 @@ bool AbstractMetaTypeData::generateOpaqueContainer(Predicate pred) const
         return false;
     auto containerTypeEntry = std::static_pointer_cast<const ContainerTypeEntry>(m_typeEntry);
     auto kind = containerTypeEntry->containerKind();
-    if (kind != ContainerTypeEntry::ListContainer)
+    if (kind != ContainerTypeEntry::ListContainer && kind != ContainerTypeEntry::SpanContainer)
         return false;
 
     const auto &firstInstantiation = m_instantiations.constFirst();

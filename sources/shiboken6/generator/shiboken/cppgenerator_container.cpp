@@ -168,7 +168,8 @@ CppGenerator::OpaqueContainerData
     // methods
     const QString &containerName = containerType.name();
     const bool isStdVector = containerName  == u"std::vector";
-    const bool isFixed = containerName == u"std::array";
+    const auto kind = containerTypeEntry->containerKind();
+    const bool isFixed = kind == ContainerTypeEntry::SpanContainer || containerName == u"std::array";
     const QString methods = result.name + u"_methods"_s;
     s << "static PyMethodDef " << methods << "[] = {\n" << indent;
     if (!isFixed) {

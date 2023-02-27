@@ -18,6 +18,7 @@
 #include "sourcelocation.h"
 #include "typedatabase.h"
 #include "complextypeentry.h"
+#include "containertypeentry.h"
 #include "functiontypeentry.h"
 #include "primitivetypeentry.h"
 #include "typesystemtypeentry.h"
@@ -856,10 +857,15 @@ const QString &AbstractMetaFunction::modifiedTypeName() const
 
 bool AbstractMetaFunction::generateOpaqueContainerReturn() const
 {
-    return isTypeModified()
-        && d->m_type.typeUsagePattern() == AbstractMetaType::ContainerPattern
-        && d->m_type.referenceType() == LValueReference
-        && d->m_type.generateOpaqueContainerForGetter(d->m_modifiedTypeName);
+    if (!isTypeModified() || d->m_type.typeUsagePattern() != AbstractMetaType::ContainerPattern)
+        return false;
+    // Needs to be a reference to a container, allow by value only for spans
+    if (d->m_type.referenceType() != LValueReference) {
+        auto cte = std::static_pointer_cast<const ContainerTypeEntry>(d->m_type.typeEntry());
+        if (cte->containerKind() != ContainerTypeEntry::SpanContainer)
+            return false;
+    }
+    return d->m_type.generateOpaqueContainerForGetter(d->m_modifiedTypeName);
 }
 
 bool AbstractMetaFunction::isModifiedToArray(int argumentIndex) const
