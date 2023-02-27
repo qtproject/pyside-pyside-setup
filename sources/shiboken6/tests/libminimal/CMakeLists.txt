@@ -4,10 +4,13 @@
 project(libminimal)
 
 set(libminimal_SRC
-containeruser.cpp
-obj.cpp
-listuser.cpp
-typedef.cpp
+containeruser.cpp containeruser.h
+libminimalmacros.h
+listuser.cpp listuser.h
+minbool.h
+obj.cpp obj.h
+typedef.cpp typedef.h
+val.h
 )
 
 add_library(libminimal SHARED ${libminimal_SRC})

@@ -4,10 +4,16 @@
 project(libsmart)
 
 set(libsmart_SRC
-smart.cpp
-stdsharedptrtestbench.cpp
-stdoptionaltestbench.cpp
-stduniqueptrtestbench.cpp
+libsmartmacros.h
+smart.cpp smart.h
+smart_integer.h
+smart_obj.h
+smart_registry.h
+smart_sharedptr.h
+smart_test.h
+stdoptionaltestbench.cpp stdoptionaltestbench.h
+stdsharedptrtestbench.cpp stdsharedptrtestbench.h
+stduniqueptrtestbench.cpp stduniqueptrtestbench.h
 )
 
 add_library(libsmart SHARED ${libsmart_SRC})

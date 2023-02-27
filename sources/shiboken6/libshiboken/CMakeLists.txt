@@ -58,33 +58,39 @@ set(libshiboken_VERSION "${libshiboken_MAJOR_VERSION}.${libshiboken_MINOR_VERSIO
 set(libshiboken_SOVERSION "${shiboken6_library_so_version}")
 
 set(libshiboken_SRC
-basewrapper.cpp
-debugfreehook.cpp
-gilstate.cpp
-helper.cpp
-sbkarrayconverter.cpp
-sbkcontainer.cpp
-sbkconverter.cpp
-sbkenum.cpp
-sbkerrors.cpp
-sbkfeature_base.cpp
-sbkmodule.cpp
-sbknumpy.cpp
-sbkcppstring.cpp
-sbkstring.cpp
-sbkstaticstrings.cpp
-sbktypefactory.cpp
-bindingmanager.cpp
-threadstatesaver.cpp
-shibokenbuffer.cpp
-pep384impl.cpp
-voidptr.cpp
-bufferprocs_py37.cpp
+autodecref.h
+basewrapper.cpp basewrapper.h basewrapper_p.h
+bindingmanager.cpp bindingmanager.h
+bufferprocs_py37.cpp bufferprocs_py37.h
+debugfreehook.cpp debugfreehook.h
+gilstate.cpp gilstate.h
+helper.cpp helper.h
+pep384impl.cpp pep384impl.h
+sbkarrayconverter.cpp sbkarrayconverter.h sbkarrayconverter_p.h
+sbkcontainer.cpp sbkcontainer.h
+sbkconverter.cpp sbkconverter.h sbkconverter_p.h
+sbkcppstring.cpp sbkcppstring.h sbkcpptonumpy.h
+sbkenum.cpp sbkenum.h sbkenum_p.h
+sbkerrors.cpp sbkerrors.h
+sbkfeature_base.cpp sbkfeature_base.h
+sbkmodule.cpp sbkmodule.h
+sbknumpy.cpp sbknumpycheck.h
+sbknumpyview.h
+sbkpython.h
+sbkstaticstrings.cpp sbkstaticstrings.h sbkstaticstrings_p.h
+sbkstring.cpp sbkstring.h
+sbktypefactory.cpp sbktypefactory.h
+sbkwindows.h
+shiboken.h
+shibokenbuffer.cpp shibokenbuffer.h
+shibokenmacros.h
+threadstatesaver.cpp threadstatesaver.h
+voidptr.cpp voidptr.h
 
 embed/signature_bootstrap_inc.h
 embed/signature_inc.h
 
-signature/signature.cpp
+signature/signature.cpp signature.h signature_p.h
 signature/signature_globals.cpp
 signature/signature_extend.cpp
 signature/signature_helper.cpp

@@ -4,12 +4,14 @@
 project(libother)
 
 set(libother_SRC
-number.cpp
-otherderived.cpp
-otherobjecttype.cpp
-othermultiplederived.cpp
-smartptrtester.cpp
-othertypesystypedef.cpp
+extendsnoimplicitconversion.h
+libothermacros.h
+number.cpp number.h
+otherderived.cpp otherderived.h
+othermultiplederived.cpp othermultiplederived.h
+otherobjecttype.cpp otherobjecttype.h
+othertypesystypedef.cpp othertypesystypedef.h
+smartptrtester.cpp smartptrtester.h
 )
 
 add_library(libother SHARED ${libother_SRC})

@@ -20,12 +20,14 @@ add_definitions(-DRXX_ALLOCATOR_INIT_0)
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 set(pysidetest_SRC
-containertest.cpp
-flagstest.cpp
-testobject.cpp
-testview.cpp
-hiddenobject.cpp
-sharedpointertestbench.cpp
+containertest.cpp containertest.h
+flagstest.cpp flagstest.h
+hiddenobject.cpp hiddenobject.h
+pysidetest_global.h
+pysidetest_macros.h
+sharedpointertestbench.cpp sharedpointertestbench.h
+testobject.cpp testobject.h
+testview.cpp testview.h
 )
 
 set(testbinding_SRC

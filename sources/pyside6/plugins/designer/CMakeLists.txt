@@ -15,7 +15,7 @@ find_package(Qt6 COMPONENTS Core Gui Widgets UiPlugin)
 qt_add_plugin(PySidePlugin)
 
 target_sources(PySidePlugin PRIVATE
-    designercustomwidgets.cpp
+    designercustomwidgets.cpp designercustomwidgets.h
 )
 
 # See libshiboken/CMakeLists.txt

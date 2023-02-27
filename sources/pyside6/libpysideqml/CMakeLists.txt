@@ -3,6 +3,22 @@
 
 set(libpysideqml_libraries Qt::Core Qt::CorePrivate Qt::Qml Qt::QmlPrivate)
 
+set(libpysideqml_HEADERS # installed below
+    pysideqmlattached.h
+    pysideqmlattached_p.h
+    pysideqmlextended_p.h
+    pysideqmlforeign_p.h
+    pysideqml.h
+    pysideqmllistproperty_p.h
+    pysideqmlmacros.h
+    pysideqmlmetacallerror_p.h
+    pysideqmlnamedelement_p.h
+    pysideqmlregistertype.h
+    pysideqmlregistertype_p.h
+    pysideqmltypeinfo_p.h
+    pysideqmluncreatable.h
+)
+
 set(libpysideqml_SRC
     pysideqml.cpp
     pysideqmlattached.cpp
@@ -14,6 +30,7 @@ set(libpysideqml_SRC
     pysideqmlnamedelement.cpp
     pysideqmluncreatable.cpp
     pysideqmltypeinfo.cpp
+    ${libpysideqml_HEADERS}
 )
 
 # Hack for // https://github.com/python/cpython/issues/86286 causes issues
@@ -54,22 +71,6 @@ endif()
 #
 # install stuff
 #
-
-set(libpysideqml_HEADERS
-    pysideqmlattached.h
-    pysideqmlattached_p.h
-    pysideqmlextended_p.h
-    pysideqmlforeign_p.h
-    pysideqml.h
-    pysideqmllistproperty_p.h
-    pysideqmlmacros.h
-    pysideqmlmetacallerror_p.h
-    pysideqmlnamedelement_p.h
-    pysideqmlregistertype.h
-    pysideqmlregistertype_p.h
-    pysideqmltypeinfo_p.h
-    pysideqmluncreatable.h
-)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(LIBRARY_OUTPUT_SUFFIX ${CMAKE_DEBUG_POSTFIX})

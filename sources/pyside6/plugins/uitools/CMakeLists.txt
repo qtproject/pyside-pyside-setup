@@ -10,8 +10,8 @@ set(CMAKE_AUTOMOC ON)
 find_package(Qt6 COMPONENTS Core Gui Widgets UiPlugin)
 
 set(ui_plugin_src
-    customwidgets.cpp
-    customwidget.cpp
+    customwidgets.cpp customwidgets.h
+    customwidget.cpp customwidget.h
 )
 
 add_library(uiplugin STATIC ${ui_plugin_src})

@@ -9,50 +9,76 @@ cmake_policy(VERSION 3.18)
 set(CMAKE_AUTOMOC ON)
 
 set(apiextractor_SRC
-apiextractor.cpp
-apiextractorresult.cpp
-abstractmetaargument.cpp
-abstractmetabuilder.cpp
+abstractmetaargument.cpp abstractmetaargument.h
+abstractmetabuilder.cpp abstractmetabuilder.h abstractmetabuilder_p.h
 abstractmetabuilder_helpers.cpp
-abstractmetaenum.cpp
-abstractmetafield.cpp
-abstractmetafunction.cpp
-abstractmetatype.cpp
-abstractmetalang.cpp
-addedfunction.cpp
-classdocumentation.cpp
-codesnip.cpp
-codesniphelpers.cpp
-conditionalstreamreader.cpp
-customconversion.cpp
-documentation.cpp
-dotview.cpp
-enclosingclassmixin.cpp
-fileout.cpp
-messages.cpp
-modifications.cpp
-predefined_templates.cpp
-propertyspec.cpp
-pymethoddefentry.cpp
-reporthandler.cpp
-sourcelocation.cpp
-typeparser.cpp
-typesystem.cpp
-typesystemparser.cpp
-include.cpp
-typedatabase.cpp
-textstream.cpp
+abstractmetaenum.cpp abstractmetaenum.h
+abstractmetafield.cpp abstractmetafield.h
+abstractmetafunction.cpp abstractmetafunction.h
+abstractmetalang.cpp abstractmetalang.h abstractmetalang_helpers.h abstractmetalang_typedefs.h
+abstractmetatype.cpp abstractmetatype.h
+addedfunction.cpp addedfunction.h addedfunction_p.h
+apiextractor.cpp apiextractor.h apiextractorflags.h
+apiextractorresult.cpp apiextractorresult.h
+arraytypeentry.h
+classdocumentation.cpp classdocumentation.h
+codesnip.cpp codesnip.h
+codesniphelpers.cpp codesniphelpers.h
+complextypeentry.h
+conditionalstreamreader.cpp conditionalstreamreader.h
+configurabletypeentry.h
+constantvaluetypeentry.h
+containertypeentry.h
+customconversion.cpp customconversion.h customconversion_typedefs.h
+customtypenentry.h
+debughelpers_p.h
+dependency.h
+documentation.cpp documentation.h
+dotview.cpp dotview.h
+enclosingclassmixin.cpp enclosingclassmixin.h
+enumtypeentry.h
+enumvaluetypeentry.h
+exception.h
+fileout.cpp fileout.h
+flagstypeentry.h
+functiontypeentry.h
+graph.h
+header_paths.h
+include.cpp include.h
+messages.cpp messages.h
+modifications.cpp modifications.h modifications_typedefs.h
+namespacetypeentry.h
+objecttypeentry.h
+predefined_templates.cpp predefined_templates.h
+primitivetypeentry.h
+propertyspec.cpp propertyspec.h
+pymethoddefentry.cpp pymethoddefentry.h
+pythontypeentry.h
+reporthandler.cpp reporthandler.h
+smartpointertypeentry.h
+sourcelocation.cpp sourcelocation.h
+templateargumententry.h
+textstream.cpp textstream.h
+typedatabase.cpp typedatabase.h typedatabase_p.h typedatabase_typedefs.h
+typedefentry.h
+typeparser.cpp typeparser.h
+typesystem.cpp typesystem.h typesystem_enums.h typesystem_typedefs.h
+typesystemparser.cpp typesystemparser_p.h
+usingmember.h
+valuetypeentry.h
+varargstypeentry.h
+voidtypeentry.h
+xmlutils.cpp xmlutils.h xmlutils_libxslt.h xmlutils_qt.h
 # Clang
-clangparser/compilersupport.cpp
-clangparser/clangparser.cpp
-clangparser/clangbuilder.cpp
-clangparser/clangdebugutils.cpp
-clangparser/clangutils.cpp
+clangparser/clangbuilder.cpp clangparser/clangbuilder.h
+clangparser/clangdebugutils.cpp clangparser/clangdebugutils.h
+clangparser/clangparser.cpp clangparser/clangparser.h
+clangparser/clangutils.cpp clangparser/clangutils.h
+clangparser/compilersupport.cpp clangparser/compilersupport.h
 # Old parser
-parser/typeinfo.cpp
-parser/codemodel.cpp
-parser/enumvalue.cpp
-xmlutils.cpp
+parser/codemodel.cpp parser/codemodel.h parser/codemodel_fwd.h parser/codemodel_enums.h
+parser/enumvalue.cpp parser/enumvalue.h
+parser/typeinfo.cpp parser/typeinfo.h
 )
 
 find_package(LibXml2 2.6.32)
@@ -90,9 +116,10 @@ if (HAS_LIBXSLT)
 endif()
 
 if (NOT DISABLE_DOCSTRINGS)
-    target_sources(apiextractor PRIVATE docparser.cpp
-                                        doxygenparser.cpp
-                                        qtdocparser.cpp)
+    target_sources(apiextractor PRIVATE
+                   docparser.cpp docparser.h
+                   doxygenparser.cpp doxygenparser.h
+                   qtdocparser.cpp qtdocparser.h)
 endif()
 
 target_compile_definitions(apiextractor

@@ -12,16 +12,19 @@ if(NOT (Qt${QT_MAJOR_VERSION}Core_FOUND AND PYTHONINTERP_FOUND))
 endif()
 
 set(shiboken6_SRC
-generator.cpp
-generatorcontext.cpp
-defaultvalue.cpp
-shiboken/cppgenerator.cpp
-shiboken/cppgenerator_container.cpp
-shiboken/generatorargument.cpp
-shiboken/headergenerator.cpp
-shiboken/overloaddata.cpp
-shiboken/shibokengenerator.cpp
+defaultvalue.cpp defaultvalue.h
+generator.cpp generator.h
+generatorcontext.cpp generatorcontext.h
 main.cpp
+shiboken/configurablescope.h
+shiboken/cppgenerator.cpp shiboken/cppgenerator.h
+shiboken/cppgenerator_container.cpp
+shiboken/ctypenames.h
+shiboken/generatorargument.cpp shiboken/generatorargument.h
+shiboken/headergenerator.cpp shiboken/headergenerator.h
+shiboken/overloaddata.cpp shiboken/overloaddata.h
+shiboken/pytypenames.h
+shiboken/shibokengenerator.cpp shiboken/shibokengenerator.h
 )
 
 add_executable(shiboken6 ${shiboken6_SRC})
@@ -37,7 +40,11 @@ target_include_directories(shiboken6 PRIVATE
                     )
 target_link_libraries(shiboken6 apiextractor Qt::Core)
 if (NOT DISABLE_DOCSTRINGS)
-    target_sources(shiboken6 PRIVATE qtdoc/qtxmltosphinx.cpp qtdoc/qtdocgenerator.cpp)
+    target_sources(shiboken6 PRIVATE
+                   qtdoc/qtdocgenerator.cpp qtdoc/qtdocgenerator.h
+                   qtdoc/qtxmltosphinx.cpp qtdoc/qtxmltosphinx.h
+                   qtdoc/qtxmltosphinxinterface.h
+                   qtdoc/rstformat.h)
     target_compile_definitions(shiboken6 PUBLIC DOCSTRINGS_ENABLED QT_LEAN_HEADERS=1)
 endif()
 
