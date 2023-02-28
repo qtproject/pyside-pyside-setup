@@ -264,7 +264,10 @@ def snippet_translate(x):
         # so we need to add '()' at the end if it's just a word
         # with only alpha numeric content
         if VAR4_PATTERN.search(xs) and not xs.endswith(")"):
-            x = f"{x.rstrip()}()"
+            v = x.rstrip()
+            if (not v.endswith(" True") and not v.endswith(" False")
+                and not v.endswith(" None")):
+                x = f"{value}()"
         return dstrip(x)
 
     # For constructors, that we now the shape is:
