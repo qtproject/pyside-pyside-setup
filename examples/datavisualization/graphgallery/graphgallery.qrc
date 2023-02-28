@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>data/raindata.txt</file>
+        <file>data/layer_1.png</file>
+        <file>data/layer_2.png</file>
+        <file>data/layer_3.png</file>
+        <file>data/refinery.obj</file>
+        <file>data/oilrig.obj</file>
+        <file>data/pipe.obj</file>
+        <file>data/maptexture.jpg</file>
+        <file>data/topography.png</file>
+    </qresource>
+</RCC>

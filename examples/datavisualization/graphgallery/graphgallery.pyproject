@@ -1,0 +1,18 @@
+{
+    "files": ["axesinputhandler.py",
+              "bargraph.py",
+              "custominputhandler.py",
+              "graphgallery.qrc",
+              "graphmodifier.py",
+              "highlightseries.py",
+              "main.py",
+              "rainfalldata.py",
+              "scatterdatamodifier.py",
+              "scattergraph.py",
+              "surfacegraph.py",
+              "surfacegraphmodifier.py",
+              "topographicseries.py",
+              "variantbardatamapping.py",
+              "variantbardataproxy.py",
+              "variantdataset.py"]
+}
