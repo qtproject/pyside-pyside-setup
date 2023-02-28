@@ -159,6 +159,8 @@ def test_variable_declaration():
     assert st("QPointer<QLabel> label = new QLabel;") == "label = QLabel()"
     assert st("QMatrix4x4 matrix;") == "matrix = QMatrix4x4()"
     assert st("QList<QImage> collage =") == "collage ="
+    assert st("bool b = true;") == "b = True"
+    assert st("Q3DBars *m_graph = nullptr;") == "m_graph = None"
 
 
 def test_for():
