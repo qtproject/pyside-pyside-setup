@@ -373,7 +373,7 @@ def test_useless_qt_classes():
         st('result = QStringLiteral("A") + QStringLiteral("B");')
         == 'result = "A" + "B"')
     assert st("<< QLatin1Char('\0') << endl;") == "print('\0')"
-    assert st('result = "A"_s;') == 'result = "A"'
+    assert st('result = u"A"_s;') == 'result = "A"'
 
 
 def test_special_cases():
