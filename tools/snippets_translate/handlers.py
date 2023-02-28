@@ -35,7 +35,8 @@ USELESS_QT_CLASSES_PATTERNS = [
     re.compile(r'QString\.fromLatin1\(("[^"]*")\)'),
     re.compile(r"QLatin1Char\(('[^']*')\)"),
     re.compile(r'QStringLiteral\(("[^"]*")\)'),
-    re.compile(r'QString\.fromUtf8\(("[^"]*")\)')
+    re.compile(r'QString\.fromUtf8\(("[^"]*")\)'),
+    re.compile(r'u("[^"]*")_s')
 ]
 COMMENT1_PATTERN = re.compile(r" *# *[\w\ ]+$")
 COMMENT2_PATTERN = re.compile(r" *# *(.*)$")
@@ -520,7 +521,6 @@ def handle_useless_qt_classes(x):
                 x = x[0:match.start()] + match.group(1) + x[match.end():]
             else:
                 break
-    x = x.replace('"_s', '"')  # New string literals
     return x
 
 
