@@ -116,11 +116,17 @@
   </object-type>
   <value-type name="QBarDataItem"/>
   <object-type name="QBarDataProxy">
-    <modify-function signature="resetArray(QBarDataArray*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
+    <modify-function signature="resetArray(QBarDataArray*)" remove="all"/>
+    <add-function signature="resetArray(const QBarDataArray&amp;)">
+      <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                   snippet="dataproxy-resetarray"/>
+    </add-function>
+    <modify-function signature="resetArray(QBarDataArray*,const QStringList&amp;,const QStringList&amp;)"
+                     remove="all"/>
+    <add-function signature="resetArray(const QBarDataArray&amp;,const QStringList&amp;,const QStringList&amp;)">
+      <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
+                   snippet="dataproxy-resetarray2"/>
+    </add-function>
     <modify-function signature="resetArray(QBarDataArray*,const QStringList&amp;,const QStringList&amp;)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
