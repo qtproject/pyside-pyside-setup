@@ -102,7 +102,8 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False, is_
 
         copied_plugins = pyside_build.get_shared_libraries_in_path_recursively(
             plugins_target)
-        pyside_build.update_rpath_for_linux_plugins(copied_plugins)
+        if not is_android:
+            pyside_build.update_rpath_for_linux_plugins(copied_plugins)
 
     if copy_qml:
         # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml
