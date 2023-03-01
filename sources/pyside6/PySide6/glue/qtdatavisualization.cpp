@@ -41,11 +41,16 @@ using ListType = decltype(%2);
 using ListType = decltype(%2);
 %CPPSELF.setRow(%1, new ListType(%2), %3);
 // @snippet dataproxy-setrow-string
-//
+
 // @snippet dataproxy-resetarray
 using ListType = decltype(%1);
 %CPPSELF.resetArray(new ListType(%1));
 // @snippet dataproxy-resetarray
+
+// @snippet dataproxy-resetarray2
+using ListType = decltype(%1);
+%CPPSELF.resetArray(new ListType(%1), %2, %3);
+// @snippet dataproxy-resetarray2
 
 // @snippet qsurfacedataproxy-resetarraynp
 auto *data = QtDataVisualizationHelper::surfaceDataFromNp(%1, %2, %3, %4, %5);
