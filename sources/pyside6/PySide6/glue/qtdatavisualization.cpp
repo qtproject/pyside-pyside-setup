@@ -52,6 +52,10 @@ using ListType = decltype(%1);
 %CPPSELF.resetArray(new ListType(%1), %2, %3);
 // @snippet dataproxy-resetarray2
 
+// @snippet scatterdataproxy-resetarray
+%CPPSELF.resetArray(new QScatterDataArray(*%1));
+// @snippet scatterdataproxy-resetarray
+
 // @snippet qsurfacedataproxy-resetarraynp
 auto *data = QtDataVisualizationHelper::surfaceDataFromNp(%1, %2, %3, %4, %5);
 // %CPPSELF.%FUNCTION_NAME
