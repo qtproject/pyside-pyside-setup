@@ -14,6 +14,7 @@ set(CMAKE_ANDROID_STL_TYPE c++_shared)
 if(NOT DEFINED ANDROID_PLATFORM AND NOT DEFINED ANDROID_NATIVE_API_LEVEL)
     set(ANDROID_PLATFORM "android-{{ api_level }}" CACHE STRING "")
 endif()
+set(ANDROID_SDK_ROOT {{ sdk_path }})
 
 set(QT_COMPILER_FLAGS "--target={{ plat_name }}-linux-android{{ api_level }} \
                        -fomit-frame-pointer \

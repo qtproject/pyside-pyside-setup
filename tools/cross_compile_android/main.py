@@ -74,6 +74,9 @@ if __name__ == "__main__":
     parser.add_argument("--api-level", type=str, default="31", help="Android API level to use")
     parser.add_argument("--ndk-path", type=str, required=True,
                         help="Path to Android NDK (Preferred 25b)")
+    # sdk path is needed to compile all the Qt Java Acitivity files into Qt6AndroidBindings.jar
+    parser.add_argument("--sdk-path", type=str, required=True,
+                        help="Path to Android SDK")
     parser.add_argument("--qt-install-path", type=str, required=not occp_exists(),
                         help="Qt installation path eg: /home/Qt/6.5.0")
 
@@ -101,6 +104,7 @@ if __name__ == "__main__":
     pyside_setup_dir = Path(__file__).parents[2].resolve()
     qt_install_path = args.qt_install_path
     ndk_path = args.ndk_path
+    sdk_path = args.sdk_path
     only_py_cross_compile = args.only_cross_compile_python
     python_path = args.android_python_install_path
     # the same android platforms are named differently in CMake, Cpython and Qt.
@@ -207,6 +211,7 @@ if __name__ == "__main__":
         template = environment.get_template("toolchain_default.tmpl.cmake")
         content = template.render(
             ndk_path=ndk_path,
+            sdk_path=sdk_path,
             api_level=platform_data.api_level,
             qt_install_path=qt_install_path,
             plat_name=platform_data.plat_name,
