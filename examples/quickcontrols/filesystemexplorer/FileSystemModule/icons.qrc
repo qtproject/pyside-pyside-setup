@@ -1,0 +1,13 @@
+<RCC>
+    <qresource>
+        <file>icons/folder_closed.svg</file>
+        <file>icons/folder_open.svg</file>
+        <file>icons/generic_file.svg</file>
+        <file>icons/globe.svg</file>
+        <file>icons/info_sign.svg</file>
+        <file>icons/light_bulb.svg</file>
+        <file>icons/qt_logo.svg</file>
+        <file>icons/read.svg</file>
+        <file>icons/resize.svg</file>
+    </qresource>
+</RCC>
