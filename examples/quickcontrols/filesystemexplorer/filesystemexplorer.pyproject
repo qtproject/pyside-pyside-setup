@@ -1,0 +1,27 @@
+{
+ "files": [
+    "filesystemexplorer.py",
+    "FileSystemModule/qmldir",
+    "FileSystemModule/app.qrc",
+    "FileSystemModule/qmldir",
+    "FileSystemModule/Main.qml",
+    "FileSystemModule/qml/About.qml",
+    "FileSystemModule/qml/Colors.qml",
+    "FileSystemModule/qml/FileSystemView.qml",
+    "FileSystemModule/qml/Icon.qml",
+    "FileSystemModule/qml/MyMenu.qml",
+    "FileSystemModule/qml/MyMenuBar.qml",
+    "FileSystemModule/qml/ResizeButton.qml",
+    "FileSystemModule/qml/Sidebar.qml",
+    "FileSystemModule/qml/WindowDragHandler.qml",
+    "FileSystemModule/icons/folder_closed.svg",
+    "FileSystemModule/icons/folder_open.svg",
+    "FileSystemModule/icons/generic_file.svg",
+    "FileSystemModule/icons/globe.svg",
+    "FileSystemModule/icons/info_sign.svg",
+    "FileSystemModule/icons/light_bulb.svg",
+    "FileSystemModule/icons/qt_logo.svg",
+    "FileSystemModule/icons/read.svg",
+    "FileSystemModule/icons/resize.svg"
+    ]
+}

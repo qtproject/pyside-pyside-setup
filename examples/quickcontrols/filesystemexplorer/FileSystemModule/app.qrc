@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/qt/qml/FileSystemModule">
+        <file>qmldir</file>
+        <file>Main.qml</file>
+        <file>qml/About.qml</file>
+        <file>qml/Colors.qml</file>
+        <file>qml/FileSystemView.qml</file>
+        <file>qml/Icon.qml</file>
+        <file>qml/MyMenu.qml</file>
+        <file>qml/MyMenuBar.qml</file>
+        <file>qml/ResizeButton.qml</file>
+        <file>qml/Sidebar.qml</file>
+        <file>qml/WindowDragHandler.qml</file>
+    </qresource>
+</RCC>
