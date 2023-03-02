@@ -267,7 +267,7 @@ def snippet_translate(x):
             v = x.rstrip()
             if (not v.endswith(" True") and not v.endswith(" False")
                 and not v.endswith(" None")):
-                x = f"{value}()"
+                x = f"{v}()"
         return dstrip(x)
 
     # For constructors, that we now the shape is:
