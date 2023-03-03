@@ -212,6 +212,13 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
                     "{st_build_dir}/{st_package_name}/examples",
                     force=False, _vars=_vars, dir_filter_function=pycache_dir_filter)
 
+        # copy the jar files
+        if is_android:
+            copydir(
+                "{install_dir}/lib/jar",
+                "{st_build_dir}/{st_package_name}/jar",
+                _vars=_vars)
+
     # Copy Qt libs to package
     if OPTION["STANDALONE"]:
         if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
