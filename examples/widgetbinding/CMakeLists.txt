@@ -23,8 +23,8 @@ find_package(Qt6 COMPONENTS Core Gui Widgets)
 
 # ================================ General configuration ======================================
 
-# Set CPP standard to C++11 minimum.
-set(CMAKE_CXX_STANDARD 11)
+# Set CPP standard to C++17 minimum.
+set(CMAKE_CXX_STANDARD 17)
 
 # The wiggly library for which we will create bindings. You can change the name to something
 # relevant for your project.
