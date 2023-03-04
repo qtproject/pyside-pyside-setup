@@ -46,7 +46,7 @@ class AsyncHelper(QObject):
             asyncio to resume when the event is handled. event.fn() is
             the next entry point of the asyncio event loop. """
         def event(self, event):
-            if event.type() == QEvent.User + 1:
+            if event.type() == QEvent.Type.User + 1:
                 event.fn()
                 return True
             return False
@@ -55,7 +55,7 @@ class AsyncHelper(QObject):
         """ This is the QEvent that will be handled by the ReenterQtObject.
             self.fn is the next entry point of the asyncio event loop. """
         def __init__(self, fn):
-            super().__init__(QEvent.Type(QEvent.User + 1))
+            super().__init__(QEvent.Type(QEvent.Type.User + 1))
             self.fn = fn
 
     def __init__(self, worker, entry):
