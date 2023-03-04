@@ -172,6 +172,91 @@ static PyObject *replaceNoArgWithZero(PyObject *callable)
     return PyObject_CallFunctionObjArgs(partial, callable, zero, nullptr);
 }
 
+static PyObject *lookupUnqualifiedOrOldEnum(PyTypeObject *type, PyObject *name)
+{
+    static PyTypeObject *const EnumMeta = getPyEnumMeta();
+    static PyObject *const _member_map_ = String::createStaticString("_member_map_");
+    // This is similar to `find_name_in_mro`, but instead of looking directly into
+    // tp_dict, we also search for the attribute in local classes of that dict (Part 2).
+    PyObject *mro = type->tp_mro;
+    PyObject *result{};
+    assert(PyTuple_Check(mro));
+    Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
+    for (idx = 0; idx < n; ++idx) {
+        auto *base = PyTuple_GET_ITEM(mro, idx);
+        auto *type_base = reinterpret_cast<PyTypeObject *>(base);
+        auto sotp = PepType_SOTP(type_base);
+        // The EnumFlagInfo structure tells us if there are Enums at all.
+        const char **enumFlagInfo = sotp->enumFlagInfo;
+        if (!(enumFlagInfo))
+            continue;
+        if (!sotp->enumFlagsDict)
+            initEnumFlagsDict(type_base);
+        bool useFakeRenames = !(Enum::enumOption & Enum::ENOPT_NO_FAKERENAMES);
+        if (useFakeRenames) {
+            auto *rename = PyDict_GetItem(sotp->enumFlagsDict, name);
+            if (rename) {
+                /*
+                 * Part 1: Look into the enumFlagsDict if we have an old flags name.
+                 * -------------------------------------------------------------
+                 * We need to replace the parameterless
+
+                    QtCore.Qt.Alignment()
+
+                 * by the one-parameter call
+
+                    QtCore.Qt.AlignmentFlag(0)
+
+                 * That means: We need to bind the zero as default into a wrapper and
+                 * return that to be called.
+                 *
+                 * Addendum:
+                 * ---------
+                 * We first need to look into the current opcode of the bytecode to find
+                 * out if we have a call like above or just a type lookup.
+                 */
+                auto *flagType = PyDict_GetItem(type_base->tp_dict, rename);
+                if (currentOpcode_Is_CallMethNoArgs())
+                    return replaceNoArgWithZero(flagType);
+                Py_INCREF(flagType);
+                return flagType;
+            }
+        }
+        bool useFakeShortcuts = !(Enum::enumOption & Enum::ENOPT_NO_FAKESHORTCUT);
+        if (useFakeShortcuts) {
+            auto *dict = type_base->tp_dict;
+            PyObject *key, *value;
+            Py_ssize_t pos = 0;
+            while (PyDict_Next(dict, &pos, &key, &value)) {
+                /*
+                 * Part 2: Check for a duplication into outer scope.
+                 * -------------------------------------------------
+                 * We need to replace the shortcut
+
+                    QtCore.Qt.AlignLeft
+
+                 * by the correct call
+
+                    QtCore.Qt.AlignmentFlag.AlignLeft
+
+                 * That means: We need to search all Enums of the class.
+                 */
+                if (Py_TYPE(value) == EnumMeta) {
+                    auto *valtype = reinterpret_cast<PyTypeObject *>(value);
+                    auto *member_map = PyDict_GetItem(valtype->tp_dict, _member_map_);
+                    if (member_map && PyDict_Check(member_map)) {
+                        result = PyDict_GetItem(member_map, name);
+                        Py_XINCREF(result);
+                        if (result)
+                            return result;
+                    }
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
 PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
 {
     /*
@@ -184,7 +269,6 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
     static PyObject *const ignAttr1 = PyName::qtStaticMetaObject();
     static PyObject *const ignAttr2 = PyMagicName::get();
     static PyTypeObject *const EnumMeta = getPyEnumMeta();
-    static PyObject *const _member_map_ = String::createStaticString("_member_map_");
 
     if (SelectFeatureSet != nullptr)
         SelectFeatureSet(type);
@@ -194,7 +278,7 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
     //              The PYI files now look correct, but the old duplication is
     //              emulated here. This should be removed in Qt 7, see `parser.py`.
     //
-    // FIXME PYSIDE7 should remove this forgivingness:
+    // FIXME PYSIDE7 should remove this forgiveness:
     //
     //      The duplication of enum values into the enclosing scope, allowing to write
     //      Qt.AlignLeft instead of Qt.Alignment.AlignLeft, is still implemented but
@@ -211,88 +295,16 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
     }
 
     if (!ret && name != ignAttr1 && name != ignAttr2) {
-        PyObject *error_type, *error_value, *error_traceback;
+        PyObject *error_type{}, *error_value{}, *error_traceback{};
         PyErr_Fetch(&error_type, &error_value, &error_traceback);
-
-        // This is similar to `find_name_in_mro`, but instead of looking directly into
-        // tp_dict, we also search for the attribute in local classes of that dict (Part 2).
-        PyObject *mro = type->tp_mro;
-        assert(PyTuple_Check(mro));
-        size_t idx, n = PyTuple_GET_SIZE(mro);
-        for (idx = 0; idx < n; ++idx) {
-            auto *base = PyTuple_GET_ITEM(mro, idx);
-            auto *type_base = reinterpret_cast<PyTypeObject *>(base);
-            auto sotp = PepType_SOTP(type_base);
-            // The EnumFlagInfo structure tells us if there are Enums at all.
-            const char **enumFlagInfo = sotp->enumFlagInfo;
-            if (!(enumFlagInfo))
-                continue;
-            if (!sotp->enumFlagsDict)
-                initEnumFlagsDict(type_base);
-            bool useFakeRenames = !(Enum::enumOption & Enum::ENOPT_NO_FAKERENAMES);
-            if (useFakeRenames) {
-                auto *rename = PyDict_GetItem(sotp->enumFlagsDict, name);
-                if (rename) {
-                    /*
-                     * Part 1: Look into the enumFlagsDict if we have an old flags name.
-                     * -------------------------------------------------------------
-                     * We need to replace the parameterless
-
-                        QtCore.Qt.Alignment()
-
-                     * by the one-parameter call
-
-                        QtCore.Qt.AlignmentFlag(0)
-
-                     * That means: We need to bind the zero as default into a wrapper and
-                     * return that to be called.
-                     *
-                     * Addendum:
-                     * ---------
-                     * We first need to look into the current opcode of the bytecode to find
-                     * out if we have a call like above or just a type lookup.
-                     */
-                    auto *flagType = PyDict_GetItem(type_base->tp_dict, rename);
-                    if (currentOpcode_Is_CallMethNoArgs())
-                        return replaceNoArgWithZero(flagType);
-                    Py_INCREF(flagType);
-                    return flagType;
-                }
-            }
-            bool useFakeShortcuts = !(Enum::enumOption & Enum::ENOPT_NO_FAKESHORTCUT);
-            if (useFakeShortcuts) {
-                auto *dict = type_base->tp_dict;
-                PyObject *key, *value;
-                Py_ssize_t pos = 0;
-                while (PyDict_Next(dict, &pos, &key, &value)) {
-                    /*
-                     * Part 2: Check for a duplication into outer scope.
-                     * -------------------------------------------------
-                     * We need to replace the shortcut
-
-                        QtCore.Qt.AlignLeft
-
-                     * by the correct call
-
-                        QtCore.Qt.AlignmentFlag.AlignLeft
-
-                     * That means: We need to search all Enums of the class.
-                     */
-                    if (Py_TYPE(value) == EnumMeta) {
-                        auto *valtype = reinterpret_cast<PyTypeObject *>(value);
-                        auto *member_map = PyDict_GetItem(valtype->tp_dict, _member_map_);
-                        if (member_map && PyDict_Check(member_map)) {
-                            auto *result = PyDict_GetItem(member_map, name);
-                            if (result) {
-                                Py_INCREF(result);
-                                return result;
-                            }
-                        }
-                    }
-                }
-            }
+        ret = lookupUnqualifiedOrOldEnum(type, name);
+        if (ret) {
+            Py_DECREF(error_type);
+            Py_XDECREF(error_value);
+            Py_XDECREF(error_traceback);
+        } else {
+            PyErr_Restore(error_type, error_value, error_traceback);
         }
-        PyErr_Restore(error_type, error_value, error_traceback);
     }
     return ret;
 }
