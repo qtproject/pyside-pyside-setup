@@ -115,6 +115,11 @@ int acceptInt(int x)
     return x;
 }
 
+const int *acceptIntReturnPtr(int x)
+{
+    return new int(x);
+}
+
 unsigned int acceptUInt(unsigned int x)
 {
     return x;

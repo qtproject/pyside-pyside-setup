@@ -400,6 +400,7 @@
     <function signature="returnNullValueTypePointer()" />
     <function signature="returnNullObjectTypePointer()" />
     <function signature="acceptInt(int)" />
+    <function signature="acceptIntReturnPtr(int)"/>
     <function signature="acceptUInt(unsigned int)" />
     <function signature="acceptLong(long)" />
     <function signature="acceptULong(unsigned long)" />

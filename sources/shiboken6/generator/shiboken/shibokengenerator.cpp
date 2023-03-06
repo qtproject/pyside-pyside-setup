@@ -1013,9 +1013,10 @@ QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaT
             result += u'&';
         return result;
     }
-    return QStringLiteral("Shiboken::Conversions::copyToPython(%1, %2")
-              .arg(converterObject(type),
-                   (type.isCString() || type.isVoidPointer()) ? QString() : u"&"_s);
+
+    const auto indirections = type.indirections() - 1;
+    return u"Shiboken::Conversions::copyToPython("_s + converterObject(type)
+           + u", "_s + AbstractMetaType::dereferencePrefix(indirections);
 }
 
 QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaClassCPtr &metaClass)

@@ -49,6 +49,7 @@ LIBSAMPLE_API unsigned long long doubleUnsignedLongLong(unsigned long long value
 LIBSAMPLE_API short doubleShort(short value);
 
 LIBSAMPLE_API int acceptInt(int x);
+LIBSAMPLE_API const int *acceptIntReturnPtr(int x);
 LIBSAMPLE_API unsigned int acceptUInt(unsigned int x);
 LIBSAMPLE_API long acceptLong(long x);
 LIBSAMPLE_API unsigned long acceptULong(unsigned long x);

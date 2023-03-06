@@ -74,7 +74,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QFormLayout::ItemRole](_role));
 %END_ALLOW_THREADS
 %PYARG_0 = PyTuple_New(2);
 PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
-PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG5_TYPE](%5));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](%5));
 // @snippet qfiledialog-return
 
 // @snippet qwidget-addaction-glue
