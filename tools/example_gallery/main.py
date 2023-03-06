@@ -15,6 +15,7 @@ since there is no special requirements.
 import json
 import math
 import shutil
+import zipfile
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 from pathlib import Path
@@ -116,8 +117,36 @@ def remove_licenses(s):
     return "\n".join(new_s)
 
 
+def make_zip_archive(zip_name, src, skip_dirs=None):
+    src_path = Path(src).expanduser().resolve(strict=True)
+    if skip_dirs is None:
+        skip_dirs = []
+    if not isinstance(skip_dirs, list):
+        print("Error: A list needs to be passed for 'skip_dirs'")
+        return
+    with zipfile.ZipFile(src_path.parents[0] / Path(zip_name), 'w', zipfile.ZIP_DEFLATED) as zf:
+        for file in src_path.rglob('*'):
+            skip = False
+            _parts = file.relative_to(src_path).parts
+            for sd in skip_dirs:
+                if sd in _parts:
+                    skip = True
+                    break
+            if not skip:
+                zf.write(file, file.relative_to(src_path.parent))
+
+
 def get_code_tabs(files, project_dir):
     content = "\n"
+
+    # Prepare ZIP file, and copy to final destination
+    zip_name = f"{project_dir.name}.zip"
+    make_zip_archive(zip_name, project_dir, skip_dirs=["doc"])
+    zip_src = f"{project_dir}.zip"
+    zip_dst = EXAMPLES_DOC / zip_name
+    shutil.move(zip_src, zip_dst)
+
+    content += f":download:`Download this example <{zip_name}>`\n\n"
 
     for i, project_file in enumerate(files):
         pfile = Path(project_file)
@@ -305,9 +334,8 @@ if __name__ == "__main__":
     A collection of examples are provided with |project| to help new users
     to understand different use cases of the module.
 
-    You can find all these examples inside the ``pyside-setup`` on the ``examples``
-    directory, or you can access them after installing |pymodname| from ``pip``
-    inside the ``site-packages/PySide6/examples`` directory.
+    You can find all these examples inside the ``pyside-setup`` repository
+    on the ``examples`` directory.
 
        """
     )
