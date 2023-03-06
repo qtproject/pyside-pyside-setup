@@ -202,16 +202,6 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             _filter=["*.pyi", "py.typed"],
             _vars=_vars)
 
-        if not OPTION["NOEXAMPLES"] and not is_android:
-            def pycache_dir_filter(dir_name, parent_full_path, dir_full_path):
-                if fnmatch.fnmatch(dir_name, "__pycache__"):
-                    return False
-                return True
-            # examples/* -> <setup>/{st_package_name}/examples
-            copydir(Path(pyside_build.script_dir) / "examples",
-                    "{st_build_dir}/{st_package_name}/examples",
-                    force=False, _vars=_vars, dir_filter_function=pycache_dir_filter)
-
         # copy the jar files
         if is_android:
             copydir(

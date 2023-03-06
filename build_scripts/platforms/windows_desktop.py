@@ -175,16 +175,6 @@ def prepare_packages_win32(pyside_build, _vars):
             _filter=pdbs,
             recursive=False, _vars=_vars)
 
-        if not OPTION["NOEXAMPLES"]:
-            def pycache_dir_filter(dir_name, parent_full_path, dir_full_path):
-                if fnmatch.fnmatch(dir_name, "__pycache__"):
-                    return False
-                return True
-            # examples/* -> <setup>/{st_package_name}/examples
-            copydir(Path(pyside_build.script_dir) / "examples",
-                    destination_dir / "examples",
-                    force=False, _vars=_vars, dir_filter_function=pycache_dir_filter)
-
         if _vars['ssl_libs_dir']:
             # <ssl_libs>/* -> <setup>/{st_package_name}/openssl
             copydir("{ssl_libs_dir}", destination_dir / "openssl",

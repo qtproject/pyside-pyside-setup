@@ -57,7 +57,7 @@ def get_manifest(wheel_name: str, data: List[ModuleData]) -> str:
             if field == "ext":
                 continue
             for line in getattr(module, field):
-                if field in ("examples", "extra_dirs", "qml", "plugins"):
+                if field in ("extra_dirs", "qml", "plugins"):
                     lines.append(f"graft PySide6/{line}")
                 elif field == "qtlib" and sys.platform == "darwin":
                     lines.append(f"graft PySide6/{line}")

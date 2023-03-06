@@ -25,7 +25,6 @@ class ModuleData:
     include: List[str] = field(default_factory=list)
     glue: List[str] = field(default_factory=list)
     metatypes: List[str] = field(default_factory=list)
-    examples: List[str] = field(default_factory=list)
     plugins: List[str] = field(default_factory=list)
 
     # For special cases when a file/directory doesn't fall into
@@ -55,7 +54,6 @@ class ModuleData:
         self.glue.append(f"qt{_lo}.cpp")
         if not len(self.metatypes):
             self.metatypes.append(f"qt6{_lo}_relwithdebinfo_metatypes.json")
-        self.examples.append(f"{_lo}")
 
     # The PySide6 directory that gets packaged by the build_scripts
     # 'prepare_packages()' has a certain structure that depends on
@@ -89,7 +87,6 @@ class ModuleData:
         self.typesystems = [f"typesystems/{i}" for i in self.typesystems]
         self.include = [f"include/{i}" for i in self.include]
         self.glue = [f"glue/{i}" for i in self.glue]
-        self.examples = [f"examples/{i}" for i in self.examples]
 
     def macos_pyside_wrappers_lib(self, s):
         if s.startswith("Qt"):
@@ -193,10 +190,10 @@ def wheel_files_pyside_addons() -> List[ModuleData]:
 
 # Functions that hold the information of all the files that needs
 # to be included for the module to work, including Qt libraries,
-# examples, typesystems, glue, etc.
+# typesystems, glue, etc.
 def module_QtCore() -> ModuleData:
     # QtCore
-    data = ModuleData("Core", examples=["corelib"])
+    data = ModuleData("Core")
 
     _typesystems = [
         "common.xml",
@@ -224,12 +221,6 @@ def module_QtCore() -> ModuleData:
             data.plugins.append("styles")
         data.extra_files.append("Qt/libexec/rcc")
         data.extra_files.append("Qt/libexec/qt.conf")
-
-    data.examples.append("samplebinding")
-    data.examples.append("utils")
-
-    if sys.platform == "darwin":
-        data.examples.append("macextras")
 
     # *.py
     data.extra_dirs.append("support")
@@ -272,8 +263,6 @@ def module_QtCore() -> ModuleData:
     data.translations.append("qtbase_*")
     data.translations.append("qt_help_*")
     data.translations.append("qt_*")
-
-    data.extra_files.append("examples/examples.pyproject")
 
     # plugins
     data.plugins.append("platforms")
@@ -338,10 +327,6 @@ def module_QtWidgets() -> ModuleData:
         data.extra_files.append("uic.exe")
     else:
         data.extra_files.append("Qt/libexec/uic")
-
-    data.examples.append("widgetbinding")
-    data.examples.append("scriptableapplication")
-    data.examples.append("external")
 
     return data
 
@@ -476,7 +461,6 @@ def module_QtQml() -> ModuleData:
     ]
 
     data.lib.append("libpyside6qml")
-    data.examples.append("declarative")
     data.plugins.append("qmltooling")
     data.translations.append("qtdeclarative_*")
     if sys.platform == "win32":
@@ -642,7 +626,6 @@ def module_Qt3DCore() -> ModuleData:
     ]
 
     data.plugins.extend(_plugins)
-    data.examples.append("3d")
     return data
 
 
