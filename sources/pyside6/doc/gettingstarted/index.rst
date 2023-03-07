@@ -413,13 +413,13 @@ Starting from 5.15, there are two options to build the documentation:
 
 The process of parsing Qt headers to generate the PySide API documentation can take several
 minutes, this means that modifying a specific section of the rst files we currently have, might
-become a hard task.
+become a hard task. You may only care about the ReStructuredText only documentation.
 
-For this, you can install :command:`sphinx` on a virtual environment, and execute the following command::
+To generate this, execute the following command::
 
     python setup.py build_rst_docs
 
-which will generate a ``html/`` directory with the following structure::
+This will generate an ``html/`` directory with the following structure::
 
     html
     └── pyside6
