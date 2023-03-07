@@ -249,8 +249,8 @@ return %out;)"_s},
 QByteArray containerTypeSystemSnippet(const char *name, const char *type,
                                       const char *include,
                                       const char *nativeToTarget,
-                                      const char *targetToNativeType = nullptr,
-                                      const char *targetToNative = nullptr)
+                                      const char *targetToNativeType,
+                                      const char *targetToNative)
 {
     QByteArray result = QByteArrayLiteral("<container-type name=\"")
             + name + QByteArrayLiteral("\" type=\"") + type + R"(">

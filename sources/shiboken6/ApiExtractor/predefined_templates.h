@@ -21,7 +21,7 @@ const PredefinedTemplates &predefinedTemplates();
 QByteArray containerTypeSystemSnippet(const char *name, const char *type,
                                       const char *include,
                                       const char *nativeToTarget,
-                                      const char *targetToNativeType,
-                                      const char *targetToNative);
+                                      const char *targetToNativeType = nullptr,
+                                      const char *targetToNative = nullptr);
 
 #endif // PREDEFINED_TEMPLATES_H
