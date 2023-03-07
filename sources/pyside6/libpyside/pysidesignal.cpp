@@ -334,15 +334,16 @@ static void signalInstanceFree(void *vself)
     auto self = reinterpret_cast<PySideSignalInstance *>(vself);
 
     PySideSignalInstancePrivate *dataPvt = self->d;
+    if (dataPvt) {
+        Py_XDECREF(dataPvt->homonymousMethod);
 
-    Py_XDECREF(dataPvt->homonymousMethod);
-
-    if (dataPvt->next) {
-        Py_DECREF(dataPvt->next);
-        dataPvt->next = nullptr;
+        if (dataPvt->next) {
+            Py_DECREF(dataPvt->next);
+            dataPvt->next = nullptr;
+        }
+        delete dataPvt;
+        self->d = nullptr;
     }
-    delete dataPvt;
-    self->d = nullptr;
     self->deleted = true;
     Py_TYPE(pySelf)->tp_base->tp_free(self);
 }
