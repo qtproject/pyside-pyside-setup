@@ -1275,6 +1275,11 @@ class PysideRstDocs(Command, CommandMixin):
 
             if self.name == PYSIDE:
                 self.sphinx_src = self.out_dir / "rst"
+                example_gallery = config.setup_script_dir / "tools" / "example_gallery" / "main.py"
+                assert(example_gallery.is_file())
+                example_gallery_cmd = [sys.executable, os.fspath(example_gallery)]
+                if run_process(example_gallery_cmd) != 0:
+                    raise SetupError(f"Error running example gallery for {self.doc_dir}")
             elif self.name == SHIBOKEN:
                 self.sphinx_src = self.out_dir
 
