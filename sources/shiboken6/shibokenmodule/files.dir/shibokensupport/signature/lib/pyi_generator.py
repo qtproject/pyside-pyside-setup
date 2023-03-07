@@ -180,8 +180,11 @@ def filter_from_imports(from_struct, text):
         lis = []
         nfs.append((mod, lis))
         for each in imports:
-            if re.search(rf"(\b|@){each}\b([^\s\(:]|\n)", text):
-                lis.append(each)
+            # PYSIDE-1603: We search text that is a usage of the class `each`,
+            #              but only if the class is not also defined here.
+            if (f"class {each}(") not in text:
+                if re.search(rf"(\b|@){each}\b([^\s\(:]|\n)", text):
+                    lis.append(each)
         if not lis:
             nfs.pop()
     return nfs
