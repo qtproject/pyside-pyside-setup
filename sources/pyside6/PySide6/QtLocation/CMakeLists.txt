@@ -13,7 +13,6 @@ ${QtLocation_GEN_DIR}/qgeoroute_wrapper.cpp
 ${QtLocation_GEN_DIR}/qgeoroutereply_wrapper.cpp
 ${QtLocation_GEN_DIR}/qgeoroutesegment_wrapper.cpp
 ${QtLocation_GEN_DIR}/qgeoserviceprovider_wrapper.cpp
-${QtLocation_GEN_DIR}/qgeoserviceproviderfactoryv2_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplace_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacecontentreply_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacedetailsreply_wrapper.cpp
@@ -32,8 +31,6 @@ ${QtLocation_GEN_DIR}/qplacecategory_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacecontactdetail_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacecontent_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacecontentrequest_wrapper.cpp
-${QtLocation_GEN_DIR}/qplaceeditorial_wrapper.cpp
-${QtLocation_GEN_DIR}/qplaceimage_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacemanagerengine_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacematchreply_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacematchrequest_wrapper.cpp
@@ -41,7 +38,6 @@ ${QtLocation_GEN_DIR}/qplaceproposedsearchresult_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplaceratings_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacereply_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplaceresult_wrapper.cpp
-${QtLocation_GEN_DIR}/qplacereview_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacesearchreply_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacesearchrequest_wrapper.cpp
 ${QtLocation_GEN_DIR}/qplacesearchresult_wrapper.cpp

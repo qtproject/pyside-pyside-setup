@@ -95,6 +95,7 @@ macro(collect_optional_modules)
         Pdf
         PdfWidgets
         Positioning
+        Location
         NetworkAuth
         Nfc
         Qml

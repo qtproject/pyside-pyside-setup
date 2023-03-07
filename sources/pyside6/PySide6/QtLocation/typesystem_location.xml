@@ -47,16 +47,14 @@
   <object-type name="QGeoRoutingManager"/>
   <object-type name="QGeoRoutingManagerEngine"/>
   <object-type name="QGeoServiceProviderFactory"/>
-  <object-type name="QGeoServiceProviderFactoryV2"/>
   <value-type name="QPlaceAttribute"/>
   <value-type name="QPlaceCategory"/>
   <value-type name="QPlaceContactDetail"/>
   <value-type name="QPlaceContent">
       <enum-type name="Type"/>
+      <enum-type name="DataTag" since="6.5"/>
   </value-type>
   <value-type name="QPlaceContentRequest"/>
-  <object-type name="QPlaceEditorial"/>
-  <object-type name="QPlaceImage"/>
   <object-type name="QPlaceManagerEngine"/>
   <object-type name="QPlaceMatchReply"/>
   <value-type name="QPlaceMatchRequest"/>
@@ -67,7 +65,6 @@
       <enum-type name="Type"/>
   </object-type>
   <object-type name="QPlaceResult"/>
-  <object-type name="QPlaceReview"/>
   <object-type name="QPlaceSearchReply"/>
   <object-type name="QPlaceSearchRequest">
       <enum-type name="RelevanceHint"/>
