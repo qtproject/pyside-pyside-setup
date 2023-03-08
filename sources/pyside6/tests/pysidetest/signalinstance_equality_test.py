@@ -12,7 +12,7 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 
-from PySide6.QtCore import QFile, QObject, QTimer, Signal, Slot
+from PySide6.QtCore import QFile, QObject, QTimer, Signal, SignalInstance, Slot
 from PySide6.QtWidgets import QSlider
 
 
@@ -40,7 +40,16 @@ class TestSignalInstance(unittest.TestCase):
     def test_custom_inherited_signal_instances_are_equal(self):
         o = D()
         self.assertTrue(o.custom_signal == o.custom_signal)
-
+    # additional tests of old errors from 2010 or so
+    def test_uninitialized_SignalInstance(self):
+        # This will no longer crash
+        print(SignalInstance())
+        with self.assertRaises(RuntimeError):
+            SignalInstance().connect(lambda: None)
+        with self.assertRaises(RuntimeError):
+            SignalInstance().disconnect()
+        with self.assertRaises(RuntimeError):
+            SignalInstance().emit()
 
 class MyWidget(QSlider):
     valueChanged = Signal(tuple)
