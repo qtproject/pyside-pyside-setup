@@ -185,7 +185,8 @@ static PyObject *signalInstanceRepr(PyObject *obSelf)
     auto *self = reinterpret_cast<PySideSignalInstance *>(obSelf);
     auto *typeName = Py_TYPE(obSelf)->tp_name;
     return Shiboken::String::fromFormat("<%s %s at %p>", typeName,
-                                        self->d->signature.constData(), obSelf);
+                                        self->d ? self->d->signature.constData()
+                                                : "(no signature)", obSelf);
 }
 
 static PyMethodDef SignalInstance_methods[] = {
@@ -436,6 +437,10 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
         return nullptr;
 
     PySideSignalInstance *source = reinterpret_cast<PySideSignalInstance *>(self);
+    if (!source->d) {
+        PyErr_Format(PyExc_RuntimeError, "cannot connect uninitialized SignalInstance");
+        return nullptr;
+    }
     Shiboken::AutoDecRef pyArgs(PyList_New(0));
 
     bool match = false;
@@ -552,6 +557,10 @@ static int argCountInSignature(const char *signature)
 static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
 {
     PySideSignalInstance *source = reinterpret_cast<PySideSignalInstance *>(self);
+    if (!source->d) {
+        PyErr_Format(PyExc_RuntimeError, "cannot emit uninitialized SignalInstance");
+        return nullptr;
+    }
 
     // PYSIDE-2201: Check if the object has vanished meanwhile.
     //              Tried to revive it without exception, but this gives problems.
@@ -625,6 +634,10 @@ static PyObject *signalInstanceGetItem(PyObject *self, PyObject *key)
 static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
 {
     auto source = reinterpret_cast<PySideSignalInstance *>(self);
+    if (!source->d) {
+        PyErr_Format(PyExc_RuntimeError, "cannot disconnect uninitialized SignalInstance");
+        return nullptr;
+    }
     Shiboken::AutoDecRef pyArgs(PyList_New(0));
 
     PyObject *slot = Py_None;
