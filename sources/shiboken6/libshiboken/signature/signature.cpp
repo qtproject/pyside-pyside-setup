@@ -583,7 +583,9 @@ void SetError_Argument(PyObject *args, const char *func_name, PyObject *info)
         PyObject *e, *v, *t;
         // Note: These references are all borrowed.
         PyErr_Fetch(&e, &v, &t);
+        Py_DECREF(e);
         info = v;
+        Py_XDECREF(t);
     }
     // PYSIDE-1019: Modify the function name expression according to feature.
     AutoDecRef new_func_name(adjustFuncName(func_name));
