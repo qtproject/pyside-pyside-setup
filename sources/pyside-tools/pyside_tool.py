@@ -12,6 +12,21 @@ from subprocess import Popen, PIPE
 import PySide6 as ref_mod
 
 
+VIRTUAL_ENV = "VIRTUAL_ENV"
+
+
+def is_virtual_env():
+    return sys.prefix != sys.base_prefix
+
+
+def init_virtual_env():
+    """PYSIDE-2251: Enable running from a non-activated virtual environment
+       as is the case for Visual Studio Code by setting the VIRTUAL_ENV
+       variable which is used by the Qt Designer plugin."""
+    if is_virtual_env() and not os.environ.get(VIRTUAL_ENV):
+        os.environ[VIRTUAL_ENV] = sys.prefix
+
+
 def main():
     # This will take care of "pyside6-lupdate" listed as an entrypoint
     # in setup.py are copied to 'scripts/..'
@@ -115,6 +130,8 @@ def designer():
     # PySide6/scripts.
     pyside_dir = Path(__file__).resolve().parents[1]
 
+    init_virtual_env()
+
     # https://www.python.org/dev/peps/pep-0384/#linkage :
     # "On Unix systems, the ABI is typically provided by the python executable
     # itself", that is, libshiboken does not link against any Python library
@@ -138,7 +155,7 @@ def designer():
         os.environ['DYLD_INSERT_LIBRARIES'] = lib_path
     elif sys.platform == 'win32':
         # Find Python DLLs from the base installation
-        if os.environ.get("VIRTUAL_ENV"):
+        if is_virtual_env():
             _append_to_path_var("PATH", os.fspath(Path(sys._base_executable).parent))
     # Add the Wiggly Widget example
     wiggly_dir = os.fspath(pyside_dir / 'examples' / 'widgetbinding')
