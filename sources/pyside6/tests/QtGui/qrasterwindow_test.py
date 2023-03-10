@@ -13,12 +13,13 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
-from PySide6.QtCore import QEvent, QPoint, QRect, QSize, QTimer, Qt
-from PySide6.QtGui import QColor, QBackingStore, QPaintDevice, QPainter, QWindow, QPaintDeviceWindow, QRasterWindow, QRegion, QStaticText
+from PySide6.QtCore import QPoint, QRect, QSize, QTimer, Qt
+from PySide6.QtGui import (QColor, QPainter, QRasterWindow, QStaticText,
+                           QTextCursor, QTextDocument, QAbstractTextDocumentLayout)
 
 
 # Window using convenience class QRasterWindow
-class TestRasterWindow(QRasterWindow):
+class StaticTextRasterWindow(QRasterWindow):
     def __init__(self):
         super().__init__()
         self.text = QStaticText("QRasterWindow")
@@ -30,12 +31,44 @@ class TestRasterWindow(QRasterWindow):
             painter.drawStaticText(QPoint(10, 10), self.text)
 
 
+class TextDocumentWindow(QRasterWindow):
+    """PYSIDE-2252, drawing with QAbstractTextDocumentLayout.PaintContext"""
+
+    def __init__(self):
+        super().__init__()
+        self.m_document = QTextDocument()
+        self.m_document.setPlainText("bla bla")
+
+    def paintEvent(self, event):
+        with QPainter(self) as painter:
+            clientRect = QRect(QPoint(0, 0), self.size())
+            painter.fillRect(clientRect, QColor(Qt.white))
+            ctx = QAbstractTextDocumentLayout.PaintContext()
+            ctx.clip = clientRect
+
+            sel = QAbstractTextDocumentLayout.Selection()
+            cursor = QTextCursor(self.m_document)
+            cursor.movePosition(QTextCursor.Start)
+            cursor.movePosition(QTextCursor.NextWord, QTextCursor.KeepAnchor)
+            sel.cursor = cursor
+            sel.format.setForeground(Qt.red)
+            ctx.selections = [sel]
+
+            self.m_document.documentLayout().draw(painter, ctx)
+
+
 class QRasterWindowTest(UsesQApplication):
     def test(self):
-        rasterWindow = TestRasterWindow()
+        rasterWindow = StaticTextRasterWindow()
         rasterWindow.setFramePosition(QPoint(100, 100))
         rasterWindow.resize(QSize(400, 400))
         rasterWindow.show()
+
+        rasterWindow2 = TextDocumentWindow()
+        rasterWindow2.setFramePosition(rasterWindow.frameGeometry().topRight() + QPoint(20, 0))
+        rasterWindow2.resize(QSize(400, 400))
+        rasterWindow2.show()
+
         QTimer.singleShot(100, self.app.quit)
         self.app.exec()
 

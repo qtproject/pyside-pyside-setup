@@ -89,7 +89,6 @@
   <rejection class="^Q.*Event$" field-name="^m_.*$"/>
   <rejection class="QEventPoint" field-name="^m_.*$"/>
 
-  <rejection class="QAbstractTextDocumentLayout::PaintContext" field-name="selections"/>
   <rejection class="QBrush" function-name="cleanUp"/>
   <rejection class="QFont" enum-name="ResolveProperties"/>
   <rejection class="QPictureIO" function-name="defineIOHandler"/>
