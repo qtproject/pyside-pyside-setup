@@ -637,6 +637,11 @@ namespace PySide
 
 static void invalidatePtr(any_t *object)
 {
+    // PYSIDE-2254: Guard against QObjects outliving Python, for example the
+    // adopted main thread as returned by QObjects::thread().
+    if (Py_IsInitialized() == 0)
+        return;
+
     Shiboken::GilState state;
 
     SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(object);
