@@ -116,10 +116,11 @@ def assistant():
     qt_tool_wrapper(ui_tool_binary("assistant"), sys.argv[1:])
 
 
-def _append_to_path_var(var, value):
+def _extend_path_var(var, value, prepend=False):
     env_value = os.environ.get(var)
     if env_value:
-        env_value = f'{env_value}{os.pathsep}{value}'
+        env_value = (f'{value}{os.pathsep}{env_value}'
+                     if prepend else f'{env_value}{os.pathsep}{value}')
     else:
         env_value = value
     os.environ[var] = env_value
@@ -156,12 +157,12 @@ def designer():
     elif sys.platform == 'win32':
         # Find Python DLLs from the base installation
         if is_virtual_env():
-            _append_to_path_var("PATH", os.fspath(Path(sys._base_executable).parent))
+            _extend_path_var("PATH", os.fspath(Path(sys._base_executable).parent), True)
     # Add the Wiggly Widget example
     wiggly_dir = os.fspath(pyside_dir / 'examples' / 'widgetbinding')
-    _append_to_path_var('PYSIDE_DESIGNER_PLUGINS', wiggly_dir)
+    _extend_path_var('PYSIDE_DESIGNER_PLUGINS', wiggly_dir)
     taskmenu_dir = os.fspath(pyside_dir / 'examples' / 'designer' / 'taskmenuextension')
-    _append_to_path_var('PYSIDE_DESIGNER_PLUGINS', taskmenu_dir)
+    _extend_path_var('PYSIDE_DESIGNER_PLUGINS', taskmenu_dir)
 
     qt_tool_wrapper(ui_tool_binary("designer"), sys.argv[1:])
 
