@@ -4,8 +4,7 @@
 // OpenGL functions are not in the QtGui module header
 #cmakedefine ANDROID
 
-#if QT_CONFIG(opengl)
-#ifndef ANDROID
+#if QT_CONFIG(opengl) && !defined(ANDROID)
 #  include <QtOpenGL/qopenglfunctions_1_0.h>
 #  include <QtOpenGL/qopenglfunctions_1_1.h>
 #  include <QtOpenGL/qopenglfunctions_1_2.h>
@@ -32,9 +31,8 @@
 #  include <QtOpenGL/qopenglfunctions_4_4_core.h>
 #  include <QtOpenGL/qopenglfunctions_4_5_compatibility.h>
 #  include <QtOpenGL/qopenglfunctions_4_5_core.h>
-#endif
 #  include <QtOpenGL/qopenglversionfunctionsfactory.h>
 #endif
-#if QT_CONFIG(opengles2) && !defined(ANDROID)
+#if QT_CONFIG(opengles2)
 #  include <QtOpenGL/qopenglfunctions_es2.h>
 #endif
