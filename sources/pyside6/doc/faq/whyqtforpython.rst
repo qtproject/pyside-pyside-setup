@@ -10,7 +10,7 @@ Why Qt for Python?
 
     <div style="float: right; padding-left: 20px; max-width: 30%;
     background-color: #e9eff5; padding-top: 5px;">
-      <img src="../../_images/tiobe.png"
+      <img src="../_images/tiobe.png"
           style="width: 90%;"
           alt="TIOBE index for Python" />
       <p style="font-size: 80%;">
@@ -67,13 +67,9 @@ Creating Qt applications in Python requires only a few lines of code,
 and not much configuration is required to execute it. As an /unfair/
 example, let's check the code of a simple hello world application:
 
+.. tab-set::
 
-.. panels::
-   :container: container-lg
-
-   :column: col-lg-6 p-2
-
-   .. tabbed:: C++ Header
+   .. tab-item:: C++ Header
 
        .. code-block:: cpp
 
@@ -96,7 +92,7 @@ example, let's check the code of a simple hello world application:
 
           #endif // MAINWINDOW_H
 
-   .. tabbed:: C++ Implementation
+   .. tab-item::  C++ Implementation
 
        .. code-block:: cpp
 
@@ -115,7 +111,7 @@ example, let's check the code of a simple hello world application:
               m_button->setText("Ready");
           }
 
-   .. tabbed:: C++ Main
+   .. tab-item:: C++ Main
 
        .. code-block:: cpp
 
@@ -130,10 +126,9 @@ example, let's check the code of a simple hello world application:
               return app.exec(d);
           }
 
-   ---
-   :column: col-lg-6 p-2
+.. tab-set::
 
-   .. tabbed:: Python
+   .. tab-item:: Python
 
       .. code-block:: python
 

@@ -27,7 +27,7 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.ifconfig',
     'sphinx.ext.coverage', 'sphinx.ext.intersphinx', 'sphinx.ext.todo',
     'sphinx.ext.graphviz',
     'sphinx.ext.viewcode',
-    'sphinx_panels', 'sphinx_copybutton',
+    'sphinx_design', 'sphinx_copybutton',
     'myst_parser']
 
 myst_enable_extensions = [
@@ -209,8 +209,3 @@ html_show_sourcelink = False
 
 # -- Options for qthelp output --------------------------------------------------
 qthelp_theme = 'pysidedocs_qthelp'
-
-# Sphinx Panels color for inactive tab
-panels_css_variables = {
-    "tabs-color-label-inactive": "rgba(116, 116, 116, 1.0)",
-}

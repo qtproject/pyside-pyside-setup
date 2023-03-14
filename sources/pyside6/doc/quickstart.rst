@@ -225,45 +225,38 @@ Frequently Asked Questions
 Here you can find a couple of common questions and situations that will
 clarify questions before you start programming.
 
-.. panels::
-    :container: container-lg pb-1
-    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
+.. grid:: 1 3 3 3
+    :gutter: 2
 
-    .. link-button:: faq/whatisqt
-        :type: ref
-        :text: Qt, QML, Widgets... What is the difference?
-        :classes: btn-link btn-block stretched-link
-    ---
+    .. grid-item-card:: What is Qt
+        :link: faq/whatisqt.html
 
-    .. link-button:: faq/whichide
-        :type: ref
-        :text: Which IDEs are compatible with PySide?
-        :classes: btn-link btn-block stretched-link
-    ---
+        Qt, QML, Widgets... What is the difference?
 
-    .. link-button:: faq/whatisshiboken
-        :type: ref
-        :text: Binding Generation: What is Shiboken?
-        :classes: btn-link btn-block stretched-link
-    ---
+    .. grid-item-card:: Compatible IDEs
+        :link: faq/whichide.html
 
-    .. link-button:: faq/typesoffiles
-        :type: ref
-        :text: File Types in PySide
-        :classes: btn-link btn-block stretched-link
-    ---
+        Which IDEs are compatible with PySide?
 
-    .. link-button:: faq/distribution
-        :type: ref
-        :text: Distributing your application to other systems and platforms
-        :classes: btn-link btn-block stretched-link
+    .. grid-item-card:: Binding Generation
+        :link: faq/whatisshiboken.html
 
-    ---
+        What is Shiboken?
 
-    .. link-button:: faq/whyqtforpython
-        :type: ref
-        :text: As a Qt/C++ developer, why should I consider Qt for Python?
-        :classes: btn-link btn-block stretched-link
+    .. grid-item-card:: File types
+        :link: faq/typesoffiles.html
+
+        File Types in PySide
+
+    .. grid-item-card:: App distribution
+        :link: faq/distribution.html
+
+        Distributing your application to other systems and platforms
+
+    .. grid-item-card:: Why Qt for Python?
+        :link: faq/whyqtforpython.html
+
+        As a Qt/C++ developer, why should I consider Qt for Python?
 
 .. toctree::
     :hidden:

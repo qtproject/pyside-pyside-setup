@@ -41,38 +41,44 @@ Guides per platform
 
 You can refer to the following pages for platform specific instructions:
 
-.. panels::
-    :body: align-items-center jutify-content-center text-center
-    :container: container-lg pb-3
-    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
-    :img-top-cls: d-flex align-self-center img-responsive card-img-top-main
+.. grid:: 1 3 3 3
+    :gutter: 2
 
-    :img-top: ../images/windows.svg
+    .. grid-item-card::
+        :img-top: ../images/windows.svg
+        :class-item: text-center
 
-    +++
+        +++
+        .. button-ref:: windows
+            :color: primary
+            :outline:
+            :expand:
 
-    .. link-button:: windows
-        :type: ref
-        :text: Windows
-        :classes: btn-qt btn-block stretched-link
-    ---
-    :img-top: ../images/macos.svg
+            Windows
 
-    +++
+    .. grid-item-card::
+        :img-top: ../images/macos.svg
+        :class-item: text-center
 
-    .. link-button:: macOS
-        :type: ref
-        :text: macOS
-        :classes: btn-qt btn-block stretched-link
-    ---
-    :img-top: ../images/linux.svg
+        +++
+        .. button-ref:: macOS
+            :color: primary
+            :outline:
+            :expand:
 
-    +++
+            macOS
 
-    .. link-button:: linux
-        :type: ref
-        :text: Linux
-        :classes: btn-qt btn-block stretched-link
+    .. grid-item-card::
+        :img-top: ../images/linux.svg
+        :class-item: text-center
+
+        +++
+        .. button-ref:: linux
+            :color: primary
+            :outline:
+            :expand:
+
+            Linux
 
 .. important:: |project| does not yet support WebAssembly and the mobile operating systems (Android or iOS).
                Most Linux-based embedded OS provide PySide with their official

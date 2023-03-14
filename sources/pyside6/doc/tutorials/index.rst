@@ -15,86 +15,78 @@ If you want to see the available widgets in action, you can check the
 `Qt Widget Gallery <https://doc.qt.io/qt-6/gallery.html>`_ to learn their
 names and how they look like.
 
-.. panels::
-    :container: container-lg pb-1
-    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
-    :img-top-cls: d-flex align-self-center
+.. grid:: 1 3 3 3
+    :gutter: 2
 
-    :img-top: basictutorial/widgets.png
+    .. grid-item-card:: Basic Widget
+        :class-item: cover-img
+        :link: basictutorial/widgets.html
+        :img-top: basictutorial/widgets.png
 
-    .. link-button:: basictutorial/widgets
-        :type: ref
-        :text: Your First QtWidgets Application
-        :classes: btn-link btn-block stretched-link
-    ---
-    :img-top: basictutorial/clickablebutton.png
+        Your first QtWidgets Application
 
-    .. link-button:: basictutorial/clickablebutton
-        :type: ref
-        :text: Using a Simple Button
-        :classes: btn-link btn-block stretched-link
-    ---
-    :img-top: basictutorial/signals_slots.png
+    .. grid-item-card:: Basic Button
+        :class-item: cover-img
+        :link: basictutorial/clickablebutton.html
+        :img-top: basictutorial/clickablebutton.png
 
-    .. link-button:: basictutorial/signals_and_slots
-        :type: ref
-        :text: Signals and Slots
-        :classes: btn-link btn-block stretched-link
-    ---
-    :img-top: basictutorial/dialog.png
+        Using a Simple Button
 
-    .. link-button:: basictutorial/dialog
-        :type: ref
-        :text: Creating a Dialog Application
-        :classes: btn-link btn-block stretched-link
-    ---
-    :img-top: basictutorial/tablewidget.png
+    .. grid-item-card:: Basic Connections
+        :class-item: cover-img
+        :link: basictutorial/signal_and_slots.html
+        :img-top: basictutorial/signals_slots.png
 
-    .. link-button:: basictutorial/tablewidget
-        :type: ref
-        :text: Displaying Data Using a Table Widget
-        :classes: btn-link btn-block stretched-link
+        Signals and Slots
 
-    ---
-    :img-top: basictutorial/treewidget.png
+    .. grid-item-card:: Basic Dialog
+        :class-item: cover-img
+        :link: basictutorial/dialog.html
+        :img-top: basictutorial/dialog.png
 
-    .. link-button:: basictutorial/treewidget
-        :type: ref
-        :text: Displaying Data Using a Tree Widget
-        :classes: btn-link btn-block stretched-link
+        Creating a Dialog Application
 
-    ---
-    :img-top: basictutorial/uifiles.png
+    .. grid-item-card:: Basic Table
+        :class-item: cover-img
+        :link: basictutorial/tablewidget.html
+        :img-top: basictutorial/tablewidget.png
 
-    .. link-button:: basictutorial/uifiles
-        :type: ref
-        :text: Using .ui files from Designer or QtCreator with QUiLoader and pyside6-uic
-        :classes: btn-link btn-block stretched-link
+        Displaying Data Using a Table Widget
 
-    ---
-    :img-top: basictutorial/player-new.png
+    .. grid-item-card:: Basic Tree
+        :class-item: cover-img
+        :link: basictutorial/treewidget.html
+        :img-top: basictutorial/treewidget.png
 
-    .. link-button:: basictutorial/qrcfiles
-        :type: ref
-        :text: Using .qrc Files (pyside6-rcc)
-        :classes: btn-link btn-block stretched-link
+        Displaying Data Using a Tree Widget
 
-    ---
-    :img-top: basictutorial/translations.png
+    .. grid-item-card:: Basic ``ui`` files
+        :class-item: cover-img
+        :link: basictutorial/uifiles.html
+        :img-top: basictutorial/uifiles.png
 
-    .. link-button:: basictutorial/translations
-        :type: ref
-        :text: Translating Applications
-        :classes: btn-link btn-block stretched-link
+        Using .ui files from Designer or QtCreator with QUiLoader and pyside6-uic
 
-    ---
-    :img-top: basictutorial/widgetstyling-yes.png
+    .. grid-item-card:: Basic ``qrc`` files
+        :class-item: cover-img
+        :link: basictutorial/qrcfiles.html
+        :img-top: basictutorial/player-new.png
 
-    .. link-button:: basictutorial/widgetstyling
-        :type: ref
-        :text: Styling the Widgets Application
-        :classes: btn-link btn-block stretched-link
+        Using .qrc Files (pyside6-rcc)
 
+    .. grid-item-card:: Basic Translations
+        :class-item: cover-img
+        :link: basictutorial/translations.html
+        :img-top: basictutorial/translations.png
+
+        Translating Applications
+
+    .. grid-item-card:: Basic Widget Style
+        :class-item: cover-img
+        :link: basictutorial/widgetstyling.html
+        :img-top: basictutorial/widgetstyling-yes.png
+
+        Styling the Widgets Application
 
 .. toctree::
     :hidden:
@@ -114,38 +106,36 @@ names and how they look like.
 Quick/QML: Basic tutorials
 --------------------------
 
-.. panels::
-    :container: container-lg pb-1
-    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
-    :img-top-cls: d-flex align-self-center
+.. grid:: 1 3 3 3
+    :gutter: 2
 
-    :img-top: basictutorial/greenapplication.png
+    .. grid-item-card:: Basic Quick
+        :class-item: cover-img
+        :link: basictutorial/qml.html
+        :img-top: basictutorial/greenapplication.png
 
-    .. link-button:: basictutorial/qml
-        :type: ref
-        :text: Your First QtQuick/QML Application
-        :classes: btn-link btn-block stretched-link
-    ---
-    :img-top: qmlintegration/textproperties_material.png
+        Your First QtQuick/QML Application
 
-    .. link-button:: qmlintegration/qmlintegration
-        :type: ref
-        :text: Python-QML integration
-        :classes: btn-link btn-block stretched-link
-    ---
-    :img-top: qmlapp/qmlapplication.png
+    .. grid-item-card:: Basic QML Integration
+        :class-item: cover-img
+        :link: qmlintegration/qmlintegration.html
+        :img-top: qmlintegration/textproperties_material.png
 
-    .. link-button:: qmlapp/qmlapplication
-        :type: ref
-        :text: QML Application Tutorial (QtCreator)
-        :classes: btn-link btn-block stretched-link
-    ---
-    :img-top: qmlsqlintegration/example_list_view.png
+        Python-QML integration
 
-    .. link-button:: qmlsqlintegration/qmlsqlintegration
-        :type: ref
-        :text: QML, SQL and PySide Integration Tutorial
-        :classes: btn-link btn-block stretched-link
+    .. grid-item-card:: QML Application
+        :class-item: cover-img
+        :link: qmlapp/qmlapplication.html
+        :img-top: qmlapp/qmlapplication.png
+
+        QML Application Tutorial (QtCreator)
+
+    .. grid-item-card:: Advanced QML Integration
+        :class-item: cover-img
+        :link: qmlsqlintegration/qmlsqlintegration.html
+        :img-top: qmlsqlintegration/example_list_view.png
+
+        QML, SQL and PySide Integration Tutorial
 
 
 .. toctree::
@@ -160,24 +150,22 @@ Quick/QML: Basic tutorials
 General Applications
 --------------------
 
-.. panels::
-    :container: container-lg pb-1
-    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
-    :img-top-cls: d-flex align-self-center
+.. grid:: 1 3 3 3
+    :gutter: 2
 
-    :img-top: datavisualize/images/datavisualization_app.png
+    .. grid-item-card:: Data Visualization
+        :class-item: cover-img
+        :link: datavisualize/index.html
+        :img-top: datavisualize/images/datavisualization_app.png
 
-    .. link-button:: datavisualize/index
-        :type: ref
-        :text: Data Visualization Tool
-        :classes: btn-link btn-block stretched-link
-    ---
-    :img-top: expenses/expenses_tool.png
+        Data Visualization Tool
 
-    .. link-button:: expenses/expenses
-        :type: ref
-        :text: Expenses Tool
-        :classes: btn-link btn-block stretched-link
+    .. grid-item-card:: Expenses Application
+        :class-item: cover-img
+        :link: expenses/expenses.html
+        :img-top: expenses/expenses_tool.png
+
+        Expenses administration tool
 
 .. toctree::
     :hidden:

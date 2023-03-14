@@ -1,39 +1,15 @@
-.btn-qt:hover,
-.btn-qt:active,
-.btn-qt:focus,
-.btn-qt.active {
-  background: var(--color-brand-primary);
-  color: #fff !important;
-  border-color: #fff;
+.text-center {
+  text-align: center !important;
 }
 
-.btn-link {
-  color: var(--color-brand-primary) !important;
-}
-
-.btn-link:hover {
-  color: #222840 !important;
-  text-decoration: underline;
-}
-
-/* Using !important is not recommended, but out CSS is being added
- * to the pages before the bootstrap ones, so we cannot override them
- * without using it */
-.btn-qt {
-  color: var(--color-brand-primary) !important;
-  border-color: var(--color-brand-primary) !important;
-  font-weight: bold !important;
-}
-.card-img-top-main {
+.text-center img {
     padding-top: 10px;
     height: 70px !important;
 }
 
-.card-img-top {
-  object-fit: contain;
-  height: 120px;
-  padding-top: 20px;
-  transform: scale(1.3, 1.3);
+.cover-img img {
+  object-fit: cover;
+  height: 50%;
 }
 
 /* Tables */
@@ -80,7 +56,7 @@ table.docutils td ul > li {
 }
 
 /* We cannot put a :download:`....` command inside
- * a sphinx-panels button, so we add some properties from the button
+ * a sphinx-design button, so we add some properties from the button
  * to the download class to mimic it */
 code.download {
   text-align: center;

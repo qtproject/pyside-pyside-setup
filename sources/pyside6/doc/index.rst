@@ -51,135 +51,151 @@ and to learn what is installed with the ``pyside6``, check the
 Documentation
 =============
 
-.. panels::
-    :body: align-items-center jutify-content-center text-center
-    :container: container-lg pb-3
-    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
-    :img-top-cls: d-flex align-self-center img-responsive card-img-top-main
+.. grid:: 1 3 3 3
+    :gutter: 2
 
-    :img-top: images/Desktop.svg
+    .. grid-item-card::
+        :img-top: images/Desktop.svg
+        :class-item: text-center
 
-    Write your first Qt application.
+        Write your first Qt application.
+        +++
+        .. button-ref:: quick-start
+            :color: primary
+            :outline:
+            :expand:
 
-    +++
+            Start here!
 
-    .. link-button:: quickstart
-        :type: ref
-        :text: Start here!
-        :classes: btn-qt btn-block stretched-link
-    ---
-    :img-top: images/Support.svg
+    .. grid-item-card::
+        :img-top: images/Support.svg
+        :class-item: text-center
 
-    Modules, docs, and cross compilation.
+        Modules, docs, and cross compilation.
+        +++
+        .. button-ref:: gettingstarted/index
+            :color: primary
+            :outline:
+            :expand:
 
-    +++
+            Build Instructions
 
-    .. link-button:: gettingstarted/index
-        :type: ref
-        :text: Build Instructions
-        :classes: btn-qt btn-block stretched-link
-    ---
-    :img-top: images/Commercial.svg
+    .. grid-item-card::
+        :img-top: images/Commercial.svg
+        :class-item: text-center
 
-    Packages, installation, and details.
+        Packages, installation, and details.
+        +++
+        .. button-ref:: commercial-page
+            :color: primary
+            :outline:
+            :expand:
 
-    +++
+            Commercial
 
-    .. link-button:: commercial-page
-        :type: ref
-        :text: Commercial
-        :classes: btn-qt btn-block stretched-link
-    ---
-    :img-top: images/Dev.svg
+    .. grid-item-card::
+        :img-top: images/Dev.svg
+        :class-item: text-center
 
-    PySide API reference.
+        PySide API reference.
+        +++
+        .. button-ref:: api
+            :color: primary
+            :outline:
+            :expand:
 
-    +++
+            API Docs
 
-    .. link-button:: api
-        :type: ref
-        :text: API Docs
-        :classes: btn-qt btn-block stretched-link
+    .. grid-item-card::
+        :img-top: images/Tutorials.svg
+        :class-item: text-center
 
-    ---
-    :img-top: images/Tutorials.svg
+        Learn with step-by-step guides.
+        +++
+        .. button-ref:: tutorials/index
+            :color: primary
+            :outline:
+            :expand:
 
-    Learn with step-by-step guides.
+            Tutorials
 
-    +++
+    .. grid-item-card::
+        :img-top: images/Examples.svg
+        :class-item: text-center
 
-    .. link-button:: tutorials/index
-        :type: ref
-        :text: Tutorials
-        :classes: btn-qt btn-block stretched-link
-    ---
-    :img-top: images/Examples.svg
+        Check all the available examples.
+        +++
+        .. button-ref:: examples/index
+            :color: primary
+            :outline:
+            :expand:
 
-    Check all the available examples.
+            Examples
 
-    +++
+    .. grid-item-card::
+        :img-top: images/Training.svg
+        :class-item: text-center
 
-    .. link-button:: examples/index
-        :type: ref
-        :text: Examples
-        :classes: btn-qt btn-block stretched-link
-    ---
-    :img-top: images/Training.svg
+        Watch webinars, talks, and more.
+        +++
+        .. button-ref:: videos
+            :color: primary
+            :outline:
+            :expand:
 
-    Watch webinars, talks, and more.
+            Videos
 
-    +++
+    .. grid-item-card::
+        :img-top: images/Deployment.svg
+        :class-item: text-center
 
-    .. link-button:: videos
-        :type: ref
-        :text: Videos
-        :classes: btn-qt btn-block stretched-link
+        Learn to deploy your applications.
+        +++
+        .. button-ref:: deployment-guides
+            :color: primary
+            :outline:
+            :expand:
 
-    ---
-    :img-top: images/Deployment.svg
+            Deployment
 
-    Learn to deploy your applications.
+    .. grid-item-card::
+        :img-top: images/cpp_python.svg
+        :class-item: text-center
 
-    +++
+        Generate C++ to Python bindings.
+        +++
+        .. button-link:: shiboken6/index.html
+            :color: primary
+            :outline:
+            :expand:
 
-    .. link-button:: deployment-guides
-        :type: ref
-        :text: Deployment
-        :classes: btn-qt btn-block stretched-link
-    ---
-    :img-top: images/cpp_python.svg
+            Shiboken
 
-    Generate C++ to Python bindings.
+    .. grid-item-card::
+        :img-top: images/stopwatch.svg
+        :class-item: text-center
 
-    +++
+        API differences and known issues.
+        +++
+        .. button-ref:: considerations
+            :color: primary
+            :outline:
+            :expand:
 
-    .. link-button:: shiboken6/index.html
-        :text: Shiboken
-        :classes: btn-qt btn-block stretched-link
+            Considerations
 
-    ---
-    :img-top: images/stopwatch.svg
+    .. grid-item-card::
+        :img-top: images/Development.svg
+        :class-item: text-center
 
-    API differences and known issues.
+        Notes for Developers.
+        +++
+        .. button-ref:: developer-notes
+            :color: primary
+            :outline:
+            :expand:
 
-    +++
-
-    .. link-button:: considerations
-        :type: ref
-        :text: Considerations
-        :classes: btn-qt btn-block stretched-link
-    ---
-    :img-top: images/Development.svg
-
-    Notes for Developers.
-
-    +++
-
-    .. link-button:: developer-notes
-        :type: ref
-        :text: Developers
-        :classes: btn-qt btn-block stretched-link
-
+            Developers
 
 
 We have also a `wiki page`_ where you can find how to report bugs, contribute or contact the community.

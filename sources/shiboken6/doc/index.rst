@@ -25,73 +25,80 @@ Shiboken
 Documentation
 =============
 
-.. panels::
-    :body: text-center
-    :container: container-lg pb-3
-    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
+.. grid:: 1 3 3 3
+    :gutter: 2
 
-    Install and build from source.
+    .. grid-item-card::
+        :class-item: text-center
 
-    +++
+        Install and build from source.
+        +++
+        .. button-ref:: gettingstarted
+            :color: primary
+            :outline:
+            :expand:
 
-    .. link-button:: gettingstarted
-        :type: ref
-        :text: Getting Started
-        :classes: btn-qt btn-block stretched-link
-    ---
+            Getting Started
 
-    Binding generator executable.
+    .. grid-item-card::
+        :class-item: text-center
 
-    +++
+        Binding generator executable.
+        +++
+        .. button-ref:: shibokengenerator
+            :color: primary
+            :outline:
+            :expand:
 
-    .. link-button:: shibokengenerator
-        :type: ref
-        :text: Shiboken Generator
-        :classes: btn-qt btn-block stretched-link
-    ---
+            Shiboken Generator
 
-    Python utility module.
+    .. grid-item-card::
+        :class-item: text-center
 
-    +++
+        Python utility module.
+        +++
+        .. button-ref:: shibokenmodule
+            :color: primary
+            :outline:
+            :expand:
 
-    .. link-button:: shibokenmodule
-        :type: ref
-        :text: Shiboken Module
-        :classes: btn-qt btn-block stretched-link
+            Shiboken Module
 
-    ---
+    .. grid-item-card::
+        :class-item: text-center
 
-    Reference and functionallities.
+        Reference and functionallities.
+        +++
+        .. button-ref:: typesystem
+            :color: primary
+            :outline:
+            :expand:
 
-    +++
+            Type System
 
-    .. link-button:: typesystem
-        :type: ref
-        :text: Type System
-        :classes: btn-qt btn-block stretched-link
+    .. grid-item-card::
+        :class-item: text-center
 
-    ---
+        Using Shiboken.
+        +++
+        .. button-ref:: examples/index
+            :color: primary
+            :outline:
+            :expand:
 
-    Using Shiboken.
+            Examples
 
-    +++
+    .. grid-item-card::
+        :class-item: text-center
 
-    .. link-button:: examples/index
-        :type: ref
-        :text: Examples
-        :classes: btn-qt btn-block stretched-link
+        Known issues and FAQ.
+        +++
+        .. button-ref:: considerations
+            :color: primary
+            :outline:
+            :expand:
 
-    ---
-
-    Known issues and FAQ.
-
-    +++
-
-    .. link-button:: considerations
-        :type: ref
-        :text: Considerations
-        :classes: btn-qt btn-block stretched-link
-
+            Considerations
 
 .. toctree::
    :hidden:

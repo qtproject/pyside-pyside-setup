@@ -1,4 +1,4 @@
-. module:: shiboken
+.. module:: shiboken
 
 .. |maya| unicode:: Maya U+2122
 

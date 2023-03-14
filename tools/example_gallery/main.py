@@ -65,9 +65,8 @@ def get_module_gallery(examples):
     """
 
     gallery = (
-        ".. panels::\n"
-        f"{ind(1)}:container: container-lg pb-3\n"
-        f"{ind(1)}:column: col-lg-3 col-md-6 col-sm-6 col-xs-12 p-2\n\n"
+        ".. grid:: 1 4 4 4\n"
+        f"{ind(1)}:gutter: 2\n\n"
     )
 
     # Iteration per rows
@@ -81,29 +80,21 @@ def get_module_gallery(examples):
             underline += f'/{e["extra"]}'
 
         if i > 0:
-            gallery += f"{ind(1)}---\n"
-        elif e["img_doc"]:
-            gallery += f"{ind(1)}---\n"
-
+            gallery += "\n"
         if e["img_doc"]:
             img_name = e['img_doc'].name
         else:
             img_name = "../example_no_image.png"
 
-        gallery += f"{ind(1)}:img-top: {img_name}\n"
-        gallery += f"{ind(1)}:img-top-cls: + d-flex align-self-center\n\n"
-
         # Fix long names
         if name.startswith("chapter"):
             name = name.replace("chapter", "c")
 
-        gallery += f"{ind(1)}`{name} <{url}>`_\n"
-        gallery += f"{ind(1)}+++\n"
-        gallery += f"{ind(1)}{underline}\n"
-        gallery += f"\n{ind(1)}.. link-button:: {url}\n"
-        gallery += f"{ind(2)}:type: url\n"
-        gallery += f"{ind(2)}:text: Go to Example\n"
-        gallery += f"{ind(2)}:classes: btn-qt btn-block stretched-link\n"
+        gallery += f"{ind(1)}.. grid-item-card:: {name}\n"
+        gallery += f"{ind(2)}:class-item: cover-img\n"
+        gallery += f"{ind(2)}:link: {url}\n"
+        gallery += f"{ind(2)}:img-top: {img_name}\n\n"
+        gallery += f"{ind(2)}found in the ``{underline}`` directory.\n"
 
     return f"{gallery}\n"
 
@@ -149,14 +140,17 @@ def get_code_tabs(files, project_dir):
     content += f":download:`Download this example <{zip_name}>`\n\n"
 
     for i, project_file in enumerate(files):
+        if i == 0:
+            content += ".. tab-set::\n\n"
+
         pfile = Path(project_file)
         if pfile.suffix in (".jpg", ".pdf", ".png", ".pyc", ".svg", ".svgz"):
             continue
 
-        content += f".. tabbed:: {project_file}\n\n"
+        content += f"{ind(1)}.. tab-item:: {project_file}\n\n"
 
         lexer = get_lexer(pfile)
-        content += add_indent(f".. code-block:: {lexer}", 1)
+        content += add_indent(f"{ind(1)}.. code-block:: {lexer}", 1)
         content += "\n"
 
         _path = project_dir / project_file
@@ -173,7 +167,7 @@ def get_code_tabs(files, project_dir):
                   file=sys.stderr)
             raise
 
-        content += add_indent(_file_content, 2)
+        content += add_indent(_file_content, 3)
         content += "\n\n"
     return content
 
@@ -322,19 +316,16 @@ if __name__ == "__main__":
 
     base_content = dedent(
         """\
-    ..
-        This file was auto-generated from the 'pyside-setup/tools/example_gallery'
-        All editions in this file will be lost.
-
-    |project| Examples
-    ===================
+   Examples
+   ========
 
     A collection of examples are provided with |project| to help new users
     to understand different use cases of the module.
 
-    You can find all these examples inside the ``pyside-setup`` repository
-    on the ``examples`` directory.
-
+    You can find all these examples inside the
+    `pyside-setup <https://code.qt.io/cgit/pyside/pyside-setup.git/>`_ repository
+    on the `examples <https://code.qt.io/cgit/pyside/pyside-setup.git/tree/examples>`_
+    directory.
        """
     )
 

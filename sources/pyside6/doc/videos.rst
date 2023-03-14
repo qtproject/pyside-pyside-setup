@@ -6,205 +6,144 @@ Videos
 Tutorials
 ---------
 
-.. panels::
-    :body: align-items-center justify-content-center text-center
-    :container: container-lg pb-3
-    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
-    :img-top-cls: d-flex align-self-center img-responsive card-img-top-main
+.. grid:: 1 3 3 3
+    :gutter: 2
 
-    Resources overview
-    ^^^^^^^^^^^^^^^^^^
-    .. raw:: html
+    .. grid-item-card:: Resources overview
+        :img-top: https://img.youtube.com/vi/sywLvidNkbw/mqdefault.jpg
+        :link: https://www.youtube.com/embed/sywLvidNkbw
 
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/sywLvidNkbw" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
-    ---
+    .. grid-item-card:: Repository overview
+        :img-top: https://img.youtube.com/vi/RP0K1B7fqMs/mqdefault.jpg
+        :link: https://www.youtube.com/embed/RP0K1B7fqMs
 
-    Repository overview
-    ^^^^^^^^^^^^^^^^^^^
+    .. grid-item-card:: Shiboken overview
+        :img-top: https://img.youtube.com/vi/RUwV_sx_gBM/mqdefault.jpg
+        :link: https://www.youtube.com/embed/RUwV_sx_gBM
 
-    .. raw:: html
+    .. grid-item-card:: Tutorial
+        :img-top: https://img.youtube.com/vi/Cqo0-EQmy1Q/mqdefault.jpg
+        :link: https://www.youtube.com/embed/Cqo0-EQmy1Q
 
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/RP0K1B7fqMs" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
-    ---
+        How to create a simple Qt Widgets app with PySide6
 
-    Shiboken overview
-    ^^^^^^^^^^^^^^^^^
+    .. grid-item-card:: Tutorial
+        :img-top: https://img.youtube.com/vi/JxfiUx60Mbg/mqdefault.jpg
+        :link: https://www.youtube.com/embed/JxfiUx60Mbg
 
-    .. raw:: html
+        Making a QML Application in Python
 
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/RUwV_sx_gBM" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
+    .. grid-item-card:: Tutorial
+        :img-top: https://img.youtube.com/vi/i-utZN_NP6c/mqdefault.jpg
+        :link: https://www.youtube.com/embed/i-utZN_NP6c
+
+        How  to install PySide6 on a new virtual environment
+
 
 Community events
 ----------------
 
-.. panels::
-    :body: align-items-center justify-content-center text-center
-    :container: container-lg pb-3
-    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
-    :img-top-cls: d-flex align-self-center img-responsive card-img-top-main
+.. grid:: 1 3 3 3
+    :gutter: 2
 
-    Akademy 2021: Qt for Python
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    .. grid-item-card:: Akademy 2021
+        :img-top: https://img.youtube.com/vi/Ftm68AzYvr8/mqdefault.jpg
+        :link: https://www.youtube.com/embed/Ftm68AzYvr8
 
-    .. raw:: html
-
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/Ftm68AzYvr8" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
-
+        Qt for Python
 
 Webinars
 --------
 
-.. panels::
-    :body: align-items-center justify-content-center text-center
-    :container: container-lg pb-3
-    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
-    :img-top-cls: d-flex align-self-center img-responsive card-img-top-main
+.. grid:: 1 3 3 3
+    :gutter: 2
 
-    How your Python projects can benefit from Qt
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    .. grid-item-card:: Online Webinar
+        :img-top: https://img.youtube.com/vi/eqHveQ5JTZU/mqdefault.jpg
+        :link: https://www.youtube.com/embed/eqHveQ5JTZU
 
-    .. raw:: html
+        How your Python projects can benefit from Qt
 
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/eqHveQ5JTZU" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
+    .. grid-item-card:: Online Webinar
+        :img-top: https://img.youtube.com/vi/wOMlDutOWXI/mqdefault.jpg
+        :link: https://www.youtube.com/embed/wOMlDutOWXI
 
-    ---
+        Interoperability of Python and C++ using Shiboken
 
-    Interoperability of Python and C++ using Shiboken
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    .. grid-item-card:: Online Webinar
+        :img-top: https://img.youtube.com/vi/HDBjmSiOBxY/mqdefault.jpg
+        :link: https://www.youtube.com/embed/HDBjmSiOBxY
 
-    .. raw:: html
+        Developing your first Qt for Python application
 
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/wOMlDutOWXI" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
+    .. grid-item-card:: Online Webinar
+        :img-top: https://img.youtube.com/vi/wKqLaNqxgas/mqdefault.jpg
+        :link: https://www.youtube.com/embed/wKqLaNqxgas
 
-    ---
-
-    Developing your first Qt for Python application
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    .. raw:: html
-
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/HDBjmSiOBxY" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
-
-    ---
-
-    Creating user interfaces with Qt for Python
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    .. raw:: html
-
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/wKqLaNqxgas" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
+        Creating user interfaces with Qt for Python
 
 Conferences
 -----------
 
-.. panels::
-    :body: align-items-center justify-content-center text-center
-    :container: container-lg pb-3
-    :column: col-lg-4 col-md-4 col-sm-6 col-xs-12 p-2
-    :img-top-cls: d-flex align-self-center img-responsive card-img-top-main
+.. grid:: 1 3 3 3
+    :gutter: 2
 
-    Boosting Projects with Python
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    .. grid-item-card:: QtWS 2022
+        :img-top: https://img.youtube.com/vi/8wcdN1Iw1Uk/mqdefault.jpg
+        :link: https://www.youtube.com/embed/8wcdN1Iw1Uk
 
-    .. raw:: html
+        5 Reasons Why You Should Use the Latest Qt for Python
 
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/SylgpRc-Lrg" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
+    .. grid-item-card:: QtDeCon 2022
+        :img-top: https://img.youtube.com/vi/ZUNg19OlDeE/mqdefault.jpg
+        :link: https://www.youtube.com/embed/ZUNg19OlDeE
 
-    ---
+        Hybrid Qt Development: Boosting Your Projects with Python
 
-    Prototypes to Hybrid Applications
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    .. grid-item-card:: QtWS 2021
+        :img-top: https://img.youtube.com/vi/SylgpRc-Lrg/mqdefault.jpg
+        :link: https://www.youtube.com/embed/SylgpRc-Lrg
 
-    .. raw:: html
+        Hybrid Qt Development: boosting Projects with Python
 
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/Vb1dbLQafyM" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
+    .. grid-item-card:: QtWS 2020
+        :img-top: https://img.youtube.com/vi/Vb1dbLQafyM/mqdefault.jpg
+        :link: https://www.youtube.com/embed/Vb1dbLQafyM
 
-    ---
+        Prototypes to Hybrid Applications
 
-    Using Shiboken to Enhance Application
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    .. grid-item-card:: QtWS 2019
+        :img-top: https://img.youtube.com/vi/mAfEVPgHRt8/mqdefault.jpg
+        :link: https://www.youtube.com/embed/mAfEVPgHRt8
 
-    .. raw:: html
+        Using Shiboken to Enhance Application
 
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/mAfEVPgHRt8" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
+    .. grid-item-card:: QtWS 2019
+        :img-top: https://img.youtube.com/vi/214TWASZVgA/mqdefault.jpg
+        :link: https://www.youtube.com/embed/214TWASZVgA
 
-    ---
+        Intro to Qt for Python
 
-    Intro to Qt for Python
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    .. grid-item-card:: QtWS 2019
+        :img-top: https://img.youtube.com/vi/XmY-tWTi9gY/mqdefault.jpg
+        :link: https://www.youtube.com/embed/XmY-tWTi9gY
 
-    .. raw:: html
+        Using C++ project in Python
 
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/214TWASZVgA" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
+    .. grid-item-card:: QtWS 2019
+        :img-top: https://img.youtube.com/vi/rRDoToEOlbY/mqdefault.jpg
+        :link: https://www.youtube.com/embed/rRDoToEOlbY
 
-    ---
+        Using Qt for Python for embedded system development
 
-    Using C++ project in Python
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    .. grid-item-card:: QtWS 2018
+        :img-top: https://img.youtube.com/vi/IhxZ99usPqY/mqdefault.jpg
+        :link: https://www.youtube.com/embed/IhxZ99usPqY
 
-    .. raw:: html
+        Qt for Python in 20 min
 
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/XmY-tWTi9gY" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
+    .. grid-item-card:: QtWS 2017
+        :img-top: https://img.youtube.com/vi/Sb4FV6SdHHQ/mqdefault.jpg
+        :link: https://www.youtube.com/embed/Sb4FV6SdHHQ
 
-    ---
-
-    Qt for Python in 20 min
-    ^^^^^^^^^^^^^^^^^^^^^^^
-
-    .. raw:: html
-
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/IhxZ99usPqY" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
-
-    ---
-
-    A walk to PySide
-    ^^^^^^^^^^^^^^^^
-
-    .. raw:: html
-
-      <div class='embed-container'>
-        <iframe width="175" height="195" src="https://www.youtube.com/embed/Sb4FV6SdHHQ" frameborder="0" allowfullscreen>
-        </iframe>
-      </div>
+        A walk to PySide
