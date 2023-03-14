@@ -1,0 +1,10 @@
+{
+    "files": ["datasource.py",
+              "main.py",
+              "qmlsurfacegallery.qrc",
+              "qml/qmlsurfacegallery/SpectrogramData.qml",
+              "qml/qmlsurfacegallery/SurfaceHeightMap.qml",
+              "qml/qmlsurfacegallery/SurfaceOscilloscope.qml",
+              "qml/qmlsurfacegallery/SurfaceSpectrogram.qml",
+              "qml/qmlsurfacegallery/main.qml"]
+}

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/qmlsurfacegallery/heightmap.png</file>
+    </qresource>
+</RCC>
