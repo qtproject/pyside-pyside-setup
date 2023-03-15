@@ -5,6 +5,7 @@ import sys
 import os
 import logging
 from importlib import util
+from importlib_metadata import version
 from pathlib import Path
 
 from . import Nuitka, run_command, Config
@@ -51,20 +52,38 @@ class PythonExecutable:
             logging.info("[DEPLOY] You are already in virtual environment!")
 
     def install(self, packages: list = None):
-        if packages:
-            for package in packages:
-                if not self.is_installed(package=package):
-                    logging.info(f"[DEPLOY] Installing package: {package}")
+        for package in packages:
+            package_info = package.split('==')
+            package_components_len = len(package_info)
+            package_name, package_version = None, None
+            if package_components_len == 1:
+                package_name = package_info[0]
+            elif package_components_len == 2:
+                package_name = package_info[0]
+                package_version = package_info[1]
+            else:
+                raise ValueError(f"{package} should be of the format 'package_name'=='version'")
+
+            if not self.is_installed(package=package_name):
+                logging.info(f"[DEPLOY] Installing package: {package}")
+                run_command(
+                    command=[self.exe, "-m", "pip", "install", package],
+                    dry_run=self.dry_run,
+                )
+            elif package_version:
+                installed_version = version(package_name)
+                if package_version != installed_version:
+                    logging.info(f"[DEPLOY] Installing package: {package_name}"
+                                 f"version: {package_version}")
                     run_command(
-                        command=[self.exe, "-m", "pip", "install", package],
+                        command=[self.exe, "-m", "pip", "install", "--force", package],
                         dry_run=self.dry_run,
                     )
                 else:
-                    logging.info(f"[DEPLOY] Upgrading package: {package}")
-                    run_command(
-                        command=[self.exe, "-m", "pip", "install", "--upgrade", package],
-                        dry_run=self.dry_run,
-                    )
+                    logging.info(f"[DEPLOY] package: {package_name}=={package_version}"
+                                 "already installed")
+            else:
+                logging.info(f"[DEPLOY] package: {package_name} already installed")
 
     def is_installed(self, package):
         return bool(util.find_spec(package))
