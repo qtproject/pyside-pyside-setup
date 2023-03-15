@@ -323,17 +323,23 @@ PyObject *BindingManager::getOverride(const void *cptr,
         PyObject *mro = Py_TYPE(wrapper)->tp_mro;
 
         int size = PyTuple_GET_SIZE(mro);
+        bool defaultFound = false;
         // The first class in the mro (index 0) is the class being checked and it should not be tested.
         // The last class in the mro (size - 1) is the base Python object class which should not be tested also.
         for (int idx = 1; idx < size - 1; ++idx) {
             auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
             if (parent->tp_dict) {
                 defaultMethod = PyDict_GetItem(parent->tp_dict, pyMethodName);
-                if (defaultMethod && function != defaultMethod)
-                    return method;
+                if (defaultMethod) {
+                    defaultFound = true;
+                    if (function != defaultMethod)
+                        return method;
+                }
             }
         }
-
+        // PYSIDE-2255: If no default method was found, use the method.
+        if (!defaultFound)
+            return method;
         Py_DECREF(method);
     }
 
