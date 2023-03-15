@@ -1,7 +1,7 @@
 # Copyright (C) 2023 The Qt Company Ltd.
+# SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 """PySide6 port of the Qt DataVisualization graphgallery example from Qt v6.x"""
-# SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import os
 import sys
