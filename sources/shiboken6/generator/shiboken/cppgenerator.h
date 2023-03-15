@@ -168,6 +168,10 @@ private:
 
     static void writeErrorSection(TextStream &s, const OverloadData &overloadData,
                                   ErrorReturn errorReturn);
+
+    static QString returnErrorWrongArguments(const OverloadData &overloadData,
+                                             ErrorReturn errorReturn);
+
     static void writeFunctionReturnErrorCheckSection(TextStream &s,
                                                      ErrorReturn errorReturn,
                                                      bool hasReturnValue = true);
@@ -272,7 +276,8 @@ private:
      *   \param s text stream to write
      *   \param overloadData the overload data describing all the possible overloads for the function/method
      */
-    void writeOverloadedFunctionDecisor(TextStream &s, const OverloadData &overloadData) const;
+    void writeOverloadedFunctionDecisor(TextStream &s, const OverloadData &overloadData,
+                                        ErrorReturn errorReturn) const;
     /// Recursive auxiliar method to the other writeOverloadedFunctionDecisor.
     void writeOverloadedFunctionDecisorEngine(TextStream &s,
                                               const OverloadData &overloadData,
@@ -355,7 +360,8 @@ private:
                                               const QString &isConvertibleFunc);
 
     void writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                                      bool usePyArgs, const OverloadData &overloadData) const;
+                                      bool usePyArgs, const OverloadData &overloadData,
+                                      ErrorReturn errorReturn) const;
 
     /// Returns a string containing the name of an argument for the given function and argument index.
     static QString argumentNameFromIndex(const ApiExtractorResult &api,
@@ -439,9 +445,6 @@ private:
     void writeRichCompareFunctionHeader(TextStream &s,
                                         const QString &baseName,
                                         const GeneratorContext &context) const;
-    static void writeRichCompareFunctionFooter(TextStream &s,
-                                               const QString &baseName,
-                                               bool writeLabel);
     void writeRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
     void writeSmartPointerRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
 

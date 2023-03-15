@@ -130,10 +130,27 @@ void callCppDestructor(void *cptr)
     delete reinterpret_cast<T *>(cptr);
 }
 
-// setErrorAboutWrongArguments now gets overload information from the signature module.
-// The extra info argument can contain additional data about the error.
+/// setErrorAboutWrongArguments now gets overload information from the signature module.
+/// The extra info argument can contain additional data about the error.
 LIBSHIBOKEN_API void setErrorAboutWrongArguments(PyObject *args, const char *funcName,
                                                  PyObject *info);
+
+/// Return values for the different retun variants.
+/// This is used instead of goto.
+LIBSHIBOKEN_API PyObject *returnWrongArguments(PyObject *args, const char *funcName,
+                                               PyObject *info);
+
+LIBSHIBOKEN_API int returnWrongArguments_Zero(PyObject *args, const char *funcName,
+                                                    PyObject *info);
+
+LIBSHIBOKEN_API int returnWrongArguments_MinusOne(PyObject *args, const char *funcName,
+                                                        PyObject *info);
+
+LIBSHIBOKEN_API void returnWrongArguments_Void(PyObject *args, const char *funcName,
+                                                    PyObject *info);
+
+/// A simple special version for the end of rich comparison.
+LIBSHIBOKEN_API PyObject *returnFromRichCompare(PyObject *result);
 
 // Return error information object if the argument count is wrong
 LIBSHIBOKEN_API PyObject *checkInvalidArgumentCount(Py_ssize_t numArgs,

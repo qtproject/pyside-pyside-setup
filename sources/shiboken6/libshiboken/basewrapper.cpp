@@ -7,6 +7,7 @@
 #include "helper.h"
 #include "sbkconverter.h"
 #include "sbkenum.h"
+#include "sbkerrors.h"
 #include "sbkfeature_base.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
@@ -752,6 +753,32 @@ void initShibokenSupport(PyObject *module)
 void setErrorAboutWrongArguments(PyObject *args, const char *funcName, PyObject *info)
 {
     SetError_Argument(args, funcName, info);
+}
+
+PyObject *returnWrongArguments(PyObject *args, const char *funcName, PyObject *info)
+{
+    setErrorAboutWrongArguments(args, funcName, info);
+    return {};
+}
+
+int returnWrongArguments_Zero(PyObject *args, const char *funcName, PyObject *info)
+{
+    setErrorAboutWrongArguments(args, funcName, info);
+    return 0;
+}
+
+int returnWrongArguments_MinusOne(PyObject *args, const char *funcName, PyObject *info)
+{
+    setErrorAboutWrongArguments(args, funcName, info);
+    return -1;
+}
+
+PyObject *returnFromRichCompare(PyObject *result)
+{
+    if (result && !PyErr_Occurred())
+        return result;
+    Shiboken::Errors::setOperatorNotImplemented();
+    return {};
 }
 
 PyObject *checkInvalidArgumentCount(Py_ssize_t numArgs, Py_ssize_t minArgs, Py_ssize_t maxArgs)

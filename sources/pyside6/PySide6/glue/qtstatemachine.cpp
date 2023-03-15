@@ -39,8 +39,9 @@ if (PySide::SignalManager::registerMetaMethod(%1, signalName.constData(),
 // since it refers to a name very tied to the generator implementation.
 // Check bug #362 for more information on this
 // http://bugs.openbossa.org/show_bug.cgi?id=362
+// PYSIDE-2256: The label was removed
 if (!PyObject_TypeCheck(%1, PySideSignalInstance_TypeF()))
-    goto Sbk_%TYPEFunc_%FUNCTION_NAME_TypeError;
+    return Shiboken::returnWrongArguments(args, fullName, errInfo);
 PySideSignalInstance *signalInstance = reinterpret_cast<PySideSignalInstance *>(%1);
 auto sender = %CONVERTTOCPP[QObject *](PySide::Signal::getObject(signalInstance));
 QSignalTransition *%0 = %CPPSELF->%FUNCTION_NAME(sender, PySide::Signal::getSignature(signalInstance),%2);

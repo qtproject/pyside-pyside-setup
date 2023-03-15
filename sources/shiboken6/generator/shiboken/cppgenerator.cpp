@@ -2387,7 +2387,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     s << '\n';
 
     if (overloadData.maxArgs() > 0)
-        writeOverloadedFunctionDecisor(s, overloadData);
+        writeOverloadedFunctionDecisor(s, overloadData, errorReturn);
 
     writeFunctionCalls(s, overloadData, classContext, errorReturn);
     s << '\n';
@@ -2399,7 +2399,9 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
         <<  indent << "delete cptr;\n" << errorReturn << outdent
         << "}\n";
     if (overloadData.maxArgs() > 0)
-        s << "if (!cptr) goto " << cpythonFunctionName(rfunc) << "_TypeError;\n\n";
+        s << "if (!cptr)\n" << indent
+            << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n\n"
+            << outdent;
 
     s << "Shiboken::Object::setValidCpp(sbkSelf, true);\n";
     // If the created C++ object has a C++ wrapper the ownership is assigned to Python
@@ -2422,7 +2424,8 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
             << "metaObject = cptr->metaObject(); // <- init python qt properties\n"
             << "if (!errInfo.isNull() && PyDict_Check(errInfo.object())) {\n" << indent
                 << "if (!PySide::fillQtProperties(self, metaObject, errInfo))\n" << indent
-                    << "goto " << cpythonFunctionName(rfunc) << "_TypeError;\n" << outdent << outdent
+                    << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n"
+                    << outdent << outdent
             << "};\n";
     }
 
@@ -2460,8 +2463,6 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     }
 
     s << "\n\nreturn 1;\n";
-    if (needsArgumentErrorHandling(overloadData))
-        writeErrorSection(s, overloadData, errorReturn);
     s<< outdent << "}\n\n";
 }
 
@@ -2525,12 +2526,12 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
             << "// Do not enter here if other object has implemented a reverse operator.\n"
             << "if (!" << PYTHON_RETURN_VAR << ") {\n" << indent;
         if (maxArgs > 0)
-            writeOverloadedFunctionDecisor(s, overloadData);
+            writeOverloadedFunctionDecisor(s, overloadData, ErrorReturn::Default);
         writeFunctionCalls(s, overloadData, classContext, ErrorReturn::Default);
         s  << outdent << '\n' << "} // End of \"if (!" << PYTHON_RETURN_VAR << ")\"\n";
     } else { // binary shift operator
         if (maxArgs > 0)
-            writeOverloadedFunctionDecisor(s, overloadData);
+            writeOverloadedFunctionDecisor(s, overloadData, ErrorReturn::Default);
         writeFunctionCalls(s, overloadData, classContext, ErrorReturn::Default);
     }
 
@@ -2548,9 +2549,6 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
     } else {
         s << "Py_RETURN_NONE;\n";
     }
-
-    if (needsArgumentErrorHandling(overloadData))
-        writeErrorSection(s, overloadData, ErrorReturn::Default);
 
     s<< outdent << "}\n\n";
 }
@@ -2596,7 +2594,8 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
         s << "errInfo.reset(Shiboken::checkInvalidArgumentCount(numArgs, "
             <<  minArgs << ", " << maxArgs << "));\n"
             << "if (!errInfo.isNull())\n" << indent
-            << "goto " << cpythonFunctionName(rfunc) << "_TypeError;\n" << outdent;
+            << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n"
+            << outdent;
     }
 
     const QList<int> invalidArgsLength = overloadData.invalidArgumentLengths();
@@ -2608,7 +2607,8 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
             s << "numArgs == " << invalidArgsLength.at(i);
         }
         s << ")\n" << indent
-            << "goto " << cpythonFunctionName(rfunc) << "_TypeError;\n" << outdent;
+            << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n"
+            << outdent;
     }
     s  << '\n';
 
@@ -2747,15 +2747,21 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
     writeCppSelfDefinition(s, context, errorReturn, flags);
 }
 
-void CppGenerator::writeErrorSection(TextStream &s, const OverloadData &overloadData,
-                                     ErrorReturn errorReturn)
+QString CppGenerator::returnErrorWrongArguments(const OverloadData &overloadData,
+                                                       ErrorReturn errorReturn)
 {
     const auto rfunc = overloadData.referenceFunction();
     QString argsVar = overloadData.pythonFunctionWrapperUsesListOfArguments()
         ? u"args"_s : PYTHON_ARG;
-    s << '\n' << cpythonFunctionName(rfunc) << "_TypeError:\n" << indent
-        << "Shiboken::setErrorAboutWrongArguments(" << argsVar << ", fullName, errInfo);\n"
-        << errorReturn << outdent;
+    switch (errorReturn) {
+    case ErrorReturn::Default:
+        return u"Shiboken::returnWrongArguments("_s + argsVar + u", fullName, errInfo)"_s;
+    case ErrorReturn::Zero:
+        return u"Shiboken::returnWrongArguments_Zero("_s + argsVar + u", fullName, errInfo)"_s;
+    case ErrorReturn::MinusOne:
+        return u"Shiboken::returnWrongArguments_MinusOne("_s + argsVar + u", fullName, errInfo)"_s;
+    }
+    return QString();
 }
 
 void CppGenerator::writeFunctionReturnErrorCheckSection(TextStream &s,
@@ -3143,7 +3149,9 @@ void CppGenerator::writeNoneReturn(TextStream &s, const AbstractMetaFunctionCPtr
     }
 }
 
-void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s, const OverloadData &overloadData) const
+void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s,
+                                                  const OverloadData &overloadData,
+                                                  ErrorReturn errorReturn) const
 {
     s << "// Overloaded function decisor\n";
     const auto rfunc = overloadData.referenceFunction();
@@ -3170,8 +3178,9 @@ void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s, const OverloadD
     }
 
     s << "// Function signature not found.\n"
-        << "if (overloadId == -1) goto "
-        << cpythonFunctionName(overloadData.referenceFunction()) << "_TypeError;\n\n";
+        << "if (overloadId == -1)\n" << indent
+            << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n\n"
+            << outdent;
 }
 
 void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
@@ -3386,7 +3395,7 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
     const bool usePyArgs = overloadData.pythonFunctionWrapperUsesListOfArguments();
 
     // Handle named arguments.
-    writeNamedArgumentResolution(s, func, usePyArgs, overloadData);
+    writeNamedArgumentResolution(s, func, usePyArgs, overloadData, errorReturn);
 
     bool injectCodeCallsFunc = injectedCodeCallsCppFunction(context, func);
     bool mayHaveUnunsedArguments = !func->isUserAdded() && func->hasInjectedCode() && injectCodeCallsFunc;
@@ -3781,7 +3790,8 @@ static bool forceQObjectNamedArguments(const AbstractMetaFunctionCPtr &func)
 }
 
 void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                                                bool usePyArgs, const OverloadData &overloadData) const
+                                                bool usePyArgs, const OverloadData &overloadData,
+                                                ErrorReturn errorReturn) const
 {
     const AbstractMetaArgumentList &args = OverloadData::getArgumentsWithDefaultValues(func);
     const bool hasDefaultArguments = !args.isEmpty();
@@ -3793,7 +3803,7 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
             s << "if (kwds && PyDict_Size(kwds) > 0) {\n" << indent
                 << "errInfo.reset(kwds);\n"
                 << "Py_INCREF(errInfo.object());\n"
-                << "goto " << cpythonFunctionName(func) << "_TypeError;\n"
+                << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n"
                 << outdent << "}\n";
         }
         return;
@@ -3817,14 +3827,14 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
             << "if (value && " << pyArgName << ") {\n" << indent
             << "errInfo.reset(" << pyKeyName << ");\n"
             << "Py_INCREF(errInfo.object());\n"
-            << "goto " << cpythonFunctionName(func) << "_TypeError;\n"
+            << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n"
             << outdent << "}\nif (value) {\n" << indent
             << pyArgName << " = value;\nif (!";
         const auto &type = arg.modifiedType();
         writeTypeCheck(s, type, pyArgName, isNumber(type.typeEntry()), {});
         s << ")\n" << indent
-            << "goto " << cpythonFunctionName(func) << "_TypeError;\n" << outdent
-            << outdent
+            << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n"
+            << outdent << outdent
             << "}\nPyDict_DelItem(kwds_dup, " << pyKeyName << ");\n"
             << outdent << "}\n";
     }
@@ -3835,7 +3845,7 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMet
     s << "if (PyDict_Size(kwds_dup) > 0) {\n" << indent
         << "errInfo.reset(kwds_dup.release());\n";
     if (!(func->isConstructor() && isQObject(func->ownerClass())))
-        s << "goto " << cpythonFunctionName(func) << "_TypeError;\n";
+        s << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n";
     else
         s << "// fall through to handle extra keyword signals and properties\n";
     s << outdent << "}\n"
@@ -5307,7 +5317,6 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
     s << "switch (op) {\n" << indent;
     const QList<AbstractMetaFunctionCList> &groupedFuncs =
         filterGroupedOperatorFunctions(metaClass, OperatorQueryOption::ComparisonOp);
-    bool needErrorLabel = false;
     for (const AbstractMetaFunctionCList &overloads : groupedFuncs) {
         const auto rfunc = overloads[0];
 
@@ -5353,7 +5362,6 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
                                    TypeSystem::TargetLangCode, func,
                                    false /* uses PyArgs */, &func->arguments().constLast());
                     generateOperatorCode = false;
-                    needErrorLabel |= std::any_of(snips.cbegin(), snips.cend(), containsGoto);
                 }
             }
             if (generateOperatorCode) {
@@ -5387,8 +5395,8 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
                 << (op == AbstractMetaFunction::OperatorEqual ? "Py_False" : "Py_True") << ";\n"
                 << "Py_INCREF(" << PYTHON_RETURN_VAR << ");\n" << outdent;
         } else {
-            s << indent << "goto " << baseName << "_RichComparison_TypeError;\n" << outdent;
-            needErrorLabel = true;
+            s << indent << "return Shiboken::returnFromRichCompare("
+                << PYTHON_RETURN_VAR << ");\n" << outdent;
         }
         s << "}\n\n";
 
@@ -5397,21 +5405,9 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
     s << "default:\n" << indent
         << richCompareComment
         << "return FallbackRichCompare(self, " << PYTHON_ARG << ", op);\n"
-        << outdent << outdent << "}\n\n";
-
-    writeRichCompareFunctionFooter(s, baseName, needErrorLabel);
-}
-
-void CppGenerator::writeRichCompareFunctionFooter(TextStream &s,
-                                                  const QString &baseName,
-                                                  bool writeErrorLabel)
-{
-    s << "if (" << PYTHON_RETURN_VAR << " && !PyErr_Occurred())\n" << indent
-        << "return " << PYTHON_RETURN_VAR << ";\n" << outdent;
-    if (writeErrorLabel)
-        s << baseName << "_RichComparison_TypeError:\n";
-    s << "Shiboken::Errors::setOperatorNotImplemented();\n"
-        << ErrorReturn::Default << '\n' << outdent << "}\n\n";
+        << outdent << outdent << "}\n\n"
+    << "return Shiboken::returnFromRichCompare(" << PYTHON_RETURN_VAR << ");\n" << outdent
+    << "}\n\n";
 }
 
 using ComparisonOperatorList = QList<AbstractMetaFunction::ComparisonOperatorType>;
@@ -5515,13 +5511,10 @@ void CppGenerator::writeSmartPointerRichCompareFunction(TextStream &s,
     }
     s << "}\n" << PYTHON_RETURN_VAR << " = " << CPP_RETURN_VAR
         << " ? Py_True : Py_False;\n"
-        << "Py_INCREF(" << PYTHON_RETURN_VAR << ");\n";
-
-    s << outdent << "} else {\n" << indent
-      << "goto " << baseName << "_RichComparison_TypeError;\n"
-      << outdent << "}\n";
-
-    writeRichCompareFunctionFooter(s, baseName, true);
+        << "Py_INCREF(" << PYTHON_RETURN_VAR << ");\n"
+        << outdent << "}\n"
+    << "return Shiboken::returnFromRichCompare(" << PYTHON_RETURN_VAR << ");\n"
+    << outdent << "}\n\n";
 }
 
 // Return a flag combination for PyMethodDef
