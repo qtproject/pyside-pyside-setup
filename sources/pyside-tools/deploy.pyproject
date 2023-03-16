@@ -1,5 +1,5 @@
 {
-    "files": ["deploy.py", "deploy/__init__.py", "deploy/commands.py", "deploy/config.py",
-              "deploy/default.spec", "deploy/nuitka_helper.py", "deploy/pyside_icon.jpg",
-              "deploy/python_helper.py"]
+    "files": ["deploy.py", "deploy_lib/__init__.py", "deploy_lib/commands.py", "deploy_lib/config.py",
+              "deploy_lib/default.spec", "deploy_lib/nuitka_helper.py", "deploy_lib/pyside_icon.jpg",
+              "deploy_lib/python_helper.py"]
 }
