@@ -504,31 +504,15 @@
   <rejection class="QUuid" field-name="data2"/>
   <rejection class="QUuid" field-name="data3"/>
   <rejection class="QUuid" field-name="data4"/>
-  <rejection class="" enum-name="QtValidLicenseForTestModule"/>
-  <rejection class="" enum-name="QtValidLicenseForDBusModule"/>
-  <rejection class="" enum-name="QtValidLicenseForSqlModule"/>
-  <rejection class="" enum-name="QtValidLicenseForOpenGLModule"/>
-  <rejection class="" enum-name="QtValidLicenseForScriptToolsModule"/>
   <rejection class="" enum-name="__codecvt_result"/>
   <rejection class="" enum-name="enum_1"/>
   <rejection class="" enum-name="enum_2"/>
-  <rejection class="" enum-name="QtValidLicenseForXmlModule"/>
-  <rejection class="" enum-name="QtValidLicenseForActiveQtModule"/>
-  <rejection class="" enum-name="QtValidLicenseForCoreModule"/>
-  <rejection class="" enum-name="QtValidLicenseForNetworkModule"/>
-  <rejection class="" enum-name="QtValidLicenseForSvgModule"/>
-  <rejection class="" enum-name="QtValidLicenseForGuiModule"/>
-  <rejection class="" enum-name="QtValidLicenseForHelpModule"/>
   <!-- Internal -->
-  <rejection class="QAbstractFileEngine"/> <!--
-  <rejection class="QAbstractFileEngine" function-name="endEntryList"/>
-  <rejection class="QAbstractFileEngine" function-name="extension"/> XXX -->
+  <rejection class="QAbstractFileEngine"/>
   <rejection class="QCoreApplication" function-name="compressEvent"/>
   <rejection class="QCoreApplication" function-name="eventFilter"/>
   <rejection class="QCoreApplication" function-name="filterEvent"/>
   <rejection class="QCoreApplication" function-name="setEventFilter"/>
-  <rejection class="QFile" function-name="setDecodingFunction"/>
-  <rejection class="QFile" function-name="setEncodingFunction"/>
   <rejection class="QRegion" function-name="cleanUp"/>
   <rejection class="QSettings" function-name="registerFormat"/>
 

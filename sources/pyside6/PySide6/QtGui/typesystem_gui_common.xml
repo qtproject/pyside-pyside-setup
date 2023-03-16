@@ -45,20 +45,12 @@
   <rejection class="*" function-name="qobject_interface_iid&lt;QStyleFactoryInterface*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleFactoryInterface*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QInputContextFactoryInterface*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsItem*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsLayout*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleBridgeFactoryInterface*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QImageIOHandlerFactoryInterface*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleInterface*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QTextObjectInterface*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsLayoutItem*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QIconEngineFactoryInterface*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QPictureFormatInterface*&gt;"/>
-
-  <rejection class="*" function-name="qobject_cast&lt;QGraphicsLayout*&gt;"/>
-  <rejection class="*" function-name="qobject_cast&lt;QGraphicsItem*&gt;"/>
-  <rejection class="*" function-name="qobject_cast&lt;QGraphicsLayoutItem*&gt;"/>
-  <rejection class="*" function-name="qobject_cast&lt;QGraphicsLayoutItem*&gt;"/>
 
   <rejection class="*" function-name="qGenericMatrixFromMatrix4x4"/>
   <rejection class="*" function-name="qDrawBorderPixmap"/>
@@ -100,14 +92,12 @@
   <rejection class="QAbstractTextDocumentLayout::PaintContext" field-name="selections"/>
   <rejection class="QBrush" function-name="cleanUp"/>
   <rejection class="QFont" enum-name="ResolveProperties"/>
-  <rejection class="QMotifStyle" field-name="focus"/>
   <rejection class="QPictureIO" function-name="defineIOHandler"/>
   <rejection class="QPolygon" function-name="putPoints"/>
   <rejection class="QPolygon" function-name="setPoints"/>
   <rejection class="QPolygon" function-name="setPoint"/>
   <rejection class="QPolygon" function-name="points"/>
   <rejection class="QPolygon" function-name="point"/>
-  <rejection class="QActionGroup" function-name="selected"/>
   <rejection class="QPaintEngine" function-name="fix_neg_rect"/>
 
   <inject-code class="native" position="beginning" file="../glue/qtgui.cpp"

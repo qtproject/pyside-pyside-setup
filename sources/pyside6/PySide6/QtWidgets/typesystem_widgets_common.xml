@@ -31,13 +31,14 @@
   -->
   <rejection class="*" enum-name="enum_1"/>
 
-  <rejection class="QMdi"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsItem*&gt;"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsLayout*&gt;"/>
+  <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsLayoutItem*&gt;"/>
 
-  <!--
-    Event classes have a lot of non-documented protected fields, those fields
-    are removed from PySide because they are Qt implementation details,
-    besides the fact they are accessible by ordinary event methods.
-    -->
+  <rejection class="*" function-name="qobject_cast&lt;QGraphicsLayout*&gt;"/>
+  <rejection class="*" function-name="qobject_cast&lt;QGraphicsItem*&gt;"/>
+  <rejection class="*" function-name="qobject_cast&lt;QGraphicsLayoutItem*&gt;"/>
+  <rejection class="*" function-name="qobject_cast&lt;QGraphicsLayoutItem*&gt;"/>
 
   <function signature="qDrawShadeLine(QPainter*,int,int,int,int,const QPalette&amp;,bool,int,int)"/>
   <function signature="qDrawShadeLine(QPainter*,const QPoint,const QPoint,const QPalette&amp;,bool,int,int)"/>
