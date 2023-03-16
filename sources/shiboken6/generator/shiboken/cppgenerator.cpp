@@ -5192,7 +5192,14 @@ void CppGenerator::writeGetterFunction(TextStream &s,
             << "Py_IncRef(pyOut);" << "\n"
             << "return pyOut;" << "\n"
             << outdent << "}\n";
-        // Create and register new wrapper
+        // Create and register new wrapper. We force a pointer conversion also
+        // for wrapped value types so that they refer to the struct member,
+        // avoiding any trouble copying them. Add a parent relationship to
+        // properly notify if the struct is deleted (see protected_test.py,
+        // testProtectedValueTypeProperty()). Note that this has currently
+        // unsolved issues when using temporary Python lists of structs
+        // which can cause elements to be reported deleted in expressions like
+        // "foo.list_of_structs[2].field".
         s << "pyOut = "
             << "Shiboken::Object::newObject(" << cpythonTypeNameExt(fieldType)
             << ", " << cppField << ", false, true);\n"
