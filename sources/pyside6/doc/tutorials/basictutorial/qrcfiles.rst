@@ -67,7 +67,7 @@ a Python class containing the binary information about the resources
 
 To do this, we need to run::
 
-    pyside6-rcc icons.rc -o rc_icons.py
+    pyside6-rcc icons.qrc -o rc_icons.py
 
 The `-o` option lets you specify the output filename,
 which is `rc_icons.py` in this case.
