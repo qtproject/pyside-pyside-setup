@@ -109,7 +109,7 @@ application and PySide6 integration:
       .. literalinclude:: style.qrc
          :linenos:
 
-      Generate the *rc* file running, `pyside6-rcc style.qrc > style_rc.py`
+      Generate the *rc* file running, `pyside6-rcc style.qrc -o style_rc.py`
       And finally import it from your `main.py` script.
 
    .. literalinclude:: main.py
