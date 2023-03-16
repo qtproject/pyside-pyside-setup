@@ -38,10 +38,11 @@ def call_testrunner(python_ver, buildnro):
     if sys.platform == "win32":
         python3 = os.path.join(os.getenv("PYTHON3_PATH"), "python.exe")
 
-    # we shouldn't install anything to m1, while it is not virtualized
+    # we shouldn't install anything outside of virtualenv, while m1 is not virtualized yet
     if CI_HOST_OS == "MacOS" and CI_HOST_ARCH == "ARM64":
         v_env = "virtualenv"
         run_instruction([str(v_env), "-p", str(_pExe), str(_env)], "Failed to create virtualenv")
+        run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
     else:
         run_instruction([python3, "-m", "pip", "install", "--user", "virtualenv==20.7.2"], "Failed to pin virtualenv")
         # installing to user base might not be in PATH by default.
