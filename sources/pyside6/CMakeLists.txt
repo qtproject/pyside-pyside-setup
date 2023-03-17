@@ -33,3 +33,5 @@ if(BUILD_TESTS)
 endif()
 
 add_subdirectory(doc)
+
+add_subdirectory(qtexampleicons)
