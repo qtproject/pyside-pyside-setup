@@ -29,6 +29,8 @@ class QTextToSpeechTestCase(UsesQApplication):
     '''Tests related to QTextToSpeech'''
     def testSay(self):
         engines = QTextToSpeech.availableEngines()
+        if len(engines) > 1 and engines[0] == "mock":
+            engines[0], engines[1] = engines[1], engines[0]
         if not engines:
             print('No QTextToSpeech engines available')
         else:
