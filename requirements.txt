@@ -9,4 +9,4 @@ numpy
 nuitka==1.4.8
 distro; sys_platform == 'linux'
 patchelf==0.15; sys_platform == 'linux'
-importlib-metadata
+importlib-metadata; python_version < '3.8'

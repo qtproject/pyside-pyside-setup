@@ -5,7 +5,10 @@ import sys
 import os
 import logging
 from importlib import util
-from importlib_metadata import version
+if sys.version_info >= (3, 8):
+    from importlib.metadata import version
+else:
+    from importlib_metadata import version
 from pathlib import Path
 
 from . import Nuitka, run_command, Config
