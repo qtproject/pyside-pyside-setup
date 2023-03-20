@@ -19,11 +19,9 @@ class PythonExecutable:
     Wrapper class around Python executable
     """
 
-    def __init__(self, python_path=None, create_venv=False, dry_run=False):
+    def __init__(self, python_path=None, dry_run=False):
         self.exe = python_path if python_path else Path(sys.executable)
         self.dry_run = dry_run
-        if create_venv:
-            self.__create_venv()
         self.nuitka = Nuitka(nuitka=[os.fspath(self.exe), "-m", "nuitka"])
 
     @property
@@ -38,21 +36,6 @@ class PythonExecutable:
     def is_venv():
         venv = os.environ.get("VIRTUAL_ENV")
         return True if venv else False
-
-    def __create_venv(self):
-        self.install("virtualenv")
-        if not self.is_venv():
-            run_command(
-                command=[self.exe, "-m", "venv", Path.cwd() / "deployment" / "venv"],
-                dry_run=self.dry_run,
-            )
-            venv_path = Path(os.environ["VIRTUAL_ENV"])
-            if sys.platform == "win32":
-                self.exe = venv_path / "Scripts" / "python.exe"
-            elif sys.platform in ["linux", "darwin"]:
-                self.exe = venv_path / "bin" / "python"
-        else:
-            logging.info("[DEPLOY] You are already in virtual environment!")
 
     def install(self, packages: list = None):
         for package in packages:
@@ -104,4 +87,3 @@ class PythonExecutable:
                     )
 
         return command_str
-

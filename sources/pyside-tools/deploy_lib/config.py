@@ -24,8 +24,11 @@ class Config:
         self.config_file = config_file
         self.parser = ConfigParser(comment_prefixes="/", allow_no_value=True)
         if not self.config_file.exists():
-            logging.info(f"[DEPLOY] Creating config file {self.config_file}")
-            shutil.copy(Path(__file__).parent / "default.spec", self.config_file)
+            if not dry_run:
+                logging.info(f"[DEPLOY] Creating config file {self.config_file}")
+                shutil.copy(Path(__file__).parent / "default.spec", self.config_file)
+            else:
+                self.config_file = Path(__file__).parent / "default.spec"
         else:
             print(f"Using existing config file {config_file}")
         self.parser.read(self.config_file)
