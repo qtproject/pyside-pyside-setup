@@ -26,6 +26,7 @@ dependencies: [
       "../../qt/qtserialbus",
       "../../qt/qtserialport",
       "../../qt/qtshadertools",
+      "../../qt/qtspeech",
       "../../qt/qtsvg",
       "../../qt/qttools",
       "../../qt/qttranslations",
