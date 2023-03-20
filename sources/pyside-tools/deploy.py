@@ -82,36 +82,32 @@ def main(main_file: Path = None, config_file: Path = None, init: bool = False,
     command_str = None
 
     logging.info("[DEPLOY] Start")
-
+    generated_files_path = None
     try:
         python = None
+        response = "yes"
         # checking if inside virtual environment
-        if not PythonExecutable.is_venv():
-            if not force:
-                response = input("Not in virtualenv. Do you want to create one? [Y/n]")
-            else:
-                response = "no"
+        if not PythonExecutable.is_venv() and not force and not dry_run and not init:
+            response = input(("You are not in virtualenv. pyside6-deploy needs to install a "
+                              "few Python packages for deployment to work seamlessly. \n"
+                              "Proceed? [Y/n]"))
 
-            if response.lower() in "yes":
-                # creating new virtual environment
-                python = PythonExecutable(create_venv=True, dry_run=dry_run)
-                logging.info("[DEPLOY] virutalenv created")
+        if response.lower() in ["no", "n"]:
+            print("Exiting ...")
+            sys.exit(0)
 
-        # in venv or user entered no
-        if not python:
-            python = PythonExecutable(dry_run=dry_run)
-            logging.info(f"[DEPLOY] using python at {sys.executable}")
+        python = PythonExecutable(dry_run=dry_run)
+        logging.info(f"[DEPLOY] using python at {sys.executable}")
 
         config = Config(config_file=config_file, source_file=main_file,
                         python_exe=python.exe, dry_run=dry_run)
 
         source_file = config.project_dir / config.source_file
-
         generated_files_path = source_file.parent / "deployment"
         if generated_files_path.exists():
             clean(generated_files_path)
 
-        if not init and not dry_run:
+        if not init:
             # install packages needed for deployment
             print("[DEPLOY] Installing dependencies \n")
             packages = config.get_value("python", "packages").split(",")
@@ -151,7 +147,7 @@ def main(main_file: Path = None, config_file: Path = None, init: bool = False,
     finally:
         # clean up generated deployment files and copy executable into
         # final_exec_path
-        if not keep_deployment_files and not dry_run and not init:
+        if (not keep_deployment_files and generated_files_path and generated_files_path.exists()):
             generated_exec_path = generated_files_path / (source_file.stem + EXE_FORMAT)
             if generated_exec_path.exists() and final_exec_path:
                 shutil.copy(generated_exec_path, final_exec_path)

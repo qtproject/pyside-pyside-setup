@@ -77,7 +77,6 @@ class TestPySide6Deploy(unittest.TestCase):
         self.setUpWidgets()
         original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
         self.assertEqual(original_output, self.expected_run_cmd)
-        self.config_file.unlink()
 
     def testWidgetConfigFile(self):
         # includes both dry run and config_file tests
@@ -88,8 +87,7 @@ class TestPySide6Deploy(unittest.TestCase):
         self.assertEqual(init_result, None)
 
         # test with config
-        config_path = self.temp_example_widgets / "pysidedeploy.spec"
-        original_output = self.deploy.main(config_file=config_path, dry_run=True, force=True)
+        original_output = self.deploy.main(config_file=self.config_file, dry_run=True, force=True)
         self.assertEqual(original_output, self.expected_run_cmd)
 
         # # test config file contents
@@ -169,7 +167,6 @@ class TestPySide6Deploy(unittest.TestCase):
             original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
             self.assertEqual(original_output, self.expected_run_cmd)
             self.assertEqual(mock_qmlimportscanner.call_count, 1)
-        self.config_file.unlink()
 
     def testMainFileDryRun(self):
         self.setUpQml()
@@ -178,7 +175,6 @@ class TestPySide6Deploy(unittest.TestCase):
             original_output = self.deploy.main(Path.cwd() / "main.py", dry_run=True, force=True)
             self.assertEqual(original_output, self.expected_run_cmd)
             self.assertEqual(mock_qmlimportscanner.call_count, 1)
-        self.config_file.unlink()
 
     # this test case retains the QtWebEngine dlls
     def testWebEngineQuickDryRun(self):
@@ -244,7 +240,6 @@ class TestPySide6Deploy(unittest.TestCase):
             config_obj.get_value("qt", "excluded_qml_plugins"),
             "QtCharts,QtQuick3D,QtSensors,QtTest",
         )
-        config_file.unlink()
 
     def tearDown(self) -> None:
         super().tearDown()
