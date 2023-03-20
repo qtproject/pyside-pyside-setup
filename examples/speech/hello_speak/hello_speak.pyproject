@@ -1,0 +1,5 @@
+{
+    "files": ["main.py",
+              "mainwindow.py",
+              "mainwindow.ui"]
+}
