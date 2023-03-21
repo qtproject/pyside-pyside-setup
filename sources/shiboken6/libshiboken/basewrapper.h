@@ -146,9 +146,6 @@ LIBSHIBOKEN_API int returnWrongArguments_Zero(PyObject *args, const char *funcNa
 LIBSHIBOKEN_API int returnWrongArguments_MinusOne(PyObject *args, const char *funcName,
                                                         PyObject *info);
 
-LIBSHIBOKEN_API void returnWrongArguments_Void(PyObject *args, const char *funcName,
-                                                    PyObject *info);
-
 /// A simple special version for the end of rich comparison.
 LIBSHIBOKEN_API PyObject *returnFromRichCompare(PyObject *result);
 

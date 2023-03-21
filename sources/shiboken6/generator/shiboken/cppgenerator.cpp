@@ -2767,6 +2767,8 @@ QString CppGenerator::returnErrorWrongArguments(const OverloadData &overloadData
         return u"Shiboken::returnWrongArguments_Zero("_s + argsVar + u", fullName, errInfo)"_s;
     case ErrorReturn::MinusOne:
         return u"Shiboken::returnWrongArguments_MinusOne("_s + argsVar + u", fullName, errInfo)"_s;
+    case ErrorReturn::Void:
+        Q_ASSERT(false);
     }
     return QString();
 }
@@ -5304,11 +5306,6 @@ void CppGenerator::writeRichCompareFunctionHeader(TextStream &s,
         << "PyObject *" << PYTHON_RETURN_VAR << "{};\n"
         << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n"
         << sbkUnusedVariableCast(PYTHON_TO_CPP_VAR) << '\n';
-}
-
-static bool containsGoto(const CodeSnip &s)
-{
-    return s.code().contains(u"goto");
 }
 
 static const char richCompareComment[] =
