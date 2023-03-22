@@ -884,6 +884,7 @@ def module_QtScxml() -> ModuleData:
 
 def module_QtWebChannel() -> ModuleData:
     data = ModuleData("WebChannel")
+    data.qtlib.append("libQt6WebChannelQuick")
 
     return data
 

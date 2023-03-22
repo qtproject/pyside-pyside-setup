@@ -4,6 +4,7 @@
 project(QtPdfWidgets)
 
 set(QtPdfWidgets_SRC
+${QtPdfWidgets_GEN_DIR}/qpdfpageselector_wrapper.cpp
 ${QtPdfWidgets_GEN_DIR}/qpdfview_wrapper.cpp
 # module is always needed
 ${QtPdfWidgets_GEN_DIR}/qtpdfwidgets_module_wrapper.cpp

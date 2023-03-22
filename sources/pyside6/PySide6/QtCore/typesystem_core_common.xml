@@ -374,6 +374,10 @@
       </conversion-rule>
   </value-type>
 
+  <value-type name="QNativeIpcKey" since="6.6">
+      <enum-type name="Type"/>
+  </value-type>
+
   <container-type name="QSet" type="set">
     <include file-name="QSet" location="global"/>
     <conversion-rule>
@@ -940,6 +944,7 @@
   </value-type>
   <value-type name="QBluetoothPermission" since="6.5">
       <configuration condition="QT_CONFIG(permissions)"/>
+      <enum-type name="CommunicationMode" flags="CommunicationModes" since="6.6"/>
   </value-type>
   <value-type name="QCalendarPermission" since="6.5">
       <configuration condition="QT_CONFIG(permissions)"/>
@@ -2498,6 +2503,11 @@
     <enum-type name="ProcessChannelMode"/>
     <enum-type name="ProcessError"/>
     <enum-type name="ProcessState"/>
+
+    <?if !windows?>
+    <enum-type name="UnixProcessFlag" flags="UnixProcessFlags" since="6.6"/>
+    <value-type name="UnixProcessParameters" since="6.6"/>
+    <?endif?>
 
     <modify-function signature="waitForStarted(int)" allow-thread="yes"/>
     <modify-function signature="waitForBytesWritten(int)" allow-thread="yes"/>

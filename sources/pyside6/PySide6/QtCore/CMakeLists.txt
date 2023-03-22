@@ -16,7 +16,8 @@ if(ENABLE_WIN)
       ${QtCore_GEN_DIR}/qwineventnotifier_wrapper.cpp
     )
 else()
-    set(SPECIFIC_OS_FILES "")
+    set(SPECIFIC_OS_FILES
+      ${QtCore_GEN_DIR}/qprocess_unixprocessparameters_wrapper.cpp)
 endif()
 
 set(QtCore_SRC
@@ -112,6 +113,7 @@ ${QtCore_GEN_DIR}/qmimetype_wrapper.cpp
 ${QtCore_GEN_DIR}/qmodelindex_wrapper.cpp
 ${QtCore_GEN_DIR}/qmodelroledata_wrapper.cpp
 ${QtCore_GEN_DIR}/qmutex_wrapper.cpp
+${QtCore_GEN_DIR}/qnativeipckey_wrapper.cpp
 ${QtCore_GEN_DIR}/qobject_wrapper.cpp
 ${QtCore_GEN_DIR}/qoperatingsystemversion_wrapper.cpp
 ${QtCore_GEN_DIR}/qoperatingsystemversionbase_wrapper.cpp

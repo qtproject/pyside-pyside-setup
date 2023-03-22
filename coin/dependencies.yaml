@@ -1,6 +1,6 @@
 product_dependency:
   ../../qt/qt5:
-    ref: "6.5"
+    ref: "6.6"
 dependency_source: supermodule
 dependencies: [
       "../../qt/qt3d",
@@ -12,6 +12,7 @@ dependencies: [
       "../../qt/qtdatavis3d",
       "../../qt/qtdeclarative",
       "../../qt/qtdoc",
+      "../../qt/qtgraphs",
       "../../qt/qthttpserver",
       "../../qt/qtimageformats",
       "../../qt/qtlocation",

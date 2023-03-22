@@ -84,6 +84,9 @@
     <value-type name="QCameraDevice">
         <enum-type name="Position" since="6.1"/>
     </value-type>
+
+    <value-type name="QCapturableWindow" since="6.6"/>
+
     <object-type name="QImageCapture">
         <enum-type name="Error"/>
         <enum-type name="FileFormat"/>
@@ -150,6 +153,10 @@
         <enum-type name="PixelFormat"/>
         <enum-type name="YCbCrColorSpace"/>
     </value-type>
+
+    <object-type name="QWindowCapture" since="6.6">
+        <enum-type name="Error"/>
+    </object-type>
 
     <object-type name="QVideoSink" since="6.1"/>
 </typesystem>

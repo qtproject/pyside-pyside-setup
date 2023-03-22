@@ -2266,6 +2266,7 @@
     <enum-type name="ButtonRole"/>
     <enum-type name="Icon"/>
     <enum-type name="StandardButton" python-type="IntFlag" flags="StandardButtons"/>
+    <enum-type name="Option" flags="Options" since="6.6"/>
     <modify-function signature="removeButton(QAbstractButton*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>

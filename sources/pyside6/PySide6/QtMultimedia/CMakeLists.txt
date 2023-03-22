@@ -16,6 +16,7 @@ ${QtMultimedia_GEN_DIR}/qaudio_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameraformat_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcameradevice_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qcamera_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qcapturablewindow_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qimagecapture_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediacapturesession_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediadevices_wrapper.cpp
@@ -31,6 +32,7 @@ ${QtMultimedia_GEN_DIR}/qsoundeffect_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qvideoframe_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qvideoframeformat_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qvideosink_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qwindowcapture_wrapper.cpp
 
 # module is always needed
 ${QtMultimedia_GEN_DIR}/qtmultimedia_module_wrapper.cpp

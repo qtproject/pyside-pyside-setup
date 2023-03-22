@@ -525,6 +525,10 @@ int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, 
                 << metaCallName(call) << " #" << id << ' '  << object;
             id -= object->metaObject()->methodCount();
             break;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+        case QMetaObject::ConstructInPlace:
+            break;
+#endif
     }
     return id;
 }

@@ -9,6 +9,7 @@ ${QtPdf_GEN_DIR}/qpdfdocument_wrapper.cpp
 ${QtPdf_GEN_DIR}/qpdfdocumentrenderoptions_wrapper.cpp
 ${QtPdf_GEN_DIR}/qpdfpagerenderer_wrapper.cpp
 ${QtPdf_GEN_DIR}/qpdflink_wrapper.cpp
+${QtPdf_GEN_DIR}/qpdflinkmodel_wrapper.cpp
 ${QtPdf_GEN_DIR}/qpdfpagenavigator_wrapper.cpp
 ${QtPdf_GEN_DIR}/qpdfsearchmodel_wrapper.cpp
 ${QtPdf_GEN_DIR}/qpdfselection_wrapper.cpp

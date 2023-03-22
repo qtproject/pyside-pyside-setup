@@ -8,6 +8,7 @@ ${QtQuick3D_GEN_DIR}/qquick3d_wrapper.cpp
 ${QtQuick3D_GEN_DIR}/qquick3dobject_wrapper.cpp
 ${QtQuick3D_GEN_DIR}/qquick3dgeometry_wrapper.cpp
 ${QtQuick3D_GEN_DIR}/qquick3dgeometry_attribute_wrapper.cpp
+${QtQuick3D_GEN_DIR}/qquick3dgeometry_targetattribute_wrapper.cpp
 ${QtQuick3D_GEN_DIR}/qquick3dinstancing_wrapper.cpp
 ${QtQuick3D_GEN_DIR}/qquick3dinstancing_instancetableentry_wrapper.cpp
 ${QtQuick3D_GEN_DIR}/qquick3dtexturedata_wrapper.cpp

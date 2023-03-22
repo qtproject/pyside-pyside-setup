@@ -8,6 +8,7 @@
     <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
     <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
     <load-typesystem name="QtPdf/typesystem_pdf.xml" generate="no"/>
+    <object-type name="QPdfPageSelector" since="6.6"/>
     <object-type name="QPdfView">
         <enum-type name="PageMode"/>
         <enum-type name="ZoomMode"/>

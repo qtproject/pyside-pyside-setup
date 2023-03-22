@@ -16,6 +16,7 @@
             <enum-type name="Semantic"/>
             <enum-type name="ComponentType"/>
         </value-type>
+        <value-type name="TargetAttribute" since="6.6"/>
         <enum-type name="PrimitiveType"/>
     </object-type>
     <object-type name="QQuick3DInstancing">

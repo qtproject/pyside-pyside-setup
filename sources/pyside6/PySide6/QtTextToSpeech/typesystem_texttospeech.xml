@@ -10,6 +10,7 @@
       <enum-type name="State"/>
       <enum-type name="BoundaryHint"/>
       <enum-type name="ErrorReason"/>
+      <enum-type name="Capability" flags="Capabilities" since="6.6"/>
   </object-type>
   <object-type name="QTextToSpeechEngine"/>
   <value-type name="QVoice">
