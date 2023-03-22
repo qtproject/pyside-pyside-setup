@@ -74,6 +74,7 @@ ${QtCore_GEN_DIR}/qfilesystemwatcher_wrapper.cpp
 ${QtCore_GEN_DIR}/qfutureinterfacebase_wrapper.cpp
 ${QtCore_GEN_DIR}/qgenericargument_wrapper.cpp
 ${QtCore_GEN_DIR}/qgenericreturnargument_wrapper.cpp
+${QtCore_GEN_DIR}/qhashseed_wrapper.cpp
 ${QtCore_GEN_DIR}/qidentityproxymodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qiodevice_wrapper.cpp
 ${QtCore_GEN_DIR}/qiodevicebase_wrapper.cpp

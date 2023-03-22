@@ -457,6 +457,8 @@
     </conversion-rule>
   </container-type>
 
+  <value-type name="QHashSeed" since="6.2"/>
+
   <container-type name="QMap" type="map">
     <include file-name="QMap" location="global"/>
     <conversion-rule>
