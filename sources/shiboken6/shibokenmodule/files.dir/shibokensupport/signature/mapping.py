@@ -142,7 +142,7 @@ class Reloader(object):
         if getattr(mod, "__file__", None) and not Path(mod.__file__).is_dir():
             ending = Path(mod.__file__).suffix
             return ending not in (".py", ".pyc", ".pyo", ".pyi")
-        return bool(is_builtin(mod.__name__))
+        return bool(hasattr(mod, "__name__") and is_builtin(mod.__name__))
 
     def update(self):
         """
