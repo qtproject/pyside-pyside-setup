@@ -2,24 +2,24 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="275"
    height="197.55103"
    id="svg2"
    sodipodi:version="0.32"
-   inkscape:version="0.92.2 2405546, 2018-03-11"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
    version="1.0"
    sodipodi:docname="shibokenqtarch.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    inkscape:export-filename="shibokenqtarch.png"
    inkscape:export-xdpi="90"
-   inkscape:export-ydpi="90">
+   inkscape:export-ydpi="90"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs4">
     <marker
@@ -54,23 +54,26 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.0474359"
-     inkscape:cx="110.19617"
-     inkscape:cy="69.09871"
+     inkscape:zoom="2.0948718"
+     inkscape:cx="130.07956"
+     inkscape:cy="99.051407"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
-     inkscape:window-width="1002"
-     inkscape:window-height="1042"
-     inkscape:window-x="10"
-     inkscape:window-y="28"
+     inkscape:window-width="2552"
+     inkscape:window-height="1432"
+     inkscape:window-x="1924"
+     inkscape:window-y="4"
      showguides="true"
      inkscape:guide-bbox="true"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:window-maximized="0">
+     inkscape:window-maximized="0"
+     inkscape:showpageshadow="2"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1">
     <inkscape:grid
        type="xygrid"
        id="grid44"
@@ -85,7 +88,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -114,7 +117,7 @@
        sodipodi:nodetypes="ccccccc" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:16.68707466px;line-height:1.25;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.12244904;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:16.6871px;line-height:1.25;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.12245;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        x="120.87232"
        y="334.88406"
        id="text153"><tspan
@@ -122,10 +125,10 @@
          id="tspan151"
          x="120.87232"
          y="334.88406"
-         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:16.68707466px;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.12244904;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">Qt for Python</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:16.6871px;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.12245;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">Qt for Python</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.74510956px;line-height:1.25;font-family:Titillium;-inkscape-font-specification:Titillium;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.31862774"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.7451px;line-height:1.25;font-family:Titillium;-inkscape-font-specification:Titillium;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.318628"
        x="121.09701"
        y="354.01886"
        id="text157"><tspan
@@ -133,7 +136,7 @@
          x="121.09701"
          y="354.01886"
          id="tspan159"
-         style="fill:#ffffff;fill-opacity:1;stroke-width:0.31862774">Qt classes and functions exported to Python</tspan></text>
+         style="fill:#ffffff;fill-opacity:1;stroke-width:0.318628">Qt classes and functions exported to Python</tspan></text>
     <path
        style="fill:#53586b;fill-opacity:1;stroke:none;stroke-width:2.20567369;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 106.0768,391.19877 v 44.89796 h 262.2093 l 12.7907,-11.22449 V 379.97428 H 117.53514 Z"
@@ -142,7 +145,7 @@
        sodipodi:nodetypes="ccccccc" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:16.68707466px;line-height:1.25;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.41717955"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:16.6871px;line-height:1.25;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.41718"
        x="121.0225"
        y="403.38095"
        id="text153-2"><tspan
@@ -150,10 +153,10 @@
          id="tspan151-9"
          x="121.0225"
          y="403.38095"
-         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:16.68707466px;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke-width:0.41717955">Shiboken</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:16.6871px;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke-width:0.41718">Shiboken</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.74510956px;line-height:1.25;font-family:Titillium;-inkscape-font-specification:Titillium;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.31862774"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.7451px;line-height:1.25;font-family:Titillium;-inkscape-font-specification:Titillium;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.318628"
        x="121.09701"
        y="421.95245"
        id="text157-1"><tspan
@@ -161,10 +164,10 @@
          x="121.09701"
          y="421.95245"
          id="tspan159-2"
-         style="fill:#ffffff;fill-opacity:1;stroke-width:0.31862774">Generator that exposes C++ classes to Python</tspan></text>
+         style="fill:#ffffff;fill-opacity:1;stroke-width:0.318628">Generator that exposes C++ classes to Python</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:17.95918465px;line-height:1.25;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.31862774"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:17.9592px;line-height:1.25;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.318628"
        x="123.35368"
        y="482.61551"
        id="text157-1-7"><tspan
@@ -172,17 +175,17 @@
          x="123.35368"
          y="482.61551"
          id="tspan159-2-0"
-         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:17.95918465px;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke-width:0.31862774">CPython API</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:17.9592px;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke-width:0.318628">CPython API</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:17.95918465px;line-height:1.25;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.4132798"
-       x="265.1445"
-       y="483.19019"
+       style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:17.9592px;line-height:1.25;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.41328"
+       x="271.38934"
+       y="483.42886"
        id="text157-1-9"><tspan
          sodipodi:role="line"
-         x="265.1445"
-         y="483.19019"
+         x="271.38934"
+         y="483.42886"
          id="tspan159-2-3"
-         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:17.95918465px;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke-width:0.4132798">Qt 5 Libraries</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:17.9592px;font-family:Titillium;-inkscape-font-specification:'Titillium, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke-width:0.41328">Qt  Libraries</tspan></text>
   </g>
 </svg>
