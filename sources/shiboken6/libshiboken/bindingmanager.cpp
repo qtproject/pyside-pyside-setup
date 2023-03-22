@@ -13,6 +13,7 @@
 #include "debugfreehook.h"
 
 #include <cstddef>
+#include <cstring>
 #include <fstream>
 #include <mutex>
 #include <unordered_map>
