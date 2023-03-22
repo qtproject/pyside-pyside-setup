@@ -8,7 +8,7 @@ import sys
 import tokenize
 from argparse import ArgumentParser, RawTextHelpFormatter
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 
 DESCRIPTION = """Parses Python source code to create QObject metatype
@@ -104,7 +104,7 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
         self._properties: List[PropertyEntry] = []
         self._signals: List[Signal] = []
         self._within_class: bool = False
-        self._qt_modules: List[str] = []
+        self._qt_modules: Set[str] = set()
         self._qml_import_name = ""
         self._qml_import_major_version = 0
         self._qml_import_minor_version = 0
@@ -119,7 +119,7 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
         return (self._qml_import_major_version, self._qml_import_minor_version)
 
     def qt_modules(self):
-        return self._qt_modules
+        return sorted(self._qt_modules)
 
     @staticmethod
     def create_ast(filename: Path) -> ast.Module:
@@ -315,16 +315,20 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
             self._properties.append(prop)
 
     def visit_Import(self, node):
-        if node.names:
-            self._handle_import(node.names[0].name)
+        for n in node.names:  # "import PySide6.QtWidgets"
+            self._handle_import(n.name)
 
     def visit_ImportFrom(self, node):
-        self._handle_import(node.module)
+        if "." in node.module:  # "from PySide6.QtWidgets import QWidget"
+            self._handle_import(node.module)
+        elif node.module == "PySide6":  # "from PySide6 import QtWidgets"
+            for n in node.names:
+                if n.name.startswith("Qt"):
+                    self._qt_modules.add(n.name)
 
     def _handle_import(self, mod: str):
-        if mod.startswith('PySide'):
-            dot = mod.index(".")
-            self._qt_modules.append(mod[dot + 1:])
+        if mod.startswith("PySide6."):
+            self._qt_modules.add(mod[8:])
 
 
 def create_arg_parser(desc: str) -> ArgumentParser:
