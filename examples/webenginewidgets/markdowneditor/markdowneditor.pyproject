@@ -4,6 +4,5 @@
               "mainwindow.py",
               "mainwindow.ui",
               "previewpage.py",
-              "resources/markdowneditor.qrc",
-              "ui_mainwindow.py"]
+              "resources/markdowneditor.qrc"]
 }

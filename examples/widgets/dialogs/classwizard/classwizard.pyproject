@@ -1,4 +1,3 @@
 {
-    "files": ["classwizard.qrc", "classwizard.py", "classwizard_rc.py",
-              "listchooser.py", "classwizard_rc.pyc"]
+    "files": ["classwizard.qrc", "classwizard.py", "listchooser.py"]
 }
