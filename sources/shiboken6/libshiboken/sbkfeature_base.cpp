@@ -178,7 +178,12 @@ void initEnumFlagsDict(PyTypeObject *type)
 
 static PyObject *replaceNoArgWithZero(PyObject *callable)
 {
-    static auto *functools = PyImport_ImportModule("_functools");   // builtin
+#ifdef PYPY_VERSION
+    const char *functools_str = "functools";
+#else
+    const char *functools_str = "_functools";
+#endif
+    static auto *functools = PyImport_ImportModule(functools_str);   // builtin
     static auto *partial = PyObject_GetAttrString(functools, "partial");
     static auto *zero = PyLong_FromLong(0);
     return PyObject_CallFunctionObjArgs(partial, callable, zero, nullptr);
