@@ -229,7 +229,7 @@ if __name__ == "__main__":
         # handling subdirectories besides the module level and the example
         extra_names = "" if len(parts) == 2 else "_".join(parts[1:-1])
 
-        rst_file = f"example_{module_name}_{extra_names}_{example_name}.rst"
+        rst_file = f"example_{module_name}_{extra_names}_{example_name}.rst".replace("__", "_")
 
         def check_img_ext(i):
             EXT = (".png", ".jpg", ".jpeg", ".gif", ".webp")
