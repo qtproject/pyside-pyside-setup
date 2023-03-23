@@ -1,0 +1,2 @@
+The Shiboken generator needs a header file that includes
+the types we are interested in:

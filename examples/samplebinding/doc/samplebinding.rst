@@ -54,8 +54,8 @@ done by specifying a special XML file called a typesystem file.
 
 In the typesystem file you specify things like:
 
- * which C++ classes should have bindings (Icecream) and what kind of
-   semantics (value / object)
+ * Which C++ classes should have bindings (Icecream, Truck) and with what
+   kind of semantics (value / object)
 
  * Ownership rules (who deletes the C++ objects, C++ or Python)
 
@@ -186,11 +186,24 @@ On Windows:
     ninja install
     cd ..
 
+Use the Python module
++++++++++++++++++++++
+
 The final example can then be run by:
 
 .. code-block:: bash
 
     python main.py
+
+In the ``main.py`` script, two types are derived from :code:`Icecream` for
+different “flavors” after importing the classes from the :code:`Universe`
+module. Then, a :code:`truck` is created to deliver some regular flavored
+Icecreams and two special ones.
+
+If the delivery fails, a new :code:`truck` is created with the old flavors
+copied over, and a new *magical* flavor that will surely satisfy all customers.
+
+Try running it to see if the ice creams are delivered.
 
 Windows troubleshooting
 +++++++++++++++++++++++

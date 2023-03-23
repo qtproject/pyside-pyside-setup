@@ -1,5 +1,6 @@
 {
     "files": ["../bindings.h",
+              "../bindings.xml",
               "../icecream.cpp",
               "../icecream.h",
               "../macros.h",
