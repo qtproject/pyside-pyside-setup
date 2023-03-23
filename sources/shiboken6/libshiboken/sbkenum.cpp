@@ -1065,11 +1065,16 @@ static PyObject *create_missing_func(PyObject *klass)
 {
     // When creating the class, memorize it in the missing function by
     // a partial function argument.
+#ifdef PYPY_VERSION
+    const char *functools_str = "functools";
+#else
+    const char *functools_str = "_functools";
+#endif
     static auto *const type = SbkType_FromSpec(&dummy_spec);
     static auto *const obType = reinterpret_cast<PyObject *>(type);
     static auto *const _missing = Shiboken::String::createStaticString("_missing_");
     static auto *const func = PyObject_GetAttr(obType, _missing);
-    static auto *const functools = PyImport_ImportModule("_functools");   // builtin
+    static auto *const functools = PyImport_ImportModule(functools_str);   // builtin
     static auto *const _partial = Shiboken::String::createStaticString("partial");
     static auto *const partial = PyObject_GetAttr(functools, _partial);
     return PyObject_CallFunctionObjArgs(partial, func, klass, nullptr);
