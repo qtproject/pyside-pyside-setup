@@ -466,7 +466,7 @@ tt.descname {
   position:relative
 }
 #menuextras li a:hover span {
-  color: #41cd52;
+  color: #2cde85;
 }
 /* new header */
 #mm-wrap, #mm-wrap #mm-helper,
@@ -557,14 +557,14 @@ tt.descname {
   display:inline;
   float:left;
   width:31px;
-  color:#41cd52
+  color:#2cde85
 }
 #navbar .navbar-oneQt:before {
   content:attr(data-icon);
   position:absolute;
   top:14px;
   left:0;
-  color:#41cd52;
+  color:#2cde85;
   font-family:'Qt Icons';
   line-height:1;
   font-size:40px;
@@ -1939,5 +1939,5 @@ table.special td {
 .special td:hover {
     padding-top: 2px;
     padding-bottom: 2px;
-    border-bottom: 4px solid #41cd52;
+    border-bottom: 4px solid #2cde85;
 }
