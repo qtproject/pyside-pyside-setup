@@ -463,7 +463,7 @@ Since the process relies on a Qt installation, you need to specify where the
 the command line option ``--qt-src-dir``.
 
 Once the common ``setup.py`` build process finishes (remember to use
-``--build-docs`` to enable the documentation build, and ``--doc-build-inline``
+``--build-docs`` to enable the documentation build, and ``--doc-build-online``
 to get the HTML files), you can go to the generated
 ``build/<your_env_name>/build/pyside6`` directory, and run::
 
@@ -472,7 +472,7 @@ to get the HTML files), you can go to the generated
 You can add ``-j X``, to perform the build process in parallel with
 X processes.
 
-.. note:: The :command:`apidoc` make target builds offline documentation in QCH (Qt Creator Help)
+.. note:: The :command:`apidoc` make target builds offline documentation in ``QCH`` (Qt Creator Help)
    format by default. You can switch to building for the online use with the ``--doc-build-online``
    configure option.
 
@@ -508,6 +508,17 @@ use Qt Assistant instead, use the following command to register the QCH file bef
 Qt Assistant::
 
     assistant -register PySide.qch
+
+Troubleshooting documentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The documentation uses intersphinx to link from the PySide to the
+Shiboken documentation. This can fail if
+
+* the default ``QCH`` format is used; in which case the required ``objects.inv``
+  files are not generated. Use ``--doc-build-online``.
+* rst-only and full doc builds are mixed, resulting in wrong values for the
+  intersphinx location in the CMake files. Re-run ``cmake`` to fix this.
 
 Using the internal tools
 ------------------------
