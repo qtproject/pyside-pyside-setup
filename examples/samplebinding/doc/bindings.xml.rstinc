@@ -1,0 +1,32 @@
+Shiboken requires an XML-based typesystem file that defines the
+relationship between C++ and Python types.
+
+It declares the two aforementioned classes. One of them as an
+“object-type” and the other as a “value-type”. The main difference is that
+object-types are passed around in generated code as pointers, whereas
+value-types are copied (value semantics).
+
+By specifying the names of these classes in the typesystem file, Shiboken
+automatically tries to generate bindings for all methods of those
+classes. You need not mention all the methods manually in the XML file, unless
+you want to modify them.
+
+Object ownership rules
+----------------------
+
+Shiboken doesn't know if Python or C++ are responsible for freeing the C++
+objects that were allocated in the Python code, and assuming this might lead to
+errors. There can be cases where Python should release the C++ memory when the
+reference count of the Python object becomes zero, but it should never delete
+the underlying C++ object just from assuming that it will not be deleted by
+underlying C++ library, or if it's maybe parented to another object (like
+QWidgets).
+
+In our case, the :code:`clone()` method is only called inside the C++ library,
+and we assume that the C++ code takes care of releasing the cloned object.
+
+As for :code:`addIcecreamFlavor()`, we know that a :code:`Truck` owns the
+:code:`Icecream` object, and will remove it once the :code:`Truck` is
+destroyed. That's why the ownership is set to “c++” in the typesystem file,
+so that the C++ objects are not deleted when the corresponding Python names
+go out of scope.
