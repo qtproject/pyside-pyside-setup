@@ -15,12 +15,9 @@ from .commands import run_qmlimportscanner
 EXCLUDED_QML_PLUGINS = {"QtQuick", "QtQuick3D", "QtCharts", "QtWebEngine", "QtTest", "QtSensors"}
 
 
-class Config:
-    """
-    Wrapper class around config file, whose options are used to control the executable creation
-    """
+class BaseConfig:
 
-    def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool):
+    def __init__(self, config_file: Path, dry_run: bool, comment_prefixes: str = "/") -> None:
         self.config_file = config_file
         self.parser = ConfigParser(comment_prefixes="/", allow_no_value=True)
         if not self.config_file.exists():
@@ -30,10 +27,45 @@ class Config:
             else:
                 self.config_file = Path(__file__).parent / "default.spec"
         else:
-            print(f"Using existing config file {config_file}")
+            logging.info(f"Using existing config file {config_file}")
         self.parser.read(self.config_file)
 
-        self.dry_run = dry_run
+    def update_config(self):
+        logging.info(f"[DEPLOY] Creating {self.config_file}")
+        with open(self.config_file, "w+") as config_file:
+            self.parser.write(config_file, space_around_delimiters=True)
+
+    def set_value(self, section: str, key: str, new_value: str):
+        try:
+            current_value = self.get_value(section, key, ignore_fail=True)
+            if current_value != new_value:
+                self.parser.set(section, key, new_value)
+        except configparser.NoOptionError:
+            logging.warning(f"[DEPLOY] Key {key} does not exist")
+        except configparser.NoSectionError:
+            logging.warning(f"[DEPLOY] Section {section} does not exist")
+
+    def get_value(self, section: str, key: str, ignore_fail: bool = False):
+        try:
+            return self.parser.get(section, key)
+        except configparser.NoOptionError:
+            if not ignore_fail:
+                logging.warning(f"[DEPLOY] Key {key} does not exist")
+        except configparser.NoSectionError:
+            if not ignore_fail:
+                logging.warning(f"[DEPLOY] Section {section} does not exist")
+
+
+class Config(BaseConfig):
+    """
+    Wrapper class around pysidedeploy.spec file, whose options are used to control the executable
+    creation
+    """
+
+    def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool):
+        super().__init__(config_file, dry_run)
+
+        self._dry_run = dry_run
         # set source_file
         self.source_file = Path(
             self.set_or_fetch(config_property_val=source_file, config_property_key="input_file")
@@ -48,11 +80,18 @@ class Config:
             )
         )
 
+        self.title = self.get_value("app", "title")
         self.project_dir = None
         if self.get_value("app", "project_dir"):
             self.project_dir = Path(self.get_value("app", "project_dir")).absolute()
         else:
             self._find_and_set_project_dir()
+
+        self.exe_dir = None
+        if self.get_value("app", "exec_directory"):
+            self.exe_dir = Path(self.get_value("app", "exec_directory")).absolute()
+        else:
+            self._find_and_set_exe_dir()
 
         self.project_data: ProjectData = None
         if self.get_value("app", "project_file"):
@@ -74,29 +113,6 @@ class Config:
         else:
             self._find_and_set_excluded_qml_plugins()
 
-    def update_config(self):
-        logging.info(f"[DEPLOY] Creating {self.config_file}")
-        with open(self.config_file, "w+") as config_file:
-            self.parser.write(config_file, space_around_delimiters=True)
-
-    def set_value(self, section: str, key: str, new_value: str):
-        try:
-            current_value = self.get_value(section, key)
-            if current_value != new_value:
-                self.parser.set(section, key, new_value)
-        except configparser.NoOptionError:
-            logging.warning(f"[DEPLOY] key {key} does not exist")
-        except configparser.NoSectionError:
-            logging.warning(f"[DEPLOY] section {section} does not exist")
-
-    def get_value(self, section: str, key: str):
-        try:
-            return self.parser.get(section, key)
-        except configparser.NoOptionError:
-            logging.warning(f"[DEPLOY] key {key} does not exist")
-        except configparser.NoSectionError:
-            logging.warning(f"[DEPLOY] section {section} does not exist")
-
     def set_or_fetch(self, config_property_val, config_property_key, config_property_group="app"):
         """
         Write to config_file if 'config_property_key' is known without config_file
@@ -110,10 +126,13 @@ class Config:
         elif self.get_value(config_property_group, config_property_key):
             return self.get_value(config_property_group, config_property_key)
         else:
-            logging.exception(
+            raise RuntimeError(
                 f"[DEPLOY] No {config_property_key} specified in config file or as cli option"
             )
-            raise
+
+    @property
+    def dry_run(self):
+        return self._dry_run
 
     @property
     def qml_files(self):
@@ -130,6 +149,15 @@ class Config:
     @project_dir.setter
     def project_dir(self, project_dir):
         self._project_dir = project_dir
+
+    @property
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, title):
+        self._title = title
+        self.set_value("app", "title", title)
 
     @property
     def source_file(self):
@@ -154,6 +182,14 @@ class Config:
     @excluded_qml_plugins.setter
     def excluded_qml_plugins(self, excluded_qml_plugins):
         self._excluded_qml_plugins = excluded_qml_plugins
+
+    @property
+    def exe_dir(self):
+        return self._exe_dir
+
+    @exe_dir.setter
+    def exe_dir(self, exe_dir):
+        self._exe_dir = exe_dir
 
     def _find_and_set_qml_files(self):
         """Fetches all the qml_files in the folder and sets them if the
@@ -208,7 +244,8 @@ class Config:
             self.set_value(
                 "qt",
                 "qml_files",
-                ",".join([str(file.relative_to(self.project_dir)) for file in self.qml_files]),
+                ",".join([str(file.absolute().relative_to(self.project_dir))
+                          for file in self.qml_files]),
             )
             logging.info("[DEPLOY] QML files identified and set in config_file")
 
@@ -257,3 +294,14 @@ class Config:
 
             if self.excluded_qml_plugins:
                 self.set_value("qt", "excluded_qml_plugins", ",".join(self.excluded_qml_plugins))
+
+    def _find_and_set_exe_dir(self):
+        if self.project_dir == Path.cwd():
+            self.exe_dir = self.project_dir.relative_to(Path.cwd())
+        else:
+            self.exe_dir = self.project_dir
+        self.exe_dir = Path(
+            self.set_or_fetch(
+                config_property_val=self.exe_dir, config_property_key="exec_directory"
+            )
+        ).absolute()
