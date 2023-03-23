@@ -1,7 +1,7 @@
 [app]
 
 # Title of your application
-title = My Application
+title = pyside_app_demo
 
 # Project Directory. The general assumption is that project_dir is the parent directory
 # of input_file
@@ -24,7 +24,7 @@ python_path =
 # python packages to install
 # ordered-set: increase compile time performance of nuitka packaging
 # zstandard: provides final executable size optimization
-packages = nuitka==1.4.8,ordered_set,zstandard
+desktop_packages = nuitka==1.4.8,ordered_set,zstandard
 
 [qt]
 

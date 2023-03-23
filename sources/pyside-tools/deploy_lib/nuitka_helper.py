@@ -3,6 +3,7 @@
 
 import os
 import sys
+import logging
 from pathlib import Path
 from typing import List
 
@@ -36,7 +37,7 @@ class Nuitka:
         output_dir = source_file.parent / "deployment"
         if not dry_run:
             output_dir.mkdir(parents=True, exist_ok=True)
-            print("[DEPLOY] Running Nuitka")
+            logging.info("[DEPLOY] Running Nuitka")
         command = self.nuitka + [
             os.fspath(source_file),
             "--follow-imports",

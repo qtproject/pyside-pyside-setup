@@ -1,161 +1,110 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-"""pyside6-deploy deployment tool
+""" pyside6-deploy deployment tool
 
-   How does it work?
+    Deployment tool that uses Nuitka to deploy PySide6 applications to various Desktop (Windows,
+    Linux, macOS) platforms.
 
-   Running "pyside6-deploy path/to/main_file" will
-    1. Create a pysidedeploy.spec config file to control the overall deployment process
-    2. Prompt the user to create a virtual environment (if not in one already)
-       If yes, virtual environment is created in the current folder
-       If no, uses the system wide python
-    3. Install all dependencies and figure out Qt nuitka optimizations
-    2. Use the spec file by android deploy tool or nuitka (desktop), to
-       create the executable
+    How does it work?
 
-   Desktop deployment: Wrapper around Nuitka with support for Windows,
-   Linux, Mac
-     1. for non-QML cases, only required modules are included
-     2. for QML cases, all modules are included because of all QML
-        plugins getting included with nuitka
+    Desktop Deployment:
+        Command: pyside6-deploy path/to/main_file
+                 pyside6-deploy (incase main file is called main.py)
+                 pyside6-deploy -c /path/to/config_file
 
-   For other ways of using the tool:
-     1. pyside6-deploy (incase main file is called main.py)
-     2. pyside6-deploy -c /path/to/config_file
+        Platforms Supported: Linux, Windows, macOS
+        Module Binary inclusion:
+            1. for non-QML cases, only required modules are included
+            2. for QML cases, all modules are included because of all QML plugins getting included
+               with nuitka
+
+    Config file:
+        On the first run of the tool, it creates a config file called pysidedeploy.spec which
+        controls the various characteristic of the deployment. Users can simply change the value
+        in this config file to achieve different properties ie. change the application name,
+        deployment platform etc.
+
+        Note: This file is used by both pyside6-deploy and pyside6-android-deploy
+
 """
 
 import argparse
 import logging
-import sys
 from pathlib import Path
-import shutil
 import traceback
 from textwrap import dedent
 
-from deploy_lib import Config, PythonExecutable, MAJOR_VERSION
-
-EXE_FORMAT = ".exe" if sys.platform == "win32" else ".bin"
-
-
-def config_option_exists():
-    return True if any(item in sys.argv for item in ["--config-file", "-c"]) else False
+from deploy_lib import (setup_python, get_config, cleanup, install_python_dependencies, finalize,
+                        config_option_exists, Config, MAJOR_VERSION)
 
 
-def main_py_exists():
-    return (Path.cwd() / "main.py").exists()
-
-
-def clean(purge_path: Path):
-    """remove the generated deployment files"""
-    if purge_path.exists():
-        shutil.rmtree(purge_path)
-        logging.info("[DEPLOY] deployment directory purged")
-    else:
-        print(f"{purge_path} does not exist")
-
-
-def main(main_file: Path = None, config_file: Path = None, init: bool = False,
+def main(main_file: Path = None, name: str = None, config_file: Path = None, init: bool = False,
          loglevel=logging.WARNING, dry_run: bool = False, keep_deployment_files: bool = False,
          force: bool = False):
+
     logging.basicConfig(level=loglevel)
 
     if config_file and Path(config_file).exists():
-        config_file = Path(config_file)
+        config_file = Path(config_file).resolve()
 
     if not config_file and not main_file.exists():
         print(dedent("""
-            Directory does not contain main.py file
-            Please specify the main python entrypoint file or the config file
-            Run "pyside6-deploy --help" to see info about cli options
+            Directory does not contain main.py file.
+            Please specify the main python entrypoint file or the config file.
+            Run "pyside6-deploy desktop --help" to see info about cli options.
 
             pyside6-deploy exiting..."""))
         return
 
-    if main_file:
-        if main_file.parent != Path.cwd():
-            config_file = main_file.parent / "pysidedeploy.spec"
-        else:
-            config_file = Path.cwd() / "pysidedeploy.spec"
-
     # Nuitka command to run
     command_str = None
-
-    logging.info("[DEPLOY] Start")
     generated_files_path = None
+    config = None
+    logging.info("[DEPLOY] Start")
+
+    python = setup_python(dry_run=dry_run, force=force, init=init)
+    config = get_config(python_exe=python.exe, dry_run=dry_run, config_file=config_file,
+                        main_file=main_file)
+
+    # set application name
+    if name:
+        config.title = name
+
+    source_file = config.project_dir / config.source_file
+
+    generated_files_path = source_file.parent / "deployment"
+    cleanup(generated_files_path=generated_files_path, config=config)
+
+    install_python_dependencies(config=config, python=python, init=init,
+                                packages="desktop_packages")
+
+    # writing config file
+    if not dry_run:
+        config.update_config()
+
+    if init:
+        # config file created above. Exiting.
+        logging.info(f"[DEPLOY]: Config file {config.config_file} created")
+        return
+
     try:
-        python = None
-        response = "yes"
-        # checking if inside virtual environment
-        if not PythonExecutable.is_venv() and not force and not dry_run and not init:
-            response = input(("You are not in virtualenv. pyside6-deploy needs to install a "
-                              "few Python packages for deployment to work seamlessly. \n"
-                              "Proceed? [Y/n]"))
-
-        if response.lower() in ["no", "n"]:
-            print("Exiting ...")
-            sys.exit(0)
-
-        python = PythonExecutable(dry_run=dry_run)
-        logging.info(f"[DEPLOY] using python at {sys.executable}")
-
-        config = Config(config_file=config_file, source_file=main_file,
-                        python_exe=python.exe, dry_run=dry_run)
-
-        source_file = config.project_dir / config.source_file
-        generated_files_path = source_file.parent / "deployment"
-        if generated_files_path.exists():
-            clean(generated_files_path)
-
-        if not init:
-            # install packages needed for deployment
-            print("[DEPLOY] Installing dependencies \n")
-            packages = config.get_value("python", "packages").split(",")
-            python.install(packages=packages)
-            # nuitka requires patchelf to make patchelf rpath changes for some Qt files
-            if sys.platform.startswith("linux"):
-                python.install(packages=["patchelf"])
-
-        if config.project_dir == Path.cwd():
-            final_exec_path = config.project_dir.relative_to(Path.cwd())
-        else:
-            final_exec_path = config.project_dir
-        final_exec_path = Path(
-            config.set_or_fetch(
-                config_property_val=final_exec_path, config_property_key="exec_directory"
-            )
-        ).absolute()
-
-        if not dry_run:
-            config.update_config()
-
-        if init:
-            # config file created above. Exiting.
-            logging.info(f"[DEPLOY]: Config file  {config.config_file} created")
-            return
-
         # create executable
         if not dry_run:
-            print("[DEPLOY] Deploying application")
+            logging.info("[DEPLOY] Deploying application")
+
         command_str = python.create_executable(
                         source_file=source_file,
                         extra_args=config.get_value("nuitka", "extra_args"),
                         config=config,
-                     )
+                    )
     except Exception:
-        print(f"Exception occurred: {traceback.format_exc()}")
+        print(f"[DEPLOY] Exception occurred: {traceback.format_exc()}")
     finally:
-        # clean up generated deployment files and copy executable into
-        # final_exec_path
-        if (not keep_deployment_files and generated_files_path and generated_files_path.exists()):
-            generated_exec_path = generated_files_path / (source_file.stem + EXE_FORMAT)
-            if generated_exec_path.exists() and final_exec_path:
-                shutil.copy(generated_exec_path, final_exec_path)
-                print(
-                    f"[DEPLOY] Executed file created in "
-                    f"{final_exec_path / (source_file.stem + EXE_FORMAT)}"
-                )
-            clean(generated_files_path)
+        if generated_files_path and config:
+            finalize(generated_files_path=generated_files_path, config=config)
+            if not keep_deployment_files:
+                cleanup(generated_files_path=generated_files_path, config=Config)
 
     logging.info("[DEPLOY] End")
     return command_str
@@ -163,7 +112,8 @@ def main(main_file: Path = None, config_file: Path = None, init: bool = False,
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description=f"This tool deploys PySide{MAJOR_VERSION} to different platforms",
+        description=(f"This tool deploys PySide{MAJOR_VERSION} to Desktop (Windows, Linux, macOS)"
+                     "platforms"),
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
@@ -179,18 +129,20 @@ if __name__ == "__main__":
         help="Create pysidedeploy.spec file, if it doesn't already exists")
 
     parser.add_argument(
-        "-v", "--verbose", help="run in verbose mode", action="store_const",
+        "-v", "--verbose", help="Run in verbose mode", action="store_const",
         dest="loglevel", const=logging.INFO)
 
-    parser.add_argument("--dry-run", action="store_true", help="show the commands to be run")
+    parser.add_argument("--dry-run", action="store_true", help="Show the commands to be run")
 
     parser.add_argument(
         "--keep-deployment-files", action="store_true",
-        help="keep the generated deployment files generated")
+        help="Keep the generated deployment files generated")
 
-    parser.add_argument("-f", "--force", action="store_true", help="force all input prompts")
+    parser.add_argument("-f", "--force", action="store_true", help="Force all input prompts")
+
+    parser.add_argument("--name", type=str, help="Application name")
 
     args = parser.parse_args()
-    main(args.main_file, args.config_file, args.init, args.loglevel, args.dry_run,
-         args.keep_deployment_files, args.force)
 
+    main(args.main_file, args.name, args.config_file, args.init, args.loglevel, args.dry_run,
+         args.keep_deployment_files, args.force)
