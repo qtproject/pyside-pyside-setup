@@ -12,7 +12,10 @@ long_description = file: {long_description}
 long_description_content_type = text/markdown
 ext_modules = None
 projects_urls =
-    Bug Tracker = https://bugreports.qt.io
+    Documentation = https://doc.qt.io/qtforpython
+    Release notes = https://code.qt.io/cgit/pyside/pyside-setup.git/tree/doc/changelogs
+    Source = https://code.qt.io/cgit/pyside/pyside-setup.git/
+    Tracker = https://bugreports.qt.io/projects/PYSIDE
 classifiers =
     Development Status :: 5 - Production/Stable
     Environment :: Console
