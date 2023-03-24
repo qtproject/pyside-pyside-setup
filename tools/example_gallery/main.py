@@ -134,6 +134,15 @@ def make_zip_archive(zip_name, src, skip_dirs=None):
                 zf.write(file, file.relative_to(src_path.parent))
 
 
+def doc_file(project_dir, project_file_entry):
+    """Return the (optional) .rstinc file describing a source file."""
+    rst_file = project_dir
+    if rst_file.name != "doc":  # Special case: Dummy .pyproject file in doc dir
+        rst_file /= "doc"
+    rst_file /= Path(project_file_entry).name + ".rstinc"
+    return rst_file if rst_file.is_file() else None
+
+
 def get_code_tabs(files, project_dir):
     content = "\n"
 
@@ -155,6 +164,13 @@ def get_code_tabs(files, project_dir):
             continue
 
         content += f"{ind(1)}.. tab-item:: {project_file}\n\n"
+
+        doc_rstinc_file = doc_file(project_dir, project_file)
+        if doc_rstinc_file:
+            indent = ind(2)
+            for line in doc_rstinc_file.read_text("utf-8").split("\n"):
+                content += indent + line + "\n"
+            content += "\n"
 
         lexer = get_lexer(pfile)
         content += add_indent(f"{ind(1)}.. code-block:: {lexer}", 1)
