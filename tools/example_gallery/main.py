@@ -22,6 +22,14 @@ from pathlib import Path
 from textwrap import dedent
 
 opt_quiet = False
+
+
+IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".svg", ".svgz", ".webp")
+
+
+IGNORED_SUFFIXES = IMAGE_SUFFIXES + (".pdf", ".pyc")
+
+
 suffixes = {
     ".h": "cpp",
     ".cpp": "cpp",
@@ -32,6 +40,7 @@ suffixes = {
     ".qrc": "xml",
     ".ui": "xml",
     ".xbel": "xml",
+    ".xml": "xml",
 }
 
 
@@ -42,10 +51,8 @@ def ind(x):
 def get_lexer(path):
     if path.name == "CMakeLists.txt":
         return "cmake"
-    suffix = path.suffix
-    if suffix in suffixes:
-        return suffixes[suffix]
-    return "text"
+    lexer = suffixes.get(path.suffix)
+    return lexer if lexer else "text"
 
 
 def add_indent(s, level):
@@ -144,7 +151,7 @@ def get_code_tabs(files, project_dir):
             content += ".. tab-set::\n\n"
 
         pfile = Path(project_file)
-        if pfile.suffix in (".jpg", ".pdf", ".png", ".pyc", ".svg", ".svgz"):
+        if pfile.suffix in IGNORED_SUFFIXES:
             continue
 
         content += f"{ind(1)}.. tab-item:: {project_file}\n\n"
@@ -232,8 +239,7 @@ if __name__ == "__main__":
         rst_file = f"example_{module_name}_{extra_names}_{example_name}.rst".replace("__", "_")
 
         def check_img_ext(i):
-            EXT = (".png", ".jpg", ".jpeg", ".gif", ".webp")
-            return i.suffix in EXT
+            return i.suffix in IMAGE_SUFFIXES
 
         # Check for a 'doc' directory inside the example
         has_doc = False
