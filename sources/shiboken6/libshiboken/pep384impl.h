@@ -149,6 +149,8 @@ LIBSHIBOKEN_API void PepType_PFTP_delete(PySideQFlagsType *flagsType);
 // functions used everywhere
 LIBSHIBOKEN_API const char *PepType_GetNameStr(PyTypeObject *type);
 
+LIBSHIBOKEN_API PyObject *Pep_GetPartialFunction(void);
+
 /*****************************************************************************
  *
  * RESOLVED: pydebug.h

@@ -719,6 +719,31 @@ PepType_GetNameStr(PyTypeObject *type)
     return ret;
 }
 
+// PYSIDE-2264: Find the _functools or functools module and retrieve the
+//              partial function. This can be tampered with, check carefully.
+PyObject *
+Pep_GetPartialFunction(void)
+{
+    static bool initialized = false;
+    static PyObject *result{};
+    if (initialized) {
+        Py_INCREF(result);
+        return result;
+    }
+    auto *functools = PyImport_ImportModule("_functools");
+    if (!functools) {
+        PyErr_Clear();
+        functools = PyImport_ImportModule("functools");
+    }
+    if (!functools)
+        Py_FatalError("functools cannot be found");
+    result = PyObject_GetAttrString(functools, "partial");
+    if (!result || !PyCallable_Check(result))
+        Py_FatalError("partial not found or not a function");
+    initialized = true;
+    return result;
+}
+
 /*****************************************************************************
  *
  * Newly introduced convenience functions
