@@ -7,6 +7,6 @@ The Camera Example demonstrates how you can use Qt Multimedia to implement some
 basic Camera functionality to take still images and record video clips with
 audio.
 
-.. image:: camera.png
-   :width: 400
+.. image:: camera.webp
+   :width: 678
    :alt: Camera Screenshot

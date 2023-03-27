@@ -1,3 +1,10 @@
 {
-    "files": ["camera.py"]
+    "files": ["main.py",
+              "camera.py",
+              "camera.ui",
+              "imagesettings.py",
+              "imagesettings.ui",
+              "metadatadialog.py",
+              "videosettings.py",
+              "videosettings.ui"]
 }
