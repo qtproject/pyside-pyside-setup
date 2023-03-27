@@ -77,7 +77,7 @@ class MainWindow(QMainWindow):
                 return
 
         self.m_file_path = ''
-        self._ui.editor.setPlainText(tr("## New document"))
+        self._ui.editor.setPlainText("## New document")
         self._ui.editor.document().setModified(False)
 
     @Slot()
@@ -105,18 +105,19 @@ class MainWindow(QMainWindow):
         name = QDir.toNativeSeparators(self.m_file_path)
         if not f.open(QIODevice.WriteOnly | QIODevice.Text):
             error = f.errorString()
-            QMessageBox.warning(self, windowTitle(),
+            QMessageBox.warning(self, self.windowTitle(),
                                 f"Could not write to file {name}: {error}")
             return
         text = self._ui.editor.toPlainText()
         f.write(bytes(text, encoding='utf8'))
         f.close()
+        self._ui.editor.document().setModified(False)
         self.statusBar().showMessage(f"Wrote {name}")
 
     @Slot()
     def onFileSaveAs(self):
         dialog = QFileDialog(self)
-        dialog.setWindowTitle("Open MarkDown File")
+        dialog.setWindowTitle("Save MarkDown File")
         dialog.setMimeTypeFilters(["text/markdown"])
         dialog.setAcceptMode(QFileDialog.AcceptSave)
         dialog.setDefaultSuffix("md")
