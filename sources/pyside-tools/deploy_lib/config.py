@@ -192,13 +192,13 @@ class Config:
                 if len(qml_files_temp) > 500:
                     if "site-packages" in str(qml_files_temp[-1]):
                         logging.warning(
-                            "You seem to include a lot of QML files from a \
-                                            local virtual env. Are they intended?"
+                            "You seem to include a lot of QML files from a local virtual env."
+                            "This can lead to errors in deployment."
                         )
                     else:
                         logging.warning(
-                            "You seem to include a lot of QML files. \
-                                        Are they intended?"
+                            "You seem to include a lot of QML files. This can lead to errors in "
+                            "deployment."
                         )
 
                 if qml_files_temp:
