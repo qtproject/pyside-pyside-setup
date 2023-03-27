@@ -7,16 +7,12 @@ set(QtWebSockets_SRC
 ${QtWebSockets_GEN_DIR}/qmaskgenerator_wrapper.cpp
 ${QtWebSockets_GEN_DIR}/qwebsocket_wrapper.cpp
 ${QtWebSockets_GEN_DIR}/qwebsocketcorsauthenticator_wrapper.cpp
+${QtWebSockets_GEN_DIR}/qwebsockethandshakeoptions_wrapper.cpp
 ${QtWebSockets_GEN_DIR}/qwebsocketprotocol_wrapper.cpp
 ${QtWebSockets_GEN_DIR}/qwebsocketserver_wrapper.cpp
 # module is always needed
 ${QtWebSockets_GEN_DIR}/qtwebsockets_module_wrapper.cpp
 )
-
-if (Qt${QT_MAJOR_VERSION}WebSockets_VERSION VERSION_GREATER_EQUAL 6.4.0)
-    list(APPEND QtWebSockets_SRC
-         ${QtWebSockets_GEN_DIR}/qwebsockethandshakeoptions_wrapper.cpp)
-endif()
 
 set(QtWebSockets_include_dirs ${QtWebSockets_SOURCE_DIR}
                         ${QtWebSockets_BINARY_DIR}
