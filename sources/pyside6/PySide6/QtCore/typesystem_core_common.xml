@@ -930,6 +930,28 @@
     </add-function>
   </value-type>
 
+  <value-type name="QPermission" since="6.5">
+      <configuration condition="QT_CONFIG(permissions)"/>
+  </value-type>
+  <value-type name="QBluetoothPermission" since="6.5">
+      <configuration condition="QT_CONFIG(permissions)"/>
+  </value-type>
+  <value-type name="QCalendarPermission" since="6.5">
+      <configuration condition="QT_CONFIG(permissions)"/>
+  </value-type>
+  <value-type name="QCameraPermission" since="6.5">
+      <configuration condition="QT_CONFIG(permissions)"/>
+  </value-type>
+  <value-type name="QContactsPermission" since="6.5">
+      <configuration condition="QT_CONFIG(permissions)"/>
+  </value-type>
+  <value-type name="QLocationPermission" since="6.5">
+      <configuration condition="QT_CONFIG(permissions)"/>
+  </value-type>
+  <value-type name="QMicrophonePermission" since="6.5">
+      <configuration condition="QT_CONFIG(permissions)"/>
+  </value-type>
+
   <value-type name="QPoint" hash-function="PySide::hash">
     <extra-includes>
       <include file-name="pysideqhash.h" location="global"/>
