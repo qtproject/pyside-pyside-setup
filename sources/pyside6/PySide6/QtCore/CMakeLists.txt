@@ -3,6 +3,8 @@
 
 project(QtCore)
 
+set(QtCore_DROPPED_ENTRIES )
+
 set(QtCore_static_sources
     "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.cpp"
     "${QtCore_SOURCE_DIR}/glue/core_snippets.cpp"
@@ -197,6 +199,25 @@ ${SPECIFIC_OS_FILES}
 ${QtCore_GEN_DIR}/qtcore_module_wrapper.cpp
 )
 
+get_property(QtCore_disabled_features TARGET Qt${QT_MAJOR_VERSION}::Core
+             PROPERTY QT_DISABLED_PUBLIC_FEATURES)
+
+if("permissions" IN_LIST QtCore_disabled_features)
+    list(APPEND QtCore_DROPPED_ENTRIES QPermission
+         QBluetoothPermission QCalendarPermission QCameraPermission
+         QContactsPermission QLocationPermission QMicrophonePermission)
+    message(STATUS "Qt${QT_MAJOR_VERSION}Core: Dropping Permissions classes")
+else()
+    list(APPEND QtCore_SRC
+         ${QtCore_GEN_DIR}/qbluetoothpermission_wrapper.cpp
+         ${QtCore_GEN_DIR}/qcalendarpermission_wrapper.cpp
+         ${QtCore_GEN_DIR}/qcamerapermission_wrapper.cpp
+         ${QtCore_GEN_DIR}/qcontactspermission_wrapper.cpp
+         ${QtCore_GEN_DIR}/qlocationpermission_wrapper.cpp
+         ${QtCore_GEN_DIR}/qmicrophonepermission_wrapper.cpp
+         ${QtCore_GEN_DIR}/qpermission_wrapper.cpp)
+endif()
+
 configure_file("${QtCore_SOURCE_DIR}/QtCore_global.post.h.in"
                "${QtCore_BINARY_DIR}/QtCore_global.post.h" @ONLY)
 
@@ -223,6 +244,7 @@ create_pyside_module(NAME QtCore
                      STATIC_SOURCES QtCore_static_sources
                      TYPESYSTEM_NAME ${QtCore_BINARY_DIR}/typesystem_core.xml
                      GLUE_SOURCES QtCore_glue_sources
+                     DROPPED_ENTRIES QtCore_DROPPED_ENTRIES
                      )
 
 install(FILES ${pyside6_SOURCE_DIR}/qtcorehelper.h DESTINATION include/PySide6/QtCore/)
