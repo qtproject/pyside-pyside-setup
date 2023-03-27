@@ -34,8 +34,8 @@ ${QtCore_GEN_DIR}/qbuffer_wrapper.cpp
 ${QtCore_GEN_DIR}/qbytearray_frombase64result_wrapper.cpp
 ${QtCore_GEN_DIR}/qbytearray_wrapper.cpp
 ${QtCore_GEN_DIR}/qbytearraymatcher_wrapper.cpp
-${QtCore_GEN_DIR}/qcalendar_wrapper.cpp
 ${QtCore_GEN_DIR}/qcalendar_systemid_wrapper.cpp
+${QtCore_GEN_DIR}/qcalendar_wrapper.cpp
 ${QtCore_GEN_DIR}/qcalendar_yearmonthday_wrapper.cpp
 ${QtCore_GEN_DIR}/qcborarray_wrapper.cpp
 ${QtCore_GEN_DIR}/qcborerror_wrapper.cpp
@@ -92,6 +92,7 @@ ${QtCore_GEN_DIR}/qline_wrapper.cpp
 ${QtCore_GEN_DIR}/qlinef_wrapper.cpp
 ${QtCore_GEN_DIR}/qlocale_wrapper.cpp
 ${QtCore_GEN_DIR}/qlockfile_wrapper.cpp
+${QtCore_GEN_DIR}/qloggingcategory_wrapper.cpp
 ${QtCore_GEN_DIR}/qmargins_wrapper.cpp
 ${QtCore_GEN_DIR}/qmarginsf_wrapper.cpp
 ${QtCore_GEN_DIR}/qmessageauthenticationcode_wrapper.cpp
@@ -111,6 +112,7 @@ ${QtCore_GEN_DIR}/qmodelroledata_wrapper.cpp
 ${QtCore_GEN_DIR}/qmutex_wrapper.cpp
 ${QtCore_GEN_DIR}/qobject_wrapper.cpp
 ${QtCore_GEN_DIR}/qoperatingsystemversion_wrapper.cpp
+${QtCore_GEN_DIR}/qoperatingsystemversionbase_wrapper.cpp
 ${QtCore_GEN_DIR}/qparallelanimationgroup_wrapper.cpp
 ${QtCore_GEN_DIR}/qpauseanimation_wrapper.cpp
 ${QtCore_GEN_DIR}/qpersistentmodelindex_wrapper.cpp
@@ -147,11 +149,11 @@ ${QtCore_GEN_DIR}/qsocketnotifier_wrapper.cpp
 ${QtCore_GEN_DIR}/qsortfilterproxymodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qstandardpaths_wrapper.cpp
 ${QtCore_GEN_DIR}/qstorageinfo_wrapper.cpp
-${QtCore_GEN_DIR}/qstringconverterbase_wrapper.cpp
-${QtCore_GEN_DIR}/qstringconverterbase_state_wrapper.cpp
 ${QtCore_GEN_DIR}/qstringconverter_wrapper.cpp
-${QtCore_GEN_DIR}/qstringencoder_wrapper.cpp
+${QtCore_GEN_DIR}/qstringconverterbase_state_wrapper.cpp
+${QtCore_GEN_DIR}/qstringconverterbase_wrapper.cpp
 ${QtCore_GEN_DIR}/qstringdecoder_wrapper.cpp
+${QtCore_GEN_DIR}/qstringencoder_wrapper.cpp
 ${QtCore_GEN_DIR}/qstringlistmodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qsysinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qsystemsemaphore_wrapper.cpp
@@ -189,17 +191,11 @@ ${QtCore_GEN_DIR}/qxmlstreamnamespacedeclaration_wrapper.cpp
 ${QtCore_GEN_DIR}/qxmlstreamnotationdeclaration_wrapper.cpp
 ${QtCore_GEN_DIR}/qxmlstreamreader_wrapper.cpp
 ${QtCore_GEN_DIR}/qxmlstreamwriter_wrapper.cpp
-${QtCore_GEN_DIR}/qloggingcategory_wrapper.cpp
 
 ${SPECIFIC_OS_FILES}
 # module is always needed
 ${QtCore_GEN_DIR}/qtcore_module_wrapper.cpp
 )
-
-if (Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_EQUAL 6.3.0 OR Qt${QT_MAJOR_VERSION}Core_VERSION VERSION_GREATER 6.3.0)
-    list(APPEND QtCore_SRC
-         ${QtCore_GEN_DIR}/qoperatingsystemversionbase_wrapper.cpp)
-endif()
 
 configure_file("${QtCore_SOURCE_DIR}/QtCore_global.post.h.in"
                "${QtCore_BINARY_DIR}/QtCore_global.post.h" @ONLY)

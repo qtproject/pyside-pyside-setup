@@ -68,11 +68,9 @@ else()
          ${QtNetwork_GEN_DIR}/qsslerror_wrapper.cpp
          ${QtNetwork_GEN_DIR}/qsslkey_wrapper.cpp
          ${QtNetwork_GEN_DIR}/qsslpresharedkeyauthenticator_wrapper.cpp
+         ${QtNetwork_GEN_DIR}/qsslserver_wrapper.cpp
          ${QtNetwork_GEN_DIR}/qsslsocket_wrapper.cpp
          ${QtNetwork_GEN_DIR}/qocspresponse_wrapper.cpp)
-     if (Qt${QT_MAJOR_VERSION}Network_VERSION VERSION_GREATER_EQUAL 6.4.0)
-         list(APPEND QtNetwork_SRC ${QtNetwork_GEN_DIR}/qsslserver_wrapper.cpp)
-     endif()
     message(STATUS "Qt${QT_MAJOR_VERSION}Network: Adding SSL classes")
 endif()
 
