@@ -555,13 +555,19 @@ def handle_new(x):
 INSTANCE_PMF_RE = re.compile(r"&?(\w+),\s*&\w+::(\w+)")
 
 
-CONNECT_RE = re.compile(r"^(\s*)(QObject::)?connect\((\w+\.\w+),\s*")
+CONNECT_RE = re.compile(r"^(\s*)(QObject::)?connect\(([A-Za-z0-9_\.]+),\s*")
 
 
-def handle_qt_connects(line):
-    if not INSTANCE_PMF_RE.search(line):
+def handle_qt_connects(line_in):
+    if not INSTANCE_PMF_RE.search(line_in):
         return None
     # 1st pass, "fontButton, &QAbstractButton::clicked" -> "fontButton.clicked"
+
+    is_connect = "connect(" in line_in
+    line = line_in
+    # Remove any smart pointer access, etc in connect statements
+    if is_connect:
+        line = line.replace(".get()", "").replace(".data()", "").replace("->", ".")
     last_pos = 0
     result = ""
     for match in INSTANCE_PMF_RE.finditer(line):
@@ -574,6 +580,9 @@ def handle_qt_connects(line):
         last_pos = match.end()
         result += f"{instance}.{member_fun}"
     result += line[last_pos:]
+
+    if not is_connect:
+        return result
 
     # 2nd pass, reorder connect.
     connect_match = CONNECT_RE.match(result)
