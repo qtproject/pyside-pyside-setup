@@ -27,6 +27,17 @@ QML_IMPORT_MINOR_VERSION = "QML_IMPORT_MINOR_VERSION"
 QT_MODULES = "QT_MODULES"
 
 
+ITEM_MODELS = ["QAbstractListModel", "QAbstractProxyModel",
+               "QAbstractTableModel", "QConcatenateTablesProxyModel",
+               "QFileSystemModel", "QIdentityProxyModel", "QPdfBookmarkModel",
+               "QPdfSearchModel", "QSortFilterProxyModel", "QSqlQueryModel",
+               "QStandardItemModel", "QStringListModel", "QTransposeProxyModel",
+               "QWebEngineHistoryModel"]
+
+
+QOBJECT_DERIVED = ["QObject", "QQuickItem", "QQuickPaintedItem"] + ITEM_MODELS
+
+
 AstDecorator = Union[ast.Name, ast.Call]
 
 
@@ -89,7 +100,7 @@ class VisitorContext:
        out which classes inherit QObject."""
 
     def __init__(self):
-        self.qobject_derived = ["QObject", "QQuickItem", "QQuickPaintedItem"]
+        self.qobject_derived = QOBJECT_DERIVED
 
 
 class MetaObjectDumpVisitor(ast.NodeVisitor):
