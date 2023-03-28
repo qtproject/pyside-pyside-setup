@@ -112,6 +112,21 @@ def test_double_colon():
     assert st("this, &MyClass::slotError);") == "self.slotError)"
 
 
+def test_connects():
+    assert (
+        st("connect(button, &QPushButton::clicked, this, &MyClass::slotClicked);")
+        ==  "button.clicked.connect(self.slotClicked)"
+    )
+    assert (
+        st("connect(m_ui->button, &QPushButton::clicked, this, &MyClass::slotClicked);")
+        ==  "m_ui.button.clicked.connect(self.slotClicked)"
+    )
+    assert (
+        st("connect(button.get(), &QPushButton::clicked, this, &MyClass::slotClicked);")
+        ==  "button.clicked.connect(self.slotClicked)"
+    )
+
+
 def test_cout_endl():
     assert st("cout << 'hello' << 'world' << endl") == "print('hello', 'world')"
     assert st("    cout << 'hallo' << 'welt' << endl") == "    print('hallo', 'welt')"
