@@ -4,6 +4,11 @@
 from converter import snippet_translate as st
 
 
+def multi_st(lines):
+    result = [st(l) for l in lines.split("\n")]
+    return "\n".join(result)
+
+
 def test_comments():
     assert st("// This is a comment") == "# This is a comment"
     assert st("// double slash // inside") == "# double slash // inside"
@@ -436,6 +441,35 @@ def test_lambdas():
     #        addToCollage
     #   ).results();
     pass
+
+
+def test_switch_case():
+    source = """switch (v) {
+case 1:
+    f1();
+    break;
+case 2:
+    f2();
+    break;
+default:
+    f3();
+    break;
+}
+"""
+    expected = """
+if v == 1:
+    f1()
+    break
+elif v == 2:
+    f2()
+    break
+else:
+    f3()
+    break
+
+"""
+
+    assert multi_st(source) == expected
 
 
 def test_std_function():

@@ -36,13 +36,21 @@ RETURN_TYPE_PATTERN = re.compile(r"^[a-zA-Z0-9]+(<.*?>)? [\w]+::[\w\*\&]+\(.*\)$
 FUNCTION_PATTERN = re.compile(r"^[a-zA-Z0-9]+(<.*?>)? [\w\*\&]+\(.*\)$")
 ITERATOR_PATTERN = re.compile(r"(std::)?[\w]+<[\w]+>::(const_)?iterator")
 SCOPE_PATTERN = re.compile(r"[\w]+::")
+SWITCH_PATTERN = re.compile(r"^\s*switch\s*\(([a-zA-Z0-9_\.]+)\)\s*{.*$")
+CASE_PATTERN = re.compile(r"^(\s*)case\s+([a-zA-Z0-9_:\.]+):.*$")
+DEFAULT_PATTERN = re.compile(r"^(\s*)default:.*$")
 
 
 QUALIFIERS = {"public:", "protected:", "private:", "public slots:",
               "protected slots:", "private slots:", "signals:"}
 
 
+switch_var = None
+switch_branch = 0
+
+
 def snippet_translate(x):
+    global switch_var, switch_branch
 
     ## Cases which are not C++
     ## TODO: Maybe expand this with lines that doesn't need to be translated
@@ -135,6 +143,25 @@ def snippet_translate(x):
         x = handle_keywords(x, "false", "False")
     if "throw" in x:
         x = handle_keywords(x, "throw", "raise")
+
+    switch_match = SWITCH_PATTERN.match(x)
+    if switch_match:
+        switch_var = switch_match.group(1)
+        switch_branch = 0
+        return ""
+
+    switch_match = CASE_PATTERN.match(x)
+    if switch_match:
+        indent = switch_match.group(1)
+        value = switch_match.group(2)
+        cond = "if" if switch_branch == 0 else "elif"
+        switch_branch += 1
+        return f"{indent}{cond} {switch_var} == {value}:"
+
+    switch_match = DEFAULT_PATTERN.match(x)
+    if switch_match:
+        indent = switch_match.group(1)
+        return f"{indent}else:"
 
     # handle 'void Class::method(...)' and 'void method(...)'
     if VOID_METHOD_PATTERN.search(x):
