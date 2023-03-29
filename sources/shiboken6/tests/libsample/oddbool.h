@@ -98,7 +98,7 @@ public:
 #endif // C++ 20
 
 private:
-    int m_value;
+    [[maybe_unused]] int m_value;
 };
 
 #endif // ODDBOOL_H
