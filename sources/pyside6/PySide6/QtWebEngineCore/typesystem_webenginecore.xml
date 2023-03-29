@@ -10,6 +10,10 @@
   <load-typesystem name="QtPrintSupport/typesystem_printsupport.xml" generate="no"/>
   <load-typesystem name="QtWebChannel/typesystem_webchannel.xml" generate="no"/>
 
+  <function signature="qWebEngineChromiumVersion()"/>
+  <function signature="qWebEngineChromiumSecurityPatchVersion()"/>
+  <function signature="qWebEngineVersion()"/>
+
   <object-type name="QWebEngineCookieStore">
     <value-type name="FilterRequest" />
     <add-function signature="setCookieFilter(PyCallable* @filterCallback@)">
