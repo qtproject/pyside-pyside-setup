@@ -1,0 +1,7 @@
+{
+    "files": ["main.py", "browser.py", "browserwindow.py", "certificateerrordialog.ui",
+              "data/simplebrowser.qrc", "downloadmanagerwidget.py",
+              "downloadmanagerwidget.ui", "downloadwidget.py",
+              "downloadwidget.ui", "passworddialog.ui", "tabwidget.py",
+              "webpage.py", "webpopupwindow.py", "webview.py"]
+}
