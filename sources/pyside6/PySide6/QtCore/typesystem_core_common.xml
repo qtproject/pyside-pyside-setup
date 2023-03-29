@@ -938,15 +938,19 @@
   </value-type>
   <value-type name="QCalendarPermission" since="6.5">
       <configuration condition="QT_CONFIG(permissions)"/>
+      <enum-type name="AccessMode"/>
   </value-type>
   <value-type name="QCameraPermission" since="6.5">
       <configuration condition="QT_CONFIG(permissions)"/>
   </value-type>
   <value-type name="QContactsPermission" since="6.5">
       <configuration condition="QT_CONFIG(permissions)"/>
+      <enum-type name="AccessMode"/>
   </value-type>
   <value-type name="QLocationPermission" since="6.5">
       <configuration condition="QT_CONFIG(permissions)"/>
+      <enum-type name="Accuracy"/>
+      <enum-type name="Availability"/>
   </value-type>
   <value-type name="QMicrophonePermission" since="6.5">
       <configuration condition="QT_CONFIG(permissions)"/>
