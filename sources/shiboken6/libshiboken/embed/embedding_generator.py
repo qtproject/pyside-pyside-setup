@@ -122,22 +122,23 @@ def _embed_file(fin, fout):
     limit = 50
     text = fin.readlines()
     print(textwrap.dedent("""
-        /*
-         * This is a ZIP archive of all Python files in the directory
-         *         "shiboken6/shibokenmodule/files.dir/shibokensupport/signature"
-         * There is also a toplevel file "signature_bootstrap.py[c]" that will be
-         * directly executed from C++ as a bootstrap loader.
-         */
+         // This is a ZIP archive of all Python files in the directory
+         //         "shiboken6/shibokenmodule/files.dir/shibokensupport/signature"
+         // There is also a toplevel file "signature_bootstrap.py[c]" that will be
+         // directly executed from C++ as a bootstrap loader.
          """).strip(), file=fout)
     block, blocks = 0, len(text) // limit + 1
     for idx, line in enumerate(text):
         if idx % limit == 0:
+            if block:
+                fout.write(')"\n')
             comma = "," if block else ""
             block += 1
-            print(file=fout)
-            print(f'/* Block {block} of {blocks} */{comma}', file=fout)
-        print(f'\"{line.strip()}\"', file=fout)
-    print(f'/* Sentinel */, \"\"', file=fout)
+            fout.write(f'\n{comma} // Block {block} of {blocks}\nR"(')
+        else:
+            fout.write('\n')
+        fout.write(line.strip())
+    fout.write(')"\n\n/* Sentinel */, ""\n')
 
 
 def _embed_bytefile(fin, fout, is_text):
