@@ -43,32 +43,32 @@
         <value-type name="atomic" generate="no"/>
     </namespace-type>
 
-    <add-function signature="qmlAttachedPropertiesObject(PyTypeObject*,QObject*,bool=true)"
+    <add-function signature="qmlAttachedPropertiesObject(PyTypeObject*@type_obj@,QObject*,bool=true)"
                   return-type="QObject*">
         <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlattachedpropertiesobject"/>
     </add-function>
 
-    <add-function signature="qmlRegisterType(PyTypeObject,const char*,int,int,const char*)" return-type="int">
+    <add-function signature="qmlRegisterType(PyTypeObject@type_obj@,const char*@uri@,int@version_major@,int@version_minor@,const char*@qml_name@)" return-type="int">
         <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistertype"/>
     </add-function>
 
-    <add-function signature="qmlRegisterSingletonType(PyTypeObject,const char*,int,int,const char*,PyObject*)" return-type="int">
+    <add-function signature="qmlRegisterSingletonType(PyTypeObject@type_obj@,const char*@uri@,int@version_major@,int@version_minor@,const char*@qml_name@,PyObject*@callback@)" return-type="int">
       <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistersingletontype_qobject_callback"/>
     </add-function>
 
-    <add-function signature="qmlRegisterSingletonType(PyTypeObject,const char*,int,int,const char*)" return-type="int">
+    <add-function signature="qmlRegisterSingletonType(PyTypeObject@type_obj@,const char*@uri@,int@version_major@,int@version_minor@,const char*@qml_name@)" return-type="int">
       <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistersingletontype_qobject_nocallback"/>
     </add-function>
 
-    <add-function signature="qmlRegisterSingletonType(const char*,int,int,const char*,PyObject*)" return-type="int">
+    <add-function signature="qmlRegisterSingletonType(const char*@uri@,int@version_major@,int@version_minor@,const char*@qml_name@,PyObject*@callback@)" return-type="int">
       <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistersingletontype_qjsvalue"/>
     </add-function>
 
-    <add-function signature="qmlRegisterSingletonInstance(PyTypeObject,const char*,int,int,const char*,PyObject*)" return-type="int">
+    <add-function signature="qmlRegisterSingletonInstance(PyTypeObject@type_obj@,const char*@uri@,int@version_major@,int@version_minor@,const char*@qml_name@,PyObject*@callback@)" return-type="int">
       <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistersingletoninstance"/>
     </add-function>
 
-    <add-function signature="qmlRegisterUncreatableType(PyTypeObject,const char*,int,int,const char*,const char*)" return-type="int">
+    <add-function signature="qmlRegisterUncreatableType(PyTypeObject@type_obj@,const char*@uri@,int@version_major@,int@version_minor@,const char*@qml_name@,const char*@message@)" return-type="int">
         <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregisteruncreatabletype"/>
     </add-function>
 
