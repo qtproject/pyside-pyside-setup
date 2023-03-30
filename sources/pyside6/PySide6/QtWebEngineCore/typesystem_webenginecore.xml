@@ -38,6 +38,13 @@
     <enum-type name="SavePageFormat"/>
   </object-type>
 
+  <value-type name="QWebEngineFileSystemAccessRequest">
+    <enum-type name="AccessFlag" flags="AccessFlags"/>
+    <enum-type name="HandleType"/>
+    <!-- No default constructor -->
+    <modify-function signature="swap(QWebEngineFileSystemAccessRequest&amp;)" remove="all"/>
+  </value-type>
+
   <value-type name="QWebEngineFullScreenRequest"/>
 
   <object-type name="QWebEngineHistory"/>
