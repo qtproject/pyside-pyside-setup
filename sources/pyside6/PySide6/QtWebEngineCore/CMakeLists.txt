@@ -9,6 +9,7 @@ ${QtWebEngineCore_GEN_DIR}/qwebenginecontextmenurequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_filterrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginedownloadrequest_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebenginefilesystemaccessrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefullscreenrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginehistory_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginehistoryitem_wrapper.cpp
