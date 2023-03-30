@@ -68,6 +68,7 @@ def get_manifest(wheel_name: str, data: List[ModuleData]) -> str:
 
     # Skip certain files if needed
     lines.append("recursive-exclude PySide6/Qt/qml *.debug")
+    lines.append("prune PySide6/Qt/qml/QtQuick3D/MaterialEditor")
 
     return "\n".join(lines)
 
