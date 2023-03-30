@@ -95,7 +95,7 @@ class TestPySide6Deploy(unittest.TestCase):
         self.assertEqual(config_obj.get_value("app", "input_file"), "tetrix.py")
         self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
-        self.assertEqual(config_obj.get_value("python", "desktop_packages"), "nuitka==1.4.8,ordered_set,zstandard")
+        self.assertEqual(config_obj.get_value("python", "packages"), "nuitka==1.4.8,ordered_set,zstandard")
         self.assertEqual(config_obj.get_value("qt", "qml_files"), "")
         self.assertEqual(
             config_obj.get_value("nuitka", "extra_args"), "--quiet --noinclude-qt-translations=True"
@@ -149,7 +149,7 @@ class TestPySide6Deploy(unittest.TestCase):
         self.assertEqual(config_obj.get_value("app", "input_file"), "main.py")
         self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
-        self.assertEqual(config_obj.get_value("python", "desktop_packages"), "nuitka==1.4.8,ordered_set,zstandard")
+        self.assertEqual(config_obj.get_value("python", "packages"), "nuitka==1.4.8,ordered_set,zstandard")
         self.assertEqual(config_obj.get_value("qt", "qml_files"), "main.qml,MovingRectangle.qml")
         self.assertEqual(
             config_obj.get_value("nuitka", "extra_args"), "--quiet --noinclude-qt-translations=True"

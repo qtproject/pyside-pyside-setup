@@ -77,7 +77,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
     cleanup(generated_files_path=generated_files_path, config=config)
 
     install_python_dependencies(config=config, python=python, init=init,
-                                packages="desktop_packages")
+                                packages="packages")
 
     # writing config file
     if not dry_run:

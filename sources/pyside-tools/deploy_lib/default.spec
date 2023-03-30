@@ -24,7 +24,7 @@ python_path =
 # python packages to install
 # ordered-set: increase compile time performance of nuitka packaging
 # zstandard: provides final executable size optimization
-desktop_packages = nuitka==1.4.8,ordered_set,zstandard
+packages = nuitka==1.4.8,ordered_set,zstandard
 
 [qt]
 
