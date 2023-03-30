@@ -184,6 +184,7 @@ def wheel_files_pyside_addons() -> List[ModuleData]:
         module_QtWebEngineWidgets(),
         module_QtWebSockets(),
         module_QtHttpServer(),
+        module_QtLocation(),
     ]
     return files
 
@@ -922,4 +923,9 @@ def module_QtLanguageServer() -> ModuleData:
 def module_QtJsonRpc() -> ModuleData:
     data = ModuleData("JsonRpc")
     data.metatypes.append("qt6jsonrpcprivate_relwithdebinfo_metatypes.json")
+    return data
+
+
+def module_QtLocation() -> ModuleData:
+    data = ModuleData("Location")
     return data
