@@ -448,7 +448,7 @@ def test_switch_case():
 case 1:
     f1();
     break;
-case 2:
+case ClassName::EnumValue:
     f2();
     break;
 default:
@@ -460,7 +460,7 @@ default:
 if v == 1:
     f1()
     break
-elif v == 2:
+elif v == ClassName.EnumValue:
     f2()
     break
 else:

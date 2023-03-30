@@ -153,7 +153,7 @@ def snippet_translate(x):
     switch_match = CASE_PATTERN.match(x)
     if switch_match:
         indent = switch_match.group(1)
-        value = switch_match.group(2)
+        value = switch_match.group(2).replace("::", ".")
         cond = "if" if switch_branch == 0 else "elif"
         switch_branch += 1
         return f"{indent}{cond} {switch_var} == {value}:"
