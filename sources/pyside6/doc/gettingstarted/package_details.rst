@@ -95,7 +95,8 @@ Project development
 Widget Development
 ~~~~~~~~~~~~~~~~~~
 
-* ``pyside6-designer``, drag-and-drop tool for designing Widget UIs (generates ``.ui`` files).
+* ``pyside6-designer``, drag-and-drop tool for designing Widget UIs (generates ``.ui`` files,
+    see :ref:`using_ui_files`).
 * ``pyside6-uic``, to generate Python code from ``.ui`` form files.
 * ``pyside6-rcc``, to generate serialized data from ``.qrc`` resources files.
   Keep in mind these files can be used in other non-widget projects.
@@ -136,5 +137,3 @@ Deployment
 ~~~~~~~~~~
 
 * ``pyside6-deploy``, to deploy desktop applications in Linux, Windows and macOS environments.
-
-
