@@ -80,6 +80,7 @@ information about a particular change.
  - [PYSIDE-2259] QtTextToSpeech has been added.
  - [PYSIDE-2252] QAbstractTextDocumentLayout::PaintContext has been added.
  - [PYSIDE-2169] A leak in Enum forgiveness mode has been fixed.
+ - [PYSIDE-2260] A QML deployment issue with Nuitka has been fixed.
 
 ****************************************************************************
 *                                  Shiboken6                               *
