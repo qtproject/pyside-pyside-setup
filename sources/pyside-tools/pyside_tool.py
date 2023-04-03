@@ -158,11 +158,6 @@ def designer():
         # Find Python DLLs from the base installation
         if is_virtual_env():
             _extend_path_var("PATH", os.fspath(Path(sys._base_executable).parent), True)
-    # Add the Wiggly Widget example
-    wiggly_dir = os.fspath(pyside_dir / 'examples' / 'widgetbinding')
-    _extend_path_var('PYSIDE_DESIGNER_PLUGINS', wiggly_dir)
-    taskmenu_dir = os.fspath(pyside_dir / 'examples' / 'designer' / 'taskmenuextension')
-    _extend_path_var('PYSIDE_DESIGNER_PLUGINS', taskmenu_dir)
 
     qt_tool_wrapper(ui_tool_binary("designer"), sys.argv[1:])
 
