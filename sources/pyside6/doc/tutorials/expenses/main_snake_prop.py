@@ -61,7 +61,7 @@ class Widget(QWidget):
 
         #self.table_view.setSizePolicy(size)
         self.layout.add_widget(self.table)
-        self.layout.add_layout(self.right)
+        self.layout.form_layout(self.right)
 
         # Set the layout to the QWidget
         self.set_layout(self.layout)

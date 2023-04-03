@@ -2,16 +2,15 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import sys
-from PySide6.QtCore import Slot
-from PySide6.QtGui import QAction
-from PySide6.QtWidgets import (QApplication, QHeaderView, QHBoxLayout, QLabel, QLineEdit,
-                               QMainWindow, QPushButton, QTableWidget, QTableWidgetItem,
-                               QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QFormLayout, QHeaderView,
+                               QHBoxLayout, QLineEdit, QMainWindow, QPushButton,
+                               QTableWidget, QTableWidgetItem, QVBoxLayout,
+                               QWidget)
 
 
 class Widget(QWidget):
     def __init__(self):
-        QWidget.__init__(self)
+        super().__init__()
         self.items = 0
 
         # Example data
@@ -27,30 +26,26 @@ class Widget(QWidget):
 
         # Right
         self.description = QLineEdit()
+        self.description.setClearButtonEnabled(True)
         self.price = QLineEdit()
+        self.price.setClearButtonEnabled(True)
+
         self.add = QPushButton("Add")
         self.clear = QPushButton("Clear")
-        self.quit = QPushButton("Quit")
 
+        form_layout = QFormLayout()
+        form_layout.addRow("Description", self.description)
+        form_layout.addRow("Price", self.price)
         self.right = QVBoxLayout()
-        self.right.addWidget(QLabel("Description"))
-        self.right.addWidget(self.description)
-        self.right.addWidget(QLabel("Price"))
-        self.right.addWidget(self.price)
+        self.right.addLayout(form_layout)
         self.right.addWidget(self.add)
         self.right.addStretch()
         self.right.addWidget(self.clear)
-        self.right.addWidget(self.quit)
 
         # QWidget Layout
-        self.layout = QHBoxLayout()
-
-        #self.table_view.setSizePolicy(size)
+        self.layout = QHBoxLayout(self)
         self.layout.addWidget(self.table)
         self.layout.addLayout(self.right)
-
-        # Set the layout to the QWidget
-        self.setLayout(self.layout)
 
         # Fill example data
         self.fill_table()
@@ -66,7 +61,7 @@ class Widget(QWidget):
 
 class MainWindow(QMainWindow):
     def __init__(self, widget):
-        QMainWindow.__init__(self)
+        super().__init__()
         self.setWindowTitle("Tutorial")
 
         # Menu
@@ -74,16 +69,10 @@ class MainWindow(QMainWindow):
         self.file_menu = self.menu.addMenu("File")
 
         # Exit QAction
-        exit_action = QAction("Exit", self)
+        exit_action = self.file_menu.addAction("Exit", self.close)
         exit_action.setShortcut("Ctrl+Q")
-        exit_action.triggered.connect(self.exit_app)
 
-        self.file_menu.addAction(exit_action)
         self.setCentralWidget(widget)
-
-    @Slot()
-    def exit_app(self, checked):
-        QApplication.quit()
 
 
 if __name__ == "__main__":

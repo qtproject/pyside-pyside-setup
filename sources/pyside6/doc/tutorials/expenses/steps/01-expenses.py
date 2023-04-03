@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow
 
 class MainWindow(QMainWindow):
     def __init__(self):
-        QMainWindow.__init__(self)
+        super().__init__()
         self.setWindowTitle("Tutorial")
 
 if __name__ == "__main__":
