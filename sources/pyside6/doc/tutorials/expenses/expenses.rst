@@ -61,40 +61,13 @@ to call the method `menuBar()` and populate it inside the `MainWindow` class.
 
 .. literalinclude:: steps/02-expenses.py
    :linenos:
-   :lines: 9-21
-   :emphasize-lines: 6
+   :lines: 9-19
+   :emphasize-lines: 10
 
 Notice that the code snippet adds a *File* menu with the *Exit* option only.
 
-First signal/slot connection
-----------------------------
-
-The *Exit* option must be connected to a slot that triggers the application to exit. The main
-idea to achieve this, is the following:
-
-.. code-block:: python
-
-     element.signal_name.connect(slot_name)
-
-All the interface's elements could be connected through signals to certain slots,
-in the case of a `QAction`, the signal `triggered` can be used:
-
-.. code-block:: python
-
-     exit_action.triggered.connect(slot_name)
-
-.. note:: Now a *slot* needs to be defined to exit the application, which can be done using
-          `QApplication.quit()`.  If we put all these concepts together you will end up with the
-          following code:
-
-.. literalinclude:: steps/03-expenses.py
-   :linenos:
-   :lines: 19-28
-   :emphasize-lines: 4, 8-10
-
-Notice that the decorator `@Slot()` is required for each slot you declare to properly
-register them. Slots are normal functions, but the main difference is that they
-will be invokable from `Signals` of QObjects when connected.
+The *Exit* option must be connected to a slot that triggers the application to exit. We pass
+``QWidget.close()`` here. After the last window has been closed, the application exits.
 
 Empty widget and data
 ---------------------
@@ -107,13 +80,13 @@ Additionally, you will define example data to visualize later.
 
 .. literalinclude:: steps/04-expenses.py
    :linenos:
-   :lines: 9-16
+   :lines: 8-15
 
 With the `Widget` class in place, modify `MainWindow`'s initialization code
 
 .. literalinclude:: steps/04-expenses.py
    :linenos:
-   :lines: 43-47
+   :lines: 37-40
 
 Window layout
 -------------
@@ -130,7 +103,7 @@ will add this procedure to the `Widget` constructor.
 
 .. literalinclude:: steps/05-expenses.py
    :linenos:
-   :lines: 11-36
+   :lines: 11-31
 
 As you can see, the code also includes a `QHBoxLayout` that provides the container to place widgets
 horizontally.
@@ -143,7 +116,7 @@ displayed below.
 
 .. literalinclude:: steps/05-expenses.py
    :linenos:
-   :lines: 38-44
+   :lines: 33-39
 
 Having this process on a separate method is a good practice to leave the constructor more readable,
 and to split the main functions of the class in independent processes.
@@ -156,8 +129,8 @@ Because the data that is being used is just an example, you are required to incl
 input items to the table, and extra buttons to clear the table's content, and also quit the
 application.
 
-To distribute these input lines and buttons, you will use a `QVBoxLayout` that allows you to place
-elements vertically inside a layout.
+For input lines along with descriptive labels, you will use a `QFormLayout`. Then,
+you will nest the form layout into a `QVBoxLayout` along with the buttons.
 
 .. literalinclude:: steps/06-expenses.py
    :linenos:
@@ -169,7 +142,7 @@ example:
 
 .. literalinclude:: steps/06-expenses.py
    :linenos:
-   :lines: 5-10
+   :lines: 45-48
 
 The next step will be connecting those new buttons to slots.
 
@@ -183,17 +156,19 @@ documentation <https://doc.qt.io/qtforpython/PySide6/QtWidgets/QAbstractButton.h
 
 .. literalinclude:: steps/07-expenses.py
    :linenos:
-   :lines: 55-58
+   :lines: 50-52
 
 As you can see on the previous lines, we are connecting each *clicked* signal to different slots.
 In this example slots are normal class methods in charge of perform a determined task associated
-with our buttons. It is really important to decorate each method declaration with a `@Slot()`, in
-that way PySide6 knows internally how to register them into Qt.
+with our buttons. It is really important to decorate each method declaration with a `@Slot()`,
+that way, PySide6 knows internally how to register them into Qt and they
+will be invokable from `Signals` of QObjects when connected.
+
 
 .. literalinclude:: steps/07-expenses.py
    :linenos:
-   :lines: 63-92
-   :emphasize-lines: 2,16,28
+   :lines: 57-82
+   :emphasize-lines: 1, 23
 
 Since these slots are methods, we can access the class variables, like our `QTableWidget` to
 interact with it.
@@ -216,24 +191,21 @@ Verification step
 Adding information to the table needs to be a critical action that require a verification step
 to avoid adding invalid information, for example, empty information.
 
-You can use a signal from `QLineEdit` called *textChanged[str]* which will be emitted every
+You can use a signal from `QLineEdit` called *textChanged* which will be emitted every
 time something inside changes, i.e.: each key stroke.
-Notice that this time, there is a *[str]* section on the signal, this means that the signal
-will also emit the value of the text that was changed, which will be really useful to verify
-the current content of the `QLineEdit`.
 
 You can connect two different object's signal to the same slot, and this will be the case
 for your current application:
 
 .. literalinclude:: steps/08-expenses.py
    :linenos:
-   :lines: 62-63
+   :lines: 57-58
 
 The content of the *check_disable* slot will be really simple:
 
 .. literalinclude:: steps/08-expenses.py
    :linenos:
-   :lines: 82-87
+   :lines: 77-80
 
 You have two options, write a verification based on the current value
 of the string you retrieve, or manually get the whole content of both
@@ -255,15 +227,15 @@ side of your application.
 
 .. literalinclude:: steps/09-expenses.py
    :linenos:
-   :lines: 29-31
+   :lines: 30-32
 
 Additionally the order of how you include widgets to the right
 `QVBoxLayout` will also change.
 
 .. literalinclude:: steps/09-expenses.py
    :linenos:
-   :lines: 44-54
-   :emphasize-lines: 9
+   :lines: 46-54
+   :emphasize-lines: 8
 
 Notice that before we had a line with `self.right.addStretch()`
 to fill up the vertical space between the *Add* and the *Clear* buttons,
@@ -279,8 +251,8 @@ to a slot that creates a chart and includes it into your `QChartView`.
 
 .. literalinclude:: steps/10-expenses.py
    :linenos:
-   :lines: 66-72
-   :emphasize-lines: 6
+   :lines: 62-67
+   :emphasize-lines: 3
 
 That is nothing new, since you already did it for the other buttons,
 but now take a look at how to create a chart and include it into
@@ -288,7 +260,7 @@ your `QChartView`.
 
 .. literalinclude:: steps/10-expenses.py
    :linenos:
-   :lines: 102-114
+   :lines: 95-107
 
 The following steps show how to fill a `QPieSeries`:
 
