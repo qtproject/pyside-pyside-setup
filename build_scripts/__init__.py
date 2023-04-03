@@ -12,20 +12,29 @@ PYSIDE_PYTHON_TOOLS = ["metaobjectdump",
                        "qml",
                        "qtpy2cpp",
                        "genpyi"]
-PYSIDE_LINUX_BIN_TOOLS = ["lupdate",
-                          "lrelease",
-                          "qmllint",
-                          "qmlformat",
-                          "qmlls",
-                          "assistant",
-                          "designer",
-                          "linguist"]
-PYSIDE_LINUX_LIBEXEC_TOOLS = ["uic",
-                              "rcc",
-                              "qmltyperegistrar",
-                              "qmlimportscanner"]
+PYSIDE_UNIX_BIN_TOOLS = ["lupdate",
+                         "lrelease",
+                         "qmllint",
+                         "qmlformat",
+                         "qmlls"]
+
+# tools that are bundled as .app in macOS
+# keys represent tool name
+# value represents the path to the tool in the macOS app bundle
+PYSIDE_UNIX_BUNDLED_TOOLS = {name: f"{name.capitalize()}.app/Contents/MacOS/{name.capitalize()}"
+                             for name in ["assistant",
+                                          "designer",
+                                          "linguist"]}
+
+PYSIDE_LINUX_BIN_TOOLS = PYSIDE_UNIX_BIN_TOOLS + [name for name in PYSIDE_UNIX_BUNDLED_TOOLS.keys()]
+
+PYSIDE_UNIX_LIBEXEC_TOOLS = ["uic",
+                             "rcc",
+                             "qmltyperegistrar",
+                             "qmlimportscanner"]
+
 # all Qt tools are in 'bin' folder in Windows
-PYSIDE_WINDOWS_BIN_TOOLS = PYSIDE_LINUX_LIBEXEC_TOOLS + PYSIDE_LINUX_BIN_TOOLS
+PYSIDE_WINDOWS_BIN_TOOLS = PYSIDE_UNIX_LIBEXEC_TOOLS + PYSIDE_LINUX_BIN_TOOLS
 
 ANDROID_ESSENTIALS = ["Core", "Gui", "Widgets", "Network", "OpenGL", "Qml", "Quick",
                       "QuickControls2"]
