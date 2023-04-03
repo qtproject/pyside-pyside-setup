@@ -18,8 +18,8 @@ from pathlib import Path
 from textwrap import dedent, indent
 
 from .log import log
-from . import (PYSIDE_PYTHON_TOOLS, PYSIDE_LINUX_BIN_TOOLS, PYSIDE_LINUX_LIBEXEC_TOOLS,
-               PYSIDE_WINDOWS_BIN_TOOLS)
+from . import (PYSIDE_PYTHON_TOOLS, PYSIDE_LINUX_BIN_TOOLS, PYSIDE_UNIX_LIBEXEC_TOOLS,
+               PYSIDE_WINDOWS_BIN_TOOLS, PYSIDE_UNIX_BIN_TOOLS, PYSIDE_UNIX_BUNDLED_TOOLS)
 
 try:
     # Using the distutils implementation within setuptools
@@ -1144,10 +1144,16 @@ def available_pyside_tools(qt_tools_path: Path, package_for_wheels: bool = False
     else:
         lib_exec_path = qt_tools_path / "Qt" / "libexec" if package_for_wheels \
                         else qt_tools_path / "libexec"
-        pyside_tools.extend([tool for tool in PYSIDE_LINUX_LIBEXEC_TOOLS
+        pyside_tools.extend([tool for tool in PYSIDE_UNIX_LIBEXEC_TOOLS
                              if tool_exist(lib_exec_path / tool)])
-        pyside_tools.extend([tool for tool in PYSIDE_LINUX_BIN_TOOLS
-                             if tool_exist(bin_path / tool)])
+        if sys.platform == 'darwin':
+            pyside_tools.extend([tool for tool in PYSIDE_UNIX_BIN_TOOLS
+                                if tool_exist(bin_path / tool)])
+            pyside_tools.extend([tool_name for tool_name, tool_path in PYSIDE_UNIX_BUNDLED_TOOLS.items()
+                                if tool_exist(bin_path / tool_path)])
+        else:
+            pyside_tools.extend([tool for tool in PYSIDE_LINUX_BIN_TOOLS
+                                if tool_exist(bin_path / tool)])
 
     return pyside_tools
 
