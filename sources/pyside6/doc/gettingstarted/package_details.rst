@@ -136,4 +136,7 @@ PySide Utilities
 Deployment
 ~~~~~~~~~~
 
-* ``pyside6-deploy``, to deploy desktop applications in Linux, Windows and macOS environments.
+* ``pyside6-deploy``, to deploy PySide6 applications to desktop platforms -
+  Linux, Windows and macOS.
+* ``pyside6-android-deploy``, to deploy PySide6 application as an Android app
+  targeting different Android platforms - aarch64, armv7a, i686, x86_64.
