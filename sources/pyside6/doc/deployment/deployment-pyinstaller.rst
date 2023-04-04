@@ -11,15 +11,15 @@ Status of Qt 6 Support
 ======================
 
 As of March 2021, Qt 6 is not supported yet. PyInstaller is unable to properly
-deploy Qt; the Qt plugins are not copied. With that, using `--onefile` is not
+deploy Qt; the Qt plugins are not copied. With that, using ``--onefile`` is not
 possible.
 
-It is possible to use PyInstaller for the non `--onefile` case though by
+It is possible to use PyInstaller for the non ``--onefile`` case though by
 manually copying the Qt plugins, QML imports and translations into
 the dist directory after running PyInstaller.
 
-On Windows, this can be achieved by running the `windeployqt` tool
-from the Qt SDK on the Qt libraries present in the `dist` directory, for
+On Windows, this can be achieved by running the ``windeployqt`` tool
+from the Qt SDK on the Qt libraries present in the ``dist`` directory, for
 example:
 
    windeployqt dist\\app\\Qt6Widgets.dll
@@ -28,15 +28,15 @@ example:
 Preparation
 ===========
 
-Install the `PyInstaller` via **pip** with the following command::
+Install the ``PyInstaller`` via **pip** with the following command::
 
     pip install pyinstaller
 
-If you're using a virtual environment, remember to activate it before installing `PyInstaller`.
+If you're using a virtual environment, remember to activate it before installing ``PyInstaller``.
 
-After installation, the `pyinstaller` binary is located in your virtual environment's `bin/`
-directory, or where your Python executable is located. If that directory isn't in your `PATH`,
-include the whole path when you run `pyinstaller`.
+After installation, the ``pyinstaller`` binary is located in your virtual environment's ``bin/``
+directory, or where your Python executable is located. If that directory isn't in your ``PATH``,
+include the whole path when you run ``pyinstaller``.
 
 .. warning:: If you already have a PySide6 or Shiboken6 version installed in your
    system path, PyInstaller uses them instead of your virtual environment version.
@@ -44,24 +44,24 @@ include the whole path when you run `pyinstaller`.
 Freeze an application
 =======================
 
-`PyInstaller` has many options that you can use. To list them all, run `pyinstaller -h`.
+``PyInstaller`` has many options that you can use. To list them all, run ``pyinstaller -h``.
 
 There are two main features:
 
  * the option to package the whole project (including shared libraries) into one executable file
-   (`--onefile`)
+   (``--onefile``)
  * the option to place it in a directory containing the libraries
 
-Additionally, on Windows when the command is running, you can open a console with the `-c` option
-(or `--console` or `--nowindowed` equivalent).
+Additionally, on Windows when the command is running, you can open a console with the ``-c`` option
+(or ``--console`` or ``--nowindowed`` equivalent).
 
-Otherwise, you can specify to not open such a console window on macOS and Windows with the `-w`
-option (or `--windowed` or `--noconsole` equivalent).
+Otherwise, you can specify to not open such a console window on macOS and Windows with the ``-w``
+option (or ``--windowed`` or ``--noconsole`` equivalent).
 
 Create an example
 -----------------
 
-Now, consider the following script, named `hello.py`::
+Now, consider the following script, named ``hello.py``::
 
     import sys
     import random
@@ -102,28 +102,29 @@ Now, consider the following script, named `hello.py`::
         sys.exit(app.exec())
 
 
-Since it has a UI, you use the `--windowed` option.
+Since it has a UI, you use the ``--windowed`` option.
 
 The command line to proceed looks like this::
 
     pyinstaller --name="MyApplication" --windowed hello.py
 
-This process creates two directories: `dist/` and `build/`. The application executable and the
-required shared libraries are placed in `dist/MyApplication`.
+This process creates two directories: ``dist/`` and ``build/``. The application executable and the
+required shared libraries are placed in ``dist/MyApplication``.
 
-To run the application, go to `dist/MyApplication` and run the program::
+To run the application, go to ``dist/MyApplication`` and run the program::
 
     cd dist/MyApplication/
     ./MyApplication
 
-.. note:: The directory inside `dist/` and the executable have the same name.
+.. note:: The directory inside ``dist/`` and the executable have the same name.
 
-Use the `--onefile` option if you prefer to have everything bundled into one executable, without
+Use the ``--onefile`` option if you prefer to have everything bundled into one executable, without
 the shared libraries next to it::
 
     pyinstaller --name="MyApplication" --windowed --onefile hello.py
 
-This process takes a bit longer, but in the end you have one executable in the `dist/` directory::
+This process takes a bit longer, but in the end you have one executable in the
+``dist/`` directory::
 
     cd dist/
     ./MyApplication
@@ -136,26 +137,26 @@ Some Caveats
 PyInstaller Issue
 -----------------
 
-As mentioned before, if available, `PyInstaller` picks a system installation of PySide6 or
-Shiboken6 instead of your `virtualenv` version without notice. This is negligible if those
+As mentioned before, if available, ``PyInstaller`` picks a system installation of |pymodname| or
+Shiboken6 instead of your ``virtualenv`` version without notice. This is negligible if those
 two versions are the same.
 
 If you're working with different versions, this can result in frustrating debugging sessions
-when you think you are testing the latest version, but `PyInstaller` is working with an older
+when you think you are testing the latest version, but ``PyInstaller`` is working with an older
 version.
 
 
 Safety Instructions
 -------------------
 
-- When using `PyInstaller` with `virtualenv`, make sure that there is no system
+- When using ``PyInstaller`` with ``virtualenv``, make sure that there is no system
   installation of PySide6 or shiboken6.
 
-- Before compiling, use `pip -uninstall pyside6 shiboken6 -y` multiple times, until
-  none of the programs are found anymore.
+- Before compiling, use ``pip -uninstall pyside6 pyside6_essentials pyside6_addons shiboken6 -y``
+  multiple times, until none of the programs are found anymore.
 
 - Pip is usually a good tool. But to be 100 % sure, you should directly remove
-  the PySide6 and shiboken6 folders from site-packages.
+  the PySide6 and shiboken6 folders from ``site-packages``.
 
 - Be sure to use the right version of pip. The safest way to really run the right
   pip, is to use the Python that you mean: Instead of the pip command, better use::

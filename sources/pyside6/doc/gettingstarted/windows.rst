@@ -7,9 +7,9 @@ selected when using the online installer.
 Requirements
 ------------
 
- * `MSVC2022`_ or (MSVC2019) for Python 3 on Windows,
- * `OpenSSL`_ (optional for SSL support, Qt must have been configured using the same SSL library).
- * ``sphinx`` package for the documentation (optional).
+* `MSVC2022`_ or (MSVC2019) for Python 3 on Windows,
+* `OpenSSL`_ (optional for SSL support, Qt must have been configured using the same SSL library).
+* ``sphinx`` package for the documentation (optional).
 
 .. note:: Python 3.8.0 was missing some API required for PySide/Shiboken so it's not possible
     to use it for a Windows build.
@@ -83,7 +83,7 @@ Creating Debug Builds
 * Choose *Custom Installation* when installing Python and tick the options for
   debug binaries and libraries
 
-* Use ``venv`` to create a virtual environment and pass the debug binary:
+* Use ``venv`` to create a virtual environment and pass the debug binary::
 
    python_d.exe -m venv testenv_d
 

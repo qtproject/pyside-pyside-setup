@@ -11,11 +11,11 @@ For more details, see the `official documentation <https://nuitka.net/pages/over
 Preparation
 ===========
 
-Install `Nuitka` via **pip** with the following command::
+Install ``Nuitka`` via **pip** with the following command::
 
-    pip3 install nuitka
+    pip install nuitka
 
-After installation, the `nuitka3` binary is located in your virtual environment's `bin/`
+After installation, the ``nuitka3`` binary is located in your virtual environment's ``bin/``
 directory, or where your Python executable is located.
 Alternatively, you can also run::
 
@@ -26,7 +26,7 @@ to achieve the same effect.
 Freeze an application
 =====================
 
-`Nuitka` has many options that you can use. To list them all, run `nuitka3 -h`.
+``Nuitka`` has many options that you can use. To list them all, run ``nuitka3 -h``.
 
 To simply compile a project, you can run::
 
@@ -34,17 +34,17 @@ To simply compile a project, you can run::
 
 There are two main features:
 
- * the option to place it in a directory containing the libraries
-   (`--standalone`)
- * the option to package the whole project (including shared libraries) into one executable file
-   (`--onefile`)
+* the option to place it in a directory containing the libraries
+  (``--standalone``)
+* the option to package the whole project (including shared libraries) into one executable file
+  (``--onefile``)
 
-If you use these options, you need to specify `--plugin-enable=pyside6`.
+If you use these options, you need to specify ``--plugin-enable=pyside6``.
 
 Run an example
 --------------
 
-Now, consider the following script, named `hello.py`::
+Now, consider the following script, named ``hello.py``::
 
     import sys
     import random
@@ -84,13 +84,13 @@ Now, consider the following script, named `hello.py`::
 
         sys.exit(app.exec())
 
-You don't have to copy this script. You find it as `examples/installer_test/hello.py`.
+You don't have to copy this script. You find it as ``examples/installer_test/hello.py``.
 
 The command line to proceed looks like this::
 
     nuitka3 examples/installer_test/hello.py
 
-This process creates an executable `hello.bin` and a directory hello.build that you
+This process creates an executable ``hello.bin`` and a directory hello.build that you
 don't need. You can execute the binary directly.
 
 In order to create a bundle which can be copied onto a machine without any pre-existing
@@ -98,23 +98,23 @@ installation, run::
 
     nuitka3 --standalone --plugin-enable=pyside6 examples/installer_test/hello.py
 
-This creates an application `hello.dist/hello` that contains everything needed to run.
+This creates an application ``hello.dist/hello`` that contains everything needed to run.
 
-To run the application, go to `hello.dist/` and run the program::
+To run the application, go to ``hello.dist/`` and run the program::
 
     cd hello.dist
     ./hello
 
-Use the `--onefile` option if you prefer to have everything bundled into one executable, without
+Use the ``--onefile`` option if you prefer to have everything bundled into one executable, without
 the shared libraries next to it. First you need to install::
 
-    pip3 install zstandard
+    pip install zstandard
 
-for data compression. Then you can run
+for data compression. Then you can run::
 
     nuitka3 --onefile --plugin-enable=pyside6 examples/installer_test/hello.py
 
-This process takes a bit longer, but in the end you have one executable `hello.bin`::
+This process takes a bit longer, but in the end you have one executable ``hello.bin``::
 
     ./hello.bin
 
@@ -127,6 +127,6 @@ Nuitka issue on macOS
 ---------------------
 
 Nuitka currently has a problem with the macOS bundle files on current macOS versions.
-That has the effect that `--standalone` and `--onefile` create a crashing application.
+That has the effect that ``--standalone`` and ``--onefile`` create a crashing application.
 Older versions which don't have the recent macOS API changes from 2020 will work.
 We are currently trying to fix that problem.

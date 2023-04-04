@@ -1,7 +1,7 @@
 .. _using_qrc_files:
 
-Using `.qrc` Files (`pyside6-rcc`)
-**********************************
+Using ``.qrc`` Files (``pyside6-rcc``)
+**************************************
 
 The `Qt Resource System`_ is a mechanism for storing binary files
 in an application.
@@ -17,7 +17,7 @@ In this tutorial you will learn how to load custom images as button icons.
 For inspiration, we will try to adapt the multimedia player example
 from Qt.
 
-As you can see on the following image, the `QPushButton` that are used
+As you can see on the following image, the ``QPushButton`` that are used
 for the media actions (play, pause, stop, and so on) are using the
 default icons meant for such actions.
 
@@ -31,19 +31,19 @@ and use them.
 .. image:: icons.png
    :alt: New Multimedia icons
 
-You can find more information about the `rcc` command, and `.qrc` file
+You can find more information about the ``rcc`` command, and ``.qrc`` file
 format, and the resource system in general in the `Qt Resource System`_
 site.
 
 .. _`download the following set`: icons/
 
 
-The `.qrc` file
-================
+The ``.qrc`` file
+=================
 
-Before running any command, add information about the resources to a `.qrc`
+Before running any command, add information about the resources to a ``.qrc``
 file.
-In the following example, notice how the resources are listed in `icons.qrc`
+In the following example, notice how the resources are listed in ``icons.qrc``
 
 ::
 
@@ -62,15 +62,15 @@ In the following example, notice how the resources are listed in `icons.qrc`
 Generating a Python file
 =========================
 
-Now that the `icons.qrc` file is ready, use the `pyside6-rcc` tool to generate
+Now that the ``icons.qrc`` file is ready, use the ``pyside6-rcc`` tool to generate
 a Python class containing the binary information about the resources
 
 To do this, we need to run::
 
     pyside6-rcc icons.qrc -o rc_icons.py
 
-The `-o` option lets you specify the output filename,
-which is `rc_icons.py` in this case.
+The ``-o`` option lets you specify the output filename,
+which is ``rc_icons.py`` in this case.
 
 To use the generated file, add the following import at the top of your main Python file::
 
@@ -167,7 +167,7 @@ Now, the constructor of your class should look like this:
 Executing the example
 =====================
 
-Run the application by calling `python main.py` to checkout the new icon-set:
+Run the application by calling ``python main.py`` to checkout the new icon-set:
 
 .. image:: player-new.png
    :alt: New Multimedia Player Qt Example

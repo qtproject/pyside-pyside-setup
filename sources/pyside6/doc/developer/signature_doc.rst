@@ -136,71 +136,52 @@ Really important are the **parser**, **mapping**, **errorhandler**, **enum_sig**
 or be compatible with embedding and installers.
 
 
-loader.py
-+++++++++
-
-This module assembles and imports the ``inspect`` module, and then exports the
-``create_signature`` function. This function takes a fake function and some
-attributes and builds a ``__signature__`` object with the inspect module.
+**loader.py**
+    This module assembles and imports the ``inspect`` module, and then exports the
+    ``create_signature`` function. This function takes a fake function and some
+    attributes and builds a ``__signature__`` object with the inspect module.
 
 
-parser.py
-+++++++++
-
-This module takes a class signatures string from C++ and parses it into the
-needed properties for the ``create_signature`` function. Its entry point is the
-``pyside_type_init`` function, which is called from the C module via ``loader.py``.
+**parser.py**
+    This module takes a class signatures string from C++ and parses it into the
+    needed properties for the ``create_signature`` function. Its entry point is the
+    ``pyside_type_init`` function, which is called from the C module via ``loader.py``.
 
 
-mapping.py
-++++++++++
+**mapping.py**
+    The purpose of the mapping module is maintaining a list of replacement strings
+    that map from the *signature text* in C to the property strings that Python
+    needs. A lot of mappings are resolved by rather complex expressions in ``parser.py``,
+    but a few hundred cases are better to spell explicitly, here.
 
-The purpose of the mapping module is maintaining a list of replacement strings
-that map from the *signature text* in C to the property strings that Python
-needs. A lot of mappings are resolved by rather complex expressions in ``parser.py``,
-but a few hundred cases are better to spell explicitly, here.
+**errorhandler.py**
+    Since ``Qt For Python 5.12``, we no longer use the builtin type error messages from C++.
+    Instead, we get much better results with the signature module. At the same time,
+    this enforced supporting shiboken as well, and the signature module was no longer
+    optional.
 
+**enum_sig.py**
+    The diverse applications of the signature module all needed to iterate over modules,
+    classes and functions. In order to centralize this enumeration, the process has
+    been factored out as a context manager. The user has only to supply functions
+    that do the actual formatting.
 
-errorhandler.py
-+++++++++++++++
+    See for example the .pyi generator ``pyside6/PySide6/support/generate_pyi.py``.
 
-Since ``Qt For Python 5.12``, we no longer use the builtin type error messages from C++.
-Instead, we get much better results with the signature module. At the same time,
-this enforced supporting shiboken as well, and the signature module was no longer
-optional.
-
-
-enum_sig.py
-+++++++++++
-
-The diverse applications of the signature module all needed to iterate over modules,
-classes and functions. In order to centralize this enumeration, the process has
-been factored out as a context manager. The user has only to supply functions
-that do the actual formatting.
-
-See for example the .pyi generator ``pyside6/PySide6/support/generate_pyi.py``.
+**layout.py**
+    As more applications used the signature module, different formatting of signatures
+    was needed. To support that, we created the function ``create_signature``, which
+    has a parameter to choose from some predefined layouts.
 
 
-layout.py
-+++++++++
-
-As more applications used the signature module, different formatting of signatures
-was needed. To support that, we created the function ``create_signature``, which
-has a parameter to choose from some predefined layouts.
+**typing27.py**
+    Python 2 has no typing module at all. This is a backport of the minimum that is needed.
 
 
-*typing27.py*
-+++++++++++++
-
-Python 2 has no typing module at all. This is a backport of the minimum that is needed.
-
-
-*backport_inspect.py*
-+++++++++++++++++++++
-
-Python 2 has an inspect module, but lacks the signature functions, completely.
-This module adds the missing functionality, which is merged at runtime into
-the inspect module.
+**backport_inspect.py**
+    Python 2 has an inspect module, but lacks the signature functions, completely.
+    This module adds the missing functionality, which is merged at runtime into
+    the inspect module.
 
 
 Multiple Arities
@@ -372,11 +353,9 @@ This was implemented in ``Qt For Python 5.12.1``.
 Literature
 ----------
 
-    `PEP 362 – Function Signature Object <https://www.python.org/dev/peps/pep-0362/>`__
-
-    `PEP 484 – Type Hints <https://www.python.org/dev/peps/pep-0484/>`__
-
-    `PEP 3107 – Function Annotations <https://www.python.org/dev/peps/pep-3107/>`__
+* `PEP 362 – Function Signature Object <https://www.python.org/dev/peps/pep-0362/>`__
+* `PEP 484 – Type Hints <https://www.python.org/dev/peps/pep-0484/>`__
+* `PEP 3107 – Function Annotations <https://www.python.org/dev/peps/pep-3107/>`__
 
 
 *Personal Remark: This module is dedicated to our lovebird "Püppi", who died on 2017-09-15.*

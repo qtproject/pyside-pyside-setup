@@ -66,28 +66,28 @@ Class/Function Deprecations
 Then, the code base needs to be checked for usage of deprecated API and adapted
 accordingly. For example:
 
- * The High DPI scaling attributes ``Qt.AA_EnableHighDpiScaling``,
-   ``Qt.AA_DisableHighDpiScaling`` and ``Qt.AA_UseHighDpiPixmaps`` are
-   deprecated. High DPI is by default enabled in Qt 6 and cannot be turned off.
- * ``QDesktopWidget`` has been removed. ``QScreen`` should be used instead,
-   which can be retrieved using ``QWidget.screen()``,
-   ``QGuiApplication.primaryScreen()`` or ``QGuiApplication.screens()``.
- * ``QFontMetrics.width()`` has been renamed to ``horizontalAdvance()``.
- * ``QMouseEvent.pos()`` and ``QMouseEvent.globalPos()`` returning a ``QPoint``
-   as well as ``QMouseEvent.x()`` and ``QMouseEvent.y()`` returning ``int``
-   are now deprecated. ``QMouseEvent.position()`` and
-   ``QMouseEvent.globalPosition()`` returning a ``QPointF`` should be used
-   instead.
- * ``Qt.MidButton`` has been renamed to ``Qt.MiddleButton``.
- * ``QOpenGLVersionFunctionsFactory.get()`` instead of
-   ``QOpenGLContext.versionFunctions()`` should be used to obtain
-   *Open GL* functions.
- * ``QRegExp`` has been replaced by ``QRegularExpression``.
- * ``QWidget.mapToGlobal()`` and ``QWidget.mapFromGlobal()`` now also accept
-   and return ``QPointF``.
- * Functions named ``exec_`` (classes ``QCoreApplication``, ``QDialog``,
-   ``QEventLoop``) have been renamed to ``exec`` which became possible
-   in Python 3.
+* The High DPI scaling attributes ``Qt.AA_EnableHighDpiScaling``,
+  ``Qt.AA_DisableHighDpiScaling`` and ``Qt.AA_UseHighDpiPixmaps`` are
+  deprecated. High DPI is by default enabled in Qt 6 and cannot be turned off.
+* ``QDesktopWidget`` has been removed. ``QScreen`` should be used instead,
+  which can be retrieved using ``QWidget.screen()``,
+  ``QGuiApplication.primaryScreen()`` or ``QGuiApplication.screens()``.
+* ``QFontMetrics.width()`` has been renamed to ``horizontalAdvance()``.
+* ``QMouseEvent.pos()`` and ``QMouseEvent.globalPos()`` returning a ``QPoint``
+  as well as ``QMouseEvent.x()`` and ``QMouseEvent.y()`` returning ``int``
+  are now deprecated. ``QMouseEvent.position()`` and
+  ``QMouseEvent.globalPosition()`` returning a ``QPointF`` should be used
+  instead.
+* ``Qt.MidButton`` has been renamed to ``Qt.MiddleButton``.
+* ``QOpenGLVersionFunctionsFactory.get()`` instead of
+  ``QOpenGLContext.versionFunctions()`` should be used to obtain
+  *Open GL* functions.
+* ``QRegExp`` has been replaced by ``QRegularExpression``.
+* ``QWidget.mapToGlobal()`` and ``QWidget.mapFromGlobal()`` now also accept
+  and return ``QPointF``.
+* Functions named ``exec_`` (classes ``QCoreApplication``, ``QDialog``,
+  ``QEventLoop``) have been renamed to ``exec`` which became possible
+  in Python 3.
 
 More information can be found in the
 `Porting to Qt 6 <https://doc.qt.io/qt-6/portingguide.html>`_ Guide

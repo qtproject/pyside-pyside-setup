@@ -43,21 +43,21 @@ a signal directly to another signal. (This will emit the second signal
 immediately whenever the first is emitted.)
 
 Qt's widgets have many predefined signals and slots. For example,
-`QAbstractButton` (base class of buttons in Qt) has a `clicked()`
-signal and `QLineEdit` (single line input field) has a slot named
-'clear()`. So, a text input field with a button to clear the text
-could be implemented by placing a `QToolButton` to the right of the
-`QLineEdit` and connecting its `clicked()` signal to the slot
-'clear()`. This is done using the `connect()` method of the signal:
+``QAbstractButton`` (base class of buttons in Qt) has a ``clicked()``
+signal and ``QLineEdit`` (single line input field) has a slot named
+``clear()``. So, a text input field with a button to clear the text
+could be implemented by placing a ``QToolButton`` to the right of the
+``QLineEdit`` and connecting its ``clicked()`` signal to the slot
+``clear()``. This is done using the ``connect()`` method of the signal:
 
-    .. code-block:: python
+.. code-block:: python
 
-        button = QToolButton()
-        line_edit = QLineEdit()
-        button.clicked.connect(line_edit.clear)
+    button = QToolButton()
+    line_edit = QLineEdit()
+    button.clicked.connect(line_edit.clear)
 
-`connect()` returns a `QMetaObject.Connection` object, which can be
-used  with the `disconnect()` method to sever the connection.
+``connect()`` returns a ``QMetaObject.Connection`` object, which can be
+used  with the ``disconnect()`` method to sever the connection.
 
 Signals can also be connected to free functions:
 
@@ -86,7 +86,7 @@ The Signal Class
 
 When writing classes in Python, signals are declared as class level
 variables of the class ``QtCore.Signal()``. A QWidget-based button
-that emits a `clicked()` signal could look as
+that emits a ``clicked()`` signal could look as
 follows:
 
 .. code-block:: python
@@ -215,7 +215,7 @@ Specifying Signals and Slots by Method Signature Strings
 
 
 Signals and slots can also be specified as C++ method signature
-strings passed through the `SIGNAL()` and/or `SLOT()` functions:
+strings passed through the ``SIGNAL()`` and/or ``SLOT()`` functions:
 
 .. code-block:: python
 
@@ -225,7 +225,7 @@ strings passed through the `SIGNAL()` and/or `SLOT()` functions:
                   action_handler, SLOT("action1(Qt::MouseButton)"))
 
 This is not recommended for connecting signals, it is mostly
-used to specify signals for methods like `QWizardPage::registerField()`:
+used to specify signals for methods like ``QWizardPage::registerField()``:
 
 .. code-block:: python
 

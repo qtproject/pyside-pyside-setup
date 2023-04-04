@@ -254,7 +254,7 @@ Activating the New Enums
 
 The new approach to enum will be the default in ``PySide 6.4``, but a preview is already built
 into ``PySide 6.3`` with the environment variable:
-`PYSIDE63_OPTION_PYTHON_ENUM=1 python3 <myscript>` enables the new enums.
+``PYSIDE63_OPTION_PYTHON_ENUM=1 python3 <myscript>`` enables the new enums.
 In ``PySide 6.4``, this flag is by default on, but it can be switched to the old Shiboken
 enums by setting the variable to 0.
 
@@ -268,13 +268,10 @@ The Differences between old and new Enums
 Python enums and Shiboken enums are more or less compatible with each other.
 Tiny differences are in restrictions:
 
-  * Python enums cannot inherit from each other, whereas Shiboken enums can
-
-  * Python enums don't allow undefined values, Shiboken enums do
-
-  * Python enums always need exactly one argument, Shiboken enums have a default zero value
-
-  * Python enums rarely inherit from int, Shiboken enums always do
+* Python enums cannot inherit from each other, whereas Shiboken enums can
+* Python enums don't allow undefined values, Shiboken enums do
+* Python enums always need exactly one argument, Shiboken enums have a default zero value
+* Python enums rarely inherit from int, Shiboken enums always do
 
 More visible are the differences between flags, as shown in the following:
 
@@ -348,9 +345,8 @@ and never propose the old ones.
 
 The reason to implement ``forgiveness mode`` this way was
 
-  * to make the transition as smooth as possible, but
-
-  * to encourage people to use the new enums whenever new code is written.
+* to make the transition as smooth as possible, but
+* to encourage people to use the new enums whenever new code is written.
 
 So you can continue to write:
 

@@ -23,7 +23,7 @@ to each component. As an example, look at the following simple snippet:
         w.show()
         sys.exit(app.exec())
 
-When you execute this code, you will see a simple `QLabel` aligned at the
+When you execute this code, you will see a simple ``QLabel`` aligned at the
 center, and with a placeholder text.
 
 .. image:: widgetstyling-simple-no.png
@@ -32,8 +32,8 @@ center, and with a placeholder text.
 You can style your application using the CSS-like syntax.
 For more information, see `Qt Style Sheets Reference`_.
 
-A `QLabel` can be styled differently by setting some of its CSS
-properties, such as `background-color` and `font-family`,
+A ``QLabel`` can be styled differently by setting some of its CSS
+properties, such as ``background-color`` and ``font-family``,
 so let's see how does the code look like with these changes:
 
 .. code-block:: python
@@ -55,7 +55,7 @@ so let's see how does the code look like with these changes:
         w.show()
         sys.exit(app.exec())
 
-Now when you run the code, notice that the `QLabel` looks different with your
+Now when you run the code, notice that the ``QLabel`` looks different with your
 custom style:
 
 .. image:: widgetstyling-simple-yes.png
@@ -64,15 +64,15 @@ custom style:
 
 .. note::
 
-  If you don't have the font `Titillium` installed, you can try with any
+  If you don't have the font ``Titillium`` installed, you can try with any
   other you prefer.
-  Remember you can list your installed fonts using `QFontDatabase`,
-  specifically the `families()` method.
+  Remember you can list your installed fonts using ``QFontDatabase``,
+  specifically the ``families()`` method.
 
 
 Styling each UI element separately like you did in the previous snippet is a
 lot of work. The easier alternative for this is to use Qt Style Sheets,
-which is one or more `.qss` files defining the style for the UI elements in
+which is one or more ``.qss`` files defining the style for the UI elements in
 your application.
 
 More examples can be found in the `Qt Style Sheet Examples`_ documentation
@@ -94,7 +94,7 @@ Qt Style Sheets
   It's recommended to create a full new Qt style to cover all the possible
   corner cases.
 
-A `qss` file is quite similar to a CSS file, but you need to specify the Widget
+A ``qss`` file is quite similar to a CSS file, but you need to specify the Widget
 component and optionally the name of the object::
 
     QLabel {
@@ -105,8 +105,8 @@ component and optionally the name of the object::
         font-size: 20px;
     }
 
-The first style defines a `background-color` for all `QLabel` objects in your
-application, whereas the later one styles the `title` object only.
+The first style defines a ``background-color`` for all ``QLabel`` objects in your
+application, whereas the later one styles the ``title`` object only.
 
 .. note::
 
@@ -115,8 +115,8 @@ application, whereas the later one styles the `title` object only.
   `label.setObjectName("title")`
 
 
-Once you have a `qss` file for your application, you can apply it by reading
-the file and using the `QApplication.setStyleSheet(str)` function:
+Once you have a ``qss`` file for your application, you can apply it by reading
+the file and using the ``QApplication.setStyleSheet(str)`` function:
 
 .. code-block:: python
 
@@ -132,7 +132,7 @@ the file and using the `QApplication.setStyleSheet(str)` function:
 
         sys.exit(app.exec())
 
-Having a general `qss` file allows you to decouple the styling aspects of
+Having a general ``qss`` file allows you to decouple the styling aspects of
 the code, without mixing it in the middle of the general functionality, and you
 can simply enable it or disable it.
 
@@ -142,14 +142,14 @@ Look at this new example, with more widgets components:
    :linenos:
    :lines: 22-44
 
-This displays a two column widget, with a `QListWidget` on the left and a
-`QLabel` and a `QPushButton` on the right. It looks like this when you run the
+This displays a two column widget, with a ``QListWidget`` on the left and a
+``QLabel`` and a ``QPushButton`` on the right. It looks like this when you run the
 code:
 
 .. image:: widgetstyling-no.png
    :alt: Widget with no style
 
-If you add content to the previously described `style.qss` file, you can modify
+If you add content to the previously described ``style.qss`` file, you can modify
 the look-n-feel of the previous example:
 
 .. literalinclude:: style.qss
@@ -161,7 +161,7 @@ You can also use state-based styling on the QListWidget *items* for example, to
 style them differently depending on whether they are *selected* or not.
 
 After applying all the styling alternatives you explored in this topic, notice
-that the `QLabel` example looks a lot different now.
+that the ``QLabel`` example looks a lot different now.
 Try running the code to check its new look:
 
 .. image:: widgetstyling-yes.png

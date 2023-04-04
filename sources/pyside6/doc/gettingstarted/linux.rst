@@ -4,11 +4,11 @@ Getting Started on Linux
 Requirements
 ------------
 
- * GCC
- * ``sphinx`` package for the documentation (optional).
- * Depending on your linux distribution, the following dependencies might also be required:
+* GCC
+* ``sphinx`` package for the documentation (optional).
+* Depending on your linux distribution, the following dependencies might also be required:
 
-    * ``libgl-dev``, ``python-dev``, ``python-distutils``, and ``python-setuptools``.
+  * ``libgl-dev``, ``python-dev``, ``python-distutils``, and ``python-setuptools``.
 
 Building from source
 --------------------
@@ -59,7 +59,7 @@ Install the general dependencies::
 Building and Installing (setuptools)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The `setuptools` approach uses the `setup.py` file to execute the build,
+The ``setuptools`` approach uses the ``setup.py`` file to execute the build,
 install, and packaging steps.
 
 Check your Qt installation path, to specifically use that version of qtpaths to build PySide.
@@ -76,7 +76,7 @@ To install on the current directory, just run::
 Building and Installing (cmake)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The `setuptools` approach includes internal `CMake` calls when
+The ``setuptools`` approach includes internal ``CMake`` calls when
 building and installing the project, but a CMake-only approach is only
 recommended for packaging the project for distribution builds.
 

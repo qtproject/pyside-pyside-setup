@@ -35,7 +35,7 @@ application and PySide6 integration:
    Notice that we only need a :code:`QQmlApplicationEngine` to
    :code:`load` the QML file.
 
-#. Define the `Bridge` class, containing all the logic for the element
+#. Define the ``Bridge`` class, containing all the logic for the element
    that will be register in QML:
 
    .. literalinclude:: main.py
@@ -48,7 +48,7 @@ application and PySide6 integration:
    class and the variables :code:`QML_IMPORT_NAME` and
    :code:`QML_IMPORT_MAJOR_VERSION`.
 
-#. Now, go back to the QML file and connect the signals to the slots defined in the `Bridge` class:
+#. Now, go back to the QML file and connect the signals to the slots defined in the ``Bridge`` class:
 
    .. code:: js
 
@@ -95,22 +95,22 @@ application and PySide6 integration:
 
 #. Now, for changing the look of our application, you have two options:
 
-   1. Use the command line: execute the python file adding the option, `--style`::
+   1. Use the command line: execute the python file adding the option, ``--style``::
 
        python main.py --style material
 
-   2. Use a `qtquickcontrols2.conf` file:
+   2. Use a ``qtquickcontrols2.conf`` file:
 
       .. literalinclude:: qtquickcontrols2.conf
          :linenos:
 
-      Then add it to your `.qrc` file:
+      Then add it to your ``.qrc`` file:
 
       .. literalinclude:: style.qrc
          :linenos:
 
-      Generate the *rc* file running, `pyside6-rcc style.qrc -o style_rc.py`
-      And finally import it from your `main.py` script.
+      Generate the *rc* file running, ``pyside6-rcc style.qrc -o style_rc.py``
+      And finally import it from your ``main.py`` script.
 
    .. literalinclude:: main.py
       :linenos:
