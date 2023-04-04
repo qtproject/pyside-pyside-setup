@@ -18,19 +18,19 @@ be tricky. That was an optimistic statement.
 
 Let's see duck punching in action for educational purposes.
 
-    .. code-block:: python
+.. code-block:: python
 
-       import types
-       import Binding
+   import types
+   import Binding
 
-       obj = Binding.CppClass()
+   obj = Binding.CppClass()
 
-       # CppClass has a virtual method called 'virtualMethod',
-       # but we don't like it anymore.
-       def myVirtualMethod(self_obj, arg):
-           pass
+   # CppClass has a virtual method called 'virtualMethod',
+   # but we don't like it anymore.
+   def myVirtualMethod(self_obj, arg):
+       pass
 
-       obj.virtualMethod = types.MethodType(myVirtualMethod, obj, Binding.CppClass)
+   obj.virtualMethod = types.MethodType(myVirtualMethod, obj, Binding.CppClass)
 
 
 If some C++ code happens to call `CppClass::virtualMethod(...)` on the C++ object
@@ -46,17 +46,17 @@ Python-land by the usage of class constructors, like in the example above.
 
 Brief interruption to show what I was saying:
 
-    .. code-block:: python
+.. code-block:: python
 
-       import types
-       import Binding
+   import types
+   import Binding
 
-       obj = Binding.createCppClass()
-       def myVirtualMethod(self_obj, arg):
-           pass
+   obj = Binding.createCppClass()
+   def myVirtualMethod(self_obj, arg):
+       pass
 
-       # Punching a dead duck...
-       obj.virtualMethod = types.MethodType(myVirtualMethod, obj, Binding.CppClass)
+   # Punching a dead duck...
+   obj.virtualMethod = types.MethodType(myVirtualMethod, obj, Binding.CppClass)
 
 
 The `Binding.createCppClass()` factory method is just an example, C++ created objects
@@ -82,30 +82,30 @@ Below you can check the examples:
 
 Example with old style class:
 
-    .. code-block:: python
+.. code-block:: python
 
-        from PySide6 import QtCore
+    from PySide6 import QtCore
 
-        class MyOldStyleObject:
-            pass
+    class MyOldStyleObject:
+        pass
 
-        class MyObject(QtCore, MyOldStyleObject):
-            pass
+    class MyObject(QtCore, MyOldStyleObject):
+        pass
 
 
 this example will raise a 'TypeError' due to the limitation on PySide, to fix
 this you will need use the new style class:
 
 
-    .. code-block:: python
+.. code-block:: python
 
-        from PySide6 import QtCore
+    from PySide6 import QtCore
 
-        class MyOldStyleObject(object):
-            pass
+    class MyOldStyleObject(object):
+        pass
 
-        class MyObject(QtCore, MyOldStyleObject):
-            pass
+    class MyObject(QtCore, MyOldStyleObject):
+        pass
 
 
 All classes used for multiple inheritance with other PySide types need to have

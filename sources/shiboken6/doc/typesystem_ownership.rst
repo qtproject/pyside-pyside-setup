@@ -58,39 +58,39 @@ The following situations can invalidate an object:
 C++ taking ownership
 --------------------
 
-    When an object is passed to a function or method that takes ownership of it, the wrapper
-    is invalidated as we can't be sure of when the object is destroyed, unless it has a
-    :ref:`virtual destructor <ownership-virt-method>` or the transfer is due to the special case
-    of :ref:`parent ownership <ownership-parent>`.
+When an object is passed to a function or method that takes ownership of it, the wrapper
+is invalidated as we can't be sure of when the object is destroyed, unless it has a
+:ref:`virtual destructor <ownership-virt-method>` or the transfer is due to the special case
+of :ref:`parent ownership <ownership-parent>`.
 
-    Besides being passed as argument, the called object can have its ownership changed, like
-    the `setParent` method in Qt's `QObject`.
+Besides being passed as argument, the called object can have its ownership changed, like
+the `setParent` method in Qt's `QObject`.
 
 Invalidate after use
 --------------------
 
-    Objects marked with *invalidate-after-use* in the type system description always are
-    virtual method arguments provided by a C++ originated call. They should be
-    invalidated right after the Python function returns (see :ref:`invalidationafteruse`).
+Objects marked with *invalidate-after-use* in the type system description always are
+virtual method arguments provided by a C++ originated call. They should be
+invalidated right after the Python function returns (see :ref:`invalidationafteruse`).
 
 .. _ownership-virt-method:
 
 Objects with virtual methods
 ----------------------------
 
-    A little bit of implementation details (see also :ref:`codegenerationterminology`):
-    virtual methods are supported by creating a C++ class, the **shell**, that inherits
-    from the class with virtual methods, the native one, and override those methods to check if
-    any derived class in Python also override it.
+A little bit of implementation details (see also :ref:`codegenerationterminology`):
+virtual methods are supported by creating a C++ class, the **shell**, that inherits
+from the class with virtual methods, the native one, and override those methods to check if
+any derived class in Python also override it.
 
-    If the class has a virtual destructor (and C++ classes with virtual methods should have), this
-    C++ instance invalidates the wrapper only when the overridden destructor is called.
+If the class has a virtual destructor (and C++ classes with virtual methods should have), this
+C++ instance invalidates the wrapper only when the overridden destructor is called.
 
-    An instance of the **shell** is created when created in Python. However,
-    when  the object is created in C++, like in a factory method or a parameter
-    to a virtual function like ``QObject::event(QEvent *)``, the wrapped object
-    is a C++ instance of the native class, not the **shell** one, and we cannot
-    know when it is destroyed.
+An instance of the **shell** is created when created in Python. However,
+when  the object is created in C++, like in a factory method or a parameter
+to a virtual function like ``QObject::event(QEvent *)``, the wrapped object
+is a C++ instance of the native class, not the **shell** one, and we cannot
+know when it is destroyed.
 
 .. _ownership-parent:
 
@@ -108,45 +108,45 @@ for any C++ library with similar behavior.
 Parentship heuristics
 ---------------------
 
-    As the parent-child relationship is very common, |project| tries to automatically
-    infer what methods falls into the parent-child scheme, adding the extra
-    directives related to ownership.
+As the parent-child relationship is very common, |project| tries to automatically
+infer what methods falls into the parent-child scheme, adding the extra
+directives related to ownership.
 
-    This heuristic will be triggered when generating code for a method and:
+This heuristic will be triggered when generating code for a method and:
 
-    * The function is a constructor.
-    * The argument name is `parent`.
-    * The argument type is a pointer to an object.
+* The function is a constructor.
+* The argument name is `parent`.
+* The argument type is a pointer to an object.
 
-    When triggered, the heuristic will set the argument named "parent"
-    as the parent of the object being created by the constructor.
+When triggered, the heuristic will set the argument named "parent"
+as the parent of the object being created by the constructor.
 
-    The main focus of this process was to remove a lot of hand written code from
-    type system when binding Qt libraries. For Qt, this heuristic works in all cases,
-    but be aware that it might not when binding your own libraries.
+The main focus of this process was to remove a lot of hand written code from
+type system when binding Qt libraries. For Qt, this heuristic works in all cases,
+but be aware that it might not when binding your own libraries.
 
-    To activate this heuristic, use the :ref:`--enable-parent-ctor-heuristic <parent-heuristic>`
-    command line switch.
+To activate this heuristic, use the :ref:`--enable-parent-ctor-heuristic <parent-heuristic>`
+command line switch.
 
 .. _return-value-heuristics:
 
 Return value heuristics
 -----------------------
 
-    When enabled, object returned as pointer in C++ will become child of the object on which the method
-    was called.
+When enabled, object returned as pointer in C++ will become child of the object on which the method
+was called.
 
-    To activate this heuristic, use the command line switch
-    :ref:`--enable-return-value-heuristic <return-heuristic>`.
+To activate this heuristic, use the command line switch
+:ref:`--enable-return-value-heuristic <return-heuristic>`.
 
-    To disable this heuristic for specific cases, specify ``default`` as
-    ownership:
+To disable this heuristic for specific cases, specify ``default`` as
+ownership:
 
-    .. code-block:: xml
+.. code-block:: xml
 
-        <modify-argument index="0">
-            <define-ownership class="target" owner="default" />
-        </modify-argument>
+    <modify-argument index="0">
+        <define-ownership class="target" owner="default" />
+    </modify-argument>
 
 Common pitfalls
 ===============
@@ -154,28 +154,28 @@ Common pitfalls
 Not saving unowned objects references
 -------------------------------------
 
-    Sometimes when you pass an instance as argument to a method and the receiving
-    instance will need that object to live indefinitely, but will not take ownership
-    of the argument instance. In this case, you should hold a reference to the argument
-    instance.
+Sometimes when you pass an instance as argument to a method and the receiving
+instance will need that object to live indefinitely, but will not take ownership
+of the argument instance. In this case, you should hold a reference to the argument
+instance.
 
-    For example, let's say that you have a renderer class that will use a source class
-    in a setSource method but will not take ownership of it. The following code is wrong,
-    because when `render` is called the `Source` object created during the call to `setSource`
-    is already destroyed.
+For example, let's say that you have a renderer class that will use a source class
+in a setSource method but will not take ownership of it. The following code is wrong,
+because when `render` is called the `Source` object created during the call to `setSource`
+is already destroyed.
 
-    .. code-block:: python
+.. code-block:: python
 
-       renderer.setModel(Source())
-       renderer.render()
+   renderer.setModel(Source())
+   renderer.render()
 
-    To solve this, you should hold a reference to the source object, like in
+To solve this, you should hold a reference to the source object, like in
 
-    .. code-block:: python
+.. code-block:: python
 
-       source = Source()
-       renderer.setSource(source)
-       renderer.render()
+   source = Source()
+   renderer.setSource(source)
+   renderer.render()
 
 
 Ownership Management in  the Typesystem
@@ -190,44 +190,44 @@ For this code, the ``class`` attribute takes the value ``target``
 Ownership transfer from C++ to target
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    When an object currently owned by C++ has its ownership transferred
-    back to the target language, the binding can know for sure when the object will be deleted and
-    tie the C++ instance existence to the wrapper, calling the C++ destructor normally when the
-    wrapper is deleted.
+When an object currently owned by C++ has its ownership transferred
+back to the target language, the binding can know for sure when the object will be deleted and
+tie the C++ instance existence to the wrapper, calling the C++ destructor normally when the
+wrapper is deleted.
 
-    .. code-block:: xml
+.. code-block:: xml
 
-        <modify-argument index="1">
-            <define-ownership class="target" owner="target" />
-        </modify-argument>
+    <modify-argument index="1">
+        <define-ownership class="target" owner="target" />
+    </modify-argument>
 
-    A typical use case would be returning an object allocated in C++, for
-    example from ``clone()`` or other factory methods.
+A typical use case would be returning an object allocated in C++, for
+example from ``clone()`` or other factory methods.
 
 Ownership transfer from target to C++
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    In the opposite direction, when an object ownership is transferred from the target language
-    to C++, the native code takes full control of the object life and you don't
-    know when that object will be deleted, rendering the wrapper object invalid,
-    unless you're wrapping an object with a virtual destructor,
-    so you can override it and be notified of its destruction.
+In the opposite direction, when an object ownership is transferred from the target language
+to C++, the native code takes full control of the object life and you don't
+know when that object will be deleted, rendering the wrapper object invalid,
+unless you're wrapping an object with a virtual destructor,
+so you can override it and be notified of its destruction.
 
-    By default it's safer to just render the wrapper
-    object invalid and raise some error if the user tries to access
-    one of this objects members or pass it as argument to some function, to avoid unpleasant segfaults.
-    Also you should avoid calling the C++ destructor when deleting the wrapper.
+By default it's safer to just render the wrapper
+object invalid and raise some error if the user tries to access
+one of this objects members or pass it as argument to some function, to avoid unpleasant segfaults.
+Also you should avoid calling the C++ destructor when deleting the wrapper.
 
-    .. code-block:: xml
+.. code-block:: xml
 
-        <modify-argument index="1">
-            <define-ownership class="target" owner="c++" />
-        </modify-argument>
+    <modify-argument index="1">
+        <define-ownership class="target" owner="c++" />
+    </modify-argument>
 
-    Use cases would be an returning a member object by pointer
-    or passing an object by pointer into a function where the class
-    takes ownership, for example
-    ``QNetworkAccessManager::setCookieJar(QNetworkCookieJar *)``.
+Use cases would be an returning a member object by pointer
+or passing an object by pointer into a function where the class
+takes ownership, for example
+``QNetworkAccessManager::setCookieJar(QNetworkCookieJar *)``.
 
 Parent-child relationship
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -240,11 +240,11 @@ as long as the parent is, unless some other method can take the C++ ownership aw
 One of the main uses of this scheme is Qt's object system, with ownership among QObject-derived
 classes, creating "trees" of instances.
 
-    .. code-block:: xml
+.. code-block:: xml
 
-        <modify-argument index="this">
-            <parent index="1" action="add"/>
-        </modify-argument>
+    <modify-argument index="this">
+        <parent index="1" action="add"/>
+    </modify-argument>
 
 In this example, the instance with the method that is being invoked (indicated by 'index="this"' on
 modify-argument) will be marked as a child
@@ -284,8 +284,8 @@ In this case, you should use the ``invalidate-after-use`` attribute in the
 :ref:`modify-argument` tag to mark the wrapper as invalid right after the
 virtual method returns.
 
-    .. code-block:: xml
+.. code-block:: xml
 
-        <modify-argument index="2" invalidate-after-use="yes"/>
+    <modify-argument index="2" invalidate-after-use="yes"/>
 
 In this example the second argument will be invalidated after this method call.

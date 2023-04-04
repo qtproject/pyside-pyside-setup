@@ -35,41 +35,41 @@ The table below lists the functions supported for opaque sequence containers
 besides the sequence protocol (element access via index and ``len()``). Both
 the STL and the Qt naming convention (which resembles Python's) are supported:
 
-    +-------------------------------------------+-----------------------------------+
-    |Function                                   | Description                       |
-    +-------------------------------------------+-----------------------------------+
-    | ``push_back(value)``, ``append(value)``   | Appends *value* to the sequence.  |
-    +-------------------------------------------+-----------------------------------+
-    | ``push_front(value)``, ``prepend(value)`` | Prepends *value* to the sequence. |
-    +-------------------------------------------+-----------------------------------+
-    | ``clear()``                               | Clears the sequence.              |
-    +-------------------------------------------+-----------------------------------+
-    | ``pop_back()``, ``removeLast()``          | Removes the last element.         |
-    +-------------------------------------------+-----------------------------------+
-    | ``pop_front()``, ``removeFirst()``        | Removes the first element.        |
-    +-------------------------------------------+-----------------------------------+
-    | ``reserve(size)``                         | For containers that support it    |
-    |                                           | (``std::vector``, ``QList``),     |
-    |                                           | allocate memory for at least      |
-    |                                           | ``size`` elements, preventing     |
-    |                                           | reallocations.                    |
-    +-------------------------------------------+-----------------------------------+
-    | ``capacity()``                            | For containers that support it    |
-    |                                           | (``std::vector``, ``QList``),     |
-    |                                           | return the number of elements     |
-    |                                           | that can be stored without        |
-    |                                           | reallocation.                     |
-    +-------------------------------------------+-----------------------------------+
-    | ``data()``                                | For containers that support it    |
-    |                                           | (``std::vector``, ``QList``),     |
-    |                                           | return a buffer viewing the       |
-    |                                           | memory.                           |
-    +-------------------------------------------+-----------------------------------+
-    | ``constData()``                           | For containers that support it    |
-    |                                           | (``std::vector``, ``QList``),     |
-    |                                           | return a read-only buffer viewing |
-    |                                           | the memory.                       |
-    +-------------------------------------------+-----------------------------------+
++-------------------------------------------+-----------------------------------+
+|Function                                   | Description                       |
++-------------------------------------------+-----------------------------------+
+| ``push_back(value)``, ``append(value)``   | Appends *value* to the sequence.  |
++-------------------------------------------+-----------------------------------+
+| ``push_front(value)``, ``prepend(value)`` | Prepends *value* to the sequence. |
++-------------------------------------------+-----------------------------------+
+| ``clear()``                               | Clears the sequence.              |
++-------------------------------------------+-----------------------------------+
+| ``pop_back()``, ``removeLast()``          | Removes the last element.         |
++-------------------------------------------+-----------------------------------+
+| ``pop_front()``, ``removeFirst()``        | Removes the first element.        |
++-------------------------------------------+-----------------------------------+
+| ``reserve(size)``                         | For containers that support it    |
+|                                           | (``std::vector``, ``QList``),     |
+|                                           | allocate memory for at least      |
+|                                           | ``size`` elements, preventing     |
+|                                           | reallocations.                    |
++-------------------------------------------+-----------------------------------+
+| ``capacity()``                            | For containers that support it    |
+|                                           | (``std::vector``, ``QList``),     |
+|                                           | return the number of elements     |
+|                                           | that can be stored without        |
+|                                           | reallocation.                     |
++-------------------------------------------+-----------------------------------+
+| ``data()``                                | For containers that support it    |
+|                                           | (``std::vector``, ``QList``),     |
+|                                           | return a buffer viewing the       |
+|                                           | memory.                           |
++-------------------------------------------+-----------------------------------+
+| ``constData()``                           | For containers that support it    |
+|                                           | (``std::vector``, ``QList``),     |
+|                                           | return a read-only buffer viewing |
+|                                           | the memory.                       |
++-------------------------------------------+-----------------------------------+
 
 
 .. note:: ``std::span``, being a non-owning container, is currently replaced by a
@@ -86,7 +86,7 @@ from `std::vector<int>`, and using it in Python.
 We will consider three separate use cases.
 
 **Case 1** - When a Python list is passed to C++ function
-`TestOpaqueContainer.getVectorSum(const std::vector<int>&)` as an opaque container
+``TestOpaqueContainer.getVectorSum(const std::vector<int>&)`` as an opaque container
 
 .. code-block:: c
 
@@ -99,7 +99,7 @@ We will consider three separate use cases.
         }
     };
 
-**Case 2** - When we have a C++ class named `TestOpaqueContainer` with a `std::vector<int>`
+**Case 2** - When we have a C++ class named ``TestOpaqueContainer`` with a ``std::vector<int>``
 public variable
 
 .. code-block:: c
@@ -111,7 +111,7 @@ public variable
 
     };
 
-**Case 3** - When we have a C++ class named `TestOpaqueContainer` with a `std::vector<int>` as
+**Case 3** - When we have a C++ class named ``TestOpaqueContainer`` with a ``std::vector<int>`` as
 private variable and the variable is returned by a reference through a getter.
 
 .. code-block:: c
@@ -133,9 +133,9 @@ private variable and the variable is returned by a reference through a getter.
           of these examples are rather to show the different possibilities with opaque containers in
           Shiboken than the class design.
 
-In all the three cases, we want to use `intVector` in Python through an opaque-container. The
-first thing to do is to create the corresponding `<container-type />` attribute in the typesystem
-file, making Shiboken aware of the `IntVector`.
+In all the three cases, we want to use ``intVector`` in Python through an opaque-container. The
+first thing to do is to create the corresponding ``<container-type />`` attribute in the typesystem
+file, making Shiboken aware of the ``IntVector``.
 
 .. code-block:: xml
 
@@ -157,17 +157,17 @@ For the rest of the steps, we consider the three cases separately.
 
 **Case 1** - When a Python list is passed to a C++ function
 
-As the next step, we create a typesystem entry for the class `TestOpaqueContainer`.
+As the next step, we create a typesystem entry for the class ``TestOpaqueContainer``.
 
 .. code-block:: xml
 
     <value-type name="TestOpaqueContainer" />
 
 In this case, the typesystem entry is simple and the function
-`getVectorSum(const std::vector<int>&)` accepts `IntVector` as the parameter. This is
-because inherantly `IntVector` is the same as `std::vector<int>`.
+``getVectorSum(const std::vector<int>&)`` accepts ``IntVector`` as the parameter. This is
+because inherantly ``IntVector`` is the same as ``std::vector<int>``.
 
-Now, build the code to create the \*_wrapper.cpp and \*.so files which we import into Python.
+Now, build the code to create the ``*_wrapper.cpp`` and ``*.so`` files which we import into Python.
 
 Verifying the usage in Python
 
@@ -183,7 +183,7 @@ Verifying the usage in Python
 
 **Case 2** - When the variable is public
 
-We create a typesystem entry for the class `TestOpaqueContainer`.
+We create a typesystem entry for the class ``TestOpaqueContainer``.
 
 .. code-block:: xml
 
@@ -191,11 +191,11 @@ We create a typesystem entry for the class `TestOpaqueContainer`.
         <modify-field name="intVector" opaque-container="yes"/>
     </value-type>
 
-In the `<modify-field />` notice the `opaque-container="yes"`. Since the type
-of `intVector' is `std::vector<int>`, it picks up the ``IntVector`` opaque
+In the ``<modify-field />`` notice the ``opaque-container="yes"``. Since the type
+of ``intVector`` is ``std::vector<int>``, it picks up the ``IntVector`` opaque
 container.
 
-Build the code to create the \*_wrapper.cpp and \*.so files which we import into Python.
+Build the code to create the ``*_wrapper.cpp`` and ``*.so`` files which we import into Python.
 
 Verifying the usage in Python
 
@@ -216,7 +216,7 @@ Verifying the usage in Python
 
 **Case 3** - When the variable is private and returned by reference through a getter
 
-Similar to the previous cases, we create a typesystem entry for the class `TestOpaqueContainer`.
+Similar to the previous cases, we create a typesystem entry for the class ``TestOpaqueContainer``.
 
 .. code-block:: xml
 
@@ -228,7 +228,7 @@ Similar to the previous cases, we create a typesystem entry for the class `TestO
         </modify-function>
     </value-type>
 
-In this case, we specify the name of the opaque container `IntVector` in the <replace-type />
+In this case, we specify the name of the opaque container ``IntVector`` in the ``<replace-type />``
 field.
 
 Build the code to create the \*_wrapper.cpp and \*.so files which we import into Python.

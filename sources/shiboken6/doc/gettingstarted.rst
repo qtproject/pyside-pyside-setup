@@ -11,11 +11,11 @@ need to continue if you already have a built PySide.
 General Requirements
 ^^^^^^^^^^^^^^^^^^^^
 
- * **Python**: 3.7+
- * **Qt:** 6.0+
- * **libclang:** The libclang library, recommended: version 10 for 6.0+.
-   Prebuilt versions of it can be `downloaded here`_.
- * **CMake:** 3.1+ is needed.
+* **Python**: 3.7+
+* **Qt:** 6.0+
+* **libclang:** The libclang library, recommended: version 10 for 6.0+.
+  Prebuilt versions of it can be `downloaded here`_.
+* **CMake:** 3.1+ is needed.
 
 .. _downloaded here: https://download.qt.io/development_releases/prebuilt/libclang/
 
