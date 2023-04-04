@@ -12,11 +12,11 @@ should be written to depends upon the technology used on the generated binding c
 
 This is the ``inject-code`` tag options that matters to |project|.
 
-    .. code-block:: xml
+.. code-block:: xml
 
-         <inject-code class="native | target" position="beginning | end">
-             // custom code
-         </inject-code>
+     <inject-code class="native | target" position="beginning | end">
+         // custom code
+     </inject-code>
 
 
 inject-code tag
@@ -30,76 +30,76 @@ The ``position`` attribute specifies the location of the custom code in the
 function.
 
 
-    +---------------+------+-----------+--------------------------------------------------------------+
-    |Parent Tag     |Class |Position   |Meaning                                                       |
-    +===============+======+===========+==============================================================+
-    |value-type,    |native|beginning  |Write to the beginning of a class wrapper ``.cpp`` file, right|
-    |object-type    |      |           |after the ``#include`` clauses. A common use would be to write|
-    |               |      |           |prototypes for custom functions whose definitions are put on a|
-    |               |      |           |``native/end`` code injection.                                |
-    |               |      +-----------+--------------------------------------------------------------+
-    |               |      |end        |Write to the end of a class wrapper ``.cpp`` file. Could be   |
-    |               |      |           |used to write custom/helper functions definitions for         |
-    |               |      |           |prototypes declared on ``native/beginning``.                  |
-    |               +------+-----------+--------------------------------------------------------------+
-    |               |target|beginning  |Put custom code on the beginning of the wrapper initializer   |
-    |               |      |           |function (``init_CLASS(PyObject *module)``). This could be    |
-    |               |      |           |used to manipulate the ``PyCLASS_Type`` structure before      |
-    |               |      |           |registering it on Python.                                     |
-    |               |      +-----------+--------------------------------------------------------------+
-    |               |      |end        |Write the given custom code at the end of the class wrapper   |
-    |               |      |           |initializer function (``init_CLASS(PyObject *module)``). The  |
-    |               |      |           |code here will be executed after all the wrapped class        |
-    |               |      |           |components have been initialized.                             |
-    +---------------+------+-----------+--------------------------------------------------------------+
-    |modify-function|native|beginning  |Code here is put on the virtual method override of a C++      |
-    |               |      |           |wrapper class (the one responsible for passing C++ calls to a |
-    |               |      |           |Python override, if there is any), right after the C++        |
-    |               |      |           |arguments have been converted but before the Python call.     |
-    |               |      +-----------+--------------------------------------------------------------+
-    |               |      |end        |This code injection is put in a virtual method override on the|
-    |               |      |           |C++ wrapper class, after the call to Python and before        |
-    |               |      |           |dereferencing the Python method and tuple of arguments.       |
-    |               +------+-----------+--------------------------------------------------------------+
-    |               |target|beginning  |This code is injected on the Python method wrapper            |
-    |               |      |           |(``PyCLASS_METHOD(...)``), right after the decisor have found |
-    |               |      |           |which signature to call and also after the conversion of the  |
-    |               |      |           |arguments to be used, but before the actual call.             |
-    |               |      +-----------+--------------------------------------------------------------+
-    |               |      |end        |This code is injected on the Python method wrapper            |
-    |               |      |           |(``PyCLASS_METHOD(...)``), right after the C++ method call,   |
-    |               |      |           |but still inside the scope created by the overload for each   |
-    |               |      |           |signature.                                                    |
-    |               +------+-----------+--------------------------------------------------------------+
-    |               |shell |declaration|Used only for virtual functions. This code is injected at the |
-    |               |      |           |top.                                                          |
-    |               |      +-----------+--------------------------------------------------------------+
-    |               |      |beginning  |Used only for virtual functions. The code is injected when the|
-    |               |      |           |function does not has a Python implementation, then the code  |
-    |               |      |           |is inserted before c++ call                                   |
-    |               |      +-----------+--------------------------------------------------------------+
-    |               |      |end        |Same as above, but the code is inserted after c++ call        |
-    +---------------+------+-----------+--------------------------------------------------------------+
-    |typesystem     |native|beginning  |Write code to the beginning of the module ``.cpp`` file, right|
-    |               |      |           |after the ``#include`` clauses. This position has a similar   |
-    |               |      |           |purpose as the ``native/beginning`` position on a wrapper     |
-    |               |      |           |class ``.cpp`` file, namely write function prototypes, but not|
-    |               |      |           |restricted to this use.                                       |
-    |               |      +-----------+--------------------------------------------------------------+
-    |               |      |end        |Write code to the end of the module ``.cpp`` file. Usually    |
-    |               |      |           |implementations for function prototypes inserted at the       |
-    |               |      |           |beginning of the file with a ``native/beginning`` code        |
-    |               |      |           |injection.                                                    |
-    |               +------+-----------+--------------------------------------------------------------+
-    |               |target|beginning  |Insert code at the start of the module initialization function|
-    |               |      |           |(``initMODULENAME()``), before the calling ``Py_InitModule``. |
-    |               |      +-----------+--------------------------------------------------------------+
-    |               |      |end        |Insert code at the end of the module initialization function  |
-    |               |      |           |(``initMODULENAME()``), but before the checking that emits a  |
-    |               |      |           |fatal error in case of problems importing the module.         |
-    |               |      +-----------+--------------------------------------------------------------+
-    |               |      |declaration|Insert code into module header.                               |
-    +---------------+------+-----------+--------------------------------------------------------------+
++---------------+------+-----------+--------------------------------------------------------------+
+|Parent Tag     |Class |Position   |Meaning                                                       |
++===============+======+===========+==============================================================+
+|value-type,    |native|beginning  |Write to the beginning of a class wrapper ``.cpp`` file, right|
+|object-type    |      |           |after the ``#include`` clauses. A common use would be to write|
+|               |      |           |prototypes for custom functions whose definitions are put on a|
+|               |      |           |``native/end`` code injection.                                |
+|               |      +-----------+--------------------------------------------------------------+
+|               |      |end        |Write to the end of a class wrapper ``.cpp`` file. Could be   |
+|               |      |           |used to write custom/helper functions definitions for         |
+|               |      |           |prototypes declared on ``native/beginning``.                  |
+|               +------+-----------+--------------------------------------------------------------+
+|               |target|beginning  |Put custom code on the beginning of the wrapper initializer   |
+|               |      |           |function (``init_CLASS(PyObject *module)``). This could be    |
+|               |      |           |used to manipulate the ``PyCLASS_Type`` structure before      |
+|               |      |           |registering it on Python.                                     |
+|               |      +-----------+--------------------------------------------------------------+
+|               |      |end        |Write the given custom code at the end of the class wrapper   |
+|               |      |           |initializer function (``init_CLASS(PyObject *module)``). The  |
+|               |      |           |code here will be executed after all the wrapped class        |
+|               |      |           |components have been initialized.                             |
++---------------+------+-----------+--------------------------------------------------------------+
+|modify-function|native|beginning  |Code here is put on the virtual method override of a C++      |
+|               |      |           |wrapper class (the one responsible for passing C++ calls to a |
+|               |      |           |Python override, if there is any), right after the C++        |
+|               |      |           |arguments have been converted but before the Python call.     |
+|               |      +-----------+--------------------------------------------------------------+
+|               |      |end        |This code injection is put in a virtual method override on the|
+|               |      |           |C++ wrapper class, after the call to Python and before        |
+|               |      |           |dereferencing the Python method and tuple of arguments.       |
+|               +------+-----------+--------------------------------------------------------------+
+|               |target|beginning  |This code is injected on the Python method wrapper            |
+|               |      |           |(``PyCLASS_METHOD(...)``), right after the decisor have found |
+|               |      |           |which signature to call and also after the conversion of the  |
+|               |      |           |arguments to be used, but before the actual call.             |
+|               |      +-----------+--------------------------------------------------------------+
+|               |      |end        |This code is injected on the Python method wrapper            |
+|               |      |           |(``PyCLASS_METHOD(...)``), right after the C++ method call,   |
+|               |      |           |but still inside the scope created by the overload for each   |
+|               |      |           |signature.                                                    |
+|               +------+-----------+--------------------------------------------------------------+
+|               |shell |declaration|Used only for virtual functions. This code is injected at the |
+|               |      |           |top.                                                          |
+|               |      +-----------+--------------------------------------------------------------+
+|               |      |beginning  |Used only for virtual functions. The code is injected when the|
+|               |      |           |function does not has a Python implementation, then the code  |
+|               |      |           |is inserted before c++ call                                   |
+|               |      +-----------+--------------------------------------------------------------+
+|               |      |end        |Same as above, but the code is inserted after c++ call        |
++---------------+------+-----------+--------------------------------------------------------------+
+|typesystem     |native|beginning  |Write code to the beginning of the module ``.cpp`` file, right|
+|               |      |           |after the ``#include`` clauses. This position has a similar   |
+|               |      |           |purpose as the ``native/beginning`` position on a wrapper     |
+|               |      |           |class ``.cpp`` file, namely write function prototypes, but not|
+|               |      |           |restricted to this use.                                       |
+|               |      +-----------+--------------------------------------------------------------+
+|               |      |end        |Write code to the end of the module ``.cpp`` file. Usually    |
+|               |      |           |implementations for function prototypes inserted at the       |
+|               |      |           |beginning of the file with a ``native/beginning`` code        |
+|               |      |           |injection.                                                    |
+|               +------+-----------+--------------------------------------------------------------+
+|               |target|beginning  |Insert code at the start of the module initialization function|
+|               |      |           |(``initMODULENAME()``), before the calling ``Py_InitModule``. |
+|               |      +-----------+--------------------------------------------------------------+
+|               |      |end        |Insert code at the end of the module initialization function  |
+|               |      |           |(``initMODULENAME()``), but before the checking that emits a  |
+|               |      |           |fatal error in case of problems importing the module.         |
+|               |      +-----------+--------------------------------------------------------------+
+|               |      |declaration|Insert code into module header.                               |
++---------------+------+-----------+--------------------------------------------------------------+
 
 
 Anatomy of Code Injection
@@ -110,16 +110,16 @@ and the places where each kind of code injection goes.
 
 Below is the example C++ class for whom wrapper code will be generated.
 
-    .. code-block:: c++
+.. code-block:: c++
 
-        class InjectCode
-        {
-        public:
-            InjectCode();
-            double overloadedMethod(int arg);
-            double overloadedMethod(double arg);
-            virtual int virtualMethod(int arg);
-        };
+    class InjectCode
+    {
+    public:
+        InjectCode();
+        double overloadedMethod(int arg);
+        double overloadedMethod(double arg);
+        virtual int virtualMethod(int arg);
+    };
 
 From the C++ class, |project| will generate a ``injectcode_wrapper.cpp`` file
 with the binding code. The next section will use a simplified version of the
@@ -168,21 +168,21 @@ of writing the actual name of the wrapped method/function.
 
 In other words, use
 
-    .. code-block:: xml
+.. code-block:: xml
 
-         <inject-code class="target" position="beginning | end">
-             %CPPSELF.originalMethodName();
-         </inject-code>
+     <inject-code class="target" position="beginning | end">
+         %CPPSELF.originalMethodName();
+     </inject-code>
 
 
 instead of
 
 
-    .. code-block:: xml
+.. code-block:: xml
 
-         <inject-code class="target" position="beginning | end">
-            %CPPSELF.%FUNCTION_NAME();
-         </inject-code>
+     <inject-code class="target" position="beginning | end">
+        %CPPSELF.%FUNCTION_NAME();
+     </inject-code>
 
 
 Code Injection for Functions/Methods
@@ -197,30 +197,30 @@ On The Native Side
 Notice that this is only used when there is a C++ wrapper, i.e. the wrapped
 class is polymorphic.
 
-    .. code-block:: c++
+.. code-block:: c++
 
-        int InjectCodeWrapper::virtualMethod(int arg)
-        {
-            PyObject *method = BindingManager::instance().getOverride(this, "virtualMethod");
-            if (!py_override)
-                return this->InjectCode::virtualMethod(arg);
+    int InjectCodeWrapper::virtualMethod(int arg)
+    {
+        PyObject *method = BindingManager::instance().getOverride(this, "virtualMethod");
+        if (!py_override)
+            return this->InjectCode::virtualMethod(arg);
 
-            (... here C++ arguments are converted to Python ...)
+        (... here C++ arguments are converted to Python ...)
 
-            // INJECT-CODE: <modify-function><inject-code class="native" position="beginning">
-            // Uses: pre method call custom code, modify the argument before the
-            // Python call.
+        // INJECT-CODE: <modify-function><inject-code class="native" position="beginning">
+        // Uses: pre method call custom code, modify the argument before the
+        // Python call.
 
-            (... Python method call goes in here ...)
+        (... Python method call goes in here ...)
 
-            // INJECT-CODE: <modify-function><inject-code class="native" position="end">
-            // Uses: post method call custom code, modify the result before delivering
-            // it to C++ caller.
+        // INJECT-CODE: <modify-function><inject-code class="native" position="end">
+        // Uses: post method call custom code, modify the result before delivering
+        // it to C++ caller.
 
-            (... Python method and argument tuple are dereferenced here ...)
+        (... Python method and argument tuple are dereferenced here ...)
 
-            return Shiboken::Converter<int>::toCpp(method_result);
-        }
+        return Shiboken::Converter<int>::toCpp(method_result);
+    }
 
 
 On The Target Side
@@ -231,37 +231,37 @@ method that uses an overload decisor to call the correct C++ method based on the
 arguments passed by the Python call. Each overloaded method signature has its
 own ``beginning`` and ``end`` code injections.
 
-    .. code-block:: c++
+.. code-block:: c++
 
-            static PyObject *PyInjectCode_overloadedMethod(PyObject *self, PyObject *arg)
-            {
-                PyObject* py_result{};
-                if (PyFloat_Check(arg)) {
-                    double cpp_arg0 = Shiboken::Converter<double >::toCpp(arg);
+        static PyObject *PyInjectCode_overloadedMethod(PyObject *self, PyObject *arg)
+        {
+            PyObject* py_result{};
+            if (PyFloat_Check(arg)) {
+                double cpp_arg0 = Shiboken::Converter<double >::toCpp(arg);
 
-                    // INJECT-CODE: <modify-function><inject-code class="target" position="beginning">
-                    // Uses: pre method call custom code.
+                // INJECT-CODE: <modify-function><inject-code class="target" position="beginning">
+                // Uses: pre method call custom code.
 
-                    py_result = Shiboken::Converter<double >::toPython(
-                        PyInjectCode_cptr(self)->InjectCode::overloadedMethod(cpp_arg0)
-                    );
+                py_result = Shiboken::Converter<double >::toPython(
+                    PyInjectCode_cptr(self)->InjectCode::overloadedMethod(cpp_arg0)
+                );
 
-                    // INJECT-CODE: <modify-function><inject-code class="target" position="end">
-                    // Uses: post method call custom code.
+                // INJECT-CODE: <modify-function><inject-code class="target" position="end">
+                // Uses: post method call custom code.
 
-                } else if (PyNumber_Check(arg)) {
-                    (... other overload calling code ...)
-                } else goto PyInjectCode_overloadedMethod_TypeError;
+            } else if (PyNumber_Check(arg)) {
+                (... other overload calling code ...)
+            } else goto PyInjectCode_overloadedMethod_TypeError;
 
-                if (PyErr_Occurred() || !py_result)
-                    return {};
+            if (PyErr_Occurred() || !py_result)
+                return {};
 
-                return py_result;
+            return py_result;
 
-                PyInjectCode_overloadedMethod_TypeError:
-                    PyErr_SetString(PyExc_TypeError, "'overloadedMethod()' called with wrong parameters.");
-                    return {};
-            }
+            PyInjectCode_overloadedMethod_TypeError:
+                PyErr_SetString(PyExc_TypeError, "'overloadedMethod()' called with wrong parameters.");
+                return {};
+        }
 
 
 .. _codeinjecting_classes:
@@ -277,35 +277,35 @@ On The Native Side
 Those injections go in the body of the ``CLASSNAME_wrapper.cpp`` file for the
 wrapped class.
 
-    .. code-block:: c++
+.. code-block:: c++
 
-        // Start of ``CLASSNAME_wrapper.cpp``
-        #define protected public
-        // default includes
-        #include <shiboken.h>
+    // Start of ``CLASSNAME_wrapper.cpp``
+    #define protected public
+    // default includes
+    #include <shiboken.h>
+    (...)
+    #include "injectcode_wrapper.h"
+    using namespace Shiboken;
+
+    // INJECT-CODE: <value/object-type><inject-code class="native" position="beginning">
+    // Uses: prototype declarations
+
+    (... C++ wrapper virtual methods, if any ...)
+
+    (... Python wrapper code ...)
+
+    PyAPI_FUNC(void)
+    init_injectcode(PyObject *module)
+    {
         (...)
-        #include "injectcode_wrapper.h"
-        using namespace Shiboken;
+    }
 
-        // INJECT-CODE: <value/object-type><inject-code class="native" position="beginning">
-        // Uses: prototype declarations
+    (...)
 
-        (... C++ wrapper virtual methods, if any ...)
+    // INJECT-CODE: <value/object-type><inject-code class="native" position="end">
+    // Uses: definition of functions prototyped at ``native/beginning``.
 
-        (... Python wrapper code ...)
-
-        PyAPI_FUNC(void)
-        init_injectcode(PyObject *module)
-        {
-            (...)
-        }
-
-        (...)
-
-        // INJECT-CODE: <value/object-type><inject-code class="native" position="end">
-        // Uses: definition of functions prototyped at ``native/beginning``.
-
-        // End of ``CLASSNAME_wrapper.cpp``
+    // End of ``CLASSNAME_wrapper.cpp``
 
 
 .. _codeinjecting_classes_target:
@@ -315,34 +315,34 @@ On The Target Side
 
 Code injections to the class Python initialization function.
 
-    .. code-block:: c++
+.. code-block:: c++
 
-        // Start of ``CLASSNAME_wrapper.cpp``
+    // Start of ``CLASSNAME_wrapper.cpp``
 
-        (...)
+    (...)
 
-        PyAPI_FUNC(void)
-        init_injectcode(PyObject *module)
-        {
-            // INJECT-CODE: <value/object-type><inject-code class="target" position="beginning">
-            // Uses: Alter something in the PyInjectCode_Type (tp_flags value for example)
-            // before registering it.
+    PyAPI_FUNC(void)
+    init_injectcode(PyObject *module)
+    {
+        // INJECT-CODE: <value/object-type><inject-code class="target" position="beginning">
+        // Uses: Alter something in the PyInjectCode_Type (tp_flags value for example)
+        // before registering it.
 
-            if (PyType_Ready(&PyInjectCode_Type) < 0)
-                return;
+        if (PyType_Ready(&PyInjectCode_Type) < 0)
+            return;
 
-            Py_INCREF(&PyInjectCode_Type);
-            PyModule_AddObject(module, "InjectCode",
-                ((PyObject*)&PyInjectCode_Type));
+        Py_INCREF(&PyInjectCode_Type);
+        PyModule_AddObject(module, "InjectCode",
+            ((PyObject*)&PyInjectCode_Type));
 
-            // INJECT-CODE: <value/object-type><inject-code class="target" position="end">
-            // Uses: do something right after the class is registered, like set some static
-            // variable injected on this same file elsewhere.
-        }
+        // INJECT-CODE: <value/object-type><inject-code class="target" position="end">
+        // Uses: do something right after the class is registered, like set some static
+        // variable injected on this same file elsewhere.
+    }
 
-        (...)
+    (...)
 
-        // End of ``CLASSNAME_wrapper.cpp``
+    // End of ``CLASSNAME_wrapper.cpp``
 
 Code Injection for Modules
 ==========================
@@ -365,30 +365,30 @@ This is very similar to class wrapper code injections :ref:`codeinjecting_classe
 Notice that the inject code at ``target/end`` is inserted before the check for errors
 to prevent bad custom code to pass unnoticed.
 
-    .. code-block:: c++
+.. code-block:: c++
 
-        // Start of ``MODULENAME_module_wrapper.cpp``
+    // Start of ``MODULENAME_module_wrapper.cpp``
 
-        (...)
-        initMODULENAME()
-        {
-            // INJECT-CODE: <typesystem><inject-code class="target" position="beginning">
-            // Uses: do something before the module is created.
+    (...)
+    initMODULENAME()
+    {
+        // INJECT-CODE: <typesystem><inject-code class="target" position="beginning">
+        // Uses: do something before the module is created.
 
-            PyObject *module = Py_InitModule("MODULENAME", MODULENAME_methods);
+        PyObject *module = Py_InitModule("MODULENAME", MODULENAME_methods);
 
-            (... initialization of wrapped classes, namespaces, functions and enums ...)
+        (... initialization of wrapped classes, namespaces, functions and enums ...)
 
-            // INJECT-CODE: <typesystem><inject-code class="target" position="end">
-            // Uses: do something after the module is registered and initialized.
+        // INJECT-CODE: <typesystem><inject-code class="target" position="end">
+        // Uses: do something after the module is registered and initialized.
 
-            if (PyErr_Occurred())
-                Py_FatalError("can't initialize module sample");
-        }
+        if (PyErr_Occurred())
+            Py_FatalError("can't initialize module sample");
+    }
 
-        (...)
+    (...)
 
-        // Start of ``MODULENAME_module_wrapper.cpp``
+    // Start of ``MODULENAME_module_wrapper.cpp``
 
 In addition, code can be injected into the module header by specifying ``target``
 and ``declaration``. This is useful for type definitions.

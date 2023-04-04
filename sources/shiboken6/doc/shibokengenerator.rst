@@ -52,13 +52,13 @@ Handwritten inputs
 Creating new bindings involves creating several pieces of "code": the header,
 the typesystem and, in most cases, the injected code.
 
-:header: A header with ``#include`` directives listing all the headers of the
-         desired classes. This header is not referenced by the generated code.
-         Alternatively, it is possible to pass a list of the headers of the
-         desired classes directly on the command line. In this case,
-         the command line option ``--use-global-header`` should be passed as
-         well to prevent the headers from being suppressed in the generated
-         code.
+**header** A header with ``#include`` directives listing all the headers of the
+    desired classes. This header is not referenced by the generated code.
+    Alternatively, it is possible to pass a list of the headers of the
+    desired classes directly on the command line. In this case,
+    the command line option ``--use-global-header`` should be passed as
+    well to prevent the headers from being suppressed in the generated
+    code.
 
 ::ref:`typesystem`: XML files that provides the developer with a tool to customize the
              way that the generators will see the classes and functions. For
@@ -212,7 +212,7 @@ Options
 ``-I<path>, --include-paths=<path>[:<path>:...]``
     Include paths used by the C++ parser.
 
-... _system-include-paths:
+.. _system-include-paths:
 
 ``-isystem<path>, --system-include-paths=<path>[:<path>:...]``
     System include paths used by the C++ parser
@@ -325,18 +325,18 @@ The project file structure
 
 Here follows a comprehensive example of a generator project file.
 
-    .. code-block:: ini
+.. code-block:: ini
 
-         [generator-project]
-         generator-set = path/to/generator/CHOICE_GENERATOR
-         header-file = DIR/global.h" />
-         typesystem-file = DIR/typesystem_for_your_binding.xml
-         output-directory location="OUTPUTDIR" />
-         include-path = path/to/library/being/wrapped/headers/1
-         include-path = path/to/library/being/wrapped/headers/2
-         typesystem-path = path/to/directory/containing/type/system/files/1
-         typesystem-path = path/to/directory/containing/type/system/files/2
-         enable-parent-ctor-heuristic
+     [generator-project]
+     generator-set = path/to/generator/CHOICE_GENERATOR
+     header-file = DIR/global.h" />
+     typesystem-file = DIR/typesystem_for_your_binding.xml
+     output-directory location="OUTPUTDIR" />
+     include-path = path/to/library/being/wrapped/headers/1
+     include-path = path/to/library/being/wrapped/headers/2
+     typesystem-path = path/to/directory/containing/type/system/files/1
+     typesystem-path = path/to/directory/containing/type/system/files/2
+     enable-parent-ctor-heuristic
 
 
 Project file tags
@@ -352,26 +352,25 @@ generator project file following simple conversion rules.
 For tags without options, just write as an empty tag without any attributes.
 Example:
 
-    .. code-block:: bash
+.. code-block:: bash
 
-         --BOOLEAN-ARGUMENT
+     --BOOLEAN-ARGUMENT
 
 becomes
 
-    .. code-block:: ini
+.. code-block:: ini
 
-         BOOLEAN-ARGUMENT
+     BOOLEAN-ARGUMENT
 
 and
 
-    .. code-block:: bash
+.. code-block:: bash
 
-         --VALUE-ARGUMENT=VALUE
+     --VALUE-ARGUMENT=VALUE
 
 becomes
 
-    .. code-block:: ini
+.. code-block:: ini
 
-         VALUE-ARGUMENT = VALUE
-
+     VALUE-ARGUMENT = VALUE
 

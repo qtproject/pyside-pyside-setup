@@ -20,32 +20,30 @@ Variables
 .. _cpp_return_argument:
 
 **%0**
-
   Replaced by the C++ return variable of the Python method/function wrapper.
 
 
 .. _arg_number:
 
 **%<number>**
-
   Replaced by the name of a C++ argument in the position indicated by ``<number>``.
   The argument counting starts with ``%1``, since ``%0`` represents the return
   variable name. If the number indicates a variable that was removed in the
   type system description, but there is a default value for it, this value will
   be used. Consider this example:
 
-      .. code-block:: c++
+  .. code-block:: c++
 
-          void argRemoval(int a0, int a1 = 123);
+      void argRemoval(int a0, int a1 = 123);
 
 
-      .. code-block:: xml
+  .. code-block:: xml
 
-            <modify-function signature="argRemoval(int, int)">
-                <modify-argument index="2">
-                    <remove-argument/>
-                </modify-argument>
-            </modify-function>
+        <modify-function signature="argRemoval(int, int)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+        </modify-function>
 
   The ``%1`` will be replaced by the C++ argument name, and ``%2`` will get the
   value ``123``.
@@ -54,7 +52,6 @@ Variables
 .. _argument_names:
 
 **%ARGUMENT_NAMES**
-
   Replaced by a comma separated list with the names of all C++ arguments that
   were not removed on the type system description for the method/function. When
   the removed argument has a default value (original or provided in the type
@@ -66,37 +63,36 @@ Variables
 
   Take the following method and related type system description as an example:
 
-      .. code-block:: c++
+  .. code-block:: c++
 
-          void argRemoval(int a0, Point a1 = Point(1, 2), bool a2 = true, Point a3 = Point(3, 4), int a4 = 56);
+      void argRemoval(int a0, Point a1 = Point(1, 2), bool a2 = true, Point a3 = Point(3, 4), int a4 = 56);
 
 
-      .. code-block:: xml
+  .. code-block:: xml
 
-            <modify-function signature="argRemoval(int, Point, bool, Point, int)">
-                <modify-argument index="2">
-                    <remove-argument/>
-                    <replace-default-expression with="Point(6, 9)"/>
-                </modify-argument>
-                <modify-argument index="4">
-                    <remove-argument/>
-                </modify-argument>
-            </modify-function>
+        <modify-function signature="argRemoval(int, Point, bool, Point, int)">
+            <modify-argument index="2">
+                <remove-argument/>
+                <replace-default-expression with="Point(6, 9)"/>
+            </modify-argument>
+            <modify-argument index="4">
+                <remove-argument/>
+            </modify-argument>
+        </modify-function>
 
   As seen on the XML description, the function's ``a1`` and ``a3`` arguments
   were removed. If any ``inject-code`` for this function uses ``%ARGUMENT_NAMES``
   the resulting list will be the equivalent of using individual argument type
   system variables this way:
 
-      .. code-block:: c++
+  .. code-block:: c++
 
-            %1, Point(6, 9), %3, Point(3, 4), %5
+        %1, Point(6, 9), %3, Point(3, 4), %5
 
 
 .. _arg_type:
 
 **%ARG#_TYPE**
-
   Replaced by the type of a C++ argument in the position indicated by ``#``.
   The argument counting starts with ``%1``, since ``%0`` represents the return
   variable in other contexts, but ``%ARG0_TYPE`` will not translate to the
@@ -104,18 +100,18 @@ Variables
   :ref:`%RETURN_TYPE <return_type>` variable.
   Example:
 
-      .. code-block:: c++
+  .. code-block:: c++
 
-          void argRemoval(int a0, int a1 = 123);
+      void argRemoval(int a0, int a1 = 123);
 
 
-      .. code-block:: xml
+  .. code-block:: xml
 
-            <modify-function signature="argRemoval(int, int)">
-                <modify-argument index="2">
-                    <remove-argument/>
-                </modify-argument>
-            </modify-function>
+        <modify-function signature="argRemoval(int, int)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+        </modify-function>
 
   The ``%1`` will be replaced by the C++ argument name, and ``%2`` will get the
   value ``123``.
@@ -124,40 +120,38 @@ Variables
 .. _converttocpp:
 
 **%CONVERTTOCPP[CPPTYPE]**
-
   Replaced by a |project| conversion call that converts a Python variable
   to a C++ variable of the type indicated by ``CPPTYPE``.
 
-   Typically, this is a variable assignment:
+  Typically, this is a variable assignment:
 
-      .. code-block:: c++
+  .. code-block:: c++
 
-         double value = %CONVERTTOCPP[double](pyValue);
+     double value = %CONVERTTOCPP[double](pyValue);
 
-   Pointer assignments are also possible:
+  Pointer assignments are also possible:
 
-      .. code-block:: c++
+  .. code-block:: c++
 
-         void f(double *valuePtr)
-         {
-             *valuePtr = %CONVERTTOCPP[double](pyValue);
+     void f(double *valuePtr)
+     {
+         *valuePtr = %CONVERTTOCPP[double](pyValue);
 
-   Note however, that for variable definitions, the type must
-   be a space-delimited token:
+  Note however, that for variable definitions, the type must
+  be a space-delimited token:
 
-      .. code-block:: c++
+  .. code-block:: c++
 
-         double * valuePtr = %CONVERTTOCPP[double](pyValue);
+     double * valuePtr = %CONVERTTOCPP[double](pyValue);
 
-   since it otherwise would be indistinguishable from the pointer assignment
-   above.
+  since it otherwise would be indistinguishable from the pointer assignment
+  above.
 
-   It is possible to use "auto" as type.
+  It is possible to use "auto" as type.
 
 .. _converttopython:
 
 **%CONVERTTOPYTHON[CPPTYPE]**
-
   Replaced by a |project| conversion call that converts a C++ variable of the
   type indicated by ``CPPTYPE`` to the proper Python object.
 
@@ -165,7 +159,6 @@ Variables
 .. _isconvertible:
 
 **%ISCONVERTIBLE[CPPTYPE]**
-
   Replaced by a |project| "isConvertible" call that checks if a Python
   variable is convertible (via an implicit conversion or cast operator call)
   to a C++ variable of the type indicated by ``CPPTYPE``.
@@ -174,7 +167,6 @@ Variables
 .. _checktype:
 
 **%CHECKTYPE[CPPTYPE]**
-
   Replaced by a |project| "checkType" call that verifies if a Python
   if of the type indicated by ``CPPTYPE``.
 
@@ -182,14 +174,12 @@ Variables
 .. _cppself:
 
 **%CPPSELF**
-
   Replaced by the wrapped C++ object instance that owns the method in which the
   code with this variable was inserted.
 
 .. _cpptype:
 
 **%CPPTYPE**
-
   Replaced by the original name of the C++ class, without any namespace prefix,
   that owns the method in which the code with this variable was inserted. It will
   work on class level code injections also. Notice that ``CPPTYPE`` differs from
@@ -202,22 +192,18 @@ Variables
 .. _function_name:
 
 **%FUNCTION_NAME**
-
   Replaced by the name of a function or method.
-
 
 
 .. _py_return_argument:
 
 **%PYARG_0**
-
   Replaced by the name of the Python return variable of the Python method/function wrapper.
 
 
 .. _pyarg:
 
 **%PYARG_<number>**
-
   Similar to ``%<number>``, but is replaced by the Python arguments (PyObjects)
   received by the Python wrapper method.
 
@@ -228,16 +214,16 @@ Variables
 
   The example
 
-      .. code-block:: c++
+  .. code-block:: c++
 
-          long a = PyLong_AS_LONG(%PYARG_1);
+      long a = PyLong_AS_LONG(%PYARG_1);
 
 
   is equivalent of
 
-      .. code-block:: c++
+  .. code-block:: c++
 
-          long a = PyLong_AS_LONG(PyTuple_GET_ITEM(%PYTHON_ARGUMENTS, 0));
+      long a = PyLong_AS_LONG(PyTuple_GET_ITEM(%PYTHON_ARGUMENTS, 0));
 
 
   The generator tries to be smart with attributions, but it will work for the
@@ -245,24 +231,23 @@ Variables
 
   This example
 
-      .. code-block:: c++
+  .. code-block:: c++
 
-           Py_DECREF(%PYARG_1);
-           %PYARG_1 = PyLong_FromLong(10);
+       Py_DECREF(%PYARG_1);
+       %PYARG_1 = PyLong_FromLong(10);
 
 
   is equivalent of
 
-      .. code-block:: c++
+  .. code-block:: c++
 
-          Py_DECREF(PyTuple_GET_ITEM(%PYTHON_ARGUMENTS, 0));
-          PyTuple_SET_ITEM(%PYTHON_ARGUMENTS, 0, PyLong_FromLong(10));
+      Py_DECREF(PyTuple_GET_ITEM(%PYTHON_ARGUMENTS, 0));
+      PyTuple_SET_ITEM(%PYTHON_ARGUMENTS, 0, PyLong_FromLong(10));
 
 
 .. _pyself:
 
 **%PYSELF**
-
   Replaced by the Python wrapper variable (a PyObject) representing the instance
   bounded to the Python wrapper method which receives the custom code.
 
@@ -270,7 +255,6 @@ Variables
 .. _python_arguments:
 
 **%PYTHON_ARGUMENTS**
-
   Replaced by the pointer to the Python tuple with Python objects converted from
   the C++ arguments received on the binding override of a virtual method.
   This tuple is the same passed as arguments to the Python method overriding the
@@ -280,7 +264,6 @@ Variables
 .. _python_method_override:
 
 **%PYTHON_METHOD_OVERRIDE**
-
   This variable is used only on :ref:`native method code injections
   <codeinjecting_method_native>`, i.e. on the binding overrides for C++ virtual
   methods. It is replaced by a pointer to the Python method override.
@@ -289,7 +272,6 @@ Variables
 .. _pythontypeobject:
 
 **%PYTHONTYPEOBJECT**
-
   Replaced by the Python type object for the context in which it is inserted:
   method or class modification.
 
@@ -297,7 +279,6 @@ Variables
 .. _beginallowthreads:
 
 **%BEGIN_ALLOW_THREADS**
-
   Replaced by a thread state saving procedure.
   Must match with a :ref:`%END_ALLOW_THREADS <endallowthreads>` variable.
 
@@ -305,7 +286,6 @@ Variables
 .. _endallowthreads:
 
 **%END_ALLOW_THREADS**
-
   Replaced by a thread state restoring procedure.
   Must match with a :ref:`%BEGIN_ALLOW_THREADS <beginallowthreads>` variable.
 
@@ -313,14 +293,12 @@ Variables
 .. _return_type:
 
 **%RETURN_TYPE**
-
   Replaced by the type returned by a function or method.
 
 
 .. _type:
 
 **%TYPE**
-
   Replaced by the name of the class to which a function belongs. May be used
   in code injected at method or class level.
 
@@ -335,27 +313,27 @@ sections, below is an excerpt from the type system description of a |project|
 test. It changes a method that received ``argc/argv`` arguments into something
 that expects a Python sequence instead.
 
-    .. code-block:: xml
+.. code-block:: xml
 
-        <modify-function signature="overloadedMethod(int, char**)">
-            <modify-argument index="1">
-                <replace-type modified-type="PySequence" />
-            </modify-argument>
-            <modify-argument index="2">
-                <remove-argument />
-            </modify-argument>
-            <inject-code class="target" position="beginning">
-                int argc;
-                char** argv;
-                if (!PySequence_to_argc_argv(%PYARG_1, &amp;argc, &amp;argv)) {
-                    PyErr_SetString(PyExc_TypeError, "error");
-                    return 0;
-                }
-                %RETURN_TYPE foo = %CPPSELF.%FUNCTION_NAME(argc, argv);
-                %0 = %CONVERTTOPYTHON[%RETURN_TYPE](foo);
+    <modify-function signature="overloadedMethod(int, char**)">
+        <modify-argument index="1">
+            <replace-type modified-type="PySequence" />
+        </modify-argument>
+        <modify-argument index="2">
+            <remove-argument />
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            int argc;
+            char** argv;
+            if (!PySequence_to_argc_argv(%PYARG_1, &amp;argc, &amp;argv)) {
+                PyErr_SetString(PyExc_TypeError, "error");
+                return 0;
+            }
+            %RETURN_TYPE foo = %CPPSELF.%FUNCTION_NAME(argc, argv);
+            %0 = %CONVERTTOPYTHON[%RETURN_TYPE](foo);
 
-                for (int i = 0; i &lt; argc; ++i)
-                    delete[] argv[i];
-                delete[] argv;
-            </inject-code>
-        </modify-function>
+            for (int i = 0; i &lt; argc; ++i)
+                delete[] argv[i];
+            delete[] argv;
+        </inject-code>
+    </modify-function>

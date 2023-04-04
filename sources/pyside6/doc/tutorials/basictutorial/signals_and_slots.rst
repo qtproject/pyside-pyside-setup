@@ -61,20 +61,20 @@ used  with the `disconnect()` method to sever the connection.
 
 Signals can also be connected to free functions:
 
-    .. code-block:: python
+.. code-block:: python
 
-        import sys
-        from PySide6.QtWidgets import QApplication, QPushButton
+    import sys
+    from PySide6.QtWidgets import QApplication, QPushButton
 
 
-        def function():
-            print("The 'function' has been called!")
+    def function():
+        print("The 'function' has been called!")
 
-        app = QApplication()
-        button = QPushButton("Call function")
-        button.clicked.connect(func)
-        button.show()
-        sys.exit(app.exec())
+    app = QApplication()
+    button = QPushButton("Call function")
+    button.clicked.connect(func)
+    button.show()
+    sys.exit(app.exec())
 
 Connections can be spelled out in code or, for widget forms,
 designed in the
@@ -89,55 +89,55 @@ variables of the class ``QtCore.Signal()``. A QWidget-based button
 that emits a `clicked()` signal could look as
 follows:
 
-   .. code-block:: python
+.. code-block:: python
 
-       from PySide6.QtCore import Qt, Signal
-       from PySide6.QtWidgets import QWidget
+    from PySide6.QtCore import Qt, Signal
+    from PySide6.QtWidgets import QWidget
 
-       class Button(QWidget):
+    class Button(QWidget):
 
-           clicked = Signal(Qt.MouseButton)
+        clicked = Signal(Qt.MouseButton)
 
-           ...
+        ...
 
-           def mousePressEvent(self, event):
-               self.clicked.emit(event.button())
+        def mousePressEvent(self, event):
+            self.clicked.emit(event.button())
 
 The constructor of ``Signal`` takes a tuple or a list of Python types
 and C types:
 
-    .. code-block:: python
+.. code-block:: python
 
-        signal1 = Signal(int)  # Python types
-        signal2 = Signal(QUrl)  # Qt Types
-        signal3 = Signal(int, str, int)  # more than one type
-        signal4 = Signal((float,), (QDate,))  # optional types
+    signal1 = Signal(int)  # Python types
+    signal2 = Signal(QUrl)  # Qt Types
+    signal3 = Signal(int, str, int)  # more than one type
+    signal4 = Signal((float,), (QDate,))  # optional types
 
 In addition to that, it can receive also a named argument ``name`` that defines
 the signal name. If nothing is passed, the new signal will have the same name
 as the variable that it is being assigned to.
 
-    .. code-block:: python
+.. code-block:: python
 
-        # TODO
-        signal5 = Signal(int, name='rangeChanged')
-        # ...
-        rangeChanged.emit(...)
+    # TODO
+    signal5 = Signal(int, name='rangeChanged')
+    # ...
+    rangeChanged.emit(...)
 
 Another useful option of ``Signal`` is the arguments name,
 useful for QML applications to refer to the emitted values by name:
 
-    .. code-block:: python
+.. code-block:: python
 
-        sumResult = Signal(int, arguments=['sum'])
+    sumResult = Signal(int, arguments=['sum'])
 
-    .. code-block:: javascript
+.. code-block:: javascript
 
-        Connections {
-            target: ...
-            function onSumResult(sum) {
-                // do something with 'sum'
-            }
+    Connections {
+        target: ...
+        function onSumResult(sum) {
+            // do something with 'sum'
+        }
 
 The Slot Class
 --------------
@@ -146,11 +146,11 @@ Slots in QObject-derived classes should be indicated by the decorator
 ``@QtCore.Slot()``. Again, to define a signature just pass the types
 similar to the ``QtCore.Signal()`` class.
 
-    .. code-block:: python
+.. code-block:: python
 
-        @Slot(str)
-        def slot_function(self, s):
-            ...
+    @Slot(str)
+    def slot_function(self, s):
+        ...
 
 
 ``Slot()`` also accepts a ``name`` and a ``result`` keyword.
@@ -172,42 +172,42 @@ In Qt 6, signals have distinct names for different types.
 The following example uses two handlers for a Signal and a Slot to showcase
 the different functionality.
 
-    .. code-block:: python
+.. code-block:: python
 
-        import sys
-        from PySide6.QtWidgets import QApplication, QPushButton
-        from PySide6.QtCore import QObject, Signal, Slot
+    import sys
+    from PySide6.QtWidgets import QApplication, QPushButton
+    from PySide6.QtCore import QObject, Signal, Slot
 
 
-        class Communicate(QObject):
-            # create two new signals on the fly: one will handle
-            # int type, the other will handle strings
-            speak = Signal((int,), (str,))
+    class Communicate(QObject):
+        # create two new signals on the fly: one will handle
+        # int type, the other will handle strings
+        speak = Signal((int,), (str,))
 
-            def __init__(self, parent=None):
-                super().__init__(parent)
+        def __init__(self, parent=None):
+            super().__init__(parent)
 
-                self.speak[int].connect(self.say_something)
-                self.speak[str].connect(self.say_something)
+            self.speak[int].connect(self.say_something)
+            self.speak[str].connect(self.say_something)
 
-            # define a new slot that receives a C 'int' or a 'str'
-            # and has 'say_something' as its name
-            @Slot(int)
-            @Slot(str)
-            def say_something(self, arg):
-                if isinstance(arg, int):
-                    print("This is a number:", arg)
-                elif isinstance(arg, str):
-                    print("This is a string:", arg)
+        # define a new slot that receives a C 'int' or a 'str'
+        # and has 'say_something' as its name
+        @Slot(int)
+        @Slot(str)
+        def say_something(self, arg):
+            if isinstance(arg, int):
+                print("This is a number:", arg)
+            elif isinstance(arg, str):
+                print("This is a string:", arg)
 
-        if __name__ == "__main__":
-            app = QApplication(sys.argv)
-            someone = Communicate()
+    if __name__ == "__main__":
+        app = QApplication(sys.argv)
+        someone = Communicate()
 
-            # emit 'speak' signal with different arguments.
-            # we have to specify the str as int is the default
-            someone.speak.emit(10)
-            someone.speak[str].emit("Hello everybody!")
+        # emit 'speak' signal with different arguments.
+        # we have to specify the str as int is the default
+        someone.speak.emit(10)
+        someone.speak[str].emit("Hello everybody!")
 
 
 Specifying Signals and Slots by Method Signature Strings
@@ -217,17 +217,17 @@ Specifying Signals and Slots by Method Signature Strings
 Signals and slots can also be specified as C++ method signature
 strings passed through the `SIGNAL()` and/or `SLOT()` functions:
 
-    .. code-block:: python
+.. code-block:: python
 
-        from PySide6.QtCore import SIGNAL, SLOT
+    from PySide6.QtCore import SIGNAL, SLOT
 
-        button.connect(SIGNAL("clicked(Qt::MouseButton)"),
-                      action_handler, SLOT("action1(Qt::MouseButton)"))
+    button.connect(SIGNAL("clicked(Qt::MouseButton)"),
+                  action_handler, SLOT("action1(Qt::MouseButton)"))
 
 This is not recommended for connecting signals, it is mostly
 used to specify signals for methods like `QWizardPage::registerField()`:
 
-    .. code-block:: python
+.. code-block:: python
 
-        wizard.registerField("text", line_edit, "text",
-                             SIGNAL("textChanged(QString)"))
+    wizard.registerField("text", line_edit, "text",
+                         SIGNAL("textChanged(QString)"))
