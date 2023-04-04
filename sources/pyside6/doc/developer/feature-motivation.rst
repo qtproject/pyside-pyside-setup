@@ -84,12 +84,11 @@ all methods of all classes used in this module are changing their name.
 
 The algorithm to change names is this:
 
- * if the name has less than 3 chars, or
- * if two upper chars are adjacent, or
- * if the name starts with ``gl`` (which marks OpenGL),
- * the name is returned unchanged. Otherwise
-
- * a single upper char ``C`` is replaced by ``_c``
+* if the name has less than 3 chars, or
+* if two upper chars are adjacent, or
+* if the name starts with ``gl`` (which marks OpenGL),
+* the name is returned unchanged. Otherwise
+* a single upper char ``C`` is replaced by ``_c``
 
 
 The true_property feature

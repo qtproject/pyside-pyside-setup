@@ -2,7 +2,7 @@
 ####################
 
 `fbs`_ provides a powerful environment for packaging, creating installers, and signing your
-application. It also lets you manage updates to your application. Since `fbs` is based on
+application. It also lets you manage updates to your application. Since `fbs`_ is based on
 PyInstaller, it supports Linux, macOS, and Windows.
 
 For more details, see the `fbs tutorial`_ and the `fbs manual`_.
@@ -32,12 +32,12 @@ command::
 
 This command prompts you to answer a few questions to configure the details of your project, like:
 
- * Application name
- * Author name
- * Qt bindings (PySide6 or PyQt5)
- * Bundle indentified (for macOS)
+* Application name
+* Author name
+* Qt bindings (PySide6)
+* Bundle indentified (for macOS)
 
-Afterwards, you have a `src/` directory that contains the following structure::
+Afterwards, you have a ``src/`` directory that contains the following structure::
 
     └── src
         ├── build
@@ -49,10 +49,10 @@ Afterwards, you have a `src/` directory that contains the following structure::
             │   └── mac
             └── python
 
-Inside the `settings` directory, there are a few JSON files that can be edited to include more
+Inside the ``settings`` directory, there are a few JSON files that can be edited to include more
 information about your project.
 
-The `main` file is in the `python` directory, and its default content is::
+The ``main`` file is in the ``python`` directory, and its default content is::
 
     from fbs_runtime.application_context import ApplicationContext
     from PySide6.QtWidgets import QMainWindow
@@ -67,7 +67,7 @@ The `main` file is in the `python` directory, and its default content is::
         exit_code = appctxt.app.exec()      # 2. Invoke appctxt.app.exec()
         sys.exit(exit_code)
 
-This example shows an empty `QMainWindow`. You can run it using the following command::
+This example shows an empty ``QMainWindow``. You can run it using the following command::
 
     fbs run
 
@@ -87,11 +87,11 @@ example::
 
 
 Now, you can try to run the application. The result is the same window as the one you saw with the
-`fbs run` command::
+``fbs run`` command::
 
     cd target/MyApp/
     ./MyApp
 
 .. note:: This is the case for Linux. For other platforms like macOS, you need to enter the
-   directory: `target/MyApp.app/Contents/macOS`. For Windows, you need to find the `MyApp.exe`
+   directory: ``target/MyApp.app/Contents/macOS``. For Windows, you need to find the ``MyApp.exe``
    executable.

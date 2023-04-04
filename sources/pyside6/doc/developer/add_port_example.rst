@@ -33,7 +33,7 @@ Port a Qt example
 - Add a ``.pyproject`` file (verify later on that docs build).
 - Add a ``doc`` directory and descriptive ``.rst`` file,
   and a screenshot if suitable (use ``optipng`` to reduce file size).
-- Add the """Port of the ... example from Qt 6""" doc string.
+- Add the ``"""Port of the ... example from Qt 6"""`` doc string.
 - Try to port variable and function names to snake case convention.
 - Verify that a flake check is mostly silent.
 - Remove C++ documentation from ``sources/pyside6/doc/additionaldocs.lst``.

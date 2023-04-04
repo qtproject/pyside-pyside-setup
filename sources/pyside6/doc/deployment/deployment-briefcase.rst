@@ -1,13 +1,16 @@
 |project| & Briefcase
 #######################
 
-`Briefcase <https://briefcase.readthedocs.io>`_  is a packaging tool that lets you create a standalone package for a Python application. It supports the following installer formats:
+`Briefcase <https://briefcase.readthedocs.io>`_  is a packaging tool that lets
+you create a standalone package for a Python application. It supports the
+following installer formats:
 
- * .app application bundle for macOS
- * MSI installer for Windows
- * AppImage for Linux
+* ``.app`` application bundle for macOS
+* MSI installer for Windows
+* AppImage for Linux
 
-For more details, see the `official documentation <https://briefcase.readthedocs.io/en/latest/index.html>`_.
+For more details, see the `official documentation
+<https://briefcase.readthedocs.io/en/latest/index.html>`_.
 
 Status of Qt 6 Support
 ======================
@@ -17,15 +20,15 @@ As of March 2021, Qt 6 is not supported yet.
 Preparation
 ===========
 
-Install `Briefcase` using the following **pip** command::
+Install ``Briefcase`` using the following **pip** command::
 
     pip install briefcase
 
 You also need : docker on linux, `WixToolset`_ on windows,
 
-If you're using a virtual environment, remember to activate it before installing `Briefcase`.
+If you're using a virtual environment, remember to activate it before installing ``Briefcase``.
 
-After installation, the `briefcase` binary is located in your virtual environment's `bin/`
+After installation, the ``briefcase`` binary is located in your virtual environment's ``bin/``
 directory, or where your Python executable is located.
 
 You can either create a brand new project using the briefcase assistant or setup your own.
@@ -39,8 +42,8 @@ Run the following command and answer the questions to get started::
 
     briefcase new
 
-Ensure that `PySide6` is chosen as the `GUI toolkit choice`.
-Your PySide6 application is now configured. You can jump to `Build the package`_.
+Ensure that |pymodname| is chosen as the **GUI toolkit choice**.
+Your |pymodname| application is now configured. You can jump to `Build the package`_.
 
 
 Set up your project
@@ -49,7 +52,7 @@ Set up your project
 Create a pyproject.toml
 -----------------------
 
-At the root level of your project, create a `pyproject.toml` file::
+At the root level of your project, create a ``pyproject.toml`` file::
 
         [tool.briefcase]
         project_name = "MyPySideApp"
@@ -85,7 +88,7 @@ At the root level of your project, create a `pyproject.toml` file::
 
 
 Write some code
-----------------
+---------------
 
 Let's say your project tree is like this::
 
@@ -103,7 +106,7 @@ Let's say your project tree is like this::
             app.py
 
 
-Content of `__main__.py`::
+Content of ``__main__.py``::
 
     import sys
     from PySide6.QtWidgets import QApplication
@@ -119,7 +122,7 @@ Content of `__main__.py`::
         sys.exit(app.exec())
 
 
-Content of  `app.py`::
+Content of ``app.py``::
 
     import random
     from PySide6.QtWidgets import (QLabel, QPushButton,
@@ -151,10 +154,10 @@ Content of  `app.py`::
 
 
 Build the package
-==================
+=================
 
 Initialize the package
-------------------------
+----------------------
 
 Just run::
 
@@ -162,7 +165,8 @@ Just run::
 
 Run the following command to initialize the building the packages for Windows, Linux, and macOS.
 It creates a subdirectory each for the different platforms.
-This step takes longer as it adds the packages listed in `requires` sections in the `pyproject.toml` file.
+This step takes longer as it adds the packages listed in ``requires`` sections in the
+``pyproject.toml`` file.
 
 Build the application
 ---------------------
@@ -185,20 +189,23 @@ Run the application
 
     briefcase run
 
-.. note:: You can run your project in `dev` mode (your source code not packaged) with `briefcase dev`
+.. note:: You can run your project in ``dev`` mode (your source code not packaged) with
+   ``briefcase dev``
 
 
 Build the installer (only Windows and macOS)
----------------------------------------------
+--------------------------------------------
 
 macOS::
 
     briefcase package --no-sign
 
-It's possible to sign, see the `documentation <https://briefcase.readthedocs.io/en/latest/how-to/code-signing/index.html>`_. You get `macOS/A Cool App-0.0.1.dmg`
+It's possible to sign, see the
+`documentation <https://briefcase.readthedocs.io/en/latest/how-to/code-signing/index.html>`_.
+You get ``macOS/A Cool App-0.0.1.dmg``
 
 Windows::
 
     briefcase package
 
-You get `windows\A_Cool_App-0.0.1.msi`
+You get ``windows\A_Cool_App-0.0.1.msi``

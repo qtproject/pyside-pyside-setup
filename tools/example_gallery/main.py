@@ -348,6 +348,7 @@ if __name__ == "__main__":
     `pyside-setup <https://code.qt.io/cgit/pyside/pyside-setup.git/>`_ repository
     on the `examples <https://code.qt.io/cgit/pyside/pyside-setup.git/tree/examples>`_
     directory.
+
        """
     )
 

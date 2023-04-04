@@ -15,31 +15,31 @@ if you find any, or contributing to `their development <https://github.com/marce
 Preparation
 ===========
 
-Installing `cx_Freeze` can be done using **pip**::
+Installing ``cx_Freeze`` can be done using **pip**::
 
     pip install cx_freeze
 
 If you are using a virtual environment, remember to activate it before
-installing `cx_Freeze` into it.
+installing ``cx_Freeze`` into it.
 
-After the installation, you will have the `cxfreeze` binary to deploy
+After the installation, you will have the ``cxfreeze`` binary to deploy
 your application.
 
 Freezing an application
 =======================
 
-There are three options to work with `cx_Freeze`:
+There are three options to work with ``cx_Freeze``:
 
- 1. Using the `cxfreeze` script.
- 2. Creating `setup.py` script to build the project.
- 3. Using the module classes directly (for advanced purposes).
+1. Using the ``cxfreeze`` script.
+2. Creating ``setup.py`` script to build the project.
+3. Using the module classes directly (for advanced purposes).
 
 The following sections cover the first two use cases.
 
 Creating an example
 -------------------
 
-Now, consider the following simple script, named `hello.py`::
+Now, consider the following simple script, named ``hello.py``::
 
     import sys
     import random
@@ -80,28 +80,28 @@ Now, consider the following simple script, named `hello.py`::
         sys.exit(app.exec())
 
 
-Using `cxfreeze` executable
----------------------------
+Using ``cxfreeze`` executable
+-----------------------------
 
 Now that we have an application, try freezing it with the following
 command::
 
     cxfreeze hello.py
 
-This command creates a `dist/` directory containing the executable.
-and a `lib/` directory containing all the shared libraries.
+This command creates a ``dist/`` directory containing the executable.
+and a ``lib/`` directory containing all the shared libraries.
 
-To launch the application, go to the `dist/` directory and execute
+To launch the application, go to the ``dist/`` directory and execute
 the file::
 
     cd dist/
     ./main
 
 
-Using a setuptools script
--------------------------
+Using a ``setuptools`` script
+-----------------------------
 
-For this process, you need an additional script called `setup.py`::
+For this process, you need an additional script called ``setup.py``::
 
     import sys
     from cx_Freeze import setup, Executable
@@ -115,15 +115,15 @@ Now, build the project using it::
 
     python setup.py build
 
-This step creates a `build/` directory with the following structure::
+This step creates a ``build/`` directory with the following structure::
 
     build
     └── exe.linux-x86_64-3.7
         └── lib
         └── main
 
-The first directory inside `build/` depends on the platform
-you are using, in this case a `x86_64` Linux using Python 3.7.
+The first directory inside ``build/`` depends on the platform
+you are using, in this case a ``x86_64`` Linux using Python 3.7.
 The structure is the same as previously described, and you can simply
 enter the directory and execute the file::
 

@@ -4,11 +4,11 @@ Getting Started on macOS
 Requirements
 ------------
 
- * `XCode`_ 8.2 (macOS 10.11), 8.3.3 (macOS 10.12), 9 (macOS 10.13), 10.1 (macOS 10.14)
- * ``sphinx`` package for the documentation (optional).
- * Depending on your OS, the following dependencies might also be required:
+* `XCode`_ 8.2 (macOS 10.11), 8.3.3 (macOS 10.12), 9 (macOS 10.13), 10.1 (macOS 10.14)
+* ``sphinx`` package for the documentation (optional).
+* Depending on your OS, the following dependencies might also be required:
 
-   * ``libgl-dev``, ``python-dev``, ``python-distutils``, and ``python-setuptools``.
+  * ``libgl-dev``, ``python-dev``, ``python-distutils``, and ``python-setuptools``.
 
 .. _XCode: https://developer.apple.com/xcode/
 

@@ -1,7 +1,7 @@
 .. _using_ui_files:
 
-Using `.ui` files from Designer or QtCreator with `QUiLoader` and `pyside6-uic`
-*******************************************************************************
+Using ``.ui`` files from Designer or QtCreator with ``QUiLoader`` and ``pyside6-uic``
+*************************************************************************************
 
 This page describes the use of
 `Qt Designer <https://doc.qt.io/qt-6/qtdesigner-manual.html>`_ to create
@@ -15,13 +15,13 @@ is described at
 .. image:: uifiles.png
    :alt: Designer and the equivalent code
 
-The designs are stored in `.ui` files, which is an XML-based format. It will
+The designs are stored in ``.ui`` files, which is an XML-based format. It will
 be converted to Python or C++ code populating a widget instance at project build
 time by the `pyside6-uic <https://doc.qt.io/qt-6/uic.html>`_ tool.
 
 To create a new Qt Design Form in **Qt Creator**, choose
-`File/New File Or Project` and "Main Window" for template. Save it as
-`mainwindow.ui`. Add a `QPushButton` to the center of the centralwidget.
+``File/New File Or Project`` and "Main Window" for template. Save it as
+``mainwindow.ui``. Add a ``QPushButton`` to the center of the centralwidget.
 
 Your file ``mainwindow.ui`` should look something like this:
 
@@ -88,12 +88,12 @@ Option A: Generating a Python class
 ===================================
 
 The standard way to interact with a **UI file** is to generate a Python
-class from it. This is possible thanks to the `pyside6-uic` tool.
+class from it. This is possible thanks to the ``pyside6-uic`` tool.
 To use this tool, you need to run the following command on a console::
 
-    pyside6-uic mainwindow.ui > ui_mainwindow.py
+    pyside6-uic mainwindow.ui -o ui_mainwindow.py
 
-We redirect all the output of the command to a file called `ui_mainwindow.py`,
+We redirect all the output of the command to a file called ``ui_mainwindow.py``,
 which will be imported directly::
 
     from ui_mainwindow import Ui_MainWindow
@@ -136,7 +136,7 @@ file:
 
 .. note::
 
-  You must run `pyside6-uic` again every time you make changes
+  You must run ``pyside6-uic`` again every time you make changes
   to the **UI file**.
 
 Option B: Loading it directly
@@ -149,7 +149,7 @@ module:
 
     from PySide6.QtUiTools import QUiLoader
 
-The `QUiLoader` lets us load the **ui file** dynamically
+The ``QUiLoader`` lets us load the **ui file** dynamically
 and use it right away:
 
 .. code-block:: python
@@ -198,9 +198,9 @@ command prompt:
 
 .. note::
 
-    `QUiLoader` uses connect() calls taking the function signatures as string
+    ``QUiLoader`` uses ``connect()`` calls taking the function signatures as string
     arguments for signal/slot connections.
-    It is thus unable to handle Python types like `str` or `list` from
+    It is thus unable to handle Python types like ``str`` or ``list`` from
     custom widgets written in Python since these types are internally mapped
     to different C++ types.
 
@@ -270,7 +270,7 @@ for registering types or adding instances of
 The function
 :meth:`registerCustomWidget()<PySide6.QtDesigner.QPyDesignerCustomWidgetCollection.registerCustomWidget>`
 is used to register a widget type with **Qt Designer**. In the simple case, it
-can be used like `QUiLoader.registerCustomWidget()`. It takes the custom widget
+can be used like ``QUiLoader.registerCustomWidget()``. It takes the custom widget
 type and some optional keyword arguments passing values that correspond to the
 getters of
 `QDesignerCustomWidgetInterface <https://doc.qt.io/qt-6/qdesignercustomwidgetinterface.html>`_ :

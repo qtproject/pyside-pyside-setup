@@ -36,7 +36,7 @@ search for "Python: Select Interpreter".
 Creating Configurations in launch.json
 --------------------------------------
 
-Run -> Add Configuration -> Python -> Python File
+``Run -> Add Configuration -> Python -> Python File``
 
 This should create a launch.json file which looks like this:
 
@@ -145,7 +145,7 @@ Debug The Process
 
 1. Set a breakpoint in the Python code.
 
-2. Go to `Run And Debug` (Ctrl + Shift + D) and run the "Python: Current File"
+2. Go to ``Run And Debug`` (Ctrl + Shift + D) and run the "Python: Current File"
    by clicking the run symbol (green right-arrow). This will hit the breakpoint
    and will halt the Python debugger.
 
@@ -153,40 +153,40 @@ Debug The Process
    Current File" to "(gdb) Attach" or "(Windows) Attach". Your setup should now
    look like this.
 
-    .. image:: breakpoint_gdb.png
-        :alt: breakpoint before attach gdb
-        :align: center
+   .. image:: breakpoint_gdb.png
+       :alt: breakpoint before attach gdb
+       :align: center
 
 4. Run "(gdb) Attach" or "(Windows) Attach" and this should ask you for the
    processId of the Python process to which you want to attach the C++ debugger.
    VSCode also lets you search for the process by its name.
 
-    .. tip:: You can find the processId by running `ps aux | grep python`
+   .. tip:: You can find the processId by running ``ps aux | grep python``
 
-    .. image:: find_process_gdb.png
-        :alt: find process vscode
-        :align: center
+   .. image:: find_process_gdb.png
+       :alt: find process vscode
+       :align: center
 
 5. VSCode might now ask you for superuser permissions. In that case, type 'y'
    and enter your password.
 
-    .. code-block:: bash
+   .. code-block:: bash
 
-        Superuser access is required to attach to a process. Attaching as
-        superuser can potentially harm your computer. Do you want to continue?
-        [y/N]_
+       Superuser access is required to attach to a process. Attaching as
+       superuser can potentially harm your computer. Do you want to continue?
+       [y/N]_
 
 6. That is it. You should now be able to hit the breakpoints that you have set
    on the C++ counterparts.
 
-    .. figure:: audioformat_wrapper.png
-        :alt: Breakpoint set on the shiboken wrapper class
-        :align: left
+   .. figure:: audioformat_wrapper.png
+       :alt: Breakpoint set on the shiboken wrapper class
+       :align: left
 
-    Breakpoint set on the shiboken wrapper class
+   Breakpoint set on the shiboken wrapper class
 
-    .. figure:: audioformat_cpp.png
-        :alt: Breakpoint set on C++ implementation
-        :align: left
+   .. figure:: audioformat_cpp.png
+       :alt: Breakpoint set on C++ implementation
+       :align: left
 
-    Breakpoint set on C++ implementation
+   Breakpoint set on C++ implementation

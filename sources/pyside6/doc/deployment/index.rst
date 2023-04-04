@@ -20,12 +20,12 @@ that deploys your PySide6 application to all desktop platforms - Windows, Linux,
 more about how to use the tool see :ref:`pyside6-deploy`. Additionally, you can also use other
 popular deployment tools shown below:
 
- * `fbs`_
- * `PyInstaller`_
- * `cx_Freeze`_
- * `py2exe`_
- * `py2app`_
- * `briefcase`_
+* `fbs`_
+* `PyInstaller`_
+* `cx_Freeze`_
+* `py2exe`_
+* `py2app`_
+* `briefcase`_
 
 .. _fbs: https://build-system.fman.io/
 .. _PyInstaller: https://www.pyinstaller.org/

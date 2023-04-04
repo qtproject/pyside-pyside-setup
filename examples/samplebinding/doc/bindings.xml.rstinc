@@ -11,8 +11,7 @@ automatically tries to generate bindings for all methods of those
 classes. You need not mention all the methods manually in the XML file, unless
 you want to modify them.
 
-Object ownership rules
-----------------------
+**Object ownership rules**
 
 Shiboken doesn't know if Python or C++ are responsible for freeing the C++
 objects that were allocated in the Python code, and assuming this might lead to
