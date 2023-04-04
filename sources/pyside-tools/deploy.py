@@ -3,21 +3,20 @@
 
 """ pyside6-deploy deployment tool
 
-    Deployment tool that uses Nuitka to deploy PySide6 applications to various Desktop (Windows,
+    Deployment tool that uses Nuitka to deploy PySide6 applications to various desktop (Windows,
     Linux, macOS) platforms.
 
     How does it work?
 
-    Desktop Deployment:
-        Command: pyside6-deploy path/to/main_file
-                 pyside6-deploy (incase main file is called main.py)
-                 pyside6-deploy -c /path/to/config_file
+    Command: pyside6-deploy path/to/main_file
+             pyside6-deploy (incase main file is called main.py)
+             pyside6-deploy -c /path/to/config_file
 
-        Platforms Supported: Linux, Windows, macOS
-        Module Binary inclusion:
-            1. for non-QML cases, only required modules are included
-            2. for QML cases, all modules are included because of all QML plugins getting included
-               with nuitka
+    Platforms supported: Linux, Windows, macOS
+    Module binary inclusion:
+        1. for non-QML cases, only required modules are included
+        2. for QML cases, all modules are included because of all QML plugins getting included
+            with nuitka
 
     Config file:
         On the first run of the tool, it creates a config file called pysidedeploy.spec which
@@ -31,8 +30,8 @@
 
 import argparse
 import logging
-from pathlib import Path
 import traceback
+from pathlib import Path
 from textwrap import dedent
 
 from deploy_lib import (setup_python, get_config, cleanup, install_python_dependencies, finalize,
@@ -44,9 +43,6 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
          force: bool = False):
 
     logging.basicConfig(level=loglevel)
-
-    if config_file and Path(config_file).exists():
-        config_file = Path(config_file).resolve()
 
     if not config_file and not main_file.exists():
         print(dedent("""
@@ -80,6 +76,8 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
                                 packages="packages")
 
     # writing config file
+    # in the case of --dry-run, we use default.spec as reference. Do not save the changes
+    # for --dry-run
     if not dry_run:
         config.update_config()
 
@@ -112,12 +110,13 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description=(f"This tool deploys PySide{MAJOR_VERSION} to Desktop (Windows, Linux, macOS)"
+        description=(f"This tool deploys PySide{MAJOR_VERSION} to desktop (Windows, Linux, macOS)"
                      "platforms"),
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
-    parser.add_argument("-c", "--config-file", type=str, help="Path to the .spec config file")
+    parser.add_argument("-c", "--config-file", type=lambda p: Path(p).absolute(),
+                        help="Path to the .spec config file")
 
     parser.add_argument(
         type=lambda p: Path(p).absolute(),

@@ -60,11 +60,10 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
     main_file = Path.cwd() / "main.py"
     generated_files_path = None
     if not main_file.exists():
-        print(dedent("""
+        raise RuntimeError(dedent("""
         [DEPLOY] For android deployment to work, the main entrypoint Python file should be named
-        'main.py'
+        'main.py' and it should be run from the application directory
         """))
-        return
 
     # check if ndk and sdk path given, else use default
     if ndk_path and sdk_path:
@@ -75,16 +74,9 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
     android_data = AndroidData(wheel_pyside=pyside_wheel, wheel_shiboken=shiboken_wheel,
                                ndk_path=ndk_path, sdk_path=sdk_path)
 
-    if config_file and Path(config_file).exists():
-        config_file = Path(config_file).resolve()
-
     python = setup_python(dry_run=dry_run, force=force, init=init)
     config = get_config(python_exe=python.exe, dry_run=dry_run, config_file=config_file,
                         main_file=main_file, android_data=android_data, is_android=True)
-
-    if config.project_dir != Path.cwd():
-        raise RuntimeError("[DEPLOY] For Android deployment, pyside6-deploy should be run from"
-                           f"{config.project_dir}")
 
     if not config.wheel_pyside and not config.wheel_shiboken:
         raise RuntimeError(f"[DEPLOY] No PySide{MAJOR_VERSION} and Shiboken{MAJOR_VERSION} wheels"
@@ -191,7 +183,8 @@ if __name__ == "__main__":
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
-    parser.add_argument("-c", "--config-file", type=str, help="Path to the .spec config file")
+    parser.add_argument("-c", "--config-file", type=lambda p: Path(p).absolute(),
+                        help="Path to the .spec config file")
 
     parser.add_argument(
         "--init", action="store_true",

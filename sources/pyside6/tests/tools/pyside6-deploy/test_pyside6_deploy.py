@@ -230,7 +230,7 @@ class TestPySide6Deploy(unittest.TestCase):
             # run dry_run
             original_output = self.deploy.main(main_file, dry_run=True, force=True)
             self.assertTrue(original_output, expected_run_cmd)
-            self.assertEqual(mock_qmlimportscanner.call_count, 1)
+            self.assertEqual(mock_qmlimportscanner.call_count, 2)
 
         # test config file contents
         config_obj = ConfigFile(config_file=config_file)
