@@ -30,7 +30,7 @@ def create_recipe(version: str, component: str, wheel_path: str, generated_files
 
     recipe_path = generated_files_path / "recipes" / f"{component}"
     recipe_path.mkdir(parents=True, exist_ok=True)
-    logging.info(f"Writing {component} recipe into {recipe_path}")
+    logging.info(f"[DEPLOY] Writing {component} recipe into {recipe_path}")
     with open(recipe_path / "__init__.py", mode="w", encoding="utf-8") as recipe:
         recipe.write(content)
 
@@ -38,7 +38,7 @@ def create_recipe(version: str, component: str, wheel_path: str, generated_files
 def extract_and_copy_jar(wheel_path: Path, generated_files_path: Path) -> str:
     '''
     extracts the PySide6 wheel and copies the 'jar' folder to 'generated_files_path'.
-    These .jar files are added to the buildozer.spec file to be later use by buildozer
+    These .jar files are added to the buildozer.spec file to be used later by buildozer
     '''
     jar_path = generated_files_path / "jar"
     jar_path.mkdir(parents=True, exist_ok=True)
@@ -49,8 +49,10 @@ def extract_and_copy_jar(wheel_path: Path, generated_files_path: Path) -> str:
     return jar_path
 
 
-def get_wheel_android_arch(wheel: str):
-    wheel = Path(wheel)
+def get_wheel_android_arch(wheel: Path):
+    '''
+    Get android architecture from wheel
+    '''
     supported_archs = ["aarch64", "armv7a", "i686", "x86_64"]
     for arch in supported_archs:
         if arch in wheel.stem:

@@ -4,7 +4,6 @@
 from pathlib import Path
 import configparser
 from configparser import ConfigParser
-import shutil
 import logging
 
 from project import ProjectData
@@ -17,17 +16,11 @@ EXCLUDED_QML_PLUGINS = {"QtQuick", "QtQuick3D", "QtCharts", "QtWebEngine", "QtTe
 
 class BaseConfig:
 
-    def __init__(self, config_file: Path, dry_run: bool, comment_prefixes: str = "/") -> None:
+    def __init__(self, config_file: Path, comment_prefixes: str = "/") -> None:
         self.config_file = config_file
         self.parser = ConfigParser(comment_prefixes=comment_prefixes, allow_no_value=True)
-        if not self.config_file.exists():
-            if not dry_run:
-                logging.info(f"[DEPLOY] Creating config file {self.config_file}")
-                shutil.copy(Path(__file__).parent / "default.spec", self.config_file)
-            else:
-                self.config_file = Path(__file__).parent / "default.spec"
-        else:
-            logging.info(f"Using existing config file {config_file}")
+        if not config_file.exists():
+            raise RuntimeError(f"[DEPLOY] {config_file} does not exist")
         self.parser.read(self.config_file)
 
     def update_config(self):
@@ -35,15 +28,17 @@ class BaseConfig:
         with open(self.config_file, "w+") as config_file:
             self.parser.write(config_file, space_around_delimiters=True)
 
-    def set_value(self, section: str, key: str, new_value: str):
+    def set_value(self, section: str, key: str, new_value: str, raise_warning: bool = True):
         try:
             current_value = self.get_value(section, key, ignore_fail=True)
             if current_value != new_value:
                 self.parser.set(section, key, new_value)
         except configparser.NoOptionError:
-            logging.warning(f"[DEPLOY] Key {key} does not exist")
+            if raise_warning:
+                logging.warning(f"[DEPLOY] Key {key} does not exist")
         except configparser.NoSectionError:
-            logging.warning(f"[DEPLOY] Section {section} does not exist")
+            if raise_warning:
+                logging.warning(f"[DEPLOY] Section {section} does not exist")
 
     def get_value(self, section: str, key: str, ignore_fail: bool = False):
         try:
@@ -64,7 +59,7 @@ class Config(BaseConfig):
 
     def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
                  android_data, is_android: bool):
-        super().__init__(config_file, dry_run)
+        super().__init__(config_file)
 
         self._dry_run = dry_run
         # set source_file

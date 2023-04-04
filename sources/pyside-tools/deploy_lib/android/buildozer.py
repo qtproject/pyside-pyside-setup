@@ -7,8 +7,8 @@ from .. import run_command, BaseConfig, Config
 
 
 class BuildozerConfig(BaseConfig):
-    def __init__(self, buildozer_spec_file: Path, pysidedeploy_config: Config, dry_run: bool):
-        super().__init__(buildozer_spec_file, dry_run, comment_prefixes="#")
+    def __init__(self, buildozer_spec_file: Path, pysidedeploy_config: Config):
+        super().__init__(buildozer_spec_file, comment_prefixes="#")
         self.set_value("app", "title", pysidedeploy_config.title)
         self.set_value("app", "package.name", pysidedeploy_config.title)
         self.set_value("app", "package.domain",
@@ -16,7 +16,7 @@ class BuildozerConfig(BaseConfig):
 
         include_exts = self.get_value("app", "source.include_exts")
         include_exts = f"{include_exts},qml"
-        self.set_value("app", "source.include_exts", include_exts)
+        self.set_value("app", "source.include_exts", include_exts, raise_warning=False)
 
         self.set_value("app", "requirements", "python3,shiboken6,PySide6")
 
@@ -73,12 +73,12 @@ class Buildozer:
         # creates buildozer.spec config file
         command = ["buildozer", "init"]
         run_command(command=command, dry_run=Buildozer.dry_run)
-        if not Buildozer.dry_run and not buildozer_spec.exists():
-            raise RuntimeError(f"buildozer.spec not found in {Path.cwd()}")
-        BuildozerConfig(buildozer_spec, pysidedeploy_config, Buildozer.dry_run)
+        if not Buildozer.dry_run:
+            if not buildozer_spec.exists():
+                raise RuntimeError(f"buildozer.spec not found in {Path.cwd()}")
+            BuildozerConfig(buildozer_spec, pysidedeploy_config)
 
     @staticmethod
     def create_executable(mode: str):
-        # build the application in release mode
         command = ["buildozer", "android", mode]
         run_command(command=command, dry_run=Buildozer.dry_run)

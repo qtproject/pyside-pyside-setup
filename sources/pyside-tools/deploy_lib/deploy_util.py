@@ -42,15 +42,30 @@ def cleanup(generated_files_path: Path, config: Config, is_android: bool = False
 
 
 def get_config(python_exe: Path, dry_run: bool = False, config_file: Path = None, main_file:
-               Path = None, android_data = None, is_android: bool = False):
+               Path = None, android_data=None, is_android: bool = False):
     """
-        Sets up a new deployment configuration or use an existing config file
+        Sets up a new pysidedeploy.spec or use an existing config file
     """
-    if main_file and not config_file:
+
+    config_file_exists = config_file and Path(config_file).exists()
+
+    if main_file and not config_file_exists:
         if main_file.parent != Path.cwd():
             config_file = main_file.parent / "pysidedeploy.spec"
         else:
             config_file = Path.cwd() / "pysidedeploy.spec"
+
+    if config_file_exists:
+        logging.info(f"[DEPLOY] Using existing config file {config_file}")
+    else:
+        logging.info(f"[DEPLOY] Creating config file {config_file}")
+        if not dry_run:
+            shutil.copy(Path(__file__).parent / "default.spec", config_file)
+
+    # the config parser needs a reference to parse. So, in the case of --dry-run
+    # use the default.spec file.
+    if dry_run and not config_file_exists:
+        config_file = Path(__file__).parent / "default.spec"
 
     config = Config(config_file=config_file, source_file=main_file, python_exe=python_exe,
                     dry_run=dry_run, android_data=android_data, is_android=is_android)
