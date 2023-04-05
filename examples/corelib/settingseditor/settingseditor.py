@@ -200,13 +200,13 @@ class MainWindow(QMainWindow):
                 "application settings using Qt.")
 
     def create_actions(self):
-        self._open_settings_act = QtGui.QAction("&Open Application Settings...",
+        self._open_settings_act = QAction("&Open Application Settings...",
                 self, shortcut="Ctrl+O", triggered=self.openSettings)
 
-        self._open_ini_file_act = QtGui.QAction("Open I&NI File...", self,
+        self._open_ini_file_act = QAction("Open I&NI File...", self,
                 shortcut="Ctrl+N", triggered=self.openIniFile)
 
-        self._open_property_list_act = QtGui.QAction("Open macOS &Property List...",
+        self._open_property_list_act = QAction("Open macOS &Property List...",
                 self, shortcut="Ctrl+P", triggered=self.openPropertyList)
 
     def create_actions(self):

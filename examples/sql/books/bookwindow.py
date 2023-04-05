@@ -75,7 +75,7 @@ class BookWindow(QMainWindow, Ui_BookWindow):
         self.bookTable.setCurrentIndex(model.index(0, 0))
         self.create_menubar()
 
-    def showError(err):
+    def showError(self, err):
         QMessageBox.critical(self, "Unable to initialize Database",
                     f"Error initializing database: {err.text()}")
 

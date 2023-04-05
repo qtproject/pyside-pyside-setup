@@ -4,7 +4,7 @@
 
 import sys
 
-from PySide6.QtCore import QCoreApplication, QObject, Qt, Property, Signal
+from PySide6.QtCore import QCoreApplication, QObject, Property, Signal
 from PySide6.QtStateMachine import (QFinalState, QSignalTransition, QState,
                                     QStateMachine)
 

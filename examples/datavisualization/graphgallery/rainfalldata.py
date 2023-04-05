@@ -5,7 +5,7 @@ import sys
 
 from pathlib import Path
 
-from PySide6.QtCore import QFile, QIODevice, QObject, Qt
+from PySide6.QtCore import QFile, QIODevice, QObject
 from PySide6.QtDataVisualization import (QBar3DSeries, QCategory3DAxis, QValue3DAxis)
 
 from variantbardataproxy import VariantBarDataProxy

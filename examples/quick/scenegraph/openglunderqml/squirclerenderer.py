@@ -8,8 +8,7 @@ from OpenGL.GL import (GL_ARRAY_BUFFER, GL_BLEND, GL_DEPTH_TEST, GL_FLOAT,
                        GL_ONE, GL_SRC_ALPHA, GL_TRIANGLE_STRIP)
 from PySide6.QtCore import QSize, Slot
 from PySide6.QtGui import QOpenGLFunctions
-from PySide6.QtOpenGL import (QOpenGLShader, QOpenGLShaderProgram,
-                              QOpenGLVersionProfile)
+from PySide6.QtOpenGL import QOpenGLShader, QOpenGLShaderProgram
 from PySide6.QtQuick import QQuickWindow, QSGRendererInterface
 
 VERTEX_SHADER = dedent(

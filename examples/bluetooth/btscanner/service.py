@@ -1,7 +1,7 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-from PySide6.QtCore import Qt, Slot
+from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QDialog
 from PySide6.QtBluetooth import (QBluetoothAddress, QBluetoothServiceInfo,
                                  QBluetoothServiceDiscoveryAgent, QBluetoothLocalDevice)

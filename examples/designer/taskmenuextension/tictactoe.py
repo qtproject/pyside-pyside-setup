@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 from PySide6.QtCore import Qt, QPoint, QRect, QSize, Property, Slot
-from PySide6.QtGui import QMouseEvent, QPainter, QPen
+from PySide6.QtGui import QPainter, QPen
 from PySide6.QtWidgets import QWidget
 
 

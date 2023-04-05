@@ -4,7 +4,7 @@
 """PySide6 port of the QtDBus pingpong example from Qt v6.x (ping client)"""
 
 import sys
-from PySide6.QtCore import QCoreApplication, QObject, Slot
+from PySide6.QtCore import QCoreApplication
 from PySide6.QtDBus import QDBusConnection,  QDBusInterface, QDBusReply
 
 

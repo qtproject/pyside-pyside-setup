@@ -8,8 +8,7 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 import ctypes
 import math
 import sys
-from PySide6.QtCore import (QCoreApplication, Signal, Slot,
-                            Qt, QSize, QPointF)
+from PySide6.QtCore import Signal, Slot, Qt, QSize, QPointF
 from PySide6.QtGui import (QVector3D, QOpenGLFunctions,
     QMatrix4x4, QOpenGLContext, QSurfaceFormat, QVector3DList)
 from PySide6.QtOpenGL import (QOpenGLVertexArrayObject, QOpenGLBuffer,

@@ -8,8 +8,8 @@ from pathlib import Path
 import sys
 
 from PySide6.QtQuick import QQuickView
-from PySide6.QtCore import Qt, QUrl
-from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtCore import QUrl
+from PySide6.QtWidgets import QApplication
 
 
 if __name__ == '__main__':

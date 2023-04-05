@@ -5,9 +5,8 @@
 import sys
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QApplication, QGridLayout,
-                               QLabel, QGridLayout, QLineEdit, QTextEdit,
-                               QWidget)
+from PySide6.QtWidgets import (QApplication, QGridLayout, QLabel, QLineEdit,
+                               QTextEdit, QWidget)
 
 
 class AddressBook(QWidget):

@@ -532,7 +532,6 @@ class MainWindow(QMainWindow):
     @Slot(QGraphicsItem)
     def item_selected(self, item):
         font = item.font()
-        color = item.defaultTextColor()
         self._font_combo.setCurrentFont(font)
         self._font_size_combo.setEditText(str(font.pointSize()))
         self._bold_action.setChecked(font.weight() == QFont.Bold)

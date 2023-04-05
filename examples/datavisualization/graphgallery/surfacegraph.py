@@ -3,7 +3,7 @@
 
 from surfacegraphmodifier import SurfaceGraphModifier
 
-from PySide6.QtCore import QObject, QSize, Qt
+from PySide6.QtCore import QObject, Qt
 from PySide6.QtGui import QBrush, QIcon, QLinearGradient, QPainter, QPixmap
 from PySide6.QtWidgets import (QGroupBox, QCheckBox, QLabel, QHBoxLayout,
                                QPushButton, QRadioButton, QSizePolicy, QSlider,

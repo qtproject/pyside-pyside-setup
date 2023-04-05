@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QCheckBox, QFormLayout,
                                QMessageBox, QToolButton, QVBoxLayout, QWizard,
                                QWizardPage)
 
-from listchooser import ListChooser, PropertyChooser, SignalChooser
+from listchooser import PropertyChooser, SignalChooser
 
 import classwizard_rc
 

@@ -3,20 +3,17 @@
 
 import numpy
 from pathlib import Path
-import sys
 import weakref
 from OpenGL.GL import (GL_TEXTURE_MAG_FILTER, GL_TEXTURE_MIN_FILTER,
                        GL_NEAREST, GL_RGBA, GL_TEXTURE_2D, GL_UNSIGNED_BYTE)
 
-from PySide6.QtGui import (QMatrix4x4, QMouseEvent, QOffscreenSurface,
-                           QOpenGLContext, QOpenGLFunctions, QScreen, QSurface,
+from PySide6.QtGui import (QMouseEvent, QOffscreenSurface,
+                           QOpenGLContext, QSurface,
                            QSurfaceFormat, QWindow)
-from PySide6.QtOpenGL import (QOpenGLFramebufferObject, QOpenGLTexture,
-                              QOpenGLShaderProgram, QOpenGLVertexArrayObject,
-                              QOpenGLBuffer)
+from PySide6.QtOpenGL import QOpenGLFramebufferObject
 from PySide6.QtQml import QQmlComponent, QQmlEngine
 from PySide6.QtQuick import (QQuickGraphicsDevice,
-                             QQuickItem, QQuickRenderControl,
+                             QQuickRenderControl,
                              QQuickRenderTarget, QQuickWindow)
 from PySide6.QtCore import QCoreApplication, QTimer, QUrl, Slot
 from shiboken6 import VoidPtr

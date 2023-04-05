@@ -11,7 +11,7 @@ from PySide6.QtCore import QByteArray, QDataStream, QIODevice, Qt
 from PySide6.QtNetwork import QTcpServer
 from PySide6.QtWidgets import (QApplication, QDialog, QHBoxLayout,
                                QLabel, QMessageBox, QPushButton,
-                               QVBoxLayout, QWidget)
+                               QVBoxLayout)
 
 
 class Server(QDialog):

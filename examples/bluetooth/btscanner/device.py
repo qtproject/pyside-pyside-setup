@@ -3,7 +3,7 @@
 
 from PySide6.QtCore import QPoint, Qt, Slot
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QDialog, QListWidgetItem, QListWidget, QMenu
+from PySide6.QtWidgets import QDialog, QListWidgetItem, QMenu
 from PySide6.QtBluetooth import (QBluetoothAddress, QBluetoothDeviceDiscoveryAgent,
                                  QBluetoothDeviceInfo, QBluetoothLocalDevice)
 

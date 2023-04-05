@@ -6,9 +6,9 @@
 import os
 from pathlib import Path
 import sys
-from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
-from PySide6.QtQml import QQmlApplicationEngine, QQmlContext
+from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtCore import QCoreApplication, QLoggingCategory, QUrl
 
