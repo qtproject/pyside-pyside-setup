@@ -26,6 +26,7 @@ ${QtMultimedia_GEN_DIR}/qmediaplayer_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediarecorder_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediatimerange_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qmediatimerange_interval_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qscreencapture_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qsoundeffect_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qvideoframe_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qvideoframeformat_wrapper.cpp
