@@ -4,7 +4,6 @@
 import errno
 import fnmatch
 import glob
-import itertools
 import os
 import re
 import shutil
