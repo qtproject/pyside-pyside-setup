@@ -125,6 +125,10 @@
         <value-type name="Interval"/>
     </value-type>
 
+    <object-type name="QScreenCapture" since="6.5">
+        <enum-type name="Error"/>
+    </object-type>
+
     <object-type name="QSoundEffect">
         <enum-type name="Loop"/>
         <enum-type name="Status"/>
