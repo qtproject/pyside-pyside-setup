@@ -3,7 +3,7 @@
 
 import json
 import sys
-from typing import Any, Iterable, List, Dict, Union
+from typing import Any, List, Dict, Union
 
 from PySide6.QtWidgets import QTreeView, QApplication, QHeaderView
 from PySide6.QtCore import QAbstractItemModel, QModelIndex, QObject, Qt, QFileInfo
@@ -182,10 +182,7 @@ class JsonModel(QAbstractItemModel):
                 item = index.internalPointer()
                 item.value = str(value)
 
-                if __binding__ in ("PySide", "PyQt4"):
-                    self.dataChanged.emit(index, index)
-                else:
-                    self.dataChanged.emit(index, index, [Qt.EditRole])
+                self.dataChanged.emit(index, index, [Qt.EditRole])
 
                 return True
 

@@ -5,7 +5,6 @@
 
 import sys
 
-from PySide6.QtCore import QCoreApplication, Qt
 from PySide6.QtWidgets import QApplication
 from widgetgallery import WidgetGallery
 

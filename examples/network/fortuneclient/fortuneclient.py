@@ -6,12 +6,11 @@
 
 import sys
 
-from PySide6.QtCore import QDataStream, QTimer, Qt
+from PySide6.QtCore import QDataStream, QTimer
 from PySide6.QtGui import QIntValidator
 from PySide6.QtNetwork import QAbstractSocket, QTcpSocket
 from PySide6.QtWidgets import (QApplication, QDialog, QDialogButtonBox, QGridLayout,
-                               QLabel, QLineEdit, QMessageBox, QPushButton,
-                               QVBoxLayout, QWidget)
+                               QLabel, QLineEdit, QMessageBox, QPushButton)
 
 
 class Client(QDialog):

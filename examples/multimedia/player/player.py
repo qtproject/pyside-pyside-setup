@@ -5,10 +5,10 @@
 
 import sys
 from PySide6.QtCore import QStandardPaths, Qt, Slot
-from PySide6.QtGui import QAction, QIcon, QKeySequence, QScreen
+from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog,
     QMainWindow, QSlider, QStyle, QToolBar)
-from PySide6.QtMultimedia import (QAudio, QAudioOutput, QMediaFormat,
+from PySide6.QtMultimedia import (QAudioOutput, QMediaFormat,
                                   QMediaPlayer)
 from PySide6.QtMultimediaWidgets import QVideoWidget
 

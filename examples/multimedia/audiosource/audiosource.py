@@ -16,7 +16,7 @@ import sys
 from typing import Optional
 
 import PySide6
-from PySide6.QtCore import QByteArray, QIODevice, QMargins, QRect, Qt, Signal, Slot
+from PySide6.QtCore import QByteArray, QMargins, Qt, Slot
 from PySide6.QtGui import QPainter, QPalette
 from PySide6.QtMultimedia import (
     QAudio,

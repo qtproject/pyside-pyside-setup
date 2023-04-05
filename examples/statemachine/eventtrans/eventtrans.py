@@ -4,7 +4,7 @@
 
 import sys
 
-from PySide6.QtCore import QEvent, QRect, Qt
+from PySide6.QtCore import QEvent, QRect
 from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton
 from PySide6.QtStateMachine import QEventTransition, QState, QStateMachine
 

@@ -7,8 +7,7 @@ from OpenGL.GL import (GL_COLOR_BUFFER_BIT, GL_CULL_FACE, GL_CW,
                        GL_DEPTH_BUFFER_BIT, GL_DEPTH_TEST, GL_FALSE, GL_FLOAT,
                        GL_TEXTURE_2D, GL_TRIANGLES)
 
-from PySide6.QtGui import (QMatrix4x4, QOffscreenSurface, QOpenGLContext,
-                           QOpenGLFunctions, QWindow)
+from PySide6.QtGui import QMatrix4x4, QOpenGLContext
 from PySide6.QtOpenGL import (QOpenGLBuffer, QOpenGLShader,
                               QOpenGLShaderProgram, QOpenGLVertexArrayObject)
 from shiboken6 import VoidPtr

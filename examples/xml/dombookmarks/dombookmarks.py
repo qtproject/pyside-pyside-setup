@@ -6,9 +6,11 @@
 
 import sys
 
-from PySide6.QtCore import QDir, QFile, Qt
+from PySide6.QtCore import QDir, QFile, Qt, QTextStream
 from PySide6.QtGui import QAction, QIcon
-from PySide6.QtWidgets import (QApplication, QFileDialog, QHeaderView, QMainWindow, QMessageBox, QStyle, QTreeWidget, QTreeWidgetItem, QWidget)
+from PySide6.QtWidgets import (QApplication, QFileDialog, QHeaderView,
+                               QMainWindow, QMessageBox, QStyle, QTreeWidget,
+                               QTreeWidgetItem)
 from PySide6.QtXml import QDomDocument
 
 
@@ -138,7 +140,7 @@ class XbelTree(QTreeWidget):
         # It might not be connected.
         try:
             self.itemChanged.disconnect(self.update_dom_element)
-        except:
+        except RuntimeError:
             pass
 
         child = root.firstChildElement('folder')

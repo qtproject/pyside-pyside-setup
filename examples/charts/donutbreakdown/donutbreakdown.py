@@ -6,7 +6,7 @@
 
 import sys
 from PySide6.QtCore import Qt, Slot
-from PySide6.QtGui import QColor, QFont, QPainter, QScreen
+from PySide6.QtGui import QColor, QFont, QPainter
 from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtCharts import QChart, QChartView, QPieSeries, QPieSlice
 
