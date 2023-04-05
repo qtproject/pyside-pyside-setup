@@ -28,7 +28,6 @@ from setuptools.command.install import install as _install
 from setuptools.command.install_lib import install_lib as _install_lib
 from setuptools.command.install_scripts import install_scripts  # noqa: preload only
 
-# Use the distutils implementation within setuptools (but not before)
 from .log import log, LogLevel
 from setuptools.errors import SetupError
 
