@@ -1,7 +1,6 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-
 modules_to_test = {
     # 6.0
     'QtCore': 'qtcore-module.html',
@@ -10,8 +9,8 @@ modules_to_test = {
     'QtQml': 'qtqml-module.html',
     'QtQuick': 'qtquick-module.html',
     'QtQuickWidgets': 'qtquickwidgets-module.html',
-    'QtQuickControls2': 'qtquickcontrols2-module.html',
-    'QtQuick3D': 'qtquick3d-module.html',
+    # Broken in 6.5.0
+    #'QtQuickControls2': 'qtquickcontrols-module.html',
     'QtSql': 'qtsql-module.html',
     'QtWidgets': 'qtwidgets-module.html',
     'QtConcurrent': 'qtconcurrent-module.html',
@@ -20,10 +19,10 @@ modules_to_test = {
     'QtOpenGL': 'qtopengl-module.html',
     'QtPrintSupport': 'qtprintsupport-module.html',
     'QtSvg': 'qtsvg-module.html',
+    'QtSvgWidgets': 'qtsvgwidgets-module.html',
     'QtUiTools': 'qtuitools-module.html',
     'QtXml': 'qtxml-module.html',
     'QtTest': 'qttest-module.html',
-    # 'QtXmlPatterns':  'qtxmlpatterns-module.html',  # in Qt5 compat
     'Qt3DCore': 'qt3dcore-module.html',
     'Qt3DInput': 'qt3dinput-module.html',
     'Qt3DLogic': 'qt3dlogic-module.html',
@@ -31,6 +30,7 @@ modules_to_test = {
     'Qt3DAnimation': 'qt3danimation-module.html',
     'Qt3DExtras': 'qt3dextras-module.html',
     'QtNetworkAuth':  'qtnetworkauth-module.html',
+    'QtStateMachine': 'qtstatemachine-module.html',
     # 'QtCoAp' -- TODO
     # 'QtMqtt' -- TODO
     # 'QtOpcUA' -- TODO
@@ -52,17 +52,23 @@ modules_to_test = {
     'QtWebEngineQuick':  'qtwebenginequick-module.html',
     'QtWebEngineWidgets':  'qtwebenginewidgets-module.html',
     'QtWebSockets':  'qtwebsockets-module.html',
+    'QtHttpServer': 'qthttpserver-module.html',
 
-    #  6.x
+    #  6.3
     #'QtSpeech':  'qtspeech-module.html',
     'QtMultimediaWidgets':  'qtmultimediawidgets-module.html',
-    # 'QtLocation':  'qtlocation-module.html',
+    'QtNfc': 'qtnfc-module.html',
+    'QtQuick3D': 'qtquick3d-module.html',
 
-    #  Not in 6
-    # 'QtScriptTools':  'qtscripttools-module.html',
-    # 'QtMacExtras':  'qtmacextras-module.html',
-    # 'QtX11Extras':  'qtx11extras-module.html',
-    # 'QtWinExtras':  'qtwinextras-module.html',
+    # 6.4
+    'QtPdf':  'qtpdf-module.html',  # this include qtpdfwidgets
+    'QtSpatialAudio': 'qtspatialaudio-module.html',
+
+    # 6.5
+    'QtSerialBus':  'qtserialbus-module.html',
+    'QtTextToSpeech': 'qttexttospeech-module.html',
+    'QtLocation':  'qtlocation-module.html',
+
 }
 
 types_to_ignore = {
