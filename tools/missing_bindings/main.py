@@ -30,7 +30,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 qt_documentation_website_prefixes = {
-    "6.4": "https://doc.qt.io/qt-6/",
+    "6.5": "https://doc.qt.io/qt-6/",
     "dev": "https://doc-snapshots.qt.io/qt6-dev/",
 }
 
@@ -59,8 +59,8 @@ def get_parser():
     parser.add_argument(
         "--qt-version",
         "-v",
-        default="6.4",
-        choices=["6.4", "dev"],
+        default="6.5",
+        choices=["6.5", "dev"],
         type=str,
         dest="version",
         help="the Qt version to use to check for types",
