@@ -51,11 +51,11 @@ setup_script_dir = Path.cwd()
 build_scripts_dir = setup_script_dir / 'build_scripts'
 setup_py_path = setup_script_dir / "setup.py"
 
-start_time = int(time.time())
+start_time = time.time()
 
 
 def elapsed():
-    return int(time.time()) - start_time
+    return int(time.time() - start_time)
 
 
 def get_setuptools_extension_modules():
