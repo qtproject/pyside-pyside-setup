@@ -622,6 +622,7 @@ public:
     const auto derived = AbstractMetaClass::findClass(classes, u"Derived");
     QVERIFY(derived);
     auto base = derived->templateBaseClass();
+    QVERIFY(base);
     QCOMPARE(base->name(), u"Container1");
 }
 
