@@ -25,8 +25,9 @@ default icons meant for such actions.
    :alt: Multimedia Player Qt Example
 
 You could make the application more attractive by designing the icons,
-but in case you don't want to design them, `download the following set`_
-and use them.
+but in case you don't want to design them, you can download and use them.
+
+:download:`Download icons <icons.zip>`
 
 .. image:: icons.png
    :alt: New Multimedia icons
@@ -34,8 +35,6 @@ and use them.
 You can find more information about the ``rcc`` command, and ``.qrc`` file
 format, and the resource system in general in the `Qt Resource System`_
 site.
-
-.. _`download the following set`: icons/
 
 
 The ``.qrc`` file
