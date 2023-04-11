@@ -12,6 +12,7 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtWidgets import QMainWindow, QLabel
 
 
 def xprint(*args, **kw):
@@ -100,6 +101,19 @@ class I(G, H, QtWidgets.QLabel):
     pass
 
 
+# PYSIDE-2294: Friedemann's test adapted.
+#              We need to ignore positional args in mixin classes.
+class Ui_X_MainWindow(object):  # Emulating uic
+    def setupUi(self, MainWindow):
+        MainWindow.resize(400, 300)
+        self.lbl = QLabel(self)
+
+class MainWindow(QMainWindow, Ui_X_MainWindow):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setupUi(self)
+
+
 class AdditionalMultipleInheritanceTest(UsesQApplication):
 
     def testABC(self):
@@ -122,6 +136,12 @@ class AdditionalMultipleInheritanceTest(UsesQApplication):
         res = I(age=7)
         self.assertEqual(res.age, 7)
         xprint()
+
+    def testParentDoesNotCrash(self):
+        # This crashed with
+        # TypeError: object.__init__() takes exactly one argument (the instance to initialize)
+        MainWindow()
+
 
 if __name__ == "__main__":
     unittest.main()
