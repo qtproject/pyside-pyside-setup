@@ -166,7 +166,6 @@ FROM_IMPORTS = [
     (None, ["builtins"]),
     (None, ["os"]),
     (None, ["enum"] if sys.pyside63_option_python_enum else []),
-    ("types", ["NoneType"]),
     ("typing", sorted(typing.__all__)),
     ("PySide6.QtCore", ["PyClassProperty", "Signal", "SignalInstance"]),
     ("shiboken6", ["Shiboken"]),
@@ -270,6 +269,8 @@ def generate_pyi(import_name, outpath, options):
                     else:
                         wr.print(f"from {mod} import {import_args}")
                 wr.print()
+                wr.print()
+                wr.print("NoneType = type(None)")
                 wr.print()
             else:
                 wr.print(line)
