@@ -425,17 +425,13 @@ bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
     auto *subType = reinterpret_cast<PyTypeObject *>(obSubType);
     if (subType == &PyBaseObject_Type)
         return false;
-    const Py_ssize_t nargs = PyTuple_GET_SIZE(args);
     AutoDecRef func(PyObject_GetAttr(obSubType, _init));
-    AutoDecRef newArgs(PyTuple_New(1 + nargs));
+    // PYSIDE-2294: We need to explicitly ignore positional args in a mixin class.
+    SBK_UNUSED(args);
+    AutoDecRef newArgs(PyTuple_New(1));
     auto *newArgsOb = newArgs.object();
     Py_INCREF(self);
     PyTuple_SET_ITEM(newArgsOb, 0, self);
-    for (idx = 0; idx < nargs; ++idx) {
-        auto *ob = PyTuple_GET_ITEM(args, idx);
-        Py_INCREF(ob);
-        PyTuple_SET_ITEM(newArgsOb, 1 + idx, ob);
-    }
     // Note: This can fail, so please always check the error status.
     AutoDecRef result(PyObject_Call(func, newArgs, kwds));
     return true;
