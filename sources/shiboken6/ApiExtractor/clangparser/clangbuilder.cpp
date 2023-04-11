@@ -903,6 +903,8 @@ static NamespaceType namespaceType(const CXCursor &cursor)
 static QString enumType(const CXCursor &cursor)
 {
     QString name = getCursorSpelling(cursor); // "enum Foo { v1, v2 };"
+    if (name.contains(u"unnamed enum")) // Clang 16.0
+        return {};
     if (name.isEmpty()) {
         // PYSIDE-1228: For "typedef enum { v1, v2 } Foo;", type will return
         // "Foo" as expected. Care must be taken to exclude real anonymous enums.
