@@ -2,9 +2,44 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 
+import json
 import sys
 from dataclasses import Field, dataclass, field
 from typing import Dict, List
+
+
+_pyside_package_path = None
+_module_json_file_path = None
+
+
+def set_pyside_package_path(p):
+    global _pyside_package_path, _module_json_file_path
+    _pyside_package_path = p
+    qt_path = p
+    if sys.platform != "win32":
+        qt_path /= "Qt"
+    _module_json_file_path = qt_path / "modules"
+
+
+def get_module_json_data(module):
+    """Read the JSON module data."""
+    json_path = _module_json_file_path / f"{module}.json"
+    json_data = None
+    if not json_path.is_file():  # Wayland is Linux only
+        print(f"Skipping {json_path}", file=sys.stderr)
+        return None
+    with json_path.open(encoding="utf-8") as json_file:
+        json_data = json.load(json_file)
+    return json_data
+
+
+def get_module_plugins(json_data):
+    """Return the plugins from the JSON module data."""
+    if json_data:
+        plugins = json_data.get("plugin_types")
+        if plugins:
+            return plugins
+    return []
 
 
 # This dataclass is in charge of holding the file information
@@ -206,8 +241,6 @@ def module_QtCore() -> ModuleData:
     data.typesystems.extend(_typesystems)
     data.include.append("*.h")
     if sys.platform == "win32":
-        data.plugins.append("assetimporters")
-        data.plugins.append("styles")
         data.qtlib.append("pyside6.*")
         data.extra_files.append("qt.conf")
         data.extra_files.append("rcc.exe")
@@ -218,8 +251,6 @@ def module_QtCore() -> ModuleData:
         data.extra_files.extend(msvc_redist)
     else:
         data.lib.append("libpyside6.*")
-        if sys.platform == "darwin":
-            data.plugins.append("styles")
         data.extra_files.append("Qt/libexec/rcc")
         data.extra_files.append("Qt/libexec/qt.conf")
 
@@ -265,14 +296,6 @@ def module_QtCore() -> ModuleData:
     data.translations.append("qt_help_*")
     data.translations.append("qt_*")
 
-    # plugins
-    data.plugins.append("platforms")
-    data.plugins.append("platformthemes")
-    data.plugins.append("platforminputcontexts")
-    data.plugins.append("imageformats")
-    data.plugins.append("generic")
-    data.plugins.append("xcbglintegrations")
-
     # Extra libraries
     data.qtlib.append("libicudata*")
     data.qtlib.append("libicui18n*")
@@ -313,7 +336,8 @@ def module_QtGui() -> ModuleData:
     data.metatypes.extend(_metatypes)
     data.qtlib.extend(_qtlib)
 
-    data.plugins.append("egldeviceintegrations")
+    json_data = get_module_json_data("Gui")
+    data.plugins = get_module_plugins(json_data)
     data.extra_files.append("Qt/plugins/platforms/libqeglfs*")
 
     return data
@@ -328,6 +352,8 @@ def module_QtWidgets() -> ModuleData:
         data.extra_files.append("uic.exe")
     else:
         data.extra_files.append("Qt/libexec/uic")
+    json_data = get_module_json_data("Widgets")
+    data.plugins = get_module_plugins(json_data)
 
     return data
 
@@ -340,8 +366,8 @@ def module_QtHelp() -> ModuleData:
 
 def module_QtNetwork() -> ModuleData:
     data = ModuleData("Network")
-    data.plugins.append("networkinformation")
-    data.plugins.append("tls")
+    json_data = get_module_json_data("Network")
+    data.plugins = get_module_plugins(json_data)
 
     return data
 
@@ -368,7 +394,8 @@ def module_QtDesigner() -> ModuleData:
     data = ModuleData("Designer")
     data.qtlib.append("libQt6DesignerComponents")
     data.metatypes.append("qt6designercomponentsprivate_relwithdebinfo_metatypes.json")
-    data.plugins.append("designer")
+    json_data = get_module_json_data("Designer")
+    data.plugins = get_module_plugins(json_data)
     data.extra_files.append("Qt/plugins/assetimporters/libuip*")
 
     # Designer
@@ -402,13 +429,18 @@ def module_QtPdfWidgets() -> ModuleData:
 def module_QtPrintSupport() -> ModuleData:
     data = ModuleData("PrintSupport")
     data.typesystems.append("typesystem_printsupport_common.xml")
-    data.plugins.append("printsupport")
+    json_data = get_module_json_data("PrintSupport")
+    data.plugins = get_module_plugins(json_data)
 
     return data
 
 
 def module_QtQml() -> ModuleData:
     data = ModuleData("Qml")
+    json_data = get_module_json_data("Qml")
+    data.plugins = get_module_plugins(json_data)
+    json_data = get_module_json_data("QmlCompilerPrivate")
+    data.plugins += get_module_plugins(json_data)
 
     _qtlib = [
         "libQt6LabsAnimation",
@@ -462,7 +494,7 @@ def module_QtQml() -> ModuleData:
     ]
 
     data.lib.append("libpyside6qml")
-    data.plugins.append("qmltooling")
+    data.plugins = get_module_json_data("Qml")
     data.translations.append("qtdeclarative_*")
     if sys.platform == "win32":
         data.extra_files.append("pyside6qml.*.lib")
@@ -523,6 +555,8 @@ def module_QtQuick() -> ModuleData:
 
     data.qtlib.extend(_qtlib)
     data.metatypes.extend(_metatypes)
+    json_data = get_module_json_data("Quick")
+    data.plugins = get_module_plugins(json_data)
 
     return data
 
@@ -552,14 +586,14 @@ def module_QtTest() -> ModuleData:
 
 def module_QtSql() -> ModuleData:
     data = ModuleData("Sql")
-    data.plugins.append("sqldrivers")
+    json_data = get_module_json_data("Sql")
+    data.plugins = get_module_plugins(json_data)
 
     return data
 
 
 def module_QtSvg() -> ModuleData:
     data = ModuleData("Svg")
-    data.plugins.append("iconengines")
 
     return data
 
@@ -572,7 +606,7 @@ def module_QtSvgWidgets() -> ModuleData:
 
 def module_QtTextToSpeech() -> ModuleData:
     data = ModuleData("TextToSpeech")
-    data.plugins.append("texttospeech")
+    data.plugins = get_module_json_data("TextToSpeech")
 
     return data
 
@@ -600,33 +634,18 @@ def module_QtWayland() -> ModuleData:
         "qt6wlshellintegrationprivate_relwithdebinfo_metatypes.json",
     ]
 
-    # This is added by module_QtCore()
-    # data.plugins.append("platforms")
-    _plugins = [
-        "wayland-decoration",
-        "wayland-decoration-client",
-        "wayland-graphics-integration-client",
-        "wayland-graphics-integration-server",
-        "wayland-shell-integration",
-    ]
-
     data.qtlib.extend(_qtlib)
     data.metatypes.extend(_metatypes)
-    data.plugins.extend(_plugins)
+    json_data = get_module_json_data("WaylandClient")
+    data.plugins = get_module_plugins(json_data)
+    json_data = get_module_json_data("WaylandCompositor")
+    data.plugins += get_module_plugins(json_data)
     return data
 
 
 def module_Qt3DCore() -> ModuleData:
     data = ModuleData("3DCore", qml=["Qt3D/Core"])
 
-    _plugins = [
-        "geometryloaders",
-        "renderers",
-        "renderplugins",
-        "sceneparsers",
-    ]
-
-    data.plugins.extend(_plugins)
     return data
 
 
@@ -644,6 +663,8 @@ def module_Qt3DExtras() -> ModuleData:
 
 def module_Qt3DInput() -> ModuleData:
     data = ModuleData("3DInput", qml=["Qt3D/Input"])
+    json_data = get_module_json_data("3DInput")
+    data.plugins = get_module_plugins(json_data)
 
     return data
 
@@ -656,6 +677,8 @@ def module_Qt3DLogic() -> ModuleData:
 
 def module_Qt3DRender() -> ModuleData:
     data = ModuleData("3DRender", qml=["Qt3D/Render"])
+    json_data = get_module_json_data("3DRender")
+    data.plugins = get_module_plugins(json_data)
 
     return data
 
@@ -704,6 +727,8 @@ def module_QtQuick3D() -> ModuleData:
         "qt6shadertools_relwithdebinfo_metatypes.json",
     ]
 
+    json_data = get_module_json_data("Quick3DAssetImport")
+    data.plugins = get_module_plugins(json_data)
     data.qtlib.extend(_qtlib)
     data.metatypes.extend(_metatypes)
     data.extra_files.append("Qt/plugins/assetimporters/libassimp*")
@@ -769,8 +794,10 @@ def module_QtMultimedia() -> ModuleData:
     data = ModuleData("Multimedia")
     data.qtlib.append("libQt6MultimediaQuick")
     data.metatypes.append("qt6multimediaquickprivate_relwithdebinfo_metatypes.json")
+
+    json_data = get_module_json_data("Multimedia")
     data.translations.append("qtmultimedia_*")
-    data.plugins.append("multimedia")
+    data.plugins = get_module_plugins(json_data)
 
     return data
 
@@ -791,7 +818,8 @@ def module_QtPositioning() -> ModuleData:
     data = ModuleData("Positioning")
     data.qtlib.append("libQt6PositioningQuick")
     data.metatypes.append("qt6positioningquick_relwithdebinfo_metatypes.json")
-    data.plugins.append("position")
+    json_data = get_module_json_data("Positioning")
+    data.plugins = get_module_plugins(json_data)
 
     return data
 
@@ -808,7 +836,8 @@ def module_QtSensors() -> ModuleData:
     data = ModuleData("Sensors")
     data.qtlib.append("libQt6SensorsQuick")
     data.metatypes.append("qt6sensorsquick_relwithdebinfo_metatypes.json")
-    data.plugins.append("sensors")
+    json_data = get_module_json_data("Sensors")
+    data.plugins = get_module_plugins(json_data)
 
     return data
 
@@ -839,7 +868,8 @@ def module_QtScxml() -> ModuleData:
     data = ModuleData("Scxml")
     data.qtlib.append("libQt6ScxmlQml")
     data.metatypes.append("qt6scxmlqml_relwithdebinfo_metatypes.json")
-    data.plugins.append("scxmldatamodel")
+    json_data = get_module_json_data("Scxml")
+    data.plugins = get_module_plugins(json_data)
 
     return data
 
@@ -899,7 +929,8 @@ def module_QtOpenGLWidgets() -> ModuleData:
 
 def module_QtSerialBus() -> ModuleData:
     data = ModuleData("SerialBus")
-    data.plugins.append("canbus")
+    json_data = get_module_json_data("SerialBus")
+    data.plugins = get_module_plugins(json_data)
     return data
 
 
@@ -928,4 +959,6 @@ def module_QtJsonRpc() -> ModuleData:
 
 def module_QtLocation() -> ModuleData:
     data = ModuleData("Location")
+    json_data = get_module_json_data("Location")
+    data.plugins = get_module_plugins(json_data)
     return data

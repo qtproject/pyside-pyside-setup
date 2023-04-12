@@ -13,6 +13,7 @@ from typing import List, Optional, Tuple
 
 import build  # type: ignore
 from build_scripts.wheel_files import (ModuleData,  # type: ignore
+                                       set_pyside_package_path,
                                        wheel_files_pyside_addons,
                                        wheel_files_pyside_essentials)
 from build_scripts.utils import available_pyside_tools
@@ -193,6 +194,7 @@ def wheel_shiboken_module() -> Tuple[SetupData, None]:
 
 
 def wheel_pyside6_essentials(packaged_qt_tools_path: Path) -> Tuple[SetupData, List[ModuleData]]:
+    set_pyside_package_path(packaged_qt_tools_path)
     _pyside_tools = available_pyside_tools(packaged_qt_tools_path, package_for_wheels=True)
 
     # replacing pyside6-android_deploy by pyside6-android-deploy for consistency
