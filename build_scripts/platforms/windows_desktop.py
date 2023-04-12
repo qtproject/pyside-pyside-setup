@@ -210,7 +210,7 @@ msvc_redist = [
 def copy_msvc_redist_files(destination_dir):
     in_coin = os.environ.get('COIN_LAUNCH_PARAMETERS', None)
     if in_coin is None:
-        print("Qt dependency DLLs (MSVC redist) will not be copied.")
+        log.info("Qt dependency DLLs (MSVC redist) will not be copied.")
         return
 
     # Make a directory where the files should be extracted.
@@ -236,11 +236,13 @@ def copy_msvc_redist_files(destination_dir):
 
 
 def copy_qt_dependency_dlls(_vars, destination_qt_dir, artifacts):
-    temp_path = tempfile.TemporaryDirectory()
-
     # Extract Qt dependency dlls when building on Qt CI.
     in_coin = os.environ.get('COIN_LAUNCH_PARAMETERS', None)
-    if in_coin is not None:
+    if in_coin is None:
+        log.info("Qt dependency DLLs will not be downloaded and extracted.")
+        return
+
+    with tempfile.TemporaryDirectory() as temp_path:
         redist_url = "https://download.qt.io/development_releases/prebuilt/vcredist/"
         zip_file = "pyside_qt_deps_64_2019.7z"
         if "{target_arch}".format(**_vars) == "32":
@@ -248,14 +250,11 @@ def copy_qt_dependency_dlls(_vars, destination_qt_dir, artifacts):
         try:
             download_and_extract_7z(redist_url + zip_file, temp_path)
         except Exception as e:
-            print(f"Download failed: {type(e).__name__}: {e}")
-            print("download.qt.io is down, try with mirror")
+            log.warning(f"Download failed: {type(e).__name__}: {e}")
+            log.warning("download.qt.io is down, try with mirror")
             redist_url = "https://master.qt.io/development_releases/prebuilt/vcredist/"
             download_and_extract_7z(redist_url + zip_file, temp_path)
-    else:
-        print("Qt dependency DLLs will not be downloaded and extracted.")
-
-    copydir(temp_path, destination_qt_dir, _filter=artifacts, recursive=False, _vars=_vars)
+        copydir(temp_path, destination_qt_dir, _filter=artifacts, recursive=False, _vars=_vars)
 
 
 def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
@@ -267,7 +266,6 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
     copy_translations = True
     copy_qt_conf = True
     copy_qt_permanent_artifacts = True
-    copy_msvc_redist = False
     copy_clang = False
 
     if config.is_internal_shiboken_generator_build():
@@ -277,7 +275,6 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
         copy_translations = False
         copy_qt_conf = False
         copy_qt_permanent_artifacts = False
-        copy_msvc_redist = True
         copy_clang = True
 
     # <qt>/bin/*.dll and Qt *.exe -> <setup>/{st_package_name}
@@ -304,12 +301,8 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
         egl_suffix = ''
     qt_artifacts_egl = [a.format(egl_suffix) for a in qt_artifacts_egl]
 
-    artifacts = []
     if copy_qt_permanent_artifacts:
-        artifacts += qt_artifacts_permanent
-        artifacts += qt_artifacts_egl
-
-    if copy_msvc_redist and artifacts:
+        artifacts = qt_artifacts_permanent + qt_artifacts_egl
         copy_qt_dependency_dlls(_vars, destination_qt_dir, artifacts)
 
     # <qt>/bin/*.dll and Qt *.pdbs -> <setup>/{st_package_name} part two
