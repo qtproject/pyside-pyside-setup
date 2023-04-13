@@ -10,12 +10,14 @@ Requirements
 * `MSVC2022`_ or (MSVC2019) for Python 3 on Windows,
 * `OpenSSL`_ (optional for SSL support, Qt must have been configured using the same SSL library).
 * ``sphinx`` package for the documentation (optional).
+* Check the platform dependencies of `Qt for Windows`_.
 
 .. note:: Python 3.8.0 was missing some API required for PySide/Shiboken so it's not possible
     to use it for a Windows build.
 
 .. _MSVC2022: https://visualstudio.microsoft.com/downloads/
 .. _OpenSSL: https://sourceforge.net/projects/openssl/
+.. _`Qt for Windows`: https://doc.qt.io/qt-6/windows.html
 
 Building from source on Windows 10
 ----------------------------------

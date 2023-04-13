@@ -10,8 +10,10 @@ Requirements
 
   * ``libgl-dev``, ``python-dev``, ``python-distutils``, and ``python-setuptools``.
 
-.. _XCode: https://developer.apple.com/xcode/
+* Check the platform dependencies of `Qt for macOS`_.
 
+.. _XCode: https://developer.apple.com/xcode/
+.. _`Qt for macOS`: https://doc.qt.io/qt-6/macos.html
 
 Building from source
 --------------------

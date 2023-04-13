@@ -9,6 +9,7 @@ Requirements
 * Depending on your linux distribution, the following dependencies might also be required:
 
   * ``libgl-dev``, ``python-dev``, ``python-distutils``, and ``python-setuptools``.
+* Check the platform dependencies of `Qt for Linux/X11`_.
 
 Building from source
 --------------------
@@ -110,3 +111,5 @@ You can execute one of the examples to verify the process is properly working.
 Remember to properly set the environment variables for Qt and PySide::
 
     python examples/widgets/widgets/tetrix.py
+
+.. _`Qt for Linux/X11`: https://doc.qt.io/qt-6/linux.html
