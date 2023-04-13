@@ -33,7 +33,7 @@
                 <remove-argument/>
                 <remove-default-expression/>
             </modify-argument>
-            <modify-argument index="return">
+            <modify-argument index="return" pyi-type="Tuple[bool, str, int, int]">
                 <replace-type modified-type="(retval, errorMsg, errorLine, errorColumn)"/>
             </modify-argument>
             <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
@@ -51,7 +51,7 @@
                 <remove-argument/>
                 <remove-default-expression/>
             </modify-argument>
-            <modify-argument index="return">
+            <modify-argument index="return" pyi-type="Tuple[bool, str, int, int]">
                 <replace-type modified-type="(retval, errorMsg, errorLine, errorColumn)"/>
             </modify-argument>
             <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
@@ -69,7 +69,7 @@
                 <remove-argument/>
                 <remove-default-expression/>
             </modify-argument>
-            <modify-argument index="return">
+            <modify-argument index="return" pyi-type="Tuple[bool, str, int, int]">
                 <replace-type modified-type="(retval, errorMsg, errorLine, errorColumn)"/>
             </modify-argument>
             <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
@@ -87,7 +87,7 @@
                 <remove-argument/>
                 <remove-default-expression/>
             </modify-argument>
-            <modify-argument index="return">
+            <modify-argument index="return" pyi-type="Tuple[bool, str, int, int]">
                 <replace-type modified-type="(retval, errorMsg, errorLine, errorColumn)"/>
             </modify-argument>
             <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
@@ -105,7 +105,7 @@
                 <remove-argument/>
                 <remove-default-expression/>
             </modify-argument>
-            <modify-argument index="return">
+            <modify-argument index="return" pyi-type="Tuple[bool, str, int, int]">
                 <replace-type modified-type="(retval, errorMsg, errorLine, errorColumn)"/>
             </modify-argument>
             <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
@@ -123,7 +123,7 @@
                 <remove-argument/>
                 <remove-default-expression/>
             </modify-argument>
-            <modify-argument index="return">
+            <modify-argument index="return" pyi-type="Tuple[bool, str, int, int]">
                 <replace-type modified-type="(retval, errorMsg, errorLine, errorColumn)"/>
             </modify-argument>
             <inject-code class="target" position="beginning" file="../glue/qtxml.cpp" snippet="qdomdocument-setcontent" />
