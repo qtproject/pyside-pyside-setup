@@ -62,7 +62,7 @@
             <modify-argument index="1">
               <remove-argument/>
             </modify-argument>
-            <modify-argument index="return">
+            <modify-argument index="return" pyi-type="Tuple[int, bool]">
               <replace-type modified-type="PyTuple"/>
             </modify-argument>
             <inject-code class="target" position="beginning">
@@ -73,7 +73,7 @@
             <modify-argument index="1">
               <remove-argument/>
             </modify-argument>
-            <modify-argument index="return">
+            <modify-argument index="return" pyi-type="Tuple[int, bool]">
               <replace-type modified-type="PyTuple"/>
             </modify-argument>
             <inject-code class="target" position="beginning">

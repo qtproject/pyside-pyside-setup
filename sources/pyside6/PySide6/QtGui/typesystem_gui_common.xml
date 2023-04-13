@@ -250,7 +250,7 @@
       <modify-argument index="1">
         <remove-argument/>
       </modify-argument>
-      <modify-argument index="return">
+      <modify-argument index="return" pyi-type="Tuple[PySide6.QtGui.QTransform, bool]">
         <replace-type modified-type="PyTuple"/>
       </modify-argument>
       <inject-code class="target" position="beginning">
@@ -1752,7 +1752,7 @@
       </modify-argument>
     </modify-function>
     <modify-function signature="text(QString&amp;,QClipboard::Mode)const">
-      <modify-argument index="return">
+      <modify-argument index="return" pyi-type="Tuple[str, PySide6.QtGui.QClipboard.Mode]">
         <replace-type modified-type="(retval, subtype)"/>
       </modify-argument>
       <inject-code class="target" position="end" file="../glue/qtgui.cpp" snippet="qclipboard-text"/>
@@ -2349,7 +2349,7 @@
       <modify-argument index="1">
         <remove-argument/>
       </modify-argument>
-      <modify-argument index="return">
+      <modify-argument index="return" pyi-type="Tuple[PySide6.QtGui.QMatrix4x4, bool]">
         <replace-type modified-type="PyTuple"/>
       </modify-argument>
       <inject-code class="target" position="beginning">

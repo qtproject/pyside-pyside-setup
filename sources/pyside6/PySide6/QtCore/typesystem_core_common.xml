@@ -744,7 +744,7 @@
         <modify-argument index="2">
             <remove-argument />
         </modify-argument>
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="Tuple[PySide6.QtCore.QLineF.IntersectionType, PySide6.QtCore.QPointF]">
             <replace-type modified-type="(intersectType, intersectionPoint)"/>
         </modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qlinef-intersect"/>
@@ -830,7 +830,7 @@
         <modify-argument index="3">
             <remove-argument/>
         </modify-argument>
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="Tuple[int, int, int]">
             <replace-type modified-type="(year, month, day)"/>
         </modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdate-getdate"/>
@@ -839,7 +839,7 @@
         <modify-argument index="1">
             <remove-argument/>
         </modify-argument>
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="Tuple[int, int]">
             <replace-type modified-type="(week, yearNumber)"/>
         </modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdate-weeknumber"/>
@@ -1360,7 +1360,7 @@
             <remove-argument />
             <remove-default-expression />
         </modify-argument>
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="Tuple[int, bool]">
             <replace-type modified-type="(int, bool ok)"/>
         </modify-argument>
         <inject-code class="target" position="beginning">
@@ -1372,7 +1372,7 @@
             <remove-argument />
             <remove-default-expression />
         </modify-argument>
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="Tuple[int, bool]">
             <replace-type modified-type="(int, bool ok)"/>
         </modify-argument>
         <inject-code class="target" position="beginning">
@@ -1384,7 +1384,7 @@
             <remove-argument />
             <remove-default-expression />
         </modify-argument>
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="Tuple[float, bool]">
             <replace-type modified-type="(float, bool ok)"/>
         </modify-argument>
         <inject-code class="target" position="beginning">
@@ -1396,7 +1396,7 @@
             <remove-argument />
             <remove-default-expression />
         </modify-argument>
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="Tuple[float, bool]">
             <replace-type modified-type="(float, bool ok)"/>
         </modify-argument>
         <inject-code class="target" position="beginning">
@@ -1407,7 +1407,7 @@
         <modify-argument index="2">
             <remove-argument />
         </modify-argument>
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="Tuple[int, bool]">
             <replace-type modified-type="(int, bool ok)"/>
         </modify-argument>
         <inject-code class="target" position="beginning">
@@ -1418,7 +1418,7 @@
         <modify-argument index="2">
             <remove-argument />
         </modify-argument>
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="Tuple[int, bool]">
             <replace-type modified-type="(int, bool ok)"/>
         </modify-argument>
         <inject-code class="target" position="beginning">
@@ -1429,7 +1429,7 @@
         <modify-argument index="2">
             <remove-argument />
         </modify-argument>
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="Tuple[int, bool]">
             <replace-type modified-type="(int, bool ok)"/>
         </modify-argument>
         <inject-code class="target" position="beginning">
@@ -1440,7 +1440,7 @@
         <modify-argument index="2">
             <remove-argument />
         </modify-argument>
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="Tuple[int, bool]">
             <replace-type modified-type="(int, bool ok)"/>
         </modify-argument>
         <inject-code class="target" position="beginning">
@@ -2509,7 +2509,7 @@
         <modify-argument index="4">
             <remove-argument />
         </modify-argument>
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="Tuple[bool, int]">
             <replace-type modified-type="(retval, pid)"/>
         </modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qprocess-startdetached"/>

@@ -193,7 +193,7 @@
             <modify-argument index="1">
                 <remove-argument />
             </modify-argument>
-            <modify-argument index="return">
+            <modify-argument index="return" pyi-type="Tuple[any, bool]">
                 <replace-type modified-type="PyTuple"/>
             </modify-argument>
             <inject-code class="target" position="beginning">
@@ -255,7 +255,7 @@
             <modify-argument index="1">
                 <remove-argument />
             </modify-argument>
-            <modify-argument index="return">
+            <modify-argument index="return" pyi-type="Tuple[float, bool]">
                 <replace-type modified-type="PyTuple"/>
             </modify-argument>
             <inject-code class="target" position="beginning">
@@ -266,7 +266,7 @@
             <modify-argument index="1">
                 <remove-argument />
             </modify-argument>
-            <modify-argument index="return">
+            <modify-argument index="return" pyi-type="Tuple[bool, bool]">
                 <replace-type modified-type="PyTuple"/>
             </modify-argument>
             <inject-code class="target" position="beginning">
