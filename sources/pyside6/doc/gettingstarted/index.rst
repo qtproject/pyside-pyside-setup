@@ -23,8 +23,10 @@ website.
 * **Git:** 2.0+. `[official Git website] <https://git-scm.com/downloads>`_
 * **libclang:** The libclang library, recommended: version 10 for 6.0+.
   Prebuilt versions for each OS can be `downloaded here`_.
+* Check the `Supported Platforms of Qt`_
 
 .. _downloaded here: https://download.qt.io/development_releases/prebuilt/libclang/
+.. _`Supported Platforms of Qt` : https://doc.qt.io/qt-6/supported-platforms.html
 
 Guides per platform
 -------------------
