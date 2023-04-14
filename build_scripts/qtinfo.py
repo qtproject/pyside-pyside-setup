@@ -74,6 +74,12 @@ class QtInfo(object):
             return self.get_property("QT_INSTALL_LIBS")
 
         @property
+        def module_json_files_dir(self):
+            install_libs = self.get_property("QT_INSTALL_LIBS")
+            result = Path(install_libs).parent / "modules"
+            return os.fspath(result)
+
+        @property
         def metatypes_dir(self):
             parent = self.arch_data if self.version_tuple >= (6, 5, 0) else self.libs_dir
             return os.fspath(Path(parent) / "metatypes")

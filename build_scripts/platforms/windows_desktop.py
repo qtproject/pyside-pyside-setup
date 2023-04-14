@@ -141,6 +141,10 @@ def prepare_packages_win32(pyside_build, _vars):
             _filter=["pyside*.lib"],
             recursive=False, _vars=_vars)
 
+        copydir("{qt_module_json_files_dir}",
+                destination_qt_dir / "modules",
+                _filter=["*.json"], _vars=_vars)
+
         # <install>/share/{st_package_name}/typesystems/* ->
         #   <setup>/{st_package_name}/typesystems
         copydir(
