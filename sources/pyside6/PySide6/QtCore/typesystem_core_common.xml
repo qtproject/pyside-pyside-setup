@@ -1291,6 +1291,7 @@
 
   <value-type name="QTimeZone">
     <configuration condition="QT_CONFIG(timezone)"/>
+    <enum-type name="Initialization" since="6.5"/>
     <enum-type name="TimeType"/>
     <enum-type name="NameType"/>
     <value-type name="OffsetData">
