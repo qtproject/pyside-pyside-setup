@@ -181,6 +181,10 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             ],
             recursive=False, _vars=_vars, force_copy_symlinks=True)
 
+        copydir("{qt_module_json_files_dir}",
+                destination_qt_dir / "modules",
+                _filter=["*.json"], _vars=_vars)
+
         if not config.is_cross_compile():
             # <install>/share/{st_package_name}/typesystems/* ->
             #   <setup>/{st_package_name}/typesystems

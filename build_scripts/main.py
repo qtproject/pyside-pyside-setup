@@ -913,6 +913,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                 "qt_data_dir": self.qtinfo.data_dir,
                 "qt_doc_dir": self.qtinfo.docs_dir,
                 "qt_lib_dir": self.qtinfo.libs_dir,
+                "qt_module_json_files_dir": self.qtinfo.module_json_files_dir,
                 "qt_metatypes_dir": self.qtinfo.metatypes_dir,
                 "qt_lib_execs_dir": self.qtinfo.lib_execs_dir,
                 "qt_plugins_dir": self.qtinfo.plugins_dir,
