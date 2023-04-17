@@ -8,7 +8,7 @@ from ..config import config
 from ..options import OPTION
 from ..utils import (copy_icu_libs, copydir, copyfile, find_files_using_glob,
                      linux_patch_executable)
-from .. import PYSIDE
+from .. import PYSIDE, PYSIDE_UNIX_BUNDLED_TOOLS
 
 
 def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False, is_android=False):
@@ -73,10 +73,10 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False, is_
 
     # Patching designer to use the Qt libraries provided in the wheel
     if config.is_internal_pyside_build() and not OPTION['NO_QT_TOOLS']:
-        assistant_path = destination_dir / "assistant"
-        linux_patch_executable(pyside_build._patchelf_path, assistant_path)
-        designer_path = destination_dir / "designer"
-        linux_patch_executable(pyside_build._patchelf_path, designer_path)
+
+        for tool in PYSIDE_UNIX_BUNDLED_TOOLS:
+            tool_path = destination_dir / tool
+            linux_patch_executable(pyside_build._patchelf_path, tool_path)
 
     if pyside_build.is_webengine_built(built_modules):
         copydir("{qt_data_dir}/resources",

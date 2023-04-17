@@ -9,7 +9,7 @@ from ..config import config
 from ..options import OPTION
 from ..utils import (copydir, copyfile, macos_add_rpath,
                      macos_fix_rpaths_for_library)
-from .. import PYSIDE
+from .. import PYSIDE, PYSIDE_UNIX_BUNDLED_TOOLS
 
 
 def _macos_patch_executable(name, _vars=None):
@@ -62,9 +62,8 @@ def prepare_standalone_package_macos(pyside_build, _vars):
 
     # Patching designer to use the Qt libraries provided in the wheel
     if config.is_internal_pyside_build() and not OPTION['NO_QT_TOOLS']:
-        _macos_patch_executable('assistant', _vars)
-        _macos_patch_executable('designer', _vars)
-        _macos_patch_executable('linguist', _vars)
+        for tool in PYSIDE_UNIX_BUNDLED_TOOLS:
+            _macos_patch_executable(tool, _vars)
 
     # <qt>/lib/* -> <setup>/{st_package_name}/Qt/lib
     if pyside_build.qt_is_framework_build():

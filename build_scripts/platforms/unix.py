@@ -11,6 +11,7 @@ from ..utils import copydir, copyfile, copy_qt_metatypes, makefile
 from .. import PYSIDE, SHIBOKEN
 from .linux import prepare_standalone_package_linux
 from .macos import prepare_standalone_package_macos
+from .. import PYSIDE_UNIX_BIN_TOOLS, PYSIDE_UNIX_LIBEXEC_TOOLS, PYSIDE_UNIX_BUNDLED_TOOLS
 
 
 def _macos_copy_gui_executable(name, _vars=None):
@@ -149,15 +150,15 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
 
             lib_exec_filters = []
             if not OPTION['NO_QT_TOOLS']:
-                lib_exec_filters.extend(['uic', 'rcc', 'qmltyperegistrar', 'qmlimportscanner'])
+                lib_exec_filters.extend(PYSIDE_UNIX_LIBEXEC_TOOLS)
                 executables.extend(copydir(
                     "{install_dir}/bin/", destination_dir,
-                    _filter=["lrelease", "lupdate", "qmllint", "qmlformat", "qmlls"],
+                    _filter=PYSIDE_UNIX_BIN_TOOLS,
                     recursive=False, _vars=_vars))
-                # Copying assistant/designer
-                executables.extend(_copy_gui_executable('assistant', _vars=_vars))
-                executables.extend(_copy_gui_executable('designer', _vars=_vars))
-                executables.extend(_copy_gui_executable('linguist', _vars=_vars))
+
+                # Copying assistant/designer/linguist
+                for tool in PYSIDE_UNIX_BUNDLED_TOOLS:
+                    executables.extend(_copy_gui_executable(tool, _vars=_vars))
 
             copy_qt_metatypes(destination_qt_dir, _vars)
 

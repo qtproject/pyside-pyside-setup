@@ -1146,10 +1146,13 @@ def available_pyside_tools(qt_tools_path: Path, package_for_wheels: bool = False
         pyside_tools.extend([tool for tool in PYSIDE_UNIX_LIBEXEC_TOOLS
                              if tool_exist(lib_exec_path / tool)])
         if sys.platform == 'darwin':
+            def name_to_path(name):
+                return f"{name.capitalize()}.app/Contents/MacOS/{name.capitalize()}"
+
             pyside_tools.extend([tool for tool in PYSIDE_UNIX_BIN_TOOLS
                                 if tool_exist(bin_path / tool)])
-            pyside_tools.extend([tool_name for tool_name, tool_path in PYSIDE_UNIX_BUNDLED_TOOLS.items()
-                                if tool_exist(bin_path / tool_path)])
+            pyside_tools.extend([tool for tool in PYSIDE_UNIX_BUNDLED_TOOLS
+                                if tool_exist(bin_path / name_to_path(tool))])
         else:
             pyside_tools.extend([tool for tool in PYSIDE_LINUX_BIN_TOOLS
                                 if tool_exist(bin_path / tool)])
