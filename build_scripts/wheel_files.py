@@ -374,6 +374,7 @@ def module_QtNetwork() -> ModuleData:
 
 def module_QtBluetooth() -> ModuleData:
     data = ModuleData("Bluetooth")
+    data.translations.append("qtconnectivity_*")
 
     return data
 
@@ -963,4 +964,5 @@ def module_QtLocation() -> ModuleData:
     data = ModuleData("Location")
     json_data = get_module_json_data("Location")
     data.plugins = get_module_plugins(json_data)
+    data.translations.append("qtlocation_*")
     return data
