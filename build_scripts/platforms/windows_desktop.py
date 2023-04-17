@@ -12,7 +12,7 @@ from ..config import config
 from ..options import OPTION
 from ..utils import (copydir, copyfile, copy_qt_metatypes,
                      download_and_extract_7z, filter_match, makefile)
-from .. import PYSIDE, SHIBOKEN
+from .. import PYSIDE, SHIBOKEN, PYSIDE_WINDOWS_BIN_TOOLS
 
 
 def prepare_packages_win32(pyside_build, _vars):
@@ -125,10 +125,7 @@ def prepare_packages_win32(pyside_build, _vars):
         # <install>/bin/*.exe,*.dll -> {st_package_name}/
         filters = ["pyside*.exe", "pyside*.dll"]
         if not OPTION['NO_QT_TOOLS']:
-            filters.extend(["lrelease.exe", "lupdate.exe", "uic.exe",
-                            "rcc.exe", "qmllint.exe", "qmltyperegistrar.exe",
-                            "assistant.exe", "designer.exe", "qmlimportscanner.exe",
-                            "linguist.exe", "qmlformat.exe", "qmlls.exe"])
+            filters.extend([f"{tool}.exe" for tool in PYSIDE_WINDOWS_BIN_TOOLS])
         copydir("{install_dir}/bin/", destination_qt_dir,
                 _filter=filters,
                 recursive=False, _vars=_vars)

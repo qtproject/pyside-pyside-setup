@@ -10,32 +10,40 @@ tools to solve issues, or improve some project workflows.
 Add a new tool
 --------------
 
+Tools not available to end users
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This depicts the tools that are not shipped with Qt for Python wheels and are used to aid
+Qt for Python development
+
 - Place your tool in the ``tools`` directory.
 - If your project has more than one file, create a directory.
 - Create a ``.pyproject`` file including all the relevant files
   for your tool.
-- If you would like to interface the tool for end users,
-  you need to create an entry point for the wheel creation,
-  and also copy the files in the wheel creation process.
+
+Tools available to end users
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Place your tool in the ``sources/pyside-tools`` directory.
+- If your project has more than one file, create a directory.
+- Create a ``.pyproject`` file including all the relevant files
+  for your tool.
+- Add the relevant files in ``sources/pyside-tools/CMakeLists.txt``.
+- Add the tool in ``sources/pyside-tools/pyside_tool.py``.
+- Add the tool in ``build_scripts/__init__.py`` to create the setuptools entry points
+  i.e. this enable using the tool from the console as "pyside6-<tool_name>"
+- Add an entry to ``sources/pyside6/doc/gettingstarted/package_details.rst``.
+- Include the necessary Qt binaries explicitly on ``build_scripts/wheel_files.py``
+- Build with ``--standalone``, verify it is working.
 
 
 Add a Qt tool wrapper
 ---------------------
 
-- Add script and optional library under ``sources/pyside-tools``.
-- Install the files (``sources/pyside-tools/CMakeLists.txt``).
-- Include the tool in the deprecated 'setup.py bdist_wheel' process:
-
-  - Add the tool in ``build_scripts/__init__.py``.
-
-  - Copy the files to the wheels in ``build_scripts/platforms/*.py``.
-
-  - Add an entry to ``sources/pyside6/doc/gettingstarted/package_details.rst``.
-
-- Include the tool in the new wheel creation process:
-
-  - Add an entry to ``create_wheels.py``.
-
-  - Include the Qt binaries explicitly on ``build_scripts/wheel_files.py``
-
+- Add the relevant files in ``sources/pyside-tools/CMakeLists.txt``.
+- Add the tool in ``sources/pyside-tools/pyside_tool.py``.
+- Add the tool in ``build_scripts/__init__.py`` to create the setuptools entry points
+  i.e. this enable using the tool from the console as "pyside6-<tool_name>"
+- Add an entry to ``sources/pyside6/doc/gettingstarted/package_details.rst``.
+- Include the necessary Qt binaries explicitly on ``build_scripts/wheel_files.py``
 - Build with ``--standalone``, verify it is working.

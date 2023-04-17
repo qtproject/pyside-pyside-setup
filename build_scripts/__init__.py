@@ -12,21 +12,19 @@ PYSIDE_PYTHON_TOOLS = ["metaobjectdump",
                        "qml",
                        "qtpy2cpp",
                        "genpyi"]
+
 PYSIDE_UNIX_BIN_TOOLS = ["lupdate",
                          "lrelease",
                          "qmllint",
                          "qmlformat",
                          "qmlls"]
 
-# tools that are bundled as .app in macOS
-# keys represent tool name
-# value represents the path to the tool in the macOS app bundle
-PYSIDE_UNIX_BUNDLED_TOOLS = {name: f"{name.capitalize()}.app/Contents/MacOS/{name.capitalize()}"
-                             for name in ["assistant",
-                                          "designer",
-                                          "linguist"]}
+# tools that are bundled as .app in macOS, but are normal executables in Linux and Windows
+PYSIDE_UNIX_BUNDLED_TOOLS = ["assistant",
+                             "designer",
+                             "linguist"]
 
-PYSIDE_LINUX_BIN_TOOLS = PYSIDE_UNIX_BIN_TOOLS + [name for name in PYSIDE_UNIX_BUNDLED_TOOLS.keys()]
+PYSIDE_LINUX_BIN_TOOLS = PYSIDE_UNIX_BIN_TOOLS + PYSIDE_UNIX_BUNDLED_TOOLS
 
 PYSIDE_UNIX_LIBEXEC_TOOLS = ["uic",
                              "rcc",
