@@ -125,6 +125,9 @@
     </extra-includes>
     <modify-function signature="setQuery(QSqlQuery)" allow-thread="yes"/>
     <modify-function signature="setQuery(QString,QSqlDatabase)" allow-thread="yes"/>
+    <!-- FIXME: PYSIDE7: Probably needs a fix, make QSqlQuery an object type?
+         QTBUG-105048/PYSIDE-2300 -->
+    <declare-function signature="query()" return-type="QSqlQuery"/>
   </object-type>
   <object-type name="QSqlRelationalTableModel">
     <enum-type name="JoinMode"/>
