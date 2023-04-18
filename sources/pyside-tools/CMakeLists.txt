@@ -38,6 +38,7 @@ else()
                         "${LIBEXEC_PATH}/rcc${CMAKE_EXECUTABLE_SUFFIX}"
                         "${LIBEXEC_PATH}/qmltyperegistrar${CMAKE_EXECUTABLE_SUFFIX}"
                         "${LIBEXEC_PATH}/qmlimportscanner${CMAKE_EXECUTABLE_SUFFIX}"
+                        "${LIBEXEC_PATH}/qmlcachegen${CMAKE_EXECUTABLE_SUFFIX}"
                         "${TOOLS_PATH}/lrelease${CMAKE_EXECUTABLE_SUFFIX}"
                         "${TOOLS_PATH}/lupdate${CMAKE_EXECUTABLE_SUFFIX}"
                         "${TOOLS_PATH}/qmllint${CMAKE_EXECUTABLE_SUFFIX}"

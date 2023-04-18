@@ -503,11 +503,13 @@ def module_QtQml() -> ModuleData:
         data.extra_files.append("qml/jsroot.qmltypes")
         data.extra_files.append("qmlimportscanner.exe")
         data.extra_files.append("qmltyperegistrar.exe")
+        data.extra_files.append("qmlcachegen.exe")
     else:
         data.extra_files.append("Qt/qml/builtins.qmltypes")
         data.extra_files.append("Qt/qml/jsroot.qmltypes")
         data.extra_files.append("Qt/libexec/qmlimportscanner")
         data.extra_files.append("Qt/libexec/qmltyperegistrar")
+        data.extra_files.append("Qt/libexec/qmlcachegen")
 
     data.qtlib.extend(_qtlib)
     data.include.extend(_include)
