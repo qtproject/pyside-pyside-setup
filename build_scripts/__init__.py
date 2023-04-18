@@ -29,7 +29,8 @@ PYSIDE_LINUX_BIN_TOOLS = PYSIDE_UNIX_BIN_TOOLS + PYSIDE_UNIX_BUNDLED_TOOLS
 PYSIDE_UNIX_LIBEXEC_TOOLS = ["uic",
                              "rcc",
                              "qmltyperegistrar",
-                             "qmlimportscanner"]
+                             "qmlimportscanner",
+                             "qmlcachegen"]
 
 # all Qt tools are in 'bin' folder in Windows
 PYSIDE_WINDOWS_BIN_TOOLS = PYSIDE_UNIX_LIBEXEC_TOOLS + PYSIDE_LINUX_BIN_TOOLS

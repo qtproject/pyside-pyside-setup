@@ -100,6 +100,10 @@ def qmlimportscanner():
     qt_tool_wrapper("qmlimportscanner", sys.argv[1:], True)
 
 
+def qmlcachegen():
+    qt_tool_wrapper("qmlcachegen", sys.argv[1:], True)
+
+
 def qmllint():
     qt_tool_wrapper("qmllint", sys.argv[1:])
 

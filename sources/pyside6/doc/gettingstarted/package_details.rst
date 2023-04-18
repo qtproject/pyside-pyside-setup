@@ -110,6 +110,8 @@ QML Development
   relevant macros.
 * ``pyside6-qmlimportscanner``, to identify the QML modules imported from a
     project/QML files and dump the result as a JSON array.
+* ``pyside6-qmlcachegen``, to compile QML to bytecode at compile time for bundling inside the
+    binary.
 
 Translations
 ~~~~~~~~~~~~
