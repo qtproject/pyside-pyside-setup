@@ -694,7 +694,7 @@
         </inject-code>
     </modify-function>
 
-    <modify-function signature="QImage(const QString&amp;, const char *)">
+    <modify-function signature="QImage(const QString&amp;, const char *)" allow-thread="yes">
         <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
     </modify-function>
