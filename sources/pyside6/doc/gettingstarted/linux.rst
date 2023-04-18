@@ -45,16 +45,16 @@ Cloning the official repository can be done by::
 
     git clone https://code.qt.io/pyside/pyside-setup
 
-Checking out the version that we want to build, for example 6.4::
+Checking out the version that we want to build, for example 6.5::
 
-    cd pyside-setup && git checkout 6.4
+    cd pyside-setup && git checkout 6.5
 
 Install the general dependencies::
 
     pip install -r requirements.txt
 
 .. note:: Keep in mind you need to use the same version as your Qt installation.
-          Additionally, :command:`git checkout -b 6.4 --track origin/6.4` could be a better option
+          Additionally, :command:`git checkout -b 6.5 --track origin/6.5` could be a better option
           in case you want to work on it.
 
 Building and Installing (setuptools)
@@ -64,15 +64,15 @@ The ``setuptools`` approach uses the ``setup.py`` file to execute the build,
 install, and packaging steps.
 
 Check your Qt installation path, to specifically use that version of qtpaths to build PySide.
-for example, :command:`/opt/Qt/6.4.2/gcc_64/bin/qtpaths`.
+for example, :command:`/opt/Qt/6.5.0/gcc_64/bin/qtpaths`.
 
 Build can take a few minutes, so it is recommended to use more than one CPU core::
 
-    python setup.py build --qtpaths=/opt/Qt/6.4.2/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
+    python setup.py build --qtpaths=/opt/Qt/6.5.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
 To install on the current directory, just run::
 
-    python setup.py install --qtpaths=/opt/Qt/6.4.2/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
+    python setup.py install --qtpaths=/opt/Qt/6.5.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
 Building and Installing (cmake)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
