@@ -115,7 +115,6 @@ static bool isSigned(CXTypeKind kind)
 class BuilderPrivate {
 public:
     using CursorClassHash = QHash<CXCursor, ClassModelItem>;
-    using CursorTypedefHash = QHash<CXCursor, TypeDefModelItem>;
     using TypeInfoHash = QHash<CXType, TypeInfo>;
 
     explicit BuilderPrivate(BaseVisitor *bv) : m_baseVisitor(bv), m_model(new CodeModel)
@@ -181,9 +180,6 @@ public:
     std::pair<QString, ClassModelItem> getBaseClass(CXType type) const;
     void addBaseClass(const CXCursor &cursor);
 
-    template <class Item>
-    void qualifyTypeDef(const CXCursor &typeRefCursor, const std::shared_ptr<Item> &item) const;
-
     bool visitHeader(const QString &fileName) const;
 
     void setFileName(const CXCursor &cursor, _CodeModelItem *item);
@@ -197,7 +193,6 @@ public:
     // classes can be correctly parented in case of forward-declared inner classes
     // (QMetaObject::Connection)
     CursorClassHash m_cursorClassHash;
-    CursorTypedefHash m_cursorTypedefHash;
 
     mutable TypeInfoHash m_typeInfoHash; // Cache type information
     mutable QHash<QString, TemplateTypeAliasModelItem> m_templateTypeAliases;
@@ -608,7 +603,6 @@ void BuilderPrivate::addTypeDef(const CXCursor &cursor, const CXType &cxType)
     item->setType(createTypeInfo(cxType));
     item->setScope(m_scope);
     m_scopeStack.back()->addTypeDef(item);
-    m_cursorTypedefHash.insert(cursor, item);
 }
 
 ClassModelItem BuilderPrivate::currentTemplateClass() const
@@ -738,31 +732,6 @@ static inline CXCursor definitionFromTypeRef(const CXCursor &typeRefCursor)
 {
     Q_ASSERT(typeRefCursor.kind == CXCursor_TypeRef);
     return clang_getTypeDeclaration(clang_getCursorType(typeRefCursor));
-}
-
-// Qualify function arguments or fields that are typedef'ed from another scope:
-// enum ConversionFlag {};
-// typedef QFlags<ConversionFlag> ConversionFlags;
-// class QTextCodec {
-//      enum ConversionFlag {};
-//      typedef QFlags<ConversionFlag> ConversionFlags;
-//      struct ConverterState {
-//          explicit ConverterState(ConversionFlags);
-//                                  ^^ qualify to QTextCodec::ConversionFlags
-//          ConversionFlags m_flags;
-//                          ^^ ditto
-
-template <class Item> // ArgumentModelItem, VariableModelItem
-void BuilderPrivate::qualifyTypeDef(const CXCursor &typeRefCursor, const std::shared_ptr<Item> &item) const
-{
-    TypeInfo type = item->type();
-    if (type.qualifiedName().size() == 1) { // item's type is unqualified.
-        const auto it = m_cursorTypedefHash.constFind(definitionFromTypeRef(typeRefCursor));
-        if (it != m_cursorTypedefHash.constEnd() && !it.value()->scope().isEmpty()) {
-            type.setQualifiedName(it.value()->scope() + type.qualifiedName());
-            item->setType(type);
-        }
-    }
 }
 
 void BuilderPrivate::setFileName(const CXCursor &cursor, _CodeModelItem *item)
@@ -1157,16 +1126,8 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
             d->m_usingTypeRef = getCursorSpelling(cursor);
         break;
     case CXCursor_TypeRef:
-        if (d->m_currentFunction) {
-            if (!d->m_currentArgument)
-                d->qualifyTypeDef(cursor, d->m_currentFunction); // return type
-            else
-                d->qualifyTypeDef(cursor, d->m_currentArgument);
-        } else if (d->m_currentField) {
-            d->qualifyTypeDef(cursor, d->m_currentField);
-        } else if (d->m_withinUsingDeclaration && d->m_usingTypeRef.isEmpty()) {
+        if (d->m_withinUsingDeclaration && d->m_usingTypeRef.isEmpty())
             d->m_usingTypeRef = d->getBaseClass(clang_getCursorType(cursor)).first;
-        }
         break;
     case CXCursor_CXXFinalAttr:
          if (d->m_currentFunction)
