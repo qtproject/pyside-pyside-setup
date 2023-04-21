@@ -101,6 +101,10 @@ public:
 
     static void stripPythonQualifiers(QString *s);
 
+    // For testing
+    static QString readSnippet(QIODevice &inputFile, const QString &identifier,
+                               QString *errorMessage);
+
 private:
     using StringSharedPtr = std::shared_ptr<QString>;
 

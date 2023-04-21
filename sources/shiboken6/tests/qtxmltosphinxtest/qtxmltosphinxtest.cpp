@@ -5,8 +5,11 @@
 #include "qtxmltosphinx.h"
 #include <QtTest/QTest>
 
+#include <QtCore/QBuffer>
 #include <QtCore/QDebug>
 #include <QtCore/QLoggingCategory>
+
+using namespace Qt::StringLiterals;
 
 Q_LOGGING_CATEGORY(lcQtXmlToSphinxTest, "qt.sphinxtabletest");
 
@@ -455,6 +458,53 @@ void QtXmlToSphinxTest::testTableFormattingIoDevice()
     }
     const QString actual = QString::fromUtf8(byteArray);
 
+    QCOMPARE(actual, expected);
+}
+
+void QtXmlToSphinxTest::testSnippetExtraction_data()
+{
+    QTest::addColumn<QByteArray>("file");
+    QTest::addColumn<QString>("id");
+    QTest::addColumn<QString>("expected");
+
+    const char *fileCpp = R"(bla
+// ![snip1]
+snip1_line1
+// ![snip1] // ![snip2]
+snip2_line1
+snip2_line2
+// ![snip2] // ![snip3]
+)";
+
+    const QString id = u"snip2"_s;
+    const QString expected  = uR"(snip2_line1
+snip2_line2
+)"_s;
+
+    const char *filePython = R"(bla
+# ![snip1]
+snip1_line1
+# ![snip1] # ![snip2]
+snip2_line1
+snip2_line2
+# ![snip2] # ![snip3]
+)";
+
+    QTest::newRow("c++") << QByteArray(fileCpp) << id << expected;
+    QTest::newRow("Python") << QByteArray(filePython) << id << expected;
+}
+
+void QtXmlToSphinxTest::testSnippetExtraction()
+{
+    QFETCH(QByteArray, file);
+    QFETCH(QString, id);
+    QFETCH(QString, expected);
+
+    QBuffer buffer(&file);
+    QVERIFY(buffer.open(QIODevice::ReadOnly));
+    QString errorMessage;
+    QString actual = QtXmlToSphinx::readSnippet(buffer, id, &errorMessage);
+    QVERIFY2(errorMessage.isEmpty(), qPrintable(errorMessage));
     QCOMPARE(actual, expected);
 }
 

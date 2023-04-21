@@ -27,6 +27,8 @@ private slots:
     void testTableFormatting();
     void testTableFormattingIoDevice_data();
     void testTableFormattingIoDevice();
+    void testSnippetExtraction_data();
+    void testSnippetExtraction();
 
 private:
     QString transformXml(const QString &xml) const;
