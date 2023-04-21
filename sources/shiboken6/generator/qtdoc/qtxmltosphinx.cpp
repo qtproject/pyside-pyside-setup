@@ -613,6 +613,88 @@ QtXmlToSphinx::Snippet QtXmlToSphinx::readSnippetFromLocations(const QString &pa
     return {{}, Snippet::Error};
 }
 
+// Helpers for extracting qdoc snippets "#/// [id]"
+static QString fileNameOfDevice(const QIODevice *inputFile)
+{
+    const auto *file = qobject_cast<const QFile *>(inputFile);
+    return file ? QDir::toNativeSeparators(file->fileName()) : u"<stdin>"_s;
+}
+
+static QString msgSnippetNotFound(const QIODevice &inputFile,
+                                  const QString &identifier)
+{
+    return u"Code snippet file found ("_s + fileNameOfDevice(&inputFile)
+           + u"), but snippet ["_s + identifier + u"] not found."_s;
+}
+
+static QString msgEmptySnippet(const QIODevice &inputFile, int lineNo,
+                               const QString &identifier)
+{
+    return u"Empty code snippet ["_s + identifier + u"] at "_s
+           + fileNameOfDevice(&inputFile) + u':' + QString::number(lineNo);
+}
+
+// Pattern to match qdoc snippet IDs with "#/// [id]" comments and helper to find ID
+static const QRegularExpression &snippetIdPattern()
+{
+    static const QRegularExpression result(uR"RX((//|#) *! *\[([^]]+)\])RX"_s);
+    Q_ASSERT(result.isValid());
+    return result;
+}
+
+static bool matchesSnippetId(QRegularExpressionMatchIterator it,
+                             const QString &identifier)
+{
+    while (it.hasNext()) {
+        if (it.next().captured(2) == identifier)
+            return true;
+    }
+    return false;
+}
+
+QString QtXmlToSphinx::readSnippet(QIODevice &inputFile, const QString &identifier,
+                                   QString *errorMessage)
+{
+    const QByteArray identifierBA = identifier.toUtf8();
+    // Lambda that matches the snippet id
+    const auto snippetIdPred = [&identifierBA, &identifier](const QByteArray &lineBA)
+    {
+        const bool isComment = lineBA.contains('/') || lineBA.contains('#');
+        if (!isComment || !lineBA.contains(identifierBA))
+            return false;
+        const QString line = QString::fromUtf8(lineBA);
+        return matchesSnippetId(snippetIdPattern().globalMatch(line), identifier);
+    };
+
+    // Find beginning, skip over
+    int lineNo = 1;
+    for (; !inputFile.atEnd() && !snippetIdPred(inputFile.readLine());
+         ++lineNo) {
+    }
+
+    if (inputFile.atEnd()) {
+        *errorMessage = msgSnippetNotFound(inputFile, identifier);
+        return {};
+    }
+
+    QString code;
+    for (; !inputFile.atEnd(); ++lineNo) {
+        const QString line = QString::fromUtf8(inputFile.readLine());
+        auto it = snippetIdPattern().globalMatch(line);
+        if (it.hasNext()) { // Skip snippet id lines
+            if (matchesSnippetId(it, identifier))
+                break;
+        } else {
+            code += line;
+        }
+    }
+
+    if (code.isEmpty())
+        *errorMessage = msgEmptySnippet(inputFile, lineNo, identifier);
+
+    return code;
+}
+
 QString QtXmlToSphinx::readFromLocation(const QString &location, const QString &identifier,
                                         QString *errorMessage)
 {
@@ -632,37 +714,8 @@ QString QtXmlToSphinx::readFromLocation(const QString &location, const QString &
         return CodeSnipHelpers::fixSpaces(code);
     }
 
-    const QRegularExpression searchString(u"//!\\s*\\["_s
-                                          + identifier + u"\\]"_s);
-    Q_ASSERT(searchString.isValid());
-    static const QRegularExpression cppCodeSnippetCode(u"//!\\s*\\[[\\w\\d\\s]+\\]"_s);
-    Q_ASSERT(cppCodeSnippetCode.isValid());
-    static const QRegularExpression pythonCodeSnippetCode(u"#!\\s*\\[[\\w\\d\\s]+\\]"_s);
-    Q_ASSERT(pythonCodeSnippetCode.isValid());
-
-    bool getCode = false;
-
-    while (!inputFile.atEnd()) {
-        QString line = QString::fromUtf8(inputFile.readLine());
-        if (getCode && !line.contains(searchString)) {
-            line.remove(cppCodeSnippetCode);
-            line.remove(pythonCodeSnippetCode);
-            code += line;
-        } else if (line.contains(searchString)) {
-            if (getCode)
-                break;
-            getCode = true;
-        }
-    }
-
-    if (!getCode) {
-        QTextStream(errorMessage) << "Code snippet file found ("
-            << QDir::toNativeSeparators(location) << "), but snippet ["
-            << identifier << "] not found.";
-        return QString(); // null
-    }
-
-    return CodeSnipHelpers::fixSpaces(code);
+    code = readSnippet(inputFile, identifier, errorMessage);
+    return code.isEmpty() ? QString{} : CodeSnipHelpers::fixSpaces(code); // maintain isNull()
 }
 
 void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
