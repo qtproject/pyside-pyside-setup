@@ -33,10 +33,6 @@ ${QtOpenGL_GEN_DIR}/qtopengl_module_wrapper.cpp
 get_property(QtGui_enabled_features  TARGET Qt${QT_MAJOR_VERSION}::Gui
              PROPERTY QT_ENABLED_PUBLIC_FEATURES)
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Android")
-    option(ANDROID TRUE)
-endif()
-
 if("opengles2" IN_LIST QtGui_enabled_features)
     list(APPEND QtOpenGL_DROPPED_ENTRIES QOpenGLTimeMonitor QOpenGLTimerQuery
                 QOpenGLVersionFunctionsFactory)

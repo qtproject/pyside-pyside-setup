@@ -1,10 +1,10 @@
 // Copyright (C) 2021 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 #include <QtGui/qtgui-config.h>
-// OpenGL functions are not in the QtGui module header
-#cmakedefine ANDROID
 
-#if QT_CONFIG(opengl) && !defined(ANDROID)
+#if QT_CONFIG(opengles2)
+#  include <QtOpenGL/qopenglfunctions_es2.h>
+#elif QT_CONFIG(opengl)
 #  include <QtOpenGL/qopenglfunctions_1_0.h>
 #  include <QtOpenGL/qopenglfunctions_1_1.h>
 #  include <QtOpenGL/qopenglfunctions_1_2.h>
@@ -32,7 +32,4 @@
 #  include <QtOpenGL/qopenglfunctions_4_5_compatibility.h>
 #  include <QtOpenGL/qopenglfunctions_4_5_core.h>
 #  include <QtOpenGL/qopenglversionfunctionsfactory.h>
-#endif
-#if QT_CONFIG(opengles2)
-#  include <QtOpenGL/qopenglfunctions_es2.h>
 #endif
