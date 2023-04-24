@@ -15,6 +15,8 @@ QML_IMPORT_MAJOR_VERSION = 1
 @QmlSingleton
 class SchemeManager(QObject):
 
+    schemeChanged = Signal()
+
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         with open(Path(__file__).parent / "schemes.json", 'r') as f:
@@ -33,10 +35,6 @@ class SchemeManager(QObject):
     @Slot(result='QStringList')
     def getKeys(self):
         return self.m_schemes.keys()
-
-    @Signal
-    def schemeChanged(self):
-        pass
 
     @Property('QStringList', notify=schemeChanged)
     def currentColors(self):
