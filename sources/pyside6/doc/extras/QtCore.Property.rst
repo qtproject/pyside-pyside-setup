@@ -116,16 +116,15 @@ example illustrating how to do this:
     from PySide6.QtCore import QObject, Signal, Property
 
     class Person(QObject):
+
+        name_changed = Signal()
+
         def __init__(self, name):
             QObject.__init__(self)
             self._person_name = name
 
         def _name(self):
             return self._person_name
-
-        @Signal
-        def name_changed(self):
-            pass
 
         name = Property(str, _name, notify=name_changed)
 
