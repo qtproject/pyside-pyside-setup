@@ -3,6 +3,7 @@
 
 #include "compilersupport.h"
 #include "header_paths.h"
+#include "clangutils.h"
 
 #include <reporthandler.h>
 
@@ -320,7 +321,8 @@ static void appendClangBuiltinIncludes(HeaderPaths *p)
                   "(neither by checking the environment variables LLVM_INSTALL_DIR, CLANG_INSTALL_DIR "
                   " nor running llvm-config). This may lead to parse errors.");
     } else {
-        qCInfo(lcShiboken, "CLANG builtins includes directory: %s",
+        qCInfo(lcShiboken, "CLANG v%d.%d, builtins includes directory: %s",
+               CINDEX_VERSION_MAJOR, CINDEX_VERSION_MINOR,
                qPrintable(clangBuiltinIncludesDir));
         p->append(HeaderPath{QFile::encodeName(clangBuiltinIncludesDir),
                              HeaderType::System});
