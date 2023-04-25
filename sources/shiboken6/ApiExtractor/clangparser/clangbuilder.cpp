@@ -550,7 +550,7 @@ TypeInfo BuilderPrivate::createTypeInfoUncached(const CXType &type,
     typeInfo.setConstant(clang_isConstQualifiedType(nestedType) != 0);
     typeInfo.setVolatile(clang_isVolatileQualifiedType(nestedType) != 0);
 
-    QString typeName = getTypeName(nestedType);
+    QString typeName = getResolvedTypeName(nestedType);
     while (TypeInfo::stripLeadingConst(&typeName)
            || TypeInfo::stripLeadingVolatile(&typeName)) {
     }

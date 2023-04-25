@@ -105,12 +105,35 @@ QString getCursorDisplayName(const CXCursor &cursor)
     return result;
 }
 
+static inline bool isBuiltinType(CXTypeKind kind)
+{
+    return kind >= CXType_FirstBuiltin && kind <= CXType_LastBuiltin;
+}
+
+// Resolve elaborated types occurring with clang 16
+static CXType resolveType(const CXType &type)
+{
+    if (!isBuiltinType(type.kind)) {
+        CXCursor decl = clang_getTypeDeclaration(type);
+        auto resolvedType = clang_getCursorType(decl);
+        if (resolvedType.kind != CXType_Invalid && resolvedType.kind != type.kind)
+            return resolvedType;
+    }
+    return type;
+}
+
 QString getTypeName(const CXType &type)
 {
     CXString typeSpelling = clang_getTypeSpelling(type);
     const QString result = QString::fromUtf8(clang_getCString(typeSpelling));
     clang_disposeString(typeSpelling);
     return result;
+}
+
+// Resolve elaborated types occurring with clang 16
+QString getResolvedTypeName(const CXType &type)
+{
+    return getTypeName(resolveType(type));
 }
 
 Diagnostic::Diagnostic(const QString &m, const CXCursor &c, CXDiagnosticSeverity s)
