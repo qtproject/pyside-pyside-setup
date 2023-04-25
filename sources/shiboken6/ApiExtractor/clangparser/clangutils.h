@@ -97,6 +97,8 @@ QPair<qsizetype, qsizetype>
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug, const SourceLocation &);
 QDebug operator<<(QDebug, const Diagnostic &);
+QDebug operator<<(QDebug debug, const CXCursor &cursor);
+QDebug operator<<(QDebug debug, const CXType &type);
 #endif // QT_NO_DEBUG_STREAM
 } // namespace clang
 
