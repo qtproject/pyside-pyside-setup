@@ -658,6 +658,9 @@ QString BuilderPrivate::cursorValueExpression(BaseVisitor *bv, const CXCursor &c
 }
 
 // Resolve a type (loop over aliases/typedefs), for example for base classes
+// Note: TypeAliasTemplateDecl ("using QVector<T>=QList<T>") is automatically
+// resolved by clang_getTypeDeclaration(), but it stops at
+// TypeAliasDecl / TypedefDecl.
 
 struct TypeDeclaration
 {
@@ -665,17 +668,21 @@ struct TypeDeclaration
     CXCursor declaration;
 };
 
-static TypeDeclaration resolveType(CXType type)
+static inline bool isTypeAliasDecl(const CXCursor &cursor)
+{
+    const auto kind = clang_getCursorKind(cursor);
+    return kind == CXCursor_TypeAliasDecl || kind == CXCursor_TypedefDecl;
+}
+
+static TypeDeclaration resolveBaseClassType(CXType type)
 {
     CXCursor decl = clang_getTypeDeclaration(type);
-    if (type.kind != CXType_Unexposed) {
-        while (true) {
-            auto kind = clang_getCursorKind(decl);
-            if (kind != CXCursor_TypeAliasDecl && kind != CXCursor_TypedefDecl)
-                break;
-            type = clang_getTypedefDeclUnderlyingType(decl);
-            decl = clang_getTypeDeclaration(type);
-        }
+    auto resolvedType = clang_getCursorType(decl);
+    if (resolvedType.kind != CXType_Invalid && resolvedType.kind != type.kind)
+        type = resolvedType;
+    while (isTypeAliasDecl(decl)) {
+        type = clang_getTypedefDeclUnderlyingType(decl);
+        decl = clang_getTypeDeclaration(type);
     }
     return {type, decl};
 }
@@ -684,21 +691,11 @@ static TypeDeclaration resolveType(CXType type)
 // where the cursor spelling has "struct baseClass".
 std::pair<QString, ClassModelItem> BuilderPrivate::getBaseClass(CXType type) const
 {
-    const auto decl = resolveType(type);
+    const auto decl = resolveBaseClassType(type);
     // Note: spelling has "struct baseClass", use type
-    QString baseClassName;
-    if (decl.type.kind == CXType_Unexposed) {
-        // The type is unexposed when the base class is a template type alias:
-        // "class QItemSelection : public QList<X>" where QList is aliased to QVector.
-        // Try to resolve via code model.
-        TypeInfo info = createTypeInfo(decl.type);
-        auto parentScope = m_scopeStack.at(m_scopeStack.size() - 2); // Current is class.
-        auto resolved = TypeInfo::resolveType(info, parentScope);
-        if (resolved != info)
-            baseClassName = resolved.toString();
-    }
-    if (baseClassName.isEmpty())
-        baseClassName = getTypeName(decl.type);
+    QString baseClassName = getTypeName(decl.type);
+    if (baseClassName.startsWith(u"std::")) // Simplify "std::" types
+        baseClassName = createTypeInfo(decl.type).toString();
 
     auto it = m_cursorClassHash.constFind(decl.declaration);
     // Not found: Set unqualified name. This happens in cases like
