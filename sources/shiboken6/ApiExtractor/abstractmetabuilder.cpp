@@ -2522,6 +2522,13 @@ static bool isNumber(const QString &s)
                        [](QChar c) { return c.isDigit(); });
 }
 
+// A type entry relevant only for non type template "X<5>"
+static bool isNonTypeTemplateArgument(const TypeEntryCPtr &te)
+{
+    const auto type = te->type();
+    return type == TypeEntry::EnumValue || type == TypeEntry::ConstantValueType;
+}
+
 std::optional<AbstractMetaType>
     AbstractMetaBuilderPrivate::translateTypeStatic(const TypeInfo &_typei,
                                                     const AbstractMetaClassCPtr &currentClass,
@@ -2651,7 +2658,16 @@ std::optional<AbstractMetaType>
         typeInfo.clearInstantiations();
     }
 
-    const TypeEntryCList types = findTypeEntries(qualifiedName, name, currentClass, d, errorMessageIn);
+    TypeEntryCList types = findTypeEntries(qualifiedName, name, currentClass,
+                                           d, errorMessageIn);
+    if (!flags.testFlag(AbstractMetaBuilder::TemplateArgument)) {
+        // Avoid clashes between QByteArray and enum value QMetaType::QByteArray
+        // unless we are looking for template arguments.
+        auto end = std::remove_if(types.begin(), types.end(),
+                                  isNonTypeTemplateArgument);
+        types.erase(end, types.end());
+    }
+
     if (types.isEmpty()) {
         if (errorMessageIn != nullptr)
             *errorMessageIn = msgUnableToTranslateType(_typei, *errorMessageIn);
@@ -2671,7 +2687,9 @@ std::optional<AbstractMetaType>
     const auto &templateArguments = typeInfo.instantiations();
     for (qsizetype t = 0, size = templateArguments.size(); t < size; ++t) {
         const  TypeInfo &ti = templateArguments.at(t);
-        auto targType = translateTypeStatic(ti, currentClass, d, flags, &errorMessage);
+        auto targType = translateTypeStatic(ti, currentClass, d,
+                                            flags | AbstractMetaBuilder::TemplateArgument,
+                                            &errorMessage);
         // For non-type template parameters, create a dummy type entry on the fly
         // as is done for classes.
         if (!targType.has_value()) {
