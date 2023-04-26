@@ -1773,6 +1773,7 @@
       <include file-name="QTextOption" location="global"/>
     </extra-includes>
     <enum-type name="CursorMode"/>
+    <enum-type name="GlyphRunRetrievalFlag" flags="GlyphRunRetrievalFlags" since="6.5"/>
     <value-type name="FormatRange">
       <include file-name="QTextLayout" location="global"/>
     </value-type>
