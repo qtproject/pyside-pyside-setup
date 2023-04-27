@@ -1343,6 +1343,5 @@ QtXmlToSphinxLink QtDocGenerator::resolveLink(const QtXmlToSphinxLink &link) con
         if (anchor != -1)
             resolved.linkText.truncate(anchor);
     }
-    qDebug() << __FUNCTION__ << link << "->" << resolved;
     return resolved;
 }
