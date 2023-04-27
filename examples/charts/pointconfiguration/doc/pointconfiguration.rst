@@ -29,7 +29,7 @@ Subclass QMainWindow
 
 Create a subclass of :py:`QMainWindow` to contain the chart and controls.
 
-.. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
+.. literalinclude:: chartwindow.py
    :linenos:
    :lineno-start: 16
    :lines: 16-18
@@ -40,7 +40,7 @@ Create a line series
 Create a :py:`QLineSeries` containing the points to plot. Give it a name and make the points
 visible.
 
-.. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
+.. literalinclude:: chartwindow.py
    :linenos:
    :lineno-start: 20
    :lines: 20-28
@@ -60,7 +60,7 @@ Now, create controls to configure the color, size, and label visibility attribut
    Do not set initial values for any of the controls, as a point will always be selected showing
    its current settings.
 
-.. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
+.. literalinclude:: chartwindow.py
    :linenos:
    :lineno-start: 31
    :lines: 31-52
@@ -81,11 +81,11 @@ Query the :py:`PointConfigurations`, and use those to find the matching indices 
 Set the current indices of the comboboxes to the corresponding values you looked up. Similarly,
 look up the values in :py:`PointConfigurations`, and update the checkbox and line edit controls.
 
-.. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
+.. literalinclude:: chartwindow.py
    :linenos:
    :lineno-start: 54
    :lines: 54
-.. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
+.. literalinclude:: chartwindow.py
    :linenos:
    :lineno-start: 97
    :lines: 97-132
@@ -99,11 +99,11 @@ chosen values in the controls. You can do this by setting the :py:`QXYSeries::Po
 value that is associated with the control, to the :py:`m_selectedPointConfig` and
 :py:`PointConfigurations` member variables, and call :py:`QXYSeries::setPointConfiguration`.
 
-.. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
+.. literalinclude:: chartwindow.py
    :linenos:
    :lineno-start: 55
    :lines: 55-60
-.. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
+.. literalinclude:: chartwindow.py
    :linenos:
    :lineno-start: 140
    :lines: 140-156
@@ -114,7 +114,7 @@ Create the chart and lay out the controls
 Finally, create the chart and its view, add the series to the chart, create the layout of the
 window, and select an initial point.
 
-.. literalinclude:: ../../../../examples/charts/pointconfiguration/chartwindow.py
+.. literalinclude:: chartwindow.py
    :linenos:
    :lineno-start: 62
    :lines: 62-95
@@ -122,7 +122,7 @@ window, and select an initial point.
 In our entrypoint file `pointconfiguration.py`, instantiate the :py:`ChartWindow`, resize it, show
 it, and start the event loop.
 
-.. literalinclude:: ../../../../examples/charts/pointconfiguration/pointconfiguration.py
+.. literalinclude:: pointconfiguration.py
    :linenos:
    :lineno-start: 11
    :lines: 11-17

@@ -14,6 +14,7 @@ since there is no special requirements.
 
 import json
 import math
+import os
 import shutil
 import zipfile
 import sys
@@ -22,6 +23,9 @@ from pathlib import Path
 from textwrap import dedent
 
 opt_quiet = False
+
+
+LITERAL_INCLUDE = ".. literalinclude::"
 
 
 IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".svg", ".svgz", ".webp")
@@ -209,6 +213,37 @@ def get_header_title(example_dir):
     )
 
 
+def rel_path(from_path, to_path):
+    """Determine relative paths for paths that are not subpaths (where
+       relative_to() fails) via a common root."""
+    common = Path(*os.path.commonprefix([from_path.parts, to_path.parts]))
+    up_dirs = len(from_path.parts) - len(common.parts)
+    prefix = up_dirs * "../"
+    rel_to_common = os.fspath(to_path.relative_to(common))
+    return f"{prefix}{rel_to_common}"
+
+
+def read_rst_file(project_dir, project_files, doc_rst):
+    """Read the example .rst file and expand literal includes to project files
+       by relative paths to the example directory. Note: sphinx does not
+       handle absolute paths as expected, they need to be relative."""
+    content = ""
+    with open(doc_rst, encoding="utf-8") as doc_f:
+        content = doc_f.read()
+    if LITERAL_INCLUDE not in content:
+        return content
+
+    result = []
+    path_to_example = rel_path(EXAMPLES_DOC, project_dir)
+    for line in content.split("\n"):
+        if line.startswith(LITERAL_INCLUDE):
+            file = line[len(LITERAL_INCLUDE) + 1:].strip()
+            if file in project_files:
+                line = f"{LITERAL_INCLUDE} {path_to_example}/{file}"
+        result.append(line)
+    return "\n".join(result)
+
+
 if __name__ == "__main__":
     # Only examples with a '.pyproject' file will be listed.
     DIR = Path(__file__).parent
@@ -309,9 +344,7 @@ if __name__ == "__main__":
             with open(rst_file_full, "w", encoding="utf-8") as out_f:
                 if has_doc:
                     doc_rst = original_doc_dir / f"{example_name}.rst"
-
-                    with open(doc_rst, encoding="utf-8") as doc_f:
-                        content_f = doc_f.read()
+                    content_f = read_rst_file(example_dir, files, doc_rst)
 
                     # Copy other files in the 'doc' directory, but
                     # excluding the main '.rst' file and all the
