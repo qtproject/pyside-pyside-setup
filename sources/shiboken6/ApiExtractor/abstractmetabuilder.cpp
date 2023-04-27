@@ -2048,7 +2048,10 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             return nullptr;
         }
 
-        auto type = translateType(returnType, currentClass, {}, &errorMessage);
+        TranslateTypeFlags flags;
+        if (functionItem->scopeResolution())
+            flags.setFlag(AbstractMetaBuilder::NoClassScopeLookup);
+        auto type = translateType(returnType, currentClass, flags, &errorMessage);
         if (!type.has_value()) {
             const QString reason = msgUnmatchedReturnType(functionItem, errorMessage);
             qCWarning(lcShiboken, "%s",
@@ -2089,7 +2092,10 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             return nullptr;
         }
 
-        auto metaTypeO = translateType(arg->type(), currentClass, {}, &errorMessage);
+        TranslateTypeFlags flags;
+        if (arg->scopeResolution())
+            flags.setFlag(AbstractMetaBuilder::NoClassScopeLookup);
+        auto metaTypeO = translateType(arg->type(), currentClass, flags, &errorMessage);
         if (!metaTypeO.has_value()) {
             // If an invalid argument has a default value, simply remove it
             // unless the function is virtual (since the override in the
@@ -2215,11 +2221,13 @@ static TypeEntryCPtr findTypeEntryUsingContext(const AbstractMetaClassCPtr &meta
 // Helper for findTypeEntries/translateTypeStatic()
 TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntriesHelper(const QString &qualifiedName,
                                                                  const QString &name,
+                                                                 TranslateTypeFlags flags,
                                                                  const AbstractMetaClassCPtr &currentClass,
                                                                  AbstractMetaBuilderPrivate *d)
 {
     // 5.1 - Try first using the current scope
-    if (currentClass) {
+    if (currentClass != nullptr
+        && !flags.testFlag(AbstractMetaBuilder::NoClassScopeLookup)) {
         if (auto type = findTypeEntryUsingContext(currentClass, qualifiedName))
             return {type};
 
@@ -2262,11 +2270,13 @@ TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntriesHelper(const QString &
 // and does some error checking.
 TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualifiedName,
                                                            const QString &name,
+                                                           TranslateTypeFlags flags,
                                                            const AbstractMetaClassCPtr &currentClass,
                                                            AbstractMetaBuilderPrivate *d,
                                                            QString *errorMessage)
 {
-    TypeEntryCList types = findTypeEntriesHelper(qualifiedName, name, currentClass, d);
+    TypeEntryCList types = findTypeEntriesHelper(qualifiedName, name, flags,
+                                                 currentClass, d);
     if (types.isEmpty()) {
         if (errorMessage != nullptr)
             *errorMessage = msgCannotFindTypeEntry(qualifiedName);
@@ -2658,8 +2668,8 @@ std::optional<AbstractMetaType>
         typeInfo.clearInstantiations();
     }
 
-    TypeEntryCList types = findTypeEntries(qualifiedName, name, currentClass,
-                                           d, errorMessageIn);
+    TypeEntryCList types = findTypeEntries(qualifiedName, name, flags,
+                                           currentClass, d, errorMessageIn);
     if (!flags.testFlag(AbstractMetaBuilder::TemplateArgument)) {
         // Avoid clashes between QByteArray and enum value QMetaType::QByteArray
         // unless we are looking for template arguments.

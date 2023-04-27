@@ -148,9 +148,11 @@ public:
                             AbstractMetaBuilderPrivate *d = nullptr, TranslateTypeFlags flags = {},
                             QString *errorMessageIn = nullptr);
     static TypeEntryCList findTypeEntriesHelper(const QString &qualifiedName, const QString &name,
+                                                TranslateTypeFlags flags = {},
                                                 const AbstractMetaClassCPtr &currentClass = {},
                                                 AbstractMetaBuilderPrivate *d = nullptr);
     static TypeEntryCList findTypeEntries(const QString &qualifiedName, const QString &name,
+                                          TranslateTypeFlags flags = {},
                                           const AbstractMetaClassCPtr &currentClass = {},
                                           AbstractMetaBuilderPrivate *d = nullptr,
                                           QString *errorMessage = nullptr);

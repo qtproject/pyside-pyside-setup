@@ -2380,7 +2380,7 @@
           <reference-count action="set"/>
         </modify-argument>
       </modify-function>
-      <add-function signature="__enter__()" return-type="QMutexLocker">
+      <add-function signature="__enter__()" return-type="QtCoreHelper::QMutexLocker">
           <inject-code file="../glue/qtcore.cpp" snippet="default-enter"/>
       </add-function>
       <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">

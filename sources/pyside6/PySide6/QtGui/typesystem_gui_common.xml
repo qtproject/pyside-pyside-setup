@@ -3101,7 +3101,7 @@
 
   <namespace-type name="QtGuiHelper" visible="no">
       <object-type name="QOverrideCursorGuard" copyable="no">
-      <add-function signature="__enter__()" return-type="QOverrideCursorGuard">
+      <add-function signature="__enter__()" return-type="QtGuiHelper::QOverrideCursorGuard">
           <inject-code file="../glue/qtcore.cpp" snippet="default-enter"/>
       </add-function>
       <add-function signature="__exit__(PyObject*,PyObject*,PyObject*)">
