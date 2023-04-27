@@ -1047,6 +1047,7 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunctionCPtr &func,
     auto type = options.testFlag(OriginalTypeDescription)
         ? argument.type() : argument.modifiedType();
 
+
     QString arg = translateType(type, func->implementingClass(), options);
 
     if (argument.isTypeModified())
