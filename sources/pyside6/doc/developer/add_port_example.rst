@@ -37,6 +37,13 @@ Add a new example
 - If you want the example to be automatically displayed on the
   example gallery, include a ``doc`` directory that contains a ``rst``
   file and a screenshot. Check other examples for formatting questions.
+- When writing the ``rst`` file, you can include code snippets using
+  the ``literalinclude`` directive specifying the relative path
+  as listed in the ``.pyproject`` file. The `example_gallery` tool will
+  expand this (see the `pointconfiguration` example).
+- For the code displayed in the tabs, you can create ``rstinc`` files
+  in the ``doc`` directory containing some description explaining them
+  (see the `samplebinding` example).
 
 Port a Qt example
 -----------------
