@@ -376,6 +376,10 @@ public:
     QString defaultValueExpression() const { return m_defaultValueExpression; }
     void setDefaultValueExpression(const QString &expr) { m_defaultValueExpression = expr; }
 
+    // Argument type has scope resolution "::ArgumentType"
+    bool scopeResolution() const;
+    void setScopeResolution(bool v);
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
@@ -384,6 +388,7 @@ private:
     TypeInfo m_type;
     QString m_defaultValueExpression;
     bool m_defaultValue = false;
+    bool m_scopeResolution = false;
 };
 
 class _MemberModelItem: public _CodeModelItem
@@ -505,6 +510,9 @@ public:
     bool isVariadics() const;
     void setVariadics(bool isVariadics);
 
+    bool scopeResolution() const; // Return type has scope resolution "::ReturnType"
+    void setScopeResolution(bool v);
+
     bool isDefaultConstructor() const;
     bool isSpaceshipOperator() const;
 
@@ -544,6 +552,7 @@ private:
             uint m_isVariadics: 1;
             uint m_isHiddenFriend: 1;
             uint m_isInvokable : 1; // Qt
+            uint m_scopeResolution: 1;
         };
         uint m_flags;
     };
