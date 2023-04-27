@@ -8,6 +8,8 @@
 #include <QtCore/QHashFunctions>
 #include <QtCore/QProcess>
 
+#include <string_view>
+
 bool operator==(const CXCursor &c1, const CXCursor &c2)
 {
     return c1.kind == c2.kind
@@ -126,6 +128,17 @@ QString getTypeName(const CXType &type)
 {
     CXString typeSpelling = clang_getTypeSpelling(type);
     const QString result = QString::fromUtf8(clang_getCString(typeSpelling));
+    clang_disposeString(typeSpelling);
+    return result;
+}
+
+// Quick check for "::Type"
+bool hasScopeResolution(const CXType &type)
+{
+    CXString typeSpelling = clang_getTypeSpelling(type);
+    std::string_view spelling = clang_getCString(typeSpelling);
+    const bool result = spelling.compare(0, 2, "::") == 0
+        || spelling.find(" ::") != std::string::npos;
     clang_disposeString(typeSpelling);
     return result;
 }

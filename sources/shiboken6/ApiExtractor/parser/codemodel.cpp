@@ -857,11 +857,23 @@ void _ArgumentModelItem::setDefaultValue(bool defaultValue)
     m_defaultValue = defaultValue;
 }
 
+bool _ArgumentModelItem::scopeResolution() const
+{
+    return m_scopeResolution;
+}
+
+void _ArgumentModelItem::setScopeResolution(bool v)
+{
+    m_scopeResolution = v;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 void _ArgumentModelItem::formatDebug(QDebug &d) const
 {
     _CodeModelItem::formatDebug(d);
     d << ", type=" << m_type;
+    if (m_scopeResolution)
+        d << ", [m_scope resolution]";
     if (m_defaultValue)
         d << ", defaultValue=\"" << m_defaultValueExpression << '"';
 }
@@ -934,6 +946,16 @@ bool _FunctionModelItem::isVariadics() const
 void _FunctionModelItem::setVariadics(bool isVariadics)
 {
     m_isVariadics = isVariadics;
+}
+
+bool _FunctionModelItem::scopeResolution() const
+{
+    return m_scopeResolution;
+}
+
+void _FunctionModelItem::setScopeResolution(bool v)
+{
+    m_scopeResolution = v;
 }
 
 bool _FunctionModelItem::isDefaultConstructor() const
@@ -1227,6 +1249,8 @@ void _FunctionModelItem::formatDebug(QDebug &d) const
         d << " [explicit]";
     if (m_isInvokable)
         d << " [invokable]";
+    if (m_scopeResolution)
+        d << " [scope resolution]";
     formatModelItemList(d, ", arguments=", m_arguments);
     if (m_isVariadics)
         d << ",...";
