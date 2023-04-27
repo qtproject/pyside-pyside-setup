@@ -538,20 +538,20 @@ QString Generator::translateType(AbstractMetaType cType,
     } else if (cType.isArray()) {
         s = translateType(*cType.arrayElementType(), context, options) + u"[]"_s;
     } else {
+        AbstractMetaType copyType = cType;
         if (options & Generator::ExcludeConst || options & Generator::ExcludeReference) {
-            AbstractMetaType copyType = cType;
-
             if (options & Generator::ExcludeConst)
                 copyType.setConstant(false);
-
             if (options & Generator::ExcludeReference)
                 copyType.setReferenceType(NoReference);
+        }
 
-            s = copyType.cppSignature();
-            if (!copyType.typeEntry()->isVoid() && !isCppPrimitive(copyType.typeEntry()))
-                s.prepend(u"::"_s);
-        } else {
-            s = cType.cppSignature();
+        s = copyType.cppSignature();
+        const auto te = copyType.typeEntry();
+        if (!te->isVoid() && !isCppPrimitive(te)) { // Add scope resolution
+            const auto pos = s.indexOf(te->qualifiedCppName()); // Skip const/volatile
+            Q_ASSERT(pos >= 0);
+            s.insert(pos, u"::"_s);
         }
     }
 
