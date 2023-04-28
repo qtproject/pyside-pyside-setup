@@ -3,7 +3,7 @@
 
 import QtQuick
 
-import examples.grouped.people
+import People
 
 BirthdayParty {
     host: Boy {

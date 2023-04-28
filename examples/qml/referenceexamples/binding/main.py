@@ -6,7 +6,7 @@
 from pathlib import Path
 import sys
 
-from PySide6.QtCore import QCoreApplication, QUrl
+from PySide6.QtCore import QCoreApplication
 from PySide6.QtQml import QQmlComponent, QQmlEngine, qmlAttachedPropertiesObject
 
 from person import Boy, Girl
@@ -16,10 +16,10 @@ from happybirthdaysong import HappyBirthdaySong
 
 if __name__ == "__main__":
     app = QCoreApplication(sys.argv)
-    qml_file = Path(__file__).parent / "example.qml"
-    url = QUrl.fromLocalFile(qml_file)
     engine = QQmlEngine()
-    component = QQmlComponent(engine, url)
+    engine.addImportPath(Path(__file__).parent)
+    component = QQmlComponent(engine)
+    component.loadFromModule("People", "Main")
     party = component.create()
     if not party:
         print(component.errors())

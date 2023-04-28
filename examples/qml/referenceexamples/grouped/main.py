@@ -1,12 +1,12 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-"""PySide6 port of the qml/examples/qml/referenceexamples/default example from Qt v6.x"""
+"""PySide6 port of the qml/examples/qml/tutorials/extending-qml-advanced/advanced4-Grouped-properties example from Qt v6.x"""
 
 from pathlib import Path
 import sys
 
-from PySide6.QtCore import QCoreApplication, QUrl
+from PySide6.QtCore import QCoreApplication
 from PySide6.QtQml import QQmlComponent, QQmlEngine
 
 from person import Boy, Girl
@@ -15,10 +15,11 @@ from birthdayparty import BirthdayParty
 
 if __name__ == '__main__':
     app = QCoreApplication(sys.argv)
-    qml_file = Path(__file__).parent / "example.qml"
-    url = QUrl.fromLocalFile(qml_file)
     engine = QQmlEngine()
-    component = QQmlComponent(engine, url)
+    engine.addImportPath(Path(__file__).parent)
+    component = QQmlComponent(engine)
+    component.loadFromModule("People", "Main")
+
     party = component.create()
     if not party:
         print(component.errors())
