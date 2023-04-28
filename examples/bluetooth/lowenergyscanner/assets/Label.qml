@@ -1,7 +1,7 @@
 // Copyright (C) 2013 BlackBerry Limited. All rights reserved.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-import QtQuick 2.0
+import QtQuick
 
 Text {
     property string textContent: ""
