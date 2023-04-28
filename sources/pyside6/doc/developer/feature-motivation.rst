@@ -230,8 +230,9 @@ Example:
 .. code-block:: python
 
     >>> from PySide6 import *
+    >>> from PySide6.support.signature import get_signature
     >>> import pprint
-    >>> pprint.pprint(QtCore.QTimer.singleShot.__signature__)
+    >>> pprint.pprint(get_signature(QtCore.QTimer.singleShot))
     [<Signature (arg__1: int, arg__2: Callable) -> None>,
      <Signature (msec: int, receiver: PySide6.QtCore.QObject, member: bytes) -> None>,
      <Signature (msec: int, timerType: PySide6.QtCore.Qt.TimerType,
