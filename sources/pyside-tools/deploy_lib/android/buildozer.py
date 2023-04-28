@@ -2,8 +2,12 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 import logging
+import xml.etree.ElementTree as ET
+import zipfile
 from pathlib import Path
-from .. import run_command, BaseConfig, Config
+from typing import List
+
+from .. import MAJOR_VERSION, BaseConfig, Config, run_command
 
 
 class BuildozerConfig(BaseConfig):
@@ -20,6 +24,7 @@ class BuildozerConfig(BaseConfig):
 
         self.set_value("app", "requirements", "python3,shiboken6,PySide6")
 
+        # android platform specific
         if pysidedeploy_config.ndk_path:
             self.set_value("app", "android.ndk_path", str(pysidedeploy_config.ndk_path))
 
@@ -32,14 +37,14 @@ class BuildozerConfig(BaseConfig):
                         "armv7a": "armeabi-v7a",
                         "i686": "x86",
                         "x86_64": "x86_64"}
-        arch = platform_map[pysidedeploy_config.arch]
-        self.set_value("app", "android.archs", arch)
+        self.arch = platform_map[pysidedeploy_config.arch]
+        self.set_value("app", "android.archs", self.arch)
 
         # p4a changes
         logging.info("[DEPLOY] Using custom fork of python-for-android: "
                      "https://github.com/shyamnathp/python-for-android/tree/pyside_support")
         self.set_value("app", "p4a.fork", "shyamnathp")
-        self.set_value("app", "p4a.branch", "pyside_support")
+        self.set_value("app", "p4a.branch", "pyside_support_2")
         self.set_value('app', "p4a.local_recipes", str(pysidedeploy_config.recipe_dir))
         self.set_value("app", "p4a.bootstrap", "qt")
 
@@ -47,6 +52,11 @@ class BuildozerConfig(BaseConfig):
         local_libs = ",".join(pysidedeploy_config.local_libs)
         extra_args = (f"--qt-libs={modules} --load-local-libs={local_libs}")
         self.set_value("app", "p4a.extra_args", extra_args)
+
+        dependency_files = self.__get_dependency_files(pysidedeploy_config)
+        permissions = self.__find_permissions(dependency_files)
+        permissions = ", ".join(permissions)
+        self.set_value("app", "android.permissions", permissions)
 
         # TODO: does not work atm. Seems like a bug with buildozer
         # change buildozer build_dir
@@ -56,6 +66,47 @@ class BuildozerConfig(BaseConfig):
         self.set_value("buildozer", "bin_dir", str(pysidedeploy_config.exe_dir.resolve()))
 
         self.update_config()
+
+    def __get_dependency_files(self, pysidedeploy_config: Config) -> List[zipfile.Path]:
+        """
+        Based on pysidedeploy_config.modules, returns the
+        Qt6{module}_{arch}-android-dependencies.xml file, which contains the various
+        dependencies of the module, like permissions, plugins etc
+        """
+        dependency_files = []
+        needed_dependency_files = [(f"Qt{MAJOR_VERSION}{module}_{self.arch}"
+                                   "-android-dependencies.xml") for module in
+                                   pysidedeploy_config.modules]
+        archive = zipfile.ZipFile(pysidedeploy_config.wheel_pyside)
+
+        # find parent path to dependency files in the wheel
+        dependency_parent_path = None
+        for file in archive.namelist():
+            if file.endswith("android-dependencies.xml"):
+                dependency_parent_path = Path(file).parent
+                # all dependency files are in the same path
+                break
+
+        for dependency_file_name in needed_dependency_files:
+            dependency_file = dependency_parent_path / dependency_file_name
+            # convert from pathlib.Path to zipfile.Path
+            dependency_file = zipfile.Path(archive, at=str(dependency_file))
+
+            if dependency_file.exists():
+                dependency_files.append(dependency_file)
+
+        logging.info(f"[DEPLOY] The following dependency files were found: {*dependency_files,}")
+
+        return dependency_files
+
+    def __find_permissions(self, dependency_files: List[zipfile.Path]):
+        permissions = set()
+        for dependency_file in dependency_files:
+            xml_content = dependency_file.read_text()
+            root = ET.fromstring(xml_content)
+            for permission in root.iter("permission"):
+                permissions.add(permission.attrib['name'])
+        return permissions
 
 
 class Buildozer:

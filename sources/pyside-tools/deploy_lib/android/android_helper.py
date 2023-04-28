@@ -10,6 +10,9 @@ from dataclasses import dataclass
 
 @dataclass
 class AndroidData:
+    """
+    Dataclass to store all the Android data obtained through cli
+    """
     wheel_pyside: Path
     wheel_shiboken: Path
     ndk_path: Path
