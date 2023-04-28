@@ -11,7 +11,7 @@ from PySide6.QtQml import QQmlComponent, QQmlEngine
 from PySide6.QtQuick import QQuickWindow
 from PySide6.QtQuickControls2 import QQuickStyle
 
-import window_rc
+import rc_window
 
 # Append the parent directory of this file so that Python can find and
 # import from the "shared" sibling directory.
