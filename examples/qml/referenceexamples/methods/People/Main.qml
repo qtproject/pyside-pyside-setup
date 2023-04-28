@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import QtQuick
-import examples.methods.people
+import People
 
 BirthdayParty {
     host: Person {

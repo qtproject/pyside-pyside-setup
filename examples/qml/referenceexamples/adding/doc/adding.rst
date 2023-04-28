@@ -33,7 +33,7 @@ return members of the object instance.
 
     # To be used on the @QmlElement decorator
     # (QML_IMPORT_MINOR_VERSION is optional)
-    QML_IMPORT_NAME = "examples.adding.people"
+    QML_IMPORT_NAME = "People"
     QML_IMPORT_MAJOR_VERSION = 1
 
 

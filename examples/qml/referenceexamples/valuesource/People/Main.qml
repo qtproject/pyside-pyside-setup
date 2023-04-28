@@ -1,12 +1,10 @@
 // Copyright (C) 2022 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-import examples.binding.people
+import People
 
 BirthdayParty {
-    id: theParty
-
-    HappyBirthdaySong on announcement { name: theParty.host.name }
+    HappyBirthdaySong on announcement { name: "Bob Jones" }
 
     onPartyStarted: (time) => { console.log("This party started rockin' at " + time); }
 

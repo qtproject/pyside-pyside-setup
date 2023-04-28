@@ -9,7 +9,7 @@ from person import Person
 
 # To be used on the @QmlElement decorator
 # (QML_IMPORT_MINOR_VERSION is optional)
-QML_IMPORT_NAME = "examples.grouped.people"
+QML_IMPORT_NAME = "People"
 QML_IMPORT_MAJOR_VERSION = 1
 
 

@@ -40,7 +40,7 @@ The BirthdayParty class is declared like this:
 
     # To be used on the @QmlElement decorator
     # (QML_IMPORT_MINOR_VERSION is optional)
-    QML_IMPORT_NAME = "examples.properties.people"
+    QML_IMPORT_NAME = "People"
     QML_IMPORT_MAJOR_VERSION = 1
 
 
