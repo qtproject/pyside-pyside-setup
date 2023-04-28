@@ -9,6 +9,7 @@ from PySide6.QtCore import QUrl, qWarning
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlComponent, QQmlEngine
 from PySide6.QtQuick import QQuickWindow
+from PySide6.QtQuickControls2 import QQuickStyle
 
 import rc_window
 
@@ -20,6 +21,8 @@ from shared import shared_rc
 
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
+    if sys.platform == "win32":
+        QQuickStyle.setStyle("Fusion")
     engine = QQmlEngine()
 
     # Add the qrc root as QML import path so that the "shared" module
