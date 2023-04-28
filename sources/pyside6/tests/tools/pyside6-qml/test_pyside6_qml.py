@@ -25,8 +25,8 @@ class TestPySide6QmlUnit(unittest.TestCase):
         self.pyside_root = self._dir.parents[4]
 
         self.pyqml_path = self.pyside_root / "sources" / "pyside-tools" / "qml.py"
-        self.core_qml_path = (self.pyside_root / "examples" / "qml" / "referenceexamples"
-                              / "adding")
+        self.core_qml_path = (self.pyside_root / "examples" / "qml" /
+                              "tutorials" / "extending-qml-advanced" / "adding")
 
         self.pyqml_run_cmd = [sys.executable, os.fspath(self.pyqml_path)]
 
@@ -63,7 +63,7 @@ class TestPySide6QmlUnit(unittest.TestCase):
 
     def testCoreApplication(self):
         self.pyqml_run_cmd.extend(["--apptype", "core"])
-        self.pyqml_run_cmd.append(str(self.core_qml_path / "example.qml"))
+        self.pyqml_run_cmd.append(str(self.core_qml_path / "People" / "Main.qml"))
         self.pyqml_run_cmd.extend(["-I", str(self.core_qml_path / "person.py")])
 
         result = subprocess.run(self.pyqml_run_cmd, stdout=PIPE, env=self.test_env)

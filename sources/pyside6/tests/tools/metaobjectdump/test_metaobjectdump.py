@@ -30,11 +30,11 @@ class TestMetaObjectDump(unittest.TestCase):
         pyside_root = self._dir.parents[4]
         self._metaobjectdump_tool = pyside_root / "sources" / "pyside-tools" / "metaobjectdump.py"
         self._examples_dir = (pyside_root / "examples" /
-                              "qml" / "referenceexamples")
+                              "qml" / "tutorials" / "extending-qml-advanced")
 
         # Compile a list of examples (tuple [file, base line, command])
         examples = []
-        for d in ["coercion", "default"]:
+        for d in ["advanced2-Inheritance-and-coercion", "advanced3-Default-properties"]:
             example_dir = self._examples_dir / d
             examples.append(example_dir / "birthdayparty.py")
             examples.append(example_dir / "person.py")
@@ -43,7 +43,9 @@ class TestMetaObjectDump(unittest.TestCase):
         self._examples = []
         for example in examples:
             name = example.parent.name
-            baseline_name = f"baseline_{name}_{example.stem}.json"
+            # Simplify "advanced2-Inheritance-and-coercion" -> "inheritance"
+            short_name = name.split("-")[1].lower()
+            baseline_name = f"baseline_{short_name}_{example.stem}.json"
             baseline_path = self._dir / baseline_name
             cmd = metaobjectdump_cmd_root + [os.fspath(example)]
             self._examples.append((example, baseline_path, cmd))
