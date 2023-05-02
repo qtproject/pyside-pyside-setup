@@ -48,6 +48,9 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False, is_
                             for module in constrain_modules]
     accepted_modules.append("libicu*.so.??")
 
+    if is_android:
+        accepted_modules.append("*-android-dependencies.xml")
+
     copydir("{qt_lib_dir}", destination_qt_lib_dir,
             _filter=accepted_modules,
             recursive=False, _vars=_vars, force_copy_symlinks=True)
