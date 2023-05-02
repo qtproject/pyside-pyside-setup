@@ -1,7 +1,7 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-from PySide6.QtCore import QTimer, Property, Slot
+from PySide6.QtCore import QTimer, Property, Signal, Slot
 from PySide6.QtQml import QmlElement, QPyQmlPropertyValueSource
 
 # To be used on the @QmlElement decorator
@@ -12,6 +12,7 @@ QML_IMPORT_MAJOR_VERSION = 1
 
 @QmlElement
 class HappyBirthdaySong(QPyQmlPropertyValueSource):
+    name_changed = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -28,18 +29,19 @@ class HappyBirthdaySong(QPyQmlPropertyValueSource):
     def setTarget(self, property):
         self.m_target = property
 
-    @Property(str)
+    @Property(str, notify=name_changed, final=True)
     def name(self):
         return self.m_name
 
     @name.setter
     def name(self, n):
-        self.m_name = n
-        self.m_lyrics = ["Happy birthday to you,",
-                         "Happy birthday to you,",
-                         f"Happy birthday dear {self.m_name},",
-                         "Happy birthday to you!",
-                         ""]
+        if self.m_name != n:
+            self.m_name = n
+            self.m_lyrics = ["Happy birthday to you,",
+                             "Happy birthday to you,",
+                             f"Happy birthday dear {self.m_name},",
+                             "Happy birthday to you!",
+                             ""]
 
     @Slot()
     def advance(self):

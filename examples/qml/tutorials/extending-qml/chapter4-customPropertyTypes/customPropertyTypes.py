@@ -25,7 +25,7 @@ class PieSlice (QQuickPaintedItem):
         QQuickPaintedItem.__init__(self, parent)
         self._color = QColor()
 
-    @Property(QColor)
+    @Property(QColor, final=True)
     def color(self):
         return self._color
 
@@ -47,7 +47,7 @@ class PieChart (QQuickItem):
         self._name = None
         self._pieSlice = None
 
-    @Property(str)
+    @Property(str, final=True)
     def name(self):
         return self._name
 
@@ -55,7 +55,7 @@ class PieChart (QQuickItem):
     def name(self, value):
         self._name = value
 
-    @Property(PieSlice)
+    @Property(PieSlice, final=True)
     def pieSlice(self):
         return self._pieSlice
 

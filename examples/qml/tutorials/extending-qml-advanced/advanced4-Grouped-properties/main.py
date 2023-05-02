@@ -37,8 +37,8 @@ if __name__ == '__main__':
         name = guest.name
         print(f"    {name}")
         if not best_shoe or best_shoe.shoe.price < guest.shoe.price:
-            best_shoe = guest;
+            best_shoe = guest
     if best_shoe:
-          print(f"{best_shoe.name} is wearing the best shoes!");
+        print(f"{best_shoe.name} is wearing the best shoes!")
     del engine
     sys.exit(0)
