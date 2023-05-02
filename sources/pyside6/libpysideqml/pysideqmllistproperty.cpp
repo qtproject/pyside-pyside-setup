@@ -40,22 +40,43 @@ static PyObject *propList_tp_new(PyTypeObject *subtype, PyObject * /* args */, P
 
 static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 {
-    static const char *kwlist[] = {"type", "append", "count", "at", "clear", "replace", "removeLast", 0};
+    static const char *kwlist[] = {"type", "append", "count", "at", "clear",
+                                   "replace", "removeLast",
+                                   "doc", "notify", // PySideProperty
+                                   "designable", "scriptable", "stored",
+                                   "user", "constant", "final",
+                                   nullptr};
     PySideProperty *pySelf = reinterpret_cast<PySideProperty *>(self);
 
     auto *data = static_cast<QmlListPropertyPrivate *>(pySelf->d);
 
+    char *doc{};
+
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
-                                     "O|OOOOOO:QtQml.ListProperty", (char **) kwlist,
+                                     "O|OOOOOOsObbbbbb:QtQml.ListProperty",
+                                     const_cast<char **>(kwlist),
                                      &data->type,
                                      &data->append,
                                      &data->count,
                                      &data->at,
                                      &data->clear,
                                      &data->replace,
-                                     &data->removeLast)) {
+                                     &data->removeLast,
+                                     /*s*/   &doc,
+                                     /*O*/   &(data->notify), // PySideProperty
+                                     /*bbb*/ &(data->designable),
+                                             &(data->scriptable),
+                                             &(data->stored),
+                                     /*bbb*/ &(data->user),
+                                             &(data->constant),
+                                             &(data->final))) {
         return -1;
     }
+
+    if (doc)
+        data->doc = doc;
+    else
+        data->doc.clear();
 
     PyTypeObject *qobjectType = qObjectType();
 
