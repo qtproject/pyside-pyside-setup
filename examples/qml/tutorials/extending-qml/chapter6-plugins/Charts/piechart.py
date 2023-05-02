@@ -19,7 +19,7 @@ class PieChart(QQuickItem):
         self._slices = []
         self._name = ''
 
-    @Property(str)
+    @Property(str, final=True)
     def name(self):
         return self._name
 

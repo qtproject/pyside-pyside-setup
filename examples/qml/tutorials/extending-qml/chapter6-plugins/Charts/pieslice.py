@@ -20,7 +20,7 @@ class PieSlice(QQuickPaintedItem):
         self._from_angle = 0
         self._angle_span = 0
 
-    @Property(QColor)
+    @Property(QColor, final=True)
     def color(self):
         return self._color
 
@@ -28,7 +28,7 @@ class PieSlice(QQuickPaintedItem):
     def color(self, color):
         self._color = QColor(color)
 
-    @Property(int)
+    @Property(int, final=True)
     def fromAngle(self):
         return self._from_angle
 
@@ -36,7 +36,7 @@ class PieSlice(QQuickPaintedItem):
     def fromAngle(self, fromAngle):
         self._from_angle = fromAngle
 
-    @Property(int)
+    @Property(int, final=True)
     def angleSpan(self):
         return self._angle_span
 

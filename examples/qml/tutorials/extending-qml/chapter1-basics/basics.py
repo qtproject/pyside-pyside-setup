@@ -34,7 +34,7 @@ class PieChart (QQuickPaintedItem):
         painter.setRenderHints(QPainter.Antialiasing, True)
         painter.drawPie(self.boundingRect().adjusted(1, 1, -1, -1), 90 * 16, 290 * 16)
 
-    @Property(QColor)
+    @Property(QColor, final=True)
     def color(self):
         return self._color
 
@@ -42,7 +42,7 @@ class PieChart (QQuickPaintedItem):
     def color(self, value):
         self._color = value
 
-    @Property(str, notify=nameChanged)
+    @Property(str, notify=nameChanged, final=True)
     def name(self):
         return self._name
 
