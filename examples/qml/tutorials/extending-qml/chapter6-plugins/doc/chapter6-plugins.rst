@@ -18,4 +18,4 @@ Running the Example
 
 .. code-block:: shell
 
-    pyside6-pyqml examples/declarative/extending/chapter6-plugins/app.qml -I examples/declarative/extending/chapter6-plugins/Charts
+    pyside6-qml examples/qml/tutorials/extending-qml/chapter6-plugins/app.qml -I examples/qml/tutorials/extending-qml/chapter6-plugins/Charts
