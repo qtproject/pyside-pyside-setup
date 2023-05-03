@@ -5,7 +5,7 @@ enable_if:
   not_contains_value: LicenseCheck
 instructions:
   - type: ExecuteCommand
-    command: "python3 -m pip install -U setuptools<65.6"
+    command: "python3 -m pip install -U setuptools==67.7.2"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     enable_if:
