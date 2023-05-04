@@ -117,11 +117,15 @@ def get_module_gallery(examples):
         elif name.startswith("advanced"):
             name = name.replace("advanced", "a")
 
+        desc = e.get("headline")
+        if not desc:
+            desc = f"found in the ``{underline}`` directory."
+
         gallery += f"{ind(1)}.. grid-item-card:: {name}\n"
         gallery += f"{ind(2)}:class-item: cover-img\n"
         gallery += f"{ind(2)}:link: {url}\n"
         gallery += f"{ind(2)}:img-top: {img_name}\n\n"
-        gallery += f"{ind(2)}found in the ``{underline}`` directory.\n"
+        gallery += f"{ind(2)}{desc}\n"
 
     return f"{gallery}\n"
 
@@ -260,6 +264,15 @@ def read_rst_file(project_dir, project_files, doc_rst):
     return "\n".join(result)
 
 
+def get_headline(text):
+    """Find the headline in the .rst file."""
+    underline = text.find("\n====")
+    if underline != -1:
+        start = text.rfind("\n", 0, underline - 1)
+        return text[start + 1:underline]
+    return ""
+
+
 def write_example(pyproject_file):
     """Read the project file and documentation, create the .rst file and
        copy the data. Return a tuple of module name and a dict of example data."""
@@ -318,6 +331,7 @@ def write_example(pyproject_file):
         print(f"example_gallery: error reading {pyproject_file}: {e}")
         raise
 
+    headline = ""
     if files:
         rst_file_full = EXAMPLES_DOC / rst_file
 
@@ -325,6 +339,10 @@ def write_example(pyproject_file):
             if has_doc:
                 doc_rst = original_doc_dir / f"{example_name}.rst"
                 content_f = read_rst_file(example_dir, files, doc_rst)
+                headline = get_headline(content_f)
+                if not headline:
+                    print(f"example_gallery: No headline found in {doc_rst}",
+                          file=sys.stderr)
 
                 # Copy other files in the 'doc' directory, but
                 # excluding the main '.rst' file and all the
@@ -348,6 +366,8 @@ def write_example(pyproject_file):
     else:
         if not opt_quiet:
             print("Empty '.pyproject' file, skipping")
+
+    result["headline"] = headline
 
     return (module_name, result)
 
