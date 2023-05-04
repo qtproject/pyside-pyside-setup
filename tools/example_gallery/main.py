@@ -114,6 +114,8 @@ def get_module_gallery(examples):
         # Fix long names
         if name.startswith("chapter"):
             name = name.replace("chapter", "c")
+        elif name.startswith("advanced"):
+            name = name.replace("advanced", "a")
 
         gallery += f"{ind(1)}.. grid-item-card:: {name}\n"
         gallery += f"{ind(2)}:class-item: cover-img\n"
@@ -350,6 +352,13 @@ def write_example(pyproject_file):
     return (module_name, result)
 
 
+def sort_examples(example):
+    result = {}
+    for module in example.keys():
+        result[module] = sorted(example.get(module), key=lambda e: e.get("rst"))
+    return result
+
+
 if __name__ == "__main__":
     # Only examples with a '.pyproject' file will be listed.
     DIR = Path(__file__).parent
@@ -385,6 +394,8 @@ if __name__ == "__main__":
             if module_name not in examples:
                 examples[module_name] = []
             examples[module_name].append(data)
+
+    examples = sort_examples(examples)
 
     # We generate a 'toctree' at the end of the file, to include the new
     # 'example' rst files, so we get no warnings, and also that users looking
