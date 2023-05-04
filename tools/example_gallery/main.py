@@ -48,6 +48,20 @@ suffixes = {
 }
 
 
+BASE_CONTENT = """\
+Examples
+========
+
+ A collection of examples are provided with |project| to help new users
+ to understand different use cases of the module.
+
+ You can find all these examples inside the
+ `pyside-setup <https://code.qt.io/cgit/pyside/pyside-setup.git/>`_ repository
+ on the `examples <https://code.qt.io/cgit/pyside/pyside-setup.git/tree/examples>`_
+ directory.
+
+"""
+
 def ind(x):
     return " " * 4 * x
 
@@ -244,6 +258,98 @@ def read_rst_file(project_dir, project_files, doc_rst):
     return "\n".join(result)
 
 
+def write_example(pyproject_file):
+    """Read the project file and documentation, create the .rst file and
+       copy the data. Return a tuple of module name and a dict of example data."""
+    example_dir = pyproject_file.parent
+    if example_dir.name == "doc":  # Dummy pyproject in doc dir (scriptableapplication)
+        example_dir = example_dir.parent
+
+    parts = example_dir.parts[len(EXAMPLES_DIR.parts):]
+
+    module_name = parts[0]
+    example_name = parts[-1]
+    # handling subdirectories besides the module level and the example
+    extra_names = "" if len(parts) == 2 else "_".join(parts[1:-1])
+
+    rst_file = f"example_{module_name}_{extra_names}_{example_name}.rst".replace("__", "_")
+
+    def check_img_ext(i):
+        return i.suffix in IMAGE_SUFFIXES
+
+    # Check for a 'doc' directory inside the example
+    has_doc = False
+    img_doc = None
+    original_doc_dir = Path(example_dir / "doc")
+    if original_doc_dir.is_dir():
+        has_doc = True
+        images = [i for i in original_doc_dir.glob("*") if i.is_file() and check_img_ext(i)]
+        if len(images) > 0:
+            # We look for an image with the same example_name first, if not, we select the first
+            image_path = [i for i in images if example_name in str(i)]
+            if not image_path:
+                image_path = images[0]
+            else:
+                img_doc = image_path[0]
+
+    result = {"example": example_name,
+              "module": module_name,
+              "extra": extra_names,
+              "rst": rst_file,
+              "abs_path": str(example_dir),
+              "has_doc": has_doc,
+              "img_doc": img_doc}
+
+    files = []
+    try:
+        with pyproject_file.open("r", encoding="utf-8") as pyf:
+            pyproject = json.load(pyf)
+            # iterate through the list of files in .pyproject and
+            # check if they exist, before appending to the list.
+            for f in pyproject["files"]:
+                if not Path(f).exists:
+                    print(f"example_gallery: {f} listed in {pyproject_file} does not exist")
+                    raise FileNotFoundError
+                else:
+                    files.append(f)
+    except (json.JSONDecodeError, KeyError, FileNotFoundError) as e:
+        print(f"example_gallery: error reading {pyproject_file}: {e}")
+        raise
+
+    if files:
+        rst_file_full = EXAMPLES_DOC / rst_file
+
+        with open(rst_file_full, "w", encoding="utf-8") as out_f:
+            if has_doc:
+                doc_rst = original_doc_dir / f"{example_name}.rst"
+                content_f = read_rst_file(example_dir, files, doc_rst)
+
+                # Copy other files in the 'doc' directory, but
+                # excluding the main '.rst' file and all the
+                # directories.
+                for _f in original_doc_dir.glob("*"):
+                    if _f == doc_rst or _f.is_dir():
+                        continue
+                    src = _f
+                    dst = EXAMPLES_DOC / _f.name
+
+                    resource_written = shutil.copy(src, dst)
+                    if not opt_quiet:
+                        print("Written resource:", resource_written)
+            else:
+                content_f = get_header_title(example_dir)
+            content_f += get_code_tabs(files, pyproject_file.parent)
+            out_f.write(content_f)
+
+        if not opt_quiet:
+            print(f"Written: {EXAMPLES_DOC}/{rst_file}")
+    else:
+        if not opt_quiet:
+            print("Empty '.pyproject' file, skipping")
+
+    return (module_name, result)
+
+
 if __name__ == "__main__":
     # Only examples with a '.pyproject' file will be listed.
     DIR = Path(__file__).parent
@@ -274,116 +380,11 @@ if __name__ == "__main__":
         EXAMPLES_DOC.mkdir()
 
     for pyproject_file in EXAMPLES_DIR.glob("**/*.pyproject"):
-        if pyproject_file.name == "examples.pyproject":
-            continue
-        example_dir = pyproject_file.parent
-        if example_dir.name == "doc":  # Dummy pyproject in doc dir (scriptableapplication)
-            example_dir = example_dir.parent
-
-        parts = example_dir.parts[len(EXAMPLES_DIR.parts):]
-
-        module_name = parts[0]
-        example_name = parts[-1]
-        # handling subdirectories besides the module level and the example
-        extra_names = "" if len(parts) == 2 else "_".join(parts[1:-1])
-
-        rst_file = f"example_{module_name}_{extra_names}_{example_name}.rst".replace("__", "_")
-
-        def check_img_ext(i):
-            return i.suffix in IMAGE_SUFFIXES
-
-        # Check for a 'doc' directory inside the example
-        has_doc = False
-        img_doc = None
-        original_doc_dir = Path(example_dir / "doc")
-        if original_doc_dir.is_dir():
-            has_doc = True
-            images = [i for i in original_doc_dir.glob("*") if i.is_file() and check_img_ext(i)]
-            if len(images) > 0:
-                # We look for an image with the same example_name first, if not, we select the first
-                image_path = [i for i in images if example_name in str(i)]
-                if not image_path:
-                    image_path = images[0]
-                else:
-                    img_doc = image_path[0]
-
-        if module_name not in examples:
-            examples[module_name] = []
-
-        examples[module_name].append(
-            {
-                "example": example_name,
-                "module": module_name,
-                "extra": extra_names,
-                "rst": rst_file,
-                "abs_path": str(example_dir),
-                "has_doc": has_doc,
-                "img_doc": img_doc,
-            }
-        )
-
-        files = []
-        try:
-            with pyproject_file.open("r", encoding="utf-8") as pyf:
-                pyproject = json.load(pyf)
-                # iterate through the list of files in .pyproject and
-                # check if they exist, before appending to the list.
-                for f in pyproject["files"]:
-                    if not Path(f).exists:
-                        print(f"example_gallery: {f} listed in {pyproject_file} does not exist")
-                        raise FileNotFoundError
-                    else:
-                        files.append(f)
-        except (json.JSONDecodeError, KeyError, FileNotFoundError) as e:
-            print(f"example_gallery: error reading {pyproject_file}: {e}")
-            raise
-
-        if files:
-            rst_file_full = EXAMPLES_DOC / rst_file
-
-            with open(rst_file_full, "w", encoding="utf-8") as out_f:
-                if has_doc:
-                    doc_rst = original_doc_dir / f"{example_name}.rst"
-                    content_f = read_rst_file(example_dir, files, doc_rst)
-
-                    # Copy other files in the 'doc' directory, but
-                    # excluding the main '.rst' file and all the
-                    # directories.
-                    for _f in original_doc_dir.glob("*"):
-                        if _f == doc_rst or _f.is_dir():
-                            continue
-                        src = _f
-                        dst = EXAMPLES_DOC / _f.name
-
-                        resource_written = shutil.copy(src, dst)
-                        if not opt_quiet:
-                            print("Written resource:", resource_written)
-                else:
-                    content_f = get_header_title(example_dir)
-                content_f += get_code_tabs(files, pyproject_file.parent)
-                out_f.write(content_f)
-
-            if not opt_quiet:
-                print(f"Written: {EXAMPLES_DOC}/{rst_file}")
-        else:
-            if not opt_quiet:
-                print("Empty '.pyproject' file, skipping")
-
-    base_content = dedent(
-        """\
-   Examples
-   ========
-
-    A collection of examples are provided with |project| to help new users
-    to understand different use cases of the module.
-
-    You can find all these examples inside the
-    `pyside-setup <https://code.qt.io/cgit/pyside/pyside-setup.git/>`_ repository
-    on the `examples <https://code.qt.io/cgit/pyside/pyside-setup.git/tree/examples>`_
-    directory.
-
-       """
-    )
+        if pyproject_file.name != "examples.pyproject":
+            module_name, data = write_example(pyproject_file)
+            if module_name not in examples:
+                examples[module_name] = []
+            examples[module_name].append(data)
 
     # We generate a 'toctree' at the end of the file, to include the new
     # 'example' rst files, so we get no warnings, and also that users looking
@@ -402,7 +403,7 @@ if __name__ == "__main__":
     # Writing the main example rst file.
     index_files = []
     with open(f"{EXAMPLES_DOC}/index.rst", "w") as f:
-        f.write(base_content)
+        f.write(BASE_CONTENT)
         for module_name, e in sorted(examples.items()):
             for i in e:
                 index_files.append(i["rst"])
