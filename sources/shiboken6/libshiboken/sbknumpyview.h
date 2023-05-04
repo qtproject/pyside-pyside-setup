@@ -22,7 +22,7 @@ LIBSHIBOKEN_API bool check(PyObject *pyIn);
 /// numpy headers.
 struct LIBSHIBOKEN_API View
 {
-    enum Type { Int, Unsigned, Float, Double};
+    enum Type { Int, Unsigned, Float, Double, Int16, Unsigned16, Int64, Unsigned64 };
 
     static View fromPyObject(PyObject *pyIn);
 

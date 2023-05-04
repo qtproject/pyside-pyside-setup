@@ -45,10 +45,18 @@ QList<QPointF> xyDataToQPointFList(PyObject *pyXIn, PyObject *pyYIn)
     if (size == 0)
         return {};
     switch (xv.type) {
+    case Shiboken::Numpy::View::Int16:
+        return xyDataToQPointHelper<int16_t, QPointF>(xv.data, yv.data, size);
+    case Shiboken::Numpy::View::Unsigned16:
+        return xyDataToQPointHelper<uint16_t, QPointF>(xv.data, yv.data, size);
     case Shiboken::Numpy::View::Int:
         return xyDataToQPointHelper<int, QPointF>(xv.data, yv.data, size);
     case Shiboken::Numpy::View::Unsigned:
         return xyDataToQPointHelper<unsigned, QPointF>(xv.data, yv.data, size);
+    case Shiboken::Numpy::View::Int64:
+        return xyDataToQPointHelper<int64_t, QPointF>(xv.data, yv.data, size);
+    case Shiboken::Numpy::View::Unsigned64:
+        return xyDataToQPointHelper<uint64_t, QPointF>(xv.data, yv.data, size);
     case Shiboken::Numpy::View::Float:
         return xyDataToQPointHelper<float, QPointF>(xv.data, yv.data, size);
     case Shiboken::Numpy::View::Double:
@@ -67,10 +75,18 @@ QList<QPoint> xyDataToQPointList(PyObject *pyXIn, PyObject *pyYIn)
     if (size == 0)
         return {};
     switch (xv.type) {
+    case Shiboken::Numpy::View::Int16:
+        return xyDataToQPointHelper<int16_t, QPoint>(xv.data, yv.data, size);
+    case Shiboken::Numpy::View::Unsigned16:
+        return xyDataToQPointHelper<uint16_t, QPoint>(xv.data, yv.data, size);
     case Shiboken::Numpy::View::Int:
         return xyDataToQPointHelper<int, QPoint>(xv.data, yv.data, size);
     case Shiboken::Numpy::View::Unsigned:
         return xyDataToQPointHelper<unsigned, QPoint>(xv.data, yv.data, size);
+    case Shiboken::Numpy::View::Int64:
+        return xyDataToQPointHelper<int64_t, QPoint>(xv.data, yv.data, size);
+    case Shiboken::Numpy::View::Unsigned64:
+        return xyDataToQPointHelper<uint64_t, QPoint>(xv.data, yv.data, size);
     case Shiboken::Numpy::View::Float:
         return xyFloatDataToQPointHelper<float>(xv.data, yv.data, size);
     case Shiboken::Numpy::View::Double:

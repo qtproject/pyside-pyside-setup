@@ -25,11 +25,37 @@ View View::fromPyObject(PyObject *pyIn)
 
     View::Type type;
     switch (PyArray_TYPE(ar)) {
+    case NPY_SHORT:
+        type = View::Int16;
+        break;
+    case NPY_USHORT:
+        type = View::Unsigned16;
+        break;
     case NPY_INT:
         type = View::Int;
         break;
     case NPY_UINT:
         type = View::Unsigned;
+        break;
+    case NPY_LONG:
+         if constexpr (sizeof(long) == sizeof(int))
+            type = View::Int;
+        else if constexpr (sizeof(long) == sizeof(int64_t))
+            type = View::Int64;
+        break;
+    case NPY_ULONG:
+         if constexpr (sizeof(long) == sizeof(int))
+            type = View::Unsigned;
+        else if constexpr (sizeof(long) == sizeof(int64_t))
+            type = View::Unsigned64;
+        break;
+    case NPY_LONGLONG:
+         if constexpr (sizeof(long long) == 64)
+            type = View::Int64;
+        break;
+    case NPY_ULONGLONG:
+         if constexpr (sizeof(long long) == 64)
+            type = View::Unsigned64;
         break;
     case NPY_FLOAT:
         type = View::Float;
@@ -91,11 +117,29 @@ std::ostream &operator<<(std::ostream &str, const debugPyArrayObject &a)
         }
         str << "], type=";
         switch (type) {
+        case NPY_SHORT:
+            str << "short";
+            break;
+        case NPY_USHORT:
+            str << "ushort";
+            break;
         case NPY_INT:
-            str << "int";
+            str << "int32";
             break;
         case NPY_UINT:
-            str << "uint";
+            str << "uint32";
+            break;
+        case NPY_LONG:
+            str << "long";
+            break;
+        case NPY_ULONG:
+            str << "ulong";
+            break;
+        case NPY_LONGLONG:
+            str << "long long";
+            break;
+        case NPY_ULONGLONG:
+            str << "ulong long";
             break;
         case NPY_FLOAT:
             str << "float";
@@ -122,11 +166,29 @@ std::ostream &operator<<(std::ostream &str, const debugPyArrayObject &a)
         if (const int dim0 = PyArray_DIMS(ar)[0]) {
             auto *data = PyArray_DATA(ar);
             switch (type) {
+            case NPY_SHORT:
+                debugArray(str, reinterpret_cast<const short *>(data), dim0);
+                break;
+            case NPY_USHORT:
+                debugArray(str, reinterpret_cast<const unsigned short *>(data), dim0);
+                break;
             case NPY_INT:
                 debugArray(str, reinterpret_cast<const int *>(data), dim0);
                 break;
             case NPY_UINT:
                 debugArray(str, reinterpret_cast<const unsigned *>(data), dim0);
+                break;
+            case NPY_LONG:
+                debugArray(str, reinterpret_cast<const long *>(data), dim0);
+                break;
+            case NPY_ULONG:
+                debugArray(str, reinterpret_cast<const unsigned long*>(data), dim0);
+                break;
+            case NPY_LONGLONG:
+                debugArray(str, reinterpret_cast<const long long *>(data), dim0);
+                break;
+            case NPY_ULONGLONG:
+                debugArray(str, reinterpret_cast<const unsigned long long *>(data), dim0);
                 break;
             case NPY_FLOAT:
                 debugArray(str, reinterpret_cast<const float *>(data), dim0);

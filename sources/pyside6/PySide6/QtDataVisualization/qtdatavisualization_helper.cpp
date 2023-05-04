@@ -57,6 +57,14 @@ QSurfaceDataArray *surfaceDataFromNp(double xStart, double deltaX, double zStart
         return result;
 
     switch (view.type) {
+    case Shiboken::Numpy::View::Int16:
+        populateArray(xStart, deltaX, zStart, deltaZ, xSize, zSize, view.stride[0],
+                      reinterpret_cast<const int16_t *>(view.data), result);
+        break;
+    case Shiboken::Numpy::View::Unsigned16:
+        populateArray(xStart, deltaX, zStart, deltaZ, xSize, zSize, view.stride[0],
+                      reinterpret_cast<const uint16_t *>(view.data), result);
+        break;
     case Shiboken::Numpy::View::Int:
         populateArray(xStart, deltaX, zStart, deltaZ, xSize, zSize, view.stride[0],
                       reinterpret_cast<const int *>(view.data), result);
@@ -64,6 +72,14 @@ QSurfaceDataArray *surfaceDataFromNp(double xStart, double deltaX, double zStart
     case Shiboken::Numpy::View::Unsigned:
         populateArray(xStart, deltaX, zStart, deltaZ, xSize, zSize, view.stride[0],
                       reinterpret_cast<const unsigned *>(view.data), result);
+        break;
+    case Shiboken::Numpy::View::Int64:
+        populateArray(xStart, deltaX, zStart, deltaZ, xSize, zSize, view.stride[0],
+                      reinterpret_cast<const int64_t *>(view.data), result);
+        break;
+    case Shiboken::Numpy::View::Unsigned64:
+        populateArray(xStart, deltaX, zStart, deltaZ, xSize, zSize, view.stride[0],
+                      reinterpret_cast<const uint64_t *>(view.data), result);
         break;
     case Shiboken::Numpy::View::Float:
         populateArray(xStart, deltaX, zStart, deltaZ, xSize, zSize, view.stride[0],
