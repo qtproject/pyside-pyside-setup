@@ -31,8 +31,6 @@ class BuildozerConfig(BaseConfig):
         if pysidedeploy_config.sdk_path:
             self.set_value("app", "android.sdk_path", str(pysidedeploy_config.sdk_path))
 
-        self.set_value("app", "android.add_jars", f"{str(pysidedeploy_config.jars_dir)}/*.jar")
-
         platform_map = {"aarch64": "arm64-v8a",
                         "armv7a": "armeabi-v7a",
                         "i686": "x86",
@@ -54,9 +52,15 @@ class BuildozerConfig(BaseConfig):
         self.set_value("app", "p4a.extra_args", extra_args)
 
         dependency_files = self.__get_dependency_files(pysidedeploy_config)
+
+        # add permissions
         permissions = self.__find_permissions(dependency_files)
         permissions = ", ".join(permissions)
         self.set_value("app", "android.permissions", permissions)
+
+        # add jars
+        jars = self.__find_jars(dependency_files, pysidedeploy_config.jars_dir)
+        self.set_value("app", "android.add_jars", ",".join(jars))
 
         # TODO: does not work atm. Seems like a bug with buildozer
         # change buildozer build_dir
@@ -107,6 +111,34 @@ class BuildozerConfig(BaseConfig):
             for permission in root.iter("permission"):
                 permissions.add(permission.attrib['name'])
         return permissions
+
+    def __find_jars(self, dependency_files: List[zipfile.Path], jars_dir: Path):
+        jars = set()
+        for dependency_file in dependency_files:
+            xml_content = dependency_file.read_text()
+            root = ET.fromstring(xml_content)
+            for jar in root.iter("jar"):
+                jar_file = jar.attrib['file']
+                if jar_file.startswith("jar/"):
+                    jar_file_name = jar_file[4:]
+                    if (jars_dir / jar_file_name).exists():
+                        jars.add(str(jars_dir / jar_file_name))
+                    else:
+                        logging.warning(f"[DEPLOY] Unable to include {jar_file}. "
+                                        f"{jar_file} does not exist in {jars_dir}")
+                else:
+                    logging.warning(f"[DEPLOY] Unable to include {jar_file}. "
+                                    "All jar file paths should begin with 'jar/'")
+
+        # add the jar with all the activity and service java files
+        # this is created from Qt for Python instead of Qt
+        android_bindings_jar = jars_dir / "Qt6AndroidBindings.jar"
+        if android_bindings_jar.exists():
+            jars.add(str(android_bindings_jar))
+        else:
+            raise FileNotFoundError(f"{android_bindings_jar} not found in wheel")
+
+        return jars
 
 
 class Buildozer:
