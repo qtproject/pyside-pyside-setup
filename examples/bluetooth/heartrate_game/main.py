@@ -3,14 +3,13 @@
 
 """PySide6 port of the bluetooth/heartrate-game example from Qt v6.x"""
 
-import os
 from pathlib import Path
 import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtCore import QCoreApplication, QLoggingCategory, QUrl
+from PySide6.QtCore import QCoreApplication, QLoggingCategory
 
 from connectionhandler import ConnectionHandler
 from devicefinder import DeviceFinder
@@ -43,8 +42,9 @@ if __name__ == '__main__':
         "deviceFinder": deviceFinder,
         "deviceHandler": deviceHandler})
 
-    qml_file = os.fspath(Path(__file__).resolve().parent / "qml" / "main.qml")
-    engine.load(QUrl.fromLocalFile(qml_file))
+    engine.addImportPath(Path(__file__).parent)
+    engine.loadFromModule("HeartRateGame", "Main");
+
     if not engine.rootObjects():
         sys.exit(-1)
 

@@ -12,7 +12,7 @@ from heartrate_global import simulator
 
 # To be used on the @QmlElement decorator
 # (QML_IMPORT_MINOR_VERSION is optional)
-QML_IMPORT_NAME = "Shared"
+QML_IMPORT_NAME = "HeartRateGame"
 QML_IMPORT_MAJOR_VERSION = 1
 
 
