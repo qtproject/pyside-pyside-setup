@@ -4,7 +4,6 @@
 import QtQuick
 import QtQuick.Window
 import "."
-import Shared
 
 Window {
     id: wroot
