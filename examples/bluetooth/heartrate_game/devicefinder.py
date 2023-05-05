@@ -36,7 +36,7 @@ class DeviceFinder(BluetoothBaseClass):
         self.m_deviceDiscoveryAgent.finished.connect(self.scanFinished)
         self.m_deviceDiscoveryAgent.canceled.connect(self.scanFinished)
 #! [devicediscovery-1]
-        if simulator:
+        if simulator():
             self.m_demoTimer.setSingleShot(True)
             self.m_demoTimer.setInterval(2000)
             self.m_demoTimer.timeout.connect(self.scanFinished)
@@ -49,7 +49,7 @@ class DeviceFinder(BluetoothBaseClass):
 
         self.devicesChanged.emit()
 
-        if simulator:
+        if simulator():
             self.m_demoTimer.start()
         else:
 #! [devicediscovery-2]
@@ -82,7 +82,7 @@ class DeviceFinder(BluetoothBaseClass):
 
     @Slot()
     def scanFinished(self):
-        if simulator:
+        if simulator():
             # Only for testing
             for i in range(5):
                 self.m_devices.append(DeviceInfo(QBluetoothDeviceInfo()))
@@ -113,7 +113,7 @@ class DeviceFinder(BluetoothBaseClass):
 
     @Property(bool, notify=scanningChanged)
     def scanning(self):
-        if simulator:
+        if simulator():
             return self.m_demoTimer.isActive()
         return self.m_deviceDiscoveryAgent.isActive()
 

@@ -3,4 +3,15 @@
 
 import sys
 
-simulator = sys.platform == "win32"
+
+_simulator = sys.platform == "win32"
+
+
+def simulator():
+    global _simulator
+    return _simulator
+
+
+def set_simulator(s):
+    global _simulator
+    _simulator = s

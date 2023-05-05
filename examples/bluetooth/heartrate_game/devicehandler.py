@@ -62,7 +62,7 @@ class DeviceHandler(BluetoothBaseClass):
 
         self.m_demoTimer = QTimer()
 
-        if simulator:
+        if simulator():
             self.m_demoTimer.setSingleShot(False)
             self.m_demoTimer.setInterval(2000)
             self.m_demoTimer.timeout.connect(self.updateDemoHR)
@@ -99,7 +99,7 @@ class DeviceHandler(BluetoothBaseClass):
         self.clearMessages()
         self.m_currentDevice = device
 
-        if simulator:
+        if simulator():
             self.info = "Demo device connected."
             return
 
@@ -259,7 +259,7 @@ class DeviceHandler(BluetoothBaseClass):
 
     @Property(bool, notify=aliveChanged)
     def alive(self):
-        if simulator:
+        if simulator():
             return True
         if self.m_service:
             return self.m_service.state() == QLowEnergyService.RemoteServiceDiscovered
