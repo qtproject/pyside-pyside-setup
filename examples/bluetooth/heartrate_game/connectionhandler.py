@@ -29,7 +29,7 @@ class ConnectionHandler(QObject):
     def alive(self):
         if sys.platform == "darwin":
             return True
-        if simulator:
+        if simulator():
             return True
         return (self.m_localDevice.isValid()
                 and self.m_localDevice.hostMode() != QBluetoothLocalDevice.HostPoweredOff)

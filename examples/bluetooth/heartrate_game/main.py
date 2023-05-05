@@ -14,7 +14,7 @@ from PySide6.QtCore import QCoreApplication, QLoggingCategory
 from connectionhandler import ConnectionHandler
 from devicefinder import DeviceFinder
 from devicehandler import DeviceHandler
-from heartrate_global import simulator
+from heartrate_global import set_simulator
 
 
 if __name__ == '__main__':
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     parser.add_argument("-s", "--simulator", action="store_true",
                         help="Use Simulator")
     options = parser.parse_args()
-    simulator = options.simulator
+    set_simulator(options.simulator)
     if options.verbose:
         QLoggingCategory.setFilterRules("qt.bluetooth* = true")
 

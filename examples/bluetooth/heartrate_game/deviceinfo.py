@@ -25,13 +25,13 @@ class DeviceInfo(QObject):
 
     @Property(str, notify=deviceChanged)
     def deviceName(self):
-        if simulator:
+        if simulator():
             return "Demo device"
         return self.m_device.name()
 
     @Property(str, notify=deviceChanged)
     def deviceAddress(self):
-        if simulator:
+        if simulator():
             return "00:11:22:33:44:55"
         if sys.platform == "Darwin":  # workaround for Core Bluetooth:
             return self.m_device.deviceUuid().toString()
