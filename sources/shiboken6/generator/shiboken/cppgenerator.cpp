@@ -2109,7 +2109,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
                                                Qt::SkipEmptyParts);
         while (!lst.isEmpty()) {
             QString signature = lst.join(u"::"_s);
-            writeConversions(smartPointerName + u'<' + signature + u" >"_s);
+            writeConversions(smartPointerName + u'<' + signature + u'>');
             lst.removeFirst();
         }
 

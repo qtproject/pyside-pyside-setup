@@ -64,7 +64,7 @@ namespace Internet {
     QVERIFY(func);
     AbstractMetaType funcType = func->type();
     QVERIFY(!funcType.isVoid());
-    QCOMPARE(funcType.cppSignature(), u"QList<Internet::Url >");
+    QCOMPARE(funcType.cppSignature(), u"QList<Internet::Url>");
 }
 
 void TestTemplates::testTemplateOnContainers()
@@ -137,7 +137,7 @@ void func(List<int> arg) {}
     const auto func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), u"func(List<int>)");
     QCOMPARE(func->arguments().constFirst().type().cppSignature(),
-             u"List<int >");
+             u"List<int>");
 }
 
 void TestTemplates::testTemplatePointerAsArgument()
@@ -162,7 +162,7 @@ void func(List<int>* arg) {}
     const auto func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), u"func(List<int>*)");
     QCOMPARE(func->arguments().constFirst().type().cppSignature(),
-             u"List<int > *");
+             u"List<int> *");
 }
 
 void TestTemplates::testTemplateReferenceAsArgument()
@@ -187,7 +187,7 @@ void func(List<int>& arg) {}
     const auto func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), u"func(List<int>&)");
     QCOMPARE(func->arguments().constFirst().type().cppSignature(),
-             u"List<int > &");
+             u"List<int> &");
 }
 
 void TestTemplates::testTemplateParameterFixup()
@@ -214,11 +214,11 @@ struct List {
 
     QCOMPARE(templates.size(), 1);
     AbstractMetaClassCPtr list = templates.constFirst();
-    // Verify that the parameter of "void append(List l)" gets fixed to "List<T >"
+    // Verify that the parameter of "void append(List l)" gets fixed to "List<T>"
     const auto append = list->findFunction(QStringLiteral("append"));
     QVERIFY(append);
     QCOMPARE(append->arguments().size(), 1);
-    QCOMPARE(append->arguments().at(0).type().cppSignature(), u"List<T >");
+    QCOMPARE(append->arguments().at(0).type().cppSignature(), u"List<T>");
     // Verify that the parameter of "void erase(Iterator)" is not modified
     const auto erase = list->findFunction(QStringLiteral("erase"));
     QVERIFY(erase);
@@ -424,13 +424,13 @@ typedef Vector<int> IntVector;
 
     const auto method = vector->findFunction(u"method");
     QVERIFY(method);
-    QCOMPARE(method->signature(), u"method(const Vector<int > & vector)");
+    QCOMPARE(method->signature(), u"method(const Vector<int> & vector)");
 
     const auto otherMethod = vector->findFunction(u"otherMethod");
     QVERIFY(otherMethod);
     QCOMPARE(otherMethod->signature(), u"otherMethod()");
     QVERIFY(!otherMethod->type().isVoid());
-    QCOMPARE(otherMethod->type().cppSignature(), u"Vector<int >");
+    QCOMPARE(otherMethod->type().cppSignature(), u"Vector<int>");
 }
 
 void TestTemplates::testNonTypeTemplates()
