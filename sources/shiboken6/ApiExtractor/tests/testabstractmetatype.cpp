@@ -193,7 +193,7 @@ void TestAbstractMetaType::testTypedefWithTemplates()
     QCOMPARE(args.size(), 1);
     const AbstractMetaArgument &arg = args.constFirst();
     AbstractMetaType metaType = arg.type();
-    QCOMPARE(metaType.cppSignature(), u"A<B >");
+    QCOMPARE(metaType.cppSignature(), u"A<B>");
 }
 
 

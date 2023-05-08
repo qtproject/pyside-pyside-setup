@@ -619,7 +619,7 @@ QString AbstractMetaTypeData::formatSignature(bool minimal) const
                 result += u',';
             result += m_instantiations.at(i).minimalSignature();
         }
-        result += u" >"_s;
+        result += u'>';
     }
 
     if (!minimal && (!m_indirections.isEmpty() || m_referenceType != NoReference))
