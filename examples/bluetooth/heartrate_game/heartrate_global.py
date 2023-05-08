@@ -4,7 +4,7 @@
 import sys
 
 
-_simulator = sys.platform == "win32"
+_simulator = False
 
 
 def simulator():

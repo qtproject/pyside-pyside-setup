@@ -2,33 +2,20 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import QtQuick
-import "."
+import HeartRateGame
 
 Item {
     id: root
-    anchors.fill: parent
 
     property bool appIsReady: false
     property bool splashIsReady: false
-
     property bool ready: appIsReady && splashIsReady
-    onReadyChanged: if (ready) readyToGo();
 
-    signal readyToGo()
-
-    function appReady()
-    {
-        appIsReady = true
-    }
-
-    function errorInLoadingApp()
-    {
-        Qt.quit()
-    }
+    anchors.fill: parent
 
     Image {
         anchors.centerIn: parent
-        width: Math.min(parent.height, parent.width)*0.6
+        width: Math.min(parent.height, parent.width) * 0.6
         height: GameSettings.heightForWidth(width, sourceSize)
         source: "images/logo.png"
     }

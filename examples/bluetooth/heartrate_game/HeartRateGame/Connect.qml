@@ -1,10 +1,18 @@
 // Copyright (C) 2022 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
+pragma ComponentBehavior: Bound
 import QtQuick
-import "."
+import HeartRateGame
 
 GamePage {
+    id: connectPage
+
+    required property ConnectionHandler connectionHandler
+    required property DeviceFinder deviceFinder
+    required property DeviceHandler deviceHandler
+
+    signal showMeasurePage
 
     errorMessage: deviceFinder.error
     infoMessage: deviceFinder.info
@@ -12,16 +20,15 @@ GamePage {
     Rectangle {
         id: viewContainer
         anchors.top: parent.top
-        anchors.bottom:
-            // only BlueZ platform has address type selection
-            connectionHandler.requiresAddressType ? addressTypeButton.top : searchButton.top
-        anchors.topMargin: GameSettings.fieldMargin + messageHeight
+        // only BlueZ platform has address type selection
+        anchors.bottom: connectPage.connectionHandler.requiresAddressType ? addressTypeButton.top
+                                                                          : searchButton.top
+        anchors.topMargin: GameSettings.fieldMargin + connectPage.messageHeight
         anchors.bottomMargin: GameSettings.fieldMargin
         anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width - GameSettings.fieldMargin*2
+        width: parent.width - GameSettings.fieldMargin * 2
         color: GameSettings.viewColor
         radius: GameSettings.buttonRadius
-
 
         Text {
             id: title
@@ -34,12 +41,11 @@ GamePage {
             text: qsTr("FOUND DEVICES")
 
             BottomLine {
-                height: 1;
+                height: 1
                 width: parent.width
                 color: "#898989"
             }
         }
-
 
         ListView {
             id: devices
@@ -47,27 +53,31 @@ GamePage {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.top: title.bottom
-            model: deviceFinder.devices
+            model: connectPage.deviceFinder.devices
             clip: true
 
             delegate: Rectangle {
                 id: box
-                height:GameSettings.fieldHeight * 1.2
+
+                required property int index
+                required property var modelData
+
+                height: GameSettings.fieldHeight * 1.2
                 width: devices.width
                 color: index % 2 === 0 ? GameSettings.delegate1Color : GameSettings.delegate2Color
 
                 MouseArea {
-                anchors.fill: parent
+                    anchors.fill: parent
                     onClicked: {
-                        deviceFinder.connectToService(modelData.deviceAddress);
-                        app.showPage("Measure.qml")
+                        connectPage.deviceFinder.connectToService(box.modelData.deviceAddress)
+                        connectPage.showMeasurePage()
                     }
                 }
 
                 Text {
                     id: device
                     font.pixelSize: GameSettings.smallFontSize
-                    text: modelData.deviceName
+                    text: box.modelData.deviceName
                     anchors.top: parent.top
                     anchors.topMargin: parent.height * 0.1
                     anchors.leftMargin: parent.height * 0.1
@@ -78,7 +88,7 @@ GamePage {
                 Text {
                     id: deviceAddress
                     font.pixelSize: GameSettings.smallFontSize
-                    text: modelData.deviceAddress
+                    text: box.modelData.deviceAddress
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: parent.height * 0.1
                     anchors.rightMargin: parent.height * 0.1
@@ -93,23 +103,31 @@ GamePage {
         id: addressTypeButton
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: searchButton.top
-        anchors.bottomMargin: GameSettings.fieldMargin*0.5
+        anchors.bottomMargin: GameSettings.fieldMargin * 0.5
         width: viewContainer.width
         height: GameSettings.fieldHeight
-        visible: connectionHandler.requiresAddressType // only required on BlueZ
+        visible: connectPage.connectionHandler.requiresAddressType // only required on BlueZ
         state: "public"
-        onClicked: state == "public" ? state = "random" : state = "public"
+        onClicked: state === "public" ? state = "random" : state = "public"
 
         states: [
             State {
                 name: "public"
-                PropertyChanges { target: addressTypeText; text: qsTr("Public Address") }
-                PropertyChanges { target: deviceHandler; addressType: AddressType.PUBLIC_ADDRESS }
+                PropertyChanges {
+                    addressTypeText.text: qsTr("Public Address")
+                }
+                PropertyChanges {
+                    connectPage.deviceHandler.addressType: DeviceHandler.PUBLIC_ADDRESS
+                }
             },
             State {
                 name: "random"
-                PropertyChanges { target: addressTypeText; text: qsTr("Random Address") }
-                PropertyChanges { target: deviceHandler; addressType: AddressType.RANDOM_ADDRESS }
+                PropertyChanges {
+                    addressTypeText.text: qsTr("Random Address")
+                }
+                PropertyChanges {
+                    connectPage.deviceHandler.addressType: DeviceHandler.RANDOM_ADDRESS
+                }
             }
         ]
 
@@ -128,8 +146,8 @@ GamePage {
         anchors.bottomMargin: GameSettings.fieldMargin
         width: viewContainer.width
         height: GameSettings.fieldHeight
-        enabled: !deviceFinder.scanning
-        onClicked: deviceFinder.startSearch()
+        enabled: !connectPage.deviceFinder.scanning
+        onClicked: connectPage.deviceFinder.startSearch()
 
         Text {
             anchors.centerIn: parent

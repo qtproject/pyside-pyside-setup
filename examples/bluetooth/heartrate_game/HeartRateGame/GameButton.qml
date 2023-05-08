@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import QtQuick
-import "."
 
 Rectangle {
     id: button
@@ -14,10 +13,9 @@ Rectangle {
     property color pressedColor: GameSettings.buttonPressedColor
     property color disabledColor: GameSettings.disabledButtonColor
 
-    signal clicked()
+    signal clicked
 
-    function checkColor()
-    {
+    function checkColor() {
         if (!button.enabled) {
             button.color = disabledColor
         } else {
@@ -31,10 +29,10 @@ Rectangle {
     MouseArea {
         id: mouseArea
         anchors.fill: parent
-        onPressed: checkColor()
-        onReleased: checkColor()
+        onPressed: button.checkColor()
+        onReleased: button.checkColor()
         onClicked: {
-            checkColor()
+            button.checkColor()
             button.clicked()
         }
     }

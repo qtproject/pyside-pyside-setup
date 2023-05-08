@@ -2,49 +2,49 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import QtQuick
+import HeartRateGame
 
 GamePage {
     id: measurePage
 
+    required property DeviceHandler deviceHandler
+
     errorMessage: deviceHandler.error
     infoMessage: deviceHandler.info
 
-    property real __timeCounter: 0;
+    property real __timeCounter: 0
     property real __maxTimeCount: 60
     property string relaxText: qsTr("Relax!\nWhen you are ready, press Start. You have %1s time to increase heartrate so much as possible.\nGood luck!").arg(__maxTimeCount)
 
-    function close()
-    {
-        deviceHandler.stopMeasurement();
-        deviceHandler.disconnectService();
-        app.prevPage();
+    signal showStatsPage
+
+    function close() {
+        deviceHandler.stopMeasurement()
+        deviceHandler.disconnectService()
     }
 
-    function start()
-    {
+    function start() {
         if (!deviceHandler.measuring) {
-            __timeCounter = 0;
+            __timeCounter = 0
             deviceHandler.startMeasurement()
         }
     }
 
-    function stop()
-    {
-        if (deviceHandler.measuring) {
+    function stop() {
+        if (deviceHandler.measuring)
             deviceHandler.stopMeasurement()
-        }
 
-        app.showPage("Stats.qml")
+        measurePage.showStatsPage()
     }
 
     Timer {
         id: measureTimer
         interval: 1000
-        running: deviceHandler.measuring
+        running: measurePage.deviceHandler.measuring
         repeat: true
         onTriggered: {
-            __timeCounter++;
-            if (__timeCounter >= __maxTimeCount)
+            measurePage.__timeCounter++
+            if (measurePage.__timeCounter >= measurePage.__maxTimeCount)
                 measurePage.stop()
         }
     }
@@ -56,22 +56,23 @@ GamePage {
         Rectangle {
             id: circle
             anchors.horizontalCenter: parent.horizontalCenter
-            width: Math.min(measurePage.width, measurePage.height-GameSettings.fieldHeight*4) - 2*GameSettings.fieldMargin
+            width: Math.min(measurePage.width, measurePage.height - GameSettings.fieldHeight * 4)
+                   - 2 * GameSettings.fieldMargin
             height: width
-            radius: width*0.5
+            radius: width * 0.5
             color: GameSettings.viewColor
 
             Text {
                 id: hintText
                 anchors.centerIn: parent
-                anchors.verticalCenterOffset: -parent.height*0.1
+                anchors.verticalCenterOffset: -parent.height * 0.1
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 width: parent.width * 0.8
                 height: parent.height * 0.6
                 wrapMode: Text.WordWrap
                 text: measurePage.relaxText
-                visible: !deviceHandler.measuring
+                visible: !measurePage.deviceHandler.measuring
                 color: GameSettings.textColor
                 fontSizeMode: Text.Fit
                 minimumPixelSize: 10
@@ -81,33 +82,33 @@ GamePage {
             Text {
                 id: text
                 anchors.centerIn: parent
-                anchors.verticalCenterOffset: -parent.height*0.15
+                anchors.verticalCenterOffset: -parent.height * 0.15
                 font.pixelSize: parent.width * 0.45
-                text: deviceHandler.hr
-                visible: deviceHandler.measuring
+                text: measurePage.deviceHandler.hr
+                visible: measurePage.deviceHandler.measuring
                 color: GameSettings.textColor
             }
 
             Item {
                 id: minMaxContainer
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width*0.7
+                width: parent.width * 0.7
                 height: parent.height * 0.15
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: parent.height*0.16
-                visible: deviceHandler.measuring
+                anchors.bottomMargin: parent.height * 0.16
+                visible: measurePage.deviceHandler.measuring
 
                 Text {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: deviceHandler.minHR
+                    text: measurePage.deviceHandler.minHR
                     color: GameSettings.textColor
                     font.pixelSize: GameSettings.hugeFontSize
 
                     Text {
                         anchors.left: parent.left
                         anchors.bottom: parent.top
-                        font.pixelSize: parent.font.pixelSize*0.8
+                        font.pixelSize: parent.font.pixelSize * 0.8
                         color: parent.color
                         text: "MIN"
                     }
@@ -116,14 +117,14 @@ GamePage {
                 Text {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    text: deviceHandler.maxHR
+                    text: measurePage.deviceHandler.maxHR
                     color: GameSettings.textColor
                     font.pixelSize: GameSettings.hugeFontSize
 
                     Text {
                         anchors.right: parent.right
                         anchors.bottom: parent.top
-                        font.pixelSize: parent.font.pixelSize*0.8
+                        font.pixelSize: parent.font.pixelSize * 0.8
                         color: parent.color
                         text: "MAX"
                     }
@@ -140,13 +141,25 @@ GamePage {
                 smooth: true
                 antialiasing: true
 
-                SequentialAnimation{
+                SequentialAnimation {
                     id: heartAnim
-                    running: deviceHandler.alive
+                    running: measurePage.deviceHandler.alive
                     loops: Animation.Infinite
                     alwaysRunToEnd: true
-                    PropertyAnimation { target: heart; property: "scale"; to: 1.2; duration: 500; easing.type: Easing.InQuad }
-                    PropertyAnimation { target: heart; property: "scale"; to: 1.0; duration: 500; easing.type: Easing.OutQuad }
+                    PropertyAnimation {
+                        target: heart
+                        property: "scale"
+                        to: 1.2
+                        duration: 500
+                        easing.type: Easing.InQuad
+                    }
+                    PropertyAnimation {
+                        target: heart
+                        property: "scale"
+                        to: 1.0
+                        duration: 500
+                        easing.type: Easing.OutQuad
+                    }
                 }
             }
         }
@@ -163,13 +176,15 @@ GamePage {
                 height: parent.height
                 radius: parent.radius
                 color: GameSettings.sliderColor
-                width: Math.min(1.0,__timeCounter / __maxTimeCount) * parent.width
+                width: Math.min(
+                           1.0,
+                           measurePage.__timeCounter / measurePage.__maxTimeCount) * parent.width
             }
 
             Text {
                 anchors.centerIn: parent
                 color: "gray"
-                text: (__maxTimeCount - __timeCounter).toFixed(0) + " s"
+                text: (measurePage.__maxTimeCount - measurePage.__timeCounter).toFixed(0) + " s"
                 font.pixelSize: GameSettings.bigFontSize
             }
         }
@@ -182,10 +197,10 @@ GamePage {
         anchors.bottomMargin: GameSettings.fieldMargin
         width: circle.width
         height: GameSettings.fieldHeight
-        enabled: !deviceHandler.measuring
+        enabled: !measurePage.deviceHandler.measuring
         radius: GameSettings.buttonRadius
 
-        onClicked: start()
+        onClicked: measurePage.start()
 
         Text {
             anchors.centerIn: parent
