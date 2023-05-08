@@ -196,6 +196,7 @@ def wheel_files_pyside_addons() -> List[ModuleData]:
         module_QtBluetooth(),
         module_QtCharts(),
         module_QtDataVisualization(),
+        module_QtGraphs(),
         module_QtMultimedia(),
         module_QtMultimediaWidgets(),
         module_QtNetworkAuth(),
@@ -794,6 +795,12 @@ def module_QtDataVisualization() -> ModuleData:
     data.qtlib.append("libQt6DataVisualizationQml")
     data.metatypes.append("qt6datavisualizationqml_relwithdebinfo_metatypes.json")
     data.typesystems.append("datavisualization_common.xml")
+
+    return data
+
+
+def module_QtGraphs() -> ModuleData:
+    data = ModuleData("Graphs")
 
     return data
 
