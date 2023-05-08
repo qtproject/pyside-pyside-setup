@@ -2,8 +2,12 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import QtQuick
+import HeartRateGame
 
 GamePage {
+    id: statsPage
+
+    required property DeviceHandler deviceHandler
 
     Column {
         anchors.centerIn: parent
@@ -18,9 +22,9 @@ GamePage {
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            font.pixelSize: GameSettings.giganticFontSize*3
+            font.pixelSize: GameSettings.giganticFontSize * 3
             color: GameSettings.textColor
-            text: (deviceHandler.maxHR - deviceHandler.minHR).toFixed(0)
+            text: (statsPage.deviceHandler.maxHR - statsPage.deviceHandler.minHR).toFixed(0)
         }
 
         Item {
@@ -30,23 +34,22 @@ GamePage {
 
         StatsLabel {
             title: qsTr("MIN")
-            value: deviceHandler.minHR.toFixed(0)
+            value: statsPage.deviceHandler.minHR.toFixed(0)
         }
 
         StatsLabel {
             title: qsTr("MAX")
-            value: deviceHandler.maxHR.toFixed(0)
+            value: statsPage.deviceHandler.maxHR.toFixed(0)
         }
 
         StatsLabel {
             title: qsTr("AVG")
-            value: deviceHandler.average.toFixed(1)
+            value: statsPage.deviceHandler.average.toFixed(1)
         }
-
 
         StatsLabel {
             title: qsTr("CALORIES")
-            value: deviceHandler.calories.toFixed(3)
+            value: statsPage.deviceHandler.calories.toFixed(3)
         }
     }
 }

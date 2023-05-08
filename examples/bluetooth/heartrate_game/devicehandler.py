@@ -10,7 +10,7 @@ from PySide6.QtBluetooth import (QLowEnergyCharacteristic,
                                  QLowEnergyDescriptor,
                                  QLowEnergyService,
                                  QBluetoothUuid)
-from PySide6.QtQml import QmlNamedElement, QmlUncreatable
+from PySide6.QtQml import QmlElement
 from PySide6.QtCore import (QByteArray, QDateTime, QRandomGenerator, QTimer,
                             Property, Signal, Slot, QEnum)
 
@@ -24,8 +24,7 @@ QML_IMPORT_NAME = "HeartRateGame"
 QML_IMPORT_MAJOR_VERSION = 1
 
 
-@QmlNamedElement("AddressType")
-@QmlUncreatable("Enum is not a type")
+@QmlElement
 class DeviceHandler(BluetoothBaseClass):
 
     @QEnum
@@ -113,13 +112,13 @@ class DeviceHandler(BluetoothBaseClass):
 
             # Make connections
 #! [Connect-Signals-1]
-            self.m_control = QLowEnergyController.createCentral(self.m_currentDevice.getDevice(), self)
+            self.m_control = QLowEnergyController.createCentral(self.m_currentDevice.device(), self)
 #! [Connect-Signals-1]
             self.m_control.setRemoteAddressType(self.m_addressType)
 #! [Connect-Signals-2]
 
-            m_control.serviceDiscovered.connect(self.serviceDiscovered)
-            m_control.discoveryFinished.connect(self.serviceScanDone)
+            self.m_control.serviceDiscovered.connect(self.serviceDiscovered)
+            self.m_control.discoveryFinished.connect(self.serviceScanDone)
 
             self.m_control.errorOccurred.connect(self.controllerErrorOccurred)
             self.m_control.connected.connect(self.controllerConnected)
@@ -183,14 +182,14 @@ class DeviceHandler(BluetoothBaseClass):
     @Slot(QLowEnergyService.ServiceState)
     def serviceStateChanged(self, switch):
         if switch == QLowEnergyService.RemoteServiceDiscovering:
-            self.setInfo(tr("Discovering services..."))
+            self.info = "Discovering services..."
         elif switch == QLowEnergyService.RemoteServiceDiscovered:
-            self.setInfo(tr("Service discovered."))
-            hrChar = m_service.characteristic(QBluetoothUuid(QBluetoothUuid.CharacteristicType.HeartRateMeasurement))
+            self.info = "Service discovered."
+            hrChar = self.m_service.characteristic(QBluetoothUuid(QBluetoothUuid.CharacteristicType.HeartRateMeasurement))
             if hrChar.isValid():
                 self.m_notificationDesc = hrChar.descriptor(QBluetoothUuid.DescriptorType.ClientCharacteristicConfiguration)
                 if self.m_notificationDesc.isValid():
-                    self.m_service.writeDescriptor(m_notificationDesc,
+                    self.m_service.writeDescriptor(self.m_notificationDesc,
                                                    QByteArray.fromHex(b"0100"))
             else:
                 self.error = "HR Data not found."
@@ -209,9 +208,9 @@ class DeviceHandler(BluetoothBaseClass):
         # Heart Rate
         hrvalue = 0
         if flags & 0x1:  # HR 16 bit little endian? otherwise 8 bit
-            hrvalue = struct.unpack("<H", data[1:3])
+            hrvalue = struct.unpack("<H", data[1:3])[0]
         else:
-            hrvalue = struct.unpack("B", data[1:2])
+            hrvalue = struct.unpack("B", data[1:2])[0]
 
         self.addMeasurement(hrvalue)
 

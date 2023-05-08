@@ -46,6 +46,10 @@ class ConnectionHandler(QObject):
     def address(self):
         return self.m_localDevice.address().toString()
 
+    @Property(bool, notify=deviceChanged)
+    def hasPermission(self):
+        return True
+
     @Slot(QBluetoothLocalDevice.HostMode)
     def hostModeChanged(self, mode):
         self.deviceChanged.emit()

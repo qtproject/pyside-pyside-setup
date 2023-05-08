@@ -5,6 +5,9 @@ import QtQuick
 
 Item {
     id: root
+
+    property bool permissionError: false
+
     anchors.fill: parent
 
     Rectangle {
@@ -51,7 +54,9 @@ Item {
                 wrapMode: Text.WordWrap
                 font.pixelSize: GameSettings.mediumFontSize
                 color: GameSettings.textColor
-                text: qsTr("This application cannot be used without Bluetooth. Please switch Bluetooth ON to continue.")
+                text: root.permissionError
+                      ? qsTr("Bluetooth permissions are not granted. Please grant the permissions in the system settings.")
+                      : qsTr("This application cannot be used without Bluetooth. Please switch Bluetooth ON to continue.")
             }
 
             GameButton {

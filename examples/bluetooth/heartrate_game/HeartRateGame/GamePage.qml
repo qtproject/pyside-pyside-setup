@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import QtQuick
-import "."
 
 Item {
-    anchors.fill: parent
+    id: page
 
     property string errorMessage: ""
     property string infoMessage: ""
@@ -13,23 +12,14 @@ Item {
     property bool hasError: errorMessage != ""
     property bool hasInfo: infoMessage != ""
 
-    function init()
-    {
-    }
-
-    function close()
-    {
-        app.prevPage()
-    }
-
     Rectangle {
         id: msg
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         height: GameSettings.fieldHeight
-        color: hasError ? GameSettings.errorColor : GameSettings.infoColor
-        visible: hasError || hasInfo
+        color: page.hasError ? GameSettings.errorColor : GameSettings.infoColor
+        visible: page.hasError || page.hasInfo
 
         Text {
             id: error
@@ -40,7 +30,7 @@ Item {
             font.pixelSize: GameSettings.smallFontSize
             fontSizeMode: Text.Fit
             color: GameSettings.textColor
-            text: hasError ? errorMessage : infoMessage
+            text: page.hasError ? page.errorMessage : page.infoMessage
         }
     }
 }
