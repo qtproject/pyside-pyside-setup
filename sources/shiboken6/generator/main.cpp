@@ -14,7 +14,6 @@
 #include <reporthandler.h>
 #include <typedatabase.h>
 
-#include <QtCore/QCoreApplication>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QLibrary>
@@ -198,11 +197,11 @@ static void processProjectFileLine(const QByteArray &line, CommandLineArguments 
 }
 
 static std::optional<CommandLineArguments>
-    processProjectFile(const QString &appName, QFile &projectFile)
+    processProjectFile(const char *appName, QFile &projectFile)
 {
     QByteArray line = projectFile.readLine().trimmed();
     if (line.isEmpty() || line != "[generator-project]") {
-        std::cerr << qPrintable(appName) << ": first line of project file \""
+        std::cerr << appName << ": first line of project file \""
             << qPrintable(projectFile.fileName())
             << "\" must be the string \"[generator-project]\"\n";
         return {};
@@ -214,12 +213,8 @@ static std::optional<CommandLineArguments>
     return args;
 }
 
-static std::optional<CommandLineArguments> getProjectFileArguments()
+static std::optional<CommandLineArguments> getProjectFileArguments(const QStringList &arguments)
 {
-    QStringList arguments = QCoreApplication::arguments();
-    QString appName = arguments.constFirst();
-    arguments.removeFirst();
-
     QString projectFileName;
     for (const QString &arg : std::as_const(arguments)) {
         if (arg.startsWith(u"--project-file")) {
@@ -234,14 +229,14 @@ static std::optional<CommandLineArguments> getProjectFileArguments()
         return CommandLineArguments{};
 
     if (!QFile::exists(projectFileName)) {
-        std::cerr << qPrintable(appName) << ": Project file \""
+        std::cerr << appName << ": Project file \""
             << qPrintable(projectFileName) << "\" not found.\n";
         return {};
     }
 
     QFile projectFile(projectFileName);
     if (!projectFile.open(QIODevice::ReadOnly)) {
-        std::cerr << qPrintable(appName) << ": Cannot open project file \""
+        std::cerr << appName << ": Cannot open project file \""
             << qPrintable(projectFileName) << "\" : " << qPrintable(projectFile.errorString())
             << '\n';
         return {};
@@ -295,12 +290,11 @@ static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &ar
     ++argNum;
 }
 
-static void getCommandLineArgs(CommandLineArguments &args)
+static void getCommandLineArgs(CommandLineArguments &args, const QStringList &arguments)
 {
-    const QStringList arguments = QCoreApplication::arguments();
     int argNum = 0;
-    for (qsizetype i = 1, size = arguments.size(); i < size; ++i)
-        getCommandLineArg(arguments.at(i).trimmed(), argNum, args);
+    for (const QString &argument : arguments)
+        getCommandLineArg(argument.trimmed(), argNum, args);
 }
 
 static inline Generators docGenerators()
@@ -415,10 +409,8 @@ static inline void printVerAndBanner()
     std::cout << "Copyright (C) 2016 The Qt Company Ltd." << std::endl;
 }
 
-static inline void errorPrint(const QString &s)
+static inline void errorPrint(const QString &s, const QStringList &arguments)
 {
-    QStringList arguments = QCoreApplication::arguments();
-    arguments.pop_front();
     std::cerr << appName << ": " << qPrintable(s) << "\nCommand line:\n";
     for (const auto &argument : arguments)
         std::cerr << "    \"" << qPrintable(argument) << "\"\n";
@@ -439,25 +431,24 @@ static void parseIncludePathOption(const QString &option, HeaderType headerType,
     }
 }
 
-int shibokenMain(int argc, char *argv[])
+int shibokenMain(const QStringList &argV)
 {
     // PYSIDE-757: Request a deterministic ordering of QHash in the code model
     // and type system.
     QHashSeed::setDeterministicGlobalSeed();
-    // needed by qxmlpatterns
-    QCoreApplication app(argc, argv);
+
     ReportHandler::install();
     if (ReportHandler::isDebug(ReportHandler::SparseDebug))
-        qCInfo(lcShiboken()).noquote().nospace() << QCoreApplication::arguments().join(u' ');
+        qCInfo(lcShiboken()).noquote().nospace() << appName << ' ' << argV.join(u' ');
 
     // Store command arguments in a map
-    const auto projectFileArgumentsOptional = getProjectFileArguments();
+    const auto projectFileArgumentsOptional = getProjectFileArguments(argV);
     if (!projectFileArgumentsOptional.has_value())
         return EXIT_FAILURE;
 
     const CommandLineArguments projectFileArguments = projectFileArgumentsOptional.value();
     CommandLineArguments args = projectFileArguments;
-    getCommandLineArgs(args);
+    getCommandLineArgs(args, argV);
     Generators generators;
 
     auto ait = args.options.find(u"version"_s);
@@ -480,13 +471,13 @@ int shibokenMain(int argc, char *argv[])
     if (generatorSet == u"qtdoc") {
         generators = docGenerators();
         if (generators.isEmpty()) {
-            errorPrint(u"Doc strings extractions was not enabled in this shiboken build."_s);
+            errorPrint(u"Doc strings extractions was not enabled in this shiboken build."_s, argV);
             return EXIT_FAILURE;
         }
     } else if (generatorSet.isEmpty() || generatorSet == u"shiboken") {
         generators = shibokenGenerators();
     } else {
-        errorPrint(u"Unknown generator set, try \"shiboken\" or \"qtdoc\"."_s);
+        errorPrint(u"Unknown generator set, try \"shiboken\" or \"qtdoc\"."_s, argV);
         return EXIT_FAILURE;
     }
 
@@ -524,7 +515,7 @@ int shibokenMain(int argc, char *argv[])
             licenseComment = QString::fromUtf8(licenseFile.readAll());
         } else {
             errorPrint(QStringLiteral("Could not open the file \"%1\" containing the license heading: %2").
-                       arg(QDir::toNativeSeparators(licenseFile.fileName()), licenseFile.errorString()));
+                       arg(QDir::toNativeSeparators(licenseFile.fileName()), licenseFile.errorString()), argV);
             return EXIT_FAILURE;
         }
     }
@@ -562,7 +553,7 @@ int shibokenMain(int argc, char *argv[])
         if (ait != args.options.end()) {
             const QString value = ait.value().toString();
             if (!ReportHandler::setDebugLevelFromArg(value)) {
-                errorPrint(u"Invalid debug level: "_s + value);
+                errorPrint(u"Invalid debug level: "_s + value, argV);
                 return EXIT_FAILURE;
             }
             args.options.erase(ait);
@@ -584,7 +575,7 @@ int shibokenMain(int argc, char *argv[])
             package = parts.size() == 1 ? u"*"_s : parts.constFirst();
             version = parts.constLast();
             if (!extractor.setApiVersion(package, version)) {
-                errorPrint(msgInvalidVersion(package, version));
+                errorPrint(msgInvalidVersion(package, version), argV);
                 return EXIT_FAILURE;
             }
         }
@@ -618,7 +609,7 @@ int shibokenMain(int argc, char *argv[])
     if (ait != args.options.end()) {
         const QString name = ait.value().toString();
         if (!clang::setCompiler(name)) {
-            errorPrint(u"Invalid value \""_s + name + u"\" passed to --compiler"_s);
+            errorPrint(u"Invalid value \""_s + name + u"\" passed to --compiler"_s, argV);
             return EXIT_FAILURE;
         }
         args.options.erase(ait);
@@ -639,7 +630,7 @@ int shibokenMain(int argc, char *argv[])
     if (ait != args.options.end()) {
         const QString name = ait.value().toString();
         if (!clang::setPlatform(name)) {
-            errorPrint(u"Invalid value \""_s + name + u"\" passed to --platform"_s);
+            errorPrint(u"Invalid value \""_s + name + u"\" passed to --platform"_s, argV);
             return EXIT_FAILURE;
         }
         args.options.erase(ait);
@@ -653,7 +644,8 @@ int shibokenMain(int argc, char *argv[])
                            args, extractor);
 
     if (args.positionalArguments.size() < 2) {
-        errorPrint(u"Insufficient positional arguments, specify header-file and typesystem-file."_s);
+        errorPrint(u"Insufficient positional arguments, specify header-file and typesystem-file."_s,
+                  argV);
         std::cout << '\n';
         printUsage();
         return EXIT_FAILURE;
@@ -669,7 +661,7 @@ int shibokenMain(int argc, char *argv[])
     for (const QString &cppFileName : std::as_const(args.positionalArguments)) {
         const QFileInfo cppFileNameFi(cppFileName);
         if (!cppFileNameFi.isFile() && !cppFileNameFi.isSymLink()) {
-            errorPrint(u'"' + cppFileName + u"\" does not exist."_s);
+            errorPrint(u'"' + cppFileName + u"\" does not exist."_s, argV);
             return EXIT_FAILURE;
         }
         cppFileNames.append(cppFileNameFi);
@@ -710,7 +702,7 @@ int shibokenMain(int argc, char *argv[])
     }
 
     if (!args.options.isEmpty()) {
-        errorPrint(msgLeftOverArguments(args.options));
+        errorPrint(msgLeftOverArguments(args.options), argV);
         std::cout << helpHint;
         return EXIT_FAILURE;
     }
@@ -731,7 +723,7 @@ int shibokenMain(int argc, char *argv[])
     const std::optional<ApiExtractorResult> apiOpt = extractor.run(apiExtractorFlags);
 
     if (!apiOpt.has_value()) {
-        errorPrint(u"Error running ApiExtractor."_s);
+        errorPrint(u"Error running ApiExtractor."_s, argV);
         return EXIT_FAILURE;
     }
 
@@ -755,7 +747,7 @@ int shibokenMain(int argc, char *argv[])
         ReportHandler::endProgress();
          if (!ok) {
              errorPrint(u"Error running generator: "_s
-                        + QLatin1StringView(g->name()) + u'.');
+                        + QLatin1StringView(g->name()) + u'.', argV);
              return EXIT_FAILURE;
          }
     }
@@ -766,11 +758,32 @@ int shibokenMain(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
+#ifndef Q_OS_WIN
+
+static inline QString argvToString(const char *arg)
+{
+    return QString::fromLocal8Bit(arg);
+}
+
 int main(int argc, char *argv[])
+#else
+
+static inline QString argvToString(const  wchar_t *arg)
+{
+    return QString::fromWCharArray(arg);
+}
+
+int wmain(int argc, wchar_t *argv[])
+#endif
 {
     int ex = EXIT_SUCCESS;
+
+    QStringList argV;
+    argV.reserve(argc - 1);
+    std::transform(argv + 1, argv + argc, std::back_inserter(argV), argvToString);
+
     try {
-        ex = shibokenMain(argc, argv);
+        ex = shibokenMain(argV);
     }  catch (const std::exception &e) {
         std::cerr << appName << " error: " << e.what() << std::endl;
         ex = EXIT_FAILURE;
