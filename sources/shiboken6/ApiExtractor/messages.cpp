@@ -663,23 +663,6 @@ QString msgCannotUseEnumAsInt(const QString &name)
            "Compilation errors may occur when used as a function argument."_s;
 }
 
-QString msgConversionTypesDiffer(const QString &varType, const QString &conversionType)
-{
-    QString result;
-    QTextStream str(&result);
-    str << "Types of receiver variable ('" << varType
-         << "') and %%CONVERTTOCPP type system variable ('" << conversionType
-         << "') differ";
-    QString strippedVarType = varType;
-    QString strippedConversionType = conversionType;
-    TypeInfo::stripQualifiers(&strippedVarType);
-    TypeInfo::stripQualifiers(&strippedConversionType);
-    if (strippedVarType == strippedConversionType)
-        str << " in qualifiers. Please make sure the type is a distinct token";
-    str << '.';
-    return result;
-}
-
 QString msgCannotFindSmartPointerGetter(const SmartPointerTypeEntryCPtr &te)
 {
      return u"Getter \""_s + te->getter() +  u"()\" of smart pointer \""_s

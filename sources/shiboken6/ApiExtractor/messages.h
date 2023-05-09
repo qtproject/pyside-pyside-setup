@@ -184,8 +184,6 @@ QString msgWriteFailed(const QFile &f, qsizetype size);
 
 QString msgCannotUseEnumAsInt(const QString &name);
 
-QString msgConversionTypesDiffer(const QString &varType, const QString &conversionType);
-
 QString msgCannotFindSmartPointerGetter(const SmartPointerTypeEntryCPtr &);
 
 QString msgCannotFindSmartPointerMethod(const SmartPointerTypeEntryCPtr &te, const QString &m);
