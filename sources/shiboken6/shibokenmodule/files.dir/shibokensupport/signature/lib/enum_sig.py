@@ -155,7 +155,8 @@ class ExactEnumerator(object):
 
         # find out how many functions create a signature
         sigs = list(_ for _ in functions if get_sig(_[1]))
-        self.fmt.have_body = bool(subclasses or sigs or properties or enums or init_signature)
+        self.fmt.have_body = bool(subclasses or sigs or properties or enums or init_signature
+                                  or signals)
 
         with self.fmt.klass(class_name, class_str):
             self.fmt.level += 1
