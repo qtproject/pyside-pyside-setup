@@ -290,8 +290,11 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
             firstArgumentIsSelf = false;
         }
     }
-    if (!baseoperandClass)
+    if (!baseoperandClass) {
+        rejectFunction(item, currentClass, AbstractMetaBuilder::UnmatchedOperator,
+                       u"base operand class not found."_s);
         return;
+    }
 
     if (item->isSpaceshipOperator() && !item->isDeleted()) {
         AbstractMetaClass::addSynthesizedComparisonOperators(baseoperandClass);
@@ -3433,7 +3436,8 @@ static void writeRejectLogFile(const QString &name,
         {AbstractMetaBuilder::RedefinedToNotClass, "Type redefined to not be a class"_qba},
         {AbstractMetaBuilder::UnmatchedReturnType, "Unmatched return type"_qba},
         {AbstractMetaBuilder::UnmatchedArgumentType, "Unmatched argument type"_qba},
-        {AbstractMetaBuilder::Deprecated, "Deprecated"_qba},
+        {AbstractMetaBuilder::UnmatchedOperator, "Unmatched operator"_qba},
+        {AbstractMetaBuilder::Deprecated, "Deprecated"_qba}
     };
 
     QFile f(name);
