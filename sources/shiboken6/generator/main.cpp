@@ -53,6 +53,7 @@ static inline QString skipDeprecatedOption() { return QStringLiteral("skip-depre
 static inline QString printBuiltinTypesOption() { return QStringLiteral("print-builtin-types"); }
 
 static const char helpHint[] = "Note: use --help or -h for more information.\n";
+static const char appName[] = "shiboken";
 
 using OptionDescriptions = Generator::OptionDescriptions;
 
@@ -410,7 +411,7 @@ void printUsage()
 
 static inline void printVerAndBanner()
 {
-    std::cout << "shiboken v" SHIBOKEN_VERSION << std::endl;
+    std::cout << appName << " v" << SHIBOKEN_VERSION << std::endl;
     std::cout << "Copyright (C) 2016 The Qt Company Ltd." << std::endl;
 }
 
@@ -418,7 +419,7 @@ static inline void errorPrint(const QString &s)
 {
     QStringList arguments = QCoreApplication::arguments();
     arguments.pop_front();
-    std::cerr << "shiboken: " << qPrintable(s) << "\nCommand line:\n";
+    std::cerr << appName << ": " << qPrintable(s) << "\nCommand line:\n";
     for (const auto &argument : arguments)
         std::cerr << "    \"" << qPrintable(argument) << "\"\n";
 }
@@ -771,7 +772,7 @@ int main(int argc, char *argv[])
     try {
         ex = shibokenMain(argc, argv);
     }  catch (const std::exception &e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << appName << " error: " << e.what() << std::endl;
         ex = EXIT_FAILURE;
     }
     return ex;
