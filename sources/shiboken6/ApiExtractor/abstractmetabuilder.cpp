@@ -2847,9 +2847,10 @@ static bool isUnderQualifiedSpec(QStringView qualifiedType, QStringView candidat
 }
 
 QString AbstractMetaBuilder::fixEnumDefault(const AbstractMetaType &type,
-                                            const QString &expr) const
+                                            const QString &expr,
+                                            const AbstractMetaClassCPtr &klass) const
 {
-    return d->fixEnumDefault(type, expr);
+    return d->fixEnumDefault(type, expr, klass);
 }
 
 void AbstractMetaBuilder::setCodeModelTestMode(bool b)
@@ -2887,7 +2888,7 @@ QString AbstractMetaBuilderPrivate::fixDefaultValue(QString expr, const Abstract
         return expr;
 
     if (type.isFlags() || type.isEnum()) {
-        expr = fixEnumDefault(type, expr);
+        expr = fixEnumDefault(type, expr, implementingClass);
     } else if (type.isContainer() && expr.contains(u'<')) {
         // Expand a container of a nested class, fex
         // "QList<FormatRange>()" -> "QList<QTextLayout::FormatRange>()"

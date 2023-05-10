@@ -136,7 +136,8 @@ public:
     QString fixSimpleDefaultValue(QStringView expr,
                                   const AbstractMetaClassCPtr &klass) const;
 
-    QString fixEnumDefault(const AbstractMetaType &type, const QString &expr) const;
+    QString fixEnumDefault(const AbstractMetaType &type, const QString &expr,
+                           const AbstractMetaClassCPtr &) const;
     /// Qualify a static field name for default value expressions
     static QString qualifyStaticField(const AbstractMetaClassCPtr &c, QStringView field);
 

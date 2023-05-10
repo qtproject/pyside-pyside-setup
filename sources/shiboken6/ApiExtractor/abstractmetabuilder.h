@@ -127,7 +127,8 @@ public:
     // For testing purposes
     QString fixDefaultValue(const QString &expr, const AbstractMetaType &type,
                             const AbstractMetaClassCPtr &) const;
-    QString fixEnumDefault(const AbstractMetaType &type, const QString &expr) const;
+    QString fixEnumDefault(const AbstractMetaType &type, const QString &expr,
+                           const AbstractMetaClassCPtr & = {}) const;
 
     static void setCodeModelTestMode(bool b);
 

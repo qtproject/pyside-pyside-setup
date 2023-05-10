@@ -85,11 +85,16 @@ static bool isFloatConstant(const QStringView expr)
 // to the default value, making it usable from Python wrapper code outside the
 // owner class hierarchy. See TestEnum::testEnumDefaultValues().
 QString AbstractMetaBuilderPrivate::fixEnumDefault(const AbstractMetaType &type,
-                                                   const QString &expr) const
+                                                   const QString &expr,
+                                                   const AbstractMetaClassCPtr &klass) const
 {
     // QFlags construct from integers, do not fix that
     if (isIntegerConstant(expr))
         return expr;
+
+    const QString field = qualifyStaticField(klass, expr);
+    if (!field.isEmpty())
+        return field;
 
     const auto typeEntry = type.typeEntry();
     EnumTypeEntryCPtr enumTypeEntry;

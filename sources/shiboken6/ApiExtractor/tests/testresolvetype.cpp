@@ -4,10 +4,12 @@
 #include "testresolvetype.h"
 #include "testutil.h"
 #include <abstractmetaargument.h>
+#include <abstractmetaenum.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <abstractmetatype.h>
 #include <complextypeentry.h>
+#include <enumtypeentry.h>
 #include <primitivetypeentry.h>
 #include <typedatabase.h>
 
@@ -66,6 +68,7 @@ struct DefaultValuesFixture
     AbstractMetaType stringType;
     AbstractMetaType classType;
     AbstractMetaType listType;
+    AbstractMetaType enumType;
     AbstractMetaClassCPtr klass{};
 };
 
@@ -91,6 +94,7 @@ public:
 
     static const int INT_FIELD_1 = 42;
     static const char *CHAR_FIELD_1;
+    static const Enum DefaultValue = enumValue1;
 };
 } // Namespace
 )";
@@ -138,6 +142,9 @@ public:
     if (!listFunc || listFunc->arguments().size() != 1)
         return -3;
     fixture->listType = listFunc->arguments().constFirst().type();
+
+    fixture->enumType = AbstractMetaType(fixture->klass->enums().constFirst().typeEntry());
+    fixture->enumType.decideUsagePattern();
 
     return 0;
 }
@@ -213,6 +220,11 @@ void TestResolveType::testFixDefaultArguments_data()
     QTest::newRow("self from enum")
         << fixture << setupOk << fixture.classType
         << "Test(enumValue1)" << expected;
+
+    // Don't qualify fields to "Test::Enum::DefaultValue"
+    QTest::newRow("enum from static field")
+        << fixture << setupOk << fixture.enumType
+        << "DefaultValue" << u"Namespace::Test::DefaultValue"_s;
 }
 
 void TestResolveType::testFixDefaultArguments()
