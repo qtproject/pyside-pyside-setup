@@ -97,8 +97,8 @@ public:
     bool hasQEnumsDeclaration() const;
     void setHasQEnumsDeclaration(bool on);
 
-    EnumTypeEntryPtr typeEntry() const;
-    void setTypeEntry(const EnumTypeEntryPtr &entry);
+    EnumTypeEntryCPtr typeEntry() const;
+    void setTypeEntry(const EnumTypeEntryCPtr &entry);
 
     bool isSigned() const;
     void setSigned(bool s);

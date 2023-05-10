@@ -103,7 +103,7 @@ public:
 
     AbstractMetaEnumValueList m_enumValues;
 
-    EnumTypeEntryPtr m_typeEntry;
+    EnumTypeEntryCPtr m_typeEntry;
     Documentation m_doc;
 
     EnumKind m_enumKind = CEnum;
@@ -263,12 +263,12 @@ void AbstractMetaEnum::setHasQEnumsDeclaration(bool on)
         d->m_hasQenumsDeclaration = on;
 }
 
-EnumTypeEntryPtr AbstractMetaEnum::typeEntry() const
+EnumTypeEntryCPtr AbstractMetaEnum::typeEntry() const
 {
     return d->m_typeEntry;
 }
 
-void AbstractMetaEnum::setTypeEntry(const EnumTypeEntryPtr &entry)
+void AbstractMetaEnum::setTypeEntry(const EnumTypeEntryCPtr &entry)
 {
     if (d->m_typeEntry != entry)
         d->m_typeEntry = entry;
