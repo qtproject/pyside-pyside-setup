@@ -35,7 +35,6 @@ public:
         RedefinedToNotClass,
         UnmatchedArgumentType,
         UnmatchedReturnType,
-        ApiIncompatible,
         Deprecated,
         NoReason
     };
