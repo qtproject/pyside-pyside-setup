@@ -1,6 +1,7 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
+import re
 import logging
 import xml.etree.ElementTree as ET
 import zipfile
@@ -46,12 +47,20 @@ class BuildozerConfig(BaseConfig):
         self.set_value('app', "p4a.local_recipes", str(pysidedeploy_config.recipe_dir))
         self.set_value("app", "p4a.bootstrap", "qt")
 
+        # gets the xml dependency files from Qt installation path
+        dependency_files = self.__get_dependency_files(pysidedeploy_config)
+
         modules = ",".join(pysidedeploy_config.modules)
+        local_libs = self.__find_local_libs(dependency_files)
+        pysidedeploy_config.local_libs += local_libs
+
+        if local_libs:
+            pysidedeploy_config.update_config()
+
         local_libs = ",".join(pysidedeploy_config.local_libs)
+
         extra_args = (f"--qt-libs={modules} --load-local-libs={local_libs}")
         self.set_value("app", "p4a.extra_args", extra_args)
-
-        dependency_files = self.__get_dependency_files(pysidedeploy_config)
 
         # add permissions
         permissions = self.__find_permissions(dependency_files)
@@ -139,6 +148,37 @@ class BuildozerConfig(BaseConfig):
             raise FileNotFoundError(f"{android_bindings_jar} not found in wheel")
 
         return jars
+
+    def __find_local_libs(self, dependency_files: List[zipfile.Path]):
+        local_libs = set()
+        lib_pattern = re.compile(f"lib(?P<lib_name>.*)_{self.arch}")
+        for dependency_file in dependency_files:
+            xml_content = dependency_file.read_text()
+            root = ET.fromstring(xml_content)
+            for local_lib in root.iter("lib"):
+
+                if 'file' not in local_lib.attrib:
+                    continue
+
+                file = local_lib.attrib['file']
+                if file.endswith(".so"):
+                    # file_name starts with lib and ends with the platform name
+                    # eg: lib<lib_name>_x86_64.so
+                    file_name = Path(file).stem
+
+                    if file_name.startswith("libplugins_platforms_qtforandroid"):
+                        # the platform library is a requisite and is already added from the
+                        # configuration file
+                        continue
+
+                    # we only need lib_name, because lib and arch gets re-added by
+                    # python-for-android
+                    match = lib_pattern.search(file_name)
+                    if match:
+                        lib_name = match.group("lib_name")
+                        local_libs.add(lib_name)
+
+        return list(local_libs)
 
 
 class Buildozer:
