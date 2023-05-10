@@ -67,6 +67,20 @@ static void fixArgumentIndexes(AbstractMetaArgumentList *list)
         (*list)[i].setArgumentIndex(i);
 }
 
+bool operator<(const RejectEntry &re1, const RejectEntry &re2)
+{
+    return re1.reason != re2.reason
+        ? (re1.reason < re2.reason) : (re1.sortkey < re2.sortkey);
+}
+
+QTextStream &operator<<(QTextStream &str, const RejectEntry &re)
+{
+    str << re.signature;
+    if (!re.message.isEmpty())
+        str << ": " << re.message;
+    return str;
+}
+
 bool AbstractMetaBuilderPrivate::m_useGlobalHeader = false;
 bool AbstractMetaBuilderPrivate::m_codeModelTestMode = false;
 
@@ -734,14 +748,17 @@ AbstractMetaClassPtr
     namespaceName.append(namespaceItem->name());
 
     if (TypeDatabase::instance()->isClassRejected(namespaceName)) {
-        m_rejectedClasses.insert(namespaceName, AbstractMetaBuilder::GenerationDisabled);
-        return nullptr;
+        m_rejectedClasses.insert({AbstractMetaBuilder::GenerationDisabled,
+                                  namespaceName, namespaceName, QString{}});
+        return {};
     }
 
     auto type = TypeDatabase::instance()->findNamespaceType(namespaceName, namespaceItem->fileName());
     if (!type) {
-        qCWarning(lcShiboken, "%s",
-                  qPrintable(msgNamespaceNoTypeEntry(namespaceItem, namespaceName)));
+        const QString rejectReason = msgNamespaceNoTypeEntry(namespaceItem, namespaceName);
+        qCWarning(lcShiboken, "%s", qPrintable(rejectReason));
+        m_rejectedClasses.insert({AbstractMetaBuilder::GenerationDisabled,
+                                  namespaceName, namespaceName, rejectReason});
         return nullptr;
     }
 
@@ -852,25 +869,28 @@ std::optional<AbstractMetaEnum>
     if (TypeDatabase::instance()->isEnumRejected(className, enumName, &rejectReason)) {
         if (typeEntry)
             typeEntry->setCodeGeneration(TypeEntry::GenerateNothing);
-        m_rejectedEnums.insert(qualifiedName + rejectReason, AbstractMetaBuilder::GenerationDisabled);
+        m_rejectedEnums.insert({AbstractMetaBuilder::GenerationDisabled, qualifiedName,
+                                qualifiedName, rejectReason});
         return {};
     }
 
     const bool rejectionWarning = !enclosing || enclosing->typeEntry()->generateCode();
 
     if (!typeEntry) {
+        const QString rejectReason = msgNoEnumTypeEntry(enumItem, className);
         if (rejectionWarning)
-            qCWarning(lcShiboken, "%s", qPrintable(msgNoEnumTypeEntry(enumItem, className)));
-        m_rejectedEnums.insert(qualifiedName, AbstractMetaBuilder::NotInTypeSystem);
+            qCWarning(lcShiboken, "%s", qPrintable(rejectReason));
+        m_rejectedEnums.insert({AbstractMetaBuilder::NotInTypeSystem, qualifiedName,
+                                qualifiedName, rejectReason});
         return {};
     }
 
     if (!typeEntry->isEnum()) {
-        if (rejectionWarning) {
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgNoEnumTypeConflict(enumItem, className, typeEntry)));
-        }
-        m_rejectedEnums.insert(qualifiedName, AbstractMetaBuilder::NotInTypeSystem);
+        const QString rejectReason = msgNoEnumTypeConflict(enumItem, className, typeEntry);
+        if (rejectionWarning)
+            qCWarning(lcShiboken, "%s", qPrintable(rejectReason));
+        m_rejectedEnums.insert({AbstractMetaBuilder::NotInTypeSystem, qualifiedName,
+                                qualifiedName, rejectReason});
         return {};
     }
 
@@ -1050,7 +1070,7 @@ AbstractMetaClassPtr AbstractMetaBuilderPrivate::traverseClass(const FileModelIt
             QTextStream(&fullClassName) << "anonymous struct at " << classItem->fileName()
                 << ':' << classItem->startLine();
         }
-        m_rejectedClasses.insert(fullClassName, reason);
+        m_rejectedClasses.insert({reason, fullClassName, fullClassName, QString{}});
         return nullptr;
     }
 
@@ -1221,8 +1241,9 @@ std::optional<AbstractMetaField>
 
     QString rejectReason;
     if (TypeDatabase::instance()->isFieldRejected(className, fieldName, &rejectReason)) {
-        m_rejectedFields.insert(qualifiedFieldSignatureWithType(className, field) + rejectReason,
-                                AbstractMetaBuilder::GenerationDisabled);
+        const QString signature = qualifiedFieldSignatureWithType(className, field);
+        m_rejectedFields.insert({AbstractMetaBuilder::GenerationDisabled,
+                                 signature, signature, rejectReason});
         return {};
     }
 
@@ -1916,9 +1937,24 @@ static AbstractMetaType createViewOnType(const AbstractMetaType &metaType,
     return result;
 }
 
+void AbstractMetaBuilderPrivate::rejectFunction(const FunctionModelItem &functionItem,
+                                                const AbstractMetaClassPtr &currentClass,
+                                                AbstractMetaBuilder::RejectReason reason,
+                                                const QString &rejectReason)
+{
+    QString sortKey;
+    if (currentClass)
+        sortKey += currentClass->typeEntry()->qualifiedCppName() + u"::"_s;
+    sortKey += functionSignature(functionItem); // Sort without return type
+    const QString signatureWithType = functionItem->type().toString() + u' ' + sortKey;
+    m_rejectedFunctions.insert({reason, signatureWithType, sortKey, rejectReason});
+}
+
 AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const FunctionModelItem &functionItem,
                                                                    const AbstractMetaClassPtr &currentClass)
 {
+    const auto *tdb = TypeDatabase::instance();
+
     if (!functionItem->templateParameters().isEmpty())
         return nullptr;
 
@@ -1959,20 +1995,17 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         }
     } // PySide extensions
 
-    // Store original signature with unresolved typedefs for message/log purposes
-    const QString originalQualifiedSignatureWithReturn =
-        qualifiedFunctionSignatureWithType(functionItem, className);
-
     QString rejectReason;
-    if (TypeDatabase::instance()->isFunctionRejected(className, functionName, &rejectReason)) {
-        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
+    if (tdb->isFunctionRejected(className, functionName, &rejectReason)) {
+        rejectFunction(functionItem, currentClass,
+                       AbstractMetaBuilder::GenerationDisabled, rejectReason);
         return nullptr;
     }
-    const QString &signature = functionSignature(functionItem);
-    const bool rejected =
-        TypeDatabase::instance()->isFunctionRejected(className, signature, &rejectReason);
 
-    if (rejected) {
+    const QString &signature = functionSignature(functionItem);
+    if (tdb->isFunctionRejected(className, signature, &rejectReason)) {
+        rejectFunction(functionItem, currentClass,
+                       AbstractMetaBuilder::GenerationDisabled, rejectReason);
         if (ReportHandler::isDebug(ReportHandler::MediumDebug)) {
             qCInfo(lcShiboken, "%s::%s was rejected by the type database (%s).",
                    qPrintable(className), qPrintable(signature), qPrintable(rejectReason));
@@ -1985,8 +2018,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
 
     const bool deprecated = functionItem->isDeprecated();
     if (deprecated && m_skipDeprecated) {
-        m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + u" is deprecated."_s,
-                                   AbstractMetaBuilder::GenerationDisabled);
+        rejectFunction(functionItem, currentClass,
+                       AbstractMetaBuilder::GenerationDisabled, u" is deprecated."_s);
         return nullptr;
     }
 
@@ -2044,8 +2077,9 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     default: {
         TypeInfo returnType = functionItem->type();
 
-        if (TypeDatabase::instance()->isReturnTypeRejected(className, returnType.toString(), &rejectReason)) {
-            m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
+        if (tdb->isReturnTypeRejected(className, returnType.toString(), &rejectReason)) {
+            rejectFunction(functionItem, currentClass,
+                           AbstractMetaBuilder::GenerationDisabled, rejectReason);
             delete metaFunction;
             return nullptr;
         }
@@ -2056,9 +2090,11 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         auto type = translateType(returnType, currentClass, flags, &errorMessage);
         if (!type.has_value()) {
             const QString reason = msgUnmatchedReturnType(functionItem, errorMessage);
+            const QString signature = qualifiedFunctionSignatureWithType(functionItem, className);
             qCWarning(lcShiboken, "%s",
-                      qPrintable(msgSkippingFunction(functionItem, originalQualifiedSignatureWithReturn, reason)));
-            m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn, AbstractMetaBuilder::UnmatchedReturnType);
+                      qPrintable(msgSkippingFunction(functionItem, signature, reason)));
+            rejectFunction(functionItem, currentClass,
+                           AbstractMetaBuilder::UnmatchedReturnType, reason);
             delete metaFunction;
             return nullptr;
         }
@@ -2088,8 +2124,9 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     for (qsizetype i = 0; i < arguments.size(); ++i) {
         const ArgumentModelItem &arg = arguments.at(i);
 
-        if (TypeDatabase::instance()->isArgumentTypeRejected(className, arg->type().toString(), &rejectReason)) {
-            m_rejectedFunctions.insert(originalQualifiedSignatureWithReturn + rejectReason, AbstractMetaBuilder::GenerationDisabled);
+        if (tdb->isArgumentTypeRejected(className, arg->type().toString(), &rejectReason)) {
+            rejectFunction(functionItem, currentClass,
+                           AbstractMetaBuilder::GenerationDisabled, rejectReason);
             delete metaFunction;
             return nullptr;
         }
@@ -2104,17 +2141,18 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             // wrapper can then not correctly be generated).
             if (arg->defaultValue() && !functionItem->isVirtual()) {
                 if (!currentClass || currentClass->typeEntry()->generateCode()) {
+                    const QString signature = qualifiedFunctionSignatureWithType(functionItem, className);
                     qCWarning(lcShiboken, "%s",
-                              qPrintable(msgStrippingArgument(functionItem, i, originalQualifiedSignatureWithReturn, arg)));
+                              qPrintable(msgStrippingArgument(functionItem, i, signature, arg)));
                 }
                 break;
             }
             const QString reason = msgUnmatchedParameterType(arg, i, errorMessage);
+            const QString signature = qualifiedFunctionSignatureWithType(functionItem, className);
             qCWarning(lcShiboken, "%s",
-                      qPrintable(msgSkippingFunction(functionItem, originalQualifiedSignatureWithReturn, reason)));
-            const QString rejectedFunctionSignature = originalQualifiedSignatureWithReturn
-                + u": "_s + reason;
-            m_rejectedFunctions.insert(rejectedFunctionSignature, AbstractMetaBuilder::UnmatchedArgumentType);
+                      qPrintable(msgSkippingFunction(functionItem, signature, reason)));
+            rejectFunction(functionItem, currentClass,
+                           AbstractMetaBuilder::UnmatchedArgumentType, reason);
             delete metaFunction;
             return nullptr;
         }
@@ -3387,8 +3425,17 @@ void AbstractMetaBuilderPrivate::setupExternalConversion(const AbstractMetaClass
 }
 
 static void writeRejectLogFile(const QString &name,
-                                  const QMap<QString, AbstractMetaBuilder::RejectReason> &rejects)
+                               const AbstractMetaBuilderPrivate::RejectSet &rejects)
 {
+    static const QHash<AbstractMetaBuilder::RejectReason, QByteArray> descriptions ={
+        {AbstractMetaBuilder::NotInTypeSystem,  "Not in type system"_qba},
+        {AbstractMetaBuilder::GenerationDisabled, "Generation disabled by type system"_qba},
+        {AbstractMetaBuilder::RedefinedToNotClass, "Type redefined to not be a class"_qba},
+        {AbstractMetaBuilder::UnmatchedReturnType, "Unmatched return type"_qba},
+        {AbstractMetaBuilder::UnmatchedArgumentType, "Unmatched argument type"_qba},
+        {AbstractMetaBuilder::Deprecated, "Deprecated"_qba},
+    };
+
     QFile f(name);
     if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qCWarning(lcShiboken, "%s", qPrintable(msgCannotOpenForWriting(f)));
@@ -3397,53 +3444,19 @@ static void writeRejectLogFile(const QString &name,
 
     QTextStream s(&f);
 
-
-    for (int reason = 0; reason < AbstractMetaBuilder::NoReason; ++reason) {
-        s << QByteArray(72, '*') << '\n';
-        switch (reason) {
-        case AbstractMetaBuilder::NotInTypeSystem:
-            s << "Not in type system";
-            break;
-        case AbstractMetaBuilder::GenerationDisabled:
-            s << "Generation disabled by type system";
-            break;
-        case AbstractMetaBuilder::RedefinedToNotClass:
-            s << "Type redefined to not be a class";
-            break;
-
-        case AbstractMetaBuilder::UnmatchedReturnType:
-            s << "Unmatched return type";
-            break;
-
-        case AbstractMetaBuilder::UnmatchedArgumentType:
-            s << "Unmatched argument type";
-            break;
-
-        case AbstractMetaBuilder::ApiIncompatible:
-            s << "Incompatible API";
-            break;
-
-        case AbstractMetaBuilder::Deprecated:
-            s << "Deprecated";
-            break;
-
-        default:
-            s << "unknown reason";
-            break;
+    int lastReason = -1;
+    for (const auto &e : rejects) {
+        if (e.reason != lastReason) {
+            const QByteArray description = descriptions.value(e.reason, "Unknown reason"_qba);
+            const QByteArray underline(description.size(), '*');
+            if (lastReason != -1)
+                s << '\n';
+            s << underline << '\n' << description << '\n' << underline << "\n\n";
+            lastReason = e.reason;
         }
 
-        s << Qt::endl;
-
-        for (QMap<QString, AbstractMetaBuilder::RejectReason>::const_iterator it = rejects.constBegin();
-             it != rejects.constEnd(); ++it) {
-            if (it.value() != reason)
-                continue;
-            s << " - " << it.key() << Qt::endl;
-        }
-
-        s << QByteArray(72, '*') << "\n\n";
+        s << " - " << e << '\n';
     }
-
 }
 
 void AbstractMetaBuilderPrivate::dumpLog() const

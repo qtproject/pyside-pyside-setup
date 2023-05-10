@@ -803,17 +803,17 @@ QString msgRejectReason(const TypeRejection &r, const QString &needle)
     QTextStream str(&result);
     switch (r.matchType) {
     case TypeRejection::ExcludeClass:
-        str << " matches class exclusion \"" << r.className.pattern() << '"';
+        str << "matches class exclusion \"" << r.className.pattern() << '"';
         break;
     case TypeRejection::Function:
     case TypeRejection::Field:
     case TypeRejection::Enum:
-        str << " matches class \"" << r.className.pattern() << "\" and \""
+        str << "matches class \"" << r.className.pattern() << "\" and \""
             << r.pattern.pattern() << '"';
         break;
     case TypeRejection::ArgumentType:
     case TypeRejection::ReturnType:
-        str << " matches class \"" << r.className.pattern() << "\" and \""
+        str << "matches class \"" << r.className.pattern() << "\" and \""
             << needle << "\" matches \"" << r.pattern.pattern() << '"';
         break;
     }

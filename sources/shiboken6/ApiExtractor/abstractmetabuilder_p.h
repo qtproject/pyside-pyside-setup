@@ -20,8 +20,19 @@
 #include <QtCore/QSet>
 
 #include <optional>
+#include <set>
 
 class TypeDatabase;
+
+struct RejectEntry
+{
+    AbstractMetaBuilder::RejectReason reason;
+    QString signature;
+    QString sortkey;
+    QString message;
+};
+
+bool operator<(const RejectEntry &re1, const RejectEntry &re2);
 
 class AbstractMetaBuilderPrivate
 {
@@ -101,7 +112,11 @@ public:
     bool traverseAddedMemberFunction(const AddedFunctionPtr &addedFunc,
                                      const AbstractMetaClassPtr &metaClass,
                                      QString *errorMessage);
-    AbstractMetaFunction *traverseFunction(const FunctionModelItem &function,
+    void rejectFunction(const FunctionModelItem &functionItem,
+                        const AbstractMetaClassPtr &currentClass,
+                        AbstractMetaBuilder::RejectReason reason,
+                        const QString &rejectReason);
+        AbstractMetaFunction *traverseFunction(const FunctionModelItem &function,
                                            const AbstractMetaClassPtr &currentClass);
     std::optional<AbstractMetaField> traverseField(const VariableModelItem &field,
                                                    const AbstractMetaClassCPtr &cls);
@@ -209,12 +224,12 @@ public:
     AbstractMetaFunctionCList m_globalFunctions;
     AbstractMetaEnumList m_globalEnums;
 
-    using RejectMap = QMap<QString, AbstractMetaBuilder::RejectReason>;
+    using RejectSet = std::set<RejectEntry>;
 
-    RejectMap m_rejectedClasses;
-    RejectMap m_rejectedEnums;
-    RejectMap m_rejectedFunctions;
-    RejectMap m_rejectedFields;
+    RejectSet m_rejectedClasses;
+    RejectSet m_rejectedEnums;
+    RejectSet m_rejectedFunctions;
+    RejectSet m_rejectedFields;
 
     QHash<TypeEntryCPtr, AbstractMetaEnum> m_enums;
 
