@@ -902,8 +902,10 @@ std::optional<AbstractMetaEnum>
         metaEnum.addEnumValue(metaEnumValue);
     }
 
-    if (!metaEnum.typeEntry()->include().isValid())
-        setInclude(metaEnum.typeEntry(), enumItem->fileName());
+    if (!metaEnum.typeEntry()->include().isValid()) {
+        auto te = std::const_pointer_cast<EnumTypeEntry>(metaEnum.typeEntry());
+        setInclude(te, enumItem->fileName());
+    }
 
     // Register all enum values on Type database
     const bool isScopedEnum = enumItem->enumKind() == EnumClass;

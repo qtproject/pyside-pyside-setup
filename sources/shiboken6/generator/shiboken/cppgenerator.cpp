@@ -1787,7 +1787,7 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMeta
 {
     if (metaEnum.isPrivate() || metaEnum.isAnonymous())
         return;
-    EnumTypeEntryPtr enumType = metaEnum.typeEntry();
+    EnumTypeEntryCPtr enumType = metaEnum.typeEntry();
     Q_ASSERT(enumType);
     QString typeName = fixedCppTypeName(enumType);
     QString enumPythonType = cpythonTypeNameExt(enumType);
