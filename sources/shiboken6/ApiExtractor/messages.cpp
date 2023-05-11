@@ -225,7 +225,8 @@ QString msgNoEnumTypeEntry(const EnumModelItem &enumItem,
     QTextStream str(&result);
     str << enumItem->sourceLocation();
     msgFormatEnumType(str, enumItem, className);
-    str << " does not have a type entry";
+    str << " does not have a type entry (type systems: "
+        << TypeDatabase::instance()->loadedTypeSystemNames() << ')';
     return result;
 }
 
@@ -249,7 +250,8 @@ QString msgNamespaceNoTypeEntry(const NamespaceModelItem &item,
     QString result;
     QTextStream str(&result);
     str << item->sourceLocation() << "namespace '" << fullName
-        << "' does not have a type entry";
+        << "' does not have a type entry (type systems: "
+        << TypeDatabase::instance()->loadedTypeSystemNames() << ')';
     return result;
 }
 

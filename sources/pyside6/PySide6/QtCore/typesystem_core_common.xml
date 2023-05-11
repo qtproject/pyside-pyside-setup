@@ -3338,7 +3338,7 @@
   <suppress-warning text="Visibility of function '*' modified in class '*'"/>
   <suppress-warning text="hiding of function '*' in class '*'"/>
   <suppress-warning text="Shadowing: *"/>
-  <suppress-warning text="namespace '*' does not have a type entry"/>
+  <suppress-warning text="^namespace '.*' does not have a type entry.*$"/>
   <!-- QCborStreamReader: Suppress warnings about 32/64bit signatures not found depending on qsizetype -->
   <suppress-warning text="^signature 'readStringChunk\(char.*in 'QCborStreamReader' not found.*$"/>
 
