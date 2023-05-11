@@ -495,7 +495,8 @@ def module_QtQml() -> ModuleData:
     ]
 
     data.lib.append("libpyside6qml")
-    data.plugins = get_module_json_data("Qml")
+    json_data = get_module_json_data("Qml")
+    data.plugins = get_module_plugins(json_data)
     data.translations.append("qtdeclarative_*")
     if sys.platform == "win32":
         data.extra_files.append("pyside6qml.*.lib")
@@ -609,7 +610,8 @@ def module_QtSvgWidgets() -> ModuleData:
 
 def module_QtTextToSpeech() -> ModuleData:
     data = ModuleData("TextToSpeech")
-    data.plugins = get_module_json_data("TextToSpeech")
+    json_data = get_module_json_data("TextToSpeech")
+    data.plugins = get_module_plugins(json_data)
 
     return data
 
