@@ -19,6 +19,7 @@
 
 
     <value-type name="QDomDocument">
+        <enum-type name="ParseOption" flags="ParseOptions" since="6.5"/>
         <!-- will be replaced in inject code -->
         <modify-function signature="setContent(const QByteArray&amp;,bool,QString*,int*,int*)">
             <modify-argument index="3">
@@ -167,12 +168,5 @@
         <modify-function signature="setAttribute(const QString&amp;, qulonglong)" remove="all"/>
     </value-type>
 
-    <object-type name="QXmlContentHandler">
-        <modify-function signature="setDocumentLocator(QXmlLocator*)">
-            <modify-argument index="1">
-                <define-ownership owner="c++"/>
-            </modify-argument>
-        </modify-function>
-    </object-type>
 </typesystem>
 

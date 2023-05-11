@@ -107,6 +107,9 @@
   <rejection class="*" function-name="qMallocAligned"/>
   <rejection class="*" function-name="qFreeAligned"/>
   <rejection class="QMetaMethod" enum-name="Attributes"/>
+  <rejection class="QMetaMethod" field-name="data"/>
+  <rejection class="Qt" field-name="Disambiguated"/>
+  <rejection class="" enum-name="QCborNegativeInteger"/>
 
   <rejection class="*" argument-type="^qfloat16&amp;?$"/>
   <rejection class="*" argument-type="QLatin1String"/>
