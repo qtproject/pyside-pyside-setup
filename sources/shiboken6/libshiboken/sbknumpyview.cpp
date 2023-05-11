@@ -6,11 +6,53 @@
 #include "helper.h"
 #include <iostream>
 #include <iomanip>
+#include <optional>
 
 #ifdef HAVE_NUMPY
 
 namespace Shiboken {
 namespace Numpy {
+
+static std::optional<View::Type> viewTypeFromNumPy(int npt)
+{
+    switch (npt) {
+    case NPY_SHORT:
+        return View::Int16;
+    case NPY_USHORT:
+        return View::Unsigned16;
+    case NPY_INT:
+        return View::Int;
+    case NPY_UINT:
+        return View::Unsigned;
+    case NPY_LONG:
+        if constexpr (sizeof(long) == sizeof(int))
+            return View::Int;
+        if constexpr (sizeof(long) == sizeof(int64_t))
+            return View::Int64;
+        break;
+    case NPY_ULONG:
+        if constexpr (sizeof(long) == sizeof(int))
+            return View::Unsigned;
+        if constexpr (sizeof(long) == sizeof(int64_t))
+            return View::Unsigned64;
+        break;
+    case NPY_LONGLONG:
+        if constexpr (sizeof(long long) == 8)
+            return View::Int64;
+        break;
+    case NPY_ULONGLONG:
+        if constexpr (sizeof(long long) == 8)
+            return View::Unsigned64;
+        break;
+    case NPY_FLOAT:
+        return View::Float;
+    case NPY_DOUBLE:
+        return View::Double;
+    default:
+        break;
+    }
+    return {};
+}
 
 View View::fromPyObject(PyObject *pyIn)
 {
@@ -23,53 +65,13 @@ View View::fromPyObject(PyObject *pyIn)
     if (ndim > 2)
         return {};
 
-    View::Type type;
-    switch (PyArray_TYPE(ar)) {
-    case NPY_SHORT:
-        type = View::Int16;
-        break;
-    case NPY_USHORT:
-        type = View::Unsigned16;
-        break;
-    case NPY_INT:
-        type = View::Int;
-        break;
-    case NPY_UINT:
-        type = View::Unsigned;
-        break;
-    case NPY_LONG:
-         if constexpr (sizeof(long) == sizeof(int))
-            type = View::Int;
-        else if constexpr (sizeof(long) == sizeof(int64_t))
-            type = View::Int64;
-        break;
-    case NPY_ULONG:
-         if constexpr (sizeof(long) == sizeof(int))
-            type = View::Unsigned;
-        else if constexpr (sizeof(long) == sizeof(int64_t))
-            type = View::Unsigned64;
-        break;
-    case NPY_LONGLONG:
-         if constexpr (sizeof(long long) == 64)
-            type = View::Int64;
-        break;
-    case NPY_ULONGLONG:
-         if constexpr (sizeof(long long) == 64)
-            type = View::Unsigned64;
-        break;
-    case NPY_FLOAT:
-        type = View::Float;
-        break;
-    case NPY_DOUBLE:
-        type = View::Double;
-        break;
-    default:
+    const auto typeO = viewTypeFromNumPy(PyArray_TYPE(ar));
+    if (!typeO.has_value())
         return {};
-    }
 
     View result;
     result.ndim = ndim;
-    result.type = type;
+    result.type = typeO.value();
     result.data = PyArray_DATA(ar);
     result.dimensions[0] = PyArray_DIMS(ar)[0];
     result.stride[0] = PyArray_STRIDES(ar)[0];
