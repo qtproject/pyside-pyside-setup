@@ -33,10 +33,16 @@ class QChartsNumpyTestCase(UsesQApplication):
         data_types = [np.short, np.ushort, np.int32, np.uint32,
                       np.int64, np.uint64, np.float32, np.float64]
         for dt in data_types:
+            print("Testing ", dt)
             old_size = line_series.count()
-            arr = np.array([2], dtype=dt)
-            line_series.appendNp(arr, arr)
-            self.assertEqual(line_series.count(), old_size + 1)
+            x_arr = np.array([2], dtype=dt)
+            y_arr = np.array([3], dtype=dt)
+            line_series.appendNp(x_arr, y_arr)
+            size = line_series.count()
+            self.assertEqual(size, old_size + 1)
+            point = line_series.points()[size - 1]
+            self.assertEqual(point.x(), 2)
+            self.assertEqual(point.y(), 3)
 
 
 if __name__ == '__main__':
