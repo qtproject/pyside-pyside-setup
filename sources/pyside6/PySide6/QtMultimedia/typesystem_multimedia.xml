@@ -10,7 +10,6 @@
 
     <namespace-type name="QAudio">
         <enum-type name="Error"/>
-        <enum-type name="Mode"/>
         <enum-type name="State"/>
         <enum-type name="VolumeScale"/>
     </namespace-type>

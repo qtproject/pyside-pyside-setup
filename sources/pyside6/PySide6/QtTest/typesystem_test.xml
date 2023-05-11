@@ -91,6 +91,7 @@
     <enum-type name="MouseAction"/>
     <enum-type name="QBenchmarkMetric" since="4.7"/>
     <enum-type name="TestFailMode"/>
+    <enum-type name="ComparisonOperation" since="6.4"/>
     <extra-includes>
         <include file-name="QtTest" location="global"/>
     </extra-includes>

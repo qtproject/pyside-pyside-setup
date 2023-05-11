@@ -10,6 +10,7 @@
         the name space from QtCore -->
   <namespace-type name="QtConcurrent" target-type="class">
     <rejection class="QtConcurrent" enum-name="enum_1"/>
+    <enum-type name="FutureResult"/>
     <enum-type name="ReduceOption" flags="ReduceOptions"/>
     <enum-type name="ThreadFunctionResult"/>
     <extra-includes>
@@ -20,7 +21,6 @@
 
   <typedef-type name="QFutureVoid" source="QFuture&lt;void&gt;" disable-wrapper="yes">
       <include file-name="QtCore/qfuture.h" location="global"/>
-      <modify-function signature="isResultReadyAt(int) const" remove="all"/>
   </typedef-type>
   <typedef-type name="QFutureQString" source="QFuture&lt;QString&gt;" disable-wrapper="yes">
       <include file-name="QtCore/qfuture.h" location="global"/>

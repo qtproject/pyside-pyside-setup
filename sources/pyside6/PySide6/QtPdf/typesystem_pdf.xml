@@ -21,7 +21,6 @@
     </value-type>
     <object-type name="QPdfPageRenderer">
         <enum-type name="RenderMode"/>
-        <enum-type name="RenderFlag" flags="RenderFlags"/>
     </object-type>
     <value-type name="QPdfLink"/>
     <object-type name="QPdfPageNavigator"/>
