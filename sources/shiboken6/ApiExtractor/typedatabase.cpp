@@ -417,6 +417,17 @@ TypeSystemTypeEntryCPtr TypeDatabase::defaultTypeSystemType() const
     return d->defaultTypeSystemType();
 }
 
+QString TypeDatabase::loadedTypeSystemNames() const
+{
+    QString result;
+    for (const auto &entry : d->m_typeSystemEntries) {
+        if (!result.isEmpty())
+            result += u", "_s;
+        result += entry->name();
+    }
+    return result;
+}
+
 TypeSystemTypeEntryCPtr TypeDatabasePrivate::defaultTypeSystemType() const
 {
     return m_typeSystemEntries.value(0, nullptr);

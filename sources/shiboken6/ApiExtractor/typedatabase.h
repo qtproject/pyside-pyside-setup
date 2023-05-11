@@ -98,6 +98,7 @@ public:
     FunctionTypeEntryPtr findFunctionType(const QString &name) const;
     TypeSystemTypeEntryCPtr findTypeSystemType(const QString &name) const;
     TypeSystemTypeEntryCPtr defaultTypeSystemType() const;
+    QString loadedTypeSystemNames() const;
     QString defaultPackageName() const;
 
     TypeEntryPtr findType(const QString &name) const;
