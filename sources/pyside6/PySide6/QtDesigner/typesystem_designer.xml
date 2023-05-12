@@ -5,6 +5,9 @@
 -->
 <typesystem package="PySide6.QtDesigner">
   <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
+
+  <rejection class="qdesigner_internal"/>
+
   <object-type name="QAbstractExtensionFactory"/>
   <object-type name="QAbstractExtensionManager"/>
   <object-type name="QAbstractFormBuilder"/>

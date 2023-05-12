@@ -10,6 +10,8 @@
   <load-typesystem name="QtPrintSupport/typesystem_printsupport.xml" generate="no"/>
   <load-typesystem name="QtWebChannel/typesystem_webchannel.xml" generate="no"/>
 
+   <rejection class="extensions"/>
+
   <function signature="qWebEngineChromiumVersion()"/>
   <function signature="qWebEngineChromiumSecurityPatchVersion()"/>
   <function signature="qWebEngineVersion()"/>

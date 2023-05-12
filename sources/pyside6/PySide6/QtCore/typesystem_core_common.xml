@@ -87,6 +87,19 @@
     <rejection class="QtSharedPointer"/>
     <rejection class="QtStringBuilder"/>
 
+    <rejection class="q20"/>
+    <rejection class="q23"/>
+    <rejection class="q_has_char8_t"/>
+    <rejection class="QContainerInfo"/>
+    <rejection class="QHashPrivate"/>
+    <rejection class="q_no_char8_t"/>
+    <rejection class="Qt::Literals"/>
+    <rejection class="QtLiterals"/>
+    <rejection class="QtMetaContainerPrivate"/>
+    <rejection class="QtTsan"/>
+    <rejection class="QTypeTraits"/>
+    <rejection class="qxp"/>
+
   <rejection class="QChildEvent" field-name="c"/>
   <rejection class="QTimerEvent" field-name="id"/>
   <rejection class="QEvent" field-name="t"/>

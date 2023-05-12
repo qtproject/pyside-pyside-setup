@@ -6,6 +6,8 @@
 <typesystem package="PySide6.QtRemoteObjects">
     <load-typesystem name="templates/core_common.xml" generate="no"/>
     <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+
+    <rejection class="QRemoteObjectStringLiterals"/>
     <rejection class="*" function-name="getTypeNameAndMetaobjectFromClassInfo"/>
 <!-- Exclude namespace due to Q_NAMESPACE link errors on Windows (QTBUG-68014)
     <rejection class="QtRemoteObjects" field-name="staticMetaObject"/>
