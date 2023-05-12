@@ -112,4 +112,8 @@
     <value-type name="QLowEnergyServiceData">
         <enum-type name="ServiceType"/>
     </value-type>
+
+    <!-- QtNetwork is pulled in via QtBluetoothDepends. -->
+    <suppress-warning text="^Scoped enum 'Q(Ocsp)|(Dtls).*' does not have a type entry.*$"/>
+
 </typesystem>

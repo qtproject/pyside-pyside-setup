@@ -147,4 +147,7 @@
 
   <object-type name="QWebEngineUrlSchemeHandler"/>
 
+  <!-- QtQml is pulled in via QtWebEngineCoreDepends. -->
+  <suppress-warning text="^Scoped enum 'QQml.*' does not have a type entry.*$"/>
+
 </typesystem>

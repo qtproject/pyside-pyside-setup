@@ -468,4 +468,8 @@
   <extra-includes>
     <include file-name="qutils.h" location="global"/>
   </extra-includes>
+
+  <!-- QtQml/QtNetwork are pulled in via QtDataVisualizationDepends. -->
+  <suppress-warning text="^Scoped enum 'Q(Ocsp)|(Dtls)|(Qml).*' does not have a type entry.*$"/>
+
 </typesystem>

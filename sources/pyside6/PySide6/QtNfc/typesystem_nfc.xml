@@ -28,4 +28,6 @@
         <enum-type name="Error"/>
         <enum-type name="Type"/>
     </object-type>
+    <!-- QtNetwork is pulled in via QtNfcDepends. -->
+    <suppress-warning text="^Scoped enum 'Q(Ocsp)|(Dtls).*' does not have a type entry.*$"/>
 </typesystem>

@@ -74,4 +74,8 @@
   </object-type>
   <object-type name="QPlaceSearchSuggestionReply"/>
   <value-type name="QPlaceSupplier"/>
+
+  <!-- QtQml, QtNetwork are pulled in via QtLocationDepends. -->
+  <suppress-warning text="^Scoped enum 'Q(Ocsp)|(Dtls)|(Qml).*' does not have a type entry.*$"/>
+
 </typesystem>
