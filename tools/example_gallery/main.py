@@ -375,7 +375,7 @@ if __name__ == "__main__":
     options = parser.parse_args()
     opt_quiet = options.quiet
     if options.target_dir:
-        EXAMPLES_DOC = Path(options.target_dir)
+        EXAMPLES_DOC = Path(options.target_dir).resolve()
 
     # This main loop will be in charge of:
     #   * Getting all the .pyproject files,
@@ -385,8 +385,12 @@ if __name__ == "__main__":
     examples = {}
 
     # Create the 'examples' directory if it doesn't exist
-    if not EXAMPLES_DOC.is_dir():
-        EXAMPLES_DOC.mkdir()
+    # If it does exist, remove it and create a new one to start fresh
+    if EXAMPLES_DOC.is_dir():
+        shutil.rmtree(EXAMPLES_DOC, ignore_errors=True)
+        if not opt_quiet:
+            print("WARNING: Deleted old html directory")
+    EXAMPLES_DOC.mkdir()
 
     for pyproject_file in EXAMPLES_DIR.glob("**/*.pyproject"):
         if pyproject_file.name != "examples.pyproject":
