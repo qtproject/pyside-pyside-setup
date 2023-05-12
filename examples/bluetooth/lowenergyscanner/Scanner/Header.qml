@@ -4,6 +4,7 @@
 import QtQuick
 
 Rectangle {
+    id: header
     width: parent.width
     height: 70
     border.width: 1
@@ -15,7 +16,7 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         anchors.fill: parent
-        text: headerText
+        text: header.headerText
         font.bold: true
         font.pointSize: 20
         elide: Text.ElideMiddle

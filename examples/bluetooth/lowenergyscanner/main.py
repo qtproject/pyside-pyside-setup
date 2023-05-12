@@ -5,29 +5,23 @@
 
 
 import sys
-import os
 
-from PySide6.QtCore import QUrl
+from PySide6.QtCore import QCoreApplication
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtQuick import QQuickView
+from PySide6.QtQml import QQmlApplicationEngine
 
 from device import Device
 from pathlib import Path
 
-import rc_resources
-
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
-    d = Device()
-    view = QQuickView()
-    view.rootContext().setContextProperty("device", d)
-    src_dir = Path(__file__).resolve().parent
-    view.engine().addImportPath(os.fspath(src_dir))
-    view.engine().quit.connect(view.close)
-    view.setSource(QUrl.fromLocalFile(":/assets/main.qml"))
-    view.setResizeMode(QQuickView.SizeRootObjectToView)
-    view.show()
-    res = app.exec()
-    del view
-    sys.exit(res)
+    engine = QQmlApplicationEngine()
+    engine.addImportPath(Path(__file__).parent)
+    engine.loadFromModule("Scanner", "Main")
 
+    if not engine.rootObjects():
+        sys.exit(-1)
+
+    ex = QCoreApplication.exec()
+    del engine
+    sys.exit(ex)
