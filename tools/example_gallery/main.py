@@ -19,8 +19,18 @@ import shutil
 import zipfile
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
+from enum import Enum
 from pathlib import Path
 from textwrap import dedent
+
+
+class Format(Enum):
+    RST = 0
+    MD = 1
+
+
+SUFFIXES = {Format.RST: "rst", Format.MD: "md"}
+
 
 opt_quiet = False
 
@@ -97,7 +107,8 @@ def get_module_gallery(examples):
     # Iteration per rows
     for i in range(math.ceil(len(examples))):
         e = examples[i]
-        url = e["rst"].replace(".rst", ".html")
+        suffix = SUFFIXES[e["format"]]
+        url = e["doc_file"].replace(f".{suffix}", ".html")
         name = e["example"]
         underline = f'{e["module"]}'
 
@@ -167,7 +178,7 @@ def doc_file(project_dir, project_file_entry):
     return rst_file if rst_file.is_file() else None
 
 
-def get_code_tabs(files, project_dir):
+def get_code_tabs(files, project_dir, file_format):
     content = "\n"
 
     # Prepare ZIP file, and copy to final destination
@@ -177,7 +188,11 @@ def get_code_tabs(files, project_dir):
     zip_dst = EXAMPLES_DOC / zip_name
     shutil.move(zip_src, zip_dst)
 
-    content += f":download:`Download this example <{zip_name}>`\n\n"
+    if file_format == Format.RST:
+        content += f":download:`Download this example <{zip_name}>`\n\n"
+    else:
+        content += f"{{download}}`Download this example <{zip_name}>`\n\n"
+        content += "```{eval-rst}\n"
 
     for i, project_file in enumerate(files):
         if i == 0:
@@ -216,6 +231,10 @@ def get_code_tabs(files, project_dir):
 
         content += add_indent(_file_content, 3)
         content += "\n\n"
+
+    if file_format == Format.MD:
+        content += "```"
+
     return content
 
 
@@ -264,13 +283,31 @@ def read_rst_file(project_dir, project_files, doc_rst):
     return "\n".join(result)
 
 
-def get_headline(text):
+def get_headline(text, file_format):
     """Find the headline in the .rst file."""
-    underline = text.find("\n====")
-    if underline != -1:
-        start = text.rfind("\n", 0, underline - 1)
-        return text[start + 1:underline]
+    if file_format == Format.RST:
+        underline = text.find("\n====")
+        if underline != -1:
+            start = text.rfind("\n", 0, underline - 1)
+            return text[start + 1:underline]
+    elif file_format == Format.MD:
+        headline = text.find("# ")
+        if headline != -1:
+            new_line = text.find("\n", headline + 1)
+            if new_line != -1:
+                return text[headline + 2:new_line].strip()
     return ""
+
+
+def get_doc_source_file(original_doc_dir, example_name):
+    """Find the doc source file, return (Path, Format)."""
+    if original_doc_dir.is_dir():
+        for file_format in (Format.RST, Format.MD):
+            suffix = SUFFIXES[file_format]
+            result = original_doc_dir / f"{example_name}.{suffix}"
+            if result.is_file():
+                return result, file_format
+    return None, Format.RST
 
 
 def write_example(pyproject_file):
@@ -287,17 +324,14 @@ def write_example(pyproject_file):
     # handling subdirectories besides the module level and the example
     extra_names = "" if len(parts) == 2 else "_".join(parts[1:-1])
 
-    rst_file = f"example_{module_name}_{extra_names}_{example_name}.rst".replace("__", "_")
-
     def check_img_ext(i):
         return i.suffix in IMAGE_SUFFIXES
 
     # Check for a 'doc' directory inside the example
-    has_doc = False
     img_doc = None
     original_doc_dir = Path(example_dir / "doc")
+    doc_source_file, file_format = get_doc_source_file(original_doc_dir, example_name)
     if original_doc_dir.is_dir():
-        has_doc = True
         images = [i for i in original_doc_dir.glob("*") if i.is_file() and check_img_ext(i)]
         if len(images) > 0:
             # We look for an image with the same example_name first, if not, we select the first
@@ -307,12 +341,16 @@ def write_example(pyproject_file):
             else:
                 img_doc = image_path[0]
 
+    target_suffix = SUFFIXES[file_format]
+    doc_file = f"example_{module_name}_{extra_names}_{example_name}.{target_suffix}".replace("__", "_")
+
     result = {"example": example_name,
               "module": module_name,
               "extra": extra_names,
-              "rst": rst_file,
+              "doc_file": doc_file,
+              "format": file_format,
               "abs_path": str(example_dir),
-              "has_doc": has_doc,
+              "has_doc": bool(doc_source_file),
               "img_doc": img_doc}
 
     files = []
@@ -333,22 +371,21 @@ def write_example(pyproject_file):
 
     headline = ""
     if files:
-        rst_file_full = EXAMPLES_DOC / rst_file
+        doc_file_full = EXAMPLES_DOC / doc_file
 
-        with open(rst_file_full, "w", encoding="utf-8") as out_f:
-            if has_doc:
-                doc_rst = original_doc_dir / f"{example_name}.rst"
-                content_f = read_rst_file(example_dir, files, doc_rst)
-                headline = get_headline(content_f)
+        with open(doc_file_full, "w", encoding="utf-8") as out_f:
+            if doc_source_file:
+                content_f = read_rst_file(example_dir, files, doc_source_file)
+                headline = get_headline(content_f, file_format)
                 if not headline:
-                    print(f"example_gallery: No headline found in {doc_rst}",
+                    print(f"example_gallery: No headline found in {doc_file}",
                           file=sys.stderr)
 
                 # Copy other files in the 'doc' directory, but
                 # excluding the main '.rst' file and all the
                 # directories.
                 for _f in original_doc_dir.glob("*"):
-                    if _f == doc_rst or _f.is_dir():
+                    if _f == doc_source_file or _f.is_dir():
                         continue
                     src = _f
                     dst = EXAMPLES_DOC / _f.name
@@ -358,11 +395,11 @@ def write_example(pyproject_file):
                         print("Written resource:", resource_written)
             else:
                 content_f = get_header_title(example_dir)
-            content_f += get_code_tabs(files, pyproject_file.parent)
+            content_f += get_code_tabs(files, pyproject_file.parent, file_format)
             out_f.write(content_f)
 
         if not opt_quiet:
-            print(f"Written: {EXAMPLES_DOC}/{rst_file}")
+            print(f"Written: {EXAMPLES_DOC}/{doc_file}")
     else:
         if not opt_quiet:
             print("Empty '.pyproject' file, skipping")
@@ -375,7 +412,7 @@ def write_example(pyproject_file):
 def sort_examples(example):
     result = {}
     for module in example.keys():
-        result[module] = sorted(example.get(module), key=lambda e: e.get("rst"))
+        result[module] = sorted(example.get(module), key=lambda e: e.get("doc_file"))
     return result
 
 
@@ -389,7 +426,7 @@ if __name__ == "__main__":
     gallery = ""
 
     parser = ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
-    TARGET_HELP = f"Directory into which to generate RST files (default: {str(EXAMPLES_DOC)})"
+    TARGET_HELP = f"Directory into which to generate Doc files (default: {str(EXAMPLES_DOC)})"
     parser.add_argument("--target", "-t", action="store", dest="target_dir", help=TARGET_HELP)
     parser.add_argument("--quiet", "-q", action="store_true", help="Quiet")
     options = parser.parse_args()
@@ -441,7 +478,7 @@ if __name__ == "__main__":
         f.write(BASE_CONTENT)
         for module_name, e in sorted(examples.items()):
             for i in e:
-                index_files.append(i["rst"])
+                index_files.append(i["doc_file"])
             f.write(f"{module_name.title()}\n")
             f.write(f"{'*' * len(module_name.title())}\n")
             f.write(get_module_gallery(e))
