@@ -1,0 +1,10 @@
+{
+    "files": ["../bindings.h",
+              "../dialog.py",
+              "../macros.h",
+              "../main.py",
+              "../registerwigglywidget.py",
+              "../wigglywidget.cpp",
+              "../wigglywidget.h",
+              "../wigglywidget.py"]
+}
