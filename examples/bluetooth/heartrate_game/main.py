@@ -43,7 +43,7 @@ if __name__ == '__main__':
         "deviceHandler": deviceHandler})
 
     engine.addImportPath(Path(__file__).parent)
-    engine.loadFromModule("HeartRateGame", "Main");
+    engine.loadFromModule("HeartRateGame", "Main")
 
     if not engine.rootObjects():
         sys.exit(-1)
