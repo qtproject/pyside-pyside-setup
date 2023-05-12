@@ -8,6 +8,9 @@
   <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
   <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
 
+  <rejection class="QTest::Internal"/>
+  <rejection class="QTestPrivate"/>
+
   <rejection class="QTest" function-name="qCompare&lt;char&gt;"/>
   <rejection class="QTest" function-name="qCompare&lt;char*&gt;"/>
   <rejection class="QTest" function-name="qCompare&lt;double&gt;"/>

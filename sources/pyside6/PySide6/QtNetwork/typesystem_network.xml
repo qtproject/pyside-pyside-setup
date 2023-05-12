@@ -7,6 +7,7 @@
   <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
 
     <rejection class="dtlsopenssl"/>
+    <rejection class="QTlsPrivate"/>
 
     <enum-type name="QDtlsError">
         <configuration condition="QT_CONFIG(ssl)"/>

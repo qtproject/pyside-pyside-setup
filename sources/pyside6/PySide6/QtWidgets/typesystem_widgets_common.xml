@@ -30,6 +30,7 @@
   """
   -->
   <rejection class="*" enum-name="enum_1"/>
+  <rejection class="QMdi"/>
 
   <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsItem*&gt;"/>
   <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsLayout*&gt;"/>
