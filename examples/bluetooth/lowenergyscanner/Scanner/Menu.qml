@@ -5,11 +5,12 @@
 import QtQuick
 
 Rectangle {
+    id: menu
 
     property real menuWidth: 100
     property real menuHeight: 50
     property string menuText: "Search"
-    signal buttonClick()
+    signal buttonClick
 
     height: menuHeight
     width: menuWidth
@@ -28,7 +29,7 @@ Rectangle {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
-            text: menuText
+            text: menu.menuText
             elide: Text.ElideMiddle
             color: "#E3E3E3"
             wrapMode: Text.WordWrap
@@ -47,7 +48,7 @@ Rectangle {
             }
 
             onClicked: {
-                buttonClick()
+                menu.buttonClick()
             }
         }
     }

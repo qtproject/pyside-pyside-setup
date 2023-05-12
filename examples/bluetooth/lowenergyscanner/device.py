@@ -4,12 +4,17 @@ import warnings
 from PySide6.QtBluetooth import (QBluetoothDeviceDiscoveryAgent, QLowEnergyController,
                                  QBluetoothDeviceInfo, QBluetoothUuid, QLowEnergyService)
 from PySide6.QtCore import QObject, Property, Signal, Slot, QTimer, QMetaObject, Qt
+from PySide6.QtQml import QmlElement, QmlSingleton
 
 from deviceinfo import DeviceInfo
 from serviceinfo import ServiceInfo
 from characteristicinfo import CharacteristicInfo
 
+QML_IMPORT_NAME = "Scanner"
+QML_IMPORT_MAJOR_VERSION = 1
 
+@QmlElement
+@QmlSingleton
 class Device(QObject):
 
     devices_updated = Signal()
@@ -108,7 +113,7 @@ class Device(QObject):
         self.update = "Back\n(Connecting to device...)"
 
         if self.controller and (self._previousAddress != self.currentDevice.device_address):
-            self.controller.disconnect_from_device()
+            self.controller.disconnectFromDevice()
             del self.controller
             self.controller = None
 
@@ -167,7 +172,7 @@ class Device(QObject):
         # device scan progress
 
         if self.controller.state() != QLowEnergyController.UnconnectedState:
-            self.controller.disconnect_from_device()
+            self.controller.disconnectFromDevice()
         else:
             self.device_disconnected()
 
@@ -265,4 +270,10 @@ class Device(QObject):
             self._characteristics.append(cInfo)
 
         self.characteristic_updated.emit()
+
+    @Slot()
+    def stop_device_discovery(self):
+        if self.discovery_agent.isActive():
+            self.discovery_agent.stop()
+
 

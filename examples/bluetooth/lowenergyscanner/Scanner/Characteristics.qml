@@ -2,9 +2,15 @@
 // Copyright (C) 2023 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
+pragma ComponentBehavior: Bound
 import QtQuick
 
 Rectangle {
+    id: characteristicsPage
+
+    signal showServices
+    signal showDevices
+
     width: 300
     height: 600
 
@@ -18,12 +24,12 @@ Rectangle {
         id: info
         anchors.centerIn: parent
         visible: true
-        dialogText: "Scanning for characteristics...";
+        dialogText: "Scanning for characteristics..."
     }
 
     Connections {
-        target: device
-        function oncharacteristic_updated() {
+        target: Device
+        function oncharacteristics_pdated() {
             menu.menuText = "Back"
             if (characteristicview.count === 0) {
                 info.dialogText = "No characteristic found"
@@ -35,7 +41,7 @@ Rectangle {
         }
 
         function onDisconnected() {
-            pageLoader.source = "qrc:/assets/main.qml"
+            characteristicsPage.showDevices()
         }
     }
 
@@ -46,11 +52,12 @@ Rectangle {
 
         anchors.top: header.bottom
         anchors.bottom: menu.top
-        model: device.characteristic_list
+        model: Device.characteristicList
 
         delegate: Rectangle {
-            id: characteristicbox
-            height:300
+            required property var modelData
+            id: box
+            height: 300
             width: characteristicview.width
             color: "lightsteelblue"
             border.width: 2
@@ -58,24 +65,24 @@ Rectangle {
             radius: 5
 
             Label {
-                id: characteristic_name
-                textContent: modelData.characteristic_name
+                id: characteristicName
+                textContent: box.modelData.characteristic_name
                 anchors.top: parent.top
                 anchors.topMargin: 5
             }
 
             Label {
-                id: characteristic_uuid
-                font.pointSize: characteristic_name.font.pointSize*0.7
-                textContent: modelData.characteristic_uuid
-                anchors.top: characteristic_name.bottom
+                id: characteristicUuid
+                font.pointSize: characteristicName.font.pointSize * 0.7
+                textContent: box.modelData.characteristic_uuid
+                anchors.top: characteristicName.bottom
                 anchors.topMargin: 5
             }
 
             Label {
-                id: characteristic_value
-                font.pointSize: characteristic_name.font.pointSize*0.7
-                textContent: ("Value: " + modelData.characteristic_value)
+                id: characteristicValue
+                font.pointSize: characteristicName.font.pointSize * 0.7
+                textContent: ("Value: " + box.modelData.characteristic_value)
                 anchors.bottom: characteristicHandle.top
                 horizontalAlignment: Text.AlignHCenter
                 anchors.topMargin: 5
@@ -83,16 +90,16 @@ Rectangle {
 
             Label {
                 id: characteristicHandle
-                font.pointSize: characteristic_name.font.pointSize*0.7
-                textContent: ("Handlers: " + modelData.characteristicHandle)
-                anchors.bottom: characteristic_permission.top
+                font.pointSize: characteristicName.font.pointSize * 0.7
+                textContent: ("Handlers: " + box.modelData.characteristic_handle)
+                anchors.bottom: characteristicPermission.top
                 anchors.topMargin: 5
             }
 
             Label {
-                id: characteristic_permission
-                font.pointSize: characteristic_name.font.pointSize*0.7
-                textContent: modelData.characteristic_permission
+                id: characteristicPermission
+                font.pointSize: characteristicName.font.pointSize * 0.7
+                textContent: box.modelData.characteristic_permission
                 anchors.bottom: parent.bottom
                 anchors.topMargin: 5
                 anchors.bottomMargin: 5
@@ -104,11 +111,11 @@ Rectangle {
         id: menu
         anchors.bottom: parent.bottom
         menuWidth: parent.width
-        menuText: device.update
-        menuHeight: (parent.height/6)
+        menuText: Device.update
+        menuHeight: (parent.height / 6)
         onButtonClick: {
-            pageLoader.source = "qrc:/assets/Services.qml"
-            device.update = "Back"
+            characteristicsPage.showServices()
+            Device.update = "Back"
         }
     }
 }

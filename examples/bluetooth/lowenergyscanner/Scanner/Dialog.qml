@@ -4,7 +4,8 @@
 import QtQuick
 
 Rectangle {
-    width: parent.width/3*2
+    id: dialog
+    width: parent.width / 3 * 2
     height: dialogTextId.height + background.height + 20
     z: 50
     property string dialogText: ""
@@ -18,11 +19,11 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top;
+        anchors.top: parent.top
         anchors.topMargin: 10
 
         elide: Text.ElideMiddle
-        text: dialogText
+        text: dialog.dialogText
         color: "#363636"
         wrapMode: Text.Wrap
     }
@@ -30,13 +31,18 @@ Rectangle {
     Image {
         id: background
 
-        width:20
-        height:20
+        width: 20
+        height: 20
         anchors.top: dialogTextId.bottom
         anchors.horizontalCenter: dialogTextId.horizontalCenter
         visible: parent.busyImage
-        source: "qrc:/assets/busy_dark.png"
+        source: "assets/busy_dark.png"
         fillMode: Image.PreserveAspectFit
-        NumberAnimation on rotation { duration: 3000; from:0; to: 360; loops: Animation.Infinite}
+        NumberAnimation on rotation {
+            duration: 3000
+            from: 0
+            to: 360
+            loops: Animation.Infinite
+        }
     }
 }
