@@ -43,4 +43,7 @@
     <suppress-warning text="^QRemoteObjectPendingCallWatcher inherits from a non polymorphic type.*$"/>
     <suppress-warning text="Enum 'QRemoteObjectReplica::ConstructorType' (class: QRemoteObjectReplica) does not have a type entry"/>
     <suppress-warning text="skipping field 'QRemoteObjectReplica::d_impl' with unmatched type 'QSharedPointer'"/>
+    <!-- QtNetwork is pulled in via QtRemoteObjectsDepends. -->
+    <suppress-warning text="^Scoped enum 'Q(Ocsp)|(Dtls).*' does not have a type entry.*$"/>
+
 </typesystem>

@@ -16,4 +16,7 @@
        the QML module is not yet wrapped.
   <object-type name="QQmlWebChannel"/> -->
 
+  <!-- QtQml/QtNetwork are pulled in via QtQtWebChannelDepends. -->
+  <suppress-warning text="^Scoped enum 'Q(Ocsp)|(Dtls)|(Qml).*' does not have a type entry.*$"/>
+
 </typesystem>
