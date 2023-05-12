@@ -15,53 +15,36 @@ from PySide6.QtWidgets import QWidget
 from helper.usesqapplication import UsesQApplication
 
 
-try:
-    sys.gettotalrefcount
-    have_debug = True
-except AttributeError:
-    have_debug = False
+have_debug = hasattr(sys, "gettotalrefcount")
 
 
-def external_slot():
-    pass
+class LeakerLambda():
+    def __init__(self, widget):
+        widget.windowIconChanged.connect(lambda *args: None)
 
 
-class Leaker:
-    def __init__(self, slot):
-        widget = QWidget()
-        widget.windowIconChanged.connect(slot)
-
-
-class LeakerLambda(Leaker):
-    def __init__(self):
-        super().__init__(lambda *args: None)
-
-
-class LeakerFunctoolsPartial(Leaker):
-    def __init__(self):
-        super().__init__(partial(int, 0))
-
-
-class LeakerExternal(Leaker):
-    def __init__(self):
-        super().__init__(external_slot)
+class LeakerFunctoolsPartial():
+    def __init__(self, widget):
+        widget.windowIconChanged.connect(partial(int, 0))
 
 
 class TestBugPYSIDE2299(UsesQApplication):
     def leak(self, leaker):
+        widget = QWidget()
+
+        # Warm-up
+        leaker(widget)
+
         refs_before = sys.gettotalrefcount()
         for _ in range(1000):
-            leaker()
+            leaker(widget)
         refs_after = sys.gettotalrefcount()
-        self.assertNotAlmostEqual(refs_after - refs_before, 0, delta=10)
+
+        self.assertAlmostEqual(refs_after - refs_before, 0, delta=10)
 
     @unittest.skipUnless(have_debug, "You need a debug build")
     def test_lambda(self):
         self.leak(LeakerLambda)
-
-    @unittest.skipUnless(have_debug, "You need a debug build")
-    def test_external(self):
-        self.leak(LeakerExternal)
 
     @unittest.skipUnless(have_debug, "You need a debug build")
     def test_functools_partial(self):
