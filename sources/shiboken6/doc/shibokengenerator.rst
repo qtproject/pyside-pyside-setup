@@ -247,6 +247,10 @@ Options
 ``--no-suppress-warnings``
     Show all warnings.
 
+``--log-unmatched``
+    Prints :ref:`suppress-warning` and :ref:`rejection` elements that were
+    not matched. This is useful for cleaning up old type system files.
+
 .. _silent:
 
 ``--silent``

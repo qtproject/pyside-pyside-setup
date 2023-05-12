@@ -44,6 +44,7 @@ static inline QString includePathOption() { return QStringLiteral("include-paths
 static inline QString frameworkIncludePathOption() { return QStringLiteral("framework-include-paths"); }
 static inline QString systemIncludePathOption() { return QStringLiteral("system-include-paths"); }
 static inline QString typesystemPathOption() { return QStringLiteral("typesystem-paths"); }
+static inline QString logUnmatchedOption() { return QStringLiteral("log-unmatched"); }
 static inline QString helpOption() { return QStringLiteral("help"); }
 static inline QString diffOption() { return QStringLiteral("diff"); }
 static inline QString useGlobalHeaderOption() { return QStringLiteral("use-global-header"); }
@@ -506,6 +507,11 @@ int shibokenMain(const QStringList &argV)
         FileOut::setDryRun(true);
     }
 
+    ait = args.options.find(logUnmatchedOption());
+    const bool logUnmatched = ait != args.options.end();
+    if (logUnmatched)
+        args.options.erase(ait);
+
     QString licenseComment;
     ait = args.options.find(u"license-file"_s);
     if (ait != args.options.end()) {
@@ -751,6 +757,9 @@ int shibokenMain(const QStringList &argV)
              return EXIT_FAILURE;
          }
     }
+
+    if (logUnmatched)
+        TypeDatabase::instance()->logUnmatched();
 
     const QByteArray doneMessage = ReportHandler::doneMessage();
     std::cout << doneMessage.constData() << std::endl;

@@ -49,7 +49,9 @@ struct TypeRejection
 
     QRegularExpression className;
     QRegularExpression pattern;
-    MatchType matchType;
+    MatchType matchType = ExcludeClass;
+    bool generate; // Current type system
+    mutable bool matched = false;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -157,7 +159,7 @@ public:
 
     void setSuppressWarnings(bool on);
 
-    bool addSuppressedWarning(const QString &warning, QString *errorMessage);
+    bool addSuppressedWarning(const QString &warning, bool generate, QString *errorMessage);
 
     bool isSuppressedWarning(QStringView s) const;
 
@@ -185,6 +187,8 @@ public:
     void setDropTypeEntries(QStringList dropTypeEntries);
 
     QString modifiedTypesystemFilepath(const QString &tsFile, const QString &currentPath = QString()) const;
+
+    void logUnmatched() const;
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const;

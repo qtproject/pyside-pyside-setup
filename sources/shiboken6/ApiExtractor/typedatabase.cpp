@@ -101,6 +101,14 @@ static const PythonTypes &builtinPythonTypes()
     return result;
 }
 
+struct SuppressedWarning
+{
+    QRegularExpression pattern;
+    QString rawText;
+    bool generate; // Current type system
+    mutable bool matched = false;
+};
+
 struct TypeDatabasePrivate
 {
     TypeSystemTypeEntryCPtr defaultTypeSystemType() const;
@@ -147,7 +155,7 @@ struct TypeDatabasePrivate
     TypeEntryMap m_flagsEntries;
     TypedefEntryMap m_typedefEntries;
     TemplateEntryMap m_templates;
-    QList<QRegularExpression> m_suppressedWarnings;
+    QList<SuppressedWarning> m_suppressedWarnings;
     QList<TypeSystemTypeEntryCPtr > m_typeSystemEntries; // maintain order, default is first.
 
     AddedFunctionList m_globalUserFunctions;
@@ -572,6 +580,7 @@ bool TypeDatabase::isClassRejected(const QString& className, QString *reason) co
 {
     for (const TypeRejection& r : d->m_rejections) {
         if (r.matchType == TypeRejection::ExcludeClass && r.className.match(className).hasMatch()) {
+            r.matched = true;
             if (reason)
                 *reason = msgRejectReason(r);
             return true;
@@ -590,6 +599,7 @@ static bool findRejection(const QList<TypeRejection> &rejections,
     for (const TypeRejection& r : rejections) {
         if (r.matchType == matchType && r.pattern.match(name).hasMatch()
             && r.className.match(className).hasMatch()) {
+            r.matched = true;
             if (reason)
                 *reason = msgRejectReason(r, name);
             return true;
@@ -785,7 +795,8 @@ void TypeDatabase::setSuppressWarnings(bool on)
     d->m_suppressWarnings = on;
 }
 
-bool TypeDatabase::addSuppressedWarning(const QString &warning, QString *errorMessage)
+bool TypeDatabase::addSuppressedWarning(const QString &warning, bool generate,
+                                        QString *errorMessage)
 {
     QString pattern;
     if (warning.startsWith(u'^') && warning.endsWith(u'$')) {
@@ -823,7 +834,7 @@ bool TypeDatabase::addSuppressedWarning(const QString &warning, QString *errorMe
     }
     expression.setPatternOptions(expression.patternOptions() | QRegularExpression::MultilineOption);
 
-    d->m_suppressedWarnings.append(expression);
+    d->m_suppressedWarnings.append({expression, warning, generate});
     return true;
 }
 
@@ -831,15 +842,40 @@ bool TypeDatabase::isSuppressedWarning(QStringView s) const
 {
     if (!d->m_suppressWarnings)
         return false;
-    return std::any_of(d->m_suppressedWarnings.cbegin(), d->m_suppressedWarnings.cend(),
-                       [&s] (const QRegularExpression &e) {
-                           return e.matchView(s).hasMatch();
-                       });
+    auto wit = std::find_if(d->m_suppressedWarnings.cbegin(), d->m_suppressedWarnings.cend(),
+                            [&s] (const SuppressedWarning &e) {
+                                return e.pattern.match(s).hasMatch();
+                            });
+    const bool found = wit != d->m_suppressedWarnings.cend();
+    if (found)
+        wit->matched = true;
+    return found;
 }
 
 QString TypeDatabase::modifiedTypesystemFilepath(const QString& tsFile, const QString &currentPath) const
 {
     return d->modifiedTypesystemFilepath(tsFile, currentPath);
+}
+
+void TypeDatabase::logUnmatched() const
+{
+    for (auto &sw : d->m_suppressedWarnings) {
+        if (sw.generate && !sw.matched)
+            qWarning("Unmatched suppressed warning: \"%s\"", qPrintable(sw.rawText));
+    }
+
+    for (auto &tr : d->m_rejections) {
+        if (tr.generate && !tr.matched) {
+            QDebug d = qWarning();
+            d.noquote();
+            d.nospace();
+            d << "Unmatched rejection: " << tr.matchType;
+            if (!tr.className.pattern().isEmpty())
+                d << " class " << tr.className.pattern();
+            if (!tr.pattern.pattern().isEmpty())
+                d << " \"" << tr.pattern.pattern() << '"';
+        }
+    }
 }
 
 QString TypeDatabasePrivate::modifiedTypesystemFilepath(const QString& tsFile,

@@ -735,7 +735,7 @@ static inline
                                                  attribute.value());
 }
 
-static bool addRejection(TypeDatabase *database, QXmlStreamAttributes *attributes,
+static bool addRejection(TypeDatabase *database, bool generate, QXmlStreamAttributes *attributes,
                          QString *errorMessage)
 {
     const auto classIndex = indexOfAttribute(*attributes, classAttribute());
@@ -745,6 +745,7 @@ static bool addRejection(TypeDatabase *database, QXmlStreamAttributes *attribute
     }
 
     TypeRejection rejection;
+    rejection.generate = generate;
     const QString className = attributes->takeAt(classIndex).value().toString();
     if (!setRejectionRegularExpression(className, &rejection.className, errorMessage))
         return false;
@@ -3458,8 +3459,11 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
             } else {
                 const QString suppressedWarning =
                     attributes.takeAt(textIndex).value().toString();
-                if (!m_context->db->addSuppressedWarning(suppressedWarning, &m_error))
+                if (!m_context->db->addSuppressedWarning(suppressedWarning,
+                                                         m_generate == TypeEntry::GenerateCode,
+                                                         &m_error)) {
                     return false;
+                }
             }
         }
             break;
@@ -3528,8 +3532,10 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                 return false;
             break;
         case StackElement::Rejection:
-            if (!addRejection(m_context->db, &attributes, &m_error))
+            if (!addRejection(m_context->db, m_generate == TypeEntry::GenerateCode,
+                              &attributes, &m_error)) {
                 return false;
+            }
             break;
         case StackElement::SystemInclude:
             if (!parseSystemInclude(reader, &attributes))
