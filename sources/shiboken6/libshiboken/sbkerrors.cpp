@@ -4,9 +4,35 @@
 #include "sbkerrors.h"
 #include "sbkstring.h"
 #include "helper.h"
+#include "gilstate.h"
 
 namespace Shiboken
 {
+
+// PYSIDE-2335: Track down if we can reach a Python error handler.
+//              _pythonContextStack has always the current state of handler status
+//              in its lowest bit.
+//              Blocking calls like exec or run need to use `setBlocking`.
+static thread_local std::size_t _pythonContextStack{};
+
+PythonContextMarker::PythonContextMarker()
+{
+    // Shift history up and set lowest bit.
+    _pythonContextStack = (_pythonContextStack * 2) + 1;
+}
+
+PythonContextMarker::~PythonContextMarker()
+{
+    // Shift history down.
+    _pythonContextStack /= 2;
+}
+
+void PythonContextMarker::setBlocking()
+{
+    // Clear lowest bit.
+    _pythonContextStack = _pythonContextStack / 2 * 2;
+}
+
 namespace Errors
 {
 
@@ -73,35 +99,21 @@ struct ErrorStore {
     PyObject *traceback;
 };
 
-static ErrorStore savedError{};
+static thread_local ErrorStore savedError{};
 
-void storeError()
+void storeErrorOrPrint()
 {
     // This error happened in a function with no way to return an error state.
     // Therefore, we handle the error when we are error checking, anyway.
-    PyErr_Fetch(&savedError.type, &savedError.exc, &savedError.traceback);
-    PyErr_NormalizeException(&savedError.type, &savedError.exc, &savedError.traceback);
-
-    // In this error-free context, it is safe to call a string function.
-    static PyObject *const msg = PyUnicode_FromString("    Note: This exception was delayed.");
-    static PyObject *const _add_note = Shiboken::String::createStaticString("add_note");
-    static bool hasAddNote = PyObject_HasAttr(PyExc_BaseException, _add_note);
-    if (hasAddNote) {
-        PyObject_CallMethodObjArgs(savedError.exc, _add_note, msg, nullptr);
-    } else {
-        PyObject *type, *exc, *traceback;
-        PyErr_Format(PyExc_RuntimeError, "Delayed %s exception:",
-            reinterpret_cast<PyTypeObject *>(savedError.type)->tp_name);
-        PyErr_Fetch(&type, &exc, &traceback);
-        PyException_SetContext(savedError.exc, exc);
-        PyErr_NormalizeException(&type, &exc, &traceback);
-    }
+    // But we do that only when we know that an error handler can pick it up.
+    if (_pythonContextStack & 1)
+        PyErr_Fetch(&savedError.type, &savedError.exc, &savedError.traceback);
+    else
+        PyErr_Print();
 }
 
 PyObject *occurred()
 {
-    // This error handler can be called in any Python context.
-
     if (savedError.type) {
         PyErr_Restore(savedError.type, savedError.exc, savedError.traceback);
         savedError.type = nullptr;
