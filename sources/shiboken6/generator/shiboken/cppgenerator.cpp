@@ -1421,7 +1421,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     s << "Shiboken::GilState gil;\n";
 
     // Get out of virtual method call if someone already threw an error.
-    s << "if (PyErr_Occurred())\n" << indent
+    s << "if (Shiboken::Errors::occurred())\n" << indent
         << returnStatement << '\n' << outdent;
 
     // PYSIDE-1019: Add info about properties
@@ -1542,7 +1542,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 
         s << "if (" << PYTHON_RETURN_VAR << ".isNull()) {\n" << indent
             << "// An error happened in python code!\n"
-            << "PyErr_Print();\n"
+            << "Shiboken::Errors::storeErrorOrPrint();\n"
             << returnStatement << "\n" << outdent
         << "}\n";
 
@@ -2301,7 +2301,13 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,const OverloadData &
         s << "Shiboken::AutoDecRef errInfo{};\n";
 
     s << "static const char fullName[] = \"" << fullPythonFunctionName(rfunc, true)
-        << "\";\nSBK_UNUSED(fullName)\n";
+        << "\";\nSBK_UNUSED(fullName)\n"
+        << "Shiboken::PythonContextMarker pcm;\n";
+    // PYSIDE-2335: Mark blocking calls like `exec` or `run` as such.
+    bool isBlockingFunction = rfunc->name() == u"exec"_s || rfunc->name() == u"exec_"_s
+                              || rfunc->name() == u"run"_s;
+    if (isBlockingFunction)
+        s << "pcm.setBlocking();\n";
 
     if (maxArgs > 0) {
         s << "int overloadId = -1;\n"
@@ -2394,14 +2400,14 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     QString pre = needsMetaObject ? u"bool usesPyMI = "_s : u""_s;
     s << "\n// PyMI support\n"
         << pre << "Shiboken::callInheritedInit(self, args, kwds, fullName);\n"
-        << "if (PyErr_Occurred())\n" << indent << errorReturn << outdent << "\n";
+        << "if (Shiboken::Errors::occurred())\n" << indent << errorReturn << outdent << "\n";
 
     writeFunctionCalls(s, overloadData, classContext, errorReturn);
     s << '\n';
 
     const QString typeName = classContext.forSmartPointer()
         ? classContext.preciseType().cppSignature() : metaClass->qualifiedCppName();
-    s << "if (PyErr_Occurred() || !Shiboken::Object::setCppPointer(sbkSelf, Shiboken::SbkType< ::"
+    s << "if (Shiboken::Errors::occurred() || !Shiboken::Object::setCppPointer(sbkSelf, Shiboken::SbkType< ::"
         << typeName << " >(), cptr)) {\n"
         <<  indent << "delete cptr;\n" << errorReturn << outdent
         << "}\n";
@@ -2521,7 +2527,7 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
             << "PyObject *revOpMethod = PyObject_GetAttr(" << PYTHON_ARG << ", attrName);\n"
             << "if (revOpMethod && PyCallable_Check(revOpMethod)) {\n" << indent
             << PYTHON_RETURN_VAR << " = PyObject_CallFunction(revOpMethod, \"O\", self);\n"
-            << "if (PyErr_Occurred() && (PyErr_ExceptionMatches(PyExc_NotImplementedError)"
+            << "if (Shiboken::Errors::occurred() && (PyErr_ExceptionMatches(PyExc_NotImplementedError)"
             << " || PyErr_ExceptionMatches(PyExc_AttributeError))) {\n" << indent
             << "PyErr_Clear();\n"
             << "Py_XDECREF(" << PYTHON_RETURN_VAR << ");\n"
@@ -2777,7 +2783,7 @@ void CppGenerator::writeFunctionReturnErrorCheckSection(TextStream &s,
                                                         ErrorReturn errorReturn,
                                                         bool hasReturnValue)
 {
-    s << "if (PyErr_Occurred()";
+    s << "if (Shiboken::Errors::occurred()";
     if (hasReturnValue)
         s << " || !" << PYTHON_RETURN_VAR;
     s << ") {\n" << indent;
@@ -3382,7 +3388,7 @@ static void writeDeprecationWarning(TextStream &s,
         s << cls->name() << "\", ";
     // Check error in case "warning-as-error" is set.
     s << '"' << func->signature().replace(u"::"_s, u"."_s) << "\");\n"
-        << "if (PyErr_Occurred())\n" << indent << errorReturn << outdent;
+        << "if (Shiboken::Errors::occurred())\n" << indent << errorReturn << outdent;
 }
 
 void CppGenerator::writeSingleFunctionCall(TextStream &s,
@@ -3453,7 +3459,7 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
 
     int numRemovedArgs = OverloadData::numberOfRemovedArguments(func);
 
-    s << "if (!PyErr_Occurred()) {\n" << indent;
+    s << "if (!Shiboken::Errors::occurred()) {\n" << indent;
     writeMethodCall(s, func, context,
                     overloadData.pythonFunctionWrapperUsesListOfArguments(),
                     func->arguments().size() - numRemovedArgs, indirections, errorReturn);
@@ -5221,7 +5227,7 @@ void CppGenerator::writeGetterFunction(TextStream &s, const QPropertySpec &prope
     s << "auto " << value << " = " << CPP_SELF_VAR << "->" << property.read() << "();\n"
         << "auto pyResult = ";
     writeToPythonConversion(s, property.type(), context.metaClass(), value);
-    s << ";\nif (PyErr_Occurred() || !pyResult) {\n" << indent
+    s << ";\nif (Shiboken::Errors::occurred() || !pyResult) {\n" << indent
         << "Py_XDECREF(pyResult);\nreturn {};\n" << outdent
         << "}\nreturn pyResult;\n" << outdent << "}\n\n";
 }
@@ -5295,7 +5301,7 @@ void CppGenerator::writeSetterFunction(TextStream &s, const QPropertySpec &prope
 
     s << "auto cppOut = " << CPP_SELF_VAR << "->" << property.read() << "();\n"
         << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut);\n"
-        << "if (PyErr_Occurred())\n" << indent
+        << "if (Shiboken::Errors::occurred())\n" << indent
         << "return -1;\n" << outdent
         << CPP_SELF_VAR << "->" << property.write() << "(cppOut);\n"
         << "return 0;\n" << outdent << "}\n\n";
@@ -5914,11 +5920,11 @@ void CppGenerator::writeFlagsBinaryOperator(TextStream &s, const AbstractMetaEnu
         << ">(int(PyLong_AsLong(self)));\n"
         // PYSIDE-1436: Need to error check self as well because operators are used
         //              sometimes with swapped args.
-        << "if (PyErr_Occurred())\n" << indent
+        << "if (Shiboken::Errors::occurred())\n" << indent
             << "return nullptr;\n" << outdent
         << "cppArg = static_cast<" << flagsEntry->originalName()
         << ">(int(PyLong_AsLong(" << PYTHON_ARG << ")));\n"
-        << "if (PyErr_Occurred())\n" << indent
+        << "if (Shiboken::Errors::occurred())\n" << indent
             << "return nullptr;\n" << outdent
         << "cppResult = " << CPP_SELF_VAR << " " << cppOpName << " cppArg;\n"
         << "return ";
@@ -7030,7 +7036,7 @@ bool CppGenerator::finishGeneration()
         }
     }
 
-    s << "\nif (PyErr_Occurred()) {\n" << indent
+    s << "\nif (Shiboken::Errors::occurred()) {\n" << indent
         << "PyErr_Print();\n"
         << "Py_FatalError(\"can't initialize module " << moduleName() << "\");\n"
         << outdent << "}\n";

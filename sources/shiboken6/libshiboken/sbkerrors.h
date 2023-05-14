@@ -18,6 +18,20 @@
 
 namespace Shiboken
 {
+
+struct LIBSHIBOKEN_API PythonContextMarker
+{
+public:
+    PythonContextMarker(const PythonContextMarker &) = delete;
+    PythonContextMarker(PythonContextMarker &&) = delete;
+    PythonContextMarker &operator=(const PythonContextMarker &) = delete;
+    PythonContextMarker &operator=(PythonContextMarker &&) = delete;
+
+    explicit PythonContextMarker();
+    ~PythonContextMarker();
+    void setBlocking();
+};
+
 namespace Errors
 {
 
@@ -35,9 +49,9 @@ LIBSHIBOKEN_API void setWrongContainerType();
 /// Report an error ASAP: Instead of printing, store for later re-raise.
 /// This replaces `PyErr_Print`, which cannot report errors as exception.
 /// To be used in contexts where raising errors is impossible.
-LIBSHIBOKEN_API void storeError();
+LIBSHIBOKEN_API void storeErrorOrPrint();
 /// Handle an error as in PyErr_Occurred(), but also check for errors which
-/// were captured by `storeError`.
+/// were captured by `storeErrorOrPrint`.
 /// To be used in normal error checks.
 LIBSHIBOKEN_API PyObject *occurred();
 
