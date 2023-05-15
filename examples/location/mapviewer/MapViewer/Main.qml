@@ -5,9 +5,7 @@ import QtQuick
 import QtQuick.Controls
 import QtLocation
 import QtPositioning
-import "map"
-import "menus"
-import "helper.js" as Helper
+import MapViewer
 
 ApplicationWindow {
     id: appWindow

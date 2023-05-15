@@ -10,7 +10,7 @@ from pathlib import Path
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtNetwork import QSslSocket
-from PySide6.QtCore import QCoreApplication, QMetaObject, QUrl, Q_ARG
+from PySide6.QtCore import QCoreApplication, QMetaObject, Q_ARG
 
 HELP = """Usage:
 plugin.<parameter_name> <parameter_value> - Sets parameter = value for plugin"""
@@ -59,9 +59,8 @@ if __name__ == "__main__":
     engine = QQmlApplicationEngine()
     engine.rootContext().setContextProperty("supportsSsl",
                                             QSslSocket.supportsSsl())
-    engine.addImportPath(":/imports")
-    qml_file = Path(__file__).parent / "mapviewer.qml"
-    engine.load(QUrl.fromLocalFile(qml_file))
+    engine.addImportPath(Path(__file__).parent)
+    engine.loadFromModule("MapViewer", "Main")
     engine.quit.connect(QCoreApplication.quit)
 
     items = engine.rootObjects()

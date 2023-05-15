@@ -1,0 +1,27 @@
+module MapViewer
+typeinfo mapviewer.qmltypes
+Main 1.0 Main.qml
+Helper 1.0 helper.js
+MapComponent 1.0 map/MapComponent.qml
+MapSliders 1.0 map/MapSliders.qml
+Marker 1.0 map/Marker.qml
+MiniMap 1.0 map/MiniMap.qml
+ItemPopupMenu 1.0 menus/ItemPopupMenu.qml
+MainMenu 1.0 menus/MainMenu.qml
+MapPopupMenu 1.0 menus/MapPopupMenu.qml
+MarkerPopupMenu 1.0 menus/MarkerPopupMenu.qml
+Geocode 1.0 forms/Geocode.qml
+GeocodeForm 1.0 forms/GeocodeForm.ui.qml
+Message 1.0 forms/Message.qml
+MessageForm 1.0 forms/MessageForm.ui.qml
+ReverseGeocode 1.0 forms/ReverseGeocode.qml
+ReverseGeocodeForm 1.0 forms/ReverseGeocodeForm.ui.qml
+RouteCoordinate 1.0 forms/RouteCoordinate.qml
+Locale 1.0 forms/Locale.qml
+LocaleForm 1.0 forms/LocaleForm.ui.qml
+RouteAddress 1.0 forms/RouteAddress.qml
+RouteAddressForm 1.0 forms/RouteAddressForm.ui.qml
+RouteCoordinateForm 1.0 forms/RouteCoordinateForm.ui.qml
+RouteList 1.0 forms/RouteList.qml
+RouteListDelegate 1.0 forms/RouteListDelegate.qml
+RouteListHeader 1.0 forms/RouteListHeader.qml
