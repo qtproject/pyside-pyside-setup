@@ -896,6 +896,10 @@ def module_QtOpenGL() -> ModuleData:
     data = ModuleData("OpenGL")
     _typesystems = [
         "opengl_common.xml",
+        "typesystem_glgeti_v_includes.xml",
+        "typesystem_glgeti_v_modifications.xml",
+        "typesystem_glgetv_includes.xml",
+        "typesystem_glgetv_modifications.xml",
         "typesystem_opengl_modifications1_0.xml",
         "typesystem_opengl_modifications1_0_compat.xml",
         "typesystem_opengl_modifications1_1.xml",
