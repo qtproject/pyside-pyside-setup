@@ -3,5 +3,5 @@
               "Scanner/Main.qml", "Scanner/Menu.qml","Scanner/Header.qml",
               "Scanner/Characteristics.qml", "Scanner/Dialog.qml", "Scanner/Services.qml",
               "Scanner/Label.qml", "Scanner/Devices.qml", "Scanner/assets/busy_dark.png",
-              "Scammer/qmldir"]
+              "Scanner/qmldir"]
 }
