@@ -88,11 +88,9 @@ static safe_globals_struc *init_phase_1()
          * Due to MSVC's limitation to 64k strings, we needed to assemble pieces.
          */
         auto **block_ptr = reinterpret_cast<const char **>(PySide_CompressedSignaturePackage);
-        int npieces = 0;
         PyObject *piece{};
         AutoDecRef zipped_string_sequence(PyList_New(0));
         for (; **block_ptr != 0; ++block_ptr) {
-            npieces++;
             // we avoid the string/unicode dilemma by not using PyString_XXX:
             piece = Py_BuildValue("s", *block_ptr);
             if (piece == nullptr || PyList_Append(zipped_string_sequence, piece) < 0)
