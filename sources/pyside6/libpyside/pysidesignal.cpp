@@ -441,6 +441,11 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
         PyErr_Format(PyExc_RuntimeError, "cannot connect uninitialized SignalInstance");
         return nullptr;
     }
+    if (source->deleted) {
+        PyErr_Format(PyExc_RuntimeError, "Signal source has been deleted");
+        return nullptr;
+    }
+
     Shiboken::AutoDecRef pyArgs(PyList_New(0));
 
     bool match = false;

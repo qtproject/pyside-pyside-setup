@@ -57,7 +57,7 @@ class Foo(QObject):
         self.s.emit(i)
 
 
-# PYSIDE-2201: This crashed until we introduced a weak reference.
+# PYSIDE-2201/2328: This crashed until we introduced a weak reference.
 class TestDestroyNoConnect(unittest.TestCase):
 
     def testSignalDestroyedMissingReference(self):
@@ -66,6 +66,11 @@ class TestDestroyNoConnect(unittest.TestCase):
         # This crashed because we have no reference in the signal.
         with self.assertRaises(RuntimeError):
             Foo().s.emit(44)
+
+    def testSignalDestroyedinConnect(self):
+        # PYSIDE-2328: Connect to signal of temporary
+        with self.assertRaises(RuntimeError):
+            Foo().s.connect(None)
 
 
 if __name__ == '__main__':
