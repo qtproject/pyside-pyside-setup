@@ -1,0 +1,63 @@
+Qt for Python 6.5.1 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - pyside6-qmlcachegen has been added.
+ - The qmllint target of pyside6-project has been fixed to work on Windows.
+ - [PYSIDE-1106] The example documentation has been improved.
+ - [PYSIDE-2206] Many examples and tutorials have been revamped.
+ - [PYSIDE-2278] Type hints: Checks for None with pyright have been fixed.
+ - [PYSIDE-2283] Qt platform dependencies have been linked to the
+                 documentation.
+ - [PYSIDE-2284] Type hints: The missing NoneType import has been added.
+ - [PYSIDE-2285] Type hints for return values modified to Tuple[] have
+                 been added.
+ - [PYSIDE-2289] opengl32sw.dll is now again shipped.
+ - [PYSIDE-2293] The deployment tool has been fixed to keep structure of QML
+                 files.
+ - [PYSIDE-2294] A regression bug in handling multiple inheritance has been
+                 fixed.
+ - [PYSIDE-2298] QTimeZone::Initialization has been added.
+ - [PYSIDE-2299] A leak connecting signals to anonymous functions has been
+                 fixed.
+ - [PYSIDE-2300] QSqlQueryModel::query() has been re-added.
+ - [PYSIDE-2302] A bug blocking the UI when loading images from a thread has
+                 been fixed.
+ - [PYSIDE-2310] The delayed reporting of exceptions in reimplemented
+ - [PYSIDE-2321] virtual functions introduced in 6.4.3 has been reverted
+                 to the original state.
+ - [PYSIDE-2318] Type hints: Signatures for QDBusAbstractInterfaceBase
+                 functions have been fixed.
+ - [PYSIDE-2325] Missing OpenGL type system files have been added.
+ - [PYSIDE-2328] A crash when connecting to temporary signal sources
+                 has been fixed.
+ - [PYSIDE-2329] Signals with parameters can now be connected by passing
+                 keyword arguments to constructor.
+ - [PYSIDE-2334] Some missing libraries (QtPdfQuick/QtQuickEffects)
+                 have been added.
+ - [QTBUG-112708] Building with QT_FEATURE_opengles2 has been fixed.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-2313] numpy support has been extended to handle short/long long
+                 integer types.
+ - [PYSIDE-1106] The sample binding example documentation has been improved.
+ - [PYSIDE-2288] Clang 16 is now supported.
+ - [PYSIDE-2316] Smart pointer signatures are now correctly registered.
