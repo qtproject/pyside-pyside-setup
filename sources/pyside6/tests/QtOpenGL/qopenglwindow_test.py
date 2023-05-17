@@ -17,7 +17,8 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import QSize, QTimer, Qt
 from PySide6.QtGui import (QColor, QGuiApplication, QImage, QOpenGLContext,
     QSurfaceFormat)
-from PySide6.QtOpenGL import (QOpenGLTexture, QOpenGLWindow)
+from PySide6.QtOpenGL import (QOpenGLTexture, QOpenGLWindow, QOpenGLVersionProfile,
+                              QOpenGLVersionFunctionsFactory)
 
 
 try:
@@ -41,36 +42,40 @@ class OpenGLWindow(QOpenGLWindow):
             self.context().doneCurrent()
 
     def initializeGL(self):
-        self.m_functions = self.context().functions()
+        profile = QOpenGLVersionProfile()
+        profile.setVersion(1, 3)
+        profile.setProfile(QSurfaceFormat.CompatibilityProfile)
+        self.m_functions = QOpenGLVersionFunctionsFactory.get(profile)
         self.m_functions.initializeOpenGLFunctions()
+
         print("GL_MAX_LIGHTS=", self.m_functions.glGetIntegerv(GL.GL_MAX_LIGHTS))
         image = QImage(QSize(200, 200), QImage.Format_RGBA8888)
         image.fill(QColor(Qt.red))
         self.m_texture = QOpenGLTexture(image)
 
     def paintGL(self):
-        GL.glMatrixMode(GL.GL_MODELVIEW)
-        GL.glLoadIdentity()
+        self.m_functions.glMatrixMode(GL.GL_MODELVIEW)
+        self.m_functions.glLoadIdentity()
 
-        GL.glMatrixMode(GL.GL_PROJECTION)
-        GL.glLoadIdentity()
-        GL.glOrtho(0, 1, 1, 0, -1, 1)
+        self.m_functions.glMatrixMode(GL.GL_PROJECTION)
+        self.m_functions.glLoadIdentity()
+        self.m_functions.glOrtho(0, 1, 1, 0, -1, 1)
 
         self.m_functions.glClear(GL.GL_COLOR_BUFFER_BIT)
         self.m_functions.glEnable(GL.GL_TEXTURE_2D)
         self.m_texture.bind()
 
         d = 0.5
-        GL.glBegin(GL.GL_QUADS)
-        GL.glTexCoord2f(0, 0)
-        GL.glVertex2f(0, 0)
-        GL.glTexCoord2f(d, 0)
-        GL.glVertex2f(d, 0)
-        GL.glTexCoord2f(d, d)
-        GL.glVertex2f(d, d)
-        GL.glTexCoord2f(0, d)
-        GL.glVertex2f(0, d)
-        GL.glEnd()
+        self.m_functions.glBegin(GL.GL_QUADS)
+        self.m_functions.glTexCoord2f(0, 0)
+        self.m_functions.glVertex2f(0, 0)
+        self.m_functions.glTexCoord2f(d, 0)
+        self.m_functions.glVertex2f(d, 0)
+        self.m_functions.glTexCoord2f(d, d)
+        self.m_functions.glVertex2f(d, d)
+        self.m_functions.glTexCoord2f(0, d)
+        self.m_functions.glVertex2f(0, d)
+        self.m_functions.glEnd()
         self.m_texture.release()
 
     def resizeGL(self, w, h):
