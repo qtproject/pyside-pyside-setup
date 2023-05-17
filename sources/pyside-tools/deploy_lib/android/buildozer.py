@@ -3,12 +3,15 @@
 
 import re
 import logging
+import tempfile
 import xml.etree.ElementTree as ET
+
 import zipfile
 from pathlib import Path
 from typing import List
 
-from .. import MAJOR_VERSION, BaseConfig, Config, run_command
+from .. import run_command, BaseConfig, Config, MAJOR_VERSION
+from . import get_llvm_readobj, find_lib_dependencies, find_qtlibs_in_wheel
 
 
 class BuildozerConfig(BaseConfig):
@@ -47,10 +50,24 @@ class BuildozerConfig(BaseConfig):
         self.set_value('app', "p4a.local_recipes", str(pysidedeploy_config.recipe_dir))
         self.set_value("app", "p4a.bootstrap", "qt")
 
-        # gets the xml dependency files from Qt installation path
-        dependency_files = self.__get_dependency_files(pysidedeploy_config)
+        self.qt_libs_path: zipfile.Path = (
+            find_qtlibs_in_wheel(wheel_pyside=pysidedeploy_config.wheel_pyside))
+        logging.info(f"[DEPLOY] Found Qt libs path inside wheel: {str(self.qt_libs_path)}")
+
+        extra_modules = self.__find_dependent_qt_modules(pysidedeploy_config)
+        logging.info(f"[DEPLOY] Other dependent modules to be added: {extra_modules}")
+        pysidedeploy_config.modules = pysidedeploy_config.modules + extra_modules
+
+        # update the config file with the extra modules
+        if extra_modules:
+            pysidedeploy_config.update_config()
 
         modules = ",".join(pysidedeploy_config.modules)
+
+        # gets the xml dependency files from Qt installation path
+        dependency_files = self.__get_dependency_files(modules=pysidedeploy_config.modules,
+                                                       arch=self.arch)
+
         local_libs = self.__find_local_libs(dependency_files)
         pysidedeploy_config.local_libs += local_libs
 
@@ -80,31 +97,18 @@ class BuildozerConfig(BaseConfig):
 
         self.update_config()
 
-    def __get_dependency_files(self, pysidedeploy_config: Config) -> List[zipfile.Path]:
+    def __get_dependency_files(self, modules: List[str], arch: str) -> List[zipfile.Path]:
         """
         Based on pysidedeploy_config.modules, returns the
         Qt6{module}_{arch}-android-dependencies.xml file, which contains the various
         dependencies of the module, like permissions, plugins etc
         """
         dependency_files = []
-        needed_dependency_files = [(f"Qt{MAJOR_VERSION}{module}_{self.arch}"
-                                   "-android-dependencies.xml") for module in
-                                   pysidedeploy_config.modules]
-        archive = zipfile.ZipFile(pysidedeploy_config.wheel_pyside)
-
-        # find parent path to dependency files in the wheel
-        dependency_parent_path = None
-        for file in archive.namelist():
-            if file.endswith("android-dependencies.xml"):
-                dependency_parent_path = Path(file).parent
-                # all dependency files are in the same path
-                break
+        needed_dependency_files = [(f"Qt{MAJOR_VERSION}{module}_{arch}"
+                                    "-android-dependencies.xml") for module in modules]
 
         for dependency_file_name in needed_dependency_files:
-            dependency_file = dependency_parent_path / dependency_file_name
-            # convert from pathlib.Path to zipfile.Path
-            dependency_file = zipfile.Path(archive, at=str(dependency_file))
-
+            dependency_file = self.qt_libs_path / dependency_file_name
             if dependency_file.exists():
                 dependency_files.append(dependency_file)
 
@@ -179,6 +183,46 @@ class BuildozerConfig(BaseConfig):
                         local_libs.add(lib_name)
 
         return list(local_libs)
+
+    def __find_dependent_qt_modules(self, pysidedeploy_config: Config):
+        """
+        Given pysidedeploy_config.modules, find all the other dependent Qt modules. This is
+        done by using llvm-readobj (readelf) to find the dependent libraries from the module
+        library.
+        """
+        dependent_modules = set()
+        all_dependencies = set()
+        lib_pattern = re.compile(f"libQt6(?P<mod_name>.*)_{self.arch}")
+
+        llvm_readobj = get_llvm_readobj(pysidedeploy_config.ndk_path)
+        if not llvm_readobj.exists():
+            raise FileNotFoundError(f"[DEPLOY] {llvm_readobj} does not exist."
+                                    "Finding Qt dependencies failed")
+
+        archive = zipfile.ZipFile(pysidedeploy_config.wheel_pyside)
+        lib_path_suffix = Path(str(self.qt_libs_path)).relative_to(pysidedeploy_config.wheel_pyside)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            archive.extractall(tmpdir)
+            qt_libs_tmpdir = Path(tmpdir) / lib_path_suffix
+            # find the lib folder where Qt libraries are stored
+            for module_name in pysidedeploy_config.modules:
+                qt_module_path = qt_libs_tmpdir / f"libQt6{module_name}_{self.arch}.so"
+                if not qt_module_path.exists():
+                    raise FileNotFoundError(f"[DEPLOY] libQt6{module_name}_{self.arch}.so not found"
+                                            " inside the wheel")
+                find_lib_dependencies(llvm_readobj=llvm_readobj, lib_path=qt_module_path,
+                                      dry_run=pysidedeploy_config.dry_run,
+                                      used_dependencies=all_dependencies)
+
+        for dependency in all_dependencies:
+            match = lib_pattern.search(dependency)
+            if match:
+                module = match.group("mod_name")
+                if module not in pysidedeploy_config.modules:
+                    dependent_modules.add(module)
+
+        return list(dependent_modules)
 
 
 class Buildozer:

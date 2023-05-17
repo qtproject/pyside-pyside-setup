@@ -1,9 +1,12 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-import sys
+import ast
 import os
+import re
+import sys
 import logging
+from typing import List
 from importlib import util
 if sys.version_info >= (3, 8):
     from importlib.metadata import version
@@ -12,6 +15,88 @@ else:
 from pathlib import Path
 
 from . import Nuitka, run_command, Config
+
+IMPORT_WARNING_PYSIDE = (f"[DEPLOY] Found 'import PySide6' in file {0}"
+                         ". Use 'from PySide6 import <module>' or pass the module"
+                         " needed using --extra-modules command line argument")
+
+
+def find_pyside_modules(project_dir: Path, extra_ignore_dirs: List[Path] = None,
+                        project_data=None):
+    """
+    Searches all the python files in the project to find all the PySide modules used by
+    the application.
+    """
+    all_modules = set()
+    mod_pattern = re.compile("PySide6.Qt(?P<mod_name>.*)")
+
+    def pyside_imports(py_file: Path):
+        modules = []
+        contents = py_file.read_text(encoding="utf-8")
+        try:
+            tree = ast.parse(contents)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ImportFrom):
+                    main_mod_name = node.module
+                    if main_mod_name.startswith("PySide6"):
+                        if main_mod_name == "PySide6":
+                            # considers 'from PySide6 import QtCore'
+                            for imported_module in node.names:
+                                full_mod_name = imported_module.name
+                                if full_mod_name.startswith("Qt"):
+                                    modules.append(full_mod_name[2:])
+                            continue
+
+                        # considers 'from PySide6.QtCore import Qt'
+                        match = mod_pattern.search(main_mod_name)
+                        if match:
+                            mod_name = match.group("mod_name")
+                            modules.append(mod_name)
+                        else:
+                            logging.warning((
+                                f"[DEPLOY] Unable to find module name from{ast.dump(node)}"))
+
+                if isinstance(node, ast.Import):
+                    for imported_module in node.names:
+                        full_mod_name = imported_module.name
+                        if full_mod_name == "PySide6":
+                            logging.warning(IMPORT_WARNING_PYSIDE.format(str(py_file)))
+
+        except Exception as e:
+            logging.error(f"Finding module import failed on file {str(py_file)}")
+            raise e
+
+        return set(modules)
+
+    py_candidates = []
+    ignore_dirs = ["__pycache__", "env", "venv", "deployment"]
+
+    if project_data:
+        py_candidates = project_data.python_files
+        for py_candidate in py_candidates:
+            all_modules = all_modules.union(pyside_imports(py_candidate))
+        return list(all_modules)
+
+    # incase there is not .pyproject file, search all python files in project_dir, except
+    # ignore_dirs
+    if extra_ignore_dirs:
+        ignore_dirs.extend(extra_ignore_dirs)
+
+    # find relevant .py files
+    _walk = os.walk(project_dir)
+    for root, dirs, files in _walk:
+        dirs[:] = [d for d in dirs if d not in ignore_dirs and not d.startswith(".")]
+        for py_file in files:
+            if py_file.endswith(".py"):
+                py_candidates.append(Path(root) / py_file)
+
+    for py_candidate in py_candidates:
+        all_modules = all_modules.union(pyside_imports(py_candidate))
+
+    if not all_modules:
+        ValueError("[DEPLOY] No PySide6 modules were found")
+
+    return list(all_modules)
 
 
 class PythonExecutable:

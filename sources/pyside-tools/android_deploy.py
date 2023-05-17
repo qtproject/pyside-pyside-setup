@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 import argparse
-import sys
 import logging
 import shutil
 import traceback
@@ -12,10 +11,9 @@ from textwrap import dedent
 from pkginfo import Wheel
 
 from deploy_lib import (setup_python, get_config, cleanup, install_python_dependencies,
-                        config_option_exists, MAJOR_VERSION)
+                        config_option_exists, find_pyside_modules, MAJOR_VERSION)
 from deploy_lib.android import (create_recipe, extract_and_copy_jar, get_wheel_android_arch,
-                                Buildozer, AndroidData, WIDGET_APPLICATION_MODULES,
-                                QUICK_APPLICATION_MODULES)
+                                Buildozer, AndroidData)
 
 
 """ pyside6-android-deploy deployment tool
@@ -39,8 +37,6 @@ from deploy_lib.android import (create_recipe, extract_and_copy_jar, get_wheel_a
 
     Platforms Supported: aarch64, armv7a, i686, x86_64
 
-    Supported Modules: Core, Gui, Widgets, Network, OpenGL, Qml, Quick, QuickControls2
-
     Config file:
         On the first run of the tool, it creates a config file called pysidedeploy.spec which
         controls the various characteristic of the deployment. Users can simply change the value
@@ -50,13 +46,46 @@ from deploy_lib.android import (create_recipe, extract_and_copy_jar, get_wheel_a
         Note: This file is used by both pyside6-deploy and pyside6-android-deploy
 """
 
+HELP_EXTRA_IGNORE_DIRS = dedent("""
+                                Comma separated directory names inside the project dir. These
+                                directories will be skipped when searching for python files
+                                relevant to the project.
+
+                                Example usage: --extra-ignore-dirs=doc,translations
+                                """)
+
+HELP_EXTRA_MODULES = dedent("""
+                            Comma separated list of Qt modules to be added to the application,
+                            in case they are not found automatically.
+
+                            This occurs when you have 'import PySide6' in your code instead
+                            'from PySide6 import <module>'. The module name is specified
+                            with either omitting the prefix of Qt or with it.
+
+                            Example usage 1: --extra-modules=Network,Svg
+                            Example usage 2: --extra-modules=QtNetwork,QtSvg
+                            """)
+
 
 def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = None, ndk_path: Path = None,
          sdk_path: Path = None, config_file: Path = None, init: bool = False,
          loglevel=logging.WARNING, dry_run: bool = False, keep_deployment_files: bool = False,
-         force: bool = False):
+         force: bool = False, extra_ignore_dirs: str = None, extra_modules_grouped: str = None):
 
     logging.basicConfig(level=loglevel)
+
+    if extra_ignore_dirs:
+        extra_ignore_dirs = extra_ignore_dirs.split(",")
+
+    extra_modules = []
+    if extra_modules_grouped:
+        tmp_extra_modules = extra_modules_grouped.split(",")
+        for extra_module in tmp_extra_modules:
+            if extra_module.startswith("Qt"):
+                extra_modules.append(extra_module[2:])
+            else:
+                extra_modules.append(extra_module)
+
     main_file = Path.cwd() / "main.py"
     generated_files_path = None
     if not main_file.exists():
@@ -64,12 +93,6 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
         [DEPLOY] For android deployment to work, the main entrypoint Python file should be named
         'main.py' and it should be run from the application directory
         """))
-
-    # check if ndk and sdk path given, else use default
-    if ndk_path and sdk_path:
-        logging.warning("[DEPLOY] May not work with custom Ndk and Sdk versions."
-                        "Use the default by leaving out --ndk-path and --sdk-path cl"
-                        "arguments")
 
     android_data = AndroidData(wheel_pyside=pyside_wheel, wheel_shiboken=shiboken_wheel,
                                ndk_path=ndk_path, sdk_path=sdk_path)
@@ -121,8 +144,13 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
         # TODO: Optimize this based on the modules needed
         # check if other modules not supported by Android used and raise error
         if not config.modules:
-            config.modules = (QUICK_APPLICATION_MODULES if config.qml_files else
-                              WIDGET_APPLICATION_MODULES)
+            config.modules = find_pyside_modules(project_dir=config.project_dir,
+                                                 extra_ignore_dirs=extra_ignore_dirs,
+                                                 project_data=config.project_data)
+            logging.info("The following PySide modules were found from the python files of "
+                         f"the project {config.modules}")
+
+        config.modules.extend(extra_modules)
 
         # find architecture from wheel name
         if not config.arch:
@@ -211,16 +239,21 @@ if __name__ == "__main__":
                         help=f"Path to shiboken{MAJOR_VERSION} Android Wheel",
                         required=not config_option_exists())
 
+    #TODO: --ndk-path and --sdk-path will be removed when automatic download of sdk and ndk is added
     parser.add_argument("--ndk-path", type=lambda p: Path(p).resolve(),
                         help=("Path to Android Ndk. If omitted, the default from buildozer is used")
-                        , required="--sdk-path" in sys.argv)
+                        , required=True)
 
     parser.add_argument("--sdk-path", type=lambda p: Path(p).resolve(),
                         help=("Path to Android Sdk. If omitted, the default from buildozer is used")
-                        , required="--ndk-path" in sys.argv)
+                        , required=True)
+
+    parser.add_argument("--extra-ignore-dirs", type=str, help=HELP_EXTRA_IGNORE_DIRS)
+
+    parser.add_argument("--extra-modules", type=str, help=HELP_EXTRA_MODULES)
 
     args = parser.parse_args()
 
     main(args.name, args.wheel_pyside, args.wheel_shiboken, args.ndk_path, args.sdk_path,
          args.config_file, args.init, args.loglevel, args.dry_run, args.keep_deployment_files,
-         args.force)
+         args.force, args.extra_ignore_dirs, args.extra_modules)
