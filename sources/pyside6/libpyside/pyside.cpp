@@ -37,6 +37,7 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDir>
 #include <QtCore/QFileInfo>
+#include <QtCore/QMetaMethod>
 #include <QtCore/QMutex>
 #include <QtCore/QStack>
 #include <QtCore/QThread>
@@ -45,6 +46,7 @@
 #include <cstring>
 #include <cctype>
 #include <memory>
+#include <optional>
 #include <typeinfo>
 
 using namespace Qt::StringLiterals;
@@ -299,6 +301,21 @@ static bool _setProperty(PyObject *qObj, PyObject *name, PyObject *value, bool *
     return true;
 }
 
+// PYSIDE-2329: Search a signal by name (Note: QMetaObject::indexOfSignal()
+// searches by signature).
+static std::optional<QMetaMethod> findSignal(const QMetaObject *mo,
+                                             const QByteArray &name)
+{
+    const auto count = mo->methodCount();
+    for (int i = mo->methodOffset(); i < count; ++i) {
+        const auto method = mo->method(i);
+        if (method.methodType() == QMetaMethod::Signal && method.name() == name)
+            return method;
+    }
+    auto *base = mo->superClass();
+    return base != nullptr ? findSignal(base, name) : std::nullopt;
+}
+
 bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj,
                       PyObject *kwds, bool allowErrors)
 {
@@ -309,7 +326,7 @@ bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj,
     int snake_flag = flags & 0x01;
 
     while (PyDict_Next(kwds, &pos, &key, &value)) {
-        QByteArray propName(Shiboken::String::toCString(key));
+        const QByteArray propName = Shiboken::String::toCString(key);
         QByteArray unmangledName = _sigWithOrigName(propName, snake_flag);
         bool accept = false;
         // PYSIDE-1705: Make sure that un-mangled names are not recognized in snake_case mode.
@@ -318,11 +335,11 @@ bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj,
                 if (!_setProperty(qObj, key, value, &accept))
                     return false;
             } else {
-                propName.append("()");
-                if (metaObj->indexOfSignal(propName) != -1) {
+                const auto methodO = findSignal(metaObj, propName);
+                if (methodO.has_value()) {
+                    const auto signature = "2"_ba + methodO->methodSignature();
                     accept = true;
-                    propName.prepend('2');
-                    if (!PySide::Signal::connect(qObj, propName, value))
+                    if (!PySide::Signal::connect(qObj, signature, value))
                         return false;
                 }
             }

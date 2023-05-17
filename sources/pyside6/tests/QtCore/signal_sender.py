@@ -12,7 +12,8 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 
-from PySide6.QtCore import QCoreApplication, QObject, QTimer, Signal, Slot
+from PySide6.QtCore import (QCoreApplication, QObject, QStringListModel,
+                            QTimer, Signal, Slot, Qt)
 
 
 class Sender(QObject):
@@ -57,6 +58,33 @@ class TestSignalSender(UsesQApplication):
 
         self.assertEqual(receiver._sender, sender)
         self.assertEqual(derived_receiver._sender, sender)
+
+
+class TestConstructorConnection(UsesQApplication):
+    """PYSIDE-2329: Check constructor connections for signals from the
+       base as well as signals with arguments."""
+    def testConstructorConnection(self):
+
+        was_destroyed = False
+        was_changed = False
+
+        def destroyed_handler():
+            nonlocal was_destroyed
+            was_destroyed = True
+
+        def changed_handler():
+            nonlocal was_changed
+            was_changed = True
+
+        data_list = ["blub"]
+        model = QStringListModel(data_list,
+                                 destroyed=destroyed_handler,
+                                 dataChanged=changed_handler)
+        model.setData(model.index(0, 0), "bla", Qt.EditRole)
+        del model
+
+        self.assertTrue(was_changed)
+        self.assertTrue(was_destroyed)
 
 
 if __name__ == '__main__':
