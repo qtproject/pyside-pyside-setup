@@ -417,6 +417,7 @@ def module_QtNfc() -> ModuleData:
 
 def module_QtPdf() -> ModuleData:
     data = ModuleData("Pdf")
+    data.qtlib.append("libQt6PdfQuick")
 
     return data
 
@@ -532,6 +533,7 @@ def module_QtQuick() -> ModuleData:
         "qt6quickdialogs2_relwithdebinfo_metatypes.json",
         "qt6quickdialogs2quickimpl_relwithdebinfo_metatypes.json",
         "qt6quickdialogs2utils_relwithdebinfo_metatypes.json",
+        "qt6quickeffectsprivate_relwithdebinfo_metatypes.json",
         "qt6quicketest_relwithdebinfo_metatypes.json",
         "qt6quicketestutilsprivate_relwithdebinfo_metatypes.json",
         "qt6quicklayouts_relwithdebinfo_metatypes.json",
@@ -543,6 +545,7 @@ def module_QtQuick() -> ModuleData:
         "qt6quicktimeline_relwithdebinfo_metatypes.json",
     ]
     _qtlib = [
+        "libQt6QuickEffects",
         "libQt6QuickDialogs2",
         "libQt6QuickDialogs2QuickImpl",
         "libQt6QuickDialogs2Utils",
