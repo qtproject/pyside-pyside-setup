@@ -1542,7 +1542,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 
         s << "if (" << PYTHON_RETURN_VAR << ".isNull()) {\n" << indent
             << "// An error happened in python code!\n"
-            << "Shiboken::Errors::storeError();\n"
+            << "PyErr_Print();\n"
             << returnStatement << "\n" << outdent
         << "}\n";
 
@@ -2777,7 +2777,7 @@ void CppGenerator::writeFunctionReturnErrorCheckSection(TextStream &s,
                                                         ErrorReturn errorReturn,
                                                         bool hasReturnValue)
 {
-    s << "if (Shiboken::Errors::occurred()";
+    s << "if (PyErr_Occurred()";
     if (hasReturnValue)
         s << " || !" << PYTHON_RETURN_VAR;
     s << ") {\n" << indent;
