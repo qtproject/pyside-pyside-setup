@@ -415,7 +415,7 @@ int SignalManager::SignalManagerPrivate::qtPropertyMetacall(QObject *object,
                     : "Unknown property type '%s' of QObject '%s' used in fget with %R",
                 pp->d->typeName.constData(), metaObject->className(), excValue);
             if (PyErr_Occurred())
-                Shiboken::Errors::storeError();
+                PyErr_Print();
             Py_DECREF(excType);
             Py_DECREF(excValue);
             Py_XDECREF(excTraceback);
