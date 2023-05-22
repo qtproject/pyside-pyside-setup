@@ -29,6 +29,8 @@ static bool isMethodDecorator(PyObject *method, bool is_pymethod, PyObject *self
         function1 = PyMethod_GET_FUNCTION(otherMethod.object());
     } else {
         function1 = PyObject_GetAttr(otherMethod.object(), Shiboken::PyName::im_func());
+        if (function1 == nullptr)
+            return false;
         Py_DECREF(function1);
         // Not retaining a reference in line with what PyMethod_GET_FUNCTION does.
     }
