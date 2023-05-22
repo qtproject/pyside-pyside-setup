@@ -4,6 +4,12 @@ Quick start
 ===========
 
 New to Qt? Check also the :ref:`faq-section` section at the end of this page.
+In case you own a Qt License, please refer to :ref:`commercial-page`.
+
+.. note:: Having Qt installed in your system will not interfere with your
+   PySide6 installation if you do it via ``pip install``, because the Python
+   packages (wheels) include already Qt binaries. Most notably, style plugins
+   from the system won't have any effect on PySide applications.
 
 Requirements
 ------------
@@ -11,9 +17,10 @@ Requirements
 Before you can install |project|, first you must install the following software:
 
 * Python 3.7+,
-* We recommend using a virtual environment, such as
+* We **highly** recommend using a virtual environment, such as
   `venv <https://docs.python.org/3/library/venv.html>`_ or
   `virtualenv <https://virtualenv.pypa.io/en/latest>`_
+  and avoid installing PySide6 via ``pip`` in your system.
 
 Installation
 ------------
@@ -36,7 +43,7 @@ Installation
   Check this animation on how to do it:
 
   .. image:: https://qt-wiki-uploads.s3.amazonaws.com/images/8/8a/Pyside6_install.gif
-     :alt: Installation gif
+     :alt: Installation GIF
 
 * **Installing PySide6**
 
@@ -56,10 +63,11 @@ Installation
 
       pip install --index-url=https://download.qt.io/snapshots/ci/pyside/6.4/latest pyside6 --trusted-host download.qt.io
 
-  .. note:: Starting with 6.4.3, PySide6 can be used from inside a conda
-     environment, but any manual changes you make to the qt.conf file will be
-     ignored. If you want to set custom values to the Qt configuration, set
-     them in a qt6.conf file instead. Read more about `qt.conf`_.
+  .. note:: Starting with 6.4.3, PySide6 can be used from inside a
+    `conda <https://conda.io>`_ environment, but any manual changes you make to
+    the ``qt.conf`` file will be ignored. If you want to set custom values to
+    the Qt configuration, set them in a ``qt6.conf`` file instead.
+    Read more about `qt.conf`_.
 
 .. _`qt.conf`: https://doc.qt.io/qt-6/qt-conf.html
 
@@ -95,12 +103,12 @@ guide you through the development process:
     from PySide6 import QtCore, QtWidgets, QtGui
 
   The |pymodname| Python module provides access to the Qt APIs as its submodule.
-  In this case, you are importing the :code:`QtCore`, :code:`QtWidgets`, and :code:`QtGui` submodules.
+  In this case, you are importing the :ref:`QtCore`, :ref:`QtWidgets`, and :ref:`QtGui` submodules.
 
 * **Main Class**
 
-  Define a class named :code:`MyWidget`, which extends QWidget and includes a QPushButton and
-  QLabel.::
+  Define a class named :code:`MyWidget`, which extends :ref:`QWidget` and
+  includes a :ref:`QPushButton` and :ref:`QLabel`.::
 
     class MyWidget(QtWidgets.QWidget):
         def __init__(self):
@@ -122,8 +130,9 @@ guide you through the development process:
         def magic(self):
             self.text.setText(random.choice(self.hello))
 
-  The MyWidget class has the :code:`magic` member function that randomly chooses an item from the
-  :code:`hello` list. When you click the button, the :code:`magic` function is called.
+  The ``MyWidget`` class has the :code:`magic` member function that randomly
+  chooses an item from the :code:`hello` list. When you click the button, the
+  :code:`magic` function is called.
 
 * **Application execution**
 
@@ -198,9 +207,12 @@ To do the same using Qt Quick:
     }
     """
 
+  .. note:: Keep in mind ideally this content should go into
+    a ``qml`` file, but for simplicity, we are using a string variable.
+
 * **Application execution**
 
-  Now, add a main function where you instantiate a :code:`QQmlApplicationEngine` and
+  Now, add a main function where you instantiate a :ref:`QQmlApplicationEngine` and
   load the QML::
 
     if __name__ == "__main__":
@@ -267,5 +279,4 @@ clarify questions before you start programming.
     faq/typesoffiles.rst
     faq/distribution.rst
     faq/whyqtforpython.rst
-
 
