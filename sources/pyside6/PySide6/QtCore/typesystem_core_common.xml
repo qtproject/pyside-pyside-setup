@@ -2624,6 +2624,14 @@
       <modify-argument index="2" pyi-type="str"/>
       <modify-argument index="3" pyi-type="Optional[str]"/>
     </modify-function>
+    <?if !no_QPermission?>
+    <declare-function signature="checkPermission(const QBluetoothPermission &amp; @permission@)" return-type="Qt::PermissionStatus" since="6.5" />
+    <declare-function signature="checkPermission(const QCalendarPermission &amp; @permission@)" return-type="Qt::PermissionStatus" since="6.5" />
+    <declare-function signature="checkPermission(const QCameraPermission &amp; @permission@)" return-type="Qt::PermissionStatus" since="6.5" />
+    <declare-function signature="checkPermission(const QContactsPermission &amp; @permission@)" return-type="Qt::PermissionStatus" since="6.5" />
+    <declare-function signature="checkPermission(const QLocationPermission &amp; @permission@)" return-type="Qt::PermissionStatus" since="6.5" />
+    <declare-function signature="checkPermission(const QMicrophonePermission &amp; @permission@)" return-type="Qt::PermissionStatus" since="6.5" />
+    <?endif?>
   </object-type>
   <object-type name="QSettings">
     <enum-type name="Format"/>
