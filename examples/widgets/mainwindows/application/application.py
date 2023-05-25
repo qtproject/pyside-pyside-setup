@@ -189,16 +189,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.statusBar().showMessage("Ready")
 
     def readSettings(self):
-        settings = QtCore.QSettings("Trolltech", "Application Example")
-        pos = settings.value("pos", QtCore.QPoint(200, 200))
-        size = settings.value("size", QtCore.QSize(400, 400))
-        self.resize(size)
-        self.move(pos)
+        settings = QtCore.QSettings('QtProject', 'Application Example')
+        geometry = settings.value('geometry', QtCore.QByteArray())
+        if geometry.size():
+            self.restoreGeometry(geometry)
 
     def writeSettings(self):
-        settings = QtCore.QSettings("Trolltech", "Application Example")
-        settings.setValue("pos", self.pos())
-        settings.setValue("size", self.size())
+        settings = QtCore.QSettings('QtProject', 'Application Example')
+        settings.setValue('geometry', self.saveGeometry())
 
     def maybeSave(self):
         if self.textEdit.document().isModified():

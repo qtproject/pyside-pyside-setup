@@ -643,6 +643,16 @@
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
+    <modify-function signature="currentTable()const">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="currentList()const">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
     <modify-function signature="insertTable(int,int,const QTextTableFormat &amp;)">
       <modify-argument index="return">
         <define-ownership class="target" owner="default"/>
@@ -758,6 +768,8 @@
       <include file-name="QStringList" location="global"/>
       <include file-name="QMatrix" location="global"/>
     </extra-includes>
+    <inject-code class="native" position="beginning"
+                 file="../glue/qtgui.cpp" snippet="qimage-decref-image-data"/>
 
     <modify-function signature="load(const QString&amp;, const char*)" allow-thread="yes"/>
     <modify-function signature="load(QIODevice*,const char*)" allow-thread="yes"/>
@@ -1760,6 +1772,11 @@
       </modify-argument>
       <inject-code class="target" position="end" file="../glue/qtgui.cpp" snippet="qclipboard-text"/>
     </modify-function>
+    <modify-function signature="mimeData(QClipboard::Mode)const">
+      <modify-argument index="return">
+        <define-ownership class="target" owner="default"/>
+      </modify-argument>
+    </modify-function>
   </object-type>
   <object-type name="QPaintEngineState">
     <extra-includes>
@@ -2625,9 +2642,7 @@
     <enum-type name="FramebufferRestorePolicy" since="5.7"/>
   </object-type>
   <value-type name="QOpenGLFramebufferObjectFormat"/>
-  <!-- Compile error on Windows: QOpenGLPaintDevice::QOpenGLPaintDevice(const QOpenGLPaintDevice &)': attempting to reference a deleted function
   <object-type name="QOpenGLPaintDevice" since="5.0"/>
-  -->
   <object-type name="QOpenGLExtraFunctions" since="5.6">
       <!-- Exlusions due to compile errors -->
       <modify-function signature="glEndTransformFeedback()" remove="all"/>
