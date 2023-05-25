@@ -1,0 +1,34 @@
+Qt for Python 5.15.6 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide2                                 *
+****************************************************************************
+
+ * [PYSIDE-131] The `tr` function now works also for
+   PySide derived Python class instances with the right context.
+ * [PYSIDE-1619][PYSIDE-1609] Fixed several crashes on QObject.findChild
+   and QSettings.value
+ * [PYSIDE-1639][PYSIDE-1640] Fixed locks on QInputDialog and QAbstractSocket.
+
+****************************************************************************
+*                                  Shiboken2                               *
+****************************************************************************
+
+ * [PYSIDE-1621] Embedding of supporting Python files
+   is now completely virtual. No FS files are involved any longer.
+ * [PYSIDE-1626] Coexistence of different feature
+   selections works now, especially for UIC files and inheritance.
+

@@ -38,7 +38,7 @@ init_test_paths(False)
 
 from helper.helper import adjust_filename
 import py3kcompat as py3k
-from PySide2.QtCore import QDir, QSettings, QTemporaryDir
+from PySide2.QtCore import QDir, QSettings, QTemporaryDir, QByteArray
 
 class TestQSettings(unittest.TestCase):
     def testConversions(self):
@@ -56,6 +56,20 @@ class TestQSettings(unittest.TestCase):
 
         r = settings.value('var2', type=list)
         self.assertEqual(type(r), list)
+
+        # Test mixed conversions
+        if py3k.IS_PY3K:
+            ba = QByteArray("hello".encode("utf-8"))
+
+            r = settings.value("test", ba, type=QByteArray)
+            self.assertEqual(type(r), QByteArray)
+
+            r = settings.value("test", ba, type=str)
+            self.assertEqual(type(r), str)
+
+            # Test invalid conversions
+            with self.assertRaises(TypeError):
+                r = settings.value("test", ba, type=dict)
 
 
     def testDefaultValueConversion(self):

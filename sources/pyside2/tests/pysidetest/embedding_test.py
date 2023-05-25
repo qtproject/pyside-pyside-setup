@@ -65,16 +65,15 @@ class EmbeddingTest(unittest.TestCase):
     # Unfortunately, I see no way how to shut things enough down
     # to trigger a second initiatization. Therefore, only one test :-/
     def test_pyside_embedding(self):
-        import sys, os
+        import sys
         self.assertFalse(hasattr(sys, "pyside_uses_embedding"))
         sys.pyside_uses_embedding = "anything true"
         import PySide2
         # everything has to be imported
         self.assertTrue("PySide2.support.signature" in sys.modules)
         self.assertEqual(sys.pyside_uses_embedding, True)
-        dn = os.path.dirname
-        name = os.path.basename(dn(dn(dn(PySide2.support.signature.__file__))))
-        self.assertTrue(name.startswith("embedded.") and name.endswith(".zip"))
+        # We no longer use a physical zip file.
+
 
 if __name__ == '__main__':
     unittest.main()

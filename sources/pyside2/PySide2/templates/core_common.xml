@@ -114,35 +114,52 @@
         <insert-template name="tuple_retval_ok"/>
     </template>
 
+    <!-- QInputDialog: these should allow threads -->
     <template name="fix_arg,arg,arg,arg,arg,arg,arg,bool*,arg">
         bool ok_;
-        %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, %5, %6, %7, &amp;ok_, %9);
+        %RETURN_TYPE retval_;
+        Py_BEGIN_ALLOW_THREADS
+        retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, %5, %6, %7, &amp;ok_, %9);
+        Py_END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_arg,arg,arg,arg,arg,arg,arg,bool*,arg,arg">
         bool ok_;
-        %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, %5, %6, %7, &amp;ok_, %9, %10);
+        %RETURN_TYPE retval_;
+        Py_BEGIN_ALLOW_THREADS
+        retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, %5, %6, %7, &amp;ok_, %9, %10);
+        Py_END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_arg,arg,arg,arg,arg,arg,bool*,arg">
         bool ok_;
-        %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, %5, %6, &amp;ok_, %8);
+        %RETURN_TYPE retval_;
+        Py_BEGIN_ALLOW_THREADS
+        retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, %5, %6, &amp;ok_, %8);
+        Py_END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_arg,arg,arg,arg,arg,bool*,arg">
         bool ok_;
-        %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, %5, &amp;ok_, %7);
+        %RETURN_TYPE retval_;
+        Py_BEGIN_ALLOW_THREADS
+        retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, %5, &amp;ok_, %7);
+        Py_END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
 
     <template name="fix_arg,arg,arg,arg,bool*,arg,arg">
         bool ok_;
-        %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, &amp;ok_, %6, %7);
+        %RETURN_TYPE retval_;
+        Py_BEGIN_ALLOW_THREADS
+        retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, &amp;ok_, %6, %7);
+        Py_END_ALLOW_THREADS
         <insert-template name="tuple_retval_ok"/>
     </template>
+    <!-- End of QInputDialog templates -->
 
     <template name="fix_char*">
         char val_{};

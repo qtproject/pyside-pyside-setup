@@ -80,6 +80,8 @@
         <modify-function signature="disconnectFromHost()" allow-thread="yes"/>
         <modify-function signature="waitForConnected(int)" allow-thread="yes"/>
         <modify-function signature="waitForDisconnected(int)" allow-thread="yes"/>
+        <modify-function signature="waitForBytesWritten(int)" allow-thread="yes"/>
+        <modify-function signature="waitForReadyRead(int)" allow-thread="yes"/>
     </object-type>
 
     <value-type name="QDnsDomainNameRecord"/>

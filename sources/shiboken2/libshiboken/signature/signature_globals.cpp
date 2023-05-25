@@ -110,7 +110,7 @@ static safe_globals_struc *init_phase_1(PyMethodDef *init_meth)
         if (compile == nullptr)
             goto error;
         AutoDecRef code_obj(PyObject_CallFunction(compile, "Oss",
-                                bytes.object(), "(builtin)", "exec"));
+                                bytes.object(), "signature_bootstrap.py", "exec"));
 #else
         AutoDecRef code_obj(PyObject_CallFunctionObjArgs(
                                 loads, bytes.object(), nullptr));
