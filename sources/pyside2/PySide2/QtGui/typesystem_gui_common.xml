@@ -1824,7 +1824,7 @@
         <define-ownership class="target" owner="target"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="print(QPagedPaintDevice*)const" rename="print_"/>
+    <modify-function signature="print(QPagedPaintDevice*)const" allow-thread="yes" rename="print_"/>
   </object-type>
   <object-type name="QTextDocumentWriter" since="4.5"/>
   <object-type name="QTextTable">

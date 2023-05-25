@@ -188,7 +188,7 @@ def write_data(name, text):
         lines.pop()
     text = "\n".join(lines) + "\n"
     modname = re.search(r"'(..*?)'", text).group(1)
-    fn = os.path.join(test_path, f"{ts}-{name}-{modname}.py")
+    fn = os.path.join(test_path, "{}-{}-{}.py".format(ts, name, modname))
     if os.path.exists(fn):
         # do not change the file, we want to skip it
         return
@@ -321,31 +321,31 @@ def get_test_results(starturl):
     minutes, seconds = divmod(remainder, 60)
 
     runtime_formatted = '%d:%02d:%06.3f' % (hours, minutes, seconds)
-    print(f"Run time: {runtime_formatted}s")
+    print("Run time: {}s".format(runtime_formatted))
     if ok:
         found = eval_data()
-        print(f"Successful scan, {found} new files.")
+        print("Successful scan, {} new files.".format(found))
         if found:
             print("Please check if a git push is necessary.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        usage=dedent(f"""\
-            {os.path.basename(my_name)} [-h] scan
+        usage=dedent("""\
+            {} [-h] scan
 
-            Scan the COIN testresults website for embedded exists_{{platf}}_{{version}}_ci.py files.
+            Scan the COIN testresults website for embedded exists_{{}}_{{}}_ci.py files.
 
             Warning: On the first call, this script may take almost 30 minutes to run.
             Subsequent calls are *much* faster due to caching.
 
-            {os.path.basename(my_name)} [-h] eval
+            {} [-h] eval
 
             Enforces evaluation when a scan did not complete yet.
 
             For more information, see the file
                 sources/shiboken2/libshiboken/signature_doc.rst
-            """))
+            """.format(os.path.basename(my_name), platf, version, os.path.basename(my_name)))
     subparsers = parser.add_subparsers(dest="command", metavar="", title="required argument")
     # create the parser for the "scan" command
     parser_scan = subparsers.add_parser("scan", help="run the scan")

@@ -3257,7 +3257,7 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
     {
         Indentation indent(INDENT);
         s << INDENT << "PyObject *value{};\n";
-        s << INDENT << "PyObject *kwds_dup = PyDict_Copy(kwds);\n";
+        s << INDENT << "Shiboken::AutoDecRef kwds_dup(PyDict_Copy(kwds));\n";
         for (const AbstractMetaArgument *arg : args) {
             const int pyArgIndex = arg->argumentIndex()
                 - OverloadData::numberOfRemovedArguments(func, arg->argumentIndex());
@@ -3302,7 +3302,7 @@ void CppGenerator::writeNamedArgumentResolution(QTextStream &s, const AbstractMe
         s << INDENT << "if (PyDict_Size(kwds_dup) > 0) {\n";
         {
             Indentation indent(INDENT);
-            s << INDENT << "errInfo = kwds_dup;\n";
+            s << INDENT << "errInfo = kwds_dup.release();\n";
             if (!(func->isConstructor() && func->ownerClass()->isQObject()))
                 s << INDENT << "goto " << cpythonFunctionName(func) << "_TypeError;\n";
             else
@@ -5230,6 +5230,10 @@ void CppGenerator::writeFlagsBinaryOperator(QTextStream &s, const AbstractMetaEn
         << ">(int(PyLong_AsLong(self)));\n";
     s << INDENT << "cppArg = static_cast<" << flagsEntry->originalName() << ">(int(PyLong_AsLong("
         << PYTHON_ARG << ")));\n";
+        // PYSIDE-1436: Need to error check self as well because operators are used
+        //              sometimes with swapped args.
+    s << INDENT << "if (PyErr_Occurred())\n" << INDENT
+            << "return nullptr;\n";
     s << "#else\n";
     s << INDENT << CPP_SELF_VAR << " = static_cast<::" << flagsEntry->originalName()
         << ">(int(PyInt_AsLong(self)));\n";

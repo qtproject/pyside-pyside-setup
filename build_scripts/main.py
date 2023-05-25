@@ -1056,7 +1056,7 @@ class PysideBuild(_build, DistUtilsCommandMixin):
             OPTION["CMAKE"],
             "-L",         # Lists variables
             "-N",         # Just inspects the cache (faster)
-            "--build",    # Specifies the build dir
+            "-B",         # Specifies the build dir
             self.shiboken_build_dir
         ]
         out = run_process_output(cmake_cmd)

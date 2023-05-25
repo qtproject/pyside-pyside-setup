@@ -150,6 +150,13 @@
     <object-type name="QSGOpacityNode"/>
     <!-- <object-type name="QSGOpaqueTextureMaterial"/> -->
     <object-type name="QSGSimpleRectNode"/>
+    <object-type name="QSGRendererInterface">
+        <enum-type name="GraphicsApi"/>
+        <enum-type name="Resource"/>
+        <enum-type name="ShaderType"/>
+        <enum-type name="ShaderCompilationType" flags="ShaderCompilationTypes"/>
+        <enum-type name="ShaderSourceType" flags="ShaderSourceTypes"/>
+    </object-type>
     <object-type name="QSGSimpleTextureNode">
         <enum-type name="TextureCoordinatesTransformFlag" flags="TextureCoordinatesTransformMode"/>
     </object-type>

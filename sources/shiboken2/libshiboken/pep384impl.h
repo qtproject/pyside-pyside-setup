@@ -40,6 +40,11 @@
 #ifndef PEP384IMPL_H
 #define PEP384IMPL_H
 
+// PYSIDE-1436: Adapt to Python 3.10
+#if PY_VERSION_HEX < 0x030900A4
+#  define Py_SET_REFCNT(obj, refcnt) ((Py_REFCNT(obj) = (refcnt)), (void)0)
+#endif
+
 extern "C"
 {
 
@@ -327,7 +332,7 @@ LIBSHIBOKEN_API PyObject *PyRun_String(const char *, int, PyObject *, PyObject *
 // But this is no problem as we check it's validity for every version.
 
 #define PYTHON_BUFFER_VERSION_COMPATIBLE    (PY_VERSION_HEX >= 0x03030000 && \
-                                             PY_VERSION_HEX <  0x0309FFFF)
+                                             PY_VERSION_HEX <  0x030AFFFF)
 #if !PYTHON_BUFFER_VERSION_COMPATIBLE
 # error Please check the buffer compatibility for this python version!
 #endif

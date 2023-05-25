@@ -754,11 +754,13 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
 #ifndef Py_LIMITED_API
     return _Py_Mangle(privateobj, name);
 #else
-    // For some reason, _Py_Mangle is not in the Limited API. Why?
-    size_t plen = PyUnicode_GET_LENGTH(privateobj);
+    // PYSIDE-1436: _Py_Mangle is no longer exposed; implement it always.
+    // The rest of this function is our own implementation of _Py_Mangle.
+    // Please compare the original function in compile.c .
+    size_t plen = PyUnicode_GET_LENGTH(privateobj.object());
     /* Strip leading underscores from class name */
     size_t ipriv = 0;
-    while (PyUnicode_READ_CHAR(privateobj, ipriv) == '_')
+    while (PyUnicode_READ_CHAR(privateobj.object(), ipriv) == '_')
         ipriv++;
     if (ipriv == plen) {
         Py_INCREF(name);

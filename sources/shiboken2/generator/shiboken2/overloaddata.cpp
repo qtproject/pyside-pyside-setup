@@ -30,6 +30,7 @@
 #include <reporthandler.h>
 #include <graph.h>
 #include "overloaddata.h"
+#include "messages.h"
 #include "ctypenames.h"
 #include "indentor.h"
 #include "shibokengenerator.h"
@@ -151,28 +152,6 @@ static QString getImplicitConversionTypeName(const AbstractMetaType *containerTy
 
     return containerType->typeEntry()->qualifiedCppName() + QLatin1Char('<')
            + types.join(QLatin1String(", ")) + QLatin1String(" >");
-}
-
-// overloaddata.cpp
-static QString msgCyclicDependency(const QString &funcName, const QString &graphName,
-                                   const OverloadData::MetaFunctionList &involvedConversions)
-{
-    QString result;
-    QTextStream str(&result);
-    str << "Cyclic dependency found on overloaddata for \"" << funcName
-         << "\" method! The graph boy saved the graph at \"" << QDir::toNativeSeparators(graphName)
-         << "\".";
-    if (const int count = involvedConversions.size()) {
-        str << " Implicit conversions (" << count << "): ";
-        for (int i = 0; i < count; ++i) {
-            if (i)
-                str << ", \"";
-            str << involvedConversions.at(i)->signature() << '"';
-            if (const AbstractMetaClass *c = involvedConversions.at(i)->implementingClass())
-                str << '(' << c->name() << ')';
-        }
-    }
-    return result;
 }
 
 static inline int overloadNumber(const OverloadData *o)
@@ -330,7 +309,10 @@ void OverloadData::sortNextOverloads()
 
         // Process inheritance relationships
         if (targetType->isValue() || targetType->isObject()) {
-            const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_generator->classes(), targetType->typeEntry());
+            auto *te = targetType->typeEntry();
+            const AbstractMetaClass *metaClass = AbstractMetaClass::findClass(m_generator->classes(), te);
+            if (!metaClass)
+                qFatal("%s", qPrintable(msgArgumentClassNotFound(m_overloads.constFirst(), te)));
             const AbstractMetaClassList &ancestors = m_generator->getAllAncestors(metaClass);
             for (const AbstractMetaClass *ancestor : ancestors) {
                 QString ancestorTypeName = ancestor->typeEntry()->name();

@@ -1,0 +1,41 @@
+Qt for Python 5.15.8 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide2                                 *
+****************************************************************************
+
+ - Backporting changes from PySide6 to enable Python 3.10
+ - [PYSIDE-803] Allow threads in QtGui.QTextDocument.print_
+ - [PYSIDE-1556] Fix cmake argument for standalone macOS
+ - [PYSIDE-1675] PySide6: Fix a bug in Slot.__call__
+ - [PYSIDE-1703] Fix build with MSVC 19.29.30136
+ - [PYSIDE-1710] signature: improve error handling for embedded applications
+ - [PYSIDE-1710] scriptable: make it work by default on macOS, too
+ - [PYSIDE-1715] PySide6: Fix crash when connecting slot after disconnecting
+   non-existent connection to same slot
+ - [PYSIDE-1716] PySide2: Add QSGRendererInterface
+ - [PYSIDE-1727] Signature: fix the __doc__ attribute of classes
+
+****************************************************************************
+*                                  Shiboken2                               *
+****************************************************************************
+
+ - [PYSIDE-1710] Error handling was improved for embedded
+   applications and builtin modules are trusted as valid modules.
+ - [PYSIDE-1684] shiboken6: Do not crash when class cannot be found in the
+   overload sorter
+ - [PYSIDE-1697] shiboken6: Fix a leak in keyword arguments handling
+
