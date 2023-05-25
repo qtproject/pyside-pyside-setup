@@ -84,6 +84,7 @@ public:
                   Format fmt = Documentation::Native);
 
     bool isEmpty() const;
+    bool hasBrief() const { return m_data.contains(Brief); }
 
     QString value(Type t = Documentation::Detailed) const;
     void setValue(const QString& value, Type t = Documentation::Detailed,
@@ -1424,6 +1425,8 @@ public:
 
     AbstractMetaField *findField(const QString &name) const;
 
+    bool hasStaticFields() const;
+
     const AbstractMetaEnumList &enums() const { return m_enums; }
     void setEnums(const AbstractMetaEnumList &enums)
     {
@@ -1442,10 +1445,7 @@ public:
 
     void getFunctionsFromInvisibleNamespacesToBeGenerated(AbstractMetaFunctionList *funcList) const;
 
-    QString fullName() const
-    {
-        return package() + QLatin1Char('.') + name();
-    }
+    QString fullName() const;
 
     /**
      *   Retrieves the class name without any namespace/scope information.

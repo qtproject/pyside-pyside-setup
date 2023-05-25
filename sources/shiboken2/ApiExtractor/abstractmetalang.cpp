@@ -2123,6 +2123,12 @@ AbstractMetaField *AbstractMetaClass::findField(const QString &name) const
     return AbstractMetaField::find(m_fields, name);
 }
 
+bool AbstractMetaClass::hasStaticFields() const
+{
+    return std::any_of(m_fields.cbegin(), m_fields.cend(),
+                       [](const AbstractMetaField *f) { return f->isStatic(); });
+}
+
 AbstractMetaEnum *AbstractMetaClass::findEnum(const QString &enumName)
 {
     if (AbstractMetaEnum *e = findByName(m_enums, enumName))
@@ -2169,6 +2175,11 @@ void AbstractMetaClass::getFunctionsFromInvisibleNamespacesToBeGenerated(Abstrac
             funcList->append(c->functions());
         });
     }
+}
+
+QString AbstractMetaClass::fullName() const
+{
+    return package() + QLatin1Char('.') + m_typeEntry->targetLangName();
 }
 
 static void addExtraIncludeForType(AbstractMetaClass *metaClass, const AbstractMetaType *type)
@@ -2742,4 +2753,3 @@ QString AbstractMetaEnum::package() const
 {
     return m_typeEntry->targetLangPackage();
 }
-

@@ -88,5 +88,18 @@ class QtDataVisualizationTestCase(UsesQGuiApplication):
         QTimer.singleShot(500, self.app.quit)
         self.app.exec_()
 
+    def testBarDataProxy(self):
+        '''PSYSIDE-1438, crashes in QBarDataProxy.addRow()'''
+        items = [QtDataVisualization.QBarDataItem(v) for v in [1.0, 2.0]]
+        data_proxy = QtDataVisualization.QBarDataProxy()
+        data_proxy.addRow(items)
+        data_proxy.addRow(items, 'bla')
+        data_proxy.insertRow(0, items)
+        data_proxy.insertRow(0, items, 'bla')
+        data_proxy.setRow(0, items)
+        data_proxy.setRow(0, items, 'bla')
+        self.assertTrue(data_proxy.rowCount(), 4)
+
+
 if __name__ == '__main__':
     unittest.main()

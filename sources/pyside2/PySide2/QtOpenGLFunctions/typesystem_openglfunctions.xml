@@ -404,6 +404,15 @@
       &openglfunctions_modifications1_0;
       &openglfunctions_modifications1_1;
   </object-type>
+
+  <object-type name="QOpenGLVersionFunctionsFactory">
+      <modify-function signature="get(const QOpenGLVersionProfile&amp;,QOpenGLContext*)"
+                       return-type="QAbstractOpenGLFunctions*">
+          <inject-code class="target" position="beginning" file="../glue/qtopenglfunctions.cpp"
+                       snippet="qopenglversionfunctionsfactory-get"/>
+      </modify-function>
+  </object-type>
+
   <suppress-warning text="^There's no user provided way.*QOpenGLFunctions_\d_\d.*::glIndex.*$"/>
 
 </typesystem>

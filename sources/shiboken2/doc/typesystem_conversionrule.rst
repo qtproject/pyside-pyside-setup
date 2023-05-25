@@ -32,6 +32,10 @@ conversion-rule
             </conversion-rule>
         </value-type>
 
+    The code can be inserted directly, via ``add-conversion`` (providing snippet
+    functionality) or via ``insert-template`` (XML template,
+    see :ref:`using-code-templates`).
+
     The example above show the structure of a complete conversion rule. Each of the
     child tags comprising the conversion rule are described in their own sections
     below.

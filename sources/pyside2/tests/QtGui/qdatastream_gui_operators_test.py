@@ -47,7 +47,9 @@ class QPixmapQDatastream(UsesQApplication):
     def setUp(self):
         super(QPixmapQDatastream, self).setUp()
         self.source_pixmap = QPixmap(100, 100)
-        self.source_pixmap.fill(Qt.red)
+        # PYSIDE-1533: Use Qt.transparent to force Format_ARGB32_Premultiplied
+        # when converting to QImage in any case.
+        self.source_pixmap.fill(Qt.transparent)
         self.output_pixmap = QPixmap()
         self.buffer = QByteArray()
         self.read_stream = QDataStream(self.buffer, QIODevice.ReadOnly)
@@ -60,8 +62,8 @@ class QPixmapQDatastream(UsesQApplication):
 
         image = self.output_pixmap.toImage()
         pixel = image.pixel(10,10)
-        self.assertEqual(pixel, QColor(Qt.red).rgba())
-        self.assertEqual(self.source_pixmap.toImage(), self.output_pixmap.toImage())
+        self.assertEqual(pixel, QColor(Qt.transparent).rgba())
+        self.assertEqual(self.source_pixmap.toImage(), image)
 
 
 if __name__ == '__main__':

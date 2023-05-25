@@ -1,9 +1,9 @@
 #############################################################################
 ##
-## Copyright (C) 2019 The Qt Company Ltd.
+## Copyright (C) 2021 The Qt Company Ltd.
 ## Contact: https://www.qt.io/licensing/
 ##
-## This file is part of Qt for Python.
+## This file is part of the Qt for Python project.
 ##
 ## $QT_BEGIN_LICENSE:LGPL$
 ## Commercial License Usage
@@ -37,19 +37,34 @@
 ##
 #############################################################################
 
-major_version = "5"
-minor_version = "15"
-patch_version = "4"
+import os
+from pathlib import Path
+import subprocess
+import sys
 
-# For example: "a", "b", "rc"
-# (which means "alpha", "beta", "release candidate").
-# An empty string means the generated package will be an official release.
-release_version_type = ""
 
-# For example: "1", "2" (which means "beta1", "beta2", if type is "b").
-pre_release_version = ""
+"""Tool to run a license check
+
+Requires the qtqa repo to be checked out as sibling.
+"""
+
+
+REPO_DIR = Path(__file__).resolve().parents[1]
+
 
 if __name__ == '__main__':
-    # Used by CMake.
-    print('{0};{1};{2};{3};{4}'.format(major_version, minor_version, patch_version,
-                                       release_version_type, pre_release_version))
+    license_check = (REPO_DIR.parent / 'qtqa' / 'tests' / 'prebuild'
+                     / 'license' / 'tst_licenses.pl')
+    print('Checking ', license_check)
+    if not license_check.is_file():
+        print('Not found, please clone the qtqa repo')
+        sys.exit(1)
+
+    os.environ['QT_MODULE_TO_TEST'] = str(REPO_DIR)
+    cmd = [str(license_check), '-m', 'pyside-setup']
+    cmds = ' '.join(cmd)
+    print('Running: ', cmds)
+    ex = subprocess.call(cmd)
+    if ex != 0:
+        print('FAIL! ', cmds)
+        sys.exit(1)

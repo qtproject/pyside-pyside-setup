@@ -42,13 +42,17 @@
 
 """PySide2 port of the widgets/richtext/textobject example from Qt v5.x"""
 
+import os
+
 from PySide2 import QtCore, QtGui, QtWidgets, QtSvg
 
 
-class SvgTextObject(QtCore.QObject, QtGui.QTextObjectInterface):
+class SvgTextObject(QtGui.QPyTextObject):
+    def __init__(self, parent=None):
+        super(SvgTextObject, self).__init__(parent)
 
     def intrinsicSize(self, doc, posInDocument, format):
-        renderer = QtSvg.QSvgRenderer(format.property(Window.SvgData).toByteArray())
+        renderer = QtSvg.QSvgRenderer(format.property(Window.SvgData))
         size = renderer.defaultSize()
 
         if size.height() > 25:
@@ -57,7 +61,7 @@ class SvgTextObject(QtCore.QObject, QtGui.QTextObjectInterface):
         return QtCore.QSizeF(size)
 
     def drawObject(self, painter, rect, doc, posInDocument, format):
-        renderer = QtSvg.QSvgRenderer(format.property(Window.SvgData).toByteArray())
+        renderer = QtSvg.QSvgRenderer(format.property(Window.SvgData))
         renderer.render(painter, rect)
 
 
@@ -80,8 +84,10 @@ class Window(QtWidgets.QWidget):
         file = QtCore.QFile(fileName)
 
         if not file.open(QtCore.QIODevice.ReadOnly):
-            QtWidgets.QMessageBox.warning(self, self.tr("Error Opening File"),
-                    self.tr("Could not open '%1'").arg(fileName))
+            reason = file.errorString()
+            message = "Could not open '{}': {}".format(fileName, reason)
+            QtWidgets.QMessageBox.warning(self, "Error Opening File",
+                                          message.arg(fileName))
 
         svgData = file.readAll()
 
@@ -90,7 +96,7 @@ class Window(QtWidgets.QWidget):
         svgCharFormat.setProperty(Window.SvgData, svgData)
 
         cursor = self.textEdit.textCursor()
-        cursor.insertText(u"\uFFFD", svgCharFormat)
+        cursor.insertText(chr(0xfffc), svgCharFormat)
         self.textEdit.setTextCursor(cursor)
 
     def setupTextObject(self):
@@ -102,8 +108,9 @@ class Window(QtWidgets.QWidget):
         self.fileNameLineEdit = QtWidgets.QLineEdit()
         insertTextObjectButton = QtWidgets.QPushButton(self.tr("Insert Image"))
 
-        self.fileNameLineEdit.setText('./files/heart.svg')
-        QtCore.QObject.connect(insertTextObjectButton, QtCore.SIGNAL('clicked()'), self.insertTextObject)
+        file = os.path.join(os.path.dirname(__file__), 'files', 'heart.svg')
+        self.fileNameLineEdit.setText(file)
+        insertTextObjectButton.clicked.connect(self.insertTextObject)
 
         bottomLayout = QtWidgets.QHBoxLayout()
         bottomLayout.addWidget(fileNameLabel)

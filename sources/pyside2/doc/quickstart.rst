@@ -52,12 +52,6 @@ constructs to print version information::
     # Prints the Qt version used to compile PySide2
     print(PySide2.QtCore.__version__)
 
-.. note::
-
-    As it happened in 5.14.2, PySide had a couple of new releases to fix
-    issues in 5.14.2, adding yet another version level. In that case, you
-    will have different versions being shown for Qt and PySide.
-
 Create a Simple Application
 ---------------------------
 

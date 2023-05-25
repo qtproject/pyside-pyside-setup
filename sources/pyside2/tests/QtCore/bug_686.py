@@ -49,6 +49,7 @@ class MyWriteThread(QThread):
         self.started = True
         while not self.lock.tryLockForWrite():
             pass
+        self.lock.unlock()
         self.canQuit = True
 
 class MyReadThread(QThread):
@@ -62,6 +63,7 @@ class MyReadThread(QThread):
         self.started = True
         while not self.lock.tryLockForRead():
             pass
+        self.lock.unlock()
         self.canQuit = True
 
 class MyMutexedThread(QThread):
