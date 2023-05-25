@@ -116,7 +116,14 @@
     <object-type name="QQmlAbstractUrlInterceptor">
         <enum-type name="DataType"/>
     </object-type>
-    <object-type name="QQmlApplicationEngine"/>
+    <object-type name="QQmlApplicationEngine">
+        <!-- PYSIDE-1681: QQmlApplicationEngine constructor, load() and similar need
+             allow-thread in case there is a message handler installed
+             (qInstallMessageHandler) -->
+        <modify-function signature="^QQmlApplicationEngine\(.*\)$" allow-thread="yes"/>
+        <modify-function signature="load(const QString &amp;)" allow-thread="yes"/>
+        <modify-function signature="load(const QUrl &amp;)" allow-thread="yes"/>
+    </object-type>
     <object-type name="QQmlComponent">
         <enum-type name="CompilationMode"/>
         <enum-type name="Status"/>

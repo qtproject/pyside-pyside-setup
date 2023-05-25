@@ -2353,7 +2353,8 @@ bool QtDocGenerator::doSetup()
 
 Generator::OptionDescriptions QtDocGenerator::options() const
 {
-    return OptionDescriptions()
+    OptionDescriptions result = Generator::options();
+    result
         << qMakePair(QLatin1String("doc-parser=<parser>"),
                      QLatin1String("The documentation parser used to interpret the documentation\n"
                                    "input files (qdoc|doxygen)"))
@@ -2368,10 +2369,13 @@ Generator::OptionDescriptions QtDocGenerator::options() const
         << qMakePair(additionalDocumentationOption() + QLatin1String("=<file>"),
                      QLatin1String("List of additional XML files to be converted to .rst files\n"
                                    "(for example, tutorials)."));
+    return result;
 }
 
 bool QtDocGenerator::handleOption(const QString &key, const QString &value)
 {
+    if (Generator::handleOption(key, value))
+        return true;
     if (key == QLatin1String("library-source-dir")) {
         m_libSourceDir = value;
         return true;

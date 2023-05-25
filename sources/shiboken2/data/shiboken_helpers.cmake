@@ -39,7 +39,7 @@ macro(set_debug_build)
     endif()
 endmacro()
 
-macro(setup_sanitize_address)
+macro(set_sanitize_address)
     # Currently this does not check that the clang / gcc version used supports Address sanitizer,
     # so once again, use at your own risk.
     add_compile_options("-fsanitize=address" "-g" "-fno-omit-frame-pointer")
