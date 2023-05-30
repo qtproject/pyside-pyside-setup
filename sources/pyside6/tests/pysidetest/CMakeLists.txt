@@ -28,6 +28,7 @@ pysidetest_macros.h
 sharedpointertestbench.cpp sharedpointertestbench.h
 testobject.cpp testobject.h
 testview.cpp testview.h
+testqvariantenum.cpp testqvariantenum.h
 )
 
 set(testbinding_SRC
@@ -44,6 +45,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/testbinding/qsharedpointer_int_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/sharedpointertestbench_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testbinding_module_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/testbinding/testqvariantenum_wrapper.cpp
 )
 
 # Get per module include dirs.

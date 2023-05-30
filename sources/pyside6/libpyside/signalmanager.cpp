@@ -20,6 +20,7 @@
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
 #include <sbkerrors.h>
+#include <sbkenum_p.h>
 
 #include <QtCore/QByteArrayView>
 #include <QtCore/QDebug>
@@ -127,6 +128,14 @@ PyObjectWrapper &PyObjectWrapper::operator=(const PySide::PyObjectWrapper &other
 PyObjectWrapper::operator PyObject *() const
 {
     return m_me;
+}
+
+
+int PyObjectWrapper::toInt() const
+{
+    // hold the GIL
+    Shiboken::GilState state;
+    return Shiboken::Enum::check(m_me) ? Shiboken::Enum::getValue(m_me) : -1;
 }
 
 QDataStream &operator<<(QDataStream &out, const PyObjectWrapper &myObj)
@@ -242,6 +251,8 @@ SignalManager::SignalManager() : m_d(new SignalManagerPrivate)
 
     // Register PyObject type to use in queued signal and slot connections
     qRegisterMetaType<PyObjectWrapper>("PyObject");
+    // Register QVariant(enum) conversion to QVariant(int)
+    QMetaType::registerConverter<PyObjectWrapper, int>(&PyObjectWrapper::toInt);
 
     SbkConverter *converter = Shiboken::Conversions::createConverter(&PyBaseObject_Type, nullptr);
     Shiboken::Conversions::setCppPointerToPythonFunction(converter, PyObject_PTR_CppToPython_PyObject);

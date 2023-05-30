@@ -63,6 +63,8 @@
         </modify-function>
     </object-type>
 
+    <value-type name="TestQVariantEnum"/>
+
     <namespace-type name="FlagsNamespace" visible="no">
         <enum-type name="Option" flags="Options"/>
         <object-type name="ClassForEnum" />

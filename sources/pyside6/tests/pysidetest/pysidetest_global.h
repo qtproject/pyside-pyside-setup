@@ -11,5 +11,6 @@
 #include "flagstest.h"
 #include "hiddenobject.h"
 #include "sharedpointertestbench.h"
+#include "testqvariantenum.h"
 
 #endif // PYSIDETEST_GLOBAL_H
