@@ -46,9 +46,10 @@ ClassList = List[dict]
 
 PropertyEntry = Dict[str, Union[str, int, bool]]
 
-SignalArgument = Dict[str, str]
-SignalArguments = List[SignalArgument]
-Signal = Dict[str, Union[str, SignalArguments]]
+Argument = Dict[str, str]
+Arguments = List[Argument]
+Signal = Dict[str, Union[str, Arguments]]
+Slot = Dict[str, Union[str, Arguments]]
 
 
 def _decorator(name: str, value: str) -> Dict[str, str]:
@@ -93,6 +94,28 @@ def _parse_assignment(node: ast.Assign) -> Tuple[Optional[str], Optional[ast.AST
         var_name = node.targets[0].id
         return (var_name, node.value)
     return (None, None)
+
+
+def _parse_call_args(call: ast.Call):
+    """Parse arguments of a Signal call/Slot decorator (type list)."""
+    result: Arguments = []
+    for n, arg in enumerate(call.args):
+        par_name = f"a{n+1}"
+        par_type = _python_to_cpp_type(_name(arg))
+        result.append({"name": par_name, "type": par_type})
+    return result
+
+
+def _parse_slot(func_name: str, call: ast.Call) -> Slot:
+    """Parse a 'Slot' decorator."""
+    return_type = "void"
+    for kwarg in call.keywords:
+        if kwarg.arg == "result":
+            return_type = _python_to_cpp_type(_name(kwarg.value))
+            break
+    return {"access": "public", "name": func_name,
+            "arguments": _parse_call_args(call),
+            "returnType": return_type}
 
 
 class VisitorContext:
@@ -157,6 +180,7 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
         """Visit a class definition"""
         self._properties = []
         self._signals = []
+        self._slots = []
         self._within_class = True
         qualified_name = node.name
         last_dot = qualified_name.rfind('.')
@@ -200,6 +224,9 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
 
         if self._signals:
             data["signals"] = self._signals
+
+        if self._slots:
+            data["slots"] = self._slots
 
         self._json_class_list.append(data)
 
@@ -291,7 +318,7 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
                     _parse_property_kwargs(node.keywords, prop)
                     self._properties.append(prop)
             elif name == "Slot":
-                pass
+                self._slots.append(_parse_slot(func_name, node))
             else:
                 print('Unknown decorator with parameters:', name,
                       file=sys.stderr)
@@ -303,13 +330,8 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
             return
         func_name = _func_name(call)
         if func_name == "Signal" or func_name == "QtCore.Signal":
-            arguments: SignalArguments = []
-            for n, arg in enumerate(call.args):
-                par_name = f"a{n+1}"
-                par_type = _python_to_cpp_type(_name(arg))
-                arguments.append({"name": par_name, "type": par_type})
             signal: Signal = {"access": "public", "name": var_name,
-                              "arguments": arguments,
+                              "arguments": _parse_call_args(call),
                               "returnType": "void"}
             self._signals.append(signal)
         elif func_name == "Property" or func_name == "QtCore.Property":

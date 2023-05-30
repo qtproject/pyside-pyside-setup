@@ -38,6 +38,9 @@ class TestMetaObjectDump(unittest.TestCase):
             example_dir = self._examples_dir / d
             examples.append(example_dir / "birthdayparty.py")
             examples.append(example_dir / "person.py")
+        # Example with slot
+        examples.append(self._examples_dir / "advanced6-Property-value-source"
+                        / "happybirthdaysong.py")
 
         metaobjectdump_cmd_root = [sys.executable, os.fspath(self._metaobjectdump_tool), "-c", "-s"]
         self._examples = []
