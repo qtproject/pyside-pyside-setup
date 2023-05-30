@@ -17,14 +17,14 @@ from helper.usesqapplication import UsesQApplication
 from PySide6.QtCore import QSize, QTimer, Qt
 from PySide6.QtGui import (QColor, QGuiApplication, QImage, QOpenGLContext,
     QSurfaceFormat)
-from PySide6.QtOpenGL import (QOpenGLTexture, QOpenGLWindow, QOpenGLVersionProfile,
-                              QOpenGLVersionFunctionsFactory)
+from PySide6.QtOpenGL import QOpenGLTexture, QOpenGLWindow
 
 
 try:
     from OpenGL import GL
+    from PySide6.QtOpenGL import QOpenGLVersionProfile, QOpenGLVersionFunctionsFactory
 except ImportError:
-    print("Skipping test due to missing OpenGL module")
+    print("Skipping test due to missing OpenGL module/GLES only build")
     sys.exit(0)
 
 
