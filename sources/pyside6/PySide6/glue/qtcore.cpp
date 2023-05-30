@@ -1749,14 +1749,6 @@ static PyObject *invokeMethodHelper(QObject *obj, const char *member, Qt::Connec
 %PYARG_0 = invokeMethodHelper(%1, %2, Qt::AutoConnection, %3, %4, %5, %6);
 // @snippet qmetaobject-invokemethod-return-arg
 
-// @snippet qabstractitemmodel_data
-::QVariant %0;
-if (Shiboken::Enum::check(%PYARG_0))
-    %0 = QVariant(int(Shiboken::Enum::getValue(%PYARG_0)));
-else
-    pythonToCpp(pyResult, &cppResult);
-// @snippet qabstractitemmodel_data
-
 // @snippet keycombination-from-keycombination
 cptr = new ::%TYPE(%1);
 // @snippet keycombination-from-keycombination

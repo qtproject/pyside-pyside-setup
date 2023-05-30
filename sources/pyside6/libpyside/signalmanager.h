@@ -35,6 +35,14 @@ public:
     ~PyObjectWrapper();
     operator PyObject*() const;
 
+    // FIXME: To be removed in Qt7
+    // This was done to make QAbstractItemModel::data() work without explicit conversion of
+    // QVariant(PyObjectWrapper) to QVariant(int). This works because QAbstractItemModel::data()
+    // inturn calls legacyEnumValueFromModelData(const QVariant &data). But this function will
+    // be removed in Qt7.
+    // The proper fix would be to associate PyObjectWrapper to the corresponding C++ Enum.
+    int toInt() const;
+
 private:
     PyObject* m_me;
 };
