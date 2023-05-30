@@ -259,11 +259,7 @@ macro(create_pyside_module)
                               ${generate_pyi_options})
         add_dependencies("${module_NAME}_pyi" ${module_NAME})
 
-        file(GLOB hinting_stub_files
-             RELATIVE
-                 "${CMAKE_CURRENT_BINARY_DIR}/PySide6"
-                 "${CMAKE_CURRENT_BINARY_DIR}/PySide6/*.pyi")
-        install(FILES ${hinting_stub_files}
+        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/../${module_NAME}.pyi"
                 DESTINATION "${PYTHON_SITE_PACKAGES}/PySide6")
     endif()
 
