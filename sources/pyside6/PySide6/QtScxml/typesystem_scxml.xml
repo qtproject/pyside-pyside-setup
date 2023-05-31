@@ -9,9 +9,11 @@
         <object-type name="Loader"/>
     </object-type>
     <object-type name="QScxmlCppDataModel"/>
-    <object-type name="QScxmlEvent">
+    <!-- PYSIDE-2340: Force value conversion for QScxmlStateMachine::connectToEvent()
+         which expects "func(const QScxmlEvent &)" -->
+    <value-type name="QScxmlEvent">
         <enum-type name="EventType"/>
-    </object-type>
+    </value-type>
     <object-type name="QScxmlDynamicScxmlServiceFactory"/>
     <object-type name="QScxmlInvokableService"/>
     <object-type name="QScxmlInvokableServiceFactory"/>
