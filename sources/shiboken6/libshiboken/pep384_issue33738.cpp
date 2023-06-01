@@ -79,11 +79,8 @@ typedef struct _oldtypeobject {
 
 static bool is_compatible_version()
 {
-    auto *version = PySys_GetObject("version_info");
-    auto *major = PyTuple_GetItem(version, 0);
-    auto *minor = PyTuple_GetItem(version, 1);
-    auto number = PyLong_AsLong(major) * 1000 + PyLong_AsLong(minor);
-    return number < 3010;
+    auto number = _PepRuntimeVersion();
+    return number < (3 << 16 | 10 << 8 | 0);
 }
 
 ///////////////////////////////////////////////////////////////////////

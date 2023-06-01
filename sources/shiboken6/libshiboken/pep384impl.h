@@ -121,6 +121,8 @@ LIBSHIBOKEN_API PyObject *_PepType_Lookup(PyTypeObject *type, PyObject *name);
 
 #endif // Py_LIMITED_API
 
+/// PYSIDE-939: We need the runtime version, given major << 16 + minor << 8 + micro
+LIBSHIBOKEN_API long _PepRuntimeVersion();
 /*****************************************************************************
  *
  * PYSIDE-535: Implement a clean type extension for PyPy
