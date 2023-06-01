@@ -898,6 +898,16 @@ init_PepRuntime()
         PepRuntime_38_flag = 1;
 }
 
+long _PepRuntimeVersion()
+{
+    static auto *version = PySys_GetObject("version_info");
+    static auto major = PyLong_AsLong(PyTuple_GetItem(version, 0));
+    static auto minor = PyLong_AsLong(PyTuple_GetItem(version, 1));
+    static auto micro = PyLong_AsLong(PyTuple_GetItem(version, 2));
+    static auto number = major << 16 | minor << 8 | micro;
+    return number;
+}
+
 /*****************************************************************************
  *
  * PYSIDE-535: Support for PyPy

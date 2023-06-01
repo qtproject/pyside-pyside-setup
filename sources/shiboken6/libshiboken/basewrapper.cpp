@@ -490,16 +490,20 @@ static PyTypeObject *SbkObjectType_tp_new(PyTypeObject *metatype, PyObject *args
         }
     }
 
-    // PYSIDE-939: This is a temporary patch that circumvents the problem
-    // with Py_TPFLAGS_METHOD_DESCRIPTOR until this is finally solved.
-    // PyType_Ready uses mro(). We need to temporarily remove the flag from it's type.
-    // We cannot use PyMethodDescr_Type since it is not exported by Python 2.7 .
-    static PyTypeObject *PyMethodDescr_TypePtr = Py_TYPE(
-        PyObject_GetAttr(reinterpret_cast<PyObject *>(&PyType_Type), Shiboken::PyName::mro()));
-    auto hold = PyMethodDescr_TypePtr->tp_flags;
-    PyMethodDescr_TypePtr->tp_flags &= ~Py_TPFLAGS_METHOD_DESCRIPTOR;
-    auto *newType = PepType_Type_tp_new(metatype, args, kwds);
-    PyMethodDescr_TypePtr->tp_flags = hold;
+    // PYSIDE-939: This is still a temporary patch that circumvents the problem
+    //             with Py_TPFLAGS_METHOD_DESCRIPTOR. The problem exists in Python 3.8
+    //             until 3.9.12, only. We check the runtime and hope for this version valishing.
+    //             https://github.com/python/cpython/issues/92112 will not be fixed for 3.8 :/
+    PyTypeObject *newType{};
+    static auto triplet = _PepRuntimeVersion();
+    if (triplet >= (3 << 16 | 8 << 8 | 0) && triplet < (3 << 16 | 9 << 8 | 13)) {
+        auto hold = PyMethodDescr_Type.tp_flags;
+        PyMethodDescr_Type.tp_flags &= ~Py_TPFLAGS_METHOD_DESCRIPTOR;
+        newType = PepType_Type_tp_new(metatype, args, kwds);
+        PyMethodDescr_Type.tp_flags = hold;
+    } else {
+        newType = PepType_Type_tp_new(metatype, args, kwds);
+    }
 
     if (!newType)
         return nullptr;
