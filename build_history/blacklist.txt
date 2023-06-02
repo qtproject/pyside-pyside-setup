@@ -6,6 +6,10 @@
     linux
     darwin
     win32
+[signals::anonymous_slot_leak_test]
+    linux
+    darwin
+    win32
 [Qt3DExtras::qt3dextras_test]
     win32 ci
     linux
