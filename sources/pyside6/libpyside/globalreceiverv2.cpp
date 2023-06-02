@@ -106,16 +106,7 @@ GlobalReceiverKey DynamicSlotDataV2::key(PyObject *callback)
         Shiboken::AutoDecRef func(PyObject_GetAttr(callback, PySide::PySideName::im_func()));
         return {self, func};
     }
-    // PYSIDE-2299: Callbacks can have the same code, but we only need one GlobalReceiverV2 for all
-    //              of them. If we used the callback itself instead of the code object, we would
-    //              create a new GlobalReceiverV2 for each in SignalManager::globalReceiver()
-    //              (signalmanager.cpp), leaking memory.
-
-    // TODO: Need proper fix. This is temporary
-    if (std::strcmp(Py_TYPE(callback)->tp_name, "functools.partial") == 0)
-        return {nullptr, callback};
-
-    return {nullptr, PyFunction_GetCode(callback)};
+    return {nullptr, callback};
 }
 
 PyObject *DynamicSlotDataV2::callback()
