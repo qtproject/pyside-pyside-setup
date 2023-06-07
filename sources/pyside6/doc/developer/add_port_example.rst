@@ -59,3 +59,6 @@ Port a Qt example
 - Add the ``"""Port of the ... example from Qt 6"""`` doc string.
 - Try to port variable and function names to snake case convention.
 - Remove C++ documentation from ``sources/pyside6/doc/additionaldocs.lst``.
+
+.. note:: Example screenshots in ``.png`` should be optimized by
+          running ``optipng -o 7 -strip all``. Alternatively, the ``.webp`` format can be used.
