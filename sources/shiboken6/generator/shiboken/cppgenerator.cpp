@@ -5778,18 +5778,10 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
             }
             break;
         case CEnum:
-            s << "if (!Shiboken::Enum::";
-            s << ((enclosingClass || hasUpperEnclosingClass) ? "createScopedEnumItem"
-                                                             : "createGlobalEnumItem");
-            s << '(' << "EType" << ',' << '\n' << indent
-                << enclosingObjectVariable << ", \"" << mangledName << "\", "
-                << enumValueText << "))\n" << errorReturn << outdent;
-            break;
         case EnumClass:
-            s << "if (!Shiboken::Enum::createScopedEnumItem("
-                << "EType" << ",\n" << indent
-                << "EType" << ", \"" << mangledName << "\", "
-                << enumValueText << "))\n" << errorReturn << outdent;
+            s << "if (!Shiboken::Enum::createEnumItemOld(EType,\n" << indent
+                << "\"" << mangledName << "\", " << enumValueText << "))\n" << errorReturn
+                << outdent;
             break;
         }
     }
@@ -5799,7 +5791,7 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
     if (cppEnum.typeEntry()->flags()) {
         s << "// PYSIDE-1735: Mapping the flags class to the same enum class.\n"
             << cpythonTypeNameExt(cppEnum.typeEntry()->flags()) << " =\n"
-            << indent << "mapFlagsToSameEnum(FType, EType);\n" << outdent;
+            << indent << "EType;\n" << outdent;
     }
     writeEnumConverterInitialization(s, cppEnum);
 

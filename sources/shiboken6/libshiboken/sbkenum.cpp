@@ -381,8 +381,6 @@ static bool _init_enum()
     return true;
 }
 
-static int useOldEnum = -1;
-
 static PyMethodDef SbkEnumObject_Methods[] = {
     {"__reduce__", reinterpret_cast<PyCFunction>(enum___reduce__),
         METH_NOARGS, nullptr},
@@ -399,8 +397,7 @@ static PyObject *PyFlag_KEEP{};
 
 bool PyEnumMeta_Check(PyObject *ob)
 {
-    return Py_TYPE(ob) == (useOldEnum ? SbkEnumType_TypeF()
-                                      : reinterpret_cast<PyTypeObject *>(PyEnumMeta));
+    return Py_TYPE(ob) == reinterpret_cast<PyTypeObject *>(PyEnumMeta);
 }
 
 PyTypeObject *getPyEnumMeta()
@@ -448,7 +445,6 @@ void init_enum()
     }
     int ignoreOver{};
     Enum::enumOption = PyLong_AsLongAndOverflow(option, &ignoreOver);
-    useOldEnum = Enum::enumOption == Enum::ENOPT_OLD_ENUM;
     getPyEnumMeta();
     isInitialized = true;
 }
@@ -474,8 +470,7 @@ int enumIsFlag(PyObject *ob_type)
 // PYSIDE-1735: Helper function to ask what enum we are using
 bool usingNewEnum()
 {
-    init_enum();
-    return !useOldEnum;
+    return true;
 }
 
 } // extern "C"
@@ -525,39 +520,13 @@ bool check(PyObject *pyObj)
 {
     init_enum();
 
-    // PYSIDE-1735: Decide dynamically if new or old enums will be used.
-    if (useOldEnum)
-        return Py_TYPE(Py_TYPE(pyObj)) == SbkEnumType_TypeF();
-
     static PyTypeObject *meta = getPyEnumMeta();
     return Py_TYPE(Py_TYPE(pyObj)) == reinterpret_cast<PyTypeObject *>(meta);
-}
-
-static PyObject *getEnumItemFromValueOld(PyTypeObject *enumType,
-                                         EnumValueType itemValue)
-{
-    PyObject *key, *value;
-    Py_ssize_t pos = 0;
-    PyObject *values = PyDict_GetItem(enumType->tp_dict, PyName::values());
-    if (values == nullptr)
-        return nullptr;
-
-    while (PyDict_Next(values, &pos, &key, &value)) {
-        auto *obj = reinterpret_cast<SbkEnumObject *>(value);
-        if (obj->ob_value == itemValue) {
-            Py_INCREF(value);
-            return value;
-        }
-    }
-    return nullptr;
 }
 
 PyObject *getEnumItemFromValue(PyTypeObject *enumType, EnumValueType itemValue)
 {
     init_enum();
-    // PYSIDE-1735: Decide dynamically if new or old enums will be used.
-    if (useOldEnum)
-        return getEnumItemFromValueOld(enumType, itemValue);
 
     auto *obEnumType = reinterpret_cast<PyObject *>(enumType);
     AutoDecRef val2members(PyObject_GetAttrString(obEnumType, "_value2member_map_"));
@@ -632,26 +601,10 @@ static PyObject *createEnumItem(PyTypeObject *enumType, const char *itemName,
     return enumItem;
 }
 
-bool createGlobalEnumItem(PyTypeObject *enumType, PyObject *module,
-                          const char *itemName, EnumValueType itemValue)
+bool createEnumItemOld(PyTypeObject *enumType, const char *itemName, EnumValueType itemValue)
 {
-    PyObject *enumItem = createEnumItem(enumType, itemName, itemValue);
-    if (!enumItem)
-        return false;
-    int ok = useOldEnum ? PyModule_AddObject(module, itemName, enumItem) : true;
-    Py_DECREF(enumItem);
-    return ok >= 0;
-}
-
-bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
-                          const char *itemName, EnumValueType itemValue)
-{
-    PyObject *enumItem = createEnumItem(enumType, itemName, itemValue);
-    if (!enumItem)
-        return false;
-    int ok = useOldEnum ? PyDict_SetItemString(scope->tp_dict, itemName, enumItem) : true;
-    Py_DECREF(enumItem);
-    return ok >= 0;
+    Shiboken::AutoDecRef enumItem(createEnumItem(enumType, itemName, itemValue));
+    return !enumItem.isNull();
 }
 
 // This exists temporary as the old way to create an enum item.
@@ -699,9 +652,6 @@ PyObject *newItem(PyTypeObject *enumType, EnumValueType itemValue,
                   const char *itemName)
 {
     init_enum();
-    // PYSIDE-1735: Decide dynamically if new or old enums will be used.
-    if (useOldEnum)
-        return newItemOld(enumType, itemValue, itemName);
 
     auto *obEnumType = reinterpret_cast<PyObject *>(enumType);
     if (!itemName)
@@ -846,10 +796,10 @@ PyTypeObject *newTypeWithName(const char *name,
                               const char *cppName,
                               PyTypeObject *numbers_fromFlag)
 {
-    if (!useOldEnum)
-        PyErr_Format(PyExc_RuntimeError, "function `%s` can no longer be used when the Python "
-            "Enum's have been selected", __FUNCTION__);
-    return newTypeWithNameOld(name, cppName, numbers_fromFlag);
+    // old enums are gone, remove completely?
+    PyErr_Format(PyExc_RuntimeError, "function `%s` can no longer be used because old "
+        "Enums are no longer supported", __FUNCTION__);
+    return nullptr;
 }
 
 const char *getCppName(PyTypeObject *enumType)
@@ -865,10 +815,6 @@ EnumValueType getValue(PyObject *enumItem)
     init_enum();
 
     assert(Enum::check(enumItem));
-
-    // PYSIDE-1735: Decide dynamically if new or old enums will be used.
-    if (useOldEnum)
-        return reinterpret_cast<SbkEnumObject *>(enumItem)->ob_value;
 
     AutoDecRef pyValue(PyObject_GetAttrString(enumItem, "value"));
     return PyLong_AsLongLong(pyValue);
@@ -961,10 +907,6 @@ static PyTypeObject *recordCurrentEnum(PyObject *scopeOrModule,
     lec.name = name;
     lec.enumType = enumType;
     lec.flagsType = flagsType;
-
-    // PYSIDE-1735: Decide dynamically if new or old enums will be used.
-    if (useOldEnum)
-        return flagsType;
 
     // We return nullptr as flagsType to disable flag creation.
     return nullptr;
@@ -1084,10 +1026,6 @@ PyTypeObject *morphLastEnumToPython()
     auto *enumType = lec.enumType;
     // This is temporary; SbkEnumType will be removed, soon.
 
-    // PYSIDE-1735: Decide dynamically if new or old enums will be used.
-    if (useOldEnum)
-        return enumType;
-
     auto *setp = PepType_SETP(reinterpret_cast<SbkEnumType *>(enumType));
     if (setp->replacementType) {
         // For some (yet to fix) reason, initialization of the enums can happen twice.
@@ -1188,12 +1126,6 @@ PyTypeObject *morphLastEnumToPython()
     if (old_python_version)
         Py_INCREF(obEnumType);
     return newType;
-}
-
-PyTypeObject *mapFlagsToSameEnum(PyTypeObject *FType, PyTypeObject *EType)
-{
-    // this will be switchable...
-    return useOldEnum ? FType : EType;
 }
 
 } // extern "C"

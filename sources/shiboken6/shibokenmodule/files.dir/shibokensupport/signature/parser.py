@@ -64,11 +64,11 @@ def _get_flag_enum_option():
             try:
                 flag = ast.literal_eval(opt)
             except Exception:
-                flag = True
+                flag = False    # turn a forbidden option into an error
     elif hasattr(sys, sysname):
-        flag = getattr(sys, sysname)
+        opt2 = flag = getattr(sys, sysname)
         if not isinstance(flag, int):
-            flag = True
+            flag = False        # turn a forbidden option into an error
     p = f"\n    *** Python is at version {'.'.join(map(str, pyminver or (0,)))} now."
     q = f"\n    *** PySide is at version {'.'.join(map(str, ver[:2]))} now."
     # PYSIDE-1797: Emit a warning when we may remove pep384_issue33738.cpp
@@ -86,6 +86,8 @@ def _get_flag_enum_option():
     # normalize the sys attribute
     setattr(sys, sysname, flag)
     os.environ[envname] = str(flag)
+    if int(flag) == 0:
+        raise RuntimeError(f"Old Enums are no longer supported. int({opt or opt2}) evaluates to 0)")
     return flag
 
 

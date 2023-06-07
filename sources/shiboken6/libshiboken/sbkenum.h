@@ -57,20 +57,10 @@ namespace Enum
                                                    const char *cppName,
                                                    PyTypeObject *flagsType = nullptr);
 
-    /**
-     *  Creates a new enum item for a given enum type and adds it to \p module.
-     *  \param enumType  Enum type to where the new enum item will be added.
-     *  \param module    Module to where the enum type of the new enum item belongs.
-     *  \param itemName  Name of the enum item.
-     *  \param itemValue Numerical value of the enum item.
-     *  \return true if everything goes fine, false if it fails.
-     */
-    LIBSHIBOKEN_API bool createGlobalEnumItem(PyTypeObject *enumType, PyObject *module,
-                                              const char *itemName,
-                                              EnumValueType itemValue);
-    /// This function does the same as createGlobalEnumItem, but adds the enum to a Shiboken type or namespace.
-    LIBSHIBOKEN_API bool createScopedEnumItem(PyTypeObject *enumType, PyTypeObject *scope,
-                                              const char *itemName, EnumValueType itemValue);
+    /// Creates a new enum item for a given enum type.
+    LIBSHIBOKEN_API bool createEnumItemOld(PyTypeObject *enumType,
+                                           const char *itemName,
+                                           EnumValueType itemValue);
 
     LIBSHIBOKEN_API PyObject *newItem(PyTypeObject *enumType, EnumValueType itemValue,
                                       const char *itemName = nullptr);

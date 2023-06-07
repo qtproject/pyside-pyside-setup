@@ -21,7 +21,6 @@ LIBSHIBOKEN_API void initEnumFlagsDict(PyTypeObject *type);
 
 /// PYSIDE-1735: Patching the Enum / Flags implementation. Remove in 6.4
 LIBSHIBOKEN_API PyTypeObject *morphLastEnumToPython();
-LIBSHIBOKEN_API PyTypeObject *mapFlagsToSameEnum(PyTypeObject *FType, PyTypeObject *EType);
 
 /// PYSIDE-1735: Make sure that we can import the Python enum implementation.
 LIBSHIBOKEN_API PyTypeObject *getPyEnumMeta();
@@ -35,7 +34,7 @@ LIBSHIBOKEN_API bool usingNewEnum();
 namespace Shiboken { namespace Enum {
 
 enum : int {
-    ENOPT_OLD_ENUM        = 0x00,
+    ENOPT_OLD_ENUM        = 0x00,   // no longer supported
     ENOPT_NEW_ENUM        = 0x01,
     ENOPT_INHERIT_INT     = 0x02,
     ENOPT_GLOBAL_SHORTCUT = 0x04,
