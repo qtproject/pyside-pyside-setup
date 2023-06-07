@@ -2595,6 +2595,11 @@
         <define-ownership owner="c++"/>
       </modify-argument>
     </modify-function>
+    <modify-function signature="translate(const char*,const char*,const char *,int)">
+      <modify-argument index="1" pyi-type="str"/>
+      <modify-argument index="2" pyi-type="str"/>
+      <modify-argument index="3" pyi-type="Optional[str]"/>
+    </modify-function>
   </object-type>
   <object-type name="QSettings">
     <enum-type name="Format"/>
@@ -3069,6 +3074,27 @@
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qmetaobject-repr"/>
     </add-function>
+    <modify-function signature="indexOfClassInfo(const char *)">
+        <modify-argument index="1" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="indexOfConstructor(const char *)">
+        <modify-argument index="1" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="indexOfEnumerator(const char *)">
+        <modify-argument index="1" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="indexOfMethod(const char *)">
+        <modify-argument index="1" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="indexOfProperty(const char *)">
+        <modify-argument index="1" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="indexOfSignal(const char *)">
+        <modify-argument index="1" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="indexOfSlot(const char *)">
+        <modify-argument index="1" pyi-type="str"/>
+    </modify-function>
   </object-type>
   <value-type name="QMetaProperty" >
     <!-- This isn't part of Qt public API -->
@@ -3219,10 +3245,12 @@
 
   <add-function signature="SIGNAL(const char*)" return-type="str">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-signal"/>
+    <modify-argument index="1" pyi-type="str"/>
   </add-function>
 
   <add-function signature="SLOT(const char*)" return-type="str">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-slot"/>
+    <modify-argument index="1" pyi-type="str"/>
   </add-function>
 
   <add-function signature="QT_TR_NOOP(PyObject)" return-type="PyObject*">
