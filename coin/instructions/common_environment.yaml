@@ -248,4 +248,17 @@ instructions:
           - condition: property
             property: host.os
             equals_value: Linux
-
+    - type: EnvironmentVariable
+      variableName: interpreter
+      variableValue: "python3.8"
+      enable_if:
+         condition: property
+         property: host.osVersion
+         equals_value: RHEL_8_6
+    - type: EnvironmentVariable
+      variableName: interpreter
+      variableValue: "python3"
+      disable_if: # we disable this, if in rhel 8.4
+        condition: property
+        property: target.osVersion
+        equals_value: RHEL_8_6

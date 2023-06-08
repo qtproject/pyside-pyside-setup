@@ -8,7 +8,7 @@ Requirements
 * ``sphinx`` package for the documentation (optional).
 * Depending on your linux distribution, the following dependencies might also be required:
 
-  * ``libgl-dev``, ``python-dev``, ``python-distutils``, and ``python-setuptools``.
+  * ``libgl-dev``, ``python-dev``, and ``python-setuptools``.
 * Check the platform dependencies of `Qt for Linux/X11`_.
 
 Building from source

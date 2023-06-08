@@ -20,14 +20,7 @@ from .log import log
 from . import (PYSIDE_PYTHON_TOOLS, PYSIDE_LINUX_BIN_TOOLS, PYSIDE_UNIX_LIBEXEC_TOOLS,
                PYSIDE_WINDOWS_BIN_TOOLS, PYSIDE_UNIX_BIN_TOOLS, PYSIDE_UNIX_BUNDLED_TOOLS)
 
-try:
-    # Using the distutils implementation within setuptools
-    from setuptools.errors import SetupError
-except ModuleNotFoundError:
-    # This is motivated by our CI using an old version of setuptools
-    # so then the coin_build_instructions.py script is executed, and
-    # import from this file, it was failing.
-    from distutils.errors import DistutilsSetupError as SetupError
+from setuptools.errors import SetupError
 
 try:
     WindowsError

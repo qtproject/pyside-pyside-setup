@@ -45,7 +45,17 @@ instructions:
     userMessageOnFailure: >
          Failed to execute test instructions on macOS
   - type: ExecuteCommand
-    command: "python3 -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
+    command: "{{.Env.interpreter}} -m pip install -U pip setuptools==67.7.2 --user"
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 1200
+    enable_if:
+        condition: property
+        property: host.os
+        equals_value: Linux
+    userMessageOnFailure: >
+         Failed to install setuptools on Linux
+  - type: ExecuteCommand
+    command: "{{.Env.interpreter}} -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 600
     enable_if:
@@ -54,6 +64,16 @@ instructions:
         equals_value: Linux
     userMessageOnFailure: >
          Failed to execute test instructions on Linux
+  - type: ExecuteCommand
+    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -m pip install -U pip setuptools==67.7.2 --user"
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 1200
+    enable_if:
+        condition: property
+        property: host.os
+        equals_value: Windows
+    userMessageOnFailure: >
+         Failed to install setuptools on Windows
   - type: ExecuteCommand
     command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=c:\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
     maxTimeInSeconds: 14400

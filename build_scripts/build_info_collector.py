@@ -187,7 +187,7 @@ class BuildInfoCollectorMixin(object):
             py_version = f"{_major}.{_minor}"
             py_include_dir = get_config_var("INCLUDEPY")
             py_libdir = get_config_var("LIBDIR")
-            # distutils.sysconfig.get_config_var('prefix') returned the
+            # sysconfig.get_config_var('prefix') returned the
             # virtual environment base directory, but
             # sysconfig.get_config_var returns the system's prefix.
             # We use 'base' instead (although, platbase points to the
