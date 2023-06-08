@@ -1,13 +1,7 @@
 # Copyright (C) 2018 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-try:
-    from setuptools import Command
-except ModuleNotFoundError:
-    # This is motivated by our CI using an old version of setuptools
-    # so then the coin_build_instructions.py script is executed, and
-    # import from this file, it was failing.
-    from distutils.cmd import Command  # TODO: remove
+from setuptools import Command
 
 import sys
 import logging
@@ -166,7 +160,7 @@ OPTION = {
     "SNAPSHOT_BUILD": has_option("snapshot-build"),
     "LIMITED_API": option_value("limited-api"),
     "PACKAGE_TIMESTAMP": option_value("package-timestamp"),
-    # This is used automatically by distutils.command.install object, to
+    # This is used automatically by setuptools.command.install object, to
     # specify the final installation location.
     "FINAL_INSTALL_PREFIX": option_value("prefix", remove=False),
     "CMAKE_TOOLCHAIN_FILE": option_value("cmake-toolchain-file"),

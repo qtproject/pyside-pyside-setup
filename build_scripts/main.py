@@ -14,7 +14,6 @@ from shutil import copytree
 from textwrap import dedent
 
 # PYSIDE-1760: Pre-load setuptools modules early to avoid racing conditions.
-#              Please be careful: All setuptools modules must be loaded before _distutils
 #              may be touched (should be avoided anyway, btw.)
 # Note: This bug is only visible when tools like pyenv are not used. They have some
 #       pre-loading effect so that setuptools is already in the cache, hiding the problem.
@@ -179,12 +178,12 @@ class PysideInstall(_install, CommandMixin):
 
         if sys.platform == 'darwin' or self.is_cross_compile:
             # Because we change the plat_name to include a correct
-            # deployment target on macOS distutils thinks we are
+            # deployment target on macOS setuptools thinks we are
             # cross-compiling, and throws an exception when trying to
             # execute setup.py install. The check looks like this
             # if self.warn_dir and build_plat != get_platform():
-            #   raise DistutilsPlatformError("Can't install when "
-            #                                  "cross-compiling")
+            #   raise PlatformError("Can't install when "
+            #                       "cross-compiling")
             # Obviously get_platform will return the old deployment
             # target. The fix is to disable the warn_dir flag, which
             # was created for bdist_* derived classes to override, for
@@ -236,7 +235,7 @@ class PysideBuildPy(_build_py):
 
 
 # _install_lib is reimplemented to preserve
-# symlinks when distutils / setuptools copy files to various
+# symlinks when setuptools copy files to various
 # directories from the setup tools build dir to the install dir.
 class PysideInstallLib(_install_lib):
 
@@ -283,7 +282,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
         if use_os_name_hack:
             # This is a hack to circumvent the dubious check in
-            # distutils.commands.build -> finalize_options, which only
+            # setuptool.commands.build -> finalize_options, which only
             # allows setting the plat_name for windows NT.
             # That is not the case for the wheel module though (which
             # does allow setting plat_name), so we circumvent by faking
@@ -775,7 +774,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
             # Set macOS minimum deployment target (version).
             # This is required so that calling
-            #   run_process -> distutils.spawn()
+            #   run_process -> subprocess.call()
             # does not set its own minimum deployment target
             # environment variable which is based on the python
             # interpreter sysconfig value.
@@ -890,7 +889,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
     def prepare_packages(self):
         """
         This will copy all relevant files from the various locations in the "cmake install dir",
-        to the setup tools build dir (which is read from self.build_lib provided by distutils).
+        to the setup tools build dir (which is read from self.build_lib provided by setuptools).
 
         After that setuptools.command.build_py is smart enough to copy everything
         from the build dir to the install dir (the virtualenv site-packages for example).

@@ -119,7 +119,7 @@ class Config(object):
         setup_kwargs['python_requires'] = ">=3.7, <3.12"
 
         if log_level == LogLevel.QUIET:
-            # Tells distutils / setuptools to be quiet, and only print warnings or errors.
+            # Tells setuptools to be quiet, and only print warnings or errors.
             # Makes way less noise in the terminal when building.
             setup_kwargs['verbose'] = 0
 
