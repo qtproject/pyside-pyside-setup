@@ -113,7 +113,7 @@ class QFlagsOnQVariant(unittest.TestCase):
 
 
 class QFlagsWrongType(unittest.TestCase):
-    @unittest.skipIf(sys.pyside63_option_python_enum, "Qt.ItemFlag is no longer an IntEnum")
+    @unittest.skipIf(sys.pyside6_option_python_enum, "Qt.ItemFlag is no longer an IntEnum")
     def testWrongType(self):
         '''Wrong type passed to QFlags binary operators'''
         for op in operator.or_, operator.and_, operator.xor:
@@ -136,7 +136,7 @@ class QEnumFlagDefault(unittest.TestCase):
         oldEnum = Qt.AlignmentFlag()
         self.assertEqual(type(oldFlag), Qt.Alignment)
         self.assertEqual(type(oldEnum), Qt.AlignmentFlag)
-        if sys.pyside63_option_python_enum:
+        if sys.pyside6_option_python_enum:
             self.assertEqual(type(oldFlag), type(oldEnum))
         else:
             with self.assertRaises(AssertionError):

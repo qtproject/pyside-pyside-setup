@@ -1,3 +1,5 @@
+.. _enum-features:
+
 The Set of Enum Features
 ========================
 
@@ -17,7 +19,7 @@ This is the table of all flags used to control the creation of Python enums.
 ======================  =====  ======================================================
 Flag Name               Value
 ======================  =====  ======================================================
-ENOPT_OLD_ENUM           0x00  (False) Disable new enums
+ENOPT_OLD_ENUM           0x00  (False) No longer possible since PySide 6.6
 ENOPT_NEW_ENUM           0x01  (True) The default for PySide 6.4, full implementation
 ENOPT_INHERIT_INT        0x02  Turn all Enum into IntEnum and Flag into IntFlag
 ENOPT_GLOBAL_SHORTCUT    0x04  Re-add shortcuts for global enums
@@ -29,8 +31,8 @@ ENOPT_NO_MISSING         0x80  Don't allow missing values in Enum
 ======================  =====  ======================================================
 
 Such a set of flags can be defined either by the environment variable
-``PYSIDE63_OPTION_PYTHON_ENUM`` or set by the Python variable
-``sys.pyside63_option_python_enum`` before PySide6 is imported.
+``PYSIDE6_OPTION_PYTHON_ENUM`` or set by the Python variable
+``sys.pyside6_option_python_enum`` before PySide6 is imported.
 The environment variable also supports arbitrary integer expressions
 by using ``ast.literal_eval``.
 

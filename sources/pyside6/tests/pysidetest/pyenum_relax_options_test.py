@@ -51,7 +51,7 @@ def runtest(program):
 
 def testprog2(option):
     return runtest(dedent(f"""
-        sys.pyside63_option_python_enum = {option}
+        sys.pyside6_option_python_enum = {option}
         from PySide6 import QtCore
         from enum import IntEnum
         assert(issubclass(QtCore.Qt.DateFormat, IntEnum))
@@ -59,7 +59,7 @@ def testprog2(option):
 
 def testprog4(option):
     return runtest(dedent(f"""
-        sys.pyside63_option_python_enum = {option}
+        sys.pyside6_option_python_enum = {option}
         from PySide6 import QtCore
         QtCore.QtDebugMsg
         """))
@@ -67,28 +67,28 @@ def testprog4(option):
 def testprog8_16(option):
     # this test needs flag 16, or the effect would be hidden by forgiving mode
     return runtest(dedent(f"""
-        sys.pyside63_option_python_enum = {option}
+        sys.pyside6_option_python_enum = {option}
         from PySide6 import QtCore
         QtCore.Qt.AlignTop
         """))
 
 def testprog32(option):
     return runtest(dedent(f"""
-        sys.pyside63_option_python_enum = {option}
+        sys.pyside6_option_python_enum = {option}
         from PySide6 import QtCore
         QtCore.Qt.Alignment
         """))
 
 def testprog64(option):
     return runtest(dedent(f"""
-        sys.pyside63_option_python_enum = {option}
+        sys.pyside6_option_python_enum = {option}
         from PySide6 import QtCore
         QtCore.Qt.AlignmentFlag()
         """))
 
 def testprog128(option):
     return runtest(dedent(f"""
-        sys.pyside63_option_python_enum = {option}
+        sys.pyside6_option_python_enum = {option}
         from PySide6 import QtCore
         QtCore.Qt.Key(1234567)
         """))

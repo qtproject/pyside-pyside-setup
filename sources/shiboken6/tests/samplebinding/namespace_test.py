@@ -46,15 +46,15 @@ class TestClassesUnderNamespace(unittest.TestCase):
         self.assertEqual(str(SampleNamespace.SomeClass),
             "<class 'sample.SampleNamespace.SomeClass'>")
         self.assertEqual(str(SampleNamespace.SomeClass.ProtectedEnum),
-            "<enum 'ProtectedEnum'>" if sys.pyside63_option_python_enum else
+            "<enum 'ProtectedEnum'>" if sys.pyside6_option_python_enum else
             "<class 'sample.SampleNamespace.SomeClass.ProtectedEnum'>")
         self.assertEqual(str(SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum),
-            "<enum 'ProtectedEnum'>" if sys.pyside63_option_python_enum else
+            "<enum 'ProtectedEnum'>" if sys.pyside6_option_python_enum else
             "<class 'sample.SampleNamespace.SomeClass.SomeInnerClass.ProtectedEnum'>")
         self.assertEqual(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough),
             "<class 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough'>")
         self.assertEqual(str(SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum),
-            "<enum 'NiceEnum'>" if sys.pyside63_option_python_enum else
+            "<enum 'NiceEnum'>" if sys.pyside6_option_python_enum else
             "<class 'sample.SampleNamespace.SomeClass.SomeInnerClass.OkThisIsRecursiveEnough.NiceEnum'>")
 
         # Test if enum inside of class is correct represented

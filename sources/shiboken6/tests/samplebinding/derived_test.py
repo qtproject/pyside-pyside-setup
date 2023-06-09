@@ -40,7 +40,7 @@ class DerivedTest(unittest.TestCase):
                                  'id_', 'pureVirtual', 'unpureVirtual'])
         self.assertTrue(inherited_methods.issubset(dir(Derived)))
 
-    @unittest.skipIf(sys.pyside63_option_python_enum, "Makes no sense with strict Enums")
+    @unittest.skipIf(sys.pyside6_option_python_enum, "Makes no sense with strict Enums")
     def testOverloadedMethodCall(self):
         '''Test if the correct overloaded method is being called.'''
         derived = Derived()
@@ -74,7 +74,7 @@ class DerivedTest(unittest.TestCase):
         derived = Derived()
         result = derived.overloaded(1.1, 2.2)
         self.assertEqual(type(result), OverloadedFuncEnum)
-        if not sys.pyside63_option_python_enum:
+        if not sys.pyside6_option_python_enum:
             self.assertEqual(result, sample.OverloadedFunc_ii)
 
     def testOverloadedMethodCallWithWrongNumberOfArguments(self):

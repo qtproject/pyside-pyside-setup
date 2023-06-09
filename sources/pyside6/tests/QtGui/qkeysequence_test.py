@@ -20,7 +20,7 @@ class QKeySequenceTest(UsesQApplication):
 
     def testGetItemOperator(self):
         # bug #774
-        if sys.pyside63_option_python_enum:
+        if sys.pyside6_option_python_enum:
             # PYSIDE-1735: Remapped from Qt.Modifier to Qt.KeyboardModifier
             #              Note that Qt.(Keyboard)?Modifier will be no longer IntFlag.
             ks = QKeySequence(Qt.ShiftModifier, Qt.ControlModifier, Qt.Key_P, Qt.Key_R)

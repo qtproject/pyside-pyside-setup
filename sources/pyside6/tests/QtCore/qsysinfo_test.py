@@ -14,7 +14,7 @@ from PySide6.QtCore import QSysInfo
 
 
 class TestQSysInfo(unittest.TestCase):
-    newenum = sys.pyside63_option_python_enum
+    newenum = sys.pyside6_option_python_enum
 
     def testEnumEndian(self):
         self.assertEqual(QSysInfo.BigEndian.value if self.newenum else QSysInfo.BigEndian, 0)

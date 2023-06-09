@@ -50,7 +50,7 @@ def _get_flag_enum_option():
     #              This decides between delivered vs. dev versions.
     #              When 6.4 is out, the switching mode will be gone.
     flag = ver[:2] >= (6, 4)
-    envname = "PYSIDE63_OPTION_PYTHON_ENUM"
+    envname = "PYSIDE6_OPTION_PYTHON_ENUM"
     sysname = envname.lower()
     opt = os.environ.get(envname)
     if opt:

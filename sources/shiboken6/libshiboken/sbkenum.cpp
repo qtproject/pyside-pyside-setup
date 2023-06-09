@@ -438,7 +438,7 @@ void init_enum()
     Py_AtExit(cleanupEnumTypes);
 
     // PYSIDE-1735: Determine whether we should use the old or the new enum implementation.
-    static PyObject *option = PySys_GetObject("pyside63_option_python_enum");
+    static PyObject *option = PySys_GetObject("pyside6_option_python_enum");
     if (!option || !PyLong_Check(option)) {
         PyErr_Clear();
         option = PyLong_FromLong(0);

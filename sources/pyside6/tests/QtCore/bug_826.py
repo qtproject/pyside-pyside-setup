@@ -33,7 +33,7 @@ class TestEnums(unittest.TestCase):
         self.assertTrue(QEvent.User <= TestEvent.TestEventType <= QEvent.MaxUser)
         self.assertTrue(QEvent.User <= TEST_EVENT_TYPE <= QEvent.MaxUser)
 
-    @unittest.skipIf(sys.pyside63_option_python_enum, "makes no sense for tested Python enums")
+    @unittest.skipIf(sys.pyside6_option_python_enum, "makes no sense for tested Python enums")
     def testUserTypesRepr(self):
         self.assertEqual(eval(repr(TestEvent.TestEventType)), TestEvent.TestEventType)
         self.assertEqual(eval(repr(TEST_EVENT_TYPE)), TEST_EVENT_TYPE)

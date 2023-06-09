@@ -241,6 +241,7 @@ part of modern Python. The implementation is perfectly modelled after the needs 
 users. It is therefore just consequent to stop having two different enum implementations
 in the same application and instead to use the new Python implementation everywhere.
 
+
 Existing Work
 ~~~~~~~~~~~~~
 
@@ -249,17 +250,18 @@ with Python variants, which harmonize the builtin enums with the already existin
 ``QEnum`` "macro" shown in the :ref:`QEnum` section.
 
 
-Activating the New Enums
+Enums behavior in PySide
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-The new approach to enum will be the default in ``PySide 6.4``, but a preview is already built
-into ``PySide 6.3`` with the environment variable:
-``PYSIDE63_OPTION_PYTHON_ENUM=1 python3 <myscript>`` enables the new enums.
-In ``PySide 6.4``, this flag is by default on, but it can be switched to the old Shiboken
-enums by setting the variable to 0.
+In ``PySide 6.3`` there was a double implementation of old and new enums, where the
+default was old enums.
+The new approach to enum is the default in ``PySide 6.4`` and becomes mandatory
+in ``PySide 6.6``. There exists the environment variable ``PYSIDE6_OPTION_PYTHON_ENUM``
+with the default value of "1". There can also variations be selected by specifying
+different flags, but the value of "0" (switching off) is no longer supported.
 
-This environment variable will stay until a general acceptance of the new enums has been
-reached and a fallback to the old implementation is no longer needed.
+The still available options for switching some enum features off can be found in the
+:ref:`enum-features` section.
 
 
 The Differences between old and new Enums

@@ -19,7 +19,7 @@ from PySide6.QtCore import Qt, QIODevice, QObject, QEnum, QFlag
 
 
 class TestEnum(unittest.TestCase):
-    @unittest.skipIf(sys.pyside63_option_python_enum, "not adequate for new enums to ask the value")
+    @unittest.skipIf(sys.pyside6_option_python_enum, "not adequate for new enums to ask the value")
     def testToInt(self):
         self.assertEqual(QIODevice.NotOpen, 0)
         self.assertEqual(QIODevice.ReadOnly, 1)
@@ -30,7 +30,7 @@ class TestEnum(unittest.TestCase):
         self.assertEqual(QIODevice.Text, 16)
         self.assertEqual(QIODevice.Unbuffered, 32)
 
-    @unittest.skipIf(sys.pyside63_option_python_enum, "not adequate for new enums to ask the value")
+    @unittest.skipIf(sys.pyside6_option_python_enum, "not adequate for new enums to ask the value")
     def testToIntInFunction(self):
         self.assertEqual(str(int(QIODevice.WriteOnly)), "2")
 
@@ -42,7 +42,7 @@ class TestEnum(unittest.TestCase):
         self.assertEqual(k - 2, -(2 - k))
         self.assertEqual(k * 2, 2 * k)
 
-        if not sys.pyside63_option_python_enum:
+        if not sys.pyside6_option_python_enum:
             # Floats work fine with new enums
             with self.assertRaises(TypeError):
                 a = k + 2.0
@@ -53,7 +53,7 @@ class TestEnum(unittest.TestCase):
             with self.assertRaises(TypeError):
                 a = k * 2.0
 
-    @unittest.skipIf(sys.pyside63_option_python_enum, "inheritance forbidden for Python enums")
+    @unittest.skipIf(sys.pyside6_option_python_enum, "inheritance forbidden for Python enums")
     def testInherit(self):
         class A(Qt.Key):
             pass
@@ -80,7 +80,7 @@ class TestEnum(unittest.TestCase):
 
 
 class TestQFlags(unittest.TestCase):
-    newenum = sys.pyside63_option_python_enum
+    newenum = sys.pyside6_option_python_enum
 
     def testToItn(self):
         om = QIODevice.NotOpen

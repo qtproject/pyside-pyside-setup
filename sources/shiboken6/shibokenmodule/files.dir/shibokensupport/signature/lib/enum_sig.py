@@ -146,7 +146,7 @@ class ExactEnumerator(object):
                 self.collision_track.add(thing_name)
 
         init_signature = getattr(klass, "__signature__", None)
-        new_enum = sys.pyside63_option_python_enum
+        new_enum = sys.pyside6_option_python_enum
         # sort by class then enum value
         enums.sort(key=lambda tup: (tup[1], tup[2].value if new_enum else tup[2]))
 
