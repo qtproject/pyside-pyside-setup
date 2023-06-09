@@ -191,3 +191,61 @@ instructions:
           - condition: property
             property: host.os
             equals_value: MacOS
+    - type: ExecuteCommand
+      command: "keyring --disable"
+      maxTimeInSeconds: 14400
+      maxTimeBetweenOutput: 1200
+      enable_if:
+          condition: and
+          conditions:
+            - condition: property
+              property: host.os
+              equals_value: Linux
+            - condition: property
+              property: host.arch
+              equals_value: AARCH64
+      userMessageOnFailure: >
+          Failed to disable keyring
+    - type: ExecuteCommand
+      command: "sudo apt-get install python3-pip libclang-11-dev clang -y"
+      maxTimeInSeconds: 14400
+      maxTimeBetweenOutput: 1200
+      enable_if:
+          condition: and
+          conditions:
+            - condition: property
+              property: host.os
+              equals_value: Linux
+            - condition: property
+              property: host.arch
+              equals_value: AARCH64
+      userMessageOnFailure: >
+          Failed to install dependencies
+    - type: ExecuteCommand
+      command: "python3 -m pip install -U setuptools==67.7.2"
+      maxTimeInSeconds: 14400
+      maxTimeBetweenOutput: 1200
+      enable_if:
+          condition: and
+          conditions:
+            - condition: property
+              property: host.os
+              equals_value: Linux
+            - condition: property
+              property: host.arch
+              equals_value: AARCH64
+      userMessageOnFailure: >
+          Failed to install setuptools
+    - type: EnvironmentVariable
+      variableName: LLVM_INSTALL_DIR
+      variableValue: "/usr/lib/llvm-11/lib"
+      enable_if:
+        condition: and
+        conditions:
+          - condition: property
+            property: target.arch
+            equals_value: AARCH64
+          - condition: property
+            property: host.os
+            equals_value: Linux
+

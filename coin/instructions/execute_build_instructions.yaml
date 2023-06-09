@@ -55,7 +55,7 @@ instructions:
         property: host.osVersion
         contains_value: "Windows_10"
   - type: ExecuteCommand
-    command: "python3 -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
+    command: "python3 -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch={{.Env.HOST_ARCH_COIN}} --targetArch={{.Env.TARGET_ARCH_COIN}}--phase=ALL"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 600
     enable_if:

@@ -25,9 +25,6 @@ accept_configuration:
         - condition: property  # Windows on Arm
           property: target.arch
           not_equals_value: ARM64
-        - condition: property  # Linux on Arm
-          property: target.arch
-          not_equals_value: AARCH64
     - condition: and
       conditions:
         - condition: property  # No cross compilation
