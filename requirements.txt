@@ -4,9 +4,9 @@ build==0.7
 six
 wheel>=0.35
 PyOpenGL
-pyinstaller==3.6
+pyinstaller==3.6; platform_machine != 'aarch64'
 numpy
-nuitka==1.4.8
+nuitka==1.4.8; platform_machine != 'aarch64'
 distro; sys_platform == 'linux'
 patchelf==0.15; sys_platform == 'linux'
 importlib-metadata; python_version < '3.8'
