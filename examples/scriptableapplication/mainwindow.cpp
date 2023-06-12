@@ -19,37 +19,44 @@
 #include <QtCore/QDebug>
 #include <QtCore/QTextStream>
 
-static const char defaultScript[] = R"(
-import AppLib
+using namespace Qt::StringLiterals;
+
+static const auto defaultScript = R"(import AppLib
 print("Hello, world")
 mainWindow.testFunction1()
-)";
+)"_L1;
 
 MainWindow::MainWindow()
-    : m_scriptEdit(new QPlainTextEdit(QString::fromLatin1(defaultScript).trimmed(), this))
+    : m_scriptEdit(new QPlainTextEdit(defaultScript, this))
 {
     setWindowTitle(tr("Scriptable Application"));
 
-    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    const QIcon runIcon = QIcon::fromTheme(QStringLiteral("system-run"));
-    QAction *runAction = fileMenu->addAction(runIcon, tr("&Run..."), this, &MainWindow::slotRunScript);
+    auto  *fileMenu = menuBar()->addMenu(tr("&File"));
+    const QIcon runIcon = QIcon::fromTheme("system-run"_L1);
+    auto *runAction = fileMenu->addAction(runIcon, tr("&Run..."),
+                                          this, &MainWindow::slotRunScript);
     runAction->setShortcut(Qt::CTRL | Qt::Key_R);
-    QAction *diagnosticAction = fileMenu->addAction(tr("&Print Diagnostics"), this, &MainWindow::slotPrintDiagnostics);
+    auto *diagnosticAction = fileMenu->addAction(tr("&Print Diagnostics"),
+                                                 this, &MainWindow::slotPrintDiagnostics);
     diagnosticAction->setShortcut(Qt::CTRL | Qt::Key_D);
-    fileMenu->addAction(tr("&Invoke testFunction1()"), this, &MainWindow::testFunction1);
-    const QIcon quitIcon = QIcon::fromTheme(QStringLiteral("application-exit"));
-    QAction *quitAction = fileMenu->addAction(quitIcon, tr("&Quit"), qApp, &QCoreApplication::quit);
+    fileMenu->addAction(tr("&Invoke testFunction1()"),
+                        this, &MainWindow::testFunction1);
+    const QIcon quitIcon = QIcon::fromTheme("application-exit"_L1);
+    auto *quitAction = fileMenu->addAction(quitIcon, tr("&Quit"),
+                                           qApp, &QCoreApplication::quit);
     quitAction->setShortcut(Qt::CTRL | Qt::Key_Q);
 
-    QMenu *editMenu = menuBar()->addMenu(tr("&Edit"));
-    const QIcon clearIcon = QIcon::fromTheme(QStringLiteral("edit-clear"));
-    QAction *clearAction = editMenu->addAction(clearIcon, tr("&Clear"), m_scriptEdit, &QPlainTextEdit::clear);
+    auto *editMenu = menuBar()->addMenu(tr("&Edit"));
+    const QIcon clearIcon = QIcon::fromTheme("edit-clear"_L1);
+    auto *clearAction = editMenu->addAction(clearIcon, tr("&Clear"),
+                                            m_scriptEdit, &QPlainTextEdit::clear);
 
-    QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
-    const QIcon aboutIcon = QIcon::fromTheme(QStringLiteral("help-about"));
-    QAction *aboutAction = helpMenu->addAction(aboutIcon, tr("&About Qt"), qApp, &QApplication::aboutQt);
+    auto *helpMenu = menuBar()->addMenu(tr("&Help"));
+    const QIcon aboutIcon = QIcon::fromTheme("help-about"_L1);
+    auto *aboutAction = helpMenu->addAction(aboutIcon, tr("&About Qt"),
+                                            qApp, &QApplication::aboutQt);
 
-    QToolBar *toolBar = new QToolBar;
+    auto *toolBar = new QToolBar;
     addToolBar(toolBar);
     toolBar->addAction(quitAction);
     toolBar->addSeparator();
@@ -62,8 +69,10 @@ MainWindow::MainWindow()
     m_scriptEdit->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     setCentralWidget(m_scriptEdit);
 
-    if (!PythonUtils::bindAppObject("__main__", "mainWindow", PythonUtils::MainWindowType, this))
+    if (!PythonUtils::bindAppObject("__main__"_L1, "mainWindow"_L1,
+                                    PythonUtils::MainWindowType, this)) {
        statusBar()->showMessage(tr("Error loading the application module"));
+    }
 }
 
 void MainWindow::slotRunScript()
