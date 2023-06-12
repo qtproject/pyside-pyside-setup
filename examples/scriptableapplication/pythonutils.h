@@ -27,7 +27,7 @@ State init();
 bool bindAppObject(const QString &moduleName, const QString &name,
                    int index, QObject *o);
 
-bool runScript(const QStringList &script);
+bool runScript(const QString &script);
 
 } // namespace PythonUtils
 

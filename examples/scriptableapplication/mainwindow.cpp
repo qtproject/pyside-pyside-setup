@@ -78,19 +78,20 @@ MainWindow::MainWindow()
 void MainWindow::slotRunScript()
 {
     const QString text = m_scriptEdit->toPlainText().trimmed();
-    const QStringList script = text.split(u'\n', Qt::SkipEmptyParts);
-    if (!script.isEmpty())
-        runScript(script);
+    if (!text.isEmpty())
+        runScript(text);
 }
 
 void MainWindow::slotPrintDiagnostics()
 {
-    const QStringList script = QStringList()
-            << "import sys" << "print('Path=', sys.path)" << "print('Executable=', sys.executable)";
+    const QString script = R"P(import sys
+print('Path=', sys.path)
+print('Executable=', sys.executable)
+)P"_L1;
     runScript(script);
 }
 
-void MainWindow::runScript(const QStringList &script)
+void MainWindow::runScript(const QString &script)
 {
     if (!::PythonUtils::runScript(script))
         statusBar()->showMessage(tr("Error running script"));
