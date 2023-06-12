@@ -21,7 +21,7 @@ private Q_SLOTS:
     void slotPrintDiagnostics();
 
 private:
-    void runScript(const QStringList &);
+    void runScript(const QString &);
 
     QPlainTextEdit *m_scriptEdit;
 };

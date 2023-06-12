@@ -114,20 +114,14 @@ bool bindAppObject(const QString &moduleName, const QString &name,
     return true;
 }
 
-bool runScript(const QStringList &script)
+bool runScript(const QString &script)
 {
     if (init() == PythonUninitialized)
         return false;
 
-    // Concatenating all the lines
-    QString content;
-    QTextStream ss(&content);
-    for (const QString &line: script)
-        ss << line << "\n";
-
     // Executing the whole script as one line
     bool result = true;
-    const QByteArray line = content.toUtf8();
+    const QByteArray line = script.toUtf8();
     if (PyRun_SimpleString(line.constData()) == -1) {
         if (PyErr_Occurred())
             PyErr_Print();
