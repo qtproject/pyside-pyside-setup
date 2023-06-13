@@ -113,7 +113,7 @@ static inline bool isBuiltinType(CXTypeKind kind)
 }
 
 // Resolve elaborated types occurring with clang 16
-static CXType resolveType(const CXType &type)
+static CXType resolveElaboratedType(const CXType &type)
 {
     if (!isBuiltinType(type.kind)) {
         CXCursor decl = clang_getTypeDeclaration(type);
@@ -122,6 +122,26 @@ static CXType resolveType(const CXType &type)
             return resolvedType;
     }
     return type;
+}
+
+// Resolve typedefs
+static CXType resolveTypedef(const CXType &type)
+{
+    auto result = type;
+    while (result.kind == CXType_Typedef) {
+        auto decl = clang_getTypeDeclaration(result);
+        auto resolved = clang_getTypedefDeclUnderlyingType(decl);
+        if (resolved.kind == CXType_Invalid)
+            break;
+        result = resolved;
+    }
+    return result;
+}
+
+// Fully resolve a type from elaborated & typedefs
+CXType fullyResolveType(const CXType &type)
+{
+    return resolveTypedef(resolveElaboratedType(type));
 }
 
 QString getTypeName(const CXType &type)
@@ -146,7 +166,7 @@ bool hasScopeResolution(const CXType &type)
 // Resolve elaborated types occurring with clang 16
 QString getResolvedTypeName(const CXType &type)
 {
-    return getTypeName(resolveType(type));
+    return getTypeName(resolveElaboratedType(type));
 }
 
 Diagnostic::Diagnostic(const QString &m, const CXCursor &c, CXDiagnosticSeverity s)
