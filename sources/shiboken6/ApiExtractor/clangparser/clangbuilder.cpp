@@ -946,7 +946,8 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         d->m_currentEnum->setEnumKind(kind);
         if (clang_getCursorAvailability(cursor) == CXAvailability_Deprecated)
             d->m_currentEnum->setDeprecated(true);
-        d->m_currentEnum->setSigned(isSigned(clang_getEnumDeclIntegerType(cursor).kind));
+        const auto enumType = fullyResolveType(clang_getEnumDeclIntegerType(cursor));
+        d->m_currentEnum->setSigned(isSigned(enumType.kind));
         if (std::dynamic_pointer_cast<_ClassModelItem>(d->m_scopeStack.back()))
             d->m_currentEnum->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
     }
