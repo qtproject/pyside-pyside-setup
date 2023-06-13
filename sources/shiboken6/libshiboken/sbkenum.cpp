@@ -792,9 +792,9 @@ static PyTypeObject * newTypeWithNameOld(const char *name,
 
 // PySIDE-1735: This function is in the API and should be removed in 6.4 .
 //              Python enums are created differently.
-PyTypeObject *newTypeWithName(const char *name,
-                              const char *cppName,
-                              PyTypeObject *numbers_fromFlag)
+PyTypeObject *newTypeWithName([[maybe_unused]] const char *name,
+                              [[maybe_unused]] const char *cppName,
+                              [[maybe_unused]] PyTypeObject *numbers_fromFlag)
 {
     // old enums are gone, remove completely?
     PyErr_Format(PyExc_RuntimeError, "function `%s` can no longer be used because old "
