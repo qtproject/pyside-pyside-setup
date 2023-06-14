@@ -833,7 +833,7 @@ bool TypeDatabase::isSuppressedWarning(QStringView s) const
         return false;
     return std::any_of(d->m_suppressedWarnings.cbegin(), d->m_suppressedWarnings.cend(),
                        [&s] (const QRegularExpression &e) {
-                           return e.match(s).hasMatch();
+                           return e.matchView(s).hasMatch();
                        });
 }
 

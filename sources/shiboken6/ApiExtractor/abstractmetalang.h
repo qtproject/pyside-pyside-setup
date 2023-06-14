@@ -372,7 +372,10 @@ void AbstractMetaClass::invisibleNamespaceRecursion(Function f) const
 
 bool inheritsFrom(const AbstractMetaClassCPtr &c, const AbstractMetaClassCPtr &other);
 bool inheritsFrom(const AbstractMetaClassCPtr &c, const QString &name);
-inline bool isQObject(const AbstractMetaClassCPtr &c) { return inheritsFrom(c, u"QObject"_qs); }
+inline bool isQObject(const AbstractMetaClassCPtr &c)
+{
+    return inheritsFrom(c, QStringLiteral("QObject"));
+}
 
 AbstractMetaClassCPtr findBaseClass(const AbstractMetaClassCPtr &c,
                                     const QString &qualifiedName);

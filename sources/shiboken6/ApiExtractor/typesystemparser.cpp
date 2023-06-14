@@ -175,7 +175,7 @@ std::optional<QString>
     QString result;
     const auto lines = QStringView{code}.split(u'\n');
     for (const auto &line : lines) {
-        if (snippetRe.match(line).hasMatch()) {
+        if (snippetRe.matchView(line).hasMatch()) {
             foundLabel = true;
             useLine = !useLine;
             if (!useLine)
