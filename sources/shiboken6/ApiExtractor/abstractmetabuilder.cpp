@@ -3431,13 +3431,13 @@ static void writeRejectLogFile(const QString &name,
                                const AbstractMetaBuilderPrivate::RejectSet &rejects)
 {
     static const QHash<AbstractMetaBuilder::RejectReason, QByteArray> descriptions ={
-        {AbstractMetaBuilder::NotInTypeSystem,  "Not in type system"_qba},
-        {AbstractMetaBuilder::GenerationDisabled, "Generation disabled by type system"_qba},
-        {AbstractMetaBuilder::RedefinedToNotClass, "Type redefined to not be a class"_qba},
-        {AbstractMetaBuilder::UnmatchedReturnType, "Unmatched return type"_qba},
-        {AbstractMetaBuilder::UnmatchedArgumentType, "Unmatched argument type"_qba},
-        {AbstractMetaBuilder::UnmatchedOperator, "Unmatched operator"_qba},
-        {AbstractMetaBuilder::Deprecated, "Deprecated"_qba}
+        {AbstractMetaBuilder::NotInTypeSystem,  "Not in type system"_ba},
+        {AbstractMetaBuilder::GenerationDisabled, "Generation disabled by type system"_ba},
+        {AbstractMetaBuilder::RedefinedToNotClass, "Type redefined to not be a class"_ba},
+        {AbstractMetaBuilder::UnmatchedReturnType, "Unmatched return type"_ba},
+        {AbstractMetaBuilder::UnmatchedArgumentType, "Unmatched argument type"_ba},
+        {AbstractMetaBuilder::UnmatchedOperator, "Unmatched operator"_ba},
+        {AbstractMetaBuilder::Deprecated, "Deprecated"_ba}
     };
 
     QFile f(name);
@@ -3451,7 +3451,7 @@ static void writeRejectLogFile(const QString &name,
     int lastReason = -1;
     for (const auto &e : rejects) {
         if (e.reason != lastReason) {
-            const QByteArray description = descriptions.value(e.reason, "Unknown reason"_qba);
+            const QByteArray description = descriptions.value(e.reason, "Unknown reason"_ba);
             const QByteArray underline(description.size(), '*');
             if (lastReason != -1)
                 s << '\n';

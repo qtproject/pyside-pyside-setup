@@ -1517,7 +1517,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
             if (argCount > 0) {
                 s << "PyObject_Vectorcall(" << PYTHON_OVERRIDE_VAR << ", "
                     << PYTHON_ARGS_ARRAY << ", " << argCount << ", nullptr));\n";
-                for (int argIndex : qAsConst(invalidateArgs)) {
+                for (int argIndex : std::as_const(invalidateArgs)) {
                     s << "if (invalidateArg" << argIndex << ")\n" << indent
                         << "Shiboken::Object::invalidate(" << PYTHON_ARGS_ARRAY
                         << '[' << (argIndex - 1) << "]);\n" << outdent;
