@@ -8,7 +8,6 @@
 #include "basewrapper.h"
 #include "basewrapper_p.h"
 #include "sbkenum.h"
-#include "sbkenum_p.h"
 #include "sbkconverter.h"
 #include "voidptr.h"
 

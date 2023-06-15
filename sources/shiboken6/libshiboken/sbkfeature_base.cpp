@@ -4,7 +4,7 @@
 #include "basewrapper.h"
 #include "basewrapper_p.h"
 #include "autodecref.h"
-#include "sbkenum_p.h"
+#include "sbkenum.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"

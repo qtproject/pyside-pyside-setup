@@ -7,7 +7,6 @@
 #include "sbkpython.h"
 #include "shibokenmacros.h"
 #include "sbkenum.h"
-#include "sbkenum_p.h"
 #include "basewrapper_p.h"
 
 #include <limits>

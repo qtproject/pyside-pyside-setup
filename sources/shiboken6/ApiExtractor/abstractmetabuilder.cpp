@@ -914,7 +914,7 @@ std::optional<AbstractMetaEnum>
         typeEntry->setCodeGeneration(TypeEntry::GenerateNothing);
     // PYSIDE-2088, MSVC signedness issue in Qt
     const bool castToUnsigned = enumItem->isSigned()
-        && enumTypeEntry->cppType().contains(u"unsigned");
+        && enumTypeEntry->cppType().contains(u"unsigned"_s);
     const EnumeratorList &enums = enumItem->enumerators();
     for (const EnumeratorModelItem &valueItem : enums) {
 

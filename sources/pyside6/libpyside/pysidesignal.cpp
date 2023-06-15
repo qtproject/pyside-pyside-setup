@@ -927,8 +927,6 @@ QByteArray getTypeName(PyObject *obType)
             return QByteArrayLiteral("QVariantList");
         if (type == &PyDict_Type)
             return QByteArrayLiteral("QVariantMap");
-        if (Py_TYPE(type) == SbkEnumType_TypeF())
-            return Shiboken::Enum::getCppName(type);
         return QByteArrayLiteral("PyObject");
     }
     if (obType == Py_None) // Must be checked before as Shiboken::String::check accepts Py_None

@@ -6,7 +6,6 @@
 #include <autodecref.h>
 #include <sbkenum.h>
 #include <sbkconverter.h>
-#include <sbkenum_p.h>
 
 extern "C" {
     struct SbkConverter;
@@ -34,9 +33,7 @@ extern "C" {
         long val = 0;
         if (PyTuple_GET_SIZE(args)) {
             PyObject *arg = PyTuple_GET_ITEM(args, 0);
-            if (Shiboken::isShibokenEnum(arg)) {// faster call
-                val = Shiboken::Enum::getValue(arg);
-            } else if (PyNumber_Check(arg)) {
+            if (PyNumber_Check(arg)) {
                 Shiboken::AutoDecRef number(PyNumber_Long(arg));
                 val = PyLong_AsLong(number);
             } else {

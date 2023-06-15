@@ -448,10 +448,8 @@ private:
     void writeRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
     void writeSmartPointerRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
 
-    void writeEnumsInitialization(TextStream &s, AbstractMetaEnumList &enums,
-                                  ErrorReturn errorReturn) const;
-    void writeEnumInitialization(TextStream &s, const AbstractMetaEnum &metaEnum,
-                                 ErrorReturn errorReturn) const;
+    void writeEnumsInitialization(TextStream &s, AbstractMetaEnumList &enums) const;
+    bool writeEnumInitialization(TextStream &s, const AbstractMetaEnum &metaEnum) const;
 
     static void writeSignalInitialization(TextStream &s, const AbstractMetaClassCPtr &metaClass);
 

@@ -145,11 +145,7 @@ else {
 // @snippet metatype-from-type
 
 // @snippet metatype-from-metatype-type
-Shiboken::AutoDecRef intArg;
-if (usingNewEnum())
-    intArg.reset(PyObject_GetAttrString(%PYARG_1, "value"));
-else
-    intArg.reset(PyObject_CallMethod(%PYARG_1, "__int__", nullptr));
+Shiboken::AutoDecRef intArg(PyObject_GetAttrString(%PYARG_1, "value"));
 %0 = new %TYPE(PyLong_AsLong(intArg));
 // @snippet metatype-from-metatype-type
 
@@ -1187,7 +1183,7 @@ Py_END_ALLOW_THREADS
     if (atexit.isNull()) {
         qWarning("Module atexit not found for registering __moduleShutdown");
         PyErr_Clear();
-    }else{
+    } else {
         regFunc.reset(PyObject_GetAttrString(atexit, "register"));
         if (regFunc.isNull()) {
             qWarning("Function atexit.register not found for registering __moduleShutdown");

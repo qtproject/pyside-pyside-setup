@@ -313,10 +313,7 @@ if (_i < 0 || _i >= %CPPSELF.count()) {
     return 0;
 }
 QKeyCombination item = (*%CPPSELF)[_i];
-if (usingNewEnum())
-    return %CONVERTTOPYTHON[QKeyCombination](item);
-auto combined = item.toCombined();
-return %CONVERTTOPYTHON[int](combined);
+return %CONVERTTOPYTHON[QKeyCombination](item);
 // @snippet qkeysequence-getitem
 
 // @snippet qkeysequence-repr

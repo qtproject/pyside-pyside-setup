@@ -15,71 +15,89 @@ LIBSHIBOKEN_API bool PyEnumMeta_Check(PyObject *ob);
 /// exposed for the signature module
 LIBSHIBOKEN_API void init_enum();
 
-extern LIBSHIBOKEN_API PyTypeObject *SbkEnumType_TypeF(void);
 struct SbkConverter;
 struct SbkEnumType;
-struct SbkEnumTypePrivate;
 
-} // extern "C"
-
-namespace Shiboken
+struct SbkEnumTypePrivate
 {
+    SbkConverter *converter;
+};
 
-inline bool isShibokenEnum(PyObject *pyObj)
-{
-    return Py_TYPE(Py_TYPE(pyObj)) == SbkEnumType_TypeF();
+/// PYSIDE-1735: Pass on the Python enum/flag information.
+LIBSHIBOKEN_API void initEnumFlagsDict(PyTypeObject *type);
+
+/// PYSIDE-1735: Make sure that we can import the Python enum implementation.
+LIBSHIBOKEN_API PyTypeObject *getPyEnumMeta();
+/// PYSIDE-1735: Helper function supporting QEnum
+LIBSHIBOKEN_API int enumIsFlag(PyObject *ob_enum);
+
 }
 
-namespace Enum
+namespace Shiboken { namespace Enum {
+
+enum : int {
+    ENOPT_OLD_ENUM        = 0x00,   // PySide 6.6: no longer supported
+    ENOPT_NEW_ENUM        = 0x01,
+    ENOPT_INHERIT_INT     = 0x02,
+    ENOPT_GLOBAL_SHORTCUT = 0x04,
+    ENOPT_SCOPED_SHORTCUT = 0x08,
+    ENOPT_NO_FAKESHORTCUT = 0x10,
+    ENOPT_NO_FAKERENAMES  = 0x20,
+    ENOPT_NO_ZERODEFAULT  = 0x40,
+    ENOPT_NO_MISSING      = 0x80,
+};
+
+LIBSHIBOKEN_API extern int enumOption;
+
+using EnumValueType = long long;
+
+LIBSHIBOKEN_API bool check(PyObject *obj);
+
+LIBSHIBOKEN_API PyObject *newItem(PyTypeObject *enumType, EnumValueType itemValue,
+                                  const char *itemName = nullptr);
+
+LIBSHIBOKEN_API EnumValueType getValue(PyObject *enumItem);
+LIBSHIBOKEN_API PyObject *getEnumItemFromValue(PyTypeObject *enumType,
+                                               EnumValueType itemValue);
+
+/// Sets the enum/flag's type converter.
+LIBSHIBOKEN_API void setTypeConverter(PyTypeObject *type, SbkConverter *converter, bool isFlag);
+
+/// Creating Python enums for different types.
+LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
+    const char *fullName, const char *enumItemStrings[], int64_t enumValues[]);
+
+LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
+    const char *fullName, const char *enumItemStrings[], uint64_t enumValues[]);
+
+LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
+    const char *fullName, const char *enumItemStrings[], int32_t enumValues[]);
+
+LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
+    const char *fullName, const char *enumItemStrings[], uint32_t enumValues[]);
+
+LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
+    const char *fullName, const char *enumItemStrings[], int16_t enumValues[]);
+
+LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
+    const char *fullName, const char *enumItemStrings[], uint16_t enumValues[]);
+
+LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
+    const char *fullName, const char *enumItemStrings[], int8_t enumValues[]);
+
+LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
+    const char *fullName, const char *enumItemStrings[], uint8_t enumValues[]);
+
+/// This template removes duplication by inlining necessary type casts.
+template <typename IntT>
+inline PyTypeObject *createPythonEnum(PyTypeObject *scope,
+    const char *fullName, const char *enumItemStrings[], IntT enumValues[])
 {
-    using EnumValueType = long long;
-
-    LIBSHIBOKEN_API bool check(PyObject *obj);
-    /**
-     *  Creates a new enum type (and its flags type, if any is given)
-     *  and registers it to Python and adds it to \p module.
-     *  \param module       Module to where the new enum type will be added.
-     *  \param name         Name of the enum.
-     *  \param fullName     Name of the enum that includes all scope information (e.g.: "module.Enum").
-     *  \param cppName      Full qualified C++ name of the enum.
-     *  \param flagsType    Optional Python type for the flags associated with the enum.
-     *  \return The new enum type or NULL if it fails.
-     */
-    LIBSHIBOKEN_API PyTypeObject *createGlobalEnum(PyObject *module,
-                                                   const char *name,
-                                                   const char *fullName,
-                                                   const char *cppName,
-                                                   PyTypeObject *flagsType = nullptr);
-    /// This function does the same as createGlobalEnum, but adds the enum to a Shiboken type or namespace.
-    LIBSHIBOKEN_API PyTypeObject *createScopedEnum(PyTypeObject *scope,
-                                                   const char *name,
-                                                   const char *fullName,
-                                                   const char *cppName,
-                                                   PyTypeObject *flagsType = nullptr);
-
-    /// Creates a new enum item for a given enum type.
-    LIBSHIBOKEN_API bool createEnumItemOld(PyTypeObject *enumType,
-                                           const char *itemName,
-                                           EnumValueType itemValue);
-
-    LIBSHIBOKEN_API PyObject *newItem(PyTypeObject *enumType, EnumValueType itemValue,
-                                      const char *itemName = nullptr);
-
-    LIBSHIBOKEN_API PyTypeObject *newTypeWithName(const char *name, const char *cppName,
-                                                  PyTypeObject *numbers_fromFlag=nullptr);
-    LIBSHIBOKEN_API const char *getCppName(PyTypeObject *type);
-    LIBSHIBOKEN_API PyObject *getCppNameNew(PyTypeObject *type);
-
-    LIBSHIBOKEN_API EnumValueType getValue(PyObject *enumItem);
-    LIBSHIBOKEN_API PyObject *getEnumItemFromValue(PyTypeObject *enumType,
-                                                   EnumValueType itemValue);
-
-    /// Sets the enum/flag's type converter.
-    LIBSHIBOKEN_API void setTypeConverter(PyTypeObject *type, SbkConverter *converter, bool isFlag);
-
-    LIBSHIBOKEN_API PyObject *unpickleEnum(PyObject *, PyObject *);
+    auto *obScope = reinterpret_cast<PyObject *>(scope);
+    return createPythonEnum(obScope, fullName, enumItemStrings, enumValues);
 }
 
+} // namespace Enum
 } // namespace Shiboken
 
 #endif // SKB_PYENUM_H

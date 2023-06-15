@@ -20,7 +20,6 @@
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
 #include <sbkerrors.h>
-#include <sbkenum_p.h>
 
 #include <QtCore/QByteArrayView>
 #include <QtCore/QDebug>

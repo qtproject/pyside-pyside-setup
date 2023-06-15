@@ -62,6 +62,7 @@ public:
     ~AbstractMetaEnum();
 
     const AbstractMetaEnumValueList &values() const;
+    AbstractMetaEnumValueList nonRejectedValues() const;
     void addEnumValue(const AbstractMetaEnumValue &enumValue);
 
     std::optional<AbstractMetaEnumValue> findEnumValue(QStringView value) const;

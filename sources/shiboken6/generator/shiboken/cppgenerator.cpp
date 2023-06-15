@@ -2129,13 +2129,11 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
             << classContext.wrapperName() << ").name());\n";
     }
 
-    s << '\n';
-
     if (!typeEntry->isValue() && !typeEntry->isSmartPointer())
         return;
 
     // Python to C++ copy (value, not pointer neither reference) conversion.
-    s << "// Add Python to C++ copy (value, not pointer neither reference) conversion to type converter.\n";
+    s << "\n// Add Python to C++ copy (value, not pointer neither reference) conversion to type converter.\n";
     sourceTypeName = metaClass->name();
     targetTypeName = sourceTypeName + u"_COPY"_s;
     QString toCpp = pythonToCppFunctionName(sourceTypeName, targetTypeName);
@@ -3681,8 +3679,6 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
         QString pyTypeName = toNative.sourceTypeName();
         if (pyTypeName == u"Py_None" || pyTypeName == u"PyNone")
             typeCheck = u"%in == Py_None"_s;
-        else if (pyTypeName == u"SbkEnumType")
-            typeCheck = u"Shiboken::isShibokenEnum(%in)"_s;
         else if (pyTypeName == u"SbkObject")
             typeCheck = u"Shiboken::Object::checkType(%in)"_s;
     }
@@ -5665,13 +5661,14 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
     }
 }
 
-void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList &enums,
-                                            ErrorReturn errorReturn) const
+void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList &enums) const
 {
     if (enums.isEmpty())
         return;
     bool preambleWrittenE = false;
     bool preambleWrittenF = false;
+    bool etypeUsed = false;
+
     for (const AbstractMetaEnum &cppEnum : std::as_const(enums)) {
         if (cppEnum.isPrivate())
             continue;
@@ -5686,12 +5683,13 @@ void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList 
             preambleWrittenF = true;
         }
         ConfigurableScope configScope(s, cppEnum.typeEntry());
-        writeEnumInitialization(s, cppEnum, errorReturn);
+        etypeUsed |= writeEnumInitialization(s, cppEnum);
     }
+    if (preambleWrittenE && !etypeUsed)
+        s << sbkUnusedVariableCast(u"EType"_s);
 }
 
-void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum &cppEnum,
-                                           ErrorReturn errorReturn) const
+bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum &cppEnum) const
 {
     const auto enclosingClass = cppEnum.targetLangEnclosingClass();
     const bool hasUpperEnclosingClass = enclosingClass
@@ -5709,6 +5707,137 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
     s << (cppEnum.isAnonymous() ? "anonymous enum identified by enum value" : "enum");
     s << " '" << cppEnum.name() << "'.\n";
 
+    const bool isSigned = cppEnum.isSigned()
+                          && !cppEnum.typeEntry()->cppType().contains(u"unsigned"_s);
+    const bool isAccessible = !avoidProtectedHack() || !cppEnum.isProtected();
+    const auto enumValues = cppEnum.nonRejectedValues();
+
+    const QString prefix = cppEnum.name();
+
+    QString tmp;
+    if (const auto userType = cppEnum.typeEntry()->cppType(); !userType.isEmpty()) {
+        tmp = userType;
+    } else {
+        if (!isSigned && !cppEnum.underlyingType().contains(u"unsigned"_s))
+            tmp += u"unsigned "_s;
+        tmp += cppEnum.underlyingType();
+    }
+    const QString simpleIntType = getSimplifiedIntTypeName(tmp);
+    QStringList pythonEnumNames;
+
+    // Create a list of values
+    const QString initializerValues = prefix + u"_InitializerValues"_s;
+    const QString initializerName = prefix + u"_Initializer"_s;
+
+    // Build maybe array of enum names.
+    if (cppEnum.enumKind() != AnonymousEnum) {
+        s << "const char *" << initializerName << "[] = {\n" << indent;
+        for (const auto &enumValue : enumValues) {
+            QString name = mangleName(enumValue.name());
+            s << '\"' << name << "\",\n";
+        }
+        s << "nullptr};\n" << outdent;
+    }
+
+    // Calculate formatting and record used number range.
+    int maxNameLen = 0;
+    unsigned long long valueMaskPos = 0;
+    long long valueMaskNeg = 0;
+
+    for (const auto &enumValue : enumValues) {
+        QString name = mangleName(enumValue.name());
+
+        // calculate formatting
+        if (name.length() > maxNameLen)
+            maxNameLen = name.length();
+
+        // calculate used number range
+        QString numStr = enumValue.value().toString();
+        if (numStr.startsWith(u"-"_s)) {
+            auto val = numStr.toLongLong();
+            if (val < valueMaskNeg)
+                valueMaskNeg = val;
+        } else {
+            auto val = numStr.toULongLong();
+            if (val > valueMaskPos)
+                valueMaskPos = val;
+        }
+    }
+
+    // update signedness for the reduced number type.
+    const bool isSignedShort = valueMaskNeg < 0;
+    const QString usedIntType = calcMinimalIntTypeName(valueMaskPos, valueMaskNeg);
+    const int targetHexLen = calcUsedBits(valueMaskPos, valueMaskNeg) / 4;
+
+    if (usedIntType != simpleIntType)
+        s << "// " << usedIntType << " used instead of " << simpleIntType << "\n";
+
+    // Calculating formatting columns
+    QString enumValuePrefix;
+    if (isAccessible) {
+        enumValuePrefix = usedIntType + u"("_s;
+        if (cppEnum.enclosingClass())
+            enumValuePrefix += cppEnum.enclosingClass()->qualifiedCppName() + u"::"_s;
+        if (!cppEnum.isAnonymous())
+            enumValuePrefix += cppEnum.name() + u"::"_s;
+    }
+    const int needSpace = enumValuePrefix.length() + 2;   // braces
+
+    // Build array of enum values
+    if (enumValues.isEmpty()) {
+        s << usedIntType << " *" << initializerValues << "{};\n";
+    } else {
+        s << usedIntType << ' ' << initializerValues << "[] = {\n" << indent;
+        for (qsizetype idx = 0, last = enumValues.size() - 1; idx <= last; ++idx) {
+            const auto &enumValue = enumValues[idx];
+
+            QString valueStr = enumValue.value().toString();
+
+            QString enumValueText = enumValuePrefix;
+            if (isAccessible)
+                enumValueText += enumValue.name() + u')';
+            else
+                enumValueText += valueStr;
+
+            bool hasSign = valueStr.startsWith(u"-"_s);
+            if (hasSign)
+                valueStr.removeFirst();
+            auto val = valueStr.toULongLong();
+            QString valueHex = QString(u"0x%1"_s).arg(val, targetHexLen, 16, QChar(u'0'));
+            if (hasSign)
+                valueStr = u'-' + valueHex + u" -"_s + valueStr;
+            else
+                valueStr = u' ' + valueHex + u"  "_s + valueStr;
+            if (idx != last)
+                enumValueText += u',';
+            int targetCol = needSpace + maxNameLen - enumValueText.length();
+            s << enumValueText << QByteArray(targetCol, ' ') << "  // " << valueStr << "\n";
+        }
+        s << "};\n" << outdent;
+    }
+
+    // Build initialization of anonymous enums
+    if (cppEnum.enumKind() == AnonymousEnum) {
+        int idx = 0;
+        for (const auto &enumValue : enumValues) {
+            const QString mangledName = mangleName(enumValue.name());
+            const QString pyValue = initializerValues + u'[' + QString::number(idx++) + u']';
+            if (enclosingClass || hasUpperEnclosingClass) {
+                s << "PyDict_SetItemString(reinterpret_cast<PyTypeObject *>("
+                    << enclosingObjectVariable
+                    << ")->tp_dict, \"" << mangledName << "\",\n" << indent
+                    << (isSignedShort ? "PyLong_FromLongLong" : "PyLong_FromUnsignedLongLong") << "("
+                    << pyValue << "));\n" << outdent;
+            } else {
+                s << "PyModule_AddObject(module, \"" << mangledName << "\",\n" << indent
+                    << (isSignedShort ? "PyLong_FromLongLong" : "PyLong_FromUnsignedLongLong") << "("
+                    << pyValue << "));\n" << outdent;
+            }
+        }
+    }
+
+    bool etypeUsed = false;
+
     QString enumVarTypeObj = cpythonTypeNameExt(enumTypeEntry);
     if (!cppEnum.isAnonymous()) {
         int packageLevel = packageName().count(u'.') + 1;
@@ -5725,73 +5854,14 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
         }
 
         s << "EType = Shiboken::Enum::"
-            << ((enclosingClass
-                || hasUpperEnclosingClass) ? "createScopedEnum" : "createGlobalEnum")
-            << '(' << enclosingObjectVariable << ',' << '\n' << indent
-            << '"' << cppEnum.name() << "\",\n"
-                << '"' << packageLevel << ':' << getClassTargetFullName(cppEnum) << "\",\n"
-                << '"' << cppEnum.qualifiedCppName() << '"';
-        if (flags)
-            s << ",\nFType";
-        s << ");\n" << outdent
-            << "if (!EType)\n"
-            << indent << errorReturn << outdent << '\n';
-    }
-
-    for (const AbstractMetaEnumValue &enumValue : cppEnum.values()) {
-        if (enumTypeEntry->isEnumValueRejected(enumValue.name()))
-            continue;
-
-        QString enumValueText;
-        if (!avoidProtectedHack() || !cppEnum.isProtected()) {
-            enumValueText = cppEnum.typeEntry()->cppType();
-            if (enumValueText.isEmpty())
-                enumValueText = u"Shiboken::Enum::EnumValueType"_s;
-            enumValueText += u'(';
-            if (cppEnum.enclosingClass())
-                enumValueText += cppEnum.enclosingClass()->qualifiedCppName() + u"::"_s;
-            // Fully qualify the value which is required for C++ 11 enum classes.
-            if (!cppEnum.isAnonymous())
-                enumValueText += cppEnum.name() + u"::"_s;
-            enumValueText += enumValue.name();
-            enumValueText += u')';
-        } else {
-            enumValueText += enumValue.value().toString();
-        }
-
-        const QString mangledName = mangleName(enumValue.name());
-        switch (cppEnum.enumKind()) {
-        case AnonymousEnum:
-            if (enclosingClass || hasUpperEnclosingClass) {
-                s << "{\n" << indent
-                    << "PyObject *anonEnumItem = PyLong_FromLong(" << enumValueText << ");\n"
-                    << "if (PyDict_SetItemString(reinterpret_cast<PyTypeObject *>("
-                    << enclosingObjectVariable
-                    << ")->tp_dict, \"" << mangledName << "\", anonEnumItem) < 0)\n"
-                    << indent << errorReturn << outdent
-                    << "Py_DECREF(anonEnumItem);\n" << outdent
-                    << "}\n";
-            } else {
-                s << "if (PyModule_AddIntConstant(module, \"" << mangledName << "\", ";
-                s << enumValueText << ") < 0)\n" << indent << errorReturn << outdent;
-            }
-            break;
-        case CEnum:
-        case EnumClass:
-            s << "if (!Shiboken::Enum::createEnumItemOld(EType,\n" << indent
-                << "\"" << mangledName << "\", " << enumValueText << "))\n" << errorReturn
-                << outdent;
-            break;
-        }
-    }
-    if (cppEnum.enumKind() != AnonymousEnum) {
-        s << "// PYSIDE-1735: Resolving the whole enum class at the end for API compatibility.\n"
-            << "EType = morphLastEnumToPython();\n"
+            << "createPythonEnum"
+            << '(' << enclosingObjectVariable << ",\n" << indent
+            << '"' << packageLevel << ':' << getClassTargetFullName(cppEnum) << "\",\n"
+            << initializerName << ", " << initializerValues << ");\n" << outdent
             << enumVarTypeObj << " = EType;\n";
-    } else {
-        s << "// PYSIDE-1735: Skip an Anonymous enum class for Python coercion.\n"
-            << enumVarTypeObj << " = EType;\n";
+        etypeUsed = true;
     }
+
     if (cppEnum.typeEntry()->flags()) {
         s << "// PYSIDE-1735: Mapping the flags class to the same enum class.\n"
             << cpythonTypeNameExt(cppEnum.typeEntry()->flags()) << " =\n"
@@ -5803,6 +5873,8 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
     if (cppEnum.typeEntry()->flags())
         s << "/flags";
     s << ".\n\n";
+
+    return etypeUsed;
 }
 
 void CppGenerator::writeSignalInitialization(TextStream &s, const AbstractMetaClassCPtr &metaClass)
@@ -6159,8 +6231,9 @@ void CppGenerator::writeClassRegister(TextStream &s,
 
     // Set typediscovery struct or fill the struct of another one
     if (needsTypeDiscoveryFunction(metaClass)) {
-        s << "Shiboken::ObjectType::setTypeDiscoveryFunctionV2(" << cpythonTypeName(metaClass)
-            << ", &" << cpythonBaseName(metaClass) << "_typeDiscovery);\n\n";
+        s << "Shiboken::ObjectType::setTypeDiscoveryFunctionV2(\n" << indent
+            << cpythonTypeName(metaClass)
+            << ", &" << cpythonBaseName(metaClass) << "_typeDiscovery);" << outdent << "\n\n";
     }
 
     AbstractMetaEnumList classEnums = metaClass->enums();
@@ -6170,7 +6243,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
         s << "// Pass the ..._EnumFlagInfo to the class.\n"
             << "SbkObjectType_SetEnumFlagInfo(pyType, " << chopType(pyTypeName)
             << "_EnumFlagInfo);\n\n";
-    writeEnumsInitialization(s, classEnums, ErrorReturn::Void);
+    writeEnumsInitialization(s, classEnums);
 
     if (metaClass->hasSignals())
         writeSignalInitialization(s, metaClass);
@@ -6997,7 +7070,7 @@ bool CppGenerator::finishGeneration()
         }
     }
 
-    writeEnumsInitialization(s, globalEnums, ErrorReturn::Default);
+    writeEnumsInitialization(s, globalEnums);
 
     s << "// Register primitive types converters.\n";
     const PrimitiveTypeEntryCList &primitiveTypeList = primitiveTypes();

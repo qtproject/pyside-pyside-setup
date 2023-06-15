@@ -721,9 +721,6 @@ void init()
     //Init private data
     Pep384_Init();
 
-    if (PyType_Ready(SbkEnumType_TypeF()) < 0)
-        Py_FatalError("[libshiboken] Failed to initialize Shiboken.SbkEnumType metatype.");
-
     if (PyType_Ready(SbkObjectType_TypeF()) < 0)
         Py_FatalError("[libshiboken] Failed to initialize Shiboken.BaseWrapperType metatype.");
 

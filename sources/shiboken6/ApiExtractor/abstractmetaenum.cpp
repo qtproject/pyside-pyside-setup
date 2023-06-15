@@ -129,6 +129,16 @@ const AbstractMetaEnumValueList &AbstractMetaEnum::values() const
     return d->m_enumValues;
 }
 
+AbstractMetaEnumValueList AbstractMetaEnum::nonRejectedValues() const
+{
+    auto te = d->m_typeEntry;
+    AbstractMetaEnumValueList result = d->m_enumValues;
+    auto pred = [te](const AbstractMetaEnumValue &v) {
+                    return te->isEnumValueRejected(v.name()); };
+    result.erase(std::remove_if(result.begin(), result.end(), pred), result.end());
+    return result;
+}
+
 void AbstractMetaEnum::addEnumValue(const AbstractMetaEnumValue &enumValue)
 {
     d->m_enumValues << enumValue;
