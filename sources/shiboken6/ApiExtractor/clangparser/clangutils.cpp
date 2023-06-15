@@ -322,46 +322,6 @@ QDebug operator<<(QDebug s, const Diagnostic &d)
     return s;
 }
 
-QDebug operator<<(QDebug debug, const CXCursor &cursor)
-{
-    QDebugStateSaver saver(debug);
-    debug.nospace();
-    debug.noquote();
-    debug << "CXCursor(" << cursor.kind;
-    if (cursor.kind >= CXCursor_FirstInvalid && cursor.kind <= CXCursor_LastInvalid)
-        debug << " [invalid]";
-    else
-        debug << ", " << getCursorSpelling(cursor);
-    debug << ')';
-    return debug;
-}
-
-QDebug operator<<(QDebug debug, const CXType &type)
-{
-    QDebugStateSaver saver(debug);
-    debug.nospace();
-    debug.noquote();
-    debug << "CXType(";
-    if (type.kind == CXType_Invalid) {
-        debug << " [invalid]";
-    } else {
-        debug << type.kind;
-        switch (type.kind) {
-        case CXType_Unexposed:
-            debug << " [unexposed]";
-            break;
-        case CXType_Elaborated:
-            debug << " [elaborated]";
-            break;
-        default:
-            break;
-        }
-        debug << ", " << getTypeName(type);
-    }
-    debug << ')';
-    return debug;
-}
-
 #endif // QT_NO_DEBUG_STREAM
 
 } // namespace clang

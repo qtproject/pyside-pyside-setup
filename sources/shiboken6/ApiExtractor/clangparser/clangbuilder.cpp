@@ -4,6 +4,7 @@
 #include "clangbuilder.h"
 #include "compilersupport.h"
 #include "clangutils.h"
+#include "clangdebugutils.h"
 
 #include <codemodel.h>
 #include <reporthandler.h>

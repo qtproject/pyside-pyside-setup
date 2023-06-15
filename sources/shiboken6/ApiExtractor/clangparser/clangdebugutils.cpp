@@ -47,59 +47,99 @@ QDebug operator<<(QDebug s, CX_CXXAccessSpecifier ac)
     return s;
 }
 
-QDebug operator<<(QDebug s, const CXType &t)
+struct formatCXTypeName
 {
-    CXString typeSpelling = clang_getTypeSpelling(t);
-    s << typeSpelling;
+    explicit formatCXTypeName(const CXType &type) : m_type(type) {}
+
+    const CXType &m_type;
+};
+
+QDebug operator<<(QDebug debug, const formatCXTypeName &ft)
+{
+    CXString typeSpelling = clang_getTypeSpelling(ft.m_type);
+    debug << typeSpelling;
     clang_disposeString(typeSpelling);
-    return s;
+    return debug;
 }
 
-QDebug operator<<(QDebug s, const CXCursor &cursor)
+QDebug operator<<(QDebug debug, const CXType &type)
 {
-    QDebugStateSaver saver(s);
-    s.nospace();
-    s.noquote();
+    QDebugStateSaver saver(debug);
+    debug.nospace();
+    debug.noquote();
+    debug << "CXType(";
+    if (type.kind == CXType_Invalid) {
+        debug << "invalid)";
+        return debug;
+    }
+
+    debug << type.kind;
+    switch (type.kind) {
+    case CXType_Unexposed:
+        debug << " [unexposed]";
+        break;
+    case CXType_Elaborated:
+        debug << " [elaborated]";
+        break;
+    default:
+        break;
+    }
+    debug << ", " << formatCXTypeName(type) << ')';
+    return debug;
+}
+
+QDebug operator<<(QDebug debug, const CXCursor &cursor)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace();
+    debug.noquote();
     const CXCursorKind kind = clang_getCursorKind(cursor);
-    s << kind;
-    if (kind >= CXCursor_FirstInvalid && kind <= CXCursor_LastInvalid)
-        return s;
+    debug << "CXCursor(";
+    if (kind >= CXCursor_FirstInvalid && kind <= CXCursor_LastInvalid) {
+        debug << "invalid)";
+        return debug;
+    }
+
+    const QString cursorSpelling = clang::getCursorSpelling(cursor);
+    debug << '"' << cursorSpelling << '"';
+    CXString cursorDisplay = clang_getCursorDisplayName(cursor);
+    if (const char *dpy = clang_getCString(cursorDisplay)) {
+        const QString display = QString::fromUtf8(dpy);
+        if (display != cursorSpelling)
+            debug << ", display=\"" << dpy << '"';
+    }
+    clang_disposeString(cursorDisplay);
+
+    debug << ", kind=" << kind;
+
     const CXType type = clang_getCursorType(cursor);
     switch (kind) {
         case CXCursor_CXXAccessSpecifier:
-        s << ' ' << clang_getCXXAccessSpecifier(cursor);
+        debug << ", " << clang_getCXXAccessSpecifier(cursor);
         break;
     case CXCursor_CXXBaseSpecifier:
-         s << ", inherits=\"" << clang::getCursorSpelling(clang_getTypeDeclaration(type)) << '"';
+         debug << ", inherits=\"" << clang::getCursorSpelling(clang_getTypeDeclaration(type)) << '"';
          break;
     case CXCursor_CXXMethod:
     case CXCursor_FunctionDecl:
     case CXCursor_ConversionFunction:
-        s << ", result type=\"" << clang_getCursorResultType(cursor) << '"';
+         debug << ", result type=\""
+            << formatCXTypeName(clang_getCursorResultType(cursor)) << '"';
         break;
     case CXCursor_TypedefDecl:
-        s << ", underlyingType=\"" << clang_getTypedefDeclUnderlyingType(cursor) << '"';
+        debug << ", underlyingType=\""
+            << formatCXTypeName(clang_getTypedefDeclUnderlyingType(cursor)) << '"';
         break;
     default:
         break;
     }
 
-    if (type.kind != CXType_Invalid)
-        s  << ", type=\"" << type << '"';
+    debug << ", type=\"" << formatCXTypeName(type) << '"';
     if (clang_Cursor_hasAttrs(cursor))
-        s  << ", [attrs]";
+        debug << ", [attrs]";
 
-    const QString cursorSpelling = clang::getCursorSpelling(cursor);
-    if (!cursorSpelling.isEmpty())
-        s << ", spelling=\"" << cursorSpelling << '"';
-    CXString cursorDisplay = clang_getCursorDisplayName(cursor);
-    if (const char *dpy = clang_getCString(cursorDisplay)) {
-        const QString display = QString::fromUtf8(dpy);
-        if (display != cursorSpelling)
-            s << ", display=\"" << dpy << '"';
-    }
-    clang_disposeString(cursorDisplay);
-    return s;
+    debug << ')';
+    return debug;
 }
 
 QDebug operator<<(QDebug s, const CXSourceLocation &location)
