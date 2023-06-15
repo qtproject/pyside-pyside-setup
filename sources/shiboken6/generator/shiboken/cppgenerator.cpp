@@ -5793,9 +5793,14 @@ void CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
             break;
         }
     }
-    s << "// PYSIDE-1735: Resolving the whole enum class at the end for API compatibility.\n"
-        << "EType = morphLastEnumToPython();\n"
-        << enumVarTypeObj << " = EType;\n";
+    if (cppEnum.enumKind() != AnonymousEnum) {
+        s << "// PYSIDE-1735: Resolving the whole enum class at the end for API compatibility.\n"
+            << "EType = morphLastEnumToPython();\n"
+            << enumVarTypeObj << " = EType;\n";
+    } else {
+        s << "// PYSIDE-1735: Skip an Anonymous enum class for Python coercion.\n"
+            << enumVarTypeObj << " = EType;\n";
+    }
     if (cppEnum.typeEntry()->flags()) {
         s << "// PYSIDE-1735: Mapping the flags class to the same enum class.\n"
             << cpythonTypeNameExt(cppEnum.typeEntry()->flags()) << " =\n"
