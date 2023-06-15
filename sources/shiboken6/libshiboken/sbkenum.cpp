@@ -1026,13 +1026,6 @@ PyTypeObject *morphLastEnumToPython()
     auto *enumType = lec.enumType;
     // This is temporary; SbkEnumType will be removed, soon.
 
-    auto *setp = PepType_SETP(reinterpret_cast<SbkEnumType *>(enumType));
-    if (setp->replacementType) {
-        // For some (yet to fix) reason, initialization of the enums can happen twice.
-        // If that happens, use the existing new type to keep type checks correct.
-        return setp->replacementType;
-    }
-
     auto *scopeOrModule = lec.scopeOrModule;
     static PyObject *enumName = String::createStaticString("IntEnum");
     if (PyType_Check(scopeOrModule)) {
@@ -1117,9 +1110,6 @@ PyTypeObject *morphLastEnumToPython()
                     return nullptr;
         }
     }
-
-    // Protect against double initialization
-    setp->replacementType = newType;
 
     // PYSIDE-1735: Old Python versions can't stand the early enum deallocation.
     static bool old_python_version = is_old_version();

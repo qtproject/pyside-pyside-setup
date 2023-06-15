@@ -11,7 +11,6 @@ struct SbkEnumTypePrivate
 {
     SbkConverter *converter;
     const char *cppName;
-    PyTypeObject *replacementType;
 };
 
 extern "C" {
