@@ -18,7 +18,7 @@ Creating the chart and its elements
 We start by creating a series, filling it with the data, and enabling the light marker and point selection features.
 It is important not to set points visibility to :py:`True`, because light markers functionality is an independent feature and setting both would result in undesired behavior.
 
-.. literalinclude:: ../../../../examples/charts/pointselectionandmarkers/pointselectionandmarkers.py
+.. literalinclude:: pointselectionandmarkers.py
    :linenos:
    :lineno-start: 20
    :lines: 20-42
@@ -26,7 +26,7 @@ It is important not to set points visibility to :py:`True`, because light marker
 
 Then we create the :py:`QChart`, the :py:`QChartview` and the control widget with its layout to arrange customization elements.
 
-.. literalinclude:: ../../../../examples/charts/pointselectionandmarkers/pointselectionandmarkers.py
+.. literalinclude:: pointselectionandmarkers.py
    :lineno-start: 44
    :lines: 44-53
    :emphasize-lines: 1,6,9
@@ -36,7 +36,7 @@ Creating UI for configuring the chart
 
 The next step is where we create user interface elements that allow customizing the chart, including setting light marker and selection marker images.
 
-.. literalinclude:: ../../../../examples/charts/pointselectionandmarkers/pointselectionandmarkers.py
+.. literalinclude:: pointselectionandmarkers.py
    :linenos:
    :lineno-start: 54
    :lines: 54-57
@@ -44,7 +44,7 @@ The next step is where we create user interface elements that allow customizing 
 We create the label for the marker selection combobox and fill the combobox with the items. We then provide functionality to the combobox, allowing the user's selection to set the desired light marker image. As light markers are enabled and disabled by setting a valid QImage or setting an empty :py:`QImage()`, we need to make sure that if the user does not wish unselected points to be displayed, we do not actually set the light marker image.
 If checking isn't performed, a new :py:`QImage` will be set as the light marker and unselected points will be visible even though it has been switched off.
 
-.. literalinclude:: ../../../../examples/charts/pointselectionandmarkers/pointselectionandmarkers.py
+.. literalinclude:: pointselectionandmarkers.py
    :linenos:
    :lineno-start: 59
    :lines: 59-67
@@ -52,14 +52,14 @@ If checking isn't performed, a new :py:`QImage` will be set as the light marker 
 
 Almost the same procedure applies to the selected point light marker and line color. The only difference is that there is no need to check the visibility of unselected points as it doesn't affect the functionality.
 
-.. literalinclude:: ../../../../examples/charts/pointselectionandmarkers/pointselectionandmarkers.py
+.. literalinclude:: pointselectionandmarkers.py
    :linenos:
    :lineno-start: 70
    :lines: 70-85
 
 A small difference comes with changing visibility of unselected points. As it was mentioned before, making light markers invisible is achieved by setting the light marker to an empty :py:`QImage()`. That is why, depending on checkbox state, selected point light marker is set to an empty :py:`QImage` or to the light marker extracted from the current index of the corresponding combobox.
 
-.. literalinclude:: ../../../../examples/charts/pointselectionandmarkers/pointselectionandmarkers.py
+.. literalinclude:: pointselectionandmarkers.py
    :linenos:
    :lineno-start: 88
    :lines: 88-97
