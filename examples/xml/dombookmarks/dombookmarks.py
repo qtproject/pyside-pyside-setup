@@ -21,7 +21,6 @@ class MainWindow(QMainWindow):
         self._xbel_tree = XbelTree()
         self.setCentralWidget(self._xbel_tree)
 
-        self.create_actions()
         self.create_menus()
 
         self.statusBar().showMessage("Ready")
@@ -70,32 +69,22 @@ class MainWindow(QMainWindow):
             "The <b>DOM Bookmarks</b> example demonstrates how to use Qt's "
             "DOM classes to read and write XML documents.")
 
-    def create_actions(self):
-        self._open_act = QAction("&Open...", self, shortcut="Ctrl+O",
-                triggered=self.open)
-
-        self._save_as_act = QAction("&Save As...", self, shortcut="Ctrl+S",
-                triggered=self.save_as)
-
-        self._exit_act = QAction("E&xit", self, shortcut="Ctrl+Q",
-                triggered=self.close)
-
-        self._about_act = QAction("&About", self, triggered=self.about)
-
-        self._about_qt_act = QAction("About &Qt", self,
-                triggered=qApp.aboutQt)
-
     def create_menus(self):
         self._file_menu = self.menuBar().addMenu("&File")
-        self._file_menu.addAction(self._open_act)
-        self._file_menu.addAction(self._save_as_act)
-        self._file_menu.addAction(self._exit_act)
+        self._file_menu.addAction(QAction("&Open...", self,
+                shortcut=QKeySequence(Qt.CTRL | Qt.Key_O), triggered=self.open))
+        self._file_menu.addAction(QAction("&Save As...", self,
+                shortcut=QKeySequence(Qt.CTRL | Qt.Key_S), triggered=self.save_as))
+        self._file_menu.addAction(QAction("E&xit", self,
+                shortcut=QKeySequence(Qt.CTRL | Qt.Key_Q), triggered=self.close))
 
         self.menuBar().addSeparator()
 
         self._help_menu = self.menuBar().addMenu("&Help")
-        self._help_menu.addAction(self._about_act)
-        self._help_menu.addAction(self._about_qt_act)
+        self._help_menu.addAction(QAction("&About", self,
+                triggered=self.about))
+        self._help_menu.addAction(QAction("About &Qt", self,
+                triggered=qApp.aboutQt))
 
 
 class XbelTree(QTreeWidget):
