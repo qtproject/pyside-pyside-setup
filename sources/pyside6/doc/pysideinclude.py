@@ -14,6 +14,7 @@ from docutils.parsers.rst import Directive, directives
 from sphinx import addnodes
 from sphinx.util import parselinenos
 
+
 class PySideInclude(Directive):
     """
     Like ``.. include:: :literal:``, but only warns if the include file is
@@ -91,7 +92,7 @@ class PySideInclude(Directive):
                     'Object named %r not found in include file %r' %
                     (objectname, filename), line=self.lineno)]
             else:
-                lines = lines[tags[objectname][1]-1 : tags[objectname][2]-1]
+                lines = lines[tags[objectname][1] - 1: tags[objectname][2] - 1]
 
         linespec = self.options.get('lines')
         if linespec is not None:
@@ -126,9 +127,9 @@ class PySideInclude(Directive):
             lines = res
 
         if prepend:
-           lines.insert(0, prepend + '\n')
+            lines.insert(0, prepend + '\n')
         if append:
-           lines.append(append + '\n')
+            lines.append(append + '\n')
 
         text = ''.join(lines)
         if self.options.get('tab-width'):
@@ -142,6 +143,7 @@ class PySideInclude(Directive):
             retnode['linenos'] = True
         document.settings.env.note_dependency(rel_fn)
         return [retnode]
+
 
 def setup(app):
     app.add_directive('pysideinclude', PySideInclude)

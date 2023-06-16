@@ -26,7 +26,8 @@ def indent(lines, indent):
         result = f"{result}{indent}{l}\n"
     return result
 
-rstHeader="""Licenses Used in Qt for Python
+
+rstHeader = """Licenses Used in Qt for Python
 ******************************
 
 Qt for Python contains some code that is not provided under the
@@ -52,17 +53,22 @@ code licensed under third-party opensource licenses:
 
 """
 
+
 def rstHeadline(title):
     return f"{title}\n{'-' * len(title)}\n"
+
 
 def rstUrl(title, url):
     return f"`{title} <{url}>`_"
 
+
 def rstLiteralBlock(lines):
     return f"::\n\n{indent(lines, '    ')}\n\n"
 
+
 def rstLiteralBlockFromText(text):
     return rstLiteralBlock(text.strip().split('\n'))
+
 
 def readFile(fileName):
     with open(fileName, 'r') as file:
