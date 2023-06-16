@@ -1,0 +1,6 @@
+{
+    "files": ["inheritance_diagram.py",
+              "import_inheritance.py",
+              "inheritance_graph.py",
+              "json_inheritance.py"]
+}
