@@ -165,7 +165,7 @@ def find_imports(text):
 FROM_IMPORTS = [
     (None, ["builtins"]),
     (None, ["os"]),
-    (None, ["enum"] if sys.pyside6_option_python_enum else []),
+    (None, ["enum"]),
     ("typing", sorted(typing.__all__)),
     ("PySide6.QtCore", ["PyClassProperty", "Signal", "SignalInstance"]),
     ("shiboken6", ["Shiboken"]),

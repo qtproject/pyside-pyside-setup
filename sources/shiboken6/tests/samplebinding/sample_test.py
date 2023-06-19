@@ -18,32 +18,6 @@ import sample
 class ModuleTest(unittest.TestCase):
     '''Test case for module and global functions'''
 
-    @unittest.skipIf(sys.pyside6_option_python_enum, "Makes no sense with strict Enums")
-    def testModuleMembers(self):
-        '''Test availability of classes, global functions and other members on binding'''
-        expected_members = set(['Abstract', 'Derived', 'Point',
-                                'ListUser', 'PairUser', 'MapUser',
-                                'gimmeComplexList', 'gimmeDouble', 'gimmeInt',
-                                'makeCString', 'multiplyPair', 'returnCString',
-                                'SampleNamespace', 'transmuteComplexIntoPoint',
-                                'transmutePointIntoComplex', 'sumComplexPair',
-                                'FirstThing', 'SecondThing', 'ThirdThing',
-                                'GlobalEnum', 'NoThing'])
-        self.assertTrue(expected_members.issubset(dir(sample)))
-
-    @unittest.skipIf(sys.pyside6_option_python_enum, "Makes no sense with strict Enums")
-    def testAbstractPrintFormatEnum(self):
-        '''Test availability of PrintFormat enum from Abstract class'''
-        enum_members = set(['PrintFormat', 'Short', 'Verbose',
-                            'OnlyId', 'ClassNameAndId'])
-        self.assertTrue(enum_members.issubset(dir(sample.Abstract)))
-
-    @unittest.skipIf(sys.pyside6_option_python_enum, "Makes no sense with strict Enums")
-    def testSampleNamespaceOptionEnum(self):
-        '''Test availability of Option enum from SampleNamespace namespace'''
-        enum_members = set(['Option', 'None_', 'RandomNumber', 'UnixTime'])
-        self.assertTrue(enum_members.issubset(dir(sample.SampleNamespace)))
-
     def testAddedFunctionAtModuleLevel(self):
         '''Calls function added to module from type system description.'''
         str1 = 'Foo'

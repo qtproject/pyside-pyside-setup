@@ -41,18 +41,6 @@ class ModificationsTest(unittest.TestCase):
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
 
-    @unittest.skipIf(sys.pyside6_option_python_enum, "Makes no sense with strict Enums")
-    def testClassMembersAvailability(self):
-        '''Test if Modified class really have the expected members.'''
-        expected_members = set(['OverloadedModFunc', 'OverloadedNone',
-                                'Overloaded_ibiP', 'Overloaded_ibib',
-                                'Overloaded_ibid', 'Overloaded_ibii',
-                                'calculateArea', 'doublePlus', 'increment',
-                                'multiplyPointCoordsPlusValue', 'name',
-                                'pointToPair', 'overloaded', 'power',
-                                'timesTen'])
-        self.assertTrue(expected_members.issubset(dir(Modifications)))
-
     def testRenamedMethodAvailability(self):
         '''Test if Modification class really have renamed the 'className' virtual method to 'name'.'''
         self.assertTrue('className' not in dir(Modifications))

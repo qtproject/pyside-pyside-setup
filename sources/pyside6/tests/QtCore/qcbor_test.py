@@ -56,11 +56,6 @@ class TestCbor(unittest.TestCase):
         value = QCborValue('hello')
         self.assertTrue(value.isString())
         self.assertEqual(value.toString(), 'hello')
-        if sys.pyside6_option_python_enum:
-            # PYSIDE-1735: Undefined enums are not possible
-            return
-        tag = value.tag(QCborTag(32))
-        self.assertEqual(int(tag), 32)
 
 
 if __name__ == '__main__':

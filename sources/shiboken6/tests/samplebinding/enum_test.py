@@ -29,22 +29,13 @@ def createTempFile():
 class EnumTest(unittest.TestCase):
     '''Test case for Python representation of C++ enums.'''
 
-    @unittest.skipIf(sys.pyside6_option_python_enum, "test not suitable for Python enum")
-    def testEnumRepr(self):
-        enum = SampleNamespace.Option(1)
-        self.assertEqual(eval(repr(enum)), enum)
-
-        enum = SampleNamespace.Option(999)
-        self.assertEqual(eval(repr(enum)), enum)
-
     def testHashability(self):
         self.assertEqual(hash(SampleNamespace.TwoIn), hash(SampleNamespace.TwoOut))
         self.assertNotEqual(hash(SampleNamespace.TwoIn), hash(SampleNamespace.OneIn))
 
     def testEnumValuesInsideEnum(self):
         '''Enum values should be accessible inside the enum as well as outside.'''
-        for value_name in (SampleNamespace.Option.__members__ if sys.pyside6_option_python_enum
-                      else SampleNamespace.Option.values):
+        for value_name in SampleNamespace.Option.__members__:
             enum_item1 = getattr(SampleNamespace.Option, value_name)
             enum_item2 = getattr(SampleNamespace, value_name)
             self.assertEqual(enum_item1, enum_item2)
@@ -107,54 +98,21 @@ class EnumTest(unittest.TestCase):
         event.setEventTypeByConstPtr(Event.BASIC_EVENT)
         self.assertEqual(event.eventType(), Event.BASIC_EVENT)
 
-    @unittest.skipIf(sys.pyside6_option_python_enum, "test not suitable for Python enum")
-    def testEnumTpPrintImplementation(self):
-        '''Without SbkEnum.tp_print 'print' returns the enum represented as an int.'''
-        tmpfile = createTempFile()
-        print(Event.ANY_EVENT, file=tmpfile)
-        tmpfile.seek(0)
-        text = tmpfile.read().strip()
-        tmpfile.close()
-        self.assertEqual(text, str(Event.ANY_EVENT))
-        self.assertEqual(text, repr(Event.ANY_EVENT))
-
     def testEnumArgumentWithDefaultValue(self):
         '''Option enumArgumentWithDefaultValue(Option opt = UnixTime);'''
         self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(), SampleNamespace.UnixTime)
         self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(SampleNamespace.RandomNumber), SampleNamespace.RandomNumber)
 
-    @unittest.skipIf(sys.pyside6_option_python_enum, "test not suitable for Python enum")
-    def testSignature(self):
-        enum = SampleNamespace.Option(1)
-        types = type(enum).mro()
-        klass = types[0]
-        base = types[1]
-        # The class has an empty signature.
-
-        self.assertEqual(get_signature(klass), None)
-        # The base class must be Enum
-        self.assertNotEqual(get_signature(base), None)
-        # It contains an int annotation.
-        param = get_signature(base).parameters["itemValue"]
-        self.assertEqual(param.annotation, int)
-
 
 class MyEvent(Event):
     def __init__(self):
-        Event.__init__(self, Event.EventType(3 if sys.pyside6_option_python_enum else 999))
+        Event.__init__(self, Event.EventType(3))
 
 
 class OutOfBoundsTest(unittest.TestCase):
     def testValue(self):
         e = MyEvent()
-        self.assertEqual(repr(e.eventType()), "<EventType.ANY_EVENT: 3>"
-            if sys.pyside6_option_python_enum else 'sample.Event.EventType(999)')
-
-    @unittest.skipIf(sys.pyside6_option_python_enum, "test not suitable for Python enum")
-    def testNoneName(self):
-        e = MyEvent()
-        t = e.eventType()
-        self.assertEqual(t.name, None)
+        self.assertEqual(repr(e.eventType()), "<EventType.ANY_EVENT: 3>")
 
 
 class EnumOverloadTest(unittest.TestCase):

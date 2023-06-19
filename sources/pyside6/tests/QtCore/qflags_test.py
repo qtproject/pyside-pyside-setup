@@ -112,18 +112,6 @@ class QFlagsOnQVariant(unittest.TestCase):
         self.assertEqual(type(o.property("foo")), QIODevice.OpenMode)
 
 
-class QFlagsWrongType(unittest.TestCase):
-    @unittest.skipIf(sys.pyside6_option_python_enum, "Qt.ItemFlag is no longer an IntEnum")
-    def testWrongType(self):
-        '''Wrong type passed to QFlags binary operators'''
-        for op in operator.or_, operator.and_, operator.xor:
-            for x in '43', 'jabba', QObject, object:
-                self.assertRaises(TypeError, op, Qt.NoItemFlags, x)
-                self.assertRaises(TypeError, op, x, Qt.NoItemFlags)
-        # making sure this actually does not fail all the time
-        self.assertEqual(operator.or_(Qt.NoItemFlags, 43), 43)
-
-
 class QEnumFlagDefault(unittest.TestCase):
     """
         Check that old flag and enum syntax can be used.
@@ -136,11 +124,7 @@ class QEnumFlagDefault(unittest.TestCase):
         oldEnum = Qt.AlignmentFlag()
         self.assertEqual(type(oldFlag), Qt.Alignment)
         self.assertEqual(type(oldEnum), Qt.AlignmentFlag)
-        if sys.pyside6_option_python_enum:
-            self.assertEqual(type(oldFlag), type(oldEnum))
-        else:
-            with self.assertRaises(AssertionError):
-                self.assertEqual(type(oldFlag), type(oldEnum))
+        self.assertEqual(type(oldFlag), type(oldEnum))
 
 
 if __name__ == '__main__':

@@ -19,21 +19,6 @@ from PySide6.QtCore import Qt, QIODevice, QObject, QEnum, QFlag
 
 
 class TestEnum(unittest.TestCase):
-    @unittest.skipIf(sys.pyside6_option_python_enum, "not adequate for new enums to ask the value")
-    def testToInt(self):
-        self.assertEqual(QIODevice.NotOpen, 0)
-        self.assertEqual(QIODevice.ReadOnly, 1)
-        self.assertEqual(QIODevice.WriteOnly, 2)
-        self.assertEqual(QIODevice.ReadWrite, 1 | 2)
-        self.assertEqual(QIODevice.Append, 4)
-        self.assertEqual(QIODevice.Truncate, 8)
-        self.assertEqual(QIODevice.Text, 16)
-        self.assertEqual(QIODevice.Unbuffered, 32)
-
-    @unittest.skipIf(sys.pyside6_option_python_enum, "not adequate for new enums to ask the value")
-    def testToIntInFunction(self):
-        self.assertEqual(str(int(QIODevice.WriteOnly)), "2")
-
     def testOperations(self):
         k = Qt.Key.Key_1
 
@@ -41,24 +26,6 @@ class TestEnum(unittest.TestCase):
         self.assertEqual(k + 2, 2 + k)
         self.assertEqual(k - 2, -(2 - k))
         self.assertEqual(k * 2, 2 * k)
-
-        if not sys.pyside6_option_python_enum:
-            # Floats work fine with new enums
-            with self.assertRaises(TypeError):
-                a = k + 2.0
-
-            with self.assertRaises(TypeError):
-                a = k - 2.0
-
-            with self.assertRaises(TypeError):
-                a = k * 2.0
-
-    @unittest.skipIf(sys.pyside6_option_python_enum, "inheritance forbidden for Python enums")
-    def testInherit(self):
-        class A(Qt.Key):
-            pass
-
-        self.assertEqual(A.Key_1, Qt.Key.Key_1)
 
     @unittest.skipUnless(getattr(sys, "getobjects", None), "requires --with-trace-refs")
     @unittest.skipUnless(getattr(sys, "gettotalrefcount", None), "requires --with-pydebug")
@@ -80,11 +47,10 @@ class TestEnum(unittest.TestCase):
 
 
 class TestQFlags(unittest.TestCase):
-    newenum = sys.pyside6_option_python_enum
 
     def testToItn(self):
         om = QIODevice.NotOpen
-        omcmp = om.value if self.newenum else om
+        omcmp = om.value
 
         self.assertEqual(om, QIODevice.NotOpen)
         self.assertTrue(omcmp == 0)
@@ -94,7 +60,7 @@ class TestQFlags(unittest.TestCase):
 
     def testToIntInFunction(self):
         om = QIODevice.WriteOnly
-        self.assertEqual(int(om.value if self.newenum else om), 2)
+        self.assertEqual(int(om.value), 2)
 
     def testNonExtensibleEnums(self):
         try:
