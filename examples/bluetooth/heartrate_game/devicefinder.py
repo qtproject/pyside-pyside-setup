@@ -4,11 +4,14 @@
 from PySide6.QtBluetooth import (QBluetoothDeviceDiscoveryAgent,
                                  QBluetoothDeviceInfo)
 from PySide6.QtQml import QmlElement
-from PySide6.QtCore import QTimer, Property, Signal, Slot
+from PySide6.QtCore import QTimer, Property, Signal, Slot, Qt, QCoreApplication
 
 from bluetoothbaseclass import BluetoothBaseClass
 from deviceinfo import DeviceInfo
-from heartrate_global import simulator
+from heartrate_global import simulator, is_android
+
+if is_android:
+    from PySide6.QtCore import QBluetoothPermission
 
 # To be used on the @QmlElement decorator
 # (QML_IMPORT_MINOR_VERSION is optional)
@@ -43,6 +46,18 @@ class DeviceFinder(BluetoothBaseClass):
 
     @Slot()
     def startSearch(self):
+        if is_android:
+            permission = QBluetoothPermission()
+            permission.setCommunicationModes(QBluetoothPermission.Access)
+            permission_status = qApp.checkPermission(permission)
+            if permission_status == Qt.PermissionStatus.Undetermined:
+                qApp.requestPermission(permission, self, self.startSearch)
+                return
+            elif permission_status == Qt.PermissionStatus.Denied:
+                return
+            elif permission_status == Qt.PermissionStatus.Granted:
+                print("[HeartRateGame] Bluetooth Permission Granted")
+
         self.clearMessages()
         self.m_deviceHandler.setDevice(None)
         self.m_devices.clear()

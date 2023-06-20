@@ -5,9 +5,12 @@ import sys
 
 from PySide6.QtBluetooth import QBluetoothLocalDevice
 from PySide6.QtQml import QmlElement
-from PySide6.QtCore import QObject, Property, Signal, Slot
+from PySide6.QtCore import QObject, Property, Signal, Slot, Qt, QCoreApplication
 
-from heartrate_global import simulator
+from heartrate_global import simulator, is_android
+
+if is_android:
+    from PySide6.QtCore import QBluetoothPermission
 
 # To be used on the @QmlElement decorator
 # (QML_IMPORT_MINOR_VERSION is optional)
@@ -22,8 +25,8 @@ class ConnectionHandler(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.m_localDevice = QBluetoothLocalDevice()
-        self.m_localDevice.hostModeStateChanged.connect(self.hostModeChanged)
+        self.m_hasPermission = False
+        self.initLocalDevice()
 
     @Property(bool, notify=deviceChanged)
     def alive(self):
@@ -48,8 +51,26 @@ class ConnectionHandler(QObject):
 
     @Property(bool, notify=deviceChanged)
     def hasPermission(self):
-        return True
+        return self.m_hasPermission
 
     @Slot(QBluetoothLocalDevice.HostMode)
     def hostModeChanged(self, mode):
+        self.deviceChanged.emit()
+
+    def initLocalDevice(self):
+        if is_android:
+            permission = QBluetoothPermission()
+            permission.setCommunicationModes(QBluetoothPermission.Access)
+            permission_status = qApp.checkPermission(permission)
+            if permission_status == Qt.PermissionStatus.Undetermined:
+                qApp.requestPermission(permission, self, self.initLocalDevice)
+                return
+            if permission_status == Qt.PermissionStatus.Denied:
+                return
+            elif permission_status == Qt.PermissionStatus.Granted:
+                print("[HeartRateGame] Bluetooth Permission Granted")
+
+        self.m_localDevice = QBluetoothLocalDevice()
+        self.m_localDevice.hostModeStateChanged.connect(self.hostModeChanged)
+        self.m_hasPermission = True
         self.deviceChanged.emit()
