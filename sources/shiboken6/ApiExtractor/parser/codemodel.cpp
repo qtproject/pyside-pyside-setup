@@ -1380,6 +1380,16 @@ void _EnumModelItem::setSigned(bool s)
     m_signed = s;
 }
 
+QString _EnumModelItem::underlyingType() const
+{
+    return m_underlyingType;
+}
+
+void _EnumModelItem::setUnderlyingType(const QString &underlyingType)
+{
+    m_underlyingType = underlyingType;
+}
+
 bool _EnumModelItem::isDeprecated() const
 {
     return m_deprecated;

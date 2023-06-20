@@ -105,6 +105,7 @@ public:
 
     EnumTypeEntryCPtr m_typeEntry;
     Documentation m_doc;
+    QString m_underlyingType;
 
     EnumKind m_enumKind = CEnum;
     Access m_access = Access::Public;
@@ -285,6 +286,17 @@ void AbstractMetaEnum::setSigned(bool s)
         d->m_signed = s;
 }
 
+QString AbstractMetaEnum::underlyingType() const
+{
+    return d->m_underlyingType;
+}
+
+void AbstractMetaEnum::setUnderlyingType(const QString &underlyingType)
+{
+    if (d->m_underlyingType != underlyingType)
+        d->m_underlyingType = underlyingType;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 
 static void formatMetaEnumValue(QDebug &d, const AbstractMetaEnumValue &v)
@@ -308,12 +320,13 @@ QDebug operator<<(QDebug d, const AbstractMetaEnumValue &v)
 
 static void formatMetaEnum(QDebug &d, const AbstractMetaEnum &e)
 {
-    d << e.fullName();
+    d << '"' << e.fullName() << '"';
     if (e.isDeprecated())
-        d << " (deprecated) ";
+        d << " (deprecated)";
+    d << " \"" << e.underlyingType() << '"';
     if (!e.isSigned())
-        d << " (unsigned) ";
-    d << '[';
+        d << " (unsigned)";
+    d << " [";
     const AbstractMetaEnumValueList &values = e.values();
     for (qsizetype i = 0, count = values.size(); i < count; ++i) {
         if (i)

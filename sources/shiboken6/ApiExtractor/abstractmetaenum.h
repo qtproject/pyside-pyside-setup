@@ -103,6 +103,9 @@ public:
     bool isSigned() const;
     void setSigned(bool s);
 
+    QString underlyingType() const;
+    void setUnderlyingType(const QString &underlyingType);
+
 private:
     QSharedDataPointer<AbstractMetaEnumData> d;
 };

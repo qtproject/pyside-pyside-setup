@@ -900,6 +900,7 @@ std::optional<AbstractMetaEnum>
     AbstractMetaEnum metaEnum;
     metaEnum.setEnumKind(enumItem->enumKind());
     metaEnum.setDeprecated(enumItem->isDeprecated());
+    metaEnum.setUnderlyingType(enumItem->underlyingType());
     metaEnum.setSigned(enumItem->isSigned());
     if (enumsDeclarations.contains(qualifiedName)
         || enumsDeclarations.contains(enumName)) {
