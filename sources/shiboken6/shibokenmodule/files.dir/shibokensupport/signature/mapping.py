@@ -186,6 +186,7 @@ namespace = globals()  # our module's __dict__
 
 type_map.update({
     "...": ellipsis,
+    "Any": typing.Any,
     "bool": bool,
     "char": int,
     "double": float,
