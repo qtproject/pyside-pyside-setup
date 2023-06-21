@@ -1,0 +1,42 @@
+Qt for Python 6.5.2 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - [PYSIDE-2184] .pyi files are now installed by CMake.
+ - [PYSIDE-2206] The QtStateMachine moveblocks example has been added.
+ - [PYSIDE-2206] The QtLocation mapviewer example has been revamped.
+ - [PYSIDE-2331] Type hints of several functions taking a str have been fixed.
+ - [PYSIDE-2339] Enumeration types are now kept when passed through the
+                 QVariant APIs of QAbstractItemModel, and a conversion
+                 to int takes place when required (Qt.CheckState and similar).
+ - [PYSIDE-2340] A crash when using QScxmlStateMachine::connectToEvent()
+                 has been fixed.
+ - [PYSIDE-2347] Output of QObject slots has been added to the
+                 metaobjectdump.py tool as an input of qmllint.
+ - [PYSIDE-2364] The type hint for QQmlExpression.evaluate() has been fixed.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-1735] The detection of signedness for enums with typedefs
+                 as underlying types has been fixed.
+ - [PYSIDE-2335] The raising of unraisable exceptions from virtual methods
+                 overwritten in Python has been implemented.
+                 They are now handled by a handler on the stack if possible
+                 or otherwise printed.
