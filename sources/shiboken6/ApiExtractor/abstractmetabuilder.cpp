@@ -912,17 +912,20 @@ std::optional<AbstractMetaEnum>
     metaEnum.setAccess(enumItem->accessPolicy());
     if (metaEnum.access() == Access::Private)
         typeEntry->setCodeGeneration(TypeEntry::GenerateNothing);
-
+    // PYSIDE-2088, MSVC signedness issue in Qt
+    const bool castToUnsigned = enumItem->isSigned()
+        && enumTypeEntry->cppType().contains(u"unsigned");
     const EnumeratorList &enums = enumItem->enumerators();
-    for (const EnumeratorModelItem &value : enums) {
+    for (const EnumeratorModelItem &valueItem : enums) {
 
         AbstractMetaEnumValue metaEnumValue;
-        metaEnumValue.setName(value->name());
+        metaEnumValue.setName(valueItem->name());
         // Deciding the enum value...
 
-        metaEnumValue.setStringValue(value->stringValue());
-        metaEnumValue.setValue(value->value());
-        metaEnumValue.setDeprecated(value->isDeprecated());
+        metaEnumValue.setStringValue(valueItem->stringValue());
+        const auto value = valueItem->value();
+        metaEnumValue.setValue(castToUnsigned ? value.toUnsigned() : value);
+        metaEnumValue.setDeprecated(valueItem->isDeprecated());
         metaEnum.addEnumValue(metaEnumValue);
     }
 

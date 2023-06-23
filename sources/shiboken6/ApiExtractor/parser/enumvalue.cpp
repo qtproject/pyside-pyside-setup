@@ -25,6 +25,15 @@ void EnumValue::setUnsignedValue(quint64 v)
     m_type = Unsigned;
 }
 
+EnumValue EnumValue::toUnsigned() const
+{
+    if (m_type == Unsigned)
+        return *this;
+    EnumValue result;
+    result.setUnsignedValue(m_value < 0 ? quint64(-m_value) : quint64(m_value));
+    return result;
+}
+
 bool EnumValue::equals(const EnumValue &rhs) const
 {
     if (m_type != rhs.m_type)

@@ -29,6 +29,8 @@ public:
     void setValue(qint64 v);
     void setUnsignedValue(quint64 v);
 
+    EnumValue toUnsigned() const;
+
     bool equals(const EnumValue &rhs) const;
 
     void formatDebug(QDebug &d) const;
