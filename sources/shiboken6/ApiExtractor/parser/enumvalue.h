@@ -34,6 +34,7 @@ public:
     bool equals(const EnumValue &rhs) const;
 
     void formatDebug(QDebug &d) const;
+    void formatDebugHex(QDebug &d) const;
 
 private:
 #ifndef QT_NO_DEBUG_STREAM

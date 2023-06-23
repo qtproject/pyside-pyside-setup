@@ -41,8 +41,16 @@ bool EnumValue::equals(const EnumValue &rhs) const
     return m_type == Signed ? m_value == rhs.m_value : m_unsignedValue == rhs.m_unsignedValue;
 }
 
+void EnumValue::formatDebugHex(QDebug &d) const
+{
+    d << "0x" << Qt::hex;
+    formatDebug(d);
+    d << Qt::dec;
+}
+
 void EnumValue::formatDebug(QDebug &d) const
 {
+
     if (m_type == EnumValue::Signed)
         d << m_value;
     else

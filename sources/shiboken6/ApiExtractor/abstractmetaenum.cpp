@@ -299,10 +299,13 @@ void AbstractMetaEnum::setUnderlyingType(const QString &underlyingType)
 
 #ifndef QT_NO_DEBUG_STREAM
 
-static void formatMetaEnumValue(QDebug &d, const AbstractMetaEnumValue &v)
+static void formatMetaEnumValue(QDebug &d, const AbstractMetaEnumValue &v, bool forceHex = false)
 {
     d << v.name() << '=';
-    v.value().formatDebug(d);
+    if (forceHex)
+        v.value().formatDebugHex(d);
+    else
+        v.value().formatDebug(d);
     if (v.isDeprecated())
         d << " (deprecated)";
 }
@@ -328,10 +331,11 @@ static void formatMetaEnum(QDebug &d, const AbstractMetaEnum &e)
         d << " (unsigned)";
     d << " [";
     const AbstractMetaEnumValueList &values = e.values();
+    const bool hasFlags = e.typeEntry()->flags() != nullptr;
     for (qsizetype i = 0, count = values.size(); i < count; ++i) {
         if (i)
             d << ", ";
-        formatMetaEnumValue(d, values.at(i));
+        formatMetaEnumValue(d, values.at(i), hasFlags);
     }
     d << ']';
 }
