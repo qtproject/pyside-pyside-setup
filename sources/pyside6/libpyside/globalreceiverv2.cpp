@@ -13,6 +13,7 @@
 #include <QtCore/qhashfunctions.h>
 #include <QtCore/QMetaMethod>
 #include <QtCore/QSet>
+#include <QtCore/QDebug>
 
 #include <cstring>
 
@@ -46,6 +47,8 @@ class DynamicSlotDataV2
         static void onCallbackDestroyed(void *data);
         static GlobalReceiverKey key(PyObject *callback);
 
+        void formatDebug(QDebug &debug) const;
+
     private:
         bool m_isMethod;
         PyObject *m_callback;
@@ -56,6 +59,32 @@ class DynamicSlotDataV2
         GlobalReceiverV2 *m_parent;
 };
 
+void DynamicSlotDataV2::formatDebug(QDebug &debug) const
+{
+    debug << "method=" << m_isMethod << ", m_callback=" << m_callback;
+    if (m_callback != nullptr)
+        debug << '/' << Py_TYPE(m_callback)->tp_name;
+    debug << ", self=" << m_pythonSelf;
+    if (m_pythonSelf != nullptr)
+        debug << '/' << Py_TYPE(m_pythonSelf)->tp_name;
+    debug << ", m_pyClass=" << m_pyClass;
+    if (m_pyClass != nullptr)
+        debug << '/' << Py_TYPE(m_pyClass)->tp_name;
+    debug << ", signatures=" << m_signatures.keys();
+}
+
+QDebug operator<<(QDebug debug, const DynamicSlotDataV2 *d)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "DynamicSlotDataV2(";
+    if (d)
+        d->formatDebug(debug);
+    else
+        debug << '0';
+    debug << ')';
+    return debug;
 }
 
 using namespace PySide;
@@ -275,3 +304,28 @@ int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void **args)
 
     return -1;
 }
+
+void GlobalReceiverV2::formatDebug(QDebug &debug) const
+{
+    debug << "receiver=" << m_receiver << ", slot=" << m_data;
+    if (isEmpty())
+        debug << ", empty";
+    else
+        debug << ", refs=" << m_refs;
+};
+
+QDebug operator<<(QDebug debug, const GlobalReceiverV2 *g)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "GlobalReceiverV2(";
+    if (g)
+        g->formatDebug(debug);
+    else
+        debug << '0';
+    debug << ')';
+    return debug;
+}
+
+} // namespace PySide
