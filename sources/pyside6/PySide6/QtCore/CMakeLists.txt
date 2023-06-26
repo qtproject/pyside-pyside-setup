@@ -141,7 +141,6 @@ ${QtCore_GEN_DIR}/qsemaphore_wrapper.cpp
 ${QtCore_GEN_DIR}/qsemaphorereleaser_wrapper.cpp
 ${QtCore_GEN_DIR}/qsequentialanimationgroup_wrapper.cpp
 ${QtCore_GEN_DIR}/qsettings_wrapper.cpp
-${QtCore_GEN_DIR}/qsharedmemory_wrapper.cpp
 ${QtCore_GEN_DIR}/qsignalblocker_wrapper.cpp
 ${QtCore_GEN_DIR}/qsignalmapper_wrapper.cpp
 ${QtCore_GEN_DIR}/qsize_wrapper.cpp
@@ -216,6 +215,13 @@ else()
          ${QtCore_GEN_DIR}/qlocationpermission_wrapper.cpp
          ${QtCore_GEN_DIR}/qmicrophonepermission_wrapper.cpp
          ${QtCore_GEN_DIR}/qpermission_wrapper.cpp)
+endif()
+
+if("sharedmemory" IN_LIST QtCore_disabled_features)
+    list(APPEND QtCore_DROPPED_ENTRIES QSharedMemory)
+    message(STATUS "Qt${QT_MAJOR_VERSION}Core: Dropping QSharedMemory")
+else()
+    list(APPEND QtCore_SRC ${QtCore_GEN_DIR}/qsharedmemory_wrapper.cpp)
 endif()
 
 configure_file("${QtCore_SOURCE_DIR}/QtCore_global.post.h.in"
