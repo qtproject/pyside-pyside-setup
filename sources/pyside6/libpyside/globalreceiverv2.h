@@ -15,6 +15,8 @@
 
 #include <memory>
 
+QT_FORWARD_DECLARE_CLASS(QDebug);
+
 namespace PySide
 {
 
@@ -91,6 +93,8 @@ public:
 
     static const char *senderDynamicProperty;
 
+    void formatDebug(QDebug &debug) const;
+
 private:
     void purgeDeletedSenders();
 
@@ -100,6 +104,8 @@ private:
     QList<QObjectPointer> m_refs;
     QPointer<QObject> m_receiver;
 };
+
+QDebug operator<<(QDebug debug, const GlobalReceiverV2 *g);
 
 }
 
