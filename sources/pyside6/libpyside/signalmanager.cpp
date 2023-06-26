@@ -210,6 +210,7 @@ struct SignalManager::SignalManagerPrivate
 
     void deleteGobalReceiver(const QObject *gr);
     void clear();
+    void purgeEmptyGobalReceivers();
 
     GlobalReceiverV2Map m_globalReceivers;
     static SignalManager::QmlMetaCallErrorHandler m_qmlMetaCallErrorHandler;
@@ -307,6 +308,7 @@ QObject *SignalManager::globalReceiver(QObject *sender, PyObject *callback, QObj
 void SignalManager::notifyGlobalReceiver(QObject *receiver)
 {
     reinterpret_cast<GlobalReceiverV2 *>(receiver)->notify();
+    m_d->purgeEmptyGobalReceivers();
 }
 
 void SignalManager::releaseGlobalReceiver(const QObject *source, QObject *receiver)
@@ -340,6 +342,23 @@ void SignalManager::SignalManagerPrivate::clear()
     // iterator invalidation, and thus undefined behavior.
     while (!m_globalReceivers.isEmpty())
         m_globalReceivers.erase(m_globalReceivers.cbegin());
+}
+
+static bool isEmptyGlobalReceiver(const GlobalReceiverV2Ptr &g)
+{
+    return g->isEmpty();
+}
+
+void SignalManager::SignalManagerPrivate::purgeEmptyGobalReceivers()
+{
+    // Delete repetitively (see comment in clear()).
+    while (true) {
+        auto it = std::find_if(m_globalReceivers.cbegin(), m_globalReceivers.cend(),
+                               isEmptyGlobalReceiver);
+        if (it == m_globalReceivers.cend())
+            break;
+        m_globalReceivers.erase(it);
+    }
 }
 
 int SignalManager::globalReceiverSlotIndex(QObject *receiver, const char *signature) const
