@@ -1,0 +1,25 @@
+``AbstractViewer`` provides a generalized API to view, save, and print a
+document. Properties of both the document and the viewer can be queried:
+
+ * Does the document have content?
+ * Has it been modified?
+ * Is an overview (thumbnails or bookmarks) supported?
+
+``AbstractViewer`` provides protected methods for derived classes to create
+actions and menus on the main window. In order to display these assets on the
+main window, they are parented to it. ``AbstractViewer`` is responsible for
+removing and destroying the UI assets it creates. It inherits from ``QObject``
+to implement signals and slots.
+
+The ``uiInitialized()`` signal is emitted after a viewer receives all necessary
+information about UI assets on the main window.
+
+The ``printingEnabledChanged()`` signal is emitted when document printing is
+either enabled or disabled. This happens after a new document was successfully
+loaded, or, for example, all content was removed.
+
+The ``printStatusChanged`` signal notifies about changes in its progress after
+starting the printing process.
+
+The ``documentLoaded()`` signal notifies the application that a document was
+successfully loaded.

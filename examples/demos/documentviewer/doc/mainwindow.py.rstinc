@@ -1,0 +1,11 @@
+The ``MainWindow`` class provides an application screen with menus, actions,
+and a toolbar. It can open a file, automatically detecting its content type. It
+also maintains a list of previously opened files, using ``QSettings`` to store
+and reload settings when launched. The ``MainWindow`` creates a suitable viewer
+for the opened file, based on its content type, and provides support for
+printing a document.
+
+``MainWindow's`` constructor initializes the user interface created in Qt
+Designer. The ``mainwindow.ui`` file provides a ``QTabWidget`` on the left,
+showing bookmarks and thumbnails. On the right, there is a ``QScrollArea`` for
+viewing file content.

@@ -1,0 +1,3 @@
+The ``ViewerFactory`` class manages viewers for known file types. It loads all
+available viewers on construction and provides a public API to query the loaded
+plugins, their names, and supported MIME types.

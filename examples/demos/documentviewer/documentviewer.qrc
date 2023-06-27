@@ -1,0 +1,42 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="demos/documentviewer">
+    <file>images/copy@2x.png</file>
+    <file>images/copy.png</file>
+    <file>images/cut@2x.png</file>
+    <file>images/cut.png</file>
+    <file>images/go-next-view@2x.png</file>
+    <file>images/go-next-view-page@2x.png</file>
+    <file>images/go-next-view-page.png</file>
+    <file>images/go-next-view.png</file>
+    <file>images/go-previous-view@2x.png</file>
+    <file>images/go-previous-view-page@2x.png</file>
+    <file>images/go-previous-view-page.png</file>
+    <file>images/go-previous-view.png</file>
+    <file>images/magnifier@2x.png</file>
+    <file>images/magnifier.png</file>
+    <file>images/open@2x.png</file>
+    <file>images/open.png</file>
+    <file>images/paste@2x.png</file>
+    <file>images/paste.png</file>
+    <file>images/print2x.png</file>
+    <file>images/print.png</file>
+    <file>images/qt-logo@2x.png</file>
+    <file>images/qt-logo.png</file>
+    <file>images/zoom-fit-best@2x.png</file>
+    <file>images/zoom-fit-best.png</file>
+    <file>images/zoom-fit-width@2x.png</file>
+    <file>images/zoom-fit-width.png</file>
+    <file>images/zoom-in@2x.png</file>
+    <file>images/zoom-in.png</file>
+    <file>images/zoom-original@2x.png</file>
+    <file>images/zoom-original.png</file>
+    <file>images/zoom-out@2x.png</file>
+    <file>images/zoom-out.png</file>
+    <file>images/zoom-previous@2x.png</file>
+    <file>images/zoom-previous.png</file>
+    <file>images/document-open-recent.svgz</file>
+    <file>images/go-next.svgz</file>
+    <file>images/go-previous.svgz</file>
+    <file>images/help-about.svgz</file>
+</qresource>
+</RCC>

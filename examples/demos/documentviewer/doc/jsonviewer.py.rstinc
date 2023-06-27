@@ -1,0 +1,11 @@
+``JsonViewer`` displays a JSON file in a ``QTreeView``. Internally, it loads
+the contents of a file into a data structure via a string and uses it to
+populate a custom tree model with JsonItemModel.
+
+The JSON viewer demonstrates how to implement a custom item model
+inherited from ``QAbstractItemModel``.
+
+``JsonViewer`` uses the top-level objects of the document as bookmarks for
+navigation. Other nodes (keys and values) can be added as additional bookmarks,
+or removed from the bookmark list. A ``QLineEdit`` is used as a search field to
+navigate through the JSON tree.
