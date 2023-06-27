@@ -14,7 +14,7 @@ from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
         QMdiArea, QMessageBox, QTextEdit)
 
-import mdi_rc
+import PySide6.QtExampleIcons
 
 
 class MdiChild(QTextEdit):
@@ -271,17 +271,17 @@ class MainWindow(QMainWindow):
 
     def create_actions(self):
 
-        icon = QIcon.fromTheme("document-new", QIcon(':/images/new.png'))
+        icon = QIcon.fromTheme("document-new")
         self._new_act = QAction(icon, "&New", self,
                 shortcut=QKeySequence.New, statusTip="Create a new file",
                 triggered=self.new_file)
 
-        icon = QIcon.fromTheme("document-open", QIcon(':/images/open.png'))
+        icon = QIcon.fromTheme("document-open")
         self._open_act = QAction(icon, "&Open...", self,
                 shortcut=QKeySequence.Open, statusTip="Open an existing file",
                 triggered=self.open)
 
-        icon = QIcon.fromTheme("document-save", QIcon(':/images/save.png'))
+        icon = QIcon.fromTheme("document-save")
         self._save_act = QAction(icon, "&Save", self,
                 shortcut=QKeySequence.Save,
                 statusTip="Save the document to disk", triggered=self.save)
@@ -295,19 +295,19 @@ class MainWindow(QMainWindow):
                 statusTip="Exit the application",
                 triggered=QApplication.instance().closeAllWindows)
 
-        icon = QIcon.fromTheme("edit-cut", QIcon(':/images/cut.png'))
+        icon = QIcon.fromTheme("edit-cut")
         self._cut_act = QAction(icon, "Cu&t", self,
                 shortcut=QKeySequence.Cut,
                 statusTip="Cut the current selection's contents to the clipboard",
                 triggered=self.cut)
 
-        icon = QIcon.fromTheme("edit-copy", QIcon(':/images/copy.png'))
+        icon = QIcon.fromTheme("edit-copy")
         self._copy_act = QAction(icon, "&Copy", self,
                 shortcut=QKeySequence.Copy,
                 statusTip="Copy the current selection's contents to the clipboard",
                 triggered=self.copy)
 
-        icon = QIcon.fromTheme("edit-paste", QIcon(':/images/paste.png'))
+        icon = QIcon.fromTheme("edit-paste")
         self._paste_act = QAction(icon, "&Paste", self,
                 shortcut=QKeySequence.Paste,
                 statusTip="Paste the clipboard's contents into the current selection",
@@ -432,6 +432,11 @@ if __name__ == '__main__':
     options = argument_parser.parse_args()
 
     app = QApplication(sys.argv)
+
+    icon_paths = QIcon.themeSearchPaths()
+    QIcon.setThemeSearchPaths(icon_paths + [":/qt-project.org/icons"])
+    QIcon.setFallbackThemeName("example_icons");
+
     main_win = MainWindow()
     for f in options.files:
         main_win.load(f)
