@@ -63,6 +63,13 @@ static bool alwaysGenerateDestructorDeclaration()
     return  clang::compiler() == Compiler::Msvc;
 }
 
+const char *HeaderGenerator::protectedHackDefine = R"(// Workaround to access protected functions
+#ifndef protected
+#  define protected public
+#endif
+
+)";
+
 QString HeaderGenerator::fileNameForContext(const GeneratorContext &context) const
 {
     return headerFileNameForContext(context);
@@ -99,7 +106,7 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
     s << "#define SBK_" << outerHeaderGuard << "_H\n\n";
 
     if (!avoidProtectedHack())
-        s << "#define protected public\n\n";
+        s << protectedHackDefine;
 
     //Includes
     s << metaClass->typeEntry()->include() << '\n';

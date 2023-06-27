@@ -504,11 +504,10 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
     s << licenseComment() << '\n';
 
     const bool normalClass = !classContext.forSmartPointer();
-    if (normalClass && !avoidProtectedHack() && !metaClass->isNamespace()
-        && !metaClass->hasPrivateDestructor()) {
-        s << "//workaround to access protected functions\n";
-        s << "#define protected public\n\n";
-    }
+    // Normally only required for classes for which we want to generate protected API,
+    // but it needs to be generated into all files to ensure ODR for Unity builds.
+    if (!avoidProtectedHack())
+        s << HeaderGenerator::protectedHackDefine;
 
     QByteArrayList cppIncludes{"typeinfo", "iterator", // for containers
                                "cctype", "cstring"};
