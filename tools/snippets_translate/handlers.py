@@ -521,7 +521,7 @@ def handle_useless_qt_classes(x):
                 x = x[0:match.start()] + match.group(1) + x[match.end():]
             else:
                 break
-    return x
+    return x.replace('"_L1', '"').replace("u'", "'")
 
 
 def handle_new(x):
