@@ -151,6 +151,7 @@
             <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
         </modify-function>
         <modify-function signature="load(const QUrl &amp;)" allow-thread="yes" overload-number="2"/>
+        <modify-function signature="loadFromModule(QAnyStringView,QAnyStringView)" allow-thread="yes"/>
     </object-type>
     <object-type name="QQmlComponent">
         <enum-type name="CompilationMode"/>
@@ -161,6 +162,10 @@
         <modify-function signature="QQmlComponent(QQmlEngine*,QString,QQmlComponent::CompilationMode,QObject*)" allow-thread="yes"/>
         <modify-function signature="QQmlComponent(QQmlEngine*,QUrl,QObject*)" allow-thread="yes"/>
         <modify-function signature="QQmlComponent(QQmlEngine*,QUrl,QQmlComponent::CompilationMode,QObject*)" allow-thread="yes"/>
+        <modify-function signature="loadFromModule(QAnyStringView,QAnyStringView,QQmlComponent::CompilationMode)" allow-thread="yes"/>
+        <modify-function signature="loadUrl(QUrl)" allow-thread="yes"/>
+        <modify-function signature="loadUrl(QUrl,QQmlComponent::CompilationMode)" allow-thread="yes"/>
+        <modify-function signature="setData(QByteArray,QUrl)" allow-thread="yes"/>
     </object-type>
     <object-type name="QQmlContext">
         <value-type name="PropertyPair"/>
