@@ -330,13 +330,21 @@ void SbkEnumTypeDealloc(PyObject *pyObj)
 
     PyObject_GC_UnTrack(pyObj);
 #ifndef Py_LIMITED_API
+#  if PY_VERSION_HEX >= 0x030A0000
+    Py_TRASHCAN_BEGIN(pyObj, 1);
+#  else
     Py_TRASHCAN_SAFE_BEGIN(pyObj);
+#  endif
 #endif
     if (PepType_SETP(sbkType)->converter) {
         Shiboken::Conversions::deleteConverter(PepType_SETP(sbkType)->converter);
     }
 #ifndef Py_LIMITED_API
+#  if PY_VERSION_HEX >= 0x030A0000
+    Py_TRASHCAN_END;
+#  else
     Py_TRASHCAN_SAFE_END(pyObj);
+#  endif
 #endif
     if (PepRuntime_38_flag) {
         // PYSIDE-939: Handling references correctly.
@@ -752,9 +760,10 @@ newTypeWithName(const char *name,
     static auto basetype = SbkEnum_TypeF();
     Py_INCREF(basetype);
     PyTuple_SetItem(bases, 0, reinterpret_cast<PyObject *>(basetype));
-    auto *type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpecWithBases(&newspec, bases));
+    auto *obj = SbkType_FromSpecWithBases(&newspec, bases);
+    auto *type = reinterpret_cast<PyTypeObject *>(obj);
     PyErr_Print();
-    Py_TYPE(type) = SbkEnumType_TypeF();
+    obj->ob_type = SbkEnumType_TypeF();
 
     auto *enumType = reinterpret_cast<SbkEnumType *>(type);
     PepType_SETP(enumType)->cppName = cppName;

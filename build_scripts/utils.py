@@ -64,6 +64,10 @@ except NameError:
     WindowsError = None
 
 
+def is_64bit():
+    return sys.maxsize > 2147483647
+
+
 def filter_match(name, patterns):
     for pattern in patterns:
         if pattern is None:

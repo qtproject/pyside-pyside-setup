@@ -41,8 +41,14 @@
 #include "sbkstaticstrings_p.h"
 #include "autodecref.h"
 
-#include <vector>
-#include <unordered_set>
+#if PY_VERSION_HEX >= 0x03000000
+#  define USE_INTERN_STRINGS
+#endif
+
+#ifndef USE_INTERN_STRINGS
+#  include <vector>
+#  include <unordered_set>
+#endif
 
 namespace Shiboken
 {
@@ -233,6 +239,13 @@ Py_ssize_t len(PyObject *str)
 //     PyObject *attr = PyObject_GetAttr(obj, name());
 //
 
+#ifdef USE_INTERN_STRINGS
+PyObject *createStaticString(const char *str)
+{
+     return PyUnicode_InternFromString(str);
+}
+#else
+
 using StaticStrings = std::unordered_set<PyObject *>;
 
 static void finalizeStaticStrings();    // forward
@@ -282,6 +295,8 @@ PyObject *createStaticString(const char *str)
     Py_INCREF(result);
     return result;
 }
+
+#endif // !USE_INTERN_STRINGS
 
 ///////////////////////////////////////////////////////////////////////
 //

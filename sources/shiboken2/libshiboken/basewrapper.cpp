@@ -376,8 +376,9 @@ SbkObjectType *SbkObject_TypeF(void)
 {
     static PyTypeObject *type = nullptr;
     if (!type) {
-        type = reinterpret_cast<PyTypeObject *>(SbkType_FromSpec(&SbkObject_Type_spec));
-        Py_TYPE(type) = SbkObjectType_TypeF();
+        auto *obj = SbkType_FromSpec(&SbkObject_Type_spec);
+        type = reinterpret_cast<PyTypeObject *>(obj);
+        obj->ob_type = SbkObjectType_TypeF();
         Py_INCREF(Py_TYPE(type));
         type->tp_weaklistoffset = offsetof(SbkObject, weakreflist);
         type->tp_dictoffset = offsetof(SbkObject, ob_dict);
@@ -521,7 +522,11 @@ void SbkObjectTypeDealloc(PyObject *pyObj)
 
     PyObject_GC_UnTrack(pyObj);
 #ifndef Py_LIMITED_API
+#  if PY_VERSION_HEX >= 0x030A0000
+    Py_TRASHCAN_BEGIN(pyObj, 1);
+#  else
     Py_TRASHCAN_SAFE_BEGIN(pyObj);
+#  endif
 #endif
     if (sotp) {
         if (sotp->user_data && sotp->d_func) {
@@ -536,7 +541,11 @@ void SbkObjectTypeDealloc(PyObject *pyObj)
         sotp = nullptr;
     }
 #ifndef Py_LIMITED_API
+#  if PY_VERSION_HEX >= 0x030A0000
+    Py_TRASHCAN_END;
+#  else
     Py_TRASHCAN_SAFE_END(pyObj);
+#  endif
 #endif
     if (PepRuntime_38_flag) {
         // PYSIDE-939: Handling references correctly.
@@ -1161,7 +1170,7 @@ introduceWrapperType(PyObject *enclosingObject,
     typeSpec->slots[0].pfunc = reinterpret_cast<void *>(baseType ? baseType : SbkObject_TypeF());
 
     PyObject *heaptype = SbkType_FromSpecWithBases(typeSpec, baseTypes);
-    Py_TYPE(heaptype) = SbkObjectType_TypeF();
+    heaptype->ob_type = SbkObjectType_TypeF();
     Py_INCREF(Py_TYPE(heaptype));
     auto *type = reinterpret_cast<SbkObjectType *>(heaptype);
 #if PY_VERSION_HEX < 0x03000000
@@ -1526,6 +1535,7 @@ bool setCppPointer(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr)
 bool isValid(PyObject *pyObj)
 {
     if (!pyObj || pyObj == Py_None
+        || PyType_Check(pyObj) != 0
         || Py_TYPE(Py_TYPE(pyObj)) != SbkObjectType_TypeF()) {
         return true;
     }

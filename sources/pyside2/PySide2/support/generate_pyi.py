@@ -147,10 +147,7 @@ class Formatter(Writer):
         self.print("from PySide2.support.signature.mapping import (")
         self.print("    Virtual, Missing, Invalid, Default, Instance)")
         self.print()
-        self.print("class Object(object): pass")
-        self.print()
-        self.print("import shiboken2 as Shiboken")
-        self.print("Shiboken.Object = Object")
+        self.print("from shiboken2 import Shiboken")
         self.print()
         # This line will be replaced by the missing imports postprocess.
         self.print("IMPORTS")
@@ -222,7 +219,6 @@ def generate_pyi(import_name, outpath, options):
     outfile = io.StringIO()
     fmt = Formatter(outfile)
     fmt.print(LICENSE_TEXT.strip())
-    need_imports = not USE_PEP563
     if USE_PEP563:
         fmt.print("from __future__ import annotations")
         fmt.print()
@@ -246,11 +242,10 @@ def generate_pyi(import_name, outpath, options):
             line = line.rstrip()
             # we remove the IMPORTS marker and insert imports if needed
             if line == "IMPORTS":
-                if need_imports:
-                    for mod_name in find_imports(outfile.getvalue()):
-                        imp = "PySide2." + mod_name
-                        if imp != import_name:
-                            wr.print("import " + imp)
+                for mod_name in find_imports(outfile.getvalue()):
+                    imp = "PySide2." + mod_name
+                    if imp != import_name:
+                        wr.print("import " + imp)
                 wr.print("import " + import_name)
                 wr.print()
                 wr.print()

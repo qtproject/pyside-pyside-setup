@@ -81,14 +81,17 @@ rejection
         <typesystem>
             <rejection class="..."
                 function-name="..."
+                argument-type="..."
                 field-name="..." />
         </typesystem>
 
-    The **class** attribute is the C++ class name of the class to reject. Use the
-    *optional* **function-name** or **field-name** attributes to reject a particular
-    function or field. Note that the **field-name** and **function-name** cannot
-    be specified at the same time. To remove all occurrences of a given field or
-    function, set the class attribute to \*.
+    The **class** attribute is the C++ class name of the class to reject. Use
+    the *optional* **function-name**, **argument-type**, or **field-name**
+    attributes to reject a particular function, function with arguments of a
+    particular type, or a field. Note that the **field-name** and
+    **function-name**/**argument-type** cannot be specified at the same time.
+    To remove all occurrences of a given field or function, set the class
+    attribute to \*.
 
 .. _primitive-type:
 

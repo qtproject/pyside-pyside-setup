@@ -41,6 +41,14 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_config.py"
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Shiboken.pyi"
+               "${CMAKE_CURRENT_BINARY_DIR}/Shiboken.pyi" @ONLY)
+# typing support for mypy
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/py.typed.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/py.typed" @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Shiboken.pyi"
+              "${CMAKE_CURRENT_BINARY_DIR}/py.typed"
+        DESTINATION "${PYTHON_SITE_PACKAGES}/shiboken2")
 
 # Variable from enclosing scope.
 foreach(item IN LISTS shiboken_python_files)

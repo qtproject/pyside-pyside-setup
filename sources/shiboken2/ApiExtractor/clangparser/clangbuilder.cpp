@@ -784,18 +784,22 @@ static bool cStringStartsWith(const char *str, const QByteArray &prefix)
     return std::strncmp(prefix.constData(), str, int(prefix.size())) == 0;
 }
 
+#ifdef Q_OS_UNIX
+static bool cStringContains(const char *str, const char *prefix)
+{
+    return std::strstr(str, prefix) != nullptr;
+}
+#endif
+
 bool BuilderPrivate::visitHeader(const char *cFileName) const
 {
     // Resolve OpenGL typedefs although the header is considered a system header.
     const char *baseName = cBaseName(cFileName);
     if (cCompareFileName(baseName, "gl.h"))
         return true;
-#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-    if (cStringStartsWith(cFileName, "/usr/include/stdint.h"))
-        return true;
-#endif
 #ifdef Q_OS_LINUX
-    if (cStringStartsWith(cFileName, "/usr/include/stdlib.h")
+    if (cStringStartsWith(cFileName, "/usr/include/stdint.h")
+        || cStringStartsWith(cFileName, "/usr/include/stdlib.h")
         || cStringStartsWith(cFileName, "/usr/include/sys/types.h")) {
         return true;
     }
@@ -804,9 +808,9 @@ bool BuilderPrivate::visitHeader(const char *cFileName) const
     // Parse the following system headers to get the correct typdefs for types like
     // int32_t, which are used in the macOS implementation of OpenGL framework.
     if (cCompareFileName(baseName, "gltypes.h")
-        || cStringStartsWith(cFileName, "/usr/include/_types")
-        || cStringStartsWith(cFileName, "/usr/include/_types")
-        || cStringStartsWith(cFileName, "/usr/include/sys/_types")) {
+        || cStringContains(cFileName, "/usr/include/stdint.h")
+        || cStringContains(cFileName, "/usr/include/_types")
+        || cStringContains(cFileName, "/usr/include/sys/_types")) {
         return true;
     }
 #endif // Q_OS_MACOS
