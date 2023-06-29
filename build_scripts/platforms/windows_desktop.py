@@ -274,7 +274,7 @@ def copy_msvc_redist_files(vars, redist_target_path):
             download_and_extract_7z(redist_url + zip_file, redist_target_path)
         except:
             print("download.qt.io is down, try with mirror")
-            redist_url = "https://www.funet.fi/pub/mirrors/download.qt-project.org/development_releases/prebuilt/vcredist/"
+            redist_url = "https://master.qt.io/development_releases/prebuilt/vcredist/"
             download_and_extract_7z(redist_url + zip_file, redist_target_path)
     else:
         print("Qt dependency DLLs (MSVC redist) will not be downloaded and extracted.")

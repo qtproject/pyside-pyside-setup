@@ -8,15 +8,35 @@ instructions:
     variableName: QTEST_ENVIRONMENT
     variableValue: "ci"
   - type: ExecuteCommand
-    command: "python -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
+    command: "python -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.TARGET_ARCH_COIN}}"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     enable_if:
-        condition: property
-        property: host.os
-        equals_value: MacOS
+        condition: and
+        conditions:
+        - condition: property
+          property: target.arch
+          equals_value: X86_64
+        - condition: property
+          property: host.os
+          equals_value: MacOS
     userMessageOnFailure: >
-         Failed to execute test instructions on osx
+        Failed to execute test instructions on osx
+  - type: ExecuteCommand
+    command: "python -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/Users/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch=X86_64-ARM64"
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 1200
+    enable_if:
+        condition: and
+        conditions:
+        - condition: property
+          property: target.arch
+          equals_value: X86_64-ARM64
+        - condition: property
+          property: host.os
+          equals_value: MacOS
+    userMessageOnFailure: >
+        Failed to execute test instructions on osx
   - type: ExecuteCommand
     command: "python -u coin_test_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}}"
     maxTimeInSeconds: 14400

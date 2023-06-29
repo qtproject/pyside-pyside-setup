@@ -47,6 +47,7 @@ import subprocess
 import fnmatch
 import itertools
 import glob
+from os.path import expanduser
 
 # There is no urllib.request in Python2
 try:
@@ -813,7 +814,36 @@ def ldd_get_paths_for_dependencies(dependencies_regex, executable_path=None, dep
     return paths
 
 
-def ldd(executable_path):
+def _ldd_ldd(executable_path):
+    """Helper for ldd():
+       Returns ldd output of shared library dependencies for given
+       `executable_path`.
+
+    Parameters
+    ----------
+    executable_path : str
+        path to executable or shared library.
+
+    Returns
+    -------
+    output : str
+        the raw output retrieved from the dynamic linker.
+    """
+
+    output = ''
+    error = ''
+    try:
+        output_lines = run_process_output(['ldd', executable_path])
+        output = '\n'.join(output_lines)
+    except Exception as e:
+        error = str(e)
+    if not output:
+        message = "ldd failed to query for dependent shared libraries of {}: {}".format(executable_path, error)
+        raise RuntimeError(message)
+    return output
+
+
+def _ldd_ldso(executable_path):
     """
     Returns ld.so output of shared library dependencies for given
     `executable_path`.
@@ -871,6 +901,32 @@ def ldd(executable_path):
     else:
         raise RuntimeError("ld.so failed to query for dependent shared "
                            "libraries of {} ".format(executable_path))
+
+
+def ldd(executable_path):
+    """
+    Returns ldd output of shared library dependencies for given `executable_path`,
+    using either ldd or ld.so depending on availability.
+
+    Parameters
+    ----------
+    executable_path : str
+        path to executable or shared library.
+
+    Returns
+    -------
+    output : str
+        the raw output retrieved from the dynamic linker.
+    """
+    result = ''
+    try:
+        result = _ldd_ldd(executable_path)
+    except RuntimeError as e:
+        message = "ldd: Falling back to ld.so ({})".format(str(e))
+        log.warn(message)
+    if not result:
+        result = _ldd_ldso(executable_path)
+    return result
 
 
 def find_files_using_glob(path, pattern):
@@ -1102,7 +1158,7 @@ def install_pip_dependencies(env_pip, packages, upgrade=True):
 
 
 def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
-    _pExe = "python"
+    _pExe = "python2"
     _env = "env{}".format(str(python_ver))
     env_python = _env + "/bin/python"
     env_pip = _env + "/bin/pip"
@@ -1174,3 +1230,16 @@ def get_ci_qmake_path(ci_install_dir, ci_host_os):
         return qmake_path + "\\bin\\qmake.exe"
     else:
         return qmake_path + "/bin/qmake"
+
+
+def provisioning():
+    home = expanduser("~")
+    file = "https://download.qt.io/development_releases/prebuilt/libclang/libclang-release_100-based-dyn-mac-universal.7z"
+    target = os.path.join(home, "libclang-dynlibs-10.0-universal")
+    try:
+        download_and_extract_7z(file, target)
+    except RuntimeError as e:
+        print("debug: Exception error: {}".format(e))
+        file = file.replace("s://download","://master")
+        print("New url: {}".format(file))
+        download_and_extract_7z(file, target)

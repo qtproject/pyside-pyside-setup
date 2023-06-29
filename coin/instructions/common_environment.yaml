@@ -119,6 +119,32 @@ instructions:
       variableName: LLVM_INSTALL_DIR
       variableValue: "{{.Env.LLVM_DYNAMIC_LIBS_100}}"
       disable_if:
+        condition: and
+        conditions:
+          - condition: property
+            property: target.arch
+            equals_value: X86_64-ARM64 # When target arch is universal binary, we can use the default libclang
+          - condition: property
+            property: host.os
+            equals_value: MacOS
+    - type: EnvironmentVariable
+      variableName: LLVM_INSTALL_DIR
+      variableValue: "/Users/qt/libclang-dynlibs-10.0-universal/libclang-dynlibs-10.0"
+      enable_if:
+        condition: and
+        conditions:
+          - condition: property
+            property: target.arch
+            equals_value: X86_64-ARM64 # When target arch is universal binary, we can use the default libclang
+          - condition: property
+            property: host.os
+            equals_value: MacOS
+    - type: PrependToEnvironmentVariable
+      variableName: PATH
+      variableValue: "/Library/Frameworks/Python.framework/Versions/3.9/bin:"
+      enable_if:
          condition: property
-         property: host.osVersion
-         equals_value: openSUSE_15_1
+         property: host.os
+         equals_value: MacOS
+
+

@@ -43,6 +43,8 @@ from build_scripts.utils import get_qtci_virtualEnv
 from build_scripts.utils import run_instruction
 from build_scripts.utils import rmtree
 from build_scripts.utils import get_ci_qmake_path
+from build_scripts.utils import provisioning
+
 import os
 import site
 import sys
@@ -85,6 +87,8 @@ def call_testrunner(python_ver, buildnro):
     run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
     if sys.platform == "win32":
         run_instruction([env_pip, "install", "numpy==1.19.3"], "Failed to install numpy 1.19.3")
+    elif os.environ.get("HOST_OSVERSION_COIN") == "macos_10_13" and python_ver == "3":
+        run_instruction([env_pip, "install", "numpy==1.19.4"], "Failed to install numpy")
     else:
         run_instruction([env_pip, "install", "numpy"], "Failed to install numpy")
 
@@ -96,7 +100,7 @@ def call_testrunner(python_ver, buildnro):
     qmake_path = get_ci_qmake_path(CI_ENV_INSTALL_DIR, CI_HOST_OS)
 
     # Try to install built wheels, and build some buildable examples.
-    if CI_RELEASE_CONF:
+    if CI_RELEASE_CONF and CI_HOST_OS != "MacOS":
         wheel_tester_path = os.path.join("testing", "wheel_tester.py")
         cmd = [env_python, wheel_tester_path, qmake_path]
         run_instruction(cmd, "Error while running wheel_tester.py")
@@ -104,6 +108,12 @@ def call_testrunner(python_ver, buildnro):
 def run_test_instructions():
     # Remove some environment variables that impact cmake
     arch = '32' if CI_TARGET_ARCH and CI_TARGET_ARCH == 'X86' else '64'
+
+    if CI_TARGET_ARCH == "X86_64-ARM64":
+        print("Install Libclang supporting universal binary")
+        provisioning()
+    else:
+        print("Using preinstalled libclang. While target arch was:" + str(CI_TARGET_ARCH))
     expand_clang_variables(arch)
     for env_var in ['CC', 'CXX']:
         if os.environ.get(env_var):
@@ -111,18 +121,18 @@ def run_test_instructions():
 
     os.chdir(CI_ENV_AGENT_DIR)
     testRun = 0
-    # We didn't build for Python 2 in win
-    if CI_HOST_OS != "Windows":
+    # In win machines, there are additional python versions to test with
+    if CI_HOST_OS == "Windows":
+        call_testrunner("3.6.1", str(testRun))
+        call_testrunner("3.8.1", str(testRun))
+    elif CI_HOST_OS == "MacOS" and CI_TARGET_ARCH=="X86_64-ARM64":
+        call_testrunner("3", str(testRun))
+    else:
         call_testrunner("", str(testRun))
         testRun =+ 1
-    # We know that second build was with python3
-    if CI_RELEASE_CONF:
-        # In win machines, there are additional python versions to test with
-        if CI_HOST_OS == "Windows":
-            call_testrunner("3.6.1", str(testRun))
-            call_testrunner("3.8.1", str(testRun))
-        else:
-            call_testrunner("3", str(testRun))
+        call_testrunner("3", str(testRun))
 
 if __name__ == "__main__":
+    print("HOST OS " + str(CI_HOST_OS))
+    print("TARGET ARCH " + str(CI_TARGET_ARCH))
     run_test_instructions()
