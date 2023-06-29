@@ -1244,7 +1244,7 @@ class PysideRstDocs(Command, DistUtilsCommandMixin):
             elif self.name == "shiboken2":
                 self.sphinx_src = self.out_dir
 
-            sphinx_cmd = ["sphinx-build", "-b", "html", "-c", self.sphinx_src,
+            sphinx_cmd = ["sphinx-build", "-b", "html", "-j", "auto", "-c", self.sphinx_src,
                           self.doc_dir, self.out_dir]
             if run_process(sphinx_cmd) != 0:
                 raise DistutilsSetupError("Error running CMake for {}".format(self.doc_dir))

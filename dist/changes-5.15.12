@@ -1,4 +1,4 @@
-Qt for Python 5.5.11 is a bug-fix release.
+Qt for Python 5.5.12 is a bug-fix release.
 
 For more details, refer to the online documentation included in this
 distribution. The documentation is also available online:
@@ -17,19 +17,8 @@ information about a particular change.
 *                                  PySide2                                 *
 ****************************************************************************
 
- - [PYSIDE-1956] Documentation regarding the clang environment variables has
-                 been fixed.
- - [PYSIDE-1960] Support for Python 3.11 has been added.
- - [PYSIDE-1980] The GLES build has been fixed.
- - [PYSIDE-2019] Crashes when using QtDataVisualization's
-                 QValue3DAxisFormatter have been fixed.
- - [PYSIDE-2043] Errors when using VSCode's Intellisense have been fixed.
- - [PYSIDE-2034] Blocking threads in static functions of QMessageBox
-                 have been fixed.
-
 ****************************************************************************
 *                                  Shiboken2                               *
 ****************************************************************************
 
- - [PYSIDE-1960] Crashes in libshiboken related to Python 3.11
-                 have been fixed.
+ - [PYSIDE-1012] Missing includes for g++ 11.3 have been added.
