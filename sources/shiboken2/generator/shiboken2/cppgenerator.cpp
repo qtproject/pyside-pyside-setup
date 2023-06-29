@@ -1770,7 +1770,7 @@ void CppGenerator::writeSmartPointerConverterFunctions(QTextStream &s, const Abs
         // TODO: Missing conversion to smart pointer pointer type:
 
         s << "// Register smartpointer conversion for all derived classes\n";
-        const auto classes = getBaseClasses(targetClass);
+        const auto classes = getAllAncestors(targetClass);
         for (auto k : classes) {
             if (smartPointerTypeEntry->matchesInstantiation(k->typeEntry())) {
                 if (auto smartTargetType = findSmartPointerInstantiation(k->typeEntry())) {
@@ -4016,7 +4016,7 @@ void CppGenerator::writeSmartPointerConverterInitialization(QTextStream &s, cons
     if (!klass)
         return;
 
-    const auto classes = getBaseClasses(klass);
+    const auto classes = getAllAncestors(klass);
     if (classes.isEmpty())
         return;
 
