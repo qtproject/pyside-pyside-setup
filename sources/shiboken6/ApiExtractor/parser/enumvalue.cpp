@@ -7,10 +7,32 @@
 #include <QtCore/QString>
 #include <QtCore/QTextStream>
 
+using namespace Qt::StringLiterals;
+
 QString EnumValue::toString() const
 {
     return m_type == EnumValue::Signed
         ? QString::number(m_value) : QString::number(m_unsignedValue);
+}
+
+QString EnumValue::toHex(int fieldWidth) const
+{
+    QString result;
+    QTextStream str(&result);
+    // Note: Qt goofes up formatting of negative padded hex numbers, it ends up
+    // with "0x00-1". Write '-' before.
+    if (isNegative())
+        str << '-';
+    str << "0x" << Qt::hex;
+    if (fieldWidth) {
+        str.setFieldWidth(fieldWidth);
+        str.setPadChar(u'0');
+    }
+    if (m_type == EnumValue::Signed)
+        str << qAbs(m_value);
+    else
+        str << m_unsignedValue;
+    return result;
 }
 
 void EnumValue::setValue(qint64 v)

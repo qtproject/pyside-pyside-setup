@@ -382,7 +382,7 @@ static PyObject *toPyObject(IntT v)
 
 template <typename IntT>
 static PyTypeObject *createPythonEnumHelper(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], IntT enumValues[])
+    const char *fullName, const char *enumItemStrings[], const IntT enumValues[])
 {
     AutoDecRef args(PyList_New(0));
     auto *pyEnumItems = args.object();
@@ -402,49 +402,49 @@ static PyTypeObject *createPythonEnumHelper(PyObject *module,
 // otherwise templates will not work across modules.
 
 PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], int64_t enumValues[])
+    const char *fullName, const char *enumItemStrings[], const int64_t enumValues[])
 {
     return createPythonEnumHelper(module, fullName, enumItemStrings, enumValues);
 }
 
 PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], uint64_t enumValues[])
+    const char *fullName, const char *enumItemStrings[], const uint64_t enumValues[])
 {
     return createPythonEnumHelper(module, fullName, enumItemStrings, enumValues);
 }
 
 PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], int32_t enumValues[])
+    const char *fullName, const char *enumItemStrings[], const int32_t enumValues[])
 {
     return createPythonEnumHelper(module, fullName, enumItemStrings, enumValues);
 }
 
 PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], uint32_t enumValues[])
+    const char *fullName, const char *enumItemStrings[], const uint32_t enumValues[])
 {
     return createPythonEnumHelper(module, fullName, enumItemStrings, enumValues);
 }
 
 PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], int16_t enumValues[])
+    const char *fullName, const char *enumItemStrings[], const int16_t enumValues[])
 {
     return createPythonEnumHelper(module, fullName, enumItemStrings, enumValues);
 }
 
 PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], uint16_t enumValues[])
+    const char *fullName, const char *enumItemStrings[], const uint16_t enumValues[])
 {
     return createPythonEnumHelper(module, fullName, enumItemStrings, enumValues);
 }
 
 PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], int8_t enumValues[])
+    const char *fullName, const char *enumItemStrings[], const int8_t enumValues[])
 {
     return createPythonEnumHelper(module, fullName, enumItemStrings, enumValues);
 }
 
 PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], uint8_t enumValues[])
+    const char *fullName, const char *enumItemStrings[], const uint8_t enumValues[])
 {
     return createPythonEnumHelper(module, fullName, enumItemStrings, enumValues);
 }

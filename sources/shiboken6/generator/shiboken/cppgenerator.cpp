@@ -5572,6 +5572,16 @@ void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList 
         s << sbkUnusedVariableCast(u"EType"_s);
 }
 
+static qsizetype maxLineLength(const QStringList &list)
+{
+    qsizetype result = 0;
+    for (const auto &s : list) {
+        if (auto len = s.size(); len > result)
+            result = len;
+    }
+    return result;
+}
+
 bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum &cppEnum) const
 {
     const auto enclosingClass = cppEnum.targetLangEnclosingClass();
@@ -5590,23 +5600,13 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
     s << (cppEnum.isAnonymous() ? "anonymous enum identified by enum value" : "enum");
     s << " '" << cppEnum.name() << "'.\n";
 
-    const bool isSigned = cppEnum.isSigned()
-                          && !cppEnum.typeEntry()->cppType().contains(u"unsigned"_s);
+    const QString userType = cppEnum.typeEntry()->cppType();
     const bool isAccessible = !avoidProtectedHack() || !cppEnum.isProtected();
     const auto enumValues = cppEnum.nonRejectedValues();
 
     const QString prefix = cppEnum.name();
 
-    QString tmp;
-    if (const auto userType = cppEnum.typeEntry()->cppType(); !userType.isEmpty()) {
-        tmp = userType;
-    } else {
-        if (!isSigned && !cppEnum.underlyingType().contains(u"unsigned"_s))
-            tmp += u"unsigned "_s;
-        tmp += cppEnum.underlyingType();
-    }
-    const QString simpleIntType = getSimplifiedIntTypeName(tmp);
-    QStringList pythonEnumNames;
+    const QString intType = userType.isEmpty() ? cppEnum.underlyingType() : userType;
 
     // Create a list of values
     const QString initializerValues = prefix + u"_InitializerValues"_s;
@@ -5622,18 +5622,11 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
         s << "nullptr};\n" << outdent;
     }
 
-    // Calculate formatting and record used number range.
-    int maxNameLen = 0;
+    // Calculate used number range.
     unsigned long long valueMaskPos = 0;
     long long valueMaskNeg = 0;
 
     for (const auto &enumValue : enumValues) {
-        QString name = mangleName(enumValue.name());
-
-        // calculate formatting
-        if (name.length() > maxNameLen)
-            maxNameLen = name.length();
-
         // calculate used number range
         QString numStr = enumValue.value().toString();
         if (numStr.startsWith(u"-"_s)) {
@@ -5652,49 +5645,42 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
     const QString usedIntType = calcMinimalIntTypeName(valueMaskPos, valueMaskNeg);
     const int targetHexLen = calcUsedBits(valueMaskPos, valueMaskNeg) / 4;
 
-    if (usedIntType != simpleIntType)
-        s << "// " << usedIntType << " used instead of " << simpleIntType << "\n";
+    if (usedIntType != intType)
+        s << "// \"" << usedIntType << "\" used instead of \"" << intType << "\"\n";
 
     // Calculating formatting columns
     QString enumValuePrefix;
     if (isAccessible) {
-        enumValuePrefix = usedIntType + u"("_s;
         if (cppEnum.enclosingClass())
             enumValuePrefix += cppEnum.enclosingClass()->qualifiedCppName() + u"::"_s;
         if (!cppEnum.isAnonymous())
             enumValuePrefix += cppEnum.name() + u"::"_s;
     }
-    const int needSpace = enumValuePrefix.length() + 2;   // braces
 
     // Build array of enum values
     if (enumValues.isEmpty()) {
-        s << usedIntType << " *" << initializerValues << "{};\n";
+        s << "const " << usedIntType << " *" << initializerValues << "{};\n";
     } else {
-        s << usedIntType << ' ' << initializerValues << "[] = {\n" << indent;
+        QStringList values;
+        values.reserve(enumValues.size());
+        s << "constexpr " << usedIntType << ' ' << initializerValues << "[] = {\n" << indent;
         for (qsizetype idx = 0, last = enumValues.size() - 1; idx <= last; ++idx) {
-            const auto &enumValue = enumValues[idx];
-
-            QString valueStr = enumValue.value().toString();
-
-            QString enumValueText = enumValuePrefix;
-            if (isAccessible)
-                enumValueText += enumValue.name() + u')';
-            else
-                enumValueText += valueStr;
-
-            bool hasSign = valueStr.startsWith(u"-"_s);
-            if (hasSign)
-                valueStr.removeFirst();
-            auto val = valueStr.toULongLong();
-            QString valueHex = QString(u"0x%1"_s).arg(val, targetHexLen, 16, QChar(u'0'));
-            if (hasSign)
-                valueStr = u'-' + valueHex + u" -"_s + valueStr;
-            else
-                valueStr = u' ' + valueHex + u"  "_s + valueStr;
+            const auto &enumValue = enumValues.at(idx);
+            QString line = usedIntType + u'(' + (isAccessible
+                               ? enumValuePrefix + enumValue.name()
+                               : enumValue.value().toString()) + u')';
             if (idx != last)
-                enumValueText += u',';
-            int targetCol = needSpace + maxNameLen - enumValueText.length();
-            s << enumValueText << QByteArray(targetCol, ' ') << "  // " << valueStr << "\n";
+                line += u',';
+            values.append(line);
+        }
+
+        const auto len = maxLineLength(values) + 1;
+        for (qsizetype idx = 0, size = enumValues.size(); idx < size; ++idx) {
+            const auto &enumValue = enumValues.at(idx).value();
+            const char *numberSpace = enumValue.isNegative() ? " " : "  ";
+            s << values.at(idx) << Pad(' ', len - values.at(idx).size())
+                << "//" << numberSpace << enumValue.toHex(targetHexLen)
+                << numberSpace << enumValue.toString() << '\n';
         }
         s << "};\n" << outdent;
     }

@@ -65,33 +65,33 @@ LIBSHIBOKEN_API void setTypeConverter(PyTypeObject *type, SbkConverter *converte
 
 /// Creating Python enums for different types.
 LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], int64_t enumValues[]);
+    const char *fullName, const char *enumItemStrings[], const int64_t enumValues[]);
 
 LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], uint64_t enumValues[]);
+    const char *fullName, const char *enumItemStrings[], const uint64_t enumValues[]);
 
 LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], int32_t enumValues[]);
+    const char *fullName, const char *enumItemStrings[], const int32_t enumValues[]);
 
 LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], uint32_t enumValues[]);
+    const char *fullName, const char *enumItemStrings[], const uint32_t enumValues[]);
 
 LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], int16_t enumValues[]);
+    const char *fullName, const char *enumItemStrings[], const int16_t enumValues[]);
 
 LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], uint16_t enumValues[]);
+    const char *fullName, const char *enumItemStrings[], const uint16_t enumValues[]);
 
 LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], int8_t enumValues[]);
+    const char *fullName, const char *enumItemStrings[], const int8_t enumValues[]);
 
 LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,
-    const char *fullName, const char *enumItemStrings[], uint8_t enumValues[]);
+    const char *fullName, const char *enumItemStrings[], const uint8_t enumValues[]);
 
 /// This template removes duplication by inlining necessary type casts.
 template <typename IntT>
 inline PyTypeObject *createPythonEnum(PyTypeObject *scope,
-    const char *fullName, const char *enumItemStrings[], IntT enumValues[])
+    const char *fullName, const char *enumItemStrings[], const IntT enumValues[])
 {
     auto *obScope = reinterpret_cast<PyObject *>(scope);
     return createPythonEnum(obScope, fullName, enumItemStrings, enumValues);

@@ -1880,22 +1880,6 @@ QString ShibokenGenerator::getPrivateModuleHeaderFileName(const QString &moduleN
     return getModuleHeaderFileBaseName(moduleName) + QStringLiteral("_p.h");
 }
 
-QString ShibokenGenerator::getSimplifiedIntTypeName(const QString &name)
-
-{
-    bool isSigned = !name.contains(u"unsigned"_s);
-    if (name.contains(u"long"_s)) {
-        if (name.contains(u"long long"_s))
-            return isSigned ? u"int64_t"_s : u"uint64_t"_s;
-        return isSigned ? u"int32_t"_s : u"uint32_t"_s;
-    }
-    if (name.contains(u"short"_s))
-        return isSigned ? u"int16_t"_s : u"uint16_t"_s;
-    if (name.contains(u"char"_s))
-        return isSigned ? u"int8_t"_s : u"uint8_t"_s;
-    return isSigned ? u"int32_t"_s : u"uint32_t"_s;
-}
-
 QString ShibokenGenerator::calcMinimalIntTypeName(uint64_t maxNumber, int64_t minNumber)
 {
     // Calculate the really needed bits.
