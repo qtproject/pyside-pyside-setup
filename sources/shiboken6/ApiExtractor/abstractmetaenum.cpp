@@ -101,6 +101,9 @@ public:
     {
     }
 
+    int unsignedUsedBits() const;
+    int signedUsedBits() const;
+
     AbstractMetaEnumValueList m_enumValues;
 
     EnumTypeEntryCPtr m_typeEntry;
@@ -113,6 +116,38 @@ public:
     uint m_hasQenumsDeclaration : 1;
     uint m_signed : 1;
 };
+
+static int _usedBits(uint64_t v)
+{
+    return (v >> 32) ? 64 : (v >> 16) ? 32 : (v >> 8) ? 16 : 8;
+}
+
+static int _usedBits(int64_t v)
+{
+    return (v >> 31) ? 64 : (v >> 15) ? 32 : (v >> 7) ? 16 : 8;
+}
+
+int AbstractMetaEnumData::unsignedUsedBits() const
+{
+    uint64_t maxValue = 0;
+    for (const auto &v : m_enumValues) {
+        if (const auto uv = v.value().unsignedValue(); uv > maxValue)
+            maxValue = uv;
+    }
+    return _usedBits(maxValue);
+}
+
+int AbstractMetaEnumData::signedUsedBits() const
+{
+    int64_t maxValue = 0;
+    for (const auto &v : m_enumValues) {
+        const auto sv = v.value().value();
+        const auto absV = sv < 0 ? ~sv : sv;
+        if (absV > maxValue)
+            maxValue = absV;
+    }
+    return _usedBits(maxValue);
+}
 
 AbstractMetaEnum::AbstractMetaEnum() : d(new AbstractMetaEnumData)
 {
@@ -305,6 +340,17 @@ void AbstractMetaEnum::setUnderlyingType(const QString &underlyingType)
 {
     if (d->m_underlyingType != underlyingType)
         d->m_underlyingType = underlyingType;
+}
+
+int AbstractMetaEnum::usedBits() const
+{
+    return isSigned() ? d->signedUsedBits() : d->unsignedUsedBits();
+}
+
+QString AbstractMetaEnum::intTypeForSize(int usedBits, bool isSigned)
+{
+    QString result = u"int"_s + QString::number(usedBits) + u"_t"_s;
+    return isSigned ? result : u'u' + result;
 }
 
 #ifndef QT_NO_DEBUG_STREAM

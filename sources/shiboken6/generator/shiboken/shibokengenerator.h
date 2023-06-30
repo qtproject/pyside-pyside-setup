@@ -272,10 +272,6 @@ protected:
     static QString getModuleHeaderFileName(const QString &moduleName = QString());
     static QString getPrivateModuleHeaderFileName(const QString &moduleName = QString());
 
-    /// Determine the minimal needed data type for a given number range.
-    static QString calcMinimalIntTypeName(uint64_t maxNumber, int64_t minNumber);
-    static int calcUsedBits(uint64_t maxNumber, int64_t minNumber);
-
     /// Includes for header (native wrapper class) or binding source
     QList<IncludeGroup> classIncludes(const AbstractMetaClassCPtr &metaClass) const;
 

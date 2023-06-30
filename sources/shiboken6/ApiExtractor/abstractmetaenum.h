@@ -47,6 +47,8 @@ public:
     Documentation documentation() const;
     void setDocumentation(const Documentation& doc);
 
+    int usedBits() const;
+
 private:
     QSharedDataPointer<AbstractMetaEnumValueData> d;
 };
@@ -106,6 +108,9 @@ public:
 
     QString underlyingType() const;
     void setUnderlyingType(const QString &underlyingType);
+
+    static QString intTypeForSize(int usedBits, bool isSigned);
+    int usedBits() const;
 
 private:
     QSharedDataPointer<AbstractMetaEnumData> d;

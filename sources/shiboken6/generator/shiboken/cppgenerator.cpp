@@ -5601,6 +5601,7 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
     s << " '" << cppEnum.name() << "'.\n";
 
     const QString userType = cppEnum.typeEntry()->cppType();
+    const bool isSigned = cppEnum.isSigned() && !userType.contains(u"unsigned"_s);
     const bool isAccessible = !avoidProtectedHack() || !cppEnum.isProtected();
     const auto enumValues = cppEnum.nonRejectedValues();
 
@@ -5622,28 +5623,13 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
         s << "nullptr};\n" << outdent;
     }
 
-    // Calculate used number range.
-    unsigned long long valueMaskPos = 0;
-    long long valueMaskNeg = 0;
-
-    for (const auto &enumValue : enumValues) {
-        // calculate used number range
-        QString numStr = enumValue.value().toString();
-        if (numStr.startsWith(u"-"_s)) {
-            auto val = numStr.toLongLong();
-            if (val < valueMaskNeg)
-                valueMaskNeg = val;
-        } else {
-            auto val = numStr.toULongLong();
-            if (val > valueMaskPos)
-                valueMaskPos = val;
-        }
+    int targetHexLen = 0;
+    QString usedIntType = userType;
+    if (usedIntType.isEmpty()) {
+        const int usedBits = cppEnum.usedBits();
+        targetHexLen = usedBits / 4;
+        usedIntType = AbstractMetaEnum::intTypeForSize(usedBits, cppEnum.isSigned());
     }
-
-    // update signedness for the reduced number type.
-    const bool isSignedShort = valueMaskNeg < 0;
-    const QString usedIntType = calcMinimalIntTypeName(valueMaskPos, valueMaskNeg);
-    const int targetHexLen = calcUsedBits(valueMaskPos, valueMaskNeg) / 4;
 
     if (usedIntType != intType)
         s << "// \"" << usedIntType << "\" used instead of \"" << intType << "\"\n";
@@ -5695,11 +5681,11 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
                 s << "PyDict_SetItemString(reinterpret_cast<PyTypeObject *>("
                     << enclosingObjectVariable
                     << ")->tp_dict, \"" << mangledName << "\",\n" << indent
-                    << (isSignedShort ? "PyLong_FromLongLong" : "PyLong_FromUnsignedLongLong") << "("
+                    << (isSigned ? "PyLong_FromLongLong" : "PyLong_FromUnsignedLongLong") << "("
                     << pyValue << "));\n" << outdent;
             } else {
                 s << "PyModule_AddObject(module, \"" << mangledName << "\",\n" << indent
-                    << (isSignedShort ? "PyLong_FromLongLong" : "PyLong_FromUnsignedLongLong") << "("
+                    << (isSigned ? "PyLong_FromLongLong" : "PyLong_FromUnsignedLongLong") << "("
                     << pyValue << "));\n" << outdent;
             }
         }
