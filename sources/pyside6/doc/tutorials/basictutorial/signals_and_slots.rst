@@ -72,7 +72,7 @@ Signals can also be connected to free functions:
 
     app = QApplication()
     button = QPushButton("Call function")
-    button.clicked.connect(func)
+    button.clicked.connect(function)
     button.show()
     sys.exit(app.exec())
 
