@@ -443,7 +443,6 @@
   <container-type name="QHash" type="hash">
     <include file-name="QHash" location="global"/>
     <!-- Include to make enum flags work. -->
-    <include file-name="pysideqflags.h" location="global"/>
     <conversion-rule>
         <native-to-target>
             <insert-template name="shiboken_conversion_qmap_to_pydict"/>
@@ -459,7 +458,6 @@
   <container-type name="QMultiHash" type="multi-hash">
     <include file-name="QMultiHash" location="global"/>
     <!-- Include to make enum flags work. -->
-    <include file-name="pysideqflags.h" location="global"/>
     <conversion-rule>
         <native-to-target>
             <insert-template name="shiboken_conversion_qmultihash_to_pydict"/>

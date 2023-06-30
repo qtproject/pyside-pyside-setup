@@ -652,11 +652,8 @@ QString ShibokenGenerator::converterObject(const TypeEntryCPtr &type)
     if (type->isWrapperType())
         return QString::fromLatin1("PepType_SOTP(reinterpret_cast<PyTypeObject *>(%1))->converter")
                                   .arg(cpythonTypeNameExt(type));
-    if (type->isEnum())
+    if (type->isEnum() || type->isFlags())
         return QString::fromLatin1("PepType_SETP(reinterpret_cast<SbkEnumType *>(%1))->converter")
-                                  .arg(cpythonTypeNameExt(type));
-    if (type->isFlags())
-        return QString::fromLatin1("PepType_PFTP(reinterpret_cast<PySideQFlagsType *>(%1))->converter")
                                   .arg(cpythonTypeNameExt(type));
 
     if (type->isArray()) {

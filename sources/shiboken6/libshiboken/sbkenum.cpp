@@ -268,16 +268,10 @@ EnumValueType getValue(PyObject *enumItem)
     return PyLong_AsLongLong(pyValue);
 }
 
-void setTypeConverter(PyTypeObject *type, SbkConverter *converter, bool isFlag)
+void setTypeConverter(PyTypeObject *type, SbkConverter *converter)
 {
-    if (isFlag) {
-        auto *flagsType = reinterpret_cast<PySideQFlagsType *>(type);
-        PepType_PFTP(flagsType)->converter = converter;
-    }
-    else {
-        auto *enumType = reinterpret_cast<SbkEnumType *>(type);
-        PepType_SETP(enumType)->converter = converter;
-    }
+    auto *enumType = reinterpret_cast<SbkEnumType *>(type);
+    PepType_SETP(enumType)->converter = converter;
 }
 
 static PyTypeObject *createEnumForPython(PyObject *scopeOrModule,

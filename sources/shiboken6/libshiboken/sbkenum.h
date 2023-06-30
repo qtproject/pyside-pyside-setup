@@ -61,7 +61,7 @@ LIBSHIBOKEN_API PyObject *getEnumItemFromValue(PyTypeObject *enumType,
                                                EnumValueType itemValue);
 
 /// Sets the enum/flag's type converter.
-LIBSHIBOKEN_API void setTypeConverter(PyTypeObject *type, SbkConverter *converter, bool isFlag);
+LIBSHIBOKEN_API void setTypeConverter(PyTypeObject *type, SbkConverter *converter);
 
 /// Creating Python enums for different types.
 LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,

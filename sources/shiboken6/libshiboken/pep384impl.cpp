@@ -8,7 +8,6 @@
 #include "basewrapper.h"
 #include "basewrapper_p.h"
 #include "sbkenum.h"
-#include "sbkconverter.h"
 #include "voidptr.h"
 
 #include <cstdlib>
@@ -968,40 +967,6 @@ void PepType_SETP_delete(SbkEnumType *enumType)
 {
     SETP_extender.erase(enumType);
     SETP_key = nullptr;
-}
-
-/*
- * PySideQFlagsType extender
- */
-static std::unordered_map<PySideQFlagsType *, SbkQFlagsTypePrivate> PFTP_extender{};
-static thread_local PySideQFlagsType *PFTP_key{};
-static thread_local SbkQFlagsTypePrivate *PFTP_value{};
-
-SbkQFlagsTypePrivate *PepType_PFTP(PySideQFlagsType *flagsType)
-{
-    static PyTypeObject *enumMeta = getPyEnumMeta();
-    auto *mappedType = reinterpret_cast<PyTypeObject *>(flagsType);
-    auto *metaType = Py_TYPE(mappedType);
-    if (metaType == enumMeta) {
-        return reinterpret_cast<SbkQFlagsTypePrivate *>(
-            PepType_SETP(reinterpret_cast<SbkEnumType *>(flagsType)));
-    }
-    if (flagsType == PFTP_key)
-        return PFTP_value;
-    auto it = PFTP_extender.find(flagsType);
-    if (it == PFTP_extender.end()) {
-        it = PFTP_extender.insert({flagsType, {}}).first;
-        memset(&it->second, 0, sizeof(SbkQFlagsTypePrivate));
-    }
-    PFTP_key = flagsType;
-    PFTP_value = &it->second;
-    return PFTP_value;
-}
-
-void PepType_PFTP_delete(PySideQFlagsType *flagsType)
-{
-    PFTP_extender.erase(flagsType);
-    PFTP_key = nullptr;
 }
 
 /***************************************************************************

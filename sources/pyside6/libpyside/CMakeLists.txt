@@ -27,7 +27,6 @@ set(libpyside_HEADERS # installed below
     pysideproperty_p.h
     pysideqapp.h
     pysideqenum.h
-    pysideqflags.h
     pysideqhash.h
     pysideqmetatype.h
     pysideqobject.h
@@ -54,7 +53,6 @@ set(libpyside_SRC
     pysidesignal.cpp
     pysideslot.cpp
     pysideproperty.cpp
-    pysideqflags.cpp
     pysideweakref.cpp
     pyside.cpp
     pyside_numpy.cpp

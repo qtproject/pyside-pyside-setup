@@ -531,7 +531,6 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
                 << "#include <pysidemetafunction.h>\n";
         }
         s << "#include <pysideqenum.h>\n"
-            << "#include <pysideqflags.h>\n"
             << "#include <pysideqmetatype.h>\n"
             << "#include <pysideutils.h>\n"
             << "#include <feature_select.h>\n"
@@ -914,11 +913,10 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     writeClassDefinition(s, metaClass, classContext);
     s << '\n';
 
-    if (needsTypeDiscoveryFunction(metaClass))
+    if (needsTypeDiscoveryFunction(metaClass)) {
         writeTypeDiscoveryFunction(s, metaClass);
-
-    writeFlagsNumberMethodsDefinitions(s, classEnums);
-    s << '\n';
+        s << '\n';
+    }
 
     writeConverterFunctions(s, metaClass, classContext);
     writeAddedTypeSignatures(signatureStream, typeEntry);
@@ -1707,59 +1705,6 @@ void CppGenerator::writeMetaCast(TextStream &s,
         << outdent << "}\n\n";
 }
 
-void CppGenerator::writeFlagsConverterFunctions(TextStream &s,
-                                                const FlagsTypeEntryCPtr &flagsType,
-                                                const QString &enumTypeName,
-                                                const QString &flagsCppTypeName,
-                                                const QString &enumTypeCheck) const
-{
-    Q_ASSERT(flagsType);
-    const QString flagsTypeName = fixedCppTypeName(flagsType);
-    const QString flagsPythonType = cpythonTypeNameExt(flagsType);
-
-    StringStream c(TextStream::Language::Cpp);
-    c << "*reinterpret_cast<" << flagsCppTypeName << " *>(cppOut) =\n"
-        << "    " << flagsCppTypeName
-        << "(QFlag(int(PySide::QFlagsSupport::getValue(reinterpret_cast<PySideQFlagsObject *>(pyIn)))))"
-        << ";\n";
-    writePythonToCppFunction(s, c.toString(), flagsTypeName, flagsTypeName);
-
-    QString pyTypeCheck = u"PyObject_TypeCheck(pyIn, "_s + flagsPythonType + u')';
-    writeIsPythonConvertibleToCppFunction(s, flagsTypeName, flagsTypeName, pyTypeCheck);
-
-    c.clear();
-
-    c << "const int castCppIn = int(*reinterpret_cast<const "
-        << flagsCppTypeName << " *>(cppIn));\n" << "return "
-        << "reinterpret_cast<PyObject *>(PySide::QFlagsSupport::newObject(castCppIn, "
-        << flagsPythonType << "));\n";
-    writeCppToPythonFunction(s, c.toString(), flagsTypeName, flagsTypeName);
-    s << '\n';
-
-    c.clear();
-    c << "*reinterpret_cast<" << flagsCppTypeName << " *>(cppOut) =\n"
-      << "    " << flagsCppTypeName
-      << "(QFlag(int(Shiboken::Enum::getValue(pyIn))));\n";
-
-    writePythonToCppFunction(s, c.toString(), enumTypeName, flagsTypeName);
-    writeIsPythonConvertibleToCppFunction(s, enumTypeName, flagsTypeName, enumTypeCheck);
-
-    c.clear();
-    c << "Shiboken::AutoDecRef pyLong(PyNumber_Long(pyIn));\n"
-      << "*reinterpret_cast<" << flagsCppTypeName << " *>(cppOut) =\n"
-      << "    " << flagsCppTypeName
-      << "(QFlag(int(PyLong_AsLong(pyLong.object()))));\n";
-    // PYSIDE-898: Include an additional condition to detect if the type of the
-    // enum corresponds to the object that is being evaluated.
-    // Using only `PyNumber_Check(...)` is too permissive,
-    // then we would have been unable to detect the difference between
-    // a PolarOrientation and Qt::AlignmentFlag, which was the main
-    // issue of the bug.
-    const QString numberCondition = u"PyNumber_Check(pyIn) && "_s + enumTypeCheck;
-    writePythonToCppFunction(s, c.toString(), u"number"_s, flagsTypeName);
-    writeIsPythonConvertibleToCppFunction(s, u"number"_s, flagsTypeName, numberCondition);
-}
-
 static void generateDeprecatedValueWarnings(TextStream &c,
                                             const AbstractMetaEnum &metaEnum,
                                             bool useSurrogateName)
@@ -1821,13 +1766,6 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMeta
         << "Shiboken::Enum::newItem(" << enumPythonType << ", castCppIn);\n";
     writeCppToPythonFunction(s, c.toString(), typeName, typeName);
     s << '\n';
-
-    // QFlags part.
-    if (auto flags = enumType->flags()) {
-        const QString flagsCppTypeName = useSurrogateName
-            ? cppTypeName : getFullTypeName(flags).trimmed();
-        writeFlagsConverterFunctions(s, flags, typeName, flagsCppTypeName, pyTypeCheck);
-    }
 }
 
 void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClassCPtr &metaClass,
@@ -4469,55 +4407,6 @@ static void registerEnumConverterScopes(TextStream &s, QString signature)
     }
 }
 
-void CppGenerator::writeFlagsConverterInitialization(TextStream &s,
-                                                     const FlagsTypeEntryCPtr &flags)
-{
-    static const char enumPythonVar[] = "FType";
-
-    const QString qualifiedCppName = flags->qualifiedCppName();
-    s << "// Register converter for flag '" << qualifiedCppName << "'.\n{\n"
-        << indent;
-    QString typeName = fixedCppTypeName(flags);
-    s << "SbkConverter *converter = Shiboken::Conversions::createConverter("
-        << enumPythonVar << ',' << '\n' << indent
-        << cppToPythonFunctionName(typeName, typeName) << ");\n" << outdent;
-
-    const QString enumTypeName = fixedCppTypeName(flags->originator());
-    QString toCpp = pythonToCppFunctionName(enumTypeName, typeName);
-    QString isConv = convertibleToCppFunctionName(enumTypeName, typeName);
-    writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
-    toCpp = pythonToCppFunctionName(typeName, typeName);
-    isConv = convertibleToCppFunctionName(typeName, typeName);
-    writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
-    toCpp = pythonToCppFunctionName(u"number"_s, typeName);
-    isConv = convertibleToCppFunctionName(u"number"_s, typeName);
-    writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
-    s << "Shiboken::Enum::setTypeConverter(" << enumPythonVar
-        << ", converter, true);\n";
-    // Replace "QFlags<Class::Option>" by "Class::Options"
-    QString signature = qualifiedCppName;
-    if (qualifiedCppName.startsWith(u"QFlags<") && qualifiedCppName.endsWith(u'>')) {
-        signature.chop(1);
-        signature.remove(0, 7);
-        const int lastQualifierPos = signature.lastIndexOf(u"::");
-        if (lastQualifierPos != -1) {
-            signature.replace(lastQualifierPos + 2, signature.size() - lastQualifierPos - 2,
-                              flags->flagsName());
-        } else {
-            signature = flags->flagsName();
-        }
-    }
-
-    registerEnumConverterScopes(s, signature);
-
-    // PYSIDE-1673: Also register "QFlags<Class::Option>" purely for
-    // the purpose of finding the converter by QVariant::typeName()
-    // in the QVariant conversion code.
-    s << "Shiboken::Conversions::registerConverterName(converter, \""
-        << flags->name() << "\");\n"
-        << outdent << "}\n";
-}
-
 void CppGenerator::writeEnumConverterInitialization(TextStream &s, const AbstractMetaEnum &metaEnum)
 {
     if (metaEnum.isPrivate() || metaEnum.isAnonymous())
@@ -4539,14 +4428,14 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const Abstrac
     const QString isConv = convertibleToCppFunctionName(typeName, typeName);
     writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
     s << "Shiboken::Enum::setTypeConverter(" << enumPythonVar
-        << ", converter, false);\n";
+        << ", converter);\n";
 
     registerEnumConverterScopes(s, enumType->qualifiedCppName());
-
-    s << outdent << "}\n";
-
     if (auto flags = enumType->flags())
-        writeFlagsConverterInitialization(s, flags);
+        s << "// Register converter for flag '" << flags->qualifiedCppName() << "'.\n"
+            << "Shiboken::Conversions::registerConverterName(converter, \""
+            << flags->name() << "\");\n";
+    s << outdent << "}\n";
 }
 
 QString CppGenerator::writeContainerConverterInitialization(TextStream &s, const AbstractMetaType &type) const
@@ -5665,27 +5554,21 @@ void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList 
 {
     if (enums.isEmpty())
         return;
-    bool preambleWrittenE = false;
-    bool preambleWrittenF = false;
+    bool preambleWritten = false;
     bool etypeUsed = false;
 
     for (const AbstractMetaEnum &cppEnum : std::as_const(enums)) {
         if (cppEnum.isPrivate())
             continue;
-        if (!preambleWrittenE) {
+        if (!preambleWritten) {
             s << "// Initialization of enums.\n"
                 << "PyTypeObject *EType{};\n\n";
-            preambleWrittenE = true;
-        }
-        if (!preambleWrittenF && cppEnum.typeEntry()->flags()) {
-            s << "// Initialization of enums, flags part.\n"
-                << "PyTypeObject *FType{};\n\n";
-            preambleWrittenF = true;
+            preambleWritten = true;
         }
         ConfigurableScope configScope(s, cppEnum.typeEntry());
         etypeUsed |= writeEnumInitialization(s, cppEnum);
     }
-    if (preambleWrittenE && !etypeUsed)
+    if (preambleWritten && !etypeUsed)
         s << sbkUnusedVariableCast(u"EType"_s);
 }
 
@@ -5841,18 +5724,6 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
     QString enumVarTypeObj = cpythonTypeNameExt(enumTypeEntry);
     if (!cppEnum.isAnonymous()) {
         int packageLevel = packageName().count(u'.') + 1;
-        FlagsTypeEntryPtr flags = enumTypeEntry->flags();
-        if (flags) {
-            // The following could probably be made nicer:
-            // We need 'flags->flagsName()' with the full module/class path.
-            QString fullPath = getClassTargetFullName(cppEnum);
-            fullPath.truncate(fullPath.lastIndexOf(u'.') + 1);
-            s << "FType = PySide::QFlagsSupport::create(\""
-                << packageLevel << ':' << fullPath << flags->flagsName() << "\", \n" << indent
-                << cpythonEnumName(cppEnum) << "_number_slots);\n" << outdent
-                << cpythonTypeNameExt(flags) << " = FType;\n";
-        }
-
         s << "EType = Shiboken::Enum::"
             << "createPythonEnum"
             << '(' << enclosingObjectVariable << ",\n" << indent
@@ -5901,132 +5772,6 @@ void CppGenerator::writeSignalInitialization(TextStream &s, const AbstractMetaCl
 
     s << "PySide::Signal::registerSignals(pyType, &::"
        << metaClass->qualifiedCppName() << "::staticMetaObject);\n";
-}
-
-void CppGenerator::writeFlagsToLong(TextStream &s, const AbstractMetaEnum &cppEnum)
-{
-    FlagsTypeEntryPtr flagsEntry = cppEnum.typeEntry()->flags();
-    if (!flagsEntry)
-        return;
-    s << "static PyObject *" << cpythonEnumName(cppEnum) << "_long(PyObject *self)\n"
-        << "{\n" << indent
-        << "int val;\n";
-    AbstractMetaType flagsType = AbstractMetaType::fromTypeEntry(flagsEntry);
-    s << cpythonToCppConversionFunction(flagsType) << "self, &val);\n"
-        << "return Shiboken::Conversions::copyToPython(Shiboken::Conversions::PrimitiveTypeConverter<int>(), &val);\n"
-        << outdent << "}\n";
-}
-
-void CppGenerator::writeFlagsNonZero(TextStream &s, const AbstractMetaEnum &cppEnum)
-{
-    FlagsTypeEntryPtr flagsEntry = cppEnum.typeEntry()->flags();
-    if (!flagsEntry)
-        return;
-    s << "static int " << cpythonEnumName(cppEnum) << "__nonzero(PyObject *self)\n";
-    s << "{\n" << indent << "int val;\n";
-    AbstractMetaType flagsType = AbstractMetaType::fromTypeEntry(flagsEntry);
-    s << cpythonToCppConversionFunction(flagsType) << "self, &val);\n"
-        << "return val != 0;\n"
-        << outdent << "}\n";
-}
-
-void CppGenerator::writeFlagsMethods(TextStream &s, const AbstractMetaEnum &cppEnum)
-{
-    writeFlagsBinaryOperator(s, cppEnum, u"and"_s, u"&"_s);
-    writeFlagsBinaryOperator(s, cppEnum, u"or"_s, u"|"_s);
-    writeFlagsBinaryOperator(s, cppEnum, u"xor"_s, u"^"_s);
-
-    writeFlagsUnaryOperator(s, cppEnum, u"invert"_s, u"~"_s);
-    writeFlagsToLong(s, cppEnum);
-    writeFlagsNonZero(s, cppEnum);
-
-    s << '\n';
-}
-
-void CppGenerator::writeFlagsNumberMethodsDefinition(TextStream &s, const AbstractMetaEnum &cppEnum)
-{
-    QString cpythonName = cpythonEnumName(cppEnum);
-
-    s << "static PyType_Slot " << cpythonName << "_number_slots[] = {\n" << indent
-        << "{Py_nb_bool,    reinterpret_cast<void *>(" << cpythonName << "__nonzero)},\n"
-        << "{Py_nb_invert,  reinterpret_cast<void *>(" << cpythonName << "___invert__)},\n"
-        << "{Py_nb_and,     reinterpret_cast<void *>(" << cpythonName  << "___and__)},\n"
-        << "{Py_nb_xor,     reinterpret_cast<void *>(" << cpythonName  << "___xor__)},\n"
-        << "{Py_nb_or,      reinterpret_cast<void *>(" << cpythonName  << "___or__)},\n"
-        << "{Py_nb_int,     reinterpret_cast<void *>(" << cpythonName << "_long)},\n"
-        << "{Py_nb_index,   reinterpret_cast<void *>(" << cpythonName << "_long)},\n"
-        << "{0, " << NULL_PTR << "} // sentinel\n" << outdent
-        << "};\n\n";
-}
-
-void CppGenerator::writeFlagsNumberMethodsDefinitions(TextStream &s,
-                                                      const AbstractMetaEnumList &enums)
-{
-    for (const AbstractMetaEnum &e : enums) {
-        if (!e.isAnonymous() && !e.isPrivate() && e.typeEntry()->flags()) {
-            ConfigurableScope configScope(s, e.typeEntry());
-            writeFlagsMethods(s, e);
-            writeFlagsNumberMethodsDefinition(s, e);
-            s << '\n';
-        }
-    }
-}
-
-void CppGenerator::writeFlagsBinaryOperator(TextStream &s, const AbstractMetaEnum &cppEnum,
-                                            const QString &pyOpName, const QString &cppOpName)
-{
-    FlagsTypeEntryPtr flagsEntry = cppEnum.typeEntry()->flags();
-    Q_ASSERT(flagsEntry);
-
-    s << "PyObject *" << cpythonEnumName(cppEnum) << "___" << pyOpName
-        << "__(PyObject *self, PyObject *" << PYTHON_ARG << ")\n{\n" << indent;
-
-    AbstractMetaType flagsType = AbstractMetaType::fromTypeEntry(flagsEntry);
-    s << "::" << flagsEntry->originalName() << " cppResult, " << CPP_SELF_VAR
-        << ", cppArg;\n"
-        << CPP_SELF_VAR << " = static_cast<::" << flagsEntry->originalName()
-        << ">(int(PyLong_AsLong(self)));\n"
-        // PYSIDE-1436: Need to error check self as well because operators are used
-        //              sometimes with swapped args.
-        << "if (Shiboken::Errors::occurred())\n" << indent
-            << "return nullptr;\n" << outdent
-        << "cppArg = static_cast<" << flagsEntry->originalName()
-        << ">(int(PyLong_AsLong(" << PYTHON_ARG << ")));\n"
-        << "if (Shiboken::Errors::occurred())\n" << indent
-            << "return nullptr;\n" << outdent
-        << "cppResult = " << CPP_SELF_VAR << " " << cppOpName << " cppArg;\n"
-        << "return ";
-    writeToPythonConversion(s, flagsType, nullptr, u"cppResult"_s);
-    s << ";\n" << outdent << "}\n\n";
-}
-
-void CppGenerator::writeFlagsUnaryOperator(TextStream &s, const AbstractMetaEnum &cppEnum,
-                                           const QString &pyOpName,
-                                           const QString &cppOpName, bool boolResult)
-{
-    FlagsTypeEntryPtr flagsEntry = cppEnum.typeEntry()->flags();
-    Q_ASSERT(flagsEntry);
-
-    s << "PyObject *" << cpythonEnumName(cppEnum) << "___" << pyOpName
-        << "__(PyObject *self, PyObject *" << PYTHON_ARG << ")\n{\n" << indent;
-    if (cppOpName == u"~")
-        s << sbkUnusedVariableCast(PYTHON_ARG);
-
-    AbstractMetaType flagsType = AbstractMetaType::fromTypeEntry(flagsEntry);
-    s << "::" << flagsEntry->originalName() << " " << CPP_SELF_VAR << ";\n"
-        << cpythonToCppConversionFunction(flagsType) << "self, &" << CPP_SELF_VAR
-        << ");\n";
-    if (boolResult)
-        s << "bool";
-    else
-        s << "::" << flagsEntry->originalName();
-    s << " cppResult = " << cppOpName << CPP_SELF_VAR << ";\n"
-        << "return ";
-    if (boolResult)
-        s << "PyBool_FromLong(cppResult)";
-    else
-        writeToPythonConversion(s, flagsType, nullptr, u"cppResult"_s);
-    s << ";\n" << outdent << "}\n\n";
 }
 
 QString CppGenerator::getSimpleClassInitFunctionName(const AbstractMetaClassCPtr &metaClass)
@@ -6900,7 +6645,6 @@ bool CppGenerator::finishGeneration()
                 << "} // namespace Shiboken\n\n";
         }
 
-        writeFlagsNumberMethodsDefinitions(s, globalEnums);
         s << '\n';
     }
 

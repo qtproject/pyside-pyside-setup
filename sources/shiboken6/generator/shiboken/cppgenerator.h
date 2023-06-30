@@ -95,10 +95,6 @@ private:
     void writeMetaObjectMethod(TextStream &s, const GeneratorContext &classContext) const;
     static void writeMetaCast(TextStream &s, const GeneratorContext &classContext);
 
-    void writeFlagsConverterFunctions(TextStream &s, const FlagsTypeEntryCPtr &flagsType,
-                                      const QString &enumTypeName,
-                                      const QString &flagsCppTypeName,
-                                      const QString &enumTypeCheck) const;
     void writeEnumConverterFunctions(TextStream &s, const AbstractMetaEnum &metaEnum) const;
     void writeConverterFunctions(TextStream &s, const AbstractMetaClassCPtr &metaClass,
                                  const GeneratorContext &classContext) const;
@@ -453,22 +449,6 @@ private:
 
     static void writeSignalInitialization(TextStream &s, const AbstractMetaClassCPtr &metaClass);
 
-    static void writeFlagsMethods(TextStream &s, const AbstractMetaEnum &cppEnum);
-    static void writeFlagsToLong(TextStream &s, const AbstractMetaEnum &cppEnum);
-    static void writeFlagsNonZero(TextStream &s, const AbstractMetaEnum &cppEnum);
-    static void writeFlagsNumberMethodsDefinition(TextStream &s, const AbstractMetaEnum &cppEnum);
-    static void writeFlagsNumberMethodsDefinitions(TextStream &s,
-                                                   const AbstractMetaEnumList &enums);
-    static void writeFlagsBinaryOperator(TextStream &s,
-                                         const AbstractMetaEnum &cppEnum,
-                                         const QString &pyOpName,
-                                         const QString &cppOpName);
-    static void writeFlagsUnaryOperator(TextStream &s,
-                                        const AbstractMetaEnum &cppEnum,
-                                        const QString &pyOpName,
-                                        const QString &cppOpName,
-                                        bool boolResult = false);
-
     /// Writes the function that registers the multiple inheritance information
     /// for the classes that need it.
     static void writeMultipleInheritanceInitializerFunction(TextStream &s,
@@ -479,7 +459,6 @@ private:
 
     static void writePrimitiveConverterInitialization(TextStream &s,
                                                       const CustomConversionPtr &customConversion);
-    static void writeFlagsConverterInitialization(TextStream &s, const FlagsTypeEntryCPtr &enumType);
     static void writeEnumConverterInitialization(TextStream &s, const AbstractMetaEnum &metaEnum);
     QString writeContainerConverterInitialization(TextStream &s, const AbstractMetaType &type) const;
     void writeSmartPointerConverterInitialization(TextStream &s, const AbstractMetaType &ype) const;

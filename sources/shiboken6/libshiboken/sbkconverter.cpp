@@ -403,7 +403,7 @@ bool isImplicitConversion(PyTypeObject *type, PythonToCppFunc toCppFunc)
     return toCppFunc != (*conv).second;
 }
 
-void registerConverterName(SbkConverter *converter , const char *typeName)
+void registerConverterName(SbkConverter *converter, const char *typeName)
 {
     auto iter = converters.find(typeName);
     if (iter == converters.end())
