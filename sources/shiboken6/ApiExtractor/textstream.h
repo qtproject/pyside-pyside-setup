@@ -179,6 +179,28 @@ TextStream &operator<<(TextStream &str, const AlignedField<T> &fa)
     return str;
 }
 
+class Pad
+{
+public:
+    explicit Pad(char c, int count) : m_char(c), m_count(count) {}
+
+    void write(TextStream &str) const
+    {
+        for (int i = 0; i < m_count; ++i)
+            str << m_char;
+    }
+
+private:
+    const char m_char;
+    const int m_count;
+};
+
+inline TextStream &operator<<(TextStream &str, const Pad &pad)
+{
+    pad.write(str);
+    return str;
+}
+
 class Indentation
 {
 public:
