@@ -45,6 +45,9 @@ QUALIFIERS = {"public:", "protected:", "private:", "public slots:",
               "protected slots:", "private slots:", "signals:"}
 
 
+FUNCTION_QUALIFIERS = ["virtual ", " override", "inline ", " noexcept"]
+
+
 switch_var = None
 switch_branch = 0
 
@@ -60,7 +63,8 @@ def snippet_translate(x):
     ## General Rules
 
     # Remove ';' at the end of the lines
-    if x.endswith(";"):
+    has_semicolon = x.endswith(";")
+    if has_semicolon:
         x = x[:-1]
 
     # Remove lines with only '{' or '}'
@@ -260,7 +264,8 @@ def snippet_translate(x):
     # At the end we skip methods with the form:
     #     QStringView Message::body()
     # to threat them as methods.
-    if (VAR1_PATTERN.search(xs)
+    if (has_semicolon and VAR1_PATTERN.search(xs)
+            and not ([f for f in FUNCTION_QUALIFIERS if f in x])
             and xs.split()[0] not in ("def", "return", "and", "or")
             and not VAR2_PATTERN.search(xs)
             and ("{" not in x and "}" not in x)):

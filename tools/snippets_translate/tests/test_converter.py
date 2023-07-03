@@ -166,14 +166,14 @@ def test_cout_endl():
 
 def test_variable_declaration():
     assert st("QLabel label;") == "label = QLabel()"
-    assert st('QLabel label("Hello")') == 'label = QLabel("Hello")'
+    assert st('QLabel label("Hello");') == 'label = QLabel("Hello")'
     assert st("Widget w;") == "w = Widget()"
     assert st('QLabel *label = new QLabel("Hello");') == 'label = QLabel("Hello")'
     assert st('QLabel label = a_function("Hello");') == 'label = a_function("Hello")'
     assert st('QString a = "something";') == 'a = "something"'
     assert st("int var;") == "var = int()"
     assert st("float v = 0.1;") == "v = 0.1"
-    assert st("QSome<thing> var") == "var = QSome()"
+    assert st("QSome<thing> var;") == "var = QSome()"
     assert st("QQueue<int> queue;") == "queue = QQueue()"
     assert st("QVBoxLayout *layout = new QVBoxLayout;") == "layout = QVBoxLayout()"
     assert st("QPointer<QLabel> label = new QLabel;") == "label = QLabel()"
@@ -181,6 +181,10 @@ def test_variable_declaration():
     assert st("QList<QImage> collage =") == "collage ="
     assert st("bool b = true;") == "b = True"
     assert st("Q3DBars *m_graph = nullptr;") == "m_graph = None"
+    # Do not fall for member function definitions
+    assert st("Q3DBars *Graph::bars() const") == "Q3DBars Graph.bars()"
+    # Do not fall for member function declarations
+    assert st("virtual Q3DBars *bars();") == "virtual Q3DBars bars()"
 
 
 def test_for():
