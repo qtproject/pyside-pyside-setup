@@ -221,6 +221,7 @@ def wheel_files_pyside_addons() -> List[ModuleData]:
         module_QtWebSockets(),
         module_QtHttpServer(),
         module_QtLocation(),
+        module_QtAsyncio(),
     ]
     return files
 
@@ -982,4 +983,9 @@ def module_QtLocation() -> ModuleData:
     json_data = get_module_json_data("Location")
     data.plugins = get_module_plugins(json_data)
     data.translations.append("qtlocation_*")
+    return data
+
+
+def module_QtAsyncio() -> ModuleData:
+    data = ModuleData("Asyncio")
     return data

@@ -163,6 +163,13 @@ def prepare_packages_win32(pyside_build, _vars):
             destination_dir / "support",
             _vars=_vars)
 
+        # <source>/pyside6/{st_package_name}/QtAsyncio/* ->
+        #   <setup>/{st_package_name}/QtAsyncio/*
+        copydir(
+            f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/QtAsyncio",
+            "{st_build_dir}/{st_package_name}/QtAsyncio",
+            _vars=_vars)
+
         # <source>/pyside6/{st_package_name}/*.pyi ->
         #   <setup>/{st_package_name}/*.pyi
         copydir(
