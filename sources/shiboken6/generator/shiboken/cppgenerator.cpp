@@ -6102,10 +6102,6 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
                     << metaEnum.typeEntry()->qualifiedCppName() << " >(\""
                     << name << "::" << metaEnum.name() << "\");\n";
             }
-            if (metaEnum.typeEntry()->flags()) {
-                QString n = metaEnum.typeEntry()->flags()->originalName();
-                s << "qRegisterMetaType< ::" << n << " >(\"" << n << "\");\n";
-            }
         }
     }
 }
