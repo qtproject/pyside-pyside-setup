@@ -99,6 +99,13 @@ static PyObject *convertToPrimitiveType(const QVariant &out, int metaTypeId)
 static PyObject *settingsTypeCoercion(const QVariant &out, PyTypeObject *typeObj)
 {
     if (typeObj == &PyList_Type) {
+        // Convert any string, etc, to a list of 1 element
+        if (auto *primitiveValue = convertToPrimitiveType(out, out.typeId())) {
+            PyObject *list = PyList_New(1);
+            PyList_SET_ITEM(list, 0, primitiveValue);
+            return list;
+        }
+
         const QByteArray out_ba = out.toByteArray();
         if (out_ba.isEmpty())
             return PyList_New(0);
@@ -132,6 +139,36 @@ static PyObject *settingsTypeCoercion(const QVariant &out, PyTypeObject *typeObj
     return nullptr;
 }
 
+static bool isEquivalentSettingsType(PyTypeObject *typeObj, int metaTypeId)
+{
+    switch (metaTypeId) {
+    case QMetaType::QVariantList:
+    case QMetaType::QStringList:
+        return typeObj == &PyList_Type;
+    case QMetaType::QByteArray:
+        return typeObj == &PyBytes_Type;
+    case QMetaType::QString:
+        return typeObj == &PyUnicode_Type;
+    case QMetaType::Short:
+    case QMetaType::Long:
+    case QMetaType::LongLong:
+    case QMetaType::UShort:
+    case QMetaType::ULong:
+    case QMetaType::ULongLong:
+    case QMetaType::Int:
+    case QMetaType::UInt:
+        return typeObj == &PyLong_Type;
+    case QMetaType::Double:
+    case QMetaType::Float:
+    case QMetaType::Float16:
+        return typeObj == &PyFloat_Type;
+    case QMetaType::Bool:
+        return typeObj == &PyBool_Type;
+    default:
+        break;
+    }
+    return false;
+}
 // @snippet settings-value-helpers
 
 // @snippet qsettings-value
@@ -154,7 +191,8 @@ if ((kwds && PyDict_Size(kwds) > 0) || numArgs > 1) {
 
 PyTypeObject *typeObj = reinterpret_cast<PyTypeObject*>(%PYARG_3);
 
-if (typeObj && !Shiboken::ObjectType::checkType(typeObj)) {
+if (typeObj && !Shiboken::ObjectType::checkType(typeObj)
+    && !isEquivalentSettingsType(typeObj, out.typeId())) {
     %PYARG_0 = settingsTypeCoercion(out, typeObj);
 } else {
     if (out.isValid()) {
