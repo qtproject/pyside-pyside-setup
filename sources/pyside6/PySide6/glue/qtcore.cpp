@@ -60,6 +60,80 @@ QArgData qArgDataFromPyType(PyObject *t)
 }
 // @snippet qarg_helper
 
+// @snippet settings-value-helpers
+// Convert a QVariant to a desired primitive type
+static PyObject *convertToPrimitiveType(const QVariant &out, int metaTypeId)
+{
+    switch (metaTypeId) {
+    case QMetaType::QByteArray:
+        return PyBytes_FromString(out.toByteArray().constData());
+    case QMetaType::QString:
+        return PyUnicode_FromString(out.toByteArray().constData());
+    case QMetaType::Short:
+    case QMetaType::Long:
+    case QMetaType::LongLong:
+    case QMetaType::UShort:
+    case QMetaType::ULong:
+    case QMetaType::ULongLong:
+    case QMetaType::Int:
+    case QMetaType::UInt:
+        return PyLong_FromDouble(out.toFloat());
+    case QMetaType::Double:
+    case QMetaType::Float:
+    case QMetaType::Float16:
+        return PyFloat_FromDouble(out.toFloat());
+    case QMetaType::Bool:
+        if (out.toBool()) {
+            Py_INCREF(Py_True);
+            return Py_True;
+        }
+        Py_INCREF(Py_False);
+        return Py_False;
+    default:
+        break;
+    }
+    return nullptr;
+}
+
+// Helper for QSettings::value() to convert a value to the desired type
+static PyObject *settingsTypeCoercion(const QVariant &out, PyTypeObject *typeObj)
+{
+    if (typeObj == &PyList_Type) {
+        const QByteArray out_ba = out.toByteArray();
+        if (out_ba.isEmpty())
+            return PyList_New(0);
+
+        const QByteArrayList valuesList = out_ba.split(',');
+        const Py_ssize_t valuesSize = valuesList.size();
+        PyObject *list = PyList_New(valuesSize);
+        for (Py_ssize_t i = 0; i < valuesSize; ++i) {
+            PyObject *item = PyUnicode_FromString(valuesList.at(i).constData());
+            PyList_SET_ITEM(list, i, item);
+        }
+        return list;
+    }
+
+    if (typeObj == &PyBytes_Type)
+        return convertToPrimitiveType(out, QMetaType::QByteArray);
+    if (typeObj == &PyUnicode_Type)
+        return convertToPrimitiveType(out, QMetaType::QString);
+    if (typeObj == &PyLong_Type)
+        return convertToPrimitiveType(out, QMetaType::Int);
+    if (typeObj == &PyFloat_Type)
+        return convertToPrimitiveType(out, QMetaType::Double);
+    if (typeObj == &PyBool_Type)
+        return convertToPrimitiveType(out, QMetaType::Bool);
+
+    // TODO: PyDict_Type and PyTuple_Type
+    PyErr_SetString(PyExc_TypeError,
+                    "Invalid type parameter.\n"
+                    "\tUse 'list', 'bytes', 'str', 'int', 'float', 'bool', "
+                    "or a Qt-derived type");
+    return nullptr;
+}
+
+// @snippet settings-value-helpers
+
 // @snippet qsettings-value
 // If we enter the kwds, means that we have a defaultValue or
 // at least a type.
@@ -81,60 +155,13 @@ if ((kwds && PyDict_Size(kwds) > 0) || numArgs > 1) {
 PyTypeObject *typeObj = reinterpret_cast<PyTypeObject*>(%PYARG_3);
 
 if (typeObj && !Shiboken::ObjectType::checkType(typeObj)) {
-    if (typeObj == &PyList_Type) {
-        QByteArray out_ba = out.toByteArray();
-        if (!out_ba.isEmpty()) {
-            QByteArrayList valuesList = out_ba.split(',');
-            const Py_ssize_t valuesSize = valuesList.size();
-            if (valuesSize > 0) {
-                PyObject *list = PyList_New(valuesSize);
-                for (Py_ssize_t i = 0; i < valuesSize; ++i) {
-                    PyObject *item = PyUnicode_FromString(valuesList.at(i).constData());
-                    PyList_SET_ITEM(list, i, item);
-                }
-                %PYARG_0 = list;
-
-            } else {
-                %PYARG_0 = %CONVERTTOPYTHON[QVariant](out);
-            }
-        } else {
-            %PYARG_0 = PyList_New(0);
-        }
-    } else if (typeObj == &PyBytes_Type) {
-        QByteArray asByteArray = out.toByteArray();
-        %PYARG_0 = PyBytes_FromString(asByteArray.constData());
-    } else if (typeObj == &PyUnicode_Type) {
-        QByteArray asByteArray = out.toByteArray();
-        %PYARG_0 = PyUnicode_FromString(asByteArray.constData());
-    } else if (typeObj == &PyLong_Type) {
-        float asFloat = out.toFloat();
-        pyResult = PyLong_FromDouble(asFloat);
-    } else if (typeObj == &PyFloat_Type) {
-        float asFloat = out.toFloat();
-        %PYARG_0 = PyFloat_FromDouble(asFloat);
-    } else if (typeObj == &PyBool_Type) {
-        if (out.toBool()) {
-            Py_INCREF(Py_True);
-            %PYARG_0 = Py_True;
-        } else {
-            Py_INCREF(Py_False);
-            %PYARG_0 = Py_False;
-        }
+    %PYARG_0 = settingsTypeCoercion(out, typeObj);
+} else {
+    if (out.isValid()) {
+        %PYARG_0 = %CONVERTTOPYTHON[QVariant](out);
     } else {
-        // TODO: PyDict_Type and PyTuple_Type
-        PyErr_SetString(PyExc_TypeError,
-                        "Invalid type parameter.\n"
-                        "\tUse 'list', 'bytes', 'str', 'int', 'float', 'bool', "
-                        "or a Qt-derived type");
-        return nullptr;
-    }
-}
-else {
-    if (!out.isValid()) {
         Py_INCREF(Py_None);
         %PYARG_0 = Py_None;
-    } else {
-        %PYARG_0 = %CONVERTTOPYTHON[QVariant](out);
     }
 }
 

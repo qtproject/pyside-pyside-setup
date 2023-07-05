@@ -2602,10 +2602,12 @@
     <extra-includes>
       <include file-name="QStringList" location="global"/>
     </extra-includes>
+    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
+                 snippet="settings-value-helpers"/>
     <!-- PYSIDE-1010:
     We remove the original implementation of value() to include the optional parameter -->
     <modify-function signature="value(QAnyStringView,const QVariant&amp;)const" remove="all"/>
-    <add-function signature="value(const QString&amp;, const QVariant&amp; @defaultValue@ = 0, PyObject* @type@ = 0)" return-type="PyObject*">
+    <add-function signature="value(const QString&amp;, const QVariant&amp; @defaultValue@ = {}, PyObject* @type@ = nullptr)" return-type="PyObject*">
       <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qsettings-value"/>
       <inject-documentation mode="append" format="target">
         Custom overload that adds an optional named parameter to the function ``value()``
