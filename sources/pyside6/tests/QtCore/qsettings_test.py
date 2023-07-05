@@ -51,8 +51,12 @@ class TestQSettings(unittest.TestCase):
         self.assertTrue(dir.isValid())
         file_name = dir.filePath('foo.ini')
         settings = QSettings(file_name, QSettings.IniFormat)
+        sample_list = ["a", "b"]
+        string_list_of_empty = [""]
         settings.setValue('zero_value', 0)
         settings.setValue('empty_list', [])
+        settings.setValue('some_strings', sample_list)
+        settings.setValue('string_list_of_empty', string_list_of_empty)
         settings.setValue('bool1', False)
         settings.setValue('bool2', True)
         del settings
@@ -65,6 +69,10 @@ class TestQSettings(unittest.TestCase):
         # Getting value that doesn't exist
         r = settings.value("variable")
         self.assertEqual(type(r), type(None))
+
+        r = settings.value("variable", type=list)
+        self.assertEqual(type(r), list)
+        self.assertEqual(len(r), 0)
 
         # Handling zero value
         r = settings.value('zero_value')
@@ -81,6 +89,15 @@ class TestQSettings(unittest.TestCase):
         r = settings.value('empty_list', type=list)
         self.assertTrue(len(r) == 0)
         self.assertEqual(type(r), list)
+
+        r = settings.value('some_strings')
+        self.assertEqual(r, sample_list)
+
+        r = settings.value('some_strings', type=list)
+        self.assertEqual(r, sample_list)
+
+        r = settings.value('string_list_of_empty', type=list)
+        self.assertEqual(r, string_list_of_empty)
 
         # Booleans
         r = settings.value('bool1')
