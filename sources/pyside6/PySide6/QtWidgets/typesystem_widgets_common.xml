@@ -527,7 +527,10 @@
         <parent index="return" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="registerField(const QString&amp;,QWidget*,const char*,const char*)" allow-thread="yes"/>
+    <modify-function signature="registerField(const QString&amp;,QWidget*,const char*,const char*)" allow-thread="yes">
+        <modify-argument index="3" pyi-type="str" rename="property"/>
+        <modify-argument index="4" pyi-type="str" rename="changed_signal"/>
+    </modify-function>
   </object-type>
   <object-type name="QFocusFrame">
     <modify-function signature="setWidget(QWidget*)">
