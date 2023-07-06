@@ -45,15 +45,19 @@
 
     <add-function signature="qDebug(const char*)">
         <inject-code file="../glue/qtcore.cpp" snippet="use-stream-for-format-security"/>
+        <modify-argument index="1" pyi-type="str"/>
     </add-function>
     <add-function signature="qCritical(const char*)">
         <inject-code file="../glue/qtcore.cpp" snippet="use-stream-for-format-security"/>
+        <modify-argument index="1" pyi-type="str"/>
     </add-function>
     <add-function signature="qFatal(const char*)">
         <inject-code file="../glue/qtcore.cpp" snippet="qfatal"/>
+        <modify-argument index="1" pyi-type="str"/>
     </add-function>
     <add-function signature="qWarning(const char*)">
         <inject-code file="../glue/qtcore.cpp" snippet="use-stream-for-format-security"/>
+        <modify-argument index="1" pyi-type="str"/>
     </add-function>
 
     <add-function signature="Q_ARG(PyObject *@type@, PyObject *@value@)"
