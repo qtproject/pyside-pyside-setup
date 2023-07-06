@@ -2631,6 +2631,30 @@
     <declare-function signature="checkPermission(const QContactsPermission &amp; @permission@)" return-type="Qt::PermissionStatus" since="6.5" />
     <declare-function signature="checkPermission(const QLocationPermission &amp; @permission@)" return-type="Qt::PermissionStatus" since="6.5" />
     <declare-function signature="checkPermission(const QMicrophonePermission &amp; @permission@)" return-type="Qt::PermissionStatus" since="6.5" />
+    <add-function signature="requestPermission(const QBluetoothPermission &amp; @permission@, const QObject* @context@, PyCallable* @functor@)" since="6.5">
+      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+              snippet="qcoreapplication-requestpermission"/>
+    </add-function>
+    <add-function signature="requestPermission(const QCalendarPermission &amp; @permission@, const QObject* @context@, PyCallable* @functor@)" since="6.5">
+      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+              snippet="qcoreapplication-requestpermission"/>
+    </add-function>
+    <add-function signature="requestPermission(const QCameraPermission &amp; @permission@, const QObject* @context@, PyCallable* @functor@)" since="6.5">
+      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+              snippet="qcoreapplication-requestpermission"/>
+    </add-function>
+    <add-function signature="requestPermission(const QContactsPermission &amp; @permission@, const QObject* @context@, PyCallable* @functor@)" since="6.5">
+      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+              snippet="qcoreapplication-requestpermission"/>
+    </add-function>
+    <add-function signature="requestPermission(const QLocationPermission &amp; @permission@, const QObject* @context@, PyCallable* @functor@)" since="6.5">
+      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+              snippet="qcoreapplication-requestpermission"/>
+    </add-function>
+    <add-function signature="requestPermission(const QMicrophonePermission &amp; @permission@, const QObject* @context@, PyCallable* @functor@)" since="6.5">
+      <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+              snippet="qcoreapplication-requestpermission"/>
+    </add-function>
     <?endif?>
   </object-type>
   <object-type name="QSettings">

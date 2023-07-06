@@ -1883,3 +1883,66 @@ Py_INCREF(callable);
 #endif
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qlocale_system
+
+// @snippet qcoreapplication-requestpermission
+auto permission = %1;
+auto callable = %PYARG_3;
+
+// check if callable
+if (!PyCallable_Check(callable)) {
+    qWarning("Functor of %FUNCTION_NAME is not a callable");
+    return {};
+}
+
+// find the number of arguments of callable. It should either be empy or accept a QPermission
+// object
+int count = 0;
+PyObject* fc = nullptr;
+bool classMethod = false;
+Shiboken::AutoDecRef func_ob(PyObject_GetAttr(callable, Shiboken::PyMagicName::func()));
+
+if (func_ob.isNull() && PyObject_HasAttr(callable, Shiboken::PyMagicName::code())) {
+    // variable `callable` is a function
+    fc = PyObject_GetAttr(callable, Shiboken::PyMagicName::code());
+} else {
+    // variable `callable` is a class method
+    fc = PyObject_GetAttr(func_ob, Shiboken::PyMagicName::code());
+    classMethod = true;
+}
+
+if (fc) {
+    PyObject* ac = PyObject_GetAttrString(fc, "co_argcount");
+    if (ac) {
+        count = PyLong_AsLong(ac);
+        Py_DECREF(ac);
+    }
+    Py_DECREF(fc);
+}
+
+if ((classMethod && (count > 2)) || (!classMethod && (count > 1))) {
+    qWarning("Functor of %FUNCTION_NAME must either have QPermission object as argument or none."
+             "The QPermission object store the result of requestPermission()");
+    return {};
+}
+
+bool arg_qpermission = (classMethod && (count == 2)) || (!classMethod && (count == 1));
+
+auto callback = [callable, count, arg_qpermission](const QPermission &permission) -> void
+{
+    Shiboken::GilState state;
+    if (arg_qpermission) {
+        Shiboken::AutoDecRef arglist(PyTuple_New(1));
+        PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QPermission](permission));
+        PyObject_CallObject(callable, arglist);
+    } else {
+        PyObject_CallObject(callable, nullptr);
+    }
+    Py_DECREF(callable);
+};
+Py_INCREF(callable);
+
+Py_BEGIN_ALLOW_THREADS
+%CPPSELF.%FUNCTION_NAME(permission, %2, callback);
+Py_END_ALLOW_THREADS
+// @snippet qcoreapplication-requestpermission
+
