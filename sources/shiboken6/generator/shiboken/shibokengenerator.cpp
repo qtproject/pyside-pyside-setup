@@ -2150,7 +2150,7 @@ bool ShibokenGenerator::handleOption(const QString &key, const QString &value)
     if (key == QLatin1StringView(USE_OPERATOR_BOOL_AS_NB_NONZERO))
         return (m_useOperatorBoolAsNbNonZero = true);
     if (key == QLatin1StringView(NO_IMPLICIT_CONVERSIONS)) {
-        return m_generateImplicitConversions = false;
+        m_generateImplicitConversions = false;
         return true;
     }
     if (key == QLatin1StringView(WRAPPER_DIAGNOSTICS))
