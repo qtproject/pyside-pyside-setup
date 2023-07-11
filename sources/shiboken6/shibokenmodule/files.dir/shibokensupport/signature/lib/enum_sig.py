@@ -130,6 +130,12 @@ class ExactEnumerator(object):
             if signal_check(thing):
                 signals.append((thing_name, thing))
             elif inspect.isclass(thing):
+                # If this is the only member of the class, it causes the stub
+                # to be printed empty without ..., as self.fmt.have_body will
+                # then be True. (Example: QtCore.QCborTag). Skip it to avoid
+                # this problem.
+                if thing_name == "_member_type_":
+                    continue
                 subclass_name = ".".join((class_name, thing_name))
                 subclasses.append((subclass_name, thing))
             elif inspect.isroutine(thing):
