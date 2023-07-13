@@ -1190,7 +1190,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         for library in self.package_libraries(qt_lib_dir):
             if library.is_dir() or library.is_symlink():
                 continue
-            if library.exists():
+            if not library.exists():
                 continue
 
             linux_fix_rpaths_for_library(self._patchelf_path, library, rpath_value, override=True)
