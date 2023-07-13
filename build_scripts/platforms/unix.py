@@ -240,7 +240,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
     # Update rpath to $ORIGIN
     if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
         rpath_path = destination_dir
-        pyside_build.update_rpath(rpath_path, executables)
-        pyside_build.update_rpath(rpath_path, pyside_build.package_libraries(rpath_path))
+        pyside_build.update_rpath(executables)
+        pyside_build.update_rpath(pyside_build.package_libraries(rpath_path))
         if libexec_executables:
-            pyside_build.update_rpath(rpath_path, libexec_executables, libexec=True)
+            pyside_build.update_rpath(libexec_executables, libexec=True)
