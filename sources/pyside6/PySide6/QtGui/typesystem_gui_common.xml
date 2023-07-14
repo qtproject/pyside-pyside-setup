@@ -1745,6 +1745,18 @@
       <include file-name="QPixmap" location="global"/>
     </extra-includes>
     <enum-type name="Mode"/>
+    <modify-function signature="setPixmap(const QPixmap&amp;, QClipboard::Mode)">
+      <modify-argument index="1" pyi-type="PySide6.QtGui.QPixmap"/>
+    </modify-function>
+    <add-function signature="setPixmap(PyPathLike@path@)">
+      <inject-code file="../glue/qtgui.cpp" snippet="qclipboard-setpixmap"/>
+    </add-function>
+    <modify-function signature="setImage(const QImage&amp;, QClipboard::Mode)">
+      <modify-argument index="1" pyi-type="PySide6.QtGui.QImage"/>
+    </modify-function>
+    <add-function signature="setImage(PyPathLike@path@)">
+      <inject-code file="../glue/qtgui.cpp" snippet="qclipboard-setimage"/>
+    </add-function>
     <modify-function signature="setMimeData(QMimeData*,QClipboard::Mode)" allow-thread="yes">
       <modify-argument index="1">
         <!-- TODO: maybe this is not the best solution -->
