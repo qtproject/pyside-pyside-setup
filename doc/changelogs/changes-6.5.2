@@ -30,7 +30,10 @@ information about a particular change.
                  metaobjectdump.py tool as an input of qmllint.
  - [PYSIDE-2364] The type hint for QQmlExpression.evaluate() has been fixed.
  - [PYSIDE-2299] A memory leak connecting free methods/lambdas has been
- - [PYSIDE-2371] fixed.
+ - [PYSIDE-2371] Fixed regression related to memory leak when connecting
+                 signal to local function.
+ - [PYSIDE-2381] Fixed issue qith QSetting list of strings and value()
+ - [PYSIDE-2384] Fixed QWizardPage.registerField signature
 
 ****************************************************************************
 *                                  Shiboken6                               *
@@ -42,3 +45,4 @@ information about a particular change.
                  overwritten in Python has been implemented.
                  They are now handled by a handler on the stack if possible
                  or otherwise printed.
+ - [PYSIDE-1669] Fixed option --no-implicit-conversions
