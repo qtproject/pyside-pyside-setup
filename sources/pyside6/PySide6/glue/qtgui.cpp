@@ -374,6 +374,16 @@ const auto path = PySide::pyPathToQString(%PYARG_1);
 %CPPSELF->addPixmap(path);
 // @snippet qicon-addpixmap
 
+// @snippet qclipboard-setpixmap
+const auto path = PySide::pyPathToQString(%PYARG_1);
+%CPPSELF->setPixmap(QPixmap(path));
+// @snippet qclipboard-setpixmap
+
+// @snippet qclipboard-setimage
+const auto path = PySide::pyPathToQString(%PYARG_1);
+%CPPSELF->setImage(QImage(path));
+// @snippet qclipboard-setimage
+
 // @snippet qimage-decref-image-data
 static void imageDecrefDataHandler(void *data)
 {
