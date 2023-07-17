@@ -26,8 +26,16 @@ set(QT_COMPILER_FLAGS "--target={{ plat_name }}-linux-android{{ api_level }} \
                        -I{{ target_python_path }}/include/python{{ python_version }} \
                        -Wno-unused-command-line-argument")
 set(QT_COMPILER_FLAGS_RELEASE "-O2 -pipe")
-set(QT_LINKER_FLAGS "-Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed \
-                     -L{{ qt_install_path }}/android_{{ qt_plat_name }}/lib \
+
+# FIXME
+# https://gitlab.kitware.com/cmake/cmake/-/issues/23670
+# The CMake Android toolchain does not allow RPATHS. Hence CMAKE_INSTALL_RPATH does not work.
+# Currently the linker flags are set directly as -Wl,-rpath='$ORIGIN' -Wl,-rpath='$ORIGIN/Qt/lib'
+# set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+# set(CMAKE_INSTALL_RPATH "$ORIGIN")
+
+set(QT_LINKER_FLAGS "-Wl,-O1 -Wl,--hash-style=gnu -Wl,-rpath='$ORIGIN' -Wl,-rpath='$ORIGIN/Qt/lib' \
+                     -Wl,--as-needed -L{{ qt_install_path }}/android_{{ qt_plat_name }}/lib \
                      -L{{ qt_install_path }}/android_{{ qt_plat_name }}/plugins/platforms \
                      -L{{ target_python_path }}/lib \
                      -lpython{{ python_version }}")

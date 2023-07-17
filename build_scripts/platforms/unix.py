@@ -238,7 +238,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             pyside_build.prepare_standalone_clang(is_win=False)
 
     # Update rpath to $ORIGIN
-    if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
+    if (sys.platform.startswith('linux') or sys.platform.startswith('darwin')) and not is_android:
         rpath_path = destination_dir
         pyside_build.update_rpath(executables)
         pyside_build.update_rpath(pyside_build.package_libraries(rpath_path))

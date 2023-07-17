@@ -72,7 +72,8 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False, is_
             copy_icu_libs(pyside_build._patchelf_path, destination_qt_lib_dir)
 
     # Set RPATH for Qt libs.
-    pyside_build.update_rpath_for_linux_qt_libraries(destination_qt_lib_dir)
+    if not is_android:
+        pyside_build.update_rpath_for_linux_qt_libraries(destination_qt_lib_dir)
 
     # Patching designer to use the Qt libraries provided in the wheel
     if config.is_internal_pyside_build() and not OPTION['NO_QT_TOOLS']:
@@ -120,10 +121,11 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False, is_
                 _vars=_vars)
         copied_plugins = pyside_build.get_shared_libraries_in_path_recursively(
             qml_plugins_target)
-        pyside_build.update_rpath_for_linux_plugins(
-            copied_plugins,
-            qt_lib_dir=destination_qt_lib_dir,
-            is_qml_plugin=True)
+        if not is_android:
+            pyside_build.update_rpath_for_linux_plugins(
+                copied_plugins,
+                qt_lib_dir=destination_qt_lib_dir,
+                is_qml_plugin=True)
 
     if copy_translations:
         # <qt>/translations/* ->
