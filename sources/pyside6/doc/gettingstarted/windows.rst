@@ -91,6 +91,8 @@ Creating Debug Builds
 
 * Use ``python_d.exe`` to invoke ``setup.py``
 
+.. note:: Make sure you add the ``--debug`` option to the ``python setup.py install`` to produce a debug build
+
 
 Installing PySide
 ~~~~~~~~~~~~~~~~~
