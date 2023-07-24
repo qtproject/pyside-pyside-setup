@@ -662,6 +662,22 @@ def init_PySide6_QtBluetooth():
     return locals()
 
 
+def init_PySide6_QtGraphs():
+    from PySide6.QtGraphs import (QBarDataItem, QSurfaceDataItem)
+    QBarDataRow = typing.List[QBarDataItem]
+    QBarDataArray = typing.List[QBarDataRow]
+    QSurfaceDataRow = typing.List[QSurfaceDataItem]
+    QSurfaceDataArray = typing.List[QSurfaceDataRow]
+    type_map.update({
+        "100.0f": 100.0,
+        "QBarDataArray": QBarDataArray,
+        "QBarDataArray*": QBarDataArray,
+        "QSurfaceDataArray": QSurfaceDataArray,
+        "QSurfaceDataArray*": QSurfaceDataArray,
+    })
+    return locals()
+
+
 def init_PySide6_QtHttpServer():
     type_map.update({
         "qMakePair(1u, 1u)": (1, 1),
