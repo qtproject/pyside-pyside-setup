@@ -86,6 +86,7 @@ endmacro()
 macro(collect_optional_modules)
     # Collect all optional modules.
     set(ALL_OPTIONAL_MODULES
+        DBus
         Designer
         Xml
         Help Multimedia
@@ -126,12 +127,7 @@ macro(collect_optional_modules)
         list(APPEND ALL_OPTIONAL_MODULES AxContainer)
     endif()
     list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineCore WebEngineWidgets
-         WebEngineQuick WebSockets)
-    if(NOT WIN32)
-        # FIXME: Move to global once DELETE define clash is resolved.
-        list(APPEND ALL_OPTIONAL_MODULES HttpServer)
-        list(APPEND ALL_OPTIONAL_MODULES DBus)
-    endif()
+         WebEngineQuick WebSockets HttpServer)
     list(APPEND ALL_OPTIONAL_MODULES 3DCore 3DRender 3DInput 3DLogic 3DAnimation 3DExtras)
 endmacro()
 
