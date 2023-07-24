@@ -918,7 +918,8 @@ void TypeDatabasePrivate::addBuiltInContainerTypes(const TypeDatabaseParserConte
                   "shiboken_conversion_stdmap_to_pydict",
                   "PyDict", "shiboken_conversion_pydict_to_stdmap");
     }
-    if (!hasStdSpan) {
+    if (!hasStdSpan
+        && clang::emulatedCompilerLanguageLevel() >= LanguageLevel::Cpp20) {
         auto spanSnip = containerTypeSystemSnippet(
                             "std::span", "span", "span",
                             "shiboken_conversion_cppsequence_to_pylist");
