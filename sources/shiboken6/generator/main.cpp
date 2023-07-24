@@ -702,7 +702,7 @@ int shibokenMain(const QStringList &argV)
     }
 
     if (!args.options.isEmpty()) {
-        errorPrint(msgLeftOverArguments(args.options), argV);
+        errorPrint(msgLeftOverArguments(args.options, argV), argV);
         std::cout << helpHint;
         return EXIT_FAILURE;
     }
