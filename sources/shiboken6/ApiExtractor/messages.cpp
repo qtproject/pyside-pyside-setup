@@ -16,7 +16,6 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
@@ -685,7 +684,7 @@ QString msgMethodNotFound(const AbstractMetaClassCPtr &klass, const QString &nam
 
 // main.cpp
 
-QString msgLeftOverArguments(const QVariantMap &remainingArgs)
+QString msgLeftOverArguments(const QVariantMap &remainingArgs, const QStringList &argV)
 {
     QString message;
     QTextStream str(&message);
@@ -696,7 +695,7 @@ QString msgLeftOverArguments(const QVariantMap &remainingArgs)
         if (!value.isEmpty())
             str << ' ' << value;
     }
-    str << "\nCommand line: " << QCoreApplication::arguments().join(u' ');
+    str << "\nCommand line: " << argV.join(u' ');
     return message;
 }
 
