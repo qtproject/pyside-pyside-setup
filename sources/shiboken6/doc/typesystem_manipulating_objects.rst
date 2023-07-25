@@ -169,7 +169,8 @@ modification affects.
                           final="true | false"
                           overload-number="number"
                           rename="..."
-                          snake-case="yes | no | both" />
+                          snake-case="yes | no | both"
+                          deprecated = "true | false" />
      </object-type>
 
 The ``signature`` attribute is a normalized C++ signature, excluding return
@@ -256,6 +257,9 @@ given function in the generated target language API.
 
 The *optional* **snake-case** attribute allows for overriding the value
 specified on the class entry or **typesystem** element.
+
+The *optional* **deprecated** attribute allows for overriding deprecation
+as detected by the C++ attribute. It works in both ways.
 
 .. _add-function:
 

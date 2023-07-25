@@ -28,6 +28,8 @@
 #include <QtCore/QDebug>
 #include <QtCore/QRegularExpression>
 
+#include <algorithm>
+
 using namespace Qt::StringLiterals;
 
 // Cache FunctionModificationList in a flat list per class (0 for global
@@ -701,15 +703,22 @@ void AbstractMetaFunction::addArgument(const AbstractMetaArgument &argument)
     d->m_arguments << argument;
 }
 
+static bool modifiedDeprecated(const FunctionModification &mod)
+{
+    return mod.modifiers().testFlag(FunctionModification::Deprecated);
+}
+
+static bool modifiedUndeprecated(const FunctionModification &mod)
+{
+    return mod.modifiers().testFlag(FunctionModification::Undeprecated);
+}
+
 bool AbstractMetaFunction::isDeprecated() const
 {
-    if (d->m_attributes.testFlag(Attribute::Deprecated))
-        return true;
-    for (const auto &modification : modifications(declaringClass())) {
-        if (modification.isDeprecated())
-            return true;
-    }
-    return false;
+    const auto &mods = modifications(declaringClass());
+    return d->m_attributes.testFlag(Attribute::Deprecated)
+           ? std::none_of(mods.cbegin(), mods.cend(), modifiedUndeprecated)
+           : std::any_of(mods.cbegin(), mods.cend(), modifiedDeprecated);
 }
 
 bool AbstractMetaFunction::isConstructor() const

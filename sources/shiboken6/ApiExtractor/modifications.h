@@ -155,7 +155,8 @@ public:
         CodeInjection =         0x1000,
         Rename =                0x2000,
         Deprecated =            0x4000,
-        ReplaceExpression =     0x8000
+        Undeprecated =          0x8000,
+        ReplaceExpression =    0x10000
     };
 
     Q_DECLARE_FLAGS(Modifiers, ModifierFlag);

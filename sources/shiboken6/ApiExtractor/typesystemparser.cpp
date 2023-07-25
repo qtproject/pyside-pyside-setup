@@ -2726,7 +2726,7 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
     QString access;
     bool removed = false;
     QString rename;
-    bool deprecated = false;
+    std::optional<bool> deprecated;
     bool isThread = false;
     int overloadNumber = TypeSystem::OverloadNumberUnset;
     TypeSystem::ExceptionHandling exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
@@ -2826,8 +2826,11 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
         mod.setModifierFlag(m);
     }
 
-    if (deprecated)
-        mod.setModifierFlag(FunctionModification::Deprecated);
+    if (deprecated.has_value()) {
+        mod.setModifierFlag(deprecated.value()
+                            ? FunctionModification::Deprecated
+                            : FunctionModification::Undeprecated);
+    }
 
     mod.setRemoved(removed);
 
