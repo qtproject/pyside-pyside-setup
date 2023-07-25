@@ -93,6 +93,18 @@ PYSIDE_API PyObject *getObject(PySideSignalInstance *signal);
  **/
 PYSIDE_API const char *getSignature(PySideSignalInstance *signal);
 
+struct EmitterData
+{
+    QObject *emitter = nullptr;
+    int methodIndex = -1;
+};
+
+/// A convenience to retrieve the emitter data from a signal instance
+///
+/// @param   signal The Signal object
+/// @return  Data structure
+PYSIDE_API EmitterData getEmitterData(PySideSignalInstance *signal);
+
 /**
  * This function is used to retrieve the signal signature
  *

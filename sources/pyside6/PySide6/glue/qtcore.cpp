@@ -1820,12 +1820,10 @@ cptr = new ::%TYPE(%1, %2);
 
 // @snippet qmetamethod-from-signal
 auto *signalInst = reinterpret_cast<PySideSignalInstance *>(%PYARG_1);
-PyObject *emitterPyObject = PySide::Signal::getObject(signalInst);
-QObject* emitter = %CONVERTTOCPP[QObject *](emitterPyObject);
-const QByteArray signature = PySide::Signal::getSignature(signalInst);
-const auto *mo = emitter->metaObject();
-const auto index = mo->indexOfSignal(signature.constData());
-const auto result = index != -1 ? mo->method(index) : QMetaMethod{};
+const auto data = PySide::Signal::getEmitterData(signalInst);
+const auto result = data.methodIndex != -1
+    ? data.emitter->metaObject()->method(data.methodIndex)
+    : QMetaMethod{};
 %PYARG_0 = %CONVERTTOPYTHON[QMetaMethod](result);
 // @snippet qmetamethod-from-signal
 

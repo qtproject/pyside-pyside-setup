@@ -4,6 +4,7 @@
 #include <sbkpython.h>
 #include "pysidesignal.h"
 #include "pysidesignal_p.h"
+#include "pysideqobject.h"
 #include "pysideutils.h"
 #include "pysidestaticstrings.h"
 #include "pysideweakref.h"
@@ -1161,6 +1162,17 @@ PyObject *getObject(PySideSignalInstance *signal)
 const char *getSignature(PySideSignalInstance *signal)
 {
     return signal->d->signature;
+}
+
+EmitterData getEmitterData(PySideSignalInstance *signal)
+{
+    EmitterData result;
+    result.emitter = PySide::convertToQObject(getObject(signal), false);
+    if (result.emitter != nullptr) {
+        auto *mo = result.emitter->metaObject();
+        result.methodIndex = mo->indexOfMethod(getSignature(signal));
+    }
+    return result;
 }
 
 QStringList getArgsFromSignature(const char *signature, bool *isShortCircuit)
