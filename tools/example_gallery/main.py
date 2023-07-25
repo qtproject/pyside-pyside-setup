@@ -41,7 +41,7 @@ LITERAL_INCLUDE = ".. literalinclude::"
 IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".svg", ".svgz", ".webp")
 
 
-IGNORED_SUFFIXES = IMAGE_SUFFIXES + (".pdf", ".pyc")
+IGNORED_SUFFIXES = IMAGE_SUFFIXES + (".pdf", ".pyc", ".obj", ".mesh")
 
 
 suffixes = {
