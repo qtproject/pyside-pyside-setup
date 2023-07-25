@@ -471,6 +471,13 @@ bool AbstractMetaFunction::generateBinding() const
             return false;
         break;
     }
+    // Can we access the wrapper in case of a protected method? If not,
+    // disable for consistency regardless of avoidProtectedHack.
+    if (isProtected()) {
+        const auto typeFlags = ownerClass()->typeEntry()->typeFlags();
+        if (typeFlags.testFlag(ComplexTypeEntry::DisableWrapper))
+            return false;
+    }
     if (isPrivate() && d->m_functionType != EmptyFunction)
         return false;
     return d->m_name != u"qt_metacall" && !usesRValueReferences()
