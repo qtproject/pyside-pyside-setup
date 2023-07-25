@@ -123,7 +123,10 @@
         <include file-name="QStringList" location="global"/>
         <include file-name="QSize" location="global"/>
     </extra-includes>
-    <modify-function signature="setQuery(QSqlQuery)" allow-thread="yes"/>
+    <!-- FIXME: PYSIDE7: Handle setQuery(QSqlQuery&&) in some way?
+         QTBUG-91766/PYSIDE-2394 -->
+    <modify-function signature="setQuery(QSqlQuery)" allow-thread="yes"
+                     deprecated="false"/>
     <modify-function signature="setQuery(QString,QSqlDatabase)" allow-thread="yes"/>
     <!-- FIXME: PYSIDE7: Probably needs a fix, make QSqlQuery an object type?
          QTBUG-105048/PYSIDE-2300 -->
