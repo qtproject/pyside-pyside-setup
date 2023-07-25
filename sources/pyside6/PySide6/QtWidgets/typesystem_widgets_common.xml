@@ -522,6 +522,9 @@
     </modify-function>
   </object-type>
   <object-type name="QWizardPage">
+    <extra-includes>
+        <include file-name="pysidesignal.h" location="global"/>
+    </extra-includes>
     <modify-function signature="wizard()const">
       <modify-argument index="this">
         <parent index="return" action="add"/>
@@ -531,6 +534,11 @@
         <modify-argument index="3" pyi-type="str" rename="property"/>
         <modify-argument index="4" pyi-type="str" rename="changed_signal"/>
     </modify-function>
+    <add-function signature="registerField(const QString&amp;@name@,QWidget*@widget@,const char*@property@,PySideSignalInstance@changedSignal@)" allow-thread="yes">
+        <modify-argument index="3" pyi-type="str"/>
+            <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp"
+                         snippet="qwizardpage-registerfield"/>
+        </add-function>
   </object-type>
   <object-type name="QFocusFrame">
     <modify-function signature="setWidget(QWidget*)">
