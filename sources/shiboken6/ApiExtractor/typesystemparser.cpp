@@ -2727,7 +2727,6 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
     bool removed = false;
     QString rename;
     std::optional<bool> deprecated;
-    bool isThread = false;
     int overloadNumber = TypeSystem::OverloadNumberUnset;
     TypeSystem::ExceptionHandling exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
     TypeSystem::AllowThread allowThread = TypeSystem::AllowThread::Unspecified;
@@ -2745,9 +2744,6 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
         } else if (name == deprecatedAttribute()) {
             deprecated = convertBoolean(attributes->takeAt(i).value(),
                                         deprecatedAttribute(), false);
-        } else if (name == threadAttribute()) {
-            isThread = convertBoolean(attributes->takeAt(i).value(),
-                                      threadAttribute(), false);
         } else if (name == allowThreadAttribute()) {
             const QXmlStreamAttribute attribute = attributes->takeAt(i);
             const auto allowThreadOpt = allowThreadFromAttribute(attribute.value());
@@ -2777,7 +2773,7 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
-        } else if (name == virtualSlotAttribute()) {
+        } else if (name == virtualSlotAttribute() || name == threadAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
         }
@@ -2839,7 +2835,6 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
         mod.setModifierFlag(FunctionModification::Rename);
     }
 
-    mod.setIsThread(isThread);
     if (allowThread != TypeSystem::AllowThread::Unspecified)
         mod.setAllowThread(allowThread);
 
