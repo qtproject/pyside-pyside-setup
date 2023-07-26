@@ -534,7 +534,7 @@
         <modify-argument index="3" pyi-type="str" rename="property"/>
         <modify-argument index="4" pyi-type="str" rename="changed_signal"/>
     </modify-function>
-    <add-function signature="registerField(const QString&amp;@name@,QWidget*@widget@,const char*@property@,PySideSignalInstance@changedSignal@)" allow-thread="yes">
+    <add-function signature="registerField(const QString&amp;@name@,QWidget*@widget@,const char*@property@,PySideSignalInstance@changedSignal@)">
         <modify-argument index="3" pyi-type="str"/>
             <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp"
                          snippet="qwizardpage-registerfield"/>

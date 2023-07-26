@@ -761,7 +761,9 @@ if (data.methodIndex == -1) {
 }
 const auto method = data.emitter->metaObject()->method(data.methodIndex);
 const QByteArray signature = QByteArrayLiteral("2") + method.methodSignature();
+%BEGIN_ALLOW_THREADS
 %CPPSELF.%FUNCTION_NAME(%1, %2, %3, signature.constData());
+%END_ALLOW_THREADS
 // @snippet qwizardpage-registerfield
 
 /*********************************************************************
