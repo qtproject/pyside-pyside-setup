@@ -423,7 +423,6 @@ public:
     QString m_originalSignature;
     QRegularExpression m_signaturePattern;
     int m_overloadNumber = TypeSystem::OverloadNumberUnset;
-    bool m_thread = false;
     bool removed = false;
     TypeSystem::AllowThread m_allowThread = TypeSystem::AllowThread::Unspecified;
     TypeSystem::ExceptionHandling m_exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
@@ -453,8 +452,6 @@ void FunctionModification::formatDebug(QDebug &debug) const
         debug << ", renamedToName=\"" << d->renamedToName << '"';
     if (d->m_allowThread != TypeSystem::AllowThread::Unspecified)
         debug << ", allowThread=" << int(d->m_allowThread);
-    if (d->m_thread)
-        debug << ", thread";
     if (d->m_exceptionHandling != TypeSystem::ExceptionHandling::Unspecified)
         debug << ", exceptionHandling=" << int(d->m_exceptionHandling);
     if (!d->m_snips.isEmpty())
@@ -557,17 +554,6 @@ void FunctionModification::setSnips(const CodeSnipList &snips)
 }
 
 // ---------------------- FunctionModification
-void FunctionModification::setIsThread(bool flag)
-{
-    if (d->m_thread != flag)
-        d->m_thread = flag;
-}
-
-bool FunctionModification::isThread() const
-{
-    return d->m_thread;
-}
-
 FunctionModification::AllowThread FunctionModification::allowThread() const
 {
     return d->m_allowThread;

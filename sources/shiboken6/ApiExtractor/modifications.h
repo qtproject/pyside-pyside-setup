@@ -223,8 +223,6 @@ public:
     {
         return modifiers().testFlag(CodeInjection);
     }
-    void setIsThread(bool flag);
-    bool isThread() const;
 
     AllowThread allowThread() const;
     void setAllowThread(AllowThread allow);
