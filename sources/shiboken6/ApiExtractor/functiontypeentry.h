@@ -5,7 +5,6 @@
 #define FUNCTIONTYPEENTRY_H
 
 #include "typesystem.h"
-#include "typesystem_enums.h"
 
 class FunctionTypeEntryPrivate;
 
@@ -19,9 +18,6 @@ public:
     const QStringList &signatures() const;
     bool hasSignature(const QString& signature) const;
     void addSignature(const QString& signature);
-
-    TypeSystem::SnakeCase snakeCase() const;
-    void setSnakeCase(TypeSystem::SnakeCase sc);
 
     TypeEntry *clone() const override;
 

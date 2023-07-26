@@ -1493,11 +1493,8 @@ TypeSystem::SnakeCase AbstractMetaFunction::snakeCase() const
             return mod.snakeCase();
     }
 
-    if (d->m_typeEntry) { // Global function
-        const auto snakeCase = d->m_typeEntry->snakeCase();
-        return snakeCase != TypeSystem::SnakeCase::Unspecified
-            ? snakeCase : typeSystemTypeEntry(d->m_typeEntry)->snakeCase();
-    }
+    if (d->m_typeEntry) // Global function
+        return typeSystemTypeEntry(d->m_typeEntry)->snakeCase();
 
     if (d->m_class) {
         auto typeEntry = d->m_class->typeEntry();

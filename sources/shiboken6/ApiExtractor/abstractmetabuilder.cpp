@@ -81,6 +81,17 @@ QTextStream &operator<<(QTextStream &str, const RejectEntry &re)
     return str;
 }
 
+static void applyCachedFunctionModifications(AbstractMetaFunction *metaFunction,
+                                             const FunctionModificationList &functionMods)
+{
+    for (const FunctionModification &mod : functionMods) {
+        if (mod.exceptionHandling() != TypeSystem::ExceptionHandling::Unspecified)
+            metaFunction->setExceptionHandlingModification(mod.exceptionHandling());
+        if (mod.allowThread() != TypeSystem::AllowThread::Unspecified)
+            metaFunction->setAllowThreadModification(mod.allowThread());
+    }
+}
+
 bool AbstractMetaBuilderPrivate::m_useGlobalHeader = false;
 bool AbstractMetaBuilderPrivate::m_codeModelTestMode = false;
 
@@ -1733,6 +1744,7 @@ AbstractMetaFunction *
 
     // Find the correct default values
     const FunctionModificationList functionMods = metaFunction->modifications(metaClass);
+    applyCachedFunctionModifications(metaFunction, functionMods);
     for (qsizetype i = 0; i < metaArguments.size(); ++i) {
         AbstractMetaArgument &metaArg = metaArguments[i];
 
@@ -2187,12 +2199,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         ? AbstractMetaFunction::findClassModifications(metaFunction, currentClass)
         : AbstractMetaFunction::findGlobalModifications(metaFunction);
 
-    for (const FunctionModification &mod : functionMods) {
-        if (mod.exceptionHandling() != TypeSystem::ExceptionHandling::Unspecified)
-            metaFunction->setExceptionHandlingModification(mod.exceptionHandling());
-        if (mod.allowThread() != TypeSystem::AllowThread::Unspecified)
-            metaFunction->setAllowThreadModification(mod.allowThread());
-    }
+    applyCachedFunctionModifications(metaFunction, functionMods);
 
     // Find the correct default values
     for (qsizetype i = 0, size = metaArguments.size(); i < size; ++i) {

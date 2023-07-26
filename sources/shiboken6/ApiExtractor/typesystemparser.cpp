@@ -1710,27 +1710,29 @@ FunctionTypeEntryPtr
     if (!checkRootElement())
         return nullptr;
 
-    QString signature;
-    TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Disabled;
+    FunctionModification mod;
+    const auto oldAttributesSize = attributes->size();
+    if (!parseModifyFunctionAttributes(attributes, &mod))
+        return nullptr;
+    const bool hasModification = attributes->size() < oldAttributesSize;
 
+    QString originalSignature;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == signatureAttribute()) {
-            signature = TypeDatabase::normalizedSignature(attributes->takeAt(i).value().toString());
-        } else if (name == snakeCaseAttribute()) {
-            const auto attribute = attributes->takeAt(i);
-            const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
-            if (!snakeCaseOpt.has_value()) {
-                m_error = msgInvalidAttributeValue(attribute);
-                return nullptr;
-            }
-            snakeCase = snakeCaseOpt.value();
-        }
+        if (name == signatureAttribute())
+            originalSignature = attributes->takeAt(i).value().toString();
     }
 
+    const QString signature = TypeDatabase::normalizedSignature(originalSignature);
     if (signature.isEmpty()) {
         m_error =  msgMissingAttribute(signatureAttribute());
         return nullptr;
+    }
+
+    if (hasModification) {
+        mod.setOriginalSignature(originalSignature);
+        mod.setSignature(signature);
+        m_contextStack.top()->functionMods << mod;
     }
 
     TypeEntryPtr existingType = m_context->db->findType(name);
@@ -1738,7 +1740,6 @@ FunctionTypeEntryPtr
     if (!existingType) {
         auto result = std::make_shared<FunctionTypeEntry>(name, signature, since,
                                                           currentParentTypeEntry());
-        result->setSnakeCase(snakeCase);
         applyCommonAttributes(reader, result, attributes);
         return result;
     }
@@ -2560,12 +2561,19 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
                                       ", was=%1").arg(tagFromElement(topElement));
         return false;
     }
+
+    FunctionModification mod;
+    if (!(t == StackElement::AddFunction
+          ? parseBasicModifyFunctionAttributes(attributes, &mod)
+          : parseModifyFunctionAttributes(attributes, &mod))) {
+        return false;
+    }
+
     QString originalSignature;
     QString returnType;
     bool staticFunction = false;
     bool classMethod = false;
     QString access;
-    int overloadNumber = TypeSystem::OverloadNumberUnset;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"signature") {
@@ -2580,9 +2588,6 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
                                             classmethodAttribute(), false);
         } else if (name == accessAttribute()) {
             access = attributes->takeAt(i).value().toString();
-        } else if (name == overloadNumberAttribute()) {
-            if (!parseOverloadNumber(attributes->takeAt(i), &overloadNumber, &m_error))
-                return false;
         }
     }
 
@@ -2627,8 +2632,6 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
     m_contextStack.top()->addedFunctionModificationIndex =
         m_contextStack.top()->functionMods.size();
 
-    FunctionModification mod;
-    mod.setOverloadNumber(overloadNumber);
     if (!mod.setSignature(m_currentSignature, &m_error))
         return false;
     mod.setOriginalSignature(originalSignature);
@@ -2710,6 +2713,67 @@ bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, StackEleme
     return true;
 }
 
+// Parse basic attributes applicable to <add-function>/<declare-function>/<function>
+// and <modify-function> (all that is not done by injected code).
+bool TypeSystemParser::parseBasicModifyFunctionAttributes(QXmlStreamAttributes *attributes,
+                                                          FunctionModification *mod)
+{
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
+        const auto name = attributes->at(i).qualifiedName();
+        if (name == overloadNumberAttribute()) {
+            int overloadNumber = TypeSystem::OverloadNumberUnset;
+            if (!parseOverloadNumber(attributes->takeAt(i), &overloadNumber, &m_error))
+                return false;
+            mod->setOverloadNumber(overloadNumber);
+        }
+    }
+    return true;
+}
+
+// Parse attributes applicable to <declare-function>/<function>
+// and <modify-function>.
+bool TypeSystemParser::parseModifyFunctionAttributes(QXmlStreamAttributes *attributes,
+                                                     FunctionModification *mod)
+{
+    if (!parseBasicModifyFunctionAttributes(attributes, mod))
+        return false;
+
+    for (auto i = attributes->size() - 1; i >= 0; --i) {
+        const auto name = attributes->at(i).qualifiedName();
+        if (name == allowThreadAttribute()) {
+            const QXmlStreamAttribute attribute = attributes->takeAt(i);
+            const auto allowThreadOpt = allowThreadFromAttribute(attribute.value());
+            if (!allowThreadOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
+                return false;
+            }
+            mod->setAllowThread(allowThreadOpt.value());
+        } else if (name == exceptionHandlingAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            const auto exceptionOpt = exceptionHandlingFromAttribute(attribute.value());
+            if (!exceptionOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
+                return false;
+            }
+            mod->setExceptionHandling(exceptionOpt.value());
+        } else if (name == snakeCaseAttribute()) {
+            const auto attribute = attributes->takeAt(i);
+            const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
+            if (!snakeCaseOpt.has_value()) {
+                m_error = msgInvalidAttributeValue(attribute);
+                return false;
+            }
+            mod->setSnakeCase(snakeCaseOpt.value());
+        } else if (name == deprecatedAttribute()) {
+            const bool deprecated = convertBoolean(attributes->takeAt(i).value(),
+                                                   deprecatedAttribute(), false);
+            mod->setModifierFlag(deprecated ? FunctionModification::Deprecated
+                                            : FunctionModification::Undeprecated);
+        }
+    }
+    return true;
+}
+
 bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader,
                                   StackElement topElement,
                                   QXmlStreamAttributes *attributes)
@@ -2724,14 +2788,13 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
     }
 
     QString originalSignature;
+    FunctionModification mod;
+    if (!parseModifyFunctionAttributes(attributes, &mod))
+        return false;
+
     QString access;
     bool removed = false;
     QString rename;
-    std::optional<bool> deprecated;
-    int overloadNumber = TypeSystem::OverloadNumberUnset;
-    TypeSystem::ExceptionHandling exceptionHandling = TypeSystem::ExceptionHandling::Unspecified;
-    TypeSystem::AllowThread allowThread = TypeSystem::AllowThread::Unspecified;
-    TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"signature") {
@@ -2742,38 +2805,6 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
             rename = attributes->takeAt(i).value().toString();
         } else if (name == removeAttribute()) {
             removed = convertRemovalAttribute(attributes->takeAt(i).value());
-        } else if (name == deprecatedAttribute()) {
-            deprecated = convertBoolean(attributes->takeAt(i).value(),
-                                        deprecatedAttribute(), false);
-        } else if (name == allowThreadAttribute()) {
-            const QXmlStreamAttribute attribute = attributes->takeAt(i);
-            const auto allowThreadOpt = allowThreadFromAttribute(attribute.value());
-            if (!allowThreadOpt.has_value()) {
-                m_error = msgInvalidAttributeValue(attribute);
-                return false;
-            }
-            allowThread = allowThreadOpt.value();
-        } else if (name == exceptionHandlingAttribute()) {
-            const auto attribute = attributes->takeAt(i);
-            const auto exceptionOpt = exceptionHandlingFromAttribute(attribute.value());
-            if (exceptionOpt.has_value()) {
-                exceptionHandling = exceptionOpt.value();
-            } else {
-                qCWarning(lcShiboken, "%s",
-                          qPrintable(msgInvalidAttributeValue(attribute)));
-            }
-        } else if (name == overloadNumberAttribute()) {
-            if (!parseOverloadNumber(attributes->takeAt(i), &overloadNumber, &m_error))
-                return false;
-        } else if (name == snakeCaseAttribute()) {
-            const auto attribute = attributes->takeAt(i);
-            const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
-            if (snakeCaseOpt.has_value()) {
-                snakeCase = snakeCaseOpt.value();
-            } else {
-                qCWarning(lcShiboken, "%s",
-                          qPrintable(msgInvalidAttributeValue(attribute)));
-            }
         } else if (name == virtualSlotAttribute() || name == threadAttribute()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
@@ -2799,13 +2830,9 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
         return false;
     }
 
-    FunctionModification mod;
     if (!mod.setSignature(signature, &m_error))
         return false;
     mod.setOriginalSignature(originalSignature);
-    mod.setExceptionHandling(exceptionHandling);
-    mod.setOverloadNumber(overloadNumber);
-    mod.setSnakeCase(snakeCase);
     m_currentSignature = signature;
 
     if (!access.isEmpty()) {
@@ -2823,21 +2850,12 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
         mod.setModifierFlag(m);
     }
 
-    if (deprecated.has_value()) {
-        mod.setModifierFlag(deprecated.value()
-                            ? FunctionModification::Deprecated
-                            : FunctionModification::Undeprecated);
-    }
-
     mod.setRemoved(removed);
 
     if (!rename.isEmpty()) {
         mod.setRenamedToName(rename);
         mod.setModifierFlag(FunctionModification::Rename);
     }
-
-    if (allowThread != TypeSystem::AllowThread::Unspecified)
-        mod.setAllowThread(allowThread);
 
     top->functionMods << mod;
     return true;

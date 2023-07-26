@@ -2312,7 +2312,6 @@ public:
     }
 
     QStringList m_signatures;
-    TypeSystem::SnakeCase m_snakeCase = TypeSystem::SnakeCase::Unspecified;
 };
 
 FunctionTypeEntry::FunctionTypeEntry(const QString &entryName, const QString &signature,
@@ -2338,18 +2337,6 @@ bool FunctionTypeEntry::hasSignature(const QString &signature) const
 {
     S_D(const FunctionTypeEntry);
     return d->m_signatures.contains(signature);
-}
-
-TypeSystem::SnakeCase FunctionTypeEntry::snakeCase() const
-{
-    S_D(const FunctionTypeEntry);
-    return d->m_snakeCase;
-}
-
-void FunctionTypeEntry::setSnakeCase(TypeSystem::SnakeCase sc)
-{
-    S_D(FunctionTypeEntry);
-    d->m_snakeCase = sc;
 }
 
 TypeEntry *FunctionTypeEntry::clone() const
@@ -2477,8 +2464,7 @@ void FunctionTypeEntry::formatDebug(QDebug &debug) const
     S_D(const FunctionTypeEntry);
 
     TypeEntry::formatDebug(debug);
-    debug << "signatures=" << d->m_signatures
-          << ", snakeCase=" << int(d->m_snakeCase);
+    debug << "signatures=" << d->m_signatures;
 }
 
 void TypedefEntry::formatDebug(QDebug &debug) const

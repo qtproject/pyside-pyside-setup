@@ -236,6 +236,10 @@ private:
                              StackElement topElement, QXmlStreamAttributes *attributes);
     bool parseProperty(const ConditionalStreamReader &, StackElement topElement,
                        QXmlStreamAttributes *);
+    bool parseBasicModifyFunctionAttributes(QXmlStreamAttributes *,
+                                            FunctionModification *mod);
+    bool parseModifyFunctionAttributes(QXmlStreamAttributes *,
+                                       FunctionModification *mod);
     bool parseModifyFunction(const ConditionalStreamReader &, StackElement topElement,
                              QXmlStreamAttributes *);
     bool parseReplaceDefaultExpression(const ConditionalStreamReader &,

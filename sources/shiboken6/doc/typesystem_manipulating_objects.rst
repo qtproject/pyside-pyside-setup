@@ -165,7 +165,7 @@ modification affects.
                           remove="true | false"
                           access="public | private | protected"
                           allow-thread="true | auto | false"
-                          exception-handling="off | auto-off | auto-on | on"
+                          exception-handling="no | auto-off | auto-on | yes"
                           final="true | false"
                           overload-number="number"
                           rename="..."
@@ -280,6 +280,7 @@ logic. This can be done using the :ref:`inject-code` node.
      <object-type>
          <add-function signature="..." return-type="..."
                        access="public | protected"
+                       overload-number="number"
                        static="yes | no" classmethod="yes | no"
                        since="..."/>
      </object-type>
@@ -291,6 +292,8 @@ The ``since`` attribute specifies the API version when this function was added.
 The ``classmethod`` attribute specifies whether the function should be a Python class method.
 It sets the METH_CLASS flag which means that ``PyTypeObject`` instead of an instance
 ``PyObject`` is passed as self, which needs to be handled in injected code.
+
+For the *optional* attribute ``overload-number``, see :ref:`modify-function`.
 
 Note that the label "static" in Qt's class documentation almost always means that a Python
 ``classmethod`` should be generated, because an object's class is always accessible from the
@@ -331,13 +334,20 @@ namespace or a global function. It may contain :ref:`modify-argument` nodes.
 .. code-block:: xml
 
      <container-type>
-         <declare-function signature="..." return-type="..." since="..."/>
+         <declare-function signature="..." return-type="..." since="..."
+                           allow-thread="true | auto | false"
+                           exception-handling="off | auto-off | auto-on | on"
+                           overload-number="number"
+                           snake-case="yes | no | both"/>
      </container-type>
 
 The ``return-type`` attribute defaults to *void*.
 
 The ``since`` attribute specifies the API version when this function was
 added.
+
+For the *optional* attributes ``allow-thread``, ``exception-handling``,
+``overload-number`` and ``snake-case``, see :ref:`modify-function`.
 
 This is useful to make functions known to shiboken which its code parser
 does not detect. For example, in Qt 6, the ``append()`` function of the

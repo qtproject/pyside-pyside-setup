@@ -758,7 +758,11 @@ and may contain a :ref:`modify-function` child node.
 .. code-block:: xml
 
     <typesystem>
-        <function signature="..." rename="..." since="..." snake-case="yes | no | both" />
+        <function signature="..." rename="..." since="..."
+                  allow-thread="true | auto | false"
+                  exception-handling="off | auto-off | auto-on | on"
+                  overload-number="number"
+                  snake-case="yes | no | both" />
     </typesystem>
 
 There is a limitation; you cannot add a function overload using
@@ -769,8 +773,8 @@ the function was introduced.
 
 The *optional* **rename** attribute is used to modify the function name.
 
-The *optional* **snake-case** attribute allows for overriding the value
-specified on the **typesystem** element.
+For the *optional* attributes **allow-thread**, **exception-handling**,
+**overload-number** and **snake-case**, see :ref:`modify-function`.
 
 .. _system_include:
 
