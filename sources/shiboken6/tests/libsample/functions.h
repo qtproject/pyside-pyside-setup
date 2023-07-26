@@ -12,6 +12,8 @@
 #include <list>
 #include <utility>
 
+class Polygon;
+
 enum GlobalEnum {
     NoThing,
     FirstThing,
@@ -67,6 +69,9 @@ LIBSAMPLE_API std::string addStdStrings(const std::string &s1, const std::string
 LIBSAMPLE_API std::wstring addStdWStrings(const std::wstring &s1, const std::wstring &s2);
 
 LIBSAMPLE_API void testNullPtrT(std::nullptr_t);
+
+LIBSAMPLE_API int takePolygon(Polygon &&p);
+LIBSAMPLE_API int takeObjectType(ObjectType &&o);
 
 class LIBSAMPLE_API ArrayModifyTest
 {

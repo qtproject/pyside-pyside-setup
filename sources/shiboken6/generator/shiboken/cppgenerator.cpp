@@ -3961,7 +3961,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 }
                 // "Pass unique ptr by value" pattern: Apply std::move()
                 auto type = arg.type();
-                if (type.isUniquePointer() && type.passByValue())
+                if (type.useStdMove())
                     userArgs.last() = stdMove(userArgs.constLast());
                 else if (type.viewOn() != nullptr)
                     userArgs.last() = explicitConversion(userArgs.constLast(), type);

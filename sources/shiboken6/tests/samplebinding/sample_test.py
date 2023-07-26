@@ -51,6 +51,27 @@ class ModuleTest(unittest.TestCase):
         self.assertRaises(TypeError, sample.testNullPtrT, 42)
 
 
+    def testRValueRefsWithValueTypes(self):
+        """Passing value types by rvalue refs: For value types, nothing should
+           happen since the argument is copied in the call and the copy is
+           moved from."""
+        polygon = sample.Polygon()
+        polygon.addPoint(sample.Point(1, 2))
+        polygon.addPoint(sample.Point(3, 4))
+        point_count = len(polygon.points())
+        self.assertEqual(point_count, sample.takePolygon(polygon))
+
+    def testRValueRefsWithObjectTypes(self):
+        """Passing object types by rvalue refs: The underlying object should
+           be moved from."""
+        o = sample.ObjectType()
+        object_name = "Name"
+        o.setObjectName(object_name)
+        self.assertEqual(len(object_name), sample.takeObjectType(o))
+        # o should be moved from, name is now empty
+        self.assertEqual(len(o.objectName()), 0)
+
+
 if __name__ == '__main__':
     unittest.main()
 

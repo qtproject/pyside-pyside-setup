@@ -482,7 +482,10 @@ bool AbstractMetaFunction::generateBinding() const
     }
     if (isPrivate() && d->m_functionType != EmptyFunction)
         return false;
-    return d->m_name != u"qt_metacall" && !usesRValueReferences()
+    // RValue references only for user-specified
+    // functions (<add-function>/<declare-function>/<function>)
+    return d->m_name != u"qt_metacall" &&
+           (!usesRValueReferences() || d->m_addedFunction || d->m_typeEntry)
            && !isModifiedRemoved();
 }
 

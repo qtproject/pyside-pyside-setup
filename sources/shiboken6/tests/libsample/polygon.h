@@ -9,7 +9,7 @@
 
 #include <list>
 
-class LIBSAMPLE_API Polygon
+class LIBSAMPLE_API Polygon // should be moveable
 {
 public:
     using PointList = std::list<Point>;
@@ -18,7 +18,6 @@ public:
     Polygon(double x, double y);
     Polygon(Point point);
     Polygon(PointList points);
-    ~Polygon() {}
 
     void addPoint(Point point);
 

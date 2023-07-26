@@ -944,12 +944,14 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaTyp
         return result;
     }
     if (metaType.isWrapperType()) {
-        if (metaType.isPointer() || metaType.isValueTypeWithCopyConstructorOnly())
+        if (metaType.isPointer() || metaType.isValueTypeWithCopyConstructorOnly()) {
             result += u"pythonToCppPointerConversion"_s;
-        else if (metaType.referenceType() == LValueReference)
+        } else if (metaType.referenceType() == LValueReference
+                   || (metaType.referenceType() == RValueReference && typeEntry->isObject())) {
             result += u"pythonToCppReferenceConversion"_s;
-        else
+        } else {
             result += u"pythonToCppValueConversion"_s;
+        }
         result += u'(' + cpythonTypeNameExt(metaType) + u", "_s;
         return result;
     }

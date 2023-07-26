@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "functions.h"
+#include "polygon.h"
 
 #include <cstring>
 #include <algorithm>
@@ -218,4 +219,18 @@ std::wstring addStdWStrings(const std::wstring &s1, const std::wstring &s2)
 void testNullPtrT(std::nullptr_t)
 {
     std::cout << __FUNCTION__ << '\n';
+}
+
+int takePolygon(Polygon &&p)
+{
+    auto p2 = std::move(p);
+    std::cout << __FUNCTION__ << ' ' << p2.points().size() << " points\n";
+    return int(p2.points().size());
+}
+
+int takeObjectType(ObjectType &&o)
+{
+    auto o2 = std::move(o);
+    std::cout << __FUNCTION__ << ' ' << o2.objectName().cstring()  << '\n';
+    return o2.objectName().size();
 }

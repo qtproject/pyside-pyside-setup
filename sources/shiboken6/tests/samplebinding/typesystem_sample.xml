@@ -422,6 +422,8 @@
     <function signature="addStdStrings(const std::string&amp;, const std::string&amp;)"/>
     <function signature="addStdWStrings(const std::wstring&amp;, const std::wstring&amp;)"/>
     <function signature="testNullPtrT(std::nullptr_t)"/>
+    <function signature="takePolygon(Polygon&amp;&amp;)"/>
+    <function signature="takeObjectType(ObjectType&amp;&amp;)"/>
 
     <value-type name="ArrayModifyTest">
         <modify-function signature="sumIntArray(int, int*)">

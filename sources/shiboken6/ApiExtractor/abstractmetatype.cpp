@@ -354,6 +354,12 @@ bool AbstractMetaType::passByValue() const
     return d->passByValue();
 }
 
+bool AbstractMetaType::useStdMove() const
+{
+    return (isUniquePointer() && d->passByValue())
+        || d->m_referenceType == RValueReference;
+}
+
 ReferenceType AbstractMetaType::referenceType() const
 {
     return d->m_referenceType;

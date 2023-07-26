@@ -6,6 +6,18 @@ Words of Advice
 
 When writing or using Python bindings there is some things you must keep in mind.
 
+.. _rvalue_references:
+
+Rvalue References
+=================
+
+Normally, no bindings are generated for functions taking rvalue references.
+Experimental support has been added in 6.6. The functions need to be explicitly
+specified using the :ref:`add-function`, :ref:`declare-function` or
+:ref:`function` elements. For :ref:`value-type` objects, this does not have any
+implications since the arguments are copied in the generated code and the copy
+is moved from. For :ref:`object-type` objects however, it means that the object
+instance is moved from and should no longer be referenced.
 
 .. _duck-punching-and-virtual-methods:
 

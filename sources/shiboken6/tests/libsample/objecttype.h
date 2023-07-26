@@ -50,6 +50,8 @@ public:
     virtual ~ObjectType();
     ObjectType(const ObjectType &) = delete;
     ObjectType &operator=(const ObjectType &) = delete;
+    ObjectType(ObjectType &&);
+    ObjectType &operator=(ObjectType &&);
 
     // factory method
     inline static ObjectType *create() { return new ObjectType(); }

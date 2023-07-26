@@ -14,6 +14,9 @@ ObjectType::ObjectType(ObjectType *parent)
     setParent(parent);
 }
 
+ObjectType::ObjectType(ObjectType &&) = default;
+ObjectType &ObjectType::operator=(ObjectType &&) = default;
+
 ObjectType::~ObjectType()
 {
     for (auto *o : m_children)

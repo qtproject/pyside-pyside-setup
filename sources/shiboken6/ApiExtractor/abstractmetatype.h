@@ -119,6 +119,7 @@ public:
 
     bool passByConstRef() const;
     bool passByValue() const;
+    bool useStdMove() const;
 
     ReferenceType referenceType() const;
     void setReferenceType(ReferenceType ref);
