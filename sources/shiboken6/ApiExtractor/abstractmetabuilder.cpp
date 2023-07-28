@@ -497,8 +497,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     // Start the generation...
     const ClassList &typeValues = dom->classes();
 
-    ReportHandler::startProgress("Generating class model ("
-                                 + QByteArray::number(typeValues.size()) + ")...");
+    ReportHandler::startProgress("Generated class model ("
+                                 + QByteArray::number(typeValues.size()) + ").");
     for (const ClassModelItem &item : typeValues) {
         if (const auto cls = traverseClass(dom, item, nullptr))
             addAbstractMetaClass(cls, item.get());
@@ -507,8 +507,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     // We need to know all global enums
     const EnumList &enums = dom->enums();
 
-    ReportHandler::startProgress("Generating enum model ("
-                                 + QByteArray::number(enums.size()) + ")...");
+    ReportHandler::startProgress("Generated enum model ("
+                                 + QByteArray::number(enums.size()) + ").");
     for (const EnumModelItem &item : enums) {
         auto metaEnum = traverseEnum(item, nullptr, QSet<QString>());
         if (metaEnum.has_value()) {
@@ -518,16 +518,16 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     }
 
     const auto &namespaceTypeValues = dom->namespaces();
-    ReportHandler::startProgress("Generating namespace model ("
-                                 + QByteArray::number(namespaceTypeValues.size()) + ")...");
+    ReportHandler::startProgress("Generated namespace model ("
+                                 + QByteArray::number(namespaceTypeValues.size()) + ").");
     for (const NamespaceModelItem &item : namespaceTypeValues)
         traverseNamespace(dom, item);
 
     // Go through all typedefs to see if we have defined any
     // specific typedefs to be used as classes.
     const TypeDefList typeDefs = dom->typeDefs();
-    ReportHandler::startProgress("Resolving typedefs ("
-                                 + QByteArray::number(typeDefs.size()) + ")...");
+    ReportHandler::startProgress("Resolved typedefs ("
+                                 + QByteArray::number(typeDefs.size()) + ").");
     for (const TypeDefModelItem &typeDef : typeDefs) {
         if (const auto cls = traverseTypeDef(dom, typeDef, nullptr))
             addAbstractMetaClass(cls, typeDef.get());
@@ -568,7 +568,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
         m_globalFunctions << metaFuncPtr;
     }
 
-    ReportHandler::startProgress("Fixing class inheritance...");
+    ReportHandler::startProgress("Fixed class inheritance.");
     for (const auto &cls : std::as_const(m_metaClasses)) {
         if (cls->needsInheritanceSetup()) {
             setupInheritance(cls);
@@ -581,7 +581,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
         }
     }
 
-    ReportHandler::startProgress("Detecting inconsistencies in class model...");
+    ReportHandler::startProgress("Checked for inconsistencies in class model.");
     for (const auto &cls : std::as_const(m_metaClasses)) {
         AbstractMetaClass::fixFunctions(cls);
 
@@ -599,8 +599,8 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
 
     const auto &allEntries = types->entries();
 
-    ReportHandler::startProgress("Detecting inconsistencies in typesystem ("
-                                 + QByteArray::number(allEntries.size()) + ")...");
+    ReportHandler::startProgress("Checked for inconsistencies in typesystem ("
+                                 + QByteArray::number(allEntries.size()) + ").");
     for (auto it = allEntries.cbegin(), end = allEntries.cend(); it != end; ++it) {
         TypeEntryPtr entry = it.value();
         if (!entry->isPrimitive()) {
@@ -672,11 +672,11 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
         }
     }
 
-    ReportHandler::startProgress("Checking inconsistencies in function modifications...");
+    ReportHandler::startProgress("Checked for inconsistencies in function modifications.");
 
     checkFunctionModifications();
 
-    ReportHandler::startProgress("Writing log files...");
+    ReportHandler::startProgress("Wrote log files.");
 
     for (const auto &cls : std::as_const(m_metaClasses)) {
 //         setupEquals(cls);

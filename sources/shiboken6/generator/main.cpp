@@ -748,7 +748,7 @@ int shibokenMain(const QStringList &argV)
     for (const GeneratorPtr &g : std::as_const(generators)) {
         g->setOutputDirectory(outputDirectory);
         g->setLicenseComment(licenseComment);
-        ReportHandler::startProgress(QByteArray("Running ") + g->name() + "...");
+        ReportHandler::startProgress("Ran "_ba + g->name() + '.');
         const bool ok = g->setup(apiOpt.value()) && g->generate();
         ReportHandler::endProgress();
          if (!ok) {
