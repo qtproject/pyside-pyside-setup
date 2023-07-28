@@ -31,7 +31,11 @@
     <function signature="qIsNull(double)"/>
     <!-- Qt5: gone <function signature="qRound(qreal)"/> -->
     <function signature="qtTrId(const char*,int)" since="4.6"/>
-    <function signature="qVersion()"/>
+    <function signature="qVersion()">
+        <modify-function>
+            <modify-argument index="return" pyi-type="str"/>
+        </modify-function>
+    </function>
     <function signature="qCompress(const uchar*,qsizetype,int)"/>
     <function signature="qCompress(const QByteArray&amp;,int)"/>
     <function signature="qUncompress(const uchar*,qsizetype)"/>
