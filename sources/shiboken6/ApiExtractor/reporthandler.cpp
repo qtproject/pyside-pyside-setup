@@ -33,6 +33,7 @@ static ReportHandler::DebugLevel m_debugLevel = ReportHandler::NoDebug;
 static QSet<QString> m_reportedWarnings;
 static QString m_prefix;
 static bool m_withinProgress = false;
+static QByteArray m_progressMessage;
 static int m_step_warning = 0;
 static QElapsedTimer m_timer;
 
@@ -147,9 +148,13 @@ void ReportHandler::startProgress(const QByteArray& str)
         endProgress();
 
     m_withinProgress = true;
-    const auto ts = '[' + timeStamp() + ']';
-    std::printf("%s %8s %-60s", qPrintable(m_prefix), ts.constData(), str.constData());
-    std::fflush(stdout);
+    m_progressMessage = str;
+}
+
+static void indentStdout(qsizetype n)
+{
+    for (qsizetype i = 0; i < n; ++i)
+        fputc(' ', stdout);
 }
 
 void ReportHandler::endProgress()
@@ -158,11 +163,23 @@ void ReportHandler::endProgress()
         return;
 
     m_withinProgress = false;
+
+    std::fputs(m_prefix.toUtf8().constData(), stdout);
+    const auto ts = timeStamp();
+    if (ts.size() < 6)
+        indentStdout(6 - ts.size());
+    std::fputs(" [", stdout);
+    std::fputs(ts.constData(), stdout);
+    std::fputs("] ", stdout);
+    std::fputs(m_progressMessage.constData(), stdout);
+    if (m_progressMessage.size() < 60)
+        indentStdout(60 - m_progressMessage.size());
     const char *endMessage = m_step_warning == 0
         ?  "[" COLOR_GREEN "OK" COLOR_END "]\n"
         : "[" COLOR_YELLOW "WARNING" COLOR_END "]\n";
     std::fputs(endMessage, stdout);
     std::fflush(stdout);
+    m_progressMessage.clear();
     m_step_warning = 0;
 }
 
