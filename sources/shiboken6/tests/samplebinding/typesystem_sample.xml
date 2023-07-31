@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <typesystem package="sample">
-    <suppress-warning text="Duplicate type entry: 'sample'" />
-    <suppress-warning text="Duplicate type entry: 'SampleNamespace'" />
-
     <primitive-type name="ObjectType::Identifier"/>
     <primitive-type name="std::nullptr_t"/>
 
@@ -430,7 +427,7 @@
     </value-type>
 
     <value-type name="ClassWithFunctionPointer">
-        <suppress-warning text="skipping function 'ClassWithFunctionPointer::callFunctionPointer', unmatched parameter type 'void (*)(void*)'" />
+        <suppress-warning text="^skipping function 'void ClassWithFunctionPointer::callFunctionPointer.*$" />
     </value-type>
 
     <value-type name="IntArray" generate="no"/>
@@ -2417,20 +2414,9 @@
 
     <suppress-warning text="horribly broken type '__off64_t'" />
     <suppress-warning text="enum '__codecvt_result' does not have a type entry or is not an enum" />
-    <suppress-warning text="Pure virtual method &quot;Abstract::hideFunction(HideType*)&quot; must be implement but was completely removed on typesystem." />
-    <suppress-warning text="hiding of function 'takeChild' in class 'ObjectType'" />
+    <suppress-warning text="Pure virtual method 'Abstract::hideFunction(HideType*)' must be implemented but was completely removed on type system." />
     <suppress-warning text="Shadowing: MDerived2::castToBase3() and MDerived3::castToBase3()" />
-    <suppress-warning text="hiding of function 'takeChild' in class 'Bucket'" />
-    <suppress-warning text="visibility of function 'publicMethod' modified in class 'MDerived1'" />
-    <suppress-warning text="hiding of function 'doNothingInPublic3' in class 'Overload2'" />
-    <suppress-warning text="hiding of function 'takeChild' in class 'ObjectModel'" />
-    <suppress-warning text="hiding of function 'takeChild' in class 'ObjectView'" />
-    <suppress-warning text="visibility of function 'publicMethod' modified in class 'MDerived3'" />
-    <suppress-warning text="skipping function 'InjectCode::toStr', unmatched parameter type 'T const&amp;'" />
+    <suppress-warning text="Visibility of function 'publicMethod' modified in class 'MDerived1'" />
 
     <suppress-warning text="^skipping function 'std::enable_if.*ComparisonTester::operator[!=]=.*ComparisonTester.*$"/>
-
-    <!-- Do not fix this warning, the generator should be able to handle this situation for Object Types. -->
-    <suppress-warning text="Argument in position 1 of added function 'SampleNamespace::passReferenceToObjectType(ObjectType * arg__1)', has a type that is not a reference, while the argument in the corresponding position in C++ function 'SampleNamespace::passReferenceToObjectType(const ObjectType &amp; obj, int multiplier)' is a reference." />
-
 </typesystem>
