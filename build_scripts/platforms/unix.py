@@ -90,10 +90,10 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
 
     if config.is_internal_shiboken_generator_build():
         # <install>/bin/* -> {st_package_name}/
-        executables.extend(copydir(
+        copydir(
             "{install_dir}/bin/", destination_dir,
             _filter=[SHIBOKEN],
-            recursive=False, _vars=_vars))
+            recursive=False, _vars=_vars)
 
         # Used to create scripts directory.
         makefile(
@@ -246,8 +246,6 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
 
     # Update rpath to $ORIGIN
     if (sys.platform.startswith('linux') or sys.platform.startswith('darwin')) and not is_android:
-        rpath_path = destination_dir
         pyside_build.update_rpath(executables)
-        pyside_build.update_rpath(pyside_build.package_libraries(rpath_path))
         if libexec_executables:
             pyside_build.update_rpath(libexec_executables, libexec=True)

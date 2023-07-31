@@ -11,6 +11,14 @@ project(pysidebindings)
 
 include(cmake/PySideSetup.cmake)
 
+get_rpath_base_token(base)
+
+if (${STANDALONE})
+    set(CMAKE_INSTALL_RPATH ${base}/ ${base}/Qt/lib)
+else()
+    set(CMAKE_INSTALL_RPATH ${base}/ ${QT6_INSTALL_PREFIX}/${QT6_INSTALL_LIBS})
+endif()
+
 add_subdirectory(libpyside)
 
 if(Qt${QT_MAJOR_VERSION}Qml_FOUND)

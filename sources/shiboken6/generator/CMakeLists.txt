@@ -27,9 +27,19 @@ shiboken/pytypenames.h
 shiboken/shibokengenerator.cpp shiboken/shibokengenerator.h
 )
 
+find_libclang()
+
+if(${STANDALONE})
+        list(APPEND CMAKE_INSTALL_RPATH ${base}/Qt/lib)
+else()
+        list(APPEND CMAKE_INSTALL_RPATH ${QT6_INSTALL_PREFIX}/${QT6_INSTALL_LIBS}
+             ${libclang_lib_dir})
+endif()
+
 add_executable(shiboken6 ${shiboken6_SRC})
 add_executable(Shiboken6::shiboken6 ALIAS shiboken6)
 add_dependencies(shiboken6 apiextractor)
+
 set_target_properties(shiboken6 PROPERTIES OUTPUT_NAME shiboken6${shiboken6_SUFFIX})
 target_include_directories(shiboken6 PRIVATE
                     ${CMAKE_CURRENT_SOURCE_DIR}/shiboken

@@ -679,14 +679,26 @@ endmacro()
 # tool_name should be a unique tool name, preferably without spaces.
 # Returns the wrapper path in path_out_var.
 #
-# Currently adds the Qt bin dir and the libclang.dll bin dir to PATH.
-# On platforms other than Windows, returs an empty string.
+# Currently adds the Qt lib dir and libclang to PATH.
 # Meant to be used as the first argument to add_custom_command's COMMAND option.
+# TODO: Remove tool_name as the tool_name for this function is always shiboken.
 function(shiboken_get_tool_shell_wrapper tool_name path_out_var)
-    # No need for a wrapper on non Windows hosts.
-    if(NOT CMAKE_HOST_WIN32)
-        set(${path_out_var} "" PARENT_SCOPE)
-        return()
+
+    # Make sure that for cross building, the host shiboken_wrapper.sh tool is used instead of target
+    # shiboken_wrapper.sh when calling shiboken. This wrapper script resolves the dependency to Qt
+    # libraries.
+    if((SHIBOKEN_IS_CROSS_BUILD OR PYSIDE_IS_CROSS_BUILD) AND
+       (CMAKE_HOST_UNIX AND NOT CMAKE_HOST_APPLE))
+        set(host_tool_wrapper_path
+            "${QFP_SHIBOKEN_HOST_PATH}/../build/shiboken6/.qfp/bin/shiboken_wrapper.sh")
+
+        if(EXISTS "${host_tool_wrapper_path}")
+            set_property(GLOBAL PROPERTY "_shiboken_tool_wrapper_shiboken_path"
+                        "${host_tool_wrapper_path}")
+            set_property(GLOBAL PROPERTY "_shiboken_tool_wrapper_shiboken_created" TRUE)
+        else()
+            message(FATAL_ERROR "${host_tool_wrapper_path} does not exist")
+        endif()
     endif()
 
     # Generate the wrapper only once during the execution of CMake.
@@ -701,28 +713,28 @@ function(shiboken_get_tool_shell_wrapper tool_name path_out_var)
     set(path_dirs "")
     set(path_dirs_native "")
 
+    if(CMAKE_HOST_WIN32)
+        # in Windows the Qt dll are store `bin` in directory
+        set(qt_library_dir ${QT6_INSTALL_BINS})
+        set(wrapper_script_extension ".bat")
+    else()
+        # in Unix the .so are stored in `lib` directory
+        set(qt_library_dir ${QT6_INSTALL_LIBS})
+        set(wrapper_script_extension ".sh")
+    endif()
+
     # Assert that Qt is already found.
-    if(NOT QT6_INSTALL_PREFIX OR NOT QT6_INSTALL_BINS)
+    if(NOT QT6_INSTALL_PREFIX OR NOT qt_library_dir)
         message(FATAL_ERROR "Qt should have been found already by now.")
     endif()
 
-    # Get path to the Qt bin dir.
-    set(qt_bin_dir "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}")
-    list(APPEND path_dirs "${qt_bin_dir}")
+    # Get path to the Qt bin/lib dir depending on the platform
+    list(APPEND path_dirs "${QT6_INSTALL_PREFIX}/${qt_library_dir}")
 
-    # Get path to libclang.dll.
-    set(libclang_bin_dir "")
-    if(DEFINED ENV{LLVM_INSTALL_DIR})
-        set(libclang_bin_dir "$ENV{LLVM_INSTALL_DIR}/bin")
-    elseif(DEFINED ENV{CLANG_INSTALL_DIR})
-        set(libclang_bin_dir "$ENV{CLANG_INSTALL_DIR}/bin")
-    else()
-        message(WARNING
-            "Couldn't find libclang.dll. "
-            "You will likely need to add it manually to PATH to ensure the build succeeds.")
-    endif()
-    if(libclang_bin_dir)
-        list(APPEND path_dirs "${libclang_bin_dir}")
+    # find libclang
+    find_libclang()
+    if(libclang_lib_dir)
+        list(APPEND path_dirs "${libclang_lib_dir}")
     endif()
 
     # Convert the paths from unix-style to native Windows style.
@@ -735,15 +747,73 @@ function(shiboken_get_tool_shell_wrapper tool_name path_out_var)
 
     set(wrapper_dir "${CMAKE_BINARY_DIR}/.qfp/bin")
     file(MAKE_DIRECTORY "${wrapper_dir}")
-    set(wrapper_path "${wrapper_dir}/${tool_name}_wrapper.bat")
+    set(wrapper_path "${wrapper_dir}/${tool_name}_wrapper${wrapper_script_extension}")
 
-    file(WRITE "${wrapper_path}" "@echo off
+    if(CMAKE_HOST_WIN32)
+        file(WRITE "${wrapper_path}" "@echo off
 set PATH=${path_dirs_native};%PATH%
 %*")
+    elseif(CMAKE_HOST_APPLE)
+        string(REPLACE ";" ":" path_dirs_native "${path_dirs_native}")
+        file(WRITE "${wrapper_path}" "#!/bin/bash
+export DYLD_LIBRARY_PATH=${path_dirs_native}:$DYLD_LIBRARY_PATH
+export DYLD_FRAMEWORK_PATH=${path_dirs_native}:$DYLD_FRAMEWORK_PATH
+$@")
+    else()
+        string(REPLACE ";" ":" path_dirs_native "${path_dirs_native}")
+        file(WRITE "${wrapper_path}" "#!/bin/bash
+export LD_LIBRARY_PATH=${path_dirs_native}:$LD_LIBRARY_PATH
+$@")
+    endif()
 
     # Remember the creation of the file for a specific tool.
     set_property(GLOBAL PROPERTY "_shiboken_tool_wrapper_${tool_name}_path" "${wrapper_path}")
     set_property(GLOBAL PROPERTY "_shiboken_tool_wrapper_${tool_name}_created" TRUE)
 
+    # give execute permission to run the file
+    if(CMAKE_HOST_UNIX)
+        execute_process(COMMAND chmod +x ${wrapper_path})
+    endif()
+
     set(${path_out_var} "${wrapper_path}" PARENT_SCOPE)
 endfunction()
+
+# Returns the platform-specific relative rpath base token, if it's supported.
+# If it's not supported, returns the string NO_KNOWN_RPATH_REL_BASE.
+function(get_rpath_base_token out_var)
+    if(APPLE)
+        set(rpath_rel_base "@loader_path")
+    elseif(UNIX)
+        set(rpath_rel_base "$ORIGIN")
+    else()
+        #has no effect on Windows
+        set(rpath_rel_base "NO_KNOWN_RPATH_REL_BASE")
+    endif()
+    set(${out_var} "${rpath_rel_base}" PARENT_SCOPE)
+endfunction()
+
+# Get path to libclang.dll/libclang.so depending on the platform
+macro(find_libclang)
+    if(CMAKE_HOST_WIN32)
+        set(libclang_directory_suffix "bin")
+        set(libclang_suffix ".dll")
+    else()
+        set(libclang_directory_suffix "lib")
+        if(CMAKE_HOST_APPLE)
+            set(libclang_suffix ".dylib")
+        else()
+            set(libclang_suffix ".so")
+        endif()
+    endif()
+
+    set(libclang_lib_dir "")
+    if(DEFINED ENV{LLVM_INSTALL_DIR})
+        set(libclang_lib_dir "$ENV{LLVM_INSTALL_DIR}/${libclang_directory_suffix}")
+    elseif(DEFINED ENV{CLANG_INSTALL_DIR})
+        set(libclang_lib_dir "$ENV{CLANG_INSTALL_DIR}/${libclang_directory_suffix}")
+    else()
+        message(WARNING
+            "Couldn't find libclang${libclang_suffix} "
+            "You will likely need to add it manually to PATH to ensure the build succeeds.")
+    endif()
+endmacro()

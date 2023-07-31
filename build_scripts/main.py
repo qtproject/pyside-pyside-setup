@@ -725,6 +725,9 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                     pyside_qt_conf_prefix = '"."'
             cmake_cmd.append(f"-DPYSIDE_QT_CONF_PREFIX={pyside_qt_conf_prefix}")
 
+        if OPTION["STANDALONE"]:
+            cmake_cmd.append("-DSTANDALONE:BOOL=ON")
+
         # Pass package version to CMake, so this string can be
         # embedded into _config.py file.
         package_version = get_package_version()
@@ -739,7 +742,6 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         cmake_cmd.append(f"-DPACKAGE_SETUP_PY_PACKAGE_TIMESTAMP={timestamp}")
 
         if extension.lower() in [SHIBOKEN]:
-            cmake_cmd.append("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=yes")
             cmake_cmd.append("-DUSE_PYTHON_VERSION=3.7")
 
         cmake_cmd += platform_cmake_options()
