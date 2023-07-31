@@ -7,10 +7,7 @@
     <load-typesystem name="QtCore/typesystem_core.xml" generate="no" />
     <load-typesystem name="templates/core_common.xml" generate="no" />
 
-    <rejection class="QXmlAttributes::Attribute"/>
     <rejection class="QDomNode" field-name="impl"/>
-    <rejection class="QXmlInputSource" field-name="EndOfData"/>
-    <rejection class="QXmlInputSource" field-name="EndOfDocument"/>
 
     <value-type name="QDomAttr"/>
     <value-type name="QDomCDATASection"/>

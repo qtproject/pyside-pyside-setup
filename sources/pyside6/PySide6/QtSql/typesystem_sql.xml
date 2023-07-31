@@ -8,7 +8,6 @@
 
   <rejection class="QSqlDriverCreator"/>
   <rejection class="QSqlDriverPlugin"/>
-  <rejection class="QSqlDriverFactoryInterface"/>
 
   <namespace-type name="QSql">
     <enum-type name="Location"/>
