@@ -42,24 +42,6 @@
   <function signature="qPixelFormatYuv(QPixelFormat::YUVLayout,uchar,QPixelFormat::AlphaUsage,QPixelFormat::AlphaPosition,QPixelFormat::AlphaPremultiplied,QPixelFormat::TypeInterpretation,QPixelFormat::ByteOrder)"/>
   <function signature="qt_set_sequence_auto_mnemonic(bool)"/>
 
-  <rejection class="*" function-name="qobject_interface_iid&lt;QStyleFactoryInterface*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleFactoryInterface*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QInputContextFactoryInterface*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleBridgeFactoryInterface*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QImageIOHandlerFactoryInterface*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QAccessibleInterface*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QTextObjectInterface*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QIconEngineFactoryInterface*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QPictureFormatInterface*&gt;"/>
-
-  <rejection class="*" function-name="qGenericMatrixFromMatrix4x4"/>
-  <rejection class="*" function-name="qDrawBorderPixmap"/>
-  <rejection class="*" function-name="qDrawPixmaps"/>
-  <rejection class="*" function-name="qGenericMatrixToMatrix4x4"/>
-
-  <rejection class="*" function-name="d_func"/>
-  <rejection class="*" field-name="d_ptr"/>
-  <rejection class="*" field-name="d"/>
   <rejection class="^QOpenGL.*$" argument-type="^const GLboolean ?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^GLchar\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^(const )?GLchar ?\*(const)?\*$"/>
@@ -78,8 +60,6 @@
   <rejection class="^QOpenGL.*$" argument-type="^(const )?QVector.D ?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^(const )?void ?\*\*$"/>
 
-  <rejection class="QDrawBorderPixmap"/>
-
   <!--
     Event classes have a lot of non-documented protected fields, those fields
     are removed from PySide because they are Qt implementation details,
@@ -87,15 +67,11 @@
     -->
 
   <rejection class="^Q.*Event$" field-name="^m_.*$"/>
-  <rejection class="QEventPoint" field-name="^m_.*$"/>
 
-  <rejection class="QBrush" function-name="cleanUp"/>
   <rejection class="QFont" enum-name="ResolveProperties"/>
-  <rejection class="QPictureIO" function-name="defineIOHandler"/>
   <rejection class="QPolygon" function-name="putPoints"/>
   <rejection class="QPolygon" function-name="setPoints"/>
   <rejection class="QPolygon" function-name="setPoint"/>
-  <rejection class="QPolygon" function-name="points"/>
   <rejection class="QPolygon" function-name="point"/>
   <rejection class="QPaintEngine" function-name="fix_neg_rect"/>
 

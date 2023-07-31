@@ -112,28 +112,14 @@
   <rejection class="QTimerEvent" field-name="id"/>
   <rejection class="QEvent" field-name="t"/>
   <rejection class="*" function-name="tr"/>
-  <rejection class="*" function-name="qt_metacast"/>
   <!-- From Qt4.6 -->
   <rejection class="*" field-name="d_ptr"/>
-  <rejection class="*" field-name="staticQtMetaObject"/>
-  <rejection class="*" function-name="qobject_interface_iid"/>
-  <rejection class="*" function-name="qGetPtrHelper"/>
-  <rejection class="*" function-name="q_check_ptr"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QTextCodecFactoryInterface*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QFactoryInterface*&gt;"/>
-  <rejection class="*" function-name="qRegisterAnimationInterpolator"/>
-  <rejection class="*" function-name="qvariant_cast&lt;QVariant&gt;"/>
-  <rejection class="*" function-name="qVariantSetValue&lt;QVariant&gt;"/>
-  <rejection class="*" function-name="qReallocAligned"/>
-  <rejection class="*" function-name="qMallocAligned"/>
-  <rejection class="*" function-name="qFreeAligned"/>
   <rejection class="QMetaMethod" enum-name="Attributes"/>
   <rejection class="QMetaMethod" field-name="data"/>
   <rejection class="Qt" field-name="Disambiguated"/>
   <rejection class="" enum-name="QCborNegativeInteger"/>
 
   <rejection class="*" argument-type="^qfloat16&amp;?$"/>
-  <rejection class="*" argument-type="QLatin1String"/>
   <rejection class="*" argument-type="QTSMFI"/>
   <rejection class="*" argument-type="QTSMFC"/>
   <rejection class="*" argument-type="QtPrivate::QSlotObjectBase*"/>
@@ -146,12 +132,8 @@
   <rejection class="*" argument-type="std::chrono::milliseconds"/>
   <rejection class="*" argument-type="^std::nullptr_t&amp;?$"/>
   <rejection class="*" argument-type="^std::initializer_list&lt;.*$"/>
-  <rejection class="*" argument-type="^std::list&lt;[^&gt;]&gt; const&amp;$"/>
-  <rejection class="*" argument-type="std::string const&amp;"/>
-  <rejection class="*" argument-type="^std::vector&lt;[^&gt;]&gt; const&amp;$"/>
 
   <!-- From Qt4.6 ^^^ -->
-
 
   <enum-type name="QtMsgType"/>
   <enum-type name="QCborSimpleType"/>
@@ -533,22 +515,12 @@
   <rejection class="*" field-name="d"/>
   <rejection class="*" field-name="staticMetaObject"/>
   <!-- not support array in property -->
-  <rejection class="QTextCodec::ConverterState" field-name="state_data"/>
   <rejection class="QUuid" field-name="data1"/>
   <rejection class="QUuid" field-name="data2"/>
   <rejection class="QUuid" field-name="data3"/>
   <rejection class="QUuid" field-name="data4"/>
-  <rejection class="" enum-name="__codecvt_result"/>
-  <rejection class="" enum-name="enum_1"/>
-  <rejection class="" enum-name="enum_2"/>
   <!-- Internal -->
-  <rejection class="QAbstractFileEngine"/>
   <rejection class="QCoreApplication" function-name="compressEvent"/>
-  <rejection class="QCoreApplication" function-name="eventFilter"/>
-  <rejection class="QCoreApplication" function-name="filterEvent"/>
-  <rejection class="QCoreApplication" function-name="setEventFilter"/>
-  <rejection class="QRegion" function-name="cleanUp"/>
-  <rejection class="QSettings" function-name="registerFormat"/>
 
   <namespace-type name="Qt">
     <extra-includes>

@@ -29,17 +29,7 @@
     enum 'QGraphicsPolygonItem::Type' does not have a type entry or is not an enum
   """
   -->
-  <rejection class="*" enum-name="enum_1"/>
   <rejection class="QMdi"/>
-
-  <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsItem*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsLayout*&gt;"/>
-  <rejection class="*" function-name="qobject_interface_iid&lt;QGraphicsLayoutItem*&gt;"/>
-
-  <rejection class="*" function-name="qobject_cast&lt;QGraphicsLayout*&gt;"/>
-  <rejection class="*" function-name="qobject_cast&lt;QGraphicsItem*&gt;"/>
-  <rejection class="*" function-name="qobject_cast&lt;QGraphicsLayoutItem*&gt;"/>
-  <rejection class="*" function-name="qobject_cast&lt;QGraphicsLayoutItem*&gt;"/>
 
   <function signature="qDrawShadeLine(QPainter*,int,int,int,int,const QPalette&amp;,bool,int,int)"/>
   <function signature="qDrawShadeLine(QPainter*,const QPoint,const QPoint,const QPalette&amp;,bool,int,int)"/>
