@@ -78,6 +78,15 @@ virtualmethods.cpp virtualmethods.h
 voidholder.h
 )
 
+# Includes windows.h which is causing clashes between class Polygon and
+# wingdi.h's Polygon() function.
+
+if(WIN32)
+    set_source_files_properties(
+        bucket.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON
+    )
+endif()
+
 add_library(libsample SHARED ${libsample_SRC})
 target_include_directories(libsample PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(libsample PRIVATE LIBSAMPLE_BUILD)
