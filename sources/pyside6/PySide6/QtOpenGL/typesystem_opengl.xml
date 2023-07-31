@@ -716,6 +716,4 @@
       </object-type>
   </object-type>
 
-  <suppress-warning text="^There's no user provided way.*QOpenGLFunctions_\d_\d.*::glIndex.*$"/>
-
 </typesystem>
