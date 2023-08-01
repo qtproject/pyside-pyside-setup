@@ -97,7 +97,7 @@ endif()
 
 # Generate example gallery
 set(EXAMPLE_TOOL_TARGET "${CMAKE_CURRENT_BINARY_DIR}/rst/examples")
-set(EXAMPLE_TOOL_OPTIONS --target "${EXAMPLE_TOOL_TARGET}")
+set(EXAMPLE_TOOL_OPTIONS --target "${EXAMPLE_TOOL_TARGET}" --qt-src-dir "${QT_SRC_DIR}")
 if (QUIET_BUILD)
     list(APPEND EXAMPLE_TOOL_OPTIONS "-q")
 endif()

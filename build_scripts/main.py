@@ -1276,6 +1276,9 @@ class PysideRstDocs(Command, CommandMixin):
                 example_gallery_cmd = [sys.executable, os.fspath(example_gallery)]
                 if OPTION["LOG_LEVEL"] == LogLevel.QUIET:
                     example_gallery_cmd.append("--quiet")
+                qt_src_dir = OPTION['QT_SRC']
+                if qt_src_dir:
+                    example_gallery_cmd.extend(["--qt-src-dir", qt_src_dir])
                 if run_process(example_gallery_cmd) != 0:
                     raise SetupError(f"Error running example gallery for {self.doc_dir}")
             elif self.name == SHIBOKEN:

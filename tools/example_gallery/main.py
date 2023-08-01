@@ -405,10 +405,33 @@ def detect_pyside_example(example_root, pyproject_file):
     return p
 
 
-def write_example(example_root, pyproject_file):
+def detect_qt_example(example_root, pyproject_file):
+    """Detemine parameters of an example from a Qt repository."""
+    p = ExampleParameters()
+
+    p.example_dir = pyproject_file.parent
+    p.module_name = "Qt Demos"
+    p.example_name = p.example_dir.name
+    # Check for a 'doc' directory inside the example (qdoc)
+    doc_root = p.example_dir / "doc"
+    if doc_root.is_dir():
+        src_doc_file_path, fmt = get_doc_source_file(doc_root / "src", p.example_name)
+        if src_doc_file_path:
+            p.src_doc_file_path = src_doc_file_path
+            p.file_format = fmt
+            p.src_doc_dir = doc_root
+            p.src_screenshot = get_screenshot(doc_root / "images", p.example_name)
+
+    target_suffix = SUFFIXES[p.file_format]
+    p.target_doc_file = f"example_qtdemos_{p.example_name}.{target_suffix}"
+    return p
+
+
+def write_example(example_root, pyproject_file, pyside_example=True):
     """Read the project file and documentation, create the .rst file and
        copy the data. Return a tuple of module name and a dict of example data."""
-    p = detect_pyside_example(example_root, pyproject_file)
+    p = (detect_pyside_example(example_root, pyproject_file) if pyside_example
+         else detect_qt_example(example_root, pyproject_file))
 
     result = ExampleData()
     result.example = p.example_name
@@ -451,9 +474,13 @@ def write_example(example_root, pyproject_file):
                 # excluding the main '.rst' file and all the
                 # directories.
                 resources = []
-                for _f in p.src_doc_dir.glob("*"):
-                    if _f != p.src_doc_file_path and not _f.is_dir():
-                        resources.append(_f)
+                if pyside_example:
+                    for _f in p.src_doc_dir.glob("*"):
+                        if _f != p.src_doc_file_path and not _f.is_dir():
+                            resources.append(_f)
+                else:  # Qt example: only use image.
+                    if p.src_screenshot:
+                        resources.append(p.src_screenshot)
                 write_resources(resources, EXAMPLES_DOC)
             else:
                 content_f = get_header_title(p.example_dir)
@@ -478,11 +505,12 @@ def sort_examples(example):
     return result
 
 
-def scan_examples_dir(examples_dir):
+def scan_examples_dir(examples_dir, pyside_example=True):
     """Scan a directory of examples."""
     for pyproject_file in examples_dir.glob("**/*.pyproject"):
         if pyproject_file.name != "examples.pyproject":
-            module_name, data = write_example(examples_dir, pyproject_file)
+            module_name, data = write_example(examples_dir, pyproject_file,
+                                              pyside_example)
             if module_name not in examples:
                 examples[module_name] = []
             examples[module_name].append(data)
@@ -500,6 +528,7 @@ if __name__ == "__main__":
     parser = ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
     TARGET_HELP = f"Directory into which to generate Doc files (default: {str(EXAMPLES_DOC)})"
     parser.add_argument("--target", "-t", action="store", dest="target_dir", help=TARGET_HELP)
+    parser.add_argument("--qt-src-dir", "-s", action="store", help="Qt source directory")
     parser.add_argument("--quiet", "-q", action="store_true", help="Quiet")
     options = parser.parse_args()
     opt_quiet = options.quiet
@@ -522,6 +551,12 @@ if __name__ == "__main__":
     EXAMPLES_DOC.mkdir()
 
     scan_examples_dir(EXAMPLES_DIR)
+    if options.qt_src_dir:
+        qt_src = Path(options.qt_src_dir)
+        if not qt_src.is_dir():
+            print("Invalid Qt source directory: {}", file=sys.stderr)
+            sys.exit(-1)
+        scan_examples_dir(qt_src.parent / "qtdoc", pyside_example=False)
 
     examples = sort_examples(examples)
 
