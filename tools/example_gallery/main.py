@@ -19,6 +19,7 @@ import shutil
 import zipfile
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from textwrap import dedent
@@ -338,36 +339,70 @@ def write_resources(src_list, dst):
             print("Written resource:", resource_written)
 
 
+@dataclass
+class ExampleParameters:
+    """Parameters obtained from scanning the examples directory."""
+
+    def __init__(self):
+        self.file_format = Format.RST
+        self.src_doc_dir = self.src_doc_file_path = self.src_screenshot = None
+        self.extra_names = ""
+
+    example_dir: Path
+    module_name: str
+    example_name: str
+    extra_names: str
+    file_format: Format
+    target_doc_file: str
+    src_doc_dir: Path
+    src_doc_file_path: Path
+    src_screenshot: Path
+
+
+def detect_pyside_example(example_root, pyproject_file):
+    """Detemine parameters of a PySide example."""
+    p = ExampleParameters()
+
+    p.example_dir = pyproject_file.parent
+    if p.example_dir.name == "doc":  # Dummy pyproject in doc dir (scriptableapplication)
+        p.example_dir = p.example_dir.parent
+
+    parts = p.example_dir.parts[len(example_root.parts):]
+    p.module_name = parts[0]
+    p.example_name = parts[-1]
+    # handling subdirectories besides the module level and the example
+    p.extra_names = "" if len(parts) == 2 else "_".join(parts[1:-1])
+
+    # Check for a 'doc' directory inside the example
+    src_doc_dir = p.example_dir / "doc"
+
+    if src_doc_dir.is_dir():
+        src_doc_file_path, fmt = get_doc_source_file(src_doc_dir, p.example_name)
+        if src_doc_file_path:
+            p.src_doc_file_path = src_doc_file_path
+            p.file_format = fmt
+            p.src_doc_dir = src_doc_dir
+            p.src_screenshot = get_screenshot(src_doc_dir, p.example_name)
+
+    target_suffix = SUFFIXES[p.file_format]
+    doc_file = f"example_{p.module_name}_{p.extra_names}_{p.example_name}.{target_suffix}"
+    p.target_doc_file = doc_file.replace("__", "_")
+    return p
+
+
 def write_example(example_root, pyproject_file):
     """Read the project file and documentation, create the .rst file and
        copy the data. Return a tuple of module name and a dict of example data."""
-    example_dir = pyproject_file.parent
-    if example_dir.name == "doc":  # Dummy pyproject in doc dir (scriptableapplication)
-        example_dir = example_dir.parent
+    p = detect_pyside_example(example_root, pyproject_file)
 
-    parts = example_dir.parts[len(EXAMPLES_DIR.parts):]
-
-    module_name = parts[0]
-    example_name = parts[-1]
-    # handling subdirectories besides the module level and the example
-    extra_names = "" if len(parts) == 2 else "_".join(parts[1:-1])
-
-    # Check for a 'doc' directory inside the example
-    original_doc_dir = Path(example_dir / "doc")
-    doc_source_file, file_format = get_doc_source_file(original_doc_dir, example_name)
-    img_doc = get_screenshot(original_doc_dir, example_name)
-
-    target_suffix = SUFFIXES[file_format]
-    doc_file = f"example_{module_name}_{extra_names}_{example_name}.{target_suffix}".replace("__", "_")
-
-    result = {"example": example_name,
-              "module": module_name,
-              "extra": extra_names,
-              "doc_file": doc_file,
-              "format": file_format,
-              "abs_path": str(example_dir),
-              "has_doc": bool(doc_source_file),
-              "img_doc": img_doc}
+    result = {"example": p.example_name,
+              "module": p.module_name,
+              "extra": p.extra_names,
+              "doc_file": p.target_doc_file,
+              "format": p.file_format,
+              "abs_path": str(p.example_dir),
+              "has_doc": bool(p.src_doc_file_path),
+              "img_doc": p.src_screenshot}
 
     files = []
     try:
@@ -387,12 +422,11 @@ def write_example(example_root, pyproject_file):
 
     headline = ""
     if files:
-        doc_file_full = EXAMPLES_DOC / doc_file
-
-        with open(doc_file_full, "w", encoding="utf-8") as out_f:
-            if doc_source_file:
-                content_f = read_rst_file(example_dir, files, doc_source_file)
-                headline = get_headline(content_f, file_format)
+        doc_file = EXAMPLES_DOC / p.target_doc_file
+        with open(doc_file, "w", encoding="utf-8") as out_f:
+            if p.src_doc_file_path:
+                content_f = read_rst_file(p.example_dir, files, p.src_doc_file_path)
+                headline = get_headline(content_f, p.file_format)
                 if not headline:
                     print(f"example_gallery: No headline found in {doc_file}",
                           file=sys.stderr)
@@ -401,24 +435,24 @@ def write_example(example_root, pyproject_file):
                 # excluding the main '.rst' file and all the
                 # directories.
                 resources = []
-                for _f in original_doc_dir.glob("*"):
-                    if _f != doc_source_file and not _f.is_dir():
+                for _f in p.src_doc_dir.glob("*"):
+                    if _f != p.src_doc_file_path and not _f.is_dir():
                         resources.append(_f)
                 write_resources(resources, EXAMPLES_DOC)
             else:
-                content_f = get_header_title(example_dir)
-            content_f += get_code_tabs(files, pyproject_file.parent, file_format)
+                content_f = get_header_title(p.example_dir)
+            content_f += get_code_tabs(files, pyproject_file.parent, p.file_format)
             out_f.write(content_f)
 
         if not opt_quiet:
-            print(f"Written: {EXAMPLES_DOC}/{doc_file}")
+            print(f"Written: {doc_file}")
     else:
         if not opt_quiet:
             print("Empty '.pyproject' file, skipping")
 
     result["headline"] = headline
 
-    return (module_name, result)
+    return (p.module_name, result)
 
 
 def sort_examples(example):
