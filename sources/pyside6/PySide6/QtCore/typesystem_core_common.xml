@@ -1689,6 +1689,7 @@
       <modify-argument index="this">
         <parent index="1" action="add"/>
       </modify-argument>
+      <modify-argument index="1" pyi-type="Optional[PySide6.QtCore.QObject]"/>
     </modify-function>
     <modify-function signature="connect(const QObject*,const char*,const char*,Qt::ConnectionType)const">
         <modify-argument index="4">

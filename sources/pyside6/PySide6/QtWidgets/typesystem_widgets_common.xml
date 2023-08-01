@@ -1985,12 +1985,14 @@
       <modify-argument index="this">
         <parent index="1" action="add"/>
       </modify-argument>
+      <modify-argument index="1" pyi-type="Optional[PySide6.QtWidgets.QWidget]"/>
     </modify-function>
 
     <modify-function signature="setParent(QWidget*,QFlags&lt;Qt::WindowType&gt;)">
       <modify-argument index="this">
         <parent index="1" action="add"/>
       </modify-argument>
+      <modify-argument index="1" pyi-type="Optional[PySide6.QtWidgets.QWidget]"/>
     </modify-function>
 
     <modify-function signature="parentWidget()const">
@@ -2251,6 +2253,7 @@
       <modify-argument index="this">
         <parent index="1" action="add"/>
       </modify-argument>
+      <modify-argument index="1" pyi-type="Optional[PySide6.QtWidgets.QWidget]"/>
     </modify-function>
 
     <modify-function signature="window()const">
