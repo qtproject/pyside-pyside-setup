@@ -44,13 +44,13 @@ set(shiboken6_library_so_version "${shiboken_MAJOR_VERSION}.${shiboken_MINOR_VER
 compute_config_py_values(shiboken6_VERSION)
 
 ## For debugging the PYTHON* variables
-message(STATUS "PYTHONLIBS_FOUND:       " ${PYTHONLIBS_FOUND})
-message(STATUS "PYTHON_LIBRARIES:       " ${PYTHON_LIBRARIES})
-message(STATUS "PYTHON_INCLUDE_DIRS:    " ${PYTHON_INCLUDE_DIRS})
-message(STATUS "PYTHON_DEBUG_LIBRARIES: " ${PYTHON_DEBUG_LIBRARIES})
-message(STATUS "PYTHONINTERP_FOUND:     " ${PYTHONINTERP_FOUND})
-message(STATUS "PYTHON_EXECUTABLE:      " ${PYTHON_EXECUTABLE})
-message(STATUS "PYTHON_VERSION:         " ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH})
+message(STATUS "Python_Development_FOUND:       " ${Python_Development_FOUND})
+message(STATUS "Python_LIBRARIES:       " ${Python_LIBRARIES})
+message(STATUS "Python_INCLUDE_DIRS:    " ${Python_INCLUDE_DIRS})
+message(STATUS "Python_DEBUG_LIBRARIES: " ${PYTHON_DEBUG_LIBRARIES})
+message(STATUS "Python_Interpreter_FOUND:     " ${Python_Interpreter_FOUND})
+message(STATUS "Python_EXECUTABLE:      " ${Python_EXECUTABLE})
+message(STATUS "Python_VERSION:         " ${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}.${Python_VERSION_PATCH})
 
 if(NOT PYTHON_EXTENSION_SUFFIX)
     get_python_extension_suffix()
@@ -121,7 +121,7 @@ endif()
 # Detect if the python libs were compiled in debug mode
 # On Linux distros there is no standard way to check that.
 execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+    COMMAND ${Python_EXECUTABLE} -c "if True:
         import sys
         import sysconfig
         config_py_debug = sysconfig.get_config_var('Py_DEBUG')
@@ -139,7 +139,7 @@ if(SHIBOKEN_IS_CROSS_BUILD)
     set(PYTHON_WITH_COUNT_ALLOCS 0)
 else()
     execute_process(
-        COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+        COMMAND ${Python_EXECUTABLE} -c "if True:
             count_allocs = False
             import sys
             try:

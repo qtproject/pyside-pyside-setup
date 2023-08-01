@@ -46,13 +46,18 @@ list(SORT TEST_FILES)
 set(test_blacklist "")
 
 if(SHIBOKEN_IS_CROSS_BUILD)
-    # PYTHON_EXECUTABLE will be empty when cross-building.
+    # Python_EXECUTABLE will be empty when cross-building.
     message(WARNING
         "Running tests when cross-compiling is not supported because it would require running "
         "a target python interpreter which might have a different architecture than the host."
     )
 else()
-    find_package(PythonInterp REQUIRED)
+    find_package(
+        Python
+        ${USE_PYTHON_VERSION}
+        REQUIRED
+        COMPONENTS Interpreter Development
+    )
 endif()
 
 if(NOT CTEST_TESTING_TIMEOUT)
@@ -66,7 +71,7 @@ foreach(test_file ${TEST_FILES})
     string(REGEX MATCH "/([^/]+)(binding|module)/([^/]+)_test.py" tmp ${test_file})
     set(test_name "${CMAKE_MATCH_1}_${CMAKE_MATCH_3}")
     list(FIND test_blacklist ${test_name} expect_fail)
-    add_test(${test_name} ${PYTHON_EXECUTABLE} ${test_file})
+    add_test(${test_name} ${Python_EXECUTABLE} ${test_file})
     set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "BUILD_DIR=${BUILD_DIR}")
     set_tests_properties(${test_name} PROPERTIES TIMEOUT ${CTEST_TESTING_TIMEOUT})
     if (${expect_fail} GREATER -1)

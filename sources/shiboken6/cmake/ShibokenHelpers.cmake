@@ -116,7 +116,7 @@ macro(shiboken_internal_set_python_site_packages)
         endif()
     else()
         execute_process(
-            COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+            COMMAND ${Python_EXECUTABLE} -c "if True:
                 import sysconfig
                 from os.path import sep
 
@@ -209,7 +209,7 @@ macro(get_python_extension_suffix)
     else()
         # See PYSIDE-1841 / https://bugs.python.org/issue39825 for distutils vs sysconfig
         execute_process(
-          COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+          COMMAND ${Python_EXECUTABLE} -c "if True:
              import sys
              if sys.version_info >= (3, 8, 2):
                  import sysconfig
@@ -241,18 +241,22 @@ macro(shiboken_check_if_limited_api)
     # TODO: Figure out how to use limited API libs when cross-building to Windows, if that's ever
     # needed. Perhaps use host python to walk the libs of the target python installation.
 
-    if(NOT SHIBOKEN_IS_CROSS_BUILD)
+    if(NOT SHIBOKEN_IS_CROSS_BUILD AND WIN32)
         # On Windows, PYTHON_LIBRARIES can be a list. Example:
         #    optimized;C:/Python36/libs/python36.lib;debug;C:/Python36/libs/python36_d.lib
         # On other platforms, this result is not used at all.
         execute_process(
-            COMMAND ${PYTHON_EXECUTABLE} -c "if True:
-                import os
-                for lib in '${PYTHON_LIBRARIES}'.split(';'):
-                    if '/' in lib and os.path.isfile(lib):
-                        prefix, py = lib.rsplit('/', 1)
+            COMMAND ${Python_EXECUTABLE} -c "if True:
+                from pathlib import Path
+                libs = r'${Python_LIBRARIES}'
+                libs = libs.split(';')
+                for lib in libs:
+                    if '\\\\' in lib and Path(lib).is_file():
+                        lib = Path(lib)
+                        prefix = lib.parent
+                        py = lib.name
                         if py.startswith('python3'):
-                            print(prefix + '/python3.lib')
+                            print(prefix / 'python3.lib')
                             break
                 "
             OUTPUT_VARIABLE PYTHON_LIMITED_LIBRARIES
@@ -271,6 +275,10 @@ endmacro()
 
 
 macro(shiboken_find_required_python)
+    set(_shiboken_find_python_version_args "")
+    if(${ARGC} GREATER 0)
+        list(APPEND _shiboken_find_python_version_args "${ARGV0}")
+    endif()
     # This function can also be called by consumers of ShibokenConfig.cmake package like pyside,
     # that's why we also check for PYSIDE_IS_CROSS_BUILD (which is set by pyside project)
     # and QFP_FIND_NEW_PYTHON_PACKAGE for an explicit opt in.
@@ -278,11 +286,6 @@ macro(shiboken_find_required_python)
     # We have to use FindPython package instead of FindPythonInterp to get required target Python
     # information.
     if(SHIBOKEN_IS_CROSS_BUILD OR PYSIDE_IS_CROSS_BUILD OR QFP_FIND_NEW_PYTHON_PACKAGE)
-        set(_shiboken_find_python_version_args "")
-        if(${ARGC} GREATER 0)
-            list(APPEND _shiboken_find_python_version_args "${ARGV0}")
-        endif()
-
         # We want FindPython to look in the sysroot for the python-config executable,
         # but toolchain files might set CMAKE_FIND_ROOT_PATH_MODE_PROGRAM to NEVER because
         # programs are mostly found for running and you usually can't run a target executable on
@@ -311,40 +314,23 @@ macro(shiboken_find_required_python)
             "${_shiboken_backup_CMAKE_FIND_ROOT_PATH_MODE_PROGRAM}")
         set(CMAKE_FIND_ROOT_PATH
             "${_shiboken_backup_CMAKE_FIND_ROOT_PATH}")
-
-        # Mirror the variables that FindPythonInterp sets, instead of conditionally checking
-        # and modifying all the places where the variables are used.
-        set(PYTHON_EXECUTABLE "${Python_EXECUTABLE}")
-        set(PYTHON_VERSION "${Python_VERSION}")
-        set(PYTHON_LIBRARIES "${Python_LIBRARIES}")
-        set(PYTHON_INCLUDE_DIRS "${Python_INCLUDE_DIRS}")
-        set(PYTHONINTERP_FOUND "${Python_Interpreter_FOUND}")
-        set(PYTHONINTERP_FOUND "${Python_Interpreter_FOUND}")
-        set(PYTHONLIBS_FOUND "${Python_Development_FOUND}")
-        set(PYTHON_VERSION_MAJOR "${Python_VERSION_MAJOR}")
-        set(PYTHON_VERSION_MINOR "${Python_VERSION_MINOR}")
-        set(PYTHON_VERSION_PATCH "${Python_VERSION_PATCH}")
     else()
-        if(${ARGC} GREATER 0)
-            find_package(PythonInterp ${ARGV0} REQUIRED)
-            find_package(PythonLibs ${ARGV0} REQUIRED)
-        else()
-            # If no version is specified, just use any interpreter that can be found (from PATH).
-            # This is useful for super-project builds, so that the default system interpeter
-            # gets picked up (e.g. /usr/bin/python and not /usr/bin/python2.7).
-            find_package(PythonInterp REQUIRED)
-            find_package(PythonLibs REQUIRED)
-        endif()
+        find_package(
+            Python
+            ${_shiboken_find_python_version_args}
+            REQUIRED
+            COMPONENTS Interpreter Development
+        )
     endif()
 
     shiboken_validate_python_version()
 
-    set(SHIBOKEN_PYTHON_INTERPRETER "${PYTHON_EXECUTABLE}")
-    set_property(GLOBAL PROPERTY SHIBOKEN_PYTHON_INTERPRETER "${PYTHON_EXECUTABLE}")
+    set(SHIBOKEN_PYTHON_INTERPRETER "${Python_EXECUTABLE}")
+    set_property(GLOBAL PROPERTY SHIBOKEN_PYTHON_INTERPRETER "${Python_EXECUTABLE}")
 endmacro()
 
 macro(shiboken_validate_python_version)
-    if(PYTHON_VERSION_MAJOR EQUAL "3" AND PYTHON_VERSION_MINOR LESS "7")
+    if(Python_VERSION_MAJOR EQUAL "3" AND Python_VERSION_MINOR LESS "7")
             message(FATAL_ERROR
                    "Shiboken requires Python 3.7+.")
     endif()
@@ -365,14 +351,14 @@ macro(shiboken_compute_python_includes)
     if (SHIBOKEN_COMPUTE_INCLUDES_IS_CALLED_FROM_EXPORT)
         #TODO target_include_directories works on imported targets only starting with v3.11.0.
         set_property(TARGET Shiboken6::libshiboken
-                     APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${PYTHON_INCLUDE_DIRS})
+                     APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Python_INCLUDE_DIRS})
     else()
         target_include_directories(libshiboken
-                                   PUBLIC $<BUILD_INTERFACE:${PYTHON_INCLUDE_DIRS}>)
+                                   PUBLIC $<BUILD_INTERFACE:${Python_INCLUDE_DIRS}>)
     endif()
 
 
-    set(SHIBOKEN_PYTHON_INCLUDE_DIRS "${PYTHON_INCLUDE_DIRS}")
+    set(SHIBOKEN_PYTHON_INCLUDE_DIRS "${Python_INCLUDE_DIRS}")
 
     set_property(GLOBAL PROPERTY shiboken_python_include_dirs "${SHIBOKEN_PYTHON_INCLUDE_DIRS}")
 
@@ -440,7 +426,7 @@ macro(shiboken_compute_python_libraries)
 
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
         if(WIN32 AND NOT SHIBOKEN_PYTHON_LIBRARIES)
-            set(SHIBOKEN_PYTHON_LIBRARIES ${PYTHON_LIBRARIES})
+            set(SHIBOKEN_PYTHON_LIBRARIES ${Python_LIBRARIES})
         endif()
     endif()
 
@@ -474,11 +460,11 @@ macro(shiboken_compute_python_libraries)
 endmacro()
 
 function(shiboken_check_if_built_and_target_python_are_compatible)
-    if(NOT SHIBOKEN_PYTHON_VERSION_MAJOR STREQUAL PYTHON_VERSION_MAJOR)
+    if(NOT SHIBOKEN_PYTHON_VERSION_MAJOR STREQUAL Python_VERSION_MAJOR)
         message(FATAL_ERROR "The detected Python major version is not \
 compatible with the Python major version which was used when Shiboken was built.
 Built with: '${SHIBOKEN_PYTHON_VERSION_MAJOR}.${SHIBOKEN_PYTHON_VERSION_MINOR}' \
-Detected: '${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}'")
+Detected: '${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}'")
     else()
         if(NOT SHIBOKEN_PYTHON_LIMITED_API
            AND NOT SHIBOKEN_PYTHON_VERSION_MINOR STREQUAL PYTHON_VERSION_MINOR)
@@ -487,7 +473,7 @@ Detected: '${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}'")
 version which was used when Shiboken was built. Consider building shiboken with \
 FORCE_LIMITED_API set to '1', so that only the Python major version matters.
 Built with: '${SHIBOKEN_PYTHON_VERSION_MAJOR}.${SHIBOKEN_PYTHON_VERSION_MINOR}' \
-Detected: '${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}'")
+Detected: '${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}'")
         endif()
     endif()
 endfunction()
