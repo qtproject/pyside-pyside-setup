@@ -100,6 +100,24 @@ def check_img_ext(i):
     return i.suffix in IMAGE_SUFFIXES
 
 
+@dataclass
+class ExampleData:
+    """Example data for formatting the gallery."""
+
+    def __init__(self):
+        self.headline = ""
+
+    example: str
+    module: str
+    extra: str
+    doc_file: str
+    file_format: Format
+    abs_path: str
+    has_doc: bool
+    img_doc: Path
+    headline: str
+
+
 def get_module_gallery(examples):
     """
     This function takes a list of dictionaries, that contain examples
@@ -114,20 +132,17 @@ def get_module_gallery(examples):
     # Iteration per rows
     for i in range(math.ceil(len(examples))):
         e = examples[i]
-        suffix = SUFFIXES[e["format"]]
-        url = e["doc_file"].replace(f".{suffix}", ".html")
-        name = e["example"]
-        underline = f'{e["module"]}'
+        suffix = SUFFIXES[e.file_format]
+        url = e.doc_file.replace(f".{suffix}", ".html")
+        name = e.example
+        underline = e.module
 
-        if e["extra"]:
-            underline += f'/{e["extra"]}'
+        if e.extra:
+            underline += f"/{e.extra}"
 
         if i > 0:
             gallery += "\n"
-        if e["img_doc"]:
-            img_name = e['img_doc'].name
-        else:
-            img_name = "../example_no_image.png"
+        img_name = e.img_doc.name if e.img_doc else "../example_no_image.png"
 
         # Fix long names
         if name.startswith("chapter"):
@@ -135,7 +150,7 @@ def get_module_gallery(examples):
         elif name.startswith("advanced"):
             name = name.replace("advanced", "a")
 
-        desc = e.get("headline")
+        desc = e.headline
         if not desc:
             desc = f"found in the ``{underline}`` directory."
 
@@ -395,14 +410,15 @@ def write_example(example_root, pyproject_file):
        copy the data. Return a tuple of module name and a dict of example data."""
     p = detect_pyside_example(example_root, pyproject_file)
 
-    result = {"example": p.example_name,
-              "module": p.module_name,
-              "extra": p.extra_names,
-              "doc_file": p.target_doc_file,
-              "format": p.file_format,
-              "abs_path": str(p.example_dir),
-              "has_doc": bool(p.src_doc_file_path),
-              "img_doc": p.src_screenshot}
+    result = ExampleData()
+    result.example = p.example_name
+    result.module = p.module_name
+    result.extra = p.extra_names
+    result.doc_file = p.target_doc_file
+    result.file_format = p.file_format
+    result.abs_path = str(p.example_dir)
+    result.has_doc = bool(p.src_doc_file_path)
+    result.img_doc = p.src_screenshot
 
     files = []
     try:
@@ -450,7 +466,7 @@ def write_example(example_root, pyproject_file):
         if not opt_quiet:
             print("Empty '.pyproject' file, skipping")
 
-    result["headline"] = headline
+    result.headline = headline
 
     return (p.module_name, result)
 
@@ -458,7 +474,7 @@ def write_example(example_root, pyproject_file):
 def sort_examples(example):
     result = {}
     for module in example.keys():
-        result[module] = sorted(example.get(module), key=lambda e: e.get("doc_file"))
+        result[module] = sorted(example.get(module), key=lambda e: e.doc_file)
     return result
 
 
@@ -529,7 +545,7 @@ if __name__ == "__main__":
         f.write(BASE_CONTENT)
         for module_name, e in sorted(examples.items()):
             for i in e:
-                index_files.append(i["doc_file"])
+                index_files.append(i.doc_file)
             f.write(f"{module_name.title()}\n")
             f.write(f"{'*' * len(module_name.title())}\n")
             f.write(get_module_gallery(e))
