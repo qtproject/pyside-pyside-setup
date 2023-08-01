@@ -72,6 +72,7 @@ Examples
 
 """
 
+
 def ind(x):
     return " " * 4 * x
 
@@ -91,6 +92,11 @@ def add_indent(s, level):
         else:
             new_s += "\n"
     return new_s
+
+
+def check_img_ext(i):
+    """Check whether path is an image."""
+    return i.suffix in IMAGE_SUFFIXES
 
 
 def get_module_gallery(examples):
@@ -310,7 +316,29 @@ def get_doc_source_file(original_doc_dir, example_name):
     return None, Format.RST
 
 
-def write_example(pyproject_file):
+def get_screenshot(image_dir, example_name):
+    """Find screen shot: We look for an image with the same
+       example_name first, if not, we select the first."""
+    if not image_dir.is_dir():
+        return None
+    images = [i for i in image_dir.glob("*") if i.is_file() and check_img_ext(i)]
+    example_images = [i for i in images if i.name.startswith(example_name)]
+    if example_images:
+        return example_images[0]
+    if images:
+        return images[0]
+    return None
+
+
+def write_resources(src_list, dst):
+    """Write a list of example resource paths to the dst path."""
+    for src in src_list:
+        resource_written = shutil.copy(src, dst / src.name)
+        if not opt_quiet:
+            print("Written resource:", resource_written)
+
+
+def write_example(example_root, pyproject_file):
     """Read the project file and documentation, create the .rst file and
        copy the data. Return a tuple of module name and a dict of example data."""
     example_dir = pyproject_file.parent
@@ -324,22 +352,10 @@ def write_example(pyproject_file):
     # handling subdirectories besides the module level and the example
     extra_names = "" if len(parts) == 2 else "_".join(parts[1:-1])
 
-    def check_img_ext(i):
-        return i.suffix in IMAGE_SUFFIXES
-
     # Check for a 'doc' directory inside the example
-    img_doc = None
     original_doc_dir = Path(example_dir / "doc")
     doc_source_file, file_format = get_doc_source_file(original_doc_dir, example_name)
-    if original_doc_dir.is_dir():
-        images = [i for i in original_doc_dir.glob("*") if i.is_file() and check_img_ext(i)]
-        if len(images) > 0:
-            # We look for an image with the same example_name first, if not, we select the first
-            image_path = [i for i in images if example_name in str(i)]
-            if not image_path:
-                image_path = images[0]
-            else:
-                img_doc = image_path[0]
+    img_doc = get_screenshot(original_doc_dir, example_name)
 
     target_suffix = SUFFIXES[file_format]
     doc_file = f"example_{module_name}_{extra_names}_{example_name}.{target_suffix}".replace("__", "_")
@@ -384,15 +400,11 @@ def write_example(pyproject_file):
                 # Copy other files in the 'doc' directory, but
                 # excluding the main '.rst' file and all the
                 # directories.
+                resources = []
                 for _f in original_doc_dir.glob("*"):
-                    if _f == doc_source_file or _f.is_dir():
-                        continue
-                    src = _f
-                    dst = EXAMPLES_DOC / _f.name
-
-                    resource_written = shutil.copy(src, dst)
-                    if not opt_quiet:
-                        print("Written resource:", resource_written)
+                    if _f != doc_source_file and not _f.is_dir():
+                        resources.append(_f)
+                write_resources(resources, EXAMPLES_DOC)
             else:
                 content_f = get_header_title(example_dir)
             content_f += get_code_tabs(files, pyproject_file.parent, file_format)
@@ -414,6 +426,16 @@ def sort_examples(example):
     for module in example.keys():
         result[module] = sorted(example.get(module), key=lambda e: e.get("doc_file"))
     return result
+
+
+def scan_examples_dir(examples_dir):
+    """Scan a directory of examples."""
+    for pyproject_file in examples_dir.glob("**/*.pyproject"):
+        if pyproject_file.name != "examples.pyproject":
+            module_name, data = write_example(examples_dir, pyproject_file)
+            if module_name not in examples:
+                examples[module_name] = []
+            examples[module_name].append(data)
 
 
 if __name__ == "__main__":
@@ -449,12 +471,7 @@ if __name__ == "__main__":
             print("WARNING: Deleted old html directory")
     EXAMPLES_DOC.mkdir()
 
-    for pyproject_file in EXAMPLES_DIR.glob("**/*.pyproject"):
-        if pyproject_file.name != "examples.pyproject":
-            module_name, data = write_example(pyproject_file)
-            if module_name not in examples:
-                examples[module_name] = []
-            examples[module_name].append(data)
+    scan_examples_dir(EXAMPLES_DIR)
 
     examples = sort_examples(examples)
 
