@@ -121,13 +121,15 @@ static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
 {
     AutoDecRef ob_type_mod(GetClassOrModOf(ob));
     const char *name;
-    if (PyModule_Check(ob_type_mod.object()))
+    bool isModule = PyModule_Check(ob_type_mod.object());
+    if (isModule)
         name = PyModule_GetName(ob_type_mod.object());
     else
         name = reinterpret_cast<PyTypeObject *>(ob_type_mod.object())->tp_name;
     PyObject *res{};
 
-    if (handle_doc_in_progress || name == nullptr || strncmp(name, "PySide6.", 8) != 0) {
+    if (handle_doc_in_progress || name == nullptr
+        || (isModule && strncmp(name, "PySide6.", 8) != 0)) {
         res = PyObject_CallMethodObjArgs(old_descr, PyMagicName::get(), ob, nullptr);
     } else {
         handle_doc_in_progress++;
