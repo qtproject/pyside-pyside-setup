@@ -63,7 +63,6 @@ file(REMOVE ${CMAKE_CURRENT_LIST_DIR}/pyside.qdocconf ${CMAKE_CURRENT_LIST_DIR}/
 # for a rst_build_docs case, and not a full doc build
 if (NOT FULLDOCSBUILD)
     find_package(Python COMPONENTS Interpreter)
-    set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
 endif()
 
 if (QT_SRC_DIR)
@@ -75,7 +74,7 @@ endif()
 if(PYSIDE_IS_CROSS_BUILD)
     set(python_executable "${QFP_PYTHON_HOST_PATH}")
 else()
-    set(python_executable "${PYTHON_EXECUTABLE}")
+    set(python_executable "${Python_EXECUTABLE}")
 endif()
 
 set(TOOLS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools")
@@ -134,7 +133,7 @@ if (FULLDOCSBUILD)
     file(WRITE ${global_typesystem} "${typeSystemDocXmlContents}")
 
     execute_process(
-      COMMAND ${PYTHON_EXECUTABLE} "${TOOLS_DIR}/doc_modules.py"
+      COMMAND ${Python_EXECUTABLE} "${TOOLS_DIR}/doc_modules.py"
               -t "${global_typesystem}" -g "${global_header}" -d "${config_docconf}"
               "${QT_INCLUDE_DIR}" "${SUPPORTED_QT_VERSION}"
       OUTPUT_VARIABLE ALL_DOC_MODULES

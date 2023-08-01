@@ -51,7 +51,7 @@ set(BINDING_API_PRE_RELEASE_VERSION "${pyside_PRE_RELEASE_VERSION}")
 
 # Detect if the Python interpreter is actually PyPy
 execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "if True:
+    COMMAND ${Python_EXECUTABLE} -c "if True:
         pypy_version = ''
         import sys
         if hasattr(sys, 'pypy_version_info'):

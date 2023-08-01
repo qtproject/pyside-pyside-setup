@@ -6,7 +6,7 @@ set(package_name "Shiboken6Tools")
 
 set(CMAKE_AUTOMOC ON)
 
-if(NOT (Qt${QT_MAJOR_VERSION}Core_FOUND AND PYTHONINTERP_FOUND))
+if(NOT (Qt${QT_MAJOR_VERSION}Core_FOUND AND Python_Interpreter_FOUND))
     message(WARNING "Some dependencies were not found: shiboken6 generator compilation disabled!")
     return()
 endif()

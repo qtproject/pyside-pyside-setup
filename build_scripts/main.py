@@ -611,9 +611,9 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             # embedding_generator.py. Pass it as a separate option.
             cmake_cmd.append(f"-DQFP_PYTHON_HOST_PATH={sys.executable}")
         else:
-            cmake_cmd.append(f"-DPYTHON_EXECUTABLE={self.py_executable}")
-            cmake_cmd.append(f"-DPYTHON_INCLUDE_DIR={self.py_include_dir}")
-            cmake_cmd.append(f"-DPYTHON_LIBRARY={self.py_library}")
+            cmake_cmd.append(f"-DPython_EXECUTABLE={self.py_executable}")
+            cmake_cmd.append(f"-DPython_INCLUDE_DIR={self.py_include_dir}")
+            cmake_cmd.append(f"-DPython_LIBRARY={self.py_library}")
 
         # If a custom shiboken cmake config directory path was provided, pass it to CMake.
         if OPTION["SHIBOKEN_CONFIG_DIR"] and config.is_internal_pyside_build():

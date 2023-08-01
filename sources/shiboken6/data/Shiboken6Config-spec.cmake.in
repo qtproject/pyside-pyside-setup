@@ -5,9 +5,9 @@
 
 # This is the version of Python against which Shiboken was built. Not necessarily the version
 # against which a downstream project is built (e.g. PySide6).
-set(SHIBOKEN_PYTHON_VERSION_MAJOR "@PYTHON_VERSION_MAJOR@")
-set(SHIBOKEN_PYTHON_VERSION_MINOR "@PYTHON_VERSION_MINOR@")
-set(SHIBOKEN_PYTHON_VERSION_PATCH "@PYTHON_VERSION_PATCH@")
+set(SHIBOKEN_PYTHON_VERSION_MAJOR "@Python_VERSION_MAJOR@")
+set(SHIBOKEN_PYTHON_VERSION_MINOR "@Python_VERSION_MINOR@")
+set(SHIBOKEN_PYTHON_VERSION_PATCH "@Python_VERSION_PATCH@")
 set(SHIBOKEN_PYTHON_LIMITED_API "@PYTHON_LIMITED_API@")
 
 # Import targets and call variable set up functions  only when using an installed shiboken config
@@ -17,7 +17,7 @@ if (NOT TARGET Shiboken6::libshiboken)
     include("${CMAKE_CURRENT_LIST_DIR}/ShibokenHelpers.cmake")
 
     # Compute the python include and libraries path if needed (aka not part of super project build).
-    shiboken_find_required_python(@PYTHON_VERSION_MAJOR@)
+    shiboken_find_required_python(@Python_VERSION_MAJOR@)
     shiboken_check_if_built_and_target_python_are_compatible()
     shiboken_check_if_limited_api()
     shiboken_compute_python_includes(IS_CALLED_FROM_EXPORT)
