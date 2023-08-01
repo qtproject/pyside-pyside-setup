@@ -37,6 +37,11 @@ class QLocaleTestToNumber(unittest.TestCase):
         self.assertEqual((ctypes.c_short(37).value, True),
                          obj.toShort('37'))
 
+    def testToNumberLong(self):
+        obj = QLocale(QLocale.C)
+        self.assertEqual((ctypes.c_long(37).value, True),
+                         obj.toLong('37'))
+
     def testToNumberULongLong(self):
         obj = QLocale(QLocale.C)
         self.assertEqual((ctypes.c_ulonglong(37).value, True),

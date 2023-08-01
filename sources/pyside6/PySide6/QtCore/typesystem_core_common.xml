@@ -1416,6 +1416,17 @@
             <insert-template name="fix_args,bool*"/>
         </inject-code>
     </modify-function>
+    <modify-function signature="toLong(QString,bool*)const">
+        <modify-argument index="2">
+            <remove-argument />
+        </modify-argument>
+        <modify-argument index="return" pyi-type="Tuple[int, bool]">
+            <replace-type modified-type="(int, bool ok)"/>
+        </modify-argument>
+        <inject-code class="target" position="beginning">
+            <insert-template name="fix_args,bool*"/>
+        </inject-code>
+    </modify-function>
     <modify-function signature="toShort(QString,bool*)const">
         <modify-argument index="2">
             <remove-argument />
@@ -1442,6 +1453,7 @@
          ensure float overloads are used -->
     <modify-function signature="^to(Currency)?String\(q?u.*$" remove="all"/>
     <modify-function signature="^to(Currency)?String\(.*short.*$" remove="all"/>
+    <modify-function signature="^to.*\(.*QStringView.*$" remove="all"/>
   </value-type>
   <value-type name="QBitArray">
     <add-function signature="__len__">
