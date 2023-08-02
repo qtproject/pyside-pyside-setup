@@ -5,6 +5,7 @@
 
 import sys
 
+from PySide6.QtCore import QCoreApplication
 from PySide6.QtWidgets import QApplication
 
 from screencapturepreview import ScreenCapturePreview
@@ -12,6 +13,8 @@ from screencapturepreview import ScreenCapturePreview
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    QCoreApplication.setApplicationName("screencapture")
+    QCoreApplication.setOrganizationName("QtProject")
     screen_capture_preview = ScreenCapturePreview()
     screen_capture_preview.show()
     sys.exit(app.exec())
