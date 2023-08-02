@@ -52,26 +52,32 @@
 
     <add-function signature="qmlRegisterType(PyTypeObject@type_obj@,const char*@uri@,int@version_major@,int@version_minor@,const char*@qml_name@)" return-type="int">
         <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistertype"/>
+        <modify-argument index="2" pyi-type="str"/>
     </add-function>
 
     <add-function signature="qmlRegisterSingletonType(PyTypeObject@type_obj@,const char*@uri@,int@version_major@,int@version_minor@,const char*@qml_name@,PyObject*@callback@)" return-type="int">
       <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistersingletontype_qobject_callback"/>
+      <modify-argument index="2" pyi-type="str"/>
     </add-function>
 
     <add-function signature="qmlRegisterSingletonType(PyTypeObject@type_obj@,const char*@uri@,int@version_major@,int@version_minor@,const char*@qml_name@)" return-type="int">
       <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistersingletontype_qobject_nocallback"/>
+      <modify-argument index="2" pyi-type="str"/>
     </add-function>
 
     <add-function signature="qmlRegisterSingletonType(const char*@uri@,int@version_major@,int@version_minor@,const char*@qml_name@,PyObject*@callback@)" return-type="int">
       <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistersingletontype_qjsvalue"/>
+      <modify-argument index="1" pyi-type="str"/>
     </add-function>
 
     <add-function signature="qmlRegisterSingletonInstance(PyTypeObject@type_obj@,const char*@uri@,int@version_major@,int@version_minor@,const char*@qml_name@,PyObject*@callback@)" return-type="int">
       <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregistersingletoninstance"/>
+      <modify-argument index="2" pyi-type="str"/>
     </add-function>
 
     <add-function signature="qmlRegisterUncreatableType(PyTypeObject@type_obj@,const char*@uri@,int@version_major@,int@version_minor@,const char*@qml_name@,const char*@message@)" return-type="int">
         <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlregisteruncreatabletype"/>
+        <modify-argument index="2" pyi-type="str"/>
     </add-function>
 
     <add-function signature="QmlElement(PyObject*)" return-type="PyObject*">
