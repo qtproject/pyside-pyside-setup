@@ -131,10 +131,6 @@ def _extend_path_var(var, value, prepend=False):
 
 
 def designer():
-    # Add the examples to PYSIDE_DESIGNER_PLUGINS, as determined by starting from
-    # PySide6/scripts.
-    pyside_dir = Path(__file__).resolve().parents[1]
-
     init_virtual_env()
 
     # https://www.python.org/dev/peps/pep-0384/#linkage :
