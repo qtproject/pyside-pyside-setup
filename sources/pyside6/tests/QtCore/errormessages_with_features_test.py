@@ -34,7 +34,6 @@ This test is in its own file because combining it with
 @unittest.skipIf(is_pypy, "__feature__ cannot yet be used with PyPy")
 class ErrormessagesWithFeatures(unittest.TestCase):
     probe = "called with wrong argument types"
-    probe_miss = "missing signature"
 
     def setUp(self):
         qApp or QApplication()
@@ -76,20 +75,20 @@ class ErrormessagesWithFeatures(unittest.TestCase):
         with self.assertRaises(TypeError) as cm:
             QApplication.quitOnLastWindowClosed = object
         print("\n\n" + cm.exception.args[0])
-        self.assertTrue(self.probe_miss in cm.exception.args[0])
+        self.assertTrue(self.probe in cm.exception.args[0])
         with self.assertRaises(TypeError) as cm:
             qApp.quitOnLastWindowClosed = object
-        self.assertTrue(self.probe_miss in cm.exception.args[0])
+        self.assertTrue(self.probe in cm.exception.args[0])
 
     def testCorrectErrorMessagesClassSnakeProp(self):
         from __feature__ import snake_case, true_property
         with self.assertRaises(TypeError) as cm:
             QApplication.quit_on_last_window_closed = object
         print("\n\n" + cm.exception.args[0])
-        self.assertTrue(self.probe_miss in cm.exception.args[0])
+        self.assertTrue(self.probe in cm.exception.args[0])
         with self.assertRaises(TypeError) as cm:
             qApp.quit_on_last_window_closed = object
-        self.assertTrue(self.probe_miss in cm.exception.args[0])
+        self.assertTrue(self.probe in cm.exception.args[0])
 
     def testDocIsWorking(self):
         """
