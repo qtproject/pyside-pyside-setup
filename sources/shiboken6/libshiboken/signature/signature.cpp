@@ -248,6 +248,9 @@ PyObject *get_signature_intern(PyObject *ob, PyObject *modifier)
         return pyside_tp_get___signature__(ob, modifier);
     if (Py_TYPE(ob) == &PyWrapperDescr_Type)
         return pyside_wd_get___signature__(ob, modifier);
+    // For classmethods we use the simple wrapper description implementation.
+    if (Py_TYPE(ob) == &PyClassMethodDescr_Type)
+        return pyside_wd_get___signature__(ob, modifier);
     return nullptr;
 }
 
