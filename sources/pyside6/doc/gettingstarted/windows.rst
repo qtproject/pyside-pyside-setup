@@ -15,6 +15,9 @@ Requirements
 .. note:: Python 3.8.0 was missing some API required for PySide/Shiboken so it's not possible
     to use it for a Windows build.
 
+.. note:: The Python provided by the Microsoft Store is not compatible with PySide. Please
+    use https://python.org/download to get a Python Interpreter.
+
 .. _MSVC2022: https://visualstudio.microsoft.com/downloads/
 .. _OpenSSL: https://sourceforge.net/projects/openssl/
 .. _`Qt for Windows`: https://doc.qt.io/qt-6/windows.html
