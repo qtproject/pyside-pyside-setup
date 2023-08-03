@@ -175,13 +175,20 @@ static void initPython()
     qAddPostRoutine(Py_Finalize);
 }
 
+static bool withinQtDesigner = false;
+
 PyDesignerCustomWidgets::PyDesignerCustomWidgets(QObject *parent) : QObject(parent)
 {
     qCDebug(lcPySidePlugin, "%s", __FUNCTION__);
 
+    withinQtDesigner = QCoreApplication::applicationName() == u"Designer"
+                       && QCoreApplication::organizationName() == u"QtProject";
+
     if (!qEnvironmentVariableIsSet(pathVar)) {
-        qCWarning(lcPySidePlugin, "Environment variable %s is not set, bailing out.",
-                  pathVar);
+        if (withinQtDesigner) {
+            qCWarning(lcPySidePlugin, "Environment variable %s is not set, bailing out.",
+                      pathVar);
+        }
         return;
     }
 
@@ -246,6 +253,7 @@ QList<QDesignerCustomWidgetInterface *> PyDesignerCustomWidgets::customWidgets()
 {
     if (auto collection = findPyDesignerCustomWidgetCollection())
         return collection->customWidgets();
-    qCWarning(lcPySidePlugin, "No instance of QPyDesignerCustomWidgetCollection was found.");
+    if (withinQtDesigner)
+        qCWarning(lcPySidePlugin, "No instance of QPyDesignerCustomWidgetCollection was found.");
     return {};
 }
