@@ -1936,6 +1936,9 @@
       <inject-code class="target" position="beginning">
         <insert-template name="fix_args,QRectF*"/>
       </inject-code>
+      <inject-documentation format="target" mode="prepend">
+      The function returns the bounding rectangle enclosing the whole text.
+      </inject-documentation>
     </modify-function>
     <modify-function signature="drawText(QRect,int,QString,QRect*)">
       <modify-argument index="4">
@@ -1948,6 +1951,9 @@
       <inject-code class="target" position="beginning">
         <insert-template name="fix_args,QRect*"/>
       </inject-code>
+      <inject-documentation format="target" mode="prepend">
+      The function returns the bounding rectangle enclosing the whole text.
+      </inject-documentation>
     </modify-function>
     <modify-function signature="drawText(int,int,int,int,int,QString,QRect*)">
       <modify-argument index="7">
@@ -1957,6 +1963,9 @@
       <inject-code class="target" position="beginning">
         <insert-template name="fix_args,QRect*"/>
       </inject-code>
+      <inject-documentation format="target" mode="prepend">
+      The function returns the bounding rectangle enclosing the whole text.
+      </inject-documentation>
     </modify-function>
     <add-function signature="__enter__()" return-type="QPainter">
         <inject-code file="../glue/qtgui.cpp" snippet="qpainter-enter"/>
