@@ -28,9 +28,12 @@ add_custom_command(
 add_library(shibokenmodule MODULE ${sample_SRC})
 target_include_directories(shibokenmodule PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                                                   ${CMAKE_SOURCE_DIR})
-set_property(TARGET shibokenmodule PROPERTY PREFIX "")
-# PYSIDE-1497: This `..` is the crucial trick to unify the path location of `Shiboken`.
-set_property(TARGET shibokenmodule PROPERTY OUTPUT_NAME "../Shiboken${PYTHON_EXTENSION_SUFFIX}")
+
+set_target_properties(shibokenmodule PROPERTIES
+                      PREFIX ""
+                      OUTPUT_NAME "Shiboken${PYTHON_EXTENSION_SUFFIX}"
+                      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/.."
+                      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/..")
 
 if(WIN32)
     set_property(TARGET shibokenmodule PROPERTY SUFFIX ".pyd")
