@@ -764,23 +764,17 @@ void QtDocGenerator::writeFunctionParametersType(TextStream &s,
             writeParameterType(s, cppClass, arg);
     }
 
-    if (!func->isConstructor() && !func->isVoid()) {
-
-        QString retType;
+    QString retType;
+    if (!func->isConstructor()) {
         // check if the return type was modified
-        for (const auto &mod : func->modifications()) {
-            for (const ArgumentModification &argMod : mod.argument_mods()) {
-                if (argMod.index() == 0) {
-                    retType = argMod.modifiedType();
-                    break;
-                }
-            }
-        }
-
-        if (retType.isEmpty())
+        retType = func->modifiedTypeName();
+        if (retType.isEmpty() && !func->isVoid())
             retType = translateToPythonType(func->type(), cppClass);
-        s << ":rtype: " << retType << '\n';
     }
+
+    if (!retType.isEmpty())
+        s << ":rtype: " << retType << '\n';
+
     s << '\n';
 }
 
