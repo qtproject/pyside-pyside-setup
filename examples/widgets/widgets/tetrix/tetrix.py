@@ -283,7 +283,7 @@ class TetrixBoard(QFrame):
 
             if line_is_full:
                 num_full_lines += 1
-                for k in range(TetrixBoard.board_height - 1):
+                for k in range(i, TetrixBoard.board_height - 1):
                     for j in range(TetrixBoard.board_width):
                         self.set_shape_at(j, k, self.shape_at(j, k + 1))
 
