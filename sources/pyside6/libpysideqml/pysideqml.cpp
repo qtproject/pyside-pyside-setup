@@ -11,6 +11,7 @@
 #include "pysideqmlmetacallerror_p.h"
 
 #include <QtQml/QQmlPropertyMap>
+#include <QtQml/QQmlComponent>
 
 #include <signalmanager.h>
 
@@ -28,6 +29,7 @@ void init(PyObject *module)
     PySide::SignalManager::setQmlMetaCallErrorHandler(PySide::Qml::qmlMetaCallErrorHandler);
 
     qRegisterMetaType<QQmlPropertyMap *>(); // PYSIDE-1845, QQmlPropertyMap * properties
+    qRegisterMetaType<QQmlComponent *>(); // PYSIDE-2415, QQmlComponent * properties
 }
 
 } //namespace PySide::Qml
