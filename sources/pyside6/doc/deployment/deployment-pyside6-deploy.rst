@@ -78,7 +78,7 @@ The various parameters controlled by this file are:
     is the parent directory of the main Python entry point file
   * ``input_file``: Path to the main Python entry point file
   * ``project_file``: If it exists, this points to the path to the `Qt Creator Python Project File
-    .pyproject <https://doc.qt.io/qtforpython/tutorials/pretutorial/typesoffiles.html
+    .pyproject <https://doc.qt.io/qtforpython-6/faq/typesoffiles.html
     #qt-creator-python-project-file-pyproject>`_ file. Such a file makes sure that the deployment
     process never considers unnecessary files when bundling the executable.
 
