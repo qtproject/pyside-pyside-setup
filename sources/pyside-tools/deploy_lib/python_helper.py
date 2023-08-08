@@ -9,12 +9,7 @@ import sys
 import warnings
 from typing import List
 from importlib import util
-
-if sys.version_info >= (3, 8):
-    from importlib.metadata import version
-else:
-    from importlib_metadata import version
-
+from importlib.metadata import version
 from pathlib import Path
 
 from . import Config, Nuitka, run_command
