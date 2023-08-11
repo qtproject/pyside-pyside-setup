@@ -38,11 +38,19 @@ int currentSelectId(PyTypeObject *type)
 }
 
 static SelectableFeatureHook SelectFeatureSet = nullptr;
+static SelectableFeatureCallback featureCb = nullptr;
+
+void setSelectableFeatureCallback(SelectableFeatureCallback func)
+{
+    featureCb = func;
+}
 
 SelectableFeatureHook initSelectableFeature(SelectableFeatureHook func)
 {
     auto ret = SelectFeatureSet;
     SelectFeatureSet = func;
+    if (featureCb)
+        featureCb(SelectFeatureSet != nullptr);
     return ret;
 }
 //

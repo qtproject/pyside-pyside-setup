@@ -19,6 +19,7 @@ PYSIDE_API PyObject *fset();
 PYSIDE_API PyObject *im_func();
 PYSIDE_API PyObject *im_self();
 PYSIDE_API PyObject *name();
+PYSIDE_API PyObject *orig_dict();
 PYSIDE_API PyObject *parameters();
 PYSIDE_API PyObject *property();
 PYSIDE_API PyObject *select_id();

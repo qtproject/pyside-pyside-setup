@@ -312,6 +312,15 @@ int _build_func_to_type(PyObject *obtype)
     auto *type = reinterpret_cast<PyTypeObject *>(obtype);
     AutoDecRef tpDict(PepType_GetDict(type));
     auto *dict = tpDict.object();
+
+    // PYSIDE-2404: Get the original dict for late initialization.
+    //              The dict might have been switched before signature init.
+    static const auto *pyTypeType_tp_dict = PepType_GetDict(&PyType_Type);
+    if (Py_TYPE(dict) != Py_TYPE(pyTypeType_tp_dict)) {
+        tpDict.reset(PyObject_GetAttr(dict, PyName::orig_dict()));
+        dict = tpDict.object();
+    }
+
     PyMethodDef *meth = type->tp_methods;
 
     if (meth == nullptr)

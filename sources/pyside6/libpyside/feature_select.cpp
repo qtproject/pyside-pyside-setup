@@ -107,7 +107,7 @@ createDerivedDictType()
     PyObject *ChameleonDict = PepRun_GetResult(R"CPP(if True:
 
         class ChameleonDict(dict):
-            __slots__ = ("dict_ring", "select_id")
+            __slots__ = ("dict_ring", "select_id", "orig_dict")
 
         result = ChameleonDict
 
@@ -172,9 +172,9 @@ static bool replaceClassDict(PyTypeObject *type)
     // insert the dict into itself as ring
     setNextDict(new_dict, new_dict);
     // We have now an exact copy of the dict with a new type.
-    // Replace `__dict__` which usually has refcount 1 (but see cyclic_test.py)
-    Py_DECREF(PepType_GetDict(type));
     PepType_SetDict(type, new_dict);
+    // PYSIDE-2404: Retain the original dict for easy late init.
+    PyObject_SetAttr(new_dict, PySideName::orig_dict(), dict);
     return true;
 }
 
@@ -185,6 +185,7 @@ static bool addNewDict(PyTypeObject *type, int select_id)
      * A 'false' return is fatal.
      */
     AutoDecRef dict(PepType_GetDict(type));
+    AutoDecRef orig_dict(PyObject_GetAttr(dict, PySideName::orig_dict()));
     auto *ob_ndt = reinterpret_cast<PyObject *>(new_dict_type);
     auto *new_dict = PyObject_CallObject(ob_ndt, nullptr);
     if (new_dict == nullptr)
@@ -195,6 +196,8 @@ static bool addNewDict(PyTypeObject *type, int select_id)
     setNextDict(dict, new_dict);
     setNextDict(new_dict, next_dict);
     PepType_SetDict(type, new_dict);
+    // PYSIDE-2404: Retain the original dict for easy late init.
+    PyObject_SetAttr(new_dict, PySideName::orig_dict(), orig_dict);
     return true;
 }
 
@@ -393,12 +396,18 @@ static FeatureProc featureProcArray[] = {
 static bool patch_property_impl();
 static bool is_initialized = false;
 
+static void featureEnableCallback(bool enable)
+{
+    featurePointer = enable ? featureProcArray : nullptr;
+}
+
 void init()
 {
     // This function can be called multiple times.
     if (!is_initialized) {
         featurePointer = featureProcArray;
         initSelectableFeature(SelectFeatureSet);
+        setSelectableFeatureCallback(featureEnableCallback);
         patch_property_impl();
         is_initialized = true;
     }

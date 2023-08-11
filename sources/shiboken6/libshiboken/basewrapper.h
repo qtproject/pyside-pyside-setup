@@ -59,7 +59,9 @@ using SubTypeInitHook = void (*)(PyTypeObject *, PyObject *, PyObject *);
 /// PYSIDE-1019: Set the function to select the current feature.
 /// Return value is the previous content.
 using SelectableFeatureHook = void (*)(PyTypeObject *);
+using SelectableFeatureCallback = void (*)(bool);
 LIBSHIBOKEN_API SelectableFeatureHook initSelectableFeature(SelectableFeatureHook func);
+LIBSHIBOKEN_API void setSelectableFeatureCallback(SelectableFeatureCallback func);
 
 /// PYSIDE-1626: Enforcing a context switch without further action.
 LIBSHIBOKEN_API void SbkObjectType_UpdateFeature(PyTypeObject *type);
@@ -198,7 +200,7 @@ LIBSHIBOKEN_API const char *getOriginalName(PyTypeObject *self);
 LIBSHIBOKEN_API void setTypeDiscoveryFunctionV2(PyTypeObject *self, TypeDiscoveryFuncV2 func);
 LIBSHIBOKEN_API void copyMultipleInheritance(PyTypeObject *self, PyTypeObject *other);
 LIBSHIBOKEN_API void setMultipleInheritanceFunction(PyTypeObject *self, MultipleInheritanceInitFunction func);
-LIBSHIBOKEN_API MultipleInheritanceInitFunction getMultipleInheritanceFunction(PyTypeObject *self);
+LIBSHIBOKEN_API MultipleInheritanceInitFunction getMultipleInheritanceFunction(PyTypeObject *type);
 
 LIBSHIBOKEN_API void setDestructorFunction(PyTypeObject *self, ObjectDestructor func);
 

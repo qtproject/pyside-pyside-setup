@@ -23,6 +23,7 @@ LIBSHIBOKEN_API PyObject *im_self();
 LIBSHIBOKEN_API PyObject *loads();
 LIBSHIBOKEN_API PyObject *multi();
 LIBSHIBOKEN_API PyObject *name();
+LIBSHIBOKEN_API PyObject *orig_dict();
 LIBSHIBOKEN_API PyObject *result();
 LIBSHIBOKEN_API PyObject *select_id();
 LIBSHIBOKEN_API PyObject *value();
