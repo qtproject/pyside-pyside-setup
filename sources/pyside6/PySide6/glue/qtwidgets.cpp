@@ -307,6 +307,12 @@ static void removeWidgetFromLayout(QLayout *layout, QWidget *widget)
 
 inline void removeLayoutOwnership(QLayout *layout, QLayoutItem *item)
 {
+
+    if (item == nullptr) {
+        PyErr_Format(PyExc_RuntimeError, "Item for removal from layout is None, or invalid.");
+        return;
+    }
+
     if (QWidget *w = item->widget()) {
         removeWidgetFromLayout(layout, w);
     } else {
