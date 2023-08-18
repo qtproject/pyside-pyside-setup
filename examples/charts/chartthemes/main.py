@@ -271,26 +271,8 @@ class ThemeWidget(QWidget):
             chart_theme = self.charts[0].chart().theme()
             if chart_theme != theme:
                 for chart_view in self.charts:
-                    if theme == 0:
-                        theme_name = QChart.ChartThemeLight
-                    elif theme == 1:
-                        theme_name = QChart.ChartThemeBlueCerulean
-                    elif theme == 2:
-                        theme_name = QChart.ChartThemeDark
-                    elif theme == 3:
-                        theme_name = QChart.ChartThemeBrownSand
-                    elif theme == 4:
-                        theme_name = QChart.ChartThemeBlueNcs
-                    elif theme == 5:
-                        theme_name = QChart.ChartThemeHighContrast
-                    elif theme == 6:
-                        theme_name = QChart.ChartThemeBlueIcy
-                    elif theme == 7:
-                        theme_name = QChart.ChartThemeQt
-                    else:
-                        theme_name = QChart.ChartThemeLight
+                    chart_view.chart().setTheme(theme)
 
-                    chart_view.chart().setTheme(theme_name)
 
                 # Set palette colors based on selected theme
                 if theme == QChart.ChartThemeLight:
