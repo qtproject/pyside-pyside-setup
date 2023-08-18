@@ -1848,4 +1848,27 @@ auto callback = [callable]() -> void
 Py_INCREF(callable);
 %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(callback);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
-// @snipped qrunnable_create
+// @snippet qrunnable_create
+
+// @snippet qlocale_system
+// For darwin systems, QLocale::system() involves looking at the Info.plist of the application
+// bundle to detect the system localization. In the case of Qt for Python, the application bundle
+// is the used Python framework. To enable retreival of localized string, the property list key
+// CFBunldeAllowMixedLocalizations should be set to True inside the Info.plist file. Otherwise,
+// CFBundleDevelopmentRegion will be used to find the language preference of the user, which in the
+// case of Python is always english.
+// This is a hack until CFBunldeAllowMixedLocalizations will be set in the Python framework
+// installation in darwin systems.
+// Upstream issue in CPython: https://github.com/python/cpython/issues/108269
+#ifdef Q_OS_DARWIN
+    Shiboken::AutoDecRef locale(PyImport_ImportModule("locale"));
+    Shiboken::AutoDecRef getLocale(PyObject_GetAttrString(locale, "getlocale"));
+    Shiboken::AutoDecRef systemLocale(PyObject_CallObject(getLocale, nullptr));
+    Shiboken::AutoDecRef localeCode(PyUnicode_AsUTF8String(PyTuple_GetItem(systemLocale, 0)));
+    QString localeCodeStr =  PySide::pyStringToQString(localeCode);
+    %RETURN_TYPE %0 = QLocale(localeCodeStr);
+#else
+    %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME();
+#endif
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+// @snippet qlocale_system

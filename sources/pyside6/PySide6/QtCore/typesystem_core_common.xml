@@ -1330,10 +1330,31 @@
     <modify-function signature="toString(qulonglong)const" remove="all"/>
     <modify-function signature="toString(ushort)const" remove="all"/>
     <modify-function signature="toString(unsigned int)const" remove="all"/>
+    <modify-function signature="system()" remove="all"/>
     <!--### -->
     <extra-includes>
       <include file-name="QDate" location="global"/>
     </extra-includes>
+    <add-function signature="system()" return-type="QLocale" static="yes">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+         snippet="qlocale_system"/>
+        <inject-documentation mode="append" format="target">
+          Returns a QLocale object initialized to the system locale.
+
+          The system locale may use system-specific sources for locale data, where available,
+          otherwise falling back on QLocale's built-in database entry for the language, script and
+          territory the system reports.
+
+          For example, on Windows, this locale will use the decimal/grouping characters and
+          date/time formats specified in the system configuration panel.
+
+          .. note:: Qt for Python on macOS will not reflect the user's region and language
+             preferences though QLocale::system(), but will instead reflect the environment
+             variables POSIX uses to specify locale, similar to Python's locale module.
+
+          See also c().
+        </inject-documentation>
+    </add-function>
     <modify-function signature="toTime(QString,QLocale::FormatType)const">
         <modify-argument index="2">
             <rename to="format"/>
