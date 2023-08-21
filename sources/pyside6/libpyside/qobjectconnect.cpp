@@ -15,6 +15,8 @@
 #include <QtCore/QMetaMethod>
 #include <QtCore/QObject>
 
+#include <string_view>
+
 static bool isMethodDecorator(PyObject *method, bool is_pymethod, PyObject *self)
 {
     Shiboken::AutoDecRef methodName(PyObject_GetAttr(method, Shiboken::PyMagicName::name()));
@@ -69,6 +71,25 @@ QDebug operator<<(QDebug d, const GetReceiverResult &r)
 }
 #endif // QT_NO_DEBUG_STREAM
 
+static const char *getQualifiedName(PyObject *ob)
+{
+    Shiboken::AutoDecRef qualNameP(PyObject_GetAttr(ob, Shiboken::PyMagicName::qualname()));
+    return qualNameP.isNull()
+                ? nullptr : Shiboken::String::toCString(qualNameP.object());
+}
+
+// Determine whether a method is declared in a class using qualified name lookup.
+static bool isDeclaredIn(PyObject *method, const char *className)
+{
+    bool result = false;
+    if (auto *qualifiedNameC = getQualifiedName(PyMethod_Function(method))) {
+        std::string_view qualifiedName(qualifiedNameC);
+        if (const auto dot = qualifiedName.rfind('.'); dot != std::string::npos)
+            result = qualifiedName.substr(0, dot) == className;
+    }
+    return result;
+}
+
 static GetReceiverResult getReceiver(QObject *source, const char *signal,
                                      PyObject *callback)
 {
@@ -111,10 +132,15 @@ static GetReceiverResult getReceiver(QObject *source, const char *signal,
                                                  result.usingGlobalReceiver).toLatin1();
         const QMetaObject *metaObject = result.receiver->metaObject();
         result.slotIndex = metaObject->indexOfSlot(result.callbackSig.constData());
-        if (result.slotIndex != -1 && result.slotIndex < metaObject->methodOffset()
-            && PyMethod_Check(callback)) {
-            result.usingGlobalReceiver = true;
-        }
+        if (PyMethod_Check(callback) != 0 && result.slotIndex != -1) {
+             // Find the class in which the slot is declared.
+             while (result.slotIndex < metaObject->methodOffset())
+                 metaObject = metaObject->superClass();
+             // If the Python callback is not declared in the same class, assume it is
+             // a Python override. Resort to global receiver (PYSIDE-2418).
+             if (!isDeclaredIn(callback, metaObject->className()))
+                 result.usingGlobalReceiver = true;
+         }
     }
 
     const auto receiverThread = result.receiver ? result.receiver->thread() : nullptr;
