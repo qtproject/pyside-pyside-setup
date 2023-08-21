@@ -327,7 +327,7 @@ struct FloatPrimitive : TwoPrimitive<FLOAT>
     }
     static void toCpp(PyObject *pyIn, void *cppOut)
     {
-        *reinterpret_cast<FLOAT *>(cppOut) = FLOAT(PyLong_AsLong(pyIn));
+        *reinterpret_cast<FLOAT *>(cppOut) = FLOAT(PyLong_AsLongLong(pyIn));
     }
     static PythonToCppFunc isConvertible(PyObject *pyIn)
     {

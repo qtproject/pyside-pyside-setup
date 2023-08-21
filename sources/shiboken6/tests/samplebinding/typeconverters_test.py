@@ -159,11 +159,22 @@ class StringBasedConversionTest(unittest.TestCase):
         self.assertTrue(len(result), 1)
         self.assertTrue(lst, result[0])
 
+
+class PrimitiveConversionTest(unittest.TestCase):
+
     def testCppPrimitiveType(self):
         integers = (12, 34)
         result = sample.convertIntegersToCppAndThenToPython(integers[0], integers[1])
         for orig, new in zip(integers, result):
             self.assertEqual(orig, new)
+
+    def testLargeIntAsFloat(self):
+        """PYSIDE-2417: When passing an int to a function taking float,
+           a 64bit conversion should be done."""
+        point = sample.PointF(1, 2)
+        large_int = 2**31 + 2
+        point.setX(large_int)
+        self.assertEqual(round(point.x()), large_int)
 
 
 if __name__ == '__main__':
