@@ -109,7 +109,7 @@ def call_setup(python_ver, phase):
         cmd += ["bdist_wheel", "--reuse-build", "--standalone", "--skip-cmake", "--skip-make-install", "--only-package"]
 
     cmd += ["--build-tests",
-            "--verbose-build"]
+            "--log-level=verbose"]
 
     if CI_TARGET_ARCH == "X86_64-ARM64":
         cmd += ["--macos-arch='x86_64;arm64'"]
