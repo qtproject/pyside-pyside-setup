@@ -63,7 +63,7 @@ QDebug operator<<(QDebug d, const GetReceiverResult &r)
     d.noquote();
     d.nospace();
     d << "GetReceiverResult(receiver=" << r.receiver << ", self=" << r.self
-      << ", sig=" << r.callbackSig << "slotIndex=" << r.slotIndex
+      << ", sig=\"" << r.callbackSig << "\", slotIndex=" << r.slotIndex
       << ", usingGlobalReceiver=" << r.usingGlobalReceiver << ')';
     return d;
 }
@@ -101,7 +101,10 @@ static GetReceiverResult getReceiver(QObject *source, const char *signal,
 
     result.usingGlobalReceiver = !result.receiver || forceGlobalReceiver;
 
-    // Check if this callback is a overwrite of a non-virtual Qt slot.
+    // Check if this callback is a overwrite of a non-virtual Qt slot (pre-Jira bug 1019).
+    // Make it possible to connect to a MyWidget.show() although QWidget.show()
+    // is a non-virtual slot which would be found by QMetaObject search.
+    // FIXME PYSIDE7: This is arguably a bit of a misguided "feature", remove?
     if (!result.usingGlobalReceiver && result.receiver && result.self) {
         result.callbackSig =
             PySide::Signal::getCallbackSignature(signal, result.receiver, callback,
