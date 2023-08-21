@@ -30,6 +30,7 @@ class MyTimer2 (MyTimer):
         pass
 
     def start(self):
+        """ 'Overrides' non-virtual slot QTimer.start()."""
         self.startCalled = True
         QCoreApplication.instance().quit()
 
