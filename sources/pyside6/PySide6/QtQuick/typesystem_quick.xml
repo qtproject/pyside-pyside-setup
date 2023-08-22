@@ -166,6 +166,8 @@
             <enum-type name="DirtyState" flags="DirtyStates"/>
         </value-type>
         <modify-function signature="updateSampledImage(QSGMaterialShader::RenderState&amp;,int,QSGTexture**,QSGMaterial*,QSGMaterial*)" remove="all"/>
+        <!-- Private QRhi class -->
+        <modify-function signature="setShader(QSGMaterialShader::Stage,QShader)" remove="all"/>
     </object-type>
     <object-type name="QSGMaterialType"/>
     <object-type name="QSGNode">
