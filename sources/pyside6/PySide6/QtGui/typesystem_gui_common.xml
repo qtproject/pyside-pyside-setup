@@ -480,6 +480,7 @@
   <value-type name="QIcon" >
     <enum-type name="Mode"/>
     <enum-type name="State"/>
+    <enum-type name="ThemeIcon" since="6.7"/>
     <modify-function signature="QIcon(QIconEngine*)">
       <modify-argument index="1">
         <no-null-pointer/>
@@ -615,6 +616,7 @@
     <extra-includes>
       <include file-name="QStringList" location="global"/>
     </extra-includes>
+    <value-type name="Tag" since="6.7"/>
     <!-- PYSIDE-1685: QFont(QString) should be checked first, else it will be interpreted as sequence -->
     <modify-function signature="QFont(const QString&amp;,int,int, bool)" overload-number="0"/>
     <modify-function signature="QFont(const QStringList &amp;,int,int, bool)" overload-number="1"/>
@@ -1344,6 +1346,8 @@
         </inject-code>
     </add-function>
   </object-type>
+  <object-type name="QChildWindowEvent" copyable="false" since="6.7"
+               polymorphic-id-expression="%1-&gt;type() == QEvent::ChildWindowAdded || %1-&gt;type() == QEvent::ChildWindowRemoved"/>
   <object-type name="QEnterEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::Enter"/>
   <object-type name="QExposeEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Expose"/>
   <object-type name="QFileOpenEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::FileOpen"/>

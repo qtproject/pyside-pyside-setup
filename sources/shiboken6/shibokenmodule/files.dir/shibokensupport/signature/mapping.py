@@ -523,6 +523,7 @@ def init_PySide6_QtCore():
         "QVariant()": Invalid(Variant),
         "QVariant.Type": type,  # not so sure here...
         "QVariantMap": typing.Dict[str, Variant],
+        "std.chrono.seconds{5}" : ellipsis,
     })
     try:
         type_map.update({

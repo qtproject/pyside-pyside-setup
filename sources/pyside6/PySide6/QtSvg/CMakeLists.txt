@@ -6,6 +6,7 @@ project(QtSvg)
 set(QtSvg_SRC
 ${QtSvg_GEN_DIR}/qsvggenerator_wrapper.cpp
 ${QtSvg_GEN_DIR}/qsvgrenderer_wrapper.cpp
+${QtSvg_GEN_DIR}/qtsvg_wrapper.cpp
 # module is always needed
 ${QtSvg_GEN_DIR}/qtsvg_module_wrapper.cpp
 )

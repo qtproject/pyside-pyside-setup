@@ -14,6 +14,10 @@
         <enum-type name="VolumeScale"/>
     </namespace-type>
 
+    <namespace-type name="QtVideo" since="6.7">
+        <enum-type name="Rotation"/>
+    </namespace-type>
+
     <value-type name="QAudioBuffer">
         <add-function signature="data()" return-type="PyBuffer">
             <inject-code file="../glue/qtmultimedia.cpp" snippet="qaudiobuffer-data"/>

@@ -25,4 +25,5 @@
     <object-type name="QQuick3DTextureData">
         <enum-type name="Format"/>
     </object-type>
+    <object-type name="QQuick3DRenderExtension" since="6.7"/>
 </typesystem>

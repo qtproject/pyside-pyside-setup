@@ -32,6 +32,8 @@ ${QtQuick_GEN_DIR}/qsharedpointer_qquickitemgrabresult_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickpainteditem_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickrendercontrol_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickrendertarget_wrapper.cpp
+${QtQuick_GEN_DIR}/qquickrhiitemrenderer_wrapper.cpp
+${QtQuick_GEN_DIR}/qquickrhiitem_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquicktextdocument_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickview_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickwindow_wrapper.cpp
@@ -59,6 +61,7 @@ ${QtQuick_GEN_DIR}/qsgrendernode_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgsimplerectnode_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgsimpletexturenode_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgrendererinterface_wrapper.cpp
+${QtQuick_GEN_DIR}/qsgtextnode_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgtexture_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgtexturematerial_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgtextureprovider_wrapper.cpp

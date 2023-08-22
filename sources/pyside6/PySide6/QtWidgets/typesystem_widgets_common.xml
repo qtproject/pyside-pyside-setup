@@ -43,6 +43,8 @@
   <function signature="qDrawWinPanel(QPainter*,const QRect&amp;,const QPalette&amp;,bool,const QBrush*)"/>
   <function signature="qDrawPlainRect(QPainter*,int,int,int,int,const QColor&amp;,int,const QBrush*)"/>
   <function signature="qDrawPlainRect(QPainter*,const QRect&amp;,const QColor&amp;,int,const QBrush*)"/>
+  <function signature="qDrawPlainRoundedRect(QPainter*,int,int,int,int,qreal,qreal,const QColor&amp;,int,const QBrush*)" since="6.7"/>
+  <function signature="qDrawPlainRoundedRect(QPainter*,const QRect&amp;,qreal,qreal,const QColor&amp;,int,const QBrush *)" since="6.7"/>
 
   <object-type name="QStyleOption" polymorphic-id-expression="%1-&gt;type == QStyleOption::SO_Default"
                polymorphic-name-function="styleOptionType">
@@ -3345,6 +3347,12 @@
   <object-type name="QPinchGesture" since="4.6">
       <enum-type name="ChangeFlag" flags="ChangeFlags"/>
   </object-type>
+
+  <object-type name="QRhiWidget" since="6.7">
+      <enum-type name="Api"/>
+      <enum-type name="TextureFormat"/>
+  </object-type>
+
   <object-type name="QSwipeGesture" since="4.6">
       <enum-type name="SwipeDirection"/>
   </object-type>

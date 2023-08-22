@@ -7,6 +7,9 @@
   <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
 
   <object-type name="QSvgRenderer"/>
+  <namespace-type name="QtSvg" since="6.7">
+      <enum-type name="Option" flags="Options"/>
+  </namespace-type>
 
   <object-type name="QSvgGenerator">
     <enum-type name="SvgVersion" since="6.5"/>

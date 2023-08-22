@@ -106,6 +106,7 @@ ${QtGui_GEN_DIR}/qactiongroup_wrapper.cpp
 ${QtGui_GEN_DIR}/qbackingstore_wrapper.cpp
 ${QtGui_GEN_DIR}/qbitmap_wrapper.cpp
 ${QtGui_GEN_DIR}/qbrush_wrapper.cpp
+${QtGui_GEN_DIR}/qchildwindowevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qclipboard_wrapper.cpp
 ${QtGui_GEN_DIR}/qcloseevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qcolor_wrapper.cpp
@@ -129,6 +130,7 @@ ${QtGui_GEN_DIR}/qexposeevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qfileopenevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qfocusevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qfont_wrapper.cpp
+${QtGui_GEN_DIR}/qfont_tag_wrapper.cpp
 ${QtGui_GEN_DIR}/qfontdatabase_wrapper.cpp
 ${QtGui_GEN_DIR}/qfontinfo_wrapper.cpp
 ${QtGui_GEN_DIR}/qfontmetrics_wrapper.cpp

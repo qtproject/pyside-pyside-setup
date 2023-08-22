@@ -147,6 +147,18 @@
 
   <object-type name="QWebEngineUrlSchemeHandler"/>
 
+  <!-- FIXME  not in snapshot yet
+  <value-type name="QWebEngineDesktopMediaRequest" since="6.7"/>
+  <object-type name="QWebEngineMediaSourceModel" since="6.7"/>
+  -->
+  <value-type name="QWebEngineWebAuthPinRequest" since="6.7"/>
+  <object-type name="QWebEngineWebAuthUxRequest" since="6.7">
+      <enum-type name="WebAuthUxState"/>
+      <enum-type name="PinEntryReason"/>
+      <enum-type name="PinEntryError"/>
+      <enum-type name="RequestFailureReason"/>
+  </object-type>
+
   <!-- QtQml is pulled in via QtWebEngineCoreDepends. -->
   <suppress-warning text="^Scoped enum 'QQml.*' does not have a type entry.*$"/>
 

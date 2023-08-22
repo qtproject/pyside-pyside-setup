@@ -9,13 +9,11 @@
 
     <rejection class="QRemoteObjectStringLiterals"/>
     <rejection class="*" function-name="getTypeNameAndMetaobjectFromClassInfo"/>
-<!-- Exclude namespace due to Q_NAMESPACE link errors on Windows (QTBUG-68014)
     <rejection class="QtRemoteObjects" field-name="staticMetaObject"/>
     <namespace-type name="QtRemoteObjects">
         <enum-type name="InitialAction"/>
         <enum-type name="QRemoteObjectPacketTypeEnum"/>
     </namespace-type>
--->
     <object-type name="QAbstractItemModelReplica"/>
     <object-type name="QRemoteObjectAbstractPersistedStore"/>
     <object-type name="QRemoteObjectDynamicReplica"/>

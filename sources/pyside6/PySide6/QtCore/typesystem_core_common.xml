@@ -873,6 +873,7 @@
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
                  snippet="core-snippets-p-h"/>
     <enum-type name="YearRange"/>
+    <enum-type name="TransitionResolution" since="6.7"/>
     <conversion-rule>
         <target-to-native>
             <add-conversion type="Py_None" file="../glue/qtcore.cpp" snippet="conversion-pynone"/>
@@ -1334,6 +1335,7 @@
   </object-type>
 
   <value-type name="QLocale">
+    <enum-type name="TagSeparator" since="6.7"/>
     <enum-type name="Country"/>
     <enum-type name="DataSizeFormat" flags="DataSizeFormats"/>
     <enum-type name="FloatingPointPrecisionOption" python-type="IntEnum"/>
@@ -1382,9 +1384,19 @@
             <rename to="format"/>
         </modify-argument>
     </modify-function>
-    <modify-function signature="toDate(QString,QLocale::FormatType)const">
+    <modify-function signature="toDate(QString,QLocale::FormatType,int)const">
         <modify-argument index="2">
             <rename to="format"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="^toDate(Time)?\(QString,[^,]+,int\)const$">
+        <modify-argument index="3">
+            <replace-default-expression with="1900"/> <!-- private FirstTwoDigitYear -->
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="^toDate(Time)?\(QString,[^,]+,QCalendar,int\)const$">
+        <modify-argument index="4">
+            <replace-default-expression with="1900"/> <!-- private FirstTwoDigitYear -->
         </modify-argument>
     </modify-function>
     <modify-function signature="toUInt(QString,bool*)const">
@@ -1717,7 +1729,9 @@
         <reference-count action="set"/>
       </modify-argument>
     </modify-function>
-
+    <!-- FIXME PYSIDE 7: Remove this (QT6_DECL_NEW_OVERLOAD_TAIL) -->
+    <modify-function signature="^moveToThread\(.*\)" remove="all"/>
+    <declare-function signature="moveToThread(QThread*)" return-type="bool"/>
     <modify-function signature="deleteLater()">
       <modify-argument index="this">
         <define-ownership owner="c++"/>
@@ -2396,6 +2410,7 @@
   <value-type name="QOperatingSystemVersionBase" since="6.3">
       <enum-type name="OSType"/>
   </value-type>
+  <value-type name="QOperatingSystemVersionUnexported" since="6.3" generate="false"/>
   <value-type name="QOperatingSystemVersion">
       <enum-type name="OSType"/>
       <modify-function signature="QOperatingSystemVersion(const QOperatingSystemVersionBase&amp;)" remove="all"/>
@@ -2813,7 +2828,7 @@
     <add-function signature="readQVariant()" return-type="QVariant">
         <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="stream-read-method"/>
     </add-function>
-    <modify-function signature="readRawData(char*,int)">
+    <modify-function signature="readRawData(char*,qint64)">
         <modify-argument index="return" pyi-type="bytes"/>
         <modify-argument index="1">
             <remove-argument />
@@ -2824,7 +2839,7 @@
         <inject-code class="target" position="beginning"
                      file="../glue/qtcore.cpp" snippet="qdatastream-writerawdata-pybuffer"/>
     </add-function>
-    <modify-function signature="writeRawData(const char*,int)">
+    <modify-function signature="writeRawData(const char*,qint64)">
         <modify-argument index="1" pyi-type="str"/>
         <modify-argument index="2">
             <remove-argument />
@@ -2906,7 +2921,7 @@
     <add-function signature="writeString(QString)">
         <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="stream-write-method"/>
     </add-function>
-    <modify-function signature="readBytes(char*&amp;,uint&amp;)">
+    <modify-function signature="readBytes(char*&amp;,qint64&amp;)">
         <modify-argument index="return">
             <replace-type modified-type="PyTuple"/>
         </modify-argument>
@@ -2915,8 +2930,9 @@
         </modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdatastream-read-bytes"/>
     </modify-function>
+    <modify-function signature="readBytes(char*&amp;,uint&amp;)" remove="all"/>
 
-    <modify-function signature="writeBytes(const char*,uint)">
+    <modify-function signature="writeBytes(const char*,qint64)">
         <modify-argument index="1">
             <replace-type modified-type="PyBuffer"/>
             <conversion-rule class="native">
@@ -3579,7 +3595,8 @@
   <!-- TODO: this need be removed -->
   <suppress-warning text="^skipping.*function '.*', unmatched return type '.*$"/>
   <suppress-warning text="^skipping.*function '.*', unmatched type '.*$"/>
-  <suppress-warning text="skipping public field 'QStringConverter::iface' with unmatched type 'QStringConverter::Interface'"/>
+  <suppress-warning text="skipping protected field 'QStringConverter::iface' with unmatched type 'QStringConverter::Interface'"/>
+  <suppress-warning text="^skipping public field 'Qt::.*' with unmatched type 'Qt::.*ordering'$"/>
   <suppress-warning text="skipping public field 'Qt::Uninitialized' with unmatched type 'Qt::Initialization'"/>
   <suppress-warning text="skipping public field 'State::clearFn' with unmatched type 'void'"/>
   <suppress-warning text="template baseclass 'QListSpecialMethods&lt;T&gt;' of 'QList' is not known"/>

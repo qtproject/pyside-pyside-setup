@@ -11,6 +11,7 @@ ${QtQuick3D_GEN_DIR}/qquick3dgeometry_attribute_wrapper.cpp
 ${QtQuick3D_GEN_DIR}/qquick3dgeometry_targetattribute_wrapper.cpp
 ${QtQuick3D_GEN_DIR}/qquick3dinstancing_wrapper.cpp
 ${QtQuick3D_GEN_DIR}/qquick3dinstancing_instancetableentry_wrapper.cpp
+${QtQuick3D_GEN_DIR}/qquick3drenderextension_wrapper.cpp
 ${QtQuick3D_GEN_DIR}/qquick3dtexturedata_wrapper.cpp
 # module is always needed
 ${QtQuick3D_GEN_DIR}/qtquick3d_module_wrapper.cpp

@@ -58,3 +58,65 @@ quint8 item = %CONVERTTOCPP[quint8](_value);
 %CPPSELF.c[_i] = item;
 return 0;
 // @snippet qipv6address-setitem
+
+// @snippet qrestaccessmanager-functor
+class QRestFunctor
+{
+public:
+    explicit QRestFunctor(PyObject *callable) noexcept : m_callable(callable)
+    {
+        Py_INCREF(callable);
+    }
+
+    void operator()(QRestReply &restReply);
+
+private:
+    PyObject *m_callable;
+};
+
+void QRestFunctor::operator()(QRestReply &restReply)
+{
+    Q_ASSERT(m_callable);
+    Shiboken::GilState state;
+    Shiboken::AutoDecRef arglist(PyTuple_New(1));
+    auto *restReplyPtr = &restReply;
+    auto *pyRestReply = %CONVERTTOPYTHON[QRestReply*](restReplyPtr);
+    PyTuple_SET_ITEM(arglist.object(), 0, pyRestReply);
+    Shiboken::AutoDecRef ret(PyObject_CallObject(m_callable, arglist));
+    Py_DECREF(m_callable);
+    m_callable = nullptr;
+}
+// @snippet qrestaccessmanager-functor
+
+// @snippet qrestaccessmanager-callback
+auto *networkReply = %CPPSELF.%FUNCTION_NAME(%1, %2, QRestFunctor(%PYARG_3));
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](networkReply);
+// @snippet qrestaccessmanager-callback
+
+// @snippet qrestaccessmanager-data-callback
+auto *networkReply = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, QRestFunctor(%PYARG_4));
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](networkReply);
+// @snippet qrestaccessmanager-data-callback
+
+// @snippet qrestaccessmanager-method-data-callback
+auto *networkReply = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, %4, QRestFunctor(%PYARG_5));
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](networkReply);
+// @snippet qrestaccessmanager-method-data-callback
+
+// @snippet qrestreply-readjson
+QJsonParseError jsonParseError;
+std::optional<QJsonDocument> documentOptional = %CPPSELF.%FUNCTION_NAME(&jsonParseError);
+
+PyObject *pyDocument{};
+if (documentOptional.has_value()) {
+    const auto &document = documentOptional.value();
+    pyDocument = %CONVERTTOPYTHON[QJsonDocument](document);
+} else {
+    pyDocument = Py_None;
+    Py_INCREF(Py_None);
+}
+
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SetItem(%PYARG_0, 0, pyDocument);
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[QJsonParseError](jsonParseError));
+// @snippet qrestreply-readjson

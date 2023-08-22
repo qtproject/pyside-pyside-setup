@@ -133,11 +133,6 @@
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="Q3DCamera">
-    <enum-type name="CameraPreset"/>
-  </object-type>
-  <object-type name="Q3DLight"/>
-  <object-type name="Q3DObject"/>
   <object-type name="Q3DScatter">
     <modify-function signature="addAxis(QValue3DAxis*)">
       <modify-argument index="1">
@@ -201,6 +196,7 @@
     <enum-type name="RenderingMode"/>
     <enum-type name="SelectionFlag" flags="SelectionFlags"/>
     <enum-type name="ShadowQuality"/>
+    <enum-type name="CameraPreset" since="6.7"/>
     <modify-function signature="addCustomItem(QCustom3DItem*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>

@@ -116,6 +116,7 @@ ${QtWidgets_GEN_DIR}/qprogressdialog_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qproxystyle_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qpushbutton_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qradiobutton_wrapper.cpp
+${QtWidgets_GEN_DIR}/qrhiwidget_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qrubberband_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qscrollarea_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qscrollbar_wrapper.cpp

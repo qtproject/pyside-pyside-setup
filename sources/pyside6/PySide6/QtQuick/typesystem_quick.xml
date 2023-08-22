@@ -75,6 +75,11 @@
         <!-- TODO: Find a way to wrap `union ItemChangeData {}` -->
     </object-type>
 
+    <object-type name="QQuickRhiItemRenderer" since="6.7"/>
+    <object-type name="QQuickRhiItem" since="6.7">
+        <enum-type name="TextureFormat"/>
+    </object-type>
+
     <object-type name="QQuickItemGrabResult"/>
 
     <object-type name="QQuickPaintedItem">
@@ -89,7 +94,9 @@
         <modify-function signature="^fromVulkanImage\(.*$" remove="all"/>
     </value-type>
 
-    <object-type name="QQuickTextDocument"/>
+    <object-type name="QQuickTextDocument">
+        <enum-type name="Status" since="6.7"/>
+    </object-type>
 
     <object-type name="QQuickView">
         <enum-type name="ResizeMode"/>
@@ -180,6 +187,10 @@
     <object-type name="QSGSimpleRectNode"/>
     <object-type name="QSGSimpleTextureNode">
         <enum-type name="TextureCoordinatesTransformFlag" flags="TextureCoordinatesTransformMode"/>
+    </object-type>
+    <object-type name="QSGTextNode" since="6.7">
+        <enum-type name="TextStyle"/>
+        <enum-type name="RenderType"/>
     </object-type>
     <object-type name="QSGRectangleNode"/>
     <object-type name="QSGRendererInterface">

@@ -8,14 +8,17 @@ ${QtWebEngineCore_GEN_DIR}/qwebenginecertificateerror_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecontextmenurequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_filterrequest_wrapper.cpp
+# FIXME ${QtWebEngineCore_GEN_DIR}/qwebenginedesktopmediarequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginedownloadrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefilesystemaccessrequest_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebenginefindtextresult_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefullscreenrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginehistory_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginehistoryitem_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginehistorymodel_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginehttprequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineloadinginfo_wrapper.cpp
+# FIXME ${QtWebEngineCore_GEN_DIR}/qwebenginemediasourcemodel_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginenewwindowrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginenotification_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginepage_wrapper.cpp
@@ -25,12 +28,13 @@ ${QtWebEngineCore_GEN_DIR}/qwebengineregisterprotocolhandlerrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginescript_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginescriptcollection_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginesettings_wrapper.cpp
-${QtWebEngineCore_GEN_DIR}/qwebenginefindtextresult_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineurlrequestinfo_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineurlrequestinterceptor_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineurlrequestjob_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineurlscheme_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineurlschemehandler_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebenginewebauthpinrequest_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebenginewebauthuxrequest_wrapper.cpp
 # module is always needed
 ${QtWebEngineCore_GEN_DIR}/qtwebenginecore_module_wrapper.cpp
 )

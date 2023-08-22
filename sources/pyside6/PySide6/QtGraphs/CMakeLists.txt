@@ -31,9 +31,6 @@ ${QtGraphs_GEN_DIR}/qsurface3dseries_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qsurfacedataitem_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qsurfacedataproxy_wrapper.cpp
 ${QtGraphs_GEN_DIR}/q3dbars_wrapper.cpp
-${QtGraphs_GEN_DIR}/q3dcamera_wrapper.cpp
-${QtGraphs_GEN_DIR}/q3dlight_wrapper.cpp
-${QtGraphs_GEN_DIR}/q3dobject_wrapper.cpp
 ${QtGraphs_GEN_DIR}/q3dscatter_wrapper.cpp
 ${QtGraphs_GEN_DIR}/q3dscene_wrapper.cpp
 ${QtGraphs_GEN_DIR}/q3dsurface_wrapper.cpp

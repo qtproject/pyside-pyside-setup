@@ -18,6 +18,7 @@ ${QtNetwork_GEN_DIR}/qdnstextrecord_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhostaddress_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhostinfo_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhstspolicy_wrapper.cpp
+${QtNetwork_GEN_DIR}/qhttpheaders_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhttpmultipart_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhttppart_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhttp2configuration_wrapper.cpp
@@ -38,7 +39,10 @@ ${QtNetwork_GEN_DIR}/qnetworkproxyfactory_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkproxyquery_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkreply_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qnetworkrequest_wrapper.cpp
+${QtNetwork_GEN_DIR}/qnetworkrequestfactory_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qpassworddigestor_wrapper.cpp
+${QtNetwork_GEN_DIR}/qrestaccessmanager_wrapper.cpp
+${QtNetwork_GEN_DIR}/qrestreply_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qssl_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qsslcertificate_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qsslcertificateextension_wrapper.cpp
