@@ -287,6 +287,8 @@ type_map.update({
     "zero(Any)": None,
     # This can be refined by importing numpy.typing optionally, but better than nothing.
     "numpy.ndarray": typing.List[typing.Any],
+    "std.array[int, 4]": typing.List[int],
+    "std.array[float, 4]": typing.List[float]
     })
 
 type_map.update({

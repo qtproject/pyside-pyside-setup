@@ -16,6 +16,68 @@ set(QtGui_SRC_UNITY_EXCLUDED_SRC
 set_property(SOURCE ${QtGui_SRC_UNITY_EXCLUDED_SRC}
              PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
 
+set(QtGui_SRC_RHI
+${QtGui_GEN_DIR}/qrhi_wrapper.cpp
+${QtGui_GEN_DIR}/qrhibuffer_wrapper.cpp
+${QtGui_GEN_DIR}/qrhicolorattachment_wrapper.cpp
+${QtGui_GEN_DIR}/qrhicommandbuffer_wrapper.cpp
+${QtGui_GEN_DIR}/qrhicomputepipeline_wrapper.cpp
+${QtGui_GEN_DIR}/qrhidepthstencilclearvalue_wrapper.cpp
+${QtGui_GEN_DIR}/qrhidriverinfo_wrapper.cpp
+${QtGui_GEN_DIR}/qrhigles2initparams_wrapper.cpp
+${QtGui_GEN_DIR}/qrhigles2nativehandles_wrapper.cpp
+${QtGui_GEN_DIR}/qrhigraphicspipeline_targetblend_wrapper.cpp
+${QtGui_GEN_DIR}/qrhigraphicspipeline_wrapper.cpp
+${QtGui_GEN_DIR}/qrhiinitparams_wrapper.cpp
+${QtGui_GEN_DIR}/qrhinativehandles_wrapper.cpp
+${QtGui_GEN_DIR}/qrhinullinitparams_wrapper.cpp
+${QtGui_GEN_DIR}/qrhireadbackdescription_wrapper.cpp
+${QtGui_GEN_DIR}/qrhireadbackresult_wrapper.cpp
+${QtGui_GEN_DIR}/qrhirenderbuffer_wrapper.cpp
+${QtGui_GEN_DIR}/qrhirenderpassdescriptor_wrapper.cpp
+${QtGui_GEN_DIR}/qrhirendertarget_wrapper.cpp
+${QtGui_GEN_DIR}/qrhiresource_wrapper.cpp
+${QtGui_GEN_DIR}/qrhiresourceupdatebatch_wrapper.cpp
+${QtGui_GEN_DIR}/qrhisampler_wrapper.cpp
+${QtGui_GEN_DIR}/qrhiscissor_wrapper.cpp
+${QtGui_GEN_DIR}/qrhishaderresourcebinding_textureandsampler_wrapper.cpp
+${QtGui_GEN_DIR}/qrhishaderresourcebinding_data_storagebufferdata_wrapper.cpp
+${QtGui_GEN_DIR}/qrhishaderresourcebinding_data_storageimagedata_wrapper.cpp
+${QtGui_GEN_DIR}/qrhishaderresourcebinding_data_wrapper.cpp
+${QtGui_GEN_DIR}/qrhishaderresourcebinding_wrapper.cpp
+${QtGui_GEN_DIR}/qrhishaderresourcebindings_wrapper.cpp
+${QtGui_GEN_DIR}/qrhishaderstage_wrapper.cpp
+${QtGui_GEN_DIR}/qrhistats_wrapper.cpp
+${QtGui_GEN_DIR}/qrhiswapchain_wrapper.cpp
+${QtGui_GEN_DIR}/qrhiswapchainrendertarget_wrapper.cpp
+${QtGui_GEN_DIR}/qrhitexture_wrapper.cpp
+${QtGui_GEN_DIR}/qrhitexturecopydescription_wrapper.cpp
+${QtGui_GEN_DIR}/qrhitexturerendertarget_wrapper.cpp
+${QtGui_GEN_DIR}/qrhitexturerendertargetdescription_wrapper.cpp
+${QtGui_GEN_DIR}/qrhitexturesubresourceuploaddescription_wrapper.cpp
+${QtGui_GEN_DIR}/qrhitextureuploaddescription_wrapper.cpp
+${QtGui_GEN_DIR}/qrhitextureuploadentry_wrapper.cpp
+${QtGui_GEN_DIR}/qrhivertexinputattribute_wrapper.cpp
+${QtGui_GEN_DIR}/qrhivertexinputbinding_wrapper.cpp
+${QtGui_GEN_DIR}/qrhivertexinputlayout_wrapper.cpp
+${QtGui_GEN_DIR}/qrhiviewport_wrapper.cpp
+${QtGui_GEN_DIR}/qshader_wrapper.cpp
+${QtGui_GEN_DIR}/qshadercode_wrapper.cpp
+${QtGui_GEN_DIR}/qshaderkey_wrapper.cpp
+${QtGui_GEN_DIR}/qshaderversion_wrapper.cpp
+)
+
+if (ENABLE_WIN)
+    list(APPEND QtGui_SRC_RHI
+         ${QtGui_GEN_DIR}/qrhid3d11initparams_wrapper.cpp
+         ${QtGui_GEN_DIR}/qrhid3d11nativehandles_wrapper.cpp
+         ${QtGui_GEN_DIR}/qrhid3d12initparams_wrapper.cpp
+         ${QtGui_GEN_DIR}/qrhid3d12nativehandles_wrapper.cpp)
+elseif (ENABLE_MAC)
+    list(APPEND QtGui_SRC_RHI
+         ${QtGui_GEN_DIR}/qrhimetalinitparams_wrapper.cpp)
+endif()
+
 set(QtGui_SRC
 ${QtGui_SRC_UNITY_EXCLUDED_SRC}
 ${QtGui_GEN_DIR}/qabstractfileiconprovider_wrapper.cpp
@@ -162,6 +224,7 @@ ${QtGui_GEN_DIR}/qscreen_wrapper.cpp
 ${QtGui_GEN_DIR}/qshortcut_wrapper.cpp
 ${QtGui_GEN_DIR}/qrasterwindow_wrapper.cpp
 ${QtGui_GEN_DIR}/qrawfont_wrapper.cpp
+${QtGui_SRC_RHI}
 ${QtGui_GEN_DIR}/qscrollevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qscrollprepareevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qstatictext_wrapper.cpp
@@ -220,6 +283,10 @@ ${QtGui_GEN_DIR}/qwindowstatechangeevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qtgui_module_wrapper.cpp
 )
 
+set(QtGui_private_include_dirs
+    ${Qt${QT_MAJOR_VERSION}Core_PRIVATE_INCLUDE_DIRS}
+    ${Qt${QT_MAJOR_VERSION}Gui_PRIVATE_INCLUDE_DIRS})
+
 configure_file("${QtGui_SOURCE_DIR}/QtGui_global.post.h.in"
                "${QtGui_BINARY_DIR}/QtGui_global.post.h" @ONLY)
 
@@ -228,6 +295,7 @@ set(QtGui_include_dirs  ${QtGui_SOURCE_DIR}
                         ${pyside6_SOURCE_DIR}
                         ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
                         ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
+                        ${QtGui_private_include_dirs}
                         ${libpyside_SOURCE_DIR}
                         ${QtCore_GEN_DIR}
                         )
@@ -243,7 +311,8 @@ create_pyside_module(NAME QtGui
                      SOURCES QtGui_SRC
                      STATIC_SOURCES QPYTEXTOBJECT_MOC
                      TYPESYSTEM_NAME ${QtGui_BINARY_DIR}/typesystem_gui.xml
-                     DROPPED_ENTRIES QtGui_DROPPED_ENTRIES)
+                     DROPPED_ENTRIES QtGui_DROPPED_ENTRIES
+                     ADDITIONAL_INCLUDE_DIRS QtGui_private_include_dirs)
 
 install(FILES ${pyside6_SOURCE_DIR}/qpytextobject.h
               ${pyside6_SOURCE_DIR}/qtguihelper.h

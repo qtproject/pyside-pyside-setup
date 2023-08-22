@@ -320,6 +320,7 @@ def module_QtGui() -> ModuleData:
         "typesystem_gui_mac.xml",
         "typesystem_gui_win.xml",
         "typesystem_gui_x11.xml",
+        "typesystem_gui_rhi.xml"
     ]
 
     _metatypes = [

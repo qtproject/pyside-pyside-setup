@@ -868,6 +868,17 @@ const QRect cppResult = *(%CPPSELF.cbegin() + _i);
 return %CONVERTTOPYTHON[QRect](cppResult);
 // @snippet qregion-getitem
 
+// Some RHI functions take a std::initializer_list<>. Add functions
+// to convert from list.
+
+// @snippet qrhi-initializer-list
+%CPPSELF.%FUNCTION_NAME(%1.cbegin(), %1.cend());
+// @snippet qrhi-initializer-list
+
+// @snippet qrhi-commandbuffer-setvertexinput
+%CPPSELF.%FUNCTION_NAME(%1, %2.size(), %2.constData(), %3, %4, %5);
+// @snippet qrhi-commandbuffer-setvertexinput
+
 /*********************************************************************
  * CONVERSIONS
  ********************************************************************/

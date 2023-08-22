@@ -15,4 +15,5 @@
     <load-typesystem name="QtGui/typesystem_gui_x11.xml" generate="yes"/>
     <?endif?>
     <load-typesystem name="QtGui/typesystem_gui_common.xml" generate="yes"/>
+    <load-typesystem name="QtGui/typesystem_gui_rhi.xml" generate="yes"/>
 </typesystem>

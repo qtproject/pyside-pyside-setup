@@ -1,3 +1,6 @@
 #include "qpytextobject.h"  // PySide class
+#include <rhi/qrhi.h>
+#include <rhi/qrhi_platform.h>
+#include <rhi/qshader.h>
 #include <qtguihelper.h>
 void qt_set_sequence_auto_mnemonic(bool b);
