@@ -1,0 +1,51 @@
+Qt for Python 6.5.3 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - [PYSIDE-1884] The __doc__ attribute is now used for signatures when
+                 provided.
+ - [PYSIDE-2235] Type hints: setParent() now accepts an Optional object.
+ - [PYSIDE-2272] The signatures of the qmlRegister() functions have been
+                 fixed.
+ - [PYSIDE-2387] The signature of qVersion() has been fixed.
+ - [PYSIDE-2394] A deprecation warning for QSqlQueryModel.setQuery(QSqlQuery)
+                 has been removed.
+ - [PYSIDE-2395] The signatures for QClipboard.setPixmap() and
+                 QClipboard.setImage() have been fixed.
+ - [PYSIDE-2402] The modules QtDBus and QtHttpServer have been enabled
+                 on Windows.
+ - [PYSIDE-2411] The documentation for QPainter.drawText() has been fixed.
+ - [PYSIDE-2412] A bug removing rows in the Tetrix example has been fixed.
+ - [PYSIDE-2415] Support for QQmlComponent in Property has been added.
+ - [PYSIDE-2417] Overflows when passing int to functions taking floats
+                 have been fixed.
+ - [PYSIDE-2418] Connections to base class slots incorrectly falling back to
+                 the global receiver have been fixed.
+ - [PYSIDE-2425] Theme switching of the chart theme example has been fixed.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - The generator progress messages have been changed to avoid losing warnings
+   with ninja.
+ - [PYSIDE-2174] The include of <span> is no longer generated when using
+                 C++ 17.
+ - [PYSIDE-2394] It is now possible to override a C++ deprecation attribute.
+ - [PYSIDE-2411] Modified return types of void functions are now properly
+                 documented.
