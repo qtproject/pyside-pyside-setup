@@ -189,6 +189,9 @@ if __name__ == "__main__":
     module_dependency_dict = {}
     for m in SOURCE_DIR.glob("Qt*"):
         module = m.name
+        # QtGraphs duplicates symbols from QtDataVisualization causing shiboken errors
+        if module == "QtDataVisualization":
+            continue
         qt_include_path = qt_include_dir / module
         if qt_include_path.is_dir():
             module_dependency_dict[module] = required_typesystems(module)
