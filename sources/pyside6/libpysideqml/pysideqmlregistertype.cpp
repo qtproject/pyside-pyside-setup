@@ -216,6 +216,8 @@ int qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versionMajor,
     type.version = QTypeRevision::fromVersion(versionMajor, versionMinor);
     type.typeName = qmlName;
     type.instanceMetaObject = metaObject;
+    type.extensionMetaObject = nullptr;
+    type.extensionObjectCreate = nullptr;
 
     if (isQObject) {
         // FIXME: Fix this to assign new type ids each time.
