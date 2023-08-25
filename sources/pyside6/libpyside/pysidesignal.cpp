@@ -818,7 +818,7 @@ static const char *MetaSignal_SignatureStrings[] = {
     nullptr}; // Sentinel
 
 static const char *Signal_SignatureStrings[] = {
-    "PySide6.QtCore.Signal(self,*types:type,name:str=nullptr,arguments:str=nullptr)",
+    "PySide6.QtCore.Signal(self,*types:type,name:str=nullptr,arguments:typing.List[str]=nullptr)",
     "1:PySide6.QtCore.Signal.__get__(self,instance:None,owner:Optional[typing.Any])->"
         "PySide6.QtCore.Signal",
     "0:PySide6.QtCore.Signal.__get__(self,instance:PySide6.QtCore.QObject,"
