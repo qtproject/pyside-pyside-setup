@@ -159,6 +159,19 @@ Python type. The ``name`` keyword behaves the same way as in ``Signal()``. If
 nothing is passed as name then the new slot will have the same name as the
 function that is being decorated.
 
+We recommend marking all methods used by signal connections with a
+``@QtCore.Slot()`` decorator. Not doing causes run-time overhead due to the
+method being added to the ``QMetaObject`` when creating the connection. This is
+particularly important for ``QObject`` classes registered with QML, where
+missing decorators can introduce bugs.
+
+Missing decorators can be diagnosed by setting activating warnings of the
+logging category ``qt.pyside.libpyside``; for example by setting the
+environment variable:
+
+.. code-block:: bash
+
+    export QT_LOGGING_RULES="qt.pyside.libpyside.warning=true"
 
 .. _overloading-signals-and-slots:
 
