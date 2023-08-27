@@ -63,6 +63,7 @@ PyObject *_get_class_of_cf(PyObject *ob_cf);
 PyObject *_get_class_of_sm(PyObject *ob_sm);
 PyObject *_get_class_of_descr(PyObject *ob);
 PyObject *_address_to_stringlist(PyObject *numkey);
+int _build_func_to_type(PyObject *obtype);
 int _finish_nested_classes(PyObject *dict);
 
 #ifdef PYPY_VERSION

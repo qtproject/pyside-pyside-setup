@@ -293,7 +293,7 @@ PyObject *_address_to_stringlist(PyObject *numkey)
     return res_list;
 }
 
-static int _build_func_to_type(PyObject *obtype)
+int _build_func_to_type(PyObject *obtype)
 {
     /*
      * There is no general way to directly get the type of a static method.
@@ -369,28 +369,6 @@ static int _build_func_to_type(PyObject *obtype)
         // Then we insert the mapping for static methods.
         if (meth->ml_flags & METH_STATIC) {
             if (PyDict_SetItem(pyside_globals->map_dict, look, obtype) < 0)
-                return -1;
-        }
-    }
-    return 0;
-}
-
-int _finish_nested_classes(PyObject *obdict)
-{
-    PyObject *key, *value, *obtype;
-    PyTypeObject *subtype;
-    Py_ssize_t pos = 0;
-
-    if (obdict == nullptr)
-        return -1;
-    while (PyDict_Next(obdict, &pos, &key, &value)) {
-        if (PyType_Check(value)) {
-            obtype = value;
-            if (_build_func_to_type(obtype) < 0)
-                return -1;
-            // now continue with nested cases
-            subtype = reinterpret_cast<PyTypeObject *>(obtype);
-            if (_finish_nested_classes(subtype->tp_dict) < 0)
                 return -1;
         }
     }

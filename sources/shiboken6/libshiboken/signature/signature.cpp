@@ -428,8 +428,6 @@ static int PySide_FinishSignatures(PyObject *module, const char *signatures[])
         if (PyCFunction_Check(func))
             if (PyDict_SetItem(pyside_globals->map_dict, func, module) < 0)
                 return -1;
-    if (_finish_nested_classes(obdict) < 0)
-        return -1;
     // The finish_import function will not work the first time since phase 2
     // was not yet run. But that is ok, because the first import is always for
     // the shiboken module (or a test module).
@@ -451,10 +449,12 @@ static int PySide_FinishSignatures(PyObject *module, const char *signatures[])
 
 int InitSignatureStrings(PyTypeObject *type, const char *signatures[])
 {
+    // PYSIDE-2404: This function now also builds the mapping for static methods.
+    //              It was one missing spot to let Lazy import work.
     init_shibokensupport_module();
     auto *ob_type = reinterpret_cast<PyObject *>(type);
     int ret = PySide_BuildSignatureArgs(ob_type, signatures);
-    if (ret < 0) {
+    if (ret < 0 || _build_func_to_type(ob_type) < 0) {
         PyErr_Print();
         PyErr_SetNone(PyExc_ImportError);
     }
