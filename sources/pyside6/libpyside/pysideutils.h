@@ -10,6 +10,7 @@
 
 #include <QtCore/QtGlobal>
 
+QT_FORWARD_DECLARE_CLASS(QDebug)
 QT_FORWARD_DECLARE_CLASS(QString)
 QT_FORWARD_DECLARE_CLASS(QStringView)
 
@@ -35,6 +36,24 @@ PYSIDE_API QString pyStringToQString(PyObject *str);
 PYSIDE_API QString pyPathToQString(PyObject *path);
 
 PYSIDE_API bool isCompiledMethod(PyObject *callback);
+
+struct debugPyTypeObject
+{
+    PYSIDE_API explicit debugPyTypeObject(const PyTypeObject *o) noexcept;
+
+    const PyTypeObject *m_object;
+};
+
+PYSIDE_API QDebug operator<<(QDebug debug, const debugPyTypeObject &o);
+
+struct debugPyObject
+{
+    PYSIDE_API explicit debugPyObject(PyObject *o) noexcept;
+
+    PyObject *m_object;
+};
+
+PYSIDE_API QDebug operator<<(QDebug debug, const debugPyObject &o);
 
 } //namespace PySide
 

@@ -35,6 +35,7 @@
 
 #include <QtCore/QByteArray>
 #include <QtCore/QCoreApplication>
+#include <QtCore/QDebug>
 #include <QtCore/QDir>
 #include <QtCore/QFileInfo>
 #include <QtCore/QMetaMethod>
@@ -975,6 +976,112 @@ QMetaType qMetaTypeFromPyType(PyTypeObject *pyType)
     if (Shiboken::ObjectType::checkType(pyType))
         return QMetaType::fromName(Shiboken::ObjectType::getOriginalName(pyType));
     return QMetaType::fromName(pyType->tp_name);
+}
+
+debugPyTypeObject::debugPyTypeObject(const PyTypeObject *o) noexcept
+    : m_object(o)
+{
+}
+
+QDebug operator<<(QDebug debug, const debugPyTypeObject &o)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "PyTypeObject(";
+    if (o.m_object)
+        debug << '"' << o.m_object->tp_name << '"';
+    else
+        debug << '0';
+    debug << ')';
+    return debug;
+}
+
+static void formatPyObject(PyObject *obj, QDebug &debug);
+
+static void formatPySequence(PyObject *obj, QDebug &debug)
+{
+    const Py_ssize_t size = PySequence_Size(obj);
+    debug << size << " [";
+    for (Py_ssize_t i = 0; i < size; ++i) {
+        if (i)
+            debug << ", ";
+        Shiboken::AutoDecRef item(PySequence_GetItem(obj, i));
+        formatPyObject(item.object(), debug);
+    }
+    debug << ']';
+}
+
+static void formatPyDict(PyObject *obj, QDebug &debug)
+{
+    PyObject *key;
+    PyObject *value;
+    Py_ssize_t pos = 0;
+    bool first = true;
+    debug << '{';
+    while (PyDict_Next(obj, &pos, &key, &value) != 0) {
+        if (first)
+            first = false;
+        else
+            debug << ", ";
+        formatPyObject(key, debug);
+        debug << '=';
+        formatPyObject(value, debug);
+    }
+    debug << '}';
+}
+
+static inline const char *pyTypeName(PyObject *obj)
+{
+    return Py_TYPE(obj)->tp_name;
+}
+
+static void formatPyObjectValue(PyObject *obj, QDebug &debug)
+{
+    if (PyType_Check(obj) != 0)
+        debug << "type: \"" << pyTypeName(obj) << '"';
+    else if (PyLong_Check(obj) != 0)
+        debug << PyLong_AsLongLong(obj);
+    else if (PyFloat_Check(obj) != 0)
+        debug << PyFloat_AsDouble(obj);
+    else if (PyUnicode_Check(obj) != 0)
+        debug << '"' << pyStringToQString(obj) << '"';
+    else if (PySequence_Check(obj) != 0)
+        formatPySequence(obj, debug);
+    else if (PyDict_Check(obj) != 0)
+        formatPyDict(obj, debug);
+    else
+        debug << obj;
+}
+
+static void formatPyObject(PyObject *obj, QDebug &debug)
+{
+    if (obj == nullptr) {
+        debug << '0';
+        return;
+    }
+    if (obj == Py_None) {
+        debug << "None";
+        return;
+    }
+    if (PyType_Check(obj) == 0)
+        debug << pyTypeName(obj) << ": ";
+    formatPyObjectValue(obj, debug);
+}
+
+debugPyObject::debugPyObject(PyObject *o) noexcept : m_object(o)
+{
+}
+
+QDebug operator<<(QDebug debug, const debugPyObject &o)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "PyObject(";
+    formatPyObject(o.m_object, debug);
+    debug << ')';
+    return debug;
 }
 
 } //namespace PySide
