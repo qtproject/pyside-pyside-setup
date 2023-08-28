@@ -3,6 +3,7 @@
 
 #include "pysidesignal_p.h"
 #include "pysideslot_p.h"
+#include "pysidestaticstrings.h"
 
 #include <shiboken.h>
 
@@ -95,7 +96,6 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
 
 PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
-    static PyObject *pySlotName = nullptr;
     PyObject *callback = nullptr;
 
     if (!PyArg_UnpackTuple(args, "Slot.__call__", 1, 1, &callback))
@@ -117,11 +117,9 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
         const QByteArray signature =
             returnType + ' ' + data->slotData->name + '(' + data->slotData->args + ')';
 
-        if (!pySlotName)
-            pySlotName = String::fromCString(PYSIDE_SLOT_LIST_ATTR);
-
         PyObject *pySignature = String::fromCString(signature);
         PyObject *signatureList = nullptr;
+        PyObject *pySlotName = PySide::PySideMagicName::slot_list_attr();
         if (PyObject_HasAttr(callback, pySlotName)) {
             signatureList = PyObject_GetAttr(callback, pySlotName);
         } else {

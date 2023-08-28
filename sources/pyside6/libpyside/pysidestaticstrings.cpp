@@ -34,5 +34,6 @@ STATIC_STRING_IMPL(doc, "__doc__")
 STATIC_STRING_IMPL(func, "__func__")
 STATIC_STRING_IMPL(name, "__name__")
 STATIC_STRING_IMPL(property_methods, "__property_methods__")
+STATIC_STRING_IMPL(slot_list_attr, "_slots")
 } // namespace PyMagicName
 } // namespace PySide

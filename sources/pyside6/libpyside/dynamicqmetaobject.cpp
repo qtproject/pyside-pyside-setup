@@ -10,6 +10,7 @@
 #include "pysideslot_p.h"
 #include "pysideqenum.h"
 #include "pyside_p.h"
+#include "pysidestaticstrings.h"
 
 #include <shiboken.h>
 
@@ -608,7 +609,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
         }
     }
 
-    AutoDecRef slotAttrName(String::fromCString(PYSIDE_SLOT_LIST_ATTR));
+    PyObject *slotAttrName = PySide::PySideMagicName::slot_list_attr();
     // PYSIDE-315: Now take care of the rest.
     // Signals and slots should be separated, unless the types are modified, later.
     // We check for this using "is_sorted()". Sorting no longer happens at all.

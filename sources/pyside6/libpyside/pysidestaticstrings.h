@@ -30,6 +30,7 @@ PYSIDE_API PyObject *doc();
 PYSIDE_API PyObject *func();
 PYSIDE_API PyObject *name();
 PYSIDE_API PyObject *property_methods();
+PYSIDE_API PyObject *slot_list_attr();
 } // namespace PyMagicName
 } // namespace PySide
 
