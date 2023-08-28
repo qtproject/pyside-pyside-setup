@@ -19,7 +19,7 @@ struct PySideSignalData
 
     QByteArray signalName;
     QList<Signature> signatures;
-    QByteArrayList *signalArguments = nullptr;
+    QByteArrayList signalArguments;
 };
 
 extern "C"

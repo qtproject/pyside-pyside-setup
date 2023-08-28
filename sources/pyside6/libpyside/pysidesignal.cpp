@@ -21,6 +21,7 @@
 #include <signature.h>
 
 #include <algorithm>
+#include <optional>
 #include <utility>
 #include <cstring>
 
@@ -45,8 +46,8 @@ QDebug operator<<(QDebug debug, const PySideSignalData &d)
     debug.nospace();
     debug << "PySideSignalData(\"" << d.signalName << "\", "
           << d.signatures;
-    if (d.signalArguments)
-        debug << ", signalArguments=\"" << *d.signalArguments << '"';
+    if (!d.signalArguments.isEmpty())
+        debug << ", signalArguments=" << d.signalArguments;
     debug << ')';
     return debug;
 }
@@ -74,6 +75,29 @@ static bool connection_Check(PyObject *o)
         + QByteArray::number(QT_VERSION_MAJOR)
         + QByteArrayLiteral(".QtCore.QMetaObject.Connection");
     return std::strcmp(o->ob_type->tp_name, typeName.constData()) == 0;
+}
+
+static std::optional<QByteArrayList> parseArgumentNames(PyObject *argArguments)
+{
+    QByteArrayList result;
+    if (argArguments == nullptr)
+        return result;
+    // Prevent a string from being split into a sequence of characters
+    if (PySequence_Check(argArguments) == 0 || PyUnicode_Check(argArguments) != 0)
+        return std::nullopt;
+    const Py_ssize_t argumentSize = PySequence_Size(argArguments);
+    result.reserve(argumentSize);
+    for (Py_ssize_t i = 0; i < argumentSize; ++i) {
+        Shiboken::AutoDecRef item(PySequence_GetItem(argArguments, i));
+        if (PyUnicode_Check(item.object()) == 0)
+            return std::nullopt;
+        Shiboken::AutoDecRef strObj(PyUnicode_AsUTF8String(item));
+        const char *s = PyBytes_AsString(strObj);
+        if (s == nullptr)
+            return std::nullopt;
+        result.append(QByteArray(s));
+    }
+    return result;
 }
 
 namespace PySide {
@@ -242,19 +266,12 @@ static int signalTpInit(PyObject *obSelf, PyObject *args, PyObject *kwds)
     if (argName)
         self->data->signalName = argName;
 
-    const Py_ssize_t argument_size =
-        argArguments != nullptr && PySequence_Check(argArguments)
-        ? PySequence_Size(argArguments) : 0;
-    if (argument_size > 0) {
-        self->data->signalArguments = new QByteArrayList();
-        self->data->signalArguments->reserve(argument_size);
-        for (Py_ssize_t i = 0; i < argument_size; ++i) {
-            Shiboken::AutoDecRef item(PySequence_GetItem(argArguments, i));
-            Shiboken::AutoDecRef strObj(PyUnicode_AsUTF8String(item));
-            if (char *s = PyBytes_AsString(strObj))
-                self->data->signalArguments->append(QByteArray(s));
-        }
+    auto argumentNamesOpt = parseArgumentNames(argArguments);
+    if (!argumentNamesOpt.has_value()) {
+        PyErr_SetString(PyExc_TypeError, "'arguments' must be a sequence of strings.");
+        return -1;
     }
+    self->data->signalArguments = argumentNamesOpt.value();
 
     for (Py_ssize_t i = 0, i_max = PyTuple_Size(args); i < i_max; i++) {
         PyObject *arg = PyTuple_GET_ITEM(args, i);
@@ -282,7 +299,6 @@ static void signalFree(void *vself)
     auto pySelf = reinterpret_cast<PyObject *>(vself);
     auto self = reinterpret_cast<PySideSignal *>(vself);
     if (self->data) {
-        delete self->data->signalArguments;
         delete self->data;
         self->data = nullptr;
     }

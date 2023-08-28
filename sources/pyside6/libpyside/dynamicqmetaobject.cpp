@@ -604,8 +604,8 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
                         //     Signal(..., arguments=['...', ...]
                         // the arguments are now on data-data->signalArguments
                         auto builder = m_builder->addSignal(sig);
-                        if (data->signalArguments && !data->signalArguments->isEmpty())
-                            builder.setParameterNames(*data->signalArguments);
+                        if (!data->signalArguments.isEmpty())
+                            builder.setParameterNames(data->signalArguments);
                     }
                 }
             }
