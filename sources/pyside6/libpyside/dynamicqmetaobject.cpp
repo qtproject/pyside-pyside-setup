@@ -24,6 +24,8 @@
 #include <cstring>
 #include <vector>
 
+using namespace Qt::StringLiterals;
+
 using namespace PySide;
 
 // MetaObjectBuilder: Provides the QMetaObject's returned by
@@ -215,7 +217,8 @@ int MetaObjectBuilderPrivate::addSlot(const QByteArray &signature,
         return -1;
     m_dirty = true;
     QMetaMethodBuilder methodBuilder = ensureBuilder()->addSlot(signature);
-    methodBuilder.setReturnType(type);
+    if (!type.isEmpty() && type != "void"_ba)
+        methodBuilder.setReturnType(type);
     return m_baseObject->methodCount() + methodBuilder.index();
 }
 
@@ -628,24 +631,11 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
                 // PYSIDE-198: PyFunction_Check does not work with Nuitka.
                 // Register slots.
                 if (PyObject_HasAttr(value, slotAttrName)) {
-                    PyObject *signatureList = PyObject_GetAttr(value, slotAttrName);
-                    for (Py_ssize_t i = 0, i_max = PyList_Size(signatureList); i < i_max; ++i) {
-                        PyObject *pySignature = PyList_GET_ITEM(signatureList, i);
-                        QByteArray signature(String::toCString(pySignature));
-                        // Split the slot type and its signature.
-                        QByteArray type;
-                        const int spacePos = signature.indexOf(' ');
-                        if (spacePos != -1) {
-                            type = signature.left(spacePos);
-                            signature.remove(0, spacePos + 1);
-                        }
-                        const int index = m_baseObject->indexOfSlot(signature);
-                        if (index == -1) {
-                            if (type.isEmpty() || type == "void")
-                                addSlot(signature);
-                            else
-                                addSlot(signature, type);
-                        }
+                    auto *capsule = PyObject_GetAttr(value, slotAttrName);
+                    const auto *entryList = PySide::Slot::dataListFromCapsule(capsule);
+                    for (const auto &e : *entryList) {
+                        if (m_baseObject->indexOfSlot(e.signature) == -1)
+                            addSlot(e.signature, e.resultType);
                     }
                 }
             }

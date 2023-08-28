@@ -29,6 +29,11 @@ typedef struct
 extern "C"
 {
 
+static void slotDataListDestructor(PyObject *o)
+{
+    delete PySide::Slot::dataListFromCapsule(o);
+}
+
 static int slotTpInit(PyObject *, PyObject *, PyObject *);
 static PyObject *slotCall(PyObject *, PyObject *, PyObject *);
 
@@ -114,22 +119,20 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
             data->slotData->name = funcName.isNull() ? "<no name>" : String::toCString(funcName);
         }
         const QByteArray returnType = QMetaObject::normalizedType(data->slotData->resultType);
-        const QByteArray signature =
-            returnType + ' ' + data->slotData->name + '(' + data->slotData->args + ')';
+        const QByteArray signature = data->slotData->name + '(' + data->slotData->args + ')';
 
-        PyObject *pySignature = String::fromCString(signature);
-        PyObject *signatureList = nullptr;
         PyObject *pySlotName = PySide::PySideMagicName::slot_list_attr();
+        PySide::Slot::DataList *entryList = nullptr;
         if (PyObject_HasAttr(callback, pySlotName)) {
-            signatureList = PyObject_GetAttr(callback, pySlotName);
+            auto *capsule = PyObject_GetAttr(callback, pySlotName);
+            entryList = PySide::Slot::dataListFromCapsule(capsule);
         } else {
-            signatureList = PyList_New(0);
-            PyObject_SetAttr(callback, pySlotName, signatureList);
-            Py_DECREF(signatureList);
+            entryList = new PySide::Slot::DataList{};
+            auto *capsule = PyCapsule_New(entryList, nullptr /* name */, slotDataListDestructor);
+            Py_INCREF(capsule);
+            PyObject_SetAttr(callback, pySlotName, capsule);
         }
-
-        PyList_Append(signatureList, pySignature);
-        Py_DECREF(pySignature);
+        entryList->append({signature, returnType});
 
         //clear data
         delete data->slotData;
@@ -141,6 +144,15 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 } // extern "C"
 
 namespace PySide::Slot {
+
+DataList *dataListFromCapsule(PyObject *capsule)
+{
+    if (capsule != nullptr && PyCapsule_CheckExact(capsule) != 0) {
+        if (void *v = PyCapsule_GetPointer(capsule, nullptr))
+            return reinterpret_cast<DataList *>(v);
+    }
+    return nullptr;
+}
 
 static const char *Slot_SignatureStrings[] = {
     "PySide6.QtCore.Slot(self,*types:type,name:str=nullptr,result:type=nullptr)",

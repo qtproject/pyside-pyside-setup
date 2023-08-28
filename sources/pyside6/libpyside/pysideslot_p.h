@@ -5,8 +5,23 @@
 
 #include <sbkpython.h>
 
-namespace PySide { namespace Slot {
-    void init(PyObject* module);
-}}
+#include <QtCore/qbytearray.h>
+#include <QtCore/qlist.h>
 
-#endif
+namespace PySide::Slot {
+
+struct Data {
+    QByteArray signature;
+    QByteArray resultType;
+};
+
+// This list is set as an attribute named PySide::PySideMagicName::slot_list_attr()
+// by the decorator for usage by MetaObjectBuilder.
+using DataList = QList<Data>;
+
+DataList *dataListFromCapsule(PyObject *capsule);
+
+void init(PyObject* module);
+} // namespace PySide::Slot
+
+#endif // PYSIDE_SLOT_P_H
