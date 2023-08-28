@@ -53,7 +53,8 @@ public:
                       const QByteArray &signature) const;
     int indexOfProperty(const QByteArray &name) const;
     int addSlot(const QByteArray &signature);
-    int addSlot(const QByteArray &signature, const QByteArray &type);
+    int addSlot(const QByteArray &signature, const QByteArray &type,
+                const QByteArray &tag = {});
     int addSignal(const QByteArray &signature);
     void removeMethod(QMetaMethod::MethodType mtype, int index);
     int getPropertyNotifyId(PySideProperty *property) const;
@@ -211,7 +212,8 @@ int MetaObjectBuilder::addSlot(const char *signature)
 }
 
 int MetaObjectBuilderPrivate::addSlot(const QByteArray &signature,
-                                      const QByteArray &type)
+                                      const QByteArray &type,
+                                      const QByteArray &tag)
 {
     if (!checkMethodSignature(signature))
         return -1;
@@ -219,6 +221,8 @@ int MetaObjectBuilderPrivate::addSlot(const QByteArray &signature,
     QMetaMethodBuilder methodBuilder = ensureBuilder()->addSlot(signature);
     if (!type.isEmpty() && type != "void"_ba)
         methodBuilder.setReturnType(type);
+    if (!tag.isEmpty())
+        methodBuilder.setTag(tag);
     return m_baseObject->methodCount() + methodBuilder.index();
 }
 
@@ -638,7 +642,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
                     const auto *entryList = PySide::Slot::dataListFromCapsule(capsule);
                     for (const auto &e : *entryList) {
                         if (m_baseObject->indexOfSlot(e.signature) == -1)
-                            addSlot(e.signature, e.resultType);
+                            addSlot(e.signature, e.resultType, e.tag);
                     }
                 }
             }
