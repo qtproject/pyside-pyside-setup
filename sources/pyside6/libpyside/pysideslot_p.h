@@ -13,6 +13,7 @@ namespace PySide::Slot {
 struct Data {
     QByteArray signature;
     QByteArray resultType;
+    QByteArray tag; // QMetaMethod::tag()
 };
 
 // This list is set as an attribute named PySide::PySideMagicName::slot_list_attr()

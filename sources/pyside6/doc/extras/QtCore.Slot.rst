@@ -22,10 +22,11 @@ Detailed Description
     QtCore   pyqtSlot                 Slot
     =======  =======================  =============
 
-    .. class:: PySide6.QtCore.Slot([type1 [, type2...]] [, name="" [, result=None]])
+    .. class:: PySide6.QtCore.Slot([type1 [, type2...]] [, name="" [, result=None, [tag=""]]])
 
             :param name: str
             :param result: type
+            :param tag: str
 
     ``Slot`` takes a list of Python types of the arguments.
 
@@ -33,6 +34,9 @@ Detailed Description
     passed, the slot name will be the decorated function name.
 
     The optional named argument ``result`` specifies the return type.
+
+    The optional named argument ``tag`` specifies a value to be returned
+    by ``QMetaMethod.tag()``.
 
     .. seealso:: :ref:`signals-and-slots`
 

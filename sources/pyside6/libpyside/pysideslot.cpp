@@ -18,6 +18,7 @@ struct SlotData
     QByteArray name;
     QByteArray args;
     QByteArray resultType;
+    QByteArray tag; // QMetaMethod::tag()
 };
 
 struct PySideSlot
@@ -63,15 +64,17 @@ static PyTypeObject *PySideSlot_TypeF()
 int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
 {
     static PyObject *emptyTuple = nullptr;
-    static const char *kwlist[] = {"name", "result", nullptr};
+    static const char *kwlist[] = {"name", "result", "tag", nullptr};
     char *argName = nullptr;
     PyObject *argResult = nullptr;
+    char *tag = nullptr;
 
     if (emptyTuple == nullptr)
         emptyTuple = PyTuple_New(0);
 
-    if (!PyArg_ParseTupleAndKeywords(emptyTuple, kw, "|sO:QtCore.Slot",
-                                     const_cast<char **>(kwlist), &argName, &argResult)) {
+    if (!PyArg_ParseTupleAndKeywords(emptyTuple, kw, "|sOs:QtCore.Slot",
+                                     const_cast<char **>(kwlist),
+                                     &argName, &argResult, &tag)) {
         return -1;
     }
 
@@ -92,6 +95,9 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
 
     if (argName)
         data->slotData->name = argName;
+
+    if (tag)
+        data->slotData->tag = tag;
 
     data->slotData->resultType = argResult
         ? PySide::Signal::getTypeName(argResult) : PySide::Signal::voidType();
@@ -132,7 +138,7 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
             Py_INCREF(capsule);
             PyObject_SetAttr(callback, pySlotName, capsule);
         }
-        entryList->append({signature, returnType});
+        entryList->append({signature, returnType, data->slotData->tag});
 
         //clear data
         delete data->slotData;
