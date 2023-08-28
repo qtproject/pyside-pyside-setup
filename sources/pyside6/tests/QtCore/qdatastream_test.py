@@ -296,6 +296,16 @@ class QDataStreamBuffer(unittest.TestCase):
         data = QDataStream(ba)
         self.assertEqual(data.readRawData(4), bytes('AB\x00C', "UTF-8"))
 
+    def testRawDataBytes(self):
+        test_data = b'AB\0'
+        data = QDataStream()
+        ba = QByteArray()
+        data = QDataStream(ba, QIODevice.WriteOnly)
+        data.writeRawData(test_data)
+        self.assertEqual(ba.data(), test_data)
+        data = QDataStream(ba)
+        self.assertEqual(data.readRawData(3), test_data)
+
     def testBytes(self):
         dataOne = QDataStream()
         self.assertEqual(dataOne.readBytes(4), None)
