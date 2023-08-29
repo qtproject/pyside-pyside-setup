@@ -4,6 +4,7 @@
 import os
 import platform
 import sys
+import importlib
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
 from pathlib import Path
@@ -86,7 +87,18 @@ def generate_setup_cfg(artifacts: Path, setup: SetupData) -> str:
         # Will generate manylinux_2_28_x86_64
         _tag = f"manylinux_{glibc}_{arch}"
     elif _os == "darwin":
-        target = get_config_var("MACOSX_DEPLOYMENT_TARGET")
+        # find _config.py and load it to obtain __qt_macos_min_deployment_target__
+        target = None
+        config_py = package_path / "shiboken6" / "_config.py"
+        if not config_py.exists():
+            raise RuntimeError(f"Unable to find {str(config_py)}")
+
+        module_name = config_py.name[:-3]
+        _spec = importlib.util.spec_from_file_location(f"{module_name}", config_py)
+        _module = importlib.util.module_from_spec(_spec)
+        _spec.loader.exec_module(module=_module)
+        target = _module.__qt_macos_min_deployment_target__
+
         if not target:
             print("Error: couldn't get the value from MACOSX_DEPLOYMENT_TARGET. "
                   "Falling back to local platform version.")

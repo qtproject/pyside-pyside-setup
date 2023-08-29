@@ -598,6 +598,17 @@ endfunction()
 macro(compute_config_py_values
       full_version_var_name
         )
+    set(QT_MACOS_DEPLOYMENT_TARGET "")
+    if (Qt${QT_MAJOR_VERSION}Core_FOUND)
+        get_target_property(darwin_target Qt6::Core QT_DARWIN_MIN_DEPLOYMENT_TARGET)
+        if(darwin_target)
+            set(QT_MACOS_DEPLOYMENT_TARGET
+                "__qt_macos_min_deployment_target__ = '${darwin_target}'")
+        endif()
+    elseif(APPLE)
+        message(FATAL_ERROR "Qt6::Core should be found before calling this macro")
+    endif()
+
     string(TIMESTAMP PACKAGE_BUILD_DATE "%Y-%m-%dT%H:%M:%S+00:00" UTC)
     if (PACKAGE_BUILD_DATE)
         set(PACKAGE_BUILD_DATE "__build_date__ = '${PACKAGE_BUILD_DATE}'")
