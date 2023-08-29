@@ -254,11 +254,11 @@ instructions:
       enable_if:
          condition: property
          property: host.osVersion
-         equals_value: RHEL_8_4
+         in_values: [ RHEL_8_4, RHEL_8_6, RHEL_8_8]
     - type: EnvironmentVariable
       variableName: interpreter
       variableValue: "python3"
-      disable_if: # we disable this, if in rhel 8.4
+      enable_if: # Enable for others than rhl 8.*
         condition: property
         property: target.osVersion
-        equals_value: RHEL_8_4
+        not_in_values: [ RHEL_8_4, RHEL_8_6, RHEL_8_8]
