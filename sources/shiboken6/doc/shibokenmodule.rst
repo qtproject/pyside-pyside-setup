@@ -1,4 +1,4 @@
-.. module:: shiboken
+.. module:: Shiboken
 
 .. |maya| unicode:: Maya U+2122
 
@@ -32,6 +32,11 @@ or just for debug purposes.
 Some function description refer to "Shiboken based objects", wich means
 Python objects instances of any Python Type created using Shiboken.
 
+To import the module:
+
+.. code-block:: python
+
+    from shiboken6 import Shiboken
 
 .. function:: isValid(obj)
 
@@ -110,3 +115,19 @@ Python objects instances of any Python Type created using Shiboken.
     internally the `str` function is called with it.
 
     This method should be used **only** for debug purposes by developers.
+
+ .. py:class:: VoidPtr(address, size = -1, writeable = 0)
+
+     :param address: (PyBuffer, SbkObject, int, VoidPtr)
+     :param size: int
+     :param writeable: int
+
+     Represents a chunk of memory by address and size and implements the ``buffer`` protocol.
+     It can be constructed from a ``buffer``, a Shiboken based object, a memory address
+     or another VoidPtr instance.
+
+     .. py:method:: toBytes()
+
+         :rtype: bytes
+
+         Returns the contents as ``bytes``.
