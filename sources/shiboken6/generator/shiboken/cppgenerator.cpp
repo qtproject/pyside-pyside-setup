@@ -218,7 +218,8 @@ static bool skipOperatorFunc(const AbstractMetaFunctionCPtr &func)
     if (func->isModifiedRemoved() || func->usesRValueReferences())
         return true;
     const auto &name = func->name();
-    return name == u"operator[]" || name == u"operator->" || name == u"operator!";
+    return name == u"operator[]" || name == u"operator->" || name == u"operator!"
+           || name == u"operator/="; // __idiv__ is not needed in Python3
 }
 
 QList<AbstractMetaFunctionCList>
@@ -4897,7 +4898,7 @@ static const QHash<QString, QString> &nbFuncs()
         {u"__add__"_s, u"nb_add"_s},
         {u"__sub__"_s, u"nb_subtract"_s},
         {u"__mul__"_s, u"nb_multiply"_s},
-        {u"__div__"_s, u"nb_divide"_s},
+        {u"__div__"_s, u"nb_true_divide"_s},
         {u"__mod__"_s, u"nb_remainder"_s},
         {u"__neg__"_s, u"nb_negative"_s},
         {u"__pos__"_s, u"nb_positive"_s},
@@ -4910,7 +4911,6 @@ static const QHash<QString, QString> &nbFuncs()
         {u"__iadd__"_s, u"nb_inplace_add"_s},
         {u"__isub__"_s, u"nb_inplace_subtract"_s},
         {u"__imul__"_s, u"nb_inplace_multiply"_s},
-        {u"__idiv__"_s, u"nb_inplace_divide"_s},
         {u"__imod__"_s, u"nb_inplace_remainder"_s},
         {u"__ilshift__"_s, u"nb_inplace_lshift"_s},
         {u"__irshift__"_s, u"nb_inplace_rshift"_s},
@@ -4946,8 +4946,6 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
 
     for (auto it = nbFuncs().cbegin(), end = nbFuncs().cend(); it != end; ++it) {
         const QString &nbName = it.key();
-        if (nbName == u"__div__" || nbName == u"__idiv__")
-            continue; // excludeFromPy3K
         const auto nbIt = nb.constFind(nbName);
         if (nbIt != nb.constEnd()) {
             const QString fixednbName = nbName == boolT()
@@ -4955,18 +4953,6 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
             s <<  "{Py_" << fixednbName << ", reinterpret_cast<void *>("
                << nbIt.value() << ")},\n";
         }
-    }
-
-    auto nbIt = nb.constFind(u"__div__"_s);
-    if (nbIt != nb.constEnd())
-        s << "{Py_nb_true_divide, reinterpret_cast<void *>(" << nbIt.value() << ")},\n";
-
-    nbIt = nb.constFind(u"__idiv__"_s);
-    if (nbIt != nb.constEnd()) {
-        s << "// This function is unused in Python 3. We reference it here.\n"
-            << "{0, reinterpret_cast<void *>(" << nbIt.value() << ")},\n"
-            << "// This list is ending at the first 0 entry.\n"
-            << "// Therefore, we need to put the unused functions at the very end.\n";
     }
 }
 
