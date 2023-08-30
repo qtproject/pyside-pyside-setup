@@ -4700,24 +4700,22 @@ bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClassCPtr &metaCla
 
 struct pyTypeSlotEntry
 {
-    explicit pyTypeSlotEntry(const char *name, const QString &function) :
+    explicit pyTypeSlotEntry(QStringView name, QStringView function) :
         m_name(name), m_function(function) {}
 
-    const char *m_name;
-    const QString &m_function;
+    QStringView m_name;
+    QStringView m_function;
 };
 
 TextStream &operator<<(TextStream &str, const pyTypeSlotEntry &e)
 {
-    str << '{' << e.m_name << ',';
-    const int padding = qMax(0, 18 - int(strlen(e.m_name)));
-    for (int p = 0; p < padding; ++p)
-        str << ' ';
-    if (e.m_function.isEmpty())
-        str << NULL_PTR;
-    else
-        str << "reinterpret_cast<void *>(" << e.m_function << ')';
-    str << "},\n";
+    if (!e.m_function.isEmpty()) {
+        str << '{' << e.m_name << ',';
+        const int padding = qMax(0, 18 - int(e.m_name.size()));
+        for (int p = 0; p < padding; ++p)
+            str << ' ';
+        str << "reinterpret_cast<void *>(" << e.m_function << ")},\n";
+    }
     return str;
 }
 
@@ -4842,22 +4840,22 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         << "{\n" << indent << "return " << typePtr << ";\n" << outdent
         << "}\n\nstatic PyType_Slot " << className << "_slots[] = {\n" << indent
         << "{Py_tp_base,        nullptr}, // inserted by introduceWrapperType\n"
-        << pyTypeSlotEntry("Py_tp_dealloc", tp_dealloc)
-        << pyTypeSlotEntry("Py_tp_repr", m_tpFuncs.value(reprFunction()))
-        << pyTypeSlotEntry("Py_tp_hash", tp_hash)
-        << pyTypeSlotEntry("Py_tp_call", tp_call)
-        << pyTypeSlotEntry("Py_tp_str", m_tpFuncs.value(u"__str__"_s))
-        << pyTypeSlotEntry("Py_tp_getattro", tp_getattro)
-        << pyTypeSlotEntry("Py_tp_setattro", tp_setattro)
-        << pyTypeSlotEntry("Py_tp_traverse", className + u"_traverse"_s)
-        << pyTypeSlotEntry("Py_tp_clear", className + u"_clear"_s)
-        << pyTypeSlotEntry("Py_tp_richcompare", tp_richcompare)
-        << pyTypeSlotEntry("Py_tp_iter", m_tpFuncs.value(u"__iter__"_s))
-        << pyTypeSlotEntry("Py_tp_iternext", m_tpFuncs.value(u"__next__"_s))
-        << pyTypeSlotEntry("Py_tp_methods", className + u"_methods"_s)
-        << pyTypeSlotEntry("Py_tp_getset", tp_getset)
-        << pyTypeSlotEntry("Py_tp_init", tp_init)
-        << pyTypeSlotEntry("Py_tp_new", tp_new);
+        << pyTypeSlotEntry(u"Py_tp_dealloc", tp_dealloc)
+        << pyTypeSlotEntry(u"Py_tp_repr", m_tpFuncs.value(reprFunction()))
+        << pyTypeSlotEntry(u"Py_tp_hash", tp_hash)
+        << pyTypeSlotEntry(u"Py_tp_call", tp_call)
+        << pyTypeSlotEntry(u"Py_tp_str", m_tpFuncs.value(u"__str__"_s))
+        << pyTypeSlotEntry(u"Py_tp_getattro", tp_getattro)
+        << pyTypeSlotEntry(u"Py_tp_setattro", tp_setattro)
+        << pyTypeSlotEntry(u"Py_tp_traverse", className + u"_traverse"_s)
+        << pyTypeSlotEntry(u"Py_tp_clear", className + u"_clear"_s)
+        << pyTypeSlotEntry(u"Py_tp_richcompare", tp_richcompare)
+        << pyTypeSlotEntry(u"Py_tp_iter", m_tpFuncs.value(u"__iter__"_s))
+        << pyTypeSlotEntry(u"Py_tp_iternext", m_tpFuncs.value(u"__next__"_s))
+        << pyTypeSlotEntry(u"Py_tp_methods", className + u"_methods"_s)
+        << pyTypeSlotEntry(u"Py_tp_getset", tp_getset)
+        << pyTypeSlotEntry(u"Py_tp_init", tp_init)
+        << pyTypeSlotEntry(u"Py_tp_new", tp_new);
     if (supportsSequenceProtocol(metaClass)) {
         s << "// type supports sequence protocol\n";
         writeTypeAsSequenceDefinition(s, metaClass);
@@ -4935,13 +4933,13 @@ void CppGenerator::writeSequenceMethods(TextStream &s,
 static const QHash<QString, QString> &sqFuncs()
 {
     static const QHash<QString, QString> result = {
-        {u"__concat__"_s, u"sq_concat"_s},
-        {u"__contains__"_s, u"sq_contains"_s},
-        {u"__getitem__"_s, u"sq_item"_s},
-        {u"__getslice__"_s, u"sq_slice"_s},
-        {u"__len__"_s, u"sq_length"_s},
-        {u"__setitem__"_s, u"sq_ass_item"_s},
-        {u"__setslice__"_s, u"sq_ass_slice"_s}
+        {u"__concat__"_s, u"Py_sq_concat"_s},
+        {u"__contains__"_s, u"Py_sq_contains"_s},
+        {u"__getitem__"_s, u"Py_sq_item"_s},
+        {u"__getslice__"_s, u"Py_sq_slice"_s},
+        {u"__len__"_s, u"Py_sq_length"_s},
+        {u"__setitem__"_s, u"Py_sq_ass_item"_s},
+        {u"__setslice__"_s, u"Py_sq_ass_slice"_s}
     };
     return result;
 }
@@ -4971,10 +4969,8 @@ void CppGenerator::writeTypeAsSequenceDefinition(TextStream &s,
     for (auto it = sqFuncs().cbegin(), end = sqFuncs().cend(); it != end; ++it) {
         const QString &sqName = it.key();
         auto fit = funcs.constFind(sqName);
-        if (fit != funcs.constEnd()) {
-            s <<  "{Py_" << it.value() << ", reinterpret_cast<void *>("
-               << fit.value() << ")},\n";
-        }
+        if (fit != funcs.constEnd())
+            s << pyTypeSlotEntry(it.value(), fit.value());
     }
 }
 
@@ -4983,9 +4979,9 @@ void CppGenerator::writeTypeAsMappingDefinition(TextStream &s,
 {
     // Sequence protocol structure members names
     static const QHash<QString, QString> mpFuncs{
-        {u"__mlen__"_s, u"mp_length"_s},
-        {u"__mgetitem__"_s, u"mp_subscript"_s},
-        {u"__msetitem__"_s, u"mp_ass_subscript"_s},
+        {u"__mlen__"_s, u"Py_mp_length"_s},
+        {u"__mgetitem__"_s, u"Py_mp_subscript"_s},
+        {u"__msetitem__"_s, u"Py_mp_ass_subscript"_s},
     };
     QMap<QString, QString> funcs;
     for (const auto &m : mappingProtocols()) {
@@ -4994,15 +4990,13 @@ void CppGenerator::writeTypeAsMappingDefinition(TextStream &s,
             const QString entry = u"reinterpret_cast<void *>(&"_s
                                   + cpythonFunctionName(func) + u')';
             funcs.insert(m.name, entry);
-        } else {
-            funcs.insert(m.name, NULL_PTR);
         }
     }
 
     for (auto it = mpFuncs.cbegin(), end = mpFuncs.cend(); it != end; ++it) {
         const auto fit = funcs.constFind(it.key());
         if (fit != funcs.constEnd())
-            s <<  "{Py_" << it.value() << ", " << fit.value() <<  "},\n";
+            s << pyTypeSlotEntry(it.value(), fit.value());
     }
 }
 
@@ -5010,29 +5004,29 @@ void CppGenerator::writeTypeAsMappingDefinition(TextStream &s,
 static const QHash<QString, QString> &nbFuncs()
 {
     static const QHash<QString, QString> result = {
-        {u"__add__"_s, u"nb_add"_s},
-        {u"__sub__"_s, u"nb_subtract"_s},
-        {u"__mul__"_s, u"nb_multiply"_s},
-        {u"__div__"_s, u"nb_true_divide"_s},
-        {u"__mod__"_s, u"nb_remainder"_s},
-        {u"__neg__"_s, u"nb_negative"_s},
-        {u"__pos__"_s, u"nb_positive"_s},
-        {u"__invert__"_s, u"nb_invert"_s},
-        {u"__lshift__"_s, u"nb_lshift"_s},
-        {u"__rshift__"_s, u"nb_rshift"_s},
-        {u"__and__"_s, u"nb_and"_s},
-        {u"__xor__"_s, u"nb_xor"_s},
-        {u"__or__"_s, u"nb_or"_s},
-        {u"__iadd__"_s, u"nb_inplace_add"_s},
-        {u"__isub__"_s, u"nb_inplace_subtract"_s},
-        {u"__imul__"_s, u"nb_inplace_multiply"_s},
-        {u"__imod__"_s, u"nb_inplace_remainder"_s},
-        {u"__ilshift__"_s, u"nb_inplace_lshift"_s},
-        {u"__irshift__"_s, u"nb_inplace_rshift"_s},
-        {u"__iand__"_s, u"nb_inplace_and"_s},
-        {u"__ixor__"_s, u"nb_inplace_xor"_s},
-        {u"__ior__"_s, u"nb_inplace_or"_s},
-        {boolT(), u"nb_nonzero"_s}
+        {u"__add__"_s, u"Py_nb_add"_s},
+        {u"__sub__"_s, u"Py_nb_subtract"_s},
+        {u"__mul__"_s, u"Py_nb_multiply"_s},
+        {u"__div__"_s, u"Py_nb_true_divide"_s},
+        {u"__mod__"_s, u"Py_nb_remainder"_s},
+        {u"__neg__"_s, u"Py_nb_negative"_s},
+        {u"__pos__"_s, u"Py_nb_positive"_s},
+        {u"__invert__"_s, u"Py_nb_invert"_s},
+        {u"__lshift__"_s, u"Py_nb_lshift"_s},
+        {u"__rshift__"_s, u"Py_nb_rshift"_s},
+        {u"__and__"_s, u"Py_nb_and"_s},
+        {u"__xor__"_s, u"Py_nb_xor"_s},
+        {u"__or__"_s, u"Py_nb_or"_s},
+        {u"__iadd__"_s, u"Py_nb_inplace_add"_s},
+        {u"__isub__"_s, u"Py_nb_inplace_subtract"_s},
+        {u"__imul__"_s, u"Py_nb_inplace_multiply"_s},
+        {u"__imod__"_s, u"Py_nb_inplace_remainder"_s},
+        {u"__ilshift__"_s, u"Py_nb_inplace_lshift"_s},
+        {u"__irshift__"_s, u"Py_nb_inplace_rshift"_s},
+        {u"__iand__"_s, u"Py_nb_inplace_and"_s},
+        {u"__ixor__"_s, u"Py_nb_inplace_xor"_s},
+        {u"__ior__"_s, u"Py_nb_inplace_or"_s},
+        {boolT(), u"Py_nb_nonzero"_s}
     };
     return result;
 }
@@ -5064,9 +5058,8 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
         const auto nbIt = nb.constFind(nbName);
         if (nbIt != nb.constEnd()) {
             const QString fixednbName = nbName == boolT()
-                ? u"nb_bool"_s : it.value();
-            s <<  "{Py_" << fixednbName << ", reinterpret_cast<void *>("
-               << nbIt.value() << ")},\n";
+                ? u"Py_nb_bool"_s : it.value();
+            s << pyTypeSlotEntry(fixednbName, nbIt.value());
         }
     }
 }
