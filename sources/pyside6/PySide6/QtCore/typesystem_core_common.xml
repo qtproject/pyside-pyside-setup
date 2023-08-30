@@ -2287,12 +2287,21 @@
     <modify-function signature="write(const QByteArray&amp;)" allow-thread="yes"/>
     <modify-function signature="waitForReadyRead(int)" allow-thread="yes"/>
     <modify-function signature="waitForBytesWritten(int)" allow-thread="yes"/>
-    <!-- ### peek(qint64) do the job -->
     <modify-function signature="peek(char*,qint64)" remove="all"/>
-    <!-- ### read(qint64) do the job -->
+    <add-function signature="peek(PyBuffer@buffer@,qint64@maxlen@)" return-type="qint64">
+        <modify-argument index="1" pyi-type="bytearray"/>
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qiodevice-bufferedread"/>
+    </add-function>
     <modify-function signature="read(char*,qint64)" remove="all"/>
-    <!-- ### readLine(qint64) do the job -->
+    <add-function signature="read(PyBuffer@buffer@,qint64@maxlen@)" return-type="qint64">
+        <modify-argument index="1" pyi-type="bytearray"/>
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qiodevice-bufferedread"/>
+    </add-function>
     <modify-function signature="readLine(char*,qint64)" remove="all"/>
+    <add-function signature="readLine(PyBuffer@buffer@,qint64@maxlen@)" return-type="qint64">
+        <modify-argument index="1" pyi-type="bytearray"/>
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qiodevice-bufferedread"/>
+    </add-function>
     <!-- ### write(str) do the job -->
     <modify-function signature="write(const char*,qint64)" remove="all"/>
     <modify-function signature="write(const char*)" remove="all"/>

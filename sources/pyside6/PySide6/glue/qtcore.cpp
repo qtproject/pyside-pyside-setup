@@ -946,6 +946,13 @@ uchar *ptr = reinterpret_cast<uchar *>(Shiboken::Buffer::getPointer(%PYARG_1));
 %PYARG_0 = Shiboken::Buffer::newObject(%CPPSELF.%FUNCTION_NAME(%1, %2, %3), %2, Shiboken::Buffer::ReadWrite);
 // @snippet qfiledevice-map
 
+// @snippet qiodevice-bufferedread
+Py_ssize_t bufferLen;
+auto *data = reinterpret_cast<char*>(Shiboken::Buffer::getPointer(%PYARG_1, &bufferLen));
+%RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(data, PyLong_AsLongLong(%PYARG_2));
+return PyLong_FromLong(%0);
+// @snippet qiodevice-bufferedread
+
 // @snippet qiodevice-readdata
 QByteArray ba(1 + qsizetype(%2), char(0));
 %CPPSELF.%FUNCTION_NAME(ba.data(), qint64(%2));
