@@ -867,6 +867,15 @@ QString msgCannotFindSnippet(const QString &file, const QString &snippetLabel)
     return result;
 }
 
+QString msgUnableToResolveTypedef(const QString &sourceType, const QString &sourceName)
+{
+    QString result;
+    QTextStream(&result) << "Unable to resolve typedef \"" << sourceType
+        << "\": Could not find a value, container, object or smart pointer type named \""
+        << sourceName << "\".";
+    return result;
+}
+
 // cppgenerator.cpp
 
 QString msgPureVirtualFunctionRemoved(const AbstractMetaFunction *f)

@@ -208,6 +208,7 @@ QString msgIncorrectlyNestedName(const QString &name);
 QString msgCannotFindView(const QString &viewedName, const QString &name);
 
 QString msgCannotFindSnippet(const QString &file, const QString &snippetLabel);
+QString msgUnableToResolveTypedef(const QString &sourceType, const QString &sourceName);
 
 QString msgCyclicDependency(const QString &funcName, const QString &graphName,
                             const AbstractMetaFunctionCList &cyclic,
