@@ -516,6 +516,7 @@ private:
     void clearTpFuncs();
 
     QHash<QString, QString> m_tpFuncs;
+    QHash<QString, QString> m_nbFuncs;
 
     static const char *PYTHON_TO_CPPCONVERSION_STRUCT;
 };

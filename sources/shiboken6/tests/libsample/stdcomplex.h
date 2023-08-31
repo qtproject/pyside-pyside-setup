@@ -25,6 +25,8 @@ public:
 
     double abs_value() const { return std::abs(m_impl); } // abs() is reserved Python word
 
+    StdComplex pow(const StdComplex &exp) const;
+
     friend inline bool operator==(const StdComplex &c1, const StdComplex &c2) noexcept
     { return c1.m_impl == c2.m_impl; }
     friend inline bool operator!=(const StdComplex &c1, const StdComplex &c2) noexcept

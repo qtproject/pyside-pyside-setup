@@ -25,6 +25,19 @@ class StdComplexTest(unittest.TestCase):
     '''Test case for StdComplex class, exercising esoteric number
        protocols (Py_nb_). For standard number protocols, see Point.'''
 
+    def testAbs(self):
+        pt = StdComplex(REAL, IMAG)
+        self.assertEqual(abs(pt), pt.abs_value())
+
+    def testPow(self):
+        '''Compare pow() function to builtin Python type.'''
+        pt = StdComplex(REAL, IMAG)
+        result = pow(pt, StdComplex(2.0, 0))
+        py_pt = complex(REAL, IMAG)
+        py_result = pow(py_pt, complex(2.0, 0))
+        self.assertAlmostEqual(result.real(), py_result.real)
+        self.assertAlmostEqual(result.imag(), py_result.imag)
+
     def testFloor(self):
         pt = StdComplex(REAL, IMAG)
         self.assertEqual(math.floor(pt), math.floor(pt.abs_value()))

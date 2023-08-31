@@ -2414,6 +2414,16 @@
             <inject-code class="target" position="end"
                          file="samplesnippets.cpp" snippet="stdcomplex_ceil"/>
         </add-function>
+        <!-- PYSIDE-2446: number protocols with Py_nb_ constants. -->
+        <add-function signature="__abs__()" return-type="double">
+            <inject-code class="target" position="end"
+                         file="samplesnippets.cpp" snippet="stdcomplex_abs"/>
+        </add-function>
+        <add-function signature="__pow__(StdComplex@exp@)" return-type="StdComplex">
+            <inject-code class="target" position="end"
+                         file="samplesnippets.cpp" snippet="stdcomplex_pow"/>
+        </add-function>
+
     </value-type>
 
     <object-type name="TemplatePtr">

@@ -15,6 +15,11 @@ StdComplex::StdComplex(const Impl &impl) noexcept : m_impl(impl)
 {
 }
 
+StdComplex StdComplex::pow(const StdComplex &exp) const
+{
+    return StdComplex(std::pow(m_impl, exp.m_impl));
+}
+
 std::ostream &operator<<(std::ostream &str, const StdComplex &c)
 {
     str << "Complex(" << c.real() << ", " << c.imag() << ')';

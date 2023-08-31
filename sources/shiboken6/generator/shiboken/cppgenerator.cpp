@@ -253,11 +253,14 @@ std::optional<AbstractMetaType>
 
 void CppGenerator::clearTpFuncs()
 {
+    // Functions that should not be registered under a name in PyMethodDef,
+    // but under a special constant under slots.
     m_tpFuncs = {
         {u"__str__"_s, {}}, {u"__str__"_s, {}},
         {reprFunction(), {}}, {u"__iter__"_s, {}},
         {u"__next__"_s, {}}
     };
+    m_nbFuncs = { {u"__abs__"_s, {}}, {u"__pow__"_s, {} }};
 }
 
 // Prevent ELF symbol qt_version_tag from being generated into the source
@@ -684,7 +687,8 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
                 smd << "static PyMethodDef " << methDefName << " = " << indent
                     << defEntries.constFirst() << outdent << ";\n\n";
             }
-            if (!m_tpFuncs.contains(rfunc->name()))
+            const auto &fname = rfunc->name();
+            if (!m_tpFuncs.contains(fname) && !m_nbFuncs.contains(fname))
                 md << defEntries;
         }
     }
@@ -4600,8 +4604,12 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     // search for special functions
     clearTpFuncs();
     for (const auto &func : metaClass->functions()) {
-        if (m_tpFuncs.contains(func->name()))
-            m_tpFuncs[func->name()] = cpythonFunctionName(func);
+        // Special non-operator functions identified by name
+        auto it = m_tpFuncs.find(func->name());
+        if (it != m_tpFuncs.end())
+            it.value() = cpythonFunctionName(func);
+        else if ( it = m_nbFuncs.find(func->name()); it !=  m_nbFuncs.end() )
+            it.value() = cpythonFunctionName(func);
     }
     if (m_tpFuncs.value(reprFunction()).isEmpty()
         && metaClass->hasToStringCapability()) {
@@ -4799,6 +4807,7 @@ void CppGenerator::writeTypeAsMappingDefinition(TextStream &s,
 static const QHash<QString, QString> &nbFuncs()
 {
     static const QHash<QString, QString> result = {
+        {u"__abs__"_s, u"Py_nb_absolute"_s},
         {u"__add__"_s, u"Py_nb_add"_s},
         {u"__sub__"_s, u"Py_nb_subtract"_s},
         {u"__mul__"_s, u"Py_nb_multiply"_s},
@@ -4806,6 +4815,7 @@ static const QHash<QString, QString> &nbFuncs()
         {u"__mod__"_s, u"Py_nb_remainder"_s},
         {u"__neg__"_s, u"Py_nb_negative"_s},
         {u"__pos__"_s, u"Py_nb_positive"_s},
+        {u"__pow__"_s, u"Py_nb_power"_s},
         {u"__invert__"_s, u"Py_nb_invert"_s},
         {u"__lshift__"_s, u"Py_nb_lshift"_s},
         {u"__rshift__"_s, u"Py_nb_rshift"_s},
@@ -4835,6 +4845,11 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
         const auto rfunc = opOverload.at(0);
         QString opName = ShibokenGenerator::pythonOperatorFunctionName(rfunc);
         nb[opName] = cpythonFunctionName(rfunc);
+    }
+
+    for (auto it = m_nbFuncs.cbegin(), end = m_nbFuncs.cend(); it != end; ++it) {
+        if (!it.value().isEmpty())
+            nb.insert(it.key(), it.value());
     }
 
     QString baseName = cpythonBaseName(metaClass);

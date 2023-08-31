@@ -26,3 +26,12 @@ static PyObject *Sbk_IntWrapper_add_ints(PyObject * /* self */, PyObject *args)
 // @snippet stdcomplex_ceil
 %PYARG_0 = PyFloat_FromDouble(std::ceil(%CPPSELF.abs_value()));
 // @snippet stdcomplex_ceil
+
+// @snippet stdcomplex_abs
+%PYARG_0 = PyFloat_FromDouble(%CPPSELF.abs_value());
+// @snippet stdcomplex_abs
+
+// @snippet stdcomplex_pow
+%RETURN_TYPE %0 = %CPPSELF.pow(%1);
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+// @snippet stdcomplex_pow
