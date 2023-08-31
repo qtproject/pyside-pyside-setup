@@ -158,6 +158,9 @@ def _mod_uses_pyside(module):
         # This is undocumented and a Python error, seen in Python 3.10.2 on Windows,
         # importing `pythoncom` of the win32 package.
         return False
+    except Exception:
+        # PYSIDE-2393: pytest behaves weird when allowing any other error.
+        return False
     return "PySide6" in source
 
 
