@@ -626,8 +626,7 @@ TypeEntryPtr TypeDatabasePrivate::resolveTypeDefEntry(const TypedefEntryPtr &typ
     }
     if (!source) {
         if (errorMessage)
-            *errorMessage = u"Unable to resolve typedef \""_s
-                            + typedefEntry->sourceType() + u'"';
+            *errorMessage = msgUnableToResolveTypedef(typedefEntry->sourceType(), sourceName);
         return nullptr;
     }
 
