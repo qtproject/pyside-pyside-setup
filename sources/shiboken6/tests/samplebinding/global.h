@@ -56,6 +56,7 @@
 #include "removednamespaces.h"
 #include "sample.h"
 #include "samplenamespace.h"
+#include "stdcomplex.h"
 #include "simplefile.h"
 #include "size.h"
 #include "snakecasetest.h"

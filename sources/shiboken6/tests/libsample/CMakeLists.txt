@@ -64,6 +64,7 @@ renaming.cpp renaming.h
 sample.cpp sample.h
 samplenamespace.cpp samplenamespace.h
 sbkdate.cpp sbkdate.h
+stdcomplex.cpp stdcomplex.h
 simplefile.cpp simplefile.h
 size.cpp size.h
 snakecasetest.cpp snakecasetest.h
