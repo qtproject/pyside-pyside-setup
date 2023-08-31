@@ -18,3 +18,11 @@ static PyObject *Sbk_IntWrapper_add_ints(PyObject * /* self */, PyObject *args)
 }
 }
 // @snippet intwrapper_add_ints
+
+// @snippet stdcomplex_floor
+%PYARG_0 = PyFloat_FromDouble(std::floor(%CPPSELF.abs_value()));
+// @snippet stdcomplex_floor
+
+// @snippet stdcomplex_ceil
+%PYARG_0 = PyFloat_FromDouble(std::ceil(%CPPSELF.abs_value()));
+// @snippet stdcomplex_ceil

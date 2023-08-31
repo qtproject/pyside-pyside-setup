@@ -2401,6 +2401,21 @@
 
     <object-type name="ObjectTypeByValue" />
 
+    <value-type name="StdComplex">
+        <extra-includes>
+            <include file-name="cmath" location="global"/>
+        </extra-includes>
+        <!-- PYSIDE-2446: number protocols without a Py_nb_ constant. -->
+        <add-function signature="__floor__()" return-type="double">
+            <inject-code class="target" position="end"
+                         file="samplesnippets.cpp" snippet="stdcomplex_floor"/>
+        </add-function>
+        <add-function signature="__ceil__()" return-type="double">
+            <inject-code class="target" position="end"
+                         file="samplesnippets.cpp" snippet="stdcomplex_ceil"/>
+        </add-function>
+    </value-type>
+
     <object-type name="TemplatePtr">
         <modify-function signature="dummy(std::list&lt;std::pair&lt;BlackBox *, BlackBox *&gt; &gt; &amp;)" rename="dummy_method" />
     </object-type>
