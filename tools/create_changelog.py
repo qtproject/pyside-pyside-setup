@@ -226,9 +226,14 @@ def extract_change_log(commit_message: List[str]) -> Tuple[str, int, str]:
     return (component, task_nr_int, format_text(result))
 
 
-def create_change_log(versions: List[str]) -> None:
+def create_change_log(versions: List[str], release_type: str) -> None:
     for sha in git_get_sha1s(versions, r"\[ChangeLog\]"):
-        change_log = extract_change_log(get_commit_content(sha).splitlines())
+        commit_message = get_commit_content(sha)
+        # For major/minor releases, skip all fixes with
+        # "Pick-to: " since they appear in bug-fix releases
+        if release_type != "bug-fix" and "Pick-to: " in commit_message:
+            continue
+        change_log = extract_change_log(commit_message.splitlines())
         component, task_nr, text = change_log
         if component.startswith('shiboken'):
             shiboken6_changelogs.append((task_nr, text))
@@ -277,7 +282,7 @@ if __name__ == "__main__":
         if check_tag(versions[0]) and check_tag(versions[1]):
             create_fixes_log(versions)
             create_task_log(versions)
-            create_change_log(versions)
+            create_change_log(versions, args.type)
 
     # Sort commits
     pyside6_commits = sort_dict(pyside6_commits)
