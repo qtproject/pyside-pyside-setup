@@ -117,6 +117,15 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
         config.title = name
 
     try:
+        # check which modules are needed
+        if not config.modules:
+            config.modules = find_pyside_modules(project_dir=config.project_dir,
+                                                 extra_ignore_dirs=extra_ignore_dirs,
+                                                 project_data=config.project_data)
+            logging.info("The following PySide modules were found from the python files of "
+                         f"the project {config.modules}")
+        config.modules.extend(extra_modules)
+
         # create recipes
         # https://python-for-android.readthedocs.io/en/latest/recipes/
         # These recipes are manually added through buildozer.spec file to be used by
@@ -126,7 +135,8 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
             version = Wheel(config.wheel_pyside).version
             create_recipe(version=version, component=f"PySide{MAJOR_VERSION}",
                           wheel_path=config.wheel_pyside,
-                          generated_files_path=generated_files_path)
+                          generated_files_path=generated_files_path,
+                          qt_modules=config.modules)
             create_recipe(version=version, component=f"shiboken{MAJOR_VERSION}",
                           wheel_path=config.wheel_shiboken,
                           generated_files_path=generated_files_path)
@@ -139,18 +149,6 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
             extract_and_copy_jar(wheel_path=config.wheel_pyside,
                                  generated_files_path=generated_files_path)
             config.jars_dir = (generated_files_path / "jar" / "PySide6" / "jar").resolve()
-
-        # check which modules are needed
-        # TODO: Optimize this based on the modules needed
-        # check if other modules not supported by Android used and raise error
-        if not config.modules:
-            config.modules = find_pyside_modules(project_dir=config.project_dir,
-                                                 extra_ignore_dirs=extra_ignore_dirs,
-                                                 project_data=config.project_data)
-            logging.info("The following PySide modules were found from the python files of "
-                         f"the project {config.modules}")
-
-        config.modules.extend(extra_modules)
 
         # find architecture from wheel name
         if not config.arch:

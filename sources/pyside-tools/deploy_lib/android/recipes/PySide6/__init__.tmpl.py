@@ -26,6 +26,17 @@ class PySideRecipe(PythonRecipe):
         lib_dir = Path(f"{self.ctx.get_python_install_dir(arch.arch)}/PySide6/Qt/lib")
         info("Copying Qt libraries to be loaded on startup")
         shutil.copytree(lib_dir, self.ctx.get_libs_dir(arch.arch), dirs_exist_ok=True)
+        shutil.copyfile(lib_dir.parent.parent / "libpyside6.abi3.so",
+                        Path(self.ctx.get_libs_dir(arch.arch)) / "libpyside6.abi3.so")
+
+        {%- for module in qt_modules %}
+        shutil.copyfile(lib_dir.parent.parent / f"Qt{{ module }}.abi3.so",
+                        Path(self.ctx.get_libs_dir(arch.arch)) / f"Qt{{ module }}.abi3.so")
+        {% if module == "Qml" -%}
+        shutil.copyfile(lib_dir.parent.parent / "libpyside6qml.abi3.so",
+                        Path(self.ctx.get_libs_dir(arch.arch)) / "libpyside6qml.abi3.so")
+        {% endif %}
+        {%- endfor -%}
 
         info("Copying libc++_shared.so from SDK to be loaded on startup")
         libcpp_path = f"{self.ctx.ndk.sysroot_lib_dir}/{arch.command_prefix}/libc++_shared.so"

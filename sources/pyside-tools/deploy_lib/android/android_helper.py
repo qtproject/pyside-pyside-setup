@@ -5,7 +5,7 @@ import logging
 import zipfile
 from zipfile import ZipFile
 from dataclasses import dataclass
-from typing import Set
+from typing import Set, List
 
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
@@ -24,7 +24,8 @@ class AndroidData:
     sdk_path: Path
 
 
-def create_recipe(version: str, component: str, wheel_path: str, generated_files_path: Path):
+def create_recipe(version: str, component: str, wheel_path: str, generated_files_path: Path,
+                  qt_modules: List[str] = None):
     '''
     Create python_for_android recipe for PySide6 and shiboken6
     '''
@@ -34,6 +35,7 @@ def create_recipe(version: str, component: str, wheel_path: str, generated_files
     content = template.render(
         version=version,
         wheel_path=wheel_path,
+        qt_modules=qt_modules
     )
 
     recipe_path = generated_files_path / "recipes" / f"{component}"

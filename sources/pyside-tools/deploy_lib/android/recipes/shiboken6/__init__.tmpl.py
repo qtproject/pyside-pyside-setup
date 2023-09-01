@@ -4,6 +4,8 @@
 from pythonforandroid.recipe import PythonRecipe
 from pythonforandroid.logger import info
 import zipfile
+import shutil
+from pathlib import Path
 
 
 class ShibokenRecipe(PythonRecipe):
@@ -19,6 +21,10 @@ class ShibokenRecipe(PythonRecipe):
         with zipfile.ZipFile(self.wheel_path, 'r') as zip_ref:
             info('Unzip wheels and copy into {}'.format(self.ctx.get_python_install_dir(arch.arch)))
             zip_ref.extractall(self.ctx.get_python_install_dir(arch.arch))
+
+        lib_dir = Path(f"{self.ctx.get_python_install_dir(arch.arch)}/shiboken6")
+        shutil.copyfile(lib_dir / "libshiboken6.abi3.so",
+                        Path(self.ctx.get_libs_dir(arch.arch)) / "libshiboken6.abi3.so")
 
 
 recipe = ShibokenRecipe()
