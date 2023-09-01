@@ -110,6 +110,7 @@ public:
     static QString moduleName();
 
     static QString pythonOperatorFunctionName(const QString &cppOpFuncName);
+    static bool isPythonOperatorFunctionName(const QString &cppOpFuncName);
 
 protected:
     /// Helper for determining the file name

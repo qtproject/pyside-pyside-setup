@@ -25,6 +25,11 @@ class StdComplexTest(unittest.TestCase):
     '''Test case for StdComplex class, exercising esoteric number
        protocols (Py_nb_). For standard number protocols, see Point.'''
 
+    def testConversion(self):
+        pt = StdComplex(REAL, IMAG)
+        self.assertEqual(int(pt), int(round(pt.abs_value())))
+        self.assertEqual(float(pt), pt.abs_value())
+
     def testAbs(self):
         pt = StdComplex(REAL, IMAG)
         self.assertEqual(abs(pt), pt.abs_value())

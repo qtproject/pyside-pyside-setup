@@ -595,7 +595,10 @@ static const QHash<QString, QString> &pythonOperators()
         {u"operator<"_s, u"__lt__"_s},
         {u"operator>"_s, u"__gt__"_s},
         {u"operator<="_s, u"__le__"_s},
-        {u"operator>="_s, u"__ge__"_s}
+        {u"operator>="_s, u"__ge__"_s},
+        // Conversion (note bool has special handling with heuristics)
+        {u"operator int"_s, u"__int__"_s},
+        {u"operator double"_s, u"__float__"_s}
     };
     return result;
 }
@@ -603,6 +606,11 @@ static const QHash<QString, QString> &pythonOperators()
 QString Generator::pythonOperatorFunctionName(const QString &cppOpFuncName)
 {
     return pythonOperators().value(cppOpFuncName);
+}
+
+bool Generator::isPythonOperatorFunctionName(const QString &cppOpFuncName)
+{
+    return pythonOperators().contains(cppOpFuncName);
 }
 
 QString Generator::subDirectoryForPackage(QString packageNameIn) const

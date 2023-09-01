@@ -464,6 +464,9 @@ bool AbstractMetaFunction::generateBinding() const
 {
     switch (d->m_functionType) {
     case ConversionOperator:
+        if (d->m_name != u"operator int" && d->m_name != u"operator double")
+            return false;
+        break;
     case AssignmentOperatorFunction:
     case MoveAssignmentOperatorFunction:
     case AbstractMetaFunction::MoveConstructorFunction:

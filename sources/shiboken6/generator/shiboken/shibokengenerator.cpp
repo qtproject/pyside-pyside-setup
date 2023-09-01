@@ -2056,7 +2056,8 @@ QList<AbstractMetaFunctionCList>
             OperatorQueryOption::ArithmeticOp
                 | OperatorQueryOption::IncDecrementOp
                 | OperatorQueryOption::LogicalOp
-                | OperatorQueryOption::BitwiseOp);
+                | OperatorQueryOption::BitwiseOp
+                | OperatorQueryOption::ConversionOp);
 
     for (auto i = result.size() - 1; i >= 0; --i) {
         AbstractMetaFunctionCList &l = result[i];

@@ -4831,7 +4831,9 @@ static const QHash<QString, QString> &nbFuncs()
         {u"__iand__"_s, u"Py_nb_inplace_and"_s},
         {u"__ixor__"_s, u"Py_nb_inplace_xor"_s},
         {u"__ior__"_s, u"Py_nb_inplace_or"_s},
-        {u"__bool__"_s, u"Py_nb_bool"_s}
+        {u"__bool__"_s, u"Py_nb_bool"_s},
+        {u"__int__"_s, u"Py_nb_int"_s},
+        {u"__float__"_s, u"Py_nb_float"_s}
     };
     return result;
 }

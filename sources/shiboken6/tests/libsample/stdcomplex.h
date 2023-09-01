@@ -27,6 +27,9 @@ public:
 
     StdComplex pow(const StdComplex &exp) const;
 
+    operator double() const { return abs_value(); }
+    operator int() const;
+
     friend inline bool operator==(const StdComplex &c1, const StdComplex &c2) noexcept
     { return c1.m_impl == c2.m_impl; }
     friend inline bool operator!=(const StdComplex &c1, const StdComplex &c2) noexcept

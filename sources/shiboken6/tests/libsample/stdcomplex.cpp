@@ -11,6 +11,11 @@ StdComplex::StdComplex(double re, double img) noexcept : m_impl(re, img)
 {
 }
 
+StdComplex::operator int() const
+{
+    return std::lround(abs_value());
+}
+
 StdComplex::StdComplex(const Impl &impl) noexcept : m_impl(impl)
 {
 }
