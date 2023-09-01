@@ -5846,6 +5846,19 @@ void CppGenerator::writeInitFunc(TextStream &declStr, TextStream &callStr,
     }
 }
 
+static void writeSubModuleHandling(TextStream &s, const QString &moduleName,
+                                   const QString &subModuleOf)
+{
+    s << "{\n" << indent
+        << "Shiboken::AutoDecRef parentModule(Shiboken::Module::import(\""
+        << subModuleOf << "\"));\n"
+        << "if (parentModule.isNull())\n" << indent
+        << "return nullptr;\n" << outdent
+        << "if (PyModule_AddObject(parentModule.object(), \"" << moduleName
+        << "\", module) < 0)\n"
+        << indent << "return nullptr;\n" << outdent << outdent << "}\n";
+}
+
 bool CppGenerator::finishGeneration()
 {
     //Generate CPython wrapper file
@@ -6164,8 +6177,13 @@ bool CppGenerator::finishGeneration()
         << "PyObject *module = Shiboken::Module::create(\""  << moduleName()
         << "\", &moduledef);\n\n"
         << "// Make module available from global scope\n"
-        << globalModuleVar << " = module;\n\n"
-        << "// Initialize classes in the type system\n"
+        << globalModuleVar << " = module;\n\n";
+
+    const QString subModuleOf = typeDb->defaultTypeSystemType()->subModuleOf();
+    if (!subModuleOf.isEmpty())
+        writeSubModuleHandling(s,  moduleName(), subModuleOf);
+
+    s << "// Initialize classes in the type system\n"
         << s_classPythonDefines.toString();
 
     if (!typeConversions.isEmpty()) {

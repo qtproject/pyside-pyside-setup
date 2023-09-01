@@ -114,6 +114,7 @@ constexpr auto xPathAttribute = "xpath"_L1;
 constexpr auto virtualSlotAttribute = "virtual-slot"_L1;
 constexpr auto visibleAttribute = "visible"_L1;
 constexpr auto enumIdentifiedByValueAttribute = "identified-by-value"_L1;
+constexpr auto subModuleOfAttribute = "submodule-of"_L1;
 
 constexpr auto noAttributeValue = "no"_L1;
 constexpr auto yesAttributeValue = "yes"_L1;
@@ -2088,6 +2089,7 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
                                                QXmlStreamAttributes *attributes)
 {
     TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
+    QString subModuleOf;
 
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
@@ -2122,6 +2124,8 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
+        } else if (name == subModuleOfAttribute) {
+            subModuleOf = attributes->takeAt(i).value().toString();
         }
     }
 
@@ -2138,6 +2142,7 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
     if (add) {
         moduleEntry.reset(new TypeSystemTypeEntry(m_defaultPackage, since,
                                                   currentParentTypeEntry()));
+        moduleEntry->setSubModule(subModuleOf);
     }
     moduleEntry->setCodeGeneration(m_generate);
     moduleEntry->setSnakeCase(snakeCase);

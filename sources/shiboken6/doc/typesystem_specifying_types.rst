@@ -43,14 +43,16 @@ It can have a number of attributes, described below.
 
 .. code-block:: xml
 
-    <typesystem package="..." default-superclass="..." allow-thread="..."
+    <typesystem package="..." submodule-of="..." allow-thread="..."
                 exception-handling="..." snake-case="yes | no | both" >
     </typesystem>
 
 The **package** attribute is a string describing the package to be used,
 e.g. "QtCore".
-The *optional* **default-superclass** attribute is the canonical C++ base class
-name of all objects, e.g., "object".
+
+The *optional* **submodule-of** attribute specifies the name of a module to
+which the module is added as a sub-module. This requires adapting the
+installation directory of the module accordingly.
 
 The *optional* attributes **allow-thread** and **exception-handling**
 specify the default handling for the corresponding function modification

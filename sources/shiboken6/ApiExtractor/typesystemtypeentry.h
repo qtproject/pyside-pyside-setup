@@ -5,6 +5,7 @@
 #define TYPESYSTEMTYPEENTRY_H
 
 #include "typesystem.h"
+#include "modifications_typedefs.h"
 #include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
 
@@ -22,6 +23,9 @@ public:
     const CodeSnipList &codeSnips() const;
     CodeSnipList &codeSnips();
     void addCodeSnip(const CodeSnip &codeSnip);
+
+    QString subModuleOf() const;
+    void setSubModule(const QString &);
 
 protected:
     explicit TypeSystemTypeEntry(TypeEntryPrivate *d);

@@ -666,6 +666,7 @@ public:
 
     CodeSnipList m_codeSnips;
     TypeSystem::SnakeCase m_snakeCase = TypeSystem::SnakeCase::Disabled;
+    QString m_subModuleOf;
 };
 
 TypeSystemTypeEntry::TypeSystemTypeEntry(const QString &entryName, const QVersionNumber &vr,
@@ -701,6 +702,18 @@ void TypeSystemTypeEntry::addCodeSnip(const CodeSnip &codeSnip)
 {
     S_D(TypeSystemTypeEntry);
     d->m_codeSnips.append(codeSnip);
+}
+
+QString TypeSystemTypeEntry::subModuleOf() const
+{
+    S_D(const TypeSystemTypeEntry);
+    return d->m_subModuleOf;
+}
+
+void TypeSystemTypeEntry::setSubModule(const QString &s)
+{
+    S_D(TypeSystemTypeEntry);
+    d->m_subModuleOf = s;
 }
 
 TypeSystem::SnakeCase TypeSystemTypeEntry::snakeCase() const
