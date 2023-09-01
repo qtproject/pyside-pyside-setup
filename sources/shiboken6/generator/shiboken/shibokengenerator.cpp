@@ -42,6 +42,8 @@
 #include <QtCore/QDir>
 #include <QtCore/QDebug>
 #include <QtCore/QRegularExpression>
+
+#include <algorithm>
 #include <limits>
 #include <memory>
 
@@ -75,6 +77,7 @@ const QString END_ALLOW_THREADS = u"PyEval_RestoreThread(_save); // Py_END_ALLOW
 struct GeneratorClassInfoCacheEntry
 {
     ShibokenGenerator::FunctionGroups functionGroups;
+    QList<AbstractMetaFunctionCList> numberProtocolOperators;
     bool needsGetattroFunction = false;
 };
 
@@ -1968,6 +1971,7 @@ const GeneratorClassInfoCacheEntry &
         it = cache->insert(scope, {});
         it.value().functionGroups = getFunctionGroupsImpl(scope);
         it.value().needsGetattroFunction = classNeedsGetattroFunctionImpl(scope);
+        it.value().numberProtocolOperators = getNumberProtocolOperators(scope);
     }
     return it.value();
 }
@@ -1977,6 +1981,13 @@ ShibokenGenerator::FunctionGroups
 {
     Q_ASSERT(scope);
     return getGeneratorClassInfo(scope).functionGroups;
+}
+
+QList<AbstractMetaFunctionCList>
+    ShibokenGenerator::numberProtocolOperators(const AbstractMetaClassCPtr &scope)
+{
+    Q_ASSERT(scope);
+    return getGeneratorClassInfo(scope).numberProtocolOperators;
 }
 
 // Use non-const overloads only, for example, "foo()" and "foo()const"
@@ -2026,6 +2037,102 @@ ShibokenGenerator::FunctionGroups
         }
     }
     return results;
+}
+
+static bool removeNumberProtocolOperator(const AbstractMetaFunctionCPtr &f)
+{
+    return !f->generateBinding()
+        || (f->ownerClass() != f->implementingClass() && !f->isAbstract());
+}
+
+QList<AbstractMetaFunctionCList>
+    ShibokenGenerator::getNumberProtocolOperators(const AbstractMetaClassCPtr &metaClass)
+{
+    QList<AbstractMetaFunctionCList> result;
+    if (metaClass->isNamespace())
+        return result;
+    result = filterGroupedOperatorFunctions(
+            metaClass,
+            OperatorQueryOption::ArithmeticOp
+                | OperatorQueryOption::IncDecrementOp
+                | OperatorQueryOption::LogicalOp
+                | OperatorQueryOption::BitwiseOp);
+
+    for (auto i = result.size() - 1; i >= 0; --i) {
+        AbstractMetaFunctionCList &l = result[i];
+        auto rend = std::remove_if(l.begin(), l.end(), removeNumberProtocolOperator);
+        l.erase(rend, l.end());
+        if (l.isEmpty())
+            result.removeAt(i);
+    }
+
+    return result;
+}
+
+static bool isInplaceAdd(const AbstractMetaFunctionCPtr &func)
+{
+        return func->name() == u"operator+=";
+}
+
+static bool isIncrementOperator(const AbstractMetaFunctionCPtr &func)
+{
+        return func->functionType() == AbstractMetaFunction::IncrementOperator;
+}
+
+static bool isDecrementOperator(const AbstractMetaFunctionCPtr &func)
+{
+        return func->functionType() == AbstractMetaFunction::DecrementOperator;
+}
+
+// Filter predicate for operator functions
+static bool skipOperatorFunc(const AbstractMetaFunctionCPtr &func)
+{
+        if (func->isModifiedRemoved() || func->usesRValueReferences())
+            return true;
+        const auto &name = func->name();
+        return name == u"operator[]" || name == u"operator->" || name == u"operator!"
+               || name == u"operator/="; // __idiv__ is not needed in Python3
+}
+
+QList<AbstractMetaFunctionCList>
+ShibokenGenerator::filterGroupedOperatorFunctions(const AbstractMetaClassCPtr &metaClass,
+                                                  OperatorQueryOptions query)
+{
+    // ( func_name, num_args ) => func_list
+    QMap<QPair<QString, int>, AbstractMetaFunctionCList> results;
+    auto funcs = metaClass->operatorOverloads(query);
+    auto end = std::remove_if(funcs.begin(), funcs.end(), skipOperatorFunc);
+    funcs.erase(end, funcs.end());
+    // If we have operator+=, we remove the operator++/-- which would
+    // otherwise be used for emulating __iadd__, __isub__.
+    if (std::any_of(funcs.cbegin(), funcs.cend(), isInplaceAdd)) {
+        end = std::remove_if(funcs.begin(), funcs.end(),
+                             [] (const AbstractMetaFunctionCPtr &func) {
+                                 return func->isIncDecrementOperator();
+                             });
+        funcs.erase(end, funcs.end());
+    } else {
+        // If both prefix/postfix ++/-- are present, remove one
+        if (std::count_if(funcs.begin(), funcs.end(), isIncrementOperator) > 1)
+            funcs.erase(std::find_if(funcs.begin(), funcs.end(), isIncrementOperator));
+        if (std::count_if(funcs.begin(), funcs.end(), isDecrementOperator) > 1)
+            funcs.erase(std::find_if(funcs.begin(), funcs.end(), isDecrementOperator));
+    }
+    for (const auto &func : funcs) {
+        int args;
+        if (func->isComparisonOperator()) {
+            args = -1;
+        } else {
+            args = func->arguments().size();
+        }
+        QPair<QString, int > op(func->name(), args);
+        results[op].append(func);
+    }
+    QList<AbstractMetaFunctionCList> result;
+    result.reserve(results.size());
+    for (auto it = results.cbegin(), end = results.cend(); it != end; ++it)
+        result.append(it.value());
+    return result;
 }
 
 static bool hidesBaseClassFunctions(const AbstractMetaFunctionCPtr &f)

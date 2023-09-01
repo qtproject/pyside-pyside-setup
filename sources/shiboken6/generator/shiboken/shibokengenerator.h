@@ -7,6 +7,7 @@
 #include <generator.h>
 
 #include "customconversion_typedefs.h"
+#include "abstractmetalang_enums.h"
 #include "typesystem_typedefs.h"
 #include "typesystem_enums.h"
 
@@ -92,6 +93,9 @@ protected:
      */
     FunctionGroups getGlobalFunctionGroups() const;
     static FunctionGroups getFunctionGroups(const AbstractMetaClassCPtr &scope);
+
+    static QList<AbstractMetaFunctionCList>
+        numberProtocolOperators(const AbstractMetaClassCPtr &scope);
 
     /**
      *   Returns all different inherited overloads of func, and includes func as well.
@@ -203,6 +207,9 @@ protected:
     static QString pythonPrimitiveTypeName(const QString &cppTypeName);
 
     static QString pythonOperatorFunctionName(const AbstractMetaFunctionCPtr &func);
+    static QList<AbstractMetaFunctionCList>
+        filterGroupedOperatorFunctions(const AbstractMetaClassCPtr &metaClass,
+                                       OperatorQueryOptions query);
 
     static QString fixedCppTypeName(const TargetToNativeConversion &toNative);
     static QString fixedCppTypeName(const AbstractMetaType &type);
@@ -342,6 +349,8 @@ private:
     static const GeneratorClassInfoCacheEntry &
         getGeneratorClassInfo(const AbstractMetaClassCPtr &scope);
     static FunctionGroups getFunctionGroupsImpl(const AbstractMetaClassCPtr &scope);
+    static QList<AbstractMetaFunctionCList>
+        getNumberProtocolOperators(const AbstractMetaClassCPtr &metaClass);
     static bool classNeedsGetattroFunctionImpl(const AbstractMetaClassCPtr &metaClass);
 
     QString translateTypeForWrapperMethod(const AbstractMetaType &cType,
