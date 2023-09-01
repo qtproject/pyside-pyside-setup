@@ -5,7 +5,6 @@
 #define CPPGENERATOR_H
 
 #include "shibokengenerator.h"
-#include "abstractmetalang_enums.h"
 #include "include.h"
 #include "modifications_typedefs.h"
 
@@ -45,9 +44,6 @@ public:
 
 protected:
     QString fileNameForContext(const GeneratorContext &context) const override;
-    static QList<AbstractMetaFunctionCList>
-        filterGroupedOperatorFunctions(const AbstractMetaClassCPtr &metaClass,
-                                       OperatorQueryOptions query);
     void generateClass(TextStream &s, const GeneratorContext &classContext) override;
     bool finishGeneration() override;
 
