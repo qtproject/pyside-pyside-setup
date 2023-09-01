@@ -37,7 +37,7 @@ description = """
 PySide6 changelog tool
 
 Example usage:
-tools/create_changelog.py -v v6.2.3..HEAD -r 6.2.4
+tools/create_changelog.py -v -r 6.5.3
 """
 
 
@@ -56,8 +56,7 @@ def parse_options() -> Namespace:
     options.add_argument("-v",
                          "--versions",
                          type=str,
-                         help=tag_msg,
-                         required=True)
+                         help=tag_msg)
     options.add_argument("-r",
                          "--release",
                          type=str,
@@ -66,8 +65,7 @@ def parse_options() -> Namespace:
     options.add_argument("-t",
                          "--type",
                          type=str,
-                         help="Release type: bug-fix, minor, or major",
-                         default="bug-fix")
+                         help="Release type: bug-fix, minor, or major")
 
     options.add_argument("-e",
                          "--exclude",
@@ -76,11 +74,36 @@ def parse_options() -> Namespace:
                          default=False)
 
     args = options.parse_args()
+
+    release_version = list(int(v) for v in args.release.split("."))
+    if len(release_version) != 3:
+        print("Error: --release must be of form major.minor.patch")
+        sys.exit(-1)
+
+    # Some auto-detection smartness
+    if not args.type:
+        if release_version[2] == 0:
+            args.type = "major" if release_version[1] == 0 else "minor"
+        else:
+            args.type = "bug-fix"
+        print(f'Assuming "{args.type}" version', file=sys.stderr)
+
     if args.type not in ("bug-fix", "minor", "major"):
-        print("Error:"
+        print("Error: "
               "-y/--type needs to be: bug-fix (default), minor, or major")
         sys.exit(-1)
 
+    if not args.versions:
+        last_version = release_version.copy()
+        if release_version[2] == 0:
+            adjust_idx = 0 if release_version[1] == 0 else 1
+        else:
+            adjust_idx = 2
+        last_version[adjust_idx] -= 1
+        args.versions = f"v{last_version[0]}.{last_version[1]}.{last_version[2]}..HEAD"
+        print(f"Assuming range {args.versions}", file=sys.stderr)
+
+    args.release_version = release_version
     return args
 
 
