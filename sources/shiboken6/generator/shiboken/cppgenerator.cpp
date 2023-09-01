@@ -4897,7 +4897,7 @@ static const QHash<QString, QString> &nbFuncs()
         {u"__iand__"_s, u"Py_nb_inplace_and"_s},
         {u"__ixor__"_s, u"Py_nb_inplace_xor"_s},
         {u"__ior__"_s, u"Py_nb_inplace_or"_s},
-        {boolT(), u"Py_nb_nonzero"_s}
+        {u"__bool__"_s, u"Py_nb_bool"_s}
     };
     return result;
 }
@@ -4916,16 +4916,13 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
     QString baseName = cpythonBaseName(metaClass);
 
     if (hasBoolCast(metaClass))
-        nb.insert(boolT(), baseName + u"___nb_bool"_s);
+        nb.insert(u"__bool__"_s, baseName + u"___nb_bool"_s);
 
     for (auto it = nbFuncs().cbegin(), end = nbFuncs().cend(); it != end; ++it) {
         const QString &nbName = it.key();
         const auto nbIt = nb.constFind(nbName);
-        if (nbIt != nb.constEnd()) {
-            const QString fixednbName = nbName == boolT()
-                ? u"Py_nb_bool"_s : it.value();
-            s << pyTypeSlotEntry(fixednbName, nbIt.value());
-        }
+        if (nbIt != nb.constEnd())
+            s << pyTypeSlotEntry(it.value(), nbIt.value());
     }
 }
 
