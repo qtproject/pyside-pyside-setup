@@ -124,10 +124,15 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
       </modify-argument>
     </modify-function>
 
+    <modify-function signature="assignProperty(QObject*,const char*,QVariant)">
+        <modify-argument index="2" pyi-type="str"/>
+    </modify-function>
+
     <modify-function signature="addTransition(const QObject*,const char*,QAbstractState*)">
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
+      <modify-argument index="2" pyi-type="str"/>
       <inject-code class="target" position="beginning" file="../glue/qtstatemachine.cpp"
                    snippet="qstate-addtransition-1"/>
     </modify-function>
