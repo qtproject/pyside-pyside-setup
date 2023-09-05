@@ -112,21 +112,25 @@ Options
 ``--avoid-protected-hack``
     Avoid the use of the '#define protected public' hack.
 
-.. _use-isnull-as-nb-nonzero:
+.. _use-isnull-as-nb-bool:
 
-``--use-isnull-as-nb_nonzero``
+``--use-isnull-as-nb-bool``
     If a class has an isNull() const method, it will be used to
     compute the value of boolean casts (see :ref:`bool-cast`).
+    The legacy option ``--use-isnull-as-nb_nonzero`` has the
+    same effect, but should not be used any more.
 
 ``--lean-headers``
     Forward declare classes in module headers instead of including their class
     headers where possible.
 
-.. _use-operator-bool-as-nb-nonzero:
+.. _use-operator-bool-as-nb-bool:
 
-``--use-operator-bool-as-nb_nonzero``
+``--use-operator-bool-as-nb-bool``
     If a class has an operator bool, it will be used to compute
     the value of boolean casts (see :ref:`bool-cast`).
+    The legacy option ``--use-operator-bool-as-nb_nonzero`` has the
+    same effect, but should not be used any more.
 
 .. _no-implicit-conversions:
 

@@ -222,7 +222,7 @@ set(GENERATOR_EXTRA_FLAGS --generator-set=shiboken
                           --enable-parent-ctor-heuristic
                           --enable-pyside-extensions
                           --enable-return-value-heuristic
-                          --use-isnull-as-nb_nonzero)
+                          --use-isnull-as-nb-bool)
 use_protected_as_public_hack()
 
 # Build with Address sanitizer enabled if requested. This may break things, so use at your own risk.

@@ -47,8 +47,8 @@ in boolean expressions. In C++, this is commonly implemented as
 
 In Python, the function ``__bool__`` is used for this. shiboken can generate
 this functions depending on the command line options
-:ref:`--use-operator-bool-as-nb_nonzero <use-operator-bool-as-nb-nonzero>`
-and :ref:`--use-isnull-as-nb_nonzero <use-isnull-as-nb-nonzero>`,
+:ref:`--use-operator-bool-as-nb-bool <use-operator-bool-as-nb-bool>`
+and :ref:`--use-isnull-as-nb-bool <use-isnull-as-nb-bool>`,
 which can be overridden by specifying the boolean attributes
 **isNull** or **operator-bool** on the :ref:`value-type` or :ref:`object-type`
 elements in typesystem XML.

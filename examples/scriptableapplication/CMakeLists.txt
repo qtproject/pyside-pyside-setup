@@ -101,7 +101,7 @@ set(WRAPPED_HEADER ${CMAKE_SOURCE_DIR}/wrappedclasses.h)
 set(TYPESYSTEM_FILE ${CMAKE_SOURCE_DIR}/scriptableapplication.xml)
 
 set(SHIBOKEN_OPTIONS --generator-set=shiboken --enable-parent-ctor-heuristic
-    --enable-pyside-extensions --enable-return-value-heuristic --use-isnull-as-nb_nonzero
+    --enable-pyside-extensions --enable-return-value-heuristic --use-isnull-as-nb-bool
     --avoid-protected-hack
     ${INCLUDES}
     -I${CMAKE_SOURCE_DIR}

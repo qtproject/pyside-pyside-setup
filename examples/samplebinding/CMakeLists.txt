@@ -135,7 +135,7 @@ target_compile_definitions(${sample_library} PRIVATE BINDINGS_BUILD)
 
 # Set up the options to pass to shiboken.
 set(shiboken_options --generator-set=shiboken --enable-parent-ctor-heuristic
-    --enable-return-value-heuristic --use-isnull-as-nb_nonzero
+    --enable-return-value-heuristic --use-isnull-as-nb-bool
     --avoid-protected-hack
     -I${CMAKE_SOURCE_DIR}
     -T${CMAKE_SOURCE_DIR}

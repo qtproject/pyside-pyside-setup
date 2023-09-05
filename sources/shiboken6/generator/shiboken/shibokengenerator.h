@@ -290,11 +290,11 @@ protected:
     /// Returns true if the user enabled the so called "return value heuristic".
     bool useReturnValueHeuristic() const;
     /// Returns true if the generator should use the result of isNull()const to compute boolean casts.
-    bool useIsNullAsNbNonZero() const;
+    bool useIsNullAsNbBool() const;
     /// Whether to generate lean module headers
     bool leanHeaders() const;
     /// Returns true if the generator should use operator bool to compute boolean casts.
-    bool useOperatorBoolAsNbNonZero() const;
+    bool useOperatorBoolAsNbBool() const;
     /// Generate implicit conversions of function arguments
     bool generateImplicitConversions() const;
     static QString cppApiVariableName(const QString &moduleName = QString());
@@ -457,10 +457,10 @@ private:
     bool m_useCtorHeuristic = false;
     bool m_userReturnValueHeuristic = false;
     bool m_verboseErrorMessagesDisabled = false;
-    bool m_useIsNullAsNbNonZero = false;
+    bool m_useIsNullAsNbBool = false;
     // FIXME PYSIDE 7 Flip m_leanHeaders default or remove?
     bool m_leanHeaders = false;
-    bool m_useOperatorBoolAsNbNonZero = false;
+    bool m_useOperatorBoolAsNbBool = false;
     // FIXME PYSIDE 7 Flip generateImplicitConversions default or remove?
     bool m_generateImplicitConversions = true;
     bool m_wrapperDiagnostics = false;

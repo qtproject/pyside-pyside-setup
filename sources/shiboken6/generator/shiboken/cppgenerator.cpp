@@ -222,7 +222,7 @@ CppGenerator::BoolCastFunctionOptional
     }
 
     auto mode = te->operatorBoolMode();
-    if (useOperatorBoolAsNbNonZero()
+    if (useOperatorBoolAsNbBool()
         ? mode != TypeSystem::BoolCast::Disabled : mode == TypeSystem::BoolCast::Enabled) {
         const auto func = metaClass->findOperatorBool();
         if (func)
@@ -230,7 +230,7 @@ CppGenerator::BoolCastFunctionOptional
     }
 
     mode = te->isNullMode();
-    if (useIsNullAsNbNonZero()
+    if (useIsNullAsNbBool()
         ? mode != TypeSystem::BoolCast::Disabled : mode == TypeSystem::BoolCast::Enabled) {
         const auto func = metaClass->findQtIsNullMethod();
         if (func)
