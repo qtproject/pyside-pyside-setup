@@ -95,8 +95,14 @@ class IntListConversionTest(unittest.TestCase):
     def testSumIntList(self):
         lu = ListUser()
         lst = range(4)
-        self.assertEqual(lu.sumIntList(lst), sum(lst))
-        self.assertEqual(lu.callSumIntList(lst), sum(lst))
+        expected = sum(lst)
+        self.assertEqual(lu.sumIntList(lst), expected)
+        self.assertEqual(lu.callSumIntList(lst), expected)
+        self.assertEqual(lu.sumIntListDefaultParam(lst), expected)
+        self.assertEqual(lu.sumIntListDefaultParamConstRef(lst), expected)
+        # PYSIDE-2454: Check container default parameters (1,2,3)
+        self.assertEqual(lu.sumIntListDefaultParam(), 6)
+        self.assertEqual(lu.sumIntListDefaultParamConstRef(), 6)
 
     def testSumIntListFromExtendedClass(self):
         lu = ExtListUser()

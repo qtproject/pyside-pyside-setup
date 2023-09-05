@@ -2891,7 +2891,7 @@ qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
         // conversion for &cppOut
         s << ' ' << cppOutAux;
         // No default value for containers which can also be passed by pointer.
-        if (arg.type != GeneratorArgument::Type::Container)
+        if (arg.type != GeneratorArgument::Type::Container || type.indirections() == 0)
             writeMinimalConstructorExpression(s, api(), type, isPrimitive, defaultValue);
         s << ";\n" << typeName << " *" << cppOut << " = &" << cppOutAux;
     }
@@ -2923,7 +2923,7 @@ qsizetype CppGenerator::writePythonToCppTypeConversion(TextStream &s,
                    || arg.type == GeneratorArgument::Type::Enum
                    || arg.type == GeneratorArgument::Type::Flags) {
             writeMinimalConstructorExpression(s, api(), typeEntry, isPrimitive, defaultValue);
-        } else if (!type.isContainer() && !type.isSmartPointer()) {
+        } else if ((!type.isContainer() || type.indirections() == 0) && !type.isSmartPointer()) {
             writeMinimalConstructorExpression(s, api(), type, isPrimitive, defaultValue);
         }
         break;

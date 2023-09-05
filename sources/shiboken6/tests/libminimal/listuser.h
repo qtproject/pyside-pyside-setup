@@ -22,6 +22,9 @@ struct LIBMINIMAL_API ListUser
     virtual int sumIntList(std::list<int> intList);
     int callSumIntList(std::list<int> intList) { return sumIntList(intList); }
 
+    int sumIntListDefaultParamConstRef(const std::list<int> &intList = {1, 2, 3});
+    int sumIntListDefaultParam(std::list<int> intList = {1, 2, 3});
+
     // List of C++ MinBool objects used as primitives in Python
     virtual std::list<MinBool> createMinBoolList(MinBool mb1, MinBool mb2);
     std::list<MinBool> callCreateMinBoolList(MinBool mb1, MinBool mb2) { return createMinBoolList(mb1, mb2); }

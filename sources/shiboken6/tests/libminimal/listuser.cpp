@@ -20,6 +20,16 @@ int ListUser::sumIntList(std::list<int> intList)
     return std::accumulate(intList.begin(), intList.end(), 0);
 }
 
+int ListUser::sumIntListDefaultParamConstRef(const std::list<int> &intList)
+{
+    return sumIntList(intList);
+}
+
+int ListUser::sumIntListDefaultParam(std::list<int> intList)
+{
+    return sumIntList(intList);
+}
+
 std::list<MinBool> ListUser::createMinBoolList(MinBool mb1, MinBool mb2)
 {
     std::list<MinBool> retval;
