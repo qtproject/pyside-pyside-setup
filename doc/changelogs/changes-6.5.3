@@ -37,6 +37,17 @@ information about a particular change.
  - [PYSIDE-2418] Connections to base class slots incorrectly falling back to
                  the global receiver have been fixed.
  - [PYSIDE-2425] Theme switching of the chart theme example has been fixed.
+ - [PYSIDE-2368] The signature of PySide6.QtCore.Signal has been fixed.
+ - [PYSIDE-2393] A recursion occurring with pytest-forked has been fixed.
+ - [PYSIDE-2419] QLocale::system() on macOS has been fixed.
+ - [PYSIDE-2422] A crash occurring when passing None to
+                 QGridLayout.removeItem() has been turned into a warning.
+ - [PYSIDE-2433] Crashes related to enums in QML singletons have been fixed.
+ - [PYSIDE-2444] Incorrect signatures in class QState have been fixed.
+ - [PYSIDE-2454] Default parameters for containers without indirections
+                 have been fixed.
+ - [PYSIDE-2461] Build system: The "modules" is now correctly resolved
+                 relative to archdata.
 
 ****************************************************************************
 *                                  Shiboken6                               *
@@ -49,3 +60,6 @@ information about a particular change.
  - [PYSIDE-2394] It is now possible to override a C++ deprecation attribute.
  - [PYSIDE-2411] Modified return types of void functions are now properly
                  documented.
+ - [PYSIDE-2446] It is now possible to use remove-modifications for numerical
+                 operators.
+ - [PYSIDE-2465] A test failure occurring with Python 3.11.5 has been fixed.
