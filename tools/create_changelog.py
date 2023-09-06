@@ -2,9 +2,11 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 import re
+import os
 import sys
 import textwrap
 from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
+from pathlib import Path
 from subprocess import PIPE, Popen, check_output
 from typing import Dict, List, Tuple
 
@@ -39,6 +41,41 @@ PySide6 changelog tool
 Example usage:
 tools/create_changelog.py -v -r 6.5.3
 """
+
+
+def change_log(version: list) -> Path:
+    """Return path of the changelog of the version."""
+    name = f"changes-{version[0]}.{version[1]}.{version[2]}"
+    return Path(__file__).parents[1] / "doc" / "changelogs" / name
+
+
+def is_lts_version(version: list) -> bool:
+    return version[0] == 5 or version[1] == 2
+
+
+def version_tag(version: list) -> str:
+    """Return the version tag."""
+    tag = f"v{version[0]}.{version[1]}.{version[2]}"
+    return tag + "-lts" if is_lts_version(version) else tag
+
+
+def revision_range(version: list) -> str:
+    """Determine a git revision_range from the version. Either log from
+       the previous version tag or since the last update to the changelog."""
+    changelog = change_log(version)
+    if changelog.is_file():
+        output = check_output(["git", "log", "-n", "1", "--format=%H",
+                               os.fspath(changelog)])
+        if output:
+            return output.strip().decode("utf-8") + "..HEAD"
+
+    last_version = version.copy()
+    if version[2] == 0:
+        adjust_idx = 0 if version[1] == 0 else 1
+    else:
+        adjust_idx = 2
+    last_version[adjust_idx] -= 1
+    return version_tag(last_version) + "..HEAD"
 
 
 def parse_options() -> Namespace:
@@ -94,13 +131,7 @@ def parse_options() -> Namespace:
         sys.exit(-1)
 
     if not args.versions:
-        last_version = release_version.copy()
-        if release_version[2] == 0:
-            adjust_idx = 0 if release_version[1] == 0 else 1
-        else:
-            adjust_idx = 2
-        last_version[adjust_idx] -= 1
-        args.versions = f"v{last_version[0]}.{last_version[1]}.{last_version[2]}..HEAD"
+        args.versions = revision_range(release_version)
         print(f"Assuming range {args.versions}", file=sys.stderr)
 
     args.release_version = release_version
