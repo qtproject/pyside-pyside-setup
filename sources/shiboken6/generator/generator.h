@@ -6,6 +6,7 @@
 
 #include <abstractmetalang_typedefs.h>
 #include <typedatabase_typedefs.h>
+#include <optionsparser.h>
 #include <QtCore/QList>
 
 #include <memory>
@@ -27,12 +28,9 @@ QString getFilteredCppSignatureString(QString signature);
  *   Base class for all generators. The default implementations does nothing,
  *   you must subclass this to create your own generators.
  */
-class Generator
+class Generator : public OptionsParser
 {
 public:
-    using OptionDescription = QPair<QString, QString>;
-    using OptionDescriptions = QList<OptionDescription>;
-
     /// Optiosn used around the generator code
     enum Option {
         NoOption                 = 0x00000000,
@@ -59,8 +57,8 @@ public:
 
     bool setup(const ApiExtractorResult &api);
 
-    virtual OptionDescriptions options() const;
-    virtual bool handleOption(const QString &key, const QString &value);
+    static QList<OptionDescription> options();
+    bool handleBoolOption(const QString &key, OptionSource source) override;
 
     /// Returns the top namespace made invisible
     const AbstractMetaClassCList &invisibleTopNamespaces() const;

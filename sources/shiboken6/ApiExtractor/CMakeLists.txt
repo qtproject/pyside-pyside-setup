@@ -49,6 +49,7 @@ messages.cpp messages.h
 modifications.cpp modifications.h modifications_typedefs.h
 namespacetypeentry.h
 objecttypeentry.h
+optionsparser.cpp optionsparser.h
 predefined_templates.cpp predefined_templates.h
 primitivetypeentry.h
 propertyspec.cpp propertyspec.h

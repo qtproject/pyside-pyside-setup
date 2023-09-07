@@ -55,8 +55,6 @@ static inline QString printBuiltinTypesOption() { return QStringLiteral("print-b
 static const char helpHint[] = "Note: use --help or -h for more information.\n";
 static const char appName[] = "shiboken";
 
-using OptionDescriptions = Generator::OptionDescriptions;
-
 struct CommandLineArguments
 {
     void addToOptionsList(const QString &option,
@@ -134,25 +132,6 @@ bool CommandLineArguments::addCommonOption(const QString &option,
         result = false;
     }
     return result;
-}
-
-static void printOptions(QTextStream &s, const OptionDescriptions &options)
-{
-    s.setFieldAlignment(QTextStream::AlignLeft);
-    for (const auto &od : options) {
-        if (!od.first.startsWith(u'-'))
-            s << "--";
-        s << od.first;
-        if (od.second.isEmpty()) {
-            s << ", ";
-        } else {
-            s << Qt::endl;
-            const auto lines = QStringView{od.second}.split(u'\n');
-            for (const auto &line : lines)
-                s << "        " << line << Qt::endl;
-            s << Qt::endl;
-        }
-    }
 }
 
 // Return the file command line option matching a project file keyword
@@ -323,14 +302,12 @@ static inline QString languageLevelDescription()
 
 void printUsage()
 {
-    const QChar pathSplitter = QDir::listSeparator();
+    const auto generatorOptions = Generator::options();
+
     QTextStream s(stdout);
     s << "Usage:\n  "
       << "shiboken [options] header-file(s) typesystem-file\n\n"
       << "General options:\n";
-    QString pathSyntax;
-    QTextStream(&pathSyntax) << "<path>[" << pathSplitter << "<path>"
-        << pathSplitter << "...]";
     OptionDescriptions generalOptions = {
         {u"api-version=<\"package mask\">,<\"version\">"_s,
          u"Specify the supported api version used to generate the bindings"_s},
@@ -354,10 +331,10 @@ void printUsage()
         {compilerPathOption() + u"=<file>"_s,
          u"Path to the compiler for determining builtin include paths"_s},
         {u"-F<path>"_s, {} },
-        {u"framework-include-paths="_s + pathSyntax,
+        {u"framework-include-paths="_s + OptionsParser::pathSyntax(),
          u"Framework include paths used by the C++ parser"_s},
         {u"-isystem<path>"_s, {} },
-        {u"system-include-paths="_s + pathSyntax,
+        {u"system-include-paths="_s + OptionsParser::pathSyntax(),
          u"System include paths used by the C++ parser"_s},
         {useGlobalHeaderOption(),
          u"Use the global headers in generated code."_s},
@@ -370,7 +347,7 @@ void printUsage()
         {u"-h"_s, {} },
         {helpOption(), u"Display this help and exit"_s},
         {u"-I<path>"_s, {} },
-        {u"include-paths="_s + pathSyntax,
+        {u"include-paths="_s + OptionsParser::pathSyntax(),
         u"Include paths used by the C++ parser"_s},
         {languageLevelOption() + u"=, -std=<level>"_s,
          languageLevelDescription()},
@@ -385,23 +362,22 @@ void printUsage()
           "Replaces and overrides command line arguments"_s},
         {u"silent"_s, u"Avoid printing any message"_s},
         {u"-T<path>"_s, {} },
-        {u"typesystem-paths="_s + pathSyntax,
+        {u"typesystem-paths="_s + OptionsParser::pathSyntax(),
          u"Paths used when searching for typesystems"_s},
         {printBuiltinTypesOption(),
          u"Print information about builtin types"_s},
         {u"version"_s,
          u"Output version information and exit"_s}
     };
-    printOptions(s, generalOptions);
 
-    const Generators generators = shibokenGenerators() + docGenerators();
-    for (const GeneratorPtr &generator : generators) {
-        const OptionDescriptions options = generator->options();
-        if (!options.isEmpty()) {
-            s << Qt::endl << generator->name() << " options:\n\n";
-            printOptions(s, generator->options());
-        }
-    }
+    s << generalOptions
+        << "\nSource generator options:\n\n" << generatorOptions
+        << ShibokenGenerator::options();
+
+#ifdef DOCSTRINGS_ENABLED
+    s << "\nDocumentation Generator options:\n\n"
+        << generatorOptions << QtDocGenerator::options();
+#endif
 }
 
 static inline void printVerAndBanner()
@@ -676,8 +652,14 @@ int shibokenMain(const QStringList &argV)
     // Pass option to all generators (Cpp/Header generator have the same options)
     for (ait = args.options.begin(); ait != args.options.end(); ) {
         bool found = false;
-        for (const GeneratorPtr &generator : std::as_const(generators))
-            found |= generator->handleOption(ait.key(), ait.value().toString());
+        if (ait.value().metaType().id() == QMetaType::QString) {
+            const QString value = ait.value().toString();
+            for (const GeneratorPtr &generator : std::as_const(generators)) {
+                found |= value.isEmpty()
+                    ? generator->handleBoolOption(ait.key(), OptionSource::CommandLine)
+                    : generator->handleOption(ait.key(), value, OptionSource::CommandLine);
+            }
+        }
         if (found)
             ait = args.options.erase(ait);
         else

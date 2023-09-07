@@ -2293,10 +2293,9 @@ void ShibokenGenerator::getInheritedOverloads(const AbstractMetaClassCPtr &scope
     }
 }
 
-Generator::OptionDescriptions ShibokenGenerator::options() const
+QList<OptionDescription> ShibokenGenerator::options()
 {
-    auto result = Generator::options();
-    result.append({
+    return {
         {QLatin1StringView(DISABLE_VERBOSE_ERROR_MESSAGES),
          u"Disable verbose error messages. Turn the python code hard to debug\n"
           "but safe few kB on the generated bindings."_s},
@@ -2317,14 +2316,15 @@ Generator::OptionDescriptions ShibokenGenerator::options() const
          u"Do not generate implicit_conversions for function arguments."_s},
         {QLatin1StringView(WRAPPER_DIAGNOSTICS),
          u"Generate diagnostic code around wrappers"_s}
-    });
-    return result;
+    };
 }
 
-bool ShibokenGenerator::handleOption(const QString &key, const QString &value)
+bool ShibokenGenerator::handleBoolOption(const QString &key, OptionSource source)
 {
-    if (Generator::handleOption(key, value))
+    if (Generator::handleBoolOption(key, source))
         return true;
+    if (source == OptionSource::CommandLineSingleDash)
+        return false;
     if (key == QLatin1StringView(PARENT_CTOR_HEURISTIC))
         return (m_options.useCtorHeuristic = true);
     if (key == QLatin1StringView(RETURN_VALUE_HEURISTIC))
