@@ -28,23 +28,15 @@
 using namespace Qt::StringLiterals;
 
 static const QChar clangOptionsSplitter = u',';
-static const QChar keywordsSplitter = u',';
-static const QChar dropTypeEntriesSplitter = u';';
-static const QChar apiVersionSplitter = u'|';
-
-static inline QString keywordsOption() { return QStringLiteral("keywords"); }
 static inline QString clangOptionOption() { return QStringLiteral("clang-option"); }
 static inline QString clangOptionsOption() { return QStringLiteral("clang-options"); }
 static inline QString compilerOption() { return QStringLiteral("compiler"); }
 static inline QString compilerPathOption() { return QStringLiteral("compiler-path"); }
 static inline QString platformOption() { return QStringLiteral("platform"); }
-static inline QString apiVersionOption() { return QStringLiteral("api-version"); }
-static inline QString dropTypeEntriesOption() { return QStringLiteral("drop-type-entries"); }
 static inline QString languageLevelOption() { return QStringLiteral("language-level"); }
 static inline QString includePathOption() { return QStringLiteral("include-paths"); }
 static inline QString frameworkIncludePathOption() { return QStringLiteral("framework-include-paths"); }
 static inline QString systemIncludePathOption() { return QStringLiteral("system-include-paths"); }
-static inline QString typesystemPathOption() { return QStringLiteral("typesystem-paths"); }
 static inline QString logUnmatchedOption() { return QStringLiteral("log-unmatched"); }
 static inline QString helpOption() { return QStringLiteral("help"); }
 static inline QString diffOption() { return QStringLiteral("diff"); }
@@ -123,12 +115,6 @@ bool CommandLineArguments::addCommonOption(const QString &option,
         options.insert(option, QStringList(value));
     } else if (option == clangOptionsOption()) {
         addToOptionsList(option, value, clangOptionsSplitter);
-    } else if (option == apiVersionOption()) {
-        addToOptionsList(option, value, apiVersionSplitter);
-    } else if (option == keywordsOption()) {
-        addToOptionsList(option, value, keywordsSplitter);
-    } else if (option == dropTypeEntriesOption()) {
-        addToOptionsList(option, value, dropTypeEntriesSplitter);
     } else {
         result = false;
     }
@@ -142,8 +128,6 @@ static QString projectFileKeywordToCommandLineOption(const QString &p)
         return includePathOption(); // "include-paths", ...
     if (p == u"framework-include-path")
         return frameworkIncludePathOption();
-    if (p == u"typesystem-path")
-        return typesystemPathOption();
     if (p == u"system-include-paths")
         return systemIncludePathOption();
     return {};
@@ -238,7 +222,7 @@ static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &ar
         const QString value = arg.mid(split + 1).trimmed();
         if (args.addCommonOption(option, value)) {
         } else if (option == includePathOption() || option == frameworkIncludePathOption()
-                   || option == systemIncludePathOption() || option == typesystemPathOption()) {
+                   || option == systemIncludePathOption()) {
             // Add platform path-separator separated list value to path list
             args.addToOptionsPathList(option, value);
         } else {
@@ -254,8 +238,6 @@ static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &ar
             args.addToOptionsPathList(frameworkIncludePathOption(), arg.mid(1));
         else if (arg.startsWith(u"isystem"))
             args.addToOptionsPathList(systemIncludePathOption(), arg.mid(7));
-        else if (arg.startsWith(u'T'))
-            args.addToOptionsPathList(typesystemPathOption(), arg.mid(1));
         else if (arg == u"h")
             args.options.insert(helpOption(), QString());
         else if (arg.startsWith(u"std="))
@@ -310,17 +292,10 @@ void printUsage()
       << "shiboken [options] header-file(s) typesystem-file\n\n"
       << "General options:\n";
     OptionDescriptions generalOptions = {
-        {u"api-version=<\"package mask\">,<\"version\">"_s,
-         u"Specify the supported api version used to generate the bindings"_s},
         {u"debug-level=[sparse|medium|full]"_s,
          u"Set the debug level"_s},
         {u"documentation-only"_s,
          u"Do not generates any code, just the documentation"_s},
-        {u"drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\""_s,
-         u"Semicolon separated list of type system entries (classes, namespaces,\n"
-          "global functions and enums) to be dropped from generation."_s},
-        {keywordsOption() + QStringLiteral("=keyword1[,keyword2,...]"),
-         u"A comma-separated list of keywords for conditional typesystem parsing"_s},
         {clangOptionOption(),
          u"Option to be passed to clang"_s},
         {clangOptionsOption(),
@@ -362,9 +337,6 @@ void printUsage()
          u"text file containing a description of the binding project.\n"
           "Replaces and overrides command line arguments"_s},
         {u"silent"_s, u"Avoid printing any message"_s},
-        {u"-T<path>"_s, {} },
-        {u"typesystem-paths="_s + OptionsParser::pathSyntax(),
-         u"Paths used when searching for typesystems"_s},
         {printBuiltinTypesOption(),
          u"Print information about builtin types"_s},
         {u"version"_s,
@@ -372,6 +344,7 @@ void printUsage()
     };
 
     s << generalOptions
+        << TypeDatabase::options()
         << "\nSource generator options:\n\n" << generatorOptions
         << ShibokenGenerator::options();
 
@@ -450,6 +423,7 @@ int shibokenMain(const QStringList &argV)
 
     OptionsParserList optionParser;
     optionParser.append(Generator::createOptionsParser());
+    optionParser.append(TypeDatabase::instance()->createOptionsParser());
 
     // Pre-defined generator sets.
     if (generatorSet == u"qtdoc") {
@@ -551,45 +525,6 @@ int shibokenMain(const QStringList &argV)
             }
             args.options.erase(ait);
         }
-    }
-    ait = args.options.find(u"no-suppress-warnings"_s);
-    if (ait != args.options.end()) {
-        args.options.erase(ait);
-        extractor.setSuppressWarnings(false);
-    }
-    ait = args.options.find(apiVersionOption());
-    if (ait != args.options.end()) {
-        const QStringList &versions = ait.value().toStringList();
-        args.options.erase(ait);
-        for (const QString &fullVersion : versions) {
-            QStringList parts = fullVersion.split(u',');
-            QString package;
-            QString version;
-            package = parts.size() == 1 ? u"*"_s : parts.constFirst();
-            version = parts.constLast();
-            if (!extractor.setApiVersion(package, version)) {
-                errorPrint(msgInvalidVersion(package, version), argV);
-                return EXIT_FAILURE;
-            }
-        }
-    }
-
-    ait = args.options.find(dropTypeEntriesOption());
-    if (ait != args.options.end()) {
-        extractor.setDropTypeEntries(ait.value().toStringList());
-        args.options.erase(ait);
-    }
-
-    ait = args.options.find(keywordsOption());
-    if (ait != args.options.end()) {
-        extractor.setTypesystemKeywords(ait.value().toStringList());
-        args.options.erase(ait);
-    }
-
-    ait = args.options.find(typesystemPathOption());
-    if (ait != args.options.end()) {
-        extractor.addTypesystemSearchPath(ait.value().toStringList());
-        args.options.erase(ait);
     }
 
     ait = args.options.find(clangOptionsOption());

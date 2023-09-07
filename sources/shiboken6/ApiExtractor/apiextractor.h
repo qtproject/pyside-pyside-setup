@@ -41,17 +41,11 @@ public:
     void setCppFileNames(const QFileInfoList &cppFileNames);
     QFileInfoList cppFileNames() const;
     void setSkipDeprecated(bool value);
-    static void setSuppressWarnings(bool value);
     static void setSilent(bool value);
-    static void addTypesystemSearchPath(const QString &path);
-    static void addTypesystemSearchPath(const QStringList& paths);
-    static void setTypesystemKeywords(const QStringList& keywords);
     void addIncludePath(const HeaderPath& path);
     void addIncludePath(const HeaderPaths& paths);
     HeaderPaths includePaths() const;
     void setLogDirectory(const QString& logDir);
-    static bool setApiVersion(const QString &package, const QString &version);
-    static void setDropTypeEntries(const QStringList &dropEntries);
     LanguageLevel languageLevel() const;
     void setLanguageLevel(LanguageLevel languageLevel);
     QStringList clangOptions() const;

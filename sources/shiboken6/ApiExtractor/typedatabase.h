@@ -16,6 +16,8 @@
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 
+struct OptionDescription;
+class OptionsParser;
 struct TypeDatabasePrivate;
 struct TypeDatabaseParserContext;
 
@@ -65,6 +67,9 @@ class TypeDatabase
 public:
     ~TypeDatabase();
 
+    static QList<OptionDescription> options();
+    std::shared_ptr<OptionsParser> createOptionsParser();
+
     /**
     * Return the type system instance.
     * \param newInstance This parameter is useful just for unit testing, because singletons causes
@@ -79,9 +84,6 @@ public:
 
     void addRequiredTargetImport(const QString &moduleName);
 
-    void addTypesystemPath(const QString &typesystem_paths);
-
-    void setTypesystemKeywords(const QStringList &keywords);
     QStringList typesystemKeywords() const;
 
     IncludeList extraIncludes(const QString &className) const;
@@ -156,8 +158,6 @@ public:
 
     FunctionModificationList
         globalFunctionModifications(const QStringList &signatures) const;
-
-    void setSuppressWarnings(bool on);
 
     bool addSuppressedWarning(const QString &warning, bool generate, QString *errorMessage);
 
