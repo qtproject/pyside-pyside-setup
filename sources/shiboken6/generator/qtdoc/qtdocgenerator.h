@@ -33,8 +33,8 @@ public:
         return "QtDocGenerator";
     }
 
-    OptionDescriptions options() const override;
-    bool handleOption(const QString &key, const QString &value) override;
+    static QList<OptionDescription> options();
+    bool handleOption(const QString &key, const QString &value, OptionSource source) override;
 
     // QtXmlToSphinxDocGeneratorInterface
     QString expandFunction(const QString &function) const override;

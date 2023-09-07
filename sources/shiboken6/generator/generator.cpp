@@ -85,7 +85,7 @@ bool Generator::setup(const ApiExtractorResult &api)
     return doSetup();
 }
 
-Generator::OptionDescriptions Generator::options() const
+QList<OptionDescription> Generator::options()
 {
     return {
         {QLatin1StringView(AVOID_PROTECTED_HACK),
@@ -96,8 +96,10 @@ Generator::OptionDescriptions Generator::options() const
     };
 }
 
-bool Generator::handleOption(const QString & key, const QString & /* value */)
+bool Generator::handleBoolOption(const QString & key, OptionSource source)
 {
+    if (source == OptionSource::CommandLineSingleDash)
+        return false;
     auto &options = GeneratorPrivate::m_options;
     if (key == QLatin1StringView(ENABLE_PYSIDE_EXTENSIONS))
         return ( options.usePySideExtensions = true);

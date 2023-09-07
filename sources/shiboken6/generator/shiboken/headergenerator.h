@@ -18,8 +18,6 @@ struct ModuleHeaderParameters;
 class HeaderGenerator : public ShibokenGenerator
 {
 public:
-    OptionDescriptions options() const override { return OptionDescriptions(); }
-
     const char *name() const override { return "Header generator"; }
 
     static const char *protectedHackDefine;

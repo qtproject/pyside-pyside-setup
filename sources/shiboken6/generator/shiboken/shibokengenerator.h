@@ -77,6 +77,8 @@ public:
 
     const char *name() const override { return "Shiboken"; }
 
+    static QList<OptionDescription> options();
+
     static QString minimalConstructorExpression(const ApiExtractorResult &api,
                                                 const AbstractMetaType &type);
     static QString minimalConstructorExpression(const ApiExtractorResult &api,
@@ -283,8 +285,7 @@ protected:
     /// Includes for header (native wrapper class) or binding source
     QList<IncludeGroup> classIncludes(const AbstractMetaClassCPtr &metaClass) const;
 
-    OptionDescriptions options() const override;
-    bool handleOption(const QString &key, const QString &value) override;
+    bool handleBoolOption(const QString &key, OptionSource source) override;
 
     /// Returns true if the user enabled the so called "parent constructor heuristic".
     static bool useCtorHeuristic();

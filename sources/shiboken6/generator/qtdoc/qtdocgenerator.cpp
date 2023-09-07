@@ -1103,11 +1103,9 @@ bool QtDocGenerator::doSetup()
     return true;
 }
 
-
-Generator::OptionDescriptions QtDocGenerator::options() const
+QList<OptionDescription> QtDocGenerator::options()
 {
-    auto result = Generator::options();
-    result.append({
+    return {
         {u"doc-parser=<parser>"_s,
          u"The documentation parser used to interpret the documentation\n"
           "input files (qdoc|doxygen)"_s},
@@ -1126,15 +1124,15 @@ Generator::OptionDescriptions QtDocGenerator::options() const
           "(for example, tutorials)."_s},
         {u"inheritance-file=<file>"_s,
          u"Generate a JSON file containing the class inheritance."_s}
-
-    });
-    return result;
+    };
 }
 
-bool QtDocGenerator::handleOption(const QString &key, const QString &value)
+bool QtDocGenerator::handleOption(const QString &key, const QString &value, OptionSource source)
 {
-    if (Generator::handleOption(key, value))
+    if (Generator::handleOption(key, value, source))
         return true;
+    if (source == OptionSource::CommandLineSingleDash)
+        return false;
     if (key == u"library-source-dir") {
         m_options.parameters.libSourceDir = value;
         return true;
