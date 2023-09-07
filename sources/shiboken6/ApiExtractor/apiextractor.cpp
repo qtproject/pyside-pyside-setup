@@ -76,32 +76,12 @@ struct ApiExtractorPrivate
 ApiExtractor::ApiExtractor() :
       d(new ApiExtractorPrivate)
 {
-    // Environment TYPESYSTEMPATH
-    QString envTypesystemPaths = QFile::decodeName(qgetenv("TYPESYSTEMPATH"));
-    if (!envTypesystemPaths.isEmpty())
-        TypeDatabase::instance()->addTypesystemPath(envTypesystemPaths);
 }
 
 ApiExtractor::~ApiExtractor()
 {
     delete d->m_builder;
     delete d;
-}
-
-void ApiExtractor::addTypesystemSearchPath (const QString& path)
-{
-    TypeDatabase::instance()->addTypesystemPath(path);
-}
-
-void ApiExtractor::addTypesystemSearchPath(const QStringList& paths)
-{
-    for (const QString &path : paths)
-        addTypesystemSearchPath(path);
-}
-
-void ApiExtractor::setTypesystemKeywords(const QStringList &keywords)
-{
-    TypeDatabase::instance()->setTypesystemKeywords(keywords);
 }
 
 void ApiExtractor::addIncludePath(const HeaderPath& path)
@@ -151,24 +131,9 @@ void ApiExtractor::setSkipDeprecated(bool value)
         d->m_builder->setSkipDeprecated(d->m_skipDeprecated);
 }
 
-void ApiExtractor::setSuppressWarnings ( bool value )
-{
-    TypeDatabase::instance()->setSuppressWarnings(value);
-}
-
 void ApiExtractor::setSilent ( bool value )
 {
     ReportHandler::setSilent(value);
-}
-
-bool ApiExtractor::setApiVersion(const QString& package, const QString &version)
-{
-    return TypeDatabase::setApiVersion(package, version);
-}
-
-void ApiExtractor::setDropTypeEntries(const QStringList &dropEntries)
-{
-    TypeDatabase::instance()->setDropTypeEntries(dropEntries);
 }
 
 const AbstractMetaEnumList &ApiExtractor::globalEnums() const

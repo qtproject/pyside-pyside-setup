@@ -11,11 +11,13 @@
 #include "containertypeentry.h"
 #include "customtypenentry.h"
 #include "debughelpers_p.h"
+#include "exception.h"
 #include "flagstypeentry.h"
 #include "functiontypeentry.h"
 #include "namespacetypeentry.h"
 #include "objecttypeentry.h"
 #include "primitivetypeentry.h"
+#include "optionsparser.h"
 #include "pythontypeentry.h"
 #include "smartpointertypeentry.h"
 #include "typedefentry.h"
@@ -109,7 +111,108 @@ struct SuppressedWarning
     mutable bool matched = false;
 };
 
-struct TypeDatabasePrivate
+QList<OptionDescription> TypeDatabase::options()
+{
+    return {
+        {u"api-version=<\"package mask\">,<\"version\">"_s,
+         u"Specify the supported api version used to generate the bindings"_s},
+        {u"drop-type-entries=\"<TypeEntry0>[;TypeEntry1;...]\""_s,
+         u"Semicolon separated list of type system entries (classes, namespaces,\n"
+         "global functions and enums) to be dropped from generation."_s},
+        {u"-T<path>"_s, {} },
+        {u"typesystem-paths="_s + OptionsParser::pathSyntax(),
+         u"Paths used when searching for typesystems"_s},
+        {u"keywords=keyword1[,keyword2,...]"_s,
+         u"A comma-separated list of keywords for conditional typesystem parsing"_s},
+    };
+}
+
+struct TypeDatabaseOptions
+{
+    QStringList m_dropTypeEntries;
+    QStringList m_systemIncludes;
+    QStringList m_typesystemKeywords;
+    QStringList m_typesystemPaths;
+    bool m_suppressWarnings = true;
+};
+
+class TypeDatabaseOptionsParser : public OptionsParser
+{
+public:
+    explicit TypeDatabaseOptionsParser(TypeDatabaseOptions *o) : m_options(o) {}
+
+    bool handleBoolOption(const QString &key, OptionSource source) override;
+    bool handleOption(const QString &key, const QString &value, OptionSource source) override;
+
+private:
+    TypeDatabaseOptions *m_options;
+};
+
+bool TypeDatabaseOptionsParser::handleBoolOption(const QString &key, OptionSource source)
+{
+    switch (source) {
+    case OptionSource::CommandLine:
+    case OptionSource::ProjectFile:
+        if (key == u"no-suppress-warnings") {
+            m_options->m_suppressWarnings = false;
+            return true;
+        }
+        break;
+    case OptionSource::CommandLineSingleDash:
+        if (key.startsWith(u'T')) { // "-T/path" ends up a bool option
+            m_options->m_typesystemPaths += key.sliced(1).split(QDir::listSeparator());
+            return true;
+        }
+        break;
+    }
+    return false;
+}
+
+bool TypeDatabaseOptionsParser::handleOption(const QString &key, const QString &value,
+                                             OptionSource source)
+{
+    if (source == OptionSource::CommandLineSingleDash)
+        return false;
+    if (key == u"api-version") {
+        const auto fullVersions = QStringView{value}.split(u'|');
+        for (const auto &fullVersion : fullVersions) {
+            const auto parts = fullVersion.split(u',');
+            const QString package = parts.size() == 1
+                                    ? u"*"_s : parts.constFirst().toString();
+            const QString version = parts.constLast().toString();
+            if (!TypeDatabase::setApiVersion(package, version))
+                throw Exception(msgInvalidVersion(package, version));
+        }
+        return true;
+    }
+
+    if (key == u"drop-type-entries") {
+        m_options->m_dropTypeEntries = value.split(u';');
+        m_options->m_dropTypeEntries.sort();
+        return true;
+    }
+
+    if (key == u"keywords") {
+        m_options->m_typesystemKeywords = value.split(u',');
+        return true;
+    }
+
+    if (key == u"typesystem-paths") {
+        m_options->m_typesystemPaths += value.split(QDir::listSeparator());
+        return true;
+    }
+
+    if (source == OptionSource::ProjectFile) {
+        if (key == u"typesystem-path") {
+            m_options->m_typesystemPaths += value;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+struct TypeDatabasePrivate : public TypeDatabaseOptions
 {
     TypeSystemTypeEntryCPtr defaultTypeSystemType() const;
     TypeEntryPtr findType(const QString &name) const;
@@ -150,7 +253,6 @@ struct TypeDatabasePrivate
     void formatDebug(QDebug &d) const;
     void formatBuiltinTypes(QDebug &d) const;
 
-    bool m_suppressWarnings = true;
     TypeEntryMultiMap m_entries; // Contains duplicate entries (cf addInlineNamespaceLookups).
     TypeEntryMap m_flagsEntries;
     TypedefEntryMap m_typedefEntries;
@@ -163,18 +265,21 @@ struct TypeDatabasePrivate
 
     QStringList m_requiredTargetImports;
 
-    QStringList m_typesystemPaths;
-    QStringList m_typesystemKeywords;
     QHash<QString, bool> m_parsedTypesystemFiles;
 
     QList<TypeRejection> m_rejections;
-
-    QStringList m_dropTypeEntries;
-    QStringList m_systemIncludes;
 };
+
+static const char ENV_TYPESYSTEMPATH[] = "TYPESYSTEMPATH";
 
 TypeDatabase::TypeDatabase() : d(new TypeDatabasePrivate)
 {
+    // Environment TYPESYSTEMPATH
+    if (qEnvironmentVariableIsSet(ENV_TYPESYSTEMPATH)) {
+        d->m_typesystemPaths
+            += qEnvironmentVariable(ENV_TYPESYSTEMPATH).split(QDir::listSeparator());
+    }
+
     d->addBuiltInType(TypeEntryPtr(new VoidTypeEntry()));
     d->addBuiltInType(TypeEntryPtr(new VarargsTypeEntry()));
     for (const auto &pt : builtinPythonTypes())
@@ -187,6 +292,11 @@ TypeDatabase::TypeDatabase() : d(new TypeDatabasePrivate)
 TypeDatabase::~TypeDatabase()
 {
     delete d;
+}
+
+std::shared_ptr<OptionsParser> TypeDatabase::createOptionsParser()
+{
+    return std::make_shared<TypeDatabaseOptionsParser>(d);
 }
 
 TypeDatabase *TypeDatabase::instance(bool newInstance)
@@ -304,21 +414,6 @@ void TypeDatabase::addRequiredTargetImport(const QString& moduleName)
 {
     if (!d->m_requiredTargetImports.contains(moduleName))
         d->m_requiredTargetImports << moduleName;
-}
-
-void TypeDatabase::addTypesystemPath(const QString& typesystem_paths)
-{
-    #if defined(Q_OS_WIN32)
-    const char path_splitter = ';';
-    #else
-    const char path_splitter = ':';
-    #endif
-    d->m_typesystemPaths += typesystem_paths.split(QLatin1Char(path_splitter));
-}
-
-void TypeDatabase::setTypesystemKeywords(const QStringList &keywords)
-{
-    d->m_typesystemKeywords = keywords;
 }
 
 QStringList TypeDatabase::typesystemKeywords() const
@@ -787,11 +882,6 @@ FunctionModificationList
     }
 
     return lst;
-}
-
-void TypeDatabase::setSuppressWarnings(bool on)
-{
-    d->m_suppressWarnings = on;
 }
 
 bool TypeDatabase::addSuppressedWarning(const QString &warning, bool generate,
