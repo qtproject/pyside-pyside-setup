@@ -12,6 +12,9 @@ from .commands import run_qmlimportscanner
 # Some QML plugins like QtCore are excluded from this list as they don't contribute much to
 # executable size. Excluding them saves the extra processing of checking for them in files
 EXCLUDED_QML_PLUGINS = {"QtQuick", "QtQuick3D", "QtCharts", "QtWebEngine", "QtTest", "QtSensors"}
+# TODO: Move this to android module. Fix circular import.
+ANDROID_NDK_VERSION = "25c"
+ANDROID_DEPLOY_CACHE = Path.home() / ".pyside6_android_deploy"
 
 
 class BaseConfig:
@@ -128,13 +131,30 @@ class Config(BaseConfig):
                 self.ndk_path = android_data.ndk_path
             else:
                 ndk_path_temp = self.get_value("buildozer", "ndk_path")
-                self.ndk_path = Path(ndk_path_temp) if ndk_path_temp else None
+                if ndk_path_temp:
+                    self.ndk_path = Path(ndk_path_temp)
+                else:
+                    self.ndk_path = (ANDROID_DEPLOY_CACHE / "android-ndk"
+                                     / f"android-ndk-r{ANDROID_NDK_VERSION}")
+                    if not self.ndk_path.exists():
+                        logging.info("[DEPLOY] Use default NDK from buildoer")
+
+            if self.ndk_path:
+                print(f"Using Android NDK: {str(self.ndk_path)}")
 
             if android_data.sdk_path:
                 self.sdk_path = android_data.sdk_path
             else:
                 sdk_path_temp = self.get_value("buildozer", "sdk_path")
-                self.sdk_path = Path(sdk_path_temp) if sdk_path_temp else None
+                if sdk_path_temp:
+                    self.sdk_path = Path(sdk_path_temp)
+                else:
+                    self.sdk_path = ANDROID_DEPLOY_CACHE / "android-sdk"
+                    if not self.sdk_path.exists():
+                        logging.info("[DEPLOY] Use default SDK from buildozer")
+
+            if self.sdk_path:
+                print(f"Using Android SDK: {str(self.sdk_path)}")
 
             recipe_dir_temp = self.get_value("buildozer", "recipe_dir")
             self.recipe_dir = Path(recipe_dir_temp) if recipe_dir_temp else None

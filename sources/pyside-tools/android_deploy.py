@@ -237,14 +237,13 @@ if __name__ == "__main__":
                         help=f"Path to shiboken{MAJOR_VERSION} Android Wheel",
                         required=not config_option_exists())
 
-    #TODO: --ndk-path and --sdk-path will be removed when automatic download of sdk and ndk is added
     parser.add_argument("--ndk-path", type=lambda p: Path(p).resolve(),
                         help=("Path to Android Ndk. If omitted, the default from buildozer is used")
-                        , required=True)
+                        )
 
     parser.add_argument("--sdk-path", type=lambda p: Path(p).resolve(),
                         help=("Path to Android Sdk. If omitted, the default from buildozer is used")
-                        , required=True)
+                        )
 
     parser.add_argument("--extra-ignore-dirs", type=str, help=HELP_EXTRA_IGNORE_DIRS)
 

@@ -16,8 +16,30 @@ from git import Repo, RemoteProgress
 from tqdm import tqdm
 from jinja2 import Environment, FileSystemLoader
 
+from android_utilities import (run_command, download_android_commandlinetools,
+                                download_android_ndk, install_android_packages)
+
 # Note: Does not work with PyEnv. Your Host Python should contain openssl.
 PYTHON_VERSION = "3.10"
+
+APIC_HELP = ('''
+Points to the installation path of Python for the specific Android
+platform. If the path given does not exist, then Python for Android
+is cross compiled for the specific platform and installed into this
+path as <path>/Python-'plat_name'/_install.
+
+If this path is not given, then Python for Android is cross-compiled
+into a temportary directory, which is deleted when the Qt for Python
+Android wheels are created.
+''')
+
+SKIP_UPDATE_HELP = ("skip the updation of SDK packages build-tools, platform-tools to"
+                    " latest version")
+
+ACCEPT_LICENSE_HELP = ('''
+Accepts license automatically for Android SDK installation. Otherwise,
+accept the license manually through command line.
+''')
 
 
 @dataclass
@@ -48,20 +70,10 @@ class CloneProgress(RemoteProgress):
         self.pbar.refresh()
 
 
-def run_command(command: List[str], cwd: str = None, ignore_fail: bool = False,
-                dry_run: bool = False):
-    if dry_run:
-        print(" ".join(command))
-        return
-    ex = subprocess.call(command, cwd=cwd)
-    if ex != 0 and not ignore_fail:
-        sys.exit(ex)
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="This tool cross builds cpython for android and uses that Python to cross build"
-                    "android Qt for Python wheels",
+        description="This tool cross builds CPython for Android and uses that Python to cross build"
+                    "Android Qt for Python wheels",
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
@@ -72,11 +84,9 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", help="run in verbose mode", action="store_const",
                         dest="loglevel", const=logging.INFO)
     parser.add_argument("--api-level", type=str, default="31", help="Android API level to use")
-    parser.add_argument("--ndk-path", type=str, required=True,
-                        help="Path to Android NDK (Preferred 25b)")
+    parser.add_argument("--ndk-path", type=str, help="Path to Android NDK (Preferred 25b)")
     # sdk path is needed to compile all the Qt Java Acitivity files into Qt6AndroidBindings.jar
-    parser.add_argument("--sdk-path", type=str, required=True,
-                        help="Path to Android SDK")
+    parser.add_argument("--sdk-path", type=str, help="Path to Android SDK")
     parser.add_argument("--qt-install-path", type=str, required=not occp_exists(),
                         help="Qt installation path eg: /home/Qt/6.5.0")
 
@@ -85,18 +95,15 @@ if __name__ == "__main__":
 
     parser.add_argument("-apic", "--android-python-install-path", type=str, default=None,
                         required=occp_exists(),
-                        help='''
-                        Points to the installation path of Python for the specific Android
-                        platform. If the path given does not exist, then Python for android
-                        is cross compiled for the specific platform and installed into this
-                        path as <path>/Python-'plat_name'/_install.
-
-                        If this path is not given, then Python for android is cross-compiled
-                        into a temportary directory, which is deleted when the Qt for Python
-                        android wheels are created.
-                        ''')
+                        help=APIC_HELP)
 
     parser.add_argument("--dry-run", action="store_true", help="show the commands to be run")
+
+    parser.add_argument("--skip-update", action="store_true",
+                        help=SKIP_UPDATE_HELP)
+
+    parser.add_argument("--auto-accept-license", action="store_true",
+                        help=ACCEPT_LICENSE_HELP)
 
     args = parser.parse_args()
 
@@ -114,6 +121,24 @@ if __name__ == "__main__":
     gcc_march = None
     plat_bits = None
     dry_run = args.dry_run
+    plat_name = args.plat_name
+    api_level = args.api_level
+    skip_update = args.skip_update
+    auto_accept_license = args.auto_accept_license
+
+    # auto download Android NDK and SDK
+    pyside6_deploy_cache = Path.home() / ".pyside6_android_deploy"
+
+    if not ndk_path:
+        # Download android ndk
+        ndk_path = download_android_ndk(pyside6_deploy_cache)
+
+    if not sdk_path:
+        # download and unzip command-line tools
+        sdk_path = download_android_commandlinetools(pyside6_deploy_cache)
+        # install and update required android packages
+        install_android_packages(android_sdk_dir=sdk_path, android_api=api_level, dry_run=dry_run,
+                                 accept_license=auto_accept_license, skip_update=skip_update)
 
     # python path is valid, if Python for android installation exists in python_path
     valid_python_path = True
@@ -130,8 +155,6 @@ if __name__ == "__main__":
                 break
 
     templates_path = Path(__file__).parent / "templates"
-    plat_name = args.plat_name
-    api_level = args.api_level
 
     # for armv7a the API level dependent binaries like clang are named
     # armv7a-linux-androideabi27-clang, as opposed to other platforms which
@@ -187,7 +210,7 @@ if __name__ == "__main__":
 
             # run the cross compile script
             logging.info(f"Running Python cross-compile for platform {platform_data.plat_name}")
-            run_command(["./cross_compile.sh"], cwd=cpython_dir, dry_run=dry_run)
+            run_command(["./cross_compile.sh"], cwd=cpython_dir, dry_run=dry_run, show_stdout=True)
 
             python_path = (f"{android_py_install_path_prefix}/Python-{platform_data.plat_name}-linux-android/"
                            "_install")
@@ -196,7 +219,8 @@ if __name__ == "__main__":
             # libpython3.x.so, to match with python_for_android's Python library. Otherwise,
             # the Qfp binaries won't be able to link to Python
             run_command(["patchelf", "--set-soname", f"libpython{PYTHON_VERSION}.so",
-                         f"libpython{PYTHON_VERSION}.so.1.0"], cwd=Path(python_path) / "lib")
+                        f"libpython{PYTHON_VERSION}.so.1.0"], cwd=Path(python_path) / "lib",
+                        dry_run=dry_run)
 
             logging.info(
                 f"Cross compile Python for Android platform {platform_data.plat_name}. "
@@ -242,4 +266,4 @@ if __name__ == "__main__":
                             (f"--qt-target-path={qt_install_path}/"
                              f"android_{platform_data.qt_plat_name}"),
                             "--no-qt-tools", "--skip-docs", "--unity"]
-        run_command(qfp_ccompile_cmd, cwd=pyside_setup_dir, dry_run=dry_run)
+        run_command(qfp_ccompile_cmd, cwd=pyside_setup_dir, dry_run=dry_run, show_stdout=True)
