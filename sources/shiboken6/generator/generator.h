@@ -94,10 +94,10 @@ public:
     bool hasPrivateClasses() const;
 
     /// Returns true if the user enabled PySide extensions (command line option)
-    bool usePySideExtensions() const;
+    static bool usePySideExtensions();
     /// Returns true if the generated code should not use the
     /// "#define protected public" hack.
-    bool avoidProtectedHack() const;
+    static bool avoidProtectedHack();
 
     /**
      *  Retrieves the name of the currently processed module.

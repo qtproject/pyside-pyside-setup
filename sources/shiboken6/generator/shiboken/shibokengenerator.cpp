@@ -74,6 +74,20 @@ const QString BEGIN_ALLOW_THREADS =
     u"PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS"_s;
 const QString END_ALLOW_THREADS = u"PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS"_s;
 
+struct ShibokenGeneratorOptions
+{
+    bool useCtorHeuristic = false;
+    bool userReturnValueHeuristic = false;
+    bool verboseErrorMessagesDisabled = false;
+    bool useIsNullAsNbNonZero = false;
+    // FIXME PYSIDE 7 Flip m_leanHeaders default or remove?
+    bool leanHeaders = false;
+    bool useOperatorBoolAsNbNonZero = false;
+    // FIXME PYSIDE 7 Flip generateImplicitConversions default or remove?
+    bool generateImplicitConversions = true;
+    bool wrapperDiagnostics = false;
+};
+
 struct GeneratorClassInfoCacheEntry
 {
     ShibokenGenerator::FunctionGroups functionGroups;
@@ -104,6 +118,10 @@ const ShibokenGenerator::TypeSystemConverterRegExps &
     };
     return result;
 }
+
+// Options are static to avoid duplicated handling since ShibokenGenerator
+// is instantiated for HeaderGenerator and CppGenerator.
+ShibokenGeneratorOptions ShibokenGenerator::m_options;
 
 ShibokenGenerator::ShibokenGenerator() = default;
 
@@ -355,6 +373,11 @@ QString ShibokenGenerator::fullPythonFunctionName(const AbstractMetaFunctionCPtr
         funcName = packageName() + u'.' + func->name();
     }
     return funcName;
+}
+
+bool ShibokenGenerator::wrapperDiagnostics()
+{
+    return m_options.wrapperDiagnostics;
 }
 
 QString ShibokenGenerator::protectedEnumSurrogateName(const AbstractMetaEnum &metaEnum)
@@ -2245,23 +2268,23 @@ bool ShibokenGenerator::handleOption(const QString &key, const QString &value)
     if (Generator::handleOption(key, value))
         return true;
     if (key == QLatin1StringView(PARENT_CTOR_HEURISTIC))
-        return (m_useCtorHeuristic = true);
+        return (m_options.useCtorHeuristic = true);
     if (key == QLatin1StringView(RETURN_VALUE_HEURISTIC))
-        return (m_userReturnValueHeuristic = true);
+        return (m_options.userReturnValueHeuristic = true);
     if (key == QLatin1StringView(DISABLE_VERBOSE_ERROR_MESSAGES))
-        return (m_verboseErrorMessagesDisabled = true);
+        return (m_options.verboseErrorMessagesDisabled = true);
     if (key == QLatin1StringView(USE_ISNULL_AS_NB_NONZERO))
-        return (m_useIsNullAsNbNonZero = true);
+        return (m_options.useIsNullAsNbNonZero = true);
     if (key == QLatin1StringView(LEAN_HEADERS))
-        return (m_leanHeaders= true);
+        return (m_options.leanHeaders= true);
     if (key == QLatin1StringView(USE_OPERATOR_BOOL_AS_NB_NONZERO))
-        return (m_useOperatorBoolAsNbNonZero = true);
+        return (m_options.useOperatorBoolAsNbNonZero = true);
     if (key == QLatin1StringView(NO_IMPLICIT_CONVERSIONS)) {
-        m_generateImplicitConversions = false;
+        m_options.generateImplicitConversions = false;
         return true;
     }
     if (key == QLatin1StringView(WRAPPER_DIAGNOSTICS))
-        return (m_wrapperDiagnostics = true);
+        return (m_options.wrapperDiagnostics = true);
     return false;
 }
 
@@ -2270,34 +2293,34 @@ bool ShibokenGenerator::doSetup()
     return true;
 }
 
-bool ShibokenGenerator::useCtorHeuristic() const
+bool ShibokenGenerator::useCtorHeuristic()
 {
-    return m_useCtorHeuristic;
+    return m_options.useCtorHeuristic;
 }
 
-bool ShibokenGenerator::useReturnValueHeuristic() const
+bool ShibokenGenerator::useReturnValueHeuristic()
 {
-    return m_userReturnValueHeuristic;
+    return m_options.userReturnValueHeuristic;
 }
 
-bool ShibokenGenerator::useIsNullAsNbNonZero() const
+bool ShibokenGenerator::useIsNullAsNbNonZero()
 {
-    return m_useIsNullAsNbNonZero;
+    return m_options.useIsNullAsNbNonZero;
 }
 
-bool ShibokenGenerator::leanHeaders() const
+bool ShibokenGenerator::leanHeaders()
 {
-    return m_leanHeaders;
+    return m_options.leanHeaders;
 }
 
-bool ShibokenGenerator::useOperatorBoolAsNbNonZero() const
+bool ShibokenGenerator::useOperatorBoolAsNbNonZero()
 {
-    return m_useOperatorBoolAsNbNonZero;
+    return m_options.useOperatorBoolAsNbNonZero;
 }
 
-bool ShibokenGenerator::generateImplicitConversions() const
+bool ShibokenGenerator::generateImplicitConversions()
 {
-    return m_generateImplicitConversions;
+    return m_options.generateImplicitConversions;
 }
 
 QString ShibokenGenerator::moduleCppPrefix(const QString &moduleName)
@@ -2385,9 +2408,9 @@ QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaType &type
     return result;
 }
 
-bool ShibokenGenerator::verboseErrorMessagesDisabled() const
+bool ShibokenGenerator::verboseErrorMessagesDisabled()
 {
-    return m_verboseErrorMessagesDisabled;
+    return m_options.verboseErrorMessagesDisabled;
 }
 
 bool ShibokenGenerator::pythonFunctionWrapperUsesListOfArguments(const AbstractMetaFunctionCPtr &func) const

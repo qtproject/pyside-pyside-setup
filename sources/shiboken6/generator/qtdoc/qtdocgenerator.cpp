@@ -42,6 +42,15 @@
 
 using namespace Qt::StringLiterals;
 
+struct DocGeneratorOptions
+{
+    QtXmlToSphinxParameters parameters;
+    QString extraSectionDir;
+    QString additionalDocumentationList;
+    QString inheritanceFile;
+    bool doxygen = false;
+};
+
 struct GeneratorDocumentation
 {
     struct Property
@@ -205,9 +214,11 @@ struct propRef : public shortDocRef // Attribute/property (short) reference
         shortDocRef("attr", target) {}
 };
 
+DocGeneratorOptions QtDocGenerator::m_options;
+
 QtDocGenerator::QtDocGenerator()
 {
-    m_parameters.snippetComparison =
+    m_options.parameters.snippetComparison =
         ReportHandler::debugLevel() >= ReportHandler::FullDebug;
 }
 
@@ -253,7 +264,7 @@ void QtDocGenerator::writeFormattedText(TextStream &s, const QString &doc,
         metaClassName = metaClass->fullName();
 
     if (format == Documentation::Native) {
-        QtXmlToSphinx x(this, m_parameters, doc, metaClassName);
+        QtXmlToSphinx x(this, m_options.parameters, doc, metaClassName);
         s << x;
     } else {
         const auto lines = QStringView{doc}.split(u'\n');
@@ -867,18 +878,18 @@ bool QtDocGenerator::finishGeneration()
 {
     if (!api().classes().isEmpty())
         writeModuleDocumentation();
-    if (!m_additionalDocumentationList.isEmpty())
+    if (!m_options.additionalDocumentationList.isEmpty())
         writeAdditionalDocumentation();
-    if (!m_inheritanceFile.isEmpty() && !writeInheritanceFile())
+    if (!m_options.inheritanceFile.isEmpty() && !writeInheritanceFile())
         return false;
     return true;
 }
 
 bool QtDocGenerator::writeInheritanceFile()
 {
-    QFile inheritanceFile(m_inheritanceFile);
+    QFile inheritanceFile(m_options.inheritanceFile);
     if (!inheritanceFile.open(QIODevice::WriteOnly | QIODevice::Text))
-        throw Exception(msgCannotOpenForWriting(m_inheritanceFile));
+        throw Exception(msgCannotOpenForWriting(m_options.inheritanceFile));
 
     QJsonObject dict;
     for (const auto &c : api().classes()) {
@@ -922,11 +933,11 @@ void QtDocGenerator::writeModuleDocumentation()
             moduleName.remove(0, lastIndex + 1);
 
         // Search for extra-sections
-        if (!m_extraSectionDir.isEmpty()) {
-            QDir extraSectionDir(m_extraSectionDir);
+        if (!m_options.extraSectionDir.isEmpty()) {
+            QDir extraSectionDir(m_options.extraSectionDir);
             if (!extraSectionDir.exists()) {
-                const QString m = QStringLiteral("Extra sections directory ") +
-                                  m_extraSectionDir + QStringLiteral(" doesn't exist");
+                const QString m = u"Extra sections directory "_s +
+                                  m_options.extraSectionDir + u" doesn't exist"_s;
                 throw Exception(m);
             }
 
@@ -958,7 +969,7 @@ void QtDocGenerator::writeModuleDocumentation()
             << "Detailed Description\n--------------------\n\n";
 
         // module doc is always wrong and C++istic, so go straight to the extra directory!
-        QFile moduleDoc(m_extraSectionDir + u'/' + moduleName
+        QFile moduleDoc(m_options.extraSectionDir + u'/' + moduleName
                         + u".rst"_s);
         if (moduleDoc.open(QIODevice::ReadOnly | QIODevice::Text)) {
             s << moduleDoc.readAll();
@@ -969,7 +980,7 @@ void QtDocGenerator::writeModuleDocumentation()
             if (moduleDoc.format() == Documentation::Native) {
                 QString context = it.key();
                 QtXmlToSphinx::stripPythonQualifiers(&context);
-                QtXmlToSphinx x(this, m_parameters, moduleDoc.detailed(), context);
+                QtXmlToSphinx x(this, m_options.parameters, moduleDoc.detailed(), context);
                 s << x;
             } else {
                 s << moduleDoc.detailed();
@@ -996,7 +1007,7 @@ static inline QString msgNonExistentAdditionalDocFile(const QString &dir,
 
 void QtDocGenerator::writeAdditionalDocumentation() const
 {
-    QFile additionalDocumentationFile(m_additionalDocumentationList);
+    QFile additionalDocumentationFile(m_options.additionalDocumentationList);
     if (!additionalDocumentationFile.open(QIODevice::ReadOnly | QIODevice::Text))
         throw Exception(msgCannotOpenForReading(additionalDocumentationFile));
 
@@ -1030,7 +1041,7 @@ void QtDocGenerator::writeAdditionalDocumentation() const
             }
         } else {
             // Normal file entry
-            QFileInfo fi(m_parameters.docDataDir + u'/' + line);
+            QFileInfo fi(m_options.parameters.docDataDir + u'/' + line);
             if (fi.isFile()) {
                 const QString rstFileName = fi.baseName() + rstSuffix;
                 const QString rstFile = targetDir + u'/' + rstFileName;
@@ -1048,7 +1059,7 @@ void QtDocGenerator::writeAdditionalDocumentation() const
                 // FIXME: This should be an exception, in principle, but it
                 // requires building all modules.
                 qCWarning(lcShibokenDoc, "%s",
-                          qPrintable(msgNonExistentAdditionalDocFile(m_parameters.docDataDir, line)));
+                          qPrintable(msgNonExistentAdditionalDocFile(m_options.parameters.docDataDir, line)));
             }
             ++count;
         }
@@ -1067,24 +1078,28 @@ void QtDocGenerator::writeAdditionalDocumentation() const
 
 bool QtDocGenerator::doSetup()
 {
-    if (m_parameters.codeSnippetDirs.isEmpty()) {
-        m_parameters.codeSnippetDirs =
-            m_parameters.libSourceDir.split(QLatin1Char(PATH_SEP));
+    if (m_options.parameters.codeSnippetDirs.isEmpty()) {
+        m_options.parameters.codeSnippetDirs =
+            m_options.parameters.libSourceDir.split(QLatin1Char(PATH_SEP));
     }
 
-    if (m_docParser.isNull())
-        m_docParser.reset(new QtDocParser);
+    if (m_docParser.isNull()) {
+        if (m_options.doxygen)
+            m_docParser.reset(new DoxygenParser);
+        else
+            m_docParser.reset(new QtDocParser);
+    }
 
-    if (m_parameters.libSourceDir.isEmpty()
-        || m_parameters.docDataDir.isEmpty()) {
+    if (m_options.parameters.libSourceDir.isEmpty()
+        || m_options.parameters.docDataDir.isEmpty()) {
         qCWarning(lcShibokenDoc) << "Documentation data dir and/or Qt source dir not informed, "
                                  "documentation will not be extracted from Qt sources.";
         return false;
     }
 
-    m_docParser->setDocumentationDataDirectory(m_parameters.docDataDir);
-    m_docParser->setLibrarySourceDirectory(m_parameters.libSourceDir);
-    m_parameters.outputDirectory = outputDirectory();
+    m_docParser->setDocumentationDataDirectory(m_options.parameters.docDataDir);
+    m_docParser->setLibrarySourceDirectory(m_options.parameters.libSourceDir);
+    m_options.parameters.outputDirectory = outputDirectory();
     return true;
 }
 
@@ -1121,15 +1136,15 @@ bool QtDocGenerator::handleOption(const QString &key, const QString &value)
     if (Generator::handleOption(key, value))
         return true;
     if (key == u"library-source-dir") {
-        m_parameters.libSourceDir = value;
+        m_options.parameters.libSourceDir = value;
         return true;
     }
     if (key == u"documentation-data-dir") {
-        m_parameters.docDataDir = value;
+        m_options.parameters.docDataDir = value;
         return true;
     }
     if (key == u"documentation-code-snippets-dir") {
-        m_parameters.codeSnippetDirs = value.split(QLatin1Char(PATH_SEP));
+        m_options.parameters.codeSnippetDirs = value.split(QLatin1Char(PATH_SEP));
         return true;
     }
 
@@ -1137,28 +1152,28 @@ bool QtDocGenerator::handleOption(const QString &key, const QString &value)
         const auto pos = value.indexOf(u':');
         if (pos == -1)
             return false;
-        m_parameters.codeSnippetRewriteOld= value.left(pos);
-        m_parameters.codeSnippetRewriteNew = value.mid(pos + 1);
+        m_options.parameters.codeSnippetRewriteOld= value.left(pos);
+        m_options.parameters.codeSnippetRewriteNew = value.mid(pos + 1);
         return true;
     }
 
     if (key == u"documentation-extra-sections-dir") {
-        m_extraSectionDir = value;
+        m_options.extraSectionDir = value;
         return true;
     }
     if (key == u"doc-parser") {
         qCDebug(lcShibokenDoc).noquote().nospace() << "doc-parser: " << value;
         if (value == u"doxygen")
-            m_docParser.reset(new DoxygenParser);
+            m_options.doxygen = true;
         return true;
     }
     if (key == additionalDocumentationOption()) {
-        m_additionalDocumentationList = value;
+        m_options.additionalDocumentationList = value;
         return true;
     }
 
     if (key == u"inheritance-file") {
-        m_inheritanceFile = value;
+        m_options.inheritanceFile = value;
         return true;
     }
 
@@ -1180,7 +1195,7 @@ bool QtDocGenerator::convertToRst(const QString &sourceFileName,
     sourceFile.close();
 
     FileOut targetFile(targetFileName);
-    QtXmlToSphinx x(this, m_parameters, doc, context);
+    QtXmlToSphinx x(this, m_options.parameters, doc, context);
     targetFile.stream << x;
     targetFile.done();
     return true;

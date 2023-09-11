@@ -32,6 +32,12 @@ using namespace Qt::StringLiterals;
 static const char ENABLE_PYSIDE_EXTENSIONS[] = "enable-pyside-extensions";
 static const char AVOID_PROTECTED_HACK[] = "avoid-protected-hack";
 
+struct GeneratorOptions
+{
+    bool usePySideExtensions = false;
+    bool avoidProtectedHack = false;
+};
+
 struct Generator::GeneratorPrivate
 {
     ApiExtractorResult api;
@@ -40,9 +46,10 @@ struct Generator::GeneratorPrivate
     QString licenseComment;
     AbstractMetaClassCList m_invisibleTopNamespaces;
     bool m_hasPrivateClasses = false;
-    bool m_usePySideExtensions = false;
-    bool m_avoidProtectedHack = false;
+    static GeneratorOptions m_options;
 };
+
+GeneratorOptions Generator::GeneratorPrivate::m_options;
 
 Generator::Generator() : m_d(new GeneratorPrivate)
 {
@@ -91,10 +98,11 @@ Generator::OptionDescriptions Generator::options() const
 
 bool Generator::handleOption(const QString & key, const QString & /* value */)
 {
+    auto &options = GeneratorPrivate::m_options;
     if (key == QLatin1StringView(ENABLE_PYSIDE_EXTENSIONS))
-        return ( m_d->m_usePySideExtensions = true);
+        return ( options.usePySideExtensions = true);
     if (key == QLatin1StringView(AVOID_PROTECTED_HACK))
-        return (m_d->m_avoidProtectedHack = true);
+        return ( options.avoidProtectedHack = true);
     return false;
 }
 
@@ -267,14 +275,14 @@ bool Generator::hasPrivateClasses() const
     return m_d->m_hasPrivateClasses;
 }
 
-bool Generator::usePySideExtensions() const
+bool Generator::usePySideExtensions()
 {
-    return m_d->m_usePySideExtensions;
+    return GeneratorPrivate::m_options.usePySideExtensions;
 }
 
-bool Generator::avoidProtectedHack() const
+bool Generator::avoidProtectedHack()
 {
-    return m_d->m_avoidProtectedHack;
+    return GeneratorPrivate::m_options.avoidProtectedHack;
 }
 
 QString Generator::getFullTypeName(TypeEntryCPtr type)
