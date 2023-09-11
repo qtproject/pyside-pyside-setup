@@ -467,8 +467,12 @@ class QAsyncioHandle():
         self._state = QAsyncioHandle.HandleState.PENDING
         self._start()
 
+    def _schedule_event(self, timeout: int, func: typing.Callable) -> None:
+        if not self._loop.is_closed():
+            QTimer.singleShot(timeout, func)
+
     def _start(self) -> None:
-        QTimer.singleShot(self._timeout, lambda: self._cb())
+        self._schedule_event(self._timeout, lambda: self._cb())
 
     @Slot()
     def _cb(self) -> None:
@@ -487,7 +491,7 @@ class QAsyncioHandle():
         if self._state == QAsyncioHandle.HandleState.PENDING:
             self._state = QAsyncioHandle.HandleState.CANCELLED
             # The old timer that was created in _start will still trigger but _cb won't do anything.
-            QTimer.singleShot(0, lambda: self._cancel_exception())
+            self._schedule_event(0, lambda: self._cancel_exception())
 
     def cancelled(self) -> bool:
         return self._state == QAsyncioHandle.HandleState.CANCELLED

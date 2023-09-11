@@ -62,7 +62,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
               exception_or_future: typing.Union[
                   Exception, futures.QAsyncioFuture, None] = None):
         if self.done():
-            raise asyncio.exceptions.InvalidStateError("Task is already done")
+            return
         result = None
         try:
             if exception_or_future is None:
