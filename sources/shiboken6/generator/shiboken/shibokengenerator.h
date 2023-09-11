@@ -24,6 +24,7 @@ class OverloadData;
 class TargetToNativeConversion;
 struct GeneratorClassInfoCacheEntry;
 struct IncludeGroup;
+struct ShibokenGeneratorOptions;
 
 QT_FORWARD_DECLARE_CLASS(TextStream)
 
@@ -200,7 +201,7 @@ protected:
 
     static QString fullPythonFunctionName(const AbstractMetaFunctionCPtr &func, bool forceFunc);
 
-    bool wrapperDiagnostics() const { return m_wrapperDiagnostics; }
+    static bool wrapperDiagnostics();
 
     static QString protectedEnumSurrogateName(const AbstractMetaEnum &metaEnum);
 
@@ -286,17 +287,17 @@ protected:
     bool handleOption(const QString &key, const QString &value) override;
 
     /// Returns true if the user enabled the so called "parent constructor heuristic".
-    bool useCtorHeuristic() const;
+    static bool useCtorHeuristic();
     /// Returns true if the user enabled the so called "return value heuristic".
-    bool useReturnValueHeuristic() const;
+    static bool useReturnValueHeuristic();
     /// Returns true if the generator should use the result of isNull()const to compute boolean casts.
-    bool useIsNullAsNbBool() const;
+    static bool useIsNullAsNbBool();
     /// Whether to generate lean module headers
-    bool leanHeaders() const;
+    static bool leanHeaders();
     /// Returns true if the generator should use operator bool to compute boolean casts.
-    bool useOperatorBoolAsNbBool() const;
+    static bool useOperatorBoolAsNbBool();
     /// Generate implicit conversions of function arguments
-    bool generateImplicitConversions() const;
+    static bool generateImplicitConversions();
     static QString cppApiVariableName(const QString &moduleName = QString());
     static QString pythonModuleObjectName(const QString &moduleName = QString());
     static QString convertersVariableName(const QString &moduleName = QString());
@@ -309,7 +310,7 @@ protected:
     static QString getTypeIndexVariableName(const AbstractMetaType &type) ;
 
     /// Returns true if the user don't want verbose error messages on the generated bindings.
-    bool verboseErrorMessagesDisabled() const;
+    static bool verboseErrorMessagesDisabled();
 
     void collectContainerTypesFromConverterMacros(const QString &code, bool toPythonMacro);
 
@@ -454,16 +455,7 @@ private:
     void replaceTemplateVariables(QString &code,
                                   const AbstractMetaFunctionCPtr &func) const;
 
-    bool m_useCtorHeuristic = false;
-    bool m_userReturnValueHeuristic = false;
-    bool m_verboseErrorMessagesDisabled = false;
-    bool m_useIsNullAsNbBool = false;
-    // FIXME PYSIDE 7 Flip m_leanHeaders default or remove?
-    bool m_leanHeaders = false;
-    bool m_useOperatorBoolAsNbBool = false;
-    // FIXME PYSIDE 7 Flip generateImplicitConversions default or remove?
-    bool m_generateImplicitConversions = true;
-    bool m_wrapperDiagnostics = false;
+    static ShibokenGeneratorOptions m_options;
 
     /// Type system converter variable replacement names and regular expressions.
     static const QHash<int, QString> &typeSystemConvName();

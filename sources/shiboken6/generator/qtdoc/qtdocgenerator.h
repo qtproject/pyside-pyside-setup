@@ -14,7 +14,7 @@
 #include "qtxmltosphinxinterface.h"
 
 class DocParser;
-
+struct DocGeneratorOptions;
 struct GeneratorDocumentation;
 
 /**
@@ -110,13 +110,10 @@ private:
 
     GeneratorDocumentation generatorDocumentation(const AbstractMetaClassCPtr &cppClass) const;
 
-    QString m_extraSectionDir;
     QStringList m_functionList;
     QMap<QString, QStringList> m_packages;
     QScopedPointer<DocParser> m_docParser;
-    QtXmlToSphinxParameters m_parameters;
-    QString m_additionalDocumentationList;
-    QString m_inheritanceFile;
+    static DocGeneratorOptions m_options;
 };
 
 #endif // DOCGENERATOR_H
