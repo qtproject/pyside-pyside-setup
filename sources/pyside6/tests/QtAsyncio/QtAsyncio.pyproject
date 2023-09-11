@@ -1,3 +1,3 @@
 {
-    "files": ["qt_asyncio_test.py", "qt_asyncio_test_chain.py"]
+    "files": ["qt_asyncio_test.py", "qt_asyncio_test_chain.py", "qt_asyncio_test_time.py"]
 }

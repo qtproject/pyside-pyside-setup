@@ -202,7 +202,7 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop):
                    context: typing.Optional[contextvars.Context] = None) -> "QAsyncioHandle":
         if not isinstance(delay, (int, float)):
             raise TypeError("delay must be an int or float")
-        return self.call_at(self.time() + delay * 1000, callback, *args,
+        return self.call_at(self.time() + delay, callback, *args,
                             context=context)
 
     def call_at(self, when: typing.Union[int, float],  # type: ignore[override]
@@ -212,10 +212,10 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop):
             raise TypeError("when must be an int or float")
         if self.is_closed():
             raise RuntimeError("Event loop is closed")
-        return QAsyncioTimerHandle(int(when), callback, args, self, context)
+        return QAsyncioTimerHandle(when, callback, args, self, context)
 
-    def time(self) -> int:
-        return QDateTime.currentMSecsSinceEpoch()
+    def time(self) -> float:
+        return QDateTime.currentMSecsSinceEpoch() / 1000
 
     # Creating Futures and Tasks
 
@@ -494,12 +494,12 @@ class QAsyncioHandle():
 
 
 class QAsyncioTimerHandle(QAsyncioHandle):
-    def __init__(self, when: int, callback: typing.Callable, args: typing.Tuple,
+    def __init__(self, when: float, callback: typing.Callable, args: typing.Tuple,
                  loop: QAsyncioEventLoop, context: typing.Optional[contextvars.Context]) -> None:
         super().__init__(callback, args, loop, context)
 
         self._when = when
-        self._timeout = max(self._when - self._loop.time(), 0)
+        self._timeout = int(max(self._when - self._loop.time(), 0) * 1000)
 
         super()._start()
 
@@ -508,5 +508,5 @@ class QAsyncioTimerHandle(QAsyncioHandle):
     def _start(self) -> None:
         pass
 
-    def when(self) -> int:
+    def when(self) -> float:
         return self._when
