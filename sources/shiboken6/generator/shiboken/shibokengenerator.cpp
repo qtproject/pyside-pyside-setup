@@ -33,6 +33,7 @@
 #include <namespacetypeentry.h>
 #include <primitivetypeentry.h>
 #include <pythontypeentry.h>
+#include <smartpointertypeentry.h>
 #include <valuetypeentry.h>
 
 #include <iostream>
@@ -92,6 +93,7 @@ struct GeneratorClassInfoCacheEntry
 {
     ShibokenGenerator::FunctionGroups functionGroups;
     QList<AbstractMetaFunctionCList> numberProtocolOperators;
+    BoolCastFunctionOptional boolCastFunctionO;
     bool needsGetattroFunction = false;
 };
 
@@ -1993,9 +1995,11 @@ const GeneratorClassInfoCacheEntry &
     auto it = cache->find(scope);
     if (it == cache->end()) {
         it = cache->insert(scope, {});
-        it.value().functionGroups = getFunctionGroupsImpl(scope);
-        it.value().needsGetattroFunction = classNeedsGetattroFunctionImpl(scope);
-        it.value().numberProtocolOperators = getNumberProtocolOperators(scope);
+        auto &entry = it.value();
+        entry.functionGroups = getFunctionGroupsImpl(scope);
+        entry.needsGetattroFunction = classNeedsGetattroFunctionImpl(scope);
+        entry.numberProtocolOperators = getNumberProtocolOperators(scope);
+        entry.boolCastFunctionO = getBoolCast(scope);
     }
     return it.value();
 }
@@ -2012,6 +2016,12 @@ QList<AbstractMetaFunctionCList>
 {
     Q_ASSERT(scope);
     return getGeneratorClassInfo(scope).numberProtocolOperators;
+}
+
+BoolCastFunctionOptional ShibokenGenerator::boolCast(const AbstractMetaClassCPtr &scope)
+{
+    Q_ASSERT(scope);
+    return getGeneratorClassInfo(scope).boolCastFunctionO;
 }
 
 // Use non-const overloads only, for example, "foo()" and "foo()const"
@@ -2091,6 +2101,51 @@ QList<AbstractMetaFunctionCList>
     }
 
     return result;
+}
+
+BoolCastFunctionOptional
+ShibokenGenerator::getBoolCast(const AbstractMetaClassCPtr &metaClass)
+{
+    if (metaClass->isNamespace())
+        return std::nullopt;
+
+    const auto te = metaClass->typeEntry();
+    if (te->isSmartPointer()) {
+        auto ste = std::static_pointer_cast<const SmartPointerTypeEntry>(te);
+
+        auto valueCheckMethod = ste->valueCheckMethod();
+        if (!valueCheckMethod.isEmpty()) {
+            const auto func = metaClass->findFunction(valueCheckMethod);
+            if (!func)
+                throw Exception(msgMethodNotFound(metaClass, valueCheckMethod));
+            return BoolCastFunction{func, false};
+        }
+
+        auto nullCheckMethod = ste->nullCheckMethod();
+        if (!nullCheckMethod.isEmpty()) {
+            const auto func = metaClass->findFunction(nullCheckMethod);
+            if (!func)
+                throw Exception(msgMethodNotFound(metaClass, nullCheckMethod));
+            return BoolCastFunction{func, true};
+        }
+    }
+
+    auto mode = te->operatorBoolMode();
+    if (useOperatorBoolAsNbNonZero()
+            ? mode != TypeSystem::BoolCast::Disabled : mode == TypeSystem::BoolCast::Enabled) {
+        const auto func = metaClass->findOperatorBool();
+        if (func)
+            return BoolCastFunction{func, false};
+    }
+
+    mode = te->isNullMode();
+    if (useIsNullAsNbNonZero()
+            ? mode != TypeSystem::BoolCast::Disabled : mode == TypeSystem::BoolCast::Enabled) {
+        const auto func = metaClass->findQtIsNullMethod();
+        if (func)
+            return BoolCastFunction{func, true};
+    }
+    return std::nullopt;
 }
 
 static bool isInplaceAdd(const AbstractMetaFunctionCPtr &func)
