@@ -197,48 +197,6 @@ QString CppGenerator::fileNameForContext(const GeneratorContext &context) const
     return fileNameForContextHelper(context, u"_wrapper.cpp"_s);
 }
 
-CppGenerator::BoolCastFunctionOptional
-    CppGenerator::boolCast(const AbstractMetaClassCPtr &metaClass) const
-{
-    const auto te = metaClass->typeEntry();
-    if (te->isSmartPointer()) {
-        auto ste = std::static_pointer_cast<const SmartPointerTypeEntry>(te);
-
-        auto valueCheckMethod = ste->valueCheckMethod();
-        if (!valueCheckMethod.isEmpty()) {
-            const auto func = metaClass->findFunction(valueCheckMethod);
-            if (!func)
-                throw Exception(msgMethodNotFound(metaClass, valueCheckMethod));
-            return BoolCastFunction{func, false};
-        }
-
-        auto nullCheckMethod = ste->nullCheckMethod();
-        if (!nullCheckMethod.isEmpty()) {
-            const auto func = metaClass->findFunction(nullCheckMethod);
-            if (!func)
-                throw Exception(msgMethodNotFound(metaClass, nullCheckMethod));
-            return BoolCastFunction{func, true};
-        }
-    }
-
-    auto mode = te->operatorBoolMode();
-    if (useOperatorBoolAsNbBool()
-        ? mode != TypeSystem::BoolCast::Disabled : mode == TypeSystem::BoolCast::Enabled) {
-        const auto func = metaClass->findOperatorBool();
-        if (func)
-            return BoolCastFunction{func, false};
-    }
-
-    mode = te->isNullMode();
-    if (useIsNullAsNbBool()
-        ? mode != TypeSystem::BoolCast::Disabled : mode == TypeSystem::BoolCast::Enabled) {
-        const auto func = metaClass->findQtIsNullMethod();
-        if (func)
-            return BoolCastFunction{func, true};
-    }
-    return std::nullopt;
-}
-
 std::optional<AbstractMetaType>
     CppGenerator::findSmartPointerInstantiation(const SmartPointerTypeEntryCPtr &pointer,
                                                 const TypeEntryCPtr &pointee) const

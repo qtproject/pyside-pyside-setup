@@ -14,6 +14,7 @@
 #include <QtCore/QRegularExpression>
 
 #include <array>
+#include <optional>
 
 class EnumTypeEntry;
 class FlagsTypeEntry;
@@ -27,6 +28,15 @@ struct IncludeGroup;
 struct ShibokenGeneratorOptions;
 
 QT_FORWARD_DECLARE_CLASS(TextStream)
+
+// Function to be used for implementing nb_bool
+struct BoolCastFunction
+{
+    AbstractMetaFunctionCPtr function;
+    bool invert = false; // Function is "isNull()", (invert result).
+};
+
+using BoolCastFunctionOptional = std::optional<BoolCastFunction>;
 
 /**
  * Abstract generator that contains common methods used in CppGenerator and HeaderGenerator.
@@ -100,6 +110,8 @@ protected:
 
     static QList<AbstractMetaFunctionCList>
         numberProtocolOperators(const AbstractMetaClassCPtr &scope);
+
+    static BoolCastFunctionOptional boolCast(const AbstractMetaClassCPtr &scope);
 
     /**
      *   Returns all different inherited overloads of func, and includes func as well.
@@ -352,6 +364,7 @@ private:
     static FunctionGroups getFunctionGroupsImpl(const AbstractMetaClassCPtr &scope);
     static QList<AbstractMetaFunctionCList>
         getNumberProtocolOperators(const AbstractMetaClassCPtr &metaClass);
+    static BoolCastFunctionOptional getBoolCast(const AbstractMetaClassCPtr &metaClass);
     static bool classNeedsGetattroFunctionImpl(const AbstractMetaClassCPtr &metaClass);
 
     QString translateTypeForWrapperMethod(const AbstractMetaType &cType,
