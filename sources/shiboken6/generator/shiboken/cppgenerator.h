@@ -48,13 +48,6 @@ protected:
     bool finishGeneration() override;
 
 private:
-    struct BoolCastFunction
-    {
-        AbstractMetaFunctionCPtr function;
-        bool invert = false; // Function is isNull() (invert result).
-    };
-    using BoolCastFunctionOptional = std::optional<BoolCastFunction>;
-
     void generateSmartPointerClass(TextStream &s, const GeneratorContext &classContext);
     void generateIncludes(TextStream &s, const GeneratorContext &classContext,
                           const IncludeGroupList &includes = {},
@@ -506,8 +499,7 @@ private:
     QString writeReprFunction(TextStream &s, const GeneratorContext &context,
                               uint indirections) const;
 
-    BoolCastFunctionOptional boolCast(const AbstractMetaClassCPtr &metaClass) const;
-    bool hasBoolCast(const AbstractMetaClassCPtr &metaClass) const
+    static bool hasBoolCast(const AbstractMetaClassCPtr &metaClass)
     { return boolCast(metaClass).has_value(); }
 
     std::optional<AbstractMetaType>
