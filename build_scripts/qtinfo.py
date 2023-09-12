@@ -75,8 +75,8 @@ class QtInfo(object):
 
         @property
         def module_json_files_dir(self):
-            install_libs = self.get_property("QT_INSTALL_LIBS")
-            result = Path(install_libs).parent / "modules"
+            # FIXME: Use INSTALL_DESCRIPTIONSDIR once QTBUG-116983 is done.
+            result = Path(self.arch_data) / "modules"
             return os.fspath(result)
 
         @property
