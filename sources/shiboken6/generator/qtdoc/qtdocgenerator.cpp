@@ -1127,22 +1127,32 @@ QList<OptionDescription> QtDocGenerator::options()
     };
 }
 
-bool QtDocGenerator::handleOption(const QString &key, const QString &value, OptionSource source)
+class QtDocGeneratorOptionsParser : public OptionsParser
 {
-    if (Generator::handleOption(key, value, source))
-        return true;
+public:
+    explicit QtDocGeneratorOptionsParser(DocGeneratorOptions *o) : m_options(o) {}
+
+    bool handleOption(const QString &key, const QString &value, OptionSource source) override;
+
+private:
+    DocGeneratorOptions *m_options;
+};
+
+bool QtDocGeneratorOptionsParser::handleOption(const QString &key, const QString &value,
+                                               OptionSource source)
+{
     if (source == OptionSource::CommandLineSingleDash)
         return false;
     if (key == u"library-source-dir") {
-        m_options.parameters.libSourceDir = value;
+        m_options->parameters.libSourceDir = value;
         return true;
     }
     if (key == u"documentation-data-dir") {
-        m_options.parameters.docDataDir = value;
+        m_options->parameters.docDataDir = value;
         return true;
     }
     if (key == u"documentation-code-snippets-dir") {
-        m_options.parameters.codeSnippetDirs = value.split(QLatin1Char(PATH_SEP));
+        m_options->parameters.codeSnippetDirs = value.split(QLatin1Char(PATH_SEP));
         return true;
     }
 
@@ -1150,32 +1160,37 @@ bool QtDocGenerator::handleOption(const QString &key, const QString &value, Opti
         const auto pos = value.indexOf(u':');
         if (pos == -1)
             return false;
-        m_options.parameters.codeSnippetRewriteOld= value.left(pos);
-        m_options.parameters.codeSnippetRewriteNew = value.mid(pos + 1);
+        m_options->parameters.codeSnippetRewriteOld= value.left(pos);
+        m_options->parameters.codeSnippetRewriteNew = value.mid(pos + 1);
         return true;
     }
 
     if (key == u"documentation-extra-sections-dir") {
-        m_options.extraSectionDir = value;
+        m_options->extraSectionDir = value;
         return true;
     }
     if (key == u"doc-parser") {
         qCDebug(lcShibokenDoc).noquote().nospace() << "doc-parser: " << value;
         if (value == u"doxygen")
-            m_options.doxygen = true;
+            m_options->doxygen = true;
         return true;
     }
     if (key == additionalDocumentationOption()) {
-        m_options.additionalDocumentationList = value;
+        m_options->additionalDocumentationList = value;
         return true;
     }
 
     if (key == u"inheritance-file") {
-        m_options.inheritanceFile = value;
+        m_options->inheritanceFile = value;
         return true;
     }
 
     return false;
+}
+
+std::shared_ptr<OptionsParser> QtDocGenerator::createOptionsParser()
+{
+    return std::make_shared<QtDocGeneratorOptionsParser>(&m_options);
 }
 
 bool QtDocGenerator::convertToRst(const QString &sourceFileName,

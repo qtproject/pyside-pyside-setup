@@ -6,7 +6,6 @@
 
 #include <abstractmetalang_typedefs.h>
 #include <typedatabase_typedefs.h>
-#include <optionsparser.h>
 #include <QtCore/QList>
 
 #include <memory>
@@ -16,6 +15,8 @@
 class ApiExtractorResult;
 class GeneratorContext;
 class DefaultValue;
+struct OptionDescription;
+class OptionsParser;
 class TextStream;
 
 QString getClassTargetFullName(const AbstractMetaClassCPtr &metaClass,
@@ -28,7 +29,7 @@ QString getFilteredCppSignatureString(QString signature);
  *   Base class for all generators. The default implementations does nothing,
  *   you must subclass this to create your own generators.
  */
-class Generator : public OptionsParser
+class Generator
 {
 public:
     /// Optiosn used around the generator code
@@ -58,7 +59,7 @@ public:
     bool setup(const ApiExtractorResult &api);
 
     static QList<OptionDescription> options();
-    bool handleBoolOption(const QString &key, OptionSource source) override;
+    static std::shared_ptr<OptionsParser> createOptionsParser();
 
     /// Returns the top namespace made invisible
     const AbstractMetaClassCList &invisibleTopNamespaces() const;

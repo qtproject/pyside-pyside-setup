@@ -53,3 +53,21 @@ bool OptionsParser::handleOption(const QString &, const QString &, OptionSource)
 {
     return false;
 }
+
+bool OptionsParserList::handleBoolOption(const QString &key, OptionSource source)
+{
+    for (const auto &p : std::as_const(m_parsers)) {
+        if (p->handleBoolOption(key, source))
+            return true;
+    }
+    return false;
+}
+
+bool OptionsParserList::handleOption(const QString &key, const QString &value, OptionSource source)
+{
+    for (const auto &p : std::as_const(m_parsers)) {
+        if (p->handleOption(key, value, source))
+            return true;
+    }
+    return false;
+}

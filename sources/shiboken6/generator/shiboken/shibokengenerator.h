@@ -88,6 +88,7 @@ public:
     const char *name() const override { return "Shiboken"; }
 
     static QList<OptionDescription> options();
+    static std::shared_ptr<OptionsParser> createOptionsParser();
 
     static QString minimalConstructorExpression(const ApiExtractorResult &api,
                                                 const AbstractMetaType &type);
@@ -296,8 +297,6 @@ protected:
 
     /// Includes for header (native wrapper class) or binding source
     QList<IncludeGroup> classIncludes(const AbstractMetaClassCPtr &metaClass) const;
-
-    bool handleBoolOption(const QString &key, OptionSource source) override;
 
     /// Returns true if the user enabled the so called "parent constructor heuristic".
     static bool useCtorHeuristic();
