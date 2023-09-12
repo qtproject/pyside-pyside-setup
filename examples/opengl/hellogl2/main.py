@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (QApplication, QMessageBox)
 
 
 try:
-    from window import Window
+    from mainwindow import MainWindow
     from glwidget import GLWidget
 except ImportError:
     app = QApplication(sys.argv)
@@ -47,12 +47,11 @@ if __name__ == '__main__':
 
     GLWidget.set_transparent(options.transparent)
 
-    main_window = Window()
+    main_window = MainWindow()
     if options.transparent:
         main_window.setAttribute(Qt.WA_TranslucentBackground)
         main_window.setAttribute(Qt.WA_NoSystemBackground, False)
 
-    main_window.resize(main_window.sizeHint())
     main_window.show()
 
     res = app.exec()
