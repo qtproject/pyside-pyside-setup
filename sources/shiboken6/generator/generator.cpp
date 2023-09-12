@@ -10,6 +10,7 @@
 #include "abstractmetafunction.h"
 #include "abstractmetalang.h"
 #include "messages.h"
+#include <optionsparser.h>
 #include "reporthandler.h"
 #include "fileout.h"
 #include "arraytypeentry.h"
@@ -96,16 +97,31 @@ QList<OptionDescription> Generator::options()
     };
 }
 
-bool Generator::handleBoolOption(const QString & key, OptionSource source)
+class GeneratorOptionsParser : public OptionsParser
+{
+public:
+    explicit GeneratorOptionsParser(GeneratorOptions *o) : m_options(o) {}
+
+    bool handleBoolOption(const QString &key, OptionSource source) override;
+
+private:
+    GeneratorOptions *m_options;
+};
+
+bool GeneratorOptionsParser::handleBoolOption(const QString & key, OptionSource source)
 {
     if (source == OptionSource::CommandLineSingleDash)
         return false;
-    auto &options = GeneratorPrivate::m_options;
     if (key == QLatin1StringView(ENABLE_PYSIDE_EXTENSIONS))
-        return ( options.usePySideExtensions = true);
+        return ( m_options->usePySideExtensions = true);
     if (key == QLatin1StringView(AVOID_PROTECTED_HACK))
-        return ( options.avoidProtectedHack = true);
+        return ( m_options->avoidProtectedHack = true);
     return false;
+}
+
+std::shared_ptr<OptionsParser> Generator::createOptionsParser()
+{
+    return std::make_shared<GeneratorOptionsParser>(&GeneratorPrivate::m_options);
 }
 
 QString Generator::fileNameForContextHelper(const GeneratorContext &context,

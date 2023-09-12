@@ -20,6 +20,7 @@
 #include <messages.h>
 #include <modifications.h>
 #include "overloaddata.h"
+#include <optionsparser.h>
 #include "propertyspec.h"
 #include "pytypenames.h"
 #include <reporthandler.h>
@@ -2264,35 +2265,49 @@ QList<OptionDescription> ShibokenGenerator::options()
     };
 }
 
-bool ShibokenGenerator::handleBoolOption(const QString &key, OptionSource source)
+class ShibokenGeneratorOptionsParser : public OptionsParser
 {
-    if (Generator::handleBoolOption(key, source))
-        return true;
+public:
+    explicit ShibokenGeneratorOptionsParser(ShibokenGeneratorOptions *o) : m_options(o) {}
+
+    bool handleBoolOption(const QString & key, OptionSource source) override;
+
+private:
+    ShibokenGeneratorOptions *m_options;
+};
+
+bool ShibokenGeneratorOptionsParser::handleBoolOption(const QString &key, OptionSource source)
+{
     if (source == OptionSource::CommandLineSingleDash)
         return false;
     if (key == QLatin1StringView(PARENT_CTOR_HEURISTIC))
-        return (m_options.useCtorHeuristic = true);
+        return (m_options->useCtorHeuristic = true);
     if (key == QLatin1StringView(RETURN_VALUE_HEURISTIC))
-        return (m_options.userReturnValueHeuristic = true);
+        return (m_options->userReturnValueHeuristic = true);
     if (key == QLatin1StringView(DISABLE_VERBOSE_ERROR_MESSAGES))
-        return (m_options.verboseErrorMessagesDisabled = true);
+        return (m_options->verboseErrorMessagesDisabled = true);
     if (key == QLatin1StringView(USE_ISNULL_AS_NB_BOOL)
         || key == QLatin1StringView(USE_ISNULL_AS_NB_NONZERO)) {
-        return (m_options.useIsNullAsNbBool = true);
+        return (m_options->useIsNullAsNbBool = true);
     }
     if (key == QLatin1StringView(LEAN_HEADERS))
-        return (m_options.leanHeaders= true);
+        return (m_options->leanHeaders= true);
     if (key == QLatin1StringView(USE_OPERATOR_BOOL_AS_NB_BOOL)
         || key == QLatin1StringView(USE_OPERATOR_BOOL_AS_NB_NONZERO)) {
-        return (m_options.useOperatorBoolAsNbBool = true);
+        return (m_options->useOperatorBoolAsNbBool = true);
     }
     if (key == QLatin1StringView(NO_IMPLICIT_CONVERSIONS)) {
-        m_options.generateImplicitConversions = false;
+        m_options->generateImplicitConversions = false;
         return true;
     }
     if (key == QLatin1StringView(WRAPPER_DIAGNOSTICS))
-        return (m_options.wrapperDiagnostics = true);
+        return (m_options->wrapperDiagnostics = true);
     return false;
+}
+
+std::shared_ptr<OptionsParser> ShibokenGenerator::createOptionsParser()
+{
+    return std::make_shared<ShibokenGeneratorOptionsParser>(&m_options);
 }
 
 bool ShibokenGenerator::doSetup()

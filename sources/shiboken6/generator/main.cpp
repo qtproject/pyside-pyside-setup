@@ -11,6 +11,7 @@
 #include <apiextractorresult.h>
 #include <fileout.h>
 #include <messages.h>
+#include <optionsparser.h>
 #include <reporthandler.h>
 #include <typedatabase.h>
 
@@ -444,6 +445,9 @@ int shibokenMain(const QStringList &argV)
         args.options.erase(ait);
     }
 
+    OptionsParserList optionParser;
+    optionParser.append(Generator::createOptionsParser());
+
     // Pre-defined generator sets.
     if (generatorSet == u"qtdoc") {
         generators = docGenerators();
@@ -451,8 +455,12 @@ int shibokenMain(const QStringList &argV)
             errorPrint(u"Doc strings extractions was not enabled in this shiboken build."_s, argV);
             return EXIT_FAILURE;
         }
+#ifdef DOCSTRINGS_ENABLED
+        optionParser.append(QtDocGenerator::createOptionsParser());
+#endif
     } else if (generatorSet.isEmpty() || generatorSet == u"shiboken") {
         generators = shibokenGenerators();
+        optionParser.append(ShibokenGenerator::createOptionsParser());
     } else {
         errorPrint(u"Unknown generator set, try \"shiboken\" or \"qtdoc\"."_s, argV);
         return EXIT_FAILURE;
@@ -654,17 +662,16 @@ int shibokenMain(const QStringList &argV)
         bool found = false;
         if (ait.value().metaType().id() == QMetaType::QString) {
             const QString value = ait.value().toString();
-            for (const GeneratorPtr &generator : std::as_const(generators)) {
-                found |= value.isEmpty()
-                    ? generator->handleBoolOption(ait.key(), OptionSource::CommandLine)
-                    : generator->handleOption(ait.key(), value, OptionSource::CommandLine);
-            }
+            found |= value.isEmpty()
+                ? optionParser.handleBoolOption(ait.key(), OptionSource::CommandLine)
+                : optionParser.handleOption(ait.key(), value, OptionSource::CommandLine);
         }
         if (found)
             ait = args.options.erase(ait);
         else
             ++ait;
     }
+    optionParser.clear();
 
     ait = args.options.find(languageLevelOption());
     if (ait != args.options.end()) {

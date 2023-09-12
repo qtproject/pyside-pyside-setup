@@ -9,6 +9,7 @@
 
 #include "generator.h"
 #include "documentation.h"
+#include <optionsparser.h>
 #include "typesystem_enums.h"
 #include "modifications_typedefs.h"
 #include "qtxmltosphinxinterface.h"
@@ -34,7 +35,7 @@ public:
     }
 
     static QList<OptionDescription> options();
-    bool handleOption(const QString &key, const QString &value, OptionSource source) override;
+    static std::shared_ptr<OptionsParser> createOptionsParser();
 
     // QtXmlToSphinxDocGeneratorInterface
     QString expandFunction(const QString &function) const override;

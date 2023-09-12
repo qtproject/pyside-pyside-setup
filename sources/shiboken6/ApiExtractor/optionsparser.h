@@ -7,6 +7,8 @@
 #include <QtCore/QString>
 #include <QtCore/QList>
 
+#include <memory>
+
 QT_FORWARD_DECLARE_CLASS(QTextStream)
 
 enum class OptionSource
@@ -42,6 +44,21 @@ public:
 
 protected:
     OptionsParser() noexcept;
+};
+
+class OptionsParserList : public OptionsParser
+{
+public:
+    using OptionsParserPtr = std::shared_ptr<OptionsParser>;
+
+    void append(const OptionsParserPtr &parser) { m_parsers.append(parser); }
+    void clear() { m_parsers.clear(); }
+
+    bool handleBoolOption(const QString &key, OptionSource source) override;
+    bool handleOption(const QString &key, const QString &value, OptionSource source) override;
+
+private:
+    QList<OptionsParserPtr> m_parsers;
 };
 
 #endif // OPTIONSPARSER_H
