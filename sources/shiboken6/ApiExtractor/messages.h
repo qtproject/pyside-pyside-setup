@@ -251,4 +251,6 @@ QString msgMissingCustomConversion(const TypeEntryCPtr &t);
 
 QString msgUnknownArrayPointerConversion(const QString &s);
 
+QString msgMissingProjectFileMarker(const QString &name, const QByteArray &startMarker);
+
 #endif // MESSAGES_H

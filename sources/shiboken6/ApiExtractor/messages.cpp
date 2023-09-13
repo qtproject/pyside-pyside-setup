@@ -947,3 +947,9 @@ QString msgUnknownArrayPointerConversion(const QString &s)
     return u"Warning: Falling back to pointer conversion for unknown array type \""_s
         + s + u"\""_s;
 }
+
+QString msgMissingProjectFileMarker(const QString &name, const QByteArray &startMarker)
+{
+    return u"First line of project file \""_s + QDir::toNativeSeparators(name)
+        + u"\" must be the string \""_s + QString::fromLatin1(startMarker) + u"\"."_s;
+}

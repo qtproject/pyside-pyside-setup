@@ -5,7 +5,7 @@
 #define OPTIONSPARSER_H
 
 #include <QtCore/QString>
-#include <QtCore/QList>
+#include <QtCore/QStringList>
 
 #include <memory>
 
@@ -18,6 +18,31 @@ enum class OptionSource
     ProjectFile
 };
 
+struct BoolOption
+{
+    QString option;
+    OptionSource source = OptionSource::CommandLine;
+};
+
+struct OptionValue // --option=value pair
+{
+    QString option;
+    QString value;
+    OptionSource source = OptionSource::CommandLine;
+};
+
+using BoolOptions = QList<BoolOption>;
+using OptionValues = QList<OptionValue>;
+
+struct Options // Options from command line and project file
+{
+    void setOptions(const QStringList &argv);
+
+    BoolOptions boolOptions;
+    OptionValues valueOptions;
+    QStringList positionalArguments;
+};
+
 struct OptionDescription // For help formatting
 {
     QString name;
@@ -26,6 +51,8 @@ struct OptionDescription // For help formatting
 
 using OptionDescriptions = QList<OptionDescription>;
 
+QTextStream &operator<<(QTextStream &s, const BoolOption &bo);
+QTextStream &operator<<(QTextStream &s, const OptionValue &ov);
 QTextStream &operator<<(QTextStream &s, const OptionDescription &od);
 QTextStream &operator<<(QTextStream &s, const OptionDescriptions &options);
 
@@ -39,6 +66,8 @@ public:
     // Return true to indicate the option was processed.
     virtual bool handleBoolOption(const QString &key, OptionSource source);
     virtual bool handleOption(const QString &key, const QString &value, OptionSource source);
+
+    void process(Options *);
 
     static const QString &pathSyntax();
 
@@ -60,5 +89,9 @@ public:
 private:
     QList<OptionsParserPtr> m_parsers;
 };
+
+QDebug operator<<(QDebug debug, const BoolOption &bo);
+QDebug operator<<(QDebug debug, const OptionValue &v);
+QDebug operator<<(QDebug debug, const Options &v);
 
 #endif // OPTIONSPARSER_H

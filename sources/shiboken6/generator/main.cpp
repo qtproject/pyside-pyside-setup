@@ -419,6 +419,9 @@ int shibokenMain(const QStringList &argV)
     if (ReportHandler::isDebug(ReportHandler::SparseDebug))
         qCInfo(lcShiboken()).noquote().nospace() << appName << ' ' << argV.join(u' ');
 
+    Options options;
+    options.setOptions(argV);
+
     // Store command arguments in a map
     const auto projectFileArgumentsOptional = getProjectFileArguments(argV);
     if (!projectFileArgumentsOptional.has_value())
@@ -657,20 +660,7 @@ int shibokenMain(const QStringList &argV)
         cppFileNames.append(cppFileNameFi);
     }
 
-    // Pass option to all generators (Cpp/Header generator have the same options)
-    for (ait = args.options.begin(); ait != args.options.end(); ) {
-        bool found = false;
-        if (ait.value().metaType().id() == QMetaType::QString) {
-            const QString value = ait.value().toString();
-            found |= value.isEmpty()
-                ? optionParser.handleBoolOption(ait.key(), OptionSource::CommandLine)
-                : optionParser.handleOption(ait.key(), value, OptionSource::CommandLine);
-        }
-        if (found)
-            ait = args.options.erase(ait);
-        else
-            ++ait;
-    }
+    optionParser.process(&options);
     optionParser.clear();
 
     ait = args.options.find(languageLevelOption());
@@ -696,11 +686,13 @@ int shibokenMain(const QStringList &argV)
         args.options.remove(it.key());
     }
 
+    /* FIXME: re-activate check
     if (!args.options.isEmpty()) {
         errorPrint(msgLeftOverArguments(args.options, argV), argV);
         std::cout << helpHint;
         return EXIT_FAILURE;
     }
+    */
 
     if (typeSystemFileName.isEmpty()) {
         std::cout << "You must specify a Type System file." << std::endl << helpHint;
