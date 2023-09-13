@@ -145,6 +145,9 @@
     <enum-type name="RangeAccessFlag" flags="RangeAccessFlags"/>
     <enum-type name="Type"/>
     <enum-type name="UsagePattern"/>
+    <modify-function signature="allocate(const void*,int)">
+        <modify-argument index="1" pyi-type="bytes"/>
+    </modify-function>
   </object-type>
   <object-type name="QOpenGLDebugLogger">
       <enum-type name="LoggingMode"/>
