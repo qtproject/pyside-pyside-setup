@@ -48,9 +48,9 @@ class PdfViewer(AbstractViewer):
         nav = self._pdfView.pageNavigator()
         self._pageSelector = QPdfPageSelector(self._toolBar)
         self._toolBar.insertWidget(self._uiAssets_forward, self._pageSelector)
-        self._pageSelector.valueChanged.connect(self.pageSelected)
-        self._pageSelector.valueChanged.connect(self.pageSelected)
-        nav.currentPageChanged.connect(self._pageSelector.setValue)
+        self._pageSelector.setDocument(self._document);
+        self._pageSelector.currentPageChanged.connect(self.pageSelected)
+        nav.currentPageChanged.connect(self._pageSelector.setCurrentPage)
         nav.backAvailableChanged.connect(self._uiAssets_back.setEnabled)
         self._actionBack = self._uiAssets_back
         self._actionForward = self._uiAssets_forward
@@ -133,7 +133,6 @@ class PdfViewer(AbstractViewer):
             documentTitle = "PDF Viewer"
         self.statusMessage(documentTitle)
         self.pageSelected(0)
-        self._pageSelector.setMaximum(self._document.pageCount() - 1)
 
         file_name = QDir.toNativeSeparators(self._file.fileName())
         self.statusMessage(f"Opened PDF file {file_name}")
