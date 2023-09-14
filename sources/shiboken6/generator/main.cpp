@@ -27,22 +27,13 @@
 
 using namespace Qt::StringLiterals;
 
-static const QChar clangOptionsSplitter = u',';
-static inline QString clangOptionOption() { return QStringLiteral("clang-option"); }
-static inline QString clangOptionsOption() { return QStringLiteral("clang-options"); }
 static inline QString compilerOption() { return QStringLiteral("compiler"); }
 static inline QString compilerPathOption() { return QStringLiteral("compiler-path"); }
 static inline QString platformOption() { return QStringLiteral("platform"); }
-static inline QString languageLevelOption() { return QStringLiteral("language-level"); }
-static inline QString includePathOption() { return QStringLiteral("include-paths"); }
-static inline QString frameworkIncludePathOption() { return QStringLiteral("framework-include-paths"); }
-static inline QString systemIncludePathOption() { return QStringLiteral("system-include-paths"); }
 static inline QString logUnmatchedOption() { return QStringLiteral("log-unmatched"); }
 static inline QString helpOption() { return QStringLiteral("help"); }
 static inline QString diffOption() { return QStringLiteral("diff"); }
-static inline QString useGlobalHeaderOption() { return QStringLiteral("use-global-header"); }
 static inline QString dryrunOption() { return QStringLiteral("dry-run"); }
-static inline QString skipDeprecatedOption() { return QStringLiteral("skip-deprecated"); }
 static inline QString printBuiltinTypesOption() { return QStringLiteral("print-builtin-types"); }
 
 static const char helpHint[] = "Note: use --help or -h for more information.\n";
@@ -111,26 +102,10 @@ bool CommandLineArguments::addCommonOption(const QString &option,
     if (option == compilerOption() || option == compilerPathOption()
         || option == platformOption()) {
         options.insert(option, value);
-    } else if (option == clangOptionOption()) {
-        options.insert(option, QStringList(value));
-    } else if (option == clangOptionsOption()) {
-        addToOptionsList(option, value, clangOptionsSplitter);
     } else {
         result = false;
     }
     return result;
-}
-
-// Return the file command line option matching a project file keyword
-static QString projectFileKeywordToCommandLineOption(const QString &p)
-{
-    if (p == u"include-path")
-        return includePathOption(); // "include-paths", ...
-    if (p == u"framework-include-path")
-        return frameworkIncludePathOption();
-    if (p == u"system-include-paths")
-        return systemIncludePathOption();
-    return {};
 }
 
 static void processProjectFileLine(const QByteArray &line, CommandLineArguments &args)
@@ -146,18 +121,12 @@ static void processProjectFileLine(const QByteArray &line, CommandLineArguments 
 
     const QString key = lineS.left(split).trimmed();
     const QString value = lineS.mid(split + 1).trimmed();
-    const QString fileOption = projectFileKeywordToCommandLineOption(key);
-    if (fileOption.isEmpty()) {
-        if (key == u"header-file") {
-            args.positionalArguments.prepend(value);
-        } else if (key == u"typesystem-file") {
-            args.positionalArguments.append(value);
-        } else {
-            args.options.insert(key, value);
-        }
+    if (key == u"header-file") {
+        args.positionalArguments.prepend(value);
+    } else if (key == u"typesystem-file") {
+        args.positionalArguments.append(value);
     } else {
-        // Add single line value to the path list
-        args.addToOptionsList(fileOption, QDir::toNativeSeparators(value));
+        args.options.insert(key, value);
     }
 }
 
@@ -220,28 +189,14 @@ static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &ar
         }
         const QString option = arg.left(split);
         const QString value = arg.mid(split + 1).trimmed();
-        if (args.addCommonOption(option, value)) {
-        } else if (option == includePathOption() || option == frameworkIncludePathOption()
-                   || option == systemIncludePathOption()) {
-            // Add platform path-separator separated list value to path list
-            args.addToOptionsPathList(option, value);
-        } else {
+        if (!args.addCommonOption(option, value))
             args.options.insert(option, value);
-        }
         return;
     }
     if (arg.startsWith(u'-')) {
         arg.remove(0, 1);
-        if (arg.startsWith(u'I')) // Shorthand path arguments -I/usr/include...
-            args.addToOptionsPathList(includePathOption(), arg.mid(1));
-        else if (arg.startsWith(u'F'))
-            args.addToOptionsPathList(frameworkIncludePathOption(), arg.mid(1));
-        else if (arg.startsWith(u"isystem"))
-            args.addToOptionsPathList(systemIncludePathOption(), arg.mid(7));
-        else if (arg == u"h")
+        if (arg == u"h")
             args.options.insert(helpOption(), QString());
-        else if (arg.startsWith(u"std="))
-            args.options.insert(languageLevelOption(), arg.mid(4));
         else
             args.options.insert(arg, QString());
         return;
@@ -276,13 +231,6 @@ static inline Generators shibokenGenerators()
     return result;
 }
 
-static inline QString languageLevelDescription()
-{
-    return u"C++ Language level (c++11..c++17, default="_s
-        + QLatin1StringView(clang::languageLevelOption(clang::emulatedCompilerLanguageLevel()))
-        + u')';
-}
-
 void printUsage()
 {
     const auto generatorOptions = Generator::options();
@@ -296,28 +244,14 @@ void printUsage()
          u"Set the debug level"_s},
         {u"documentation-only"_s,
          u"Do not generates any code, just the documentation"_s},
-        {clangOptionOption(),
-         u"Option to be passed to clang"_s},
-        {clangOptionsOption(),
-         u"A comma-separated list of options to be passed to clang"_s},
         {compilerOption() + u"=<type>"_s,
          u"Emulated compiler type (g++, msvc, clang)"_s},
         {platformOption() + u"=<name>"_s,
          u"Emulated platform (windows, darwin, unix)"_s},
         {compilerPathOption() + u"=<file>"_s,
          u"Path to the compiler for determining builtin include paths"_s},
-        {u"-F<path>"_s, {} },
-        {u"framework-include-paths="_s + OptionsParser::pathSyntax(),
-         u"Framework include paths used by the C++ parser"_s},
-        {u"-isystem<path>"_s, {} },
-        {u"system-include-paths="_s + OptionsParser::pathSyntax(),
-         u"System include paths used by the C++ parser"_s},
-        {useGlobalHeaderOption(),
-         u"Use the global headers in generated code."_s},
         {u"generator-set=<\"generator module\">"_s,
          u"generator-set to be used. e.g. qtdoc"_s},
-        {skipDeprecatedOption(),
-         u"Skip deprecated functions"_s},
         {diffOption(), u"Print a diff of wrapper files"_s},
         {dryrunOption(), u"Dry run, do not generate wrapper files"_s},
         {u"-h"_s, {} },
@@ -325,8 +259,6 @@ void printUsage()
         {u"-I<path>"_s, {} },
         {u"include-paths="_s + OptionsParser::pathSyntax(),
         u"Include paths used by the C++ parser"_s},
-        {languageLevelOption() + u"=, -std=<level>"_s,
-         languageLevelDescription()},
         {u"license-file=<license-file>"_s,
          u"File used for copyright headers of generated files"_s},
         {u"no-suppress-warnings"_s,
@@ -344,6 +276,7 @@ void printUsage()
     };
 
     s << generalOptions
+        << ApiExtractor::options()
         << TypeDatabase::options()
         << "\nSource generator options:\n\n" << generatorOptions
         << ShibokenGenerator::options();
@@ -365,21 +298,6 @@ static inline void errorPrint(const QString &s, const QStringList &arguments)
     std::cerr << appName << ": " << qPrintable(s) << "\nCommand line:\n";
     for (const auto &argument : arguments)
         std::cerr << "    \"" << qPrintable(argument) << "\"\n";
-}
-
-static void parseIncludePathOption(const QString &option, HeaderType headerType,
-                                   CommandLineArguments &args,
-                                   ApiExtractor &extractor)
-{
-    const auto it = args.options.find(option);
-    if (it != args.options.end()) {
-        const auto includePathListList = it.value().toStringList();
-        args.options.erase(it);
-        for (const QString &s : includePathListList) {
-            auto path = QFile::encodeName(QDir::cleanPath(s));
-            extractor.addIncludePath(HeaderPath{path, headerType});
-        }
-    }
 }
 
 int shibokenMain(const QStringList &argV)
@@ -424,6 +342,8 @@ int shibokenMain(const QStringList &argV)
     OptionsParserList optionParser;
     optionParser.append(Generator::createOptionsParser());
     optionParser.append(TypeDatabase::instance()->createOptionsParser());
+    ApiExtractor extractor;
+    optionParser.append(extractor.createOptionsParser());
 
     // Pre-defined generator sets.
     if (generatorSet == u"qtdoc") {
@@ -454,12 +374,6 @@ int shibokenMain(const QStringList &argV)
     if (ait != args.options.end()) {
         args.options.erase(ait);
         FileOut::setDiff(true);
-    }
-
-    ait = args.options.find(useGlobalHeaderOption());
-    if (ait != args.options.end()) {
-        args.options.erase(ait);
-        ApiExtractor::setUseGlobalHeader(true);
     }
 
     ait = args.options.find(dryrunOption());
@@ -503,17 +417,11 @@ int shibokenMain(const QStringList &argV)
     }
 
     // Create and set-up API Extractor
-    ApiExtractor extractor;
     extractor.setLogDirectory(outputDirectory);
-    ait = args.options.find(skipDeprecatedOption());
-    if (ait != args.options.end()) {
-        extractor.setSkipDeprecated(true);
-        args.options.erase(ait);
-    }
 
     ait = args.options.find(u"silent"_s);
     if (ait != args.options.end()) {
-        extractor.setSilent(true);
+        ReportHandler::setSilent(true);
         args.options.erase(ait);
     } else {
         ait = args.options.find(u"debug-level"_s);
@@ -525,12 +433,6 @@ int shibokenMain(const QStringList &argV)
             }
             args.options.erase(ait);
         }
-    }
-
-    ait = args.options.find(clangOptionsOption());
-    if (ait != args.options.end()) {
-        extractor.setClangOptions(ait.value().toStringList());
-        args.options.erase(ait);
     }
 
     ait = args.options.find(compilerOption());
@@ -564,13 +466,6 @@ int shibokenMain(const QStringList &argV)
         args.options.erase(ait);
     }
 
-    parseIncludePathOption(includePathOption(), HeaderType::Standard,
-                           args, extractor);
-    parseIncludePathOption(frameworkIncludePathOption(), HeaderType::Framework,
-                           args, extractor);
-    parseIncludePathOption(systemIncludePathOption(), HeaderType::System,
-                           args, extractor);
-
     if (args.positionalArguments.size() < 2) {
         errorPrint(u"Insufficient positional arguments, specify header-file and typesystem-file."_s,
                   argV);
@@ -597,19 +492,6 @@ int shibokenMain(const QStringList &argV)
 
     optionParser.process(&options);
     optionParser.clear();
-
-    ait = args.options.find(languageLevelOption());
-    if (ait != args.options.end()) {
-        const QByteArray languageLevelBA = ait.value().toString().toLatin1();
-        args.options.erase(ait);
-        const LanguageLevel level = clang::languageLevelFromOption(languageLevelBA.constData());
-        if (level == LanguageLevel::Default) {
-            std::cout << "Invalid argument for language level: \""
-                << languageLevelBA.constData() << "\"\n" << helpHint;
-            return EXIT_FAILURE;
-        }
-        extractor.setLanguageLevel(level);
-    }
 
     /* Make sure to remove the project file's arguments (if any) and
      * --project-file, also the arguments of each generator before

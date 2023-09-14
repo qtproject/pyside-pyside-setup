@@ -953,3 +953,8 @@ QString msgMissingProjectFileMarker(const QString &name, const QByteArray &start
     return u"First line of project file \""_s + QDir::toNativeSeparators(name)
         + u"\" must be the string \""_s + QString::fromLatin1(startMarker) + u"\"."_s;
 }
+
+QString msgInvalidLanguageLevel(const QString &l)
+{
+    return u"Invalid argument for language level: \""_s + l + u"\"."_s;
+}

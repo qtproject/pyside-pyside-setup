@@ -20,6 +20,8 @@ class AbstractMetaClass;
 class AbstractMetaEnum;
 class AbstractMetaFunction;
 class ComplexTypeEntry;
+struct OptionDescription;
+class OptionsParser;
 
 QT_BEGIN_NAMESPACE
 class QDebug;
@@ -36,21 +38,17 @@ public:
     ApiExtractor();
     ~ApiExtractor();
 
+    static QList<OptionDescription> options();
+    std::shared_ptr<OptionsParser> createOptionsParser();
+
     void setTypeSystem(const QString& typeSystemFileName);
     QString typeSystem() const;
     void setCppFileNames(const QFileInfoList &cppFileNames);
     QFileInfoList cppFileNames() const;
-    void setSkipDeprecated(bool value);
-    static void setSilent(bool value);
-    void addIncludePath(const HeaderPath& path);
-    void addIncludePath(const HeaderPaths& paths);
     HeaderPaths includePaths() const;
     void setLogDirectory(const QString& logDir);
     LanguageLevel languageLevel() const;
-    void setLanguageLevel(LanguageLevel languageLevel);
     QStringList clangOptions() const;
-    void setClangOptions(const QStringList &co);
-    static void setUseGlobalHeader(bool h);
 
     const AbstractMetaEnumList &globalEnums() const;
     const AbstractMetaFunctionCList &globalFunctions() const;
