@@ -13,6 +13,7 @@
 #include "exception.h"
 #include "messages.h"
 #include "modifications.h"
+#include "optionsparser.h"
 #include "reporthandler.h"
 #include "typedatabase.h"
 #include "customconversion.h"
@@ -42,7 +43,181 @@ struct InstantiationCollectContext
     QStringList instantiatedContainersNames;
 };
 
-struct ApiExtractorPrivate
+struct ApiExtractorOptions
+{
+    QString m_typeSystemFileName;
+    QFileInfoList m_cppFileNames;
+    HeaderPaths m_includePaths;
+    QStringList m_clangOptions;
+    QString m_logDirectory;
+    LanguageLevel m_languageLevel = LanguageLevel::Default;
+    bool m_skipDeprecated = false;
+};
+
+static inline QString languageLevelDescription()
+{
+    return u"C++ Language level (c++11..c++17, default="_s
+           + QLatin1StringView(clang::languageLevelOption(clang::emulatedCompilerLanguageLevel()))
+           + u')';
+}
+
+QList<OptionDescription> ApiExtractor::options()
+{
+    return {
+        {u"use-global-header"_s,
+         u"Use the global headers in generated code."_s},
+        {u"clang-option"_s,
+         u"Option to be passed to clang"_s},
+        {u"clang-options"_s,
+         u"A comma-separated list of options to be passed to clang"_s},
+        {u"skip-deprecated"_s,
+         u"Skip deprecated functions"_s},
+        {u"-F<path>"_s, {} },
+        {u"framework-include-paths="_s + OptionsParser::pathSyntax(),
+         u"Framework include paths used by the C++ parser"_s},
+        {u"-isystem<path>"_s, {} },
+        {u"system-include-paths="_s + OptionsParser::pathSyntax(),
+         u"System include paths used by the C++ parser"_s},
+        {u"language-level=, -std=<level>"_s,
+         languageLevelDescription()},
+    };
+}
+
+class ApiExtractorOptionsParser : public OptionsParser
+{
+public:
+    explicit ApiExtractorOptionsParser(ApiExtractorOptions *o) : m_options(o) {}
+
+    bool handleBoolOption(const QString &key, OptionSource source) override;
+    bool handleOption(const QString &key, const QString &value,
+                      OptionSource source) override;
+
+private:
+    void parseIncludePathOption(const QString &value, HeaderType headerType);
+    void parseIncludePathOption(const QStringList &values, HeaderType headerType);
+    void setLanguageLevel(const QString &value);
+
+    ApiExtractorOptions *m_options;
+};
+
+void ApiExtractorOptionsParser::parseIncludePathOption(const QString &value,
+                                                       HeaderType headerType)
+{
+    const auto path = QFile::encodeName(QDir::cleanPath(value));
+    m_options->m_includePaths.append(HeaderPath{path, headerType});
+}
+
+void ApiExtractorOptionsParser::parseIncludePathOption(const QStringList &values,
+                                                       HeaderType headerType)
+{
+    for (const auto &value : values)
+        parseIncludePathOption(value, headerType);
+}
+
+void ApiExtractorOptionsParser::setLanguageLevel(const QString &value)
+{
+    const QByteArray languageLevelBA = value.toLatin1();
+    const LanguageLevel level = clang::languageLevelFromOption(languageLevelBA.constData());
+    if (level == LanguageLevel::Default)
+        throw Exception(msgInvalidLanguageLevel(value));
+    m_options->m_languageLevel = level;
+}
+
+bool ApiExtractorOptionsParser::handleBoolOption(const QString &key, OptionSource source)
+{
+    static const auto isystemOption = "isystem"_L1;
+
+    switch (source) {
+    case OptionSource::CommandLine:
+    case OptionSource::ProjectFile:
+        if (key == u"use-global-header") {
+            AbstractMetaBuilder::setUseGlobalHeader(true);
+            return true;
+        }
+        if (key == u"skip-deprecated") {
+            m_options->m_skipDeprecated = true;
+            return true;
+        }
+        break;
+
+    case OptionSource::CommandLineSingleDash:
+        if (key.startsWith(u'I')) { // Shorthand path arguments -I/usr/include...
+            parseIncludePathOption(key.sliced(1), HeaderType::Standard);
+            return true;
+        }
+        if (key.startsWith(u'F')) {
+            parseIncludePathOption(key.sliced(1), HeaderType::Framework);
+            return true;
+        }
+        if (key.startsWith(isystemOption)) {
+            parseIncludePathOption(key.sliced(isystemOption.size()), HeaderType::System);
+            return true;
+        }
+        break;
+    }
+    return false;
+}
+
+bool ApiExtractorOptionsParser::handleOption(const QString &key, const QString &value,
+                                             OptionSource source)
+{
+    if (source == OptionSource::CommandLineSingleDash) {
+        if (key == u"std") {
+            setLanguageLevel(value);
+            return true;
+        }
+        return false;
+    }
+
+    if (key == u"clang-option") {
+        m_options->m_clangOptions.append(value);
+        return true;
+    }
+    if (key == u"clang-options") {
+        m_options->m_clangOptions.append(value.split(u','));
+        return true;
+    }
+    if (key == u"include-paths") {
+        parseIncludePathOption(value.split(QDir::listSeparator()), HeaderType::Standard);
+        return true;
+    }
+    if (key == u"framework-include-paths") {
+        parseIncludePathOption(value.split(QDir::listSeparator()), HeaderType::Framework);
+        return true;
+    }
+    if (key == u"system-include-paths") {
+        parseIncludePathOption(value.split(QDir::listSeparator()), HeaderType::System);
+        return true;
+    }
+    if (key == u"language-level") {
+        setLanguageLevel(value);
+        return true;
+    }
+
+    if (source == OptionSource::ProjectFile) {
+        if (key == u"include-path") {
+            parseIncludePathOption(value, HeaderType::Standard);
+            return true;
+        }
+        if (key == u"framework-include-path") {
+            parseIncludePathOption(value, HeaderType::Framework);
+            return true;
+        }
+        if (key == u"system-include-path") {
+            parseIncludePathOption(value, HeaderType::System);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+std::shared_ptr<OptionsParser> ApiExtractor::createOptionsParser()
+{
+    return std::make_shared<ApiExtractorOptionsParser>(d);
+}
+
+struct ApiExtractorPrivate : public ApiExtractorOptions
 {
     bool runHelper(ApiExtractorFlags flags);
 
@@ -63,14 +238,7 @@ struct ApiExtractorPrivate
     void addInstantiatedSmartPointer(InstantiationCollectContext &context,
                                      const AbstractMetaType &type);
 
-    QString m_typeSystemFileName;
-    QFileInfoList m_cppFileNames;
-    HeaderPaths m_includePaths;
-    QStringList m_clangOptions;
     AbstractMetaBuilder *m_builder = nullptr;
-    QString m_logDirectory;
-    LanguageLevel m_languageLevel = LanguageLevel::Default;
-    bool m_skipDeprecated = false;
 };
 
 ApiExtractor::ApiExtractor() :
@@ -82,16 +250,6 @@ ApiExtractor::~ApiExtractor()
 {
     delete d->m_builder;
     delete d;
-}
-
-void ApiExtractor::addIncludePath(const HeaderPath& path)
-{
-    d->m_includePaths << path;
-}
-
-void ApiExtractor::addIncludePath(const HeaderPaths& paths)
-{
-    d->m_includePaths << paths;
 }
 
 HeaderPaths ApiExtractor::includePaths() const
@@ -122,18 +280,6 @@ void ApiExtractor::setTypeSystem(const QString& typeSystemFileName)
 QString ApiExtractor::typeSystem() const
 {
     return d->m_typeSystemFileName;
-}
-
-void ApiExtractor::setSkipDeprecated(bool value)
-{
-    d->m_skipDeprecated = value;
-    if (d->m_builder)
-        d->m_builder->setSkipDeprecated(d->m_skipDeprecated);
-}
-
-void ApiExtractor::setSilent ( bool value )
-{
-    ReportHandler::setSilent(value);
 }
 
 const AbstractMetaEnumList &ApiExtractor::globalEnums() const
@@ -281,24 +427,9 @@ LanguageLevel ApiExtractor::languageLevel() const
     return d->m_languageLevel;
 }
 
-void ApiExtractor::setLanguageLevel(LanguageLevel languageLevel)
-{
-    d->m_languageLevel = languageLevel;
-}
-
 QStringList ApiExtractor::clangOptions() const
 {
     return d->m_clangOptions;
-}
-
-void ApiExtractor::setClangOptions(const QStringList &co)
-{
-    d->m_clangOptions = co;
-}
-
-void ApiExtractor::setUseGlobalHeader(bool h)
-{
-    AbstractMetaBuilder::setUseGlobalHeader(h);
 }
 
 AbstractMetaFunctionPtr

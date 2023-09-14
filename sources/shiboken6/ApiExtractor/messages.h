@@ -253,4 +253,6 @@ QString msgUnknownArrayPointerConversion(const QString &s);
 
 QString msgMissingProjectFileMarker(const QString &name, const QByteArray &startMarker);
 
+QString msgInvalidLanguageLevel(const QString &l);
+
 #endif // MESSAGES_H
