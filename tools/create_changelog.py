@@ -123,6 +123,10 @@ def parse_options() -> Namespace:
             args.type = "major" if release_version[1] == 0 else "minor"
         else:
             args.type = "bug-fix"
+        # For major/minor releases, skip all fixes with "Pick-to: " since they
+        # appear in bug-fix releases.
+        if args.type != "bug-fix":
+           args.exclude = True
         print(f'Assuming "{args.type}" version', file=sys.stderr)
 
     if args.type not in ("bug-fix", "minor", "major"):
