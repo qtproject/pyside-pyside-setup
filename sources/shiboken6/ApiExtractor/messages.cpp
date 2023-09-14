@@ -684,18 +684,12 @@ QString msgMethodNotFound(const AbstractMetaClassCPtr &klass, const QString &nam
 
 // main.cpp
 
-QString msgLeftOverArguments(const QVariantMap &remainingArgs, const QStringList &argV)
+QString msgLeftOverArguments(const QString &remainingArgs, const QStringList &argV)
 {
     QString message;
     QTextStream str(&message);
-    str << "shiboken: Called with wrong arguments:";
-    for (auto it = remainingArgs.cbegin(), end = remainingArgs.cend(); it != end; ++it) {
-        str << ' ' << it.key();
-        const QString value = it.value().toString();
-        if (!value.isEmpty())
-            str << ' ' << value;
-    }
-    str << "\nCommand line: " << argV.join(u' ');
+    str << "shiboken: Unprocessed arguments: " << remainingArgs
+        << "\nCommand line: " << argV.join(u' ');
     return message;
 }
 
