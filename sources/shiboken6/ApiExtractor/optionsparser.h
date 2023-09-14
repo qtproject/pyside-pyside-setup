@@ -37,6 +37,7 @@ using OptionValues = QList<OptionValue>;
 struct Options // Options from command line and project file
 {
     void setOptions(const QStringList &argv);
+    QString msgUnprocessedOptions() const;
 
     BoolOptions boolOptions;
     OptionValues valueOptions;

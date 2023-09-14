@@ -190,7 +190,7 @@ QString msgCannotFindSmartPointerMethod(const SmartPointerTypeEntryCPtr &te, con
 
 QString msgMethodNotFound(const AbstractMetaClassCPtr &klass, const QString &name);
 
-QString msgLeftOverArguments(const QVariantMap &remainingArgs, const QStringList &argV);
+QString msgLeftOverArguments(const QString &remainingArgs, const QStringList &argV);
 
 QString msgInvalidVersion(const QString &package, const QString &version);
 

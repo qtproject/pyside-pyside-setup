@@ -219,3 +219,14 @@ void Options::setOptions(const QStringList &argv)
         }
     }
 }
+
+QString Options::msgUnprocessedOptions() const
+{
+    QString result;
+    QTextStream str(&result);
+    for (const auto &b : boolOptions)
+        str << b << ' ';
+    for (const auto &v : valueOptions)
+        str << v << ' ';
+    return result.trimmed();
+}

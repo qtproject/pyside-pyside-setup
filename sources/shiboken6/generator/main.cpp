@@ -9,6 +9,7 @@
 
 #include <apiextractor.h>
 #include <apiextractorresult.h>
+#include <exception.h>
 #include <fileout.h>
 #include <messages.h>
 #include <optionsparser.h>
@@ -27,193 +28,8 @@
 
 using namespace Qt::StringLiterals;
 
-static inline QString compilerOption() { return QStringLiteral("compiler"); }
-static inline QString compilerPathOption() { return QStringLiteral("compiler-path"); }
-static inline QString platformOption() { return QStringLiteral("platform"); }
-static inline QString logUnmatchedOption() { return QStringLiteral("log-unmatched"); }
-static inline QString helpOption() { return QStringLiteral("help"); }
-static inline QString diffOption() { return QStringLiteral("diff"); }
-static inline QString dryrunOption() { return QStringLiteral("dry-run"); }
-static inline QString printBuiltinTypesOption() { return QStringLiteral("print-builtin-types"); }
-
 static const char helpHint[] = "Note: use --help or -h for more information.\n";
 static const char appName[] = "shiboken";
-
-struct CommandLineArguments
-{
-    void addToOptionsList(const QString &option,
-                          const QString &value);
-    void addToOptionsList(const QString &option,
-                          const QStringList &value);
-    void addToOptionsList(const QString &option,
-                          const QString &listValue,
-                          QChar separator);
-    void addToOptionsPathList(const QString &option,
-                              const QString &pathListValue)
-    {
-        addToOptionsList(option, pathListValue, QDir::listSeparator());
-    }
-
-    bool addCommonOption(const QString &option, const QString &value);
-
-    QVariantMap options; // string,stringlist for path lists, etc.
-    QStringList positionalArguments;
-};
-
-void CommandLineArguments::addToOptionsList(const QString &option,
-                                            const QString &value)
-{
-    auto it = options.find(option);
-    if (it == options.end()) {
-        options.insert(option, QVariant(QStringList(value)));
-    } else {
-        auto list = it.value().toStringList();
-        list += value;
-        options[option] = QVariant(list);
-    }
-}
-
-void CommandLineArguments::addToOptionsList(const QString &option,
-                                            const QStringList &value)
-{
-    auto it = options.find(option);
-    if (it == options.end()) {
-        options.insert(option, QVariant(value));
-    } else {
-        auto list = it.value().toStringList();
-        list += value;
-        options[option] = QVariant(list);
-    }
-}
-
-void CommandLineArguments::addToOptionsList(const QString &option,
-                                            const QString &listValue,
-                                            QChar separator)
-{
-    const auto newValues = listValue.split(separator, Qt::SkipEmptyParts);
-    addToOptionsList(option, newValues);
-}
-
-// Add options common to project file and command line
-bool CommandLineArguments::addCommonOption(const QString &option,
-                                           const QString &value)
-{
-    bool result = true;
-    if (option == compilerOption() || option == compilerPathOption()
-        || option == platformOption()) {
-        options.insert(option, value);
-    } else {
-        result = false;
-    }
-    return result;
-}
-
-static void processProjectFileLine(const QByteArray &line, CommandLineArguments &args)
-{
-    if (line.isEmpty())
-        return;
-    const QString lineS = QString::fromUtf8(line);
-    const auto split = line.indexOf(u'=');
-    if (split < 0) {
-        args.options.insert(lineS, QString{});
-        return;
-    }
-
-    const QString key = lineS.left(split).trimmed();
-    const QString value = lineS.mid(split + 1).trimmed();
-    if (key == u"header-file") {
-        args.positionalArguments.prepend(value);
-    } else if (key == u"typesystem-file") {
-        args.positionalArguments.append(value);
-    } else {
-        args.options.insert(key, value);
-    }
-}
-
-static std::optional<CommandLineArguments>
-    processProjectFile(const char *appName, QFile &projectFile)
-{
-    QByteArray line = projectFile.readLine().trimmed();
-    if (line.isEmpty() || line != "[generator-project]") {
-        std::cerr << appName << ": first line of project file \""
-            << qPrintable(projectFile.fileName())
-            << "\" must be the string \"[generator-project]\"\n";
-        return {};
-    }
-
-    CommandLineArguments args;
-    while (!projectFile.atEnd())
-        processProjectFileLine(projectFile.readLine().trimmed(), args);
-    return args;
-}
-
-static std::optional<CommandLineArguments> getProjectFileArguments(const QStringList &arguments)
-{
-    QString projectFileName;
-    for (const QString &arg : std::as_const(arguments)) {
-        if (arg.startsWith(u"--project-file")) {
-            int split = arg.indexOf(u'=');
-            if (split > 0)
-                projectFileName = arg.mid(split + 1).trimmed();
-            break;
-        }
-    }
-
-    if (projectFileName.isEmpty())
-        return CommandLineArguments{};
-
-    if (!QFile::exists(projectFileName)) {
-        std::cerr << appName << ": Project file \""
-            << qPrintable(projectFileName) << "\" not found.\n";
-        return {};
-    }
-
-    QFile projectFile(projectFileName);
-    if (!projectFile.open(QIODevice::ReadOnly)) {
-        std::cerr << appName << ": Cannot open project file \""
-            << qPrintable(projectFileName) << "\" : " << qPrintable(projectFile.errorString())
-            << '\n';
-        return {};
-    }
-    return processProjectFile(appName, projectFile);
-}
-
-static void getCommandLineArg(QString arg, int &argNum, CommandLineArguments &args)
-{
-    if (arg.startsWith(u"--")) {
-        arg.remove(0, 2);
-        const auto split = arg.indexOf(u'=');
-        if (split < 0) {
-            args.options.insert(arg, QString());
-            return;
-        }
-        const QString option = arg.left(split);
-        const QString value = arg.mid(split + 1).trimmed();
-        if (!args.addCommonOption(option, value))
-            args.options.insert(option, value);
-        return;
-    }
-    if (arg.startsWith(u'-')) {
-        arg.remove(0, 1);
-        if (arg == u"h")
-            args.options.insert(helpOption(), QString());
-        else
-            args.options.insert(arg, QString());
-        return;
-    }
-    if (argNum < args.positionalArguments.size())
-        args.positionalArguments[argNum] = arg;
-    else
-        args.positionalArguments.append(arg);
-    ++argNum;
-}
-
-static void getCommandLineArgs(CommandLineArguments &args, const QStringList &arguments)
-{
-    int argNum = 0;
-    for (const QString &argument : arguments)
-        getCommandLineArg(argument.trimmed(), argNum, args);
-}
 
 static inline Generators docGenerators()
 {
@@ -231,31 +47,54 @@ static inline Generators shibokenGenerators()
     return result;
 }
 
-void printUsage()
+struct CommonOptions
 {
-    const auto generatorOptions = Generator::options();
+    QString generatorSet;
+    QString licenseComment;
+    QString outputDirectory = u"out"_s;
+    QStringList headers;
+    QString typeSystemFileName;
+    bool help = false;
+    bool version = false;
+    bool diff = false;
+    bool dryRun = false;
+    bool logUnmatched = false;
+    bool printBuiltinTypes = false;
+};
 
-    QTextStream s(stdout);
-    s << "Usage:\n  "
-      << "shiboken [options] header-file(s) typesystem-file\n\n"
-      << "General options:\n";
-    OptionDescriptions generalOptions = {
+class CommonOptionsParser : public OptionsParser
+{
+public:
+    explicit CommonOptionsParser(CommonOptions *o) : m_options(o) {}
+
+    bool handleBoolOption(const QString &key, OptionSource source) override;
+    bool handleOption(const QString &key, const QString &value, OptionSource source) override;
+
+    static OptionDescriptions optionDescriptions();
+
+private:
+    CommonOptions *m_options;
+};
+
+OptionDescriptions CommonOptionsParser::optionDescriptions()
+{
+    return {
         {u"debug-level=[sparse|medium|full]"_s,
          u"Set the debug level"_s},
         {u"documentation-only"_s,
          u"Do not generates any code, just the documentation"_s},
-        {compilerOption() + u"=<type>"_s,
+        {u"compiler=<type>"_s,
          u"Emulated compiler type (g++, msvc, clang)"_s},
-        {platformOption() + u"=<name>"_s,
+        {u"platform=<name>"_s,
          u"Emulated platform (windows, darwin, unix)"_s},
-        {compilerPathOption() + u"=<file>"_s,
+        {u"compiler-path=<file>"_s,
          u"Path to the compiler for determining builtin include paths"_s},
         {u"generator-set=<\"generator module\">"_s,
          u"generator-set to be used. e.g. qtdoc"_s},
-        {diffOption(), u"Print a diff of wrapper files"_s},
-        {dryrunOption(), u"Dry run, do not generate wrapper files"_s},
+        {u"diff"_s, u"Print a diff of wrapper files"_s},
+        {u"dry-run"_s, u"Dry run, do not generate wrapper files"_s},
         {u"-h"_s, {} },
-        {helpOption(), u"Display this help and exit"_s},
+        {u"help"_s, u"Display this help and exit"_s},
         {u"-I<path>"_s, {} },
         {u"include-paths="_s + OptionsParser::pathSyntax(),
         u"Include paths used by the C++ parser"_s},
@@ -269,13 +108,119 @@ void printUsage()
          u"text file containing a description of the binding project.\n"
           "Replaces and overrides command line arguments"_s},
         {u"silent"_s, u"Avoid printing any message"_s},
-        {printBuiltinTypesOption(),
+        {u"print-builtin-types"_s,
          u"Print information about builtin types"_s},
         {u"version"_s,
          u"Output version information and exit"_s}
     };
+}
 
-    s << generalOptions
+bool CommonOptionsParser::handleBoolOption(const QString &key, OptionSource source)
+{
+    if (source == OptionSource::CommandLineSingleDash) {
+        if (key == u"h") {
+            m_options->help = true;
+            return true;
+        }
+        return false;
+    }
+
+    if (key == u"version") {
+        m_options->version = true;
+        return true;
+    }
+    if (key == u"help") {
+        m_options->help = true;
+        return true;
+    }
+    if (key == u"diff") {
+        FileOut::setDiff(true);
+        return true;
+    }
+    if (key == u"dry-run") {
+        FileOut::setDryRun(true);
+        return true;
+    }
+    if (key == u"silent") {
+        ReportHandler::setSilent(true);
+        return true;
+    }
+    if (key == u"log-unmatched") {
+        m_options->logUnmatched = true;
+        return true;
+    }
+    if (key == u"print-builtin-types") {
+        m_options->printBuiltinTypes = true;
+        return true;
+    }
+
+    return false;
+}
+
+bool CommonOptionsParser::handleOption(const QString &key, const QString &value,
+                                       OptionSource source)
+{
+    if (source == OptionSource::CommandLineSingleDash)
+        return false;
+
+    if (key == u"generator-set" || key == u"generatorSet" /* legacy */) {
+        m_options->generatorSet = value;
+        return true;
+    }
+    if (key == u"license-file") {
+        QFile licenseFile(value);
+        if (!licenseFile.open(QIODevice::ReadOnly))
+            throw Exception(msgCannotOpenForReading(licenseFile));
+        m_options->licenseComment = QString::fromUtf8(licenseFile.readAll());
+        return true;
+    }
+    if (key == u"debug-level") {
+        if (!ReportHandler::setDebugLevelFromArg(value))
+            throw Exception(u"Invalid debug level: "_s + value);
+        return true;
+    }
+    if (key == u"output-directory") {
+        m_options->outputDirectory = value;
+        return true;
+    }
+    if (key == u"compiler") {
+        if (!clang::setCompiler(value))
+            throw Exception(u"Invalid value \""_s + value + u"\" passed to --compiler"_s);
+        return true;
+    }
+    if (key == u"compiler-path") {
+        clang::setCompilerPath(value);
+        return true;
+    }
+    if (key == u"platform") {
+        if (!clang::setPlatform(value))
+            throw Exception(u"Invalid value \""_s + value + u"\" passed to --platform"_s);
+        return true;
+    }
+
+    if (source == OptionSource::ProjectFile) {
+        if (key == u"header-file") {
+            m_options->headers.append(value);
+            return true;
+        }
+        if (key == u"typesystem-file") {
+            m_options->typeSystemFileName = value;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void printUsage()
+{
+    const auto generatorOptions = Generator::options();
+
+    QTextStream s(stdout);
+    s << "Usage:\n  "
+        << "shiboken [options] header-file(s) typesystem-file\n\n"
+        << "General options:\n"
+        << CommonOptionsParser::optionDescriptions()
         << ApiExtractor::options()
         << TypeDatabase::options()
         << "\nSource generator options:\n\n" << generatorOptions
@@ -313,31 +258,21 @@ int shibokenMain(const QStringList &argV)
     Options options;
     options.setOptions(argV);
 
-    // Store command arguments in a map
-    const auto projectFileArgumentsOptional = getProjectFileArguments(argV);
-    if (!projectFileArgumentsOptional.has_value())
-        return EXIT_FAILURE;
-
-    const CommandLineArguments projectFileArguments = projectFileArgumentsOptional.value();
-    CommandLineArguments args = projectFileArguments;
-    getCommandLineArgs(args, argV);
-    Generators generators;
-
-    auto ait = args.options.find(u"version"_s);
-    if (ait != args.options.end()) {
-        args.options.erase(ait);
+    CommonOptions commonOptions;
+    {
+        CommonOptionsParser parser(&commonOptions);
+        parser.process(&options);
+    }
+    if (commonOptions.version) {
         printVerAndBanner();
         return EXIT_SUCCESS;
     }
-
-    QString generatorSet;
-    ait = args.options.find(u"generator-set"_s);
-    if (ait == args.options.end()) // Also check "generatorSet" command line argument for backward compatibility.
-        ait = args.options.find(u"generatorSet"_s);
-    if (ait != args.options.end()) {
-        generatorSet = ait.value().toString();
-        args.options.erase(ait);
+    if (commonOptions.help) {
+        printUsage();
+        return EXIT_SUCCESS;
     }
+
+    Generators generators;
 
     OptionsParserList optionParser;
     optionParser.append(Generator::createOptionsParser());
@@ -346,7 +281,7 @@ int shibokenMain(const QStringList &argV)
     optionParser.append(extractor.createOptionsParser());
 
     // Pre-defined generator sets.
-    if (generatorSet == u"qtdoc") {
+    if (commonOptions.generatorSet == u"qtdoc") {
         generators = docGenerators();
         if (generators.isEmpty()) {
             errorPrint(u"Doc strings extractions was not enabled in this shiboken build."_s, argV);
@@ -355,7 +290,7 @@ int shibokenMain(const QStringList &argV)
 #ifdef DOCSTRINGS_ENABLED
         optionParser.append(QtDocGenerator::createOptionsParser());
 #endif
-    } else if (generatorSet.isEmpty() || generatorSet == u"shiboken") {
+    } else if (commonOptions.generatorSet.isEmpty() || commonOptions.generatorSet == u"shiboken") {
         generators = shibokenGenerators();
         optionParser.append(ShibokenGenerator::createOptionsParser());
     } else {
@@ -363,125 +298,38 @@ int shibokenMain(const QStringList &argV)
         return EXIT_FAILURE;
     }
 
-    ait = args.options.find(u"help"_s);
-    if (ait != args.options.end()) {
-        args.options.erase(ait);
-        printUsage();
-        return EXIT_SUCCESS;
-    }
-
-    ait = args.options.find(diffOption());
-    if (ait != args.options.end()) {
-        args.options.erase(ait);
-        FileOut::setDiff(true);
-    }
-
-    ait = args.options.find(dryrunOption());
-    if (ait != args.options.end()) {
-        args.options.erase(ait);
-        FileOut::setDryRun(true);
-    }
-
-    ait = args.options.find(logUnmatchedOption());
-    const bool logUnmatched = ait != args.options.end();
-    if (logUnmatched)
-        args.options.erase(ait);
-
-    QString licenseComment;
-    ait = args.options.find(u"license-file"_s);
-    if (ait != args.options.end()) {
-        QFile licenseFile(ait.value().toString());
-        args.options.erase(ait);
-        if (licenseFile.open(QIODevice::ReadOnly)) {
-            licenseComment = QString::fromUtf8(licenseFile.readAll());
-        } else {
-            errorPrint(QStringLiteral("Could not open the file \"%1\" containing the license heading: %2").
-                       arg(QDir::toNativeSeparators(licenseFile.fileName()), licenseFile.errorString()), argV);
-            return EXIT_FAILURE;
-        }
-    }
-
-    QString outputDirectory = u"out"_s;
-    ait = args.options.find(u"output-directory"_s);
-    if (ait != args.options.end()) {
-        outputDirectory = ait.value().toString();
-        args.options.erase(ait);
-    }
-
-    if (!QDir(outputDirectory).exists()) {
-        if (!QDir().mkpath(outputDirectory)) {
+    if (!QDir(commonOptions.outputDirectory).exists()) {
+        if (!QDir().mkpath(commonOptions.outputDirectory)) {
             qCWarning(lcShiboken).noquote().nospace()
-                << "Can't create output directory: " << QDir::toNativeSeparators(outputDirectory);
+                << "Can't create output directory: "
+                << QDir::toNativeSeparators(commonOptions.outputDirectory);
             return EXIT_FAILURE;
         }
     }
 
     // Create and set-up API Extractor
-    extractor.setLogDirectory(outputDirectory);
+    extractor.setLogDirectory(commonOptions.outputDirectory);
 
-    ait = args.options.find(u"silent"_s);
-    if (ait != args.options.end()) {
-        ReportHandler::setSilent(true);
-        args.options.erase(ait);
-    } else {
-        ait = args.options.find(u"debug-level"_s);
-        if (ait != args.options.end()) {
-            const QString value = ait.value().toString();
-            if (!ReportHandler::setDebugLevelFromArg(value)) {
-                errorPrint(u"Invalid debug level: "_s + value, argV);
-                return EXIT_FAILURE;
-            }
-            args.options.erase(ait);
-        }
-    }
-
-    ait = args.options.find(compilerOption());
-    if (ait != args.options.end()) {
-        const QString name = ait.value().toString();
-        if (!clang::setCompiler(name)) {
-            errorPrint(u"Invalid value \""_s + name + u"\" passed to --compiler"_s, argV);
+    if (commonOptions.typeSystemFileName.isEmpty() && commonOptions.headers.isEmpty()) {
+        if (options.positionalArguments.size() < 2) {
+            errorPrint(u"Insufficient positional arguments, specify header-file and typesystem-file."_s,
+                       argV);
+            std::cout << '\n';
+            printUsage();
             return EXIT_FAILURE;
         }
-        args.options.erase(ait);
+
+        commonOptions.typeSystemFileName = options.positionalArguments.takeLast();
+        commonOptions.headers = options.positionalArguments;
     }
 
-    ait = args.options.find(printBuiltinTypesOption());
-    const bool printBuiltinTypes = ait != args.options.end();
-    if (printBuiltinTypes)
-        args.options.erase(ait);
-
-    ait = args.options.find(compilerPathOption());
-    if (ait != args.options.end()) {
-        clang::setCompilerPath(ait.value().toString());
-        args.options.erase(ait);
-    }
-
-    ait = args.options.find(platformOption());
-    if (ait != args.options.end()) {
-        const QString name = ait.value().toString();
-        if (!clang::setPlatform(name)) {
-            errorPrint(u"Invalid value \""_s + name + u"\" passed to --platform"_s, argV);
-            return EXIT_FAILURE;
-        }
-        args.options.erase(ait);
-    }
-
-    if (args.positionalArguments.size() < 2) {
-        errorPrint(u"Insufficient positional arguments, specify header-file and typesystem-file."_s,
-                  argV);
-        std::cout << '\n';
-        printUsage();
-        return EXIT_FAILURE;
-    }
-
-    const QString typeSystemFileName = args.positionalArguments.takeLast();
-    QString messagePrefix = QFileInfo(typeSystemFileName).baseName();
+    QString messagePrefix = QFileInfo(commonOptions.typeSystemFileName).baseName();
     if (messagePrefix.startsWith(u"typesystem_"))
         messagePrefix.remove(0, 11);
     ReportHandler::setPrefix(u'(' + messagePrefix + u')');
 
     QFileInfoList cppFileNames;
-    for (const QString &cppFileName : std::as_const(args.positionalArguments)) {
+    for (const QString &cppFileName : std::as_const(commonOptions.headers)) {
         const QFileInfo cppFileNameFi(cppFileName);
         if (!cppFileNameFi.isFile() && !cppFileNameFi.isSymLink()) {
             errorPrint(u'"' + cppFileName + u"\" does not exist."_s, argV);
@@ -493,31 +341,19 @@ int shibokenMain(const QStringList &argV)
     optionParser.process(&options);
     optionParser.clear();
 
-    /* Make sure to remove the project file's arguments (if any) and
-     * --project-file, also the arguments of each generator before
-     * checking if there isn't any existing arguments in argsHandler.
-     */
-    args.options.remove(u"project-file"_s);
-    for (auto it = projectFileArguments.options.cbegin(), end = projectFileArguments.options.cend();
-         it != end; ++it) {
-        args.options.remove(it.key());
-    }
-
-    /* FIXME: re-activate check
-    if (!args.options.isEmpty()) {
-        errorPrint(msgLeftOverArguments(args.options, argV), argV);
+    if (!options.boolOptions.isEmpty() || !options.valueOptions.isEmpty()) {
+        errorPrint(msgLeftOverArguments(options.msgUnprocessedOptions(), argV), argV);
         std::cout << helpHint;
         return EXIT_FAILURE;
     }
-    */
 
-    if (typeSystemFileName.isEmpty()) {
+    if (commonOptions.typeSystemFileName.isEmpty()) {
         std::cout << "You must specify a Type System file." << std::endl << helpHint;
         return EXIT_FAILURE;
     }
 
     extractor.setCppFileNames(cppFileNames);
-    extractor.setTypeSystem(typeSystemFileName);
+    extractor.setTypeSystem(commonOptions.typeSystemFileName);
 
     ApiExtractorFlags apiExtractorFlags;
     if (generators.constFirst()->usePySideExtensions())
@@ -540,12 +376,12 @@ int shibokenMain(const QStringList &argV)
             << "\n\nType datase:\n" << *TypeDatabase::instance();
     }
 
-    if (printBuiltinTypes)
+    if (commonOptions.printBuiltinTypes)
         TypeDatabase::instance()->formatBuiltinTypes(qInfo());
 
     for (const GeneratorPtr &g : std::as_const(generators)) {
-        g->setOutputDirectory(outputDirectory);
-        g->setLicenseComment(licenseComment);
+        g->setOutputDirectory(commonOptions.outputDirectory);
+        g->setLicenseComment(commonOptions.licenseComment);
         ReportHandler::startProgress("Ran "_ba + g->name() + '.');
         const bool ok = g->setup(apiOpt.value()) && g->generate();
         ReportHandler::endProgress();
@@ -556,7 +392,7 @@ int shibokenMain(const QStringList &argV)
          }
     }
 
-    if (logUnmatched)
+    if (commonOptions.logUnmatched)
         TypeDatabase::instance()->logUnmatched();
 
     const QByteArray doneMessage = ReportHandler::doneMessage();
