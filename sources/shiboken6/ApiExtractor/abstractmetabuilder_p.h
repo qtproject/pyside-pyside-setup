@@ -84,7 +84,7 @@ public:
     void traverseScopeMembers(const ScopeModelItem &item,
                               const AbstractMetaClassPtr &metaClass);
     void traverseClassMembers(const ClassModelItem &scopeItem);
-    void traverseUsingMembers(const AbstractMetaClassPtr &metaClass);
+    void traverseUsingMembers(const AbstractMetaClassPtr &metaClass) const;
     void traverseNamespaceMembers(const NamespaceModelItem &scopeItem);
     bool setupInheritance(const AbstractMetaClassPtr &metaClass);
     AbstractMetaClassPtr traverseNamespace(const FileModelItem &dom,
@@ -97,7 +97,8 @@ public:
     AbstractMetaFunctionRawPtrList classFunctionList(const ScopeModelItem &scopeItem,
                                                      AbstractMetaClass::Attributes *constructorAttributes,
                                                      const AbstractMetaClassPtr &currentClass);
-    void traverseFunctions(ScopeModelItem item, const AbstractMetaClassPtr &parent);
+    void traverseFunctions(const ScopeModelItem& item,
+                           const AbstractMetaClassPtr &parent);
     static void applyFunctionModifications(AbstractMetaFunction *func);
     void traverseFields(const ScopeModelItem &item, const AbstractMetaClassPtr &parent);
     bool traverseStreamOperator(const FunctionModelItem &functionItem,
@@ -120,7 +121,7 @@ public:
                                            const AbstractMetaClassPtr &currentClass);
     std::optional<AbstractMetaField> traverseField(const VariableModelItem &field,
                                                    const AbstractMetaClassCPtr &cls);
-    void checkFunctionModifications();
+    void checkFunctionModifications() const;
     void registerHashFunction(const FunctionModelItem &functionItem,
                               const AbstractMetaClassPtr &currentClass);
     void registerToStringCapabilityIn(const NamespaceModelItem &namespaceItem);
@@ -215,7 +216,7 @@ public:
 
     void fixSmartPointers();
 
-    AbstractMetaBuilder *q;
+    AbstractMetaBuilder *q = nullptr;
     AbstractMetaClassList m_metaClasses;
     AbstractMetaClassList m_templates;
     AbstractMetaClassList m_smartPointers;

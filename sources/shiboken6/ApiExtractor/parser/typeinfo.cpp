@@ -47,10 +47,10 @@ public:
         };
     };
 
-    ReferenceType m_referenceType;
+    ReferenceType m_referenceType = NoReference;
 };
 
-TypeInfoData::TypeInfoData() : flags(0), m_referenceType(NoReference)
+TypeInfoData::TypeInfoData() : flags(0)
 {
 }
 
@@ -98,7 +98,7 @@ TypeInfo TypeInfo::combine(const TypeInfo &__lhs, const TypeInfo &__rhs)
 
     __result.setArrayElements(__result.arrayElements() + __rhs.arrayElements());
 
-    const auto instantiations = __rhs.instantiations();
+    const auto &instantiations = __rhs.instantiations();
     for (const auto &i : instantiations)
         __result.addInstantiation(i);
 
@@ -313,7 +313,7 @@ TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, con
         for (qsizetype i = 0; i < count; ++i)
             aliasInstantiations[i] = concreteInstantiations.at(i);
         combined.setInstantiations(aliasInstantiations);
-        const CodeModelItem nextItem = __scope->model()->findItem(combined.qualifiedName(), __scope);
+        const CodeModelItem nextItem = CodeModel::findItem(combined.qualifiedName(), __scope);
         if (!nextItem)
             return combined;
         return resolveType(nextItem, combined, __scope);

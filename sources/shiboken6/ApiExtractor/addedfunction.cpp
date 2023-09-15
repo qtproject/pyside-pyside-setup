@@ -87,7 +87,7 @@ Arguments splitParameters(QStringView paramString, QString *errorMessage)
     for (const auto &t : tokens) {
         Argument argument;
         // Check defaultValue, "int @b@=5"
-        const int equalPos = t.lastIndexOf(u'=');
+        const auto equalPos = t.lastIndexOf(u'=');
         if (equalPos != -1) {
             const int defaultValuePos = equalPos + 1;
             argument.defaultValue =
@@ -95,7 +95,7 @@ Arguments splitParameters(QStringView paramString, QString *errorMessage)
         }
         QString typeString = (equalPos != -1 ? t.left(equalPos) : t).trimmed().toString();
         // Check @name@
-        const int atPos = typeString.indexOf(u'@');
+        const auto atPos = typeString.indexOf(u'@');
         if (atPos != -1) {
             const int namePos = atPos + 1;
             const int nameEndPos = typeString.indexOf(u'@', namePos);
@@ -143,16 +143,16 @@ AddedFunction::AddedFunctionPtr
     QStringView signature = QStringView{signatureIn}.trimmed();
 
     // Skip past "operator()(...)"
-    const int parenSearchStartPos = signature.startsWith(callOperator())
+    const auto parenSearchStartPos = signature.startsWith(callOperator())
         ? callOperator().size() : 0;
-    const int openParenPos = signature.indexOf(u'(', parenSearchStartPos);
+    const auto openParenPos = signature.indexOf(u'(', parenSearchStartPos);
     if (openParenPos < 0) {
         return AddedFunctionPtr(new AddedFunction(signature.toString(),
                                                   arguments, returnType));
     }
 
     const QString name = signature.left(openParenPos).trimmed().toString();
-    const int closingParenPos = signature.lastIndexOf(u')');
+    const auto closingParenPos = signature.lastIndexOf(u')');
     if (closingParenPos < 0) {
         *errorMessage = u"Missing closing parenthesis"_s;
         return {};
@@ -160,8 +160,8 @@ AddedFunction::AddedFunctionPtr
 
     // Check for "foo() const"
     bool isConst = false;
-    const int signatureLength = signature.length();
-    const int qualifierLength = signatureLength - closingParenPos - 1;
+    const auto signatureLength = signature.length();
+    const auto qualifierLength = signatureLength - closingParenPos - 1;
     if (qualifierLength >= 5
         && signature.right(qualifierLength).contains(u"const")) {
         isConst = true;

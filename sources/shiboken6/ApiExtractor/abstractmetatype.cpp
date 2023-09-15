@@ -1058,7 +1058,7 @@ void AbstractMetaType::formatDebug(QDebug &debug) const
             for (auto i : indirections)
                 debug << ' ' << TypeInfo::indirectionKeyword(i);
         }
-        if (referenceType())
+        if (referenceType() != NoReference)
             debug << ", reftype=" << referenceType();
         if (isConstant())
             debug << ", [const]";

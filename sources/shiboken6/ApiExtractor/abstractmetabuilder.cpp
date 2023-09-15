@@ -57,7 +57,7 @@ using namespace Qt::StringLiterals;
 
 static QString stripTemplateArgs(const QString &name)
 {
-    int pos = name.indexOf(u'<');
+    const auto pos = name.indexOf(u'<');
     return pos < 0 ? name : name.left(pos);
 }
 
@@ -161,7 +161,7 @@ const QHash<TypeEntryCPtr, AbstractMetaEnum> &AbstractMetaBuilder::typeEntryToEn
     return d->m_enums;
 }
 
-void AbstractMetaBuilderPrivate::checkFunctionModifications()
+void AbstractMetaBuilderPrivate::checkFunctionModifications() const
 {
     const auto &entries = TypeDatabase::instance()->entries();
 
@@ -476,7 +476,7 @@ static QStringList functionCandidates(const AbstractMetaFunctionCList &list,
                                       const QString &signature)
 {
     QString name  = signature;
-    const int parenPos = name.indexOf(u'(');
+    const auto parenPos = name.indexOf(u'(');
     if (parenPos > 0)
         name.truncate(parenPos);
     QStringList result;
@@ -602,7 +602,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     ReportHandler::startProgress("Checked for inconsistencies in typesystem ("
                                  + QByteArray::number(allEntries.size()) + ").");
     for (auto it = allEntries.cbegin(), end = allEntries.cend(); it != end; ++it) {
-        TypeEntryPtr entry = it.value();
+        const TypeEntryPtr &entry = it.value();
         if (!entry->isPrimitive()) {
             if ((entry->isValue() || entry->isObject())
                 && !types->shouldDropTypeEntry(entry->qualifiedCppName())
@@ -1025,7 +1025,7 @@ void AbstractMetaBuilderPrivate::traverseTypesystemTypedefs()
 {
     const auto &entries = TypeDatabase::instance()->typedefEntries();
     for (auto it = entries.begin(), end = entries.end(); it != end; ++it) {
-        TypedefEntryPtr te = it.value();
+        const TypedefEntryPtr &te = it.value();
         auto metaClass = std::make_shared<AbstractMetaClass>();
         metaClass->setTypeDef(true);
         metaClass->setTypeEntry(te->target());
@@ -1192,20 +1192,20 @@ void AbstractMetaBuilderPrivate::traverseClassMembers(const ClassModelItem &item
         traverseScopeMembers(item, metaClass);
 }
 
-void AbstractMetaBuilderPrivate::traverseUsingMembers(const AbstractMetaClassPtr &metaClass)
+void AbstractMetaBuilderPrivate::traverseUsingMembers(const AbstractMetaClassPtr &metaClass) const
 {
     const _CodeModelItem *item = m_classToItem.value(metaClass);
     if (item == nullptr || item->kind() != _CodeModelItem::Kind_Class)
         return;
-    auto classItem = static_cast<const _ClassModelItem *>(item);
+    const auto *classItem = static_cast<const _ClassModelItem *>(item);
     for (const auto &um : classItem->usingMembers()) {
         QString className = um.className;
-        int pos = className.indexOf(u'<'); // strip "QList<value>"
+        auto pos = className.indexOf(u'<'); // strip "QList<value>"
         if (pos != -1)
             className.truncate(pos);
         if (auto baseClass = findBaseClass(metaClass, className)) {
             QString name = um.memberName;
-            const int lastQualPos = name.lastIndexOf(u"::"_s);
+            const auto lastQualPos = name.lastIndexOf(u"::"_s);
             if (lastQualPos != -1)
                 name.remove(0, lastQualPos + 2);
             metaClass->addUsingMember({name, baseClass, um.access});
@@ -1374,7 +1374,7 @@ AbstractMetaFunctionRawPtrList
     return result;
 }
 
-void AbstractMetaBuilderPrivate::traverseFunctions(ScopeModelItem scopeItem,
+void AbstractMetaBuilderPrivate::traverseFunctions(const ScopeModelItem& scopeItem,
                                                    const AbstractMetaClassPtr &metaClass)
 {
     AbstractMetaClass::Attributes constructorAttributes;
@@ -1617,7 +1617,7 @@ bool AbstractMetaBuilderPrivate::setupInheritance(const AbstractMetaClassPtr &me
         } else {
             QString message;
             QTextStream(&message) << "Class \"" << defaultSuperclassName
-                << "\" specified as \"default-superclass\" of \"" << metaClass->name()
+                << R"(" specified as "default-superclass" of ")" << metaClass->name()
                 << "\" could not be found in the code model.";
             qCWarning(lcShiboken, "%s", qPrintable(message));
         }
@@ -1944,7 +1944,7 @@ static AbstractMetaType createViewOnType(const AbstractMetaType &metaType,
     // (std::span<T, int N>) is mapped onto a std::vector<T>,
     // remove the superfluous template parameters and strip 'const'.
     const auto vcte = std::static_pointer_cast<const ContainerTypeEntry>(viewOnTypeEntry);
-    const auto instantiations = metaType.instantiations();
+    const auto &instantiations = metaType.instantiations();
     AbstractMetaTypeList viewInstantiations;
     const auto size = std::min(vcte->templateParameterCount(), instantiations.size());
     for (qsizetype i = 0; i < size; ++i) {
@@ -3556,7 +3556,7 @@ static QList<std::shared_ptr<MetaClass> >
         QString message;
         QTextStream str(&message);
         str << "Cyclic dependency of classes found:";
-        for (auto c : result.cyclic)
+        for (const auto &c : result.cyclic)
             str << ' ' << c->name();
         str << ". Graph can be found at \"" << QDir::toNativeSeparators(tempFile.fileName()) << '"';
         qCWarning(lcShiboken, "%s", qPrintable(message));

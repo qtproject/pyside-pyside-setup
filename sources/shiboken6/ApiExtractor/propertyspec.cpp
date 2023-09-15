@@ -248,11 +248,11 @@ TypeSystemProperty QPropertySpec::typeSystemPropertyFromQ_Property(const QString
         }
     }
 
-    const int namePos = firstToken - 1;
+    const auto namePos = firstToken - 1;
     result.name = propertyTokens.at(namePos);
 
     result.type = propertyTokens.constFirst();
-    for (int pos = 1; pos < namePos; ++pos)
+    for (qsizetype pos = 1; pos < namePos; ++pos)
         result.type += u' ' + propertyTokens.at(pos);
 
     // Fix errors like "Q_PROPERTY(QXYSeries *series .." to be of type "QXYSeries*"

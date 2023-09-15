@@ -185,7 +185,6 @@ protected:
                                         const QString &argumentName);
     static void writeToCppConversion(TextStream &s,
                                      const AbstractMetaType &type,
-                                     const AbstractMetaClassCPtr &context,
                                      const QString &inArgName,
                                      const QString &outArgName);
     static void writeToCppConversion(TextStream &s,
@@ -253,14 +252,12 @@ protected:
     static QString cpythonCheckFunction(TypeEntryCPtr type);
     static QString cpythonCheckFunction(AbstractMetaType metaType);
     static QString cpythonIsConvertibleFunction(const TypeEntryCPtr &type);
-    static QString cpythonIsConvertibleFunction(AbstractMetaType metaType);
+    static QString cpythonIsConvertibleFunction(const AbstractMetaType &metaType);
     static QString cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg);
 
     static QString cpythonToCppConversionFunction(const AbstractMetaClassCPtr &metaClass) ;
-    static QString cpythonToCppConversionFunction(const AbstractMetaType &type,
-                                                  AbstractMetaClassCPtr context = {});
-    static QString cpythonToPythonConversionFunction(const AbstractMetaType &type,
-                                                     AbstractMetaClassCPtr context = {});
+    static QString cpythonToCppConversionFunction(const AbstractMetaType &type);
+    static QString cpythonToPythonConversionFunction(const AbstractMetaType &type);
     static QString cpythonToPythonConversionFunction(const AbstractMetaClassCPtr &metaClass);
     static QString cpythonToPythonConversionFunction(const TypeEntryCPtr &type);
 
