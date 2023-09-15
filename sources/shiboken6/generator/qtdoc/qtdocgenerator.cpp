@@ -1215,7 +1215,7 @@ bool QtDocGenerator::convertToRst(const QString &sourceFileName,
 }
 
 GeneratorDocumentation
-    QtDocGenerator::generatorDocumentation(const AbstractMetaClassCPtr &cppClass) const
+    QtDocGenerator::generatorDocumentation(const AbstractMetaClassCPtr &cppClass)
 {
     GeneratorDocumentation result;
     const auto allFunctions = cppClass->functions();

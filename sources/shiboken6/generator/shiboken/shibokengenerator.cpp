@@ -206,7 +206,7 @@ QString ShibokenGenerator::translateTypeForWrapperMethod(const AbstractMetaType 
     return translateType(cType, context, options);
 }
 
-bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClassCPtr &metaClass) const
+bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClassCPtr &metaClass)
 {
     const auto wrapper = metaClass->cppWrapper();
     return wrapper.testFlag(AbstractMetaClass::CppVirtualMethodWrapper)
@@ -214,8 +214,8 @@ bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClassCPtr &me
             && wrapper.testFlag(AbstractMetaClass::CppProtectedHackWrapper));
 }
 
-ShibokenGenerator::FunctionGeneration
-    ShibokenGenerator::functionGeneration(const AbstractMetaFunctionCPtr &func) const
+ShibokenGenerator::FunctionGeneration ShibokenGenerator::functionGeneration(
+    const AbstractMetaFunctionCPtr &func)
 {
     FunctionGeneration result;
 
@@ -299,7 +299,7 @@ AbstractMetaFunctionCList ShibokenGenerator::implicitConversions(const TypeEntry
     return result;
 }
 
-QString ShibokenGenerator::wrapperName(const AbstractMetaClassCPtr &metaClass) const
+QString ShibokenGenerator::wrapperName(const AbstractMetaClassCPtr &metaClass)
 {
     Q_ASSERT(shouldGenerateCppWrapper(metaClass));
     QString result = metaClass->name();
@@ -1807,8 +1807,8 @@ bool ShibokenGenerator::useOverrideCaching(const AbstractMetaClassCPtr &metaClas
     return metaClass->isPolymorphic();
 }
 
-ShibokenGenerator::AttroCheck
-    ShibokenGenerator::checkAttroFunctionNeeds(const AbstractMetaClassCPtr &metaClass) const
+ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(
+    const AbstractMetaClassCPtr &metaClass)
 {
     AttroCheck result;
     if (metaClass->typeEntry()->isSmartPointer()) {

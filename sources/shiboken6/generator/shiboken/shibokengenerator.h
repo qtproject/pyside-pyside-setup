@@ -172,7 +172,7 @@ protected:
         getMultipleInheritingClass(const AbstractMetaClassCPtr &metaClass);
 
     static bool useOverrideCaching(const AbstractMetaClassCPtr &metaClass);
-    AttroCheck checkAttroFunctionNeeds(const AbstractMetaClassCPtr &metaClass) const;
+    static AttroCheck checkAttroFunctionNeeds(const AbstractMetaClassCPtr &metaClass);
 
     /// Returns a list of methods of the given class where each one is part of
     /// a different overload with both static and non-static method.
@@ -199,15 +199,15 @@ protected:
 
     /// Verifies if the class should have a C++ wrapper generated for it,
     /// instead of only a Python wrapper.
-    bool shouldGenerateCppWrapper(const AbstractMetaClassCPtr &metaClass) const;
+    static bool shouldGenerateCppWrapper(const AbstractMetaClassCPtr &metaClass);
 
     /// Returns which functions need to be generated into the wrapper class
-    FunctionGeneration functionGeneration(const AbstractMetaFunctionCPtr &func) const;
+    static FunctionGeneration functionGeneration(const AbstractMetaFunctionCPtr &func);
 
     // Return a list of implicit conversions if generation is enabled.
     AbstractMetaFunctionCList implicitConversions(const TypeEntryCPtr &t) const;
 
-    QString wrapperName(const AbstractMetaClassCPtr &metaClass) const;
+    static QString wrapperName(const AbstractMetaClassCPtr &metaClass);
 
     static QString fullPythonClassName(const AbstractMetaClassCPtr &metaClass);
 

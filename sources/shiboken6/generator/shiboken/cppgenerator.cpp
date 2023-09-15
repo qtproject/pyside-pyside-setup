@@ -989,7 +989,7 @@ void CppGenerator::writeConstructorNative(TextStream &s, const GeneratorContext 
 }
 
 void CppGenerator::writeDestructorNative(TextStream &s,
-                                         const GeneratorContext &classContext) const
+                                         const GeneratorContext &classContext)
 {
     s << classContext.wrapperName() << "::~"
         << classContext.wrapperName() << "()\n{\n" << indent;
@@ -1170,7 +1170,7 @@ static const char PYTHON_ARGS_ARRAY[] = "pyArgArray";
 void CppGenerator::writeVirtualMethodNativeVectorCallArgs(TextStream &s,
                                                           const AbstractMetaFunctionCPtr &func,
                                                           const AbstractMetaArgumentList &arguments,
-                                                          const QList<int> &invalidateArgs) const
+                                                          const QList<int> &invalidateArgs)
 {
     Q_ASSERT(!arguments.isEmpty());
     s << "PyObject *" << PYTHON_ARGS_ARRAY <<'[' << arguments.size() << "] = {\n" << indent;
@@ -1199,7 +1199,7 @@ void CppGenerator::writeVirtualMethodNativeVectorCallArgs(TextStream &s,
 void CppGenerator::writeVirtualMethodNativeArgs(TextStream &s,
                                                 const AbstractMetaFunctionCPtr &func,
                                                 const AbstractMetaArgumentList &arguments,
-                                                const QList<int> &invalidateArgs) const
+                                                const QList<int> &invalidateArgs)
 {
     s << "Shiboken::AutoDecRef " << PYTHON_ARGS << '(';
     if (arguments.isEmpty()) {
@@ -2052,7 +2052,7 @@ void CppGenerator::writeSmartPointerConverterFunctions(TextStream &s,
     }
 }
 
-bool CppGenerator::needsArgumentErrorHandling(const OverloadData &overloadData) const
+bool CppGenerator::needsArgumentErrorHandling(const OverloadData &overloadData)
 {
     if (overloadData.maxArgs() > 0)
         return true;
@@ -2064,9 +2064,10 @@ bool CppGenerator::needsArgumentErrorHandling(const OverloadData &overloadData) 
         && isQObject(rfunc->ownerClass());
 }
 
-void CppGenerator::writeMethodWrapperPreamble(TextStream &s,const OverloadData &overloadData,
+void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
+                                              const OverloadData &overloadData,
                                               const GeneratorContext &context,
-                                              ErrorReturn errorReturn) const
+                                              ErrorReturn errorReturn)
 {
     const auto rfunc = overloadData.referenceFunction();
     const auto ownerClass = rfunc->targetLangOwner();
@@ -2504,7 +2505,7 @@ void CppGenerator::writeSmartPointerCppSelfDefinition(TextStream &s,
 void CppGenerator::writeCppSelfDefinition(TextStream &s,
                                           const GeneratorContext &context,
                                           ErrorReturn errorReturn,
-                                          CppSelfDefinitionFlags flags) const
+                                          CppSelfDefinitionFlags flags)
 {
     Q_ASSERT(!(flags.testFlag(CppSelfAsReference) && flags.testFlag(HasStaticOverload)));
     if (context.forSmartPointer()) {
@@ -2556,7 +2557,7 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
                                           const AbstractMetaFunctionCPtr &func,
                                           const GeneratorContext &context,
                                           ErrorReturn errorReturn,
-                                          CppSelfDefinitionFlags flags) const
+                                          CppSelfDefinitionFlags flags)
 {
     if (!func->ownerClass() || func->isConstructor())
         return;
@@ -3614,9 +3615,11 @@ static bool forceQObjectNamedArguments(const AbstractMetaFunctionCPtr &func)
         || name == u"QSplitterHandle" || name == u"QSizeGrip";
 }
 
-void CppGenerator::writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                                                bool usePyArgs, const OverloadData &overloadData,
-                                                ErrorReturn errorReturn) const
+void CppGenerator::writeNamedArgumentResolution(TextStream &s,
+                                                const AbstractMetaFunctionCPtr &func,
+                                                bool usePyArgs,
+                                                const OverloadData &overloadData,
+                                                ErrorReturn errorReturn)
 {
     const AbstractMetaArgumentList &args = OverloadData::getArgumentsWithDefaultValues(func);
     const bool hasDefaultArguments = !args.isEmpty();
@@ -4315,7 +4318,8 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const Abstrac
     s << outdent << "}\n";
 }
 
-QString CppGenerator::writeContainerConverterInitialization(TextStream &s, const AbstractMetaType &type) const
+QString CppGenerator::writeContainerConverterInitialization(TextStream &s,
+                                                            const AbstractMetaType &type)
 {
     QByteArray cppSignature = QMetaObject::normalizedSignature(type.cppSignature().toUtf8());
     s << "// Register converter for type '" << cppSignature << "'.\n";
@@ -4423,7 +4427,7 @@ bool CppGenerator::supportsMappingProtocol(const AbstractMetaClassCPtr &metaClas
     return false;
 }
 
-bool CppGenerator::supportsNumberProtocol(const AbstractMetaClassCPtr &metaClass) const
+bool CppGenerator::supportsNumberProtocol(const AbstractMetaClassCPtr &metaClass)
 {
     return metaClass->hasArithmeticOperatorOverload()
             || metaClass->hasIncDecrementOperatorOverload()
@@ -4443,7 +4447,7 @@ bool CppGenerator::supportsSequenceProtocol(const AbstractMetaClassCPtr &metaCla
     return baseType && baseType->isContainer();
 }
 
-bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClassCPtr &metaClass) const
+bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClassCPtr &metaClass)
 {
     for (const AbstractMetaField &f : metaClass->fields()) {
         if (!f.isStatic())
@@ -4842,7 +4846,7 @@ void CppGenerator::writeTpClearFunction(TextStream &s, const AbstractMetaClassCP
        << outdent << "}\n";
 }
 
-void CppGenerator::writeCopyFunction(TextStream &s, const GeneratorContext &context) const
+void CppGenerator::writeCopyFunction(TextStream &s, const GeneratorContext &context)
 {
     const auto metaClass = context.metaClass();
     const QString className = chopType(cpythonTypeName(metaClass));
@@ -4869,7 +4873,7 @@ static inline void writeGetterFunctionStart(TextStream &s, const QString &funcNa
 }
 
 QString CppGenerator::cppFieldAccess(const AbstractMetaField &metaField,
-                                     const GeneratorContext &context) const
+                                     const GeneratorContext &context)
 {
     QString result;
     QTextStream str(&result);
@@ -4883,7 +4887,7 @@ QString CppGenerator::cppFieldAccess(const AbstractMetaField &metaField,
 
 void CppGenerator::writeGetterFunction(TextStream &s,
                                        const AbstractMetaField &metaField,
-                                       const GeneratorContext &context) const
+                                       const GeneratorContext &context)
 {
     writeGetterFunctionStart(s, cpythonGetterFunctionName(metaField));
 
@@ -4957,8 +4961,9 @@ void CppGenerator::writeGetterFunction(TextStream &s,
 }
 
 // Write a getter for QPropertySpec
-void CppGenerator::writeGetterFunction(TextStream &s, const QPropertySpec &property,
-                                       const GeneratorContext &context) const
+void CppGenerator::writeGetterFunction(TextStream &s,
+                                       const QPropertySpec &property,
+                                       const GeneratorContext &context)
 {
     writeGetterFunctionStart(s, cpythonGetterFunctionName(property, context.metaClass()));
     writeCppSelfDefinition(s, context);
@@ -4972,10 +4977,11 @@ void CppGenerator::writeGetterFunction(TextStream &s, const QPropertySpec &prope
 }
 
 // Write setter function preamble (type checks on "pyIn")
-void CppGenerator::writeSetterFunctionPreamble(TextStream &s, const QString &name,
+void CppGenerator::writeSetterFunctionPreamble(TextStream &s,
+                                               const QString &name,
                                                const QString &funcName,
                                                const AbstractMetaType &type,
-                                               const GeneratorContext &context) const
+                                               const GeneratorContext &context)
 {
     s << "static int " << funcName << "(PyObject *self, PyObject *pyIn, void *)\n"
         << "{\n" << indent;
@@ -4999,7 +5005,7 @@ void CppGenerator::writeSetterFunctionPreamble(TextStream &s, const QString &nam
 
 void CppGenerator::writeSetterFunction(TextStream &s,
                                        const AbstractMetaField &metaField,
-                                       const GeneratorContext &context) const
+                                       const GeneratorContext &context)
 {
     const AbstractMetaType &fieldType = metaField.type();
     writeSetterFunctionPreamble(s, metaField.name(), cpythonSetterFunctionName(metaField),
@@ -5031,10 +5037,12 @@ void CppGenerator::writeSetterFunction(TextStream &s,
 }
 
 // Write a setter for QPropertySpec
-void CppGenerator::writeSetterFunction(TextStream &s, const QPropertySpec &property,
-                                       const GeneratorContext &context) const
+void CppGenerator::writeSetterFunction(TextStream &s,
+                                       const QPropertySpec &property,
+                                       const GeneratorContext &context)
 {
-    writeSetterFunctionPreamble(s, property.name(),
+    writeSetterFunctionPreamble(s,
+                                property.name(),
                                 cpythonSetterFunctionName(property, context.metaClass()),
                                 property.type(), context);
 
@@ -5048,7 +5056,7 @@ void CppGenerator::writeSetterFunction(TextStream &s, const QPropertySpec &prope
 
 void CppGenerator::writeRichCompareFunctionHeader(TextStream &s,
                                                   const QString &baseName,
-                                                  const GeneratorContext &context) const
+                                                  const GeneratorContext &context)
 {
     s << "static PyObject * ";
     s << baseName << "_richcompare(PyObject *self, PyObject *" << PYTHON_ARG
@@ -5405,7 +5413,7 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
     }
 }
 
-void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList &enums) const
+void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList &enums)
 {
     if (enums.isEmpty())
         return;
@@ -5437,7 +5445,7 @@ static qsizetype maxLineLength(const QStringList &list)
     return result;
 }
 
-bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum &cppEnum) const
+bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum &cppEnum)
 {
     const auto enclosingClass = cppEnum.targetLangEnclosingClass();
     const bool hasUpperEnclosingClass = enclosingClass
@@ -5645,7 +5653,7 @@ void CppGenerator::writeSignatureStrings(TextStream &s,
 
 // Return the class name for which to invoke the destructor
 QString CppGenerator::destructorClassName(const AbstractMetaClassCPtr &metaClass,
-                                          const GeneratorContext &classContext) const
+                                          const GeneratorContext &classContext)
 {
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor())
         return {};
@@ -6002,7 +6010,7 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s,
 }
 
 void CppGenerator::writeSetattroDefinition(TextStream &s,
-                                           const AbstractMetaClassCPtr &metaClass) const
+                                           const AbstractMetaClassCPtr &metaClass)
 {
     s << "static int " << ShibokenGenerator::cpythonSetattroFunctionName(metaClass)
         << "(PyObject *self, PyObject *name, PyObject *value)\n{\n" << indent;
@@ -6073,7 +6081,7 @@ static QString smartPointerGetter(const GeneratorContext &context)
 }
 
 void CppGenerator::writeSmartPointerSetattroFunction(TextStream &s,
-                                                     const GeneratorContext &context) const
+                                                     const GeneratorContext &context)
 {
     Q_ASSERT(context.forSmartPointer());
     writeSetattroDefinition(s, context.metaClass());
@@ -6230,7 +6238,7 @@ void CppGenerator::writeNbBoolExpression(TextStream &s, const BoolCastFunction &
 
 void CppGenerator::writeNbBoolFunction(const GeneratorContext &context,
                                        const BoolCastFunction &f,
-                                       TextStream &s) const
+                                       TextStream &s)
 {
     s << "static int " << cpythonBaseName(context.metaClass()) << "___nb_bool(PyObject *self)\n"
       << "{\n" << indent;
@@ -6839,7 +6847,7 @@ void CppGenerator::writeReturnValueHeuristics(TextStream &s, const AbstractMetaF
     }
 }
 
-void CppGenerator::writeHashFunction(TextStream &s, const GeneratorContext &context) const
+void CppGenerator::writeHashFunction(TextStream &s, const GeneratorContext &context)
 {
     const auto metaClass = context.metaClass();
     const char hashType[] = "Py_hash_t";
@@ -6934,7 +6942,7 @@ void CppGenerator::writeIndexError(TextStream &s, const QString &errorMsg,
 
 QString CppGenerator::writeReprFunction(TextStream &s,
                                         const GeneratorContext &context,
-                                        uint indirections) const
+                                        uint indirections)
 {
     const auto metaClass = context.metaClass();
     QString funcName = cpythonBaseName(metaClass) + reprFunction();
