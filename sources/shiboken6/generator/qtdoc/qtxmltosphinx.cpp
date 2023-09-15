@@ -439,7 +439,7 @@ void QtXmlToSphinx::pushOutputBuffer()
 QString QtXmlToSphinx::popOutputBuffer()
 {
     Q_ASSERT(!m_buffers.isEmpty());
-    QString result(*m_buffers.top().get());
+    QString result(*m_buffers.top());
     m_buffers.pop();
     m_output.setString(m_buffers.isEmpty() ? nullptr : m_buffers.top().get());
     return result;
@@ -704,7 +704,7 @@ QString QtXmlToSphinx::readFromLocation(const QString &location, const QString &
         QTextStream(errorMessage) << "Could not read code snippet file: "
             << QDir::toNativeSeparators(inputFile.fileName())
             << ": " << inputFile.errorString();
-        return QString(); // null
+        return {}; // null
     }
 
     QString code = u""_s; // non-null
@@ -1218,10 +1218,10 @@ static QString fixLinkText(const QtXmlToSphinxLink *linkContext,
     else
          QtXmlToSphinx::stripPythonQualifiers(&linktext);
     if (linkContext->linkRef == linktext)
-        return QString();
+         return {};
     if ((linkContext->type & QtXmlToSphinxLink::FunctionMask) != 0
         && (linkContext->linkRef + u"()"_s) == linktext) {
-        return QString();
+        return {};
     }
     return  linktext;
 }
@@ -1249,7 +1249,7 @@ static bool copyImage(const QString &href, const QString &docDataDir,
                       const QLoggingCategory &lc, QString *errorMessage)
 {
     const QChar slash = u'/';
-    const int lastSlash = href.lastIndexOf(slash);
+    const auto lastSlash = href.lastIndexOf(slash);
     const QString imagePath = lastSlash != -1 ? href.left(lastSlash) : QString();
     const QString imageFileName = lastSlash != -1 ? href.right(href.size() - lastSlash - 1) : href;
     QFileInfo imageSource(docDataDir + slash + href);
@@ -1262,7 +1262,7 @@ static bool copyImage(const QString &href, const QString &docDataDir,
     // FIXME: Not perfect yet, should have knowledge about namespaces (DataVis3D) or
     // nested classes "Pyside2.QtGui.QTouchEvent.QTouchPoint".
     QString relativeTargetDir = context;
-    const int lastDot = relativeTargetDir.lastIndexOf(u'.');
+    const auto lastDot = relativeTargetDir.lastIndexOf(u'.');
     if (lastDot != -1)
         relativeTargetDir.truncate(lastDot);
     relativeTargetDir.replace(u'.', slash);
@@ -1329,7 +1329,7 @@ void QtXmlToSphinx::handleInlineImageTag(QXmlStreamReader& reader)
     // enclosed by '|' and define it further down. Determine tag from the base
     //file name with number.
     QString tag = href;
-    int pos = tag.lastIndexOf(u'/');
+    auto pos = tag.lastIndexOf(u'/');
     if (pos != -1)
         tag.remove(0, pos + 1);
     pos = tag.indexOf(u'.');
@@ -1589,13 +1589,11 @@ void QtXmlToSphinx::Table::format(TextStream& s) const
         // print line
         s << '+';
         for (qsizetype col = 0; col < headerColumnCount; ++col) {
-            char c;
+            char c = '-';
             if (col >= row.size() || row[col].rowSpan == -1)
                 c = ' ';
             else if (i == 1 && hasHeader())
                 c = '=';
-            else
-                c = '-';
             s << Pad(c, colWidths.at(col)) << '+';
         }
         s << '\n';

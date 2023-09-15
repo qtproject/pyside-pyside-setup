@@ -191,7 +191,7 @@ QDebug operator<<(QDebug d, const AbstractMetaArgument *aa)
     d.noquote();
     d.nospace();
     d << "AbstractMetaArgument(";
-    if (aa)
+    if (aa != nullptr)
         d << aa->toString();
     else
         d << '0';

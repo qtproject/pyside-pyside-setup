@@ -30,9 +30,11 @@ QString getFilteredCppSignatureString(QString signature);
  *   you must subclass this to create your own generators.
  */
 class Generator
-{
+{;
 public:
-    /// Optiosn used around the generator code
+    Q_DISABLE_COPY_MOVE(Generator)
+
+    /// Options used around the generator code
     enum Option {
         NoOption                 = 0x00000000,
         ExcludeConst             = 0x00000001,

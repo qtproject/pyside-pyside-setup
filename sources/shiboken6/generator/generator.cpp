@@ -528,8 +528,7 @@ std::optional<DefaultValue>
     for (auto it = candidates.cbegin(), end = candidates.cend(); it != end; ++it) {
         const AbstractMetaArgumentList &arguments = it.value()->arguments();
         QStringList args;
-        for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
-            const AbstractMetaArgument &arg = arguments.at(i);
+        for (const auto &arg : arguments) {
             if (arg.hasModifiedDefaultValueExpression()) {
                 args << arg.defaultValueExpression(); // Spell out modified values
                 break;

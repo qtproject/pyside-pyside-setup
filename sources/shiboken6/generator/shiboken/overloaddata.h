@@ -46,7 +46,7 @@ public:
     AbstractMetaFunctionCPtr getFunctionWithDefaultValue() const;
 
     /// Returns the nearest occurrence, including this instance, of an argument with a default value.
-    const OverloadDataRootNode *findNextArgWithDefault();
+    const OverloadDataRootNode *findNextArgWithDefault() const;
     bool isFinalOccurrence(const AbstractMetaFunctionCPtr &func) const;
 
     int functionNumber(const AbstractMetaFunctionCPtr &func) const;

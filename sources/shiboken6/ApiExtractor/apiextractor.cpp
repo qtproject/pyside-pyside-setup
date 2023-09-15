@@ -669,7 +669,7 @@ ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(Instantiation
 
     // The list of inner classes might be extended when smart pointer
     // instantiations are specified to be in namespaces.
-    auto &innerClasses = metaClass->innerClasses();
+    const auto &innerClasses = metaClass->innerClasses();
     for (auto i = innerClasses.size() - 1; i >= 0; --i) {
          const auto innerClass = innerClasses.at(i);
          if (!innerClass->typeEntry()->isSmartPointer())
@@ -759,7 +759,7 @@ void ApiExtractorPrivate::collectContainerTypesFromSnippets(InstantiationCollect
     const ContainerTypeEntryCList &containerTypeList = td->containerTypes();
     for (const auto &type : containerTypeList)
         getCode(snips, type);
-    for (auto metaClass : m_builder->classes())
+    for (const auto &metaClass : m_builder->classes())
         getCode(snips, metaClass->typeEntry());
 
     const auto moduleEntry = td->defaultTypeSystemType();
@@ -781,8 +781,8 @@ ApiExtractorPrivate::collectContainerTypesFromConverterMacros(InstantiationColle
                                                               bool toPythonMacro)
 {
     QString convMacro = toPythonMacro ? u"%CONVERTTOPYTHON["_s : u"%CONVERTTOCPP["_s;
-    int offset = toPythonMacro ? sizeof("%CONVERTTOPYTHON") : sizeof("%CONVERTTOCPP");
-    int start = 0;
+    const qsizetype offset = toPythonMacro ? sizeof("%CONVERTTOPYTHON") : sizeof("%CONVERTTOCPP");
+    qsizetype start = 0;
     QString errorMessage;
     while ((start = code.indexOf(convMacro, start)) != -1) {
         int end = code.indexOf(u']', start);

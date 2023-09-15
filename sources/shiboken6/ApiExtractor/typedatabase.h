@@ -141,7 +141,7 @@ public:
                                const ComplexTypeEntryCPtr &source);
 
     FlagsTypeEntryPtr findFlagsType(const QString &name) const;
-    void addFlagsType(FlagsTypeEntryPtr fte);
+    void addFlagsType(const FlagsTypeEntryPtr &fte);
 
     TemplateEntryPtr findTemplate(const QString &name) const;
 
@@ -184,7 +184,7 @@ public:
 
     bool shouldDropTypeEntry(const QString &fullTypeName) const;
 
-    void setDropTypeEntries(QStringList dropTypeEntries);
+    void setDropTypeEntries(const QStringList &dropTypeEntries);
 
     QString modifiedTypesystemFilepath(const QString &tsFile, const QString &currentPath = QString()) const;
 

@@ -140,7 +140,7 @@ static inline QVersionNumber versionOf(const TypeEntryCPtr &te)
         if (!version.isNull() && version > QVersionNumber(0, 0))
             return version;
     }
-    return QVersionNumber();
+    return {};
 }
 
 // Format a documentation reference (meth/attr): ":meth:`name<target>`"
@@ -1268,7 +1268,7 @@ GeneratorDocumentation
 // QtXmlToSphinxDocGeneratorInterface
 QString QtDocGenerator::expandFunction(const QString &function) const
 {
-    const int firstDot = function.indexOf(u'.');
+    const auto firstDot = function.indexOf(u'.');
     AbstractMetaClassCPtr metaClass;
     if (firstDot != -1) {
         const auto className = QStringView{function}.left(firstDot);
