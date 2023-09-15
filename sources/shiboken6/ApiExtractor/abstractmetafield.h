@@ -26,8 +26,8 @@ public:
     AbstractMetaField();
     AbstractMetaField(const AbstractMetaField &);
     AbstractMetaField &operator=(const AbstractMetaField &);
-    AbstractMetaField(AbstractMetaField &&);
-    AbstractMetaField &operator=(AbstractMetaField &&);
+    AbstractMetaField(AbstractMetaField &&) noexcept;
+    AbstractMetaField &operator=(AbstractMetaField &&) noexcept;
     ~AbstractMetaField();
 
     FieldModificationList modifications() const;

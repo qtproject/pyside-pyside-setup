@@ -32,8 +32,8 @@ AbstractMetaEnumValue::AbstractMetaEnumValue() :
 
 AbstractMetaEnumValue::AbstractMetaEnumValue(const AbstractMetaEnumValue &) = default;
 AbstractMetaEnumValue &AbstractMetaEnumValue::operator=(const AbstractMetaEnumValue &) = default;
-AbstractMetaEnumValue::AbstractMetaEnumValue(AbstractMetaEnumValue &&) = default;
-AbstractMetaEnumValue &AbstractMetaEnumValue::operator=(AbstractMetaEnumValue &&) = default;
+AbstractMetaEnumValue::AbstractMetaEnumValue(AbstractMetaEnumValue &&) noexcept = default;
+AbstractMetaEnumValue &AbstractMetaEnumValue::operator=(AbstractMetaEnumValue &&) noexcept = default;
 AbstractMetaEnumValue::~AbstractMetaEnumValue() = default;
 
 EnumValue AbstractMetaEnumValue::value() const
@@ -119,8 +119,8 @@ AbstractMetaEnum::AbstractMetaEnum() : d(new AbstractMetaEnumData)
 
 AbstractMetaEnum::AbstractMetaEnum(const AbstractMetaEnum &) = default;
 AbstractMetaEnum &AbstractMetaEnum::operator=(const AbstractMetaEnum&) = default;
-AbstractMetaEnum::AbstractMetaEnum(AbstractMetaEnum &&) = default;
-AbstractMetaEnum &AbstractMetaEnum::operator=(AbstractMetaEnum &&) = default;
+AbstractMetaEnum::AbstractMetaEnum(AbstractMetaEnum &&) noexcept = default;
+AbstractMetaEnum &AbstractMetaEnum::operator=(AbstractMetaEnum &&) noexcept = default;
 AbstractMetaEnum::~AbstractMetaEnum() = default;
 
 const AbstractMetaEnumValueList &AbstractMetaEnum::values() const

@@ -33,8 +33,8 @@ public:
                            const AbstractMetaType &type);
     QPropertySpec(const QPropertySpec &);
     QPropertySpec &operator=(const QPropertySpec &);
-    QPropertySpec(QPropertySpec &&);
-    QPropertySpec &operator=(QPropertySpec &&);
+    QPropertySpec(QPropertySpec &&) noexcept;
+    QPropertySpec &operator=(QPropertySpec &&) noexcept;
     ~QPropertySpec();
 
     static TypeSystemProperty typeSystemPropertyFromQ_Property(const QString &declarationIn,

@@ -28,8 +28,8 @@ public:
     AbstractMetaEnumValue();
     AbstractMetaEnumValue(const AbstractMetaEnumValue &);
     AbstractMetaEnumValue &operator=(const AbstractMetaEnumValue &);
-    AbstractMetaEnumValue(AbstractMetaEnumValue &&);
-    AbstractMetaEnumValue &operator=(AbstractMetaEnumValue &&);
+    AbstractMetaEnumValue(AbstractMetaEnumValue &&) noexcept;
+    AbstractMetaEnumValue &operator=(AbstractMetaEnumValue &&) noexcept;
     ~AbstractMetaEnumValue();
 
     EnumValue value() const;
@@ -57,8 +57,8 @@ public:
     AbstractMetaEnum();
     AbstractMetaEnum(const AbstractMetaEnum &);
     AbstractMetaEnum &operator=(const AbstractMetaEnum &);
-    AbstractMetaEnum(AbstractMetaEnum &&);
-    AbstractMetaEnum &operator=(AbstractMetaEnum &&);
+    AbstractMetaEnum(AbstractMetaEnum &&) noexcept;
+    AbstractMetaEnum &operator=(AbstractMetaEnum &&) noexcept;
     ~AbstractMetaEnum();
 
     const AbstractMetaEnumValueList &values() const;

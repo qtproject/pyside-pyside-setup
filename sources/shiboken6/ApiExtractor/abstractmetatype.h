@@ -50,8 +50,8 @@ public:
     explicit AbstractMetaType(const TypeEntryCPtr &t);
     AbstractMetaType(const AbstractMetaType &);
     AbstractMetaType &operator=(const AbstractMetaType &);
-    AbstractMetaType(AbstractMetaType &&);
-    AbstractMetaType &operator=(AbstractMetaType &&);
+    AbstractMetaType(AbstractMetaType &&) noexcept;
+    AbstractMetaType &operator=(AbstractMetaType &&) noexcept;
     ~AbstractMetaType();
 
     QString package() const;

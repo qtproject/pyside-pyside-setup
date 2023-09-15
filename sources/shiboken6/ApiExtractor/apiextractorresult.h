@@ -31,8 +31,8 @@ public:
     ApiExtractorResult();
     ApiExtractorResult(const ApiExtractorResult &);
     ApiExtractorResult &operator=(const ApiExtractorResult &);
-    ApiExtractorResult(ApiExtractorResult &&);
-    ApiExtractorResult &operator=(ApiExtractorResult &&);
+    ApiExtractorResult(ApiExtractorResult &&) noexcept;
+    ApiExtractorResult &operator=(ApiExtractorResult &&) noexcept;
     ~ApiExtractorResult();
 
     const AbstractMetaEnumList &globalEnums() const;

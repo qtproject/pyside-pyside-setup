@@ -38,9 +38,9 @@ AbstractMetaArgument::AbstractMetaArgument(const AbstractMetaArgument &) = defau
 
 AbstractMetaArgument &AbstractMetaArgument::operator=(const AbstractMetaArgument &) = default;
 
-AbstractMetaArgument::AbstractMetaArgument(AbstractMetaArgument &&) = default;
+AbstractMetaArgument::AbstractMetaArgument(AbstractMetaArgument &&) noexcept = default;
 
-AbstractMetaArgument &AbstractMetaArgument::operator=(AbstractMetaArgument &&) = default;
+AbstractMetaArgument &AbstractMetaArgument::operator=(AbstractMetaArgument &&) noexcept = default;
 
 const AbstractMetaType &AbstractMetaArgument::type() const
 {
