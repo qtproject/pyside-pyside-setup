@@ -58,21 +58,22 @@ private:
     static void writeCacheResetNative(TextStream &s, const GeneratorContext &classContext);
     void writeConstructorNative(TextStream &s, const GeneratorContext &classContext,
                                 const AbstractMetaFunctionCPtr &func) const;
-    void writeDestructorNative(TextStream &s, const GeneratorContext &classContext) const;
+    static void writeDestructorNative(TextStream &s, const GeneratorContext &classContext);
 
     QString getVirtualFunctionReturnTypeName(const AbstractMetaFunctionCPtr &func) const;
     static QPair<QString, QChar>
         virtualMethodNativeArg(const AbstractMetaFunctionCPtr &func,
                                const AbstractMetaArgument &arg);
-    void writeVirtualMethodNativeVectorCallArgs(TextStream &s,
-                                                const AbstractMetaFunctionCPtr &func,
-                                                const AbstractMetaArgumentList &arguments,
-                                                const QList<int> &invalidateArgs) const;
-    void writeVirtualMethodNativeArgs(TextStream &s,
-                                      const AbstractMetaFunctionCPtr &func,
-                                      const AbstractMetaArgumentList &arguments,
-                                      const QList<int> &invalidateArgs) const;
-    void writeVirtualMethodNative(TextStream &s, const AbstractMetaFunctionCPtr &func,
+    static void writeVirtualMethodNativeVectorCallArgs(TextStream &s,
+                                                       const AbstractMetaFunctionCPtr &func,
+                                                       const AbstractMetaArgumentList &arguments,
+                                                       const QList<int> &invalidateArgs);
+    static void writeVirtualMethodNativeArgs(TextStream &s,
+                                             const AbstractMetaFunctionCPtr &func,
+                                             const AbstractMetaArgumentList &arguments,
+                                             const QList<int> &invalidateArgs);
+    void writeVirtualMethodNative(TextStream &s,
+                                  const AbstractMetaFunctionCPtr &func,
                                   int cacheIndex) const;
     void writeVirtualMethodCppCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    const QString &funcName, const QList<CodeSnip> &snips,
@@ -117,11 +118,13 @@ private:
     void writeSmartPointerConverterFunctions(TextStream &s,
                                              const AbstractMetaType &smartPointerType) const;
 
-    bool needsArgumentErrorHandling(const OverloadData &overloadData) const;
-    void writeMethodWrapperPreamble(TextStream &s, const OverloadData &overloadData,
-                                    const GeneratorContext &context,
-                                    ErrorReturn errorReturn = ErrorReturn::Default) const;
-    void writeConstructorWrapper(TextStream &s, const OverloadData &overloadData,
+    static bool needsArgumentErrorHandling(const OverloadData &overloadData);
+    static void writeMethodWrapperPreamble(TextStream &s,
+                                           const OverloadData &overloadData,
+                                           const GeneratorContext &context,
+                                           ErrorReturn errorReturn = ErrorReturn::Default);
+    void writeConstructorWrapper(TextStream &s,
+                                 const OverloadData &overloadData,
                                  const GeneratorContext &classContext) const;
     void writeMethodWrapper(TextStream &s, const OverloadData &overloadData,
                             const GeneratorContext &classContext) const;
@@ -141,17 +144,18 @@ private:
                                                    const GeneratorContext &,
                                                    ErrorReturn errorReturn = ErrorReturn::Default,
                                                    CppSelfDefinitionFlags flags = {});
-    void writeCppSelfDefinition(TextStream &s,
-                                const AbstractMetaFunctionCPtr &func,
-                                const GeneratorContext &context,
-                                ErrorReturn errorReturn = ErrorReturn::Default,
-                                CppSelfDefinitionFlags flags = {}) const;
-    void writeCppSelfDefinition(TextStream &s,
-                                const GeneratorContext &context,
-                                ErrorReturn errorReturn = ErrorReturn::Default,
-                                CppSelfDefinitionFlags flags = {}) const;
+    static void writeCppSelfDefinition(TextStream &s,
+                                       const AbstractMetaFunctionCPtr &func,
+                                       const GeneratorContext &context,
+                                       ErrorReturn errorReturn = ErrorReturn::Default,
+                                       CppSelfDefinitionFlags flags = {});
+    static void writeCppSelfDefinition(TextStream &s,
+                                       const GeneratorContext &context,
+                                       ErrorReturn errorReturn = ErrorReturn::Default,
+                                       CppSelfDefinitionFlags flags = {});
 
-    static void writeErrorSection(TextStream &s, const OverloadData &overloadData,
+    static void writeErrorSection(TextStream &s,
+                                  const OverloadData &overloadData,
                                   ErrorReturn errorReturn);
 
     static QString returnErrorWrongArguments(const OverloadData &overloadData,
@@ -176,11 +180,12 @@ private:
     static void writeTypeDiscoveryFunction(TextStream &s,
                                            const AbstractMetaClassCPtr &metaClass);
 
-    void writeSetattroDefinition(TextStream &s, const AbstractMetaClassCPtr &metaClass) const;
+    static void writeSetattroDefinition(TextStream &s, const AbstractMetaClassCPtr &metaClass);
     static void writeSetattroDefaultReturn(TextStream &s);
-    void writeSmartPointerSetattroFunction(TextStream &s,
-                                           const GeneratorContext &context) const;
-    void writeSetattroFunction(TextStream &s, AttroCheck attroCheck,
+    static void writeSmartPointerSetattroFunction(TextStream &s,
+                                                  const GeneratorContext &context);
+    void writeSetattroFunction(TextStream &s,
+                               AttroCheck attroCheck,
                                const GeneratorContext &context) const;
     static void writeGetattroDefinition(TextStream &s, const AbstractMetaClassCPtr &metaClass);
     static void writeSmartPointerGetattroFunction(TextStream &s,
@@ -190,11 +195,10 @@ private:
                                const GeneratorContext &context) const;
     QString qObjectGetAttroFunction() const;
 
-    void writeNbBoolFunction(const GeneratorContext &context,
-                             const BoolCastFunction &f,
-                             TextStream &s) const;
-    static void writeNbBoolExpression(TextStream &s, const BoolCastFunction &f,
-                                      bool invert = false);
+    static void writeNbBoolFunction(const GeneratorContext &context,
+                                    const BoolCastFunction &f,
+                                    TextStream &s);
+    static void writeNbBoolExpression(TextStream &s, const BoolCastFunction &f, bool invert = false);
 
     /**
      *   Writes Python to C++ conversions for arguments on Python wrappers.
@@ -344,9 +348,11 @@ private:
                                               const QString &pythonToCppFunc,
                                               const QString &isConvertibleFunc);
 
-    void writeNamedArgumentResolution(TextStream &s, const AbstractMetaFunctionCPtr &func,
-                                      bool usePyArgs, const OverloadData &overloadData,
-                                      ErrorReturn errorReturn) const;
+    static void writeNamedArgumentResolution(TextStream &s,
+                                             const AbstractMetaFunctionCPtr &func,
+                                             bool usePyArgs,
+                                             const OverloadData &overloadData,
+                                             ErrorReturn errorReturn);
 
     /// Returns a string containing the name of an argument for the given function and argument index.
     static QString argumentNameFromIndex(const ApiExtractorResult &api,
@@ -374,8 +380,8 @@ private:
                             const AbstractMetaClassCPtr &metaClass,
                             const GeneratorContext &classContext,
                             const QString &signatures) const;
-    QString destructorClassName(const AbstractMetaClassCPtr &metaClass,
-                                const GeneratorContext &classContext) const;
+    static QString destructorClassName(const AbstractMetaClassCPtr &metaClass,
+                                       const GeneratorContext &classContext);
     static void writeStaticFieldInitialization(TextStream &s,
                                                const AbstractMetaClassCPtr &metaClass);
     void writeClassDefinition(TextStream &s,
@@ -405,36 +411,36 @@ private:
     static void writeTpTraverseFunction(TextStream &s, const AbstractMetaClassCPtr &metaClass);
     static void writeTpClearFunction(TextStream &s, const AbstractMetaClassCPtr &metaClass);
 
-    void writeCopyFunction(TextStream &s, const GeneratorContext &context) const;
+    static void writeCopyFunction(TextStream &s, const GeneratorContext &context);
 
-    QString cppFieldAccess(const AbstractMetaField &metaField,
-                           const GeneratorContext &context) const;
-    void writeGetterFunction(TextStream &s,
-                             const AbstractMetaField &metaField,
-                             const GeneratorContext &context) const;
-    void writeGetterFunction(TextStream &s,
-                             const QPropertySpec &property,
-                             const GeneratorContext &context) const;
-    void writeSetterFunctionPreamble(TextStream &s,
-                                     const QString &name,
-                                     const QString &funcName,
-                                     const AbstractMetaType &type,
-                                     const GeneratorContext &context) const;
-    void writeSetterFunction(TextStream &s,
-                             const AbstractMetaField &metaField,
-                             const GeneratorContext &context) const;
-    void writeSetterFunction(TextStream &s,
-                             const QPropertySpec &property,
-                             const GeneratorContext &context) const;
+    static QString cppFieldAccess(const AbstractMetaField &metaField,
+                                  const GeneratorContext &context);
+    static void writeGetterFunction(TextStream &s,
+                                    const AbstractMetaField &metaField,
+                                    const GeneratorContext &context);
+    static void writeGetterFunction(TextStream &s,
+                                    const QPropertySpec &property,
+                                    const GeneratorContext &context);
+    static void writeSetterFunctionPreamble(TextStream &s,
+                                            const QString &name,
+                                            const QString &funcName,
+                                            const AbstractMetaType &type,
+                                            const GeneratorContext &context);
+    static void writeSetterFunction(TextStream &s,
+                                    const AbstractMetaField &metaField,
+                                    const GeneratorContext &context);
+    static void writeSetterFunction(TextStream &s,
+                                    const QPropertySpec &property,
+                                    const GeneratorContext &context);
 
-    void writeRichCompareFunctionHeader(TextStream &s,
-                                        const QString &baseName,
-                                        const GeneratorContext &context) const;
+    static void writeRichCompareFunctionHeader(TextStream &s,
+                                               const QString &baseName,
+                                               const GeneratorContext &context);
     void writeRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
     void writeSmartPointerRichCompareFunction(TextStream &s, const GeneratorContext &context) const;
 
-    void writeEnumsInitialization(TextStream &s, AbstractMetaEnumList &enums) const;
-    bool writeEnumInitialization(TextStream &s, const AbstractMetaEnum &metaEnum) const;
+    static void writeEnumsInitialization(TextStream &s, AbstractMetaEnumList &enums);
+    static bool writeEnumInitialization(TextStream &s, const AbstractMetaEnum &metaEnum);
 
     static void writeSignalInitialization(TextStream &s, const AbstractMetaClassCPtr &metaClass);
 
@@ -449,7 +455,8 @@ private:
     static void writePrimitiveConverterInitialization(TextStream &s,
                                                       const CustomConversionPtr &customConversion);
     static void writeEnumConverterInitialization(TextStream &s, const AbstractMetaEnum &metaEnum);
-    QString writeContainerConverterInitialization(TextStream &s, const AbstractMetaType &type) const;
+    static QString writeContainerConverterInitialization(TextStream &s,
+                                                         const AbstractMetaType &type);
     void writeSmartPointerConverterInitialization(TextStream &s, const AbstractMetaType &ype) const;
     static void writeExtendedConverterInitialization(TextStream &s,
                                                      const TypeEntryCPtr &externalType,
@@ -477,7 +484,7 @@ private:
     static QStringList getAncestorMultipleInheritance(const AbstractMetaClassCPtr &metaClass);
 
     /// Returns true if the given class supports the python number protocol
-    bool supportsNumberProtocol(const AbstractMetaClassCPtr &metaClass) const;
+    static bool supportsNumberProtocol(const AbstractMetaClassCPtr &metaClass);
 
     /// Returns true if the given class supports the python sequence protocol
     static bool supportsSequenceProtocol(const AbstractMetaClassCPtr &metaClass) ;
@@ -486,9 +493,9 @@ private:
     static bool supportsMappingProtocol(const AbstractMetaClassCPtr &metaClass) ;
 
     /// Returns true if generator should produce getters and setters for the given class.
-    bool shouldGenerateGetSetList(const AbstractMetaClassCPtr &metaClass) const;
+    static bool shouldGenerateGetSetList(const AbstractMetaClassCPtr &metaClass);
 
-    void writeHashFunction(TextStream &s, const GeneratorContext &context) const;
+    static void writeHashFunction(TextStream &s, const GeneratorContext &context);
 
     /// Write default implementations for sequence protocol
     void writeDefaultSequenceMethods(TextStream &s, const GeneratorContext &context) const;
@@ -496,8 +503,9 @@ private:
     static void writeIndexError(TextStream &s, const QString &errorMsg,
                                 ErrorReturn errorReturn);
 
-    QString writeReprFunction(TextStream &s, const GeneratorContext &context,
-                              uint indirections) const;
+    static QString writeReprFunction(TextStream &s,
+                                     const GeneratorContext &context,
+                                     uint indirections);
 
     static bool hasBoolCast(const AbstractMetaClassCPtr &metaClass)
     { return boolCast(metaClass).has_value(); }

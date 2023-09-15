@@ -76,7 +76,7 @@ QString HeaderGenerator::fileNameForContext(const GeneratorContext &context) con
 }
 
 void HeaderGenerator::writeCopyCtor(TextStream &s,
-                                    const AbstractMetaClassCPtr &metaClass) const
+                                    const AbstractMetaClassCPtr &metaClass)
 {
     s << wrapperName(metaClass) << "(const " << metaClass->qualifiedCppName()
       << "& self) : " << metaClass->qualifiedCppName() << "(self)\n{\n}\n\n";
@@ -848,13 +848,13 @@ void HeaderGenerator::writeTypeFunctions(TextStream &s, const QString &typeFunct
         s << "QT_WARNING_POP\n";
 }
 
-void HeaderGenerator::writeProtectedEnumSurrogate(TextStream &s, const AbstractMetaEnum &cppEnum) const
+void HeaderGenerator::writeProtectedEnumSurrogate(TextStream &s, const AbstractMetaEnum &cppEnum)
 {
     if (avoidProtectedHack() && cppEnum.isProtected())
         s << "enum " << protectedEnumSurrogateName(cppEnum) << " {};\n";
 }
 
-void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum) const
+void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum)
 {
      const QString enumName = avoidProtectedHack() && cppEnum.isProtected()
         ? protectedEnumSurrogateName(cppEnum)

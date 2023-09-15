@@ -69,9 +69,9 @@ private:
     static void writeFunctionToc(TextStream &s, const QString &title,
                                  const AbstractMetaClassCPtr &cppClass,
                                  const AbstractMetaFunctionCList &functions);
-    void writePropertyToc(TextStream &s,
-                          const GeneratorDocumentation &doc,
-                          const AbstractMetaClassCPtr &cppClass);
+    static void writePropertyToc(TextStream &s,
+                                 const GeneratorDocumentation &doc,
+                                 const AbstractMetaClassCPtr &cppClass);
     void writeProperties(TextStream &s,
                          const GeneratorDocumentation &doc,
                          const AbstractMetaClassCPtr &cppClass) const;
@@ -109,7 +109,7 @@ private:
                       const QString &context = QString(),
                       QString *errorMessage = nullptr) const;
 
-    GeneratorDocumentation generatorDocumentation(const AbstractMetaClassCPtr &cppClass) const;
+    static GeneratorDocumentation generatorDocumentation(const AbstractMetaClassCPtr &cppClass);
 
     QStringList m_functionList;
     QMap<QString, QStringList> m_packages;

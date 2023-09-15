@@ -30,25 +30,26 @@ protected:
 private:
     using InheritedOverloadSet = QSet<AbstractMetaFunctionCPtr>;
 
-    void writeCopyCtor(TextStream &s, const AbstractMetaClassCPtr &metaClass) const;
-    void writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
+    static void writeCopyCtor(TextStream &s, const AbstractMetaClassCPtr &metaClass);
+    void writeFunction(TextStream &s,
+                       const AbstractMetaFunctionCPtr &func,
                        InheritedOverloadSet *inheritedOverloads,
                        FunctionGeneration generation) const;
-    void writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum) const;
+    static void writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum);
     static void writeSbkTypeFunction(TextStream &s, const AbstractMetaClassCPtr &cppClass);
     static void writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType);
     void writeTypeIndexValueLine(TextStream &s, const ApiExtractorResult &api,
                                  const TypeEntryCPtr &typeEntry);
     void writeTypeIndexValueLines(TextStream &s, const ApiExtractorResult &api,
                                   const AbstractMetaClassCPtr &metaClass);
-    void writeProtectedEnumSurrogate(TextStream &s, const AbstractMetaEnum &cppEnum) const;
+    static void writeProtectedEnumSurrogate(TextStream &s, const AbstractMetaEnum &cppEnum);
     void writeMemberFunctionWrapper(TextStream &s,
                                     const AbstractMetaFunctionCPtr &func,
                                     const QString &postfix = {}) const;
     void writePrivateHeader(const QString &moduleHeaderDir,
                             const QString &publicIncludeShield,
                             const ModuleHeaderParameters &parameters);
-    void writeTypeFunctions(TextStream &s, const QString &typeFunctions);
+    static void writeTypeFunctions(TextStream &s, const QString &typeFunctions);
     void writeWrapperClassDeclaration(TextStream &s,
                                       const QString &wrapperName,
                                       const GeneratorContext &classContext) const;
