@@ -48,8 +48,8 @@ FieldModification::FieldModification() : d(new FieldModificationData)
 
 FieldModification::FieldModification(const FieldModification &) = default;
 FieldModification &FieldModification::operator=(const FieldModification &) = default;
-FieldModification::FieldModification(FieldModification &&) = default;
-FieldModification &FieldModification::operator=(FieldModification &&) = default;
+FieldModification::FieldModification(FieldModification &&) noexcept = default;
+FieldModification &FieldModification::operator=(FieldModification &&) noexcept = default;
 FieldModification::~FieldModification() = default;
 
 QString FieldModification::name() const
@@ -241,8 +241,8 @@ ArgumentModification::ArgumentModification(int idx) : d(new ArgumentModification
 
 ArgumentModification::ArgumentModification(const ArgumentModification &) = default;
 ArgumentModification &ArgumentModification::operator=(const ArgumentModification &) = default;
-ArgumentModification::ArgumentModification(ArgumentModification &&) = default;
-ArgumentModification &ArgumentModification::operator=(ArgumentModification &&) = default;
+ArgumentModification::ArgumentModification(ArgumentModification &&) noexcept = default;
+ArgumentModification &ArgumentModification::operator=(ArgumentModification &&) noexcept = default;
 ArgumentModification::~ArgumentModification() = default;
 
 const QString &ArgumentModification::modifiedType() const
@@ -435,8 +435,8 @@ FunctionModification::FunctionModification() : d(new FunctionModificationData)
 
 FunctionModification::FunctionModification(const FunctionModification &) = default;
 FunctionModification &FunctionModification::operator=(const FunctionModification &) = default;
-FunctionModification::FunctionModification(FunctionModification &&) = default;
-FunctionModification &FunctionModification::operator=(FunctionModification &&) = default;
+FunctionModification::FunctionModification(FunctionModification &&) noexcept = default;
+FunctionModification &FunctionModification::operator=(FunctionModification &&) noexcept = default;
 FunctionModification::~FunctionModification() = default;
 
 void FunctionModification::formatDebug(QDebug &debug) const

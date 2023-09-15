@@ -36,8 +36,8 @@ AbstractMetaField::AbstractMetaField() : d(new AbstractMetaFieldData)
 
 AbstractMetaField::AbstractMetaField(const AbstractMetaField &) = default;
 AbstractMetaField &AbstractMetaField::operator=(const AbstractMetaField &) = default;
-AbstractMetaField::AbstractMetaField(AbstractMetaField &&) = default;
-AbstractMetaField &AbstractMetaField::operator=(AbstractMetaField &&) = default;
+AbstractMetaField::AbstractMetaField(AbstractMetaField &&) noexcept = default;
+AbstractMetaField &AbstractMetaField::operator=(AbstractMetaField &&) noexcept = default;
 AbstractMetaField::~AbstractMetaField() = default;
 
 //    returned->setEnclosingClass(nullptr);

@@ -64,8 +64,8 @@ public:
     explicit ArgumentModification(int idx);
     ArgumentModification(const ArgumentModification &);
     ArgumentModification &operator=(const ArgumentModification &);
-    ArgumentModification(ArgumentModification &&);
-    ArgumentModification &operator=(ArgumentModification &&);
+    ArgumentModification(ArgumentModification &&) noexcept;
+    ArgumentModification &operator=(ArgumentModification &&) noexcept;
     ~ArgumentModification();
 
     // Reference count flags for this argument
@@ -134,8 +134,8 @@ public:
     FunctionModification();
     FunctionModification(const FunctionModification &);
     FunctionModification &operator=(const FunctionModification &);
-    FunctionModification(FunctionModification &&);
-    FunctionModification &operator=(FunctionModification &&);
+    FunctionModification(FunctionModification &&) noexcept;
+    FunctionModification &operator=(FunctionModification &&) noexcept;
     ~FunctionModification();
 
     enum ModifierFlag {
@@ -277,8 +277,8 @@ public:
     FieldModification();
     FieldModification(const FieldModification &);
     FieldModification &operator=(const FieldModification &);
-    FieldModification(FieldModification &&);
-    FieldModification &operator=(FieldModification &&);
+    FieldModification(FieldModification &&) noexcept;
+    FieldModification &operator=(FieldModification &&) noexcept;
     ~FieldModification();
 
     QString name() const;

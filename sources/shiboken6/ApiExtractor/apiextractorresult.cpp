@@ -14,9 +14,9 @@ ApiExtractorResult::ApiExtractorResult(const ApiExtractorResult &) = default;
 
 ApiExtractorResult &ApiExtractorResult::operator=(const ApiExtractorResult &) = default;
 
-ApiExtractorResult::ApiExtractorResult(ApiExtractorResult &&) = default;
+ApiExtractorResult::ApiExtractorResult(ApiExtractorResult &&) noexcept = default;
 
-ApiExtractorResult &ApiExtractorResult::operator=(ApiExtractorResult &&) = default;
+ApiExtractorResult &ApiExtractorResult::operator=(ApiExtractorResult &&) noexcept = default;
 
 ApiExtractorResult::~ApiExtractorResult() = default;
 
