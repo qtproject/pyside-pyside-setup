@@ -59,8 +59,8 @@ QPropertySpec::QPropertySpec(const TypeSystemProperty &ts,
 
 QPropertySpec::QPropertySpec(const QPropertySpec &) = default;
 QPropertySpec &QPropertySpec::operator=(const QPropertySpec &) = default;
-QPropertySpec::QPropertySpec(QPropertySpec &&) = default;
-QPropertySpec &QPropertySpec::operator=(QPropertySpec &&) = default;
+QPropertySpec::QPropertySpec(QPropertySpec &&) noexcept = default;
+QPropertySpec &QPropertySpec::operator=(QPropertySpec &&) noexcept = default;
 QPropertySpec::~QPropertySpec() = default;
 
 const AbstractMetaType &QPropertySpec::type() const

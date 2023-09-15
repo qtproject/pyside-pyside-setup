@@ -28,8 +28,8 @@ public:
     ~TypeInfo();
     TypeInfo(const TypeInfo &);
     TypeInfo& operator=(const TypeInfo &);
-    TypeInfo(TypeInfo &&);
-    TypeInfo& operator=(TypeInfo &&);
+    TypeInfo(TypeInfo &&) noexcept;
+    TypeInfo &operator=(TypeInfo &&) noexcept;
 
     static TypeInfo voidType();
     static TypeInfo varArgsType();

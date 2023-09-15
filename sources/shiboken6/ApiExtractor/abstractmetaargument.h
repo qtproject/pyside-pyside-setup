@@ -19,9 +19,8 @@ public:
     ~AbstractMetaArgument();
     AbstractMetaArgument(const AbstractMetaArgument &);
     AbstractMetaArgument &operator=(const AbstractMetaArgument &);
-    AbstractMetaArgument(AbstractMetaArgument &&);
-    AbstractMetaArgument &operator=(AbstractMetaArgument &&);
-
+    AbstractMetaArgument(AbstractMetaArgument &&) noexcept;
+    AbstractMetaArgument &operator=(AbstractMetaArgument &&) noexcept;
 
     const AbstractMetaType &type() const;
     void setType(const AbstractMetaType &type);

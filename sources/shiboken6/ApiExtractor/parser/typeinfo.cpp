@@ -61,9 +61,8 @@ TypeInfo::TypeInfo() : d(new TypeInfoData)
 TypeInfo::~TypeInfo() = default;
 TypeInfo::TypeInfo(const TypeInfo &) = default;
 TypeInfo& TypeInfo::operator=(const TypeInfo &) = default;
-TypeInfo::TypeInfo(TypeInfo &&) = default;
-TypeInfo& TypeInfo::operator=(TypeInfo &&) = default;
-
+TypeInfo::TypeInfo(TypeInfo &&) noexcept = default;
+TypeInfo &TypeInfo::operator=(TypeInfo &&) noexcept = default;
 
 static inline TypeInfo createType(const QString &name)
 {

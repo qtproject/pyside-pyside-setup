@@ -176,9 +176,9 @@ AbstractMetaType &AbstractMetaType::operator=(const AbstractMetaType &) = defaul
 
 AbstractMetaType::AbstractMetaType(const AbstractMetaType &rhs) = default;
 
-AbstractMetaType::AbstractMetaType(AbstractMetaType &&) = default;
+AbstractMetaType::AbstractMetaType(AbstractMetaType &&) noexcept = default;
 
-AbstractMetaType &AbstractMetaType::operator=(AbstractMetaType &&) = default;
+AbstractMetaType &AbstractMetaType::operator=(AbstractMetaType &&) noexcept = default;
 
 AbstractMetaType::~AbstractMetaType() = default;
 
