@@ -40,7 +40,7 @@ enum class LocationType
 };
 
 class BaseVisitor {
-    Q_DISABLE_COPY(BaseVisitor)
+    Q_DISABLE_COPY_MOVE(BaseVisitor)
 public:
     using Diagnostics = QList<Diagnostic>;
 

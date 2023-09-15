@@ -30,6 +30,8 @@ QString getFilteredCppSignatureString(QString signature);
 class Generator
 {
 public:
+    Q_DISABLE_COPY_MOVE(Generator)
+
     using OptionDescription = QPair<QString, QString>;
     using OptionDescriptions = QList<OptionDescription>;
 

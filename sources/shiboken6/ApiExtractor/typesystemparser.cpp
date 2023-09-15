@@ -8,7 +8,6 @@
 #include "containertypeentry.h"
 #include "customconversion.h"
 #include "customtypenentry.h"
-#include "enumtypeentry.h"
 #include "flagstypeentry.h"
 #include "functiontypeentry.h"
 #include "namespacetypeentry.h"
@@ -605,12 +604,12 @@ QString TypeSystemEntityResolver::readFile(const QString &entityName, QString *e
     path = TypeDatabase::instance()->modifiedTypesystemFilepath(fileName, m_currentPath);
     if (!QFileInfo::exists(path)) {
         *errorMessage = u"Unable to resolve: "_s + entityName;
-        return QString();
+        return {};
     }
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         *errorMessage = msgCannotOpenForReading(file);
-        return QString();
+        return {};
     }
     QString result = QString::fromUtf8(file.readAll()).trimmed();
     // Remove license header comments on which QXmlStreamReader chokes

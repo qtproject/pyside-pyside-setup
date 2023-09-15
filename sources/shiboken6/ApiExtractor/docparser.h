@@ -21,7 +21,7 @@ struct FunctionDocumentation;
 class DocParser
 {
 public:
-    Q_DISABLE_COPY(DocParser)
+    Q_DISABLE_COPY_MOVE(DocParser)
 
     using XQueryPtr = std::shared_ptr<XQuery>;
 

@@ -25,7 +25,7 @@ QString FunctionModification::accessModifierString() const
         return u"public"_s;
     if (isFriendly())
         return u"friendly"_s;
-    return QString();
+    return {};
 }
 
 // ---------------------- FieldModification

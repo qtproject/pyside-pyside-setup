@@ -372,7 +372,7 @@ ContainerTypeEntryPtr TypeDatabase::findContainerType(const QString &name) const
 {
     QString template_name = name;
 
-    int pos = name.indexOf(u'<');
+    const auto pos = name.indexOf(u'<');
     if (pos > 0)
         template_name = name.left(pos);
 
@@ -607,7 +607,7 @@ TypeEntryPtr TypeDatabasePrivate::resolveTypeDefEntry(const TypedefEntryPtr &typ
                                              QString *errorMessage)
 {
     QString sourceName = typedefEntry->sourceType();
-    const int lessThanPos = sourceName.indexOf(u'<');
+    const auto lessThanPos = sourceName.indexOf(u'<');
     if (lessThanPos != -1)
         sourceName.truncate(lessThanPos);
     ComplexTypeEntryPtr source;
@@ -715,7 +715,7 @@ FlagsTypeEntryPtr TypeDatabase::findFlagsType(const QString &name) const
     return std::static_pointer_cast<FlagsTypeEntry>(fte);
 }
 
-void TypeDatabase::addFlagsType(FlagsTypeEntryPtr fte)
+void TypeDatabase::addFlagsType(const FlagsTypeEntryPtr &fte)
 {
     d->m_flagsEntries[fte->originalName()] = fte;
 }
@@ -1178,7 +1178,7 @@ bool TypeDatabase::shouldDropTypeEntry(const QString& fullTypeName) const
     return d->m_dropTypeEntries.contains(fullTypeName);
 }
 
-void TypeDatabase::setDropTypeEntries(QStringList dropTypeEntries)
+void TypeDatabase::setDropTypeEntries(const QStringList &dropTypeEntries)
 {
     d->m_dropTypeEntries = dropTypeEntries;
     d->m_dropTypeEntries.sort();
@@ -1205,7 +1205,7 @@ static void _computeTypeIndexes()
     const auto &allEntries = tdb->entries();
     list.reserve(allEntries.size());
     for (auto  tit = allEntries.cbegin(), end = allEntries.cend(); tit != end; ++tit) {
-        TypeEntryPtr entry = tit.value();
+        const TypeEntryPtr &entry = tit.value();
         if (entry->isPrimitive()
             || entry->isContainer()
             || entry->isFunction()
@@ -1401,7 +1401,7 @@ void TypeDatabase::formatBuiltinTypes(QDebug debug) const
 
     // Determine base types and their typedef'ed types
     QList<PrimitiveFormatListEntry> primitiveEntries;
-    for (auto &e : std::as_const(d->m_entries)) {
+    for (const auto &e : std::as_const(d->m_entries)) {
         if (e->isPrimitive()) {
             auto pe = std::static_pointer_cast<const PrimitiveTypeEntry>(e);
             auto basic = basicReferencedTypeEntry(pe);

@@ -47,7 +47,7 @@ QString DefaultValue::returnValue() const
     case DefaultValue::Pointer:
         return u"nullptr"_s;
     case DefaultValue::Void:
-        return QString();
+        return {};
     case DefaultValue::DefaultConstructorWithDefaultValues:
         return m_value + u"()"_s;
     case DefaultValue::DefaultConstructor:
@@ -76,7 +76,7 @@ QString DefaultValue::initialization() const
     case DefaultValue::DefaultConstructorWithDefaultValues:
         break;
     }
-    return QString();
+    return {};
 }
 
 QString DefaultValue::constructorParameter() const

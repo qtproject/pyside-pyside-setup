@@ -614,7 +614,7 @@ bool HeaderGenerator::finishGeneration()
         macrosStream << ", // " << smp.type.cppSignature() << '\n';
         // Add a the same value for const pointees (shared_ptr<const Foo>).
         const auto ptrName = smp.type.typeEntry()->entryName();
-        int pos = indexName.indexOf(ptrName, 0, Qt::CaseInsensitive);
+        const auto pos = indexName.indexOf(ptrName, 0, Qt::CaseInsensitive);
         if (pos >= 0) {
             indexName.insert(pos + ptrName.size() + 1, u"CONST"_s);
             _writeTypeIndexValue(macrosStream, indexName, smartPointerCountIndex);

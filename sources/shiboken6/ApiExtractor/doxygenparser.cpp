@@ -207,7 +207,7 @@ Documentation DoxygenParser::retrieveModuleDocumentation(const QString& name){
         qCWarning(lcShibokenDoc).noquote().nospace()
             << "Can't find doxygen XML file for module " << name << ", tried: "
             << QDir::toNativeSeparators(sourceFile);
-        return Documentation();
+        return {};
     }
 
     QString errorMessage;

@@ -337,11 +337,7 @@ static QSet<QString> useIntSet()
 
 static bool _shouldInheritInt(const AbstractMetaEnum &cppEnum)
 {
-    if (!cppEnum.fullName().startsWith(u"PySide6."_s))
-        return true;
-    // static auto intSet = useIntSet();
-    // return intSet.contains(cppEnum.fullName());
-    return false;
+    return !cppEnum.fullName().startsWith(u"PySide6."_s);
 }
 
 static QString BuildEnumFlagInfo(const AbstractMetaEnum &cppEnum)
@@ -1891,14 +1887,14 @@ return result;)";
                 StringStream pc(TextStream::Language::Cpp);
                 pc << getFullTypeNameWithoutModifiers(sourceType) << " cppIn"
                     << minimalConstructorExpression(api(), sourceType) << ";\n";
-                writeToCppConversion(pc, sourceType, nullptr, pyInVariable,
+                writeToCppConversion(pc, sourceType, pyInVariable,
                                      u"cppIn"_s);
                 pc << ';';
                 toCppPreConv = pc.toString();
                 toCppConv.append(u"cppIn"_s);
             } else if (!sourceType.isWrapperType()) {
                 StringStream tcc(TextStream::Language::Cpp);
-                writeToCppConversion(tcc, sourceType, metaClass, pyInVariable,
+                writeToCppConversion(tcc, sourceType, pyInVariable,
                                      u"/*BOZO-1061*/"_s);
                 toCppConv = tcc.toString();
             }
@@ -2648,7 +2644,7 @@ QString CppGenerator::returnErrorWrongArguments(const OverloadData &overloadData
     case ErrorReturn::Void:
         Q_ASSERT(false);
     }
-    return QString();
+    return {};
 }
 
 void CppGenerator::writeFunctionReturnErrorCheckSection(TextStream &s,
@@ -3048,7 +3044,7 @@ void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s,
         s << "// " << i << ": ";
         if (func->isStatic())
             s << "static ";
-        if (const auto decl = func->declaringClass())
+        if (const auto &decl = func->declaringClass())
             s << decl->name() << "::";
         s << func->signatureComment() << '\n';
     }
@@ -3808,7 +3804,7 @@ if (errorType != nullptr)
     PyErr_SetObject(errorType, errorString);
 )";
 
-static QString explicitConversion(QString v, const AbstractMetaType &t)
+static QString explicitConversion(const QString &v, const AbstractMetaType &t)
 {
     return t.plainType().cppSignature() + u'(' + v + u')';
 }
@@ -4338,7 +4334,7 @@ static void registerEnumConverterScopes(TextStream &s, QString signature)
     while (true) {
         s << "Shiboken::Conversions::registerConverterName(converter, \""
           << signature << "\");\n";
-        const int qualifierPos = signature.indexOf(u"::");
+        const auto qualifierPos = signature.indexOf(u"::");
         if (qualifierPos != -1)
             signature.remove(0, qualifierPos + 2);
         else

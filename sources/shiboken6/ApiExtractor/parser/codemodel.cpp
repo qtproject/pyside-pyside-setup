@@ -72,7 +72,7 @@ static CodeModelItem findRecursion(const ScopeModelItem &scope,
             return tp;
         if (TemplateTypeAliasModelItem tta = scope->findTemplateTypeAlias(nameSegment))
             return tta;
-        return CodeModelItem();
+        return {};
     }
     if (auto nestedClass = scope->findClass(nameSegment))
         return findRecursion(nestedClass, qualifiedName, segment + 1);
@@ -84,7 +84,7 @@ static CodeModelItem findRecursion(const ScopeModelItem &scope,
             }
         }
     }
-    return CodeModelItem();
+    return {};
 }
 
 CodeModelItem CodeModel::findItem(const QStringList &qualifiedName, const ScopeModelItem &scope)
@@ -459,7 +459,7 @@ FunctionModelItem _ScopeModelItem::declaredFunction(const FunctionModelItem &ite
             return fun;
 
     }
-    return FunctionModelItem();
+    return {};
 }
 
 _ScopeModelItem::~_ScopeModelItem() = default;
@@ -833,9 +833,7 @@ _ArgumentModelItem::_ArgumentModelItem(CodeModel *model, const QString &name, in
 {
 }
 
-_ArgumentModelItem::~_ArgumentModelItem()
-{
-}
+_ArgumentModelItem::~_ArgumentModelItem() = default;
 
 TypeInfo _ArgumentModelItem::type() const
 {

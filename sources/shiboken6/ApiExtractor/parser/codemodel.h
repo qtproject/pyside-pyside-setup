@@ -32,7 +32,7 @@ class CodeModel
 {
     Q_GADGET
 public:
-    Q_DISABLE_COPY(CodeModel)
+    Q_DISABLE_COPY_MOVE(CodeModel)
 
     enum FunctionType {
         Normal,

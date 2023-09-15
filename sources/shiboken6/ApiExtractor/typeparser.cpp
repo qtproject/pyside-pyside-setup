@@ -166,7 +166,7 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
     Scanner::Token tok = scanner.nextToken(errorMessage);
     while (tok != Scanner::NoToken) {
         if (tok == Scanner::InvalidToken)
-            return TypeInfo();
+            return {};
 
 //         switch (tok) {
 //         case Scanner::StarToken: printf(" - *\n"); break;
@@ -204,7 +204,7 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
                     *errorMessage = message;
                 else
                     qWarning().noquote().nospace() << message;
-                return TypeInfo();
+                return {};
             }
             break;
         case Scanner::LessThanToken:
@@ -251,7 +251,7 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
                 *errorMessage = message;
             else
                 qWarning().noquote().nospace() << message;
-            return TypeInfo();
+            return {};
         }
 
         case Scanner::Identifier:

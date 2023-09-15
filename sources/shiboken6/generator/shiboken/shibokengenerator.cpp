@@ -25,7 +25,6 @@
 #include <reporthandler.h>
 #include <textstream.h>
 #include <typedatabase.h>
-#include <abstractmetabuilder.h>
 #include <containertypeentry.h>
 #include <customtypenentry.h>
 #include <enumtypeentry.h>
@@ -418,7 +417,7 @@ QString ShibokenGenerator::cpythonFunctionName(const AbstractMetaFunctionCPtr &f
 QString ShibokenGenerator::cpythonMethodDefinitionName(const AbstractMetaFunctionCPtr &func)
 {
     if (!func->ownerClass())
-        return QString();
+        return {};
     return cpythonBaseName(func->ownerClass()->typeEntry()) + u"Method_"_s
            + func->name();
 }
@@ -521,7 +520,7 @@ QString ShibokenGenerator::cpythonWrapperCPtr(const AbstractMetaType &metaType,
                                               const QString &argName)
 {
     if (!metaType.isWrapperType())
-        return QString();
+        return {};
     return u"reinterpret_cast< ::"_s + metaType.cppSignature()
         + u" *>(Shiboken::Conversions::cppPointer("_s + cpythonTypeNameExt(metaType)
         + u", reinterpret_cast<SbkObject *>("_s + argName + u")))"_s;
@@ -552,10 +551,10 @@ void ShibokenGenerator::writeToCppConversion(TextStream &s,
 }
 
 void ShibokenGenerator::writeToCppConversion(TextStream &s, const AbstractMetaType &type,
-                                             const AbstractMetaClassCPtr &context, const QString &inArgName,
+                                             const QString &inArgName,
                                              const QString &outArgName)
 {
-    s << cpythonToCppConversionFunction(type, context) << inArgName << ", &" << outArgName << ')';
+    s << cpythonToCppConversionFunction(type) << inArgName << ", &" << outArgName << ')';
 }
 
 bool ShibokenGenerator::shouldRejectNullPointerArgument(const AbstractMetaFunctionCPtr &func,
@@ -690,14 +689,14 @@ QString ShibokenGenerator::converterObject(const TypeEntryCPtr &type)
 
     if (type->isArray()) {
         qDebug() << "Warning: no idea how to handle the Qt5 type " << type->qualifiedCppName();
-        return QString();
+        return {};
     }
 
     /* the typedef'd primitive types case */
     auto pte = std::dynamic_pointer_cast<const PrimitiveTypeEntry>(type);
     if (!pte) {
         qDebug() << "Warning: the Qt5 primitive type is unknown" << type->qualifiedCppName();
-        return QString();
+        return {};
     }
     pte = basicReferencedTypeEntry(pte);
     if (pte->isPrimitive() && !isCppPrimitive(pte) && !pte->customConversion()) {
@@ -959,7 +958,7 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntryCPtr &typ
               .arg(converterObject(type));
 }
 
-QString ShibokenGenerator::cpythonIsConvertibleFunction(AbstractMetaType metaType)
+QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType &metaType)
 {
     const auto typeEntry = metaType.typeEntry();
     if (typeEntry->isCustom()) {
@@ -1010,8 +1009,7 @@ QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaClas
         + cpythonTypeNameExt(metaClass->typeEntry()) + u", "_s;
 }
 
-QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaType &type,
-                                                          AbstractMetaClassCPtr  /* context */)
+QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaType &type)
 {
     if (type.isWrapperType()) {
         return u"Shiboken::Conversions::pythonToCpp"_s
@@ -1022,8 +1020,7 @@ QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaType
               .arg(converterObject(type));
 }
 
-QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaType &type,
-                                                             AbstractMetaClassCPtr  /* context */)
+QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaType &type)
 {
     if (type.isWrapperType()) {
         QString conversion;
@@ -1083,7 +1080,7 @@ QString ShibokenGenerator::argumentString(const AbstractMetaFunctionCPtr &func,
         arg.replace(u'$', u'.'); // Haehh?
 
     // "int a", "int a[]"
-    const int arrayPos = arg.indexOf(u'[');
+    const auto arrayPos = arg.indexOf(u'[');
     if (arrayPos != -1)
         arg.insert(arrayPos, u' ' + argument.name());
     else
@@ -1256,7 +1253,7 @@ static QString getArgumentsFromMethodCall(const QString &str)
     // For more information check this:
     // http://perl.plover.com/yak/regex/samples/slide083.html
     static QLatin1String funcCall("%CPPSELF.%FUNCTION_NAME");
-    int pos = str.indexOf(funcCall);
+    auto pos = str.indexOf(funcCall);
     if (pos == -1)
         return QString();
     pos = pos + funcCall.size();
@@ -1926,7 +1923,7 @@ IncludeGroupList ShibokenGenerator::classIncludes(const AbstractMetaClassCPtr &m
 
     result.append({u"Argument includes"_s, typeEntry->argumentIncludes()});
     const auto implicitConvs = implicitConversions(typeEntry);
-    for (auto &f : implicitConvs) {
+    for (const auto &f : implicitConvs) {
         if (f->isConversionOperator()) {
             const auto source = f->ownerClass();
             Q_ASSERT(source);

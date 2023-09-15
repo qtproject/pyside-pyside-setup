@@ -16,7 +16,6 @@
 #include "pytypenames.h"
 #include "textstream.h"
 #include "exception.h"
-#include "messages.h"
 
 #include "qtcompat.h"
 
@@ -393,8 +392,7 @@ static std::pair<int, int> getMinMaxArgs(const AbstractMetaFunctionCPtr &func)
     int defaultValueIndex = -1;
     const auto &arguments = func->arguments();
     int argIndex = 0;
-    for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
-        const auto &arg =  arguments.at(i);
+    for (const auto &arg : arguments) {
         if (!arg.isModifiedRemoved()) {
             if (defaultValueIndex < 0 && arg.hasDefaultValueExpression())
                 defaultValueIndex = argIndex;
@@ -637,7 +635,7 @@ static const OverloadDataRootNode *_findNextArgWithDefault(const OverloadDataRoo
     return result;
 }
 
-const OverloadDataRootNode *OverloadDataRootNode::findNextArgWithDefault()
+const OverloadDataRootNode *OverloadDataRootNode::findNextArgWithDefault() const
 {
     return _findNextArgWithDefault(this);
 }
