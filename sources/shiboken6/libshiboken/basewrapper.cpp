@@ -601,9 +601,9 @@ PyObject *SbkQApp_tp_new(PyTypeObject *subtype, PyObject *, PyObject *)
 PyObject *SbkDummyNew(PyTypeObject *type, PyObject *, PyObject *)
 {
     // PYSIDE-595: Give the same error as type_call does when tp_new is NULL.
+    const char regret[] = "¯\\_(ツ)_/¯";
     PyErr_Format(PyExc_TypeError,
-                 "cannot create '%.100s' instances ¯\\_(ツ)_/¯",
-                 type->tp_name);
+                 "cannot create '%.100s' instances %s", type->tp_name, regret);
     return nullptr;
 }
 
