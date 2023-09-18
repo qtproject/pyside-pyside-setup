@@ -126,11 +126,14 @@ class QAsyncioTask(futures.QAsyncioFuture):
     def set_name(self, value) -> None:
         self._name = str(value)
 
-    def cancel(self, msg: typing.Optional[str] = None) -> None:
+    def cancel(self, msg: typing.Optional[str] = None) -> bool:
+        if self.done():
+            return False
         if (isinstance(self._handle, events.QAsyncioHandle)):
             self._handle._cancel_exception_msg = msg
         self._handle.cancel()
         self._state = futures.QAsyncioFuture.FutureState.CANCELLED
+        return True
 
     def uncancel(self) -> None:
         # TODO

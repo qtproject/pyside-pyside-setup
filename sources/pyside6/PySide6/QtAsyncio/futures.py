@@ -91,11 +91,12 @@ class QAsyncioFuture():
         self._callbacks = [_cb for _cb in self._callbacks if _cb != cb]
         return original_len - len(self._callbacks)
 
-    def cancel(self) -> None:
+    def cancel(self) -> bool:
         if self.done():
-            return
+            return False
         self._state = QAsyncioFuture.FutureState.CANCELLED
         self._schedule_callbacks()
+        return True
 
     def exception(self) -> typing.Optional[Exception]:
         if self._state == QAsyncioFuture.FutureState.CANCELLED:
