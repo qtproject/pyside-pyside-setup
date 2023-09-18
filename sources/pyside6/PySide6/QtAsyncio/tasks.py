@@ -64,6 +64,9 @@ class QAsyncioTask(futures.QAsyncioFuture):
         if self.done():
             return
         result = None
+
+        asyncio._enter_task(self._loop, self)  # type: ignore[arg-type]
+
         try:
             if exception_or_future is None:
                 result = self._coro.send(None)
@@ -103,6 +106,8 @@ class QAsyncioTask(futures.QAsyncioFuture):
             if self.done():
                 self._schedule_callbacks()
                 self._loop.stop()
+
+            asyncio._leave_task(self._loop, self)  # type: ignore[arg-type]
 
     def get_stack(self, *, limit=None) -> typing.List[typing.Any]:
         # TODO
