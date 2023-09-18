@@ -19,6 +19,7 @@ main.cpp
 shiboken/configurablescope.h
 shiboken/cppgenerator.cpp shiboken/cppgenerator.h
 shiboken/cppgenerator_container.cpp
+shiboken/cppgenerator_smartpointer.cpp
 shiboken/ctypenames.h
 shiboken/generatorargument.cpp shiboken/generatorargument.h shiboken/generatorstrings.h
 shiboken/headergenerator.cpp shiboken/headergenerator.h

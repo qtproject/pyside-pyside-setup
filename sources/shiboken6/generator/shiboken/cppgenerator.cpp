@@ -192,18 +192,6 @@ QString CppGenerator::fileNameForContext(const GeneratorContext &context) const
     return fileNameForContextHelper(context, u"_wrapper.cpp"_s);
 }
 
-std::optional<AbstractMetaType>
-    CppGenerator::findSmartPointerInstantiation(const SmartPointerTypeEntryCPtr &pointer,
-                                                const TypeEntryCPtr &pointee) const
-{
-    for (const auto &smp : api().instantiatedSmartPointers()) {
-        const auto &i = smp.type;
-        if (i.typeEntry() == pointer && i.instantiations().at(0).typeEntry() == pointee)
-            return i;
-    }
-    return {};
-}
-
 void CppGenerator::clearTpFuncs()
 {
     // Functions that should not be registered under a name in PyMethodDef,
@@ -223,7 +211,7 @@ static const char includeQDebug[] =
 "#endif\n"
 "#include <QtCore/QDebug>\n";
 
-static QString chopType(QString s)
+QString CppGenerator::chopType(QString s)
 {
     if (s.endsWith(u"_Type"))
         s.chop(5);
@@ -458,8 +446,8 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
 }
 
 // Write methods definition
-static void writePyMethodDefs(TextStream &s, const QString &className,
-                              const QString &methodsDefinitions, bool generateCopy)
+void CppGenerator::writePyMethodDefs(TextStream &s, const QString &className,
+                                     const QString &methodsDefinitions, bool generateCopy)
 {
     s << "static PyMethodDef " << className << "_methods[] = {\n" << indent
         << methodsDefinitions << '\n';
@@ -471,7 +459,7 @@ static void writePyMethodDefs(TextStream &s, const QString &className,
         << "};\n\n";
 }
 
-static bool hasHashFunction(const AbstractMetaClassCPtr &c)
+bool CppGenerator::hasHashFunction(const AbstractMetaClassCPtr &c)
 {
     return !c->typeEntry()->hashFunction().isEmpty()
            || c->hasHashFunction();
@@ -784,143 +772,6 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
 
     if (metaClass->hasStaticFields())
         writeStaticFieldInitialization(s, metaClass);
-
-    // class inject-code native/end
-    if (!typeEntry->codeSnips().isEmpty()) {
-        writeClassCodeSnips(s, typeEntry->codeSnips(),
-                            TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode,
-                            classContext);
-        s << '\n';
-    }
-}
-
-static bool hasParameterPredicate(const AbstractMetaFunctionCPtr &f)
-{
-    return !f->arguments().isEmpty();
-}
-
-void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorContext &classContext)
-{
-    s.setLanguage(TextStream::Language::Cpp);
-    AbstractMetaClassCPtr metaClass = classContext.metaClass();
-    const auto typeEntry = std::static_pointer_cast<const SmartPointerTypeEntry>(metaClass->typeEntry());
-    const bool hasPointeeClass = classContext.pointeeClass() != nullptr;
-    const auto smartPointerType = typeEntry->smartPointerType();
-    const bool isValueHandle = smartPointerType ==TypeSystem::SmartPointerType::ValueHandle;
-
-    IncludeGroup includes{u"Extra includes"_s, typeEntry->extraIncludes()};
-    if (hasPointeeClass)
-        includes.append(classContext.pointeeClass()->typeEntry()->include());
-    generateIncludes(s, classContext, {includes});
-
-    s  << '\n';
-
-    // class inject-code native/beginning
-    if (!typeEntry->codeSnips().isEmpty()) {
-        writeClassCodeSnips(s, typeEntry->codeSnips(),
-                            TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode,
-                            classContext);
-        s << '\n';
-    }
-
-    StringStream smd(TextStream::Language::Cpp);
-    StringStream md(TextStream::Language::Cpp);
-    StringStream signatureStream(TextStream::Language::Cpp);
-
-    s << openTargetExternC;
-
-    const auto &functionGroups = getFunctionGroups(metaClass);
-
-    // Skip all public methods of the smart pointer except for the special
-    // methods declared in the type entry.
-
-    auto ctors = metaClass->queryFunctions(FunctionQueryOption::Constructors);
-    if (!hasPointeeClass && !isValueHandle) { // Cannot generate "int*"
-        auto end = std::remove_if(ctors.begin(), ctors.end(), hasParameterPredicate);
-        ctors.erase(end, ctors.end());
-    }
-
-    if (!ctors.isEmpty()) {
-        OverloadData overloadData(ctors, api());
-        writeConstructorWrapper(s, overloadData, classContext);
-        writeSignatureInfo(signatureStream, overloadData);
-    }
-
-    if (!typeEntry->resetMethod().isEmpty()) {
-        auto it = functionGroups.constFind(typeEntry->resetMethod());
-        if (it == functionGroups.cend())
-            throw Exception(msgCannotFindSmartPointerMethod(typeEntry, typeEntry->resetMethod()));
-        AbstractMetaFunctionCList resets = it.value();
-        if (!hasPointeeClass && !isValueHandle) { // Cannot generate "int*"
-            auto end = std::remove_if(resets.begin(), resets.end(), hasParameterPredicate);
-            resets.erase(end, resets.end());
-        }
-        if (!resets.isEmpty())
-            writeMethodWrapper(s, md, signatureStream, resets, classContext);
-    }
-
-    auto it = functionGroups.constFind(typeEntry->getter());
-    if (it == functionGroups.cend() || it.value().size() != 1)
-        throw Exception(msgCannotFindSmartPointerGetter(typeEntry));
-
-    writeMethodWrapper(s, md, signatureStream, it.value(), classContext);
-
-    QStringList optionalMethods;
-    if (!typeEntry->refCountMethodName().isEmpty())
-        optionalMethods.append(typeEntry->refCountMethodName());
-    const QString valueCheckMethod = typeEntry->valueCheckMethod();
-    if (!valueCheckMethod.isEmpty() && !valueCheckMethod.startsWith(u"operator"))
-        optionalMethods.append(valueCheckMethod);
-    if (!typeEntry->nullCheckMethod().isEmpty())
-        optionalMethods.append(typeEntry->nullCheckMethod());
-
-    for (const QString &optionalMethod : optionalMethods) {
-        auto it = functionGroups.constFind(optionalMethod);
-        if (it == functionGroups.cend() || it.value().size() != 1)
-            throw Exception(msgCannotFindSmartPointerMethod(typeEntry, optionalMethod));
-        writeMethodWrapper(s, md, signatureStream, it.value(), classContext);
-    }
-
-    const QString methodsDefinitions = md.toString();
-    const QString singleMethodDefinitions = smd.toString();
-
-    const QString className = chopType(cpythonTypeName(typeEntry));
-
-    writeCopyFunction(s, classContext);
-    signatureStream << fullPythonClassName(metaClass) << ".__copy__()\n";
-
-    // Write single method definitions
-    s << singleMethodDefinitions;
-
-    // Write methods definition
-    writePyMethodDefs(s, className, methodsDefinitions, true /* ___copy__ */);
-
-    // Write tp_s/getattro function
-    const auto boolCastOpt = boolCast(metaClass);
-    writeSmartPointerGetattroFunction(s, classContext, boolCastOpt);
-    writeSmartPointerSetattroFunction(s, classContext);
-
-    if (boolCastOpt.has_value())
-        writeNbBoolFunction(classContext, boolCastOpt.value(), s);
-
-    if (smartPointerType == TypeSystem::SmartPointerType::Shared)
-        writeSmartPointerRichCompareFunction(s, classContext);
-
-    s << closeExternC;
-
-    if (hasHashFunction(metaClass))
-        writeHashFunction(s, classContext);
-
-    // Write tp_traverse and tp_clear functions.
-    writeTpTraverseFunction(s, metaClass);
-    writeTpClearFunction(s, metaClass);
-
-    writeClassDefinition(s, metaClass, classContext);
-
-    s << '\n';
-
-    writeConverterFunctions(s, metaClass, classContext);
-    writeClassRegister(s, metaClass, classContext, signatureStream);
 
     // class inject-code native/end
     if (!typeEntry->codeSnips().isEmpty()) {
@@ -1996,45 +1847,6 @@ void CppGenerator::writeContainerConverterFunctions(TextStream &s,
     writePythonToCppConversionFunctions(s, containerType);
 }
 
-// Helpers to collect all smart pointer pointee base classes
-static AbstractMetaClassCList findSmartPointeeBaseClasses(const ApiExtractorResult &api,
-                                                          const AbstractMetaType &smartPointerType)
-{
-    AbstractMetaClassCList result;
-    auto instantiationsTe = smartPointerType.instantiations().at(0).typeEntry();
-    auto targetClass = AbstractMetaClass::findClass(api.classes(), instantiationsTe);
-    if (targetClass != nullptr)
-        result = targetClass->allTypeSystemAncestors();
-    return result;
-}
-
-void CppGenerator::writeSmartPointerConverterFunctions(TextStream &s,
-                                                       const AbstractMetaType &smartPointerType) const
-{
-    const auto baseClasses = findSmartPointeeBaseClasses(api(), smartPointerType);
-    if (baseClasses.isEmpty())
-        return;
-
-    auto smartPointerTypeEntry =
-        std::static_pointer_cast<const SmartPointerTypeEntry>(smartPointerType.typeEntry());
-
-    // TODO: Missing conversion to smart pointer pointer type:
-
-    s << "// Register smartpointer conversion for all derived classes\n";
-    for (const auto &base : baseClasses) {
-        auto baseTe = base->typeEntry();
-        if (smartPointerTypeEntry->matchesInstantiation(baseTe)) {
-            if (auto opt = findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
-                const auto smartTargetType = opt.value();
-                s << "// SmartPointer derived class: "
-                    << smartTargetType.cppSignature() << "\n";
-                writePythonToCppConversionFunctions(s, smartPointerType,
-                                                    smartTargetType, {}, {}, {});
-            }
-        }
-    }
-}
-
 bool CppGenerator::needsArgumentErrorHandling(const OverloadData &overloadData)
 {
     if (overloadData.maxArgs() > 0)
@@ -2457,32 +2269,13 @@ void CppGenerator::writeCppSelfConversion(TextStream &s, const GeneratorContext 
         s << ')';
 }
 
-void CppGenerator::writeSmartPointerCppSelfConversion(TextStream &s,
-                                                      const GeneratorContext &context)
-{
-    Q_ASSERT(context.forSmartPointer());
-    s << cpythonWrapperCPtr(context.preciseType(), u"self"_s);
-}
-
-static inline void writeCppSelfVarDef(TextStream &s,
-                                      CppGenerator::CppSelfDefinitionFlags flags = {})
+void CppGenerator::writeCppSelfVarDef(TextStream &s,
+                                      CppSelfDefinitionFlags flags)
 {
     if (flags.testFlag(CppGenerator::CppSelfAsReference))
         s << "auto &" <<  CPP_SELF_VAR << " = *";
     else
         s << "auto *" << CPP_SELF_VAR << " = ";
-}
-
-void CppGenerator::writeSmartPointerCppSelfDefinition(TextStream &s,
-                                                      const GeneratorContext &context,
-                                                      ErrorReturn errorReturn,
-                                                      CppSelfDefinitionFlags flags)
-{
-    Q_ASSERT(context.forSmartPointer());
-    writeInvalidPyObjectCheck(s, u"self"_s, errorReturn);
-    writeCppSelfVarDef(s, flags);
-    writeSmartPointerCppSelfConversion(s, context);
-    s << ";\n";
 }
 
 void CppGenerator::writeCppSelfDefinition(TextStream &s,
@@ -4339,44 +4132,6 @@ QString CppGenerator::writeContainerConverterInitialization(TextStream &s,
     return converter;
 }
 
-void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s, const AbstractMetaType &type) const
-{
-    const QByteArray cppSignature = type.cppSignature().toUtf8();
-    auto writeConversionRegister = [&s](const AbstractMetaType &sourceType, const QString &targetTypeName, const QString &targetConverter)
-    {
-        const QString sourceTypeName = fixedCppTypeName(sourceType);
-        const QString toCpp = pythonToCppFunctionName(sourceTypeName, targetTypeName);
-        const QString isConv = convertibleToCppFunctionName(sourceTypeName, targetTypeName);
-
-        writeAddPythonToCppConversion(s, targetConverter, toCpp, isConv);
-    };
-
-    const auto classes = findSmartPointeeBaseClasses(api(), type);
-    if (classes.isEmpty())
-        return;
-
-    auto smartPointerTypeEntry = std::static_pointer_cast<const SmartPointerTypeEntry>(type.typeEntry());
-
-    s << "// Register SmartPointer converter for type '" << cppSignature << "'." << '\n'
-       << "///////////////////////////////////////////////////////////////////////////////////////\n\n";
-
-    for (const auto &base : classes) {
-        auto baseTe = base->typeEntry();
-        if (auto opt = findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
-            const auto smartTargetType = opt.value();
-            s << "// Convert to SmartPointer derived class: ["
-                << smartTargetType.cppSignature() << "]\n";
-            const QString converter = u"Shiboken::Conversions::getConverter(\""_s
-                                      + smartTargetType.cppSignature() + u"\")"_s;
-            writeConversionRegister(type, fixedCppTypeName(smartTargetType), converter);
-        } else {
-            s << "// Class not found:" << type.instantiations().at(0).cppSignature();
-        }
-    }
-
-    s << "///////////////////////////////////////////////////////////////////////////////////////" << '\n' << '\n';
-}
-
 void CppGenerator::writeExtendedConverterInitialization(TextStream &s,
                                                         const TypeEntryCPtr &externalType,
                                                         const AbstractMetaClassCList &conversions)
@@ -5151,113 +4906,6 @@ void CppGenerator::writeRichCompareFunction(TextStream &s,
         << outdent << outdent << "}\n\n"
     << "return Shiboken::returnFromRichCompare(" << PYTHON_RETURN_VAR << ");\n" << outdent
     << "}\n\n";
-}
-
-using ComparisonOperatorList = QList<AbstractMetaFunction::ComparisonOperatorType>;
-
-// Return the available comparison operators for smart pointers
-static ComparisonOperatorList smartPointeeComparisons(const GeneratorContext &context)
-{
-    Q_ASSERT(context.forSmartPointer());
-    auto te = context.preciseType().instantiations().constFirst().typeEntry();
-    if (isExtendedCppPrimitive(te)) { // Primitive pointee types have all
-        return {AbstractMetaFunction::OperatorEqual,
-                AbstractMetaFunction::OperatorNotEqual,
-                AbstractMetaFunction::OperatorLess,
-                AbstractMetaFunction::OperatorLessEqual,
-                AbstractMetaFunction::OperatorGreater,
-                AbstractMetaFunction::OperatorGreaterEqual};
-    }
-
-    const auto pointeeClass = context.pointeeClass();
-    if (!pointeeClass)
-        return {};
-
-    ComparisonOperatorList result;
-    const auto &comparisons =
-        pointeeClass->operatorOverloads(OperatorQueryOption::SymmetricalComparisonOp);
-    for (const auto &f : comparisons) {
-        const auto ct = f->comparisonOperatorType().value();
-        if (!result.contains(ct))
-            result.append(ct);
-    }
-    return result;
-}
-
-void CppGenerator::writeSmartPointerRichCompareFunction(TextStream &s,
-                                                        const GeneratorContext &context) const
-{
-    static const char selfPointeeVar[] = "cppSelfPointee";
-    static const char cppArg0PointeeVar[] = "cppArg0Pointee";
-
-    const auto metaClass = context.metaClass();
-    QString baseName = cpythonBaseName(metaClass);
-    writeRichCompareFunctionHeader(s, baseName, context);
-
-    s << "if (";
-    writeTypeCheck(s, context.preciseType(), PYTHON_ARG);
-    s << ") {\n" << indent;
-    writeArgumentConversion(s, context.preciseType(), CPP_ARG0,
-                            PYTHON_ARG, ErrorReturn::Default, metaClass);
-
-    const auto te = context.preciseType().typeEntry();
-    Q_ASSERT(te->isSmartPointer());
-    const auto ste = std::static_pointer_cast<const SmartPointerTypeEntry>(te);
-
-    s << "const auto *" << selfPointeeVar << " = " << CPP_SELF_VAR
-        << '.' << ste->getter() << "();\n";
-    s << "const auto *" << cppArg0PointeeVar << " = " << CPP_ARG0
-        << '.' << ste->getter() << "();\n";
-
-    // If we have an object without any comparisons, only generate a simple
-    // equality check by pointee address
-    auto availableOps = smartPointeeComparisons(context);
-    const bool comparePointeeAddressOnly = availableOps.isEmpty();
-    if (comparePointeeAddressOnly) {
-        availableOps << AbstractMetaFunction::OperatorEqual
-            << AbstractMetaFunction::OperatorNotEqual;
-    } else {
-        // For value types with operators, we complain about nullptr
-        s << "if (" << selfPointeeVar << " == nullptr || " << cppArg0PointeeVar
-            << " == nullptr) {\n" << indent
-            << "PyErr_SetString(PyExc_NotImplementedError, \"nullptr passed to comparison.\");\n"
-            << ErrorReturn::Default << '\n' << outdent << "}\n";
-    }
-
-    s << "bool " << CPP_RETURN_VAR << "= false;\n"
-        << "switch (op) {\n";
-    for (auto op : availableOps) {
-        s << "case " << AbstractMetaFunction::pythonRichCompareOpCode(op) << ":\n"
-          << indent << CPP_RETURN_VAR << " = ";
-        if (comparePointeeAddressOnly) {
-            s << selfPointeeVar << ' ' << AbstractMetaFunction::cppComparisonOperator(op)
-              << ' ' << cppArg0PointeeVar << ";\n";
-        } else {
-            // Shortcut for equality: Check pointee address
-            if (op == AbstractMetaFunction::OperatorEqual
-                || op == AbstractMetaFunction::OperatorLessEqual
-                || op == AbstractMetaFunction::OperatorGreaterEqual) {
-                s << selfPointeeVar << " == " << cppArg0PointeeVar << " || ";
-            }
-            // Generate object's comparison
-            s << "*" << selfPointeeVar << ' '
-              << AbstractMetaFunction::cppComparisonOperator(op) << " *"
-              << cppArg0PointeeVar << ";\n";
-        }
-        s << "break;\n" << outdent;
-
-    }
-    if (availableOps.size() < 6) {
-        s << "default:\n" << indent
-            << richCompareComment
-            << "return FallbackRichCompare(self, " << PYTHON_ARG << ", op);\n" << outdent;
-    }
-    s << "}\n" << PYTHON_RETURN_VAR << " = " << CPP_RETURN_VAR
-        << " ? Py_True : Py_False;\n"
-        << "Py_INCREF(" << PYTHON_RETURN_VAR << ");\n"
-        << outdent << "}\n"
-    << "return Shiboken::returnFromRichCompare(" << PYTHON_RETURN_VAR << ");\n"
-    << outdent << "}\n\n";
 }
 
 // Return a flag combination for PyMethodDef
@@ -6048,33 +5696,6 @@ void CppGenerator::writeSetattroFunction(TextStream &s, AttroCheck attroCheck,
     writeSetattroDefaultReturn(s);
 }
 
-static const char smartPtrComment[] =
-   "// Try to find the 'name' attribute, by retrieving the PyObject for "
-   "the corresponding C++ object held by the smart pointer.\n";
-
-static QString smartPointerGetter(const GeneratorContext &context)
-{
-    const auto te = context.metaClass()->typeEntry();
-    Q_ASSERT(te->isSmartPointer());
-    return std::static_pointer_cast<const SmartPointerTypeEntry>(te)->getter();
-}
-
-void CppGenerator::writeSmartPointerSetattroFunction(TextStream &s,
-                                                     const GeneratorContext &context)
-{
-    Q_ASSERT(context.forSmartPointer());
-    writeSetattroDefinition(s, context.metaClass());
-    s << smartPtrComment
-        << "if (auto *rawObj = PyObject_CallMethod(self, \""
-        << smartPointerGetter(context)
-        << "\", 0)) {\n" << indent
-        << "if (PyObject_HasAttr(rawObj, name) != 0)\n" << indent
-        << "return PyObject_GenericSetAttr(rawObj, name, value);\n" << outdent
-        << "Py_DECREF(rawObj);\n" << outdent
-        << "}\n";
-    writeSetattroDefaultReturn(s);
-}
-
 void CppGenerator::writeGetattroDefinition(TextStream &s, const AbstractMetaClassCPtr &metaClass)
 {
     s << "static PyObject *" << cpythonGetattroFunctionName(metaClass)
@@ -6154,51 +5775,6 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
     }
 
     s << "return " << getattrFunc << ";\n" << outdent << "}\n\n";
-}
-
-void CppGenerator::writeSmartPointerGetattroFunction(TextStream &s,
-                                                     const GeneratorContext &context,
-                                                     const BoolCastFunctionOptional &boolCast)
-{
-    Q_ASSERT(context.forSmartPointer());
-    const auto metaClass = context.metaClass();
-    writeGetattroDefinition(s, metaClass);
-    s << "PyObject *tmp = PyObject_GenericGetAttr(self, name);\n"
-        << "if (tmp)\n" << indent << "return tmp;\n" << outdent
-        << "if (PyErr_ExceptionMatches(PyExc_AttributeError) == 0)\n"
-        << indent << "return nullptr;\n" << outdent
-        << "PyErr_Clear();\n";
-
-    if (boolCast.has_value()) {
-        writeSmartPointerCppSelfDefinition(s, context);
-        s << "if (";
-        writeNbBoolExpression(s, boolCast.value(), true /* invert */);
-        s << ") {\n" << indent
-          << R"(PyTypeObject *tp = Py_TYPE(self);
-PyErr_Format(PyExc_AttributeError, "Attempt to retrieve '%s' from null object '%s'.",
-             Shiboken::String::toCString(name), tp->tp_name);
-return nullptr;
-)" << outdent << "}\n";
-    }
-
-    // This generates the code which dispatches access to member functions
-    // and fields from the smart pointer to its pointee.
-    s << smartPtrComment
-        << "if (auto *rawObj = PyObject_CallMethod(self, \""
-        << smartPointerGetter(context)
-        << "\", 0)) {\n" << indent
-        << "if (auto *attribute = PyObject_GetAttr(rawObj, name))\n"
-        << indent << "tmp = attribute;\n" << outdent
-        << "Py_DECREF(rawObj);\n" << outdent
-        << "}\n"
-        << "if (!tmp) {\n" << indent
-        << R"(PyTypeObject *tp = Py_TYPE(self);
-PyErr_Format(PyExc_AttributeError,
-             "'%.50s' object has no attribute '%.400s'",
-             tp->tp_name, Shiboken::String::toCString(name));
-)" << outdent
-        << "}\n"
-        << "return tmp;\n" << outdent << "}\n\n";
 }
 
 void CppGenerator::writeNbBoolExpression(TextStream &s, const BoolCastFunction &f,
