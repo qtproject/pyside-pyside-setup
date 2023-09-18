@@ -1,7 +1,7 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-from PySide6.QtCore import QDateTime, QCoreApplication, QTimer, QThread, Slot
+from PySide6.QtCore import QCoreApplication, QDateTime, QEventLoop, QObject, QTimer, QThread, Slot
 
 from . import futures
 from . import tasks
@@ -20,6 +20,37 @@ __all__ = [
     "QAsyncioEventLoopPolicy", "QAsyncioEventLoop",
     "QAsyncioHandle", "QAsyncioTimerHandle",
 ]
+
+
+class QAsyncioExecutorWrapper(QObject):
+
+    def __init__(self, func: typing.Callable, *args: typing.Tuple) -> None:
+        super().__init__()
+        self._loop: QEventLoop
+        self._func = func
+        self._args = args
+        self._result = None
+        self._exception = None
+
+    def _cb(self):
+        try:
+            self._result = self._func(*self._args)
+        except BaseException as e:
+            self._exception = e
+        self._loop.exit()
+
+    def do(self):
+        # This creates a new event loop and dispatcher for the thread, if not already created.
+        self._loop = QEventLoop()
+        asyncio.events._set_running_loop(self._loop)
+        QTimer.singleShot(0, self._loop, lambda: self._cb())
+        self._loop.exec()
+        if self._exception is not None:
+            raise self._exception
+        return self._result
+
+    def exit(self):
+        self._loop.exit()
 
 
 class QAsyncioEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
@@ -45,7 +76,7 @@ class QAsyncioEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
         return QAsyncioEventLoop(self._application)
 
 
-class QAsyncioEventLoop(asyncio.BaseEventLoop):
+class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
     """
     Implements the asyncio API:
     https://docs.python.org/3/library/asyncio-eventloop.html
@@ -71,7 +102,8 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop):
                     self._loop.call_soon_threadsafe(self._future.set_exception, e)
 
     def __init__(self, application: QCoreApplication) -> None:
-        super().__init__()
+        asyncio.BaseEventLoop.__init__(self)
+        QObject.__init__(self)
 
         self._application: QCoreApplication = application
         self._thread = QThread.currentThread()
@@ -206,6 +238,8 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop):
                              typing.Optional[contextvars.Context] = None) -> "QAsyncioHandle":
         if self.is_closed():
             raise RuntimeError("Event loop is closed")
+        if context is None:
+            context = contextvars.copy_context()
         return self.call_soon(callback, *args, context=context)
 
     def call_later(self, delay: typing.Union[int, float],  # type: ignore[override]
@@ -213,8 +247,7 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop):
                    context: typing.Optional[contextvars.Context] = None) -> "QAsyncioHandle":
         if not isinstance(delay, (int, float)):
             raise TypeError("delay must be an int or float")
-        return self.call_at(self.time() + delay, callback, *args,
-                            context=context)
+        return self.call_at(self.time() + delay, callback, *args, context=context)
 
     def call_at(self, when: typing.Union[int, float],  # type: ignore[override]
                 callback: typing.Callable, *args: typing.Any,
@@ -402,8 +435,9 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop):
             raise RuntimeError("Event loop is closed")
         if executor is None:
             executor = self._default_executor
+        wrapper = QAsyncioExecutorWrapper(func, *args)
         return asyncio.futures.wrap_future(
-            executor.submit(func, *args), loop=self
+            executor.submit(wrapper.do), loop=self
         )
 
     def set_default_executor(self,
@@ -478,7 +512,7 @@ class QAsyncioHandle():
 
     def _schedule_event(self, timeout: int, func: typing.Callable) -> None:
         if not self._loop.is_closed() and not self._loop._quit_from_outside:
-            QTimer.singleShot(timeout, func)
+            QTimer.singleShot(timeout, self._loop, func)
 
     def _start(self) -> None:
         self._schedule_event(self._timeout, lambda: self._cb())
