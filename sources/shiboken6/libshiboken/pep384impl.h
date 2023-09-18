@@ -285,7 +285,7 @@ enum PepUnicode_Kind {
 
 #ifdef Py_LIMITED_API
 
-typedef struct _pycfunc PyCFunctionObject;
+using PyCFunctionObject = struct _pycfunc;
 #define PyCFunction_GET_FUNCTION(func)  PyCFunction_GetFunction((PyObject *)func)
 #define PyCFunction_GET_SELF(func)      PyCFunction_GetSelf((PyObject *)func)
 #define PyCFunction_GET_FLAGS(func)     PyCFunction_GetFlags((PyObject *)func)

@@ -15,10 +15,10 @@
 
     using AtomicBool = std::atomic&lt;bool&gt;;
 
-    typedef struct {
+    struct QtQml_VolatileBoolObject {
         PyObject_HEAD
         AtomicBool *flag;
-    } QtQml_VolatileBoolObject;
+    };
     </inject-code>
 
     <inject-code class="native" position="beginning">

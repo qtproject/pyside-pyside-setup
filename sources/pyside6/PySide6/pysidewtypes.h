@@ -4,12 +4,12 @@
 #ifndef __PYSIDEWTYPES__
 #define __PYSIDEWTYPES__
 
-typedef struct HWND__ *HWND;
-typedef unsigned UINT;
-typedef long LONG;
-typedef unsigned long DWORD;
-typedef UINT WPARAM;
-typedef LONG LPARAM;
+using HWND = struct HWND__ *;
+using UINT = unsigned;
+using LONG = long;
+using DWORD = unsigned long;
+using WPARAM = UINT;
+using LPARAM = LONG;
 
 struct POINT
 {

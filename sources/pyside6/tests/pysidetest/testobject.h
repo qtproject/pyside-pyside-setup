@@ -23,7 +23,7 @@ public:
     int value;
 };
 
-typedef IntValue TypedefValue;
+using TypedefValue = IntValue;
 
 class PYSIDETEST_API TestObject : public QObject
 {
@@ -60,8 +60,7 @@ private:
 
 PYSIDETEST_API QDebug operator<<(QDebug dbg, TestObject &testObject);
 
-typedef int PySideInt;
-
+using PySideInt = int;
 
 namespace PySideCPP {
 
@@ -100,8 +99,7 @@ namespace PySideCPP2 {
 
 enum Enum1 { Option1 = 1, Option2 = 2 };
 
-
-typedef long PySideLong;
+using PySideLong = long;
 
 class PYSIDETEST_API TestObjectWithoutNamespace :  public QObject
 {

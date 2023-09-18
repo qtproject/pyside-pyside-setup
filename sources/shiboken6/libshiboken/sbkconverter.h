@@ -43,7 +43,7 @@ struct SbkArrayConverter;
  *
  *  C++ -> Python
  */
-typedef PyObject *(*CppToPythonFunc)(const void *);
+using CppToPythonFunc = PyObject *(*)(const void *);
 
 /**
  *  This function converts a Python object to a C++ value, it may be
@@ -56,7 +56,7 @@ typedef PyObject *(*CppToPythonFunc)(const void *);
  *
  *  Python -> C++
  */
-typedef void (*PythonToCppFunc)(PyObject *,void *);
+using PythonToCppFunc = void (*)(PyObject *,void *);
 
 /**
  *  Checks if the Python object passed in the argument is convertible to a
@@ -67,7 +67,7 @@ typedef void (*PythonToCppFunc)(PyObject *,void *);
  *
  *  Python -> C++ ?
  */
-typedef PythonToCppFunc (*IsConvertibleToCppFunc)(PyObject *);
+using IsConvertibleToCppFunc = PythonToCppFunc (*)(PyObject *);
 
 } // extern "C"
 

@@ -237,7 +237,7 @@ static void handler(int sig) {
 ////////////////////////////////////////////////////////////////////////////
 #endif // _WIN32
 
-safe_globals pyside_globals = nullptr;
+safe_globals_struc *pyside_globals = nullptr;
 
 void init_shibokensupport_module(void)
 {
