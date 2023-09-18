@@ -440,8 +440,6 @@ static int qpropertyClear(PyObject *self)
 
 } // extern "C"
 
-namespace {
-
 static PyObject *getFromType(PyTypeObject *type, PyObject *name)
 {
     PyObject *attr = nullptr;
@@ -459,10 +457,7 @@ static PyObject *getFromType(PyTypeObject *type, PyObject *name)
     return attr;
 }
 
-} //namespace
-
-
-namespace PySide { namespace Property {
+namespace PySide::Property {
 
 static const char *Property_SignatureStrings[] = {
     "PySide6.QtCore.Property(self,type:type,fget:typing.Callable=None,fset:typing.Callable=None,"
@@ -595,5 +590,4 @@ PyObject *getTypeObject(const PySideProperty *self)
     return self->d->pyTypeObject;
 }
 
-} //namespace Property
-} //namespace PySide
+} //namespace PySide::Property

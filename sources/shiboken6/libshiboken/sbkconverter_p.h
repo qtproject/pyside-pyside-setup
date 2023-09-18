@@ -524,13 +524,13 @@ struct Primitive<std::nullptr_t> : OnePrimitive<std::nullptr_t>
     }
 };
 
-namespace Shiboken {
-namespace Conversions {
+namespace Shiboken::Conversions {
+
 SbkConverter *createConverterObject(PyTypeObject *type,
                                     PythonToCppFunc toCppPointerConvFunc,
                                     IsConvertibleToCppFunc toCppPointerCheckFunc,
                                     CppToPythonFunc pointerToPythonFunc,
                                     CppToPythonFunc copyToPythonFunc);
-} // namespace Conversions
-} // namespace Shiboken
+} // namespace Shiboken::Conversions
+
 #endif // SBK_CONVERTER_P_H

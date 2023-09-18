@@ -7,15 +7,13 @@
 #include "pysidemacros.h"
 #include <sbkpython.h>
 
-namespace PySide {
-namespace Feature {
+namespace PySide::Feature {
 
 PYSIDE_API void init();
 PYSIDE_API void Select(PyObject *obj);
 PYSIDE_API void Select(PyTypeObject *type);
 PYSIDE_API void Enable(bool);
 
-} // namespace Feature
-} // namespace PySide
+} // namespace PySide::Feature
 
 #endif // FEATURE_SELECT_H

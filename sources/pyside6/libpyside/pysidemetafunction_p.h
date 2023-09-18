@@ -12,7 +12,7 @@ QT_BEGIN_NAMESPACE
 class QObject;
 QT_END_NAMESPACE
 
-namespace PySide { namespace MetaFunction {
+namespace PySide::MetaFunction {
 
     void init(PyObject *module);
     /**
@@ -20,7 +20,6 @@ namespace PySide { namespace MetaFunction {
      */
     bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal = nullptr);
 
-} //namespace MetaFunction
-} //namespace PySide
+} //namespace PySide::MetaFunction
 
 #endif

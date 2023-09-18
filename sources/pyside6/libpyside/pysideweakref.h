@@ -9,12 +9,10 @@
 
 using PySideWeakRefFunction = void (*)(void *userData);
 
-namespace PySide { namespace WeakRef {
+namespace PySide::WeakRef {
 
 PYSIDE_API PyObject* create(PyObject* ob, PySideWeakRefFunction func, void* userData);
 
-} //PySide
-} //WeakRef
-
+} // namespace PySide::WeakRef
 
 #endif

@@ -27,12 +27,10 @@ PYSIDE_API PyTypeObject *PyClassProperty_TypeF();
 
 } // extern "C"
 
-namespace PySide {
-namespace ClassProperty {
+namespace PySide::ClassProperty {
 
 PYSIDE_API void init(PyObject *module);
 
-} // namespace ClassProperty
-} // namespace PySide
+} // namespace PySide::ClassProperty
 
 #endif // CLASS_PROPERTY_H

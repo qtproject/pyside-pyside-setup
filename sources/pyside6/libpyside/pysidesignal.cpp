@@ -810,8 +810,7 @@ static PyObject *metaSignalCheck(PyObject * /* klass */, PyObject *arg)
 
 } // extern "C"
 
-namespace PySide {
-namespace Signal {
+namespace PySide::Signal {
 
 static const char *MetaSignal_SignatureStrings[] = {
     "PySide6.QtCore.MetaSignal.__instancecheck__(self,object:object)->bool",
@@ -1309,6 +1308,4 @@ QByteArray voidType()
     return QByteArrayLiteral("void");
 }
 
-} //namespace Signal
-} //namespace PySide
-
+} //namespace PySide::Signal

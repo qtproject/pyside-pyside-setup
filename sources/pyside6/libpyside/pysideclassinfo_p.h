@@ -19,7 +19,7 @@ extern PYSIDE_API PyTypeObject *PySideClassInfo_TypeF(void);
 
 } // extern "C"
 
-namespace PySide { namespace ClassInfo {
+namespace PySide::ClassInfo {
 
 class ClassInfoPrivate : public PySide::ClassDecorator::DecoratorPrivate
 {
@@ -38,7 +38,6 @@ public:
 void init(PyObject* module);
 
 
-} // namespace ClassInfo
-} // namespace PySide
+} // namespace PySide::ClassInfo
 
 #endif

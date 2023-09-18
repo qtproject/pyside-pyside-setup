@@ -23,7 +23,7 @@ extern "C"
     };
 };
 
-namespace PySide { namespace Property {
+namespace PySide::Property {
 
 PYSIDE_API bool checkType(PyObject *pyObj);
 
@@ -68,7 +68,6 @@ PYSIDE_API PySideProperty *getObject(PyObject *source, PyObject *name);
 
 PYSIDE_API void setTypeName(PySideProperty *self, const char *typeName);
 
-} //namespace Property
-} //namespace PySide
+} //namespace PySide::Property
 
 #endif

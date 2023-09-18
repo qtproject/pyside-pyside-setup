@@ -45,7 +45,7 @@ struct PySideSignalInstancePrivate
     PySideSignalInstance *next = nullptr;
 };
 
-namespace PySide { namespace Signal {
+namespace PySide::Signal {
 
     void            init(PyObject *module);
     bool            connect(PyObject *source, const char *signal, PyObject *callback);
@@ -53,6 +53,6 @@ namespace PySide { namespace Signal {
     QString         codeCallbackName(PyObject *callback, const QString &funcName);
     QByteArray      voidType();
 
-}} //namespace PySide
+} // namespace PySide::Signal
 
 #endif

@@ -11,8 +11,7 @@ extern "C" {
 struct SbkArrayConverter;
 }
 
-namespace Shiboken {
-namespace Conversions {
+namespace Shiboken::Conversions {
 
 enum : int {
     SBK_UNIMPLEMENTED_ARRAY_IDX,
@@ -132,7 +131,6 @@ void ArrayHandle<T>::destroy()
     m_owned = false;
 }
 
-} // namespace Conversions
-} // namespace Shiboken
+} // namespace Shiboken::Conversions
 
 #endif // SBKARRAYCONVERTERS_H
