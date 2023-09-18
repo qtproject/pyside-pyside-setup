@@ -22,7 +22,7 @@ extern "C"
     };
 }; //extern "C"
 
-namespace PySide { namespace MetaFunction {
+namespace PySide::MetaFunction {
 
 /**
  * This function creates a MetaFunction object
@@ -33,7 +33,6 @@ namespace PySide { namespace MetaFunction {
  **/
 PYSIDE_API PySideMetaFunction *newObject(QObject *obj, int methodIndex);
 
-} //namespace MetaFunction
-} //namespace PySide
+} //namespace PySide::MetaFunction
 
 #endif

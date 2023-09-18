@@ -11,12 +11,11 @@
 #include <QtCore/QMap>
 #include <QtCore/QByteArray>
 
-namespace PySide { namespace ClassInfo {
+namespace PySide::ClassInfo {
 
 PYSIDE_API bool checkType(PyObject* pyObj);
 PYSIDE_API QMap<QByteArray, QByteArray> getMap(PyObject *obj);
 
-} //namespace ClassInfo
-} //namespace PySide
+} // namespace PySide::ClassInfo
 
 #endif

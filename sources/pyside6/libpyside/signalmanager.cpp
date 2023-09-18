@@ -37,21 +37,17 @@
 #define PYSIDE_SIGNAL '2'
 #include "globalreceiverv2.h"
 
-namespace {
-    static PyObject *metaObjectAttr = nullptr;
-
-    static PyObject *parseArguments(const QList< QByteArray >& paramTypes, void **args);
-    static bool emitShortCircuitSignal(QObject *source, int signalIndex, PyObject *args);
-
-    static void destroyMetaObject(PyObject *obj)
-    {
-        void *ptr = PyCapsule_GetPointer(obj, nullptr);
-        auto meta = reinterpret_cast<PySide::MetaObjectBuilder *>(ptr);
-        SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(meta);
-        if (wrapper)
-            Shiboken::BindingManager::instance().releaseWrapper(wrapper);
-        delete meta;
-    }
+static PyObject *metaObjectAttr = nullptr;
+static PyObject *parseArguments(const QList< QByteArray >& paramTypes, void **args);
+static bool emitShortCircuitSignal(QObject *source, int signalIndex, PyObject *args);
+static void destroyMetaObject(PyObject *obj)
+{
+    void *ptr = PyCapsule_GetPointer(obj, nullptr);
+    auto meta = reinterpret_cast<PySide::MetaObjectBuilder *>(ptr);
+    SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(meta);
+    if (wrapper)
+        Shiboken::BindingManager::instance().releaseWrapper(wrapper);
+    delete meta;
 }
 
 static const char *metaCallName(QMetaObject::Call call)
@@ -707,8 +703,6 @@ const QMetaObject *SignalManager::retrieveMetaObject(PyObject *self)
     return builder->update();
 }
 
-namespace {
-
 static PyObject *parseArguments(const QList<QByteArray>& paramTypes, void **args)
 {
     const qsizetype argsSize = paramTypes.size();
@@ -735,5 +729,3 @@ static bool emitShortCircuitSignal(QObject *source, int signalIndex, PyObject *a
     source->qt_metacall(QMetaObject::InvokeMetaMethod, signalIndex, signalArgs);
     return true;
 }
-
-} //namespace

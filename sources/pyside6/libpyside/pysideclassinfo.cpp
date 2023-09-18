@@ -36,7 +36,7 @@ PyTypeObject *PySideClassInfo_TypeF(void)
 
 }  // extern "C"
 
-namespace PySide { namespace ClassInfo {
+namespace PySide::ClassInfo {
 
 const char *ClassInfoPrivate::name() const
 {
@@ -141,5 +141,4 @@ QMap<QByteArray, QByteArray> getMap(PyObject *obj)
     return pData->m_data;
 }
 
-} //namespace Property
-} //namespace PySide
+} //namespace PySide::Property

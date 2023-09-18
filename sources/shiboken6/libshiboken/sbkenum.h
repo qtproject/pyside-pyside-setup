@@ -33,7 +33,7 @@ LIBSHIBOKEN_API int enumIsFlag(PyObject *ob_enum);
 
 }
 
-namespace Shiboken { namespace Enum {
+namespace Shiboken::Enum {
 
 enum : int {
     ENOPT_OLD_ENUM        = 0x00,   // PySide 6.6: no longer supported
@@ -97,7 +97,6 @@ inline PyTypeObject *createPythonEnum(PyTypeObject *scope,
     return createPythonEnum(obScope, fullName, enumItemStrings, enumValues);
 }
 
-} // namespace Enum
-} // namespace Shiboken
+} // namespace Shiboken::Enum
 
 #endif // SKB_PYENUM_H

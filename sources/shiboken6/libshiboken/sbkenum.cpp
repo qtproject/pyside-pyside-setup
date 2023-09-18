@@ -210,9 +210,7 @@ static PyObject *create_missing_func(PyObject *klass)
 
 } // extern "C"
 
-namespace Shiboken {
-
-namespace Enum {
+namespace Shiboken::Enum {
 
 int enumOption{};
 
@@ -449,5 +447,4 @@ PyTypeObject *createPythonEnum(PyObject *module,
     return createPythonEnumHelper(module, fullName, enumItemStrings, enumValues);
 }
 
-} // namespace Enum
-} // namespace Shiboken
+} // namespace Shiboken::Enum

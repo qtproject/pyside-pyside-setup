@@ -34,8 +34,7 @@ extern "C"
     };
 }; // extern "C"
 
-namespace PySide {
-namespace Signal {
+namespace PySide::Signal {
 
 /**
  * This function checks for the PySideSignal type.
@@ -149,7 +148,6 @@ PYSIDE_API QString getCallbackSignature(const char *signal, QObject *receiver, P
 QStringList getArgsFromSignature(const char *signature,
                                  bool *isShortCircuit = nullptr);
 
-} // namespace Signal
-} // namespace PySide
+} // namespace PySide::Signal
 
 #endif

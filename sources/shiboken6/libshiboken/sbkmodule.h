@@ -12,8 +12,7 @@ extern "C"
 struct SbkConverter;
 }
 
-namespace Shiboken {
-namespace Module {
+namespace Shiboken::Module {
 
 /**
  *  Imports and returns the module named \p moduleName, or a NULL pointer in case of failure.
@@ -58,6 +57,6 @@ LIBSHIBOKEN_API void registerTypeConverters(PyObject *module, SbkConverter **con
  */
 LIBSHIBOKEN_API SbkConverter **getTypeConverters(PyObject *module);
 
-} } // namespace Shiboken::Module
+} // namespace Shiboken::Module
 
 #endif // SBK_MODULE_H
