@@ -15,7 +15,7 @@ namespace Shiboken
 
 struct DestructorEntry;
 
-typedef void (*ObjectVisitor)(SbkObject *, void *);
+using ObjectVisitor = void (*)(SbkObject *, void *);
 
 class LIBSHIBOKEN_API BindingManager
 {

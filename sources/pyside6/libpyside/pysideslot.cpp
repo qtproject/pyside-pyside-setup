@@ -20,11 +20,11 @@ struct SlotData
     QByteArray resultType;
 };
 
-typedef struct
+struct PySideSlot
 {
     PyObject_HEAD
     SlotData *slotData;
-} PySideSlot;
+};
 
 extern "C"
 {

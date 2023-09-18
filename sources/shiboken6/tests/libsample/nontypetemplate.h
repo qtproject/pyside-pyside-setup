@@ -21,7 +21,7 @@ private:
     int m_array[Size];
 };
 
-typedef IntArray<2> IntArray2;
-typedef IntArray<3> IntArray3;
+using IntArray2 = IntArray<2>;
+using IntArray3 = IntArray<3>;
 
 #endif // NONTYPETEMPLATE_H

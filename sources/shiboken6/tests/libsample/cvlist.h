@@ -12,7 +12,7 @@ class CVValueType
     CVValueType();
 };
 
-typedef std::list<const CVValueType*> const_ptr_value_list;
+using const_ptr_value_list = std::list<const CVValueType*>;
 
 // This tests binding generation for a container of a const value type. The
 // class doesn't need to do anything; this is just to verify that the generated

@@ -10,12 +10,12 @@ extern "C"
 {
 
 // Void pointer object definition.
-typedef struct {
+struct SbkVoidPtrObject {
     PyObject_HEAD
     void *cptr;
     Py_ssize_t size;
     bool isWritable;
-} SbkVoidPtrObject;
+};
 
 PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject * /* args */, PyObject * /* kwds */)
 {

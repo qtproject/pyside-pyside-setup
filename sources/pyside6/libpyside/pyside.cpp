@@ -646,7 +646,7 @@ void setNextQObjectMemoryAddr(void *addr)
 // A std::shared_ptr is used with a deletion function to invalidate a pointer
 // when the property value is cleared.  This should be a QSharedPointer with
 // a void *pointer, but that isn't allowed
-typedef char any_t;
+using any_t = char;
 Q_DECLARE_METATYPE(std::shared_ptr<any_t>);
 
 

@@ -6,12 +6,12 @@
 #include <sbkpython.h>
 #include <shiboken.h>
 
-typedef struct {
+struct PySideCallableObject {
     PyObject_HEAD
     /* Type-specific fields go here. */
     PySideWeakRefFunction weakref_func;
     void *user_data;
-} PySideCallableObject;
+};
 
 static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, PyObject *kw);
 

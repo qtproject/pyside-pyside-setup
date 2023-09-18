@@ -9,7 +9,7 @@
 
 extern "C" {
 
-typedef struct {
+struct propertyobject {
     PyObject_HEAD
     PyObject *prop_get;
     PyObject *prop_set;
@@ -21,7 +21,7 @@ typedef struct {
     PyObject *prop_name;
 #endif
    int getter_doc;
-} propertyobject;
+};
 
 PYSIDE_API PyTypeObject *PyClassProperty_TypeF();
 
