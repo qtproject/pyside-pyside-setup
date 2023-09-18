@@ -23,7 +23,7 @@ class BuildozerConfig(BaseConfig):
                        f"org.{pysidedeploy_config.title}")
 
         include_exts = self.get_value("app", "source.include_exts")
-        include_exts = f"{include_exts},qml"
+        include_exts = f"{include_exts},qml,js"
         self.set_value("app", "source.include_exts", include_exts, raise_warning=False)
 
         self.set_value("app", "requirements", "python3,shiboken6,PySide6")
