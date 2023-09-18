@@ -33,7 +33,7 @@ size_t qHash(const GlobalReceiverKey &k, size_t seed)
 
 class DynamicSlotDataV2
 {
-    Q_DISABLE_COPY(DynamicSlotDataV2)
+    Q_DISABLE_COPY_MOVE(DynamicSlotDataV2)
     public:
         DynamicSlotDataV2(PyObject *callback, GlobalReceiverV2 *parent);
         ~DynamicSlotDataV2();

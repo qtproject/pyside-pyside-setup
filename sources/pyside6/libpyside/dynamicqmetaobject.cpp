@@ -184,8 +184,8 @@ int MetaObjectBuilder::indexOfProperty(const QByteArray &name) const
 static bool checkMethodSignature(const QByteArray &signature)
 {
     // Common mistake not to add parentheses to the signature.
-    const int openParen = signature.indexOf('(');
-    const int closingParen = signature.lastIndexOf(')');
+    const auto openParen = signature.indexOf('(');
+    const auto closingParen = signature.lastIndexOf(')');
     const bool ok = openParen != -1 && closingParen != -1 && openParen < closingParen;
     if (!ok) {
          const QByteArray message =
