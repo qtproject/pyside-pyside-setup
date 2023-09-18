@@ -10,7 +10,7 @@ extern "C" {
 
 // signature_globals.cpp
 
-typedef struct safe_globals_struc {
+struct safe_globals_struc {
     // init part 1: get arg_dict
     PyObject *helper_module;
     PyObject *arg_dict;
@@ -25,9 +25,9 @@ typedef struct safe_globals_struc {
     PyObject *finish_import_func;
     PyObject *feature_import_func;
     PyObject *feature_imported_func;
-} safe_globals_struc, *safe_globals;
+};
 
-extern safe_globals pyside_globals;
+extern safe_globals_struc *pyside_globals;
 extern PyMethodDef signature_methods[];
 
 void init_shibokensupport_module(void);

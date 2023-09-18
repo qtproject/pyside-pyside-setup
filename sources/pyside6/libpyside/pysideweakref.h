@@ -7,7 +7,7 @@
 #include <pysidemacros.h>
 #include <sbkpython.h>
 
-typedef void (*PySideWeakRefFunction)(void* userData);
+using PySideWeakRefFunction = void (*)(void *userData);
 
 namespace PySide::WeakRef {
 

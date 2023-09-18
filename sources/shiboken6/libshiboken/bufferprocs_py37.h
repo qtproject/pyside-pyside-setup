@@ -67,8 +67,8 @@ typedef struct bufferinfo {
     void *internal;
 } Pep_buffer;
 
-typedef int (*getbufferproc)(PyObject *, Pep_buffer *, int);
-typedef void (*releasebufferproc)(PyObject *, Pep_buffer *);
+using getbufferproc =int (*)(PyObject *, Pep_buffer *, int);
+using releasebufferproc = void (*)(PyObject *, Pep_buffer *);
 
 /* Maximum number of dimensions */
 #define PyBUF_MAX_NDIM 64

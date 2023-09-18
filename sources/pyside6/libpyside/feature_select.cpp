@@ -93,7 +93,7 @@ namespace PySide::Feature {
 
 using namespace Shiboken;
 
-typedef bool(*FeatureProc)(PyTypeObject *type, PyObject *prev_dict, int id);
+using FeatureProc = bool(*)(PyTypeObject *type, PyObject *prev_dict, int id);
 
 static FeatureProc *featurePointer = nullptr;
 
@@ -501,12 +501,12 @@ static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, in
 // This is the Python 2 version for inspection of m_ml, only.
 // The actual Python 3 version is larget.
 
-typedef struct {
+struct PyCFunctionObject {
     PyObject_HEAD
     PyMethodDef *m_ml; /* Description of the C function to call */
     PyObject    *m_self; /* Passed as 'self' arg to the C func, can be NULL */
     PyObject    *m_module; /* The __module__ attribute, can be anything */
-} PyCFunctionObject;
+};
 
 static PyObject *modifyStaticToClassMethod(PyTypeObject *type, PyObject *sm)
 {
