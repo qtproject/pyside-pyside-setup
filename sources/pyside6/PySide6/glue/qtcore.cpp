@@ -1119,9 +1119,9 @@ if (result == -1) {
 
 // @snippet qdatastream-writerawdata-pybuffer
 int r = 0;
-Py_BEGIN_ALLOW_THREADS
 Py_ssize_t bufferLen;
 auto *data = reinterpret_cast<const char*>(Shiboken::Buffer::getPointer(%PYARG_1, &bufferLen));
+Py_BEGIN_ALLOW_THREADS
 r = %CPPSELF.%FUNCTION_NAME(data, bufferLen);
 Py_END_ALLOW_THREADS
 %PYARG_0 = %CONVERTTOPYTHON[int](r);
