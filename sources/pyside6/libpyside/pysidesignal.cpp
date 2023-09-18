@@ -789,9 +789,9 @@ static PyObject *_getHomonymousMethod(PySideSignalInstance *inst)
     auto signalName = inst->d->signalName;
     Shiboken::AutoDecRef name(Shiboken::String::fromCString(signalName));
     auto *mro = Py_TYPE(inst->d->source)->tp_mro;
-    Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
+    const Py_ssize_t n = PyTuple_GET_SIZE(mro);
 
-    for (idx = 0; idx < n; idx++) {
+    for (Py_ssize_t idx = 0; idx < n; idx++) {
         auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
         auto *hom = PyDict_GetItem(sub_type->tp_dict, name);
         PyObject *realFunc{};

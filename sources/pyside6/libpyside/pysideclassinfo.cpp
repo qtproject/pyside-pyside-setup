@@ -14,7 +14,7 @@
 extern "C"
 {
 
-static PyTypeObject *createClassInfoType(void)
+static PyTypeObject *createClassInfoType()
 {
     auto typeSlots =
         PySide::ClassDecorator::Methods<PySide::ClassInfo::ClassInfoPrivate>::typeSlots();

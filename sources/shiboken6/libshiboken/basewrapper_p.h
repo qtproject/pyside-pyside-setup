@@ -30,14 +30,12 @@ using ChildrenList = std::set<SbkObject *>;
 /// Structure used to store information about object parent and children.
 struct ParentInfo
 {
-    /// Default ctor.
-    ParentInfo() : parent(nullptr), hasWrapperRef(false) {}
     /// Pointer to parent object.
-    SbkObject *parent;
+    SbkObject *parent = nullptr;
     /// List of object children.
     ChildrenList children;
     /// has internal ref
-    bool hasWrapperRef;
+    bool hasWrapperRef = false;
 };
 
 } // namespace Shiboken

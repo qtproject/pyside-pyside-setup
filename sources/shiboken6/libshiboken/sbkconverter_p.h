@@ -278,7 +278,7 @@ struct Primitive<PY_LONG_LONG> : OnePrimitive<PY_LONG_LONG>
     {
         PY_LONG_LONG result = PyLong_AsLongLong(pyIn);
         if (OverFlowChecker<PY_LONG_LONG>::check(result, pyIn))
-            PyErr_SetObject(PyExc_OverflowError, 0);
+            PyErr_SetObject(PyExc_OverflowError, nullptr);
         *reinterpret_cast<PY_LONG_LONG * >(cppOut) = result;
     }
     static PythonToCppFunc isConvertible(PyObject *pyIn)

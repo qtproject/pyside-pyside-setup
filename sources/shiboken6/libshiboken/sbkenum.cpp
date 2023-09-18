@@ -102,8 +102,8 @@ int enumIsFlag(PyObject *ob_type)
     if (metatype != reinterpret_cast<PyTypeObject *>(PyEnumMeta))
         return -1;
     auto *mro = reinterpret_cast<PyTypeObject *>(ob_type)->tp_mro;
-    Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
-    for (idx = 0; idx < n; idx++) {
+    const Py_ssize_t n = PyTuple_GET_SIZE(mro);
+    for (Py_ssize_t idx = 0; idx < n; ++idx) {
         auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
         if (sub_type == reinterpret_cast<PyTypeObject *>(PyFlag))
             return 1;
