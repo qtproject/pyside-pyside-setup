@@ -14,8 +14,7 @@
 
 static SbkArrayConverter *ArrayTypeConverters[Shiboken::Conversions::SBK_ARRAY_IDX_SIZE] [2] = {};
 
-namespace Shiboken {
-namespace Conversions {
+namespace Shiboken::Conversions {
 
 // Check whether Predicate is true for all elements of a sequence
 template <class Predicate>
@@ -244,5 +243,4 @@ void setArrayTypeConverter(int index, int dimension, SbkArrayConverter *c)
     ArrayTypeConverters[index][dimension - 1] = c;
 }
 
-} // namespace Conversions
-} // namespace Shiboken
+} // namespace Shiboken::Conversions

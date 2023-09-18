@@ -45,7 +45,7 @@ public:
     bool final = false;
 };
 
-namespace PySide { namespace Property {
+namespace PySide::Property {
 
 /**
  * Init PySide QProperty support system
@@ -159,7 +159,6 @@ bool isFinal(const PySideProperty* self);
 /// @return type object
 PyObject *getTypeObject(const PySideProperty* self);
 
-} // namespace Property
-} // namespace PySide
+} // namespace PySide::Property
 
 #endif

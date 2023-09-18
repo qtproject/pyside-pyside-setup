@@ -97,7 +97,7 @@ static bool is_module_code()
 
 } // extern "C"
 
-namespace PySide { namespace QEnum {
+namespace PySide::QEnum {
 
 static std::map<int, PyObject *> enumCollector;
 
@@ -191,8 +191,7 @@ std::vector<PyObject *> resolveDelayedQEnums(PyTypeObject *containerType)
     return result;
 }
 
-} // namespace Enum
-} // namespace Shiboken
+} // namespace Shiboken::Enum
 
 //
 ///////////////////////////////////////////////////////////////

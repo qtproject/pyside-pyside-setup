@@ -89,7 +89,7 @@ This is everything that the following code does.
 *****************************************************************************/
 
 
-namespace PySide { namespace Feature {
+namespace PySide::Feature {
 
 using namespace Shiboken;
 
@@ -778,5 +778,4 @@ SIMILAR_FEATURE(20)
 SIMILAR_FEATURE(40)
 SIMILAR_FEATURE(80)
 
-} // namespace PySide
-} // namespace Feature
+} // namespace PySide::Feature

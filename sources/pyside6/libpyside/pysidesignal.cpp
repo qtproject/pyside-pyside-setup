@@ -100,8 +100,7 @@ static std::optional<QByteArrayList> parseArgumentNames(PyObject *argArguments)
     return result;
 }
 
-namespace PySide {
-namespace Signal {
+namespace PySide::Signal {
     //aux
     class SignalSignature {
     public:
@@ -121,8 +120,7 @@ namespace Signal {
     static void instanceInitialize(PySideSignalInstance *, PyObject *, PySideSignal *, PyObject *, int);
     static QByteArray parseSignature(PyObject *);
     static PyObject *buildQtCompatible(const QByteArray &);
-}
-}
+} // PySide::Signal
 
 extern "C"
 {
@@ -827,8 +825,7 @@ static PyObject *metaSignalCheck(PyObject * /* klass */, PyObject *arg)
 
 } // extern "C"
 
-namespace PySide {
-namespace Signal {
+namespace PySide::Signal {
 
 static const char *MetaSignal_SignatureStrings[] = {
     "PySide6.QtCore.MetaSignal.__instancecheck__(self,object:object)->bool",
@@ -1335,6 +1332,4 @@ QByteArray voidType()
     return QByteArrayLiteral("void");
 }
 
-} //namespace Signal
-} //namespace PySide
-
+} //namespace PySide::Signal

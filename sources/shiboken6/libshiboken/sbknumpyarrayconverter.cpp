@@ -94,8 +94,7 @@ std::ostream &operator<<(std::ostream &str, PyArrayObject *o)
     return str;
 }
 
-namespace Shiboken {
-namespace Conversions {
+namespace Shiboken::Conversions {
 
 // Internals from sbkarrayconverter.cpp
 SbkArrayConverter *createArrayConverter(IsArrayConvertibleToCppFunc toCppCheckFunc);
@@ -273,5 +272,4 @@ void initNumPyArrayConverters()
     extendArrayConverter2<double, NPY_DOUBLE>();
 }
 
-} // namespace Conversions
-} // namespace Shiboken
+} // namespace Shiboken::Conversions

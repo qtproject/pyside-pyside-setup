@@ -7,7 +7,7 @@
 #include <pysidemacros.h>
 #include <vector>
 
-namespace PySide { namespace QEnum {
+namespace PySide::QEnum {
 
 // PYSIDE-957: Support the QEnum macro
 PYSIDE_API PyObject *QEnumMacro(PyObject *, bool);
@@ -15,7 +15,6 @@ PYSIDE_API int isFlag(PyObject *);
 PYSIDE_API std::vector<PyObject *> resolveDelayedQEnums(PyTypeObject *);
 PYSIDE_API void init();
 
-} // namespace QEnum
-} // namespace PySide
+} // namespace PySide::QEnum
 
 #endif

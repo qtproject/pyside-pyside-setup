@@ -108,7 +108,7 @@ static int SbkObjectType_meta_setattro(PyObject *obj, PyObject *name, PyObject *
 /*
  * These functions are added to the SbkObjectType_TypeF() dynamically.
  */
-namespace PySide { namespace ClassProperty {
+namespace PySide::ClassProperty {
 
 static const char *PyClassProperty_SignatureStrings[] = {
     "PySide6.QtCore.PyClassProperty(cls,"
@@ -135,5 +135,4 @@ void init(PyObject *module)
     PyModule_AddObject(module, "PyClassProperty", classproptype);
 }
 
-} // namespace ClassProperty
-} // namespace PySide
+} // namespace PySide::ClassProperty

@@ -18,8 +18,7 @@ static SbkConverter **PrimitiveTypeConverters;
 using ConvertersMap = std::unordered_map<std::string, SbkConverter *>;
 static ConvertersMap converters;
 
-namespace Shiboken {
-namespace Conversions {
+namespace Shiboken::Conversions {
 
 void initArrayConverters();
 
@@ -748,4 +747,4 @@ void SpecificConverter::toCpp(PyObject *pyIn, void *cppOut)
     }
 }
 
-} } // namespace Shiboken::Conversions
+} // namespace Shiboken::Conversions

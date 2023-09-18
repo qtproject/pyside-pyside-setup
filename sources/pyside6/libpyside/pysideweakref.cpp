@@ -44,7 +44,7 @@ static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, 
     Py_RETURN_NONE;
 }
 
-namespace PySide { namespace WeakRef {
+namespace PySide::WeakRef {
 
 PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData)
 {
@@ -74,5 +74,4 @@ PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData)
     return reinterpret_cast<PyObject *>(weak);
 }
 
-} }  //namespace
-
+} // namespace PySide::WeakRef
