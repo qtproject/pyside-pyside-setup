@@ -39,15 +39,15 @@ public:
     }
 
 #ifndef NDEBUG
-    void dumpDotGraph()
+    void dumpDotGraph() const
     {
         std::ofstream file("/tmp/shiboken_graph.dot");
 
         file << "digraph D {\n";
 
-        for (auto i = m_edges.begin(), end = m_edges.end(); i != end; ++i) {
-            auto *node1 = i->first;
-            const NodeList &nodeList = i->second;
+        for (const auto &p : m_edges) {
+            auto *node1 = p.first;
+            const NodeList &nodeList = p.second;
             for (const PyTypeObject *o : nodeList) {
                 auto *node2 = o;
                 file << '"' << node2->tp_name << "\" -> \""
@@ -321,7 +321,7 @@ PyObject *BindingManager::getOverride(const void *cptr,
     }
 
     if (method != nullptr) {
-        PyObject *defaultMethod;
+        PyObject *defaultMethod{};
         PyObject *mro = Py_TYPE(wrapper)->tp_mro;
 
         int size = PyTuple_GET_SIZE(mro);
@@ -374,9 +374,9 @@ std::set<PyObject *> BindingManager::getAllPyObjects()
 void BindingManager::visitAllPyObjects(ObjectVisitor visitor, void *data)
 {
     WrapperMap copy = m_d->wrapperMapper;
-    for (auto it = copy.begin(); it != copy.end(); ++it) {
-        if (hasWrapper(it->first))
-            visitor(it->second, data);
+    for (const auto &p : copy) {
+        if (hasWrapper(p.first))
+            visitor(p.second, data);
     }
 }
 

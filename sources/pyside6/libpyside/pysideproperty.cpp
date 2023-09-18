@@ -174,7 +174,7 @@ void PySidePropertyPrivate::metaCall(PyObject *source, QMetaObject::Call call, v
 
 static PyObject *qpropertyTpNew(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
 {
-    PySideProperty *me = reinterpret_cast<PySideProperty *>(subtype->tp_alloc(subtype, 0));
+    auto *me = reinterpret_cast<PySideProperty *>(subtype->tp_alloc(subtype, 0));
     me->d = new PySidePropertyPrivate;
     return reinterpret_cast<PyObject *>(me);
 }
@@ -262,7 +262,7 @@ static void qpropertyDeAlloc(PyObject *self)
 static PyObject *
 _property_copy(PyObject *old, PyObject *get, PyObject *set, PyObject *reset, PyObject *del)
 {
-    PySideProperty *pold = reinterpret_cast<PySideProperty *>(old);
+    auto *pold = reinterpret_cast<PySideProperty *>(old);
     PySidePropertyPrivate *pData = pold->d;
 
     AutoDecRef type(PyObject_Type(old));
@@ -448,8 +448,8 @@ static PyObject *getFromType(PyTypeObject *type, PyObject *name)
     attr = PyDict_GetItem(type->tp_dict, name);
     if (!attr) {
         PyObject *bases = type->tp_bases;
-        int size = PyTuple_GET_SIZE(bases);
-        for(int i=0; i < size; i++) {
+        const Py_ssize_t size = PyTuple_GET_SIZE(bases);
+        for (Py_ssize_t i = 0; i < size; ++i) {
             PyObject *base = PyTuple_GET_ITEM(bases, i);
             attr = getFromType(reinterpret_cast<PyTypeObject *>(base), name);
             if (attr)

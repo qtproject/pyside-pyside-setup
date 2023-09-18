@@ -17,7 +17,7 @@ namespace PySide
 
 class MetaObjectBuilder
 {
-    Q_DISABLE_COPY(MetaObjectBuilder)
+    Q_DISABLE_COPY_MOVE(MetaObjectBuilder)
 public:
     using EnumValue = QPair<QByteArray, int>;
     using EnumValues = QList<EnumValue>;

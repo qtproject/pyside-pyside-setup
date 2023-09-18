@@ -1239,11 +1239,10 @@ void makeValid(SbkObject *self)
 
     // If has ref to other objects make all valid again
     if (self->d->referredObjects) {
-        RefCountMap &refCountMap = *(self->d->referredObjects);
-        RefCountMap::iterator iter;
-        for (auto it = refCountMap.begin(), end = refCountMap.end(); it != end; ++it) {
-            if (Shiboken::Object::checkType(it->second))
-                makeValid(reinterpret_cast<SbkObject *>(it->second));
+        const RefCountMap &refCountMap = *(self->d->referredObjects);
+        for (const auto &p : refCountMap) {
+            if (Shiboken::Object::checkType(p.second))
+                makeValid(reinterpret_cast<SbkObject *>(p.second));
         }
     }
 }
@@ -1758,17 +1757,17 @@ std::string info(SbkObject *self)
     }
 
     if (self->d->referredObjects && !self->d->referredObjects->empty()) {
-        Shiboken::RefCountMap &map = *self->d->referredObjects;
+        const Shiboken::RefCountMap &map = *self->d->referredObjects;
         s << "referred objects.. ";
         std::string lastKey;
-        for (auto it = map.begin(), end = map.end(); it != end; ++it) {
-            if (it->first != lastKey) {
+        for (const auto &p : map) {
+            if (p.first != lastKey) {
                 if (!lastKey.empty())
                     s << "                   ";
-                s << '"' << it->first << "\" => ";
-                lastKey = it->first;
+                s << '"' << p.first << "\" => ";
+                lastKey = p.first;
             }
-            Shiboken::AutoDecRef obj(PyObject_Str(it->second));
+            Shiboken::AutoDecRef obj(PyObject_Str(p.second));
             s << String::toCString(obj) << ' ';
         }
         s << '\n';

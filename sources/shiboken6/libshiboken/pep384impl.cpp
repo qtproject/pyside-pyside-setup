@@ -866,13 +866,13 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
     wchar_t bigbuf[big_stack];
     wchar_t *resbuf = amount <= big_stack ? bigbuf : (wchar_t *)malloc(sizeof(wchar_t) * amount);
     if (!resbuf)
-        return 0;
+        return nullptr;
     /* ident = "_" + priv[ipriv:] + ident # i.e. 1+plen+nlen bytes */
     resbuf[0] = '_';
     if (PyUnicode_AsWideChar(privateobj, resbuf + 1, ipriv + plen) < 0)
-        return 0;
+        return nullptr;
     if (PyUnicode_AsWideChar(name, resbuf + ipriv + plen + 1, nlen) < 0)
-        return 0;
+        return nullptr;
     PyObject *result = PyUnicode_FromWideChar(resbuf + ipriv, 1 + plen + nlen);
     if (amount > big_stack)
         free(resbuf);

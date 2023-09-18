@@ -611,9 +611,9 @@ static QByteArrayList GetPropertyStringsMro(PyTypeObject *type)
     auto res = QByteArrayList();
 
     PyObject *mro = type->tp_mro;
-    Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
+    const Py_ssize_t n = PyTuple_GET_SIZE(mro);
     // We leave 'Shiboken.Object' and 'object' alone, therefore "n - 2".
-    for (idx = 0; idx < n - 2; idx++) {
+    for (Py_ssize_t idx = 0; idx < n - 2; idx++) {
         auto *subType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
         auto props = SbkObjectType_GetPropertyStrings(subType);
         if (props != nullptr)

@@ -572,7 +572,7 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
 
         const char *cname = Shiboken::String::toCString(name);
         uint cnameLen = qstrlen(cname);
-        if (std::strncmp("__", cname, 2)) {
+        if (std::strncmp("__", cname, 2) != 0) {
             const QMetaObject *metaObject = cppSelf->metaObject();
             QList<QMetaMethod> signalList;
             // Caution: This inserts a meta function or a signal into the instance dict.

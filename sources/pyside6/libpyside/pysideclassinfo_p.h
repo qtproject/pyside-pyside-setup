@@ -8,7 +8,6 @@
 
 #include "pysideclassdecorator_p.h"
 #include "pysideclassinfo.h"
-#include "pysideclassinfo.h"
 
 #include <QtCore/QMetaObject>
 

@@ -51,7 +51,7 @@ static PyType_Slot PyClassProperty_slots[] = {
     {Py_tp_descr_get,   reinterpret_cast<void *>(PyClassProperty_descr_get)},
     {Py_tp_descr_set,   reinterpret_cast<void *>(PyClassProperty_descr_set)},
     {Py_tp_init,        reinterpret_cast<void *>(PyClassProperty_tp_init)},
-    {0, 0}
+    {0, nullptr}
 };
 
 static PyType_Spec PyClassProperty_spec = {
@@ -97,10 +97,8 @@ static int SbkObjectType_meta_setattro(PyObject *obj, PyObject *name, PyObject *
     if (call_descr_set) {
         // Call `class_property.__set__()` instead of replacing the `class_property`.
         return Py_TYPE(descr)->tp_descr_set(descr, obj, value);
-    } else {
-        // Replace existing attribute.
-        return PyType_Type.tp_setattro(obj, name, value);
-    }
+    } // Replace existing attribute.
+    return PyType_Type.tp_setattro(obj, name, value);
 }
 
 } // extern "C"
