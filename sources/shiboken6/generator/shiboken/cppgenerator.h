@@ -140,6 +140,8 @@ private:
                                        bool useWrapperClass);
     static void writeSmartPointerCppSelfConversion(TextStream &s,
                                                    const GeneratorContext &context);
+
+    static void writeCppSelfVarDef(TextStream &s, CppSelfDefinitionFlags flags = {});
     static void writeSmartPointerCppSelfDefinition(TextStream &s,
                                                    const GeneratorContext &,
                                                    ErrorReturn errorReturn = ErrorReturn::Default,
@@ -495,6 +497,7 @@ private:
     /// Returns true if generator should produce getters and setters for the given class.
     static bool shouldGenerateGetSetList(const AbstractMetaClassCPtr &metaClass);
 
+    static bool hasHashFunction(const AbstractMetaClassCPtr &c);
     static void writeHashFunction(TextStream &s, const GeneratorContext &context);
 
     /// Write default implementations for sequence protocol
@@ -506,6 +509,8 @@ private:
     static QString writeReprFunction(TextStream &s,
                                      const GeneratorContext &context,
                                      uint indirections);
+    static void writePyMethodDefs(TextStream &s, const QString &className,
+                                  const QString &methodsDefinitions, bool generateCopy);
 
     static bool hasBoolCast(const AbstractMetaClassCPtr &metaClass)
     { return boolCast(metaClass).has_value(); }
@@ -514,11 +519,14 @@ private:
         findSmartPointerInstantiation(const SmartPointerTypeEntryCPtr &pointer,
                                       const TypeEntryCPtr &pointee) const;
     void clearTpFuncs();
+    static QString chopType(QString s);
 
     QHash<QString, QString> m_tpFuncs;
     QHash<QString, QString> m_nbFuncs;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(CppGenerator::CppSelfDefinitionFlags)
+
+TextStream &operator<<(TextStream &s, CppGenerator::ErrorReturn r);
 
 #endif // CPPGENERATOR_H
