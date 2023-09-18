@@ -478,6 +478,7 @@ def init_PySide6_QtCore():
         "QByteArrayView": QByteArray,
         "Q_NULLPTR": None,
         "QCalendar.Unspecified": PySide6.QtCore.QCalendar.Unspecified,
+        "QCborTag(-1)": ulong_max,
         "QDir.Filters(AllEntries | NoDotAndDotDot)": Instance(
             "QDir.Filters(QDir.AllEntries | QDir.NoDotAndDotDot)"),
         "QDir.SortFlags(Name | IgnoreCase)": Instance(
