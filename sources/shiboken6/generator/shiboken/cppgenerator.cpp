@@ -64,9 +64,9 @@ static QString mangleName(QString name)
 
 struct sbkUnusedVariableCast
 {
-    explicit sbkUnusedVariableCast(QString name) : m_name(name) {}
+    explicit sbkUnusedVariableCast(QStringView name) : m_name(name) {}
 
-    const QString m_name;
+    const QStringView m_name;
 };
 
 TextStream &operator<<(TextStream &str, const sbkUnusedVariableCast &c)
@@ -2370,9 +2370,9 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
     }
     s << ")\n{\n" << indent;
     if (rfunc->ownerClass() == nullptr || overloadData.hasStaticFunction())
-        s << sbkUnusedVariableCast(u"self"_s);
+        s << sbkUnusedVariableCast(u"self");
     if (hasKwdArgs)
-        s << sbkUnusedVariableCast(u"kwds"_s);
+        s << sbkUnusedVariableCast(u"kwds");
 
     writeMethodWrapperPreamble(s, overloadData, classContext);
 
@@ -3487,7 +3487,7 @@ void CppGenerator::writeIsPythonConvertibleToCppFunction(TextStream &s,
             << "return Shiboken::Conversions::nonePythonToCppNullPtr;\n" << outdent;
     } else {
         if (!condition.contains(u"pyIn"))
-            s << sbkUnusedVariableCast(u"pyIn"_s);
+            s << sbkUnusedVariableCast(u"pyIn");
     }
     s << "if (" << condition << ")\n" << indent
         << "return " << pythonToCppFuncName << ";\n" << outdent
@@ -6180,7 +6180,7 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s,
     s << "static void *" << cpythonBaseName(metaClass)
         << "_typeDiscovery(void *cptr, PyTypeObject *instanceType)\n{\n" << indent
         << sbkUnusedVariableCast(u"cptr"_s)
-        << sbkUnusedVariableCast(u"instanceType"_s);
+        << sbkUnusedVariableCast(u"instanceType");
 
     if (!polymorphicExpr.isEmpty()) {
         polymorphicExpr = polymorphicExpr.replace(u"%1"_s,
