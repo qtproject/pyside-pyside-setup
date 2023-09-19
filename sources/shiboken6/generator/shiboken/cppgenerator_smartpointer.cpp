@@ -29,6 +29,19 @@ static QString smartPointerGetter(const GeneratorContext &context)
     return std::static_pointer_cast<const SmartPointerTypeEntry>(te)->getter();
 }
 
+struct callGetter
+{
+    explicit callGetter(const GeneratorContext &context) : m_context(context) {}
+
+    const GeneratorContext &m_context;
+};
+
+TextStream &operator<<(TextStream &str, const callGetter &c)
+{
+    str << "PyObject_CallMethod(self, \"" << smartPointerGetter(c.m_context) << "\", 0)";
+    return str;
+}
+
 // Helpers to collect all smart pointer pointee base classes
 static AbstractMetaClassCList
     findSmartPointeeBaseClasses(const ApiExtractorResult &api,
@@ -102,6 +115,7 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
     IncludeGroup includes{u"Extra includes"_s, typeEntry->extraIncludes()};
     if (hasPointeeClass)
         includes.append(classContext.pointeeClass()->typeEntry()->include());
+    includes.includes.append({Include::IncludePath, u"sbksmartpointer.h"_s});
     generateIncludes(s, classContext, {includes});
 
     s << '\n';
@@ -390,9 +404,7 @@ void CppGenerator::writeSmartPointerSetattroFunction(TextStream &s,
     Q_ASSERT(context.forSmartPointer());
     writeSetattroDefinition(s, context.metaClass());
     s << smartPtrComment
-      << "if (auto *rawObj = PyObject_CallMethod(self, \""
-      << smartPointerGetter(context)
-      << "\", 0)) {\n" << indent
+      << "if (auto *rawObj = " << callGetter(context) << ") {\n" << indent
       << "if (PyObject_HasAttr(rawObj, name) != 0)\n" << indent
       << "return PyObject_GenericSetAttr(rawObj, name, value);\n" << outdent
       << "Py_DECREF(rawObj);\n" << outdent
@@ -428,9 +440,7 @@ return nullptr;
     // This generates the code which dispatches access to member functions
     // and fields from the smart pointer to its pointee.
     s << smartPtrComment
-      << "if (auto *rawObj = PyObject_CallMethod(self, \""
-      << smartPointerGetter(context)
-      << "\", 0)) {\n" << indent
+      << "if (auto *rawObj = " << callGetter(context) << ") {\n" << indent
       << "if (auto *attribute = PyObject_GetAttr(rawObj, name))\n"
       << indent << "tmp = attribute;\n" << outdent
       << "Py_DECREF(rawObj);\n" << outdent
@@ -443,4 +453,15 @@ PyErr_Format(PyExc_AttributeError,
 )" << outdent
       << "}\n"
       << "return tmp;\n" << outdent << "}\n\n";
+}
+
+QString CppGenerator::writeSmartPointerReprFunction(TextStream &s,
+                                                    const GeneratorContext &context)
+{
+    const auto metaClass = context.metaClass();
+    QString funcName = writeReprFunctionHeader(s, context);
+    s << "Shiboken::AutoDecRef pointee(" << callGetter(context) << ");\n"
+        << "return Shiboken::SmartPointer::repr(self, pointee);\n";
+    writeReprFunctionFooter(s);
+    return funcName;
 }

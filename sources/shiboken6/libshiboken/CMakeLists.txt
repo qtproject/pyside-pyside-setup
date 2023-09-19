@@ -77,6 +77,7 @@ sbkmodule.cpp sbkmodule.h
 sbknumpy.cpp sbknumpycheck.h
 sbknumpyview.h
 sbkpython.h
+sbksmartpointer.cpp sbksmartpointer.h
 sbkstaticstrings.cpp sbkstaticstrings.h sbkstaticstrings_p.h
 sbkstring.cpp sbkstring.h
 sbktypefactory.cpp sbktypefactory.h
@@ -165,6 +166,7 @@ install(FILES
         sbknumpyview.h
         sbkstring.h
         sbkcppstring.h
+        sbksmartpointer.h
         sbkstaticstrings.h
         sbktypefactory.h
         shiboken.h

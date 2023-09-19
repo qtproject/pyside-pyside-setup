@@ -233,4 +233,16 @@ PyObject *getSnakeCaseName(PyObject *name, bool lower)
     return name;
 }
 
+// Return a generic representation of a PyObject as does PyObject_Repr().
+// Note: PyObject_Repr() may not be called on self from __repr__() as this
+// causes a recursion.
+PyObject *repr(PyObject *o)
+{
+    if (o == nullptr)
+        return PyUnicode_FromString("<NULL>");
+    if (o == Py_None)
+        return PyUnicode_FromString("None");
+     return PyUnicode_FromFormat("<%s object at %p>", Py_TYPE(o)->tp_name, o);
+}
+
 } // namespace Shiboken::String
