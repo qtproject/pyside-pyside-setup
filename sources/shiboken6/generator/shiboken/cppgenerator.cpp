@@ -4289,8 +4289,9 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     if (generateRichComparison(classContext))
         tp_richcompare = cpythonBaseName(metaClass) + u"_richcompare"_s;
 
+    const bool isSmartPointer = classContext.forSmartPointer();
     QString tp_getset;
-    if (shouldGenerateGetSetList(metaClass) && !classContext.forSmartPointer())
+    if (shouldGenerateGetSetList(metaClass) && !isSmartPointer)
         tp_getset = cpythonGettersSettersDefinitionName(metaClass);
 
     // search for special functions
@@ -4304,10 +4305,11 @@ void CppGenerator::writeClassDefinition(TextStream &s,
             it.value() = cpythonFunctionName(func);
     }
     if (m_tpFuncs.value(REPR_FUNCTION).isEmpty()
-        && metaClass->hasToStringCapability()) {
-        m_tpFuncs[REPR_FUNCTION] = writeReprFunction(s,
-                classContext,
-                metaClass->toStringCapabilityIndirections());
+        && (isSmartPointer || metaClass->hasToStringCapability())) {
+        const QString name = isSmartPointer
+          ? writeSmartPointerReprFunction(s, classContext)
+          : writeReprFunction(s, classContext, metaClass->toStringCapabilityIndirections());
+        m_tpFuncs[REPR_FUNCTION] = name;
     }
 
     // class or some ancestor has multiple inheritance
@@ -6499,14 +6501,20 @@ void CppGenerator::writeIndexError(TextStream &s, const QString &errorMsg,
         << errorReturn << outdent << "}\n";
 }
 
+QString CppGenerator::writeReprFunctionHeader(TextStream &s, const GeneratorContext &context)
+{
+    QString funcName = cpythonBaseName(context.metaClass()) + REPR_FUNCTION;
+    s << "extern \"C\"\n{\n"
+      << "static PyObject *" << funcName << "(PyObject *self)\n{\n" << indent;
+    return funcName;
+}
+
 QString CppGenerator::writeReprFunction(TextStream &s,
                                         const GeneratorContext &context,
                                         uint indirections)
 {
     const auto metaClass = context.metaClass();
-    QString funcName = cpythonBaseName(metaClass) + REPR_FUNCTION;
-    s << "extern \"C\"\n{\n"
-        << "static PyObject *" << funcName << "(PyObject *self)\n{\n" << indent;
+    QString funcName = writeReprFunctionHeader(s, context);
     writeCppSelfDefinition(s, context);
     s << R"(QBuffer buffer;
 buffer.open(QBuffer::ReadWrite);
@@ -6529,7 +6537,12 @@ if (idx >= 0)
         << "return Shiboken::String::fromFormat(\"<%s.%s at %p>\","
            " Shiboken::String::toCString(mod), str.constData(), self);\n"
         << outdent
-        << "return Shiboken::String::fromFormat(\"<%s at %p>\", str.constData(), self);\n"
-        << outdent << "}\n} // extern C\n\n";
+        << "return Shiboken::String::fromFormat(\"<%s at %p>\", str.constData(), self);\n";
+    writeReprFunctionFooter(s);
     return funcName;
+}
+
+void CppGenerator::writeReprFunctionFooter(TextStream &s)
+{
+    s << outdent << "}\n} // extern C\n\n";
 }

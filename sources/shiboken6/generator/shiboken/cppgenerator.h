@@ -507,9 +507,13 @@ private:
     static void writeIndexError(TextStream &s, const QString &errorMsg,
                                 ErrorReturn errorReturn);
 
+    static QString writeReprFunctionHeader(TextStream &s, const GeneratorContext &context);
     static QString writeReprFunction(TextStream &s,
                                      const GeneratorContext &context,
                                      uint indirections);
+    static QString writeSmartPointerReprFunction(TextStream &s,
+                                                 const GeneratorContext &context);
+    static void writeReprFunctionFooter(TextStream &s);
     static void writePyMethodDefs(TextStream &s, const QString &className,
                                   const QString &methodsDefinitions);
 
