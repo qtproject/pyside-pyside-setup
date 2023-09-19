@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "shibokengenerator.h"
+#include "generatorstrings.h"
 #include "generatorargument.h"
 #include "defaultvalue.h"
 #include "generatorcontext.h"
@@ -62,8 +63,18 @@ static const char WRAPPER_DIAGNOSTICS[] = "wrapper-diagnostics";
 static const char NO_IMPLICIT_CONVERSIONS[] = "no-implicit-conversions";
 static const char LEAN_HEADERS[] = "lean-headers";
 
-const QString CPP_ARG = u"cppArg"_s;
-const QString CPP_ARG_REMOVED = u"removed_cppArg"_s;
+QString CPP_ARG(int i)
+{
+    return u"cppArg"_s + QString::number(i);
+}
+
+static const QString CPP_ARG_REMOVED_PREFIX = u"removed_cppArg"_s;
+
+QString CPP_ARG_REMOVED(int i)
+{
+    return CPP_ARG_REMOVED_PREFIX + QString::number(i);
+}
+
 const QString CPP_RETURN_VAR = u"cppResult"_s;
 const QString CPP_SELF_VAR = u"cppSelf"_s;
 const QString NULL_PTR = u"nullptr"_s;
@@ -77,6 +88,21 @@ const QString CONV_RULE_OUT_VAR_SUFFIX = u"_out"_s;
 const QString BEGIN_ALLOW_THREADS =
     u"PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS"_s;
 const QString END_ALLOW_THREADS = u"PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS"_s;
+
+const QString REPR_FUNCTION = u"__repr__"_s;
+
+const QString CPP_ARG0 = u"cppArg0"_s;
+const char *const METHOD_DEF_SENTINEL = "{nullptr, nullptr, 0, nullptr} // Sentinel\n";
+const char *const PYTHON_TO_CPPCONVERSION_STRUCT = "Shiboken::Conversions::PythonToCppConversion";
+
+const char *const openTargetExternC =  R"(
+// Target ---------------------------------------------------------
+
+extern "C" {
+)";
+const char *const closeExternC =  "} // extern \"C\"\n\n";
+const char *const richCompareComment =
+    "// PYSIDE-74: By default, we redirect to object's tp_richcompare (which is `==`, `!=`).\n";
 
 struct ShibokenGeneratorOptions
 {
@@ -1337,7 +1363,7 @@ ShibokenGenerator::ArgumentVarReplacementList
             if (argRemoved && hasConversionRule)
                 argValue = arg.name() + CONV_RULE_OUT_VAR_SUFFIX;
             else if (argRemoved || (lastArg && arg.argumentIndex() > lastArg->argumentIndex()))
-                argValue = CPP_ARG_REMOVED + QString::number(i);
+                argValue = CPP_ARG_REMOVED(i);
             if (!argRemoved && argValue.isEmpty()) {
                 int argPos = i - removed;
                 AbstractMetaType type = arg.modifiedType();
@@ -1347,7 +1373,7 @@ ShibokenGenerator::ArgumentVarReplacementList
                 } else {
                     argValue = hasConversionRule
                                ? arg.name() + CONV_RULE_OUT_VAR_SUFFIX
-                               : CPP_ARG + QString::number(argPos);
+                               : CPP_ARG(argPos);
                     const auto generatorArg = GeneratorArgument::fromMetaType(type);
                     AbstractMetaType::applyDereference(&argValue, generatorArg.indirections);
                 }
@@ -1556,7 +1582,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
 
     QStringList args;
     for (const ArgumentVarReplacementPair &pair : argReplacements) {
-        if (pair.second.startsWith(CPP_ARG_REMOVED))
+        if (pair.second.startsWith(CPP_ARG_REMOVED_PREFIX))
             continue;
         args << pair.second;
     }

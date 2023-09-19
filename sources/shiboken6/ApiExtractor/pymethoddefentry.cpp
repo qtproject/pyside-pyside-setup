@@ -6,10 +6,15 @@
 
 #include <QtCore/QDebug>
 
+TextStream &operator<<(TextStream &str, const castToPyCFunction &c)
+{
+    str << "reinterpret_cast<PyCFunction>(" << c.m_function << ')';
+    return str;
+}
+
 TextStream &operator<<(TextStream &s, const PyMethodDefEntry &e)
 {
-     s <<  "{\"" << e.name << "\", reinterpret_cast<PyCFunction>("
-      << e.function << "), ";
+    s <<  "{\"" << e.name << "\", " << castToPyCFunction(e.function) <<", ";
     if (e.methFlags.isEmpty()) {
          s << '0';
     } else {

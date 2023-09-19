@@ -11,6 +11,14 @@ QT_FORWARD_DECLARE_CLASS(QDebug)
 
 class TextStream;
 
+struct castToPyCFunction
+{
+    explicit castToPyCFunction(QStringView function) noexcept :
+        m_function(function) {}
+
+    QStringView m_function;
+};
+
 struct PyMethodDefEntry
 {
     QString name;
@@ -21,6 +29,7 @@ struct PyMethodDefEntry
 
 using PyMethodDefEntries = QList<PyMethodDefEntry>;
 
+TextStream &operator<<(TextStream &str, const castToPyCFunction &e);
 TextStream &operator<<(TextStream &s, const PyMethodDefEntry &e);
 TextStream &operator<<(TextStream &s, const PyMethodDefEntries &e);
 

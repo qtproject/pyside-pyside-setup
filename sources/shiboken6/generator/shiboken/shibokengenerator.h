@@ -477,19 +477,4 @@ private:
 Q_DECLARE_OPERATORS_FOR_FLAGS(ShibokenGenerator::FunctionGeneration);
 Q_DECLARE_OPERATORS_FOR_FLAGS(ShibokenGenerator::AttroCheck);
 
-extern const QString CPP_ARG;
-extern const QString CPP_ARG_REMOVED;
-extern const QString CPP_RETURN_VAR;
-extern const QString CPP_SELF_VAR;
-extern const QString NULL_PTR;
-extern const QString PYTHON_ARG;
-extern const QString PYTHON_ARGS;
-extern const QString PYTHON_OVERRIDE_VAR;
-extern const QString PYTHON_RETURN_VAR;
-extern const QString PYTHON_TO_CPP_VAR;
-
-extern const QString CONV_RULE_OUT_VAR_SUFFIX;
-extern const QString BEGIN_ALLOW_THREADS;
-extern const QString END_ALLOW_THREADS;
-
 #endif // SHIBOKENGENERATOR_H
