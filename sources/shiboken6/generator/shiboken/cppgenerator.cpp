@@ -4,6 +4,7 @@
 #include "cppgenerator.h"
 #include "configurablescope.h"
 #include "generatorargument.h"
+#include "generatorstrings.h"
 #include "defaultvalue.h"
 #include "generatorcontext.h"
 #include "codesnip.h"
@@ -74,12 +75,6 @@ TextStream &operator<<(TextStream &str, const sbkUnusedVariableCast &c)
     str << "SBK_UNUSED(" << c.m_name << ")\n";
     return str;
 }
-
-static const QString CPP_ARG0 = u"cppArg0"_s;
-static const char methodDefSentinel[] = "{nullptr, nullptr, 0, nullptr} // Sentinel\n";
-const char *CppGenerator::PYTHON_TO_CPPCONVERSION_STRUCT = "Shiboken::Conversions::PythonToCppConversion";
-
-static inline QString reprFunction() { return QStringLiteral("__repr__"); }
 
 TextStream &operator<<(TextStream &s, CppGenerator::ErrorReturn r)
 {
@@ -215,7 +210,7 @@ void CppGenerator::clearTpFuncs()
     // but under a special constant under slots.
     m_tpFuncs = {
         {u"__str__"_s, {}}, {u"__str__"_s, {}},
-        {reprFunction(), {}}, {u"__iter__"_s, {}},
+        {REPR_FUNCTION, {}}, {u"__iter__"_s, {}},
         {u"__next__"_s, {}}
     };
     m_nbFuncs = { {u"__abs__"_s, {}}, {u"__pow__"_s, {} }};
@@ -462,14 +457,6 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
         s << "#include <" << i << ">\n";
 }
 
-static const char openTargetExternC[] =  R"(
-// Target ---------------------------------------------------------
-
-extern "C" {
-)";
-
-static const char closeExternC[] =  "} // extern \"C\"\n\n";
-
 // Write methods definition
 static void writePyMethodDefs(TextStream &s, const QString &className,
                               const QString &methodsDefinitions, bool generateCopy)
@@ -480,7 +467,7 @@ static void writePyMethodDefs(TextStream &s, const QString &className,
         s << "{\"__copy__\", reinterpret_cast<PyCFunction>(" << className << "___copy__)"
           << ", METH_NOARGS, nullptr},\n";
     }
-    s  << methodDefSentinel << outdent
+    s  << METHOD_DEF_SENTINEL << outdent
         << "};\n\n";
 }
 
@@ -3233,8 +3220,7 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
         const AbstractMetaArgument &arg = func->arguments().at(argIdx);
         if (arg.isModifiedRemoved()) {
             if (!arg.defaultValueExpression().isEmpty()) {
-                const QString cppArgRemoved = CPP_ARG_REMOVED
-                    + QString::number(argIdx);
+                const QString cppArgRemoved = CPP_ARG_REMOVED(argIdx);
                 s << getFullTypeName(arg.type()) << ' ' << cppArgRemoved;
                 s << " = " << arg.defaultValueExpression() << ";\n"
                     << sbkUnusedVariableCast(cppArgRemoved);
@@ -3256,7 +3242,7 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
             continue;
         auto argType = getArgumentType(func, argIdx);
         int argPos = argIdx - removedArgs;
-        QString argName = CPP_ARG + QString::number(argPos);
+        QString argName = CPP_ARG(argPos);
         QString pyArgName = usePyArgs ? pythonArgsAt(argPos) : PYTHON_ARG;
         indirections[argIdx] =
             writeArgumentConversion(s, argType, argName, pyArgName, errorReturn,
@@ -3823,7 +3809,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                     if (hasConversionRule)
                         userArgs << arg.name() + CONV_RULE_OUT_VAR_SUFFIX;
                     else if (!arg.defaultValueExpression().isEmpty())
-                        userArgs.append(CPP_ARG_REMOVED + QString::number(i));
+                        userArgs.append(CPP_ARG_REMOVED(i));
                 } else {
                     if (hasConversionRule) {
                         userArgs.append(arg.name() + CONV_RULE_OUT_VAR_SUFFIX);
@@ -3831,7 +3817,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                         const int idx = arg.argumentIndex() - removedArgs;
                         const auto deRef = argumentIndirections.at(i);
                         QString argName = AbstractMetaType::dereferencePrefix(deRef)
-                                          + CPP_ARG + QString::number(idx);
+                                          + CPP_ARG(idx);
                         userArgs.append(argName);
                     }
                 }
@@ -3862,7 +3848,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 if (hasConversionRule)
                     otherArgs.prepend(arg.name() + CONV_RULE_OUT_VAR_SUFFIX);
                 else
-                    otherArgs.prepend(CPP_ARG_REMOVED + QString::number(i));
+                    otherArgs.prepend(CPP_ARG_REMOVED(i));
             }
             if (otherArgsModified)
                 userArgs << otherArgs;
@@ -4569,9 +4555,9 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         else if ( it = m_nbFuncs.find(func->name()); it !=  m_nbFuncs.end() )
             it.value() = cpythonFunctionName(func);
     }
-    if (m_tpFuncs.value(reprFunction()).isEmpty()
+    if (m_tpFuncs.value(REPR_FUNCTION).isEmpty()
         && metaClass->hasToStringCapability()) {
-        m_tpFuncs[reprFunction()] = writeReprFunction(s,
+        m_tpFuncs[REPR_FUNCTION] = writeReprFunction(s,
                 classContext,
                 metaClass->toStringCapabilityIndirections());
     }
@@ -4603,7 +4589,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         << "}\n\nstatic PyType_Slot " << className << "_slots[] = {\n" << indent
         << "{Py_tp_base,        nullptr}, // inserted by introduceWrapperType\n"
         << pyTypeSlotEntry(u"Py_tp_dealloc", tp_dealloc)
-        << pyTypeSlotEntry(u"Py_tp_repr", m_tpFuncs.value(reprFunction()))
+      << pyTypeSlotEntry(u"Py_tp_repr", m_tpFuncs.value(REPR_FUNCTION))
         << pyTypeSlotEntry(u"Py_tp_hash", tp_hash)
         << pyTypeSlotEntry(u"Py_tp_call", tp_call)
         << pyTypeSlotEntry(u"Py_tp_str", m_tpFuncs.value(u"__str__"_s))
@@ -5063,9 +5049,6 @@ void CppGenerator::writeRichCompareFunctionHeader(TextStream &s,
         << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n"
         << sbkUnusedVariableCast(PYTHON_TO_CPP_VAR) << '\n';
 }
-
-static const char richCompareComment[] =
-    "// PYSIDE-74: By default, we redirect to object's tp_richcompare (which is `==`, `!=`).\n";
 
 void CppGenerator::writeRichCompareFunction(TextStream &s,
                                             const GeneratorContext &context) const
@@ -6451,7 +6434,7 @@ bool CppGenerator::finishGeneration()
         << s_globalFunctionImpl.toString() << '\n'
         << "static PyMethodDef " << moduleName() << "_methods[] = {\n" << indent
         << s_globalFunctionDef.toString()
-        << methodDefSentinel << outdent << "};\n\n"
+        << METHOD_DEF_SENTINEL << outdent << "};\n\n"
         << "// Classes initialization functions "
         << "------------------------------------------------------------\n"
         << s_classInitDecl.toString() << '\n';
@@ -6941,7 +6924,7 @@ QString CppGenerator::writeReprFunction(TextStream &s,
                                         uint indirections)
 {
     const auto metaClass = context.metaClass();
-    QString funcName = cpythonBaseName(metaClass) + reprFunction();
+    QString funcName = cpythonBaseName(metaClass) + REPR_FUNCTION;
     s << "extern \"C\"\n{\n"
         << "static PyObject *" << funcName << "(PyObject *self)\n{\n" << indent;
     writeCppSelfDefinition(s, context);

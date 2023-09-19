@@ -20,7 +20,7 @@ shiboken/configurablescope.h
 shiboken/cppgenerator.cpp shiboken/cppgenerator.h
 shiboken/cppgenerator_container.cpp
 shiboken/ctypenames.h
-shiboken/generatorargument.cpp shiboken/generatorargument.h
+shiboken/generatorargument.cpp shiboken/generatorargument.h shiboken/generatorstrings.h
 shiboken/headergenerator.cpp shiboken/headergenerator.h
 shiboken/overloaddata.cpp shiboken/overloaddata.h
 shiboken/pytypenames.h
