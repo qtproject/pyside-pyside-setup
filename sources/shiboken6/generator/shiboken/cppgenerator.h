@@ -413,7 +413,8 @@ private:
     static void writeTpTraverseFunction(TextStream &s, const AbstractMetaClassCPtr &metaClass);
     static void writeTpClearFunction(TextStream &s, const AbstractMetaClassCPtr &metaClass);
 
-    static void writeCopyFunction(TextStream &s, const GeneratorContext &context);
+    static QString writeCopyFunction(TextStream &s, TextStream &definitionStream,
+                                     TextStream &signatureStream, const GeneratorContext &context);
 
     static QString cppFieldAccess(const AbstractMetaField &metaField,
                                   const GeneratorContext &context);
@@ -510,7 +511,7 @@ private:
                                      const GeneratorContext &context,
                                      uint indirections);
     static void writePyMethodDefs(TextStream &s, const QString &className,
-                                  const QString &methodsDefinitions, bool generateCopy);
+                                  const QString &methodsDefinitions);
 
     static bool hasBoolCast(const AbstractMetaClassCPtr &metaClass)
     { return boolCast(metaClass).has_value(); }

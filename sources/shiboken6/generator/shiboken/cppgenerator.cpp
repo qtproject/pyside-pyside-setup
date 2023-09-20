@@ -447,16 +447,10 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
 
 // Write methods definition
 void CppGenerator::writePyMethodDefs(TextStream &s, const QString &className,
-                                     const QString &methodsDefinitions, bool generateCopy)
+                                     const QString &methodsDefinitions)
 {
     s << "static PyMethodDef " << className << "_methods[] = {\n" << indent
-        << methodsDefinitions << '\n';
-    if (generateCopy) {
-        s << "{\"__copy__\", reinterpret_cast<PyCFunction>(" << className << "___copy__)"
-          << ", METH_NOARGS, nullptr},\n";
-    }
-    s  << METHOD_DEF_SENTINEL << outdent
-        << "};\n\n";
+        << methodsDefinitions << METHOD_DEF_SENTINEL << outdent << "};\n\n";
 }
 
 bool CppGenerator::hasHashFunction(const AbstractMetaClassCPtr &c)
@@ -623,15 +617,14 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     }
     for (const auto &pyMethodDef : typeEntry->addedPyMethodDefEntrys())
         md << pyMethodDef << ",\n";
+
+    if (typeEntry->isValue())
+        writeCopyFunction(s, md, signatureStream, classContext);
+
     const QString methodsDefinitions = md.toString();
     const QString singleMethodDefinitions = smd.toString();
 
     const QString className = chopType(cpythonTypeName(metaClass));
-
-    if (typeEntry->isValue()) {
-        writeCopyFunction(s, classContext);
-        signatureStream << fullPythonClassName(metaClass) << ".__copy__()\n";
-    }
 
     // Write single method definitions
     s << singleMethodDefinitions;
@@ -668,7 +661,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
     }
 
     // Write methods definition
-    writePyMethodDefs(s, className, methodsDefinitions, typeEntry->isValue());
+    writePyMethodDefs(s, className, methodsDefinitions);
 
     // Write tp_s/getattro function
     const AttroCheck attroCheck = checkAttroFunctionNeeds(metaClass);
@@ -4583,12 +4576,21 @@ void CppGenerator::writeTpClearFunction(TextStream &s, const AbstractMetaClassCP
        << outdent << "}\n";
 }
 
-void CppGenerator::writeCopyFunction(TextStream &s, const GeneratorContext &context)
+QString CppGenerator::writeCopyFunction(TextStream &s,
+                                        TextStream &definitionStream,
+                                        TextStream &signatureStream,
+                                        const GeneratorContext &context)
 {
     const auto metaClass = context.metaClass();
     const QString className = chopType(cpythonTypeName(metaClass));
-    s << "static PyObject *" << className << "___copy__(PyObject *self)\n"
-        << "{\n" << indent;
+    const QString funcName = className + u"__copy__"_s;
+
+    signatureStream << fullPythonClassName(metaClass) << ".__copy__()\n";
+    definitionStream << PyMethodDefEntry{u"__copy__"_s, funcName, {"METH_NOARGS"_ba}, {}}
+                     << ",\n";
+
+    s << "static PyObject *" << funcName << "(PyObject *self)\n"
+      << "{\n" << indent;
     writeCppSelfDefinition(s, context, ErrorReturn::Default, CppSelfDefinitionFlag::CppSelfAsReference);
     QString conversionCode;
     if (!context.forSmartPointer())
@@ -4601,6 +4603,8 @@ void CppGenerator::writeCopyFunction(TextStream &s, const GeneratorContext &cont
     writeFunctionReturnErrorCheckSection(s, ErrorReturn::Default);
     s << "return " << PYTHON_RETURN_VAR << ";\n" << outdent
         << "}\n\n";
+
+    return funcName;
 }
 
 static inline void writeGetterFunctionStart(TextStream &s, const QString &funcName)
