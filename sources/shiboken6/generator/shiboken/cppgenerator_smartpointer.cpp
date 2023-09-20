@@ -172,19 +172,18 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
         writeMethodWrapper(s, md, signatureStream, it.value(), classContext);
     }
 
+    writeCopyFunction(s, md, signatureStream, classContext);
+
     const QString methodsDefinitions = md.toString();
     const QString singleMethodDefinitions = smd.toString();
 
     const QString className = chopType(cpythonTypeName(typeEntry));
 
-    writeCopyFunction(s, classContext);
-    signatureStream << fullPythonClassName(metaClass) << ".__copy__()\n";
-
     // Write single method definitions
     s << singleMethodDefinitions;
 
     // Write methods definition
-    writePyMethodDefs(s, className, methodsDefinitions, true /* ___copy__ */);
+    writePyMethodDefs(s, className, methodsDefinitions);
 
     // Write tp_s/getattro function
     const auto boolCastOpt = boolCast(metaClass);
