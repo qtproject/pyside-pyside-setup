@@ -28,6 +28,8 @@ class VirtualTester(StdSharedPtrVirtualMethodTester):
 class StdSharedPtrTests(unittest.TestCase):
     def testInteger(self):
         p = StdSharedPtrTestBench.createInteger()
+        # PYSIDE-2462: Ensure Integer's __dir__ entries in the pointer's
+        self.assertTrue("printInteger" in dir(p))
         StdSharedPtrTestBench.printInteger(p)
         self.assertTrue(p)
         call_func_on_ptr(p)
