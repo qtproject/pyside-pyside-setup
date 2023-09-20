@@ -11,6 +11,7 @@ namespace Shiboken::SmartPointer
 {
 
 LIBSHIBOKEN_API PyObject *repr(PyObject *pointer, PyObject *pointee);
+LIBSHIBOKEN_API PyObject *dir(PyObject *pointer, PyObject *pointee);
 
 } // namespace Shiboken::SmartPointer
 

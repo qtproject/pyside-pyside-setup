@@ -187,6 +187,7 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
     }
 
     writeCopyFunction(s, md, signatureStream, classContext);
+    writeSmartPointerDirFunction(s, md, signatureStream, classContext);
 
     const QString methodsDefinitions = md.toString();
     const QString singleMethodDefinitions = smd.toString();
@@ -463,5 +464,23 @@ QString CppGenerator::writeSmartPointerReprFunction(TextStream &s,
     s << "Shiboken::AutoDecRef pointee(" << callGetter(context) << ");\n"
         << "return Shiboken::SmartPointer::repr(self, pointee);\n";
     writeReprFunctionFooter(s);
+    return funcName;
+}
+
+QString CppGenerator::writeSmartPointerDirFunction(TextStream &s, TextStream &definitionStream,
+                                                   TextStream &signatureStream,
+                                                   const GeneratorContext &context)
+{
+    QString funcName = cpythonBaseName(context.metaClass()) + u"__dir__"_s;
+
+    signatureStream << fullPythonClassName(context.metaClass()) << ".__dir__()\n";
+    definitionStream << PyMethodDefEntry{u"__dir__"_s, funcName, {"METH_NOARGS"_ba}, {}}
+        << ",\n";
+
+    s << "extern \"C\"\n{\n"
+      << "static PyObject *" << funcName << "(PyObject *self)\n{\n" << indent
+      << "Shiboken::AutoDecRef pointee(" << callGetter(context) << ");\n"
+      << "return Shiboken::SmartPointer::dir(self, pointee);\n"
+      << outdent << "}\n} // extern C\n\n";
     return funcName;
 }
