@@ -12,11 +12,12 @@ Note: This Python example is not fully complete as compared to its C++ counterpa
 Only the push mode works at the moment. For the pull mode to work, the class
 QIODevice have python bindings that needs to be fixed.
 """
+import os
 import sys
 from typing import Optional
 
 import PySide6
-from PySide6.QtCore import QByteArray, QMargins, Qt, Slot
+from PySide6.QtCore import QByteArray, QMargins, Qt, Slot, qWarning
 from PySide6.QtGui import QPainter, QPalette
 from PySide6.QtMultimedia import (
     QAudio,
@@ -32,8 +33,13 @@ from PySide6.QtWidgets import (
     QSlider,
     QVBoxLayout,
     QWidget,
+    QLabel
 )
 
+is_android = os.environ.get('ANDROID_ARGUMENT')
+
+if is_android:
+    from PySide6.QtCore import QCoreApplication, QMicrophonePermission
 
 class AudioInfo:
     def __init__(self, format: QAudioFormat):
@@ -95,6 +101,22 @@ class InputTest(QWidget):
         super().__init__()
         self.m_devices = QMediaDevices(self)
         self.m_pullMode = False
+        self.initialize()
+
+    @Slot()
+    def initialize(self):
+        if is_android:
+            permission = QMicrophonePermission()
+            permission_status = qApp.checkPermission(permission)
+            if permission_status == Qt.PermissionStatus.Undetermined:
+                qApp.requestPermission(permission, self, self.initialize)
+                return
+            if permission_status == Qt.PermissionStatus.Denied:
+                qWarning("Microphone permission is not granted!")
+                self.initializeErrorWindow()
+                return
+            elif permission_status == Qt.PermissionStatus.Granted:
+                print("[AudioSource] Microphone permission granted")
 
         self.initialize_window()
         self.initialize_audio(QMediaDevices.defaultAudioInput())
@@ -131,6 +153,13 @@ class InputTest(QWidget):
         self.m_suspend_resume_button = QPushButton(self)
         self.m_suspend_resume_button.clicked.connect(self.toggle_suspend)
         self.layout.addWidget(self.m_suspend_resume_button)
+
+    def initializeErrorWindow(self):
+        self.layout = QVBoxLayout(self)
+        error_label = QLabel(self.tr("Microphone permission is not granted!"))
+        error_label.setWordWrap(True)
+        error_label.setAlignment(Qt.AlignCenter)
+        self.layout.addWidget(error_label)
 
     def initialize_audio(self, device_info: QAudioDevice):
         format = QAudioFormat()
