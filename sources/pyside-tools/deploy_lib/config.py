@@ -172,6 +172,10 @@ class Config(BaseConfig):
             if self.get_value("buildozer", "local_libs"):
                 self.local_libs = self.get_value("buildozer", "local_libs").split(",")
 
+            self._qt_plugins = []
+            if self.get_value("qt", "plugins"):
+                self._qt_plugins = self.get_value("qt", "plugins").split(",")
+
             self._mode = self.get_value("buildozer", "mode")
 
     def set_or_fetch(self, config_property_val, config_property_key, config_property_group="app"):
@@ -290,6 +294,15 @@ class Config(BaseConfig):
     def local_libs(self, local_libs):
         self._local_libs = local_libs
         self.set_value("buildozer", "local_libs", ",".join(local_libs))
+
+    @property
+    def qt_plugins(self):
+        return self._qt_plugins
+
+    @qt_plugins.setter
+    def qt_plugins(self, qt_plugins):
+        self._qt_plugins = qt_plugins
+        self.set_value("qt", "plugins", ",".join(qt_plugins))
 
     @property
     def ndk_path(self):
