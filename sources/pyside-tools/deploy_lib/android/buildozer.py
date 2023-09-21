@@ -5,17 +5,19 @@ import re
 import logging
 import tempfile
 import xml.etree.ElementTree as ET
+from typing import List
+from pkginfo import Wheel
 
 import zipfile
 from pathlib import Path
-from typing import List
 
 from .. import run_command, BaseConfig, Config, MAJOR_VERSION
-from . import get_llvm_readobj, find_lib_dependencies, find_qtlibs_in_wheel
+from . import get_llvm_readobj, find_lib_dependencies, find_qtlibs_in_wheel, create_recipe
 
 
 class BuildozerConfig(BaseConfig):
-    def __init__(self, buildozer_spec_file: Path, pysidedeploy_config: Config):
+    def __init__(self, buildozer_spec_file: Path, pysidedeploy_config: Config,
+                 generated_files_path: Path):
         super().__init__(buildozer_spec_file, comment_prefixes="#")
         self.set_value("app", "title", pysidedeploy_config.title)
         self.set_value("app", "package.name", pysidedeploy_config.title)
@@ -47,7 +49,6 @@ class BuildozerConfig(BaseConfig):
                      "https://github.com/shyamnathp/python-for-android/tree/pyside_support")
         self.set_value("app", "p4a.fork", "shyamnathp")
         self.set_value("app", "p4a.branch", "pyside_support_2")
-        self.set_value('app', "p4a.local_recipes", str(pysidedeploy_config.recipe_dir))
         self.set_value("app", "p4a.bootstrap", "qt")
 
         self.qt_libs_path: zipfile.Path = (
@@ -68,13 +69,37 @@ class BuildozerConfig(BaseConfig):
         dependency_files = self.__get_dependency_files(modules=pysidedeploy_config.modules,
                                                        arch=self.arch)
 
-        local_libs = self.__find_local_libs(dependency_files)
+        dependent_plugins = []
+        # the local_libs can also store dependent plugins
+        local_libs, dependent_plugins = self.__find_local_libs(dependency_files)
         pysidedeploy_config.local_libs += local_libs
 
-        if local_libs:
+        self.__find_plugin_dependencies(dependency_files, dependent_plugins)
+        pysidedeploy_config.qt_plugins += dependent_plugins
+
+        if local_libs or dependent_plugins:
             pysidedeploy_config.update_config()
 
         local_libs = ",".join(pysidedeploy_config.local_libs)
+
+        # create recipes
+        # https://python-for-android.readthedocs.io/en/latest/recipes/
+        # These recipes are manually added through buildozer.spec file to be used by
+        # python_for_android while building the distribution
+        if not pysidedeploy_config.recipes_exist() and not pysidedeploy_config.dry_run:
+            logging.info("[DEPLOY] Creating p4a recipes for PySide6 and shiboken6")
+            version = Wheel(pysidedeploy_config.wheel_pyside).version
+            create_recipe(version=version, component=f"PySide{MAJOR_VERSION}",
+                          wheel_path=pysidedeploy_config.wheel_pyside,
+                          generated_files_path=generated_files_path,
+                          qt_modules=pysidedeploy_config.modules,
+                          local_libs=pysidedeploy_config.local_libs,
+                          plugins=pysidedeploy_config.qt_plugins)
+            create_recipe(version=version, component=f"shiboken{MAJOR_VERSION}",
+                          wheel_path=pysidedeploy_config.wheel_shiboken,
+                          generated_files_path=generated_files_path)
+            pysidedeploy_config.recipe_dir = (generated_files_path / "recipes").resolve()
+        self.set_value('app', "p4a.local_recipes", str(pysidedeploy_config.recipe_dir))
 
         # add permissions
         permissions = self.__find_permissions(dependency_files)
@@ -165,6 +190,7 @@ class BuildozerConfig(BaseConfig):
 
     def __find_local_libs(self, dependency_files: List[zipfile.Path]):
         local_libs = set()
+        plugins = set()
         lib_pattern = re.compile(f"lib(?P<lib_name>.*)_{self.arch}")
         for dependency_file in dependency_files:
             xml_content = dependency_file.read_text()
@@ -172,6 +198,9 @@ class BuildozerConfig(BaseConfig):
             for local_lib in root.iter("lib"):
 
                 if 'file' not in local_lib.attrib:
+                    if 'name' not in local_lib.attrib:
+                        logging.warning("[DEPLOY] Invalid android dependency file"
+                                        f" {str(dependency_file)}")
                     continue
 
                 file = local_lib.attrib['file']
@@ -191,8 +220,59 @@ class BuildozerConfig(BaseConfig):
                     if match:
                         lib_name = match.group("lib_name")
                         local_libs.add(lib_name)
+                        if lib_name.startswith("plugins"):
+                            plugin_name = lib_name.split('plugins_', 1)[1]
+                            plugins.add(plugin_name)
 
-        return list(local_libs)
+        return list(local_libs), list(plugins)
+
+    def __find_plugin_dependencies(self, dependency_files: List[zipfile.Path],
+                                   dependent_plugins: List[str]):
+        # The `bundled` element in the dependency xml files points to the folder where
+        # additional dependencies for the application exists. Inspecting the depenency files
+        # in android, this always points to the specific Qt plugin dependency folder.
+        # eg: for application using Qt Multimedia, this looks like:
+        # <bundled file="./plugins/multimedia" />
+        # The code recusively checks all these dependent folders and adds the necessary plugins
+        # as dependencies
+        lib_pattern = re.compile(f"libplugins_(?P<plugin_name>.*)_{self.arch}.so")
+        for dependency_file in dependency_files:
+            xml_content = dependency_file.read_text()
+            root = ET.fromstring(xml_content)
+            for bundled_element in root.iter("bundled"):
+                # the attribute 'file' can be misleading, but it always points to the plugin
+                # folder on inspecting the dependency files
+                if 'file' not in bundled_element.attrib:
+                    logging.warning("[DEPLOY] Invalid Android dependency file"
+                                    f" {str(dependency_file)}")
+                    continue
+
+                # from "./plugins/multimedia" to absolute path in wheel
+                plugin_module_folder = bundled_element.attrib['file']
+                # they all should start with `./plugins`
+                if plugin_module_folder.startswith("./plugins"):
+                    plugin_module_folder = plugin_module_folder.partition("./plugins/")[2]
+                else:
+                    continue
+
+                absolute_plugin_module_folder = (self.qt_libs_path.parent / "plugins" /
+                                                plugin_module_folder)
+
+                if not absolute_plugin_module_folder.is_dir():
+                    logging.warning(f"[DEPLOY] Qt plugin folder '{plugin_module_folder}' does not"
+                                    " exist or is not a directory for this Android platform")
+                    continue
+
+                for plugin in absolute_plugin_module_folder.iterdir():
+                    plugin_name = plugin.name
+                    if plugin_name.endswith(".so") and plugin_name.startswith("libplugins"):
+                        # we only need part of plugin_name, because `lib` prefix and `arch` suffix
+                        # gets re-added by python-for-android
+                        match = lib_pattern.search(plugin_name)
+                        if match:
+                            plugin_infix_name = match.group("plugin_name")
+                            if plugin_infix_name not in dependent_plugins:
+                                dependent_plugins.append(plugin_infix_name)
 
     def __find_dependent_qt_modules(self, pysidedeploy_config: Config):
         """
@@ -232,6 +312,10 @@ class BuildozerConfig(BaseConfig):
                 if module not in pysidedeploy_config.modules:
                     dependent_modules.add(module)
 
+        dependent_modules_str = ",".join(dependent_modules)
+        logging.info("[DEPLOY] The following extra dependencies were found:"
+                     f" {dependent_modules_str}")
+
         return list(dependent_modules)
 
 
@@ -239,7 +323,7 @@ class Buildozer:
     dry_run = False
 
     @staticmethod
-    def initialize(pysidedeploy_config: Config):
+    def initialize(pysidedeploy_config: Config, generated_files_path: Path):
         project_dir = Path(pysidedeploy_config.project_dir)
         buildozer_spec = project_dir / "buildozer.spec"
         if buildozer_spec.exists():
@@ -253,7 +337,7 @@ class Buildozer:
         if not Buildozer.dry_run:
             if not buildozer_spec.exists():
                 raise RuntimeError(f"buildozer.spec not found in {Path.cwd()}")
-            BuildozerConfig(buildozer_spec, pysidedeploy_config)
+            BuildozerConfig(buildozer_spec, pysidedeploy_config, generated_files_path)
 
     @staticmethod
     def create_executable(mode: str):

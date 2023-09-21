@@ -44,6 +44,9 @@ wheel_pyside =
 # path to Shiboken wheel
 wheel_shiboken =
 
+# plugins to be copied to libs folder of the packaged application. Comma separated
+plugins = platforms_qtforandroid
+
 [nuitka]
 
 # (str) specify any extra nuitka arguments
@@ -73,6 +76,7 @@ sdk_path =
 modules =
 
 # other libraries to be loaded. Comma separated.
+# loaded at app startup
 local_libs = plugins_platforms_qtforandroid
 
 # architecture of deployed platform

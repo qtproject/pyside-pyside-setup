@@ -63,7 +63,7 @@ def find_pyside_modules(project_dir: Path, extra_ignore_dirs: List[Path] = None,
                             logging.warning(IMPORT_WARNING_PYSIDE.format(str(py_file)))
 
         except Exception as e:
-            logging.error(f"Finding module import failed on file {str(py_file)}")
+            logging.error(f"[DEPLOY] Finding module import failed on file {str(py_file)}")
             raise e
 
         return set(modules)

@@ -8,11 +8,9 @@ import traceback
 from pathlib import Path
 from textwrap import dedent
 
-from pkginfo import Wheel
-
 from deploy_lib import (setup_python, get_config, cleanup, install_python_dependencies,
                         config_option_exists, find_pyside_modules, MAJOR_VERSION)
-from deploy_lib.android import (create_recipe, extract_and_copy_jar, get_wheel_android_arch,
+from deploy_lib.android import (extract_and_copy_jar, get_wheel_android_arch,
                                 Buildozer, AndroidData)
 
 
@@ -126,24 +124,8 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
                          f"the project {config.modules}")
         config.modules.extend(extra_modules)
 
-        # create recipes
-        # https://python-for-android.readthedocs.io/en/latest/recipes/
-        # These recipes are manually added through buildozer.spec file to be used by
-        # python_for_android while building the distribution
-        if not config.recipes_exist():
-            logging.info("[DEPLOY] Creating p4a recipes for PySide6 and shiboken6")
-            version = Wheel(config.wheel_pyside).version
-            create_recipe(version=version, component=f"PySide{MAJOR_VERSION}",
-                          wheel_path=config.wheel_pyside,
-                          generated_files_path=generated_files_path,
-                          qt_modules=config.modules)
-            create_recipe(version=version, component=f"shiboken{MAJOR_VERSION}",
-                          wheel_path=config.wheel_shiboken,
-                          generated_files_path=generated_files_path)
-            config.recipe_dir = (generated_files_path / "recipes").resolve()
-
         # extract out and copy .jar files to {generated_files_path}
-        if not config.jars_dir or not Path(config.jars_dir).exists():
+        if not config.jars_dir or not Path(config.jars_dir).exists() and not dry_run:
             logging.info("[DEPLOY] Extract and copy jar files from PySide6 wheel to "
                          f"{generated_files_path}")
             extract_and_copy_jar(wheel_path=config.wheel_pyside,
@@ -154,9 +136,8 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
         if not config.arch:
             arch = get_wheel_android_arch(wheel=config.wheel_pyside)
             if not arch:
-                logging.exception("[DEPLOY] PySide wheel corrupted. Wheel name should end with"
+                raise RuntimeError("[DEPLOY] PySide wheel corrupted. Wheel name should end with"
                                   "platform name")
-                raise
             config.arch = arch
 
         # writing config file
@@ -174,7 +155,7 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
         # init buildozer
         Buildozer.dry_run = dry_run
         logging.info("[DEPLOY] Creating buildozer.spec file")
-        Buildozer.initialize(pysidedeploy_config=config)
+        Buildozer.initialize(pysidedeploy_config=config, generated_files_path=generated_files_path)
 
         # run buildozer
         logging.info("[DEPLOY] Running buildozer deployment")
