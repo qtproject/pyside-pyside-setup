@@ -76,17 +76,20 @@ class BuildozerConfig(BaseConfig):
 
         local_libs = ",".join(pysidedeploy_config.local_libs)
 
-        extra_args = (f"--qt-libs={modules} --load-local-libs={local_libs}")
-        self.set_value("app", "p4a.extra_args", extra_args)
-
         # add permissions
         permissions = self.__find_permissions(dependency_files)
         permissions = ", ".join(permissions)
         self.set_value("app", "android.permissions", permissions)
 
-        # add jars
-        jars = self.__find_jars(dependency_files, pysidedeploy_config.jars_dir)
+        # add jars and initClasses for the jars
+        jars, init_classes = self.__find_jars(dependency_files, pysidedeploy_config.jars_dir)
         self.set_value("app", "android.add_jars", ",".join(jars))
+        init_classes = ",".join(init_classes)
+
+        #extra arguments specific to Qt
+        extra_args = (f"--qt-libs={modules} --load-local-libs={local_libs}"
+                      f" --init-classes={init_classes}")
+        self.set_value("app", "p4a.extra_args", extra_args)
 
         # TODO: does not work atm. Seems like a bug with buildozer
         # change buildozer build_dir
@@ -126,7 +129,7 @@ class BuildozerConfig(BaseConfig):
         return permissions
 
     def __find_jars(self, dependency_files: List[zipfile.Path], jars_dir: Path):
-        jars = set()
+        jars, init_classes = set(), set()
         for dependency_file in dependency_files:
             xml_content = dependency_file.read_text()
             root = ET.fromstring(xml_content)
@@ -139,19 +142,26 @@ class BuildozerConfig(BaseConfig):
                     else:
                         logging.warning(f"[DEPLOY] Unable to include {jar_file}. "
                                         f"{jar_file} does not exist in {jars_dir}")
+                        continue
                 else:
                     logging.warning(f"[DEPLOY] Unable to include {jar_file}. "
                                     "All jar file paths should begin with 'jar/'")
+                    continue
+
+                jar_init_class = jar.attrib.get('initClass')
+                if jar_init_class:
+                    init_classes.add(jar_init_class)
 
         # add the jar with all the activity and service java files
         # this is created from Qt for Python instead of Qt
+        # The initClasses for this are already taken care of by python-for-android
         android_bindings_jar = jars_dir / "Qt6AndroidBindings.jar"
         if android_bindings_jar.exists():
             jars.add(str(android_bindings_jar))
         else:
             raise FileNotFoundError(f"{android_bindings_jar} not found in wheel")
 
-        return jars
+        return jars, init_classes
 
     def __find_local_libs(self, dependency_files: List[zipfile.Path]):
         local_libs = set()
