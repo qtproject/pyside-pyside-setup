@@ -2,9 +2,11 @@
     "files": ["main.py",
               "camera.py",
               "camera.ui",
+              "camera_mobile.ui",
               "imagesettings.py",
               "imagesettings.ui",
               "metadatadialog.py",
               "videosettings.py",
-              "videosettings.ui"]
+              "videosettings.ui",
+              "videosettings_mobile.ui"]
 }

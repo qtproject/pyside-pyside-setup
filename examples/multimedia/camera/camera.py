@@ -10,12 +10,17 @@ from PySide6.QtMultimedia import (QAudioInput, QCamera, QCameraDevice,
                                   QMediaRecorder)
 from PySide6.QtWidgets import QDialog, QMainWindow, QMessageBox
 from PySide6.QtGui import QAction, QActionGroup, QIcon, QImage, QPixmap
-from PySide6.QtCore import QDateTime, QDir, QTimer, Qt, Slot
+from PySide6.QtCore import QDateTime, QDir, QTimer, Qt, Slot, qWarning
 
-from ui_camera import Ui_Camera
 from metadatadialog import MetaDataDialog
 from imagesettings import ImageSettings
-from videosettings import VideoSettings
+from videosettings import VideoSettings, is_android
+
+if is_android:
+    from PySide6.QtCore import QCoreApplication, QMicrophonePermission, QCameraPermission
+    from ui_camera_mobile import Ui_Camera
+else:
+    from ui_camera import Ui_Camera
 
 
 class Camera(QMainWindow):
@@ -23,13 +28,10 @@ class Camera(QMainWindow):
         super().__init__()
 
         self._video_devices_group = None
-
         self.m_devices = QMediaDevices()
         self.m_imageCapture = None
         self.m_captureSession = QMediaCaptureSession()
         self.m_camera = None
-        self.m_audioInput = QAudioInput()
-        self.m_captureSession.setAudioInput(self.m_audioInput)
         self.m_mediaRecorder = None
 
         self.m_isCapturingImage = False
@@ -42,7 +44,8 @@ class Camera(QMainWindow):
         self._ui.setupUi(self)
         image = Path(__file__).parent / "shutter.svg"
         self._ui.takeImageButton.setIcon(QIcon(os.fspath(image)))
-        self._ui.actionAbout_Qt.triggered.connect(qApp.aboutQt)
+        if not is_android:
+            self._ui.actionAbout_Qt.triggered.connect(qApp.aboutQt)
 
         # disable all buttons by default
         self.updateCameraActive(False)
@@ -53,6 +56,40 @@ class Camera(QMainWindow):
         self._ui.metaDataButton.setEnabled(False)
 
         # try to actually initialize camera & mic
+        self.initialize()
+
+    @Slot()
+    def initialize(self):
+        if is_android:
+            # camera
+            cam_permission = QCameraPermission()
+            cam_permission_status = qApp.checkPermission(cam_permission)
+            if cam_permission_status == Qt.PermissionStatus.Undetermined:
+                qApp.requestPermission(cam_permission, self, self.initialize)
+                return
+            if cam_permission_status == Qt.PermissionStatus.Denied:
+                qWarning("Camera permission is not granted!")
+                return
+            elif cam_permission_status == Qt.PermissionStatus.Granted:
+                print("[AudioSource] Camera permission granted")
+
+            # microphone
+            microphone_permission = QMicrophonePermission()
+            microphone_permission_status = qApp.checkPermission(microphone_permission)
+            if microphone_permission_status == Qt.PermissionStatus.Undetermined:
+                qApp.requestPermission(microphone_permission, self, self.initialize)
+                return
+            if microphone_permission_status == Qt.PermissionStatus.Denied:
+                qWarning("Microphone permission is not granted!")
+                self.initializeErrorWindow()
+                return
+            elif microphone_permission_status == Qt.PermissionStatus.Granted:
+                print("[AudioSource] Microphone permission granted")
+
+        self.m_audioInput = QAudioInput()
+        self.m_captureSession.setAudioInput(self.m_audioInput)
+
+        # Camera devices
 
         self._video_devices_group = QActionGroup(self)
         self._video_devices_group.setExclusive(True)
