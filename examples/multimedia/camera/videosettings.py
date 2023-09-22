@@ -1,11 +1,18 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
+import os
 from PySide6.QtMultimedia import (QCameraFormat, QMediaFormat, QMediaRecorder,
                                   QVideoFrameFormat)
 from PySide6.QtWidgets import QDialog
 
-from ui_videosettings import Ui_VideoSettingsUi
+is_android = os.environ.get('ANDROID_ARGUMENT')
+
+if is_android:
+    from ui_videosettings_mobile import Ui_VideoSettingsUi
+else:
+    from ui_videosettings import Ui_VideoSettingsUi
+
 
 
 def box_value(box):
