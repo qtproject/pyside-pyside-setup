@@ -34,7 +34,7 @@ public:
 
 protected:
     inline const char *getClassName() { return className(); }
-    virtual const char *className() const override { return "OtherDerived"; }
+    const char *className() const override { return "OtherDerived"; }
 
 private:
     void pureVirtualPrivate() override;

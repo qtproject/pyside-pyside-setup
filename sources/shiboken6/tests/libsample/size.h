@@ -90,11 +90,11 @@ public:
     // External operators
     friend inline bool operator==(const Size&, const Size&);
     friend inline bool operator!=(const Size&, const Size&);
-    friend inline const Size operator+(const Size&, const Size&);
-    friend inline const Size operator-(const Size&, const Size&);
-    friend inline const Size operator*(const Size&, double);
-    friend inline const Size operator*(double, const Size&);
-    friend inline const Size operator/(const Size&, double);
+    friend inline Size operator+(const Size&, const Size&);
+    friend inline Size operator-(const Size&, const Size&);
+    friend inline Size operator*(const Size&, double);
+    friend inline Size operator*(double, const Size&);
+    friend inline Size operator/(const Size&, double);
 
     friend inline bool operator<(double, const Size&);
     friend inline bool operator>(double, const Size&);
@@ -140,27 +140,27 @@ inline bool operator>=(double area, const Size &s)
 }
 
 // Arithmetic Operators
-inline const Size operator+(const Size &s1, const Size &s2)
+inline Size operator+(const Size &s1, const Size &s2)
 {
     return Size(s1.m_width + s2.m_width, s1.m_height + s2.m_height);
 }
 
-inline const Size operator-(const Size &s1, const Size &s2)
+inline Size operator-(const Size &s1, const Size &s2)
 {
     return Size(s1.m_width - s2.m_width, s1.m_height - s2.m_height);
 }
 
-inline const Size operator*(const Size &s, double mult)
+inline Size operator*(const Size &s, double mult)
 {
     return Size(s.m_width * mult, s.m_height * mult);
 }
 
-inline const Size operator*(double mult, const Size &s)
+inline Size operator*(double mult, const Size &s)
 {
     return Size(s.m_width * mult, s.m_height * mult);
 }
 
-inline const Size operator/(const Size &s, double div)
+inline Size operator/(const Size &s, double div)
 {
     return Size(s.m_width / div, s.m_height / div);
 }

@@ -5,7 +5,7 @@
 
 ObjectTypeHolder::ObjectTypeHolder(const char *objectName)
 {
-    auto object = new ObjectType();
+    auto *object = new ObjectType();
     object->setObjectName(objectName);
     m_objectType = object;
 }

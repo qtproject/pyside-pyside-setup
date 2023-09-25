@@ -14,6 +14,9 @@ ObjectType::ObjectType(ObjectType *parent)
     setParent(parent);
 }
 
+ObjectType::ObjectType(ObjectType &&) noexcept = default;
+ObjectType &ObjectType::operator=(ObjectType &&) noexcept = default;
+
 ObjectType::~ObjectType()
 {
     for (auto *o : m_children)
@@ -167,10 +170,9 @@ void ObjectType::setLayout(ObjectTypeLayout *l)
                 << "' on ObjectType '" << objectName().cstring()
                 << "', when the ObjectTypeLayout already has a parent layout.\n";
             return;
-        } else {
-            // Steal the layout from an ObjectType parent.
-            oldParent->takeLayout();
         }
+        // Steal the layout from an ObjectType parent.
+        oldParent->takeLayout();
     }
 
     m_layout = l;
@@ -240,7 +242,7 @@ int ObjectType::callId() const
 
 void ObjectType::callVirtualCreateChild()
 {
-    ObjectType *fake_parent = new ObjectType();
+    auto *fake_parent = new ObjectType();
     ObjectType *fake_child = createChild(fake_parent);
     assert(fake_child->isPython());
     (void)fake_child;

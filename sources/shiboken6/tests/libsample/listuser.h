@@ -24,9 +24,9 @@ public:
 
     ListUser();
     ListUser(const ListUser &other);
-    ListUser(ListUser &&other);
+    ListUser(ListUser &&other) noexcept;
     ListUser &operator=(const ListUser &other);
-    ListUser &operator=(ListUser &&other);
+    ListUser &operator=(ListUser &&other) noexcept;
     virtual ~ListUser();
 
     virtual std::list<int> createList();

@@ -19,10 +19,10 @@ Point applyHomogeneousTransform(const Point &in,
     if (std::isfinite(w) && fabs(w) > 1e-10) {
         if (okay)
             *okay = true;
-        return Point(x / w, y / w);
-    } else {
-        if (okay)
-            *okay = false;
-        return Point();
+        return {x / w, y / w};
     }
+
+    if (okay)
+        *okay = false;
+    return {};
 }

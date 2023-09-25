@@ -19,7 +19,7 @@ SomeClass::PublicScopedEnum SomeClass::protectedMethodReturningPublicScopedEnum(
 
 OutValue enumInEnumOut(InValue in)
 {
-    OutValue retval;
+    auto retval = OutValue(-1);
     switch(in) {
     case ZeroIn:
         retval = ZeroOut;
@@ -31,7 +31,6 @@ OutValue enumInEnumOut(InValue in)
         retval = TwoOut;
         break;
     default:
-        retval = OutValue(-1);
         break;
     }
     return retval;

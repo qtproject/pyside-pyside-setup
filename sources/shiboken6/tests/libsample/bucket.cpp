@@ -25,7 +25,7 @@ int Bucket::pop(void)
 {
     int x = 0;
 
-    if (m_data.size() > 0) {
+    if (!m_data.empty()) {
         x = m_data.front();
         m_data.pop_front();
     }

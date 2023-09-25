@@ -67,7 +67,7 @@ struct SecretClass : public Abstract {
     PrintFormat returnAnEnum() override { return Short; }
     void hideFunction(HideType*) override {};
 private:
-    virtual void pureVirtualPrivate() override {}
+    void pureVirtualPrivate() override {}
 };
 
 Abstract *Derived::triggerImpossibleTypeDiscovery()

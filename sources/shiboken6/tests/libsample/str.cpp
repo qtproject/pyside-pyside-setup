@@ -68,7 +68,7 @@ int Str::toInt(bool *ok, int base) const
         conv >> std::hex >> result;
         break;
     }
-    const bool my_ok = std::istringstream::eofbit  &conv.rdstate();
+    const bool my_ok = std::istringstream::eofbit & conv.rdstate();
     if (!my_ok)
         result = 0;
     if (ok)
@@ -120,7 +120,7 @@ unsigned int strHash(const Str &str)
 {
     unsigned int result = 0;
     for (char c : str.m_str)
-        result = 5u * result + unsigned(c);
+        result = 5U * result + unsigned(c);
     return result;
 }
 

@@ -8,7 +8,7 @@
 Str ObjectView::displayModelData()
 {
     if (!m_model)
-        return Str("(NULL)");
+        return {"(NULL)"};
     return Str("Name: %VAR").arg(m_model->objectName());
 }
 

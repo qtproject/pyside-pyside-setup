@@ -51,9 +51,9 @@ public:
     Pen(SampleNamespace::Option option);
     Pen(const Color &color);
     Pen(const Pen &pen);
-    Pen(Pen &&);
+    Pen(Pen &&) noexcept;
     Pen &operator=(const Pen &pen);
-    Pen &operator=(Pen &&);
+    Pen &operator=(Pen &&) noexcept;
 
     // PYSIDE-1325, default initializer
     void drawLine(int x1, int y1, int x2, int y2, RenderHints renderHints = {});

@@ -14,7 +14,7 @@ Str Number::toStr() const
 
 Point operator*(const Point &p, const Number &n)
 {
-    return Point(p.x() * n.value(), p.y() * n.value());
+    return {p.x() * n.value(), p.y() * n.value()};
 }
 
 Complex Number::toComplex() const

@@ -3,19 +3,16 @@
 
 #include "polygon.h"
 
-Polygon::Polygon(double x, double y)
+Polygon::Polygon(double x, double y) : m_points({Point(x, y)})
 {
-    m_points.push_back(Point(x, y));
 }
 
-Polygon::Polygon(Point point)
+Polygon::Polygon(Point point) : m_points({point})
 {
-    m_points.push_back(point);
 }
 
-Polygon::Polygon(PointList points)
+Polygon::Polygon(PointList points) : m_points(points)
 {
-    m_points = points;
 }
 
 void Polygon::addPoint(Point point)
