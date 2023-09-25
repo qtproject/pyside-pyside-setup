@@ -41,12 +41,12 @@ bool Point::operator==(const Point &other)
 
 Point Point::operator+(const Point &other)
 {
-    return Point(m_x + other.m_x, m_y + other.m_y);
+    return {m_x + other.m_x, m_y + other.m_y};
 }
 
 Point Point::operator-(const Point &other)
 {
-    return Point(m_x - other.m_x, m_y - other.m_y);
+    return {m_x - other.m_x, m_y - other.m_y};
 }
 
 Point &Point::operator+=(Point &other)
@@ -70,22 +70,22 @@ Point operator*(const Point &pt, double mult)
 
 Point operator*(const Point &pt, int mult)
 {
-    return Point(int(pt.m_x) * mult, int(pt.m_y) * mult);
+    return {int(pt.m_x) * mult, int(pt.m_y) * mult};
 }
 
 Point operator*(double mult, const Point &pt)
 {
-    return Point(pt.m_x * mult, pt.m_y * mult);
+    return {pt.m_x * mult, pt.m_y * mult};
 }
 
 Point operator*(int mult, const Point &pt)
 {
-    return Point(int(pt.m_x) * mult, int(pt.m_y) * mult);
+    return {int(pt.m_x) * mult, int(pt.m_y) * mult};
 }
 
 Point operator-(const Point &pt)
 {
-    return Point(-pt.m_x, -pt.m_y);
+    return {-pt.m_x, -pt.m_y};
 }
 
 bool operator!(const Point &pt)
@@ -95,7 +95,7 @@ bool operator!(const Point &pt)
 
 Point Point::operator/(int operand)
 {
-    return Point(m_x/operand, m_y/operand);
+    return {m_x/operand, m_y/operand};
 }
 
 Complex transmutePointIntoComplex(const Point &point)

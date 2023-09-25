@@ -17,6 +17,10 @@ namespace Smart { class Integer2; }
 class LIB_SMART_API Obj {
 public:
     Obj();
+    Obj(const Obj &other) = delete;
+    Obj &operator=(const Obj &other) = delete;
+    Obj(Obj &&other) = delete;
+    Obj &operator=(Obj &&other) = delete;
     virtual ~Obj();
 
     void printObj();

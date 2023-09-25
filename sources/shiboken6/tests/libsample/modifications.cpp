@@ -7,8 +7,8 @@
 #include <iostream>
 
 Modifications::Modifications()
+    : m_object(new ObjectType())
 {
-    m_object = new ObjectType();
     m_object->setObjectName("MyObject");
 }
 

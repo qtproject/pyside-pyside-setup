@@ -5,7 +5,7 @@
 
 SharedPtr<Str> SmartPtrTester::createSharedPtrStr(const char *what)
 {
-    return SharedPtr<Str>(new Str(what));
+    return {new Str(what)};
 }
 
 std::string SmartPtrTester::valueOfSharedPtrStr(const SharedPtr<Str> &str)

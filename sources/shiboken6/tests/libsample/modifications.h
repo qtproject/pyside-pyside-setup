@@ -130,7 +130,7 @@ class LIBSAMPLE_API AbstractModifications : public Modifications
 {
 public:
     AbstractModifications() {}
-    virtual ~AbstractModifications() {}
+    ~AbstractModifications() override {}
 
     inline bool invert(bool value) { return !value; }
 

@@ -21,7 +21,7 @@ using const_ptr_value_list = std::list<const CVValueType*>;
 class CVListUser
 {
 public:
-    static const_ptr_value_list produce() { return const_ptr_value_list(); }
+    static const_ptr_value_list produce() { return {}; }
     static void consume(const const_ptr_value_list &l) { (void)l; }
 };
 

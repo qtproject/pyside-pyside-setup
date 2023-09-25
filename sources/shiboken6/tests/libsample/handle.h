@@ -25,16 +25,16 @@ public:
 
     void set(SAMPLE_HANDLE ptr);
     inline void set(const Foo::SAMPLE_HANDLE &val) { m_handle2 = val; }
-    inline SAMPLE_HANDLE handle() { return m_handle; }
-    inline Foo::SAMPLE_HANDLE handle2() { return m_handle2; }
+    inline SAMPLE_HANDLE handle() const { return m_handle; }
+    inline Foo::SAMPLE_HANDLE handle2() const { return m_handle2; }
 
     static SAMPLE_HANDLE createHandle();
     bool compare(HandleHolder *other);
     bool compare2(HandleHolder *other);
 
 private:
-    SAMPLE_HANDLE m_handle;
-    Foo::SAMPLE_HANDLE m_handle2;
+    SAMPLE_HANDLE m_handle = nullptr;
+    Foo::SAMPLE_HANDLE m_handle2 = 0;
 };
 
 inline void HandleHolder::set(SAMPLE_HANDLE)

@@ -13,9 +13,9 @@ std::list<int> ListUser::callCreateList()
 
 ListUser::ListUser() = default;
 ListUser::ListUser(const ListUser &other) = default;
-ListUser::ListUser(ListUser &&other) = default;
+ListUser::ListUser(ListUser &&other) noexcept = default;
 ListUser &ListUser::operator=(const ListUser &other) = default;
-ListUser &ListUser::operator=(ListUser &&other) = default;
+ListUser &ListUser::operator=(ListUser &&other) noexcept = default;
 ListUser::~ListUser() = default;
 
 std::list<int> ListUser::createList()

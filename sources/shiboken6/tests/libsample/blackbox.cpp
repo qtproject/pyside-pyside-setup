@@ -6,10 +6,10 @@
 BlackBox::~BlackBox()
 {
     // Free all maps.
-    for (auto it = m_objects.begin(), end = m_objects.end(); it != end; ++it)
-        delete it->second;
-    for (auto it = m_points.begin(), end = m_points.end(); it != end; ++it)
-        delete it->second;
+    for (const auto &p :m_objects)
+        delete p.second;
+    for (const auto &p : m_points)
+        delete p.second;
 }
 
 int BlackBox::keepObjectType(ObjectType *object)
@@ -64,8 +64,8 @@ std::list<ObjectType*> BlackBox::objects()
 {
     std::list<ObjectType*> l;
 
-    for (auto it = m_objects.begin(), end = m_objects.end(); it != end; ++it)
-        l.push_back((*it).second);
+    for (const auto &p : m_objects)
+        l.push_back(p.second);
 
     return l;
 }
@@ -74,8 +74,8 @@ std::list<Point*> BlackBox::points()
 {
     std::list<Point*> l;
 
-    for (auto it = m_points.begin(), end = m_points.end(); it != end; ++it)
-        l.push_back((*it).second);
+    for (const auto &p : m_points)
+        l.push_back(p.second);
 
     return l;
 }
