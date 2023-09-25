@@ -1036,6 +1036,25 @@ static inline const char *pyTypeName(PyObject *obj)
     return Py_TYPE(obj)->tp_name;
 }
 
+static QString getQualName(PyObject *obj)
+{
+    Shiboken::AutoDecRef result(PyObject_GetAttr(obj, Shiboken::PyMagicName::qualname()));
+    return result.object() != nullptr
+        ? pyStringToQString(result.object()) : QString{};
+}
+
+static void formatPyFunction(PyObject *obj, QDebug &debug)
+{
+    debug << '"' << getQualName(obj) << "()\"";
+}
+
+static void formatPyMethod(PyObject *obj, QDebug &debug)
+{
+    if (auto *func = PyMethod_Function(obj))
+        formatPyFunction(func, debug);
+    debug << ", instance=" << PyMethod_Self(obj);
+}
+
 static void formatPyObjectValue(PyObject *obj, QDebug &debug)
 {
     if (PyType_Check(obj) != 0)
@@ -1046,6 +1065,10 @@ static void formatPyObjectValue(PyObject *obj, QDebug &debug)
         debug << PyFloat_AsDouble(obj);
     else if (PyUnicode_Check(obj) != 0)
         debug << '"' << pyStringToQString(obj) << '"';
+    else if (PyFunction_Check(obj) != 0)
+        formatPyFunction(obj, debug);
+    else if (PyMethod_Check(obj) != 0)
+        formatPyMethod(obj, debug);
     else if (PySequence_Check(obj) != 0)
         formatPySequence(obj, debug);
     else if (PyDict_Check(obj) != 0)
@@ -1062,6 +1085,14 @@ static void formatPyObject(PyObject *obj, QDebug &debug)
     }
     if (obj == Py_None) {
         debug << "None";
+        return;
+    }
+    if (obj == Py_True) {
+        debug << "True";
+        return;
+    }
+    if (obj == Py_False) {
+        debug << "False";
         return;
     }
     if (PyType_Check(obj) == 0)
