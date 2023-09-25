@@ -49,14 +49,12 @@ double multiplyPair(std::pair<double, double> pair)
 
 int countCharacters(const char *text)
 {
-    if (!text)
-        return -1;
-    return std::strlen(text);
+    return text != nullptr ? int(std::strlen(text)) : -1;
 }
 
 char *makeCString()
 {
-    char *string = new char[strlen(__FUNCTION__) + 1];
+    char *string = new char[std::strlen(__FUNCTION__) + 1];
     std::strcpy(string, __FUNCTION__);
     return string;
 }
@@ -181,9 +179,7 @@ double sumDoubleMatrix(double m[2][3])
     return result;
 }
 
-ArrayModifyTest::ArrayModifyTest()
-{
-}
+ArrayModifyTest::ArrayModifyTest() = default;
 
 int ArrayModifyTest::sumIntArray(int n, int *array)
 {

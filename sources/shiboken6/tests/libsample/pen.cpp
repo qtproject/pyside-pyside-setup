@@ -59,9 +59,9 @@ Pen::Pen(const Pen &) : m_ctor(CopyCtor)
 {
 }
 
-Pen::Pen(Pen &&) = default;
+Pen::Pen(Pen &&) noexcept = default;
 Pen &Pen::operator=(const Pen &pen) = default;
-Pen &Pen::operator=(Pen &&) = default;
+Pen &Pen::operator=(Pen &&) noexcept = default;
 
 int Pen::ctorType()
 {

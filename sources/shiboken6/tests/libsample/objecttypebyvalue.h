@@ -11,7 +11,7 @@
 class ObjectTypeByValue
 {
 public:
-    ObjectTypeByValue returnSomeKindOfMe() { return ObjectTypeByValue(); }
+    ObjectTypeByValue returnSomeKindOfMe() { return {}; }
     void acceptKindOfMeAsValue(ObjectTypeByValue kindOfMe);
 
     void acceptListOfObjectTypeByValue(std::list<ObjectTypeByValue> listOfMe);

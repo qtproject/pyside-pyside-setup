@@ -1,11 +1,10 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
-#include <numeric>
-#include <cstdlib>
 #include "listuser.h"
 
 #include <algorithm>
+#include <cstdlib>
 #include <numeric>
 
 std::list<int> ListUser::createIntList(int num)

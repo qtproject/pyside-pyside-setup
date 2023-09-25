@@ -12,12 +12,12 @@ Expression::Expression(int number) : m_value(number)
 {
 }
 
-Expression::Expression(const Expression &other)
+Expression::Expression(const Expression &other) :
+    m_value(other.m_value),
+    m_operation(other.m_operation),
+    m_operand1(other.m_operand1 ? new Expression(*other.m_operand1) : nullptr),
+    m_operand2(other.m_operand2 ? new Expression(*other.m_operand2) : nullptr)
 {
-    m_operand1 = other.m_operand1 ? new Expression(*other.m_operand1) : nullptr;
-    m_operand2 = other.m_operand2 ? new Expression(*other.m_operand2) : nullptr;
-    m_value = other.m_value;
-    m_operation = other.m_operation;
 }
 
 Expression &Expression::operator=(const Expression &other)
@@ -86,7 +86,7 @@ std::string Expression::toString() const
     std::string result;
     result += '(';
     result += m_operand1->toString();
-    char op;
+    char op = '?';
     switch (m_operation) {
         case Add:
             op = '+';
@@ -100,9 +100,7 @@ std::string Expression::toString() const
         case GreaterThan:
             op = '<';
             break;
-        case None: // just to avoid the compiler warning
         default:
-            op = '?';
             break;
     }
     result += op;

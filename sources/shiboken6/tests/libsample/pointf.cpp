@@ -33,12 +33,12 @@ bool PointF::operator==(const PointF &other)
 
 PointF PointF::operator+(const PointF &other)
 {
-    return PointF(m_x + other.m_x, m_y + other.m_y);
+    return {m_x + other.m_x, m_y + other.m_y};
 }
 
 PointF PointF::operator-(const PointF &other)
 {
-    return PointF(m_x - other.m_x, m_y - other.m_y);
+    return {m_x - other.m_x, m_y - other.m_y};
 }
 
 PointF &PointF::operator+=(PointF &other)
@@ -57,7 +57,7 @@ PointF &PointF::operator-=(PointF &other)
 
 PointF operator*(const PointF &pt, double mult)
 {
-    return PointF(pt.m_x * mult, pt.m_y * mult);
+    return {pt.m_x * mult, pt.m_y * mult};
 }
 
 PointF operator*(const PointF &pt, int mult)
@@ -67,7 +67,7 @@ PointF operator*(const PointF &pt, int mult)
 
 PointF operator*(double mult, const PointF &pt)
 {
-    return PointF(pt.m_x * mult, pt.m_y * mult);
+    return {pt.m_x * mult, pt.m_y * mult};
 }
 
 PointF operator*(int mult, const PointF &pt)
@@ -77,7 +77,7 @@ PointF operator*(int mult, const PointF &pt)
 
 PointF operator-(const PointF &pt)
 {
-    return PointF(-pt.m_x, -pt.m_y);
+    return {-pt.m_x, -pt.m_y};
 }
 
 bool operator!(const PointF &pt)

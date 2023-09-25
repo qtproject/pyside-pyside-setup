@@ -31,13 +31,8 @@ public:
     RectF() = default;
     explicit RectF(int left, int top, int right, int bottom)
         : m_left(left), m_top(top), m_right(right), m_bottom(bottom) { }
-    RectF(const Rect &other)
-    {
-        m_left = other.left();
-        m_top = other.top();
-        m_right = other.right();
-        m_bottom = other.bottom();
-    }
+    RectF(const Rect &other) : m_left(other.left()), m_top(other.top()),
+                               m_right(other.right()), m_bottom(other.bottom()) {}
     ~RectF() = default;
 
     inline double left() const { return m_left; }

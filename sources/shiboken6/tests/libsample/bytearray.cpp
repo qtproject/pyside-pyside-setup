@@ -161,6 +161,6 @@ unsigned int ByteArray::hash(const ByteArray &byteArray)
 {
     unsigned int result = 0;
     for (char c : byteArray.m_data)
-        result = 5u * result + unsigned(c);
+        result = 5U * result + unsigned(c);
     return result;
 }

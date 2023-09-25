@@ -11,6 +11,8 @@ public:
     Integer();
     Integer(const Integer &other);
     Integer &operator=(const Integer &other);
+    Integer(Integer &&other) noexcept = default;
+    Integer &operator=(Integer &&other) noexcept = default;
     ~Integer();
     void printInteger() const;
 
@@ -58,6 +60,9 @@ public:
     Integer2();
     Integer2(const Integer2 &);
     Integer2 &operator=(const Integer2 &);
+    Integer2(Integer2 &&other) = delete;
+    Integer2 &operator=(Integer2 &&other) = delete;
+    ~Integer2() = default;
 };
 } // namespace Smart
 

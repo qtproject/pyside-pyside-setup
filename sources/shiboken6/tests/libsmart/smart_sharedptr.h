@@ -40,7 +40,8 @@ public:
 
     SharedPtr &operator=(const SharedPtr &other)
     {
-        mPtr = other.mPtr;
+        if (this != &other)
+            mPtr = other.mPtr;
         return *this;
     }
 

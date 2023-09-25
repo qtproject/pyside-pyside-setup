@@ -13,7 +13,7 @@ public:
     bool value() const { return m_value; }
     inline MinBool operator!() const { return MinBool(!m_value); }
     inline MinBool& operator|=(const MinBool& other) {
-        m_value = m_value | other.m_value;
+        m_value |= other.m_value;
         return *this;
     }
 

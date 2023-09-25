@@ -29,8 +29,8 @@ std::map<std::string, std::pair<Complex, int> > MapUser::createMap()
 void MapUser::showMap(std::map<std::string, int> mapping)
 {
     std::cout << __FUNCTION__ << std::endl;
-    for (auto it = mapping.begin(), end = mapping.end(); it != end; ++it)
-        std::cout << (*it).first << " => " << (*it).second << std::endl;
+    for (const auto &p : mapping)
+        std::cout << p.first << " => " << p.second << std::endl;
 }
 
 void MapUser::pointerToMap(std::map<std::string, std::string> *)
