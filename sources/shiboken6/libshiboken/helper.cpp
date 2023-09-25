@@ -5,6 +5,7 @@
 #include "basewrapper_p.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
+#include "sbkstaticstrings.h"
 #include "pep384impl.h"
 
 #include <algorithm>
@@ -211,9 +212,41 @@ static void formatPyUnicode(PyObject *obj, std::ostream &str)
 #endif // !Py_LIMITED_API
 }
 
+static std::string getQualName(PyObject *obj)
+{
+    Shiboken::AutoDecRef result(PyObject_GetAttr(obj, Shiboken::PyMagicName::qualname()));
+    return result.object() != nullptr
+        ? _PepUnicode_AsString(result.object()) : std::string{};
+}
+
+static void formatPyFunction(PyObject *obj, std::ostream &str)
+{
+    str << '"' << getQualName(obj) << "()\"";
+}
+
+static void formatPyMethod(PyObject *obj, std::ostream &str)
+{
+    if (auto *func = PyMethod_Function(obj))
+        formatPyFunction(func, str);
+    str << ", instance=" << PyMethod_Self(obj);
+}
+
 static void formatPyObjectHelper(PyObject *obj, std::ostream &str)
 {
-    str << ", refs=" << Py_REFCNT(obj) << ", ";
+    str << ", ";
+    if (obj == Py_None) {
+        str << "None";
+        return;
+    }
+    if (obj == Py_True) {
+        str << "True";
+        return;
+    }
+    if (obj == Py_False) {
+        str << "False";
+        return;
+    }
+    str << "refs=" << Py_REFCNT(obj) << ", ";
     if (PyType_Check(obj)) {
         str << "type: ";
         formatPyTypeObject(reinterpret_cast<PyTypeObject *>(obj), str);
@@ -227,6 +260,10 @@ static void formatPyObjectHelper(PyObject *obj, std::ostream &str)
         str << PyFloat_AsDouble(obj);
     else if (PyUnicode_Check(obj))
         formatPyUnicode(obj, str);
+    else if (PyFunction_Check(obj) != 0)
+        formatPyFunction(obj, str);
+    else if (PyMethod_Check(obj) != 0)
+        formatPyMethod(obj, str);
     else if (PySequence_Check(obj))
         formatPySequence(obj, str);
     else if (PyDict_Check(obj))
