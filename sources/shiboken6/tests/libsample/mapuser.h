@@ -17,8 +17,8 @@
 class LIBSAMPLE_API MapUser
 {
 public:
-    MapUser() {}
-    virtual ~MapUser() {}
+    MapUser() noexcept = default;
+    virtual ~MapUser() = default;
 
     virtual std::map<std::string, std::pair<Complex, int> > createMap();
     std::map<std::string, std::pair<Complex, int> > callCreateMap();

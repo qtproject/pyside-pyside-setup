@@ -84,7 +84,7 @@ LIBSAMPLE_API int countValueDuplicators(const std::list<TemplateBase<DuplicatorT
 class Pointer
 {
 public:
-    Pointer() noexcept {}
+    Pointer() noexcept = default;
     explicit Pointer(int *p) : px(p) {}
 
     void reset() noexcept { Pointer().swap(*this); }

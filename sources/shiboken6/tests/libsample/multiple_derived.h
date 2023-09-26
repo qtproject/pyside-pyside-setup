@@ -37,7 +37,7 @@ class LIBSAMPLE_API MDerived1 : public Base1, public Base2
 {
 public:
     MDerived1();
-    ~MDerived1() override {}
+    ~MDerived1() override = default;
 
     int mderived1Method() { return m_value; }
     int base1Method () override { return Base1::base1Method() * 10; }
@@ -116,7 +116,7 @@ class LIBSAMPLE_API MDerived2 : public Base3, public Base4, public Base5, public
 {
 public:
     MDerived2();
-    virtual ~MDerived2() {}
+    virtual ~MDerived2() = default;
 
     inline int base4Method() { return Base3::base3Method() * 10; }
     inline int mderived2Method() { return m_value; }

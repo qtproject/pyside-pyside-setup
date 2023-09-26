@@ -14,7 +14,7 @@
 
 struct LIBMINIMAL_API ListUser
 {
-    virtual ~ListUser() {}
+    virtual ~ListUser() = default;
 
     // List of C++ primitive type items
     virtual std::list<int> createIntList(int num);

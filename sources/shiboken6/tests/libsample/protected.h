@@ -38,7 +38,7 @@ class LIBSAMPLE_API ProtectedPolymorphic
 {
 public:
     explicit ProtectedPolymorphic(const char *name) : m_name(name) {}
-    virtual ~ProtectedPolymorphic() {}
+    virtual ~ProtectedPolymorphic() = default;
 
     inline static ProtectedPolymorphic *create()
     { return new ProtectedPolymorphic("created"); }
@@ -73,7 +73,7 @@ public:
 class LIBSAMPLE_API ProtectedVirtualDestructor
 {
 public:
-    ProtectedVirtualDestructor() {}
+    ProtectedVirtualDestructor() noexcept = default;
     inline static ProtectedVirtualDestructor *create()
     { return new ProtectedVirtualDestructor(); }
     inline static int dtorCalled() { return dtor_called; }
@@ -87,8 +87,8 @@ private:
 class LIBSAMPLE_API ProtectedEnumClass
 {
 public:
-    ProtectedEnumClass() {}
-    virtual ~ProtectedEnumClass() {}
+    ProtectedEnumClass() noexcept = default;
+    virtual ~ProtectedEnumClass() = default;
     enum PublicEnum {
         PublicItem0,
         PublicItem1
