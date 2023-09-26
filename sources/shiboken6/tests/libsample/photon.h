@@ -81,30 +81,18 @@ LIBSAMPLE_API int callCalculateForValueDuplicatorReference(ValueDuplicator &valu
 LIBSAMPLE_API int countValueIdentities(const std::list<ValueIdentity> &values);
 LIBSAMPLE_API int countValueDuplicators(const std::list<TemplateBase<DuplicatorType> > &values);
 
-// This simulates an internal error (SEGV) caused by 'noexcept' in
-// boost::intrusive_ptr before support for 'noexcept' was added. The ENTIRE
-// code below is needed to trigger the exception; it isn't seen with just a
-// 'noexcept' following a declaration.
-//
-// NOTE: For reasons that should be fairly obvious, this test unfortunately can
-//       only be "run" when building in C++11 mode.
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1900)
-#  define PHOTON_NOEXCEPT noexcept
-#else
-#  define PHOTON_NOEXCEPT
-#endif
 class Pointer
 {
 public:
-    Pointer() PHOTON_NOEXCEPT {}
+    Pointer() noexcept {}
     explicit Pointer(int *p) : px(p) {}
 
-    void reset() PHOTON_NOEXCEPT { Pointer().swap(*this); }
+    void reset() noexcept { Pointer().swap(*this); }
 
-    int *get() const PHOTON_NOEXCEPT { return px; }
+    int *get() const noexcept { return px; }
     int &operator*() const { return *px; }
 
-    void swap(Pointer &rhs) PHOTON_NOEXCEPT
+    void swap(Pointer &rhs) noexcept
     {
         int *tmp = px;
         px = rhs.px;
