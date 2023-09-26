@@ -11,6 +11,10 @@ from . import (METATYPES_JSON_SUFFIX, PROJECT_FILE_SUFFIX, qt_metatype_json_dir,
                MOD_CMD, QML_IMPORT_MAJOR_VERSION, QML_IMPORT_MINOR_VERSION, QML_IMPORT_NAME,
                QT_MODULES)
 
+def is_python_file(file: Path) -> bool:
+    return (file.suffix == ".py"
+            or sys.platform == "win32" and file.suffix == ".pyw")
+
 
 class ProjectData:
     def __init__(self, project_file: Path) -> None:
@@ -36,8 +40,8 @@ class ProjectData:
                     self._files.append(file)
                     if file.suffix == ".qml":
                         self._qml_files.append(file)
-                    elif file.suffix == ".py":
-                        if file.name == "main.py":
+                    elif is_python_file(file):
+                        if file.stem == "main":
                             self.main_file = file
                         self._python_files.append(file)
         if not self.main_file:
