@@ -1,4 +1,4 @@
-setuptools==67.7.2
+setuptools==67.8.0
 packaging
 build==0.7
 six
