@@ -129,8 +129,8 @@ private:
 class LIBSAMPLE_API AbstractModifications : public Modifications
 {
 public:
-    AbstractModifications() {}
-    ~AbstractModifications() override {}
+    AbstractModifications() noexcept = default;
+    ~AbstractModifications() override = default;
 
     inline bool invert(bool value) { return !value; }
 

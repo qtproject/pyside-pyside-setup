@@ -14,7 +14,7 @@ class LIBSAMPLE_API Polygon
 public:
     using PointList = std::list<Point>;
 
-    Polygon() {}
+    Polygon() noexcept = default;
     Polygon(double x, double y);
     Polygon(Point point);
     Polygon(PointList points);

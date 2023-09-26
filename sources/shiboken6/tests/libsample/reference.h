@@ -45,8 +45,8 @@ private:
 class LIBSAMPLE_API ObjTypeReference
 {
 public:
-    ObjTypeReference() = default;
-    ObjTypeReference(const ObjTypeReference &) {}
+    ObjTypeReference() noexcept = default;
+    ObjTypeReference(const ObjTypeReference &) = default;
     virtual ~ObjTypeReference();
 
     virtual ObjTypeReference &returnMyFirstArg(ObjTypeReference &ref) { return ref; }

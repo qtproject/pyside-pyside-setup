@@ -91,7 +91,7 @@ public:
         class OkThisIsRecursiveEnough
         {
         public:
-            virtual ~OkThisIsRecursiveEnough() {}
+            virtual ~OkThisIsRecursiveEnough() = default;
             enum NiceEnum {
                 NiceValue1, NiceValue2
             };
