@@ -25,9 +25,10 @@ from typing import List, Tuple, Optional
 from pathlib import Path
 from argparse import ArgumentParser, RawTextHelpFormatter
 
-from project import (QmlProjectData, check_qml_decorators, QMLDIR_FILE,
-                     MOD_CMD, METATYPES_JSON_SUFFIX, requires_rebuild, run_command,
-                     remove_path, ProjectData, resolve_project_file, new_project,
+from project import (QmlProjectData, check_qml_decorators, is_python_file,
+                     QMLDIR_FILE, MOD_CMD, METATYPES_JSON_SUFFIX,
+                     requires_rebuild, run_command, remove_path,
+                     ProjectData, resolve_project_file, new_project,
                      ProjectType)
 
 MODE_HELP = """build    Builds the project
@@ -71,7 +72,7 @@ class Project:
         if not opt_qml_module and not self.project.qml_files:
             return
         for file in self.project.files:
-            if file.suffix == ".py":
+            if is_python_file(file):
                 has_class, data = check_qml_decorators(file)
                 if has_class:
                     self._qml_module_sources.append(file)
