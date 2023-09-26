@@ -32,8 +32,8 @@ public:
         Param1
     };
 
-    Overload() {}
-    virtual ~Overload() {}
+    Overload() noexcept = default;
+    virtual ~Overload() = default;
 
     FunctionEnum overloaded();
     FunctionEnum overloaded(Size *size);

@@ -14,7 +14,7 @@ class LIBSAMPLE_API PointF
 public:
     PointF(const Point &point);
     PointF(double x = 0.0, double y = 0.0);
-    ~PointF() {}
+    ~PointF() noexcept = default;
 
     inline double x() const { return m_x; }
     inline double y() const { return m_y; }

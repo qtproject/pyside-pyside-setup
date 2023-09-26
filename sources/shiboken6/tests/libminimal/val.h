@@ -10,7 +10,7 @@ class LIBMINIMAL_API Val
 {
 public:
     explicit Val(int valId) : m_valId(valId) {}
-    virtual ~Val() {}
+    virtual ~Val() = default;
 
     int valId() const { return m_valId; }
     void setValId(int valId) { m_valId = valId; }

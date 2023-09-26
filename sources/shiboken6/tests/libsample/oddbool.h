@@ -37,7 +37,7 @@ class OddBoolUser
 public:
     OddBoolUser() : m_oddbool(OddBool(false)) {}
     OddBoolUser(const OddBool &oddBool) : m_oddbool(oddBool) {}
-    virtual ~OddBoolUser() {}
+    virtual ~OddBoolUser() = default;
 
     inline OddBool oddBool() { return m_oddbool; }
     inline void setOddBool(OddBool oddBool) { m_oddbool = oddBool; }
