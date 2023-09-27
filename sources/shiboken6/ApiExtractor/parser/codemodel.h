@@ -12,7 +12,6 @@
 #include "typeinfo.h"
 
 #include <QtCore/QHash>
-#include <QtCore/QPair>
 #include <QtCore/QSet>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
@@ -20,6 +19,7 @@
 #include <QtCore/QWeakPointer>
 
 #include <optional>
+#include <utility>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 

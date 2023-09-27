@@ -403,7 +403,7 @@ private:
     QString functionReturnType(const AbstractMetaFunctionCPtr &func, Options options = NoOption) const;
 
     /// Utility function for writeCodeSnips.
-    using ArgumentVarReplacementPair = QPair<AbstractMetaArgument, QString>;
+    using ArgumentVarReplacementPair = std::pair<AbstractMetaArgument, QString>;
     using ArgumentVarReplacementList = QList<ArgumentVarReplacementPair>;
     static ArgumentVarReplacementList
         getArgumentReplacement(const AbstractMetaFunctionCPtr &func,
