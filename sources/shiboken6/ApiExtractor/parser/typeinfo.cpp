@@ -365,7 +365,8 @@ private:
     QStack<TypeInfo *> m_parseStack;
 };
 
-QPair<qsizetype, qsizetype> TypeInfo::parseTemplateArgumentList(const QString &l, qsizetype from)
+std::pair<qsizetype, qsizetype>
+    TypeInfo::parseTemplateArgumentList(const QString &l, qsizetype from)
 {
     return clang::parseTemplateArgumentList(l, clang::TemplateArgumentHandler(TypeInfoTemplateArgumentHandler(this)), from);
 }

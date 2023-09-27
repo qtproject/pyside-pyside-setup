@@ -663,7 +663,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
         AutoDecRef items(PyMapping_Items(members));
         Py_ssize_t nr_items = PySequence_Length(items);
 
-        QList<QPair<QByteArray, int> > entries;
+        QList<std::pair<QByteArray, int> > entries;
         for (Py_ssize_t idx = 0; idx < nr_items; ++idx) {
             AutoDecRef item(PySequence_GetItem(items, idx));
             AutoDecRef key(PySequence_GetItem(item, 0));
@@ -671,8 +671,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
             AutoDecRef value(PyObject_GetAttr(member, Shiboken::PyName::value()));
             auto ckey = String::toCString(key);
             auto ivalue = PyLong_AsSsize_t(value);
-            auto thing = QPair<QByteArray, int>(ckey, int(ivalue));
-            entries.push_back(thing);
+            entries.push_back(std::make_pair(ckey, int(ivalue)));
         }
         addEnumerator(name, isFlag, true, entries);
     }

@@ -79,8 +79,8 @@ CXString getFileNameFromLocation(const CXSourceLocation &location)
 SourceRange getCursorRange(const CXCursor &cursor)
 {
     const CXSourceRange extent = clang_getCursorExtent(cursor);
-    return qMakePair(getExpansionLocation(clang_getRangeStart(extent)),
-                     getExpansionLocation(clang_getRangeEnd(extent)));
+    return std::make_pair(getExpansionLocation(clang_getRangeStart(extent)),
+                          getExpansionLocation(clang_getRangeEnd(extent)));
 }
 
 QString getCursorKindName(CXCursorKind cursorKind)
@@ -222,14 +222,14 @@ QList<Diagnostic> getDiagnostics(CXTranslationUnit tu)
     return result;
 }
 
-QPair<qsizetype, qsizetype>
+std::pair<qsizetype, qsizetype>
     parseTemplateArgumentList(const QString &l,
                               const TemplateArgumentHandler &handler,
                               qsizetype from)
 {
     const auto ltPos = l.indexOf(u'<', from);
     if (ltPos == - 1)
-        return qMakePair(-1, -1);
+        return std::make_pair(-1, -1);
     auto startPos = ltPos + 1;
     int level = 1;
     for (qsizetype p = startPos, end = l.size(); p < end; ) {
@@ -241,7 +241,7 @@ QPair<qsizetype, qsizetype>
             ++p;
             if (c == '>') {
                 if (--level == 0)
-                    return qMakePair(ltPos, p);
+                    return std::make_pair(ltPos, p);
                 // Skip over next ',': "a<b<c,d>,e>"
                 for (; p < end && (l.at(p).isSpace() || l.at(p) == u','); ++p) {}
             }
@@ -257,7 +257,7 @@ QPair<qsizetype, qsizetype>
             break;
         }
     }
-    return qMakePair(-1, -1);
+    return std::make_pair(-1, -1);
 }
 
 CXDiagnosticSeverity maxSeverity(const QList<Diagnostic> &ds)

@@ -8,11 +8,11 @@
 
 #include <QtCore/QByteArrayList>
 #include <QtCore/QHash>
-#include <QtCore/QPair>
 #include <QtCore/QString>
 #include <QtCore/QList>
 
 #include <string_view>
+#include <utility>
 
 namespace clang {
 

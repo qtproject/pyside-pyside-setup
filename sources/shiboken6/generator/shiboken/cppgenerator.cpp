@@ -1141,8 +1141,8 @@ QString CppGenerator::virtualMethodReturn(TextStream &s, const ApiExtractorResul
 
 // Create an argument for Py_BuildValue() when writing virtual methods.
 // Return a pair of (argument, format-char).
-QPair<QString, QChar> CppGenerator::virtualMethodNativeArg(const AbstractMetaFunctionCPtr &func,
-                                                             const AbstractMetaArgument &arg)
+std::pair<QString, QChar> CppGenerator::virtualMethodNativeArg(const AbstractMetaFunctionCPtr &func,
+                                                               const AbstractMetaArgument &arg)
 {
     if (func->hasConversionRule(TypeSystem::TargetLangCode, arg.argumentIndex() + 1))
         return {arg.name() + CONV_RULE_OUT_VAR_SUFFIX, u'N'};

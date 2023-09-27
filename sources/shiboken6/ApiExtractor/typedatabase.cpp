@@ -33,14 +33,14 @@
 #include <QtCore/QFile>
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
-#include <QtCore/QPair>
 #include <QtCore/QList>
 #include <QtCore/QRegularExpression>
 #include <QtCore/QVersionNumber>
 #include <QtCore/QXmlStreamReader>
 #include "reporthandler.h"
-// #include <tr1/tuple>
+
 #include <algorithm>
+#include <utility>
 
 using namespace Qt::StringLiterals;
 
@@ -55,7 +55,7 @@ static QString wildcardToRegExp(QString w)
     return w;
 }
 
-using ApiVersion =QPair<QRegularExpression, QVersionNumber>;
+using ApiVersion = std::pair<QRegularExpression, QVersionNumber>;
 using ApiVersions = QList<ApiVersion>;
 
 Q_GLOBAL_STATIC(ApiVersions, apiVersions)
@@ -1270,7 +1270,7 @@ bool TypeDatabase::setApiVersion(const QString& packageWildcardPattern, const QS
     const QRegularExpression packageRegex(packagePattern);
     if (!packageRegex.isValid())
         return false;
-    versions.append(qMakePair(packageRegex, versionNumber));
+    versions.append(std::make_pair(packageRegex, versionNumber));
     return true;
 }
 
