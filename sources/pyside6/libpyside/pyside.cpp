@@ -469,7 +469,6 @@ const QMetaObject *retrieveMetaObject(PyObject *pyObj)
 void initQObjectSubType(PyTypeObject *type, PyObject *args, PyObject * /* kwds */)
 {
     PyTypeObject *qObjType = Shiboken::Conversions::getPythonTypeObject("QObject*");
-    QByteArray className(Shiboken::String::toCString(PyTuple_GET_ITEM(args, 0)));
 
     PyObject *bases = PyTuple_GET_ITEM(args, 1);
     int numBases = PyTuple_GET_SIZE(bases);
@@ -484,7 +483,9 @@ void initQObjectSubType(PyTypeObject *type, PyObject *args, PyObject * /* kwds *
         }
     }
     if (!userData) {
-        qWarning("Sub class of QObject not inheriting QObject!? Crash will happen when using %s.", className.constData());
+        const char *className = Shiboken::String::toCString(PyTuple_GET_ITEM(args, 0));
+        qWarning("Sub class of QObject not inheriting QObject!? Crash will happen when using %s.",
+                 className);
         return;
     }
     // PYSIDE-1463: Don't change feature selection durin subtype initialization.

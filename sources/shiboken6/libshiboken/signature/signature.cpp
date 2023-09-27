@@ -197,7 +197,7 @@ PyObject *GetSignature_Wrapper(PyObject *ob, PyObject *modifier)
     PyObject *props = PyDict_GetItem(dict, func_name);
     if (props == nullptr) {
         // handle `__init__` like the class itself
-        if (strcmp(String::toCString(func_name), "__init__") == 0)
+        if (PyUnicode_CompareWithASCIIString(func_name, "__init__") == 0)
             return GetSignature_TypeMod(objclass, modifier);
         Py_RETURN_NONE;
     }

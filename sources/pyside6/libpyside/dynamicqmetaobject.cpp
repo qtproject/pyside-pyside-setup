@@ -620,9 +620,10 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
 
         while (PyDict_Next(attrs, &pos, &key, &value)) {
             if (Property::checkType(value)) {
-                const int index = m_baseObject->indexOfProperty(String::toCString(key));
+                const QByteArray name = String::toCString(key);
+                const int index = m_baseObject->indexOfProperty(name);
                 if (index == -1)
-                    addProperty(String::toCString(key), value);
+                    addProperty(name, value);
             } else if (Py_TYPE(value)->tp_call != nullptr) {
                 // PYSIDE-198: PyFunction_Check does not work with Nuitka.
                 // Register slots.
