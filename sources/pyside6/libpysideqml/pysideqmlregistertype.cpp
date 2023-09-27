@@ -105,29 +105,46 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
     const QMetaObject *metaObject = PySide::retrieveMetaObject(pyObjType);
     Q_ASSERT(metaObject);
 
-    QQmlPrivate::RegisterType type;
-
-    // Allow registering Qt Quick items.
-    const bool isQuickType = quickRegisterItemFunction && quickRegisterItemFunction(pyObj, &type);
-
     // Register as simple QObject rather than Qt Quick item.
     // Incref the type object, don't worry about decref'ing it because
     // there's no way to unregister a QML type.
     Py_INCREF(pyObj);
 
-    type.structVersion = 0;
-
     const QByteArray typeName(pyObjType->tp_name);
     QByteArray ptrType = typeName + '*';
     QByteArray listType = QByteArrayLiteral("QQmlListProperty<") + typeName + '>';
+    const auto typeId = QMetaType(new QQmlMetaTypeInterface(ptrType));
+    const auto listId = QMetaType(new QQmlListMetaTypeInterface(listType, typeId.iface()));
+    const int objectSize = static_cast<int>(PySide::getSizeOfQObject(reinterpret_cast<PyTypeObject *>(pyObj)));
 
-    type.typeId = QMetaType(new QQmlMetaTypeInterface(ptrType));
-    type.listId = QMetaType(new QQmlListMetaTypeInterface(listType,
-                                                          type.typeId.iface()));
     const auto typeInfo = qmlTypeInfo(pyObj);
-    auto info = qmlAttachedInfo(pyObjType, typeInfo);
-    type.attachedPropertiesFunction = info.factory;
-    type.attachedPropertiesMetaObject = info.metaObject;
+    const auto attachedInfo = qmlAttachedInfo(pyObjType, typeInfo);
+    const auto extendedInfo = qmlExtendedInfo(pyObj, typeInfo);
+
+    QQmlPrivate::RegisterType type {
+        QQmlPrivate::RegisterType::StructVersion::Base, // structVersion
+        typeId, listId, objectSize,
+        creatable ? createInto : nullptr, // create
+        pyObj, // userdata
+        QString::fromUtf8(noCreationReason),
+        nullptr, // createValueType (Remove in Qt 7)
+        uri,
+        QTypeRevision::fromVersion(versionMajor, versionMinor), // version
+        qmlName, // elementName
+        metaObject,
+        attachedInfo.factory, // attachedPropertiesFunction
+        attachedInfo.metaObject, // attachedPropertiesMetaObject
+        0, 0, 0, // parserStatusCast, valueSourceCast, valueInterceptorCast
+        extendedInfo.factory, // extensionObjectCreate
+        extendedInfo.metaObject, // extensionMetaObject
+        nullptr, // customParser
+        {}, // revision
+        0, // finalizerCast
+        QQmlPrivate::ValueTypeCreationMethod::None // creationMethod
+    };
+
+    // Allow registering Qt Quick items.
+    const bool isQuickType = quickRegisterItemFunction && quickRegisterItemFunction(pyObj, &type);
 
     if (!isQuickType) { // values filled by the Quick registration
         // QPyQmlParserStatus inherits QObject, QQmlParserStatus, so,
@@ -142,22 +159,6 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         type.valueInterceptorCast =
                 QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueInterceptor>::cast();
     }
-
-    int objectSize = static_cast<int>(PySide::getSizeOfQObject(
-                                      reinterpret_cast<PyTypeObject *>(pyObj)));
-    type.objectSize = objectSize;
-    type.create = creatable ? createInto : nullptr;
-    type.noCreationReason = QString::fromUtf8(noCreationReason);
-    type.userdata = pyObj;
-    type.uri = uri;
-    type.version = QTypeRevision::fromVersion(versionMajor, versionMinor);
-    type.elementName = qmlName;
-
-    info = qmlExtendedInfo(pyObj, typeInfo);
-    type.extensionObjectCreate = info.factory;
-    type.extensionMetaObject = info.metaObject;
-    type.customParser = 0;
-    type.metaObject = metaObject; // Snapshot may have changed.
 
     int qmlTypeId = QQmlPrivate::qmlregister(QQmlPrivate::TypeRegistration, &type);
     if (qmlTypeId == -1) {
@@ -209,15 +210,19 @@ int qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versionMajor,
         Q_ASSERT(metaObject);
     }
 
-    QQmlPrivate::RegisterSingletonType type;
-    type.structVersion = 0;
-
-    type.uri = uri;
-    type.version = QTypeRevision::fromVersion(versionMajor, versionMinor);
-    type.typeName = qmlName;
-    type.instanceMetaObject = metaObject;
-    type.extensionMetaObject = nullptr;
-    type.extensionObjectCreate = nullptr;
+    QQmlPrivate::RegisterSingletonType type {
+        QQmlPrivate::RegisterType::StructVersion::Base, // structVersion
+        uri,
+        QTypeRevision::fromVersion(versionMajor, versionMinor), // version
+        qmlName, // typeName
+        {}, // scriptApi
+        {}, // qObjectApi
+        metaObject, // instanceMetaObject
+        {}, // typeId
+        nullptr, // extensionMetaObject
+        nullptr, // extensionObjectCreate
+        {} // revision
+    };
 
     if (isQObject) {
         // FIXME: Fix this to assign new type ids each time.
@@ -307,18 +312,22 @@ int qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMa
     const QMetaObject *metaObject = PySide::retrieveMetaObject(pyObjType);
     Q_ASSERT(metaObject);
 
-    QQmlPrivate::RegisterSingletonType type;
-    type.structVersion = 0;
-
-    type.uri = uri;
-    type.version = QTypeRevision::fromVersion(versionMajor, versionMinor);
-    type.typeName = qmlName;
-    type.instanceMetaObject = metaObject;
-
     // FIXME: Fix this to assign new type ids each time.
-    type.typeId = QMetaType(QMetaType::QObjectStar);
-    type.qObjectApi = registrationFunctor;
+    const QMetaType typeId = QMetaType(QMetaType::QObjectStar);
 
+    QQmlPrivate::RegisterSingletonType type {
+        QQmlPrivate::RegisterType::StructVersion::Base, // structVersion
+        uri,
+        QTypeRevision::fromVersion(versionMajor, versionMinor), // version
+        qmlName, // typeName
+        {}, // scriptApi
+        registrationFunctor, // qObjectApi
+        metaObject, // instanceMetaObject
+        typeId,
+        nullptr, // extensionMetaObject
+        nullptr, // extensionObjectCreate
+        {} // revision
+    };
 
     return QQmlPrivate::qmlregister(QQmlPrivate::SingletonRegistration, &type);
 }
