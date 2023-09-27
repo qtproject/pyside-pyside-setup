@@ -16,6 +16,7 @@ init_test_paths(False)
 
 from PySide6.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel
 from PySide6.QtWidgets import QApplication, QWidget
+from helper.usesqapplication import UsesQApplication
 
 
 class Foo(QWidget):
@@ -24,11 +25,12 @@ class Foo(QWidget):
         self.model = QSqlTableModel()
 
 
-class SqlDatabaseCreationDestructionAndQueries(unittest.TestCase):
+class SqlDatabaseCreationDestructionAndQueries(UsesQApplication):
     '''Test cases for QtSql database creation, destruction and queries'''
 
     def setUp(self):
         # Acquire resources
+        super().setUp()
         self.assertFalse(not QSqlDatabase.drivers(), "installed Qt has no DB drivers")
         self.assertTrue("QSQLITE" in QSqlDatabase.drivers(), "\"QSQLITE\" driver not available in this Qt version")
         self.db = QSqlDatabase.addDatabase("QSQLITE")
@@ -42,6 +44,7 @@ class SqlDatabaseCreationDestructionAndQueries(unittest.TestCase):
         del self.db
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
+        super().tearDown()
 
     def testTableCreationAndDestruction(self):
         # Test table creation and destruction
@@ -71,12 +74,9 @@ class SqlDatabaseCreationDestructionAndQueries(unittest.TestCase):
         self.assertEqual(lastname, 'Harrison')
 
     def testTableModelDeletion(self):
-        app = QApplication([])
-
         bar = Foo()
         model = bar.model
         del bar
-        del app
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
 
