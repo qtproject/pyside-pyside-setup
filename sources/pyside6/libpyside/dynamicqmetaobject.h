@@ -10,6 +10,8 @@
 #include <QtCore/QMetaObject>
 #include <QtCore/QMetaMethod>
 
+#include <utility>
+
 class MetaObjectBuilderPrivate;
 
 namespace PySide
@@ -19,7 +21,7 @@ class MetaObjectBuilder
 {
     Q_DISABLE_COPY_MOVE(MetaObjectBuilder)
 public:
-    using EnumValue = QPair<QByteArray, int>;
+    using EnumValue = std::pair<QByteArray, int>;
     using EnumValues = QList<EnumValue>;
 
     MetaObjectBuilder(const char *className, const QMetaObject *metaObject);

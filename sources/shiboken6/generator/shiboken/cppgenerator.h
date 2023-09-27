@@ -13,6 +13,7 @@
 #include <QtCore/QHash>
 
 #include <memory>
+#include <utility>
 
 class OverloadDataNode;
 class OverloadDataRootNode;
@@ -61,8 +62,7 @@ private:
     static void writeDestructorNative(TextStream &s, const GeneratorContext &classContext);
 
     QString getVirtualFunctionReturnTypeName(const AbstractMetaFunctionCPtr &func) const;
-    static QPair<QString, QChar>
-        virtualMethodNativeArg(const AbstractMetaFunctionCPtr &func,
+    static std::pair<QString, QChar> virtualMethodNativeArg(const AbstractMetaFunctionCPtr &func,
                                const AbstractMetaArgument &arg);
     static void writeVirtualMethodNativeVectorCallArgs(TextStream &s,
                                                        const AbstractMetaFunctionCPtr &func,

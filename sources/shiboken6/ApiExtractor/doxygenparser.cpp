@@ -81,7 +81,7 @@ void DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
         return;
     }
 
-    static const QList<QPair<Documentation::Type, QString>> docTags = {
+    static const QList<std::pair<Documentation::Type, QString>> docTags = {
         { Documentation::Brief,  u"briefdescription"_s },
         { Documentation::Detailed,  u"detaileddescription"_s }
     };

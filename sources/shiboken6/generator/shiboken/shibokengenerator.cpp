@@ -48,6 +48,7 @@
 #include <algorithm>
 #include <limits>
 #include <memory>
+#include <utility>
 
 using namespace Qt::StringLiterals;
 
@@ -1716,7 +1717,7 @@ const QHash<int, QString> &ShibokenGenerator::typeSystemConvName()
     return result;
 }
 
-using StringPair = QPair<QString, QString>;
+using StringPair = std::pair<QString, QString>;
 
 void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVariable converterVariable,
                                                            QString &code) const
@@ -1798,7 +1799,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                 }
             }
         }
-        replacements.append(qMakePair(conversionString, conversion));
+        replacements.append(std::make_pair(conversionString, conversion));
     }
     for (const StringPair &rep : std::as_const(replacements))
         code.replace(rep.first, rep.second);
@@ -2205,7 +2206,7 @@ ShibokenGenerator::filterGroupedOperatorFunctions(const AbstractMetaClassCPtr &m
                                                   OperatorQueryOptions query)
 {
     // ( func_name, num_args ) => func_list
-    QMap<QPair<QString, int>, AbstractMetaFunctionCList> results;
+    QMap<std::pair<QString, int>, AbstractMetaFunctionCList> results;
     auto funcs = metaClass->operatorOverloads(query);
     auto end = std::remove_if(funcs.begin(), funcs.end(), skipOperatorFunc);
     funcs.erase(end, funcs.end());
@@ -2231,7 +2232,7 @@ ShibokenGenerator::filterGroupedOperatorFunctions(const AbstractMetaClassCPtr &m
         } else {
             args = func->arguments().size();
         }
-        QPair<QString, int > op(func->name(), args);
+        auto op = std::make_pair(func->name(), args);
         results[op].append(func);
     }
     QList<AbstractMetaFunctionCList> result;

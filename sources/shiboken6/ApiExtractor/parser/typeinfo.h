@@ -12,6 +12,8 @@
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QStringList>
 
+#include <utility>
+
 QT_FORWARD_DECLARE_CLASS(QDebug)
 QT_FORWARD_DECLARE_CLASS(QTextStream)
 
@@ -79,7 +81,8 @@ public:
 
     bool isStdType() const;
 
-    QPair<qsizetype, qsizetype> parseTemplateArgumentList(const QString &l, qsizetype from = 0);
+    std::pair<qsizetype, qsizetype>
+        parseTemplateArgumentList(const QString &l, qsizetype from = 0);
 
     bool equals(const TypeInfo &other) const;
 

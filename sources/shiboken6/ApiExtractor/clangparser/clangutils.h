@@ -5,12 +5,12 @@
 #define CLANGUTILS_H
 
 #include <clang-c/Index.h>
-#include <QtCore/QPair>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QList>
 
 #include <functional>
+#include <utility>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
@@ -59,7 +59,7 @@ inline bool operator!=(const SourceLocation &l1, const SourceLocation &l2)
 
 SourceLocation getExpansionLocation(const CXSourceLocation &location);
 
-using SourceRange =QPair<SourceLocation, SourceLocation>;
+using SourceRange = std::pair<SourceLocation, SourceLocation>;
 
 SourceLocation getCursorLocation(const CXCursor &cursor);
 CXString getFileNameFromLocation(const CXSourceLocation &location);
@@ -92,7 +92,7 @@ CXDiagnosticSeverity maxSeverity(const QList<Diagnostic> &ds);
 // with each match (level and string). Return begin and end of the list.
 using TemplateArgumentHandler = std::function<void (int, QStringView)>;
 
-QPair<qsizetype, qsizetype>
+std::pair<qsizetype, qsizetype>
     parseTemplateArgumentList(const QString &l,
                               const TemplateArgumentHandler &handler,
                               qsizetype from = 0);
