@@ -302,20 +302,10 @@ class ThemeWidget(QWidget):
         options = self.ui.animatedComboBox.itemData(idx)
 
         if len(self.charts):
-            chart = self.charts[0].chart()
-            animation_options = chart.animationOptions()
+            animation_options = self.charts[0].chart().animationOptions()
             if animation_options != options:
                 for chart_view in self.charts:
-                    options_name = QChart.NoAnimation
-                    if options == 0:
-                        options_name = QChart.NoAnimation
-                    elif options == 1:
-                        options_name = QChart.GridAxisAnimations
-                    elif options == 2:
-                        options_name = QChart.SeriesAnimations
-                    elif options == 3:
-                        options_name = QChart.AllAnimations
-                    chart_view.chart().setAnimationOptions(options_name)
+                    chart_view.chart().setAnimationOptions(options)
 
         # Update legend alignment
         idx = self.ui.legendComboBox.currentIndex()
