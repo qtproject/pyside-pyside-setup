@@ -27,17 +27,15 @@ def run_command(command, dry_run: bool, fetch_output: bool = False):
         else:
             print(command_str + "\n")
     except FileNotFoundError as error:
-        logging.exception(f"[DEPLOY] {error.filename} not found")
-        raise
+        raise FileNotFoundError(f"[DEPLOY] {error.filename} not found")
     except subprocess.CalledProcessError as error:
-        logging.exception(
+        raise RuntimeError(
             f"[DEPLOY] Command {command_str} failed with error {error} and return_code"
             f"{error.returncode}"
         )
-        raise
     except Exception as error:
-        logging.exception(f"[DEPLOY] Command {command_str} failed with error {error}")
-        raise
+        raise RuntimeError(f"[DEPLOY] Command {command_str} failed with error {error}")
+
     return command_str, output
 
 

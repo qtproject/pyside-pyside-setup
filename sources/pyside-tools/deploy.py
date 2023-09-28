@@ -75,6 +75,10 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
     install_python_dependencies(config=config, python=python, init=init,
                                 packages="packages")
 
+    # required by Nuitka for pyenv Python
+    if python.is_pyenv_python():
+        config.extra_args += " --static-libpython=no"
+
     # writing config file
     # in the case of --dry-run, we use default.spec as reference. Do not save the changes
     # for --dry-run
@@ -93,7 +97,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
 
         command_str = python.create_executable(
                         source_file=source_file,
-                        extra_args=config.get_value("nuitka", "extra_args"),
+                        extra_args=config.extra_args,
                         config=config,
                     )
     except Exception:
@@ -116,6 +120,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument("-c", "--config-file", type=lambda p: Path(p).absolute(),
+                        default=(Path.cwd() / "pysidedeploy.spec"),
                         help="Path to the .spec config file")
 
     parser.add_argument(

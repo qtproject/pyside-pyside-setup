@@ -54,7 +54,7 @@ def create_recipe(version: str, component: str, wheel_path: str, generated_files
 
     recipe_path = generated_files_path / "recipes" / f"{component}"
     recipe_path.mkdir(parents=True, exist_ok=True)
-    logging.info(f"[DEPLOY] Writing {component} recipe into {recipe_path}")
+    logging.info(f"[DEPLOY] Writing {component} recipe into {str(recipe_path)}")
     with open(recipe_path / "__init__.py", mode="w", encoding="utf-8") as recipe:
         recipe.write(content)
 
