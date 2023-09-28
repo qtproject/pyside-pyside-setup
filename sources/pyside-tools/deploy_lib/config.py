@@ -1,10 +1,11 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-from pathlib import Path
 import configparser
-from configparser import ConfigParser
 import logging
+import warnings
+from pathlib import Path
+from configparser import ConfigParser
 
 from project import ProjectData
 from .commands import run_qmlimportscanner
@@ -19,11 +20,11 @@ ANDROID_DEPLOY_CACHE = Path.home() / ".pyside6_android_deploy"
 
 class BaseConfig:
 
-    def __init__(self, config_file: Path, comment_prefixes: str = "/") -> None:
+    def __init__(self, config_file: Path, comment_prefixes: str = "/",
+                 existing_config_file: bool = False) -> None:
         self.config_file = config_file
+        self.existing_config_file = existing_config_file
         self.parser = ConfigParser(comment_prefixes=comment_prefixes, allow_no_value=True)
-        if not config_file.exists():
-            raise RuntimeError(f"[DEPLOY] {config_file} does not exist")
         self.parser.read(self.config_file)
 
     def update_config(self):
@@ -61,8 +62,8 @@ class Config(BaseConfig):
     """
 
     def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
-                 android_data, is_android: bool):
-        super().__init__(config_file)
+                 android_data, is_android: bool, existing_config_file: bool = False):
+        super().__init__(config_file=config_file, existing_config_file=existing_config_file)
 
         self._dry_run = dry_run
         # set source_file
@@ -102,13 +103,13 @@ class Config(BaseConfig):
 
         self.qml_files = []
         config_qml_files = self.get_value("qt", "qml_files")
-        if config_qml_files and self.project_dir:
+        if config_qml_files and self.project_dir and self.existing_config_file:
             self.qml_files = [Path(self.project_dir) / file for file in config_qml_files.split(",")]
         else:
             self._find_and_set_qml_files()
 
         self.excluded_qml_plugins = []
-        if self.get_value("qt", "excluded_qml_plugins"):
+        if self.get_value("qt", "excluded_qml_plugins") and self.existing_config_file:
             self.excluded_qml_plugins = self.get_value("qt", "excluded_qml_plugins").split(",")
         else:
             self._find_and_set_excluded_qml_plugins()
@@ -119,13 +120,17 @@ class Config(BaseConfig):
                 self.wheel_pyside = android_data.wheel_pyside
             else:
                 wheel_pyside_temp = self.get_value("qt", "wheel_pyside")
-                self.wheel_pyside = Path(wheel_pyside_temp) if wheel_pyside_temp else None
+                if not wheel_pyside_temp:
+                    raise RuntimeError("[DEPLOY] Unable to find PySide6 Android wheel")
+                self.wheel_pyside = Path(wheel_pyside_temp).resolve()
 
             if android_data.wheel_shiboken:
                 self.wheel_shiboken = android_data.wheel_shiboken
             else:
                 wheel_shiboken_temp = self.get_value("qt", "wheel_shiboken")
-                self.wheel_shiboken = Path(wheel_shiboken_temp) if wheel_shiboken_temp else None
+                if not wheel_shiboken_temp:
+                    raise RuntimeError("[DEPLOY] Unable to find shiboken6 Android wheel")
+                self.wheel_shiboken = Path(wheel_shiboken_temp).resolve()
 
             self.ndk_path = None
             if android_data.ndk_path:
@@ -248,6 +253,14 @@ class Config(BaseConfig):
     @python_path.setter
     def python_path(self, python_path: Path):
         self._python_path = python_path
+
+    @property
+    def extra_args(self):
+        return self.get_value("nuitka", "extra_args")
+
+    @extra_args.setter
+    def extra_args(self, extra_args):
+        self.set_value("nuitka", "extra_args", extra_args)
 
     @property
     def excluded_qml_plugins(self):
@@ -410,12 +423,12 @@ class Config(BaseConfig):
 
                 if len(qml_files_temp) > 500:
                     if "site-packages" in str(qml_files_temp[-1]):
-                        logging.warning(
-                            "You seem to include a lot of QML files from a local virtual env."
-                            "This can lead to errors in deployment."
+                        raise RuntimeError(
+                            "You are including a lot of QML files from a local virtual env."
+                            " This can lead to errors in deployment."
                         )
                     else:
-                        logging.warning(
+                        warnings.warn(
                             "You seem to include a lot of QML files. This can lead to errors in "
                             "deployment."
                         )
@@ -438,18 +451,14 @@ class Config(BaseConfig):
         self.project_dir = self.source_file.parent
 
         # update input_file path
-        logging.info("[DEPLOY] Update input_file path")
         self.set_value("app", "input_file", str(self.source_file.relative_to(self.project_dir)))
 
-        logging.info("[DEPLOY] Update project_dir path")
         if self.project_dir != Path.cwd():
             self.set_value("app", "project_dir", str(self.project_dir))
         else:
             self.set_value("app", "project_dir", str(self.project_dir.relative_to(Path.cwd())))
 
     def _find_and_set_project_file(self):
-        logging.info("[DEPLOY] Searching for .pyproject file")
-
         if self.project_dir:
             files = list(self.project_dir.glob("*.pyproject"))
         else:

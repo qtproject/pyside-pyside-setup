@@ -26,8 +26,6 @@ def cleanup(generated_files_path: Path, config: Config, is_android: bool = False
     if generated_files_path.exists():
         shutil.rmtree(generated_files_path)
         logging.info("[DEPLOY] Deployment directory purged")
-    elif not config.dry_run:
-        logging.info(f"[DEPLOY] {generated_files_path} does not exist")
 
     if is_android:
         buildozer_spec: Path = config.project_dir / "buildozer.spec"
@@ -68,7 +66,8 @@ def get_config(python_exe: Path, dry_run: bool = False, config_file: Path = None
         config_file = Path(__file__).parent / "default.spec"
 
     config = Config(config_file=config_file, source_file=main_file, python_exe=python_exe,
-                    dry_run=dry_run, android_data=android_data, is_android=is_android)
+                    dry_run=dry_run, android_data=android_data, is_android=is_android,
+                    existing_config_file=config_file_exists)
 
     return config
 
@@ -102,7 +101,7 @@ def install_python_dependencies(config: Config, python: PythonExecutable, init: 
     """
     if not init:
         # install packages needed for deployment
-        logging.info("[DEPLOY] Installing dependencies \n")
+        logging.info("[DEPLOY] Installing dependencies")
         packages = config.get_value("python", packages).split(",")
         python.install(packages=packages)
         # nuitka requires patchelf to make patchelf rpath changes for some Qt files

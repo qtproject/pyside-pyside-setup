@@ -147,7 +147,20 @@ class PythonExecutable:
         venv = os.environ.get("VIRTUAL_ENV")
         return True if venv else False
 
+    def is_pyenv_python(self):
+        pyenv_root = os.environ.get("PYENV_ROOT")
+
+        if pyenv_root:
+            resolved_exe = self.exe.resolve()
+            if str(resolved_exe).startswith(pyenv_root):
+                return True
+
+        return False
+
     def install(self, packages: list = None):
+        _, installed_packages = run_command(command=[str(self.exe), "-m", "pip", "freeze"], dry_run=False
+                                            , fetch_output=True)
+        installed_packages = [p.decode().split('==')[0] for p in installed_packages.split()]
         for package in packages:
             package_info = package.split('==')
             package_components_len = len(package_info)
@@ -159,7 +172,7 @@ class PythonExecutable:
                 package_version = package_info[1]
             else:
                 raise ValueError(f"{package} should be of the format 'package_name'=='version'")
-            if not self.is_installed(package=package_name):
+            if (package_name not in installed_packages) and (not self.is_installed(package_name)):
                 logging.info(f"[DEPLOY] Installing package: {package}")
                 run_command(
                     command=[self.exe, "-m", "pip", "install", package],
@@ -176,7 +189,7 @@ class PythonExecutable:
                     )
                 else:
                     logging.info(f"[DEPLOY] package: {package_name}=={package_version}"
-                                 "already installed")
+                                 " already installed")
             else:
                 logging.info(f"[DEPLOY] package: {package_name} already installed")
 
