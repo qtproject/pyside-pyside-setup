@@ -132,9 +132,12 @@ def feature_imported(module):
     A module that uses PySide has a switching default of 0 = "no feature".
     Otherwise the default is -1 = "ignore this module".
     """
-    name = module.__name__
-    if name not in pyside_feature_dict:
-        pyside_feature_dict[name] = 0 if _mod_uses_pyside(module) else -1
+
+    # PYSIDE-1368: The `__name__` attribute does not need to exist in all modules.
+    if hasattr(module, "__name__"):
+        name = module.__name__
+        if name not in pyside_feature_dict:
+            pyside_feature_dict[name] = 0 if _mod_uses_pyside(module) else -1
 
 
 def _mod_uses_pyside(module):
