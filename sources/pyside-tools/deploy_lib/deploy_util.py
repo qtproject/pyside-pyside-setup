@@ -1,14 +1,14 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-import sys
 import logging
 import shutil
-
+import sys
 from pathlib import Path
+
+from . import EXE_FORMAT
 from .config import Config
 from .python_helper import PythonExecutable
-from . import EXE_FORMAT
 
 
 def config_option_exists():

@@ -1,13 +1,11 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
+import json
 import subprocess
 import sys
-import logging
-from typing import List
-
-import json
 from pathlib import Path
+from typing import List
 
 """
 All utility functions for deployment

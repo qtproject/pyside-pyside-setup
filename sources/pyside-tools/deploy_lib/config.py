@@ -4,10 +4,11 @@
 import configparser
 import logging
 import warnings
-from pathlib import Path
 from configparser import ConfigParser
+from pathlib import Path
 
 from project import ProjectData
+
 from .commands import run_qmlimportscanner
 
 # Some QML plugins like QtCore are excluded from this list as they don't contribute much to

@@ -2,20 +2,22 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 import ast
+import logging
 import os
 import re
 import sys
-import logging
 import warnings
 from typing import List
 from importlib import util
+
 if sys.version_info >= (3, 8):
     from importlib.metadata import version
 else:
     from importlib_metadata import version
+
 from pathlib import Path
 
-from . import Nuitka, run_command, Config
+from . import Config, Nuitka, run_command
 
 IMPORT_WARNING_PYSIDE = (f"[DEPLOY] Found 'import PySide6' in file {0}"
                          ". Use 'from PySide6 import <module>' or pass the module"
