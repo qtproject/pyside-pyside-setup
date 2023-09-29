@@ -6,22 +6,16 @@ The Python language provides keywords for asynchronous operations, i.e.,
 event loop (see `PEP 492 <https://peps.python.org/pep-0492/>`_). It is up to
 packages to implement an event loop, support for these keywords, and more.
 
-The best-known package for this is `asyncio`. Since both an async package and
-Qt itself work with event loops, special care must be taken to ensure that both
-event loops work with each other. asyncio offers a function `stop` that allows
-stopping an event loop without closing it. If it is called while a loop is
-running through `run_forever`, the loop will run the current batch of callbacks
-and then exit. New callbacks wil be scheduled the next time `run_forever` is
-called.
+The best-known package for this is `asyncio`. asyncio offers an API that allows
+for the asyncio event loop to be replaced by a custom implementation. Such an
+implementation is available with the `QtAsyncio` module. It is based on Qt and
+uses Qt's event loop in the backend.
 
-This approach is highly experimental and does not represent the state of the
-art of integrating Qt with asyncio. Instead it should rather be regarded more
-as a proof of concept to contrast asyncio with other async packages such as
-`trio`, which offers a dedicated `low-level API
+`trio` is another popular package that offers a dedicated `low-level API
 <https://trio.readthedocs.io/en/stable/reference-lowlevel.html>`_ for more
-complicated use cases such as this. Specifically, there exists a function
-`start_guest_run` that enables running the Trio event loop as a "guest" inside
-another event loop - Qt's in our case.
+complex use cases. Specifically, there exists a function `start_guest_run` that
+enables running the Trio event loop as a "guest" inside another event loop -
+Qt's in our case, standing in contrast to asyncio's approach.
 
 Based on this functionality, two examples for async usage with Qt have been
 implemented: `eratosthenes` and `minimal`:
@@ -37,14 +31,6 @@ implemented: `eratosthenes` and `minimal`:
   asynchronous coroutine with a sleep. It is designed to highlight which
   boilerplate code is essential for an async program with Qt and offers a
   starting point for more complex programs.
-
-Both examples feature:
-
-1. A window class.
-2. An `AsyncHelper` class containing `start_guest_run` plus helpers and
-   callbacks necessary for its invocation. The entry point for the Trio/asyncio
-   guest run is provided as an argument from outside, which can be any async
-   function.
 
 While `eratosthenes` offloads the asynchronous logic that will run in
 trio's/asyncio's event loop into a separate class, `minimal` demonstrates that
