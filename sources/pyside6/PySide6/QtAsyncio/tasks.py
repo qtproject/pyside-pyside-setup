@@ -111,7 +111,6 @@ class QAsyncioTask(futures.QAsyncioFuture):
             if self.done():
                 self._schedule_callbacks()
                 asyncio._unregister_task(self)  # type: ignore[arg-type]
-                self._loop.stop()
 
     def get_stack(self, *, limit=None) -> typing.List[typing.Any]:
         # TODO
