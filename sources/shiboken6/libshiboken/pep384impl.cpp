@@ -896,13 +896,18 @@ init_PepRuntime()
         PepRuntime_38_flag = 1;
 }
 
+static long _GetPepRuntimeVersion()
+{
+    auto *version = PySys_GetObject("version_info");
+    const auto major = PyLong_AsLong(PyTuple_GetItem(version, 0));
+    const auto minor = PyLong_AsLong(PyTuple_GetItem(version, 1));
+    const auto micro = PyLong_AsLong(PyTuple_GetItem(version, 2));
+    return major << 16 | minor << 8 | micro;
+}
+
 long _PepRuntimeVersion()
 {
-    static auto *version = PySys_GetObject("version_info");
-    static auto major = PyLong_AsLong(PyTuple_GetItem(version, 0));
-    static auto minor = PyLong_AsLong(PyTuple_GetItem(version, 1));
-    static auto micro = PyLong_AsLong(PyTuple_GetItem(version, 2));
-    static auto number = major << 16 | minor << 8 | micro;
+    static const auto number = _GetPepRuntimeVersion();
     return number;
 }
 
