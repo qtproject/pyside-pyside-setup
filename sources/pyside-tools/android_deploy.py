@@ -8,11 +8,11 @@ import traceback
 from pathlib import Path
 from textwrap import dedent
 
-from deploy_lib import (setup_python, get_config, cleanup, install_python_dependencies,
-                        config_option_exists, find_pyside_modules, MAJOR_VERSION)
-from deploy_lib.android import (extract_and_copy_jar, get_wheel_android_arch,
-                                Buildozer, AndroidData)
-
+from deploy_lib import (MAJOR_VERSION, cleanup, config_option_exists,
+                        find_pyside_modules, get_config,
+                        install_python_dependencies, setup_python)
+from deploy_lib.android import (AndroidData, Buildozer, extract_and_copy_jar,
+                                get_wheel_android_arch)
 
 """ pyside6-android-deploy deployment tool
 
@@ -166,9 +166,10 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
         if not dry_run:
             buildozer_build_dir = config.project_dir / ".buildozer"
             if not buildozer_build_dir.exists():
-                logging.info(f"[DEPLOY] Unable to copy {buildozer_build_dir} to {generated_files_path}"
-                             f"{buildozer_build_dir} does not exist")
-            logging.info(f"[DEPLOY] copy {buildozer_build_dir} to {generated_files_path}")
+                logging.info(f"[DEPLOY] Unable to copy {buildozer_build_dir} to "
+                             f"{generated_files_path}. {buildozer_build_dir} does not exist")
+            logging.info(f"[DEPLOY] Copying {str(buildozer_build_dir)} to "
+                         f"{str(generated_files_path)}")
             shutil.move(buildozer_build_dir, generated_files_path)
 
         logging.info(f"[DEPLOY] apk created in {config.exe_dir}")

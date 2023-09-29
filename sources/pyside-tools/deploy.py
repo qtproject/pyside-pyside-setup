@@ -34,8 +34,9 @@ import traceback
 from pathlib import Path
 from textwrap import dedent
 
-from deploy_lib import (setup_python, get_config, cleanup, install_python_dependencies, finalize,
-                        config_option_exists, Config, MAJOR_VERSION)
+from deploy_lib import (MAJOR_VERSION, Config, cleanup, config_option_exists,
+                        finalize, get_config, install_python_dependencies,
+                        setup_python)
 
 
 def main(main_file: Path = None, name: str = None, config_file: Path = None, init: bool = False,
