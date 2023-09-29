@@ -134,6 +134,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
             return False
         if (isinstance(self._handle, events.QAsyncioHandle)):
             self._handle._cancel_exception_msg = msg
+        self._cancel_message = msg
         self._handle.cancel()
         self._state = futures.QAsyncioFuture.FutureState.CANCELLED
         return True
