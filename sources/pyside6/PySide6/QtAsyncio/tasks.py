@@ -27,6 +27,8 @@ class QAsyncioTask(futures.QAsyncioFuture):
 
         self._cancellation_requests = 0
 
+        asyncio._register_task(self)  # type: ignore[arg-type]
+
     def __repr__(self) -> str:
         if self._state == futures.QAsyncioFuture.FutureState.PENDING:
             state = "Pending"
@@ -60,17 +62,19 @@ class QAsyncioTask(futures.QAsyncioFuture):
 
     def _step(self,
               exception_or_future: typing.Union[
-                  Exception, futures.QAsyncioFuture, None] = None):
+                  Exception, futures.QAsyncioFuture, None] = None) -> None:
         if self.done():
             return
         result = None
 
-        asyncio._enter_task(self._loop, self)  # type: ignore[arg-type]
-
         try:
+            asyncio._enter_task(self._loop, self)  # type: ignore[arg-type]
             if exception_or_future is None:
                 result = self._coro.send(None)
             elif asyncio.futures.isfuture(exception_or_future):
+                # If the future has an exception set by set_exception(), this will raise it.
+                # If the future has been cancelled, this will raise CancelledError.
+                # If the future's result isn't yet available, this will raise InvalidStateError.
                 exception_or_future.result()
                 exception_or_future = None
                 result = self._coro.send(None)
@@ -92,6 +96,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
             else:
                 self._loop.call_soon(self._step, exception_or_future, context=self._context)
         finally:
+            asyncio._leave_task(self._loop, self)  # type: ignore[arg-type]
             if self._exception:
                 self._loop.call_exception_handler({
                     "message": (str(self._exception) if self._exception
@@ -105,9 +110,8 @@ class QAsyncioTask(futures.QAsyncioFuture):
                 })
             if self.done():
                 self._schedule_callbacks()
+                asyncio._unregister_task(self)  # type: ignore[arg-type]
                 self._loop.stop()
-
-            asyncio._leave_task(self._loop, self)  # type: ignore[arg-type]
 
     def get_stack(self, *, limit=None) -> typing.List[typing.Any]:
         # TODO
