@@ -6,6 +6,7 @@ import os
 import re
 import sys
 import logging
+import warnings
 from typing import List
 from importlib import util
 if sys.version_info >= (3, 8):
@@ -73,6 +74,31 @@ def find_pyside_modules(project_dir: Path, extra_ignore_dirs: List[Path] = None,
 
     if project_data:
         py_candidates = project_data.python_files
+        ui_candidates = project_data.ui_files
+        qrc_candidates = project_data.qrc_files
+        ui_py_candidates = None
+        qrc_ui_candidates = None
+
+        if ui_candidates:
+            ui_py_candidates = [(file.parent / f"ui_{file.stem}.py") for file in ui_candidates
+                                if (file.parent / f"ui_{file.stem}.py").exists()]
+
+            if len(ui_py_candidates) != len(ui_candidates):
+                warnings.warn("[DEPLOY] The number of uic files and their corresponding Python"
+                              " files don't match.", category=RuntimeWarning)
+
+            py_candidates.extend(ui_py_candidates)
+
+        if qrc_candidates:
+            qrc_ui_candidates = [(file.parent / f"rc_{file.stem}.py") for file in qrc_candidates
+                                 if (file.parent / f"rc_{file.stem}.py").exists()]
+
+            if len(qrc_ui_candidates) != len(qrc_candidates):
+                warnings.warn("[DEPLOY] The number of qrc files and their corresponding Python"
+                              " files don't match.", category=RuntimeWarning)
+
+            py_candidates.extend(qrc_ui_candidates)
+
         for py_candidate in py_candidates:
             all_modules = all_modules.union(pyside_imports(py_candidate))
         return list(all_modules)

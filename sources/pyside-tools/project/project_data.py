@@ -29,6 +29,10 @@ class ProjectData:
         # Python files
         self.main_file: Path = None
         self._python_files: List[Path] = []
+        # ui files
+        self._ui_files: List[Path] = []
+        # qrc files
+        self._qrc_files: List[Path] = []
 
         with project_file.open("r") as pyf:
             pyproject = json.load(pyf)
@@ -44,6 +48,11 @@ class ProjectData:
                         if file.stem == "main":
                             self.main_file = file
                         self._python_files.append(file)
+                    elif file.suffix == ".ui":
+                        self._ui_files.append(file)
+                    elif file.suffix == ".qrc":
+                        self._qrc_files.append(file)
+
         if not self.main_file:
             self._find_main_file()
 
@@ -66,6 +75,14 @@ class ProjectData:
     @property
     def python_files(self):
         return self._python_files
+
+    @property
+    def ui_files(self):
+        return self._ui_files
+
+    @property
+    def qrc_files(self):
+        return self._qrc_files
 
     @property
     def qml_files(self):
