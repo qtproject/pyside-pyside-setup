@@ -249,7 +249,7 @@ _PepType_Lookup(PyTypeObject *type, PyObject *name)
 // structs and macros modelled after their equivalents in
 // cpython/Include/cpython/unicodeobject.h
 
-struct PepASCIIObject
+struct PepASCIIObject // since 3.12
 {
     PyObject_HEAD
     Py_ssize_t length;          /* Number of code points in the string */
@@ -262,20 +262,42 @@ struct PepASCIIObject
         unsigned int ready:1;
         unsigned int :24;
     } state;
+};
+
+struct PepASCIIObject_311 : public PepASCIIObject
+{
     wchar_t *wstr;              /* wchar_t representation (null-terminated) */
 };
 
-struct PepCompactUnicodeObject
+struct PepCompactUnicodeObject // since 3.12
 {
     PepASCIIObject _base;
+    Py_ssize_t utf8_length;
+    char *utf8;                 /* UTF-8 representation (null-terminated) */
+};
+
+struct PepCompactUnicodeObject_311 // since 3.12
+{
+    PepASCIIObject_311 _base;
     Py_ssize_t utf8_length;
     char *utf8;                 /* UTF-8 representation (null-terminated) */
     Py_ssize_t wstr_length;     /* Number of code points in wstr */
 };
 
-struct PepUnicodeObject
+struct PepUnicodeObject // since 3.12
 {
     PepCompactUnicodeObject _base;
+    union {
+        void *any;
+        Py_UCS1 *latin1;
+        Py_UCS2 *ucs2;
+        Py_UCS4 *ucs4;
+    } data;                     /* Canonical, smallest-form Unicode buffer */
+};
+
+struct PepUnicodeObject_311
+{
+    PepCompactUnicodeObject_311 _base;
     union {
         void *any;
         Py_UCS1 *latin1;
@@ -301,18 +323,33 @@ int _PepUnicode_IS_COMPACT(PyObject *str)
     return asciiObj->state.compact;
 }
 
+static void *_PepUnicode_ASCII_DATA(PyObject *str)
+{
+    if (_PepRuntimeVersion() < 0x030C00) {
+        auto *asciiObj_311 = reinterpret_cast<PepASCIIObject_311 *>(str);
+        return asciiObj_311 + 1;
+    }
+    auto *asciiObj = reinterpret_cast<PepASCIIObject *>(str);
+    return asciiObj + 1;
+}
+
 static void *_PepUnicode_COMPACT_DATA(PyObject *str)
 {
-    auto *asciiObj = reinterpret_cast<PepASCIIObject *>(str);
-    if (asciiObj->state.ascii)
-        return asciiObj + 1;
+    if (_PepUnicode_IS_ASCII(str) != 0)
+        return _PepUnicode_ASCII_DATA(str);
+    if (_PepRuntimeVersion() < 0x030C00) {
+        auto *compactObj_311 = reinterpret_cast<PepCompactUnicodeObject_311 *>(str);
+        return compactObj_311 + 1;
+    }
     auto *compactObj = reinterpret_cast<PepCompactUnicodeObject *>(str);
     return compactObj + 1;
 }
 
 static void *_PepUnicode_NONCOMPACT_DATA(PyObject *str)
 {
-    return reinterpret_cast<PepUnicodeObject *>(str)->data.any;
+    return _PepRuntimeVersion() < 0x030C00
+        ? reinterpret_cast<PepUnicodeObject_311 *>(str)->data.any
+        : reinterpret_cast<PepUnicodeObject *>(str)->data.any;
 }
 
 void *_PepUnicode_DATA(PyObject *str)
@@ -323,6 +360,23 @@ void *_PepUnicode_DATA(PyObject *str)
 
 // Fast path accessing UTF8 data without doing a conversion similar
 // to _PyUnicode_AsUTF8String
+static const char *utf8FastPath_311(PyObject *str)
+{
+    if (PyUnicode_GetLength(str) == 0)
+        return "";
+    auto *asciiObj = reinterpret_cast<PepASCIIObject_311 *>(str);
+    if (asciiObj->state.kind != PepUnicode_1BYTE_KIND || asciiObj->state.compact == 0)
+        return nullptr; // Empirical: PyCompactUnicodeObject.utf8 is only valid for 1 byte
+    if (asciiObj->state.ascii) {
+        auto *data = asciiObj + 1;
+        return reinterpret_cast<const char *>(data);
+    }
+    auto *compactObj = reinterpret_cast<PepCompactUnicodeObject_311 *>(str);
+    if (compactObj->utf8_length)
+        return compactObj->utf8;
+    return nullptr;
+}
+
 static const char *utf8FastPath(PyObject *str)
 {
     if (PyUnicode_GetLength(str) == 0)
@@ -354,8 +408,10 @@ const char *_PepUnicode_AsString(PyObject *str)
 #define TOSTRING(x) STRINGIFY(x)
 #define AT __FILE__ ":" TOSTRING(__LINE__)
 
-    if (const auto *utf8 = utf8FastPath(str))
+    if (const auto *utf8 = _PepRuntimeVersion() < 0x030C00
+        ? utf8FastPath_311(str) : utf8FastPath(str)) {
         return utf8;
+    }
 
     static PyObject *cstring_dict = nullptr;
     if (cstring_dict == nullptr) {
