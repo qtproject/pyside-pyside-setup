@@ -29,6 +29,8 @@ class TypeEntry;
 class AbstractMetaBuilder
 {
 public:
+    Q_DISABLE_COPY_MOVE(AbstractMetaBuilder)
+
     enum RejectReason {
         NotInTypeSystem,
         GenerationDisabled,

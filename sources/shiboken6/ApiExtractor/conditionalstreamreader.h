@@ -26,6 +26,8 @@ class ProxyEntityResolver;
 class ConditionalStreamReader
 {
 public:
+    Q_DISABLE_COPY_MOVE(ConditionalStreamReader)
+
     using TokenType = QXmlStreamReader::TokenType;
     explicit ConditionalStreamReader(QIODevice *iod);
     explicit ConditionalStreamReader(const QString &s);

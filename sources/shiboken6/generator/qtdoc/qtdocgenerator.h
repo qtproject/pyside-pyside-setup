@@ -24,6 +24,8 @@ struct GeneratorDocumentation;
 class QtDocGenerator : public Generator, public QtXmlToSphinxDocGeneratorInterface
 {
 public:
+    Q_DISABLE_COPY_MOVE(QtDocGenerator)
+
     QtDocGenerator();
     ~QtDocGenerator();
 

@@ -115,6 +115,8 @@ static bool isSigned(CXTypeKind kind)
 
 class BuilderPrivate {
 public:
+    Q_DISABLE_COPY_MOVE(BuilderPrivate)
+
     using CursorClassHash = QHash<CXCursor, ClassModelItem>;
     using TypeInfoHash = QHash<CXType, TypeInfo>;
 

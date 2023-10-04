@@ -44,6 +44,8 @@ using BoolCastFunctionOptional = std::optional<BoolCastFunction>;
 class ShibokenGenerator : public Generator
 {
 public:
+    Q_DISABLE_COPY_MOVE(ShibokenGenerator)
+
     /// Besides the actual bindings (see AbstractMetaFunction::generateBinding(),
     /// some functions need to be generated into the wrapper class
     /// (virtual method/avoid protected hack expose).

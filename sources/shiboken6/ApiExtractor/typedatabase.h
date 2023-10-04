@@ -63,8 +63,9 @@ QDebug operator<<(QDebug d, const TypeRejection &r);
 class TypeDatabase
 {
     TypeDatabase();
-    Q_DISABLE_COPY(TypeDatabase)
 public:
+    Q_DISABLE_COPY_MOVE(TypeDatabase)
+
     ~TypeDatabase();
 
     static QList<OptionDescription> options();
