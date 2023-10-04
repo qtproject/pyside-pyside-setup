@@ -5653,7 +5653,7 @@ void CppGenerator::writeSetattroDefinition(TextStream &s,
     }
 }
 
-inline void CppGenerator::writeSetattroDefaultReturn(TextStream &s)
+void CppGenerator::writeSetattroDefaultReturn(TextStream &s)
 {
     s << "return PyObject_GenericSetAttr(self, name, value);\n"
         << outdent << "}\n\n";
