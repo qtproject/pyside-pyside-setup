@@ -14,7 +14,7 @@ class BuilderPrivate;
 
 class Builder : public BaseVisitor {
 public:
-    Q_DISABLE_COPY(Builder)
+    Q_DISABLE_COPY_MOVE(Builder)
 
     Builder();
     ~Builder();

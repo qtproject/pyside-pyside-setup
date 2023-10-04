@@ -91,8 +91,9 @@ QDebug operator<<(QDebug d, const CodeModel *m);
 
 class _CodeModelItem
 {
-    Q_DISABLE_COPY(_CodeModelItem)
 public:
+    Q_DISABLE_COPY_MOVE(_CodeModelItem)
+
     enum Kind {
         /* These are bit-flags resembling inheritance */
         Kind_Scope = 0x1,
@@ -175,6 +176,7 @@ QDebug operator<<(QDebug d, const _CodeModelItem *t);
 class _ScopeModelItem: public _CodeModelItem
 {
 public:
+    Q_DISABLE_COPY_MOVE(_ScopeModelItem)
     DECLARE_MODEL_NODE(Scope)
 
     ~_ScopeModelItem();
@@ -257,6 +259,7 @@ private:
 class _ClassModelItem: public _ScopeModelItem
 {
 public:
+    Q_DISABLE_COPY_MOVE(_ClassModelItem)
     DECLARE_MODEL_NODE(Class)
 
     struct BaseClass
@@ -320,6 +323,7 @@ private:
 class _NamespaceModelItem: public _ScopeModelItem
 {
 public:
+    Q_DISABLE_COPY_MOVE(_NamespaceModelItem)
     DECLARE_MODEL_NODE(Namespace)
 
     explicit _NamespaceModelItem(CodeModel *model, int kind = __node_kind);
@@ -350,6 +354,7 @@ private:
 class _FileModelItem: public _NamespaceModelItem
 {
 public:
+    Q_DISABLE_COPY_MOVE(_FileModelItem)
     DECLARE_MODEL_NODE(File)
 
     using _NamespaceModelItem::_NamespaceModelItem;
@@ -360,6 +365,7 @@ public:
 class _ArgumentModelItem: public _CodeModelItem
 {
 public:
+    Q_DISABLE_COPY_MOVE(_ArgumentModelItem)
     DECLARE_MODEL_NODE(Argument)
 
     explicit _ArgumentModelItem(CodeModel *model, int kind = __node_kind);
@@ -394,6 +400,7 @@ private:
 class _MemberModelItem: public _CodeModelItem
 {
 public:
+    Q_DISABLE_COPY_MOVE(_MemberModelItem)
     DECLARE_MODEL_NODE(Member)
 
     explicit _MemberModelItem(CodeModel *model, int kind = __node_kind);
@@ -461,6 +468,7 @@ private:
 class _FunctionModelItem: public _MemberModelItem
 {
 public:
+    Q_DISABLE_COPY_MOVE(_FunctionModelItem)
     DECLARE_MODEL_NODE(Function)
 
     explicit _FunctionModelItem(CodeModel *model, int kind = __node_kind);
@@ -614,6 +622,7 @@ private:
 class _EnumModelItem: public _CodeModelItem
 {
 public:
+    Q_DISABLE_COPY_MOVE(_EnumModelItem)
     DECLARE_MODEL_NODE(Enum)
 
     explicit _EnumModelItem(CodeModel *model, const QString &name, int kind = __node_kind);
@@ -657,6 +666,7 @@ private:
 class _EnumeratorModelItem: public _CodeModelItem
 {
 public:
+    Q_DISABLE_COPY_MOVE(_EnumeratorModelItem)
     DECLARE_MODEL_NODE(Enumerator)
 
     explicit _EnumeratorModelItem(CodeModel *model, int kind = __node_kind);
@@ -686,6 +696,7 @@ private:
 class _TemplateParameterModelItem: public _CodeModelItem
 {
 public:
+    Q_DISABLE_COPY_MOVE(_TemplateParameterModelItem)
     DECLARE_MODEL_NODE(TemplateParameter)
 
     explicit _TemplateParameterModelItem(CodeModel *model, int kind = __node_kind);

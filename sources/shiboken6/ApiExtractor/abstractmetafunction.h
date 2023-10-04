@@ -32,6 +32,8 @@ class AbstractMetaFunction
 {
     Q_GADGET
 public:
+    Q_DISABLE_COPY_MOVE(AbstractMetaFunction)
+
     enum FunctionType {
         ConstructorFunction,
         CopyConstructorFunction,

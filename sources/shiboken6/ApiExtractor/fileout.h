@@ -14,7 +14,7 @@ class FileOut
 {
     QByteArray m_buffer;
 public:
-    Q_DISABLE_COPY(FileOut)
+    Q_DISABLE_COPY_MOVE(FileOut)
 
     enum State { Unchanged, Success };
 

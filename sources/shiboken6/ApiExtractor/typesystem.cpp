@@ -52,6 +52,11 @@ static QString buildName(const QString &entryName, const TypeEntryCPtr &parent)
 class TypeEntryPrivate
 {
 public:
+    TypeEntryPrivate(const TypeEntryPrivate &) = default; // Enable copy for cloning.
+    TypeEntryPrivate &operator=(const TypeEntryPrivate &) = delete;
+    TypeEntryPrivate(TypeEntryPrivate &&) = delete;
+    TypeEntryPrivate &operator=(TypeEntryPrivate &&) = delete;
+
     explicit TypeEntryPrivate(const QString &entryName, TypeEntry::Type t, const QVersionNumber &vr,
                               const TypeEntryCPtr &parent);
     virtual ~TypeEntryPrivate() = default;

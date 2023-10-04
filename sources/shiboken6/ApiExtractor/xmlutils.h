@@ -10,7 +10,7 @@
 class XQuery
 {
 public:
-    Q_DISABLE_COPY(XQuery);
+    Q_DISABLE_COPY_MOVE(XQuery)
 
     virtual ~XQuery();
 

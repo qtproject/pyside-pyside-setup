@@ -132,7 +132,7 @@ struct StackElementContext
 class TypeSystemParser
 {
 public:
-    Q_DISABLE_COPY(TypeSystemParser)
+    Q_DISABLE_COPY_MOVE(TypeSystemParser)
 
     using StackElementContextPtr = std::shared_ptr<StackElementContext>;
     using ContextStack = QStack<StackElementContextPtr>;
