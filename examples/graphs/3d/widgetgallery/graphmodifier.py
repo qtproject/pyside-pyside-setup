@@ -9,7 +9,7 @@ from PySide6.QtCore import QObject, QPropertyAnimation, Signal, Slot
 from PySide6.QtGui import QFont, QVector3D
 from PySide6.QtGraphs import (QAbstract3DGraph, QAbstract3DSeries,
                               QBarDataItem, QBar3DSeries, QCategory3DAxis,
-                              QValue3DAxis, Q3DCamera, Q3DTheme)
+                              QValue3DAxis, Q3DTheme)
 
 from rainfalldata import RainfallData
 
@@ -63,7 +63,7 @@ class GraphModifier(QObject):
         self._subSegments = 3
         self._minval = float(-20)
         self._maxval = float(20)
-        self._barMesh = QAbstract3DSeries.MeshBevelBar
+        self._barMesh = QAbstract3DSeries.Mesh.BevelBar
         self._smooth = False
         self._animationCameraX = QPropertyAnimation()
         self._animationCameraY = QPropertyAnimation()
@@ -75,7 +75,7 @@ class GraphModifier(QObject):
         self._defaultTarget = []
         self._customData = None
 
-        self._graph.setShadowQuality(QAbstract3DGraph.ShadowQualitySoftMedium)
+        self._graph.setShadowQuality(QAbstract3DGraph.ShadowQuality.SoftMedium)
         theme = self._graph.activeTheme()
         theme.setBackgroundEnabled(False)
         theme.setFont(QFont("Times New Roman", self._fontSize))
@@ -109,12 +109,12 @@ class GraphModifier(QObject):
 
         format = "Oulu - @colLabel @rowLabel: @valueLabel"
         self._primarySeries.setItemLabelFormat(format)
-        self._primarySeries.setMesh(QAbstract3DSeries.MeshBevelBar)
+        self._primarySeries.setMesh(QAbstract3DSeries.Mesh.BevelBar)
         self._primarySeries.setMeshSmooth(False)
 
         format = "Helsinki - @colLabel @rowLabel: @valueLabel"
         self._secondarySeries.setItemLabelFormat(format)
-        self._secondarySeries.setMesh(QAbstract3DSeries.MeshBevelBar)
+        self._secondarySeries.setMesh(QAbstract3DSeries.Mesh.BevelBar)
         self._secondarySeries.setMeshSmooth(False)
         self._secondarySeries.setVisible(False)
 
@@ -126,21 +126,20 @@ class GraphModifier(QObject):
         self.resetTemperatureData()
 
         # Set up property animations for zooming to the selected bar
-        camera = self._graph.scene().activeCamera()
-        self._defaultAngleX = camera.xRotation()
-        self._defaultAngleY = camera.yRotation()
-        self._defaultZoom = camera.zoomLevel()
-        self._defaultTarget = camera.target()
+        self._defaultAngleX = self._graph.cameraXRotation()
+        self._defaultAngleY = self._graph.cameraYRotation()
+        self._defaultZoom = self._graph.cameraZoomLevel()
+        self._defaultTarget = self._graph.cameraTargetPosition()
 
-        self._animationCameraX.setTargetObject(camera)
-        self._animationCameraY.setTargetObject(camera)
-        self._animationCameraZoom.setTargetObject(camera)
-        self._animationCameraTarget.setTargetObject(camera)
+        self._animationCameraX.setTargetObject(self._graph)
+        self._animationCameraY.setTargetObject(self._graph)
+        self._animationCameraZoom.setTargetObject(self._graph)
+        self._animationCameraTarget.setTargetObject(self._graph)
 
-        self._animationCameraX.setPropertyName(b"xRotation")
-        self._animationCameraY.setPropertyName(b"yRotation")
-        self._animationCameraZoom.setPropertyName(b"zoomLevel")
-        self._animationCameraTarget.setPropertyName(b"target")
+        self._animationCameraX.setPropertyName(b"cameraXRotation")
+        self._animationCameraY.setPropertyName(b"cameraYRotation")
+        self._animationCameraZoom.setPropertyName(b"cameraZoomLevel")
+        self._animationCameraTarget.setPropertyName(b"cameraTargetPosition")
 
         duration = 1700
         self._animationCameraX.setDuration(duration)
@@ -206,16 +205,15 @@ class GraphModifier(QObject):
         self._animationCameraTarget.stop()
 
         # Restore camera target in case animation has changed it
-        self._graph.scene().activeCamera().setTarget(QVector3D(0.0, 0.0, 0.0))
+        self._graph.setCameraTargetPosition(QVector3D(0.0, 0.0, 0.0))
 
-        self._preset = Q3DCamera.CameraPresetFront.value
+        self._preset = QAbstract3DGraph.CameraPreset.Front.value
 
-        camera = self._graph.scene().activeCamera()
-        camera.setCameraPreset(Q3DCamera.CameraPreset(self._preset))
+        self._graph.setCameraPreset(QAbstract3DGraph.CameraPreset(self._preset))
 
         self._preset += 1
-        if self._preset > Q3DCamera.CameraPresetDirectlyBelow.value:
-            self._preset = Q3DCamera.CameraPresetFrontLow.value
+        if self._preset > QAbstract3DGraph.CameraPreset.DirectlyBelow.value:
+            self._preset = QAbstract3DGraph.CameraPreset.FrontLow.value
 
     @Slot(int)
     def changeTheme(self, theme):
@@ -277,11 +275,10 @@ class GraphModifier(QObject):
         self._animationCameraZoom.stop()
         self._animationCameraTarget.stop()
 
-        camera = self._graph.scene().activeCamera()
-        currentX = camera.xRotation()
-        currentY = camera.yRotation()
-        currentZoom = camera.zoomLevel()
-        currentTarget = camera.target()
+        currentX = self._graph.cameraXRotation()
+        currentY = self._graph.cameraYRotation()
+        currentZoom = self._graph.cameraZoomLevel()
+        currentTarget = self._graph.cameraTargetPosition()
 
         self._animationCameraX.setStartValue(currentX)
         self._animationCameraY.setStartValue(currentY)

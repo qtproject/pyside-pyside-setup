@@ -56,10 +56,10 @@ class ScatterGraph(QObject):
         smoothCheckBox.setChecked(True)
 
         itemStyleList = QComboBox(self._scatterWidget)
-        itemStyleList.addItem("Sphere", QAbstract3DSeries.MeshSphere)
-        itemStyleList.addItem("Cube", QAbstract3DSeries.MeshCube)
-        itemStyleList.addItem("Minimal", QAbstract3DSeries.MeshMinimal)
-        itemStyleList.addItem("Point", QAbstract3DSeries.MeshPoint)
+        itemStyleList.addItem("Sphere", QAbstract3DSeries.Mesh.Sphere)
+        itemStyleList.addItem("Cube", QAbstract3DSeries.Mesh.Cube)
+        itemStyleList.addItem("Minimal", QAbstract3DSeries.Mesh.Minimal)
+        itemStyleList.addItem("Point", QAbstract3DSeries.Mesh.Point)
         itemStyleList.setCurrentIndex(0)
 
         themeList = QComboBox(self._scatterWidget)

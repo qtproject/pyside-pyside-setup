@@ -7,7 +7,7 @@ from PySide6.QtCore import QObject, Signal, Slot, Qt
 from PySide6.QtGui import QVector3D
 from PySide6.QtGraphs import (QAbstract3DGraph, QAbstract3DSeries,
                               QScatterDataItem, QScatterDataProxy,
-                              QScatter3DSeries, Q3DCamera, Q3DTheme)
+                              QScatter3DSeries, Q3DTheme)
 
 from axesinputhandler import AxesInputHandler
 
@@ -29,7 +29,7 @@ class ScatterDataModifier(QObject):
 
         self._graph = scatter
 
-        self._style = QAbstract3DSeries.MeshSphere
+        self._style = QAbstract3DSeries.Mesh.Sphere
         self._smooth = True
         self._inputHandler = AxesInputHandler(scatter)
         self._autoAdjust = True
@@ -37,16 +37,17 @@ class ScatterDataModifier(QObject):
         self._CURVE_DIVIDER = LOWER_CURVE_DIVIDER
         self._inputHandler = AxesInputHandler(scatter)
 
-        self._graph.activeTheme().setType(Q3DTheme.ThemeStoneMoss)
-        self._graph.setShadowQuality(QAbstract3DGraph.ShadowQualitySoftHigh)
-        self._graph.scene().activeCamera().setCameraPreset(Q3DCamera.CameraPresetFront)
-        self._graph.scene().activeCamera().setZoomLevel(80.0)
+        self._graph.activeTheme().setType(Q3DTheme.Theme.StoneMoss)
+        self._graph.setShadowQuality(QAbstract3DGraph.ShadowQuality.SoftHigh)
+        self._graph.setCameraPreset(QAbstract3DGraph.CameraPreset.Front)
+        self._graph.setCameraZoomLevel(80.0)
 
         self._proxy = QScatterDataProxy()
         self._series = QScatter3DSeries(self._proxy)
         self._series.setItemLabelFormat("@xTitle: @xLabel @yTitle: @yLabel @zTitle: @zLabel")
         self._series.setMeshSmooth(self._smooth)
         self._graph.addSeries(self._series)
+        self._preset = QAbstract3DGraph.CameraPreset.FrontLow.value
 
         # Give ownership of the handler to the graph and make it the active
         # handler
@@ -98,14 +99,12 @@ class ScatterDataModifier(QObject):
 
     @Slot()
     def changePresetCamera(self):
-        preset = Q3DCamera.CameraPresetFrontLow.value
-
         camera = self._graph.scene().activeCamera()
-        camera.setCameraPreset(Q3DCamera.CameraPreset(preset))
+        camera.setCameraPreset(QAbstract3DGraph.CameraPreset(self._preset))
 
-        preset += 1
-        if preset > Q3DCamera.CameraPresetDirectlyBelow.value:
-            preset = Q3DCamera.CameraPresetFrontLow.value
+        self._preset += 1
+        if self._preset > QAbstract3DGraph.CameraPreset.DirectlyBelow.value:
+            self._preset = QAbstract3DGraph.CameraPreset.FrontLow.value
 
     @Slot(QAbstract3DGraph.ShadowQuality)
     def shadowQualityUpdatedByVisual(self, sq):

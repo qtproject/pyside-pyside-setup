@@ -6,6 +6,7 @@ project(QtGraphs)
 list(APPEND QtGraphs_src "${QtGraphs_SOURCE_DIR}/qtgraphs_helper.cpp")
 
 set(QtGraphs_SRC
+# 3D
 ${QtGraphs_GEN_DIR}/qabstract3daxis_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qcategory3daxis_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qlogvalue3daxisformatter_wrapper.cpp
@@ -41,6 +42,19 @@ ${QtGraphs_GEN_DIR}/q3dinputhandler_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qabstract3dinputhandler_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qtouch3dinputhandler_wrapper.cpp
 ${QtGraphs_GEN_DIR}/q3dtheme_wrapper.cpp
+# 2D
+${QtGraphs_GEN_DIR}/qbarcategoryaxis_wrapper.cpp
+${QtGraphs_GEN_DIR}/qabstractaxis_wrapper.cpp
+${QtGraphs_GEN_DIR}/qvalueaxis_wrapper.cpp
+${QtGraphs_GEN_DIR}/qabstractbarseries_wrapper.cpp
+${QtGraphs_GEN_DIR}/qbarseries_wrapper.cpp
+${QtGraphs_GEN_DIR}/qbarset_wrapper.cpp
+${QtGraphs_GEN_DIR}/qlineseries_wrapper.cpp
+${QtGraphs_GEN_DIR}/qabstractseries_wrapper.cpp
+${QtGraphs_GEN_DIR}/qscatterseries_wrapper.cpp
+${QtGraphs_GEN_DIR}/qgraphtheme_wrapper.cpp
+${QtGraphs_GEN_DIR}/qseriestheme_wrapper.cpp
+${QtGraphs_GEN_DIR}/qxyseries_wrapper.cpp
 # module is always needed
 ${QtGraphs_GEN_DIR}/qtgraphs_module_wrapper.cpp
 )

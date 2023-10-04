@@ -91,4 +91,4 @@ class HighlightSeries(QSurface3DSeries):
         gr.setColorAt(DARK_RED_POS * ratio, Qt.darkRed)
 
         self.setBaseGradient(gr)
-        self.setColorStyle(Q3DTheme.ColorStyleRangeGradient)
+        self.setColorStyle(Q3DTheme.ColorStyle.RangeGradient)

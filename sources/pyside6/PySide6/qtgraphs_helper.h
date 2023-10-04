@@ -11,8 +11,8 @@
 
 namespace QtGraphsHelper {
 
-QSurfaceDataArray *surfaceDataFromNp(double x, double deltaX, double z, double deltaZ,
-                                     PyObject *data);
+QSurfaceDataArray surfaceDataFromNp(double x, double deltaX, double z, double deltaZ,
+                                    PyObject *data);
 
 } // namespace QtGraphsHelper
 

@@ -69,9 +69,8 @@ class AxesInputHandler(Q3DInputHandler):
     def handleAxisDragging(self):
         distance = 0.0
         # Get scene orientation from active camera
-        ac = self.scene().activeCamera()
-        xRotation = ac.xRotation()
-        yRotation = ac.yRotation()
+        xRotation = self.cameraXRotation()
+        yRotation = self.cameraYRotation()
 
         # Calculate directional drag multipliers based on rotation
         xMulX = cos(degrees(xRotation))

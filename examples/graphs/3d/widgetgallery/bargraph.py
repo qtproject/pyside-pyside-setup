@@ -48,12 +48,12 @@ class BarGraph(QObject):
         smoothCheckBox.setChecked(False)
 
         barStyleList = QComboBox(self._barsWidget)
-        barStyleList.addItem("Bar", QAbstract3DSeries.MeshBar)
-        barStyleList.addItem("Pyramid", QAbstract3DSeries.MeshPyramid)
-        barStyleList.addItem("Cone", QAbstract3DSeries.MeshCone)
-        barStyleList.addItem("Cylinder", QAbstract3DSeries.MeshCylinder)
-        barStyleList.addItem("Bevel bar", QAbstract3DSeries.MeshBevelBar)
-        barStyleList.addItem("Sphere", QAbstract3DSeries.MeshSphere)
+        barStyleList.addItem("Bar", QAbstract3DSeries.Mesh.Bar)
+        barStyleList.addItem("Pyramid", QAbstract3DSeries.Mesh.Pyramid)
+        barStyleList.addItem("Cone", QAbstract3DSeries.Mesh.Cone)
+        barStyleList.addItem("Cylinder", QAbstract3DSeries.Mesh.Cylinder)
+        barStyleList.addItem("Bevel bar", QAbstract3DSeries.Mesh.BevelBar)
+        barStyleList.addItem("Sphere", QAbstract3DSeries.Mesh.Sphere)
         barStyleList.setCurrentIndex(4)
 
         cameraButton = QPushButton(self._barsWidget)

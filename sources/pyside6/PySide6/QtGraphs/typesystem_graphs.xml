@@ -14,40 +14,6 @@
 
   <function signature="qDefaultSurfaceFormat(bool)"/>
 
-  <primitive-type name="QBarDataArray">
-    <include file-name="qbardataproxy.h" location="global"/>
-    <conversion-rule>
-        <native-to-target>
-            <insert-template name="cppqlistofptrtoqlists_to_py_conversion">
-              <replace from="%INTYPE_0" to="QBarDataItem"/>
-            </insert-template>
-        </native-to-target>
-        <target-to-native>
-            <add-conversion type="PySequence">
-                <insert-template name="py_to_cppqlistofptrtoqlists_conversion">
-                    <replace from="%OUTTYPE_0" to="QBarDataItem"/>
-                </insert-template>
-            </add-conversion>
-        </target-to-native>
-    </conversion-rule>
-  </primitive-type>
-  <primitive-type name="QSurfaceDataArray">
-    <include file-name="qsurfacedataproxy.h" location="global"/>
-    <conversion-rule>
-        <native-to-target>
-            <insert-template name="cppqlistofptrtoqlists_to_py_conversion">
-              <replace from="%INTYPE_0" to="QSurfaceDataItem"/>
-            </insert-template>
-        </native-to-target>
-        <target-to-native>
-            <add-conversion type="PySequence">
-                <insert-template name="py_to_cppqlistofptrtoqlists_conversion">
-                    <replace from="%OUTTYPE_0" to="QSurfaceDataItem"/>
-                </insert-template>
-            </add-conversion>
-        </target-to-native>
-    </conversion-rule>
-  </primitive-type>
 
   <object-type name="QAbstract3DAxis">
     <enum-type name="AxisOrientation"/>
@@ -63,37 +29,12 @@
   </modify-function>
   </object-type>
   <object-type name="QValue3DAxisFormatter">
-    <inject-code class="native" position="beginning" file="../glue/qtdatavisualization.cpp"
-                 snippet="qvalue3daxisformatter-friend"/>
     <modify-function signature="createNewInstance() const">
       <modify-argument index="return">
         <define-ownership class="native" owner="c++"/>
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
-    <!-- PYSIDE-2025: gridPositions(), labelPositions(), labelStrings() return
-         non-const-references to lists for modifications. Add setters for them. -->
-    <add-function signature="setGridPositions(const QList&lt;float&gt;&amp;@grid_positions@)">
-      <inject-documentation format="target" mode="append">
-      Sets the normalized grid line positions to ``grid_positions``.
-      </inject-documentation>
-      <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                   snippet="qvalue3daxisformatter-setgridpositions"/>
-    </add-function>
-    <add-function signature="setLabelPositions(const QList&lt;float&gt;&amp;@label_positions@)">
-      <inject-documentation format="target" mode="append">
-      Sets the normalized label positions to ``label_positions``.
-      </inject-documentation>
-      <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                   snippet="qvalue3daxisformatter-setlabelpositions"/>
-    </add-function>
-    <add-function signature="setLabelStrings(const QStringList&amp;@label_strings@)">
-      <inject-documentation format="target" mode="append">
-      Sets the label strings to ``label_strings``.
-      </inject-documentation>
-      <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                   snippet="qvalue3daxisformatter-setlabelstrings"/>
-    </add-function>
   </object-type>
   <object-type name="QAbstract3DSeries">
     <enum-type name="Mesh"/>
@@ -111,89 +52,6 @@
   </object-type>
   <value-type name="QBarDataItem"/>
   <object-type name="QBarDataProxy">
-    <modify-function signature="resetArray(QBarDataArray*)" remove="all"/>
-    <add-function signature="resetArray(const QBarDataArray&amp;)">
-      <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                   snippet="dataproxy-resetarray"/>
-    </add-function>
-    <modify-function signature="resetArray(QBarDataArray*,const QStringList&amp;,const QStringList&amp;)"
-                     remove="all"/>
-    <add-function signature="resetArray(const QBarDataArray&amp;,const QStringList&amp;,const QStringList&amp;)">
-      <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                   snippet="dataproxy-resetarray2"/>
-    </add-function>
-    <modify-function signature="resetArray(QBarDataArray*,const QStringList&amp;,const QStringList&amp;)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-
-    <!-- PYSIDE-1438: Replace all add/set/insertRow() taking a 'QList*' by overloads
-         taking 'const QList &' since an allocated list needs to be passed. -->
-    <modify-function signature="addRow(QList&lt;QBarDataItem&gt;*)" remove="all"/>
-    <add-function signature="addRow(const QList&lt;QBarDataItem&gt;&amp;)" return-type="int">
-        <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                     snippet="dataproxy-addrow"/>
-    </add-function>
-    <modify-function signature="addRow(QList&lt;QBarDataItem&gt;*,const QString&amp;)" remove="all"/>
-    <add-function signature="addRow(const QList&lt;QBarDataItem&gt;&amp;,const QString&amp;)"
-                  return-type="int">
-        <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                     snippet="dataproxy-addrow-string"/>
-    </add-function>
-
-    <modify-function signature="insertRow(int,QList&lt;QBarDataItem&gt;*)" remove="all"/>
-    <add-function signature="insertRow(int,const QList&lt;QBarDataItem&gt;&amp;)">
-        <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                     snippet="dataproxy-insertrow"/>
-    </add-function>
-    <modify-function signature="insertRow(int,QList&lt;QBarDataItem&gt;*,const QString&amp;)" remove="all"/>
-    <add-function signature="insertRow(int,const QList&lt;QBarDataItem&gt;&amp;, const QString&amp;)">
-        <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                     snippet="dataproxy-insertrow-string"/>
-    </add-function>
-
-    <modify-function signature="setRow(int,QList&lt;QBarDataItem&gt;*)" remove="all"/>
-    <add-function signature="setRow(int,const QList&lt;QBarDataItem&gt;&amp;)">
-        <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                     snippet="dataproxy-setrow"/>
-    </add-function>
-    <modify-function signature="setRow(int,QList&lt;QBarDataItem&gt;*,const QString&amp;)" remove="all"/>
-    <add-function signature="setRow(int,const QList&lt;QBarDataItem&gt;&amp;,const QString&amp;)">
-        <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                     snippet="dataproxy-setrow-string"/>
-    </add-function>
-
-    <modify-function signature="addRows(const QBarDataArray&amp;)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="addRows(const QBarDataArray&amp;, const QStringList&amp;)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="insertRows(int, const QBarDataArray&amp;)">
-      <modify-argument index="2">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="insertRows(int, const QBarDataArray&amp;, const QStringList&amp;)">
-      <modify-argument index="2">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setRows(int, const QBarDataArray&amp;)">
-      <modify-argument index="2">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setRows(int, const QBarDataArray&amp;, const QStringList&amp;)">
-      <modify-argument index="2">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
   </object-type>
   <object-type name="QCustom3DItem"/>
   <object-type name="QCustom3DLabel"/>
@@ -221,42 +79,6 @@
   </object-type>
   <value-type name="QScatterDataItem"/>
   <object-type name="QScatterDataProxy">
-    <modify-function signature="resetArray(QList&lt;QScatterDataItem&gt;*)"
-                     remove="all"/>
-    <add-function signature="resetArray(QList&lt;QScatterDataItem&gt;*)">
-      <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                   snippet="scatterdataproxy-resetarray"/>
-    </add-function>
-    <modify-function signature="addItem(const QScatterDataItem&amp;)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="addItems(const QList&lt;QScatterDataItem&gt;&amp;)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="insertItem(int, const QScatterDataItem&amp;)">
-      <modify-argument index="2">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="insertItems(int, const QList&lt;QScatterDataItem&gt;&amp;)">
-      <modify-argument index="2">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setItem(int, const QScatterDataItem&amp;)">
-      <modify-argument index="2">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setItems(int, const QList&lt;QScatterDataItem&gt;&amp;)">
-      <modify-argument index="2">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
   </object-type>
   <object-type name="QSurface3DSeries">
     <enum-type name="DrawFlag" flags="DrawFlags"/>
@@ -277,35 +99,6 @@
       #include &lt;sbknumpycheck.h&gt;
       #include &lt;qtgraphs_helper.h&gt;
     </inject-code>
-    <!-- PYSIDE-1438: Replace all add/set/insertRow() taking a 'QList*' by overloads
-         taking 'const QList &' since an allocated list needs to be passed. -->
-    <modify-function signature="addRow(QList&lt;QSurfaceDataItem&gt;*)" remove="all"/>
-    <add-function signature="addRow(const QList&lt;QSurfaceDataItem&gt;&amp;)" return-type="int">
-        <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                     snippet="dataproxy-addrow"/>
-    </add-function>
-
-    <modify-function signature="insertRow(int,QList&lt;QSurfaceDataItem&gt;*)" remove="all"/>
-    <add-function signature="insertRow(int,const QList&lt;QSurfaceDataItem&gt;&amp;)">
-        <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                     snippet="dataproxy-insertrow"/>
-    </add-function>
-
-    <modify-function signature="setRow(int,QList&lt;QSurfaceDataItem&gt;*)" remove="all"/>
-    <add-function signature="setRow(int,const QList&lt;QSurfaceDataItem&gt;&amp;)">
-        <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                     snippet="dataproxy-setrow"/>
-    </add-function>
-
-    <modify-function signature="resetArray(QSurfaceDataArray*)" remove="all"/>
-    <add-function signature="resetArray(const QSurfaceDataArray&amp;)">
-      <inject-code class="target" position="beginning" file="../glue/qtdatavisualization.cpp"
-                   snippet="dataproxy-resetarray"/>
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </add-function>
-
     <add-function signature="resetArrayNp(double@x@,double@deltaX@,double@z@,double@deltaZ@,PyArrayObject*@data@)">
         <inject-code file="../glue/qtgraphs.cpp"
                      snippet="graphs-qsurfacedataproxy-resetarraynp"/>
@@ -461,6 +254,56 @@
     <enum-type name="ColorStyle"/>
     <enum-type name="Theme"/>
   </object-type>
+
+  <!-- 2D -->
+  <object-type name="QBarCategoryAxis"/>
+  <object-type name="QAbstractAxis">
+    <enum-type name="AxisType"/>
+  </object-type>
+  <object-type name="QValueAxis"/>
+  <object-type name="QAbstractBarSeries">
+    <enum-type name="LabelsPosition"/>
+    <modify-function signature="append(QBarSet*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="append(QList&lt;QBarSet*&gt;)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="insert(int,QBarSet*)">
+      <modify-argument index="2">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="take(QBarSet*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+  <object-type name="QBarSeries"/>
+  <object-type name="QBarSet"/>
+  <object-type name="QLineSeries"/>
+  <object-type name="QAbstractSeries">
+    <enum-type name="SeriesType"/>
+  </object-type>
+  <object-type name="QScatterSeries"/>
+  <object-type name="QGraphTheme">
+    <enum-type name="ColorTheme"/>
+    <!-- missing symbols -->
+    <modify-function signature="graphSeriesCount()const" remove="all"/>
+    <modify-function signature="setGraphSeriesCount(int)" remove="all"/>
+    <modify-function signature="graphSeriesColor(int)const" remove="all"/>
+  </object-type>
+  <object-type name="QSeriesTheme">
+    <enum-type name="SeriesColorTheme"/>
+  </object-type>
+  <object-type name="QXYSeries">
+  </object-type>
+
   <extra-includes>
     <include file-name="qutils.h" location="global"/>
   </extra-includes>

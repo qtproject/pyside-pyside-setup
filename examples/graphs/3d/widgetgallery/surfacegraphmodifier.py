@@ -12,7 +12,7 @@ from PySide6.QtGraphs import (QAbstract3DGraph, QCustom3DItem,
                               QCustom3DLabel, QHeightMapSurfaceDataProxy,
                               QValue3DAxis, QSurfaceDataItem,
                               QSurfaceDataProxy, QSurface3DSeries,
-                              Q3DInputHandler, Q3DCamera, Q3DTheme)
+                              Q3DInputHandler, Q3DTheme)
 
 
 from highlightseries import HighlightSeries
@@ -73,10 +73,9 @@ class SurfaceGraphModifier(QObject):
         self._customInputHandler = None
         self._defaultInputHandler = Q3DInputHandler()
 
-        ac = self._graph.scene().activeCamera()
-        ac.setZoomLevel(85.0)
-        ac.setCameraPreset(Q3DCamera.CameraPresetIsometricRight)
-        self._graph.activeTheme().setType(Q3DTheme.ThemeRetro)
+        self._graph.setCameraZoomLevel(85.0)
+        self._graph.setCameraPreset(QAbstract3DGraph.CameraPreset.IsometricRight)
+        self._graph.activeTheme().setType(Q3DTheme.Theme.Retro)
 
         self._x_axis = QValue3DAxis()
         self._y_axis = QValue3DAxis()
@@ -128,19 +127,19 @@ class SurfaceGraphModifier(QObject):
         grOne.setColorAt(0.5, Qt.darkGray)
         grOne.setColorAt(1.0, Qt.gray)
         self._heightMapSeriesOne.setBaseGradient(grOne)
-        self._heightMapSeriesOne.setColorStyle(Q3DTheme.ColorStyleRangeGradient)
+        self._heightMapSeriesOne.setColorStyle(Q3DTheme.ColorStyle.RangeGradient)
 
         grTwo = QLinearGradient()
         grTwo.setColorAt(0.39, Qt.blue)
         grTwo.setColorAt(0.4, Qt.white)
         self._heightMapSeriesTwo.setBaseGradient(grTwo)
-        self._heightMapSeriesTwo.setColorStyle(Q3DTheme.ColorStyleRangeGradient)
+        self._heightMapSeriesTwo.setColorStyle(Q3DTheme.ColorStyle.RangeGradient)
 
         grThree = QLinearGradient()
         grThree.setColorAt(0.0, Qt.white)
         grThree.setColorAt(0.05, Qt.black)
         self._heightMapSeriesThree.setBaseGradient(grThree)
-        self._heightMapSeriesThree.setColorStyle(Q3DTheme.ColorStyleRangeGradient)
+        self._heightMapSeriesThree.setColorStyle(Q3DTheme.ColorStyle.RangeGradient)
 
         # Custom items and label
         self._graph.selectedElementChanged.connect(self.handleElementSelected)
@@ -420,7 +419,7 @@ class SurfaceGraphModifier(QObject):
         gr.setColorAt(1.0, Qt.yellow)
 
         self._sqrtSinSeries.setBaseGradient(gr)
-        self._sqrtSinSeries.setColorStyle(Q3DTheme.ColorStyleRangeGradient)
+        self._sqrtSinSeries.setColorStyle(Q3DTheme.ColorStyle.RangeGradient)
 
     def setGreenToRedGradient(self):
         gr = QLinearGradient()
@@ -430,7 +429,7 @@ class SurfaceGraphModifier(QObject):
         gr.setColorAt(1.0, Qt.darkRed)
 
         self._sqrtSinSeries.setBaseGradient(gr)
-        self._sqrtSinSeries.setColorStyle(Q3DTheme.ColorStyleRangeGradient)
+        self._sqrtSinSeries.setColorStyle(Q3DTheme.ColorStyle.RangeGradient)
 
     @Slot(bool)
     def toggleItemOne(self, show):

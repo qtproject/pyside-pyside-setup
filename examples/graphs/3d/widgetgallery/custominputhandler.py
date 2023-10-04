@@ -110,7 +110,7 @@ class CustomInputHandler(Q3DInputHandler):
         distance = 0.0
 
         # Get scene orientation from active camera
-        xRotation = self.scene().activeCamera().xRotation()
+        xRotation = self.scene().cameraXRotation()
 
         # Calculate directional drag multipliers based on rotation
         xMulX = cos(degrees(xRotation))
