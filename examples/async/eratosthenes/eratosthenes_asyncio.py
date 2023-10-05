@@ -63,8 +63,6 @@ class MainWindow(QMainWindow):
 
 class Eratosthenes(QObject):
 
-    done_signal = Signal()
-
     """ This Sieve of Eratosthenes runs on a configurable tick (default
         0.1 seconds). At each tick, a new subroutine will be created
         that will check multiples of the next prime number. Each of
@@ -121,10 +119,6 @@ class Eratosthenes(QObject):
         self.window.widget_outer_text.setText(
             "🥳 Congratulations! You found all the prime numbers and solved mathematics. 🥳"
         )
-
-        # This signals to the guest run when there are no more asyncio tasks
-        # left so its event loop can finish.
-        self.done_signal.emit()
 
 
 if __name__ == "__main__":
