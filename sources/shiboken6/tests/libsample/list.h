@@ -18,6 +18,8 @@ class List : public std::list<T>
 class IntList : public List<int>
 {
 public:
+    LIBMINIMAL_DEFAULT_MOVE(IntList)
+
     enum CtorEnum {
         NoParamsCtor,
         IntCtor,
@@ -25,14 +27,13 @@ public:
         ListOfIntCtor
     };
 
-    inline IntList() : m_ctorUsed(NoParamsCtor) {}
+    inline IntList() noexcept : m_ctorUsed(NoParamsCtor) {}
     inline explicit IntList(int val) : m_ctorUsed(IntCtor) { push_back(val); }
     inline IntList(const List<int> &lst) : List<int>(lst), m_ctorUsed(ListOfIntCtor) {}
+    ~IntList() = default;
 
     inline IntList(const IntList &lst) : List<int>(lst), m_ctorUsed(CopyCtor) {}
-    IntList(IntList &&) = default;
     IntList &operator=(const IntList &) = default;
-    IntList &operator=(IntList &&) = default;
 
     inline void append(int v) { insert(end(), v); }
     CtorEnum constructorUsed() { return m_ctorUsed; }
@@ -43,6 +44,8 @@ private:
 class PointValueList : public List<Point>
 {
 public:
+    LIBMINIMAL_DEFAULT_MOVE(PointValueList)
+
     enum CtorEnum {
         NoParamsCtor,
         PointCtor,
@@ -50,14 +53,13 @@ public:
         ListOfPointValuesCtor
     };
 
-    inline PointValueList() : m_ctorUsed(NoParamsCtor) {}
+    inline PointValueList() noexcept : m_ctorUsed(NoParamsCtor) {}
     inline explicit PointValueList(Point val) : m_ctorUsed(PointCtor) { push_back(val); }
     inline PointValueList(const List<Point> &lst) : List<Point>(lst), m_ctorUsed(ListOfPointValuesCtor) {}
 
     inline PointValueList(const PointValueList &lst) : List<Point>(lst), m_ctorUsed(CopyCtor) {}
-    PointValueList(PointValueList &&) = default;
     PointValueList &operator=(const PointValueList &) = default;
-    PointValueList &operator=(PointValueList &&) = default;
+    ~PointValueList() = default;
 
     inline void append(Point v) { insert(end(), v); }
     CtorEnum constructorUsed() { return m_ctorUsed; }
@@ -68,6 +70,8 @@ private:
 class ObjectTypePtrList : public List<ObjectType*>
 {
 public:
+    LIBMINIMAL_DEFAULT_MOVE(ObjectTypePtrList)
+
     enum CtorEnum {
         NoParamsCtor,
         ObjectTypeCtor,
@@ -82,10 +86,9 @@ public:
         m_ctorUsed(ObjectTypeCtor) { push_back(val); }
     inline ObjectTypePtrList(const List<ObjectType*> &lst) :
         List<ObjectType*>(lst), m_ctorUsed(ListOfObjectTypePtrCtor) {}
+    ~ObjectTypePtrList() = default;
 
-    ObjectTypePtrList(ObjectTypePtrList &&) = default;
     ObjectTypePtrList &operator=(const ObjectTypePtrList &) = default;
-    ObjectTypePtrList &operator=(ObjectTypePtrList &&) = default;
 
     inline void append(ObjectType *v) { insert(end(), v); }
     CtorEnum constructorUsed() { return m_ctorUsed; }

@@ -12,8 +12,10 @@
 class LIBSAMPLE_API Point
 {
 public:
-    Point(int x = 0, int y = 0);
-    Point(double x, double y);
+    LIBMINIMAL_DEFAULT_COPY_MOVE(Point)
+
+    Point(int x = 0, int y = 0) noexcept;
+    Point(double x, double y) noexcept;
     ~Point() = default;
 
     inline double x() const { return m_x; }

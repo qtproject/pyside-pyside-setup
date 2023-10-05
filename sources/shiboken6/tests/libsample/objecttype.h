@@ -149,13 +149,17 @@ LIBSAMPLE_API unsigned int objectTypeHash(const ObjectType *objectType);
 
 class LIBSAMPLE_API OtherBase {
 public:
-    OtherBase() = default;
+    LIBMINIMAL_DISABLE_COPY_MOVE(OtherBase)
+
+    OtherBase() noexcept = default;
     virtual ~OtherBase();
 };
 
 class LIBSAMPLE_API ObjectTypeDerived: public ObjectType, public OtherBase {
 public:
-    ObjectTypeDerived() = default;
+    LIBMINIMAL_DISABLE_COPY_MOVE(ObjectTypeDerived)
+
+    ObjectTypeDerived() noexcept = default;
 
     bool event(Event *event) override;
     ~ObjectTypeDerived() override;

@@ -3,7 +3,7 @@
 
 #include "obj.h"
 
-Obj::Obj(int objId) : m_objId(objId)
+Obj::Obj(int objId) noexcept : m_objId(objId)
 {
 }
 

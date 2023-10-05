@@ -12,7 +12,9 @@
 class LIBSAMPLE_API InjectCode
 {
 public:
-    InjectCode();
+    LIBMINIMAL_DEFAULT_COPY_MOVE(InjectCode)
+
+    InjectCode() noexcept;
     virtual ~InjectCode();
 
     const char *simpleMethod1(int arg0, int arg1);

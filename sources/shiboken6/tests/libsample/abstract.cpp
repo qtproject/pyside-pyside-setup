@@ -7,7 +7,7 @@
 
 const int Abstract::staticPrimitiveField = 0;
 
-Abstract::Abstract(int id) : m_id(id)
+Abstract::Abstract(int id) noexcept : m_id(id)
 {
     bitField = 0;
 }

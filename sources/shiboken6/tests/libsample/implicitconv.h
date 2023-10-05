@@ -12,6 +12,8 @@ class ObjectType;
 class LIBSAMPLE_API ImplicitConv
 {
 public:
+    LIBMINIMAL_DEFAULT_COPY_MOVE(ImplicitConv)
+
     enum CtorEnum {
         CtorNone,
         CtorOne,
@@ -28,8 +30,8 @@ public:
         OverFunc_C
     };
 
-    ImplicitConv() = default;
-    ImplicitConv(int objId) : m_ctorEnum(CtorOne), m_objId(objId) {}
+    ImplicitConv() noexcept = default;
+    ImplicitConv(int objId) noexcept : m_ctorEnum(CtorOne), m_objId(objId) {}
     ImplicitConv(CtorEnum ctorEnum) : m_ctorEnum(ctorEnum) {}
     ImplicitConv(ObjectType&) : m_ctorEnum(CtorObjectTypeReference) {}
     ImplicitConv(double value, bool=true) : m_ctorEnum(CtorNone), m_value(value) {}

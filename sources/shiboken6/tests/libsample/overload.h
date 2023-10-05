@@ -17,6 +17,8 @@
 class LIBSAMPLE_API Overload
 {
 public:
+    LIBMINIMAL_DISABLE_COPY_MOVE(Overload)
+
     enum FunctionEnum {
         Function0,
         Function1,

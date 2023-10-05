@@ -15,6 +15,8 @@ class ObjectType;
 class LIBSAMPLE_API Modifications
 {
 public:
+    LIBMINIMAL_DISABLE_COPY_MOVE(Modifications)
+
     Modifications();
     virtual ~Modifications();
 
@@ -129,6 +131,8 @@ private:
 class LIBSAMPLE_API AbstractModifications : public Modifications
 {
 public:
+    LIBMINIMAL_DISABLE_COPY_MOVE(AbstractModifications)
+
     AbstractModifications() noexcept = default;
     ~AbstractModifications() override = default;
 

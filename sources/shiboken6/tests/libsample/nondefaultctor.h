@@ -9,7 +9,9 @@
 class NonDefaultCtor
 {
 public:
-    NonDefaultCtor(int value) : m_value(value)
+    LIBMINIMAL_DEFAULT_COPY_MOVE(NonDefaultCtor)
+
+    explicit NonDefaultCtor(int value) noexcept : m_value(value)
     {
     }
 

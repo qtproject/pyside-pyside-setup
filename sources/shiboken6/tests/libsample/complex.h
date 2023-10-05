@@ -9,7 +9,9 @@
 class LIBSAMPLE_API Complex
 {
 public:
-    Complex(double real = 0.0, double imag = 0.0);
+    LIBMINIMAL_DEFAULT_COPY_MOVE(Complex)
+
+    explicit Complex(double real = 0.0, double imag = 0.0) noexcept;
     ~Complex() = default;
 
     inline double real() const { return m_real; }

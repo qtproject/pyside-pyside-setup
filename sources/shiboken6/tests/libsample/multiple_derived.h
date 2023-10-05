@@ -11,7 +11,9 @@
 class Base1
 {
 public:
-    Base1() = default;
+    LIBMINIMAL_DISABLE_COPY_MOVE(Base1)
+
+    Base1() noexcept = default;
     virtual ~Base1() = default;
 
     virtual int base1Method() { return m_value; }
@@ -25,7 +27,9 @@ private:
 class Base2
 {
 public:
-    Base2() = default;
+    LIBMINIMAL_DISABLE_COPY_MOVE(Base2)
+
+    Base2() noexcept = default;
     virtual ~Base2() = default;
     virtual int base2Method() { return m_value; }
 
@@ -36,7 +40,9 @@ private:
 class LIBSAMPLE_API MDerived1 : public Base1, public Base2
 {
 public:
-    MDerived1();
+    LIBMINIMAL_DISABLE_COPY_MOVE(MDerived1)
+
+    MDerived1() noexcept;
     ~MDerived1() override = default;
 
     int mderived1Method() { return m_value; }
@@ -57,7 +63,9 @@ private:
 class SonOfMDerived1 : public MDerived1
 {
 public:
-    SonOfMDerived1() = default;
+    LIBMINIMAL_DISABLE_COPY_MOVE(SonOfMDerived1)
+
+    SonOfMDerived1() noexcept = default;
     ~SonOfMDerived1() = default;
 
     inline MDerived1 *castToMDerived1() { return this; }
@@ -71,7 +79,9 @@ private:
 class Base3
 {
 public:
-    explicit Base3(int val = 3) : m_value(val) {}
+    LIBMINIMAL_DISABLE_COPY_MOVE(Base3)
+
+    explicit Base3(int val = 3) noexcept : m_value(val) {}
     virtual ~Base3() = default;
     int base3Method() { return m_value; }
 
@@ -82,7 +92,9 @@ private:
 class Base4
 {
 public:
-    Base4() = default;
+    LIBMINIMAL_DISABLE_COPY_MOVE(Base4)
+
+    Base4() noexcept = default;
     virtual ~Base4() = default;
     int base4Method() { return m_value; }
 
@@ -93,7 +105,9 @@ private:
 class Base5
 {
 public:
-    Base5() = default;
+    LIBMINIMAL_DISABLE_COPY_MOVE(Base5)
+
+    Base5() noexcept = default;
     virtual ~Base5() = default;
     virtual int base5Method() { return m_value; }
 
@@ -104,7 +118,9 @@ private:
 class Base6
 {
 public:
-    Base6() = default;
+    LIBMINIMAL_DISABLE_COPY_MOVE(Base6)
+
+    Base6() noexcept = default;
     virtual ~Base6() = default;
     virtual int base6Method() { return m_value; }
 
@@ -115,7 +131,9 @@ private:
 class LIBSAMPLE_API MDerived2 : public Base3, public Base4, public Base5, public Base6
 {
 public:
-    MDerived2();
+    LIBMINIMAL_DISABLE_COPY_MOVE(MDerived2)
+
+    MDerived2() noexcept;
     virtual ~MDerived2() = default;
 
     inline int base4Method() { return Base3::base3Method() * 10; }
@@ -133,7 +151,9 @@ private:
 class LIBSAMPLE_API MDerived3 : public MDerived1, public MDerived2
 {
 public:
-    MDerived3();
+    LIBMINIMAL_DISABLE_COPY_MOVE(MDerived3)
+
+    MDerived3() noexcept;
     virtual ~MDerived3() = default;
 
     inline virtual int mderived3Method() { return m_value; }
@@ -150,7 +170,9 @@ private:
 class LIBSAMPLE_API MDerived4 : public Base3, public Base4
 {
 public:
-    MDerived4();
+    LIBMINIMAL_DISABLE_COPY_MOVE(MDerived4)
+
+    MDerived4() noexcept;
     ~MDerived4() = default;
 
     inline int mderived4Method() { return 0; }
@@ -166,7 +188,9 @@ private:
 class LIBSAMPLE_API MDerived5 : public Base3, public Base4
 {
 public:
-    MDerived5();
+    LIBMINIMAL_DISABLE_COPY_MOVE(MDerived5)
+
+    MDerived5() noexcept;
     virtual ~MDerived5() = default;
 
     virtual int mderived5Method() { return 0; }

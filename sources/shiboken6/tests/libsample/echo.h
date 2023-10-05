@@ -12,7 +12,9 @@ class ObjectType;
 class Echo
 {
 public:
-    Echo() = default;
+    LIBMINIMAL_DEFAULT_COPY_MOVE(Echo)
+
+    Echo() noexcept = default;
     ~Echo() = default;
 
     void doNothingWithConstBool(const bool hi);

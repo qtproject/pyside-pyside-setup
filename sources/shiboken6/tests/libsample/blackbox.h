@@ -17,7 +17,8 @@ public:
     using ObjectTypeMap = std::map<int, ObjectType*>;
     using PointMap = std::map<int, Point*>;
 
-    BlackBox() = default;
+    LIBMINIMAL_DEFAULT_COPY_MOVE(BlackBox)
+    BlackBox() noexcept = default;
     ~BlackBox();
 
     int keepObjectType(ObjectType *object);

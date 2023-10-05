@@ -13,10 +13,9 @@
 class LIBSAMPLE_API Collector
 {
 public:
-    Collector() = default;
+    Collector() noexcept = default;
     virtual ~Collector() = default;
-    Collector(const Collector &) = delete;
-    Collector &operator=(const Collector &) = delete;
+    LIBMINIMAL_DISABLE_COPY_MOVE(Collector)
 
     void clear();
 

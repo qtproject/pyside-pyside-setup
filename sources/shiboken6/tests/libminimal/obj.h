@@ -9,7 +9,9 @@
 class LIBMINIMAL_API Obj
 {
 public:
-    explicit Obj(int objId);
+    LIBMINIMAL_DISABLE_COPY_MOVE(Obj)
+
+    explicit Obj(int objId) noexcept;
     virtual ~Obj();
 
     int objId() const { return m_objId; }
@@ -25,8 +27,6 @@ public:
     Obj* callPassObjectTypeReference(Obj& obj) { return passObjectTypeReference(obj); }
 
 private:
-    Obj(const Obj&);
-    Obj& operator=(const Obj&);
     int m_objId;
 };
 

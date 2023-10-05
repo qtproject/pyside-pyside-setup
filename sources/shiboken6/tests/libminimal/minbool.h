@@ -31,7 +31,10 @@ inline bool operator!=(MinBool b1, MinBool b2) { return (!b1).value() != (!b2).v
 class LIBMINIMAL_API MinBoolUser
 {
 public:
-    MinBoolUser() : m_minbool(MinBool(false)) {}
+    LIBMINIMAL_DEFAULT_COPY(MinBoolUser)
+    LIBMINIMAL_DISABLE_MOVE(MinBoolUser)
+
+    MinBoolUser() noexcept : m_minbool(MinBool(false)) {}
     virtual ~MinBoolUser() = default;
     inline MinBool minBool() { return m_minbool; }
     inline void setMinBool(MinBool minBool) { m_minbool = minBool; }

@@ -24,6 +24,8 @@ private:
         PrivValue2 = PrivValue1 + 2
     };
 public:
+    LIBMINIMAL_DISABLE_COPY_MOVE(Abstract)
+
     enum PrintFormat {
         Short,
         Verbose,
@@ -45,7 +47,7 @@ public:
     int toBeRenamedField = 123;
     int readOnlyField = 123;
 
-    Abstract(int id = -1);
+    explicit Abstract(int id = -1) noexcept;
     virtual ~Abstract();
 
     inline int id() const { return m_id; }

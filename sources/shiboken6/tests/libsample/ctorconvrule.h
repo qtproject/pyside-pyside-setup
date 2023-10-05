@@ -9,7 +9,9 @@
 class CtorConvRule
 {
 public:
-    explicit CtorConvRule(long value) : m_value(value) {}
+    LIBMINIMAL_DEFAULT_COPY_MOVE(CtorConvRule)
+
+    explicit CtorConvRule(long value) noexcept : m_value(value) {}
     virtual ~CtorConvRule() = default;
     virtual void dummyVirtualMethod() {}
     long value() { return m_value; }

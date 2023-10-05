@@ -17,6 +17,8 @@
 class LIBSAMPLE_API MapUser
 {
 public:
+    LIBMINIMAL_DEFAULT_COPY_MOVE(MapUser)
+
     MapUser() noexcept = default;
     virtual ~MapUser() = default;
 
