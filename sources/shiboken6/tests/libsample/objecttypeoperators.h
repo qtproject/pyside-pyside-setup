@@ -11,10 +11,10 @@
 class LIBSAMPLE_API ObjectTypeOperators
 {
 public:
+    LIBMINIMAL_DISABLE_COPY_MOVE(ObjectTypeOperators)
+
     explicit ObjectTypeOperators(const std::string key);
     virtual ~ObjectTypeOperators() = default;
-    ObjectTypeOperators(ObjectTypeOperators &) = delete;
-    ObjectTypeOperators &operator=(ObjectTypeOperators &) = delete;
 
     bool operator==(const ObjectTypeOperators &other) const;
     const ObjectTypeOperators &operator<(const ObjectTypeOperators &other) const;

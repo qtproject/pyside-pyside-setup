@@ -3,15 +3,15 @@
 
 #include "multiple_derived.h"
 
-MDerived1::MDerived1() = default;
+MDerived1::MDerived1() noexcept = default;
 
-MDerived2::MDerived2() = default;
+MDerived2::MDerived2() noexcept = default;
 
-MDerived3::MDerived3() = default;
+MDerived3::MDerived3() noexcept = default;
 
-MDerived4::MDerived4() = default;
+MDerived4::MDerived4() noexcept = default;
 
-MDerived5::MDerived5() = default;
+MDerived5::MDerived5() noexcept = default;
 
 MDerived1 *MDerived1::transformFromBase1(Base1 *self)
 {

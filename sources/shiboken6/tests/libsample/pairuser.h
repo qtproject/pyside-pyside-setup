@@ -12,7 +12,9 @@
 class LIBSAMPLE_API PairUser
 {
 public:
-    PairUser() = default;
+    LIBMINIMAL_DEFAULT_COPY_MOVE(PairUser)
+
+    PairUser() noexcept = default;
     virtual ~PairUser() = default;
 
     virtual std::pair<int, int> createPair();

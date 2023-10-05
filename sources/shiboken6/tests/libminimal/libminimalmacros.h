@@ -22,4 +22,28 @@
 #  define LIBMINIMAL_API LIBMINIMAL_IMPORT
 #endif
 
+#define LIBMINIMAL_DEFAULT_COPY(Class) \
+    Class(const Class &) noexcept = default; \
+    Class &operator=(const Class &) noexcept = default;
+
+#define LIBMINIMAL_DISABLE_COPY(Class) \
+    Class(const Class &) = delete;\
+    Class &operator=(const Class &) = delete;
+
+#define LIBMINIMAL_DEFAULT_MOVE(Class) \
+    Class(Class &&) noexcept = default; \
+    Class &operator=(Class &&) noexcept = default;
+
+#define LIBMINIMAL_DEFAULT_COPY_MOVE(Class) \
+    LIBMINIMAL_DEFAULT_COPY(Class) \
+    LIBMINIMAL_DEFAULT_MOVE(Class)
+
+#define LIBMINIMAL_DISABLE_MOVE(Class) \
+    Class(Class &&) = delete; \
+    Class &operator=(Class &&) = delete;
+
+#define LIBMINIMAL_DISABLE_COPY_MOVE(Class) \
+    LIBMINIMAL_DISABLE_COPY(Class) \
+    LIBMINIMAL_DISABLE_MOVE(Class)
+
 #endif // LIBMINIMALMACROS_H

@@ -20,6 +20,8 @@ struct SharedPtrBase
 template <class T>
 class SharedPtr : public SharedPtrBase {
 public:
+    LIBMINIMAL_DEFAULT_MOVE(SharedPtr)
+
     SharedPtr() { logDefaultConstructor(typeid(T).name(), this); }
 
     SharedPtr(T *v) : mPtr(v)

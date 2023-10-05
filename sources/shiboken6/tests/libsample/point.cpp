@@ -5,11 +5,11 @@
 
 #include <iostream>
 
-Point::Point(int x, int y) : m_x(x), m_y(y)
+Point::Point(int x, int y) noexcept : m_x(x), m_y(y)
 {
 }
 
-Point::Point(double x, double y) : m_x(x), m_y(y)
+Point::Point(double x, double y) noexcept : m_x(x), m_y(y)
 {
 }
 

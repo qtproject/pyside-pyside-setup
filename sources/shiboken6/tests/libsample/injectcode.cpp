@@ -5,7 +5,7 @@
 
 #include <sstream>
 
-InjectCode::InjectCode() = default;
+InjectCode::InjectCode() noexcept = default;
 
 InjectCode::~InjectCode() = default;
 

@@ -15,6 +15,8 @@ enum OverloadedFuncEnum {
 class LIBSAMPLE_API Derived : public Abstract
 {
 public:
+    LIBMINIMAL_DISABLE_COPY_MOVE(Derived)
+
     enum OtherOverloadedFuncEnum {
         OtherOverloadedFunc_iibd,
         OtherOverloadedFunc_id
@@ -27,7 +29,7 @@ public:
         bool operator==(const SomeInnerClass &) { return true; }
     };
 
-    explicit Derived(int id = -1);
+    explicit Derived(int id = -1) noexcept;
     ~Derived() override;
     void pureVirtual() override;
     void *pureVirtualReturningVoidPtr() override;

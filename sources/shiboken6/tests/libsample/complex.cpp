@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-Complex::Complex(double real, double imag)
+Complex::Complex(double real, double imag) noexcept
     : m_real(real), m_imag(imag)
 {
 }

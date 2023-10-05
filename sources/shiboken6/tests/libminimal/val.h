@@ -9,7 +9,9 @@
 class LIBMINIMAL_API Val
 {
 public:
-    explicit Val(int valId) : m_valId(valId) {}
+    explicit Val(int valId) noexcept : m_valId(valId) {}
+    LIBMINIMAL_DEFAULT_COPY_MOVE(Val)
+
     virtual ~Val() = default;
 
     int valId() const { return m_valId; }

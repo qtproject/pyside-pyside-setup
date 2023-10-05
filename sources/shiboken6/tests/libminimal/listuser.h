@@ -14,6 +14,10 @@
 
 struct LIBMINIMAL_API ListUser
 {
+    LIBMINIMAL_DEFAULT_COPY(ListUser)
+    LIBMINIMAL_DISABLE_MOVE(ListUser)
+
+    ListUser() noexcept = default;
     virtual ~ListUser() = default;
 
     // List of C++ primitive type items

@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-Derived::Derived(int id) : Abstract(id)
+Derived::Derived(int id) noexcept : Abstract(id)
 {
 }
 

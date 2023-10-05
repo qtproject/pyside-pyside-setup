@@ -16,7 +16,7 @@ class OddBool
 {
 
 public:
-    inline explicit OddBool(bool b) : m_value(b) {}
+    inline explicit OddBool(bool b) noexcept : m_value(b) {}
     bool value() const { return m_value; }
 
     inline OddBool operator!() const { return OddBool(!m_value); }
@@ -35,7 +35,9 @@ inline bool operator!=(OddBool b1, OddBool b2) { return (!b1).value() != (!b2).v
 class OddBoolUser
 {
 public:
-    OddBoolUser() : m_oddbool(OddBool(false)) {}
+    LIBMINIMAL_DEFAULT_COPY_MOVE(OddBoolUser)
+
+    OddBoolUser() noexcept : m_oddbool(OddBool(false)) {}
     OddBoolUser(const OddBool &oddBool) : m_oddbool(oddBool) {}
     virtual ~OddBoolUser() = default;
 

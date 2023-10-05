@@ -23,7 +23,9 @@ enum ClassType {
 class LIBSAMPLE_API Base
 {
 public:
-    explicit Base(int value) : m_value(value) {}
+    LIBMINIMAL_DEFAULT_COPY_MOVE(Base)
+
+    explicit Base(int value) noexcept : m_value(value) {}
     virtual ~Base() = default;
 
     inline void setValue(int value) { m_value = value; }
