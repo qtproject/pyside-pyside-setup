@@ -900,8 +900,9 @@ void updateSourceObject(PyObject *source)
                 if (!PyDict_GetItem(dict, key)) {
                     auto *inst = PyObject_New(PySideSignalInstance, PySideSignalInstance_TypeF());
                     Shiboken::AutoDecRef signalInstance(reinterpret_cast<PyObject *>(inst));
-                    instanceInitialize(signalInstance.cast<PySideSignalInstance *>(),
-                                       key, reinterpret_cast<PySideSignal *>(value), source, 0);
+                    auto *si = reinterpret_cast<PySideSignalInstance *>(signalInstance.object());
+                    instanceInitialize(si, key, reinterpret_cast<PySideSignal *>(value),
+                                       source, 0);
                     if (PyDict_SetItem(dict, key, signalInstance) == -1)
                         return;     // An error occurred while setting the attribute
                 }

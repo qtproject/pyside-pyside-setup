@@ -1477,9 +1477,9 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         static const QRegularExpression pyArgsAttributionRegex(QStringLiteral("%PYARG_(\\d+)\\s*=[^=]\\s*([^;]+)"));
         Q_ASSERT(pyArgsAttributionRegex.isValid());
         code.replace(pyArgsAttributionRegex, u"PyTuple_SET_ITEM("_s
-                     + PYTHON_ARGS + u", \\1-1, \\2)"_s);
+                     + PYTHON_ARGS + u".object(), \\1-1, \\2)"_s);
         code.replace(pyArgsRegex, u"PyTuple_GET_ITEM("_s
-                     + PYTHON_ARGS + u", \\1-1)"_s);
+                     + PYTHON_ARGS + u".object(), \\1-1)"_s);
     }
 
     // Replace %ARG#_TYPE variables.

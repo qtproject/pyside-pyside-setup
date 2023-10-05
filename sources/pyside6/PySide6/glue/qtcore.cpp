@@ -1932,7 +1932,7 @@ auto callback = [callable, count, arg_qpermission](const QPermission &permission
     Shiboken::GilState state;
     if (arg_qpermission) {
         Shiboken::AutoDecRef arglist(PyTuple_New(1));
-        PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QPermission](permission));
+        PyTuple_SET_ITEM(arglist.object(), 0, %CONVERTTOPYTHON[QPermission](permission));
         PyObject_CallObject(callable, arglist);
     } else {
         PyObject_CallObject(callable, nullptr);

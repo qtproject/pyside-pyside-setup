@@ -65,7 +65,8 @@ QVariant QVariant_convertToValueList(PyObject *list)
 
     Shiboken::AutoDecRef element(PySequence_GetItem(list, 0));
 
-    QMetaType metaType = QVariant_resolveMetaType(element.cast<PyTypeObject *>());
+    auto *type = reinterpret_cast<PyTypeObject *>(element.object());
+    QMetaType metaType = QVariant_resolveMetaType(type);
     if (!metaType.isValid())
         return {};
 
