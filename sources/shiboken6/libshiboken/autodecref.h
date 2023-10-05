@@ -7,6 +7,8 @@
 #include "sbkpython.h"
 #include "basewrapper.h"
 
+#include <utility>
+
 struct SbkObject;
 namespace Shiboken
 {
@@ -18,25 +20,23 @@ struct LIBSHIBOKEN_API AutoDecRef
 {
 public:
     AutoDecRef(const AutoDecRef &) = delete;
-    AutoDecRef(AutoDecRef &&) = delete;
+    AutoDecRef(AutoDecRef &&o) noexcept : m_pyObj{std::exchange(o.m_pyObj, nullptr)} {}
     AutoDecRef &operator=(const AutoDecRef &) = delete;
-    AutoDecRef &operator=(AutoDecRef &&) = delete;
+    AutoDecRef &operator=(AutoDecRef &&o)
+    {
+        m_pyObj = std::exchange(o.m_pyObj, nullptr);
+        return *this;
+    }
 
-    /**
-     * AutoDecRef constructor.
-     * \param pyobj A borrowed reference to a Python object
-     */
-    explicit AutoDecRef(PyObject *pyObj) : m_pyObj(pyObj) {}
-    /**
-     * AutoDecRef constructor.
-     * \param pyobj A borrowed reference to a Python object
-     */
-    explicit AutoDecRef(SbkObject *pyObj) : m_pyObj(reinterpret_cast<PyObject *>(pyObj)) {}
-    /**
-     * AutoDecref constructor.
-     * To be used later with reset():
-     */
-    AutoDecRef() : m_pyObj(nullptr) {}
+    /// AutoDecRef constructor.
+    /// \param pyobj A borrowed reference to a Python object
+    explicit AutoDecRef(PyObject *pyObj) noexcept : m_pyObj(pyObj) {}
+    /// AutoDecRef constructor.
+    /// \param pyobj A borrowed reference to a wrapped Python object
+    explicit AutoDecRef(SbkObject *pyObj) noexcept : m_pyObj(reinterpret_cast<PyObject *>(pyObj)) {}
+    /// AutoDecref default constructor.
+    /// To be used later with reset():
+    AutoDecRef() noexcept = default;
 
     /// Decref the borrowed python reference
     ~AutoDecRef()
@@ -79,7 +79,7 @@ public:
     }
 
 private:
-    PyObject *m_pyObj;
+    PyObject *m_pyObj = nullptr;
 };
 
 } // namespace Shiboken
