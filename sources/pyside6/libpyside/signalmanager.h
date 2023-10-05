@@ -52,8 +52,9 @@ PYSIDE_API QDataStream &operator>>(QDataStream& in, PyObjectWrapper& myObj);
 
 class PYSIDE_API SignalManager
 {
-    Q_DISABLE_COPY(SignalManager)
 public:
+    Q_DISABLE_COPY_MOVE(SignalManager)
+
     using QmlMetaCallErrorHandler = std::optional<int>(*)(QObject *object);
 
     static SignalManager& instance();

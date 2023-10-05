@@ -201,6 +201,9 @@ using namespace PySide;
 
 struct SignalManager::SignalManagerPrivate
 {
+    Q_DISABLE_COPY_MOVE(SignalManagerPrivate)
+
+    SignalManagerPrivate() noexcept = default;
     ~SignalManagerPrivate() { clear(); }
 
     void deleteGobalReceiver(const QObject *gr);

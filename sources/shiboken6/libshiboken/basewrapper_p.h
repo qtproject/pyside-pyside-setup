@@ -49,6 +49,12 @@ extern "C"
  */
 struct SbkObjectPrivate
 {
+    SbkObjectPrivate() noexcept = default;
+    SbkObjectPrivate(const SbkObjectPrivate &) = delete;
+    SbkObjectPrivate(SbkObjectPrivate &&o) = delete;
+    SbkObjectPrivate &operator=(const SbkObjectPrivate &) = delete;
+    SbkObjectPrivate &operator=(SbkObjectPrivate &&o) = delete;
+
     /// Pointer to the C++ class.
     void ** cptr;
     /// True when Python is responsible for freeing the used memory.

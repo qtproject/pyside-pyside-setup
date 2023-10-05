@@ -48,6 +48,8 @@ size_t qHash(const GlobalReceiverKey &k, size_t seed = 0);
 class GlobalReceiverV2 : public QObject
 {
 public:
+    Q_DISABLE_COPY_MOVE(GlobalReceiverV2)
+
     /// Create a GlobalReceiver object that will call 'callback'
     /// @param callback A Python callable object (can be a method or not)
     explicit GlobalReceiverV2(PyObject *callback, QObject *receiver = nullptr);

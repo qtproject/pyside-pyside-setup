@@ -11,6 +11,7 @@
 
 namespace PySide::ClassDecorator {
 
+DecoratorPrivate::DecoratorPrivate() noexcept = default;
 DecoratorPrivate::~DecoratorPrivate() = default;
 
 DecoratorPrivate *DecoratorPrivate::getPrivate(PyObject *o)
