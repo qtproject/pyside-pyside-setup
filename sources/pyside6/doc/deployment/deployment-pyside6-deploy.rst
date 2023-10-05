@@ -70,7 +70,10 @@ two folds:
    gives the user more control of the deployment process. For example, when you decide to exclude
    more QML plugins, or want to include more Nuitka options into your executable.
 
-The various parameters controlled by this file are:
+This file is also used by the ``pyside6-android-deploy`` tool as a configuration file. The advantage
+here is that you can have one single file to control deployment to all platforms.
+
+The relevant parameters for ``pyside6-deploy`` are:
 
 **app**
   * ``title``: The name of the application
@@ -81,6 +84,7 @@ The various parameters controlled by this file are:
     .pyproject <https://doc.qt.io/qtforpython-6/faq/typesoffiles.html
     #qt-creator-python-project-file-pyproject>`_ file. Such a file makes sure that the deployment
     process never considers unnecessary files when bundling the executable.
+  * ``exec_directory``: The directory where the final executable is generated.
 
 **python**
   * ``python_path``: Path to the Python executable. It is recommended to run the deployment
