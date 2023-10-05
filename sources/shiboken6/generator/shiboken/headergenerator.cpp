@@ -186,7 +186,11 @@ void HeaderGenerator::writeWrapperClassDeclaration(TextStream &s,
     // Class
     s << "class " << wrapperName
       << " : public " << metaClass->qualifiedCppName()
-      << "\n{\npublic:\n" << indent;
+      << "\n{\npublic:\n" << indent
+      << wrapperName << "(const " << wrapperName << " &) = delete;\n"
+      << wrapperName << "& operator=(const " << wrapperName << " &) = delete;\n"
+      << wrapperName << '(' << wrapperName << " &&) = delete;\n"
+      << wrapperName << "& operator=(" << wrapperName << " &&) = delete;\n\n";
 
     // Make protected enums accessible
     if (avoidProtectedHack()) {
