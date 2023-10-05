@@ -86,6 +86,7 @@ PyTypeObject *PySideProperty_TypeF(void)
     return type;
 }
 
+PySidePropertyPrivate::PySidePropertyPrivate() noexcept = default;
 PySidePropertyPrivate::~PySidePropertyPrivate() = default;
 
 PyObject *PySidePropertyPrivate::getValue(PyObject *source)

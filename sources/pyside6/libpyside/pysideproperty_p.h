@@ -10,6 +10,7 @@
 #include <pysidemacros.h>
 
 #include <QtCore/QByteArray>
+#include <QtCore/qtclasshelpermacros.h>
 #include <QtCore/QMetaObject>
 
 struct PySideProperty;
@@ -17,6 +18,10 @@ struct PySideProperty;
 class PYSIDE_API PySidePropertyPrivate
 {
 public:
+
+    Q_DISABLE_COPY_MOVE(PySidePropertyPrivate)
+
+    PySidePropertyPrivate() noexcept;
     virtual ~PySidePropertyPrivate();
 
     virtual void metaCall(PyObject *source, QMetaObject::Call call, void **args);

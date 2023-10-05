@@ -8,6 +8,8 @@
 
 #include <sbkpython.h>
 
+#include <QtCore/qtclasshelpermacros.h>
+
 #include <array>
 #include <string>
 
@@ -18,6 +20,8 @@ namespace PySide::ClassDecorator {
 class PYSIDE_API DecoratorPrivate
 {
 public:
+     Q_DISABLE_COPY_MOVE(DecoratorPrivate)
+
     virtual ~DecoratorPrivate();
 
     /// Virtual function which is passed the decorated class type
@@ -41,6 +45,7 @@ protected:
     /// Check mode for the arguments of the call operator
     enum class CheckMode { None, WrappedType, QObjectType };
 
+    DecoratorPrivate() noexcept;
     static DecoratorPrivate *getPrivate(PyObject *o);
 
     /// Helper for checking the arguments of the call operator
