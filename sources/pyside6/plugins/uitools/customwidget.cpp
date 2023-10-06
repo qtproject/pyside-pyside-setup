@@ -24,22 +24,22 @@ bool PyCustomWidget::isInitialized() const
 
 QIcon PyCustomWidget::icon() const
 {
-    return QIcon();
+    return {};
 }
 
 QString PyCustomWidget::domXml() const
 {
-    return QString();
+    return {};
 }
 
 QString PyCustomWidget::group() const
 {
-    return QString();
+    return {};
 }
 
 QString PyCustomWidget::includeFile() const
 {
-    return QString();
+    return {};
 }
 
 QString PyCustomWidget::name() const
@@ -49,12 +49,12 @@ QString PyCustomWidget::name() const
 
 QString PyCustomWidget::toolTip() const
 {
-    return QString();
+    return {};
 }
 
 QString PyCustomWidget::whatsThis() const
 {
-    return QString();
+    return {};
 }
 
 // A copy of this code exists in PyDesignerCustomWidget::createWidget()
@@ -64,9 +64,9 @@ QWidget *PyCustomWidget::createWidget(QWidget *parent)
     // Create a python instance and return cpp object
     PyObject *pyParent = nullptr;
     bool unknownParent = false;
-    if (parent) {
+    if (parent != nullptr) {
         pyParent = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(parent));
-        if (pyParent) {
+        if (pyParent != nullptr) {
             Py_INCREF(pyParent);
         } else {
             static Shiboken::Conversions::SpecificConverter converter("QWidget*");
@@ -79,11 +79,11 @@ QWidget *PyCustomWidget::createWidget(QWidget *parent)
     }
 
     Shiboken::AutoDecRef pyArgs(PyTuple_New(1));
-    PyTuple_SET_ITEM(pyArgs, 0, pyParent); // tuple will keep pyParent reference
+    PyTuple_SET_ITEM(pyArgs.object(), 0, pyParent); // tuple will keep pyParent reference
 
     // Call python constructor
-    auto result = reinterpret_cast<SbkObject *>(PyObject_CallObject(m_pyObject, pyArgs));
-    if (!result) {
+    auto *result = reinterpret_cast<SbkObject *>(PyObject_CallObject(m_pyObject, pyArgs));
+    if (result == nullptr) {
         qWarning("Unable to create a Python custom widget of type \"%s\".",
                  qPrintable(m_name));
         PyErr_Print();
