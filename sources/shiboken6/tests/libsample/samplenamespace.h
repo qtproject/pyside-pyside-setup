@@ -26,10 +26,10 @@ inline namespace InlineNamespace
 
     class LIBSAMPLE_API ClassWithinInlineNamespace {
     public:
-        ClassWithinInlineNamespace() = default;
+        LIBMINIMAL_DEFAULT_COPY_MOVE(ClassWithinInlineNamespace)
+
+        ClassWithinInlineNamespace() noexcept = default;
         ~ClassWithinInlineNamespace() = default;
-        ClassWithinInlineNamespace(const ClassWithinInlineNamespace &) = default;
-        ClassWithinInlineNamespace &operator=(const ClassWithinInlineNamespace &) = default;
 
         void setValue(EnumWithinInlineNamespace v) { m_value = v; }
         EnumWithinInlineNamespace value() const { return m_value; }
@@ -91,6 +91,9 @@ public:
         class OkThisIsRecursiveEnough
         {
         public:
+            LIBMINIMAL_DISABLE_COPY_MOVE(OkThisIsRecursiveEnough)
+
+            OkThisIsRecursiveEnough() noexcept = default;
             virtual ~OkThisIsRecursiveEnough() = default;
             enum NiceEnum {
                 NiceValue1, NiceValue2

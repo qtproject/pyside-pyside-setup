@@ -9,7 +9,9 @@
 class LIBSAMPLE_API Size
 {
 public:
-    explicit Size(double width = 0.0, double height = 0.0) :
+    LIBMINIMAL_DEFAULT_COPY_MOVE(Size)
+
+    explicit Size(double width = 0.0, double height = 0.0) noexcept :
         m_width(width), m_height(height) {}
     ~Size() = default;
 

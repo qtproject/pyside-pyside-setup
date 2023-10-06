@@ -30,6 +30,7 @@ public:
     StrList(StrList &&) = default;
     StrList &operator=(const StrList &) = default;
     StrList &operator=(StrList &&) = default;
+    ~StrList() = default;
 
     inline void append(const Str &str) { push_back(str); }
     Str join(const Str &sep) const;

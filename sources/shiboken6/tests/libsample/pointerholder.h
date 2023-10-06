@@ -9,6 +9,8 @@
 class PointerHolder
 {
 public:
+    LIBMINIMAL_DEFAULT_COPY_MOVE(PointerHolder)
+
     explicit PointerHolder(void *ptr) : m_pointer(ptr) {}
     ~PointerHolder() = default;
 

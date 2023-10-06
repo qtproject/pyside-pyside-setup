@@ -12,6 +12,8 @@
 class LIBSAMPLE_API Time
 {
 public:
+    LIBMINIMAL_DEFAULT_COPY_MOVE(Time)
+
     enum NumArgs {
         ZeroArgs,
         TwoArgs,
@@ -19,8 +21,8 @@ public:
         FourArgs
     };
 
-    Time() = default;
-    explicit Time(int h, int m, int s = 0, int ms = 0) :
+    Time() noexcept = default;
+    explicit Time(int h, int m, int s = 0, int ms = 0) noexcept:
         m_hour(h), m_minute(m), m_second(s), m_msec(ms), m_is_null(false)
     {}
 

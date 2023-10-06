@@ -9,7 +9,9 @@
 class LIBSAMPLE_API Reference
 {
 public:
-    explicit Reference(int objId = -1)
+    LIBMINIMAL_DEFAULT_COPY_MOVE(Reference)
+
+    explicit Reference(int objId = -1) noexcept
             : m_objId(objId) {}
     virtual ~Reference() = default;
 
@@ -45,8 +47,11 @@ private:
 class LIBSAMPLE_API ObjTypeReference
 {
 public:
+    LIBMINIMAL_DISABLE_MOVE(ObjTypeReference)
+
     ObjTypeReference() noexcept = default;
-    ObjTypeReference(const ObjTypeReference &) = default;
+    ObjTypeReference(const ObjTypeReference &) noexcept = default;
+    ObjTypeReference &operator=(const ObjTypeReference &) = delete;
     virtual ~ObjTypeReference();
 
     virtual ObjTypeReference &returnMyFirstArg(ObjTypeReference &ref) { return ref; }

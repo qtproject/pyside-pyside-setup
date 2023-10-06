@@ -5,11 +5,11 @@
 
 #include <iostream>
 
-PointF::PointF(const Point &point) : m_x(point.x()), m_y(point.y())
+PointF::PointF(const Point &point) noexcept : m_x(point.x()), m_y(point.y())
 {
 }
 
-PointF::PointF(double x, double y) : m_x(x), m_y(y)
+PointF::PointF(double x, double y) noexcept : m_x(x), m_y(y)
 {
 }
 
