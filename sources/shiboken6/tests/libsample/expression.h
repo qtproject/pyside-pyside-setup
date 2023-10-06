@@ -7,20 +7,20 @@
 
 #include "libsamplemacros.h"
 
+#include <memory>
 #include <string>
 
 class LIBSAMPLE_API Expression
 {
 public:
+    LIBMINIMAL_DEFAULT_COPY_MOVE(Expression)
+
     enum Operation {
         None, Add, Sub, LessThan, GreaterThan
     };
 
-    Expression(int number);
-    Expression(const Expression &other);
-    Expression &operator=(const Expression &other);
-
-    ~Expression();
+    explicit Expression(int number) noexcept;
+    ~Expression() = default;
 
     Expression operator>(const Expression &other);
     Expression operator<(const Expression &other);
@@ -31,9 +31,10 @@ public:
 private:
     int m_value = 0;
     Operation m_operation = None;
-    Expression *m_operand1 = nullptr;
-    Expression *m_operand2 = nullptr;
-    Expression();
+    std::shared_ptr<Expression> m_operand1;
+    std::shared_ptr<Expression> m_operand2;
+
+    Expression() noexcept;
 };
 
 #endif // EXPRESSION_H
