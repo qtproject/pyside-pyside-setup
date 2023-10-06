@@ -18,7 +18,8 @@ class PYSIDETEST_API TestView : public QObject
 {
     Q_OBJECT
 public:
-    TestView(QAbstractListModel* model, QObject* parent = 0) : QObject(parent), m_model(model) {}
+    TestView(QAbstractListModel* model, QObject* parent = nullptr) :
+        QObject(parent), m_model(model) {}
     QAbstractListModel* model() { return m_model; }
     QVariant getData();
 
@@ -27,7 +28,7 @@ public:
 
 private:
     QAbstractListModel* m_model;
-    QAbstractItemDelegate* m_delegate;
+    QAbstractItemDelegate* m_delegate = nullptr;
 };
 
 #endif // TESTVIEW_H

@@ -13,12 +13,12 @@ class HiddenObject : public QObject
 {
     Q_OBJECT
 public:
-    HiddenObject() : m_called(false) {}
+    HiddenObject() noexcept = default;
     Q_INVOKABLE void callMe();
 public Q_SLOTS:
-    bool wasCalled();
+    bool wasCalled() const;
 private:
-    bool m_called;
+    bool m_called = false;
 };
 
 // Return a instance of HiddenObject
