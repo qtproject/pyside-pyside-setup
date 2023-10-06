@@ -1,8 +1,8 @@
 // Copyright (C) 2020 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-#ifndef _PY_CUSTOM_WIDGET_H_
-#define _PY_CUSTOM_WIDGET_H_
+#ifndef PY_CUSTOM_WIDGET_H_
+#define PY_CUSTOM_WIDGET_H_
 
 #include <shiboken.h>
 
@@ -36,4 +36,4 @@ private:
     bool m_initialized = false;
 };
 
-#endif // _PY_CUSTOM_WIDGET_H_
+#endif // PY_CUSTOM_WIDGET_H_

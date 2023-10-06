@@ -17,6 +17,8 @@
 
 #include <string_view>
 
+using namespace Qt::StringLiterals;
+
 Q_LOGGING_CATEGORY(lcPySidePlugin, "qt.pysideplugin")
 
 static const char pathVar[] = "PYSIDE_DESIGNER_PLUGINS";
@@ -27,7 +29,7 @@ static const char pythonPathVar[] = "PYTHONPATH";
 static QDesignerCustomWidgetCollectionInterface *findPyDesignerCustomWidgetCollection()
 {
     static const char propertyName[] =  "__qt_PySideCustomWidgetCollection";
-    if (auto coreApp = QCoreApplication::instance()) {
+    if (auto *coreApp = QCoreApplication::instance()) {
         const QVariant value = coreApp->property(propertyName);
         if (value.isValid() && value.canConvert<void *>())
             return reinterpret_cast<QDesignerCustomWidgetCollectionInterface *>(value.value<void *>());
@@ -47,7 +49,7 @@ static QString pyStringToQString(PyObject *s)
 static QString pyStr(PyObject *o)
 {
     PyObject *pstr = PyObject_Str(o);
-    return pstr ? pyStringToQString(pstr) : QString();
+    return pstr != nullptr ? pyStringToQString(pstr) : QString();
 }
 
 static QString pyErrorMessage()
@@ -57,7 +59,7 @@ static QString pyErrorMessage()
     PyObject *pvalue = {};
     PyObject *ptraceback = {};
     PyErr_Fetch(&ptype, &pvalue, &ptraceback);
-    if (pvalue)
+    if (pvalue != nullptr)
         result = pyStr(pvalue);
     PyErr_Restore(ptype, pvalue, ptraceback);
     return result;
@@ -154,10 +156,10 @@ static void initVirtualEnvironment()
         pythonPath.append(virtualEnvPath + R"(\Lib\site-packages)");
         break;
     case QOperatingSystemVersion::MacOS:
-        pythonPath.append(virtualEnvPath + QByteArrayLiteral("/lib/python") +
+        pythonPath.append(virtualEnvPath + "/lib/python"_ba +
                           QByteArray::number(majorVersion) + '.'
                           + QByteArray::number(minorVersion)
-                          + QByteArrayLiteral("/site-packages"));
+                          + "/site-packages"_ba);
         break;
     default:
         break;
@@ -204,7 +206,7 @@ PyDesignerCustomWidgets::PyDesignerCustomWidgets(QObject *parent) : QObject(pare
         QDir dir(p);
         if (dir.exists()) {
             const QFileInfoList matches =
-                dir.entryInfoList({QStringLiteral("register*.py")}, QDir::Files,
+                dir.entryInfoList({u"register*.py"_s}, QDir::Files,
                                   QDir::Name);
             for (const auto &fi : matches)
                 pythonFiles.append(fi.absoluteFilePath());
@@ -251,7 +253,7 @@ PyDesignerCustomWidgets::~PyDesignerCustomWidgets()
 
 QList<QDesignerCustomWidgetInterface *> PyDesignerCustomWidgets::customWidgets() const
 {
-    if (auto collection = findPyDesignerCustomWidgetCollection())
+    if (auto *collection = findPyDesignerCustomWidgetCollection())
         return collection->customWidgets();
     if (withinQtDesigner)
         qCWarning(lcPySidePlugin, "No instance of QPyDesignerCustomWidgetCollection was found.");
