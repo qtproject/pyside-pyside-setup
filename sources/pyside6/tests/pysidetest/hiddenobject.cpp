@@ -8,7 +8,7 @@ void HiddenObject::callMe()
     m_called = true;
 }
 
-bool HiddenObject::wasCalled()
+bool HiddenObject::wasCalled() const
 {
     return m_called;
 }
