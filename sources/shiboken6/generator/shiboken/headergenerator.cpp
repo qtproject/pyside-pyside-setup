@@ -228,7 +228,10 @@ void HeaderGenerator::writeWrapperClassDeclaration(TextStream &s,
         if (avoidProtectedHack() && metaClass->hasPrivateDestructor())
             s << "// C++11: need to declare (unimplemented) destructor because "
                  "the base class destructor is private.\n";
-        s << '~' << wrapperName << "();\n";
+        s << '~' << wrapperName << "()";
+        if (metaClass->hasVirtualDestructor())
+            s << " override";
+        s << ";\n";
     }
 
     writeClassCodeSnips(s, typeEntry->codeSnips(),
