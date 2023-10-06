@@ -23,8 +23,10 @@ class PYSIDETEST_API ClassForEnum : public QObject
 {
     Q_OBJECT
 public:
+    Q_DISABLE_COPY_MOVE(ClassForEnum)
+
     ClassForEnum(FlagsNamespace::Options opt = FlagsNamespace::Option::NoOptions);
-    virtual ~ClassForEnum();
+    virtual ~ClassForEnum() override;
 };
 
 } // namespace FlagsNamespace

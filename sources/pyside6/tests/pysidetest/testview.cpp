@@ -18,7 +18,7 @@ TestView::getData()
 QWidget*
 TestView::getEditorWidgetFromItemDelegate() const
 {
-    if (!m_delegate)
+    if (m_delegate == nullptr)
         return nullptr;
 
     QModelIndex index;
