@@ -11,8 +11,10 @@
 class LIBSAMPLE_API ObjectTypeHolder
 {
 public:
+    LIBMINIMAL_DISABLE_COPY_MOVE(ObjectTypeHolder)
+
     explicit ObjectTypeHolder(const char *objectName);
-    explicit ObjectTypeHolder(const ObjectType *object = ObjectType::defaultInstance());
+    explicit ObjectTypeHolder(const ObjectType *object) noexcept;
     virtual ~ObjectTypeHolder();
 
     const ObjectType *getObjectType() const { return m_objectType; }
