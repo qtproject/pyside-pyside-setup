@@ -6,45 +6,18 @@
 
 #include <sstream>
 
-Expression::Expression() = default;
+Expression::Expression() noexcept = default;
 
-Expression::Expression(int number) : m_value(number)
+Expression::Expression(int number) noexcept : m_value(number)
 {
-}
-
-Expression::Expression(const Expression &other) :
-    m_value(other.m_value),
-    m_operation(other.m_operation),
-    m_operand1(other.m_operand1 ? new Expression(*other.m_operand1) : nullptr),
-    m_operand2(other.m_operand2 ? new Expression(*other.m_operand2) : nullptr)
-{
-}
-
-Expression &Expression::operator=(const Expression &other)
-{
-    if (&other == this)
-        return *this;
-    delete m_operand1;
-    delete m_operand2;
-    m_operand1 = other.m_operand1 ? new Expression(*other.m_operand1) : nullptr;
-    m_operand2 = other.m_operand2 ? new Expression(*other.m_operand2) : nullptr;
-    m_operation = other.m_operation;
-    m_value = other.m_value;
-    return *this;
-}
-
-Expression::~Expression()
-{
-    delete m_operand1;
-    delete m_operand2;
 }
 
 Expression Expression::operator+(const Expression &other)
 {
     Expression expr;
     expr.m_operation = Add;
-    expr.m_operand1 = new Expression(*this);
-    expr.m_operand2 = new Expression(other);
+    expr.m_operand1 = std::make_shared<Expression>(*this);
+    expr.m_operand2 = std::make_shared<Expression>(other);
     return expr;
 }
 
@@ -52,8 +25,8 @@ Expression Expression::operator-(const Expression &other)
 {
     Expression expr;
     expr.m_operation = Add;
-    expr.m_operand1 = new Expression(*this);
-    expr.m_operand2 = new Expression(other);
+    expr.m_operand1 = std::make_shared<Expression>(*this);
+    expr.m_operand2 = std::make_shared<Expression>(other);
     return expr;
 }
 
@@ -61,8 +34,8 @@ Expression Expression::operator<(const Expression &other)
 {
     Expression expr;
     expr.m_operation = LessThan;
-    expr.m_operand1 = new Expression(*this);
-    expr.m_operand2 = new Expression(other);
+    expr.m_operand1 = std::make_shared<Expression>(*this);
+    expr.m_operand2 = std::make_shared<Expression>(other);
     return expr;
 }
 
@@ -70,41 +43,37 @@ Expression Expression::operator>(const Expression &other)
 {
     Expression expr;
     expr.m_operation = GreaterThan;
-    expr.m_operand1 = new Expression(*this);
-    expr.m_operand2 = new Expression(other);
+    expr.m_operand1 = std::make_shared<Expression>(*this);
+    expr.m_operand2 = std::make_shared<Expression>(other);
     return expr;
 }
 
 std::string Expression::toString() const
 {
+    std::ostringstream s;
     if (m_operation == None) {
-        std::ostringstream s;
         s << m_value;
         return s.str();
     }
 
-    std::string result;
-    result += '(';
-    result += m_operand1->toString();
-    char op = '?';
+    s << '(' << m_operand1->toString();
     switch (m_operation) {
         case Add:
-            op = '+';
+            s << '+';
             break;
         case Sub:
-            op = '-';
+            s << '-';
             break;
         case LessThan:
-            op = '<';
+            s << '<';
             break;
         case GreaterThan:
-            op = '<';
+            s << '<';
             break;
         default:
+            s << '?';
             break;
     }
-    result += op;
-    result += m_operand2->toString();
-    result += ')';
-    return result;
+    s << m_operand2->toString() << ')';
+    return s.str();
 }
