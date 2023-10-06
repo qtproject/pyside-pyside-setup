@@ -1894,13 +1894,13 @@
 
     </value-type>
     <value-type name="Size">
+        <extra-includes>
+            <include file-name="string" location="global"/>
+            <include file-name="sstream" location="global"/>
+        </extra-includes>
         <add-function signature="Size(const char*)">
-            <inject-code class="target" position="beginning">
-                %0 = new %TYPE();
-            </inject-code>
-            <inject-code class="target" position="end">
-                Shiboken::AutoDecRef result(PyObject_CallMethod(%PYSELF, const_cast&lt;char*>("setHeight"), const_cast&lt;char*>("i"), 2));
-            </inject-code>
+            <inject-code class="target" position="beginning"
+             file="samplesnippets.cpp" snippet="size_char_ct"/>
         </add-function>
     </value-type>
     <value-type name="SizeF"/>

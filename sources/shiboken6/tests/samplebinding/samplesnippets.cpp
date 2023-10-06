@@ -35,3 +35,20 @@ static PyObject *Sbk_IntWrapper_add_ints(PyObject * /* self */, PyObject *args)
 %RETURN_TYPE %0 = %CPPSELF.pow(%1);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet stdcomplex_pow
+
+// @snippet size_char_ct
+// Convert a string "{width}x{height}" specification
+{
+    double width = -1;
+    double height = -1;
+    const std::string s = %1;
+    const auto pos = s.find('x');
+    if (pos != std::string::npos) {
+        std::istringstream wstr(s.substr(0, pos));
+        wstr >> width;
+        std::istringstream hstr(s.substr(pos + 1, s.size() - pos - 1));
+        hstr >> height;
+    }
+    %0 = new %TYPE(width, height);
+}
+// @snippet size_char_ct

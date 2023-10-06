@@ -12,12 +12,12 @@ from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
-from sample import *
+from sample import Size
 
 class PointTest(unittest.TestCase):
     def testUsingSelfOnCtor(self):
         # This is a user added ctor and no errors should happen!
-        s = Size("oi")
+        s = Size("3x2")
         self.assertEqual(s.height(), 2)
 
 if __name__ == '__main__':
