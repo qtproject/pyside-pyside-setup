@@ -7,6 +7,7 @@
 #include "libsamplemacros.h"
 
 #include <list>
+#include <memory>
 
 // These classes simulate a situation found in QWebEngineHistoryItem.
 
@@ -15,8 +16,8 @@ class OnlyCopyPrivate;
 class LIBSAMPLE_API OnlyCopy
 {
 public:
-    OnlyCopy(const OnlyCopy &other);
-    OnlyCopy &operator=(const OnlyCopy &other);
+    LIBMINIMAL_DEFAULT_COPY_MOVE(OnlyCopy)
+
     ~OnlyCopy();
 
     int value() const;
@@ -24,10 +25,11 @@ public:
     static int getValueFromReference(const OnlyCopy &onlyCopy) { return onlyCopy.value(); }
 
 private:
-    OnlyCopyPrivate *d;
-    explicit OnlyCopy(int value);
-    explicit OnlyCopy(OnlyCopyPrivate *d); // rejected due to unknown OnlyCopyPrivate
     friend class FriendOfOnlyCopy;
+
+    explicit OnlyCopy(int value);
+
+    std::shared_ptr<OnlyCopyPrivate> d;
 };
 
 class LIBSAMPLE_API FriendOfOnlyCopy
