@@ -11,28 +11,11 @@ public:
     int value;
 };
 
-OnlyCopy::OnlyCopy(int value) : d(new OnlyCopyPrivate(value))
+OnlyCopy::OnlyCopy(int value) : d(std::make_shared<OnlyCopyPrivate>(value))
 {
 }
 
-OnlyCopy::OnlyCopy(OnlyCopyPrivate *dIn) : d(dIn)
-{
-}
-
-OnlyCopy::~OnlyCopy()
-{
-    delete d;
-}
-
-OnlyCopy::OnlyCopy(const OnlyCopy &other) : d(new OnlyCopyPrivate(other.value()))
-{
-}
-
-OnlyCopy &OnlyCopy::operator=(const OnlyCopy &other)
-{
-    d->value = other.d->value;
-    return *this;
-}
+OnlyCopy::~OnlyCopy() = default;
 
 int OnlyCopy::value() const
 {
