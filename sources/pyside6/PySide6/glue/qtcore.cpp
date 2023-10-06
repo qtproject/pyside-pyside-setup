@@ -236,7 +236,7 @@ static QVariant QVariant_convertToVariantMap(PyObject *map)
     Py_ssize_t pos = 0;
     Shiboken::AutoDecRef keys(PyDict_Keys(map));
     if (!QVariant_isStringList(keys))
-        return QVariant();
+        return {};
     PyObject *key;
     PyObject *value;
     QMap<QString,QVariant> ret;
@@ -260,7 +260,7 @@ static QVariant QVariant_convertToVariantList(PyObject *list)
     if (PySequence_Size(list) < 0) {
         // clear the error if < 0 which means no length at all
         PyErr_Clear();
-        return QVariant();
+        return {};
     }
 
     QList<QVariant> lst;
