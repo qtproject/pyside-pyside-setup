@@ -4,10 +4,14 @@
 #ifndef VOIDHOLDER_H
 #define VOIDHOLDER_H
 
+#include "libsamplemacros.h"
+
 class VoidHolder
 {
 public:
-    explicit VoidHolder(void *ptr = nullptr) : m_ptr(ptr) {}
+    LIBMINIMAL_DEFAULT_COPY_MOVE(VoidHolder)
+
+    explicit VoidHolder(void *ptr = nullptr) noexcept : m_ptr(ptr) {}
     ~VoidHolder() = default;
 
     inline void *voidPointer() { return m_ptr; }

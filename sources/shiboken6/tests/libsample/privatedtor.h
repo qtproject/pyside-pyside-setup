@@ -9,6 +9,8 @@
 class PrivateDtor
 {
 public:
+    LIBMINIMAL_DISABLE_COPY_MOVE(PrivateDtor)
+
     inline static PrivateDtor *instance()
     {
         static PrivateDtor self;
@@ -27,8 +29,7 @@ protected:
 private:
     int m_instantiations = 0;
 
-    PrivateDtor() = default;
-    PrivateDtor(const PrivateDtor &) = default;
+    PrivateDtor() noexcept = default;
     ~PrivateDtor() = default;
 };
 

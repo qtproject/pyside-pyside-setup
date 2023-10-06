@@ -14,6 +14,8 @@
 class LIBSAMPLE_API ProtectedNonPolymorphic
 {
 public:
+    LIBMINIMAL_DEFAULT_COPY_MOVE(ProtectedNonPolymorphic)
+
     explicit ProtectedNonPolymorphic(const char *name) : m_name(name) {}
     ~ProtectedNonPolymorphic() = default;
 
@@ -37,6 +39,8 @@ private:
 class LIBSAMPLE_API ProtectedPolymorphic
 {
 public:
+    LIBMINIMAL_DEFAULT_COPY_MOVE(ProtectedPolymorphic)
+
     explicit ProtectedPolymorphic(const char *name) : m_name(name) {}
     virtual ~ProtectedPolymorphic() = default;
 
@@ -73,6 +77,8 @@ public:
 class LIBSAMPLE_API ProtectedVirtualDestructor
 {
 public:
+    LIBMINIMAL_DISABLE_COPY_MOVE(ProtectedVirtualDestructor)
+
     ProtectedVirtualDestructor() noexcept = default;
     inline static ProtectedVirtualDestructor *create()
     { return new ProtectedVirtualDestructor(); }
@@ -87,6 +93,8 @@ private:
 class LIBSAMPLE_API ProtectedEnumClass
 {
 public:
+    LIBMINIMAL_DISABLE_COPY_MOVE(ProtectedEnumClass)
+
     ProtectedEnumClass() noexcept = default;
     virtual ~ProtectedEnumClass() = default;
     enum PublicEnum {

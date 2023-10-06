@@ -17,6 +17,8 @@
 class LIBSAMPLE_API VirtualMethods
 {
 public:
+    LIBMINIMAL_DEFAULT_COPY_MOVE(VirtualMethods)
+
     explicit VirtualMethods(Str name = "VirtualMethods") : m_name(name) {}
     virtual ~VirtualMethods() = default;
 
@@ -127,7 +129,9 @@ public:
 class LIBSAMPLE_API VirtualDtor
 {
 public:
-    VirtualDtor() = default;
+    LIBMINIMAL_DEFAULT_COPY_MOVE(VirtualDtor)
+
+    VirtualDtor() noexcept = default;
     virtual ~VirtualDtor() { dtor_called++; }
 
     static VirtualDtor *create() { return new VirtualDtor(); }
