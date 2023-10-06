@@ -57,8 +57,6 @@ public:
     inline static ObjectType *create() { return new ObjectType(); }
     static ObjectType *createWithChild();
 
-    static const ObjectType *defaultInstance();
-
     void setParent(ObjectType *parent);
     inline ObjectType *parent() const { return m_parent; }
     inline const ObjectTypeList &children() const { return m_children; }

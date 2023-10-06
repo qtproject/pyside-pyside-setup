@@ -32,12 +32,6 @@ ObjectType *ObjectType::createWithChild()
     return parent;
 }
 
-const ObjectType *ObjectType::defaultInstance()
-{
-    static ObjectType result;
-    return &result;
-}
-
 void ObjectType::removeChild(ObjectType *child)
 {
     if (!child)

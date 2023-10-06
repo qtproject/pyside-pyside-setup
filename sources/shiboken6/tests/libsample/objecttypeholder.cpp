@@ -10,7 +10,7 @@ ObjectTypeHolder::ObjectTypeHolder(const char *objectName)
     m_objectType = object;
 }
 
-ObjectTypeHolder::ObjectTypeHolder(const ObjectType *object) :
+ObjectTypeHolder::ObjectTypeHolder(const ObjectType *object) noexcept :
     m_objectType(object)
 {
 }

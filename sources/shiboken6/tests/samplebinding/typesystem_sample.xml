@@ -721,7 +721,7 @@
         </modify-function>
     </object-type>
 
-    <value-type name="ObjectTypeHolder"/>
+    <object-type name="ObjectTypeHolder"/>
     <value-type name="OnlyCopy"/>
     <value-type name="FriendOfOnlyCopy"/>
 
