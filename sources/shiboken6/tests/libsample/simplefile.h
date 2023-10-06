@@ -6,16 +6,21 @@
 
 #include "libsamplemacros.h"
 
-class SimpleFile_p;
+#include <memory>
+
+class SimpleFilePrivate;
 
 class LIBSAMPLE_API SimpleFile
 {
 public:
+    LIBMINIMAL_DISABLE_COPY(SimpleFile)
+    LIBMINIMAL_DEFAULT_MOVE(SimpleFile)
+
     explicit SimpleFile(const char *filename);
     ~SimpleFile();
 
     const char *filename();
-    long size();
+    long size() const;
     bool open();
     void close();
 
@@ -23,7 +28,7 @@ public:
     static bool exists(const char *filename);
 
 private:
-    SimpleFile_p *p;
+    std::unique_ptr<SimpleFilePrivate> p;
 };
 
 #endif // SIMPLEFILE_H

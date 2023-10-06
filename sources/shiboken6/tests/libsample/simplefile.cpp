@@ -4,63 +4,59 @@
 #include "simplefile.h"
 
 #include <cstdlib>
-#include <cstring>
-#include <fstream>
+#include <cstdio>
+#include <string>
+#include <filesystem>
 
-class SimpleFile_p
+class SimpleFilePrivate
 {
 public:
-    SimpleFile_p(const char *filename) :
-        m_filename(strdup(filename)) {}
+    LIBMINIMAL_DISABLE_COPY_MOVE(SimpleFilePrivate)
 
-    ~SimpleFile_p()
-    {
-        std::free(m_filename);
-    }
+    SimpleFilePrivate(const char *filename) : m_filename(filename) {}
+    ~SimpleFilePrivate() = default;
 
-    char *m_filename;
+    std::string m_filename;
     FILE *m_descriptor = nullptr;
     long m_size = 0;
 };
 
-SimpleFile::SimpleFile(const char *filename)
+SimpleFile::SimpleFile(const char *filename) :
+    p(std::make_unique<SimpleFilePrivate>(filename))
 {
-    p = new SimpleFile_p(filename);
 }
 
 SimpleFile::~SimpleFile()
 {
     close();
-    delete p;
 }
 
 const char *SimpleFile::filename()
 {
-    return p->m_filename;
+    return p->m_filename.c_str();
 }
 
-long SimpleFile::size()
+long SimpleFile::size() const
 {
     return p->m_size;
 }
 
 bool SimpleFile::open()
 {
-    auto *descriptor = fopen(p->m_filename, "rb");
+    auto *descriptor = std::fopen(p->m_filename.c_str(), "rb");
     if (descriptor == nullptr)
         return false;
 
     p->m_descriptor = descriptor;
-    std::fseek(p->m_descriptor, 0, SEEK_END);
-    p->m_size = ftell(p->m_descriptor);
-    std::rewind(p->m_descriptor);
+    const auto size = std::filesystem::file_size(std::filesystem::path(p->m_filename));
+    p->m_size = long(size);
 
     return true;
 }
 
 void SimpleFile::close()
 {
-    if (p->m_descriptor) {
+    if (p->m_descriptor != nullptr) {
         std::fclose(p->m_descriptor);
         p->m_descriptor = nullptr;
     }
@@ -68,12 +64,10 @@ void SimpleFile::close()
 
 bool SimpleFile::exists() const
 {
-    std::ifstream ifile(p->m_filename);
-    return !ifile.fail();
+    return std::filesystem::exists(std::filesystem::path(p->m_filename));
 }
 
 bool SimpleFile::exists(const char *filename)
 {
-    std::ifstream ifile(filename);
-    return !ifile.fail();
+    return std::filesystem::exists(std::filesystem::path(filename));
 }
