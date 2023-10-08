@@ -87,15 +87,6 @@ static int const LOAD_ATTR = 106;
 static int const LOAD_METHOD_NOGIL = 55;
 static int const CALL_METHOD_NOGIL = 72;
 
-static int _getVersion()
-{
-    static PyObject *const version = PySys_GetObject("version_info");
-    static PyObject *const major = PyTuple_GetItem(version, 0);
-    static PyObject *const minor = PyTuple_GetItem(version, 1);
-    static auto number = PyLong_AsLong(major) * 1000 + PyLong_AsLong(minor);
-    return number;
-}
-
 static bool currentOpcode_Is_CallMethNoArgs()
 {
     // PYSIDE-2221: Special case for the NoGil version:
@@ -134,13 +125,13 @@ static bool currentOpcode_Is_CallMethNoArgs()
     }
     uint8_t opcode2 = co_code[f_lasti + 2];
     uint8_t oparg2 = co_code[f_lasti + 3];
-    static auto number = _getVersion();
-    if (number < 3007)
+    static auto number = _PepRuntimeVersion();
+    if (number < 0x030700)
         return opcode1 == LOAD_ATTR && opcode2 == CALL_FUNCTION && oparg2 == 0;
-    if (number < 3011)
+    if (number < 0x030B00)
         return opcode1 == LOAD_METHOD && opcode2 == CALL_METHOD && oparg2 == 0;
 
-    if (number < 3012) {
+    if (number < 0x030C00) {
         // With Python 3.11, the opcodes get bigger and change a bit.
         // Note: The new adaptive opcodes are elegantly hidden and we
         //       don't need to take care of them.
