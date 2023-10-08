@@ -130,9 +130,10 @@ PyTypeObject *SbkType_FromSpec_BMDWB(PyType_Spec *spec,
     // PyType_Ready too early. (at least in PyPy, which caused pretty long debugging.)
     auto *ht = reinterpret_cast<PyHeapTypeObject *>(type);
     ht->ht_qualname = qualname;
-    if (PyDict_SetItem(type->tp_dict, Shiboken::PyMagicName::qualname(), qualname))
+    AutoDecRef tpDict(PepType_GetDict(type));
+    if (PyDict_SetItem(tpDict.object(), Shiboken::PyMagicName::qualname(), qualname))
         return nullptr;
-    if (PyDict_SetItem(type->tp_dict, Shiboken::PyMagicName::module(), module))
+    if (PyDict_SetItem(tpDict.object(), Shiboken::PyMagicName::module(), module))
         return nullptr;
     PyType_Ready(type);
 #else
@@ -361,7 +362,7 @@ _PyType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
     /// Here is the only change needed: Do not finalize type creation.
     // if (PyType_Ready(type) < 0)
     //     goto fail;
-    type->tp_dict = PyDict_New();
+    PepType_SetDict(type, PyDict_New());
     /// This is not found in PyPy:
     // if (type->tp_dictoffset) {
     //     res->ht_cached_keys = _PyDict_NewKeysForClass();

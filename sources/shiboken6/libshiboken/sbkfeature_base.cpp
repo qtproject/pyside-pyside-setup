@@ -23,7 +23,8 @@ extern "C"
 //
 int currentSelectId(PyTypeObject *type)
 {
-    PyObject *PyId = PyObject_GetAttr(type->tp_dict, PyName::select_id());
+    AutoDecRef tpDict(PepType_GetDict(type));
+    PyObject *PyId = PyObject_GetAttr(tpDict.object(), PyName::select_id());
     if (PyId == nullptr) {
         PyErr_Clear();
         return 0x00;
@@ -235,7 +236,8 @@ static PyObject *lookupUnqualifiedOrOldEnum(PyTypeObject *type, PyObject *name)
                  * We first need to look into the current opcode of the bytecode to find
                  * out if we have a call like above or just a type lookup.
                  */
-                auto *flagType = PyDict_GetItem(type_base->tp_dict, rename);
+                AutoDecRef tpDict(PepType_GetDict(type_base));
+                auto *flagType = PyDict_GetItem(tpDict.object(), rename);
                 if (currentOpcode_Is_CallMethNoArgs())
                     return replaceNoArgWithZero(flagType);
                 Py_INCREF(flagType);
@@ -244,7 +246,8 @@ static PyObject *lookupUnqualifiedOrOldEnum(PyTypeObject *type, PyObject *name)
         }
         bool useFakeShortcuts = !(Enum::enumOption & Enum::ENOPT_NO_FAKESHORTCUT);
         if (useFakeShortcuts) {
-            auto *dict = type_base->tp_dict;
+            AutoDecRef tpDict(PepType_GetDict(type_base));
+            auto *dict = tpDict.object();
             PyObject *key, *value;
             Py_ssize_t pos = 0;
             while (PyDict_Next(dict, &pos, &key, &value)) {
@@ -334,12 +337,14 @@ PyObject *Sbk_TypeGet___dict__(PyTypeObject *type, void * /* context */)
     /*
      * This is the override for getting a dict.
      */
-    auto dict = type->tp_dict;
+    AutoDecRef tpDict(PepType_GetDict(type));
+    auto dict = tpDict.object();;
     if (dict == nullptr)
         Py_RETURN_NONE;
     if (SelectFeatureSet != nullptr) {
         SelectFeatureSet(type);
-        dict = type->tp_dict;
+        tpDict.reset(PepType_GetDict(type));
+        dict = tpDict.object();
     }
     return PyDictProxy_New(dict);
 }

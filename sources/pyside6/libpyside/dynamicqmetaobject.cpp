@@ -585,7 +585,8 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
     // Leave the properties to be registered after signals because they may depend on
     // notify signals.
     for (PyTypeObject *baseType : basesToCheck) {
-        PyObject *attrs = baseType->tp_dict;
+        AutoDecRef tpDict(PepType_GetDict(baseType));
+        PyObject *attrs = tpDict.object();
         PyObject *key = nullptr;
         PyObject *value = nullptr;
         Py_ssize_t pos = 0;
@@ -617,7 +618,8 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
     // Signals and slots should be separated, unless the types are modified, later.
     // We check for this using "is_sorted()". Sorting no longer happens at all.
     for (PyTypeObject *baseType : basesToCheck) {
-        PyObject *attrs = baseType->tp_dict;
+        AutoDecRef tpDict(PepType_GetDict(baseType));
+        PyObject *attrs = tpDict.object();
         PyObject *key = nullptr;
         PyObject *value = nullptr;
         Py_ssize_t pos = 0;

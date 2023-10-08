@@ -330,8 +330,10 @@ PyObject *BindingManager::getOverride(const void *cptr,
         // The last class in the mro (size - 1) is the base Python object class which should not be tested also.
         for (int idx = 1; idx < size - 1; ++idx) {
             auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
-            if (parent->tp_dict) {
-                defaultMethod = PyDict_GetItem(parent->tp_dict, pyMethodName);
+            AutoDecRef tpDict(PepType_GetDict(parent));
+            auto *parentDict = tpDict.object();
+            if (parentDict) {
+                defaultMethod = PyDict_GetItem(parentDict, pyMethodName);
                 if (defaultMethod) {
                     defaultFound = true;
                     if (function != defaultMethod)
