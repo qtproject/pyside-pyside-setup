@@ -548,6 +548,10 @@ extern LIBSHIBOKEN_API int PepRuntime_38_flag;
 
 LIBSHIBOKEN_API PyObject *PepType_GetDict(PyTypeObject *type);
 
+// This function does not exist as PyType_SetDict. But because tp_dict
+// is no longer considered to be accessible, we treat it as such.
+LIBSHIBOKEN_API int PepType_SetDict(PyTypeObject *type, PyObject *dict);
+
 /*****************************************************************************
  *
  * Module Initialization

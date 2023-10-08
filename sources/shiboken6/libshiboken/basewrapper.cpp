@@ -111,7 +111,8 @@ type_set_doc(PyTypeObject *type, PyObject *value, void * /* context */)
     if (!check_set_special_type_attr(type, value, "__doc__"))
         return -1;
     PyType_Modified(type);
-    return PyDict_SetItem(type->tp_dict, Shiboken::PyMagicName::doc(), value);
+    Shiboken::AutoDecRef tpDict(PepType_GetDict(type));
+    return PyDict_SetItem(tpDict.object(), Shiboken::PyMagicName::doc(), value);
 }
 
 // PYSIDE-908: The function PyType_Modified does not work in PySide, so we need to

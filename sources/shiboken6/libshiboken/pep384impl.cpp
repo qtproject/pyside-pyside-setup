@@ -115,6 +115,8 @@ check_PyTypeObject_valid()
     PyObject *d = PyObject_GetAttr(obtype, Shiboken::PyMagicName::dictoffset());
     long probe_tp_dictoffset = PyLong_AsLong(d);
     PyObject *probe_tp_mro = PyObject_GetAttr(obtype, Shiboken::PyMagicName::mro());
+    Shiboken::AutoDecRef tpDict(PepType_GetDict(check));
+    auto *checkDict = tpDict.object();
     if (false
         || strcmp(probe_tp_name, check->tp_name) != 0
         || probe_tp_basicsize       != check->tp_basicsize
@@ -131,8 +133,8 @@ check_PyTypeObject_valid()
         || probe_tp_methods         != check->tp_methods
         || probe_tp_getset          != check->tp_getset
         || probe_tp_base            != typetype->tp_base
-        || !PyDict_Check(check->tp_dict)
-        || !PyDict_GetItemString(check->tp_dict, "dummy")
+        || !PyDict_Check(checkDict)
+        || !PyDict_GetItemString(checkDict, "dummy")
         || probe_tp_descr_get       != check->tp_descr_get
         || probe_tp_descr_set       != check->tp_descr_set
         || probe_tp_dictoffset      != typetype->tp_dictoffset
@@ -1062,6 +1064,12 @@ PyObject *PepType_GetDict(PyTypeObject *type)
 #else
     return emulatePyType_GetDict(type);
 #endif // Py_LIMITED_API
+}
+
+int PepType_SetDict(PyTypeObject *type, PyObject *dict)
+{
+    type->tp_dict = dict;
+    return 0;
 }
 
 /***************************************************************************

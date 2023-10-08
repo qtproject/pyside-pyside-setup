@@ -162,7 +162,7 @@ static bool replaceClassDict(PyTypeObject *type)
      * This is mandatory for all type dicts when they are touched.
      */
     ensureNewDictType();
-    auto *dict = type->tp_dict;
+    AutoDecRef dict(PepType_GetDict(type));
     auto *ob_ndt = reinterpret_cast<PyObject *>(new_dict_type);
     auto *new_dict = PyObject_CallObject(ob_ndt, nullptr);
     if (new_dict == nullptr || PyDict_Update(new_dict, dict) < 0)
@@ -173,8 +173,8 @@ static bool replaceClassDict(PyTypeObject *type)
     setNextDict(new_dict, new_dict);
     // We have now an exact copy of the dict with a new type.
     // Replace `__dict__` which usually has refcount 1 (but see cyclic_test.py)
-    Py_DECREF(type->tp_dict);
-    type->tp_dict = new_dict;
+    Py_DECREF(PepType_GetDict(type));
+    PepType_SetDict(type, new_dict);
     return true;
 }
 
@@ -184,7 +184,7 @@ static bool addNewDict(PyTypeObject *type, int select_id)
      * Add a new dict to the ring and set it as `type->tp_dict`.
      * A 'false' return is fatal.
      */
-    auto *dict = type->tp_dict;
+    AutoDecRef dict(PepType_GetDict(type));
     auto *ob_ndt = reinterpret_cast<PyObject *>(new_dict_type);
     auto *new_dict = PyObject_CallObject(ob_ndt, nullptr);
     if (new_dict == nullptr)
@@ -194,7 +194,7 @@ static bool addNewDict(PyTypeObject *type, int select_id)
     auto next_dict = nextInCircle(dict);
     setNextDict(dict, new_dict);
     setNextDict(new_dict, next_dict);
-    type->tp_dict = new_dict;
+    PepType_SetDict(type, new_dict);
     return true;
 }
 
@@ -204,18 +204,19 @@ static inline bool moveToFeatureSet(PyTypeObject *type, int select_id)
      * Rotate the ring to the given `select_id` and return `true`.
      * If not found, stay at the current position and return `false`.
      */
-    auto *initial_dict = type->tp_dict;
+    AutoDecRef tpDict(PepType_GetDict(type));
+    auto *initial_dict = tpDict.object();
     auto *dict = initial_dict;
     do {
         int current_id = getSelectId(dict);
         // This works because small numbers are singleton objects.
         if (current_id == select_id) {
-            type->tp_dict = dict;
+            PepType_SetDict(type, dict);
             return true;
         }
         dict = nextInCircle(dict);
     } while (dict != initial_dict);
-    type->tp_dict = initial_dict;
+    PepType_SetDict(type, initial_dict);
     return false;
 }
 
@@ -234,8 +235,7 @@ static bool createNewFeatureSet(PyTypeObject *type, int select_id)
     Q_UNUSED(ok);
     assert(ok);
 
-    AutoDecRef prev_dict(type->tp_dict);
-    Py_INCREF(prev_dict);   // keep the first ref unchanged
+    AutoDecRef prev_dict(PepType_GetDict(type));
     if (!addNewDict(type, select_id))
         return false;
     int id = select_id;
@@ -245,13 +245,14 @@ static bool createNewFeatureSet(PyTypeObject *type, int select_id)
     for (int idx = id; *proc != nullptr; ++proc, idx >>= 1) {
         if (idx & 1) {
             // clear the tp_dict that will get new content
-            PyDict_Clear(type->tp_dict);
+            AutoDecRef tpDict(PepType_GetDict(type));
+            PyDict_Clear(tpDict);
             // let the proc re-fill the tp_dict
             if (!(*proc)(type, prev_dict, id))
                 return false;
             // if there is still a step, prepare `prev_dict`
             if (idx >> 1) {
-                prev_dict.reset(PyDict_Copy(type->tp_dict));
+                prev_dict.reset(PyDict_Copy(tpDict.object()));
                 if (prev_dict.isNull())
                     return false;
             }
@@ -267,7 +268,8 @@ static inline void SelectFeatureSetSubtype(PyTypeObject *type, int select_id)
      * every subclass until no more subclasses or reaching the wanted id.
      */
     static const auto *pyTypeType_tp_dict = PepType_GetDict(&PyType_Type);
-    if (Py_TYPE(type->tp_dict) == Py_TYPE(pyTypeType_tp_dict)) {
+    AutoDecRef tpDict(PepType_GetDict(type));
+    if (Py_TYPE(tpDict.object()) == Py_TYPE(pyTypeType_tp_dict)) {
         // On first touch, we initialize the dynamic naming.
         // The dict type will be replaced after the first call.
         if (!replaceClassDict(type)) {
@@ -322,7 +324,8 @@ static inline void SelectFeatureSet(PyTypeObject *type)
      * Shiboken will assign it via a public hook of `basewrapper.cpp`.
      */
     static const auto *pyTypeType_tp_dict = PepType_GetDict(&PyType_Type);
-    if (Py_TYPE(type->tp_dict) == Py_TYPE(pyTypeType_tp_dict)) {
+    AutoDecRef tpDict(PepType_GetDict(type));
+    if (Py_TYPE(tpDict.object()) == Py_TYPE(pyTypeType_tp_dict)) {
         // We initialize the dynamic features by using our own dict type.
         if (!replaceClassDict(type)) {
             Py_FatalError("failed to replace class dict!");
@@ -456,7 +459,8 @@ static PyObject *methodWithNewName(PyTypeObject *type,
 static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, int /* id */)
 {
     PyMethodDef *meth = type->tp_methods;
-    PyObject *lower_dict = type->tp_dict;
+    AutoDecRef tpDict(PepType_GetDict(type));
+    PyObject *lower_dict = tpDict.object();
 
     // PYSIDE-1702: A user-defined class in Python has no internal method list.
     //              We are not going to change anything.
@@ -632,7 +636,8 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
      */
 
     PyMethodDef *meth = type->tp_methods;
-    PyObject *prop_dict = type->tp_dict;
+    AutoDecRef tpDict(PepType_GetDict(type));
+    PyObject *prop_dict = tpDict.object();
 
     // The empty `tp_dict` gets populated by the previous dict.
     if (PyDict_Update(prop_dict, prev_dict) < 0)
@@ -765,7 +770,8 @@ static bool patch_property_impl()
 #define SIMILAR_FEATURE(xx)  \
 static bool feature_##xx##_addDummyNames(PyTypeObject *type, PyObject *prev_dict, int /* id */) \
 { \
-    PyObject *dict = type->tp_dict; \
+    AutoDecRef tpDict(PepType_GetDict(type)); \
+    PyObject *dict = tpDict.object(); \
     if (PyDict_Update(dict, prev_dict) < 0) \
         return false; \
     if (PyDict_SetItemString(dict, "fake_feature_" #xx, Py_None) < 0) \
