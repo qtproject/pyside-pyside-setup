@@ -28,7 +28,7 @@ public:
     int tp_init(PyObject *self, PyObject *args, PyObject *kwds) override;
     const char *name() const override;
 
-    QMap<QByteArray, QByteArray> m_data;
+    ClassInfoList m_data;
     bool m_alreadyWrapped = false;
 };
 

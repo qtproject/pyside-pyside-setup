@@ -8,13 +8,25 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/QMap>
 #include <QtCore/QByteArray>
+#include <QtCore/QList>
 
 namespace PySide::ClassInfo {
 
+struct ClassInfo
+{
+    QByteArray key;
+    QByteArray value;
+};
+
+using ClassInfoList = QList<ClassInfo>;
+
 PYSIDE_API bool checkType(PyObject* pyObj);
-PYSIDE_API QMap<QByteArray, QByteArray> getMap(PyObject *obj);
+PYSIDE_API ClassInfoList getClassInfoList(PyObject *decorator);
+
+PYSIDE_API bool setClassInfo(PyTypeObject *type, const QByteArray &key,
+                             const QByteArray &value);
+PYSIDE_API bool setClassInfo(PyTypeObject *type, const ClassInfoList &list);
 
 } // namespace PySide::ClassInfo
 
