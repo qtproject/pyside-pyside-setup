@@ -5064,6 +5064,7 @@ void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList 
             continue;
         if (!preambleWritten) {
             s << "// Initialization of enums.\n"
+                << "Shiboken::AutoDecRef tpDict{};\n"
                 << "PyTypeObject *EType{};\n\n";
             preambleWritten = true;
         }
@@ -5180,11 +5181,11 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
             const QString mangledName = mangleName(enumValue.name());
             const QString pyValue = initializerValues + u'[' + QString::number(idx++) + u']';
             if (enclosingClass || hasUpperEnclosingClass) {
-                s << "PyDict_SetItemString(reinterpret_cast<PyTypeObject *>("
-                    << enclosingObjectVariable
-                    << ")->tp_dict, \"" << mangledName << "\",\n" << indent
-                    << (isSigned ? "PyLong_FromLongLong" : "PyLong_FromUnsignedLongLong") << "("
-                    << pyValue << "));\n" << outdent;
+                s << "tpDict.reset(PepType_GetDict(reinterpret_cast<PyTypeObject *>("
+                    << enclosingObjectVariable << ")));\n"
+                    << "PyDict_SetItemString(tpDict.object(), \"" << mangledName << "\",\n"
+                    << indent << (isSigned ? "PyLong_FromLongLong" : "PyLong_FromUnsignedLongLong")
+                    << "(" << pyValue << "));\n" << outdent;
             } else {
                 s << "PyModule_AddObject(module, \"" << mangledName << "\",\n" << indent
                     << (isSigned ? "PyLong_FromLongLong" : "PyLong_FromUnsignedLongLong") << "("
@@ -5500,8 +5501,8 @@ void CppGenerator::writeStaticFieldInitialization(TextStream &s,
                                                   const AbstractMetaClassCPtr &metaClass)
 {
     s << "\nvoid " << getSimpleClassStaticFieldsInitFunctionName(metaClass)
-        << "()\n{\n" << indent << "auto dict = reinterpret_cast<PyTypeObject *>("
-        << cpythonTypeName(metaClass) << ")->tp_dict;\n";
+        << "()\n{\n" << indent << "Shiboken::AutoDecRef dict(PepType_GetDict(reinterpret_cast<PyTypeObject *>("
+        << cpythonTypeName(metaClass) << ")));\n";
     for (const AbstractMetaField &field : metaClass->fields()) {
         if (field.isStatic()) {
             s << "PyDict_SetItemString(dict, \"" << field.name()
@@ -5750,7 +5751,8 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
             << "if (Shiboken::Object::isUserType(self)) {\n" << indent;
         // PYSIDE-772: Perform optimized name mangling.
         s << "Shiboken::AutoDecRef tmp(_Pep_PrivateMangle(self, name));\n"
-            << "if (auto *meth = PyDict_GetItem(Py_TYPE(self)->tp_dict, tmp)) {\n" << indent;
+            << "Shiboken::AutoDecRef tpDict(PepType_GetDict(Py_TYPE(self)));\n"
+            << "if (auto *meth = PyDict_GetItem(tpDict.object(), tmp)) {\n" << indent;
         // PYSIDE-1523: PyFunction_Check is not accepting compiled functions.
         s << "if (std::strcmp(Py_TYPE(meth)->tp_name, \"compiled_function\") == 0)\n" << indent
             << "return Py_TYPE(meth)->tp_descr_get(meth, self, nullptr);\n" << outdent
@@ -5837,8 +5839,8 @@ void CppGenerator::writeInitFunc(TextStream &declStr, TextStream &callStr,
         << (hasParent ? "enclosingClass" : "module") << ");\n";
     callStr << "init_" << initFunctionName;
     if (hasParent) {
-        callStr << "(reinterpret_cast<PyTypeObject *>("
-            << cpythonTypeNameExt(enclosingEntry) << ")->tp_dict);\n";
+        callStr << "(reinterpret_cast<PyObject *>("
+        << cpythonTypeNameExt(enclosingEntry) << "));\n";
     } else {
         callStr << "(module);\n";
     }
@@ -6535,8 +6537,9 @@ const auto idx = str.indexOf('(');
 auto *typeName = Py_TYPE(self)->tp_name;
 if (idx >= 0)
 )" << indent << "str.replace(0, idx, typeName);\n" << outdent
-       << "str = str.trimmed();\n"
-        << "PyObject *mod = PyDict_GetItem(Py_TYPE(self)->tp_dict, Shiboken::PyMagicName::module());\n";
+        << "str = str.trimmed();\n"
+        << "Shiboken::AutoDecRef tpDict(PepType_GetDict(Py_TYPE(self)));\n"
+        << "PyObject *mod = PyDict_GetItem(tpDict.object(), Shiboken::PyMagicName::module());\n";
     // PYSIDE-595: The introduction of heap types has the side effect that the module name
     // is always prepended to the type name. Therefore the strchr check:
     s << "if (mod != nullptr && std::strchr(typeName, '.') == nullptr)\n" << indent

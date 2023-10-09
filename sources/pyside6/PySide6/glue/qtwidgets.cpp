@@ -20,7 +20,8 @@ Shiboken::Object::releaseOwnership(%PYARG_0);
 
 // @snippet qgraphicsitem
 PyObject *userTypeConstant =  PyLong_FromLong(QGraphicsItem::UserType);
-PyDict_SetItemString(Sbk_QGraphicsItem_TypeF()->tp_dict, "UserType", userTypeConstant);
+tpDict.reset(PepType_GetDict(Sbk_QGraphicsItem_TypeF()));
+PyDict_SetItemString(tpDict.object(), "UserType", userTypeConstant);
 // @snippet qgraphicsitem
 
 // @snippet qgraphicsitem-scene-return-parenting

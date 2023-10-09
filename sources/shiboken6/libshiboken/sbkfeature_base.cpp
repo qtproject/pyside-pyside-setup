@@ -266,7 +266,8 @@ static PyObject *lookupUnqualifiedOrOldEnum(PyTypeObject *type, PyObject *name)
                  */
                 if (Py_TYPE(value) == EnumMeta) {
                     auto *valtype = reinterpret_cast<PyTypeObject *>(value);
-                    auto *member_map = PyDict_GetItem(valtype->tp_dict, _member_map_);
+                    AutoDecRef valtypeDict(PepType_GetDict(valtype));
+                    auto *member_map = PyDict_GetItem(valtypeDict.object(), _member_map_);
                     if (member_map && PyDict_Check(member_map)) {
                         result = PyDict_GetItem(member_map, name);
                         Py_XINCREF(result);
@@ -338,7 +339,7 @@ PyObject *Sbk_TypeGet___dict__(PyTypeObject *type, void * /* context */)
      * This is the override for getting a dict.
      */
     AutoDecRef tpDict(PepType_GetDict(type));
-    auto dict = tpDict.object();;
+    auto *dict = tpDict.object();;
     if (dict == nullptr)
         Py_RETURN_NONE;
     if (SelectFeatureSet != nullptr) {
