@@ -950,8 +950,16 @@ introduceWrapperType(PyObject *enclosingObject,
     setDestructorFunction(type, cppObjDtor);
     auto *ob_type = reinterpret_cast<PyObject *>(type);
 
-    if (wrapperFlags & InnerClass)
+    if (wrapperFlags & InnerClass) {
+        // PYSIDE-2230: Instead of tp_dict, use the enclosing type.
+        //              This stays interface compatible.
+        if (PyType_Check(enclosingObject)) {
+            AutoDecRef tpDict(PepType_GetDict(reinterpret_cast<PyTypeObject *>(enclosingObject)));
+            return PyDict_SetItemString(tpDict, typeName, ob_type) == 0 ? type : nullptr;
+        }
+        assert(PyDict_Check(enclosingObject));
         return PyDict_SetItemString(enclosingObject, typeName, ob_type) == 0 ? type : nullptr;
+    }
 
     // PyModule_AddObject steals type's reference.
     Py_INCREF(ob_type);

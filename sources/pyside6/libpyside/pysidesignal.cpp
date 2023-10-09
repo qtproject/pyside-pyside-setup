@@ -784,7 +784,7 @@ static PyObject *_getHomonymousMethod(PySideSignalInstance *inst)
 
     for (Py_ssize_t idx = 0; idx < n; idx++) {
         auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
-        AutoDecRef tpDict(PepType_GetDict(sub_type));
+        Shiboken::AutoDecRef tpDict(PepType_GetDict(sub_type));
         auto *hom = PyDict_GetItem(tpDict, name);
         PyObject *realFunc{};
         if (hom && PyCallable_Check(hom) && (realFunc = _getRealCallable(hom)))
@@ -892,7 +892,7 @@ void updateSourceObject(PyObject *source)
         Py_ssize_t pos = 0;
         PyObject *key, *value;
         auto *type = reinterpret_cast<PyTypeObject *>(mroItem.object());
-        AutoDecRef tpDict(PepType_GetDict(type));
+        Shiboken::AutoDecRef tpDict(PepType_GetDict(type));
         while (PyDict_Next(tpDict, &pos, &key, &value)) {
             if (PyObject_TypeCheck(value, PySideSignal_TypeF())) {
                 // PYSIDE-1751: We only insert an instance into the instance dict, if a signal
@@ -1100,7 +1100,7 @@ static typename T::value_type join(T t, const char *sep)
 
 static void _addSignalToWrapper(PyTypeObject *wrapperType, const char *signalName, PySideSignal *signal)
 {
-    AutoDecRef tpDict(PepType_GetDict(wrapperType));
+    Shiboken::AutoDecRef tpDict(PepType_GetDict(wrapperType));
     auto typeDict = tpDict.object();
     PyObject *homonymousMethod;
     if ((homonymousMethod = PyDict_GetItemString(typeDict, signalName))) {

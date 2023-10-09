@@ -3,6 +3,7 @@
 
 #include "sbkcontainer.h"
 #include "sbkstaticstrings.h"
+#include "autodecref.h"
 
 namespace Shiboken
 {

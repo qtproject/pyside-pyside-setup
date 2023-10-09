@@ -97,6 +97,10 @@ signature/signature_extend.cpp
 signature/signature_helper.cpp
 )
 
+# This is needed to let the header obey a variable in "pep384impl.h".
+# Note: This must be set on the cpp file!
+set_property(SOURCE "pep384impl.cpp" PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
+
 add_library(libshiboken SHARED ${libshiboken_SRC})
 add_library(Shiboken6::libshiboken ALIAS libshiboken)
 

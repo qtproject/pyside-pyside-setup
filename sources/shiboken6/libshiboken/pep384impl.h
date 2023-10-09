@@ -82,7 +82,11 @@ typedef struct _typeobject {
     struct PyMemberDef *tp_members;
     struct PyGetSetDef *tp_getset;
     struct _typeobject *tp_base;
+#ifdef PEP384_INTERN
     PyObject *tp_dict;
+#else
+    void *X31;
+#endif
     descrgetfunc tp_descr_get;
     descrsetfunc tp_descr_set;
     Py_ssize_t tp_dictoffset;
