@@ -19,6 +19,9 @@ namespace PySide::Qml
 /**
  * PySide implementation of qmlRegisterType<T> function.
  *
+ * This is a helper for the legacy free qmlRegisterType*() type functions.
+ * Decorators should be used instead.
+ *
  * \param pyObj Python type to be registered.
  * \param uri QML element uri.
  * \param versionMajor QML component major version.
@@ -33,6 +36,9 @@ PYSIDEQML_API int qmlRegisterType(PyObject *pyObj, const char *uri,
 
 /**
  * PySide implementation of qmlRegisterSingletonType<T> function.
+ *
+ * This is a helper for the legacy free qmlRegisterSingletonType<T> type function.
+ * Decorators should be used instead.
  *
  * \param pyObj Python type to be registered.
  * \param uri QML element uri.
@@ -80,7 +86,7 @@ PYSIDEQML_API PyObject *qmlSingletonMacro(PyObject *pyObj);
 // Used by QtQuick module to fill the QQmlPrivate::RegisterType::parserStatusCast,
 // valueSourceCast and valueInterceptorCast fields with the correct values.
 using QuickRegisterItemFunction =
-    bool (*)(PyObject *pyObj, QQmlPrivate::RegisterType *);
+    bool (*)(PyObject *pyObj, QQmlPrivate::RegisterTypeAndRevisions *);
 
 PYSIDEQML_API QuickRegisterItemFunction getQuickRegisterItemFunction();
 PYSIDEQML_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function);

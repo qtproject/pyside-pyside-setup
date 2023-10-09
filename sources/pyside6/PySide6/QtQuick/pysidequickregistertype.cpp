@@ -22,7 +22,7 @@ bool pyTypeObjectInheritsFromClass(PyTypeObject *pyObjType, const char *classPtr
 template <class WrappedClass>
 bool registerTypeIfInheritsFromClass(const char *classPtrName,
                                      PyTypeObject *typeToRegister,
-                                     QQmlPrivate::RegisterType *type)
+                                     QQmlPrivate::RegisterTypeAndRevisions *type)
 {
     if (!pyTypeObjectInheritsFromClass(typeToRegister, classPtrName))
         return false;
@@ -35,7 +35,7 @@ bool registerTypeIfInheritsFromClass(const char *classPtrName,
     return true;
 }
 
-bool quickRegisterType(PyObject *pyObj, QQmlPrivate::RegisterType *type)
+bool quickRegisterType(PyObject *pyObj, QQmlPrivate::RegisterTypeAndRevisions *type)
 {
     using namespace Shiboken;
 

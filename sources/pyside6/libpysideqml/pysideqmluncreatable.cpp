@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "pysideqmluncreatable.h"
-#include "pysideqmltypeinfo_p.h"
 #include <pysideclassdecorator_p.h>
+#include <pysideclassinfo.h>
 
 #include <shiboken.h>
 #include <signature.h>
@@ -13,6 +13,8 @@
 #include <unordered_map>
 
 #include <QtCore/QtGlobal>
+
+using namespace Qt::StringLiterals;
 
 class PySideQmlUncreatablePrivate : public PySide::ClassDecorator::StringDecoratorPrivate
 {
@@ -35,11 +37,9 @@ PyObject *PySideQmlUncreatablePrivate::tp_call(PyObject *self, PyObject *args, P
     if (klass== nullptr)
         return nullptr;
 
+    auto *type = reinterpret_cast<PyTypeObject *>(klass);
     auto *data = DecoratorPrivate::get<PySideQmlUncreatablePrivate>(self);
-
-    const auto info = PySide::Qml::ensureQmlTypeInfo(klass);
-    info->flags.setFlag(PySide::Qml::QmlTypeFlag::Uncreatable);
-    info->noCreationReason = data->string();
+    setUncreatableClassInfo(type, data->string());
 
     Py_INCREF(klass);
     return klass;
@@ -104,4 +104,11 @@ void initQmlUncreatable(PyObject *module)
     Py_INCREF(PySideQmlUncreatable_TypeF());
     PyModule_AddObject(module, "QmlUncreatable",
                        reinterpret_cast<PyObject *>(PySideQmlUncreatable_TypeF()));
+}
+
+void setUncreatableClassInfo(PyTypeObject *type, const QByteArray &reason)
+{
+    PySide::ClassInfo::setClassInfo(type, {
+        {"QML.Creatable"_ba, "false"_ba},
+        {"QML.UncreatableReason"_ba, reason} });
 }

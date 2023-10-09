@@ -6,6 +6,7 @@
 #include "pysideqmltypeinfo_p.h"
 #include "pysideqmlattached_p.h"
 #include "pysideqmlextended_p.h"
+#include "pysideqmluncreatable.h"
 
 #include <limits>
 #include <optional>
@@ -17,6 +18,7 @@
 // pyside
 #include <pyside.h>
 #include <pysideqobject.h>
+#include <pysideclassinfo.h>
 #include <pyside_p.h>
 
 #include <QtCore/QMutex>
@@ -27,7 +29,11 @@
 #include <QtQml/QQmlListProperty>
 #include <private/qqmlmetatype_p.h>
 
+using namespace Qt::StringLiterals;
+
 static PySide::Qml::QuickRegisterItemFunction quickRegisterItemFunction = nullptr;
+
+static const auto qmlElementKey = "QML.Element"_ba;
 
 static void createInto(void *memory, void *type)
 {
@@ -150,11 +156,41 @@ std::optional<ImportData> getGlobalImportData(const char *decoratorName)
     return result;
 }
 
+static PyTypeObject *checkTypeObject(PyObject *pyObj, const char *what)
+{
+    if (PyType_Check(pyObj) == 0) {
+        PyErr_Format(PyExc_TypeError, "%s can only be used for classes.", what);
+        return nullptr;
+    }
+    return reinterpret_cast<PyTypeObject *>(pyObj);
+}
+
+static bool setClassInfo(PyTypeObject *type, const QByteArray &key, const QByteArray &value)
+{
+    if (!PySide::ClassInfo::setClassInfo(type, key, value)) {
+        PyErr_Format(PyExc_TypeError, "Setting class info \"%s\" to \"%s\" on \"%s\" failed.",
+                     key.constData(), value.constData(), type->tp_name);
+        return false;
+    }
+    return true;
+}
+
+static inline bool setSingletonClassInfo(PyTypeObject *type)
+{
+    return setClassInfo(type, "QML.Singleton"_ba, "true"_ba);
+}
+
+static QQmlCustomParser *defaultCustomParserFactory()
+{
+    return nullptr;
+}
+
 namespace PySide::Qml {
 
-static int qmlRegisterType(PyObject *pyObj, const ImportData &importData,
-                           const char *qmlName, const char *noCreationReason,
-                           bool creatable)
+// Modern (6.7) type registration using RegisterTypeAndRevisions
+// and information set to QMetaClassInfo.
+static int qmlRegisterType(PyObject *pyObj, PyObject *pyClassInfoObj,
+                           const ImportData &importData)
 {
     using namespace Shiboken;
 
@@ -164,6 +200,8 @@ static int qmlRegisterType(PyObject *pyObj, const ImportData &importData,
 
     const QMetaObject *metaObject = PySide::retrieveMetaObject(pyObjType);
     Q_ASSERT(metaObject);
+    const QMetaObject *classInfoMetaObject = pyObj == pyClassInfoObj
+        ? metaObject : PySide::retrieveMetaObject(pyClassInfoObj);
 
     // Register as simple QObject rather than Qt Quick item.
     // Incref the type object, don't worry about decref'ing it because
@@ -181,26 +219,27 @@ static int qmlRegisterType(PyObject *pyObj, const ImportData &importData,
     const auto attachedInfo = qmlAttachedInfo(pyObjType, typeInfo);
     const auto extendedInfo = qmlExtendedInfo(pyObj, typeInfo);
 
-    QQmlPrivate::RegisterType type {
+    QList<int> ids;
+    QQmlPrivate::RegisterTypeAndRevisions type {
         QQmlPrivate::RegisterType::StructVersion::Base, // structVersion
         typeId, listId, objectSize,
-        creatable ? createInto : nullptr, // create
+        createInto, // create
         pyObj, // userdata
-        QString::fromUtf8(noCreationReason),
         nullptr, // createValueType (Remove in Qt 7)
         importData.importName.constData(),
         importData.toTypeRevision(), // version
-        qmlName, // elementName
         metaObject,
+        classInfoMetaObject,
         attachedInfo.factory, // attachedPropertiesFunction
         attachedInfo.metaObject, // attachedPropertiesMetaObject
         0, 0, 0, // parserStatusCast, valueSourceCast, valueInterceptorCast
         extendedInfo.factory, // extensionObjectCreate
         extendedInfo.metaObject, // extensionMetaObject
-        nullptr, // customParser
-        {}, // revision
+        defaultCustomParserFactory, // customParser
+        &ids, // qmlTypeIds
         0, // finalizerCast
-        QQmlPrivate::ValueTypeCreationMethod::None // creationMethod
+        false, // forceAnonymous
+        {} // listMetaSequence
     };
 
     // Allow registering Qt Quick items.
@@ -220,47 +259,137 @@ static int qmlRegisterType(PyObject *pyObj, const ImportData &importData,
                 QQmlPrivate::StaticCastSelector<QObject, QQmlPropertyValueInterceptor>::cast();
     }
 
-    int qmlTypeId = QQmlPrivate::qmlregister(QQmlPrivate::TypeRegistration, &type);
+    QQmlPrivate::qmlregister(QQmlPrivate::TypeAndRevisionsRegistration, &type);
+    const int qmlTypeId = ids.value(0, -1);
     if (qmlTypeId == -1) {
         PyErr_Format(PyExc_TypeError, "QML meta type registration of \"%s\" failed.",
-                     qmlName);
+                     typeName.constData());
     }
     return qmlTypeId;
 }
 
+// Legacy (pre 6.7) compatibility helper for the free register functions.
 int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int versionMinor,
                     const char *qmlName, const char *noCreationReason,
                     bool creatable)
 {
-    return qmlRegisterType(pyObj, {uri, versionMajor, versionMinor}, qmlName,
-                           noCreationReason, creatable);
+    auto *type = checkTypeObject(pyObj, "qmlRegisterType()");
+    if (type == nullptr || !setClassInfo(type, qmlElementKey, qmlName))
+        return -1;
+    if (!creatable)
+        setUncreatableClassInfo(type, noCreationReason);
+    return qmlRegisterType(pyObj, pyObj, {uri, versionMajor, versionMinor});
 }
 
+// Singleton helpers
+
+bool checkSingletonCallback(PyObject *callback)
+{
+    if (PyCallable_Check(callback) == 0) {
+        PyErr_Format(PyExc_TypeError, "Invalid callback specified.");
+        return false;
+    }
+    Shiboken::AutoDecRef funcCode(PyObject_GetAttrString(callback, "__code__"));
+    Shiboken::AutoDecRef argCount(PyObject_GetAttrString(funcCode, "co_argcount"));
+    if (PyLong_AsLong(argCount) != 1) {
+        PyErr_Format(PyExc_TypeError, "Callback has a bad parameter count.");
+        return false;
+    }
+    // Make sure the callback never gets deallocated
+    Py_INCREF(callback);
+
+    return true;
+}
+
+using SingletonQObjectCreation = std::function<QObject*(QQmlEngine *, QJSEngine *)>;
+
+static SingletonQObjectCreation
+    singletonQObjectCreation(PyObject *pyObj, PyObject *callback, bool hasCallback)
+{
+    using namespace Shiboken;
+
+    return [callback, pyObj, hasCallback](QQmlEngine *engine, QJSEngine *) -> QObject * {
+        Shiboken::GilState gil;
+        AutoDecRef args(PyTuple_New(hasCallback ? 1 : 0));
+
+        if (hasCallback) {
+            PyTuple_SET_ITEM(args, 0, Conversions::pointerToPython(
+                                          qQmlEngineType(), engine));
+        }
+
+        AutoDecRef retVal(PyObject_CallObject(hasCallback ? callback : pyObj, args));
+
+        // Make sure the callback returns something we can convert, else the entire application will crash.
+        if (retVal.isNull() ||
+            Conversions::isPythonToCppPointerConvertible(qObjectType(), retVal) == nullptr) {
+            PyErr_Format(PyExc_TypeError, "Callback returns invalid value.");
+            return nullptr;
+        }
+
+        QObject *obj = nullptr;
+        Conversions::pythonToCppPointer(qObjectType(), retVal, &obj);
+
+        if (obj != nullptr)
+            Py_INCREF(retVal);
+
+        return obj;
+    };
+}
+
+// Modern (6.7) singleton type registration using RegisterSingletonTypeAndRevisions
+// and information set to QMetaClassInfo (QObject only pending QTBUG-110467).
+static int qmlRegisterSingletonTypeV2(PyObject *pyObj, PyObject *pyClassInfoObj,
+                                      const ImportData &importData,
+                                      PyObject *callback, bool hasCallback)
+{
+    PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
+    if (!isQObjectDerived(pyObjType, true))
+        return -1;
+
+    if (hasCallback && !checkSingletonCallback(callback))
+        return -1;
+
+    const QMetaObject *metaObject = PySide::retrieveMetaObject(pyObjType);
+    Q_ASSERT(metaObject);
+    const QMetaObject *classInfoMetaObject = pyObj == pyClassInfoObj
+        ? metaObject : PySide::retrieveMetaObject(pyClassInfoObj);
+
+    // If we don't have a callback we'll need the pyObj to stay allocated indefinitely
+    if (!hasCallback)
+        Py_INCREF(pyObj);
+
+    QList<int> ids;
+    QQmlPrivate::RegisterSingletonTypeAndRevisions type {
+        QQmlPrivate::RegisterType::StructVersion::Base, // structVersion
+        importData.importName.constData(),
+        importData.toTypeRevision(), // version
+        singletonQObjectCreation(pyObj, callback, hasCallback), // qObjectApi,
+        metaObject,
+        classInfoMetaObject,
+        QMetaType(QMetaType::QObjectStar), // typeId
+        nullptr, // extensionMetaObject
+        nullptr, // extensionObjectCreate
+        &ids
+    };
+
+    QQmlPrivate::qmlregister(QQmlPrivate::SingletonAndRevisionsRegistration, &type);
+    const int qmlTypeId = ids.value(0, -1);
+    if (qmlTypeId == -1) {
+        PyErr_Format(PyExc_TypeError, "Singleton QML meta type registration of \"%s\" failed.",
+                     pyObjType->tp_name);
+    }
+    return qmlTypeId;
+}
+
+// Legacy (pre 6.7) singleton type registration using RegisterSingletonType
+// for QObject and value types. Still used by qmlRegisterSingletonType()
+// for the hypothetical case of a value type.
 static int qmlRegisterSingletonType(PyObject *pyObj, const ImportData &importData,
                                     const char *qmlName, PyObject *callback,
                                     bool isQObject, bool hasCallback)
 {
-    using namespace Shiboken;
-
-    if (hasCallback) {
-        if (!PyCallable_Check(callback)) {
-            PyErr_Format(PyExc_TypeError, "Invalid callback specified.");
-            return -1;
-        }
-
-        AutoDecRef funcCode(PyObject_GetAttrString(callback, "__code__"));
-        AutoDecRef argCount(PyObject_GetAttrString(funcCode, "co_argcount"));
-
-        int count = PyLong_AsLong(argCount);
-
-        if (count != 1) {
-            PyErr_Format(PyExc_TypeError, "Callback has a bad parameter count.");
-            return -1;
-        }
-
-        // Make sure the callback never gets deallocated
-        Py_INCREF(callback);
-    }
+    if (hasCallback && !checkSingletonCallback(callback))
+        return -1;
 
     const QMetaObject *metaObject = nullptr;
 
@@ -296,36 +425,12 @@ static int qmlRegisterSingletonType(PyObject *pyObj, const ImportData &importDat
         // FIXME: Fix this to assign new type ids each time.
         type.typeId = QMetaType(QMetaType::QObjectStar);
 
-        type.qObjectApi =
-            [callback, pyObj, hasCallback](QQmlEngine *engine, QJSEngine *) -> QObject * {
-                Shiboken::GilState gil;
-                AutoDecRef args(PyTuple_New(hasCallback ? 1 : 0));
-
-                if (hasCallback) {
-                    PyTuple_SET_ITEM(args, 0, Conversions::pointerToPython(
-                                     qQmlEngineType(), engine));
-                }
-
-                AutoDecRef retVal(PyObject_CallObject(hasCallback ? callback : pyObj, args));
-
-                // Make sure the callback returns something we can convert, else the entire application will crash.
-                if (retVal.isNull() ||
-                    Conversions::isPythonToCppPointerConvertible(qObjectType(), retVal) == nullptr) {
-                    PyErr_Format(PyExc_TypeError, "Callback returns invalid value.");
-                    return nullptr;
-                }
-
-                QObject *obj = nullptr;
-                Conversions::pythonToCppPointer(qObjectType(), retVal, &obj);
-
-                if (obj != nullptr)
-                    Py_INCREF(retVal);
-
-                return obj;
-            };
+        type.qObjectApi = singletonQObjectCreation(pyObj, callback, hasCallback);
     } else {
         type.scriptApi =
             [callback](QQmlEngine *engine, QJSEngine *) -> QJSValue {
+                using namespace Shiboken;
+
                 Shiboken::GilState gil;
                 AutoDecRef args(PyTuple_New(1));
 
@@ -355,6 +460,7 @@ static int qmlRegisterSingletonType(PyObject *pyObj, const ImportData &importDat
     return QQmlPrivate::qmlregister(QQmlPrivate::SingletonRegistration, &type);
 }
 
+// Legacy (pre 6.7) compatibility helper for the free register functions.
 int qmlRegisterSingletonType(PyObject *pyObj,const char *uri,
                              int versionMajor, int versionMinor, const char *qmlName,
                              PyObject *callback, bool isQObject, bool hasCallback)
@@ -363,8 +469,10 @@ int qmlRegisterSingletonType(PyObject *pyObj,const char *uri,
                                     callback, isQObject, hasCallback);
 }
 
+// Modern (6.7) singleton instance registration using RegisterSingletonTypeAndRevisions
+// and information set to QMetaClassInfo (QObject only).
 static int qmlRegisterSingletonInstance(PyObject *pyObj, const ImportData &importData,
-                                        const char *qmlName, PyObject *instanceObject)
+                                        PyObject *instanceObject)
 {
     using namespace Shiboken;
 
@@ -387,61 +495,71 @@ static int qmlRegisterSingletonInstance(PyObject *pyObj, const ImportData &impor
     const QMetaObject *metaObject = PySide::retrieveMetaObject(pyObjType);
     Q_ASSERT(metaObject);
 
-    // FIXME: Fix this to assign new type ids each time.
-    const QMetaType typeId = QMetaType(QMetaType::QObjectStar);
-
-    QQmlPrivate::RegisterSingletonType type {
+    QList<int> ids;
+    QQmlPrivate::RegisterSingletonTypeAndRevisions type {
         QQmlPrivate::RegisterType::StructVersion::Base, // structVersion
         importData.importName.constData(),
         importData.toTypeRevision(), // version
-        qmlName, // typeName
-        {}, // scriptApi
-        registrationFunctor, // qObjectApi
-        metaObject, // instanceMetaObject
-        typeId,
+        registrationFunctor, // qObjectApi,
+        metaObject,
+        metaObject, // classInfoMetaObject
+        QMetaType(QMetaType::QObjectStar), // typeId
         nullptr, // extensionMetaObject
         nullptr, // extensionObjectCreate
-        {} // revision
+        &ids
     };
 
-    return QQmlPrivate::qmlregister(QQmlPrivate::SingletonRegistration, &type);
+    QQmlPrivate::qmlregister(QQmlPrivate::SingletonAndRevisionsRegistration, &type);
+    return ids.value(0, -1);
 }
 
+// Legacy (pre 6.7) compatibility helper for the free register functions.
 int qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMajor,
                                  int versionMinor, const char *qmlName,
                                  PyObject *instanceObject)
 {
+    auto *type = checkTypeObject(pyObj, "qmlRegisterSingletonInstance()");
+    if (type == nullptr || !setClassInfo(type, qmlElementKey, qmlName)
+        || !setSingletonClassInfo(type)) {
+        return -1;
+    }
     return qmlRegisterSingletonInstance(pyObj, {uri, versionMajor, versionMinor},
-                                        qmlName, instanceObject);
+                                        instanceObject);
 }
 
 } // namespace PySide::Qml
 
 enum class RegisterMode {
     Normal,
-    Anonymous,
-    Uncreatable,
     Singleton
 };
 
-static PyObject *qmlElementMacroHelper(PyObject *pyObj,
-                                       const char *decoratorName,
-                                       const char *typeName = nullptr,
-                                       RegisterMode mode = RegisterMode::Normal,
-                                       const char *noCreationReason = nullptr)
+namespace PySide::Qml {
+
+PyObject *qmlElementMacro(PyObject *pyObj, const char *decoratorName,
+                          const QByteArray &typeName)
 {
-    if (!PyType_Check(pyObj)) {
-        PyErr_Format(PyExc_TypeError, "This decorator can only be used on classes.");
+    auto *pyObjType = checkTypeObject(pyObj, decoratorName);
+    if (pyObjType == nullptr || !setClassInfo(pyObjType, qmlElementKey, typeName))
+        return nullptr;
+
+    if (!PySide::isQObjectDerived(pyObjType, false)) {
+        PyErr_Format(PyExc_TypeError,
+                     "%s can only be used with classes inherited from QObject, got %s.",
+                     decoratorName, pyObjType->tp_name);
         return nullptr;
     }
 
-    PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
-    if (typeName == nullptr)
-        typeName = pyObjType->tp_name;
-    if (!PySide::isQObjectDerived(pyObjType, false)) {
-        PyErr_Format(PyExc_TypeError, "This decorator can only be used with classes inherited from QObject, got %s.",
-                     pyObjType->tp_name);
-        return nullptr;
+    RegisterMode mode = RegisterMode::Normal;
+    const auto info = PySide::Qml::qmlTypeInfo(pyObj);
+    auto *registerObject = pyObj;
+    if (info) {
+        if (info->flags.testFlag(PySide::Qml::QmlTypeFlag::Singleton)) {
+            mode = RegisterMode::Singleton;
+            setSingletonClassInfo(pyObjType);
+        }
+        if (info->foreignType)
+            registerObject = reinterpret_cast<PyObject *>(info->foreignType);
     }
 
     const auto importDataO = getGlobalImportData(decoratorName);
@@ -450,60 +568,32 @@ static PyObject *qmlElementMacroHelper(PyObject *pyObj,
     const auto importData = importDataO.value();
 
     const int result = mode == RegisterMode::Singleton
-        ? PySide::Qml::qmlRegisterSingletonType(pyObj, importData,
-                                                typeName, nullptr,
-                                                true /* is QObject */,
-                                                false)
-        : PySide::Qml::qmlRegisterType(pyObj, importData,
-                                       mode != RegisterMode::Anonymous ? typeName : nullptr,
-                                       noCreationReason,
-                                       mode == RegisterMode::Normal);
+        ? PySide::Qml::qmlRegisterSingletonTypeV2(registerObject, pyObj, importData,
+                                                  nullptr, false)
+        : PySide::Qml::qmlRegisterType(registerObject, pyObj, importData);
 
     if (result == -1) {
         PyErr_Format(PyExc_TypeError, "%s: Failed to register type %s.",
-                     decoratorName, typeName);
-    }
-
-    return pyObj;
-}
-
-namespace PySide::Qml {
-
-PyObject *qmlElementMacro(PyObject *pyObj, const char *decoratorName,
-                          const char *typeName = nullptr)
-{
-    RegisterMode mode = RegisterMode::Normal;
-    const char *noCreationReason = nullptr;
-    const auto info = PySide::Qml::qmlTypeInfo(pyObj);
-    auto *registerObject = pyObj;
-    if (info) {
-        if (info->flags.testFlag(PySide::Qml::QmlTypeFlag::Singleton))
-            mode = RegisterMode::Singleton;
-        else if (info->flags.testFlag(PySide::Qml::QmlTypeFlag::Uncreatable))
-            mode = RegisterMode::Uncreatable;
-        noCreationReason = info->noCreationReason.constData();
-        if (info->foreignType)
-            registerObject = reinterpret_cast<PyObject *>(info->foreignType);
-    }
-    if (!qmlElementMacroHelper(registerObject, decoratorName, typeName, mode, noCreationReason))
+                     decoratorName, pyObjType->tp_name);
         return nullptr;
+    }
+
     return pyObj;
 }
 
 PyObject *qmlElementMacro(PyObject *pyObj)
 {
-    return qmlElementMacro(pyObj, "QmlElement");
+    return qmlElementMacro(pyObj, "QmlElement", "auto"_ba);
 }
 
 PyObject *qmlNamedElementMacro(PyObject *pyObj, const QByteArray &typeName)
 {
-    return qmlElementMacro(pyObj, "QmlNamedElement", qstrdup(typeName.constData()));
+    return qmlElementMacro(pyObj, "QmlNamedElement", typeName);
 }
 
 PyObject *qmlAnonymousMacro(PyObject *pyObj)
 {
-    return qmlElementMacroHelper(pyObj, "QmlAnonymous", nullptr,
-                                 RegisterMode::Anonymous);
+    return qmlElementMacro(pyObj, "QmlAnonymous",  "anonymous"_ba);
 }
 
 PyObject *qmlSingletonMacro(PyObject *pyObj)

@@ -42,8 +42,6 @@ QDebug operator<<(QDebug d, const QmlTypeInfo &i)
     d.noquote();
     d.nospace();
     d << "QmlTypeInfo(" << i.flags;
-    if (!i.noCreationReason.isEmpty())
-        d << ", noCreationReason=\"" << i.noCreationReason << '"';
     if (i.foreignType)
         d << ", foreignType=" << i.foreignType->tp_name;
     if (i.attachedType)

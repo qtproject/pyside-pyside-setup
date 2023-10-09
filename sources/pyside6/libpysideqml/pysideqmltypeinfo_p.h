@@ -19,8 +19,7 @@ namespace PySide::Qml {
 
 enum class QmlTypeFlag
 {
-    Singleton = 0x1,
-    Uncreatable = 0x2
+    Singleton = 0x1
 };
 
 Q_DECLARE_FLAGS(QmlTypeFlags, QmlTypeFlag)
@@ -30,7 +29,6 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(QmlTypeFlags)
 struct QmlTypeInfo
 {
     QmlTypeFlags flags;
-    QByteArray noCreationReason;
     PyTypeObject *foreignType = nullptr;
     PyTypeObject *attachedType = nullptr;
     PyTypeObject *extensionType = nullptr;

@@ -6,6 +6,8 @@
 
 #include <sbkpython.h>
 
+#include <QtCore/QByteArray>
+
 // The QmlUncreatable decorator modifies QmlElement to register an uncreatable
 // type. Due to the (reverse) execution order of decorators, it needs to follow
 // QmlElement.
@@ -15,5 +17,7 @@ extern "C"
 }
 
 void initQmlUncreatable(PyObject *module);
+
+void setUncreatableClassInfo(PyTypeObject *type, const QByteArray &reason);
 
 #endif // PYSIDEQMLUNCREATABLE_H
