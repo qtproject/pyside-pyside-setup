@@ -158,14 +158,9 @@ static int qmlRegisterType(PyObject *pyObj, const ImportData &importData,
 {
     using namespace Shiboken;
 
-    PyTypeObject *qobjectType = qObjectType();
-
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
-    if (!PySequence_Contains(pyObjType->tp_mro, reinterpret_cast<PyObject *>(qobjectType))) {
-        PyErr_Format(PyExc_TypeError, "A type inherited from %s expected, got %s.",
-                     qobjectType->tp_name, pyObjType->tp_name);
+    if (!isQObjectDerived(pyObjType, true))
         return -1;
-    }
 
     const QMetaObject *metaObject = PySide::retrieveMetaObject(pyObjType);
     Q_ASSERT(metaObject);
@@ -443,9 +438,9 @@ static PyObject *qmlElementMacroHelper(PyObject *pyObj,
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
     if (typeName == nullptr)
         typeName = pyObjType->tp_name;
-    if (!PySequence_Contains(pyObjType->tp_mro, reinterpret_cast<PyObject *>(qObjectType()))) {
+    if (!PySide::isQObjectDerived(pyObjType, false)) {
         PyErr_Format(PyExc_TypeError, "This decorator can only be used with classes inherited from QObject, got %s.",
-                     typeName);
+                     pyObjType->tp_name);
         return nullptr;
     }
 
@@ -457,7 +452,7 @@ static PyObject *qmlElementMacroHelper(PyObject *pyObj,
     const int result = mode == RegisterMode::Singleton
         ? PySide::Qml::qmlRegisterSingletonType(pyObj, importData,
                                                 typeName, nullptr,
-                                                PySide::isQObjectDerived(pyObjType, false),
+                                                true /* is QObject */,
                                                 false)
         : PySide::Qml::qmlRegisterType(pyObj, importData,
                                        mode != RegisterMode::Anonymous ? typeName : nullptr,
