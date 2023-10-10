@@ -127,21 +127,28 @@ class Config(BaseConfig):
                 wheel_shiboken_temp = self.get_value("qt", "wheel_shiboken")
                 self.wheel_shiboken = Path(wheel_shiboken_temp) if wheel_shiboken_temp else None
 
+            self.ndk_path = None
             if android_data.ndk_path:
+                # from cli
                 self.ndk_path = android_data.ndk_path
             else:
+                # from config
                 ndk_path_temp = self.get_value("buildozer", "ndk_path")
                 if ndk_path_temp:
                     self.ndk_path = Path(ndk_path_temp)
                 else:
-                    self.ndk_path = (ANDROID_DEPLOY_CACHE / "android-ndk"
+                    ndk_path_temp = (ANDROID_DEPLOY_CACHE / "android-ndk"
                                      / f"android-ndk-r{ANDROID_NDK_VERSION}")
-                    if not self.ndk_path.exists():
-                        logging.info("[DEPLOY] Use default NDK from buildoer")
+                    if ndk_path_temp.exists():
+                        self.ndk_path = ndk_path_temp
 
             if self.ndk_path:
                 print(f"Using Android NDK: {str(self.ndk_path)}")
+            else:
+                raise FileNotFoundError("[DEPLOY] Unable to find Android NDK. Please pass the NDK "
+                                        "path either from the CLI or from pysidedeploy.spec")
 
+            self.sdk_path = None
             if android_data.sdk_path:
                 self.sdk_path = android_data.sdk_path
             else:
@@ -149,8 +156,10 @@ class Config(BaseConfig):
                 if sdk_path_temp:
                     self.sdk_path = Path(sdk_path_temp)
                 else:
-                    self.sdk_path = ANDROID_DEPLOY_CACHE / "android-sdk"
-                    if not self.sdk_path.exists():
+                    sdk_path_temp = ANDROID_DEPLOY_CACHE / "android-sdk"
+                    if sdk_path_temp.exists():
+                        self.sdk_path = sdk_path_temp
+                    else:
                         logging.info("[DEPLOY] Use default SDK from buildozer")
 
             if self.sdk_path:

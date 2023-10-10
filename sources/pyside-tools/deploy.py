@@ -43,15 +43,13 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
          force: bool = False):
 
     logging.basicConfig(level=loglevel)
-
-    if not config_file and not main_file.exists():
-        print(dedent("""
+    if config_file and not config_file.exists() and not main_file.exists():
+        raise RuntimeError(dedent("""
             Directory does not contain main.py file.
             Please specify the main python entrypoint file or the config file.
             Run "pyside6-deploy desktop --help" to see info about cli options.
 
             pyside6-deploy exiting..."""))
-        return
 
     # Nuitka command to run
     command_str = None

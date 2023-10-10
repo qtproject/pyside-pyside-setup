@@ -29,7 +29,9 @@ from deploy_lib.android import (extract_and_copy_jar, get_wheel_android_arch,
              pyside6-android-deploy android -c /path/to/pysidedeploy.spec
 
 
-    Note: If --ndk-path and --sdk-path are not specified, the defaults from buildozer are used
+    Note: If --ndk-path and --sdk-path are not specified, the cache of the tool
+    `.pyside6_android_deploy` is checked in the user's HOME directory. If it is not found, the user
+    will have to manually download them.
 
     Prerequisities: Python main entrypoint file should be named "main.py"
 
@@ -87,10 +89,10 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
     main_file = Path.cwd() / "main.py"
     generated_files_path = None
     if not main_file.exists():
-        raise RuntimeError(dedent("""
-        [DEPLOY] For android deployment to work, the main entrypoint Python file should be named
-        'main.py' and it should be run from the application directory
-        """))
+        raise RuntimeError(("[DEPLOY] For Android deployment to work, the main"
+                            " entrypoint Python file should be named 'main.py'"
+                            " and it should be run from the application"
+                            " directory"))
 
     android_data = AndroidData(wheel_pyside=pyside_wheel, wheel_shiboken=shiboken_wheel,
                                ndk_path=ndk_path, sdk_path=sdk_path)
@@ -128,17 +130,24 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
         if not config.jars_dir or not Path(config.jars_dir).exists() and not dry_run:
             logging.info("[DEPLOY] Extract and copy jar files from PySide6 wheel to "
                          f"{generated_files_path}")
-            extract_and_copy_jar(wheel_path=config.wheel_pyside,
-                                 generated_files_path=generated_files_path)
-            config.jars_dir = (generated_files_path / "jar" / "PySide6" / "jar").resolve()
+            config.jars_dir = extract_and_copy_jar(wheel_path=config.wheel_pyside,
+                                                   generated_files_path=generated_files_path)
 
         # find architecture from wheel name
         if not config.arch:
             arch = get_wheel_android_arch(wheel=config.wheel_pyside)
             if not arch:
                 raise RuntimeError("[DEPLOY] PySide wheel corrupted. Wheel name should end with"
-                                  "platform name")
+                                   "platform name")
             config.arch = arch
+
+        # TODO: include qml files from pysidedeploy.spec rather than from extensions
+        # buildozer currently includes all the files with .qml extension
+
+        # init buildozer
+        Buildozer.dry_run = dry_run
+        logging.info("[DEPLOY] Creating buildozer.spec file")
+        Buildozer.initialize(pysidedeploy_config=config, generated_files_path=generated_files_path)
 
         # writing config file
         if not dry_run:
@@ -149,14 +158,6 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
             logging.info(f"[DEPLOY]: Config file  {config.config_file} created")
             return
 
-        # TODO: include qml files from pysidedeploy.spec rather than from extensions
-        # buildozer currently includes all the files with .qml extension
-
-        # init buildozer
-        Buildozer.dry_run = dry_run
-        logging.info("[DEPLOY] Creating buildozer.spec file")
-        Buildozer.initialize(pysidedeploy_config=config, generated_files_path=generated_files_path)
-
         # run buildozer
         logging.info("[DEPLOY] Running buildozer deployment")
         Buildozer.create_executable(config.mode)
@@ -166,7 +167,7 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
             buildozer_build_dir = config.project_dir / ".buildozer"
             if not buildozer_build_dir.exists():
                 logging.info(f"[DEPLOY] Unable to copy {buildozer_build_dir} to {generated_files_path}"
-                            f"{buildozer_build_dir} does not exist")
+                             f"{buildozer_build_dir} does not exist")
             logging.info(f"[DEPLOY] copy {buildozer_build_dir} to {generated_files_path}")
             shutil.move(buildozer_build_dir, generated_files_path)
 
@@ -219,11 +220,14 @@ if __name__ == "__main__":
                         required=not config_option_exists())
 
     parser.add_argument("--ndk-path", type=lambda p: Path(p).resolve(),
-                        help=("Path to Android Ndk. If omitted, the default from buildozer is used")
+                        help=("Path to Android NDK. If omitted, the tool's cache at "
+                              ".pyside6_android_deploy is checked to find the NDK")
                         )
 
     parser.add_argument("--sdk-path", type=lambda p: Path(p).resolve(),
-                        help=("Path to Android Sdk. If omitted, the default from buildozer is used")
+                        help=("Path to Android SDK. If omitted, the tool's cache at "
+                              ".pyside6_android_deploy is checked to find the SDK. Otherwise "
+                              "the default from buildozer is used.")
                         )
 
     parser.add_argument("--extra-ignore-dirs", type=str, help=HELP_EXTRA_IGNORE_DIRS)

@@ -30,9 +30,9 @@ def create_recipe(version: str, component: str, wheel_path: str, generated_files
     '''
     Create python_for_android recipe for PySide6 and shiboken6
     '''
-    qt_plugins  = []
+    qt_plugins = []
     if plugins:
-        #split plugins based on category
+        # split plugins based on category
         for plugin in plugins:
             plugin_category, plugin_name = plugin.split('_', 1)
             qt_plugins.append((plugin_category, plugin_name))
@@ -70,7 +70,7 @@ def extract_and_copy_jar(wheel_path: Path, generated_files_path: Path) -> str:
     jar_files = [file for file in archive.namelist() if file.startswith("PySide6/jar")]
     for file in jar_files:
         archive.extract(file, jar_path)
-    return jar_path
+    return (jar_path / "PySide6" / "jar").resolve() if jar_files else None
 
 
 def get_wheel_android_arch(wheel: Path):
@@ -89,11 +89,6 @@ def get_llvm_readobj(ndk_path: Path) -> Path:
     '''
     Return the path to llvm_readobj from the Android Ndk
     '''
-    if not ndk_path:
-        # fetch ndk path from buildozer
-        raise FileNotFoundError("[DEPLOY] Unable to find Ndk path. Please pass the Ndk path either"
-                                " from the CLI or from pysidedeploy.spec")
-
     # TODO: Requires change if Windows platform supports Android Deployment or if we
     # support host other than linux-x86_64
     return (ndk_path / "toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readobj")
