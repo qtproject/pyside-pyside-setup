@@ -85,6 +85,32 @@ static inline bool isQmlParserStatus(const QMetaObject *o)
     return inheritsFrom(o, "QPyQmlParserStatus");
 }
 
+static QByteArray getGlobalString(const char *name)
+{
+    PyObject *globalVar = PyDict_GetItemString(PyEval_GetGlobals(), name);
+
+    if (globalVar == nullptr || PyUnicode_Check(globalVar) == 0)
+        return {};
+
+    const char *stringValue = _PepUnicode_AsString(globalVar);
+    return stringValue != nullptr ? QByteArray(stringValue) : QByteArray{};
+}
+
+static int getGlobalInt(const char *name)
+{
+    PyObject *globalVar = PyDict_GetItemString(PyEval_GetGlobals(), name);
+
+    if (globalVar == nullptr || PyLong_Check(globalVar) == 0)
+        return -1;
+
+    long value = PyLong_AsLong(globalVar);
+
+    if (value > std::numeric_limits<int>::max() || value < std::numeric_limits<int>::min())
+        return -1;
+
+    return value;
+}
+
 namespace PySide::Qml {
 
 int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
@@ -334,44 +360,6 @@ int qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMa
 
 } // namespace PySide::Qml
 
-static std::string getGlobalString(const char *name)
-{
-    using Shiboken::AutoDecRef;
-
-    PyObject *globals = PyEval_GetGlobals();
-
-    AutoDecRef pyName(Py_BuildValue("s", name));
-
-    PyObject *globalVar = PyDict_GetItem(globals, pyName);
-
-    if (globalVar == nullptr || !PyUnicode_Check(globalVar))
-        return "";
-
-    const char *stringValue = _PepUnicode_AsString(globalVar);
-    return stringValue != nullptr ? stringValue : "";
-}
-
-static int getGlobalInt(const char *name)
-{
-    using Shiboken::AutoDecRef;
-
-    PyObject *globals = PyEval_GetGlobals();
-
-    AutoDecRef pyName(Py_BuildValue("s", name));
-
-    PyObject *globalVar = PyDict_GetItem(globals, pyName);
-
-    if (globalVar == nullptr || !PyLong_Check(globalVar))
-        return -1;
-
-    long value = PyLong_AsLong(globalVar);
-
-    if (value > std::numeric_limits<int>::max() || value < std::numeric_limits<int>::min())
-        return -1;
-
-    return value;
-}
-
 enum class RegisterMode {
     Normal,
     Anonymous,
@@ -399,11 +387,11 @@ static PyObject *qmlElementMacroHelper(PyObject *pyObj,
         return nullptr;
     }
 
-    std::string importName = getGlobalString("QML_IMPORT_NAME");
+    const auto importName = getGlobalString("QML_IMPORT_NAME");
     int majorVersion = getGlobalInt("QML_IMPORT_MAJOR_VERSION");
     int minorVersion = getGlobalInt("QML_IMPORT_MINOR_VERSION");
 
-    if (importName.empty()) {
+    if (importName.isEmpty()) {
         PyErr_Format(PyExc_TypeError, "You need specify QML_IMPORT_NAME in order to use %s.",
                      decoratorName);
         return nullptr;
@@ -419,7 +407,7 @@ static PyObject *qmlElementMacroHelper(PyObject *pyObj,
     if (minorVersion == -1)
         minorVersion = 0;
 
-    const char *uri = importName.c_str();
+    const char *uri = importName.constData();
     const int result = mode == RegisterMode::Singleton
         ? PySide::Qml::qmlRegisterSingletonType(pyObj, uri, majorVersion, minorVersion,
                                                 typeName, nullptr,
@@ -452,7 +440,7 @@ PyObject *qmlElementMacro(PyObject *pyObj, const char *decoratorName,
             mode = RegisterMode::Singleton;
         else if (info->flags.testFlag(PySide::Qml::QmlTypeFlag::Uncreatable))
             mode = RegisterMode::Uncreatable;
-        noCreationReason = info->noCreationReason.c_str();
+        noCreationReason = info->noCreationReason.constData();
         if (info->foreignType)
             registerObject = reinterpret_cast<PyObject *>(info->foreignType);
     }
@@ -466,9 +454,9 @@ PyObject *qmlElementMacro(PyObject *pyObj)
     return qmlElementMacro(pyObj, "QmlElement");
 }
 
-PyObject *qmlNamedElementMacro(PyObject *pyObj, const char *typeName)
+PyObject *qmlNamedElementMacro(PyObject *pyObj, const QByteArray &typeName)
 {
-    return qmlElementMacro(pyObj, "QmlNamedElement", qstrdup(typeName));
+    return qmlElementMacro(pyObj, "QmlNamedElement", qstrdup(typeName.constData()));
 }
 
 PyObject *qmlAnonymousMacro(PyObject *pyObj)

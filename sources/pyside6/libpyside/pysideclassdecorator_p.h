@@ -8,7 +8,7 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/qtclasshelpermacros.h>
+#include <QtCore/QByteArray>
 
 #include <array>
 #include <string>
@@ -64,7 +64,7 @@ public:
     /// Init function that retrieves the string parameter using convertToString()
     int tp_init(PyObject *self, PyObject *args, PyObject *kwds) override;
 
-    const std::string &string() const { return m_string; }
+    QByteArray string() const { return m_string; }
 
 protected:
     /// Helper function that retrieves the string parameter
@@ -74,7 +74,7 @@ protected:
     int convertToString(PyObject *self, PyObject *args);
 
 private:
-    std::string m_string;
+    QByteArray m_string;
 };
 
 /// Base class for private objects of class decorator with a type parameter

@@ -31,7 +31,7 @@ PyObject *PySideQmlNamedElementPrivate::tp_call(PyObject *self, PyObject *args, 
         return nullptr;
 
     auto *data = DecoratorPrivate::get<PySideQmlNamedElementPrivate>(self);
-    auto *result = PySide::Qml::qmlNamedElementMacro(klass, data->string().c_str());
+    auto *result = PySide::Qml::qmlNamedElementMacro(klass, data->string());
     Py_XINCREF(result);
     return result;
 }

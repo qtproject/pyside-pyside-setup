@@ -7,7 +7,7 @@
 #include "pysideqobject.h"
 
 #include <basewrapper.h>
-#include <sbkcppstring.h>
+#include <sbkstring.h>
 
 namespace PySide::ClassDecorator {
 
@@ -63,7 +63,7 @@ int StringDecoratorPrivate::convertToString(PyObject *self, PyObject *args)
         if (PyUnicode_Check(arg)) {
             auto *pData = DecoratorPrivate::get<StringDecoratorPrivate>(self);
             result = 0;
-            Shiboken::String::toCppString(arg, &(pData->m_string));
+            pData->m_string.assign(Shiboken::String::toCString(arg));
         }
     }
     return result;

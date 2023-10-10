@@ -6,10 +6,10 @@
 
 #include <sbkpython.h>
 
+#include <QtCore/QByteArray>
 #include <QtCore/QFlags>
 
 #include <memory>
-#include <string>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 QT_FORWARD_DECLARE_CLASS(QObject)
@@ -30,7 +30,7 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(QmlTypeFlags)
 struct QmlTypeInfo
 {
     QmlTypeFlags flags;
-    std::string noCreationReason;
+    QByteArray noCreationReason;
     PyTypeObject *foreignType = nullptr;
     PyTypeObject *attachedType = nullptr;
     PyTypeObject *extensionType = nullptr;

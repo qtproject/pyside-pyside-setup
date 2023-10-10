@@ -6,12 +6,14 @@
 
 #include <sbkpython.h>
 
+#include <QtCore/QByteArray>
+
 PyTypeObject *qObjectType();
 
 
 namespace PySide::Qml {
 
-PyObject *qmlNamedElementMacro(PyObject *pyObj, const char *typeName);
+PyObject *qmlNamedElementMacro(PyObject *pyObj, const QByteArray &typeName);
 
 }
 
