@@ -111,7 +111,7 @@ class BuildozerConfig(BaseConfig):
         self.set_value("app", "android.add_jars", ",".join(jars))
         init_classes = ",".join(init_classes)
 
-        #extra arguments specific to Qt
+        # extra arguments specific to Qt
         extra_args = (f"--qt-libs={modules} --load-local-libs={local_libs}"
                       f" --init-classes={init_classes}")
         self.set_value("app", "p4a.extra_args", extra_args)
