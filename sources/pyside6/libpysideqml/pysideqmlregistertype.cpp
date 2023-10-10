@@ -8,6 +8,7 @@
 #include "pysideqmlextended_p.h"
 
 #include <limits>
+#include <optional>
 
 // shiboken
 #include <shiboken.h>
@@ -111,11 +112,49 @@ static int getGlobalInt(const char *name)
     return value;
 }
 
+struct ImportData
+{
+    QByteArray importName;
+    int majorVersion = 0;
+    int minorVersion = 0;
+
+    QTypeRevision toTypeRevision() const;
+};
+
+QTypeRevision ImportData::toTypeRevision() const
+{
+    return QTypeRevision::fromVersion(majorVersion, minorVersion);
+}
+
+std::optional<ImportData> getGlobalImportData(const char *decoratorName)
+{
+    ImportData result{getGlobalString("QML_IMPORT_NAME"),
+                      getGlobalInt("QML_IMPORT_MAJOR_VERSION"),
+                      getGlobalInt("QML_IMPORT_MINOR_VERSION")};
+
+    if (result.importName.isEmpty()) {
+        PyErr_Format(PyExc_TypeError, "You need specify QML_IMPORT_NAME in order to use %s.",
+                     decoratorName);
+        return {};
+    }
+
+    if (result.majorVersion == -1) {
+        PyErr_Format(PyExc_TypeError, "You need specify QML_IMPORT_MAJOR_VERSION in order to use %s.",
+                     decoratorName);
+        return {};
+    }
+
+    // Specifying a minor version is optional
+    if (result.minorVersion == -1)
+        result.minorVersion = 0;
+    return result;
+}
+
 namespace PySide::Qml {
 
-int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
-                    int versionMinor, const char *qmlName, const char *noCreationReason,
-                    bool creatable)
+static int qmlRegisterType(PyObject *pyObj, const ImportData &importData,
+                           const char *qmlName, const char *noCreationReason,
+                           bool creatable)
 {
     using namespace Shiboken;
 
@@ -154,8 +193,8 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
         pyObj, // userdata
         QString::fromUtf8(noCreationReason),
         nullptr, // createValueType (Remove in Qt 7)
-        uri,
-        QTypeRevision::fromVersion(versionMajor, versionMinor), // version
+        importData.importName.constData(),
+        importData.toTypeRevision(), // version
         qmlName, // elementName
         metaObject,
         attachedInfo.factory, // attachedPropertiesFunction
@@ -194,9 +233,17 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor,
     return qmlTypeId;
 }
 
-int qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versionMajor,
-                             int versionMinor, const char *qmlName, PyObject *callback,
-                             bool isQObject, bool hasCallback)
+int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int versionMinor,
+                    const char *qmlName, const char *noCreationReason,
+                    bool creatable)
+{
+    return qmlRegisterType(pyObj, {uri, versionMajor, versionMinor}, qmlName,
+                           noCreationReason, creatable);
+}
+
+static int qmlRegisterSingletonType(PyObject *pyObj, const ImportData &importData,
+                                    const char *qmlName, PyObject *callback,
+                                    bool isQObject, bool hasCallback)
 {
     using namespace Shiboken;
 
@@ -238,8 +285,8 @@ int qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versionMajor,
 
     QQmlPrivate::RegisterSingletonType type {
         QQmlPrivate::RegisterType::StructVersion::Base, // structVersion
-        uri,
-        QTypeRevision::fromVersion(versionMajor, versionMinor), // version
+        importData.importName.constData(),
+        importData.toTypeRevision(), // version
         qmlName, // typeName
         {}, // scriptApi
         {}, // qObjectApi
@@ -313,9 +360,16 @@ int qmlRegisterSingletonType(PyObject *pyObj, const char *uri, int versionMajor,
     return QQmlPrivate::qmlregister(QQmlPrivate::SingletonRegistration, &type);
 }
 
-int qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMajor,
-                                 int versionMinor, const char *qmlName,
-                                 PyObject *instanceObject)
+int qmlRegisterSingletonType(PyObject *pyObj,const char *uri,
+                             int versionMajor, int versionMinor, const char *qmlName,
+                             PyObject *callback, bool isQObject, bool hasCallback)
+{
+    return qmlRegisterSingletonType(pyObj, {uri, versionMajor, versionMinor}, qmlName,
+                                    callback, isQObject, hasCallback);
+}
+
+static int qmlRegisterSingletonInstance(PyObject *pyObj, const ImportData &importData,
+                                        const char *qmlName, PyObject *instanceObject)
 {
     using namespace Shiboken;
 
@@ -343,8 +397,8 @@ int qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMa
 
     QQmlPrivate::RegisterSingletonType type {
         QQmlPrivate::RegisterType::StructVersion::Base, // structVersion
-        uri,
-        QTypeRevision::fromVersion(versionMajor, versionMinor), // version
+        importData.importName.constData(),
+        importData.toTypeRevision(), // version
         qmlName, // typeName
         {}, // scriptApi
         registrationFunctor, // qObjectApi
@@ -356,6 +410,14 @@ int qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMa
     };
 
     return QQmlPrivate::qmlregister(QQmlPrivate::SingletonRegistration, &type);
+}
+
+int qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMajor,
+                                 int versionMinor, const char *qmlName,
+                                 PyObject *instanceObject)
+{
+    return qmlRegisterSingletonInstance(pyObj, {uri, versionMajor, versionMinor},
+                                        qmlName, instanceObject);
 }
 
 } // namespace PySide::Qml
@@ -387,33 +449,17 @@ static PyObject *qmlElementMacroHelper(PyObject *pyObj,
         return nullptr;
     }
 
-    const auto importName = getGlobalString("QML_IMPORT_NAME");
-    int majorVersion = getGlobalInt("QML_IMPORT_MAJOR_VERSION");
-    int minorVersion = getGlobalInt("QML_IMPORT_MINOR_VERSION");
-
-    if (importName.isEmpty()) {
-        PyErr_Format(PyExc_TypeError, "You need specify QML_IMPORT_NAME in order to use %s.",
-                     decoratorName);
+    const auto importDataO = getGlobalImportData(decoratorName);
+    if (!importDataO.has_value())
         return nullptr;
-    }
+    const auto importData = importDataO.value();
 
-    if (majorVersion == -1) {
-       PyErr_Format(PyExc_TypeError, "You need specify QML_IMPORT_MAJOR_VERSION in order to use %s.",
-                    decoratorName);
-       return nullptr;
-    }
-
-    // Specifying a minor version is optional
-    if (minorVersion == -1)
-        minorVersion = 0;
-
-    const char *uri = importName.constData();
     const int result = mode == RegisterMode::Singleton
-        ? PySide::Qml::qmlRegisterSingletonType(pyObj, uri, majorVersion, minorVersion,
+        ? PySide::Qml::qmlRegisterSingletonType(pyObj, importData,
                                                 typeName, nullptr,
                                                 PySide::isQObjectDerived(pyObjType, false),
                                                 false)
-        : PySide::Qml::qmlRegisterType(pyObj, uri, majorVersion, minorVersion,
+        : PySide::Qml::qmlRegisterType(pyObj, importData,
                                        mode != RegisterMode::Anonymous ? typeName : nullptr,
                                        noCreationReason,
                                        mode == RegisterMode::Normal);
