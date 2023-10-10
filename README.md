@@ -116,10 +116,10 @@ using `setup.py build`:
 
 ## Requirements
 
- * Python 3.7+ is supported,
+ * Python 3.8+ is supported (for Qt 6.6+)
  * CMake: Specify the path to cmake with `--cmake` option or add cmake to the
    system path.
- * Qt 6.2+ is supported. Specify the path to qtpaths with `--qtpaths` option or
+ * Qt 6.x is supported. Specify the path to qtpaths with `--qtpaths` option or
    add `qtpaths6` to the system path.
 
 ### Optional

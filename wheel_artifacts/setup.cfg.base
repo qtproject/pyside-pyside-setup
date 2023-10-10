@@ -33,11 +33,11 @@ classifiers =
     Programming Language :: C++
     Programming Language :: Python
     Programming Language :: Python :: 3
-    Programming Language :: Python :: 3.7
     Programming Language :: Python :: 3.8
     Programming Language :: Python :: 3.9
     Programming Language :: Python :: 3.10
     Programming Language :: Python :: 3.11
+    Programming Language :: Python :: 3.12
     Topic :: Database
     Topic :: Software Development
     Topic :: Software Development :: Code Generators
@@ -47,9 +47,9 @@ classifiers =
 
 [options]
 packages = find:
-python_requires = >=3.7, <3.12
+python_requires = >=3.8, <3.13
 include_package_data = True
 
 [bdist_wheel]
-py_limited_api = cp37
+py_limited_api = cp38
 plat_name = {tag}
