@@ -54,6 +54,10 @@ add_subdirectory(support)
 add_subdirectory(tools/metaobjectdump)
 add_subdirectory(tools/pyside6-deploy)
 
+if(UNIX AND NOT APPLE)
+    add_subdirectory(tools/pyside6-android-deploy)
+endif()
+
 if (NOT DISABLE_QtQuick)
     add_subdirectory(tools/pyside6-qml)
 endif()

@@ -8,19 +8,8 @@ import sys
 import os
 import importlib
 from pathlib import Path
-from configparser import ConfigParser
 from unittest.mock import patch
 from unittest import mock
-
-
-class ConfigFile:
-    def __init__(self, config_file: Path) -> None:
-        self.config_file = config_file
-        self.parser = ConfigParser(comment_prefixes="/", allow_no_value=True)
-        self.parser.read(self.config_file)
-
-    def get_value(self, section: str, key: str):
-        return str(self.parser.get(section, key))
 
 
 def is_pyenv_python():
@@ -133,7 +122,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
         self.assertEqual(original_output, self.expected_run_cmd)
 
         # # test config file contents
-        config_obj = ConfigFile(config_file=self.config_file)
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
         self.assertEqual(config_obj.get_value("app", "input_file"), "tetrix.py")
         self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
@@ -144,6 +133,13 @@ class TestPySide6DeployWidgets(DeployTestBase):
         self.assertEqual(config_obj.get_value("nuitka", "extra_args"), equ_value)
         self.assertEqual(config_obj.get_value("qt", "excluded_qml_plugins"), "")
         self.config_file.unlink()
+
+    def testErrorReturns(self):
+        # main file and config file does not exists
+        fake_main_file = self.main_file.parent / "main.py"
+        with self.assertRaises(RuntimeError) as context:
+            self.deploy.main(main_file=fake_main_file, config_file=self.config_file)
+        self.assertTrue("Directory does not contain main.py file." in str(context.exception))
 
 
 class TestPySide6DeployQml(DeployTestBase):
@@ -202,7 +198,7 @@ class TestPySide6DeployQml(DeployTestBase):
             self.assertEqual(init_result, None)
 
         # test config file contents
-        config_obj = ConfigFile(config_file=self.config_file)
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
         self.assertEqual(config_obj.get_value("app", "input_file"), "main.py")
         self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
@@ -283,6 +279,10 @@ class TestPySide6DeployWebEngine(DeployTestBase):
 
         if sys.platform.startswith("linux"):
             expected_run_cmd += f" --linux-icon={str(self.linux_icon)}"
+        elif sys.platform == "darwin":
+            expected_run_cmd += f" --macos-app-icon={str(self.macos_icon)}"
+        elif sys.platform == "win32":
+            expected_run_cmd += f" --windows-icon-from-ico={str(self.win_icon)}"
 
         config_file = self.temp_example_webenginequick / "pysidedeploy.spec"
 
@@ -298,7 +298,7 @@ class TestPySide6DeployWebEngine(DeployTestBase):
             self.assertEqual(mock_qmlimportscanner.call_count, 2)
 
         # test config file contents
-        config_obj = ConfigFile(config_file=config_file)
+        config_obj = self.deploy_lib.BaseConfig(config_file=config_file)
         self.assertEqual(config_obj.get_value("app", "input_file"), "quicknanobrowser.py")
         self.assertEqual(config_obj.get_value("qt", "qml_files"), ",".join(qml_files))
         self.assertEqual(
