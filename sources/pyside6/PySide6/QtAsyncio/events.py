@@ -77,6 +77,10 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop):
         self._thread = QThread.currentThread()
 
         self._closed = False
+
+        self._quit_from_inside = False
+        self._quit_from_outside = False
+
         self._asyncgens: typing.Set[collections.abc.AsyncGenerator] = set()
 
         # Starting with Python 3.11, this must be an instance of
@@ -88,6 +92,8 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop):
         self._future_to_complete: typing.Optional[futures.QAsyncioFuture] = None
 
         self._debug = bool(os.getenv("PYTHONASYNCIODEBUG", False))
+
+        self._application.aboutToQuit.connect(self._about_to_quit_cb)
 
     # Running and stopping the loop
 
@@ -130,12 +136,17 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop):
         self._application.exec()
         asyncio.events._set_running_loop(None)
 
+    def _about_to_quit_cb(self):
+        if not self._quit_from_inside:
+            self._quit_from_outside = True
+
     def stop(self) -> None:
         if self._future_to_complete is not None:
             if self._future_to_complete.done():
                 self._future_to_complete = None
             else:
                 return
+        self._quit_from_inside = True
         self._application.quit()
 
     def is_running(self) -> bool:
@@ -468,7 +479,7 @@ class QAsyncioHandle():
         self._start()
 
     def _schedule_event(self, timeout: int, func: typing.Callable) -> None:
-        if not self._loop.is_closed():
+        if not self._loop.is_closed() and not self._loop._quit_from_outside:
             QTimer.singleShot(timeout, func)
 
     def _start(self) -> None:
