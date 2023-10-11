@@ -218,11 +218,13 @@ if(NOT PYTHON_SITE_PACKAGES)
     shiboken_internal_set_python_site_packages()
 endif()
 
-set(GENERATOR_EXTRA_FLAGS --generator-set=shiboken
-                          --enable-parent-ctor-heuristic
-                          --enable-pyside-extensions
-                          --enable-return-value-heuristic
-                          --use-isnull-as-nb-bool)
+set(GENERATOR_EXTRA_FLAGS
+    ${SHIBOKEN_GENERATOR_EXTRA_FLAGS}
+    --generator-set=shiboken
+    --enable-parent-ctor-heuristic
+    --enable-pyside-extensions
+    --enable-return-value-heuristic
+    --use-isnull-as-nb-bool)
 use_protected_as_public_hack()
 
 # Build with Address sanitizer enabled if requested. This may break things, so use at your own risk.
