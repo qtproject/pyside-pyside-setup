@@ -1,18 +1,24 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-import re
 import logging
+import re
 import tempfile
 import xml.etree.ElementTree as ET
+import zipfile
+import PySide6
+from pathlib import Path
 from typing import List
+
 from pkginfo import Wheel
 
-import zipfile
-from pathlib import Path
+from .. import MAJOR_VERSION, BaseConfig, Config, run_command
+from . import (create_recipe, find_lib_dependencies, find_qtlibs_in_wheel,
+               get_llvm_readobj)
 
-from .. import run_command, BaseConfig, Config, MAJOR_VERSION
-from . import get_llvm_readobj, find_lib_dependencies, find_qtlibs_in_wheel, create_recipe
+# They all start with `Qt` as the prefix. Removing this prefix and getting the actual
+# module name
+ALL_PYSIDE_MODULES = [module[2:] for module in PySide6.__all__]
 
 
 class BuildozerConfig(BaseConfig):
@@ -312,6 +318,9 @@ class BuildozerConfig(BaseConfig):
                 if module not in pysidedeploy_config.modules:
                     dependent_modules.add(module)
 
+        # check if the PySide6 binary for the Qt module actually exists
+        # eg: libQt6QmlModels.so exists and it includes QML types. Hence, it makes no
+        dependent_modules = [module for module in dependent_modules if module in ALL_PYSIDE_MODULES]
         dependent_modules_str = ",".join(dependent_modules)
         logging.info("[DEPLOY] The following extra dependencies were found:"
                      f" {dependent_modules_str}")
