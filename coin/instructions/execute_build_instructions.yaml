@@ -42,7 +42,7 @@ instructions:
          Failed to execute build instructions on macOS
   - type: EnvironmentVariable
     variableName: PYSIDE_SIGNING_DIR
-    variableValue: "{{.AgentWorkingDir}}\\pyside\\{{.Env.TESTED_MODULE_COIN}}\\build\\qfpa-p3.7\\package_for_wheels"
+    variableValue: "{{.AgentWorkingDir}}\\pyside\\{{.Env.TESTED_MODULE_COIN}}\\build\\qfpa-p3.8\\package_for_wheels"
     enable_if:
         condition: property
         property: host.osVersion
