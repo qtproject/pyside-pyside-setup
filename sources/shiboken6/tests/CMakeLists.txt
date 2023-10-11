@@ -21,6 +21,7 @@ else()
     message(STATUS "Tests will be generated using the protected hack!")
     set(GENERATOR_EXTRA_FLAGS )
 endif()
+list(APPEND GENERATOR_EXTRA_FLAGS ${SHIBOKEN_GENERATOR_EXTRA_FLAGS})
 
 add_subdirectory(minimalbinding)
 if(NOT DEFINED MINIMAL_TESTS)
