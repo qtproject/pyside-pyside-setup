@@ -25,6 +25,9 @@ accept_configuration:
         - condition: property  # Windows on Arm
           property: target.arch
           not_equals_value: ARM64
+        - condition: property
+          property: features
+          not_contains_value: DebianPackaging
     - condition: and
       conditions:
         - condition: property  # No cross compilation
