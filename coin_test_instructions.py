@@ -104,7 +104,7 @@ def run_test_instructions():
         if (os.environ.get('HOST_OSVERSION_COIN')).startswith('windows_10'):
             call_testrunner("3.10.0", str(testRun))
         else:
-            call_testrunner("3.7.9", str(testRun))
+            call_testrunner("3.8.1", str(testRun))
     elif CI_HOST_OS == "Linux":
         call_testrunner("3.8", str(testRun))
     else:
