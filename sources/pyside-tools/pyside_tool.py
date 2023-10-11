@@ -2,15 +2,15 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-import sys
+import importlib
 import os
-from pathlib import Path
 import subprocess
+import sys
 import sysconfig
+from pathlib import Path
+from subprocess import PIPE, Popen
 
-from subprocess import Popen, PIPE
 import PySide6 as ref_mod
-
 
 VIRTUAL_ENV = "VIRTUAL_ENV"
 
@@ -53,7 +53,6 @@ def qt_tool_wrapper(qt_tool, args, libexec=False):
         command = ' '.join(cmd)
         print(f"Error: {msg}\nwhile executing '{command}'")
     sys.exit(proc.returncode)
-
 
 
 def pyside_script_wrapper(script_name):
@@ -195,7 +194,15 @@ def deploy():
 
 
 def android_deploy():
-    pyside_script_wrapper("android_deploy.py")
+    if not sys.platform == "linux":
+        print("pyside6-android-deploy only works from a Linux host")
+    else:
+        dependent_packages = ["jinja2", "pkginfo"]
+        for dependent_package in dependent_packages:
+            if not bool(importlib.util.find_spec(dependent_package)):
+                command = [sys.executable, "-m", "pip", "install", dependent_package]
+                subprocess.run(command)
+        pyside_script_wrapper("android_deploy.py")
 
 
 if __name__ == "__main__":
