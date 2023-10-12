@@ -763,6 +763,7 @@ def module_QtWebEngineCore() -> ModuleData:
     data.extra_dirs.append("Qt/resources")
     if sys.platform == "win32":
         data.extra_files.append("resources/qtwebengine*.pak")
+        data.extra_files.append("resources/v8_context_snapshot*.*")
         data.extra_files.append("QtWebEngineProcess.exe")
     else:
         data.extra_files.append("Qt/libexec/QtWebEngineProcess")
