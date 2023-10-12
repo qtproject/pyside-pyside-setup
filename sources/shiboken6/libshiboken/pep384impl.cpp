@@ -157,9 +157,6 @@ check_PyTypeObject_valid()
     Py_DECREF(probe_tp_mro);
 }
 
-// PYSIDE-1797: This must be a runtime decision.
-#include "pep384_issue33738.cpp"
-
 #endif // Py_LIMITED_API
 
 /*****************************************************************************
