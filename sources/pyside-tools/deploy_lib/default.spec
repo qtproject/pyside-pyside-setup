@@ -16,6 +16,9 @@ exec_directory =
 # Path to .pyproject project file
 project_file =
 
+# Application icon
+icon =
+
 [python]
 
 # Python path

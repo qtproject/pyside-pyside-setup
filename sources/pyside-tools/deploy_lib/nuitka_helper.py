@@ -18,8 +18,17 @@ class Nuitka:
     def __init__(self, nuitka):
         self.nuitka = nuitka
 
+    @staticmethod
+    def icon_option():
+        if sys.platform == "linux":
+            return "--linux-icon"
+        elif sys.platform == "win32":
+            return "--windows-icon-from-ico"
+        else:
+            return "--macos-app-icon"
+
     def create_executable(self, source_file: Path, extra_args: str, qml_files: List[Path],
-                          excluded_qml_plugins, dry_run: bool):
+                          excluded_qml_plugins: List[str], icon: str, dry_run: bool):
         extra_args = extra_args.split()
         qml_args = []
         if qml_files:
@@ -51,10 +60,7 @@ class Nuitka:
             f"--output-dir={output_dir}",
         ]
         command.extend(extra_args + qml_args)
-
-        if sys.platform == "linux":
-            linux_icon = str(Path(__file__).parent / "pyside_icon.jpg")
-            command.append(f"--linux-onefile-icon={linux_icon}")
+        command.append(f"{self.__class__.icon_option()}={icon}")
 
         command_str, _ = run_command(command=command, dry_run=dry_run)
         return command_str

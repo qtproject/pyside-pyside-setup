@@ -6,11 +6,11 @@ import logging
 import warnings
 from configparser import ConfigParser
 from pathlib import Path
-from typing import List
 
 from project import ProjectData
 
 from .commands import run_qmlimportscanner
+from . import DEFAULT_APP_ICON
 
 # Some QML plugins like QtCore are excluded from this list as they don't contribute much to
 # executable size. Excluding them saves the extra processing of checking for them in files
@@ -81,6 +81,13 @@ class Config(BaseConfig):
         )
 
         self.title = self.get_value("app", "title")
+
+        # set application icon
+        config_icon = self.get_value("app", "icon")
+        if config_icon:
+            self.icon = str(Path(config_icon).resolve())
+        else:
+            self.icon = DEFAULT_APP_ICON
 
         self.project_dir = None
         if self.get_value("app", "project_dir"):
@@ -165,6 +172,15 @@ class Config(BaseConfig):
     def title(self, title):
         self._title = title
         self.set_value("app", "title", title)
+
+    @property
+    def icon(self):
+        return self._icon
+
+    @icon.setter
+    def icon(self, icon):
+        self._icon = icon
+        self.set_value("app", "icon", icon)
 
     @property
     def source_file(self):

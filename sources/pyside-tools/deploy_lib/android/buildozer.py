@@ -130,6 +130,9 @@ class BuildozerConfig(BaseConfig):
         # change final apk/aab path
         self.set_value("buildozer", "bin_dir", str(pysidedeploy_config.exe_dir.resolve()))
 
+        # set application icon
+        self.set_value("app", "icon.filename", pysidedeploy_config.icon)
+
         self.update_config()
 
     def __get_dependency_files(self, modules: List[str], arch: str) -> List[zipfile.Path]:

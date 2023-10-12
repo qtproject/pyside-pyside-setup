@@ -61,7 +61,9 @@ class DeployTestBase(LongSortedOptionTest):
         cls.temp_dir = tempfile.mkdtemp()
         cls.current_dir = Path.cwd()
         tools_path = cls.pyside_root / "sources" / "pyside-tools"
-        cls.linux_onefile_icon = tools_path / "deploy_lib" / "pyside_icon.jpg"
+        cls.win_icon = tools_path / "deploy_lib" / "pyside_icon.ico"
+        cls.linux_icon = tools_path / "deploy_lib" / "pyside_icon.jpg"
+        cls.macos_icon = tools_path / "deploy_lib" / "pyside_icon.icns"
         if tools_path not in sys.path:
             sys.path.append(str(cls.pyside_root / "sources" / "pyside-tools"))
         cls.deploy_lib = importlib.import_module("deploy_lib")
@@ -102,7 +104,12 @@ class TestPySide6DeployWidgets(DeployTestBase):
             f" --noinclude-qt-translations"
         )
         if sys.platform.startswith("linux"):
-            self.expected_run_cmd += f" --linux-onefile-icon={str(self.linux_onefile_icon)}"
+            self.expected_run_cmd += f" --linux-icon={str(self.linux_icon)}"
+        elif sys.platform == "darwin":
+            self.expected_run_cmd += f" --macos-app-icon={str(self.macos_icon)}"
+        elif sys.platform == "win32":
+            self.expected_run_cmd += f" --windows-icon-from-ico={str(self.win_icon)}"
+
         if is_pyenv_python():
             self.expected_run_cmd += " --static-libpython=no"
         self.config_file = self.temp_example_widgets / "pysidedeploy.spec"
@@ -177,7 +184,12 @@ class TestPySide6DeployQml(DeployTestBase):
                 )
 
         if sys.platform.startswith("linux"):
-            self.expected_run_cmd += f" --linux-onefile-icon={str(self.linux_onefile_icon)}"
+            self.expected_run_cmd += f" --linux-icon={str(self.linux_icon)}"
+        elif sys.platform == "darwin":
+            self.expected_run_cmd += f" --macos-app-icon={str(self.macos_icon)}"
+        elif sys.platform == "win32":
+            self.expected_run_cmd += f" --windows-icon-from-ico={str(self.win_icon)}"
+
         if is_pyenv_python():
             self.expected_run_cmd += " --static-libpython=no"
         self.config_file = self.temp_example_qml / "pysidedeploy.spec"
@@ -270,7 +282,7 @@ class TestPySide6DeployWebEngine(DeployTestBase):
                 )
 
         if sys.platform.startswith("linux"):
-            expected_run_cmd += f" --linux-onefile-icon={str(self.linux_onefile_icon)}"
+            expected_run_cmd += f" --linux-icon={str(self.linux_icon)}"
 
         config_file = self.temp_example_webenginequick / "pysidedeploy.spec"
 
