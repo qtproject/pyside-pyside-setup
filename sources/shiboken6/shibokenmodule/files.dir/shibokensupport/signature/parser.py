@@ -71,13 +71,10 @@ def _get_flag_enum_option():
             flag = False        # turn a forbidden option into an error
     p = f"\n    *** Python is at version {'.'.join(map(str, pyminver or (0,)))} now."
     q = f"\n    *** PySide is at version {'.'.join(map(str, ver[:2]))} now."
-    # PYSIDE-1797: Emit a warning when we may remove pep384_issue33738.cpp
-    if pyminver and pyminver >= (3, 8):
-        warnings.warn(f"{p} The file pep384_issue33738.cpp should be removed ASAP! ***")
     # _PepUnicode_AsString: Fix a broken promise
     if pyminver and pyminver >= (3, 10):
         warnings.warn(f"{p} _PepUnicode_AsString can now be replaced by PyUnicode_AsUTF8! ***")
-    # PYSIDE-1960: Emit a warning when we may remove pep384_issue33738.cpp
+    # PYSIDE-1960: Emit a warning when we may remove bufferprocs_py37.(cpp|h)
     if pyminver and pyminver >= (3, 11):
         warnings.warn(f"{p} The files bufferprocs_py37.(cpp|h) should be removed ASAP! ***")
     # PYSIDE-1735: Emit a warning when we should maybe evict forgiveness mode

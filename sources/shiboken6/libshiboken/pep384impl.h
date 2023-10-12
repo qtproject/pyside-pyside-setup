@@ -107,20 +107,11 @@ typedef struct _typeobject {
      && (Py_TYPE(o)->tp_is_gc == NULL || Py_TYPE(o)->tp_is_gc(o)))
 #endif
 
-// This was a macro error in the limited API from the beginning.
-// It was fixed in Python master, but did make it only into Python 3.8 .
-
-// PYSIDE-1797: This must be a runtime decision.
-//              Remove that when the minimum Python version is 3.8,
-//              because the macro PepIndex_Check bug was fixed then.
-/// FIXME: Remove PepIndex_Check and pep384_issue33738.cpp when Python 3.7 is gone.
-LIBSHIBOKEN_API int PepIndex_Check(PyObject *obj);
-
 LIBSHIBOKEN_API PyObject *_PepType_Lookup(PyTypeObject *type, PyObject *name);
 
 #else // Py_LIMITED_API
 
-#define PepIndex_Check(obj)               PyIndex_Check(obj)
+#define PyIndex_Check(obj)                PyIndex_Check(obj)
 #define _PepType_Lookup(type, name)       _PyType_Lookup(type, name)
 
 #endif // Py_LIMITED_API
