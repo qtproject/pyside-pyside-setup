@@ -47,13 +47,18 @@ if __name__ == '__main__':
 
     argument_parser = ArgumentParser(description="Quick Nano Browser",
                                      formatter_class=RawTextHelpFormatter)
+    argument_parser.add_argument("--single-process", "-s", action="store_true",
+                                 help="Run in single process mode (trouble shooting)")
     argument_parser.add_argument("url", help="The URL to open",
                                  nargs='?', type=str)
     options = argument_parser.parse_args()
 
     url = url_from_user_input(options.url) if options.url else QUrl("https://www.qt.io")
 
-    app = QGuiApplication([])
+    app_args = sys.argv
+    if options.single_process:
+        app_args.extend(["--webEngineArgs", "--single-process"])
+    app = QGuiApplication(app_args)
     engine = QQmlApplicationEngine()
     qml_file = os.fspath(Path(__file__).resolve().parent / 'ApplicationRoot.qml')
     engine.load(QUrl.fromLocalFile(qml_file))

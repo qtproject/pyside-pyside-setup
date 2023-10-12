@@ -18,12 +18,17 @@ import data.rc_simplebrowser
 if __name__ == "__main__":
     parser = ArgumentParser(description="Qt Widgets Web Browser",
                             formatter_class=RawTextHelpFormatter)
+    parser.add_argument("--single-process", "-s", action="store_true",
+                        help="Run in single process mode (trouble shooting)")
     parser.add_argument("url", type=str, nargs="?", help="URL")
     args = parser.parse_args()
 
     QCoreApplication.setOrganizationName("QtExamples")
 
-    app = QApplication(sys.argv)
+    app_args = sys.argv
+    if args.single_process:
+        app_args.extend(["--webEngineArgs", "--single-process"])
+    app = QApplication(app_args)
     app.setWindowIcon(QIcon(":AppLogoColor.png"))
     QLoggingCategory.setFilterRules("qt.webenginecontext.debug=true")
 
