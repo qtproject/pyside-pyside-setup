@@ -182,6 +182,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument("-c", "--config-file", type=lambda p: Path(p).absolute(),
+                        default=(Path.cwd() / "pysidedeploy.spec"),
                         help="Path to the .spec config file")
 
     parser.add_argument(

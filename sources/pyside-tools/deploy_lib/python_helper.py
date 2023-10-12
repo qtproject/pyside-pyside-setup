@@ -202,7 +202,8 @@ class PythonExecutable:
                         extra_args=extra_args,
                         qml_files=config.qml_files,
                         excluded_qml_plugins=config.excluded_qml_plugins,
+                        icon=config.icon,
                         dry_run=self.dry_run,
-                    )
+                        )
 
         return command_str

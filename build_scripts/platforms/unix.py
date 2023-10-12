@@ -140,7 +140,8 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
                 src = f"{{install_dir}}/bin/{script_dir}"
                 target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script_dir}"
                 # Exclude subdirectory tests
-                copydir(src, target, _filter=["*.py", "*.spec", "*.jpg"], recursive=False, _vars=_vars)
+                copydir(src, target, _filter=["*.py", "*.spec", "*.jpg", "*.icns", "*.ico"],
+                        recursive=False, _vars=_vars)
 
             # <install>/bin/* -> {st_package_name}/
             executables.extend(copydir(
