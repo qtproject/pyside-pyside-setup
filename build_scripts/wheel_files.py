@@ -989,6 +989,7 @@ def module_QtLocation() -> ModuleData:
 
 def module_QtAsyncio() -> ModuleData:
     data = ModuleData("Asyncio")
+    data.extra_dirs.append("QtAsyncio")
     return data
 
 
