@@ -88,7 +88,7 @@ class WebView(QWebEngineView):
         elif termStatus == QWebEnginePage.KilledTerminationStatus:
             status = "Render process killed"
 
-        m = f"Render process exited with code: {statusCode}\nDo you want to reload the page?"
+        m = f"Render process exited with code: {statusCode:#x}\nDo you want to reload the page?"
         btn = QMessageBox.question(self.window(), status, m)
         if btn == QMessageBox.Yes:
             QTimer.singleShot(0, self.reload)
