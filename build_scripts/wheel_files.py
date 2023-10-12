@@ -173,6 +173,7 @@ def wheel_files_pyside_essentials() -> List[ModuleData]:
         module_QtSvg(),
         module_QtSvgWidgets(),
         module_QtUiTools(),
+        module_QtExampleIcons(),
         # Only for plugins
         module_QtWayland(),
         # there are no bindings for these modules, but their binaries are
@@ -988,4 +989,9 @@ def module_QtLocation() -> ModuleData:
 
 def module_QtAsyncio() -> ModuleData:
     data = ModuleData("Asyncio")
+    return data
+
+
+def module_QtExampleIcons() -> ModuleData:
+    data = ModuleData("ExampleIcons")
     return data
