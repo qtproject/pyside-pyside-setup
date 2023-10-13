@@ -132,7 +132,8 @@ static GetReceiverResult getReceiver(QObject *source, const char *signal,
                                                  result.usingGlobalReceiver).toLatin1();
         const QMetaObject *metaObject = result.receiver->metaObject();
         result.slotIndex = metaObject->indexOfSlot(result.callbackSig.constData());
-        if (PyMethod_Check(callback) != 0 && result.slotIndex != -1) {
+        if (PyMethod_Check(callback) != 0 && result.slotIndex != -1
+            && result.slotIndex < metaObject->methodOffset()) {
              // Find the class in which the slot is declared.
              while (result.slotIndex < metaObject->methodOffset())
                  metaObject = metaObject->superClass();
