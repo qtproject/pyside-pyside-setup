@@ -15,11 +15,18 @@ struct propertyobject {
     PyObject *prop_set;
     PyObject *prop_del;
     PyObject *prop_doc;
-#if PY_VERSION_HEX >= 0x030A0000
+    int getter_doc;
+};
+
+struct propertyobject310 {
+    PyObject_HEAD
+    PyObject *prop_get;
+    PyObject *prop_set;
+    PyObject *prop_del;
+    PyObject *prop_doc;
     // Note: This is a problem with Limited API: We have no direct access.
     //       You need to pick it from runtime info.
     PyObject *prop_name;
-#endif
    int getter_doc;
 };
 
