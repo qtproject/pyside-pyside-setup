@@ -218,8 +218,11 @@ if(NOT PYTHON_SITE_PACKAGES)
     shiboken_internal_set_python_site_packages()
 endif()
 
+shiboken_get_debug_level(debug_level)
+
 set(GENERATOR_EXTRA_FLAGS
     ${SHIBOKEN_GENERATOR_EXTRA_FLAGS}
+    ${debug_level}
     --generator-set=shiboken
     --enable-parent-ctor-heuristic
     --enable-pyside-extensions

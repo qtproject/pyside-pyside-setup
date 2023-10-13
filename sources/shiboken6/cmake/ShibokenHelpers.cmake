@@ -828,3 +828,15 @@ macro(find_libclang)
             "You will likely need to add it manually to PATH to ensure the build succeeds.")
     endif()
 endmacro()
+
+# Allow setting a shiboken debug level from the the build system or from the environment
+# to all shiboken invocations.
+function(shiboken_get_debug_level out_var)
+    set(debug_level "")
+    if(SHIBOKEN_DEBUG_LEVEL)
+        set(debug_level "--debug-level=${SHIBOKEN_DEBUG_LEVEL}")
+    elseif(DEFINED $ENV{SHIBOKEN_DEBUG_LEVEL})
+        set(debug_level "--debug-level=$ENV{SHIBOKEN_DEBUG_LEVEL}")
+    endif()
+    set(${out_var} "${debug_level}" PARENT_SCOPE)
+endfunction()
