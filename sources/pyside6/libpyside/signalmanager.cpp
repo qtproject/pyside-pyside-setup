@@ -658,7 +658,9 @@ int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signa
     if (methodIndex == -1) {
         SbkObject *self = Shiboken::BindingManager::instance().retrieveWrapper(source);
         if (!Shiboken::Object::hasCppWrapper(self)) {
-            qWarning() << "Invalid Signal signature:" << signature;
+            qWarning().noquote().nospace() << __FUNCTION__
+                << ": Cannot add dynamic method \"" << signature << "\" (" << type
+                << ") to " << source << ": No Wrapper found.";
             return -1;
         }
         auto *pySelf = reinterpret_cast<PyObject *>(self);
@@ -676,8 +678,8 @@ int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signa
         if (type == QMetaMethod::Slot) {
             qCWarning(lcPySide).noquote().nospace()
                 << "Warning: Registering dynamic slot \""
-                << signature << "\" on " << source->metaObject()->className()
-                << ". Consider annotating with " << slotSignature(signature);
+                << signature << "\" on \"" << source->metaObject()->className()
+                << "\". Consider annotating with " << slotSignature(signature);
         }
 
         return type == QMetaMethod::Signal
