@@ -68,6 +68,8 @@ PyTypeObject *PyClassProperty_TypeF()
     if (type == nullptr) {
         // Provide the same `tp_getset`, which is not inherited.
         PyClassProperty_slots[0].pfunc = PyProperty_Type.tp_getset;
+        if (_PepRuntimeVersion() >= 0x030A00)
+            PyClassProperty_spec.basicsize = sizeof(propertyobject310);
         type = SbkType_FromSpec(&PyClassProperty_spec);
     }
     return type;
