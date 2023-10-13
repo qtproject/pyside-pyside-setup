@@ -53,4 +53,4 @@ target_link_libraries(PySidePlugin PRIVATE
                       Qt::Widgets
                       ${SHIBOKEN_PYTHON_LIBRARIES})
 
-install(TARGETS PySidePlugin LIBRARY DESTINATION "plugins/designer")
+install(TARGETS PySidePlugin LIBRARY DESTINATION "${QT6_INSTALL_PLUGINS}/designer")

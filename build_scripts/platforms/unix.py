@@ -212,7 +212,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
         # <source>/pyside6/{st_package_name}/QtAsyncio/* ->
         #   <setup>/{st_package_name}/QtAsyncio/*
         copydir(
-            f"{{build_dir}}/{PYSIDE}/{{st_package_name}}/QtAsyncio",
+            f"{{site_packages_dir}}/{{st_package_name}}/QtAsyncio",
             "{st_build_dir}/{st_package_name}/QtAsyncio",
             _vars=_vars)
 
