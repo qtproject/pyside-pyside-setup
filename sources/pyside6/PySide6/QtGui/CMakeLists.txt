@@ -7,7 +7,17 @@ qt_wrap_cpp(QPYTEXTOBJECT_MOC "${pyside6_SOURCE_DIR}/qpytextobject.h")
 
 set(QtGui_DROPPED_ENTRIES)
 
+# Exclude sources that have clashing static helper functions named "iterator_..."
+set(QtGui_SRC_UNITY_EXCLUDED_SRC
+    ${QtGui_GEN_DIR}/qtextframe_iterator_wrapper.cpp
+    ${QtGui_GEN_DIR}/qtextblock_iterator_wrapper.cpp
+)
+
+set_property(SOURCE ${QtGui_SRC_UNITY_EXCLUDED_SRC}
+             PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
+
 set(QtGui_SRC
+${QtGui_SRC_UNITY_EXCLUDED_SRC}
 ${QtGui_GEN_DIR}/qabstractfileiconprovider_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_paintcontext_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_selection_wrapper.cpp
@@ -160,7 +170,6 @@ ${QtGui_GEN_DIR}/qsurface_wrapper.cpp
 ${QtGui_GEN_DIR}/qsurfaceformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qsyntaxhighlighter_wrapper.cpp
 ${QtGui_GEN_DIR}/qtabletevent_wrapper.cpp
-${QtGui_GEN_DIR}/qtextblock_iterator_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextblock_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextblockformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextblockgroup_wrapper.cpp
@@ -172,7 +181,6 @@ ${QtGui_GEN_DIR}/qtextdocumentfragment_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextdocumentwriter_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextfragment_wrapper.cpp
-${QtGui_GEN_DIR}/qtextframe_iterator_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextframe_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextframeformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qtextimageformat_wrapper.cpp
