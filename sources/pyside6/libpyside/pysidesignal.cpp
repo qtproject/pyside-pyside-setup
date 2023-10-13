@@ -679,8 +679,8 @@ static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
         Py_DECREF(result);
     }
 
-    PyErr_Format(PyExc_RuntimeError, "Failed to disconnect signal %s.",
-                 source->d->signature.constData());
+    PyErr_Format(PyExc_RuntimeError, "Failed to disconnect (%S) from signal \"%s\".",
+                 slot, source->d->signature.constData());
     return nullptr;
 }
 
