@@ -14,6 +14,8 @@ if(NOT DEFINED MINIMAL_TESTS)
     add_subdirectory(libother)
 endif()
 
+shiboken_get_debug_level(debug_level)
+
 if(WIN32 OR DEFINED AVOID_PROTECTED_HACK)
     message(STATUS "Tests will be generated avoiding the protected hack!")
     set(GENERATOR_EXTRA_FLAGS --avoid-protected-hack)
@@ -21,7 +23,7 @@ else()
     message(STATUS "Tests will be generated using the protected hack!")
     set(GENERATOR_EXTRA_FLAGS )
 endif()
-list(APPEND GENERATOR_EXTRA_FLAGS ${SHIBOKEN_GENERATOR_EXTRA_FLAGS})
+list(APPEND GENERATOR_EXTRA_FLAGS ${SHIBOKEN_GENERATOR_EXTRA_FLAGS} ${debug_level})
 
 add_subdirectory(minimalbinding)
 if(NOT DEFINED MINIMAL_TESTS)
