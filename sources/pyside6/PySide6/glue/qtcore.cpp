@@ -1628,13 +1628,17 @@ pthread_cleanup_pop(0);
 // @snippet qthread_pthread_cleanup_uninstall
 
 // @snippet qlibraryinfo_build
-#if defined(Py_LIMITED_API)
-auto suffix = PyUnicode_FromString(" [limited API]");
 auto oldResult = pyResult;
-pyResult = PyUnicode_Concat(pyResult, suffix);
-Py_DECREF(oldResult);
-Py_DECREF(suffix);
+const auto version = _PepRuntimeVersion();
+pyResult = PyUnicode_FromFormat(
+#ifdef Py_LIMITED_API
+                                "%U [Python limited API %d.%d.%d]",
+#else
+                                "%U [Python %d.%d.%d]",
 #endif
+                                oldResult, (version >> 16) & 0xFF,
+                                (version >> 8) & 0xFF, version & 0xFF);
+Py_DECREF(oldResult);
 // @snippet qlibraryinfo_build
 
 // @snippet qsharedmemory_data_readonly
