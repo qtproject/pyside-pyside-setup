@@ -179,6 +179,13 @@ static HeaderPaths gppInternalIncludePaths(const QString &compiler)
         return result;
     const QByteArrayList stdErrLines = stdErr.split('\n');
     bool isIncludeDir = false;
+
+    if (ReportHandler::isDebug(ReportHandler::MediumDebug))
+        qCInfo(lcShiboken()).noquote().nospace()
+            << "gppInternalIncludePaths:\n    compiler: " << compiler
+            << "\n    stdOut: " << stdOut
+            << "\n    stdErr: " << stdErr;
+
     for (const QByteArray &line : stdErrLines) {
         if (isIncludeDir) {
             if (line.startsWith(QByteArrayLiteral("End of search list"))) {
