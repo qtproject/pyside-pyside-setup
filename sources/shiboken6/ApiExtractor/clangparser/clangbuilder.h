@@ -19,7 +19,7 @@ public:
     Builder();
     ~Builder();
 
-    void setSystemIncludes(const QStringList &systemIncludes);
+    void setForceProcessSystemIncludes(const QStringList &systemIncludes);
 
     bool visitLocation(const QString &fileName, LocationType locationType) const override;
 

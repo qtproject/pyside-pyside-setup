@@ -112,6 +112,39 @@ macro(create_pyside_module)
     # Transform the path separators into something shiboken understands.
     make_path(shiboken_include_dirs ${shiboken_include_dir_list})
 
+    set(force_process_system_include_paths_list "")
+    # When building against system Qt (as it happens with yocto / Boot2Qt), the Qt headers are
+    # considered system headers by clang_Location_isInSystemHeader, and thus shiboken will not
+    # process them.
+    #
+    # We do want to process them.
+    #
+    # Tell shiboken to consider them as special typesystem system include paths, which ensures
+    # the types are processed and extracted.
+    #
+    # This option is opt-in because it might cause problems if there are other system headers
+    # installed in the same location as the Qt ones, resulting in processing more non-Qt system
+    # types that might not be supported by shiboken.
+    if(PYSIDE_TREAT_QT_INCLUDE_DIRS_AS_NON_SYSTEM)
+        list(APPEND force_process_system_include_paths_list
+            ${qt_platform_includes}
+            ${qt_core_includes})
+    endif()
+
+    # Allow passing extra non system inlcude dirs.
+    if(SHIBOKEN_FORCE_PROCESS_SYSTEM_INCLUDE_PATHS)
+        list(APPEND force_process_system_include_paths_list
+            ${SHIBOKEN_FORCE_PROCESS_SYSTEM_INCLUDE_PATHS})
+    endif()
+
+    # Transform the path separators into something shiboken understands.
+    make_path(force_process_system_include_paths ${force_process_system_include_paths_list})
+
+    if(force_process_system_include_paths)
+        set(force_process_system_include_paths
+            "--force-process-system-include-paths=${force_process_system_include_paths}")
+    endif()
+
     get_filename_component(pyside_binary_dir ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
 
     # Install module glue files.
@@ -136,6 +169,7 @@ macro(create_pyside_module)
         $<TARGET_FILE:Shiboken6::shiboken6>
         ${GENERATOR_EXTRA_FLAGS}
         "--include-paths=${shiboken_include_dirs}"
+        "${force_process_system_include_paths}"
         "--typesystem-paths=${pyside_binary_dir}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${${module_TYPESYSTEM_PATH}}"
         --output-directory=${CMAKE_CURRENT_BINARY_DIR}
         --license-file=${CMAKE_CURRENT_SOURCE_DIR}/../licensecomment.txt

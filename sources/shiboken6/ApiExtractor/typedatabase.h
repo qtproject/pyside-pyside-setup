@@ -89,8 +89,8 @@ public:
 
     IncludeList extraIncludes(const QString &className) const;
 
-    const QStringList &systemIncludes() const;
-    void addSystemInclude(const QString &name);
+    const QStringList &forceProcessSystemIncludes() const;
+    void addForceProcessSystemInclude(const QString &name);
 
     void addInlineNamespaceLookups(const NamespaceTypeEntryCPtr &n);
 

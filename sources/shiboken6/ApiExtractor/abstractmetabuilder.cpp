@@ -449,7 +449,7 @@ FileModelItem AbstractMetaBuilderPrivate::buildDom(QByteArrayList arguments,
                                                    unsigned clangFlags)
 {
     clang::Builder builder;
-    builder.setSystemIncludes(TypeDatabase::instance()->systemIncludes());
+    builder.setForceProcessSystemIncludes(TypeDatabase::instance()->forceProcessSystemIncludes());
     if (addCompilerSupportArguments) {
         if (level == LanguageLevel::Default)
             level = clang::emulatedCompilerLanguageLevel();

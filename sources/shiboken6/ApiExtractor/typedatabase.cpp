@@ -122,6 +122,9 @@ QList<OptionDescription> TypeDatabase::options()
         {u"-T<path>"_s, {} },
         {u"typesystem-paths="_s + OptionsParser::pathSyntax(),
          u"Paths used when searching for typesystems"_s},
+        {u"force-process-system-include-paths="_s + OptionsParser::pathSyntax(),
+         u"Include paths that are considered as system headers by the C++ parser, but should still "
+         "be processed to extract types (e.g. Qt include paths in a yocto sysroot)"_s},
         {u"keywords=keyword1[,keyword2,...]"_s,
          u"A comma-separated list of keywords for conditional typesystem parsing"_s},
     };
@@ -130,7 +133,7 @@ QList<OptionDescription> TypeDatabase::options()
 struct TypeDatabaseOptions
 {
     QStringList m_dropTypeEntries;
-    QStringList m_systemIncludes;
+    QStringList m_forceProcessSystemIncludes;
     QStringList m_typesystemKeywords;
     QStringList m_typesystemPaths;
     bool m_suppressWarnings = true;
@@ -199,6 +202,11 @@ bool TypeDatabaseOptionsParser::handleOption(const QString &key, const QString &
 
     if (key == u"typesystem-paths") {
         m_options->m_typesystemPaths += value.split(QDir::listSeparator());
+        return true;
+    }
+
+    if (key == u"force-process-system-include-paths") {
+        m_options->m_forceProcessSystemIncludes += value.split(QDir::listSeparator());
         return true;
     }
 
@@ -447,14 +455,14 @@ IncludeList TypeDatabase::extraIncludes(const QString& className) const
     return typeEntry ? typeEntry->extraIncludes() :  IncludeList();
 }
 
-const QStringList &TypeDatabase::systemIncludes() const
+const QStringList &TypeDatabase::forceProcessSystemIncludes() const
 {
-    return d->m_systemIncludes;
+    return d->m_forceProcessSystemIncludes;
 }
 
-void TypeDatabase::addSystemInclude(const QString &name)
+void TypeDatabase::addForceProcessSystemInclude(const QString &name)
 {
-    d->m_systemIncludes.append(name);
+    d->m_forceProcessSystemIncludes.append(name);
 }
 
 // Add a lookup for the short name excluding inline namespaces
