@@ -216,8 +216,8 @@ public:
     ArgumentModelItem m_currentArgument;
     VariableModelItem m_currentField;
     TemplateTypeAliasModelItem m_currentTemplateTypeAlias;
-    QStringList m_systemIncludes; // files, like "memory"
-    QStringList m_systemIncludePaths; // paths, like "/usr/include/Qt/"
+    QStringList m_forceProcessSystemIncludes; // files, like "memory"
+    QStringList m_forceProcessSystemIncludePaths; // paths, like "/usr/include/Qt/"
     QString m_usingTypeRef; // Base classes in "using Base::member;"
     bool m_withinUsingDeclaration = false;
 
@@ -850,10 +850,16 @@ BuilderPrivate::SpecialSystemHeader
         break;
     }
 
-    if (m_systemIncludes.contains(baseName))
+    // When building against system Qt (as it happens with yocto / Boot2Qt), the Qt headers are
+    // considered system headers by clang_Location_isInSystemHeader, and shiboken will not
+    // process them. We need to explicitly process them by checking against the list of
+    // include paths that were passed to shiboken's --force-process-system-include-paths option
+    // or specified via the <system-include> xml tag.
+    if (m_forceProcessSystemIncludes.contains(baseName))
         return SpecialSystemHeader::WhiteListed;
 
-    if (std::any_of(m_systemIncludePaths.cbegin(), m_systemIncludePaths.cend(),
+    if (std::any_of(m_forceProcessSystemIncludePaths.cbegin(),
+                    m_forceProcessSystemIncludePaths.cend(),
                     [fileName](const QString &p) { return fileName.startsWith(p); })) {
         return SpecialSystemHeader::WhiteListedPath;
     }
@@ -866,13 +872,13 @@ bool Builder::visitLocation(const QString &fileName, LocationType locationType) 
     return locationType != LocationType::System || d->visitHeader(fileName);
 }
 
-void Builder::setSystemIncludes(const QStringList &systemIncludes)
+void Builder::setForceProcessSystemIncludes(const QStringList &systemIncludes)
 {
     for (const auto &i : systemIncludes) {
         if (i.endsWith(u'/'))
-            d->m_systemIncludePaths.append(i);
+            d->m_forceProcessSystemIncludePaths.append(i);
         else
-            d->m_systemIncludes.append(i);
+            d->m_forceProcessSystemIncludes.append(i);
     }
 }
 

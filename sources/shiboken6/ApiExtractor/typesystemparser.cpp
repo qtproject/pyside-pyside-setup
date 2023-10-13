@@ -3097,7 +3097,7 @@ bool TypeSystemParser::parseSystemInclude(const ConditionalStreamReader &,
         m_error = msgMissingAttribute(fileNameAttribute());
         return false;
     }
-    TypeDatabase::instance()->addSystemInclude(attributes->takeAt(index).value().toString());
+    TypeDatabase::instance()->addForceProcessSystemInclude(attributes->takeAt(index).value().toString());
     return true;
 }
 

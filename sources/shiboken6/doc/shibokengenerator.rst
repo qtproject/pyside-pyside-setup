@@ -226,6 +226,12 @@ Options
 ``-F<path>, --framework-include-paths=<path>[:<path>:...]``
     Framework include paths used by the C++ parser
 
+.. _force-process-system-include-paths:
+
+``--force-process-system-include-paths=<path>[:<path>:...]``
+    Include paths that are considered as system headers by the C++ parser,
+    but should still be processed to extract types
+
 .. _language-level:
 
 ``--language-level=, -std=<level>``
