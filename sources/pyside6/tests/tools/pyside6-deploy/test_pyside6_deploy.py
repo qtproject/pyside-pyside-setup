@@ -23,34 +23,47 @@ class ConfigFile:
         return str(self.parser.get(section, key))
 
 
-class TestPySide6Deploy(unittest.TestCase):
+def is_pyenv_python():
+    pyenv_root = os.environ.get("PYENV_ROOT")
+
+    if pyenv_root and (resolved_exe := str(Path(sys.executable).resolve())):
+        return resolved_exe.startswith(pyenv_root)
+    return False
+
+
+class LongSortedOptionTest(unittest.TestCase):
+    @staticmethod
+    def _option_prepare(s):
+        """
+        Take a string and return a list obtained by text.split().
+        Options starting with "--" are also sorted."
+        """
+        items = s.split()
+        for idx in range(len(items)):
+            if items[idx].startswith("--"):
+                return items[:idx] + sorted(items[idx:])
+        return items
+
+    def assertEqual(self, text_a, text_b):
+        if (not isinstance(text_a, str) or not isinstance(text_b, str)
+                or (len(text_a) < 50 and len(text_b) < 50)):
+            return super().assertEqual(text_a, text_b)
+        sort_a = self._option_prepare(text_a)
+        sort_b = self._option_prepare(text_b)
+        return super().assertEqual(sort_a, sort_b)
+
+
+class DeployTestBase(LongSortedOptionTest):
     @classmethod
     def setUpClass(cls):
-        # PYSIDE-2230: A temporary patch that avoids the pyenv error.
-        #              The final solution is too much for this quick fix.
-        if os.environ.get("PYENV_ROOT"):
-            del os.environ["PYENV_ROOT"]
         cls.pyside_root = Path(__file__).parents[5].resolve()
-        example_root = cls.pyside_root / "examples"
-        example_widgets = example_root / "widgets" / "widgets" / "tetrix"
-        example_qml = example_root / "qml" / "editingmodel"
-        example_webenginequick = example_root / "webenginequick" / "nanobrowser"
+        cls.example_root = cls.pyside_root / "examples"
         cls.temp_dir = tempfile.mkdtemp()
-        cls.temp_example_widgets = Path(
-            shutil.copytree(example_widgets, Path(cls.temp_dir) / "tetrix")
-        ).resolve()
-        cls.temp_example_qml = Path(
-            shutil.copytree(example_qml, Path(cls.temp_dir) / "editingmodel")
-        ).resolve()
-        cls.temp_example_webenginequick = Path(
-            shutil.copytree(example_webenginequick, Path(cls.temp_dir) / "nanobrowser")
-        ).resolve()
         cls.current_dir = Path.cwd()
-        cls.linux_onefile_icon = (
-            cls.pyside_root / "sources" / "pyside-tools" / "deploy_lib" / "pyside_icon.jpg"
-        )
-
-        sys.path.append(str(cls.pyside_root / "sources" / "pyside-tools"))
+        tools_path = cls.pyside_root / "sources" / "pyside-tools"
+        cls.linux_onefile_icon = tools_path / "deploy_lib" / "pyside_icon.jpg"
+        if tools_path not in sys.path:
+            sys.path.append(str(cls.pyside_root / "sources" / "pyside-tools"))
         cls.deploy_lib = importlib.import_module("deploy_lib")
         cls.deploy = importlib.import_module("deploy")
         sys.modules["deploy"] = cls.deploy
@@ -61,7 +74,25 @@ class TestPySide6Deploy(unittest.TestCase):
         # print no outputs to stdout
         sys.stdout = mock.MagicMock()
 
-    def setUpWidgets(self):
+    @classmethod
+    def tearDownClass(cls) -> None:
+        shutil.rmtree(Path(cls.temp_dir))
+
+    def tearDown(self) -> None:
+        super().tearDown()
+        os.chdir(self.current_dir)
+
+
+class TestPySide6DeployWidgets(DeployTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        example_widgets = cls.example_root / "widgets" / "widgets" / "tetrix"
+        cls.temp_example_widgets = Path(
+            shutil.copytree(example_widgets, Path(cls.temp_dir) / "tetrix")
+        ).resolve()
+
+    def setUp(self):
         os.chdir(self.temp_example_widgets)
         self.main_file = self.temp_example_widgets / "tetrix.py"
         self.deployment_files = self.temp_example_widgets / "deployment"
@@ -72,20 +103,20 @@ class TestPySide6Deploy(unittest.TestCase):
         )
         if sys.platform.startswith("linux"):
             self.expected_run_cmd += f" --linux-onefile-icon={str(self.linux_onefile_icon)}"
+        if is_pyenv_python():
+            self.expected_run_cmd += " --static-libpython=no"
         self.config_file = self.temp_example_widgets / "pysidedeploy.spec"
 
     def testWidgetDryRun(self):
         # Checking for dry run commands is equivalent to mocking the
         # subprocess.check_call() in commands.py as the the dry run command
         # is the command being run.
-        self.setUpWidgets()
         original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
         self.assertEqual(original_output, self.expected_run_cmd)
 
     def testWidgetConfigFile(self):
         # includes both dry run and config_file tests
 
-        self.setUpWidgets()
         # init
         init_result = self.deploy.main(self.main_file, init=True, force=True)
         self.assertEqual(init_result, None)
@@ -101,13 +132,23 @@ class TestPySide6Deploy(unittest.TestCase):
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
         self.assertEqual(config_obj.get_value("python", "packages"), "nuitka==1.5.4,ordered_set,zstandard")
         self.assertEqual(config_obj.get_value("qt", "qml_files"), "")
-        self.assertEqual(
-            config_obj.get_value("nuitka", "extra_args"), "--quiet --noinclude-qt-translations=True"
-        )
+        equ_base = "--quiet --noinclude-qt-translations=True"
+        equ_value = equ_base + " --static-libpython=no" if is_pyenv_python() else equ_base
+        self.assertEqual(config_obj.get_value("nuitka", "extra_args"), equ_value)
         self.assertEqual(config_obj.get_value("qt", "excluded_qml_plugins"), "")
         self.config_file.unlink()
 
-    def setUpQml(self):
+
+class TestPySide6DeployQml(DeployTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        example_qml = cls.example_root / "qml" / "editingmodel"
+        cls.temp_example_qml = Path(
+            shutil.copytree(example_qml, Path(cls.temp_dir) / "editingmodel")
+        ).resolve()
+
+    def setUp(self):
         os.chdir(self.temp_example_qml)
         self.main_file = self.temp_example_qml / "main.py"
         self.deployment_files = self.temp_example_qml / "deployment"
@@ -137,11 +178,11 @@ class TestPySide6Deploy(unittest.TestCase):
 
         if sys.platform.startswith("linux"):
             self.expected_run_cmd += f" --linux-onefile-icon={str(self.linux_onefile_icon)}"
+        if is_pyenv_python():
+            self.expected_run_cmd += " --static-libpython=no"
         self.config_file = self.temp_example_qml / "pysidedeploy.spec"
 
     def testQmlConfigFile(self):
-        self.setUpQml()
-
         # create config file
         with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:
             mock_qmlimportscanner.return_value = ["QtQuick"]
@@ -155,9 +196,9 @@ class TestPySide6Deploy(unittest.TestCase):
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
         self.assertEqual(config_obj.get_value("python", "packages"), "nuitka==1.5.4,ordered_set,zstandard")
         self.assertEqual(config_obj.get_value("qt", "qml_files"), "main.qml,MovingRectangle.qml")
-        self.assertEqual(
-            config_obj.get_value("nuitka", "extra_args"), "--quiet --noinclude-qt-translations=True"
-        )
+        equ_base = "--quiet --noinclude-qt-translations=True"
+        equ_value = equ_base + " --static-libpython=no" if is_pyenv_python() else equ_base
+        self.assertEqual(config_obj.get_value("nuitka", "extra_args"), equ_value)
         self.assertEqual(
             config_obj.get_value("qt", "excluded_qml_plugins"),
             "QtCharts,QtQuick3D,QtSensors,QtTest,QtWebEngine",
@@ -165,7 +206,6 @@ class TestPySide6Deploy(unittest.TestCase):
         self.config_file.unlink()
 
     def testQmlDryRun(self):
-        self.setUpQml()
         with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:
             mock_qmlimportscanner.return_value = ["QtQuick"]
             original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
@@ -173,12 +213,21 @@ class TestPySide6Deploy(unittest.TestCase):
             self.assertEqual(mock_qmlimportscanner.call_count, 1)
 
     def testMainFileDryRun(self):
-        self.setUpQml()
         with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:
             mock_qmlimportscanner.return_value = ["QtQuick"]
             original_output = self.deploy.main(Path.cwd() / "main.py", dry_run=True, force=True)
             self.assertEqual(original_output, self.expected_run_cmd)
             self.assertEqual(mock_qmlimportscanner.call_count, 1)
+
+
+class TestPySide6DeployWebEngine(DeployTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        example_webenginequick = cls.example_root / "webenginequick" / "nanobrowser"
+        cls.temp_example_webenginequick = Path(
+            shutil.copytree(example_webenginequick, Path(cls.temp_dir) / "nanobrowser")
+        ).resolve()
 
     # this test case retains the QtWebEngine dlls
     def testWebEngineQuickDryRun(self):
@@ -244,14 +293,6 @@ class TestPySide6Deploy(unittest.TestCase):
             config_obj.get_value("qt", "excluded_qml_plugins"),
             "QtCharts,QtQuick3D,QtSensors,QtTest",
         )
-
-    def tearDown(self) -> None:
-        super().tearDown()
-        os.chdir(self.current_dir)
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        shutil.rmtree(Path(cls.temp_dir))
 
 
 if __name__ == "__main__":
