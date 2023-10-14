@@ -79,8 +79,9 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
                                 packages="packages")
 
     # required by Nuitka for pyenv Python
-    if python.is_pyenv_python():
-        config.extra_args += " --static-libpython=no"
+    add_arg = " --static-libpython=no"
+    if python.is_pyenv_python() and add_arg not in config.extra_args:
+        config.extra_args += add_arg
 
     # writing config file
     # in the case of --dry-run, we use default.spec as reference. Do not save the changes
