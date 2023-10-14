@@ -26,6 +26,10 @@ class ConfigFile:
 class TestPySide6Deploy(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # PYSIDE-2230: A temporary patch that avoids the pyenv error.
+        #              The final solution is too much for this quick fix.
+        if os.environ.get("PYENV_ROOT"):
+            del os.environ["PYENV_ROOT"]
         cls.pyside_root = Path(__file__).parents[5].resolve()
         example_root = cls.pyside_root / "examples"
         example_widgets = example_root / "widgets" / "widgets" / "tetrix"

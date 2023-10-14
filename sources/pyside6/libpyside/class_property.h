@@ -27,7 +27,7 @@ struct propertyobject310 {
     // Note: This is a problem with Limited API: We have no direct access.
     //       You need to pick it from runtime info.
     PyObject *prop_name;
-   int getter_doc;
+    int getter_doc;
 };
 
 PYSIDE_API PyTypeObject *PyClassProperty_TypeF();

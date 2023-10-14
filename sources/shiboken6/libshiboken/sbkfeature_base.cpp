@@ -76,6 +76,7 @@ static int const CALL = 171;
 // Python 3.11
 static int const PRECALL = 166;
 // we have "big instructions" with gaps after them
+static int const LOAD_METHOD_GAP_311 = 10 * 2;
 static int const LOAD_ATTR_GAP_311 = 4 * 2;
 static int const LOAD_ATTR_GAP = 9 * 2;
 // Python 3.7 - 3.10
@@ -136,7 +137,9 @@ static bool currentOpcode_Is_CallMethNoArgs()
         // With Python 3.11, the opcodes get bigger and change a bit.
         // Note: The new adaptive opcodes are elegantly hidden and we
         //       don't need to take care of them.
-        if (opcode1 == LOAD_ATTR)
+        if (opcode1 == LOAD_METHOD)
+            f_lasti += LOAD_METHOD_GAP_311;
+        else if (opcode1 == LOAD_ATTR)
             f_lasti += LOAD_ATTR_GAP_311;
         else
             return false;
