@@ -1,0 +1,5 @@
+{
+    "files": ["main.py", "rhiwindow.py", "rhiwindow.qrc",
+              "shaders/color.frag", "shaders/color.vert",
+              "shaders/quad.frag", "shaders/quad.vert"]
+}
