@@ -28,6 +28,90 @@ packages provided in the `Qt Account`_.
 Installation
 ------------
 
+We understand that the installation of the commercial wheels will depend
+on your use cases. For this, we currently offer three
+ways to install a commercial Qt for Python release: a command line tool,
+using the Maintenance Tool, or downloading packages by hand.
+
+qtpip - a commercial wheel installer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+`qtpip`_ is a wrapper around `pip`_ (the package installer for Python) that provides an
+integration with the detection of commercial licenses.
+
+To set up the tool, we recommend creating a virtual environment for your
+project, and then installing the tool like any other module:
+
+.. code-block:: bash
+
+    # Create and activate a virtual environment first
+    # then install 'qtpip'
+    pip install qtpip
+
+    # Now install pyside6 (or any of the Qt for Python packages)
+    qtpip install pyside6
+
+Besides the ``install`` command, you can also ``uninstall`` (like in pip) but
+you can also perform a `fulluninstall`` to fully remove all the Qt for Python
+packages. You can find more information running ``qtpip -h``::
+
+   $ qtpip -h
+   Usage: qtpip [options] install <package> fulluninstall <PySide6/shiboken6/all>
+   Qt wrapper around pip.
+   These arguments override pip's. For more, refer to pip --help
+
+   Options:
+     -f, --force                  Force installation if OSS wheels were already
+                                  installed.
+     --no-input                   Disable prompting for input.
+     --no-cache-dir               Disable the cache.
+     --disable-pip-version-check  Don't periodically check PyPI to determine
+                                  whether a new version of pip is available for
+                                  download.
+     --no-color                   Suppress colored output.
+     --user                       Install to the Python user install directory for
+                                  your platform.
+     --force-reinstall            Reinstall all packages even if they are already
+                                  up-to-date.
+     -h, --help                   Displays help on commandline options.
+     --help-all                   Displays help, including generic Qt options.
+     -v, --version                Displays version information.
+
+   Arguments:
+     install                      Installs a package, this can be any of PySide6,
+                                  PySide6-Essentials, PySide6-Addons, shiboken6 or
+                                  shiboken6-generator for the respective commercial
+                                  wheel, or any other wheel from PyPi.
+     fulluninstall                Fully uninstalls all packages related to
+                                  PySide6, shiboken6, or both.
+
+.. note:: The release cycle of ``qtpip`` will be independent from the Qt for
+   Python one.
+
+
+Maintenance Tool
+^^^^^^^^^^^^^^^^
+
+As a commercial user, you are able to download the commercial set of wheels
+from the `Qt Maintenance Tool`_.  The same versions that are available for
+Qt/C++ are available for the Python bindings.
+
+The wheels will be downloaded, but not installed, mainly because they should
+be installed into a virtual environment rather than the default interpreter.
+A ``requirements.txt`` file will be provided alongside the wheels, in order to
+simplify the installation step::
+
+   pip install -r /path/to/Qt/QtForPython/6.6.0/requirements.txt
+
+Complementary to the wheels, you will be able to download the sources
+as well.
+
+.. note:: Wheels installed this way will be detectable by `Qt Creator`_, which
+   will offer you to install them for your current Python interpreter.
+
+Using account.qt.io
+^^^^^^^^^^^^^^^^^^^
+
 Head to your `Qt Account`_ page, and select the **Download** option on the side
 menu. You will find an option to select |project| from the **Products**
 section:
@@ -156,4 +240,8 @@ packages will likely happen.
 
 .. _`Qt Licensing`: https://www.qt.io/licensing/
 .. _`Qt Account`: https://account.qt.io
+.. _`Qt Maintenance Tool`: https://doc.qt.io/qt-6/qt-online-installation.html
+.. _`Qt Creator`: https://www.qt.io/product/development-tools
+.. _`qtpip`: https://pypi.org/project/qtpip/
+.. _`pip`: https://pypi.org/project/pip/
 
