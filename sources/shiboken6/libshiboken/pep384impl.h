@@ -111,7 +111,6 @@ LIBSHIBOKEN_API PyObject *_PepType_Lookup(PyTypeObject *type, PyObject *name);
 
 #else // Py_LIMITED_API
 
-#define PyIndex_Check(obj)                PyIndex_Check(obj)
 #define _PepType_Lookup(type, name)       _PyType_Lookup(type, name)
 
 #endif // Py_LIMITED_API
