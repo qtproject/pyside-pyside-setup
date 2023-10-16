@@ -117,6 +117,14 @@ class BuilderPrivate {
 public:
     Q_DISABLE_COPY_MOVE(BuilderPrivate)
 
+    enum class SpecialSystemHeader {
+        None,
+        Types,
+        OpenGL,
+        WhiteListed,
+        WhiteListedPath
+    };
+
     using CursorClassHash = QHash<CXCursor, ClassModelItem>;
     using TypeInfoHash = QHash<CXType, TypeInfo>;
 
@@ -183,7 +191,9 @@ public:
     std::pair<QString, ClassModelItem> getBaseClass(CXType type) const;
     void addBaseClass(const CXCursor &cursor);
 
+    SpecialSystemHeader specialSystemHeader(const QString &fileName) const;
     bool visitHeader(const QString &fileName) const;
+    static const char *specialSystemHeaderReason(SpecialSystemHeader sh);
 
     void setFileName(const CXCursor &cursor, _CodeModelItem *item);
 
@@ -214,6 +224,7 @@ public:
     int m_anonymousEnumCount = 0;
     CodeModel::FunctionType m_currentFunctionType = CodeModel::Normal;
     bool m_withinFriendDecl = false;
+    mutable QHash<QString, SpecialSystemHeader> m_systemHeaders;
 };
 
 bool BuilderPrivate::addClass(const CXCursor &cursor, CodeModel::ClassType t)
@@ -772,7 +783,37 @@ static QString baseName(QString path)
     return path;
 }
 
+const char * BuilderPrivate::specialSystemHeaderReason(BuilderPrivate::SpecialSystemHeader sh)
+{
+    static const QHash<SpecialSystemHeader, const char *> mapping {
+        {SpecialSystemHeader::OpenGL, "OpenGL"},
+        {SpecialSystemHeader::Types, "types"},
+        {SpecialSystemHeader::WhiteListed, "white listed"},
+        {SpecialSystemHeader::WhiteListedPath,  "white listed path"}
+    };
+    return mapping.value(sh, "");
+}
+
 bool BuilderPrivate::visitHeader(const QString &fileName) const
+{
+    auto it = m_systemHeaders.find(fileName);
+    if (it == m_systemHeaders.end()) {
+        it = m_systemHeaders.insert(fileName, specialSystemHeader(fileName));
+        if (ReportHandler::isDebug(ReportHandler::MediumDebug)) {
+            const QString &name = QDir::toNativeSeparators(fileName);
+            if (it.value() == SpecialSystemHeader::None) {
+                qCInfo(lcShiboken, "Skipping system header %s", qPrintable(name));
+            } else {
+                qCInfo(lcShiboken, "Parsing system header %s (%s)",
+                       qPrintable(name), specialSystemHeaderReason(it.value()));
+            }
+        }
+    }
+    return it.value() != SpecialSystemHeader::None;
+}
+
+BuilderPrivate::SpecialSystemHeader
+    BuilderPrivate::specialSystemHeader(const QString &fileName) const
 {
     // Resolve OpenGL typedefs although the header is considered a system header.
     const QString baseName = clang::baseName(fileName);
@@ -782,8 +823,8 @@ bool BuilderPrivate::visitHeader(const QString &fileName) const
         || baseName == u"gl31.h"
         || baseName == u"gl32.h"
         || baseName == u"stdint.h" // Windows: int32_t, uint32_t
-        || baseName == u"stddef.h") { // size_t
-        return true;
+        || baseName == u"stddef.h") { // size_t`
+        return SpecialSystemHeader::OpenGL;
     }
 
     switch (clang::platform()) {
@@ -792,7 +833,7 @@ bool BuilderPrivate::visitHeader(const QString &fileName) const
             || baseName == u"types.h"
             || baseName == u"stdint-intn.h" // int32_t
             || baseName == u"stdint-uintn.h") { // uint32_t
-            return true;
+            return SpecialSystemHeader::Types;
         }
         break;
     case Platform::macOS:
@@ -802,22 +843,22 @@ bool BuilderPrivate::visitHeader(const QString &fileName) const
         if (baseName == u"gltypes.h"
             || fileName.contains(u"/usr/include/_types")
             || fileName.contains(u"/usr/include/sys/_types")) {
-            return true;
+            return SpecialSystemHeader::Types;
         }
         break;
     default:
         break;
     }
 
-    for (const auto &systemInclude : m_systemIncludes) {
-        if (systemInclude == baseName)
-            return true;
+    if (m_systemIncludes.contains(baseName))
+        return SpecialSystemHeader::WhiteListed;
+
+    if (std::any_of(m_systemIncludePaths.cbegin(), m_systemIncludePaths.cend(),
+                    [fileName](const QString &p) { return fileName.startsWith(p); })) {
+        return SpecialSystemHeader::WhiteListedPath;
     }
-    for (const auto &systemIncludePath : m_systemIncludePaths) {
-        if (fileName.startsWith(systemIncludePath))
-            return true;
-    }
-    return false;
+
+    return SpecialSystemHeader::None;
 }
 
 bool Builder::visitLocation(const QString &fileName, LocationType locationType) const
