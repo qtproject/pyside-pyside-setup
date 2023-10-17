@@ -1879,9 +1879,16 @@ Py_INCREF(callable);
     Shiboken::AutoDecRef locale(PyImport_ImportModule("locale"));
     Shiboken::AutoDecRef getLocale(PyObject_GetAttrString(locale, "getlocale"));
     Shiboken::AutoDecRef systemLocale(PyObject_CallObject(getLocale, nullptr));
-    Shiboken::AutoDecRef localeCode(PyUnicode_AsUTF8String(PyTuple_GetItem(systemLocale, 0)));
-    QString localeCodeStr =  PySide::pyStringToQString(localeCode);
-    %RETURN_TYPE %0 = QLocale(localeCodeStr);
+    Shiboken::AutoDecRef localeCode(PyTuple_GetItem(systemLocale, 0));
+    %RETURN_TYPE %0;
+    if (localeCode != Py_None) {
+        QString localeCodeStr = PySide::pyStringToQString(localeCode);
+        %0 = QLocale(localeCodeStr);
+    } else {
+       // The default locale is 'C' locale as mentioned in
+       // https://docs.python.org/3/library/locale.html
+        %0 = ::QLocale::c();
+    }
 #else
     %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME();
 #endif
