@@ -1352,7 +1352,10 @@
 
           .. note:: Qt for Python on macOS will not reflect the user's region and language
              preferences though QLocale::system(), but will instead reflect the environment
-             variables POSIX uses to specify locale, similar to Python's locale module.
+             variables POSIX uses to specify locale, similar to Python's locale module. If the
+             system locale cannot be determined, which can be due to none of the variables 'LC_ALL',
+             'LC_CTYPE', 'LANG' or 'LANGUAGE' being set by your environment, then the default POSIX
+             locale or 'C' locale is returned.
 
           See also c().
         </inject-documentation>
