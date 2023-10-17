@@ -117,8 +117,13 @@ static PyType_Spec PropertyListType_spec = {
 
 PyTypeObject *PropertyList_TypeF(void)
 {
-    static Shiboken::AutoDecRef bases(Py_BuildValue("(O)", PySideProperty_TypeF()));
-    static auto *type = SbkType_FromSpecWithBases(&PropertyListType_spec, bases);
+    // PYSIDE-2230: This was a wrong replacement by static AutoDecref.
+    //              Never do that, deletes things way too late.
+    static PyTypeObject *type{};
+    if (!type) {
+        Shiboken::AutoDecRef bases(Py_BuildValue("(O)", PySideProperty_TypeF()));
+        type = (PyTypeObject *)SbkType_FromSpecWithBases(&PropertyListType_spec, bases.object());
+    }
     return type;
 }
 
