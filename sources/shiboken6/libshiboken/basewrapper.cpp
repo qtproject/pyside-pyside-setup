@@ -234,8 +234,14 @@ static const char *SbkObject_SignatureStrings[] = {
 
 PyTypeObject *SbkObject_TypeF(void)
 {
+    // PYSIDE-2230: When creating this type, we cannot easily handle the metaclass.
+    //              In versions < Python 3.12, the metaclass can only be set
+    //              indirectly by a base which has that metaclass.
+    //              But before 3.12 is the minimum version, we cannot use the new
+    //              function, although we would need this for 3.12 :-D
+    //              We do a special patching here that is triggered through Py_None.
     static auto *type = SbkType_FromSpec_BMDWB(&SbkObject_Type_spec,
-                                               nullptr,     // bases
+                                               Py_None,     // bases, special flag!
                                                SbkObjectType_TypeF(),
                                                offsetof(SbkObject, ob_dict),
                                                offsetof(SbkObject, weakreflist),
