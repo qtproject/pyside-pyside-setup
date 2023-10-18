@@ -15,7 +15,7 @@ The normal usage is like
 Alternatively, there is the `set_selection` function which uses select_id's
 and takes an optional `mod_name` parameter.
 
-The select id `-1` has the spectial meaning "ignore this module".
+The select id `-1` has the special meaning "ignore this module".
 """
 
 import inspect

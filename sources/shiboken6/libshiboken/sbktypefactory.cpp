@@ -7,6 +7,8 @@
 extern "C"
 {
 
+using Shiboken::AutoDecRef;
+
 PyTypeObject *SbkType_FromSpec(PyType_Spec *spec)
 {
     return SbkType_FromSpec_BMDWB(spec, nullptr, nullptr, 0, 0, nullptr);
@@ -42,12 +44,25 @@ static PyObject *_PyType_FromSpecWithBases(PyType_Spec *, PyObject *);
 //              Hopefully, the Python devs will supply the missing support.
 //              It turned out that they will not fix that, as expected.
 // Note: Python 3.12 is the first version that grabs the metaclass from base classes.
-static PyObject *_PyType_FromSpecWithBasesHack(PyType_Spec *spec, PyObject *bases)
+static PyObject *_PyType_FromSpecWithBasesHack(PyType_Spec *spec,
+                                               PyObject *bases,
+                                               PyTypeObject *meta)
 {
     PyTypeObject *keepMeta{};
     newfunc keepNew{};
+    AutoDecRef basesPatch{};
 
     if (bases) {
+        if (bases == Py_None) {
+            // PYSIDE-2230: This is the SbkObject entry which has no base to provide
+            //              the metaclass. We patch it in by modifying `object`s class.
+            assert(meta);
+            auto *base = reinterpret_cast<PyObject *>(&PyBaseObject_Type);
+            base->ob_type = meta;
+            basesPatch.reset(Py_BuildValue("(O)", &PyBaseObject_Type));
+            bases = basesPatch.object();
+        }
+
         Py_ssize_t n = PyTuple_GET_SIZE(bases);
         for (auto idx = 0; idx < n; ++idx) {
             PyTypeObject *base = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(bases, idx));
@@ -66,6 +81,11 @@ static PyObject *_PyType_FromSpecWithBasesHack(PyType_Spec *spec, PyObject *base
 
     if (keepMeta)
         keepMeta->tp_new = keepNew;
+    if (basesPatch.object()) {
+        // undo the metaclass patch.
+        auto *base = PyTuple_GET_ITEM(basesPatch.object(), 0);
+        base->ob_type = &PyType_Type;
+    }
     return ret;
 }
 
@@ -93,7 +113,7 @@ PyTypeObject *SbkType_FromSpec_BMDWB(PyType_Spec *spec,
     int package_level = atoi(spec->name);
     const char *mod = new_spec.name = colon + 1;
 
-    PyObject *obType = _PyType_FromSpecWithBasesHack(&new_spec, bases);
+    PyObject *obType = _PyType_FromSpecWithBasesHack(&new_spec, bases, meta);
     if (obType == nullptr)
         return nullptr;
 
@@ -105,8 +125,8 @@ PyTypeObject *SbkType_FromSpec_BMDWB(PyType_Spec *spec,
         qual = dot + 1;
     }
     int mlen = qual - mod - 1;
-    Shiboken::AutoDecRef module(Shiboken::String::fromCString(mod, mlen));
-    Shiboken::AutoDecRef qualname(Shiboken::String::fromCString(qual));
+    AutoDecRef module(Shiboken::String::fromCString(mod, mlen));
+    AutoDecRef qualname(Shiboken::String::fromCString(qual));
 
     auto *type = reinterpret_cast<PyTypeObject *>(obType);
 
