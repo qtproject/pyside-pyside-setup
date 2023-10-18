@@ -805,7 +805,7 @@ Pep_GetPartialFunction(void)
  * Newly introduced convenience functions
  *
  */
-#if PY_VERSION_HEX < 0x03070000 || defined(Py_LIMITED_API)
+#ifdef Py_LIMITED_API
 
 PyObject *
 PyImport_GetModule(PyObject *name)
@@ -831,7 +831,7 @@ PyImport_GetModule(PyObject *name)
     return m;
 }
 
-#endif // PY_VERSION_HEX < 0x03070000 || defined(Py_LIMITED_API)
+#endif // Py_LIMITED_API
 
 // 2020-06-16: For simplicity of creating arbitrary things, this function
 // is now made public.
