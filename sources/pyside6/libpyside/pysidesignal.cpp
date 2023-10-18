@@ -25,6 +25,8 @@
 
 #define QT_SIGNAL_SENTINEL '2'
 
+using namespace Qt::StringLiterals;
+
 QDebug operator<<(QDebug debug, const PySideSignalData::Signature &s)
 {
     QDebugStateSaver saver(debug);
@@ -305,9 +307,21 @@ static PyObject *signalGetItem(PyObject *obSelf, PyObject *key)
     return Shiboken::String::fromCString(sig.constData());
 }
 
-static PyObject *signalToString(PyObject *self)
+static PyObject *signalToString(PyObject *obSelf)
 {
-    return signalGetItem(self, nullptr);
+    auto self = reinterpret_cast<PySideSignal *>(obSelf);
+    QByteArray result;
+    if (self->data == nullptr || self->data->signatures.isEmpty()) {
+        result = "<invalid>"_ba;
+    } else {
+        for (const auto &signature : std::as_const(self->data->signatures)) {
+            if (!result.isEmpty())
+                result += "; "_ba;
+            result += PySide::Signal::buildSignature(self->data->signalName,
+                                                     signature.signature);
+        }
+    }
+    return Shiboken::String::fromCString(result.constData());
 }
 
 static PyObject *signalGetAttr(PyObject *obSelf, PyObject *name)
