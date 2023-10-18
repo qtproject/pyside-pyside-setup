@@ -110,6 +110,9 @@ LIBSHIBOKEN_API PyObject *FallbackRichCompare(PyObject *self, PyObject *other, i
 /// PYSIDE-1970: Be easily able to see what is happening in the running code.
 LIBSHIBOKEN_API void disassembleFrame(const char *marker);
 
+/// PYSIDE-2230: Check if an object is an SbkObject.
+LIBSHIBOKEN_API bool SbkObjectType_Check(PyTypeObject *type);
+
 } // extern "C"
 
 namespace Shiboken
