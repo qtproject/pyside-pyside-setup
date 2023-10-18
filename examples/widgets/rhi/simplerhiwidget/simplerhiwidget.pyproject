@@ -1,0 +1,4 @@
+{
+    "files": ["main.py","examplewidget.py", "simplerhiwidget.qrc",
+              "shaders/color.frag", "shaders/color.vert"]
+}

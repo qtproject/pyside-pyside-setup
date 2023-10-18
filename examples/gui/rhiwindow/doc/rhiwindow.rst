@@ -1,3 +1,5 @@
+.. _rhi-window-example:
+
 RHI Window Example
 ==================
 
@@ -28,13 +30,7 @@ platform/API specifics or correctly handling ``QExposeEvent`` and resize events
 for the window are all managed by Qt Quick. Whereas in this example, all that
 is managed and taken care of by the application itself.
 
-.. note:: For ``QWidget``-based applications in particular, it should be noted
-    that ``QWidget::createWindowContainer()`` allows embedding a ``QWindow``
-    (backed by a native window) into the widget-based user interface. Therefore,
-    the ``HelloWindow`` class from this example is reusable in ``QWidget``-based
-    applications, assuming the necessary initialization from ``main()`` is in place
-    as well.
-
+.. note:: For ``QWidget``-based applications, see the :ref:`rhi-widget-example`.
 
 Shaders
 -------
