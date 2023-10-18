@@ -5,7 +5,17 @@ project(QtQuick)
 
 set(QtQuick_registerType "${QtQuick_SOURCE_DIR}/pysidequickregistertype.cpp")
 
+# Exclude sources that have clashing static helper functions named "renderstate_..."
+set(QtQuick_SRC_UNITY_EXCLUDED_SRC
+    ${QtQuick_GEN_DIR}/qsgrendernode_renderstate_wrapper.cpp
+    ${QtQuick_GEN_DIR}/qsgmaterialshader_renderstate_wrapper.cpp
+)
+
+set_property(SOURCE ${QtQuick_SRC_UNITY_EXCLUDED_SRC}
+             PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
+
 set(QtQuick_SRC
+${QtQuick_SRC_UNITY_EXCLUDED_SRC}
 ${QtQuick_GEN_DIR}/qquickasyncimageprovider_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickframebufferobject_wrapper.cpp
 ${QtQuick_GEN_DIR}/qquickframebufferobject_renderer_wrapper.cpp
@@ -37,7 +47,6 @@ ${QtQuick_GEN_DIR}/qsggeometry_texturedpoint2d_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsggeometry_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsggeometrynode_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgmaterial_wrapper.cpp
-${QtQuick_GEN_DIR}/qsgmaterialshader_renderstate_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgmaterialshader_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgmaterialtype_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgnode_wrapper.cpp
@@ -46,7 +55,6 @@ ${QtQuick_GEN_DIR}/qsgopaquetexturematerial_wrapper.cpp
 #${QtQuick_GEN_DIR}/qsgsimplematerial_wrapper.cpp
 #${QtQuick_GEN_DIR}/qsgsimplematerialshader_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgrectanglenode_wrapper.cpp
-${QtQuick_GEN_DIR}/qsgrendernode_renderstate_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgrendernode_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgsimplerectnode_wrapper.cpp
 ${QtQuick_GEN_DIR}/qsgsimpletexturenode_wrapper.cpp
