@@ -652,6 +652,14 @@ PyObject *FallbackRichCompare(PyObject *self, PyObject *other, int op)
     return res;
 }
 
+bool SbkObjectType_Check(PyTypeObject *type)
+{
+    static auto *obMeta = reinterpret_cast<PyObject *>(SbkObjectType_TypeF());
+    auto *obType = reinterpret_cast<PyObject *>(type);
+    return obMeta == reinterpret_cast<PyObject *>(Py_TYPE(obType))
+           || PyObject_IsInstance(obType, obMeta);
+}
+
 } //extern "C"
 
 

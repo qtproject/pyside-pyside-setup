@@ -207,6 +207,8 @@ static PyObject *lookupUnqualifiedOrOldEnum(PyTypeObject *type, PyObject *name)
     for (idx = 0; idx < n; ++idx) {
         auto *base = PyTuple_GET_ITEM(mro, idx);
         auto *type_base = reinterpret_cast<PyTypeObject *>(base);
+        if (!SbkObjectType_Check(type_base))
+            continue;
         auto sotp = PepType_SOTP(type_base);
         // The EnumFlagInfo structure tells us if there are Enums at all.
         const char **enumFlagInfo = sotp->enumFlagInfo;

@@ -203,6 +203,8 @@ static QByteArrayList _SbkType_LookupProperty(PyTypeObject *type,
     auto len = std::strlen(origName);
     for (Py_ssize_t idx = 0; idx < n; idx++) {
         PyTypeObject *base = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        if (!SbkObjectType_Check(base))
+            continue;
         auto props = SbkObjectType_GetPropertyStrings(base);
         if (props == nullptr || *props == nullptr)
             continue;
