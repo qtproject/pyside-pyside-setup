@@ -128,8 +128,6 @@ static bool currentOpcode_Is_CallMethNoArgs()
     uint8_t opcode2 = co_code[f_lasti + 2];
     uint8_t oparg2 = co_code[f_lasti + 3];
     static auto number = _PepRuntimeVersion();
-    if (number < 0x030700)
-        return opcode1 == LOAD_ATTR && opcode2 == CALL_FUNCTION && oparg2 == 0;
     if (number < 0x030B00)
         return opcode1 == LOAD_METHOD && opcode2 == CALL_METHOD && oparg2 == 0;
 

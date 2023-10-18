@@ -509,9 +509,9 @@ extern LIBSHIBOKEN_API PyTypeObject *PepBuiltinMethod_TypePtr;
  *
  * This is not defined if Py_LIMITED_API is defined.
  */
-#if PY_VERSION_HEX < 0x03070000 || defined(Py_LIMITED_API)
+#ifdef Py_LIMITED_API
 LIBSHIBOKEN_API PyObject *PyImport_GetModule(PyObject *name);
-#endif // PY_VERSION_HEX < 0x03070000 || defined(Py_LIMITED_API)
+#endif // Py_LIMITED_API
 
 // Evaluate a script and return the variable `result`
 LIBSHIBOKEN_API PyObject *PepRun_GetResult(const char *command);
