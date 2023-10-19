@@ -1,0 +1,34 @@
+# PySide6 Examples
+
+PySide6 is the official Python module from the
+[Qt for Python project](https://wiki.qt.io/Qt_for_Python),
+which provides access to the complete Qt 6.0+ framework.
+
+The Qt for Python project is developed in the open, with all facilities you'd expect
+from any modern OSS project such as all code in a git repository and an open
+design process. We welcome any contribution conforming to the
+[Qt Contribution Agreement](https://www.qt.io/contributionagreement/).
+
+This is a wheel containing the [PySide6](https://pypi.org/project/PySide6)
+examples, from all the modules.
+
+### Documentation and Bugs
+
+You can find more information about the PySide6 module API in the
+[official Qt for Python documentation](https://doc.qt.io/qtforpython/).
+
+If you come across any issue, please file a bug report at our
+[JIRA tracker](https://bugreports.qt.io/projects/PYSIDE) following
+our [guidelines](https://wiki.qt.io/Qt_for_Python/Reporting_Bugs).
+
+### Community
+
+Check our channels on IRC (Libera), Telegram, Gitter, Matrix, and mailing list,
+and [join our community](https://wiki.qt.io/Qt_for_Python#Community)!
+
+### Licensing
+
+PySide6 is available under both Open Source (LGPLv3/GPLv2) and commercial
+licenses. Using PyPi is the recommended installation source, because the
+content of the wheels is valid for both cases. For more information, refer to
+the [Qt Licensing page](https://www.qt.io/licensing/).
