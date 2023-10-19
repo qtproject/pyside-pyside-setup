@@ -8,8 +8,7 @@ import importlib
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
 from pathlib import Path
-from shutil import copy, rmtree
-from sysconfig import get_config_var
+from shutil import copy, rmtree, copytree
 from typing import List, Optional, Tuple
 
 import build  # type: ignore
@@ -32,7 +31,7 @@ class SetupData:
     console_scripts: List[str]
 
 
-def get_version_from_package(name: str) -> str:
+def get_version_from_package(name: str, package_path: Path) -> str:
     # Get version from the already configured '__init__.py' file
     version = ""
     with open(package_path / name / "__init__.py") as f:
@@ -75,8 +74,15 @@ def get_manifest(wheel_name: str, data: List[ModuleData]) -> str:
     return "\n".join(lines)
 
 
+def get_simple_manifest(name: str) -> str:
+    if name == "PySide6":
+        return f"prune {name}\n"
+    elif name == "PySide6_Examples":
+        return "prune PySide6\ngraft PySide6/examples\n"
+    return f"graft {name}\n"
+
+
 def get_platform_tag() -> str:
-    content = None
     _os = sys.platform
     arch = platform.machine()
 
@@ -124,6 +130,7 @@ def get_platform_tag() -> str:
 
     return _tag
 
+
 def generate_pyproject_toml(artifacts: Path, setup: SetupData) -> str:
     content = None
 
@@ -159,7 +166,7 @@ def generate_setup_py(artifacts: Path, setup: SetupData):
 
     # Installing dependencies
     install_requires = []
-    if name == "PySide6":
+    if name in ("PySide6", "PySide6_Examples"):
         install_requires.append(f"shiboken6=={setup.version[0]}")
         install_requires.append(f"PySide6_Essentials=={setup.version[0]}")
         install_requires.append(f"PySide6_Addons=={setup.version[0]}")
@@ -172,7 +179,7 @@ def generate_setup_py(artifacts: Path, setup: SetupData):
     # For special wheels based on 'PySide6'
     # we force the name to be PySide6 for the package_name,
     # so we can take the files from that packaged-directory
-    if setup.name in ("PySide6_Essentials", "PySide6_Addons"):
+    if setup.name in ("PySide6_Essentials", "PySide6_Addons", "PySide6_Examples"):
         _name = "PySide6"
 
     with open(artifacts / "setup.py.base") as f:
@@ -186,10 +193,10 @@ def generate_setup_py(artifacts: Path, setup: SetupData):
     return content
 
 
-def wheel_shiboken_generator() -> Tuple[SetupData, None]:
+def wheel_shiboken_generator(package_path: Path) -> Tuple[SetupData, None]:
     setup = SetupData(
         name="shiboken6_generator",
-        version=get_version_from_package("shiboken6_generator"),
+        version=get_version_from_package("shiboken6_generator", package_path),
         description="Python/C++ bindings generator",
         readme="README.shiboken6-generator.md",
         console_scripts=[
@@ -201,10 +208,10 @@ def wheel_shiboken_generator() -> Tuple[SetupData, None]:
     return setup, None
 
 
-def wheel_shiboken_module() -> Tuple[SetupData, None]:
+def wheel_shiboken_module(package_path: Path) -> Tuple[SetupData, None]:
     setup = SetupData(
         name="shiboken6",
-        version=get_version_from_package("shiboken6"),
+        version=get_version_from_package("shiboken6", package_path),
         description="Python/C++ bindings helper module",
         readme="README.shiboken6.md",
         console_scripts=[],
@@ -213,7 +220,8 @@ def wheel_shiboken_module() -> Tuple[SetupData, None]:
     return setup, None
 
 
-def wheel_pyside6_essentials(packaged_qt_tools_path: Path) -> Tuple[SetupData, List[ModuleData]]:
+def wheel_pyside6_essentials(package_path: Path) -> Tuple[SetupData, List[ModuleData]]:
+    packaged_qt_tools_path = package_path / "PySide6"
     set_pyside_package_path(packaged_qt_tools_path)
     _pyside_tools = available_pyside_tools(packaged_qt_tools_path, package_for_wheels=True)
 
@@ -229,7 +237,7 @@ def wheel_pyside6_essentials(packaged_qt_tools_path: Path) -> Tuple[SetupData, L
 
     setup = SetupData(
         name="PySide6_Essentials",
-        version=get_version_from_package("PySide6"),  # we use 'PySide6' here
+        version=get_version_from_package("PySide6", package_path),  # we use 'PySide6' here
         description="Python bindings for the Qt cross-platform application and UI framework (Essentials)",
         readme="README.pyside6_essentials.md",
         console_scripts=_console_scripts
@@ -240,10 +248,10 @@ def wheel_pyside6_essentials(packaged_qt_tools_path: Path) -> Tuple[SetupData, L
     return setup, data
 
 
-def wheel_pyside6_addons() -> Tuple[SetupData, List[ModuleData]]:
+def wheel_pyside6_addons(package_path: Path) -> Tuple[SetupData, List[ModuleData]]:
     setup = SetupData(
         name="PySide6_Addons",
-        version=get_version_from_package("PySide6"),  # we use 'PySide6' here
+        version=get_version_from_package("PySide6", package_path),  # we use 'PySide6' here
         description="Python bindings for the Qt cross-platform application and UI framework (Addons)",
         readme="README.pyside6_addons.md",
         console_scripts=[],
@@ -254,16 +262,37 @@ def wheel_pyside6_addons() -> Tuple[SetupData, List[ModuleData]]:
     return setup, data
 
 
-def wheel_pyside6() -> Tuple[SetupData, Optional[List[ModuleData]]]:
+def wheel_pyside6(package_path: Path) -> Tuple[SetupData, Optional[List[ModuleData]]]:
     setup = SetupData(
         name="PySide6",
-        version=get_version_from_package("PySide6"),
+        version=get_version_from_package("PySide6", package_path),
         description="Python bindings for the Qt cross-platform application and UI framework",
         readme="README.pyside6.md",
         console_scripts=[],
     )
 
     return setup, None
+
+
+def wheel_pyside6_examples(package_path: Path) -> Tuple[SetupData, Optional[List[ModuleData]]]:
+    setup = SetupData(
+        name="PySide6_Examples",
+        version=get_version_from_package("PySide6", package_path),
+        description="Examples for the Qt for Python project",
+        readme="README.pyside6_examples.md",
+        console_scripts=[],
+    )
+
+    return setup, None
+
+
+def copy_examples_for_wheel(package_path: Path):
+    # Copying examples
+    try:
+        copytree("examples", package_path / "PySide6" / "examples", dirs_exist_ok=True)
+    except OSError as e:
+        print("Error trying to copy the examples directory:", e, file=sys.stderr)
+        sys.exit(-1)
 
 
 def venv_name():
@@ -351,59 +380,54 @@ if __name__ == "__main__":
         "PySide6_Essentials": wheel_pyside6_essentials,
         "PySide6_Addons": wheel_pyside6_addons,
         "PySide6": wheel_pyside6,
+        "PySide6_Examples": wheel_pyside6_examples,
     }
 
     for name, wheel_info in wheels.items():
 
         print(f"Starting process for: {name}")
-        setup, data = wheel_info() if not name=="PySide6_Essentials" else \
-                      wheel_pyside6_essentials(package_path / "PySide6")
+        setup, data = wheel_info(package_path)
 
-        # 2. Generate 'setup.py'
+        # 1. Generate 'setup.py'
         print("-- Generating setup.py")
         setup_py_content = generate_setup_py(artifacts_path, setup)
         with open(setup_py_path, "w") as f:
             f.write(setup_py_content)
 
-        # 3. Generate 'pyproject.toml'
+        # 2. Generate 'pyproject.toml'
         print("-- Generating pyproject.toml")
         pyproject_toml_content = generate_pyproject_toml(artifacts_path, setup)
         with open(pyproject_toml_path, "w") as f:
             f.write(pyproject_toml_content)
 
-        # 4. Create the 'MANIFEST.in'
+        # 3. Create the 'MANIFEST.in'
         # Special case for shiboken and shiboken_generator
         # so we copy the whole directory, only PySide and derivatives
         # will need to have specific information
         print("-- Creating MANIFEST.in")
-        if not data:
-            if name == "PySide6":
-                with open(package_path / "MANIFEST.in", "w") as f:
-                    f.write(f"purge {name}\n")
-            else:
-                with open(package_path / "MANIFEST.in", "w") as f:
-                    f.write(f"graft {name}\n")
+        if data is None:
+            manifest_content = get_simple_manifest(name)
         else:
             manifest_content = get_manifest(name, data)
-            with open(package_path / "MANIFEST.in", "w") as f:
-                f.write(manifest_content)
+        with open(package_path / "MANIFEST.in", "w") as f:
+            f.write(manifest_content)
 
         # 5. copy configuration files to create the wheel
         print("-- Copy configuration files to create the wheel")
+        if name == "PySide6_Examples":
+            copy_examples_for_wheel(package_path)
         _files: List[Path] = base_files + [Path(setup.readme)]
         for fname in _files:
             copy(fname, package_path)
 
-        # 6. call the build module to create the wheel
-        # print("-- Creating wheel")
-        # os.chdir(package_path)
+        # 5. call the build module to create the wheel
+        print("-- Creating wheels")
         if not verbose:
             _runner = build.pep517.wrappers.quiet_subprocess_runner
         else:
             _runner = build.pep517.wrappers.default_subprocess_runner
         builder = build.ProjectBuilder(package_path, runner=_runner)
         builder.build("wheel", "dist_new")
-        # os.chdir(current_path)
 
         # 7. Copy wheels back
         print("-- Copying wheels to dist_new/")
