@@ -64,11 +64,6 @@ class BuildozerConfig(BaseConfig):
         extra_modules = self.__find_dependent_qt_modules(pysidedeploy_config)
         logging.info(f"[DEPLOY] Other dependent modules to be added: {extra_modules}")
         pysidedeploy_config.modules = pysidedeploy_config.modules + extra_modules
-
-        # update the config file with the extra modules
-        if extra_modules:
-            pysidedeploy_config.update_config()
-
         modules = ",".join(pysidedeploy_config.modules)
 
         # gets the xml dependency files from Qt installation path
@@ -82,9 +77,6 @@ class BuildozerConfig(BaseConfig):
 
         self.__find_plugin_dependencies(dependency_files, dependent_plugins)
         pysidedeploy_config.qt_plugins += dependent_plugins
-
-        if local_libs or dependent_plugins:
-            pysidedeploy_config.update_config()
 
         local_libs = ",".join(pysidedeploy_config.local_libs)
 
