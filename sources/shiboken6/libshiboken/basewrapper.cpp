@@ -125,31 +125,36 @@ static PyGetSetDef SbkObjectType_tp_getset[] = {
     {nullptr, nullptr, nullptr, nullptr, nullptr}  // Sentinel
 };
 
-static PyType_Slot SbkObjectType_Type_slots[] = {
-    {Py_tp_dealloc, reinterpret_cast<void *>(SbkObjectType_tp_dealloc)},
-    {Py_tp_getattro, reinterpret_cast<void *>(mangled_type_getattro)},
-    {Py_tp_base, static_cast<void *>(&PyType_Type)},
-    {Py_tp_alloc, reinterpret_cast<void *>(PyType_GenericAlloc)},
-    {Py_tp_new, reinterpret_cast<void *>(SbkObjectType_tp_new)},
-    {Py_tp_free, reinterpret_cast<void *>(PyObject_GC_Del)},
-    {Py_tp_getset, reinterpret_cast<void *>(SbkObjectType_tp_getset)},
-    {0, nullptr}
-};
+static PyTypeObject *createObjectTypeType()
+{
+    PyType_Slot SbkObjectType_Type_slots[] = {
+        {Py_tp_dealloc, reinterpret_cast<void *>(SbkObjectType_tp_dealloc)},
+        {Py_tp_getattro, reinterpret_cast<void *>(mangled_type_getattro)},
+        {Py_tp_base, static_cast<void *>(&PyType_Type)},
+        {Py_tp_alloc, reinterpret_cast<void *>(PyType_GenericAlloc)},
+        {Py_tp_new, reinterpret_cast<void *>(SbkObjectType_tp_new)},
+        {Py_tp_free, reinterpret_cast<void *>(PyObject_GC_Del)},
+        {Py_tp_getset, reinterpret_cast<void *>(SbkObjectType_tp_getset)},
+        {0, nullptr}
+    };
 
-// PYSIDE-535: The tp_itemsize field is inherited and does not need to be set.
-// In PyPy, it _must_ not be set, because it would have the meaning that a
-// `__len__` field must be defined. Not doing so creates a hard-to-find crash.
-static PyType_Spec SbkObjectType_Type_spec = {
-    "1:Shiboken.ObjectType",
-    0,
-    0, // sizeof(PyMemberDef), not for PyPy without a __len__ defined
-    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
-    SbkObjectType_Type_slots,
-};
+    // PYSIDE-535: The tp_itemsize field is inherited and does not need to be set.
+    // In PyPy, it _must_ not be set, because it would have the meaning that a
+    // `__len__` field must be defined. Not doing so creates a hard-to-find crash.
+    PyType_Spec SbkObjectType_Type_spec = {
+        "1:Shiboken.ObjectType",
+        0,
+        0, // sizeof(PyMemberDef), not for PyPy without a __len__ defined
+        Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
+        SbkObjectType_Type_slots,
+    };
+
+    return SbkType_FromSpec(&SbkObjectType_Type_spec);
+}
 
 PyTypeObject *SbkObjectType_TypeF(void)
 {
-    static auto *type = SbkType_FromSpec(&SbkObjectType_Type_spec);
+    static auto *type = createObjectTypeType();
     return type;
 }
 
@@ -186,10 +191,10 @@ static int SbkObject_tp_traverse(PyObject *self, visitproc visit, void *arg)
     if (sbkSelf->ob_dict)
         Py_VISIT(sbkSelf->ob_dict);
 
-    if (_PepRuntimeVersion() >= 0x030900) {
-        // This was not needed before Python 3.9 (Python issue 35810 and 40217)
-        Py_VISIT(Py_TYPE(self));
-    }
+#if PY_VERSION_HEX >= 0x03090000
+    // This was not needed before Python 3.9 (Python issue 35810 and 40217)
+    Py_VISIT(Py_TYPE(self));
+#endif
     return 0;
 }
 
@@ -209,45 +214,51 @@ static int SbkObject_tp_clear(PyObject *self)
     return 0;
 }
 
-static PyType_Slot SbkObject_Type_slots[] = {
-    {Py_tp_getattro, reinterpret_cast<void *>(SbkObject_GenericGetAttr)},
-    {Py_tp_setattro, reinterpret_cast<void *>(SbkObject_GenericSetAttr)},
-    {Py_tp_dealloc, reinterpret_cast<void *>(SbkDeallocWrapperWithPrivateDtor)},
-    {Py_tp_traverse, reinterpret_cast<void *>(SbkObject_tp_traverse)},
-    {Py_tp_clear, reinterpret_cast<void *>(SbkObject_tp_clear)},
-    // unsupported: {Py_tp_weaklistoffset, (void *)offsetof(SbkObject, weakreflist)},
-    {Py_tp_getset, reinterpret_cast<void *>(SbkObject_tp_getset)},
-    // unsupported: {Py_tp_dictoffset, (void *)offsetof(SbkObject, ob_dict)},
-    {0, nullptr}
-};
-static PyType_Spec SbkObject_Type_spec = {
-    "1:Shiboken.Object",
-    sizeof(SbkObject),
-    0,
-    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,
-    SbkObject_Type_slots,
-};
-
-static const char *SbkObject_SignatureStrings[] = {
-    "Shiboken.Object(self)",
-    nullptr}; // Sentinel
-
-PyTypeObject *SbkObject_TypeF(void)
+static PyTypeObject *createObjectType()
 {
+    PyType_Slot SbkObject_Type_slots[] = {
+        {Py_tp_getattro, reinterpret_cast<void *>(SbkObject_GenericGetAttr)},
+        {Py_tp_setattro, reinterpret_cast<void *>(SbkObject_GenericSetAttr)},
+        {Py_tp_dealloc, reinterpret_cast<void *>(SbkDeallocWrapperWithPrivateDtor)},
+        {Py_tp_traverse, reinterpret_cast<void *>(SbkObject_tp_traverse)},
+        {Py_tp_clear, reinterpret_cast<void *>(SbkObject_tp_clear)},
+        // unsupported: {Py_tp_weaklistoffset, (void *)offsetof(SbkObject, weakreflist)},
+        {Py_tp_getset, reinterpret_cast<void *>(SbkObject_tp_getset)},
+        // unsupported: {Py_tp_dictoffset, (void *)offsetof(SbkObject, ob_dict)},
+        {0, nullptr}
+    };
+
+    PyType_Spec SbkObject_Type_spec = {
+        "1:Shiboken.Object",
+        sizeof(SbkObject),
+        0,
+        Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,
+        SbkObject_Type_slots,
+    };
+
     // PYSIDE-2230: When creating this type, we cannot easily handle the metaclass.
     //              In versions < Python 3.12, the metaclass can only be set
     //              indirectly by a base which has that metaclass.
     //              But before 3.12 is the minimum version, we cannot use the new
     //              function, although we would need this for 3.12 :-D
     //              We do a special patching here that is triggered through Py_None.
-    static auto *type = SbkType_FromSpec_BMDWB(&SbkObject_Type_spec,
-                                               Py_None,     // bases, special flag!
-                                               SbkObjectType_TypeF(),
-                                               offsetof(SbkObject, ob_dict),
-                                               offsetof(SbkObject, weakreflist),
-                                               nullptr);    // bufferprocs
+    return SbkType_FromSpec_BMDWB(&SbkObject_Type_spec,
+                                  Py_None,     // bases, special flag!
+                                  SbkObjectType_TypeF(),
+                                  offsetof(SbkObject, ob_dict),
+                                  offsetof(SbkObject, weakreflist),
+                                  nullptr);    // bufferprocs
+}
+
+PyTypeObject *SbkObject_TypeF(void)
+{
+    static auto *type = createObjectType();    // bufferprocs
     return type;
 }
+
+static const char *SbkObject_SignatureStrings[] = {
+    "Shiboken.Object(self)",
+    nullptr}; // Sentinel
 
 static int mainThreadDeletionHandler(void *)
 {

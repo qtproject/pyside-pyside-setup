@@ -22,25 +22,30 @@ struct PySideMetaFunctionPrivate
 static void functionFree(void *);
 static PyObject *functionCall(PyObject *, PyObject *, PyObject *);
 
-static PyType_Slot PySideMetaFunctionType_slots[] = {
-    {Py_tp_call, reinterpret_cast<void *>(functionCall)},
-    {Py_tp_new, reinterpret_cast<void *>(PyType_GenericNew)},
-    {Py_tp_free, reinterpret_cast<void *>(functionFree)},
-    {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
-    {0, nullptr}
-};
-static PyType_Spec PySideMetaFunctionType_spec = {
-    "2:PySide6.QtCore.MetaFunction",
-    sizeof(PySideMetaFunction),
-    0,
-    Py_TPFLAGS_DEFAULT,
-    PySideMetaFunctionType_slots,
-};
+static PyTypeObject *createMetaFunctionType()
+{
+    PyType_Slot PySideMetaFunctionType_slots[] = {
+        {Py_tp_call, reinterpret_cast<void *>(functionCall)},
+        {Py_tp_new, reinterpret_cast<void *>(PyType_GenericNew)},
+        {Py_tp_free, reinterpret_cast<void *>(functionFree)},
+        {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
+        {0, nullptr}
+    };
 
+    PyType_Spec PySideMetaFunctionType_spec = {
+        "2:PySide6.QtCore.MetaFunction",
+        sizeof(PySideMetaFunction),
+        0,
+        Py_TPFLAGS_DEFAULT,
+        PySideMetaFunctionType_slots,
+    };
+
+    return SbkType_FromSpec(&PySideMetaFunctionType_spec);
+}
 
 PyTypeObject *PySideMetaFunction_TypeF(void)
 {
-    static auto *type = SbkType_FromSpec(&PySideMetaFunctionType_spec);
+    static auto *type = createMetaFunctionType();
     return type;
 }
 

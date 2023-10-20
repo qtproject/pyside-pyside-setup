@@ -113,25 +113,31 @@ QtQml_VolatileBoolObject_str(QtQml_VolatileBoolObject *self)
     return s;
 }
 
-static PyType_Slot QtQml_VolatileBoolType_slots[] = {
-    {Py_tp_repr, reinterpret_cast<void *>(QtQml_VolatileBoolObject_repr)},
-    {Py_tp_str, reinterpret_cast<void *>(QtQml_VolatileBoolObject_str)},
-    {Py_tp_methods, reinterpret_cast<void *>(QtQml_VolatileBoolObject_methods)},
-    {Py_tp_new, reinterpret_cast<void *>(QtQml_VolatileBoolObject_new)},
-    {Py_tp_dealloc, reinterpret_cast<void *>(QtQml_VolatileBoolObject_dealloc)},
-    {0, 0}
-};
-static PyType_Spec QtQml_VolatileBoolType_spec = {
-    "2:PySide6.QtQml.VolatileBool",
-    sizeof(QtQml_VolatileBoolObject),
-    0,
-    Py_TPFLAGS_DEFAULT,
-    QtQml_VolatileBoolType_slots,
-};
+static PyTypeObject *createVolatileBoolType()
+{
+    PyType_Slot QtQml_VolatileBoolType_slots[] = {
+        {Py_tp_repr, reinterpret_cast<void *>(QtQml_VolatileBoolObject_repr)},
+        {Py_tp_str, reinterpret_cast<void *>(QtQml_VolatileBoolObject_str)},
+        {Py_tp_methods, reinterpret_cast<void *>(QtQml_VolatileBoolObject_methods)},
+        {Py_tp_new, reinterpret_cast<void *>(QtQml_VolatileBoolObject_new)},
+        {Py_tp_dealloc, reinterpret_cast<void *>(QtQml_VolatileBoolObject_dealloc)},
+        {0, 0}
+    };
+
+    PyType_Spec QtQml_VolatileBoolType_spec = {
+        "2:PySide6.QtQml.VolatileBool",
+        sizeof(QtQml_VolatileBoolObject),
+        0,
+        Py_TPFLAGS_DEFAULT,
+        QtQml_VolatileBoolType_slots,
+    };
+
+    return SbkType_FromSpec(&QtQml_VolatileBoolType_spec);
+}
 
 PyTypeObject *QtQml_VolatileBool_TypeF(void)
 {
-    static auto *type = SbkType_FromSpec(&QtQml_VolatileBoolType_spec);
+    static auto *type = createVolatileBoolType();
     return type;
 }
 

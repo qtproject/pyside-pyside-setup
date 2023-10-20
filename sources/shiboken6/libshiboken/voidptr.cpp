@@ -256,37 +256,41 @@ static PyBufferProcs SbkVoidPtrObjectBufferProc = {
     (releasebufferproc)nullptr                         // bf_releasebuffer
 };
 
-// Void pointer type definition.
-static PyType_Slot SbkVoidPtrType_slots[] = {
-    {Py_tp_repr, reinterpret_cast<void *>(SbkVoidPtrObject_repr)},
-    {Py_nb_int, reinterpret_cast<void *>(SbkVoidPtrObject_int)},
-    {Py_sq_length, reinterpret_cast<void *>(SbkVoidPtrObject_length)},
-    {Py_tp_str, reinterpret_cast<void *>(SbkVoidPtrObject_str)},
-    {Py_tp_richcompare, reinterpret_cast<void *>(SbkVoidPtrObject_richcmp)},
-    {Py_tp_init, reinterpret_cast<void *>(SbkVoidPtrObject_init)},
-    {Py_tp_new, reinterpret_cast<void *>(SbkVoidPtrObject_new)},
-    {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
-    {Py_tp_methods, reinterpret_cast<void *>(SbkVoidPtrObject_methods)},
-    {0, nullptr}
-};
-static PyType_Spec SbkVoidPtrType_spec = {
-    "2:shiboken6.Shiboken.VoidPtr",
-    sizeof(SbkVoidPtrObject),
-    0,
-    Py_TPFLAGS_DEFAULT,
-    SbkVoidPtrType_slots,
-};
+static PyTypeObject *createVoidPtrType()
+{
+    PyType_Slot SbkVoidPtrType_slots[] = {
+        {Py_tp_repr, reinterpret_cast<void *>(SbkVoidPtrObject_repr)},
+        {Py_nb_int, reinterpret_cast<void *>(SbkVoidPtrObject_int)},
+        {Py_sq_length, reinterpret_cast<void *>(SbkVoidPtrObject_length)},
+        {Py_tp_str, reinterpret_cast<void *>(SbkVoidPtrObject_str)},
+        {Py_tp_richcompare, reinterpret_cast<void *>(SbkVoidPtrObject_richcmp)},
+        {Py_tp_init, reinterpret_cast<void *>(SbkVoidPtrObject_init)},
+        {Py_tp_new, reinterpret_cast<void *>(SbkVoidPtrObject_new)},
+        {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
+        {Py_tp_methods, reinterpret_cast<void *>(SbkVoidPtrObject_methods)},
+        {0, nullptr}
+    };
 
+    PyType_Spec SbkVoidPtrType_spec = {
+        "2:shiboken6.Shiboken.VoidPtr",
+        sizeof(SbkVoidPtrObject),
+        0,
+        Py_TPFLAGS_DEFAULT,
+        SbkVoidPtrType_slots,
+    };
 
+    return SbkType_FromSpec_BMDWB(&SbkVoidPtrType_spec,
+                                  nullptr, nullptr, 0, 0,
+                                  &SbkVoidPtrObjectBufferProc);
 }
 
 PyTypeObject *SbkVoidPtr_TypeF(void)
 {
-    static PyTypeObject *type = SbkType_FromSpec_BMDWB(&SbkVoidPtrType_spec,
-                                                       nullptr, nullptr, 0, 0,
-                                                       &SbkVoidPtrObjectBufferProc);
+    static auto *type = createVoidPtrType();
     return type;
 }
+
+} // extern "C"
 
 namespace VoidPtr {
 

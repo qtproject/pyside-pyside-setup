@@ -15,23 +15,28 @@ struct PySideCallableObject {
 
 static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, PyObject *kw);
 
-static PyType_Slot PySideCallableObjectType_slots[] = {
-    {Py_tp_call, reinterpret_cast<void *>(CallableObject_call)},
-    {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
-    {0, nullptr}
-};
-static PyType_Spec PySideCallableObjectType_spec = {
-    "1:PySide.Callable",
-    sizeof(PySideCallableObject),
-    0,
-    Py_TPFLAGS_DEFAULT,
-    PySideCallableObjectType_slots,
-};
+static PyTypeObject *createCallableObjectType()
+{
+    PyType_Slot PySideCallableObjectType_slots[] = {
+        {Py_tp_call, reinterpret_cast<void *>(CallableObject_call)},
+        {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
+        {0, nullptr}
+    };
 
+    PyType_Spec PySideCallableObjectType_spec = {
+        "1:PySide.Callable",
+        sizeof(PySideCallableObject),
+        0,
+        Py_TPFLAGS_DEFAULT,
+        PySideCallableObjectType_slots,
+    };
+
+    return SbkType_FromSpec(&PySideCallableObjectType_spec);
+}
 
 static PyTypeObject *PySideCallableObject_TypeF()
 {
-    static auto *type = SbkType_FromSpec(&PySideCallableObjectType_spec);
+    static auto *type = createCallableObjectType();
     return type;
 }
 

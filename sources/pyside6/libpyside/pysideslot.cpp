@@ -39,25 +39,31 @@ static int slotTpInit(PyObject *, PyObject *, PyObject *);
 static PyObject *slotCall(PyObject *, PyObject *, PyObject *);
 
 // Class Definition -----------------------------------------------
-static PyType_Slot PySideSlotType_slots[] = {
-    {Py_tp_call, reinterpret_cast<void *>(slotCall)},
-    {Py_tp_init, reinterpret_cast<void *>(slotTpInit)},
-    {Py_tp_new, reinterpret_cast<void *>(PyType_GenericNew)},
-    {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
-    {0, nullptr}
-};
-static PyType_Spec PySideSlotType_spec = {
-    "2:PySide6.QtCore.Slot",
-    sizeof(PySideSlot),
-    0,
-    Py_TPFLAGS_DEFAULT,
-    PySideSlotType_slots,
-};
 
+static PyTypeObject *createSlotType()
+{
+    PyType_Slot PySideSlotType_slots[] = {
+        {Py_tp_call, reinterpret_cast<void *>(slotCall)},
+        {Py_tp_init, reinterpret_cast<void *>(slotTpInit)},
+        {Py_tp_new, reinterpret_cast<void *>(PyType_GenericNew)},
+        {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
+        {0, nullptr}
+    };
+
+    PyType_Spec PySideSlotType_spec = {
+        "2:PySide6.QtCore.Slot",
+        sizeof(PySideSlot),
+        0,
+        Py_TPFLAGS_DEFAULT,
+        PySideSlotType_slots,
+    };
+
+    return SbkType_FromSpec(&PySideSlotType_spec);
+}
 
 static PyTypeObject *PySideSlot_TypeF()
 {
-    static auto *type = SbkType_FromSpec(&PySideSlotType_spec);
+    static auto *type = createSlotType();
     return type;
 }
 

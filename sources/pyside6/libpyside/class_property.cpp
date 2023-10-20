@@ -45,33 +45,34 @@ static int PyClassProperty_tp_init(PyObject *self, PyObject *args, PyObject *kwa
     return ret;
 }
 
-static PyType_Slot PyClassProperty_slots[] = {
-    {Py_tp_getset,      nullptr},    // will be set below
-    {Py_tp_base,        reinterpret_cast<void *>(&PyProperty_Type)},
-    {Py_tp_descr_get,   reinterpret_cast<void *>(PyClassProperty_descr_get)},
-    {Py_tp_descr_set,   reinterpret_cast<void *>(PyClassProperty_descr_set)},
-    {Py_tp_init,        reinterpret_cast<void *>(PyClassProperty_tp_init)},
-    {0, nullptr}
-};
+static PyTypeObject *createPyClassPropertyType()
+{
+    PyType_Slot PyClassProperty_slots[] = {
+        {Py_tp_getset,      nullptr},    // will be set below
+        {Py_tp_base,        reinterpret_cast<void *>(&PyProperty_Type)},
+        {Py_tp_descr_get,   reinterpret_cast<void *>(PyClassProperty_descr_get)},
+        {Py_tp_descr_set,   reinterpret_cast<void *>(PyClassProperty_descr_set)},
+        {Py_tp_init,        reinterpret_cast<void *>(PyClassProperty_tp_init)},
+        {0, nullptr}
+    };
 
-static PyType_Spec PyClassProperty_spec = {
-    "2:PySide6.QtCore.PyClassProperty",
-    sizeof(propertyobject),
-    0,
-    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
-    PyClassProperty_slots,
-};
+    PyType_Spec PyClassProperty_spec = {
+        "2:PySide6.QtCore.PyClassProperty",
+        sizeof(propertyobject),
+        0,
+        Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
+        PyClassProperty_slots,
+    };
+
+    PyClassProperty_slots[0].pfunc = PyProperty_Type.tp_getset;
+    if (_PepRuntimeVersion() >= 0x030A00)
+        PyClassProperty_spec.basicsize = sizeof(propertyobject310);
+    return SbkType_FromSpec(&PyClassProperty_spec);
+}
 
 PyTypeObject *PyClassProperty_TypeF()
 {
-    static PyTypeObject *type = nullptr;
-    if (type == nullptr) {
-        // Provide the same `tp_getset`, which is not inherited.
-        PyClassProperty_slots[0].pfunc = PyProperty_Type.tp_getset;
-        if (_PepRuntimeVersion() >= 0x030A00)
-            PyClassProperty_spec.basicsize = sizeof(propertyobject310);
-        type = SbkType_FromSpec(&PyClassProperty_spec);
-    }
+    static auto *type = createPyClassPropertyType();
     return type;
 }
 
