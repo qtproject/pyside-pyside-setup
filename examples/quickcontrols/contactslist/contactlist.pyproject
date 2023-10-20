@@ -1,0 +1,10 @@
+{
+    "files": ["main.py",
+              "contactmodel.py",
+              "Contact/ContactDialog.qml",
+              "Contact/ContactDelegate.ui.qml",
+              "Contact/ContactForm.ui.qml",
+              "Contact/ContactList.qml",
+              "Contact/ContactView.ui.qml",
+              "Contact/SectionDelegate.ui.qml"]
+}
