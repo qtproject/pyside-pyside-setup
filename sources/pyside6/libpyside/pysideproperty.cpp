@@ -58,31 +58,35 @@ static PyGetSetDef PySidePropertyType_getset[] = {
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
-static PyType_Slot PySidePropertyType_slots[] = {
-    {Py_tp_dealloc, reinterpret_cast<void *>(qpropertyDeAlloc)},
-    {Py_tp_call, reinterpret_cast<void *>(qPropertyCall)},
-    {Py_tp_traverse, reinterpret_cast<void *>(qpropertyTraverse)},
-    {Py_tp_clear, reinterpret_cast<void *>(qpropertyClear)},
-    {Py_tp_methods, reinterpret_cast<void *>(PySidePropertyMethods)},
-    {Py_tp_init, reinterpret_cast<void *>(qpropertyTpInit)},
-    {Py_tp_new, reinterpret_cast<void *>(qpropertyTpNew)},
-    {Py_tp_getset, PySidePropertyType_getset},
-    {Py_tp_del, reinterpret_cast<void *>(PyObject_GC_Del)},
-    {0, nullptr}
-};
+static PyTypeObject *createPropertyType()
+{
+    PyType_Slot PySidePropertyType_slots[] = {
+        {Py_tp_dealloc, reinterpret_cast<void *>(qpropertyDeAlloc)},
+        {Py_tp_call, reinterpret_cast<void *>(qPropertyCall)},
+        {Py_tp_traverse, reinterpret_cast<void *>(qpropertyTraverse)},
+        {Py_tp_clear, reinterpret_cast<void *>(qpropertyClear)},
+        {Py_tp_methods, reinterpret_cast<void *>(PySidePropertyMethods)},
+        {Py_tp_init, reinterpret_cast<void *>(qpropertyTpInit)},
+        {Py_tp_new, reinterpret_cast<void *>(qpropertyTpNew)},
+        {Py_tp_getset, PySidePropertyType_getset},
+        {Py_tp_del, reinterpret_cast<void *>(PyObject_GC_Del)},
+        {0, nullptr}
+    };
 
-static PyType_Spec PySidePropertyType_spec = {
-    "2:PySide6.QtCore.Property",
-    sizeof(PySideProperty),
-    0,
-    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC|Py_TPFLAGS_BASETYPE,
-    PySidePropertyType_slots,
-};
+    PyType_Spec PySidePropertyType_spec = {
+        "2:PySide6.QtCore.Property",
+        sizeof(PySideProperty),
+        0,
+        Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_GC|Py_TPFLAGS_BASETYPE,
+        PySidePropertyType_slots,
+    };
 
+    return SbkType_FromSpec(&PySidePropertyType_spec);
+}
 
 PyTypeObject *PySideProperty_TypeF(void)
 {
-    static auto *type = SbkType_FromSpec(&PySidePropertyType_spec);
+    static auto *type = createPropertyType();
     return type;
 }
 

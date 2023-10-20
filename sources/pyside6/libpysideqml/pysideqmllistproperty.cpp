@@ -101,29 +101,31 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     return 0;
 }
 
-static PyType_Slot PropertyListType_slots[] = {
-    {Py_tp_new, reinterpret_cast<void *>(propList_tp_new)},
-    {Py_tp_init, reinterpret_cast<void *>(propListTpInit)},
-    {0, nullptr}
-};
-static PyType_Spec PropertyListType_spec = {
-    "2:PySide6.QtQml.ListProperty",
-    sizeof(PySideProperty),
-    0,
-    Py_TPFLAGS_DEFAULT,
-    PropertyListType_slots,
-};
+static PyTypeObject *createPropertyListType()
+{
+    PyType_Slot PropertyListType_slots[] = {
+        {Py_tp_new, reinterpret_cast<void *>(propList_tp_new)},
+        {Py_tp_init, reinterpret_cast<void *>(propListTpInit)},
+        {0, nullptr}
+    };
 
+    PyType_Spec PropertyListType_spec = {
+        "2:PySide6.QtQml.ListProperty",
+        sizeof(PySideProperty),
+        0,
+        Py_TPFLAGS_DEFAULT,
+        PropertyListType_slots,
+    };
+
+    Shiboken::AutoDecRef bases(Py_BuildValue("(O)", PySideProperty_TypeF()));
+    return SbkType_FromSpecWithBases(&PropertyListType_spec, bases.object());
+}
 
 PyTypeObject *PropertyList_TypeF(void)
 {
     // PYSIDE-2230: This was a wrong replacement by static AutoDecref.
     //              Never do that, deletes things way too late.
-    static PyTypeObject *type{};
-    if (!type) {
-        Shiboken::AutoDecRef bases(Py_BuildValue("(O)", PySideProperty_TypeF()));
-        type = (PyTypeObject *)SbkType_FromSpecWithBases(&PropertyListType_spec, bases.object());
-    }
+    static PyTypeObject *type = createPropertyListType();
     return type;
 }
 

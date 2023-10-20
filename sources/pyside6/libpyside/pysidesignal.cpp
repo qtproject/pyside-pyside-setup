@@ -154,54 +154,64 @@ static PyMethodDef MetaSignal_tp_methods[] = {
     {nullptr, nullptr, 0, nullptr}
 };
 
-static PyType_Slot PySideMetaSignalType_slots[] = {
-    {Py_tp_methods, reinterpret_cast<void *>(MetaSignal_tp_methods)},
-    {Py_tp_base,    reinterpret_cast<void *>(&PyType_Type)},
-    {Py_tp_free,    reinterpret_cast<void *>(PyObject_GC_Del)},
-    {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
-    {0, nullptr}
-};
-static PyType_Spec PySideMetaSignalType_spec = {
-    "2:PySide6.QtCore.MetaSignal",
-    0,
-    // sizeof(PyHeapTypeObject) is filled in by SbkType_FromSpec
-    // which calls PyType_Ready which calls inherit_special.
-    0,
-    Py_TPFLAGS_DEFAULT,
-    PySideMetaSignalType_slots,
-};
+static PyTypeObject *createMetaSignalType()
+{
+    PyType_Slot PySideMetaSignalType_slots[] = {
+        {Py_tp_methods, reinterpret_cast<void *>(MetaSignal_tp_methods)},
+        {Py_tp_base,    reinterpret_cast<void *>(&PyType_Type)},
+        {Py_tp_free,    reinterpret_cast<void *>(PyObject_GC_Del)},
+        {Py_tp_dealloc, reinterpret_cast<void *>(Sbk_object_dealloc)},
+        {0, nullptr}
+    };
 
+    PyType_Spec PySideMetaSignalType_spec = {
+        "2:PySide6.QtCore.MetaSignal",
+        0,
+        // sizeof(PyHeapTypeObject) is filled in by SbkType_FromSpec
+        // which calls PyType_Ready which calls inherit_special.
+        0,
+        Py_TPFLAGS_DEFAULT,
+        PySideMetaSignalType_slots,
+    };
+
+    return SbkType_FromSpec(&PySideMetaSignalType_spec);
+}
 
 static PyTypeObject *PySideMetaSignal_TypeF(void)
 {
-    static auto *type = SbkType_FromSpec(&PySideMetaSignalType_spec);
+    static auto *type = createMetaSignalType();
     return type;
 }
 
-static PyType_Slot PySideSignalType_slots[] = {
-    {Py_mp_subscript,   reinterpret_cast<void *>(signalGetItem)},
-    {Py_tp_getattro,    reinterpret_cast<void *>(signalGetAttr)},
-    {Py_tp_descr_get,   reinterpret_cast<void *>(signalDescrGet)},
-    {Py_tp_call,        reinterpret_cast<void *>(signalCall)},
-    {Py_tp_str,         reinterpret_cast<void *>(signalToString)},
-    {Py_tp_init,        reinterpret_cast<void *>(signalTpInit)},
-    {Py_tp_new,         reinterpret_cast<void *>(PyType_GenericNew)},
-    {Py_tp_free,        reinterpret_cast<void *>(signalFree)},
-    {Py_tp_dealloc,     reinterpret_cast<void *>(Sbk_object_dealloc)},
-    {0, nullptr}
-};
-static PyType_Spec PySideSignalType_spec = {
-    "2:PySide6.QtCore.Signal",
-    sizeof(PySideSignal),
-    0,
-    Py_TPFLAGS_DEFAULT,
-    PySideSignalType_slots,
-};
+static PyTypeObject *createSignalType()
+{
+    PyType_Slot PySideSignalType_slots[] = {
+        {Py_mp_subscript,   reinterpret_cast<void *>(signalGetItem)},
+        {Py_tp_getattro,    reinterpret_cast<void *>(signalGetAttr)},
+        {Py_tp_descr_get,   reinterpret_cast<void *>(signalDescrGet)},
+        {Py_tp_call,        reinterpret_cast<void *>(signalCall)},
+        {Py_tp_str,         reinterpret_cast<void *>(signalToString)},
+        {Py_tp_init,        reinterpret_cast<void *>(signalTpInit)},
+        {Py_tp_new,         reinterpret_cast<void *>(PyType_GenericNew)},
+        {Py_tp_free,        reinterpret_cast<void *>(signalFree)},
+        {Py_tp_dealloc,     reinterpret_cast<void *>(Sbk_object_dealloc)},
+        {0, nullptr}
+    };
 
+    PyType_Spec PySideSignalType_spec = {
+        "2:PySide6.QtCore.Signal",
+        sizeof(PySideSignal),
+        0,
+        Py_TPFLAGS_DEFAULT,
+        PySideSignalType_slots,
+    };
+
+    return SbkType_FromSpecWithMeta(&PySideSignalType_spec, PySideMetaSignal_TypeF());
+}
 
 PyTypeObject *PySideSignal_TypeF(void)
 {
-    static auto *type = SbkType_FromSpecWithMeta(&PySideSignalType_spec, PySideMetaSignal_TypeF());
+    static auto *type = createSignalType();
     return type;
 }
 
@@ -222,28 +232,33 @@ static PyMethodDef SignalInstance_methods[] = {
     {nullptr, nullptr, 0, nullptr}  /* Sentinel */
 };
 
-static PyType_Slot PySideSignalInstanceType_slots[] = {
-    {Py_mp_subscript,   reinterpret_cast<void *>(signalInstanceGetItem)},
-    {Py_tp_call,        reinterpret_cast<void *>(signalInstanceCall)},
-    {Py_tp_methods,     reinterpret_cast<void *>(SignalInstance_methods)},
-    {Py_tp_repr,        reinterpret_cast<void *>(signalInstanceRepr)},
-    {Py_tp_new,         reinterpret_cast<void *>(PyType_GenericNew)},
-    {Py_tp_free,        reinterpret_cast<void *>(signalInstanceFree)},
-    {Py_tp_dealloc,     reinterpret_cast<void *>(Sbk_object_dealloc)},
-    {0, nullptr}
-};
-static PyType_Spec PySideSignalInstanceType_spec = {
-    "2:PySide6.QtCore.SignalInstance",
-    sizeof(PySideSignalInstance),
-    0,
-    Py_TPFLAGS_DEFAULT,
-    PySideSignalInstanceType_slots,
-};
+static PyTypeObject *createSignalInstanceType()
+{
+    PyType_Slot PySideSignalInstanceType_slots[] = {
+        {Py_mp_subscript,   reinterpret_cast<void *>(signalInstanceGetItem)},
+        {Py_tp_call,        reinterpret_cast<void *>(signalInstanceCall)},
+        {Py_tp_methods,     reinterpret_cast<void *>(SignalInstance_methods)},
+        {Py_tp_repr,        reinterpret_cast<void *>(signalInstanceRepr)},
+        {Py_tp_new,         reinterpret_cast<void *>(PyType_GenericNew)},
+        {Py_tp_free,        reinterpret_cast<void *>(signalInstanceFree)},
+        {Py_tp_dealloc,     reinterpret_cast<void *>(Sbk_object_dealloc)},
+        {0, nullptr}
+    };
 
+    PyType_Spec PySideSignalInstanceType_spec = {
+        "2:PySide6.QtCore.SignalInstance",
+        sizeof(PySideSignalInstance),
+        0,
+        Py_TPFLAGS_DEFAULT,
+        PySideSignalInstanceType_slots,
+    };
+
+    return SbkType_FromSpec(&PySideSignalInstanceType_spec);
+}
 
 PyTypeObject *PySideSignalInstance_TypeF(void)
 {
-    static auto *type = SbkType_FromSpec(&PySideSignalInstanceType_spec);
+    static auto *type = createSignalInstanceType();
     return type;
 }
 
