@@ -91,6 +91,7 @@ class AndroidConfig(Config):
             self.modules = self.get_value("buildozer", "modules").split(",")
         else:
             self._find_and_set_pysidemodules()
+            self._find_and_set_qtquick_modules()
 
         self._arch = None
         if self.get_value("buildozer", "arch"):
@@ -240,3 +241,16 @@ class AndroidConfig(Config):
         if not self.arch:
             raise RuntimeError("[DEPLOY] PySide wheel corrupted. Wheel name should end with"
                                "platform name")
+
+    def _find_and_set_qtquick_modules(self):
+        """Identify if QtQuick is used in QML files and add them as dependency
+        """
+        extra_modules = []
+
+        if "QtQuick" in self.qml_modules:
+            extra_modules.append("Quick")
+
+        if "QtQuick.Controls" in self.qml_modules:
+            extra_modules.append("QuickControls2")
+
+        self.modules += extra_modules
