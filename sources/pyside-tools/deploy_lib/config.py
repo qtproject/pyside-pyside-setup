@@ -65,6 +65,7 @@ class Config(BaseConfig):
         super().__init__(config_file=config_file, existing_config_file=existing_config_file)
 
         self._dry_run = dry_run
+        self.qml_modules = set()
         # set source_file
         self.source_file = Path(
             self.set_or_fetch(config_property_val=source_file, config_property_key="input_file")
@@ -295,9 +296,9 @@ class Config(BaseConfig):
 
     def _find_and_set_excluded_qml_plugins(self):
         if self.qml_files:
-            included_qml_modules = set(run_qmlimportscanner(qml_files=self.qml_files,
+            self.qml_modules = set(run_qmlimportscanner(qml_files=self.qml_files,
                                                             dry_run=self.dry_run))
-            self.excluded_qml_plugins = EXCLUDED_QML_PLUGINS.difference(included_qml_modules)
+            self.excluded_qml_plugins = EXCLUDED_QML_PLUGINS.difference(self.qml_modules)
 
             # needed for dry_run testing
             self.excluded_qml_plugins = sorted(self.excluded_qml_plugins)
