@@ -12,7 +12,7 @@ from importlib import util
 from importlib.metadata import version
 from pathlib import Path
 
-from . import Config, Nuitka, run_command
+from . import Nuitka, run_command
 
 IMPORT_WARNING_PYSIDE = (f"[DEPLOY] Found 'import PySide6' in file {0}"
                          ". Use 'from PySide6 import <module>' or pass the module"
@@ -193,7 +193,7 @@ class PythonExecutable:
     def is_installed(self, package):
         return bool(util.find_spec(package))
 
-    def create_executable(self, source_file: Path, extra_args: str, config: Config):
+    def create_executable(self, source_file: Path, extra_args: str, config):
         if config.qml_files:
             logging.info(f"[DEPLOY] Included QML files: {config.qml_files}")
 

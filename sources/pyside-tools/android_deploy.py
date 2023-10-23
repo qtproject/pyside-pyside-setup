@@ -8,11 +8,11 @@ import traceback
 from pathlib import Path
 from textwrap import dedent
 
-from deploy_lib import (MAJOR_VERSION, cleanup, config_option_exists,
-                        find_pyside_modules, get_config,
-                        install_python_dependencies, setup_python)
-from deploy_lib.android import (AndroidData, Buildozer, extract_and_copy_jar,
-                                get_wheel_android_arch)
+from deploy_lib import (setup_python, create_config_file, cleanup, install_python_dependencies,
+                        config_option_exists, MAJOR_VERSION)
+from deploy_lib.android import AndroidData, AndroidConfig
+from deploy_lib.android.buildozer import Buildozer
+
 
 """ pyside6-android-deploy deployment tool
 
@@ -87,7 +87,6 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
                 extra_modules.append(extra_module)
 
     main_file = Path.cwd() / "main.py"
-    generated_files_path = None
     if not main_file.exists():
         raise RuntimeError(("[DEPLOY] For Android deployment to work, the main"
                             " entrypoint Python file should be named 'main.py'"
@@ -98,16 +97,25 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
                                ndk_path=ndk_path, sdk_path=sdk_path)
 
     python = setup_python(dry_run=dry_run, force=force, init=init)
-    config = get_config(python_exe=python.exe, dry_run=dry_run, config_file=config_file,
-                        main_file=main_file, android_data=android_data, is_android=True)
+
+    config_file_exists = config_file and Path(config_file).exists()
+
+    if config_file_exists:
+        logging.info(f"[DEPLOY] Using existing config file {config_file}")
+    else:
+        config_file = create_config_file(dry_run=dry_run, config_file=config_file,
+                                         main_file=main_file)
+
+    config = AndroidConfig(config_file=config_file, source_file=main_file,
+                           python_exe=python.exe, dry_run=dry_run, android_data=android_data,
+                           existing_config_file=config_file_exists,
+                           extra_ignore_dirs=extra_ignore_dirs)
 
     if not config.wheel_pyside and not config.wheel_shiboken:
         raise RuntimeError(f"[DEPLOY] No PySide{MAJOR_VERSION} and Shiboken{MAJOR_VERSION} wheels"
                            "found")
 
-    source_file = config.project_dir / config.source_file
-    generated_files_path = source_file.parent / "deployment"
-    cleanup(generated_files_path=generated_files_path, config=config, is_android=True)
+    cleanup(config=config, is_android=True)
 
     install_python_dependencies(config=config, python=python, init=init,
                                 packages="android_packages", is_android=True)
@@ -117,29 +125,11 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
         config.title = name
 
     try:
-        # check which modules are needed
-        if not config.modules:
-            config.modules = find_pyside_modules(project_dir=config.project_dir,
-                                                 extra_ignore_dirs=extra_ignore_dirs,
-                                                 project_data=config.project_data)
-            logging.info("The following PySide modules were found from the python files of "
-                         f"the project {config.modules}")
-        config.modules.extend(extra_modules)
+        config.modules += extra_modules
 
-        # extract out and copy .jar files to {generated_files_path}
-        if not config.jars_dir or not Path(config.jars_dir).exists() and not dry_run:
-            logging.info("[DEPLOY] Extract and copy jar files from PySide6 wheel to "
-                         f"{generated_files_path}")
-            config.jars_dir = extract_and_copy_jar(wheel_path=config.wheel_pyside,
-                                                   generated_files_path=generated_files_path)
-
-        # find architecture from wheel name
-        if not config.arch:
-            arch = get_wheel_android_arch(wheel=config.wheel_pyside)
-            if not arch:
-                raise RuntimeError("[DEPLOY] PySide wheel corrupted. Wheel name should end with"
-                                   "platform name")
-            config.arch = arch
+        # this cannot be done when config file is initialized because cleanup() removes it
+        # so this can only be done after the cleanup()
+        config.find_and_set_jars_dir()
 
         # TODO: include qml files from pysidedeploy.spec rather than from extensions
         # buildozer currently includes all the files with .qml extension
@@ -147,7 +137,7 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
         # init buildozer
         Buildozer.dry_run = dry_run
         logging.info("[DEPLOY] Creating buildozer.spec file")
-        Buildozer.initialize(pysidedeploy_config=config, generated_files_path=generated_files_path)
+        Buildozer.initialize(pysidedeploy_config=config)
 
         # writing config file
         if not dry_run:
@@ -167,17 +157,16 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
             buildozer_build_dir = config.project_dir / ".buildozer"
             if not buildozer_build_dir.exists():
                 logging.info(f"[DEPLOY] Unable to copy {buildozer_build_dir} to "
-                             f"{generated_files_path}. {buildozer_build_dir} does not exist")
-            logging.info(f"[DEPLOY] Copying {str(buildozer_build_dir)} to "
-                         f"{str(generated_files_path)}")
-            shutil.move(buildozer_build_dir, generated_files_path)
+                             f"{config.generated_files_path}. {buildozer_build_dir} does not exist")
+            logging.info(f"[DEPLOY] copy {buildozer_build_dir} to {config.generated_files_path}")
+            shutil.move(buildozer_build_dir, config.generated_files_path)
 
         logging.info(f"[DEPLOY] apk created in {config.exe_dir}")
     except Exception:
         print(f"Exception occurred: {traceback.format_exc()}")
     finally:
-        if generated_files_path and config and not keep_deployment_files:
-            cleanup(generated_files_path=generated_files_path, config=config, is_android=True)
+        if config.generated_files_path and config and not keep_deployment_files:
+            cleanup(config=config, is_android=True)
 
     logging.info("[DEPLOY] End")
 
