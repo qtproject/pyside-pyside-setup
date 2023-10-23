@@ -1,6 +1,7 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
+import sys
 import logging
 import re
 import tempfile
@@ -22,8 +23,7 @@ ALL_PYSIDE_MODULES = [module[2:] for module in PySide6.__all__]
 
 
 class BuildozerConfig(BaseConfig):
-    def __init__(self, buildozer_spec_file: Path, pysidedeploy_config: Config,
-                 generated_files_path: Path):
+    def __init__(self, buildozer_spec_file: Path, pysidedeploy_config: Config):
         super().__init__(buildozer_spec_file, comment_prefixes="#")
         self.set_value("app", "title", pysidedeploy_config.title)
         self.set_value("app", "package.name", pysidedeploy_config.title)
@@ -97,14 +97,15 @@ class BuildozerConfig(BaseConfig):
             version = Wheel(pysidedeploy_config.wheel_pyside).version
             create_recipe(version=version, component=f"PySide{MAJOR_VERSION}",
                           wheel_path=pysidedeploy_config.wheel_pyside,
-                          generated_files_path=generated_files_path,
+                          generated_files_path=pysidedeploy_config.generated_files_path,
                           qt_modules=pysidedeploy_config.modules,
                           local_libs=pysidedeploy_config.local_libs,
                           plugins=pysidedeploy_config.qt_plugins)
             create_recipe(version=version, component=f"shiboken{MAJOR_VERSION}",
                           wheel_path=pysidedeploy_config.wheel_shiboken,
-                          generated_files_path=generated_files_path)
-            pysidedeploy_config.recipe_dir = (generated_files_path / "recipes").resolve()
+                          generated_files_path=pysidedeploy_config.generated_files_path)
+            pysidedeploy_config.recipe_dir = ((pysidedeploy_config.generated_files_path
+                                              / "recipes").resolve())
         self.set_value('app', "p4a.local_recipes", str(pysidedeploy_config.recipe_dir))
 
         # add permissions
@@ -332,7 +333,7 @@ class Buildozer:
     dry_run = False
 
     @staticmethod
-    def initialize(pysidedeploy_config: Config, generated_files_path: Path):
+    def initialize(pysidedeploy_config: Config):
         project_dir = Path(pysidedeploy_config.project_dir)
         buildozer_spec = project_dir / "buildozer.spec"
         if buildozer_spec.exists():
@@ -341,14 +342,14 @@ class Buildozer:
             return
 
         # creates buildozer.spec config file
-        command = ["buildozer", "init"]
+        command = [sys.executable, "-m", "buildozer", "init"]
         run_command(command=command, dry_run=Buildozer.dry_run)
         if not Buildozer.dry_run:
             if not buildozer_spec.exists():
                 raise RuntimeError(f"buildozer.spec not found in {Path.cwd()}")
-            BuildozerConfig(buildozer_spec, pysidedeploy_config, generated_files_path)
+            BuildozerConfig(buildozer_spec, pysidedeploy_config)
 
     @staticmethod
     def create_executable(mode: str):
-        command = ["buildozer", "android", mode]
+        command = [sys.executable, "-m", "buildozer", "android", mode]
         run_command(command=command, dry_run=Buildozer.dry_run)

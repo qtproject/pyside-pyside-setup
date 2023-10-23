@@ -6,6 +6,7 @@ import logging
 import warnings
 from configparser import ConfigParser
 from pathlib import Path
+from typing import List
 
 from project import ProjectData
 
@@ -14,9 +15,6 @@ from .commands import run_qmlimportscanner
 # Some QML plugins like QtCore are excluded from this list as they don't contribute much to
 # executable size. Excluding them saves the extra processing of checking for them in files
 EXCLUDED_QML_PLUGINS = {"QtQuick", "QtQuick3D", "QtCharts", "QtWebEngine", "QtTest", "QtSensors"}
-# TODO: Move this to android module. Fix circular import.
-ANDROID_NDK_VERSION = "25c"
-ANDROID_DEPLOY_CACHE = Path.home() / ".pyside6_android_deploy"
 
 
 class BaseConfig:
@@ -63,14 +61,14 @@ class Config(BaseConfig):
     """
 
     def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
-                 android_data, is_android: bool, existing_config_file: bool = False):
+                 existing_config_file: bool = False):
         super().__init__(config_file=config_file, existing_config_file=existing_config_file)
 
         self._dry_run = dry_run
         # set source_file
         self.source_file = Path(
             self.set_or_fetch(config_property_val=source_file, config_property_key="input_file")
-        )
+        ).resolve()
 
         # set python path
         self.python_path = Path(
@@ -115,83 +113,7 @@ class Config(BaseConfig):
         else:
             self._find_and_set_excluded_qml_plugins()
 
-        # Android
-        if is_android:
-            if android_data.wheel_pyside:
-                self.wheel_pyside = android_data.wheel_pyside
-            else:
-                wheel_pyside_temp = self.get_value("qt", "wheel_pyside")
-                if not wheel_pyside_temp:
-                    raise RuntimeError("[DEPLOY] Unable to find PySide6 Android wheel")
-                self.wheel_pyside = Path(wheel_pyside_temp).resolve()
-
-            if android_data.wheel_shiboken:
-                self.wheel_shiboken = android_data.wheel_shiboken
-            else:
-                wheel_shiboken_temp = self.get_value("qt", "wheel_shiboken")
-                if not wheel_shiboken_temp:
-                    raise RuntimeError("[DEPLOY] Unable to find shiboken6 Android wheel")
-                self.wheel_shiboken = Path(wheel_shiboken_temp).resolve()
-
-            self.ndk_path = None
-            if android_data.ndk_path:
-                # from cli
-                self.ndk_path = android_data.ndk_path
-            else:
-                # from config
-                ndk_path_temp = self.get_value("buildozer", "ndk_path")
-                if ndk_path_temp:
-                    self.ndk_path = Path(ndk_path_temp)
-                else:
-                    ndk_path_temp = (ANDROID_DEPLOY_CACHE / "android-ndk"
-                                     / f"android-ndk-r{ANDROID_NDK_VERSION}")
-                    if ndk_path_temp.exists():
-                        self.ndk_path = ndk_path_temp
-
-            if self.ndk_path:
-                print(f"Using Android NDK: {str(self.ndk_path)}")
-            else:
-                raise FileNotFoundError("[DEPLOY] Unable to find Android NDK. Please pass the NDK "
-                                        "path either from the CLI or from pysidedeploy.spec")
-
-            self.sdk_path = None
-            if android_data.sdk_path:
-                self.sdk_path = android_data.sdk_path
-            else:
-                sdk_path_temp = self.get_value("buildozer", "sdk_path")
-                if sdk_path_temp:
-                    self.sdk_path = Path(sdk_path_temp)
-                else:
-                    sdk_path_temp = ANDROID_DEPLOY_CACHE / "android-sdk"
-                    if sdk_path_temp.exists():
-                        self.sdk_path = sdk_path_temp
-                    else:
-                        logging.info("[DEPLOY] Use default SDK from buildozer")
-
-            if self.sdk_path:
-                print(f"Using Android SDK: {str(self.sdk_path)}")
-
-            recipe_dir_temp = self.get_value("buildozer", "recipe_dir")
-            self.recipe_dir = Path(recipe_dir_temp) if recipe_dir_temp else None
-
-            jars_dir_temp = self.get_value("buildozer", "jars_dir")
-            self.jars_dir = Path(jars_dir_temp) if jars_dir_temp else None
-
-            self._modules = []
-            if self.get_value("buildozer", "modules"):
-                self.modules = self.get_value("buildozer", "modules").split(",")
-
-            self.arch = self.get_value("buildozer", "arch")
-
-            self._local_libs = []
-            if self.get_value("buildozer", "local_libs"):
-                self.local_libs = self.get_value("buildozer", "local_libs").split(",")
-
-            self._qt_plugins = []
-            if self.get_value("qt", "plugins"):
-                self._qt_plugins = self.get_value("qt", "plugins").split(",")
-
-            self._mode = self.get_value("buildozer", "mode")
+        self._generated_files_path = self.project_dir / "deployment"
 
     def set_or_fetch(self, config_property_val, config_property_key, config_property_group="app"):
         """
@@ -213,6 +135,10 @@ class Config(BaseConfig):
     @property
     def dry_run(self):
         return self._dry_run
+
+    @property
+    def generated_files_path(self):
+        return self._generated_files_path
 
     @property
     def qml_files(self):
@@ -272,121 +198,12 @@ class Config(BaseConfig):
         self._excluded_qml_plugins = excluded_qml_plugins
 
     @property
-    def recipe_dir(self):
-        return self._recipe_dir
-
-    @recipe_dir.setter
-    def recipe_dir(self, recipe_dir: Path):
-        self._recipe_dir = recipe_dir.resolve() if recipe_dir else None
-        if self._recipe_dir:
-            self.set_value("buildozer", "recipe_dir", str(self._recipe_dir))
-
-    def recipes_exist(self):
-        if not self._recipe_dir:
-            return False
-
-        pyside_recipe_dir = Path(self.recipe_dir) / "PySide6"
-        shiboken_recipe_dir = Path(self.recipe_dir) / "shiboken6"
-
-        return pyside_recipe_dir.is_dir() and shiboken_recipe_dir.is_dir()
-
-    @property
-    def jars_dir(self) -> Path:
-        return self._jars_dir
-
-    @jars_dir.setter
-    def jars_dir(self, jars_dir: Path):
-        self._jars_dir = jars_dir.resolve() if jars_dir else None
-        if self._jars_dir:
-            self.set_value("buildozer", "jars_dir", str(self._jars_dir))
-
-    @property
-    def modules(self):
-        return self._modules
-
-    @modules.setter
-    def modules(self, modules):
-        self._modules = modules
-        self.set_value("buildozer", "modules", ",".join(modules))
-
-    @property
-    def local_libs(self):
-        return self._local_libs
-
-    @local_libs.setter
-    def local_libs(self, local_libs):
-        self._local_libs = local_libs
-        self.set_value("buildozer", "local_libs", ",".join(local_libs))
-
-    @property
-    def qt_plugins(self):
-        return self._qt_plugins
-
-    @qt_plugins.setter
-    def qt_plugins(self, qt_plugins):
-        self._qt_plugins = qt_plugins
-        self.set_value("qt", "plugins", ",".join(qt_plugins))
-
-    @property
-    def ndk_path(self):
-        return self._ndk_path
-
-    @ndk_path.setter
-    def ndk_path(self, ndk_path: Path):
-        self._ndk_path = ndk_path.resolve() if ndk_path else None
-        if self._ndk_path:
-            self.set_value("buildozer", "ndk_path", str(self._ndk_path))
-
-    @property
-    def sdk_path(self) -> Path:
-        return self._sdk_path
-
-    @sdk_path.setter
-    def sdk_path(self, sdk_path: Path):
-        self._sdk_path = sdk_path.resolve() if sdk_path else None
-        if self._sdk_path:
-            self.set_value("buildozer", "sdk_path", str(self._sdk_path))
-
-    @property
-    def arch(self):
-        return self._arch
-
-    @arch.setter
-    def arch(self, arch):
-        self._arch = arch
-        self.set_value("buildozer", "arch", arch)
-
-    @property
-    def mode(self):
-        return self._mode
-
-    @property
     def exe_dir(self):
         return self._exe_dir
 
     @exe_dir.setter
     def exe_dir(self, exe_dir: Path):
         self._exe_dir = exe_dir
-
-    @property
-    def wheel_pyside(self) -> Path:
-        return self._wheel_pyside
-
-    @wheel_pyside.setter
-    def wheel_pyside(self, wheel_pyside: Path):
-        self._wheel_pyside = wheel_pyside.resolve() if wheel_pyside else None
-        if self._wheel_pyside:
-            self.set_value("qt", "wheel_pyside", str(self._wheel_pyside))
-
-    @property
-    def wheel_shiboken(self) -> Path:
-        return self._wheel_shiboken
-
-    @wheel_shiboken.setter
-    def wheel_shiboken(self, wheel_shiboken: Path):
-        self._wheel_shiboken = wheel_shiboken.resolve() if wheel_shiboken else None
-        if self._wheel_shiboken:
-            self.set_value("qt", "wheel_shiboken", str(self._wheel_shiboken))
 
     def _find_and_set_qml_files(self):
         """Fetches all the qml_files in the folder and sets them if the

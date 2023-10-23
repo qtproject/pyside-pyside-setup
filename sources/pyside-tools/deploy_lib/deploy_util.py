@@ -19,12 +19,12 @@ def config_option_exists():
     return False
 
 
-def cleanup(generated_files_path: Path, config: Config, is_android: bool = False):
+def cleanup(config: Config, is_android: bool = False):
     """
         Cleanup the generated build folders/files
     """
-    if generated_files_path.exists():
-        shutil.rmtree(generated_files_path)
+    if config.generated_files_path.exists():
+        shutil.rmtree(config.generated_files_path)
         logging.info("[DEPLOY] Deployment directory purged")
 
     if is_android:
@@ -39,37 +39,27 @@ def cleanup(generated_files_path: Path, config: Config, is_android: bool = False
             logging.info(f"[DEPLOY] {str(buildozer_build)} removed")
 
 
-def get_config(python_exe: Path, dry_run: bool = False, config_file: Path = None, main_file:
-               Path = None, android_data=None, is_android: bool = False):
+def create_config_file(dry_run: bool = False, config_file: Path = None, main_file:  Path = None):
     """
         Sets up a new pysidedeploy.spec or use an existing config file
     """
 
-    config_file_exists = config_file and Path(config_file).exists()
-
-    if main_file and not config_file_exists:
+    if main_file:
         if main_file.parent != Path.cwd():
             config_file = main_file.parent / "pysidedeploy.spec"
         else:
             config_file = Path.cwd() / "pysidedeploy.spec"
 
-    if config_file_exists:
-        logging.info(f"[DEPLOY] Using existing config file {config_file}")
-    else:
-        logging.info(f"[DEPLOY] Creating config file {config_file}")
-        if not dry_run:
-            shutil.copy(Path(__file__).parent / "default.spec", config_file)
+    logging.info(f"[DEPLOY] Creating config file {config_file}")
+    if not dry_run:
+        shutil.copy(Path(__file__).parent / "default.spec", config_file)
 
     # the config parser needs a reference to parse. So, in the case of --dry-run
     # use the default.spec file.
-    if dry_run and not config_file_exists:
+    if dry_run:
         config_file = Path(__file__).parent / "default.spec"
 
-    config = Config(config_file=config_file, source_file=main_file, python_exe=python_exe,
-                    dry_run=dry_run, android_data=android_data, is_android=is_android,
-                    existing_config_file=config_file_exists)
-
-    return config
+    return config_file
 
 
 def setup_python(dry_run: bool, force: bool, init: bool):
@@ -109,12 +99,12 @@ def install_python_dependencies(config: Config, python: PythonExecutable, init: 
             python.install(packages=["patchelf"])
 
 
-def finalize(generated_files_path: Path, config: Config):
+def finalize(config: Config):
     """
         Copy the executable into the final location
         For Android deployment, this is done through buildozer
     """
-    generated_exec_path = generated_files_path / (config.source_file.stem + EXE_FORMAT)
+    generated_exec_path = config.generated_files_path / (config.source_file.stem + EXE_FORMAT)
     if generated_exec_path.exists() and config.exe_dir:
         shutil.copy(generated_exec_path, config.exe_dir)
         print("[DEPLOY] Executed file created in "

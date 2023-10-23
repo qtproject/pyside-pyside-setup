@@ -35,7 +35,7 @@ from pathlib import Path
 from textwrap import dedent
 
 from deploy_lib import (MAJOR_VERSION, Config, cleanup, config_option_exists,
-                        finalize, get_config, install_python_dependencies,
+                        finalize, create_config_file, install_python_dependencies,
                         setup_python)
 
 
@@ -54,22 +54,26 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
 
     # Nuitka command to run
     command_str = None
-    generated_files_path = None
     config = None
     logging.info("[DEPLOY] Start")
 
     python = setup_python(dry_run=dry_run, force=force, init=init)
-    config = get_config(python_exe=python.exe, dry_run=dry_run, config_file=config_file,
-                        main_file=main_file)
+    config_file_exists = config_file and Path(config_file).exists()
+
+    if config_file_exists:
+        logging.info(f"[DEPLOY] Using existing config file {config_file}")
+    else:
+        config_file = create_config_file(dry_run=dry_run, config_file=config_file,
+                                         main_file=main_file)
+
+    config = Config(config_file=config_file, source_file=main_file, python_exe=python.exe,
+                    dry_run=dry_run, existing_config_file=config_file_exists)
 
     # set application name
     if name:
         config.title = name
 
-    source_file = config.project_dir / config.source_file
-
-    generated_files_path = source_file.parent / "deployment"
-    cleanup(generated_files_path=generated_files_path, config=config)
+    cleanup(config=config)
 
     install_python_dependencies(config=config, python=python, init=init,
                                 packages="packages")
@@ -96,17 +100,17 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
             logging.info("[DEPLOY] Deploying application")
 
         command_str = python.create_executable(
-                        source_file=source_file,
+                        source_file=config.source_file,
                         extra_args=config.extra_args,
                         config=config,
                     )
     except Exception:
         print(f"[DEPLOY] Exception occurred: {traceback.format_exc()}")
     finally:
-        if generated_files_path and config:
-            finalize(generated_files_path=generated_files_path, config=config)
+        if config.generated_files_path and config:
+            finalize(config=config)
             if not keep_deployment_files:
-                cleanup(generated_files_path=generated_files_path, config=Config)
+                cleanup(config=config)
 
     logging.info("[DEPLOY] End")
     return command_str
