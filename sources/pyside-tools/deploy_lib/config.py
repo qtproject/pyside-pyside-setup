@@ -8,7 +8,6 @@ from configparser import ConfigParser
 from pathlib import Path
 
 from project import ProjectData
-
 from .commands import run_qmlimportscanner
 from . import DEFAULT_APP_ICON
 
@@ -233,27 +232,17 @@ class Config(BaseConfig):
             self.qml_files = qml_files
         else:
             qml_files_temp = None
-            source_file = (
-                Path(self.get_value("app", "input_file"))
-                if self.get_value("app", "input_file")
-                else None
-            )
-            python_exe = (
-                Path(self.get_value("python", "python_path"))
-                if self.get_value("python", "python_path")
-                else None
-            )
-            if source_file and python_exe:
+            if self.source_file and self.python_path:
                 if not self.qml_files:
-                    qml_files_temp = list(source_file.parent.glob("**/*.qml"))
+                    qml_files_temp = list(self.source_file.parent.glob("**/*.qml"))
 
                 # add all QML files, excluding the ones shipped with installed PySide6
                 # The QML files shipped with PySide6 gets added if venv is used,
                 # because of recursive glob
-                if python_exe.parent.parent == source_file.parent:
+                if self.python_path.parent.parent == self.source_file.parent:
                     # python venv path is inside the main source dir
                     qml_files_temp = list(
-                        set(qml_files_temp) - set(python_exe.parent.parent.rglob("*.qml"))
+                        set(qml_files_temp) - set(self.python_path.parent.parent.rglob("*.qml"))
                     )
 
                 if len(qml_files_temp) > 500:

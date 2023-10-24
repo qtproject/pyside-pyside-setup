@@ -75,17 +75,29 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         self.config_file = self.temp_example / "pysidedeploy.spec"
         self.buildozer_config = self.temp_example / "buildozer.spec"
 
-    def test_dry_run(self, mock_extract_jar):
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_local_libs")
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
+    def test_dry_run(self, mock_qtlibs, mock_extraqtmodules, mock_local_libs, mock_extract_jar):
+        mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
+        mock_extraqtmodules.return_value = []
+        dependent_plugins = ["platforms_qtforandroid",
+                             "platforminputcontexts_qtvirtualkeyboardplugin",
+                             "iconengines_qsvgicon"]
+        mock_local_libs.return_value = [], dependent_plugins
         self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
                                  pyside_wheel=self.pyside_wheel, ndk_path=self.ndk_path,
                                  dry_run=True, force=True)
+
         self.assertEqual(mock_extract_jar.call_count, 0)
+        self.assertEqual(mock_qtlibs.call_count, 1)
+        self.assertEqual(mock_extraqtmodules.call_count, 1)
+        self.assertEqual(mock_local_libs.call_count, 1)
 
     @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
     @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
-    @patch("deploy_lib.android.buildozer.BuildozerConfig."
-           "_BuildozerConfig__find_dependent_qt_modules")
-    @patch("deploy_lib.android.buildozer.find_qtlibs_in_wheel")
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
     def test_config(self, mock_qtlibs, mock_extraqtmodules, mock_recipes_exist, mock_find_jars,
                     mock_extract_jar):
         jar_dir = "tmp/jar/PySide6/jar"
@@ -189,12 +201,11 @@ class TestPySide6AndroidDeployQml(DeployTestBase):
         (self.temp_qml_example / "stringlistmodel.py").rename(self.temp_qml_example / "main.py")
         (self.temp_qml_example / "stringlistmodel.pyproject").unlink()
 
-    @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_local_libs")
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_local_libs")
     @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
     @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
-    @patch("deploy_lib.android.buildozer.BuildozerConfig."
-           "_BuildozerConfig__find_dependent_qt_modules")
-    @patch("deploy_lib.android.buildozer.find_qtlibs_in_wheel")
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
     def test_config_with_Qml(self, mock_qtlibs, mock_extraqtmodules, mock_recipes_exist,
                              mock_find_jars, mock_local_libs, mock_extract_jar,
                              mock_qmlimportscanner):
@@ -228,7 +239,6 @@ class TestPySide6AndroidDeployQml(DeployTestBase):
         self.assertTrue(self.config_file.exists())
         self.assertTrue(self.buildozer_config_file.exists())
 
-        # test config file contents
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
         expected_modules = {"Quick", "Core", "Gui", "Network", "Qml", "QmlModels", "OpenGL"}
         obtained_modules = set(config_obj.get_value("buildozer", "modules").split(","))

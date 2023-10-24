@@ -17,7 +17,18 @@ else:
 
 DEFAULT_APP_ICON = str((Path(__file__).parent / f"pyside_icon{IMAGE_FORMAT}").resolve())
 
-from .commands import run_command
+
+def get_all_pyside_modules():
+    """
+    Returns all the modules installed with PySide6
+    """
+    # They all start with `Qt` as the prefix. Removing this prefix and getting the actual
+    # module name
+    import PySide6
+    return [module[2:] for module in PySide6.__all__]
+
+
+from .commands import run_command, run_qmlimportscanner
 from .nuitka_helper import Nuitka
 from .python_helper import PythonExecutable, find_pyside_modules
 from .config import BaseConfig, Config

@@ -102,8 +102,15 @@ def find_lib_dependencies(llvm_readobj: Path, lib_path: Path, used_dependencies:
     if lib_path.name in used_dependencies:
         return
 
+    used_dependencies.add(lib_path.name)
+
     command = [str(llvm_readobj), "--needed-libs", str(lib_path)]
-    _, output = run_command(command=command, dry_run=dry_run, fetch_output=True)
+
+    # even if dry_run is given, we need to run the actual command to see all the dependencies
+    # for which llvm-readelf is run.
+    if dry_run:
+        _, output = run_command(command=command, dry_run=dry_run, fetch_output=True)
+    _, output = run_command(command=command, dry_run=False, fetch_output=True)
 
     dependencies = set()
     neededlibraries_found = False

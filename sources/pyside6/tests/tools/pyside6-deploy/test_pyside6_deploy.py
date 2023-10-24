@@ -11,6 +11,10 @@ from pathlib import Path
 from unittest.mock import patch
 from unittest import mock
 
+sys.path.append(os.fspath(Path(__file__).resolve().parents[2]))
+from init_paths import init_test_paths
+init_test_paths(False)
+
 
 def is_pyenv_python():
     pyenv_root = os.environ.get("PYENV_ROOT")

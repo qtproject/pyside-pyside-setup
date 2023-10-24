@@ -130,6 +130,7 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
         # this cannot be done when config file is initialized because cleanup() removes it
         # so this can only be done after the cleanup()
         config.find_and_set_jars_dir()
+        config.verify_and_set_recipe_dir()
 
         # TODO: include qml files from pysidedeploy.spec rather than from extensions
         # buildozer currently includes all the files with .qml extension
