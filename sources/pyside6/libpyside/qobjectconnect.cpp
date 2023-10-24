@@ -240,7 +240,10 @@ QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *sign
         }
     }
 
-    auto connection = QMetaObject::connect(source, signalIndex, receiver.receiver, slotIndex, type);
+    QMetaObject::Connection connection{};
+    Py_BEGIN_ALLOW_THREADS // PYSIDE-2367, prevent threading deadlocks with connectNotify()
+    connection = QMetaObject::connect(source, signalIndex, receiver.receiver, slotIndex, type);
+    Py_END_ALLOW_THREADS
     if (!connection) {
         if (receiver.usingGlobalReceiver)
             signalManager.releaseGlobalReceiver(source, receiver.receiver);
@@ -269,7 +272,11 @@ bool qobjectDisconnectCallback(QObject *source, const char *signal, PyObject *ca
     const int signalIndex = source->metaObject()->indexOfSignal(signal + 1);
     const int slotIndex = receiver.slotIndex;
 
-    if (!QMetaObject::disconnectOne(source, signalIndex, receiver.receiver, slotIndex))
+    bool ok{};
+    Py_BEGIN_ALLOW_THREADS // PYSIDE-2367, prevent threading deadlocks with disconnectNotify()
+    ok = QMetaObject::disconnectOne(source, signalIndex, receiver.receiver, slotIndex);
+    Py_END_ALLOW_THREADS
+    if (!ok)
         return false;
 
     Q_ASSERT(receiver.receiver);
