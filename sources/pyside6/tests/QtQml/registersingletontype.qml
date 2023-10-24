@@ -9,6 +9,6 @@ Item {
         SingletonQObjectCallback.data += SingletonQObjectNoCallback.data
             + SingletonQJSValue.data
             + SingletonInstance.data
-            + DecoratedSingletonQObject.data;
+            + DecoratedSingletonQObject.data + DecoratedSingletonWithCreate.data;
     }
 }

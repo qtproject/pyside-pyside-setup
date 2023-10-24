@@ -65,6 +65,26 @@ class DecoratedSingletonQObject(QObject):
     data = Property(int, getData, setData)
 
 
+@QmlElement
+@QmlSingleton
+class DecoratedSingletonWithCreate(QObject):
+    def __init__(self, data, parent=None):
+        super().__init__(parent)
+        self._data = data
+
+    @staticmethod
+    def create(engine):
+        return DecoratedSingletonWithCreate(400)
+
+    def getData(self):
+        return self._data
+
+    def setData(self, data):
+        self._data = data
+
+    data = Property(int, getData, setData)
+
+
 class TestQmlSupport(unittest.TestCase):
     def testIt(self):
         app = QGuiApplication([])
@@ -94,7 +114,7 @@ class TestQmlSupport(unittest.TestCase):
         view.show()
         QTimer.singleShot(250, view.close)
         app.exec()
-        self.assertEqual(finalResult, 499)
+        self.assertEqual(finalResult, 899)
 
 
 if __name__ == '__main__':

@@ -408,6 +408,8 @@ class SingletonQObjectCallbackCreation : public SingletonQObjectCreationBase
 public:
     explicit SingletonQObjectCallbackCreation(PyObject *callback) :
         SingletonQObjectCreationBase(callback, callback) {}
+    explicit SingletonQObjectCallbackCreation(PyObject *callback, PyObject *ref) :
+        SingletonQObjectCreationBase(callback, ref) {}
 
     QObject *operator ()(QQmlEngine *engine, QJSEngine *) const
     {
@@ -617,6 +619,30 @@ enum class RegisterMode {
 
 namespace PySide::Qml {
 
+// Check for a static create() method on a decorated singleton.
+// Might set a Python error if the check fails.
+static std::optional<SingletonQObjectCreation>
+    singletonCreateMethod(PyTypeObject *pyObjType)
+{
+    Shiboken::AutoDecRef tpDict(PepType_GetDict(pyObjType));
+    auto *create = PyDict_GetItemString(tpDict.object(), "create");
+    // Method decorated by "@staticmethod"
+    if (create == nullptr || std::strcmp(Py_TYPE(create)->tp_name, "staticmethod") != 0)
+        return std::nullopt;
+    // 3.10: "__wrapped__"
+    Shiboken::AutoDecRef function(PyObject_GetAttrString(create, "__func__"));
+    if (function.isNull()) {
+        PyErr_Format(PyExc_TypeError, "Cannot retrieve function of callback (%S).",
+                     create);
+        return std::nullopt;
+    }
+    if (!checkSingletonCallback(function.object()))
+        return std::nullopt;
+    // Reference to the type needs to be kept.
+    return SingletonQObjectCallbackCreation(function.object(),
+                                            reinterpret_cast<PyObject *>(pyObjType));
+}
+
 PyObject *qmlElementMacro(PyObject *pyObj, const char *decoratorName,
                           const QByteArray &typeName)
 {
@@ -651,11 +677,19 @@ PyObject *qmlElementMacro(PyObject *pyObj, const char *decoratorName,
         return nullptr;
     const auto importData = importDataO.value();
 
-    const int result = mode == RegisterMode::Singleton
-        ? PySide::Qml::qmlRegisterSingletonTypeV2(registerObject, pyObj, importData,
-                                                  SingletonQObjectFromTypeCreation(pyObj))
-        : PySide::Qml::qmlRegisterType(registerObject, pyObj, importData);
-
+    int result{};
+    if (mode == RegisterMode::Singleton) {
+        auto singletonCreateMethodO = singletonCreateMethod(pyObjType);
+        if (!singletonCreateMethodO.has_value()) {
+            if (PyErr_Occurred() != nullptr)
+                return nullptr;
+            singletonCreateMethodO = SingletonQObjectFromTypeCreation(pyObj);
+        }
+        result = PySide::Qml::qmlRegisterSingletonTypeV2(registerObject, pyObj, importData,
+                                                         singletonCreateMethodO.value());
+    } else {
+        result = PySide::Qml::qmlRegisterType(registerObject, pyObj, importData);
+    }
     if (result == -1) {
         PyErr_Format(PyExc_TypeError, "%s: Failed to register type %s.",
                      decoratorName, pyObjType->tp_name);

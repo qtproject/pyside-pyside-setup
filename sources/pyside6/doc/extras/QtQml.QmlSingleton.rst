@@ -22,4 +22,17 @@ constructor.
     class ClassForQml(QObject):
         # ...
 
+It is also possible to use a static ``create()`` method which receives
+the engine as a parameter:
+
+.. code-block:: python
+
+    @QmlElement
+    @QmlSingleton
+    class ClassForQml(QObject):
+
+        @staticmethod
+        def create(engine):
+            # ...
+
 .. note:: The order of the decorators matters; ``QmlSingleton`` needs to be preceded by ``QmlElement``.
