@@ -416,16 +416,17 @@ You can find the ``requirements-doc.txt`` file in the root of the repository.
 
 Starting from 5.15, there are two options to build the documentation:
 
-1. Building rst-only documentation (no API)
+1. Building the base documentation (no API)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The process of parsing Qt headers to generate the PySide API documentation can take several
-minutes, this means that modifying a specific section of the rst files we currently have, might
-become a hard task. You may only care about the ReStructuredText only documentation.
+minutes, this means that modifying a specific section of the documentation we currently have, might
+become a hard task. You may only care about the base documentation, which comprises all the
+documentation except for the API documentation.
 
 To generate this, execute the following command::
 
-    python setup.py build_rst_docs
+    python setup.py build_base_docs
 
 This will generate an ``html/`` directory with the following structure::
 
@@ -443,13 +444,14 @@ files.
 This is useful when updating the general sections of the documentation, adding tutorials,
 modifying the build instructions, and more.
 
-.. note:: In case you are interested in generating the Example Gallery, you
-          would need to first run ``python tools/example_gallery/main.py`` to
-          generate the examples ``rst`` for the gallery.
+.. note:: In case you are interested in only generating the Example Gallery,
+          you would need to run ``python tools/example_gallery/main.py`` to
+          generate the examples ``documentation`` for the gallery. This will
+          also be used internally by the ``build_base_docs`` target
 
 
-2. Building the documentation (rst + API)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2. Building the documentation (Base + API)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The documentation is being generated using **qdoc** to get the API information, and also **sphinx**
 for the local Python related notes.
@@ -486,7 +488,7 @@ The target executes several steps:
 
 Re-running the command will not execute step 1 unless the file
 ``qdoc-output/webxml/qtcore-index.webxml`` is removed from the build tree.
-Similarly, step 2 will not be executed unless the file ``rst/PySide6/QtCore/index.rst``
+Similarly, step 2 will not be executed unless the file ``base/PySide6/QtCore/index.rst``
 is removed.
 
 Finally, you will get a ``html`` directory containing all the generated documentation. The offline
@@ -496,7 +498,7 @@ can find ``Shiboken.qch`` in the build directory, ``build/<your_env_name>/build/
 If you want to temporarily change a ``.rst`` file to examine the impact on
 formatting, you can re-run ``sphinx`` in the ``doc`` directory::
 
-    sphinx-build rst html
+    sphinx-build base html
 
 Viewing offline documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -519,7 +521,7 @@ Shiboken documentation. This can fail if
 
 * the default ``QCH`` format is used; in which case the required ``objects.inv``
   files are not generated. Use ``--doc-build-online``.
-* rst-only and full doc builds are mixed, resulting in wrong values for the
+* base and full doc builds are mixed, resulting in wrong values for the
   intersphinx location in the CMake files. Re-run ``cmake`` to fix this.
 
 Using the internal tools

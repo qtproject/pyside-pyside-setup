@@ -10,7 +10,7 @@ import sysconfig
 import time
 from packaging.version import parse as parse_version
 from pathlib import Path
-from shutil import copytree
+from shutil import copytree, rmtree
 from textwrap import dedent
 
 # PYSIDE-1760: Pre-load setuptools modules early to avoid racing conditions.
@@ -784,7 +784,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             os.environ['MACOSX_DEPLOYMENT_TARGET'] = deployment_target
 
         if OPTION["BUILD_DOCS"]:
-            # Build the whole documentation (rst + API) by default
+            # Build the whole documentation (Base + API) by default
             cmake_cmd.append("-DFULLDOCSBUILD=1")
 
             if OPTION["DOC_BUILD_ONLINE"]:
@@ -1195,17 +1195,21 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             log.debug(f"Patched rpath to '{rpath_value}' in {library}.")
 
 
-class PysideRstDocs(Command, CommandMixin):
-    description = "Build .rst documentation only"
+class PysideBaseDocs(Command, CommandMixin):
+    description = "Build the base documentation only"
     user_options = CommandMixin.mixin_user_options
 
     def __init__(self, *args, **kwargs):
-        self.command_name = "build_rst_docs"
+        if args[0].commands[0] == "build_rst_docs":
+            args[0].commands[0] = "build_base_docs"
+            log.warning("'build_rst_docs' is deprecated and will be removed. "
+                        "Please use 'build_base_docs' instead.")
+        self.command_name = "build_base_docs"
         Command.__init__(self, *args, **kwargs)
         CommandMixin.__init__(self)
 
     def initialize_options(self):
-        log.info("-- This build process will not include the API documentation."
+        log.info("-- This build process will not include the API documentation. "
                  "API documentation requires a full build of pyside/shiboken.")
         self.skip = False
         if config.is_internal_shiboken_generator_build():
@@ -1215,8 +1219,13 @@ class PysideRstDocs(Command, CommandMixin):
             self.doc_dir = config.setup_script_dir / "sources" / self.name / "doc"
             # Check if sphinx is installed to proceed.
             found = importlib.util.find_spec("sphinx")
+            self.html_dir = Path("html")
             if found:
                 if self.name == SHIBOKEN:
+                    # Delete the 'html' directory since new docs will be generated anyway
+                    if self.html_dir.is_dir():
+                        rmtree(self.html_dir)
+                        log.info("-- Deleted old html directory")
                     log.info("-- Generating Shiboken documentation")
                     log.info(f"-- Documentation directory: 'html/{PYSIDE}/{SHIBOKEN}/'")
                 elif self.name == PYSIDE:
@@ -1224,7 +1233,6 @@ class PysideRstDocs(Command, CommandMixin):
                     log.info(f"-- Documentation directory: 'html/{PYSIDE}/'")
             else:
                 raise SetupError("Sphinx not found - aborting")
-            self.html_dir = Path("html")
 
             # creating directories html/pyside6/shiboken6
             try:
@@ -1272,7 +1280,7 @@ class PysideRstDocs(Command, CommandMixin):
                 raise SetupError(f"Error running CMake for {self.doc_dir}")
 
             if self.name == PYSIDE:
-                self.sphinx_src = self.out_dir / "rst"
+                self.sphinx_src = self.out_dir / "base"
                 example_gallery = config.setup_script_dir / "tools" / "example_gallery" / "main.py"
                 assert(example_gallery.is_file())
                 example_gallery_cmd = [sys.executable, os.fspath(example_gallery)]
@@ -1307,7 +1315,9 @@ cmd_class_dict = {
     'develop': PysideDevelop,
     'install': PysideInstall,
     'install_lib': PysideInstallLib,
-    'build_rst_docs': PysideRstDocs,
+    'build_base_docs': PysideBaseDocs,
+    # TODO: Remove build_rst_docs in the next version, see PYSIDE-2504
+    'build_rst_docs': PysideBaseDocs,
 }
 if wheel_module_exists:
     pyside_bdist_wheel = get_bdist_wheel_override()

@@ -222,7 +222,7 @@ intersphinx_mapping = {'shiboken6': ('shiboken6','@SHIBOKEN_INTERSPHINX_FILE@')}
 add_module_names = False
 
 # Skip some warnings when building the documentation with
-# 'build_rst_docs' due to the lack of qdoc generated files, in charge
+# 'build_base_docs' due to the lack of qdoc generated files, in charge
 # of sphinx modules (autodoc) and references.
 if @SKIP_SPHINX_WARNINGS@:
     suppress_warnings = ["autodoc", "autodoc.import_object", "ref.ref"]

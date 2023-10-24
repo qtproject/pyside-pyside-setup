@@ -32,7 +32,7 @@ if(NOT CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         return()
     endif()
 else()
-    # We are building the docs as a standalone project, likely via setup.py build_rst_docs
+    # We are building the docs as a standalone project, likely via setup.py build_base_docs
     # command. Perform stricter sanity checks.
     if(NOT SPHINX_BUILD)
         message(FATAL_ERROR "sphinx-build command not found. Please set the SPHINX_BUILD variable.")
@@ -51,6 +51,10 @@ else()
 endif()
 
 set(DOC_DATA_DIR "${CMAKE_CURRENT_BINARY_DIR}/qdoc-output")
+# Directory for sphinx-generated files to build the HTML website. If changed,
+# update "build_scripts/main.py" in "PysideBaseDocs" class at line:
+# self.sphinx_src = self.out_dir / "base".
+set(DOC_BASE_DIR "base")
 
 set(ENV_INHERITANCE_FILE "${CMAKE_CURRENT_BINARY_DIR}/inheritance.json")
 
@@ -60,7 +64,7 @@ set(TS_ROOT "${ROOT}/PySide6")
 file(REMOVE ${CMAKE_CURRENT_LIST_DIR}/pyside.qdocconf ${CMAKE_CURRENT_LIST_DIR}/pyside.qdocconf.in)
 
 # We need to find the interpreter when running this only
-# for a rst_build_docs case, and not a full doc build
+# for the 'build_base_docs' case, and not a full doc build
 if (NOT FULLDOCSBUILD)
     find_package(Python COMPONENTS Interpreter)
     set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
@@ -83,7 +87,7 @@ set(TOOLS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools")
 if (FULLDOCSBUILD)
     # Fetch and transform the snippets from Qt
     set(SNIPPETS_TOOL "${TOOLS_DIR}/snippets_translate/main.py")
-    set(SNIPPETS_TARGET ${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets)
+    set(SNIPPETS_TARGET ${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/codesnippets)
 
     # Note QT_SRC_DIR points to 'qtbase',
     # so we use the general SRC directory to copy all the other snippets
@@ -96,7 +100,7 @@ if (FULLDOCSBUILD)
 endif()
 
 # Generate example gallery
-set(EXAMPLE_TOOL_TARGET "${CMAKE_CURRENT_BINARY_DIR}/rst/examples")
+set(EXAMPLE_TOOL_TARGET "${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/examples")
 set(EXAMPLE_TOOL_OPTIONS --target "${EXAMPLE_TOOL_TARGET}" --qt-src-dir "${QT_SRC_DIR}")
 if (QUIET_BUILD)
     list(APPEND EXAMPLE_TOOL_OPTIONS "-q")
@@ -185,7 +189,7 @@ endif()
 add_custom_target(apidoc
                   COMMAND ${CMAKE_COMMAND} -E env INHERITANCE_FILE=${ENV_INHERITANCE_FILE}
                           ${SHIBOKEN_PYTHON_INTERPRETER} ${SPHINX_BUILD} -b ${DOC_OUTPUT_FORMAT}
-                          -j auto ${CMAKE_CURRENT_BINARY_DIR}/rst html
+                          -j auto ${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR} html
                   COMMENT "Generating PySide htmls..."
                  )
 
@@ -217,14 +221,14 @@ else()
 endif()
 
 # create conf.py based on conf.py.in
-configure_file("conf.py.in" "rst/conf.py" @ONLY)
+configure_file("conf.py.in" "${DOC_BASE_DIR}/conf.py" @ONLY)
 
-set(CODE_SNIPPET_ROOT "${CMAKE_CURRENT_BINARY_DIR}/rst/codesnippets")
+set(CODE_SNIPPET_ROOT "${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/codesnippets")
 
 if (FULLDOCSBUILD)
 shiboken_get_tool_shell_wrapper(shiboken tool_wrapper)
 
-add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.rst"
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/PySide6/QtCore/index.rst"
                    COMMAND
                        ${tool_wrapper}
                        $<TARGET_FILE:Shiboken6::shiboken6>
@@ -236,26 +240,26 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.
                        --typesystem-paths="${QDOC_TYPESYSTEM_PATH}"
                        --library-source-dir=${QT_SRC_DIR}
                        --documentation-data-dir=${DOC_DATA_DIR}/webxml
-                       --output-directory=${CMAKE_CURRENT_BINARY_DIR}/rst
+                       --output-directory=${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}
                        --documentation-code-snippets-dir=${CODE_SNIPPET_ROOT}
                        --snippets-path-rewrite=${QT_ROOT_PATH}:${CODE_SNIPPET_ROOT}
-                       --documentation-extra-sections-dir=${CMAKE_CURRENT_BINARY_DIR}/rst/extras
-                       --additional-documentation=${CMAKE_CURRENT_BINARY_DIR}/rst/additionaldocs.lst
+                       --documentation-extra-sections-dir=${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/extras
+                       --additional-documentation=${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/additionaldocs.lst
                        --inheritance-file=${ENV_INHERITANCE_FILE}
                        ${global_typesystem}
                    WORKING_DIRECTORY ${${module}_SOURCE_DIR}
                    COMMENT "Running generator to generate documentation...")
 endif()
 
-add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/rst/extras"
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/rst
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/extras"
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}
                    COMMENT "Copying docs...")
 
 add_custom_target("doc_copy"
-                  DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/rst/extras")
+                  DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/extras")
 
 add_custom_target("docrsts"
-                  DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/rst/PySide6/QtCore/index.rst")
+                  DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/PySide6/QtCore/index.rst")
 
 set(LIBEXEC_PATH "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_LIBEXECS}")
 add_custom_target("licensedocrsts"
@@ -263,7 +267,7 @@ add_custom_target("licensedocrsts"
             ${CMAKE_CURRENT_LIST_DIR}/qtattributionsscannertorst.py
             -l "${LIBEXEC_PATH}"
             ${CMAKE_CURRENT_LIST_DIR}/../../..
-            ${CMAKE_CURRENT_BINARY_DIR}/rst/licenses.rst
+            ${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/licenses.rst
     COMMENT "Creating 3rdparty license documentation..."
 )
 
