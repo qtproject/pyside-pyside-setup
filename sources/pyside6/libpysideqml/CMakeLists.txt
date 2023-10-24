@@ -59,7 +59,7 @@ set_target_properties(pyside6qml PROPERTIES
 
 target_compile_definitions(pyside6qml PRIVATE -DQT_LEAN_HEADERS=1)
 
-set_property(TARGET pyside6 PROPERTY CXX_STANDARD 17)
+set_property(TARGET pyside6qml PROPERTY CXX_STANDARD 17)
 
 if(PYSIDE_QT_CONF_PREFIX)
     set_property(SOURCE pysideqml.cpp
