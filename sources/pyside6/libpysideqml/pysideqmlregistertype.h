@@ -10,7 +10,7 @@
 
 namespace QQmlPrivate
 {
-struct RegisterType;
+struct RegisterTypeAndRevisions;
 }
 
 namespace PySide::Qml
