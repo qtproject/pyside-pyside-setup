@@ -103,6 +103,8 @@ private:
 void ApiExtractorOptionsParser::parseIncludePathOption(const QString &value,
                                                        HeaderType headerType)
 {
+    if (value.isEmpty())
+        throw Exception(u"Empty value passed to include path option"_s);
     const auto path = QFile::encodeName(QDir::cleanPath(value));
     m_options->m_includePaths.append(HeaderPath{path, headerType});
 }
@@ -174,19 +176,22 @@ bool ApiExtractorOptionsParser::handleOption(const QString &key, const QString &
         return true;
     }
     if (key == u"clang-options") {
-        m_options->m_clangOptions.append(value.split(u','));
+        m_options->m_clangOptions.append(value.split(u',', Qt::SkipEmptyParts));
         return true;
     }
     if (key == u"include-paths") {
-        parseIncludePathOption(value.split(QDir::listSeparator()), HeaderType::Standard);
+        parseIncludePathOption(value.split(QDir::listSeparator(), Qt::SkipEmptyParts),
+                               HeaderType::Standard);
         return true;
     }
     if (key == u"framework-include-paths") {
-        parseIncludePathOption(value.split(QDir::listSeparator()), HeaderType::Framework);
+        parseIncludePathOption(value.split(QDir::listSeparator(), Qt::SkipEmptyParts),
+                               HeaderType::Framework);
         return true;
     }
     if (key == u"system-include-paths") {
-        parseIncludePathOption(value.split(QDir::listSeparator()), HeaderType::System);
+        parseIncludePathOption(value.split(QDir::listSeparator(), Qt::SkipEmptyParts),
+                               HeaderType::System);
         return true;
     }
     if (key == u"language-level") {
@@ -376,15 +381,15 @@ bool ApiExtractorPrivate::runHelper(ApiExtractorFlags flags)
 
     for (const HeaderPath &headerPath : std::as_const(m_includePaths))
         arguments.append(HeaderPath::includeOption(headerPath));
+    if (flags.testFlag(ApiExtractorFlag::UsePySideExtensions))
+        addPySideExtensions(&arguments);
     arguments.append(QFile::encodeName(preprocessedCppFileName));
+
     if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
         qCInfo(lcShiboken).noquote().nospace()
             << "clang language level: " << int(m_languageLevel)
             << "\nclang arguments: " << arguments;
     }
-
-    if (flags.testFlag(ApiExtractorFlag::UsePySideExtensions))
-        addPySideExtensions(&arguments);
 
     const bool result = m_builder->build(arguments, flags, addCompilerSupportArguments,
                                          m_languageLevel);
