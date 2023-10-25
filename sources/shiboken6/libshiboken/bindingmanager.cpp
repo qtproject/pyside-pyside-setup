@@ -118,17 +118,19 @@ struct BindingManager::BindingManagerPrivate {
     bool destroying;
 
     BindingManagerPrivate() : destroying(false) {}
-    bool releaseWrapper(void *cptr, SbkObject *wrapper);
-    void assignWrapper(SbkObject *wrapper, const void *cptr);
 
+    bool releaseWrapper(void *cptr, SbkObject *wrapper, const int *bases = nullptr);
+    bool releaseWrapperHelper(void *cptr, SbkObject *wrapper);
+
+    void assignWrapper(SbkObject *wrapper, const void *cptr, const int *bases = nullptr);
+    void assignWrapperHelper(SbkObject *wrapper, const void *cptr);
 };
 
-bool BindingManager::BindingManagerPrivate::releaseWrapper(void *cptr, SbkObject *wrapper)
+inline bool BindingManager::BindingManagerPrivate::releaseWrapperHelper(void *cptr, SbkObject *wrapper)
 {
     // The wrapper argument is checked to ensure that the correct wrapper is released.
     // Returns true if the correct wrapper is found and released.
     // If wrapper argument is NULL, no such check is performed.
-    std::lock_guard<std::recursive_mutex> guard(wrapperMapLock);
     auto iter = wrapperMapper.find(cptr);
     if (iter != wrapperMapper.end() && (wrapper == nullptr || iter->second == wrapper)) {
         wrapperMapper.erase(iter);
@@ -137,13 +139,39 @@ bool BindingManager::BindingManagerPrivate::releaseWrapper(void *cptr, SbkObject
     return false;
 }
 
-void BindingManager::BindingManagerPrivate::assignWrapper(SbkObject *wrapper, const void *cptr)
+bool BindingManager::BindingManagerPrivate::releaseWrapper(void *cptr, SbkObject *wrapper,
+                                                           const int *bases)
 {
     assert(cptr);
     std::lock_guard<std::recursive_mutex> guard(wrapperMapLock);
+    const bool result = releaseWrapperHelper(cptr, wrapper);
+    if (bases != nullptr) {
+        auto *base = static_cast<uint8_t *>(cptr);
+        for (const auto *offset = bases; *offset != -1; ++offset)
+            releaseWrapperHelper(base + *offset, wrapper);
+    }
+    return result;
+}
+
+inline void BindingManager::BindingManagerPrivate::assignWrapperHelper(SbkObject *wrapper,
+                                                                       const void *cptr)
+{
     auto iter = wrapperMapper.find(cptr);
     if (iter == wrapperMapper.end())
         wrapperMapper.insert(std::make_pair(cptr, wrapper));
+}
+
+void BindingManager::BindingManagerPrivate::assignWrapper(SbkObject *wrapper, const void *cptr,
+                                                          const int *bases)
+{
+    assert(cptr);
+    std::lock_guard<std::recursive_mutex> guard(wrapperMapLock);
+    assignWrapperHelper(wrapper, cptr);
+    if (bases != nullptr) {
+        const auto *base = static_cast<const uint8_t *>(cptr);
+        for (const auto *offset = bases; *offset != -1; ++offset)
+            assignWrapperHelper(wrapper, base + *offset);
+    }
 }
 
 BindingManager::BindingManager()
@@ -197,15 +225,7 @@ void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
 
     if (d->mi_init && !d->mi_offsets)
         d->mi_offsets = d->mi_init(cptr);
-    m_d->assignWrapper(pyObj, cptr);
-    if (d->mi_offsets) {
-        int *offset = d->mi_offsets;
-        while (*offset != -1) {
-            if (*offset > 0)
-                m_d->assignWrapper(pyObj, reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(cptr) + *offset));
-            offset++;
-        }
-    }
+    m_d->assignWrapper(pyObj, cptr, d->mi_offsets);
 }
 
 void BindingManager::releaseWrapper(SbkObject *sbkObj)
@@ -215,17 +235,10 @@ void BindingManager::releaseWrapper(SbkObject *sbkObj)
     int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(Py_TYPE(sbkObj)) : 1);
 
     void ** cptrs = reinterpret_cast<SbkObject *>(sbkObj)->d->cptr;
+    const int *mi_offsets = d != nullptr ? d->mi_offsets : nullptr;
     for (int i = 0; i < numBases; ++i) {
-        auto *cptr = reinterpret_cast<unsigned char *>(cptrs[i]);
-        m_d->releaseWrapper(cptr, sbkObj);
-        if (d && d->mi_offsets) {
-            int *offset = d->mi_offsets;
-            while (*offset != -1) {
-                if (*offset > 0)
-                    m_d->releaseWrapper(reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(cptr) + *offset), sbkObj);
-                offset++;
-            }
-        }
+        if (cptrs[i] != nullptr)
+            m_d->releaseWrapper(cptrs[i], sbkObj, mi_offsets);
     }
     sbkObj->d->validCppObject = false;
 }
