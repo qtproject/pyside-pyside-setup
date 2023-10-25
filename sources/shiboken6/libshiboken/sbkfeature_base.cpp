@@ -196,6 +196,9 @@ static PyObject *replaceNoArgWithZero(PyObject *callable)
 
 static PyObject *lookupUnqualifiedOrOldEnum(PyTypeObject *type, PyObject *name)
 {
+    // MRO has been observed to be 0 in case of errors with QML decorators
+    if (type == nullptr || type->tp_mro == nullptr)
+        return nullptr;
     static PyTypeObject *const EnumMeta = getPyEnumMeta();
     static PyObject *const _member_map_ = String::createStaticString("_member_map_");
     // This is similar to `find_name_in_mro`, but instead of looking directly into
