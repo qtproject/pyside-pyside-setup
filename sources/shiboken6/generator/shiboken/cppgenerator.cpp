@@ -3991,20 +3991,24 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(TextStream &s,
     s  << "int *\n"
         << multipleInheritanceInitializerFunctionName(metaClass) << "(const void *cptr)\n"
         << "{\n" << indent;
-    s << "static int mi_offsets[] = { ";
+    s << "static int mi_offsets[] = {-2";
     for (qsizetype i = 0; i < ancestors.size(); i++)
-        s << "-1, ";
-    s << "-1 };\n"
-        << "if (mi_offsets[0] == -1) {\n" << indent
-        << "std::set<int> offsets;\n"
-            << "const auto *class_ptr = reinterpret_cast<const " << className << " *>(cptr);\n"
-            << "const auto base = reinterpret_cast<uintptr_t>(class_ptr);\n";
+        s << ", 0";
+    s << "};\n"
+        << "if (mi_offsets[0] == -2) {\n" << indent
+        << "const auto *class_ptr = reinterpret_cast<const " << className << " *>(cptr);\n"
+        << "const auto base = reinterpret_cast<uintptr_t>(class_ptr);\n"
+        << "int *p = mi_offsets;\n";
 
     for (const QString &ancestor : ancestors)
-        s << "offsets.insert(int(" << ancestor << "));\n";
-
-    s << "\noffsets.erase(0);\n\n"
-        << "std::copy(offsets.cbegin(), offsets.cend(), mi_offsets);\n" << outdent
+        s << "*p++ = int(" << ancestor << ");\n";
+    s << "std::sort(mi_offsets, p);\n"
+        << "auto *end = std::unique(mi_offsets, p);\n"
+        << "*end++ = -1;\n"
+        << "if (mi_offsets[0] == 0)\n"
+        << indent
+        << "std::memmove(&mi_offsets[0], &mi_offsets[1], (end - mi_offsets  - 1) * sizeof(int));\n"
+        << outdent << outdent
         << "}\nreturn mi_offsets;\n" << outdent << "}\n";
 }
 
