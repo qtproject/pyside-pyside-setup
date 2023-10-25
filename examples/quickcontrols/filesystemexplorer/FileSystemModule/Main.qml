@@ -30,12 +30,12 @@ ApplicationWindow {
 
             Action {
                 text: qsTr("Increase Font")
-                shortcut: "Ctrl++"
+                shortcut: StandardKey.ZoomIn
                 onTriggered: textArea.font.pixelSize += 1
             }
             Action {
                 text: qsTr("Decrease Font")
-                shortcut: "Ctrl+-"
+                shortcut: StandardKey.ZoomOut
                 onTriggered: textArea.font.pixelSize -= 1
             }
             Action {
@@ -46,6 +46,7 @@ ApplicationWindow {
             Action {
                 text: qsTr("Exit")
                 onTriggered: Qt.exit(0)
+                shortcut: "Ctrl+Q"
             }
         }
 
