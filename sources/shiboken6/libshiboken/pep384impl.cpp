@@ -991,31 +991,114 @@ long _PepRuntimeVersion()
  *
  */
 
+///////////////////////////////////////////////////////////////////////
+//
+// PEP 697: Support for embedded type structures.
+//
+// According to `https://docs.python.org/3/c-api/object.html?highlight=pyobject_gettypedata#c.PyObject_GetTypeData`
+// the function `PyObject_GetTypeData` should belong to the Stable API
+// since version 3.12.0, but it does not. We use instead some copies
+// from Python source code.
+
+#if !defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030C0000
+
+# define PepObject_GetTypeData PyObject_GetTypeData
+
+SbkObjectTypePrivate *PepType_SOTP(PyTypeObject *type)
+{
+    assert(SbkObjectType_Check(type));
+    auto *obType = reinterpret_cast<PyObject *>(type);
+    void *data = PyObject_GetTypeData(obType, Py_TYPE(obType));
+    return reinterpret_cast<SbkObjectTypePrivate *>(data);
+}
+
+void PepType_SOTP_delete(PyTypeObject * /*type*/)
+{
+}
+
+#else
+
+// The following comments are directly copied from Python 3.12
+//
+
+// Make sure we have maximum alignment, even if the current compiler
+// does not support max_align_t. Note that:
+// - Autoconf reports alignment of unknown types to 0.
+// - 'long double' has maximum alignment on *most* platforms,
+//   looks like the best we can do for pre-C11 compilers.
+// - The value is tested, see test_alignof_max_align_t
+#  if !defined(ALIGNOF_MAX_ALIGN_T) || ALIGNOF_MAX_ALIGN_T == 0
+#    undef ALIGNOF_MAX_ALIGN_T
+#    define ALIGNOF_MAX_ALIGN_T alignof(long double)
+#  endif
+
+/* Align up to the nearest multiple of alignof(max_align_t)
+ * (like _Py_ALIGN_UP, but for a size rather than pointer)
+ */
+static Py_ssize_t _align_up(Py_ssize_t size)
+{
+    return (size + ALIGNOF_MAX_ALIGN_T - 1) & ~(ALIGNOF_MAX_ALIGN_T - 1);
+}
+
+static void *PepObject_GetTypeData(PyObject *obj, PyTypeObject *cls)
+{
+    assert(PyObject_TypeCheck(obj, cls));
+    return reinterpret_cast<char *>(obj) + _align_up(cls->tp_base->tp_basicsize);
+}
+//
+///////////////////////////////////////////////////////////////////////
+
 /*
  * PyTypeObject extender
  */
+
 static std::unordered_map<PyTypeObject *, SbkObjectTypePrivate > SOTP_extender{};
 static thread_local PyTypeObject *SOTP_key{};
 static thread_local SbkObjectTypePrivate *SOTP_value{};
 
-SbkObjectTypePrivate *PepType_SOTP(PyTypeObject *sbkType)
+SbkObjectTypePrivate *PepType_SOTP(PyTypeObject *type)
 {
-    if (sbkType == SOTP_key)
+    static bool use_312 = _PepRuntimeVersion() >= 0x030C00;
+    assert(SbkObjectType_Check(type));
+    if (use_312) {
+        auto *obType = reinterpret_cast<PyObject *>(type);
+        void *data = PepObject_GetTypeData(obType, Py_TYPE(obType));
+        return reinterpret_cast<SbkObjectTypePrivate *>(data);
+    }
+    if (type == SOTP_key)
         return SOTP_value;
-    auto it = SOTP_extender.find(sbkType);
+    auto it = SOTP_extender.find(type);
     if (it == SOTP_extender.end()) {
-        it = SOTP_extender.insert({sbkType, {}}).first;
+        it = SOTP_extender.insert({type, {}}).first;
         memset(&it->second, 0, sizeof(SbkObjectTypePrivate));
     }
-    SOTP_key = sbkType;
+    SOTP_key = type;
     SOTP_value = &it->second;
     return SOTP_value;
 }
 
-void PepType_SOTP_delete(PyTypeObject *sbkType)
+void PepType_SOTP_delete(PyTypeObject *type)
 {
-    SOTP_extender.erase(sbkType);
+    static bool use_312 = _PepRuntimeVersion() >= 0x030C00;
+    assert(SbkObjectType_Check(type));
+    if (use_312)
+        return;
+    SOTP_extender.erase(type);
     SOTP_key = nullptr;
+}
+
+#endif // !defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030C0000
+
+void _PepPostInit_SbkObject_Type(PyTypeObject *type)
+{
+    // Special init for SbkObject_Type.
+    // A normal initialization would recurse PepType_SOTP.
+    if (_PepRuntimeVersion() >= 0x030C00) {
+        auto *obType = reinterpret_cast<PyObject *>(type);
+        void *data = PepObject_GetTypeData(obType, Py_TYPE(obType));
+        auto *sbkExt = reinterpret_cast<SbkObjectTypePrivate *>(data);
+        std::fill_n(reinterpret_cast<char *>(data), sizeof(*sbkExt), 0);
+    }
 }
 
 /*
@@ -1027,6 +1110,7 @@ static thread_local SbkEnumTypePrivate *SETP_value{};
 
 SbkEnumTypePrivate *PepType_SETP(SbkEnumType *enumType)
 {
+    // PYSIDE-2230: This makes no sense at all for Enum types.
     if (enumType == SETP_key)
         return SETP_value;
     auto it = SETP_extender.find(enumType);

@@ -77,7 +77,11 @@ static PyObject *_PyType_FromSpecWithBasesHack(PyType_Spec *spec,
         }
     }
 
+#if !defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030C0000
+    auto *ret = PyType_FromMetaclass(meta, nullptr /*module*/, spec, bases);
+#else
     auto *ret = _PyType_FromSpecWithBases(spec, bases);
+#endif
 
     if (keepMeta)
         keepMeta->tp_new = keepNew;

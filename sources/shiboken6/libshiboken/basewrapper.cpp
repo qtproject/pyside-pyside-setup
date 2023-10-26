@@ -152,11 +152,21 @@ static PyTypeObject *createObjectTypeType()
         "1:Shiboken.ObjectType",
         static_cast<int>(PyType_Type.tp_basicsize) + 1,           // see above
         0, // sizeof(PyMemberDef), not for PyPy without a __len__ defined
-        Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
+        Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_TYPE_SUBCLASS,
         SbkObjectType_Type_slots,
     };
 
-    return SbkType_FromSpec(&SbkObjectType_Type_spec);
+    PyType_Spec SbkObjectType_Type_spec_312 = {
+        "1:Shiboken.ObjectType",
+        -long(sizeof(SbkObjectTypePrivate)),
+        0, // sizeof(PyMemberDef), not for PyPy without a __len__ defined
+        Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_TYPE_SUBCLASS,
+        SbkObjectType_Type_slots,
+    };
+
+    return SbkType_FromSpec(_PepRuntimeVersion() >= 0x030C00 ?
+                            &SbkObjectType_Type_spec_312 :
+                            &SbkObjectType_Type_spec);
 }
 
 PyTypeObject *SbkObjectType_TypeF(void)
@@ -249,12 +259,15 @@ static PyTypeObject *createObjectType()
     //              But before 3.12 is the minimum version, we cannot use the new
     //              function, although we would need this for 3.12 :-D
     //              We do a special patching here that is triggered through Py_None.
-    return SbkType_FromSpec_BMDWB(&SbkObject_Type_spec,
-                                  Py_None,     // bases, special flag!
-                                  SbkObjectType_TypeF(),
-                                  offsetof(SbkObject, ob_dict),
-                                  offsetof(SbkObject, weakreflist),
-                                  nullptr);    // bufferprocs
+    auto *type = SbkType_FromSpec_BMDWB(&SbkObject_Type_spec,
+                                        Py_None,     // bases, spectial flag!
+                                        SbkObjectType_TypeF(),
+                                        offsetof(SbkObject, ob_dict),
+                                        offsetof(SbkObject, weakreflist),
+                                        nullptr);    // bufferprocs
+    // Initialize the hidden data area.
+    _PepPostInit_SbkObject_Type(type);
+    return type;
 }
 
 PyTypeObject *SbkObject_TypeF(void)
@@ -661,10 +674,8 @@ PyObject *FallbackRichCompare(PyObject *self, PyObject *other, int op)
 
 bool SbkObjectType_Check(PyTypeObject *type)
 {
-    static auto *obMeta = reinterpret_cast<PyObject *>(SbkObjectType_TypeF());
-    auto *obType = reinterpret_cast<PyObject *>(type);
-    return obMeta == reinterpret_cast<PyObject *>(Py_TYPE(obType))
-           || PyObject_IsInstance(obType, obMeta);
+    static auto *meta = SbkObjectType_TypeF();
+    return Py_TYPE(type) == meta || PyType_IsSubtype(Py_TYPE(type), meta);
 }
 
 } //extern "C"
@@ -1006,16 +1017,19 @@ introduceWrapperType(PyObject *enclosingObject,
 
 void setSubTypeInitHook(PyTypeObject *type, SubTypeInitHook func)
 {
+    assert(SbkObjectType_Check(type));
     PepType_SOTP(type)->subtype_init = func;
 }
 
 void *getTypeUserData(PyTypeObject *type)
 {
+    assert(SbkObjectType_Check(type));
     return PepType_SOTP(type)->user_data;
 }
 
 void setTypeUserData(PyTypeObject *type, void *userData, DeleteUserDataFunc d_func)
 {
+    assert(SbkObjectType_Check(type));
     auto *sotp = PepType_SOTP(type);
     sotp->user_data = userData;
     sotp->d_func = d_func;

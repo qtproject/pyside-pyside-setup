@@ -446,6 +446,8 @@ void initDynamicMetaObject(PyTypeObject *type, const QMetaObject *base, std::siz
 
 TypeUserData *retrieveTypeUserData(PyTypeObject *pyTypeObj)
 {
+    if (!SbkObjectType_Check(pyTypeObj))
+        return nullptr;
     return reinterpret_cast<TypeUserData *>(Shiboken::ObjectType::getTypeUserData(pyTypeObj));
 }
 

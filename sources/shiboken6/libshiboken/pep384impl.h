@@ -128,6 +128,9 @@ struct SbkObjectTypePrivate;
 LIBSHIBOKEN_API SbkObjectTypePrivate *PepType_SOTP(PyTypeObject *type);
 LIBSHIBOKEN_API void PepType_SOTP_delete(PyTypeObject *type);
 
+// PYSIDE-2230: SbkObjectType needs a special init
+LIBSHIBOKEN_API void _PepPostInit_SbkObject_Type(PyTypeObject *type);
+
 struct SbkEnumType;
 struct SbkEnumTypePrivate;
 
