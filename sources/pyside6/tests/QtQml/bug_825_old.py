@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 """
-This is the corrected version for Python 3.
-Unfortunately, this touches a Python 3.8 error that was fixed late.
+This is the now incorrect old version from Python 2.
+It happens to work in another way and will be retained.
 """
 
 import os
@@ -30,8 +30,9 @@ class MetaA(type):
     pass
 
 
-class A(object, metaclass=MetaA):
-    pass
+class A(object):
+    __metaclass__ = MetaA
+
 
 MetaB = type(QQuickPaintedItem)
 B = QQuickPaintedItem
@@ -41,8 +42,8 @@ class MetaC(MetaA, MetaB):
     pass
 
 
-class C(A, B, metaclass=MetaC):
-    pass
+class C(A, B):
+    __metaclass__ = MetaC
 
 
 class Bug825 (C):

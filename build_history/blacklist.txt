@@ -43,7 +43,10 @@
     darwin ci
 [QtAsyncio::qasyncio_test_chain]
     win32
-
+[QtQml::bug_825]
+    py3.8       # bug in typeobject::type_mro_modified, fix in 3.9
+    py3.9       # fixed in 3.9.12
+    py3.10      # fixed in 3.10.4
 # PYSIDE-535: These errors are still present. Please try to remove one :)
 [sample::mixed_mi]
     pypy

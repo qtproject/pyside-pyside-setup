@@ -139,11 +139,18 @@ static PyTypeObject *createObjectTypeType()
     };
 
     // PYSIDE-535: The tp_itemsize field is inherited and does not need to be set.
-    // In PyPy, it _must_ not be set, because it would have the meaning that a
-    // `__len__` field must be defined. Not doing so creates a hard-to-find crash.
+    //             In PyPy, it _must_ not be set, because it would have the meanin
+    //             that a `__len__` field must be defined. Not doing so creates
+    //             a hard-to-find crash.
+    //
+    // PYSIDE-2230: In Python < 3.12, the decision which base class should create
+    //              the instance is arbitrarily drawn by the size of the type.
+    //              Ignoring this creates a bug in the new version of bug_825 that
+    //              selects the wrong metatype.
+    //
     PyType_Spec SbkObjectType_Type_spec = {
         "1:Shiboken.ObjectType",
-        0,
+        static_cast<int>(PyType_Type.tp_basicsize) + 1,           // see above
         0, // sizeof(PyMemberDef), not for PyPy without a __len__ defined
         Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,
         SbkObjectType_Type_slots,
