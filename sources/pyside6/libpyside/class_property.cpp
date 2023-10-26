@@ -33,6 +33,46 @@ static int PyClassProperty_descr_set(PyObject *self, PyObject *obj, PyObject *va
     return PyProperty_Type.tp_descr_set(self, cls, value);
 }
 
+// PYSIDE-2230: Why is this metaclass necessary?
+//
+// The problem is that the property object already exists as a Python
+// object. We derive a subclass for class properties, without
+// repeating everything but just by adding something to support
+// the class-ness.
+//
+// But this Python property has as metaclass `type` which is incompatible
+// now with SbkObjectType, which generates physically larger types that
+// are incompatible with properties by using PEP 697.
+// Adding a compatible metaclass that is unrelated to `SbkObjectType`
+// is the correct solution. Re-using `SbkObjectType` was actually an abuse,
+// since Python properties are in no way PySide objects.
+
+static PyTypeObject *createClassPropertyTypeType()
+{
+    PyType_Slot PyClassPropertyType_Type_slots[] = {
+        {Py_tp_base, static_cast<void *>(&PyType_Type)},
+        {Py_tp_alloc, reinterpret_cast<void *>(PyType_GenericAlloc)},
+        {Py_tp_free, reinterpret_cast<void *>(PyObject_GC_Del)},
+        {0, nullptr}
+    };
+
+    PyType_Spec PyClassPropertyType_Type_spec = {
+        "1:Shiboken.ClassPropertyType",
+        0,
+        0, // sizeof(PyMemberDef), not for PyPy without a __len__ defined
+        Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_TYPE_SUBCLASS,
+        PyClassPropertyType_Type_slots,
+    };
+
+    return SbkType_FromSpec(&PyClassPropertyType_Type_spec);
+}
+
+PyTypeObject *PyClassPropertyType_TypeF()
+{
+    static auto *type = createClassPropertyTypeType();
+    return type;
+}
+
 // The property `__doc__` default does not work for class properties
 // because PyProperty_Type.tp_init thinks this is a subclass which needs PyObject_SetAttr.
 // We call `__init__` while pretending to be a PyProperty_Type instance.
@@ -48,7 +88,7 @@ static int PyClassProperty_tp_init(PyObject *self, PyObject *args, PyObject *kwa
 static PyTypeObject *createPyClassPropertyType()
 {
     PyType_Slot PyClassProperty_slots[] = {
-        {Py_tp_getset,      nullptr},    // will be set below
+        {Py_tp_getset,      reinterpret_cast<void *>(PyProperty_Type.tp_getset)},    // will be set below
         {Py_tp_base,        reinterpret_cast<void *>(&PyProperty_Type)},
         {Py_tp_descr_get,   reinterpret_cast<void *>(PyClassProperty_descr_get)},
         {Py_tp_descr_set,   reinterpret_cast<void *>(PyClassProperty_descr_set)},
@@ -64,10 +104,9 @@ static PyTypeObject *createPyClassPropertyType()
         PyClassProperty_slots,
     };
 
-    PyClassProperty_slots[0].pfunc = PyProperty_Type.tp_getset;
     if (_PepRuntimeVersion() >= 0x030A00)
         PyClassProperty_spec.basicsize = sizeof(propertyobject310);
-    return SbkType_FromSpec(&PyClassProperty_spec);
+    return SbkType_FromSpecWithMeta(&PyClassProperty_spec, PyClassPropertyType_TypeF());
 }
 
 PyTypeObject *PyClassProperty_TypeF()
@@ -126,7 +165,6 @@ void init(PyObject *module)
 {
     PyTypeObject *type = SbkObjectType_TypeF();
     type->tp_setattro = SbkObjectType_meta_setattro;
-    reinterpret_cast<PyObject *>(type)->ob_type = type;
 
     if (InitSignatureStrings(PyClassProperty_TypeF(), PyClassProperty_SignatureStrings) < 0)
         return;
