@@ -22,9 +22,13 @@
 #  include <pthread.h>
 #endif
 
-static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str)
+
+static void formatTypeTuple(PyObject *t, const char *what, std::ostream &str);
+
+static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str, bool verbose)
 {
     if (obj) {
+        bool immutableType = false;
         str << '"' << obj->tp_name << "\", 0x" << std::hex
             << obj->tp_flags << std::dec;
         if (obj->tp_flags & Py_TPFLAGS_HEAPTYPE)
@@ -49,6 +53,10 @@ static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str)
             str << " [type]";
         if (obj->tp_flags & Py_TPFLAGS_IS_ABSTRACT)
             str << " [abstract]";
+        if (obj->tp_flags & Py_TPFLAGS_READY)
+            str << " [ready]";
+        if (obj->tp_flags & Py_TPFLAGS_READYING)
+            str << " [readying]";
         if (obj->tp_flags & Py_TPFLAGS_METHOD_DESCRIPTOR)
             str << " [method_descriptor]";
 #if PY_VERSION_HEX >= 0x03090000
@@ -57,7 +65,8 @@ static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str)
             str << " [vectorcall]";
 #  endif // !Py_LIMITED_API
 #  if PY_VERSION_HEX >= 0x030A0000
-        if (obj->tp_flags & Py_TPFLAGS_IMMUTABLETYPE)
+        immutableType = (obj->tp_flags & Py_TPFLAGS_IMMUTABLETYPE) != 0;
+        if (immutableType)
             str << " [immutabletype]";
         if (obj->tp_flags & Py_TPFLAGS_DISALLOW_INSTANTIATION)
             str << " [disallow_instantiation]";
@@ -69,8 +78,38 @@ static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str)
 #       endif // !Py_LIMITED_API
 #  endif // 3.10
 #endif // 3.9
+        if (obj->tp_basicsize != 0)
+            str << ", basicsize=" << obj->tp_basicsize;
+        if (verbose) {
+            formatTypeTuple(obj->tp_bases, "bases", str);
+            formatTypeTuple(obj->tp_mro, "mro", str);
+            if (!immutableType) {
+                auto *underlying = reinterpret_cast<const PyObject *>(obj)->ob_type;
+                if (underlying != nullptr && underlying != obj) {
+                    str << ", underlying=\"" << underlying->tp_name << '"';
+                }
+            }
+        }
     } else {
         str << '0';
+    }
+}
+
+static void formatTypeTuple(PyObject *t, const char *what, std::ostream &str)
+{
+    const Py_ssize_t size = t != nullptr && PyTuple_Check(t) != 0 ? PyTuple_Size(t) : 0;
+    if (size > 0) {
+        str << ", " << what << "=[" << size << "]{";
+        for (Py_ssize_t i = 0; i < size; ++i) {
+            if (i != 0)
+                str << ", ";
+            Shiboken::AutoDecRef item(PyTuple_GetItem(t, i));
+            if (item.isNull())
+                str << '0'; // Observed with non-ready types
+            else
+                str << '"' << reinterpret_cast<PyTypeObject *>(item.object())->tp_name << '"';
+        }
+        str << '}';
     }
 }
 
@@ -247,10 +286,10 @@ static void formatPyObjectHelper(PyObject *obj, std::ostream &str)
     str << "refs=" << Py_REFCNT(obj) << ", ";
     if (PyType_Check(obj)) {
         str << "type: ";
-        formatPyTypeObject(reinterpret_cast<PyTypeObject *>(obj), str);
+        formatPyTypeObject(reinterpret_cast<PyTypeObject *>(obj), str, true);
         return;
     }
-    formatPyTypeObject(obj->ob_type, str);
+    formatPyTypeObject(obj->ob_type, str, false);
     str << ", ";
     if (PyLong_Check(obj))
         str << PyLong_AsLong(obj);
@@ -301,7 +340,7 @@ debugPyBuffer::debugPyBuffer(const Py_buffer &b) : m_buffer(b)
 std::ostream &operator<<(std::ostream &str, const debugPyTypeObject &o)
 {
     str << "PyTypeObject(";
-    formatPyTypeObject(o.m_object, str);
+    formatPyTypeObject(o.m_object, str, true);
     str << ')';
     return str;
 }
