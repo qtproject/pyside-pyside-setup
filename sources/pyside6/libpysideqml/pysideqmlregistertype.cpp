@@ -284,16 +284,28 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int vers
 
 // Singleton helpers
 
-bool checkSingletonCallback(PyObject *callback)
+// Check the arguments of a singleton callback (C++: "QJSValue cb(QQmlEngine *, QJSEngine *)",
+// but we drop the QJSEngine since it will be the same as QQmlEngine when the latter exists.
+static bool checkSingletonCallback(PyObject *callback)
 {
+    if (callback == nullptr) {
+        PyErr_SetString(PyExc_TypeError, "No callback specified.");
+        return false;
+    }
     if (PyCallable_Check(callback) == 0) {
-        PyErr_Format(PyExc_TypeError, "Invalid callback specified.");
+        PyErr_Format(PyExc_TypeError, "Invalid callback specified (%S).", callback);
         return false;
     }
     Shiboken::AutoDecRef funcCode(PyObject_GetAttrString(callback, "__code__"));
-    Shiboken::AutoDecRef argCount(PyObject_GetAttrString(funcCode, "co_argcount"));
-    if (PyLong_AsLong(argCount) != 1) {
-        PyErr_Format(PyExc_TypeError, "Callback has a bad parameter count.");
+    if (funcCode.isNull()) {
+        PyErr_Format(PyExc_TypeError, "Cannot retrieve code of callback (%S).", callback);
+        return false;
+    }
+    Shiboken::AutoDecRef argCountAttr(PyObject_GetAttrString(funcCode, "co_argcount"));
+    const int argCount = PyLong_AsLong(argCountAttr.object());
+    if (argCount != 1) {
+        PyErr_Format(PyExc_TypeError, "Callback (%S) has %d parameter(s), expected one.",
+                     callback, argCount);
         return false;
     }
     // Make sure the callback never gets deallocated
