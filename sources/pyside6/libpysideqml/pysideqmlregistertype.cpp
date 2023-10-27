@@ -274,7 +274,8 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int vers
                     bool creatable)
 {
     auto *type = checkTypeObject(pyObj, "qmlRegisterType()");
-    if (type == nullptr || !setClassInfo(type, qmlElementKey, qmlName))
+    if (type == nullptr || !PySide::isQObjectDerived(type, true)
+        || !setClassInfo(type, qmlElementKey, qmlName))
         return -1;
     if (!creatable)
         setUncreatableClassInfo(type, noCreationReason);
@@ -540,7 +541,7 @@ PyObject *qmlElementMacro(PyObject *pyObj, const char *decoratorName,
                           const QByteArray &typeName)
 {
     auto *pyObjType = checkTypeObject(pyObj, decoratorName);
-    if (pyObjType == nullptr || !setClassInfo(pyObjType, qmlElementKey, typeName))
+    if (pyObjType == nullptr)
         return nullptr;
 
     if (!PySide::isQObjectDerived(pyObjType, false)) {
@@ -549,6 +550,9 @@ PyObject *qmlElementMacro(PyObject *pyObj, const char *decoratorName,
                      decoratorName, pyObjType->tp_name);
         return nullptr;
     }
+
+    if (!setClassInfo(pyObjType, qmlElementKey, typeName))
+        return nullptr;
 
     RegisterMode mode = RegisterMode::Normal;
     const auto info = PySide::Qml::qmlTypeInfo(pyObj);
