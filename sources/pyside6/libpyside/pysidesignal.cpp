@@ -703,7 +703,8 @@ static PyObject *signalDescrGet(PyObject *self, PyObject *obj, PyObject * /*type
 {
     auto signal = reinterpret_cast<PySideSignal *>(self);
     // Return the unbound signal if there is nothing to bind it to.
-    if (obj == nullptr || obj == Py_None) {
+    if (obj == nullptr || obj == Py_None
+        || !PySide::isQObjectDerived(Py_TYPE(obj), true)) {
         Py_INCREF(self);
         return self;
     }
