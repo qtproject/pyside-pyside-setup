@@ -5003,12 +5003,6 @@ QString CppGenerator::signatureParameter(const AbstractMetaArgument &arg) const
     if (size > 1)
         s << ']';
 
-    if (!arg.defaultValueExpression().isEmpty()) {
-        s << '=';
-        QString e = arg.defaultValueExpression();
-        e.replace(u"::"_s, u"."_s);
-        s << e;
-    }
     return result;
 }
 
@@ -5029,14 +5023,18 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
         const auto &arguments = f->arguments();
         for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
             const auto n = i + 1;
+            const auto &arg = arguments.at(i);
             if (!f->argumentRemoved(n)) {
                 QString t = f->pyiTypeReplaced(n);
                 if (t.isEmpty()) {
-                    t = signatureParameter(arguments.at(i));
+                    t = signatureParameter(arg);
                 } else {
                     t.prepend(u':');
-                    t.prepend(arguments.at(i).name());
+                    t.prepend(arg.name());
                 }
+                QString defaultValue = arg.defaultValueExpression();
+                if (!defaultValue.isEmpty())
+                    t += u'=' + defaultValue.replace(u"::"_s, u"."_s);
                 args.append(t);
             }
         }
