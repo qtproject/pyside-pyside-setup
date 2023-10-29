@@ -79,6 +79,8 @@ def test_project(project, args, blacklist, runs):
     for idx in range(runs):
         index = idx + 1
         runner = TestRunner(builds.selected, project, index)
+        # For the full Python version we need to ask the TestRunner.
+        builds.set_python_version(runner.get_python_version())
         print()
         print(f"********* Start testing of {project} *********")
         print("Config: Using", " ".join(builds.classifiers))

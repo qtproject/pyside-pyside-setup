@@ -36,6 +36,31 @@ class TestRunner(object):
         self._setup_clang()
         self._setup()
 
+    def get_python_version(self):
+        """
+        Finding the exact Python version.
+        ---------------------------------
+
+        This is done by asking the interpreter, because it cannot reliably
+        be found from any file name parsing as a triple.
+
+        Note: We need to look into the CMakeCache.txt file to find out
+        what CMake has found as the Python interpreter to use.
+        This is *not* necessarily the same Python that runs this script,
+        otherwise we could use the version info directly.
+        """
+        look_python = os.path.join(self.test_dir, "CMakeCache.txt")
+        look_for = "PYTHON_EXECUTABLE:FILEPATH="
+        with open(look_python) as f:
+            for line in f:
+                if line.startswith(look_for):
+                    python_exec = line.split("=")[-1].strip()
+                    res = subprocess.run([python_exec, "-c",
+                                         "import sys;print(sys.version_info[:3])"],
+                                         capture_output=True)
+                    return eval(res.stdout.decode("utf-8"))
+        return None
+
     def _setup_clang(self):
         if sys.platform != "win32":
             return
