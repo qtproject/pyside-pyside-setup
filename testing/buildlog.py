@@ -77,6 +77,7 @@ class BuildLog(object):
         # we take the latest build for now.
         build_history.sort()
         self.history = build_history
+        self.python_version = None
         self._buildno = None
         if not is_ci:
             # there seems to be a timing problem in RHel 7.6, so we better don't touch it
@@ -137,6 +138,9 @@ class BuildLog(object):
             path = self.selected.build_dir
             base = os.path.basename(path)
             res.extend(base.split("-"))
+        # add exact Python version
+        if self.python_version:
+            res.append("py" + ".".join(map(str, self.python_version)))
         # add all the python and qt subkeys
         for entry in res:
             parts = entry.split(".")
@@ -148,6 +152,9 @@ class BuildLog(object):
         # This gives "i386" or "arm" on macOS.
         res.append(platform.processor())
         return res
+
+    def set_python_version(self, version_triple):
+        self.python_version = version_triple
 
 
 builds = BuildLog()
