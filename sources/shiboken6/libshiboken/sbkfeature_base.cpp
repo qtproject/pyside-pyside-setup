@@ -12,6 +12,8 @@
 #include "sbkfeature_base.h"
 #include "gilstate.h"
 
+#include <cctype>
+
 using namespace Shiboken;
 
 extern "C"
@@ -198,6 +200,9 @@ static PyObject *lookupUnqualifiedOrOldEnum(PyTypeObject *type, PyObject *name)
 {
     // MRO has been observed to be 0 in case of errors with QML decorators
     if (type == nullptr || type->tp_mro == nullptr)
+        return nullptr;
+    // Quick Check: Avoid "__..", "_slots", etc.
+    if (std::isalpha(Shiboken::String::toCString(name)[0]) == 0)
         return nullptr;
     static PyTypeObject *const EnumMeta = getPyEnumMeta();
     static PyObject *const _member_map_ = String::createStaticString("_member_map_");
