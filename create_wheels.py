@@ -28,7 +28,7 @@ class SetupData:
     name: str
     version: str
     description: str
-    long_description: str
+    readme: str
     console_scripts: List[str]
 
 
@@ -40,7 +40,7 @@ def get_version_from_package(name: str) -> str:
             if line.strip().startswith("__version__"):
                 version = line.split("=")[1].strip().replace('"', "")
                 break
-    return version
+    return version, f"{name}.__init__.__version__"
 
 
 def get_manifest(wheel_name: str, data: List[ModuleData]) -> str:
@@ -75,7 +75,7 @@ def get_manifest(wheel_name: str, data: List[ModuleData]) -> str:
     return "\n".join(lines)
 
 
-def generate_setup_cfg(artifacts: Path, setup: SetupData) -> str:
+def get_platform_tag() -> str:
     content = None
     _os = sys.platform
     arch = platform.machine()
@@ -122,13 +122,21 @@ def generate_setup_cfg(artifacts: Path, setup: SetupData) -> str:
         msvc_arch = "x86" if win_arch.startswith("32") else "amd64"
         _tag = f"win_{msvc_arch}"
 
-    with open(artifacts / "setup.cfg.base") as f:
-        content = f.read().format(
-            name=setup.name,
-            version=setup.version,
-            description=setup.description,
-            long_description=setup.long_description,
-            tag=_tag,
+    return _tag
+
+def generate_pyproject_toml(artifacts: Path, setup: SetupData) -> str:
+    content = None
+
+    _tag = get_platform_tag()
+
+    with open(artifacts / "pyproject.toml.base") as f:
+        content = (
+            f.read()
+            .replace("PROJECT_NAME", f'"{setup.name}"')
+            .replace("PROJECT_VERSION", f'"{setup.version[1]}"')
+            .replace("PROJECT_DESCRIPTION", f'"{setup.description}"')
+            .replace("PROJECT_README", f'"{setup.readme}"')
+            .replace("PROJECT_TAG", f'"{_tag}"')
         )
 
     return content
@@ -152,14 +160,14 @@ def generate_setup_py(artifacts: Path, setup: SetupData):
     # Installing dependencies
     install_requires = []
     if name == "PySide6":
-        install_requires.append(f"shiboken6=={setup.version}")
-        install_requires.append(f"PySide6_Essentials=={setup.version}")
-        install_requires.append(f"PySide6_Addons=={setup.version}")
+        install_requires.append(f"shiboken6=={setup.version[0]}")
+        install_requires.append(f"PySide6_Essentials=={setup.version[0]}")
+        install_requires.append(f"PySide6_Addons=={setup.version[0]}")
     elif _name == "PySide6_Essentials":
-        install_requires.append(f"shiboken6=={setup.version}")
+        install_requires.append(f"shiboken6=={setup.version[0]}")
     elif _name == "PySide6_Addons":
-        install_requires.append(f"shiboken6=={setup.version}")
-        install_requires.append(f"PySide6_Essentials=={setup.version}")
+        install_requires.append(f"shiboken6=={setup.version[0]}")
+        install_requires.append(f"PySide6_Essentials=={setup.version[0]}")
 
     # For special wheels based on 'PySide6'
     # we force the name to be PySide6 for the package_name,
@@ -183,7 +191,7 @@ def wheel_shiboken_generator() -> Tuple[SetupData, None]:
         name="shiboken6_generator",
         version=get_version_from_package("shiboken6_generator"),
         description="Python/C++ bindings generator",
-        long_description="README.shiboken6-generator.md",
+        readme="README.shiboken6-generator.md",
         console_scripts=[
             "shiboken6 = shiboken6_generator.scripts.shiboken_tool:main",
             "shiboken6-genpyi = shiboken6_generator.scripts.shiboken_tool:genpyi",
@@ -198,7 +206,7 @@ def wheel_shiboken_module() -> Tuple[SetupData, None]:
         name="shiboken6",
         version=get_version_from_package("shiboken6"),
         description="Python/C++ bindings helper module",
-        long_description="README.shiboken6.md",
+        readme="README.shiboken6.md",
         console_scripts=[],
     )
 
@@ -223,7 +231,7 @@ def wheel_pyside6_essentials(packaged_qt_tools_path: Path) -> Tuple[SetupData, L
         name="PySide6_Essentials",
         version=get_version_from_package("PySide6"),  # we use 'PySide6' here
         description="Python bindings for the Qt cross-platform application and UI framework (Essentials)",
-        long_description="README.pyside6_essentials.md",
+        readme="README.pyside6_essentials.md",
         console_scripts=_console_scripts
     )
 
@@ -237,7 +245,7 @@ def wheel_pyside6_addons() -> Tuple[SetupData, List[ModuleData]]:
         name="PySide6_Addons",
         version=get_version_from_package("PySide6"),  # we use 'PySide6' here
         description="Python bindings for the Qt cross-platform application and UI framework (Addons)",
-        long_description="README.pyside6_addons.md",
+        readme="README.pyside6_addons.md",
         console_scripts=[],
     )
 
@@ -251,7 +259,7 @@ def wheel_pyside6() -> Tuple[SetupData, Optional[List[ModuleData]]]:
         name="PySide6",
         version=get_version_from_package("PySide6"),
         description="Python bindings for the Qt cross-platform application and UI framework",
-        long_description="README.pyside6.md",
+        readme="README.pyside6.md",
         console_scripts=[],
     )
 
@@ -324,11 +332,10 @@ if __name__ == "__main__":
         print("Maybe your build used '--skip-packaging'?. Exiting")
         sys.exit(-1)
 
-    setup_cfg_path = package_path / "setup.cfg"
     setup_py_path = package_path / "setup.py"
+    pyproject_toml_path = package_path / "pyproject.toml"
 
     base_files = [
-        artifacts_path / "pyproject.toml",
         current_path / "LICENSES/GFDL-1.3-no-invariants-only.txt",
         current_path / "LICENSES/LicenseRef-Qt-Commercial.txt",
         current_path / "LICENSES/GPL-2.0-only.txt",
@@ -352,19 +359,19 @@ if __name__ == "__main__":
         setup, data = wheel_info() if not name=="PySide6_Essentials" else \
                       wheel_pyside6_essentials(package_path / "PySide6")
 
-        # 1. Generate 'setup.cfg'
-        print("-- Generating setup.cfg")
-        setup_cfg_content = generate_setup_cfg(artifacts_path, setup)
-        with open(setup_cfg_path, "w") as f:
-            f.write(setup_cfg_content)
-
         # 2. Generate 'setup.py'
         print("-- Generating setup.py")
         setup_py_content = generate_setup_py(artifacts_path, setup)
         with open(setup_py_path, "w") as f:
             f.write(setup_py_content)
 
-        # 3. Create the 'MANIFEST.in'
+        # 3. Generate 'pyproject.toml'
+        print("-- Generating pyproject.toml")
+        pyproject_toml_content = generate_pyproject_toml(artifacts_path, setup)
+        with open(pyproject_toml_path, "w") as f:
+            f.write(pyproject_toml_content)
+
+        # 4. Create the 'MANIFEST.in'
         # Special case for shiboken and shiboken_generator
         # so we copy the whole directory, only PySide and derivatives
         # will need to have specific information
@@ -381,13 +388,13 @@ if __name__ == "__main__":
             with open(package_path / "MANIFEST.in", "w") as f:
                 f.write(manifest_content)
 
-        # 4. copy configuration files to create the wheel
+        # 5. copy configuration files to create the wheel
         print("-- Copy configuration files to create the wheel")
-        _files: List[Path] = base_files + [Path(setup.long_description)]
+        _files: List[Path] = base_files + [Path(setup.readme)]
         for fname in _files:
             copy(fname, package_path)
 
-        # 5. call the build module to create the wheel
+        # 6. call the build module to create the wheel
         # print("-- Creating wheel")
         # os.chdir(package_path)
         if not verbose:
@@ -398,7 +405,7 @@ if __name__ == "__main__":
         builder.build("wheel", "dist_new")
         # os.chdir(current_path)
 
-        # 6. Copy wheels back
+        # 7. Copy wheels back
         print("-- Copying wheels to dist_new/")
         dist_path = Path("dist_new")
         if not dist_path.is_dir():
@@ -406,7 +413,7 @@ if __name__ == "__main__":
         for wheel in Path(package_path / "dist_new").glob("*.whl"):
             copy(wheel, dist_path / wheel.name)
 
-        # 7. Remove leftover files
+        # 8. Remove leftover files
         print("-- Removing leftover files")
         all_files = set(package_path.glob("*"))
         files_to_remove = all_files - {
