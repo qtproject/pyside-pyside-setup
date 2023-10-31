@@ -123,8 +123,7 @@ def _jobs_option_value():
 
 def find_qtpaths():
     # for these command --qtpaths should not be required
-    no_qtpaths_commands = ["--help", "--help-commands", "--qt-target-path", "build_base_docs",
-                           "build_rst_docs"]
+    no_qtpaths_commands = ["--help", "--help-commands", "--qt-target-path", "build_base_docs"]
 
     for no_qtpaths_command in no_qtpaths_commands:
         if any(no_qtpaths_command in argument for argument in sys.argv):
@@ -461,7 +460,7 @@ class CommandMixin(object):
                        qt_target_path=qt_target_path,
                        cmake_toolchain_file=cmake_toolchain_file)
 
-        if 'build_base_docs' not in sys.argv and 'build_rst_docs' not in sys.argv:
+        if 'build_base_docs' not in sys.argv:
             try:
                 QtInfo().prefix_dir
             except Exception as e:
@@ -551,9 +550,8 @@ class CommandMixin(object):
         # while cross-compiling.
         # Skip this process for the 'build_base_docs' command
         if (not self.is_cross_compile
-                and not self.qt_target_path
-                and 'build_base_docs' not in sys.argv
-                and 'build_rst_docs' not in sys.argv):
+            and not self.qt_target_path
+                and 'build_base_docs' not in sys.argv):
             # Enforce usage of qmake in QtInfo if it was given explicitly.
             if self.qmake:
                 self.has_qmake_option = True

@@ -1200,10 +1200,6 @@ class PysideBaseDocs(Command, CommandMixin):
     user_options = CommandMixin.mixin_user_options
 
     def __init__(self, *args, **kwargs):
-        if args[0].commands[0] == "build_rst_docs":
-            args[0].commands[0] = "build_base_docs"
-            log.warning("'build_rst_docs' is deprecated and will be removed. "
-                        "Please use 'build_base_docs' instead.")
         self.command_name = "build_base_docs"
         Command.__init__(self, *args, **kwargs)
         CommandMixin.__init__(self)
@@ -1316,8 +1312,6 @@ cmd_class_dict = {
     'install': PysideInstall,
     'install_lib': PysideInstallLib,
     'build_base_docs': PysideBaseDocs,
-    # TODO: Remove build_rst_docs in the next version, see PYSIDE-2504
-    'build_rst_docs': PysideBaseDocs,
 }
 if wheel_module_exists:
     pyside_bdist_wheel = get_bdist_wheel_override()
