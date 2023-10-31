@@ -1719,7 +1719,7 @@ FunctionTypeEntryPtr
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == signatureAttribute())
-            originalSignature = attributes->takeAt(i).value().toString();
+            originalSignature = attributes->takeAt(i).value().toString().simplified();
     }
 
     const QString signature = TypeDatabase::normalizedSignature(originalSignature);
@@ -1958,7 +1958,7 @@ bool TypeSystemParser::parseRenameFunction(const ConditionalStreamReader &,
         const auto name = attributes->at(i).qualifiedName();
         if (name == signatureAttribute()) {
             // Do not remove as it is needed for the type entry later on
-            signature = attributes->at(i).value().toString();
+            signature = attributes->at(i).value().toString().simplified();
         } else if (name == renameAttribute()) {
             rename = attributes->takeAt(i).value().toString();
         }
@@ -2575,8 +2575,8 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
     QString access;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == u"signature") {
-            originalSignature = attributes->takeAt(i).value().toString();
+        if (name == signatureAttribute()) {
+            originalSignature = attributes->takeAt(i).value().toString().simplified();
         } else if (name == u"return-type") {
             returnType = attributes->takeAt(i).value().toString();
         } else if (name == staticAttribute()) {
@@ -2796,8 +2796,8 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
     QString rename;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == u"signature") {
-            originalSignature = attributes->takeAt(i).value().toString();
+        if (name == signatureAttribute()) {
+            originalSignature = attributes->takeAt(i).value().toString().simplified();
         } else if (name == accessAttribute()) {
             access = attributes->takeAt(i).value().toString();
         } else if (name == renameAttribute()) {
@@ -3261,7 +3261,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
 
         if (m_context->db->hasDroppedTypeEntries()) {
             const QString identifier = element == StackElement::FunctionTypeEntry
-                ? attributes.value(signatureAttribute()).toString() : name;
+                ? attributes.value(signatureAttribute()).toString().simplified() : name;
             if (shouldDropTypeEntry(m_context->db, m_contextStack, identifier)) {
                 m_currentDroppedEntryDepth = 1;
                 if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
