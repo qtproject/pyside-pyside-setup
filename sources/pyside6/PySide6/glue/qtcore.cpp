@@ -1750,6 +1750,57 @@ QtCoreHelper::QGenericReturnArgumentHolder result(qArgData.metaType, qArgData.da
 %PYARG_0 = %CONVERTTOPYTHON[QtCoreHelper::QGenericReturnArgumentHolder](result);
 // @snippet q_return_arg
 
+// @snippet qmetamethod-invoke-helpers
+static InvokeMetaMethodFunc
+    createInvokeMetaMethodFunc(const QMetaMethod &method, QObject *object,
+                               Qt::ConnectionType type = Qt::AutoConnection)
+{
+    return [&method, object, type](QGenericArgument a0, QGenericArgument a1,
+                                   QGenericArgument a2, QGenericArgument a3,
+                                   QGenericArgument a4, QGenericArgument a5,
+                                   QGenericArgument a6, QGenericArgument a7,
+                                   QGenericArgument a8, QGenericArgument a9) -> bool
+    {
+        return method.invoke(object, type, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+    };
+}
+
+static InvokeMetaMethodFuncWithReturn
+    createInvokeMetaMethodFuncWithReturn(const QMetaMethod &method, QObject *object,
+                                         Qt::ConnectionType type = Qt::AutoConnection)
+{
+    return [&method, object, type](QGenericReturnArgument r,
+                                   QGenericArgument a0, QGenericArgument a1,
+                                   QGenericArgument a2, QGenericArgument a3,
+                                   QGenericArgument a4, QGenericArgument a5,
+                                   QGenericArgument a6, QGenericArgument a7,
+                                   QGenericArgument a8, QGenericArgument a9) -> bool
+    {
+        return method.invoke(object, type, r, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+    };
+}
+// @snippet qmetamethod-invoke-helpers
+
+// @snippet qmetamethod-invoke-conn-type-return-arg
+%PYARG_0 = invokeMetaMethodWithReturn(createInvokeMetaMethodFuncWithReturn(*%CPPSELF, %1, %2),
+                                      %3, %4, %5, %6, %7, %8, %9, %10, %11, %12, %13);
+// @snippet qmetamethod-invoke-conn-type-return-arg
+
+// @snippet qmetamethod-invoke-return-arg
+%PYARG_0 = invokeMetaMethodWithReturn(createInvokeMetaMethodFuncWithReturn(*%CPPSELF, %1),
+                                      %2, %3, %4, %5, %6, %7, %8, %9, %10, %11, %12);
+// @snippet qmetamethod-invoke-return-arg
+
+// @snippet qmetamethod-invoke-conn-type
+%PYARG_0 = invokeMetaMethod(createInvokeMetaMethodFunc(*%CPPSELF, %1, %2),
+                            %3, %4, %5, %6, %7, %8, %9, %10, %11, %12);
+// @snippet qmetamethod-invoke-conn-type
+
+// @snippet qmetamethod-invoke
+%PYARG_0 = invokeMetaMethod(createInvokeMetaMethodFunc(*%CPPSELF, %1),
+                            %2, %3, %4, %5, %6, %7, %8, %9, %10, %11);
+// @snippet qmetamethod-invoke
+
 // @snippet qmetaobject-invokemethod-helpers
 static InvokeMetaMethodFunc
     createInvokeMetaMethodFunc(QObject *object, const char *methodName,

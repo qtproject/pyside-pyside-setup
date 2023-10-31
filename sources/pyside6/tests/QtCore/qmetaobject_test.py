@@ -143,6 +143,17 @@ class qmetaobject_test(unittest.TestCase):
                                        Q_ARG(int, 2), Q_ARG(int, 3))
         self.assertEqual(sum, 5)
 
+        # Same with QMetaMethod
+        mo = tester.metaObject()
+        method = mo.method(mo.indexOfMethod("add(int,int)"))
+        self.assertTrue(method.isValid())
+        sum = method.invoke(tester, Qt.ConnectionType.AutoConnection,
+                            Q_RETURN_ARG(int), Q_ARG(int, 2), Q_ARG(int, 3))
+        self.assertEqual(sum, 5)
+        sum = method.invoke(tester, Q_RETURN_ARG(int), Q_ARG(int, 2),
+                            Q_ARG(int, 3))
+        self.assertEqual(sum, 5)
+
         concatenated = QMetaObject.invokeMethod(tester, "concatenate",
                                                 Q_RETURN_ARG(str),
                                                 Q_ARG(str, "bla"),
@@ -189,6 +200,16 @@ class qmetaobject_test(unittest.TestCase):
                                  Q_ARG(QModelIndex, index),
                                  Q_ARG("QVariant", "bla"))
         self.assertEqual(model.data(index), "bla")
+
+        # Same with QMetaMethod
+        mo = model.metaObject()
+        method = mo.method(mo.indexOfMethod("setData(QModelIndex,QVariant)"))
+        self.assertTrue(method.isValid())
+        method.invoke(model, Qt.ConnectionType.AutoConnection,
+                      Q_ARG(QModelIndex, index), Q_ARG("QVariant", "blub"))
+        self.assertEqual(model.data(index), "blub")
+        method.invoke(model, Q_ARG(QModelIndex, index), Q_ARG("QVariant", "blip"))
+        self.assertEqual(model.data(index), "blip")
 
     def test_QMetaMethod(self):
         o = QObject()
