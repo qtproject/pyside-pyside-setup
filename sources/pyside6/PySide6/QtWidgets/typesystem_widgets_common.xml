@@ -380,7 +380,7 @@
     <enum-type name="SelectionMode"/>
     <enum-type name="State"/>
     <modify-function signature="setModel(QAbstractItemModel*)">
-      <modify-argument index="1">
+      <modify-argument index="1" pyi-type="Optional[PySide6.QtCore.QAbstractItemModel]">
         <reference-count action="set"/>
       </modify-argument>
     </modify-function>
@@ -1385,7 +1385,7 @@
     <enum-type name="ViewportAnchor"/>
     <enum-type name="ViewportUpdateMode"/>
     <modify-function signature="setScene(QGraphicsScene*)">
-      <modify-argument index="1">
+      <modify-argument index="1" pyi-type="Optional[PySide6.QtWidgets.QGraphicsScene]">
         <reference-count action="set"/>
       </modify-argument>
     </modify-function>
