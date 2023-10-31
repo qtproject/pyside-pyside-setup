@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = PROJECT_NAME
+authors = [
+    {name = "Qt for Python Team", email = "pyside@qt-project.org"},
+]
+description = PROJECT_DESCRIPTION
+readme = PROJECT_README
+dynamic = ["version"]
+requires-python = ">=3.8, <3.13"
+keywords = ["Qt"]
+license = {text = "LGPL"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Environment :: MacOS X",
+    "Environment :: X11 Applications :: Qt",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
+    "License :: Other/Proprietary License",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: C++",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Database",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: User Interfaces",
+    "Topic :: Software Development :: Widget Sets",
+]
+
+[project.urls]
+Homepage = "https://pyside.org"
+Documentation = "https://doc.qt.io/qtforpython"
+Repository = "https://code.qt.io/cgit/pyside/pyside-setup.git/"
+Changelog = "https://code.qt.io/cgit/pyside/pyside-setup.git/tree/doc/changelogs"
+Tracker = "https://bugreports.qt.io/projects/PYSIDE"
+
+[tool.distutils.bdist_wheel]
+py_limited_api = "cp38"
+plat_name = PROJECT_TAG
+
+[tool.setuptools.packages]
+find = {}
+
+[tool.setuptools.dynamic]
+version = {attr = PROJECT_VERSION}
