@@ -3083,7 +3083,10 @@
   <value-type name="QMetaMethod">
     <extra-includes>
         <include file-name="pysidesignal.h" location="global"/>
+        <include file-name="glue/core_snippets_p.h" location="local"/>
     </extra-includes>
+    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
+                 snippet="qmetamethod-invoke-helpers"/>
     <enum-type name="Access"/>
     <enum-type name="MethodType"/>
     <add-function signature="fromSignal(PySideSignalInstance@signal@)"
@@ -3094,6 +3097,68 @@
         Returns the meta-method that corresponds to the given signal, or an invalid QMetaMethod
         if signal is not a signal of the class.
         </inject-documentation>
+    </add-function>
+    <add-function signature="invoke(QObject*@object@,Qt::ConnectionType@type@,
+                                    QtCoreHelper::QGenericReturnArgumentHolder@ret@,
+                                    QtCoreHelper::QGenericArgumentHolder@val0@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val1@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val2@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val3@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val4@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val5@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val6@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val7@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val8@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val9@={})"
+                  return-type="PyObject*">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                     snippet="qmetamethod-invoke-conn-type-return-arg"/>
+    </add-function>
+    <add-function signature="invoke(QObject*@object@,
+                                    QtCoreHelper::QGenericReturnArgumentHolder@ret@,
+                                    QtCoreHelper::QGenericArgumentHolder@val0@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val1@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val2@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val3@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val4@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val5@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val6@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val7@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val8@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val9@={})"
+                  return-type="PyObject*">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                     snippet="qmetamethod-invoke-return-arg"/>
+    </add-function>
+    <add-function signature="invoke(QObject*@object@,Qt::ConnectionType@type@,
+                                    QtCoreHelper::QGenericArgumentHolder@val0@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val1@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val2@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val3@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val4@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val5@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val6@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val7@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val8@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val9@={})"
+                  return-type="PyObject*">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                     snippet="qmetamethod-invoke-conn-type"/>
+    </add-function>
+    <add-function signature="invoke(QObject*@object@,
+                                    QtCoreHelper::QGenericArgumentHolder@val0@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val1@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val2@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val3@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val4@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val5@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val6@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val7@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val8@={},
+                                    QtCoreHelper::QGenericArgumentHolder@val9@={})"
+                  return-type="PyObject*">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                     snippet="qmetamethod-invoke"/>
     </add-function>
     <!-- This isn't part of Qt public API -->
     <modify-function signature="attributes()const" remove="all"/>
