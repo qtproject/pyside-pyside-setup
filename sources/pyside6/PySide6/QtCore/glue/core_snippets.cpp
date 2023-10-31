@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "core_snippets_p.h"
+#include "qtcorehelper.h"
 #include "pysideqobject.h"
 
 #include "shiboken.h"
@@ -10,6 +11,7 @@
 #endif
 #include "basewrapper.h"
 #include "autodecref.h"
+#include "pysideutils.h"
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
@@ -261,4 +263,86 @@ bool PyTime_ImportAndCheck(PyObject *pyIn)
     if (!PyDateTimeAPI)
         PyDateTime_IMPORT;
     return PyTime_Check(pyIn);
+}
+
+PyObject *invokeMetaMethod(const InvokeMetaMethodFunc &f,
+                           const QtCoreHelper::QGenericArgumentHolder &a0,
+                           const QtCoreHelper::QGenericArgumentHolder &a1,
+                           const QtCoreHelper::QGenericArgumentHolder &a2,
+                           const QtCoreHelper::QGenericArgumentHolder &a3,
+                           const QtCoreHelper::QGenericArgumentHolder &a4,
+                           const QtCoreHelper::QGenericArgumentHolder &a5,
+                           const QtCoreHelper::QGenericArgumentHolder &a6,
+                           const QtCoreHelper::QGenericArgumentHolder &a7,
+                           const QtCoreHelper::QGenericArgumentHolder &a8,
+                           const QtCoreHelper::QGenericArgumentHolder &a9)
+{
+    PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
+    const bool resultB = f(a0.toGenericArgument(), a1.toGenericArgument(), a2.toGenericArgument(),
+                           a3.toGenericArgument(), a4.toGenericArgument(), a5.toGenericArgument(),
+                           a6.toGenericArgument(), a7.toGenericArgument(), a8.toGenericArgument(),
+                           a9.toGenericArgument());
+    PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
+    PyObject *result = resultB ? Py_True : Py_False;
+    Py_INCREF(result);
+    return result;
+}
+
+// Convert a QGenericReturnArgument to Python for QMetaObject::invokeMethod
+static PyObject *convertGenericReturnArgument(const void *retData, QMetaType metaType)
+{
+    PyObject *result = nullptr;
+    switch (metaType.id()) {
+    case QMetaType::Bool:
+        result = *reinterpret_cast<const bool *>(retData) ? Py_True : Py_False;
+        Py_INCREF(result);
+        break;
+    case QMetaType::Int:
+        result = PyLong_FromLong(*reinterpret_cast<const int *>(retData));
+        break;
+    case QMetaType::Double:
+        result = PyFloat_FromDouble(*reinterpret_cast<const double *>(retData));
+        break;
+    case QMetaType::QString:
+        result = PySide::qStringToPyUnicode(*reinterpret_cast<const QString *>(retData));
+        break;
+    default: {
+        Shiboken::Conversions::SpecificConverter converter(metaType.name());
+        const auto type = converter.conversionType();
+        if (type == Shiboken::Conversions::SpecificConverter::InvalidConversion) {
+            PyErr_Format(PyExc_RuntimeError, "%s: Unable to find converter for \"%s\".",
+                         __FUNCTION__, metaType.name());
+            return nullptr;
+        }
+        result = converter.toPython(retData);
+    }
+    }
+    return result;
+}
+
+PyObject *invokeMetaMethodWithReturn(const InvokeMetaMethodFuncWithReturn &f,
+                                     const QtCoreHelper::QGenericReturnArgumentHolder &r,
+                                     const QtCoreHelper::QGenericArgumentHolder &a0,
+                                     const QtCoreHelper::QGenericArgumentHolder &a1,
+                                     const QtCoreHelper::QGenericArgumentHolder &a2,
+                                     const QtCoreHelper::QGenericArgumentHolder &a3,
+                                     const QtCoreHelper::QGenericArgumentHolder &a4,
+                                     const QtCoreHelper::QGenericArgumentHolder &a5,
+                                     const QtCoreHelper::QGenericArgumentHolder &a6,
+                                     const QtCoreHelper::QGenericArgumentHolder &a7,
+                                     const QtCoreHelper::QGenericArgumentHolder &a8,
+                                     const QtCoreHelper::QGenericArgumentHolder &a9)
+{
+    PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
+    const bool callResult = f(r.toGenericReturnArgument(),
+                              a0.toGenericArgument(), a1.toGenericArgument(), a2.toGenericArgument(),
+                              a3.toGenericArgument(), a4.toGenericArgument(), a5.toGenericArgument(),
+                              a6.toGenericArgument(), a7.toGenericArgument(), a8.toGenericArgument(),
+                              a9.toGenericArgument());
+    PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
+    if (!callResult) {
+        PyErr_SetString(PyExc_RuntimeError, "QMetaMethod invocation failed.");
+        return nullptr;
+    }
+    return convertGenericReturnArgument(r.data(), r.metaType());
 }
