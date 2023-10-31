@@ -1750,85 +1750,61 @@ QtCoreHelper::QGenericReturnArgumentHolder result(qArgData.metaType, qArgData.da
 %PYARG_0 = %CONVERTTOPYTHON[QtCoreHelper::QGenericReturnArgumentHolder](result);
 // @snippet q_return_arg
 
+// @snippet qmetaobject-invokemethod-helpers
+static InvokeMetaMethodFunc
+    createInvokeMetaMethodFunc(QObject *object, const char *methodName,
+                               Qt::ConnectionType type = Qt::AutoConnection)
+{
+    return [object, methodName, type](QGenericArgument a0, QGenericArgument a1,
+                                      QGenericArgument a2, QGenericArgument a3,
+                                      QGenericArgument a4, QGenericArgument a5,
+                                      QGenericArgument a6, QGenericArgument a7,
+                                      QGenericArgument a8, QGenericArgument a9) -> bool
+    {
+        return QMetaObject::invokeMethod(object, methodName, type,
+                                         a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+    };
+}
+
+static InvokeMetaMethodFuncWithReturn
+    createInvokeMetaMethodFuncWithReturn(QObject *object, const char *methodName,
+                                         Qt::ConnectionType type = Qt::AutoConnection)
+{
+    return [object, methodName, type](QGenericReturnArgument r,
+                                      QGenericArgument a0, QGenericArgument a1,
+                                      QGenericArgument a2, QGenericArgument a3,
+                                      QGenericArgument a4, QGenericArgument a5,
+                                      QGenericArgument a6, QGenericArgument a7,
+                                      QGenericArgument a8, QGenericArgument a9) -> bool
+    {
+        return QMetaObject::invokeMethod(object, methodName, type,
+                                         r, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+    };
+}
+// @snippet qmetaobject-invokemethod-helpers
+
 // invokeMethod(QObject *,const char *, QGenericArgument a0, a1, a2 )
 // @snippet qmetaobject-invokemethod-arg
-PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
-const bool result = %CPPSELF.invokeMethod(%1, %2, %3.toGenericArgument(), %4.toGenericArgument(),
-                                          %5.toGenericArgument());
-PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
-%PYARG_0 = %CONVERTTOPYTHON[bool](result);
+%PYARG_0 = invokeMetaMethod(createInvokeMetaMethodFunc(%1, %2),
+                            %3, %4, %5, %6, %7, %8, %9, %10, %11, %12);
 // @snippet qmetaobject-invokemethod-arg
 
 // invokeMethod(QObject *,const char *,Qt::ConnectionType, QGenericArgument a0, a1, a2 )
 // @snippet qmetaobject-invokemethod-conn-type-arg
-PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
-const bool result = %CPPSELF.invokeMethod(%1, %2, %3,
-                                          %4.toGenericArgument(), %5.toGenericArgument(),
-                                          %6.toGenericArgument());
-PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
-%PYARG_0 = %CONVERTTOPYTHON[bool](result);
+%PYARG_0 = invokeMetaMethod(createInvokeMetaMethodFunc(%1, %2, %3),
+                             %4, %5, %6, %7, %8, %9, %10, %11, %12, %13);
 // @snippet qmetaobject-invokemethod-conn-type-arg
-
-// @snippet qmetaobject-invokemethod-helpers
-static PyObject *invokeMethodHelper(QObject *obj, const char *member, Qt::ConnectionType type,
-                                    const QtCoreHelper::QGenericReturnArgumentHolder &returnArg,
-                                    const QtCoreHelper::QGenericArgumentHolder &v1,
-                                    const QtCoreHelper::QGenericArgumentHolder &v2,
-                                    const QtCoreHelper::QGenericArgumentHolder &v3)
-
-{
-    PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
-    const bool callResult = QMetaObject::invokeMethod(obj, member, type,
-                                                      returnArg.toGenericReturnArgument(),
-                                                      v1.toGenericArgument(), v2.toGenericArgument(),
-                                                      v3.toGenericArgument());
-    PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
-    if (!callResult) {
-        PyErr_Format(PyExc_RuntimeError, "QMetaObject::invokeMethod(): Invocation of %s::%s() failed.",
-                     obj->metaObject()->className(), member);
-        return nullptr;
-    }
-
-    PyObject *result = nullptr;
-    const void *retData = returnArg.data();
-    const QMetaType metaType = returnArg.metaType();
-    switch (metaType.id()) {
-    case QMetaType::Bool:
-        result = *reinterpret_cast<const bool *>(retData) ? Py_True : Py_False;
-        Py_INCREF(result);
-        break;
-    case QMetaType::Int:
-        result = PyLong_FromLong(*reinterpret_cast<const int *>(retData));
-        break;
-    case QMetaType::Double:
-        result = PyFloat_FromDouble(*reinterpret_cast<const double *>(retData));
-        break;
-    case QMetaType::QString:
-        result = PySide::qStringToPyUnicode(*reinterpret_cast<const QString *>(retData));
-        break;
-    default: {
-        Shiboken::Conversions::SpecificConverter converter(metaType.name());
-        const auto type = converter.conversionType();
-        if (type == Shiboken::Conversions::SpecificConverter::InvalidConversion) {
-            PyErr_Format(PyExc_RuntimeError, "%s: Unable to find converter for \"%s\".",
-                         __FUNCTION__, metaType.name());
-            return nullptr;
-        }
-        result = converter.toPython(retData);
-    }
-    }
-    return result;
-}
-// @snippet qmetaobject-invokemethod-helpers
 
 // invokeMethod(QObject *,const char *, Qt::ConnectionType, QGenericReturnArgument,QGenericArgument a0, a1, a2 )
 // @snippet qmetaobject-invokemethod-conn-type-return-arg
-%PYARG_0 = invokeMethodHelper(%1, %2, %3, %4, %5, %6, %7);
+%PYARG_0 = invokeMetaMethodWithReturn(createInvokeMetaMethodFuncWithReturn(%1, %2, %3),
+                                      %4, %5, %6, %7, %8, %9, %10, %11, %12, %13, %14);
 // @snippet qmetaobject-invokemethod-conn-type-return-arg
 
 // invokeMethod(QObject *,const char *, QGenericReturnArgument,QGenericArgument a0, a1, a2 )
 // @snippet qmetaobject-invokemethod-return-arg
-%PYARG_0 = invokeMethodHelper(%1, %2, Qt::AutoConnection, %3, %4, %5, %6);
+%PYARG_0 = invokeMetaMethodWithReturn(createInvokeMetaMethodFuncWithReturn(%1, %2),
+                                      %3, %4, %5, %6, %7, %8, %9, %10, %11, %12, %13);
 // @snippet qmetaobject-invokemethod-return-arg
 
 // @snippet keycombination-from-keycombination

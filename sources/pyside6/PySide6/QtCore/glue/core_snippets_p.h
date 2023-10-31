@@ -12,10 +12,17 @@
 
 #include <functional>
 
+QT_FORWARD_DECLARE_CLASS(QGenericArgument)
+QT_FORWARD_DECLARE_CLASS(QGenericReturnArgument)
 QT_FORWARD_DECLARE_CLASS(QMetaType)
 QT_FORWARD_DECLARE_CLASS(QObject)
 QT_FORWARD_DECLARE_CLASS(QRegularExpression)
 QT_FORWARD_DECLARE_CLASS(QVariant);
+
+namespace QtCoreHelper {
+class QGenericArgumentHolder;
+class QGenericReturnArgumentHolder;
+}
 
 // Helpers for QVariant conversion
 
@@ -51,5 +58,46 @@ QString qObjectTr(PyTypeObject *type, const char *sourceText, const char *disamb
 bool PyDate_ImportAndCheck(PyObject *pyIn);
 bool PyDateTime_ImportAndCheck(PyObject *pyIn);
 bool PyTime_ImportAndCheck(PyObject *pyIn);
+
+// Helpers for QMetaObject::invokeMethod(), QMetaMethod::invoke(). The std::function
+// serves to abstract from QMetaObject/QMetaMethod invocation parameters.
+using InvokeMetaMethodFunc =
+    std::function<bool(QGenericArgument,QGenericArgument,QGenericArgument,QGenericArgument,
+                       QGenericArgument,QGenericArgument,QGenericArgument,QGenericArgument,
+                       QGenericArgument,QGenericArgument)>;
+
+using InvokeMetaMethodFuncWithReturn =
+    std::function<bool(QGenericReturnArgument,
+                       QGenericArgument,QGenericArgument,QGenericArgument,QGenericArgument,
+                       QGenericArgument,QGenericArgument,QGenericArgument,QGenericArgument,
+                       QGenericArgument,QGenericArgument)>;
+
+// Call a void meta method from Python passing the argument holder helpers.
+PyObject *invokeMetaMethod(const InvokeMetaMethodFunc &f,
+                           const QtCoreHelper::QGenericArgumentHolder &,
+                           const QtCoreHelper::QGenericArgumentHolder &,
+                           const QtCoreHelper::QGenericArgumentHolder &,
+                           const QtCoreHelper::QGenericArgumentHolder &,
+                           const QtCoreHelper::QGenericArgumentHolder &,
+                           const QtCoreHelper::QGenericArgumentHolder &,
+                           const QtCoreHelper::QGenericArgumentHolder &,
+                           const QtCoreHelper::QGenericArgumentHolder &,
+                           const QtCoreHelper::QGenericArgumentHolder &,
+                           const QtCoreHelper::QGenericArgumentHolder &);
+
+// Call a meta method with a return value from Python passing the argument holder
+// helpers.
+PyObject *invokeMetaMethodWithReturn(const InvokeMetaMethodFuncWithReturn &f,
+                                     const QtCoreHelper::QGenericReturnArgumentHolder &,
+                                     const QtCoreHelper::QGenericArgumentHolder &,
+                                     const QtCoreHelper::QGenericArgumentHolder &,
+                                     const QtCoreHelper::QGenericArgumentHolder &,
+                                     const QtCoreHelper::QGenericArgumentHolder &,
+                                     const QtCoreHelper::QGenericArgumentHolder &,
+                                     const QtCoreHelper::QGenericArgumentHolder &,
+                                     const QtCoreHelper::QGenericArgumentHolder &,
+                                     const QtCoreHelper::QGenericArgumentHolder &,
+                                     const QtCoreHelper::QGenericArgumentHolder &,
+                                     const QtCoreHelper::QGenericArgumentHolder &);
 
 #endif // CORE_SNIPPETS_P_H
