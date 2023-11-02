@@ -146,6 +146,19 @@ Documentation
             Videos
 
     .. grid-item-card::
+        :img-top: images/Tooling.svg
+        :class-item: text-center
+
+        Discover the tools included.
+        +++
+        .. button-ref:: package_tools
+            :color: primary
+            :outline:
+            :expand:
+
+            Tooling
+
+    .. grid-item-card::
         :img-top: images/Deployment.svg
         :class-item: text-center
 

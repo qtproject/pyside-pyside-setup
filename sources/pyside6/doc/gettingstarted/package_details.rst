@@ -68,6 +68,8 @@ which is the original QtCore library.
   Adding the full URL because it's a different sphinx project.
 .. _`Shiboken Documentation`: https://doc.qt.io/qtforpython/shiboken6/gettingstarted.html
 
+.. _package_tools:
+
 Tools Included
 --------------
 
