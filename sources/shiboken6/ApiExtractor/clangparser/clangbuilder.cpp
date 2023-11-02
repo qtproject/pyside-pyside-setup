@@ -875,7 +875,8 @@ bool Builder::visitLocation(const QString &fileName, LocationType locationType) 
 void Builder::setForceProcessSystemIncludes(const QStringList &systemIncludes)
 {
     for (const auto &i : systemIncludes) {
-        if (i.endsWith(u'/'))
+        QFileInfo fi(i);
+        if (fi.exists() && fi.isDir())
             d->m_forceProcessSystemIncludePaths.append(i);
         else
             d->m_forceProcessSystemIncludes.append(i);
