@@ -744,12 +744,6 @@ void BuilderPrivate::addBaseClass(const CXCursor &cursor)
     m_currentClass->addBaseClass({baseClass.first, baseClass.second, access});
 }
 
-static inline CXCursor definitionFromTypeRef(const CXCursor &typeRefCursor)
-{
-    Q_ASSERT(typeRefCursor.kind == CXCursor_TypeRef);
-    return clang_getTypeDeclaration(clang_getCursorType(typeRefCursor));
-}
-
 void BuilderPrivate::setFileName(const CXCursor &cursor, _CodeModelItem *item)
 {
     const SourceRange range = getCursorRange(cursor);
