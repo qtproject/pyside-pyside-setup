@@ -1305,6 +1305,10 @@ QString getCallbackSignature(const char *signal, QObject *receiver, PyObject *ca
 
     bool isShortCircuit = false;
 
+    if (functionName.startsWith('<') && functionName.endsWith('>')) { // fix "<lambda>"
+        functionName[0] = '_';
+        functionName[functionName.size() - 1] = '_';
+    }
     const QString functionNameS = QLatin1String(functionName);
     QString signature = encodeName ? codeCallbackName(callback, functionNameS) : functionNameS;
     QStringList args = getArgsFromSignature(signal, &isShortCircuit);
