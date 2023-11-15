@@ -50,7 +50,7 @@ namespace PySide::Signal {
     void            init(PyObject *module);
     bool            connect(PyObject *source, const char *signal, PyObject *callback);
     QByteArray      getTypeName(PyObject *);
-    QString         codeCallbackName(PyObject *callback, const QString &funcName);
+    QByteArray      codeCallbackName(PyObject *callback, const QByteArray &funcName);
     QByteArray      voidType();
 
 } // namespace PySide::Signal

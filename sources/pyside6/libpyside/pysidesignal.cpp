@@ -530,7 +530,7 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
 
             // Get signature args
             bool isShortCircuit = false;
-            QStringList argsSignature = PySide::Signal::getArgsFromSignature(it->d->signature,
+            QByteArrayList argsSignature = PySide::Signal::getArgsFromSignature(it->d->signature,
                 &isShortCircuit);
             qsizetype signatureArgs = argsSignature.size();
 
@@ -1214,29 +1214,30 @@ EmitterData getEmitterData(PySideSignalInstance *signal)
     return result;
 }
 
-QStringList getArgsFromSignature(const char *signature, bool *isShortCircuit)
+QByteArrayList getArgsFromSignature(const char *signature, bool *isShortCircuit)
 {
-    QString qsignature = QString::fromLatin1(signature).trimmed();
-    QStringList result;
+    QByteArray qsignature = QByteArray(signature).trimmed();
+    QByteArrayList result;
 
     if (isShortCircuit)
         *isShortCircuit = !qsignature.contains(u'(');
-    if (qsignature.contains(u"()") || qsignature.contains(u"(void)"))
+    if (qsignature.contains("()") || qsignature.contains("(void)"))
         return result;
-    if (qsignature.endsWith(u')')) {
-        const int paren = qsignature.indexOf(u'(');
+    if (qsignature.endsWith(')')) {
+        const auto paren = qsignature.indexOf('(');
         if (paren >= 0) {
             qsignature.chop(1);
             qsignature.remove(0, paren + 1);
             result = qsignature.split(u',');
-            for (QString &type : result)
+            for (auto &type : result)
                 type = type.trimmed();
         }
     }
     return result;
 }
 
-QString getCallbackSignature(const char *signal, QObject *receiver, PyObject *callback, bool encodeName)
+QByteArray getCallbackSignature(const char *signal, QObject *receiver,
+                                PyObject *callback, bool encodeName)
 {
     QByteArray functionName;
     qsizetype numArgs = -1;
@@ -1309,9 +1310,8 @@ QString getCallbackSignature(const char *signal, QObject *receiver, PyObject *ca
         functionName[0] = '_';
         functionName[functionName.size() - 1] = '_';
     }
-    const QString functionNameS = QLatin1String(functionName);
-    QString signature = encodeName ? codeCallbackName(callback, functionNameS) : functionNameS;
-    QStringList args = getArgsFromSignature(signal, &isShortCircuit);
+    QByteArray signature = encodeName ? codeCallbackName(callback, functionName) : functionName;
+    QByteArrayList args = getArgsFromSignature(signal, &isShortCircuit);
 
     if (!isShortCircuit) {
         signature.append(u'(');
@@ -1319,8 +1319,8 @@ QString getCallbackSignature(const char *signal, QObject *receiver, PyObject *ca
             numArgs = std::numeric_limits<qsizetype>::max();
         while (!args.isEmpty() && (args.size() > (numArgs - useSelf)))
             args.removeLast();
-        signature.append(args.join(u','));
-        signature.append(u')');
+        signature.append(args.join(','));
+        signature.append(')');
     }
     return signature;
 }
@@ -1339,21 +1339,21 @@ bool checkQtSignal(const char *signal)
     return true;
 }
 
-QString codeCallbackName(PyObject *callback, const QString &funcName)
+QByteArray codeCallbackName(PyObject *callback, const QByteArray &funcName)
 {
     if (PyMethod_Check(callback)) {
         PyObject *self = PyMethod_GET_SELF(callback);
         PyObject *func = PyMethod_GET_FUNCTION(callback);
-        return funcName + QString::number(quint64(self), 16) + QString::number(quint64(func), 16);
+        return funcName + QByteArray::number(quint64(self), 16) + QByteArray::number(quint64(func), 16);
     }
     // PYSIDE-1523: Handle the compiled case.
     if (PySide::isCompiledMethod(callback)) {
         // Not retaining references inline with what PyMethod_GET_(SELF|FUNC) does.
         Shiboken::AutoDecRef self(PyObject_GetAttr(callback, PySide::PySideName::im_self()));
         Shiboken::AutoDecRef func(PyObject_GetAttr(callback, PySide::PySideName::im_func()));
-        return funcName + QString::number(quint64(self), 16) + QString::number(quint64(func), 16);
+        return funcName + QByteArray::number(quint64(self), 16) + QByteArray::number(quint64(func), 16);
     }
-    return funcName + QString::number(quint64(callback), 16);
+    return funcName + QByteArray::number(quint64(callback), 16);
 }
 
 QByteArray voidType()

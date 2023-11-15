@@ -129,7 +129,7 @@ static GetReceiverResult getReceiver(QObject *source, const char *signal,
     if (!result.usingGlobalReceiver && result.receiver && result.self) {
         result.callbackSig =
             PySide::Signal::getCallbackSignature(signal, result.receiver, callback,
-                                                 result.usingGlobalReceiver).toLatin1();
+                                                 result.usingGlobalReceiver);
         const QMetaObject *metaObject = result.receiver->metaObject();
         result.slotIndex = metaObject->indexOfSlot(result.callbackSig.constData());
         if (PyMethod_Check(callback) != 0 && result.slotIndex != -1
@@ -155,7 +155,7 @@ static GetReceiverResult getReceiver(QObject *source, const char *signal,
             result.receiver->moveToThread(receiverThread);
         result.callbackSig =
             PySide::Signal::getCallbackSignature(signal, result.receiver, callback,
-                                                 result.usingGlobalReceiver).toLatin1();
+                                                 result.usingGlobalReceiver);
         const QMetaObject *metaObject = result.receiver->metaObject();
         result.slotIndex = metaObject->indexOfSlot(result.callbackSig.constData());
     }
