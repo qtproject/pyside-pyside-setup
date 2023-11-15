@@ -9,6 +9,7 @@
 #include "pep384impl.h"
 
 #include <algorithm>
+#include <optional>
 
 #include <iomanip>
 #include <iostream>
@@ -22,6 +23,25 @@
 #  include <pthread.h>
 #endif
 
+static std::optional<std::string> getStringAttr(PyObject *obj, const char *what)
+{
+    if (PyObject_HasAttrString(obj, what) != 0) { // Check first to suppress error.
+        Shiboken::AutoDecRef result(PyObject_GetAttrString(obj, what));
+        if (PyUnicode_Check(result.object()) != 0)
+            return _PepUnicode_AsString(result.object());
+    }
+    return std::nullopt;
+}
+
+static std::optional<int> getIntAttr(PyObject *obj, const char *what)
+{
+    if (PyObject_HasAttrString(obj, what) != 0) { // Check first to suppress error.
+        Shiboken::AutoDecRef result(PyObject_GetAttrString(obj, what));
+        if (PyLong_Check(result.object()) != 0)
+            return PyLong_AsLong(result.object());
+    }
+    return std::nullopt;
+}
 
 static void formatTypeTuple(PyObject *t, const char *what, std::ostream &str);
 
@@ -268,6 +288,27 @@ static void formatPyMethod(PyObject *obj, std::ostream &str)
     str << ", instance=" << PyMethod_Self(obj);
 }
 
+static void formatPyCodeObject(PyObject *obj, std::ostream &str)
+{
+    if (auto name = getStringAttr(obj, "co_name"))
+        str << '"' << name.value() << '"';
+    if (auto qualName = getStringAttr(obj, "co_qualname"))
+        str << ", co_qualname=\"" << qualName.value() << '"';
+    if (auto flags = getIntAttr(obj, "co_flags"))
+        str << ", flags=0x" << std::hex << flags.value() << std::dec;
+    if (auto c = getIntAttr(obj, "co_argcount"))
+        str << ", co_argcounts=" << c.value();
+    if (auto c = getIntAttr(obj, "co_posonlyargcount"))
+        str << ", co_posonlyargcount=" << c.value();
+    if (auto c = getIntAttr(obj, "co_kwonlyargcount"))
+        str << ", co_kwonlyargcount=" << c.value();
+    if (auto fileName = getStringAttr(obj, "co_filename")) {
+        str << " @" << fileName.value();
+        if (auto l = getIntAttr(obj, "co_firstlineno"))
+            str << ':'<< l.value();
+    }
+}
+
 static void formatPyObjectHelper(PyObject *obj, std::ostream &str)
 {
     str << ", ";
@@ -301,6 +342,8 @@ static void formatPyObjectHelper(PyObject *obj, std::ostream &str)
         formatPyFunction(obj, str);
     else if (PyMethod_Check(obj) != 0)
         formatPyMethod(obj, str);
+    else if (PepCode_Check(obj) != 0)
+        formatPyCodeObject(obj, str);
     else if (PySequence_Check(obj))
         formatPySequence(obj, str);
     else if (PyDict_Check(obj))

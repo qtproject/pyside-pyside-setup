@@ -391,6 +391,7 @@ LIBSHIBOKEN_API PyObject *PyMethod_Self(PyObject *);
 typedef struct _code PepCodeObject;
 
 LIBSHIBOKEN_API int PepCode_Get(PepCodeObject *co, const char *name);
+LIBSHIBOKEN_API int PepCode_Check(PyObject *o);
 
 #  define PepCode_GET_FLAGS(o)         PepCode_Get(o, "co_flags")
 #  define PepCode_GET_ARGCOUNT(o)      PepCode_Get(o, "co_argcount")
@@ -408,7 +409,7 @@ LIBSHIBOKEN_API int PepCode_Get(PepCodeObject *co, const char *name);
 #  define PepCodeObject                PyCodeObject
 #  define PepCode_GET_FLAGS(o)         ((o)->co_flags)
 #  define PepCode_GET_ARGCOUNT(o)      ((o)->co_argcount)
-
+#  define PepCode_Check PyCode_Check
 #endif
 
 /*****************************************************************************

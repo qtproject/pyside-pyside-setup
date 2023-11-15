@@ -504,6 +504,12 @@ PepCode_Get(PepCodeObject *co, const char *name)
     }
     return ret;
 }
+
+int PepCode_Check(PyObject *o)
+{
+    return o != nullptr && std::strcmp(Py_TYPE(o)->tp_name, "code") == 0 ? 1 : 0;
+}
+
 #endif // Py_LIMITED_API
 
 /*****************************************************************************
