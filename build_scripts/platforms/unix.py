@@ -126,6 +126,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
 
             if sys.platform.startswith("linux"):
                 scripts.append("android_deploy.py")
+                scripts.append("requirements-android.txt")
                 script_dirs.extend(["deploy_lib/android",
                                     "deploy_lib/android/recipes/PySide6",
                                     "deploy_lib/android/recipes/shiboken6",])
