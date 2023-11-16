@@ -14,7 +14,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, QTimer, QCoreApplication, Signal
+from PySide6.QtCore import QObject, QThread, QTimer, Signal
 from helper.usesqapplication import UsesQApplication
 
 
@@ -32,6 +32,19 @@ class WatchDog(QObject):
             self.watched.exit_app_cb()
 
 
+class ThreadForContext(QThread):
+    def __init__(self):
+        super().__init__()
+        self.called = False
+        self.qthread = None
+        self.context = QObject()
+
+    def run(self):
+        self.called = True
+        self.qthread = QThread.currentThread()
+        self.exec()
+
+
 class TestSingleShot(UsesQApplication):
     '''Test case for QTimer.singleShot'''
 
@@ -40,6 +53,7 @@ class TestSingleShot(UsesQApplication):
         UsesQApplication.setUp(self)
         self.watchdog = WatchDog(self)
         self.called = False
+        self.qthread = None
 
     def tearDown(self):
         # Release resources
@@ -51,12 +65,25 @@ class TestSingleShot(UsesQApplication):
 
     def callback(self):
         self.called = True
+        self.qthread = QThread.currentThread()
+        self.qthread.exit()
         self.app.quit()
 
     def testSingleShot(self):
         QTimer.singleShot(100, self.callback)
         self.app.exec()
         self.assertTrue(self.called)
+
+    def testSingleShotWithContext(self):
+        thread = ThreadForContext()
+        thread.start()
+        thread.context.moveToThread(thread)
+        QTimer.singleShot(100, thread.context, self.callback)
+        self.app.exec()
+        thread.wait()
+        self.assertTrue(self.called)
+        self.assertTrue(thread.called)
+        self.assertEqual(self.qthread, thread.qthread)
 
 
 class SigEmitter(QObject):
@@ -93,4 +120,3 @@ class TestSingleShotSignal(UsesQApplication):
 
 if __name__ == '__main__':
     unittest.main()
-

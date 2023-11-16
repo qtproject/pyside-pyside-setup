@@ -2514,11 +2514,17 @@
     <include file-name="QtCore/qbuffer.h" location="global"/>
   </object-type>
   <object-type name="QTimer">
+    <extra-includes>
+      <include file-name="pysidestaticstrings.h" location="global"/>
+    </extra-includes>
     <modify-function signature="singleShot(int,const QObject*,const char*)">
       <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qtimer-singleshot-1"/>
     </modify-function>
     <add-function signature="singleShot(int,PyCallable*)" static="yes">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qtimer-singleshot-2"/>
+    </add-function>
+    <add-function signature="singleShot(int@msec@,const QObject*@context@,PyCallable*@functor@)" static="yes">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qtimer-singleshot-functor-context"/>
     </add-function>
   </object-type>
   <object-type name="QProcess">
