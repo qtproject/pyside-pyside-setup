@@ -51,6 +51,6 @@ and [join our community](https://wiki.qt.io/Qt_for_Python#Community)!
 ### Licensing
 
 PySide6 is available under both Open Source (LGPLv3/GPLv2) and commercial
-license.  Using PyPi is the recommended installation source, because the
-content of the wheels is valid for both cases.  For more information, refer to
+license. Using PyPi is the recommended installation source, because the
+content of the wheels is valid for both cases. For more information, refer to
 the [Qt Licensing page](https://www.qt.io/licensing/).

@@ -61,19 +61,19 @@ are found by the QtNetwork module.
 ## Building Additional Options
 
 On Linux and macOS you can use the option `--standalone` to embed Qt libraries
-into the PySide6 package.  The option does not affect Windows, because it is
+into the PySide6 package. The option does not affect Windows, because it is
 used implicitly, i.e. all relevant DLLs have to be copied into the PySide6
 package anyway, because there is no proper rpath support on the platform.
 
 You can use the option `--rpath=/path/to/lib/path` to specify which rpath
-values should be embedded into the PySide6 modules and shared libraries.  This
+values should be embedded into the PySide6 modules and shared libraries. This
 overrides the automatically generated values when the option is not specified.
 
 You can use the option `--qt-conf-prefix` to pass a path relative to the
 PySide6 installed package, which will be embedded into an auto-generated
-`qt.conf` registered in the Qt resource system.  This path will serve as the
+`qt.conf` registered in the Qt resource system. This path will serve as the
 PrefixPath for QLibraryInfo, thus allowing to choose where Qt plugins should be
-loaded from.  This option overrides the usual prefix chosen by `--standalone`
+loaded from. This option overrides the usual prefix chosen by `--standalone`
 option, or when building on Windows.
 
 To temporarily disable registration of the internal `qt.conf` file, a new
@@ -209,7 +209,7 @@ make sure to specify the following things:
    a system interpreter, or a virtualenv one for example)
 
 Once that is done, just re-run CMake, so that it picks up the new environment
-values.  If needed, all other cache variables defined by the project files can
+values. If needed, all other cache variables defined by the project files can
 be re-adjusted (for example FORCE_LIMITED_API).
 
 ## Command line CMake case

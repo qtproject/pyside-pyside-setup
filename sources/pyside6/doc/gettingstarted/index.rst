@@ -143,7 +143,7 @@ Cross Compilation
 -----------------
 
 Starting from 6.3, it is possible to cross-compile Shiboken (module), and
-PySide.  This functionality is still in Technical Preview, which means it could
+PySide. This functionality is still in Technical Preview, which means it could
 change in the future releases.
 
 .. important:: The only supported configuration is using a host Linux
@@ -177,7 +177,7 @@ Prerequisites
 ~~~~~~~~~~~~~
 
 First and foremost, you need to have access to the target device because you
-need to copy several system files (sysroot).  We recommend a Linux OS that has
+need to copy several system files (sysroot). We recommend a Linux OS that has
 the latest Qt versions, like `Manjaro ARM`_ or `Archlinux ARM`_.
 
 * (target) Install Qt 6.3+ on the system using the package manager.
@@ -190,7 +190,7 @@ the latest Qt versions, like `Manjaro ARM`_ or `Archlinux ARM`_.
 
 After installing these prerequisites, copy the ``target`` sysroot to your
 ``host`` computer. This process is tricky, because copying system files from
-another computer might cause problems with the symbolic links.  Here you
+another computer might cause problems with the symbolic links. Here you
 have two options to achieve that.
 
 Option A: Copying the files
@@ -275,7 +275,7 @@ and unpacked it.
 
 With those compilers, now you need a CMake toolchain file. This is
 a configuration file to set the compilers and sysroot information, together
-with extra options like compilation flags, and other details.  You can use the
+with extra options like compilation flags, and other details. You can use the
 following file as an example, but keep in mind they might vary:
 
 .. code-block:: cmake

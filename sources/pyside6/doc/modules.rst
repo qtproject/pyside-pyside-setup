@@ -82,7 +82,7 @@ Qt Modules Supported by Qt for Python
 
     .. grid-item-card:: :mod:`QtOpenGL Widgets <PySide6.QtOpenGLWidgets>`
 
-        Provides the  OpenGLWidget class enabling OpenGL rendering for
+        Provides the OpenGLWidget class enabling OpenGL rendering for
         a certain part of the widget tree.
 
     .. grid-item-card:: :mod:`Qt Positioning <PySide6.QtPositioning>`

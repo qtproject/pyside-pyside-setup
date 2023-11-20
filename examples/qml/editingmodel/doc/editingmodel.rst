@@ -2,7 +2,7 @@ QAbstractListModel in QML
 =========================
 
 This example shows how to add, remove and move items inside a QML
-ListView, but showing and editing the data via roles using  a
+ListView, but showing and editing the data via roles using a
 QAbstractListModel from Python.
 
 You can add new elements and reset the view using the two top buttons,

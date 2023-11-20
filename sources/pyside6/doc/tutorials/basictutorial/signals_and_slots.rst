@@ -57,7 +57,7 @@ could be implemented by placing a ``QToolButton`` to the right of the
     button.clicked.connect(line_edit.clear)
 
 ``connect()`` returns a ``QMetaObject.Connection`` object, which can be
-used  with the ``disconnect()`` method to sever the connection.
+used with the ``disconnect()`` method to sever the connection.
 
 Signals can also be connected to free functions:
 

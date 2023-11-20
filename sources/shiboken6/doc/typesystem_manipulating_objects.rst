@@ -136,7 +136,7 @@ language API (both are set to true by default).
 The ``remove`` attribute is an *optional* boolean attribute, which can
 mark the field to be discarded on generation.
 
-The  *optional* ``rename`` attribute can be used to change the name of the
+The *optional* ``rename`` attribute can be used to change the name of the
 given field in the generated target language API.
 
 The *optional* ``opaque-container`` attribute specifies whether
@@ -183,7 +183,7 @@ The ``since`` attribute specify the API version when this function was modified.
 The ``allow-thread`` attribute specifies whether a function should be wrapped
 into ``Py_BEGIN_ALLOW_THREADS`` and ``Py_END_ALLOW_THREADS``, that is,
 temporarily release the GIL (global interpreter lock). Doing so is required
-for any thread-related  function (wait operations), functions that might call
+for any thread-related function (wait operations), functions that might call
 a virtual function (potentially reimplemented in Python), and recommended for
 lengthy I/O operations or similar. It has performance costs, though.
 The value ``auto`` means that it will be turned off for functions for which
@@ -249,10 +249,10 @@ and disables generating the code for overriding the function in Python
 The ``remove`` attribute is an *optional* boolean attribute, which can
 mark the function to be discarded on generation.
 
-The  *optional* ``rename`` attribute can be used to change the name of the
+The *optional* ``rename`` attribute can be used to change the name of the
 given function in the generated target language API.
 
-The  *optional* ``access`` attribute changes the access privileges of the
+The *optional* ``access`` attribute changes the access privileges of the
 given function in the generated target language API.
 
 The *optional* **snake-case** attribute allows for overriding the value

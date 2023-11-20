@@ -87,7 +87,7 @@ If the class has a virtual destructor (and C++ classes with virtual methods shou
 C++ instance invalidates the wrapper only when the overridden destructor is called.
 
 An instance of the **shell** is created when created in Python. However,
-when  the object is created in C++, like in a factory method or a parameter
+when the object is created in C++, like in a factory method or a parameter
 to a virtual function like ``QObject::event(QEvent *)``, the wrapped object
 is a C++ instance of the native class, not the **shell** one, and we cannot
 know when it is destroyed.
@@ -178,8 +178,8 @@ To solve this, you should hold a reference to the source object, like in
    renderer.render()
 
 
-Ownership Management in  the Typesystem
-=======================================
+Ownership Management in the Typesystem
+======================================
 
 Python Wrapper Code
 -------------------

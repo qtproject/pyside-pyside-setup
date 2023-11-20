@@ -18,12 +18,12 @@ The ``Person`` type can be used from QML like this:
 Declare the Person Class
 ------------------------
 
-All QML types map to C++ types.  Here we declare a basic C++ Person class
+All QML types map to C++ types. Here we declare a basic C++ Person class
 with the two properties we want accessible on the QML type - name and shoeSize.
 Although in this example we use the same name for the C++ class as the QML
 type, the C++ class can be named differently, or appear in a namespace.
 
-The Person class implementation is quite basic.  The property accessors simply
+The Person class implementation is quite basic. The property accessors simply
 return members of the object instance.
 
 .. code-block:: python
