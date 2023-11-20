@@ -40,7 +40,7 @@ The same can be used for the module, changing the value of ``internal-build-type
 ``shiboken6-module``.
 
 .. warning:: If you are planning to use PySide too, for examples like
-    'scriptableapplication' you need to have build it as well.  The main issue is
+    'scriptableapplication' you need to have build it as well. The main issue is
     that your PySide and Shiboken needs to be build using the same dependencies
     from Qt and libclang.
 

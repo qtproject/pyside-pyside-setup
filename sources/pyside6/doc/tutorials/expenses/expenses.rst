@@ -56,7 +56,7 @@ Now that our class is defined, create an instance of it and call `show()`.
 Menu bar
 --------
 
-Using a `QMainWindow` gives some features for free, among them a *menu bar*.  To use it, you need
+Using a `QMainWindow` gives some features for free, among them a *menu bar*. To use it, you need
 to call the method `menuBar()` and populate it inside the `MainWindow` class.
 
 .. literalinclude:: steps/02-expenses.py
@@ -94,7 +94,7 @@ Window layout
 Now that the main empty window is in place, you need to start adding widgets to achieve the main
 goal of creating an expenses application.
 
-After declaring the example data, you can visualize it on a simple `QTableWidget`.  To do so, you
+After declaring the example data, you can visualize it on a simple `QTableWidget`. To do so, you
 will add this procedure to the `Widget` constructor.
 
 .. warning:: Only for the example purpose a QTableWidget will be used,

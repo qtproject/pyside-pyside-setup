@@ -63,7 +63,7 @@ C++ vs Python
       doStuff(key, value)
 
 In this example, ``func()`` would treat ``var`` as a local
-name without the ``global`` statement.  This would lead to
+name without the ``global`` statement. This would lead to
 a ``NameError`` in the ``value is None`` handling, on
 accessing ``var``. For more information about this, see
 `Python refernce documentation <python refdoc>`_.

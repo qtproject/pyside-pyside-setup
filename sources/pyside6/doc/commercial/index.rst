@@ -16,7 +16,7 @@ any of the following licenses:
 #. Qt for Device Creation Enterprise (DCE)
 
 The only difference is that the ADP license **does not** include the extra
-``Qt OPC UA``,  ``Qt MQTT`` and ``Qt CoAP`` modules, which are distributed in
+``Qt OPC UA``, ``Qt MQTT`` and ``Qt CoAP`` modules, which are distributed in
 a special Python wheel.
 
 All commercial licenses include the 5.15.x and 6.2.x LTS releases.
@@ -93,7 +93,7 @@ Maintenance Tool
 ^^^^^^^^^^^^^^^^
 
 As a commercial user, you are able to download the commercial set of wheels
-from the `Qt Maintenance Tool`_.  The same versions that are available for
+from the `Qt Maintenance Tool`_. The same versions that are available for
 Qt/C++ are available for the Python bindings.
 
 The wheels will be downloaded, but not installed, mainly because they should

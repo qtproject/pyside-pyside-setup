@@ -2,17 +2,17 @@ Python-QML integration
 ======================
 
 This tutorial provides a quick walk-through of a python application that loads, and interacts with
-a QML file.  QML is a declarative language that lets you design UIs faster than a traditional
-language, such as C++.  The QtQml and QtQuick modules provides the necessary infrastructure for
+a QML file. QML is a declarative language that lets you design UIs faster than a traditional
+language, such as C++. The QtQml and QtQuick modules provides the necessary infrastructure for
 QML-based UIs.
 
 In this tutorial, you will learn how to integrate Python with a QML application.
 This mechanism will help us to understand how to use Python as a backend for certain
-signals from the UI elements in the QML interface.  Additionally, you will learn how to provide
+signals from the UI elements in the QML interface. Additionally, you will learn how to provide
 a modern look to your QML application using one of the features from Qt Quick Controls 2.
 
 The tutorial is based on an application that allow you to set many text properties, like increasing
-the font size, changing the color, changing the style, and so on.  Before you begin, install the
+the font size, changing the color, changing the style, and so on. Before you begin, install the
 `PySide6 <https://pypi.org/project/PySide6/>`_ Python packages.
 
 The following step-by-step process will guide you through the key elements of the QML based
@@ -68,7 +68,7 @@ application and PySide6 integration:
 
    The properties *Italic*, *Bold*, and *Underline* are mutually
    exclusive, this means only one can be active at any time.
-   To achieve  this each time we select one of these options, we
+   To achieve this each time we select one of these options, we
    check the three properties via the QML element property as you can
    see in the above snippet.
    Only one of the three will return *True*, while the other two

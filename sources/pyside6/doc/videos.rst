@@ -37,7 +37,7 @@ Tutorials
         :img-top: https://img.youtube.com/vi/i-utZN_NP6c/mqdefault.jpg
         :link: https://www.youtube.com/embed/i-utZN_NP6c
 
-        How  to install PySide6 on a new virtual environment
+        How to install PySide6 on a new virtual environment
 
 
 Community events

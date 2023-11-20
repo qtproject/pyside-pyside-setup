@@ -58,7 +58,7 @@ specify the default handling for the corresponding function modification
 
 The *optional* **snake-case** attribute specifies whether function
 and field names will be automatically changed to the snake case
-style that is common in Python (for example,  ``snakeCase`` will be
+style that is common in Python (for example, ``snakeCase`` will be
 changed to ``snake_case``).
 
 The value ``both`` means that the function or field will be exposed
@@ -148,10 +148,10 @@ The **name** attribute is the name of the primitive in C++.
 The optional **target-lang-api-name** attribute is the name of the
 primitive type in the target language, defaulting to the **name** attribute.
 
-The *optional*  **since** value is used to specify the API version in which
+The *optional* **since** value is used to specify the API version in which
 the type was introduced.
 
-Similarly, the *optional*  **until** value can be used to specify the API
+Similarly, the *optional* **until** value can be used to specify the API
 version in which the type will be obsoleted.
 
 If the *optional* **preferred-conversion** attribute is set to *no*, it
@@ -191,8 +191,8 @@ namespace-type
 The ``namespace-type`` node maps the given C++ namespace to the target
 language, and it is a child of the :ref:`typesystem` node or other
 ``namespace-type`` nodes. It may contain :ref:`add-function`,
-:ref:`declare-function`,  :ref:`enum-type`, :ref:`extra-includes`,
-:ref:`include-element`,  :ref:`modify-function`, ``namespace-type``,
+:ref:`declare-function`, :ref:`enum-type`, :ref:`extra-includes`,
+:ref:`include-element`, :ref:`modify-function`, ``namespace-type``,
 :ref:`object-type`, :ref:`smart-pointer-type`, :ref:`typedef-type` or :ref:`value-type`
 child nodes.
 
@@ -230,7 +230,7 @@ off.
 
 The **package** attribute can be used to override the package of the type system.
 
-The *optional*  **since** value is used to specify the API version of this type.
+The *optional* **since** value is used to specify the API version of this type.
 
 The **revision** attribute can be used to specify a revision for each type, easing the
 production of ABI compatible bindings.
@@ -328,7 +328,7 @@ node or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethod
 .. code-block:: xml
 
     <typesystem>
-        <value-type  name="..." since="..."
+        <value-type name="..." since="..."
          copyable="yes | no"
          allow-thread="..."
          disable-wrapper="yes | no"
@@ -354,7 +354,7 @@ The *optional* attribute **stream** specifies whether this type will be able to
 use externally defined operators, like QDataStream << and >>. If equals to **yes**,
 these operators will be called as normal methods within the current class.
 
-The *optional*  **since** value is used to specify the API version of this type.
+The *optional* **since** value is used to specify the API version of this type.
 
 The *optional* **default-constructor** specifies the minimal constructor
 call to build one instance of the value-type. This is not needed when the
@@ -373,7 +373,7 @@ a Qt meta type registration is generated for ``name``. By
 default, this is generated for non-abstract, default-constructible
 types for usage in signals and slots.
 The value ``base`` means that the registration will be generated for the
-class in question but not for inheriting classes.  This allows for
+class in question but not for inheriting classes. This allows for
 restricting the registration to base classes of type hierarchies.
 
 The **revision** attribute can be used to specify a revision for each type, easing the
@@ -454,14 +454,14 @@ a Qt meta type registration is generated for ``name *``. By
 default, this is only generated for non-QObject types for usage
 in signals and slots.
 The value ``base`` means that the registration will be generated for the
-class in question but not for inheriting classes.  This allows for
+class in question but not for inheriting classes. This allows for
 restricting the registration to base classes of type hierarchies.
 
 The *optional* attribute **stream** specifies whether this type will be able to
 use externally defined operators, like QDataStream << and >>. If equals to **yes**,
 these operators will be called as normal methods within the current class.
 
-The *optional*  **since** value is used to specify the API version of this type.
+The *optional* **since** value is used to specify the API version of this type.
 
 The **revision** attribute can be used to specify a revision for each type, easing the
 production of ABI compatible bindings.
@@ -552,7 +552,7 @@ list of mappings from instantiations to a type name for
                         opaque-containers ="int,3:IntArray3;float,4:FloatArray4">
 
 
-The *optional*  **since** value is used to specify the API version of this container.
+The *optional* **since** value is used to specify the API version of this container.
 
 Some common standard containers are :ref:`built-in <builtin-cpp-container-types>`,
 and there are also a number of useful
@@ -563,7 +563,7 @@ and there are also a number of useful
 opaque-container
 ^^^^^^^^^^^^^^^^
 
-The ``opaque-container`` element can be used to  add further instantiations
+The ``opaque-container`` element can be used to add further instantiations
 of :ref:`opaque containers <opaque-containers>` to existing container types
 (built-in or specified by :ref:`container-type` in included modules).
 It is a child of the :ref:`typesystem` node.
@@ -611,7 +611,7 @@ is equivalent to
 
     typedef std::optional<int> IntOptional;
 
-The *optional*  **since** value is used to specify the API version of this type.
+The *optional* **since** value is used to specify the API version of this type.
 
 .. _custom-type:
 
@@ -633,7 +633,7 @@ It is a child of the :ref:`typesystem` node.
 
 The **name** attribute is the name of the custom type, e.g., "PyObject".
 
-The *optional*  **check-function** attribute can be used to specify a
+The *optional* **check-function** attribute can be used to specify a
 boolean check function that verifies if the PyObject is of the given type
 in the function overload decisor. While shiboken knows common check
 functions like ``PyLong_Check()`` or ``PyType_Check()``, it might be useful

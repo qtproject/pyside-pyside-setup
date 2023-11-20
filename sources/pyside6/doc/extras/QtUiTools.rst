@@ -1,5 +1,5 @@
 Qt Designer forms are processed at run-time to produce
-dynamically-generated user interfaces.  In order to generate a form at
+dynamically-generated user interfaces. In order to generate a form at
 run-time, a resource file containing a UI file is needed.
 
 A form loader object, provided by the ``QUiLoader`` class, is used to

@@ -75,10 +75,10 @@ The class contains a member to store the celebrant object, and also a
 list member storing the Person instances.
 
 In QML, the type of a list properties - and the guests property is a list of
-people - are all of type ListProperty.  ListProperty is simple value
-type that contains a set of functions.  QML calls these functions
+people - are all of type ListProperty. ListProperty is simple value
+type that contains a set of functions. QML calls these functions
 whenever it needs to read from, write to or otherwise interact with
-the list.  In addition to concrete lists like the people list used in this
+the list. In addition to concrete lists like the people list used in this
 example, the use of QQmlListProperty allows for "virtual lists" and other advanced
 scenarios.
 

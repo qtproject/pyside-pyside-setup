@@ -4,7 +4,7 @@ pyside6-deploy: the deployment tool for Qt for Python
 #####################################################
 
 ``pyside6-deploy`` is an easy to use tool for deploying PySide6 applications to different
-platforms.  It is a  wrapper around `Nuitka <https://nuitka.net/>`_, a Python compiler that
+platforms. It is a wrapper around `Nuitka <https://nuitka.net/>`_, a Python compiler that
 compiles your Python code to C code, and links with libpython to produce the final executable.
 
 The final executable produced has a ``.exe`` suffix on Windows. For Linux and macOS, they have a

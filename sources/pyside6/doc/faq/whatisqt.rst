@@ -25,7 +25,7 @@ As a framework, Qt has many components, which are distributed by components
 and modules, for example, `qtbase <https://code.qt.io/cgit/qt/qtbase.git/>`_
 is the base component that holds many modules, like: ``QtCore``, ``QtGui``,
 ``QtWidgets``, ``QtNetwork``, etc.
-All those  modules contains many classes that you can directly use, like the
+All those modules contains many classes that you can directly use, like the
 case of the `Classes of QtCore <https://doc.qt.io/qt-6/qtcore-module.html>`_
 from which you can find classes like ``QFile``, ``QTime``, ``QByteArray``, etc.
 

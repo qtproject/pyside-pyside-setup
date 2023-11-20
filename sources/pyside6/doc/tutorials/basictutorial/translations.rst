@@ -172,7 +172,7 @@ is first created:
     xgettext -L Python -o locales/example.pot main.py
 
 This file has a few generic placeholders which can be replaced by the
-appropriate values.  It is then copied to the ``de_DE/LC_MESSAGES`` directory.
+appropriate values. It is then copied to the ``de_DE/LC_MESSAGES`` directory.
 
 .. code-block:: bash
 

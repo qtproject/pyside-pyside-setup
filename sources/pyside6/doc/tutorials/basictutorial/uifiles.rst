@@ -213,7 +213,7 @@ Custom Widgets in Qt Designer
 in the widget box and can be dragged onto the form just like Qt's widgets (see
 `Using Custom Widgets with Qt Designer <https://doc.qt.io/qt-6/designer-using-custom-widgets.html>`_
 ). Normally, this requires implementing the widget as a plugin to Qt Designer
-written in  C++ implementing its
+written in C++ implementing its
 `QDesignerCustomWidgetInterface <https://doc.qt.io/qt-6/qdesignercustomwidgetinterface.html>`_ .
 
 Qt for Python provides a simple interface for this which is similar to
@@ -225,7 +225,7 @@ the taskmenuextension example (file ``tictactoe.py``).
 
 Registering this with Qt Designer is done by providing
 a registration script named ``register*.py`` and pointing
-the  path-type environment variable ``PYSIDE_DESIGNER_PLUGINS``
+the path-type environment variable ``PYSIDE_DESIGNER_PLUGINS``
 to the directory.
 
 The code of the registration script looks as follows:
