@@ -250,7 +250,7 @@ instructions:
             equals_value: Linux
     - type: EnvironmentVariable
       variableName: interpreter
-      variableValue: "python3.8"
+      variableValue: "python3.11"
       enable_if:
          condition: property
          property: host.osVersion
