@@ -202,4 +202,5 @@ Debug a PySide6 Application
     :maxdepth: 1
 
     debugging/mixed_debugging.rst
+    debugging/qml_debugging.rst
 
