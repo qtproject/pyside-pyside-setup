@@ -62,7 +62,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
 
     def _step(self,
               exception_or_future: typing.Union[
-                  Exception, futures.QAsyncioFuture, None] = None) -> None:
+                  BaseException, futures.QAsyncioFuture, None] = None) -> None:
         if self.done():
             return
         result = None
@@ -72,13 +72,13 @@ class QAsyncioTask(futures.QAsyncioFuture):
             if exception_or_future is None:
                 result = self._coro.send(None)
             elif asyncio.futures.isfuture(exception_or_future):
-                # If the future has an exception set by set_exception(), this will raise it.
-                # If the future has been cancelled, this will raise CancelledError.
-                # If the future's result isn't yet available, this will raise InvalidStateError.
-                exception_or_future.result()
-                exception_or_future = None
-                result = self._coro.send(None)
-            elif isinstance(exception_or_future, Exception):
+                try:
+                    exception_or_future.result()
+                except BaseException as e:
+                    result = self._coro.throw(e)
+                else:
+                    result = self._coro.send(None)
+            elif isinstance(exception_or_future, BaseException):
                 result = self._coro.throw(exception_or_future)
         except StopIteration as e:
             self._state = futures.QAsyncioFuture.FutureState.DONE_WITH_RESULT
@@ -86,15 +86,18 @@ class QAsyncioTask(futures.QAsyncioFuture):
         except concurrent.futures.CancelledError as e:
             self._state = futures.QAsyncioFuture.FutureState.CANCELLED
             self._exception = e
-        except Exception as e:
+        except BaseException as e:
             self._state = futures.QAsyncioFuture.FutureState.DONE_WITH_EXCEPTION
             self._exception = e  # type: ignore[assignment]
         else:
             if asyncio.futures.isfuture(result):
                 result.add_done_callback(
                     self._step, context=self._context)  # type: ignore[arg-type]
+            elif result is None:
+                self._loop.call_soon(self._step, context=self._context)
             else:
-                self._loop.call_soon(self._step, exception_or_future, context=self._context)
+                exception = RuntimeError(f"Bad task result: {result}")
+                self._loop.call_soon(self._step, exception, context=self._context)
         finally:
             asyncio._leave_task(self._loop, self)  # type: ignore[arg-type]
             if self._exception:

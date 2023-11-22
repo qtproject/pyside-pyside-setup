@@ -37,7 +37,7 @@ class QAsyncioFuture():
 
         self._callbacks: typing.List[typing.Callable] = list()
 
-        self._cancel_message = None
+        self._cancel_message: typing.Optional[str] = None
 
     def __await__(self):
         if not self.done():
