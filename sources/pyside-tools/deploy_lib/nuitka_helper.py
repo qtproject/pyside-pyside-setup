@@ -28,8 +28,9 @@ class Nuitka:
             #     --include-data-files=ABSOLUTE_PATH_TO_FILE=RELATIVE_PATH_TO ROOT
             # for each file. This will preserve the directory structure of QML resources.
             qml_args.extend(
-                [f"--include-data-files={qml_file}=./{qml_file.relative_to(source_file.parent)}"
-                    for qml_file in qml_files]
+                [f"--include-data-files={qml_file.resolve()}="
+                 f"./{qml_file.resolve().relative_to(source_file.parent)}"
+                 for qml_file in qml_files]
             )
 
             if excluded_qml_plugins:
