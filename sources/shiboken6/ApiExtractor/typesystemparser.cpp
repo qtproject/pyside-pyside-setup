@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "typesystemparser_p.h"
+#include "anystringview_helpers.h"
 #include "addedfunction.h"
 #include "codesnip.h"
 #include "enumtypeentry.h"
@@ -45,78 +46,78 @@
 
 using namespace Qt::StringLiterals;
 
-static inline QString allowThreadAttribute() { return QStringLiteral("allow-thread"); }
-static inline QString checkFunctionAttribute() { return QStringLiteral("check-function"); }
-static inline QString copyableAttribute() { return QStringLiteral("copyable"); }
-static inline QString accessAttribute() { return QStringLiteral("access"); }
-static inline QString actionAttribute() { return QStringLiteral("action"); }
-static inline QString quoteAfterLineAttribute() { return QStringLiteral("quote-after-line"); }
-static inline QString quoteBeforeLineAttribute() { return QStringLiteral("quote-before-line"); }
-static inline QString textAttribute() { return QStringLiteral("text"); }
-static inline QString nameAttribute() { return QStringLiteral("name"); }
-static inline QString sinceAttribute() { return QStringLiteral("since"); }
-static inline QString untilAttribute() { return QStringLiteral("until"); }
-static inline QString defaultSuperclassAttribute() { return QStringLiteral("default-superclass"); }
-static inline QString deleteInMainThreadAttribute() { return QStringLiteral("delete-in-main-thread"); }
-static inline QString deprecatedAttribute() { return QStringLiteral("deprecated"); }
-static inline QString disableWrapperAttribute() { return QStringLiteral("disable-wrapper"); }
-static inline QString exceptionHandlingAttribute() { return QStringLiteral("exception-handling"); }
-static inline QString extensibleAttribute() { return QStringLiteral("extensible"); }
-static inline QString fileNameAttribute() { return QStringLiteral("file-name"); }
-static inline QString flagsAttribute() { return QStringLiteral("flags"); }
-static inline QString forceAbstractAttribute() { return QStringLiteral("force-abstract"); }
-static inline QString forceIntegerAttribute() { return QStringLiteral("force-integer"); }
-static inline QString formatAttribute() { return QStringLiteral("format"); }
-static inline QString generateUsingAttribute() { return QStringLiteral("generate-using"); }
-static inline QString generateFunctionsAttribute() { return QStringLiteral("generate-functions"); }
-static inline QString classAttribute() { return QStringLiteral("class"); }
-static inline QString generateAttribute() { return QStringLiteral("generate"); }
-static inline QString generateGetSetDefAttribute() { return QStringLiteral("generate-getsetdef"); }
-static inline QString genericClassAttribute() { return QStringLiteral("generic-class"); }
-static inline QString indexAttribute() { return QStringLiteral("index"); }
-static inline QString invalidateAfterUseAttribute() { return QStringLiteral("invalidate-after-use"); }
-static inline QString isNullAttribute() { return QStringLiteral("isNull"); }
-static inline QString locationAttribute() { return QStringLiteral("location"); }
-static inline QString modifiedTypeAttribute() { return QStringLiteral("modified-type"); }
-static inline QString opaqueContainerAttribute() { return QStringLiteral("opaque-containers"); }
-static inline QString operatorBoolAttribute() { return QStringLiteral("operator-bool"); }
-static inline QString parentManagementAttribute() { return QStringLiteral("parent-management"); }
-static inline QString pyiTypeAttribute() { return QStringLiteral("pyi-type"); }
-static inline QString overloadNumberAttribute() { return QStringLiteral("overload-number"); }
-static inline QString ownershipAttribute() { return QStringLiteral("owner"); }
-static inline QString packageAttribute() { return QStringLiteral("package"); }
-static inline QString positionAttribute() { return QStringLiteral("position"); }
-static inline QString preferredConversionAttribute() { return QStringLiteral("preferred-conversion"); }
-static inline QString preferredTargetLangTypeAttribute() { return QStringLiteral("preferred-target-lang-type"); }
-static inline QString pythonEnumTypeAttribute() { return QStringLiteral("python-type"); }
-static inline QString cppEnumTypeAttribute() { return QStringLiteral("cpp-type"); }
-static inline QString qtMetaTypeAttribute() { return QStringLiteral("qt-register-metatype"); }
-static inline QString removeAttribute() { return QStringLiteral("remove"); }
-static inline QString renameAttribute() { return QStringLiteral("rename"); }
-static inline QString readAttribute() { return QStringLiteral("read"); }
-static inline QString targetLangNameAttribute() { return QStringLiteral("target-lang-name"); }
-static inline QString writeAttribute() { return QStringLiteral("write"); }
-static inline QString opaqueContainerFieldAttribute() { return QStringLiteral("opaque-container"); }
-static inline QString replaceAttribute() { return QStringLiteral("replace"); }
-static inline QString toAttribute() { return QStringLiteral("to"); }
-static inline QString signatureAttribute() { return QStringLiteral("signature"); }
-static inline QString snippetAttribute() { return QStringLiteral("snippet"); }
-static inline QString snakeCaseAttribute() { return QStringLiteral("snake-case"); }
-static inline QString staticAttribute() { return QStringLiteral("static"); }
-static inline QString classmethodAttribute() { return QStringLiteral("classmethod"); }
-static inline QString threadAttribute() { return QStringLiteral("thread"); }
-static inline QString sourceAttribute() { return QStringLiteral("source"); }
-static inline QString streamAttribute() { return QStringLiteral("stream"); }
-static inline QString privateAttribute() { return QStringLiteral("private"); }
-static inline QString xPathAttribute() { return QStringLiteral("xpath"); }
-static inline QString virtualSlotAttribute() { return QStringLiteral("virtual-slot"); }
-static inline QString visibleAttribute() { return QStringLiteral("visible"); }
-static inline QString enumIdentifiedByValueAttribute() { return QStringLiteral("identified-by-value"); }
+constexpr auto allowThreadAttribute = "allow-thread"_L1;
+constexpr auto checkFunctionAttribute = "check-function"_L1;
+constexpr auto copyableAttribute = "copyable"_L1;
+constexpr auto accessAttribute = "access"_L1;
+constexpr auto actionAttribute = "action"_L1;
+constexpr auto quoteAfterLineAttribute = "quote-after-line"_L1;
+constexpr auto quoteBeforeLineAttribute = "quote-before-line"_L1;
+constexpr auto textAttribute = "text"_L1;
+constexpr auto nameAttribute = "name"_L1;
+constexpr auto sinceAttribute = "since"_L1;
+constexpr auto untilAttribute = "until"_L1;
+constexpr auto defaultSuperclassAttribute = "default-superclass"_L1;
+constexpr auto deleteInMainThreadAttribute = "delete-in-main-thread"_L1;
+constexpr auto deprecatedAttribute = "deprecated"_L1;
+constexpr auto disableWrapperAttribute = "disable-wrapper"_L1;
+constexpr auto exceptionHandlingAttribute = "exception-handling"_L1;
+constexpr auto extensibleAttribute = "extensible"_L1;
+constexpr auto fileNameAttribute = "file-name"_L1;
+constexpr auto flagsAttribute = "flags"_L1;
+constexpr auto forceAbstractAttribute = "force-abstract"_L1;
+constexpr auto forceIntegerAttribute = "force-integer"_L1;
+constexpr auto formatAttribute = "format"_L1;
+constexpr auto generateUsingAttribute = "generate-using"_L1;
+constexpr auto generateFunctionsAttribute = "generate-functions"_L1;
+constexpr auto classAttribute = "class"_L1;
+constexpr auto generateAttribute = "generate"_L1;
+constexpr auto generateGetSetDefAttribute = "generate-getsetdef"_L1;
+constexpr auto genericClassAttribute = "generic-class"_L1;
+constexpr auto indexAttribute = "index"_L1;
+constexpr auto invalidateAfterUseAttribute = "invalidate-after-use"_L1;
+constexpr auto isNullAttribute = "isNull"_L1;
+constexpr auto locationAttribute = "location"_L1;
+constexpr auto modifiedTypeAttribute = "modified-type"_L1;
+constexpr auto opaqueContainerAttribute = "opaque-containers"_L1;
+constexpr auto operatorBoolAttribute = "operator-bool"_L1;
+constexpr auto parentManagementAttribute = "parent-management"_L1;
+constexpr auto pyiTypeAttribute = "pyi-type"_L1;
+constexpr auto overloadNumberAttribute = "overload-number"_L1;
+constexpr auto ownershipAttribute = "owner"_L1;
+constexpr auto packageAttribute = "package"_L1;
+constexpr auto positionAttribute = "position"_L1;
+constexpr auto preferredConversionAttribute = "preferred-conversion"_L1;
+constexpr auto preferredTargetLangTypeAttribute = "preferred-target-lang-type"_L1;
+constexpr auto pythonEnumTypeAttribute = "python-type"_L1;
+constexpr auto cppEnumTypeAttribute = "cpp-type"_L1;
+constexpr auto qtMetaTypeAttribute = "qt-register-metatype"_L1;
+constexpr auto removeAttribute = "remove"_L1;
+constexpr auto renameAttribute = "rename"_L1;
+constexpr auto readAttribute = "read"_L1;
+constexpr auto targetLangNameAttribute = "target-lang-name"_L1;
+constexpr auto writeAttribute = "write"_L1;
+constexpr auto opaqueContainerFieldAttribute = "opaque-container"_L1;
+constexpr auto replaceAttribute = "replace"_L1;
+constexpr auto toAttribute = "to"_L1;
+constexpr auto signatureAttribute = "signature"_L1;
+constexpr auto snippetAttribute = "snippet"_L1;
+constexpr auto snakeCaseAttribute = "snake-case"_L1;
+constexpr auto staticAttribute = "static"_L1;
+constexpr auto classmethodAttribute = "classmethod"_L1;
+constexpr auto threadAttribute = "thread"_L1;
+constexpr auto sourceAttribute = "source"_L1;
+constexpr auto streamAttribute = "stream"_L1;
+constexpr auto privateAttribute = "private"_L1;
+constexpr auto xPathAttribute = "xpath"_L1;
+constexpr auto virtualSlotAttribute = "virtual-slot"_L1;
+constexpr auto visibleAttribute = "visible"_L1;
+constexpr auto enumIdentifiedByValueAttribute = "identified-by-value"_L1;
 
-static inline QString noAttributeValue() { return QStringLiteral("no"); }
-static inline QString yesAttributeValue() { return QStringLiteral("yes"); }
-static inline QString trueAttributeValue() { return QStringLiteral("true"); }
-static inline QString falseAttributeValue() { return QStringLiteral("false"); }
+constexpr auto noAttributeValue = "no"_L1;
+constexpr auto yesAttributeValue = "yes"_L1;
+constexpr auto trueAttributeValue = "true"_L1;
+constexpr auto falseAttributeValue = "false"_L1;
 
 static bool isTypeEntry(StackElement el)
 {
@@ -536,7 +537,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::Visibility, Qt::CaseSensitive,
 ENUM_LOOKUP_LINEAR_SEARCH()
 
 static int indexOfAttribute(const QXmlStreamAttributes &atts,
-                            QStringView name)
+                            QAnyStringView name)
 {
     for (qsizetype i = 0, size = atts.size(); i < size; ++i) {
         if (atts.at(i).qualifiedName() == name)
@@ -692,7 +693,7 @@ static QString msgReaderError(const ConditionalStreamReader &reader, const QStri
 }
 
 static QString msgUnimplementedElementWarning(const ConditionalStreamReader &reader,
-                                              QStringView name)
+                                              QAnyStringView name)
 {
     QString message;
     QTextStream(&message) << "The element \"" << name
@@ -717,7 +718,7 @@ static inline QString msgUnimplementedAttributeWarning(const ConditionalStreamRe
 
 static QString
     msgUnimplementedAttributeValueWarning(const ConditionalStreamReader &reader,
-                                          QStringView name, QStringView value)
+                                          QAnyStringView name, QAnyStringView value)
 {
     QString message;
     QTextStream(&message) << "The value \"" << value
@@ -737,9 +738,9 @@ static inline
 static bool addRejection(TypeDatabase *database, bool generate, QXmlStreamAttributes *attributes,
                          QString *errorMessage)
 {
-    const auto classIndex = indexOfAttribute(*attributes, classAttribute());
+    const auto classIndex = indexOfAttribute(*attributes, classAttribute);
     if (classIndex == -1) {
-        *errorMessage = msgMissingAttribute(classAttribute());
+        *errorMessage = msgMissingAttribute(classAttribute);
         return false;
     }
 
@@ -1125,7 +1126,7 @@ bool TypeSystemParser::characters(const String &ch)
 
 bool TypeSystemParser::importFileElement(const QXmlStreamAttributes &atts)
 {
-    const QString fileName = atts.value(nameAttribute()).toString();
+    const QString fileName = atts.value(nameAttribute).toString();
     if (fileName.isEmpty()) {
         m_error = u"Required attribute 'name' missing for include-file tag."_s;
         return false;
@@ -1140,11 +1141,11 @@ bool TypeSystemParser::importFileElement(const QXmlStreamAttributes &atts)
         }
     }
 
-    const auto quoteFrom = atts.value(quoteAfterLineAttribute());
+    const auto quoteFrom = atts.value(quoteAfterLineAttribute);
     bool foundFromOk = quoteFrom.isEmpty();
     bool from = quoteFrom.isEmpty();
 
-    const auto quoteTo = atts.value(quoteBeforeLineAttribute());
+    const auto quoteTo = atts.value(quoteBeforeLineAttribute);
     bool foundToOk = quoteTo.isEmpty();
     bool to = true;
 
@@ -1181,29 +1182,27 @@ bool TypeSystemParser::importFileElement(const QXmlStreamAttributes &atts)
     return true;
 }
 
-static bool convertBoolean(QStringView value, const QString &attributeName, bool defaultValue)
+static bool convertBoolean(QStringView value, QAnyStringView attributeName, bool defaultValue)
 {
-    if (value.compare(trueAttributeValue(), Qt::CaseInsensitive) == 0
-        || value.compare(yesAttributeValue(), Qt::CaseInsensitive) == 0) {
+    if (value.compare(trueAttributeValue, Qt::CaseInsensitive) == 0
+        || value.compare(yesAttributeValue, Qt::CaseInsensitive) == 0) {
         return true;
     }
-    if (value.compare(falseAttributeValue(), Qt::CaseInsensitive) == 0
-        || value.compare(noAttributeValue(), Qt::CaseInsensitive) == 0) {
+    if (value.compare(falseAttributeValue, Qt::CaseInsensitive) == 0
+        || value.compare(noAttributeValue, Qt::CaseInsensitive) == 0) {
         return false;
     }
-    const QString warn = QStringLiteral("Boolean value '%1' not supported in attribute '%2'. Use 'yes' or 'no'. Defaulting to '%3'.")
-                                      .arg(value)
-                                      .arg(attributeName,
-                                           defaultValue ? yesAttributeValue() : noAttributeValue());
-
-    qCWarning(lcShiboken).noquote().nospace() << warn;
+    qCWarning(lcShiboken).noquote().nospace() << "Boolean value '" << value
+        << "' not supported in attribute '" << attributeName
+        << "'. Use 'yes' or 'no'. Defaulting to '"
+        << (defaultValue ? yesAttributeValue : noAttributeValue) << "'.";
     return defaultValue;
 }
 
 static bool convertRemovalAttribute(QStringView value)
 {
     return value == u"all" // Legacy
-        || convertBoolean(value, removeAttribute(), false);
+        || convertBoolean(value, removeAttribute, false);
 }
 
 // Check whether an entry should be dropped, allowing for dropping the module
@@ -1308,7 +1307,7 @@ CustomTypeEntryPtr TypeSystemParser::parseCustomTypeEntry(const ConditionalStrea
     auto result = std::make_shared<CustomTypeEntry>(name, since, m_contextStack.top()->entry);
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == checkFunctionAttribute())
+        if (name == checkFunctionAttribute)
             result->setCheckFunction(attributes->takeAt(i).value().toString());
     }
     return result;
@@ -1452,16 +1451,16 @@ PrimitiveTypeEntryPtr
         return nullptr;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == targetLangNameAttribute()) {
+        if (name == targetLangNameAttribute) {
             type->setTargetLangName(attributes->takeAt(i).value().toString());
         } else if (name == u"target-lang-api-name") {
             targetLangApiName = attributes->takeAt(i).value().toString();
-        } else if (name == preferredConversionAttribute()) {
+        } else if (name == preferredConversionAttribute) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-        } else if (name == preferredTargetLangTypeAttribute()) {
+        } else if (name == preferredTargetLangTypeAttribute) {
             const bool v = convertBoolean(attributes->takeAt(i).value(),
-                                          preferredTargetLangTypeAttribute(), true);
+                                          preferredTargetLangTypeAttribute, true);
             type->setPreferredTargetLangType(v);
         } else if (name == u"default-constructor") {
              type->setDefaultConstructor(attributes->takeAt(i).value().toString());
@@ -1535,7 +1534,7 @@ ContainerTypeEntryPtr
 
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == opaqueContainerAttribute()) {
+        if (name == opaqueContainerAttribute) {
             const auto attribute = attributes->takeAt(i);
             OpaqueContainers oc;
             if (!parseOpaqueContainers(attribute.value(), &oc))
@@ -1553,16 +1552,16 @@ bool TypeSystemParser::parseOpaqueContainerElement(QXmlStreamAttributes *attribu
     OpaqueContainers oc;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == nameAttribute()) {
+        if (name == nameAttribute) {
             containerName = attributes->takeAt(i).value().toString();
-        } else if (name == opaqueContainerAttribute()) {
+        } else if (name == opaqueContainerAttribute) {
             const auto attribute = attributes->takeAt(i);
             if (!parseOpaqueContainers(attribute.value(), &oc))
                 return false;
         }
     }
     if (containerName.isEmpty()) {
-        m_error = msgMissingAttribute(nameAttribute());
+        m_error = msgMissingAttribute(nameAttribute);
         return false;
     }
     m_context->opaqueContainerHash[containerName].append(oc);
@@ -1589,10 +1588,10 @@ EnumTypeEntryPtr
         } else if (name == u"lower-bound") {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-        } else if (name == forceIntegerAttribute()) {
+        } else if (name == forceIntegerAttribute) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-        } else if (name == pythonEnumTypeAttribute()) {
+        } else if (name == pythonEnumTypeAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto typeOpt = pythonEnumTypeFromAttribute(attribute.value());
             if (typeOpt.has_value()) {
@@ -1601,12 +1600,12 @@ EnumTypeEntryPtr
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
-        } else if (name == cppEnumTypeAttribute()) {
+        } else if (name == cppEnumTypeAttribute) {
             entry->setCppType(attributes->takeAt(i).value().toString());
-        } else if (name == extensibleAttribute()) {
+        } else if (name == extensibleAttribute) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-        } else if (name == flagsAttribute()) {
+        } else if (name == flagsAttribute) {
             flagNames = attributes->takeAt(i).value().toString();
         }
     }
@@ -1654,7 +1653,7 @@ NamespaceTypeEntryPtr
             }
             result->setExtends(*extendsIt);
             attributes->removeAt(i);
-        } else if (attributeName == visibleAttribute()) {
+        } else if (attributeName == visibleAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto visibilityOpt = visibilityFromAttribute(attribute.value());
             if (!visibilityOpt.has_value()) {
@@ -1662,11 +1661,12 @@ NamespaceTypeEntryPtr
                 return nullptr;
             }
             visibility = visibilityOpt.value();
-        } else if (attributeName == generateAttribute()) {
-            if (!convertBoolean(attributes->takeAt(i).value(), generateAttribute(), true))
+        } else if (attributeName == generateAttribute) {
+            if (!convertBoolean(attributes->takeAt(i).value(), generateAttribute, true))
                 visibility = TypeSystem::Visibility::Invisible;
-        } else if (attributeName == generateUsingAttribute()) {
-            result->setGenerateUsing(convertBoolean(attributes->takeAt(i).value(), generateUsingAttribute(), true));
+        } else if (attributeName == generateUsingAttribute) {
+            result->setGenerateUsing(convertBoolean(attributes->takeAt(i).value(),
+                                                    generateUsingAttribute, true));
         }
     }
 
@@ -1718,13 +1718,13 @@ FunctionTypeEntryPtr
     QString originalSignature;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == signatureAttribute())
+        if (name == signatureAttribute)
             originalSignature = attributes->takeAt(i).value().toString().simplified();
     }
 
     const QString signature = TypeDatabase::normalizedSignature(originalSignature);
     if (signature.isEmpty()) {
-        m_error =  msgMissingAttribute(signatureAttribute());
+        m_error =  msgMissingAttribute(signatureAttribute);
         return nullptr;
     }
 
@@ -1767,9 +1767,9 @@ TypedefEntryPtr
         m_error = u"typedef entries must be nested in namespaces or type system."_s;
         return nullptr;
     }
-    const auto sourceIndex = indexOfAttribute(*attributes, sourceAttribute());
+    const auto sourceIndex = indexOfAttribute(*attributes, sourceAttribute);
     if (sourceIndex == -1) {
-        m_error =  msgMissingAttribute(sourceAttribute());
+        m_error =  msgMissingAttribute(sourceAttribute);
         return nullptr;
     }
     const QString sourceType = attributes->takeAt(sourceIndex).value().toString();
@@ -1793,23 +1793,24 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
     QString package = m_defaultPackage;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == streamAttribute()) {
-            ctype->setStream(convertBoolean(attributes->takeAt(i).value(), streamAttribute(), false));
-        } else if (name == privateAttribute()) {
+        if (name == streamAttribute) {
+            ctype->setStream(convertBoolean(attributes->takeAt(i).value(), streamAttribute, false));
+        } else if (name == privateAttribute) {
             ctype->setPrivate(convertBoolean(attributes->takeAt(i).value(),
-                                             privateAttribute(), false));
-        } else if (name == generateAttribute()) {
-            generate = convertBoolean(attributes->takeAt(i).value(), generateAttribute(), true);
-        } else if (name ==packageAttribute()) {
+                                             privateAttribute, false));
+        } else if (name == generateAttribute) {
+            generate = convertBoolean(attributes->takeAt(i).value(), generateAttribute, true);
+        } else if (name ==packageAttribute) {
             package = attributes->takeAt(i).value().toString();
-        } else if (name == defaultSuperclassAttribute()) {
+        } else if (name == defaultSuperclassAttribute) {
             ctype->setDefaultSuperclass(attributes->takeAt(i).value().toString());
-        } else if (name == genericClassAttribute()) {
+        } else if (name == genericClassAttribute) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
-            const bool v = convertBoolean(attributes->takeAt(i).value(), genericClassAttribute(), false);
+            const bool v = convertBoolean(attributes->takeAt(i).value(),
+                                          genericClassAttribute, false);
             ctype->setGenericClass(v);
-        } else if (name == targetLangNameAttribute()) {
+        } else if (name == targetLangNameAttribute) {
             ctype->setTargetLangName(attributes->takeAt(i).value().toString());
         } else if (name == u"polymorphic-base") {
             ctype->setPolymorphicIdValue(attributes->takeAt(i).value().toString());
@@ -1817,10 +1818,11 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
             ctype->setPolymorphicNameFunction(attributes->takeAt(i).value().toString());
         } else if (name == u"polymorphic-id-expression") {
             ctype->setPolymorphicIdValue(attributes->takeAt(i).value().toString());
-        } else if (name == copyableAttribute()) {
-            const bool v = convertBoolean(attributes->takeAt(i).value(), copyableAttribute(), false);
+        } else if (name == copyableAttribute) {
+            const bool v = convertBoolean(attributes->takeAt(i).value(),
+                                          copyableAttribute, false);
             ctype->setCopyable(v ? ComplexTypeEntry::CopyableSet : ComplexTypeEntry::NonCopyableSet);
-        } else if (name == exceptionHandlingAttribute()) {
+        } else if (name == exceptionHandlingAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto exceptionOpt = exceptionHandlingFromAttribute(attribute.value());
             if (exceptionOpt.has_value()) {
@@ -1829,7 +1831,7 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
-        } else if (name == allowThreadAttribute()) {
+        } else if (name == allowThreadAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto allowThreadOpt = allowThreadFromAttribute(attribute.value());
             if (allowThreadOpt.has_value()) {
@@ -1843,19 +1845,19 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
         } else if (name == u"hash-function") {
             ctype->setHashFunction(attributes->takeAt(i).value().toString());
-        } else if (name == forceAbstractAttribute()) {
-            if (convertBoolean(attributes->takeAt(i).value(), forceAbstractAttribute(), false))
+        } else if (name == forceAbstractAttribute) {
+            if (convertBoolean(attributes->takeAt(i).value(), forceAbstractAttribute, false))
                 ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::ForceAbstract);
-        } else if (name == deprecatedAttribute()) {
-            if (convertBoolean(attributes->takeAt(i).value(), deprecatedAttribute(), false))
+        } else if (name == deprecatedAttribute) {
+            if (convertBoolean(attributes->takeAt(i).value(), deprecatedAttribute, false))
                 ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::Deprecated);
-        } else if (name == disableWrapperAttribute()) {
-            if (convertBoolean(attributes->takeAt(i).value(), disableWrapperAttribute(), false))
+        } else if (name == disableWrapperAttribute) {
+            if (convertBoolean(attributes->takeAt(i).value(), disableWrapperAttribute, false))
                 ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::DisableWrapper);
-        } else if (name == deleteInMainThreadAttribute()) {
-            if (convertBoolean(attributes->takeAt(i).value(), deleteInMainThreadAttribute(), false))
+        } else if (name == deleteInMainThreadAttribute) {
+            if (convertBoolean(attributes->takeAt(i).value(), deleteInMainThreadAttribute, false))
                 ctype->setDeleteInMainThread(true);
-        } else if (name == generateFunctionsAttribute()) {
+        } else if (name == generateFunctionsAttribute) {
             const auto names = attributes->takeAt(i).value();
             const auto nameList = names.split(u';', Qt::SkipEmptyParts);
             QSet<QString> nameSet;
@@ -1864,7 +1866,7 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
             ctype->setGenerateFunctions(nameSet);
         } else if (name == u"target-type") {
             ctype->setTargetType(attributes->takeAt(i).value().toString());
-        }  else if (name == snakeCaseAttribute()) {
+        }  else if (name == snakeCaseAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
             if (snakeCaseOpt.has_value()) {
@@ -1873,7 +1875,7 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
-        }  else if (name == isNullAttribute()) {
+        }  else if (name == isNullAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto boolCastOpt = boolCastFromAttribute(attribute.value());
             if (boolCastOpt.has_value()) {
@@ -1882,7 +1884,7 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
-        }  else if (name == operatorBoolAttribute()) {
+        }  else if (name == operatorBoolAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto boolCastOpt = boolCastFromAttribute(attribute.value());
             if (boolCastOpt.has_value()) {
@@ -1891,7 +1893,7 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
-        } else if (name == qtMetaTypeAttribute()) {
+        } else if (name == qtMetaTypeAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto qtMetaTypeOpt = qtMetaTypeFromAttribute(attribute.value());
             if (qtMetaTypeOpt.has_value()) {
@@ -1900,9 +1902,9 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
-        } else if (name == parentManagementAttribute()) {
+        } else if (name == parentManagementAttribute) {
             const auto attribute = attributes->takeAt(i);
-            if (convertBoolean(attribute.value(), parentManagementAttribute(), false))
+            if (convertBoolean(attribute.value(), parentManagementAttribute, false))
                 ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::ParentManagement);
             ComplexTypeEntry::setParentManagementEnabled(true);
         }
@@ -1956,16 +1958,16 @@ bool TypeSystemParser::parseRenameFunction(const ConditionalStreamReader &,
     QString rename;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == signatureAttribute()) {
+        if (name == signatureAttribute) {
             // Do not remove as it is needed for the type entry later on
             signature = attributes->at(i).value().toString().simplified();
-        } else if (name == renameAttribute()) {
+        } else if (name == renameAttribute) {
             rename = attributes->takeAt(i).value().toString();
         }
     }
 
     if (signature.isEmpty()) {
-        m_error = msgMissingAttribute(signatureAttribute());
+        m_error = msgMissingAttribute(signatureAttribute);
         return false;
     }
 
@@ -2021,7 +2023,7 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
                 return false;
             }
             mode = modeOpt.value();
-        } else if (name == formatAttribute()) {
+        } else if (name == formatAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto langOpt = languageFromAttribute(attribute.value());
             if (!langOpt.has_value()) {
@@ -2056,9 +2058,9 @@ bool TypeSystemParser::parseModifyDocumentation(const ConditionalStreamReader &,
         return false;
     }
 
-    const auto xpathIndex = indexOfAttribute(*attributes, xPathAttribute());
+    const auto xpathIndex = indexOfAttribute(*attributes, xPathAttribute);
     if (xpathIndex == -1) {
-        m_error = msgMissingAttribute(xPathAttribute());
+        m_error = msgMissingAttribute(xPathAttribute);
         return false;
     }
 
@@ -2078,11 +2080,11 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
 
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == packageAttribute()) {
+        if (name == packageAttribute) {
             m_defaultPackage = attributes->takeAt(i).value().toString();
-        } else if (name == defaultSuperclassAttribute()) {
+        } else if (name == defaultSuperclassAttribute) {
             m_defaultSuperclass = attributes->takeAt(i).value().toString();
-        } else if (name == exceptionHandlingAttribute()) {
+        } else if (name == exceptionHandlingAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto exceptionOpt = exceptionHandlingFromAttribute(attribute.value());
             if (exceptionOpt.has_value()) {
@@ -2091,7 +2093,7 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
-        } else if (name == allowThreadAttribute()) {
+        } else if (name == allowThreadAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto allowThreadOpt = allowThreadFromAttribute(attribute.value());
             if (allowThreadOpt.has_value()) {
@@ -2100,7 +2102,7 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
                 qCWarning(lcShiboken, "%s",
                           qPrintable(msgInvalidAttributeValue(attribute)));
             }
-        } else if (name == snakeCaseAttribute()) {
+        } else if (name == snakeCaseAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
             if (snakeCaseOpt.has_value()) {
@@ -2145,10 +2147,10 @@ bool TypeSystemParser::loadTypesystem(const ConditionalStreamReader &,
     bool generateChild = true;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == nameAttribute())
+        if (name == nameAttribute)
             typeSystemName = attributes->takeAt(i).value().toString();
-        else if (name == generateAttribute())
-           generateChild = convertBoolean(attributes->takeAt(i).value(), generateAttribute(), true);
+        else if (name == generateAttribute)
+           generateChild = convertBoolean(attributes->takeAt(i).value(), generateAttribute, true);
     }
     if (typeSystemName.isEmpty()) {
             m_error = u"No typesystem name specified"_s;
@@ -2169,9 +2171,9 @@ bool TypeSystemParser::parseRejectEnumValue(const ConditionalStreamReader &,
         m_error = u"<reject-enum-value> node must be used inside a <enum-type> node"_s;
         return false;
     }
-    const auto nameIndex = indexOfAttribute(*attributes, nameAttribute());
+    const auto nameIndex = indexOfAttribute(*attributes, nameAttribute);
     if (nameIndex == -1) {
-        m_error = msgMissingAttribute(nameAttribute());
+        m_error = msgMissingAttribute(nameAttribute);
         return false;
     }
     m_currentEnum->addEnumValueRejection(attributes->takeAt(nameIndex).value().toString());
@@ -2186,7 +2188,7 @@ bool TypeSystemParser::parseReplaceArgumentType(const ConditionalStreamReader &,
         m_error = u"Type replacement can only be specified for argument modifications"_s;
         return false;
     }
-    const auto modifiedTypeIndex = indexOfAttribute(*attributes, modifiedTypeAttribute());
+    const auto modifiedTypeIndex = indexOfAttribute(*attributes, modifiedTypeAttribute);
     if (modifiedTypeIndex == -1) {
         m_error = u"Type replacement requires 'modified-type' attribute"_s;
         return false;
@@ -2214,7 +2216,7 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
     TypeSystem::Language lang = TypeSystem::NativeCode;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == classAttribute()) {
+        if (name == classAttribute) {
             const auto languageAttribute = attributes->takeAt(i);
             const auto langOpt = languageFromAttribute(languageAttribute.value());
             if (!langOpt.has_value()) {
@@ -2224,7 +2226,7 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
             lang = langOpt.value();
         } else if (name == u"file") {
             sourceFile = attributes->takeAt(i).value().toString();
-        } else if (name == snippetAttribute()) {
+        } else if (name == snippetAttribute) {
             snippetLabel = attributes->takeAt(i).value().toString();
         }
     }
@@ -2378,20 +2380,20 @@ bool TypeSystemParser::parseModifyArgument(const ConditionalStreamReader &,
     bool resetAfterUse = false;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == indexAttribute()) {
+        if (name == indexAttribute) {
              index = attributes->takeAt(i).value().toString();
-        } else if (name == invalidateAfterUseAttribute()) {
+        } else if (name == invalidateAfterUseAttribute) {
             resetAfterUse = convertBoolean(attributes->takeAt(i).value(),
-                                           invalidateAfterUseAttribute(), false);
-        } else if (name == renameAttribute()) {
+                                           invalidateAfterUseAttribute, false);
+        } else if (name == renameAttribute) {
             renameTo = attributes->takeAt(i).value().toString();
-        } else if (name == pyiTypeAttribute()) {
+        } else if (name == pyiTypeAttribute) {
             pyiType = attributes->takeAt(i).value().toString();
         }
     }
 
     if (index.isEmpty()) {
-        m_error = msgMissingAttribute(indexAttribute());
+        m_error = msgMissingAttribute(indexAttribute);
         return false;
     }
 
@@ -2441,7 +2443,7 @@ bool TypeSystemParser::parseDefineOwnership(const ConditionalStreamReader &,
     std::optional<TypeSystem::Ownership> ownershipOpt;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == classAttribute()) {
+        if (name == classAttribute) {
             const auto classAttribute = attributes->takeAt(i);
             const auto langOpt = languageFromAttribute(classAttribute.value());
             if (!langOpt.has_value() || langOpt.value() == TypeSystem::ShellCode) {
@@ -2449,7 +2451,7 @@ bool TypeSystemParser::parseDefineOwnership(const ConditionalStreamReader &,
                 return false;
             }
             lang = langOpt.value();
-        } else if (name == ownershipAttribute()) {
+        } else if (name == ownershipAttribute) {
             const auto attribute = attributes->takeAt(i);
             ownershipOpt = ownershipFromFromAttribute(attribute.value());
             if (!ownershipOpt.has_value()) {
@@ -2487,9 +2489,9 @@ bool TypeSystemParser::parseRename(const ConditionalStreamReader &,
         return false;
     }
 
-    const auto toIndex = indexOfAttribute(*attributes, toAttribute());
+    const auto toIndex = indexOfAttribute(*attributes, toAttribute);
     if (toIndex == -1) {
-        m_error = msgMissingAttribute(toAttribute());
+        m_error = msgMissingAttribute(toAttribute);
         return false;
     }
     const QString renamed_to = attributes->takeAt(toIndex).value().toString();
@@ -2503,20 +2505,20 @@ bool TypeSystemParser::parseModifyField(const ConditionalStreamReader &,
     FieldModification fm;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == nameAttribute()) {
+        if (name == nameAttribute) {
             fm.setName(attributes->takeAt(i).value().toString());
-        } else if (name == removeAttribute()) {
+        } else if (name == removeAttribute) {
             fm.setRemoved(convertRemovalAttribute(attributes->takeAt(i).value()));
-        } else if (name == opaqueContainerFieldAttribute()) {
+        } else if (name == opaqueContainerFieldAttribute) {
             fm.setOpaqueContainer(convertBoolean(attributes->takeAt(i).value(),
-                                                 opaqueContainerFieldAttribute(), false));
-        }  else if (name == readAttribute()) {
-            fm.setReadable(convertBoolean(attributes->takeAt(i).value(), readAttribute(), true));
-        } else if (name == writeAttribute()) {
-            fm.setWritable(convertBoolean(attributes->takeAt(i).value(), writeAttribute(), true));
-        } else if (name == renameAttribute()) {
+                                                 opaqueContainerFieldAttribute, false));
+        }  else if (name == readAttribute) {
+            fm.setReadable(convertBoolean(attributes->takeAt(i).value(), readAttribute, true));
+        } else if (name == writeAttribute) {
+            fm.setWritable(convertBoolean(attributes->takeAt(i).value(), writeAttribute, true));
+        } else if (name == renameAttribute) {
             fm.setRenamedToName(attributes->takeAt(i).value().toString());
-        } else if (name == snakeCaseAttribute()) {
+        } else if (name == snakeCaseAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
             if (snakeCaseOpt.has_value()) {
@@ -2528,7 +2530,7 @@ bool TypeSystemParser::parseModifyField(const ConditionalStreamReader &,
         }
     }
     if (fm.name().isEmpty()) {
-        m_error = msgMissingAttribute(nameAttribute());
+        m_error = msgMissingAttribute(nameAttribute);
         return false;
     }
     m_contextStack.top()->fieldMods << fm;
@@ -2575,17 +2577,17 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
     QString access;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == signatureAttribute()) {
+        if (name == signatureAttribute) {
             originalSignature = attributes->takeAt(i).value().toString().simplified();
         } else if (name == u"return-type") {
             returnType = attributes->takeAt(i).value().toString();
-        } else if (name == staticAttribute()) {
+        } else if (name == staticAttribute) {
             staticFunction = convertBoolean(attributes->takeAt(i).value(),
-                                            staticAttribute(), false);
-        } else if (name == classmethodAttribute()) {
+                                            staticAttribute, false);
+        } else if (name == classmethodAttribute) {
             classMethod = convertBoolean(attributes->takeAt(i).value(),
-                                            classmethodAttribute(), false);
-        } else if (name == accessAttribute()) {
+                                            classmethodAttribute, false);
+        } else if (name == accessAttribute) {
             access = attributes->takeAt(i).value().toString();
         }
     }
@@ -2651,7 +2653,7 @@ bool TypeSystemParser::parseAddPyMethodDef(const ConditionalStreamReader &,
     TypeSystemPyMethodDefEntry def;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == nameAttribute()) {
+        if (name == nameAttribute) {
             def.name = attributes->takeAt(i).value().toString();
         } else if (name == u"doc") {
             def.doc = attributes->takeAt(i).value().toString();
@@ -2690,7 +2692,7 @@ bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, StackEleme
     TypeSystemProperty property;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == nameAttribute()) {
+        if (name == nameAttribute) {
             property.name = attributes->takeAt(i).value().toString();
         } else if (name == u"get") {
             property.read = attributes->takeAt(i).value().toString();
@@ -2698,10 +2700,10 @@ bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, StackEleme
             property.type = attributes->takeAt(i).value().toString();
         } else if (name == u"set") {
             property.write = attributes->takeAt(i).value().toString();
-        } else if (name == generateGetSetDefAttribute()) {
+        } else if (name == generateGetSetDefAttribute) {
             property.generateGetSetDef =
                 convertBoolean(attributes->takeAt(i).value(),
-                               generateGetSetDefAttribute(), false);
+                               generateGetSetDefAttribute, false);
         }
     }
     if (!property.isValid()) {
@@ -2719,7 +2721,7 @@ bool TypeSystemParser::parseBasicModifyFunctionAttributes(QXmlStreamAttributes *
 {
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == overloadNumberAttribute()) {
+        if (name == overloadNumberAttribute) {
             int overloadNumber = TypeSystem::OverloadNumberUnset;
             if (!parseOverloadNumber(attributes->takeAt(i), &overloadNumber, &m_error))
                 return false;
@@ -2739,7 +2741,7 @@ bool TypeSystemParser::parseModifyFunctionAttributes(QXmlStreamAttributes *attri
 
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == allowThreadAttribute()) {
+        if (name == allowThreadAttribute) {
             const QXmlStreamAttribute attribute = attributes->takeAt(i);
             const auto allowThreadOpt = allowThreadFromAttribute(attribute.value());
             if (!allowThreadOpt.has_value()) {
@@ -2747,7 +2749,7 @@ bool TypeSystemParser::parseModifyFunctionAttributes(QXmlStreamAttributes *attri
                 return false;
             }
             mod->setAllowThread(allowThreadOpt.value());
-        } else if (name == exceptionHandlingAttribute()) {
+        } else if (name == exceptionHandlingAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto exceptionOpt = exceptionHandlingFromAttribute(attribute.value());
             if (!exceptionOpt.has_value()) {
@@ -2755,7 +2757,7 @@ bool TypeSystemParser::parseModifyFunctionAttributes(QXmlStreamAttributes *attri
                 return false;
             }
             mod->setExceptionHandling(exceptionOpt.value());
-        } else if (name == snakeCaseAttribute()) {
+        } else if (name == snakeCaseAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto snakeCaseOpt = snakeCaseFromAttribute(attribute.value());
             if (!snakeCaseOpt.has_value()) {
@@ -2763,9 +2765,9 @@ bool TypeSystemParser::parseModifyFunctionAttributes(QXmlStreamAttributes *attri
                 return false;
             }
             mod->setSnakeCase(snakeCaseOpt.value());
-        } else if (name == deprecatedAttribute()) {
+        } else if (name == deprecatedAttribute) {
             const bool deprecated = convertBoolean(attributes->takeAt(i).value(),
-                                                   deprecatedAttribute(), false);
+                                                   deprecatedAttribute, false);
             mod->setModifierFlag(deprecated ? FunctionModification::Deprecated
                                             : FunctionModification::Undeprecated);
         }
@@ -2796,15 +2798,15 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
     QString rename;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == signatureAttribute()) {
+        if (name == signatureAttribute) {
             originalSignature = attributes->takeAt(i).value().toString().simplified();
-        } else if (name == accessAttribute()) {
+        } else if (name == accessAttribute) {
             access = attributes->takeAt(i).value().toString();
-        } else if (name == renameAttribute()) {
+        } else if (name == renameAttribute) {
             rename = attributes->takeAt(i).value().toString();
-        } else if (name == removeAttribute()) {
+        } else if (name == removeAttribute) {
             removed = convertRemovalAttribute(attributes->takeAt(i).value());
-        } else if (name == virtualSlotAttribute() || name == threadAttribute()) {
+        } else if (name == virtualSlotAttribute || name == threadAttribute) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
         }
@@ -2844,7 +2846,7 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
         if (m == FunctionModification::NonFinal) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeValueWarning(reader,
-                      accessAttribute(), access)));
+                      accessAttribute, access)));
         }
         mod.setModifierFlag(m);
     }
@@ -2891,7 +2893,7 @@ bool TypeSystemParser::parseReferenceCount(const ConditionalStreamReader &reader
     ReferenceCount rc;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == actionAttribute()) {
+        if (name == actionAttribute) {
             const QXmlStreamAttribute attribute = attributes->takeAt(i);
             const auto actionOpt = referenceCountFromAttribute(attribute.value());
             if (!actionOpt.has_value()) {
@@ -2928,11 +2930,11 @@ bool TypeSystemParser::parseParentOwner(const ConditionalStreamReader &,
     ArgumentOwner ao;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == indexAttribute()) {
+        if (name == indexAttribute) {
             const QString index = attributes->takeAt(i).value().toString();
             if (!parseArgumentIndex(index, &ao.index, &m_error))
                 return false;
-        } else if (name == actionAttribute()) {
+        } else if (name == actionAttribute) {
             const auto action = attributes->takeAt(i);
             const auto actionOpt = argumentOwnerActionFromAttribute(action.value());
             if (!actionOpt.has_value()) {
@@ -2954,7 +2956,7 @@ bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSni
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"file") {
             fileName = attributes->takeAt(i).value().toString();
-        } else if (name == snippetAttribute()) {
+        } else if (name == snippetAttribute) {
             snippetLabel = attributes->takeAt(i).value().toString();
         }
     }
@@ -3011,7 +3013,7 @@ bool TypeSystemParser::parseInjectCode(const ConditionalStreamReader &,
         return false;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == classAttribute()) {
+        if (name == classAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto langOpt = languageFromAttribute(attribute.value());
             if (!langOpt.has_value()) {
@@ -3019,7 +3021,7 @@ bool TypeSystemParser::parseInjectCode(const ConditionalStreamReader &,
                 return false;
             }
             lang = langOpt.value();
-        } else if (name == positionAttribute()) {
+        } else if (name == positionAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto positionOpt = codeSnipPositionFromAttribute(attribute.value());
             if (!positionOpt.has_value()) {
@@ -3060,9 +3062,9 @@ bool TypeSystemParser::parseInclude(const ConditionalStreamReader &,
     Include::IncludeType location = Include::IncludePath;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == fileNameAttribute()) {
+        if (name == fileNameAttribute) {
             fileName = attributes->takeAt(i).value().toString();
-        } else if (name == locationAttribute()) {
+        } else if (name == locationAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto locationOpt = locationFromAttribute(attribute.value());
             if (!locationOpt.has_value()) {
@@ -3092,9 +3094,9 @@ bool TypeSystemParser::parseInclude(const ConditionalStreamReader &,
 bool TypeSystemParser::parseSystemInclude(const ConditionalStreamReader &,
                                           QXmlStreamAttributes *attributes)
 {
-    const auto index = indexOfAttribute(*attributes, fileNameAttribute());
+    const auto index = indexOfAttribute(*attributes, fileNameAttribute);
     if (index == -1) {
-        m_error = msgMissingAttribute(fileNameAttribute());
+        m_error = msgMissingAttribute(fileNameAttribute);
         return false;
     }
     TypeDatabase::instance()->addForceProcessSystemInclude(attributes->takeAt(index).value().toString());
@@ -3115,9 +3117,9 @@ TemplateInstance *
                    "conversion-rule, native-to-target or add-conversion tags."_s;
         return nullptr;
     }
-    const auto nameIndex = indexOfAttribute(*attributes, nameAttribute());
+    const auto nameIndex = indexOfAttribute(*attributes, nameAttribute);
     if (nameIndex == -1) {
-        m_error = msgMissingAttribute(nameAttribute());
+        m_error = msgMissingAttribute(nameAttribute);
         return nullptr;
     }
     return new TemplateInstance(attributes->takeAt(nameIndex).value().toString());
@@ -3136,7 +3138,7 @@ bool TypeSystemParser::parseReplace(const ConditionalStreamReader &,
         const auto name = attributes->at(i).qualifiedName();
         if (name == u"from")
             from = attributes->takeAt(i).value().toString();
-        else if (name == toAttribute())
+        else if (name == toAttribute)
             to = attributes->takeAt(i).value().toString();
     }
     m_templateInstance->addReplaceRule(from, to);
@@ -3192,12 +3194,12 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
     VersionRange versionRange;
     for (auto i = attributes.size() - 1; i >= 0; --i) {
         const auto name = attributes.at(i).qualifiedName();
-        if (name == sinceAttribute()) {
+        if (name == sinceAttribute) {
             if (!parseVersion(attributes.takeAt(i).value().toString(),
                               m_defaultPackage, &versionRange.since, &m_error)) {
                 return false;
             }
-        } else if (name == untilAttribute()) {
+        } else if (name == untilAttribute) {
             if (!parseVersion(attributes.takeAt(i).value().toString(),
                               m_defaultPackage, &versionRange.until, &m_error)) {
                 return false;
@@ -3244,11 +3246,11 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
     if (isTypeEntry(element)) {
         QString name;
         if (element != StackElement::FunctionTypeEntry) {
-            const auto nameIndex = indexOfAttribute(attributes, nameAttribute());
+            const auto nameIndex = indexOfAttribute(attributes, nameAttribute);
             if (nameIndex != -1) {
                 name = attributes.takeAt(nameIndex).value().toString();
             } else if (element != StackElement::EnumTypeEntry) { // anonymous enum?
-                m_error = msgMissingAttribute(nameAttribute());
+                m_error = msgMissingAttribute(nameAttribute);
                 return false;
             }
         }
@@ -3261,7 +3263,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
 
         if (m_context->db->hasDroppedTypeEntries()) {
             const QString identifier = element == StackElement::FunctionTypeEntry
-                ? attributes.value(signatureAttribute()).toString().simplified() : name;
+                ? attributes.value(signatureAttribute).toString().simplified() : name;
             if (shouldDropTypeEntry(m_context->db, m_contextStack, identifier)) {
                 m_currentDroppedEntryDepth = 1;
                 if (ReportHandler::isDebug(ReportHandler::SparseDebug)) {
@@ -3293,7 +3295,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
 
         if (element == StackElement::EnumTypeEntry) {
             const auto enumIdentifiedByIndex =
-                indexOfAttribute(attributes, enumIdentifiedByValueAttribute());
+                indexOfAttribute(attributes, enumIdentifiedByValueAttribute);
             const QString identifiedByValue = enumIdentifiedByIndex != -1
                 ? attributes.takeAt(enumIdentifiedByIndex).value().toString() : QString();
             if (name.isEmpty()) {
@@ -3440,10 +3442,10 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
 
             const auto topParent = m_stack.value(m_stack.size() - 3, StackElement::None);
             if (isTypeEntry(topParent)) {
-                const auto replaceIndex = indexOfAttribute(attributes, replaceAttribute());
+                const auto replaceIndex = indexOfAttribute(attributes, replaceAttribute);
                 const bool replace = replaceIndex == -1
                     || convertBoolean(attributes.takeAt(replaceIndex).value(),
-                                      replaceAttribute(), true);
+                                      replaceAttribute, true);
                 auto customConversion = CustomConversion::getCustomConversion(top->entry);
                 if (!customConversion) {
                     m_error = msgMissingCustomConversion(top->entry);
@@ -3470,7 +3472,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                 return false;
             break;
         case StackElement::SuppressedWarning: {
-            const auto textIndex = indexOfAttribute(attributes, textAttribute());
+            const auto textIndex = indexOfAttribute(attributes, textAttribute);
             if (textIndex == -1) {
                 qCWarning(lcShiboken) << "Suppressed warning with no text specified";
             } else {
@@ -3559,9 +3561,9 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                 return false;
             break;
         case StackElement::Template: {
-            const auto nameIndex = indexOfAttribute(attributes, nameAttribute());
+            const auto nameIndex = indexOfAttribute(attributes, nameAttribute);
             if (nameIndex == -1) {
-                m_error = msgMissingAttribute(nameAttribute());
+                m_error = msgMissingAttribute(nameAttribute);
                 return false;
             }
             m_templateEntry.reset(new TemplateEntry(attributes.takeAt(nameIndex).value().toString()));

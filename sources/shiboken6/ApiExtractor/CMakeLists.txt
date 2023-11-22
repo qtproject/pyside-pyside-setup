@@ -18,6 +18,7 @@ abstractmetafunction.cpp abstractmetafunction.h
 abstractmetalang.cpp abstractmetalang.h abstractmetalang_helpers.h abstractmetalang_typedefs.h
 abstractmetatype.cpp abstractmetatype.h
 addedfunction.cpp addedfunction.h addedfunction_p.h
+anystringview_helpers.cpp anystringview_helpers.h
 apiextractor.cpp apiextractor.h apiextractorflags.h
 apiextractorresult.cpp apiextractorresult.h
 arraytypeentry.h
