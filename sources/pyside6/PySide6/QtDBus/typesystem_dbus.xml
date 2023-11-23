@@ -82,7 +82,7 @@
     <value-type name="QDBusError">
       <enum-type name="ErrorType"/>
     </value-type>
-    <object-type name="QDBusInterface"/>
+    <object-type name="QDBusInterface" qt-metaobject="no"/>
     <value-type name="QDBusMessage">
       <enum-type name="MessageType"/>
     </value-type>
