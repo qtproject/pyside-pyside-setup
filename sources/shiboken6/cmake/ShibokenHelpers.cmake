@@ -690,28 +690,10 @@ endmacro()
 # tool_name should be a unique tool name, preferably without spaces.
 # Returns the wrapper path in path_out_var.
 #
-# Currently adds the Qt lib dir and libclang to PATH.
+# Currently adds the Qt lib dir and libclang to PATH / LD_LIBRARY_PATH / DYLD_LIBRARY_PATH.
 # Meant to be used as the first argument to add_custom_command's COMMAND option.
 # TODO: Remove tool_name as the tool_name for this function is always shiboken.
 function(shiboken_get_tool_shell_wrapper tool_name path_out_var)
-
-    # Make sure that for cross building, the host shiboken_wrapper.sh tool is used instead of target
-    # shiboken_wrapper.sh when calling shiboken. This wrapper script resolves the dependency to Qt
-    # libraries.
-    if((SHIBOKEN_IS_CROSS_BUILD OR PYSIDE_IS_CROSS_BUILD) AND
-       (CMAKE_HOST_UNIX AND NOT CMAKE_HOST_APPLE))
-        set(host_tool_wrapper_path
-            "${QFP_SHIBOKEN_HOST_PATH}/../build/shiboken6/.qfp/bin/shiboken_wrapper.sh")
-
-        if(EXISTS "${host_tool_wrapper_path}")
-            set_property(GLOBAL PROPERTY "_shiboken_tool_wrapper_shiboken_path"
-                        "${host_tool_wrapper_path}")
-            set_property(GLOBAL PROPERTY "_shiboken_tool_wrapper_shiboken_created" TRUE)
-        else()
-            message(FATAL_ERROR "${host_tool_wrapper_path} does not exist")
-        endif()
-    endif()
-
     # Generate the wrapper only once during the execution of CMake.
     get_property(is_called GLOBAL PROPERTY "_shiboken_tool_wrapper_${tool_name}_created")
 
@@ -725,25 +707,56 @@ function(shiboken_get_tool_shell_wrapper tool_name path_out_var)
     set(path_dirs_native "")
 
     if(CMAKE_HOST_WIN32)
-        # in Windows the Qt dll are store `bin` in directory
-        set(qt_library_dir ${QT6_INSTALL_BINS})
         set(wrapper_script_extension ".bat")
     else()
-        # in Unix the .so are stored in `lib` directory
-        set(qt_library_dir ${QT6_INSTALL_LIBS})
         set(wrapper_script_extension ".sh")
     endif()
 
+    # Try to get original host shiboken paths from exported target properties.
+    shiboken_get_host_tool_wrapper_properties(orig_qt_library_dir_absolute orig_libclang_lib_dir)
+
+    # Get path to the Qt bin/lib dir depending on the platform and developer input.
+    # Prefer values given on the command line, then the original host path if it exists, otherwise
+    # try to use the Qt install prefix and libclang env vars.
+    #
+    # Note that in a cross-compiling case, using the Qt install prefix is very likely
+    # wrong, because you want to use the location of the host Qt, not the target Qt. Same for
+    # libclang. Unfortunately we currently don't provide a host Qt and host libclang option via
+    # setup.py, so the manual cmake vars will have to suffice.
+    if(SHIBOKEN_WRAPPER_HOST_QT_LIB_PATH AND EXISTS "${SHIBOKEN_WRAPPER_HOST_QT_LIB_PATH}")
+        set(qt_library_dir_absolute "${SHIBOKEN_WRAPPER_HOST_QT_LIB_PATH}")
+    elseif(orig_qt_library_dir_absolute AND EXISTS "${orig_qt_library_dir_absolute}")
+        set(qt_library_dir_absolute "${orig_qt_library_dir_absolute}")
+    elseif(CMAKE_HOST_WIN32)
+        # in Windows the Qt dll are store `bin` in directory
+        set(qt_library_dir ${QT6_INSTALL_BINS})
+    else()
+        # in Unix the .so are stored in `lib` directory
+        set(qt_library_dir ${QT6_INSTALL_LIBS})
+    endif()
+
     # Assert that Qt is already found.
-    if(NOT QT6_INSTALL_PREFIX OR NOT qt_library_dir)
+    if((QT6_INSTALL_PREFIX AND qt_library_dir) OR orig_qt_library_dir_absolute)
+    else()
         message(FATAL_ERROR "Qt should have been found already by now.")
     endif()
 
-    # Get path to the Qt bin/lib dir depending on the platform
-    list(APPEND path_dirs "${QT6_INSTALL_PREFIX}/${qt_library_dir}")
+    if(NOT qt_library_dir_absolute)
+        set(qt_library_dir_absolute "${QT6_INSTALL_PREFIX}/${qt_library_dir}")
+    endif()
+    list(APPEND path_dirs "${qt_library_dir_absolute}")
 
-    # find libclang
-    find_libclang()
+    # Get libclang lib dir path.
+    # Prefer values given on the command line, then the original host path if it exists.
+    if(SHIBOKEN_WRAPPER_HOST_CLANG_LIB_PATH AND EXISTS "${SHIBOKEN_WRAPPER_HOST_CLANG_LIB_PATH}")
+        set(libclang_lib_dir "${SHIBOKEN_WRAPPER_HOST_CLANG_LIB_PATH}")
+    elseif(orig_libclang_lib_dir AND EXISTS "${orig_libclang_lib_dir}")
+        set(libclang_lib_dir "${orig_libclang_lib_dir}")
+    else()
+        # find libclang
+        find_libclang()
+    endif()
+
     if(libclang_lib_dir)
         list(APPEND path_dirs "${libclang_lib_dir}")
     endif()
@@ -781,12 +794,57 @@ $@")
     set_property(GLOBAL PROPERTY "_shiboken_tool_wrapper_${tool_name}_path" "${wrapper_path}")
     set_property(GLOBAL PROPERTY "_shiboken_tool_wrapper_${tool_name}_created" TRUE)
 
+    # Save original host paths for future cross-builds.
+    shiboken_save_host_tool_wrapper_properties("${qt_library_dir_absolute}" "${libclang_lib_dir}")
+
     # give execute permission to run the file
     if(CMAKE_HOST_UNIX)
         execute_process(COMMAND chmod +x ${wrapper_path})
     endif()
 
     set(${path_out_var} "${wrapper_path}" PARENT_SCOPE)
+endfunction()
+
+# Retrieve the original host shiboken runtime dependency paths from the installed (namespaced)
+# shiboken generator target.
+function(shiboken_get_host_tool_wrapper_properties out_qt_library_dir out_libclang_lib_dir)
+    if(TARGET Shiboken6::shiboken6)
+        get_target_property(qt_library_dir Shiboken6::shiboken6 _shiboken_original_qt_lib_dir)
+        if(NOT qt_library_dir)
+            set(qt_library_dir "")
+        endif()
+        get_target_property(libclang_lib_dir Shiboken6::shiboken6
+            _shiboken_original_libclang_lib_dir)
+        if(NOT libclang_lib_dir)
+            set(libclang_lib_dir "")
+        endif()
+    endif()
+
+    set(${out_qt_library_dir} "${qt_library_dir}" PARENT_SCOPE)
+    set(${out_libclang_lib_dir} "${libclang_lib_dir}" PARENT_SCOPE)
+endfunction()
+
+# Save original host shiboken runtime dependency paths as target properties, so they can be used
+# when generating the wrapper file for cross-builds.
+# Should only be done when shiboken is being built (aka it's a non-imported target).
+function(shiboken_save_host_tool_wrapper_properties qt_library_dir libclang_lib_dir)
+    if(TARGET shiboken6)
+        get_target_property(is_imported shiboken6 IMPORTED)
+        if(is_imported)
+            return()
+        endif()
+
+        set_target_properties(shiboken6 PROPERTIES
+            _shiboken_original_qt_lib_dir "${qt_library_dir}")
+        set_property(TARGET shiboken6 APPEND PROPERTY
+            EXPORT_PROPERTIES _shiboken_original_qt_lib_dir)
+        if(libclang_lib_dir)
+            set_target_properties(shiboken6 PROPERTIES
+                _shiboken_original_libclang_lib_dir "${libclang_lib_dir}")
+            set_property(TARGET shiboken6 APPEND PROPERTY
+                EXPORT_PROPERTIES _shiboken_original_libclang_lib_dir)
+        endif()
+    endif()
 endfunction()
 
 # Returns the platform-specific relative rpath base token, if it's supported.
