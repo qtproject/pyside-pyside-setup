@@ -92,6 +92,7 @@ constexpr auto preferredConversionAttribute = "preferred-conversion"_L1;
 constexpr auto preferredTargetLangTypeAttribute = "preferred-target-lang-type"_L1;
 constexpr auto pythonEnumTypeAttribute = "python-type"_L1;
 constexpr auto cppEnumTypeAttribute = "cpp-type"_L1;
+constexpr auto qtMetaObjectFunctionsAttribute = "qt-metaobject"_L1;
 constexpr auto qtMetaTypeAttribute = "qt-register-metatype"_L1;
 constexpr auto removeAttribute = "remove"_L1;
 constexpr auto renameAttribute = "rename"_L1;
@@ -1863,6 +1864,12 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
         } else if (name == deleteInMainThreadAttribute) {
             if (convertBoolean(attributes->takeAt(i).value(), deleteInMainThreadAttribute, false))
                 ctype->setDeleteInMainThread(true);
+        } else if (name == qtMetaObjectFunctionsAttribute) {
+            if (!convertBoolean(attributes->takeAt(i).value(),
+                                qtMetaObjectFunctionsAttribute, true))  {
+                ctype->setTypeFlags(ctype->typeFlags()
+                                    | ComplexTypeEntry::DisableQtMetaObjectFunctions);
+            }
         } else if (name == generateFunctionsAttribute) {
             const auto names = attributes->takeAt(i).value();
             const auto nameList = names.split(u';', Qt::SkipEmptyParts);

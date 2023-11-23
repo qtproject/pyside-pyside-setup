@@ -42,7 +42,8 @@ public:
         ForceAbstract      = 0x8,
         // Indicates that the instances are used to create hierarchies
         // like widgets; parent ownership heuristics are enabled for them.
-        ParentManagement   = 0x10
+        ParentManagement   = 0x10,
+        DisableQtMetaObjectFunctions = 0x20
     };
     Q_DECLARE_FLAGS(TypeFlags, TypeFlag)
 

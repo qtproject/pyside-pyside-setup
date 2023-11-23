@@ -424,6 +424,7 @@ or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethoddef`,
          polymorphic-id-expression="..."
          polymorphic-name-function="..."
          private="yes | no"
+         qt-metaobject="yes | no"
          qt-register-metatype = "yes | no | base"
          stream="yes | no"
          revision="..."
@@ -450,6 +451,12 @@ references, or using a default value that cannot be generated for a
 parameter, or similar).
 
 For the *optional* **private** attribute, see :ref:`private_types`.
+
+The *optional* **qt-metaobject** attribute specifies whether
+the special Qt virtual functions ``metaObject()``,
+``metaCall()``, and ``metaCast()`` are generated. For classes
+using dynamic meta objects, for example, ``QDBusInterface``,
+it can be turned off.
 
 The *optional* **qt-register-metatype** attribute determines whether
 a Qt meta type registration is generated for ``name *``. By

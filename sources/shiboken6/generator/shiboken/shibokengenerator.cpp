@@ -227,6 +227,8 @@ bool ShibokenGenerator::shouldGenerateMetaObjectFunctions(const AbstractMetaClas
 {
     return usePySideExtensions()
         && (!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
+           && !metaClass->typeEntry()->typeFlags()
+                  .testFlag(ComplexTypeEntry::DisableQtMetaObjectFunctions)
         && isQObject(metaClass);
 }
 
