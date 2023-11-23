@@ -566,11 +566,10 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
                 writeVirtualMethodNative(s, func, maxOverrides++);
         }
 
-        if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor()) {
-            if (usePySideExtensions() && isQObject(metaClass))
-                writeMetaObjectMethod(s, classContext);
+        if (shouldGenerateMetaObjectFunctions(metaClass))
+            writeMetaObjectMethod(s, classContext);
+        if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
             writeDestructorNative(s, classContext);
-        }
     }
 
     StringStream smd(TextStream::Language::Cpp);

@@ -202,6 +202,8 @@ protected:
     /// instead of only a Python wrapper.
     static bool shouldGenerateCppWrapper(const AbstractMetaClassCPtr &metaClass);
 
+    static bool shouldGenerateMetaObjectFunctions(const AbstractMetaClassCPtr &metaClass);
+
     /// Returns which functions need to be generated into the wrapper class
     static FunctionGeneration functionGeneration(const AbstractMetaFunctionCPtr &func);
 

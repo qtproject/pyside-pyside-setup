@@ -223,6 +223,13 @@ bool ShibokenGenerator::shouldGenerateCppWrapper(const AbstractMetaClassCPtr &me
             && wrapper.testFlag(AbstractMetaClass::CppProtectedHackWrapper));
 }
 
+bool ShibokenGenerator::shouldGenerateMetaObjectFunctions(const AbstractMetaClassCPtr &metaClass)
+{
+    return usePySideExtensions()
+        && (!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
+        && isQObject(metaClass);
+}
+
 ShibokenGenerator::FunctionGeneration ShibokenGenerator::functionGeneration(
     const AbstractMetaFunctionCPtr &func)
 {

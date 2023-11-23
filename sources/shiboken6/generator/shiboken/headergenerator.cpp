@@ -238,10 +238,10 @@ void HeaderGenerator::writeWrapperClassDeclaration(TextStream &s,
                         TypeSystem::CodeSnipPositionDeclaration, TypeSystem::NativeCode,
                         classContext);
 
-    if ((!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
-        && usePySideExtensions() && isQObject(metaClass)) {
-        s << outdent << "public:\n" << indent <<
-            R"(int qt_metacall(QMetaObject::Call call, int id, void **args) override;
+    if (shouldGenerateMetaObjectFunctions(metaClass)) {
+        s << R"(
+const ::QMetaObject * metaObject() const override;
+int qt_metacall(QMetaObject::Call call, int id, void **args) override;
 void *qt_metacast(const char *_clname) override;
 )";
     }
@@ -328,7 +328,7 @@ void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPt
     }
 
     const bool isVirtual = generation.testFlag(FunctionGenerationFlag::VirtualMethod);
-    if (isVirtual || generation.testFlag(FunctionGenerationFlag::QMetaObjectMethod)) {
+    if (isVirtual) {
         s << functionSignature(func, {}, {}, Generator::OriginalTypeDescription)
             << " override;\n";
     }
