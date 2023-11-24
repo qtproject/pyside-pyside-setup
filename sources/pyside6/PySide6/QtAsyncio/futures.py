@@ -61,7 +61,10 @@ class QAsyncioFuture():
         if self._state == QAsyncioFuture.FutureState.DONE_WITH_EXCEPTION and self._exception:
             raise self._exception
         if self._state == QAsyncioFuture.FutureState.CANCELLED:
-            raise asyncio.CancelledError
+            if self._cancel_message:
+                raise asyncio.CancelledError(self._cancel_message)
+            else:
+                raise asyncio.CancelledError
         raise asyncio.InvalidStateError
 
     def set_result(self, result: typing.Any) -> None:

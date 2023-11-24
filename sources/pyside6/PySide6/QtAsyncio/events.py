@@ -466,8 +466,6 @@ class QAsyncioHandle():
 
     def __init__(self, callback: typing.Callable, args: typing.Tuple,
                  loop: QAsyncioEventLoop, context: typing.Optional[contextvars.Context]) -> None:
-        self._cancel_exception_msg: typing.Optional[str] = None
-
         self._callback = callback
         self._args = args
         self._loop = loop
@@ -494,15 +492,10 @@ class QAsyncioHandle():
                 self._callback(*self._args)
             self._state = QAsyncioHandle.HandleState.DONE
 
-    @Slot()
-    def _cancel_exception(self) -> None:
-        raise asyncio.CancelledError(self._cancel_exception_msg)
-
     def cancel(self) -> None:
         if self._state == QAsyncioHandle.HandleState.PENDING:
-            self._state = QAsyncioHandle.HandleState.CANCELLED
             # The old timer that was created in _start will still trigger but _cb won't do anything.
-            self._schedule_event(0, lambda: self._cancel_exception())
+            self._state = QAsyncioHandle.HandleState.CANCELLED
 
     def cancelled(self) -> bool:
         return self._state == QAsyncioHandle.HandleState.CANCELLED
