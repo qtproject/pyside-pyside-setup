@@ -2103,7 +2103,7 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
     }
     s << ")\n{\n" << indent;
     if (rfunc->ownerClass() == nullptr || overloadData.hasStaticFunction())
-        s << sbkUnusedVariableCast("self");
+        s << sbkUnusedVariableCast(PYTHON_SELF_VAR);
     if (hasKwdArgs)
         s << sbkUnusedVariableCast("kwds");
 
@@ -2259,10 +2259,9 @@ void CppGenerator::writeCppSelfConversion(TextStream &s, const GeneratorContext 
         return;
     }
 
-    static const QString pythonSelfVar = u"self"_s;
     if (useWrapperClass)
         s << "static_cast<" << className << " *>(";
-    s << cpythonWrapperCPtr(context.metaClass(), pythonSelfVar);
+    s << cpythonWrapperCPtr(context.metaClass(), PYTHON_SELF_VAR);
     if (useWrapperClass)
         s << ')';
 }
@@ -2298,7 +2297,7 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
         ? context.wrapperName()
         : (u"::"_s + metaClass->qualifiedCppName());
 
-    writeInvalidPyObjectCheck(s, u"self"_s, errorReturn);
+    writeInvalidPyObjectCheck(s, PYTHON_SELF_VAR, errorReturn);
 
     if (flags.testFlag(CppSelfAsReference)) {
          writeCppSelfVarDef(s, flags);
@@ -3034,10 +3033,9 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
             continue;
         auto argType = getArgumentType(func, argIdx);
         int argPos = argIdx - removedArgs;
-        QString argName = CPP_ARG(argPos);
         QString pyArgName = usePyArgs ? pythonArgsAt(argPos) : PYTHON_ARG;
         indirections[argIdx] =
-            writeArgumentConversion(s, argType, argName, pyArgName, errorReturn,
+            writeArgumentConversion(s, argType, CPP_ARG_N(argPos), pyArgName, errorReturn,
                                     func->implementingClass(), arg.defaultValueExpression(),
                                     func->isUserAdded());
     }
@@ -3459,7 +3457,7 @@ QString CppGenerator::argumentNameFromIndex(const ApiExtractorResult &api,
 {
     switch (argIndex) {
     case -1:
-        return u"self"_s;
+        return PYTHON_SELF_VAR;
     case 0:
         return PYTHON_RETURN_VAR;
     case 1: { // Single argument?
@@ -3609,7 +3607,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                         const int idx = arg.argumentIndex() - removedArgs;
                         const auto deRef = argumentIndirections.at(i);
                         QString argName = AbstractMetaType::dereferencePrefix(deRef)
-                                          + CPP_ARG(idx);
+                                          + CPP_ARG_N(idx);
                         userArgs.append(argName);
                     }
                 }
@@ -5019,7 +5017,7 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
         // PYSIDE-1328: `self`-ness cannot be computed in Python because there are mixed cases.
         // Toplevel functions like `PySide6.QtCore.QEnum` are always self-less.
         if (!(f->isStatic()) && f->ownerClass())
-            args << u"self"_s;
+            args << PYTHON_SELF_VAR;
         const auto &arguments = f->arguments();
         for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
             const auto n = i + 1;
@@ -5683,7 +5681,7 @@ void CppGenerator::writeSetattroFunction(TextStream &s, AttroCheck attroCheck,
     if (attroCheck.testFlag(AttroCheckFlag::SetattroMethodOverride)
             && context.useWrapper()) {
         s << "if (value != nullptr && PyCallable_Check(value) != 0) {\n" << indent
-            << "auto plain_inst = " << cpythonWrapperCPtr(metaClass, u"self"_s) << ";\n"
+            << "auto plain_inst = " << cpythonWrapperCPtr(metaClass, PYTHON_SELF_VAR) << ";\n"
             << "auto *inst = dynamic_cast<" << context.wrapperName() << " *>(plain_inst);\n"
             << "if (inst != nullptr)\n" << indent
             << "inst->resetPyMethodCache();\n" << outdent << outdent
@@ -5702,7 +5700,7 @@ void CppGenerator::writeSetattroFunction(TextStream &s, AttroCheck attroCheck,
         Q_ASSERT(func);
         s << "{\n" << indent
             << "auto " << CPP_SELF_VAR << " = "
-            << cpythonWrapperCPtr(metaClass, u"self"_s) << ";\n";
+            << cpythonWrapperCPtr(metaClass, PYTHON_SELF_VAR) << ";\n";
         writeClassCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionAny,
                             TypeSystem::TargetLangCode, context);
         s << outdent << "}\n";
@@ -5724,7 +5722,7 @@ QString CppGenerator::qObjectGetAttroFunction() const
         auto qobjectClass = AbstractMetaClass::findClass(api().classes(), qObjectT);
         Q_ASSERT(qobjectClass);
         result = u"PySide::getHiddenDataFromQObject("_s
-                 + cpythonWrapperCPtr(qobjectClass, u"self"_s)
+                 + cpythonWrapperCPtr(qobjectClass, PYTHON_SELF_VAR)
                  + u", self, name)"_s;
     }
     return result;
@@ -5784,7 +5782,7 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
         Q_ASSERT(func);
         s << "{\n" << indent
             << "auto " << CPP_SELF_VAR << " = "
-            << cpythonWrapperCPtr(metaClass, u"self"_s) << ";\n";
+            << cpythonWrapperCPtr(metaClass, PYTHON_SELF_VAR) << ";\n";
         writeClassCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionAny,
                             TypeSystem::TargetLangCode, context);
         s << outdent << "}\n";
@@ -6351,7 +6349,7 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
             if (parentIndex == 0) {
                 parentVariable = PYTHON_RETURN_VAR;
             } else if (parentIndex == -1) {
-                parentVariable = u"self"_s;
+                parentVariable = PYTHON_SELF_VAR;
             } else {
                 parentVariable = usePyArgs
                     ? pythonArgsAt(parentIndex - 1) : PYTHON_ARG;
@@ -6361,7 +6359,7 @@ bool CppGenerator::writeParentChildManagement(TextStream &s, const AbstractMetaF
         if (childIndex == 0) {
             childVariable = PYTHON_RETURN_VAR;
         } else if (childIndex == -1) {
-            childVariable = u"self"_s;
+            childVariable = PYTHON_SELF_VAR;
         } else {
             childVariable = usePyArgs
                 ? pythonArgsAt(childIndex - 1) : PYTHON_ARG;

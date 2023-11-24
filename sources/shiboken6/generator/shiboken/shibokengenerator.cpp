@@ -64,35 +64,18 @@ static const char WRAPPER_DIAGNOSTICS[] = "wrapper-diagnostics";
 static const char NO_IMPLICIT_CONVERSIONS[] = "no-implicit-conversions";
 static const char LEAN_HEADERS[] = "lean-headers";
 
-QString CPP_ARG(int i)
+QString CPP_ARG_N(int i)
 {
-    return u"cppArg"_s + QString::number(i);
+    return CPP_ARG + QString::number(i);
 }
 
-static const QString CPP_ARG_REMOVED_PREFIX = u"removed_cppArg"_s;
+constexpr auto CPP_ARG_REMOVED_PREFIX = "removed_cppArg"_L1;
 
 QString CPP_ARG_REMOVED(int i)
 {
     return CPP_ARG_REMOVED_PREFIX + QString::number(i);
 }
 
-const QString CPP_RETURN_VAR = u"cppResult"_s;
-const QString CPP_SELF_VAR = u"cppSelf"_s;
-const QString NULL_PTR = u"nullptr"_s;
-const QString PYTHON_ARG = u"pyArg"_s;
-const QString PYTHON_ARGS = u"pyArgs"_s;
-const QString PYTHON_OVERRIDE_VAR = u"pyOverride"_s;
-const QString PYTHON_RETURN_VAR = u"pyResult"_s;
-const QString PYTHON_TO_CPP_VAR = u"pythonToCpp"_s;
-
-const QString CONV_RULE_OUT_VAR_SUFFIX = u"_out"_s;
-const QString BEGIN_ALLOW_THREADS =
-    u"PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS"_s;
-const QString END_ALLOW_THREADS = u"PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS"_s;
-
-const QString REPR_FUNCTION = u"__repr__"_s;
-
-const QString CPP_ARG0 = u"cppArg0"_s;
 const char *const METHOD_DEF_SENTINEL = "{nullptr, nullptr, 0, nullptr} // Sentinel\n";
 const char *const PYTHON_TO_CPPCONVERSION_STRUCT = "Shiboken::Conversions::PythonToCppConversion";
 
@@ -1372,7 +1355,7 @@ ShibokenGenerator::ArgumentVarReplacementList
                 } else {
                     argValue = hasConversionRule
                                ? arg.name() + CONV_RULE_OUT_VAR_SUFFIX
-                               : CPP_ARG(argPos);
+                               : CPP_ARG_N(argPos);
                     const auto generatorArg = GeneratorArgument::fromMetaType(type);
                     AbstractMetaType::applyDereference(&argValue, generatorArg.indirections);
                 }

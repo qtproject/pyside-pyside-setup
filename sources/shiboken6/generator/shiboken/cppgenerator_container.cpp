@@ -101,20 +101,17 @@ void CppGenerator::writeOpaqueContainerValueConverter(TextStream &s,
                                                       const AbstractMetaType &valueType) const
 {
     // Generate template specialization of value converter helper unless it is already there
-    const QString pyArg = u"pyArg"_s;
-    const QString cppArg = u"cppArg"_s;
-
     const QString valueTypeName = valueType.cppSignature();
     const QString checkFunction = cpythonCheckFunction(valueType);
 
     s << "template <>\nstruct ShibokenContainerValueConverter<"
       << valueTypeName << ">\n{\n";
     // Type check
-    s << indent << "static bool checkValue(PyObject *" << pyArg << ")\n{\n"
+    s << indent << "static bool checkValue(PyObject *" << PYTHON_ARG << ")\n{\n"
         << indent << "return " << checkFunction;
     if (!checkFunction.contains(u'('))
         s << '(';
-    s << pyArg << ");\n"
+    s << PYTHON_ARG << ");\n"
         << outdent << "}\n\n";
 
     // C++ to Python
@@ -126,21 +123,21 @@ void CppGenerator::writeOpaqueContainerValueConverter(TextStream &s,
     s << valueTypeName << ' ';
     if (passByConstRef)
         s << '&';
-    s << cppArg << ")\n{\n" << indent << "return ";
-    writeToPythonConversion(s, valueType, nullptr, cppArg);
+    s << CPP_ARG << ")\n{\n" << indent << "return ";
+    writeToPythonConversion(s, valueType, nullptr, CPP_ARG);
     s << ";\n" << outdent << "}\n\n";
 
     // Python to C++
     s << "static std::optional<" << valueTypeName << "> convertValueToCpp(PyObject *"
-        << pyArg << ")\n{\n" << indent;
+        << PYTHON_ARG << ")\n{\n" << indent;
     s << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n"
         << "if (!(";
-    writeTypeCheck(s, valueType, pyArg), isNumber(valueType.typeEntry());
+    writeTypeCheck(s, valueType, PYTHON_ARG), isNumber(valueType.typeEntry());
     s << ")) {\n" << indent
         << "Shiboken::Errors::setWrongContainerType();\n"
         << "return {};\n" << outdent << "}\n";
-    writePythonToCppTypeConversion(s, valueType, pyArg, cppArg, nullptr, {});
-    s << "return " << cppArg << ";\n" << outdent << "}\n" << outdent << "};\n\n";
+    writePythonToCppTypeConversion(s, valueType, PYTHON_ARG, CPP_ARG, nullptr, {});
+    s << "return " << CPP_ARG << ";\n" << outdent << "}\n" << outdent << "};\n\n";
 }
 
 // Generate code for a type wrapping a C++ container instantiation
@@ -245,26 +242,25 @@ CppGenerator::OpaqueContainerData
 
     // Check function
     result.checkFunctionName = result.name + u"_Check"_s;
-    const QString pyArg = u"pyArg"_s;
-    s << "extern \"C\" int " << result.checkFunctionName << "(PyObject *" << pyArg
-        << ")\n{\n" << indent << "return " << pyArg << " != nullptr && "
-        << pyArg << " != Py_None && " << pyArg << "->ob_type == "
+    s << "extern \"C\" int " << result.checkFunctionName << "(PyObject *" << PYTHON_ARG
+        << ")\n{\n" << indent << "return " << PYTHON_ARG << " != nullptr && "
+        << PYTHON_ARG << " != Py_None && " << PYTHON_ARG << "->ob_type == "
         << typeFName << "();\n" << outdent << "}\n\n";
 
     // SBK converter Python to C++
     result.pythonToConverterFunctionName = u"PythonToCpp"_s + result.name;
     s << "extern \"C\" void " << result.pythonToConverterFunctionName
-        << "(PyObject *" << pyArg << ", void *cppOut)\n{\n" << indent
+        << "(PyObject *" << PYTHON_ARG << ", void *cppOut)\n{\n" << indent
         << "auto *d = ShibokenSequenceContainerPrivate<" << cppSignature
-        << ">::get(" << pyArg << ");\n"
+        << ">::get(" << PYTHON_ARG << ");\n"
         << "*reinterpret_cast<" << cppSignature << "**>(cppOut) = d->m_list;\n"
         << outdent << "}\n\n";
 
     // SBK check function for converting Python to C++ that returns the converter
     result.converterCheckFunctionName = u"is"_s + result.name + u"PythonToCppConvertible"_s;
     s << "extern \"C\" PythonToCppFunc " << result.converterCheckFunctionName
-        << "(PyObject *" << pyArg << ")\n{\n" << indent << "if ("
-        << result.checkFunctionName << '(' << pyArg << "))\n" << indent
+        << "(PyObject *" << PYTHON_ARG << ")\n{\n" << indent << "if ("
+        << result.checkFunctionName << '(' << PYTHON_ARG << "))\n" << indent
         << "return " << result.pythonToConverterFunctionName << ";\n"
         << outdent << "return {};\n" << outdent << "}\n\n";
 
