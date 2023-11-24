@@ -9,7 +9,7 @@
 
 using namespace Qt::StringLiterals;
 
-static inline QString callOperator() { return QStringLiteral("operator()"); }
+constexpr auto callOperator = "operator()"_L1;
 
 // Helpers to split a parameter list of <add-function>, <declare-function>
 // (@ denoting names), like
@@ -143,8 +143,8 @@ AddedFunction::AddedFunctionPtr
     QStringView signature = QStringView{signatureIn}.trimmed();
 
     // Skip past "operator()(...)"
-    const auto parenSearchStartPos = signature.startsWith(callOperator())
-        ? callOperator().size() : 0;
+    const auto parenSearchStartPos = signature.startsWith(callOperator)
+        ? callOperator.size() : 0;
     const auto openParenPos = signature.indexOf(u'(', parenSearchStartPos);
     if (openParenPos < 0) {
         return AddedFunctionPtr(new AddedFunction(signature.toString(),

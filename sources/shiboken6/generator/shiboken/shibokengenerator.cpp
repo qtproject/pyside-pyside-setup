@@ -163,32 +163,32 @@ ShibokenGenerator::~ShibokenGenerator() = default;
 static const QHash<QString, QString> &primitiveTypesCorrespondences()
 {
     static const QHash<QString, QString> result = {
-        {u"bool"_s, pyBoolT()},
-        {u"char"_s, sbkCharT()},
-        {u"signed char"_s, sbkCharT()},
-        {u"unsigned char"_s, sbkCharT()},
-        {intT(), pyLongT()},
-        {u"signed int"_s, pyLongT()},
-        {u"uint"_s, pyLongT()},
-        {u"unsigned int"_s, pyLongT()},
-        {shortT(), pyLongT()},
-        {u"ushort"_s, pyLongT()},
-        {u"signed short"_s, pyLongT()},
-        {u"signed short int"_s, pyLongT()},
-        {unsignedShortT(), pyLongT()},
-        {u"unsigned short int"_s, pyLongT()},
-        {longT(), pyLongT()},
-        {doubleT(), pyFloatT()},
-        {floatT(), pyFloatT()},
-        {u"unsigned long"_s, pyLongT()},
-        {u"signed long"_s, pyLongT()},
-        {u"ulong"_s, pyLongT()},
-        {u"unsigned long int"_s, pyLongT()},
-        {u"long long"_s, pyLongT()},
-        {u"__int64"_s, pyLongT()},
-        {u"unsigned long long"_s, pyLongT()},
-        {u"unsigned __int64"_s, pyLongT()},
-        {u"size_t"_s, pyLongT()}
+        {u"bool"_s, pyBoolT},
+        {u"char"_s, sbkCharT},
+        {u"signed char"_s, sbkCharT},
+        {u"unsigned char"_s, sbkCharT},
+        {intT, pyLongT},
+        {u"signed int"_s, pyLongT},
+        {u"uint"_s, pyLongT},
+        {u"unsigned int"_s, pyLongT},
+        {shortT, pyLongT},
+        {u"ushort"_s, pyLongT},
+        {u"signed short"_s, pyLongT},
+        {u"signed short int"_s, pyLongT},
+        {unsignedShortT, pyLongT},
+        {u"unsigned short int"_s, pyLongT},
+        {longT, pyLongT},
+        {doubleT, pyFloatT},
+        {floatT, pyFloatT},
+        {u"unsigned long"_s, pyLongT},
+        {u"signed long"_s, pyLongT},
+        {u"ulong"_s, pyLongT},
+        {u"unsigned long int"_s, pyLongT},
+        {u"long long"_s, pyLongT},
+        {u"__int64"_s, pyLongT},
+        {u"unsigned long long"_s, pyLongT},
+        {u"unsigned __int64"_s, pyLongT},
+        {u"size_t"_s, pyLongT}
     };
     return result;
 }
@@ -198,18 +198,18 @@ const QHash<QString, QChar> &ShibokenGenerator::formatUnits()
     static const QHash<QString, QChar> result = {
         {u"char"_s, u'b'},
         {u"unsigned char"_s, u'B'},
-        {intT(), u'i'},
+        {intT, u'i'},
         {u"unsigned int"_s, u'I'},
-        {shortT(), u'h'},
-        {unsignedShortT(), u'H'},
-        {longT(), u'l'},
-        {unsignedLongLongT(), u'k'},
-        {longLongT(), u'L'},
+        {shortT, u'h'},
+        {unsignedShortT, u'H'},
+        {longT, u'l'},
+        {unsignedLongLongT, u'k'},
+        {longLongT, u'L'},
         {u"__int64"_s, u'L'},
-        {unsignedLongLongT(), u'K'},
+        {unsignedLongLongT, u'K'},
         {u"unsigned __int64"_s, u'K'},
-        {doubleT(), u'd'},
-        {floatT(), u'f'},
+        {doubleT, u'd'},
+        {floatT, u'f'},
     };
     return result;
 }
@@ -639,7 +639,7 @@ QString ShibokenGenerator::containerCpythonBaseName(const ContainerTypeEntryCPtr
     default:
         Q_ASSERT(false);
     }
-    return cPySequenceT();
+    return cPySequenceT;
 }
 
 QString ShibokenGenerator::cpythonBaseName(const TypeEntryCPtr &type)
@@ -659,7 +659,7 @@ QString ShibokenGenerator::cpythonBaseName(const TypeEntryCPtr &type)
         const auto ctype = std::static_pointer_cast<const ContainerTypeEntry>(type);
         baseName = containerCpythonBaseName(ctype);
     } else {
-        baseName = cPyObjectT();
+        baseName = cPyObjectT;
     }
     return baseName.replace(u"::"_s, u"_"_s);
 }
@@ -741,8 +741,6 @@ QString ShibokenGenerator::cpythonTypeNameExt(const AbstractMetaType &type)
            + getTypeIndexVariableName(type) + u']';
 }
 
-static inline QString unknownOperator() { return QStringLiteral("__UNKNOWN_OPERATOR__"); }
-
 QString ShibokenGenerator::fixedCppTypeName(const TargetToNativeConversion &toNative)
 {
     if (toNative.sourceType())
@@ -791,7 +789,7 @@ QString ShibokenGenerator::pythonOperatorFunctionName(const AbstractMetaFunction
     QString op = Generator::pythonOperatorFunctionName(func->originalName());
     if (op.isEmpty()) {
         qCWarning(lcShiboken).noquote().nospace() << msgUnknownOperator(func.get());
-        return unknownOperator();
+        return "__UNKNOWN_OPERATOR__"_L1;
     }
     if (func->arguments().isEmpty()) {
         if (op == u"__sub__")
@@ -808,8 +806,8 @@ QString ShibokenGenerator::pythonOperatorFunctionName(const AbstractMetaFunction
 
 bool ShibokenGenerator::isNumber(const QString &cpythonApiName)
 {
-    return cpythonApiName == pyFloatT() || cpythonApiName == pyLongT()
-       || cpythonApiName == pyBoolT();
+    return cpythonApiName == pyFloatT || cpythonApiName == pyLongT
+       || cpythonApiName == pyBoolT;
 }
 
 static std::optional<TypeSystem::CPythonType>
@@ -856,7 +854,7 @@ bool ShibokenGenerator::isPyInt(const TypeEntryCPtr &type)
     if (!cPythonTypeOpt.has_value()) {
         const auto &mapping = primitiveTypesCorrespondences();
         const auto it = mapping.constFind(pte->name());
-        return it != mapping.cend() && it.value() ==  pyLongT();
+        return it != mapping.cend() && it.value() ==  pyLongT;
     }
     return cPythonTypeOpt.value() == TypeSystem::CPythonType::Integer;
 }
@@ -1768,7 +1766,7 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
             case TypeSystemCheckFunction:
                 conversion = cpythonCheckFunction(conversionType);
                 if (conversionType.typeEntry()->isPrimitive()
-                    && (conversionType.typeEntry()->name() == cPyObjectT()
+                    && (conversionType.typeEntry()->name() == cPyObjectT
                         || !conversion.endsWith(u' '))) {
                     conversion += u'(';
                     break;
@@ -1844,7 +1842,7 @@ ShibokenGenerator::AttroCheck ShibokenGenerator::checkAttroFunctionNeeds(
                                           FunctionQueryOption::GetAttroFunction)) {
             result |= AttroCheckFlag::GetattroUser;
         }
-        if (usePySideExtensions() && metaClass->qualifiedCppName() == qObjectT())
+        if (usePySideExtensions() && metaClass->qualifiedCppName() == qObjectT)
             result |= AttroCheckFlag::SetattroQObject;
         if (useOverrideCaching(metaClass))
             result |= AttroCheckFlag::SetattroMethodOverride;

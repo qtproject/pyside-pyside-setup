@@ -19,10 +19,6 @@
 
 using namespace Qt::StringLiterals;
 
-static inline QString nameAttribute() { return QStringLiteral("name"); }
-static inline QString titleAttribute() { return QStringLiteral("title"); }
-static inline QString fullTitleAttribute() { return QStringLiteral("fulltitle"); }
-
 QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
                       const QString &tag, const QString &message)
 {
@@ -849,23 +845,23 @@ void QtXmlToSphinx::handleArgumentTag(QXmlStreamReader& reader)
     }
 }
 
-static inline QString functionLinkType() { return QStringLiteral("function"); }
-static inline QString classLinkType() { return QStringLiteral("class"); }
+constexpr auto functionLinkType = "function"_L1;
+constexpr auto classLinkType = "class"_L1;
 
 static inline QString fixLinkType(QStringView type)
 {
     // TODO: create a flag PROPERTY-AS-FUNCTION to ask if the properties
     // are recognized as such or not in the binding
     if (type == u"property")
-        return functionLinkType();
+        return functionLinkType;
     if (type == u"typedef")
-        return classLinkType();
+        return classLinkType;
     return type.toString();
 }
 
 static inline QString linkSourceAttribute(const QString &type)
 {
-    if (type == functionLinkType() || type == classLinkType())
+    if (type == functionLinkType || type == classLinkType)
         return u"raw"_s;
     return type == u"enum" || type == u"page"
         ? type : u"href"_s;
@@ -891,7 +887,7 @@ void QtXmlToSphinx::handleSeeAlsoTag(QXmlStreamReader& reader)
             const QString text = textR.toString();
             if (m_seeAlsoContext.isNull()) {
                 const QString type = text.endsWith(u"()")
-                    ? functionLinkType() : classLinkType();
+                    ? functionLinkType : classLinkType;
                 m_seeAlsoContext.reset(handleLinkStart(type, text));
             }
             handleLinkText(m_seeAlsoContext.data(), text);
@@ -910,7 +906,7 @@ void QtXmlToSphinx::handleSeeAlsoTag(QXmlStreamReader& reader)
     }
 }
 
-static inline QString fallbackPathAttribute() { return QStringLiteral("path"); }
+constexpr auto fallbackPathAttribute = "path"_L1;
 
 template <class Indent> // const char*/class Indentor
 void formatSnippet(TextStream &str, Indent indent, const QString &snippet)
@@ -950,8 +946,8 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
         QString location = reader.attributes().value(u"location"_s).toString();
         QString identifier = reader.attributes().value(u"identifier"_s).toString();
         QString fallbackPath;
-        if (reader.attributes().hasAttribute(fallbackPathAttribute()))
-            fallbackPath = reader.attributes().value(fallbackPathAttribute()).toString();
+        if (reader.attributes().hasAttribute(fallbackPathAttribute))
+            fallbackPath = reader.attributes().value(fallbackPathAttribute).toString();
         QString errorMessage;
 
         const Snippet snippet = readSnippetFromLocations(location, identifier,
@@ -1165,7 +1161,7 @@ QtXmlToSphinxLink *QtXmlToSphinx::handleLinkStart(const QString &type, QString r
 
     if (type == u"external" || isHttpLink(ref)) {
         result->type = QtXmlToSphinxLink::External;
-    } else if (type == functionLinkType() && !m_context.isEmpty()) {
+    } else if (type == functionLinkType && !m_context.isEmpty()) {
         result->type = QtXmlToSphinxLink::Method;
         const auto rawlinklist = QStringView{result->linkRef}.split(u'.');
         if (rawlinklist.size() == 1 || rawlinklist.constFirst() == m_context) {
@@ -1176,9 +1172,9 @@ QtXmlToSphinxLink *QtXmlToSphinx::handleLinkStart(const QString &type, QString r
         } else {
             result->linkRef = m_generator->expandFunction(result->linkRef);
         }
-    } else if (type == functionLinkType() && m_context.isEmpty()) {
+    } else if (type == functionLinkType && m_context.isEmpty()) {
         result->type = QtXmlToSphinxLink::Function;
-    } else if (type == classLinkType()) {
+    } else if (type == classLinkType) {
         result->type = QtXmlToSphinxLink::Class;
         result->linkRef = m_generator->expandClass(m_context, result->linkRef);
     } else if (type == u"enum") {
@@ -1397,11 +1393,11 @@ void QtXmlToSphinx::handlePageTag(QXmlStreamReader &reader)
 
     m_output << disableIndent;
 
-    const auto  title = reader.attributes().value(titleAttribute());
+    const auto  title = reader.attributes().value("title");
     if (!title.isEmpty())
         m_output << rstLabel(title.toString());
 
-    const auto  fullTitle = reader.attributes().value(fullTitleAttribute());
+    const auto  fullTitle = reader.attributes().value("fulltitle");
     const int size = fullTitle.isEmpty()
        ? writeEscapedRstText(m_output, title)
        : writeEscapedRstText(m_output, fullTitle);
@@ -1414,7 +1410,7 @@ void QtXmlToSphinx::handleTargetTag(QXmlStreamReader &reader)
 {
     if (reader.tokenType() != QXmlStreamReader::StartElement)
         return;
-    const auto  name = reader.attributes().value(nameAttribute());
+    const auto  name = reader.attributes().value("name");
     if (!name.isEmpty())
         m_output << rstLabel(name.toString());
 }

@@ -6,24 +6,24 @@
 
 #include <QtCore/QString>
 
-static inline QString pyBoolT() { return QStringLiteral("PyBool"); }
-static inline QString pyFloatT() { return QStringLiteral("PyFloat"); }
-static inline QString pyLongT() { return QStringLiteral("PyLong"); }
-static inline QString pyObjectT() { return QStringLiteral("object"); }
-static inline QString pyStrT() { return QStringLiteral("str"); }
+constexpr auto pyBoolT = QLatin1StringView ("PyBool");
+constexpr auto pyFloatT = QLatin1StringView ("PyFloat");
+constexpr auto pyLongT = QLatin1StringView ("PyLong");
+constexpr auto pyObjectT = QLatin1StringView ("object");
+constexpr auto pyStrT = QLatin1StringView ("str");
 
 // PYSIDE-1499: A custom type determined by existence of an `__fspath__` attribute.
-static inline QString pyPathLikeT() { return QStringLiteral("PyPathLike"); }
+constexpr auto pyPathLikeT = QLatin1StringView ("PyPathLike");
 
-static inline QString cPyBufferT() { return QStringLiteral("PyBuffer"); }
-static inline QString cPyListT() { return QStringLiteral("PyList"); }
-static inline QString cPyObjectT() { return QStringLiteral("PyObject"); }
-static inline QString cPySequenceT() { return QStringLiteral("PySequence"); }
-static inline QString cPyTypeObjectT() { return QStringLiteral("PyTypeObject"); }
+constexpr auto cPyBufferT = QLatin1StringView ("PyBuffer");
+constexpr auto cPyListT = QLatin1StringView ("PyList");
+constexpr auto cPyObjectT = QLatin1StringView ("PyObject");
+constexpr auto cPySequenceT = QLatin1StringView ("PySequence");
+constexpr auto cPyTypeObjectT = QLatin1StringView ("PyTypeObject");
 
 // numpy
-static inline QString cPyArrayObjectT() { return QStringLiteral("PyArrayObject"); }
+constexpr auto cPyArrayObjectT = QLatin1StringView ("PyArrayObject");
 
-static inline QString sbkCharT() { return QStringLiteral("SbkChar"); }
+constexpr auto sbkCharT = QLatin1StringView ("SbkChar");
 
 #endif // PYTYPENAMES_H

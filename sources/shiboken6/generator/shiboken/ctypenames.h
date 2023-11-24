@@ -6,26 +6,26 @@
 
 #include <QtCore/QString>
 
-static inline QString boolT() { return QStringLiteral("bool"); }
-static inline QString intT() { return QStringLiteral("int"); }
-static inline QString unsignedT() { return QStringLiteral("unsigned"); }
-static inline QString unsignedIntT() { return QStringLiteral("unsigned int"); }
-static inline QString longT() { return QStringLiteral("long"); }
-static inline QString unsignedLongT() { return QStringLiteral("unsigned long"); }
-static inline QString shortT() { return QStringLiteral("short"); }
-static inline QString unsignedShortT() { return QStringLiteral("unsigned short"); }
-static inline QString unsignedCharT() { return QStringLiteral("unsigned char"); }
-static inline QString longLongT() { return QStringLiteral("long long"); }
-static inline QString unsignedLongLongT() { return QStringLiteral("unsigned long long"); }
-static inline QString charT() { return QStringLiteral("char"); }
-static inline QString floatT() { return QStringLiteral("float"); }
-static inline QString doubleT() { return QStringLiteral("double"); }
-static inline QString constCharPtrT() { return QStringLiteral("const char*"); }
+constexpr auto boolT = QLatin1StringView("bool");
+constexpr auto intT = QLatin1StringView("int");
+constexpr auto unsignedT = QLatin1StringView("unsigned");
+constexpr auto unsignedIntT = QLatin1StringView("unsigned int");
+constexpr auto longT = QLatin1StringView("long");
+constexpr auto unsignedLongT = QLatin1StringView("unsigned long");
+constexpr auto shortT = QLatin1StringView("short");
+constexpr auto unsignedShortT = QLatin1StringView("unsigned short");
+constexpr auto unsignedCharT = QLatin1StringView("unsigned char");
+constexpr auto longLongT = QLatin1StringView("long long");
+constexpr auto unsignedLongLongT = QLatin1StringView("unsigned long long");
+constexpr auto charT = QLatin1StringView("char");
+constexpr auto floatT = QLatin1StringView("float");
+constexpr auto doubleT = QLatin1StringView("double");
+constexpr auto constCharPtrT = QLatin1StringView("const char*");
 
-static inline QString qByteArrayT() { return QStringLiteral("QByteArray"); }
-static inline QString qMetaObjectT() { return QStringLiteral("QMetaObject"); }
-static inline QString qObjectT() { return QStringLiteral("QObject"); }
-static inline QString qStringT() { return QStringLiteral("QString"); }
-static inline QString qVariantT() { return QStringLiteral("QVariant"); }
+constexpr auto qByteArrayT = QLatin1StringView("QByteArray");
+constexpr auto qMetaObjectT = QLatin1StringView("QMetaObject");
+constexpr auto qObjectT = QLatin1StringView("QObject");
+constexpr auto qStringT = QLatin1StringView("QString");
+constexpr auto qVariantT = QLatin1StringView("QVariant");
 
 #endif // CTYPENAMES_H

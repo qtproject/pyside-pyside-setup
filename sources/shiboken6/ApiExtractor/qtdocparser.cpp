@@ -26,8 +26,8 @@ using namespace Qt::StringLiterals;
 
 enum { debugFunctionSearch = 0 };
 
-static inline QString briefStartElement() { return QStringLiteral("<brief>"); }
-static inline QString briefEndElement() { return QStringLiteral("</brief>"); }
+constexpr auto briefStartElement = "<brief>"_L1;
+constexpr auto briefEndElement = "</brief>"_L1;
 
 Documentation QtDocParser::retrieveModuleDocumentation()
 {
@@ -187,16 +187,16 @@ QString QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
 // from the source.
 static QString extractBrief(QString *value)
 {
-    const auto briefStart = value->indexOf(briefStartElement());
+    const auto briefStart = value->indexOf(briefStartElement);
     if (briefStart < 0)
         return {};
-    const auto briefEnd = value->indexOf(briefEndElement(),
-                                         briefStart + briefStartElement().size());
+    const auto briefEnd = value->indexOf(briefEndElement,
+                                         briefStart + briefStartElement.size());
     if (briefEnd < briefStart)
         return {};
-    const auto briefLength = briefEnd + briefEndElement().size() - briefStart;
+    const auto briefLength = briefEnd + briefEndElement.size() - briefStart;
     QString briefValue = value->mid(briefStart, briefLength);
-    briefValue.insert(briefValue.size() - briefEndElement().size(),
+    briefValue.insert(briefValue.size() - briefEndElement.size(),
                       u"<rst> More_...</rst>"_s);
     value->remove(briefStart, briefLength);
     return briefValue;

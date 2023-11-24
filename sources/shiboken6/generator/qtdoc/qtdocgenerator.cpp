@@ -91,9 +91,9 @@ static QString propertyRefTarget(const AbstractMetaClassCPtr &cppClass, const QS
     return result;
 }
 
-static inline QString additionalDocumentationOption() { return QStringLiteral("additional-documentation"); }
+constexpr auto additionalDocumentationOption = "additional-documentation"_L1;
 
-static inline QString none() { return QStringLiteral("None"); }
+constexpr auto none = "None"_L1;
 
 static bool shouldSkip(const AbstractMetaFunctionCPtr &func)
 {
@@ -557,13 +557,13 @@ QString QtDocGenerator::formatArgs(const AbstractMetaFunctionCPtr &func)
                        || defValue.startsWith(u"QList")) {
                 defValue = u"list()"_s;
             } else if (defValue == u"QVariant()") {
-                defValue = none();
+                defValue = none;
             } else {
                 defValue.replace(u"::"_s, u"."_s);
                 if (defValue == u"nullptr")
-                    defValue = none();
+                    defValue = none;
                 else if (defValue == u"0" && arg.type().isObject())
-                    defValue = none();
+                    defValue = none;
             }
             ret += u'=' + defValue;
         }
@@ -686,25 +686,25 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
                                               bool createRef) const
 {
     static const QStringList nativeTypes =
-        {boolT(), floatT(), intT(), pyObjectT(), pyStrT()};
+        {boolT, floatT, intT, pyObjectT, pyStrT};
 
     const QString name = type.name();
     if (nativeTypes.contains(name))
         return name;
 
     static const QMap<QString, QString> typeMap = {
-        { cPyObjectT(), pyObjectT() },
-        { qStringT(), pyStrT() },
-        { u"uchar"_s, pyStrT() },
+        { cPyObjectT, pyObjectT },
+        { qStringT, pyStrT },
+        { u"uchar"_s, pyStrT },
         { u"QStringList"_s, u"list of strings"_s },
-        { qVariantT(), pyObjectT() },
-        { u"quint32"_s, intT() },
-        { u"uint32_t"_s, intT() },
-        { u"quint64"_s, intT() },
-        { u"qint64"_s, intT() },
-        { u"size_t"_s, intT() },
-        { u"int64_t"_s, intT() },
-        { u"qreal"_s, floatT() }
+        { qVariantT, pyObjectT },
+        { u"quint32"_s, intT },
+        { u"uint32_t"_s, intT },
+        { u"quint64"_s, intT },
+        { u"qint64"_s, intT },
+        { u"size_t"_s, intT },
+        { u"int64_t"_s, intT },
+        { u"qreal"_s, floatT }
     };
     const auto found = typeMap.find(name);
     if (found != typeMap.end())
@@ -713,10 +713,10 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
     QString strType;
     if (type.isConstant() && name == u"char" && type.indirections() == 1) {
         strType = u"str"_s;
-    } else if (name.startsWith(unsignedShortT())) {
-        strType = intT();
-    } else if (name.startsWith(unsignedT())) { // uint and ulong
-        strType = intT();
+    } else if (name.startsWith(unsignedShortT)) {
+        strType = intT;
+    } else if (name.startsWith(unsignedT)) { // uint and ulong
+        strType = intT;
     } else if (type.isContainer()) {
         QString strType = translateType(type, cppClass, Options(ExcludeConst) | ExcludeReference);
         strType.remove(u'*');
@@ -1119,7 +1119,7 @@ QList<OptionDescription> QtDocGenerator::options()
          u"Directory used to search for extra documentation sections"_s},
         {u"library-source-dir=<dir>"_s,
          u"Directory where library source code is located"_s},
-        {additionalDocumentationOption() + u"=<file>"_s,
+        {additionalDocumentationOption + u"=<file>"_s,
          u"List of additional XML files to be converted to .rst files\n"
           "(for example, tutorials)."_s},
         {u"inheritance-file=<file>"_s,
@@ -1175,7 +1175,7 @@ bool QtDocGeneratorOptionsParser::handleOption(const QString &key, const QString
             m_options->doxygen = true;
         return true;
     }
-    if (key == additionalDocumentationOption()) {
+    if (key == additionalDocumentationOption) {
         m_options->additionalDocumentationList = value;
         return true;
     }

@@ -26,8 +26,6 @@ using namespace Qt::StringLiterals;
 
 namespace clang {
 
-static inline QString templateBrackets() { return QStringLiteral("<>"); }
-
 static inline bool isClassCursor(const CXCursor &c)
 {
     return c.kind == CXCursor_ClassDecl || c.kind == CXCursor_StructDecl
@@ -969,8 +967,8 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
             || !d->addClass(cursor, CodeModel::Class)) {
             return Skip;
         }
-        d->m_currentClass->setName(d->m_currentClass->name() + templateBrackets());
-        d->m_scope.back() += templateBrackets();
+        d->m_currentClass->setName(d->m_currentClass->name() + "<>"_L1);
+        d->m_scope.back() += "<>"_L1;
         break;
     case CXCursor_EnumDecl: {
         QString name = enumType(cursor);

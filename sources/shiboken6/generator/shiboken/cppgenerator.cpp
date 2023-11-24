@@ -130,7 +130,7 @@ const ProtocolEntries &mappingProtocols()
          u"PyObject*"_s},
         {u"__msetitem__"_s,
          u"PyObject *self, PyObject *_key, PyObject *_value"_s,
-         intT()}};
+         intT}};
     return result;
 }
 
@@ -147,16 +147,16 @@ const ProtocolEntries &sequenceProtocols()
          u"PyObject*"_s},
         {u"__setitem__"_s,
          u"PyObject *self, Py_ssize_t _i, PyObject *_value"_s,
-         intT()},
+         intT},
         {u"__getslice__"_s,
          u"PyObject *self, Py_ssize_t _i1, Py_ssize_t _i2"_s,
          u"PyObject*"_s},
         {u"__setslice__"_s,
          u"PyObject *self, Py_ssize_t _i1, Py_ssize_t _i2, PyObject *_value"_s,
-         intT()},
+         intT},
         {u"__contains__"_s,
          u"PyObject *self, PyObject *_value"_s,
-         intT()},
+         intT},
         {u"__concat__"_s,
          u"PyObject *self, PyObject *_other"_s,
          u"PyObject*"_s}
@@ -1258,7 +1258,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 
         if (!func->isVoid()) {
 
-            if (func->modifiedTypeName() != cPyObjectT()) {
+            if (func->modifiedTypeName() != cPyObjectT) {
 
                 s << "// Check return type\n";
 
@@ -2874,7 +2874,7 @@ void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
         int sequenceArgCount = 0;
         while (od && !od->argType().isVarargs()) {
             const bool typeReplacedByPyObject = od->isTypeModified()
-                && od->modifiedArgType().name() == cPyObjectT();
+                && od->modifiedArgType().name() == cPyObjectT;
             if (!typeReplacedByPyObject) {
                 if (usePyArgs)
                     pyArgName = pythonArgsAt(od->argPos());
@@ -3141,10 +3141,10 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s,
 QString CppGenerator::containerNativeToTargetTypeName(const ContainerTypeEntryCPtr &type)
 {
     QString result = type->targetLangApiName();
-    if (result != cPyObjectT()) {
+    if (result != cPyObjectT) {
         result = containerCpythonBaseName(type);
-        if (result == cPySequenceT())
-            result = cPyListT();
+        if (result == cPySequenceT)
+            result = cPyListT;
     }
     return result;
 }
@@ -4041,7 +4041,7 @@ void CppGenerator::writePrimitiveConverterInitialization(TextStream &s,
         << converter << " = Shiboken::Conversions::createConverter(";
     if (!type->hasTargetLangApiType())
         s << "nullptr";
-    else if (type->targetLangApiName() == cPyObjectT())
+    else if (type->targetLangApiName() == cPyObjectT)
         s << "&PyBaseObject_Type";
     else
         s << '&' << type->targetLangApiName() << "_Type";
@@ -4108,7 +4108,7 @@ QString CppGenerator::writeContainerConverterInitialization(TextStream &s,
     const auto typeEntry = std::static_pointer_cast<const ContainerTypeEntry>(type.typeEntry());
 
     const QString targetTypeName = containerNativeToTargetTypeName(typeEntry);
-    if (targetTypeName == cPyObjectT()) {
+    if (targetTypeName == cPyObjectT) {
         s << "&PyBaseObject_Type";
     } else {
         s << '&' << targetTypeName << "_Type";
@@ -5721,7 +5721,7 @@ QString CppGenerator::qObjectGetAttroFunction() const
 {
     static QString result;
     if (result.isEmpty()) {
-        auto qobjectClass = AbstractMetaClass::findClass(api().classes(), qObjectT());
+        auto qobjectClass = AbstractMetaClass::findClass(api().classes(), qObjectT);
         Q_ASSERT(qobjectClass);
         result = u"PySide::getHiddenDataFromQObject("_s
                  + cpythonWrapperCPtr(qobjectClass, u"self"_s)

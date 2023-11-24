@@ -135,10 +135,10 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
 
     // Primitive types that are not int, long, short,
     // char and their respective unsigned counterparts.
-    static const QStringList nonIntegerPrimitives{floatT(), doubleT(), boolT()};
+    static const QStringList nonIntegerPrimitives{floatT, doubleT, boolT};
 
     // Signed integer primitive types.
-    static const QStringList signedIntegerPrimitives{intT(), shortT(), longT(), longLongT()};
+    static const QStringList signedIntegerPrimitives{intT, shortT, longT, longLongT};
 
     // sort the children overloads
     for (const auto &ov : std::as_const(m_children))
@@ -162,15 +162,15 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
             it.value().append(ov);
         }
 
-        if (!checkPyObject && typeName == cPyObjectT())
+        if (!checkPyObject && typeName == cPyObjectT)
             checkPyObject = true;
-        else if (!checkPySequence && typeName == cPySequenceT())
+        else if (!checkPySequence && typeName == cPySequenceT)
             checkPySequence = true;
-        else if (!checkPyBuffer && typeName == cPyBufferT())
+        else if (!checkPyBuffer && typeName == cPyBufferT)
             checkPyBuffer = true;
-        else if (!checkQVariant && typeName == qVariantT())
+        else if (!checkQVariant && typeName == qVariantT)
             checkQVariant = true;
-        else if (!checkQString && typeName == qStringT())
+        else if (!checkQString && typeName == qStringT)
             checkQString = true;
 
         for (const auto &instantiation : ov->argType().instantiations()) {
@@ -196,9 +196,9 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
 
     // Create the graph of type dependencies based on implicit conversions.
     // All C++ primitive types, add any forgotten type AT THE END OF THIS LIST!
-    static const QStringList primitiveTypes{intT(), unsignedIntT(), longT(), unsignedLongT(),
-        shortT(), unsignedShortT(), boolT(), unsignedCharT(), charT(), floatT(),
-        doubleT(), constCharPtrT()};
+    static const QStringList primitiveTypes{intT, unsignedIntT, longT, unsignedLongT,
+        shortT, unsignedShortT, boolT, unsignedCharT, charT, floatT,
+        doubleT, constCharPtrT};
 
     QStringList foundPrimitiveTypeIds;
     for (const auto &p : primitiveTypes) {
@@ -207,7 +207,7 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
     }
 
     if (checkPySequence && checkPyObject)
-        graph.addEdge(cPySequenceT(), cPyObjectT());
+        graph.addEdge(cPySequenceT, cPyObjectT);
 
     QStringList classesWithIntegerImplicitConversion;
 
@@ -226,7 +226,7 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
             else
                 convertibleType = getTypeName(function->arguments().constFirst().type());
 
-            if (convertibleType == intT() || convertibleType == unsignedIntT())
+            if (convertibleType == intT || convertibleType == unsignedIntT)
                 classesWithIntegerImplicitConversion << targetTypeEntryName;
 
             if (!graph.hasNode(convertibleType))
@@ -288,28 +288,28 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
 
 
         if ((checkPySequence || checkPyObject || checkPyBuffer)
-            && !targetTypeEntryName.contains(cPyObjectT())
-            && !targetTypeEntryName.contains(cPyBufferT())
-            && !targetTypeEntryName.contains(cPySequenceT())) {
+            && !targetTypeEntryName.contains(cPyObjectT)
+            && !targetTypeEntryName.contains(cPyBufferT)
+            && !targetTypeEntryName.contains(cPySequenceT)) {
             if (checkPySequence) {
                 // PySequence will be checked after all more specific types, but before PyObject.
-                graph.addEdge(targetTypeEntryName, cPySequenceT());
+                graph.addEdge(targetTypeEntryName, cPySequenceT);
             } else if (checkPyBuffer) {
                 // PySequence will be checked after all more specific types, but before PyObject.
-                graph.addEdge(targetTypeEntryName, cPyBufferT());
+                graph.addEdge(targetTypeEntryName, cPyBufferT);
             } else {
                 // Add dependency on PyObject, so its check is the last one (too generic).
-                graph.addEdge(targetTypeEntryName, cPyObjectT());
+                graph.addEdge(targetTypeEntryName, cPyObjectT);
             }
-        } else if (checkQVariant && targetTypeEntryName != qVariantT()) {
-            if (!graph.containsEdge(qVariantT(), targetTypeEntryName)) // Avoid cyclic dependency.
-                graph.addEdge(targetTypeEntryName, qVariantT());
+        } else if (checkQVariant && targetTypeEntryName != qVariantT) {
+            if (!graph.containsEdge(qVariantT, targetTypeEntryName)) // Avoid cyclic dependency.
+                graph.addEdge(targetTypeEntryName, qVariantT);
         } else if (checkQString && ov->argType().isPointer()
-            && targetTypeEntryName != qStringT()
-            && targetTypeEntryName != qByteArrayT()
-            && (!checkPyObject || targetTypeEntryName != cPyObjectT())) {
-            if (!graph.containsEdge(qStringT(), targetTypeEntryName)) // Avoid cyclic dependency.
-                graph.addEdge(targetTypeEntryName, qStringT());
+            && targetTypeEntryName != qStringT
+            && targetTypeEntryName != qByteArrayT
+            && (!checkPyObject || targetTypeEntryName != cPyObjectT)) {
+            if (!graph.containsEdge(qStringT, targetTypeEntryName)) // Avoid cyclic dependency.
+                graph.addEdge(targetTypeEntryName, qStringT);
         }
 
         if (targetType.isEnum()) {
@@ -320,14 +320,14 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
     }
 
     // QByteArray args need to be checked after QString args
-    if (graph.hasNode(qStringT()) && graph.hasNode(qByteArrayT()))
-        graph.addEdge(qStringT(), qByteArrayT());
+    if (graph.hasNode(qStringT) && graph.hasNode(qByteArrayT))
+        graph.addEdge(qStringT, qByteArrayT);
 
     static const Edge rangeOrder[] =
-        {{doubleT(), floatT()},
-         {longLongT(), longT()}, {longLongT(), intT()}, {intT(), shortT()},
-         {unsignedLongLongT(), unsignedLongT()}, {unsignedLongLongT(), unsignedT()},
-         {unsignedLongLongT(), unsignedIntT()}, {unsignedT(), unsignedShortT()}
+        {{doubleT, floatT},
+         {longLongT, longT}, {longLongT, intT}, {intT, shortT},
+         {unsignedLongLongT, unsignedLongT}, {unsignedLongLongT, unsignedT},
+         {unsignedLongLongT, unsignedIntT}, {unsignedT, unsignedShortT}
     };
     for (const auto &r : rangeOrder) {
         if (graph.hasNode(r.first) && graph.hasNode(r.second))

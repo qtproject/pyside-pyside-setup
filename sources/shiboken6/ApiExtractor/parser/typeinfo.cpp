@@ -457,20 +457,17 @@ QString TypeInfo::indirectionKeyword(Indirection i)
         ? QStringLiteral("*") : QStringLiteral("*const");
 }
 
-static inline QString constQualifier() { return QStringLiteral("const"); }
-static inline QString volatileQualifier() { return QStringLiteral("volatile"); }
-
 bool TypeInfo::stripLeadingConst(QString *s)
 {
-    return stripLeadingQualifier(constQualifier(), s);
+    return stripLeadingQualifier("const"_L1, s);
 }
 
 bool TypeInfo::stripLeadingVolatile(QString *s)
 {
-    return stripLeadingQualifier(volatileQualifier(), s);
+    return stripLeadingQualifier("volatile"_L1, s);
 }
 
-bool TypeInfo::stripLeadingQualifier(const QString &qualifier, QString *s)
+bool TypeInfo::stripLeadingQualifier(QLatin1StringView qualifier, QString *s)
 {
     // "const int x"
     const auto qualifierSize = qualifier.size();

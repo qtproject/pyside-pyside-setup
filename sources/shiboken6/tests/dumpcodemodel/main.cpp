@@ -48,14 +48,14 @@ static const char *primitiveTypes[] = {
     "float", "double"
 };
 
-static inline QString nameAttribute() { return QStringLiteral("name"); }
+constexpr auto nameAttribute = "name"_L1;
 
 static void formatXmlClass(QXmlStreamWriter &writer, const ClassModelItem &klass);
 
 static void formatXmlEnum(QXmlStreamWriter &writer, const EnumModelItem &en)
 {
     writer.writeStartElement(u"enum-type"_s);
-    writer.writeAttribute(nameAttribute(), en->name());
+    writer.writeAttribute(nameAttribute, en->name());
     writer.writeEndElement();
 }
 
@@ -97,7 +97,7 @@ static void formatXmlClass(QXmlStreamWriter &writer, const ClassModelItem &klass
     formatXmlLocationComment(writer, klass);
     writer.writeStartElement(isValueType ? u"value-type"_s
                                          : u"object-type"_s);
-    writer.writeAttribute(nameAttribute(), klass->name());
+    writer.writeAttribute(nameAttribute, klass->name());
     formatXmlScopeMembers(writer, klass);
     writer.writeEndElement();
 }
@@ -118,7 +118,7 @@ static void startXmlNamespace(QXmlStreamWriter &writer, const NamespaceModelItem
 {
     formatXmlLocationComment(writer, nsp);
     writer.writeStartElement(u"namespace-type"_s);
-    writer.writeAttribute(nameAttribute(), nsp->name());
+    writer.writeAttribute(nameAttribute, nsp->name());
 }
 
 static void formatXmlNamespaceMembers(QXmlStreamWriter &writer, const NamespaceModelItem &nsp)
@@ -170,7 +170,7 @@ static void formatXmlOutput(const FileModelItem &dom)
                         QDateTime::currentDateTime().toString(Qt::ISODate));
     for (auto p : primitiveTypes) {
         writer.writeStartElement(u"primitive-type"_s);
-        writer.writeAttribute(nameAttribute(), QLatin1StringView(p));
+        writer.writeAttribute(nameAttribute, QLatin1StringView(p));
         writer.writeEndElement();
     }
     formatXmlNamespaceMembers(writer, dom);
