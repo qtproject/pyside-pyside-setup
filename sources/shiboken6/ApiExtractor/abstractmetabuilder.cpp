@@ -245,7 +245,7 @@ void AbstractMetaBuilderPrivate::registerHashFunction(const FunctionModelItem &f
 
 void AbstractMetaBuilderPrivate::registerToStringCapabilityIn(const NamespaceModelItem &nsItem)
 {
-    const FunctionList &streamOps = nsItem->findFunctions(u"operator<<"_s);
+    const FunctionList &streamOps = nsItem->findFunctions("operator<<");
     for (const FunctionModelItem &item : streamOps)
         registerToStringCapability(item, nullptr);
     for (const NamespaceModelItem &ni : nsItem->namespaces())
@@ -649,7 +649,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     }
 
     {
-        const FunctionList &hashFunctions = dom->findFunctions(u"qHash"_s);
+        const FunctionList &hashFunctions = dom->findFunctions("qHash");
         for (const FunctionModelItem &item : hashFunctions)
             registerHashFunction(item, nullptr);
     }

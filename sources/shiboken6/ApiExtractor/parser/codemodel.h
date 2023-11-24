@@ -74,7 +74,7 @@ public:
     NamespaceModelItem globalNamespace() const;
 
     void addFile(const FileModelItem &item);
-    FileModelItem findFile(const QString &name) const;
+    FileModelItem findFile(QAnyStringView name) const;
 
     static CodeModelItem findItem(const QStringList &qualifiedName,
                                   const ScopeModelItem &scope);
@@ -196,7 +196,7 @@ public:
     void addVariable(const VariableModelItem &item);
 
     ClassModelItem findClass(const QString &name) const;
-    EnumModelItem findEnum(const QString &name) const;
+    EnumModelItem findEnum(QAnyStringView name) const;
 
     struct FindEnumByValueReturn
     {
@@ -207,10 +207,10 @@ public:
     };
     FindEnumByValueReturn findEnumByValue(QStringView value) const;
 
-    FunctionList findFunctions(const QString &name) const;
-    TypeDefModelItem findTypeDef(const QString &name) const;
-    TemplateTypeAliasModelItem findTemplateTypeAlias(const QString &name) const;
-    VariableModelItem findVariable(const QString &name) const;
+    FunctionList findFunctions(QAnyStringView name) const;
+    TypeDefModelItem findTypeDef(QAnyStringView name) const;
+    TemplateTypeAliasModelItem findTemplateTypeAlias(QAnyStringView name) const;
+    VariableModelItem findVariable(QAnyStringView name) const;
 
     void addEnumsDeclaration(const QString &enumsDeclaration);
     QStringList enumsDeclarations() const { return m_enumsDeclarations; }
@@ -338,7 +338,7 @@ public:
 
     void addNamespace(NamespaceModelItem item);
 
-    NamespaceModelItem findNamespace(const QString &name) const;
+    NamespaceModelItem findNamespace(QAnyStringView name) const;
 
     void appendNamespace(const _NamespaceModelItem &other);
 

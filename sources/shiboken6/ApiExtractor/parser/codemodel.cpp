@@ -13,27 +13,17 @@
 #include <QtCore/QRegularExpression>
 
 #include <algorithm>
-#include <functional>
-#include <iostream>
 
 using namespace Qt::StringLiterals;
 
-// Predicate to find an item by name in a list of std::shared_ptr<Item>
-template <class T> class ModelItemNamePredicate
-{
-public:
-    explicit ModelItemNamePredicate(const QString &name) : m_name(name) {}
-    bool operator()(const std::shared_ptr<T> &item) const { return item->name() == m_name; }
-
-private:
-    const QString m_name;
-};
-
 template <class T>
-static std::shared_ptr<T> findModelItem(const QList<std::shared_ptr<T> > &list, const QString &name)
+static std::shared_ptr<T> findModelItem(const QList<std::shared_ptr<T> > &list,
+                                        QAnyStringView name)
 {
-    const auto it = std::find_if(list.cbegin(), list.cend(), ModelItemNamePredicate<T>(name));
-    return it != list.cend() ? *it : std::shared_ptr<T>();
+    using ItemPtr = std::shared_ptr<T>;
+    auto pred = [name](const ItemPtr &item) { return item->name() == name; };
+    const auto it = std::find_if(list.cbegin(), list.cend(), pred);
+    return it != list.cend() ? *it : ItemPtr{};
 }
 
 // ---------------------------------------------------------------------------
@@ -54,7 +44,7 @@ void CodeModel::addFile(const FileModelItem &item)
     m_files.append(item);
 }
 
-FileModelItem CodeModel::findFile(const QString &name) const
+FileModelItem CodeModel::findFile(QAnyStringView name) const
 {
     return findModelItem(m_files, name);
 }
@@ -628,52 +618,46 @@ void  _ScopeModelItem::formatDebug(QDebug &d) const
 }
 #endif // !QT_NO_DEBUG_STREAM
 
-namespace {
 // Predicate to match a non-template class name against the class list.
 // "Vector" should match "Vector" as well as "Vector<T>" (as seen for methods
 // from within the class "Vector").
-class ClassNamePredicate
+static bool matchClassNameNonTemplatePart(const ClassModelItem &item, const QString &name)
 {
-public:
-    explicit ClassNamePredicate(const QString &name) : m_name(name) {}
-    bool operator()(const ClassModelItem &item) const
-    {
-        const QString &itemName = item->name();
-        if (!itemName.startsWith(m_name))
-            return false;
-        return itemName.size() == m_name.size() || itemName.at(m_name.size()) == u'<';
-    }
-
-private:
-    const QString m_name;
-};
-} // namespace
+    const QString &itemName = item->name();
+    if (!itemName.startsWith(name))
+        return false;
+    return itemName.size() == name.size() || itemName.at(name.size()) == u'<';
+}
 
 ClassModelItem _ScopeModelItem::findClass(const QString &name) const
 {
     // A fully qualified template is matched by name only
     const ClassList::const_iterator it = name.contains(u'<')
-        ? std::find_if(m_classes.begin(), m_classes.end(), ModelItemNamePredicate<_ClassModelItem>(name))
-        : std::find_if(m_classes.begin(), m_classes.end(), ClassNamePredicate(name));
+        ? std::find_if(m_classes.begin(), m_classes.end(),
+                       [&name](const ClassModelItem &item) {
+                               return item->name() == name; })
+        : std::find_if(m_classes.begin(), m_classes.end(),
+                       [&name](const ClassModelItem &item) {
+                               return matchClassNameNonTemplatePart(item, name); });
     return it != m_classes.end() ? *it : ClassModelItem();
 }
 
-VariableModelItem _ScopeModelItem::findVariable(const QString &name) const
+VariableModelItem _ScopeModelItem::findVariable(QAnyStringView name) const
 {
     return findModelItem(m_variables, name);
 }
 
-TypeDefModelItem _ScopeModelItem::findTypeDef(const QString &name) const
+TypeDefModelItem _ScopeModelItem::findTypeDef(QAnyStringView name) const
 {
     return findModelItem(m_typeDefs, name);
 }
 
-TemplateTypeAliasModelItem _ScopeModelItem::findTemplateTypeAlias(const QString &name) const
+TemplateTypeAliasModelItem _ScopeModelItem::findTemplateTypeAlias(QAnyStringView name) const
 {
     return findModelItem(m_templateTypeAliases, name);
 }
 
-EnumModelItem _ScopeModelItem::findEnum(const QString &name) const
+EnumModelItem _ScopeModelItem::findEnum(QAnyStringView name) const
 {
     return findModelItem(m_enums, name);
 }
@@ -762,7 +746,7 @@ _ScopeModelItem::FindEnumByValueReturn
     return findEnumByValueRecursion(this, value, enumValue);
 }
 
-FunctionList _ScopeModelItem::findFunctions(const QString &name) const
+FunctionList _ScopeModelItem::findFunctions(QAnyStringView name) const
 {
     FunctionList result;
     for (const FunctionModelItem &func : m_functions) {
@@ -791,7 +775,7 @@ void _NamespaceModelItem::addNamespace(NamespaceModelItem item)
     m_namespaces.append(item);
 }
 
-NamespaceModelItem _NamespaceModelItem::findNamespace(const QString &name) const
+NamespaceModelItem _NamespaceModelItem::findNamespace(QAnyStringView name) const
 {
     return findModelItem(m_namespaces, name);
 }
