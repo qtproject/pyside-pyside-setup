@@ -13,10 +13,10 @@ class TextStream;
 
 struct castToPyCFunction
 {
-    explicit castToPyCFunction(QStringView function) noexcept :
+    explicit castToPyCFunction(QAnyStringView function) noexcept :
         m_function(function) {}
 
-    QStringView m_function;
+    QAnyStringView m_function;
 };
 
 struct PyMethodDefEntry

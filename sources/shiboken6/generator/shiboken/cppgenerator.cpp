@@ -67,9 +67,9 @@ static QString mangleName(QString name)
 
 struct sbkUnusedVariableCast
 {
-    explicit sbkUnusedVariableCast(QStringView name) : m_name(name) {}
+    explicit sbkUnusedVariableCast(QAnyStringView name) : m_name(name) {}
 
-    const QStringView m_name;
+    const QAnyStringView m_name;
 };
 
 TextStream &operator<<(TextStream &str, const sbkUnusedVariableCast &c)
@@ -1943,8 +1943,8 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     s << cpythonFunctionName(rfunc)
         << "(PyObject *self, PyObject *args, PyObject *kwds)\n{\n" << indent;
     if (overloadData.maxArgs() == 0 || metaClass->isAbstract())
-        s << sbkUnusedVariableCast(u"args"_s);
-    s << sbkUnusedVariableCast(u"kwds"_s);
+        s << sbkUnusedVariableCast("args");
+    s << sbkUnusedVariableCast("kwds");
 
     const bool needsMetaObject = usePySideExtensions() && isQObject(metaClass);
     if (needsMetaObject)
@@ -1961,11 +1961,11 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     if (metaClass->isAbstract()) {
         // C++ Wrapper disabled: Abstract C++ class cannot be instantiated.
         if (metaClass->typeEntry()->typeFlags().testFlag(ComplexTypeEntry::DisableWrapper)) {
-            s << sbkUnusedVariableCast(u"sbkSelf"_s)
-                << sbkUnusedVariableCast(u"type"_s)
-                << sbkUnusedVariableCast(u"myType"_s);
+            s << sbkUnusedVariableCast("sbkSelf")
+                << sbkUnusedVariableCast("type")
+                << sbkUnusedVariableCast("myType");
             if (needsMetaObject)
-                s << sbkUnusedVariableCast(u"metaObject"_s);
+                s << sbkUnusedVariableCast("metaObject");
             s << "Shiboken::Errors::setInstantiateAbstractClassDisabledWrapper(\""
                 << metaClass->qualifiedCppName() << "\");\n" << errorReturn << outdent
                 << "}\n\n";
@@ -2103,9 +2103,9 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
     }
     s << ")\n{\n" << indent;
     if (rfunc->ownerClass() == nullptr || overloadData.hasStaticFunction())
-        s << sbkUnusedVariableCast(u"self");
+        s << sbkUnusedVariableCast("self");
     if (hasKwdArgs)
-        s << sbkUnusedVariableCast(u"kwds");
+        s << sbkUnusedVariableCast("kwds");
 
     writeMethodWrapperPreamble(s, overloadData, classContext);
 
@@ -2176,7 +2176,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
                                              ErrorReturn errorReturn)
 {
     const auto rfunc = overloadData.referenceFunction();
-    s << "PyTuple_GET_SIZE(args);\n" << sbkUnusedVariableCast(u"numArgs"_s);
+    s << "PyTuple_GET_SIZE(args);\n" << sbkUnusedVariableCast("numArgs");
 
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
@@ -3202,7 +3202,7 @@ void CppGenerator::writeIsPythonConvertibleToCppFunction(TextStream &s,
             << "return Shiboken::Conversions::nonePythonToCppNullPtr;\n" << outdent;
     } else {
         if (!condition.contains(u"pyIn"))
-            s << sbkUnusedVariableCast(u"pyIn");
+            s << sbkUnusedVariableCast("pyIn");
     }
     s << "if (" << condition << ")\n" << indent
         << "return " << pythonToCppFuncName << ";\n" << outdent
@@ -4205,11 +4205,11 @@ bool CppGenerator::shouldGenerateGetSetList(const AbstractMetaClassCPtr &metaCla
 
 struct pyTypeSlotEntry
 {
-    explicit pyTypeSlotEntry(QStringView name, QStringView function) :
+    explicit pyTypeSlotEntry(QAnyStringView name, QAnyStringView function) :
         m_name(name), m_function(function) {}
 
-    QStringView m_name;
-    QStringView m_function;
+    QAnyStringView m_name;
+    QAnyStringView m_function;
 };
 
 TextStream &operator<<(TextStream &str, const pyTypeSlotEntry &e)
@@ -4348,22 +4348,22 @@ void CppGenerator::writeClassDefinition(TextStream &s,
         << "{\n" << indent << "return " << typePtr << ";\n" << outdent
         << "}\n\nstatic PyType_Slot " << className << "_slots[] = {\n" << indent
         << "{Py_tp_base,        nullptr}, // inserted by introduceWrapperType\n"
-        << pyTypeSlotEntry(u"Py_tp_dealloc", tp_dealloc)
-      << pyTypeSlotEntry(u"Py_tp_repr", m_tpFuncs.value(REPR_FUNCTION))
-        << pyTypeSlotEntry(u"Py_tp_hash", tp_hash)
-        << pyTypeSlotEntry(u"Py_tp_call", tp_call)
-        << pyTypeSlotEntry(u"Py_tp_str", m_tpFuncs.value(u"__str__"_s))
-        << pyTypeSlotEntry(u"Py_tp_getattro", tp_getattro)
-        << pyTypeSlotEntry(u"Py_tp_setattro", tp_setattro)
-        << pyTypeSlotEntry(u"Py_tp_traverse", className + u"_traverse"_s)
-        << pyTypeSlotEntry(u"Py_tp_clear", className + u"_clear"_s)
-        << pyTypeSlotEntry(u"Py_tp_richcompare", tp_richcompare)
-        << pyTypeSlotEntry(u"Py_tp_iter", m_tpFuncs.value(u"__iter__"_s))
-        << pyTypeSlotEntry(u"Py_tp_iternext", m_tpFuncs.value(u"__next__"_s))
-        << pyTypeSlotEntry(u"Py_tp_methods", className + u"_methods"_s)
-        << pyTypeSlotEntry(u"Py_tp_getset", tp_getset)
-        << pyTypeSlotEntry(u"Py_tp_init", tp_init)
-        << pyTypeSlotEntry(u"Py_tp_new", tp_new);
+        << pyTypeSlotEntry("Py_tp_dealloc", tp_dealloc)
+      << pyTypeSlotEntry("Py_tp_repr", m_tpFuncs.value(REPR_FUNCTION))
+        << pyTypeSlotEntry("Py_tp_hash", tp_hash)
+        << pyTypeSlotEntry("Py_tp_call", tp_call)
+        << pyTypeSlotEntry("Py_tp_str", m_tpFuncs.value(u"__str__"_s))
+        << pyTypeSlotEntry("Py_tp_getattro", tp_getattro)
+        << pyTypeSlotEntry("Py_tp_setattro", tp_setattro)
+        << pyTypeSlotEntry("Py_tp_traverse", className + u"_traverse"_s)
+        << pyTypeSlotEntry("Py_tp_clear", className + u"_clear"_s)
+        << pyTypeSlotEntry("Py_tp_richcompare", tp_richcompare)
+        << pyTypeSlotEntry("Py_tp_iter", m_tpFuncs.value(u"__iter__"_s))
+        << pyTypeSlotEntry("Py_tp_iternext", m_tpFuncs.value(u"__next__"_s))
+        << pyTypeSlotEntry("Py_tp_methods", className + u"_methods"_s)
+        << pyTypeSlotEntry("Py_tp_getset", tp_getset)
+        << pyTypeSlotEntry("Py_tp_init", tp_init)
+        << pyTypeSlotEntry("Py_tp_new", tp_new);
     if (supportsSequenceProtocol(metaClass)) {
         s << "// type supports sequence protocol\n";
         writeTypeAsSequenceDefinition(s, metaClass);
@@ -5074,7 +5074,7 @@ void CppGenerator::writeEnumsInitialization(TextStream &s, AbstractMetaEnumList 
         etypeUsed |= writeEnumInitialization(s, cppEnum);
     }
     if (preambleWritten && !etypeUsed)
-        s << sbkUnusedVariableCast(u"EType");
+        s << sbkUnusedVariableCast("EType");
 }
 
 static qsizetype maxLineLength(const QStringList &list)
@@ -5618,8 +5618,8 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s,
 
     s << "static void *" << cpythonBaseName(metaClass)
         << "_typeDiscovery(void *cptr, PyTypeObject *instanceType)\n{\n" << indent
-        << sbkUnusedVariableCast(u"cptr"_s)
-        << sbkUnusedVariableCast(u"instanceType");
+        << sbkUnusedVariableCast("cptr")
+        << sbkUnusedVariableCast("instanceType");
 
     if (!polymorphicExpr.isEmpty()) {
         polymorphicExpr = polymorphicExpr.replace(u"%1"_s,

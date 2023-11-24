@@ -77,6 +77,10 @@ public:
     void putRawChar(char c) { m_str << c; }
 
     TextStream &operator<<(QStringView v) { putString(v); return *this; }
+    TextStream &operator<<(const QString &qs) { putString(QStringView{qs}); return *this; }
+    TextStream &operator<<(QLatin1StringView lv) { putString(lv.constData()); return *this; }
+    TextStream &operator<<(QUtf8StringView uv) { putString(uv.data()); return *this; }
+    TextStream &operator<<(const QByteArray &ba) { putString(ba.constData()); return *this; }
     TextStream &operator<<(QChar c) { putChar(c); return *this; }
     TextStream &operator<<(const char *s) { putString(s); return *this; }
     TextStream &operator<<(char c) { putChar(c); return *this; }
@@ -139,6 +143,12 @@ void rstCode(TextStream &s);
 void rstCodeOff(TextStream &s);
 void rstItalic(TextStream &s);
 void rstItalicOff(TextStream &s);
+
+inline TextStream &operator<<(TextStream &str, QAnyStringView asv)
+{
+    asv.visit([&str](auto s) { str << s; });
+    return str;
+}
 
 /// Format an aligned field
 template <class T>
