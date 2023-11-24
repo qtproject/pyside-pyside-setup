@@ -1,5 +1,5 @@
-Async examples
-==============
+Async "Minimal" Example
+=======================
 
 The Python language provides keywords for asynchronous operations, i.e.,
 "async" to define coroutines or "await" to schedule asynchronous calls in the
