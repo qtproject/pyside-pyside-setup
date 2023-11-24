@@ -1032,8 +1032,8 @@ void QtDocGenerator::writeAdditionalDocumentation() const
                 targetDir = outDir.absolutePath();
             } else {
                 if (!outDir.exists(dir) && !outDir.mkdir(dir)) {
-                    const QString m = QStringLiteral("Cannot create directory ")
-                                      + dir + QStringLiteral(" under ")
+                    const QString m = "Cannot create directory "_L1
+                                      + dir + " under "_L1
                                       + QDir::toNativeSeparators(outputDirectory());
                     throw Exception(m);
                 }
@@ -1354,7 +1354,7 @@ QtXmlToSphinxLink QtDocGenerator::resolveLink(const QtXmlToSphinxLink &link) con
 {
     if (link.type != QtXmlToSphinxLink::Reference || !isRelativeHtmlFile(link.linkRef))
         return link;
-    static const QString prefix = QStringLiteral("https://doc.qt.io/qt-")
+    static const QString prefix = "https://doc.qt.io/qt-"_L1
         + QString::number(QT_VERSION_MAJOR) + u'/';
     QtXmlToSphinxLink resolved = link;
     resolved.type = QtXmlToSphinxLink::External;

@@ -1234,7 +1234,7 @@ void AbstractMetaBuilderPrivate::traverseNamespaceMembers(const NamespaceModelIt
 
 static inline QString fieldSignatureWithType(const VariableModelItem &field)
 {
-    return field->name() + QStringLiteral(" -> ") + field->type().toString();
+    return field->name() + " -> "_L1 + field->type().toString();
 }
 
 static inline QString qualifiedFieldSignatureWithType(const QString &className,
@@ -1328,7 +1328,7 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
         return;
 
     TypeDatabase *types = TypeDatabase::instance();
-    static const QRegularExpression operatorRegExp(QStringLiteral("^operator "));
+    static const QRegularExpression operatorRegExp("^operator "_L1);
     Q_ASSERT(operatorRegExp.isValid());
     QString castTo = metaFunction->name().remove(operatorRegExp).trimmed();
 
@@ -1580,9 +1580,9 @@ bool AbstractMetaBuilderPrivate::setupInheritance(const AbstractMetaClassPtr &me
             return true;
         }
 
-        qCWarning(lcShiboken).noquote().nospace()
-            << QStringLiteral("template baseclass '%1' of '%2' is not known")
-                              .arg(baseClasses.constFirst(), metaClass->name());
+        qCWarning(lcShiboken, "template baseclass '%s' of '%s' is not known",
+                  qPrintable(baseClasses.constFirst()),
+                  qPrintable(metaClass->name()));
         return false;
     }
 
@@ -2649,7 +2649,7 @@ std::optional<AbstractMetaType>
     bool isConstCharStarCase =
             oneDimensionalArrayOfUnspecifiedSize
             && typeInfo.qualifiedName().size() == 1
-            && typeInfo.qualifiedName().at(0) == QStringLiteral("char")
+            && typeInfo.qualifiedName().at(0) == "char"_L1
             && typeInfo.indirections() == 0
             && typeInfo.isConstant()
             && typeInfo.referenceType() == NoReference
@@ -2862,7 +2862,7 @@ qint64 AbstractMetaBuilderPrivate::findOutValueFromString(const QString &stringV
 
     // This is a very lame way to handle expression evaluation,
     // but it is not critical and will do for the time being.
-    static const QRegularExpression variableNameRegExp(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_]*$"));
+    static const QRegularExpression variableNameRegExp("^[a-zA-Z_][a-zA-Z0-9_]*$"_L1);
     Q_ASSERT(variableNameRegExp.isValid());
     if (!variableNameRegExp.match(stringValue).hasMatch()) {
         ok = true;

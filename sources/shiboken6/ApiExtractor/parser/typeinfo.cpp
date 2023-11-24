@@ -453,8 +453,7 @@ bool TypeInfo::equals(const TypeInfo &other) const
 
 QString TypeInfo::indirectionKeyword(Indirection i)
 {
-    return i == Indirection::Pointer
-        ? QStringLiteral("*") : QStringLiteral("*const");
+    return i == Indirection::Pointer ? "*"_L1 : "*const"_L1;
 }
 
 bool TypeInfo::stripLeadingConst(QString *s)

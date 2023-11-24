@@ -27,7 +27,7 @@ namespace TestUtil
         auto *td = TypeDatabase::instance(true);
         if (apiVersion.isEmpty())
             TypeDatabase::clearApiVersions();
-        else if (!TypeDatabase::setApiVersion(QStringLiteral("*"), apiVersion))
+        else if (!TypeDatabase::setApiVersion(QLatin1StringView("*"), apiVersion))
             return nullptr;
         td->setDropTypeEntries(dropTypeEntries);
         QBuffer buffer;
@@ -39,7 +39,7 @@ namespace TestUtil
             return nullptr;
         buffer.close();
         // parse C++ code
-        QTemporaryFile tempSource(QDir::tempPath() + QStringLiteral("/st_XXXXXX_main.cpp"));
+        QTemporaryFile tempSource(QDir::tempPath() + QLatin1StringView("/st_XXXXXX_main.cpp"));
         if (!tempSource.open()) {
             qWarning().noquote().nospace() << "Creation of temporary file failed: "
                 << tempSource.errorString();

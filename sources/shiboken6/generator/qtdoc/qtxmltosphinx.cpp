@@ -774,9 +774,9 @@ void QtXmlToSphinx::handleParaTagEnd()
 {
     QString result = popOutputBuffer().simplified();
     if (result.startsWith(u"**Warning:**"))
-        result.replace(0, 12, QStringLiteral(".. warning:: "));
+        result.replace(0, 12, ".. warning:: "_L1);
     else if (result.startsWith(u"**Note:**"))
-        result.replace(0, 9, QStringLiteral(".. note:: "));
+        result.replace(0, 9, ".. note:: "_L1);
     m_output << result << "\n\n";
 }
 

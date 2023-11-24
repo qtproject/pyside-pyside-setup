@@ -471,13 +471,13 @@ QString ShibokenGenerator::cpythonGetattroFunctionName(const AbstractMetaClassCP
 QString ShibokenGenerator::cpythonGetterFunctionName(const QString &name,
                                                      const AbstractMetaClassCPtr &enclosingClass)
 {
-    return cpythonBaseName(enclosingClass) + QStringLiteral("_get_") + name;
+    return cpythonBaseName(enclosingClass) + "_get_"_L1 + name;
 }
 
 QString ShibokenGenerator::cpythonSetterFunctionName(const QString &name,
                                                      const AbstractMetaClassCPtr &enclosingClass)
 {
-    return cpythonBaseName(enclosingClass) + QStringLiteral("_set_") + name;
+    return cpythonBaseName(enclosingClass) + "_set_"_L1 + name;
 }
 
 QString ShibokenGenerator::cpythonGetterFunctionName(const AbstractMetaField &metaField)
@@ -688,7 +688,7 @@ QString ShibokenGenerator::converterObject(const AbstractMetaType &type)
         return u"Shiboken::Conversions::PrimitiveTypeConverter<void *>()"_s;
     const AbstractMetaTypeList nestedArrayTypes = type.nestedArrayTypes();
     if (!nestedArrayTypes.isEmpty() && nestedArrayTypes.constLast().isCppPrimitive()) {
-        return QStringLiteral("Shiboken::Conversions::ArrayTypeConverter<")
+        return "Shiboken::Conversions::ArrayTypeConverter<"_L1
             + nestedArrayTypes.constLast().minimalSignature()
             + u">("_s + QString::number(nestedArrayTypes.size())
             + u')';
@@ -1043,8 +1043,8 @@ QString ShibokenGenerator::cpythonToCppConversionFunction(const AbstractMetaType
             + (type.isPointer() ? u"Pointer"_s : u"Copy"_s)
             + u'(' + cpythonTypeNameExt(type) + u", "_s;
     }
-    return QStringLiteral("Shiboken::Conversions::pythonToCppCopy(%1, ")
-              .arg(converterObject(type));
+    return "Shiboken::Conversions::pythonToCppCopy("_L1
+           + converterObject(type) + ", "_L1;
 }
 
 QString ShibokenGenerator::cpythonToPythonConversionFunction(const AbstractMetaType &type)
@@ -1453,13 +1453,13 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
     // Replace %PYARG_# variables.
     replacePyArg0(language, &code);
 
-    static const QRegularExpression pyArgsRegex(QStringLiteral("%PYARG_(\\d+)"));
+    static const QRegularExpression pyArgsRegex("%PYARG_(\\d+)"_L1);
     Q_ASSERT(pyArgsRegex.isValid());
     if (language == TypeSystem::TargetLangCode) {
         if (usePyArgs) {
             code.replace(pyArgsRegex, PYTHON_ARGS + u"[\\1-1]"_s);
         } else {
-            static const QRegularExpression pyArgsRegexCheck(QStringLiteral("%PYARG_([2-9]+)"));
+            static const QRegularExpression pyArgsRegexCheck("%PYARG_([2-9]+)"_L1);
             Q_ASSERT(pyArgsRegexCheck.isValid());
             const QRegularExpressionMatch match = pyArgsRegexCheck.match(code);
             if (match.hasMatch()) {
@@ -1472,7 +1472,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
     } else {
         // Replaces the simplest case of attribution to a
         // Python argument on the binding virtual method.
-        static const QRegularExpression pyArgsAttributionRegex(QStringLiteral("%PYARG_(\\d+)\\s*=[^=]\\s*([^;]+)"));
+        static const QRegularExpression pyArgsAttributionRegex("%PYARG_(\\d+)\\s*=[^=]\\s*([^;]+)"_L1);
         Q_ASSERT(pyArgsAttributionRegex.isValid());
         code.replace(pyArgsAttributionRegex, u"PyTuple_SET_ITEM("_s
                      + PYTHON_ARGS + u".object(), \\1-1, \\2)"_s);
@@ -1489,7 +1489,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
         code.replace(argTypeVar, argTypeVal);
     }
 
-    static const QRegularExpression cppArgTypeRegexCheck(QStringLiteral("%ARG(\\d+)_TYPE"));
+    static const QRegularExpression cppArgTypeRegexCheck("%ARG(\\d+)_TYPE"_L1);
     Q_ASSERT(cppArgTypeRegexCheck.isValid());
     QRegularExpressionMatchIterator rit = cppArgTypeRegexCheck.globalMatch(code);
     while (rit.hasNext()) {
@@ -1631,8 +1631,8 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
 
         if (isProtected) {
             code.replace(u"%TYPE::%FUNCTION_NAME"_s,
-                         QStringLiteral("%1::%2_protected")
-                         .arg(wrapperName(func->ownerClass()), func->originalName()));
+                         wrapperName(func->ownerClass()) + "::"_L1
+                                     + func->originalName() + "_protected"_L1);
             code.replace(u"%FUNCTION_NAME"_s,
                          func->originalName() + u"_protected"_s);
         }
@@ -1654,7 +1654,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
 // and false if it is a variable.
 static bool isVariable(const QString &code)
 {
-    static const QRegularExpression expr(QStringLiteral("^\\s*\\*?\\s*[A-Za-z_][A-Za-z_0-9.]*\\s*(?:\\[[^\\[]+\\])*$"));
+    static const QRegularExpression expr("^\\s*\\*?\\s*[A-Za-z_][A-Za-z_0-9.]*\\s*(?:\\[[^\\[]+\\])*$"_L1);
     Q_ASSERT(expr.isValid());
     return expr.match(code.trimmed()).hasMatch();
 }
@@ -1923,17 +1923,17 @@ AbstractMetaClassCPtr
 
 QString ShibokenGenerator::getModuleHeaderFileBaseName(const QString &moduleName)
 {
-    return moduleCppPrefix(moduleName).toLower() + QStringLiteral("_python");
+    return moduleCppPrefix(moduleName).toLower() + "_python"_L1;
 }
 
 QString ShibokenGenerator::getModuleHeaderFileName(const QString &moduleName)
 {
-    return getModuleHeaderFileBaseName(moduleName) + QStringLiteral(".h");
+    return getModuleHeaderFileBaseName(moduleName) + ".h"_L1;
 }
 
 QString ShibokenGenerator::getPrivateModuleHeaderFileName(const QString &moduleName)
 {
-    return getModuleHeaderFileBaseName(moduleName) + QStringLiteral("_p.h");
+    return getModuleHeaderFileBaseName(moduleName) + "_p.h"_L1;
 }
 
 IncludeGroupList ShibokenGenerator::classIncludes(const AbstractMetaClassCPtr &metaClass) const
@@ -2462,7 +2462,7 @@ static void appendIndexSuffix(QString *s)
 {
     if (!s->endsWith(u'_'))
         s->append(u'_');
-    s->append(QStringLiteral("IDX"));
+    s->append("IDX"_L1);
 }
 
 QString

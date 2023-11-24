@@ -929,7 +929,7 @@ QString CppGenerator::virtualMethodReturn(TextStream &s, const ApiExtractorResul
     for (const FunctionModification &mod : functionModifications) {
         for (const ArgumentModification &argMod : mod.argument_mods()) {
             if (argMod.index() == 0 && !argMod.replacedDefaultExpression().isEmpty()) {
-                static const QRegularExpression regex(QStringLiteral("%(\\d+)"));
+                static const QRegularExpression regex("%(\\d+)"_L1);
                 Q_ASSERT(regex.isValid());
                 QString expr = argMod.replacedDefaultExpression();
                 for (int offset = 0; ; ) {
@@ -1581,7 +1581,7 @@ return result;)";
     s << "// Python to C++ copy conversion.\n";
     sourceTypeName = metaClass->name();
 
-    targetTypeName = sourceTypeName + QStringLiteral("_COPY");
+    targetTypeName = sourceTypeName + "_COPY"_L1;
     c.clear();
 
     QString pyInVariable = u"pyIn"_s;
@@ -2544,12 +2544,12 @@ static inline QString arrayHandleType(const AbstractMetaTypeList &nestedArrayTyp
 {
     switch (nestedArrayTypes.size()) {
     case 1:
-        return QStringLiteral("Shiboken::Conversions::ArrayHandle<")
+        return "Shiboken::Conversions::ArrayHandle<"_L1
             + nestedArrayTypes.constLast().minimalSignature() + u'>';
     case 2:
-        return QStringLiteral("Shiboken::Conversions::Array2Handle<")
+        return "Shiboken::Conversions::Array2Handle<"_L1
             + nestedArrayTypes.constLast().minimalSignature()
-            + QStringLiteral(", ")
+            + ", "_L1
             + QString::number(nestedArrayTypes.constFirst().arrayElementCount())
             + u'>';
     }
@@ -4720,7 +4720,7 @@ void CppGenerator::writeGetterFunction(TextStream &s,
 {
     writeGetterFunctionStart(s, cpythonGetterFunctionName(property, context.metaClass()));
     writeCppSelfDefinition(s, context);
-    const QString value = QStringLiteral("value");
+    const QString value = "value"_L1;
     s << "auto " << value << " = " << CPP_SELF_VAR << "->" << property.read() << "();\n"
         << "auto *pyResult = ";
     writeToPythonConversion(s, property.type(), context.metaClass(), value);

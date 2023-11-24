@@ -215,12 +215,12 @@ struct List {
     QCOMPARE(templates.size(), 1);
     AbstractMetaClassCPtr list = templates.constFirst();
     // Verify that the parameter of "void append(List l)" gets fixed to "List<T>"
-    const auto append = list->findFunction(QStringLiteral("append"));
+    const auto append = list->findFunction("append");
     QVERIFY(append);
     QCOMPARE(append->arguments().size(), 1);
     QCOMPARE(append->arguments().at(0).type().cppSignature(), u"List<T>");
     // Verify that the parameter of "void erase(Iterator)" is not modified
-    const auto erase = list->findFunction(QStringLiteral("erase"));
+    const auto erase = list->findFunction("erase");
     QVERIFY(erase);
     QCOMPARE(erase->arguments().size(), 1);
     QCOMPARE(erase->arguments().at(0).type().cppSignature(), u"List::Iterator");

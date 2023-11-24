@@ -147,7 +147,7 @@ static bool setRejectionRegularExpression(const QString &patternIn,
     if (patternIn.startsWith(u'^') && patternIn.endsWith(u'$'))
         pattern = patternIn;
     else if (patternIn == u"*")
-        pattern = QStringLiteral("^.*$");
+        pattern = "^.*$"_L1;
     else
         pattern = u'^' + QRegularExpression::escape(patternIn) + u'$';
     re->setPattern(pattern);
@@ -164,9 +164,9 @@ std::optional<QString>
 {
     if (snippetLabel.isEmpty())
         return code;
-    const QString pattern = QStringLiteral(R"(^\s*//\s*@snippet\s+)")
+    const QString pattern = R"(^\s*//\s*@snippet\s+)"_L1
         + QRegularExpression::escape(snippetLabel)
-        + QStringLiteral(R"(\s*$)");
+        + R"(\s*$)"_L1;
     const QRegularExpression snippetRe(pattern);
     Q_ASSERT(snippetRe.isValid());
 
@@ -1165,10 +1165,10 @@ bool TypeSystemParser::importFileElement(const QXmlStreamAttributes &atts)
         }
     }
     if (!foundFromOk || !foundToOk) {
-        QString fromError = QStringLiteral("Could not find quote-after-line='%1' in file '%2'.")
-                                           .arg(quoteFrom.toString(), fileName);
-        QString toError = QStringLiteral("Could not find quote-before-line='%1' in file '%2'.")
-                                         .arg(quoteTo.toString(), fileName);
+        QString fromError = QString::fromLatin1("Could not find quote-after-line='%1' in file '%2'.")
+                                                .arg(quoteFrom.toString(), fileName);
+        QString toError = QString::fromLatin1("Could not find quote-before-line='%1' in file '%2'.")
+                                              .arg(quoteTo.toString(), fileName);
 
         if (!foundToOk)
             m_error = toError;
@@ -1228,7 +1228,7 @@ static bool shouldDropTypeEntry(const TypeDatabase *db,
 static QString checkSignatureError(const QString& signature, const QString& tag)
 {
     QString funcName = signature.left(signature.indexOf(u'(')).trimmed();
-    static const QRegularExpression whiteSpace(QStringLiteral("\\s"));
+    static const QRegularExpression whiteSpace("\\s"_L1);
     Q_ASSERT(whiteSpace.isValid());
     if (!funcName.startsWith(u"operator ") && funcName.contains(whiteSpace)) {
         return QString::fromLatin1("Error in <%1> tag signature attribute '%2'.\n"
@@ -1343,9 +1343,9 @@ FlagsTypeEntryPtr
     const QString targetLangFlagName = lst.join(u'.');
     const QString &targetLangQualifier = enumEntry->targetLangQualifier();
     if (targetLangFlagName != targetLangQualifier) {
-        qCWarning(lcShiboken).noquote().nospace()
-            << QStringLiteral("enum %1 and flags %2 (%3) differ in qualifiers")
-                              .arg(targetLangQualifier, lst.value(0), targetLangFlagName);
+        qCWarning(lcShiboken, "enum %s and flags %s (%s) differ in qualifiers",
+                  qPrintable(targetLangQualifier), qPrintable(lst.value(0)),
+                  qPrintable(targetLangFlagName));
     }
 
     ftype->setFlagsName(name);
@@ -1744,8 +1744,7 @@ FunctionTypeEntryPtr
     }
 
     if (existingType->type() != TypeEntry::FunctionType) {
-        m_error = QStringLiteral("%1 expected to be a function, but isn't! Maybe it was already declared as a class or something else.")
-                 .arg(name);
+        m_error = name + " expected to be a function, but isn't! Maybe it was already declared as a class or something else."_L1;
         return nullptr;
     }
 
@@ -2345,7 +2344,7 @@ static bool parseIndex(const QString &index, int *result, QString *errorMessage)
     bool ok = false;
     *result = index.toInt(&ok);
     if (!ok)
-        *errorMessage = QStringLiteral("Cannot convert '%1' to integer").arg(index);
+        *errorMessage = QString::fromLatin1("Cannot convert '%1' to integer").arg(index);
     return ok;
 }
 
@@ -2462,7 +2461,7 @@ bool TypeSystemParser::parseDefineOwnership(const ConditionalStreamReader &,
     }
 
     if (!ownershipOpt.has_value()) {
-        m_error = QStringLiteral("unspecified ownership");
+        m_error = "unspecified ownership"_L1;
         return false;
     }
     auto &lastArgMod = m_contextStack.top()->functionMods.last().argument_mods().last();

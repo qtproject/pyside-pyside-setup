@@ -275,7 +275,7 @@ protected:
     static QString cpythonSetterFunctionName(const QPropertySpec &property,
                                              const AbstractMetaClassCPtr &metaClass);
     static QString cpythonWrapperCPtr(const AbstractMetaClassCPtr &metaClass,
-                                      const QString &argName = QStringLiteral("self"));
+                                      const QString &argName = QLatin1StringView("self"));
      static QString cpythonWrapperCPtr(const AbstractMetaType &metaType,
                                       const QString &argName);
     static QString cpythonWrapperCPtr(const TypeEntryCPtr &type, const QString &argName);

@@ -636,13 +636,13 @@ QString msgXpathDocModificationError(const DocModificationList& mods,
 
 QString msgCannotOpenForReading(const QFile &f)
 {
-    return QStringLiteral("Failed to open file '%1' for reading: %2")
+    return QString::fromLatin1("Failed to open file '%1' for reading: %2")
            .arg(QDir::toNativeSeparators(f.fileName()), f.errorString());
 }
 
 QString msgCannotOpenForWriting(const QFile &f)
 {
-    return QStringLiteral("Failed to open file '%1' for writing: %2")
+    return QString::fromLatin1("Failed to open file '%1' for writing: %2")
            .arg(QDir::toNativeSeparators(f.fileName()), f.errorString());
 }
 

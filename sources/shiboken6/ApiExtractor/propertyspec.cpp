@@ -192,11 +192,11 @@ TypeSystemProperty QPropertySpec::typeSystemPropertyFromQ_Property(const QString
     enum class PropertyToken { None, Read, Write, Designable, Reset, Notify };
 
     static const QHash<QString, PropertyToken> tokenLookup = {
-        {QStringLiteral("READ"), PropertyToken::Read},
-        {QStringLiteral("WRITE"), PropertyToken::Write},
-        {QStringLiteral("DESIGNABLE"), PropertyToken::Designable},
-        {QStringLiteral("RESET"), PropertyToken::Reset},
-        {QStringLiteral("NOTIFY"), PropertyToken::Notify}
+        {"READ"_L1, PropertyToken::Read},
+        {"WRITE"_L1, PropertyToken::Write},
+        {"DESIGNABLE"_L1, PropertyToken::Designable},
+        {"RESET"_L1, PropertyToken::Reset},
+        {"NOTIFY"_L1, PropertyToken::Notify}
     };
 
     errorMessage->clear();

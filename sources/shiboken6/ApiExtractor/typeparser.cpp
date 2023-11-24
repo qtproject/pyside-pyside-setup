@@ -147,8 +147,8 @@ Scanner::Token Scanner::nextToken(QString *errorMessage)
 
 QString Scanner::msgParseError(const QString &why) const
 {
-    return QStringLiteral("TypeParser: Unable to parse \"")
-        + QString(m_chars, m_length) + QStringLiteral("\": ") + why;
+    return "TypeParser: Unable to parse \""_L1
+        + QString(m_chars, m_length) + "\": "_L1 + why;
 }
 
 TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
@@ -199,7 +199,7 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
                 stack.top().setReferenceType(RValueReference);
                 break;
             case RValueReference:
-                const QString message = scanner.msgParseError(QStringLiteral("Too many '&' qualifiers"));
+                const QString message = scanner.msgParseError("Too many '&' qualifiers"_L1);
                 if (errorMessage)
                     *errorMessage = message;
                 else
@@ -246,7 +246,7 @@ TypeInfo TypeParser::parse(const QString &str, QString *errorMessage)
 
         case Scanner::OpenParenToken: // function pointers not supported
         case Scanner::CloseParenToken: {
-            const QString message = scanner.msgParseError(QStringLiteral("Function pointers are not supported"));
+            const QString message = scanner.msgParseError("Function pointers are not supported"_L1);
             if (errorMessage)
                 *errorMessage = message;
             else

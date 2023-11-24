@@ -1517,7 +1517,7 @@ bool AbstractMetaFunction::injectedCodeUsesPySelf() const
 bool AbstractMetaFunction::injectedCodeCallsPythonOverride() const
 {
     static const QRegularExpression
-        overrideCallRegexCheck(QStringLiteral(R"(PyObject_Call\s*\(\s*%PYTHON_METHOD_OVERRIDE\s*,)"));
+        overrideCallRegexCheck(R"(PyObject_Call\s*\(\s*%PYTHON_METHOD_OVERRIDE\s*,)"_L1);
     Q_ASSERT(overrideCallRegexCheck.isValid());
     return injectedCodeContains(overrideCallRegexCheck, TypeSystem::CodeSnipPositionAny,
                                 TypeSystem::NativeCode);
@@ -1527,13 +1527,13 @@ bool AbstractMetaFunction::injectedCodeHasReturnValueAttribution(TypeSystem::Lan
 {
     if (language == TypeSystem::TargetLangCode) {
         static const QRegularExpression
-            retValAttributionRegexCheck_target(QStringLiteral(R"(%PYARG_0\s*=[^=]\s*.+)"));
+            retValAttributionRegexCheck_target(R"(%PYARG_0\s*=[^=]\s*.+)"_L1);
         Q_ASSERT(retValAttributionRegexCheck_target.isValid());
         return injectedCodeContains(retValAttributionRegexCheck_target, TypeSystem::CodeSnipPositionAny, language);
     }
 
     static const QRegularExpression
-        retValAttributionRegexCheck_native(QStringLiteral(R"(%0\s*=[^=]\s*.+)"));
+        retValAttributionRegexCheck_native(R"(%0\s*=[^=]\s*.+)"_L1);
     Q_ASSERT(retValAttributionRegexCheck_native.isValid());
     return injectedCodeContains(retValAttributionRegexCheck_native, TypeSystem::CodeSnipPositionAny, language);
 }

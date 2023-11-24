@@ -668,8 +668,8 @@ bool HeaderGenerator::finishGeneration()
     // Because on win32 the compiler will not accept a zero length array.
     if (pCount == 0)
         pCount++;
-    _writeTypeIndexValue(macrosStream, QStringLiteral("SBK_%1_CONVERTERS_IDX_COUNT")
-                                       .arg(moduleName()), pCount);
+    _writeTypeIndexValue(macrosStream,
+                         "SBK_"_L1 + moduleName() + "_CONVERTERS_IDX_COUNT"_L1,  pCount);
     macrosStream << "\n};\n";
 
     formatTypeDefEntries(macrosStream);
@@ -816,8 +816,7 @@ void HeaderGenerator::writePrivateHeader(const QString &moduleHeaderDir,
     TextStream &ps = privateFile.stream;
     ps.setLanguage(TextStream::Language::Cpp);
     QString privateIncludeShield =
-        publicIncludeShield.left(publicIncludeShield.size() - 2)
-        + QStringLiteral("_P_H");
+        publicIncludeShield.left(publicIncludeShield.size() - 2) + "_P_H"_L1;
 
     ps << licenseComment()<< "\n\n";
 

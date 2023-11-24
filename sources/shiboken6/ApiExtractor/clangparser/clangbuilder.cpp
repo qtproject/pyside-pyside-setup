@@ -272,7 +272,7 @@ static QString msgCannotDetermineException(const std::string_view &snippetV)
     const qsizetype length = qsizetype(truncate ? newLine : snippetV.size());
     QString snippet = QString::fromUtf8(snippetV.data(), length);
     if (truncate)
-        snippet += QStringLiteral("...");
+        snippet += "..."_L1;
 
     return u"Cannot determine exception specification: \""_s + snippet + u'"';
 }
@@ -975,7 +975,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         EnumKind kind = CEnum;
         if (name.isEmpty()) {
             kind = AnonymousEnum;
-            name = QStringLiteral("enum_") + QString::number(++d->m_anonymousEnumCount);
+            name = "enum_"_L1 + QString::number(++d->m_anonymousEnumCount);
 #if !CLANG_NO_ENUMDECL_ISSCOPED
         } else if (clang_EnumDecl_isScoped(cursor) != 0) {
 #else
@@ -1132,8 +1132,8 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
             const QString &tplParmName = tItem->name();
             if (Q_UNLIKELY(!insertTemplateParameterIntoClassName(tplParmName, d->m_currentClass)
                            || !insertTemplateParameterIntoClassName(tplParmName, &d->m_scope.back()))) {
-                const QString message = QStringLiteral("Error inserting template parameter \"") + tplParmName
-                        + QStringLiteral("\" into ") + d->m_currentClass->name();
+                const QString message = "Error inserting template parameter \""_L1 + tplParmName
+                        + "\" into "_L1 + d->m_currentClass->name();
                 const Diagnostic d(message, cursor, CXDiagnostic_Error);
                 qWarning() << d;
                 appendDiagnostic(d);

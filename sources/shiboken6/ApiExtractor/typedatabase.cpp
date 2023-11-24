@@ -53,7 +53,7 @@ using TypeDatabaseParserContextPtr = std::shared_ptr<TypeDatabaseParserContext>;
 static QString wildcardToRegExp(QString w)
 {
     w.replace(u'?', u'.');
-    w.replace(u'*', QStringLiteral(".*"));
+    w.replace(u'*', ".*"_L1);
     return w;
 }
 
@@ -337,8 +337,8 @@ static const IntTypeNormalizationEntries &intTypeNormalizationEntries()
             const QString intType = QLatin1StringView(t);
             if (!TypeDatabase::instance()->findType(u'u' + intType)) {
                 IntTypeNormalizationEntry entry;
-                entry.replacement = QStringLiteral("unsigned ") + intType;
-                entry.regex.setPattern(QStringLiteral("\\bu") + intType + QStringLiteral("\\b"));
+                entry.replacement = "unsigned "_L1 + intType;
+                entry.regex.setPattern("\\bu"_L1 + intType + "\\b"_L1);
                 Q_ASSERT(entry.regex.isValid());
                 result.append(entry);
             }
@@ -428,7 +428,7 @@ QStringList TypeDatabase::typesystemKeywords() const
 {
     QStringList result = d->m_typesystemKeywords;
     for (const auto &d : d->m_dropTypeEntries)
-        result.append(QStringLiteral("no_") + d);
+        result.append("no_"_L1 + d);
 
     switch (clang::emulatedCompilerLanguageLevel()) {
     case LanguageLevel::Cpp11:
@@ -914,7 +914,7 @@ bool TypeDatabase::addSuppressedWarning(const QString &warning, bool generate,
         qsizetype lastPos = 0;
         for (qsizetype a = 0, aSize = asteriskPositions.size(); a < aSize; ++a) {
             if (a)
-                pattern.append(QStringLiteral(".*"));
+                pattern.append(".*"_L1);
             const auto nextPos = asteriskPositions.at(a);
             if (nextPos > lastPos)
                 pattern.append(QRegularExpression::escape(warning.mid(lastPos, nextPos - lastPos)));

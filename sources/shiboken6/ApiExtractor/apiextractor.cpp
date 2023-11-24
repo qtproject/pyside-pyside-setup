@@ -340,8 +340,7 @@ bool ApiExtractorPrivate::runHelper(ApiExtractorFlags flags)
     }
 
     const QString pattern = QDir::tempPath() + u'/'
-        + m_cppFileNames.constFirst().baseName()
-        + QStringLiteral("_XXXXXX.hpp");
+        + m_cppFileNames.constFirst().baseName() + "_XXXXXX.hpp"_L1;
     QTemporaryFile ppFile(pattern);
     bool autoRemove = !qEnvironmentVariableIsSet("KEEP_TEMP_FILES");
     // make sure that a tempfile can be written
@@ -534,12 +533,12 @@ ApiExtractorPrivate::addInstantiatedContainersAndSmartPointers(InstantiationColl
         return;
     }
     if (type.hasTemplateChildren()) {
-        QString piece = isContainer ? QStringLiteral("container") : QStringLiteral("smart pointer");
+        const auto piece = isContainer ? "container"_L1 : "smart pointer"_L1;
         QString warning =
             QString::fromLatin1("Skipping instantiation of %1 '%2' because it has template"
                                 " arguments.").arg(piece, type.originalTypeDescription());
         if (!contextName.isEmpty())
-            warning.append(QStringLiteral(" Calling context: ") + contextName);
+            warning.append(" Calling context: "_L1 + contextName);
 
         qCWarning(lcShiboken).noquote().nospace() << warning;
         return;

@@ -63,7 +63,7 @@ void CodeSnipAbstract::purgeEmptyFragments()
 
 QRegularExpression CodeSnipAbstract::placeHolderRegex(int index)
 {
-    return QRegularExpression(u'%' + QString::number(index) + QStringLiteral("\\b"));
+    return QRegularExpression(u'%' + QString::number(index) + "\\b"_L1);
 }
 
 void purgeEmptyCodeSnips(QList<CodeSnip> *list)

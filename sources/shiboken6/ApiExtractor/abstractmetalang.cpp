@@ -1529,9 +1529,9 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
                                     f->setFunctionType(AbstractMetaFunction::EmptyFunction);
                                     f->setVisibility(AbstractMetaAttributes::Protected);
                                     *f += AbstractMetaAttributes::FinalInTargetLang;
-                                    qCWarning(lcShiboken).noquote().nospace()
-                                        << QStringLiteral("private virtual function '%1' in '%2'")
-                                                          .arg(f->signature(), f->implementingClass()->name());
+                                    qCWarning(lcShiboken, "private virtual function '%s' in '%s'",
+                                              qPrintable(f->signature()),
+                                              qPrintable(f->implementingClass()->name()));
                                 }
 #endif
                             }

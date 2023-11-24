@@ -13,6 +13,8 @@
 #include <QtCore/QScopedArrayPointer>
 #include <QtCore/QString>
 
+using namespace Qt::StringLiterals;
+
 namespace clang {
 
 QString SourceFileCache::getFileName(CXFile file)
@@ -39,7 +41,7 @@ std::string_view SourceFileCache::getCodeSnippet(const CXCursor &cursor,
 
     if (range.first.file != range.second.file) {
         if (errorMessage)
-            *errorMessage = QStringLiteral("Range spans several files");
+            *errorMessage = "Range spans several files"_L1;
         return std::string_view(empty, 0);
     }
 
@@ -48,7 +50,7 @@ std::string_view SourceFileCache::getCodeSnippet(const CXCursor &cursor,
         const QString fileName = getFileName(range.first.file);
         if (fileName.isEmpty()) {
             if (errorMessage)
-                 *errorMessage = QStringLiteral("Range has no file");
+                 *errorMessage = "Range has no file"_L1;
             return std::string_view(empty, 0);
         }
         QFile file(fileName);

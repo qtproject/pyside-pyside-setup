@@ -301,7 +301,7 @@ static QString findClangBuiltInIncludesDir()
             }
         }
         if (!candidate.isEmpty())
-            return candidate + QStringLiteral("/include");
+            return candidate + "/include"_L1;
     }
     return queryLlvmConfigDir(u"--includedir"_s);
 }

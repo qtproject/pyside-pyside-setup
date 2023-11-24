@@ -218,9 +218,9 @@ void QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
         + metaClass->qualifiedCppName().toLower();
     sourceFileRoot.replace(u"::"_s, u"-"_s);
 
-    QFileInfo sourceFile(sourceFileRoot + QStringLiteral(".webxml"));
+    QFileInfo sourceFile(sourceFileRoot + ".webxml"_L1);
     if (!sourceFile.exists())
-        sourceFile.setFile(sourceFileRoot + QStringLiteral(".xml"));
+        sourceFile.setFile(sourceFileRoot + ".xml"_L1);
    if (!sourceFile.exists()) {
         qCWarning(lcShibokenDoc).noquote().nospace()
             << "Can't find qdoc file for class " << metaClass->name() << ", tried: "

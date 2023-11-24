@@ -165,15 +165,15 @@ QStringList ConditionalStreamReader::platformConditions()
 {
     QStringList result;
 #if defined (Q_OS_UNIX)
-    result << QStringLiteral("unix");
+    result << "unix"_L1;
 #endif
 
 #if defined (Q_OS_LINUX)
-    result << QStringLiteral("linux");
+    result << "linux"_L1;
 #elif defined (Q_OS_MACOS)
-    result << QStringLiteral("darwin");
+    result << "darwin"_L1;
 #elif defined (Q_OS_WINDOWS)
-    result << QStringLiteral("windows");
+    result << "windows"_L1;
 #endif
     return result;
 }

@@ -439,18 +439,18 @@ void TestModifyFunction::testScopedModifications()
     const auto classA = AbstractMetaClass::findClass(builder->classes(), "A");
     QVERIFY(classA);
 
-    auto f = classA->findFunction(QStringLiteral("unspecified"));
+    auto f = classA->findFunction("unspecified");
     QVERIFY(f);
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::Unknown);
     QCOMPARE(f->generateExceptionHandling(), expectedGenerateUnspecified);
     QCOMPARE(f->allowThread(), expectedAllowThread);
 
-    f = classA->findFunction(QStringLiteral("nonThrowing"));
+    f = classA->findFunction("nonThrowing");
     QVERIFY(f);
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::NoExcept);
     QCOMPARE(f->generateExceptionHandling(), expectedGenerateNonThrowing);
 
-    f = classA->findFunction(QStringLiteral("throwing"));
+    f = classA->findFunction("throwing");
     QVERIFY(f);
     QCOMPARE(f->exceptionSpecification(), ExceptionSpecification::Throws);
     QCOMPARE(f->generateExceptionHandling(), expectedGenerateThrowing);
@@ -458,20 +458,20 @@ void TestModifyFunction::testScopedModifications()
 
 void TestModifyFunction::testSnakeCaseRenaming_data()
 {
-    QTest::addColumn<QString>("name");
-    QTest::addColumn<QString>("expected");
+    QTest::addColumn<QLatin1StringView>("name");
+    QTest::addColumn<QLatin1StringView>("expected");
     QTest::newRow("s1")
-        << QStringLiteral("snakeCaseFunc") << QStringLiteral("snake_case_func");
+        << "snakeCaseFunc"_L1 << "snake_case_func"_L1;
     QTest::newRow("s2")
-        << QStringLiteral("SnakeCaseFunc") << QStringLiteral("snake_case_func");
+        << "SnakeCaseFunc"_L1 << "snake_case_func"_L1;
     QTest::newRow("consecutive-uppercase")
-        << QStringLiteral("snakeCAseFunc") << QStringLiteral("snakeCAseFunc");
+        << "snakeCAseFunc"_L1 << "snakeCAseFunc"_L1;
 }
 
 void TestModifyFunction::testSnakeCaseRenaming()
 {
-    QFETCH(QString, name);
-    QFETCH(QString, expected);
+    QFETCH(QLatin1StringView, name);
+    QFETCH(QLatin1StringView, expected);
 
     const QString actual = AbstractMetaBuilder::getSnakeCaseName(name);
     QCOMPARE(actual, expected);

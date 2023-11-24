@@ -129,7 +129,7 @@ void TestDropTypeEntries::testDontDropEntryWithChildTags()
 
 void TestDropTypeEntries::testConditionalParsing_data()
 {
-    const QString xml = QStringLiteral(R"(<?xml version="1.0" encoding="UTF-8"?>
+    const QString xml = R"(<?xml version="1.0" encoding="UTF-8"?>
 <root>
     <tag1>text</tag1>
     <?if keyword1?>
@@ -145,17 +145,17 @@ void TestDropTypeEntries::testConditionalParsing_data()
     <?if !keyword99?> <!-- Exclusion only -->
         <tag6>text</tag6>
     <?endif?>
-</root>)");
+</root>)"_L1;
 
-    const QString root = QStringLiteral("root");
-    const QString tag1 = QStringLiteral("tag1");
-    const QString tag2 = QStringLiteral("tag2");
-    const QString tag3 = QStringLiteral("tag3");
-    const QString tag4 = QStringLiteral("tag4");
-    const QString tag5 = QStringLiteral("tag5");
-    const QString tag6 = QStringLiteral("tag6");
-    const QString keyword1 = QStringLiteral("keyword1");
-    const QString keyword2 = QStringLiteral("keyword2");
+    constexpr auto root = "root"_L1;
+    constexpr auto tag1 = "tag1"_L1;
+    constexpr auto tag2 = "tag2"_L1;
+    constexpr auto tag3 = "tag3"_L1;
+    constexpr auto tag4 = "tag4"_L1;
+    constexpr auto tag5 = "tag5"_L1;
+    constexpr auto tag6 = "tag6"_L1;
+    constexpr auto keyword1 = "keyword1"_L1;
+    constexpr auto keyword2 = "keyword2"_L1;
 
     QTest::addColumn<QString>("xml");
     QTest::addColumn<QStringList>("keywords");
@@ -204,11 +204,11 @@ void TestDropTypeEntries::testConditionalParsing()
 
 void TestDropTypeEntries::testEntityParsing()
 {
-    const QString xml = QStringLiteral(R"(<?xml version="1.0" encoding="UTF-8"?>
+    const QString xml = R"(<?xml version="1.0" encoding="UTF-8"?>
 <root>
     <?entity testentity word1 word2?>
     <text>bla &testentity;</text>
-</root>)");
+</root>)"_L1;
 
     QString actual;
     ConditionalStreamReader reader(xml);
