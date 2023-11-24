@@ -441,11 +441,25 @@ static FunctionArgumentsResult extractFunctionArgumentsFromSlot(PyObject *slot)
     return ret;
 }
 
-static int argCount(const FunctionArgumentsResult &args)
+struct ArgCount
+{
+    int min;
+    int max;
+};
+
+// Return a pair of minimum / arg count "foo(p1, p2=0)" -> {1, 2}
+ArgCount argCount(const FunctionArgumentsResult &args)
 {
     Q_ASSERT(args.objCode);
-    return (PepCode_GET_FLAGS(args.objCode) & CO_VARARGS) != 0
-        ? -1 : PepCode_GET_ARGCOUNT(args.objCode);
+    ArgCount result{-1, -1};
+    if ((PepCode_GET_FLAGS(args.objCode) & CO_VARARGS) == 0) {
+        result.min = result.max = PepCode_GET_ARGCOUNT(args.objCode);
+        if (args.function != nullptr) {
+            if (auto *defaultArgs = PepFunction_GetDefaults(args.function))
+                result.min -= PyTuple_Size(defaultArgs);
+        }
+    }
+    return result;
 }
 
 // Find Signal Instance for argument count.
@@ -510,14 +524,19 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
         PySideSignalInstance *matchedSlot = nullptr;
 
         if (args.function != nullptr) {
-            qsizetype slotArgs = argCount(args);
-            if (args.isMethod)
-                slotArgs -= 1;
+            auto slotArgRange = argCount(args);
+            if (args.isMethod) {
+                slotArgRange.min -= 1;
+                slotArgRange.max -= 1;
+            }
 
             // Get signature args
             // Iterate the possible types of connection for this signal and compare
             // it with slot arguments
-            matchedSlot = findSignalInstance(source, slotArgs);
+            for (int slotArgs = slotArgRange.max;
+                 slotArgs >= slotArgRange.min && matchedSlot == nullptr; --slotArgs) {
+                 matchedSlot = findSignalInstance(source, slotArgs);
+            }
         }
 
         // Adding references to pyArgs
@@ -1205,7 +1224,7 @@ QByteArray getCallbackSignature(const char *signal, QObject *receiver,
     qsizetype useSelf = slotArgs.isMethod ? 1 : 0;
 
     if (slotArgs.function != nullptr) {
-        numArgs = argCount(slotArgs);
+        numArgs = argCount(slotArgs).max;
 #ifdef PYPY_VERSION
     } else if (Py_TYPE(callback) == PepBuiltinMethod_TypePtr) {
         // PYSIDE-535: PyPy has a special builtin method that acts almost like PyCFunction.

@@ -15,8 +15,19 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, SIGNAL, SLOT
 from PySide6.QtWidgets import QPushButton, QWidget
+from PySide6.QtCore import QObject, Slot
 
 from helper.usesqapplication import UsesQApplication
+
+
+class Receiver(QObject):
+    def __init__(self, p=None):
+        super().__init__(p)
+        self.triggered = False
+
+    @Slot(bool,int)
+    def default_parameter_slot(self, bool_value, int_value=0):
+        self.triggered = True
 
 
 class SelfConnect(UsesQApplication):
@@ -39,6 +50,15 @@ class SelfConnect(UsesQApplication):
         self.assertTrue(window.isVisible())
         button.click()
         self.assertTrue(not window.isVisible())
+
+    def testDefaultParameters(self):
+        button = QPushButton()
+        receiver = Receiver(button)
+        button.clicked.connect(receiver.default_parameter_slot)
+        button.clicked.connect(button.close)
+        button.show()
+        button.click()
+        self.assertTrue(receiver.triggered)
 
 
 if __name__ == '__main__':

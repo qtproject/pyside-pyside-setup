@@ -396,6 +396,8 @@ LIBSHIBOKEN_API int PepCode_Check(PyObject *o);
 #  define PepCode_GET_FLAGS(o)         PepCode_Get(o, "co_flags")
 #  define PepCode_GET_ARGCOUNT(o)      PepCode_Get(o, "co_argcount")
 
+LIBSHIBOKEN_API PyObject *PepFunction_GetDefaults(PyObject *function);
+
 /* Masks for co_flags above */
 #  define CO_OPTIMIZED    0x0001
 #  define CO_NEWLOCALS    0x0002
@@ -410,6 +412,7 @@ LIBSHIBOKEN_API int PepCode_Check(PyObject *o);
 #  define PepCode_GET_FLAGS(o)         ((o)->co_flags)
 #  define PepCode_GET_ARGCOUNT(o)      ((o)->co_argcount)
 #  define PepCode_Check PyCode_Check
+#  define PepFunction_GetDefaults PyFunction_GetDefaults
 #endif
 
 /*****************************************************************************

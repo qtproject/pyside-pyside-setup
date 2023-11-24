@@ -510,6 +510,13 @@ int PepCode_Check(PyObject *o)
     return o != nullptr && std::strcmp(Py_TYPE(o)->tp_name, "code") == 0 ? 1 : 0;
 }
 
+PyObject *PepFunction_GetDefaults(PyObject *function)
+{
+    auto *ob_ret = PyObject_GetAttrString(function, "__defaults__");
+    Py_XDECREF(ob_ret); // returns borrowed ref
+    return ob_ret != Py_None ? ob_ret : nullptr;
+}
+
 #endif // Py_LIMITED_API
 
 /*****************************************************************************
