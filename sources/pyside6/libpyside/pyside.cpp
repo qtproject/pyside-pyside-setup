@@ -849,7 +849,7 @@ bool registerInternalQtConf()
     QString executablePath = QString::fromWCharArray(Py_GetProgramFullPath());
 #else
     // PYSIDE-535: FIXME: Add this function when available.
-    QString executablePath = QLatin1String("missing Py_GetProgramFullPath");
+    QString executablePath = QLatin1StringView("missing Py_GetProgramFullPath");
 #endif // PYPY_VERSION
 
     QString appDirPath = QFileInfo(executablePath).absolutePath();

@@ -21,10 +21,10 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
 {
     // FIXME PYSIDE7 remove
     // temp file used later
-    const char conversionData[] = "Hi! I'm a conversion rule.";
+    constexpr auto conversionData = "Hi! I'm a conversion rule."_L1;
     QTemporaryFile file;
     file.open();
-    QCOMPARE(file.write(conversionData), qint64(sizeof(conversionData)-1));
+    QCOMPARE(file.write(conversionData.constData()), conversionData.size());
     file.close();
 
     const char cppCode[] = "struct A {};\n";
@@ -43,7 +43,7 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
     QVERIFY(typeEntry->isValue());
     auto vte = std::static_pointer_cast<const ValueTypeEntry>(typeEntry);
     QVERIFY(vte->hasTargetConversionRule());
-    QCOMPARE(vte->targetConversionRule(), QLatin1String(conversionData));
+    QCOMPARE(vte->targetConversionRule(), conversionData);
 }
 
 void TestConversionRuleTag::testConversionRuleTagReplace()

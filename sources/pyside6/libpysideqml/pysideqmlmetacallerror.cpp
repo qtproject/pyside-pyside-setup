@@ -45,7 +45,7 @@ std::optional<int> qmlMetaCallErrorHandler(QObject *object)
     // PYSIDE-464: The error is only valid before PyErr_Restore,
     // PYSIDE-464: therefore we take local copies.
     Shiboken::AutoDecRef objStr(PyObject_Str(errValue));
-    const QString errString = QLatin1String(Shiboken::String::toCString(objStr));
+    const QString errString = QString::fromUtf8(Shiboken::String::toCString(objStr));
     const bool isSyntaxError = errType == PyExc_SyntaxError;
     const bool isTypeError = errType == PyExc_TypeError;
     PyErr_Restore(errType, errValue, errTraceback);

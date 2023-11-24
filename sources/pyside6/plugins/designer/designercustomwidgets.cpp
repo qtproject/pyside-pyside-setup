@@ -54,7 +54,7 @@ static QString pyStr(PyObject *o)
 
 static QString pyErrorMessage()
 {
-    QString result = QLatin1String("<error information not available>");
+    QString result = "<error information not available>"_L1;
     PyObject *ptype = {};
     PyObject *pvalue = {};
     PyObject *ptraceback = {};
@@ -86,7 +86,7 @@ static bool runPyScript(const char *script, QString *errorMessage)
 {
     PyObject *main = PyImport_AddModule("__main__");
     if (main == nullptr) {
-        *errorMessage = QLatin1String("Internal error: Cannot retrieve __main__");
+        *errorMessage = "Internal error: Cannot retrieve __main__"_L1;
         return false;
     }
     PyObject *globalDictionary = PyModule_GetDict(main);
@@ -117,8 +117,7 @@ static bool runPyScriptFile(const QString &fileName, QString *errorMessage)
     file.close();
     const bool ok = runPyScript(script.constData(), errorMessage);
     if (!ok && !errorMessage->isEmpty()) {
-        errorMessage->prepend(QLatin1String("Error running ") + fileName
-                              + QLatin1String(": "));
+        errorMessage->prepend("Error running "_L1 + fileName + ": "_L1);
     }
     return ok;
 }
