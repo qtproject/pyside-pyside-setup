@@ -1398,7 +1398,7 @@ QString AbstractMetaFunction::modifiedName() const
 
 AbstractMetaFunctionCPtr
 AbstractMetaFunction::find(const AbstractMetaFunctionCList &haystack,
-                           QStringView needle)
+                           QAnyStringView needle)
 {
     for (const auto &f : haystack) {
         if (f->name() == needle)

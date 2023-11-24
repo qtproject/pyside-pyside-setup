@@ -7,6 +7,8 @@
 #include <QtCore/QDebug>
 #include <QtCore/QTextStream>
 
+#include <cstring>
+
 QTextStream &operator<<(QTextStream &str, QAnyStringView asv)
 {
     asv.visit([&str](auto s) { str << s; });
@@ -20,4 +22,43 @@ QDebug operator<<(QDebug debug, QAnyStringView asv)
     debug.nospace();
     asv.visit([&debug](auto s) { debug << s; });
     return debug;
+}
+
+static bool asv_containsImpl(QLatin1StringView v, char c)
+{
+    return v.contains(uint16_t(c));
+}
+
+static bool asv_containsImpl(QUtf8StringView v, char c)
+{
+    return std::strchr(v.data(), c) != nullptr;
+}
+
+static bool asv_containsImpl(QStringView v, char c)
+{
+    return v.contains(uint16_t(c));
+}
+
+bool asv_contains(QAnyStringView asv, char needle)
+{
+    return asv.visit([needle](auto s) { return asv_containsImpl(s, needle); });
+}
+
+static bool asv_containsImpl(QLatin1StringView v, const char *c)
+{
+    return v.contains(QLatin1StringView(c));
+}
+static bool asv_containsImpl(QUtf8StringView v, const char *c)
+{
+    return std::strstr(v.data(), c) != nullptr;
+}
+
+static bool asv_containsImpl(QStringView v, const char *c)
+{
+    return v.contains(QLatin1StringView(c));
+}
+
+bool asv_contains(QAnyStringView asv, const char *needle)
+{
+    return asv.visit([needle](auto s) { return asv_containsImpl(s, needle); });
 }

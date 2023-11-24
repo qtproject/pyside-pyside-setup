@@ -105,12 +105,12 @@ struct A {
     QVERIFY(builder);
     auto *typeDb = TypeDatabase::instance();
     AbstractMetaClassList classes = builder->classes();
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
     // default ctor, default copy ctor, func a() and the added functions
     QCOMPARE(classA->functions().size(), 5);
 
-    auto addedFunc = classA->findFunction(u"b");
+    auto addedFunc = classA->findFunction("b");
     QVERIFY(addedFunc);
     QCOMPARE(addedFunc->access(), Access::Protected);
     QCOMPARE(addedFunc->functionType(), AbstractMetaFunction::NormalFunction);
@@ -131,7 +131,7 @@ struct A {
     QCOMPARE(args.at(1).defaultValueExpression(), u"4.6");
     QCOMPARE(args.at(2).type().typeEntry(), typeDb->findType(u"B"_s));
 
-    auto addedCallOperator = classA->findFunction(u"operator()");
+    auto addedCallOperator = classA->findFunction("operator()");
     QVERIFY(addedCallOperator);
 }
 
@@ -148,7 +148,7 @@ void TestAddFunction::testAddFunctionConstructor()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
     QCOMPARE(classA->functions().size(), 3); // default and added ctors
     const auto addedFunc = classA->functions().constLast();
@@ -171,7 +171,7 @@ void TestAddFunction::testAddFunctionTagDefaultValues()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
     // default ctor, default copy ctor and the added function
     QCOMPARE(classA->functions().size(), 3);
@@ -197,7 +197,7 @@ void TestAddFunction::testAddFunctionCodeSnippets()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
     const auto addedFunc = classA->functions().constLast();
     QVERIFY(addedFunc->hasInjectedCode());
@@ -227,9 +227,9 @@ void TestAddFunction::testAddFunctionWithoutParenteses()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
-    const auto addedFunc = classA->findFunction(u"func");
+    const auto addedFunc = classA->findFunction("func");
     QVERIFY(addedFunc);
     QVERIFY(addedFunc->hasInjectedCode());
     const auto snips = addedFunc->injectedCodeSnips(TypeSystem::CodeSnipPositionAny,
@@ -264,9 +264,9 @@ void TestAddFunction::testAddFunctionWithDefaultArgs()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
-    const auto addedFunc = classA->findFunction(u"func");
+    const auto addedFunc = classA->findFunction("func");
     QVERIFY(addedFunc);
     const AbstractMetaArgument &arg = addedFunc->arguments().at(1);
     QCOMPARE(arg.defaultValueExpression(), u"2");
@@ -287,7 +287,7 @@ void TestAddFunction::testAddFunctionAtModuleLevel()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
 
     auto *typeDb = TypeDatabase::instance();
@@ -328,9 +328,9 @@ void TestAddFunction::testAddFunctionWithVarargs()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
-    const auto addedFunc = classA->findFunction(u"func");
+    const auto addedFunc = classA->findFunction("func");
     QVERIFY(addedFunc);
     const AbstractMetaArgument &arg = addedFunc->arguments().constLast();
     QVERIFY(arg.type().isVarargs());
@@ -352,9 +352,9 @@ void TestAddFunction::testAddStaticFunction()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
-    const auto addedFunc = classA->findFunction(u"func");
+    const auto addedFunc = classA->findFunction("func");
     QVERIFY(addedFunc);
     QVERIFY(addedFunc->isStatic());
 }
@@ -378,10 +378,10 @@ void TestAddFunction::testAddGlobalFunction()
     QVERIFY(builder);
     const auto globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.size(), 2);
-    const auto classB = AbstractMetaClass::findClass(builder->classes(), u"B");
+    const auto classB = AbstractMetaClass::findClass(builder->classes(), "B");
     QVERIFY(classB);
-    QVERIFY(!classB->findFunction(u"globalFunc"));
-    QVERIFY(!classB->findFunction(u"globalFunc2"));
+    QVERIFY(!classB->findFunction("globalFunc"));
+    QVERIFY(!classB->findFunction("globalFunc2"));
     QVERIFY(!globalFuncs[0]->injectedCodeSnips().isEmpty());
     QVERIFY(!globalFuncs[1]->injectedCodeSnips().isEmpty());
 }
@@ -426,8 +426,8 @@ void TestAddFunction::testModifyAddedFunction()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto foo = AbstractMetaClass::findClass(classes, u"Foo");
-    const auto method = foo->findFunction(u"method");
+    const auto foo = AbstractMetaClass::findClass(classes, "Foo");
+    const auto method = foo->findFunction("method");
     QVERIFY(method);
     QCOMPARE(method->arguments().size(), 2);
     const AbstractMetaArgument &arg = method->arguments().at(1);
@@ -453,14 +453,14 @@ void TestAddFunction::testAddFunctionOnTypedef()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto foo = AbstractMetaClass::findClass(classes, u"FooInt");
+    const auto foo = AbstractMetaClass::findClass(classes, "FooInt");
     QVERIFY(foo);
     QVERIFY(foo->hasNonPrivateConstructor());
     const auto &lst = foo->queryFunctions(FunctionQueryOption::AnyConstructor);
     for (const auto &f : lst)
         QVERIFY(f->signature().startsWith(f->name()));
     QCOMPARE(lst.size(), 2);
-    const auto method = foo->findFunction(u"method");
+    const auto method = foo->findFunction("method");
     QVERIFY(method);
 }
 

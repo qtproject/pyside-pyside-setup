@@ -70,7 +70,7 @@ struct A {
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
     QCOMPARE(classA->functions().size(), 14);
     QStringList removedSignatures;

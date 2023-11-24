@@ -33,11 +33,11 @@ void TestRemoveImplConv::testRemoveImplConv()
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
-    const auto classB = AbstractMetaClass::findClass(classes, u"B");
+    const auto classB = AbstractMetaClass::findClass(classes, "B");
     QVERIFY(classB);
-    const auto classC = AbstractMetaClass::findClass(classes, u"C");
+    const auto classC = AbstractMetaClass::findClass(classes, "C");
     QVERIFY(classC);
     const auto implConv = classC->implicitConversions();
     QCOMPARE(implConv.size(), 1);

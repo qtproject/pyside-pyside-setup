@@ -4337,7 +4337,7 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     if (hasHashFunction(metaClass))
         tp_hash = u'&' + cpythonBaseName(metaClass) + u"_HashFunc"_s;
 
-    const auto callOp = metaClass->findFunction(u"operator()");
+    const auto callOp = metaClass->findFunction("operator()");
     if (callOp && !callOp->isModifiedRemoved())
         tp_call = u'&' + cpythonFunctionName(callOp);
 

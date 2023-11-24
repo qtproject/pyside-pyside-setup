@@ -27,7 +27,7 @@ void TestReverseOperators::testReverseSum()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
     QCOMPARE(classA->functions().size(), 4);
 
@@ -69,11 +69,11 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
     QCOMPARE(classA->functions().size(), 4);
 
-    const auto classB = AbstractMetaClass::findClass(classes, u"B");
+    const auto classB = AbstractMetaClass::findClass(classes, "B");
     QVERIFY(classB);
     QCOMPARE(classB->functions().size(), 4);
 
@@ -114,7 +114,7 @@ void  TestReverseOperators::testSpaceshipOperator()
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
-    const auto testClass = AbstractMetaClass::findClass(classes, u"Test");
+    const auto testClass = AbstractMetaClass::findClass(classes, "Test");
     QVERIFY(testClass);
     const auto &functions = testClass->functions();
     // 6 operators should be synthesized

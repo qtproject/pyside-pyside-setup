@@ -58,9 +58,9 @@ namespace Internet {
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
-    const auto classB = AbstractMetaClass::findClass(classes, u"Bookmarks");
+    const auto classB = AbstractMetaClass::findClass(classes, "Bookmarks");
     QVERIFY(classB);
-    const auto func = classB->findFunction(u"list");
+    const auto func = classB->findFunction("list");
     QVERIFY(func);
     AbstractMetaType funcType = func->type();
     QVERIFY(!funcType.isVoid());
@@ -96,11 +96,11 @@ namespace Namespace {
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
-    const auto classB = AbstractMetaClass::findClass(classes, u"B");
+    const auto classB = AbstractMetaClass::findClass(classes, "B");
     QVERIFY(classB);
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
-    const auto func = classB->findFunction(u"foo");
+    const auto func = classB->findFunction("foo");
     QVERIFY(func);
     AbstractMetaType argType = func->arguments().constFirst().type();
     QCOMPARE(argType.instantiations().size(), 1);
@@ -255,7 +255,7 @@ struct FooBars : public ListContainer<FooBar> {};
     QCOMPARE(classes.size(), 2);
     QCOMPARE(templates.size(), 1);
 
-    const auto foobars = AbstractMetaClass::findClass(classes, u"FooBars");
+    const auto foobars = AbstractMetaClass::findClass(classes, "FooBars");
     QCOMPARE(foobars->functions().size(), 4);
 
     AbstractMetaClassCPtr lc = templates.constFirst();
@@ -289,7 +289,7 @@ template<SomeEnum type> struct Future {};
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
-    const auto classB = AbstractMetaClass::findClass(classes, u"B");
+    const auto classB = AbstractMetaClass::findClass(classes, "B");
     QVERIFY(classB);
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
@@ -328,7 +328,7 @@ template<SomeEnum type> struct Future {};
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
-    const auto classB = AbstractMetaClass::findClass(classes, u"Namespace::B");
+    const auto classB = AbstractMetaClass::findClass(classes, "Namespace::B");
     QVERIFY(classB);
     QVERIFY(!classB->baseClass());
     QVERIFY(classB->baseClassName().isEmpty());
@@ -365,9 +365,9 @@ typedef BaseTemplateClass<TypeOne> TypeOneClass;
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
 
-    const auto base = AbstractMetaClass::findClass(classes, u"BaseTemplateClass");
+    const auto base = AbstractMetaClass::findClass(classes, "BaseTemplateClass");
     QVERIFY(base);
-    const auto one = AbstractMetaClass::findClass(classes, u"TypeOneClass");
+    const auto one = AbstractMetaClass::findClass(classes, "TypeOneClass");
     QVERIFY(one);
     QCOMPARE(one->templateBaseClass(), base);
     QCOMPARE(one->functions().size(), base->functions().size());
@@ -414,7 +414,7 @@ typedef Vector<int> IntVector;
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
 
-    const auto vector = AbstractMetaClass::findClass(classes, u"IntVector");
+    const auto vector = AbstractMetaClass::findClass(classes, "IntVector");
     QVERIFY(vector);
     auto baseContainer = vector->typeEntry()->baseContainerType();
     QVERIFY(baseContainer);
@@ -422,11 +422,11 @@ typedef Vector<int> IntVector;
              ContainerTypeEntry::ListContainer);
     QCOMPARE(vector->functions().size(), 4);
 
-    const auto method = vector->findFunction(u"method");
+    const auto method = vector->findFunction("method");
     QVERIFY(method);
     QCOMPARE(method->signature(), u"method(const Vector<int> & vector)");
 
-    const auto otherMethod = vector->findFunction(u"otherMethod");
+    const auto otherMethod = vector->findFunction("otherMethod");
     QVERIFY(otherMethod);
     QCOMPARE(otherMethod->signature(), u"otherMethod()");
     QVERIFY(!otherMethod->type().isVoid());
@@ -540,26 +540,26 @@ void TestTemplates::testTemplateTypeDefs()
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
-    const auto optional = AbstractMetaClass::findClass(classes, u"Optional");
+    const auto optional = AbstractMetaClass::findClass(classes, "Optional");
     QVERIFY(optional);
 
     // Find the typedef'ed class
-    const auto optionalInt = AbstractMetaClass::findClass(classes, u"IntOptional");
+    const auto optionalInt = AbstractMetaClass::findClass(classes, "IntOptional");
     QVERIFY(optionalInt);
     QCOMPARE(optionalInt->templateBaseClass(), optional);
 
     // Find the class typedef'ed in the typesystem XML
-    const auto xmlOptionalInt = AbstractMetaClass::findClass(classes, u"XmlIntOptional");
+    const auto xmlOptionalInt = AbstractMetaClass::findClass(classes, "XmlIntOptional");
     QVERIFY(xmlOptionalInt);
     QCOMPARE(xmlOptionalInt->templateBaseClass(), optional);
 
     // Check whether the value() method now has an 'int' return
-    const auto valueMethod = optionalInt->findFunction(u"value");
+    const auto valueMethod = optionalInt->findFunction("value");
     QVERIFY(valueMethod);
     QCOMPARE(valueMethod->type().cppSignature(), u"int");
 
     // ditto for typesystem XML
-    const auto xmlValueMethod = xmlOptionalInt->findFunction(u"value");
+    const auto xmlValueMethod = xmlOptionalInt->findFunction("value");
     QVERIFY(xmlValueMethod);
     QCOMPARE(xmlValueMethod->type().cppSignature(), u"int");
 
@@ -609,7 +609,7 @@ public:
     QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
-    const auto testClass = AbstractMetaClass::findClass(classes, u"Test");
+    const auto testClass = AbstractMetaClass::findClass(classes, "Test");
     QVERIFY(testClass);
 
     auto fields = testClass->fields();
@@ -618,7 +618,7 @@ public:
     QCOMPARE(fieldType.name(), u"Container1");
     QCOMPARE(fieldType.instantiations().size(), 1);
 
-    const auto derived = AbstractMetaClass::findClass(classes, u"Derived");
+    const auto derived = AbstractMetaClass::findClass(classes, "Derived");
     QVERIFY(derived);
     auto base = derived->templateBaseClass();
     QVERIFY(base);

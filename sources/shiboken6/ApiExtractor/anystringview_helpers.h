@@ -13,4 +13,7 @@ QT_FORWARD_DECLARE_CLASS(QDebug)
 QTextStream &operator<<(QTextStream &str, QAnyStringView asv);
 QDebug operator<<(QDebug debug, QAnyStringView asv);
 
+bool asv_contains(QAnyStringView asv, char needle);
+bool asv_contains(QAnyStringView asv, const char *needle);
+
 #endif // ANYSTRINGVIEW_STREAM_H

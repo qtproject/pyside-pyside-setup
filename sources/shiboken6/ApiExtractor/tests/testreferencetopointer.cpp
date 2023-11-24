@@ -25,9 +25,9 @@ void TestReferenceToPointer::testReferenceToPointerArgument()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classB = AbstractMetaClass::findClass(classes, u"B");
+    const auto classB = AbstractMetaClass::findClass(classes, "B");
     QVERIFY(classB);
-    const auto func = classB->findFunction(u"dummy");
+    const auto func = classB->findFunction("dummy");
     QVERIFY(func);
     QCOMPARE(func->arguments().constFirst().type().minimalSignature(), u"A*&");
 }

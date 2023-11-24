@@ -28,10 +28,10 @@ private:
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    auto klass = AbstractMetaClass::findClass(classes, u"Control");
+    auto klass = AbstractMetaClass::findClass(classes, "Control");
     QVERIFY(klass);
     QVERIFY(!klass->hasPrivateDestructor());
-    klass = AbstractMetaClass::findClass(classes, u"Subject");
+    klass = AbstractMetaClass::findClass(classes, "Subject");
     QVERIFY(klass);
     QVERIFY(klass->hasPrivateDestructor());
 }
@@ -56,10 +56,10 @@ protected:
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    auto klass = AbstractMetaClass::findClass(classes, u"Control");
+    auto klass = AbstractMetaClass::findClass(classes, "Control");
     QVERIFY(klass);
     QVERIFY(!klass->hasProtectedDestructor());
-    klass = AbstractMetaClass::findClass(classes, u"Subject");
+    klass = AbstractMetaClass::findClass(classes, "Subject");
     QVERIFY(klass);
     QVERIFY(klass->hasProtectedDestructor());
 }
@@ -84,10 +84,10 @@ protected:
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    auto klass = AbstractMetaClass::findClass(classes, u"Control");
+    auto klass = AbstractMetaClass::findClass(classes, "Control");
     QVERIFY(klass);
     QVERIFY(!klass->hasVirtualDestructor());
-    klass = AbstractMetaClass::findClass(classes, u"Subject");
+    klass = AbstractMetaClass::findClass(classes, "Subject");
     QVERIFY(klass);
     QVERIFY(klass->hasVirtualDestructor());
 }
@@ -110,17 +110,17 @@ class Subject : public SubjectBase {};
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 4);
 
-    auto klass = AbstractMetaClass::findClass(classes, u"ControlBase");
+    auto klass = AbstractMetaClass::findClass(classes, "ControlBase");
     QVERIFY(klass);
     QVERIFY(!klass->hasVirtualDestructor());
-    klass = AbstractMetaClass::findClass(classes, u"Control");
+    klass = AbstractMetaClass::findClass(classes, "Control");
     QVERIFY(klass);
     QVERIFY(!klass->hasVirtualDestructor());
 
-    klass = AbstractMetaClass::findClass(classes, u"SubjectBase");
+    klass = AbstractMetaClass::findClass(classes, "SubjectBase");
     QVERIFY(klass);
     QVERIFY(klass->hasVirtualDestructor());
-    klass = AbstractMetaClass::findClass(classes, u"Subject");
+    klass = AbstractMetaClass::findClass(classes, "Subject");
     QVERIFY(klass);
     QVERIFY(klass->hasVirtualDestructor());
 }
@@ -145,10 +145,10 @@ protected:
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    auto klass = AbstractMetaClass::findClass(classes, u"Control");
+    auto klass = AbstractMetaClass::findClass(classes, "Control");
     QVERIFY(klass);
     QVERIFY(klass->isPolymorphic());
-    klass = AbstractMetaClass::findClass(classes, u"Subject");
+    klass = AbstractMetaClass::findClass(classes, "Subject");
     QVERIFY(klass);
     QVERIFY(klass->isPolymorphic());
 }

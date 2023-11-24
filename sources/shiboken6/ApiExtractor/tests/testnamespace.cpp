@@ -33,11 +33,11 @@ void NamespaceTest::testNamespaceMembers()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto ns = AbstractMetaClass::findClass(classes, u"Namespace");
+    const auto ns = AbstractMetaClass::findClass(classes, "Namespace");
     QVERIFY(ns);
     auto metaEnum = ns->findEnum(u"Option"_s);
     QVERIFY(metaEnum.has_value());
-    const auto func = ns->findFunction(u"foo");
+    const auto func = ns->findFunction("foo");
     QVERIFY(func);
 }
 
@@ -63,13 +63,13 @@ void NamespaceTest::testNamespaceInnerClassMembers()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto ons = AbstractMetaClass::findClass(classes, u"OuterNamespace");
+    const auto ons = AbstractMetaClass::findClass(classes, "OuterNamespace");
     QVERIFY(ons);
-    const auto ins = AbstractMetaClass::findClass(classes, u"OuterNamespace::InnerNamespace");
+    const auto ins = AbstractMetaClass::findClass(classes, "OuterNamespace::InnerNamespace");
     QVERIFY(ins);
-    const auto sc = AbstractMetaClass::findClass(classes, u"OuterNamespace::InnerNamespace::SomeClass");
+    const auto sc = AbstractMetaClass::findClass(classes, "OuterNamespace::InnerNamespace::SomeClass");
     QVERIFY(sc);
-    const auto meth = sc->findFunction(u"method");
+    const auto meth = sc->findFunction("method");
     QVERIFY(meth);
 }
 

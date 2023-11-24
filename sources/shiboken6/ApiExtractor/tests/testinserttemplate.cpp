@@ -28,7 +28,7 @@ void TestInsertTemplate::testInsertTemplateOnClassInjectCode()
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 1);
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
     QCOMPARE(classA->typeEntry()->codeSnips().size(), 1);
     QString code = classA->typeEntry()->codeSnips().constFirst().code();

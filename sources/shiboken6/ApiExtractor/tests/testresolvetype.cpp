@@ -49,9 +49,9 @@ void TestResolveType::testResolveReturnTypeFromParentScope()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classD = AbstractMetaClass::findClass(classes, u"A::D");
+    const auto classD = AbstractMetaClass::findClass(classes, "A::D");
     QVERIFY(classD);
-    const auto meth = classD->findFunction(u"method");
+    const auto meth = classD->findFunction("method");
     QVERIFY(meth);
     QVERIFY(meth);
 }
@@ -125,7 +125,7 @@ public:
     fixture->classType = AbstractMetaType(fixture->klass->typeEntry());
     fixture->classType.decideUsagePattern();
 
-    for (const auto &f : fixture->klass->findFunctions(u"Test"_s)) {
+    for (const auto &f : fixture->klass->findFunctions("Test")) {
         if (f->functionType() == AbstractMetaFunction::ConstructorFunction
             && f->arguments().size() == 1) {
             const auto type = f->arguments().constFirst().type();
@@ -138,7 +138,7 @@ public:
     if (fixture->intType.isVoid() || fixture->stringType.isVoid())
         return -3;
 
-    auto listFunc = fixture->klass->findFunction(u"listFunc"_s);
+    auto listFunc = fixture->klass->findFunction("listFunc");
     if (!listFunc || listFunc->arguments().size() != 1)
         return -3;
     fixture->listType = listFunc->arguments().constFirst().type();
@@ -265,7 +265,7 @@ public:
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto testClass = AbstractMetaClass::findClass(classes, u"Test");
+    const auto testClass = AbstractMetaClass::findClass(classes, "Test");
     QVERIFY(testClass);
 
     auto *tdb = TypeDatabase::instance();

@@ -33,8 +33,8 @@ void TestImplicitConversions::testWithPrivateCtors()
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
 
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    const auto classC = AbstractMetaClass::findClass(classes, u"C");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
+    const auto classC = AbstractMetaClass::findClass(classes, "C");
     const auto implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.size(), 1);
     QCOMPARE(implicitConvs.constFirst()->arguments().constFirst().type().typeEntry(),
@@ -62,8 +62,8 @@ void TestImplicitConversions::testWithModifiedVisibility()
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    const auto classB = AbstractMetaClass::findClass(classes, u"B");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
+    const auto classB = AbstractMetaClass::findClass(classes, "B");
     const auto implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.size(), 1);
     QCOMPARE(implicitConvs.constFirst()->arguments().constFirst().type().typeEntry(),
@@ -97,12 +97,12 @@ void TestImplicitConversions::testWithAddedCtor()
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 3);
 
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     auto implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.size(), 2);
 
     // Added constructors with custom types should never result in implicit converters.
-    const auto classB = AbstractMetaClass::findClass(classes, u"B");
+    const auto classB = AbstractMetaClass::findClass(classes, "B");
     implicitConvs = classB->implicitConversions();
     QCOMPARE(implicitConvs.size(), 0);
 }
@@ -123,8 +123,8 @@ void TestImplicitConversions::testWithExternalConversionOperator()
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    const auto classB = AbstractMetaClass::findClass(classes, u"B");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
+    const auto classB = AbstractMetaClass::findClass(classes, "B");
     const auto implicitConvs = classA->implicitConversions();
     QCOMPARE(implicitConvs.size(), 1);
     const auto &externalConvOps = classA->externalConversionOperators();

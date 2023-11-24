@@ -32,13 +32,13 @@ void TestTypeRevision::testRevisionAttr()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto rev0 = AbstractMetaClass::findClass(classes, u"Rev_0");
+    const auto rev0 = AbstractMetaClass::findClass(classes, "Rev_0");
     QCOMPARE(rev0->typeEntry()->revision(), 0);
 
-    const auto rev1 = AbstractMetaClass::findClass(classes, u"Rev_1");
+    const auto rev1 = AbstractMetaClass::findClass(classes, "Rev_1");
     QCOMPARE(rev1->typeEntry()->revision(), 1);
 
-    const auto rev2 = AbstractMetaClass::findClass(classes, u"Rev_2");
+    const auto rev2 = AbstractMetaClass::findClass(classes, "Rev_2");
     QCOMPARE(rev2->typeEntry()->revision(), 2);
 
     auto rev3 = rev2->findEnum(u"Rev_3"_s);

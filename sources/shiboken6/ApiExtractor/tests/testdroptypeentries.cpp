@@ -59,13 +59,13 @@ void TestDropTypeEntries::testDropEntries()
     QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
-    QVERIFY(AbstractMetaClass::findClass(classes, u"ValueA"));
-    QVERIFY(!AbstractMetaClass::findClass(classes, u"ValueB"));
-    QVERIFY(AbstractMetaClass::findClass(classes, u"ObjectA"));
-    QVERIFY(!AbstractMetaClass::findClass(classes, u"ObjectB"));
-    QVERIFY(AbstractMetaClass::findClass(classes, u"NamespaceA"));
-    QVERIFY(!AbstractMetaClass::findClass(classes, u"NamespaceA::InnerClassA"));
-    QVERIFY(!AbstractMetaClass::findClass(classes, u"NamespaceB"));
+    QVERIFY(AbstractMetaClass::findClass(classes, "ValueA"));
+    QVERIFY(!AbstractMetaClass::findClass(classes, "ValueB"));
+    QVERIFY(AbstractMetaClass::findClass(classes, "ObjectA"));
+    QVERIFY(!AbstractMetaClass::findClass(classes, "ObjectB"));
+    QVERIFY(AbstractMetaClass::findClass(classes, "NamespaceA"));
+    QVERIFY(!AbstractMetaClass::findClass(classes, "NamespaceA::InnerClassA"));
+    QVERIFY(!AbstractMetaClass::findClass(classes, "NamespaceB"));
 
     AbstractMetaEnumList globalEnums = builder->globalEnums();
     QCOMPARE(globalEnums.size(), 1);
@@ -82,13 +82,13 @@ void TestDropTypeEntries::testDontDropEntries()
     QVERIFY(builder);
 
     AbstractMetaClassList classes = builder->classes();
-    QVERIFY(AbstractMetaClass::findClass(classes, u"ValueA"));
-    QVERIFY(AbstractMetaClass::findClass(classes, u"ValueB"));
-    QVERIFY(AbstractMetaClass::findClass(classes, u"ObjectA"));
-    QVERIFY(AbstractMetaClass::findClass(classes, u"ObjectB"));
-    QVERIFY(AbstractMetaClass::findClass(classes, u"NamespaceA"));
-    QVERIFY(AbstractMetaClass::findClass(classes, u"NamespaceA::InnerClassA"));
-    QVERIFY(AbstractMetaClass::findClass(classes, u"NamespaceB"));
+    QVERIFY(AbstractMetaClass::findClass(classes, "ValueA"));
+    QVERIFY(AbstractMetaClass::findClass(classes, "ValueB"));
+    QVERIFY(AbstractMetaClass::findClass(classes, "ObjectA"));
+    QVERIFY(AbstractMetaClass::findClass(classes, "ObjectB"));
+    QVERIFY(AbstractMetaClass::findClass(classes, "NamespaceA"));
+    QVERIFY(AbstractMetaClass::findClass(classes, "NamespaceA::InnerClassA"));
+    QVERIFY(AbstractMetaClass::findClass(classes, "NamespaceB"));
 
     QCOMPARE(builder->globalEnums().size(), 2);
 
@@ -116,7 +116,7 @@ void TestDropTypeEntries::testDropEntryWithChildTags()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode2, xmlCode2, false,
                                                                 QString(), droppedEntries));
     QVERIFY(builder);
-    QVERIFY(!AbstractMetaClass::findClass(builder->classes(), u"ValueA"));
+    QVERIFY(!AbstractMetaClass::findClass(builder->classes(), "ValueA"));
 }
 
 
@@ -124,7 +124,7 @@ void TestDropTypeEntries::testDontDropEntryWithChildTags()
 {
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode2, xmlCode2, false));
     QVERIFY(builder);
-    QVERIFY(AbstractMetaClass::findClass(builder->classes(), u"ValueA"));
+    QVERIFY(AbstractMetaClass::findClass(builder->classes(), "ValueA"));
 }
 
 void TestDropTypeEntries::testConditionalParsing_data()

@@ -48,8 +48,8 @@ void TestModifyFunction::testRenameArgument()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode.constData(), false));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
-    const auto func = classA->findFunction(u"method");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
+    const auto func = classA->findFunction("method");
     QVERIFY(func);
 
     QCOMPARE(func->argumentName(1), u"otherArg");
@@ -76,8 +76,8 @@ void TestModifyFunction::testOwnershipTransfer()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode, false));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    const auto func = classB->findFunction(u"method");
+    const auto classB = AbstractMetaClass::findClass(classes, "B");
+    const auto func = classB->findFunction("method");
     QVERIFY(func);
 
     QCOMPARE(func->argumentTargetOwnership(func->ownerClass(), 0),
@@ -126,45 +126,45 @@ void TestModifyFunction::invalidateAfterUse()
                                                                 false, u"0.1"_s));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    auto func = classB->findFunction(u"call");
+    const auto classB = AbstractMetaClass::findClass(classes, "B");
+    auto func = classB->findFunction("call");
     QCOMPARE(func->modifications().size(), 1);
     QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
     QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse());
 
-    const auto classC = AbstractMetaClass::findClass(classes, u"C");
+    const auto classC = AbstractMetaClass::findClass(classes, "C");
     QVERIFY(classC);
-    func = classC->findFunction(u"call");
+    func = classC->findFunction("call");
     QCOMPARE(func->modifications().size(), 1);
     QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
     QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse());
 
-    func = classC->findFunction(u"call2");
+    func = classC->findFunction("call2");
     QCOMPARE(func->modifications().size(), 1);
     QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
     QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse());
 
-    AbstractMetaClassCPtr classD =  AbstractMetaClass::findClass(classes, u"D");
+    AbstractMetaClassCPtr classD =  AbstractMetaClass::findClass(classes, "D");
     QVERIFY(classD);
-    func = classD->findFunction(u"call");
+    func = classD->findFunction("call");
     QCOMPARE(func->modifications().size(), 1);
     QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
     QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse());
 
-    func = classD->findFunction(u"call2");
+    func = classD->findFunction("call2");
     QCOMPARE(func->modifications().size(), 1);
     QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
     QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse());
 
-    const auto classE = AbstractMetaClass::findClass(classes, u"E");
+    const auto classE = AbstractMetaClass::findClass(classes, "E");
     QVERIFY(classE);
-    func = classE->findFunction(u"call");
+    func = classE->findFunction("call");
     QVERIFY(func);
     QCOMPARE(func->modifications().size(), 1);
     QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
     QVERIFY(func->modifications().at(0).argument_mods().at(0).resetAfterUse());
 
-    func = classE->findFunction(u"call2");
+    func = classE->findFunction("call2");
     QVERIFY(func);
     QCOMPARE(func->modifications().size(), 1);
     QCOMPARE(func->modifications().at(0).argument_mods().size(), 1);
@@ -199,13 +199,13 @@ void TestModifyFunction::testWithApiVersion()
                                                                 false, u"0.1"_s));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classB = AbstractMetaClass::findClass(classes, u"B");
-    auto func = classB->findFunction(u"method");
+    const auto classB = AbstractMetaClass::findClass(classes, "B");
+    auto func = classB->findFunction("method");
 
     auto returnOwnership = func->argumentTargetOwnership(func->ownerClass(), 0);
     QCOMPARE(returnOwnership, TypeSystem::CppOwnership);
 
-    func = classB->findFunction(u"methodB");
+    func = classB->findFunction("methodB");
     returnOwnership = func->argumentTargetOwnership(func->ownerClass(), 0);
     QVERIFY(returnOwnership != TypeSystem::CppOwnership);
 }
@@ -238,31 +238,31 @@ struct A {
                                                                 false, u"0.1"_s));
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
-    const auto classA = AbstractMetaClass::findClass(classes, u"A");
+    const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
 
     // Nothing specified, true
-    const auto f1 = classA->findFunction(u"f1");
+    const auto f1 = classA->findFunction("f1");
     QVERIFY(f1);
     QVERIFY(!f1->allowThread());
 
     // 'auto' specified, should be false for nontrivial function
-    const auto f2 = classA->findFunction(u"f2");
+    const auto f2 = classA->findFunction("f2");
     QVERIFY(f2);
     QVERIFY(f2->allowThread());
 
     // 'no' specified, should be false
-    const auto f3 = classA->findFunction(u"f3");
+    const auto f3 = classA->findFunction("f3");
     QVERIFY(f3);
     QVERIFY(!f3->allowThread());
 
     // Nothing specified, should be false for simple getter
-    const auto getter1 = classA->findFunction(u"getter1");
+    const auto getter1 = classA->findFunction("getter1");
     QVERIFY(getter1);
     QVERIFY(!getter1->allowThread());
 
     // Forced to true simple getter
-    const auto getter2 = classA->findFunction(u"getter2");
+    const auto getter2 = classA->findFunction("getter2");
     QVERIFY(getter2);
     QVERIFY(getter2->allowThread()); // Forced to true simple getter
 }
@@ -436,7 +436,7 @@ void TestModifyFunction::testScopedModifications()
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode.constData(), xmlCode.constData(), false));
     QVERIFY(builder);
 
-    const auto classA = AbstractMetaClass::findClass(builder->classes(), u"A");
+    const auto classA = AbstractMetaClass::findClass(builder->classes(), "A");
     QVERIFY(classA);
 
     auto f = classA->findFunction(QStringLiteral("unspecified"));

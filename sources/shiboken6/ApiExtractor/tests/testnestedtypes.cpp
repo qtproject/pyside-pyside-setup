@@ -46,10 +46,10 @@ void TestNestedTypes::testNestedTypesModifications()
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
 
-    const auto ons = AbstractMetaClass::findClass(classes, u"OuterNamespace");
+    const auto ons = AbstractMetaClass::findClass(classes, "OuterNamespace");
     QVERIFY(ons);
 
-    const auto ins = AbstractMetaClass::findClass(classes, u"OuterNamespace::InnerNamespace");
+    const auto ins = AbstractMetaClass::findClass(classes, "OuterNamespace::InnerNamespace");
     QVERIFY(ins);
     QCOMPARE(ins->functions().size(), 1);
     QCOMPARE(ins->typeEntry()->codeSnips().size(), 1);
@@ -69,7 +69,7 @@ void TestNestedTypes::testNestedTypesModifications()
     QCOMPARE(snip.code().trimmed(), u"custom_code2();");
 
     const auto sc =
-        AbstractMetaClass::findClass(classes, u"OuterNamespace::InnerNamespace::SomeClass");
+        AbstractMetaClass::findClass(classes, "OuterNamespace::InnerNamespace::SomeClass");
     QVERIFY(sc);
     QCOMPARE(sc->functions().size(), 2); // default constructor and removed method
     const auto removedFunc = sc->functions().constLast();
@@ -96,11 +96,11 @@ void TestNestedTypes::testDuplicationOfNestedTypes()
     QVERIFY(builder);
     AbstractMetaClassList classes = builder->classes();
     QCOMPARE(classes.size(), 2);
-    const auto nspace = AbstractMetaClass::findClass(classes, u"Namespace");
+    const auto nspace = AbstractMetaClass::findClass(classes, "Namespace");
     QVERIFY(nspace);
-    const auto cls1 = AbstractMetaClass::findClass(classes, u"SomeClass");
+    const auto cls1 = AbstractMetaClass::findClass(classes, "SomeClass");
     QVERIFY(cls1);
-    const auto cls2 = AbstractMetaClass::findClass(classes, u"Namespace::SomeClass");
+    const auto cls2 = AbstractMetaClass::findClass(classes, "Namespace::SomeClass");
     QVERIFY(cls2);
     QCOMPARE(cls1, cls2);
     QCOMPARE(cls1->name(), u"SomeClass");

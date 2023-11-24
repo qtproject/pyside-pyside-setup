@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "abstractmetalang.h"
+#include "anystringview_helpers.h"
 #include "abstractmetalang_helpers.h"
 #include "abstractmetaargument.h"
 #include "abstractmetaenum.h"
@@ -567,12 +568,12 @@ bool AbstractMetaClass::hasFunction(const QString &str) const
     return bool(findFunction(str));
 }
 
-AbstractMetaFunctionCPtr AbstractMetaClass::findFunction(QStringView functionName) const
+AbstractMetaFunctionCPtr AbstractMetaClass::findFunction(QAnyStringView functionName) const
 {
     return AbstractMetaFunction::find(d->m_functions, functionName);
 }
 
-AbstractMetaFunctionCList AbstractMetaClass::findFunctions(QStringView functionName) const
+AbstractMetaFunctionCList AbstractMetaClass::findFunctions(QAnyStringView functionName) const
 {
     AbstractMetaFunctionCList result;
     std::copy_if(d->m_functions.cbegin(), d->m_functions.cend(),
@@ -1715,12 +1716,12 @@ std::optional<AbstractMetaEnumValue>
 /// Target language base name or complete Target language package.class name.
 
 template <class It>
-static It findClassHelper(It begin, It end, QStringView name)
+static It findClassHelper(It begin, It end, QAnyStringView name)
 {
     if (name.isEmpty() || begin == end)
         return end;
 
-    if (name.contains(u'.')) { // Search target lang name
+    if (asv_contains(name,'.')) { // Search target lang name
         for (auto it = begin; it != end; ++it) {
             if ((*it)->fullName() == name)
                 return it;
@@ -1733,7 +1734,7 @@ static It findClassHelper(It begin, It end, QStringView name)
             return it;
     }
 
-    if (name.contains(u"::")) // Qualified, cannot possibly match name
+    if (asv_contains(name, "::")) // Qualified, cannot possibly match name
         return end;
 
     for (auto it = begin; it != end; ++it) {
@@ -1745,14 +1746,14 @@ static It findClassHelper(It begin, It end, QStringView name)
 }
 
 AbstractMetaClassPtr AbstractMetaClass::findClass(const AbstractMetaClassList &classes,
-                                                  QStringView name)
+                                                  QAnyStringView name)
 {
     auto it =findClassHelper(classes.cbegin(), classes.cend(), name);
     return it != classes.cend() ? *it : nullptr;
 }
 
 AbstractMetaClassCPtr AbstractMetaClass::findClass(const AbstractMetaClassCList &classes,
-                                                   QStringView name)
+                                                   QAnyStringView name)
 {
     auto it = findClassHelper(classes.cbegin(), classes.cend(), name);
     return it != classes.cend() ? *it : nullptr;
@@ -1791,7 +1792,7 @@ bool inheritsFrom(const AbstractMetaClassCPtr &c, const AbstractMetaClassCPtr &c
     }));
 }
 
-bool inheritsFrom(const AbstractMetaClassCPtr &c, const QString &name)
+bool inheritsFrom(const AbstractMetaClassCPtr &c, QAnyStringView name)
 {
     if (c->qualifiedCppName() == name)
         return true;

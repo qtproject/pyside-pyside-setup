@@ -70,8 +70,8 @@ public:
     static void addFunction(const AbstractMetaClassPtr &klass,
                             const AbstractMetaFunctionCPtr &function);
     bool hasFunction(const QString &str) const;
-    AbstractMetaFunctionCPtr findFunction(QStringView functionName) const;
-    AbstractMetaFunctionCList findFunctions(QStringView functionName) const;
+    AbstractMetaFunctionCPtr findFunction(QAnyStringView functionName) const;
+    AbstractMetaFunctionCList findFunctions(QAnyStringView functionName) const;
     AbstractMetaFunctionCPtr findOperatorBool() const;
     // Find a Qt-style isNull() method suitable for nb_bool
     AbstractMetaFunctionCPtr findQtIsNullMethod() const;
@@ -315,9 +315,9 @@ public:
                                                           bool avoidProtectedHack);
 
     static AbstractMetaClassPtr findClass(const AbstractMetaClassList &classes,
-                                        QStringView name);
+                                          QAnyStringView name);
     static AbstractMetaClassCPtr findClass(const AbstractMetaClassCList &classes,
-                                              QStringView name);
+                                           QAnyStringView name);
     static AbstractMetaClassPtr findClass(const AbstractMetaClassList &classes,
                                         const TypeEntryCPtr &typeEntry);
     static AbstractMetaClassCPtr findClass(const AbstractMetaClassCList &classes,
@@ -371,10 +371,10 @@ void AbstractMetaClass::invisibleNamespaceRecursion(Function f) const
 }
 
 bool inheritsFrom(const AbstractMetaClassCPtr &c, const AbstractMetaClassCPtr &other);
-bool inheritsFrom(const AbstractMetaClassCPtr &c, const QString &name);
+bool inheritsFrom(const AbstractMetaClassCPtr &c, QAnyStringView name);
 inline bool isQObject(const AbstractMetaClassCPtr &c)
 {
-    return inheritsFrom(c, QStringLiteral("QObject"));
+    return inheritsFrom(c, "QObject");
 }
 
 AbstractMetaClassCPtr findBaseClass(const AbstractMetaClassCPtr &c,

@@ -34,7 +34,7 @@ R"(<typesystem package="Foo">
 )";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(builder);
-    const auto classA = AbstractMetaClass::findClass(builder->classes(), u"A");
+    const auto classA = AbstractMetaClass::findClass(builder->classes(), "A");
     QVERIFY(classA);
     DocModificationList docMods = classA->typeEntry()->docModifications();
     QCOMPARE(docMods.size(), 2);
@@ -95,9 +95,9 @@ void TestModifyDocumentation::testInjectAddedFunctionDocumentation()
 )XML";
     QScopedPointer<AbstractMetaBuilder> builder(TestUtil::parse(cppCode, xmlCode));
     QVERIFY(builder);
-    const auto classA = AbstractMetaClass::findClass(builder->classes(), u"A");
+    const auto classA = AbstractMetaClass::findClass(builder->classes(), "A");
     QVERIFY(classA);
-    const auto f = classA->findFunction(u"foo");
+    const auto f = classA->findFunction("foo");
     QVERIFY(f);
     QVERIFY(f->isUserAdded());
     auto docMods = f->addedFunctionDocModifications();
