@@ -147,7 +147,7 @@ if __name__ == "__main__":
             del os.environ[env_var]
     python_ver = "3"
     if CI_TARGET_OS in ["Linux"] and CI_HOST_ARCH !="aarch64":
-        python_ver = "3.11"
+        python_ver = "3.8"
     wheel_package_dir = "qfpa-p3.6"
     if CI_TARGET_OS in ["Windows"]:
         if (os.environ.get('HOST_OSVERSION_COIN')).startswith('windows_10'):

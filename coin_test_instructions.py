@@ -106,7 +106,7 @@ def run_test_instructions():
         else:
             call_testrunner("3.8.1", str(testRun))
     elif CI_HOST_OS == "Linux":
-        call_testrunner("3.11", str(testRun))
+        call_testrunner("3.8", str(testRun))
     else:
         call_testrunner("3", str(testRun))
 
