@@ -13,8 +13,8 @@ struct PySideSignalData
 {
     struct Signature
     {
-        QByteArray signature;
-        int attributes;
+        QByteArray signature; // ','-separated list of parameter types
+        unsigned short attributes;
     };
 
     QByteArray signalName;
@@ -39,10 +39,10 @@ struct PySideSignalInstancePrivate
 {
     QByteArray signalName;
     QByteArray signature;
-    int attributes = 0;
     PyObject *source = nullptr;
     PyObject *homonymousMethod = nullptr;
     PySideSignalInstance *next = nullptr;
+    unsigned short attributes = 0;
 };
 
 namespace PySide::Signal {
