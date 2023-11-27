@@ -123,7 +123,7 @@
         <include file-name="QSize" location="global"/>
     </extra-includes>
     <!-- FIXME: PYSIDE7: Handle setQuery(QSqlQuery&&) in some way?
-         QTBUG-91766/PYSIDE-2394 -->
+         QTBUG-91766/PYSIDE-2394. allow-thread for PYSIDE-1931 -->
     <modify-function signature="setQuery(QSqlQuery)" allow-thread="yes"
                      deprecated="false"/>
     <modify-function signature="setQuery(QString,QSqlDatabase)" allow-thread="yes"/>
@@ -137,6 +137,7 @@
         <include file-name="QStringList" location="global"/>
         <include file-name="QSize" location="global"/>
     </extra-includes>
+    <modify-function signature="select()" allow-thread="yes"/> <!-- PYSIDE-1931 -->
   </object-type>
   <object-type name="QSqlResult">
       <enum-type name="BindingSyntax"/>
@@ -169,6 +170,7 @@
         <include file-name="QStringList" location="global"/>
         <include file-name="QSize" location="global"/>
     </extra-includes>
+    <modify-function signature="select()" allow-thread="yes"/> <!-- PYSIDE-1931 -->
   </object-type>
   <object-type name="QSqlDriverCreatorBase">
     <extra-includes>
