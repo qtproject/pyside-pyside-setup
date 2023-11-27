@@ -448,6 +448,16 @@ static int argCount(const FunctionArgumentsResult &args)
         ? -1 : PepCode_GET_ARGCOUNT(args.objCode);
 }
 
+// Find Signal Instance for argument count.
+static PySideSignalInstance *findSignalInstance(PySideSignalInstance *source, int argCount)
+{
+    for (auto *si = source; si != nullptr; si = si->d->next) {
+        if (si->d->argCount == argCount)
+            return si;
+    }
+    return nullptr;
+}
+
 static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject *kwds)
 {
     PyObject *slot = nullptr;
@@ -496,10 +506,8 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
         }
     } else {
         // Check signature of the slot (method or function) to match signal
-        bool matchedSlot = false;
-
-        PySideSignalInstance *it = source;
         const auto args = extractFunctionArgumentsFromSlot(slot);
+        PySideSignalInstance *matchedSlot = nullptr;
 
         if (args.function != nullptr) {
             qsizetype slotArgs = argCount(args);
@@ -507,34 +515,18 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
                 slotArgs -= 1;
 
             // Get signature args
-            bool isShortCircuit = false;
-            QByteArrayList argsSignature = PySide::Signal::getArgsFromSignature(it->d->signature,
-                &isShortCircuit);
-            qsizetype signatureArgs = argsSignature.size();
-
             // Iterate the possible types of connection for this signal and compare
             // it with slot arguments
-            if (signatureArgs != slotArgs) {
-                while (it->d->next != nullptr) {
-                    it = it->d->next;
-                    argsSignature = PySide::Signal::getArgsFromSignature(it->d->signature,
-                        &isShortCircuit);
-                    signatureArgs = argsSignature.size();
-                    if (signatureArgs == slotArgs) {
-                        matchedSlot = true;
-                        break;
-                    }
-                }
-            }
+            matchedSlot = findSignalInstance(source, slotArgs);
         }
 
         // Adding references to pyArgs
         PyList_Append(pyArgs, source->d->source);
 
-        if (matchedSlot) {
+        if (matchedSlot != nullptr) {
             // If a slot matching the same number of arguments was found,
             // include signature to the pyArgs
-            Shiboken::AutoDecRef signature(PySide::Signal::buildQtCompatible(it->d->signature));
+            Shiboken::AutoDecRef signature(PySide::Signal::buildQtCompatible(matchedSlot->d->signature));
             PyList_Append(pyArgs, signature);
         } else {
             // Try the first by default if the slot was not found
@@ -964,9 +956,10 @@ static QByteArray buildSignature(const QByteArray &name, const QByteArray &signa
 
 static PySideSignalData::Signature parseSignature(PyObject *args)
 {
-    PySideSignalData::Signature result{{}, QMetaMethod::Compatibility};
+    PySideSignalData::Signature result{{}, QMetaMethod::Compatibility, 0};
     if (args && (Shiboken::String::check(args) || !PyTuple_Check(args))) {
         result.signature = getTypeName(args);
+        result.argCount = 1;
         return result;
     }
 
@@ -977,6 +970,7 @@ static PySideSignalData::Signature parseSignature(PyObject *args)
             if (!result.signature.isEmpty())
                 result.signature += ',';
             result.signature += typeName;
+            ++result.argCount;
         }
     }
     return result;
@@ -1001,6 +995,7 @@ static void instanceInitialize(PySideSignalInstance *self, PyObject *name, PySid
     selfPvt->source = source;
     const auto &signature = signal->data->signatures.at(index);
     selfPvt->signature = buildSignature(self->d->signalName, signature.signature);
+    selfPvt->argCount = signature.argCount;
     selfPvt->attributes = signature.attributes;
     selfPvt->homonymousMethod = nullptr;
     if (signal->homonymousMethod) {
@@ -1078,6 +1073,7 @@ PySideSignalInstance *newObjectFromMethod(PyObject *source, const QList<QMetaMet
         // separate SignalName
         selfPvt->signalName = cppName;
         selfPvt->signature = m.methodSignature();
+        selfPvt->argCount = int(m.parameterCount());
         selfPvt->attributes = m.attributes();
         selfPvt->homonymousMethod = nullptr;
         selfPvt->next = nullptr;
@@ -1121,7 +1117,8 @@ void registerSignals(PyTypeObject *pyObj, const QMetaObject *metaObject)
         if (method.methodType() == QMetaMethod::Signal) {
             QByteArray methodName(method.methodSignature());
             methodName.chop(methodName.size() - methodName.indexOf('('));
-            Signature signature{method.parameterTypes().join(','), {}};
+            Signature signature{method.parameterTypes().join(','), {},
+                                short(method.parameterCount())};
             if (method.attributes() & QMetaMethod::Cloned)
                 signature.attributes = QMetaMethod::Cloned;
             signalsFound[methodName] << signature;

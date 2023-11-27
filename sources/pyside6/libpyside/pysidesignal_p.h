@@ -15,6 +15,7 @@ struct PySideSignalData
     {
         QByteArray signature; // ','-separated list of parameter types
         unsigned short attributes;
+        short argCount;
     };
 
     QByteArray signalName;
@@ -43,6 +44,7 @@ struct PySideSignalInstancePrivate
     PyObject *homonymousMethod = nullptr;
     PySideSignalInstance *next = nullptr;
     unsigned short attributes = 0;
+    short argCount = 0;
 };
 
 namespace PySide::Signal {
