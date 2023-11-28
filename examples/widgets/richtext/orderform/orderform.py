@@ -153,8 +153,8 @@ class MainWindow(QMainWindow):
     def create_sample(self):
         dialog = DetailsDialog('Dialog with default values', self)
         self.create_letter('Mr Smith',
-                '12 High Street\nSmall Town\nThis country',
-                dialog.order_items(), True)
+                           '12 High Street\nSmall Town\nThis country',
+                           dialog.order_items(), True)
 
     @Slot()
     def open_dialog(self):
@@ -162,7 +162,7 @@ class MainWindow(QMainWindow):
 
         if dialog.exec() == QDialog.Accepted:
             self.create_letter(dialog.sender_name(), dialog.sender_address(),
-                    dialog.order_items(), dialog.send_offers())
+                               dialog.order_items(), dialog.send_offers())
 
     @Slot()
     def print_file(self):

@@ -7,14 +7,20 @@
 import sys
 
 from PySide6.QtCore import (QByteArray, QDate, QDateTime, QDir, QEvent, QPoint,
-    QRect, QRegularExpression, QSettings, QSize, QTime, QTimer, Qt, Slot)
+                            QRect, QRegularExpression, QSettings, QSize, QTime,
+                            QTimer, Qt, Slot)
 from PySide6.QtGui import (QAction, QColor, QIcon, QIntValidator,
-    QDoubleValidator, QRegularExpressionValidator, QValidator)
+                           QDoubleValidator, QRegularExpressionValidator,
+                           QValidator)
 from PySide6.QtWidgets import (QAbstractItemView, QApplication,
-    QCheckBox, QComboBox, QFileDialog, QDialog, QDialogButtonBox, QGridLayout,
-    QGroupBox, QHeaderView, QInputDialog, QItemDelegate, QLabel, QLineEdit,
-    QMainWindow, QMessageBox, QStyle, QSpinBox, QStyleOptionViewItem,
-    QTableWidget, QTableWidgetItem, QTreeWidget, QTreeWidgetItem, QVBoxLayout)
+                               QCheckBox, QComboBox, QFileDialog, QDialog,
+                               QDialogButtonBox, QGridLayout,
+                               QGroupBox, QHeaderView, QInputDialog,
+                               QItemDelegate, QLabel, QLineEdit,
+                               QMainWindow, QMessageBox, QStyle, QSpinBox,
+                               QStyleOptionViewItem, QTableWidget,
+                               QTableWidgetItem, QTreeWidget, QTreeWidgetItem,
+                               QVBoxLayout)
 
 
 class TypeChecker:

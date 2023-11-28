@@ -9,7 +9,7 @@ from random import randrange
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, QRect, Qt
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import (QApplication, QGridLayout, QHeaderView,
-    QTableView, QWidget)
+                               QTableView, QWidget)
 from PySide6.QtCharts import QChart, QChartView, QLineSeries, QVXYModelMapper
 
 

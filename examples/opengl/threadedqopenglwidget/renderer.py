@@ -120,7 +120,7 @@ class Renderer(QObject, QOpenGLFunctions):
             if self._exiting:
                 return
 
-            assert(ctx.thread() == QThread.currentThread())
+            assert ctx.thread() == QThread.currentThread()
 
             # Make the context (and an offscreen surface) current for self thread.
             # The QOpenGLWidget's fbo is bound in the context.

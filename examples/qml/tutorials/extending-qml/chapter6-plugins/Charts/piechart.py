@@ -12,6 +12,7 @@ from pieslice import PieSlice
 QML_IMPORT_NAME = "Charts"
 QML_IMPORT_MAJOR_VERSION = 1
 
+
 @QmlElement
 class PieChart(QQuickItem):
     def __init__(self, parent=None):

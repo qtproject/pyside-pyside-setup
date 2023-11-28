@@ -212,7 +212,7 @@ def python_link_flags_qmake():
         # e.g.: "Program Files" to "Progra~1"
         for d in libdir.split("\\"):
             if " " in d:
-                libdir = libdir.replace(d, d.split(" ")[0][:-1]+"~1")
+                libdir = libdir.replace(d, d.split(" ")[0][:-1] + "~1")
         lib_flags = flags['lib']
         return f'-L{libdir} -l{lib_flags}'
     elif sys.platform == 'darwin':

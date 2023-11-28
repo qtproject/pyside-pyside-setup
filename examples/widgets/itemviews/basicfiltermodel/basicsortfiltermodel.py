@@ -46,11 +46,11 @@ class Window(QWidget):
 
         self._filter_syntax_combo_box = QComboBox()
         self._filter_syntax_combo_box.addItem("Regular expression",
-                                          REGULAR_EXPRESSION)
+                                              REGULAR_EXPRESSION)
         self._filter_syntax_combo_box.addItem("Wildcard",
-                                          WILDCARD)
+                                              WILDCARD)
         self._filter_syntax_combo_box.addItem("Fixed string",
-                                          FIXED_STRING)
+                                              FIXED_STRING)
         self._filter_syntax_label = QLabel("Filter &syntax:")
         self._filter_syntax_label.setBuddy(self._filter_syntax_combo_box)
 

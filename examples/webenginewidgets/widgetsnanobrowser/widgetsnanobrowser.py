@@ -7,7 +7,7 @@ import sys
 from PySide6.QtCore import QUrl, Slot
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QApplication, QLineEdit,
-    QMainWindow, QPushButton, QToolBar)
+                               QMainWindow, QPushButton, QToolBar)
 from PySide6.QtWebEngineCore import QWebEnginePage
 from PySide6.QtWebEngineWidgets import QWebEngineView
 

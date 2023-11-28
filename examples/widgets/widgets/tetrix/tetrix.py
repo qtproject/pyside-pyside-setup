@@ -349,7 +349,7 @@ class TetrixBoard(QFrame):
 
     def draw_square(self, painter, x, y, shape):
         color_table = [0x000000, 0xCC6666, 0x66CC66, 0x6666CC,
-                      0xCCCC66, 0xCC66CC, 0x66CCCC, 0xDAAA00]
+                       0xCCCC66, 0xCC66CC, 0x66CCCC, 0xDAAA00]
 
         color = QColor(color_table[shape])
         painter.fillRect(x + 1, y + 1, self.square_width() - 2,
@@ -379,7 +379,7 @@ class TetrixPiece(object):
     )
 
     def __init__(self):
-        self.coords = [[0,0] for _ in range(4)]
+        self.coords = [[0, 0] for _ in range(4)]
         self._piece_shape = Piece.NoShape
 
         self.set_shape(Piece.NoShape)

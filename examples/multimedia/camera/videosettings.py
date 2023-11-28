@@ -14,7 +14,6 @@ else:
     from ui_videosettings import Ui_VideoSettingsUi
 
 
-
 def box_value(box):
     idx = box.currentIndex()
     return None if idx == -1 else box.itemData(idx)

@@ -6,6 +6,7 @@ from PySide6.QtCore import Qt
 
 import rc_markers
 
+
 def rectangle(point_type, image_size):
     image = QImage(image_size, image_size, QImage.Format_RGB32)
     painter = QPainter()
@@ -15,8 +16,10 @@ def rectangle(point_type, image_size):
     painter.end()
     return image
 
+
 def triangle(point_type, image_size):
     return QImage(point_type[3]).scaled(image_size, image_size)
+
 
 def circle(point_type, image_size):
     image = QImage(image_size, image_size, QImage.Format_ARGB32)
@@ -32,6 +35,7 @@ def circle(point_type, image_size):
     painter.end()
     return image
 
+
 _point_types = [("RedRectangle", rectangle, Qt.red),
                 ("GreenTriangle", triangle, Qt.green, ":/images/green_triangle.png"),
                 ("OrangeCircle", circle, QColor(255, 127, 80))]
@@ -40,11 +44,14 @@ _selected_point_types = [("BlueTriangle", triangle, Qt.blue, ":/images/blue_tria
                          ("LavenderCircle", circle, QColor(147, 112, 219))]
 _line_colors = [("Blue", QColor(65, 105, 225)), ("Black", Qt.black), ("Mint", QColor(70, 203, 155))]
 
+
 def point_type(index):
     return _point_types[index]
 
+
 def selected_point_type(index):
     return _selected_point_types[index]
+
 
 def line_color(index):
     return _line_colors[index]
@@ -53,6 +60,7 @@ def line_color(index):
 def default_light_marker(image_size):
     return rectangle(_point_types[0], image_size)
 
+
 def default_selected_light_marker(image_size):
     return triangle(_selected_point_types[0], image_size)
 
@@ -60,8 +68,10 @@ def default_selected_light_marker(image_size):
 def get_point_representation(point_type, image_size):
     return point_type[1](point_type, image_size)
 
+
 def get_selected_point_representation(point_type, image_size):
     return point_type[1](point_type, image_size)
+
 
 def make_line_color(line_color):
     return line_color[1]

@@ -67,7 +67,7 @@ if __name__ == '__main__':
         value.append(chr(0))  # Flags that specify the format of the value.
         value.append(chr(current_heart_rate))  # Actual value.
         characteristic = service.characteristic(QBluetoothUuid.CharacteristicType.HeartRateMeasurement)
-        assert(characteristic.isValid())
+        assert characteristic.isValid()
         # Potentially causes notification.
         service.writeCharacteristic(characteristic, value)
         if current_heart_rate == 60:

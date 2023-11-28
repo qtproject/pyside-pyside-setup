@@ -333,7 +333,7 @@ class OutputFilesPage(QWizardPage):
 
     def _choose_output_dir(self):
         directory = QFileDialog.getExistingDirectory(self, "Output Directory",
-                                               self.output_dir())
+                                                     self.output_dir())
         if directory:
             self.set_output_dir(directory)
 

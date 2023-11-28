@@ -13,6 +13,7 @@ from characteristicinfo import CharacteristicInfo
 QML_IMPORT_NAME = "Scanner"
 QML_IMPORT_MAJOR_VERSION = 1
 
+
 @QmlElement
 @QmlSingleton
 class Device(QObject):

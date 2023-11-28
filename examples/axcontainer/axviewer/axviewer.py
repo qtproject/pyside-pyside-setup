@@ -7,7 +7,7 @@ import sys
 from PySide6.QtAxContainer import QAxSelect, QAxWidget
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (QApplication, QDialog,
-    QMainWindow, QMessageBox, QToolBar)
+                               QMainWindow, QMessageBox, QToolBar)
 
 
 class MainWindow(QMainWindow):

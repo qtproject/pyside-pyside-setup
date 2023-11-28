@@ -7,7 +7,7 @@
 from PySide6.QtCore import QRect, QRectF, QSize, Qt, QTimer
 from PySide6.QtGui import QColor, QPainter, QPalette, QPen
 from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QLabel,
-        QSizePolicy, QWidget)
+                               QSizePolicy, QWidget)
 
 
 class CircleWidget(QWidget):

@@ -43,6 +43,7 @@ class MyModel(QAbstractTableModel):
         self.dataChanged.emit(top_left, top_left, [Qt.DisplayRole])
 #! [3]
 
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     table_view = QTableView()

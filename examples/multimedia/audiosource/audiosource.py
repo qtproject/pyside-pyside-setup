@@ -41,6 +41,7 @@ is_android = os.environ.get('ANDROID_ARGUMENT')
 if is_android:
     from PySide6.QtCore import QCoreApplication, QMicrophonePermission
 
+
 class AudioInfo:
     def __init__(self, format: QAudioFormat):
         super().__init__()

@@ -15,7 +15,7 @@ def create_intro_page():
     page.setTitle("Introduction")
 
     label = QLabel("This wizard will help you register your copy of "
-            "Super Product Two.")
+                   "Super Product Two.")
     label.setWordWrap(True)
 
     layout = QVBoxLayout(page)

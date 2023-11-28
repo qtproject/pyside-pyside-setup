@@ -192,7 +192,7 @@ class Node(QGraphicsItem):
     def boundingRect(self):
         adjust = 2.0
         return QRectF(-10 - adjust, -10 - adjust,
-                             23 + adjust, 23 + adjust)
+                      23 + adjust, 23 + adjust)
 
     def shape(self):
         path = QPainterPath()
@@ -362,7 +362,7 @@ class GraphWidget(QGraphicsView):
 
         # Text.
         text_rect = QRectF(scene_rect.left() + 4, scene_rect.top() + 4,
-                                 scene_rect.width() - 4, scene_rect.height() - 4)
+                           scene_rect.width() - 4, scene_rect.height() - 4)
         message = self.tr("Click and drag the nodes around, and zoom with the "
                           "mouse wheel or the '+' and '-' keys")
 

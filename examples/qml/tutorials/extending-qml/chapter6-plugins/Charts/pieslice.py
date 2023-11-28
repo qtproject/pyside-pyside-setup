@@ -11,6 +11,7 @@ from PySide6.QtQml import QmlElement
 QML_IMPORT_NAME = "Charts"
 QML_IMPORT_MAJOR_VERSION = 1
 
+
 @QmlElement
 class PieSlice(QQuickPaintedItem):
     def __init__(self, parent=None):

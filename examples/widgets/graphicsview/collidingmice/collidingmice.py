@@ -26,7 +26,7 @@ class Mouse(QGraphicsItem):
     # Create the bounding rectangle once.
     adjust = 0.5
     BOUNDING_RECT = QRectF(-20 - adjust, -22 - adjust, 40 + adjust,
-            83 + adjust)
+                           83 + adjust)
 
     def __init__(self):
         super().__init__()
