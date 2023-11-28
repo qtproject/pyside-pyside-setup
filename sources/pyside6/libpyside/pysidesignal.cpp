@@ -1109,36 +1109,45 @@ static PyObject *buildQtCompatible(const QByteArray &signature)
 void registerSignals(PyTypeObject *pyObj, const QMetaObject *metaObject)
 {
     using Signature = PySideSignalData::Signature;
-    using SignalSigMap = QHash<QByteArray, QList<Signature>>;
-    SignalSigMap signalsFound;
+    struct MetaSignal
+    {
+        QByteArray methodName;
+        QList<Signature> signatures;
+    };
+
+    QList<MetaSignal> signalsFound;
     for (int i = metaObject->methodOffset(), max = metaObject->methodCount(); i < max; ++i) {
         QMetaMethod method = metaObject->method(i);
 
         if (method.methodType() == QMetaMethod::Signal) {
             QByteArray methodName(method.methodSignature());
-            methodName.chop(methodName.size() - methodName.indexOf('('));
+            methodName.truncate(methodName.indexOf('('));
             Signature signature{method.parameterTypes().join(','), {},
                                 short(method.parameterCount())};
             if (method.attributes() & QMetaMethod::Cloned)
                 signature.attributes = QMetaMethod::Cloned;
-            signalsFound[methodName] << signature;
+            auto it = std::find_if(signalsFound.begin(), signalsFound.end(),
+                                   [methodName](const MetaSignal &ms)
+                                   { return ms.methodName == methodName; });
+            if (it != signalsFound.end())
+                it->signatures << signature;
+            else
+                signalsFound.append(MetaSignal{methodName, {signature}});
         }
     }
 
-    SignalSigMap::Iterator it = signalsFound.begin();
-    SignalSigMap::Iterator end = signalsFound.end();
-    for (; it != end; ++it) {
+    for (const auto &metaSignal : std::as_const(signalsFound)) {
         PySideSignal *self = PyObject_New(PySideSignal, PySideSignal_TypeF());
         self->data = new PySideSignalData;
-        self->data->signalName = it.key();
+        self->data->signalName = metaSignal.methodName;
         self->homonymousMethod = nullptr;
 
         // Empty signatures comes first! So they will be the default signal signature
-        self->data->signatures = it.value();
+        self->data->signatures = metaSignal.signatures;
         std::stable_sort(self->data->signatures.begin(),
                          self->data->signatures.end(), &compareSignals);
 
-        _addSignalToWrapper(pyObj, it.key(), self);
+        _addSignalToWrapper(pyObj, metaSignal.methodName, self);
         Py_DECREF(reinterpret_cast<PyObject *>(self));
     }
 }
