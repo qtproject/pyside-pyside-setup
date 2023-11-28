@@ -47,7 +47,7 @@ R"(<typesystem package="Foo">
     // cannot handle Qt resources.
     QTemporaryDir tempDir(QDir::tempPath() + u"/shiboken_testmodifydocXXXXXX"_s);
     QVERIFY2(tempDir.isValid(), qPrintable(tempDir.errorString()));
-    const QString docFileName = u"a.xml"_s;
+    constexpr auto docFileName = "a.xml"_L1;
     QVERIFY(QFile::copy(u":/"_s + docFileName, tempDir.filePath(docFileName)));
 
     QtDocParser docParser;

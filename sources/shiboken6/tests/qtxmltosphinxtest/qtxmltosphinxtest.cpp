@@ -464,7 +464,7 @@ void QtXmlToSphinxTest::testTableFormattingIoDevice()
 void QtXmlToSphinxTest::testSnippetExtraction_data()
 {
     QTest::addColumn<QByteArray>("file");
-    QTest::addColumn<QString>("id");
+    QTest::addColumn<QLatin1StringView>("id");
     QTest::addColumn<QString>("expected");
 
     const char *fileCpp = R"(bla
@@ -476,7 +476,7 @@ snip2_line2
 // ![snip2] // ![snip3]
 )";
 
-    const QString id = u"snip2"_s;
+    constexpr auto id = "snip2"_L1;
     const QString expected  = uR"(snip2_line1
 snip2_line2
 )"_s;
@@ -497,7 +497,7 @@ snip2_line2
 void QtXmlToSphinxTest::testSnippetExtraction()
 {
     QFETCH(QByteArray, file);
-    QFETCH(QString, id);
+    QFETCH(QLatin1StringView, id);
     QFETCH(QString, expected);
 
     QBuffer buffer(&file);

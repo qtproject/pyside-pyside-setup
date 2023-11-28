@@ -13,7 +13,7 @@ using namespace Qt::StringLiterals;
 
 bool showDotGraph(const QString &name, const QString &graph)
 {
-    const QString imageType = u"jpg"_s;
+    constexpr auto imageType = "jpg"_L1;
 
     // Write out the graph to a temporary file
     QTemporaryFile dotFile(QDir::tempPath() + u'/' + name + u"_XXXXXX.dot"_s);
@@ -43,9 +43,9 @@ bool showDotGraph(const QString &name, const QString &graph)
     // Launch image. Should use QDesktopServices::openUrl(),
     // but we don't link against QtGui
 #ifdef Q_OS_UNIX
-    const QString imageViewer = u"gwenview"_s;
+    constexpr auto imageViewer = "gwenview"_L1;
 #else
-    const QString imageViewer = u"mspaint"_s;
+    constexpr auto imageViewer = "mspaint"_L1;
 #endif
     if (!QProcess::startDetached(imageViewer, {imageFile})) {
         qWarning("Failed to launch viewer: %s", qPrintable(imageViewer));

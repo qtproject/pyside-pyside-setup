@@ -441,13 +441,13 @@ QString QtXmlToSphinx::popOutputBuffer()
     return result;
 }
 
-static const QString autoTranslatedPlaceholder = u"AUTO_GENERATED\n"_s;
-static const QString autoTranslatedNote =
-uR"(.. warning::
+constexpr auto autoTranslatedPlaceholder = "AUTO_GENERATED\n"_L1;
+constexpr auto autoTranslatedNote =
+R"(.. warning::
     This section contains snippets that were automatically
     translated from C++ to Python and may contain errors.
 
-)"_s;
+)"_L1;
 
 void QtXmlToSphinx::setAutoTranslatedNote(QString *str) const
 {

@@ -411,7 +411,7 @@ void QtDocGenerator::writePropertyToc(TextStream &s,
     if (doc.properties.isEmpty())
         return;
 
-    const QString title = u"Properties"_s;
+    constexpr auto title = "Properties"_L1;
     s << title << '\n'
       << Pad('^', title.size()) << '\n';
 
@@ -454,7 +454,7 @@ void QtDocGenerator::writeProperties(TextStream &s,
 
 void QtDocGenerator::writeEnums(TextStream &s, const AbstractMetaClassCPtr &cppClass) const
 {
-    static const QString section_title = u".. attribute:: "_s;
+    constexpr auto section_title = ".. attribute:: "_L1;
 
     for (const AbstractMetaEnum &en : cppClass->enums()) {
         s << section_title << cppClass->fullName() << '.' << en.name() << "\n\n";
@@ -468,7 +468,7 @@ void QtDocGenerator::writeEnums(TextStream &s, const AbstractMetaClassCPtr &cppC
 
 void QtDocGenerator::writeFields(TextStream &s, const AbstractMetaClassCPtr &cppClass) const
 {
-    static const QString section_title = u".. attribute:: "_s;
+    constexpr auto section_title = ".. attribute:: "_L1;
 
     for (const AbstractMetaField &field : cppClass->fields()) {
         s << section_title << cppClass->fullName() << "." << field.name() << "\n\n";
@@ -479,7 +479,7 @@ void QtDocGenerator::writeFields(TextStream &s, const AbstractMetaClassCPtr &cpp
 void QtDocGenerator::writeConstructors(TextStream &s, const AbstractMetaClassCPtr &cppClass,
                                        const AbstractMetaFunctionCList &constructors) const
 {
-    static const QString sectionTitle = u".. class:: "_s;
+    constexpr auto sectionTitle = ".. class:: "_L1;
 
     bool first = true;
     QHash<QString, AbstractMetaArgument> arg_map;

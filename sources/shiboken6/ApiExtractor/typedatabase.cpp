@@ -1632,13 +1632,13 @@ void TypeDatabasePrivate::addBuiltInPrimitiveTypes()
     Q_ASSERT(pyUnicodeEntry && pyUnicodeEntry->isCustom());
     auto pyUnicodeCustomEntry = std::static_pointer_cast<CustomTypeEntry>(pyUnicodeEntry);
 
-    const QString stdString = u"std::string"_s;
+    constexpr auto stdString = "std::string"_L1;
     if (!m_entries.contains(stdString)) {
         addBuiltInCppStringPrimitiveType(stdString, u"std::string_view"_s,
                                          root, rootPackage,
                                          pyUnicodeCustomEntry);
     }
-    const QString stdWString = u"std::wstring"_s;
+    constexpr auto stdWString = "std::wstring"_L1;
     if (!m_entries.contains(stdWString)) {
         addBuiltInCppStringPrimitiveType(stdWString, u"std::wstring_view"_s,
                                          root, rootPackage,

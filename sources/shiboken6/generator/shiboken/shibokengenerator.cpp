@@ -1397,7 +1397,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
 
 static void replacePyArg0(TypeSystem::Language language, QString *code)
 {
-    static const QString pyArg0 = u"%PYARG_0"_s;
+    static constexpr auto pyArg0 = "%PYARG_0"_L1;
 
     if (!code->contains(pyArg0))
         return;
