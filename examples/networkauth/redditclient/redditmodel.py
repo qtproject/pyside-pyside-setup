@@ -51,7 +51,7 @@ class RedditModel(QAbstractTableModel):
         document = QJsonDocument.fromJson(json)
         root_object = document.object()
         kind = root_object["kind"]
-        assert(kind == "Listing")
+        assert kind == "Listing"
         data_object = root_object["data"]
         children_array = data_object["children"]
         if not children_array:

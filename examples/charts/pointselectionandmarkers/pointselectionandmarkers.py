@@ -20,12 +20,12 @@ if __name__ == "__main__":
     marker_size = 20.
     series = QSplineSeries()
     series.append([QPointF(0, 0),
-                    QPointF(0.5, 2.27),
-                    QPointF(1.5, 2.2),
-                    QPointF(3.3, 1.7),
-                    QPointF(4.23, 3.1),
-                    QPointF(5.3, 2.3),
-                    QPointF(6.47, 4.1)])
+                   QPointF(0.5, 2.27),
+                   QPointF(1.5, 2.2),
+                   QPointF(3.3, 1.7),
+                   QPointF(4.23, 3.1),
+                   QPointF(5.3, 2.3),
+                   QPointF(6.47, 4.1)])
     series.setMarkerSize(marker_size)
     series.setLightMarker(Utilities.default_light_marker(marker_size))
     series.setSelectedLightMarker(Utilities.default_selected_light_marker(marker_size))
@@ -66,7 +66,6 @@ if __name__ == "__main__":
     char_point_combobox.addItems(["Red rectangle", "Green triangle", "Orange circle"])
     char_point_combobox.currentIndexChanged.connect(set_light_marker)
 
-
     @Slot(int)
     def set_selected_light_marker(index):
         series.setSelectedLightMarker(Utilities.get_selected_point_representation(Utilities.selected_point_type(index), marker_size))
@@ -75,7 +74,6 @@ if __name__ == "__main__":
     char_point_selected_combobox.addItems(["Blue triangle", "Yellow rectangle", "Lavender circle"])
     char_point_selected_combobox.currentIndexChanged.connect(set_selected_light_marker)
 
-
     @Slot(int)
     def set_line_color(index):
         series.setColor(Utilities.make_line_color(Utilities.line_color(index)))
@@ -83,7 +81,6 @@ if __name__ == "__main__":
     line_color_label = QLabel("Line color: ")
     line_color_combobox.addItems(["Blue", "Black", "Mint"])
     line_color_combobox.currentIndexChanged.connect(set_line_color)
-
 
     @Slot(int)
     def display_unselected_points(checkbox_state):
@@ -95,7 +92,6 @@ if __name__ == "__main__":
     show_unselected_points_label = QLabel("Display unselected points: ")
     show_unselected_points_checkbox.setChecked(True)
     show_unselected_points_checkbox.stateChanged.connect(display_unselected_points)
-
 
     control_label = QLabel("Marker and Selection Controls")
     control_label.setAlignment(Qt.AlignHCenter)

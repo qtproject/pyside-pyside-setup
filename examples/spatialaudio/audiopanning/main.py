@@ -149,7 +149,7 @@ class AudioWidget(QWidget):
             self._file_dialog = QFileDialog(self, "Open Audio File", directory)
             self._file_dialog.setAcceptMode(QFileDialog.AcceptOpen)
             mime_types = ["audio/mpeg", "audio/aac", "audio/x-ms-wma",
-                         "audio/x-flac+ogg", "audio/x-wav"]
+                          "audio/x-flac+ogg", "audio/x-wav"]
             self._file_dialog.setMimeTypeFilters(mime_types)
             self._file_dialog.selectMimeTypeFilter(mime_types[0])
 

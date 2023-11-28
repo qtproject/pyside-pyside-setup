@@ -54,7 +54,7 @@ def get_memory_usage():
                     legend = f'{command} {memory_usage}%'
                     result.append([legend, memory_usage])
 
-    result.sort(key = lambda x: x[1], reverse=True)
+    result.sort(key=lambda x: x[1], reverse=True)
     return result
 
 

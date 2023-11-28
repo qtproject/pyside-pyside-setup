@@ -40,8 +40,8 @@ class Utils(QObject):
 
 
 if __name__ == '__main__':
-    QCoreApplication.setApplicationName("Quick Nano Browser");
-    QCoreApplication.setOrganizationName("QtProject");
+    QCoreApplication.setApplicationName("Quick Nano Browser")
+    QCoreApplication.setOrganizationName("QtProject")
 
     QtWebEngineQuick.initialize()
 

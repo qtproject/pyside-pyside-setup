@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QTreeView
 
 """PySide6 port of the widgets/tutorials/modelview/6_treeview example from Qt v6.x"""
 
+
 #! [1]
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):

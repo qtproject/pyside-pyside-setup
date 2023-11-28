@@ -23,13 +23,13 @@ class StarRating(object):
         self._star_polygon.append(QPointF(1.0, 0.5))
         for i in range(1, 5):
             self._star_polygon.append(QPointF(0.5 + 0.5 * cos(0.8 * i * pi),
-                                    0.5 + 0.5 * sin(0.8 * i * pi)))
+                                      0.5 + 0.5 * sin(0.8 * i * pi)))
 
         # Create the diamond shape we'll show in the editor
         self._diamond_polygon = QPolygonF()
         diamond_points = [QPointF(0.4, 0.5), QPointF(0.5, 0.4),
-                         QPointF(0.6, 0.5), QPointF(0.5, 0.6),
-                         QPointF(0.4, 0.5)]
+                          QPointF(0.6, 0.5), QPointF(0.5, 0.6),
+                          QPointF(0.4, 0.5)]
         self._diamond_polygon.append(diamond_points)
 
     def sizeHint(self):

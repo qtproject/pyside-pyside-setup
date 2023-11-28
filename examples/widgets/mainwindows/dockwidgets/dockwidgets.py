@@ -8,10 +8,11 @@ import sys
 
 from PySide6.QtCore import QDate, QFile, Qt, QTextStream
 from PySide6.QtGui import (QAction, QFont, QIcon, QKeySequence,
-        QTextCharFormat, QTextCursor, QTextTableFormat)
+                           QTextCharFormat, QTextCursor, QTextTableFormat)
 from PySide6.QtPrintSupport import QPrintDialog, QPrinter
 from PySide6.QtWidgets import (QApplication, QDialog, QDockWidget,
-        QFileDialog, QListWidget, QMainWindow, QMessageBox, QTextEdit)
+                               QFileDialog, QListWidget, QMainWindow,
+                               QMessageBox, QTextEdit)
 
 import dockwidgets_rc
 
@@ -143,8 +144,8 @@ class MainWindow(QMainWindow):
         if cursor.isNull():
             return
         cursor.beginEditBlock()
-        cursor.movePosition(QTextCursor.PreviousBlock, QTextCursor.MoveAnchor,
-                2)
+        cursor.movePosition(QTextCursor.PreviousBlock,
+                            QTextCursor.MoveAnchor, 2)
         cursor.insertBlock()
         cursor.insertText(paragraph)
         cursor.insertBlock()

@@ -30,7 +30,7 @@ INFO_KEY = 'info'
 
 
 HELP = ("Use mouse wheel or the '+' and '-' keys to zoom. Press and "
-       "hold left mouse button to scroll.")
+        "hold left mouse button to scroll.")
 
 
 class RenderThread(QThread):
@@ -302,7 +302,7 @@ class MandelbrotWidget(QWidget):
             delta_y = (self.height() - self.pixmap.height()) / 2 - self._pixmap_offset.y()
             self.scroll(delta_x, delta_y)
 
-    @Slot(QImage,float)
+    @Slot(QImage, float)
     def update_pixmap(self, image, scale_factor):
         if not self._last_drag_pos.isNull():
             return

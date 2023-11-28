@@ -19,6 +19,7 @@ NEW_URL = "https://oauth.reddit.com/new"
 HOT_URL = "https://oauth.reddit.com/hot"
 LIVE_THREADS_URL = "https://oauth.reddit.com/live/XXXX/about.json"
 
+
 class RedditWrapper(QObject):
 
     authenticated = Signal()
@@ -78,7 +79,7 @@ class RedditWrapper(QObject):
 
         json = reply.readAll()
         document = QJsonDocument.fromJson(json)
-        assert(document.isObject())
+        assert document.isObject()
         root_object = document.object()
         data_object = root_object["data"]
         websocketUrl = QUrl(data_object["websocket_url"])

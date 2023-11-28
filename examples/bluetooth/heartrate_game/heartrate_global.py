@@ -16,4 +16,5 @@ def set_simulator(s):
     global _simulator
     _simulator = s
 
+
 is_android = os.environ.get('ANDROID_ARGUMENT')

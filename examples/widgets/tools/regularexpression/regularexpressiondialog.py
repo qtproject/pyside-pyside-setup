@@ -5,12 +5,14 @@ import re
 import logging
 
 from PySide6.QtCore import (QMargins, QRegularExpression, QRegularExpressionMatch,
-    QRegularExpressionMatchIterator, Qt, Slot,)
+                            QRegularExpressionMatchIterator, Qt, Slot,)
 from PySide6.QtGui import (QAction, QColor, QContextMenuEvent, QFontDatabase,
-    QGuiApplication, QIcon, QPalette,)
+                           QGuiApplication, QIcon, QPalette,)
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QFormLayout,
-    QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit,
-    QSpinBox, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,)
+                               QFrame, QGridLayout, QHBoxLayout, QLabel,
+                               QLineEdit, QPlainTextEdit, QSpinBox,
+                               QTreeWidget, QTreeWidgetItem, QVBoxLayout,
+                               QWidget)
 
 
 def rawStringLiteral(pattern: str) -> str:
@@ -42,7 +44,7 @@ def codeToPattern(code: str) -> str:
         if code_characters[index] == '\\':
             del code_characters[index]
             code_characters_size -= 1
-        index +=1
+        index += 1
     code = "".join(code_characters)
 
     if code.startswith('"') and code.endswith('"'):

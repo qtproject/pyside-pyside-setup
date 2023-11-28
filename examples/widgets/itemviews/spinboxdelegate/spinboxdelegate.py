@@ -10,6 +10,7 @@ from PySide6.QtCore import QModelIndex
 
 """PySide6 port of the widgets/itemviews/spinboxdelegate from Qt v6.x"""
 
+
 #! [0]
 class SpinBoxDelegate(QStyledItemDelegate):
     """A delegate that allows the user to change integer values from the model
@@ -52,7 +53,7 @@ class SpinBoxDelegate(QStyledItemDelegate):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    model= QStandardItemModel(4, 2)
+    model = QStandardItemModel(4, 2)
     tableView = QTableView()
     tableView.setModel(model)
 

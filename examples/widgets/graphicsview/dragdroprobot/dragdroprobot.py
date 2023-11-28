@@ -154,7 +154,7 @@ class RobotTorso(RobotPart):
 
     def paint(self, painter, option, widget=None):
         painter.setBrush(self._drag_over and self.color.lighter(130)
-                                        or self.color)
+                         or self.color)
         painter.drawRoundedRect(-20, -20, 40, 60, 25, 25, Qt.RelativeSize)
         painter.drawEllipse(-25, -20, 20, 20)
         painter.drawEllipse(5, -20, 20, 20)
@@ -169,7 +169,7 @@ class RobotLimb(RobotPart):
     def paint(self, painter, option, widget=None):
         painter.setBrush(self._drag_over and self.color.lighter(130) or self.color)
         painter.drawRoundedRect(self.boundingRect(), 50, 50,
-                Qt.RelativeSize)
+                                Qt.RelativeSize)
         painter.drawEllipse(-5, -5, 10, 10)
 
 

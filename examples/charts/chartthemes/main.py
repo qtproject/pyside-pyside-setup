@@ -7,7 +7,7 @@ import sys
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QPainter, QPalette
 from PySide6.QtWidgets import (QApplication, QMainWindow, QSizePolicy,
-    QWidget)
+                               QWidget)
 from PySide6.QtCharts import (QAreaSeries, QBarSet, QChart, QChartView,
                               QLineSeries, QPieSeries, QScatterSeries,
                               QSplineSeries, QStackedBarSeries)
@@ -272,7 +272,6 @@ class ThemeWidget(QWidget):
             if chart_theme != theme:
                 for chart_view in self.charts:
                     chart_view.chart().setTheme(theme)
-
 
                 # Set palette colors based on selected theme
                 if theme == QChart.ChartThemeLight:

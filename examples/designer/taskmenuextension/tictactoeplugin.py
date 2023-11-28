@@ -5,7 +5,7 @@ from tictactoe import TicTacToe
 from tictactoetaskmenu import TicTacToeTaskMenuFactory
 
 from PySide6.QtGui import QIcon
-from PySide6.QtDesigner import  QDesignerCustomWidgetInterface
+from PySide6.QtDesigner import QDesignerCustomWidgetInterface
 
 
 DOM_XML = """

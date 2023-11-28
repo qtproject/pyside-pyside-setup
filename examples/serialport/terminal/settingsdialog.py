@@ -29,7 +29,7 @@ class Settings():
         self.string_data_bits = ""
         self.parity = QSerialPort.NoParity
         self.string_parity = ""
-        self.stop_bits =  QSerialPort.OneStop
+        self.stop_bits = QSerialPort.OneStop
         self.string_stop_bits = ""
         self.flow_control = QSerialPort.SoftwareControl
         self.string_flow_control = ""

@@ -7,11 +7,11 @@
 import random
 
 from PySide6.QtCore import (Signal, QByteArray, QDataStream, QIODevice,
-        QThread, Qt)
+                            QThread, Qt)
 from PySide6.QtWidgets import (QApplication, QDialog, QHBoxLayout, QLabel,
-        QMessageBox, QPushButton, QVBoxLayout)
+                               QMessageBox, QPushButton, QVBoxLayout)
 from PySide6.QtNetwork import (QHostAddress, QNetworkInterface, QTcpServer,
-        QTcpSocket)
+                               QTcpSocket)
 
 
 class FortuneThread(QThread):

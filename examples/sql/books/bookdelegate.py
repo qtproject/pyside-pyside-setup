@@ -53,7 +53,6 @@ class BookDelegate(QSqlRelationalDelegate):
                 painter.drawPixmap(x, y, self.star)
                 x += width
 
-
         pen = painter.pen()
         painter.setPen(option.palette.color(QPalette.Mid))
         painter.drawLine(option.rect.bottomLeft(), option.rect.bottomRight())

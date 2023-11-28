@@ -5,12 +5,13 @@
 """PySide6 port of the network/blockingfortunclient example from Qt v5.x, originating from PyQt"""
 
 from PySide6.QtCore import (Signal, QDataStream, QMutex, QMutexLocker,
-        QThread, QWaitCondition)
+                            QThread, QWaitCondition)
 from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import (QApplication, QDialogButtonBox, QGridLayout,
-        QLabel, QLineEdit, QMessageBox, QPushButton, QWidget)
+                               QLabel, QLineEdit, QMessageBox, QPushButton,
+                               QWidget)
 from PySide6.QtNetwork import (QAbstractSocket, QHostAddress, QNetworkInterface,
-        QTcpSocket)
+                               QTcpSocket)
 
 
 class FortuneThread(QThread):

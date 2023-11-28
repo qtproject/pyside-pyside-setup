@@ -15,7 +15,7 @@ if __name__ == '__main__':
     dataList = ["Item 1", "Item 2", "Item 3", "Item 4"]
 
     view = QQuickView()
-    view.setInitialProperties({"model": dataList })
+    view.setInitialProperties({"model": dataList})
 
     qml_file = Path(__file__).parent / "view.qml"
     view.setSource(QUrl.fromLocalFile(qml_file))

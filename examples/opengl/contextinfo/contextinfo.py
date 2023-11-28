@@ -15,7 +15,7 @@ from PySide6.QtGui import (QMatrix4x4, QOpenGLContext, QSurfaceFormat, QWindow)
 from PySide6.QtOpenGL import (QOpenGLBuffer, QOpenGLShader,
                               QOpenGLShaderProgram, QOpenGLVertexArrayObject)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QMessageBox, QPlainTextEdit,
-    QWidget)
+                               QWidget)
 from PySide6.support import VoidPtr
 try:
     from OpenGL import GL

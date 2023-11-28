@@ -27,7 +27,7 @@ class ValidatingInputDialog(QDialog):
         self._lineedit = QLineEdit()
         self._lineedit.setClearButtonEnabled(True)
         re = QRegularExpression(pattern)
-        assert(re.isValid())
+        assert re.isValid()
         self._validator = QRegularExpressionValidator(re, self)
         self._lineedit.setValidator(self._validator)
         self._form_layout.addRow(label, self._lineedit)

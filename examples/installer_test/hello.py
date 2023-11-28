@@ -31,7 +31,7 @@ class MyWidget(QWidget):
         super().__init__()
 
         self.hello = ["Hallo Welt", "你好，世界", "Hei maailma",
-            "Hola Mundo", "Привет мир"]
+                      "Hola Mundo", "Привет мир"]
 
         self.button = QPushButton("Click me!")
         self.text = QLabel(f"Hello World auto_quit={auto_quit}")

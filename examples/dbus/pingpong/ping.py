@@ -5,7 +5,7 @@
 
 import sys
 from PySide6.QtCore import QCoreApplication
-from PySide6.QtDBus import QDBusConnection,  QDBusInterface, QDBusReply
+from PySide6.QtDBus import QDBusConnection, QDBusInterface, QDBusReply
 
 
 SERVICE_NAME = 'org.example.QtDBus.PingExample'

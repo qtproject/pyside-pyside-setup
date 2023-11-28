@@ -6,9 +6,10 @@
 
 from PySide6.QtCore import QPoint, QRect, QSize, Qt, qVersion
 from PySide6.QtGui import (QBrush, QConicalGradient, QLinearGradient, QPainter,
-        QPainterPath, QPalette, QPen, QPixmap, QPolygon, QRadialGradient)
+                           QPainterPath, QPalette, QPen, QPixmap, QPolygon,
+                           QRadialGradient)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QGridLayout,
-        QLabel, QSpinBox, QWidget)
+                               QLabel, QSpinBox, QWidget)
 
 import basicdrawing_rc
 

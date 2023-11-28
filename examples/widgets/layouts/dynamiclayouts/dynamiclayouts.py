@@ -74,8 +74,8 @@ class Dialog(QDialog):
 
     def show_help(self):
         QMessageBox.information(self, "Dynamic Layouts Help",
-                            "This example shows how to change layouts "
-                            "dynamically.")
+                                "This example shows how to change layouts "
+                                "dynamically.")
 
     def create_rotable_group_box(self):
         self._rotable_group_box = QGroupBox("Rotable Widgets")

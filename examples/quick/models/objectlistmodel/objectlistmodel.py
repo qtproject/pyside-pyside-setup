@@ -9,6 +9,7 @@ from PySide6.QtQuick import QQuickView
 
 # This example illustrates exposing a list of QObjects as a model in QML
 
+
 class DataObject(QObject):
 
     nameChanged = Signal()
@@ -34,7 +35,6 @@ class DataObject(QObject):
         if color != self._color:
             self._color = color
             colorChanged.emit()
-
 
     name = Property(str, name, setName, notify=nameChanged)
     color = Property(str, color, setColor, notify=colorChanged)

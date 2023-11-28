@@ -34,7 +34,7 @@ class ImageViewer(QMainWindow):
         self._image_label = QLabel()
         self._image_label.setBackgroundRole(QPalette.Base)
         self._image_label.setSizePolicy(QSizePolicy.Ignored,
-                                       QSizePolicy.Ignored)
+                                        QSizePolicy.Ignored)
         self._image_label.setScaledContents(True)
 
         self._scroll_area = QScrollArea()

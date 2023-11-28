@@ -112,7 +112,7 @@ if __name__ == "__main__":
     table_widget = QTableWidget(4, 4)
     table_widget.setItemDelegate(StarDelegate())
     table_widget.setEditTriggers(QAbstractItemView.DoubleClicked |
-                                QAbstractItemView.SelectedClicked)
+                                 QAbstractItemView.SelectedClicked)
     table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
     table_widget.setHorizontalHeaderLabels(["Title", "Genre", "Artist", "Rating"])
 

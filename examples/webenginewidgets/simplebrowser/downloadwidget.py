@@ -25,7 +25,6 @@ def with_unit(bytes):
 class DownloadWidget(QFrame):
     """Displays one ongoing or finished download (QWebEngineDownloadRequest)."""
 
-
     # This signal is emitted when the user indicates that they want to remove
     # this download from the downloads list.
     remove_clicked = Signal(QWidget)

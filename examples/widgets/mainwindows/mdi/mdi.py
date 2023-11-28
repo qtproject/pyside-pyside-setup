@@ -435,7 +435,7 @@ if __name__ == '__main__':
 
     icon_paths = QIcon.themeSearchPaths()
     QIcon.setThemeSearchPaths(icon_paths + [":/qt-project.org/icons"])
-    QIcon.setFallbackThemeName("example_icons");
+    QIcon.setFallbackThemeName("example_icons")
 
     main_win = MainWindow()
     for f in options.files:

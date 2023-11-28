@@ -12,7 +12,7 @@ from PySide6.QtCore import (QFile, Qt, QTextStream)
 from PySide6.QtGui import (QColor, QFont, QFontDatabase, QKeySequence,
                            QSyntaxHighlighter, QTextCharFormat)
 from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
-    QPlainTextEdit)
+                               QPlainTextEdit)
 
 
 class MainWindow(QMainWindow):

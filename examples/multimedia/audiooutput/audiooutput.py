@@ -54,7 +54,7 @@ class Generator(QIODevice):
                 scaler = lambda x: x * 32767
                 pack_format = '<h' if little_endian else '>h'
 
-        assert(pack_format != '')
+        assert pack_format != ''
 
         channel_bytes = fmt.bytesPerSample()
         sample_bytes = fmt.channelCount() * channel_bytes

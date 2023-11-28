@@ -125,7 +125,6 @@ class Window(QWidget):
 
         curve_types = [(f"QEasingCurve.{e.name}", e) for e in QEasingCurve.Type if e.value <= 40]
 
-
         with QPainter(pix) as painter:
 
             for curve_name, curve_type in curve_types:
@@ -151,7 +150,7 @@ class Window(QWidget):
                 # End point.
                 painter.setBrush(Qt.blue)
                 end = QPoint(y_axis + curve_scale,
-                        x_axis - curve_scale * curve.valueForProgress(1))
+                             x_axis - curve_scale * curve.valueForProgress(1))
                 painter.drawRect(end.x() - 1, end.y() - 1, 3, 3)
 
                 curve_path = QPainterPath()
@@ -159,7 +158,7 @@ class Window(QWidget):
                 t = 0.0
                 while t <= 1.0:
                     to = QPointF(y_axis + curve_scale * t,
-                            x_axis - curve_scale * curve.valueForProgress(t))
+                                 x_axis - curve_scale * curve.valueForProgress(t))
                     curve_path.lineTo(to)
                     t += 1.0 / curve_scale
 
@@ -185,14 +184,14 @@ class Window(QWidget):
         self._anim.setCurrentTime(0)
 
         is_elastic = (curve_type.value >= QEasingCurve.InElastic.value
-                    and curve_type.value <= QEasingCurve.OutInElastic.value)
+                      and curve_type.value <= QEasingCurve.OutInElastic.value)
         is_bounce = (curve_type.value >= QEasingCurve.InBounce.value
-                    and curve_type.value <= QEasingCurve.OutInBounce.value)
+                     and curve_type.value <= QEasingCurve.OutInBounce.value)
 
         self._ui.periodSpinBox.setEnabled(is_elastic)
         self._ui.amplitudeSpinBox.setEnabled(is_elastic or is_bounce)
         self._ui.overshootSpinBox.setEnabled(curve_type.value >= QEasingCurve.InBack.value
-                                          and curve_type.value <= QEasingCurve.OutInBack.value)
+                                             and curve_type.value <= QEasingCurve.OutInBack.value)
 
     def path_changed(self, index):
         self._anim.set_path_type(index)

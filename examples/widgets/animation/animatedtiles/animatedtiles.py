@@ -95,7 +95,7 @@ class Button(QGraphicsWidget):
 
         painter.drawEllipse(r.adjusted(5, 5, -5, -5))
         painter.drawPixmap(-self._pix.width() / 2, -self._pix.height() / 2,
-                self._pix)
+                           self._pix)
 
     def mousePressEvent(self, ev):
         self.pressed.emit()
@@ -172,7 +172,7 @@ if __name__ == '__main__':
         # Random.
         random_state.assignProperty(item, 'pos',
                 QPointF(-250 + generator.bounded(0, 500),
-                               -250 + generator.bounded(0, 500)))
+                        -250 + generator.bounded(0, 500)))
 
         # Tiled.
         tiled_state.assignProperty(item, 'pos',
