@@ -91,8 +91,8 @@ class BoundingRectTest(QFontMetricsTest):
         '''QFontMetrics.boundingRect(QRect, ...) - type error'''
         arg = QRect(0, 0, 100, 200)
         self.assertRaises(TypeError, self.metrics.boundingRect, arg,
-                                         Qt.TextExpandTabs | Qt.AlignLeft,
-                                         'PySide by INdT', 20, ['aaaa', 'ase'])
+                          Qt.TextExpandTabs | Qt.AlignLeft,
+                          'PySide by INdT', 20, ['aaaa', 'ase'])
 
 
 class SizeTest(QFontMetricsTest):
@@ -196,8 +196,8 @@ class FSizeTest(QFontMetricsFTest):
     def testTypeError(self):
         '''QFontMetricsF.size - type error'''
         self.assertRaises(TypeError, self.metrics.size,
-                                         Qt.TextExpandTabs | Qt.AlignLeft,
-                                         'PySide by INdT', 20, ['aaaa', 'ase'])
+                          Qt.TextExpandTabs | Qt.AlignLeft,
+                          'PySide by INdT', 20, ['aaaa', 'ase'])
 
 
 class QCharTest(QFontMetricsFTest):

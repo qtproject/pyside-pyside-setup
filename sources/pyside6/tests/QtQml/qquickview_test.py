@@ -22,6 +22,7 @@ from PySide6.QtQuick import QQuickView
 
 class MyObject(QObject):
     titleChanged = Signal()
+
     def __init__(self, text, parent=None):
         QObject.__init__(self, parent)
         self._text = text

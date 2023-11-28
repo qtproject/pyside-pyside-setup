@@ -40,6 +40,7 @@ class TestSignalInstance(unittest.TestCase):
     def test_custom_inherited_signal_instances_are_equal(self):
         o = D()
         self.assertTrue(o.custom_signal == o.custom_signal)
+
     # additional tests of old errors from 2010 or so
     def test_uninitialized_SignalInstance(self):
         # This will no longer crash
@@ -50,6 +51,7 @@ class TestSignalInstance(unittest.TestCase):
             SignalInstance().disconnect()
         with self.assertRaises(RuntimeError):
             SignalInstance().emit()
+
 
 class MyWidget(QSlider):
     valueChanged = Signal(tuple)

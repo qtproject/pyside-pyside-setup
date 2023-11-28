@@ -21,6 +21,7 @@ from helper.usesqapplication import UsesQApplication
 
 import snake_case_sub
 
+
 class SnakeCaseNoPropagateTest(UsesQApplication):
 
     def testSnakeCase(self):
@@ -29,6 +30,7 @@ class SnakeCaseNoPropagateTest(UsesQApplication):
         check = widget.size_hint
 
         snake_case_sub.test_no_snake_case()
+
 
 if __name__ == '__main__':
     unittest.main()

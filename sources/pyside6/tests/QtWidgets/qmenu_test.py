@@ -37,11 +37,11 @@ class QMenuAddAction(UsesQApplication):
     def testAddActionKeySequenceCallable(self):
         # bug #228
         action = self.menu.addAction(self.app.tr('aaa'), lambda: 1,
-                                    QKeySequence(self.app.tr('Ctrl+O')))
+                                     QKeySequence(self.app.tr('Ctrl+O')))
 
     def testAddActionKeySequenceSlot(self):
         action = self.menu.addAction('Quit', self.app, SLOT('quit()'),
-                                    QKeySequence('Ctrl+O'))
+                                     QKeySequence('Ctrl+O'))
 
 
 class QMenuAddActionWithIcon(UsesQApplication):
@@ -65,11 +65,11 @@ class QMenuAddActionWithIcon(UsesQApplication):
     def testAddActionKeySequenceCallable(self):
         # bug #228
         action = self.menu.addAction(self.icon, self.app.tr('aaa'), lambda: 1,
-                                    QKeySequence(self.app.tr('Ctrl+O')))
+                                     QKeySequence(self.app.tr('Ctrl+O')))
 
     def testAddActionKeySequenceSlot(self):
         action = self.menu.addAction(self.icon, 'Quit', self.app, SLOT('quit()'),
-                                    QKeySequence('Ctrl+O'))
+                                     QKeySequence('Ctrl+O'))
 
 
 if __name__ == '__main__':

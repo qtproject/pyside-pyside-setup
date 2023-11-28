@@ -19,12 +19,14 @@ def xprint(*args, **kw):
     if "-v" in sys.argv:
         print(*args, **kw)
 
+
 # This is the original testcase of PYSIDE-1564
 class Age(object):
     def __init__(self, age=0, **kwds):
         super().__init__(**kwds)
 
         self.age = age
+
 
 class Person(QtCore.QObject, Age):
     def __init__(self, name, **kwds):
@@ -43,12 +45,14 @@ class OriginalMultipleInheritanceTest(unittest.TestCase):
 
 # More tests follow:
 
+
 # mro ('C', 'A', 'QObject', 'Object', 'B', 'object')
 class A(QtCore.QObject):
     def __init__(self, anna=77, **kw):
         xprint(f'A: before init kw = {kw}')
         super().__init__(**kw)
         xprint('A: after init')
+
 
 class B:
     def __init__(self, otto=6, age=7, **kw):
@@ -59,11 +63,13 @@ class B:
         self.age = age
         xprint('B: after init')
 
+
 class C(A, B):
     def __init__(self, **kw):
         xprint(f'C: before init kw = {kw}')
         super().__init__(**kw)
         xprint('C: after init')
+
 
 # mro ('F', 'D', 'QCursor', 'E', 'QLabel', 'QFrame', 'QWidget', 'QObject', 'QPaintDevice', 'Object', 'object')
 class D(QtGui.QCursor):
@@ -72,6 +78,7 @@ class D(QtGui.QCursor):
         super().__init__(**kw)
         xprint('D: after init')
 
+
 class E:
     def __init__(self, age=7, **kw):
         xprint(f'E: before init kw = {kw}')
@@ -79,16 +86,19 @@ class E:
         self.age = age
         xprint('E: after init')
 
+
 class F(D, E, QtWidgets.QLabel):
     def __init__(self, **kw):
         xprint(f'F: before init kw = {kw}')
         super().__init__(**kw)
         xprint('F: after init')
 
+
 # mro ('I', 'G', 'QTextDocument', 'H', 'QLabel', 'QFrame', 'QWidget', 'QObject', 'QPaintDevice', 'Object', 'object')
 # Similar, but this time we want to reach `H` without support from `super`.
 class G(QtGui.QTextDocument):
     pass
+
 
 class H:
     def __init__(self, age=7, **kw):
@@ -96,6 +106,7 @@ class H:
         super().__init__(**kw)
         self.age = age
         xprint('H: after init')
+
 
 class I(G, H, QtWidgets.QLabel):
     pass
@@ -107,6 +118,7 @@ class Ui_X_MainWindow(object):  # Emulating uic
     def setupUi(self, MainWindow):
         MainWindow.resize(400, 300)
         self.lbl = QLabel(self)
+
 
 class MainWindow(QMainWindow, Ui_X_MainWindow):
     def __init__(self, parent=None):
@@ -122,7 +134,7 @@ class AdditionalMultipleInheritanceTest(UsesQApplication):
         self.assertEqual(res.age, 7)
         xprint()
         with self.assertRaises(AssertionError):
-            res=C(killme=42)
+            res = C(killme=42)
         xprint()
 
     def testDEF(self):

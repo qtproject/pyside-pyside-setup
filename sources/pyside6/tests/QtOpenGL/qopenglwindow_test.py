@@ -16,7 +16,7 @@ from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import QSize, QTimer, Qt
 from PySide6.QtGui import (QColor, QGuiApplication, QImage, QOpenGLContext,
-    QSurfaceFormat)
+                           QSurfaceFormat)
 from PySide6.QtOpenGL import QOpenGLTexture, QOpenGLWindow
 
 

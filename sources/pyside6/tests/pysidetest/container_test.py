@@ -44,13 +44,13 @@ class ContainerTestTest(unittest.TestCase):
         self.assertEqual(sort_values(m2), EXPECTED_DICT)
 
     def testList(self):
-        l1 = ContainerTest.createList();
+        l1 = ContainerTest.createList()
         self.assertEqual(l1, EXPECTED_LIST)
         l2 = ContainerTest.passThroughList(l1)
         self.assertEqual(l2, EXPECTED_LIST)
 
     def testSet(self):
-        s1 = ContainerTest.createSet();  # Order is not predictable
+        s1 = ContainerTest.createSet()  # Order is not predictable
         s2 = ContainerTest.passThroughSet(s1)
         self.assertEqual(sorted(list(s1)), sorted(list(s2)))
 

@@ -36,7 +36,7 @@ class ConstructorPropertiesTest(unittest.TestCase):
     def testCallConstructor(self):
         label = QLabel(
             frameStyle=QFrame.Panel | QFrame.Sunken,    # QFrame attr, no property
-            lineWidth = 2,                              # QFrame property
+            lineWidth=2,                                # QFrame property
             text="first line\nsecond line",             # QLabel property
             alignment=Qt.AlignBottom | Qt.AlignRight    # QLabel property
         )
@@ -52,13 +52,13 @@ class ConstructorPropertiesTest(unittest.TestCase):
 
         label = QLabel(
             frame_style=QFrame.Panel | QFrame.Sunken,   # QFrame attr, no property
-            line_width = 2,                             # QFrame property
+            line_width=2,                               # QFrame property
             text="first line\nsecond line",             # QLabel property
             alignment=Qt.AlignBottom | Qt.AlignRight    # QLabel property
         )
         self.assertEqual(label.line_width(), 2)
         self.assertRaises(AttributeError, lambda: QLabel(
-            lineWidth = 2,                              # QFrame property
+            lineWidth=2,                                # QFrame property
         ))
 
     # PYSIDE-1705: The same with true_property
@@ -68,13 +68,13 @@ class ConstructorPropertiesTest(unittest.TestCase):
 
         label = QLabel(
             frameStyle=QFrame.Panel | QFrame.Sunken,    # QFrame attr, no property
-            lineWidth = 2,                              # QFrame property
+            lineWidth=2,                                # QFrame property
             text="first line\nsecond line",             # QLabel property
             alignment=Qt.AlignBottom | Qt.AlignRight    # QLabel property
         )
         self.assertEqual(label.lineWidth, 2)
         self.assertRaises(AttributeError, lambda: QLabel(
-            line_width = 2,                             # QFrame property
+            line_width=2,                               # QFrame property
         ))
 
     # PYSIDE-1705: The same with snake_case and true_property
@@ -84,13 +84,13 @@ class ConstructorPropertiesTest(unittest.TestCase):
 
         label = QLabel(
             frame_style=QFrame.Panel | QFrame.Sunken,   # QFrame attr, no property
-            line_width = 2,                             # QFrame property
+            line_width=2,                               # QFrame property
             text="first line\nsecond line",             # QLabel property
             alignment=Qt.AlignBottom | Qt.AlignRight    # QLabel property
         )
         self.assertEqual(label.line_width, 2)
         self.assertRaises(AttributeError, lambda: QLabel(
-            lineWidth = 2,                              # QFrame property
+            lineWidth=2,                                # QFrame property
         ))
 
 

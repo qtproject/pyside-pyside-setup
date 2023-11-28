@@ -17,6 +17,7 @@ from PySide6.QtCore import (QLoggingCategory, QtMsgType, qCDebug, qCWarning, qCI
 
 param = None
 
+
 def handler(msgt, ctx, msg):
     global param
     param = ctx.category + ": " + msg.strip()
@@ -69,7 +70,6 @@ class TestQLoggingCategory(unittest.TestCase):
         # nothing will be printed here
         qCWarning(self.criticalCategory, f"devices: {self.no_devices}")
         self.assertEqual(param, "warning.log: devices: 2")
-
 
     def test_qCritical(self):
         qCCritical(self.defaultCategory, "no device")

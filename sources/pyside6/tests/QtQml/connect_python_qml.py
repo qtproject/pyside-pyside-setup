@@ -42,7 +42,8 @@ class TestConnectionWithInvalidSignature(TimedQGuiApplication):
         root = view.rootObject()
         self.assertTrue(root, quickview_errorstring(view))
         button = root.findChild(QObject, "buttonMouseArea")
-        self.assertRaises(TypeError, QObject.connect, [button,SIGNAL('entered()'), self.onButtonFailClicked])
+        self.assertRaises(TypeError, QObject.connect,
+                          [button, SIGNAL('entered()'), self.onButtonFailClicked])
         button.entered.connect(self.onButtonClicked)
         button.entered.emit()
         view.show()

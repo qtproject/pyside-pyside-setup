@@ -21,7 +21,7 @@ class View_1(QWidget):
         super().__init__()
         loader = QUiLoader()
         file = Path(__file__).resolve().parent / 'bug_552.ui'
-        assert(file.is_file())
+        assert (file.is_file())
         widget = loader.load(os.fspath(file), self)
         self.children = []
         for child in widget.findChildren(QObject, None):

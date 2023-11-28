@@ -13,7 +13,7 @@ init_test_paths(False)
 
 from PySide6.QtGui import QStandardItemModel
 from PySide6.QtWidgets import (QWidget, QTreeView, QVBoxLayout,
-    QStyledItemDelegate, QHeaderView)
+                               QStyledItemDelegate, QHeaderView)
 from PySide6.QtCore import Qt
 from helper.usesqapplication import UsesQApplication
 

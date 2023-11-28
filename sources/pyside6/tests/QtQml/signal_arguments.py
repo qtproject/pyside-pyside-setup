@@ -20,6 +20,7 @@ from PySide6.QtQml import QmlElement
 QML_IMPORT_NAME = "test.Obj"
 QML_IMPORT_MAJOR_VERSION = 1
 
+
 @QmlElement
 class Obj(QObject):
     def __init__(self):

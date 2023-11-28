@@ -29,13 +29,14 @@ from PySide6.QtQml import QmlElement
 QML_IMPORT_NAME = "test.ListModel"
 QML_IMPORT_MAJOR_VERSION = 1
 
+
 @QmlElement
 class ListModel(QAbstractListModel):
     def __init__(self):
         super().__init__()
 
     def roleNames(self):
-        return { Qt.DisplayRole: b'pysideModelData' }
+        return {Qt.DisplayRole: b'pysideModelData'}
 
     def rowCount(self, parent=QModelIndex()):
         return 3

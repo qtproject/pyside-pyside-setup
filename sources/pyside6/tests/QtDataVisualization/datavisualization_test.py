@@ -82,8 +82,8 @@ class QtDataVisualizationTestCase(UsesQApplication):
         self.assertTrue(data_proxy.rowCount(), 4)
 
     def testDefaultSurfaceFormat(self):
-         format = qDefaultSurfaceFormat(True)
-         print(format)
+        format = qDefaultSurfaceFormat(True)
+        print(format)
 
     def testQValue3DAxisFormatter(self):
         """PYSIDE-2025: Test the added setters of QValue3DAxisFormatter."""

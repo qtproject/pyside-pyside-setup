@@ -16,6 +16,7 @@ PYSIDE-2029: Tests that snake_case is isolated from imported modules
 
 from PySide6.QtWidgets import QWidget
 
+
 def test_no_snake_case():
     print(__name__)
     widget = QWidget()

@@ -15,6 +15,7 @@ from testbinding import Enum1, TestObjectWithoutNamespace
 
 import dis
 
+
 class ListConnectionTest(unittest.TestCase):
 
     def testEnumVisibility(self):
@@ -45,6 +46,7 @@ class ListConnectionTest(unittest.TestCase):
         self.assertFalse(Qt.AlignBottom < Qt.AlignHCenter)
         self.assertTrue(Qt.AlignBottom > Qt.AlignHCenter)
 
+
 # PYSIDE-1735: We are testing that opcodes do what they are supposed to do.
 #              This is needed in the PyEnum forgiveness mode where we need
 #              to introspect the code if an Enum was called with no args.
@@ -69,6 +71,7 @@ class InvestigateOpcodesTest(unittest.TestCase):
         return sorted(res, key=lambda x: (x[1], x[0]))
 
     _sin = sys.implementation.name
+
     @unittest.skipIf(hasattr(sys.flags, "nogil"), f"{_sin} has different opcodes")
     def testByteCode(self):
         import dis
@@ -134,7 +137,7 @@ class InvestigateOpcodesTest(unittest.TestCase):
                 for _ in range(times):
                     f()
 
-            code_quicken(self.probe_function2, QUICKENING_WARMUP_DELAY-1)
+            code_quicken(self.probe_function2, QUICKENING_WARMUP_DELAY - 1)
             self.assertEqual(self.read_code(self.probe_function2, adaptive=True), result_2)
             self.assertEqual(self.get_sizes(self.probe_function2, adaptive=True), sizes_2)
 
@@ -173,7 +176,6 @@ class InvestigateOpcodesTest(unittest.TestCase):
                         ('CALL', 171, 0),
                         ('STORE_FAST', 125, 1),
                         ('RETURN_CONST', 121, 0)]
-
 
         self.assertEqual(self.read_code(self.probe_function1), result_1)
         self.assertEqual(self.read_code(self.probe_function2), result_2)

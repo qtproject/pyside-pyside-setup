@@ -26,7 +26,7 @@ class MyWidget(QWidget):
 
     def __init__(self, app):
         # Creates a new widget
-        assert(app)
+        assert (app)
 
         super().__init__()
         self.app = app

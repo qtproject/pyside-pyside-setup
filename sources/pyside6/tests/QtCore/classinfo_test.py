@@ -33,7 +33,7 @@ class TestClassInfo(unittest.TestCase):
         self.assertEqual(ci.value(), 'http://www.pyside.org')
 
     def test_dictionary(self):
-        @ClassInfo({'author':'pyside', 'author company':'The Qt Company'})
+        @ClassInfo({'author': 'pyside', 'author company': 'The Qt Company'})
         class MyObject(QObject):
             pass
 
@@ -50,11 +50,11 @@ class TestClassInfo(unittest.TestCase):
         self.assertEqual(ci.value(), 'The Qt Company')
 
     def test_verify_metadata_types(self):
-        valid_dict = { '123': '456' }
+        valid_dict = {'123': '456'}
 
-        invalid_dict_1 = { '123': 456 }
-        invalid_dict_2 = {  123:  456 }
-        invalid_dict_3 = {  123: '456' }
+        invalid_dict_1 = {'123': 456}
+        invalid_dict_2 = {123: 456}
+        invalid_dict_3 = {123: '456'}
 
         ClassInfo(**valid_dict)
 
@@ -88,6 +88,7 @@ class TestClassInfo(unittest.TestCase):
     def test_can_only_be_used_on_qobjects(self):
         def make_info():
             return ClassInfo(author='pyside')
+
         def test_function():
             pass
         self.assertRaises(TypeError, make_info(), test_function)

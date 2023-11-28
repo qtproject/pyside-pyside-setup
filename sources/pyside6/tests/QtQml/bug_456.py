@@ -19,6 +19,7 @@ from PySide6.QtQml import QmlElement
 QML_IMPORT_NAME = "test.RotateValue"
 QML_IMPORT_MAJOR_VERSION = 1
 
+
 @QmlElement
 class RotateValue(QObject):
     def __init__(self):

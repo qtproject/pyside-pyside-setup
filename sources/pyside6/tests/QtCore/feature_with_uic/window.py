@@ -28,7 +28,6 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.pushButton)
 
-
         self.horizontalLayout.addLayout(self.verticalLayout)
 
         MainWindow.setCentralWidget(self.centralwidget)

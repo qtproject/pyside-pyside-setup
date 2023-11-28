@@ -49,6 +49,7 @@ def runtest(program):
         finally:
             os.unlink(fp.name)
 
+
 def testprog2(option):
     return runtest(dedent(f"""
         sys.pyside6_option_python_enum = {option}
@@ -57,12 +58,14 @@ def testprog2(option):
         assert(issubclass(QtCore.Qt.DateFormat, IntEnum))
         """))
 
+
 def testprog4(option):
     return runtest(dedent(f"""
         sys.pyside6_option_python_enum = {option}
         from PySide6 import QtCore
         QtCore.QtDebugMsg
         """))
+
 
 def testprog8_16(option):
     # this test needs flag 16, or the effect would be hidden by forgiving mode
@@ -72,6 +75,7 @@ def testprog8_16(option):
         QtCore.Qt.AlignTop
         """))
 
+
 def testprog32(option):
     return runtest(dedent(f"""
         sys.pyside6_option_python_enum = {option}
@@ -79,12 +83,14 @@ def testprog32(option):
         QtCore.Qt.Alignment
         """))
 
+
 def testprog64(option):
     return runtest(dedent(f"""
         sys.pyside6_option_python_enum = {option}
         from PySide6 import QtCore
         QtCore.Qt.AlignmentFlag()
         """))
+
 
 def testprog128(option):
     return runtest(dedent(f"""
@@ -110,8 +116,8 @@ class TestPyEnumRelaxOption(unittest.TestCase):
         self.assertTrue(testprog4(12))
 
     def test_localDefault(self):
-        self.assertTrue(testprog8_16(8+16))
-        self.assertFalse(testprog8_16(0+16))
+        self.assertTrue(testprog8_16(8 + 16))
+        self.assertFalse(testprog8_16(0 + 16))
 
     def test_fakeRenames(self):
         self.assertTrue(testprog32(1))

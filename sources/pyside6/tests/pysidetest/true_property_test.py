@@ -43,6 +43,7 @@ class TruePropertyInheritanceTest(UsesQApplication):
         self.assertTrue(hasattr(widget, "setVisible"))
         self.assertEqual(widget.isVisible, QWidget.visible.fget)
         self.assertEqual(widget.setVisible, QWidget.visible.fset)
+
         # This works with inheritance as well:
         class SubClass(QWidget):
             pass

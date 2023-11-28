@@ -28,6 +28,7 @@ from PySide6.QtQml import QmlElement
 QML_IMPORT_NAME = "test.PythonObject"
 QML_IMPORT_MAJOR_VERSION = 1
 
+
 @QmlElement
 class PythonObject(QObject):
     def __init__(self):

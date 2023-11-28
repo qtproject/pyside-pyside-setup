@@ -26,7 +26,7 @@ def _cleanup():
 
 def _checkCleanup():
     global callCleanup
-    assert(callCleanup)
+    assert (callCleanup)
 
 
 app = QCoreApplication([])
