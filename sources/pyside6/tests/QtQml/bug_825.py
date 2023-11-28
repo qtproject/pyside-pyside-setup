@@ -33,6 +33,7 @@ class MetaA(type):
 class A(object, metaclass=MetaA):
     pass
 
+
 MetaB = type(QQuickPaintedItem)
 B = QQuickPaintedItem
 

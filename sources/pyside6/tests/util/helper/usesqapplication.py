@@ -12,6 +12,7 @@ import unittest
 # This should work with every compatible library.
 # Replaces the QtGui and QtCore versions as well.
 
+
 class UsesQApplication(unittest.TestCase):
     '''Helper class to provide Q(Core|Gui|)Application instances
     Just connect or call self.exit_app_cb. When called, will ask

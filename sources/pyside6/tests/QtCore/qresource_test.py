@@ -31,7 +31,7 @@ class ResourcesUsage(unittest.TestCase):
             if carriage_return != -1:
                 orig.remove(carriage_return, 1)
 
-        f = QFile(':/quote.txt')  #|QIODevice.Text
+        f = QFile(':/quote.txt')  # |QIODevice.Text
         self.assertTrue(f.open(QIODevice.ReadOnly), f.errorString())
         copy = f.readAll()
         f.close()

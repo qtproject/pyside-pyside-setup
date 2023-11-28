@@ -15,9 +15,11 @@ init_test_paths(False)
 
 from PySide6.QtBluetooth import QBluetoothLocalDevice
 
+
 class QBluetoothLocalDeviceTest(unittest.TestCase):
     def testInitialization(self):
         device = QBluetoothLocalDevice()
+
 
 if __name__ == '__main__':
     unittest.main()

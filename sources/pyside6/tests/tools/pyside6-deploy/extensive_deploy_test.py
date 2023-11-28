@@ -56,7 +56,7 @@ class TestPySide6Deploy(unittest.TestCase):
                          keep_deployment_files=True, force=True)
 
         print("Now testing Widget with config file")
-        self.deploy.main(self.main_file, config_file=self.config_file,  loglevel=logging.INFO,
+        self.deploy.main(self.main_file, config_file=self.config_file, loglevel=logging.INFO,
                          force=True)
 
     def setUpQml(self):

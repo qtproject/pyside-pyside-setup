@@ -15,7 +15,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import (QByteArray, QCborStreamReader, QCborStreamWriter,
-    QCborTag, QCborValue)
+                            QCborTag, QCborValue)
 
 
 class TestCbor(unittest.TestCase):

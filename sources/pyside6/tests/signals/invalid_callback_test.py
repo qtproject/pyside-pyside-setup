@@ -35,7 +35,7 @@ class InvalidCallback(unittest.TestCase):
     def testIntegerCb(self):
         # Test passing an int as callback to QObject.connect
         self.assertRaises(TypeError, QObject.connect, self.obj,
-                            SIGNAL('destroyed()'), 42)
+                          SIGNAL('destroyed()'), 42)
 
 
 if __name__ == '__main__':

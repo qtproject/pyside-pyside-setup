@@ -27,7 +27,7 @@ class BugTest(UsesQApplication):
         treeWidget.insertTopLevelItems(0, items)
         _iter = QTreeWidgetItemIterator(treeWidget)
         index = 0
-        while(_iter.value()):
+        while (_iter.value()):
             item = _iter.value()
             self.assertTrue(item is items[index])
             index += 1

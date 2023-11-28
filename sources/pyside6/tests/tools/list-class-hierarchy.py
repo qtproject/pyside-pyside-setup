@@ -19,8 +19,7 @@ from inspect import isclass
 ignore = ["staticMetaObject",
           "pyqtConfigure",
           "registerUserData",
-          "thread",
-         ]
+          "thread"]
 
 
 def recurse_into(el, obj):
@@ -47,7 +46,7 @@ def recurse_into(el, obj):
     return symbols
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     modules = [ 'QtCore',
                 'QtGui',
                 'QtHelp',

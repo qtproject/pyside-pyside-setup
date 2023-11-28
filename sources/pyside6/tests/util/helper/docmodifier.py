@@ -83,9 +83,9 @@ if __name__ == '__main__':
         doc_filter = lambda x: x.startswith('test')
         doc_suffix = 'suffix'
 
-    assert(Implementing.testBase.__doc__ == 'prefixbasesuffix')
-    assert(Implementing.testWithoutDoc.__doc__ == None)
-    assert(OnlySuffix.testBase.__doc__ == 'basesuffix')
-    assert(OnlySuffix.testWithoutDoc.__doc__ == None)
-    assert(OnlyPrefix.testBase.__doc__ == 'prefixbase')
-    assert(OnlyPrefix.testWithoutDoc.__doc__ == None)
+    assert (Implementing.testBase.__doc__ == 'prefixbasesuffix')
+    assert (Implementing.testWithoutDoc.__doc__ == None)
+    assert (OnlySuffix.testBase.__doc__ == 'basesuffix')
+    assert (OnlySuffix.testWithoutDoc.__doc__ == None)
+    assert (OnlyPrefix.testBase.__doc__ == 'prefixbase')
+    assert (OnlyPrefix.testWithoutDoc.__doc__ == None)

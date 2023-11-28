@@ -13,7 +13,7 @@ init_test_paths(False)
 
 from PySide6.QtCore import Qt, QObject
 from PySide6.QtWidgets import (QComboBox, QGraphicsScene,
-    QGraphicsRectItem)
+                               QGraphicsRectItem)
 
 from helper.usesqapplication import UsesQApplication
 
@@ -114,8 +114,8 @@ class QVariantConversionTest(UsesQApplication):
 
     def testContainerTypes(self):
         #list
-        self.obj.setProperty("test", [1,2,3])
-        self.assertEqual(self.obj.property("test"), [1,2,3])
+        self.obj.setProperty("test", [1, 2, 3])
+        self.assertEqual(self.obj.property("test"), [1, 2, 3])
         self.assertTrue(isinstance(self.obj.property("test"), list))
         #dict
         self.obj.setProperty("test", {1: "one"})

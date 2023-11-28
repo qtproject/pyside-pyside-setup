@@ -15,7 +15,7 @@ from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtGui import QWindow
 from PySide6.QtWidgets import (QApplication, QFontComboBox, QLabel, QProxyStyle,
-    QStyleFactory, QWidget)
+                               QStyleFactory, QWidget)
 
 
 class ProxyStyle(QProxyStyle):

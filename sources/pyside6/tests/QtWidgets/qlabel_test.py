@@ -64,7 +64,7 @@ class QLabelTest(UsesQApplication):
         # address that our QPixmap p1 because it was deleted
         # using `del ret_p`
         self.assertTrue(all(Shiboken.getCppPointer(o) != ret_p_addr
-                   for o in Shiboken.getAllValidWrappers()))
+                        for o in Shiboken.getAllValidWrappers()))
 
     # Test for PYSIDE-1673, QObject.property() returning a QFlags<> property.
     def testQObjectProperty(self):

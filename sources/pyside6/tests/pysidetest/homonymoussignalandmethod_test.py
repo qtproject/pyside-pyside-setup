@@ -99,8 +99,8 @@ class HomonymousMultipleInheritanceTest(unittest.TestCase):
 
     def testHomonymousMultipleInheritance(self):
         c = C()
-        self.assertEqual(c.method(), "M::method") # okay
-        self.assertEqual(c.signal(), "M::signal") # problem on PySide6 6.2.2
+        self.assertEqual(c.method(), "M::method")  # okay
+        self.assertEqual(c.signal(), "M::signal")  # problem on PySide6 6.2.2
         self.assertEqual(type(c.signal), SignalInstance)
 
 

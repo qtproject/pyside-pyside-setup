@@ -49,6 +49,7 @@ def singletonQJSValueCallback(engine):
 QML_IMPORT_NAME = "Singletons"
 QML_IMPORT_MAJOR_VERSION = 1
 
+
 @QmlElement
 @QmlSingleton
 class DecoratedSingletonQObject(QObject):

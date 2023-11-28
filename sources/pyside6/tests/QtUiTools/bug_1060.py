@@ -27,6 +27,6 @@ if __name__ == "__main__":
     app = QApplication([])
 
     file = Path(__file__).resolve().parent / 'bug_1060.ui'
-    assert(file.is_file())
+    assert (file.is_file())
     ui = MyQUiLoader().load(file)
     ui.show()

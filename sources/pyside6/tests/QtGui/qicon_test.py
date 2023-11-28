@@ -26,6 +26,7 @@ class QIconCtorWithNoneTest(TimedQGuiApplication):
 PIX_PATH = os.fspath(Path(__file__).resolve().parents[2]
                      / "doc/tutorials/basictutorial/icons.png")
 
+
 class QIconAddPixmapTest(TimedQGuiApplication):
     '''PYSIDE-1669: check that addPixmap works'''
 

@@ -27,7 +27,7 @@ class ProcessTimer(object):
 
     def waitfor(self):
         time_passed = 0
-        while(self.proc.poll() is None and time_passed < self.timeout):
+        while (self.proc.poll() is None and time_passed < self.timeout):
             time_passed = time_passed + 1
             time.sleep(1)
 

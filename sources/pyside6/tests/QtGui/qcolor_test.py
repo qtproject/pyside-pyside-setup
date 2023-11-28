@@ -41,7 +41,7 @@ class QColorGetTest(unittest.TestCase):
 
     def testGetCmykF(self):  # not supported by colorsys
         for x, y in zip(self.color.getCmykF(), (170 / 255.0, 85 / 255.0, 0, 195 / 255.0, 80 / 255.0)):
-            self.assertTrue(x - y < 1/10000.0)
+            self.assertTrue(x - y < 1 / 10000.0)
 
 
 class QColorQRgbConstructor(unittest.TestCase):

@@ -105,10 +105,9 @@ class ParentCase(unittest.TestCase):
         for i, child in enumerate(children):
             self.assertEqual(child, parent.findChild(QObject, f'object{i}'))
 
-
     def testFindChildOptions(self):
         parent = QObject()
-        child  = QObject(parent)
+        child = QObject(parent)
         nested_child_name = 'nestedChild'
         nested_child = QObject(child)
         nested_child.setObjectName(nested_child_name)
