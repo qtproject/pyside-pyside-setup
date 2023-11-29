@@ -99,7 +99,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
         self.expected_run_cmd = (
             f"{sys.executable} -m nuitka {str(self.main_file)} --follow-imports --onefile"
             f" --enable-plugin=pyside6 --output-dir={str(self.deployment_files)} --quiet"
-            f" --noinclude-qt-translations=True"
+            f" --noinclude-qt-translations"
         )
         if sys.platform.startswith("linux"):
             self.expected_run_cmd += f" --linux-onefile-icon={str(self.linux_onefile_icon)}"
@@ -130,9 +130,9 @@ class TestPySide6DeployWidgets(DeployTestBase):
         self.assertEqual(config_obj.get_value("app", "input_file"), "tetrix.py")
         self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
-        self.assertEqual(config_obj.get_value("python", "packages"), "nuitka==1.5.4,ordered_set,zstandard")
+        self.assertEqual(config_obj.get_value("python", "packages"), "nuitka==1.8.0,ordered_set,zstandard")
         self.assertEqual(config_obj.get_value("qt", "qml_files"), "")
-        equ_base = "--quiet --noinclude-qt-translations=True"
+        equ_base = "--quiet --noinclude-qt-translations"
         equ_value = equ_base + " --static-libpython=no" if is_pyenv_python() else equ_base
         self.assertEqual(config_obj.get_value("nuitka", "extra_args"), equ_value)
         self.assertEqual(config_obj.get_value("qt", "excluded_qml_plugins"), "")
@@ -157,7 +157,7 @@ class TestPySide6DeployQml(DeployTestBase):
         self.expected_run_cmd = (
             f"{sys.executable} -m nuitka {str(self.main_file)} --follow-imports --onefile"
             f" --enable-plugin=pyside6 --output-dir={str(self.deployment_files)} --quiet"
-            f" --noinclude-qt-translations=True --include-qt-plugins=all"
+            f" --noinclude-qt-translations --include-qt-plugins=all"
             f" --include-data-files={str(self.temp_example_qml / self.first_qml_file)}="
             f"./main.qml --include-data-files="
             f"{str(self.temp_example_qml /self.second_qml_file)}=./MovingRectangle.qml"
@@ -194,9 +194,9 @@ class TestPySide6DeployQml(DeployTestBase):
         self.assertEqual(config_obj.get_value("app", "input_file"), "main.py")
         self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
-        self.assertEqual(config_obj.get_value("python", "packages"), "nuitka==1.5.4,ordered_set,zstandard")
+        self.assertEqual(config_obj.get_value("python", "packages"), "nuitka==1.8.0,ordered_set,zstandard")
         self.assertEqual(config_obj.get_value("qt", "qml_files"), "main.qml,MovingRectangle.qml")
-        equ_base = "--quiet --noinclude-qt-translations=True"
+        equ_base = "--quiet --noinclude-qt-translations"
         equ_value = equ_base + " --static-libpython=no" if is_pyenv_python() else equ_base
         self.assertEqual(config_obj.get_value("nuitka", "extra_args"), equ_value)
         self.assertEqual(
@@ -252,7 +252,7 @@ class TestPySide6DeployWebEngine(DeployTestBase):
         expected_run_cmd = (
             f"{sys.executable} -m nuitka {str(main_file)} --follow-imports --onefile"
             f" --enable-plugin=pyside6 --output-dir={str(deployment_files)} --quiet"
-            f" --noinclude-qt-translations=True --include-qt-plugins=all"
+            f" --noinclude-qt-translations --include-qt-plugins=all"
             f" {data_files_cmd}"
         )
 

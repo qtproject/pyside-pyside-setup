@@ -24,7 +24,7 @@ python_path =
 # python packages to install
 # ordered-set: increase compile time performance of nuitka packaging
 # zstandard: provides final executable size optimization
-packages = nuitka==1.5.4,ordered_set,zstandard
+packages = nuitka==1.8.0,ordered_set,zstandard
 
 # buildozer: for deploying Android application
 android_packages = buildozer==1.5.0,cython==0.29.33
@@ -51,7 +51,7 @@ plugins = platforms_qtforandroid
 
 # (str) specify any extra nuitka arguments
 # eg: extra_args = --show-modules --follow-stdlib
-extra_args = --quiet --noinclude-qt-translations=True
+extra_args = --quiet --noinclude-qt-translations
 
 [buildozer]
 
