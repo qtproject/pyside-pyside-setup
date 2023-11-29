@@ -301,8 +301,8 @@ type_map.update({
     "array long long*"      : ArrayLikeVariable(int),
     "array long*"           : ArrayLikeVariable(int),
     "array short*"          : ArrayLikeVariable(int),
-    "array signed char*"    : bytes,
-    "array unsigned char*"  : bytes,
+    "array signed char*"    : typing.Union[bytes, bytearray, memoryview],
+    "array unsigned char*"  : typing.Union[bytes, bytearray, memoryview],
     "array unsigned int*"   : ArrayLikeVariable(int),
     "array unsigned short*" : ArrayLikeVariable(int),
     # PYSIDE-1646: New macOS primitive types
@@ -317,12 +317,12 @@ type_map.update({
 
 type_map.update({
     # Special cases:
-    "char*"         : bytes,
-    "QChar*"        : bytes,
+    "char*"         : typing.Union[bytes, bytearray, memoryview],
+    "QChar*"        : typing.Union[bytes, bytearray, memoryview],
     "quint32*"      : int,        # only for QRandomGenerator
     "quint8*"       : bytearray,  # only for QCborStreamReader and QCborValue
-    "uchar*"        : bytes,
-    "unsigned char*": bytes,
+    "uchar*"        : typing.Union[bytes, bytearray, memoryview],
+    "unsigned char*": typing.Union[bytes, bytearray, memoryview],
     })
 
 type_map.update({
@@ -391,7 +391,7 @@ def init_sample():
         "const char*": str,
         "Complex": complex,
         "double": float,
-        "ByteArray&": bytes,
+        "ByteArray&": typing.Union[bytes, bytearray, memoryview],
         "Foo.HANDLE": int,
         "HANDLE": int,
         "Null": None,
@@ -399,7 +399,7 @@ def init_sample():
         "OddBool": bool,
         "PStr": str,
         "PyDate": datetime.date,
-        "PyBuffer": bytes,
+        "PyBuffer": typing.Union[bytes, bytearray, memoryview],
         "sample.bool": bool,
         "sample.char": int,
         "sample.double": float,
@@ -469,9 +469,9 @@ def init_PySide6_QtCore():
         "size_t": int,
         "NULL": None, # 5.6, MSVC
         "nullptr": None, # 5.9
-        "PyBuffer": bytes,
+        "PyBuffer": typing.Union[bytes, bytearray, memoryview],
         "PyByteArray": bytearray,
-        "PyBytes": bytes,
+        "PyBytes": typing.Union[bytes, bytearray, memoryview],
         "PyTuple": typing.Tuple,
         "QDeadlineTimer(QDeadlineTimer.Forever)": Instance("PySide6.QtCore.QDeadlineTimer"),
         "PySide6.QtCore.QUrl.ComponentFormattingOptions":
