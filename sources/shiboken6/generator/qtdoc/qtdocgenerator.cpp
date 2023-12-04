@@ -25,6 +25,7 @@
 #include <functiontypeentry.h>
 #include <enumtypeentry.h>
 #include <complextypeentry.h>
+#include <flagstypeentry.h>
 #include <primitivetypeentry.h>
 #include <qtdocparser.h>
 #include <doxygenparser.h>
@@ -718,6 +719,12 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
     const auto found = typeMap.constFind(name);
     if (found != typeMap.cend())
         return found.value();
+
+    if (type.isFlags()) {
+        const auto fte = std::static_pointer_cast<const FlagsTypeEntry>(type.typeEntry());
+        auto enumName = fte->originator()->targetLangName();
+        return "Combination of "_L1 + (createRef ? toRef(enumName) : enumName);
+    }
 
     if (type.isConstant() && name == "char"_L1 && type.indirections() == 1)
         return "str"_L1;
