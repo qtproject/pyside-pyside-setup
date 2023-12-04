@@ -25,6 +25,7 @@
 #include <functiontypeentry.h>
 #include <enumtypeentry.h>
 #include <complextypeentry.h>
+#include <primitivetypeentry.h>
 #include <qtdocparser.h>
 #include <doxygenparser.h>
 
@@ -681,6 +682,11 @@ QString QtDocGenerator::functionSignature(const AbstractMetaClassCPtr &cppClass,
     return funcName + formatArgs(func);
 }
 
+static QString inline toRef(const QString &t)
+{
+    return ":any:`"_L1 + t + u'`';
+}
+
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
                                               const AbstractMetaClassCPtr &cppClass,
                                               bool createRef) const
@@ -688,36 +694,36 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
     static const QStringList nativeTypes =
         {boolT(), floatT(), intT(), pyObjectT(), pyStrT()};
 
-    const QString name = type.name();
+    QString name = type.name();
     if (nativeTypes.contains(name))
         return name;
 
-    static const QMap<QString, QString> typeMap = {
+    static const QHash<QString, QString> typeMap = {
         { cPyObjectT(), pyObjectT() },
         { qStringT(), pyStrT() },
         { u"uchar"_s, pyStrT() },
         { u"QStringList"_s, u"list of strings"_s },
-        { qVariantT(), pyObjectT() },
-        { u"quint32"_s, intT() },
-        { u"uint32_t"_s, intT() },
-        { u"quint64"_s, intT() },
-        { u"qint64"_s, intT() },
-        { u"size_t"_s, intT() },
-        { u"int64_t"_s, intT() },
-        { u"qreal"_s, floatT() }
+        { qVariantT(), pyObjectT() }
     };
-    const auto found = typeMap.find(name);
-    if (found != typeMap.end())
+
+    if (type.typeUsagePattern() == AbstractMetaType::PrimitivePattern) {
+        const auto &basicName = basicReferencedTypeEntry(type.typeEntry())->name();
+        if (AbstractMetaType::cppSignedIntTypes().contains(basicName)
+            || AbstractMetaType::cppUnsignedIntTypes().contains(basicName)) {
+            return intT();
+        }
+        if (AbstractMetaType::cppFloatTypes().contains(basicName))
+            return floatT();
+    }
+
+    const auto found = typeMap.constFind(name);
+    if (found != typeMap.cend())
         return found.value();
 
-    QString strType;
-    if (type.isConstant() && name == u"char" && type.indirections() == 1) {
-        strType = u"str"_s;
-    } else if (name.startsWith(unsignedShortT())) {
-        strType = intT();
-    } else if (name.startsWith(unsignedT())) { // uint and ulong
-        strType = intT();
-    } else if (type.isContainer()) {
+    if (type.isConstant() && name == "char"_L1 && type.indirections() == 1)
+        return "str"_L1;
+
+    if (type.isContainer()) {
         QString strType = translateType(type, cppClass, Options(ExcludeConst) | ExcludeReference);
         strType.remove(u'*');
         strType.remove(u'>');
@@ -733,15 +739,13 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
             strType = QString::fromLatin1("Dictionary with keys of type %1 and values of type %2.")
                                          .arg(types[0], types[1]);
         }
-    } else {
-        auto k = AbstractMetaClass::findClass(api().classes(), type.typeEntry());
-        strType = k ? k->fullName() : type.name();
-        if (createRef) {
-            strType.prepend(u":any:`"_s);
-            strType.append(u'`');
-        }
+        return strType;
     }
-    return strType;
+
+    if (auto k = AbstractMetaClass::findClass(api().classes(), type.typeEntry()))
+        return createRef ? toRef(k->fullName()) : k->fullName();
+
+    return createRef ? toRef(name) : name;
 }
 
 QString QtDocGenerator::getFuncName(const AbstractMetaFunctionCPtr &cppFunc)
