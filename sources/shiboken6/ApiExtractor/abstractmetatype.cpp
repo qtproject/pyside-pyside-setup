@@ -7,6 +7,8 @@
 #include "messages.h"
 #include "typedatabase.h"
 #include "containertypeentry.h"
+#include "enumtypeentry.h"
+#include "flagstypeentry.h"
 
 #include "qtcompat.h"
 #include "typeinfo.h"
@@ -698,10 +700,12 @@ QString AbstractMetaTypeData::formatPythonSignature() const
     if (m_typeEntry->isPrimitive())
         for (Indirection i : m_indirections)
             result += TypeInfo::indirectionKeyword(i);
-    // If it is a flags type, we replace it with the full name:
-    // "PySide6.QtCore.Qt.ItemFlags" instead of "PySide6.QtCore.QFlags<Qt.ItemFlag>"
-    if (m_typeEntry->isFlags())
-        result = m_typeEntry->qualifiedTargetLangName();
+    // If it is a flags type, we replace it with the full name of the enum:
+    // "PySide6.QtCore.Qt.ItemFlag" instead of "PySide6.QtCore.QFlags<Qt.ItemFlag>"
+    if (m_typeEntry->isFlags()) {
+        const auto fte = std::static_pointer_cast<const FlagsTypeEntry>(m_typeEntry);
+        result = fte->originator()->qualifiedTargetLangName();
+    }
     result.replace(u"::"_s, u"."_s);
     return result;
 }
