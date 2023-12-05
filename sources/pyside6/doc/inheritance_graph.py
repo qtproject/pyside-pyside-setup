@@ -16,6 +16,22 @@ python inheritance_graph.py  PySide6.QtWidgets PySide6.QtWidgets.QWizard
 """
 
 
+def format_dict(d):
+    """Format the URL dict for error message."""
+    result = '{'
+    n = 0
+    for k, v in d.items():
+        n += 1
+        if n > 10:
+            result += "..."
+            break
+        if n > 1:
+            result += ", "
+        result += f'"{k}": "{v}"'
+    result += '}'
+    return result
+
+
 class InheritanceGraph(object):
     """
     Given a list of classes, determines the set of classes that they inherit
@@ -104,6 +120,10 @@ class InheritanceGraph(object):
             if url is not None:
                 this_node_attrs['URL'] = f'"{url}"'
                 this_node_attrs['target'] = '"_top"'  # Browser target frame attribute (same page)
+            else:
+                urls_str = format_dict(urls)
+                print(f'inheritance_graph.py: No URL found for {name} ({fullname}) in {urls_str}.',
+                      file=sys.stderr)
             attribute = self._format_node_attrs(this_node_attrs)
             res.append(f'  "{name}" [{attribute}];\n')
 
