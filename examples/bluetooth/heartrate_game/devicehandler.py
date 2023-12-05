@@ -166,7 +166,8 @@ class DeviceHandler(BluetoothBaseClass):
 #! [Filter HeartRate service 2]
         # If heartRateService found, create new service
         if self.m_foundHeartRateService:
-            self.m_service = self.m_control.createServiceObject(QBluetoothUuid(QBluetoothUuid.ServiceClassUuid.HeartRate), self)
+            self.m_service = self.m_control.createServiceObject(
+                QBluetoothUuid(QBluetoothUuid.ServiceClassUuid.HeartRate), self)
 
         if self.m_service:
             self.m_service.stateChanged.connect(self.serviceStateChanged)
@@ -185,9 +186,11 @@ class DeviceHandler(BluetoothBaseClass):
             self.info = "Discovering services..."
         elif switch == QLowEnergyService.RemoteServiceDiscovered:
             self.info = "Service discovered."
-            hrChar = self.m_service.characteristic(QBluetoothUuid(QBluetoothUuid.CharacteristicType.HeartRateMeasurement))
+            hrChar = self.m_service.characteristic(
+                QBluetoothUuid(QBluetoothUuid.CharacteristicType.HeartRateMeasurement))
             if hrChar.isValid():
-                self.m_notificationDesc = hrChar.descriptor(QBluetoothUuid.DescriptorType.ClientCharacteristicConfiguration)
+                self.m_notificationDesc = hrChar.descriptor(
+                    QBluetoothUuid.DescriptorType.ClientCharacteristicConfiguration)
                 if self.m_notificationDesc.isValid():
                     self.m_service.writeDescriptor(self.m_notificationDesc,
                                                    QByteArray.fromHex(b"0100"))
@@ -233,7 +236,7 @@ class DeviceHandler(BluetoothBaseClass):
     @Slot(QLowEnergyCharacteristic, QByteArray)
     def confirmedDescriptorWrite(self, d, value):
         if (d.isValid() and d == self.m_notificationDesc
-            and value == QByteArray.fromHex(b"0000")):
+                and value == QByteArray.fromHex(b"0000")):
             # disabled notifications . assume disconnect intent
             self.m_control.disconnectFromDevice()
             self.m_service = None
@@ -244,7 +247,7 @@ class DeviceHandler(BluetoothBaseClass):
 
         # disable notifications
         if (self.m_notificationDesc.isValid() and self.m_service
-            and self.m_notificationDesc.value() == QByteArray.fromHex(b"0100")):
+                and self.m_notificationDesc.value() == QByteArray.fromHex(b"0100")):
             self.m_service.writeDescriptor(self.m_notificationDesc,
                                            QByteArray.fromHex(b"0000"))
         else:
@@ -301,6 +304,6 @@ class DeviceHandler(BluetoothBaseClass):
             self.m_sum += value
             self.m_avg = float(self.m_sum) / len(self.m_measurements)
             self.m_calories = ((-55.0969 + (0.6309 * self.m_avg) + (0.1988 * 94)
-                               + (0.2017 * 24)) / 4.184) * 60 * self.time / 3600
+                                + (0.2017 * 24)) / 4.184) * 60 * self.time / 3600
 
         self.statsChanged.emit()

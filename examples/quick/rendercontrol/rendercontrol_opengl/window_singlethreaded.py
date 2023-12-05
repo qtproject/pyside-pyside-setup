@@ -247,7 +247,7 @@ class WindowSingleThreaded(QWindow):
         # If self is a resize after the scene is up and running, recreate the
         # texture and the Quick item and scene.
         if (self.texture_id()
-            and self.m_textureSize != self.size() * self.devicePixelRatio()):
+                and self.m_textureSize != self.size() * self.devicePixelRatio()):
             self.resizeTexture()
 
     @Slot()

@@ -87,7 +87,7 @@ class PatternLineEdit(QLineEdit):
             t = (
                 t[: selection_start]
                 + escapedSelection
-                + t[selection_start + len(selection) :]
+                + t[selection_start + len(selection):]
             )
             self.setText(t)
 
@@ -329,23 +329,20 @@ class RegularExpressionDialog(QDialog):
         self.patternOptionsCheckBoxLayout = QGridLayout()
         gridRow = 0
 
-        self.patternOptionsCheckBoxLayout.addWidget(self.caseInsensitiveOptionCheckBox, gridRow, \
-        1)
-        self.patternOptionsCheckBoxLayout.addWidget(self.dotMatchesEverythingOptionCheckBox, gridRow\
-        ,2)
+        self.patternOptionsCheckBoxLayout.addWidget(self.caseInsensitiveOptionCheckBox, gridRow, 1)
+        self.patternOptionsCheckBoxLayout.addWidget(
+            self.dotMatchesEverythingOptionCheckBox, gridRow, 2)
         gridRow = gridRow + 1
-        self.patternOptionsCheckBoxLayout.addWidget(self.multilineOptionCheckBox, gridRow, \
-        1)
-        self.patternOptionsCheckBoxLayout.addWidget(self.extendedPatternSyntaxOptionCheckBox, gridRow \
-        , 2)
+        self.patternOptionsCheckBoxLayout.addWidget(self.multilineOptionCheckBox, gridRow, 1)
+        self.patternOptionsCheckBoxLayout.addWidget(
+            self.extendedPatternSyntaxOptionCheckBox, gridRow, 2)
         gridRow = gridRow + 1
-        self.patternOptionsCheckBoxLayout.addWidget(self.invertedGreedinessOptionCheckBox, gridRow,\
-        1)
-        self.patternOptionsCheckBoxLayout.addWidget(self.dontCaptureOptionCheckBox, gridRow,\
-        2)
+        self.patternOptionsCheckBoxLayout.addWidget(
+            self.invertedGreedinessOptionCheckBox, gridRow, 1)
+        self.patternOptionsCheckBoxLayout.addWidget(self.dontCaptureOptionCheckBox, gridRow, 2)
         gridRow = gridRow + 1
-        self.patternOptionsCheckBoxLayout.addWidget(self.useUnicodePropertiesOptionCheckBox, gridRow,\
-        1)
+        self.patternOptionsCheckBoxLayout.addWidget(
+            self.useUnicodePropertiesOptionCheckBox, gridRow, 1)
 
         form_layout.addRow("Pattern options:", self.patternOptionsCheckBoxLayout)
 

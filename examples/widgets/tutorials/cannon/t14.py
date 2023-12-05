@@ -174,7 +174,8 @@ class CannonField(QWidget):
             self._auto_shoot_timer.stop()
             self.hit.emit()
             self.can_shoot.emit(True)
-        elif shot_r.x() > self.width() or shot_r.y() > self.height() or shot_r.intersects(self.barrier_rect()):
+        elif (shot_r.x() > self.width() or shot_r.y() > self.height()
+                or shot_r.intersects(self.barrier_rect())):
             self._auto_shoot_timer.stop()
             self.missed.emit()
             self.can_shoot.emit(True)

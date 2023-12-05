@@ -190,8 +190,8 @@ class Window(QDialog):
         self._body_label = QLabel("Body:")
 
         self._body_edit = QTextEdit()
-        self._body_edit.setPlainText("Don't believe me. Honestly, I don't have a clue."
-                                   "\nClick this balloon for details.")
+        self._body_edit.setPlainText("Don't believe me. Honestly, I don't have a clue.\n"
+                                     "Click this balloon for details.")
 
         self._show_message_button = QPushButton("Show Message")
         self._show_message_button.setDefault(True)

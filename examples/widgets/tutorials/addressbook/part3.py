@@ -116,17 +116,16 @@ class AddressBook(QWidget):
         address = self._address_text.toPlainText()
 
         if name == "" or address == "":
-            QMessageBox.information(self, "Empty Field",
-                    "Please enter a name and address.")
+            QMessageBox.information(self, "Empty Field", "Please enter a name and address.")
             return
 
         if name not in self.contacts:
             self.contacts[name] = address
             QMessageBox.information(self, "Add Successful",
-                    f'"{name}" has been added to your address book.')
+                                    f'"{name}" has been added to your address book.')
         else:
             QMessageBox.information(self, "Add Unsuccessful",
-                    f'Sorry, "{name}" is already in your address book.')
+                                    f'Sorry, "{name}" is already in your address book.')
             return
 
         if not self.contacts:

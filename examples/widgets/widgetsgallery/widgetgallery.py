@@ -164,8 +164,8 @@ class WidgetGallery(QDialog):
         top_layout.addStretch(1)
         top_layout.addWidget(disable_widgets_checkbox)
 
-        dialog_buttonbox = QDialogButtonBox(QDialogButtonBox.Help |
-                                            QDialogButtonBox.Close)
+        dialog_buttonbox = QDialogButtonBox(QDialogButtonBox.Help
+                                            | QDialogButtonBox.Close)
         init_widget(dialog_buttonbox, "dialogButtonBox")
         dialog_buttonbox.helpRequested.connect(launch_module_help)
         dialog_buttonbox.rejected.connect(self.reject)

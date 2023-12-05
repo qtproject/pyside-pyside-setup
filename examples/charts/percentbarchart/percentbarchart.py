@@ -21,11 +21,11 @@ class MainWindow(QMainWindow):
         set3 = QBarSet("Mary")
         set4 = QBarSet("Samantha")
 
-        set0.append([1, 2, 3,  4, 5, 6])
-        set1.append([5, 0, 0,  4, 0, 7])
+        set0.append([1, 2, 3, 4, 5, 6])
+        set1.append([5, 0, 0, 4, 0, 7])
         set2.append([3, 5, 8, 13, 8, 5])
-        set3.append([5, 6, 7,  3, 4, 5])
-        set4.append([9, 7, 5,  3, 1, 2])
+        set3.append([5, 6, 7, 3, 4, 5])
+        set4.append([9, 7, 5, 3, 1, 2])
 
         series = QPercentBarSeries()
         series.append(set0)

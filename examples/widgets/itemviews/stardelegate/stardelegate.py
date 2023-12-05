@@ -111,15 +111,15 @@ if __name__ == "__main__":
     # Create and populate the tableWidget
     table_widget = QTableWidget(4, 4)
     table_widget.setItemDelegate(StarDelegate())
-    table_widget.setEditTriggers(QAbstractItemView.DoubleClicked |
-                                 QAbstractItemView.SelectedClicked)
+    table_widget.setEditTriggers(QAbstractItemView.DoubleClicked
+                                 | QAbstractItemView.SelectedClicked)
     table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
     table_widget.setHorizontalHeaderLabels(["Title", "Genre", "Artist", "Rating"])
 
-    data = [ ["Mass in B-Minor", "Baroque", "J.S. Bach", 5],
-             ["Three More Foxes", "Jazz", "Maynard Ferguson", 4],
-             ["Sex Bomb", "Pop", "Tom Jones", 3],
-             ["Barbie Girl", "Pop", "Aqua", 5] ]
+    data = [["Mass in B-Minor", "Baroque", "J.S. Bach", 5],
+            ["Three More Foxes", "Jazz", "Maynard Ferguson", 4],
+            ["Sex Bomb", "Pop", "Tom Jones", 3],
+            ["Barbie Girl", "Pop", "Aqua", 5]]
 
     for r in range(len(data)):
         table_widget.setItem(r, 0, QTableWidgetItem(data[r][0]))

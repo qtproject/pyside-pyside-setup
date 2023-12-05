@@ -147,25 +147,25 @@ def create_mail_model(parent):
     model.setHeaderData(2, Qt.Horizontal, "Date")
 
     add_mail(model, "Happy New Year!", "Grace K. <grace@software-inc.com>",
-            QDateTime(QDate(2006, 12, 31), QTime(17, 3)))
+             QDateTime(QDate(2006, 12, 31), QTime(17, 3)))
     add_mail(model, "Radically new concept", "Grace K. <grace@software-inc.com>",
-            QDateTime(QDate(2006, 12, 22), QTime(9, 44)))
+             QDateTime(QDate(2006, 12, 22), QTime(9, 44)))
     add_mail(model, "Accounts", "pascale@nospam.com",
-            QDateTime(QDate(2006, 12, 31), QTime(12, 50)))
+             QDateTime(QDate(2006, 12, 31), QTime(12, 50)))
     add_mail(model, "Expenses", "Joe Bloggs <joe@bloggs.com>",
-            QDateTime(QDate(2006, 12, 25), QTime(11, 39)))
+             QDateTime(QDate(2006, 12, 25), QTime(11, 39)))
     add_mail(model, "Re: Expenses", "Andy <andy@nospam.com>",
-            QDateTime(QDate(2007, 1, 2), QTime(16, 5)))
+             QDateTime(QDate(2007, 1, 2), QTime(16, 5)))
     add_mail(model, "Re: Accounts", "Joe Bloggs <joe@bloggs.com>",
-            QDateTime(QDate(2007, 1, 3), QTime(14, 18)))
+             QDateTime(QDate(2007, 1, 3), QTime(14, 18)))
     add_mail(model, "Re: Accounts", "Andy <andy@nospam.com>",
-            QDateTime(QDate(2007, 1, 3), QTime(14, 26)))
+             QDateTime(QDate(2007, 1, 3), QTime(14, 26)))
     add_mail(model, "Sports", "Linda Smith <linda.smith@nospam.com>",
-            QDateTime(QDate(2007, 1, 5), QTime(11, 33)))
+             QDateTime(QDate(2007, 1, 5), QTime(11, 33)))
     add_mail(model, "AW: Sports", "Rolf Newschweinstein <rolfn@nospam.com>",
-            QDateTime(QDate(2007, 1, 5), QTime(12, 0)))
+             QDateTime(QDate(2007, 1, 5), QTime(12, 0)))
     add_mail(model, "RE: Sports", "Petra Schmidt <petras@nospam.com>",
-            QDateTime(QDate(2007, 1, 5), QTime(12, 1)))
+             QDateTime(QDate(2007, 1, 5), QTime(12, 1)))
 
     return model
 

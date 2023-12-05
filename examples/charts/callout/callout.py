@@ -4,8 +4,8 @@
 """PySide6 port of the Callout example from Qt v5.x"""
 
 import sys
-from PySide6.QtWidgets import (QApplication, QGraphicsScene,
-    QGraphicsView, QGraphicsSimpleTextItem, QGraphicsItem)
+from PySide6.QtWidgets import (QApplication, QGraphicsScene, QGraphicsView,
+                               QGraphicsSimpleTextItem, QGraphicsItem)
 from PySide6.QtCore import Qt, QPointF, QRectF, QRect
 from PySide6.QtCharts import QChart, QLineSeries, QSplineSeries
 from PySide6.QtGui import QPainter, QFont, QFontMetrics, QPainterPath, QColor
@@ -42,37 +42,37 @@ class Callout(QGraphicsItem):
 
             # establish the position of the anchor point in relation to _rect
             above = anchor.y() <= self._rect.top()
-            above_center = (anchor.y() > self._rect.top() and
-                anchor.y() <= self._rect.center().y())
-            below_center = (anchor.y() > self._rect.center().y() and
-                anchor.y() <= self._rect.bottom())
+            above_center = (anchor.y() > self._rect.top()
+                            and anchor.y() <= self._rect.center().y())
+            below_center = (anchor.y() > self._rect.center().y()
+                            and anchor.y() <= self._rect.bottom())
             below = anchor.y() > self._rect.bottom()
 
             on_left = anchor.x() <= self._rect.left()
-            left_of_center = (anchor.x() > self._rect.left() and
-                anchor.x() <= self._rect.center().x())
-            right_of_center = (anchor.x() > self._rect.center().x() and
-                anchor.x() <= self._rect.right())
+            left_of_center = (anchor.x() > self._rect.left()
+                              and anchor.x() <= self._rect.center().x())
+            right_of_center = (anchor.x() > self._rect.center().x()
+                               and anchor.x() <= self._rect.right())
             on_right = anchor.x() > self._rect.right()
 
             # get the nearest _rect corner.
             x = (on_right + right_of_center) * self._rect.width()
             y = (below + below_center) * self._rect.height()
-            corner_case = ((above and on_left) or (above and on_right) or
-                (below and on_left) or (below and on_right))
+            corner_case = ((above and on_left) or (above and on_right)
+                           or (below and on_left) or (below and on_right))
             vertical = abs(anchor.x() - x) > abs(anchor.y() - y)
 
-            x1 = (x + left_of_center * 10 - right_of_center * 20 + corner_case *
-                int(not vertical) * (on_left * 10 - on_right * 20))
-            y1 = (y + above_center * 10 - below_center * 20 + corner_case *
-                vertical * (above * 10 - below * 20))
+            x1 = (x + left_of_center * 10 - right_of_center * 20 + corner_case
+                  * int(not vertical) * (on_left * 10 - on_right * 20))
+            y1 = (y + above_center * 10 - below_center * 20 + corner_case
+                  * vertical * (above * 10 - below * 20))
             point1.setX(x1)
             point1.setY(y1)
 
-            x2 = (x + left_of_center * 20 - right_of_center * 10 + corner_case *
-                int(not vertical) * (on_left * 20 - on_right * 10))
-            y2 = (y + above_center * 20 - below_center * 10 + corner_case *
-                vertical * (above * 20 - below * 10))
+            x2 = (x + left_of_center * 20 - right_of_center * 10 + corner_case
+                  * int(not vertical) * (on_left * 20 - on_right * 10))
+            y2 = (y + above_center * 20 - below_center * 10 + corner_case
+                  * vertical * (above * 20 - below * 10))
             point2.setX(x2)
             point2.setY(y2)
 
@@ -127,7 +127,7 @@ class View(QGraphicsView):
         self._chart = QChart()
         self._chart.setMinimumSize(640, 480)
         self._chart.setTitle("Hover the line to show callout. Click the line "
-            "to make it stay")
+                             "to make it stay")
         self._chart.legend().hide()
         self.series = QLineSeries()
         self.series.append(1, 3)

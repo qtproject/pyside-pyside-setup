@@ -53,7 +53,8 @@ class RenderThread(QThread):
         self.abort = False
 
         for i in range(RenderThread.colormap_size):
-            self.colormap.append(self.rgb_from_wave_length(380.0 + (i * 400.0 / RenderThread.colormap_size)))
+            self.colormap.append(
+                self.rgb_from_wave_length(380.0 + (i * 400.0 / RenderThread.colormap_size)))
 
     def stop(self):
         self.mutex.lock()
@@ -132,7 +133,8 @@ class RenderThread(QThread):
 
                         if num_iterations < max_iterations:
                             image.setPixel(x + half_width, y + half_height,
-                                           self.colormap[num_iterations % RenderThread.colormap_size])
+                                           self.colormap[
+                                               num_iterations % RenderThread.colormap_size])
                             all_black = False
                         else:
                             image.setPixel(x + half_width, y + half_height, qRgb(0, 0, 0))
@@ -221,7 +223,7 @@ class MandelbrotWidget(QWidget):
             if self.pixmap.isNull():
                 painter.setPen(Qt.white)
                 painter.drawText(self.rect(), Qt.AlignCenter,
-                        "Rendering initial image, please wait...")
+                                 "Rendering initial image, please wait...")
                 return
 
             if self._cur_scale == self._pixmap_scale:
@@ -250,10 +252,10 @@ class MandelbrotWidget(QWidget):
             painter.setPen(Qt.NoPen)
             painter.setBrush(QColor(0, 0, 0, 127))
             painter.drawRect((self.width() - text_width) / 2 - 5, 0, text_width + 10,
-                    metrics.lineSpacing() + 5)
+                             metrics.lineSpacing() + 5)
             painter.setPen(Qt.white)
             painter.drawText((self.width() - text_width) / 2,
-                    metrics.leading() + metrics.ascent(), text)
+                             metrics.leading() + metrics.ascent(), text)
 
     def resizeEvent(self, event):
         self.thread.render(self._center_x, self._center_y, self._cur_scale, self.size())
@@ -317,15 +319,13 @@ class MandelbrotWidget(QWidget):
     def zoom(self, zoomFactor):
         self._cur_scale *= zoomFactor
         self.update()
-        self.thread.render(self._center_x, self._center_y, self._cur_scale,
-                self.size())
+        self.thread.render(self._center_x, self._center_y, self._cur_scale, self.size())
 
     def scroll(self, deltaX, deltaY):
         self._center_x += deltaX * self._cur_scale
         self._center_y += deltaY * self._cur_scale
         self.update()
-        self.thread.render(self._center_x, self._center_y, self._cur_scale,
-                self.size())
+        self.thread.render(self._center_x, self._center_y, self._cur_scale, self.size())
 
 
 if __name__ == '__main__':

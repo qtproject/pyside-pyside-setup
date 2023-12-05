@@ -110,7 +110,7 @@ class BlockingClient(QWidget):
         port_label.setBuddy(self._port_line_edit)
 
         self._status_label = QLabel(
-                "This example requires that you run the Fortune Server example as well.")
+            "This example requires that you run the Fortune Server example as well.")
         self._status_label.setWordWrap(True)
 
         self._get_fortune_button = QPushButton("Get Fortune")
@@ -145,7 +145,7 @@ class BlockingClient(QWidget):
     def request_new_fortune(self):
         self._get_fortune_button.setEnabled(False)
         self.thread.request_new_fortune(self._host_line_edit.text(),
-                int(self._port_line_edit.text()))
+                                        int(self._port_line_edit.text()))
 
     def show_fortune(self, nextFortune):
         if nextFortune == self._current_fortune:
@@ -159,22 +159,22 @@ class BlockingClient(QWidget):
     def display_error(self, socketError, message):
         if socketError == QAbstractSocket.HostNotFoundError:
             QMessageBox.information(self, "Blocking Fortune Client",
-                    "The host was not found. Please check the host and port "
-                    "settings.")
+                                    "The host was not found. Please check the host and port "
+                                    "settings.")
         elif socketError == QAbstractSocket.ConnectionRefusedError:
             QMessageBox.information(self, "Blocking Fortune Client",
-                    "The connection was refused by the peer. Make sure the "
-                    "fortune server is running, and check that the host name "
-                    "and port settings are correct.")
+                                    "The connection was refused by the peer. Make sure the "
+                                    "fortune server is running, and check that the host name "
+                                    "and port settings are correct.")
         else:
             QMessageBox.information(self, "Blocking Fortune Client",
-                    f"The following error occurred: {message}.")
+                                    f"The following error occurred: {message}.")
 
         self._get_fortune_button.setEnabled(True)
 
     def enable_get_fortune_button(self):
-        self._get_fortune_button.setEnabled(self._host_line_edit.text() != '' and
-                self._port_line_edit.text() != '')
+        self._get_fortune_button.setEnabled(self._host_line_edit.text() != ''
+                                            and self._port_line_edit.text() != '')
 
 
 if __name__ == '__main__':

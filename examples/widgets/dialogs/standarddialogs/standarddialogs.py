@@ -235,14 +235,14 @@ class Dialog(QDialog):
     @Slot()
     def set_integer(self):
         i, ok = QInputDialog.getInt(self,
-                "QInputDialog.getInteger()", "Percentage:", 25, 0, 100, 1)
+                                    "QInputDialog.getInteger()", "Percentage:", 25, 0, 100, 1)
         if ok:
             self._integer_label.setText(f"{i}%")
 
     @Slot()
     def set_double(self):
         d, ok = QInputDialog.getDouble(self, "QInputDialog.getDouble()",
-                "Amount:", 37.56, -10000, 10000, 2)
+                                       "Amount:", 37.56, -10000, 10000, 2)
         if ok:
             self._double_label.setText(f"${d:g}")
 
@@ -250,23 +250,21 @@ class Dialog(QDialog):
     def set_item(self):
         items = ("Spring", "Summer", "Fall", "Winter")
 
-        item, ok = QInputDialog.getItem(self, "QInputDialog.getItem()",
-                "Season:", items, 0, False)
+        item, ok = QInputDialog.getItem(self, "QInputDialog.getItem()", "Season:", items, 0, False)
         if ok and item:
             self._item_label.setText(item)
 
     @Slot()
     def set_text(self):
         text, ok = QInputDialog.getText(self, "QInputDialog.getText()",
-                "User name:", QLineEdit.Normal,
-                QDir.home().dirName())
+                                        "User name:", QLineEdit.Normal, QDir.home().dirName())
         if ok and text != '':
             self._text_label.setText(text)
 
     @Slot()
     def set_multiline_text(self):
         text, ok = QInputDialog.getMultiLineText(self, "QInputDialog::getMultiLineText()",
-                "Address:", "John Doe\nFreedom Street")
+                                                 "Address:", "John Doe\nFreedom Street")
         if ok and text != '':
             self._multiline_text_label.setText(text)
 
@@ -301,9 +299,8 @@ class Dialog(QDialog):
         options_value = self._file_options.value()
         options = QFileDialog.Options(options_value) | QFileDialog.ShowDirsOnly
 
-        directory = QFileDialog.getExistingDirectory(self,
-                "QFileDialog.getExistingDirectory()",
-                self._directory_label.text(), options)
+        directory = QFileDialog.getExistingDirectory(self, "QFileDialog.getExistingDirectory()",
+                                                     self._directory_label.text(), options)
         if directory:
             self._directory_label.setText(directory)
 
@@ -312,10 +309,9 @@ class Dialog(QDialog):
         options_value = self._file_options.value()
         options = QFileDialog.Options(options_value)
 
-        fileName, filtr = QFileDialog.getOpenFileName(self,
-                "QFileDialog.getOpenFileName()",
-                self._open_file_name_label.text(),
-                "All Files (*);;Text Files (*.txt)", "", options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "QFileDialog.getOpenFileName()",
+                                                  self._open_file_name_label.text(),
+                                                  "All Files (*);;Text Files (*.txt)", "", options)
         if fileName:
             self._open_file_name_label.setText(fileName)
 
@@ -324,9 +320,9 @@ class Dialog(QDialog):
         options_value = self._file_options.value()
         options = QFileDialog.Options(options_value)
 
-        files, filtr = QFileDialog.getOpenFileNames(self,
-                "QFileDialog.getOpenFileNames()", self._open_files_path,
-                "All Files (*);;Text Files (*.txt)", "", options)
+        files, _ = QFileDialog.getOpenFileNames(self, "QFileDialog.getOpenFileNames()",
+                                                self._open_files_path,
+                                                "All Files (*);;Text Files (*.txt)", "", options)
         if files:
             self._open_files_path = files[0]
             file_list = ', '.join(files)
@@ -337,10 +333,9 @@ class Dialog(QDialog):
         options_value = self._file_options.value()
         options = QFileDialog.Options(options_value)
 
-        fileName, filtr = QFileDialog.getSaveFileName(self,
-                "QFileDialog.getSaveFileName()",
-                self._save_file_name_label.text(),
-                "All Files (*);;Text Files (*.txt)", "", options)
+        fileName, _ = QFileDialog.getSaveFileName(self, "QFileDialog.getSaveFileName()",
+                                                  self._save_file_name_label.text(),
+                                                  "All Files (*);;Text Files (*.txt)", "", options)
         if fileName:
             self._save_file_name_label.setText(fileName)
 

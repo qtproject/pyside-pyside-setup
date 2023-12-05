@@ -8,8 +8,7 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QFontComboBox,
                                QLabel, QPushButton, QHBoxLayout, QSizePolicy,
                                QRadioButton, QSlider, QVBoxLayout, QWidget)
-from PySide6.QtDataVisualization import (QAbstract3DGraph, QAbstract3DSeries,
-                                         Q3DBars)
+from PySide6.QtDataVisualization import (QAbstract3DGraph, QAbstract3DSeries, Q3DBars)
 
 
 class BarGraph(QObject):
@@ -92,18 +91,14 @@ class BarGraph(QObject):
         selectionModeList.addItem("Slice into Row and Item", sel)
         sel = QAbstract3DGraph.SelectionSlice | QAbstract3DGraph.SelectionColumn
         selectionModeList.addItem("Slice into Column", sel)
-        sel = (QAbstract3DGraph.SelectionSlice
-               | QAbstract3DGraph.SelectionItemAndColumn)
+        sel = (QAbstract3DGraph.SelectionSlice | QAbstract3DGraph.SelectionItemAndColumn)
         selectionModeList.addItem("Slice into Column and Item", sel)
-        sel = (QAbstract3DGraph.SelectionItemRowAndColumn
-               | QAbstract3DGraph.SelectionMultiSeries)
+        sel = (QAbstract3DGraph.SelectionItemRowAndColumn | QAbstract3DGraph.SelectionMultiSeries)
         selectionModeList.addItem("Multi: Bar, Row, Col", sel)
-        sel = (QAbstract3DGraph.SelectionSlice
-               | QAbstract3DGraph.SelectionItemAndRow
+        sel = (QAbstract3DGraph.SelectionSlice | QAbstract3DGraph.SelectionItemAndRow
                | QAbstract3DGraph.SelectionMultiSeries)
         selectionModeList.addItem("Multi, Slice: Row, Item", sel)
-        sel = (QAbstract3DGraph.SelectionSlice
-               | QAbstract3DGraph.SelectionItemAndColumn
+        sel = (QAbstract3DGraph.SelectionSlice | QAbstract3DGraph.SelectionItemAndColumn
                | QAbstract3DGraph.SelectionMultiSeries)
         selectionModeList.addItem("Multi, Slice: Col, Item", sel)
         selectionModeList.setCurrentIndex(1)

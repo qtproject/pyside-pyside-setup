@@ -103,4 +103,3 @@ class GradientTexture(QQuick3DTextureData):
         output.setBlueF(color1.blueF() + (value * (color2.blueF() - color1.blueF())))
 
         return output
-

@@ -168,8 +168,7 @@ class MainWindow(QMainWindow):
     @Slot("QMediaPlayer::PlaybackState")
     def update_buttons(self, state):
         media_count = len(self._playlist)
-        self._play_action.setEnabled(media_count > 0
-            and state != QMediaPlayer.PlayingState)
+        self._play_action.setEnabled(media_count > 0 and state != QMediaPlayer.PlayingState)
         self._pause_action.setEnabled(state == QMediaPlayer.PlayingState)
         self._stop_action.setEnabled(state != QMediaPlayer.StoppedState)
         self._previous_action.setEnabled(self._player.position() > 0)

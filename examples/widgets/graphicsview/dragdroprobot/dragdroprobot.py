@@ -103,8 +103,8 @@ class RobotPart(QGraphicsItem):
         self.setAcceptDrops(True)
 
     def dragEnterEvent(self, event):
-        if (event.mimeData().hasColor() or
-                (isinstance(self, RobotHead) and event.mimeData().hasImage())):
+        if (event.mimeData().hasColor()
+                or (isinstance(self, RobotHead) and event.mimeData().hasImage())):
             event.setAccepted(True)
             self._drag_over = True
             self.update()
@@ -131,8 +131,7 @@ class RobotHead(RobotPart):
 
     def paint(self, painter, option, widget=None):
         if not self.pixmap:
-            painter.setBrush(self._drag_over and self.color.lighter(130)
-                                            or self.color)
+            painter.setBrush(self._drag_over and self.color.lighter(130) or self.color)
             painter.drawRoundedRect(-10, -30, 20, 30, 25, 25, Qt.RelativeSize)
             painter.setBrush(Qt.white)
             painter.drawEllipse(-7, -3 - 20, 7, 7)
@@ -177,35 +176,35 @@ class Robot(RobotPart):
     def __init__(self):
         super().__init__()
 
-        self.torsoItem         = RobotTorso(self)
-        self.headItem          = RobotHead(self.torsoItem)
-        self.upperLeftArmItem  = RobotLimb(self.torsoItem)
-        self.lowerLeftArmItem  = RobotLimb(self.upperLeftArmItem)
+        self.torsoItem = RobotTorso(self)
+        self.headItem = RobotHead(self.torsoItem)
+        self.upperLeftArmItem = RobotLimb(self.torsoItem)
+        self.lowerLeftArmItem = RobotLimb(self.upperLeftArmItem)
         self._upper_right_arm_item = RobotLimb(self.torsoItem)
         self._lower_right_arm_item = RobotLimb(self._upper_right_arm_item)
         self._upper_right_leg_item = RobotLimb(self.torsoItem)
         self._lower_right_leg_item = RobotLimb(self._upper_right_leg_item)
-        self.upperLeftLegItem  = RobotLimb(self.torsoItem)
-        self.lowerLeftLegItem  = RobotLimb(self.upperLeftLegItem)
+        self.upperLeftLegItem = RobotLimb(self.torsoItem)
+        self.lowerLeftLegItem = RobotLimb(self.upperLeftLegItem)
 
         self.timeline = QTimeLine()
         settings = [
-        #             item               position    rotation at
-        #                                 x    y    time 0  /  1
-            ( self.headItem,              0,  -18,      20,   -20 ),
-            ( self.upperLeftArmItem,    -15,  -10,     190,   180 ),
-            ( self.lowerLeftArmItem,     30,    0,      50,    10 ),
-            ( self._upper_right_arm_item,    15,  -10,     300,   310 ),
-            ( self._lower_right_arm_item,    30,    0,       0,   -70 ),
-            ( self._upper_right_leg_item,    10,   32,      40,   120 ),
-            ( self._lower_right_leg_item,    30,    0,      10,    50 ),
-            ( self.upperLeftLegItem,    -10,   32,     150,    80 ),
-            ( self.lowerLeftLegItem,     30,    0,      70,    10 ),
-            ( self.torsoItem,             0,    0,       5,   -20 )
+            #         item                  position    rotation at
+            #                                x    y    time 0  /  1
+            (self.headItem,                  0,  -18,      20,   -20),  # noqa: E241
+            (self.upperLeftArmItem,        -15,  -10,     190,   180),  # noqa: E241
+            (self.lowerLeftArmItem,         30,    0,      50,    10),  # noqa: E241
+            (self._upper_right_arm_item,    15,  -10,     300,   310),  # noqa: E241
+            (self._lower_right_arm_item,    30,    0,       0,   -70),  # noqa: E241
+            (self._upper_right_leg_item,    10,   32,      40,   120),  # noqa: E241
+            (self._lower_right_leg_item,    30,    0,      10,    50),  # noqa: E241
+            (self.upperLeftLegItem,        -10,   32,     150,    80),  # noqa: E241
+            (self.lowerLeftLegItem,         30,    0,      70,    10),  # noqa: E241
+            (self.torsoItem,                 0,    0,       5,   -20)  # noqa: E241
         ]
         self.animations = []
         for item, pos_x, pos_y, rotation1, rotation2 in settings:
-            item.setPos(pos_x,pos_y)
+            item.setPos(pos_x, pos_y)
             animation = QGraphicsItemAnimation()
             animation.setItem(item)
             animation.setTimeLine(self.timeline)
@@ -228,7 +227,7 @@ class Robot(RobotPart):
         pass
 
 
-if __name__== '__main__':
+if __name__ == '__main__':
     app = QApplication(sys.argv)
 
     scene = QGraphicsScene(-200, -200, 400, 400)

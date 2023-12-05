@@ -31,7 +31,7 @@ class Client(QDialog):
         port_label.setBuddy(self._port_line_edit)
 
         self._status_label = QLabel("This examples requires that you run "
-                "the Fortune Server example as well.")
+                                    "the Fortune Server example as well.")
 
         self._get_fortune_button = QPushButton("Get Fortune")
         self._get_fortune_button.setDefault(True)
@@ -40,8 +40,7 @@ class Client(QDialog):
         quit_button = QPushButton("Quit")
 
         button_box = QDialogButtonBox()
-        button_box.addButton(self._get_fortune_button,
-                QDialogButtonBox.ActionRole)
+        button_box.addButton(self._get_fortune_button, QDialogButtonBox.ActionRole)
         button_box.addButton(quit_button, QDialogButtonBox.RejectRole)
 
         self._tcp_socket = QTcpSocket(self)
@@ -69,7 +68,7 @@ class Client(QDialog):
         self._block_size = 0
         self._tcp_socket.abort()
         self._tcp_socket.connectToHost(self._host_line_edit.text(),
-                int(self._port_line_edit.text()))
+                                       int(self._port_line_edit.text()))
 
     def read_fortune(self):
         instr = QDataStream(self._tcp_socket)
@@ -99,23 +98,23 @@ class Client(QDialog):
             pass
         elif socketError == QAbstractSocket.HostNotFoundError:
             QMessageBox.information(self, "Fortune Client",
-                    "The host was not found. Please check the host name and "
-                    "port settings.")
+                                    "The host was not found. Please check the host name and "
+                                    "port settings.")
         elif socketError == QAbstractSocket.ConnectionRefusedError:
             QMessageBox.information(self, "Fortune Client",
-                    "The connection was refused by the peer. Make sure the "
-                    "fortune server is running, and check that the host name "
-                    "and port settings are correct.")
+                                    "The connection was refused by the peer. Make sure the "
+                                    "fortune server is running, and check that the host name "
+                                    "and port settings are correct.")
         else:
             reason = self._tcp_socket.errorString()
             QMessageBox.information(self, "Fortune Client",
-                    f"The following error occurred: {reason}.")
+                                    f"The following error occurred: {reason}.")
 
         self._get_fortune_button.setEnabled(True)
 
     def enable_get_fortune_button(self):
-        self._get_fortune_button.setEnabled(bool(self._host_line_edit.text() and
-                self._port_line_edit.text()))
+        self._get_fortune_button.setEnabled(bool(self._host_line_edit.text()
+                                                 and self._port_line_edit.text()))
 
 
 if __name__ == '__main__':

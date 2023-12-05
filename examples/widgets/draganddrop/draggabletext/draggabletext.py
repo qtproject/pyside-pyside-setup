@@ -2,7 +2,8 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-"""PySide6 port of the widgets/draganddrop/draggabletext example from Qt v5.x, originating from PyQt"""
+"""PySide6 port of the widgets/draganddrop/draggabletext example from Qt v5.x,
+   originating from PyQt"""
 
 from PySide6.QtCore import QFile, QIODevice, QMimeData, QPoint, Qt, QTextStream
 from PySide6.QtGui import QDrag, QPalette, QPixmap

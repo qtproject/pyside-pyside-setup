@@ -7,7 +7,8 @@ import sys
 from PySide6.QtCore import Slot, QPointF, Qt
 from PySide6.QtCharts import QChart, QChartView, QSplineSeries
 from PySide6.QtGui import QPainter, QImage
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QGridLayout, QComboBox, QCheckBox, QLabel, QHBoxLayout
+from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QGridLayout,
+                               QComboBox, QCheckBox, QLabel, QHBoxLayout)
 
 import utilities as Utilities
 
@@ -68,7 +69,9 @@ if __name__ == "__main__":
 
     @Slot(int)
     def set_selected_light_marker(index):
-        series.setSelectedLightMarker(Utilities.get_selected_point_representation(Utilities.selected_point_type(index), marker_size))
+        series.setSelectedLightMarker(
+            Utilities.get_selected_point_representation(
+                Utilities.selected_point_type(index), marker_size))
 
     char_point_selected = QLabel("Char point selected: ")
     char_point_selected_combobox.addItems(["Blue triangle", "Yellow rectangle", "Lavender circle"])
@@ -85,7 +88,9 @@ if __name__ == "__main__":
     @Slot(int)
     def display_unselected_points(checkbox_state):
         if checkbox_state:
-            series.setLightMarker(Utilities.get_point_representation(Utilities.point_type(char_point_combobox.currentIndex()), marker_size))
+            series.setLightMarker(
+                Utilities.get_point_representation(
+                    Utilities.point_type(char_point_combobox.currentIndex()), marker_size))
         else:
             series.setLightMarker(QImage())
 

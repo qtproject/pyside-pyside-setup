@@ -36,4 +36,3 @@ if __name__ == "__main__":
     value = reply.value()
     print(f'ping: Reply was: {value}')
     sys.exit(0)
-

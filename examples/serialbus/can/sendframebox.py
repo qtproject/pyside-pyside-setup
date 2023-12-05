@@ -157,8 +157,8 @@ class SendFrameBox(QGroupBox):
 
     @Slot(bool)
     def _flexible_datarate(self, value):
-        l = MAX_PAYLOAD_FD if value else MAX_PAYLOAD
-        self.m_hexStringValidator.set_max_length(l)
+        len = MAX_PAYLOAD_FD if value else MAX_PAYLOAD
+        self.m_hexStringValidator.set_max_length(len)
         self.m_ui.bitrateSwitchBox.setEnabled(value)
         if not value:
             self.m_ui.bitrateSwitchBox.setChecked(False)

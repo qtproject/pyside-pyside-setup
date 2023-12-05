@@ -44,7 +44,8 @@ class FileSystemModel(QFileSystemModel):
         file = QFile(path)
 
         mime = self.db.mimeTypeForFile(QFileInfo(file))
-        if 'text' in mime.comment().lower() or any('text' in s.lower() for s in mime.parentMimeTypes()):
+        if ('text' in mime.comment().lower()
+                or any('text' in s.lower() for s in mime.parentMimeTypes())):
             if file.open(QFile.ReadOnly | QFile.Text):
                 stream = QTextStream(file).readAll()
                 return stream

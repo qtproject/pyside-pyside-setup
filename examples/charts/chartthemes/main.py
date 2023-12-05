@@ -27,7 +27,7 @@ class ThemeWidget(QWidget):
         self.value_max = 10
         self.value_count = 7
         self.data_table = self.generate_random_data(self.list_count,
-            self.value_max, self.value_count)
+                                                    self.value_max, self.value_count)
 
         self.ui.setupUi(self)
         self.populate_themebox()
@@ -41,8 +41,7 @@ class ThemeWidget(QWidget):
 
         # Pie Chart
         chart_view = QChartView(self.create_pie_chart())
-        chart_view.setSizePolicy(QSizePolicy.Ignored,
-            QSizePolicy.Ignored)
+        chart_view.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.ui.gridLayout.addWidget(chart_view, 1, 1)
         self.charts.append(chart_view)
 

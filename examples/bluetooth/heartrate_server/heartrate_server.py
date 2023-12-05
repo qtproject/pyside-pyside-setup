@@ -39,8 +39,8 @@ if __name__ == '__main__':
     char_data.setUuid(QBluetoothUuid.CharacteristicType.HeartRateMeasurement)
     char_data.setValue(QByteArray(2, 0))
     char_data.setProperties(QLowEnergyCharacteristic.Notify)
-    client_config = QLowEnergyDescriptorData(QBluetoothUuid.DescriptorType.ClientCharacteristicConfiguration,
-                                             QByteArray(2, 0))
+    client_config = QLowEnergyDescriptorData(
+        QBluetoothUuid.DescriptorType.ClientCharacteristicConfiguration, QByteArray(2, 0))
     char_data.addDescriptor(client_config)
 
     service_data = QLowEnergyServiceData()
@@ -66,7 +66,8 @@ if __name__ == '__main__':
         value = QByteArray()
         value.append(chr(0))  # Flags that specify the format of the value.
         value.append(chr(current_heart_rate))  # Actual value.
-        characteristic = service.characteristic(QBluetoothUuid.CharacteristicType.HeartRateMeasurement)
+        characteristic = service.characteristic(
+            QBluetoothUuid.CharacteristicType.HeartRateMeasurement)
         assert characteristic.isValid()
         # Potentially causes notification.
         service.writeCharacteristic(characteristic, value)

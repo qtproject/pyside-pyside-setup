@@ -134,11 +134,11 @@ class TetrixBoard(QFrame):
 
     def sizeHint(self):
         return QSize(TetrixBoard.board_width * 15 + self.frameWidth() * 2,
-                TetrixBoard.board_height * 15 + self.frameWidth() * 2)
+                     TetrixBoard.board_height * 15 + self.frameWidth() * 2)
 
     def minimum_size_hint(self):
         return QSize(TetrixBoard.board_width * 5 + self.frameWidth() * 2,
-                TetrixBoard.board_height * 5 + self.frameWidth() * 2)
+                     TetrixBoard.board_height * 5 + self.frameWidth() * 2)
 
     @Slot()
     def start(self):
@@ -190,16 +190,17 @@ class TetrixBoard(QFrame):
                     shape = self.shape_at(j, TetrixBoard.board_height - i - 1)
                     if shape != Piece.NoShape:
                         self.draw_square(painter,
-                                rect.left() + j * self.square_width(),
-                                board_top + i * self.square_height(), shape)
+                                         rect.left() + j * self.square_width(),
+                                         board_top + i * self.square_height(), shape)
 
             if self._cur_piece.shape() != Piece.NoShape:
                 for i in range(4):
                     x = self._cur_x + self._cur_piece.x(i)
                     y = self._cur_y - self._cur_piece.y(i)
                     self.draw_square(painter, rect.left() + x * self.square_width(),
-                            board_top + (TetrixBoard.board_height - y - 1) * self.square_height(),
-                            self._cur_piece.shape())
+                                     board_top
+                                     + (TetrixBoard.board_height - y - 1) * self.square_height(),
+                                     self._cur_piece.shape())
 
     def keyPressEvent(self, event):
         if not self._is_started or self._is_paused or self._cur_piece.shape() == Piece.NoShape:
@@ -234,7 +235,8 @@ class TetrixBoard(QFrame):
             super(TetrixBoard, self).timerEvent(event)
 
     def clear_board(self):
-        self.board = [Piece.NoShape for i in range(TetrixBoard.board_height * TetrixBoard.board_width)]
+        self.board = [
+            Piece.NoShape for _ in range(TetrixBoard.board_height * TetrixBoard.board_width)]
 
     def drop_down(self):
         drop_height = 0
@@ -328,7 +330,7 @@ class TetrixBoard(QFrame):
             x = self._next_piece.x(i) - self._next_piece.min_x()
             y = self._next_piece.y(i) - self._next_piece.min_y()
             self.draw_square(painter, x * self.square_width(),
-                    y * self.square_height(), self._next_piece.shape())
+                             y * self.square_height(), self._next_piece.shape())
 
         self.nextPieceLabel.setPixmap(pixmap)
 
@@ -352,8 +354,7 @@ class TetrixBoard(QFrame):
                        0xCCCC66, 0xCC66CC, 0x66CCCC, 0xDAAA00]
 
         color = QColor(color_table[shape])
-        painter.fillRect(x + 1, y + 1, self.square_width() - 2,
-                self.square_height() - 2, color)
+        painter.fillRect(x + 1, y + 1, self.square_width() - 2, self.square_height() - 2, color)
 
         painter.setPen(color.lighter())
         painter.drawLine(x, y + self.square_height() - 1, x, y)
@@ -361,21 +362,21 @@ class TetrixBoard(QFrame):
 
         painter.setPen(color.darker())
         painter.drawLine(x + 1, y + self.square_height() - 1,
-                x + self.square_width() - 1, y + self.square_height() - 1)
+                         x + self.square_width() - 1, y + self.square_height() - 1)
         painter.drawLine(x + self.square_width() - 1,
-                y + self.square_height() - 1, x + self.square_width() - 1, y + 1)
+                         y + self.square_height() - 1, x + self.square_width() - 1, y + 1)
 
 
 class TetrixPiece(object):
     coords_table = (
-        ((0, 0),     (0, 0),     (0, 0),     (0, 0)),
-        ((0, -1),    (0, 0),     (-1, 0),    (-1, 1)),
-        ((0, -1),    (0, 0),     (1, 0),     (1, 1)),
-        ((0, -1),    (0, 0),     (0, 1),     (0, 2)),
-        ((-1, 0),    (0, 0),     (1, 0),     (0, 1)),
-        ((0, 0),     (1, 0),     (0, 1),     (1, 1)),
-        ((-1, -1),   (0, -1),    (0, 0),     (0, 1)),
-        ((1, -1),    (0, -1),    (0, 0),     (0, 1))
+        ((0, 0), (0, 0), (0, 0), (0, 0)),
+        ((0, -1), (0, 0), (-1, 0), (-1, 1)),
+        ((0, -1), (0, 0), (1, 0), (1, 1)),
+        ((0, -1), (0, 0), (0, 1), (0, 2)),
+        ((-1, 0), (0, 0), (1, 0), (0, 1)),
+        ((0, 0), (1, 0), (0, 1), (1, 1)),
+        ((-1, -1), (0, -1), (0, 0), (0, 1)),
+        ((1, -1), (0, -1), (0, 0), (0, 1))
     )
 
     def __init__(self):

@@ -85,4 +85,3 @@ class CharacteristicInfo(QObject):
     def characteristic(self, characteristic):
         self._characteristic = characteristic
         self.characteristic_changed.emit()
-

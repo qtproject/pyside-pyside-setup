@@ -1,7 +1,8 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-"""PySide6 port of the  qml/examples/qml/tutorials/extending-qml-advanced/advanced1-Base-project example from Qt v6.x"""
+"""PySide6 port of the
+   qml/examples/qml/tutorials/extending-qml-advanced/advanced1-Base-project example from Qt v6.x"""
 
 from pathlib import Path
 import sys

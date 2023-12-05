@@ -207,10 +207,8 @@ class MainWidget(QWidget):
     def update_legend_layout(self):
         legend = self.chart.legend()
 
-        rect = QRectF(self.legend_posx.value(),
-            self.legend_posy.value(),
-            self.legend_width.value(),
-            self.legend_height.value())
+        rect = QRectF(self.legend_posx.value(), self.legend_posy.value(),
+                      self.legend_width.value(), self.legend_height.value())
         legend.setGeometry(rect)
 
         legend.update()

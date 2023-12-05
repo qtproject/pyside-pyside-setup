@@ -32,4 +32,3 @@ class Person(QObject):
     @shoe_size.setter
     def shoe_size(self, s):
         self._shoe_size = s
-

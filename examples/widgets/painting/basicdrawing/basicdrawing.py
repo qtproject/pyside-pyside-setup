@@ -191,12 +191,9 @@ class Window(QWidget):
         pen_join_label.setBuddy(self._pen_join_combo_box)
 
         self._brush_style_combo_box = QComboBox()
-        self._brush_style_combo_box.addItem("Linear Gradient",
-                Qt.LinearGradientPattern)
-        self._brush_style_combo_box.addItem("Radial Gradient",
-                Qt.RadialGradientPattern)
-        self._brush_style_combo_box.addItem("Conical Gradient",
-                Qt.ConicalGradientPattern)
+        self._brush_style_combo_box.addItem("Linear Gradient", Qt.LinearGradientPattern)
+        self._brush_style_combo_box.addItem("Radial Gradient", Qt.RadialGradientPattern)
+        self._brush_style_combo_box.addItem("Conical Gradient", Qt.ConicalGradientPattern)
         self._brush_style_combo_box.addItem("Texture", Qt.TexturePattern)
         self._brush_style_combo_box.addItem("Solid", Qt.SolidPattern)
         self._brush_style_combo_box.addItem("Horizontal", Qt.HorPattern)
@@ -261,24 +258,23 @@ class Window(QWidget):
         self.setWindowTitle("Basic Drawing")
 
     def shape_changed(self):
-        shape = self._shape_combo_box.itemData(self._shape_combo_box.currentIndex(),
-                id_role)
+        shape = self._shape_combo_box.itemData(self._shape_combo_box.currentIndex(), id_role)
         self._render_area.set_shape(shape)
 
     def pen_changed(self):
         width = self._pen_width_spin_box.value()
         style = Qt.PenStyle(self._pen_style_combo_box.itemData(
-                self._pen_style_combo_box.currentIndex(), id_role))
+            self._pen_style_combo_box.currentIndex(), id_role))
         cap = Qt.PenCapStyle(self._pen_cap_combo_box.itemData(
-                self._pen_cap_combo_box.currentIndex(), id_role))
+            self._pen_cap_combo_box.currentIndex(), id_role))
         join = Qt.PenJoinStyle(self._pen_join_combo_box.itemData(
-                self._pen_join_combo_box.currentIndex(), id_role))
+            self._pen_join_combo_box.currentIndex(), id_role))
 
         self._render_area.set_pen(QPen(Qt.blue, width, style, cap, join))
 
     def brush_changed(self):
         style = Qt.BrushStyle(self._brush_style_combo_box.itemData(
-                self._brush_style_combo_box.currentIndex(), id_role))
+            self._brush_style_combo_box.currentIndex(), id_role))
 
         if style == Qt.LinearGradientPattern:
             linear_gradient = QLinearGradient(0, 0, 100, 100)

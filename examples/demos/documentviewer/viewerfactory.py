@@ -65,7 +65,7 @@ class ViewerFactory:
         list = []
         for name, viewer in self._viewers.items():
             if ((self._defaultViewer and viewer.isDefaultViewer())
-                or (not self._defaultViewer and name == "TxtViewer")):
+                    or (not self._defaultViewer and name == "TxtViewer")):
                 name += "(default)"
             list.append(name)
         return list

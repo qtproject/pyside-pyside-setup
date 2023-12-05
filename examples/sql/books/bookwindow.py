@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 from PySide6.QtWidgets import (QAbstractItemView, QDataWidgetMapper,
-    QHeaderView, QMainWindow, QMessageBox)
+                               QHeaderView, QMainWindow, QMessageBox)
 from PySide6.QtGui import QKeySequence
 from PySide6.QtSql import QSqlRelation, QSqlRelationalTableModel, QSqlTableModel
 from PySide6.QtCore import Qt, Slot
@@ -58,7 +58,7 @@ class BookWindow(QMainWindow, Ui_BookWindow):
 
         # Lock and prohibit resizing of the width of the rating column:
         self.bookTable.horizontalHeader().setSectionResizeMode(model.fieldIndex("rating"),
-            QHeaderView.ResizeToContents)
+                                                               QHeaderView.ResizeToContents)
 
         mapper = QDataWidgetMapper(self)
         mapper.setModel(model)
@@ -77,7 +77,7 @@ class BookWindow(QMainWindow, Ui_BookWindow):
 
     def showError(self, err):
         QMessageBox.critical(self, "Unable to initialize Database",
-                    f"Error initializing database: {err.text()}")
+                             f"Error initializing database: {err.text()}")
 
     def create_menubar(self):
         file_menu = self.menuBar().addMenu(self.tr("&File"))
@@ -95,4 +95,4 @@ class BookWindow(QMainWindow, Ui_BookWindow):
     def about(self):
         QMessageBox.about(self, self.tr("About Books"),
             self.tr("<p>The <b>Books</b> example shows how to use Qt SQL classes "
-                "with a model/view framework."))
+                    "with a model/view framework."))

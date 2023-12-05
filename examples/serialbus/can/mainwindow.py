@@ -109,9 +109,11 @@ class MainWindow(QMainWindow):
         else:
             self.m_model.set_queue_limit(0)
 
-        device, error_string = QCanBus.instance().createDevice(p.plugin_name, p.device_interface_name)
+        device, error_string = QCanBus.instance().createDevice(
+            p.plugin_name, p.device_interface_name)
         if not device:
-            self.m_status.setText(f"Error creating device '{p.plugin_name}', reason: '{error_string}'")
+            self.m_status.setText(
+                f"Error creating device '{p.plugin_name}', reason: '{error_string}'")
             return
 
         self.m_number_frames_written = 0
@@ -136,18 +138,22 @@ class MainWindow(QMainWindow):
             config_bit_rate = self.m_can_device.configurationParameter(QCanBusDevice.BitRateKey)
             if config_bit_rate > 0:
                 is_can_fd = bool(self.m_can_device.configurationParameter(QCanBusDevice.CanFdKey))
-                config_data_bit_rate = self.m_can_device.configurationParameter(QCanBusDevice.DataBitRateKey)
+                config_data_bit_rate = self.m_can_device.configurationParameter(
+                    QCanBusDevice.DataBitRateKey)
                 bit_rate = config_bit_rate / 1000
                 if is_can_fd and config_data_bit_rate > 0:
                     data_bit_rate = config_data_bit_rate / 1000
-                    m = f"Plugin: {p.plugin_name}, connected to {p.device_interface_name} at {bit_rate} / {data_bit_rate} kBit/s"
+                    m = (f"Plugin: {p.plugin_name}, connected to {p.device_interface_name} "
+                         f"at {bit_rate} / {data_bit_rate} kBit/s")
                     self.m_status.setText(m)
                 else:
-                    m = f"Plugin: {p.plugin_name}, connected to {p.device_interface_name} at {bit_rate} kBit/s"
+                    m = (f"Plugin: {p.plugin_name}, connected to {p.device_interface_name} "
+                         f"at {bit_rate} kBit/s")
                     self.m_status.setText(m)
 
             else:
-                self.m_status.setText(f"Plugin: {p.plugin_name}, connected to {p.device_interface_name}")
+                self.m_status.setText(
+                    f"Plugin: {p.plugin_name}, connected to {p.device_interface_name}")
 
             if self.m_can_device.hasBusStatus():
                 self.m_busStatusTimer.start(2000)

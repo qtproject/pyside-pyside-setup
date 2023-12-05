@@ -33,7 +33,8 @@ class Browser(QObject):
             s.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
             s.setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
             s.setAttribute(QWebEngineSettings.LocalContentCanAccessFileUrls, False)
-            self._profile.downloadRequested.connect(self._download_manager_widget.download_requested)
+            self._profile.downloadRequested.connect(
+                self._download_manager_widget.download_requested)
 
         profile = QWebEngineProfile.defaultProfile() if offTheRecord else self._profile
         main_window = BrowserWindow(self, profile, False)

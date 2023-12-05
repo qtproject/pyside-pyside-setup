@@ -64,8 +64,8 @@ class VariantBarDataProxy(QBarDataProxy):
         # If we have no data or mapping, or the categories are not defined,
         # simply clear the array
         if (not self._dataSet or not self._mapping
-            or not self._mapping.rowCategories()
-            or not self._mapping.columnCategories()):
+                or not self._mapping.rowCategories()
+                or not self._mapping.columnCategories()):
             self.resetArray()
             return
 

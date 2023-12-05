@@ -22,8 +22,7 @@ try:
 except ImportError:
     app = QApplication(sys.argv)
     message_box = QMessageBox(QMessageBox.Critical, "ContextInfo",
-                             "PyOpenGL must be installed to run this example.",
-                             QMessageBox.Close)
+                              "PyOpenGL must be installed to run this example.", QMessageBox.Close)
     message_box.setDetailedText("Run:\npip install PyOpenGL PyOpenGL_accelerate")
     message_box.exec()
     sys.exit(1)
@@ -74,7 +73,10 @@ colors = numpy.array([1, 0, 0, 0, 1, 0, 0, 0, 1], dtype=numpy.float32)
 
 
 def print_surface_format(surface_format):
-    profile_name = 'core' if surface_format.profile() == QSurfaceFormat.CoreProfile else 'compatibility'
+    if surface_format.profile() == QSurfaceFormat.CoreProfile:
+        profile_name = 'core'
+    else:
+        profile_name = 'compatibility'
     major = surface_format.majorVersion()
     minor = surface_format.minorVersion()
     return f"{profile_name} version {major}.{minor}"
@@ -104,11 +106,13 @@ class RenderWindow(QWindow):
         # concept 3.2+ has. This may still fail since version 150 (3.2) is
         # specified in the sources but it's worth a try.
         if (fmt.renderableType() == QSurfaceFormat.OpenGL and fmt.majorVersion() == 3
-            and fmt.minorVersion() <= 1):
+                and fmt.minorVersion() <= 1):
             use_new_style_shader = not fmt.testOption(QSurfaceFormat.DeprecatedFunctions)
 
         vertex_shader = vertex_shader_source if use_new_style_shader else vertex_shader_source_110
-        fragment_shader = fragment_shader_source if use_new_style_shader else fragment_shader_source_110
+        fragment_shader = (fragment_shader_source
+                           if use_new_style_shader
+                           else fragment_shader_source_110)
         if not self.program.addShaderFromSourceCode(QOpenGLShader.Vertex, vertex_shader):
             log = self.program.log()
             raise Exception("Vertex shader could not be added: {log} ({vertexShader})")

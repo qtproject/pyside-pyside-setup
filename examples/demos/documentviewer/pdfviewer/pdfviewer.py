@@ -48,7 +48,7 @@ class PdfViewer(AbstractViewer):
         nav = self._pdfView.pageNavigator()
         self._pageSelector = QPdfPageSelector(self._toolBar)
         self._toolBar.insertWidget(self._uiAssets_forward, self._pageSelector)
-        self._pageSelector.setDocument(self._document);
+        self._pageSelector.setDocument(self._document)
         self._pageSelector.currentPageChanged.connect(self.pageSelected)
         nav.currentPageChanged.connect(self._pageSelector.setCurrentPage)
         nav.backAvailableChanged.connect(self._uiAssets_back.setEnabled)

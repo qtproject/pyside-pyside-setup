@@ -89,27 +89,27 @@ class TicTacToe(QWidget):
 
             for position in range(0, 8, 3):
                 if (self._state[position] != EMPTY
-                    and self._state[position + 1] == self._state[position]
-                    and self._state[position + 2] == self._state[position]):
+                        and self._state[position + 1] == self._state[position]
+                        and self._state[position + 2] == self._state[position]):
                     y = self._cell_rect(position).center().y()
                     painter.drawLine(0, y, self.width(), y)
                     self._turn_number = 9
 
             for position in range(3):
                 if (self._state[position] != EMPTY
-                    and self._state[position + 3] == self._state[position]
-                    and self._state[position + 6] == self._state[position]):
+                        and self._state[position + 3] == self._state[position]
+                        and self._state[position + 6] == self._state[position]):
                     x = self._cell_rect(position).center().x()
                     painter.drawLine(x, 0, x, self.height())
                     self._turn_number = 9
 
             if (self._state[0] != EMPTY and self._state[4] == self._state[0]
-                and self._state[8] == self._state[0]):
+                    and self._state[8] == self._state[0]):
                 painter.drawLine(0, 0, self.width(), self.height())
                 self._turn_number = 9
 
             if (self._state[2] != EMPTY and self._state[4] == self._state[2]
-                and self._state[6] == self._state[2]):
+                    and self._state[6] == self._state[2]):
                 painter.drawLine(0, self.height(), self.width(), 0)
                 self._turn_number = 9
 
