@@ -75,7 +75,7 @@ class Dialog(QDialog):
         if not self.server.listen():
             reason = self.server.errorString()
             QMessageBox.critical(self, "Threaded Fortune Server",
-                    f"Unable to start the server: {reason}.")
+                                 f"Unable to start the server: {reason}.")
             self.close()
             return
 
@@ -89,7 +89,7 @@ class Dialog(QDialog):
         port = self.server.serverPort()
 
         status_label.setText(f"The server is running on\n\nIP: {ip_address}\nport: {port}\n\n"
-                "Run the Fortune Client example now.")
+                             "Run the Fortune Client example now.")
 
         quit_button.clicked.connect(self.close)
 

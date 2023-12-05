@@ -47,7 +47,7 @@ class ContactModel(QAbstractListModel):
                                             "Piobesi Torinese", "0399 2826994"))
         self.m_contacts.append(self.Contact("Harvey Chandler", "North Squaw Creek 11",
                                             "Madisonville", "0343 1244492"))
-        self.m_contacts.append(self.Contact("Miguel Gomez", "Wild Rose Street 13", "Trussville" ,
+        self.m_contacts.append(self.Contact("Miguel Gomez", "Wild Rose Street 13", "Trussville",
                                             "0343 9826996"))
         self.m_contacts.append(self.Contact("Norma Rodriguez", " Glen Eagles Street  53",
                                             "Buffalo", "0241 5826596"))
@@ -95,7 +95,7 @@ class ContactModel(QAbstractListModel):
         self.endInsertRows()
 
     @Slot(int, str, str, str, str)
-    def set(self, row: int,  full_name: str, address: str, city: str, number: str):
+    def set(self, row: int, full_name: str, address: str, city: str, number: str):
         if row < 0 or row >= len(self.m_contacts):
             return
 

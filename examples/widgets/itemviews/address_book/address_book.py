@@ -31,10 +31,13 @@ class MainWindow(QMainWindow):
         exit_action = self.create_action("E&xit", file_menu, self.close)
 
         # Populate the Tools menu
-        add_action = self.create_action("&Add Entry...", tool_menu, self._address_widget.add_entry)
-        self._edit_action = self.create_action("&Edit Entry...", tool_menu, self._address_widget.edit_entry)
+        add_action = self.create_action(
+            "&Add Entry...", tool_menu, self._address_widget.add_entry)
+        self._edit_action = self.create_action(
+            "&Edit Entry...", tool_menu, self._address_widget.edit_entry)
         tool_menu.addSeparator()
-        self._remove_action = self.create_action("&Remove Entry", tool_menu, self._address_widget.remove_entry)
+        self._remove_action = self.create_action(
+            "&Remove Entry", tool_menu, self._address_widget.remove_entry)
 
         # Disable the edit and remove menu items initially, as there are
         # no items yet.

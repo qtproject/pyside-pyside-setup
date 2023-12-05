@@ -99,8 +99,10 @@ class WebView(QWebEngineView):
             old_page.createCertificateErrorDialog.disconnect(self.handle_certificate_error)
             old_page.authenticationRequired.disconnect(self.handle_authentication_required)
             old_page.featurePermissionRequested.disconnect(self.handle_feature_permission_requested)
-            old_page.proxyAuthenticationRequired.disconnect(self.handle_proxy_authentication_required)
-            old_page.registerProtocolHandlerRequested.disconnect(self.handle_register_protocol_handler_requested)
+            old_page.proxyAuthenticationRequired.disconnect(
+                self.handle_proxy_authentication_required)
+            old_page.registerProtocolHandlerRequested.disconnect(
+                self.handle_register_protocol_handler_requested)
             old_page.fileSystemAccessRequested.disconnect(self.handle_file_system_access_requested)
 
         self.create_web_action_trigger(page, QWebEnginePage.Forward)
@@ -112,7 +114,8 @@ class WebView(QWebEngineView):
         page.authenticationRequired.connect(self.handle_authentication_required)
         page.featurePermissionRequested.connect(self.handle_feature_permission_requested)
         page.proxyAuthenticationRequired.connect(self.handle_proxy_authentication_required)
-        page.registerProtocolHandlerRequested.connect(self.handle_register_protocol_handler_requested)
+        page.registerProtocolHandlerRequested.connect(
+            self.handle_register_protocol_handler_requested)
         page.fileSystemAccessRequested.connect(self.handle_file_system_access_requested)
 
     def load_progress(self):
@@ -229,8 +232,7 @@ class WebView(QWebEngineView):
         question = question_for_feature(feature).replace("%1", host)
         w = self.window()
         page = self.page()
-        if (question
-            and QMessageBox.question(w, title, question) == QMessageBox.Yes):
+        if question and QMessageBox.question(w, title, question) == QMessageBox.Yes:
             page.setFeaturePermission(securityOrigin, feature,
                                       QWebEnginePage.PermissionGrantedByUser)
         else:

@@ -52,7 +52,8 @@ class SettingsDialog(QDialog):
         self.m_ui.applyButton.clicked.connect(self.apply)
         self.m_ui.serialPortInfoListBox.currentIndexChanged.connect(self.show_port_info)
         self.m_ui.baudRateBox.currentIndexChanged.connect(self.check_custom_baud_rate_policy)
-        self.m_ui.serialPortInfoListBox.currentIndexChanged.connect(self.check_custom_device_path_policy)
+        self.m_ui.serialPortInfoListBox.currentIndexChanged.connect(
+            self.check_custom_device_path_policy)
 
         self.fill_ports_parameters()
         self.fill_ports_info()

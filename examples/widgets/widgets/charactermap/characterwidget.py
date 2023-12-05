@@ -127,7 +127,7 @@ class CharacterWidget(QWidget):
                                      self._square_size, self._square_size, QBrush(Qt.red))
 
                 text = chr(key)
-                painter.drawText(column * self._square_size + (self._square_size / 2) -
-                                 font_metrics.horizontalAdvance(text) / 2,
+                painter.drawText(column * self._square_size + (self._square_size / 2)
+                                 - font_metrics.horizontalAdvance(text) / 2,
                                  row * self._square_size + 4 + font_metrics.ascent(),
                                  text)

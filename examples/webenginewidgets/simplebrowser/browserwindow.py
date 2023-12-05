@@ -84,7 +84,8 @@ class BrowserWindow(QMainWindow):
         if not forDevTools:
             self._tab_widget.link_hovered.connect(self._show_status_message)
             self._tab_widget.load_progress.connect(self.handle_web_view_load_progress)
-            self._tab_widget.web_action_enabled_changed.connect(self.handle_web_action_enabled_changed)
+            self._tab_widget.web_action_enabled_changed.connect(
+                self.handle_web_action_enabled_changed)
             self._tab_widget.url_changed.connect(self._url_changed)
             self._tab_widget.fav_icon_changed.connect(self._fav_action.setIcon)
             self._tab_widget.dev_tools_requested.connect(self.handle_dev_tools_requested)

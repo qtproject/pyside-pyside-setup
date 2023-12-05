@@ -41,7 +41,7 @@ if __name__ == '__main__':
     f = create_item(QSizeF(30, 50), QSizeF(150, 50), max_size, "F")
     g = create_item(QSizeF(30, 50), QSizeF(30, 100), max_size, "G")
 
-    l = QGraphicsAnchorLayout()
+    l = QGraphicsAnchorLayout()  # noqa: E741
     l.setSpacing(0)
 
     w = QGraphicsWidget(None, Qt.Window)

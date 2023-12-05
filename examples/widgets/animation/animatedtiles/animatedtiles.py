@@ -123,7 +123,7 @@ if __name__ == '__main__':
     for i in range(64):
         item = Pixmap(kinetic_pix)
         item.pixmap_item.setOffset(-kinetic_pix.width() / 2,
-                -kinetic_pix.height() / 2)
+                                   -kinetic_pix.height() / 2)
         item.pixmap_item.setZValue(i)
         items.append(item)
         scene.addItem(item.pixmap_item)
@@ -161,23 +161,25 @@ if __name__ == '__main__':
     for i, item in enumerate(items):
         # Ellipse.
         ellipse_state.assignProperty(item, 'pos',
-                QPointF(math.cos((i / 63.0) * 6.28) * 250,
-                        math.sin((i / 63.0) * 6.28) * 250))
+                                     QPointF(math.cos((i / 63.0) * 6.28) * 250,
+                                             math.sin((i / 63.0) * 6.28) * 250))
 
         # Figure 8.
         figure_8state.assignProperty(item, 'pos',
-                QPointF(math.sin((i / 63.0) * 6.28) * 250,
-                        math.sin(((i * 2) / 63.0) * 6.28) * 250))
+                                     QPointF(math.sin((i / 63.0) * 6.28) * 250,
+                                             math.sin(((i * 2) / 63.0) * 6.28) * 250))
 
         # Random.
         random_state.assignProperty(item, 'pos',
-                QPointF(-250 + generator.bounded(0, 500),
-                        -250 + generator.bounded(0, 500)))
+                                    QPointF(-250 + generator.bounded(0, 500),
+                                            -250 + generator.bounded(0, 500)))
 
         # Tiled.
+        width = kinetic_pix.width()
+        height = kinetic_pix.height()
         tiled_state.assignProperty(item, 'pos',
-                QPointF(((i % 8) - 4) * kinetic_pix.width() + kinetic_pix.width() / 2,
-                        ((i // 8) - 4) * kinetic_pix.height() + kinetic_pix.height() / 2))
+                                   QPointF(((i % 8) - 4) * width + width / 2,
+                                           ((i // 8) - 4) * height + height / 2))
 
         # Centered.
         centered_state.assignProperty(item, 'pos', QPointF())
@@ -188,8 +190,7 @@ if __name__ == '__main__':
     view.setViewportUpdateMode(QGraphicsView.BoundingRectViewportUpdate)
     view.setBackgroundBrush(QBrush(bg_pix))
     view.setCacheMode(QGraphicsView.CacheBackground)
-    view.setRenderHints(
-            QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
+    view.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
     view.show()
 
     states = QStateMachine()

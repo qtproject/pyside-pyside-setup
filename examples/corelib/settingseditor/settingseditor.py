@@ -166,7 +166,7 @@ class MainWindow(QMainWindow):
     @Slot()
     def open_inifile(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Open INI File",
-                '', "INI Files (*.ini *.conf)")
+                                                   '', "INI Files (*.ini *.conf)")
 
         if file_name:
             self.load_ini_file(file_name)
@@ -181,7 +181,8 @@ class MainWindow(QMainWindow):
     @Slot()
     def open_property_list(self):
         file_name, _ = QFileDialog.getOpenFileName(self,
-                "Open Property List", '', "Property List Files (*.plist)")
+                                                   "Open Property List", '',
+                                                   "Property List Files (*.plist)")
 
         if file_name:
             settings = QSettings(file_name, QSettings.NativeFormat)
@@ -191,8 +192,8 @@ class MainWindow(QMainWindow):
     @Slot()
     def open_registry_path(self):
         path, ok = QInputDialog.getText(self, "Open Registry Path",
-                "Enter the path in the Windows registry:",
-                QLineEdit.Normal, 'HKEY_CURRENT_USER\\')
+                                        "Enter the path in the Windows registry:",
+                                        QLineEdit.Normal, 'HKEY_CURRENT_USER\\')
 
         if ok and path != '':
             settings = QSettings(path, QSettings.NativeFormat)
@@ -202,8 +203,8 @@ class MainWindow(QMainWindow):
     @Slot()
     def about(self):
         QMessageBox.about(self, "About Settings Editor",
-                "The <b>Settings Editor</b> example shows how to access "
-                "application settings using Qt.")
+                          "The <b>Settings Editor</b> example shows how to access "
+                          "application settings using Qt.")
 
     def create_actions(self):
         self._open_settings_act = QAction("&Open Application Settings...",
@@ -217,35 +218,35 @@ class MainWindow(QMainWindow):
 
     def create_actions(self):
         self.open_settings_action = QAction("&Open Application Settings...",
-                self, shortcut="Ctrl+O", triggered=self.open_settings)
+                                            self, shortcut="Ctrl+O", triggered=self.open_settings)
 
         self.open_ini_file_action = QAction("Open I&NI File...", self,
-                shortcut="Ctrl+N", triggered=self.open_inifile)
+                                            shortcut="Ctrl+N", triggered=self.open_inifile)
 
-        self.open_property_list_action = QAction("Open macOS &Property List...",
-                self, shortcut="Ctrl+P", triggered=self.open_property_list)
+        self.open_property_list_action = QAction("Open macOS &Property List...", self,
+                                                 shortcut="Ctrl+P",
+                                                 triggered=self.open_property_list)
         if sys.platform != 'darwin':
             self.open_property_list_action.setEnabled(False)
 
         self.open_registry_path_action = QAction(
-                "Open Windows &Registry Path...", self, shortcut="Ctrl+G",
-                triggered=self.open_registry_path)
+            "Open Windows &Registry Path...", self, shortcut="Ctrl+G",
+            triggered=self.open_registry_path)
         if sys.platform != 'win32':
             self.open_registry_path_action.setEnabled(False)
 
         self.refresh_action = QAction("&Refresh", self, shortcut="Ctrl+R",
-                enabled=False, triggered=self.settings_tree.refresh)
+                                      enabled=False, triggered=self.settings_tree.refresh)
 
-        self.exit_action = QAction("E&xit", self, shortcut="Ctrl+Q",
-                triggered=self.close)
+        self.exit_action = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=self.close)
 
         self.auto_refresh_action = QAction("&Auto-Refresh", self,
-                shortcut="Ctrl+A", checkable=True, enabled=False)
+                                           shortcut="Ctrl+A", checkable=True, enabled=False)
         self.auto_refresh_action.triggered[bool].connect(self.settings_tree.set_auto_refresh)
         self.auto_refresh_action.triggered[bool].connect(self.refresh_action.setDisabled)
 
         self.fallbacks_action = QAction("&Fallbacks", self,
-                shortcut="Ctrl+F", checkable=True, enabled=False)
+                                        shortcut="Ctrl+F", checkable=True, enabled=False)
         self.fallbacks_action.triggered[bool].connect(self.settings_tree.set_fallbacks_enabled)
 
         self.about_action = QAction("&About", self, triggered=self.about)

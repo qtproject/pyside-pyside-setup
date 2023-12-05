@@ -19,22 +19,9 @@ from typing import Optional
 import PySide6
 from PySide6.QtCore import QByteArray, QMargins, Qt, Slot, qWarning
 from PySide6.QtGui import QPainter, QPalette
-from PySide6.QtMultimedia import (
-    QAudio,
-    QAudioDevice,
-    QAudioFormat,
-    QAudioSource,
-    QMediaDevices,
-)
-from PySide6.QtWidgets import (
-    QApplication,
-    QComboBox,
-    QPushButton,
-    QSlider,
-    QVBoxLayout,
-    QWidget,
-    QLabel
-)
+from PySide6.QtMultimedia import QAudio, QAudioDevice, QAudioFormat, QAudioSource, QMediaDevices
+from PySide6.QtWidgets import (QApplication, QComboBox, QPushButton, QSlider, QVBoxLayout,
+                               QWidget, QLabel)
 
 is_android = os.environ.get('ANDROID_ARGUMENT')
 

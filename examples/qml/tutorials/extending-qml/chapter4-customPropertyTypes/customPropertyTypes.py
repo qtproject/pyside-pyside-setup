@@ -1,7 +1,8 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-"""PySide6 port of the qml/tutorials/extending-qml/chapter4-customPropertyTypes example from Qt v5.x"""
+"""PySide6 port of the qml/tutorials/extending-qml/chapter4-customPropertyTypes example
+   from Qt v5.x"""
 
 import os
 from pathlib import Path

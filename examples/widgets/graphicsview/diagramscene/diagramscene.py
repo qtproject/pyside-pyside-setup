@@ -30,8 +30,7 @@ class Arrow(QGraphicsLineItem):
         self._my_end_item = endItem
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self._my_color = Qt.black
-        self.setPen(QPen(self._my_color, 2, Qt.SolidLine,
-                Qt.RoundCap, Qt.RoundJoin))
+        self.setPen(QPen(self._my_color, 2, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
 
     def set_color(self, color):
         self._my_color = color
@@ -163,19 +162,19 @@ class DiagramItem(QGraphicsPolygonItem):
             self._my_polygon = path.toFillPolygon()
         elif self.diagram_type == self.Conditional:
             self._my_polygon = QPolygonF([
-                    QPointF(-100, 0), QPointF(0, 100),
-                    QPointF(100, 0), QPointF(0, -100),
-                    QPointF(-100, 0)])
+                QPointF(-100, 0), QPointF(0, 100),
+                QPointF(100, 0), QPointF(0, -100),
+                QPointF(-100, 0)])
         elif self.diagram_type == self.Step:
             self._my_polygon = QPolygonF([
-                    QPointF(-100, -100), QPointF(100, -100),
-                    QPointF(100, 100), QPointF(-100, 100),
-                    QPointF(-100, -100)])
+                QPointF(-100, -100), QPointF(100, -100),
+                QPointF(100, 100), QPointF(-100, 100),
+                QPointF(-100, -100)])
         else:
             self._my_polygon = QPolygonF([
-                    QPointF(-120, -80), QPointF(-70, 80),
-                    QPointF(120, 80), QPointF(70, -80),
-                    QPointF(-120, -80)])
+                QPointF(-120, -80), QPointF(-70, 80),
+                QPointF(120, 80), QPointF(70, -80),
+                QPointF(-120, -80)])
 
         self.setPolygon(self._my_polygon)
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
@@ -291,8 +290,7 @@ class DiagramScene(QGraphicsScene):
             item.setPos(mouseEvent.scenePos())
             self.item_inserted.emit(item)
         elif self._my_mode == self.InsertLine:
-            self.line = QGraphicsLineItem(QLineF(mouseEvent.scenePos(),
-                                        mouseEvent.scenePos()))
+            self.line = QGraphicsLineItem(QLineF(mouseEvent.scenePos(), mouseEvent.scenePos()))
             self.line.setPen(QPen(self._my_line_color, 2))
             self.addItem(self.line)
         elif self._my_mode == self.InsertText:
@@ -484,24 +482,21 @@ class MainWindow(QMainWindow):
     def text_color_changed(self):
         self._text_action = self.sender()
         self._font_color_tool_button.setIcon(self.create_color_tool_button_icon(
-                    ':/images/textpointer.png',
-                    QColor(self._text_action.data())))
+            ':/images/textpointer.png', QColor(self._text_action.data())))
         self.text_button_triggered()
 
     @Slot()
     def item_color_changed(self):
         self._fill_action = self.sender()
         self._fill_color_tool_button.setIcon(self.create_color_tool_button_icon(
-                    ':/images/floodfill.png',
-                    QColor(self._fill_action.data())))
+            ':/images/floodfill.png', QColor(self._fill_action.data())))
         self.fill_button_triggered()
 
     @Slot()
     def line_color_changed(self):
         self._line_action = self.sender()
         self._line_color_tool_button.setIcon(self.create_color_tool_button_icon(
-                    ':/images/linecolor.png',
-                    QColor(self._line_action.data())))
+            ':/images/linecolor.png', QColor(self._line_action.data())))
         self.line_button_triggered()
 
     @Slot()
@@ -541,7 +536,7 @@ class MainWindow(QMainWindow):
     @Slot()
     def about(self):
         QMessageBox.about(self, "About Diagram Scene",
-                "The <b>Diagram Scene</b> example shows use of the graphics framework.")
+                          "The <b>Diagram Scene</b> example shows use of the graphics framework.")
 
     def create_tool_box(self):
         self._button_group = QButtonGroup()
@@ -549,12 +544,9 @@ class MainWindow(QMainWindow):
         self._button_group.idClicked.connect(self.button_group_clicked)
 
         layout = QGridLayout()
-        layout.addWidget(self.create_cell_widget("Conditional", DiagramItem.Conditional),
-                0, 0)
-        layout.addWidget(self.create_cell_widget("Process", DiagramItem.Step), 0,
-                1)
-        layout.addWidget(self.create_cell_widget("Input/Output", DiagramItem.Io),
-                1, 0)
+        layout.addWidget(self.create_cell_widget("Conditional", DiagramItem.Conditional), 0, 0)
+        layout.addWidget(self.create_cell_widget("Process", DiagramItem.Step), 0, 1)
+        layout.addWidget(self.create_cell_widget("Input/Output", DiagramItem.Io), 1, 0)
 
         text_button = QToolButton()
         text_button.setCheckable(True)
@@ -580,14 +572,14 @@ class MainWindow(QMainWindow):
         self._background_button_group.buttonClicked.connect(self.background_button_group_clicked)
 
         background_layout = QGridLayout()
-        background_layout.addWidget(self.create_background_cell_widget("Blue Grid",
-                ':/images/background1.png'), 0, 0)
-        background_layout.addWidget(self.create_background_cell_widget("White Grid",
-                ':/images/background2.png'), 0, 1)
-        background_layout.addWidget(self.create_background_cell_widget("Gray Grid",
-                ':/images/background3.png'), 1, 0)
-        background_layout.addWidget(self.create_background_cell_widget("No Grid",
-                ':/images/background4.png'), 1, 1)
+        background_layout.addWidget(
+            self.create_background_cell_widget("Blue Grid", ':/images/background1.png'), 0, 0)
+        background_layout.addWidget(
+            self.create_background_cell_widget("White Grid", ':/images/background2.png'), 0, 1)
+        background_layout.addWidget(
+            self.create_background_cell_widget("Gray Grid", ':/images/background3.png'), 1, 0)
+        background_layout.addWidget(
+            self.create_background_cell_widget("No Grid", ':/images/background4.png'), 1, 1)
 
         background_layout.setRowStretch(2, 10)
         background_layout.setColumnStretch(2, 10)
@@ -603,38 +595,37 @@ class MainWindow(QMainWindow):
 
     def create_actions(self):
         self._to_front_action = QAction(
-                QIcon(':/images/bringtofront.png'), "Bring to &Front",
-                self, shortcut="Ctrl+F", statusTip="Bring item to front",
-                triggered=self.bring_to_front)
+            QIcon(':/images/bringtofront.png'), "Bring to &Front",
+            self, shortcut="Ctrl+F", statusTip="Bring item to front",
+            triggered=self.bring_to_front)
 
         self._send_back_action = QAction(
-                QIcon(':/images/sendtoback.png'), "Send to &Back", self,
-                shortcut="Ctrl+B", statusTip="Send item to back",
-                triggered=self.send_to_back)
+            QIcon(':/images/sendtoback.png'), "Send to &Back", self,
+            shortcut="Ctrl+B", statusTip="Send item to back",
+            triggered=self.send_to_back)
 
         self._delete_action = QAction(QIcon(':/images/delete.png'),
-                "&Delete", self, shortcut="Delete",
-                statusTip="Delete item from diagram",
-                triggered=self.delete_item)
+                                      "&Delete", self, shortcut="Delete",
+                                      statusTip="Delete item from diagram",
+                                      triggered=self.delete_item)
 
         self._exit_action = QAction("E&xit", self, shortcut="Ctrl+X",
-                statusTip="Quit Scenediagram example", triggered=self.close)
+                                    statusTip="Quit Scenediagram example", triggered=self.close)
 
         self._bold_action = QAction(QIcon(':/images/bold.png'),
-                "Bold", self, checkable=True, shortcut="Ctrl+B",
-                triggered=self.handle_font_change)
+                                    "Bold", self, checkable=True, shortcut="Ctrl+B",
+                                    triggered=self.handle_font_change)
 
         self._italic_action = QAction(QIcon(':/images/italic.png'),
-                "Italic", self, checkable=True, shortcut="Ctrl+I",
-                triggered=self.handle_font_change)
+                                      "Italic", self, checkable=True, shortcut="Ctrl+I",
+                                      triggered=self.handle_font_change)
 
         self._underline_action = QAction(
-                QIcon(':/images/underline.png'), "Underline", self,
-                checkable=True, shortcut="Ctrl+U",
-                triggered=self.handle_font_change)
+            QIcon(':/images/underline.png'), "Underline", self,
+            checkable=True, shortcut="Ctrl+U",
+            triggered=self.handle_font_change)
 
-        self._about_action = QAction("A&bout", self, shortcut="Ctrl+B",
-                triggered=self.about)
+        self._about_action = QAction("A&bout", self, shortcut="Ctrl+B", triggered=self.about)
 
     def create_menus(self):
         self._file_menu = self.menuBar().addMenu("&File")
@@ -669,32 +660,29 @@ class MainWindow(QMainWindow):
         self._font_color_tool_button = QToolButton()
         self._font_color_tool_button.setPopupMode(QToolButton.MenuButtonPopup)
         self._font_color_tool_button.setMenu(
-                self.create_color_menu(self.text_color_changed, Qt.black))
+            self.create_color_menu(self.text_color_changed, Qt.black))
         self._text_action = self._font_color_tool_button.menu().defaultAction()
         self._font_color_tool_button.setIcon(
-                self.create_color_tool_button_icon(':/images/textpointer.png',
-                        Qt.black))
+            self.create_color_tool_button_icon(':/images/textpointer.png', Qt.black))
         self._font_color_tool_button.setAutoFillBackground(True)
         self._font_color_tool_button.clicked.connect(self.text_button_triggered)
 
         self._fill_color_tool_button = QToolButton()
         self._fill_color_tool_button.setPopupMode(QToolButton.MenuButtonPopup)
         self._fill_color_tool_button.setMenu(
-                self.create_color_menu(self.item_color_changed, Qt.white))
+            self.create_color_menu(self.item_color_changed, Qt.white))
         self._fill_action = self._fill_color_tool_button.menu().defaultAction()
         self._fill_color_tool_button.setIcon(
-                self.create_color_tool_button_icon(':/images/floodfill.png',
-                        Qt.white))
+            self.create_color_tool_button_icon(':/images/floodfill.png', Qt.white))
         self._fill_color_tool_button.clicked.connect(self.fill_button_triggered)
 
         self._line_color_tool_button = QToolButton()
         self._line_color_tool_button.setPopupMode(QToolButton.MenuButtonPopup)
         self._line_color_tool_button.setMenu(
-                self.create_color_menu(self.line_color_changed, Qt.black))
+            self.create_color_menu(self.line_color_changed, Qt.black))
         self._line_action = self._line_color_tool_button.menu().defaultAction()
         self._line_color_tool_button.setIcon(
-                self.create_color_tool_button_icon(':/images/linecolor.png',
-                        Qt.black))
+            self.create_color_tool_button_icon(':/images/linecolor.png', Qt.black))
         self._line_color_tool_button.clicked.connect(self.line_button_triggered)
 
         self._text_tool_bar = self.addToolBar("Font")
@@ -719,8 +707,7 @@ class MainWindow(QMainWindow):
 
         self._pointer_type_group = QButtonGroup()
         self._pointer_type_group.addButton(pointer_button, DiagramScene.MoveItem)
-        self._pointer_type_group.addButton(line_pointer_button,
-                DiagramScene.InsertLine)
+        self._pointer_type_group.addButton(line_pointer_button, DiagramScene.InsertLine)
         self._pointer_type_group.idClicked.connect(self.pointer_group_clicked)
 
         self._scene_scale_combo = QComboBox()
@@ -775,8 +762,7 @@ class MainWindow(QMainWindow):
 
         color_menu = QMenu(self)
         for color, name in zip(colors, names):
-            action = QAction(self.create_color_icon(color), name, self,
-                    triggered=slot)
+            action = QAction(self.create_color_icon(color), name, self, triggered=slot)
             action.setData(QColor(color))
             color_menu.addAction(action)
             if color == defaultColor:

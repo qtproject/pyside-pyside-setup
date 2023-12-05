@@ -73,9 +73,9 @@ class MainWindow(QMainWindow):
     @Slot()
     def about(self):
         QMessageBox.about(self, "About Application",
-                "The <b>Application</b> example demonstrates how to write "
-                "modern GUI applications using Qt, with a menu bar, "
-                "toolbars, and a status bar.")
+                          "The <b>Application</b> example demonstrates how to write "
+                          "modern GUI applications using Qt, with a menu bar, "
+                          "toolbars, and a status bar.")
 
     @Slot()
     def document_was_modified(self):
@@ -84,50 +84,51 @@ class MainWindow(QMainWindow):
     def create_actions(self):
         icon = QIcon.fromTheme("document-new", QIcon(':/images/new.png'))
         self._new_act = QAction(icon, "&New", self, shortcut=QKeySequence.New,
-                statusTip="Create a new file", triggered=self.new_file)
+                                statusTip="Create a new file", triggered=self.new_file)
 
         icon = QIcon.fromTheme("document-open", QIcon(':/images/open.png'))
         self._open_act = QAction(icon, "&Open...", self,
-                shortcut=QKeySequence.Open, statusTip="Open an existing file",
-                triggered=self.open)
+                                 shortcut=QKeySequence.Open, statusTip="Open an existing file",
+                                 triggered=self.open)
 
         icon = QIcon.fromTheme("document-save", QIcon(':/images/save.png'))
         self._save_act = QAction(icon, "&Save", self,
-                shortcut=QKeySequence.Save,
-                statusTip="Save the document to disk", triggered=self.save)
+                                 shortcut=QKeySequence.Save,
+                                 statusTip="Save the document to disk", triggered=self.save)
 
         self._save_as_act = QAction("Save &As...", self,
-                shortcut=QKeySequence.SaveAs,
-                statusTip="Save the document under a new name",
-                triggered=self.save_as)
+                                    shortcut=QKeySequence.SaveAs,
+                                    statusTip="Save the document under a new name",
+                                    triggered=self.save_as)
 
         self._exit_act = QAction("E&xit", self, shortcut="Ctrl+Q",
-                statusTip="Exit the application", triggered=self.close)
+                                 statusTip="Exit the application", triggered=self.close)
 
         icon = QIcon.fromTheme("edit-cut", QIcon(':/images/cut.png'))
         self._cut_act = QAction(icon, "Cu&t", self, shortcut=QKeySequence.Cut,
-                statusTip="Cut the current selection's contents to the clipboard",
-                triggered=self._text_edit.cut)
+                                statusTip="Cut the current selection's contents to the clipboard",
+                                triggered=self._text_edit.cut)
 
         icon = QIcon.fromTheme("edit-copy", QIcon(':/images/copy.png'))
         self._copy_act = QAction(icon, "&Copy",
-                self, shortcut=QKeySequence.Copy,
-                statusTip="Copy the current selection's contents to the clipboard",
-                triggered=self._text_edit.copy)
+                                 self, shortcut=QKeySequence.Copy,
+                                 statusTip="Copy the current selection's contents to the clipboard",
+                                 triggered=self._text_edit.copy)
 
         icon = QIcon.fromTheme("edit-paste", QIcon(':/images/paste.png'))
         self._paste_act = QAction(icon, "&Paste",
-                self, shortcut=QKeySequence.Paste,
-                statusTip="Paste the clipboard's contents into the current selection",
-                triggered=self._text_edit.paste)
+                                  self, shortcut=QKeySequence.Paste,
+                                  statusTip="Paste the clipboard's contents into the current "
+                                  "selection",
+                                  triggered=self._text_edit.paste)
 
         self._about_act = QAction("&About", self,
-                statusTip="Show the application's About box",
-                triggered=self.about)
+                                  statusTip="Show the application's About box",
+                                  triggered=self.about)
 
         self._about_qt_act = QAction("About &Qt", self,
-                statusTip="Show the Qt library's About box",
-                triggered=qApp.aboutQt)
+                                     statusTip="Show the Qt library's About box",
+                                     triggered=qApp.aboutQt)
 
         self._cut_act.setEnabled(False)
         self._copy_act.setEnabled(False)
@@ -181,10 +182,9 @@ class MainWindow(QMainWindow):
     def maybe_save(self):
         if self._text_edit.document().isModified():
             ret = QMessageBox.warning(self, "Application",
-                    "The document has been modified.\nDo you want to save "
-                    "your changes?",
-                    QMessageBox.Save | QMessageBox.Discard |
-                    QMessageBox.Cancel)
+                                      "The document has been modified.\nDo you want to save "
+                                      "your changes?",
+                                      QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
             if ret == QMessageBox.Save:
                 return self.save()
             elif ret == QMessageBox.Cancel:
@@ -195,8 +195,7 @@ class MainWindow(QMainWindow):
         file = QFile(fileName)
         if not file.open(QFile.ReadOnly | QFile.Text):
             reason = file.errorString()
-            QMessageBox.warning(self, "Application",
-                    f"Cannot read file {fileName}:\n{reason}.")
+            QMessageBox.warning(self, "Application", f"Cannot read file {fileName}:\n{reason}.")
             return
 
         inf = QTextStream(file)

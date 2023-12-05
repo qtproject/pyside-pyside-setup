@@ -57,4 +57,3 @@ if __name__ == "__main__":
     tree.show()
 
     sys.exit(app.exec())
-

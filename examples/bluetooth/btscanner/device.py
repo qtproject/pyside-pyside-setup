@@ -46,7 +46,7 @@ class DeviceDiscoveryDialog(QDialog):
             item = QListWidgetItem(label)
             pairing_status = self._local_device.pairingStatus(info.address())
             if (pairing_status == QBluetoothLocalDevice.Paired
-                or pairing_status == QBluetoothLocalDevice.AuthorizedPaired):
+                    or pairing_status == QBluetoothLocalDevice.AuthorizedPaired):
                 item.setForeground(QColor(Qt.green))
             else:
                 item.setForeground(QColor(Qt.black))
@@ -123,7 +123,8 @@ class DeviceDiscoveryDialog(QDialog):
         items = self._ui.list.findItems(address.toString(), Qt.MatchContains)
 
         color = QColor(Qt.red)
-        if pairing == QBluetoothLocalDevice.Paired or pairing == QBluetoothLocalDevice.AuthorizedPaired:
+        if (pairing == QBluetoothLocalDevice.Paired
+                or pairing == QBluetoothLocalDevice.AuthorizedPaired):
             color = QColor(Qt.green)
         for item in items:
             item.setForeground(color)

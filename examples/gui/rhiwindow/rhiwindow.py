@@ -28,9 +28,9 @@ elif sys.platform == "darwin":
 
 # Y up (note clipSpaceCorrMatrix in m_viewProjection), CCW
 VERTEX_DATA = numpy.array([
-      0.0,  0.5, 1.0, 0.0, 0.0,
-     -0.5, -0.5, 0.0, 1.0, 0.0,
-      0.5, -0.5, 0.0, 0.0, 1.0], dtype=numpy.float32)
+    0.0, 0.5, 1.0, 0.0, 0.0,
+    -0.5, -0.5, 0.0, 1.0, 0.0,
+    0.5, -0.5, 0.0, 0.0, 1.0], dtype=numpy.float32)
 
 
 UBUF_SIZE = 68
@@ -124,7 +124,8 @@ class RhiWindow(QWindow):
         surfaceSize = self.m_sc.surfacePixelSize() if self.m_hasSwapChain else QSize()
 
         # stop pushing frames when not exposed (or size is 0)
-        if (not is_exposed or (self.m_hasSwapChain and surfaceSize.isEmpty())) and self.m_initialized and not self.m_notExposed:
+        if ((not is_exposed or (self.m_hasSwapChain and surfaceSize.isEmpty()))
+                and self.m_initialized and not self.m_notExposed):
             self.m_notExposed = True
 
         # Continue when exposed again and the surface has a valid size. Note

@@ -15,8 +15,8 @@ class AddDialogWidget(QDialog):
 
         name_label = QLabel("Name")
         address_label = QLabel("Address")
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok |
-                                      QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok
+                                      | QDialogButtonBox.Cancel)
 
         self._name_text = QLineEdit()
         self._address_text = QTextEdit()

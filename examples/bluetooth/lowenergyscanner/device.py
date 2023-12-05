@@ -276,5 +276,3 @@ class Device(QObject):
     def stop_device_discovery(self):
         if self.discovery_agent.isActive():
             self.discovery_agent.stop()
-
-

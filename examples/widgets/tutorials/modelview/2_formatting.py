@@ -32,7 +32,7 @@ class MyModel(QAbstractTableModel):
                 return "<--left"
             if row == 1 and col == 1:
                 return "right-->"
-            return f"Row{row}, Column{col+1}"
+            return f"Row{row}, Column{col + 1}"
 
         elif role == Qt.FontRole:
             if row == 0 and col == 0:  # change font only for cell(0,0)

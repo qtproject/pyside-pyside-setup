@@ -2,7 +2,8 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-"""PySide6 port of the widgets/painting/concentriccircles example from Qt v5.x, originating from PyQt"""
+"""PySide6 port of the widgets/painting/concentriccircles example from Qt v5.x, originating
+   from PyQt"""
 
 from PySide6.QtCore import QRect, QRectF, QSize, Qt, QTimer
 from PySide6.QtGui import QColor, QPainter, QPalette, QPen
@@ -52,10 +53,10 @@ class CircleWidget(QWidget):
 
                     if self._float_based:
                         painter.drawEllipse(QRectF(-diameter / 2.0,
-                                -diameter / 2.0, diameter, diameter))
+                                                   -diameter / 2.0, diameter, diameter))
                     else:
                         painter.drawEllipse(QRect(-diameter / 2,
-                                -diameter / 2, diameter, diameter))
+                                                  -diameter / 2, diameter, diameter))
 
 
 class Window(QWidget):

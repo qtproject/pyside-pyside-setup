@@ -157,7 +157,7 @@ class Node(QGraphicsItem):
             line = QLineF(self.mapFromItem(item, 0, 0), QPointF(0, 0))
             dx = line.dx()
             dy = line.dy()
-            l = 2.0 * (dx * dx + dy * dy)
+            l = 2.0 * (dx * dx + dy * dy)  # noqa: E741
             if l > 0:
                 xvel += (dx * 150.0) / l
                 yvel += (dy * 150.0) / l
@@ -348,9 +348,9 @@ class GraphWidget(QGraphicsView):
         bottom_shadow = QRectF(scene_rect.left() + 5, scene_rect.bottom(),
                                scene_rect.width(), 5)
         if right_shadow.intersects(rect) or right_shadow.contains(rect):
-                painter.fillRect(right_shadow, Qt.darkGray)
+            painter.fillRect(right_shadow, Qt.darkGray)
         if bottom_shadow.intersects(rect) or bottom_shadow.contains(rect):
-                painter.fillRect(bottom_shadow, Qt.darkGray)
+            painter.fillRect(bottom_shadow, Qt.darkGray)
 
         # Fill.
         gradient = QLinearGradient(scene_rect.topLeft(), scene_rect.bottomRight())

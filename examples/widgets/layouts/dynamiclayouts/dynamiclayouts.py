@@ -102,7 +102,8 @@ class Dialog(QDialog):
         buttons_orientation_combo_box = QComboBox()
         buttons_orientation_combo_box.addItem("Horizontal", Qt.Horizontal)
         buttons_orientation_combo_box.addItem("Vertical", Qt.Vertical)
-        buttons_orientation_combo_box.currentIndexChanged[int].connect(self.buttons_orientation_changed)
+        buttons_orientation_combo_box.currentIndexChanged[int].connect(
+            self.buttons_orientation_changed)
 
         self._buttons_orientation_combo_box = buttons_orientation_combo_box
 
@@ -117,7 +118,8 @@ class Dialog(QDialog):
 
         close_button = self._button_box.addButton(QDialogButtonBox.Close)
         help_button = self._button_box.addButton(QDialogButtonBox.Help)
-        rotate_widgets_button = self._button_box.addButton("Rotate &Widgets", QDialogButtonBox.ActionRole)
+        rotate_widgets_button = self._button_box.addButton(
+            "Rotate &Widgets", QDialogButtonBox.ActionRole)
 
         rotate_widgets_button.clicked.connect(self.rotate_widgets)
         close_button.clicked.connect(self.close)

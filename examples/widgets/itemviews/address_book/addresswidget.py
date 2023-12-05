@@ -166,8 +166,9 @@ class AddressWidget(QTabWidget):
             proxy_model.setFilterKeyColumn(0)  # Filter on the "name" column
             proxy_model.sort(0, Qt.AscendingOrder)
 
-            # This prevents an application crash (see: https://www.qtcentre.org/threads/58874-QListView-SelectionModel-selectionChanged-Crash)
-            viewselectionmodel = table_view.selectionModel()
+            # This prevents an application crash (see:
+            # https://www.qtcentre.org/threads/58874-QListView-SelectionModel-selectionChanged-Crash)  # noqa: E501
+            self.viewselectionmodel = table_view.selectionModel()
             table_view.selectionModel().selectionChanged.connect(self.selection_changed)
 
             self.addTab(table_view, group)

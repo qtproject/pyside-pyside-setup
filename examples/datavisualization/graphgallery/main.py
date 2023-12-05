@@ -34,8 +34,8 @@ if __name__ == "__main__":
     surface = SurfaceGraph()
 
     if (not bars.initialize(minimum_graph_size, screen_size)
-        or not scatter.initialize(minimum_graph_size, screen_size)
-        or not surface.initialize(minimum_graph_size, screen_size)):
+            or not scatter.initialize(minimum_graph_size, screen_size)
+            or not surface.initialize(minimum_graph_size, screen_size)):
         QMessageBox.warning(None, "Graph Gallery", "Couldn't initialize the OpenGL context.")
         sys.exit(-1)
 

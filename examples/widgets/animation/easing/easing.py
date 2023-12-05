@@ -143,8 +143,7 @@ class Window(QWidget):
 
                 # Start point.
                 painter.setBrush(Qt.red)
-                start = QPoint(y_axis,
-                        x_axis - curve_scale * curve.valueForProgress(0))
+                start = QPoint(y_axis, x_axis - curve_scale * curve.valueForProgress(0))
                 painter.drawRect(start.x() - 1, start.y() - 1, 3, 3)
 
                 # End point.

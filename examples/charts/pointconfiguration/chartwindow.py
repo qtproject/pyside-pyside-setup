@@ -109,14 +109,14 @@ class ChartWindow(QMainWindow):
         self._selectedPointConfig = self._series.pointConfiguration(index)
         selected_point = self._series.at(index)
         selected_index_lineedit = self._selected_point_index_lineedit
-        selected_index_lineedit.setText("(" + str(selected_point.x()) + ", " +
-                                        str(selected_point.y()) + ")")
+        selected_index_lineedit.setText("(" + str(selected_point.x()) + ", "
+                                        + str(selected_point.y()) + ")")
         config = self._series.pointConfiguration(index)
 
         color = config.get(PointConfig.Color) or self._series.color()
         size = config.get(PointConfig.Size) or self._series.markerSize()
-        labelVisibility = (config.get(PointConfig.LabelVisibility) or
-                           self._series.pointLabelsVisible())
+        labelVisibility = (config.get(PointConfig.LabelVisibility)
+                           or self._series.pointLabelsVisible())
         customLabel = config.get(PointConfig.LabelFormat) or ""
 
         combobox_value_list = [

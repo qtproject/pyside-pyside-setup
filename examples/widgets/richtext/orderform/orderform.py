@@ -89,8 +89,7 @@ class MainWindow(QMainWindow):
         body_frame_format.setWidth(QTextLength(QTextLength.PercentageLength, 100))
         cursor.insertFrame(body_frame_format)
 
-        cursor.insertText("I would like to place an order for the following "
-                "items:", text_format)
+        cursor.insertText("I would like to place an order for the following items:", text_format)
         cursor.insertBlock()
         cursor.insertBlock()
 
@@ -121,17 +120,17 @@ class MainWindow(QMainWindow):
         cursor.insertBlock()
 
         cursor.insertText("Please update my records to take account of the "
-                "following privacy information:")
+                          "following privacy information:")
         cursor.insertBlock()
 
         offers_table = cursor.insertTable(2, 2)
 
         cursor = offers_table.cellAt(0, 1).firstCursorPosition()
         cursor.insertText("I want to receive more information about your "
-                "company's products and special offers.", text_format)
+                          "company's products and special offers.", text_format)
         cursor = offers_table.cellAt(1, 1).firstCursorPosition()
         cursor.insertText("I do not want to receive any promotional "
-                "information from your company.", text_format)
+                          "information from your company.", text_format)
 
         if sendOffers:
             cursor = offers_table.cellAt(0, 0).firstCursorPosition()
@@ -193,8 +192,7 @@ class DetailsDialog(QDialog):
 
         self._name_edit = QLineEdit()
         self._address_edit = QTextEdit()
-        self._offers_check_box = QCheckBox("Send information about "
-                "products and special offers:")
+        self._offers_check_box = QCheckBox("Send information about products and special offers:")
 
         self.setup_items_table()
 
@@ -250,9 +248,9 @@ class DetailsDialog(QDialog):
             return
 
         answer = QMessageBox.warning(self, "Incomplete Form",
-                "The form does not contain all the necessary information.\n"
-                "Do you want to discard it?",
-                QMessageBox.Yes, QMessageBox.No)
+                                     "The form does not contain all the necessary information.\n"
+                                     "Do you want to discard it?",
+                                     QMessageBox.Yes, QMessageBox.No)
 
         if answer == QMessageBox.Yes:
             self.reject()

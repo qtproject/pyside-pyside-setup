@@ -55,8 +55,7 @@ class StarEditor(QWidget):
         """ Calculate which star the user's mouse cursor is currently
             hovering over.
         """
-        star = (x / (self.star_rating.sizeHint().width() /
-                     self.star_rating.MAX_STAR_COUNT)) + 1
+        star = (x / (self.star_rating.sizeHint().width() / self.star_rating.MAX_STAR_COUNT)) + 1
         if (star <= 0) or (star > self.star_rating.MAX_STAR_COUNT):
             return -1
 

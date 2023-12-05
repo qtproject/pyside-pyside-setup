@@ -327,5 +327,5 @@ class MainWindow(QMainWindow):
 
         # do not go beyond 10 entries
         number_of_entries = min(int(self.ui.writeSize.currentText()),
-                              10 - start_address)
+                                10 - start_address)
         return QModbusDataUnit(table, start_address, number_of_entries)

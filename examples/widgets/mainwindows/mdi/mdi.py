@@ -9,10 +9,10 @@ from functools import partial
 import sys
 
 from PySide6.QtCore import (QByteArray, QFile, QFileInfo, QSettings,
-        QSaveFile, QTextStream, Qt, Slot)
+                            QSaveFile, QTextStream, Qt, Slot)
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
-        QMdiArea, QMessageBox, QTextEdit)
+                               QMdiArea, QMessageBox, QTextEdit)
 
 import PySide6.QtExampleIcons
 
@@ -106,7 +106,7 @@ class MdiChild(QTextEdit):
             f = self.user_friendly_current_file()
             message = f"'{f}' has been modified.\nDo you want to save your changes?"
             ret = QMessageBox.warning(self, "MDI", message,
-                    QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
+                                      QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
 
             if ret == QMessageBox.Save:
                 return self.save()
@@ -208,8 +208,8 @@ class MainWindow(QMainWindow):
     @Slot()
     def about(self):
         QMessageBox.about(self, "About MDI",
-                "The <b>MDI</b> example demonstrates how to write multiple "
-                "document interface applications using Qt.")
+                          "The <b>MDI</b> example demonstrates how to write multiple "
+                          "document interface applications using Qt.")
 
     @Slot()
     def update_menus(self):
@@ -225,8 +225,8 @@ class MainWindow(QMainWindow):
         self._previous_act.setEnabled(has_mdi_child)
         self._separator_act.setVisible(has_mdi_child)
 
-        has_selection = (self.active_mdi_child() is not None and
-                        self.active_mdi_child().textCursor().hasSelection())
+        has_selection = (self.active_mdi_child() is not None
+                         and self.active_mdi_child().textCursor().hasSelection())
         self._cut_act.setEnabled(has_selection)
         self._copy_act.setEnabled(has_selection)
 
@@ -273,80 +273,81 @@ class MainWindow(QMainWindow):
 
         icon = QIcon.fromTheme("document-new")
         self._new_act = QAction(icon, "&New", self,
-                shortcut=QKeySequence.New, statusTip="Create a new file",
-                triggered=self.new_file)
+                                shortcut=QKeySequence.New, statusTip="Create a new file",
+                                triggered=self.new_file)
 
         icon = QIcon.fromTheme("document-open")
         self._open_act = QAction(icon, "&Open...", self,
-                shortcut=QKeySequence.Open, statusTip="Open an existing file",
-                triggered=self.open)
+                                 shortcut=QKeySequence.Open, statusTip="Open an existing file",
+                                 triggered=self.open)
 
         icon = QIcon.fromTheme("document-save")
         self._save_act = QAction(icon, "&Save", self,
-                shortcut=QKeySequence.Save,
-                statusTip="Save the document to disk", triggered=self.save)
+                                 shortcut=QKeySequence.Save,
+                                 statusTip="Save the document to disk", triggered=self.save)
 
         self._save_as_act = QAction("Save &As...", self,
-                shortcut=QKeySequence.SaveAs,
-                statusTip="Save the document under a new name",
-                triggered=self.save_as)
+                                    shortcut=QKeySequence.SaveAs,
+                                    statusTip="Save the document under a new name",
+                                    triggered=self.save_as)
 
         self._exit_act = QAction("E&xit", self, shortcut=QKeySequence.Quit,
-                statusTip="Exit the application",
-                triggered=QApplication.instance().closeAllWindows)
+                                 statusTip="Exit the application",
+                                 triggered=QApplication.instance().closeAllWindows)
 
         icon = QIcon.fromTheme("edit-cut")
         self._cut_act = QAction(icon, "Cu&t", self,
-                shortcut=QKeySequence.Cut,
-                statusTip="Cut the current selection's contents to the clipboard",
-                triggered=self.cut)
+                                shortcut=QKeySequence.Cut,
+                                statusTip="Cut the current selection's contents to the clipboard",
+                                triggered=self.cut)
 
         icon = QIcon.fromTheme("edit-copy")
         self._copy_act = QAction(icon, "&Copy", self,
-                shortcut=QKeySequence.Copy,
-                statusTip="Copy the current selection's contents to the clipboard",
-                triggered=self.copy)
+                                 shortcut=QKeySequence.Copy,
+                                 statusTip="Copy the current selection's contents to the clipboard",
+                                 triggered=self.copy)
 
         icon = QIcon.fromTheme("edit-paste")
         self._paste_act = QAction(icon, "&Paste", self,
-                shortcut=QKeySequence.Paste,
-                statusTip="Paste the clipboard's contents into the current selection",
-                triggered=self.paste)
+                                  shortcut=QKeySequence.Paste,
+                                  statusTip="Paste the clipboard's contents into the current "
+                                            "selection",
+                                  triggered=self.paste)
 
         self._close_act = QAction("Cl&ose", self,
-                statusTip="Close the active window",
-                triggered=self._mdi_area.closeActiveSubWindow)
+                                  statusTip="Close the active window",
+                                  triggered=self._mdi_area.closeActiveSubWindow)
 
         self._close_all_act = QAction("Close &All", self,
-                statusTip="Close all the windows",
-                triggered=self._mdi_area.closeAllSubWindows)
+                                      statusTip="Close all the windows",
+                                      triggered=self._mdi_area.closeAllSubWindows)
 
         self._tile_act = QAction("&Tile", self, statusTip="Tile the windows",
-                triggered=self._mdi_area.tileSubWindows)
+                                 triggered=self._mdi_area.tileSubWindows)
 
         self._cascade_act = QAction("&Cascade", self,
-                statusTip="Cascade the windows",
-                triggered=self._mdi_area.cascadeSubWindows)
+                                    statusTip="Cascade the windows",
+                                    triggered=self._mdi_area.cascadeSubWindows)
 
         self._next_act = QAction("Ne&xt", self, shortcut=QKeySequence.NextChild,
-                statusTip="Move the focus to the next window",
-                triggered=self._mdi_area.activateNextSubWindow)
+                                 statusTip="Move the focus to the next window",
+                                 triggered=self._mdi_area.activateNextSubWindow)
 
         self._previous_act = QAction("Pre&vious", self,
-                shortcut=QKeySequence.PreviousChild,
-                statusTip="Move the focus to the previous window",
-                triggered=self._mdi_area.activatePreviousSubWindow)
+                                     shortcut=QKeySequence.PreviousChild,
+                                     statusTip="Move the focus to the previous window",
+                                     triggered=self._mdi_area.activatePreviousSubWindow)
 
         self._separator_act = QAction(self)
         self._separator_act.setSeparator(True)
 
         self._about_act = QAction("&About", self,
-                statusTip="Show the application's About box",
-                triggered=self.about)
+                                  statusTip="Show the application's About box",
+                                  triggered=self.about)
 
         self._about_qt_act = QAction("About &Qt", self,
-                statusTip="Show the Qt library's About box",
-                triggered=QApplication.instance().aboutQt)
+                                     statusTip="Show the Qt library's About box",
+                                     triggered=QApplication.instance().aboutQt)
 
     def create_menus(self):
         self._file_menu = self.menuBar().addMenu("&File")

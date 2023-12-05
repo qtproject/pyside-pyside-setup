@@ -2,7 +2,8 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-"""PySide6 port of the widgets/mainwindows/dockwidgets example from Qt v5.x, originating from PyQt"""
+"""PySide6 port of the widgets/mainwindows/dockwidgets example from Qt v5.x,
+   originating from PyQt"""
 
 import sys
 
@@ -63,8 +64,7 @@ class MainWindow(QMainWindow):
         cursor.insertBlock()
         cursor.insertText("Some Country")
         cursor.setPosition(top_frame.lastPosition())
-        cursor.insertText(QDate.currentDate().toString("d MMMM yyyy"),
-                text_format)
+        cursor.insertText(QDate.currentDate().toString("d MMMM yyyy"), text_format)
         cursor.insertBlock()
         cursor.insertBlock()
         cursor.insertText("Dear ", text_format)
@@ -104,7 +104,7 @@ class MainWindow(QMainWindow):
         if not file.open(QFile.WriteOnly | QFile.Text):
             reason = file.errorString()
             QMessageBox.warning(self, "Dock Widgets",
-                    f"Cannot write file {filename}:\n{reason}.")
+                                f"Cannot write file {filename}:\n{reason}.")
             return
 
         out = QTextStream(file)
@@ -153,43 +153,44 @@ class MainWindow(QMainWindow):
 
     def about(self):
         QMessageBox.about(self, "About Dock Widgets",
-                "The <b>Dock Widgets</b> example demonstrates how to use "
-                "Qt's dock widgets. You can enter your own text, click a "
-                "customer to add a customer name and address, and click "
-                "standard paragraphs to add them.")
+                          "The <b>Dock Widgets</b> example demonstrates how to use "
+                          "Qt's dock widgets. You can enter your own text, click a "
+                          "customer to add a customer name and address, and click "
+                          "standard paragraphs to add them.")
 
     def create_actions(self):
         icon = QIcon.fromTheme('document-new', QIcon(':/images/new.png'))
         self._new_letter_act = QAction(icon, "&New Letter",
-                self, shortcut=QKeySequence.New,
-                statusTip="Create a new form letter", triggered=self.new_letter)
+                                       self, shortcut=QKeySequence.New,
+                                       statusTip="Create a new form letter",
+                                       triggered=self.new_letter)
 
         icon = QIcon.fromTheme('document-save', QIcon(':/images/save.png'))
         self._save_act = QAction(icon, "&Save...", self,
-                shortcut=QKeySequence.Save,
-                statusTip="Save the current form letter", triggered=self.save)
+                                 shortcut=QKeySequence.Save,
+                                 statusTip="Save the current form letter", triggered=self.save)
 
         icon = QIcon.fromTheme('document-print', QIcon(':/images/print.png'))
         self._print_act = QAction(icon, "&Print...", self,
-                shortcut=QKeySequence.Print,
-                statusTip="Print the current form letter",
-                triggered=self.print_)
+                                  shortcut=QKeySequence.Print,
+                                  statusTip="Print the current form letter",
+                                  triggered=self.print_)
 
         icon = QIcon.fromTheme('edit-undo', QIcon(':/images/undo.png'))
         self._undo_act = QAction(icon, "&Undo", self,
-                shortcut=QKeySequence.Undo,
-                statusTip="Undo the last editing action", triggered=self.undo)
+                                 shortcut=QKeySequence.Undo,
+                                 statusTip="Undo the last editing action", triggered=self.undo)
 
         self._quit_act = QAction("&Quit", self, shortcut="Ctrl+Q",
-                statusTip="Quit the application", triggered=self.close)
+                                 statusTip="Quit the application", triggered=self.close)
 
         self._about_act = QAction("&About", self,
-                statusTip="Show the application's About box",
-                triggered=self.about)
+                                  statusTip="Show the application's About box",
+                                  triggered=self.about)
 
         self._about_qt_act = QAction("About &Qt", self,
-                statusTip="Show the Qt library's About box",
-                triggered=QApplication.instance().aboutQt)
+                                     statusTip="Show the Qt library's About box",
+                                     triggered=QApplication.instance().aboutQt)
 
     def create_menus(self):
         self._file_menu = self.menuBar().addMenu("&File")
@@ -242,21 +243,21 @@ class MainWindow(QMainWindow):
         self._paragraphs_list.addItems((
             "Thank you for your payment which we have received today.",
             "Your order has been dispatched and should be with you within "
-                "28 days.",
+            "28 days.",
             "We have dispatched those items that were in stock. The rest of "
-                "your order will be dispatched once all the remaining items "
-                "have arrived at our warehouse. No additional shipping "
-                "charges will be made.",
+            "your order will be dispatched once all the remaining items "
+            "have arrived at our warehouse. No additional shipping "
+            "charges will be made.",
             "You made a small overpayment (less than $5) which we will keep "
-                "on account for you, or return at your request.",
+            "on account for you, or return at your request.",
             "You made a small underpayment (less than $1), but we have sent "
-                "your order anyway. We'll add this underpayment to your next "
-                "bill.",
+            "your order anyway. We'll add this underpayment to your next "
+            "bill.",
             "Unfortunately you did not send enough money. Please remit an "
-                "additional $. Your order will be dispatched as soon as the "
-                "complete amount has been received.",
+            "additional $. Your order will be dispatched as soon as the "
+            "complete amount has been received.",
             "You made an overpayment (more than $5). Do you wish to buy more "
-                "items, or should we return the excess to you?"))
+            "items, or should we return the excess to you?"))
         dock.setWidget(self._paragraphs_list)
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
         self._view_menu.addAction(dock.toggleViewAction())

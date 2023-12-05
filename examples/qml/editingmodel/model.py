@@ -2,8 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 
-from PySide6.QtCore import (QAbstractListModel, QByteArray, QModelIndex, Qt,
-                            Slot)
+from PySide6.QtCore import QAbstractListModel, QByteArray, QModelIndex, Qt, Slot
 from PySide6.QtGui import QColor
 from PySide6.QtQml import QmlElement
 
@@ -104,18 +103,18 @@ class BaseModel(QAbstractListModel):
         self.beginMoveRows(QModelIndex(), sourceRow, sourceRow + count, QModelIndex(), end)
 
         # start database work
-        pops = self.db[sourceRow : sourceRow + count + 1]
+        pops = self.db[sourceRow: sourceRow + count + 1]
         if sourceRow > dstChild:
             self.db = (
                 self.db[:dstChild]
                 + pops
                 + self.db[dstChild:sourceRow]
-                + self.db[sourceRow + count + 1 :]
+                + self.db[sourceRow + count + 1:]
             )
         else:
             start = self.db[:sourceRow]
-            middle = self.db[dstChild : dstChild + 1]
-            endlist = self.db[dstChild + count + 1 :]
+            middle = self.db[dstChild: dstChild + 1]
+            endlist = self.db[dstChild + count + 1:]
             self.db = start + middle + pops + endlist
         # end database work
 
@@ -136,7 +135,7 @@ class BaseModel(QAbstractListModel):
         self.beginRemoveRows(QModelIndex(), row, row + count)
 
         # start database work
-        self.db = self.db[:row] + self.db[row + count + 1 :]
+        self.db = self.db[:row] + self.db[row + count + 1:]
         # end database work
 
         self.endRemoveRows()

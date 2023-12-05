@@ -37,8 +37,7 @@ class Lighting(QGraphicsView):
     def setup_scene(self):
         self.m_scene.setSceneRect(-300, -200, 600, 460)
 
-        linear_grad = QLinearGradient(QPointF(-100, -100),
-                QPointF(100, 100))
+        linear_grad = QLinearGradient(QPointF(-100, -100), QPointF(100, 100))
         linear_grad.setColorAt(0, QColor(255, 255, 255))
         linear_grad.setColorAt(1, QColor(192, 192, 255))
         self.setBackgroundBrush(linear_grad)

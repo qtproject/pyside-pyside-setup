@@ -32,4 +32,3 @@ class DeviceInfo(QObject):
     def set_device(self, device):
         self._device = device
         self.device_changed.emit()
-

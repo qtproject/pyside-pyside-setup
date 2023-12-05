@@ -5,12 +5,9 @@
 import math
 import sys
 
-from PySide6.QtCore import (QLineF, QPointF, QRandomGenerator, QRectF, QTimer,
-                            Qt)
-from PySide6.QtGui import (QBrush, QColor, QPainter, QPainterPath, QPixmap,
-                           QPolygonF, QTransform)
-from PySide6.QtWidgets import (QApplication, QGraphicsItem, QGraphicsScene,
-                               QGraphicsView)
+from PySide6.QtCore import (QLineF, QPointF, QRandomGenerator, QRectF, QTimer, Qt)
+from PySide6.QtGui import (QBrush, QColor, QPainter, QPainterPath, QPixmap, QPolygonF, QTransform)
+from PySide6.QtWidgets import (QApplication, QGraphicsItem, QGraphicsScene, QGraphicsView)
 
 import mice_rc
 
@@ -103,7 +100,8 @@ class Mouse(QGraphicsItem):
             if angle_to_center < Mouse.PI and angle_to_center > Mouse.PI / 4:
                 # Rotate left.
                 self.angle += [-0.25, 0.25][self.angle < -Mouse.PI / 2]
-            elif angle_to_center >= Mouse.PI and angle_to_center < (Mouse.PI + Mouse.PI / 2 + Mouse.PI / 4):
+            elif (angle_to_center >= Mouse.PI
+                    and angle_to_center < (Mouse.PI + Mouse.PI / 2 + Mouse.PI / 4)):
                 # Rotate right.
                 self.angle += [-0.25, 0.25][self.angle < Mouse.PI / 2]
         elif math.sin(self.angle) < 0:

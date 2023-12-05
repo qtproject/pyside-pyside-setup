@@ -133,16 +133,14 @@ class AudioTest(QMainWindow):
 
         layout.addWidget(self.m_modeButton)
 
-        self.m_suspendResumeButton = QPushButton(
-                clicked=self.toggle_suspend_resume)
+        self.m_suspendResumeButton = QPushButton(clicked=self.toggle_suspend_resume)
         self.m_suspendResumeButton.setText(self.SUSPEND_LABEL)
 
         layout.addWidget(self.m_suspendResumeButton)
 
         volume_box = QHBoxLayout()
         volume_label = QLabel("Volume:")
-        self.m_volumeSlider = QSlider(Qt.Horizontal, minimum=0, maximum=100,
-                singleStep=10)
+        self.m_volumeSlider = QSlider(Qt.Horizontal, minimum=0, maximum=100, singleStep=10)
         self.m_volumeSlider.valueChanged.connect(self.volume_changed)
 
         volume_box.addWidget(volume_label)
@@ -167,8 +165,8 @@ class AudioTest(QMainWindow):
             qWarning("Default format not supported - trying to use nearest")
             self.m_format = info.nearestFormat(self.m_format)
 
-        self.m_generator = Generator(self.m_format,
-                self.DURATION_SECONDS * 1000000, self.TONE_SAMPLE_RATE_HZ, self)
+        self.m_generator = Generator(self.m_format, self.DURATION_SECONDS * 1000000,
+                                     self.TONE_SAMPLE_RATE_HZ, self)
 
         self.create_audio_output()
 

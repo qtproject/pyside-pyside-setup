@@ -621,7 +621,7 @@ class TextEdit(QMainWindow):
             above = QTextCursor(cursor)
             above.movePosition(QTextCursor.Up)
             if (above.currentList()
-                and list_fmt.indent() + amount == above.currentList().format().indent()):
+                    and list_fmt.indent() + amount == above.currentList().format().indent()):
                 above.currentList().add(cursor.block())
             else:
                 list_fmt.setIndent(list_fmt.indent() + amount)

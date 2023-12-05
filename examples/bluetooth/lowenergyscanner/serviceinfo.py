@@ -62,5 +62,3 @@ class ServiceInfo(QObject):
     @service.setter
     def service(self, service):
         self._service = service
-
-

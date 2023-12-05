@@ -51,8 +51,8 @@ class NotificationPopup(QWidget):
         self.notification.closed.connect(self.onClosed)
         QTimer.singleShot(10000, lambda: self.onClosed())
 
-        self.move(self.parentWidget().mapToGlobal(self.parentWidget().rect().bottomRight() -
-                  QPoint(self.width() + 10, self.height() + 10)))
+        self.move(self.parentWidget().mapToGlobal(self.parentWidget().rect().bottomRight()
+                                                  - QPoint(self.width() + 10, self.height() + 10)))
 
     @Slot()
     def onClosed(self):

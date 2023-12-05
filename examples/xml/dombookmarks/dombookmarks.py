@@ -30,8 +30,8 @@ class MainWindow(QMainWindow):
 
     def open(self):
         file_name = QFileDialog.getOpenFileName(self,
-                "Open Bookmark File", QDir.currentPath(),
-                "XBEL Files (*.xbel *.xml)")[0]
+                                                "Open Bookmark File", QDir.currentPath(),
+                                                "XBEL Files (*.xbel *.xml)")[0]
 
         if not file_name:
             return
@@ -40,7 +40,7 @@ class MainWindow(QMainWindow):
         if not in_file.open(QFile.ReadOnly | QFile.Text):
             reason = in_file.errorString()
             QMessageBox.warning(self, "DOM Bookmarks",
-                    f"Cannot read file {file_name}:\n{reason}.")
+                                f"Cannot read file {file_name}:\n{reason}.")
             return
 
         if self._xbel_tree.read(in_file):
@@ -48,8 +48,8 @@ class MainWindow(QMainWindow):
 
     def save_as(self):
         file_name = QFileDialog.getSaveFileName(self,
-                "Save Bookmark File", QDir.currentPath(),
-                "XBEL Files (*.xbel *.xml)")[0]
+                                                "Save Bookmark File", QDir.currentPath(),
+                                                "XBEL Files (*.xbel *.xml)")[0]
 
         if not file_name:
             return
@@ -58,7 +58,7 @@ class MainWindow(QMainWindow):
         if not out_file.open(QFile.WriteOnly | QFile.Text):
             reason = out_file.errorString()
             QMessageBox.warning(self, "DOM Bookmarks",
-                    "Cannot write file {fileName}:\n{reason}.")
+                                f"Cannot write file {file_name}:\n{reason}.")
             return
 
         if self._xbel_tree.write(out_file):
@@ -66,25 +66,26 @@ class MainWindow(QMainWindow):
 
     def about(self):
         QMessageBox.about(self, "About DOM Bookmarks",
-            "The <b>DOM Bookmarks</b> example demonstrates how to use Qt's "
-            "DOM classes to read and write XML documents.")
+                          "The <b>DOM Bookmarks</b> example demonstrates how to use Qt's "
+                          "DOM classes to read and write XML documents.")
 
     def create_menus(self):
         self._file_menu = self.menuBar().addMenu("&File")
         self._file_menu.addAction(QAction("&Open...", self,
-                shortcut=QKeySequence(Qt.CTRL | Qt.Key_O), triggered=self.open))
+                                          shortcut=QKeySequence(
+                                              Qt.CTRL | Qt.Key_O), triggered=self.open))
         self._file_menu.addAction(QAction("&Save As...", self,
-                shortcut=QKeySequence(Qt.CTRL | Qt.Key_S), triggered=self.save_as))
+                                          shortcut=QKeySequence(
+                                              Qt.CTRL | Qt.Key_S), triggered=self.save_as))
         self._file_menu.addAction(QAction("E&xit", self,
-                shortcut=QKeySequence(Qt.CTRL | Qt.Key_Q), triggered=self.close))
+                                          shortcut=QKeySequence(
+                                              Qt.CTRL | Qt.Key_Q), triggered=self.close))
 
         self.menuBar().addSeparator()
 
         self._help_menu = self.menuBar().addMenu("&Help")
-        self._help_menu.addAction(QAction("&About", self,
-                triggered=self.about))
-        self._help_menu.addAction(QAction("About &Qt", self,
-                triggered=qApp.aboutQt))
+        self._help_menu.addAction(QAction("&About", self, triggered=self.about))
+        self._help_menu.addAction(QAction("About &Qt", self, triggered=qApp.aboutQt))
 
 
 class XbelTree(QTreeWidget):
@@ -102,26 +103,27 @@ class XbelTree(QTreeWidget):
         self._bookmark_icon = QIcon()
 
         self._folder_icon.addPixmap(self.style().standardPixmap(QStyle.SP_DirClosedIcon),
-                QIcon.Normal, QIcon.Off)
+                                    QIcon.Normal, QIcon.Off)
         self._folder_icon.addPixmap(self.style().standardPixmap(QStyle.SP_DirOpenIcon),
-                QIcon.Normal, QIcon.On)
+                                    QIcon.Normal, QIcon.On)
         self._bookmark_icon.addPixmap(self.style().standardPixmap(QStyle.SP_FileIcon))
 
     def read(self, device):
         ok, errorStr, errorLine, errorColumn = self._dom_document.setContent(device, True)
         if not ok:
             QMessageBox.information(self.window(), "DOM Bookmarks",
-                    f"Parse error at line {errorLine}, column {errorColumn}:\n{errorStr}")
+                                    f"Parse error at line {errorLine}, "
+                                    f"column {errorColumn}:\n{errorStr}")
             return False
 
         root = self._dom_document.documentElement()
         if root.tagName() != 'xbel':
             QMessageBox.information(self.window(), "DOM Bookmarks",
-                    "The file is not an XBEL file.")
+                                    "The file is not an XBEL file.")
             return False
         elif root.hasAttribute('version') and root.attribute('version') != '1.0':
             QMessageBox.information(self.window(), "DOM Bookmarks",
-                    "The file is not an XBEL version 1.0 file.")
+                                    "The file is not an XBEL version 1.0 file.")
             return False
 
         self.clear()
