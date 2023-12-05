@@ -5,11 +5,10 @@ import numpy
 import sys
 
 from PySide6.QtCore import (QEvent, QFile, QIODevice, QPointF, QRectF, QSize,
-                            QSizeF, qFatal, qWarning, Qt)
+                            qFatal, qWarning, Qt)
 from PySide6.QtGui import (QColor, QFont, QGradient, QImage, QMatrix4x4,
-                           QOffscreenSurface, QPainter, QPlatformSurfaceEvent,
-                           QSurface, QWindow)
-from PySide6.QtGui import (QRhi, QRhiBuffer, QRhiCommandBuffer,
+                           QPainter, QPlatformSurfaceEvent, QSurface, QWindow)
+from PySide6.QtGui import (QRhi, QRhiBuffer,
                            QRhiDepthStencilClearValue,
                            QRhiGraphicsPipeline, QRhiNullInitParams,
                            QRhiGles2InitParams, QRhiRenderBuffer,

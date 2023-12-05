@@ -7,7 +7,7 @@
 import sys
 
 from PySide6.QtCore import QDir, QFile, Qt, QTextStream
-from PySide6.QtGui import QAction, QIcon
+from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QFileDialog, QHeaderView,
                                QMainWindow, QMessageBox, QStyle, QTreeWidget,
                                QTreeWidgetItem)

@@ -1,8 +1,7 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-from PySide6.QtWidgets import (QDialog, QFileDialog, QMainWindow,
-                               QMessageBox, QToolButton)
+from PySide6.QtWidgets import (QDialog, QFileDialog, QMainWindow, QMessageBox)
 from PySide6.QtCore import (QDir, QFile, QFileInfo, QSettings, Slot)
 
 from ui_mainwindow import Ui_MainWindow

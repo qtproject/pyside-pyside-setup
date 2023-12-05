@@ -4,7 +4,7 @@
 from PySide6.QtBluetooth import (QBluetoothDeviceDiscoveryAgent,
                                  QBluetoothDeviceInfo)
 from PySide6.QtQml import QmlElement
-from PySide6.QtCore import QTimer, Property, Signal, Slot, Qt, QCoreApplication
+from PySide6.QtCore import QTimer, Property, Signal, Slot, Qt
 
 from bluetoothbaseclass import BluetoothBaseClass
 from deviceinfo import DeviceInfo

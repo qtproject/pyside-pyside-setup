@@ -4,8 +4,7 @@
 import sys
 
 from PySide6.QtCore import QPoint, QTimer, QTime, Qt
-from PySide6.QtGui import (QColor, QGradient, QGuiApplication, QPainter,
-                           QPalette, QPolygon, QRasterWindow)
+from PySide6.QtGui import QGuiApplication, QPainter, QPalette, QPolygon, QRasterWindow
 
 """Simplified PySide6 port of the gui/analogclock example from Qt v6.x"""
 

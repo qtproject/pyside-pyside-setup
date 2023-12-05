@@ -3,8 +3,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 from PySide6.QtCore import Slot, Qt
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QMainWindow,
+from PySide6.QtWidgets import (QHBoxLayout, QMainWindow,
                                QMessageBox, QPushButton, QSlider,
                                QVBoxLayout, QWidget)
 

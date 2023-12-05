@@ -5,7 +5,7 @@ import sys
 
 from PySide6.QtBluetooth import QBluetoothLocalDevice
 from PySide6.QtQml import QmlElement
-from PySide6.QtCore import QObject, Property, Signal, Slot, Qt, QCoreApplication
+from PySide6.QtCore import QObject, Property, Signal, Slot, Qt
 
 from heartrate_global import simulator, is_android
 

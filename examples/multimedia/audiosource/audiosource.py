@@ -26,7 +26,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QPushButton, QSlider, QV
 is_android = os.environ.get('ANDROID_ARGUMENT')
 
 if is_android:
-    from PySide6.QtCore import QCoreApplication, QMicrophonePermission
+    from PySide6.QtCore import QMicrophonePermission
 
 
 class AudioInfo:

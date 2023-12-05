@@ -6,6 +6,9 @@ from PySide6.QtQml import QQmlApplicationEngine
 
 from gradienttexture import GradientTexture
 
+from pathlib import Path
+
+import os
 import sys
 
 if __name__ == "__main__":

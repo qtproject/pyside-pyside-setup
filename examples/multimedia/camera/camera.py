@@ -17,7 +17,7 @@ from imagesettings import ImageSettings
 from videosettings import VideoSettings, is_android
 
 if is_android:
-    from PySide6.QtCore import QCoreApplication, QMicrophonePermission, QCameraPermission
+    from PySide6.QtCore import QMicrophonePermission, QCameraPermission
     from ui_camera_mobile import Ui_Camera
 else:
     from ui_camera import Ui_Camera
