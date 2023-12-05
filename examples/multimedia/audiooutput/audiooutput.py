@@ -40,24 +40,23 @@ class Generator(QIODevice):
         sample_size = fmt.bytesPerSample() * 8
         if sample_size == 8:
             if fmt.sampleFormat() == QAudioFormat.UInt8:
-                scaler = lambda x: ((1.0 + x) / 2 * 255)
+                scaler = lambda x: ((1.0 + x) / 2 * 255)  # noqa: E731
                 pack_format = 'B'
             elif fmt.sampleFormat() == QAudioFormat.Int16:
-                scaler = lambda x: x * 127
+                scaler = lambda x: x * 127  # noqa: E731
                 pack_format = 'b'
         elif sample_size == 16:
             little_endian = QSysInfo.ByteOrder == QSysInfo.LittleEndian
             if fmt.sampleFormat() == QAudioFormat.UInt8:
-                scaler = lambda x: (1.0 + x) / 2 * 65535
+                scaler = lambda x: (1.0 + x) / 2 * 65535  # noqa: E731
                 pack_format = '<H' if little_endian else '>H'
             elif fmt.sampleFormat() == QAudioFormat.Int16:
-                scaler = lambda x: x * 32767
+                scaler = lambda x: x * 32767  # noqa: E731
                 pack_format = '<h' if little_endian else '>h'
 
         assert pack_format != ''
 
         channel_bytes = fmt.bytesPerSample()
-        sample_bytes = fmt.channelCount() * channel_bytes
 
         length = (fmt.sampleRate() * fmt.channelCount() * channel_bytes) * durationUs // 100000
 

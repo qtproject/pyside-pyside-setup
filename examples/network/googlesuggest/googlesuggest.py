@@ -120,12 +120,11 @@ class GSuggestCompletion(QObject):
 
     @Slot(QNetworkReply)
     def handle_network_data(self, network_reply: QNetworkReply):
-        url = network_reply.url()
         if network_reply.error() == QNetworkReply.NoError:
             choices: List[str] = []
 
             response: QByteArray = network_reply.readAll()
-            xml = QXmlStreamReader(response)
+            xml = QXmlStreamReader(str(response))
             while not xml.atEnd():
                 xml.readNext()
                 if xml.tokenType() == QXmlStreamReader.StartElement:

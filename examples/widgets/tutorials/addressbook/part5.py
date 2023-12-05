@@ -175,7 +175,6 @@ class AddressBook(QWidget):
     @Slot()
     def remove_contact(self):
         name = self._name_line.text()
-        address = self._address_text.toPlainText()
 
         if name in self.contacts:
             button = QMessageBox.question(self, "Confirm Remove",

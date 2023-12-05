@@ -105,7 +105,7 @@ class DeviceHandler(BluetoothBaseClass):
         # Disconnect and delete old connection
         if self.m_control:
             self.m_control.disconnectFromDevice()
-            m_control = None
+            self.m_control = None
 
         # Create new controller and connect it if device available
         if self.m_currentDevice:

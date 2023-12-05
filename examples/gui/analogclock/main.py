@@ -58,7 +58,7 @@ class AnalogClockWindow(QRasterWindow):
         painter.drawConvexPolygon(self._hour_hand)
         painter.restore()
 
-        for i in range(0, 12):
+        for _ in range(0, 12):
             painter.drawRect(73, -3, 16, 6)
             painter.rotate(30.0)
 
@@ -80,7 +80,7 @@ class AnalogClockWindow(QRasterWindow):
 
         painter.setPen(self._minute_color)
 
-        for j in range(0, 60):
+        for _ in range(0, 60):
             painter.drawLine(92, 0, 96, 0)
             painter.rotate(6.0)
 

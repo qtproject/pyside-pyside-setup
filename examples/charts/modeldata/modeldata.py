@@ -101,9 +101,6 @@ class TableWidget(QWidget):
         self.mapper.setModel(self.model)
         self.chart.addSeries(self.series)
 
-        # for storing color hex from the series
-        seriesColorHex = "#000000"
-
         # get the color of the series and use it for showing the mapped area
         self.model.add_mapping(self.series.pen().color().name(),
                                QRect(0, 0, 2, self.model.rowCount()))
