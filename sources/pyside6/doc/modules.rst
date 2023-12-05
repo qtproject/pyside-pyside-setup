@@ -114,6 +114,10 @@ Qt Modules Supported by Qt for Python
 
         Provides classes for setting up the controls from C++.
 
+    .. grid-item-card:: :mod:`QtQuickTest <PySide6.QtQuickTest>`
+
+       A unit test framework for QML applications where test cases are written as JavaScript functions.
+
     .. grid-item-card:: :mod:`QtQuickWidgets <PySide6.QtQuickWidgets>`
 
         Provides the QQuickWidget class for embedding Qt Quick in widget-based applications.

@@ -1,0 +1,3 @@
+include(@QT_SRC_DIR@/../qtdeclarative/src/qmltest/doc/qtqmltest.qdocconf)
+includepaths += -I @QT_SRC_DIR@/../qtdeclarative/src/qmltest
+include(../pyside-config.qdocconf)

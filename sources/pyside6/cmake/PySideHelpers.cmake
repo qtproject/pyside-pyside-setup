@@ -103,6 +103,7 @@ macro(collect_optional_modules)
         Quick
         Quick3D
         QuickControls2
+        QuickTest
         QuickWidgets
         RemoteObjects
         Scxml

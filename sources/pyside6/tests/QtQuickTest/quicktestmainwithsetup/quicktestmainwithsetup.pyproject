@@ -1,0 +1,4 @@
+{
+    "files": ["tst_quicktestmainwithsetup.py", "data/tst_setup.qml",
+              "imports/ImportPathQmlModule/ImportPathQmlType.qml"]
+}
