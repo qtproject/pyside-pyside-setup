@@ -6,7 +6,6 @@ PySide6 port of Qt Quick Controls Contact List example from Qt v6.x
 """
 import sys
 from pathlib import Path
-from PySide6.QtCore import QUrl
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 

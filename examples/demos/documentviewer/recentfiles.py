@@ -3,7 +3,7 @@
 
 from enum import Enum, auto
 
-from PySide6.QtCore import QFile, QFileInfo, QObject, QSettings, Signal, Slot
+from PySide6.QtCore import QFileInfo, QObject, QSettings, Signal, Slot
 
 
 DEFAULT_MAX_FILES = 10

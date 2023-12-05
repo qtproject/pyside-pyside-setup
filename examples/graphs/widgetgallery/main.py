@@ -3,7 +3,6 @@
 
 """PySide6 port of the Qt Graphs widgetgallery example from Qt v6.x"""
 
-import os
 import sys
 
 from PySide6.QtCore import QSize
