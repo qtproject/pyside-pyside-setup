@@ -12,5 +12,14 @@
         "*_test.py"
     ],
     "python.testing.pytestEnabled": false,
-    "python.testing.unittestEnabled": true
+    "python.testing.unittestEnabled": true,
+    "flake8.args": [
+        "--ignore=E115,E265,W503",
+        "--max-line-length=100"
+    ],
+    "flake8.ignorePatterns": [
+        "rc_*.py",
+        "*_rc.py",
+        "ui_*.py",
+    ]
 }
