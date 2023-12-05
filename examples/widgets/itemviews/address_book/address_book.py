@@ -25,13 +25,13 @@ class MainWindow(QMainWindow):
         tool_menu = self.menuBar().addMenu("&Tools")
 
         # Populate the File menu
-        open_action = self.create_action("&Open...", file_menu, self.open_file)
-        save_action = self.create_action("&Save As...", file_menu, self.save_file)
+        self.open_action = self.create_action("&Open...", file_menu, self.open_file)
+        self.save_action = self.create_action("&Save As...", file_menu, self.save_file)
         file_menu.addSeparator()
-        exit_action = self.create_action("E&xit", file_menu, self.close)
+        self.exit_action = self.create_action("E&xit", file_menu, self.close)
 
         # Populate the Tools menu
-        add_action = self.create_action(
+        self.add_action = self.create_action(
             "&Add Entry...", tool_menu, self._address_widget.add_entry)
         self._edit_action = self.create_action(
             "&Edit Entry...", tool_menu, self._address_widget.edit_entry)

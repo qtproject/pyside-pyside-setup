@@ -26,7 +26,7 @@ class DataObject(QObject):
     def setName(self, name):
         if name != self._name:
             self._name = name
-            nameChanged.emit()
+            self.nameChanged.emit()
 
     def color(self):
         return self._color
@@ -34,7 +34,7 @@ class DataObject(QObject):
     def setColor(self, color):
         if color != self._color:
             self._color = color
-            colorChanged.emit()
+            self.colorChanged.emit()
 
     name = Property(str, name, setName, notify=nameChanged)
     color = Property(str, color, setColor, notify=colorChanged)

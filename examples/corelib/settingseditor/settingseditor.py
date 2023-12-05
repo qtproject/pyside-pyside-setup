@@ -207,16 +207,6 @@ class MainWindow(QMainWindow):
                           "application settings using Qt.")
 
     def create_actions(self):
-        self._open_settings_act = QAction("&Open Application Settings...",
-                self, shortcut="Ctrl+O", triggered=self.openSettings)
-
-        self._open_ini_file_act = QAction("Open I&NI File...", self,
-                shortcut="Ctrl+N", triggered=self.openIniFile)
-
-        self._open_property_list_act = QAction("Open macOS &Property List...",
-                self, shortcut="Ctrl+P", triggered=self.openPropertyList)
-
-    def create_actions(self):
         self.open_settings_action = QAction("&Open Application Settings...",
                                             self, shortcut="Ctrl+O", triggered=self.open_settings)
 
@@ -515,7 +505,7 @@ class SettingsTree(QTreeWidget):
         # The signal might not be connected.
         try:
             self.itemChanged.disconnect(self.update_setting)
-        except:
+        except Exception:
             pass
 
         self.settings.sync()
@@ -538,7 +528,6 @@ class SettingsTree(QTreeWidget):
             key = ancestor.text(0) + '/' + key
             ancestor = ancestor.parent()
 
-        d = item.data(2, Qt.UserRole)
         self.settings.setValue(key, item.data(2, Qt.UserRole))
 
         if self.auto_refresh:
@@ -710,7 +699,7 @@ class VariantDelegate(QItemDelegate):
             value = editor.value()
         else:
             value = self.value_from_lineedit(editor, model, index)
-        if not value is None:
+        if value is not None:
             model.setData(index, value, Qt.UserRole)
             model.setData(index, self.display_text(value), Qt.DisplayRole)
 

@@ -113,7 +113,6 @@ class CubeRenderer():
 
         self.m_vao = QOpenGLVertexArrayObject()
         self.m_vao.create()
-        vaoBinder = QOpenGLVertexArrayObject.Binder(self.m_vao)
 
         self.m_vbo = QOpenGLBuffer()
         self.m_vbo.create()
@@ -166,7 +165,6 @@ class CubeRenderer():
             f.glEnable(GL_DEPTH_TEST)
 
             self.m_program.bind()
-            vaoBinder = QOpenGLVertexArrayObject.Binder(self.m_vao)
             # If VAOs are not supported, set the vertex attributes every time.
             if not self.m_vao.isCreated():
                 self.setupVertexAttribs()

@@ -90,7 +90,7 @@ class Callout(QGraphicsItem):
 
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.LeftButton:
-            self.setPos(mapToParent(
+            self.setPos(self.mapToParent(
                 event.pos() - event.buttonDownPos(Qt.LeftButton)))
             event.setAccepted(True)
         else:
