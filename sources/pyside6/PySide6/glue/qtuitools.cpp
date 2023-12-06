@@ -62,7 +62,7 @@ Q_IMPORT_PLUGIN(PyCustomWidgets);
 
 // @snippet quiloader-registercustomwidget
 registerCustomWidget(%PYARG_1);
-%CPPSELF.addPluginPath(""); // force reload widgets
+%CPPSELF.addPluginPath(QString{}); // force reload widgets
 // @snippet quiloader-registercustomwidget
 
 // @snippet quiloader-load-1
@@ -87,7 +87,7 @@ char *arg1 = PyBytes_AsString(strObj);
 QByteArray uiFileName(arg1);
 Py_DECREF(strObj);
 
-QFile uiFile(uiFileName);
+QFile uiFile(QString::fromUtf8(uiFileName));
 
 if (!uiFile.exists()) {
     qCritical().noquote() << "File" << uiFileName << "does not exists";
@@ -102,7 +102,7 @@ if (uiFileName.isEmpty()) {
 // Use the 'pyside6-uic' wrapper instead of 'uic'
 // This approach is better than rely on 'uic' since installing
 // the wheels cover this case.
-QString uicBin("pyside6-uic");
+QString uicBin(QStringLiteral("pyside6-uic"));
 QStringList uicArgs = {QString::fromUtf8(uiFileName)};
 
 QProcess uicProcess;

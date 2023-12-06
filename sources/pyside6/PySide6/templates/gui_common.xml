@@ -8,7 +8,7 @@
        int size = Shiboken::String::len(%PYARG_1);
        if (size == 1) {
            const char *str = Shiboken::String::toCString(%PYARG_1);
-           QChar ch(str[0]);
+           const QChar ch(static_cast&lt;unsigned short&gt;(str[0]));
            %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(ch);
            %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
        } else {
