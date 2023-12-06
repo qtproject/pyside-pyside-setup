@@ -1440,7 +1440,7 @@ auto res = (*%CPPSELF) + cppArg0;
 
 // @snippet conversion-pystring-char
 char c = %CONVERTTOCPP[char](%in);
-%out = %OUTTYPE(c);
+%out = %OUTTYPE(static_cast<unsigned short>(c));
 // @snippet conversion-pystring-char
 
 // @snippet conversion-pyint
