@@ -82,7 +82,7 @@ ApplicationWindow {
                                 );
                 }
 
-                function generateTextureData() : ArrayBuffer {
+                function generateTextureData() {
                     let dataBuffer = new ArrayBuffer(width * height * 4)
                     let data = new Uint8Array(dataBuffer)
 
