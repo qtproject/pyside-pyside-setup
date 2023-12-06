@@ -87,15 +87,15 @@ char *arg1 = PyBytes_AsString(strObj);
 QByteArray uiFileName(arg1);
 Py_DECREF(strObj);
 
-QFile uiFile(QString::fromUtf8(uiFileName));
-
-if (!uiFile.exists()) {
-    qCritical().noquote() << "File" << uiFileName << "does not exists";
+if (uiFileName.isEmpty()) {
+    qCritical() << "Error converting the UI filename to QByteArray";
     Py_RETURN_NONE;
 }
 
-if (uiFileName.isEmpty()) {
-    qCritical() << "Error converting the UI filename to QByteArray";
+QFile uiFile(QString::fromUtf8(uiFileName));
+
+if (!uiFile.exists()) {
+    qCritical().noquote() << "File" << uiFileName << "does not exist";
     Py_RETURN_NONE;
 }
 
@@ -107,18 +107,26 @@ QStringList uicArgs = {QString::fromUtf8(uiFileName)};
 
 QProcess uicProcess;
 uicProcess.start(uicBin, uicArgs);
-if (!uicProcess.waitForFinished()) {
-    qCritical() << "Cannot run 'pyside6-uic': " << uicProcess.errorString() << " - "
-                << "Exit status " << uicProcess.exitStatus()
-                << " (" << uicProcess.exitCode() << ")\n"
-                << "Check if 'pyside6-uic' is in PATH";
+if (!uicProcess.waitForStarted()) {
+    qCritical().noquote() << "Cannot run '" << uicBin << "': "
+        << uicProcess.errorString() << " - Check if 'pyside6-uic' is in PATH";
     Py_RETURN_NONE;
 }
+
+if (!uicProcess.waitForFinished()
+    || uicProcess.exitStatus() != QProcess::NormalExit
+    || uicProcess.exitCode() != 0) {
+    qCritical().noquote() << '\'' << uicBin << "' failed: "
+        << uicProcess.errorString() << " - Exit status " << uicProcess.exitStatus()
+        << " (" << uicProcess.exitCode() << ")\n";
+    Py_RETURN_NONE;
+}
+
 QByteArray uiFileContent = uicProcess.readAllStandardOutput();
 QByteArray errorOutput = uicProcess.readAllStandardError();
 
 if (!errorOutput.isEmpty()) {
-    qCritical().noquote() << errorOutput;
+    qCritical().noquote() << '\'' << uicBin << "' failed: " << errorOutput;
     Py_RETURN_NONE;
 }
 
