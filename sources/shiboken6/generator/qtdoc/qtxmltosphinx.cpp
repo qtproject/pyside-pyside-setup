@@ -945,7 +945,7 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
             || m_lastTagName == u"dots" || m_lastTagName == u"codeline";
         if (consecutiveSnippet) {
             m_output.flush();
-            m_output.string()->chop(2);
+            m_output.string()->chop(1); // Strip newline from previous snippet
         }
         QString location = reader.attributes().value(u"location"_s).toString();
         QString identifier = reader.attributes().value(u"identifier"_s).toString();
