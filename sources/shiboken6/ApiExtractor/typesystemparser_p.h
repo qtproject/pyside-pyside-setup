@@ -15,6 +15,7 @@
 #include <QtCore/QScopedPointer>
 
 #include <memory>
+#include <optional>
 
 QT_FORWARD_DECLARE_CLASS(QVersionNumber)
 QT_FORWARD_DECLARE_CLASS(QXmlStreamAttributes)
@@ -146,6 +147,13 @@ public:
     QString errorString() const { return m_error; }
 
 private:
+    struct Snippet
+    {
+        QString content;
+        QString fileName;
+        QString snippetLabel;
+    };
+
     bool parseXml(ConditionalStreamReader &reader);
     bool setupSmartPointerInstantiations();
     bool startElement(const ConditionalStreamReader &reader, StackElement element);
@@ -248,7 +256,8 @@ private:
                               QXmlStreamAttributes *);
      bool parseParentOwner(const ConditionalStreamReader &, StackElement topElement,
                            QXmlStreamAttributes *);
-     bool readFileSnippet(QXmlStreamAttributes *attributes, CodeSnip *snip);
+     std::optional<Snippet> readFileSnippet(QXmlStreamAttributes *attributes);
+     bool readCodeSnippet(QXmlStreamAttributes *attributes, CodeSnip *snip);
      bool parseInjectCode(const ConditionalStreamReader &, StackElement topElement, QXmlStreamAttributes *);
      bool parseInclude(const ConditionalStreamReader &, StackElement topElement,
                        const TypeEntryPtr &entry, QXmlStreamAttributes *);

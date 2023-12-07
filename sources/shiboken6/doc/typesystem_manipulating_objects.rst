@@ -84,8 +84,8 @@ placeholders.
 Using Snippets From External Files
 ==================================
 
-Code snippets can also be retrieved from external files found in the
-typesystem search path (see :ref:`typesystem-paths`).
+Code or documentation snippets can also be retrieved from external
+files found in the typesystem search path (see :ref:`typesystem-paths`).
 
 .. code-block:: xml
 

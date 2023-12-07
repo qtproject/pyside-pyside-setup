@@ -64,6 +64,7 @@ constexpr auto disableWrapperAttribute = "disable-wrapper"_L1;
 constexpr auto exceptionHandlingAttribute = "exception-handling"_L1;
 constexpr auto extensibleAttribute = "extensible"_L1;
 constexpr auto fileNameAttribute = "file-name"_L1;
+constexpr auto fileAttribute = "file"_L1;
 constexpr auto flagsAttribute = "flags"_L1;
 constexpr auto forceAbstractAttribute = "force-abstract"_L1;
 constexpr auto forceIntegerAttribute = "force-integer"_L1;
@@ -156,6 +157,11 @@ static bool setRejectionRegularExpression(const QString &patternIn,
         return false;
     }
     return true;
+}
+
+static inline bool hasFileSnippetAttributes(const QXmlStreamAttributes *attributes)
+{
+    return attributes->hasAttribute(fileAttribute);
 }
 
 // Extract a snippet from a file within annotation "// @snippet label".
@@ -2036,6 +2042,12 @@ bool TypeSystemParser::parseInjectDocumentation(const ConditionalStreamReader &,
     QString signature = isTypeEntry(topElement) ? QString() : m_currentSignature;
     DocModification mod(mode, signature);
     mod.setFormat(lang);
+    if (hasFileSnippetAttributes(attributes)) {
+        const auto snippetOptional = readFileSnippet(attributes);
+        if (!snippetOptional.has_value())
+            return false;
+        mod.setCode(snippetOptional.value().content);
+    }
     auto &top = m_contextStack.top();
     if (isAddFunction)
         top->addedFunctions.last()->addDocModification(mod);
@@ -2292,7 +2304,7 @@ bool TypeSystemParser::parseNativeToTarget(const ConditionalStreamReader &,
         return false;
     }
     CodeSnip snip;
-    if (!readFileSnippet(attributes, &snip))
+    if (!readCodeSnippet(attributes, &snip))
         return false;
     m_contextStack.top()->conversionCodeSnips.append(snip);
     return true;
@@ -2309,7 +2321,7 @@ bool TypeSystemParser::parseAddConversion(const ConditionalStreamReader &,
     QString sourceTypeName;
     QString typeCheck;
     CodeSnip snip;
-    if (!readFileSnippet(attributes, &snip))
+    if (!readCodeSnippet(attributes, &snip))
         return false;
 
     const auto &top = m_contextStack.top();
@@ -2947,46 +2959,62 @@ bool TypeSystemParser::parseParentOwner(const ConditionalStreamReader &,
     return true;
 }
 
-bool TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes, CodeSnip *snip)
+std::optional<TypeSystemParser::Snippet>
+    TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes)
 {
-    QString fileName;
-    QString snippetLabel;
+    Snippet result;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
-        if (name == u"file") {
-            fileName = attributes->takeAt(i).value().toString();
+        if (name == fileAttribute) {
+            result.fileName = attributes->takeAt(i).value().toString();
         } else if (name == snippetAttribute) {
-            snippetLabel = attributes->takeAt(i).value().toString();
+            result.snippetLabel = attributes->takeAt(i).value().toString();
         }
     }
-    if (fileName.isEmpty())
-        return true;
-    const QString resolved = m_context->db->modifiedTypesystemFilepath(fileName, m_currentPath);
+    if (result.fileName.isEmpty()) {
+        m_error = "Snippet missing file name"_L1;
+        return std::nullopt;
+    }
+    const QString resolved = m_context->db->modifiedTypesystemFilepath(result.fileName,
+                                                                       m_currentPath);
     if (!QFile::exists(resolved)) {
         m_error = u"File for inject code not exist: "_s
-            + QDir::toNativeSeparators(fileName);
-        return false;
+                  + QDir::toNativeSeparators(result.fileName);
+        return std::nullopt;
     }
     QFile codeFile(resolved);
     if (!codeFile.open(QIODevice::Text | QIODevice::ReadOnly)) {
         m_error = msgCannotOpenForReading(codeFile);
-        return false;
+        return std::nullopt;
     }
-    const auto codeOptional = extractSnippet(QString::fromUtf8(codeFile.readAll()), snippetLabel);
+    const auto contentOptional = extractSnippet(QString::fromUtf8(codeFile.readAll()),
+                                                result.snippetLabel);
     codeFile.close();
-    if (!codeOptional.has_value()) {
-        m_error = msgCannotFindSnippet(resolved, snippetLabel);
-        return false;
+    if (!contentOptional.has_value()) {
+        m_error = msgCannotFindSnippet(resolved, result.snippetLabel);
+        return std::nullopt;
     }
+    result.content = contentOptional.value();
+    return result;
+}
 
-    QString source = fileName;
-    if (!snippetLabel.isEmpty())
-        source += u" ("_s + snippetLabel + u')';
+bool TypeSystemParser::readCodeSnippet(QXmlStreamAttributes *attributes, CodeSnip *snip)
+{
+    if (!hasFileSnippetAttributes(attributes))
+        return true; // Expecting inline content.
+    const auto snippetOptional = readFileSnippet(attributes);
+    if (!snippetOptional.has_value())
+        return false;
+    const auto snippet = snippetOptional.value();
+
+    QString source = snippet.fileName;
+    if (!snippet.snippetLabel.isEmpty())
+        source += " ("_L1 + snippet.snippetLabel + u')';
     QString content;
     QTextStream str(&content);
     str << "// ========================================================================\n"
            "// START of custom code block [file: "
-        << source << "]\n" << codeOptional.value()
+        << source << "]\n" << snippet.content
         << "// END of custom code block [file: " << source
         << "]\n// ========================================================================\n";
     snip->addCode(content);
@@ -3008,7 +3036,7 @@ bool TypeSystemParser::parseInjectCode(const ConditionalStreamReader &,
     TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionBeginning;
     TypeSystem::Language lang = TypeSystem::TargetLangCode;
     CodeSnip snip;
-    if (!readFileSnippet(attributes, &snip))
+    if (!readCodeSnippet(attributes, &snip))
         return false;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();

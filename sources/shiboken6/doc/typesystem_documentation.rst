@@ -11,7 +11,8 @@ documentation. This node is a child of the :ref:`object-type`,
 .. code-block:: xml
 
      <value-type>
-         <inject-documentation mode="append | prepend | replace" format="native | target" >
+         <inject-documentation mode="append | prepend | replace" format="native | target"
+                               file="[file]" snippet="[label]">
              // the documentation
          </inject-code>
      </value-type>
@@ -23,6 +24,12 @@ occur and it accepts the following values:
 
 * native: Before XML<->Backend transformation occur, so the injected code *must* be a valid XML.
 * target: After XML<->Backend transformation occur, so the injected code *must* be a valid backend format.
+
+The optional ``file`` attribute specifies the file name
+(see :ref:`external-snippets`).
+
+The optional ``snippet`` attribute specifies the snippet label
+(see :ref:`external-snippets`).
 
 At the moment the only supported backend is Sphinx.
 
