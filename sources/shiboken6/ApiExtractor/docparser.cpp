@@ -31,6 +31,26 @@
 
 using namespace Qt::StringLiterals;
 
+static inline bool isXpathDocModification(const DocModification &mod)
+{
+    return mod.mode() == TypeSystem::DocModificationXPathReplace;
+}
+
+static inline bool isNotXpathDocModification(const DocModification &mod)
+{
+    return mod.mode() != TypeSystem::DocModificationXPathReplace;
+}
+
+static void removeXpathDocModifications(DocModificationList *l)
+{
+    l->erase(std::remove_if(l->begin(), l->end(), isXpathDocModification), l->end());
+}
+
+static void removeNonXpathDocModifications(DocModificationList *l)
+{
+    l->erase(std::remove_if(l->begin(), l->end(), isNotXpathDocModification), l->end());
+}
+
 DocParser::DocParser()
 {
 #ifdef HAVE_LIBXSLT
@@ -86,22 +106,59 @@ bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
                        usesRValueReference);
 }
 
-DocModificationList DocParser::getDocModifications(const AbstractMetaClassCPtr &cppClass,
-                                                   const AbstractMetaFunctionCPtr &func)
+DocModificationList DocParser::getDocModifications(const AbstractMetaClassCPtr &cppClass)
+
 {
-    auto te = cppClass->typeEntry();
-    if (!func)
-        return te->docModifications();
+    auto result = cppClass->typeEntry()->docModifications();
+    removeXpathDocModifications(&result);
+    return result;
+}
 
-    if (func->isUserAdded())
-        return func->addedFunctionDocModifications();
+static void filterBySignature(const AbstractMetaFunctionCPtr &func, DocModificationList *l)
+{
+    if (!l->isEmpty()) {
+        const QString minimalSignature = func->minimalSignature();
+        const auto filter = [&minimalSignature](const DocModification &mod) {
+            return mod.signature() != minimalSignature;
+        };
+        l->erase(std::remove_if(l->begin(), l->end(), filter), l->end());
+    }
+}
 
-    DocModificationList result = te->functionDocModifications();
-    const QString minimalSignature = func->minimalSignature();
-    const auto filter = [&minimalSignature](const DocModification &mod) {
-        return mod.signature() != minimalSignature;
-    };
-    result.erase(std::remove_if(result.begin(), result.end(), filter), result.end());
+DocModificationList DocParser::getDocModifications(const AbstractMetaFunctionCPtr &func,
+                                                   const AbstractMetaClassCPtr &cppClass)
+{
+    DocModificationList result;
+    if (func->isUserAdded()) {
+        result = func->addedFunctionDocModifications();
+        removeXpathDocModifications(&result);
+    } else if (cppClass != nullptr) {
+        result = cppClass->typeEntry()->functionDocModifications();
+        removeXpathDocModifications(&result);
+        filterBySignature(func, &result);
+    }
+    return result;
+}
+
+DocModificationList DocParser::getXpathDocModifications(const AbstractMetaClassCPtr &cppClass)
+{
+    auto result = cppClass->typeEntry()->docModifications();
+    removeNonXpathDocModifications(&result);
+    return result;
+}
+
+DocModificationList DocParser::getXpathDocModifications(const AbstractMetaFunctionCPtr &func,
+                                                        const AbstractMetaClassCPtr &cppClass)
+{
+    DocModificationList result;
+    if (func->isUserAdded()) {
+        result = func->addedFunctionDocModifications();
+        removeNonXpathDocModifications(&result);
+    } else if (cppClass != nullptr) {
+        result = cppClass->typeEntry()->functionDocModifications();
+        removeNonXpathDocModifications(&result);
+        filterBySignature(func, &result);
+    }
     return result;
 }
 
@@ -131,12 +188,8 @@ AbstractMetaFunctionCList DocParser::documentableFunctions(const AbstractMetaCla
     return result;
 }
 
-static inline bool isXpathDocModification(const DocModification &mod)
-{
-    return mod.mode() == TypeSystem::DocModificationXPathReplace;
-}
-
-QString DocParser::applyDocModifications(const DocModificationList& mods, const QString& xml)
+QString DocParser::applyDocModifications(const DocModificationList& xpathMods,
+                                         const QString& xml)
 {
     const char xslPrefix[] =
 R"(<xsl:template match="/">
@@ -150,32 +203,28 @@ R"(<xsl:template match="/">
 </xsl:template>
 )";
 
-    if (mods.isEmpty() || xml.isEmpty()
-        || !std::any_of(mods.cbegin(), mods.cend(), isXpathDocModification)) {
+    if (xpathMods.isEmpty() || xml.isEmpty())
         return xml;
-    }
 
     QString xsl = QLatin1StringView(xslPrefix);
-    for (const DocModification &mod : mods) {
-        if (isXpathDocModification(mod)) {
-            QString xpath = mod.xpath();
-            xpath.replace(u'"', u"&quot;"_s);
-            xsl += u"<xsl:template match=\""_s
-                   + xpath + u"\">"_s
-                   + mod.code() + u"</xsl:template>\n"_s;
-        }
+    for (const DocModification &mod : xpathMods) {
+        Q_ASSERT(isXpathDocModification(mod));
+        QString xpath = mod.xpath();
+        xpath.replace(u'"', u"&quot;"_s);
+        xsl += "<xsl:template match=\""_L1 + xpath + "\">"_L1
+               + mod.code() + "</xsl:template>\n"_L1;
     }
 
     QString errorMessage;
     const QString result = xsl_transform(xml, xsl, &errorMessage);
     if (!errorMessage.isEmpty())
         qCWarning(lcShibokenDoc, "%s",
-                  qPrintable(msgXpathDocModificationError(mods, errorMessage)));
+                  qPrintable(msgXpathDocModificationError(xpathMods, errorMessage)));
     if (result == xml) {
         const QString message = u"Query did not result in any modifications to \""_s
             + xml + u'"';
         qCWarning(lcShibokenDoc, "%s",
-                  qPrintable(msgXpathDocModificationError(mods, message)));
+                  qPrintable(msgXpathDocModificationError(xpathMods, message)));
     }
     return result;
 }

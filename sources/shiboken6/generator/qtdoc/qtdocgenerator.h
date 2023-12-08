@@ -95,8 +95,14 @@ private:
                                     const QString &scope = {}) const;
 
     bool writeInjectDocumentation(TextStream &s, TypeSystem::DocModificationMode mode,
-                                  const AbstractMetaClassCPtr &cppClass,
-                                  const AbstractMetaFunctionCPtr &func);
+                                  const AbstractMetaClassCPtr &cppClass);
+    bool writeInjectDocumentation(TextStream &s, TypeSystem::DocModificationMode mode,
+                                  const AbstractMetaFunctionCPtr &func,
+                                  const AbstractMetaClassCPtr &cppClass = {},
+                                  const QString &scope = {});
+    bool writeDocModifications(TextStream &s, const DocModificationList &mods,
+                               TypeSystem::DocModificationMode mode,
+                               const QString &scope = {}) const;
     static void writeDocSnips(TextStream &s, const CodeSnipList &codeSnips,
                               TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
 

@@ -403,8 +403,8 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
 
     s << '\n' << headline("Detailed Description") << ".. _More:\n";
 
-    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass, nullptr);
-    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, nullptr))
+    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass);
+    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass))
         writeFormattedDetailedText(s, documentation, scope);
 
     if (!metaClass->isNamespace())
@@ -425,7 +425,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
         writeFunction(s, func, metaClass, scope, indexed);
     }
 
-    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass, nullptr);
+    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass);
 }
 
 void QtDocGenerator::writeFunctionToc(TextStream &s, const QString &title,
@@ -669,17 +669,12 @@ void QtDocGenerator::writeDocSnips(TextStream &s,
     }
 }
 
-bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
-                                            TypeSystem::DocModificationMode mode,
-                                            const AbstractMetaClassCPtr &cppClass,
-                                            const AbstractMetaFunctionCPtr &func)
+bool QtDocGenerator::writeDocModifications(TextStream &s,
+                                           const DocModificationList &mods,
+                                           TypeSystem::DocModificationMode mode,
+                                           const QString &scope) const
 {
-    Indentation indentation(s);
     bool didSomething = false;
-
-    const DocModificationList mods = DocParser::getDocModifications(cppClass, func);
-    const QString scope = classScope(cppClass);
-
     for (const DocModification &mod : mods) {
         if (mod.mode() == mode) {
             switch (mod.format()) {
@@ -696,17 +691,42 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
             }
         }
     }
+    return didSomething;
+}
 
+bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
+                                              TypeSystem::DocModificationMode mode,
+                                              const AbstractMetaClassCPtr &cppClass)
+{
+    const bool didSomething =
+        writeDocModifications(s, DocParser::getDocModifications(cppClass),
+                              mode, classScope(cppClass));
     s << '\n';
 
     // FIXME PYSIDE-7: Deprecate the use of doc string on glue code.
     //       This is pre "add-function" and "inject-documentation" tags.
     const TypeSystem::CodeSnipPosition pos = mode == TypeSystem::DocModificationPrepend
         ? TypeSystem::CodeSnipPositionBeginning : TypeSystem::CodeSnipPositionEnd;
-    if (func)
-        writeDocSnips(s, func->injectedCodeSnips(), pos, TypeSystem::TargetLangCode);
-    else
-        writeDocSnips(s, cppClass->typeEntry()->codeSnips(), pos, TypeSystem::TargetLangCode);
+    writeDocSnips(s, cppClass->typeEntry()->codeSnips(), pos, TypeSystem::TargetLangCode);
+    return didSomething;
+}
+
+bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
+                                              TypeSystem::DocModificationMode mode,
+                                              const AbstractMetaFunctionCPtr &func,
+                                              const AbstractMetaClassCPtr &cppClass,
+                                              const QString &scope)
+{
+    const bool didSomething =
+        writeDocModifications(s, DocParser::getDocModifications(func, cppClass),
+                              mode, scope);
+    s << '\n';
+
+    // FIXME PYSIDE-7: Deprecate the use of doc string on glue code.
+    //       This is pre "add-function" and "inject-documentation" tags.
+    const TypeSystem::CodeSnipPosition pos = mode == TypeSystem::DocModificationPrepend
+        ? TypeSystem::CodeSnipPositionBeginning : TypeSystem::CodeSnipPositionEnd;
+    writeDocSnips(s, func->injectedCodeSnips(), pos, TypeSystem::TargetLangCode);
     return didSomething;
 }
 
@@ -861,12 +881,12 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr
         if (func->isDeprecated())
             s << rstDeprecationNote("function");
     }
-    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, cppClass, func);
-    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, cppClass, func)) {
+    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, func, cppClass, scope);
+    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, func, cppClass, scope)) {
         writeFormattedBriefText(s, func->documentation(), scope);
         writeFormattedDetailedText(s, func->documentation(), scope);
     }
-    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, cppClass, func);
+    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, func, cppClass, scope);
 
     if (auto propIndex = func->propertySpecIndex(); propIndex >= 0) {
         const QString name = cppClass->propertySpecs().at(propIndex).name();

@@ -112,7 +112,7 @@ QString QtDocParser::functionDocumentation(const QString &sourceFileName,
         queryFunctionDocumentation(sourceFileName, classDocumentation, metaClass,
                                    func, errorMessage);
 
-    const auto funcModifs = DocParser::getDocModifications(metaClass, func);
+    const auto funcModifs = DocParser::getXpathDocModifications(func, metaClass);
     return docString.isEmpty() || funcModifs.isEmpty()
         ? docString : applyDocModifications(funcModifs, docString);
 }
@@ -242,7 +242,7 @@ void QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
         metaClass->setPropertyDocumentation(p.name, doc);
     }
 
-    QString docString = applyDocModifications(metaClass->typeEntry()->docModifications(),
+    QString docString = applyDocModifications(DocParser::getXpathDocModifications(metaClass),
                                               classDocumentation.description);
 
     if (docString.isEmpty()) {

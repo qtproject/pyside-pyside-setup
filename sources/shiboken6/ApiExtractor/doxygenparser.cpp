@@ -151,7 +151,7 @@ void DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
             }
 
             QString doc = getDocumentation(xquery, funcQuery,
-                                           DocParser::getDocModifications(metaClass, func));
+                                           DocParser::getXpathDocModifications(func, metaClass));
             if (doc.isEmpty()) {
                 qCWarning(lcShibokenDoc, "%s",
                           qPrintable(msgCannotFindDocumentation(doxyFilePath, func.get(),

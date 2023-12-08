@@ -94,8 +94,12 @@ public:
 
     /// Helper to return the documentation modifications for a class
     /// or a member function.
-    static DocModificationList getDocModifications(const AbstractMetaClassCPtr &cppClass,
-                                                   const AbstractMetaFunctionCPtr &func = {});
+    static DocModificationList getDocModifications(const AbstractMetaClassCPtr &cppClass);
+    static DocModificationList getDocModifications(const AbstractMetaFunctionCPtr &func,
+                                                   const AbstractMetaClassCPtr &cppClass = {});
+    static DocModificationList getXpathDocModifications(const AbstractMetaClassCPtr &cppClass);
+    static DocModificationList getXpathDocModifications(const AbstractMetaFunctionCPtr &func,
+                                                        const AbstractMetaClassCPtr &cppClass = {});
 
     static QString enumBaseClass(const AbstractMetaEnum &e);
 
@@ -106,7 +110,7 @@ protected:
 
     static AbstractMetaFunctionCList documentableFunctions(const AbstractMetaClassCPtr &metaClass);
 
-    static QString applyDocModifications(const DocModificationList &mods, const QString &xml);
+    static QString applyDocModifications(const DocModificationList &xpathMods, const QString &xml);
 
 private:
     QString m_packageName;
