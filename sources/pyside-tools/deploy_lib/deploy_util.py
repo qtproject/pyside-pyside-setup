@@ -89,14 +89,20 @@ def install_python_dependencies(config: Config, python: PythonExecutable, init: 
     """
         Installs the python package dependencies for the target deployment platform
     """
+    packages = config.get_value("python", packages).split(",")
     if not init:
         # install packages needed for deployment
         logging.info("[DEPLOY] Installing dependencies")
-        packages = config.get_value("python", packages).split(",")
         python.install(packages=packages)
         # nuitka requires patchelf to make patchelf rpath changes for some Qt files
         if sys.platform.startswith("linux") and not is_android:
             python.install(packages=["patchelf"])
+    elif is_android:
+        # install only buildozer
+        logging.info("[DEPLOY] Installing buildozer")
+        buildozer_package_with_version = ([package for package in packages
+                                          if package.startswith("buildozer")])
+        python.install(packages=list(buildozer_package_with_version))
 
 
 def finalize(config: Config):
