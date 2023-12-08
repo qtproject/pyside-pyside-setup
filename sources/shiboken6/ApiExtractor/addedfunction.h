@@ -86,12 +86,16 @@ struct AddedFunction
     DocModificationList &docModifications() { return m_docModifications; }
     void addDocModification(const DocModification &m) { m_docModifications.append(m); }
 
+    QString targetLangPackage() const { return m_targetLangPackage; }
+    void setTargetLangPackage(const QString &p) { m_targetLangPackage = p; }
+
 private:
     QString m_name;
     QList<Argument> m_arguments;
     TypeInfo m_returnType;
     FunctionModificationList m_modifications;
     DocModificationList m_docModifications;
+    QString m_targetLangPackage;
     Access m_access = Public;
     bool m_isConst = false;
     bool m_isClassMethod = false;

@@ -387,8 +387,9 @@ public:
     void setPropertySpecIndex(int i);
 
     FunctionTypeEntryPtr typeEntry() const;
-
     void setTypeEntry(const FunctionTypeEntryPtr &typeEntry);
+
+    QString targetLangPackage() const;
 
     bool isCallOperator() const;
 

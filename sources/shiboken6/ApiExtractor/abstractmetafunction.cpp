@@ -1118,6 +1118,17 @@ void AbstractMetaFunction::setTypeEntry(const FunctionTypeEntryPtr &typeEntry)
     d->m_typeEntry = typeEntry;
 }
 
+QString AbstractMetaFunction::targetLangPackage() const
+{
+    if (d->m_addedFunction != nullptr)
+        return d->m_addedFunction->targetLangPackage();
+    if (d->m_class != nullptr)
+        return d->m_class->typeEntry()->targetLangPackage();
+    if (d->m_typeEntry != nullptr)
+        return d->m_typeEntry->targetLangPackage();
+    return {};
+}
+
 bool AbstractMetaFunction::isCallOperator() const
 {
     return d->m_name == u"operator()";

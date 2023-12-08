@@ -1747,6 +1747,7 @@ FunctionTypeEntryPtr
     if (!existingType) {
         auto result = std::make_shared<FunctionTypeEntry>(name, signature, since,
                                                           currentParentTypeEntry());
+        result->setTargetLangPackage(m_defaultPackage);
         applyCommonAttributes(reader, result, attributes);
         return result;
     }
@@ -2635,6 +2636,7 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
 
     func->setStatic(staticFunction);
     func->setClassMethod(classMethod);
+    func->setTargetLangPackage(m_defaultPackage);
 
     // Create signature for matching modifications
     signature = TypeDatabase::normalizedSignature(originalSignature);
