@@ -49,6 +49,12 @@ static inline QString classScope(const AbstractMetaClassCPtr &metaClass)
     return metaClass->fullName();
 }
 
+struct DocPackage
+{
+    QStringList classPages;
+    AbstractMetaFunctionCList globalFunctions;
+};
+
 struct DocGeneratorOptions
 {
     QtXmlToSphinxParameters parameters;
@@ -355,7 +361,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     AbstractMetaClassCPtr metaClass = classContext.metaClass();
     qCDebug(lcShibokenDoc).noquote().nospace() << "Generating Documentation for " << metaClass->fullName();
 
-    m_packages[metaClass->package()] << fileNameForContext(classContext);
+    m_packages[metaClass->package()].classPages << fileNameForContext(classContext);
 
     m_docParser->setPackageName(metaClass->package());
     m_docParser->fillDocumentation(std::const_pointer_cast<AbstractMetaClass>(metaClass));
@@ -925,6 +931,17 @@ static QStringList fileListToToc(const QStringList &items)
     return result;
 }
 
+static QStringList functionListToToc(const AbstractMetaFunctionCList &functions)
+{
+    QStringList result;
+    result.reserve(functions.size());
+    for (const auto &f : functions)
+        result.append(f->name());
+    // Functions are sorted by the Metabuilder; erase overloads
+    result.erase(std::unique(result.begin(), result.end()), result.end());
+    return result;
+}
+
 static void writeFancyToc(TextStream& s, QAnyStringView title,
                           const QStringList& items,
                           QLatin1StringView referenceType)
@@ -969,7 +986,10 @@ static void writeFancyToc(TextStream& s, QAnyStringView title,
 
 bool QtDocGenerator::finishGeneration()
 {
-    if (!api().classes().isEmpty())
+    for (const auto &f : api().globalFunctions())
+        m_packages[f->targetLangPackage()].globalFunctions.append(f);
+
+    if (!m_packages.isEmpty())
         writeModuleDocumentation();
     if (!m_options.additionalDocumentationList.isEmpty())
         writeAdditionalDocumentation();
@@ -1000,11 +1020,22 @@ bool QtDocGenerator::writeInheritanceFile()
     return true;
 }
 
+// Remove function entries that have extra documentation pages
+static inline void removeExtraDocs(const QStringList &extraTocEntries,
+                                   AbstractMetaFunctionCList *functions)
+{
+    auto predicate = [&extraTocEntries](const AbstractMetaFunctionCPtr &f) {
+        return extraTocEntries.contains(f->name());
+    };
+    functions->erase(std::remove_if(functions->begin(),functions->end(), predicate),
+                     functions->end());
+}
+
 void QtDocGenerator::writeModuleDocumentation()
 {
-    QMap<QString, QStringList>::iterator it = m_packages.begin();
-    for (; it != m_packages.end(); ++it) {
-        std::sort(it.value().begin(), it.value().end());
+    for (auto it = m_packages.begin(), end = m_packages.end(); it != end; ++it) {
+        auto &docPackage = it.value();
+        std::sort(docPackage.classPages.begin(), docPackage.classPages.end());
 
         QString key = it.key();
         key.replace(u'.', u'/');
@@ -1024,6 +1055,7 @@ void QtDocGenerator::writeModuleDocumentation()
             moduleName.remove(0, lastIndex + 1);
 
         // Search for extra-sections
+        QStringList extraTocEntries;
         if (!m_options.extraSectionDir.isEmpty()) {
             QDir extraSectionDir(m_options.extraSectionDir);
             if (!extraSectionDir.exists()) {
@@ -1039,7 +1071,8 @@ void QtDocGenerator::writeModuleDocumentation()
             for (const auto &fi : fileList) {
                 // Strip to "Property.rst" in output directory
                 const QString newFileName = fi.fileName().mid(moduleName.size() + 1);
-                it.value().append(newFileName);
+                docPackage.classPages.append(newFileName);
+                extraTocEntries.append(fileNameToToEntry(newFileName));
                 const QString newFilePath = outputDir + u'/' + newFileName;
                 if (QFile::exists(newFilePath))
                     QFile::remove(newFilePath);
@@ -1051,10 +1084,16 @@ void QtDocGenerator::writeModuleDocumentation()
             }
         }
 
+        removeExtraDocs(extraTocEntries, &docPackage.globalFunctions);
+        const bool hasGlobals = !docPackage.globalFunctions.isEmpty();
+        const QString globalsPage = moduleName + "_globals.rst"_L1;
+
         s << ".. container:: hide\n\n" << indent
             << ".. toctree::\n" << indent
             << ":maxdepth: 1\n\n";
-        for (const QString &className : std::as_const(it.value()))
+        if (hasGlobals)
+            s << globalsPage << '\n';
+        for (const QString &className : std::as_const(docPackage.classPages))
             s << className << '\n';
         s << "\n\n" << outdent << outdent << headline("Detailed Description");
 
@@ -1077,10 +1116,35 @@ void QtDocGenerator::writeModuleDocumentation()
             }
         }
 
-        writeFancyToc(s, "List of Classes", fileListToToc(it.value()), "doc"_L1);
+        writeFancyToc(s, "List of Classes", fileListToToc(docPackage.classPages),
+                      "doc"_L1);
+        writeFancyToc(s, "List of Functions", functionListToToc(docPackage.globalFunctions),
+                      "py:func"_L1);
 
         output.done();
+
+        if (hasGlobals)
+            writeGlobals(it.key(), outputDir + u'/' + globalsPage, docPackage);
     }
+}
+
+void QtDocGenerator::writeGlobals(const QString &package,
+                                  const QString &fileName,
+                                  const DocPackage &docPackage)
+{
+    FileOut output(fileName);
+    TextStream &s = output.stream;
+
+    // Write out functions with injected documentation
+    if (!docPackage.globalFunctions.isEmpty()) {
+        s << currentModule(package) << headline("Functions");
+        for (const auto &f : docPackage.globalFunctions) {
+            s << ".. py:function:: ";
+            writeFunction(s, f);
+        }
+    }
+
+    output.done();
 }
 
 static inline QString msgNonExistentAdditionalDocFile(const QString &dir,

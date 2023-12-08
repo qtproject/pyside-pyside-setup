@@ -17,6 +17,7 @@
 class DocParser;
 struct DocGeneratorOptions;
 struct GeneratorDocumentation;
+struct DocPackage;
 
 /**
 *   The DocGenerator generates documentation from library being binded.
@@ -107,6 +108,8 @@ private:
                               TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
 
     void writeModuleDocumentation();
+    void writeGlobals(const QString &package, const QString &fileName,
+                      const DocPackage &docPackage);
     void writeAdditionalDocumentation() const;
     bool writeInheritanceFile();
 
@@ -122,7 +125,7 @@ private:
     static GeneratorDocumentation generatorDocumentation(const AbstractMetaClassCPtr &cppClass);
 
     QStringList m_functionList;
-    QMap<QString, QStringList> m_packages;
+    QMap<QString, DocPackage> m_packages;
     QScopedPointer<DocParser> m_docParser;
     static DocGeneratorOptions m_options;
 };
