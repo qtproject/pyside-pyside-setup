@@ -216,6 +216,47 @@ struct propRef : public shortDocRef // Attribute/property (short) reference
         shortDocRef("attr", target) {}
 };
 
+struct headline
+{
+    explicit headline(QAnyStringView title, char underLineChar = '-') :
+        m_title(title), m_underLineChar(underLineChar) {}
+
+    QAnyStringView m_title;
+    char m_underLineChar;
+};
+
+static TextStream &operator<<(TextStream &s, const headline &h)
+{
+    s << h.m_title << '\n' << Pad(h.m_underLineChar, h.m_title.size()) << "\n\n";
+    return s;
+}
+
+struct anchor
+{
+    explicit anchor(QAnyStringView ref) : m_ref(ref)  {}
+
+    QAnyStringView m_ref;
+};
+
+static TextStream &operator<<(TextStream &s, const anchor &a)
+{
+    s << ".. _" <<  a.m_ref << ":\n\n";
+    return s;
+}
+
+struct currentModule
+{
+    explicit currentModule(QAnyStringView module) : m_module(module)  {}
+
+    QAnyStringView m_module;
+};
+
+static TextStream &operator<<(TextStream &s, const currentModule &m)
+{
+    s << ".. currentmodule:: " << m.m_module << "\n\n\n";
+    return s;
+}
+
 DocGeneratorOptions QtDocGenerator::m_options;
 
 QtDocGenerator::QtDocGenerator()
@@ -320,11 +361,8 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     m_docParser->fillDocumentation(std::const_pointer_cast<AbstractMetaClass>(metaClass));
 
     QString className = metaClass->name();
-    s << ".. _" << className << ":" << "\n\n";
-    s << ".. currentmodule:: " << metaClass->package() << "\n\n\n";
-
-    s << className << '\n';
-    s << Pad('*', className.size()) << "\n\n";
+    s << anchor(className) << currentModule(metaClass->package())
+        << headline(className, '*');
 
     auto documentation = metaClass->documentation();
     if (documentation.hasBrief())
@@ -346,7 +384,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     const GeneratorDocumentation doc = generatorDocumentation(metaClass);
 
     if (!doc.allFunctions.isEmpty() || !doc.properties.isEmpty()) {
-        s << "\nSynopsis\n--------\n\n";
+        s << '\n' << headline("Synopsis");
         writePropertyToc(s, doc, metaClass);
         writeFunctionToc(s, u"Functions"_s, metaClass, doc.tocNormalFunctions);
         writeFunctionToc(s, u"Virtual functions"_s, metaClass, doc.tocVirtuals);
@@ -362,9 +400,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
          "    translation, you can also let us know by creating a ticket on\n"
          "    https:/bugreports.qt.io/projects/PYSIDE\n\n";
 
-    s << "\nDetailed Description\n"
-           "--------------------\n\n"
-        << ".. _More:\n";
+    s << '\n' << headline("Detailed Description") << ".. _More:\n";
 
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass, nullptr);
     if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, nullptr))
@@ -396,10 +432,8 @@ void QtDocGenerator::writeFunctionToc(TextStream &s, const QString &title,
                                       const AbstractMetaFunctionCList &functions)
 {
     if (!functions.isEmpty()) {
-        s << title << '\n'
-          << Pad('^', title.size()) << '\n';
-
-        s << ".. container:: function_list\n\n" << indent;
+        s << headline(title, '^')
+          << ".. container:: function_list\n\n" << indent;
         for (const auto &func : functions)
             s << "* def " << functionTocEntry(func, cppClass) << '\n';
         s << outdent << "\n\n";
@@ -413,11 +447,8 @@ void QtDocGenerator::writePropertyToc(TextStream &s,
     if (doc.properties.isEmpty())
         return;
 
-    constexpr auto title = "Properties"_L1;
-    s << title << '\n'
-      << Pad('^', title.size()) << '\n';
-
-    s << ".. container:: function_list\n\n" << indent;
+    s << headline("Properties", '^')
+        << ".. container:: function_list\n\n" << indent;
     for (const auto &prop : doc.properties) {
         s << "* " << propRef(propertyRefTarget(cppClass, prop.name));
         if (prop.documentation.hasBrief())
@@ -841,21 +872,43 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaClassCPtr &c
     }
 }
 
-static void writeFancyToc(TextStream& s, const QStringList& items)
+static QString fileNameToToEntry(const QString &fileName)
+{
+    constexpr auto rstSuffix = ".rst"_L1;
+
+    QString result = fileName;
+    if (result.endsWith(rstSuffix))
+        result.chop(rstSuffix.size()); // Remove the .rst extension
+    // skip namespace if necessary
+    auto lastDot = result.lastIndexOf(u'.');
+    if (lastDot != -1)
+        result.remove(0, lastDot + 1);
+    return result;
+}
+
+static QStringList fileListToToc(const QStringList &items)
+{
+    QStringList result;
+    result.reserve(items.size());
+    std::transform(items.cbegin(), items.cend(), std::back_inserter(result),
+                   fileNameToToEntry);
+    return result;
+}
+
+static void writeFancyToc(TextStream& s, QAnyStringView title,
+                          const QStringList& items,
+                          QLatin1StringView referenceType)
 {
     using TocMap = QMap<QChar, QStringList>;
+
+    if (items.isEmpty())
+        return;
+
     TocMap tocMap;
-    QChar idx;
-    for (QString item : items) {
-        if (item.isEmpty())
-            continue;
-        item.chop(4); // Remove the .rst extension
-        // skip namespace if necessary
-        const QString className = item.split(u'.').last();
-        if (className.startsWith(u'Q') && className.length() > 1)
-            idx = className[1];
-        else
-            idx = className[0];
+
+    for (const QString &item : items) {
+        const QChar idx = item.size() > 1 && item.startsWith(u'Q')
+            ? item.at(1) : item.at(0);
         tocMap[idx] << item;
     }
 
@@ -872,7 +925,7 @@ static void writeFancyToc(TextStream& s, const QStringList& items)
                 row.clear();
                 row << QtXmlToSphinx::TableCell(QString{});
             }
-            const QString entry = u"* :doc:`"_s + item + u'`';
+            const QString entry = "* :"_L1 + referenceType + ":`"_L1 + item + u'`';
             row << QtXmlToSphinx::TableCell(entry);
         }
         if (row.size() > 1)
@@ -880,7 +933,7 @@ static void writeFancyToc(TextStream& s, const QStringList& items)
     }
 
     table.normalize();
-    s << ".. container:: pysidetoc\n\n";
+    s << '\n' << headline(title) << ".. container:: pysidetoc\n\n";
     table.format(s);
 }
 
@@ -930,9 +983,7 @@ void QtDocGenerator::writeModuleDocumentation()
         TextStream& s = output.stream;
 
         const QString &title = it.key();
-        s << ".. module:: " << title << "\n\n"
-            << title << '\n'
-            << Pad('*', title.length()) << "\n\n";
+        s << ".. module:: " << title << "\n\n" << headline(title, '*');
 
         // Store the it.key() in a QString so that it can be stripped off unwanted
         // information when neeeded. For example, the RST files in the extras directory
@@ -975,8 +1026,7 @@ void QtDocGenerator::writeModuleDocumentation()
             << ":maxdepth: 1\n\n";
         for (const QString &className : std::as_const(it.value()))
             s << className << '\n';
-        s << "\n\n" << outdent << outdent
-            << "Detailed Description\n--------------------\n\n";
+        s << "\n\n" << outdent << outdent << headline("Detailed Description");
 
         // module doc is always wrong and C++istic, so go straight to the extra directory!
         QFile moduleDoc(m_options.extraSectionDir + u'/' + moduleName
@@ -997,9 +1047,7 @@ void QtDocGenerator::writeModuleDocumentation()
             }
         }
 
-        s << "\nList of Classes\n"
-            << "---------------\n\n";
-        writeFancyToc(s, it.value());
+        writeFancyToc(s, "List of Classes", fileListToToc(it.value()), "doc"_L1);
 
         output.done();
     }
