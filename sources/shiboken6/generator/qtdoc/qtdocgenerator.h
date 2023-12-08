@@ -59,13 +59,15 @@ protected:
     bool finishGeneration() override;
 
 private:
-    void writeEnums(TextStream &s, const AbstractMetaClassCPtr &cppClass) const;
+    void writeEnums(TextStream &s, const AbstractMetaEnumList &enums,
+                    const QString &scope) const;
 
     void writeFields(TextStream &s, const AbstractMetaClassCPtr &cppClass) const;
-    static QString functionSignature(const AbstractMetaClassCPtr &cppClass,
-                                     const AbstractMetaFunctionCPtr &func);
-    void writeFunction(TextStream &s, const AbstractMetaClassCPtr &cppClass,
-                       const AbstractMetaFunctionCPtr &func, bool indexed = true);
+    static QString functionSignature(const AbstractMetaFunctionCPtr &func,
+                                     const QString &scope = {});
+    void writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                       const AbstractMetaClassCPtr &cppClass = {},
+                       const QString &scope = {}, bool indexed = true);
     void writeFunctionParametersType(TextStream &s, const AbstractMetaClassCPtr &cppClass,
                                      const AbstractMetaFunctionCPtr &func) const;
     static void writeFunctionToc(TextStream &s, const QString &title,
@@ -86,11 +88,11 @@ private:
 
     void writeFormattedText(TextStream &s, const QString &doc,
                             Documentation::Format format,
-                            const AbstractMetaClassCPtr &metaClass = {}) const;
+                            const QString &scope = {}) const;
     void writeFormattedBriefText(TextStream &s, const Documentation &doc,
-                                 const AbstractMetaClassCPtr &metaclass = {}) const;
+                                 const QString &scope = {}) const;
     void writeFormattedDetailedText(TextStream &s, const Documentation &doc,
-                                    const AbstractMetaClassCPtr &metaclass = {}) const;
+                                    const QString &scope = {}) const;
 
     bool writeInjectDocumentation(TextStream &s, TypeSystem::DocModificationMode mode,
                                   const AbstractMetaClassCPtr &cppClass,

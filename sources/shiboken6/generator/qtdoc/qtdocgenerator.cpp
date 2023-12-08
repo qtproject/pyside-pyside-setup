@@ -44,6 +44,11 @@
 
 using namespace Qt::StringLiterals;
 
+static inline QString classScope(const AbstractMetaClassCPtr &metaClass)
+{
+    return metaClass->fullName();
+}
+
 struct DocGeneratorOptions
 {
     QtXmlToSphinxParameters parameters;
@@ -286,28 +291,23 @@ QString QtDocGenerator::fileNameForContext(const GeneratorContext &context) cons
 }
 
 void QtDocGenerator::writeFormattedBriefText(TextStream &s, const Documentation &doc,
-                                             const AbstractMetaClassCPtr &metaclass) const
+                                             const QString &scope) const
 {
-    writeFormattedText(s, doc.brief(), doc.format(), metaclass);
+    writeFormattedText(s, doc.brief(), doc.format(), scope);
 }
 
 void QtDocGenerator::writeFormattedDetailedText(TextStream &s, const Documentation &doc,
-                                                const AbstractMetaClassCPtr &metaclass) const
+                                                const QString &scope) const
 {
-    writeFormattedText(s, doc.detailed(), doc.format(), metaclass);
+    writeFormattedText(s, doc.detailed(), doc.format(), scope);
 }
 
 void QtDocGenerator::writeFormattedText(TextStream &s, const QString &doc,
                                         Documentation::Format format,
-                                        const AbstractMetaClassCPtr &metaClass) const
+                                        const QString &scope) const
 {
-    QString metaClassName;
-
-    if (metaClass)
-        metaClassName = metaClass->fullName();
-
     if (format == Documentation::Native) {
-        QtXmlToSphinx x(this, m_options.parameters, doc, metaClassName);
+        QtXmlToSphinx x(this, m_options.parameters, doc, scope);
         s << x;
     } else {
         const auto lines = QStringView{doc}.split(u'\n');
@@ -365,8 +365,9 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
         << headline(className, '*');
 
     auto documentation = metaClass->documentation();
+    const QString scope = classScope(metaClass);
     if (documentation.hasBrief())
-        writeFormattedBriefText(s, documentation, metaClass);
+        writeFormattedBriefText(s, documentation, scope);
 
     s << ".. inheritance-diagram:: " << metaClass->fullName()<< '\n'
       << "    :parts: 2\n\n";
@@ -404,7 +405,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
 
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass, nullptr);
     if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, nullptr))
-        writeFormattedDetailedText(s, documentation, metaClass);
+        writeFormattedDetailedText(s, documentation, scope);
 
     if (!metaClass->isNamespace())
         writeConstructors(s, metaClass, doc.constructors);
@@ -412,7 +413,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     if (!doc.properties.isEmpty())
         writeProperties(s, doc, metaClass);
 
-    writeEnums(s, metaClass);
+    writeEnums(s, metaClass->enums(), scope);
     if (!metaClass->isNamespace())
         writeFields(s, metaClass);
 
@@ -421,7 +422,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
         const bool indexed = func->name() != lastName;
         lastName = func->name();
         s << (func->isStatic() ? ".. py:staticmethod:: " : ".. py:method:: ");
-        writeFunction(s, metaClass, func, indexed);
+        writeFunction(s, func, metaClass, scope, indexed);
     }
 
     writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass, nullptr);
@@ -466,12 +467,13 @@ void QtDocGenerator::writeProperties(TextStream &s,
         << "``from __feature__ import true_property`` is used or via accessor "
         << "functions otherwise.\n\n";
 
+    const QString scope = classScope(cppClass);
     for (const auto &prop : doc.properties) {
         const QString type = translateToPythonType(prop.type, cppClass, /* createRef */ false);
         s <<  ".. py:property:: " << propertyRefTarget(cppClass, prop.name)
             << "\n   :type: " << type << "\n\n\n";
         if (!prop.documentation.isEmpty())
-            writeFormattedText(s, prop.documentation.detailed(), Documentation::Native, cppClass);
+            writeFormattedText(s, prop.documentation.detailed(), Documentation::Native, scope);
         s << "**Access functions:**\n";
         if (prop.getter)
             s << " * " << functionTocEntry(prop.getter, cppClass) << '\n';
@@ -485,13 +487,14 @@ void QtDocGenerator::writeProperties(TextStream &s,
     }
 }
 
-void QtDocGenerator::writeEnums(TextStream &s, const AbstractMetaClassCPtr &cppClass) const
+void QtDocGenerator::writeEnums(TextStream &s, const AbstractMetaEnumList &enums,
+                                const QString &scope) const
 {
     constexpr auto section_title = ".. attribute:: "_L1;
 
-    for (const AbstractMetaEnum &en : cppClass->enums()) {
-        s << section_title << cppClass->fullName() << '.' << en.name() << "\n\n";
-        writeFormattedDetailedText(s, en.documentation(), cppClass);
+    for (const AbstractMetaEnum &en : enums) {
+        s << section_title << scope << '.' << en.name() << "\n\n";
+        writeFormattedDetailedText(s, en.documentation(), scope);
         const auto version = versionOf(en.typeEntry());
         if (!version.isNull())
             s << rstVersionAdded(version);
@@ -503,9 +506,10 @@ void QtDocGenerator::writeFields(TextStream &s, const AbstractMetaClassCPtr &cpp
 {
     constexpr auto section_title = ".. attribute:: "_L1;
 
+    const QString scope = classScope(cppClass);
     for (const AbstractMetaField &field : cppClass->fields()) {
         s << section_title << cppClass->fullName() << "." << field.name() << "\n\n";
-        writeFormattedDetailedText(s, field.documentation(), cppClass);
+        writeFormattedDetailedText(s, field.documentation(), scope);
     }
 }
 
@@ -516,6 +520,7 @@ void QtDocGenerator::writeConstructors(TextStream &s, const AbstractMetaClassCPt
 
     bool first = true;
     QHash<QString, AbstractMetaArgument> arg_map;
+    const QString scope = classScope(cppClass);
 
     if (constructors.isEmpty()) {
         s << sectionTitle << cppClass->fullName();
@@ -528,7 +533,7 @@ void QtDocGenerator::writeConstructors(TextStream &s, const AbstractMetaClassCPt
                 s << sectionTitle;
                 pad = QByteArray(sectionTitle.size(), ' ');
             }
-            s << functionSignature(cppClass, func) << "\n\n";
+            s << functionSignature(func, scope) << "\n\n";
 
             const auto version = versionOf(func->typeEntry());
             if (!version.isNull())
@@ -556,7 +561,7 @@ void QtDocGenerator::writeConstructors(TextStream &s, const AbstractMetaClassCPt
     s << '\n';
 
     for (const auto &func : constructors)
-        writeFormattedDetailedText(s, func->documentation(), cppClass);
+        writeFormattedDetailedText(s, func->documentation(), scope);
 }
 
 QString QtDocGenerator::formatArgs(const AbstractMetaFunctionCPtr &func)
@@ -673,16 +678,17 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
     bool didSomething = false;
 
     const DocModificationList mods = DocParser::getDocModifications(cppClass, func);
+    const QString scope = classScope(cppClass);
 
     for (const DocModification &mod : mods) {
         if (mod.mode() == mode) {
             switch (mod.format()) {
             case TypeSystem::NativeCode:
-                writeFormattedText(s, mod.code(), Documentation::Native, cppClass);
+                writeFormattedText(s, mod.code(), Documentation::Native, scope);
                 didSomething = true;
                 break;
             case TypeSystem::TargetLangCode:
-                writeFormattedText(s, mod.code(), Documentation::Target, cppClass);
+                writeFormattedText(s, mod.code(), Documentation::Target, scope);
                 didSomething = true;
                 break;
             default:
@@ -704,14 +710,17 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
     return didSomething;
 }
 
-QString QtDocGenerator::functionSignature(const AbstractMetaClassCPtr &cppClass,
-                                          const AbstractMetaFunctionCPtr &func)
+QString QtDocGenerator::functionSignature(const AbstractMetaFunctionCPtr &func,
+                                          const QString &scope)
 {
-    QString funcName = cppClass->fullName();
-    if (!func->isConstructor())
-        funcName += u'.' + getFuncName(func);
+    QString result = scope;
+    if (!func->isConstructor()) {
+        if (!result.isEmpty())
+            result += u'.';
+        result += getFuncName(func);
+    }
 
-    return funcName + formatArgs(func);
+    return result + formatArgs(func);
 }
 
 static QString inline toRef(const QString &t)
@@ -830,10 +839,11 @@ void QtDocGenerator::writeFunctionParametersType(TextStream &s,
     s << '\n';
 }
 
-void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaClassCPtr &cppClass,
-                                   const AbstractMetaFunctionCPtr &func, bool indexed)
+void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                                   const AbstractMetaClassCPtr &cppClass,
+                                   const QString &scope, bool indexed)
 {
-    s << functionSignature(cppClass, func);
+    s << functionSignature(func, scope);
 
     {
         Indentation indentation(s);
@@ -853,8 +863,8 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaClassCPtr &c
     }
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, cppClass, func);
     if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, cppClass, func)) {
-        writeFormattedBriefText(s, func->documentation(), cppClass);
-        writeFormattedDetailedText(s, func->documentation(), cppClass);
+        writeFormattedBriefText(s, func->documentation(), scope);
+        writeFormattedDetailedText(s, func->documentation(), scope);
     }
     writeInjectDocumentation(s, TypeSystem::DocModificationAppend, cppClass, func);
 
