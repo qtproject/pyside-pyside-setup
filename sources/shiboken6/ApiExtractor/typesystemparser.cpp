@@ -61,6 +61,7 @@ constexpr auto defaultSuperclassAttribute = "default-superclass"_L1;
 constexpr auto deleteInMainThreadAttribute = "delete-in-main-thread"_L1;
 constexpr auto deprecatedAttribute = "deprecated"_L1;
 constexpr auto disableWrapperAttribute = "disable-wrapper"_L1;
+constexpr auto docFileAttribute = "doc-file"_L1;
 constexpr auto exceptionHandlingAttribute = "exception-handling"_L1;
 constexpr auto extensibleAttribute = "extensible"_L1;
 constexpr auto fileNameAttribute = "file-name"_L1;
@@ -1596,6 +1597,8 @@ EnumTypeEntryPtr
         } else if (name == u"lower-bound") {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
+        } else if (name == docFileAttribute) {
+            entry->setDocFile(attributes->takeAt(i).value().toString());
         } else if (name == forceIntegerAttribute) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnimplementedAttributeWarning(reader, name)));
@@ -1724,10 +1727,13 @@ FunctionTypeEntryPtr
     const bool hasModification = attributes->size() < oldAttributesSize;
 
     QString originalSignature;
+    QString docFile;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == signatureAttribute)
             originalSignature = attributes->takeAt(i).value().toString().simplified();
+        else if (name == docFileAttribute)
+            docFile = attributes->takeAt(i).value().toString();
     }
 
     const QString signature = TypeDatabase::normalizedSignature(originalSignature);
@@ -1748,6 +1754,7 @@ FunctionTypeEntryPtr
         auto result = std::make_shared<FunctionTypeEntry>(name, signature, since,
                                                           currentParentTypeEntry());
         result->setTargetLangPackage(m_defaultPackage);
+        result->setDocFile(docFile);
         applyCommonAttributes(reader, result, attributes);
         return result;
     }

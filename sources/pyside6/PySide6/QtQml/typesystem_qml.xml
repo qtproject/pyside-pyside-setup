@@ -37,7 +37,7 @@
              in generator tests folder. -->
     </primitive-type>
 
-    <enum-type name="QQmlModuleImportSpecialVersions"/>
+    <enum-type name="QQmlModuleImportSpecialVersions" doc-file="qqmlengine"/>
 
     <!-- expose QQmlIncubationController::incubateWhile() (see
          QtQml_VolatileBoolTypeF/pysideqmlvolatilebool.h) -->
@@ -97,7 +97,7 @@
             <modify-argument index="return" pyi-type="Optional[PySide6.QtQml.QJSEngine]"/>
         </modify-function>
     </function>
-    <function signature="qmlClearTypeRegistrations()"/>
+    <function signature="qmlClearTypeRegistrations()" doc-file="qqmlengine"/>
     <function signature="qmlContext(const QObject*)">
         <modify-function>
             <modify-argument index="return" pyi-type="Optional[PySide6.QtQml.QQmlContext]"/>
@@ -108,9 +108,9 @@
             <modify-argument index="return" pyi-type="Optional[PySide6.QtQml.QQmlEngine]"/>
         </modify-function>
      </function>
-    <function signature="qmlProtectModule(const char*,int)"/>
-    <function signature="qmlRegisterModule(const char*,int,int)"/>
-    <function signature="qmlTypeId(const char*,int,int,const char*)"/>
+    <function signature="qmlProtectModule(const char*,int)" doc-file="qqmlengine"/>
+    <function signature="qmlRegisterModule(const char*,int,int)" doc-file="qqmlengine"/>
+    <function signature="qmlTypeId(const char*,int,int,const char*)" doc-file="qqmlengine"/>
     <function signature="qmlRegisterType(const QUrl &amp;,const char *,int,int,const char *)"/>
     <function signature="qmlRegisterSingletonType(const QUrl &amp;,const char *,int,int,const char *)"/>
     <function signature="qmlRegisterUncreatableMetaObject(const QMetaObject&amp;,const char*,int,int, const char*,const QString&amp;)"/>

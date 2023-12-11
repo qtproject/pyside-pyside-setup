@@ -37,6 +37,9 @@ public:
     void addEnumValueRejection(const QString &name);
     QStringList enumValueRejections() const;
 
+    QString docFile() const;
+    void setDocFile(const QString &df);
+
     TypeEntry *clone() const override;
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;

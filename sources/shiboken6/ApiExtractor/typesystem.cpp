@@ -1030,6 +1030,7 @@ public:
     QStringList m_rejectedEnums;
     FlagsTypeEntryPtr m_flags;
     QString m_cppType;
+    QString m_docFile;
     TypeSystem::PythonEnumType m_pythonEnumType = TypeSystem::PythonEnumType::Unspecified;
 };
 
@@ -1121,6 +1122,18 @@ QStringList EnumTypeEntry::enumValueRejections() const
 {
     S_D(const EnumTypeEntry);
     return d->m_rejectedEnums;
+}
+
+QString EnumTypeEntry::docFile() const
+{
+    S_D(const EnumTypeEntry);
+    return d->m_docFile;
+}
+
+void EnumTypeEntry::setDocFile(const QString &df)
+{
+    S_D(EnumTypeEntry);
+    d->m_docFile = df;
 }
 
 TypeEntry *EnumTypeEntry::clone() const
@@ -2330,6 +2343,7 @@ public:
     }
 
     QStringList m_signatures;
+    QString m_docFile;
 };
 
 FunctionTypeEntry::FunctionTypeEntry(const QString &entryName, const QString &signature,
@@ -2355,6 +2369,18 @@ bool FunctionTypeEntry::hasSignature(const QString &signature) const
 {
     S_D(const FunctionTypeEntry);
     return d->m_signatures.contains(signature);
+}
+
+QString FunctionTypeEntry::docFile() const
+{
+    S_D(const FunctionTypeEntry);
+    return d->m_docFile;
+}
+
+void FunctionTypeEntry::setDocFile(const QString &df)
+{
+    S_D(FunctionTypeEntry);
+    d->m_docFile = df;
 }
 
 TypeEntry *FunctionTypeEntry::clone() const

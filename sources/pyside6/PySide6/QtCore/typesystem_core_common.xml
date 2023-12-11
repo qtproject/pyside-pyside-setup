@@ -38,10 +38,11 @@
     </function>
     <function signature="qCompress(const uchar*,qsizetype,int)"/>
     <function signature="qCompress(const QByteArray&amp;,int)"/>
-    <function signature="qUncompress(const uchar*,qsizetype)"/>
-    <function signature="qUncompress(const QByteArray&amp;)"/>
-    <function signature="qFormatLogMessage(QtMsgType,const QMessageLogContext&amp;,const QString&amp;)"/>
-    <function signature="qSetMessagePattern(const QString&amp;)"/>
+    <function signature="qUncompress(const uchar*,qsizetype)" doc-file="qbytearray"/>
+    <function signature="qUncompress(const QByteArray&amp;)" doc-file="qbytearray"/>
+    <function signature="qFormatLogMessage(QtMsgType,const QMessageLogContext&amp;,const QString&amp;)"
+              doc-file="qtlogging"/>
+    <function signature="qSetMessagePattern(const QString&amp;)" doc-file="qtlogging"/>
 
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="include-pyside"/>
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
@@ -135,10 +136,10 @@
 
   <!-- From Qt4.6 ^^^ -->
 
-  <enum-type name="QtMsgType"/>
-  <enum-type name="QCborSimpleType"/>
-  <enum-type name="QCborKnownTags"/>
-  <enum-type name="QCborTag"/>
+  <enum-type name="QtMsgType" doc-file="qtlogging"/>
+  <enum-type name="QCborSimpleType" doc-file="qtcborcommon"/>
+  <enum-type name="QCborKnownTags" doc-file="qtcborcommon"/>
+  <enum-type name="QCborTag" doc-file="qtcborcommon"/>
 
   <primitive-type name="qint8"/>
   <primitive-type name="qint16"/>

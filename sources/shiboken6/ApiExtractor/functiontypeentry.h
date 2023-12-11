@@ -19,6 +19,9 @@ public:
     bool hasSignature(const QString& signature) const;
     void addSignature(const QString& signature);
 
+    QString docFile() const;
+    void setDocFile(const QString &df);
+
     TypeEntry *clone() const override;
 
 #ifndef QT_NO_DEBUG_STREAM

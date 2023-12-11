@@ -256,6 +256,7 @@ and it is a child of the :ref:`typesystem` node. Use
             flags="yes | no"
             flags-revision="..."
             cpp-type = "..."
+            doc-file = "..."
             python-type = "IntEnum | IntFlag"
             lower-bound="..."
             upper-bound="..."
@@ -289,6 +290,11 @@ Python type.
 The *optional* **cpp-type** attribute specifies a C++ to be used for
 casting values. This can be useful for large values triggering MSVC
 signedness issues.
+
+The *optional* **doc-file** attribute specifies the base name of the C++ or
+``.qdoc`` file indicated by ``\relates`` or ``\headerfile`` in ``qdoc``, to
+which the documentation of the enumeration is to be added and displayed in the
+case its a global enumeration. This attribute is for ``qdoc`` only.
 
 The **revision** attribute can be used to specify a revision for each type, easing the
 production of ABI compatible bindings.
@@ -769,6 +775,7 @@ and may contain a :ref:`modify-function` child node.
     <typesystem>
         <function signature="..." rename="..." since="..."
                   allow-thread="true | auto | false"
+                  doc-file = "..."
                   exception-handling="off | auto-off | auto-on | on"
                   overload-number="number"
                   snake-case="yes | no | both" />
@@ -781,6 +788,11 @@ The *optional* **since** attribute is used to specify the API version in which
 the function was introduced.
 
 The *optional* **rename** attribute is used to modify the function name.
+
+The *optional* **doc-file** attribute specifies the base name of the C++ or
+``.qdoc`` file indicated by ``\relates`` or ``\headerfile`` in ``qdoc``, to
+which the documentation of the function is to be added and displayed in the
+case its a global function. This attribute is for ``qdoc`` only.
 
 For the *optional* attributes **allow-thread**, **exception-handling**,
 **overload-number** and **snake-case**, see :ref:`modify-function`.
