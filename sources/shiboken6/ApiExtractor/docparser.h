@@ -28,6 +28,8 @@ public:
     DocParser();
     virtual ~DocParser();
     virtual void fillDocumentation(const AbstractMetaClassPtr &metaClass) = 0;
+    virtual void fillGlobalFunctionDocumentation(const AbstractMetaFunctionPtr &f);
+    virtual void fillGlobalEnumDocumentation(AbstractMetaEnum &e);
 
     /**
      *   Process and retrieves documentation concerning the entire

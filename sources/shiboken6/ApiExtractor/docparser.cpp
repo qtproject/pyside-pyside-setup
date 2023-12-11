@@ -60,6 +60,14 @@ DocParser::DocParser()
 
 DocParser::~DocParser() = default;
 
+void DocParser::fillGlobalFunctionDocumentation(const AbstractMetaFunctionPtr &)
+{
+}
+
+void DocParser::fillGlobalEnumDocumentation(AbstractMetaEnum &)
+{
+}
+
 QString DocParser::getDocumentation(const XQueryPtr &xquery, const QString& query,
                                     const DocModificationList& mods)
 {

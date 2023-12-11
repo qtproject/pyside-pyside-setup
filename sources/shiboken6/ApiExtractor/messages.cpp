@@ -596,9 +596,10 @@ QString msgCannotFindDocumentation(const QString &fileName,
                                    const AbstractMetaEnum &e,
                                    const QString &query)
 {
-    return msgCannotFindDocumentation(fileName, "enum",
-                                      metaClass->name() + u"::"_s + e.name(),
-                                      query);
+    QString name = e.name();
+    if (metaClass != nullptr)
+        name.prepend(metaClass->name() + "::"_L1);
+    return msgCannotFindDocumentation(fileName, "enum", name, query);
 }
 
 QString msgCannotFindDocumentation(const QString &fileName,
@@ -606,9 +607,10 @@ QString msgCannotFindDocumentation(const QString &fileName,
                                    const AbstractMetaField &f,
                                    const QString &query)
 {
-    return msgCannotFindDocumentation(fileName, "field",
-                                      metaClass->name() + u"::"_s + f.name(),
-                                      query);
+    QString name = f.name();
+    if (metaClass != nullptr)
+        name.prepend(metaClass->name() + "::"_L1);
+    return msgCannotFindDocumentation(fileName, "field", name, query);
 }
 
 QString msgXpathDocModificationError(const DocModificationList& mods,

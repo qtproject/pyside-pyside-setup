@@ -15,6 +15,8 @@
 #include "reporthandler.h"
 #include "flagstypeentry.h"
 #include "complextypeentry.h"
+#include "functiontypeentry.h"
+#include "enumtypeentry.h"
 
 #include "qtcompat.h"
 
@@ -28,6 +30,7 @@ enum { debugFunctionSearch = 0 };
 
 constexpr auto briefStartElement = "<brief>"_L1;
 constexpr auto briefEndElement = "</brief>"_L1;
+constexpr auto webxmlSuffix = ".webxml"_L1;
 
 Documentation QtDocParser::retrieveModuleDocumentation()
 {
@@ -202,6 +205,77 @@ static QString extractBrief(QString *value)
     return briefValue;
 }
 
+// Find the webxml file for global functions/enums
+// by the doc-file typesystem attribute or via include file.
+static QString findGlobalWebXmLFile(const QString &documentationDataDirectory,
+                                    const QString &docFile,
+                                    const Include &include)
+{
+    QString result;
+    if (!docFile.isEmpty()) {
+        result = documentationDataDirectory + u'/' + docFile;
+        if (!result.endsWith(webxmlSuffix))
+            result += webxmlSuffix;
+        return QFileInfo::exists(result) ? result : QString{};
+    }
+    if (include.name().isEmpty())
+        return {};
+    // qdoc "\headerfile <QtLogging>" directive produces "qtlogging.webxml"
+    result = documentationDataDirectory + u'/' +
+             QFileInfo(include.name()).baseName() + webxmlSuffix;
+    if (QFileInfo::exists(result))
+        return result;
+    // qdoc "\headerfile <qdrawutil.h>" produces "qdrawutil-h.webxml"
+    result.insert(result.size() - webxmlSuffix.size(), "-h"_L1);
+    return QFileInfo::exists(result) ? result : QString{};
+}
+
+void  QtDocParser::fillGlobalFunctionDocumentation(const AbstractMetaFunctionPtr &f)
+{
+    auto te = f->typeEntry();
+    if (te == nullptr)
+        return;
+
+    const QString sourceFileName =
+        findGlobalWebXmLFile(documentationDataDirectory(), te->docFile(), te->include());
+    if (sourceFileName.isEmpty())
+        return;
+
+    QString errorMessage;
+    auto classDocumentationO = parseWebXml(sourceFileName, &errorMessage);
+    if (!classDocumentationO.has_value()) {
+        qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
+        return;
+    }
+    const QString detailed =
+        functionDocumentation(sourceFileName, classDocumentationO.value(),
+                              {}, f, &errorMessage);
+    if (!errorMessage.isEmpty())
+        qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
+    const Documentation documentation(detailed, {});
+    f->setDocumentation(documentation);
+}
+
+void QtDocParser::fillGlobalEnumDocumentation(AbstractMetaEnum &e)
+{
+    auto te = e.typeEntry();
+    const QString sourceFileName =
+        findGlobalWebXmLFile(documentationDataDirectory(), te->docFile(), te->include());
+    if (sourceFileName.isEmpty())
+        return;
+
+    QString errorMessage;
+    auto classDocumentationO = parseWebXml(sourceFileName, &errorMessage);
+    if (!classDocumentationO.has_value()) {
+        qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
+        return;
+    }
+    if (!extractEnumDocumentation(classDocumentationO.value(), e)) {
+        qCWarning(lcShibokenDoc, "%s",
+                  qPrintable(msgCannotFindDocumentation(sourceFileName, {}, e, {})));
+    }
+}
+
 void QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
 {
     if (!metaClass)
@@ -218,7 +292,7 @@ void QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
         + metaClass->qualifiedCppName().toLower();
     sourceFileRoot.replace(u"::"_s, u"-"_s);
 
-    QFileInfo sourceFile(sourceFileRoot + ".webxml"_L1);
+    QFileInfo sourceFile(sourceFileRoot + webxmlSuffix);
     if (!sourceFile.exists())
         sourceFile.setFile(sourceFileRoot + ".xml"_L1);
    if (!sourceFile.exists()) {
@@ -284,26 +358,33 @@ void QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
 #endif
     // Enums
     for (AbstractMetaEnum &meta_enum : metaClass->enums()) {
-        Documentation enumDoc;
-        const auto index = classDocumentation.indexOfEnum(meta_enum.name());
-        if (index != -1) {
-            QString doc = classDocumentation.enums.at(index).description;
-            const auto firstPara = doc.indexOf(u"<para>");
-            if (firstPara != -1) {
-                const QString baseClass = QtDocParser::enumBaseClass(meta_enum);
-                if (baseClass != u"Enum") {
-                    const QString note = u"(inherits <teletype>enum."_s + baseClass
-                                         + u"</teletype>) "_s;
-                    doc.insert(firstPara + 6, note);
-                }
-            }
-            enumDoc.setValue(doc);
-            meta_enum.setDocumentation(enumDoc);
-        } else {
+        if (!extractEnumDocumentation(classDocumentation, meta_enum)) {
             qCWarning(lcShibokenDoc, "%s",
                       qPrintable(msgCannotFindDocumentation(sourceFileName, metaClass, meta_enum, {})));
         }
     }
+}
+
+bool QtDocParser::extractEnumDocumentation(const ClassDocumentation &classDocumentation,
+                                           AbstractMetaEnum &meta_enum)
+{
+    Documentation enumDoc;
+    const auto index = classDocumentation.indexOfEnum(meta_enum.name());
+    if (index == -1)
+        return false;
+    QString doc = classDocumentation.enums.at(index).description;
+    const auto firstPara = doc.indexOf(u"<para>");
+    if (firstPara != -1) {
+        const QString baseClass = QtDocParser::enumBaseClass(meta_enum);
+        if (baseClass != "Enum"_L1) {
+            const QString note = "(inherits <teletype>enum."_L1 + baseClass
+                                 + "</teletype>) "_L1;
+            doc.insert(firstPara + 6, note);
+        }
+    }
+    enumDoc.setValue(doc);
+    meta_enum.setDocumentation(enumDoc);
+    return true;
 }
 
 static QString qmlReferenceLink(const QFileInfo &qmlModuleFi)

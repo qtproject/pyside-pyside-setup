@@ -13,6 +13,9 @@ class QtDocParser : public DocParser
 public:
     QtDocParser() = default;
     void fillDocumentation(const AbstractMetaClassPtr &metaClass) override;
+    void fillGlobalFunctionDocumentation(const AbstractMetaFunctionPtr &f) override;
+    void fillGlobalEnumDocumentation(AbstractMetaEnum &e) override;
+
     Documentation retrieveModuleDocumentation() override;
     Documentation retrieveModuleDocumentation(const QString& name) override;
 
@@ -28,6 +31,9 @@ private:
                                               const AbstractMetaClassCPtr &metaClass,
                                               const AbstractMetaFunctionCPtr &func,
                                               QString *errorMessage);
+    static bool extractEnumDocumentation(const ClassDocumentation &classDocumentation,
+                                         AbstractMetaEnum &meta_enum);
+
 };
 
 #endif // QTDOCPARSER_H

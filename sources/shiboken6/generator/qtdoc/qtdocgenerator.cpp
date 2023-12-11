@@ -53,6 +53,7 @@ struct DocPackage
 {
     QStringList classPages;
     AbstractMetaFunctionCList globalFunctions;
+    AbstractMetaEnumList globalEnums;
 };
 
 struct DocGeneratorOptions
@@ -942,6 +943,15 @@ static QStringList functionListToToc(const AbstractMetaFunctionCList &functions)
     return result;
 }
 
+static QStringList enumListToToc(const AbstractMetaEnumList &enums)
+{
+    QStringList result;
+    result.reserve(enums.size());
+    for (const auto &e : enums)
+        result.append(e.name());
+    return result;
+}
+
 static void writeFancyToc(TextStream& s, QAnyStringView title,
                           const QStringList& items,
                           QLatin1StringView referenceType)
@@ -986,8 +996,16 @@ static void writeFancyToc(TextStream& s, QAnyStringView title,
 
 bool QtDocGenerator::finishGeneration()
 {
-    for (const auto &f : api().globalFunctions())
+    for (const auto &f : api().globalFunctions()) {
+        auto ncf = std::const_pointer_cast<AbstractMetaFunction>(f);
+        m_docParser->fillGlobalFunctionDocumentation(ncf);
         m_packages[f->targetLangPackage()].globalFunctions.append(f);
+    }
+
+    for (auto e : api().globalEnums()) {
+        m_docParser->fillGlobalEnumDocumentation(e);
+        m_packages[e.typeEntry()->targetLangPackage()].globalEnums.append(e);
+    }
 
     if (!m_packages.isEmpty())
         writeModuleDocumentation();
@@ -1085,7 +1103,8 @@ void QtDocGenerator::writeModuleDocumentation()
         }
 
         removeExtraDocs(extraTocEntries, &docPackage.globalFunctions);
-        const bool hasGlobals = !docPackage.globalFunctions.isEmpty();
+        const bool hasGlobals = !docPackage.globalFunctions.isEmpty()
+                                || !docPackage.globalEnums.isEmpty();
         const QString globalsPage = moduleName + "_globals.rst"_L1;
 
         s << ".. container:: hide\n\n" << indent
@@ -1120,6 +1139,8 @@ void QtDocGenerator::writeModuleDocumentation()
                       "doc"_L1);
         writeFancyToc(s, "List of Functions", functionListToToc(docPackage.globalFunctions),
                       "py:func"_L1);
+        writeFancyToc(s, "List of Enumerations", enumListToToc(docPackage.globalEnums),
+                      "any"_L1);
 
         output.done();
 
@@ -1142,6 +1163,11 @@ void QtDocGenerator::writeGlobals(const QString &package,
             s << ".. py:function:: ";
             writeFunction(s, f);
         }
+    }
+
+    if (!docPackage.globalEnums.isEmpty()) {
+        s << headline("Enumerations");
+        writeEnums(s, docPackage.globalEnums, package);
     }
 
     output.done();
