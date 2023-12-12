@@ -467,7 +467,7 @@ Built with: '${SHIBOKEN_PYTHON_VERSION_MAJOR}.${SHIBOKEN_PYTHON_VERSION_MINOR}' 
 Detected: '${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}'")
     else()
         if(NOT SHIBOKEN_PYTHON_LIMITED_API
-           AND NOT SHIBOKEN_PYTHON_VERSION_MINOR STREQUAL PYTHON_VERSION_MINOR)
+           AND NOT SHIBOKEN_PYTHON_VERSION_MINOR STREQUAL Python_VERSION_MINOR)
             message(FATAL_ERROR
                     "The detected Python minor version is not compatible with the Python minor \
 version which was used when Shiboken was built. Consider building shiboken with \
