@@ -231,12 +231,13 @@ void QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
     const QString sourceFileName = sourceFile.absoluteFilePath();
     QString errorMessage;
 
-    const ClassDocumentation classDocumentation = parseWebXml(sourceFileName, &errorMessage);
-    if (!classDocumentation) {
+    const auto classDocumentationO = parseWebXml(sourceFileName, &errorMessage);
+    if (!classDocumentationO.has_value()) {
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return;
     }
 
+    const auto &classDocumentation = classDocumentationO.value();
     for (const auto &p : classDocumentation.properties) {
         Documentation doc(p.description, p.brief);
         metaClass->setPropertyDocumentation(p.name, doc);

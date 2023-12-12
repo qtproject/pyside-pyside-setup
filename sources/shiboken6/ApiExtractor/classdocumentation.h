@@ -6,6 +6,8 @@
 
 #include <QtCore/QStringList>
 
+#include <optional>
+
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
 /// An enumeration in a WebXML/doxygen document
@@ -41,9 +43,14 @@ struct FunctionDocumentation : public FunctionDocumentationQuery
 
 using FunctionDocumentationList = QList<FunctionDocumentation>;
 
-/// A class/namespace in a WebXML/doxygen document
+/// A WebXML/doxygen document
 struct ClassDocumentation
 {
+    enum Type {
+        Class, // <class>, class/namespace
+        Header // <header>, grouped global functions/enums
+    };
+
     qsizetype indexOfEnum(const QString &name) const;
     FunctionDocumentationList findFunctionCandidates(const QString &name,
                                                      bool constant) const;
@@ -51,18 +58,17 @@ struct ClassDocumentation
                                      const FunctionDocumentationQuery &q);
     qsizetype indexOfProperty(const QString &name) const;
 
+    Type type = Type::Class;
     QString name;
     QString description;
 
     QList<EnumDocumentation> enums;
     QList<PropertyDocumentation> properties;
     FunctionDocumentationList functions;
-
-    operator bool() const { return !name.isEmpty(); }
 };
 
 /// Parse a WebXML class/namespace document
-ClassDocumentation parseWebXml(const QString &fileName, QString *errorMessage);
+std::optional<ClassDocumentation> parseWebXml(const QString &fileName, QString *errorMessage);
 
 /// Extract the module description from a WebXML module document
 QString webXmlModuleDescription(const QString &fileName, QString *errorMessage);

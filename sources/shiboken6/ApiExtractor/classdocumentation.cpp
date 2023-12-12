@@ -85,7 +85,7 @@ qsizetype ClassDocumentation::indexOfProperty(const QString &name) const
 
 enum class WebXmlTag
 {
-    Class, Description, Enum, Function, Parameter, Property, Typedef, Other
+    Class, Description, Enum, Function, Header, Parameter, Property, Typedef, Other
 };
 
 static WebXmlTag tag(QStringView name)
@@ -98,6 +98,8 @@ static WebXmlTag tag(QStringView name)
         return WebXmlTag::Function;
     if (name == u"description")
         return WebXmlTag::Description;
+    if (name == u"header")
+        return WebXmlTag::Header;
     if (name == u"parameter")
         return WebXmlTag::Parameter;
     if (name == u"property")
@@ -113,6 +115,11 @@ static void parseWebXmlElement(WebXmlTag tag, const QXmlStreamAttributes &attrib
     switch (tag) {
     case WebXmlTag::Class:
         cd->name = attributes.value(u"name"_s).toString();
+        cd->type = ClassDocumentation::Class;
+        break;
+    case WebXmlTag::Header:
+        cd->name = attributes.value(u"name"_s).toString();
+        cd->type = ClassDocumentation::Header;
         break;
     case WebXmlTag::Enum: {
         EnumDocumentation ed;
@@ -185,14 +192,14 @@ static QString msgXmlError(const QString &fileName, const QXmlStreamReader &read
     return result;
 }
 
-ClassDocumentation parseWebXml(const QString &fileName, QString *errorMessage)
+std::optional<ClassDocumentation> parseWebXml(const QString &fileName, QString *errorMessage)
 {
     ClassDocumentation result;
 
     QFile file(fileName);
     if (!file.open(QIODevice::Text | QIODevice::ReadOnly)) {
         *errorMessage = msgCannotOpenForReading(file);
-        return result;
+        return std::nullopt;
     }
 
     WebXmlTag lastTag = WebXmlTag::Other;
@@ -206,6 +213,7 @@ ClassDocumentation parseWebXml(const QString &fileName, QString *errorMessage)
             case WebXmlTag::Class:
             case WebXmlTag::Function:
             case WebXmlTag::Enum:
+            case WebXmlTag::Header:
             case WebXmlTag::Property:
             case WebXmlTag::Typedef:
                 lastTag = currentTag;
@@ -242,7 +250,7 @@ ClassDocumentation parseWebXml(const QString &fileName, QString *errorMessage)
 
     if (reader.error() != QXmlStreamReader::NoError) {
         *errorMessage= msgXmlError(fileName, reader);
-        return {};
+        return std::nullopt;
     }
 
     sortDocumentation(&result);
@@ -363,16 +371,11 @@ QDebug operator<<(QDebug debug, const ClassDocumentation &c)
     QDebugStateSaver saver(debug);
     debug.noquote();
     debug.nospace();
-    debug << "Class(";
-    if (c) {
-        debug << c.name << ", ";
-        formatDescription(debug, c.description);
-        formatList(debug, ", enums", c.enums);
-        formatList(debug, ", properties", c.properties);
-        formatList(debug, ", functions", c.functions);
-    } else {
-        debug << "invalid";
-    }
+    debug << "Class(" << c.name << ", ";
+    formatDescription(debug, c.description);
+    formatList(debug, ", enums", c.enums);
+    formatList(debug, ", properties", c.properties);
+    formatList(debug, ", functions", c.functions);
     debug << ')';
     return debug;
 }
