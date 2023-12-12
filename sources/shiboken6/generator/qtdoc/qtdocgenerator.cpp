@@ -81,8 +81,7 @@ struct GeneratorDocumentation
         AbstractMetaFunctionCPtr notify;
     };
 
-    AbstractMetaFunctionCList constructors;
-    AbstractMetaFunctionCList allFunctions; // Except constructors
+    AbstractMetaFunctionCList allFunctions;
     AbstractMetaFunctionCList tocNormalFunctions; // Index lists
     AbstractMetaFunctionCList tocVirtuals;
     AbstractMetaFunctionCList tocSignalFunctions;
@@ -98,13 +97,12 @@ static bool operator<(const GeneratorDocumentation::Property &lhs,
     return lhs.name < rhs.name;
 }
 
-static QString propertyRefTarget(const AbstractMetaClassCPtr &cppClass, const QString &name)
+static QString propertyRefTarget(const QString &name)
 {
-    QString result = cppClass->fullName() +  u'.' + name;
-    result.replace(u"::"_s, u"."_s);
+    QString result = name;
     // For sphinx referencing, disambiguate the target from the getter name
-    // by inserting an invisible "Hangul choseong filler" character.
-    result.insert(1, QChar(0x115F));
+    // by appending an invisible "Hangul choseong filler" character.
+    result.append(QChar(0x115F));
     return result;
 }
 
@@ -147,7 +145,9 @@ static bool shouldSkip(const AbstractMetaFunctionCPtr &func)
 
 static bool functionSort(const AbstractMetaFunctionCPtr &func1, const AbstractMetaFunctionCPtr &func2)
 {
-    return func1->name() < func2->name();
+    const bool ctor1 = func1->isConstructor();
+    const bool ctor2 = func2->isConstructor();
+    return ctor1 != ctor2 ? ctor1 : func1->name() < func2->name();
 }
 
 static inline QVersionNumber versionOf(const TypeEntryCPtr &te)
@@ -160,28 +160,18 @@ static inline QVersionNumber versionOf(const TypeEntryCPtr &te)
     return {};
 }
 
-// Format a documentation reference (meth/attr): ":meth:`name<target>`"
-// We do not use the short form ":meth:`~target`" since that adds parentheses ()
-// for functions where we list the parameters instead.
 struct docRef
 {
-    explicit docRef(const char *kind, const QString &name,
-                    const AbstractMetaClassCPtr &cppClass) :
-        m_kind(kind), m_name(name), m_cppClass(cppClass) {}
+    explicit docRef(const char *kind, QAnyStringView name) :
+        m_kind(kind), m_name(name) {}
 
     const char *m_kind;
-    const QString &m_name;
-    const AbstractMetaClassCPtr m_cppClass;
+    QAnyStringView m_name;
 };
 
 static TextStream &operator<<(TextStream &s, const docRef &dr)
 {
-    QString className = dr.m_cppClass->fullName();
-    className.replace(u"::"_s, u"."_s);
-    s << ':' << dr.m_kind << ":`" << dr.m_name << '<';
-    if (!dr.m_name.startsWith(className))
-        s << className << '.';
-    s << dr.m_name << ">`";
+    s << ':' << dr.m_kind << ":`" << dr.m_name << '`';
     return s;
 }
 
@@ -189,41 +179,28 @@ static TextStream &operator<<(TextStream &s, const docRef &dr)
 // by using '~'), usable for property/attributes ("attr").
 struct shortDocRef
 {
-    explicit shortDocRef(const char *kind, const QString &target) :
-        m_kind(kind), m_target(target) {}
+    explicit shortDocRef(const char *kind, QAnyStringView name) :
+        m_kind(kind), m_name(name) {}
 
     const char *m_kind;
-    const QString &m_target;
+    QAnyStringView m_name;
 };
 
 static TextStream &operator<<(TextStream &s, const shortDocRef &sdr)
 {
-    s << ':' << sdr.m_kind << ":`~" << sdr.m_target << '`';
+    s << ':' << sdr.m_kind << ":`~" << sdr.m_name << '`';
     return s;
 }
 
 struct functionRef : public docRef
 {
-    explicit functionRef(const QString &name, const AbstractMetaClassCPtr &cppClass) :
-        docRef("meth", name, cppClass) {}
+    explicit functionRef(QAnyStringView name) : docRef("meth", name) {}
 };
 
-struct functionTocEntry // Format a TOC entry for a function
+struct classRef : public shortDocRef
 {
-    explicit functionTocEntry(const AbstractMetaFunctionCPtr& func,
-                              const AbstractMetaClassCPtr &cppClass) :
-        m_func(func), m_cppClass(cppClass) {}
-
-    AbstractMetaFunctionCPtr m_func;
-    const AbstractMetaClassCPtr m_cppClass;
+    explicit classRef(QAnyStringView name) : shortDocRef("class", name) {}
 };
-
-static TextStream &operator<<(TextStream &s, const functionTocEntry &ft)
-{
-    s << functionRef(QtDocGenerator::getFuncName(ft.m_func), ft.m_cppClass)
-        << ' ' << QtDocGenerator::formatArgs(ft.m_func);
-    return s;
-}
 
 struct propRef : public shortDocRef // Attribute/property (short) reference
 {
@@ -246,16 +223,16 @@ static TextStream &operator<<(TextStream &s, const headline &h)
     return s;
 }
 
-struct anchor
+struct pyClass
 {
-    explicit anchor(QAnyStringView ref) : m_ref(ref)  {}
+    explicit pyClass(QAnyStringView name) : m_name(name)  {}
 
-    QAnyStringView m_ref;
+    QAnyStringView m_name;
 };
 
-static TextStream &operator<<(TextStream &s, const anchor &a)
+static TextStream &operator<<(TextStream &s, pyClass c)
 {
-    s << ".. _" <<  a.m_ref << ":\n\n";
+    s << ".. py:class:: " << c.m_name << "\n\n";
     return s;
 }
 
@@ -348,7 +325,7 @@ static void writeInheritanceList(TextStream &s, const AbstractMetaClassCList& cl
     for (qsizetype i = 0, size = classes.size(); i < size; ++i) {
         if (i > 0)
             s << ", ";
-        s << ":ref:`" << classes.at(i)->name() << '`';
+        s << classRef(classes.at(i)->fullName());
     }
     s << "\n\n";
 }
@@ -390,9 +367,8 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     m_docParser->setPackageName(metaClass->package());
     m_docParser->fillDocumentation(std::const_pointer_cast<AbstractMetaClass>(metaClass));
 
-    QString className = metaClass->name();
-    s << anchor(className) << currentModule(metaClass->package())
-        << headline(className, '*');
+    s << currentModule(metaClass->package()) << pyClass(metaClass->name());
+    Indentation indent(s);
 
     auto documentation = metaClass->documentation();
     const QString scope = classScope(metaClass);
@@ -418,12 +394,12 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
 
     if (!doc.allFunctions.isEmpty() || !doc.properties.isEmpty()) {
         s << '\n' << headline("Synopsis");
-        writePropertyToc(s, doc, metaClass);
-        writeFunctionToc(s, u"Functions"_s, metaClass, doc.tocNormalFunctions);
-        writeFunctionToc(s, u"Virtual functions"_s, metaClass, doc.tocVirtuals);
-        writeFunctionToc(s, u"Slots"_s, metaClass, doc.tocSlotFunctions);
-        writeFunctionToc(s, u"Signals"_s, metaClass, doc.tocSignalFunctions);
-        writeFunctionToc(s, u"Static functions"_s, metaClass, doc.tocStaticFunctions);
+        writePropertyToc(s, doc);
+        writeFunctionToc(s, u"Methods"_s, doc.tocNormalFunctions);
+        writeFunctionToc(s, u"Virtual methods"_s, doc.tocVirtuals);
+        writeFunctionToc(s, u"Slots"_s, doc.tocSlotFunctions);
+        writeFunctionToc(s, u"Signals"_s, doc.tocSignalFunctions);
+        writeFunctionToc(s, u"Static functions"_s, doc.tocStaticFunctions);
     }
 
     s << "\n.. note::\n"
@@ -440,13 +416,11 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
         writeFormattedDetailedText(s, documentation, scope);
     writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass);
 
-    if (!metaClass->isNamespace())
-        writeConstructors(s, metaClass, doc.constructors);
+    writeEnums(s, metaClass->enums(), scope);
 
     if (!doc.properties.isEmpty())
         writeProperties(s, doc, metaClass);
 
-    writeEnums(s, metaClass->enums(), scope);
     if (!metaClass->isNamespace())
         writeFields(s, metaClass);
 
@@ -454,21 +428,25 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
 }
 
 void QtDocGenerator::writeFunctionToc(TextStream &s, const QString &title,
-                                      const AbstractMetaClassCPtr &cppClass,
                                       const AbstractMetaFunctionCList &functions)
 {
     if (!functions.isEmpty()) {
         s << headline(title, '^')
           << ".. container:: function_list\n\n" << indent;
-        for (const auto &func : functions)
-            s << "* def " << functionTocEntry(func, cppClass) << '\n';
+        // Functions are sorted by the Metabuilder; erase overloads
+        QStringList toc;
+        toc.reserve(functions.size());
+        std::transform(functions.cbegin(), functions.end(),
+                       std::back_inserter(toc), getFuncName);
+        toc.erase(std::unique(toc.begin(), toc.end()), toc.end());
+        for (const auto &func : toc)
+            s << "* def " << functionRef(func) << '\n';
         s << outdent << "\n\n";
     }
 }
 
 void QtDocGenerator::writePropertyToc(TextStream &s,
-                                      const GeneratorDocumentation &doc,
-                                      const AbstractMetaClassCPtr &cppClass)
+                                      const GeneratorDocumentation &doc)
 {
     if (doc.properties.isEmpty())
         return;
@@ -476,7 +454,7 @@ void QtDocGenerator::writePropertyToc(TextStream &s,
     s << headline("Properties", '^')
         << ".. container:: function_list\n\n" << indent;
     for (const auto &prop : doc.properties) {
-        s << "* " << propRef(propertyRefTarget(cppClass, prop.name));
+        s << "* " << propRef(propertyRefTarget(prop.name));
         if (prop.documentation.hasBrief())
             s << " - " << prop.documentation.brief();
         s << '\n';
@@ -495,19 +473,19 @@ void QtDocGenerator::writeProperties(TextStream &s,
     const QString scope = classScope(cppClass);
     for (const auto &prop : doc.properties) {
         const QString type = translateToPythonType(prop.type, cppClass, /* createRef */ false);
-        s <<  ".. py:property:: " << propertyRefTarget(cppClass, prop.name)
+        s <<  ".. py:property:: " << propertyRefTarget(prop.name)
             << "\n   :type: " << type << "\n\n\n";
         if (!prop.documentation.isEmpty())
             writeFormattedText(s, prop.documentation.detailed(), Documentation::Native, scope);
         s << "**Access functions:**\n";
         if (prop.getter)
-            s << " * " << functionTocEntry(prop.getter, cppClass) << '\n';
+            s << " * " << functionRef(prop.getter->name()) << '\n';
         if (prop.setter)
-            s << " * " << functionTocEntry(prop.setter, cppClass) << '\n';
+            s << " * " << functionRef(prop.setter->name()) << '\n';
         if (prop.reset)
-            s << " * " << functionTocEntry(prop.reset, cppClass) << '\n';
+            s << " * " << functionRef(prop.reset->name()) << '\n';
         if (prop.notify)
-            s << " * Signal " << functionTocEntry(prop.notify, cppClass) << '\n';
+            s << " * Signal " << functionRef(prop.notify->name()) << '\n';
         s << '\n';
     }
 }
@@ -515,10 +493,9 @@ void QtDocGenerator::writeProperties(TextStream &s,
 void QtDocGenerator::writeEnums(TextStream &s, const AbstractMetaEnumList &enums,
                                 const QString &scope) const
 {
-    constexpr auto section_title = ".. attribute:: "_L1;
-
     for (const AbstractMetaEnum &en : enums) {
-        s << section_title << scope << '.' << en.name() << "\n\n";
+        s << pyClass(en.name());
+        Indentation indent(s);
         writeFormattedDetailedText(s, en.documentation(), scope);
         const auto version = versionOf(en.typeEntry());
         if (!version.isNull())
@@ -536,57 +513,6 @@ void QtDocGenerator::writeFields(TextStream &s, const AbstractMetaClassCPtr &cpp
         s << section_title << cppClass->fullName() << "." << field.name() << "\n\n";
         writeFormattedDetailedText(s, field.documentation(), scope);
     }
-}
-
-void QtDocGenerator::writeConstructors(TextStream &s, const AbstractMetaClassCPtr &cppClass,
-                                       const AbstractMetaFunctionCList &constructors) const
-{
-    constexpr auto sectionTitle = ".. class:: "_L1;
-
-    bool first = true;
-    QHash<QString, AbstractMetaArgument> arg_map;
-    const QString scope = classScope(cppClass);
-
-    if (constructors.isEmpty()) {
-        s << sectionTitle << cppClass->fullName();
-    } else {
-        QByteArray pad;
-        for (const auto &func : constructors) {
-            s << pad;
-            if (first) {
-                first = false;
-                s << sectionTitle;
-                pad = QByteArray(sectionTitle.size(), ' ');
-            }
-            s << functionSignature(func, scope) << "\n\n";
-
-            const auto version = versionOf(func->typeEntry());
-            if (!version.isNull())
-                s << pad << rstVersionAdded(version);
-            if (func->isDeprecated())
-                s << pad << rstDeprecationNote("constructor");
-
-            const AbstractMetaArgumentList &arguments = func->arguments();
-            for (const AbstractMetaArgument &arg : arguments) {
-                if (!arg_map.contains(arg.name())) {
-                    arg_map.insert(arg.name(), arg);
-                }
-            }
-        }
-    }
-
-    s << '\n';
-
-    for (auto it = arg_map.cbegin(), end = arg_map.cend(); it != end; ++it) {
-        s.indent(2);
-        writeParameterType(s, cppClass, it.value());
-        s.outdent(2);
-    }
-
-    s << '\n';
-
-    for (const auto &func : constructors)
-        writeFunctionDocumentation(s, func, DocParser::getDocModifications(func, cppClass), scope);
 }
 
 QString QtDocGenerator::formatArgs(const AbstractMetaFunctionCPtr &func)
@@ -753,22 +679,9 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
     return didSomething;
 }
 
-QString QtDocGenerator::functionSignature(const AbstractMetaFunctionCPtr &func,
-                                          const QString &scope)
-{
-    QString result = scope;
-    if (!func->isConstructor()) {
-        if (!result.isEmpty())
-            result += u'.';
-        result += getFuncName(func);
-    }
-
-    return result + formatArgs(func);
-}
-
 static QString inline toRef(const QString &t)
 {
-    return ":any:`"_L1 + t + u'`';
+    return ":class:`~"_L1 + t + u'`';
 }
 
 QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
@@ -811,8 +724,17 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
 
     if (type.isFlags()) {
         const auto fte = std::static_pointer_cast<const FlagsTypeEntry>(type.typeEntry());
-        auto enumName = fte->originator()->targetLangName();
+        auto enumTypeEntry = fte->originator();
+        auto enumName = enumTypeEntry->targetLangName();
+        if (createRef)
+            enumName.prepend(enumTypeEntry->targetLangPackage() + u'.');
         return "Combination of "_L1 + (createRef ? toRef(enumName) : enumName);
+    } else if (type.isEnum()) {
+        auto enumTypeEntry = std::static_pointer_cast<const EnumTypeEntry>(type.typeEntry());
+        auto enumName = enumTypeEntry->targetLangName();
+        if (createRef)
+            enumName.prepend(enumTypeEntry->targetLangPackage() + u'.');
+        return createRef ? toRef(enumName) : enumName;
     }
 
     if (type.isConstant() && name == "char"_L1 && type.indirections() == 1)
@@ -838,13 +760,15 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
     }
 
     if (auto k = AbstractMetaClass::findClass(api().classes(), type.typeEntry()))
-        return createRef ? toRef(k->fullName()) : k->fullName();
+        return createRef ? toRef(k->fullName()) : k->name();
 
     return createRef ? toRef(name) : name;
 }
 
 QString QtDocGenerator::getFuncName(const AbstractMetaFunctionCPtr &cppFunc)
 {
+    if (cppFunc->isConstructor())
+        return "__init__"_L1;
     QString result = cppFunc->name();
     if (cppFunc->isOperatorOverload()) {
         const QString pythonOperator = Generator::pythonOperatorFunctionName(result);
@@ -917,7 +841,7 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr
             s << ".. py:function:: ";
         else
             s << (func->isStatic() ? ".. py:staticmethod:: " : ".. py:method:: ");
-        s << functionSignature(func, scope);
+        s << getFuncName(func) << formatArgs(func);
         Indentation indentation(s);
         if (!indexed)
             s << "\n:noindex:";
@@ -938,7 +862,7 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr
 
     if (auto propIndex = func->propertySpecIndex(); propIndex >= 0) {
         const QString name = cppClass->propertySpecs().at(propIndex).name();
-        const QString target = propertyRefTarget(cppClass, name);
+        const QString target = propertyRefTarget(name);
         if (func->isPropertyReader())
             s << "\nGetter of property " << propRef(target) << " .\n\n";
         else if (func->isPropertyWriter())
@@ -1190,7 +1114,7 @@ void QtDocGenerator::writeModuleDocumentation()
         }
 
         writeFancyToc(s, "List of Classes", fileListToToc(docPackage.classPages),
-                      "doc"_L1);
+                      "class"_L1);
         writeFancyToc(s, "List of Functions", functionListToToc(docPackage.globalFunctions),
                       "py:func"_L1);
         writeFancyToc(s, "List of Enumerations", enumListToToc(docPackage.globalEnums),
@@ -1461,14 +1385,8 @@ GeneratorDocumentation
     GeneratorDocumentation result;
     const auto allFunctions = cppClass->functions();
     result.allFunctions.reserve(allFunctions.size());
-    for (const auto &func : allFunctions) {
-        if (!shouldSkip(func)) {
-            if (func->isConstructor())
-                result.constructors.append(func);
-            else
-                result.allFunctions.append(func);
-        }
-    }
+    std::remove_copy_if(allFunctions.cbegin(), allFunctions.cend(),
+                        std::back_inserter(result.allFunctions), shouldSkip);
 
     std::sort(result.allFunctions.begin(), result.allFunctions.end(), functionSort);
 

@@ -64,8 +64,6 @@ private:
                     const QString &scope) const;
 
     void writeFields(TextStream &s, const AbstractMetaClassCPtr &cppClass) const;
-    static QString functionSignature(const AbstractMetaFunctionCPtr &func,
-                                     const QString &scope = {});
     void writeFunctions(TextStream &s, const AbstractMetaFunctionCList &funcs,
                         const AbstractMetaClassCPtr &cppClass, const QString &scope);
     void writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
@@ -77,21 +75,14 @@ private:
     void writeFunctionParametersType(TextStream &s, const AbstractMetaClassCPtr &cppClass,
                                      const AbstractMetaFunctionCPtr &func) const;
     static void writeFunctionToc(TextStream &s, const QString &title,
-                                 const AbstractMetaClassCPtr &cppClass,
                                  const AbstractMetaFunctionCList &functions);
     static void writePropertyToc(TextStream &s,
-                                 const GeneratorDocumentation &doc,
-                                 const AbstractMetaClassCPtr &cppClass);
+                                 const GeneratorDocumentation &doc);
     void writeProperties(TextStream &s,
                          const GeneratorDocumentation &doc,
                          const AbstractMetaClassCPtr &cppClass) const;
     void writeParameterType(TextStream &s, const AbstractMetaClassCPtr &cppClass,
                             const AbstractMetaArgument &arg) const;
-
-    void writeConstructors(TextStream &s,
-                           const AbstractMetaClassCPtr &cppClass,
-                           const AbstractMetaFunctionCList &constructors) const;
-
     void writeFormattedText(TextStream &s, const QString &doc,
                             Documentation::Format format,
                             const QString &scope = {}) const;
