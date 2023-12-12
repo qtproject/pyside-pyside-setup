@@ -34,7 +34,7 @@ names and how they look like.
 
     .. grid-item-card:: Basic Connections
         :class-item: cover-img
-        :link: basictutorial/signal_and_slots.html
+        :link: basictutorial/signals_and_slots.html
         :img-top: basictutorial/signals_slots.png
 
         Signals and Slots
