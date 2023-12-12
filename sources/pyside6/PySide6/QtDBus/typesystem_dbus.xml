@@ -53,6 +53,8 @@
           <define-ownership class="target" owner="default"/>
         </modify-argument>
       </modify-function>
+      <!-- PYSIDE-2547, hangs -->
+      <modify-function signature="^connect\(.*\)$" allow-thread="yes"/>
     </value-type>
     <object-type name="QDBusConnectionInterface">
       <enum-type name="RegisterServiceReply"/>
