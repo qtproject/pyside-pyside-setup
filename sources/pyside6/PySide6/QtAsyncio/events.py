@@ -135,7 +135,8 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
                 return
         future.get_loop().stop()
 
-    def run_until_complete(self, future: futures.QAsyncioFuture) -> typing.Any:  # type: ignore[override]
+    def run_until_complete(self,
+                           future: futures.QAsyncioFuture) -> typing.Any:  # type: ignore[override]
         if self.is_closed():
             raise RuntimeError("Event loop is closed")
         if self.is_running():
@@ -228,35 +229,51 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
 
     # Scheduling callbacks
 
-    def call_soon(self, callback: typing.Callable, *args: typing.Any,
-                  context: typing.Optional[contextvars.Context] = None):
-        return self.call_later(0, callback, *args, context=context)
+    def _call_soon_impl(self, callback: typing.Callable, *args: typing.Any,
+                        context: typing.Optional[contextvars.Context] = None,
+                        is_threadsafe: typing.Optional[bool] = False) -> "QAsyncioHandle":
+        return self._call_later_impl(0, callback, *args, context=context,
+                                     is_threadsafe=is_threadsafe)
 
-    def call_soon_threadsafe(self, callback: typing.Callable,  # type: ignore[override]
-                             *args: typing.Any,
+    def call_soon(self, callback: typing.Callable, *args: typing.Any,
+                  context: typing.Optional[contextvars.Context] = None) -> "QAsyncioHandle":
+        return self._call_soon_impl(callback, *args, context=context, is_threadsafe=False)
+
+    def call_soon_threadsafe(self, callback: typing.Callable, *args: typing.Any,
                              context:
                              typing.Optional[contextvars.Context] = None) -> "QAsyncioHandle":
-        if self.is_closed():
-            raise RuntimeError("Event loop is closed")
         if context is None:
             context = contextvars.copy_context()
-        return self.call_soon(callback, *args, context=context)
+        return self._call_soon_impl(callback, *args, context=context, is_threadsafe=True)
+
+    def _call_later_impl(self, delay: typing.Union[int, float],
+                         callback: typing.Callable, *args: typing.Any,
+                         context: typing.Optional[contextvars.Context] = None,
+                         is_threadsafe: typing.Optional[bool] = False) -> "QAsyncioHandle":
+        if not isinstance(delay, (int, float)):
+            raise TypeError("delay must be an int or float")
+        return self._call_at_impl(self.time() + delay, callback, *args, context=context,
+                                  is_threadsafe=is_threadsafe)
 
     def call_later(self, delay: typing.Union[int, float],  # type: ignore[override]
                    callback: typing.Callable, *args: typing.Any,
                    context: typing.Optional[contextvars.Context] = None) -> "QAsyncioHandle":
-        if not isinstance(delay, (int, float)):
-            raise TypeError("delay must be an int or float")
-        return self.call_at(self.time() + delay, callback, *args, context=context)
+        return self._call_later_impl(delay, callback, *args, context=context, is_threadsafe=False)
 
-    def call_at(self, when: typing.Union[int, float],  # type: ignore[override]
-                callback: typing.Callable, *args: typing.Any,
-                context: typing.Optional[contextvars.Context] = None) -> "QAsyncioHandle":
+    def _call_at_impl(self, when: typing.Union[int, float],
+                      callback: typing.Callable, *args: typing.Any,
+                      context: typing.Optional[contextvars.Context] = None,
+                      is_threadsafe: typing.Optional[bool] = False) -> "QAsyncioHandle":
         if not isinstance(when, (int, float)):
             raise TypeError("when must be an int or float")
         if self.is_closed():
             raise RuntimeError("Event loop is closed")
-        return QAsyncioTimerHandle(when, callback, args, self, context)
+        return QAsyncioTimerHandle(when, callback, args, self, context, is_threadsafe=is_threadsafe)
+
+    def call_at(self, when: typing.Union[int, float],  # type: ignore[override]
+                callback: typing.Callable, *args: typing.Any,
+                context: typing.Optional[contextvars.Context] = None) -> "QAsyncioHandle":
+        return self._call_at_impl(when, callback, *args, context=context, is_threadsafe=False)
 
     def time(self) -> float:
         return QDateTime.currentMSecsSinceEpoch() / 1000
@@ -499,11 +516,13 @@ class QAsyncioHandle():
         DONE = enum.auto()
 
     def __init__(self, callback: typing.Callable, args: typing.Tuple,
-                 loop: QAsyncioEventLoop, context: typing.Optional[contextvars.Context]) -> None:
+                 loop: QAsyncioEventLoop, context: typing.Optional[contextvars.Context],
+                 is_threadsafe: typing.Optional[bool] = False) -> None:
         self._callback = callback
         self._args = args
         self._loop = loop
         self._context = context
+        self._is_threadsafe = is_threadsafe
 
         self._timeout = 0
 
@@ -512,7 +531,10 @@ class QAsyncioHandle():
 
     def _schedule_event(self, timeout: int, func: typing.Callable) -> None:
         if not self._loop.is_closed() and not self._loop._quit_from_outside:
-            QTimer.singleShot(timeout, self._loop, func)
+            if self._is_threadsafe:
+                QTimer.singleShot(timeout, self._loop, func)
+            else:
+                QTimer.singleShot(timeout, func)
 
     def _start(self) -> None:
         self._schedule_event(self._timeout, lambda: self._cb())
@@ -537,8 +559,9 @@ class QAsyncioHandle():
 
 class QAsyncioTimerHandle(QAsyncioHandle):
     def __init__(self, when: float, callback: typing.Callable, args: typing.Tuple,
-                 loop: QAsyncioEventLoop, context: typing.Optional[contextvars.Context]) -> None:
-        super().__init__(callback, args, loop, context)
+                 loop: QAsyncioEventLoop, context: typing.Optional[contextvars.Context],
+                 is_threadsafe: typing.Optional[bool] = False) -> None:
+        super().__init__(callback, args, loop, context, is_threadsafe)
 
         self._when = when
         self._timeout = int(max(self._when - self._loop.time(), 0) * 1000)
