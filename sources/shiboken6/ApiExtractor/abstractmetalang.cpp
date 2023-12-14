@@ -1447,6 +1447,11 @@ void AbstractMetaClassPrivate::addUsingConstructors(const AbstractMetaClassPtr &
     }
 }
 
+static inline bool isSignal(const AbstractMetaFunctionCPtr &f)
+{
+    return f->isSignal();
+}
+
 void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
 {
     auto *d = klass->d.data();
@@ -1483,6 +1488,10 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
             *superClass -= AbstractMetaClass::FinalInTargetLang;
         }
         superFuncs = superClass->queryFunctions(FunctionQueryOption::ClassImplements);
+        // We are not interested in signals as no bindings are generated for them;
+        // they cause documentation warnings.
+        superFuncs.erase(std::remove_if(superFuncs.begin(), superFuncs.end(), isSignal),
+                         superFuncs.end());
         const auto virtuals = superClass->queryFunctions(FunctionQueryOption::VirtualInCppFunctions);
         superFuncs += virtuals;
 
