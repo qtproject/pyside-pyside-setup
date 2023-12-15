@@ -7,7 +7,6 @@ from PySide6.QtWidgets import (QApplication, QLabel, QMainWindow, QPushButton, Q
 from PySide6.QtAsyncio import QAsyncioEventLoopPolicy
 
 import asyncio
-import signal
 import sys
 
 
@@ -59,8 +58,6 @@ if __name__ == "__main__":
     async_helper = AsyncHelper(main_window, main_window.set_text)
 
     main_window.show()
-
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     asyncio.set_event_loop_policy(QAsyncioEventLoopPolicy())
     asyncio.get_event_loop().run_forever()

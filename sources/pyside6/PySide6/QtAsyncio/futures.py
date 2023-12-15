@@ -33,7 +33,7 @@ class QAsyncioFuture():
 
         self._state = QAsyncioFuture.FutureState.PENDING
         self._result: typing.Any = None
-        self._exception: typing.Optional[Exception] = None
+        self._exception: typing.Optional[BaseException] = None
 
         self._callbacks: typing.List[typing.Callable] = list()
 
@@ -103,7 +103,7 @@ class QAsyncioFuture():
         self._schedule_callbacks()
         return True
 
-    def exception(self) -> typing.Optional[Exception]:
+    def exception(self) -> typing.Optional[BaseException]:
         if self._state == QAsyncioFuture.FutureState.CANCELLED:
             raise asyncio.CancelledError
         if self.done():

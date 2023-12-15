@@ -88,7 +88,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
             self._exception = e
         except BaseException as e:
             self._state = futures.QAsyncioFuture.FutureState.DONE_WITH_EXCEPTION
-            self._exception = e  # type: ignore[assignment]
+            self._exception = e
         else:
             if asyncio.futures.isfuture(result):
                 result.add_done_callback(

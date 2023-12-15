@@ -12,6 +12,7 @@ import concurrent.futures
 import contextvars
 import enum
 import os
+import signal
 import socket
 import subprocess
 import typing
@@ -63,6 +64,8 @@ class QAsyncioEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
                 application = QCoreApplication.instance()
         self._application: QCoreApplication = application  # type: ignore[assignment]
         self._event_loop: typing.Optional[asyncio.AbstractEventLoop] = None
+
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     def get_event_loop(self) -> asyncio.AbstractEventLoop:
         if self._event_loop is None:
