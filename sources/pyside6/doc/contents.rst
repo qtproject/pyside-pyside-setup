@@ -4,6 +4,7 @@
     :maxdepth: 2
 
     quickstart.rst
+    commercial/index.rst
     gettingstarted/index.rst
     api.rst
     tutorials/index.rst
@@ -12,7 +13,6 @@
     deployment/index.rst
     considerations.rst
     developer/index.rst
-    commercial/index.rst
 
 ..
     Intersphinx references in toctrees is not supported

@@ -28,6 +28,8 @@ Before you can install |project|, first you must install the following software:
 Installation
 ------------
 
+.. note:: For a commercial installation, refer to :ref:`commercial-page`.
+
 * **Creating and activating an environment**
   You can do this by running the following on a terminal:
 

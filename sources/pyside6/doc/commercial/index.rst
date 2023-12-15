@@ -1,7 +1,7 @@
 .. _commercial-page:
 
-Commercial Distribution
-=======================
+Commercial Use
+==============
 
 |project| follows the same licensing that Qt has, which means that there are two
 distributions, the Community Edition (LGPLv3/GPLv3) and a Commercial Edition. For
@@ -19,11 +19,14 @@ The only difference is that the ADP license **does not** include the extra
 ``Qt OPC UA``, ``Qt MQTT`` and ``Qt CoAP`` modules, which are distributed in
 a special Python wheel.
 
-All commercial licenses include the 5.15.x and 6.2.x LTS releases.
+|project| follows the same approach as Qt, meaning that commercial
+users will have access to both our commercial packages for any
+given version, or the special commercial LTS releases.
 
 Commercial users **should not** install the Community Edition distribution via ``pip
 install pyside6`` to avoid licensing problems, and should refer to the
-packages provided in the `Qt Account`_.
+packages that can be acquired from the `Qt Account`_, the Qt Installer, or
+via the `qtpip` tool.
 
 Installation
 ------------
