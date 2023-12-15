@@ -11,6 +11,7 @@ class TestRemoveField : public QObject
     Q_OBJECT
     private slots:
         void testRemoveField();
+        void testConstExprField();
 };
 
 #endif
