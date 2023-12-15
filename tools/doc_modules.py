@@ -54,7 +54,7 @@ def required_typesystems(module):
         parser.setContentHandler(handler)
         parser.parse(typesystem_file)
     except Exception as e:
-        print(f"Error parsing {typesystem_file}: {e}", file=sys.stderr)
+        print(f"Warning: XML error parsing {typesystem_file}: {e}", file=sys.stderr)
     return handler.required_modules
 
 
