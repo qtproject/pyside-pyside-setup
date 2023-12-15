@@ -8,7 +8,6 @@ from PySide6.QtWidgets import (QApplication, QGridLayout, QLabel, QMainWindow, Q
 from PySide6.QtAsyncio import QAsyncioEventLoopPolicy
 
 import asyncio
-import signal
 import sys
 from random import randint
 
@@ -131,8 +130,6 @@ if __name__ == "__main__":
     eratosthenes = Eratosthenes(num, main_window)
 
     main_window.show()
-
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     asyncio.set_event_loop_policy(QAsyncioEventLoopPolicy())
     asyncio.ensure_future(eratosthenes.start())
