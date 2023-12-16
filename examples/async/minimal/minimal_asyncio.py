@@ -4,7 +4,7 @@
 from PySide6.QtCore import (Qt, QObject, Signal, Slot)
 from PySide6.QtWidgets import (QApplication, QLabel, QMainWindow, QPushButton, QVBoxLayout, QWidget)
 
-from PySide6.QtAsyncio import QAsyncioEventLoopPolicy
+import PySide6.QtAsyncio as QtAsyncio
 
 import asyncio
 import sys
@@ -59,5 +59,4 @@ if __name__ == "__main__":
 
     main_window.show()
 
-    asyncio.set_event_loop_policy(QAsyncioEventLoopPolicy())
-    asyncio.get_event_loop().run_forever()
+    QtAsyncio.run()

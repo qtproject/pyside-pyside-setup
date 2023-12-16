@@ -7,8 +7,20 @@ from .events import (
 from .futures import QAsyncioFuture
 from .tasks import QAsyncioTask
 
+import asyncio
+import typing
+
 __all__ = [
     "QAsyncioEventLoopPolicy", "QAsyncioEventLoop",
     "QAsyncioHandle", "QAsyncioTimerHandle",
     "QAsyncioFuture", "QAsyncioTask"
 ]
+
+
+def run(coro: typing.Optional[typing.Coroutine] = None, *,
+        debug: typing.Optional[bool] = None) -> None:
+    """Run the event loop."""
+    asyncio.set_event_loop_policy(QAsyncioEventLoopPolicy())
+    if coro:
+        asyncio.ensure_future(coro)
+    asyncio.run(asyncio.Event().wait(), debug=debug)
