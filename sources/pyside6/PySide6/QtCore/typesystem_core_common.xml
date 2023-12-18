@@ -774,10 +774,7 @@
       <enum-type name="System"/>
       <enum-type identified-by-value="Unspecified"/>
   </value-type>
-  <value-type name="QDate" hash-function="PySide::hash" >
-    <extra-includes>
-      <include file-name="pysideqhash.h" location="global"/>
-    </extra-includes>
+  <value-type name="QDate">
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
                  snippet="core-snippets-p-h"/>
     <conversion-rule>
@@ -835,10 +832,7 @@
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qdate-weeknumber"/>
     </modify-function>
   </value-type>
-  <value-type name="QDateTime" hash-function="PySide::hash">
-    <extra-includes>
-      <include file-name="pysideqhash.h" location="global"/>
-    </extra-includes>
+  <value-type name="QDateTime">
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
                  snippet="core-snippets-p-h"/>
     <enum-type name="YearRange"/>
@@ -1222,10 +1216,7 @@
     <!--### -->
   </value-type>
 
-  <value-type name="QTime" hash-function="PySide::hash">
-    <extra-includes>
-      <include file-name="pysideqhash.h" location="global"/>
-    </extra-includes>
+  <value-type name="QTime">
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
                  snippet="core-snippets-p-h"/>
     <conversion-rule>
@@ -1852,7 +1843,7 @@
   </object-type>
   <value-type name="QUrlQuery"/>
 
-  <value-type name="QUrl" hash-function="PySide::hash">
+  <value-type name="QUrl">
     <!-- Qt5: lots of changes -->
     <enum-type name="ComponentFormattingOption" python-type="IntFlag" flags="ComponentFormattingOptions,FormattingOptions"/>
     <!-- note: above duplication of attribute is not by default XML compliant! -->
@@ -1862,7 +1853,6 @@
     <enum-type name="AceProcessingOption" flags="AceProcessingOptions" since="6.3"/>
     <extra-includes>
       <include file-name="QStringList" location="global"/>
-      <include file-name="pysideqhash.h" location="global"/>
     </extra-includes>
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">

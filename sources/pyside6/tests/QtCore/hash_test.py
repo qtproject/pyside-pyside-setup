@@ -15,13 +15,17 @@ from PySide6.QtCore import QDate, QDateTime, QTime, QUrl
 from PySide6.QtCore import QLine, QPoint, QRect, QSize
 
 
+URL = "https://qt.io/"
+
+
 class HashTest(unittest.TestCase):
     def testInsert(self):
         myHash = {}
         qdate = QDate.currentDate()
         qdatetime = QDateTime.currentDateTime()
         qtime = QTime.currentTime()
-        qurl = QUrl("http://www.pyside.org")
+        qurl = QUrl(URL)
+        self.assertTrue(qurl.isValid())
         qpoint = QPoint(12, 42)
 
         myHash[qdate] = "QDate"
@@ -64,7 +68,34 @@ class HashTest(unittest.TestCase):
         self.assertEqual(l1, l2)
         self.assertEqual(hash(l1), hash(l2))
 
+    def testQTimeHash(self):
+        t1 = QTime(5, 5, 5)
+        t2 = QTime(5, 5, 5)
+        self.assertFalse(t1 is t2)
+        self.assertEqual(t1, t2)
+        self.assertEqual(hash(t1), hash(t2))
+
+    def testQDateHash(self):
+        d1 = QDate(1968, 3, 9)
+        d2 = QDate(1968, 3, 9)
+        self.assertFalse(d1 is d2)
+        self.assertEqual(d1, d2)
+        self.assertEqual(hash(d1), hash(d2))
+
+    def testQDateTimeHash(self):
+        d1 = QDateTime(QDate(1968, 3, 9), QTime(5, 5, 5))
+        d2 = QDateTime(QDate(1968, 3, 9), QTime(5, 5, 5))
+        self.assertFalse(d1 is d2)
+        self.assertEqual(d1, d2)
+        self.assertEqual(hash(d1), hash(d2))
+
+    def testQUrlHash(self):
+        u1 = QUrl(URL)
+        u2 = QUrl(URL)
+        self.assertFalse(u1 is u2)
+        self.assertEqual(u1, u2)
+        self.assertEqual(hash(u1), hash(u2))
+
 
 if __name__ == '__main__':
     unittest.main()
-
