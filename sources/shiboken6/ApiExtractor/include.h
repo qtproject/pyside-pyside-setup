@@ -4,6 +4,7 @@
 #ifndef INCLUDE_H
 #define INCLUDE_H
 
+#include <QtCore/QHashFunctions>
 #include <QtCore/QString>
 #include <QtCore/QList>
 
@@ -42,15 +43,17 @@ public:
 
     QString toString() const;
 
-    friend size_t qHash(const Include &);
     int compare(const Include &rhs) const;
 
-    private:
-        IncludeType m_type = IncludePath;
-        QString m_name;
-};
+private:
+    friend size_t qHash(Include &inc, size_t seed = 0) noexcept
+    {
+        return qHashMulti(seed, inc.m_type, inc.m_name);
+    }
 
-size_t qHash(const Include& inc);
+    IncludeType m_type = IncludePath;
+    QString m_name;
+};
 
 inline bool operator<(const Include &lhs, const Include &rhs)
 {

@@ -10,7 +10,6 @@
 #include <autodecref.h>
 #include <gilstate.h>
 
-#include <QtCore/qhashfunctions.h>
 #include <QtCore/QMetaMethod>
 #include <QtCore/QSet>
 #include <QtCore/QDebug>
@@ -22,14 +21,6 @@
 
 namespace PySide
 {
-
-size_t qHash(const GlobalReceiverKey &k, size_t seed)
-{
-    QtPrivate::QHashCombine hash;
-    seed = hash(seed, k.object);
-    seed = hash(seed, k.method);
-    return seed;
-}
 
 class DynamicSlotDataV2
 {

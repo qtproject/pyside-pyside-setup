@@ -10,29 +10,27 @@
 
 #include <string_view>
 
-bool operator==(const CXCursor &c1, const CXCursor &c2)
+bool operator==(const CXCursor &c1, const CXCursor &c2) noexcept
 {
     return c1.kind == c2.kind
         && c1.xdata == c2.xdata
         && std::equal(c1.data, c1.data + sizeof(c1.data) / sizeof(c1.data[0]), c2.data);
 }
 
-size_t qHash(const CXCursor &c, size_t seed)
+size_t qHash(const CXCursor &c, size_t seed) noexcept
 {
-    return qHash(c.kind) ^ qHash(c.xdata) ^ qHash(c.data[0])
-        ^ qHash(c.data[1])  ^ qHash(c.data[2]) ^ seed;
+    return qHashMulti(seed, c.kind, c.xdata, c.data[0], c.data[1], c.data[2]);
 }
 
-bool operator==(const CXType &t1, const CXType &t2)
+bool operator==(const CXType &t1, const CXType &t2) noexcept
 {
     return t1.kind == t2.kind && t1.data[0] == t2.data[0]
         && t1.data[1] == t2.data[1];
 }
 
-size_t qHash(const CXType &ct, size_t seed)
+size_t qHash(const CXType &ct, size_t seed) noexcept
 {
-    return size_t(ct.kind) ^ size_t(0xFFFFFFFF & quintptr(ct.data[0]))
-        ^ size_t(0xFFFFFFFF & quintptr(ct.data[1])) ^ seed;
+    return qHashMulti(seed, ct.kind, ct.data[0], ct.data[1]);
 }
 
 namespace clang {

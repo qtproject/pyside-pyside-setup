@@ -33,11 +33,6 @@ int Include::compare(const Include &rhs) const
     return m_name.compare(rhs.m_name);
 }
 
-size_t qHash(const Include& inc)
-{
-    return qHash(inc.m_name);
-}
-
 QTextStream& operator<<(QTextStream& out, const Include& g)
 {
     if (g.isValid())

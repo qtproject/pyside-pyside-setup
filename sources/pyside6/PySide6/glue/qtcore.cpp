@@ -430,8 +430,7 @@ if (%PYARG_0 == Py_None)
 namespace PySide {
     template<> inline Py_ssize_t hash(const QLine &l)
     {
-        const int v[4] = {l.x1(), l.y1(), l.x2(), l.y2()};
-        return qHashRange(v, v + 4);
+        return qHashMulti(0, l.x1(), l.y1(), l.x2(), l.y2());
     }
 };
 // @snippet qline-hash

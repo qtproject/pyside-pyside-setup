@@ -14,11 +14,11 @@
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
-bool operator==(const CXCursor &c1, const CXCursor &c2);
-size_t qHash(const CXCursor &c, size_t seed = 0);
+bool operator==(const CXCursor &c1, const CXCursor &c2) noexcept;
+size_t qHash(const CXCursor &c, size_t seed = 0) noexcept;
 
-bool operator==(const CXType &t1, const CXType &t2);
-size_t qHash(const CXType &ct, size_t seed);
+bool operator==(const CXType &t1, const CXType &t2) noexcept;
+size_t qHash(const CXType &ct, size_t seed = 0) noexcept;
 
 namespace clang {
 
