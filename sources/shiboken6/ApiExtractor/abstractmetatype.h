@@ -10,6 +10,7 @@
 #include "typedatabase_typedefs.h"
 
 #include <QtCore/qobjectdefs.h>
+#include <QtCore/QHashFunctions>
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QList>
 #include <QtCore/QSet>
@@ -253,6 +254,9 @@ public:
 #endif
 
 private:
+    friend size_t qHash(const AbstractMetaType &t, size_t seed = 0) noexcept
+    { return qHash(t.typeEntry().get(), seed); }
+
     friend class AbstractMetaTypeData;
     QSharedDataPointer<AbstractMetaTypeData> d;
 
@@ -265,9 +269,6 @@ inline bool operator==(const AbstractMetaType &t1, const AbstractMetaType &t2)
 { return t1.equals(t2); }
 inline bool operator!=(const AbstractMetaType &t1, const AbstractMetaType &t2)
 { return !t1.equals(t2); }
-
-inline size_t qHash(const AbstractMetaType &t, size_t seed)
-{ return qHash(t.typeEntry().get(), seed); }
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const AbstractMetaType &at);

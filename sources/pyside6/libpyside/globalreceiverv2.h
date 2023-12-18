@@ -9,6 +9,7 @@
 #include "dynamicqmetaobject.h"
 
 #include <QtCore/QByteArray>
+#include <QtCore/QHashFunctions>
 #include <QtCore/QObject>
 #include <QtCore/QPointer>
 #include <QtCore/QMap>
@@ -27,6 +28,11 @@ struct GlobalReceiverKey
 {
     const PyObject *object;
     const PyObject *method;
+
+    friend constexpr size_t qHash(GlobalReceiverKey k, size_t seed = 0) noexcept
+    {
+        return qHashMulti(seed, k.object, k.method);
+    }
 };
 
 inline bool operator==(const GlobalReceiverKey &k1, const GlobalReceiverKey &k2)
@@ -38,8 +44,6 @@ inline bool operator!=(const GlobalReceiverKey &k1, const GlobalReceiverKey &k2)
 {
     return k1.object != k2.object || k1.method != k2.method;
 }
-
-size_t qHash(const GlobalReceiverKey &k, size_t seed = 0);
 
 /// A class used to link C++ Signals to non C++ slots (Python callbacks) by
 /// providing fake slots for QObject::connect().
