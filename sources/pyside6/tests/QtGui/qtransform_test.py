@@ -11,7 +11,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QPointF
-from PySide6.QtGui import QTransform, QPolygonF, QPolygonF
+from PySide6.QtGui import QTransform, QPolygonF, QPolygonF, QQuaternion, QVector3D
 
 
 class QTransformTest(unittest.TestCase):
@@ -77,6 +77,12 @@ class QTransformTest(unittest.TestCase):
         self.assertTrue(r2)
 
         self.assertEqual(t1, r2)
+
+    def testQQuaternion(self):
+        """Test return tuples."""
+        q = QQuaternion(1, 1, 1, 1)
+        self.assertEqual(len(q.getAxisAndAngle()), 2)
+        self.assertEqual(len(q.getEulerAngles()), 3)
 
 
 if __name__ == "__main__":

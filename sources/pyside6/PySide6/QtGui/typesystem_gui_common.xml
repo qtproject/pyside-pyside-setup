@@ -2385,10 +2385,27 @@
         </inject-code>
     </add-function>
 
-    <!-- Qt5.5: XXX support the output variables! For now, I just suppressed the new methods. -->
-    <modify-function signature="getAxisAndAngle(float*,float*,float*,float*)const"/>
-    <modify-function signature="getAxisAndAngle(QVector3D*,float*)const"/>
-    <modify-function signature="getEulerAngles(float*,float*,float*)const"/>
+    <!-- There can be only one return type.  -->
+    <modify-function signature="getAxisAndAngle(float*,float*,float*,float*)const" remove="all"/>
+    <modify-function signature="getAxisAndAngle(QVector3D*,float*)const">
+        <modify-argument index="return" pyi-type="Tuple[PySide6.QtGui.QVector3D, float]">
+            <replace-type modified-type="(QVector3D, float)"/>
+        </modify-argument>
+        <modify-argument index="1"><remove-argument/></modify-argument>
+        <modify-argument index="2"><remove-argument/></modify-argument>
+        <inject-code class="target" position="beginning"
+                     file="../glue/qtgui.cpp" snippet="qquaternion-getaxisandangle-vector3d-float"/>
+    </modify-function>
+    <modify-function signature="getEulerAngles(float*,float*,float*)const">
+        <modify-argument index="return" pyi-type="Tuple[float, float, float]">
+            <replace-type modified-type="(float, float, float)"/>
+        </modify-argument>
+        <modify-argument index="1"><remove-argument/></modify-argument>
+        <modify-argument index="2"><remove-argument/></modify-argument>
+        <modify-argument index="3"><remove-argument/></modify-argument>
+        <inject-code class="target" position="beginning"
+                     file="../glue/qtgui.cpp" snippet="qquaternion-geteulerangles"/>
+    </modify-function>
   </value-type>
 
   <object-type name="QTouchEvent" since="4.6">

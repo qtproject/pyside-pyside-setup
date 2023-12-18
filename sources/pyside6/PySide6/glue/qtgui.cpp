@@ -854,6 +854,24 @@ else
 %PYARG_0 = %CONVERTTOPYTHON[int](cppResult);
 // @snippet qdrag-exec-arg2
 
+// @snippet qquaternion-getaxisandangle-vector3d-float
+QVector3D outVec{};
+float angle{};
+%CPPSELF.%FUNCTION_NAME(&outVec, &angle);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[QVector3D](outVec));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[float](angle));
+// @snippet qquaternion-getaxisandangle-vector3d-float
+
+// @snippet qquaternion-geteulerangles
+float pitch{}, yaw{}, roll{};
+%CPPSELF.%FUNCTION_NAME(&pitch, &yaw, &roll);
+%PYARG_0 = PyTuple_New(3);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[float](pitch));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[float](yaw));
+PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[float](roll));
+// @snippet qquaternion-geteulerangles
+
 // @snippet qregion-len
 return %CPPSELF.rectCount();
 // @snippet qregion-len
