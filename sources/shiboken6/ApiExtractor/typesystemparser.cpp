@@ -197,48 +197,31 @@ std::optional<QString>
     return CodeSnipAbstract::fixSpaces(result);
 }
 
-template <class EnumType, Qt::CaseSensitivity cs = Qt::CaseInsensitive>
+template <class EnumType>
 struct EnumLookup
 {
     QStringView name;
     EnumType value;
 };
 
-template <class EnumType, Qt::CaseSensitivity cs>
-bool operator==(const EnumLookup<EnumType, cs> &e1, const EnumLookup<EnumType, cs> &e2)
-{
-    return e1.name.compare(e2.name, cs) == 0;
-}
-
-template <class EnumType, Qt::CaseSensitivity cs>
-bool operator<(const EnumLookup<EnumType, cs> &e1, const EnumLookup<EnumType, cs> &e2)
-{
-    return e1.name.compare(e2.name, cs) < 0;
-}
-
 // Helper macros to define lookup functions that take a QStringView needle
 // and an optional default return value.
 #define ENUM_LOOKUP_BEGIN(EnumType, caseSensitivity, functionName) \
 static std::optional<EnumType> functionName(QStringView needle) \
 { \
-    using HaystackEntry = EnumLookup<EnumType, caseSensitivity>; \
-    static const HaystackEntry haystack[] =
+    using HaystackEntry = EnumLookup<EnumType>; \
+    constexpr auto cs = caseSensitivity; \
+    static constexpr HaystackEntry haystack[] =
 
-#define ENUM_LOOKUP_LINEAR_SEARCH() \
-    const auto end = haystack + sizeof(haystack) / sizeof(haystack[0]); \
-    const auto it = std::find(haystack, end, HaystackEntry{needle, {} }); \
+#define ENUM_LOOKUP_LINEAR_SEARCH \
+    auto pred = [cs, needle](const HaystackEntry &he) { \
+        return he.name.compare(needle, cs) == 0; \
+    }; \
+    auto end = std::cend(haystack); \
+    auto it = std::find_if(std::cbegin(haystack), end, pred); \
     if (it != end) \
         return it->value; \
-    return {}; \
-}
-
-#define ENUM_LOOKUP_BINARY_SEARCH() \
-    const auto end = haystack + sizeof(haystack) / sizeof(haystack[0]); \
-    const HaystackEntry needleEntry{needle, {} }; \
-    const auto lb = std::lower_bound(haystack, end, needleEntry); \
-    if (lb != end && *lb == needleEntry) \
-        return lb->value; \
-    return {}; \
+    return std::nullopt; \
 }
 
 ENUM_LOOKUP_BEGIN(TypeSystem::AllowThread, Qt::CaseInsensitive,
@@ -250,7 +233,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::AllowThread, Qt::CaseInsensitive,
         {u"no", TypeSystem::AllowThread::Disallow},
         {u"false", TypeSystem::AllowThread::Disallow},
     };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 
 ENUM_LOOKUP_BEGIN(TypeSystem::BoolCast, Qt::CaseInsensitive,
@@ -261,7 +244,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::BoolCast, Qt::CaseInsensitive,
         {u"no", TypeSystem::BoolCast::Disabled},
         {u"false", TypeSystem::BoolCast::Disabled},
     };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(TypeSystem::PythonEnumType, Qt::CaseSensitive,
                   pythonEnumTypeFromAttribute)
@@ -271,7 +254,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::PythonEnumType, Qt::CaseSensitive,
         {u"Flag", TypeSystem::PythonEnumType::Flag},
         {u"IntFlag", TypeSystem::PythonEnumType::IntFlag},
     };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(TypeSystem::QtMetaTypeRegistration, Qt::CaseSensitive,
                   qtMetaTypeFromAttribute)
@@ -282,7 +265,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::QtMetaTypeRegistration, Qt::CaseSensitive,
         {u"no", TypeSystem::QtMetaTypeRegistration::Disabled},
         {u"false", TypeSystem::QtMetaTypeRegistration::Disabled},
     };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(TypeSystem::Language, Qt::CaseInsensitive,
                   languageFromAttribute)
@@ -292,7 +275,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::Language, Qt::CaseInsensitive,
         {u"shell", TypeSystem::ShellCode}, // coloca no header, mas antes da declaracao da classe
         {u"target", TypeSystem::TargetLangCode}  // em algum lugar do cpp
     };
-ENUM_LOOKUP_BINARY_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(TypeSystem::Ownership, Qt::CaseInsensitive,
                    ownershipFromFromAttribute)
@@ -301,7 +284,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::Ownership, Qt::CaseInsensitive,
         {u"c++", TypeSystem::CppOwnership},
         {u"default", TypeSystem::DefaultOwnership}
     };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(AddedFunction::Access, Qt::CaseInsensitive,
                   addedFunctionAccessFromAttribute)
@@ -309,7 +292,7 @@ ENUM_LOOKUP_BEGIN(AddedFunction::Access, Qt::CaseInsensitive,
         {u"public", AddedFunction::Public},
         {u"protected", AddedFunction::Protected},
     };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(FunctionModification::ModifierFlag, Qt::CaseSensitive,
                   modifierFromAttribute)
@@ -322,7 +305,7 @@ ENUM_LOOKUP_BEGIN(FunctionModification::ModifierFlag, Qt::CaseSensitive,
         {u"final", FunctionModification::Final},
         {u"non-final", FunctionModification::NonFinal}
     };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(ReferenceCount::Action, Qt::CaseInsensitive,
                   referenceCountFromAttribute)
@@ -333,7 +316,7 @@ ENUM_LOOKUP_BEGIN(ReferenceCount::Action, Qt::CaseInsensitive,
         {u"set", ReferenceCount::Set},
         {u"ignore", ReferenceCount::Ignore}
     };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(ArgumentOwner::Action, Qt::CaseInsensitive,
                   argumentOwnerActionFromAttribute)
@@ -341,7 +324,7 @@ ENUM_LOOKUP_BEGIN(ArgumentOwner::Action, Qt::CaseInsensitive,
         {u"add", ArgumentOwner::Add},
         {u"remove", ArgumentOwner::Remove}
     };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(TypeSystem::CodeSnipPosition, Qt::CaseInsensitive,
                   codeSnipPositionFromAttribute)
@@ -350,7 +333,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::CodeSnipPosition, Qt::CaseInsensitive,
         {u"end", TypeSystem::CodeSnipPositionEnd},
         {u"declaration", TypeSystem::CodeSnipPositionDeclaration}
     };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(Include::IncludeType, Qt::CaseInsensitive,
                   locationFromAttribute)
@@ -359,7 +342,7 @@ ENUM_LOOKUP_BEGIN(Include::IncludeType, Qt::CaseInsensitive,
         {u"local", Include::LocalPath},
         {u"target", Include::TargetLangImport}
     };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(TypeSystem::DocModificationMode, Qt::CaseInsensitive,
                   docModificationFromAttribute)
@@ -368,7 +351,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::DocModificationMode, Qt::CaseInsensitive,
         {u"prepend", TypeSystem::DocModificationPrepend},
         {u"replace", TypeSystem::DocModificationReplace}
     };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(ContainerTypeEntry::ContainerKind, Qt::CaseSensitive,
                   containerTypeFromAttribute)
@@ -387,7 +370,7 @@ ENUM_LOOKUP_BEGIN(ContainerTypeEntry::ContainerKind, Qt::CaseSensitive,
         {u"pair", ContainerTypeEntry::PairContainer},
         {u"span", ContainerTypeEntry::SpanContainer}
     };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(TypeRejection::MatchType, Qt::CaseSensitive,
                   typeRejectionFromAttribute)
@@ -399,7 +382,7 @@ ENUM_LOOKUP_BEGIN(TypeRejection::MatchType, Qt::CaseSensitive,
         {u"argument-type", TypeRejection::ArgumentType},
         {u"return-type", TypeRejection::ReturnType}
     };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(TypeSystem::ExceptionHandling, Qt::CaseSensitive,
                   exceptionHandlingFromAttribute)
@@ -411,7 +394,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::ExceptionHandling, Qt::CaseSensitive,
     {u"yes", TypeSystem::ExceptionHandling::On},
     {u"true", TypeSystem::ExceptionHandling::On},
 };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(TypeSystem::SmartPointerType, Qt::CaseSensitive,
                   smartPointerTypeFromAttribute)
@@ -421,7 +404,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::SmartPointerType, Qt::CaseSensitive,
     {u"value-handle", TypeSystem::SmartPointerType::ValueHandle},
     {u"shared", TypeSystem::SmartPointerType::Shared}
 };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 template <class EnumType>
 static std::optional<EnumType>
@@ -532,7 +515,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::SnakeCase, Qt::CaseSensitive,
     {u"true", TypeSystem::SnakeCase::Enabled},
     {u"both", TypeSystem::SnakeCase::Both},
 };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 ENUM_LOOKUP_BEGIN(TypeSystem::Visibility, Qt::CaseSensitive,
                   visibilityFromAttribute)
@@ -543,7 +526,7 @@ ENUM_LOOKUP_BEGIN(TypeSystem::Visibility, Qt::CaseSensitive,
     {u"yes", TypeSystem::Visibility::Visible},
     {u"true", TypeSystem::Visibility::Visible},
 };
-ENUM_LOOKUP_LINEAR_SEARCH()
+ENUM_LOOKUP_LINEAR_SEARCH
 
 static int indexOfAttribute(const QXmlStreamAttributes &atts,
                             QAnyStringView name)
