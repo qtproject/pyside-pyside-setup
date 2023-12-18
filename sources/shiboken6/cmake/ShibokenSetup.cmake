@@ -7,7 +7,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
 include(ShibokenHelpers)
 
-option(USE_PYTHON_VERSION "Use specific python version to build shiboken6." "")
 option(DISABLE_DOCSTRINGS "Disable documentation extraction." FALSE)
 
 shiboken_internal_disable_pkg_config_if_needed()

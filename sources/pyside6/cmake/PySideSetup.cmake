@@ -43,6 +43,10 @@ pyside_internal_set_up_extra_dependency_paths()
 pyside_internal_find_host_shiboken_tools()
 find_package(Shiboken6 6 CONFIG REQUIRED)
 
+if(is_pyside6_superproject_build)
+    shiboken_find_required_python()
+endif()
+
 set(BINDING_API_MAJOR_VERSION "${pyside_MAJOR_VERSION}")
 set(BINDING_API_MINOR_VERSION "${pyside_MINOR_VERSION}")
 set(BINDING_API_MICRO_VERSION "${pyside_MICRO_VERSION}")
