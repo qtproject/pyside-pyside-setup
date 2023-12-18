@@ -4,6 +4,7 @@
 #ifndef INCLUDE_H
 #define INCLUDE_H
 
+#include <QtCore/QtCompare>
 #include <QtCore/QHashFunctions>
 #include <QtCore/QString>
 #include <QtCore/QList>
@@ -50,40 +51,17 @@ private:
     {
         return qHashMulti(seed, inc.m_type, inc.m_name);
     }
+    friend bool comparesEqual(const Include &lhs, const Include  &rhs) noexcept
+    {
+        return lhs.m_type == rhs.m_type && lhs.m_name == rhs.m_name;
+    }
+    friend Qt::strong_ordering compareThreeWay(const Include &lhs,
+                                               const Include &rhs) noexcept;
+    Q_DECLARE_STRONGLY_ORDERED(Include)
 
     IncludeType m_type = IncludePath;
     QString m_name;
 };
-
-inline bool operator<(const Include &lhs, const Include &rhs)
-{
-    return lhs.compare(rhs) < 0;
-}
-
-inline bool operator<=(const Include &lhs, const Include &rhs)
-{
-    return lhs.compare(rhs) <= 0;
-}
-
-inline bool operator==(const Include &lhs, const Include &rhs)
-{
-    return lhs.compare(rhs) == 0;
-}
-
-inline bool operator!=(const Include &lhs, const Include &rhs)
-{
-    return lhs.compare(rhs) != 0;
-}
-
-inline bool operator>=(const Include &lhs, const Include &rhs)
-{
-    return lhs.compare(rhs) >= 0;
-}
-
-inline bool operator>(const Include &lhs, const Include &rhs)
-{
-    return lhs.compare(rhs) > 0;
-}
 
 QTextStream& operator<<(QTextStream& out, const Include& include);
 TextStream& operator<<(TextStream& out, const Include& include);

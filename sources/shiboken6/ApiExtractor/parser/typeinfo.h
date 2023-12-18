@@ -10,6 +10,7 @@
 
 #include <QtCore/QString>
 #include <QtCore/QSharedDataPointer>
+#include <QtCore/QtCompare>
 #include <QtCore/QStringList>
 
 #include <utility>
@@ -84,8 +85,6 @@ public:
     std::pair<qsizetype, qsizetype>
         parseTemplateArgumentList(const QString &l, qsizetype from = 0);
 
-    bool equals(const TypeInfo &other) const;
-
     // ### arrays and templates??
 
     QString toString() const;
@@ -109,18 +108,16 @@ public:
     void simplifyStdType();
 
 private:
+    friend bool comparesEqual(const TypeInfo &lhs,
+                              const TypeInfo &rhs) noexcept;
+    Q_DECLARE_EQUALITY_COMPARABLE(TypeInfo)
+
     QSharedDataPointer<TypeInfoData> d;
 
     friend class TypeInfoTemplateArgumentHandler;
 
     static TypeInfo resolveType(CodeModelItem item, TypeInfo const &__type, const ScopeModelItem &__scope);
 };
-
-inline bool operator==(const TypeInfo &t1, const TypeInfo &t2)
-{ return t1.equals(t2); }
-
-inline bool operator!=(const TypeInfo &t1, const TypeInfo &t2)
-{ return !t1.equals(t2); }
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const TypeInfo &t);

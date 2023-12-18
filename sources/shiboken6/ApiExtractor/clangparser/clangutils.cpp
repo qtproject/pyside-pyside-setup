@@ -35,11 +35,6 @@ size_t qHash(const CXType &ct, size_t seed) noexcept
 
 namespace clang {
 
-bool SourceLocation::equals(const SourceLocation &rhs) const
-{
-    return file == rhs.file && offset == rhs.offset;
-}
-
 SourceLocation getExpansionLocation(const CXSourceLocation &location)
 {
     SourceLocation result;

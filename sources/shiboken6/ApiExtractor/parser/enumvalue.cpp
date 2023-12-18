@@ -56,11 +56,12 @@ EnumValue EnumValue::toUnsigned() const
     return result;
 }
 
-bool EnumValue::equals(const EnumValue &rhs) const
+bool comparesEqual(const EnumValue &lhs, const EnumValue &rhs) noexcept
 {
-    if (m_type != rhs.m_type)
+    if (lhs.m_type != rhs.m_type)
         return false;
-    return m_type == Signed ? m_value == rhs.m_value : m_unsignedValue == rhs.m_unsignedValue;
+    return lhs.m_type == EnumValue::Signed
+        ? lhs.m_value == rhs.m_value : lhs.m_unsignedValue == rhs.m_unsignedValue;
 }
 
 void EnumValue::formatDebugHex(QDebug &d) const

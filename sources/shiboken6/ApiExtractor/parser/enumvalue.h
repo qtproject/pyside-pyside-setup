@@ -6,6 +6,7 @@
 
 #include <QtCore/qtypes.h>
 #include <QtCore/qtclasshelpermacros.h>
+#include <QtCore/QtCompare>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 QT_FORWARD_DECLARE_CLASS(QString)
@@ -40,6 +41,10 @@ public:
     void formatDebugHex(QDebug &d) const;
 
 private:
+    friend bool comparesEqual(const EnumValue &lhs,
+                              const EnumValue &rhs) noexcept;
+    Q_DECLARE_EQUALITY_COMPARABLE(EnumValue)
+
 #ifndef QT_NO_DEBUG_STREAM
     friend QDebug operator<<(QDebug, const EnumValue &);
 #endif
@@ -52,10 +57,5 @@ private:
     };
     Type m_type = Signed;
 };
-
-inline bool operator==(const EnumValue &e1, const EnumValue &e2)
-{ return e1.equals(e2); }
-inline bool operator!=(const EnumValue &e1, const EnumValue &e2)
-{ return !e1.equals(e2); }
 
 #endif // ENUMVALUE_H

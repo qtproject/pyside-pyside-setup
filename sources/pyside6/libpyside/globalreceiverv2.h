@@ -8,6 +8,7 @@
 
 #include "dynamicqmetaobject.h"
 
+#include <QtCore/QtCompare>
 #include <QtCore/QByteArray>
 #include <QtCore/QHashFunctions>
 #include <QtCore/QObject>
@@ -33,17 +34,13 @@ struct GlobalReceiverKey
     {
         return qHashMulti(seed, k.object, k.method);
     }
+    friend constexpr bool comparesEqual(const GlobalReceiverKey &lhs,
+                                        const GlobalReceiverKey &rhs) noexcept
+    {
+        return lhs.object == rhs.object && lhs.method == rhs.method;
+    }
+    Q_DECLARE_EQUALITY_COMPARABLE_LITERAL_TYPE(GlobalReceiverKey)
 };
-
-inline bool operator==(const GlobalReceiverKey &k1, const GlobalReceiverKey &k2)
-{
-    return k1.object == k2.object && k1.method == k2.method;
-}
-
-inline bool operator!=(const GlobalReceiverKey &k1, const GlobalReceiverKey &k2)
-{
-    return k1.object != k2.object || k1.method != k2.method;
-}
 
 /// A class used to link C++ Signals to non C++ slots (Python callbacks) by
 /// providing fake slots for QObject::connect().

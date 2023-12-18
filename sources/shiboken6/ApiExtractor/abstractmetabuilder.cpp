@@ -2379,7 +2379,7 @@ TypeEntryCList AbstractMetaBuilderPrivate::findTypeEntries(const QString &qualif
 AbstractMetaClassCPtr AbstractMetaBuilderPrivate::resolveTypeSystemTypeDef(const AbstractMetaType &t) const
 {
     if (t.hasInstantiations()) {
-        auto pred = [t](const TypeClassEntry &e) { return e.type.equals(t); };
+        auto pred = [t](const TypeClassEntry &e) { return e.type == t; };
         auto it = std::find_if(m_typeSystemTypeDefs.cbegin(), m_typeSystemTypeDefs.cend(), pred);
         if (it != m_typeSystemTypeDefs.cend())
             return it->klass;

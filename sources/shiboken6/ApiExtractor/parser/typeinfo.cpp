@@ -446,9 +446,10 @@ bool TypeInfoData::equals(const TypeInfoData &other) const
            && m_instantiations == other.m_instantiations;
 }
 
-bool TypeInfo::equals(const TypeInfo &other) const
+
+bool comparesEqual(const TypeInfo &lhs, const TypeInfo &rhs) noexcept
 {
-    return d.data() == other.d.data() || d->equals(*other.d);
+   return lhs.d.data() == rhs.d.data() || lhs.d->equals(*rhs.d);
 }
 
 QString TypeInfo::indirectionKeyword(Indirection i)

@@ -778,9 +778,9 @@ bool AbstractMetaTypeData::equals(const AbstractMetaTypeData &rhs) const
         && m_referenceType == rhs.m_referenceType && isEquivalent(rhs);
 }
 
-bool AbstractMetaType::equals(const AbstractMetaType &rhs) const
+bool comparesEqual(const AbstractMetaType &lhs, const AbstractMetaType &rhs) noexcept
 {
-    return d->equals(*rhs.d);
+    return lhs.d->equals(*rhs.d);
 }
 
 bool AbstractMetaType::isEquivalent(const AbstractMetaType &rhs) const

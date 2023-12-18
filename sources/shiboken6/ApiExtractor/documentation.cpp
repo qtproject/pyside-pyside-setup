@@ -35,12 +35,6 @@ void Documentation::setFormat(Documentation::Format f)
     m_format = f;
 }
 
-bool Documentation::equals(const Documentation &rhs) const
-{
-    return m_format == rhs.m_format && m_detailed == rhs.m_detailed
-        && m_brief == rhs.m_brief;
-}
-
 void Documentation::setDetailed(const QString &detailed)
 {
     m_detailed = detailed.trimmed();

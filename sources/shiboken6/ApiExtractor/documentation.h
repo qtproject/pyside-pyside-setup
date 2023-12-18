@@ -5,6 +5,7 @@
 #define DOCUMENTATION_H
 
 #include <QtCore/QString>
+#include <QtCore/QtCompare>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
@@ -44,15 +45,18 @@ public:
     void setBrief(const QString &brief);
 
 private:
+    friend bool comparesEqual(const Documentation &lhs,
+                              const  Documentation &rhs) noexcept
+    {
+        return lhs.m_format == rhs.m_format && lhs.m_detailed == rhs.m_detailed
+               && lhs.m_brief == rhs.m_brief;
+    }
+    Q_DECLARE_EQUALITY_COMPARABLE(Documentation)
+
     QString m_detailed;
     QString m_brief;
     Format m_format = Documentation::Native;
 };
-
-inline bool operator==(const Documentation &d1, const Documentation &d2)
-{ return d1.equals(d2); }
-inline bool operator!=(const Documentation &d1, const Documentation &d2)
-{ return !d1.equals(d2); }
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug debug, const Documentation &);

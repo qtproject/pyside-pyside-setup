@@ -24,13 +24,15 @@ QString Include::toString() const
     return u"import "_s + m_name + u';';
 }
 
-int Include::compare(const Include &rhs) const
+Qt::strong_ordering compareThreeWay(const Include &lhs, const Include &rhs) noexcept
 {
-    if (m_type < rhs.m_type)
-        return -1;
-    if (m_type > rhs.m_type)
-        return 1;
-    return m_name.compare(rhs.m_name);
+    if (lhs.m_type < rhs.m_type)
+        return Qt::strong_ordering::less;
+    if (lhs.m_type > rhs.m_type)
+        return Qt::strong_ordering::greater;
+    if (auto c = lhs.m_name.compare(rhs.m_name))
+        return c < 0 ? Qt::strong_ordering::less : Qt::strong_ordering::greater;
+    return Qt::strong_ordering::equal;
 }
 
 QTextStream& operator<<(QTextStream& out, const Include& g)

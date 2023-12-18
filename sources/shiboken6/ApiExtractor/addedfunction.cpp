@@ -16,11 +16,6 @@ constexpr auto callOperator = "operator()"_L1;
 // "void foo(QList<X,Y> &@list@ = QList<X,Y>{1,2}, int @b@=5, ...)"
 namespace AddedFunctionParser {
 
-bool Argument::equals(const Argument &rhs) const
-{
-    return type == rhs.type && name == rhs.name && defaultValue == rhs.defaultValue;
-}
-
 QDebug operator<<(QDebug d, const Argument &a)
 {
     QDebugStateSaver saver(d);

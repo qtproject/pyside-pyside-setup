@@ -9,6 +9,7 @@
 #include "parser/codemodel_enums.h"
 #include "typedatabase_typedefs.h"
 
+#include <QtCore/QtCompare>
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/QHashFunctions>
 #include <QtCore/QSharedDataPointer>
@@ -171,7 +172,6 @@ public:
 
     bool hasTemplateChildren() const;
 
-    bool equals(const AbstractMetaType &rhs) const;
     /// Is equivalent from the POV of argument passing (differ by const ref)
     bool isEquivalent(const AbstractMetaType &rhs) const;
 
@@ -256,6 +256,9 @@ public:
 private:
     friend size_t qHash(const AbstractMetaType &t, size_t seed = 0) noexcept
     { return qHash(t.typeEntry().get(), seed); }
+    friend bool comparesEqual(const AbstractMetaType &lhs,
+                              const AbstractMetaType &rhs) noexcept;
+    Q_DECLARE_EQUALITY_COMPARABLE(AbstractMetaType)
 
     friend class AbstractMetaTypeData;
     QSharedDataPointer<AbstractMetaTypeData> d;
@@ -264,11 +267,6 @@ private:
     QString formatSignature(bool minimal) const;
     QString formatPythonSignature() const;
 };
-
-inline bool operator==(const AbstractMetaType &t1, const AbstractMetaType &t2)
-{ return t1.equals(t2); }
-inline bool operator!=(const AbstractMetaType &t1, const AbstractMetaType &t2)
-{ return !t1.equals(t2); }
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const AbstractMetaType &at);

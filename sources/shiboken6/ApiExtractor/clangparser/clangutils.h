@@ -7,6 +7,7 @@
 #include <clang-c/Index.h>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
+#include <QtCore/QtCompare>
 #include <QtCore/QList>
 
 #include <functional>
@@ -49,13 +50,14 @@ struct SourceLocation
     unsigned line = 0;
     unsigned column = 0;
     unsigned offset = 0;
+
+    friend constexpr bool comparesEqual(const SourceLocation &lhs,
+                                        const SourceLocation &rhs) noexcept
+    {
+        return lhs.file == rhs.file && lhs.offset == rhs.offset;
+    }
+    Q_DECLARE_EQUALITY_COMPARABLE_LITERAL_TYPE(SourceLocation)
 };
-
-inline bool operator==(const SourceLocation &l1, const SourceLocation &l2)
-{ return l1.equals(l2); }
-
-inline bool operator!=(const SourceLocation &l1, const SourceLocation &l2)
-{ return !l1.equals(l2); }
 
 SourceLocation getExpansionLocation(const CXSourceLocation &location);
 

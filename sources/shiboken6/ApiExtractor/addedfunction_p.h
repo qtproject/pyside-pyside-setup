@@ -4,6 +4,7 @@
 #ifndef ADDEDFUNCTION_P_H
 #define ADDEDFUNCTION_P_H
 
+#include <QtCore/QtCompare>
 #include <QtCore/QList>
 #include <QtCore/QString>
 #include <QtCore/QStringView>
@@ -19,17 +20,19 @@ namespace AddedFunctionParser {
 
 struct Argument
 {
-    bool equals(const Argument &rhs) const;
-
     QString type;
     QString name;
     QString defaultValue;
+
+    friend bool comparesEqual(const Argument &lhs, const Argument &rhs) noexcept
+    {
+        return lhs.type == rhs.type && lhs.name == rhs.name
+               && lhs.defaultValue == rhs.defaultValue;
+    }
+    Q_DECLARE_EQUALITY_COMPARABLE(Argument)
 };
 
 using Arguments = QList<Argument>;
-
-inline bool operator==(const Argument &a1, const Argument &a2) { return a1.equals(a2); }
-inline bool operator!=(const Argument &a1, const Argument &a2) { return !a1.equals(a2); }
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const Argument &a);
