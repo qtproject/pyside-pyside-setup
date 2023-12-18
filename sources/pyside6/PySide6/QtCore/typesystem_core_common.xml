@@ -941,10 +941,7 @@
       <configuration condition="QT_CONFIG(permissions)"/>
   </value-type>
 
-  <value-type name="QPoint" hash-function="PySide::hash">
-    <extra-includes>
-      <include file-name="pysideqhash.h" location="global"/>
-    </extra-includes>
+  <value-type name="QPoint">
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
@@ -962,7 +959,6 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qpoint"/>
 
     <add-function signature="toTuple" return-type="PyObject*">
         <inject-code class="target" position="beginning">
@@ -1011,10 +1007,7 @@
     <modify-function signature="ry()" remove="all"/>
     <!--### -->
   </value-type>
-  <value-type name="QRect" hash-function="PySide::hash">
-    <extra-includes>
-      <include file-name="pysideqhash.h" location="global"/>
-    </extra-includes>
+  <value-type name="QRect">
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
@@ -1031,7 +1024,6 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qrect"/>
 
     <modify-function signature="getCoords(int*,int*,int*,int*)const">
         <modify-argument index="return">
@@ -1145,10 +1137,7 @@
         </inject-code>
     </modify-function>
   </value-type>
-  <value-type name="QSize" hash-function="PySide::hash">
-    <extra-includes>
-      <include file-name="pysideqhash.h" location="global"/>
-    </extra-includes>
+  <value-type name="QSize">
     <add-function signature="__repr__" return-type="PyObject*">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
@@ -1166,7 +1155,6 @@
             </insert-template>
         </inject-code>
     </add-function>
-    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qsize"/>
 
     <add-function signature="toTuple" return-type="PyObject*">
         <inject-code class="target" position="beginning">

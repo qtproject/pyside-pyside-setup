@@ -502,31 +502,6 @@ if (!PyDateTimeAPI)
 %PYARG_0 = PyDateTime_FromDateAndTime(date.year(), date.month(), date.day(), time.hour(), time.minute(), time.second(), time.msec()*1000);
 // @snippet qdatetime-topython
 
-// @snippet qpoint
-namespace PySide {
-    template<> inline Py_ssize_t hash(const QPoint &v) {
-        return qHash(qMakePair(v.x(), v.y()));
-    }
-};
-// @snippet qpoint
-
-// @snippet qrect
-namespace PySide {
-    template<> inline Py_ssize_t hash(const QRect &r) {
-        const int v[4] = {r.x(), r.y(), r.width(), r.height()};
-        return qHashRange(v, v + 4);
-    }
-};
-// @snippet qrect
-
-// @snippet qsize
-namespace PySide {
-    template<> inline Py_ssize_t hash(const QSize &v) {
-        return qHash(qMakePair(v.width(), v.height()));
-    }
-};
-// @snippet qsize
-
 // @snippet qtime-topython
 if (!PyDateTimeAPI)
     PyDateTime_IMPORT;
