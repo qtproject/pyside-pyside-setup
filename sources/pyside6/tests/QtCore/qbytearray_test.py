@@ -15,7 +15,8 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 
-from PySide6.QtCore import QByteArray, QSettings, QObject, QDataStream, QIODevice
+from PySide6.QtCore import (QByteArray, QSettings, QObject, QDataStream,
+                            QIODevice, qCompress, qUncompress)
 
 
 class QByteArrayTestToNumber(unittest.TestCase):
@@ -254,6 +255,27 @@ class QByteArraySliceAssignment(unittest.TestCase):
         byte_array = QByteArray(orig_bytes)
         actual_bytes = bytes(byte_array)
         self.assertEqual(orig_bytes, actual_bytes)
+
+
+class QCompressTest(unittest.TestCase):
+    def testQByteArrayCompression(self):
+        """Compress/uncompress a QByteArray."""
+        data = bytes(10 * 'long redundant sentence bla bla', "UTF8")
+        ba = QByteArray(data)
+        compressed = qCompress(ba)
+        self.assertTrue(len(compressed) < len(data))
+        uncompressed = qUncompress(compressed)
+        self.assertEqual(uncompressed, data)
+
+    def testBufferCompression(self):
+        """Compress/uncompress portions of bytes without converting to
+           QByteArray."""
+        data = bytes(10 * 'long redundant sentence bla bla', "UTF8")
+        used_len = int(len(data) / 2)
+        compressed = qCompress(data, used_len, -1)
+        self.assertTrue(len(compressed) < used_len)
+        uncompressed = qUncompress(compressed.data(), len(compressed))
+        self.assertEqual(uncompressed, data[:used_len])
 
 
 if __name__ == '__main__':

@@ -36,10 +36,26 @@
             <modify-argument index="return" pyi-type="str"/>
         </modify-function>
     </function>
-    <function signature="qCompress(const uchar*,qsizetype,int)"/>
-    <function signature="qCompress(const QByteArray&amp;,int)"/>
-    <function signature="qUncompress(const uchar*,qsizetype)" doc-file="qbytearray"/>
-    <function signature="qUncompress(const QByteArray&amp;)" doc-file="qbytearray"/>
+    <!-- Move PyBuffer overload to front to avoid conversion PyBuffer->QByteArray -->
+    <function signature="qCompress(const uchar*,qsizetype,int)" overload-number="0">
+        <modify-function>
+            <modify-argument index="1">
+                <replace-type modified-type="PyBuffer"/>
+            </modify-argument>
+            <inject-code file="../glue/qtcore.cpp" snippet="qcompress-buffer"/>
+        </modify-function>
+    </function>
+    <function signature="qCompress(const QByteArray&amp;,int)" overload-number="1"/>
+    <!-- Move PyBuffer overload to front to avoid conversion PyBuffer->QByteArray -->
+    <function signature="qUncompress(const uchar*,qsizetype)" overload-number="0">
+        <modify-function>
+            <modify-argument index="1">
+                <replace-type modified-type="PyBuffer"/>
+            </modify-argument>
+            <inject-code file="../glue/qtcore.cpp" snippet="quncompress-buffer"/>
+        </modify-function>
+    </function>
+    <function signature="qUncompress(const QByteArray&amp;)"  overload-number="1"/>
     <function signature="qFormatLogMessage(QtMsgType,const QMessageLogContext&amp;,const QString&amp;)"
               doc-file="qtlogging"/>
     <function signature="qSetMessagePattern(const QString&amp;)" doc-file="qtlogging"/>

@@ -284,6 +284,18 @@ PySide::addPostRoutine(%1);
 qAddPostRoutine(PySide::globalPostRoutineCallback);
 // @snippet qt-qaddpostroutine
 
+// @snippet qcompress-buffer
+auto *ptr = reinterpret_cast<uchar*>(Shiboken::Buffer::getPointer(%PYARG_1));
+QByteArray compressed = %FUNCTION_NAME(ptr, %2, %3);
+%PYARG_0 = %CONVERTTOPYTHON[QByteArray](compressed);
+// @snippet qcompress-buffer
+
+// @snippet quncompress-buffer
+auto *ptr = reinterpret_cast<uchar*>(Shiboken::Buffer::getPointer(%PYARG_1));
+QByteArray uncompressed = %FUNCTION_NAME(ptr, %2);
+%PYARG_0 = %CONVERTTOPYTHON[QByteArray](uncompressed);
+// @snippet quncompress-buffer
+
 // @snippet qt-version
 QList<QByteArray> version = QByteArray(qVersion()).split('.');
 PyObject *pyQtVersion = PyTuple_New(3);
