@@ -185,10 +185,13 @@ if (FULLDOCSBUILD)
                        COMMENT "Running qdoc against Qt source code...")
 endif()
 
+# Avoid using 'auto' for '-j' option as it could lead to
+# crash on some systems due to out-of-memory situation. Instead
+# use a no. less than 8.
 add_custom_target(apidoc
                   COMMAND ${CMAKE_COMMAND} -E env INHERITANCE_FILE=${ENV_INHERITANCE_FILE}
                           ${SHIBOKEN_PYTHON_INTERPRETER} ${SPHINX_BUILD} -b ${DOC_OUTPUT_FORMAT}
-                          -j auto ${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR} html
+                          -j 6 ${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR} html
                   COMMENT "Generating PySide htmls..."
                  )
 
