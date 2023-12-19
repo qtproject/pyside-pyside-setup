@@ -1995,3 +1995,12 @@ Py_BEGIN_ALLOW_THREADS
 Py_END_ALLOW_THREADS
 // @snippet qcoreapplication-requestpermission
 
+// @snippet qlockfile-getlockinfo
+qint64 pid{};
+QString hostname, appname;
+%CPPSELF.%FUNCTION_NAME(&pid, &hostname, &appname);
+%PYARG_0 = PyTuple_New(3);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[qint64](pid));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](hostname));
+PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[QString](appname));
+// @snippet qlockfile-getlockinfo

@@ -1477,6 +1477,16 @@
       <modify-function signature="removeStaleLockFile()" allow-thread="yes"/>
       <modify-function signature="tryLock(int)" allow-thread="yes"/>
       <modify-function signature="unlock()" allow-thread="yes"/>
+      <modify-function signature="getLockInfo(qint64*,QString*,QString*)const">
+          <modify-argument index="return" pyi-type="Tuple[int, str, str]">
+              <replace-type modified-type="(int, str, str)"/>
+          </modify-argument>
+          <modify-argument index="1"><remove-argument/></modify-argument>
+          <modify-argument index="2"><remove-argument/></modify-argument>
+          <modify-argument index="3"><remove-argument/></modify-argument>
+          <inject-code class="target" position="beginning"
+                       file="../glue/qtcore.cpp" snippet="qlockfile-getlockinfo"/>
+      </modify-function>
   </object-type>
   <object-type name="QMessageAuthenticationCode"/>
   <object-type name="QSignalBlocker">

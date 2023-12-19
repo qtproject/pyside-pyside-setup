@@ -32,6 +32,9 @@ class TestQMessageAuthenticationCode (unittest.TestCase):
         lockFile = QLockFile(self._fileName)
         self.assertTrue(lockFile.lock())
         self.assertTrue(lockFile.isLocked())
+        lock_info = lockFile.getLockInfo();
+        self.assertEqual(len(lock_info), 3)
+        self.assertEqual(lock_info[0], os.getpid())
         lockFile.unlock()
 
 
