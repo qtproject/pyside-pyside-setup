@@ -584,7 +584,7 @@ const char *typeNameOf(const char *typeIdName)
     return result;
 }
 
-#if !defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030A0000
+#if !defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030A0000 && !defined(PYPY_VERSION)
 static int _getPyVerbose()
 {
     PyConfig config;
@@ -597,7 +597,7 @@ int pyVerbose()
 {
 #ifdef Py_LIMITED_API
     return Pep_GetVerboseFlag();
-#elif PY_VERSION_HEX >= 0x030A0000
+#elif PY_VERSION_HEX >= 0x030A0000 && !defined(PYPY_VERSION)
     static const int result = _getPyVerbose();
     return result;
 #else

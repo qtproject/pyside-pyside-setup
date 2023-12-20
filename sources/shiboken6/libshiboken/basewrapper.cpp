@@ -412,7 +412,7 @@ void SbkObjectType_tp_dealloc(PyTypeObject *sbkType)
     auto pyObj = reinterpret_cast<PyObject *>(sbkType);
 
     PyObject_GC_UnTrack(pyObj);
-#ifndef Py_LIMITED_API
+#if !defined(Py_LIMITED_API) && !defined(PYPY_VERSION)
 #  if PY_VERSION_HEX >= 0x030A0000
     Py_TRASHCAN_BEGIN(pyObj, 1);
 #  else
@@ -430,7 +430,7 @@ void SbkObjectType_tp_dealloc(PyTypeObject *sbkType)
             Shiboken::Conversions::deleteConverter(sotp->converter);
         PepType_SOTP_delete(sbkType);
     }
-#ifndef Py_LIMITED_API
+#if !defined(Py_LIMITED_API) && !defined(PYPY_VERSION)
 #  if PY_VERSION_HEX >= 0x030A0000
     Py_TRASHCAN_END;
 #  else

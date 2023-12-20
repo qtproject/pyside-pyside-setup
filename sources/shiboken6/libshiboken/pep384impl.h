@@ -410,6 +410,14 @@ LIBSHIBOKEN_API int PepCode_Check(PyObject *o);
 #  define PepCode_GET_FLAGS(o)         ((o)->co_flags)
 #  define PepCode_GET_ARGCOUNT(o)      ((o)->co_argcount)
 #  define PepCode_Check PyCode_Check
+
+#  ifdef PYPY_VERSION
+
+LIBSHIBOKEN_API PyObject *PepFunction_GetDefaults(PyObject *function);
+
+#    else
+#    define PepFunction_GetDefaults PyFunction_GetDefaults
+#  endif
 #endif
 
 /*****************************************************************************

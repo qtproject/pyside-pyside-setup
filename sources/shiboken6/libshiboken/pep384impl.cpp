@@ -512,6 +512,16 @@ int PepCode_Check(PyObject *o)
 
 #endif // Py_LIMITED_API
 
+#if defined(Py_LIMITED_API) || defined(PYPY_VERSION)
+PyObject *PepFunction_GetDefaults(PyObject *function)
+{
+    auto *ob_ret = PyObject_GetAttrString(function, "__defaults__");
+    Py_XDECREF(ob_ret); // returns borrowed ref
+    return ob_ret != Py_None ? ob_ret : nullptr;
+}
+
+#endif // defined(Py_LIMITED_API) || defined(PYPY_VERSION)
+
 /*****************************************************************************
  *
  * Support for datetime.h
