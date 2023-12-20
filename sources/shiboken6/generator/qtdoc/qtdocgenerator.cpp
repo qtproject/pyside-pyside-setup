@@ -428,7 +428,6 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     for (const auto &func : std::as_const(doc.allFunctions)) {
         const bool indexed = func->name() != lastName;
         lastName = func->name();
-        s << (func->isStatic() ? ".. py:staticmethod:: " : ".. py:method:: ");
         writeFunction(s, func, metaClass, scope, indexed);
     }
 
@@ -720,13 +719,11 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
 
 bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
                                               TypeSystem::DocModificationMode mode,
+                                              const DocModificationList &modifications,
                                               const AbstractMetaFunctionCPtr &func,
-                                              const AbstractMetaClassCPtr &cppClass,
                                               const QString &scope)
 {
-    const bool didSomething =
-        writeDocModifications(s, DocParser::getDocModifications(func, cppClass),
-                              mode, scope);
+    const bool didSomething = writeDocModifications(s, modifications, mode, scope);
     s << '\n';
 
     // FIXME PYSIDE-7: Deprecate the use of doc string on glue code.
@@ -866,13 +863,25 @@ void QtDocGenerator::writeFunctionParametersType(TextStream &s,
     s << '\n';
 }
 
+static bool containsFunctionDirective(const DocModification &dm)
+{
+    return dm.mode() != TypeSystem::DocModificationXPathReplace
+        && dm.code().contains(".. py:"_L1);
+}
+
 void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    const AbstractMetaClassCPtr &cppClass,
                                    const QString &scope, bool indexed)
 {
-    s << functionSignature(func, scope);
+    const auto modifications = DocParser::getDocModifications(func, cppClass);
 
-    {
+    // Enable injecting parameter documentation by adding a complete function directive.
+    if (std::none_of(modifications.cbegin(), modifications.cend(), containsFunctionDirective)) {
+        if (func->ownerClass() == nullptr)
+            s << ".. py:function:: ";
+        else
+            s << (func->isStatic() ? ".. py:staticmethod:: " : ".. py:method:: ");
+        s << functionSignature(func, scope);
         Indentation indentation(s);
         if (!indexed)
             s << "\n:noindex:";
@@ -888,12 +897,13 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr
         if (func->isDeprecated())
             s << rstDeprecationNote("function");
     }
-    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, func, cppClass, scope);
-    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, func, cppClass, scope)) {
+
+    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, modifications, func, scope);
+    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, modifications, func, scope)) {
         writeFormattedBriefText(s, func->documentation(), scope);
         writeFormattedDetailedText(s, func->documentation(), scope);
     }
-    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, func, cppClass, scope);
+    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, modifications, func, scope);
 
     if (auto propIndex = func->propertySpecIndex(); propIndex >= 0) {
         const QString name = cppClass->propertySpecs().at(propIndex).name();
@@ -1159,10 +1169,8 @@ void QtDocGenerator::writeGlobals(const QString &package,
     // Write out functions with injected documentation
     if (!docPackage.globalFunctions.isEmpty()) {
         s << currentModule(package) << headline("Functions");
-        for (const auto &f : docPackage.globalFunctions) {
-            s << ".. py:function:: ";
+        for (const auto &f : docPackage.globalFunctions)
             writeFunction(s, f);
-        }
     }
 
     if (!docPackage.globalEnums.isEmpty()) {

@@ -98,8 +98,8 @@ private:
     bool writeInjectDocumentation(TextStream &s, TypeSystem::DocModificationMode mode,
                                   const AbstractMetaClassCPtr &cppClass);
     bool writeInjectDocumentation(TextStream &s, TypeSystem::DocModificationMode mode,
+                                  const DocModificationList &modifications,
                                   const AbstractMetaFunctionCPtr &func,
-                                  const AbstractMetaClassCPtr &cppClass = {},
                                   const QString &scope = {});
     bool writeDocModifications(TextStream &s, const DocModificationList &mods,
                                TypeSystem::DocModificationMode mode,

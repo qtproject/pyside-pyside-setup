@@ -33,6 +33,10 @@ The optional ``snippet`` attribute specifies the snippet label
 
 At the moment the only supported backend is Sphinx.
 
+If the injected documentation contains a Sphinx function directive, no
+directive will be auto-generated. This can be used to add parameter
+documentation to added functions.
+
 modify-documentation
 ^^^^^^^^^^^^^^^^^^^^
 
