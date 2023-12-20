@@ -377,14 +377,15 @@ QString msgGlobalFunctionNotDefined(const FunctionTypeEntryCPtr &fte,
 
 QString msgStrippingArgument(const FunctionModelItem &f, int i,
                              const QString &originalSignature,
-                             const ArgumentModelItem &arg)
+                             const ArgumentModelItem &arg,
+                             const QString &reason)
 {
     QString result;
     QTextStream str(&result);
     str << f->sourceLocation() << "Stripping argument #" << (i + 1) << " of "
         << originalSignature << " due to unmatched type \""
         << arg->type().toString() << "\" with default expression \""
-        << arg->defaultValueExpression() << "\".";
+        << arg->defaultValueExpression() << "\": " << reason;
     return result;
 }
 

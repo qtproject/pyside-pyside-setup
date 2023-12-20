@@ -99,7 +99,8 @@ QString msgGlobalFunctionNotDefined(const FunctionTypeEntryCPtr &fte,
 
 QString msgStrippingArgument(const FunctionModelItem &f, int i,
                              const QString &originalSignature,
-                             const ArgumentModelItem &arg);
+                             const ArgumentModelItem &arg,
+                             const QString &reason);
 
 QString msgEnumNotDefined(const EnumTypeEntryCPtr &t);
 

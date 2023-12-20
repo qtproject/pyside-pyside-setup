@@ -2162,7 +2162,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
                 if (!currentClass || currentClass->typeEntry()->generateCode()) {
                     const QString signature = qualifiedFunctionSignatureWithType(functionItem, className);
                     qCWarning(lcShiboken, "%s",
-                              qPrintable(msgStrippingArgument(functionItem, i, signature, arg)));
+                              qPrintable(msgStrippingArgument(functionItem, i, signature,
+                                                              arg, errorMessage)));
                 }
                 break;
             }
