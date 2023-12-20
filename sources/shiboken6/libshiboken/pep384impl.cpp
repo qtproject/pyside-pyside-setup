@@ -510,6 +510,9 @@ int PepCode_Check(PyObject *o)
     return o != nullptr && std::strcmp(Py_TYPE(o)->tp_name, "code") == 0 ? 1 : 0;
 }
 
+#endif // Py_LIMITED_API
+
+#if defined(Py_LIMITED_API) || defined(PYPY_VERSION)
 PyObject *PepFunction_GetDefaults(PyObject *function)
 {
     auto *ob_ret = PyObject_GetAttrString(function, "__defaults__");
@@ -517,7 +520,7 @@ PyObject *PepFunction_GetDefaults(PyObject *function)
     return ob_ret != Py_None ? ob_ret : nullptr;
 }
 
-#endif // Py_LIMITED_API
+#endif // defined(Py_LIMITED_API) || defined(PYPY_VERSION)
 
 /*****************************************************************************
  *
