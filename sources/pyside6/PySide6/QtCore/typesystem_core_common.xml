@@ -3547,5 +3547,6 @@
   <suppress-warning text="skipping field 'State::clearFn' with unmatched type 'void'"/>
   <suppress-warning text="template baseclass 'QListSpecialMethods&lt;T&gt;' of 'QList' is not known"/>
   <suppress-warning text="^.*inherits from a non polymorphic type.*QIODeviceBase.*type discovery based on RTTI is impossible.*$"/>
+  <suppress-warning text="Base class 'QOperatingSystemVersionUnexported' of class 'QOperatingSystemVersion' not found in the type system for setting up inheritance."/>
 
 </typesystem>
