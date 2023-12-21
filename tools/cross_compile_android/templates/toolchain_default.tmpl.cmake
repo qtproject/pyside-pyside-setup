@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 # toolchain file to cross compile Qt for Python wheels for Android
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.23)
 include_guard(GLOBAL)
 set(CMAKE_SYSTEM_NAME Android)
 {% if plat_name == "armv7a" -%}
