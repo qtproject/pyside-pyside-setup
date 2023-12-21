@@ -13,13 +13,16 @@ init_test_paths(False)
 """
 PYSIDE-2042: Tests true_property with inheritance
 """
+is_pypy = hasattr(sys, "pypy_version_info")
 
 from PySide6.QtCore import QSize
 from PySide6.QtWidgets import QWidget, QSpinBox
-from __feature__ import true_property
+if not is_pypy:
+    from __feature__ import true_property
 from helper.usesqapplication import UsesQApplication
 
 
+@unittest.skipIf(is_pypy, "__feature__ cannot yet be used with PyPy")
 class TruePropertyInheritanceTest(UsesQApplication):
 
     def testTrueProperty(self):
