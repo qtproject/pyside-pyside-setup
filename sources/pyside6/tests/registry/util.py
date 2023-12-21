@@ -26,8 +26,6 @@ def isolate_warnings():
         if mod and hasattr(mod, warn_name):
             save_warnings[name] = mod.__dict__[warn_name]
             delattr(mod, warn_name)
-        else:
-            save_warnings[name] = None
     yield
     for name, warn in save_warnings.items():
         mod = sys.modules[name]
