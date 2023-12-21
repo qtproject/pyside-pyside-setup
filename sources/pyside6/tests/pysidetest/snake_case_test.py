@@ -13,15 +13,17 @@ init_test_paths(False)
 """
 PYSIDE-2029: Tests that snake_case is isolated from imported modules
 """
+is_pypy = hasattr(sys, "pypy_version_info")
 
 from PySide6.QtCore import QSize
 from PySide6.QtWidgets import QWidget, QSpinBox
-from __feature__ import snake_case
+if not is_pypy:
+    from __feature__ import snake_case
 from helper.usesqapplication import UsesQApplication
 
 import snake_case_sub
 
-
+@unittest.skipIf(is_pypy, "__feature__ cannot yet be used with PyPy")
 class SnakeCaseNoPropagateTest(UsesQApplication):
 
     def testSnakeCase(self):
