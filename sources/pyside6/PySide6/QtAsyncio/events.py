@@ -78,6 +78,12 @@ class QAsyncioEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
     def new_event_loop(self) -> asyncio.AbstractEventLoop:
         return QAsyncioEventLoop(self._application)
 
+    def get_child_watcher(self) -> asyncio.AbstractChildWatcher:
+        raise DeprecationWarning("Child watchers are deprecated since Python 3.12")
+
+    def set_child_watcher(self, watcher: asyncio.AbstractChildWatcher) -> None:
+        raise DeprecationWarning("Child watchers are deprecated since Python 3.12")
+
 
 class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
     """
@@ -479,7 +485,8 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
 
     def default_exception_handler(self, context: typing.Dict[str, typing.Any]) -> None:
         # TODO
-        print(context["message"])
+        if context["message"]:
+            print(context["message"])
 
     def call_exception_handler(self, context: typing.Dict[str, typing.Any]) -> None:
         if self._exception_handler is not None:
