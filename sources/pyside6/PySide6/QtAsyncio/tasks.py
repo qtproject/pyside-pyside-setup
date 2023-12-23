@@ -27,6 +27,9 @@ class QAsyncioTask(futures.QAsyncioFuture):
 
         self._cancellation_requests = 0
 
+        self._future_to_await: typing.Optional[asyncio.Future] = None
+        self._cancel_message: typing.Optional[str] = None
+
         asyncio._register_task(self)  # type: ignore[arg-type]
 
     def __repr__(self) -> str:
@@ -66,6 +69,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
         if self.done():
             return
         result = None
+        self._future_to_await = None
 
         try:
             asyncio._enter_task(self._loop, self)  # type: ignore[arg-type]
@@ -83,7 +87,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
         except StopIteration as e:
             self._state = futures.QAsyncioFuture.FutureState.DONE_WITH_RESULT
             self._result = e.value
-        except concurrent.futures.CancelledError as e:
+        except (concurrent.futures.CancelledError, asyncio.exceptions.CancelledError) as e:
             self._state = futures.QAsyncioFuture.FutureState.CANCELLED
             self._exception = e
         except BaseException as e:
@@ -93,6 +97,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
             if asyncio.futures.isfuture(result):
                 result.add_done_callback(
                     self._step, context=self._context)  # type: ignore[arg-type]
+                self._future_to_await = result
             elif result is None:
                 self._loop.call_soon(self._step, context=self._context)
             else:
@@ -137,7 +142,8 @@ class QAsyncioTask(futures.QAsyncioFuture):
             return False
         self._cancel_message = msg
         self._handle.cancel()
-        self._state = futures.QAsyncioFuture.FutureState.CANCELLED
+        if self._future_to_await is not None:
+            self._future_to_await.cancel(msg)
         return True
 
     def uncancel(self) -> None:
