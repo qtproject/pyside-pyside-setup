@@ -25,8 +25,9 @@ class QAsyncioFuture():
 
     def __init__(self, *, loop: typing.Optional["events.QAsyncioEventLoop"] = None,
                  context: typing.Optional[contextvars.Context] = None) -> None:
+        self._loop: "events.QAsyncioEventLoop"
         if loop is None:
-            self._loop = asyncio.events.get_event_loop()
+            self._loop = asyncio.events.get_event_loop()  # type: ignore[assignment]
         else:
             self._loop = loop
         self._context = context
@@ -50,10 +51,9 @@ class QAsyncioFuture():
     __iter__ = __await__
 
     def _schedule_callbacks(self, context: typing.Optional[contextvars.Context] = None):
-        if self._loop.is_running():
-            for cb in self._callbacks:
-                self._loop.call_soon(
-                    cb, self, context=context if context else self._context)
+        for cb in self._callbacks:
+            self._loop.call_soon(
+                cb, self, context=context if context else self._context)
 
     def result(self) -> typing.Union[typing.Any, Exception]:
         if self._state == QAsyncioFuture.FutureState.DONE_WITH_RESULT:
@@ -96,10 +96,11 @@ class QAsyncioFuture():
         self._callbacks = [_cb for _cb in self._callbacks if _cb != cb]
         return original_len - len(self._callbacks)
 
-    def cancel(self) -> bool:
+    def cancel(self, msg: typing.Optional[str] = None) -> bool:
         if self.done():
             return False
         self._state = QAsyncioFuture.FutureState.CANCELLED
+        self._cancel_message = msg
         self._schedule_callbacks()
         return True
 
