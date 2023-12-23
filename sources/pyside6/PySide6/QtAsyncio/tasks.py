@@ -47,14 +47,6 @@ class QAsyncioTask(futures.QAsyncioFuture):
     class QtTaskApiMisuseError(Exception):
         pass
 
-    def __await__(self) -> None:  # type: ignore[override]
-        # This function is not inherited from the Future APIs.
-        raise QAsyncioTask.QtTaskApiMisuseError("Tasks cannot be awaited")
-
-    def __iter__(self) -> None:  # type: ignore[override]
-        # This function is not inherited from the Future APIs.
-        raise QAsyncioTask.QtTaskApiMisuseError("Tasks cannot be iterated over")
-
     def set_result(self, result: typing.Any) -> None:  # type: ignore[override]
         # This function is not inherited from the Future APIs.
         raise QAsyncioTask.QtTaskApiMisuseError("Tasks cannot set results")
