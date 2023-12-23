@@ -45,7 +45,7 @@ class QAsyncioFuture():
             self._asyncio_future_blocking = True
             yield self
             if not self.done():
-                raise RuntimeError("await was not used with a Future")
+                raise RuntimeError("await was not used with a Future or Future-like object")
         return self.result()
 
     __iter__ = __await__
