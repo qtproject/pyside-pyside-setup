@@ -5,6 +5,7 @@
 
 #include <QtCore/QAnyStringView>
 #include <QtCore/QDebug>
+#include <QtCore/QString>
 #include <QtCore/QTextStream>
 
 #include <cstring>
