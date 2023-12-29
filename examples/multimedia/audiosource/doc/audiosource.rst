@@ -1,6 +1,8 @@
 Audio Source Example
 ====================
 
+.. tags:: Android
+
 A Python application that demonstrates the analogous example in C++
 `Audio Source Example <https://doc-snapshots.qt.io/qt6-dev/qtmultimedia-multimedia-audiosource-example.html>`_
 

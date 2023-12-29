@@ -1,6 +1,8 @@
 Digital Clock Example
 =====================
 
+.. tags:: Android
+
 The Digital Clock example shows how to use QLCDNumber to display a number with
 LCD-like digits.
 

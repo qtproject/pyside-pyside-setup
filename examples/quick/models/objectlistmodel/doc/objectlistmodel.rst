@@ -1,6 +1,8 @@
 Object List Model Example
 =========================
 
+.. tags:: Android
+
 A list of QObject values can also be used as a model.
 A list[QObject,] provides the properties of the objects in the list as roles.
 

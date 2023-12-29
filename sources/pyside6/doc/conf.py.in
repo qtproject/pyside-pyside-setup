@@ -30,7 +30,7 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.ifconfig',
     'sphinx.ext.coverage', 'sphinx.ext.intersphinx', 'sphinx.ext.todo',
     'sphinx.ext.graphviz', 'inheritance_diagram', 'pysideinclude',
     'sphinx.ext.viewcode',
-    'sphinx_design', 'sphinx_copybutton', 'myst_parser']
+    'sphinx_design', 'sphinx_copybutton', 'myst_parser', 'sphinx_tags',]
 
 myst_enable_extensions = [
     "amsmath",
@@ -229,3 +229,10 @@ if @SKIP_SPHINX_WARNINGS@:
 
 # -- Options for qthelp output ---------------------------------------------------
 qthelp_theme = 'pysidedocs_qthelp'
+
+# for example tagging based on supported platforms
+tags_create_tags = True
+tags_create_badges = True
+tags_badge_colors = {
+    "Android": "info",
+}
