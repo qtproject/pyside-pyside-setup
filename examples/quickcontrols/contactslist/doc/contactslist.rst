@@ -1,6 +1,8 @@
 Qt Quick Controls - Contact List
 ================================
 
+.. tags:: Android
+
 A QML app using Qt Quick Controls and a Python class that implements a simple
 contact list. This example can also be deployed to Android using
 **pyside6-android-deploy**

@@ -1,6 +1,8 @@
 Audio Output Example
 ====================
 
+.. tags:: Android
+
 Audio Output demonstrates the basic use cases of QAudioOutput.
 
 This example provides a tone generator to supply continuous audio playback. The

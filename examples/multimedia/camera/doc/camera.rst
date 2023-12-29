@@ -1,6 +1,8 @@
 Camera Example
 ===============
 
+.. tags:: Android
+
 The Camera Example shows how to use the API to capture a still image or video.
 
 The Camera Example demonstrates how you can use Qt Multimedia to implement some

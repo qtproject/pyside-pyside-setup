@@ -1,6 +1,8 @@
 Map Viewer Example
 ==================
 
+.. tags:: Android
+
 The Map Viewer example shows how to display and interact with a map,
 search for an address, and find driving directions.
 

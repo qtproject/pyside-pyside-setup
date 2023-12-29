@@ -1,6 +1,8 @@
 Bluetooth Low Energy Heart Rate Game
 ====================================
 
+.. tags:: Android
+
 The Bluetooth Low Energy Heart Rate Game shows how to develop a
 Bluetooth Low Energy application using the Qt Bluetooth API. The
 application covers the scanning for Bluetooth Low Energy devices,
