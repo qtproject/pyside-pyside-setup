@@ -84,7 +84,12 @@
     <value-type name="QDBusError">
       <enum-type name="ErrorType"/>
     </value-type>
-    <object-type name="QDBusInterface" qt-metaobject="no"/>
+    <object-type name="QDBusInterface" qt-metaobject="no">
+      <inject-documentation format="target" mode="append">
+        DBus signals can be captured with string-based connections
+        (see :ref:`signals-and-slots-strings`).
+      </inject-documentation>
+    </object-type>
     <value-type name="QDBusMessage">
       <enum-type name="MessageType"/>
     </value-type>

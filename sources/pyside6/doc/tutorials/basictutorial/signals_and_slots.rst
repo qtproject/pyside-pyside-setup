@@ -139,6 +139,9 @@ useful for QML applications to refer to the emitted values by name:
             // do something with 'sum'
         }
 
+
+.. _slot-decorator:
+
 The Slot Class
 --------------
 
@@ -223,6 +226,8 @@ the different functionality.
         someone.speak[str].emit("Hello everybody!")
 
 
+.. _signals-and-slots-strings:
+
 Specifying Signals and Slots by Method Signature Strings
 --------------------------------------------------------
 
@@ -235,12 +240,24 @@ strings passed through the ``SIGNAL()`` and/or ``SLOT()`` functions:
     from PySide6.QtCore import SIGNAL, SLOT
 
     button.connect(SIGNAL("clicked(Qt::MouseButton)"),
-                  action_handler, SLOT("action1(Qt::MouseButton)"))
+                   action_handler, SLOT("action1(Qt::MouseButton)"))
 
-This is not recommended for connecting signals, it is mostly
-used to specify signals for methods like ``QWizardPage::registerField()``:
+This is not normally recommended; it is only needed
+for a few cases where signals are only accessible via ``QMetaObject``
+(``QAxObject``, ``QAxWidget``, ``QDBusInterface`` or ``QWizardPage::registerField()``):
 
 .. code-block:: python
 
     wizard.registerField("text", line_edit, "text",
                          SIGNAL("textChanged(QString)"))
+
+The signature strings can be found by querying ``QMetaMethod.methodSignature()``
+when introspecting ``QMetaObject``:
+
+.. code-block:: python
+
+    mo = widget.metaObject()
+    for m in range(mo.methodOffset(), mo.methodCount()):
+        print(mo.method(m).methodSignature())
+
+Slots should be decorated using :ref:`@Slot <slot-decorator>`.
