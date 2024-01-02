@@ -674,10 +674,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             else:
                 log.warning('numpy include directory was not found.')
 
-        if self.build_type.lower() == 'debug':
-            if not self.is_cross_compile:
-                cmake_cmd.append(f"-DPYTHON_DEBUG_LIBRARY={self.py_library}")
-        else:
+        if self.build_type.lower() != 'debug':
             if OPTION['NO_STRIP']:
                 cmake_cmd.append("-DQFP_NO_STRIP=1")
             if OPTION['NO_OVERRIDE_OPTIMIZATION_FLAGS']:

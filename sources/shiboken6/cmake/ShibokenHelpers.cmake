@@ -15,7 +15,7 @@ endmacro()
 macro(set_debug_build)
     set(SHIBOKEN_BUILD_TYPE "Debug")
 
-    if(NOT PYTHON_DEBUG_LIBRARIES)
+    if(NOT Python_LIBRARIES)
         message(WARNING "Python debug shared library not found; \
             assuming python was built with shared library support disabled.")
     endif()
@@ -418,16 +418,8 @@ macro(shiboken_compute_python_libraries)
         set(SHIBOKEN_PYTHON_LIBRARIES "")
     endif()
 
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        if(WIN32 AND NOT SHIBOKEN_PYTHON_LIBRARIES)
-            set(SHIBOKEN_PYTHON_LIBRARIES ${PYTHON_DEBUG_LIBRARIES})
-        endif()
-    endif()
-
-    if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        if(WIN32 AND NOT SHIBOKEN_PYTHON_LIBRARIES)
-            set(SHIBOKEN_PYTHON_LIBRARIES ${Python_LIBRARIES})
-        endif()
+    if(WIN32 AND NOT SHIBOKEN_PYTHON_LIBRARIES)
+        set(SHIBOKEN_PYTHON_LIBRARIES ${Python_LIBRARIES})
     endif()
 
     # If the resulting variable
