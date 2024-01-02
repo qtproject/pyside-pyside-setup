@@ -38,6 +38,7 @@
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
+#include <QtCore/QSet>
 
 #include <algorithm>
 #include <limits>
@@ -773,10 +774,16 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
             return floatT;
     }
 
+    static const QSet<QString> stringTypes = {
+        u"uchar"_s, u"std::string"_s, u"std::wstring"_s,
+        u"std::stringview"_s, u"std::wstringview"_s,
+        qStringT, u"QStringView"_s, u"QAnyStringView"_s, u"QUtf8StringView"_s
+    };
+    if (stringTypes.contains(name))
+        return pyStrT;
+
     static const QHash<QString, QString> typeMap = {
         { cPyObjectT, pyObjectT },
-        { qStringT, pyStrT },
-        { u"uchar"_s, pyStrT },
         { u"QStringList"_s, u"list of strings"_s },
         { qVariantT, pyObjectT }
     };
