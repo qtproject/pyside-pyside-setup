@@ -69,6 +69,9 @@ private:
     void writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
                        const AbstractMetaClassCPtr &cppClass = {},
                        const QString &scope = {}, bool indexed = true);
+    void writeFunctionDocumentation(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                                    const DocModificationList &modifications,
+                                    const QString &scope) const;
     void writeFunctionParametersType(TextStream &s, const AbstractMetaClassCPtr &cppClass,
                                      const AbstractMetaFunctionCPtr &func) const;
     static void writeFunctionToc(TextStream &s, const QString &title,
@@ -96,11 +99,11 @@ private:
                                     const QString &scope = {}) const;
 
     bool writeInjectDocumentation(TextStream &s, TypeSystem::DocModificationMode mode,
-                                  const AbstractMetaClassCPtr &cppClass);
+                                  const AbstractMetaClassCPtr &cppClass) const;
     bool writeInjectDocumentation(TextStream &s, TypeSystem::DocModificationMode mode,
                                   const DocModificationList &modifications,
                                   const AbstractMetaFunctionCPtr &func,
-                                  const QString &scope = {});
+                                  const QString &scope = {}) const;
     bool writeDocModifications(TextStream &s, const DocModificationList &mods,
                                TypeSystem::DocModificationMode mode,
                                const QString &scope = {}) const;

@@ -2568,20 +2568,17 @@
       <include file-name="pysidecleanup.h" location="global"/>
       <include file-name="pysideqapp.h" location="global"/>
     </extra-includes>
-    <!-- constructor documentation -->
-    <inject-documentation format="target" mode="append">
-.. class:: QCoreApplication(args)
-
-    Constructs a Qt kernel application. Kernel applications are applications
-    without a graphical user interface. These type of applications are used
-    at the console or as server processes.
-
-    The *args* argument is processed by the application, and made available
-    in a more convenient form by the :meth:`~QCoreApplication.arguments()`
-    method.
-    </inject-documentation>
-    <add-function signature="QCoreApplication(QStringList)">
+    <add-function signature="QCoreApplication(QStringList@args@)">
         <inject-code file="../glue/qtcore.cpp" snippet="qcoreapplication-1"/>
+        <inject-documentation format="target" mode="append">
+        Constructs a Qt kernel application. Kernel applications are applications
+        without a graphical user interface. These type of applications are used
+        at the console or as server processes.
+
+        The *args* argument is processed by the application, and made available
+        in a more convenient form by the :meth:`~PySide6.QtCore.QCoreApplication.arguments()`
+        method.
+        </inject-documentation>
     </add-function>
     <add-function signature="QCoreApplication()">
         <inject-code file="../glue/qtcore.cpp" snippet="qcoreapplication-2"/>

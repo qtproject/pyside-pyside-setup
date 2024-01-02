@@ -568,7 +568,7 @@ void QtDocGenerator::writeConstructors(TextStream &s, const AbstractMetaClassCPt
     s << '\n';
 
     for (const auto &func : constructors)
-        writeFormattedDetailedText(s, func->documentation(), scope);
+        writeFunctionDocumentation(s, func, DocParser::getDocModifications(func, cppClass), scope);
 }
 
 QString QtDocGenerator::formatArgs(const AbstractMetaFunctionCPtr &func)
@@ -703,7 +703,7 @@ bool QtDocGenerator::writeDocModifications(TextStream &s,
 
 bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
                                               TypeSystem::DocModificationMode mode,
-                                              const AbstractMetaClassCPtr &cppClass)
+                                              const AbstractMetaClassCPtr &cppClass) const
 {
     const bool didSomething =
         writeDocModifications(s, DocParser::getDocModifications(cppClass),
@@ -722,7 +722,7 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
                                               TypeSystem::DocModificationMode mode,
                                               const DocModificationList &modifications,
                                               const AbstractMetaFunctionCPtr &func,
-                                              const QString &scope)
+                                              const QString &scope) const
 {
     const bool didSomething = writeDocModifications(s, modifications, mode, scope);
     s << '\n';
@@ -905,12 +905,7 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr
             s << rstDeprecationNote("function");
     }
 
-    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, modifications, func, scope);
-    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, modifications, func, scope)) {
-        writeFormattedBriefText(s, func->documentation(), scope);
-        writeFormattedDetailedText(s, func->documentation(), scope);
-    }
-    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, modifications, func, scope);
+    writeFunctionDocumentation(s, func, modifications, scope);
 
     if (auto propIndex = func->propertySpecIndex(); propIndex >= 0) {
         const QString name = cppClass->propertySpecs().at(propIndex).name();
@@ -924,6 +919,19 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr
         else if (func->attributes().testFlag(AbstractMetaFunction::Attribute::PropertyNotify))
             s << "\nNotification signal of property " << propRef(target) << " .\n\n";
     }
+}
+
+void QtDocGenerator::writeFunctionDocumentation(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                                                const DocModificationList &modifications,
+                                                const QString &scope) const
+
+{
+    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, modifications, func, scope);
+    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, modifications, func, scope)) {
+        writeFormattedBriefText(s, func->documentation(), scope);
+        writeFormattedDetailedText(s, func->documentation(), scope);
+    }
+    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, modifications, func, scope);
 }
 
 static QString fileNameToToEntry(const QString &fileName)
