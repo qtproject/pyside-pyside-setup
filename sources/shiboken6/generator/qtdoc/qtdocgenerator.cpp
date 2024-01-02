@@ -414,6 +414,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass);
     if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass))
         writeFormattedDetailedText(s, documentation, scope);
+    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass);
 
     if (!metaClass->isNamespace())
         writeConstructors(s, metaClass, doc.constructors);
@@ -431,8 +432,6 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
         lastName = func->name();
         writeFunction(s, func, metaClass, scope, indexed);
     }
-
-    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass);
 }
 
 void QtDocGenerator::writeFunctionToc(TextStream &s, const QString &title,
