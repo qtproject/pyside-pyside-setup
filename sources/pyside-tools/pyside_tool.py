@@ -15,6 +15,17 @@ import PySide6 as ref_mod
 VIRTUAL_ENV = "VIRTUAL_ENV"
 
 
+def is_pyenv_python():
+    pyenv_root = os.environ.get("PYENV_ROOT")
+
+    if pyenv_root:
+        resolved_exe = Path(sys.executable).resolve()
+        if str(resolved_exe).startswith(pyenv_root):
+            return True
+
+    return False
+
+
 def is_virtual_env():
     return sys.prefix != sys.base_prefix
 
@@ -147,11 +158,23 @@ def designer():
         # Determine library name (examples/utils/pyside_config.py)
         version = f'{major_version}.{minor_version}'
         library_name = f'libpython{version}{sys.abiflags}.so'
+        if is_pyenv_python():
+            library_name = str(Path(sysconfig.get_config_var('LIBDIR')) / library_name)
         os.environ['LD_PRELOAD'] = library_name
     elif sys.platform == 'darwin':
         library_name = sysconfig.get_config_var("LDLIBRARY")
         framework_prefix = sysconfig.get_config_var("PYTHONFRAMEWORKPREFIX")
-        lib_path = os.fspath(Path(framework_prefix) / library_name)
+        lib_path = None
+        if framework_prefix:
+            lib_path = os.fspath(Path(framework_prefix) / library_name)
+        elif is_pyenv_python():
+            lib_path = str(Path(sysconfig.get_config_var('LIBDIR')) / library_name)
+        else:
+            # ideally this should never be reached because the system Python and Python installed
+            # from python.org are all framework builds
+            print("Unable to find Python library directory. Use a framework build of Python.",
+                  file=sys.stderr)
+            sys.exit(0)
         os.environ['DYLD_INSERT_LIBRARIES'] = lib_path
     elif sys.platform == 'win32':
         # Find Python DLLs from the base installation
