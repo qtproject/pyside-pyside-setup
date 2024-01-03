@@ -1,7 +1,8 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-from PySide6.QtCore import QCoreApplication, QDateTime, QEventLoop, QObject, QTimer, QThread, Slot
+from PySide6.QtCore import (QCoreApplication, QDateTime, QDeadlineTimer,
+                            QEventLoop, QObject, QTimer, QThread, Slot)
 
 from . import futures
 from . import tasks
@@ -16,6 +17,7 @@ import signal
 import socket
 import subprocess
 import typing
+import warnings
 
 __all__ = [
     "QAsyncioEventLoopPolicy", "QAsyncioEventLoop",
@@ -225,7 +227,14 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
 
         self._asyncgens.clear()
 
-    async def shutdown_default_executor(self) -> None:
+    async def shutdown_default_executor(self,  # type: ignore[override]
+                                        timeout: typing.Union[int, float, None] = None) -> None:
+        shutdown_successful = False
+        if timeout is not None:
+            deadline_timer = QDeadlineTimer(int(timeout * 1000))
+        else:
+            deadline_timer = QDeadlineTimer(QDeadlineTimer.Forever)
+
         if self._default_executor is None:
             return
         future = self.create_future()
@@ -234,7 +243,13 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
         try:
             await future
         finally:
-            thread.wait()
+            shutdown_successful = thread.wait(deadline_timer)
+
+        if timeout is not None and not shutdown_successful:
+            warnings.warn(
+                f"Could not shutdown the default executor within {timeout} seconds",
+                RuntimeWarning, stacklevel=2)
+            self._default_executor.shutdown(wait=False)
 
     # Scheduling callbacks
 
