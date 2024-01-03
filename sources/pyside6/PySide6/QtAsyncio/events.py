@@ -234,17 +234,17 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
 
     def _call_soon_impl(self, callback: typing.Callable, *args: typing.Any,
                         context: typing.Optional[contextvars.Context] = None,
-                        is_threadsafe: typing.Optional[bool] = False) -> "QAsyncioHandle":
+                        is_threadsafe: typing.Optional[bool] = False) -> asyncio.Handle:
         return self._call_later_impl(0, callback, *args, context=context,
                                      is_threadsafe=is_threadsafe)
 
     def call_soon(self, callback: typing.Callable, *args: typing.Any,
-                  context: typing.Optional[contextvars.Context] = None) -> "QAsyncioHandle":
+                  context: typing.Optional[contextvars.Context] = None) -> asyncio.Handle:
         return self._call_soon_impl(callback, *args, context=context, is_threadsafe=False)
 
     def call_soon_threadsafe(self, callback: typing.Callable, *args: typing.Any,
                              context:
-                             typing.Optional[contextvars.Context] = None) -> "QAsyncioHandle":
+                             typing.Optional[contextvars.Context] = None) -> asyncio.Handle:
         if context is None:
             context = contextvars.copy_context()
         return self._call_soon_impl(callback, *args, context=context, is_threadsafe=True)
@@ -252,30 +252,30 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
     def _call_later_impl(self, delay: typing.Union[int, float],
                          callback: typing.Callable, *args: typing.Any,
                          context: typing.Optional[contextvars.Context] = None,
-                         is_threadsafe: typing.Optional[bool] = False) -> "QAsyncioHandle":
+                         is_threadsafe: typing.Optional[bool] = False) -> asyncio.TimerHandle:
         if not isinstance(delay, (int, float)):
             raise TypeError("delay must be an int or float")
         return self._call_at_impl(self.time() + delay, callback, *args, context=context,
                                   is_threadsafe=is_threadsafe)
 
-    def call_later(self, delay: typing.Union[int, float],  # type: ignore[override]
+    def call_later(self, delay: typing.Union[int, float],
                    callback: typing.Callable, *args: typing.Any,
-                   context: typing.Optional[contextvars.Context] = None) -> "QAsyncioHandle":
+                   context: typing.Optional[contextvars.Context] = None) -> asyncio.TimerHandle:
         return self._call_later_impl(delay, callback, *args, context=context, is_threadsafe=False)
 
     def _call_at_impl(self, when: typing.Union[int, float],
                       callback: typing.Callable, *args: typing.Any,
                       context: typing.Optional[contextvars.Context] = None,
-                      is_threadsafe: typing.Optional[bool] = False) -> "QAsyncioHandle":
+                      is_threadsafe: typing.Optional[bool] = False) -> asyncio.TimerHandle:
         if not isinstance(when, (int, float)):
             raise TypeError("when must be an int or float")
         if self.is_closed():
             raise RuntimeError("Event loop is closed")
         return QAsyncioTimerHandle(when, callback, args, self, context, is_threadsafe=is_threadsafe)
 
-    def call_at(self, when: typing.Union[int, float],  # type: ignore[override]
+    def call_at(self, when: typing.Union[int, float],
                 callback: typing.Callable, *args: typing.Any,
-                context: typing.Optional[contextvars.Context] = None) -> "QAsyncioHandle":
+                context: typing.Optional[contextvars.Context] = None) -> asyncio.TimerHandle:
         return self._call_at_impl(when, callback, *args, context=context, is_threadsafe=False)
 
     def time(self) -> float:
@@ -560,16 +560,16 @@ class QAsyncioHandle():
         return self._state == QAsyncioHandle.HandleState.CANCELLED
 
 
-class QAsyncioTimerHandle(QAsyncioHandle):
+class QAsyncioTimerHandle(QAsyncioHandle, asyncio.TimerHandle):
     def __init__(self, when: float, callback: typing.Callable, args: typing.Tuple,
                  loop: QAsyncioEventLoop, context: typing.Optional[contextvars.Context],
                  is_threadsafe: typing.Optional[bool] = False) -> None:
-        super().__init__(callback, args, loop, context, is_threadsafe)
+        QAsyncioHandle.__init__(self, callback, args, loop, context, is_threadsafe)
 
         self._when = when
         self._timeout = int(max(self._when - self._loop.time(), 0) * 1000)
 
-        super()._start()
+        QAsyncioHandle._start(self)
 
     # Override this so that timer.start() is only called once at the end
     # of the constructor for both QtHandle and QtTimerHandle.
