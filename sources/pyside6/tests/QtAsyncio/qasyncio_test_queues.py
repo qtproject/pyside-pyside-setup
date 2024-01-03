@@ -14,24 +14,26 @@ from PySide6.QtAsyncio import QAsyncioEventLoopPolicy
 class QAsyncioTestCaseQueues(unittest.TestCase):
 
     async def produce(self, output, queue):
-        for _ in range(random.randint(0, 3)):
-            await asyncio.sleep(random.randint(0, 2))
+        for _ in range(random.randint(0, 2)):
+            await asyncio.sleep(random.random())
             await queue.put(self.i)
             output += f"{self.i} added to queue\n"
             self.i += 1
 
     async def consume(self, output, queue):
         while True:
-            await asyncio.sleep(random.randint(0, 2))
+            await asyncio.sleep(random.random())
             i = await queue.get()
             output += f"{i} pulled from queue\n"
             queue.task_done()
 
     async def main(self, output1, output2, num_producers, num_consumers):
         self.i = 0
-        queue = asyncio.Queue()  # type: asyncio.Queue
-        producers = [asyncio.create_task(self.produce(output1, queue)) for _ in range(num_producers)]
-        consumers = [asyncio.create_task(self.consume(output2, queue)) for _ in range(num_consumers)]
+        queue = asyncio.Queue()
+        producers = [
+            asyncio.create_task(self.produce(output1, queue)) for _ in range(num_producers)]
+        consumers = [
+            asyncio.create_task(self.consume(output2, queue)) for _ in range(num_consumers)]
         await asyncio.gather(*producers)
         await queue.join()
         for consumer in consumers:

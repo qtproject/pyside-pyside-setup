@@ -36,7 +36,7 @@ class QAsyncioTestCaseThreadsafe(unittest.TestCase):
         task = asyncio.create_task(self.loop_event.wait())
 
         # The timeout is necessary because the loop will hang for the non-threadsafe case.
-        done, pending = await asyncio.wait([task], timeout=3)
+        done, pending = await asyncio.wait([task], timeout=2)
 
         thread.join()
 

@@ -22,8 +22,8 @@ class QAsyncioTestCaseChain(unittest.TestCase):
         return result
 
     async def chain(self, output, n):
-        link1 = await self.link(output, n, 1)
-        link2 = await self.link(output, n, 2)
+        link1 = await self.link(output, n, 0.2)
+        link2 = await self.link(output, n, 0.5)
         output += f"chain {n}: {link1} -> {link2} "
 
     async def gather(self, output, *args):
