@@ -33,7 +33,7 @@ class QAsyncioTestCaseTime(unittest.TestCase):
         asyncio.set_event_loop_policy(QAsyncioEventLoopPolicy())
         loop = asyncio.new_event_loop()
 
-        end_time = loop.time() + 5.0
+        end_time = loop.time() + 3.0
         loop.call_soon(self.display_date, end_time, loop)
 
         try:

@@ -27,7 +27,8 @@ class QAsyncioTestCaseExecutor(unittest.TestCase):
     async def run_asyncio_executor(self):
         main_thread = QThread.currentThread()
         with ThreadPoolExecutor(max_workers=2) as executor:
-            result = await asyncio.get_running_loop().run_in_executor(executor, self.blocking_function)
+            result = await asyncio.get_running_loop().run_in_executor(
+                executor, self.blocking_function)
 
             # Assert that we are back to the main thread.
             self.assertEqual(QThread.currentThread(), main_thread)

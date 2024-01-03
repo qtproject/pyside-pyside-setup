@@ -12,7 +12,7 @@ from PySide6.QtAsyncio import QAsyncioEventLoopPolicy
 class QAsyncioTestCase(unittest.TestCase):
     async def sleep(self, output):
         output += "Hello"
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.2)
         output += "World"
 
     async def gather(self, output):
