@@ -13,7 +13,8 @@ class BookDelegate(QSqlRelationalDelegate):
 
     def __init__(self, parent=None):
         QSqlRelationalDelegate.__init__(self, parent)
-        self.star = QPixmap(":/images/star.png")
+        self.star = QPixmap(":/images/star.svg")
+        self.star_filled = QPixmap(":/images/star-filled.svg")
 
     def paint(self, painter, option, index):
         """ Paint the items in the table.
@@ -49,8 +50,11 @@ class BookDelegate(QSqlRelationalDelegate):
             height = self.star.height()
             x = option.rect.x()
             y = option.rect.y() + (option.rect.height() / 2) - (height / 2)
-            for i in range(rating):
-                painter.drawPixmap(x, y, self.star)
+            for i in range(5):
+                if i < rating:
+                    painter.drawPixmap(x, y, self.star_filled)
+                else:
+                    painter.drawPixmap(x, y, self.star)
                 x += width
 
         pen = painter.pen()
