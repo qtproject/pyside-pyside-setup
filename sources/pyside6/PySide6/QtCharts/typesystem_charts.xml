@@ -160,6 +160,7 @@
           </modify-argument>
       </modify-function>
   </object-type>
+  <object-type name="QColorAxis"/>
   <object-type name="QDateTimeAxis"/>
   <object-type name="QHBarModelMapper"/>
   <object-type name="QHBoxPlotModelMapper"/>
