@@ -25,6 +25,7 @@ ${QtCharts_GEN_DIR}/qcandlestickset_wrapper.cpp
 ${QtCharts_GEN_DIR}/qcategoryaxis_wrapper.cpp
 ${QtCharts_GEN_DIR}/qchart_wrapper.cpp
 ${QtCharts_GEN_DIR}/qchartview_wrapper.cpp
+${QtCharts_GEN_DIR}/qcoloraxis_wrapper.cpp
 ${QtCharts_GEN_DIR}/qdatetimeaxis_wrapper.cpp
 ${QtCharts_GEN_DIR}/qhbarmodelmapper_wrapper.cpp
 ${QtCharts_GEN_DIR}/qhboxplotmodelmapper_wrapper.cpp
