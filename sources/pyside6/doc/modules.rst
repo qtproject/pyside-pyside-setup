@@ -228,3 +228,7 @@ Qt Modules Supported by Qt for Python
     .. grid-item-card:: :mod:`Qt3D Render <PySide6.Qt3DRender>`
 
         Contains functionality to support 2D and 3D rendering using Qt 3D.
+
+    .. grid-item-card:: :mod:`QtAsyncio <PySide6.QtAsyncio>`
+
+        Provides integration between asyncio and Qt's event loop.
