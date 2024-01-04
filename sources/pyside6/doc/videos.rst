@@ -88,6 +88,12 @@ Conferences
 .. grid:: 1 3 3 3
     :gutter: 2
 
+    .. grid-item-card:: PyConES 2023
+        :img-top: https://img.youtube.com/vi/XuqdTvisqkQ/mqdefault.jpg
+        :link: https://www.youtube.com/embed/XuqdTvisqkQ
+
+        Asynchronous programming with asyncio and Qt
+
     .. grid-item-card:: QtWS 2022
         :img-top: https://img.youtube.com/vi/8wcdN1Iw1Uk/mqdefault.jpg
         :link: https://www.youtube.com/embed/8wcdN1Iw1Uk
