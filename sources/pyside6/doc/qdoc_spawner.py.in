@@ -1,0 +1,93 @@
+# Copyright (C) 2024 The Qt Company Ltd.
+# SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+
+import argparse
+import subprocess
+import sys
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+
+
+def run_qdoc(file, qdoc_args, args):
+    env = {
+        "BUILDDIR": args.build_dir,
+        "QT_INSTALL_DOCS": args.qt_install_docs,
+        "QT_VERSION": args.qt_version,
+        "QT_VER": ".".join(args.qt_version.split(".")[:2]),
+        "QT_VERSION_TAG": args.qt_version,
+    }
+
+    command = [
+        args.qdoc_bin,
+        file,
+        *qdoc_args,
+        "-installdir",
+        args.doc_data_dir,
+        "-outputdir",
+        args.doc_data_dir,
+    ]
+
+    _ = subprocess.Popen(command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    if args.verbose:
+        _out, _err = _.communicate()
+        out = _out.decode("utf-8")
+        err = _err.decode("utf-8")
+
+        if out:
+            print(out, file=sys.stdout)
+        if err:
+            print(err, file=sys.stderr)
+    else:
+        _.wait()
+
+    if args.verbose:
+        print(f"> Finished: {file}")
+
+
+def get_qdocconf_files():
+    if not Path("pyside.qdocconf").exists():
+        print("ERROR: the working dir doesn't include a 'pyside.qdocconf' file")
+        sys.exit(-1)
+
+    # Generate the temporary qdocconf files
+    # This is necessary because using a file like 'pyside-qtcore.qtdocconf'
+    # will generate an error, because inside we call functions like 'include()'
+    files_single_exec = []
+    files_prepare = []
+    with open("pyside.qdocconf") as f:
+        for i in f.read().splitlines():
+            _p = Path(i)
+            _name = f"_{_p.stem}.qdocconf"
+            with open(_name, "w", encoding="utf-8") as f:
+                f.write(i)
+            files_single_exec.append(_name)
+            files_prepare.append(i.strip())
+
+    return files_prepare, files_single_exec
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(prog="qdoc spawner")
+    parser.add_argument("--qt", dest="qt_version", action="store", required=True)
+    parser.add_argument("--doc-data-dir", dest="doc_data_dir", action="store", required=True)
+    parser.add_argument("--qdoc-binary", dest="qdoc_bin", action="store", required=True)
+    parser.add_argument("--build-dir", dest="build_dir", action="store", required=True)
+    parser.add_argument("--qt-install-docs", dest="qt_install_docs", action="store", required=True)
+    parser.add_argument("--parallel", dest="parallel", action="store", default="4")
+    parser.add_argument("--verbose", dest="verbose", action="store_true", default=False)
+
+    args = parser.parse_args()
+    files_prepare, files_single_exec = get_qdocconf_files()
+
+    parallel = args.parallel
+    if parallel == "auto":
+        parallel = cpu_count()
+
+    # mode: -prepare -no-link-errors
+    with Pool(int(parallel)) as p:
+        p.starmap(run_qdoc, [(str(f), ["-prepare", "-no-link-errors"], args) for f in files_prepare])
+
+    # mode: -single-exec
+    with Pool(int(parallel)) as p:
+        p.starmap(run_qdoc, [(str(f), ["-single-exec"], args) for f in files_single_exec])
