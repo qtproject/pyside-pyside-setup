@@ -1429,7 +1429,8 @@ static void generateDeprecatedValueWarnings(TextStream &c,
             << "\", \"" << v.name() << "\");\nbreak;\n" << outdent;
     }
     if (deprecatedValues.size() < metaEnum.values().size())
-        c << "default:\n" << indent << "break;\n" << outdent << "}\n";
+        c << "default:\n" << indent << "break;\n" << outdent;
+    c << "}\n";
 }
 
 void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMetaEnum &metaEnum) const
