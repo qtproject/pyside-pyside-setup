@@ -11,6 +11,7 @@ set(QtGui_DROPPED_ENTRIES)
 set(QtGui_SRC_UNITY_EXCLUDED_SRC
     ${QtGui_GEN_DIR}/qtextframe_iterator_wrapper.cpp
     ${QtGui_GEN_DIR}/qtextblock_iterator_wrapper.cpp
+    ${QtGui_GEN_DIR}/qshaderversion_wrapper.cpp
 )
 
 set_property(SOURCE ${QtGui_SRC_UNITY_EXCLUDED_SRC}
@@ -64,7 +65,6 @@ ${QtGui_GEN_DIR}/qrhiviewport_wrapper.cpp
 ${QtGui_GEN_DIR}/qshader_wrapper.cpp
 ${QtGui_GEN_DIR}/qshadercode_wrapper.cpp
 ${QtGui_GEN_DIR}/qshaderkey_wrapper.cpp
-${QtGui_GEN_DIR}/qshaderversion_wrapper.cpp
 )
 
 if (ENABLE_WIN)
