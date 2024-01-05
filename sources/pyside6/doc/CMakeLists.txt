@@ -157,6 +157,7 @@ if (FULLDOCSBUILD)
     file(APPEND "pyside.qdocconf.in" "\@CMAKE_CURRENT_LIST_DIR\@/${qtdoc_doc_conf}\n")
 
     configure_file("pyside.qdocconf.in" "pyside.qdocconf" @ONLY)
+    configure_file("qdoc_spawner.py.in" "qdoc_spawner.py" @ONLY)
 
 
     set(QDOC_TYPESYSTEM_PATH "${pyside6_SOURCE_DIR}${PATH_SEP}${pyside6_BINARY_DIR}")
@@ -172,12 +173,14 @@ if (FULLDOCSBUILD)
 
     add_custom_command(OUTPUT "${DOC_DATA_DIR}/webxml/qtcore-index.webxml"
                        # Use dummy Qt version information, QDoc needs it but has no effect on WebXML output
-                       COMMAND ${CMAKE_COMMAND} -E env BUILDDIR=${CMAKE_CURRENT_LIST_DIR}/src QT_INSTALL_DOCS=${QT_SRC_DIR}/doc
-                       QT_VERSION=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}
-                       QT_VER=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}
-                       QT_VERSION_TAG=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}
-                       "${qdoc_binary}" pyside.qdocconf -single-exec
-                           -installdir ${DOC_DATA_DIR} -outputdir ${DOC_DATA_DIR}
+                       COMMAND ${python_executable} qdoc_spawner.py
+                           --qt=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}
+                           --doc-data-dir=${DOC_DATA_DIR}
+                           --qdoc-binary=${qdoc_binary}
+                           --build-dir=${CMAKE_CURRENT_LIST_DIR}/src
+                           --qt-install-docs=${QT_SRC_DIR}/doc
+                           --parallel="auto"
+                           --verbose
                        COMMENT "Running qdoc against Qt source code...")
 endif()
 
