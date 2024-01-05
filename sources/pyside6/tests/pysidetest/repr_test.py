@@ -49,6 +49,15 @@ class QObjectDerivedReprTest(unittest.TestCase):
         # __repr__ should use the operator<<(QDebug,...) implementation
         self.assertEqual(str(t), "TestObject2WithNamespace(injected_repr)")
 
+    def testLatin1StringField(self):
+        self.assertEqual(TestObject.LATIN1_TEST_FIELD, "test")
+
+    def testLatin1Setter(self):
+        to = TestObject(123)
+        value = "test"
+        to.setQLatin1String(value)
+        self.assertEqual(to.qLatin1String(), value)
+
 
 if __name__ == '__main__':
     unittest.main()

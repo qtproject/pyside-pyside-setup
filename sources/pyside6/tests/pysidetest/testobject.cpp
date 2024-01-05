@@ -30,6 +30,16 @@ void TestObject::emitSignalWithTypedefValue(int value)
     emit signalWithTypedefValue(TypedefValue(value));
 }
 
+void TestObject::setQLatin1String(QLatin1String v)
+{
+    m_qLatin1String = v;
+}
+
+QString TestObject::qLatin1String() const
+{
+    return m_qLatin1String;
+}
+
 QDebug operator<<(QDebug dbg, TestObject& testObject)
 {
     QDebugStateSaver saver(dbg);

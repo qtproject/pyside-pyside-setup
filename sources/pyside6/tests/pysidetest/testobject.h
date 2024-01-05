@@ -45,6 +45,11 @@ public:
 
     void emitSignalWithTypedefValue(int value);
 
+    static constexpr auto LATIN1_TEST_FIELD = QLatin1StringView("test");
+
+    void setQLatin1String(QLatin1String v);
+    QString qLatin1String() const;
+
 signals:
     void idValue(int newValue);
     void justASignal();
@@ -56,6 +61,7 @@ signals:
 private:
     int m_idValue;
     QList<QObject*> m_children;
+    QString m_qLatin1String;
 };
 
 PYSIDETEST_API QDebug operator<<(QDebug dbg, TestObject &testObject);

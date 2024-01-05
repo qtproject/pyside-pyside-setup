@@ -247,6 +247,17 @@
     </conversion-rule>
   </primitive-type>
 
+  <primitive-type name="QLatin1String" target-lang-api-name="PyUnicode">
+    <include file-name="QtCore/qlatin1stringview.h" location="global"/>
+    <conversion-rule>
+        <native-to-target file="../glue/qtcore.cpp" snippet="return-pyunicode-from-qlatin1string"/>
+        <target-to-native>
+            <add-conversion type="PyString" check="qLatin1StringCheck(%in)"
+                            file="../glue/qtcore.cpp" snippet="conversion-pystring-qlatin1string"/>
+        </target-to-native>
+    </conversion-rule>
+  </primitive-type>
+
   <primitive-type name="QAnyStringView" target-lang-api-name="PyUnicode" view-on="QString">
     <include file-name="QAnyStringView" location="global"/>
     <conversion-rule>
@@ -668,6 +679,8 @@
   <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="qt-pysideinit"/>
 
   <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qt-messagehandler"/>
+  <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
+               snippet="qlatin1string-check"/>
   <add-function signature="qInstallMessageHandler(PyObject)" return-type="PyObject">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-installmessagehandler"/>
   </add-function>

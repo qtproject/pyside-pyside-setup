@@ -1566,6 +1566,28 @@ return PyLong_FromVoidPtr(reinterpret_cast<void *>(%in));
 return PySide::qStringToPyUnicode(%in);
 // @snippet return-pyunicode
 
+// @snippet return-pyunicode-from-qlatin1string
+#ifdef Py_LIMITED_API
+return PySide::qStringToPyUnicode(QString::fromLatin1(%in));
+#else
+return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, %in.constData(), %in.size());
+#endif
+// @snippet return-pyunicode-from-qlatin1string
+
+// @snippet qlatin1string-check
+static bool qLatin1StringCheck(PyObject *o)
+{
+    return PyUnicode_CheckExact(o) != 0
+        && _PepUnicode_KIND(o) == PepUnicode_1BYTE_KIND;
+}
+// @snippet qlatin1string-check
+
+// @snippet conversion-pystring-qlatin1string
+const char *data = reinterpret_cast<const char *>(_PepUnicode_DATA(%in));
+const Py_ssize_t len = PyUnicode_GetLength(%in);
+%out = QLatin1String(data, len);
+// @snippet conversion-pystring-qlatin1string
+
 // @snippet return-pyunicode-from-qanystringview
 return PySide::qStringToPyUnicode(%in.toString());
 // @snippet return-pyunicode-from-qanystringview
