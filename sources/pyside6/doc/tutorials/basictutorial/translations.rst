@@ -9,7 +9,7 @@ Translating Applications
 Qt Linguist
 -----------
 
-`Qt Linguist <https://doc.qt.io/qt-6/qtlinguist-index.html>`_ and
+`Qt Linguist`_ and
 its related tools can be used to provide translations for applications.
 
 The ``examples/widgets/linguist`` example illustrates this. The example is
@@ -98,10 +98,12 @@ The example can then be run in German:
 
     LANG=de python main.py
 
+.. _Qt Linguist: https://doc.qt.io/qt-6/qtlinguist-index.html
+
 GNU gettext
 -----------
 
-The `GNU gettext <https://docs.python.org/3/library/gettext.html>`_ module
+The `GNU gettext`_ module
 can be used to provide translations for applications.
 
 The ``examples/widgets/gettext`` example illustrates this. The example is
@@ -119,7 +121,7 @@ Those functions are defined at the top:
 .. code-block:: python
 
     import gettext
-    ...
+    # ...
     _ = None
     ngettext = None
 
@@ -212,3 +214,5 @@ The example can then be run in German:
 .. code-block:: bash
 
     LANG=de python main.py
+
+.. _GNU gettext: https://docs.python.org/3/library/gettext.html

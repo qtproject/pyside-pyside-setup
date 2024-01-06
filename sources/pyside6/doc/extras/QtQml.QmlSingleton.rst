@@ -1,8 +1,8 @@
 .. currentmodule:: PySide6.QtQml
 .. _QmlSingleton:
 
-QmlSingleton
-************
+QmlSingleton decorator
+**********************
 
 .. py:decorator:: QmlSingleton
 
@@ -20,6 +20,6 @@ constructor.
     @QmlElement
     @QmlSingleton
     class ClassForQml(QObject):
-        # ...
+        ...
 
 .. note:: The order of the decorators matters; ``QmlSingleton`` needs to be preceded by ``QmlElement``.

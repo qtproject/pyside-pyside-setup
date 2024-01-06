@@ -11,14 +11,14 @@ information in trees. You can also create a data model and display it using a
    further on. To know more about the Model/View architecture in Qt, refer to
    its `official documentation <https://doc.qt.io/qt-6/model-view-programming.html>`_.
 
-1. Import ``QTreeWidget`` and ``QTreeWidgetItem`` for this application:
+#. Import ``QTreeWidget`` and ``QTreeWidgetItem`` for this application:
 
    .. code-block:: python
 
        import sys
        from PySide6.QtWidgets import QApplication, QTreeWidget, QTreeWidgetItem
 
-2. Define a dictionary with project structures to display the information as a
+#. Define a dictionary with project structures to display the information as a
    tree, with files belonging to each project:
 
    .. code-block:: python
@@ -27,13 +27,13 @@ information in trees. You can also create a data model and display it using a
                "Project B": ["file_b.csv", "photo.jpg"],
                "Project C": []}
 
-3. Initialize the ``QApplication`` singleton:
+#. Initialize the ``QApplication`` singleton:
 
    .. code-block:: python
 
        app = QApplication()
 
-4. Configure the ``QTreeWidget`` to have two columns, one for the item name,
+#. Configure the ``QTreeWidget`` to have two columns, one for the item name,
    and the other for item type information of the files in the project
    directories.
    You can set the column name with the ``setHeaderLabels`` as described below:
@@ -44,7 +44,7 @@ information in trees. You can also create a data model and display it using a
        tree.setColumnCount(2)
        tree.setHeaderLabels(["Name", "Type"])
 
-5. Iterate the data structure, create the ``QTreeWidgetItem`` elements, and add
+#. Iterate the data structure, create the ``QTreeWidgetItem`` elements, and add
    the corresponding children to each parent.
    We also extract the extension name for only the files and add them
    into the second column.
@@ -64,7 +64,7 @@ information in trees. You can also create a data model and display it using a
 
        tree.insertTopLevelItems(0, items)
 
-7. Show the tree and execute the ``QApplication``.
+#. Show the tree and execute the ``QApplication``.
 
    .. code-block:: python
 

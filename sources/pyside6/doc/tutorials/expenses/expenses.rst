@@ -33,10 +33,10 @@ code block.
 .. code-block:: python
    :linenos:
 
-     if __name__ == "__main__":
-         app = QApplication([])
-         # ...
-         sys.exit(app.exec())
+    if __name__ == "__main__":
+        app = QApplication([])
+        # ...
+        sys.exit(app.exec())
 
 Now, to start the development, create an empty window called `MainWindow`.
 You could do that by defining a class that inherits from `QMainWindow`.

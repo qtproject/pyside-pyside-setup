@@ -144,7 +144,6 @@ remaining space that is left after accommodating the Pane.
 .. _attached properties: https://doc.qt.io/qt-5/qml-qtquick-layouts-layout.html
 .. _Layout.fillWidth: https://doc.qt.io/qt-5/qml-qtquick-layouts-layout.html#fillWidth-attached-prop
 .. _Layout.fillHeight: https://doc.qt.io/qt-5/qml-qtquick-layouts-layout.html#fillHeight-attached-prop
-.. _ListView: https://doc.qt.io/qt-5/qml-qtquick-listview.html
 .. _Qt Quick QML Types: https://doc.qt.io/qt-5/qtquick-qmlmodule.html
 
 Let's look at the ``Listview`` in detail:

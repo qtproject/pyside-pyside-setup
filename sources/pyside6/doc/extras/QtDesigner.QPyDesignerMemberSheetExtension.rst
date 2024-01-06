@@ -5,6 +5,8 @@ QPyDesignerMemberSheetExtension
 *******************************
 
 QPyDesignerMemberSheetExtension is the base class for implementing
-`QDesignerMemberSheetExtension <https://doc.qt.io/qt-6/qdesignermembersheetextension.html>`_
+`QDesignerMemberSheetExtension class`_
 for a Qt Designer custom widget plugin in Python.
 It provides the required inheritance from **QObject**.
+
+.. _QDesignerMemberSheetExtension class: https://doc.qt.io/qt-6/qdesignermembersheetextension.html

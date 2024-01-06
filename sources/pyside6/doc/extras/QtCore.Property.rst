@@ -16,7 +16,7 @@ They are equivalent to the ``Q_PROPERTY`` macro in the `Qt Docs`_.
 Here is an example that illustrates how to use this
 function:
 
-.. code-block::
+.. code-block:: python
    :linenos:
 
     from PySide6.QtCore import QObject, Property
@@ -40,20 +40,20 @@ function:
 
 The full options for ``QtCore.Property`` can be found with ``QtCore.Property.__doc__``:
 
-.. code-block::
+.. code-block:: python
 
-   Property(self, type: type,
-            fget: Optional[Callable] = None,
-            fset: Optional[Callable] = None,
-            freset: Optional[Callable] = None,
-            fdel: Optional[Callable] = None,
-            doc: str = '',
-            notify: Optional[Callable] = None,
-            designable: bool = True,
-            scriptable: bool = True,
-            stored: bool = True, user: bool = False,
-            constant: bool = False,
-            final: bool = False) -> PySide6.QtCore.Property
+    Property(self, type: type,
+             fget: Optional[Callable] = None,
+             fset: Optional[Callable] = None,
+             freset: Optional[Callable] = None,
+             fdel: Optional[Callable] = None,
+             doc: str = '',
+             notify: Optional[Callable] = None,
+             designable: bool = True,
+             scriptable: bool = True,
+             stored: bool = True, user: bool = False,
+             constant: bool = False,
+             final: bool = False) -> PySide6.QtCore.Property
 
 Normally, only ``type``, ``fget``and ``fset`` are used.
 
@@ -68,16 +68,16 @@ requires a ``type`` parameter.
 
 In the above example, the following lines would be equivalent properties:
 
-.. code-block::
+.. code-block:: python
 
-        pp = QtCore.Property(int, readPP, setPP)    # PySide version
-        pp = property(readPP, setPP)                # Python version
+    pp = QtCore.Property(int, readPP, setPP)    # PySide version
+    pp = property(readPP, setPP)                # Python version
 
 As you know from the `Python Docs`_, ``Python`` allows to break the property
 creation into multiple steps, using the decorator syntax. We can do this in
 ``PySide`` as well:
 
-.. code-block::
+.. code-block:: python
    :linenos:
 
     from PySide6.QtCore import QObject, Property
@@ -110,7 +110,7 @@ If you are using properties of your objects in QML expressions,
 QML requires that the property changes are notified. Here is an
 example illustrating how to do this:
 
-.. code-block::
+.. code-block:: python
    :linenos:
 
     from PySide6.QtCore import QObject, Signal, Property

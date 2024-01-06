@@ -192,7 +192,7 @@ The complete code of this example looks like this:
 Then to execute it we just need to run the following on a
 command prompt:
 
-.. code-block:: python
+.. code-block:: bash
 
     python main.py
 
@@ -214,7 +214,7 @@ in the widget box and can be dragged onto the form just like Qt's widgets (see
 `Using Custom Widgets with Qt Designer <https://doc.qt.io/qt-6/designer-using-custom-widgets.html>`_
 ). Normally, this requires implementing the widget as a plugin to Qt Designer
 written in C++ implementing its
-`QDesignerCustomWidgetInterface <https://doc.qt.io/qt-6/qdesignercustomwidgetinterface.html>`_ .
+`QDesignerCustomWidgetInterface`_ .
 
 Qt for Python provides a simple interface for this which is similar to
 :meth:`registerCustomWidget()<PySide6.QtUiTools.QUiLoader.registerCustomWidget>`.
@@ -262,10 +262,10 @@ The code of the registration script looks as follows:
 
 
 QPyDesignerCustomWidgetCollection provides an implementation of
-`QDesignerCustomWidgetCollectionInterface <https://doc.qt.io/qt-6/qdesignercustomwidgetcollectioninterface.html>`_
+`QDesignerCustomWidgetCollectionInterface`_
 exposing custom widgets to **Qt Designer** with static convenience functions
 for registering types or adding instances of
-`QDesignerCustomWidgetInterface <https://doc.qt.io/qt-6/qdesignercustomwidgetinterface.html>`_ .
+`QDesignerCustomWidgetInterface`_ .
 
 The function
 :meth:`registerCustomWidget()<PySide6.QtDesigner.QPyDesignerCustomWidgetCollection.registerCustomWidget>`
@@ -273,7 +273,7 @@ is used to register a widget type with **Qt Designer**. In the simple case, it
 can be used like ``QUiLoader.registerCustomWidget()``. It takes the custom widget
 type and some optional keyword arguments passing values that correspond to the
 getters of
-`QDesignerCustomWidgetInterface <https://doc.qt.io/qt-6/qdesignercustomwidgetinterface.html>`_ :
+`QDesignerCustomWidgetInterface`_ :
 
 When launching **Qt Designer** via its launcher ``pyside6-designer``,
 the custom widget should be visible in the widget box.
@@ -285,6 +285,9 @@ This is shown in taskmenuextension example, where a custom context menu
 is registered for the custom widget. The example is a port of the
 corresponding C++
 `Task Menu Extension Example <https://doc.qt.io/qt-6/qtdesigner-taskmenuextension-example.html>`_ .
+
+.. _QDesignerCustomWidgetCollectionInterface: https://doc.qt.io/qt-6/qdesignercustomwidgetcollectioninterface.html
+.. _QDesignerCustomWidgetInterface: https://doc.qt.io/qt-6/qdesignercustomwidgetinterface.html
 
 Troubleshooting the Qt Designer Plugin
 ++++++++++++++++++++++++++++++++++++++

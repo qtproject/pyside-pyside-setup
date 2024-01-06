@@ -60,7 +60,8 @@ signal to the `say_hello()` function:
     button.clicked.connect(say_hello)
 
 Finally, we show the button and start the Qt main loop:
-::
+
+.. code-block:: python
 
     # Show the button
     button.show()
@@ -68,9 +69,8 @@ Finally, we show the button and start the Qt main loop:
     app.exec()
 
 Here is the complete code for this example:
-::
 
-    #!/usr/bin/python
+.. code-block:: python
 
     import sys
     from PySide6.QtWidgets import QApplication, QPushButton

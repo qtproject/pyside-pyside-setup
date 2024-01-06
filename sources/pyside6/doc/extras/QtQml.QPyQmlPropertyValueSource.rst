@@ -5,6 +5,8 @@ QPyQmlPropertyValueSource
 *************************
 
 QPyQmlPropertyValueSource is the base class for implementing
-`QQmlPropertyValueSource <https://doc.qt.io/qt-6/qqmlpropertyvaluesource.html>`_
+`QQmlPropertyValueSource class`_ .
 
 It provides the required inheritance from **QObject**.
+
+.. _QQmlPropertyValueSource class: https://doc.qt.io/qt-6/qqmlpropertyvaluesource.html

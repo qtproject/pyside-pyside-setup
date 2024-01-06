@@ -1,8 +1,8 @@
 .. currentmodule:: PySide6.QtCore
 .. _Slot:
 
-Slot
-****
+Qt Slots
+********
 
 Detailed Description
 --------------------

@@ -286,7 +286,7 @@ When using ``__feature__`` often with common IDEs, you may want to provide
 a feature-aware version of ``.pyi`` files to get a correct display. The simplest
 way to change them all in-place is the command:
 
-.. code-block:: python
+.. code-block:: bash
 
     pyside6-genpyi all --feature snake_case true_property
 

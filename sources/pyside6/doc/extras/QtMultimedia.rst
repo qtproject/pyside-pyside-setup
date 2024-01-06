@@ -29,7 +29,7 @@ directive:
 
     import PySide6.QtMultimedia
 
-The module also provides `QML types <https://doc.qt.io/qt-6/qtmultimedia-qmlmodule.html>`_ .
+The module also provides QML `types <https://doc.qt.io/qt-6/qtmultimedia-qmlmodule.html>`_ .
 
 Overviews and Important Topics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -46,27 +46,38 @@ QML Types
 
 The following table outlines some important QML types.
 
-    +-------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    |Type                                                                           |Description                                                                                                                                                                                                                                             |
-    +-------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    |`MediaPlayer <https://doc.qt.io/qt-6/qml-qtmultimedia-mediaplayer.html>`_      |Add audio/video playback functionality to a scene.                                                                                                                                                                                                      |
-    +-------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    |`CaptureSession <https://doc.qt.io/qt-6/qml-qtmultimedia-capturesession.html>`_|Create a session for capturing audio/video.                                                                                                                                                                                                             |
-    +-------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    |`Camera <https://doc.qt.io/qt-6/qml-qtmultimedia-camera.html>`_                |Access a camera connected to the system.                                                                                                                                                                                                                |
-    +-------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    |`AudioInput <https://doc.qt.io/qt-6/qml-qtmultimedia-audioinput.html>`_        |Access an audio input (microphone) connected to the system.                                                                                                                                                                                             |
-    +-------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    |`AudioOutput <https://doc.qt.io/qt-6/qml-qtmultimedia-audiooutput.html>`_      |Access an audio output (speaker, headphone) connected to the system.                                                                                                                                                                                    |
-    +-------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    |`VideoOutput <https://doc.qt.io/qt-6/qml-qtmultimedia-videooutput.html>`_      |Display video content.                                                                                                                                                                                                                                  |
-    +-------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    |`MediaRecorder <https://doc.qt.io/qt-6/qml-qtmultimedia-mediarecorder.html>`_  |Record audio/video from the `CaptureSession <https://doc.qt.io/qt-6/qml-qtmultimedia-capturesession.html>`_ .                                                                                                                                           |
-    +-------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    |`ImageCapture <https://doc.qt.io/qt-6/qml-qtmultimedia-imagecapture.html>`_    |Capture still images from the Camera.                                                                                                                                                                                                                   |
-    +-------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-    |`Video <https://doc.qt.io/qt-6/qml-qtmultimedia-video.html>`_                  |Add Video playback functionality to a scene. Uses `MediaPlayer <https://doc.qt.io/qt-6/qml-qtmultimedia-mediaplayer.html>`_ and `VideoOutput <https://doc.qt.io/qt-6/qml-qtmultimedia-videooutput.html>`_ types to provide video playback functionality.|
-    +-------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    +------------------+---------------------------------------------------------------------+
+    |Type              |Description                                                          |
+    +------------------+---------------------------------------------------------------------+
+    |`MediaPlayer`_    |Add audio/video playback functionality to a scene.                   |
+    +------------------+---------------------------------------------------------------------+
+    |`CaptureSession`_ |Create a session for capturing audio/video.                          |
+    +------------------+---------------------------------------------------------------------+
+    |`Camera`_         |Access a camera connected to the system.                             |
+    +------------------+---------------------------------------------------------------------+
+    |`AudioInput`_     |Access an audio input (microphone) connected to the system.          |
+    +------------------+---------------------------------------------------------------------+
+    |`AudioOutput`_    |Access an audio output (speaker, headphone) connected to the system. |
+    +------------------+---------------------------------------------------------------------+
+    |`VideoOutput`_    |Display video content.                                               |
+    +------------------+---------------------------------------------------------------------+
+    |`MediaRecorder`_  |Record audio/video from the `CaptureSession`_ .                      |
+    +------------------+---------------------------------------------------------------------+
+    |`ImageCapture`_   |Capture still images from the Camera.                                |
+    +------------------+---------------------------------------------------------------------+
+    |`Video`_          |Add Video playback functionality to a scene. Uses `MediaPlayer`_ and |
+    |                  |`VideoOutput`_ types to provide video playback functionality.        |
+    +------------------+---------------------------------------------------------------------+
+
+.. _MediaPlayer: https://doc.qt.io/qt-6/qml-qtmultimedia-mediaplayer.html
+.. _CaptureSession: https://doc.qt.io/qt-6/qml-qtmultimedia-capturesession.html
+.. _Camera: https://doc.qt.io/qt-6/qml-qtmultimedia-camera.html
+.. _AudioInput: https://doc.qt.io/qt-6/qml-qtmultimedia-audioinput.html
+.. _AudioOutput: https://doc.qt.io/qt-6/qml-qtmultimedia-audiooutput.html
+.. _VideoOutput: https://doc.qt.io/qt-6/qml-qtmultimedia-videooutput.html
+.. _MediaRecorder: https://doc.qt.io/qt-6/qml-qtmultimedia-mediarecorder.html
+.. _ImageCapture: https://doc.qt.io/qt-6/qml-qtmultimedia-imagecapture.html
+.. _Video: https://doc.qt.io/qt-6/qml-qtmultimedia-video.html
 
 C++ Classes
 ^^^^^^^^^^^

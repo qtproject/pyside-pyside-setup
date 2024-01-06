@@ -1,5 +1,4 @@
 .. currentmodule:: PySide6.QtUiTools
-.. _loadUiType:
 
 loadUiType
 ***********
