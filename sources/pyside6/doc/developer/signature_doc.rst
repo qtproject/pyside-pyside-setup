@@ -318,7 +318,7 @@ A shortcut for this command is ``pyside6-genpyi``.
 
 A useful command to change all .pyi files to use all features is
 
-.. code-block:: python
+.. code-block:: bash
 
     pyside6-genpyi all --feature snake_case true_property
 

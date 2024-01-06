@@ -5,6 +5,8 @@ QPyQmlParserStatus
 ******************
 
 QPyQmlParserStatus is the base class for implementing
-`QQmlParserStatus <https://doc.qt.io/qt-6/qqmlparserstatus.html>`_
+`QQmlParserStatus class`_ .
 
 It provides the required inheritance from **QObject**.
+
+.. _QQmlParserStatus class: https://doc.qt.io/qt-6/qqmlparserstatus.html

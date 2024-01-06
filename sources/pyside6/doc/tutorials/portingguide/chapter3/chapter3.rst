@@ -21,9 +21,9 @@ and add the following imports to it:
 To generate this Python code, run the following command on the
 prompt:
 
-.. code-block::
+.. code-block:: bash
 
-   pyside6-uic bookwindow.ui -o ui_bookwindow.py
+    pyside6-uic bookwindow.ui -o ui_bookwindow.py
 
 Try porting the remaining code now. To begin with, here is
 how both the versions of the constructor code looks:
@@ -101,9 +101,9 @@ image only.
 Now, run the ``pyside6-rcc`` tool on the ``books.qrc`` file
 to generate ``rc_books.py``.
 
-.. code-block::
+.. code-block:: bash
 
-   pyside6-rcc books.qrc -o rc_books.py
+    pyside6-rcc books.qrc -o rc_books.py
 
 Once you have the Python script generated, make the
 following changes to ``bookdelegate.py`` and ``main.py``:

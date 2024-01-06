@@ -36,14 +36,14 @@ import statements:
 
 .. code-block:: python
 
-    from PySide2.QtWidgets import QApplication...
+    from PySide2.QtWidgets import QApplication
     from PySide2 import QtCore
 
 needs to be changed to:
 
 .. code-block:: python
 
-    from PySide6.QtWidgets import QApplication...
+    from PySide6.QtWidgets import QApplication
     from PySide6 import QtCore
 
 

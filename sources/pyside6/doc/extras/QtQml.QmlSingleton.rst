@@ -1,8 +1,8 @@
 .. currentmodule:: PySide6.QtQml
 .. _QmlSingleton:
 
-QmlSingleton
-************
+QmlSingleton decorator
+**********************
 
 .. py:decorator:: QmlSingleton
 
@@ -20,7 +20,7 @@ constructor.
     @QmlElement
     @QmlSingleton
     class ClassForQml(QObject):
-        # ...
+        ...
 
 It is also possible to use a static ``create()`` method which receives
 the engine as a parameter:
@@ -33,6 +33,6 @@ the engine as a parameter:
 
         @staticmethod
         def create(engine):
-            # ...
+            ...
 
 .. note:: The order of the decorators matters; ``QmlSingleton`` needs to be preceded by ``QmlElement``.

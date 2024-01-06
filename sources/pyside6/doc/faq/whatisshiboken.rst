@@ -4,11 +4,9 @@ Binding Generation: What Is Shiboken?
 =====================================
 
 When you install ``PySide6`` you might have notice that also ``Shiboken6``
-is installed as a dependency:
+is installed as a dependency::
 
-.. code-block:: bash
-
-    (env) [qt ~]$ pip install pyside6
+    $ pip install pyside6
     Collecting pyside6
       Downloading PySide6-6.0.0-6.0.0-cp36.cp37.cp38.cp39-abi3-manylinux1_x86_64.whl (170.5 MB)
          |████████████████████████████████| 170.5 MB 42 kB/s

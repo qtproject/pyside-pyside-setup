@@ -47,16 +47,16 @@ For example, painting stars to represent the rating for
 each book in the table. Here is how the reimplemented
 code looks like:
 
-C++ version
-------------
+C++ version (bookdelegate)
+--------------------------
 
 .. literalinclude:: bookdelegate.cpp
    :language: c++
    :linenos:
    :lines: 22-
 
-Python version
----------------
+Python version (bookdelegate)
+-----------------------------
 
 .. literalinclude:: bookdelegate.py
    :language: python

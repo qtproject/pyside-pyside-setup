@@ -5,6 +5,8 @@ QPyDesignerContainerExtension
 *****************************
 
 QPyDesignerContainerExtension is the base class for implementing
-`QDesignerContainerExtension <https://doc.qt.io/qt-6/qdesignercontainerextension.html>`_
+`QDesignerContainerExtension class`_
 for a Qt Designer custom widget plugin in Python.
 It provides the required inheritance from **QObject**.
+
+.. _QDesignerContainerExtension class: https://doc.qt.io/qt-6/qdesignercontainerextension.html

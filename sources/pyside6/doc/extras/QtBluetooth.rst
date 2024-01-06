@@ -56,7 +56,7 @@ the environment variable ``QT_EVENT_DISPATCHER_CORE_FOUNDATION=1`` to
 circumvent this issue.
 
 Applications that don't use Classic Bluetooth will find a subset of
-`QtBluetooth <https://doc.qt.io/qt-6/qtbluetooth-module.html>`_ is available,
+`QtBluetooth`_ is available,
 as CoreBluetooth (Bluetooth LE) do not require either of
 :class:`QApplication<PySide6.QtWidgets.QApplication>` or
 :class:`QGuiApplication<PySide6.QtGui.QGuiApplication>` .
@@ -71,32 +71,32 @@ Guides
 Logging Categories
 ^^^^^^^^^^^^^^^^^^
 
-The `QtBluetooth <https://doc.qt.io/qt-6/qtbluetooth-module.html>`_ module
+The `QtBluetooth`_ module
 exports the following :class:`logging categories<~.Configuring Categories>` :
 
-    +--------------------+--------------------------------------------------------------------------------------------------------------+
-    |Logging Category    |Description                                                                                                   |
-    +--------------------+--------------------------------------------------------------------------------------------------------------+
-    |qt.bluetooth        |Enables logging of cross platform code path in `QtBluetooth <https://doc.qt.io/qt-6/qtbluetooth-module.html>`_|
-    +--------------------+--------------------------------------------------------------------------------------------------------------+
-    |qt.bluetooth.android|Enables logging of the Android implementation                                                                 |
-    +--------------------+--------------------------------------------------------------------------------------------------------------+
-    |qt.bluetooth.bluez  |Enables logging of the BLuez/Linux implementation                                                             |
-    +--------------------+--------------------------------------------------------------------------------------------------------------+
-    |qt.bluetooth.ios    |Enables logging of the iOS implementation                                                                     |
-    +--------------------+--------------------------------------------------------------------------------------------------------------+
-    |qt.bluetooth.osx    |Enables logging of the macOS implementation                                                                   |
-    +--------------------+--------------------------------------------------------------------------------------------------------------+
-    |qt.bluetooth.windows|Enables logging of the Qt for Windows implementation                                                          |
-    +--------------------+--------------------------------------------------------------------------------------------------------------+
+    +--------------------+-------------------------------------------------------------+
+    |Logging Category    |Description                                                  |
+    +--------------------+-------------------------------------------------------------+
+    |qt.bluetooth        |Enables logging of cross platform code path in `QtBluetooth`_|
+    +--------------------+-------------------------------------------------------------+
+    |qt.bluetooth.android|Enables logging of the Android implementation                |
+    +--------------------+-------------------------------------------------------------+
+    |qt.bluetooth.bluez  |Enables logging of the BLuez/Linux implementation            |
+    +--------------------+-------------------------------------------------------------+
+    |qt.bluetooth.ios    |Enables logging of the iOS implementation                    |
+    +--------------------+-------------------------------------------------------------+
+    |qt.bluetooth.osx    |Enables logging of the macOS implementation                  |
+    +--------------------+-------------------------------------------------------------+
+    |qt.bluetooth.windows|Enables logging of the Qt for Windows implementation         |
+    +--------------------+-------------------------------------------------------------+
 
 Logging categories can be used to enable additional warning and debug output
-for `QtBluetooth <https://doc.qt.io/qt-6/qtbluetooth-module.html>`_ . More
-detailed information about logging can be found in
+for `QtBluetooth`_ . More detailed information about logging can be found in
 :class:`QLoggingCategory<~.QLoggingCategory>` . A quick way to enable all
-`QtBluetooth <https://doc.qt.io/qt-6/qtbluetooth-module.html>`_ logging is to
-add the following line to the ``main()`` function:
+`QtBluetooth`_ logging is to add the following line to the ``main()``
+function::
 
-    ::
+    QLoggingCategory.setFilterRules("qt.bluetooth* = true")
 
-            QLoggingCategory.setFilterRules("qt.bluetooth* = true")
+
+.. _QtBluetooth: https://doc.qt.io/qt-6/qtbluetooth-module.html

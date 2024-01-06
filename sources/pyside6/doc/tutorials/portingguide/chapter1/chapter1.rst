@@ -26,7 +26,7 @@ the tables. Port these helper functions first. Here is how
 the C++ and Python versions of these functions look like:
 
 C++ version
-------------
+-----------
 
 .. literalinclude:: initdb.h
    :language: c++
@@ -34,7 +34,7 @@ C++ version
    :lines: 9-33
 
 Python version
----------------
+--------------
 
 .. literalinclude:: createdb.py
    :language: python
@@ -45,16 +45,16 @@ Now that the helper functions are in place, port ``initDb``.
 Here is how the C++ and Python versions of this function
 looks like:
 
-C++ version
-------------
+C++ version (initDb)
+--------------------
 
 .. literalinclude:: initdb.h
    :language: c++
    :linenos:
    :lines: 35-112
 
-Python version
----------------
+Python version (init_db)
+------------------------
 
 .. literalinclude:: createdb.py
    :language: python
@@ -77,7 +77,7 @@ test it, add the following code to ``main.py`` and run it:
 
 Use the following command from the prompt to run:
 
-.. code-block::
+.. code-block:: bash
 
     python main.py
 

@@ -105,7 +105,8 @@ Complete code
 -------------
 
 Here is the complete code for this tutorial:
-::
+
+.. code-block:: python
 
     import sys
     from PySide6.QtWidgets import (QLineEdit, QPushButton, QApplication,

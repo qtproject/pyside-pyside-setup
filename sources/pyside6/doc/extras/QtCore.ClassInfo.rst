@@ -22,7 +22,7 @@ value and enabling special characters in the key.
 Example
 -------
 
-::
+.. code-block:: python
 
     # Recommended syntax
     @ClassInfo(Author='PySide Team', URL='http://www.pyside.org')

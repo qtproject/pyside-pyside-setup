@@ -58,7 +58,6 @@ XML. Here is an extract of the beginning of a ``.ui`` file:
        <string>MainWindow</string>
       </property>
       <widget class="QWidget" name="centralWidget">
-    ...
 
 The `pyside6-uic` tool generates Python code from these `.ui` files,
 which you can import from your main files, so it is not necessary

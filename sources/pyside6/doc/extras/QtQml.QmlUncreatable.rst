@@ -26,6 +26,6 @@ Passing None or no argument will cause a standard message to be used instead.
     @QmlElement
     @QmlUncreatable("BaseClassForQml is an abstract base class")
     class BaseClassForQml(QObject):
-        # ...
+        ...
 
 .. note:: The order of the decorators matters; ``QmlUncreatable`` needs to be preceded by ``QmlElement``.

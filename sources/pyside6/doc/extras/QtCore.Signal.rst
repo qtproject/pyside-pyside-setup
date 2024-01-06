@@ -1,8 +1,8 @@
 .. currentmodule:: PySide6.QtCore
 .. _Signal:
 
-Signal
-******
+Qt Signal
+*********
 
 Synopsis
 --------
@@ -10,19 +10,19 @@ Synopsis
 Functions
 ^^^^^^^^^
 
-+---------------------------------------------------------------------------------------------+
-|def :meth:`connect<Signal.connect>` (receiver)                                               |
-+---------------------------------------------------------------------------------------------+
-|def :meth:`disconnect<Signal.disconnect>` (receiver)                                         |
-+---------------------------------------------------------------------------------------------+
-|def :meth:`emit<Signal.disconnect>` (\*args)                                                 |
-+---------------------------------------------------------------------------------------------+
++-----------------------------------------------------+
+|def :meth:`connect<Signal.connect>` (receiver)       |
++-----------------------------------------------------+
+|def :meth:`disconnect<Signal.disconnect>` (receiver) |
++-----------------------------------------------------+
+|def :meth:`emit<Signal.disconnect>` (\*args)         |
++-----------------------------------------------------+
 
 Detailed Description
 --------------------
 
-    The :class:`~.Signal` class provides a way to declare and connect Qt
-    signals in a pythonic way.
+The :class:`~.Signal` class provides a way to declare and connect Qt
+signals in a pythonic way.
 
 .. class:: PySide6.QtCore.Signal([type1 [, type2...]] [, name="" [, arguments=[]]])
 
