@@ -15,6 +15,7 @@
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
+#include "abstractmetalang_helpers.h"
 #include <fileout.h>
 #include <messages.h>
 #include <modifications.h>
@@ -64,6 +65,7 @@ struct DocGeneratorOptions
     QString additionalDocumentationList;
     QString inheritanceFile;
     bool doxygen = false;
+    bool inheritanceDiagram = true;
 };
 
 struct GeneratorDocumentation
@@ -339,6 +341,18 @@ void QtDocGenerator::writeFormattedText(TextStream &s, const QString &doc,
     s << '\n';
 }
 
+static void writeInheritanceList(TextStream &s, const AbstractMetaClassCList& classes,
+                                 const char *label)
+{
+    s << "**" << label << ":** ";
+    for (qsizetype i = 0, size = classes.size(); i < size; ++i) {
+        if (i > 0)
+            s << ", ";
+        s << ":ref:`" << classes.at(i)->name() << '`';
+    }
+    s << "\n\n";
+}
+
 static void writeInheritedByList(TextStream &s, const AbstractMetaClassCPtr &metaClass,
                                  const AbstractMetaClassCList& allClasses)
 {
@@ -348,14 +362,22 @@ static void writeInheritedByList(TextStream &s, const AbstractMetaClassCPtr &met
             res << c;
     }
 
-    if (res.isEmpty())
-        return;
+    if (!res.isEmpty())
+        writeInheritanceList(s, res, "Inherited by");
+}
 
-    s << "**Inherited by:** ";
-    QStringList classes;
-    for (const auto &c : std::as_const(res))
-        classes << u":ref:`"_s + c->name() + u'`';
-    s << classes.join(u", "_s) << "\n\n";
+static void writeInheritedFromList(TextStream &s, const AbstractMetaClassCPtr &metaClass)
+{
+    AbstractMetaClassCList res;
+
+    recurseClassHierarchy(metaClass, [&res, metaClass](const AbstractMetaClassCPtr &c) {
+        if (c.get() != metaClass.get())
+            res.append(c);
+        return false;
+    });
+
+    if (!res.isEmpty())
+        writeInheritanceList(s, res, "Inherits from");
 }
 
 void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classContext)
@@ -377,10 +399,12 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     if (documentation.hasBrief())
         writeFormattedBriefText(s, documentation, scope);
 
-    s << ".. inheritance-diagram:: " << metaClass->fullName()<< '\n'
-      << "    :parts: 2\n\n";
-    // TODO: This would be a parameter in the future...
-
+    if (m_options.inheritanceDiagram) {
+        s << ".. inheritance-diagram:: " << metaClass->fullName()<< '\n'
+          << "    :parts: 2\n\n";
+    } else {
+        writeInheritedFromList(s, metaClass);
+    }
 
     writeInheritedByList(s, metaClass, api().classes());
 
@@ -1328,7 +1352,9 @@ QList<OptionDescription> QtDocGenerator::options()
          u"List of additional XML files to be converted to .rst files\n"
           "(for example, tutorials)."_s},
         {u"inheritance-file=<file>"_s,
-         u"Generate a JSON file containing the class inheritance."_s}
+         u"Generate a JSON file containing the class inheritance."_s},
+        {u"disable-inheritance-diagram"_s,
+         u"Disable the generation of the inheritance diagram."_s}
     };
 }
 
@@ -1337,11 +1363,21 @@ class QtDocGeneratorOptionsParser : public OptionsParser
 public:
     explicit QtDocGeneratorOptionsParser(DocGeneratorOptions *o) : m_options(o) {}
 
+    bool handleBoolOption(const QString &key, OptionSource source) override;
     bool handleOption(const QString &key, const QString &value, OptionSource source) override;
 
 private:
     DocGeneratorOptions *m_options;
 };
+
+bool QtDocGeneratorOptionsParser::handleBoolOption(const QString &key, OptionSource)
+{
+    if (key == "disable-inheritance-diagram"_L1) {
+        m_options->inheritanceDiagram = false;
+        return true;
+    }
+    return false;
+}
 
 bool QtDocGeneratorOptionsParser::handleOption(const QString &key, const QString &value,
                                                OptionSource source)
