@@ -37,3 +37,16 @@ pleasing UIs.
 .. image:: filesystemexplorer.webp
    :target: filesystemexplorer.webp
    :alt: QtQuickControls Filesystem Explorer Screenshot
+
+References
+----------
+
+If you're interested in the C++ version of this example, you can find it
+`here <https://doc-snapshots.qt.io/qt6-dev/qtquickcontrols-filesystemexplorer-example.html>`_.
+
+Additionally, there is a detailed
+`tutorial <https://doc.qt.io/qtforpython-6/tutorials/extendedexplorer/extendedexplorer.html>`_
+available that provides step-by-step instructions on how to extend this example
+with additional features. This tutorial can be helpful if you want to explore
+and learn more about building upon the existing functionality of the filesystem
+explorer.

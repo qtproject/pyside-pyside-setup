@@ -1,5 +1,6 @@
 <RCC>
     <qresource>
+        <file>icons/app_icon.svg</file>
         <file>icons/folder_closed.svg</file>
         <file>icons/folder_open.svg</file>
         <file>icons/generic_file.svg</file>
