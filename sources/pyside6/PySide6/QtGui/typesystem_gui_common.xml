@@ -2606,6 +2606,13 @@
     <add-function signature="exec_()" return-type="int">
         <inject-code file="../glue/qtgui.cpp" snippet="qguiapplication-exec"/>
     </add-function>
+    <add-function signature="nativeInterface()const" return-type="PyObject">
+        <modify-argument index="return"> <!-- Suppress return value heuristics -->
+            <define-ownership class="target" owner="default"/>
+        </modify-argument>
+        <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
+                     snippet="qguiapplication-nativeInterface"/>
+    </add-function>
     <modify-function signature="setOverrideCursor(const QCursor&amp;)">
         <modify-argument index="return" pyi-type="PyObject">
             <replace-type modified-type="QtGuiHelper::QOverrideCursorGuard*"/>
@@ -2614,6 +2621,31 @@
                      snippet="qguiapplication-setoverridecursor"/>
     </modify-function>
   </object-type>
+
+  <namespace-type name="QNativeInterface" private="yes" since="6.7">
+      <object-type name="QX11Application" private="yes" disable-wrapper="yes"
+                   force-abstract="yes">
+          <configuration condition="QT_CONFIG(xcb)"/>
+          <modify-function signature="display()const">
+              <modify-argument index="return">
+                  <replace-type modified-type="int"/>
+              </modify-argument>
+              <inject-code class="target" position="end" file="../glue/qtgui.cpp"
+                           snippet="qx11application-resource-ptr"/>
+          </modify-function>
+          <modify-function signature="connection()const">
+              <modify-argument index="return">
+                  <replace-type modified-type="int"/>
+              </modify-argument>
+              <inject-code class="target" position="end" file="../glue/qtgui.cpp"
+                           snippet="qx11application-resource-ptr"/>
+          </modify-function>
+      </object-type>
+      <object-type name="QWindowsScreen" private="yes" disable-wrapper="yes"
+                   force-abstract="yes">
+          <configuration condition="#ifdef Q_OS_WIN"/>
+      </object-type>
+  </namespace-type>
 
   <object-type name="QOpenGLContext">
     <enum-type name="OpenGLModuleType"/>
@@ -3062,6 +3094,13 @@
         </modify-argument>
         <inject-code file="../glue/qtgui.cpp" snippet="qscreen-grabWindow"/>
       </modify-function>
+      <add-function signature="nativeInterface()const" return-type="PyObject">
+          <modify-argument index="return"> <!-- Suppress return value heuristics -->
+              <define-ownership class="target" owner="default"/>
+          </modify-argument>
+          <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
+                       snippet="qscreen-nativeInterface"/>
+      </add-function>
   </object-type>
   <object-type name="QStyleHints"/>
 

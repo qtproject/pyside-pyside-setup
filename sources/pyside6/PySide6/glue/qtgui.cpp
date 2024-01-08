@@ -783,11 +783,44 @@ auto *cppResult = new QtGuiHelper::QOverrideCursorGuard();
 Shiboken::Object::getOwnership(%PYARG_0); // Ensure the guard is removed
 // @snippet qguiapplication-setoverridecursor
 
+// @snippet qguiapplication-nativeInterface
+bool hasNativeApp = false;
+#if QT_CONFIG(xcb)
+if (auto *x11App = %CPPSELF.nativeInterface<QNativeInterface::QX11Application>()) {
+    hasNativeApp = true;
+    %PYARG_0 = %CONVERTTOPYTHON[QNativeInterface::QX11Application*](x11App);
+}
+#endif
+if (!hasNativeApp) {
+    Py_INCREF(Py_None);
+    %PYARG_0 = Py_None;
+}
+// @snippet qguiapplication-nativeInterface
+
 // @snippet qscreen-grabWindow
 WId id = %1;
 %RETURN_TYPE retval = %CPPSELF.%FUNCTION_NAME(id, %2, %3, %4, %5);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](retval);
 // @snippet qscreen-grabWindow
+
+// @snippet qscreen-nativeInterface
+bool hasNativeScreen = false;
+#ifdef Q_OS_WIN
+if (auto *winScreen = %CPPSELF.nativeInterface<QNativeInterface::QWindowsScreen>()) {
+    hasNativeScreen = true;
+    %PYARG_0 = %CONVERTTOPYTHON[QNativeInterface::QWindowsScreen*](winScreen);
+}
+#endif
+if (!hasNativeScreen) {
+    Py_INCREF(Py_None);
+    %PYARG_0 = Py_None;
+}
+// @snippet qscreen-nativeInterface
+
+// @snippet qx11application-resource-ptr
+ auto *resource = %CPPSELF.%FUNCTION_NAME();
+%PYARG_0 = PyLong_FromVoidPtr(resource);
+// @snippet qx11application-resource-ptr
 
 // @snippet qwindow-fromWinId
 WId id = %1;

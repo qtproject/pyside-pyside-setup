@@ -561,6 +561,7 @@ def init_PySide6_QtGui():
         "int32_t": int,
         "HBITMAP": int,
         "HICON": int,
+        "HMONITOR": int,
         "HRGN": int,
         "QPixmap()": Default("PySide6.QtGui.QPixmap"),  # can't create without qApp
         "QPlatformSurface*": int,  # a handle

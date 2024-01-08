@@ -172,6 +172,7 @@ ${QtGui_GEN_DIR}/qmouseevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qmoveevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qmovie_wrapper.cpp
 ${QtGui_GEN_DIR}/qnativegestureevent_wrapper.cpp
+${QtGui_GEN_DIR}/qnativeinterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qoffscreensurface_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglcontextgroup_wrapper.cpp
 ${QtGui_GEN_DIR}/qopenglextrafunctions_wrapper.cpp
@@ -284,6 +285,17 @@ ${QtGui_GEN_DIR}/qwindowstatechangeevent_wrapper.cpp
 # module is always needed
 ${QtGui_GEN_DIR}/qtgui_module_wrapper.cpp
 )
+
+get_property(QtGui_enabled_features TARGET Qt${QT_MAJOR_VERSION}::Gui
+             PROPERTY QT_ENABLED_PUBLIC_FEATURES)
+
+if("xcb" IN_LIST QtGui_enabled_features)
+    list(APPEND QtGui_SRC
+         ${QtGui_GEN_DIR}/qnativeinterface_qx11application_wrapper.cpp)
+elseif(WIN32)
+    list(APPEND QtGui_SRC
+         ${QtGui_GEN_DIR}/qnativeinterface_qwindowsscreen_wrapper.cpp)
+endif()
 
 set(QtGui_private_include_dirs
     ${Qt${QT_MAJOR_VERSION}Core_PRIVATE_INCLUDE_DIRS}
