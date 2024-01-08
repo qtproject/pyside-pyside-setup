@@ -322,6 +322,9 @@ QtDocGenerator Options
 ``--inheritance-file=<file>``
    Generate a JSON file containing the class inheritance.
 
+``--disable-inheritance-diagram``
+        Disable the generation of the inheritance diagram.
+
 .. _project-file:
 
 ********************
