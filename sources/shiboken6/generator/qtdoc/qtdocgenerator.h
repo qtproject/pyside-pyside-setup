@@ -66,6 +66,8 @@ private:
     void writeFields(TextStream &s, const AbstractMetaClassCPtr &cppClass) const;
     static QString functionSignature(const AbstractMetaFunctionCPtr &func,
                                      const QString &scope = {});
+    void writeFunctions(TextStream &s, const AbstractMetaFunctionCList &funcs,
+                        const AbstractMetaClassCPtr &cppClass, const QString &scope);
     void writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
                        const AbstractMetaClassCPtr &cppClass = {},
                        const QString &scope = {}, bool indexed = true);

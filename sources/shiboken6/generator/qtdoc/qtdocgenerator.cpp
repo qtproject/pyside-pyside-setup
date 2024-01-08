@@ -426,12 +426,7 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     if (!metaClass->isNamespace())
         writeFields(s, metaClass);
 
-    QString lastName;
-    for (const auto &func : std::as_const(doc.allFunctions)) {
-        const bool indexed = func->name() != lastName;
-        lastName = func->name();
-        writeFunction(s, func, metaClass, scope, indexed);
-    }
+    writeFunctions(s, doc.allFunctions, metaClass, scope);
 }
 
 void QtDocGenerator::writeFunctionToc(TextStream &s, const QString &title,
@@ -875,6 +870,17 @@ static bool containsFunctionDirective(const DocModification &dm)
         && dm.code().contains(".. py:"_L1);
 }
 
+void QtDocGenerator::writeFunctions(TextStream &s, const AbstractMetaFunctionCList &funcs,
+                                    const AbstractMetaClassCPtr &cppClass, const QString &scope)
+{
+    QString lastName;
+    for (const auto &func : funcs) {
+        const bool indexed = func->name() != lastName;
+        lastName = func->name();
+        writeFunction(s, func, cppClass, scope, indexed);
+    }
+}
+
 void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    const AbstractMetaClassCPtr &cppClass,
                                    const QString &scope, bool indexed)
@@ -1183,8 +1189,7 @@ void QtDocGenerator::writeGlobals(const QString &package,
     // Write out functions with injected documentation
     if (!docPackage.globalFunctions.isEmpty()) {
         s << currentModule(package) << headline("Functions");
-        for (const auto &f : docPackage.globalFunctions)
-            writeFunction(s, f);
+        writeFunctions(s, docPackage.globalFunctions, {}, {});
     }
 
     if (!docPackage.globalEnums.isEmpty()) {
