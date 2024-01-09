@@ -211,6 +211,30 @@
             <modify-argument index="1"><replace-type modified-type="PyPathLike"/></modify-argument>
             <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qfile-path-1"/>
         </modify-function>
+        <add-function signature="singletonInstance(int@qmlTypeId@)"
+                      return-type="QObject*">
+            <!-- Suppress return value heuristics -->
+            <modify-argument index="return"
+                             pyi-type="Union[PySide6.QtCore.QObject, PySide6.QtQml.QJSValue, None]">
+                <define-ownership class="target" owner="default"/>
+            </modify-argument>
+            <inject-code class="target" file="../glue/qtqml.cpp"
+                         snippet="qqmlengine-singletoninstance-qmltypeid"/>
+            <inject-documentation format="target" mode="append" file="../doc/qtqml_functions.rst"
+                                  snippet="qqmlengine-singletoninstance-qmltypeid"/>
+        </add-function>
+        <add-function signature="singletonInstance(QString@uri@,QString@typeName@)"
+                      return-type="QObject*">
+            <!-- Suppress return value heuristics -->
+            <modify-argument index="return"
+                             pyi-type="Union[PySide6.QtCore.QObject, PySide6.QtQml.QJSValue, None]">
+                <define-ownership class="target" owner="default"/>
+            </modify-argument>
+            <inject-code class="target" file="../glue/qtqml.cpp"
+                         snippet="qqmlengine-singletoninstance-typename"/>
+            <inject-documentation format="target" mode="append" file="../doc/qtqml_functions.rst"
+                                  snippet="qqmlengine-singletoninstance-typename"/>
+        </add-function>
     </object-type>
 
     <object-type name="QQmlExpression">

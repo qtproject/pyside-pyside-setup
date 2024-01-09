@@ -62,3 +62,29 @@ return %CONVERTTOPYTHON[%RETURN_TYPE](retval);
 // @snippet qmlsingleton
 %PYARG_0 = PySide::Qml::qmlSingletonMacro(%ARGUMENT_NAMES);
 // @snippet qmlsingleton
+
+// @snippet qqmlengine-singletoninstance-qmltypeid
+QJSValue instance = %CPPSELF.singletonInstance<QJSValue>(%1);
+if (instance.isNull()) {
+    Py_INCREF(Py_None);
+    %PYARG_0 = Py_None;
+} else if (instance.isQObject()) {
+    QObject *result = instance.toQObject();
+    %PYARG_0 = %CONVERTTOPYTHON[QObject *](result);
+} else  {
+    %PYARG_0 = %CONVERTTOPYTHON[QJSValue](instance);
+}
+// @snippet qqmlengine-singletoninstance-qmltypeid
+
+// @snippet qqmlengine-singletoninstance-typename
+QJSValue instance = %CPPSELF.singletonInstance<QJSValue>(%1, %2);
+if (instance.isNull()) {
+    Py_INCREF(Py_None);
+    %PYARG_0 = Py_None;
+} else if (instance.isQObject()) {
+    QObject *result = instance.toQObject();
+    %PYARG_0 = %CONVERTTOPYTHON[QObject *](result);
+} else  {
+    %PYARG_0 = %CONVERTTOPYTHON[QJSValue](instance);
+}
+// @snippet qqmlengine-singletoninstance-typename

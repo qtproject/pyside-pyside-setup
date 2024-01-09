@@ -129,3 +129,24 @@ if more advanced versions of some of its types are available.
 
 Alternatively, the :ref:`QmlUncreatable` decorator can be used.
 // @snippet qmlregisteruncreatabletype
+
+// @snippet qqmlengine-singletoninstance-qmltypeid
+Returns the instance of a singleton type that was registered under qmlTypeId.
+For ``QObject``-derived singleton types, the ``QObject`` instance is returned,
+otherwise a ``QJSValue`` or ``None``.
+
+It is recommended to store the QML type id, e.g. as a static member in the
+singleton class. The lookup via qmlTypeId() is costly.
+// @snippet qqmlengine-singletoninstance-qmltypeid
+
+// @snippet qqmlengine-singletoninstance-typename Returns the instance of a
+singleton type named typeName from the module specified by uri.
+For ``QObject``-derived singleton types, the ``QObject`` instance is returned,
+otherwise a ``QJSValue`` or ``None``.
+
+This method can be used as an alternative to calling qmlTypeId followed by the
+id based overload of singletonInstance. This is convenient when one only needs
+to do a one time setup of a singleton; if repeated access to the singleton is
+required, caching its typeId will allow faster subsequent access via the
+type-id based overload.
+// @snippet qqmlengine-singletoninstance-typename

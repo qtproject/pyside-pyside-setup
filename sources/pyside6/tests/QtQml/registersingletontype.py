@@ -12,13 +12,18 @@ init_test_paths(False)
 
 from helper.helper import quickview_errorstring
 
-from PySide6.QtCore import Property, Signal, QTimer, QUrl, QObject
+from PySide6.QtCore import Property, Signal, QTimer, QUrl, QObject, Slot
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import (qmlRegisterSingletonType, qmlRegisterSingletonInstance,
-                           QmlElement, QmlSingleton)
+                           QmlElement, QmlSingleton, QJSValue)
 from PySide6.QtQuick import QQuickView
 
+
+URI = "Singletons"
+
+
 finalResult = 0
+qObjectQmlTypeId = 0
 
 
 class SingletonQObject(QObject):
@@ -46,7 +51,7 @@ def singletonQJSValueCallback(engine):
     return engine.evaluate("new Object({data: 50})")
 
 
-QML_IMPORT_NAME = "Singletons"
+QML_IMPORT_NAME = URI
 QML_IMPORT_MAJOR_VERSION = 1
 
 
@@ -86,37 +91,62 @@ class DecoratedSingletonWithCreate(QObject):
     data = Property(int, getData, setData)
 
 
+class TestQuickView(QQuickView):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._singleton_instance_qobject_int = False
+        self._singleton_instance_qobject_str = False
+        self._singleton_instance_jsvalue_int = False
+
+    @Slot()
+    def testSlot(self):
+        engine = self.engine()
+        instance = engine.singletonInstance(qObjectQmlTypeId)
+        if instance is not None and isinstance(instance, QObject):
+            self._singleton_instance_qobject_int = True
+        instance = engine.singletonInstance(URI, 'SingletonQObjectNoCallback')
+        if instance is not None and isinstance(instance, QObject):
+            self._singleton_instance_qobject_str = True
+        instance = engine.singletonInstance(URI, 'SingletonQJSValue')
+        if instance is not None and isinstance(instance, QJSValue):
+            self._singleton_instance_jsvalue_int = True
+        self.close()
+
+
 class TestQmlSupport(unittest.TestCase):
     def testIt(self):
         app = QGuiApplication([])
 
-        qmlRegisterSingletonType(SingletonQObject, 'Singletons', 1, 0, 'SingletonQObjectNoCallback')
-        qmlRegisterSingletonType(SingletonQObject, 'Singletons', 1, 0, 'SingletonQObjectCallback',
+        qObjectQmlTypeId = qmlRegisterSingletonType(SingletonQObject, URI, 1, 0,
+                                                    'SingletonQObjectNoCallback')
+        qmlRegisterSingletonType(SingletonQObject, URI, 1, 0, 'SingletonQObjectCallback',
                                  singletonQObjectCallback)
 
-        qmlRegisterSingletonType('Singletons', 1, 0, 'SingletonQJSValue', singletonQJSValueCallback)
+        qmlRegisterSingletonType(URI, 1, 0, 'SingletonQJSValue', singletonQJSValueCallback)
 
         # Accepts only QObject derived types
         l = [1, 2]
         with self.assertRaises(TypeError):
-            qmlRegisterSingletonInstance(SingletonQObject, 'Singletons', 1, 0, 'SingletonInstance', l)
+            qmlRegisterSingletonInstance(SingletonQObject, URI, 1, 0, 'SingletonInstance', l)
 
         # Modify value on the instance
         s = SingletonQObject()
         s.setData(99)
-        qmlRegisterSingletonInstance(SingletonQObject, 'Singletons', 1, 0, 'SingletonInstance', s)
+        qmlRegisterSingletonInstance(SingletonQObject, URI, 1, 0, 'SingletonInstance', s)
 
-        view = QQuickView()
+        view = TestQuickView()
         file = Path(__file__).resolve().parent / 'registersingletontype.qml'
         self.assertTrue(file.is_file())
         view.setSource(QUrl.fromLocalFile(file))
         self.assertTrue(view.rootObject(), quickview_errorstring(view))
         view.resize(200, 200)
         view.show()
-        QTimer.singleShot(250, view.close)
+        QTimer.singleShot(250, view.testSlot)
         app.exec()
         self.assertEqual(finalResult, 899)
+        self.assertTrue(view._singleton_instance_qobject_int)
+        self.assertTrue(view._singleton_instance_qobject_str)
+        self.assertTrue(view._singleton_instance_jsvalue_int)
 
 
-if __name__ == '__main__':
-    unittest.main()
+if __name__ == '__main__':    unittest.main()
