@@ -78,6 +78,24 @@ TextStream &operator<<(TextStream &str, const sbkUnusedVariableCast &c)
     return str;
 }
 
+struct pyTypeGetSlot
+{
+    explicit pyTypeGetSlot(QAnyStringView funcType, QAnyStringView typeObject,
+                           QAnyStringView aSlot) :
+        m_funcType(funcType), m_typeObject(typeObject), m_slot(aSlot) {}
+
+    const QAnyStringView m_funcType;
+    const QAnyStringView m_typeObject;
+    const QAnyStringView m_slot;
+};
+
+TextStream &operator<<(TextStream &str, const pyTypeGetSlot &p)
+{
+    str << "reinterpret_cast<" << p.m_funcType << ">(PepType_GetSlot("
+        << p.m_typeObject << ", " << p.m_slot << "));\n";
+    return str;
+}
+
 TextStream &operator<<(TextStream &s, CppGenerator::ErrorReturn r)
 {
     s << "return";
@@ -4574,7 +4592,9 @@ void CppGenerator::writeTpTraverseFunction(TextStream &s, const AbstractMetaClas
     QString baseName = cpythonBaseName(metaClass);
     s << "static int " << baseName
         << "_traverse(PyObject *self, visitproc visit, void *arg)\n{\n" << indent
-        << "return SbkObject_TypeF()->tp_traverse(self, visit, arg);\n"
+        << "auto traverseProc = "
+        << pyTypeGetSlot("traverseproc", "SbkObject_TypeF()", "Py_tp_traverse") << ";\n"
+        << "return traverseProc(self, visit, arg);\n"
         << outdent << "}\n";
 }
 
@@ -4582,7 +4602,9 @@ void CppGenerator::writeTpClearFunction(TextStream &s, const AbstractMetaClassCP
 {
     QString baseName = cpythonBaseName(metaClass);
     s << "static int " << baseName << "_clear(PyObject *self)\n{\n" << indent
-       << "return reinterpret_cast<PyTypeObject *>(SbkObject_TypeF())->tp_clear(self);\n"
+       << "auto clearProc = "
+       << pyTypeGetSlot("inquiry", "SbkObject_TypeF()", "Py_tp_clear") << ";\n"
+       << "return clearProc(self);\n"
        << outdent << "}\n";
 }
 
@@ -5754,9 +5776,11 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
             << "Shiboken::AutoDecRef tpDict(PepType_GetDict(Py_TYPE(self)));\n"
             << "if (auto *meth = PyDict_GetItem(tpDict.object(), tmp)) {\n" << indent;
         // PYSIDE-1523: PyFunction_Check is not accepting compiled functions.
-        s << "if (std::strcmp(Py_TYPE(meth)->tp_name, \"compiled_function\") == 0)\n" << indent
-            << "return Py_TYPE(meth)->tp_descr_get(meth, self, nullptr);\n" << outdent
-            << "return PyFunction_Check(meth) ? PyMethod_New(meth, self)\n"
+        s << "if (std::strcmp(Py_TYPE(meth)->tp_name, \"compiled_function\") == 0) {\n" << indent
+            << "auto descrGetFunc = "
+            << pyTypeGetSlot("descrgetfunc", "Py_TYPE(meth)", "Py_tp_descr_get") << ";\n"
+            << "return descrGetFunc(meth, self, nullptr);\n" << outdent
+            << "}\nreturn PyFunction_Check(meth) ? PyMethod_New(meth, self)\n"
             << "                              : " << getattrFunc << ";\n" << outdent
             << "}\n" << outdent << "}\n";
 
