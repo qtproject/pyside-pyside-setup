@@ -55,46 +55,79 @@ typedef struct _typeobject {
     const char *tp_name;
     Py_ssize_t tp_basicsize;
     void *X03; // Py_ssize_t tp_itemsize;
+#ifdef PEP384_INTERN
     destructor tp_dealloc;
+#else
+    destructor X04;
+#endif
     void *X05; // Py_ssize_t tp_vectorcall_offset;
     void *X06; // getattrfunc tp_getattr;
     void *X07; // setattrfunc tp_setattr;
     void *X08; // PyAsyncMethods *tp_as_async;
+#ifdef PEP384_INTERN
     reprfunc tp_repr;
+#else
+    reprfunc X09;
+#endif
     void *X10; // PyNumberMethods *tp_as_number;
     void *X11; // PySequenceMethods *tp_as_sequence;
     void *X12; // PyMappingMethods *tp_as_mapping;
     void *X13; // hashfunc tp_hash;
+#ifdef PEP384_INTERN
     ternaryfunc tp_call;
-    reprfunc tp_str;
+#else
+    ternaryfunc X14;
+#endif
+    reprfunc tp_str; // Only used for PEP384_INTERN and a shiboken test
     getattrofunc tp_getattro;
     setattrofunc tp_setattro;
     void *X18; // PyBufferProcs *tp_as_buffer;
     unsigned long tp_flags;
     void *X20; // const char *tp_doc;
+#ifdef PEP384_INTERN
     traverseproc tp_traverse;
     inquiry tp_clear;
+#else
+    traverseproc X21;
+    inquiry X22;
+#endif
     void *X23; // richcmpfunc tp_richcompare;
     Py_ssize_t tp_weaklistoffset;
     void *X25; // getiterfunc tp_iter;
+#ifdef PEP384_INTERN
     iternextfunc tp_iternext;
+#else
+    iternextfunc X26;
+#endif
     struct PyMethodDef *tp_methods;
     struct PyMemberDef *tp_members;
     struct PyGetSetDef *tp_getset;
     struct _typeobject *tp_base;
 #ifdef PEP384_INTERN
     PyObject *tp_dict;
-#else
-    void *X31;
-#endif
     descrgetfunc tp_descr_get;
     descrsetfunc tp_descr_set;
+#else
+    void *X31;
+    descrgetfunc X32;
+    descrsetfunc X33;
+#endif
     Py_ssize_t tp_dictoffset;
+#ifdef PEP384_INTERN
     initproc tp_init;
     allocfunc tp_alloc;
+#else
+    initproc X39;
+    allocfunc X40;
+#endif
     newfunc tp_new;
+#ifdef PEP384_INTERN
     freefunc tp_free;
     inquiry tp_is_gc; /* For PyObject_IS_GC */
+#else
+    freefunc X41;
+    inquiry X42; /* For PyObject_IS_GC */
+#endif
     PyObject *tp_bases;
     PyObject *tp_mro; /* method resolution order */
 
