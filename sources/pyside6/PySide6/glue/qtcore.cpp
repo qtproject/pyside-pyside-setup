@@ -987,8 +987,10 @@ auto *ptr = reinterpret_cast<uchar *>(Shiboken::Buffer::getPointer(%PYARG_1, &si
 (void) %2; // remove warning about unused variable
 Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
 auto *timerType = Shiboken::SbkType<QTimer>();
-auto *pyTimer = timerType->tp_new(Shiboken::SbkType<QTimer>(), emptyTuple, nullptr);
-timerType->tp_init(pyTimer, emptyTuple, nullptr);
+auto newFunc = reinterpret_cast<newfunc>(PepType_GetSlot(timerType, Py_tp_new));
+auto initFunc = reinterpret_cast<initproc>(PepType_GetSlot(timerType, Py_tp_init));
+auto *pyTimer = newFunc(Shiboken::SbkType<QTimer>(), emptyTuple, nullptr);
+initFunc(pyTimer, emptyTuple, nullptr);
 
 auto timer = %CONVERTTOCPP[QTimer *](pyTimer);
 Shiboken::AutoDecRef result(
@@ -1009,8 +1011,10 @@ timer->start(%1);
 // %FUNCTION_NAME() - disable generation of c++ function call
 Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
 auto *timerType = Shiboken::SbkType<QTimer>();
-auto *pyTimer = timerType->tp_new(Shiboken::SbkType<QTimer>(), emptyTuple, nullptr);
-timerType->tp_init(pyTimer, emptyTuple, nullptr);
+auto newFunc = reinterpret_cast<newfunc>(PepType_GetSlot(timerType, Py_tp_new));
+auto initFunc = reinterpret_cast<initproc>(PepType_GetSlot(timerType, Py_tp_init));
+auto *pyTimer = newFunc(Shiboken::SbkType<QTimer>(), emptyTuple, nullptr);
+initFunc(pyTimer, emptyTuple, nullptr);
 QTimer * timer = %CONVERTTOCPP[QTimer *](pyTimer);
 timer->setSingleShot(true);
 
@@ -1043,8 +1047,10 @@ timer->start(%1);
 Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
 if (PyObject_TypeCheck(%3, PySideSignalInstance_TypeF())) {
     auto *timerType = Shiboken::SbkType<QTimer>();
-    auto *pyTimer = timerType->tp_new(Shiboken::SbkType<QTimer>(), emptyTuple, nullptr);
-    timerType->tp_init(pyTimer, emptyTuple, nullptr);
+    auto newFunc = reinterpret_cast<newfunc>(PepType_GetSlot(timerType, Py_tp_new));
+    auto initFunc = reinterpret_cast<initproc>(PepType_GetSlot(timerType, Py_tp_init));
+    auto *pyTimer = newFunc(Shiboken::SbkType<QTimer>(), emptyTuple, nullptr);
+    initFunc(pyTimer, emptyTuple, nullptr);
     QTimer * timer = %CONVERTTOCPP[QTimer *](pyTimer);
     timer->setSingleShot(true);
     PySideSignalInstance *signalInstance = reinterpret_cast<PySideSignalInstance *>(%2);
