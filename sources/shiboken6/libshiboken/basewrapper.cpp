@@ -5,6 +5,7 @@
 #include "basewrapper_p.h"
 #include "bindingmanager.h"
 #include "helper.h"
+#include "pep384ext.h"
 #include "sbkconverter.h"
 #include "sbkenum.h"
 #include "sbkerrors.h"
@@ -55,7 +56,7 @@ void Sbk_object_dealloc(PyObject *self)
         // This was not needed before Python 3.8 (Python issue 35810)
         Py_DECREF(Py_TYPE(self));
     }
-    Py_TYPE(self)->tp_free(self);
+    PepExt_TypeCallFree(self);
 }
 
 static void SbkObjectType_tp_dealloc(PyTypeObject *pyType);
@@ -522,7 +523,7 @@ static PyTypeObject *SbkObjectType_tp_new(PyTypeObject *metatype, PyObject *args
 
     for (int i=0, i_max=PyTuple_GET_SIZE(pyBases); i < i_max; i++) {
         PyObject *baseType = PyTuple_GET_ITEM(pyBases, i);
-        if (reinterpret_cast<PyTypeObject *>(baseType)->tp_new == SbkDummyNew) {
+        if (PepExt_Type_GetNewSlot(reinterpret_cast<PyTypeObject *>(baseType)) == SbkDummyNew) {
             // PYSIDE-595: A base class does not allow inheritance.
             return reinterpret_cast<PyTypeObject *>(SbkDummyNew(metatype, args, kwds));
         }
@@ -1645,7 +1646,7 @@ void deallocData(SbkObject *self, bool cleanup)
     }
     delete self->d; // PYSIDE-205: always delete d.
     Py_XDECREF(self->ob_dict);
-    Py_TYPE(self)->tp_free(self);
+    PepExt_TypeCallFree(reinterpret_cast<PyObject *>(self));
 }
 
 void setTypeUserData(SbkObject *wrapper, void *userData, DeleteUserDataFunc d_func)

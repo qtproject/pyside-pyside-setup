@@ -180,6 +180,7 @@ install(FILES
         sbkpython.h
         sbkwindows.h
         pep384impl.h
+        pep384ext.h
         voidptr.h
         bufferprocs_py37.h
         "${CMAKE_CURRENT_BINARY_DIR}/sbkversion.h"

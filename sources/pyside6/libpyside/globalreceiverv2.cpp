@@ -9,6 +9,7 @@
 
 #include <autodecref.h>
 #include <gilstate.h>
+#include <pep384ext.h>
 
 #include <QtCore/QMetaMethod>
 #include <QtCore/QSet>
@@ -135,7 +136,7 @@ PyObject *DynamicSlotDataV2::callback()
 
     //create a callback based on method data
     if (m_isMethod)
-        callback = Py_TYPE(m_callback)->tp_descr_get(m_callback, m_pythonSelf, nullptr);
+        callback = PepExt_Type_CallDescrGet(m_callback, m_pythonSelf, nullptr);
     else
         Py_INCREF(callback);
 

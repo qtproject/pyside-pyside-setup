@@ -5,6 +5,7 @@
 #include "pysideqmlregistertype_p.h"
 
 #include <shiboken.h>
+#include <pep384ext.h>
 #include <signature.h>
 
 #include <pysideproperty.h>
@@ -33,7 +34,7 @@ extern "C"
 
 static PyObject *propList_tp_new(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
 {
-    PySideProperty *me = reinterpret_cast<PySideProperty *>(subtype->tp_alloc(subtype, 0));
+    auto *me = PepExt_TypeCallAlloc<PySideProperty>(subtype, 0);
     me->d = new QmlListPropertyPrivate;
     return reinterpret_cast<PyObject *>(me);
 }

@@ -8,6 +8,7 @@
 #include "pysidesignal_p.h"
 
 #include <shiboken.h>
+#include <pep384ext.h>
 #include <signature.h>
 
 using namespace Shiboken;
@@ -179,7 +180,7 @@ void PySidePropertyPrivate::metaCall(PyObject *source, QMetaObject::Call call, v
 
 static PyObject *qpropertyTpNew(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
 {
-    auto *me = reinterpret_cast<PySideProperty *>(subtype->tp_alloc(subtype, 0));
+    auto *me = PepExt_TypeCallAlloc<PySideProperty>(subtype, 0);
     me->d = new PySidePropertyPrivate;
     return reinterpret_cast<PyObject *>(me);
 }
@@ -258,7 +259,7 @@ static void qpropertyDeAlloc(PyObject *self)
         Py_DECREF(Py_TYPE(self));
     }
     PyObject_GC_UnTrack(self);
-    Py_TYPE(self)->tp_free(self);
+    PepExt_TypeCallFree(self);
 }
 
 // Create a copy of the property to prevent the @property.setter from modifying

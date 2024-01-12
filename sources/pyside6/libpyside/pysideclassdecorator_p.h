@@ -7,6 +7,7 @@
 #include <pysidemacros.h>
 
 #include <sbkpython.h>
+#include <pep384ext.h>
 
 #include <QtCore/QByteArray>
 
@@ -119,7 +120,7 @@ struct Methods
 {
     static PyObject *tp_new(PyTypeObject *subtype)
     {
-        auto *result = reinterpret_cast<PySideClassDecorator *>(subtype->tp_alloc(subtype, 0));
+        auto *result = PepExt_TypeCallAlloc<PySideClassDecorator>(subtype, 0);
         result->d = new DecoratorPrivate;
         return reinterpret_cast<PyObject *>(result);
     }
@@ -129,7 +130,7 @@ struct Methods
         auto pySelf = reinterpret_cast<PyObject *>(self);
         auto decorator = reinterpret_cast<PySideClassDecorator *>(self);
         delete decorator->d;
-        Py_TYPE(pySelf)->tp_base->tp_free(self);
+        PepExt_TypeCallFree(Py_TYPE(pySelf)->tp_base, self);
     }
 
     static PyObject *tp_call(PyObject *self, PyObject *args, PyObject *kwds)

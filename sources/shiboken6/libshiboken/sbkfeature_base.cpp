@@ -4,6 +4,7 @@
 #include "basewrapper.h"
 #include "basewrapper_p.h"
 #include "autodecref.h"
+#include "pep384ext.h"
 #include "sbkenum.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
@@ -300,7 +301,7 @@ PyObject *mangled_type_getattro(PyTypeObject *type, PyObject *name)
      * with the complex `tp_getattro` of `QObject` and other instances.
      * What we change here is the meta class of `QObject`.
      */
-    static getattrofunc const type_getattro = PyType_Type.tp_getattro;
+    static getattrofunc const type_getattro = PepExt_Type_GetGetAttroSlot(&PyType_Type);
     static PyObject *const ignAttr1 = PyName::qtStaticMetaObject();
     static PyObject *const ignAttr2 = PyMagicName::get();
     static PyTypeObject *const EnumMeta = getPyEnumMeta();

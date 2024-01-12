@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "voidptr.h"
+#include "pep384ext.h"
 #include "sbkconverter.h"
 #include "basewrapper.h"
 #include "basewrapper_p.h"
@@ -24,8 +25,7 @@ PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject * /* args */, PyObje
     // like this, actual call forgotten:
     //    SbkVoidPtrObject *self =
     //        reinterpret_cast<SbkVoidPtrObject *>(type->tp_alloc);
-    PyObject *ob = type->tp_alloc(type, 0);
-    auto *self = reinterpret_cast<SbkVoidPtrObject *>(ob);
+    auto *self = PepExt_TypeCallAlloc<SbkVoidPtrObject>(type, 0);
 
     if (self != nullptr) {
         self->cptr = nullptr;

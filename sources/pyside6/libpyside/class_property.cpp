@@ -5,6 +5,7 @@
 #include "pysidestaticstrings.h"
 #include "feature_select.h"
 
+#include <pep384ext.h>
 #include <shiboken.h>
 #include <sbkstaticstrings.h>
 
@@ -23,14 +24,14 @@ extern "C" {
 // `class_property.__get__()`: Always pass the class instead of the instance.
 static PyObject *PyClassProperty_descr_get(PyObject *self, PyObject * /*ob*/, PyObject *cls)
 {
-    return PyProperty_Type.tp_descr_get(self, cls, cls);
+    return PepExt_Type_GetDescrGetSlot(&PyProperty_Type)(self, cls, cls);
 }
 
 // `class_property.__set__()`: Just like the above `__get__()`.
 static int PyClassProperty_descr_set(PyObject *self, PyObject *obj, PyObject *value)
 {
     PyObject *cls = PyType_Check(obj) ? obj : reinterpret_cast<PyObject *>(Py_TYPE(obj));
-    return PyProperty_Type.tp_descr_set(self, cls, value);
+    return PepExt_Type_GetDescrSetSlot(&PyProperty_Type)(self, cls, value);
 }
 
 // PYSIDE-2230: Why is this metaclass necessary?
@@ -80,7 +81,7 @@ static int PyClassProperty_tp_init(PyObject *self, PyObject *args, PyObject *kwa
 {
     auto hold = Py_TYPE(self);
     self->ob_type = &PyProperty_Type;
-    auto ret =  PyProperty_Type.tp_init(self, args, kwargs);
+    auto ret = PepExt_Type_GetInitSlot(&PyProperty_Type)(self, args, kwargs);
     self->ob_type = hold;
     return ret;
 }
@@ -138,9 +139,9 @@ static int SbkObjectType_meta_setattro(PyObject *obj, PyObject *name, PyObject *
                                 && !PyObject_IsInstance(value, class_prop);
     if (call_descr_set) {
         // Call `class_property.__set__()` instead of replacing the `class_property`.
-        return Py_TYPE(descr)->tp_descr_set(descr, obj, value);
+        return PepExt_Type_GetDescrSetSlot(Py_TYPE(descr))(descr, obj, value);
     } // Replace existing attribute.
-    return PyType_Type.tp_setattro(obj, name, value);
+    return PepExt_Type_GetSetAttroSlot(&PyType_Type)(obj, name, value);
 }
 
 } // extern "C"

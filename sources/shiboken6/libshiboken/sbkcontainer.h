@@ -63,7 +63,8 @@ public:
 
     static PyObject *tpNew(PyTypeObject *subtype, PyObject * /* args */, PyObject * /* kwds */)
     {
-        auto *me = reinterpret_cast<ShibokenContainer *>(subtype->tp_alloc(subtype, 0));
+        allocfunc allocFunc = reinterpret_cast<allocfunc>(PepType_GetSlot(subtype, Py_tp_alloc));
+        auto *me = reinterpret_cast<ShibokenContainer *>(allocFunc(subtype, 0));
         auto *d = new ShibokenSequenceContainerPrivate;
         d->m_list = new SequenceContainer;
         d->m_ownsList = true;
@@ -91,7 +92,9 @@ public:
         if (d->m_ownsList)
             delete d->m_list;
         delete d;
-        Py_TYPE(pySelf)->tp_base->tp_free(self);
+        auto freeFunc = reinterpret_cast<freefunc>(PepType_GetSlot(Py_TYPE(pySelf)->tp_base,
+                                                                   Py_tp_free));
+        freeFunc(self);
     }
 
     static Py_ssize_t sqLen(PyObject *self)

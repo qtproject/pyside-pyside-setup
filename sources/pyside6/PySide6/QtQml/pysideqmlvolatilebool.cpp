@@ -3,6 +3,7 @@
 
 #include "pysideqmlvolatilebool.h"
 
+#include <pep384ext.h>
 #include <signature.h>
 
 #include <QtCore/QDebug>
@@ -30,8 +31,7 @@ QtQml_VolatileBoolObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     if (ok < 0)
         return nullptr;
 
-    QtQml_VolatileBoolObject *self
-            = reinterpret_cast<QtQml_VolatileBoolObject *>(type->tp_alloc(type, 0));
+    auto *self = PepExt_TypeCallAlloc<QtQml_VolatileBoolObject>(type, 0);
 
     if (self != nullptr)
         self->flag = new AtomicBool(ok);

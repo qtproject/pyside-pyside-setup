@@ -634,7 +634,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
                 const int index = m_baseObject->indexOfProperty(name);
                 if (index == -1)
                     addProperty(name, value);
-            } else if (Py_TYPE(value)->tp_call != nullptr) {
+            } else if (PepType_GetSlot(Py_TYPE(value), Py_tp_call) != nullptr) {
                 // PYSIDE-198: PyFunction_Check does not work with Nuitka.
                 // Register slots.
                 if (PyObject_HasAttr(value, slotAttrName)) {

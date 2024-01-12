@@ -18,6 +18,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QMetaMethod>
 #include <QtCore/QMetaObject>
+#include <pep384ext.h>
 #include <signature.h>
 
 #include <algorithm>
@@ -298,7 +299,7 @@ static void signalFree(void *vself)
     Py_XDECREF(self->homonymousMethod);
     self->homonymousMethod = nullptr;
 
-    Py_TYPE(pySelf)->tp_base->tp_free(self);
+    PepExt_TypeCallFree(Py_TYPE(pySelf)->tp_base, self);
 }
 
 static PyObject *signalGetItem(PyObject *obSelf, PyObject *key)
@@ -368,7 +369,7 @@ static void signalInstanceFree(void *vself)
         self->d = nullptr;
     }
     self->deleted = true;
-    Py_TYPE(pySelf)->tp_base->tp_free(self);
+    PepExt_TypeCallFree(Py_TYPE(pySelf)->tp_base, self);
 }
 
 // PYSIDE-1523: PyFunction_Check is not accepting compiled functions and
@@ -754,18 +755,16 @@ static PyObject *signalCall(PyObject *self, PyObject *args, PyObject *kw)
         return nullptr;
     }
 
-    descrgetfunc getDescriptor = Py_TYPE(signal->homonymousMethod)->tp_descr_get;
-
     // Check if there exists a method with the same name as the signal, which is also a static
     // method in C++ land.
-    Shiboken::AutoDecRef homonymousMethod(getDescriptor(signal->homonymousMethod,
-                                                        nullptr, nullptr));
+    Shiboken::AutoDecRef homonymousMethod(PepExt_Type_CallDescrGet(signal->homonymousMethod,
+                                                                   nullptr, nullptr));
     if (PyCFunction_Check(homonymousMethod.object())
             && (PyCFunction_GET_FLAGS(homonymousMethod.object()) & METH_STATIC))
         return PyObject_Call(homonymousMethod, args, kw);
 
     // Assumes homonymousMethod is not a static method.
-    ternaryfunc callFunc = Py_TYPE(signal->homonymousMethod)->tp_call;
+    ternaryfunc callFunc = PepExt_Type_GetCallSlot(Py_TYPE(signal->homonymousMethod));
     return callFunc(homonymousMethod, args, kw);
 }
 
@@ -822,8 +821,8 @@ static PyObject *signalInstanceCall(PyObject *self, PyObject *args, PyObject *kw
         return nullptr;
     }
 
-    descrgetfunc getDescriptor = Py_TYPE(hom)->tp_descr_get;
-    Shiboken::AutoDecRef homonymousMethod(getDescriptor(hom, PySideSignal->d->source, nullptr));
+    Shiboken::AutoDecRef homonymousMethod(PepExt_Type_CallDescrGet(hom, PySideSignal->d->source,
+                                                                   nullptr));
     return PyObject_Call(homonymousMethod, args, kw);
 }
 
