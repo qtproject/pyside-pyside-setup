@@ -9,7 +9,7 @@ import sys
 import time
 import warnings
 from argparse import ArgumentParser, RawTextHelpFormatter
-from enum import Enum
+from enum import Enum, auto
 from pathlib import Path
 from typing import List
 
@@ -58,7 +58,16 @@ class BuildMode(Enum):
     MAKE = 3
 
 
-DEFAULT_BUILD_ARGS = ['--build-tests', '--skip-docs', '--quiet']
+class UnityMode(Enum):
+   DEFAULT = auto()
+   ENABLE = auto()
+   DISABLE = auto()
+
+
+UNITY_OPTION = "--unity"
+LOG_LEVEL_OPTION = "--log-level"
+DEFAULT_BUILD_ARGS = ['--build-tests', '--skip-docs', LOG_LEVEL_OPTION, "quiet",
+                      UNITY_OPTION]
 IS_WINDOWS = sys.platform == 'win32'
 INCREDIBUILD_CONSOLE = 'BuildConsole' if IS_WINDOWS else '/opt/incredibuild/bin/ib_console'
 # Config file keys
@@ -75,6 +84,7 @@ DEFAULT_CONFIG_FILE = f"Modules={DEFAULT_MODULES}\n"
 build_mode = BuildMode.NONE
 opt_dry_run = False
 opt_verbose = False
+opt_unity_mode = UnityMode.DEFAULT
 
 
 def which(needle: str):
@@ -284,9 +294,17 @@ def build(target: str):
         arguments.appendh('--avoid')  # caching, v0.96.74
     arguments.extend([read_config_python_binary(), 'setup.py', target])
     build_arguments = read_config_build_arguments()
-    if opt_verbose and '--quiet' in build_arguments:
-        build_arguments.remove('--quiet')
+    if opt_verbose and LOG_LEVEL_OPTION in build_arguments:
+        i = build_arguments.index(LOG_LEVEL_OPTION)
+        del build_arguments[i]
+        del build_arguments[i]
     arguments.extend(build_arguments)
+    if opt_unity_mode != UnityMode.DEFAULT:
+        has_unity = UNITY_OPTION in build_arguments
+        if opt_unity_mode == UnityMode.ENABLE and not has_unity:
+            arguments.append(UNITY_OPTION)
+        elif opt_unity_mode == UnityMode.DISABLE and has_unity:
+            arguments.remove(UNITY_OPTION)
     generator = read_config(GENERATOR_KEY)
     if generator != 'Ninja':
         arguments.extend(['--make-spec', 'ninja'])
@@ -347,6 +365,10 @@ def create_argument_parser(desc):
     parser.add_argument('--version', '-v', action='version', version='%(prog)s 1.0')
     parser.add_argument('--verbose', '-V', action='store_true',
                         help='Turn off --quiet specified in build arguments')
+    parser.add_argument('--unity', '-u', action='store_true',
+                        help='Force unity build')
+    parser.add_argument('--no-unity', action='store_true',
+                        help='Turn off --unity specified in build arguments')
     return parser
 
 
@@ -361,6 +383,11 @@ if __name__ == '__main__':
     options = argument_parser.parse_args()
     opt_dry_run = options.dry_run
     opt_verbose = options.verbose
+
+    if options.unity:
+        opt_unity_mode = UnityMode.ENABLE
+    elif options.no_unity:
+        opt_unity_mode = UnityMode.DISABLE
 
     if options.edit:
         sys.exit(edit_config_file())
