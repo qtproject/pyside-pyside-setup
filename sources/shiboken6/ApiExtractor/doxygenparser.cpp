@@ -119,7 +119,7 @@ void DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
                      + func->originalName() + u"\"]"_s;
 
             if (func->arguments().isEmpty()) {
-                QString args = func->isConstant() ? u"() const "_s : u"()"_s;
+                QString args = func->isConstant() ? u"() const"_s : u"()"_s;
                 query += u"/../argsstring[text()=\""_s + args + u"\"]"_s;
             } else {
                 int i = 1;
