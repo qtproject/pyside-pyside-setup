@@ -1,4 +1,4 @@
-# Copyright (C) 2019 The Qt Company Ltd.
+# Copyright (C) 2024 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 import datetime
@@ -19,9 +19,9 @@ Utility script for working with Qt for Python.
 Feel free to extend!
 
 Typical Usage:
-Update and build a repository: python qp5_tool -p -b
+Update and build a repository: python qfp_tool -p -b
 
-qp5_tool.py uses a configuration file "%CONFIGFILE%"
+qfp_tool.py uses a configuration file "%CONFIGFILE%"
 in the format key=value.
 
 It is possible to use repository-specific values by adding a key postfixed by
@@ -188,7 +188,7 @@ def read_config_file(file_name):
 
 def read_config(key):
     """
-    Read a value from the '$HOME/.qp5_tool' configuration file. When given
+    Read a value from the '$HOME/.qfp_tool' configuration file. When given
     a key 'key' for the repository directory '/foo/qt-5', check for the
     repo-specific value 'key-qt5' and then for the general 'key'.
     """
@@ -356,7 +356,7 @@ if __name__ == '__main__':
     config_file = None
     user = None
 
-    config_file = get_config_file('qp5_tool.conf')
+    config_file = get_config_file('qfp_tool.conf')
     argument_parser = create_argument_parser(DESC.replace('%CONFIGFILE%', str(config_file)))
     options = argument_parser.parse_args()
     opt_dry_run = options.dry_run
