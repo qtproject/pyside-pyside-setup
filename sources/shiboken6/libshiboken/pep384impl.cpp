@@ -1171,6 +1171,39 @@ int PepType_SetDict(PyTypeObject *type, PyObject *dict)
     return 0;
 }
 
+// Pre 3.10, PyType_GetSlot() would only work for heap types.
+// FIXME: PyType_GetSlot() can be used unconditionally when the
+// minimum limited API version is >= 3.10.
+void *PepType_GetSlot(PyTypeObject *type, int aSlot)
+{
+    static const bool is310 = _PepRuntimeVersion() >= 0x030A00;
+    if (is310 || (type->tp_flags & Py_TPFLAGS_HEAPTYPE) != 0)
+        return PyType_GetSlot(type, aSlot);
+
+    switch (aSlot) {
+    case Py_tp_alloc:
+        return reinterpret_cast<void *>(type->tp_alloc);
+    case Py_tp_getattro:
+        return reinterpret_cast<void *>(type->tp_getattro);
+    case Py_tp_setattro:
+        return reinterpret_cast<void *>(type->tp_setattro);
+    case Py_tp_descr_get:
+        return reinterpret_cast<void *>(type->tp_descr_get);
+    case Py_tp_descr_set:
+        return reinterpret_cast<void *>(type->tp_descr_set);
+    case Py_tp_call:
+        return reinterpret_cast<void *>(type->tp_call);
+    case Py_tp_new:
+        return reinterpret_cast<void *>(type->tp_new);
+    case Py_tp_init:
+        return reinterpret_cast<void *>(type->tp_init);
+    case Py_tp_free:
+        return reinterpret_cast<void *>(type->tp_free);
+    }
+    assert(false);
+    return nullptr;
+}
+
 /***************************************************************************
  *
  * PYSIDE-535: The enum/flag error

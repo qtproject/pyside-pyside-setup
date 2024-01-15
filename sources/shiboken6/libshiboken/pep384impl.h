@@ -560,6 +560,8 @@ LIBSHIBOKEN_API PyObject *PepType_GetDict(PyTypeObject *type);
 // is no longer considered to be accessible, we treat it as such.
 LIBSHIBOKEN_API int PepType_SetDict(PyTypeObject *type, PyObject *dict);
 
+LIBSHIBOKEN_API void *PepType_GetSlot(PyTypeObject *type, int aSlot);
+
 /*****************************************************************************
  *
  * Module Initialization
