@@ -151,7 +151,7 @@ by adding a new entry to the `Sidebar.qml` file.
 language: QML
 caption: true
 linenos: true
-lines: 83-90
+lines: 99-105
 ---
 ```
 
@@ -164,7 +164,7 @@ modified. The necessary changes will be made to the Main.qml file:
 language: QML
 caption: true
 linenos: true
-lines: 169-198
+lines: 170-187
 ---
 ```
 
@@ -178,7 +178,7 @@ will also be made to the Main.qml file.
 language: QML
 caption: true
 linenos: true
-lines: 144-145
+lines: 147-150
 ---
 ```
 
