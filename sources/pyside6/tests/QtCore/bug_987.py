@@ -19,7 +19,7 @@ class TestBug987(unittest.TestCase):
 
     def testInvalidDisconnection(self):
         o = QObject()
-        self.assertRaises(RuntimeError, o.destroyed.disconnect, self.callback)
+        self.assertFalse(o.destroyed.disconnect(self.callback))
 
 
 if __name__ == '__main__':

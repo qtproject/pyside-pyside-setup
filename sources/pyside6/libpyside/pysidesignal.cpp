@@ -661,6 +661,12 @@ static PyObject *signalInstanceGetItem(PyObject *self, PyObject *key)
     return nullptr;
 }
 
+static inline void warnDisconnectFailed(PyObject *aSlot, const QByteArray &signature)
+{
+    PyErr_WarnFormat(PyExc_RuntimeError, 0, "Failed to disconnect (%S) from signal \"%s\".",
+                     aSlot, signature.constData());
+}
+
 static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
 {
     auto source = reinterpret_cast<PySideSignalInstance *>(self);
@@ -708,14 +714,14 @@ static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
         Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->source,
                                                        PySide::PySideName::qtDisconnect()));
         PyObject *result = PyObject_CallObject(pyMethod, tupleArgs);
-        if (!result || result == Py_True)
-            return result;
-        Py_DECREF(result);
+        if (result != Py_True)
+            warnDisconnectFailed(slot, source->d->signature);
+        return result;
     }
 
-    PyErr_Format(PyExc_RuntimeError, "Failed to disconnect (%S) from signal \"%s\".",
-                 slot, source->d->signature.constData());
-    return nullptr;
+    warnDisconnectFailed(slot, source->d->signature);
+    Py_INCREF(Py_False);
+    return Py_False;
 }
 
 // PYSIDE-68: Supply the missing __get__ function
@@ -853,7 +859,7 @@ static const char *SignalInstance_SignatureStrings[] = {
     "PySide6.QtCore.SignalInstance.connect(self,slot:object,"
         "type:PySide6.QtCore.Qt.ConnectionType=PySide6.QtCore.Qt.ConnectionType.AutoConnection)"
         "->PySide6.QtCore.QMetaObject.Connection",
-    "PySide6.QtCore.SignalInstance.disconnect(self,slot:object=nullptr)",
+    "PySide6.QtCore.SignalInstance.disconnect(self,slot:object=nullptr)->bool",
     "PySide6.QtCore.SignalInstance.emit(self,*args:typing.Any)",
     nullptr}; // Sentinel
 
