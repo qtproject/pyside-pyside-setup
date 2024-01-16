@@ -122,7 +122,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             scripts = ["pyside_tool.py", "metaobjectdump.py", "project.py", "qml.py",
                        "qtpy2cpp.py", "deploy.py"]
 
-            script_dirs = ["qtpy2cpp_lib", "deploy_lib",  "project"]
+            script_dirs = ["qtpy2cpp_lib", "deploy_lib", "project"]
 
             if sys.platform.startswith("linux"):
                 scripts.append("android_deploy.py")
@@ -170,10 +170,10 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
                 lib_exec_filters.append('QtWebEngineProcess')
             if lib_exec_filters:
                 libexec_executables.extend(copydir("{qt_lib_execs_dir}",
-                                                destination_qt_dir / "libexec",
-                                                _filter=lib_exec_filters,
-                                                recursive=False,
-                                                _vars=_vars))
+                                                   destination_qt_dir / "libexec",
+                                                   _filter=lib_exec_filters,
+                                                   recursive=False,
+                                                   _vars=_vars))
 
         # <install>/lib/lib* -> {st_package_name}/
         copydir(
@@ -214,7 +214,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
         # <source>/pyside6/{st_package_name}/QtAsyncio/* ->
         #   <setup>/{st_package_name}/QtAsyncio/*
         copydir(
-            f"{{site_packages_dir}}/{{st_package_name}}/QtAsyncio",
+            "{site_packages_dir}/{st_package_name}/QtAsyncio",
             "{st_build_dir}/{st_package_name}/QtAsyncio",
             _vars=_vars)
 

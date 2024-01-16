@@ -104,7 +104,7 @@ def _get_py_library_unix(build_type, py_version, py_prefix, py_libdir,
     if hasattr(sys, "pypy_version_info"):
         vi = sys.version_info[:2]
         version_quirk = ".".join(map(str, vi)) if vi >= (3, 9) else "3"
-        pypy_libdir = Path(py_libdir).parent /  "bin"
+        pypy_libdir = Path(py_libdir).parent / "bin"
         for lib_ext in lib_exts:
             lib_name = f"libpypy{version_quirk}-c{lib_ext}"
             pypy_library = pypy_libdir / lib_name

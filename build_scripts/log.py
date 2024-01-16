@@ -8,8 +8,8 @@ from enum import Enum
 logging.basicConfig(format="[%(levelname)s]: %(message)s", level=logging.INFO)
 log = logging.getLogger("qtforpython")
 
+
 class LogLevel(Enum):
     QUIET = 1
     INFO = 2
     VERBOSE = 3
-

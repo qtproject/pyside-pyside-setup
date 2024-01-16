@@ -59,9 +59,9 @@ class BuildMode(Enum):
 
 
 class UnityMode(Enum):
-   DEFAULT = auto()
-   ENABLE = auto()
-   DISABLE = auto()
+    DEFAULT = auto()
+    ENABLE = auto()
+    DISABLE = auto()
 
 
 UNITY_OPTION = "--unity"
