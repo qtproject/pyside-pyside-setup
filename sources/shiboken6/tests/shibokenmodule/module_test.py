@@ -45,6 +45,16 @@ class TestShiboken(unittest.TestCase):
         self.assertTrue(Shiboken.createdByPython(bb))
         bb.disposeObjectType(bb.keepObjectType(obj))
 
+    def testWrapInstancePreserveId(self):
+        """PYSIDE-31: Verify that wrapInstance() returns the existing wrapper
+           even if a base class type is specified."""
+        v = ObjectView()  # inherits ObjectType
+        addresses = Shiboken.getCppPointer(v)
+        self.assertTrue(addresses)
+        address = addresses[0]
+        wrapped = Shiboken.wrapInstance(address, ObjectType)
+        self.assertEqual(id(wrapped), id(v))
+
     def testIsOwnedByPython(self):
         obj = ObjectType()
         self.assertTrue(Shiboken.ownedByPython(obj))
