@@ -24,6 +24,7 @@ Additional options:
   --cmake-toolchain-file               Path to CMake toolchain to enable cross-compiling
   --shiboken-host-path                 Path to host shiboken package when cross-compiling
   --qt-host-path                       Path to host Qt installation when cross-compiling
+  --disable-pyi                        Disable .pyi file generation
 """
 
 
@@ -159,6 +160,7 @@ OPTION = {
     "VERBOSE_BUILD": has_option('verbose-build'),
     "SNAPSHOT_BUILD": has_option("snapshot-build"),
     "LIMITED_API": option_value("limited-api"),
+    "DISABLE_PYI": has_option("disable-pyi"),
     "PACKAGE_TIMESTAMP": option_value("package-timestamp"),
     # This is used automatically by setuptools.command.install object, to
     # specify the final installation location.
@@ -442,8 +444,8 @@ class CommandMixin(object):
         # qtpaths is available. This happens when building the host
         # tools in the overall cross-building process.
         use_cmake = False
-        if (using_cmake_toolchain_file or
-                (not self.qmake and not self.qtpaths and self.qt_target_path)):
+        if (using_cmake_toolchain_file or (not self.qmake
+                                           and not self.qtpaths and self.qt_target_path)):
             use_cmake = True
 
         QtInfo().setup(qtpaths_abs_path, self.cmake, qmake_abs_path,
@@ -541,7 +543,8 @@ class CommandMixin(object):
         # explicitly. This is to help with the building of host tools
         # while cross-compiling.
         # Skip this process for the 'build_rst_docs' command
-        if not self.is_cross_compile and not self.qt_target_path and 'build_rst_docs' not in sys.argv:
+        if not (self.is_cross_compile and not self.qt_target_path
+                and 'build_rst_docs' not in sys.argv):
             # Enforce usage of qmake in QtInfo if it was given explicitly.
             if self.qmake:
                 self.has_qmake_option = True

@@ -113,6 +113,8 @@ using `setup.py build`:
    or macOS only).
  * `--verbose-build`, will output the compiler invocation with command line
    arguments, etc.
+ * `--disable-pyi`, will suppress the generation of .pyi files. This allows
+   debugging when the project builds but the pyi generator complains.
 
 ## Requirements
 
