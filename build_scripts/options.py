@@ -370,7 +370,8 @@ class CommandMixin(object):
         OPTION['NO_STRIP'] = self.no_strip
         OPTION['ONLYPACKAGE'] = self.only_package
         OPTION['STANDALONE'] = self.standalone
-        OPTION['IGNOREGIT'] = self.ignore_git
+        if self.ignore_git:
+            _warn_deprecated_option('ignore_git')
         OPTION['SKIP_DOCS'] = self.skip_docs
         OPTION['BUILD_DOCS'] = self.build_docs
         OPTION['BUILDTESTS'] = self.build_tests
