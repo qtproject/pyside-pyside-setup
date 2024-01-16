@@ -1,13 +1,14 @@
 <?xml version="1.0" ?>
+<!--
+// Copyright (C) 2024 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+-->
 <typesystem package="Shiboken">
     <primitive-type name="bool" />
     <primitive-type name="unsigned long" />
     <primitive-type name="size_t" />
     <add-function signature="isValid(PyObject*)" return-type="bool">
-        <inject-code>
-            bool isValid = Shiboken::Object::isValid(%1, false);
-            %PYARG_0 = %CONVERTTOPYTHON[bool](isValid);
-        </inject-code>
+        <inject-code file="shibokenmodule.cpp" snippet="isvalid"/>
     </add-function>
 
     <add-function signature="invalidate(PyObject*)">
@@ -17,119 +18,40 @@
     </add-function>
 
     <add-function signature="wrapInstance(size_t, PyTypeObject)" return-type="PyObject*">
-        <inject-code>
-            auto *pyType = reinterpret_cast&lt;PyTypeObject *&gt;(%2);
-            if (Shiboken::ObjectType::checkType(pyType)) {
-                %PYARG_0 = Shiboken::Object::newObject(pyType,
-                                                       reinterpret_cast&lt;void *&gt;(%1),
-                                                       false, true);
-            } else {
-                PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
-            }
-        </inject-code>
+        <inject-code file="shibokenmodule.cpp" snippet="wrapinstance"/>
     </add-function>
 
    <add-function signature="getCppPointer(PyObject*)" return-type="PySequence*">
-        <inject-code>
-            if (Shiboken::Object::checkType(%1)) {
-                std::vector&lt;void*> ptrs = Shiboken::Object::cppPointers(reinterpret_cast&lt;SbkObject *&gt;(%1));
-                %PYARG_0 = PyTuple_New(ptrs.size());
-                for (std::size_t i = 0; i &lt; ptrs.size(); ++i)
-                    PyTuple_SET_ITEM(%PYARG_0, i, PyLong_FromVoidPtr(ptrs[i]));
-            } else {
-                PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
-            }
-        </inject-code>
+        <inject-code file="shibokenmodule.cpp" snippet="getcpppointer"/>
    </add-function>
 
    <add-function signature="delete(PyObject*)">
-        <inject-code>
-            if (Shiboken::Object::checkType(%1)) {
-                Shiboken::Object::callCppDestructors(reinterpret_cast&lt;SbkObject *&gt;(%1));
-            } else {
-                PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
-            }
-        </inject-code>
+        <inject-code file="shibokenmodule.cpp" snippet="delete"/>
    </add-function>
 
     <add-function signature="ownedByPython(PyObject*)" return-type="bool">
-        <inject-code>
-            if (Shiboken::Object::checkType(%1)) {
-                bool hasOwnership = Shiboken::Object::hasOwnership(reinterpret_cast&lt;SbkObject *&gt;(%1));
-                %PYARG_0 = %CONVERTTOPYTHON[bool](hasOwnership);
-            } else {
-                PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
-            }
-        </inject-code>
+        <inject-code file="shibokenmodule.cpp" snippet="ownedbypython"/>
     </add-function>
 
     <add-function signature="createdByPython(PyObject*)" return-type="bool">
-        <inject-code>
-            if (Shiboken::Object::checkType(%1)) {
-                bool wasCreatedByPython = Shiboken::Object::wasCreatedByPython(reinterpret_cast&lt;SbkObject *&gt;(%1));
-                %PYARG_0 = %CONVERTTOPYTHON[bool](wasCreatedByPython);
-            } else {
-                PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
-            }
-        </inject-code>
+        <inject-code file="shibokenmodule.cpp" snippet="createdbypython"/>
     </add-function>
 
     <add-function signature="disassembleFrame(PyObject*)" return-type="PyObject">
-        <inject-code>
-            Shiboken::AutoDecRef label(PyObject_Str(%1));
-            const char *marker = Shiboken::String::toCString(label);
-            disassembleFrame(marker);
-            Py_INCREF(Py_None);
-            %PYARG_0 = Py_None;
-        </inject-code>
+        <inject-code file="shibokenmodule.cpp" snippet="disassembleframe"/>
     </add-function>
 
     <add-function signature="dump(PyObject*)" return-type="const char *">
-        <inject-code>
-            if (!Shiboken::Object::checkType(%1)) {
-                %PYARG_0 = Shiboken::String::fromCString("Ordinary Python type.");
-            } else {
-                std::string str = Shiboken::Object::info(reinterpret_cast&lt;SbkObject *&gt;(%1));
-                %PYARG_0 = Shiboken::String::fromCString(str.c_str());
-            }
-        </inject-code>
+        <inject-code file="shibokenmodule.cpp" snippet="dump"/>
     </add-function>
 
     <add-function signature="getAllValidWrappers(void)" return-type="PySequence*">
-        <inject-code>
-            const auto setAll = Shiboken::BindingManager::instance().getAllPyObjects();
-            PyObject* listAll = PyList_New(0);
-            if (listAll == nullptr)
-                return nullptr;
-
-            for (auto *o : setAll) {
-                if (o != nullptr) {
-                    if (PyList_Append(listAll, o) != 0) {
-                        Py_DECREF(listAll);
-                        return nullptr;
-                    }
-                }
-            }
-            return listAll;
-        </inject-code>
+        <inject-code file="shibokenmodule.cpp" snippet="getallvalidwrappers"/>
     </add-function>
 
     <extra-includes>
         <include file-name="sbkversion.h" location="local"/>
         <include file-name="voidptr.h" location="local"/>
     </extra-includes>
-    <inject-code position="end">
-        // Add __version__ and __version_info__ attributes to the module
-        PyObject* version = PyTuple_New(5);
-        PyTuple_SET_ITEM(version, 0, PyLong_FromLong(SHIBOKEN_MAJOR_VERSION));
-        PyTuple_SET_ITEM(version, 1, PyLong_FromLong(SHIBOKEN_MINOR_VERSION));
-        PyTuple_SET_ITEM(version, 2, PyLong_FromLong(SHIBOKEN_MICRO_VERSION));
-        PyTuple_SET_ITEM(version, 3, Shiboken::String::fromCString(SHIBOKEN_RELEASE_LEVEL));
-        PyTuple_SET_ITEM(version, 4, PyLong_FromLong(SHIBOKEN_SERIAL));
-        PyModule_AddObject(module, "__version_info__", version);
-        PyModule_AddStringConstant(module, "__version__", SHIBOKEN_VERSION);
-        VoidPtr::addVoidPtrToModule(module);
-
-        Shiboken::initShibokenSupport(module);
-    </inject-code>
+     <inject-code position="end" file="shibokenmodule.cpp" snippet="init"/>
 </typesystem>
