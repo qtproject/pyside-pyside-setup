@@ -280,7 +280,7 @@ macro(create_pyside_module)
     # Don't generate the files when cross-building because the target python can not be executed
     # on the host machine (usually, unless you use some userspace qemu based mechanism).
     # TODO: Can we do something better here to still get pyi files?
-    if(NOT PYSIDE_IS_CROSS_BUILD)
+    if(NOT (PYSIDE_IS_CROSS_BUILD OR DISABLE_PYI))
         set(generate_pyi_options ${module_NAME} --sys-path
             "${pysidebindings_BINARY_DIR}"
             "${SHIBOKEN_PYTHON_MODULE_DIR}/..")     # use the layer above shiboken6

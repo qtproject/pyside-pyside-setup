@@ -692,11 +692,13 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                              "(default yes if applicable, i.e. Python "
                              "version >= 3.8 and release build if on Windows)")
 
+        if OPTION["DISABLE_PYI"]:
+            cmake_cmd.append("-DDISABLE_PYI=yes")
+
         if OPTION["LOG_LEVEL"] == LogLevel.VERBOSE:
             cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON")
         else:
             cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF")
-
 
         if OPTION['COMPILER_LAUNCHER']:
             compiler_launcher = OPTION['COMPILER_LAUNCHER']
@@ -856,8 +858,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                     if OPTION["LOG_LEVEL"] == LogLevel.VERBOSE and self.make_generator == "Ninja":
                         make_doc_cmd.append("-v")
                     if run_process(make_doc_cmd) != 0:
-                        raise SetupError("Error generating documentation "
-                                                  f"for {extension}")
+                        raise SetupError(f"Error generating documentation for {extension}")
                 else:
                     log.info("Sphinx not found, skipping documentation build")
         else:
@@ -1003,8 +1004,8 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             # (lib/libclang.lib), whereas we want to copy the shared
             # library (bin/libclang.dll).
             clang_lib_path = Path(re.sub(r'lib/libclang.lib$',
-                                    'bin/libclang.dll',
-                                    clang_lib_path))
+                                         'bin/libclang.dll',
+                                         clang_lib_path))
         else:
             clang_lib_path = Path(clang_lib_path)
             # shiboken6 links against libclang.so.6 or a similarly
@@ -1092,6 +1093,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
         message = "Patched rpath to '$ORIGIN/' in"
         if sys.platform.startswith('linux'):
+
             def rpath_cmd(srcpath):
                 final_rpath = ''
                 # Command line rpath option takes precedence over
@@ -1110,6 +1112,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
         elif sys.platform == 'darwin':
             message = "Updated rpath in"
+
             def rpath_cmd(srcpath):
                 final_rpath = ''
                 # Command line rpath option takes precedence over
@@ -1279,7 +1282,7 @@ class PysideBaseDocs(Command, CommandMixin):
             if self.name == PYSIDE:
                 self.sphinx_src = self.out_dir / "base"
                 example_gallery = config.setup_script_dir / "tools" / "example_gallery" / "main.py"
-                assert(example_gallery.is_file())
+                assert example_gallery.is_file()
                 example_gallery_cmd = [sys.executable, os.fspath(example_gallery)]
                 if OPTION["LOG_LEVEL"] == LogLevel.QUIET:
                     example_gallery_cmd.append("--quiet")
