@@ -7,16 +7,18 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from shiboken_paths import init_paths
+from shiboken_paths import init_paths  # noqa: E402
 init_paths()
 
-from shiboken6 import Shiboken
-from sample import *
+from shiboken6 import Shiboken  # noqa: E402
+from sample import BlackBox, ObjectType, ObjectModel, ObjectView, Point  # noqa: E402
+
 
 class MultipleInherited (ObjectType, Point):
     def __init__(self):
         ObjectType.__init__(self)
         Point.__init__(self)
+
 
 class TestShiboken(unittest.TestCase):
     def testIsValid(self):
@@ -55,7 +57,7 @@ class TestShiboken(unittest.TestCase):
         p = ObjectType()
         obj = ObjectType(p)
         obj2 = ObjectType(obj)
-        obj3 = ObjectType(obj)
+        obj3 = ObjectType(obj)  # noqa: F841
         self.assertEqual(Shiboken.dump(None), "Ordinary Python type.")
         Shiboken.dump(obj)
 
@@ -69,9 +71,9 @@ class TestShiboken(unittest.TestCase):
 
         # Don't crash even after deleting an object
         Shiboken.invalidate(obj)
-        Shiboken.dump(obj)  # deleted
-        Shiboken.dump(p)    # child deleted
-        Shiboken.dump(obj2) # parent deleted
+        Shiboken.dump(obj)   # deleted
+        Shiboken.dump(p)     # child deleted
+        Shiboken.dump(obj2)  # parent deleted
 
     def testDelete(self):
         obj = ObjectType()
