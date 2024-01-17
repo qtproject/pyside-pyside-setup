@@ -1,12 +1,16 @@
-setuptools==67.8.0
-packaging
-build==0.7
-six
-wheel>=0.35
+# Build dependencies
+setuptools==69.0.3
+packaging==23.2
+build==1.0.3
+wheel==0.42.0
+distro==1.9.0; sys_platform == 'linux'
+patchelf==0.17.2; sys_platform == 'linux'
+# 1.24.4 is the last version that supports Python 3.8
+numpy<1.25; python_version < '3.9'
+numpy==1.26.3; python_version >= '3.9'
+
+# For examples
 PyOpenGL
+
+# For tests
 pyinstaller==3.6; platform_machine != 'aarch64'
-numpy
-distro; sys_platform == 'linux'
-patchelf==0.15; sys_platform == 'linux'
-tqdm; sys_platform == 'linux'
-gitpython; sys_platform == 'linux'

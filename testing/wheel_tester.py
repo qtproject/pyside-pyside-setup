@@ -35,9 +35,9 @@ this_dir = os.path.dirname(this_file)
 setup_script_dir = os.path.abspath(os.path.join(this_dir, ".."))
 sys.path.append(setup_script_dir)
 
-from build_scripts.utils import (find_files_using_glob, find_glob_in_path,
+from build_scripts.utils import (find_files_using_glob, find_glob_in_path,  # noqa: E402
                                  remove_tree, run_process, run_process_output)
-from build_scripts.log import log
+from build_scripts.log import log  # noqa: E402
 
 log.setLevel(logging.DEBUG)
 
@@ -83,7 +83,8 @@ def package_prefix_names():
     # Note: shiboken6_generator is not needed for compile_using_nuitka,
     # but building modules with cmake needs it.
     if NEW_WHEELS:
-        return ["shiboken6", "shiboken6_generator", "PySide6_Essentials", "PySide6_Addons", "PySide6"]
+        return ["shiboken6", "shiboken6_generator", "PySide6_Essentials", "PySide6_Addons",
+                "PySide6"]
     else:
         return ["shiboken6", "shiboken6_generator", "PySide6"]
 
@@ -360,7 +361,7 @@ def try_build_examples():
             for modname in modules:
                 # PYSIDE-1735: pyi files are no longer compatible with Python.
                 # XXX Maybe add a test with Mypy here?
-                pass # execute_script(src_path / f"{modname}.pyi")
+                pass  # execute_script(src_path / f"{modname}.pyi")
 
 
 def run_wheel_tests(install_wheels, wheels_dir_name):
@@ -392,7 +393,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("--qmake", type=str, help="Path to qmake")
     parser.add_argument("--cmake", type=str, help="Path to cmake")
-    parser.add_argument("--wheels-dir", type=str, help="Path to where the wheels are", default="dist")
+    parser.add_argument("--wheels-dir", type=str, help="Path to where the wheels are",
+                        default="dist")
     parser.add_argument("--new", action="store_true", help="Option to test new wheels")
     options = parser.parse_args()
     QMAKE_PATH = find_executable("qmake", options.qmake)
