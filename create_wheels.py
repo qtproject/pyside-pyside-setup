@@ -12,6 +12,7 @@ from shutil import copy, rmtree, copytree
 from typing import List, Optional, Tuple
 
 import build  # type: ignore
+import pyproject_hooks
 from build_scripts.wheel_files import (ModuleData,  # type: ignore
                                        set_pyside_package_path,
                                        wheel_files_pyside_addons,
@@ -20,6 +21,7 @@ from build_scripts.utils import available_pyside_tools
 
 
 PACKAGE_FOR_WHEELS = "package_for_wheels"
+PYSIDE_DESCRIPTION = "Python bindings for the Qt cross-platform application and UI framework"
 
 
 @dataclass
@@ -136,6 +138,11 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData) -> str:
 
     _tag = get_platform_tag()
 
+    _console_scripts = ""
+    if setup.console_scripts:
+        _formatted_console_scripts = "\n".join(setup.console_scripts)
+        _console_scripts = f"[project.scripts]\n{_formatted_console_scripts}"
+
     with open(artifacts / "pyproject.toml.base") as f:
         content = (
             f.read()
@@ -144,6 +151,7 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData) -> str:
             .replace("PROJECT_DESCRIPTION", f'"{setup.description}"')
             .replace("PROJECT_README", f'"{setup.readme}"')
             .replace("PROJECT_TAG", f'"{_tag}"')
+            .replace("PROJECT_SCRIPTS", _console_scripts)
         )
 
     return content
@@ -187,7 +195,6 @@ def generate_setup_py(artifacts: Path, setup: SetupData):
             name=_name,
             fake_ext=fext,
             install=install_requires,
-            console_scripts={"console_scripts": setup.console_scripts},
         )
 
     return content
@@ -200,8 +207,8 @@ def wheel_shiboken_generator(package_path: Path) -> Tuple[SetupData, None]:
         description="Python/C++ bindings generator",
         readme="README.shiboken6-generator.md",
         console_scripts=[
-            "shiboken6 = shiboken6_generator.scripts.shiboken_tool:main",
-            "shiboken6-genpyi = shiboken6_generator.scripts.shiboken_tool:genpyi",
+            'shiboken6 = "shiboken6_generator.scripts.shiboken_tool:main"',
+            'shiboken6-genpyi = "shiboken6_generator.scripts.shiboken_tool:genpyi"',
         ],
     )
 
@@ -229,16 +236,16 @@ def wheel_pyside6_essentials(package_path: Path) -> Tuple[SetupData, List[Module
     # Also, the tool should not exist in any other platform than Linux
     _console_scripts = []
     if ("android_deploy" in _pyside_tools) and sys.platform.startswith("linux"):
-        _console_scripts = ["pyside6-android-deploy = PySide6.scripts.pyside_tool:android_deploy"]
+        _console_scripts = ['pyside6-android-deploy = "PySide6.scripts.pyside_tool:android_deploy"']
     _pyside_tools.remove("android_deploy")
 
-    _console_scripts.extend([f"pyside6-{tool} = PySide6.scripts.pyside_tool:{tool}"
+    _console_scripts.extend([f'pyside6-{tool} = "PySide6.scripts.pyside_tool:{tool}"'
                             for tool in _pyside_tools])
 
     setup = SetupData(
         name="PySide6_Essentials",
         version=get_version_from_package("PySide6", package_path),  # we use 'PySide6' here
-        description="Python bindings for the Qt cross-platform application and UI framework (Essentials)",
+        description=f"{PYSIDE_DESCRIPTION} (Essentials)",
         readme="README.pyside6_essentials.md",
         console_scripts=_console_scripts
     )
@@ -252,7 +259,7 @@ def wheel_pyside6_addons(package_path: Path) -> Tuple[SetupData, List[ModuleData
     setup = SetupData(
         name="PySide6_Addons",
         version=get_version_from_package("PySide6", package_path),  # we use 'PySide6' here
-        description="Python bindings for the Qt cross-platform application and UI framework (Addons)",
+        description=f"{PYSIDE_DESCRIPTION} (Addons)",
         readme="README.pyside6_addons.md",
         console_scripts=[],
     )
@@ -266,7 +273,7 @@ def wheel_pyside6(package_path: Path) -> Tuple[SetupData, Optional[List[ModuleDa
     setup = SetupData(
         name="PySide6",
         version=get_version_from_package("PySide6", package_path),
-        description="Python bindings for the Qt cross-platform application and UI framework",
+        description=PYSIDE_DESCRIPTION,
         readme="README.pyside6.md",
         console_scripts=[],
     )
@@ -423,18 +430,18 @@ if __name__ == "__main__":
         # 5. call the build module to create the wheel
         print("-- Creating wheels")
         if not verbose:
-            _runner = build.pep517.wrappers.quiet_subprocess_runner
+            _runner = pyproject_hooks.quiet_subprocess_runner
         else:
-            _runner = build.pep517.wrappers.default_subprocess_runner
+            _runner = pyproject_hooks.default_subprocess_runner
         builder = build.ProjectBuilder(package_path, runner=_runner)
-        builder.build("wheel", "dist_new")
+        builder.build("wheel", "dist")
 
         # 6. Copy wheels back
-        print("-- Copying wheels to dist_new/")
-        dist_path = Path("dist_new")
+        print("-- Copying wheels to dist/")
+        dist_path = Path("dist")
         if not dist_path.is_dir():
             dist_path.mkdir()
-        for wheel in Path(package_path / "dist_new").glob("*.whl"):
+        for wheel in Path(package_path / "dist").glob("*.whl"):
             copy(wheel, dist_path / wheel.name)
 
         # 7. Remove leftover files

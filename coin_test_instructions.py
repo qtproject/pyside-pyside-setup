@@ -6,7 +6,7 @@ import site
 import sys
 
 from build_scripts.log import log
-from build_scripts.options import has_option, log, option_value
+from build_scripts.options import has_option, option_value
 from build_scripts.utils import (expand_clang_variables, get_ci_qmake_path,
                                  get_qtci_virtualEnv, remove_tree, run_instruction)
 
@@ -30,7 +30,8 @@ CI_RELEASE_CONF = has_option("packaging")
 
 
 def call_testrunner(python_ver, buildnro):
-    _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH, CI_TARGET_ARCH)
+    _pExe, _env, env_pip, env_python = get_qtci_virtualEnv(python_ver, CI_HOST_OS, CI_HOST_ARCH,
+                                                           CI_TARGET_ARCH)
     remove_tree(_env, True)
     # Pinning the virtualenv before creating one
     # Use pip3 if possible while pip seems to install the virtualenv to wrong dir in some OS
@@ -42,9 +43,11 @@ def call_testrunner(python_ver, buildnro):
     if CI_HOST_OS == "MacOS" and CI_HOST_ARCH == "ARM64":
         v_env = "virtualenv"
         run_instruction([str(v_env), "-p", str(_pExe), str(_env)], "Failed to create virtualenv")
-        run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
+        run_instruction([env_pip, "install", "-r", "requirements.txt"],
+                        "Failed to install dependencies")
     else:
-        run_instruction([python3, "-m", "pip", "install", "--user", "virtualenv==20.7.2"], "Failed to pin virtualenv")
+        run_instruction([python3, "-m", "pip", "install", "--user", "virtualenv==20.7.2"],
+                        "Failed to pin virtualenv")
         # installing to user base might not be in PATH by default.
         env_path = os.path.join(site.USER_BASE, "bin")
         v_env = os.path.join(env_path, "virtualenv")
@@ -59,8 +62,10 @@ def call_testrunner(python_ver, buildnro):
             v_env = "virtualenv"
         run_instruction([str(v_env), "-p", str(_pExe), str(_env)], "Failed to create virtualenv")
         # When the 'python_ver' variable is empty, we are using Python 2
-        # Pip is always upgraded when CI template is provisioned, upgrading it in later phase may cause perm issue
-        run_instruction([env_pip, "install", "-r", "requirements.txt"], "Failed to install dependencies")
+        # Pip is always upgraded when CI template is provisioned,
+        # upgrading it in later phase may cause perm issue
+        run_instruction([env_pip, "install", "-r", "requirements.txt"],
+                        "Failed to install dependencies")
         # Install distro to replace missing platform.linux_distribution() in python3.8
         run_instruction([env_pip, "install", "distro"], "Failed to install distro")
 
@@ -73,18 +78,8 @@ def call_testrunner(python_ver, buildnro):
     # Try to install built wheels, and build some buildable examples.
     if CI_RELEASE_CONF:
         wheel_tester_path = os.path.join("testing", "wheel_tester.py")
-        # We create wheels differently in Qt CI with Windows and there are no "old" wheels
-        if CI_HOST_OS != "Windows":
-            # Run the test for the old set of wheels
-            cmd = [env_python, wheel_tester_path, qmake_path]
-            run_instruction(cmd, "Error while running wheel_tester.py on old wheels")
-
-            # Uninstalling the other wheels
-            run_instruction([env_pip, "uninstall", "shiboken6", "shiboken6_generator", "pyside6", "-y"],
-                            "Failed to uninstall old wheels")
-
         # Run the test for the new set of wheels
-        cmd = [env_python, wheel_tester_path, qmake_path, "--wheels-dir=dist_new", "--new"]
+        cmd = [env_python, wheel_tester_path, qmake_path, "--wheels-dir=dist", "--new"]
         run_instruction(cmd, "Error while running wheel_tester.py on new wheels")
 
 

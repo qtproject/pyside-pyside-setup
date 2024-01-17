@@ -20,7 +20,6 @@ class build_ext(Command):
 setup_args = dict(
     include_package_data=True,
     packages = ["{name}"],
-    entry_points = {console_scripts},
     ext_modules = [Extension("{fake_ext}", [], py_limited_api=True)],
     install_requires={install},
     cmdclass=dict([("build_ext", build_ext)]),

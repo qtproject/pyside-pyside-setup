@@ -50,12 +50,11 @@ Repository = "https://code.qt.io/cgit/pyside/pyside-setup.git/"
 Changelog = "https://code.qt.io/cgit/pyside/pyside-setup.git/tree/doc/changelogs"
 Tracker = "https://bugreports.qt.io/projects/PYSIDE"
 
+PROJECT_SCRIPTS
+
 [tool.distutils.bdist_wheel]
 py_limited_api = "cp38"
 plat_name = PROJECT_TAG
-
-[tool.setuptools.packages]
-find = {}
 
 [tool.setuptools.dynamic]
 version = {attr = PROJECT_VERSION}
