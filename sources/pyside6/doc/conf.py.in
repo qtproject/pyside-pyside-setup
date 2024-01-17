@@ -138,6 +138,11 @@ html_theme = 'furo'
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
+    # FIXME: This option is currently enable because on the 'requirements-doc.txt'
+    # We are using a fork of the theme, to include this new option.
+    # This needs to be removed once the functionality is either upstreamed,
+    # or a similar option is provided.
+    "collapse_navbar": True,
     "dark_css_variables": {
         "color-brand-primary": "#2cde85",
         "color-brand-content": "#2cde85",
