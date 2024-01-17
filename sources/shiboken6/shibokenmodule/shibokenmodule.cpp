@@ -10,10 +10,12 @@ bool isValid = Shiboken::Object::isValid(%1, false);
 auto *pyType = reinterpret_cast<PyTypeObject *>(%2);
 if (Shiboken::ObjectType::checkType(pyType)) {
     auto *ptr = reinterpret_cast<void *>(%1);
-    if (auto *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(ptr))
+    if (auto *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(ptr)) {
+        Py_INCREF(wrapper);
         %PYARG_0 = reinterpret_cast<PyObject *>(wrapper);
-    else
+    } else {
         %PYARG_0 = Shiboken::Object::newObject(pyType, ptr, false, true);
+    }
 } else {
     PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
 }
