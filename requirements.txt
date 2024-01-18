@@ -4,7 +4,7 @@ build==0.7
 six
 wheel>=0.35
 PyOpenGL
-pyinstaller==3.6; platform_machine != 'aarch64'
+pyinstaller==5.13.1; platform_machine != 'aarch64'
 numpy
 distro; sys_platform == 'linux'
 patchelf==0.15; sys_platform == 'linux'
