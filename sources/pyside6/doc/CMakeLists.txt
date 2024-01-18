@@ -172,8 +172,8 @@ if (FULLDOCSBUILD)
     add_custom_target(qdoc DEPENDS "${DOC_DATA_DIR}/webxml/qtcore-index.webxml")
 
     add_custom_command(OUTPUT "${DOC_DATA_DIR}/webxml/qtcore-index.webxml"
-                       # Use dummy Qt version information, QDoc needs it but has no effect on WebXML output
-                       COMMAND ${python_executable} qdoc_spawner.py
+                        Use dummy Qt version information, QDoc needs it but has no effect on WebXML output
+                       COMMAND ${CMAKE_COMMAND} -E env ${python_executable} qdoc_spawner.py
                            --qt=${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}
                            --doc-data-dir=${DOC_DATA_DIR}
                            --qdoc-binary=${qdoc_binary}
@@ -203,6 +203,7 @@ if(DOC_OUTPUT_FORMAT STREQUAL "html")
                     ${CMAKE_CURRENT_BINARY_DIR}/../../shiboken6/doc/html
                     ${CMAKE_CURRENT_BINARY_DIR}/html/shiboken6
             COMMENT "Copying Shiboken docs..."
+            DEPENDS "${DOC_DATA_DIR}/webxml/qtcore-index.webxml"
             VERBATIM)
 else()
     if(qhelpgenerator_binary)
@@ -214,6 +215,7 @@ else()
                 COMMAND ${python_executable} ${PATCH_QHP_SCRIPT} -p -v pyside6 ${QHP_FILE}
                 COMMAND "${qhelpgenerator_binary}" ${QHP_FILE}
                 COMMENT "Generating QCH from a QHP file..."
+                DEPENDS "${DOC_DATA_DIR}/webxml/qtcore-index.webxml"
                 VERBATIM
         )
     else()

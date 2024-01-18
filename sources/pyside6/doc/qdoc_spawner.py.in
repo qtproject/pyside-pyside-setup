@@ -3,19 +3,19 @@
 
 import argparse
 import subprocess
+import os
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
 
 def run_qdoc(file, qdoc_args, args):
-    env = {
-        "BUILDDIR": args.build_dir,
-        "QT_INSTALL_DOCS": args.qt_install_docs,
-        "QT_VERSION": args.qt_version,
-        "QT_VER": ".".join(args.qt_version.split(".")[:2]),
-        "QT_VERSION_TAG": args.qt_version,
-    }
+    env = os.environ
+    env["BUILDDIR"] = args.build_dir
+    env["QT_INSTALL_DOCS"] = args.qt_install_docs
+    env["QT_VERSION"] = args.qt_version
+    env["QT_VER"] = ".".join(args.qt_version.split(".")[:2])
+    env["QT_VERSION_TAG"] = args.qt_version
 
     command = [
         args.qdoc_bin,
@@ -38,6 +38,7 @@ def run_qdoc(file, qdoc_args, args):
             print(out, file=sys.stdout)
         if err:
             print(err, file=sys.stderr)
+            raise Exception(f"Failing executing the command {command}")
     else:
         _.wait()
 
@@ -84,10 +85,14 @@ if __name__ == "__main__":
     if parallel == "auto":
         parallel = cpu_count()
 
-    # mode: -prepare -no-link-errors
-    with Pool(int(parallel)) as p:
-        p.starmap(run_qdoc, [(str(f), ["-prepare", "-no-link-errors"], args) for f in files_prepare])
+    try:
+        # mode: -prepare -no-link-errors
+        with Pool(int(parallel)) as p:
+            p.starmap(run_qdoc, [(str(f), ["-prepare", "-no-link-errors"], args) for f in files_prepare])
 
-    # mode: -single-exec
-    with Pool(int(parallel)) as p:
-        p.starmap(run_qdoc, [(str(f), ["-single-exec"], args) for f in files_single_exec])
+        # mode: -single-exec
+        with Pool(int(parallel)) as p:
+            p.starmap(run_qdoc, [(str(f), ["-single-exec"], args) for f in files_single_exec])
+    except Exception as e:
+        print(f"Error while running qdoc_spawner: {e}", file=sys.stderr)
+        sys.exit(-1)
