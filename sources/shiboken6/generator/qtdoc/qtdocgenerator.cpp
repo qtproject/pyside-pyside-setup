@@ -353,11 +353,13 @@ void QtDocGenerator::generateClass(TextStream &s, const GeneratorContext &classC
     if (documentation.hasBrief())
         writeFormattedBriefText(s, documentation, metaClass);
 
-    if (m_options.inheritanceDiagram) {
-        s << ".. inheritance-diagram:: " << metaClass->fullName()<< '\n'
-          << "    :parts: 2\n\n";
-    } else {
-        writeInheritedFromList(s, metaClass);
+    if (!metaClass->baseClasses().isEmpty()) {
+        if (m_options.inheritanceDiagram) {
+            s << ".. inheritance-diagram:: " << metaClass->fullName()<< '\n'
+              << "    :parts: 2\n\n";
+        } else {
+            writeInheritedFromList(s, metaClass);
+        }
     }
 
     writeInheritedByList(s, metaClass, api().classes());
