@@ -5,6 +5,7 @@ import argparse
 import subprocess
 import os
 import sys
+import time
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
@@ -27,23 +28,23 @@ def run_qdoc(file, qdoc_args, args):
         args.doc_data_dir,
     ]
 
+    start_time = time.time()
     _ = subprocess.Popen(command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = _.communicate()
+    returncode = _.wait()
+    duration = round(time.time() - start_time)
 
-    if args.verbose:
-        _out, _err = _.communicate()
-        out = _out.decode("utf-8")
-        err = _err.decode("utf-8")
+    if args.verbose or returncode != 0 or err:
+       cmd_str = " ".join(command)
+       print(f"> Output of: {cmd_str}")
+       if out:
+           print(out.decode("utf-8"), file=sys.stdout)
+       if err:
+            print(err.decode("utf-8"), file=sys.stderr)
+       print(f"> Finished: {file} {duration}s (exit code {returncode})")
 
-        if out:
-            print(out, file=sys.stdout)
-        if err:
-            print(err, file=sys.stderr)
-            raise Exception(f"Failing executing the command {command}")
-    else:
-        _.wait()
-
-    if args.verbose:
-        print(f"> Finished: {file}")
+    if returncode != 0:
+       raise Exception(f"Failing executing the command {command} ({returncode})")
 
 
 def get_qdocconf_files():
@@ -94,5 +95,5 @@ if __name__ == "__main__":
         with Pool(int(parallel)) as p:
             p.starmap(run_qdoc, [(str(f), ["-single-exec"], args) for f in files_single_exec])
     except Exception as e:
-        print(f"Error while running qdoc_spawner: {e}", file=sys.stderr)
+        print(f"qdoc_spawner: error: {e}", file=sys.stderr)
         sys.exit(-1)
