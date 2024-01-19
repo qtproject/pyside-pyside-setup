@@ -1,0 +1,66 @@
+Qt for Python 6.6.2 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - [PYSIDE-535]  PyPySide has been updated to Python 3.10
+ - [PYSIDE-769]  QtAsyncio: call_soon_threadsafe() and QtAsyncio.run() (with
+   [PYSIDE-1112] keep_running and quit_qapp arguments) have been implemented.
+   [PYSIDE-2561] A bug with Python 3.12 has been fixed. Documentation has
+   [PYSIDE-2575] been added. Keyboard interrupts are now caught. Cancelling
+                 waiting tasks has been fixed. Tasks are now awaitable.
+ - [PYSIDE-1106] Documentation: The generation process has been optimized
+                 and warnings have been reduced.
+ - [PYSIDE-1586] Qt Charts: class QColorAxis has been added.
+ - [PYSIDE-1612] Android Deployment: The QtQuick dependency is now added
+                 when present.
+ - [PYSIDE-1612] Deployment problems when using pyenv have been fixed.
+ - [PYSIDE-1612] Nuitka has been upgraded to 1.8.0
+ - [PYSIDE-1612] Deployment: An icon for the application has been added.
+ - [PYSIDE-1612] A separate requirements.txt for Android deployment has been
+                 added.
+ - [PYSIDE-1612] Android Deployment: `buildozer` is now installed with the
+                 --init cli argument
+ - [PYSIDE-1931] Further hangs in QSql(Relational)TableModel.select() (PostGres
+                 with SSH tunnel) have been fixed.
+ - [PYSIDE-2206] Examples quick3d/proceduraltexture, sql/books have been
+                 updated. The contactslist has been added. Examples supported
+                 on Android are tagged as `Android`.
+ - [PYSIDE-2439] FindPython is now used instead of the deprecated
+                 FindPythonInterp and FindPythonLibs CMake modules.
+ - [PYSIDE-2539] Documentation: The enum name is now generated for flags.
+ - [PYSIDE-2544] A crash accessing QDBusVariant.variant() has been fixed.
+ - [PYSIDE-2547] A hang in QDBusConnection.connect() has been fixed.
+ - [PYSIDE-2558] Documentation: the differences between commercial and lts
+                 releases have been clarified.
+ - [PYSIDE-2568] A crash of pyside6-designer with pyenv on Unix has been
+                 fixed.
+ - [PYSIDE-2574] Documentation: A favicon for browser tabs has been added.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-1106] Documentation: An option to disable the inheritance diagram
+                 has been added.
+ - [PYSIDE-1735] An error in the generated code when all enum values are
+                 deprecated has been fixed.
+ - [PYSIDE-2404] pyi file generation can now be disabled for debugging.
+ - [PYSIDE-2530] yocto cross builds have been fixed to find
+                 shiboken_wrapper.sh.
+ - [PYSIDE-2577] Documentation/doxygen: A bug querying const functions
+                 has been fixed.
