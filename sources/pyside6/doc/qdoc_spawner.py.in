@@ -80,6 +80,12 @@ if __name__ == "__main__":
     parser.add_argument("--verbose", dest="verbose", action="store_true", default=False)
 
     args = parser.parse_args()
+
+    core_index = Path(args.doc_data_dir) / "webxml" / "qtcore-index.webxml"
+    if core_index.is_file():
+        print(f"qdoc_spawner: {core_index} already exists, bailing out")
+        sys.exit(0)
+
     files_prepare, files_single_exec = get_qdocconf_files()
 
     parallel = args.parallel
