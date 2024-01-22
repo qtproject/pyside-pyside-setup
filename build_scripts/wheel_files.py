@@ -166,6 +166,7 @@ def wheel_files_pyside_essentials() -> List[ModuleData]:
         module_QtQml(),
         module_QtQuick(),
         module_QtQuickControls2(),
+        module_QtQuickTest(),
         module_QtQuickWidgets(),
         module_QtXml(),
         module_QtTest(),
@@ -576,6 +577,12 @@ def module_QtQuickControls2() -> ModuleData:
     data = ModuleData("QuickControls2")
     data.qtlib.append("libQt6QuickControls2Impl")
     data.metatypes.append("qt6quickcontrols2impl_relwithdebinfo_metatypes.json")
+
+    return data
+
+
+def module_QtQuickTest() -> ModuleData:
+    data = ModuleData("QuickTest")
 
     return data
 
