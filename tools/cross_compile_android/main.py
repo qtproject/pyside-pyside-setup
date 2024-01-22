@@ -4,9 +4,9 @@
 import sys
 import logging
 import argparse
-import tempfile
 import stat
 import warnings
+import shutil
 from dataclasses import dataclass
 
 from pathlib import Path
@@ -20,23 +20,27 @@ from android_utilities import (run_command, download_android_commandlinetools,
 # Note: Does not work with PyEnv. Your Host Python should contain openssl.
 PYTHON_VERSION = "3.10"
 
-APIC_HELP = ('''
-Points to the installation path of Python for the specific Android
-platform. If the path given does not exist, then Python for Android
-is cross compiled for the specific platform and installed into this
-path as <path>/Python-'plat_name'/_install.
-
-If this path is not given, then Python for Android is cross-compiled
-into a temportary directory, which is deleted when the Qt for Python
-Android wheels are created.
-''')
-
 SKIP_UPDATE_HELP = ("skip the updation of SDK packages build-tools, platform-tools to"
                     " latest version")
 
 ACCEPT_LICENSE_HELP = ('''
 Accepts license automatically for Android SDK installation. Otherwise,
 accept the license manually through command line.
+''')
+
+CLEAN_CACHE_HELP = ('''
+Cleans cache stored in $HOME/.pyside6_deploy_cache.
+Options:
+
+1. all - all the cache including Android Ndk, Android Sdk and Cross-compiled Python are deleted.
+2. ndk - Only the Android Ndk is deleted.
+3. sdk - Only the Android Sdk is deleted.
+4. python - The cross compiled Python for all platforms, the cloned CPython, the cross compilation
+            scripts for all platforms are deleted.
+5. toolchain - The CMake toolchain file required for cross-compiling Qt for Python, for all
+               platforms are deleted.
+
+If --clean-cache is used and no explicit value is suppied, then `all` is used as default.
 ''')
 
 
@@ -91,10 +95,6 @@ if __name__ == "__main__":
     parser.add_argument("-occp", "--only-cross-compile-python", action="store_true",
                         help="Only cross compiles Python for the specified Android platform")
 
-    parser.add_argument("-apic", "--android-python-install-path", type=str, default=None,
-                        required=occp_exists(),
-                        help=APIC_HELP)
-
     parser.add_argument("--dry-run", action="store_true", help="show the commands to be run")
 
     parser.add_argument("--skip-update", action="store_true",
@@ -102,6 +102,10 @@ if __name__ == "__main__":
 
     parser.add_argument("--auto-accept-license", action="store_true",
                         help=ACCEPT_LICENSE_HELP)
+
+    parser.add_argument("--clean-cache", type=str, nargs="?", const="all",
+                        choices=["all", "python", "ndk", "sdk", "toolchain"],
+                        help=CLEAN_CACHE_HELP)
 
     args = parser.parse_args()
 
@@ -111,10 +115,6 @@ if __name__ == "__main__":
     ndk_path = args.ndk_path
     sdk_path = args.sdk_path
     only_py_cross_compile = args.only_cross_compile_python
-    python_path = args.android_python_install_path
-    # the same android platforms are named differently in CMake, Cpython and Qt.
-    # Hence, we need to distinguish them
-    qt_plat_name = None
     android_abi = None
     gcc_march = None
     plat_bits = None
@@ -123,9 +123,35 @@ if __name__ == "__main__":
     api_level = args.api_level
     skip_update = args.skip_update
     auto_accept_license = args.auto_accept_license
+    clean_cache = args.clean_cache
 
     # auto download Android NDK and SDK
     pyside6_deploy_cache = Path.home() / ".pyside6_android_deploy"
+    logging.info(f"Cache created at {str(pyside6_deploy_cache.resolve())}")
+    pyside6_deploy_cache.mkdir(exist_ok=True)
+
+    if pyside6_deploy_cache.exists() and clean_cache:
+        if clean_cache == "all":
+            shutil.rmtree(pyside6_deploy_cache)
+        elif clean_cache == "ndk":
+            cached_ndk_dir = pyside6_deploy_cache / "android-ndk"
+            if cached_ndk_dir.exists():
+                shutil.rmtree(cached_ndk_dir)
+        elif clean_cache == "sdk":
+            cached_sdk_dir = pyside6_deploy_cache / "android-sdk"
+            if cached_sdk_dir.exists():
+                shutil.rmtree(cached_sdk_dir)
+        elif clean_cache == "python":
+            cached_cpython_dir = pyside6_deploy_cache / "cpython"
+            if cached_cpython_dir.exists():
+                shutil.rmtree(pyside6_deploy_cache / "cpython")
+            for cc_python_path in pyside6_deploy_cache.glob("Python-*"):
+                if cc_python_path.is_dir():
+                    shutil.rmtree(cc_python_path)
+        elif clean_cache == "toolchain":
+            for toolchain_path in pyside6_deploy_cache.glob("toolchain_*"):
+                if toolchain_path.is_file():
+                    toolchain_path.unlink()
 
     if not ndk_path:
         # Download android ndk
@@ -137,20 +163,6 @@ if __name__ == "__main__":
         # install and update required android packages
         install_android_packages(android_sdk_dir=sdk_path, android_api=api_level, dry_run=dry_run,
                                  accept_license=auto_accept_license, skip_update=skip_update)
-
-    # python path is valid, if Python for android installation exists in python_path
-    valid_python_path = True
-    if python_path and Path(python_path).exists():
-        expected_dirs = ["lib", "include"]
-        for expected_dir in expected_dirs:
-            if not (Path(python_path) / expected_dir).is_dir():
-                valid_python_path = False
-                warnings.warn(
-                    "Given target Python, given through --android-python-install-path does not"
-                    "contain Python. New Python for android will be cross compiled and installed"
-                    "in this directory"
-                )
-                break
 
     templates_path = Path(__file__).parent / "templates"
 
@@ -169,15 +181,28 @@ if __name__ == "__main__":
     else:  # plat_name is x86_64
         platform_data = PlatformData("x86_64", api_level, "x86_64", "x86_64", "x86-64", "64")
 
-    # clone cpython and checkout 3.10
-    with tempfile.TemporaryDirectory() as temp_dir:
-        environment = Environment(loader=FileSystemLoader(templates_path))
-        temp_dir = Path(temp_dir)
-        logging.info(f"temp dir created at {temp_dir}")
-        if not python_path or not valid_python_path:
-            cpython_dir = temp_dir / "cpython"
-            python_ccompile_script = cpython_dir / "cross_compile.sh"
+    # python path is valid, if Python for android installation exists in python_path
+    python_path = (pyside6_deploy_cache / f"Python-{platform_data.plat_name}-linux-android"
+                   / "_install")
+    valid_python_path = python_path.exists()
+    if Path(python_path).exists():
+        expected_dirs = ["lib", "include"]
+        for expected_dir in expected_dirs:
+            if not (Path(python_path) / expected_dir).is_dir():
+                valid_python_path = False
+                warnings.warn(
+                    f"{str(python_path.resolve())} is corrupted. New Python for {plat_name} "
+                    f"android will be cross-compiled into {str(pyside6_deploy_cache.resolve())}"
+                )
+                break
 
+    environment = Environment(loader=FileSystemLoader(templates_path))
+    if not valid_python_path:
+        # clone cpython and checkout 3.10
+        cpython_dir = pyside6_deploy_cache / "cpython"
+        python_ccompile_script = cpython_dir / f"cross_compile_{plat_name}.sh"
+
+        if not cpython_dir.exists():
             logging.info(f"cloning cpython {PYTHON_VERSION}")
             Repo.clone_from(
                 "https://github.com/python/cpython.git",
@@ -186,18 +211,14 @@ if __name__ == "__main__":
                 branch=PYTHON_VERSION,
             )
 
-            if not python_path:
-                android_py_install_path_prefix = temp_dir
-            else:
-                android_py_install_path_prefix = python_path
-
+        if not python_ccompile_script.exists():
             # use jinja2 to create cross_compile.sh script
             template = environment.get_template("cross_compile.tmpl.sh")
             content = template.render(
                 plat_name=platform_data.plat_name,
                 ndk_path=ndk_path,
                 api_level=platform_data.api_level,
-                android_py_install_path_prefix=android_py_install_path_prefix,
+                android_py_install_path_prefix=pyside6_deploy_cache,
             )
 
             logging.info(f"Writing Python cross compile script into {python_ccompile_script}")
@@ -207,30 +228,35 @@ if __name__ == "__main__":
             # give run permission to cross compile script
             python_ccompile_script.chmod(python_ccompile_script.stat().st_mode | stat.S_IEXEC)
 
-            # run the cross compile script
-            logging.info(f"Running Python cross-compile for platform {platform_data.plat_name}")
-            run_command(["./cross_compile.sh"], cwd=cpython_dir, dry_run=dry_run, show_stdout=True)
+        # clean built files
+        logging.info("Cleaning CPython built files")
+        run_command(["make", "distclean"], cwd=cpython_dir, dry_run=dry_run, ignore_fail=True)
 
-            python_path = (f"{android_py_install_path_prefix}"
-                           f"/Python-{platform_data.plat_name}-linux-android/_install")
+        # run the cross compile script
+        logging.info(f"Running Python cross-compile for platform {platform_data.plat_name}")
+        run_command([f"./{python_ccompile_script.name}"], cwd=cpython_dir, dry_run=dry_run,
+                    show_stdout=True)
 
-            # run patchelf to change the SONAME of libpython from libpython3.x.so.1.0 to
-            # libpython3.x.so, to match with python_for_android's Python library. Otherwise,
-            # the Qfp binaries won't be able to link to Python
-            run_command(["patchelf", "--set-soname", f"libpython{PYTHON_VERSION}.so",
-                        f"libpython{PYTHON_VERSION}.so.1.0"], cwd=Path(python_path) / "lib",
-                        dry_run=dry_run)
+        # run patchelf to change the SONAME of libpython from libpython3.x.so.1.0 to
+        # libpython3.x.so, to match with python_for_android's Python library. Otherwise,
+        # the Qfp binaries won't be able to link to Python
+        run_command(["patchelf", "--set-soname", f"libpython{PYTHON_VERSION}.so",
+                    f"libpython{PYTHON_VERSION}.so.1.0"], cwd=Path(python_path) / "lib",
+                    dry_run=dry_run)
 
-            logging.info(
-                f"Cross compile Python for Android platform {platform_data.plat_name}. "
-                f"Final installation in "
-                f"{python_path}"
-            )
+        logging.info(
+            f"Cross compile Python for Android platform {platform_data.plat_name}. "
+            f"Final installation in {python_path}"
+        )
 
-            if only_py_cross_compile:
-                sys.exit(0)
+    if only_py_cross_compile:
+        print(f"Python for Android platforms: {plat_name} cross compiled "
+              f"to {str(pyside6_deploy_cache)}")
+        sys.exit(0)
 
-        qfp_toolchain = temp_dir / f"toolchain_{platform_data.plat_name}.cmake"
+    qfp_toolchain = pyside6_deploy_cache / f"toolchain_{platform_data.plat_name}.cmake"
+
+    if not qfp_toolchain.exists():
         template = environment.get_template("toolchain_default.tmpl.cmake")
         content = template.render(
             ndk_path=ndk_path,
@@ -246,23 +272,22 @@ if __name__ == "__main__":
             target_python_path=python_path
         )
 
-        logging.info(f"Writing Qt for Python toolchain file into"
-                     f"{qfp_toolchain}")
+        logging.info(f"Writing Qt for Python toolchain file into {qfp_toolchain}")
         with open(qfp_toolchain, mode="w", encoding="utf-8") as ccompile_script:
             ccompile_script.write(content)
 
         # give run permission to cross compile script
         qfp_toolchain.chmod(qfp_toolchain.stat().st_mode | stat.S_IEXEC)
 
-        # run the cross compile script
-        logging.info(f"Running Qt for Python cross-compile for platform {platform_data.plat_name}")
-        qfp_ccompile_cmd = [sys.executable, "setup.py", "bdist_wheel", "--parallel=9",
-                            "--standalone", "--limited-api=yes",
-                            f"--cmake-toolchain-file={str(qfp_toolchain.resolve())}",
-                            f"--qt-host-path={qt_install_path}/gcc_64",
-                            f"--plat-name=android_{platform_data.plat_name}",
-                            f"--python-target-path={python_path}",
-                            (f"--qt-target-path={qt_install_path}/"
-                             f"android_{platform_data.qt_plat_name}"),
-                            "--no-qt-tools", "--unity"]
-        run_command(qfp_ccompile_cmd, cwd=pyside_setup_dir, dry_run=dry_run, show_stdout=True)
+    # run the cross compile script
+    logging.info(f"Running Qt for Python cross-compile for platform {platform_data.plat_name}")
+    qfp_ccompile_cmd = [sys.executable, "setup.py", "bdist_wheel", "--parallel=9",
+                        "--standalone", "--limited-api=yes",
+                        f"--cmake-toolchain-file={str(qfp_toolchain.resolve())}",
+                        f"--qt-host-path={qt_install_path}/gcc_64",
+                        f"--plat-name=android_{platform_data.plat_name}",
+                        f"--python-target-path={python_path}",
+                        (f"--qt-target-path={qt_install_path}/"
+                            f"android_{platform_data.qt_plat_name}"),
+                        "--no-qt-tools", "--unity"]
+    run_command(qfp_ccompile_cmd, cwd=pyside_setup_dir, dry_run=dry_run, show_stdout=True)
