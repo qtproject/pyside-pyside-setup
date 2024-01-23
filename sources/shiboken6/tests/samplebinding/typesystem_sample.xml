@@ -429,7 +429,7 @@
     </value-type>
 
     <value-type name="ClassWithFunctionPointer">
-        <suppress-warning text="^skipping function 'void ClassWithFunctionPointer::callFunctionPointer.*$" />
+        <suppress-warning text="^skipping public function 'void ClassWithFunctionPointer::callFunctionPointer.*$" />
     </value-type>
 
     <value-type name="IntArray" generate="no"/>
@@ -2445,5 +2445,5 @@
     <suppress-warning text="Shadowing: MDerived2::castToBase3() and MDerived3::castToBase3()" />
     <suppress-warning text="Visibility of function 'publicMethod' modified in class 'MDerived1'" />
 
-    <suppress-warning text="^skipping function 'std::enable_if.*ComparisonTester::operator[!=]=.*ComparisonTester.*$"/>
+    <suppress-warning text="^skipping public function 'std::enable_if.*ComparisonTester::operator[!=]=.*ComparisonTester.*$"/>
 </typesystem>

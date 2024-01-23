@@ -26,6 +26,22 @@ using namespace Qt::StringLiterals;
 
 // abstractmetabuilder.cpp
 
+static QTextStream &operator<<(QTextStream &s, Access a)
+{
+    switch (a) {
+    case Access::Public:
+        s << "public";
+        break;
+    case Access::Protected:
+        s << "protected";
+        break;
+    case Access::Private:
+        s << "private";
+        break;
+    }
+    return s;
+}
+
 QString msgNoFunctionForModification(const AbstractMetaClassCPtr &klass,
                                      const QString &signature,
                                      const QString &originalSignature,
@@ -301,7 +317,8 @@ QString msgSkippingFunction(const FunctionModelItem &functionItem,
 {
     QString result;
     QTextStream str(&result);
-    str << functionItem->sourceLocation() << "skipping ";
+    str << functionItem->sourceLocation() << "skipping "
+        << functionItem->accessPolicy() << ' ';
     if (functionItem->isAbstract())
         str << "abstract ";
     str << "function '" << signature << "', " << why;
@@ -338,8 +355,9 @@ QString msgSkippingField(const VariableModelItem &field, const QString &classNam
 {
     QString result;
     QTextStream str(&result);
-    str << field->sourceLocation() << "skipping field '" << className
-        << "::" << field->name() << "' with unmatched type '" << type << '\'';
+    str << field->sourceLocation() << "skipping " << field->accessPolicy()
+        << " field '" << className << "::" << field->name()
+        << "' with unmatched type '" << type << '\'';
     return result;
 }
 

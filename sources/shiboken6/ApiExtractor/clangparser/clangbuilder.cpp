@@ -431,6 +431,7 @@ void BuilderPrivate::addField(const CXCursor &cursor)
     field->setScope(m_scope);
     field->setType(createTypeInfo(cursor));
     field->setMutable(clang_CXXField_isMutable(cursor) != 0);
+    setFileName(cursor, field.get());
     m_currentField = field;
     m_scopeStack.back()->addVariable(field);
 }
@@ -1057,6 +1058,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         }
     }
         d->m_currentFunction = d->createFunction(cursor, CodeModel::Normal, true);
+        d->setFileName(cursor, d->m_currentFunction.get());
         d->m_scopeStack.back()->addFunction(d->m_currentFunction);
         break;
     case CXCursor_FunctionDecl:
