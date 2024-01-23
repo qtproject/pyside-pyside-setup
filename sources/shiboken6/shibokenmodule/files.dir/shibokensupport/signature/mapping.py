@@ -1,6 +1,8 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
+# flake8: noqa E:203
+
 """
 mapping.py
 
@@ -20,9 +22,11 @@ from pathlib import Path
 from typing import TypeVar, Generic
 from _imp import is_builtin
 
+
 class ellipsis(object):
     def __repr__(self):
         return "..."
+
 
 ellipsis = ellipsis()
 Point = typing.Tuple[int, int]
@@ -38,7 +42,7 @@ _S = TypeVar("_S")
 MultiMap = typing.DefaultDict[str, typing.List[str]]
 
 # ulong_max is only 32 bit on windows.
-ulong_max = 2*sys.maxsize+1 if len(struct.pack("L", 1)) != 4 else 0xffffffff
+ulong_max = 2 * sys.maxsize + 1 if len(struct.pack("L", 1)) != 4 else 0xffffffff
 ushort_max = 0xffff
 
 GL_COLOR_BUFFER_BIT = 0x00004000
@@ -74,6 +78,7 @@ class _NotCalled(str):
         text = self if self.endswith(")") else self + "()"
         return eval(text, namespace)
 
+
 USE_PEP563 = False
 # Note: we cannot know if this feature has been imported.
 # Otherwise it would be "sys.version_info[:2] >= (3, 7)".
@@ -85,6 +90,7 @@ USE_PEP563 = False
 # Some types are abstract. They just show their name.
 class Virtual(_NotCalled):
     pass
+
 
 # Other types I simply could not find.
 class Missing(_NotCalled):
@@ -98,6 +104,7 @@ class Missing(_NotCalled):
 class Invalid(_NotCalled):
     pass
 
+
 # Helper types
 class Default(_NotCalled):
     pass
@@ -105,6 +112,7 @@ class Default(_NotCalled):
 
 class Instance(_NotCalled):
     pass
+
 
 # Parameterized primitive variables
 class _Parameterized(object):
@@ -115,14 +123,17 @@ class _Parameterized(object):
     def __repr__(self):
         return f"{type(self).__name__}({self.type.__name__})"
 
+
 # Mark the primitive variables to be moved into the result.
 class ResultVariable(_Parameterized):
     pass
+
 
 # Mark the primitive variables to become Sequence, Iterable or List
 # (decided in the parser).
 class ArrayLikeVariable(_Parameterized):
     pass
+
 
 StringList = ArrayLikeVariable(str)
 
@@ -180,6 +191,7 @@ def check_module(mod):
         mod_name = mod.__name__
         raise ImportError(f"Module '{mod_name}' is not a binary module!")
 
+
 update_mapping = Reloader().update
 type_map = {}
 namespace = globals()  # our module's __dict__
@@ -200,9 +212,9 @@ type_map.update({
     "PyCallable": typing.Callable,
     "PyObject": object,
     "PyObject*": object,
-    "PyArrayObject": ArrayLikeVariable, # numpy
+    "PyArrayObject": ArrayLikeVariable,  # numpy
     "PyPathLike": typing.Union[str, bytes, os.PathLike],
-    "PySequence": typing.Iterable,  # important for numpy
+    "PySequence": typing.Iterable,   # important for numpy
     "PyTypeObject": type,
     "QChar": str,
     "QHash": typing.Dict,
@@ -267,16 +279,16 @@ type_map.update({
     "ulong": int,
     "ULONG_MAX": ulong_max,
     "UINT64_MAX": 0xffffffff,
-    "unsigned char": int, # 5.9
+    "unsigned char": int,  # 5.9
     "unsigned char*": str,
     "unsigned int": int,
-    "unsigned long int": int, # 5.6, RHEL 6.6
+    "unsigned long int": int,  # 5.6, RHEL 6.6
     "unsigned long long": int,
     "unsigned long": int,
-    "unsigned short int": int, # 5.6, RHEL 6.6
+    "unsigned short int": int,  # 5.6, RHEL 6.6
     "unsigned short": int,
     "ushort": int,
-    "void": int, # be more specific?
+    "void": int,  # be more specific?
     "WId": WId,
     "zero(bytes)": b"",
     "zero(Char)": 0,
@@ -290,7 +302,7 @@ type_map.update({
     "numpy.ndarray": typing.List[typing.Any],
     "std.array[int, 4]": typing.List[int],
     "std.array[float, 4]": typing.List[float]
-    })
+})
 
 type_map.update({
     # Handling variables declared as array:
@@ -314,7 +326,7 @@ type_map.update({
     "array int32_t*"        : ArrayLikeVariable(int),
     "array uint32_t*"       : ArrayLikeVariable(int),
     "array intptr_t*"       : ArrayLikeVariable(int),
-    })
+})
 
 type_map.update({
     # Special cases:
@@ -324,7 +336,7 @@ type_map.update({
     "quint8*"       : bytearray,  # only for QCborStreamReader and QCborValue
     "uchar*"        : typing.Union[bytes, bytearray, memoryview],
     "unsigned char*": typing.Union[bytes, bytearray, memoryview],
-    })
+})
 
 type_map.update({
     # Handling variables that are returned, eventually as Tuples:
@@ -346,7 +358,7 @@ type_map.update({
     "uint*"         : ResultVariable(int),
     "unsigned int*" : ResultVariable(int),
     "QStringList*"  : ResultVariable(StringList),
-    })
+})
 
 
 type_map.update({
@@ -354,19 +366,20 @@ type_map.update({
     "[typing.Any]"  : [typing.Any],
     "[typing.Any,typing.Any]"  : [typing.Any, typing.Any],
     "None" : None,
-    })
+})
 
 
 # PYSIDE-1328: We need to handle "self" explicitly.
 type_map.update({
     "self" : "self",
     "cls"  : "cls",
-    })
+})
 
 # PYSIDE-1538: We need to treat "std::optional" accordingly.
 type_map.update({
     "std.optional": typing.Optional,
     })
+
 
 # The Shiboken Part
 def init_Shiboken():
@@ -376,6 +389,7 @@ def init_Shiboken():
         "size_t": int,
     })
     return locals()
+
 
 def init_minimal():
     type_map.update({
@@ -436,6 +450,7 @@ def init_smart():
     # This missing type should be defined in module smart. We cannot set it to Missing()
     # because it is a container type. Therefore, we supply a surrogate:
     global SharedPtr
+
     class SharedPtr(Generic[_S]):
         __module__ = "smart"
     smart.SharedPtr = SharedPtr
@@ -449,7 +464,7 @@ def init_smart():
 def init_PySide6_QtCore():
     from PySide6.QtCore import Qt, QUrl, QDir, QKeyCombination
     from PySide6.QtCore import QRect, QRectF, QSize, QPoint, QLocale, QByteArray
-    from PySide6.QtCore import QMarginsF # 5.9
+    from PySide6.QtCore import QMarginsF  # 5.9
     from PySide6.QtCore import SignalInstance
     try:
         # seems to be not generated by 5.9 ATM.
@@ -460,23 +475,23 @@ def init_PySide6_QtCore():
         "' '": " ",
         "'%'": "%",
         "'g'": "g",
-        "4294967295UL": 4294967295, # 5.6, RHEL 6.6
+        "4294967295UL": 4294967295,  # 5.6, RHEL 6.6
         "CheckIndexOption.NoOption": Instance(
-            "PySide6.QtCore.QAbstractItemModel.CheckIndexOptions.NoOption"), # 5.11
+            "PySide6.QtCore.QAbstractItemModel.CheckIndexOptions.NoOption"),  # 5.11
         "DescriptorType(-1)": int,  # Native handle of QSocketDescriptor
         "false": False,
         "list of QAbstractAnimation": typing.List[PySide6.QtCore.QAbstractAnimation],
         "long long": int,
         "size_t": int,
-        "NULL": None, # 5.6, MSVC
-        "nullptr": None, # 5.9
+        "NULL": None,  # 5.6, MSVC
+        "nullptr": None,  # 5.9
         "PyBuffer": typing.Union[bytes, bytearray, memoryview],
         "PyByteArray": bytearray,
         "PyBytes": typing.Union[bytes, bytearray, memoryview],
         "PyTuple": typing.Tuple,
         "QDeadlineTimer(QDeadlineTimer.Forever)": Instance("PySide6.QtCore.QDeadlineTimer"),
         "PySide6.QtCore.QUrl.ComponentFormattingOptions":
-            PySide6.QtCore.QUrl.ComponentFormattingOption, # mismatch option/enum, why???
+            PySide6.QtCore.QUrl.ComponentFormattingOption,  # mismatch option/enum, why???
         "PyUnicode": typing.Text,
         "QByteArrayView": QByteArray,
         "Q_NULLPTR": None,
@@ -486,15 +501,15 @@ def init_PySide6_QtCore():
             "QDir.Filters(QDir.AllEntries | QDir.NoDotAndDotDot)"),
         "QDir.SortFlags(Name | IgnoreCase)": Instance(
             "QDir.SortFlags(QDir.Name | QDir.IgnoreCase)"),
-        "QEvent.Type.None" : None,
-        "QGenericArgument((0))": ellipsis, # 5.6, RHEL 6.6. Is that ok?
+        "QEvent.Type.None": None,
+        "QGenericArgument((0))": ellipsis,  # 5.6, RHEL 6.6. Is that ok?
         "QGenericArgument()": ellipsis,
         "QGenericArgument(0)": ellipsis,
-        "QGenericArgument(NULL)": ellipsis, # 5.6, MSVC
-        "QGenericArgument(nullptr)": ellipsis, # 5.10
+        "QGenericArgument(NULL)": ellipsis,  # 5.6, MSVC
+        "QGenericArgument(nullptr)": ellipsis,  # 5.10
         "QGenericArgument(Q_NULLPTR)": ellipsis,
         "QJsonObject": typing.Dict[str, PySide6.QtCore.QJsonValue],
-        "QModelIndex()": Invalid("PySide6.QtCore.QModelIndex"), # repr is btw. very wrong, fix it?!
+        "QModelIndex()": Invalid("PySide6.QtCore.QModelIndex"),  # repr is btw. very wrong, fix it?!
         "QModelIndexList": typing.List[PySide6.QtCore.QModelIndex],
         "PySideSignalInstance": SignalInstance,
         "QString()": "",
@@ -502,17 +517,16 @@ def init_PySide6_QtCore():
         "QStringList()": [],
         "QStringRef": str,
         "QStringRef": str,
-        "Qt.HANDLE": int, # be more explicit with some constants?
+        "Qt.HANDLE": int,  # be more explicit with some constants?
         "QUrl.FormattingOptions(PrettyDecoded)": Instance(
             "QUrl.FormattingOptions(QUrl.PrettyDecoded)"),
         "QVariant()": Invalid(Variant),
-        "QVariant.Type": type, # not so sure here...
-        "QVariantMap": typing.Dict[str, Variant],
+        "QVariant.Type": type,  # not so sure here...
         "QVariantMap": typing.Dict[str, Variant],
     })
     try:
         type_map.update({
-            "PySide6.QtCore.QMetaObject.Connection": PySide6.QtCore.Connection, # wrong!
+            "PySide6.QtCore.QMetaObject.Connection": PySide6.QtCore.Connection,  # wrong!
         })
     except AttributeError:
         # this does not exist on 5.9 ATM.
@@ -537,7 +551,7 @@ def init_PySide6_QtConcurrent():
 
 
 def init_PySide6_QtGui():
-    from PySide6.QtGui import QPageLayout, QPageSize # 5.12 macOS
+    from PySide6.QtGui import QPageLayout, QPageSize  # 5.12 macOS
     type_map.update({
         "0.0f": 0.0,
         "1.0f": 1.0,
@@ -547,9 +561,9 @@ def init_PySide6_QtGui():
         "HBITMAP": int,
         "HICON": int,
         "HRGN": int,
-        "QPixmap()": Default("PySide6.QtGui.QPixmap"), # can't create without qApp
-        "QPlatformSurface*": int, # a handle
-        "QVector< QTextLayout.FormatRange >()": [], # do we need more structure?
+        "QPixmap()": Default("PySide6.QtGui.QPixmap"),  # can't create without qApp
+        "QPlatformSurface*": int,  # a handle
+        "QVector< QTextLayout.FormatRange >()": [],  # do we need more structure?
         "uint32_t": int,
         "uint8_t": int,
         "USHRT_MAX": ushort_max,
@@ -563,8 +577,9 @@ def init_PySide6_QtGui():
 
 
 def init_PySide6_QtWidgets():
-    from PySide6.QtWidgets import QWidget, QMessageBox, QStyleOption, QStyleHintReturn, QStyleOptionComplex
-    from PySide6.QtWidgets import QGraphicsItem, QStyleOptionGraphicsItem # 5.9
+    from PySide6.QtWidgets import (QWidget, QMessageBox, QStyleOption,
+                                   QStyleHintReturn, QStyleOptionComplex,
+                                   QGraphicsItem, QStyleOptionGraphicsItem)
     type_map.update({
         "QMessageBox.StandardButtons(Yes | No)": Instance(
             "QMessageBox.StandardButtons(QMessageBox.Yes | QMessageBox.No)"),
@@ -585,7 +600,7 @@ def init_PySide6_QtSql():
     from PySide6.QtSql import QSqlDatabase
     type_map.update({
         "QLatin1StringView(QSqlDatabase.defaultConnection)": QSqlDatabase.defaultConnection,
-        "QVariant.Invalid": Invalid("Variant"), # not sure what I should create, here...
+        "QVariant.Invalid": Invalid("Variant"),  # not sure what I should create, here...
     })
     return locals()
 
@@ -609,7 +624,7 @@ def init_PySide6_QtOpenGL():
     type_map.update({
         "GLbitfield": int,
         "GLenum": int,
-        "GLfloat": float, # 5.6, MSVC 15
+        "GLfloat": float,  # 5.6, MSVC 15
         "GLint": int,
         "GLuint": int,
     })
