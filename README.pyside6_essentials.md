@@ -26,6 +26,7 @@ it includes only the essentials Qt modules:
 * QtQml
 * QtQuick
 * QtQuickControls2
+* QtQuickTest
 * QtQuickWidgets
 * QtXml
 * QtTest
