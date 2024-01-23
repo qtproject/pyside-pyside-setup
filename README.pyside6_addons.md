@@ -22,6 +22,7 @@ it includes the following Qt modules:
 * QtBluetooth
 * QtCharts
 * QtDataVisualization
+* QtGraphs
 * QtMultimedia
 * QtMultimediaWidgets
 * QtNetworkAuth
@@ -32,7 +33,10 @@ it includes the following Qt modules:
 * QtScxml
 * QtSensors
 * QtSerialPort
+* QtSerialBus
+* QtSpatialAudio
 * QtStateMachine
+* QtTextToSpeech
 * QtVirtualKeyboard
 * QtWebChannel
 * QtWebEngineCore
@@ -42,6 +46,8 @@ it includes the following Qt modules:
 * QtPdf
 * QtPdfWidgets
 * QtHttpServer
+* QtLocation
+* QtAsyncio
 
 ### Documentation and Bugs
 
