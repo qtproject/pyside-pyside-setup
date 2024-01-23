@@ -13,6 +13,7 @@ from typing import List, Optional, Tuple
 
 import build  # type: ignore
 import pyproject_hooks
+import build_scripts.wheel_files
 from build_scripts.wheel_files import (ModuleData,  # type: ignore
                                        set_pyside_package_path,
                                        wheel_files_pyside_addons,
@@ -333,6 +334,33 @@ def get_build_directory(options: Namespace):
     raise Exception("Unable to determine build directory, no matching virtual environment found")
 
 
+def check_modules_consistency():
+    available_functions = dir(build_scripts.wheel_files)
+    functions = [i.replace("module_", "") for i in available_functions if i.startswith("module_")]
+
+    sources = [i.stem for i in Path("sources/pyside6/PySide6/").glob("Qt*")]
+
+    missing_modules = set(sources) - set(functions)
+
+    if len(missing_modules):
+        print("Warning: the following modules don't have a function "
+              f"in 'build_scripts/wheel_files.py':\n  {missing_modules}")
+
+    # Check READMEs
+    readme_modules = set()
+    for r in Path(".").glob("README.pyside6*"):
+        with open(r) as f:
+            for line in f:
+                if line.startswith("* Qt"):
+                    readme_modules.add(line.strip().replace("* ", ""))
+
+    missing_modules_readme = set(sources) - readme_modules
+
+    if len(missing_modules_readme):
+        print("Warning: the following modules are not in READMEs :"
+              f"\n  {missing_modules_readme}")
+
+
 if __name__ == "__main__":
 
     parser = ArgumentParser()
@@ -350,6 +378,10 @@ if __name__ == "__main__":
              "'package_for_wheels' folder"
     )
     options = parser.parse_args()
+
+    # Sanity check between the available modules,
+    # and the functions in build_scripts/wheel_files.py
+    check_modules_consistency()
 
     build_directory = get_build_directory(options)
 
