@@ -171,8 +171,8 @@ if __name__ == "__main__":
     # are named like x86_64-linux-android27-clang
     platform_data = None
     if plat_name == "armv7a":
-        platform_data = PlatformData("armv7a", f"eabi{api_level}", "armeabi-v7a", "armv7", "armv7",
-                                     "32")
+        platform_data = PlatformData("armv7a", api_level, "armeabi-v7a", "armv7",
+                                     "armv7", "32")
     elif plat_name == "aarch64":
         platform_data = PlatformData("aarch64", api_level, "arm64-v8a", "arm64_v8a", "armv8-a",
                                      "64")
