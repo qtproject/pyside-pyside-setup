@@ -157,7 +157,7 @@ def wheel_files_pyside_essentials() -> List[ModuleData]:
         module_QtWidgets(),
         module_QtHelp(),
         module_QtNetwork(),
-        module_QtConcurent(),
+        module_QtConcurrent(),
         module_QtDBus(),
         module_QtDesigner(),
         module_QtOpenGL(),
@@ -383,7 +383,7 @@ def module_QtBluetooth() -> ModuleData:
     return data
 
 
-def module_QtConcurent() -> ModuleData:
+def module_QtConcurrent() -> ModuleData:
     data = ModuleData("Concurrent")
 
     return data
