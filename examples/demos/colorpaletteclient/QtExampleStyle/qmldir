@@ -1,0 +1,5 @@
+module QtExampleStyle
+Button 1.0 Button.qml
+Popup 1.0 Popup.qml
+TextField 1.0 TextField.qml
+singleton UIStyle 1.0 UIStyle.qml

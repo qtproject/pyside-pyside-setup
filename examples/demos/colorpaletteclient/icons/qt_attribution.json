@@ -1,0 +1,14 @@
+{
+    "Id": "colorpaletteclient",
+    "Name": "Selected Material Icons",
+    "QDocModule": "qtdoc",
+    "QtUsage": "Used in Color Palette Client example in QtDoc",
+    "QtParts": [
+        "examples"
+    ],
+    "Files": "close.svg delete.svg dots.svg edit.svg login.svg logout.svg ok.svg update.svg user.svg",
+    "Homepage": "https://fonts.google.com/icons",
+    "License": "Apache License Version 2.0",
+    "LicenseId": "Apache-2.0",
+    "Copyright": "Copyright 2018 Google, Inc. All Rights Reserved."
+}

@@ -1,0 +1,7 @@
+module ColorPalette
+Main 1.0 Main.qml
+ColorDialogDelete 1.0 ColorDialogDelete.qml
+ColorDialogEditor 1.0 ColorDialogEditor.qml
+ColorView 1.0 ColorView.qml
+ServerSelection 1.0 ServerSelection.qml
+UserMenu 1.0 UserMenu.qml

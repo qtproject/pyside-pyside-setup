@@ -1,0 +1,21 @@
+{
+    "files": [
+        "abstractresource.py",
+        "basiclogin.py",
+        "main.py",
+        "paginatedresource.py",
+        "restservice.py",
+        "colorpaletteclient.qrc",
+        "ColorPalette/ColorDialogDelete.qml",
+        "ColorPalette/ColorDialogEditor.qml",
+        "ColorPalette/ColorView.qml",
+        "ColorPalette/Main.qml",
+        "ColorPalette/ServerSelection.qml",
+        "ColorPalette/UserMenu.qml",
+        "QtExampleStyle/Button.qml",
+        "QtExampleStyle/Popup.qml",
+        "QtExampleStyle/TextField.qml",
+        "QtExampleStyle/UIStyle.qml",
+        "colorpaletteclient.qrc"
+    ]
+}

@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/qt/qml/ColorPalette">
+        <file>icons/close.svg</file>
+        <file>icons/delete.svg</file>
+        <file>icons/dots.svg</file>
+        <file>icons/edit.svg</file>
+        <file>icons/login.svg</file>
+        <file>icons/logout.svg</file>
+        <file>icons/ok.svg</file>
+        <file>icons/plus.svg</file>
+        <file>icons/qt.png</file>
+        <file>icons/testserver.png</file>
+        <file>icons/update.svg</file>
+        <file>icons/user.svg</file>
+        <file>icons/userMask.svg</file>
+    </qresource>
+</RCC>
