@@ -5,7 +5,11 @@
 cmake_minimum_required(VERSION 3.18)
 include_guard(GLOBAL)
 set(CMAKE_SYSTEM_NAME Android)
+{% if plat_name == "armv7a" -%}
+set(CMAKE_SYSTEM_PROCESSOR armv7-a)
+{% else %}
 set(CMAKE_SYSTEM_PROCESSOR {{ plat_name }})
+{% endif %}
 set(CMAKE_ANDROID_API {{ api_level }})
 set(CMAKE_ANDROID_NDK {{ ndk_path }})
 set(CMAKE_ANDROID_ARCH_ABI {{ android_abi }})
@@ -15,8 +19,12 @@ if(NOT DEFINED ANDROID_PLATFORM AND NOT DEFINED ANDROID_NATIVE_API_LEVEL)
     set(ANDROID_PLATFORM "android-{{ api_level }}" CACHE STRING "")
 endif()
 set(ANDROID_SDK_ROOT {{ sdk_path }})
-
-set(QT_COMPILER_FLAGS "--target={{ plat_name }}-linux-android{{ api_level }} \
+{% if plat_name == "armv7a" -%}
+set(_TARGET_NAME_ENDING "eabi{{ api_level }}")
+{% else %}
+set(_TARGET_NAME_ENDING "{{ api_level }}")
+{% endif %}
+set(QT_COMPILER_FLAGS "--target={{ plat_name }}-linux-android${_TARGET_NAME_ENDING} \
                        -fomit-frame-pointer \
                        -march={{ gcc_march }} \
                        -msse4.2 \

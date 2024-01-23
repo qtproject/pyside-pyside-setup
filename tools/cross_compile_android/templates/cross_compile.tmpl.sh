@@ -6,11 +6,17 @@ export HOST_ARCH={{ plat_name }}-linux-android
 export TOOLCHAIN={{ ndk_path }}/toolchains/llvm/prebuilt/linux-x86_64/bin
 export TOOL_PREFIX=$TOOLCHAIN/$HOST_ARCH
 export PLATFORM_API={{ api_level }}
+{% if plat_name == "armv7a" -%}
+export CXX=${TOOL_PREFIX}eabi${PLATFORM_API}-clang++
+export CPP="${TOOL_PREFIX}eabi${PLATFORM_API}-clang++ -E"
+export CC=${TOOL_PREFIX}eabi${PLATFORM_API}-clang
+{% else %}
 export CXX=${TOOL_PREFIX}${PLATFORM_API}-clang++
 export CPP="${TOOL_PREFIX}${PLATFORM_API}-clang++ -E"
+export CC=${TOOL_PREFIX}${PLATFORM_API}-clang
+{% endif %}
 export AR=$TOOLCHAIN/llvm-ar
 export RANLIB=$TOOLCHAIN/llvm-ranlib
-export CC=$TOOL_PREFIX${PLATFORM_API}-clang
 export LD=$TOOLCHAIN/ld
 export READELF=$TOOLCHAIN/llvm-readelf
 export CFLAGS='-fPIC -DANDROID'
