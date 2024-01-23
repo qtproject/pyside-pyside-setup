@@ -14,9 +14,7 @@ by producing a lot of clarity.
 import inspect
 import sys
 import types
-import typing
 from shibokensupport.signature import get_signature as get_sig
-from shibokensupport.signature.layout import create_signature
 
 
 """
@@ -106,7 +104,7 @@ class ExactEnumerator(object):
             return ret
         if "<" in class_name:
             # This is happening in QtQuick for some reason:
-            ## class std::shared_ptr<QQuickItemGrabResult >:
+            # class std::shared_ptr<QQuickItemGrabResult >:
             # We simply skip over this class.
             return ret
         bases_list = []
@@ -160,8 +158,8 @@ class ExactEnumerator(object):
 
         # find out how many functions create a signature
         sigs = list(_ for _ in functions if get_sig(_[1]))
-        self.fmt.have_body = bool(subclasses or sigs or properties or enums or init_signature
-                                  or signals)
+        self.fmt.have_body = bool(subclasses or sigs or properties or enums or  # noqa W:504
+                                  init_signature or signals)
 
         with self.fmt.klass(class_name, class_str):
             self.fmt.level += 1
@@ -171,7 +169,7 @@ class ExactEnumerator(object):
                 if len(enums):
                     self.section()
                 for enum_name, enum_class_name, value in enums:
-                    with self.fmt.enum(enum_class_name, enum_name,value.value):
+                    with self.fmt.enum(enum_class_name, enum_name, value.value):
                         pass
             if hasattr(self.fmt, "signal"):
                 # this is an optional feature

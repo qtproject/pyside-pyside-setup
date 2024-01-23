@@ -9,7 +9,6 @@ Run it once after copying a new version. It is idem-potent, unless
 you are changing messages (what I did, of course :-) .
 """
 
-import os
 import glob
 from pathlib import Path
 
@@ -23,6 +22,7 @@ offending_words = {
 
 utf8_line = "# This Python file uses the following encoding: utf-8\n"
 marker_line = f"# It has been edited by {Path(__file__).name} .\n"
+
 
 def patch_file(fname):
     with fname.open() as f:
@@ -41,6 +41,7 @@ def patch_file(fname):
         with open(fname, "w") as f:
             f.write("".join(lines))
 
+
 def doit():
     dirname = Path(__file__).parent
     patched_files = []
@@ -50,6 +51,7 @@ def doit():
     for fname in patched_files:
         print("Working on", fname)
         patch_file(fname)
+
 
 if __name__ == "__main__":
     doit()

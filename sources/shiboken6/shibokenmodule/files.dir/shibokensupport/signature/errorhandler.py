@@ -1,6 +1,8 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
+# flake8: noqa E:721
+
 """
 errorhandler.py
 
@@ -19,12 +21,10 @@ This matter will be improved in a later version.
 """
 
 import collections.abc
-import inspect
-import sys
 import typing
 
 from shibokensupport.signature import get_signature
-from shibokensupport.signature.mapping import update_mapping, namespace
+from shibokensupport.signature.mapping import namespace
 from textwrap import dedent
 
 
@@ -77,8 +77,8 @@ def seterror_argument(args, func_name, info):
         if info == "<":
             msg = f"{func_name}(): not enough arguments"
         elif info == "0":
-           msg = (f"{func_name}(): not enough arguments. "
-                  "Note: keyword arguments are only supported for optional parameters.")
+            msg = (f"{func_name}(): not enough arguments. "
+                   "Note: keyword arguments are only supported for optional parameters.")
         elif info == ">":
             msg = f"{func_name}(): too many arguments"
         elif info.isalnum():

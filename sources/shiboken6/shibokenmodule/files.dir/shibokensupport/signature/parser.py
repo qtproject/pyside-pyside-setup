@@ -3,20 +3,17 @@
 
 import ast
 import enum
-import functools
 import keyword
 import os
 import re
 import sys
-import types
 import typing
 import warnings
 
 from types import SimpleNamespace
 from shibokensupport.signature.mapping import (type_map, update_mapping,
-    namespace, _NotCalled, ResultVariable, ArrayLikeVariable)
+    namespace, _NotCalled, ResultVariable, ArrayLikeVariable)  # noqa E:128
 from shibokensupport.signature.lib.tool import build_brace_pattern
-from shibokensupport import feature
 
 _DEBUG = False
 LIST_KEYWORDS = False
@@ -41,8 +38,9 @@ guesses, we provide an entry in 'type_map' that resolves it.
 In effect, 'type_map' maps text to real Python objects.
 """
 
+
 def _get_flag_enum_option():
-    from shiboken6 import (__version_info__ as ver,
+    from shiboken6 import (__version_info__ as ver,  # noqa F:401
                            __minimum_python_version__ as pyminver,
                            __maximum_python_version__ as pymaxver)
 
@@ -105,6 +103,7 @@ def dprint(*args, **kw):
 
 
 _cache = {}
+
 
 def _parse_arglist(argstr):
     # The following is a split re. The string is broken into pieces which are
@@ -187,7 +186,7 @@ def _handle_instance_fixup(thing):
     if not match:
         return thing
     start, stop = match.start(), match.end() - 1
-    pre, func, args = thing[:start], thing[start : stop], thing[stop:]
+    pre, func, args = thing[:start], thing[start:stop], thing[stop:]
     if func[0].isupper() or func.startswith("gl") and func[2:3].isupper():
         return thing
     # Now convert this string to snake case.
@@ -196,7 +195,7 @@ def _handle_instance_fixup(thing):
         if char.isupper():
             if idx and func[idx - 1].isupper():
                 # two upper chars are forbidden
-                return things
+                return thing
             snake_func += f"_{char.lower()}"
         else:
             snake_func += char
@@ -239,11 +238,13 @@ def try_to_guess(thing, valtype):
                 return ret
     return None
 
+
 def get_name(thing):
     if isinstance(thing, type):
         return getattr(thing, "__qualname__", thing.__name__)
     else:
         return thing.__name__
+
 
 def _resolve_value(thing, valtype, line):
     if thing in ("0", "None") and valtype:
@@ -297,7 +298,7 @@ def to_string(thing):
         dot = "." in str(thing) or m not in (thing.__qualname__, "builtins")
         name = get_name(thing)
         ret = m + "." + name if dot else name
-        assert(eval(ret, globals(), namespace))
+        assert (eval(ret, globals(), namespace))
         return ret
     # Note: This captures things from the typing module:
     return str(thing)
@@ -305,8 +306,9 @@ def to_string(thing):
 
 matrix_pattern = "PySide6.QtGui.QGenericMatrix"
 
+
 def handle_matrix(arg):
-    n, m, typstr = tuple(map(lambda x:x.strip(), arg.split(",")))
+    n, m, typstr = tuple(map(lambda x: x.strip(), arg.split(",")))
     assert typstr == "float"
     result = f"PySide6.QtGui.QMatrix{n}x{m}"
     return eval(result, globals(), namespace)
@@ -334,13 +336,13 @@ def _resolve_type(thing, line, level, var_handler, func_name=None):
         # Special case: Handle the generic matrices.
         if contr == matrix_pattern:
             return handle_matrix(thing)
-        contr = var_handler(_resolve_type(contr, line, level+1, var_handler))
+        contr = var_handler(_resolve_type(contr, line, level + 1, var_handler))
         if isinstance(contr, _NotCalled):
             raise SystemError("Container types must exist:", repr(contr))
         contr = to_string(contr)
         pieces = []
         for part in _parse_arglist(thing):
-            part = var_handler(_resolve_type(part, line, level+1, var_handler))
+            part = var_handler(_resolve_type(part, line, level + 1, var_handler))
             if isinstance(part, _NotCalled):
                 # fix the tag (i.e. "Missing") by repr
                 part = repr(part)
@@ -350,7 +352,7 @@ def _resolve_type(thing, line, level, var_handler, func_name=None):
         # PYSIDE-1538: Make sure that the eval does not crash.
         try:
             return eval(result, globals(), namespace)
-        except Exception as e:
+        except Exception:
             warnings.warn(f"""pyside_type_init:_resolve_type
 
                 UNRECOGNIZED:   {result!r}
@@ -429,9 +431,9 @@ def calculate_props(line):
     props.defaults = defaults
     props.kwdefaults = {}
     props.annotations = annotations
-    props.varnames = varnames = tuple(tup[0] for tup in arglist)
+    props.varnames = tuple(tup[0] for tup in arglist)
     funcname = parsed.funcname
-    shortname = funcname[funcname.rindex(".")+1:]
+    shortname = funcname[funcname.rindex(".") + 1:]
     props.name = shortname
     props.multi = parsed.multi
     fix_variables(props, line)
@@ -477,7 +479,6 @@ def fix_variables(props, line):
         else:
             diff -= 1
     if retvars:
-        rvs = []
         retvars = list(handle_retvar(rv) if isinstance(rv, ArrayLikeVariable) else rv
                        for rv in retvars)
         if len(retvars) == 1:

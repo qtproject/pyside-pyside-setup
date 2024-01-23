@@ -79,6 +79,7 @@ class SignatureLayout(SimpleNamespace):
             The only allowed values are '{allowed_values}'.
             """))
 
+
 # The following names are used literally in this module.
 # This way, we avoid the dict hashing problem.
 signature = SignatureLayout()
@@ -115,7 +116,7 @@ def define_nameless_parameter():
     P = inspect.Parameter
     newname = "NamelessParameter"
     bases = P.__bases__
-    body = dict(P.__dict__) # get rid of mappingproxy
+    body = dict(P.__dict__)  # get rid of mappingproxy
     if "__slots__" in body:
         # __slots__ would create duplicates
         for name in body["__slots__"]:
@@ -167,12 +168,13 @@ def make_signature_nameless(signature):
         signature.parameters[key].__class__ = NamelessParameter
 
 
-_POSITIONAL_ONLY         = inspect._POSITIONAL_ONLY
-_POSITIONAL_OR_KEYWORD   = inspect._POSITIONAL_OR_KEYWORD
-_VAR_POSITIONAL          = inspect._VAR_POSITIONAL
-_KEYWORD_ONLY            = inspect._KEYWORD_ONLY
-_VAR_KEYWORD             = inspect._VAR_KEYWORD
-_empty                   = inspect._empty
+_POSITIONAL_ONLY         = inspect._POSITIONAL_ONLY  # noqa E:201
+_POSITIONAL_OR_KEYWORD   = inspect._POSITIONAL_OR_KEYWORD  # noqa E:201
+_VAR_POSITIONAL          = inspect._VAR_POSITIONAL  # noqa E:201
+_KEYWORD_ONLY            = inspect._KEYWORD_ONLY  # noqa E:201
+_VAR_KEYWORD             = inspect._VAR_KEYWORD  # noqa E:201
+_empty                   = inspect._empty  # noqa E:201
+
 
 def create_signature(props, key):
     if not props:
@@ -183,9 +185,9 @@ def create_signature(props, key):
         return list(create_signature(elem, key)
                     for elem in props["multi"])
     if type(key) is tuple:
-        sig_kind, modifier = key
+        _, modifier = key
     else:
-        sig_kind, modifier = key, "signature"
+        _, modifier = key, "signature"
 
     layout = globals()[modifier]  # lookup of the modifier in this module
     if not isinstance(layout, SignatureLayout):
@@ -234,8 +236,8 @@ def create_signature(props, key):
         if kind == _VAR_POSITIONAL:
             kind = _KEYWORD_ONLY
     sig = inspect.Signature(params,
-           return_annotation=annotations.get('return', _empty),
-           __validate_parameters__=False)
+                            return_annotation=annotations.get('return', _empty),
+                            __validate_parameters__=False)
 
     # the special case of nameless parameters
     if not layout.parameter_names:

@@ -3,6 +3,8 @@ LICENSE_TEXT = """
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 """
 
+# flake8: noqa E:402
+
 """
 pyi_generator.py
 
@@ -21,7 +23,6 @@ from pathlib import Path
 from contextlib import contextmanager
 from textwrap import dedent
 
-from shiboken6 import Shiboken
 from shibokensupport.signature.lib.enum_sig import HintingEnumerator
 from shibokensupport.signature.lib.tool import build_brace_pattern
 
@@ -89,6 +90,7 @@ class Formatter(Writer):
         pattern = fr"\b Union \s* \[ \s* {brace_pat} \s*, \s* NoneType \s* \]"
         replace = r"Optional[\1]"
         optional_searcher = re.compile(pattern, flags=re.VERBOSE)
+
         def optional_replacer(source):
             return optional_searcher.sub(replace, str(source))
         self.optional_replacer = optional_replacer
@@ -176,6 +178,7 @@ FROM_IMPORTS = [
     ("shiboken6", ["Shiboken"]),
     ]
 
+
 def filter_from_imports(from_struct, text):
     """
     Build a reduced new `from` structure (nfs) with found entries, only
@@ -228,12 +231,10 @@ def generate_pyi(import_name, outpath, options):
     obj = getattr(top, plainname) if import_name != plainname else top
     if not getattr(obj, "__file__", None) or Path(obj.__file__).is_dir():
         raise ModuleNotFoundError(f"We do not accept a namespace as module `{plainname}`")
-    module = sys.modules[import_name]
 
     outfile = io.StringIO()
     fmt = Formatter(outfile, options)
     fmt.print(LICENSE_TEXT.strip())
-    need_imports = options._pyside_call and not USE_PEP563
     if USE_PEP563:
         fmt.print("from __future__ import annotations")
         fmt.print()
@@ -298,11 +299,11 @@ def main():
             pyi_generator will try to generate an interface "<module>.pyi".
             """))
     parser.add_argument("module",
-        help="The full path name of an importable module binary (.pyd, .so)")
+        help="The full path name of an importable module binary (.pyd, .so)")  # noqa E:128
     parser.add_argument("--quiet", action="store_true", help="Run quietly")
     parser.add_argument("--check", action="store_true", help="Test the output")
     parser.add_argument("--outpath",
-        help="the output directory (default = location of module binary)")
+        help="the output directory (default = location of module binary)")  # noqa E:128
     options = parser.parse_args()
     module = options.module
     outpath = options.outpath
@@ -319,6 +320,7 @@ def main():
 
     options.logger = logger
     generate_pyi(module, outpath, options=options)
+
 
 if __name__ == "__main__":
     main()

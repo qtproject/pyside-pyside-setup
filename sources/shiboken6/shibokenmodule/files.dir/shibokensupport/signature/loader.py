@@ -1,6 +1,9 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
+# flake8: noqa E:402
+# flake8: noqa F:401
+
 """
 loader.py
 
@@ -30,21 +33,26 @@ import types
 def pyside_type_init(type_key, sig_strings):
     return parser.pyside_type_init(type_key, sig_strings)
 
+
 # name used in signature.cpp
 def create_signature(props, key):
     return layout.create_signature(props, key)
+
 
 # name used in signature.cpp
 def seterror_argument(args, func_name, info):
     return errorhandler.seterror_argument(args, func_name, info)
 
+
 # name used in signature.cpp
 def make_helptext(func):
     return errorhandler.make_helptext(func)
 
+
 # name used in signature.cpp
 def finish_import(module):
     return importhandler.finish_import(module)
+
 
 # name used in signature.cpp
 def feature_import(*args, **kwds):
@@ -52,6 +60,7 @@ def feature_import(*args, **kwds):
     global feature_import
     feature_import = feature.feature_import
     return feature_import(*args, **kwds)
+
 
 # name used in signature.cpp
 def feature_imported(*args, **kwds):
@@ -107,6 +116,7 @@ def move_into_pyside_package():
     put_into_package(PySide6.support.signature.lib, pyi_generator)
     put_into_package(PySide6.support.signature.lib, tool)
 
+
 from shibokensupport.signature import mapping
 from shibokensupport.signature import errorhandler
 from shibokensupport.signature import layout
@@ -119,7 +129,7 @@ from shibokensupport.signature.lib import tool
 
 import enum
 
-post_init = lambda:None     # default
+post_init = lambda: None  # noqa E:731 default
 
 if "PySide6" in sys.modules:
     # We publish everything under "PySide6.support", again.
@@ -127,7 +137,7 @@ if "PySide6" in sys.modules:
     # PYSIDE-1502: Make sure that support can be imported.
     try:
         import PySide6.support
-    except ModuleNotFoundError as e:
+    except ModuleNotFoundError:
         print("PySide6.support could not be imported. "
               "This is a serious configuration error.", file=sys.stderr)
         raise

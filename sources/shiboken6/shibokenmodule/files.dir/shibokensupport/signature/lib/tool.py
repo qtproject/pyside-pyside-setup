@@ -44,8 +44,8 @@ def build_brace_pattern(level, separators):
 
     ro, rc = round_ = "()"
     so, sc = square = "[]"
-    co, cc = curly  = "CD"      # we insert "{}", later...
-    ao, ac = angle  = "<>"
+    co, cc = curly  = "CD"  # noqa E:201 we insert "{}", later...
+    ao, ac = angle  = "<>"  # noqa E:201
     q2, bs, q1 = '"', "\\", "'"
     allpat = round_ + square + curly + angle
     __ = "  "
@@ -79,8 +79,8 @@ def build_brace_pattern(level, separators):
         {indent}  )*
         """)
     for idx in range(level):
-        pattern = pattern.format(replacer = repeated if idx < level-1 else no_braces_q,
-                                 indent = idx * "    ", **locals())
+        pattern = pattern.format(replacer=repeated if idx < level - 1 else no_braces_q,
+                                 indent=idx * "    ", **locals())
     return pattern.replace("C", "{").replace("D", "}")
 
 

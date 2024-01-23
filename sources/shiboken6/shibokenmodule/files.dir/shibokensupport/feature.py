@@ -1,6 +1,9 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
+# flake8: noqa F:821
+# flake8: noqa F:401
+
 """
 __feature__.py  (renamed to feature.py)
 
@@ -80,6 +83,7 @@ None to indicate that a normal import should be performed, and
 All these variables are transparently kept in module `builtins`.
 """
 
+
 def feature_import(name, *args, **kwargs):
     # PYSIDE-1368: The `__name__` attribute does not need to exist in all modules.
     # PYSIDE-1398: sys._getframe(1) may not exist when embedding.
@@ -110,7 +114,9 @@ def feature_import(name, *args, **kwargs):
     # Redirect to the original import
     return None
 
+
 _is_initialized = False
+
 
 def __init__():
     global _is_initialized
@@ -181,6 +187,7 @@ def set_selection(select_id, mod_name=None):
     pyside_feature_dict[mod_name] = flag
     sys.modules["PySide6.QtCore"].__init_feature__()
     return _current_selection(flag)
+
 
 # The set_section(0) case seems to be unsafe. We will migrate to
 # use the opaque feature.reset() call in all test cases.

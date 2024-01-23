@@ -34,8 +34,9 @@ def finish_import(module):
         except Exception as e:
             name = e.__class__.__qualname__
             print(72 * "*")
-            print(f"Error in deprecated.py, ignored:")
+            print("Error in deprecated.py, ignored:")
             print(f"    {name}: {e}")
+
 
 """
 A note for people who might think this could be written in pure Python:
@@ -62,4 +63,3 @@ module, it is *perhaps* possible to solve that. I tried for a day and then
 gave up, since the solution is anyway not too nice when __import__ must
 be overridden.
 """
-#eof
