@@ -39,7 +39,7 @@ def cleanup(config: Config, is_android: bool = False):
             logging.info(f"[DEPLOY] {str(buildozer_build)} removed")
 
 
-def create_config_file(dry_run: bool = False, config_file: Path = None, main_file:  Path = None):
+def create_config_file(dry_run: bool = False, config_file: Path = None, main_file: Path = None):
     """
         Sets up a new pysidedeploy.spec or use an existing config file
     """

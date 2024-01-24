@@ -39,7 +39,7 @@ def create_recipe(version: str, component: str, wheel_path: str, generated_files
 
     qt_local_libs = []
     if local_libs:
-        qt_local_libs = [local_lib for local_lib in local_libs if local_lib.startswith("Qt6") ]
+        qt_local_libs = [local_lib for local_lib in local_libs if local_lib.startswith("Qt6")]
 
     rcp_tmpl_path = Path(__file__).parent / "recipes" / f"{component}"
     environment = Environment(loader=FileSystemLoader(rcp_tmpl_path))

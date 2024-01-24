@@ -11,6 +11,7 @@ from . import (METATYPES_JSON_SUFFIX, PROJECT_FILE_SUFFIX, qt_metatype_json_dir,
                MOD_CMD, QML_IMPORT_MAJOR_VERSION, QML_IMPORT_MINOR_VERSION, QML_IMPORT_NAME,
                QT_MODULES)
 
+
 def is_python_file(file: Path) -> bool:
     return (file.suffix == ".py"
             or sys.platform == "win32" and file.suffix == ".pyw")
@@ -106,7 +107,7 @@ class ProjectData:
 
         # __main__ not found
         print(
-            "Python file with main function not found. Add the file to" f" {project_file}",
+            "Python file with main function not found. Add the file to" f" {self.project_file}",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -233,4 +234,3 @@ def check_qml_decorators(py_file: Path) -> Tuple[bool, QmlProjectData]:
         if v:
             qml_project_data.qt_modules = v
     return (has_class, qml_project_data)
-

@@ -313,7 +313,7 @@ class Config(BaseConfig):
     def _find_and_set_excluded_qml_plugins(self):
         if self.qml_files:
             self.qml_modules = set(run_qmlimportscanner(qml_files=self.qml_files,
-                                                            dry_run=self.dry_run))
+                                                        dry_run=self.dry_run))
             self.excluded_qml_plugins = EXCLUDED_QML_PLUGINS.difference(self.qml_modules)
 
             # needed for dry_run testing

@@ -14,7 +14,7 @@ def diff_code(actual_code, expected_file):
     with tempfile.NamedTemporaryFile(suffix=".cpp") as tf:
         tf.write(actual_code.encode('utf-8'))
         tf.flush()
-        diff_cmd = ["diff", "-u", expected_file,  tf.name]
+        diff_cmd = ["diff", "-u", expected_file, tf.name]
         subprocess.run(diff_cmd)
 
 
@@ -33,22 +33,22 @@ def run_converter(tool, file):
 def test_examples():
     dir = Path(__file__).resolve().parent
     tool = dir.parents[1] / "qtpy2cpp.py"
-    assert(tool.is_file)
+    assert tool.is_file
     for test_file in (dir / "baseline").glob("*.py"):
-        assert(test_file.is_file)
+        assert test_file.is_file
         expected_file = test_file.parent / (test_file.stem + ".cpp")
         if expected_file.is_file():
             actual_code = run_converter(tool, test_file)
-            assert(actual_code)
+            assert actual_code
             expected_code = expected_file.read_text()
             # Strip the license
             code_start = expected_code.find("// Converted from")
-            assert(code_start != -1)
+            assert code_start != -1
             expected_code = expected_code[code_start:]
 
             if actual_code != expected_code:
                 diff_code(actual_code, expected_file)
-            assert(actual_code == expected_code)
+            assert actual_code == expected_code
         else:
             print(f"Warning, {test_file} is missing a .cpp file.",
                   file=sys.stderr)

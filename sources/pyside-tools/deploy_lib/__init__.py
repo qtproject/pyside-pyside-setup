@@ -23,4 +23,3 @@ from .python_helper import PythonExecutable, find_pyside_modules
 from .config import BaseConfig, Config
 from .deploy_util import (cleanup, finalize, create_config_file, setup_python,
                           install_python_dependencies, config_option_exists)
-

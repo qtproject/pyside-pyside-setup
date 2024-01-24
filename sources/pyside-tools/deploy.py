@@ -99,11 +99,9 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
         if not dry_run:
             logging.info("[DEPLOY] Deploying application")
 
-        command_str = python.create_executable(
-                        source_file=config.source_file,
-                        extra_args=config.extra_args,
-                        config=config,
-                    )
+        command_str = python.create_executable(source_file=config.source_file,
+                                               extra_args=config.extra_args,
+                                               config=config)
     except Exception:
         print(f"[DEPLOY] Exception occurred: {traceback.format_exc()}")
     finally:

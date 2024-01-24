@@ -155,8 +155,8 @@ class PythonExecutable:
         return False
 
     def install(self, packages: list = None):
-        _, installed_packages = run_command(command=[str(self.exe), "-m", "pip", "freeze"], dry_run=False
-                                            , fetch_output=True)
+        _, installed_packages = run_command(command=[str(self.exe), "-m", "pip", "freeze"],
+                                            dry_run=False, fetch_output=True)
         installed_packages = [p.decode().split('==')[0] for p in installed_packages.split()]
         for package in packages:
             package_info = package.split('==')
@@ -197,13 +197,12 @@ class PythonExecutable:
         if config.qml_files:
             logging.info(f"[DEPLOY] Included QML files: {config.qml_files}")
 
-        command_str = self.nuitka.create_executable(
-                        source_file=source_file,
-                        extra_args=extra_args,
-                        qml_files=config.qml_files,
-                        excluded_qml_plugins=config.excluded_qml_plugins,
-                        icon=config.icon,
-                        dry_run=self.dry_run,
-                        )
+        command_str = self.nuitka.create_executable(source_file=source_file,
+                                                    extra_args=extra_args,
+                                                    qml_files=config.qml_files,
+                                                    excluded_qml_plugins=(config.
+                                                                          excluded_qml_plugins),
+                                                    icon=config.icon,
+                                                    dry_run=self.dry_run)
 
         return command_str

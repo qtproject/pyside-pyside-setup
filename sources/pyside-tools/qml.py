@@ -215,7 +215,7 @@ if __name__ == "__main__":
     if apptype == "core":
         component = QQmlComponent(engine, qml_file)
         obj = component.create()
-        filtered_attributes = {k: v for k, v in vars(obj).items() if type(v) != SignalInstance}
+        filtered_attributes = {k: v for k, v in vars(obj).items() if type(v) is not SignalInstance}
         logging.info("qml: component object attributes are")
         pprint(filtered_attributes)
         del engine
@@ -227,7 +227,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     qquick_view = False
-    if type(rootObjects[0]) != QQuickWindow and qquick_present:
+    if isinstance(rootObjects[0], QQuickWindow) and qquick_present:
         logging.info("qml: loading with QQuickView")
         viewer = QQuickView()
         viewer.setSource(qml_file)
