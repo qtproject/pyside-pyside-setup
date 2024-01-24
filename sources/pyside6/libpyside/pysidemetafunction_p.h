@@ -6,7 +6,7 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/QtGlobal>
+#include <QtCore/qtconfigmacros.h>
 
 QT_BEGIN_NAMESPACE
 class QObject;

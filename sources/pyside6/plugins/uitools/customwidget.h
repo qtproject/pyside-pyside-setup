@@ -8,8 +8,6 @@
 
 #include <QtUiPlugin/QDesignerCustomWidgetInterface>
 
-#include <QtCore/qglobal.h>
-
 class PyCustomWidget: public QObject, public QDesignerCustomWidgetInterface
 {
      Q_OBJECT

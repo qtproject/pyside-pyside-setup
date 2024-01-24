@@ -4,7 +4,7 @@
 #ifndef QTCOMPAT_H
 #define QTCOMPAT_H
 
-#include <QtCore/QtGlobal>
+#include <QtCore/qtconfigmacros.h>
 
 #if QT_VERSION < 0x060400
 

@@ -8,7 +8,7 @@
 
 #include "pysideqmlmacros.h"
 
-#include <QtCore/QtGlobal>
+#include <QtCore/qtconfigmacros.h>
 
 QT_FORWARD_DECLARE_CLASS(QObject)
 

@@ -8,7 +8,9 @@
 
 #include <pysidemacros.h>
 
-#include <QtCore/QtGlobal>
+#include <QtCore/qtclasshelpermacros.h>
+
+#include <cstddef>
 
 QT_FORWARD_DECLARE_CLASS(QObject)
 QT_FORWARD_DECLARE_STRUCT(QMetaObject)

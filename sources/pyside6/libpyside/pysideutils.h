@@ -8,7 +8,7 @@
 
 #include <pysidemacros.h>
 
-#include <QtCore/QtGlobal>
+#include <QtCore/qtclasshelpermacros.h>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 QT_FORWARD_DECLARE_CLASS(QString)

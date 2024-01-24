@@ -11,7 +11,6 @@
 #include <signature.h>
 #include <sbkstring.h>
 
-#include <QtCore/QtGlobal>
 #include <QtCore/QDebug>
 
 // The QmlForeign decorator modifies QmlElement to create a different type

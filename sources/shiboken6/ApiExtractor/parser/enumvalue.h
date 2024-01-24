@@ -4,7 +4,8 @@
 #ifndef ENUMVALUE_H
 #define ENUMVALUE_H
 
-#include <QtCore/QtGlobal>
+#include <QtCore/qtypes.h>
+#include <QtCore/qtclasshelpermacros.h>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 QT_FORWARD_DECLARE_CLASS(QString)

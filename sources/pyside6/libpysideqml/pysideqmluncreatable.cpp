@@ -9,10 +9,7 @@
 #include <signature.h>
 #include <sbkcppstring.h>
 
-#include <string>
-#include <unordered_map>
-
-#include <QtCore/QtGlobal>
+#include <QtCore/qbytearray.h>
 
 using namespace Qt::StringLiterals;
 

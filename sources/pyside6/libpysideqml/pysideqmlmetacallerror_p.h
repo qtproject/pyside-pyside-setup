@@ -6,7 +6,7 @@
 
 #include <optional>
 
-#include <QtCore/QtGlobal>
+#include <QtCore/qtclasshelpermacros.h>
 
 QT_FORWARD_DECLARE_CLASS(QObject)
 

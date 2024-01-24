@@ -12,7 +12,6 @@
 #include <signature.h>
 #include <sbkstring.h>
 
-#include <QtCore/QtGlobal>
 #include <QtQml/qqml.h>
 
 // The QmlExtended decorator modifies QmlElement to register an extension.

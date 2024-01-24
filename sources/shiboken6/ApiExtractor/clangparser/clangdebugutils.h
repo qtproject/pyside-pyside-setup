@@ -4,7 +4,7 @@
 #ifndef CLANGDEBUGUTILS_H
 #define CLANGDEBUGUTILS_H
 
-#include <QtCore/QtGlobal>
+#include <QtCore/qtclasshelpermacros.h>
 
 #include <clang-c/Index.h>
 
