@@ -5,11 +5,9 @@ import sys
 import logging
 import argparse
 import tempfile
-import subprocess
 import stat
 import warnings
 from dataclasses import dataclass
-from typing import List
 
 from pathlib import Path
 from git import Repo, RemoteProgress
@@ -17,7 +15,7 @@ from tqdm import tqdm
 from jinja2 import Environment, FileSystemLoader
 
 from android_utilities import (run_command, download_android_commandlinetools,
-                                download_android_ndk, install_android_packages)
+                               download_android_ndk, install_android_packages)
 
 # Note: Does not work with PyEnv. Your Host Python should contain openssl.
 PYTHON_VERSION = "3.10"
@@ -164,7 +162,8 @@ if __name__ == "__main__":
         platform_data = PlatformData("armv7a", f"eabi{api_level}", "armeabi-v7a", "armv7", "armv7",
                                      "32")
     elif plat_name == "aarch64":
-        platform_data = PlatformData("aarch64", api_level, "arm64-v8a", "arm64_v8a", "armv8-a", "64")
+        platform_data = PlatformData("aarch64", api_level, "arm64-v8a", "arm64_v8a", "armv8-a",
+                                     "64")
     elif plat_name == "i686":
         platform_data = PlatformData("i686", api_level, "x86", "x86", "i686", "32")
     else:  # plat_name is x86_64
@@ -212,8 +211,8 @@ if __name__ == "__main__":
             logging.info(f"Running Python cross-compile for platform {platform_data.plat_name}")
             run_command(["./cross_compile.sh"], cwd=cpython_dir, dry_run=dry_run, show_stdout=True)
 
-            python_path = (f"{android_py_install_path_prefix}/Python-{platform_data.plat_name}-linux-android/"
-                           "_install")
+            python_path = (f"{android_py_install_path_prefix}"
+                           f"/Python-{platform_data.plat_name}-linux-android/_install")
 
             # run patchelf to change the SONAME of libpython from libpython3.x.so.1.0 to
             # libpython3.x.so, to match with python_for_android's Python library. Otherwise,

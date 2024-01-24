@@ -126,14 +126,14 @@ def download_android_ndk(ndk_path: Path):
         print(f"NDK path found in {str(ndk_version_path)}")
     else:
         ndk_path.mkdir(parents=True, exist_ok=True)
-        url = f"https://dl.google.com/android/repository/android-ndk-r{ANDROID_NDK_VERSION}-linux.zip"
+        url = (f"https://dl.google.com/android/repository"
+               f"/android-ndk-r{ANDROID_NDK_VERSION}-linux.zip")
 
         print(f"Downloading Android Ndk version r{ANDROID_NDK_VERSION}")
         _download(url=url, destination=ndk_zip_path)
 
         print("Unpacking Android Ndk")
-        _unpack(zip_file=(ndk_path /
-                f"android-ndk-r{ANDROID_NDK_VERSION}-linux.zip"),
+        _unpack(zip_file=(ndk_path / f"android-ndk-r{ANDROID_NDK_VERSION}-linux.zip"),
                 destination=ndk_path)
 
     return ndk_version_path
