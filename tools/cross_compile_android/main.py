@@ -79,9 +79,10 @@ if __name__ == "__main__":
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
-    parser.add_argument("-p", "--plat-name", type=str, required=True,
+    parser.add_argument("-p", "--plat-name", type=str, nargs="*",
                         choices=["aarch64", "armv7a", "i686", "x86_64"],
-                        help="Android target platform name")
+                        default=["aarch64", "armv7a", "i686", "x86_64"], dest="plat_names",
+                        help="Android target platforms")
 
     parser.add_argument("-v", "--verbose", help="run in verbose mode", action="store_const",
                         dest="loglevel", const=logging.INFO)
@@ -119,7 +120,7 @@ if __name__ == "__main__":
     gcc_march = None
     plat_bits = None
     dry_run = args.dry_run
-    plat_name = args.plat_name
+    plat_names = args.plat_names
     api_level = args.api_level
     skip_update = args.skip_update
     auto_accept_license = args.auto_accept_license
@@ -166,128 +167,133 @@ if __name__ == "__main__":
 
     templates_path = Path(__file__).parent / "templates"
 
-    # for armv7a the API level dependent binaries like clang are named
-    # armv7a-linux-androideabi27-clang, as opposed to other platforms which
-    # are named like x86_64-linux-android27-clang
-    platform_data = None
-    if plat_name == "armv7a":
-        platform_data = PlatformData("armv7a", api_level, "armeabi-v7a", "armv7",
-                                     "armv7", "32")
-    elif plat_name == "aarch64":
-        platform_data = PlatformData("aarch64", api_level, "arm64-v8a", "arm64_v8a", "armv8-a",
-                                     "64")
-    elif plat_name == "i686":
-        platform_data = PlatformData("i686", api_level, "x86", "x86", "i686", "32")
-    else:  # plat_name is x86_64
-        platform_data = PlatformData("x86_64", api_level, "x86_64", "x86_64", "x86-64", "64")
+    for plat_name in plat_names:
+        # for armv7a the API level dependent binaries like clang are named
+        # armv7a-linux-androideabi27-clang, as opposed to other platforms which
+        # are named like x86_64-linux-android27-clang
+        platform_data = None
+        if plat_name == "armv7a":
+            platform_data = PlatformData("armv7a", api_level, "armeabi-v7a", "armv7",
+                                         "armv7", "32")
+        elif plat_name == "aarch64":
+            platform_data = PlatformData("aarch64", api_level, "arm64-v8a", "arm64_v8a", "armv8-a",
+                                         "64")
+        elif plat_name == "i686":
+            platform_data = PlatformData("i686", api_level, "x86", "x86", "i686", "32")
+        else:  # plat_name is x86_64
+            platform_data = PlatformData("x86_64", api_level, "x86_64", "x86_64", "x86-64", "64")
 
-    # python path is valid, if Python for android installation exists in python_path
-    python_path = (pyside6_deploy_cache / f"Python-{platform_data.plat_name}-linux-android"
-                   / "_install")
-    valid_python_path = python_path.exists()
-    if Path(python_path).exists():
-        expected_dirs = ["lib", "include"]
-        for expected_dir in expected_dirs:
-            if not (Path(python_path) / expected_dir).is_dir():
-                valid_python_path = False
-                warnings.warn(
-                    f"{str(python_path.resolve())} is corrupted. New Python for {plat_name} "
-                    f"android will be cross-compiled into {str(pyside6_deploy_cache.resolve())}"
+        # python path is valid, if Python for android installation exists in python_path
+        python_path = (pyside6_deploy_cache / f"Python-{platform_data.plat_name}-linux-android"
+                       / "_install")
+        valid_python_path = python_path.exists()
+        if Path(python_path).exists():
+            expected_dirs = ["lib", "include"]
+            for expected_dir in expected_dirs:
+                if not (Path(python_path) / expected_dir).is_dir():
+                    valid_python_path = False
+                    warnings.warn(
+                        f"{str(python_path.resolve())} is corrupted. New Python for {plat_name} "
+                        f"android will be cross-compiled into {str(pyside6_deploy_cache.resolve())}"
+                    )
+                    break
+
+        environment = Environment(loader=FileSystemLoader(templates_path))
+        if not valid_python_path:
+            # clone cpython and checkout 3.10
+            cpython_dir = pyside6_deploy_cache / "cpython"
+            python_ccompile_script = cpython_dir / f"cross_compile_{plat_name}.sh"
+
+            if not cpython_dir.exists():
+                logging.info(f"cloning cpython {PYTHON_VERSION}")
+                Repo.clone_from(
+                    "https://github.com/python/cpython.git",
+                    cpython_dir,
+                    progress=CloneProgress(),
+                    branch=PYTHON_VERSION,
                 )
-                break
 
-    environment = Environment(loader=FileSystemLoader(templates_path))
-    if not valid_python_path:
-        # clone cpython and checkout 3.10
-        cpython_dir = pyside6_deploy_cache / "cpython"
-        python_ccompile_script = cpython_dir / f"cross_compile_{plat_name}.sh"
+            if not python_ccompile_script.exists():
+                # use jinja2 to create cross_compile.sh script
+                template = environment.get_template("cross_compile.tmpl.sh")
+                content = template.render(
+                    plat_name=platform_data.plat_name,
+                    ndk_path=ndk_path,
+                    api_level=platform_data.api_level,
+                    android_py_install_path_prefix=pyside6_deploy_cache,
+                )
 
-        if not cpython_dir.exists():
-            logging.info(f"cloning cpython {PYTHON_VERSION}")
-            Repo.clone_from(
-                "https://github.com/python/cpython.git",
-                cpython_dir,
-                progress=CloneProgress(),
-                branch=PYTHON_VERSION,
+                logging.info(f"Writing Python cross compile script into {python_ccompile_script}")
+                with open(python_ccompile_script, mode="w", encoding="utf-8") as ccompile_script:
+                    ccompile_script.write(content)
+
+                # give run permission to cross compile script
+                python_ccompile_script.chmod(python_ccompile_script.stat().st_mode | stat.S_IEXEC)
+
+            # clean built files
+            logging.info("Cleaning CPython built files")
+            run_command(["make", "distclean"], cwd=cpython_dir, dry_run=dry_run, ignore_fail=True)
+
+            # run the cross compile script
+            logging.info(f"Running Python cross-compile for platform {platform_data.plat_name}")
+            run_command([f"./{python_ccompile_script.name}"], cwd=cpython_dir, dry_run=dry_run,
+                        show_stdout=True)
+
+            # run patchelf to change the SONAME of libpython from libpython3.x.so.1.0 to
+            # libpython3.x.so, to match with python_for_android's Python library. Otherwise,
+            # the Qfp binaries won't be able to link to Python
+            run_command(["patchelf", "--set-soname", f"libpython{PYTHON_VERSION}.so",
+                        f"libpython{PYTHON_VERSION}.so.1.0"], cwd=Path(python_path) / "lib",
+                        dry_run=dry_run)
+
+            logging.info(
+                f"Cross compile Python for Android platform {platform_data.plat_name}. "
+                f"Final installation in {python_path}"
             )
 
-        if not python_ccompile_script.exists():
-            # use jinja2 to create cross_compile.sh script
-            template = environment.get_template("cross_compile.tmpl.sh")
+            if only_py_cross_compile:
+                continue
+
+        if only_py_cross_compile:
+            requested_platforms = ",".join(plat_names)
+            print(f"Python for Android platforms: {requested_platforms} cross compiled "
+                  f"to {str(pyside6_deploy_cache)}")
+            sys.exit(0)
+
+        qfp_toolchain = pyside6_deploy_cache / f"toolchain_{platform_data.plat_name}.cmake"
+
+        if not qfp_toolchain.exists():
+            template = environment.get_template("toolchain_default.tmpl.cmake")
             content = template.render(
-                plat_name=platform_data.plat_name,
                 ndk_path=ndk_path,
+                sdk_path=sdk_path,
                 api_level=platform_data.api_level,
-                android_py_install_path_prefix=pyside6_deploy_cache,
+                qt_install_path=qt_install_path,
+                plat_name=platform_data.plat_name,
+                android_abi=platform_data.android_abi,
+                qt_plat_name=platform_data.qt_plat_name,
+                gcc_march=platform_data.gcc_march,
+                plat_bits=platform_data.plat_bits,
+                python_version=PYTHON_VERSION,
+                target_python_path=python_path
             )
 
-            logging.info(f"Writing Python cross compile script into {python_ccompile_script}")
-            with open(python_ccompile_script, mode="w", encoding="utf-8") as ccompile_script:
+            logging.info(f"Writing Qt for Python toolchain file into {qfp_toolchain}")
+            with open(qfp_toolchain, mode="w", encoding="utf-8") as ccompile_script:
                 ccompile_script.write(content)
 
             # give run permission to cross compile script
-            python_ccompile_script.chmod(python_ccompile_script.stat().st_mode | stat.S_IEXEC)
-
-        # clean built files
-        logging.info("Cleaning CPython built files")
-        run_command(["make", "distclean"], cwd=cpython_dir, dry_run=dry_run, ignore_fail=True)
+            qfp_toolchain.chmod(qfp_toolchain.stat().st_mode | stat.S_IEXEC)
 
         # run the cross compile script
-        logging.info(f"Running Python cross-compile for platform {platform_data.plat_name}")
-        run_command([f"./{python_ccompile_script.name}"], cwd=cpython_dir, dry_run=dry_run,
-                    show_stdout=True)
-
-        # run patchelf to change the SONAME of libpython from libpython3.x.so.1.0 to
-        # libpython3.x.so, to match with python_for_android's Python library. Otherwise,
-        # the Qfp binaries won't be able to link to Python
-        run_command(["patchelf", "--set-soname", f"libpython{PYTHON_VERSION}.so",
-                    f"libpython{PYTHON_VERSION}.so.1.0"], cwd=Path(python_path) / "lib",
-                    dry_run=dry_run)
-
-        logging.info(
-            f"Cross compile Python for Android platform {platform_data.plat_name}. "
-            f"Final installation in {python_path}"
-        )
-
-    if only_py_cross_compile:
-        print(f"Python for Android platforms: {plat_name} cross compiled "
-              f"to {str(pyside6_deploy_cache)}")
-        sys.exit(0)
-
-    qfp_toolchain = pyside6_deploy_cache / f"toolchain_{platform_data.plat_name}.cmake"
-
-    if not qfp_toolchain.exists():
-        template = environment.get_template("toolchain_default.tmpl.cmake")
-        content = template.render(
-            ndk_path=ndk_path,
-            sdk_path=sdk_path,
-            api_level=platform_data.api_level,
-            qt_install_path=qt_install_path,
-            plat_name=platform_data.plat_name,
-            android_abi=platform_data.android_abi,
-            qt_plat_name=platform_data.qt_plat_name,
-            gcc_march=platform_data.gcc_march,
-            plat_bits=platform_data.plat_bits,
-            python_version=PYTHON_VERSION,
-            target_python_path=python_path
-        )
-
-        logging.info(f"Writing Qt for Python toolchain file into {qfp_toolchain}")
-        with open(qfp_toolchain, mode="w", encoding="utf-8") as ccompile_script:
-            ccompile_script.write(content)
-
-        # give run permission to cross compile script
-        qfp_toolchain.chmod(qfp_toolchain.stat().st_mode | stat.S_IEXEC)
-
-    # run the cross compile script
-    logging.info(f"Running Qt for Python cross-compile for platform {platform_data.plat_name}")
-    qfp_ccompile_cmd = [sys.executable, "setup.py", "bdist_wheel", "--parallel=9",
-                        "--standalone", "--limited-api=yes",
-                        f"--cmake-toolchain-file={str(qfp_toolchain.resolve())}",
-                        f"--qt-host-path={qt_install_path}/gcc_64",
-                        f"--plat-name=android_{platform_data.plat_name}",
-                        f"--python-target-path={python_path}",
-                        (f"--qt-target-path={qt_install_path}/"
-                            f"android_{platform_data.qt_plat_name}"),
-                        "--no-qt-tools", "--unity"]
-    run_command(qfp_ccompile_cmd, cwd=pyside_setup_dir, dry_run=dry_run, show_stdout=True)
+        logging.info(f"Running Qt for Python cross-compile for platform {platform_data.plat_name}")
+        qfp_ccompile_cmd = [sys.executable, "setup.py", "bdist_wheel", "--parallel=9",
+                            "--standalone", "--limited-api=yes",
+                            f"--cmake-toolchain-file={str(qfp_toolchain.resolve())}",
+                            f"--qt-host-path={qt_install_path}/gcc_64",
+                            f"--plat-name=android_{platform_data.plat_name}",
+                            f"--python-target-path={python_path}",
+                            (f"--qt-target-path={qt_install_path}/"
+                                f"android_{platform_data.qt_plat_name}"),
+                            "--no-qt-tools", "--unity"]
+        run_command(qfp_ccompile_cmd, cwd=pyside_setup_dir, dry_run=dry_run, show_stdout=True)
