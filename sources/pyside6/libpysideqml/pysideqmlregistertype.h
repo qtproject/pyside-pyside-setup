@@ -7,11 +7,14 @@
 #include "pysideqmlmacros.h"
 
 #include <sbkpython.h>
+#include <QtCore/qtconfigmacros.h>
 
+QT_BEGIN_NAMESPACE
 namespace QQmlPrivate
 {
 struct RegisterTypeAndRevisions;
 }
+QT_END_NAMESPACE
 
 namespace PySide::Qml
 {
@@ -86,7 +89,7 @@ PYSIDEQML_API PyObject *qmlSingletonMacro(PyObject *pyObj);
 // Used by QtQuick module to fill the QQmlPrivate::RegisterType::parserStatusCast,
 // valueSourceCast and valueInterceptorCast fields with the correct values.
 using QuickRegisterItemFunction =
-    bool (*)(PyObject *pyObj, QQmlPrivate::RegisterTypeAndRevisions *);
+    bool (*)(PyObject *pyObj, QT_PREPEND_NAMESPACE(QQmlPrivate::RegisterTypeAndRevisions) *);
 
 PYSIDEQML_API QuickRegisterItemFunction getQuickRegisterItemFunction();
 PYSIDEQML_API void setQuickRegisterItemFunction(QuickRegisterItemFunction function);
