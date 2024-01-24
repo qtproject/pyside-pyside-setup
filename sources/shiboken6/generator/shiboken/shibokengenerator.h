@@ -27,7 +27,7 @@ struct GeneratorClassInfoCacheEntry;
 struct IncludeGroup;
 struct ShibokenGeneratorOptions;
 
-QT_FORWARD_DECLARE_CLASS(TextStream)
+class TextStream;
 
 // Function to be used for implementing nb_bool
 struct BoolCastFunction
