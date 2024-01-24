@@ -145,7 +145,7 @@ def _qml_project() -> Project:
 
 
 def new_project(directory_s: str,
-                project_type: ProjectType=ProjectType.WIDGET_FORM) -> int:
+                project_type: ProjectType = ProjectType.WIDGET_FORM) -> int:
     directory = Path(directory_s)
     if directory.exists():
         print(f"{directory_s} already exists.", file=sys.stderr)

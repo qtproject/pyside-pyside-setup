@@ -10,8 +10,7 @@ import warnings
 
 from .formatter import (CppFormatter, format_for_loop, format_literal,
                         format_name_constant,
-                        format_reference, format_start_function_call,
-                        write_import, write_import_from)
+                        format_reference, write_import, write_import_from)
 from .nodedump import debug_format_node
 from .qt import ClassFlag, qt_class_flags
 

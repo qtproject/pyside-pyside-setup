@@ -35,30 +35,30 @@ class PySideRecipe(PythonRecipe):
         shutil.copyfile(lib_dir.parent.parent / "libpyside6.abi3.so",
                         Path(self.ctx.get_libs_dir(arch.arch)) / "libpyside6.abi3.so")
 
-        {% for module in qt_modules %}
+        {% for module in qt_modules %}  # noqa: E999
         shutil.copyfile(lib_dir.parent.parent / f"Qt{{ module }}.abi3.so",
                         Path(self.ctx.get_libs_dir(arch.arch)) / "Qt{{ module }}.abi3.so")
-        {% if module == "Qml" -%}
+        {% if module == "Qml" -%}  # noqa: E999
         shutil.copyfile(lib_dir.parent.parent / "libpyside6qml.abi3.so",
                         Path(self.ctx.get_libs_dir(arch.arch)) / "libpyside6qml.abi3.so")
-        {% endif %}
-        {% endfor %}
+        {% endif %}  # noqa: E999
+        {% endfor %}  # noqa: E999
 
-        {% for lib in qt_local_libs %}
+        {% for lib in qt_local_libs %}  # noqa: E999
         lib_path = lib_dir / f"lib{{ lib }}_{arch.arch}.so"
         if lib_path.exists():
             shutil.copyfile(lib_path,
                             Path(self.ctx.get_libs_dir(arch.arch)) / f"lib{{ lib }}_{arch.arch}.so")
-        {% endfor %}
+        {% endfor %}  # noqa: E999
 
-        {% for plugin_category,plugin_name in qt_plugins %}
+        {% for plugin_category,plugin_name in qt_plugins %}  # noqa: E999
         plugin_path = (lib_dir.parent / "plugins" / "{{ plugin_category }}" /
                       f"libplugins_{{ plugin_category }}_{{ plugin_name }}_{arch.arch}.so")
         if plugin_path.exists():
             shutil.copyfile(plugin_path,
                             (Path(self.ctx.get_libs_dir(arch.arch)) /
                              f"libplugins_{{ plugin_category }}_{{ plugin_name }}_{arch.arch}.so"))
-        {% endfor %}
+        {% endfor %}  # noqa: E999
 
 
 recipe = PySideRecipe()

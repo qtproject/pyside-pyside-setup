@@ -51,6 +51,7 @@ NEW_PROJECT_TYPES = {"new-quick": ProjectType.QUICK,
                      "new-ui": ProjectType.WIDGET_FORM,
                      "new-widget": ProjectType.WIDGET}
 
+
 class Project:
     """
     Class to wrap the various operations on Project
@@ -117,7 +118,7 @@ class Project:
             qmltypes_file = self._qml_module_dir / f"{stem}.qmltypes"
             cpp_file = self._qml_module_dir / f"{stem}_qmltyperegistrations.cpp"
             cmd = [QMLTYPEREGISTRAR_CMD, "--generate-qmltypes",
-                   os.fspath(qmltypes_file),  "-o", os.fspath(cpp_file),
+                   os.fspath(qmltypes_file), "-o", os.fspath(cpp_file),
                    os.fspath(file)]
             cmd.extend(self._qml_project_data.registrar_options())
             return ([qmltypes_file, cpp_file], cmd)

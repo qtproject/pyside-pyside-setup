@@ -4,7 +4,7 @@
 
 import sys
 
-from PySide6.QtCore import qVersion, Qt
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QPainter, QPaintEvent, QShortcut
 from PySide6.QtWidgets import QApplication, QWidget
 

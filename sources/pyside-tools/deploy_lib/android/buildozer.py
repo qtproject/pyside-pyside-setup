@@ -253,8 +253,8 @@ class BuildozerConfig(BaseConfig):
                 else:
                     continue
 
-                absolute_plugin_module_folder = (self.qt_libs_path.parent / "plugins" /
-                                                plugin_module_folder)
+                absolute_plugin_module_folder = (self.qt_libs_path.parent / "plugins"
+                                                 / plugin_module_folder)
 
                 if not absolute_plugin_module_folder.is_dir():
                     logging.warning(f"[DEPLOY] Qt plugin folder '{plugin_module_folder}' does not"
