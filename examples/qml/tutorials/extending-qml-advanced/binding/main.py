@@ -9,9 +9,9 @@ import sys
 from PySide6.QtCore import QCoreApplication
 from PySide6.QtQml import QQmlComponent, QQmlEngine, qmlAttachedPropertiesObject
 
-from person import Boy, Girl
-from birthdayparty import BirthdayParty
-from happybirthdaysong import HappyBirthdaySong
+from person import Boy, Girl  # noqa: F401
+from birthdayparty import BirthdayParty  # noqa: F401
+from happybirthdaysong import HappyBirthdaySong  # noqa: F401
 
 
 if __name__ == "__main__":

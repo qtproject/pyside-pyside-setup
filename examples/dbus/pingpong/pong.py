@@ -18,7 +18,7 @@ class Pong(QObject):
     @Slot(str, result=str)
     def ping(self, arg):
         print(f'pong: Received ping({arg})')
-        qApp.quit()
+        qApp.quit()  # noqa: F821
         return f'ping("{arg}") got called'
 
 

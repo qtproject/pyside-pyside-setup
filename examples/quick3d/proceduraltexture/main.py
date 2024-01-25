@@ -4,7 +4,7 @@
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
-from gradienttexture import GradientTexture
+from gradienttexture import GradientTexture  # noqa: F401
 
 from pathlib import Path
 

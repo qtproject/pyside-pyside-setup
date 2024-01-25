@@ -52,7 +52,7 @@ class TetrixWindow(QWidget):
 
         start_button.clicked.connect(self.board.start)
         pause_button.clicked.connect(self.board.pause)
-        quit_button.clicked.connect(qApp.quit)
+        quit_button.clicked.connect(qApp.quit)  # noqa: F821
         self.board.score_changed.connect(score_lcd.display)
         self.board.level_changed.connect(level_lcd.display)
         self.board.lines_removed_changed.connect(lines_lcd.display)

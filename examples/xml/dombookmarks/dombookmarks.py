@@ -85,7 +85,7 @@ class MainWindow(QMainWindow):
 
         self._help_menu = self.menuBar().addMenu("&Help")
         self._help_menu.addAction(QAction("&About", self, triggered=self.about))
-        self._help_menu.addAction(QAction("About &Qt", self, triggered=qApp.aboutQt))
+        self._help_menu.addAction(QAction("About &Qt", self, triggered=qApp.aboutQt))  # noqa: F821
 
 
 class XbelTree(QTreeWidget):

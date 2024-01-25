@@ -25,7 +25,7 @@ class MainWindow(QMainWindow):
         fileMenu.addAction(exitAction)
 
         aboutMenu = self.menuBar().addMenu("&About")
-        aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
+        aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)  # noqa: F821
         aboutMenu.addAction(aboutQtAct)
         self.axWidget = QAxWidget()
         self.setCentralWidget(self.axWidget)

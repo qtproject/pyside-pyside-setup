@@ -13,7 +13,7 @@ from PySide6.QtCore import QCoreApplication, QLoggingCategory, QUrl
 
 from browser import Browser
 
-import data.rc_simplebrowser
+import data.rc_simplebrowser  # noqa: F401
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Qt Widgets Web Browser",

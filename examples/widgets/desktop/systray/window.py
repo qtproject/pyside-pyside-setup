@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog,
                                QSpinBox, QStyle, QSystemTrayIcon, QTextEdit,
                                QVBoxLayout)
 
-import rc_systray
+import rc_systray  # noqa: F401
 
 
 class Window(QDialog):
@@ -222,7 +222,7 @@ class Window(QDialog):
         self._restore_action.triggered.connect(self.showNormal)
 
         self._quit_action = QAction("Quit", self)
-        self._quit_action.triggered.connect(qApp.quit)
+        self._quit_action.triggered.connect(qApp.quit)  # noqa: F821
 
     def create_tray_icon(self):
         self._tray_icon_menu = QMenu(self)

@@ -16,7 +16,7 @@ class MainWindow(QMainWindow):
         menuWindow.addAction("Add new", QKeySequence(Qt.CTRL | Qt.Key_N),
                              self.onAddNew)
         menuWindow.addAction("Quit", QKeySequence(Qt.CTRL | Qt.Key_Q),
-                             qApp.closeAllWindows)
+                             qApp.closeAllWindows)  # noqa: F821
 
         self.onAddNew()
 

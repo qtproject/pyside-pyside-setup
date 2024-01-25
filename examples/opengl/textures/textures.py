@@ -24,7 +24,7 @@ except ImportError:
     messageBox.exec()
     sys.exit(1)
 
-import textures_rc
+import textures_rc  # noqa: F401
 
 
 class GLWidget(QOpenGLWidget):
@@ -186,7 +186,7 @@ class Window(QWidget):
                 mainLayout.addWidget(glw, i, j)
 
                 glw.clicked.connect(self.setCurrentGlWidget)
-                qApp.lastWindowClosed.connect(glw.freeGLResources)
+                qApp.lastWindowClosed.connect(glw.freeGLResources)  # noqa: F821
 
         self.currentGlWidget = self.glWidgets[0][0]
 

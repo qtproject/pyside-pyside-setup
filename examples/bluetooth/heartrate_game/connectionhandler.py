@@ -61,9 +61,9 @@ class ConnectionHandler(QObject):
         if is_android:
             permission = QBluetoothPermission()
             permission.setCommunicationModes(QBluetoothPermission.Access)
-            permission_status = qApp.checkPermission(permission)
+            permission_status = qApp.checkPermission(permission)  # noqa: F821
             if permission_status == Qt.PermissionStatus.Undetermined:
-                qApp.requestPermission(permission, self, self.initLocalDevice)
+                qApp.requestPermission(permission, self, self.initLocalDevice)  # noqa: F821
                 return
             if permission_status == Qt.PermissionStatus.Denied:
                 return

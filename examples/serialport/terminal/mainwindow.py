@@ -47,7 +47,7 @@ class MainWindow(QMainWindow):
         self.m_ui.actionConfigure.triggered.connect(self.m_settings.show)
         self.m_ui.actionClear.triggered.connect(self.m_console.clear)
         self.m_ui.actionAbout.triggered.connect(self.about)
-        self.m_ui.actionAboutQt.triggered.connect(qApp.aboutQt)
+        self.m_ui.actionAboutQt.triggered.connect(qApp.aboutQt)  # noqa: F821
 
         self.m_serial.errorOccurred.connect(self.handle_error)
         self.m_serial.readyRead.connect(self.read_data)

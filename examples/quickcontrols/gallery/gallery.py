@@ -17,7 +17,7 @@ from PySide6.QtCore import QSettings, QUrl
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtQuickControls2 import QQuickStyle
 
-import rc_gallery
+import rc_gallery  # noqa: F401
 
 if __name__ == "__main__":
     QGuiApplication.setApplicationName("Gallery")

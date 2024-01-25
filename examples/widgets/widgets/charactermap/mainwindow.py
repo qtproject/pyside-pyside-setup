@@ -30,7 +30,7 @@ class MainWindow(QMainWindow):
         file_menu.addAction("Quit", self.close)
         help_menu = self.menuBar().addMenu("Help")
         help_menu.addAction("Show Font Info", self.show_info)
-        help_menu.addAction("About &Qt", qApp.aboutQt)
+        help_menu.addAction("About &Qt", qApp.aboutQt)  # noqa: F821
 
         central_widget = QWidget()
 

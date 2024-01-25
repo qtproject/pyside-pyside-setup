@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QCheckBox, QFormLayout,
 
 from listchooser import PropertyChooser, SignalChooser
 
-import classwizard_rc
+import classwizard_rc  # noqa: F401
 
 
 BASE_CLASSES = ['<None>', 'PySide6.QtCore.QObject',

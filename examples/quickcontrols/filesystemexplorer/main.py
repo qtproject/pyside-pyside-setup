@@ -10,7 +10,7 @@ This example shows how to customize Qt Quick Controls by implementing a simple f
 # import FileSystemModule.rc_icons
 # import FileSystemModule.rc_app
 
-from editormodels import FileSystemModel
+from editormodels import FileSystemModel  # noqa: F401
 import PySide6
 from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine

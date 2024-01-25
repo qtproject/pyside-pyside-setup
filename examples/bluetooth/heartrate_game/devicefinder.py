@@ -49,9 +49,9 @@ class DeviceFinder(BluetoothBaseClass):
         if is_android:
             permission = QBluetoothPermission()
             permission.setCommunicationModes(QBluetoothPermission.Access)
-            permission_status = qApp.checkPermission(permission)
+            permission_status = qApp.checkPermission(permission)  # noqa: F821
             if permission_status == Qt.PermissionStatus.Undetermined:
-                qApp.requestPermission(permission, self, self.startSearch)
+                qApp.requestPermission(permission, self, self.startSearch)  # noqa: F82 1
                 return
             elif permission_status == Qt.PermissionStatus.Denied:
                 return

@@ -100,7 +100,7 @@ class MainWindow(QMainWindow):
         tool_bar.addWidget(self._volume_slider)
 
         about_menu = self.menuBar().addMenu("&About")
-        about_qt_act = QAction("About &Qt", self, triggered=qApp.aboutQt)
+        about_qt_act = QAction("About &Qt", self, triggered=qApp.aboutQt)  # noqa: F821
         about_menu.addAction(about_qt_act)
 
         self._video_widget = QVideoWidget()

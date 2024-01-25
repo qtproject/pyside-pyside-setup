@@ -11,7 +11,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtCore import QCoreApplication, QUrl
 
-import rc_viewer
+import rc_viewer  # noqa: F401
 
 """PySide6 port of the pdf/pdfviewer example from Qt v6.x"""
 

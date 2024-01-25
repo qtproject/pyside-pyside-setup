@@ -90,4 +90,4 @@ class Dialog(QDialog):
 
     def detach(self):
         if not self._shared_memory.detach():
-            self.ui.label.setText(tr("Unable to detach from shared memory."))
+            self.ui.label.setText(self.tr("Unable to detach from shared memory."))  # noqa: F821

@@ -55,7 +55,7 @@ class TextEdit(QMainWindow):
 
         help_menu = self.menuBar().addMenu("Help")
         help_menu.addAction("About", self.about)
-        help_menu.addAction("About &Qt", qApp.aboutQt)
+        help_menu.addAction("About &Qt", qApp.aboutQt)  # noqa: F821
 
         text_font = QFont("Helvetica")
         text_font.setStyleHint(QFont.SansSerif)

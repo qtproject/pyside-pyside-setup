@@ -113,7 +113,7 @@ class MainWindow(QMainWindow):
         input_state.addTransition(quit_transition)
 
         machine.setInitialState(input_state)
-        machine.finished.connect(qApp.quit)
+        machine.finished.connect(qApp.quit)  # noqa: F821
         machine.start()
 
     def sizeHint(self):

@@ -82,17 +82,17 @@ class BookWindow(QMainWindow, Ui_BookWindow):
     def create_menubar(self):
         file_menu = self.menuBar().addMenu(self.tr("&File"))
         quit_action = file_menu.addAction(self.tr("&Quit"))
-        quit_action.triggered.connect(qApp.quit)
+        quit_action.triggered.connect(qApp.quit)  # noqa: F821
 
         help_menu = self.menuBar().addMenu(self.tr("&Help"))
         about_action = help_menu.addAction(self.tr("&About"))
         about_action.setShortcut(QKeySequence.HelpContents)
         about_action.triggered.connect(self.about)
         aboutQt_action = help_menu.addAction("&About Qt")
-        aboutQt_action.triggered.connect(qApp.aboutQt)
+        aboutQt_action.triggered.connect(qApp.aboutQt)  # noqa: F821
 
     @Slot()
     def about(self):
         QMessageBox.about(self, self.tr("About Books"),
-            self.tr("<p>The <b>Books</b> example shows how to use Qt SQL classes "
-                    "with a model/view framework."))
+                          self.tr("<p>The <b>Books</b> example shows how to use Qt SQL classes "
+                          "with a model/view framework."))

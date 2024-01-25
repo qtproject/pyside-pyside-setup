@@ -69,10 +69,10 @@ class ThemeWidget(QWidget):
         self.ui.antialiasCheckBox.setChecked(True)
 
         # Set the colors from the light theme as default ones
-        pal = qApp.palette()
+        pal = qApp.palette()  # noqa: F821
         pal.setColor(QPalette.Window, QColor(0xf0f0f0))
         pal.setColor(QPalette.WindowText, QColor(0x404044))
-        qApp.setPalette(pal)
+        qApp.setPalette(pal)  # noqa: F821
 
         self.update_ui()
 

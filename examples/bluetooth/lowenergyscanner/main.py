@@ -10,7 +10,7 @@ from PySide6.QtCore import QCoreApplication
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
-from device import Device
+from device import Device  # noqa: F401
 from pathlib import Path
 
 if __name__ == '__main__':

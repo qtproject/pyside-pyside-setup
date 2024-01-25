@@ -11,12 +11,12 @@ from PySide6.QtQml import QQmlComponent, QQmlEngine
 from PySide6.QtQuick import QQuickWindow
 from PySide6.QtQuickControls2 import QQuickStyle
 
-import rc_window
+import rc_window  # noqa: F401
 
 # Append the parent directory of this file so that Python can find and
 # import from the "shared" sibling directory.
 sys.path.append(os.fspath(Path(__file__).parent.parent))
-from shared import shared_rc
+from shared import shared_rc  # noqa: F401, E402
 
 
 if __name__ == "__main__":

@@ -46,7 +46,7 @@ class MyWidget(QWidget):
 
         quit = QPushButton("Quit")
         quit.setFont(QFont("Times", 18, QFont.Bold))
-        quit.clicked.connect(qApp.quit)
+        quit.clicked.connect(qApp.quit)  # noqa: F821
 
         previous_range = None
 

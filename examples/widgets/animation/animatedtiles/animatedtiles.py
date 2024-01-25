@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (QApplication, QGraphicsItem, QGraphicsPixmapItem,
                                QGraphicsWidget, QStyle)
 from PySide6.QtStateMachine import QState, QStateMachine
 
-import animatedtiles_rc
+import animatedtiles_rc  # noqa: F401
 
 
 # Deriving from more than one wrapped class is not supported, so we use

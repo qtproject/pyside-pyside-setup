@@ -4,7 +4,7 @@
 from PySide6.QtGui import QImage, QPainter, QColor
 from PySide6.QtCore import Qt
 
-import rc_markers
+import rc_markers  # noqa: F401
 
 
 def rectangle(point_type, image_size):
