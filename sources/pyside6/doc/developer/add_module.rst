@@ -44,6 +44,15 @@ Add bindings
    of using ``#include <QtModule/header.h>`` since module include paths
    are not passed in PySide.
 
+Distribution
+------------
+
+- Determine to which wheel the module belongs according to
+  `Qt Modules <https://doc.qt.io/qt-6/qtmodules.html>`_.
+- Add the module to ``build_scripts/wheel_files.py`` for use by
+  ``create_wheels.py``.
+- Add the module to one of the ``README.pyside6_*.md`` files.
+
 Add documentation
 -----------------
 

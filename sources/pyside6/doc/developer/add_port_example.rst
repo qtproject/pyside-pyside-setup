@@ -10,10 +10,13 @@ You can either design an example from scratch or inspired in another
 application, or simply you can port an existing Qt example that does not have
 a Python counterpart.
 
-For both cases, we recommend you to use tools like
-`flake8 <https://pypi.org/project/flake8/>`_
-(or `ruff <https://pypi.org/project/ruff/>`_) to detect issues with your code.
+Example code should be free of `flake8 <https://pypi.org/project/flake8/>`_
+warnings; this is enforced by a bot. A configuration file is provided
+at the root of the repository. Offending lines can be excluded by a
+``noqa`` directive if there is a good reason to do so.
+
 Keep in mind we do allow 100 columns for line length.
+
 Additionally, please use `isort <https://pypi.org/project/isort/>`_ to keep the
 imports ordered and consistent with other examples.
 
@@ -21,7 +24,7 @@ For example:
 
 .. code-block:: bash
 
-  $ flake8 --ignore=E266 your_file.py
+  $ flake8 --config pyside-setup/.flake8 your_file.py
   $ isort your_file.py
 
 
