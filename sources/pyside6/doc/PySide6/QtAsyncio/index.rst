@@ -118,6 +118,19 @@ or
 to run the coroutine and then stop the event loop upon its completion.
 This latter case behaves identically to ``asyncio.run(my_coroutine())``.
 
+An additional optional argument ``quit_qapp`` can be passed to ``run()``
+to configure whether the QCoreApplication at the core of QtAsyncio
+should be shut down when asyncio finishes. A special case where one
+would want to disable this is test suites that want to reuse a single
+QCoreApplication instance across all unit tests, which would fail if
+this instance is shut down every time. The default is ``True``.
+
+Note that this argument is orthogonal to the ``keep_running`` argument.
+``keep_running`` determines if **asyncio** should keep running after the
+coroutine has finished, while ``quit_qapp`` determines if the
+QCoreApplication should be shut down after asyncio has finished. It is
+possible for asyncio to finish while the QCoreApplication is kept alive.
+
 Coroutines explained
 ^^^^^^^^^^^^^^^^^^^^
 
