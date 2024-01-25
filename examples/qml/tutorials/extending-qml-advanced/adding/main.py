@@ -9,7 +9,7 @@ import sys
 from PySide6.QtCore import QCoreApplication
 from PySide6.QtQml import QQmlComponent, QQmlEngine
 
-from person import Person
+from person import Person  # noqa: F401
 
 
 if __name__ == '__main__':

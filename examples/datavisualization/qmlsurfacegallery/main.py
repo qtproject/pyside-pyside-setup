@@ -12,8 +12,8 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView
 from PySide6.QtDataVisualization import qDefaultSurfaceFormat
 
-from datasource import DataSource
-import rc_qmlsurfacegallery
+from datasource import DataSource  # noqa: F401
+import rc_qmlsurfacegallery  # noqa: F401
 
 
 if __name__ == "__main__":

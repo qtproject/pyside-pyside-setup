@@ -242,7 +242,7 @@ class MainWindow(QMainWindow):
         self.about_action = QAction("&About", self, triggered=self.about)
 
         self.about_Qt_action = QAction("About &Qt", self,
-                                       triggered=qApp.aboutQt)
+                                       triggered=qApp.aboutQt)  # noqa: F821
 
     def create_menus(self):
         self.file_menu = self.menuBar().addMenu("&File")

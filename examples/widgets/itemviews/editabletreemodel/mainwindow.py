@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
         self.insert_child_action.setShortcut("Ctrl+N")
         self.insert_child_action.triggered.connect(self.insert_child)
         help_menu = menubar.addMenu("&Help")
-        about_qt_action = help_menu.addAction("About Qt", qApp.aboutQt)
+        about_qt_action = help_menu.addAction("About Qt", qApp.aboutQt)  # noqa: F821
         about_qt_action.setShortcut("F1")
 
         self.setWindowTitle("Editable Tree Model")

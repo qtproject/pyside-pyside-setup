@@ -11,7 +11,7 @@ from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
                                QMessageBox, QTextEdit)
 
-import application_rc
+import application_rc  # noqa: F401
 
 
 class MainWindow(QMainWindow):
@@ -128,7 +128,7 @@ class MainWindow(QMainWindow):
 
         self._about_qt_act = QAction("About &Qt", self,
                                      statusTip="Show the Qt library's About box",
-                                     triggered=qApp.aboutQt)
+                                     triggered=qApp.aboutQt)  # noqa: F821
 
         self._cut_act.setEnabled(False)
         self._copy_act.setEnabled(False)

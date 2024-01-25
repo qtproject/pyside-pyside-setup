@@ -259,7 +259,7 @@ class GameBoard(QWidget):
         quit = QPushButton("&Quit")
         quit.setFont(QFont("Times", 18, QFont.Bold))
 
-        quit.clicked.connect(qApp.quit)
+        quit.clicked.connect(qApp.quit)  # noqa: F821
 
         angle = LCDRange("ANGLE")
         angle.set_range(5, 70)

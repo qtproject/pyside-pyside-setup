@@ -49,7 +49,7 @@ class FileListModel(QAbstractListModel):
 
         if role == Qt.BackgroundRole:
             batch = row // BATCH_SIZE
-            palette = qApp.palette()
+            palette = qApp.palette()  # noqa: F821
             return palette.base() if batch % 2 == 0 else palette.alternateBase()
 
         if role == Qt.DecorationRole:

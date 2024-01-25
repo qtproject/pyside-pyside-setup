@@ -35,7 +35,8 @@ class DownloaderWidget(QWidget):
         self.link_box.setPlaceholderText("Download Link ...")
 
         self._open_folder_action = self.dest_box.addAction(
-            qApp.style().standardIcon(QStyle.SP_DirOpenIcon), QLineEdit.TrailingPosition
+            qApp.style().standardIcon(QStyle.SP_DirOpenIcon),  # noqa: F821
+            QLineEdit.TrailingPosition
         )
         self._open_folder_action.triggered.connect(self.on_open_folder)
 

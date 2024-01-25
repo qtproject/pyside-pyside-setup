@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QListWidget,
                                QMainWindow)
 
 
-import linguist_rc
+import linguist_rc  # noqa: F401
 
 
 class Window(QMainWindow):
@@ -21,7 +21,7 @@ class Window(QMainWindow):
         quit_action.triggered.connect(self.close)
         help_menu = self.menuBar().addMenu(self.tr("&Help"))
         about_qt_action = help_menu.addAction(self.tr("About Qt"))
-        about_qt_action.triggered.connect(qApp.aboutQt)
+        about_qt_action.triggered.connect(qApp.aboutQt)  # noqa: F821
 
         self._list_widget = QListWidget()
         self._list_widget.setSelectionMode(QAbstractItemView.MultiSelection)

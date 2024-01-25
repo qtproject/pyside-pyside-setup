@@ -11,7 +11,7 @@ from PySide6.QtWidgets import QApplication
 
 from textedit import TextEdit
 
-import textedit_rc
+import textedit_rc  # noqa: F401
 
 
 if __name__ == '__main__':

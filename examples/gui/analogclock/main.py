@@ -27,7 +27,7 @@ class AnalogClockWindow(QRasterWindow):
         self._seconds_hand = QPolygon([QPoint(1, 14), QPoint(-1, 14),
                                        QPoint(-1, -89), QPoint(1, -89)])
 
-        palette = qApp.palette()
+        palette = qApp.palette()  # noqa: F821
         self._background_color = palette.color(QPalette.Window)
         self._hour_color = palette.color(QPalette.Text)
         self._minute_color = palette.color(QPalette.Text)

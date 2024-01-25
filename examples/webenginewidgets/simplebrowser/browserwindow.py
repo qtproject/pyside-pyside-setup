@@ -329,7 +329,7 @@ class BrowserWindow(QMainWindow):
 
     def create_help_menu(self):
         help_menu = QMenu("Help")
-        help_menu.addAction("About Qt", qApp.aboutQt)
+        help_menu.addAction("About Qt", qApp.aboutQt)  # noqa: F821
         return help_menu
 
     @Slot()

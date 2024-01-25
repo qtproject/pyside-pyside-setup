@@ -9,7 +9,7 @@ from PySide6.QtCore import (QLineF, QPointF, QRandomGenerator, QRectF, QTimer, Q
 from PySide6.QtGui import (QBrush, QColor, QPainter, QPainterPath, QPixmap, QPolygonF, QTransform)
 from PySide6.QtWidgets import (QApplication, QGraphicsItem, QGraphicsScene, QGraphicsView)
 
-import mice_rc
+import mice_rc  # noqa: F401
 
 
 def random(boundary):

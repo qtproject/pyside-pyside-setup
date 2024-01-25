@@ -25,7 +25,7 @@ class MyWidget(QWidget):
         slider.setRange(0, 99)
         slider.setValue(0)
 
-        quit.clicked.connect(qApp.quit)
+        quit.clicked.connect(qApp.quit)  # noqa: F821
         slider.valueChanged.connect(lcd.display)
 
         layout = QVBoxLayout(self)

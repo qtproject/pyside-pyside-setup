@@ -8,7 +8,7 @@ from PySide6.QtCore import QUrl
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
-from model import BaseModel
+from model import BaseModel  # noqa: F401
 
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)

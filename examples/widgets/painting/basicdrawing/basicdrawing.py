@@ -11,7 +11,7 @@ from PySide6.QtGui import (QBrush, QConicalGradient, QLinearGradient, QPainter,
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QGridLayout,
                                QLabel, QSpinBox, QWidget)
 
-import basicdrawing_rc
+import basicdrawing_rc  # noqa: F401
 
 
 class RenderArea(QWidget):

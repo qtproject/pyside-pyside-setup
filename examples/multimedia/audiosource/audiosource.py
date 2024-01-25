@@ -95,9 +95,9 @@ class InputTest(QWidget):
     def initialize(self):
         if is_android:
             permission = QMicrophonePermission()
-            permission_status = qApp.checkPermission(permission)
+            permission_status = qApp.checkPermission(permission)  # noqa: F821
             if permission_status == Qt.PermissionStatus.Undetermined:
-                qApp.requestPermission(permission, self, self.initialize)
+                qApp.requestPermission(permission, self, self.initialize)  # noqa: F821
                 return
             if permission_status == Qt.PermissionStatus.Denied:
                 qWarning("Microphone permission is not granted!")

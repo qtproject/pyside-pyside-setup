@@ -20,8 +20,6 @@ def random(boundary):
 
 class Edge(QGraphicsItem):
 
-    item_type = QGraphicsItem.UserType + 2
-
     def __init__(self, sourceNode, destNode):
         super().__init__()
 
@@ -36,7 +34,7 @@ class Edge(QGraphicsItem):
         self.adjust()
 
     def item_type(self):
-        return Edge.item_type
+        return QGraphicsItem.UserType + 2
 
     def source_node(self):
         return self.source()
@@ -119,7 +117,6 @@ class Edge(QGraphicsItem):
 
 
 class Node(QGraphicsItem):
-    item_type = QGraphicsItem.UserType + 1
 
     def __init__(self, graphWidget):
         super().__init__()
@@ -133,7 +130,7 @@ class Node(QGraphicsItem):
         self.setZValue(-1)
 
     def item_type(self):
-        return Node.item_type
+        return QGraphicsItem.UserType + 1
 
     def add_edge(self, edge):
         self._edge_list.append(weakref.ref(edge))
@@ -376,7 +373,8 @@ class GraphWidget(QGraphicsView):
         painter.drawText(text_rect, message)
 
     def scale_view(self, scaleFactor):
-        factor = self.transform().scale(scaleFactor, scaleFactor).mapRect(QRectF(0, 0, 1, 1)).width()
+        factor = self.transform().scale(scaleFactor, scaleFactor).mapRect(
+            QRectF(0, 0, 1, 1)).width()
 
         if factor < 0.07 or factor > 100:
             return

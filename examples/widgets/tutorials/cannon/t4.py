@@ -20,7 +20,7 @@ class MyWidget(QWidget):
         self.quit.setGeometry(62, 40, 75, 30)
         self.quit.setFont(QFont("Times", 18, QFont.Bold))
 
-        self.quit.clicked.connect(qApp.quit)
+        self.quit.clicked.connect(qApp.quit)  # noqa: F821
 
 
 if __name__ == '__main__':

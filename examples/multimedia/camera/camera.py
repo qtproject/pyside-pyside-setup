@@ -45,7 +45,7 @@ class Camera(QMainWindow):
         image = Path(__file__).parent / "shutter.svg"
         self._ui.takeImageButton.setIcon(QIcon(os.fspath(image)))
         if not is_android:
-            self._ui.actionAbout_Qt.triggered.connect(qApp.aboutQt)
+            self._ui.actionAbout_Qt.triggered.connect(qApp.aboutQt)  # noqa: F821
 
         # disable all buttons by default
         self.updateCameraActive(False)
@@ -63,9 +63,9 @@ class Camera(QMainWindow):
         if is_android:
             # camera
             cam_permission = QCameraPermission()
-            cam_permission_status = qApp.checkPermission(cam_permission)
+            cam_permission_status = qApp.checkPermission(cam_permission)  # noqa: F821
             if cam_permission_status == Qt.PermissionStatus.Undetermined:
-                qApp.requestPermission(cam_permission, self, self.initialize)
+                qApp.requestPermission(cam_permission, self, self.initialize)  # noqa: F821
                 return
             if cam_permission_status == Qt.PermissionStatus.Denied:
                 qWarning("Camera permission is not granted!")
@@ -75,9 +75,9 @@ class Camera(QMainWindow):
 
             # microphone
             microphone_permission = QMicrophonePermission()
-            microphone_permission_status = qApp.checkPermission(microphone_permission)
+            microphone_permission_status = qApp.checkPermission(microphone_permission)  # noqa: F821
             if microphone_permission_status == Qt.PermissionStatus.Undetermined:
-                qApp.requestPermission(microphone_permission, self, self.initialize)
+                qApp.requestPermission(microphone_permission, self, self.initialize)  # noqa: F821
                 return
             if microphone_permission_status == Qt.PermissionStatus.Denied:
                 qWarning("Microphone permission is not granted!")

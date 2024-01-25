@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (QApplication, QGraphicsItem,
                                QGraphicsItemAnimation, QGraphicsScene,
                                QGraphicsView)
 
-import dragdroprobot_rc
+import dragdroprobot_rc  # noqa: F401
 
 
 def random(boundary):

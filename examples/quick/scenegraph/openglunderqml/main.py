@@ -8,7 +8,7 @@ from PySide6.QtCore import QUrl
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView, QQuickWindow, QSGRendererInterface
 
-from squircle import Squircle
+from squircle import Squircle  # noqa: F401
 
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)

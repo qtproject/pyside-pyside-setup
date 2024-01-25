@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
         quit_act.triggered.connect(self.close)
 
         help_menu = self.menuBar().addMenu("&Help")
-        help_menu.addAction("About &Qt", qApp.aboutQt)
+        help_menu.addAction("About &Qt", qApp.aboutQt)  # noqa: F821
 
 
 class Highlighter(QSyntaxHighlighter):

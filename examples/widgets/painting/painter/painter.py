@@ -116,15 +116,17 @@ class MainWindow(QMainWindow):
         self.bar = self.addToolBar("Menu")
         self.bar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self._save_action = self.bar.addAction(
-            qApp.style().standardIcon(QStyle.SP_DialogSaveButton), "Save", self.on_save
+            qApp.style().standardIcon(QStyle.SP_DialogSaveButton),  # noqa: F821
+            "Save", self.on_save
         )
         self._save_action.setShortcut(QKeySequence.Save)
         self._open_action = self.bar.addAction(
-            qApp.style().standardIcon(QStyle.SP_DialogOpenButton), "Open", self.on_open
+            qApp.style().standardIcon(QStyle.SP_DialogOpenButton),  # noqa: F821
+            "Open", self.on_open
         )
         self._open_action.setShortcut(QKeySequence.Open)
         self.bar.addAction(
-            qApp.style().standardIcon(QStyle.SP_DialogResetButton),
+            qApp.style().standardIcon(QStyle.SP_DialogResetButton),  # noqa: F821
             "Clear",
             self.painter_widget.clear,
         )

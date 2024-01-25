@@ -9,7 +9,7 @@ class ScreenListModel(QAbstractListModel):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        app = qApp
+        app = qApp  # noqa: F821
         app.screenAdded.connect(self.screens_changed)
         app.screenRemoved.connect(self.screens_changed)
         app.primaryScreenChanged.connect(self.screens_changed)

@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
         self.m_ui.actionDisconnect.triggered.connect(self.disconnect_device)
         self.m_ui.actionResetController.triggered.connect(self._reset_controller)
         self.m_ui.actionQuit.triggered.connect(self.close)
-        self.m_ui.actionAboutQt.triggered.connect(qApp.aboutQt)
+        self.m_ui.actionAboutQt.triggered.connect(qApp.aboutQt)  # noqa: F821
         self.m_ui.actionClearLog.triggered.connect(self.m_model.clear)
         self.m_ui.actionPluginDocumentation.triggered.connect(show_help)
         self.m_ui.actionDeviceInformation.triggered.connect(self._action_device_information)

@@ -11,7 +11,7 @@ from glwidget import GLWidget
 
 
 def _main_window():
-    for t in qApp.topLevelWidgets():
+    for t in qApp.topLevelWidgets():  # noqa: F821
         if isinstance(t, QMainWindow):
             return t
     return None

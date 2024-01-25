@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (QApplication, QGraphicsLinearLayout,
 
 from PySide6.QtStateMachine import QState, QStateMachine
 
-import states_rc
+import states_rc  # noqa: F401
 
 
 class Pixmap(QGraphicsObject):

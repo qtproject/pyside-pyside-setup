@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (QApplication, QGraphicsScene, QGraphicsView,
                                QGraphicsWidget)
 from PySide6.QtStateMachine import QState, QStateMachine
 
-import appchooser_rc
+import appchooser_rc  # noqa: F401
 
 
 class Pixmap(QGraphicsWidget):

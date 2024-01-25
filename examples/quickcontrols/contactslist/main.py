@@ -9,7 +9,7 @@ from pathlib import Path
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
-from contactmodel import ContactModel
+from contactmodel import ContactModel  # noqa: F401
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)

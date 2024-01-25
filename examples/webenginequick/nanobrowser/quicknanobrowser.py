@@ -14,7 +14,7 @@ from PySide6.QtQml import QQmlApplicationEngine, QmlElement, QmlSingleton
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWebEngineQuick import QtWebEngineQuick
 
-import rc_resources
+import rc_resources  # noqa: F401
 
 
 # To be used on the @QmlElement decorator

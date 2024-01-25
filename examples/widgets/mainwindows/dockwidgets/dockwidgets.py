@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (QApplication, QDialog, QDockWidget,
                                QFileDialog, QListWidget, QMainWindow,
                                QMessageBox, QTextEdit)
 
-import dockwidgets_rc
+import dockwidgets_rc  # noqa: F401
 
 
 class MainWindow(QMainWindow):

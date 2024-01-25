@@ -1,7 +1,7 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-from tictactoe import TicTacToe
+from tictactoe import TicTacToe  # noqa: F401
 from tictactoeplugin import TicTacToePlugin
 
 from PySide6.QtDesigner import QPyDesignerCustomWidgetCollection

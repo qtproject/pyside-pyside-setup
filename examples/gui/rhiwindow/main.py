@@ -8,7 +8,7 @@ from PySide6.QtCore import QCoreApplication
 from PySide6.QtGui import QGuiApplication, QRhi, QSurfaceFormat
 
 from rhiwindow import HelloWindow
-import rc_rhiwindow
+import rc_rhiwindow  # noqa: F401
 
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)

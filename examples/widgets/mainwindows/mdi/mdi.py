@@ -14,7 +14,7 @@ from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QFileDialog, QMainWindow,
                                QMdiArea, QMessageBox, QTextEdit)
 
-import PySide6.QtExampleIcons
+import PySide6.QtExampleIcons  # noqa: F401
 
 
 class MdiChild(QTextEdit):

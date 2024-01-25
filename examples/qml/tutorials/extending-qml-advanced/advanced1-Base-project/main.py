@@ -10,8 +10,8 @@ import sys
 from PySide6.QtCore import QCoreApplication
 from PySide6.QtQml import QQmlComponent, QQmlEngine
 
-from person import Person
-from birthdayparty import BirthdayParty
+from person import Person  # noqa: F401
+from birthdayparty import BirthdayParty  # noqa: F401
 
 
 app = QCoreApplication(sys.argv)
