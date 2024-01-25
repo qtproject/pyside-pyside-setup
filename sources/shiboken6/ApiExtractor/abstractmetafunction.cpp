@@ -975,12 +975,14 @@ QString AbstractMetaFunctionPrivate::formatMinimalSignature(const AbstractMetaFu
 {
     QString result = m_originalName + u'(';
     for (qsizetype i = 0; i < m_arguments.size(); ++i) {
+        const auto &argument = m_arguments.at(i);
         if (i > 0)
             result += u',';
 
-        result += comment
-            ? m_arguments.at(i).modifiedType().minimalSignature()
-            : m_arguments.at(i).type().minimalSignature();
+        const auto &type = comment ? argument.modifiedType() : argument.type();
+        result += type.minimalSignature();
+        if (comment && argument.hasDefaultValueExpression())
+            result += u'=';
     }
     result += u')';
     if (m_constant)
