@@ -57,7 +57,9 @@ class QAsyncioExecutorWrapper(QObject):
 
 
 class QAsyncioEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
-    def __init__(self, application: typing.Optional[QCoreApplication] = None) -> None:
+    def __init__(self,
+                 application: typing.Optional[QCoreApplication] = None,
+                 quit_qapp: bool = True) -> None:
         super().__init__()
         if application is None:
             if QCoreApplication.instance() is None:
@@ -65,6 +67,7 @@ class QAsyncioEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
             else:
                 application = QCoreApplication.instance()
         self._application: QCoreApplication = application  # type: ignore[assignment]
+        self._quit_qapp = quit_qapp
         self._event_loop: typing.Optional[asyncio.AbstractEventLoop] = None
 
         signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -78,7 +81,7 @@ class QAsyncioEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
         self._event_loop = loop
 
     def new_event_loop(self) -> asyncio.AbstractEventLoop:
-        return QAsyncioEventLoop(self._application)
+        return QAsyncioEventLoop(self._application, quit_qapp=self._quit_qapp)
 
     def get_child_watcher(self) -> asyncio.AbstractChildWatcher:
         raise DeprecationWarning("Child watchers are deprecated since Python 3.12")
@@ -112,11 +115,13 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
                 if not self._loop.is_closed():
                     self._loop.call_soon_threadsafe(self._future.set_exception, e)
 
-    def __init__(self, application: QCoreApplication) -> None:
+    def __init__(self,
+                 application: QCoreApplication, quit_qapp: bool = True) -> None:
         asyncio.BaseEventLoop.__init__(self)
         QObject.__init__(self)
 
         self._application: QCoreApplication = application
+        self._quit_qapp = quit_qapp
         self._thread = QThread.currentThread()
 
         self._closed = False
@@ -191,7 +196,8 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
             else:
                 return
         self._quit_from_inside = True
-        self._application.quit()
+        if self._quit_qapp:
+            self._application.quit()
 
     def is_running(self) -> bool:
         return self._thread.loopLevel() > 0
@@ -206,7 +212,8 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
             return
         if self._default_executor is not None:
             self._default_executor.shutdown(wait=False)
-        self._application.shutdown()
+        if self._quit_qapp:
+            self._application.shutdown()
         self._closed = True
 
     async def shutdown_asyncgens(self) -> None:

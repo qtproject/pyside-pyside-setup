@@ -18,7 +18,8 @@ __all__ = [
 
 
 def run(coro: typing.Optional[typing.Coroutine] = None,
-        keep_running: typing.Optional[bool] = True, *,
+        keep_running: bool = True,
+        quit_qapp: bool = True, *,
         debug: typing.Optional[bool] = None) -> None:
     """Run the QtAsyncio event loop."""
 
@@ -31,7 +32,7 @@ def run(coro: typing.Optional[typing.Coroutine] = None,
     #
     # More details:
     # https://discuss.python.org/t/removing-the-asyncio-policy-system-asyncio-set-event-loop-policy-in-python-3-15/37553  # noqa: E501
-    asyncio.set_event_loop_policy(QAsyncioEventLoopPolicy())
+    asyncio.set_event_loop_policy(QAsyncioEventLoopPolicy(quit_qapp=quit_qapp))
 
     if keep_running:
         if coro:
