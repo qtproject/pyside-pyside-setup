@@ -18,7 +18,7 @@ _AVAILABLE_MKSPECS = ["ninja", "msvc", "mingw"] if sys.platform == "win32" else 
 ADDITIONAL_OPTIONS = """
 Additional options:
   --limited-api                        Use Limited API [yes/no]
-  ---macos-use-libc++                  Use libc++ on macOS
+  --macos-use-libc++                   Use libc++ on macOS
   --snapshot-build                     Snapshot build
   --package-timestamp                  Package Timestamp
   --cmake-toolchain-file               Path to CMake toolchain to enable cross-compiling
