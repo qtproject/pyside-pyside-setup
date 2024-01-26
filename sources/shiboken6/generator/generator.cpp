@@ -386,7 +386,7 @@ std::optional<DefaultValue>
     if (type.isNativePointer())
         return DefaultValue(DefaultValue::Pointer, type.typeEntry()->qualifiedCppName());
     if (type.isPointer())
-        return DefaultValue(DefaultValue::Pointer, u"::"_s + type.typeEntry()->qualifiedCppName());
+        return DefaultValue(DefaultValue::Pointer, getFullTypeName(type.typeEntry()));
 
     if (type.typeEntry()->isSmartPointer())
         return minimalConstructor(api, type.typeEntry());
@@ -435,8 +435,7 @@ std::optional<DefaultValue>
         if (const auto nullValue = enumEntry->nullValue())
             return DefaultValue(DefaultValue::Enum, nullValue->name());
         return DefaultValue(DefaultValue::Custom,
-                            u"static_cast< ::"_s + type->qualifiedCppName()
-                            + u">(0)"_s);
+                            "static_cast< "_L1 + getFullTypeName(type) + ">(0)"_L1);
     }
 
     if (type->isFlags()) {

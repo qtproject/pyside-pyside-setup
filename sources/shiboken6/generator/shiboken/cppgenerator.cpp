@@ -1338,7 +1338,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
             if (isProtectedEnum) {
                 QString typeCast;
                 if (metaEnum->enclosingClass())
-                    typeCast += u"::"_s + metaEnum->enclosingClass()->qualifiedCppName();
+                    typeCast += getFullTypeName(metaEnum->enclosingClass());
                 typeCast += u"::"_s + metaEnum->name();
                 s << '(' << typeCast << ')';
             }
@@ -2296,8 +2296,7 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
         && cppWrapper.testFlag(AbstractMetaClass::CppProtectedHackWrapper);
     Q_ASSERT(!useWrapperClass || context.useWrapper());
     const QString className = useWrapperClass
-        ? context.wrapperName()
-        : (u"::"_s + metaClass->qualifiedCppName());
+        ? context.wrapperName() : getFullTypeName(metaClass);
 
     writeInvalidPyObjectCheck(s, u"self"_s, errorReturn);
 
@@ -3757,7 +3756,8 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                         if (!func->isStatic()) {
                             const bool directInheritance = context.metaClass() == ownerClass;
                             mc << (directInheritance ? "static_cast" : "reinterpret_cast")
-                                << "<::" << wrapperName(ownerClass) << " *>(" << CPP_SELF_VAR << ")->";
+                               << '<' << wrapperName(ownerClass) << " *>("
+                               << CPP_SELF_VAR << ")->";
                         }
 
                         if (!func->isAbstract())
@@ -4026,7 +4026,7 @@ void CppGenerator::writeSpecialCastFunction(TextStream &s, const AbstractMetaCla
             s << "else ";
         s << "if (desiredType == " << cpythonTypeNameExt(baseClass->typeEntry())
             << ")\n" << indent
-            << "return static_cast< ::" << baseClass->qualifiedCppName() << " *>(me);\n"
+            << "return static_cast< " << getFullTypeName(baseClass) << " *>(me);\n"
             << outdent;
         firstClass = false;
     }
@@ -5489,12 +5489,10 @@ void CppGenerator::writeClassRegister(TextStream &s,
     if (usePySideExtensions() && isQObject(metaClass)) {
         s << "Shiboken::ObjectType::setSubTypeInitHook(pyType, &PySide::initQObjectSubType);\n"
             << "PySide::initDynamicMetaObject(pyType, &::"
-            << metaClass->qualifiedCppName() << "::staticMetaObject, sizeof(";
-        if (shouldGenerateCppWrapper(metaClass))
-            s << wrapperName(metaClass);
-        else
-            s << "::" << metaClass->qualifiedCppName();
-        s << "));\n";
+            << metaClass->qualifiedCppName() << "::staticMetaObject, sizeof("
+            << (shouldGenerateCppWrapper(metaClass)
+                ? wrapperName(metaClass) : getFullTypeName(metaClass))
+            << "));\n";
     }
 
     s << outdent << "}\n";
@@ -5637,8 +5635,8 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s,
             if (ancestor->isPolymorphic()) {
                 s << "if (instanceType == Shiboken::SbkType< ::"
                     << ancestor->qualifiedCppName() << " >())\n" << indent
-                    << "return dynamic_cast< ::" << metaClass->qualifiedCppName()
-                    << " *>(reinterpret_cast< ::"<< ancestor->qualifiedCppName()
+                    << "return dynamic_cast< " << getFullTypeName(metaClass)
+                    << " *>(reinterpret_cast< "<< getFullTypeName(ancestor)
                     << " *>(cptr));\n" << outdent;
             } else {
                 qCWarning(lcShiboken).noquote().nospace()
@@ -6269,7 +6267,7 @@ bool CppGenerator::finishGeneration()
         for (const AbstractMetaEnum &metaEnum : std::as_const(globalEnums))
             if (!metaEnum.isAnonymous()) {
                 ConfigurableScope configScope(s, metaEnum.typeEntry());
-                s << "qRegisterMetaType< ::" << metaEnum.typeEntry()->qualifiedCppName()
+                s << "qRegisterMetaType< " << getFullTypeName(metaEnum.typeEntry())
                   << " >(\"" << metaEnum.name() << "\");\n";
             }
 
