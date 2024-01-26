@@ -137,12 +137,25 @@ def get_platform_tag() -> str:
 def generate_pyproject_toml(artifacts: Path, setup: SetupData) -> str:
     content = None
 
+    _name = setup.name
     _tag = get_platform_tag()
 
     _console_scripts = ""
     if setup.console_scripts:
         _formatted_console_scripts = "\n".join(setup.console_scripts)
         _console_scripts = f"[project.scripts]\n{_formatted_console_scripts}"
+
+    # Installing dependencies
+    _dependencies = []
+    if _name in ("PySide6", "PySide6_Examples"):
+        _dependencies.append(f"shiboken6=={setup.version[0]}")
+        _dependencies.append(f"PySide6_Essentials=={setup.version[0]}")
+        _dependencies.append(f"PySide6_Addons=={setup.version[0]}")
+    elif _name == "PySide6_Essentials":
+        _dependencies.append(f"shiboken6=={setup.version[0]}")
+    elif _name == "PySide6_Addons":
+        _dependencies.append(f"shiboken6=={setup.version[0]}")
+        _dependencies.append(f"PySide6_Essentials=={setup.version[0]}")
 
     with open(artifacts / "pyproject.toml.base") as f:
         content = (
@@ -153,8 +166,8 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData) -> str:
             .replace("PROJECT_README", f'"{setup.readme}"')
             .replace("PROJECT_TAG", f'"{_tag}"')
             .replace("PROJECT_SCRIPTS", _console_scripts)
+            .replace("PROJECT_DEPENDENCIES", f"{_dependencies}")
         )
-
     return content
 
 
@@ -173,18 +186,6 @@ def generate_setup_py(artifacts: Path, setup: SetupData):
     else:
         fext = "Shiboken"
 
-    # Installing dependencies
-    install_requires = []
-    if name in ("PySide6", "PySide6_Examples"):
-        install_requires.append(f"shiboken6=={setup.version[0]}")
-        install_requires.append(f"PySide6_Essentials=={setup.version[0]}")
-        install_requires.append(f"PySide6_Addons=={setup.version[0]}")
-    elif _name == "PySide6_Essentials":
-        install_requires.append(f"shiboken6=={setup.version[0]}")
-    elif _name == "PySide6_Addons":
-        install_requires.append(f"shiboken6=={setup.version[0]}")
-        install_requires.append(f"PySide6_Essentials=={setup.version[0]}")
-
     # For special wheels based on 'PySide6'
     # we force the name to be PySide6 for the package_name,
     # so we can take the files from that packaged-directory
@@ -195,7 +196,6 @@ def generate_setup_py(artifacts: Path, setup: SetupData):
         content = f.read().format(
             name=_name,
             fake_ext=fext,
-            install=install_requires,
         )
 
     return content
