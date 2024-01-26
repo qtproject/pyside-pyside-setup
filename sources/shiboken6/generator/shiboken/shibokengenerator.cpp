@@ -553,7 +553,7 @@ QString ShibokenGenerator::cpythonWrapperCPtr(const TypeEntryCPtr &type,
 {
     if (!type->isWrapperType())
         return QString();
-    return u"reinterpret_cast< ::"_s + type->qualifiedCppName()
+    return u"reinterpret_cast< "_s + getFullTypeName(type)
         + u" *>(Shiboken::Conversions::cppPointer("_s + cpythonTypeNameExt(type)
         + u", reinterpret_cast<SbkObject *>("_s + argName + u")))"_s;
 }
