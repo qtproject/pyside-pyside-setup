@@ -116,6 +116,9 @@
   <rejection class="*" field-name="d_ptr"/>
   <rejection class="QMetaMethod" enum-name="Attributes"/>
   <rejection class="QMetaMethod" field-name="data"/>
+  <!-- Note: Default parameter values of Disambiguated_t as defined by
+       QT6_DECL_NEW_OVERLOAD_TAIL are not seen by the clang parser since it
+       is relying on code snippets for the values. -->
   <rejection class="Qt" field-name="Disambiguated"/>
   <rejection class="" enum-name="QCborNegativeInteger"/>
 

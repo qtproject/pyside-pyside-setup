@@ -17,6 +17,7 @@ Development Topics
    add_port_example.rst
    add_tool.rst
    documentation.rst
+   adapt_qt.rst
    extras.rst
 
 Implementation details
