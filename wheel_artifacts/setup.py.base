@@ -21,7 +21,6 @@ setup_args = dict(
     include_package_data=True,
     packages = ["{name}"],
     ext_modules = [Extension("{fake_ext}", [], py_limited_api=True)],
-    install_requires={install},
     cmdclass=dict([("build_ext", build_ext)]),
 )
 setup(**setup_args)
