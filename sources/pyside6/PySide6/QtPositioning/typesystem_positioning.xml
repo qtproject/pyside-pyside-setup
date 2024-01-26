@@ -5,6 +5,8 @@
 -->
 <typesystem package="PySide6.QtPositioning">
   <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+  <inject-code class="native" position="beginning" file="../glue/qtpositioning.cpp"
+               snippet="darwin_location_permission_plugin"/>
   <value-type name="QGeoAddress"/>
   <value-type name="QGeoAreaMonitorInfo"/>
   <object-type name="QGeoAreaMonitorSource">

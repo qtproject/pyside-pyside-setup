@@ -2062,3 +2062,16 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[qint64](pid));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](hostname));
 PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[QString](appname));
 // @snippet qlockfile-getlockinfo
+
+// @snippet darwin_permission_plugin
+#ifdef Q_OS_DARWIN
+#include<QtCore/qplugin.h>
+// register the static plugin and setup its metadata
+Q_IMPORT_PLUGIN(QDarwinCameraPermissionPlugin)
+Q_IMPORT_PLUGIN(QDarwinMicrophonePermissionPlugin)
+Q_IMPORT_PLUGIN(QDarwinBluetoothPermissionPlugin)
+Q_IMPORT_PLUGIN(QDarwinContactsPermissionPlugin)
+Q_IMPORT_PLUGIN(QDarwinCalendarPermissionPlugin)
+#endif
+// @snippet darwin_permission_plugin
+

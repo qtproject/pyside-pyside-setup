@@ -63,6 +63,8 @@
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="include-pyside"/>
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
                  snippet="qarg_helper"/>
+    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
+                 snippet="darwin_permission_plugin"/>
 
     <add-function signature="qDebug(const char*)">
         <inject-code file="../glue/qtcore.cpp" snippet="use-stream-for-format-security"/>

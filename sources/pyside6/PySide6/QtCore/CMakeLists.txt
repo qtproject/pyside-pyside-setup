@@ -255,4 +255,30 @@ create_pyside_module(NAME QtCore
                      DROPPED_ENTRIES QtCore_DROPPED_ENTRIES
                      )
 
+# Note: The permission API for Apple platforms only works if the Python application is packaged
+# with pyside6-deploy (uses Nuitka). Read "Notes for Developers" in Qt for Python documentation
+# for more information
+#
+# For Apple platforms, the Qt permission API implementations are in small static libraries.
+# In Qt C++, the application is linked directly to these static libraries during the build when
+# linking to the QtCore module as a post processing CMake step.
+# Being static plugins makes it difficult to add these plugins during Nuitka packaging step.
+# Thus, we link the static plugins to QtCore.abi3.so. However, to request the permissions
+# it is still required to have the necessary Information Property keys eg: NSCameraUsageDescription
+# in the Info.plist of the application bundle which Nuitka creates.
+if (APPLE)
+    set(permissions Camera Microphone Bluetooth Contacts Calendar)
+    foreach(permission IN LISTS permissions)
+        set(permission_plugin_name "QDarwin${permission}PermissionPlugin")
+        set(permission_plugin "${QT_CMAKE_EXPORT_NAMESPACE}::${permission_plugin_name}")
+        # Setting this property is necessary for Camera and Microphone. Otherwise it won't append
+        # the linker flags like -Wl,-u,_QDarwinMicrophonePermissionRequest which are required to
+        # link to qdarwinpermissionplugin_microphone_request.mm.o and find symbols like
+        # QDarwinMicrosphonePermissionHandler which handles requesting the actual permission
+        set_target_properties(QtCore PROPERTIES "_qt_has_${permission_plugin_name}_usage_description" TRUE)
+        # importing the plugin
+        qt6_import_plugins(QtCore INCLUDE ${permission_plugin})
+    endforeach()
+endif()
+
 install(FILES ${pyside6_SOURCE_DIR}/qtcorehelper.h DESTINATION include/PySide6/QtCore/)

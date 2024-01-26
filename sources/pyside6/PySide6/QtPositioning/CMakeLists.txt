@@ -46,3 +46,14 @@ create_pyside_module(NAME QtPositioning
                      TYPESYSTEM_PATH QtPositioning_SOURCE_DIR
                      SOURCES QtPositioning_SRC
                      DROPPED_ENTRIES QtPositioning_DROPPED_ENTRIES)
+
+if (APPLE)
+    # The QtLocation permission plugin cannot be linked to QtCore.abi3.so because for a framework
+    # build of Qt, the QtCore framework bundle must be loaded before calling
+    # Q_IMPORT_PLUGIN(QDarwinLocationPermissionPlugin)
+    set(permission_plugin_name "QDarwinLocationPermissionPlugin")
+    set(permission_plugin "${QT_CMAKE_EXPORT_NAMESPACE}::${permission_plugin_name}")
+    set_target_properties(QtPositioning PROPERTIES "_qt_has_${permission_plugin_name}_usage_description" TRUE)
+    # importing the plugin
+    qt6_import_plugins(QtPositioning INCLUDE ${permission_plugin})
+endif()
