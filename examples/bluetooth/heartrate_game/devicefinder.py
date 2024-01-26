@@ -1,5 +1,6 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+import sys
 
 from PySide6.QtBluetooth import (QBluetoothDeviceDiscoveryAgent,
                                  QBluetoothDeviceInfo)
@@ -8,9 +9,9 @@ from PySide6.QtCore import QTimer, Property, Signal, Slot, Qt
 
 from bluetoothbaseclass import BluetoothBaseClass
 from deviceinfo import DeviceInfo
-from heartrate_global import simulator, is_android
+from heartrate_global import simulator, is_android, error_not_nuitka
 
-if is_android:
+if is_android or sys.platform == "darwin":
     from PySide6.QtCore import QBluetoothPermission
 
 # To be used on the @QmlElement decorator
@@ -46,7 +47,8 @@ class DeviceFinder(BluetoothBaseClass):
 
     @Slot()
     def startSearch(self):
-        if is_android:
+        if is_android or sys.platform == "darwin":
+            error_not_nuitka()
             permission = QBluetoothPermission()
             permission.setCommunicationModes(QBluetoothPermission.Access)
             permission_status = qApp.checkPermission(permission)  # noqa: F821

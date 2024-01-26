@@ -7,9 +7,9 @@ from PySide6.QtBluetooth import QBluetoothLocalDevice
 from PySide6.QtQml import QmlElement
 from PySide6.QtCore import QObject, Property, Signal, Slot, Qt
 
-from heartrate_global import simulator, is_android
+from heartrate_global import simulator, is_android, error_not_nuitka
 
-if is_android:
+if is_android or sys.platform == "darwin":
     from PySide6.QtCore import QBluetoothPermission
 
 # To be used on the @QmlElement decorator
@@ -58,7 +58,8 @@ class ConnectionHandler(QObject):
         self.deviceChanged.emit()
 
     def initLocalDevice(self):
-        if is_android:
+        if is_android or sys.platform == "darwin":
+            error_not_nuitka()
             permission = QBluetoothPermission()
             permission.setCommunicationModes(QBluetoothPermission.Access)
             permission_status = qApp.checkPermission(permission)  # noqa: F821

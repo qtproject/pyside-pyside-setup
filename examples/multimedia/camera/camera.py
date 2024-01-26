@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import os
+import sys
 from pathlib import Path
 
 from PySide6.QtMultimedia import (QAudioInput, QCamera, QCameraDevice,
@@ -16,8 +17,10 @@ from metadatadialog import MetaDataDialog
 from imagesettings import ImageSettings
 from videosettings import VideoSettings, is_android
 
-if is_android:
+if is_android or sys.platform == "darwin":
     from PySide6.QtCore import QMicrophonePermission, QCameraPermission
+
+if is_android:
     from ui_camera_mobile import Ui_Camera
 else:
     from ui_camera import Ui_Camera
@@ -60,7 +63,14 @@ class Camera(QMainWindow):
 
     @Slot()
     def initialize(self):
-        if is_android:
+        if is_android or sys.platform == "darwin":
+            is_nuitka = "__compiled__" in globals()
+            if not is_nuitka and sys.platform == "darwin":
+                print("This example does not work on macOS when Python is run in interpreted mode."
+                      "For this example to work on macOS, package the example using pyside6-deploy"
+                      "For more information, read `Notes for Developer` in the documentation")
+                sys.exit(0)
+
             # camera
             cam_permission = QCameraPermission()
             cam_permission_status = qApp.checkPermission(cam_permission)  # noqa: F821

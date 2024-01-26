@@ -25,7 +25,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QPushButton, QSlider, QV
 
 is_android = os.environ.get('ANDROID_ARGUMENT')
 
-if is_android:
+if is_android or sys.platform == "darwin":
     from PySide6.QtCore import QMicrophonePermission
 
 
@@ -93,7 +93,13 @@ class InputTest(QWidget):
 
     @Slot()
     def initialize(self):
-        if is_android:
+        if is_android or sys.platform == "darwin":
+            is_nuitka = "__compiled__" in globals()
+            if not is_nuitka and sys.platform == "darwin":
+                print("This example does not work on macOS when Python is run in interpreted mode."
+                      "For this example to work on macOS, package the example using pyside6-deploy"
+                      "For more information, read `Notes for Developer` in the documentation")
+                sys.exit(0)
             permission = QMicrophonePermission()
             permission_status = qApp.checkPermission(permission)  # noqa: F821
             if permission_status == Qt.PermissionStatus.Undetermined:
