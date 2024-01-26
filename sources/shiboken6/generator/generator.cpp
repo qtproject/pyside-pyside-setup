@@ -52,6 +52,9 @@ struct Generator::GeneratorPrivate
 
 GeneratorOptions Generator::GeneratorPrivate::m_options;
 
+// Kept as a variable for a potential Qt-in-namespace support
+QString Generator::m_gsp = "::"_L1;
+
 Generator::Generator() : m_d(new GeneratorPrivate)
 {
 }
@@ -308,9 +311,7 @@ QString Generator::getFullTypeName(TypeEntryCPtr type)
     QString result = type->qualifiedCppName();
     if (type->isArray())
         type = std::static_pointer_cast<const ArrayTypeEntry>(type)->nestedTypeEntry();
-    if (!isCppPrimitive(type))
-        result.prepend(u"::"_s);
-    return result;
+    return isCppPrimitive(type) ? result : addGlobalScopePrefix(result);
 }
 
 QString Generator::getFullTypeName(const AbstractMetaType &type)
@@ -320,7 +321,7 @@ QString Generator::getFullTypeName(const AbstractMetaType &type)
     if (type.isVoidPointer())
         return u"void*"_s;
     if (type.typeEntry()->isContainer())
-        return u"::"_s + type.cppSignature();
+        return addGlobalScopePrefix(type.cppSignature());
     QString typeName;
     if (type.typeEntry()->isComplex() && type.hasInstantiations())
         typeName = getFullTypeNameWithoutModifiers(type);
@@ -331,7 +332,9 @@ QString Generator::getFullTypeName(const AbstractMetaType &type)
 
 QString Generator::getFullTypeName(const AbstractMetaClassCPtr &metaClass)
 {
-    return u"::"_s + metaClass->qualifiedCppName();
+    const QString &qualName = metaClass->qualifiedCppName();
+    // Typedefs are generated into the global namespace
+    return metaClass->isTypeDef() ? qualName : addGlobalScopePrefix(qualName);
 }
 
 QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType &type)
@@ -357,7 +360,7 @@ QString Generator::getFullTypeNameWithoutModifiers(const AbstractMetaType &type)
     }
     while (typeName.endsWith(u'*') || typeName.endsWith(u' '))
         typeName.chop(1);
-    return u"::"_s + typeName;
+    return addGlobalScopePrefix(typeName);
 }
 
 std::optional<DefaultValue>
@@ -643,6 +646,16 @@ QString Generator::subDirectoryForPackage(QString packageNameIn) const
         packageNameIn = packageName();
     packageNameIn.replace(u'.', QDir::separator());
     return packageNameIn;
+}
+
+QString Generator::addGlobalScopePrefix(const QString &t)
+{
+    return t.startsWith("std::"_L1) ? t : m_gsp + t;
+}
+
+QString Generator::globalScopePrefix(const GeneratorContext &classContext)
+{
+    return classContext.useWrapper() ? QString{} : m_gsp;
 }
 
 template<typename T>
