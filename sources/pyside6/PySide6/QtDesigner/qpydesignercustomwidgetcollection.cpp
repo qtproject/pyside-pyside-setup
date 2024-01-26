@@ -9,6 +9,8 @@
 #include <shiboken.h>
 #include <bindingmanager.h>
 
+QT_BEGIN_NAMESPACE
+
 static QString pyStringToQString(PyObject *s)
 {
     const char *utf8 = _PepUnicode_AsString(s);
@@ -217,3 +219,5 @@ void QPyDesignerCustomWidgetCollection::addCustomWidget(QDesignerCustomWidgetInt
 {
     instance()->m_customWidgets.append(c);
 }
+
+QT_END_NAMESPACE

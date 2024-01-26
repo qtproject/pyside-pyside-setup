@@ -6,7 +6,7 @@
 
 #include <QtWidgets/QMainWindow>
 
-class QPlainTextEdit;
+QT_FORWARD_DECLARE_CLASS(QPlainTextEdit)
 
 class MainWindow : public QMainWindow
 {

@@ -6,7 +6,7 @@
 
 #include <QtCore/QStringList>
 
-class QObject;
+QT_FORWARD_DECLARE_CLASS(QObject)
 
 namespace PythonUtils {
 

@@ -19,10 +19,12 @@ QT_FORWARD_DECLARE_CLASS(QObject)
 QT_FORWARD_DECLARE_CLASS(QRegularExpression)
 QT_FORWARD_DECLARE_CLASS(QVariant);
 
+QT_BEGIN_NAMESPACE
 namespace QtCoreHelper {
 class QGenericArgumentHolder;
 class QGenericReturnArgumentHolder;
 }
+QT_END_NAMESPACE
 
 // Helpers for QVariant conversion
 

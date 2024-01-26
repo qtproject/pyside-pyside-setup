@@ -8,6 +8,7 @@
 #include <QtDBus/qdbuspendingcall.h>
 #include <QtDBus/qdbusreply.h>
 
+QT_BEGIN_NAMESPACE
 namespace QtDBusHelper {
 
 // A Python-bindings friendly, non-template QDBusReply
@@ -55,5 +56,7 @@ private:
 inline QDBusReply::QDBusReply() = default;
 
 } // namespace QtDBusHelper
+
+QT_END_NAMESPACE
 
 #endif // QTDBUSHELPER_H

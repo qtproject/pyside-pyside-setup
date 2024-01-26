@@ -6,6 +6,7 @@
 
 #include <QtGui/QGuiApplication>
 
+QT_BEGIN_NAMESPACE
 namespace QtGuiHelper {
 
     class QOverrideCursorGuard
@@ -29,5 +30,6 @@ namespace QtGuiHelper {
     };
 
 } // namespace QtGuiHelper
+QT_END_NAMESPACE
 
 #endif // QTGUIHELPER_H
