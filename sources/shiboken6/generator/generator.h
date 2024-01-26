@@ -214,6 +214,11 @@ protected:
     */
     virtual QString subDirectoryForPackage(QString packageName = QString()) const;
 
+    static QString addGlobalScopePrefix(const QString &t);
+    static QString globalScopePrefix(const GeneratorContext &classContext);
+
+    static QString m_gsp;
+
 private:
     struct GeneratorPrivate;
     GeneratorPrivate *m_d;

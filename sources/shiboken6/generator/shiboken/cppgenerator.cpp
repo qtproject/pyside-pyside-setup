@@ -1621,7 +1621,7 @@ return result;)";
         c << "auto *source = reinterpret_cast<const " << typeName << " *>(cppIn);\n";
     }
     c << "return Shiboken::Object::newObject(" << cpythonType
-        << ", new ::" << classContext.effectiveClassName() << '('
+        << ", new " << globalScopePrefix(classContext) << classContext.effectiveClassName() << '('
         << (isUniquePointer ? "std::move(*source)" : "*source")
         << "), true, true);";
     writeCppToPythonFunction(s, c.toString(), sourceTypeName, targetTypeName);
@@ -1808,7 +1808,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
         writeConversionsForType(smartPointerType);
     }
 
-    s << "Shiboken::Conversions::registerConverterName(converter, typeid(::";
+    s << "Shiboken::Conversions::registerConverterName(converter, typeid(" << m_gsp;
     QString qualifiedCppNameInvocation;
     if (!classContext.forSmartPointer())
         qualifiedCppNameInvocation = metaClass->qualifiedCppName();
@@ -1818,7 +1818,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
     s << qualifiedCppNameInvocation << ").name());\n";
 
     if (classContext.useWrapper()) {
-        s << "Shiboken::Conversions::registerConverterName(converter, typeid(::"
+        s << "Shiboken::Conversions::registerConverterName(converter, typeid("
             << classContext.wrapperName() << ").name());\n";
     }
 
@@ -1919,7 +1919,9 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
     if (rfunc->isConstructor()) {
         // Check if the right constructor was called.
         if (!ownerClass->hasPrivateDestructor()) {
-            s << "if (Shiboken::Object::isUserType(self) && !Shiboken::ObjectType::canCallConstructor(self->ob_type, Shiboken::SbkType< ::";
+            s << "if (Shiboken::Object::isUserType(self) && "
+              << "!Shiboken::ObjectType::canCallConstructor(self->ob_type, Shiboken::SbkType< "
+              << m_gsp;
             QString qualifiedCppName;
             if (!context.forSmartPointer())
                 qualifiedCppName = ownerClass->qualifiedCppName();
@@ -1929,7 +1931,7 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
             s << qualifiedCppName << " >()))\n" << indent << errorReturn << outdent << '\n';
         }
         // Declare pointer for the underlying C++ object.
-        s << "::" << context.effectiveClassName() << " *cptr{};\n";
+        s << globalScopePrefix(context) << context.effectiveClassName() << " *cptr{};\n";
 
         initPythonArguments = maxArgs > 0;
 
@@ -2061,8 +2063,8 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     const QString typeName = classContext.forSmartPointer()
         ? classContext.preciseType().cppSignature() : metaClass->qualifiedCppName();
     s << "if (" << shibokenErrorsOccurred
-        << " || !Shiboken::Object::setCppPointer(sbkSelf, Shiboken::SbkType< ::"
-        << typeName << " >(), cptr)) {\n"
+        << " || !Shiboken::Object::setCppPointer(sbkSelf, Shiboken::SbkType< "
+        << globalScopePrefix(classContext) << typeName << " >(), cptr)) {\n"
         <<  indent << "delete cptr;\n" << errorReturn << outdent
         << "}\n";
     if (overloadData.maxArgs() > 0)
@@ -3736,7 +3738,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                 Q_ASSERT(owner == context.metaClass());
                 if (func->functionType() == AbstractMetaFunction::CopyConstructorFunction
                     && maxArgs == 1) {
-                    mc << "new ::" << context.effectiveClassName()
+                    mc << "new " << globalScopePrefix(context) << context.effectiveClassName()
                         << "(*" << CPP_ARG0 << ')';
                 } else {
                     const QString ctorCall = context.effectiveClassName() + u'('
@@ -3744,13 +3746,13 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                     if (usePySideExtensions() && isQObject(owner)) {
                         s << "void *addr = PySide::nextQObjectMemoryAddr();\n";
                         uva << "if (addr != nullptr) {\n" << indent
-                            << "cptr = new (addr) ::" << ctorCall << ";\n"
-                            << "PySide::setNextQObjectMemoryAddr(nullptr);\n" << outdent
+                            << "cptr = new (addr) " << globalScopePrefix(context) << ctorCall
+                            << ";\nPySide::setNextQObjectMemoryAddr(nullptr);\n" << outdent
                             << "} else {\n" << indent
-                            << "cptr = new ::" << ctorCall << ";\n"
+                            << "cptr = new " << globalScopePrefix(context) << ctorCall << ";\n"
                             << outdent << "}\n";
                     } else {
-                        mc << "new ::" << ctorCall;
+                        mc << "new " << globalScopePrefix(context) << ctorCall;
                     }
                 }
             } else {
@@ -3764,7 +3766,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                     const bool hasWrapper = shouldGenerateCppWrapper(ownerClass);
                     if (!avoidProtectedHack() || !func->isProtected() || !hasWrapper) {
                         if (func->isStatic()) {
-                            mc << "::" << methodCallClassName << "::";
+                            mc << m_gsp << methodCallClassName << "::";
                         } else {
                             const QString cppSelfVar = CPP_SELF_VAR;
                             const QString selfVarCast = func->ownerClass() == func->implementingClass()
@@ -3773,7 +3775,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                                   + u" *>("_s + cppSelfVar + u')';
                             if (func->isConstant()) {
                                 if (avoidProtectedHack()) {
-                                    mc << "const_cast<const ::";
+                                    mc << "const_cast<const " << globalScopePrefix(context);
                                     if (ownerClass->cppWrapper().testFlag(AbstractMetaClass::CppProtectedHackWrapper)) {
                                         // PYSIDE-500: Need a special wrapper cast when inherited
                                         const QString selfWrapCast = ownerClass == func->implementingClass()
@@ -3788,7 +3790,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                                         mc << " *>(" << selfVarCast << ")->";
                                     }
                                 } else {
-                                    mc << "const_cast<const ::" << methodCallClassName;
+                                    mc << "const_cast<const " << m_gsp << methodCallClassName;
                                     mc <<  " *>(" << selfVarCast << ")->";
                                 }
                             } else {
@@ -3810,8 +3812,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
 
                         if (!func->isAbstract())
                             mc << (func->isProtected() ? wrapperName(func->ownerClass()) :
-                                                         u"::"_s
-                                                         + methodCallClassName) << "::";
+                                                         m_gsp + methodCallClassName) << "::";
                         mc << func->originalName() << "_protected";
                     }
                 } else {
@@ -4066,7 +4067,7 @@ void CppGenerator::writeSpecialCastFunction(TextStream &s, const AbstractMetaCla
     QString className = metaClass->qualifiedCppName();
     s << "static void * " << cpythonSpecialCastFunctionName(metaClass)
         << "(void *obj, PyTypeObject *desiredType)\n{\n" << indent
-        << "auto me = reinterpret_cast< ::" << className << " *>(obj);\n";
+        << "auto me = reinterpret_cast< " << m_gsp << className << " *>(obj);\n";
     bool firstClass = true;
     const auto &allAncestors = metaClass->allTypeSystemAncestors();
     for (const auto &baseClass : allAncestors) {
@@ -5312,7 +5313,7 @@ void CppGenerator::writeSignalInitialization(TextStream &s, const AbstractMetaCl
         }
     }
 
-    s << "PySide::Signal::registerSignals(pyType, &::"
+    s << "PySide::Signal::registerSignals(pyType, &" << m_gsp
        << metaClass->qualifiedCppName() << "::staticMetaObject);\n";
 }
 
@@ -5440,7 +5441,8 @@ void CppGenerator::writeClassRegister(TextStream &s,
     if (dtorClassName.isEmpty())
         s << "nullptr,\n";
     else
-        s << "&Shiboken::callCppDestructor< ::" << dtorClassName << " >,\n";
+        s << "&Shiboken::callCppDestructor< " << globalScopePrefix(classContext)
+            << dtorClassName << " >,\n";
 
     // 6:baseType: Find a type that is not disabled.
     auto base = metaClass->isNamespace()
@@ -5554,7 +5556,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
 
     if (usePySideExtensions() && isQObject(metaClass)) {
         s << "Shiboken::ObjectType::setSubTypeInitHook(pyType, &PySide::initQObjectSubType);\n"
-            << "PySide::initDynamicMetaObject(pyType, &::"
+          << "PySide::initDynamicMetaObject(pyType, &" << m_gsp
             << metaClass->qualifiedCppName() << "::staticMetaObject, sizeof("
             << (shouldGenerateCppWrapper(metaClass)
                 ? wrapperName(metaClass) : getFullTypeName(metaClass))
@@ -5673,18 +5675,18 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
     case QtRegisterMetaType::None:
         break;
     case QtRegisterMetaType::Pointer:
-        s << "qRegisterMetaType< ::" << className << " *>();\n";
+        s << "qRegisterMetaType< " << m_gsp << className << " *>();\n";
         break;
     case QtRegisterMetaType::Value:
         for (const QString &name : std::as_const(nameVariants))
-            s << "qRegisterMetaType< ::" << className << " >(\"" << name << "\");\n";
+            s << "qRegisterMetaType< " << m_gsp << className << " >(\"" << name << "\");\n";
         break;
     }
 
     for (const AbstractMetaEnum &metaEnum : metaClass->enums()) {
         if (!metaEnum.isPrivate() && !metaEnum.isAnonymous()) {
             for (const QString &name : std::as_const(nameVariants)) {
-                s << "qRegisterMetaType< ::"
+                s << "qRegisterMetaType< " << m_gsp
                     << metaEnum.typeEntry()->qualifiedCppName() << " >(\""
                     << name << "::" << metaEnum.name() << "\");\n";
             }
@@ -5703,10 +5705,9 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s,
         << sbkUnusedVariableCast("instanceType");
 
     if (!polymorphicExpr.isEmpty()) {
-        polymorphicExpr = polymorphicExpr.replace(u"%1"_s,
-                                                  u" reinterpret_cast< ::"_s
-                                                  + metaClass->qualifiedCppName()
-                                                  + u" *>(cptr)"_s);
+        polymorphicExpr.replace(u"%1"_s, " reinterpret_cast< "_L1
+                                + m_gsp + metaClass->qualifiedCppName()
+                                         + " *>(cptr)"_L1);
         s << " if (" << polymorphicExpr << ")\n" << indent
             << "return cptr;\n" << outdent;
     } else if (metaClass->isPolymorphic()) {
@@ -5715,7 +5716,7 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s,
             if (ancestor->baseClass())
                 continue;
             if (ancestor->isPolymorphic()) {
-                s << "if (instanceType == Shiboken::SbkType< ::"
+                s << "if (instanceType == Shiboken::SbkType< " << m_gsp
                     << ancestor->qualifiedCppName() << " >())\n" << indent
                     << "return dynamic_cast< " << getFullTypeName(metaClass)
                     << " *>(reinterpret_cast< "<< getFullTypeName(ancestor)

@@ -909,12 +909,12 @@ void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum
         : cppEnum.qualifiedCppName();
     const auto te = cppEnum.typeEntry();
     ConfigurableScope configScope(s, te);
-    s << "template<> inline PyTypeObject *SbkType< ::" << enumName << " >() ";
+    s << "template<> inline PyTypeObject *SbkType< " << m_gsp << enumName << " >() ";
     s << "{ return " << cpythonTypeNameExt(te) << "; }\n";
 
     const auto flag = cppEnum.typeEntry()->flags();
     if (flag) {
-        s <<  "template<> inline PyTypeObject *SbkType< ::" << flag->name() << " >() "
+        s <<  "template<> inline PyTypeObject *SbkType< " << m_gsp << flag->name() << " >() "
           << "{ return " << cpythonTypeNameExt(flag) << "; }\n";
     }
 }
@@ -928,7 +928,8 @@ void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaClas
 
 void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType)
 {
-    s <<  "template<> inline PyTypeObject *SbkType< ::" << metaType.cppSignature() << " >() "
+    s <<  "template<> inline PyTypeObject *SbkType< "
+      << m_gsp << metaType.cppSignature() << " >() "
       <<  "{ return " << cpythonTypeNameExt(metaType) << "; }\n";
 }
 
