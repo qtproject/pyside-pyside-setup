@@ -156,6 +156,8 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData) -> str:
     elif _name == "PySide6_Addons":
         _dependencies.append(f"shiboken6=={setup.version[0]}")
         _dependencies.append(f"PySide6_Essentials=={setup.version[0]}")
+    elif _name == "shiboken6_generator":
+        _dependencies.append(f"shiboken6=={setup.version[0]}")
 
     with open(artifacts / "pyproject.toml.base") as f:
         content = (
