@@ -9,6 +9,8 @@
 
 #include <memory>
 
+QT_BEGIN_NAMESPACE
+
 namespace QtCoreHelper {
 
     using MutexLocker = QT_PREPEND_NAMESPACE(QMutexLocker<QMutex>);
@@ -114,5 +116,7 @@ namespace QtCoreHelper {
     };
 
 } // namespace QtCoreHelper
+
+QT_END_NAMESPACE
 
 #endif // QTCOREHELPER_H

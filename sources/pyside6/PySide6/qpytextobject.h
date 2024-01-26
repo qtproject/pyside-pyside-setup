@@ -13,6 +13,7 @@
 Q_DECLARE_INTERFACE(QTextObjectInterface, "org.qt-project.Qt.QTextObjectInterface")
 #endif
 
+QT_BEGIN_NAMESPACE
 class QPyTextObject : public QObject, public QTextObjectInterface
 {
     Q_OBJECT
@@ -20,6 +21,8 @@ class QPyTextObject : public QObject, public QTextObjectInterface
 public:
     QPyTextObject(QObject *parent = nullptr) : QObject(parent) {}
 };
+QT_END_NAMESPACE
+
 #endif
 
 

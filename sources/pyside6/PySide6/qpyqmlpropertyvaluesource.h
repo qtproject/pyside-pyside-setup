@@ -10,6 +10,8 @@
 Q_DECLARE_INTERFACE(QQmlPropertyValueSource, "org.qt-project.Qt.QQmlPropertyValueSource")
 #endif
 
+QT_BEGIN_NAMESPACE
+
 // Inherit from QObject such that QQmlPropertyValueSource can be found at
 // a fixed offset (RegisterType::valueSourceCast).
 class QPyQmlPropertyValueSource : public QObject, public QQmlPropertyValueSource
@@ -19,5 +21,7 @@ class QPyQmlPropertyValueSource : public QObject, public QQmlPropertyValueSource
 public:
     explicit QPyQmlPropertyValueSource(QObject *parent = nullptr) : QObject(parent) {}
 };
+
+QT_END_NAMESPACE
 
 #endif // QPYQMLPROPERTYVALUESOURCE_H

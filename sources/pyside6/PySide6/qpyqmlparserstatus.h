@@ -11,6 +11,8 @@
 Q_DECLARE_INTERFACE(QQmlParserStatus, "org.qt-project.Qt.QQmlParserStatus")
 #endif
 
+QT_BEGIN_NAMESPACE
+
 // Inherit from QObject such that QQmlParserStatus can be found at
 // a fixed offset (RegisterType::parserStatusCast).
 class QPyQmlParserStatus : public QObject, public QQmlParserStatus
@@ -20,5 +22,7 @@ class QPyQmlParserStatus : public QObject, public QQmlParserStatus
 public:
     explicit QPyQmlParserStatus(QObject *parent = nullptr) : QObject(parent) {}
 };
+
+QT_END_NAMESPACE
 
 #endif // QPYQMLPARSERSTATUS_H

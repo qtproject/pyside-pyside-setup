@@ -21,6 +21,10 @@ Q_DECLARE_INTERFACE(QDesignerTaskMenuExtension, "org.qt-project.Qt.Designer.Task
 Q_DECLARE_INTERFACE(QDesignerCustomWidgetCollectionInterface, "org.qt-project.Qt.QDesignerCustomWidgetCollectionInterface")
 #endif
 
+struct _object; // PyObject
+
+QT_BEGIN_NAMESPACE
+
 // Extension implementations need to inherit QObject which cannot be done in Python.
 // Provide a base class (cf QPyTextObject).
 
@@ -56,8 +60,6 @@ public:
     explicit QPyDesignerTaskMenuExtension(QObject *parent = nullptr) : QObject(parent) {}
 };
 
-struct _object; // PyObject
-
 class QPyDesignerCustomWidgetCollection : public QDesignerCustomWidgetCollectionInterface
 {
 public:
@@ -76,5 +78,7 @@ private:
 
     QList<QDesignerCustomWidgetInterface *> m_customWidgets;
 };
+
+QT_END_NAMESPACE
 
 #endif // QPYDESIGNEREXTENSIONS_H

@@ -6,7 +6,9 @@
  ********************************************************************/
 
 // @snippet gui-declarations
+QT_BEGIN_NAMESPACE
 void qt_set_sequence_auto_mnemonic(bool);
+QT_END_NAMESPACE
 // @snippet gui-declarations
 
 // @snippet qaccessible-pysidefactory

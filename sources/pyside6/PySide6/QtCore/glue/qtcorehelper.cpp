@@ -5,6 +5,8 @@
 
 #include <QtCore/qdebug.h>
 
+QT_BEGIN_NAMESPACE
+
 namespace QtCoreHelper {
 
 // Data classes for the generic argument data classes. The argument is freed
@@ -102,3 +104,5 @@ const void *QGenericReturnArgumentHolder::data() const
 }
 
 } // namespace QtCoreHelper
+
+QT_END_NAMESPACE
