@@ -2006,20 +2006,38 @@ QDebug operator<<(QDebug debug, const UsingMember &d)
     return debug;
 }
 
+void formatMetaClass(QDebug &ddebug, const AbstractMetaClass *ac)
+{
+    QDebugStateSaver saver(ddebug);
+    ddebug.noquote();
+    ddebug.nospace();
+    ddebug << "AbstractMetaClass(";
+    if (ac != nullptr) {
+        ac->format(ddebug);
+        if (ddebug.verbosity() > 2)
+            ac->formatMembers(ddebug);
+    } else {
+        ddebug << '0';
+    }
+    ddebug << ')';
+}
+
 QDebug operator<<(QDebug d, const AbstractMetaClassCPtr &ac)
 {
-    QDebugStateSaver saver(d);
-    d.noquote();
-    d.nospace();
-    d << "AbstractMetaClass(";
-    if (ac) {
-        ac->format(d);
-        if (d.verbosity() > 2)
-            ac->formatMembers(d);
-    } else {
-        d << '0';
-    }
-    d << ')';
+    formatMetaClass(d, ac.get());
     return d;
 }
+
+QDebug operator<<(QDebug d, const AbstractMetaClassPtr &ac)
+{
+    formatMetaClass(d, ac.get());
+    return d;
+}
+
+QDebug operator<<(QDebug d, const AbstractMetaClass *ac)
+{
+    formatMetaClass(d, ac);
+    return d;
+}
+
 #endif // !QT_NO_DEBUG_STREAM

@@ -344,6 +344,9 @@ private:
     void format(QDebug &d) const;
     void formatMembers(QDebug &d) const;
     friend QDebug operator<<(QDebug d, const AbstractMetaClassCPtr &ac);
+    friend QDebug operator<<(QDebug d, const AbstractMetaClassPtr &ac);
+    friend QDebug operator<<(QDebug d, const AbstractMetaClass *ac);
+    friend void formatMetaClass(QDebug &, const AbstractMetaClass *);
 #endif
 
     QScopedPointer<AbstractMetaClassPrivate> d;
