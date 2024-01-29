@@ -51,10 +51,6 @@ class BuildozerConfig(BaseConfig):
         self.set_value("app", "android.archs", self.arch)
 
         # p4a changes
-        logging.info("[DEPLOY] Using custom fork of python-for-android: "
-                     "https://github.com/shyamnathp/python-for-android/tree/pyside_support")
-        self.set_value("app", "p4a.fork", "shyamnathp")
-        self.set_value("app", "p4a.branch", "pyside_support_2")
         self.set_value("app", "p4a.bootstrap", "qt")
 
         self.qt_libs_path: zipfile.Path = (
