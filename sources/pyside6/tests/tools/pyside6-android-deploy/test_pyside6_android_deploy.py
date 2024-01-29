@@ -114,9 +114,9 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         self.assertEqual(config_obj.get_value("app", "input_file"), "main.py")
         self.assertEqual(config_obj.get_value("python", "android_packages"),
                          "buildozer==1.5.0,cython==0.29.33")
-        self.assertEqual(config_obj.get_value("qt", "wheel_pyside"),
+        self.assertEqual(config_obj.get_value("android", "wheel_pyside"),
                          str(self.pyside_wheel.resolve()))
-        self.assertEqual(config_obj.get_value("qt", "wheel_shiboken"),
+        self.assertEqual(config_obj.get_value("android", "wheel_shiboken"),
                          str(self.shiboken_wheel.resolve()))
         self.assertEqual(config_obj.get_value("buildozer", "mode"), "debug")
         self.assertEqual(config_obj.get_value("buildozer", "recipe_dir"),
@@ -237,7 +237,7 @@ class TestPySide6AndroidDeployQml(DeployTestBase):
         self.assertEqual(config_obj.get_value("buildozer", "local_libs"),
                          expected_local_libs)
         expected_qt_plugins = set(dependent_plugins)
-        obtained_qt_plugins = set(config_obj.get_value("qt", "plugins").split(","))
+        obtained_qt_plugins = set(config_obj.get_value("android", "plugins").split(","))
         self.assertEqual(expected_qt_plugins, obtained_qt_plugins)
 
         # test buildozer config file contents
