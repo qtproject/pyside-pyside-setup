@@ -205,6 +205,8 @@ child nodes.
             generate-using="yes | no"
             package="..."
             since="..."
+            extends = "..."
+            files = "..."
             revision="..." />
     </typesystem>
 
@@ -234,6 +236,16 @@ The *optional* **since** value is used to specify the API version of this type.
 
 The **revision** attribute can be used to specify a revision for each type, easing the
 production of ABI compatible bindings.
+
+The *optional* **extends** attribute specifies the module name where the given
+namespace first occurs in case of a namespace spanning several modules. For
+example, in Qt, the namespace ``Qt`` first occurs in the ``QtCore`` module and
+is further populated in the ``QtGui`` module. ``QtGui.Qt`` will then be
+generated extending ``QtCore.Qt`` if **extends** is specified.
+
+The *optional* **file** attribute specifies a regular expression matching the
+include files whose contents are to be associated with the current module in
+case of a namespace spanning several modules.
 
 .. _enum-type:
 
