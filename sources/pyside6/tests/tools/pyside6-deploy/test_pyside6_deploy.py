@@ -126,7 +126,8 @@ class TestPySide6DeployWidgets(DeployTestBase):
         self.assertEqual(config_obj.get_value("app", "input_file"), "tetrix.py")
         self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
-        self.assertEqual(config_obj.get_value("python", "packages"), "nuitka==1.8.0,ordered_set,zstandard")
+        self.assertEqual(config_obj.get_value("python", "packages"),
+                         "nuitka==1.8.0,ordered_set,zstandard")
         self.assertEqual(config_obj.get_value("qt", "qml_files"), "")
         equ_base = "--quiet --noinclude-qt-translations"
         equ_value = equ_base + " --static-libpython=no" if is_pyenv_python() else equ_base
@@ -164,20 +165,20 @@ class TestPySide6DeployQml(DeployTestBase):
             f" --include-data-files={str(self.temp_example_qml / self.first_qml_file)}="
             f"./main.qml --include-data-files="
             f"{str(self.temp_example_qml /self.second_qml_file)}=./MovingRectangle.qml"
-            )
+        )
 
         if sys.platform != "win32":
             self.expected_run_cmd += (
                 " --noinclude-dlls=libQt6Charts*"
                 " --noinclude-dlls=libQt6Quick3D* --noinclude-dlls=libQt6Sensors*"
                 " --noinclude-dlls=libQt6Test* --noinclude-dlls=libQt6WebEngine*"
-                )
+            )
         else:
             self.expected_run_cmd += (
                 " --noinclude-dlls=Qt6Charts*"
                 " --noinclude-dlls=Qt6Quick3D* --noinclude-dlls=Qt6Sensors*"
                 " --noinclude-dlls=Qt6Test* --noinclude-dlls=Qt6WebEngine*"
-                )
+            )
 
         if sys.platform.startswith("linux"):
             self.expected_run_cmd += f" --linux-icon={str(self.linux_icon)}"
@@ -202,7 +203,8 @@ class TestPySide6DeployQml(DeployTestBase):
         self.assertEqual(config_obj.get_value("app", "input_file"), "main.py")
         self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
-        self.assertEqual(config_obj.get_value("python", "packages"), "nuitka==1.8.0,ordered_set,zstandard")
+        self.assertEqual(config_obj.get_value("python", "packages"),
+                         "nuitka==1.8.0,ordered_set,zstandard")
         self.assertEqual(config_obj.get_value("qt", "qml_files"), "main.qml,MovingRectangle.qml")
         equ_base = "--quiet --noinclude-qt-translations"
         equ_value = equ_base + " --static-libpython=no" if is_pyenv_python() else equ_base
@@ -269,13 +271,13 @@ class TestPySide6DeployWebEngine(DeployTestBase):
                 " --noinclude-dlls=libQt6Charts*"
                 " --noinclude-dlls=libQt6Quick3D* --noinclude-dlls=libQt6Sensors*"
                 " --noinclude-dlls=libQt6Test*"
-                )
+            )
         else:
             expected_run_cmd += (
                 " --noinclude-dlls=Qt6Charts*"
                 " --noinclude-dlls=Qt6Quick3D* --noinclude-dlls=Qt6Sensors*"
                 " --noinclude-dlls=Qt6Test*"
-                )
+            )
 
         if sys.platform.startswith("linux"):
             expected_run_cmd += f" --linux-icon={str(self.linux_icon)}"

@@ -13,7 +13,6 @@ from pathlib import Path
 from unittest import mock
 from unittest.mock import patch
 
-from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[2]))
 from init_paths import init_test_paths
 init_test_paths(False)
