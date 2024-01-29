@@ -27,7 +27,7 @@ class AndroidConfig(Config):
         if android_data.wheel_pyside:
             self.wheel_pyside = android_data.wheel_pyside
         else:
-            wheel_pyside_temp = self.get_value("qt", "wheel_pyside")
+            wheel_pyside_temp = self.get_value("android", "wheel_pyside")
             if not wheel_pyside_temp:
                 raise RuntimeError("[DEPLOY] Unable to find PySide6 Android wheel")
             self.wheel_pyside = Path(wheel_pyside_temp).resolve()
@@ -35,7 +35,7 @@ class AndroidConfig(Config):
         if android_data.wheel_shiboken:
             self.wheel_shiboken = android_data.wheel_shiboken
         else:
-            wheel_shiboken_temp = self.get_value("qt", "wheel_shiboken")
+            wheel_shiboken_temp = self.get_value("android", "wheel_shiboken")
             if not wheel_shiboken_temp:
                 raise RuntimeError("[DEPLOY] Unable to find shiboken6 Android wheel")
             self.wheel_shiboken = Path(wheel_shiboken_temp).resolve()
@@ -104,8 +104,8 @@ class AndroidConfig(Config):
             self.local_libs = self.get_value("buildozer", "local_libs").split(",")
 
         self._qt_plugins = []
-        if self.get_value("qt", "plugins"):
-            self._qt_plugins = self.get_value("qt", "plugins").split(",")
+        if self.get_value("android", "plugins"):
+            self._qt_plugins = self.get_value("android", "plugins").split(",")
 
         self._mode = self.get_value("buildozer", "mode")
 
@@ -116,7 +116,7 @@ class AndroidConfig(Config):
     @qt_plugins.setter
     def qt_plugins(self, qt_plugins):
         self._qt_plugins = qt_plugins
-        self.set_value("qt", "plugins", ",".join(qt_plugins))
+        self.set_value("android", "plugins", ",".join(qt_plugins))
 
     @property
     def ndk_path(self):
@@ -206,7 +206,7 @@ class AndroidConfig(Config):
     def wheel_pyside(self, wheel_pyside: Path):
         self._wheel_pyside = wheel_pyside.resolve() if wheel_pyside else None
         if self._wheel_pyside:
-            self.set_value("qt", "wheel_pyside", str(self._wheel_pyside))
+            self.set_value("android", "wheel_pyside", str(self._wheel_pyside))
 
     @property
     def wheel_shiboken(self) -> Path:
@@ -216,7 +216,7 @@ class AndroidConfig(Config):
     def wheel_shiboken(self, wheel_shiboken: Path):
         self._wheel_shiboken = wheel_shiboken.resolve() if wheel_shiboken else None
         if self._wheel_shiboken:
-            self.set_value("qt", "wheel_shiboken", str(self._wheel_shiboken))
+            self.set_value("android", "wheel_shiboken", str(self._wheel_shiboken))
 
     def _find_and_set_pysidemodules(self):
         self.modules = find_pyside_modules(project_dir=self.project_dir,

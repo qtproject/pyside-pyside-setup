@@ -35,11 +35,13 @@ android_packages = buildozer==1.5.0,cython==0.29.33
 [qt]
 
 # Comma separated path to QML files required
-# normally all the QML files are added automatically
+# normally all the QML files required by the project are added automatically
 qml_files =
 
 # excluded qml plugin binaries
 excluded_qml_plugins =
+
+[android]
 
 # path to PySide wheel
 wheel_pyside =
