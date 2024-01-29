@@ -1676,6 +1676,7 @@ bool AbstractMetaClass::needsInheritanceSetup() const
         switch (d->m_typeEntry->type()) {
         case TypeEntry::NamespaceType:
         case TypeEntry::SmartPointerType:
+        case TypeEntry::ContainerType:
             return false;
         default:
             break;
