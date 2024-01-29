@@ -52,17 +52,17 @@
 
 using namespace Qt::StringLiterals;
 
-static const char PARENT_CTOR_HEURISTIC[] = "enable-parent-ctor-heuristic";
-static const char RETURN_VALUE_HEURISTIC[] = "enable-return-value-heuristic";
-static const char DISABLE_VERBOSE_ERROR_MESSAGES[] = "disable-verbose-error-messages";
-static const char USE_ISNULL_AS_NB_BOOL[] = "use-isnull-as-nb-bool";
+static constexpr auto PARENT_CTOR_HEURISTIC = "enable-parent-ctor-heuristic"_L1;
+static constexpr auto RETURN_VALUE_HEURISTIC = "enable-return-value-heuristic"_L1;
+static constexpr auto DISABLE_VERBOSE_ERROR_MESSAGES = "disable-verbose-error-messages"_L1;
+static constexpr auto USE_ISNULL_AS_NB_BOOL = "use-isnull-as-nb-bool"_L1;
 // FIXME PYSIDE 7: Remove USE_ISNULL_AS_NB_NONZERO/USE_OPERATOR_BOOL_AS_NB_NONZERO
-static const char USE_ISNULL_AS_NB_NONZERO[] = "use-isnull-as-nb_nonzero";
-static const char USE_OPERATOR_BOOL_AS_NB_BOOL[] = "use-operator-bool-as-nb-bool";
-static const char USE_OPERATOR_BOOL_AS_NB_NONZERO[] = "use-operator-bool-as-nb-nonzero";
-static const char WRAPPER_DIAGNOSTICS[] = "wrapper-diagnostics";
-static const char NO_IMPLICIT_CONVERSIONS[] = "no-implicit-conversions";
-static const char LEAN_HEADERS[] = "lean-headers";
+static constexpr auto USE_ISNULL_AS_NB_NONZERO = "use-isnull-as-nb_nonzero"_L1;
+static constexpr auto USE_OPERATOR_BOOL_AS_NB_BOOL = "use-operator-bool-as-nb-bool"_L1;
+static constexpr auto USE_OPERATOR_BOOL_AS_NB_NONZERO = "use-operator-bool-as-nb-nonzero"_L1;
+static constexpr auto WRAPPER_DIAGNOSTICS = "wrapper-diagnostics"_L1;
+static constexpr auto NO_IMPLICIT_CONVERSIONS = "no-implicit-conversions"_L1;
+static constexpr auto LEAN_HEADERS = "lean-headers"_L1;
 
 QString CPP_ARG_N(int i)
 {
@@ -2320,25 +2320,25 @@ void ShibokenGenerator::getInheritedOverloads(const AbstractMetaClassCPtr &scope
 QList<OptionDescription> ShibokenGenerator::options()
 {
     return {
-        {QLatin1StringView(DISABLE_VERBOSE_ERROR_MESSAGES),
+        {DISABLE_VERBOSE_ERROR_MESSAGES,
          u"Disable verbose error messages. Turn the python code hard to debug\n"
           "but safe few kB on the generated bindings."_s},
-        {QLatin1StringView(PARENT_CTOR_HEURISTIC),
+        {PARENT_CTOR_HEURISTIC,
          u"Enable heuristics to detect parent relationship on constructors."_s},
-        {QLatin1StringView(RETURN_VALUE_HEURISTIC),
+        {RETURN_VALUE_HEURISTIC,
          u"Enable heuristics to detect parent relationship on return values\n"
           "(USE WITH CAUTION!)"_s},
-        {QLatin1StringView(USE_ISNULL_AS_NB_BOOL),
+        {USE_ISNULL_AS_NB_BOOL,
          u"If a class have an isNull() const method, it will be used to compute\n"
           "the value of boolean casts"_s},
-        {QLatin1StringView(LEAN_HEADERS),
+        {LEAN_HEADERS,
          u"Forward declare classes in module headers"_s},
-        {QLatin1StringView(USE_OPERATOR_BOOL_AS_NB_BOOL),
+        {USE_OPERATOR_BOOL_AS_NB_BOOL,
          u"If a class has an operator bool, it will be used to compute\n"
           "the value of boolean casts"_s},
-        {QLatin1StringView(NO_IMPLICIT_CONVERSIONS),
+        {NO_IMPLICIT_CONVERSIONS,
          u"Do not generate implicit_conversions for function arguments."_s},
-        {QLatin1StringView(WRAPPER_DIAGNOSTICS),
+        {WRAPPER_DIAGNOSTICS,
          u"Generate diagnostic code around wrappers"_s}
     };
 }
@@ -2358,27 +2358,25 @@ bool ShibokenGeneratorOptionsParser::handleBoolOption(const QString &key, Option
 {
     if (source == OptionSource::CommandLineSingleDash)
         return false;
-    if (key == QLatin1StringView(PARENT_CTOR_HEURISTIC))
+    if (key == PARENT_CTOR_HEURISTIC)
         return (m_options->useCtorHeuristic = true);
-    if (key == QLatin1StringView(RETURN_VALUE_HEURISTIC))
+    if (key == RETURN_VALUE_HEURISTIC)
         return (m_options->userReturnValueHeuristic = true);
-    if (key == QLatin1StringView(DISABLE_VERBOSE_ERROR_MESSAGES))
+    if (key == DISABLE_VERBOSE_ERROR_MESSAGES)
         return (m_options->verboseErrorMessagesDisabled = true);
-    if (key == QLatin1StringView(USE_ISNULL_AS_NB_BOOL)
-        || key == QLatin1StringView(USE_ISNULL_AS_NB_NONZERO)) {
+    if (key == USE_ISNULL_AS_NB_BOOL || key == USE_ISNULL_AS_NB_NONZERO) {
         return (m_options->useIsNullAsNbBool = true);
     }
-    if (key == QLatin1StringView(LEAN_HEADERS))
+    if (key == LEAN_HEADERS)
         return (m_options->leanHeaders= true);
-    if (key == QLatin1StringView(USE_OPERATOR_BOOL_AS_NB_BOOL)
-        || key == QLatin1StringView(USE_OPERATOR_BOOL_AS_NB_NONZERO)) {
+    if (key == USE_OPERATOR_BOOL_AS_NB_BOOL || key == USE_OPERATOR_BOOL_AS_NB_NONZERO) {
         return (m_options->useOperatorBoolAsNbBool = true);
     }
-    if (key == QLatin1StringView(NO_IMPLICIT_CONVERSIONS)) {
+    if (key == NO_IMPLICIT_CONVERSIONS) {
         m_options->generateImplicitConversions = false;
         return true;
     }
-    if (key == QLatin1StringView(WRAPPER_DIAGNOSTICS))
+    if (key == WRAPPER_DIAGNOSTICS)
         return (m_options->wrapperDiagnostics = true);
     return false;
 }

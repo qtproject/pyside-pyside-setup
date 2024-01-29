@@ -30,8 +30,8 @@
 
 using namespace Qt::StringLiterals;
 
-static const char ENABLE_PYSIDE_EXTENSIONS[] = "enable-pyside-extensions";
-static const char AVOID_PROTECTED_HACK[] = "avoid-protected-hack";
+static constexpr auto ENABLE_PYSIDE_EXTENSIONS = "enable-pyside-extensions"_L1;
+static constexpr auto AVOID_PROTECTED_HACK = "avoid-protected-hack"_L1;
 
 struct GeneratorOptions
 {
@@ -89,9 +89,9 @@ bool Generator::setup(const ApiExtractorResult &api)
 QList<OptionDescription> Generator::options()
 {
     return {
-        {QLatin1StringView(AVOID_PROTECTED_HACK),
+        {AVOID_PROTECTED_HACK,
          u"Avoid the use of the '#define protected public' hack."_s},
-        {QLatin1StringView(ENABLE_PYSIDE_EXTENSIONS),
+        {ENABLE_PYSIDE_EXTENSIONS,
          u"Enable PySide extensions, such as support for signal/slots,\n"
           "use this if you are creating a binding for a Qt-based library."_s}
     };
@@ -112,9 +112,9 @@ bool GeneratorOptionsParser::handleBoolOption(const QString & key, OptionSource 
 {
     if (source == OptionSource::CommandLineSingleDash)
         return false;
-    if (key == QLatin1StringView(ENABLE_PYSIDE_EXTENSIONS))
+    if (key == ENABLE_PYSIDE_EXTENSIONS)
         return ( m_options->usePySideExtensions = true);
-    if (key == QLatin1StringView(AVOID_PROTECTED_HACK))
+    if (key == AVOID_PROTECTED_HACK)
         return ( m_options->avoidProtectedHack = true);
     return false;
 }
