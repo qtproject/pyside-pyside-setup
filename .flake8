@@ -2,3 +2,6 @@
 ignore = E115,E265,W503
 max-line-length = 100
 exclude = rc_*.py,*_rc.py,ui_*.py
+per-file-ignores =
+    # for init_test_paths() hack
+    test_*.py:E402
