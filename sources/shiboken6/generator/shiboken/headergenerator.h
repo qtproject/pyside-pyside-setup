@@ -7,8 +7,10 @@
 #include "shibokengenerator.h"
 #include "include.h"
 
+#include <QtCore/QList>
 #include <QtCore/QSet>
 
+struct IndexValue;
 class AbstractMetaFunction;
 struct ModuleHeaderParameters;
 
@@ -29,6 +31,10 @@ protected:
 
 private:
     using InheritedOverloadSet = QSet<AbstractMetaFunctionCPtr>;
+    using IndexValues = QList<IndexValue>;
+
+    IndexValues collectTypeIndexes(const AbstractMetaClassCList &classList);
+    IndexValues collectConverterIndexes() const;
 
     static void writeCopyCtor(TextStream &s, const AbstractMetaClassCPtr &metaClass);
     void writeFunction(TextStream &s,
@@ -38,10 +44,12 @@ private:
     static void writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum);
     static void writeSbkTypeFunction(TextStream &s, const AbstractMetaClassCPtr &cppClass);
     static void writeSbkTypeFunction(TextStream &s, const AbstractMetaType &metaType);
-    void writeTypeIndexValueLine(TextStream &s, const ApiExtractorResult &api,
-                                 const TypeEntryCPtr &typeEntry);
-    void writeTypeIndexValueLines(TextStream &s, const ApiExtractorResult &api,
-                                  const AbstractMetaClassCPtr &metaClass);
+    void collectTypeEntryTypeIndexes(const ApiExtractorResult &api,
+                                     const TypeEntryCPtr &typeEntry,
+                                     IndexValues *indexValues);
+    void collectClassTypeIndexes(const ApiExtractorResult &api,
+                                 const AbstractMetaClassCPtr &metaClass,
+                                 IndexValues *indexValues);
     static void writeProtectedEnumSurrogate(TextStream &s, const AbstractMetaEnum &cppEnum);
     void writeMemberFunctionWrapper(TextStream &s,
                                     const AbstractMetaFunctionCPtr &func,

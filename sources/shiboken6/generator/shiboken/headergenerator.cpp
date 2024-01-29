@@ -37,6 +37,22 @@
 
 using namespace Qt::StringLiterals;
 
+struct IndexValue
+{
+    QString name; // "SBK_..."
+    int value;
+    QString comment;
+};
+
+TextStream &operator<<(TextStream &s, const IndexValue &iv)
+{
+    s << "    " << AlignedField(iv.name, 56) << " = " << iv.value << ',';
+    if (!iv.comment.isEmpty())
+        s << " // " << iv.comment;
+    s << '\n';
+    return s;
+}
+
 //  PYSIDE-504: Handling the "protected hack"
 //  The problem: Creating wrappers when the class has private destructors.
 //  You can see an example on Windows in qclipboard_wrapper.h and others.
@@ -353,20 +369,6 @@ void HeaderGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPt
     }
 }
 
-static void _writeTypeIndexValue(TextStream &s, const QString &variableName,
-                                 int typeIndex)
-{
-    s << "    " << AlignedField(variableName, 56) << " = " << typeIndex;
-}
-
-static inline void _writeTypeIndexValueLine(TextStream &s,
-                                            const QString &variableName,
-                                            int typeIndex)
-{
-    _writeTypeIndexValue(s, variableName, typeIndex);
-    s << ",\n";
-}
-
 // Find equivalent typedefs "using Foo=QList<int>", "using Bar=QList<int>"
 static AbstractMetaClassCPtr
     findEquivalentTemplateTypedef(const AbstractMetaClassCList &haystack,
@@ -384,14 +386,15 @@ static AbstractMetaClassCPtr
     return nullptr;
 }
 
-void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const ApiExtractorResult &api,
-                                              const TypeEntryCPtr &typeEntry)
+void HeaderGenerator::collectTypeEntryTypeIndexes(const ApiExtractorResult &api,
+                                                  const TypeEntryCPtr &typeEntry,
+                                                  IndexValues *indexValues)
 {
     if (!typeEntry || !typeEntry->generateCode())
         return;
-    s.setFieldAlignment(QTextStream::AlignLeft);
     const int typeIndex = typeEntry->sbkIndex();
-    _writeTypeIndexValueLine(s, getTypeIndexVariableName(typeEntry), typeIndex);
+    indexValues->append({getTypeIndexVariableName(typeEntry), typeIndex, {}});
+
     if (typeEntry->isComplex()) {
         // For a typedef "using Foo=QList<int>", write a type index
         // SBK_QLIST_INT besides SBK_FOO which is then matched by function
@@ -406,7 +409,7 @@ void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const ApiExtractorR
                                                  metaClass) == nullptr) {
                 const QString indexVariable =
                     getTypeAlternateTemplateIndexVariableName(metaClass);
-                _writeTypeIndexValueLine(s, indexVariable, typeIndex);
+                indexValues->append({indexVariable, typeIndex, {}});
                 m_alternateTemplateIndexes.append(m_alternateTemplateIndexes);
             }
         }
@@ -414,12 +417,13 @@ void HeaderGenerator::writeTypeIndexValueLine(TextStream &s, const ApiExtractorR
     if (typeEntry->isEnum()) {
         auto ete = std::static_pointer_cast<const EnumTypeEntry>(typeEntry);
         if (ete->flags())
-            writeTypeIndexValueLine(s, api, ete->flags());
+            collectTypeEntryTypeIndexes(api, ete->flags(), indexValues);
     }
 }
 
-void HeaderGenerator::writeTypeIndexValueLines(TextStream &s, const ApiExtractorResult &api,
-                                               const AbstractMetaClassCPtr &metaClass)
+void HeaderGenerator::collectClassTypeIndexes(const ApiExtractorResult &api,
+                                              const AbstractMetaClassCPtr &metaClass,
+                                              IndexValues *indexValues)
 {
     auto typeEntry = metaClass->typeEntry();
     if (!typeEntry->generateCode())
@@ -427,10 +431,10 @@ void HeaderGenerator::writeTypeIndexValueLines(TextStream &s, const ApiExtractor
     // enum indices are required for invisible namespaces as well.
     for (const AbstractMetaEnum &metaEnum : metaClass->enums()) {
         if (!metaEnum.isPrivate())
-            writeTypeIndexValueLine(s, api, metaEnum.typeEntry());
+            collectTypeEntryTypeIndexes(api, metaEnum.typeEntry(), indexValues);
     }
     if (NamespaceTypeEntry::isVisibleScope(typeEntry))
-        writeTypeIndexValueLine(s, api, typeEntry);
+        collectTypeEntryTypeIndexes(api, typeEntry, indexValues);
 }
 
 // Format the typedefs for the typedef entries to be generated
@@ -584,6 +588,64 @@ struct ModuleHeaderParameters
     QString typeFunctions;
 };
 
+HeaderGenerator::IndexValues
+    HeaderGenerator::collectTypeIndexes(const AbstractMetaClassCList &classList)
+{
+    IndexValues result;
+
+    for (const auto &metaClass : classList)
+        collectClassTypeIndexes(api(), metaClass, &result);
+
+    for (const AbstractMetaEnum &metaEnum : api().globalEnums())
+        collectTypeEntryTypeIndexes(api(), metaEnum.typeEntry(), &result);
+
+    // Write the smart pointer define indexes.
+    int smartPointerCountIndex = getMaxTypeIndex();
+    int smartPointerCount = 0;
+    for (const auto &smp : api().instantiatedSmartPointers()) {
+        QString indexName = getTypeIndexVariableName(smp.type);
+        result.append({indexName, smartPointerCountIndex, smp.type.cppSignature()});
+        // Add a the same value for const pointees (shared_ptr<const Foo>).
+        const auto ptrName = smp.type.typeEntry()->entryName();
+        const auto pos = indexName.indexOf(ptrName, 0, Qt::CaseInsensitive);
+        if (pos >= 0) {
+            indexName.insert(pos + ptrName.size() + 1, u"CONST"_s);
+            result.append({indexName, smartPointerCountIndex, "(const)"_L1});
+        }
+        ++smartPointerCountIndex;
+        ++smartPointerCount;
+    }
+    result.append({"SBK_"_L1 + moduleName() + "_IDX_COUNT"_L1,
+                  getMaxTypeIndex() + smartPointerCount, {}});
+    return result;
+}
+
+HeaderGenerator::IndexValues HeaderGenerator::collectConverterIndexes() const
+{
+    IndexValues result;
+    const auto &primitives = primitiveTypes();
+    int pCount = 0;
+    for (const auto &ptype : primitives) {
+        // Note: do not generate indices for typedef'd primitive types as
+        // they'll use the primitive type converters instead, so we
+        // don't need to create any other.
+        if (ptype->generateCode() && ptype->customConversion() != nullptr)
+            result.append({getTypeIndexVariableName(ptype), pCount++, {}});
+    }
+
+    for (const AbstractMetaType &container : api().instantiatedContainers()) {
+        result.append({getTypeIndexVariableName(container),
+                       pCount++, container.cppSignature()});
+    }
+
+    // Because on win32 the compiler will not accept a zero length array.
+    if (pCount == 0)
+        pCount++;
+     result.append({"SBK_"_L1 + moduleName() + "_CONVERTERS_IDX_COUNT"_L1,
+                   pCount, {}});
+    return result;
+}
+
 bool HeaderGenerator::finishGeneration()
 {
     // Generate the main header for this module. This header should be included
@@ -606,35 +668,10 @@ bool HeaderGenerator::finishGeneration()
                   return a->typeEntry()->sbkIndex() < b->typeEntry()->sbkIndex();
               });
 
-    for (const auto &metaClass : classList)
-        writeTypeIndexValueLines(macrosStream, api(), metaClass);
-
-    for (const AbstractMetaEnum &metaEnum : api().globalEnums())
-        writeTypeIndexValueLine(macrosStream, api(), metaEnum.typeEntry());
-
-    // Write the smart pointer define indexes.
-    int smartPointerCountIndex = getMaxTypeIndex();
-    int smartPointerCount = 0;
-    for (const auto &smp : api().instantiatedSmartPointers()) {
-        QString indexName = getTypeIndexVariableName(smp.type);
-        _writeTypeIndexValue(macrosStream, indexName, smartPointerCountIndex);
-        macrosStream << ", // " << smp.type.cppSignature() << '\n';
-        // Add a the same value for const pointees (shared_ptr<const Foo>).
-        const auto ptrName = smp.type.typeEntry()->entryName();
-        const auto pos = indexName.indexOf(ptrName, 0, Qt::CaseInsensitive);
-        if (pos >= 0) {
-            indexName.insert(pos + ptrName.size() + 1, u"CONST"_s);
-            _writeTypeIndexValue(macrosStream, indexName, smartPointerCountIndex);
-            macrosStream << ", //   (const)\n";
-        }
-        ++smartPointerCountIndex;
-        ++smartPointerCount;
-    }
-
-    _writeTypeIndexValue(macrosStream,
-                         u"SBK_"_s + moduleName() + u"_IDX_COUNT"_s,
-                         getMaxTypeIndex() + smartPointerCount);
-    macrosStream << "\n};\n";
+    const auto typeIndexes = collectTypeIndexes(classList);
+    for (const auto &ti : typeIndexes)
+        macrosStream << ti;
+    macrosStream << "};\n";
 
     macrosStream << "// This variable stores all Python types exported by this module.\n";
     macrosStream << "extern PyTypeObject **" << cppApiVariableName() << ";\n\n";
@@ -645,32 +682,11 @@ bool HeaderGenerator::finishGeneration()
 
     // TODO-CONVERTER ------------------------------------------------------------------------------
     // Using a counter would not do, a fix must be made to APIExtractor's getTypeIndex().
+    const auto converterIndexes = collectConverterIndexes();
     macrosStream << "// Converter indices\nenum : int {\n";
-    const auto &primitives = primitiveTypes();
-    int pCount = 0;
-    for (const auto &ptype : primitives) {
-        /* Note: do not generate indices for typedef'd primitive types
-         * as they'll use the primitive type converters instead, so we
-         * don't need to create any other.
-         */
-        if (!ptype->generateCode() || !ptype->customConversion())
-            continue;
-
-        _writeTypeIndexValueLine(macrosStream, getTypeIndexVariableName(ptype), pCount++);
-    }
-
-    for (const AbstractMetaType &container : api().instantiatedContainers()) {
-        _writeTypeIndexValue(macrosStream, getTypeIndexVariableName(container), pCount);
-        macrosStream << ", // " << container.cppSignature() << '\n';
-        pCount++;
-    }
-
-    // Because on win32 the compiler will not accept a zero length array.
-    if (pCount == 0)
-        pCount++;
-    _writeTypeIndexValue(macrosStream,
-                         "SBK_"_L1 + moduleName() + "_CONVERTERS_IDX_COUNT"_L1,  pCount);
-    macrosStream << "\n};\n";
+    for (const auto &ci : converterIndexes)
+        macrosStream << ci;
+    macrosStream << "};\n";
 
     formatTypeDefEntries(macrosStream);
 
