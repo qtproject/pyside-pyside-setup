@@ -64,10 +64,9 @@ class UnityMode(Enum):
     DISABLE = auto()
 
 
-UNITY_OPTION = "--unity"
+DISABLE_UNITY_OPTION = "--no-unity"
 LOG_LEVEL_OPTION = "--log-level"
-DEFAULT_BUILD_ARGS = ['--build-tests', '--skip-docs', LOG_LEVEL_OPTION, "quiet",
-                      UNITY_OPTION]
+DEFAULT_BUILD_ARGS = ['--build-tests', '--skip-docs', LOG_LEVEL_OPTION, "quiet"]
 IS_WINDOWS = sys.platform == 'win32'
 INCREDIBUILD_CONSOLE = 'BuildConsole' if IS_WINDOWS else '/opt/incredibuild/bin/ib_console'
 # Config file keys
@@ -300,11 +299,11 @@ def build(target: str):
         del build_arguments[i]
     arguments.extend(build_arguments)
     if opt_unity_mode != UnityMode.DEFAULT:
-        has_unity = UNITY_OPTION in build_arguments
-        if opt_unity_mode == UnityMode.ENABLE and not has_unity:
-            arguments.append(UNITY_OPTION)
-        elif opt_unity_mode == UnityMode.DISABLE and has_unity:
-            arguments.remove(UNITY_OPTION)
+        unity_disabled = DISABLE_UNITY_OPTION in build_arguments
+        if opt_unity_mode == UnityMode.ENABLE and unity_disabled:
+            arguments.remove(DISABLE_UNITY_OPTION)
+        elif opt_unity_mode == UnityMode.DISABLE and not unity_disabled:
+            arguments.append(DISABLE_UNITY_OPTION)
     generator = read_config(GENERATOR_KEY)
     if generator != 'Ninja':
         arguments.extend(['--make-spec', 'ninja'])
@@ -312,7 +311,7 @@ def build(target: str):
     if jobs > 1:
         arguments.extend(['-j', str(jobs)])
     if build_mode != BuildMode.BUILD:
-        arguments.extend(['--reuse-build', '--ignore-git'])
+        arguments.append('--reuse-build')
         if build_mode != BuildMode.RECONFIGURE:
             arguments.append('--skip-cmake')
     modules = read_config_modules_argument()

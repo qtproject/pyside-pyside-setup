@@ -245,7 +245,8 @@ class CommandMixin(object):
         # We redeclare plat-name as an option so it's recognized by the
         # install command and doesn't throw an error.
         ('plat-name=', None, 'The platform name for which we are cross-compiling'),
-        ('unity', None, 'Use CMake UNITY_BUILD_MODE'),
+        ('unity', None, 'Use CMake UNITY_BUILD_MODE (obsolete)'),
+        ('no-unity', None, 'Disable CMake UNITY_BUILD_MODE'),
         ('unity-build-batch-size=', None, 'Value of CMAKE_UNITY_BUILD_BATCH_SIZE')
     ]
 
@@ -306,6 +307,7 @@ class CommandMixin(object):
         self.internal_cmake_install_dir_query_file_path = None
         self._per_command_mixin_options_finalized = False
         self.unity = False
+        self.no_unity = False
         self.unity_build_batch_size = "16"
 
         # When initializing a command other than the main one (so the
@@ -422,7 +424,10 @@ class CommandMixin(object):
         OPTION['SANITIZE_ADDRESS'] = self.sanitize_address
         OPTION['SHORTER_PATHS'] = self.shorter_paths
         OPTION['DOC_BUILD_ONLINE'] = self.doc_build_online
-        OPTION['UNITY'] = self.unity
+        if self.unity:
+            log.warn("Using --unity no longer has any effect, "
+                     "Unity build mode is now the default.")
+        OPTION['UNITY'] = not self.no_unity
         OPTION['UNITY_BUILD_BATCH_SIZE'] = self.unity_build_batch_size
 
         qtpaths_abs_path = None

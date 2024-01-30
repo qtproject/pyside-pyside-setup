@@ -104,9 +104,9 @@ using **ninja** (instead of make), and considering only the **module subset** of
 :mod:`QtCore <PySide6.QtCore>`, :mod:`QtGui <PySide6.QtGui>`, and
 :mod:`QtWidgets <PySide6.QtWidgets>`.
 
+`CMake Unity Build Mode`_ is used by default for speed-up.
+
 Other important options to consider are:
- * ``--unity``, Activates `CMake Unity Build Mode`_,  which speeds up the
-   build by concatenating source files,
  * ``--cmake``, to specify the path to the cmake binary,
  * ``--reuse-build``, to rebuild only the modified files,
  * ``--openssl=/path/to/openssl/bin``, to use a different path for OpenSSL,
