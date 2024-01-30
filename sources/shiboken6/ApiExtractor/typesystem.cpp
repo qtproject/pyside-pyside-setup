@@ -1767,6 +1767,7 @@ void ComplexTypeEntry::useAsTypedef(const ComplexTypeEntryCPtr &source)
     TypeEntry::useAsTypedef(source);
     d->m_qualifiedCppName = source->qualifiedCppName();
     d->m_targetType = source->targetType();
+    d->m_typeFlags.setFlag(ComplexTypeEntry::Typedef);
 }
 
 ComplexTypeEntry::ComplexTypeEntry(ComplexTypeEntryPrivate *d) :

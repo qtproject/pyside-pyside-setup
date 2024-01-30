@@ -43,7 +43,8 @@ public:
         // Indicates that the instances are used to create hierarchies
         // like widgets; parent ownership heuristics are enabled for them.
         ParentManagement   = 0x10,
-        DisableQtMetaObjectFunctions = 0x20
+        DisableQtMetaObjectFunctions = 0x20,
+        Typedef = 0x40 // Result of a <typedef-type>
     };
     Q_DECLARE_FLAGS(TypeFlags, TypeFlag)
 
