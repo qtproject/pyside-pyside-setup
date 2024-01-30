@@ -8,7 +8,6 @@ import subprocess
 import sys
 import sysconfig
 from pathlib import Path
-from subprocess import PIPE, Popen
 
 import PySide6 as ref_mod
 
@@ -57,13 +56,11 @@ def qt_tool_wrapper(qt_tool, args, libexec=False):
         exe = pyside_dir / qt_tool
 
     cmd = [os.fspath(exe)] + args
-    proc = Popen(cmd, stderr=PIPE)
-    out, err = proc.communicate()
-    if err:
-        msg = err.decode("utf-8")
+    returncode = subprocess.call(cmd)
+    if returncode != 0:
         command = ' '.join(cmd)
-        print(f"Error: {msg}\nwhile executing '{command}'")
-    sys.exit(proc.returncode)
+        print(f"'{command}' returned {returncode}", file=sys.stderr)
+    sys.exit(returncode)
 
 
 def pyside_script_wrapper(script_name):
