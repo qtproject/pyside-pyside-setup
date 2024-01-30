@@ -1,124 +1,15 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-import ast
 import logging
 import os
-import re
 import sys
-import warnings
-from typing import List
+
 from importlib import util
 from importlib.metadata import version
 from pathlib import Path
 
-from . import Nuitka, run_command
-
-IMPORT_WARNING_PYSIDE = (f"[DEPLOY] Found 'import PySide6' in file {0}"
-                         ". Use 'from PySide6 import <module>' or pass the module"
-                         " needed using --extra-modules command line argument")
-
-
-def find_pyside_modules(project_dir: Path, extra_ignore_dirs: List[Path] = None,
-                        project_data=None):
-    """
-    Searches all the python files in the project to find all the PySide modules used by
-    the application.
-    """
-    all_modules = set()
-    mod_pattern = re.compile("PySide6.Qt(?P<mod_name>.*)")
-
-    def pyside_imports(py_file: Path):
-        modules = []
-        contents = py_file.read_text(encoding="utf-8")
-        try:
-            tree = ast.parse(contents)
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ImportFrom):
-                    main_mod_name = node.module
-                    if main_mod_name.startswith("PySide6"):
-                        if main_mod_name == "PySide6":
-                            # considers 'from PySide6 import QtCore'
-                            for imported_module in node.names:
-                                full_mod_name = imported_module.name
-                                if full_mod_name.startswith("Qt"):
-                                    modules.append(full_mod_name[2:])
-                            continue
-
-                        # considers 'from PySide6.QtCore import Qt'
-                        match = mod_pattern.search(main_mod_name)
-                        if match:
-                            mod_name = match.group("mod_name")
-                            modules.append(mod_name)
-                        else:
-                            logging.warning((
-                                f"[DEPLOY] Unable to find module name from{ast.dump(node)}"))
-
-                if isinstance(node, ast.Import):
-                    for imported_module in node.names:
-                        full_mod_name = imported_module.name
-                        if full_mod_name == "PySide6":
-                            logging.warning(IMPORT_WARNING_PYSIDE.format(str(py_file)))
-        except Exception as e:
-            raise RuntimeError(f"[DEPLOY] Finding module import failed on file {str(py_file)} with "
-                               f"error {e}")
-
-        return set(modules)
-
-    py_candidates = []
-    ignore_dirs = ["__pycache__", "env", "venv", "deployment"]
-
-    if project_data:
-        py_candidates = project_data.python_files
-        ui_candidates = project_data.ui_files
-        qrc_candidates = project_data.qrc_files
-        ui_py_candidates = None
-        qrc_ui_candidates = None
-
-        if ui_candidates:
-            ui_py_candidates = [(file.parent / f"ui_{file.stem}.py") for file in ui_candidates
-                                if (file.parent / f"ui_{file.stem}.py").exists()]
-
-            if len(ui_py_candidates) != len(ui_candidates):
-                warnings.warn("[DEPLOY] The number of uic files and their corresponding Python"
-                              " files don't match.", category=RuntimeWarning)
-
-            py_candidates.extend(ui_py_candidates)
-
-        if qrc_candidates:
-            qrc_ui_candidates = [(file.parent / f"rc_{file.stem}.py") for file in qrc_candidates
-                                 if (file.parent / f"rc_{file.stem}.py").exists()]
-
-            if len(qrc_ui_candidates) != len(qrc_candidates):
-                warnings.warn("[DEPLOY] The number of qrc files and their corresponding Python"
-                              " files don't match.", category=RuntimeWarning)
-
-            py_candidates.extend(qrc_ui_candidates)
-
-        for py_candidate in py_candidates:
-            all_modules = all_modules.union(pyside_imports(py_candidate))
-        return list(all_modules)
-
-    # incase there is not .pyproject file, search all python files in project_dir, except
-    # ignore_dirs
-    if extra_ignore_dirs:
-        ignore_dirs.extend(extra_ignore_dirs)
-
-    # find relevant .py files
-    _walk = os.walk(project_dir)
-    for root, dirs, files in _walk:
-        dirs[:] = [d for d in dirs if d not in ignore_dirs and not d.startswith(".")]
-        for py_file in files:
-            if py_file.endswith(".py"):
-                py_candidates.append(Path(root) / py_file)
-
-    for py_candidate in py_candidates:
-        all_modules = all_modules.union(pyside_imports(py_candidate))
-
-    if not all_modules:
-        ValueError("[DEPLOY] No PySide6 modules were found")
-
-    return list(all_modules)
+from . import Config, run_command
 
 
 class PythonExecutable:
@@ -126,10 +17,28 @@ class PythonExecutable:
     Wrapper class around Python executable
     """
 
-    def __init__(self, python_path=None, dry_run=False):
-        self.exe = python_path if python_path else Path(sys.executable)
+    def __init__(self, python_path: Path = None, dry_run: bool = False, init: bool = False,
+                 force: bool = False):
+
         self.dry_run = dry_run
-        self.nuitka = Nuitka(nuitka=[os.fspath(self.exe), "-m", "nuitka"])
+        self.init = init
+        if not python_path:
+            response = "yes"
+            # checking if inside virtual environment
+            if not self.is_venv() and not force and not self.dry_run and not self.init:
+                response = input(("You are not using a virtual environment. pyside6-deploy needs "
+                                  "to install a few Python packages for deployment to work "
+                                  "seamlessly. \n Proceed? [Y/n]"))
+
+            if response.lower() in ["no", "n"]:
+                print("[DEPLOY] Exiting ...")
+                sys.exit(0)
+
+            self.exe = Path(sys.executable)
+        else:
+            self.exe = python_path
+
+        logging.info(f"[DEPLOY] Using Python at {str(self.exe)}")
 
     @property
     def exe(self):
@@ -193,16 +102,21 @@ class PythonExecutable:
     def is_installed(self, package):
         return bool(util.find_spec(package))
 
-    def create_executable(self, source_file: Path, extra_args: str, config):
-        if config.qml_files:
-            logging.info(f"[DEPLOY] Included QML files: {config.qml_files}")
-
-        command_str = self.nuitka.create_executable(source_file=source_file,
-                                                    extra_args=extra_args,
-                                                    qml_files=config.qml_files,
-                                                    excluded_qml_plugins=(config.
-                                                                          excluded_qml_plugins),
-                                                    icon=config.icon,
-                                                    dry_run=self.dry_run)
-
-        return command_str
+    def install_dependencies(self, config: Config, packages: str, is_android: bool = False):
+        """
+        Installs the python package dependencies for the target deployment platform
+        """
+        packages = config.get_value("python", packages).split(",")
+        if not self.init:
+            # install packages needed for deployment
+            logging.info("[DEPLOY] Installing dependencies")
+            self.install(packages=packages)
+            # nuitka requires patchelf to make patchelf rpath changes for some Qt files
+            if sys.platform.startswith("linux") and not is_android:
+                self.install(packages=["patchelf"])
+        elif is_android:
+            # install only buildozer
+            logging.info("[DEPLOY] Installing buildozer")
+            buildozer_package_with_version = ([package for package in packages
+                                               if package.startswith("buildozer")])
+            self.install(packages=list(buildozer_package_with_version))

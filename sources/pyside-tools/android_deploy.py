@@ -8,8 +8,8 @@ import traceback
 from pathlib import Path
 from textwrap import dedent
 
-from deploy_lib import (setup_python, create_config_file, cleanup, install_python_dependencies,
-                        config_option_exists, MAJOR_VERSION)
+from deploy_lib import (create_config_file, cleanup, config_option_exists, PythonExecutable,
+                        MAJOR_VERSION)
 from deploy_lib.android import AndroidData, AndroidConfig
 from deploy_lib.android.buildozer import Buildozer
 
@@ -96,7 +96,7 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
     android_data = AndroidData(wheel_pyside=pyside_wheel, wheel_shiboken=shiboken_wheel,
                                ndk_path=ndk_path, sdk_path=sdk_path)
 
-    python = setup_python(dry_run=dry_run, force=force, init=init)
+    python = PythonExecutable(dry_run=dry_run, init=init, force=force)
 
     config_file_exists = config_file and Path(config_file).exists()
 
@@ -117,8 +117,7 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
 
     cleanup(config=config, is_android=True)
 
-    install_python_dependencies(config=config, python=python, init=init,
-                                packages="android_packages", is_android=True)
+    python.install_dependencies(config=config, packages="android_packages", is_android=True)
 
     # set application name
     if name:

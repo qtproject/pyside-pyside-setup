@@ -16,6 +16,9 @@ else:
     EXE_FORMAT = ".bin"
 
 DEFAULT_APP_ICON = str((Path(__file__).parent / f"pyside_icon{IMAGE_FORMAT}").resolve())
+IMPORT_WARNING_PYSIDE = (f"[DEPLOY] Found 'import PySide6' in file {0}"
+                         ". Use 'from PySide6 import <module>' or pass the module"
+                         " needed using --extra-modules command line argument")
 
 
 def get_all_pyside_modules():
@@ -30,7 +33,7 @@ def get_all_pyside_modules():
 
 from .commands import run_command, run_qmlimportscanner
 from .nuitka_helper import Nuitka
-from .python_helper import PythonExecutable, find_pyside_modules
 from .config import BaseConfig, Config
-from .deploy_util import (cleanup, finalize, create_config_file, setup_python,
-                          install_python_dependencies, config_option_exists)
+from .python_helper import PythonExecutable
+from .deploy_util import (cleanup, finalize, create_config_file,
+                          config_option_exists, find_pyside_modules)

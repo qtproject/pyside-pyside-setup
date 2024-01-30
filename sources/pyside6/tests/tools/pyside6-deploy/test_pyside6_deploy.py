@@ -12,7 +12,7 @@ from unittest.mock import patch
 from unittest import mock
 
 sys.path.append(os.fspath(Path(__file__).resolve().parents[2]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
 
@@ -131,7 +131,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
         self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
         self.assertEqual(config_obj.get_value("python", "packages"),
-                         "nuitka==1.8.0,ordered_set,zstandard")
+                         "Nuitka==1.8,ordered_set,zstandard")
         self.assertEqual(config_obj.get_value("qt", "qml_files"), "")
         equ_base = "--quiet --noinclude-qt-translations"
         equ_value = equ_base + " --static-libpython=no" if is_pyenv_python() else equ_base
@@ -208,7 +208,7 @@ class TestPySide6DeployQml(DeployTestBase):
         self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
         self.assertEqual(config_obj.get_value("python", "packages"),
-                         "nuitka==1.8.0,ordered_set,zstandard")
+                         "Nuitka==1.8,ordered_set,zstandard")
         self.assertEqual(config_obj.get_value("qt", "qml_files"), "main.qml,MovingRectangle.qml")
         equ_base = "--quiet --noinclude-qt-translations"
         equ_value = equ_base + " --static-libpython=no" if is_pyenv_python() else equ_base

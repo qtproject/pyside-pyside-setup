@@ -35,8 +35,7 @@ from pathlib import Path
 from textwrap import dedent
 
 from deploy_lib import (MAJOR_VERSION, Config, cleanup, config_option_exists,
-                        finalize, create_config_file, install_python_dependencies,
-                        setup_python)
+                        finalize, create_config_file, PythonExecutable, Nuitka)
 
 
 def main(main_file: Path = None, name: str = None, config_file: Path = None, init: bool = False,
@@ -57,7 +56,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
     config = None
     logging.info("[DEPLOY] Start")
 
-    python = setup_python(dry_run=dry_run, force=force, init=init)
+    python = PythonExecutable(dry_run=dry_run, init=init, force=force)
     config_file_exists = config_file and Path(config_file).exists()
 
     if config_file_exists:
@@ -75,8 +74,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
 
     cleanup(config=config)
 
-    install_python_dependencies(config=config, python=python, init=init,
-                                packages="packages")
+    python.install_dependencies(config=config, packages="packages")
 
     # required by Nuitka for pyenv Python
     add_arg = " --static-libpython=no"
@@ -89,6 +87,9 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
     if not dry_run:
         config.update_config()
 
+    if config.qml_files:
+        logging.info(f"[DEPLOY] Included QML files: {config.qml_files}")
+
     if init:
         # config file created above. Exiting.
         logging.info(f"[DEPLOY]: Config file {config.config_file} created")
@@ -99,9 +100,13 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
         if not dry_run:
             logging.info("[DEPLOY] Deploying application")
 
-        command_str = python.create_executable(source_file=config.source_file,
+        nuitka = Nuitka(nuitka=[python.exe, "-m", "nuitka"])
+        command_str = nuitka.create_executable(source_file=config.source_file,
                                                extra_args=config.extra_args,
-                                               config=config)
+                                               qml_files=config.qml_files,
+                                               excluded_qml_plugins=config.excluded_qml_plugins,
+                                               icon=config.icon,
+                                               dry_run=dry_run)
     except Exception:
         print(f"[DEPLOY] Exception occurred: {traceback.format_exc()}")
     finally:

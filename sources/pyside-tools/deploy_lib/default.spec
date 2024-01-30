@@ -27,7 +27,7 @@ python_path =
 # python packages to install
 # ordered-set: increase compile time performance of nuitka packaging
 # zstandard: provides final executable size optimization
-packages = nuitka==1.8.0,ordered_set,zstandard
+packages = Nuitka==1.8,ordered_set,zstandard
 
 # buildozer: for deploying Android application
 android_packages = buildozer==1.5.0,cython==0.29.33
@@ -50,7 +50,7 @@ wheel_pyside =
 wheel_shiboken =
 
 # plugins to be copied to libs folder of the packaged application. Comma separated
-plugins = platforms_qtforandroid
+plugins =
 
 [nuitka]
 
@@ -82,7 +82,7 @@ modules =
 
 # other libraries to be loaded. Comma separated.
 # loaded at app startup
-local_libs = plugins_platforms_qtforandroid
+local_libs =
 
 # architecture of deployed platform
 # possible values: ["aarch64", "armv7a", "i686", "x86_64"]

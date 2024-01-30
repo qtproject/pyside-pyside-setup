@@ -121,20 +121,21 @@ class AndroidConfig(Config):
         self._dependency_files = []
         self._find_and_set_dependency_files()
 
+        dependent_plugins = []
+        self._local_libs = []
+        if self.get_value("buildozer", "local_libs"):
+            self._local_libs = self.get_value("buildozer", "local_libs").split(",")
+        else:
+            # the local_libs can also store dependent plugins
+            local_libs, dependent_plugins = self._find_local_libs()
+            self.local_libs = list(set(local_libs))
+
         self._qt_plugins = []
         if self.get_value("android", "plugins"):
             self._qt_plugins = self.get_value("android", "plugins").split(",")
-
-        self._local_libs = []
-        if self.get_value("buildozer", "local_libs"):
-            self.local_libs = self.get_value("buildozer", "local_libs").split(",")
-
-        dependent_plugins = []
-        # the local_libs can also store dependent plugins
-        local_libs, dependent_plugins = self._find_local_libs()
-        self._find_plugin_dependencies(dependent_plugins)
-        self.qt_plugins += dependent_plugins
-        self.local_libs += local_libs
+        elif dependent_plugins:
+            self._find_plugin_dependencies(dependent_plugins)
+            self.qt_plugins = list(set(dependent_plugins))
 
         recipe_dir_temp = self.get_value("buildozer", "recipe_dir")
         if recipe_dir_temp:
@@ -381,11 +382,6 @@ class AndroidConfig(Config):
                     # file_name starts with lib and ends with the platform name
                     # eg: lib<lib_name>_x86_64.so
                     file_name = Path(file).stem
-
-                    if file_name.startswith("libplugins_platforms_qtforandroid"):
-                        # the platform library is a requisite and is already added from the
-                        # configuration file
-                        continue
 
                     # we only need lib_name, because lib and arch gets re-added by
                     # python-for-android

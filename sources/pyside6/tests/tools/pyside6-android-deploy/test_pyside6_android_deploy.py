@@ -14,7 +14,7 @@ from unittest import mock
 from unittest.mock import patch
 
 sys.path.append(os.fspath(Path(__file__).resolve().parents[2]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
 
@@ -140,7 +140,7 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         expected_modules = {"Core", "Gui"}
         obtained_modules = set(config_obj.get_value("buildozer", "modules").split(","))
         self.assertEqual(obtained_modules, expected_modules)
-        expected_local_libs = "plugins_platforms_qtforandroid"
+        expected_local_libs = ""
         self.assertEqual(config_obj.get_value("buildozer", "local_libs"),
                          expected_local_libs)
         self.assertEqual(config_obj.get_value("buildozer", "arch"), "x86_64")
@@ -243,7 +243,7 @@ class TestPySide6AndroidDeployQml(DeployTestBase):
         expected_modules = {"Quick", "Core", "Gui", "Network", "Qml", "QmlModels", "OpenGL"}
         obtained_modules = set(config_obj.get_value("buildozer", "modules").split(","))
         self.assertEqual(obtained_modules, expected_modules)
-        expected_local_libs = "plugins_platforms_qtforandroid"
+        expected_local_libs = ""
         self.assertEqual(config_obj.get_value("buildozer", "local_libs"),
                          expected_local_libs)
         expected_qt_plugins = set(dependent_plugins)
