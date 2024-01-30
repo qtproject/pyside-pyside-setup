@@ -389,10 +389,10 @@ PySide::Feature::init();
 // @snippet qt-init-feature
 
 // @snippet qt-pysideinit
-Shiboken::Conversions::registerConverterName(SbkPySide6_QtCoreTypeConverters[SBK_QSTRING_IDX], "unicode");
-Shiboken::Conversions::registerConverterName(SbkPySide6_QtCoreTypeConverters[SBK_QSTRING_IDX], "str");
-Shiboken::Conversions::registerConverterName(SbkPySide6_QtCoreTypeConverters[SBK_QTCORE_QLIST_QVARIANT_IDX], "QVariantList");
-Shiboken::Conversions::registerConverterName(SbkPySide6_QtCoreTypeConverters[SBK_QTCORE_QMAP_QSTRING_QVARIANT_IDX], "QVariantMap");
+Shiboken::Conversions::registerConverterName(SbkPySide6_QtCoreTypeConverters[SBK_QString_IDX], "unicode");
+Shiboken::Conversions::registerConverterName(SbkPySide6_QtCoreTypeConverters[SBK_QString_IDX], "str");
+Shiboken::Conversions::registerConverterName(SbkPySide6_QtCoreTypeConverters[SBK_QtCore_QList_QVariant_IDX], "QVariantList");
+Shiboken::Conversions::registerConverterName(SbkPySide6_QtCoreTypeConverters[SBK_QtCore_QMap_QString_QVariant_IDX], "QVariantMap");
 
 PySide::registerInternalQtConf();
 PySide::init(module);
@@ -665,7 +665,7 @@ if (PyIndex_Check(_key)) {
             PyErr_SetString(PyExc_ValueError, "bytearray must be of size 1");
             return -1;
         }
-    } else if (Py_TYPE(_value) == reinterpret_cast<PyTypeObject *>(SbkPySide6_QtCoreTypes[SBK_QBYTEARRAY_IDX])) {
+    } else if (Py_TYPE(_value) == reinterpret_cast<PyTypeObject *>(SbkPySide6_QtCoreTypes[SBK_QByteArray_IDX])) {
         if (PyObject_Length(_value) != 1) {
             PyErr_SetString(PyExc_ValueError, "QByteArray must be of size 1");
             return -1;
@@ -702,7 +702,7 @@ if (PySlice_GetIndicesEx(_key, %CPPSELF.size(), &start, &stop, &step, &sliceleng
 Py_ssize_t value_length = 0;
 if (_value != nullptr && _value != Py_None) {
     if (!(PyBytes_Check(_value) || PyByteArray_Check(_value)
-          || Py_TYPE(_value) == reinterpret_cast<PyTypeObject *>(SbkPySide6_QtCoreTypes[SBK_QBYTEARRAY_IDX]))) {
+          || Py_TYPE(_value) == reinterpret_cast<PyTypeObject *>(SbkPySide6_QtCoreTypes[SBK_QByteArray_IDX]))) {
            PyErr_Format(PyExc_TypeError, "bytes, bytearray or QByteArray is required, not %.200s",
                         Py_TYPE(_value)->tp_name);
            return -1;
@@ -1751,7 +1751,7 @@ if (dataChar == nullptr) {
 
 // @snippet qloggingcategory_to_cpp
     QLoggingCategory *category{nullptr};
-    Shiboken::Conversions::pythonToCppPointer(SbkPySide6_QtCoreTypes[SBK_QLOGGINGCATEGORY_IDX],
+    Shiboken::Conversions::pythonToCppPointer(SbkPySide6_QtCoreTypes[SBK_QLoggingCategory_IDX],
     pyArgs[0], &(category));
 // @snippet qloggingcategory_to_cpp
 

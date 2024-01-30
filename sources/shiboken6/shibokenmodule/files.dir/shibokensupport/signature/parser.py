@@ -78,6 +78,9 @@ def _get_flag_enum_option():
     # PYSIDE-1735: Emit a warning when we should maybe evict forgiveness mode
     if ver[:2] >= (7, 0):
         warnings.warn(f"{q} Please drop Enum forgiveness mode in `mangled_type_getattro` ***")
+    # PYSIDE-2404: Emit a warning when we should drop uppercase offset constants
+    if ver[:2] >= (7, 0):
+        warnings.warn(f"{q} Please drop uppercase type offsets in `copyOffsetEnumStream` ***")
     # normalize the sys attribute
     setattr(sys, sysname, flag)
     os.environ[envname] = str(flag)

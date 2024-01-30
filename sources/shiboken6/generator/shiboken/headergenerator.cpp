@@ -115,7 +115,7 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
     s << licenseComment();
 
     QString wrapperName = classContext.effectiveClassName();
-    QString outerHeaderGuard = getFilteredCppSignatureString(wrapperName).toUpper();
+    QString outerHeaderGuard = getFilteredCppSignatureString(wrapperName);
 
     // Header
     s << "#ifndef SBK_" << outerHeaderGuard << "_H\n";
@@ -124,7 +124,7 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
     if (!avoidProtectedHack())
         s << protectedHackDefine;
 
-    //Includes
+    // Includes
     s << metaClass->typeEntry()->include() << '\n';
     for (auto &inst : metaClass->templateBaseClassInstantiations())
         s << inst.typeEntry()->include();
@@ -609,7 +609,7 @@ HeaderGenerator::IndexValues
         const auto ptrName = smp.type.typeEntry()->entryName();
         const auto pos = indexName.indexOf(ptrName, 0, Qt::CaseInsensitive);
         if (pos >= 0) {
-            indexName.insert(pos + ptrName.size() + 1, u"CONST"_s);
+            indexName.insert(pos + ptrName.size() + 1, u"const"_s);
             result.append({indexName, smartPointerCountIndex, "(const)"_L1});
         }
         ++smartPointerCountIndex;
@@ -646,6 +646,18 @@ HeaderGenerator::IndexValues HeaderGenerator::collectConverterIndexes() const
     return result;
 }
 
+// PYSIDE-2404: Write the enums in unchanged case for reuse in type imports.
+//              For conpatibility, we create them in uppercase, too.
+// FIXME: Remove in PySide 7. (See the note in `parser.py`)
+//
+static IndexValue typeIndexUpper(struct IndexValue const &ti)
+{
+    QString modi = ti.name.toUpper();
+    if (modi == ti.name)
+        modi = u"// "_s + modi;
+    return {modi, ti.value, ti.comment};
+}
+
 bool HeaderGenerator::finishGeneration()
 {
     // Generate the main header for this module. This header should be included
@@ -660,7 +672,6 @@ bool HeaderGenerator::finishGeneration()
                        TypeSystem::TargetLangCode);
     }
 
-    macrosStream << "// Type indices\nenum : int {\n";
     auto classList = api().classes();
 
     std::sort(classList.begin(), classList.end(),
@@ -669,6 +680,13 @@ bool HeaderGenerator::finishGeneration()
               });
 
     const auto typeIndexes = collectTypeIndexes(classList);
+
+    macrosStream << "\n// Type indices\nenum [[deprecated]] : int {\n";
+    for (const auto &ti : typeIndexes)
+        macrosStream << typeIndexUpper(ti);
+    macrosStream << "};\n";
+
+    macrosStream << "\n// Type indices\nenum : int {\n";
     for (const auto &ti : typeIndexes)
         macrosStream << ti;
     macrosStream << "};\n";
@@ -683,6 +701,11 @@ bool HeaderGenerator::finishGeneration()
     // TODO-CONVERTER ------------------------------------------------------------------------------
     // Using a counter would not do, a fix must be made to APIExtractor's getTypeIndex().
     const auto converterIndexes = collectConverterIndexes();
+    macrosStream << "// Converter indices\nenum [[deprecated]] : int {\n";
+    for (const auto &ci : converterIndexes)
+        macrosStream << typeIndexUpper(ci);
+    macrosStream << "};\n\n";
+
     macrosStream << "// Converter indices\nenum : int {\n";
     for (const auto &ci : converterIndexes)
         macrosStream << ci;
@@ -714,7 +737,7 @@ bool HeaderGenerator::finishGeneration()
         if (!shouldGenerate(classType))
             continue;
 
-        //Includes
+        // Includes
         const bool isPrivate = classType->isPrivate();
         auto &par = isPrivate ? privateParameters : parameters;
         const auto classInclude = classType->include();

@@ -2441,11 +2441,11 @@ QString ShibokenGenerator::convertersVariableName(const QString &moduleName)
 
 static QString processInstantiationsVariableName(const AbstractMetaType &type)
 {
-    QString res = u'_' + _fixedCppTypeName(type.typeEntry()->qualifiedCppName()).toUpper();
+    QString res = u'_' + _fixedCppTypeName(type.typeEntry()->qualifiedCppName());
     for (const auto &instantiation : type.instantiations()) {
         res += instantiation.isContainer()
                ? processInstantiationsVariableName(instantiation)
-               : u'_' + _fixedCppTypeName(instantiation.cppSignature()).toUpper();
+               : u'_' + _fixedCppTypeName(instantiation.cppSignature());
     }
     return res;
 }
@@ -2463,7 +2463,7 @@ QString
     const auto templateBaseClass = metaClass->templateBaseClass();
     Q_ASSERT(templateBaseClass);
     QString result = u"SBK_"_s
-        + _fixedCppTypeName(templateBaseClass->typeEntry()->qualifiedCppName()).toUpper();
+        + _fixedCppTypeName(templateBaseClass->typeEntry()->qualifiedCppName());
     for (const auto &instantiation : metaClass->templateBaseClassInstantiations())
         result += processInstantiationsVariableName(instantiation);
     appendIndexSuffix(&result);
@@ -2485,7 +2485,7 @@ QString ShibokenGenerator::getTypeIndexVariableName(TypeEntryCPtr type)
         const int dot = package.lastIndexOf(u'.');
         result += QStringView{package}.right(package.size() - (dot + 1));
     }
-    result += _fixedCppTypeName(type->qualifiedCppName()).toUpper();
+    result += _fixedCppTypeName(type->qualifiedCppName());
     appendIndexSuffix(&result);
     return result;
 }
@@ -2493,7 +2493,7 @@ QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaType &type
 {
     QString result = u"SBK"_s;
     if (type.typeEntry()->isContainer())
-        result += u'_' + moduleName().toUpper();
+        result += u'_' + moduleName();
     result += processInstantiationsVariableName(type);
     appendIndexSuffix(&result);
     return result;

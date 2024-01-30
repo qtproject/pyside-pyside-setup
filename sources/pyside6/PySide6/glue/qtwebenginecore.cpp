@@ -26,7 +26,7 @@ auto callback = [callable](std::unique_ptr<QWebEngineNotification> webEngineNoti
     Shiboken::AutoDecRef arglist(PyTuple_New(1));
     PyTuple_SET_ITEM(arglist.object(), 0,
                     Shiboken::Conversions::pointerToPython(
-                        SbkPySide6_QtWebEngineCoreTypes[SBK_QWEBENGINENOTIFICATION_IDX],
+                        SbkPySide6_QtWebEngineCoreTypes[SBK_QWebEngineNotification_IDX],
                         webEngineNotification.release()));
     Py_INCREF(callable);
     PyObject_CallObject(callable, arglist);
