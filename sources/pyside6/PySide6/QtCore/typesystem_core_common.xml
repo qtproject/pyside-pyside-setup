@@ -1767,6 +1767,10 @@
                   return-type="QMetaObject::Connection" static="yes">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-4"/>
     </add-function>
+    <add-function signature="connect(const QObject*@sender@,const char*@signal@,const QObject*@context@,PyCallable*@functor@,Qt::ConnectionType@type@=Qt::AutoConnection)"
+                  return-type="QMetaObject::Connection" static="yes">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-4-context"/>
+    </add-function>
     <!-- static version -->
     <add-function signature="connect(const char*@signal@,PyCallable*@functor@,Qt::ConnectionType@type@=Qt::AutoConnection)"
                   return-type="QMetaObject::Connection">

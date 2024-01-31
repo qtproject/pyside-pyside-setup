@@ -5,7 +5,10 @@ project(libpyside)
 
 set(libpyside_libraries Qt::Core Qt::CorePrivate)
 
+set(CMAKE_AUTOMOC ON)
+
 set(libpyside_HEADERS # installed below
+    pysideqslotobject_p.h
     class_property.h
     dynamicqmetaobject.h
     feature_select.h
@@ -41,6 +44,7 @@ set(libpyside_HEADERS # installed below
 )
 
 set(libpyside_SRC
+    pysideqslotobject_p.cpp
     class_property.cpp
     dynamicqmetaobject.cpp
     feature_select.cpp
