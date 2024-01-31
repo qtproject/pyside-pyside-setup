@@ -521,6 +521,10 @@ private:
     static void writePyMethodDefs(TextStream &s, const QString &className,
                                   const QString &methodsDefinitions);
 
+    void writeModuleCodeSnips(TextStream &s, const CodeSnipList &codeSnips,
+                              TypeSystem::CodeSnipPosition position,
+                              TypeSystem::Language language) const;
+
     static bool hasBoolCast(const AbstractMetaClassCPtr &metaClass)
     { return boolCast(metaClass).has_value(); }
 

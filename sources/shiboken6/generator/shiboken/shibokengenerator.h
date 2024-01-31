@@ -145,6 +145,7 @@ protected:
 
     /// Replaces variables for the user's custom code at global or class level.
     void processCodeSnip(QString &code) const;
+    void processCodeSnip(QString &code, const QString &context) const;
     void processClassCodeSnip(QString &code, const GeneratorContext &context) const;
 
     /**

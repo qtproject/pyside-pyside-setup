@@ -1316,7 +1316,7 @@ void ShibokenGenerator::processClassCodeSnip(QString &code, const GeneratorConte
     code.replace(u"%TYPE"_s, className);
     code.replace(u"%CPPTYPE"_s, metaClass->name());
 
-    processCodeSnip(code);
+    processCodeSnip(code, context.effectiveClassName());
 }
 
 void ShibokenGenerator::processCodeSnip(QString &code) const
@@ -1332,6 +1332,15 @@ void ShibokenGenerator::processCodeSnip(QString &code) const
 
     // replace "checkType" check
     replaceTypeCheckTypeSystemVariable(code);
+}
+
+void ShibokenGenerator::processCodeSnip(QString &code, const QString &context) const
+{
+    try {
+        processCodeSnip(code);
+    } catch (const std::exception &e) {
+        throw Exception(msgSnippetError(context, e.what()));
+    }
 }
 
 ShibokenGenerator::ArgumentVarReplacementList
@@ -1638,7 +1647,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
 
     replaceTemplateVariables(code, func);
 
-    processCodeSnip(code);
+    processCodeSnip(code, func->classQualifiedSignature());
     s << "// Begin code injection\n" << code << "// End of code injection\n\n";
 }
 

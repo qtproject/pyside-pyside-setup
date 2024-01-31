@@ -6,6 +6,7 @@
 
 #include "shibokengenerator.h"
 #include "include.h"
+#include "modifications_typedefs.h"
 
 #include <QtCore/QList>
 #include <QtCore/QSet>
@@ -64,6 +65,9 @@ private:
     void writeWrapperClass(TextStream &s, const QString &wrapperName, const GeneratorContext &classContext) const;
     void writeInheritedWrapperClassDeclaration(TextStream &s,
                                                const GeneratorContext &classContext) const;
+    void writeModuleCodeSnips(TextStream &s, const CodeSnipList &codeSnips,
+                              TypeSystem::CodeSnipPosition position,
+                              TypeSystem::Language language) const;
 
     AbstractMetaClassCList m_alternateTemplateIndexes;
 };
