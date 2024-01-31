@@ -85,6 +85,17 @@ class TestSingleShot(UsesQApplication):
         self.assertTrue(thread.called)
         self.assertEqual(self.qthread, thread.qthread)
 
+    def testSingleShotWithContextZero(self):
+        thread = ThreadForContext()
+        thread.start()
+        thread.context.moveToThread(thread)
+        QTimer.singleShot(0, thread.context, self.callback)
+        self.app.exec()
+        thread.wait()
+        self.assertTrue(self.called)
+        self.assertTrue(thread.called)
+        self.assertEqual(self.qthread, thread.qthread)
+
 
 class SigEmitter(QObject):
 

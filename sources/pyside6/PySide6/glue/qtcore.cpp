@@ -1059,28 +1059,9 @@ timer->start(%1);
 // @snippet qtimer-singleshot-2
 
 // @snippet qtimer-singleshot-functor-context
-Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
-if (PyObject_TypeCheck(%3, PySideSignalInstance_TypeF())) {
-    auto *timerType = Shiboken::SbkType<QTimer>();
-    auto *pyTimer = timerType->tp_new(Shiboken::SbkType<QTimer>(), emptyTuple, nullptr);
-    timerType->tp_init(pyTimer, emptyTuple, nullptr);
-    QTimer * timer = %CONVERTTOCPP[QTimer *](pyTimer);
-    timer->setSingleShot(true);
-    PySideSignalInstance *signalInstance = reinterpret_cast<PySideSignalInstance *>(%2);
-    Shiboken::AutoDecRef signalSignature(Shiboken::String::fromFormat("2%s", PySide::Signal::getSignature(signalInstance)));
-    Shiboken::AutoDecRef result(
-        PyObject_CallFunction(PySide::PySideName::qtConnect(), "OsOO",
-                              pyTimer,
-                              SIGNAL(timeout()),
-                              %3,
-                              PySide::Signal::getObject(signalInstance),
-                              signalSignature.object())
-    );
-    timer->connect(timer, &QTimer::timeout, timer, &QObject::deleteLater, Qt::DirectConnection);
-    Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject *>(pyTimer));
-    Py_XDECREF(pyTimer);
-    timer->start(%1);
-} else {
+auto msec = %1;
+if (msec == 0) {
+    Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
     auto *callable = %PYARG_3;
     auto cppCallback = [callable]()
     {
@@ -1091,7 +1072,30 @@ if (PyObject_TypeCheck(%3, PySideSignalInstance_TypeF())) {
     };
 
     Py_INCREF(callable);
-    %CPPSELF.%FUNCTION_NAME(%1, %2, cppCallback);
+    %CPPSELF.%FUNCTION_NAME(msec, %2, cppCallback);
+} else {
+    Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
+    auto *timerType = Shiboken::SbkType<QTimer>();
+    auto newFunc = timerType->tp_new;
+    auto initFunc = timerType->tp_init;
+    auto *pyTimer = newFunc(Shiboken::SbkType<QTimer>(), emptyTuple, nullptr);
+    initFunc(pyTimer, emptyTuple, nullptr);
+
+    QTimer * timer = %CONVERTTOCPP[QTimer *](pyTimer);
+    timer->setSingleShot(true);
+
+    Shiboken::AutoDecRef result(
+        PyObject_CallMethod(pyTimer, "connect", "OsOO",
+                            pyTimer,
+                            SIGNAL(timeout()),
+                            %PYARG_2,
+                            %PYARG_3)
+    );
+
+    timer->connect(timer, &QTimer::timeout, timer, &QObject::deleteLater, Qt::DirectConnection);
+    Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject *>(pyTimer));
+    Py_XDECREF(pyTimer);
+    timer->start(msec);
 }
 // @snippet qtimer-singleshot-functor-context
 
