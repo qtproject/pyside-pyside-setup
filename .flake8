@@ -4,4 +4,4 @@ max-line-length = 100
 exclude = rc_*.py,*_rc.py,ui_*.py
 per-file-ignores =
     # for init_test_paths() hack
-    test_*.py:E402
+    *_test_*.py:E402
