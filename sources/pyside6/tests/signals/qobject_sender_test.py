@@ -73,6 +73,12 @@ class ObjectSenderWithQAppTest(UsesQApplication):
         self.app.exec()
         self.assertTrue(isinstance(recv.the_sender, QObject))
 
+    def testSenderCppSignalSingleShotTimerWithContext(self):
+        recv = Receiver()
+        QTimer.singleShot(10, recv, recv.callback)
+        self.app.exec()
+        self.assertTrue(isinstance(recv.the_sender, QObject))
+
     def testSenderCppSignalWithPythonExtendedClass(self):
         sender = ExtQTimer()
         recv = Receiver()
@@ -105,4 +111,3 @@ class ObjectSenderWithQAppCheckOnReceiverTest(UsesQApplication):
 
 if __name__ == '__main__':
     unittest.main()
-
