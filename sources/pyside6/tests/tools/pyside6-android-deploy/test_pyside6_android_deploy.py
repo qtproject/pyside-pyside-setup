@@ -138,7 +138,7 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         self.assertIn(str(self.ndk_path), config_obj.get_value("buildozer", "ndk_path"))
         self.assertEqual(config_obj.get_value("buildozer", "sdk_path"), '')
         expected_modules = {"Core", "Gui"}
-        obtained_modules = set(config_obj.get_value("buildozer", "modules").split(","))
+        obtained_modules = set(config_obj.get_value("qt", "modules").split(","))
         self.assertEqual(obtained_modules, expected_modules)
         expected_local_libs = ""
         self.assertEqual(config_obj.get_value("buildozer", "local_libs"),
@@ -241,7 +241,7 @@ class TestPySide6AndroidDeployQml(DeployTestBase):
 
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
         expected_modules = {"Quick", "Core", "Gui", "Network", "Qml", "QmlModels", "OpenGL"}
-        obtained_modules = set(config_obj.get_value("buildozer", "modules").split(","))
+        obtained_modules = set(config_obj.get_value("qt", "modules").split(","))
         self.assertEqual(obtained_modules, expected_modules)
         expected_local_libs = ""
         self.assertEqual(config_obj.get_value("buildozer", "local_libs"),

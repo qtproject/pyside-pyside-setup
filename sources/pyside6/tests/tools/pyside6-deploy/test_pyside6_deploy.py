@@ -7,12 +7,13 @@ import shutil
 import sys
 import os
 import importlib
+import platform
 from pathlib import Path
 from unittest.mock import patch
 from unittest import mock
 
 sys.path.append(os.fspath(Path(__file__).resolve().parents[2]))
-from init_paths import init_test_paths  # noqa: E402
+from init_paths import init_test_paths, _get_qt_lib_dir  # noqa: E402
 init_test_paths(False)
 
 
@@ -78,6 +79,8 @@ class DeployTestBase(LongSortedOptionTest):
         os.chdir(self.current_dir)
 
 
+@unittest.skipIf(sys.platform == "darwin" and int(platform.mac_ver()[0].split('.')[0]) <= 11,
+                 "Test only works on macOS version 12+")
 class TestPySide6DeployWidgets(DeployTestBase):
     @classmethod
     def setUpClass(cls):
@@ -114,9 +117,10 @@ class TestPySide6DeployWidgets(DeployTestBase):
         original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
         self.assertEqual(original_output, self.expected_run_cmd)
 
-    def testWidgetConfigFile(self):
+    @patch("deploy_lib.dependency_util.get_qt_libs_dir")
+    def testWidgetConfigFile(self, mock_sitepackages):
+        mock_sitepackages.return_value = Path(_get_qt_lib_dir())
         # includes both dry run and config_file tests
-
         # init
         init_result = self.deploy.main(self.main_file, init=True, force=True)
         self.assertEqual(init_result, None)
@@ -137,6 +141,11 @@ class TestPySide6DeployWidgets(DeployTestBase):
         equ_value = equ_base + " --static-libpython=no" if is_pyenv_python() else equ_base
         self.assertEqual(config_obj.get_value("nuitka", "extra_args"), equ_value)
         self.assertEqual(config_obj.get_value("qt", "excluded_qml_plugins"), "")
+        expected_modules = {"Core", "Gui", "Widgets"}
+        if sys.platform != "win32":
+            expected_modules.add("DBus")
+        obtained_modules = set(config_obj.get_value("qt", "modules").split(","))
+        self.assertEqual(obtained_modules, expected_modules)
         self.config_file.unlink()
 
     def testErrorReturns(self):
@@ -147,6 +156,8 @@ class TestPySide6DeployWidgets(DeployTestBase):
         self.assertTrue("Directory does not contain main.py file." in str(context.exception))
 
 
+@unittest.skipIf(sys.platform == "darwin" and int(platform.mac_ver()[0].split('.')[0]) <= 11,
+                 "Test only works on macOS version 12+")
 class TestPySide6DeployQml(DeployTestBase):
     @classmethod
     def setUpClass(cls):
@@ -195,7 +206,9 @@ class TestPySide6DeployQml(DeployTestBase):
             self.expected_run_cmd += " --static-libpython=no"
         self.config_file = self.temp_example_qml / "pysidedeploy.spec"
 
-    def testQmlConfigFile(self):
+    @patch("deploy_lib.dependency_util.get_qt_libs_dir")
+    def testQmlConfigFile(self, mock_sitepackages):
+        mock_sitepackages.return_value = Path(_get_qt_lib_dir())
         # create config file
         with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:
             mock_qmlimportscanner.return_value = ["QtQuick"]
@@ -217,6 +230,11 @@ class TestPySide6DeployQml(DeployTestBase):
             config_obj.get_value("qt", "excluded_qml_plugins"),
             "QtCharts,QtQuick3D,QtSensors,QtTest,QtWebEngine",
         )
+        expected_modules = {"Core", "Gui", "Qml", "Quick", "Network", "OpenGL", "QmlModels"}
+        if sys.platform != "win32":
+            expected_modules.add("DBus")
+        obtained_modules = set(config_obj.get_value("qt", "modules").split(","))
+        self.assertEqual(obtained_modules, expected_modules)
         self.config_file.unlink()
 
     def testQmlDryRun(self):
@@ -234,6 +252,8 @@ class TestPySide6DeployQml(DeployTestBase):
             self.assertEqual(mock_qmlimportscanner.call_count, 1)
 
 
+@unittest.skipIf(sys.platform == "darwin" and int(platform.mac_ver()[0].split('.')[0]) <= 11,
+                 "Test only works on macOS version 12+")
 class TestPySide6DeployWebEngine(DeployTestBase):
     @classmethod
     def setUpClass(cls):
@@ -243,8 +263,10 @@ class TestPySide6DeployWebEngine(DeployTestBase):
             shutil.copytree(example_webenginequick, Path(cls.temp_dir) / "nanobrowser")
         ).resolve()
 
-    # this test case retains the QtWebEngine dlls
-    def testWebEngineQuickDryRun(self):
+    @patch("deploy_lib.dependency_util.get_qt_libs_dir")
+    def testWebEngineQuickDryRun(self, mock_sitepackages):
+        mock_sitepackages.return_value = Path(_get_qt_lib_dir())
+        # this test case retains the QtWebEngine dlls
         # setup
         os.chdir(self.temp_example_webenginequick)
         main_file = self.temp_example_webenginequick / "quicknanobrowser.py"
@@ -311,6 +333,13 @@ class TestPySide6DeployWebEngine(DeployTestBase):
             config_obj.get_value("qt", "excluded_qml_plugins"),
             "QtCharts,QtQuick3D,QtSensors,QtTest",
         )
+        expected_modules = {"Core", "Gui", "Quick", "Qml", "WebEngineQuick", "Network", "OpenGL",
+                            "Positioning", "WebEngineCore", "WebChannel", "WebChannelQuick",
+                            "QmlModels"}
+        if sys.platform != "win32":
+            expected_modules.add("DBus")
+        obtained_modules = set(config_obj.get_value("qt", "modules").split(","))
+        self.assertEqual(obtained_modules, expected_modules)
 
 
 if __name__ == "__main__":

@@ -41,6 +41,9 @@ qml_files =
 # excluded qml plugin binaries
 excluded_qml_plugins =
 
+# Qt modules used. Comma separated
+modules =
+
 [android]
 
 # path to PySide wheel
@@ -76,9 +79,6 @@ ndk_path =
 
 # if empty uses default sdk path downloaded by buildozer
 sdk_path =
-
-# modules used. Comma separated
-modules =
 
 # other libraries to be loaded. Comma separated.
 # loaded at app startup

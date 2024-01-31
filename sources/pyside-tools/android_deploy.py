@@ -9,7 +9,7 @@ from pathlib import Path
 from textwrap import dedent
 
 from deploy_lib import (create_config_file, cleanup, config_option_exists, PythonExecutable,
-                        MAJOR_VERSION)
+                        MAJOR_VERSION, HELP_EXTRA_IGNORE_DIRS, HELP_EXTRA_MODULES)
 from deploy_lib.android import AndroidData, AndroidConfig
 from deploy_lib.android.buildozer import Buildozer
 
@@ -45,26 +45,6 @@ from deploy_lib.android.buildozer import Buildozer
 
         Note: This file is used by both pyside6-deploy and pyside6-android-deploy
 """
-
-HELP_EXTRA_IGNORE_DIRS = dedent("""
-                                Comma separated directory names inside the project dir. These
-                                directories will be skipped when searching for python files
-                                relevant to the project.
-
-                                Example usage: --extra-ignore-dirs=doc,translations
-                                """)
-
-HELP_EXTRA_MODULES = dedent("""
-                            Comma separated list of Qt modules to be added to the application,
-                            in case they are not found automatically.
-
-                            This occurs when you have 'import PySide6' in your code instead
-                            'from PySide6 import <module>'. The module name is specified
-                            with either omitting the prefix of Qt or with it.
-
-                            Example usage 1: --extra-modules=Network,Svg
-                            Example usage 2: --extra-modules=QtNetwork,QtSvg
-                            """)
 
 
 def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = None,
@@ -124,7 +104,7 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
         config.title = name
 
     try:
-        config.modules += extra_modules
+        config.modules += list(set(extra_modules).difference(set(config.modules)))
 
         # this cannot be done when config file is initialized because cleanup() removes it
         # so this can only be done after the cleanup()

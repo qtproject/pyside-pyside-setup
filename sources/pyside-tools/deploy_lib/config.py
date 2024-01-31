@@ -1,15 +1,14 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
-
 import configparser
 import logging
 import warnings
 from configparser import ConfigParser
+from typing import List
 from pathlib import Path
 
 from project import ProjectData
-from .commands import run_qmlimportscanner
-from . import DEFAULT_APP_ICON
+from . import DEFAULT_APP_ICON, find_pyside_modules, run_qmlimportscanner, QtDependencyReader
 
 # Some QML plugins like QtCore are excluded from this list as they don't contribute much to
 # executable size. Excluding them saves the extra processing of checking for them in files
@@ -17,7 +16,8 @@ EXCLUDED_QML_PLUGINS = {"QtQuick", "QtQuick3D", "QtCharts", "QtWebEngine", "QtTe
 
 
 class BaseConfig:
-
+    """Wrapper class around any .spec file with function to read and set values for the .spec file
+    """
     def __init__(self, config_file: Path, comment_prefixes: str = "/",
                  existing_config_file: bool = False) -> None:
         self.config_file = config_file
@@ -60,9 +60,10 @@ class Config(BaseConfig):
     """
 
     def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
-                 existing_config_file: bool = False):
+                 existing_config_file: bool = False, extra_ignore_dirs: List[str] = None):
         super().__init__(config_file=config_file, existing_config_file=existing_config_file)
 
+        self.extra_ignore_dirs = extra_ignore_dirs
         self._dry_run = dry_run
         self.qml_modules = set()
         # set source_file
@@ -121,6 +122,8 @@ class Config(BaseConfig):
             self._find_and_set_excluded_qml_plugins()
 
         self._generated_files_path = self.project_dir / "deployment"
+
+        self.modules = []
 
     def set_or_fetch(self, config_property_val, config_property_key, config_property_group="app"):
         """
@@ -220,6 +223,15 @@ class Config(BaseConfig):
     @exe_dir.setter
     def exe_dir(self, exe_dir: Path):
         self._exe_dir = exe_dir
+
+    @property
+    def modules(self):
+        return self._modules
+
+    @modules.setter
+    def modules(self, modules):
+        self._modules = modules
+        self.set_value("qt", "modules", ",".join(modules))
 
     def _find_and_set_qml_files(self):
         """Fetches all the qml_files in the folder and sets them if the
@@ -321,3 +333,60 @@ class Config(BaseConfig):
                 config_property_val=self.exe_dir, config_property_key="exec_directory"
             )
         ).absolute()
+
+    def _find_and_set_pysidemodules(self):
+        self.modules = find_pyside_modules(project_dir=self.project_dir,
+                                           extra_ignore_dirs=self.extra_ignore_dirs,
+                                           project_data=self.project_data)
+        logging.info("The following PySide modules were found from the Python files of "
+                     f"the project {self.modules}")
+
+    def _find_and_set_qtquick_modules(self):
+        """Identify if QtQuick is used in QML files and add them as dependency
+        """
+        extra_modules = []
+        if not self.qml_modules:
+            self.qml_modules = set(run_qmlimportscanner(qml_files=self.qml_files,
+                                                        dry_run=self.dry_run))
+
+        if "QtQuick" in self.qml_modules:
+            extra_modules.append("Quick")
+
+        if "QtQuick.Controls" in self.qml_modules:
+            extra_modules.append("QuickControls2")
+
+        self.modules += extra_modules
+
+
+class DesktopConfig(Config):
+    """Wrapper class around pysidedeploy.spec, but specific to Desktop deployment
+    """
+    def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
+                 existing_config_file: bool = False, extra_ignore_dirs: List[str] = None):
+        super().__init__(config_file, source_file, python_exe, dry_run, existing_config_file,
+                         extra_ignore_dirs)
+
+        if self.get_value("qt", "modules"):
+            self.modules = self.get_value("qt", "modules").split(",")
+        else:
+            self._find_and_set_pysidemodules()
+            self._find_and_set_qtquick_modules()
+            self._find_dependent_qt_modules()
+
+    def _find_dependent_qt_modules(self):
+        """
+        Given pysidedeploy_config.modules, find all the other dependent Qt modules.
+        """
+        dependency_reader = QtDependencyReader(dry_run=self.dry_run)
+        all_modules = set(self.modules)
+
+        if not dependency_reader.lib_reader:
+            warnings.warn(f"[DEPLOY] Unable to find {dependency_reader.lib_reader_name}. This tool"
+                          " helps to find the Qt module dependencies of the application. Skipping "
+                          " checking for dependencies.", category=RuntimeWarning)
+            return
+
+        for module_name in self.modules:
+            dependency_reader.find_dependencies(module=module_name, used_modules=all_modules)
+
+        self.modules = list(all_modules)

@@ -12,8 +12,7 @@ from pkginfo import Wheel
 
 from . import (extract_and_copy_jar, get_wheel_android_arch, find_lib_dependencies,
                get_llvm_readobj, find_qtlibs_in_wheel, platform_map, create_recipe)
-from .. import (Config, find_pyside_modules, run_qmlimportscanner, get_all_pyside_modules,
-                MAJOR_VERSION)
+from .. import (Config, find_pyside_modules, get_all_pyside_modules, MAJOR_VERSION)
 
 ANDROID_NDK_VERSION = "25c"
 ANDROID_DEPLOY_CACHE = Path.home() / ".pyside6_android_deploy"
@@ -107,9 +106,8 @@ class AndroidConfig(Config):
         self.qt_libs_path: zipfile.Path = find_qtlibs_in_wheel(wheel_pyside=self.wheel_pyside)
         logging.info(f"[DEPLOY] Qt libs path inside wheel: {str(self.qt_libs_path)}")
 
-        self._modules = []
-        if self.get_value("buildozer", "modules"):
-            self.modules = self.get_value("buildozer", "modules").split(",")
+        if self.get_value("qt", "modules"):
+            self.modules = self.get_value("qt", "modules").split(",")
         else:
             self._find_and_set_pysidemodules()
             self._find_and_set_qtquick_modules()
@@ -190,7 +188,7 @@ class AndroidConfig(Config):
     @modules.setter
     def modules(self, modules):
         self._modules = modules
-        self.set_value("buildozer", "modules", ",".join(modules))
+        self.set_value("qt", "modules", ",".join(modules))
 
     @property
     def local_libs(self):
@@ -281,22 +279,6 @@ class AndroidConfig(Config):
         if not self.arch:
             raise RuntimeError("[DEPLOY] PySide wheel corrupted. Wheel name should end with"
                                "platform name")
-
-    def _find_and_set_qtquick_modules(self):
-        """Identify if QtQuick is used in QML files and add them as dependency
-        """
-        extra_modules = []
-        if not self.qml_modules:
-            self.qml_modules = set(run_qmlimportscanner(qml_files=self.qml_files,
-                                                        dry_run=self.dry_run))
-
-        if "QtQuick" in self.qml_modules:
-            extra_modules.append("Quick")
-
-        if "QtQuick.Controls" in self.qml_modules:
-            extra_modules.append("QuickControls2")
-
-        self.modules += extra_modules
 
     def _find_dependent_qt_modules(self):
         """

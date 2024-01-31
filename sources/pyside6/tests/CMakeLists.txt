@@ -17,7 +17,7 @@ endif()
 # the path to the testbinding module
 get_filename_component(BUILD_DIR "${CMAKE_BINARY_DIR}" DIRECTORY)
 get_filename_component(BUILD_DIR "${CMAKE_BINARY_DIR}" DIRECTORY)
-set(QT_DIR "${_qt5Core_install_prefix}")
+set(QT_DIR "${QT6_INSTALL_PREFIX}")
 
 macro(TEST_QT_MODULE var name)
   if(NOT DISABLE_${name} AND ${var})
