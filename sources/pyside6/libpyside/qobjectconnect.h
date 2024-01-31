@@ -33,6 +33,11 @@ PYSIDE_API QMetaObject::Connection
     qobjectConnectCallback(QObject *source, const char *signal,
                            PyObject *callback, Qt::ConnectionType type);
 
+/// Helpers for QObject::connect(): Make a connection to a Python callback and a context object
+PYSIDE_API QMetaObject::Connection
+    qobjectConnectCallback(QObject *source, const char *signal, QObject *context,
+                           PyObject *callback, Qt::ConnectionType type);
+
 /// Helpers for QObject::disconnect(): Disconnect a Python callback
 PYSIDE_API bool qobjectDisconnectCallback(QObject *source, const char *signal,
                                           PyObject *callback);

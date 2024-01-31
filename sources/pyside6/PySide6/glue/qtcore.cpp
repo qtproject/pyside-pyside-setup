@@ -321,6 +321,12 @@ PyModule_AddStringConstant(module, "__version__", qVersion());
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qobject-connect-4
 
+// @snippet qobject-connect-4-context
+// %FUNCTION_NAME() - disable generation of function call.
+%RETURN_TYPE %0 = PySide::qobjectConnectCallback(%1, %2, %3, %PYARG_4, %5);
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+// @snippet qobject-connect-4-context
+
 // @snippet qobject-connect-5
 // %FUNCTION_NAME() - disable generation of function call.
 %RETURN_TYPE %0 = PySide::qobjectConnectCallback(%CPPSELF, %1, %PYARG_2, %3);
