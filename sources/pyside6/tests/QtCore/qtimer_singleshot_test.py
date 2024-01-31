@@ -14,7 +14,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, QThread, QTimer, Signal
+from PySide6.QtCore import QObject, QThread, QTimer, Signal, Slot, SLOT
 from helper.usesqapplication import UsesQApplication
 
 
@@ -74,6 +74,11 @@ class TestSingleShot(UsesQApplication):
         self.app.exec()
         self.assertTrue(self.called)
 
+    def testSingleShotZero(self):
+        QTimer.singleShot(0, self.callback)
+        self.app.exec()
+        self.assertTrue(self.called)
+
     def testSingleShotWithContext(self):
         thread = ThreadForContext()
         thread.start()
@@ -95,6 +100,56 @@ class TestSingleShot(UsesQApplication):
         self.assertTrue(self.called)
         self.assertTrue(thread.called)
         self.assertEqual(self.qthread, thread.qthread)
+
+
+class TestSingleShotCallableObject(UsesQApplication):
+    '''Test case for QTimer.singleShot with callable inside an object'''
+
+    def setUp(self):
+        # Acquire resources
+        UsesQApplication.setUp(self)
+        self.watchdog = WatchDog(self)
+
+    def tearDown(self):
+        # Release resources
+        del self.watchdog
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
+        UsesQApplication.tearDown(self)
+
+    class CallbackObject(QObject):
+        def __init__(self, app) -> None:
+            super().__init__()
+            self.app = app
+
+        @Slot()
+        def func(self):
+            self.called = True
+            self.app.quit()
+
+    def testSingleShotWithObjectAndMember(self):
+        callback = self.CallbackObject(self.app)
+        QTimer.singleShot(100, callback, SLOT("func()"))
+        self.app.exec()
+        self.assertTrue(callback.called)
+
+    def testSingleShotWithObjectAndMemberZero(self):
+        callback = self.CallbackObject(self.app)
+        QTimer.singleShot(0, callback, SLOT("func()"))
+        self.app.exec()
+        self.assertTrue(callback.called)
+
+    def testSingleShotWithCallableInObject(self):
+        callback = self.CallbackObject(self.app)
+        QTimer.singleShot(100, callback.func)
+        self.app.exec()
+        self.assertTrue(callback.called)
+
+    def testSingleShotWithCallableInObjectZero(self):
+        callback = self.CallbackObject(self.app)
+        QTimer.singleShot(0, callback.func)
+        self.app.exec()
+        self.assertTrue(callback.called)
 
 
 class SigEmitter(QObject):
@@ -125,6 +180,13 @@ class TestSingleShotSignal(UsesQApplication):
         emitter = SigEmitter()
         emitter.sig1.connect(self.callback)
         QTimer.singleShot(100, emitter.sig1)
+        self.app.exec()
+        self.assertTrue(self.called)
+
+    def testSingleShotSignalZero(self):
+        emitter = SigEmitter()
+        emitter.sig1.connect(self.callback)
+        QTimer.singleShot(0, emitter.sig1)
         self.app.exec()
         self.assertTrue(self.called)
 
