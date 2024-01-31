@@ -862,6 +862,12 @@ QString msgCannotFindSnippet(const QString &file, const QString &snippetLabel)
     return result;
 }
 
+QString msgSnippetError(const QString &context, const char *what)
+{
+    return "Error processing code snippet of "_L1 + context
+           + ": "_L1 + QString::fromUtf8(what);
+}
+
 QString msgUnableToResolveTypedef(const QString &sourceType, const QString &sourceName)
 {
     QString result;

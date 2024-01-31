@@ -13,6 +13,7 @@
 #include <abstractmetalang_helpers.h>
 #include <codesnip.h>
 #include <clangparser/compilersupport.h>
+#include <exception.h>
 #include <typedatabase.h>
 #include <reporthandler.h>
 #include <textstream.h>
@@ -20,6 +21,7 @@
 #include "containertypeentry.h"
 #include "enumtypeentry.h"
 #include "flagstypeentry.h"
+#include <messages.h>
 #include "namespacetypeentry.h"
 #include "primitivetypeentry.h"
 #include "typedefentry.h"
@@ -593,10 +595,8 @@ bool HeaderGenerator::finishGeneration()
     StringStream macrosStream(TextStream::Language::Cpp);
 
     const auto snips = TypeDatabase::instance()->defaultTypeSystemType()->codeSnips();
-    if (!snips.isEmpty()) {
-        writeCodeSnips(macrosStream, snips, TypeSystem::CodeSnipPositionDeclaration,
-                       TypeSystem::TargetLangCode);
-    }
+    writeModuleCodeSnips(macrosStream, snips, TypeSystem::CodeSnipPositionDeclaration,
+                         TypeSystem::TargetLangCode);
 
     macrosStream << "// Type indices\nenum : int {\n";
     auto classList = api().classes();
@@ -890,4 +890,17 @@ void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaType
 {
     s <<  "template<> inline PyTypeObject *SbkType< ::" << metaType.cppSignature() << " >() "
       <<  "{ return " << cpythonTypeNameExt(metaType) << "; }\n";
+}
+
+void HeaderGenerator::writeModuleCodeSnips(TextStream &s, const CodeSnipList &codeSnips,
+                                           TypeSystem::CodeSnipPosition position,
+                                           TypeSystem::Language language) const
+{
+    if (!codeSnips.isEmpty()) {
+        try {
+            writeCodeSnips(s, codeSnips, position, language);
+        } catch (const std::exception &e) {
+            throw Exception(msgSnippetError("module header of "_L1 + moduleName(), e.what()));
+        }
+    }
 }

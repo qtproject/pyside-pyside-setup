@@ -455,6 +455,19 @@ void CppGenerator::writePyMethodDefs(TextStream &s, const QString &className,
         << methodsDefinitions << METHOD_DEF_SENTINEL << outdent << "};\n\n";
 }
 
+void CppGenerator::writeModuleCodeSnips(TextStream &s, const CodeSnipList &codeSnips,
+                                        TypeSystem::CodeSnipPosition position,
+                                        TypeSystem::Language language) const
+{
+    if (!codeSnips.isEmpty()) {
+        try {
+            writeCodeSnips(s, codeSnips, position, language);
+        } catch (const std::exception &e) {
+            throw Exception(msgSnippetError("module source of "_L1 + moduleName(), e.what()));
+        }
+    }
+}
+
 bool CppGenerator::hasHashFunction(const AbstractMetaClassCPtr &c)
 {
     return !c->typeEntry()->hashFunction().isEmpty()
@@ -3097,9 +3110,10 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s, const QString &code, 
 {
 
     QString prettyCode = code;
-    processCodeSnip(prettyCode);
+    const QString funcName = cppToPythonFunctionName(sourceTypeName, targetTypeName);
+    processCodeSnip(prettyCode, funcName);
 
-    s << "static PyObject *" << cppToPythonFunctionName(sourceTypeName, targetTypeName)
+    s << "static PyObject *" << funcName
         << "(const void *cppIn)\n{\n" << indent << prettyCode
         << ensureEndl << outdent << "}\n";
 }
@@ -3170,7 +3184,7 @@ void CppGenerator::writeCppToPythonFunction(TextStream &s, const AbstractMetaTyp
         code.replace(u"%INTYPE_"_s + QString::number(i), typeName);
     }
     replaceCppToPythonVariables(code, getFullTypeNameWithoutModifiers(containerType), true);
-    processCodeSnip(code);
+    processCodeSnip(code, containerType.typeEntry()->qualifiedCppName());
     writeCppToPythonFunction(s, code, fixedCppTypeName(containerType),
                              containerNativeToTargetTypeName(cte));
 }
@@ -3179,8 +3193,9 @@ void CppGenerator::writePythonToCppFunction(TextStream &s, const QString &code, 
                                             const QString &targetTypeName) const
 {
     QString prettyCode = code;
-    processCodeSnip(prettyCode);
-    s << "static void " << pythonToCppFunctionName(sourceTypeName, targetTypeName)
+    const QString funcName = pythonToCppFunctionName(sourceTypeName, targetTypeName);
+    processCodeSnip(prettyCode, funcName);
+    s << "static void " << funcName
         << "(PyObject *pyIn, void *cppOut)\n{\n" << indent << prettyCode
         << ensureEndl << outdent << "}\n";
 }
@@ -3283,7 +3298,7 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
                     + cpythonTypeNameExt(toNative.sourceType()) + u')';
     }
     typeCheck.replace(u"%in"_s, u"pyIn"_s);
-    processCodeSnip(typeCheck);
+    processCodeSnip(typeCheck, targetType->qualifiedCppName());
     writeIsPythonConvertibleToCppFunction(s, sourceTypeName, targetTypeName, typeCheck);
 }
 
@@ -6005,8 +6020,7 @@ bool CppGenerator::finishGeneration()
     const CodeSnipList snips = moduleEntry->codeSnips();
 
     // module inject-code native/beginning
-    if (!snips.isEmpty())
-        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode);
+    writeModuleCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::NativeCode);
 
     // cleanup staticMetaObject attribute
     if (usePySideExtensions()) {
@@ -6136,8 +6150,8 @@ bool CppGenerator::finishGeneration()
         << indent << "return " << globalModuleVar << ";\n" << outdent;
 
     // module inject-code target/beginning
-    if (!snips.isEmpty())
-        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning, TypeSystem::TargetLangCode);
+    writeModuleCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning,
+                         TypeSystem::TargetLangCode);
 
     for (const QString &requiredModule : requiredModules) {
         s << "{\n" << indent
@@ -6256,12 +6270,10 @@ bool CppGenerator::finishGeneration()
         << outdent << "}\n";
 
     // module inject-code target/end
-    if (!snips.isEmpty())
-        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::TargetLangCode);
+    writeModuleCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::TargetLangCode);
 
     // module inject-code native/end
-    if (!snips.isEmpty())
-        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode);
+    writeModuleCodeSnips(s, snips, TypeSystem::CodeSnipPositionEnd, TypeSystem::NativeCode);
 
     if (usePySideExtensions()) {
         for (const AbstractMetaEnum &metaEnum : std::as_const(globalEnums))
