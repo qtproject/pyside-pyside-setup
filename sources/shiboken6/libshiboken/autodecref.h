@@ -5,7 +5,6 @@
 #define AUTODECREF_H
 
 #include "sbkpython.h"
-#include "basewrapper.h"
 
 #include <utility>
 
@@ -16,13 +15,13 @@ namespace Shiboken
 /**
  *  AutoDecRef holds a PyObject pointer and decrement its reference counter when destroyed.
  */
-struct LIBSHIBOKEN_API AutoDecRef
+struct AutoDecRef
 {
 public:
     AutoDecRef(const AutoDecRef &) = delete;
     AutoDecRef(AutoDecRef &&o) noexcept : m_pyObj{std::exchange(o.m_pyObj, nullptr)} {}
     AutoDecRef &operator=(const AutoDecRef &) = delete;
-    AutoDecRef &operator=(AutoDecRef &&o)
+    AutoDecRef &operator=(AutoDecRef &&o) noexcept
     {
         m_pyObj = std::exchange(o.m_pyObj, nullptr);
         return *this;
@@ -44,10 +43,10 @@ public:
         Py_XDECREF(m_pyObj);
     }
 
-    inline bool isNull() const { return m_pyObj == nullptr; }
+    [[nodiscard]] bool isNull() const { return m_pyObj == nullptr; }
     /// Returns the pointer of the Python object being held.
-    inline PyObject *object() { return m_pyObj; }
-    inline operator PyObject *() { return m_pyObj; }
+    [[nodiscard]] PyObject *object() const { return m_pyObj; }
+    [[nodiscard]] operator PyObject *() const { return m_pyObj; }
 #ifndef Py_LIMITED_API
     [[deprecated]] inline operator PyTupleObject *()
     { return reinterpret_cast<PyTupleObject *>(m_pyObj); }
@@ -86,4 +85,3 @@ private:
 } // namespace Shiboken
 
 #endif // AUTODECREF_H
-
