@@ -55,8 +55,8 @@ auto callback = [callable](const QString &text)
     PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QString](text));
     Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
     Py_DECREF(callable);
-
 };
+
 Py_INCREF(callable);
 %CPPSELF.%FUNCTION_NAME(callback);
 // @snippet qwebenginepage-convertto
@@ -95,8 +95,8 @@ auto callback = [callable](const QVariant &result)
    // PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[bool](found));
     Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
     Py_DECREF(callable);
-
 };
+
 Py_INCREF(callable);
 %CPPSELF.%FUNCTION_NAME(%1, %2, callback);
 // @snippet qwebenginepage-runjavascript
@@ -114,8 +114,8 @@ auto callback = [callable](const QByteArray &pdf)
     PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QByteArray](pdf));
     Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
     Py_DECREF(callable);
-
 };
+
 Py_INCREF(callable);
 %CPPSELF.%FUNCTION_NAME(callback, %2);
 // @snippet qwebenginepage-printtopdf
