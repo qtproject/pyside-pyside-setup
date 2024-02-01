@@ -10,11 +10,11 @@ auto callback = [callable](const QWebEngineCookieStore::FilterRequest& filterReq
     PyTuple_SET_ITEM(arglist, 0,
                     %CONVERTTOPYTHON[QWebEngineCookieStore::FilterRequest](filterRequest));
     Py_INCREF(callable);
-    PyObject* ret = PyObject_CallObject(callable, arglist);
+    Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
     Py_DECREF(callable);
-    return ret;
-
+    return ret.object() == Py_True;
 };
+
 %CPPSELF.%FUNCTION_NAME(callback);
 // @snippet qwebenginecookiestore-setcookiefilter
 
@@ -24,13 +24,13 @@ auto callback = [callable](std::unique_ptr<QWebEngineNotification> webEngineNoti
 {
     Shiboken::GilState state;
     Shiboken::AutoDecRef arglist(PyTuple_New(1));
+    auto *notification = webEngineNotification.release();
     PyTuple_SET_ITEM(arglist.object(), 0,
-                    Shiboken::Conversions::pointerToPython(
-                        SbkPySide6_QtWebEngineCoreTypes[SBK_QWebEngineNotification_IDX],
-                        webEngineNotification.release()));
+                     %CONVERTTOPYTHON[QWebEngineNotification*](notification));
     Py_INCREF(callable);
-    PyObject_CallObject(callable, arglist);
+    Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
     Py_DECREF(callable);
 };
+
 %CPPSELF.%FUNCTION_NAME(callback);
 // @snippet qwebengineprofile-setnotificationpresenter

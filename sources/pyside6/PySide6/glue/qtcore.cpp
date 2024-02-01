@@ -1935,7 +1935,7 @@ auto callback = [callable]() -> void
         return;
     }
     Shiboken::GilState state;
-    PyObject_CallObject(callable, nullptr);
+    Shiboken::AutoDecRef ret(PyObject_CallObject(callable, nullptr));
     Py_DECREF(callable);
 };
 Py_INCREF(callable);
@@ -2022,9 +2022,9 @@ auto callback = [callable, count, arg_qpermission](const QPermission &permission
     if (arg_qpermission) {
         Shiboken::AutoDecRef arglist(PyTuple_New(1));
         PyTuple_SET_ITEM(arglist.object(), 0, %CONVERTTOPYTHON[QPermission](permission));
-        PyObject_CallObject(callable, arglist);
+        Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
     } else {
-        PyObject_CallObject(callable, nullptr);
+        Shiboken::AutoDecRef ret(PyObject_CallObject(callable, nullptr));
     }
     Py_DECREF(callable);
 };
