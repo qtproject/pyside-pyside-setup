@@ -11,6 +11,7 @@
 #include "gilstate.h"
 #include "threadstatesaver.h"
 #include "helper.h"
+#include "pyobjectholder.h"
 #include "sbkarrayconverter.h"
 #include "sbkconverter.h"
 #include "sbkenum.h"

@@ -11,6 +11,8 @@
         <enum-type name="Error"/>
         <enum-type name="Stage"/>
         <enum-type name="Status"/>
+        <inject-code class="native" position="beginning" file="../glue/qtnetworkauth.cpp"
+                     snippet="qabstractoauth-lookuphost-functor"/>
         <modify-function signature="setReplyHandler(QAbstractOAuthReplyHandler*)">
             <modify-argument index="1">
                 <define-ownership class="target" owner="c++"/>

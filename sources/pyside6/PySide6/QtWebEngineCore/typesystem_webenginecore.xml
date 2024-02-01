@@ -17,6 +17,8 @@
   <function signature="qWebEngineVersion()"/>
 
   <object-type name="QWebEngineCookieStore">
+    <inject-code class="native" position="beginning" file="../glue/qtwebenginecore.cpp"
+                 snippet="qwebenginecookiestore-functor"/>
     <value-type name="FilterRequest" />
     <add-function signature="setCookieFilter(PyCallable* @filterCallback@)">
       <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
@@ -89,6 +91,8 @@
     <extra-includes>
         <include file-name="QtWebEngineCore/QWebEngineNotification" location="global"/>
     </extra-includes>
+    <inject-code class="native" position="beginning" file="../glue/qtwebenginecore.cpp"
+                 snippet="qwebengineprofile-functor"/>
     <enum-type name="HttpCacheType"/>
     <enum-type name="PersistentCookiesPolicy"/>
     <add-function signature="setNotificationPresenter(PyCallable* @notificationPresenter@)">

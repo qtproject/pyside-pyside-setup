@@ -1012,6 +1012,24 @@ auto *ptr = reinterpret_cast<uchar *>(Shiboken::Buffer::getPointer(%PYARG_1, &si
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qtranslator-load
 
+// @snippet qtimer-singleshot-functorclass
+struct QSingleShotTimerFunctor : public Shiboken::PyObjectHolder
+{
+public:
+    using Shiboken::PyObjectHolder::PyObjectHolder;
+
+    void operator()();
+};
+
+void QSingleShotTimerFunctor::operator()()
+{
+    Shiboken::GilState state;
+    Shiboken::AutoDecRef arglist(PyTuple_New(0));
+    Shiboken::AutoDecRef ret(PyObject_CallObject(object(), arglist));
+    release(); // single shot
+}
+// @snippet qtimer-singleshot-functorclass
+
 // @snippet qtimer-singleshot-direct-mapping
 Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
 %CPPSELF.%FUNCTION_NAME(%1, %2, %3);
@@ -1032,18 +1050,7 @@ if (msec == 0) {
         Py_INCREF(signal);
         %CPPSELF.%FUNCTION_NAME(msec, cppCallback);
     } else {
-        Shiboken::AutoDecRef emptyTuple(PyTuple_New(0));
-        auto *callable = %PYARG_2;
-        auto cppCallback = [callable]()
-        {
-            Shiboken::GilState state;
-            Shiboken::AutoDecRef arglist(PyTuple_New(0));
-            Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
-            Py_DECREF(callable);
-        };
-
-        Py_INCREF(callable);
-        %CPPSELF.%FUNCTION_NAME(msec, cppCallback);
+        %CPPSELF.%FUNCTION_NAME(msec, QSingleShotTimerFunctor(%PYARG_2));
     }
 } else {
     // %FUNCTION_NAME() - disable generation of c++ function call

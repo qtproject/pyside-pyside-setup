@@ -1,10 +1,19 @@
 // Copyright (C) 2022 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-// @snippet qabstractoauth-setmodifyparametersfunction
-auto callable = %PYARG_1;
-auto callback = [callable](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* dictPointer) -> void
+// @snippet qabstractoauth-lookuphost-functor
+struct QAbstractOAuthModifyFunctor : public Shiboken::PyObjectHolder
 {
+public:
+    using Shiboken::PyObjectHolder::PyObjectHolder;
+
+    void operator()(QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* dictPointer);
+};
+
+void QAbstractOAuthModifyFunctor::operator()(QAbstractOAuth::Stage stage,
+                                             QMultiMap<QString, QVariant>* dictPointer)
+{
+    auto *callable = object();
     if (!PyCallable_Check(callable)) {
         qWarning("Argument 1 of %FUNCTION_NAME must be a callable.");
         return;
@@ -26,12 +35,10 @@ auto callback = [callable](QAbstractOAuth::Stage stage, QMultiMap<QString, QVari
             dictPointer->replace(cppKey, cppValue);
         }
     }
+}
+// @snippet qabstractoauth-lookuphost-functor
 
-    Py_DECREF(callable);
-    return;
-
-};
-Py_INCREF(callable);
-%CPPSELF.%FUNCTION_NAME(callback);
+// @snippet qabstractoauth-setmodifyparametersfunction
+%CPPSELF.%FUNCTION_NAME(QAbstractOAuthModifyFunctor(%PYARG_1));
 // @snippet qabstractoauth-setmodifyparametersfunction
 

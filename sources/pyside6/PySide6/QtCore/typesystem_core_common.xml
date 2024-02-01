@@ -2563,6 +2563,8 @@
     <extra-includes>
       <include file-name="pysidestaticstrings.h" location="global"/>
     </extra-includes>
+    <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
+                 snippet="qtimer-singleshot-functorclass"/>
     <modify-function signature="singleShot(int,const QObject*,const char*)">
       <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qtimer-singleshot-direct-mapping"/>
     </modify-function>

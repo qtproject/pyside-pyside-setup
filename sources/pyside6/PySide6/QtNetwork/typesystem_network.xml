@@ -201,6 +201,8 @@
     </value-type>
 
     <value-type name="QHostInfo">
+        <inject-code class="native" position="beginning" file="../glue/qtnetwork.cpp"
+                     snippet="qhostinfo-lookuphost-functor"/>
         <enum-type name="HostInfoError"/>
         <add-function signature="lookupHost(const QString &amp;,PyCallable)">
             <inject-code class="target" position="beginning"

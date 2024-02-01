@@ -66,6 +66,7 @@ debugfreehook.cpp debugfreehook.h
 gilstate.cpp gilstate.h
 helper.cpp helper.h
 pep384impl.cpp pep384impl.h
+pyobjectholder.h
 sbkarrayconverter.cpp sbkarrayconverter.h sbkarrayconverter_p.h
 sbkcontainer.cpp sbkcontainer.h
 sbkconverter.cpp sbkconverter.h sbkconverter_p.h
@@ -158,6 +159,7 @@ install(FILES
         bindingmanager.h
         gilstate.h
         helper.h
+        pyobjectholder.h
         sbkarrayconverter.h
         sbkcontainer.h
         sbkconverter.h

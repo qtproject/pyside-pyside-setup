@@ -15,20 +15,28 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QHostAddress](ha));
 PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[quint16](port));
 // @snippet qudpsocket-readdatagram
 
-// @snippet qhostinfo-lookuphost-callable
-auto *callable = %PYARG_2;
-auto cppCallback = [callable](const QHostInfo &hostInfo)
+// @snippet qhostinfo-lookuphost-functor
+struct QHostInfoFunctor : public Shiboken::PyObjectHolder
+{
+public:
+    using Shiboken::PyObjectHolder::PyObjectHolder;
+
+    void operator()(const QHostInfo &hostInfo);
+};
+
+void QHostInfoFunctor::operator()(const QHostInfo &hostInfo)
 {
     Shiboken::GilState state;
     Shiboken::AutoDecRef arglist(PyTuple_New(1));
     auto *pyHostInfo = %CONVERTTOPYTHON[QHostInfo](hostInfo);
     PyTuple_SET_ITEM(arglist.object(), 0, pyHostInfo);
-    Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
-    Py_DECREF(callable);
-};
+    Shiboken::AutoDecRef ret(PyObject_CallObject(object(), arglist));
+    release(); // single shot
+}
+// @snippet qhostinfo-lookuphost-functor
 
-Py_INCREF(callable);
-%CPPSELF.%FUNCTION_NAME(%1, cppCallback);
+// @snippet qhostinfo-lookuphost-callable
+%CPPSELF.%FUNCTION_NAME(%1, QHostInfoFunctor(%PYARG_2));
 // @snippet qhostinfo-lookuphost-callable
 
 // @snippet qipv6address-len
