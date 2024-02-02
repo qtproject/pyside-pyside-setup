@@ -39,6 +39,17 @@ from deploy_lib import (MAJOR_VERSION, DesktopConfig, cleanup, config_option_exi
                         HELP_EXTRA_MODULES, HELP_EXTRA_IGNORE_DIRS)
 
 
+TOOL_DESCRIPTION = dedent(f"""
+                          This tool deploys PySide{MAJOR_VERSION} to desktop (Windows, Linux,
+                          macOS) platforms. The following types of executables are produced as per
+                          the platform:
+
+                          Windows = .exe
+                          macOS = .app
+                          Linux = .bin
+                          """)
+
+
 def main(main_file: Path = None, name: str = None, config_file: Path = None, init: bool = False,
          loglevel=logging.WARNING, dry_run: bool = False, keep_deployment_files: bool = False,
          force: bool = False, extra_ignore_dirs: str = None, extra_modules_grouped: str = None):
@@ -123,7 +134,8 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
                                                qt_plugins=config.qt_plugins,
                                                excluded_qml_plugins=config.excluded_qml_plugins,
                                                icon=config.icon,
-                                               dry_run=dry_run)
+                                               dry_run=dry_run,
+                                               permissions=config.permissions)
     except Exception:
         print(f"[DEPLOY] Exception occurred: {traceback.format_exc()}")
     finally:
@@ -137,11 +149,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description=(f"This tool deploys PySide{MAJOR_VERSION} to desktop (Windows, Linux, macOS)"
-                     "platforms"),
-        formatter_class=argparse.RawTextHelpFormatter,
-    )
+    parser = argparse.ArgumentParser(description=TOOL_DESCRIPTION)
 
     parser.add_argument("-c", "--config-file", type=lambda p: Path(p).absolute(),
                         default=(Path.cwd() / "pysidedeploy.spec"),

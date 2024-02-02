@@ -68,6 +68,10 @@ def finalize(config: Config):
     """
     generated_exec_path = config.generated_files_path / (config.source_file.stem + EXE_FORMAT)
     if generated_exec_path.exists() and config.exe_dir:
-        shutil.copy(generated_exec_path, config.exe_dir)
+        if sys.platform == "darwin":
+            shutil.copytree(generated_exec_path, config.exe_dir / (config.title + EXE_FORMAT),
+                            dirs_exist_ok=True)
+        else:
+            shutil.copy(generated_exec_path, config.exe_dir)
         print("[DEPLOY] Executed file created in "
               f"{str(config.exe_dir / (config.source_file.stem + EXE_FORMAT))}")

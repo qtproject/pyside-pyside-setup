@@ -46,9 +46,19 @@ class Nuitka:
 
     def create_executable(self, source_file: Path, extra_args: str, qml_files: List[Path],
                           qt_plugins: List[str], excluded_qml_plugins: List[str], icon: str,
-                          dry_run: bool):
+                          dry_run: bool, permissions: List[str]):
         qt_plugins = [plugin for plugin in qt_plugins if plugin not in self.qt_plugins_to_ignore]
         extra_args = extra_args.split()
+
+        if sys.platform == "darwin":
+            # create an app bundle
+            extra_args.extend(["--standalone", "--macos-create-app-bundle"])
+            permission_pattern = "--macos-app-protected-resource={permission}"
+            for permission in permissions:
+                extra_args.append(permission_pattern.format(permission=permission))
+        else:
+            extra_args.append("--onefile")
+
         qml_args = []
         if qml_files:
             # This will generate options for each file using:
@@ -78,7 +88,6 @@ class Nuitka:
         command = self.nuitka + [
             os.fspath(source_file),
             "--follow-imports",
-            "--onefile",
             "--enable-plugin=pyside6",
             f"--output-dir={output_dir}",
         ]

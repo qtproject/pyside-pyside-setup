@@ -11,7 +11,7 @@ if sys.platform == "win32":
     EXE_FORMAT = ".exe"
 elif sys.platform == "darwin":
     IMAGE_FORMAT = ".icns"
-    EXE_FORMAT = ".bin"
+    EXE_FORMAT = ".app"
 else:
     IMAGE_FORMAT = ".jpg"
     EXE_FORMAT = ".bin"
@@ -52,7 +52,7 @@ def get_all_pyside_modules():
 
 
 from .commands import run_command, run_qmlimportscanner
-from .dependency_util import find_pyside_modules, QtDependencyReader
+from .dependency_util import find_pyside_modules, find_permission_categories, QtDependencyReader
 from .nuitka_helper import Nuitka
 from .config import BaseConfig, Config, DesktopConfig
 from .python_helper import PythonExecutable

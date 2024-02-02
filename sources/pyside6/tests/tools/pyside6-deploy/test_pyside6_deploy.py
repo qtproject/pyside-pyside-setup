@@ -103,17 +103,18 @@ class TestPySide6DeployWidgets(DeployTestBase):
         # Plugins that needs to be passed to Nuitka
         plugins_nuitka = ("accessiblebridge,platforminputcontexts,platforms/darwin")
         self.expected_run_cmd = (
-            f"{sys.executable} -m nuitka {str(self.main_file)} --follow-imports --onefile"
+            f"{sys.executable} -m nuitka {str(self.main_file)} --follow-imports"
             f" --enable-plugin=pyside6 --output-dir={str(self.deployment_files)} --quiet"
             f" --noinclude-qt-translations"
             f" --include-qt-plugins={plugins_nuitka}"
         )
         if sys.platform.startswith("linux"):
-            self.expected_run_cmd += f" --linux-icon={str(self.linux_icon)}"
+            self.expected_run_cmd += f" --linux-icon={str(self.linux_icon)} --onefile"
         elif sys.platform == "darwin":
-            self.expected_run_cmd += f" --macos-app-icon={str(self.macos_icon)}"
+            self.expected_run_cmd += (f" --macos-app-icon={str(self.macos_icon)}"
+                                      " --macos-create-app-bundle --standalone")
         elif sys.platform == "win32":
-            self.expected_run_cmd += f" --windows-icon-from-ico={str(self.win_icon)}"
+            self.expected_run_cmd += f" --windows-icon-from-ico={str(self.win_icon)} --onefile"
 
         if is_pyenv_python():
             self.expected_run_cmd += " --static-libpython=no"
@@ -199,7 +200,7 @@ class TestPySide6DeployQml(DeployTestBase):
         plugins_nuitka = ("accessiblebridge,networkaccess,networkinformation,platforminputcontexts,"
                           "platforms/darwin,qml,qmltooling,scenegraph")
         self.expected_run_cmd = (
-            f"{sys.executable} -m nuitka {str(self.main_file)} --follow-imports --onefile"
+            f"{sys.executable} -m nuitka {str(self.main_file)} --follow-imports"
             f" --enable-plugin=pyside6 --output-dir={str(self.deployment_files)} --quiet"
             f" --noinclude-qt-translations"
             f" --include-qt-plugins={plugins_nuitka}"
@@ -222,11 +223,12 @@ class TestPySide6DeployQml(DeployTestBase):
             )
 
         if sys.platform.startswith("linux"):
-            self.expected_run_cmd += f" --linux-icon={str(self.linux_icon)}"
+            self.expected_run_cmd += f" --linux-icon={str(self.linux_icon)} --onefile"
         elif sys.platform == "darwin":
-            self.expected_run_cmd += f" --macos-app-icon={str(self.macos_icon)}"
+            self.expected_run_cmd += (f" --macos-app-icon={str(self.macos_icon)}"
+                                      " --macos-create-app-bundle --standalone")
         elif sys.platform == "win32":
-            self.expected_run_cmd += f" --windows-icon-from-ico={str(self.win_icon)}"
+            self.expected_run_cmd += f" --windows-icon-from-ico={str(self.win_icon)} --onefile"
 
         if is_pyenv_python():
             self.expected_run_cmd += " --static-libpython=no"
@@ -327,7 +329,7 @@ class TestPySide6DeployWebEngine(DeployTestBase):
             ]
         )
         expected_run_cmd = (
-            f"{sys.executable} -m nuitka {str(main_file)} --follow-imports --onefile"
+            f"{sys.executable} -m nuitka {str(main_file)} --follow-imports"
             f" --enable-plugin=pyside6 --output-dir={str(deployment_files)} --quiet"
             f" --noinclude-qt-translations --include-qt-plugins=all"
             f" {data_files_cmd}"
@@ -348,11 +350,12 @@ class TestPySide6DeployWebEngine(DeployTestBase):
             )
 
         if sys.platform.startswith("linux"):
-            expected_run_cmd += f" --linux-icon={str(self.linux_icon)}"
+            expected_run_cmd += f" --linux-icon={str(self.linux_icon)} --onefile"
         elif sys.platform == "darwin":
-            expected_run_cmd += f" --macos-app-icon={str(self.macos_icon)}"
+            expected_run_cmd += (f" --macos-app-icon={str(self.macos_icon)}"
+                                 " --macos-create-app-bundle --standalone")
         elif sys.platform == "win32":
-            expected_run_cmd += f" --windows-icon-from-ico={str(self.win_icon)}"
+            expected_run_cmd += f" --windows-icon-from-ico={str(self.win_icon)} --onefile"
 
         config_file = self.temp_example_webenginequick / "pysidedeploy.spec"
 

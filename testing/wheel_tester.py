@@ -229,7 +229,12 @@ def _run_deploy_test(example, tmpdirname):
         raise RuntimeError("Error deploying")
 
     suffix = "exe" if sys.platform == "win32" else "bin"
-    binary = f"{tmpdirname}/{main_file.stem}.{suffix}"
+
+    if sys.platform != "darwin":
+        binary = f"{tmpdirname}/{main_file.stem}.{suffix}"
+    else:
+        binary = f"{tmpdirname}/pyside_app_demo.app/Contents/MacOS/{main_file.stem}"
+
     if run_process([binary]) != 0:
         raise RuntimeError("Error running the deployed example")
     return True

@@ -1,5 +1,7 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+
+import sys
 import configparser
 import logging
 import warnings
@@ -8,11 +10,22 @@ from typing import List
 from pathlib import Path
 
 from project import ProjectData
-from . import DEFAULT_APP_ICON, find_pyside_modules, run_qmlimportscanner, QtDependencyReader
+from . import (DEFAULT_APP_ICON, find_pyside_modules, find_permission_categories,
+               QtDependencyReader, run_qmlimportscanner)
 
 # Some QML plugins like QtCore are excluded from this list as they don't contribute much to
 # executable size. Excluding them saves the extra processing of checking for them in files
 EXCLUDED_QML_PLUGINS = {"QtQuick", "QtQuick3D", "QtCharts", "QtWebEngine", "QtTest", "QtSensors"}
+
+PERMISSION_MAP = {"Bluetooth": "NSBluetoothAlwaysUsageDescription:BluetoothAccess",
+                  "Camera": "NSCameraUsageDescription:CameraAccess",
+                  "Microphone": "NSMicrophoneUsageDescription:MicrophoneAccess",
+                  "Contacts": "NSContactsUsageDescription:ContactsAccess",
+                  "Calendar": "NSCalendarsUsageDescription:CalendarAccess",
+                  # for iOS NSLocationWhenInUseUsageDescription and
+                  # NSLocationAlwaysAndWhenInUseUsageDescription are also required.
+                  "Location": "NSLocationUsageDescription:LocationAccess",
+                  }
 
 
 class BaseConfig:
@@ -22,7 +35,8 @@ class BaseConfig:
                  existing_config_file: bool = False) -> None:
         self.config_file = config_file
         self.existing_config_file = existing_config_file
-        self.parser = ConfigParser(comment_prefixes=comment_prefixes, allow_no_value=True)
+        self.parser = ConfigParser(comment_prefixes=comment_prefixes, strict=False,
+                                   allow_no_value=True)
         self.parser.read(self.config_file)
 
     def update_config(self):
@@ -379,6 +393,14 @@ class DesktopConfig(Config):
         else:
             self.qt_plugins = self.dependency_reader.find_plugin_dependencies(self.modules)
 
+        self._permissions = []
+        if sys.platform == "darwin":
+            nuitka_macos_permissions = self.get_value("nuitka", "macos.permissions")
+            if nuitka_macos_permissions:
+                self._permissions = nuitka_macos_permissions.split(",")
+            else:
+                self._find_and_set_permissions()
+
     @property
     def qt_plugins(self):
         return self._qt_plugins
@@ -387,6 +409,15 @@ class DesktopConfig(Config):
     def qt_plugins(self, qt_plugins):
         self._qt_plugins = qt_plugins
         self.set_value("qt", "plugins", ",".join(qt_plugins))
+
+    @property
+    def permissions(self):
+        return self._permissions
+
+    @permissions.setter
+    def permissions(self, permissions):
+        self._permissions = permissions
+        self.set_value("nuitka", "macos.permissions", ",".join(permissions))
 
     def _find_dependent_qt_modules(self):
         """
@@ -404,3 +435,24 @@ class DesktopConfig(Config):
             self.dependency_reader.find_dependencies(module=module_name, used_modules=all_modules)
 
         self.modules = list(all_modules)
+
+    def _find_and_set_permissions(self):
+        """
+        Finds and sets the usage description string required for each permission requested by the
+        macOS application.
+        """
+        permissions = []
+        perm_categories = find_permission_categories(project_dir=self.project_dir,
+                                                     extra_ignore_dirs=self.extra_ignore_dirs,
+                                                     project_data=self.project_data)
+
+        perm_categories_str = ",".join(perm_categories)
+        logging.info(f"[DEPLOY] Usage descriptions for the {perm_categories_str} will be added to "
+                     "the Info.plist file of the macOS application bundle")
+
+        # handling permissions
+        for perm_category in perm_categories:
+            if perm_category in PERMISSION_MAP:
+                permissions.append(PERMISSION_MAP[perm_category])
+
+        self.permissions = permissions

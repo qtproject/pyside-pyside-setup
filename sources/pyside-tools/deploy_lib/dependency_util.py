@@ -12,8 +12,118 @@ import shutil
 import sys
 from pathlib import Path
 from typing import List, Set
+from functools import lru_cache
 
 from . import IMPORT_WARNING_PYSIDE, run_command
+
+
+@lru_cache(maxsize=None)
+def get_py_files(project_dir: Path, extra_ignore_dirs: List[Path] = None, project_data=None):
+    """Finds and returns all the Python files in the project
+    """
+    py_candidates = []
+    ignore_dirs = ["__pycache__", "env", "venv", "deployment"]
+
+    if project_data:
+        py_candidates = project_data.python_files
+        ui_candidates = project_data.ui_files
+        qrc_candidates = project_data.qrc_files
+
+        def add_uic_qrc_candidates(candidates, candidate_type):
+            possible_py_candidates = [(file.parent / f"{candidate_type}_{file.stem}.py")
+                                      for file in candidates
+                                      if (file.parent / f"{candidate_type}_{file.stem}.py").exists()
+                                      ]
+
+            if len(possible_py_candidates) != len(candidates):
+                warnings.warn(f"[DEPLOY] The number of {candidate_type} files and their "
+                              "corresponding Python files don't match.",
+                              category=RuntimeWarning)
+
+            py_candidates.extend(possible_py_candidates)
+
+        if ui_candidates:
+            add_uic_qrc_candidates(ui_candidates, "ui")
+
+        if qrc_candidates:
+            add_uic_qrc_candidates(qrc_candidates, "qrc")
+
+        return py_candidates
+
+    # incase there is not .pyproject file, search all python files in project_dir, except
+    # ignore_dirs
+    if extra_ignore_dirs:
+        ignore_dirs.extend(extra_ignore_dirs)
+
+    # find relevant .py files
+    _walk = os.walk(project_dir)
+    for root, dirs, files in _walk:
+        dirs[:] = [d for d in dirs if d not in ignore_dirs and not d.startswith(".")]
+        for py_file in files:
+            if py_file.endswith(".py"):
+                py_candidates.append(Path(root) / py_file)
+
+    return py_candidates
+
+
+@lru_cache(maxsize=None)
+def get_ast(py_file: Path):
+    """Given a Python file returns the abstract syntax tree
+    """
+    contents = py_file.read_text(encoding="utf-8")
+    try:
+        tree = ast.parse(contents)
+    except SyntaxError:
+        print(f"[DEPLOY] Unable to parse {py_file}")
+    return tree
+
+
+def find_permission_categories(project_dir: Path, extra_ignore_dirs: List[Path] = None,
+                               project_data=None):
+    """Given the project directory, finds all the permission categories required by the
+    project. eg: Camera, Bluetooth, Contacts etc.
+
+    Note: This function is only relevant for mac0S deployment.
+    """
+    all_perm_categories = set()
+    mod_pattern = re.compile("Q(?P<mod_name>.*)Permission")
+
+    def pyside_permission_imports(py_file: Path):
+        perm_categories = []
+        try:
+            tree = get_ast(py_file)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ImportFrom):
+                    main_mod_name = node.module
+                    if main_mod_name == "PySide6.QtCore":
+                        # considers 'from PySide6.QtCore import QtMicrophonePermission'
+                        for imported_module in node.names:
+                            full_mod_name = imported_module.name
+                            match = mod_pattern.search(full_mod_name)
+                            if match:
+                                mod_name = match.group("mod_name")
+                                perm_categories.append(mod_name)
+                        continue
+
+                if isinstance(node, ast.Import):
+                    for imported_module in node.names:
+                        full_mod_name = imported_module.name
+                        if full_mod_name == "PySide6":
+                            logging.warning(IMPORT_WARNING_PYSIDE.format(str(py_file)))
+        except Exception as e:
+            raise RuntimeError(f"[DEPLOY] Finding permission categories failed on file "
+                               f"{str(py_file)} with error {e}")
+
+        return set(perm_categories)
+
+    py_candidates = get_py_files(project_dir, extra_ignore_dirs, project_data)
+    for py_candidate in py_candidates:
+        all_perm_categories = all_perm_categories.union(pyside_permission_imports(py_candidate))
+
+    if not all_perm_categories:
+        ValueError("[DEPLOY] No permission categories were found for macOS app bundle creation.")
+
+    return all_perm_categories
 
 
 def find_pyside_modules(project_dir: Path, extra_ignore_dirs: List[Path] = None,
@@ -25,11 +135,10 @@ def find_pyside_modules(project_dir: Path, extra_ignore_dirs: List[Path] = None,
     all_modules = set()
     mod_pattern = re.compile("PySide6.Qt(?P<mod_name>.*)")
 
-    def pyside_imports(py_file: Path):
+    def pyside_module_imports(py_file: Path):
         modules = []
-        contents = py_file.read_text(encoding="utf-8")
         try:
-            tree = ast.parse(contents)
+            tree = get_ast(py_file)
             for node in ast.walk(tree):
                 if isinstance(node, ast.ImportFrom):
                     main_mod_name = node.module
@@ -62,55 +171,9 @@ def find_pyside_modules(project_dir: Path, extra_ignore_dirs: List[Path] = None,
 
         return set(modules)
 
-    py_candidates = []
-    ignore_dirs = ["__pycache__", "env", "venv", "deployment"]
-
-    if project_data:
-        py_candidates = project_data.python_files
-        ui_candidates = project_data.ui_files
-        qrc_candidates = project_data.qrc_files
-        ui_py_candidates = None
-        qrc_ui_candidates = None
-
-        if ui_candidates:
-            ui_py_candidates = [(file.parent / f"ui_{file.stem}.py") for file in ui_candidates
-                                if (file.parent / f"ui_{file.stem}.py").exists()]
-
-            if len(ui_py_candidates) != len(ui_candidates):
-                warnings.warn("[DEPLOY] The number of uic files and their corresponding Python"
-                              " files don't match.", category=RuntimeWarning)
-
-            py_candidates.extend(ui_py_candidates)
-
-        if qrc_candidates:
-            qrc_ui_candidates = [(file.parent / f"rc_{file.stem}.py") for file in qrc_candidates
-                                 if (file.parent / f"rc_{file.stem}.py").exists()]
-
-            if len(qrc_ui_candidates) != len(qrc_candidates):
-                warnings.warn("[DEPLOY] The number of qrc files and their corresponding Python"
-                              " files don't match.", category=RuntimeWarning)
-
-            py_candidates.extend(qrc_ui_candidates)
-
-        for py_candidate in py_candidates:
-            all_modules = all_modules.union(pyside_imports(py_candidate))
-        return list(all_modules)
-
-    # incase there is not .pyproject file, search all python files in project_dir, except
-    # ignore_dirs
-    if extra_ignore_dirs:
-        ignore_dirs.extend(extra_ignore_dirs)
-
-    # find relevant .py files
-    _walk = os.walk(project_dir)
-    for root, dirs, files in _walk:
-        dirs[:] = [d for d in dirs if d not in ignore_dirs and not d.startswith(".")]
-        for py_file in files:
-            if py_file.endswith(".py"):
-                py_candidates.append(Path(root) / py_file)
-
+    py_candidates = get_py_files(project_dir, extra_ignore_dirs, project_data)
     for py_candidate in py_candidates:
-        all_modules = all_modules.union(pyside_imports(py_candidate))
+        all_modules = all_modules.union(pyside_module_imports(py_candidate))
 
     if not all_modules:
         ValueError("[DEPLOY] No PySide6 modules were found")
@@ -197,10 +260,15 @@ class QtDependencyReader:
         dependent_modules = set()
         for line in output.splitlines():
             line = line.decode("utf-8").lstrip()
-            if sys.platform == "darwin" and line.startswith(f"Qt{module} [arm64]"):
-                # macOS Qt frameworks bundles have both x86_64 and arm64 architectures
-                # We only need to consider one as the dependencies are redundant
-                break
+            if sys.platform == "darwin":
+                if line.endswith(f"Qt{module} [arm64]:"):
+                    # macOS Qt frameworks bundles have both x86_64 and arm64 architectures
+                    # We only need to consider one as the dependencies are redundant
+                    break
+                elif line.endswith(f"Qt{module} [X86_64]:"):
+                    # this line needs to be skipped because it matches with the pattern
+                    # and is related to the module itself, not the dependencies of the module
+                    continue
             elif sys.platform == "win32" and line.startswith("Summary"):
                 # the dependencies would be found before the `Summary` line
                 break

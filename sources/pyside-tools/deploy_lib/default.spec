@@ -60,6 +60,11 @@ plugins =
 
 [nuitka]
 
+# usage description for permissions requested by the app as found in the Info.plist file
+# of the app bundle
+# eg: NSCameraUsageDescription:CameraAccess
+macos.permissions =
+
 # (str) specify any extra nuitka arguments
 # eg: extra_args = --show-modules --follow-stdlib
 extra_args = --quiet --noinclude-qt-translations
