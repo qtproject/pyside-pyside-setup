@@ -1731,16 +1731,10 @@
       <modify-argument index="1" pyi-type="Optional[PySide6.QtCore.QObject]"/>
     </modify-function>
     <modify-function signature="connect(const QObject*,const char*,const char*,Qt::ConnectionType)const">
-        <modify-argument index="4">
-            <rename to="type"/>
-        </modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-1"/>
     </modify-function>
     <!-- static version -->
     <modify-function signature="connect(const QObject*,QMetaMethod,const QObject*,QMetaMethod,Qt::ConnectionType)">
-        <modify-argument index="5">
-            <rename to="type"/>
-        </modify-argument>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-2"/>
     </modify-function>
     <modify-function signature="connect(const QObject*,const char*,const QObject*,const char*,Qt::ConnectionType)">
@@ -1750,16 +1744,16 @@
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-3"/>
     </modify-function>
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect"/>
-    <add-function signature="connect(const QObject*,const char*,PyCallable*,Qt::ConnectionType@type@=Qt::AutoConnection)"
+    <add-function signature="connect(const QObject*@sender@,const char*@signal@,PyCallable*@functor@,Qt::ConnectionType@type@=Qt::AutoConnection)"
                   return-type="QMetaObject::Connection" static="yes">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-4"/>
     </add-function>
     <!-- static version -->
-    <add-function signature="connect(const char*,PyCallable*,Qt::ConnectionType@type@=Qt::AutoConnection)"
+    <add-function signature="connect(const char*@signal@,PyCallable*@functor@,Qt::ConnectionType@type@=Qt::AutoConnection)"
                   return-type="QMetaObject::Connection">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-5"/>
     </add-function>
-    <add-function signature="connect(const char*,const QObject*,const char*,Qt::ConnectionType@type@=Qt::AutoConnection)"
+    <add-function signature="connect(const char*@signal@,const QObject*@receiver@,const char*@method@,Qt::ConnectionType@type@=Qt::AutoConnection)"
                   return-type="QMetaObject::Connection">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-6"/>
     </add-function>
@@ -1767,12 +1761,17 @@
     <add-function signature="emit(const char*,...)" return-type="bool">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-emit"/>
     </add-function>
-    <add-function signature="disconnect(const char*,PyCallable*)" return-type="bool">
+    <add-function signature="disconnect(const char*@signal@,PyCallable*@functor@)" return-type="bool">
          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-disconnect-1"/>
     </add-function>
-    <add-function signature="disconnect(const QObject*,const char*,PyCallable*)" return-type="bool" static="yes">
+    <add-function signature="disconnect(const QObject*@sender@,const char*@signal@,PyCallable*@functor@)" return-type="bool" static="yes">
          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-disconnect-2"/>
     </add-function>
+    <modify-function signature="disconnect(QMetaObject::Connection)">
+        <modify-argument index="1">
+            <rename to="connection"/>
+        </modify-argument>
+    </modify-function>
 
 
     <add-function signature="findChild(PyTypeObject*@type@,const QString&amp;@name@={},Qt::FindChildOptions@options@=Qt::FindChildrenRecursively)"
