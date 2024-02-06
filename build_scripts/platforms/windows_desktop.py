@@ -120,7 +120,8 @@ def prepare_packages_win32(pyside_build, _vars):
             src = f"{{install_dir}}/bin/{script_dir}"
             target = f"{{st_build_dir}}/{{st_package_name}}/scripts/{script_dir}"
             # Exclude subdirectory tests
-            copydir(src, target, _filter=["*.py", "*.spec"], recursive=False, _vars=_vars)
+            copydir(src, target, _filter=["*.py", "*.spec", "*.jpg", "*.icns", "*.ico"],
+                    recursive=False, _vars=_vars)
 
         # <install>/bin/*.exe,*.dll -> {st_package_name}/
         filters = ["pyside*.exe", "pyside*.dll"]
