@@ -19,7 +19,6 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False, is_
     copy_qml = True
     copy_translations = True
     copy_qt_conf = True
-    should_copy_icu_libs = True
 
     log.info("Copying files...")
 
@@ -29,7 +28,6 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False, is_
         copy_qml = False
         copy_translations = False
         copy_qt_conf = False
-        should_copy_icu_libs = False
 
     # <qt>/lib/* -> <setup>/{st_package_name}/Qt/lib
     destination_dir = Path("{st_build_dir}/{st_package_name}".format(**_vars))
@@ -55,7 +53,7 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False, is_
             _filter=accepted_modules,
             recursive=False, _vars=_vars, force_copy_symlinks=True)
 
-    if should_copy_icu_libs and not cross_build and not is_android:
+    if not cross_build and not is_android:
         # Check if ICU libraries were copied over to the destination
         # Qt libdir.
         maybe_icu_libs = find_files_using_glob(destination_qt_lib_dir, "libicu*")
