@@ -195,14 +195,19 @@ instructions:
       variableName: LLVM_INSTALL_DIR
       variableValue: "{{.Env.LLVM_DYNAMIC_LIBS_100}}"
       disable_if:
-        condition: and
+        condition: or
         conditions:
-          - condition: property
-            property: target.arch
-            equals_value: X86_64-ARM64 # When target arch is universal binary, we can use the default libclang
-          - condition: property
-            property: host.os
-            equals_value: MacOS
+        - condition: and
+          conditions:
+            - condition: property
+              property: target.arch
+              equals_value: X86_64-ARM64 # When target arch is universal binary, we can use the default libclang
+            - condition: property
+              property: host.os
+              equals_value: MacOS
+        - condition: property
+          property: target.os
+          equals_value: Android
     - type: ExecuteCommand
       command: "sudo apt-get install python3-pip libclang-11-dev clang -y"
       maxTimeInSeconds: 14400
@@ -257,5 +262,62 @@ instructions:
       variableValue: "python3"
       enable_if: # Enable for others than rhl 8.*
         condition: property
-        property: target.osVersion
+        property: host.osVersion
         not_in_values: [RHEL_8_6, RHEL_8_8]
+    # ToDo: can be removed after 3.11 is available on qt5#3.8 on macOS
+    # start of ToDo
+    - type: ExecuteCommand
+      command: "tools/install-p311.sh"
+      maxTimeInSeconds: 14400
+      maxTimeBetweenOutput: 1200
+      enable_if:
+          condition: and
+          conditions:
+          - condition: property
+            property: host.os
+            equals_value: MacOS
+          - condition: property
+            property: target.os
+            equals_value: Android
+      userMessageOnFailure: >
+          Failed to install python 3.11
+    - type: PrependToEnvironmentVariable
+      variableName: PATH
+      variableValue: "/Users/qt/python311/bin:"
+      enable_if:
+          condition: and
+          conditions:
+          - condition: property
+            property: host.os
+            equals_value: MacOS
+          - condition: property
+            property: target.os
+            equals_value: Android
+    # end of ToDo
+    - type: ExecuteCommand
+      command: "virtualenv -p {{.Env.interpreter}} {{.AgentWorkingDir}}/env"
+      maxTimeInSeconds: 14400
+      maxTimeBetweenOutput: 1200
+      enable_if:
+          condition: or
+          conditions:
+          - condition: property
+            property: host.os
+            equals_value: Linux
+          - condition: property
+            property: host.os
+            equals_value: MacOS
+      userMessageOnFailure: >
+          Failed to create env
+    - type: EnvironmentVariable
+      variableName: ENV_PYTHON
+      variableValue: "{{.AgentWorkingDir}}/env/bin/python"
+    - type: AppendToEnvironmentVariable
+      variableName: PATH
+      variableValue: ":{{.AgentWorkingDir}}/env/bin/"
+      enable_if: # Enable for others than rhl 8.*
+        condition: property
+        property: target.os
+        equals_value: Android
+
+

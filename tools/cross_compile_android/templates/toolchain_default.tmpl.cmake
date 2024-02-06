@@ -16,7 +16,7 @@ set(CMAKE_ANDROID_ARCH_ABI {{ android_abi }})
 set(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION clang)
 set(CMAKE_ANDROID_STL_TYPE c++_shared)
 if(NOT DEFINED ANDROID_PLATFORM AND NOT DEFINED ANDROID_NATIVE_API_LEVEL)
-    set(ANDROID_PLATFORM "android-{{ api_level }}" CACHE STRING "")
+    set(ANDROID_PLATFORM "android-{{ min_android_api }}" CACHE STRING "")
 endif()
 set(ANDROID_SDK_ROOT {{ sdk_path }})
 {% if plat_name == "armv7a" -%}

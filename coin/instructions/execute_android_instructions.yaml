@@ -1,0 +1,73 @@
+type: Group
+instructions:
+  - type: ExecuteCommand
+    command: "{{.Env.interpreter}} -m pip install -r requirements.txt"
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 1200
+    enable_if:
+        condition: or
+        conditions:
+        - condition: property
+          property: host.os
+          equals_value: Linux
+        - condition: property
+          property: host.os
+          equals_value: MacOS
+    userMessageOnFailure: >
+         Failed to install deps
+  - type: ExecuteCommand
+    command: "{{.Env.interpreter}} -m pip install -r tools/cross_compile_android/requirements.txt"
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 1200
+    enable_if:
+        condition: or
+        conditions:
+        - condition: property
+          property: host.os
+          equals_value: Linux
+        - condition: property
+          property: host.os
+          equals_value: MacOS
+    userMessageOnFailure: >
+         Failed to install deps
+  - type: ExecuteCommand
+    command: "{{.Env.interpreter}} tools/cross_compile_android/main.py --qt-install-path /Users/qt/work/install --auto-accept-license --skip-update --verbose --ndk-path {{.Env.ANDROID_NDK_ROOT_DEFAULT}} --sdk-path {{.Env.ANDROID_SDK_ROOT}} --plat-name aarch64 --coin"
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 1200
+    enable_if:
+      condition: property
+      property: host.os
+      equals_value: MacOS
+    userMessageOnFailure: >
+         Failed to execute build instructions on macOS
+  - type: ExecuteCommand
+    command: "{{.Env.interpreter}} tools/cross_compile_android/main.py --qt-install-path /home/qt/work/install --auto-accept-license --skip-update --verbose --ndk-path {{.Env.ANDROID_NDK_ROOT_DEFAULT}} --sdk-path {{.Env.ANDROID_SDK_ROOT}} --plat-name x86_64 --coin"
+    maxTimeInSeconds: 14400
+    maxTimeBetweenOutput: 1200
+    enable_if:
+        condition: and
+        conditions:
+        - condition: property
+          property: host.os
+          equals_value: Linux
+        - condition: property
+          property: target.arch
+          equals_value: X86_64
+    userMessageOnFailure: >
+         Failed to execute build instructions on Linux
+  # ToDo: Do we need x86 build?
+  # - type: ExecuteCommand
+  #   command: "{{.Env.interpreter}} tools/cross_compile_android/main.py --qt-install-path /home/qt/work/install --auto-accept-license --skip-update --verbose --ndk-path {{.Env.ANDROID_NDK_ROOT_DEFAULT}} --sdk-path {{.Env.ANDROID_SDK_ROOT}} --plat-name x86 --clean-cache all --coin"
+  #   maxTimeInSeconds: 14400
+  #   maxTimeBetweenOutput: 1200
+  #   enable_if:
+  #       condition: and
+  #       conditions:
+  #       - condition: property
+  #         property: host.os
+  #         equals_value: Linux
+  #       - condition: property
+  #         property: target.arch
+  #         equals_value: X86
+  #   userMessageOnFailure: >
+  #        Failed to execute build instructions on Linux

@@ -1,128 +1,21 @@
 type: Group
 instructions:
-  - type: ExecuteCommand
-    command: "python3 -m pip install -U setuptools==69.1.1"
-    maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 1200
-    enable_if:
-        condition: property
-        property: host.os
-        equals_value: MacOS
-    userMessageOnFailure: >
-         Failed to install setuptools on macOS
-  - type: ExecuteCommand
-    command: "python3 -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=/Users/qt/work/install  --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
-    maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 1200
-    enable_if:
-        condition: and
-        conditions:
-        - condition: property
-          property: target.arch
-          equals_value: X86_64
-        - condition: property
-          property: host.os
-          equals_value: MacOS
-    userMessageOnFailure: >
-         Failed to execute build instructions on macOS
-  - type: ExecuteCommand
-    command: "python3 -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=/Users/qt/work/install  --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch=X86_64-ARM64 --phase=ALL"
-    maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 1200
-    enable_if:
-        condition: and
-        conditions:
-        - condition: property
-          property: target.arch
-          equals_value: X86_64-ARM64
-        - condition: property
-          property: host.os
-          equals_value: MacOS
-    userMessageOnFailure: >
-         Failed to execute build instructions on macOS
-  - type: EnvironmentVariable
-    variableName: PYSIDE_SIGNING_DIR
-    variableValue: "{{.AgentWorkingDir}}\\pyside\\{{.Env.TESTED_MODULE_COIN}}\\build\\qfpa-p3.10\\package_for_wheels"
-    enable_if:
-        condition: property
-        property: host.os
-        equals_value: Windows
-  - type: ExecuteCommand
-    command: "{{.Env.interpreter}} -m pip install -U pip setuptools==69.1.1 --user"
-    maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 1200
-    enable_if:
-        condition: property
-        property: host.os
-        equals_value: Linux
-    userMessageOnFailure: >
-         Failed to install setuptools on Linux
-  - type: ExecuteCommand
-    command: "{{.Env.interpreter}} -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch={{.Env.HOST_ARCH_COIN}} --targetArch={{.Env.TARGET_ARCH_COIN}}--phase=ALL"
-    maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 600
-    enable_if:
-        condition: property
-        property: host.os
-        equals_value: Linux
-    userMessageOnFailure: >
-         Failed to execute build instructions on Linux
-  - type: ExecuteCommand
-    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -m pip install -U setuptools==69.1.1"
-    maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 1200
-    enable_if:
-        condition: property
-        property: host.os
-        equals_value: Windows
-    userMessageOnFailure: >
-         Failed to install setuptools on Windows
-  - type: ExecuteCommand
-    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=BUILD"
-    maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 600
-    enable_if:
-        condition: property
-        property: host.os
-        equals_value: Windows
-    userMessageOnFailure: >
-         Failed to execute build instructions on Windows
-  - type: SignPackage
-    directory: "{{.Env.PYSIDE_SIGNING_DIR}}"
-    maxTimeInSeconds: 1200
-    maxTimeBetweenOutput: 1200
+  - type: Group
+    instructions:
+      - !include "{{pyside/pyside-setup}}/execute_android_instructions.yaml"
     enable_if:
       condition: property
-      property: host.os
-      equals_value: Windows
-  - type: ChangeDirectory
-    directory: "{{.AgentWorkingDir}}\\pyside\\pyside-setup"
+      property: target.os
+      equals_value: Android
+  - type: Group
+    instructions:
+      - !include "{{pyside/pyside-setup}}/execute_desktop_instructions.yaml"
     enable_if:
-        condition: property
-        property: host.os
-        equals_value: Windows
-  - type: ExecuteCommand
-    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYSIDE_VIRTUALENV}}\\Scripts\\python.exe create_wheels.py"
-    maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 300
-    enable_if:
-        condition: property
-        property: host.os
-        equals_value: Windows
-    userMessageOnFailure: >
-         Failed to create wheels for Windows
-  - type: ExecuteCommand
-    command: "{{.Env.PYSIDE_VIRTUALENV}}/bin/python create_wheels.py"
-    maxTimeInSeconds: 14400
-    maxTimeBetweenOutput: 300
-    enable_if:
-      condition: or
-      conditions:
+        condition: and
+        conditions:
         - condition: property
-          property: host.os
-          equals_value: MacOS
+          property: host.compiler
+          not_equals_value: Mingw
         - condition: property
-          property: host.os
-          equals_value: Linux
-    userMessageOnFailure: >
-         Failed to create wheels
+          property: target.os
+          not_equals_value: Android

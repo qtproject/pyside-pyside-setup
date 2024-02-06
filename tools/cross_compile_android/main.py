@@ -11,7 +11,7 @@ import shutil
 from dataclasses import dataclass
 
 from pathlib import Path
-from git import Repo, RemoteProgress
+from git import Repo, RemoteProgress, GitCommandError
 from tqdm import tqdm
 from jinja2 import Environment, FileSystemLoader
 
@@ -21,6 +21,10 @@ from android_utilities import (run_command, download_android_commandlinetools,
 # Note: Does not work with PyEnv. Your Host Python should contain openssl.
 # also update the version in ShibokenHelpers.cmake if Python version changes.
 PYTHON_VERSION = "3.11"
+
+# minimum Android API version support. This is set according to Qt's requiremnts and needs to
+# be updated if Qt's minimum API level is updated.
+MIN_ANDROID_API_LEVEL = "28"
 
 SKIP_UPDATE_HELP = ("skip the updation of SDK packages build-tools, platform-tools to"
                     " latest version")
@@ -43,6 +47,11 @@ Options:
                platforms are deleted.
 
 If --clean-cache is used and no explicit value is suppied, then `all` is used as default.
+''')
+
+COIN_RUN_HELP = ('''
+When run by Qt's continuos integration system COIN. This option is irrelevant to user building
+their own wheels.
 ''')
 
 
@@ -88,7 +97,7 @@ if __name__ == "__main__":
 
     parser.add_argument("-v", "--verbose", help="run in verbose mode", action="store_const",
                         dest="loglevel", const=logging.INFO)
-    parser.add_argument("--api-level", type=str, default="26",
+    parser.add_argument("--api-level", type=str, default="34",
                         help="Minimum Android API level to use")
     parser.add_argument("--ndk-path", type=str, help="Path to Android NDK (Preferred r25c)")
     # sdk path is needed to compile all the Qt Java Acitivity files into Qt6AndroidBindings.jar
@@ -111,6 +120,9 @@ if __name__ == "__main__":
                         choices=["all", "python", "ndk", "sdk", "toolchain"],
                         help=CLEAN_CACHE_HELP)
 
+    parser.add_argument("--coin", action="store_true",
+                        help=COIN_RUN_HELP)
+
     args = parser.parse_args()
 
     logging.basicConfig(level=args.loglevel)
@@ -128,6 +140,7 @@ if __name__ == "__main__":
     skip_update = args.skip_update
     auto_accept_license = args.auto_accept_license
     clean_cache = args.clean_cache
+    coin = args.coin
 
     # auto download Android NDK and SDK
     pyside6_deploy_cache = Path.home() / ".pyside6_android_deploy"
@@ -209,12 +222,19 @@ if __name__ == "__main__":
 
             if not cpython_dir.exists():
                 logging.info(f"cloning cpython {PYTHON_VERSION}")
-                Repo.clone_from(
-                    "https://github.com/python/cpython.git",
-                    cpython_dir,
-                    progress=CloneProgress(),
-                    branch=PYTHON_VERSION,
-                )
+                try:
+                    Repo.clone_from(
+                        "https://github.com/python/cpython.git",
+                        cpython_dir,
+                        progress=CloneProgress(),
+                        branch=PYTHON_VERSION,
+                    )
+                except GitCommandError as e:
+                    # Print detailed error information
+                    print(f"Error cloning repository: {e}")
+                    print(f"Command: {e.command}")
+                    print(f"Status: {e.status}")
+                    print(f"Stderr: {e.stderr}")
 
             if not python_ccompile_script.exists():
                 host_system_config_name = run_command("./config.guess", cwd=cpython_dir,
@@ -279,7 +299,8 @@ if __name__ == "__main__":
                 gcc_march=platform_data.gcc_march,
                 plat_bits=platform_data.plat_bits,
                 python_version=PYTHON_VERSION,
-                target_python_path=python_path
+                target_python_path=python_path,
+                min_android_api=MIN_ANDROID_API_LEVEL
             )
 
             logging.info(f"Writing Qt for Python toolchain file into {qfp_toolchain}")
@@ -296,15 +317,21 @@ if __name__ == "__main__":
         else:
             raise RuntimeError("Qt for Python cross compilation not supported on this platform")
 
+        if coin:
+            target_path = str(Path(qt_install_path) / "target")
+            qt_host_install_path = qt_install_path
+        else:
+            target_path = str(Path(qt_install_path) / f"android_{platform_data.qt_plat_name}")
+            qt_host_install_path = str(Path(qt_install_path) / host_qt_install_suffix)
+
         # run the cross compile script
         logging.info(f"Running Qt for Python cross-compile for platform {platform_data.plat_name}")
         qfp_ccompile_cmd = [sys.executable, "setup.py", "bdist_wheel", "--parallel=9",
                             "--standalone",
                             f"--cmake-toolchain-file={str(qfp_toolchain.resolve())}",
-                            f"--qt-host-path={qt_install_path}/{host_qt_install_suffix}",
+                            f"--qt-host-path={qt_host_install_path}",
                             f"--plat-name=android_{platform_data.plat_name}",
                             f"--python-target-path={python_path}",
-                            (f"--qt-target-path={qt_install_path}/"
-                             f"android_{platform_data.qt_plat_name}"),
+                            f"--qt-target-path={target_path}",
                             "--no-qt-tools"]
         run_command(qfp_ccompile_cmd, cwd=pyside_setup_dir, dry_run=dry_run, show_stdout=True)

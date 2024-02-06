@@ -1,3 +1,6 @@
 gitpython
+# Fixes: ImportError: cannot import name 'soft_unicode' from 'markupsafe' caused when jinja2 is
+# installed
+markupsafe==2.0.1
 Jinja2
 tqdm

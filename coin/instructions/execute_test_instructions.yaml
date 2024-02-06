@@ -27,6 +27,9 @@ instructions:
           - condition: property
             property: host.arch
             equals_value: ARM64
+          - condition: property
+            property: target.os
+            not_equals_value: Android
     userMessageOnFailure: >
          Failed to execute test instructions on arm mac
   - type: ExecuteCommand
@@ -42,6 +45,9 @@ instructions:
           - condition: property
             property: host.arch
             equals_value: X86_64
+          - condition: property
+            property: target.os
+            not_equals_value: Android
     userMessageOnFailure: >
          Failed to execute test instructions on macOS
   - type: ExecuteCommand
@@ -59,9 +65,14 @@ instructions:
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 600
     enable_if:
-        condition: property
-        property: host.os
-        equals_value: Linux
+        condition: and
+        conditions:
+          - condition: property
+            property: host.os
+            equals_value: Linux
+          - condition: property
+            property: target.os
+            not_equals_value: Android
     userMessageOnFailure: >
          Failed to execute test instructions on Linux
   - type: ExecuteCommand
@@ -79,8 +90,16 @@ instructions:
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 600
     enable_if:
-        condition: property
-        property: host.os
-        equals_value: Windows
+        condition: and
+        conditions:
+          - condition: property
+            property: host.os
+            equals_value: Windows
+          - condition: property
+            property: target.os
+            not_equals_value: Android
+          - condition: property
+            property: host.compiler
+            not_equals_value: Mingw
     userMessageOnFailure: >
          Failed to execute test instructions on 64 bit Windows
