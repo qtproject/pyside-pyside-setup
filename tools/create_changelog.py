@@ -50,7 +50,7 @@ def change_log(version: list) -> Path:
 
 
 def is_lts_version(version: list) -> bool:
-    return version[0] == 5 or version[1] == 2
+    return version[0] == 5 or version[1] in (2, 5)
 
 
 def version_tag(version: list) -> str:
@@ -126,7 +126,7 @@ def parse_options() -> Namespace:
         # For major/minor releases, skip all fixes with "Pick-to: " since they
         # appear in bug-fix releases.
         if args.type != "bug-fix":
-           args.exclude = True
+            args.exclude = True
         print(f'Assuming "{args.type}" version', file=sys.stderr)
 
     if args.type not in ("bug-fix", "minor", "major"):
