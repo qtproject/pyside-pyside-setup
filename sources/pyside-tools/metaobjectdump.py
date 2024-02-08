@@ -39,6 +39,7 @@ QOBJECT_DERIVED = ["QObject", "QQuickItem", "QQuickPaintedItem"] + ITEM_MODELS
 
 
 AstDecorator = Union[ast.Name, ast.Call]
+AstPySideTypeSpec = Union[ast.Name, ast.Constant]
 
 
 ClassList = List[dict]
@@ -96,12 +97,20 @@ def _parse_assignment(node: ast.Assign) -> Tuple[Optional[str], Optional[ast.AST
     return (None, None)
 
 
+def _parse_pyside_type(type_spec: AstPySideTypeSpec) -> str:
+    """Parse type specification of a Slot/Property decorator. Usually a type,
+       but can also be a string constant with a C++ type name."""
+    if isinstance(type_spec, ast.Constant):
+        return type_spec.value
+    return _python_to_cpp_type(_name(type_spec))
+
+
 def _parse_call_args(call: ast.Call):
     """Parse arguments of a Signal call/Slot decorator (type list)."""
     result: Arguments = []
     for n, arg in enumerate(call.args):
         par_name = f"a{n+1}"
-        par_type = _python_to_cpp_type(_name(arg))
+        par_type = _parse_pyside_type(arg)
         result.append({"name": par_name, "type": par_type})
     return result
 
@@ -311,8 +320,8 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
         if isinstance(node, ast.Call):
             name = _name(node.func)
             if name == "Property":  # Property getter
-                if node.args:  # 1st is type
-                    type = _python_to_cpp_type(_name(node.args[0]))
+                if node.args:  # 1st is type/type string
+                    type = _parse_pyside_type(node.args[0])
                     prop = self._create_property_entry(func_name, type,
                                                        func_name)
                     _parse_property_kwargs(node.keywords, prop)
