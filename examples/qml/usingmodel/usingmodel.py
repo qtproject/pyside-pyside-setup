@@ -2,24 +2,37 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import os
+from dataclasses import dataclass
 from pathlib import Path
 import sys
 from PySide6.QtCore import QAbstractListModel, Qt, QUrl, QByteArray
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView
-from PySide6.QtQml import qmlRegisterSingletonType
+from PySide6.QtQml import QmlElement, QmlSingleton
 
 
+QML_IMPORT_NAME = "PersonModel"
+QML_IMPORT_MAJOR_VERSION = 1
+
+
+@dataclass
+class Person:
+    name: str
+    myrole: str
+
+
+@QmlElement
+@QmlSingleton
 class PersonModel (QAbstractListModel):
     MyRole = Qt.UserRole + 1
 
-    def __init__(self, parent=None):
-        QAbstractListModel.__init__(self, parent)
-        self._data = []
+    def __init__(self, data, parent=None):
+        super().__init__(parent)
+        self._data = data
 
     def roleNames(self):
         roles = {
-            PersonModel.MyRole: QByteArray(b'modelData'),
+            PersonModel.MyRole: QByteArray(b'myrole'),
             Qt.DisplayRole: QByteArray(b'display')
         }
         return roles
@@ -29,26 +42,18 @@ class PersonModel (QAbstractListModel):
 
     def data(self, index, role):
         d = self._data[index.row()]
-
         if role == Qt.DisplayRole:
-            return d['name']
-        elif role == Qt.DecorationRole:
+            return d.name
+        if role == Qt.DecorationRole:
             return Qt.black
-        elif role == PersonModel.MyRole:
-            return d['myrole']
+        if role == PersonModel.MyRole:
+            return d.myrole
         return None
 
-    def populate(self, data=None):
-        for item in data:
-            self._data.append(item)
-
-
-def model_callback(engine):
-    my_model = PersonModel()
-    data = [{'name': 'Qt', 'myrole': 'role1'},
-            {'name': 'PySide', 'myrole': 'role2'}]
-    my_model.populate(data)
-    return my_model
+    @staticmethod
+    def create(engine):
+        data = [Person('Qt', 'myrole'), Person('PySide', 'role2')]
+        return PersonModel(data)
 
 
 if __name__ == '__main__':
@@ -56,7 +61,6 @@ if __name__ == '__main__':
     view = QQuickView()
     view.setResizeMode(QQuickView.SizeRootObjectToView)
 
-    qmlRegisterSingletonType(PersonModel, "PersonModel", 1, 0, "MyModel", model_callback)
     qml_file = os.fspath(Path(__file__).resolve().parent / 'view.qml')
     view.setSource(QUrl.fromLocalFile(qml_file))
     if view.status() == QQuickView.Error:

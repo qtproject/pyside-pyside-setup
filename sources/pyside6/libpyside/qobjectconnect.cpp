@@ -3,6 +3,7 @@
 
 #include "qobjectconnect.h"
 #include "pysideqobject.h"
+#include "pysideqslotobject_p.h"
 #include "pysidesignal.h"
 #include "pysideutils.h"
 #include "signalmanager.h"
@@ -14,6 +15,8 @@
 #include <QtCore/QDebug>
 #include <QtCore/QMetaMethod>
 #include <QtCore/QObject>
+
+#include <QtCore/private/qobject_p.h>
 
 #include <string_view>
 
@@ -243,6 +246,46 @@ QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *sign
     QMetaObject::Connection connection{};
     Py_BEGIN_ALLOW_THREADS // PYSIDE-2367, prevent threading deadlocks with connectNotify()
     connection = QMetaObject::connect(source, signalIndex, receiver.receiver, slotIndex, type);
+    Py_END_ALLOW_THREADS
+    if (!connection) {
+        if (receiver.usingGlobalReceiver)
+            signalManager.releaseGlobalReceiver(source, receiver.receiver);
+        return {};
+    }
+
+    Q_ASSERT(receiver.receiver);
+    if (receiver.usingGlobalReceiver)
+        signalManager.notifyGlobalReceiver(receiver.receiver);
+
+    const QMetaMethod signalMethod = receiver.receiver->metaObject()->method(signalIndex);
+    static_cast<FriendlyQObject *>(source)->connectNotify(signalMethod);
+    return connection;
+}
+
+QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *signal, QObject *context,
+                                               PyObject *callback, Qt::ConnectionType type)
+{
+    if (!signal || !PySide::Signal::checkQtSignal(signal))
+        return {};
+
+    const int signalIndex =
+        PySide::SignalManager::registerMetaMethodGetIndex(source, signal + 1,
+                                                          QMetaMethod::Signal);
+    if (signalIndex == -1)
+        return {};
+
+    // Extract receiver from callback
+    const GetReceiverResult receiver = getReceiver(source, signal + 1, callback);
+    if (receiver.receiver == nullptr && receiver.self == nullptr)
+        return {};
+
+    PySide::SignalManager &signalManager = PySide::SignalManager::instance();
+
+    PySideQSlotObject *slotObject = new PySideQSlotObject(callback);
+
+    QMetaObject::Connection connection{};
+    Py_BEGIN_ALLOW_THREADS // PYSIDE-2367, prevent threading deadlocks with connectNotify()
+    connection = QObjectPrivate::connect(source, signalIndex, context, slotObject, type);
     Py_END_ALLOW_THREADS
     if (!connection) {
         if (receiver.usingGlobalReceiver)

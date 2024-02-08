@@ -8,21 +8,13 @@ ListView {
     width: 100
     height: 100
     anchors.fill: parent
-    model: MyModel
+    model: PersonModel
     delegate: Component {
         Rectangle {
             height: 25
             width: 100
             Text {
-                function displayText() {
-                    var result = ""
-                    if (typeof display !== "undefined")
-                        result = display + ": "
-                    result += modelData
-                    return result
-                }
-
-                text: displayText()
+                text: display + ": " + myrole
             }
         }
     }
