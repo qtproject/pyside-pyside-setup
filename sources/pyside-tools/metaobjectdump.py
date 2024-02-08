@@ -264,7 +264,7 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
             elif name == "QmlNamedElement" and node.args:
                 name = node.args[0].value
                 class_decorators.append(_decorator("QML.Element", name))
-            else:
+            elif name.startswith('Q'):
                 print('Unknown decorator with parameters:', name,
                       file=sys.stderr)
             return
@@ -277,7 +277,7 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
                 class_decorators.append(_decorator("QML.Singleton", "true"))
             elif name == "QmlAnonymous":
                 class_decorators.append(_decorator("QML.Element", "anonymous"))
-            else:
+            elif name.startswith('Q'):
                 print('Unknown decorator:', name, file=sys.stderr)
             return
 
