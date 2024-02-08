@@ -8,10 +8,13 @@
     <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
     <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
 
-    <namespace-type name="QAudio">
+    <namespace-type name="QtAudio">
         <enum-type name="Error"/>
         <enum-type name="State"/>
         <enum-type name="VolumeScale"/>
+        <inject-code class="target" position="end"
+                     file="../glue/qtmultimedia.cpp"
+                     snippet="qtaudio-namespace-compatibility-alias"/>
     </namespace-type>
 
     <namespace-type name="QtVideo" since="6.7">
@@ -61,6 +64,9 @@
         </modify-argument>
       </modify-function>
       <modify-function signature="stop()" allow-thread="true"/>
+      <!-- FIXME PYSIDE 7: Remove this (QT6_DECL_NEW_OVERLOAD_TAIL) -->
+      <declare-function signature="state()const" return-type="QtAudio::State"/>
+      <declare-function signature="error()const" return-type="QtAudio::Error"/>
     </object-type>
 
     <object-type name="QAudioSink">
@@ -75,6 +81,9 @@
         </modify-argument>
       </modify-function>
       <modify-function signature="stop()" allow-thread="true"/>
+      <!-- FIXME PYSIDE 7: Remove this (QT6_DECL_NEW_OVERLOAD_TAIL) -->
+      <declare-function signature="state()const" return-type="QtAudio::State"/>
+      <declare-function signature="error()const" return-type="QtAudio::Error"/>
     </object-type>
 
     <object-type name="QCamera">

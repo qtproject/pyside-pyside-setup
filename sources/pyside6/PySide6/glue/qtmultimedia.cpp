@@ -20,3 +20,8 @@ const unsigned char *data = %CPPSELF.%FUNCTION_NAME<unsigned char>();
 const auto size = %CPPSELF.byteCount();
 %PYARG_0 = Shiboken::Buffer::newObject(data, size);
 // @snippet qaudiobuffer-const-data
+
+// @snippet qtaudio-namespace-compatibility-alias
+Py_INCREF(pyType);
+PyModule_AddObject(module, "QAudio", reinterpret_cast<PyObject *>(pyType));
+// @snippet qtaudio-namespace-compatibility-alias

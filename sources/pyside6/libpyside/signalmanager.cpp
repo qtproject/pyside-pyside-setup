@@ -30,6 +30,8 @@
 #include <limits>
 #include <memory>
 
+using namespace Qt::StringLiterals;
+
 #if QSLOT_CODE != 1 || QSIGNAL_CODE != 2
 #error QSLOT_CODE and/or QSIGNAL_CODE changed! change the hardcoded stuff to the correct value!
 #endif
@@ -715,7 +717,13 @@ static PyObject *parseArguments(const QList<QByteArray>& paramTypes, void **args
 
     for (qsizetype i = 0; i < argsSize; ++i) {
         void *data = args[i+1];
-        const char *dataType = paramTypes[i].constData();
+        auto param = paramTypes.at(i);
+#if QT_VERSION < QT_VERSION_CHECK(7, 0, 0)
+        // Qt 6.7 renamed namespace "QAudio"->"QtAudio" except for signals
+        if (param.startsWith("QAudio::"_ba))
+            param.insert(1, 't');
+#endif
+        const char *dataType = param.constData();
         Shiboken::Conversions::SpecificConverter converter(dataType);
         if (converter) {
             PyTuple_SET_ITEM(preparedArgs, i, converter.toPython(data));
