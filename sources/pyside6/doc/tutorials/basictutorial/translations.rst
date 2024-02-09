@@ -59,8 +59,14 @@ the files are converted to a binary form (``.qm`` files):
 
 .. code-block:: bash
 
-    mkdir translations
-    pyside6-lrelease example_de.ts -qm translations/example_de.qm
+    pyside6-lrelease example_de.ts -qm example_de.qm
+
+``pyside6-project`` will build the ``.qm`` file automatically when
+``.ts`` file(s) are given in the ``.pyproject`` file:
+
+.. code-block:: bash
+
+    pyside6-project build .
 
 To avoid having to ship the ``.qm`` files, it is recommend
 to put them into a Qt resource file along with icons and other
@@ -71,8 +77,8 @@ under ``:/translations``:
 .. code-block:: xml
 
     <!DOCTYPE RCC><RCC version="1.0">
-    <qresource>
-        <file>translations/example_de.qm</file>
+    <qresource prefix="translations">
+        <file>example_de.qm</file>
     </qresource>
     </RCC>
 

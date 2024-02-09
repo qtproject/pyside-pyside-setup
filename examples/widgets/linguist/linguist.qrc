@@ -1,5 +1,5 @@
 <!DOCTYPE RCC><RCC version="1.0">
-<qresource>
-    <file>translations/example_de.qm</file>
+<qresource prefix="translations">
+    <file>example_de.qm</file>
 </qresource>
 </RCC>
