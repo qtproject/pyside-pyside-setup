@@ -52,6 +52,16 @@ NEW_PROJECT_TYPES = {"new-quick": ProjectType.QUICK,
                      "new-widget": ProjectType.WIDGET}
 
 
+def _sort_sources(files: List[Path]) -> List[Path]:
+    """Sort the sources for building, ensure .qrc is last since it might depend
+       on generated files."""
+
+    def key_func(p: Path):
+        return p.suffix if p.suffix != ".qrc" else ".zzzz"
+
+    return sorted(files, key=key_func)
+
+
 class Project:
     """
     Class to wrap the various operations on Project
@@ -149,7 +159,7 @@ class Project:
             Project(project_file=sub_project_file).build()
         if self._qml_module_dir:
             self._qml_module_dir.mkdir(exist_ok=True, parents=True)
-        for file in self.project.files:
+        for file in _sort_sources(self.project.files):
             self._build_file(file)
         self._regenerate_qmldir()
 
