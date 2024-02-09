@@ -1,10 +1,7 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-opt_quiet = False
-opt_dry_run = False
-opt_force = False
-opt_qml_module = False
+from dataclasses import dataclass
 
 QTPATHS_CMD = "qtpaths6"
 MOD_CMD = "pyside6-metaobjectdump"
@@ -19,6 +16,27 @@ QT_MODULES = "QT_MODULES"
 
 METATYPES_JSON_SUFFIX = "metatypes.json"
 TRANSLATION_SUFFIX = ".ts"
+
+
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+@dataclass(frozen=True)
+class ClOptions(metaclass=Singleton):
+    """
+    Dataclass to store the cl options that needs to be passed as arguments.
+    """
+    dry_run: bool
+    quiet: bool
+    force: bool
+    qml_module: bool
+
 
 from .utils import (run_command, requires_rebuild, remove_path, package_dir, qtpaths,
                     qt_metatype_json_dir, resolve_project_file)
