@@ -30,7 +30,7 @@ from project import (QmlProjectData, check_qml_decorators, is_python_file,
                      TRANSLATION_SUFFIX,
                      requires_rebuild, run_command, remove_path,
                      ProjectData, resolve_project_file, new_project,
-                     ProjectType)
+                     ProjectType, ClOptions)
 
 MODE_HELP = """build    Builds the project
 run        Builds the project and runs the first file")
@@ -70,6 +70,7 @@ class Project:
     """
     def __init__(self, project_file: Path):
         self.project = ProjectData(project_file=project_file)
+        self.cl_options = ClOptions()
 
         # Files for QML modules using the QmlElement decorators
         self._qml_module_sources: List[Path] = []
@@ -82,7 +83,7 @@ class Project:
         """Run a pre-check on Python source files and find the ones with QML
         decorators (representing a QML module)."""
         # Quick check for any QML files (to avoid running moc for no reason).
-        if not opt_qml_module and not self.project.qml_files:
+        if not self.cl_options.qml_module and not self.project.qml_files:
             return
         for file in self.project.files:
             if is_python_file(file):
@@ -104,7 +105,7 @@ class Project:
         print(self._qml_module_dir)
         self._qml_dir_file = self._qml_module_dir / QMLDIR_FILE
 
-        if not opt_quiet:
+        if not self.cl_options.quiet:
             count = len(self._qml_module_sources)
             print(f"{self.project.project_file.name}, {count} QML file(s),"
                   f" {self._qml_project_data}")
@@ -144,9 +145,9 @@ class Project:
 
     def _regenerate_qmldir(self):
         """Regenerate the 'qmldir' file."""
-        if opt_dry_run or not self._qml_dir_file:
+        if self.cl_options.dry_run or not self._qml_dir_file:
             return
-        if opt_force or requires_rebuild(self._qml_module_sources, self._qml_dir_file):
+        if self.cl_options.force or requires_rebuild(self._qml_module_sources, self._qml_dir_file):
             with self._qml_dir_file.open("w") as qf:
                 qf.write(f"module {self._qml_project_data.import_name}\n")
                 for f in self._qml_module_dir.glob("*.qmltypes"):
@@ -156,7 +157,7 @@ class Project:
         """Build an artifact."""
         artifacts, command = self._get_artifacts(source)
         for artifact in artifacts:
-            if opt_force or requires_rebuild([source], artifact):
+            if self.cl_options.force or requires_rebuild([source], artifact):
                 run_command(command, cwd=self.project.project_file.parent)
             self._build_file(artifact)  # Recurse for QML (json->qmltypes)
 
@@ -239,10 +240,9 @@ if __name__ == "__main__":
     parser.add_argument("file", help="Project file", nargs="?", type=str)
 
     options = parser.parse_args()
-    opt_quiet = options.quiet
-    opt_dry_run = options.dry_run
-    opt_force = options.force
-    opt_qml_module = options.qml_module
+    cl_options = ClOptions(dry_run=options.dry_run, quiet=options.quiet, force=options.force,
+                           qml_module=options.qml_module)
+
     mode = options.mode
 
     new_project_type = NEW_PROJECT_TYPES.get(mode)

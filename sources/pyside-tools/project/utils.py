@@ -6,14 +6,15 @@ import subprocess
 from pathlib import Path
 from typing import List, Dict, Optional
 
-from . import opt_dry_run, opt_quiet, QTPATHS_CMD, PROJECT_FILE_SUFFIX
+from . import QTPATHS_CMD, PROJECT_FILE_SUFFIX, ClOptions
 
 
 def run_command(command: List[str], cwd: str = None, ignore_fail: bool = False):
     """Run a command observing quiet/dry run"""
-    if not opt_quiet or opt_dry_run:
+    cloptions = ClOptions()
+    if not cloptions.quiet or cloptions.dry_run:
         print(" ".join(command))
-    if not opt_dry_run:
+    if not cloptions.dry_run:
         ex = subprocess.call(command, cwd=cwd)
         if ex != 0 and not ignore_fail:
             sys.exit(ex)
@@ -42,11 +43,12 @@ def _remove_path_recursion(path: Path):
 
 def remove_path(path: Path):
     """Remove path (file or directory) observing opt_dry_run."""
+    cloptions = ClOptions()
     if not path.exists():
         return
-    if not opt_quiet:
+    if not cloptions.quiet:
         print(f"Removing {path.name}...")
-    if opt_dry_run:
+    if cloptions.dry_run:
         return
     _remove_path_recursion(path)
 
