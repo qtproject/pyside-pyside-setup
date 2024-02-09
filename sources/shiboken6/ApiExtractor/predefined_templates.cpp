@@ -56,20 +56,20 @@ for (auto oit = std::begin(%out), oend = std::end(%out); oit != oend; ++oit) {
 )"_s;
 }
 
-static const char stlMapKeyAccessor[] = "->first";
-static const char stlMapValueAccessor[] = "->second";
-static const char qtMapKeyAccessor[] = ".key()";
-static const char qtMapValueAccessor[] = ".value()";
+static constexpr auto stlMapKeyAccessor = "->first"_L1;
+static constexpr auto stlMapValueAccessor = "->second"_L1;
+static constexpr auto qtMapKeyAccessor = ".key()"_L1;
+static constexpr auto qtMapValueAccessor = ".value()"_L1;
 
 static QString cppMapToPyDict(bool isQMap)
 {
     return uR"(PyObject *%out = PyDict_New();
 for (auto it = std::cbegin(%in), end = std::cend(%in); it != end; ++it) {
     const auto &key = it)"_s
-        + QLatin1StringView(isQMap ? qtMapKeyAccessor : stlMapKeyAccessor)
+        + (isQMap ? qtMapKeyAccessor : stlMapKeyAccessor)
         + uR"(;
     const auto &value = it)"_s
-        + QLatin1StringView(isQMap ? qtMapValueAccessor : stlMapValueAccessor)
+        + (isQMap ? qtMapValueAccessor : stlMapValueAccessor)
         + uR"(;
     PyObject *pyKey = %CONVERTTOPYTHON[%INTYPE_0](key);
     PyObject *pyValue = %CONVERTTOPYTHON[%INTYPE_1](value);
@@ -103,7 +103,7 @@ static QString cppMultiMapToPyDict(bool isQMultiMap)
     return uR"(PyObject *%out = PyDict_New();
     for (auto it = std::cbegin(%in), end = std::cend(%in); it != end; ) {
         const auto &key = it)"_s
-        + QLatin1StringView(isQMultiMap ? qtMapKeyAccessor : stlMapKeyAccessor)
+        + (isQMultiMap ? qtMapKeyAccessor : stlMapKeyAccessor)
         + uR"(;
         PyObject *pyKey = %CONVERTTOPYTHON[%INTYPE_0](key);
         auto upper = %in.)"_s
@@ -129,7 +129,7 @@ static QString cppMultiHashToPyDict(bool isQMultiHash)
     return uR"(PyObject *%out = PyDict_New();
     for (auto it = std::cbegin(%in), end = std::cend(%in); it != end; ) {
         const auto &key = it)"_s
-           +  QLatin1StringView(isQMultiHash ? qtMapKeyAccessor : stlMapKeyAccessor)
+           + (isQMultiHash ? qtMapKeyAccessor : stlMapKeyAccessor)
            + uR"(;
         PyObject *pyKey = %CONVERTTOPYTHON[%INTYPE_0](key);
         auto range = %in.equal_range(key);

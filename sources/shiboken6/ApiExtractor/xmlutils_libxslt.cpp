@@ -154,16 +154,16 @@ std::shared_ptr<XQuery> libXml_createXQuery(const QString &focus, QString *error
 
 // XSLT transformation
 
-static const char xsltPrefix[] = R"(<?xml version="1.0" encoding="UTF-8" ?>
+static constexpr auto xsltPrefix = R"(<?xml version="1.0" encoding="UTF-8" ?>
     <xsl:transform version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-)";
+)"_L1;
 
 QString libXslt_transform(const QString &xml, QString xsl, QString *errorMessage)
 {
     ensureInitialized();
     // Read XML data
     if (!xsl.startsWith(u"<?xml")) {
-        xsl.prepend(QLatin1StringView(xsltPrefix));
+        xsl.prepend(xsltPrefix);
         xsl.append(u"</xsl:transform>"_s);
     }
     const QByteArray xmlData = xml.toUtf8();

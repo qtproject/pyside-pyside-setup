@@ -54,13 +54,12 @@ void DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
     doxyFileSuffix += metaClass->name();
     doxyFileSuffix += u".xml"_s;
 
-    const char* prefixes[] = { "class", "struct", "namespace" };
+    static constexpr QLatin1StringView prefixes[] = { "class"_L1, "struct"_L1, "namespace"_L1 };
     bool isProperty = false;
 
     QString doxyFilePath;
-    for (const char *prefix : prefixes) {
-        doxyFilePath = documentationDataDirectory() + u'/'
-                       + QLatin1StringView(prefix) + doxyFileSuffix;
+    for (const auto &prefix : prefixes) {
+        doxyFilePath = documentationDataDirectory() + u'/' + prefix + doxyFileSuffix;
         if (QFile::exists(doxyFilePath))
             break;
         doxyFilePath.clear();

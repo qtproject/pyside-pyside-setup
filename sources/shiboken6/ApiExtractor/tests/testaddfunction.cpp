@@ -19,25 +19,28 @@
 
 using namespace Qt::StringLiterals;
 
+static constexpr auto voidT = "void"_L1;
+
 void TestAddFunction::testParsingFuncNameAndConstness()
 {
     // generic test...
-    const char sig1[] = "func(type1, const type2, const type3* const)";
+    static constexpr auto sig1 = "func(type1, const type2, const type3* const)"_L1;
     QString errorMessage;
-    auto f1 = AddedFunction::createAddedFunction(QLatin1StringView(sig1), u"void"_s,
-                                                 &errorMessage);
+    auto f1 = AddedFunction::createAddedFunction(sig1, voidT, &errorMessage);
     QVERIFY2(f1, qPrintable(errorMessage));
     QCOMPARE(f1->name(), u"func");
     QCOMPARE(f1->arguments().size(), 3);
     TypeInfo retval = f1->returnType();
-    QCOMPARE(retval.qualifiedName(), QStringList{u"void"_s});
+    QCOMPARE(retval.qualifiedName(), QStringList{voidT});
     QCOMPARE(retval.indirections(), 0);
     QCOMPARE(retval.isConstant(), false);
     QCOMPARE(retval.referenceType(), NoReference);
 
     // test with a ugly template as argument and other ugly stuff
-    const char sig2[] = "    _fu__nc_       (  type1, const type2, const Abc<int& , C<char*> *   >  * *@my_name@, const type3* const    )   const ";
-    auto f2 = AddedFunction::createAddedFunction(QLatin1StringView(sig2),
+    static constexpr auto sig2 =
+        "    _fu__nc_       (  type1, const type2, const Abc<int& , C<char*> *   >"
+        "  * *@my_name@, const type3* const    )   const "_L1;
+    auto f2 = AddedFunction::createAddedFunction(sig2,
                                                  u"const Abc<int& , C<char*> *   >  * *"_s,
                                                  &errorMessage);
     QVERIFY2(f2, qPrintable(errorMessage));
@@ -66,17 +69,14 @@ void TestAddFunction::testParsingFuncNameAndConstness()
     QVERIFY(args.at(3).name.isEmpty());
 
     // function with no args.
-    const char sig3[] = "func()";
-    auto f3 = AddedFunction::createAddedFunction(QLatin1StringView(sig3), u"void"_s,
-                                                 &errorMessage);
+    auto f3 = AddedFunction::createAddedFunction("func()"_L1, voidT, &errorMessage);
     QVERIFY2(f3, qPrintable(errorMessage));
     QCOMPARE(f3->name(), u"func");
     QCOMPARE(f3->arguments().size(), 0);
 
     // const call operator
-    const char sig4[] = "operator()(int)const";
-    auto f4 = AddedFunction::createAddedFunction(QLatin1StringView(sig4), u"int"_s,
-                                                 &errorMessage);
+    auto f4 = AddedFunction::createAddedFunction("operator()(int)const"_L1,
+                                                 "int"_L1, &errorMessage);
     QVERIFY2(f4, qPrintable(errorMessage));
     QCOMPARE(f4->name(), u"operator()");
     QCOMPARE(f4->arguments().size(), 1);
@@ -205,10 +205,9 @@ void TestAddFunction::testAddFunctionCodeSnippets()
 
 void TestAddFunction::testAddFunctionWithoutParenteses()
 {
-    const char sig1[] = "func";
+    static constexpr auto sig1 = "func"_L1;
     QString errorMessage;
-    auto f1 = AddedFunction::createAddedFunction(QLatin1StringView(sig1), u"void"_s,
-                                                 &errorMessage);
+    auto f1 = AddedFunction::createAddedFunction(sig1, voidT, &errorMessage);
     QVERIFY2(f1, qPrintable(errorMessage));
     QCOMPARE(f1->name(), u"func");
     QCOMPARE(f1->arguments().size(), 0);
@@ -229,7 +228,7 @@ void TestAddFunction::testAddFunctionWithoutParenteses()
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
-    const auto addedFunc = classA->findFunction("func");
+    const auto addedFunc = classA->findFunction(sig1);
     QVERIFY(addedFunc);
     QVERIFY(addedFunc->hasInjectedCode());
     const auto snips = addedFunc->injectedCodeSnips(TypeSystem::CodeSnipPositionAny,
@@ -239,10 +238,9 @@ void TestAddFunction::testAddFunctionWithoutParenteses()
 
 void TestAddFunction::testAddFunctionWithDefaultArgs()
 {
-    const char sig1[] = "func";
+    static constexpr auto sig1 = "func"_L1;
     QString errorMessage;
-    auto f1 = AddedFunction::createAddedFunction(QLatin1StringView(sig1), u"void"_s,
-                                                 &errorMessage);
+    auto f1 = AddedFunction::createAddedFunction(sig1, voidT, &errorMessage);
     QVERIFY2(f1, qPrintable(errorMessage));
     QCOMPARE(f1->name(), u"func");
     QCOMPARE(f1->arguments().size(), 0);
@@ -266,7 +264,7 @@ void TestAddFunction::testAddFunctionWithDefaultArgs()
     AbstractMetaClassList classes = builder->classes();
     const auto classA = AbstractMetaClass::findClass(classes, "A");
     QVERIFY(classA);
-    const auto addedFunc = classA->findFunction("func");
+    const auto addedFunc = classA->findFunction(sig1);
     QVERIFY(addedFunc);
     const AbstractMetaArgument &arg = addedFunc->arguments().at(1);
     QCOMPARE(arg.defaultValueExpression(), u"2");
@@ -306,9 +304,8 @@ void TestAddFunction::testAddFunctionAtModuleLevel()
 
 void TestAddFunction::testAddFunctionWithVarargs()
 {
-    const char sig1[] = "func(int,char,...)";
     QString errorMessage;
-    auto f1 = AddedFunction::createAddedFunction(QLatin1StringView(sig1), u"void"_s,
+    auto f1 = AddedFunction::createAddedFunction("func(int,char,...)"_L1, voidT,
                                                  &errorMessage);
     QVERIFY2(f1, qPrintable(errorMessage));
     QCOMPARE(f1->name(), u"func");

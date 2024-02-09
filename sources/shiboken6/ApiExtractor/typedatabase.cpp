@@ -333,8 +333,7 @@ static const IntTypeNormalizationEntries &intTypeNormalizationEntries()
     static bool firstTime = true;
     if (firstTime) {
         firstTime = false;
-        for (auto t : {"char", "short", "int", "long"}) {
-            const QString intType = QLatin1StringView(t);
+        for (const auto &intType : {"char"_L1, "short"_L1, "int"_L1, "long"_L1}) {
             if (!TypeDatabase::instance()->findType(u'u' + intType)) {
                 IntTypeNormalizationEntry entry;
                 entry.replacement = "unsigned "_L1 + intType;
