@@ -18,6 +18,7 @@ QML_IMPORT_MINOR_VERSION = "QML_IMPORT_MINOR_VERSION"
 QT_MODULES = "QT_MODULES"
 
 METATYPES_JSON_SUFFIX = "metatypes.json"
+TRANSLATION_SUFFIX = ".ts"
 
 from .utils import (run_command, requires_rebuild, remove_path, package_dir, qtpaths,
                     qt_metatype_json_dir, resolve_project_file)

@@ -27,6 +27,7 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 
 from project import (QmlProjectData, check_qml_decorators, is_python_file,
                      QMLDIR_FILE, MOD_CMD, METATYPES_JSON_SUFFIX,
+                     TRANSLATION_SUFFIX,
                      requires_rebuild, run_command, remove_path,
                      ProjectData, resolve_project_file, new_project,
                      ProjectType)
@@ -43,6 +44,7 @@ new-quick  Creates a new QtQuick project
 
 UIC_CMD = "pyside6-uic"
 RCC_CMD = "pyside6-rcc"
+LRELEASE_CMD = "pyside6-lrelease"
 QMLTYPEREGISTRAR_CMD = "pyside6-qmltyperegistrar"
 QMLLINT_CMD = "pyside6-qmllint"
 DEPLOY_CMD = "pyside6-deploy"
@@ -132,6 +134,11 @@ class Project:
                    os.fspath(file)]
             cmd.extend(self._qml_project_data.registrar_options())
             return ([qmltypes_file, cpp_file], cmd)
+
+        if file.name.endswith(TRANSLATION_SUFFIX):
+            qm_file = f"{file.parent}/{file.stem}.qm"
+            cmd = [LRELEASE_CMD, os.fspath(file), "-qm", qm_file]
+            return ([Path(qm_file)], cmd)
 
         return ([], None)
 
