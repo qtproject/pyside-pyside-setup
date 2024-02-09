@@ -37,6 +37,7 @@ run        Builds the project and runs the first file")
 clean      Cleans the build artifacts")
 qmllint    Runs the qmllint tool
 deploy     Deploys the application
+lupdate    Updates translation (.ts) files
 new-ui     Creates a new QtWidgets project with a Qt Designer-based main window
 new-widget Creates a new QtWidgets project with a main window
 new-quick  Creates a new QtQuick project
@@ -45,6 +46,7 @@ new-quick  Creates a new QtQuick project
 UIC_CMD = "pyside6-uic"
 RCC_CMD = "pyside6-rcc"
 LRELEASE_CMD = "pyside6-lrelease"
+LUPDATE_CMD = "pyside6-lupdate"
 QMLTYPEREGISTRAR_CMD = "pyside6-qmltyperegistrar"
 QMLLINT_CMD = "pyside6-qmllint"
 DEPLOY_CMD = "pyside6-deploy"
@@ -224,6 +226,24 @@ class Project:
         cmd.extend([str(self.project.main_file), "-f"])
         run_command(cmd, cwd=self.project.project_file.parent)
 
+    def lupdate(self):
+        for sub_project_file in self.project.sub_projects_files:
+            Project(project_file=sub_project_file).lupdate()
+
+        if not self.project.ts_files:
+            print(f"{self.project.project_file.name}: No .ts file found.",
+                  file=sys.stderr)
+            return
+
+        source_files = self.project.python_files + self.project.ui_files
+        cmd_prefix = [LUPDATE_CMD] + [p.name for p in source_files]
+        cmd_prefix.append("-ts")
+        for ts_file in self.project.ts_files:
+            if requires_rebuild(source_files, ts_file):
+                cmd = cmd_prefix
+                cmd.append(ts_file.name)
+                run_command(cmd, cwd=self.project.project_file.parent)
+
 
 if __name__ == "__main__":
     parser = ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
@@ -232,7 +252,7 @@ if __name__ == "__main__":
     parser.add_argument("--force", "-f", action="store_true", help="Force rebuild")
     parser.add_argument("--qml-module", "-Q", action="store_true",
                         help="Perform check for QML module")
-    mode_choices = ["build", "run", "clean", "qmllint", "deploy"]
+    mode_choices = ["build", "run", "clean", "qmllint", "deploy", "lupdate"]
     mode_choices.extend(NEW_PROJECT_TYPES.keys())
     parser.add_argument("mode", choices=mode_choices, default="build",
                         type=str, help=MODE_HELP)
@@ -267,6 +287,8 @@ if __name__ == "__main__":
         project.qmllint()
     elif mode == "deploy":
         project.deploy()
+    elif mode == "lupdate":
+        project.lupdate()
     else:
         print(f"Invalid mode {mode}", file=sys.stderr)
         sys.exit(1)

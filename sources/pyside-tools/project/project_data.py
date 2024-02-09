@@ -7,9 +7,9 @@ import subprocess
 import sys
 from typing import List, Tuple
 from pathlib import Path
-from . import (METATYPES_JSON_SUFFIX, PROJECT_FILE_SUFFIX, qt_metatype_json_dir,
-               MOD_CMD, QML_IMPORT_MAJOR_VERSION, QML_IMPORT_MINOR_VERSION, QML_IMPORT_NAME,
-               QT_MODULES)
+from . import (METATYPES_JSON_SUFFIX, PROJECT_FILE_SUFFIX, TRANSLATION_SUFFIX,
+               qt_metatype_json_dir, MOD_CMD, QML_IMPORT_MAJOR_VERSION,
+               QML_IMPORT_MINOR_VERSION, QML_IMPORT_NAME, QT_MODULES)
 
 
 def is_python_file(file: Path) -> bool:
@@ -34,6 +34,8 @@ class ProjectData:
         self._ui_files: List[Path] = []
         # qrc files
         self._qrc_files: List[Path] = []
+        # ts files
+        self._ts_files: List[Path] = []
 
         with project_file.open("r") as pyf:
             pyproject = json.load(pyf)
@@ -53,6 +55,8 @@ class ProjectData:
                         self._ui_files.append(file)
                     elif file.suffix == ".qrc":
                         self._qrc_files.append(file)
+                    elif file.suffix == TRANSLATION_SUFFIX:
+                        self._ts_files.append(file)
 
         if not self.main_file:
             self._find_main_file()
@@ -88,6 +92,10 @@ class ProjectData:
     @property
     def qml_files(self):
         return self._qml_files
+
+    @property
+    def ts_files(self):
+        return self._ts_files
 
     @property
     def sub_projects_files(self):
