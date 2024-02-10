@@ -709,49 +709,49 @@ const char *styleOptionType(const QStyleOption *o)
     case QStyleOption::SO_Default:
         break;
     case QStyleOption::SO_FocusRect:
-        return "StyleOptionFocusRect";
+        return "QStyleOptionFocusRect";
     case QStyleOption::SO_Button:
-        return "StyleOptionButton";
+        return "QStyleOptionButton";
     case QStyleOption::SO_Tab:
-        return "StyleOptionTab";
+        return "QStyleOptionTab";
     case QStyleOption::SO_MenuItem:
-        return "StyleOptionMenuItem";
+        return "QStyleOptionMenuItem";
     case QStyleOption::SO_Frame:
-        return "StyleOptionFrame";
+        return "QStyleOptionFrame";
     case QStyleOption::SO_ProgressBar:
-        return "StyleOptionProgressBar";
+        return "QStyleOptionProgressBar";
     case QStyleOption::SO_ToolBox:
-        return "StyleOptionToolBox";
+        return "QStyleOptionToolBox";
     case QStyleOption::SO_Header:
-        return "StyleOptionHeader";
+        return "QStyleOptionHeader";
     case QStyleOption::SO_DockWidget:
-        return "StyleOptionDockWidget";
+        return "QStyleOptionDockWidget";
     case QStyleOption::SO_ViewItem:
-        return "StyleOptionViewItem";
+        return "QStyleOptionViewItem";
     case QStyleOption::SO_TabWidgetFrame:
-        return "StyleOptionTabWidgetFrame";
+        return "QStyleOptionTabWidgetFrame";
     case QStyleOption::SO_TabBarBase:
-        return "StyleOptionTabBarBase";
+        return "QStyleOptionTabBarBase";
     case QStyleOption::SO_RubberBand:
-        return "StyleOptionRubberBand";
+        return "QStyleOptionRubberBand";
     case QStyleOption::SO_ToolBar:
-        return "StyleOptionToolBar";
+        return "QStyleOptionToolBar";
     case QStyleOption::SO_GraphicsItem:
-        return "StyleOptionGraphicsItem";
+        return "QStyleOptionGraphicsItem";
     case QStyleOption::SO_Slider:
-        return "StyleOptionSlider";
+        return "QStyleOptionSlider";
     case QStyleOption::SO_SpinBox:
-        return "StyleOptionSpinBox";
+        return "QStyleOptionSpinBox";
     case QStyleOption::SO_ToolButton:
-        return "StyleOptionToolButton";
+        return "QStyleOptionToolButton";
     case QStyleOption::SO_ComboBox:
-        return "StyleOptionComboBox";
+        return "QStyleOptionComboBox";
     case QStyleOption::SO_TitleBar:
-        return "StyleOptionTitleBar";
+        return "QStyleOptionTitleBar";
     case QStyleOption::SO_GroupBox:
-        return "StyleOptionGroupBox";
+        return "QStyleOptionGroupBox";
     case QStyleOption::SO_SizeGrip:
-        return "StyleOptionSizeGrip";
+        return "QStyleOptionSizeGrip";
     default:
         break;
     }
