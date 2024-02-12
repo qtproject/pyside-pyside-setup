@@ -306,17 +306,26 @@ static QString findClangBuiltInIncludesDir()
     return queryLlvmConfigDir(u"--includedir"_s);
 }
 
+QString compilerFromCMake()
+{
+#ifdef CMAKE_CXX_COMPILER
+    return QString::fromLocal8Bit(CMAKE_CXX_COMPILER);
+#else
+    return {};
+#endif
+}
+
+// Return a compiler suitable for determining the internal include paths
 static QString compilerFromCMake(const QString &defaultCompiler)
 {
     if (!compilerPath().isEmpty())
         return compilerPath();
-// Added !defined(Q_OS_DARWIN) due to PYSIDE-1032
-    QString result = defaultCompiler;
-#ifdef CMAKE_CXX_COMPILER
-    if (platform() != Platform::macOS)
-        result = QString::fromLocal8Bit(CMAKE_CXX_COMPILER);
-#endif
-    return result;
+    // Exclude macOS since cmakeCompiler returns the full path instead of the
+    // /usr/bin/clang shim, which results in the default SDK sysroot path
+    // missing (PYSIDE-1032)
+    const QString &cmakeCompiler = compilerFromCMake();
+    return platform() != Platform::macOS && !cmakeCompiler.isEmpty()
+           ? cmakeCompiler : defaultCompiler;
 }
 
 static void appendClangBuiltinIncludes(HeaderPaths *p)

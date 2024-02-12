@@ -44,6 +44,8 @@ QByteArrayList detectVulkan();
 Compiler compiler();
 bool setCompiler(const QString &name);
 
+QString compilerFromCMake();
+
 const QString &compilerPath();
 void setCompilerPath(const QString &name);
 
