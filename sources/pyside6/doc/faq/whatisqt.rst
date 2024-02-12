@@ -65,8 +65,8 @@ is not to affect the user experience compared to other included applications.
 
 .. note:: You can adapt these applications to use your self-made style, but
    you need to be aware that the goal of Widgets is to respect the system
-   style, be careful when changing colors. Check this `simple tutorial
-   <widgetstyling>`_ on how to do so.
+   style, be careful when changing colors. Check this
+   :ref:`simple tutorial <widgetstyling>` on how to do so.
 
 QML
 ---
