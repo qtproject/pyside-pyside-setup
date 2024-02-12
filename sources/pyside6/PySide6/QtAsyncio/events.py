@@ -83,10 +83,10 @@ class QAsyncioEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
     def new_event_loop(self) -> asyncio.AbstractEventLoop:
         return QAsyncioEventLoop(self._application, quit_qapp=self._quit_qapp)
 
-    def get_child_watcher(self) -> asyncio.AbstractChildWatcher:
+    def get_child_watcher(self) -> "asyncio.AbstractChildWatcher":
         raise DeprecationWarning("Child watchers are deprecated since Python 3.12")
 
-    def set_child_watcher(self, watcher: asyncio.AbstractChildWatcher) -> None:
+    def set_child_watcher(self, watcher: "asyncio.AbstractChildWatcher") -> None:
         raise DeprecationWarning("Child watchers are deprecated since Python 3.12")
 
 
