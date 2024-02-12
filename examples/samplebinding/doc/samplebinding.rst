@@ -181,7 +181,7 @@ On Windows:
 
     mkdir build
     cd build
-    cmake -H.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release
+    cmake -H.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl.exe
     ninja
     ninja install
     cd ..
