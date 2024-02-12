@@ -671,6 +671,7 @@ return %CONVERTTOPYTHON[QByteArray](ba);
 // @snippet qbytearray-mgetitem
 
 // @snippet qbytearray-msetitem
+// PYSIDE-2404: Usage of the `get()` function not necessary, the type exists.
 if (PyIndex_Check(_key)) {
     Py_ssize_t _i = PyNumber_AsSsize_t(_key, PyExc_IndexError);
     if (_i == -1 && PyErr_Occurred())
@@ -1806,6 +1807,7 @@ if (dataChar == nullptr) {
 // @snippet qdatastream-read-bytes
 
 // @snippet qloggingcategory_to_cpp
+// PYSIDE-2404: Usage of the `get()` function not necessary, the type exists.
     QLoggingCategory *category{nullptr};
     Shiboken::Conversions::pythonToCppPointer(SbkPySide6_QtCoreTypes[SBK_QLoggingCategory_IDX],
     pyArgs[0], &(category));

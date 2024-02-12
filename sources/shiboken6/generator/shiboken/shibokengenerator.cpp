@@ -335,7 +335,7 @@ QString ShibokenGenerator::fullPythonClassName(const AbstractMetaClassCPtr &meta
             fullClassName.prepend(enclosing->name() + u'.');
         enclosing = enclosing->enclosingClass();
     }
-    fullClassName.prepend(packageName() + u'.');
+    fullClassName.prepend(metaClass->typeEntry()->targetLangPackage() + u'.');
     return fullClassName;
 }
 
@@ -666,12 +666,6 @@ QString ShibokenGenerator::cpythonTypeName(const TypeEntryCPtr &type)
     return cpythonBaseName(type) + u"_TypeF()"_s;
 }
 
-QString ShibokenGenerator::cpythonTypeNameExt(const TypeEntryCPtr &type)
-{
-    return cppApiVariableName(type->targetLangPackage()) + u'['
-            + getTypeIndexVariableName(type) + u']';
-}
-
 QString ShibokenGenerator::converterObject(const AbstractMetaType &type)
 {
     if (type.isCString())
@@ -727,10 +721,30 @@ QString ShibokenGenerator::converterObject(const TypeEntryCPtr &type)
            + u'[' + getTypeIndexVariableName(type) + u']';
 }
 
-QString ShibokenGenerator::cpythonTypeNameExt(const AbstractMetaType &type)
+QString ShibokenGenerator::cpythonTypeNameExtSet(const TypeEntryCPtr &type)
+{
+    return cppApiVariableName(type->targetLangPackage()) + u'['
+            + getTypeIndexVariableName(type) + u']';
+}
+
+QString ShibokenGenerator::cpythonTypeNameExtSet(const AbstractMetaType &type)
 {
     return cppApiVariableName(type.typeEntry()->targetLangPackage()) + u'['
            + getTypeIndexVariableName(type) + u']';
+}
+
+QString ShibokenGenerator::cpythonTypeNameExt(const TypeEntryCPtr &type)
+{
+    return "Shiboken::Module::get("_L1 + cppApiVariableName(type->targetLangPackage())
+            + ", "_L1 + getTypeIndexVariableName(type) + ", \""_L1
+            + type->qualifiedTargetLangName() + "\")"_L1;
+}
+
+QString ShibokenGenerator::cpythonTypeNameExt(const AbstractMetaType &type)
+{
+    return "Shiboken::Module::get("_L1 + cppApiVariableName(type.typeEntry()->targetLangPackage())
+            + ", "_L1 + getTypeIndexVariableName(type) + ", \""_L1
+            + type.typeEntry()->qualifiedTargetLangName() + "\")"_L1;
 }
 
 QString ShibokenGenerator::fixedCppTypeName(const TargetToNativeConversion &toNative)

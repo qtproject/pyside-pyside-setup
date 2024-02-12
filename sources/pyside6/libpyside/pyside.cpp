@@ -32,6 +32,7 @@
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
 #include <sbkfeature_base.h>
+#include <sbkmodule.h>
 
 #include <QtCore/QByteArray>
 #include <QtCore/QCoreApplication>
@@ -683,6 +684,13 @@ static const char *typeName(const QObject *cppSelf)
     if (!Shiboken::Conversions::getConverter(typeName)) {
         for (auto metaObject = cppSelf->metaObject(); metaObject; metaObject = metaObject->superClass()) {
             const char *name = metaObject->className();
+            if (Shiboken::Conversions::getConverter(name)) {
+                typeName = name;
+                break;
+            }
+            // PYSIDE-2404: Did not find the name. Load the lazy classes
+            //              which have this name and try again.
+            Shiboken::Module::loadLazyClassesWithName(name);
             if (Shiboken::Conversions::getConverter(name)) {
                 typeName = name;
                 break;

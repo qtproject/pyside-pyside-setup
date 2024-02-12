@@ -14,6 +14,15 @@ struct SbkConverter;
 
 namespace Shiboken::Module {
 
+/// PYSIDE-2404: Replacing the arguments in cpythonTypeNameExt by a function.
+LIBSHIBOKEN_API PyTypeObject *get(PyTypeObject **types, int index, const char *typeName);
+
+/// PYSIDE-2404: Make sure that mentioned classes really exist.
+LIBSHIBOKEN_API void loadLazyClassesWithName(const char *name);
+
+/// PYSIDE-2404: incarnate all classes for star imports.
+LIBSHIBOKEN_API void resolveLazyClasses(PyObject *module);
+
 /**
  *  Imports and returns the module named \p moduleName, or a NULL pointer in case of failure.
  *  If the module is already imported, it increments its reference count before returning it.
@@ -29,6 +38,30 @@ LIBSHIBOKEN_API PyObject *import(const char *moduleName);
  */
 LIBSHIBOKEN_API PyObject *create(const char *moduleName, void *moduleData);
 
+using TypeCreationFunction = PyTypeObject *(*)(PyObject *module);
+
+/// Adds a type creation function to the module.
+LIBSHIBOKEN_API void AddTypeCreationFunction(PyObject *module,
+                                             const char *name,
+                                             TypeCreationFunction func);
+
+LIBSHIBOKEN_API void AddTypeCreationFunction(PyObject *module,
+                                             const char *name,
+                                             TypeCreationFunction func,
+                                             const char *containerName);
+
+LIBSHIBOKEN_API void AddTypeCreationFunction(PyObject *module,
+                                             const char *name,
+                                             TypeCreationFunction func,
+                                             const char *outerContainerName,
+                                             const char *innerContainerName);
+
+LIBSHIBOKEN_API void AddTypeCreationFunction(PyObject *module,
+                                             const char *name,
+                                             TypeCreationFunction func,
+                                             const char *containerName3,
+                                             const char *containerName2,
+                                             const char *containerName);
 /**
  *  Registers the list of types created by \p module.
  *  \param module   Module where the types were created.

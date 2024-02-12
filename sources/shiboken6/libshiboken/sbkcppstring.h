@@ -8,10 +8,12 @@
 #include "shibokenmacros.h"
 
 #include <string>
+#include <string_view>
 
 namespace Shiboken::String
 {
     LIBSHIBOKEN_API PyObject *fromCppString(const std::string &value);
+    LIBSHIBOKEN_API PyObject *fromCppStringView(std::string_view value);
     LIBSHIBOKEN_API PyObject *fromCppWString(const std::wstring &value);
     LIBSHIBOKEN_API void toCppString(PyObject *str, std::string *value);
     LIBSHIBOKEN_API void toCppWString(PyObject *str, std::wstring *value);

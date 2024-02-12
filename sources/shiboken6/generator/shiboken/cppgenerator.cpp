@@ -4182,6 +4182,8 @@ void CppGenerator::writeExtendedConverterInitialization(TextStream &s,
         QString targetTypeName = fixedCppTypeName(externalType);
         QString toCpp = pythonToCppFunctionName(sourceTypeName, targetTypeName);
         QString isConv = convertibleToCppFunctionName(sourceTypeName, targetTypeName);
+        if (!externalType->isPrimitive())
+            s << cpythonTypeNameExt(externalType) << ";\n";
         writeAddPythonToCppConversion(s, converterVar, toCpp, isConv);
     }
 }
@@ -5236,7 +5238,7 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
 
     bool etypeUsed = false;
 
-    QString enumVarTypeObj = cpythonTypeNameExt(enumTypeEntry);
+    QString enumVarTypeObj = cpythonTypeNameExtSet(enumTypeEntry);
     if (!cppEnum.isAnonymous()) {
         int packageLevel = packageName().count(u'.') + 1;
         s << "EType = Shiboken::Enum::"
@@ -5250,7 +5252,7 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
 
     if (cppEnum.typeEntry()->flags()) {
         s << "// PYSIDE-1735: Mapping the flags class to the same enum class.\n"
-            << cpythonTypeNameExt(cppEnum.typeEntry()->flags()) << " =\n"
+            << cpythonTypeNameExtSet(cppEnum.typeEntry()->flags()) << " =\n"
             << indent << "EType;\n" << outdent;
     }
     writeEnumConverterInitialization(s, cppEnum);
@@ -5365,8 +5367,8 @@ void CppGenerator::writeClassRegister(TextStream &s,
 
     // PYSIDE-510: Create a signatures string for the introspection feature.
     writeSignatureStrings(s, signatures, initFunctionName, "functions");
-    s << "void init_" << initFunctionName;
-    s << "(PyObject *" << enclosingObjectVariable << ")\n{\n" << indent;
+    s << "PyTypeObject *init_" << initFunctionName
+        << "(PyObject *" << enclosingObjectVariable << ")\n{\n" << indent;
 
     // Multiple inheritance
     QString pyTypeBasesVariable = chopType(pyTypeName) + u"_Type_bases"_s;
@@ -5459,9 +5461,9 @@ void CppGenerator::writeClassRegister(TextStream &s,
                     << chopType(pyTypeName) << "_PropertyStrings);\n";
 
     if (!classContext.forSmartPointer())
-        s << cpythonTypeNameExt(classTypeEntry) << " = pyType;\n\n";
+        s << cpythonTypeNameExtSet(classTypeEntry) << " = pyType;\n\n";
     else
-        s << cpythonTypeNameExt(classContext.preciseType()) << " = pyType;\n\n";
+        s << cpythonTypeNameExtSet(classContext.preciseType()) << " = pyType;\n\n";
 
     // Register conversions for the type.
     writeConverterRegister(s, metaClass, classContext);
@@ -5534,15 +5536,31 @@ void CppGenerator::writeClassRegister(TextStream &s,
             << "));\n";
     }
 
-    s << outdent << "}\n";
+    s << "\nreturn pyType;\n" << outdent << "}\n";
 }
 
 void CppGenerator::writeStaticFieldInitialization(TextStream &s,
                                                   const AbstractMetaClassCPtr &metaClass)
 {
-    s << "\nvoid " << getSimpleClassStaticFieldsInitFunctionName(metaClass)
-        << "()\n{\n" << indent << "Shiboken::AutoDecRef dict(PepType_GetDict(reinterpret_cast<PyTypeObject *>("
-        << cpythonTypeName(metaClass) << ")));\n";
+    // cpythonTypeName == "Sbk_QRhiShaderResourceBinding_Data_TypeF"
+    QString name = cpythonTypeName(metaClass);
+    const auto parts = QStringView{name}.split(u'_', Qt::SkipEmptyParts);
+    if (parts.size() < 4) {
+        s << "\nPyTypeObject *" << getSimpleClassStaticFieldsInitFunctionName(metaClass)
+            << "(PyObject *module)\n{\n" << indent
+            << "auto *obType = PyObject_GetAttrString(module, \"" << metaClass->name() << "\");\n"
+            << "auto *type = reinterpret_cast<PyTypeObject *>(obType);\n"
+            << "Shiboken::AutoDecRef dict(PepType_GetDict(type));\n";
+    } else {
+        s << "\nPyTypeObject *" << getSimpleClassStaticFieldsInitFunctionName(metaClass)
+            << "(PyObject *module)\n{\n" << indent
+            << "auto *obContainerType = PyObject_GetAttrString(module, \""
+            << parts.at(1) << "\");\n"
+            << "auto *obType = PyObject_GetAttrString(obContainerType, \""
+            << parts.at(2) << "\");\n"
+            << "auto *type = reinterpret_cast<PyTypeObject *>(obType);\n"
+            << "Shiboken::AutoDecRef dict(PepType_GetDict(type));\n";
+    }
     for (const AbstractMetaField &field : metaClass->fields()) {
         if (field.isStatic()) {
             s << "PyDict_SetItemString(dict, \"" << field.name()
@@ -5551,7 +5569,7 @@ void CppGenerator::writeStaticFieldInitialization(TextStream &s,
             s << ");\n";
         }
     }
-    s << '\n' << outdent << "}\n";
+    s << "return type;\n" << outdent << "}\n";
 }
 
 enum class QtRegisterMetaType
@@ -5873,18 +5891,28 @@ void CppGenerator::writeNbBoolFunction(const GeneratorContext &context,
 // function.
 void CppGenerator::writeInitFunc(TextStream &declStr, TextStream &callStr,
                                  const QString &initFunctionName,
-                                 const TypeEntryCPtr &enclosingEntry)
+                                 const TypeEntryCPtr &enclosingEntry,
+                                 const QString &pythonName)
 {
     const bool hasParent =
         enclosingEntry && enclosingEntry->type() != TypeEntry::TypeSystemType;
-    declStr << "void init_" << initFunctionName << "(PyObject *"
+    declStr << "PyTypeObject *init_" << initFunctionName << "(PyObject *"
         << (hasParent ? "enclosingClass" : "module") << ");\n";
-    callStr << "init_" << initFunctionName;
     if (hasParent) {
-        callStr << "(reinterpret_cast<PyObject *>("
-        << cpythonTypeNameExt(enclosingEntry) << "));\n";
+        const QString &enclosingName = enclosingEntry->name();
+        const auto parts = QStringView{enclosingName}.split(u"::", Qt::SkipEmptyParts);
+        callStr << "Shiboken::Module::AddTypeCreationFunction("
+            << "module, \"" << pythonName << "\", " << "init_" << initFunctionName << ", \"";
+        for (qsizetype i = 0; i < parts.size(); ++i) {
+            if (i > 0)
+               callStr << "\", \"";
+            callStr << parts.at(i);
+        }
+        callStr << "\");\n";
     } else {
-        callStr << "(module);\n";
+        callStr << "Shiboken::Module::AddTypeCreationFunction("
+            << "module, \"" << pythonName << "\", "
+            << "init_" << initFunctionName << ");\n";
     }
 }
 
@@ -5943,10 +5971,10 @@ bool CppGenerator::finishGeneration()
             }
             writeInitFunc(s_classInitDecl, s_classPythonDefines,
                           getSimpleClassInitFunctionName(cls),
-                          targetLangEnclosingEntry(te));
+                          targetLangEnclosingEntry(te), cls->name());
             if (cls->hasStaticFields()) {
-                s_classInitDecl << "void "
-                    << getSimpleClassStaticFieldsInitFunctionName(cls) << "();\n";
+                s_classInitDecl << "PyTypeObject *"
+                    << getSimpleClassStaticFieldsInitFunctionName(cls) << "(PyObject *module);\n";
                 classesWithStaticFields.append(cls);
             }
             if (hasConfigCondition) {
@@ -5966,7 +5994,7 @@ bool CppGenerator::finishGeneration()
 
         writeInitFunc(s_classInitDecl, s_classPythonDefines,
                       getInitFunctionName(context),
-                      enclosingTypeEntry);
+                      enclosingTypeEntry, smp.type.name());
         includes.insert(smp.type.instantiations().constFirst().typeEntry()->include());
     }
 
@@ -6304,7 +6332,7 @@ bool CppGenerator::finishGeneration()
         s << "\n// Static field initialization\n";
         for (const auto &cls : std::as_const(classesWithStaticFields)) {
             ConfigurableScope configScope(s, cls->typeEntry());
-            s << getSimpleClassStaticFieldsInitFunctionName(cls) << "();\n";
+            s << getSimpleClassStaticFieldsInitFunctionName(cls) << "(module);\n";
         }
     }
 

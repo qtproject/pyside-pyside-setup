@@ -252,8 +252,10 @@ protected:
     static QString cpythonBaseName(const AbstractMetaType &type);
     static QString cpythonTypeName(const AbstractMetaClassCPtr &metaClass);
     static QString cpythonTypeName(const TypeEntryCPtr &type);
+    static QString cpythonTypeNameExtSet(const TypeEntryCPtr &type);
+    static QString cpythonTypeNameExtSet(const AbstractMetaType &type);
     static QString cpythonTypeNameExt(const TypeEntryCPtr &type);
-    static QString cpythonTypeNameExt(const AbstractMetaType &type) ;
+    static QString cpythonTypeNameExt(const AbstractMetaType &type);
     static QString cpythonCheckFunction(TypeEntryCPtr type);
     static QString cpythonCheckFunction(AbstractMetaType metaType);
     static QString cpythonIsConvertibleFunction(const TypeEntryCPtr &type);

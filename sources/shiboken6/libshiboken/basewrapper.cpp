@@ -10,6 +10,7 @@
 #include "sbkenum.h"
 #include "sbkerrors.h"
 #include "sbkfeature_base.h"
+#include "sbkmodule.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"

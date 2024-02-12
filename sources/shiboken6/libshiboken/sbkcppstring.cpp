@@ -12,6 +12,11 @@ PyObject *fromCppString(const std::string &value)
     return PyUnicode_FromStringAndSize(value.data(), value.size());
 }
 
+PyObject *fromCppStringView(std::string_view value)
+{
+    return PyUnicode_FromStringAndSize(value.data(), value.size());
+}
+
 PyObject *fromCppWString(const std::wstring &value)
 {
     return PyUnicode_FromWideChar(value.data(), value.size());

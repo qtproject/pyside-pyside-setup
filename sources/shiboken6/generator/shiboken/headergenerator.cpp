@@ -791,6 +791,7 @@ bool HeaderGenerator::finishGeneration()
     }
 
     s << "#include <sbkpython.h>\n";
+    s << "#include <sbkmodule.h>\n";
     s << "#include <sbkconverter.h>\n";
 
     QStringList requiredTargetImports = TypeDatabase::instance()->requiredTargetImports();

@@ -474,6 +474,8 @@ void FinishSignatureInitialization(PyObject *module, const char *signatures[])
      * Still, it is not possible to call init phase 2 from here,
      * because the import is still running. Do it from Python!
      */
+    init_shibokensupport_module();
+
 #ifndef PYPY_VERSION
     static const bool patch_types = true;
 #else

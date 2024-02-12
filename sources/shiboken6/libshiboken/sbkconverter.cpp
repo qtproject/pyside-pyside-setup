@@ -4,6 +4,7 @@
 #include "sbkconverter.h"
 #include "sbkconverter_p.h"
 #include "sbkarrayconverter_p.h"
+#include "sbkmodule.h"
 #include "basewrapper_p.h"
 #include "bindingmanager.h"
 #include "autodecref.h"
@@ -409,9 +410,24 @@ void registerConverterName(SbkConverter *converter, const char *typeName)
         converters.insert(std::make_pair(typeName, converter));
 }
 
+static std::string getRealTypeName(const char *name)
+{
+    std::string typeName(name);
+    auto size = typeName.size();
+    if (std::isalnum(typeName[size - 1]) == 0)
+        return typeName.substr(0, size - 1);
+    return typeName;
+}
+
 SbkConverter *getConverter(const char *typeName)
 {
-    ConvertersMap::const_iterator it = converters.find(typeName);
+    auto it = converters.find(typeName);
+    if (it != converters.end())
+        return it->second;
+    // PYSIDE-2404: Did not find the name. Load the lazy classes
+    //              which have this name and try again.
+    Shiboken::Module::loadLazyClassesWithName(getRealTypeName(typeName).c_str());
+    it = converters.find(typeName);
     if (it != converters.end())
         return it->second;
     if (Shiboken::pyVerbose() > 0) {
@@ -676,7 +692,14 @@ PyTypeObject *getPythonTypeObject(const SbkConverter *converter)
 
 PyTypeObject *getPythonTypeObject(const char *typeName)
 {
-    return getPythonTypeObject(getConverter(typeName));
+    auto *type = getPythonTypeObject(getConverter(typeName));
+    if (type == nullptr) {
+        // PYSIDE-2404: Did not find the name. Load the lazy classes
+        //              which have this name and try again.
+        Shiboken::Module::loadLazyClassesWithName(getRealTypeName(typeName).c_str());
+        type = getPythonTypeObject(getConverter(typeName));
+    }
+    return type;
 }
 
 bool pythonTypeIsValueType(const SbkConverter *converter)
