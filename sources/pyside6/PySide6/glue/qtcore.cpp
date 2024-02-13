@@ -2106,3 +2106,39 @@ Q_IMPORT_PLUGIN(QDarwinCalendarPermissionPlugin)
 #endif
 // @snippet darwin_permission_plugin
 
+// @snippet qt-modifier
+PyObject *_inputDict = PyDict_New();
+// Note: The builtins line is no longer needed since Python 3.10. Undocumented!
+PyDict_SetItemString(_inputDict, "__builtins__", PyEval_GetBuiltins());
+PyDict_SetItemString(_inputDict, "QtCore", module);
+PyDict_SetItemString(_inputDict, "Qt", reinterpret_cast<PyObject *>(pyType));
+// Explicitly not dereferencing the result.
+PyRun_String(R"PY(if True:
+    from enum import Flag
+    from textwrap import dedent
+    from warnings import warn
+    # QtCore and Qt come as globals.
+
+    def func_or(self, other):
+        if isinstance(self, Flag) and isinstance(other, Flag):
+            # this is normal or-ing flags together
+            return Qt.KeyboardModifier(self.value | other.value)
+        return QtCore.QKeyCombination(self, other)
+
+    def func_add(self, other):
+        warn(dedent(f"""
+            The "+" operator is deprecated in Qt For Python 6.0 .
+            Please use "|" instead."""), stacklevel=2)
+        return func_or(self, other)
+
+    Qt.KeyboardModifier.__or__ = func_or
+    Qt.KeyboardModifier.__ror__ = func_or
+    Qt.Modifier.__or__ = func_or
+    Qt.Modifier.__ror__ = func_or
+    Qt.KeyboardModifier.__add__ = func_add
+    Qt.KeyboardModifier.__radd__ = func_add
+    Qt.Modifier.__add__ = func_add
+    Qt.Modifier.__radd__ = func_add
+
+)PY", Py_file_input, _inputDict, _inputDict);
+// @snippet qt-modifier

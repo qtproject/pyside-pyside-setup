@@ -653,6 +653,8 @@
     <enum-type name="WindowType" python-type="IntFlag" flags="WindowFlags"/>
     <enum-type name="CursorMoveStyle" since="4.8" revision="4800"/>
 
+    <inject-code class="target" position="end" file="../glue/qtcore.cpp"
+                 snippet="qt-modifier"/>
   </namespace-type>
 
   <add-function signature="QEnum(PyObject*)" return-type="PyObject*">

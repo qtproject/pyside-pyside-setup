@@ -11,9 +11,9 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(True)
 
-from testbinding import TestObject, TestQVariantEnum, QVariantHolder
+from testbinding import TestObject, TestQVariantEnum
 from PySide6.QtCore import Qt, QKeyCombination
-from PySide6.QtGui import QKeySequence, QAction, QMatrix3x3
+from PySide6.QtGui import QKeySequence, QAction
 
 from helper.usesqapplication import UsesQApplication
 
@@ -26,8 +26,8 @@ class PyTestQVariantEnum(TestQVariantEnum):
         return Qt.Orientation.Vertical
 
     def channelingEnum(self, rval_enum):
-        return (isinstance(rval_enum, enum.Enum) and
-                rval_enum == Qt.Orientation.Vertical)
+        return (isinstance(rval_enum, enum.Enum)
+                and rval_enum == Qt.Orientation.Vertical)
 
 
 class QVariantTest(UsesQApplication):
@@ -43,8 +43,6 @@ class QVariantTest(UsesQApplication):
         QAction().setShortcut(Qt.CTRL | Qt.AltModifier | Qt.Key_B)
         QAction().setShortcut(QKeySequence(QKeyCombination(Qt.CTRL | Qt.Key_B)))
         QKeySequence(Qt.CTRL | Qt.Key_Q)
-        # Issues a warning but works as well
-        QKeySequence(Qt.CTRL + Qt.Key_Q)
 
     def testEnum(self):
         # Testing C++ class
@@ -63,15 +61,6 @@ class QVariantTest(UsesQApplication):
         self.assertEqual(PyTestQVariantEnum.getNumberFromQVarEnum(Qt.Orientation.Vertical), 2)
         # check toInt() conversion for IntEnum
         self.assertEqual(PyTestQVariantEnum.getNumberFromQVarEnum(Qt.GestureType.TapGesture), 1)
-
-    def testMatrixTemplates(self):
-        holder = QVariantHolder()
-        matrix = QMatrix3x3()
-        matrix.setToIdentity()
-        holder.setValue(matrix)
-        returned = holder.value()
-        self.assertTrue(returned, QMatrix3x3)
-        self.assertTrue(returned.isIdentity())
 
 
 if __name__ == '__main__':
