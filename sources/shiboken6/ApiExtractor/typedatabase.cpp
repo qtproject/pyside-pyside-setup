@@ -163,7 +163,8 @@ bool TypeDatabaseOptionsParser::handleBoolOption(const QString &key, OptionSourc
         break;
     case OptionSource::CommandLineSingleDash:
         if (key.startsWith(u'T')) { // "-T/path" ends up a bool option
-            m_options->m_typesystemPaths += key.sliced(1).split(QDir::listSeparator());
+            m_options->m_typesystemPaths += key.sliced(1).split(QDir::listSeparator(),
+                                                                Qt::SkipEmptyParts);
             return true;
         }
         break;
@@ -201,12 +202,14 @@ bool TypeDatabaseOptionsParser::handleOption(const QString &key, const QString &
     }
 
     if (key == u"typesystem-paths") {
-        m_options->m_typesystemPaths += value.split(QDir::listSeparator());
+        m_options->m_typesystemPaths += value.split(QDir::listSeparator(),
+                                                    Qt::SkipEmptyParts);
         return true;
     }
 
     if (key == u"force-process-system-include-paths") {
-        m_options->m_forceProcessSystemIncludes += value.split(QDir::listSeparator());
+        m_options->m_forceProcessSystemIncludes += value.split(QDir::listSeparator(),
+                                                               Qt::SkipEmptyParts);
         return true;
     }
 
@@ -285,7 +288,8 @@ TypeDatabase::TypeDatabase() : d(new TypeDatabasePrivate)
     // Environment TYPESYSTEMPATH
     if (qEnvironmentVariableIsSet(ENV_TYPESYSTEMPATH)) {
         d->m_typesystemPaths
-            += qEnvironmentVariable(ENV_TYPESYSTEMPATH).split(QDir::listSeparator());
+            += qEnvironmentVariable(ENV_TYPESYSTEMPATH).split(QDir::listSeparator(),
+                                                              Qt::SkipEmptyParts);
     }
 
     d->addBuiltInType(TypeEntryPtr(new VoidTypeEntry()));
