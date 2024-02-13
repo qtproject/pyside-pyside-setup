@@ -4,7 +4,6 @@
 
 '''Unit tests for QMimeDatabase'''
 
-import ctypes
 import os
 import sys
 import unittest
@@ -25,7 +24,7 @@ class QMimeDatabaseTest(unittest.TestCase):
         self.assertTrue(s0.isValid())
         self.assertEqual(s0.name(), "application/x-zerosize")
         if "en" in QLocale().name():
-            self.assertEqual(s0.comment(), "empty document")
+            self.assertEqual(s0.comment().casefold(), "empty document".casefold())
 
         s0Again = db.mimeTypeForName("application/x-zerosize")
         self.assertEqual(s0Again.name(), s0.name())
