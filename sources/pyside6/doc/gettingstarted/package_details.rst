@@ -118,7 +118,7 @@ QML Development
 Translations
 ~~~~~~~~~~~~
 
-* ``pyside6-linguist``, for translating text in applications.
+* ``pyside6-linguist``, for translating text in applications (see :ref:`translations`).
 * ``pyside6-lrelease``, to create run-time translation files for the application.
 * ``pyside6-lupdate``, to synchronize source code and translations.
 
@@ -140,7 +140,7 @@ PySide Utilities
 Deployment
 ~~~~~~~~~~
 
-* ``pyside6-deploy``, to deploy PySide6 applications to desktop platforms -
+* :ref:`pyside6-deploy <pyside6-deploy>`, to deploy PySide6 applications to desktop platforms -
   Linux, Windows and macOS.
 * ``pyside6-android-deploy``, to deploy PySide6 application as an Android app
   targeting different Android platforms - aarch64, armv7a, i686, x86_64.
