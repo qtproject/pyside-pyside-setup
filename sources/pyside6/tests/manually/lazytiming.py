@@ -7,7 +7,6 @@ Time a repeated Python run
 
 Usage: python3 lazytiming.py              # uses PySide6
        python3 lazytiming.py <any arg>    # uses PyQt6
-       python3 lazytiming.py Qt           # uses PyQt6 with QtCore.Qt loaded
 
 It runs the same python for the testing.
 
