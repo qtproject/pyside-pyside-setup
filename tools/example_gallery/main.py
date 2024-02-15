@@ -548,7 +548,7 @@ if __name__ == "__main__":
         shutil.rmtree(EXAMPLES_DOC, ignore_errors=True)
         if not opt_quiet:
             print("WARNING: Deleted old html directory")
-    EXAMPLES_DOC.mkdir()
+    EXAMPLES_DOC.mkdir(exist_ok=True)
 
     scan_examples_dir(EXAMPLES_DIR)
     if options.qt_src_dir:
