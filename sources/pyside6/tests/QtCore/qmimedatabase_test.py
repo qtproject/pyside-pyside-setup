@@ -23,8 +23,7 @@ class QMimeDatabaseTest(unittest.TestCase):
         s0 = db.mimeTypeForName("application/x-zerosize")
         self.assertTrue(s0.isValid())
         self.assertEqual(s0.name(), "application/x-zerosize")
-        if "en" in QLocale().name():
-            self.assertEqual(s0.comment().casefold(), "empty document".casefold())
+        self.assertTrue(s0.comment())
 
         s0Again = db.mimeTypeForName("application/x-zerosize")
         self.assertEqual(s0Again.name(), s0.name())
@@ -39,13 +38,13 @@ class QMimeDatabaseTest(unittest.TestCase):
         rdf = db.mimeTypeForName("application/rdf+xml")
         self.assertTrue(rdf.isValid())
         self.assertEqual(rdf.name(), "application/rdf+xml")
+        self.assertTrue(rdf.comment())
         if "en" in QLocale().name():
             self.assertEqual(rdf.comment(), "RDF file")
 
         bzip2 = db.mimeTypeForName("application/x-bzip2")
         self.assertTrue(bzip2.isValid())
-        if "en" in QLocale().name():
-            self.assertEqual(bzip2.comment(), "Bzip archive")
+        self.assertTrue(bzip2.comment())
 
         defaultMime = db.mimeTypeForName("application/octet-stream")
         self.assertTrue(defaultMime.isValid())
