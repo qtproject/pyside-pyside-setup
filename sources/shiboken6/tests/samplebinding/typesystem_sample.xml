@@ -633,8 +633,8 @@
             // CHECKTYPE and ISCONVERTIBLE are used here for test purposes, don't change them.
             if (!%CHECKTYPE[ObjectTypeLayout*](layout) &amp;&amp; !%ISCONVERTIBLE[ObjectTypeLayout*](layout))
                 return;
-            // %CHECKTYPE[ObjectTypeLayout*](layout)
-            // %ISCONVERTIBLE[ObjectTypeLayout*](layout)
+            /* %CHECKTYPE[ObjectTypeLayout*](layout) */
+            /* %ISCONVERTIBLE[ObjectTypeLayout*](layout) */
             ObjectTypeLayout* var;
             var = %CONVERTTOCPP[ObjectTypeLayout*](layout);
             // TODO-CONVERTER: erase this

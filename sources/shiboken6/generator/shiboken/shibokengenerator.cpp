@@ -724,27 +724,25 @@ QString ShibokenGenerator::converterObject(const TypeEntryCPtr &type)
 QString ShibokenGenerator::cpythonTypeNameExtSet(const TypeEntryCPtr &type)
 {
     return cppApiVariableName(type->targetLangPackage()) + u'['
-            + getTypeIndexVariableName(type) + u']';
+            + getTypeIndexVariableName(type) + "].type"_L1;
 }
 
 QString ShibokenGenerator::cpythonTypeNameExtSet(const AbstractMetaType &type)
 {
     return cppApiVariableName(type.typeEntry()->targetLangPackage()) + u'['
-           + getTypeIndexVariableName(type) + u']';
+           + getTypeIndexVariableName(type) + "].type"_L1;
 }
 
 QString ShibokenGenerator::cpythonTypeNameExt(const TypeEntryCPtr &type)
 {
     return "Shiboken::Module::get("_L1 + cppApiVariableName(type->targetLangPackage())
-            + ", "_L1 + getTypeIndexVariableName(type) + ", \""_L1
-            + type->qualifiedTargetLangName() + "\")"_L1;
+            + u'[' + getTypeIndexVariableName(type) + "])"_L1;
 }
 
 QString ShibokenGenerator::cpythonTypeNameExt(const AbstractMetaType &type)
 {
-    return "Shiboken::Module::get("_L1 + cppApiVariableName(type.typeEntry()->targetLangPackage())
-            + ", "_L1 + getTypeIndexVariableName(type) + ", \""_L1
-            + type.typeEntry()->qualifiedTargetLangName() + "\")"_L1;
+    return u"Shiboken::Module::get("_s + cppApiVariableName(type.typeEntry()->targetLangPackage())
+            + u'[' + getTypeIndexVariableName(type) + "])"_L1;
 }
 
 QString ShibokenGenerator::fixedCppTypeName(const TargetToNativeConversion &toNative)
@@ -2442,19 +2440,24 @@ QString ShibokenGenerator::moduleCppPrefix(const QString &moduleName)
     return result;
 }
 
+QString ShibokenGenerator::cppApiVariableNameOld(const QString &moduleName)
+{
+    return "Sbk"_L1 + moduleCppPrefix(moduleName) + "Types"_L1;
+}
+
 QString ShibokenGenerator::cppApiVariableName(const QString &moduleName)
 {
-    return u"Sbk"_s + moduleCppPrefix(moduleName) + u"Types"_s;
+    return "Sbk"_L1 + moduleCppPrefix(moduleName) + "TypeStructs"_L1;
 }
 
 QString ShibokenGenerator::pythonModuleObjectName(const QString &moduleName)
 {
-    return u"Sbk"_s + moduleCppPrefix(moduleName) + u"ModuleObject"_s;
+    return "Sbk"_L1 + moduleCppPrefix(moduleName) + "ModuleObject"_L1;
 }
 
 QString ShibokenGenerator::convertersVariableName(const QString &moduleName)
 {
-    QString result = cppApiVariableName(moduleName);
+    QString result = cppApiVariableNameOld(moduleName);
     result.chop(1);
     result.append(u"Converters"_s);
     return result;
@@ -2518,6 +2521,39 @@ QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaType &type
     result += processInstantiationsVariableName(type);
     appendIndexSuffix(&result);
     return result;
+}
+
+void collectfromTypeEntry(TypeEntryCPtr entry, QStringList &typeNames)
+{
+    if (entry->shouldGenerate()) {
+        typeNames[entry->sbkIndex()] = entry->qualifiedTargetLangName();
+        if (entry->isEnum()) {
+            auto ete = std::static_pointer_cast<const EnumTypeEntry>(entry);
+            if (ete->flags()) {
+                auto entry = ete->flags();
+                typeNames[entry->sbkIndex()] = entry->qualifiedTargetLangName();
+            }
+        }
+    }
+}
+
+void ShibokenGenerator::collectFullTypeNamesArray(QStringList &typeNames)
+{
+    for (const auto &metaClass : api().classes()) {
+        collectfromTypeEntry(metaClass->typeEntry(), typeNames);
+
+        for (const AbstractMetaEnum &metaEnum : metaClass->enums())
+            collectfromTypeEntry(metaEnum.typeEntry(), typeNames);
+
+        int smartPointerCountIndex = getMaxTypeIndex();
+        for (const auto &smp : api().instantiatedSmartPointers()) {
+            auto entry = smp.type.typeEntry();
+            typeNames[smartPointerCountIndex] = entry->qualifiedTargetLangName();
+            ++smartPointerCountIndex;
+        }
+    }
+    for (const AbstractMetaEnum &metaEnum : api().globalEnums())
+        collectfromTypeEntry(metaEnum.typeEntry(), typeNames);
 }
 
 bool ShibokenGenerator::verboseErrorMessagesDisabled()

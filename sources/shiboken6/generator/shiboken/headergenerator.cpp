@@ -649,7 +649,9 @@ HeaderGenerator::IndexValues HeaderGenerator::collectConverterIndexes() const
 }
 
 // PYSIDE-2404: Write the enums in unchanged case for reuse in type imports.
-//              For conpatibility, we create them in uppercase, too.
+//              For conpatibility, we create them in uppercase, too and with
+//              doubled index for emulating the former type-only case.
+//
 // FIXME: Remove in PySide 7. (See the note in `parser.py`)
 //
 static IndexValue typeIndexUpper(struct IndexValue const &ti)
@@ -657,7 +659,7 @@ static IndexValue typeIndexUpper(struct IndexValue const &ti)
     QString modi = ti.name.toUpper();
     if (modi == ti.name)
         modi = u"// "_s + modi;
-    return {modi, ti.value, ti.comment};
+    return {modi, ti.value * 2, ti.comment};
 }
 
 bool HeaderGenerator::finishGeneration()
@@ -689,10 +691,10 @@ bool HeaderGenerator::finishGeneration()
     macrosStream << "\n// Type indices\nenum : int {\n";
     for (const auto &ti : typeIndexes)
         macrosStream << ti;
-    macrosStream << "};\n";
+    macrosStream << "};\n\n";
 
     macrosStream << "// This variable stores all Python types exported by this module.\n";
-    macrosStream << "extern PyTypeObject **" << cppApiVariableName() << ";\n\n";
+    macrosStream << "extern Shiboken::Module::TypeInitStruct *" << cppApiVariableName() << ";\n\n";
     macrosStream << "// This variable stores the Python module object exported by this module.\n";
     macrosStream << "extern PyObject *" << pythonModuleObjectName() << ";\n\n";
     macrosStream << "// This variable stores all type converters exported by this module.\n";

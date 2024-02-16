@@ -696,7 +696,8 @@ if (PyIndex_Check(_key)) {
             PyErr_SetString(PyExc_ValueError, "bytearray must be of size 1");
             return -1;
         }
-    } else if (Py_TYPE(_value) == reinterpret_cast<PyTypeObject *>(SbkPySide6_QtCoreTypes[SBK_QByteArray_IDX])) {
+    } else if (Py_TYPE(_value) == reinterpret_cast<PyTypeObject *>(
+            SbkPySide6_QtCoreTypeStructs[SBK_QByteArray_IDX].type)) {
         if (PyObject_Length(_value) != 1) {
             PyErr_SetString(PyExc_ValueError, "QByteArray must be of size 1");
             return -1;
@@ -733,7 +734,7 @@ if (PySlice_GetIndicesEx(_key, %CPPSELF.size(), &start, &stop, &step, &sliceleng
 Py_ssize_t value_length = 0;
 if (_value != nullptr && _value != Py_None) {
     if (!(PyBytes_Check(_value) || PyByteArray_Check(_value)
-          || Py_TYPE(_value) == reinterpret_cast<PyTypeObject *>(SbkPySide6_QtCoreTypes[SBK_QByteArray_IDX]))) {
+          || Py_TYPE(_value) == SbkPySide6_QtCoreTypeStructs[SBK_QByteArray_IDX].type)) {
            PyErr_Format(PyExc_TypeError, "bytes, bytearray or QByteArray is required, not %.200s",
                         Py_TYPE(_value)->tp_name);
            return -1;
@@ -1809,7 +1810,7 @@ if (dataChar == nullptr) {
 // @snippet qloggingcategory_to_cpp
 // PYSIDE-2404: Usage of the `get()` function not necessary, the type exists.
     QLoggingCategory *category{nullptr};
-    Shiboken::Conversions::pythonToCppPointer(SbkPySide6_QtCoreTypes[SBK_QLoggingCategory_IDX],
+    Shiboken::Conversions::pythonToCppPointer(SbkPySide6_QtCoreTypeStructs[SBK_QLoggingCategory_IDX].type,
     pyArgs[0], &(category));
 // @snippet qloggingcategory_to_cpp
 

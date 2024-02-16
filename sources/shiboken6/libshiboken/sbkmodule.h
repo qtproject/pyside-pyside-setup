@@ -14,8 +14,14 @@ struct SbkConverter;
 
 namespace Shiboken::Module {
 
+struct TypeInitStruct
+{
+    PyTypeObject *type;
+    const char *fullName;
+};
+
 /// PYSIDE-2404: Replacing the arguments in cpythonTypeNameExt by a function.
-LIBSHIBOKEN_API PyTypeObject *get(PyTypeObject **types, int index, const char *typeName);
+LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct);
 
 /// PYSIDE-2404: Make sure that mentioned classes really exist.
 LIBSHIBOKEN_API void loadLazyClassesWithName(const char *name);
@@ -67,14 +73,14 @@ LIBSHIBOKEN_API void AddTypeCreationFunction(PyObject *module,
  *  \param module   Module where the types were created.
  *  \param types    Array of PyTypeObject *objects representing the types created on \p module.
  */
-LIBSHIBOKEN_API void registerTypes(PyObject *module, PyTypeObject **types);
+LIBSHIBOKEN_API void registerTypes(PyObject *module, TypeInitStruct *types);
 
 /**
  *  Retrieves the array of types.
  *  \param module   Module where the types were created.
  *  \returns        A pointer to the PyTypeObject *array of types.
  */
-LIBSHIBOKEN_API PyTypeObject **getTypes(PyObject *module);
+LIBSHIBOKEN_API TypeInitStruct *getTypes(PyObject *module);
 
 /**
  *  Registers the list of converters created by \p module for non-wrapper types.

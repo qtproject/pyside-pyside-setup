@@ -281,7 +281,7 @@ protected:
                                              const AbstractMetaClassCPtr &metaClass);
     static QString cpythonWrapperCPtr(const AbstractMetaClassCPtr &metaClass,
                                       const QString &argName = QLatin1StringView("self"));
-     static QString cpythonWrapperCPtr(const AbstractMetaType &metaType,
+    static QString cpythonWrapperCPtr(const AbstractMetaType &metaType,
                                       const QString &argName);
     static QString cpythonWrapperCPtr(const TypeEntryCPtr &type, const QString &argName);
 
@@ -314,6 +314,7 @@ protected:
     static bool useOperatorBoolAsNbBool();
     /// Generate implicit conversions of function arguments
     static bool generateImplicitConversions();
+    static QString cppApiVariableNameOld(const QString &moduleName = {});
     static QString cppApiVariableName(const QString &moduleName = QString());
     static QString pythonModuleObjectName(const QString &moduleName = QString());
     static QString convertersVariableName(const QString &moduleName = QString());
@@ -324,6 +325,9 @@ protected:
     static QString getTypeAlternateTemplateIndexVariableName(const AbstractMetaClassCPtr &metaClass);
     static QString getTypeIndexVariableName(TypeEntryCPtr type);
     static QString getTypeIndexVariableName(const AbstractMetaType &type) ;
+
+    /// Collect all type names as an array for initializing the type/name struct.
+    void collectFullTypeNamesArray(QStringList &typeNames);
 
     /// Returns true if the user don't want verbose error messages on the generated bindings.
     static bool verboseErrorMessagesDisabled();

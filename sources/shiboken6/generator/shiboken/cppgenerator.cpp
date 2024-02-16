@@ -5894,8 +5894,7 @@ void CppGenerator::writeInitFunc(TextStream &declStr, TextStream &callStr,
                                  const TypeEntryCPtr &enclosingEntry,
                                  const QString &pythonName)
 {
-    const bool hasParent =
-        enclosingEntry && enclosingEntry->type() != TypeEntry::TypeSystemType;
+    const bool hasParent = enclosingEntry && enclosingEntry->type() != TypeEntry::TypeSystemType;
     declStr << "PyTypeObject *init_" << initFunctionName << "(PyObject *"
         << (hasParent ? "enclosingClass" : "module") << ");\n";
     if (hasParent) {
@@ -6077,12 +6076,15 @@ bool CppGenerator::finishGeneration()
         s << '\n';
     }
 
+    // FIXME PYSIDE-7: Remove backwards compatible structure
     s << "// Current module's type array.\n"
-       << "PyTypeObject **" << cppApiVariableName() << " = nullptr;\n"
+       << "Shiboken::Module::TypeInitStruct *" << cppApiVariableName() << " = nullptr;\n"
+       << "// Backwards compatible structure with identical indexing.\n"
+       << "PyTypeObject **" << cppApiVariableNameOld() << " = nullptr;\n"
        << "// Current module's PyObject pointer.\n"
        << "PyObject *" << pythonModuleObjectName() << " = nullptr;\n"
        << "// Current module's converter array.\n"
-       << "SbkConverter **" << convertersVariableName() << " = nullptr;\n";
+       << "SbkConverter **" << convertersVariableName() << " = nullptr;\n\n";
 
     const CodeSnipList snips = moduleEntry->codeSnips();
 
@@ -6091,14 +6093,17 @@ bool CppGenerator::finishGeneration()
 
     // cleanup staticMetaObject attribute
     if (usePySideExtensions()) {
+        QString iType = cppApiVariableName() + "[i].type"_L1;
+        QString iName = cppApiVariableName() + "[i].fullName"_L1;
+
         s << "void cleanTypesAttributes() {\n" << indent
             << "static PyObject *attrName = Shiboken::PyName::qtStaticMetaObject();\n"
-            << "for (int i = 0, imax = SBK_" << moduleName()
-            << "_IDX_COUNT; i < imax; i++) {\n" << indent
-            << "PyObject *pyType = reinterpret_cast<PyObject *>(" << cppApiVariableName() << "[i]);\n"
-            << "if (pyType && PyObject_HasAttr(pyType, attrName))\n" << indent
+            << "const int imax = SBK_" << moduleName() << "_IDX_COUNT;\n"
+            << "for (int i = 0; i < imax && " << iName << " != nullptr; ++i) {\n" << indent
+            << "auto *pyType = reinterpret_cast<PyObject *>(" << iType << ");\n"
+            << "if (pyType != nullptr && PyObject_HasAttr(pyType, attrName))\n" << indent
             << "PyObject_SetAttr(pyType, attrName, Py_None);\n" << outdent
-            << outdent << "}\n" << outdent << "}\n";
+            << outdent << "}\n" << outdent << "}\n\n";
     }
 
     s << "// Global functions "
@@ -6134,7 +6139,7 @@ bool CppGenerator::finishGeneration()
     if (!requiredModules.isEmpty())
         s << "// Required modules' type and converter arrays.\n";
     for (const QString &requiredModule : requiredModules) {
-        s << "PyTypeObject **" << cppApiVariableName(requiredModule) << ";\n"
+        s << "Shiboken::Module::TypeInitStruct *" << cppApiVariableName(requiredModule) << ";\n"
             << "SbkConverter **" << convertersVariableName(requiredModule) << ";\n";
     }
 
@@ -6234,9 +6239,25 @@ bool CppGenerator::finishGeneration()
 
     int maxTypeIndex = getMaxTypeIndex() + api().instantiatedSmartPointers().size();
     if (maxTypeIndex) {
-        s << "// Create an array of wrapper types for the current module.\n"
-           << "static PyTypeObject *cppApi[SBK_" << moduleName() << "_IDX_COUNT];\n"
-           << cppApiVariableName() << " = cppApi;\n\n";
+        s << "// Create an array of wrapper types/names for the current module.\n"
+            << "static Shiboken::Module::TypeInitStruct cppApi[] = {\n" << indent;
+
+        // Windows did not like an array of QString.
+        QStringList typeNames;
+        for (int idx = 0; idx < maxTypeIndex; ++idx)
+            typeNames.append("+++ unknown entry #"_L1 + QString::number(idx)
+                             + " in "_L1 + moduleName());
+
+        collectFullTypeNamesArray(typeNames);
+
+        for (auto typeName : typeNames)
+            s << "{nullptr, \"" << typeName << "\"},\n";
+
+        s << "{nullptr, nullptr}\n" << outdent << "};\n"
+            << "// The new global structure consisting of (type, name) pairs.\n"
+            << cppApiVariableName() << " = cppApi;\n"
+            << "// The backward compatible alias with upper case indexes.\n"
+            << cppApiVariableNameOld() << " = reinterpret_cast<PyTypeObject **>(cppApi);\n\n";
     }
 
     s << "// Create an array of primitive type converters for the current module.\n"

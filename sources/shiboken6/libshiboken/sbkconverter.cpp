@@ -147,6 +147,13 @@ void addPythonToCppValueConversion(PyTypeObject *type,
     addPythonToCppValueConversion(sotp->converter, pythonToCppFunc, isConvertibleToCppFunc);
 }
 
+void addPythonToCppValueConversion(Shiboken::Module::TypeInitStruct typeStruct,
+                                   PythonToCppFunc pythonToCppFunc,
+                                   IsConvertibleToCppFunc isConvertibleToCppFunc)
+{
+    addPythonToCppValueConversion(typeStruct.type, pythonToCppFunc, isConvertibleToCppFunc);
+}
+
 PyObject *pointerToPython(PyTypeObject *type, const void *cppIn)
 {
     auto *sotp = PepType_SOTP(type);
@@ -226,6 +233,11 @@ PythonToCppConversion pythonToCppPointerConversion(PyTypeObject *type, PyObject 
     if (PythonToCppFunc toCppPtr = isPythonToCppPointerConvertible(type, pyIn))
         return {toCppPtr, PythonToCppConversion::Pointer};
     return {};
+}
+
+PythonToCppConversion pythonToCppPointerConversion(Module::TypeInitStruct typeStruct, PyObject *pyIn)
+{
+    return pythonToCppPointerConversion(typeStruct.type, pyIn);
 }
 
 static inline PythonToCppFunc IsPythonToCppConvertible(const SbkConverter *converter, PyObject *pyIn)

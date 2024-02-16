@@ -5,6 +5,7 @@
 #define SBK_CONVERTER_H
 
 #include "sbkpython.h"
+#include "sbkmodule.h"
 #include "shibokenmacros.h"
 #include "sbkenum.h"
 #include "basewrapper_p.h"
@@ -146,6 +147,9 @@ LIBSHIBOKEN_API void addPythonToCppValueConversion(SbkConverter *converter,
 LIBSHIBOKEN_API void addPythonToCppValueConversion(PyTypeObject *type,
                                                    PythonToCppFunc pythonToCppFunc,
                                                    IsConvertibleToCppFunc isConvertibleToCppFunc);
+LIBSHIBOKEN_API void addPythonToCppValueConversion(Shiboken::Module::TypeInitStruct typeStruct,
+                                                   PythonToCppFunc pythonToCppFunc,
+                                                   IsConvertibleToCppFunc isConvertibleToCppFunc);
 
 // C++ -> Python ---------------------------------------------------------------------------
 
@@ -203,6 +207,7 @@ struct PythonToCppConversion
  */
 LIBSHIBOKEN_API PythonToCppFunc isPythonToCppPointerConvertible(PyTypeObject *type, PyObject *pyIn);
 LIBSHIBOKEN_API PythonToCppConversion pythonToCppPointerConversion(PyTypeObject *type, PyObject *pyIn);
+LIBSHIBOKEN_API PythonToCppConversion pythonToCppPointerConversion(Module::TypeInitStruct typeStruct, PyObject *pyIn);
 
 /**
  *  Returns a Python to C++ conversion function if the Python object is convertible to a C++ value.
