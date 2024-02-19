@@ -94,10 +94,11 @@ Project development
     :gutter: 3 3 4 5
 
     .. grid-item-card:: ``pyside6-project``
+        :link: pyside6-project
+        :link-type: ref
 
         to build Qt Designer forms (``.ui`` files), resource files (``.qrc``)
         and QML type files (``.qmltype``) from a ``.pyproject`` file.
-
 
 Widget Development
 ~~~~~~~~~~~~~~~~~~
