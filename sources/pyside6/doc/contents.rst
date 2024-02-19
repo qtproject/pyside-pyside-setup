@@ -7,6 +7,7 @@
     commercial/index.rst
     gettingstarted/index.rst
     api.rst
+    tools/index.rst
     tutorials/index.rst
     examples/index.rst
     videos.rst
