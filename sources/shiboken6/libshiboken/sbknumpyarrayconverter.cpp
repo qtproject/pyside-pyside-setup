@@ -104,6 +104,7 @@ SbkArrayConverter *unimplementedArrayConverter();
 template <int dimension>
 static bool isPrimitiveArray(PyObject *pyIn, int expectedNpType)
 {
+    Shiboken::Numpy::initNumPy();
     if (!PyArray_Check(pyIn))
         return false;
     auto *pya = reinterpret_cast<PyArrayObject *>(pyIn);
@@ -209,6 +210,9 @@ static PythonToCppFunc checkArray2(PyObject *pyIn, int dim1, int dim2)
 template <class T>
 static void setOrExtendArrayConverter(int dimension, IsArrayConvertibleToCppFunc toCppCheckFunc)
 {
+    // PYSIDE-2404/FIXME: When adding a C++ -> Python conversion, be sure
+    // to delay-initialize numpy in the converter (similar to the
+    // initialization in check() for the Python -> C++ conversion).
     SbkArrayConverter *arrayConverter = ArrayTypeConverter<T>(dimension);
     if (arrayConverter == unimplementedArrayConverter()) {
         arrayConverter = createArrayConverter(toCppCheckFunc);
@@ -234,15 +238,6 @@ static inline void extendArrayConverter2()
 
 void initNumPyArrayConverters()
 {
-    // Expanded from macro "import_array" in __multiarray_api.h
-    // Make sure to read about the magic defines PY_ARRAY_UNIQUE_SYMBOL etc.,
-    // when changing this or spreading the code over several source files.
-    if (_import_array() < 0) {
-        if (debugNumPy)
-            PyErr_Print();
-        PyErr_Clear();
-        return;
-    }
     // Extend the converters for primitive types by NumPy ones.
     extendArrayConverter1<short, NPY_SHORT>();
     extendArrayConverter2<short, NPY_SHORT>();

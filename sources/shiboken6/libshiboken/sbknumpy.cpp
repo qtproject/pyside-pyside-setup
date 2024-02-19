@@ -17,9 +17,29 @@
 namespace Shiboken::Numpy
 {
 
+#ifdef HAVE_NUMPY
+static void initNumPy()
+{
+    // PYSIDE-2404: Delay-initialize numpy from check() as it causes a
+    // significant startup delay (~770 allocations in memray)
+    static bool initialized = false;
+    if (initialized)
+        return;
+    initialized = true;
+    // Expanded from macro "import_array" in __multiarray_api.h
+    // Make sure to read about the magic defines PY_ARRAY_UNIQUE_SYMBOL etc.,
+    // when changing this or spreading the code over several source files.
+    if (_import_array() < 0) {
+        PyErr_Print();
+        PyErr_Clear();
+    }
+}
+#endif // HAVE_NUMPY
+
 bool check(PyObject *pyIn)
 {
 #ifdef HAVE_NUMPY
+    initNumPy();
     return PyArray_Check(pyIn);
 #else
     SBK_UNUSED(pyIn);
