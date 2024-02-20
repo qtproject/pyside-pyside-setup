@@ -31,9 +31,7 @@
             <enum-type name="Target"/>
             <enum-type name="TextureFormat"/>
         </object-type>
-        <object-type name="QAbstractTextureImage">
-            <modify-function signature="QAbstractTextureImage(Qt3DCore::QNode*)" remove="all"/>
-        </object-type>
+        <object-type name="QAbstractTextureImage"/>
         <object-type name="QAlphaCoverage"/>
         <object-type name="QAlphaTest">
             <enum-type name="AlphaFunction"/>
@@ -224,9 +222,7 @@
             <enum-type name="Status"/>
         </object-type>
         <object-type name="QTextureImageData"/>
-        <object-type name="QTextureImageDataGenerator">
-            <modify-function signature="QTextureImageDataGenerator()" remove="all"/>
-        </object-type>
+        <object-type name="QTextureImageDataGenerator"/>
         <object-type name="QTextureLoader"/>
         <object-type name="QTextureRectangle"/>
         <object-type name="QTextureWrapMode">
