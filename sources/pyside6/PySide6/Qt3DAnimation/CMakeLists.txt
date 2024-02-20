@@ -42,12 +42,14 @@ set(Qt3DAnimation_include_dirs
                      ${pyside6_SOURCE_DIR}
                      ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
                      ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIR}
+                     ${Qt${QT_MAJOR_VERSION}OpenGL_INCLUDE_DIRS}
                      ${Qt${QT_MAJOR_VERSION}3DCore_INCLUDE_DIRS}
                      ${Qt${QT_MAJOR_VERSION}3DRender_INCLUDE_DIRS}
                      ${Qt${QT_MAJOR_VERSION}3DAnimation_INCLUDE_DIRS}
                      ${libpyside_SOURCE_DIR}
                      ${QtCore_GEN_DIR}
                      ${QtGui_GEN_DIR}
+                     ${QtOpenGL_GEN_DIR}
                      ${Qt3DCore_GEN_DIR}
                      ${Qt3DRender_GEN_DIR}
                      ${Qt3DAnimation_GEN_DIR})
