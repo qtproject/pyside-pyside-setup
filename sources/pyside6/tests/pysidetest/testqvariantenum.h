@@ -22,4 +22,14 @@ private:
     QVariant m_enum;
 };
 
+class PYSIDETEST_API QVariantHolder // modeled after Q3DParameter, test QVariant conversion
+{
+public:
+    void setValue(QVariant v) { m_variant = v; }
+    QVariant value() const { return m_variant; }
+
+private:
+    QVariant m_variant;
+};
+
 #endif // TESTQVARIANT_H

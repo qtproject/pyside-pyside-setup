@@ -282,6 +282,9 @@
   </primitive-type>
 
   <primitive-type name="QVariant" target-lang-api-name="PyObject">
+    <extra-includes>
+        <include file-name="optional" location="global"/>
+    </extra-includes>
     <conversion-rule>
         <native-to-target file="../glue/qtcore.cpp" snippet="return-qvariant"/>
         <target-to-native>
