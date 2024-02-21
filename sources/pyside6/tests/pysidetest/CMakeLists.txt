@@ -46,6 +46,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/testbinding/sharedpointertestbench_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testview_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testbinding_module_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testqvariantenum_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/testbinding/qvariantholder_wrapper.cpp
 )
 
 # Get per module include dirs.

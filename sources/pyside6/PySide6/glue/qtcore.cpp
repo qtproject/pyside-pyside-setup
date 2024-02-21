@@ -269,6 +269,30 @@ static QVariant QVariant_convertToVariantList(PyObject *list)
     }
     return QVariant(lst);
 }
+
+using SpecificConverter = Shiboken::Conversions::SpecificConverter;
+
+static std::optional<SpecificConverter> converterForQtType(const char *typeNameC)
+{
+    // Fix typedef "QGenericMatrix<3,3,float>" -> QMatrix3x3". The reverse
+    // conversion happens automatically in QMetaType::fromName() in
+    // QVariant_resolveMetaType().
+    QByteArrayView typeNameV(typeNameC);
+    if (typeNameV.startsWith("QGenericMatrix<") && typeNameV.endsWith(",float>")) {
+        QByteArray typeName = typeNameV.toByteArray();
+        typeName.remove(1, 7);
+        typeName.remove(7, 1); // '<'
+        typeName.chop(7);
+        typeName.replace(',', 'x');
+        SpecificConverter matrixConverter(typeName.constData());
+        if (matrixConverter)
+            return matrixConverter;
+    }
+    SpecificConverter converter(typeNameC);
+    if (converter)
+        return converter;
+    return std::nullopt;
+}
 // @snippet qvariant-conversion
 
 // @snippet qt-qabs
@@ -1483,15 +1507,23 @@ double in = %CONVERTTOCPP[double](%in);
 // @snippet conversion-sbkobject
 // a class supported by QVariant?
 const QMetaType metaType = QVariant_resolveMetaType(Py_TYPE(%in));
+bool ok = false;
 if (metaType.isValid()) {
     QVariant var(metaType);
-    Shiboken::Conversions::SpecificConverter converter(metaType.name());
-    converter.toCpp(pyIn, var.data());
-    %out = var;
-} else {
-    // If the type was not encountered, return a default PyObjectWrapper
-    %out = QVariant::fromValue(PySide::PyObjectWrapper(%in));
+    auto converterO = converterForQtType(metaType.name());
+    ok = converterO.has_value();
+    if (ok) {
+        converterO.value().toCpp(pyIn, var.data());
+        %out = var;
+    } else {
+        qWarning("%s: Cannot find a converter for \"%s\".",
+                 __FUNCTION__, metaType.name());
+    }
 }
+
+// If the type was not encountered, return a default PyObjectWrapper
+if (!ok)
+    %out = QVariant::fromValue(PySide::PyObjectWrapper(%in));
 // @snippet conversion-sbkobject
 
 // @snippet conversion-pydict
@@ -1627,11 +1659,10 @@ default:
     break;
 }
 
-Shiboken::Conversions::SpecificConverter converter(cppInRef.typeName());
-if (converter) {
-   void *ptr = cppInRef.data();
-   return converter.toPython(ptr);
-}
+auto converterO = converterForQtType(cppInRef.typeName());
+if (converterO.has_value())
+    return converterO.value().toPython(cppInRef.data());
+
 PyErr_Format(PyExc_RuntimeError, "Can't find converter for '%s'.", %in.typeName());
 return 0;
 // @snippet return-qvariant
