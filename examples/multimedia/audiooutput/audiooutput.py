@@ -177,11 +177,18 @@ class AudioTest(QMainWindow):
         self.m_audioSink.start(self.m_generator)
         self.m_volumeSlider.setValue(self.m_audioSink.volume() * 100)
 
-    @Slot(int)
-    def device_changed(self, index):
+    def closeEvent(self, e):
+        self.stop()
+        e.accept()
+
+    def stop(self):
         self.m_pullTimer.stop()
         self.m_generator.stop()
         self.m_audioSink.stop()
+
+    @Slot(int)
+    def device_changed(self, index):
+        self.stop()
         self.m_device = self.m_deviceBox.itemData(index)
 
         self.create_audio_output()
