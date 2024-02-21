@@ -46,29 +46,31 @@
     <object-type name="QAudioOutput"/>
 
     <object-type name="QAudioSource">
-      <modify-function signature="start()">
+      <modify-function signature="start()" allow-thread="true">
         <modify-argument index="return">
           <define-ownership class="target" owner="c++"/>
         </modify-argument>
       </modify-function>
-      <modify-function signature="start(QIODevice*)">
+      <modify-function signature="start(QIODevice*)" allow-thread="true">
         <modify-argument index="1">
           <define-ownership class="target" owner="c++"/>
         </modify-argument>
       </modify-function>
+      <modify-function signature="stop()" allow-thread="true"/>
     </object-type>
 
     <object-type name="QAudioSink">
-      <modify-function signature="start()">
+      <modify-function signature="start()" allow-thread="true">
         <modify-argument index="return">
           <define-ownership class="target" owner="c++"/>
         </modify-argument>
       </modify-function>
-      <modify-function signature="start(QIODevice*)">
+      <modify-function signature="start(QIODevice*)" allow-thread="true">
         <modify-argument index="1">
           <define-ownership class="target" owner="c++"/>
         </modify-argument>
       </modify-function>
+      <modify-function signature="stop()" allow-thread="true"/>
     </object-type>
 
     <object-type name="QCamera">
