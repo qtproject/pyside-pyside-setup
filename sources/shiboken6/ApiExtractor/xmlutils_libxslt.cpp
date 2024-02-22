@@ -139,7 +139,8 @@ QString LibXmlXQuery::doEvaluate(const QString &xPathExpression, QString *errorM
 
 std::shared_ptr<XQuery> libXml_createXQuery(const QString &focus, QString *errorMessage)
 {
-    XmlDocUniquePtr doc(xmlParseFile(QFile::encodeName(focus).constData()));
+    XmlDocUniquePtr doc(xmlReadFile(QFile::encodeName(focus).constData(),
+                        "utf-8", XML_PARSE_NOENT));
     if (!doc) {
         *errorMessage = u"libxml2: Cannot set focus to "_s + QDir::toNativeSeparators(focus);
         return {};
@@ -167,7 +168,9 @@ QString libXslt_transform(const QString &xml, QString xsl, QString *errorMessage
         xsl.append(u"</xsl:transform>"_s);
     }
     const QByteArray xmlData = xml.toUtf8();
-    XmlDocUniquePtr xmlDoc(xmlParseMemory(xmlData.constData(), xmlData.size()));
+
+    XmlDocUniquePtr xmlDoc(xmlReadMemory(xmlData.constData(), int(xmlData.size()),
+                                         "", "utf-8", XML_PARSE_NOENT));
     if (!xmlDoc) {
         *errorMessage = u"xmlParseMemory() failed for XML."_s;
         return xml;

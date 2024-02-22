@@ -51,13 +51,7 @@ static void removeNonXpathDocModifications(DocModificationList *l)
     l->erase(std::remove_if(l->begin(), l->end(), isNotXpathDocModification), l->end());
 }
 
-DocParser::DocParser()
-{
-#ifdef HAVE_LIBXSLT
-    xmlSubstituteEntitiesDefault(1);
-#endif
-}
-
+DocParser::DocParser() = default;
 DocParser::~DocParser() = default;
 
 void DocParser::fillGlobalFunctionDocumentation(const AbstractMetaFunctionPtr &)
