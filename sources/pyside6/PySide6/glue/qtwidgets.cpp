@@ -522,15 +522,20 @@ Shiboken::Object::keepReference(reinterpret_cast<SbkObject *>(%PYSELF), "__style
 // @snippet qwidget-style
 QStyle *myStyle = %CPPSELF->style();
 if (myStyle && qApp) {
-%PYARG_0 = %CONVERTTOPYTHON[QStyle *](myStyle);
+    bool keepReference = true;
+    %PYARG_0 = %CONVERTTOPYTHON[QStyle *](myStyle);
     QStyle *appStyle = qApp->style();
     if (appStyle == myStyle) {
         Shiboken::AutoDecRef pyApp(%CONVERTTOPYTHON[QApplication *](qApp));
-        Shiboken::Object::setParent(pyApp, %PYARG_0);
-        Shiboken::Object::releaseOwnership(%PYARG_0);
-    } else {
-        Shiboken::Object::keepReference(reinterpret_cast<SbkObject *>(%PYSELF), "__style__",  %PYARG_0);
+        // Do not set parentship when qApp is embedded
+        if (Shiboken::Object::wasCreatedByPython(reinterpret_cast<SbkObject *>(pyApp.object()))) {
+            Shiboken::Object::setParent(pyApp, %PYARG_0);
+            Shiboken::Object::releaseOwnership(%PYARG_0);
+            keepReference = false;
+        }
     }
+    if (keepReference)
+        Shiboken::Object::keepReference(reinterpret_cast<SbkObject *>(%PYSELF), "__style__",  %PYARG_0);
 }
 // @snippet qwidget-style
 
