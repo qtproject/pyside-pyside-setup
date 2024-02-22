@@ -5,6 +5,7 @@ import os
 import platform
 import sys
 import importlib
+import json
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
 from pathlib import Path
@@ -45,7 +46,21 @@ def get_version_from_package(name: str, package_path: Path) -> str:
     return version, f"{name}.__init__.__version__"
 
 
-def get_manifest(wheel_name: str, data: List[ModuleData]) -> str:
+def create_module_plugin_json(wheel_name: str, data: List[ModuleData], package_path: Path):
+    all_plugins = {}
+
+    for module in data:
+        all_plugins[module.name] = getattr(module, "plugins")
+
+    # write the dictionary modules->plugins dictionary to a .json file and include this .json file
+    # This file is picked up by the deployment tool to figure out the plugin dependencies
+    # of a PySide6 application
+    if all_plugins:
+        with open(f"{package_path}/PySide6/{wheel_name}.json", 'w') as fp:
+            json.dump(all_plugins, fp, indent=4)
+
+
+def get_manifest(wheel_name: str, data: List[ModuleData], package_path: Path) -> str:
     lines = []
 
     for module in data:
@@ -73,6 +88,9 @@ def get_manifest(wheel_name: str, data: List[ModuleData]) -> str:
     # Skip certain files if needed
     lines.append("recursive-exclude PySide6/Qt/qml *.debug")
     lines.append("prune PySide6/Qt/qml/QtQuick3D/MaterialEditor")
+
+    # adding PySide6_Essentials.json and PySide6_Addons.json
+    lines.append(f"include PySide6/{wheel_name}.json")
 
     return "\n".join(lines)
 
@@ -441,7 +459,13 @@ if __name__ == "__main__":
         with open(pyproject_toml_path, "w") as f:
             f.write(pyproject_toml_content)
 
-        # 3. Create the 'MANIFEST.in'
+        # 3. Create PySide_Essentials.json and PySide_Addons.json
+        # creates a json file mapping each Qt module to the possible plugin dependencies
+        if data is not None:
+            print(f"-- Creating {name}.json")
+            create_module_plugin_json(name, data, package_path)
+
+        # 4. Create the 'MANIFEST.in'
         # Special case for shiboken and shiboken_generator
         # so we copy the whole directory, only PySide and derivatives
         # will need to have specific information
@@ -449,11 +473,11 @@ if __name__ == "__main__":
         if data is None:
             manifest_content = get_simple_manifest(name)
         else:
-            manifest_content = get_manifest(name, data)
+            manifest_content = get_manifest(name, data, package_path)
         with open(package_path / "MANIFEST.in", "w") as f:
             f.write(manifest_content)
 
-        # 4. copy configuration files to create the wheel
+        # 5. copy configuration files to create the wheel
         print("-- Copy configuration files to create the wheel")
         if name == "PySide6_Examples":
             copy_examples_for_wheel(package_path)
@@ -461,7 +485,7 @@ if __name__ == "__main__":
         for fname in _files:
             copy(fname, package_path)
 
-        # 5. call the build module to create the wheel
+        # 6. call the build module to create the wheel
         print("-- Creating wheels")
         if not verbose:
             _runner = pyproject_hooks.quiet_subprocess_runner
@@ -470,7 +494,7 @@ if __name__ == "__main__":
         builder = build.ProjectBuilder(package_path, runner=_runner)
         builder.build("wheel", "dist")
 
-        # 6. Copy wheels back
+        # 7. Copy wheels back
         print("-- Copying wheels to dist/")
         dist_path = Path("dist")
         if not dist_path.is_dir():
@@ -478,7 +502,7 @@ if __name__ == "__main__":
         for wheel in Path(package_path / "dist").glob("*.whl"):
             copy(wheel, dist_path / wheel.name)
 
-        # 7. Remove leftover files
+        # 8. Remove leftover files
         print("-- Removing leftover files")
         all_files = set(package_path.glob("*"))
         files_to_remove = all_files - {
