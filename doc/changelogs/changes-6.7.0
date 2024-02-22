@@ -1,0 +1,116 @@
+Qt for Python 6.7.0 is a minor release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - setup.py now uses CMake Unity Build Mode by default.
+ - The namespace QAudio has been renamed to QtAudio in Qt 6.7. An alias
+   has been created, but it may not work in all cases.
+ - pyside6-project now has an lupdate mode updating translation files (.ts)
+   from the sources.
+ - Python code has been updated to be free of flake8 warnings using
+   a custom configuration.
+ - For deployment, the supported version of Nuitka has been raised to 2.1.0.
+ - singleShot timers with a timeout of 0 now call the C++ function (which
+   directly calls QMetaObject::invokeMethod) instead of manually creating and
+   starting a timer object, slightly improving performance.
+ - [PYSIDE-769]  QtAsyncio: Fix a missing attribute error on Windows. Fix
+ - [PYSIDE-2641] QtAsyncio.run() not returning the result of a coroutine. It
+                 is now possible to disable the signal handler for SIGINT by
+                 passing a parameter to run(). The loop policy is reset after
+                 run() finishes.
+ - [PYSIDE-838]  Functions qCompress/qUncompress() taking a PyBuffer/len
+                 arguments have been fixed.
+ - [PYSIDE-1106] Documentation: Decorators, global functions and enumerations
+                 are now documented add indexed from the module page. The class
+                 documentation now uses more sphinx domain directives.
+                 Pages for all tools have been added. The order of the examples
+                 list has been changed to show relevant examples first.
+ - [PYSIDE-1275] QObject.disconnect() now returns False with a warning instead
+                 of raising an exception for non-fatal cases.
+ - [PYSIDE-1612] Deployment: Issues when using pyenv have been fixed.
+                 The finding of dependent modules has been improved.
+ - [PYSIDE-1612] Android Deployment: The NDK version in the tool has been
+                 updated. Python has been updated to 3.11. CMake version 3.23
+                 is now required. The wheels are no longer built with
+                 --limited-api. The generated pysidedeploy.spec has an explicit
+                 group called `android` which stores the wheels and plugins.
+ - [PYSIDE-1906] Hash value calculation has been optimized.
+ - [PYSIDE-2206] The colorpaletteclient demo as well as the hellographs and
+                 simplerhiwidget examples have been added.
+ - [PYSIDE-2215] Intersphinx support has been improved.
+ - [PYSIDE-2404] Application startup time has been significantly decreased
+                 by registering the types on demand. The importing of numpy
+                 has also been deferred since it caused quite some delay.
+ - [PYSIDE-2432] A static create() function for decorated QML singletons
+                 has been added.
+ - [PYSIDE-2484] The QML type registration code has been ported to use
+                 RegisterTypeAndRevisions.
+ - [PYSIDE-2535] Obtaining DBUS properties from QDBusInterface has been fixed.
+                 As a consequence though, it is no longer possible to derive a
+                 Python class with signals/slots from QDBusInterface.
+ - [PYSIDE-2504] Documentation: Option 'build_rst_docs' has been deprecated in
+                 favor of 'build_base_docs'.
+ - [PYSIDE-2524] It is now possible to connect signals to slots/lambdas with
+                 more arguments provided they have default parameters.
+ - [PYSIDE-2524] The signal connection code has been optimized.
+ - [PYSIDE-2543] QtQuickTest has been added.
+ - [PYSIDE-2576] Documentation: The extendedexplorer tutorial has been improved.
+ - [PYSIDE-2590] Some fixes have been made be able to cope with namespaced Qt
+                 builds.
+ - [PYSIDE-2610] The QTextureImageData methods returning an enumeration of
+                 QOpenGLTexture have been added.
+ - [PYSIDE-2605] An error about the C++ object being deleted when calling
+                 QWidget.style() in an embedded application has been fixed.
+ - [PYSIDE-2468] Deployment: Support for the Qt permission API has been added.
+                 macOS bundle applications are now created.
+ - [PYSIDE-2597] Desktop Deployment: The the plugins included have been
+                 optimized.
+ - [PYSIDE-2633] C++ typedefs of container instantiations are now
+                 registered in Python under their name, making possible
+                 to decorate slots with those names (for example,
+                 "QRemoteObjectSourceLocation").
+ - [PYSIDE-2639] Segmentation fault with QLocale.system() has been fixed.
+ - [QTBUG-119785] The Filesystemexplorer-example has been updated.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-31]   Shiboken.wrapInstance() now returns existing instances
+                 (preserving ids).
+ - [PYSIDE-560]  libshiboken/Limited API: No longer needed PyTypeObject slots
+                 have been disabled in the PyTypeObject helper struct.
+ - [PYSIDE-1106] A typesystem attribute providing a hint to a documentation
+                 file has been added to function/enum type entries
+                 (for globals).
+ - [PYSIDE-1106] Documentation can now be injected from separate .rst files.
+ - [PYSIDE-1106] Documentation injected into classes with "append" will now
+                 be appended to the class description instead of being written
+                 at the end of the page.
+ - [PYSIDE-1106] Documentation: It is now possible to inject documentation
+                 for parameters of added functions.
+ - [PYSIDE-2230] Python 3.12: Hidden Type Extensions according to PEP 697
+                 are now used instead of shadow dictionaries.
+ - [PYSIDE-2404] The generated type index constants are no longer in
+                 uppercase. Uppercase is retained until deprecation in
+                 PySide7.
+ - [PYSIDE-2447] A typesystem attribute to generate submodules has been added.
+ - [PYSIDE-2535] Generating the Qt meta object functions handling the PySide6
+                 signals can now be disabled by a typesystem attribute. This
+                 is useful for classes using dynamic meta objects, for
+                 example QDBusInterface.
