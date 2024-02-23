@@ -120,6 +120,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
         command_str = nuitka.create_executable(source_file=config.source_file,
                                                extra_args=config.extra_args,
                                                qml_files=config.qml_files,
+                                               qt_plugins=config.qt_plugins,
                                                excluded_qml_plugins=config.excluded_qml_plugins,
                                                icon=config.icon,
                                                dry_run=dry_run)

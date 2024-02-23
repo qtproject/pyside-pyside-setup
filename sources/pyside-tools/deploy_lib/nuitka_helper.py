@@ -17,6 +17,23 @@ class Nuitka:
 
     def __init__(self, nuitka):
         self.nuitka = nuitka
+        # plugins to ignore. The sensible plugins are include by default by Nuitka for PySide6
+        # application deployment
+        self.qt_plugins_to_ignore = ["imageformats",  # being Nuitka `sensible`` plugins
+                                     "iconengines",
+                                     "mediaservice",
+                                     "printsupport",
+                                     "platforms",
+                                     "platformthemes",
+                                     "styles",
+                                     "wayland-shell-integration",
+                                     "wayland-decoration-client",
+                                     "wayland-graphics-integration-client",
+                                     "egldeviceintegrations",
+                                     "xcbglintegrations",
+                                     "tls",  # end Nuitka `sensible` plugins
+                                     "generic"  # plugins that error with Nuitka
+                                     ]
 
     @staticmethod
     def icon_option():
@@ -28,11 +45,12 @@ class Nuitka:
             return "--macos-app-icon"
 
     def create_executable(self, source_file: Path, extra_args: str, qml_files: List[Path],
-                          excluded_qml_plugins: List[str], icon: str, dry_run: bool):
+                          qt_plugins: List[str], excluded_qml_plugins: List[str], icon: str,
+                          dry_run: bool):
+        qt_plugins = [plugin for plugin in qt_plugins if plugin not in self.qt_plugins_to_ignore]
         extra_args = extra_args.split()
         qml_args = []
         if qml_files:
-            qml_args.append("--include-qt-plugins=all")
             # This will generate options for each file using:
             #     --include-data-files=ABSOLUTE_PATH_TO_FILE=RELATIVE_PATH_TO ROOT
             # for each file. This will preserve the directory structure of QML resources.
@@ -41,6 +59,11 @@ class Nuitka:
                  f"./{qml_file.resolve().relative_to(source_file.parent)}"
                  for qml_file in qml_files]
             )
+            # add qml plugin. The `qml`` plugin name is not present in the module json files shipped
+            # with Qt and hence not in `qt_plugins``. However, Nuitka uses the 'qml' plugin name to
+            # include the necessary qml plugins. There we have to add it explicitly for a qml
+            # application
+            qt_plugins.append("qml")
 
             if excluded_qml_plugins:
                 prefix = "lib" if sys.platform != "win32" else ""
@@ -59,8 +82,14 @@ class Nuitka:
             "--enable-plugin=pyside6",
             f"--output-dir={output_dir}",
         ]
+
         command.extend(extra_args + qml_args)
         command.append(f"{self.__class__.icon_option()}={icon}")
+        if qt_plugins:
+            # sort qt_plugins so that the result is definitive when testing
+            qt_plugins.sort()
+            qt_plugins_str = ",".join(qt_plugins)
+            command.append(f"--include-qt-plugins={qt_plugins_str}")
 
         command_str, _ = run_command(command=command, dry_run=dry_run)
         return command_str

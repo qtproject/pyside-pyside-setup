@@ -5,6 +5,7 @@ import ast
 import re
 import os
 import site
+import json
 import warnings
 import logging
 import shutil
@@ -13,25 +14,6 @@ from pathlib import Path
 from typing import List, Set
 
 from . import IMPORT_WARNING_PYSIDE, run_command
-
-
-def get_qt_libs_dir():
-    """
-    Finds the path to the Qt libs directory inside PySide6 package installation
-    """
-    pyside_install_dir = None
-    for possible_site_package in site.getsitepackages():
-        if possible_site_package.endswith("site-packages"):
-            pyside_install_dir = Path(possible_site_package) / "PySide6"
-
-    if not pyside_install_dir:
-        print("Unable to find site-packages. Exiting ...")
-        sys.exit(-1)
-
-    if sys.platform == "win32":
-        return pyside_install_dir
-
-    return pyside_install_dir / "Qt" / "lib"  # for linux and macOS
 
 
 def find_pyside_modules(project_dir: Path, extra_ignore_dirs: List[Path] = None,
@@ -164,8 +146,26 @@ class QtDependencyReader:
             print(f"[DEPLOY] Deployment on unsupported platfrom {sys.platform}")
             sys.exit(1)
 
-        self.qt_libs_dir = get_qt_libs_dir()
+        self.pyside_install_dir = None
+        self.qt_libs_dir = self.get_qt_libs_dir()
         self._lib_reader = shutil.which(self.lib_reader_name)
+
+    def get_qt_libs_dir(self):
+        """
+        Finds the path to the Qt libs directory inside PySide6 package installation
+        """
+        for possible_site_package in site.getsitepackages():
+            if possible_site_package.endswith("site-packages"):
+                self.pyside_install_dir = Path(possible_site_package) / "PySide6"
+
+        if not self.pyside_install_dir:
+            print("Unable to find site-packages. Exiting ...")
+            sys.exit(-1)
+
+        if sys.platform == "win32":
+            return self.pyside_install_dir
+
+        return self.pyside_install_dir / "Qt" / "lib"  # for linux and macOS
 
     @property
     def lib_reader(self):
@@ -216,3 +216,27 @@ class QtDependencyReader:
             logging.info(f"[DEPLOY] Following dependencies found for {module}: {dependent_modules}")
         else:
             logging.info(f"[DEPLOY] No Qt dependencies found for {module}")
+
+    def find_plugin_dependencies(self, used_modules: List[str]) -> List[str]:
+        """
+        Given the modules used by the application, returns all the required plugins
+        """
+        plugins = set()
+        pyside_mod_plugin_jsons = ["PySide6_Essentials.json", "PySide6_Addons.json"]
+        for pyside_mod_plugin_json_name in pyside_mod_plugin_jsons:
+            pyside_mod_plugin_json_file = self.pyside_install_dir / pyside_mod_plugin_json_name
+            if not pyside_mod_plugin_json_file.exists():
+                warnings.warn(f"[DEPLOY] Unable to find {pyside_mod_plugin_json_file}.",
+                              category=RuntimeWarning)
+                continue
+
+            # convert the json to dict
+            pyside_mod_dict = {}
+            with open(pyside_mod_plugin_json_file) as pyside_json:
+                pyside_mod_dict = json.load(pyside_json)
+
+            # find all the plugins in the modules
+            for module in used_modules:
+                plugins.update(pyside_mod_dict.get(module, []))
+
+        return list(plugins)

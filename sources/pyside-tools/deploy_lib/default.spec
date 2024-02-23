@@ -44,6 +44,9 @@ excluded_qml_plugins =
 # Qt modules used. Comma separated
 modules =
 
+# Qt plugins used by the application
+plugins =
+
 [android]
 
 # path to PySide wheel

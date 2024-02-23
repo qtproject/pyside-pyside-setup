@@ -365,7 +365,7 @@ class DesktopConfig(Config):
                  existing_config_file: bool = False, extra_ignore_dirs: List[str] = None):
         super().__init__(config_file, source_file, python_exe, dry_run, existing_config_file,
                          extra_ignore_dirs)
-
+        self.dependency_reader = QtDependencyReader(dry_run=self.dry_run)
         if self.get_value("qt", "modules"):
             self.modules = self.get_value("qt", "modules").split(",")
         else:
@@ -373,20 +373,34 @@ class DesktopConfig(Config):
             self._find_and_set_qtquick_modules()
             self._find_dependent_qt_modules()
 
+        self._qt_plugins = []
+        if self.get_value("qt", "plugins"):
+            self._qt_plugins = self.get_value("qt", "plugins").split(",")
+        else:
+            self.qt_plugins = self.dependency_reader.find_plugin_dependencies(self.modules)
+
+    @property
+    def qt_plugins(self):
+        return self._qt_plugins
+
+    @qt_plugins.setter
+    def qt_plugins(self, qt_plugins):
+        self._qt_plugins = qt_plugins
+        self.set_value("qt", "plugins", ",".join(qt_plugins))
+
     def _find_dependent_qt_modules(self):
         """
         Given pysidedeploy_config.modules, find all the other dependent Qt modules.
         """
-        dependency_reader = QtDependencyReader(dry_run=self.dry_run)
         all_modules = set(self.modules)
 
-        if not dependency_reader.lib_reader:
-            warnings.warn(f"[DEPLOY] Unable to find {dependency_reader.lib_reader_name}. This tool"
-                          " helps to find the Qt module dependencies of the application. Skipping "
-                          " checking for dependencies.", category=RuntimeWarning)
+        if not self.dependency_reader.lib_reader:
+            warnings.warn(f"[DEPLOY] Unable to find {self.dependency_reader.lib_reader_name}. This "
+                          "tool helps to find the Qt module dependencies of the application. "
+                          "Skipping checking for dependencies.", category=RuntimeWarning)
             return
 
         for module_name in self.modules:
-            dependency_reader.find_dependencies(module=module_name, used_modules=all_modules)
+            self.dependency_reader.find_dependencies(module=module_name, used_modules=all_modules)
 
         self.modules = list(all_modules)
