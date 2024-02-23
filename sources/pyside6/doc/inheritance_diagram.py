@@ -37,7 +37,6 @@ r"""
     :license: BSD, see LICENSE for details.
 """
 
-import sys
 try:
     from hashlib import md5
 except ImportError:
@@ -49,10 +48,7 @@ from docutils.parsers.rst import directives, Directive
 from sphinx.ext.graphviz import render_dot_html, render_dot_latex
 
 from inheritance_graph import InheritanceGraph
-from import_inheritance import (get_inheritance_entries_by_import,
-                                InheritanceException)
-from json_inheritance import (is_inheritance_from_json_enabled,
-                              get_inheritance_entries_from_json)
+from import_inheritance import (InheritanceException)
 
 
 class inheritance_diagram(nodes.General, nodes.Element):
