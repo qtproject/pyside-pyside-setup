@@ -3,8 +3,7 @@
 
 import sys
 
-from import_inheritance import (get_inheritance_entries_by_import,
-                                InheritanceException)
+from import_inheritance import (get_inheritance_entries_by_import)
 from json_inheritance import (is_inheritance_from_json_enabled,
                               get_inheritance_entries_from_json)
 

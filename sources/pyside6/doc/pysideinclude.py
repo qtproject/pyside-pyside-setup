@@ -11,7 +11,6 @@ from os import path
 from docutils import nodes
 from docutils.parsers.rst import Directive, directives
 
-from sphinx import addnodes
 from sphinx.util import parselinenos
 
 
@@ -69,7 +68,7 @@ class PySideInclude(Directive):
         codec_info = codecs.lookup(encoding)
         try:
             f = codecs.StreamReaderWriter(open(fn, 'Ub'),
-                    codec_info[2], codec_info[3], 'strict')
+                                          codec_info[2], codec_info[3], 'strict')
             lines = f.readlines()
             f.close()
         except (IOError, OSError):
@@ -103,10 +102,10 @@ class PySideInclude(Directive):
             lines = [lines[i] for i in linelist]
 
         startafter = self.options.get('start-after')
-        endbefore  = self.options.get('end-before')
-        prepend    = self.options.get('prepend')
-        append     = self.options.get('append')
-        snippet    = self.options.get('snippet')
+        endbefore = self.options.get('end-before')
+        prepend = self.options.get('prepend')
+        append = self.options.get('append')
+        snippet = self.options.get('snippet')
 
         if snippet:
             startafter = "//![%s]" % snippet

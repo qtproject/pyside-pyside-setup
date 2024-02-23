@@ -8,7 +8,6 @@ Tool to run qtattributionsscanner and convert its output to rst
 import os
 import json
 import subprocess
-import sys
 import warnings
 from argparse import ArgumentParser, RawTextHelpFormatter
 from pathlib import Path
@@ -22,8 +21,8 @@ libexec_dir = None
 
 def indent(lines, indent):
     result = ''
-    for l in lines:
-        result = f"{result}{indent}{l}\n"
+    for line in lines:
+        result = f"{result}{indent}{line}\n"
     return result
 
 
@@ -96,7 +95,7 @@ def runScanner(directory, targetFileName, libexec_dir):
             url = entry['Homepage']
             version = entry['Version']
             if url and version:
-                content = f"{content}{rstUrl('Project Homepage', url)}, upstream version: {version}\n\n"
+                content = f"{content}{rstUrl('Project Homepage', url)}, upstream version: {version}\n\n"  # noqa E:501
             copyright = entry['Copyright']
             if copyright:
                 content += rstLiteralBlockFromText(copyright)
