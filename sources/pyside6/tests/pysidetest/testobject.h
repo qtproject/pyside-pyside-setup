@@ -45,6 +45,8 @@ public:
 
     void emitSignalWithTypedefValue(int value);
 
+    void emitFlagsSignal(Qt::Alignment alignment);
+
 signals:
     void idValue(int newValue);
     void justASignal();
@@ -52,6 +54,7 @@ signals:
     void childrenChanged(const QList<QObject*>&);
     void signalWithDefaultValue(bool value = false);
     void signalWithTypedefValue(TypedefValue value);
+    void flagsSignal(Qt::Alignment alignment);
 
 private:
     int m_idValue;

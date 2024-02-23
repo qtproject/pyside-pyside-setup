@@ -4108,7 +4108,10 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const Abstrac
     if (auto flags = enumType->flags())
         s << "// Register converter for flag '" << flags->qualifiedCppName() << "'.\n"
             << "Shiboken::Conversions::registerConverterName(converter, \""
-            << flags->name() << "\");\n";
+            << flags->name() << "\");\n" // QMetaType
+            << "Shiboken::Conversions::registerConverterName(converter, \""
+            << flags->originalName() << "\");\n"; // Signals with flags
+
     s << outdent << "}\n";
 }
 

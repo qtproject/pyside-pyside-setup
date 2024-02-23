@@ -30,6 +30,11 @@ void TestObject::emitSignalWithTypedefValue(int value)
     emit signalWithTypedefValue(TypedefValue(value));
 }
 
+void TestObject::emitFlagsSignal(Qt::Alignment alignment)
+{
+    emit flagsSignal(alignment);
+}
+
 QDebug operator<<(QDebug dbg, TestObject& testObject)
 {
     QDebugStateSaver saver(dbg);
