@@ -45,6 +45,8 @@ public:
 
     void emitSignalWithTypedefValue(int value);
 
+    void emitFlagsSignal(Qt::Alignment alignment);
+
     static constexpr auto LATIN1_TEST_FIELD = QLatin1StringView("test");
 
     void setQLatin1String(QLatin1String v);
@@ -57,6 +59,7 @@ signals:
     void childrenChanged(const QList<QObject*>&);
     void signalWithDefaultValue(bool value = false);
     void signalWithTypedefValue(TypedefValue value);
+    void flagsSignal(Qt::Alignment alignment);
 
 private:
     int m_idValue;

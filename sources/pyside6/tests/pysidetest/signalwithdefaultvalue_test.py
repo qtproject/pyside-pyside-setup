@@ -13,7 +13,7 @@ from init_paths import init_test_paths
 init_test_paths(True)
 
 from testbinding import TestObject
-from PySide6.QtCore import QObject, SIGNAL
+from PySide6.QtCore import Qt
 
 '''Tests the behaviour of signals with default values.'''
 
@@ -56,6 +56,17 @@ class SignalWithDefaultValueTest(unittest.TestCase):
         self.assertTrue(self.void_called)
         self.assertTrue(self.bool_called)
 
+    def testFlagsSignal(self):
+        test_value = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom
+
+        def callbackAlignmentFlags(alignment):
+            self.alignment_flags_called = alignment
+
+        self.obj.flagsSignal.connect(callbackAlignmentFlags)
+        self.obj.emitFlagsSignal(test_value)
+        self.assertTrue(self.alignment_flags_called)
+        self.assertEqual(self.alignment_flags_called, test_value)
+
     def testConnectOldStyleEmitVoidSignal(self):
         def callbackVoid():
             self.void_called = True
@@ -83,4 +94,3 @@ class SignalWithDefaultValueTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

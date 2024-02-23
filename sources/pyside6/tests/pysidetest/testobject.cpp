@@ -30,6 +30,11 @@ void TestObject::emitSignalWithTypedefValue(int value)
     emit signalWithTypedefValue(TypedefValue(value));
 }
 
+void TestObject::emitFlagsSignal(Qt::Alignment alignment)
+{
+    emit flagsSignal(alignment);
+}
+
 void TestObject::setQLatin1String(QLatin1String v)
 {
     m_qLatin1String = v;
