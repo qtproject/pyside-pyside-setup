@@ -1,0 +1,3 @@
+{
+    "files": ["main.py", "HelloGraphs/Main.qml", "HelloGraphs/qmldir"]
+}
