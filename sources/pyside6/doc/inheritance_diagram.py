@@ -108,27 +108,6 @@ def get_graph_hash(node):
     return md5(hashString.encode('utf-8')).hexdigest()[-10:]
 
 
-def fix_class_name(name):
-    """Fix duplicated modules 'PySide6.QtCore.PySide6.QtCore.QObject'"""
-    mod_pos = name.rfind('.PySide')
-    return name[mod_pos + 1:] if mod_pos != -1 else name
-
-
-def expand_ref_uri(uri):
-    """Fix a ref URI like 'QObject.html#PySide6.QtCore.PySide6.QtCore.QObject'
-       to point from the image directory back to the HTML directory."""
-    anchor_pos = uri.find('#')
-    if anchor_pos == -1:
-        return uri
-    # Determine the path from the anchor "#PySide6.QtCore.PySide6.QtCore.QObject"
-    class_name = fix_class_name(uri[anchor_pos + 1:])
-    path = '../'
-    modules = class_name.split('.')
-    for m in range(min(2, len(modules))):
-        path += f'{modules[m]}/'
-    return path + uri[:anchor_pos]  # Strip anchor
-
-
 def html_visit_inheritance_diagram(self, node):
     """
     Output the graph for HTML.  This will insert a PNG with clickable
@@ -145,7 +124,7 @@ def html_visit_inheritance_diagram(self, node):
         ref_title = child.get('reftitle')
         uri = child.get('refuri')
         if uri and ref_title:
-            urls[fix_class_name(ref_title)] = expand_ref_uri(uri)
+            urls[ref_title] = uri
 
     dotcode = graph.generate_dot(name, urls, env=self.builder.env)
     render_dot_html(self, node, dotcode, {}, 'inheritance', 'inheritance',
