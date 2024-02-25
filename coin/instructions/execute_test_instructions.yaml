@@ -5,7 +5,7 @@ enable_if:
   not_contains_value: LicenseCheck
 instructions:
   - type: ExecuteCommand
-    command: "python3 -m pip install -U setuptools==67.7.2"
+    command: "python3 -m pip install -U setuptools==69.1.1"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     enable_if:
@@ -45,7 +45,7 @@ instructions:
     userMessageOnFailure: >
          Failed to execute test instructions on macOS
   - type: ExecuteCommand
-    command: "{{.Env.interpreter}} -m pip install -U pip setuptools==67.7.2 --user"
+    command: "{{.Env.interpreter}} -m pip install -U pip setuptools==69.1.1 --user"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     enable_if:
@@ -65,7 +65,7 @@ instructions:
     userMessageOnFailure: >
          Failed to execute test instructions on Linux
   - type: ExecuteCommand
-    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -m pip install -U pip setuptools==67.7.2 --user"
+    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -m pip install -U pip setuptools==69.1.1 --user"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     enable_if:

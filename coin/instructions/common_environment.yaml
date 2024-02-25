@@ -222,7 +222,7 @@ instructions:
       userMessageOnFailure: >
           Failed to install dependencies
     - type: ExecuteCommand
-      command: "python3 -m pip install -U setuptools==67.7.2"
+      command: "python3 -m pip install -U setuptools==69.1.1"
       maxTimeInSeconds: 14400
       maxTimeBetweenOutput: 1200
       enable_if:
