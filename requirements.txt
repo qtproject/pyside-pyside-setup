@@ -1,5 +1,5 @@
 # Build dependencies
-setuptools==69.0.3
+setuptools==69.1.1
 packaging==23.2
 build==1.0.3
 wheel==0.42.0
