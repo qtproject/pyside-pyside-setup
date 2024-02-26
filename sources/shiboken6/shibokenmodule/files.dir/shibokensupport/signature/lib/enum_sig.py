@@ -125,6 +125,7 @@ class ExactEnumerator(object):
         enums = []
         properties = []
         signals = []
+        attributes = {}
 
         for thing_name, thing in class_members:
             if signal_check(thing):
@@ -147,6 +148,13 @@ class ExactEnumerator(object):
                     enums.append((thing_name, type(thing).__qualname__, thing))
             elif isinstance(thing, property):
                 properties.append((thing_name, thing))
+            # Support attributes that have PySide types as values,
+            # but we skip the 'staticMetaObject' that needs
+            # to be defined at a QObject level.
+            elif "PySide" in str(type(thing)) and "QMetaObject" not in str(type(thing)):
+                if class_name not in attributes:
+                    attributes[class_name] = {}
+                attributes[class_name][thing_name] = thing
 
             if thing_name in self.collision_candidates:
                 self.collision_track.add(thing_name)
@@ -183,6 +191,13 @@ class ExactEnumerator(object):
                     sig_str = str(signal)
                     with self.fmt.signal(sig_class_name, signal_name, sig_str):
                         pass
+            if hasattr(self.fmt, "attribute"):
+                if len(attributes):
+                    self.section()
+                for class_name, attrs in attributes.items():
+                    for attr_name, attr_value in attrs.items():
+                        with self.fmt.attribute(attr_name, attr_value):
+                            pass
             if len(subclasses):
                 self.section()
             for subclass_name, subclass in subclasses:
