@@ -188,7 +188,7 @@ public:
     /// \param typeSignature The string describing the type to be built.
     /// \return A new AbstractMetaType object or nullopt in case of failure.
     static std::optional<AbstractMetaType>
-        fromString(QString typeSignature, QString *errorMessage = nullptr);
+        fromString(const QString &typeSignatureIn, QString *errorMessage = nullptr);
     /// Creates an AbstractMetaType object from a TypeEntry.
     static AbstractMetaType fromTypeEntry(const TypeEntryCPtr &typeEntry);
     /// Creates an AbstractMetaType object from an AbstractMetaClass.
