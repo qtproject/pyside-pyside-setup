@@ -159,6 +159,12 @@ class Formatter(Writer):
         yield
 
     @contextmanager
+    def attribute(self, attr_name, attr_value):
+        spaces = indent * self.level
+        self.print(f"{spaces}{attr_name:25}: ...  # type: {type(attr_value).__qualname__}")
+        yield
+
+    @contextmanager
     def signal(self, class_name, sig_name, sig_str):
         spaces = indent * self.level
         self.print(f"{spaces}{sig_name:25}: ClassVar[{class_name}] = ... # {sig_str}")
