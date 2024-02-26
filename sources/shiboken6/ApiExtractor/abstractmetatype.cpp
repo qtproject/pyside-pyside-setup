@@ -948,14 +948,18 @@ using AbstractMetaTypeCache = QHash<QString, AbstractMetaType>;
 Q_GLOBAL_STATIC(AbstractMetaTypeCache, metaTypeFromStringCache)
 
 std::optional<AbstractMetaType>
-AbstractMetaType::fromString(QString typeSignature, QString *errorMessage)
+AbstractMetaType::fromString(const QString &typeSignatureIn, QString *errorMessage)
 {
-    typeSignature = typeSignature.trimmed();
+    auto &cache = *metaTypeFromStringCache();
+    auto it = cache.find(typeSignatureIn);
+    if (it != cache.end())
+        return it.value();
+
+    QString typeSignature = typeSignatureIn.trimmed();
     if (typeSignature.startsWith(u"::"))
         typeSignature.remove(0, 2);
 
-    auto &cache = *metaTypeFromStringCache();
-    auto it = cache.find(typeSignature);
+    it = cache.find(typeSignature);
     if (it == cache.end()) {
         auto metaType =
             AbstractMetaBuilder::translateType(typeSignature, nullptr, {}, errorMessage);
@@ -965,6 +969,8 @@ AbstractMetaType::fromString(QString typeSignature, QString *errorMessage)
             return {};
         }
         it = cache.insert(typeSignature, metaType.value());
+        if (typeSignature != typeSignatureIn)
+            cache.insert(typeSignatureIn, metaType.value());
     }
     return it.value();
 }
