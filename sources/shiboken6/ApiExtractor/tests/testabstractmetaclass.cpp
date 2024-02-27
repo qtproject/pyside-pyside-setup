@@ -159,11 +159,11 @@ public:
     const auto funcF = virtualFunctionsF.constFirst();
 
     QCOMPARE(funcA->ownerClass(), a);
-    QVERIFY(funcC->attributes().testFlag(AbstractMetaFunction::VirtualCppMethod));
+    QVERIFY(funcC->isVirtual());
     QCOMPARE(funcB->ownerClass(), b);
     QCOMPARE(funcC->ownerClass(), c);
-    QVERIFY(funcC->attributes().testFlag(AbstractMetaFunction::OverriddenCppMethod));
-    QVERIFY(funcF->attributes().testFlag(AbstractMetaFunction::FinalCppMethod));
+    QVERIFY(funcC->cppAttributes().testFlag(FunctionAttribute::Override));
+    QVERIFY(funcF->cppAttributes().testFlag(FunctionAttribute::Final));
 
     QCOMPARE(funcA->declaringClass(), a);
     QCOMPARE(funcB->declaringClass(), a);

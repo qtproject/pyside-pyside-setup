@@ -319,10 +319,11 @@ QString msgSkippingFunction(const FunctionModelItem &functionItem,
     QTextStream str(&result);
     str << functionItem->sourceLocation() << "skipping "
         << functionItem->accessPolicy() << ' ';
-    if (functionItem->isAbstract())
+    const bool isAbstract = functionItem->attributes().testFlag(FunctionAttribute::Abstract);
+    if (isAbstract)
         str << "abstract ";
     str << "function '" << signature << "', " << why;
-    if (functionItem->isAbstract()) {
+    if (isAbstract) {
         str << "\nThis will lead to compilation errors due to not "
                "being able to instantiate the wrapper.";
     }

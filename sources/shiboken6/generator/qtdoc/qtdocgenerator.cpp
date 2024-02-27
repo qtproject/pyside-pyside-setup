@@ -889,7 +889,7 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr
         Indentation indentation(s);
         if (!indexed)
             s << "\n:noindex:";
-        if (func->attributes().testFlag(AbstractMetaFunction::Attribute::FinalCppMethod))
+        if (func->cppAttributes().testFlag(FunctionAttribute::Final))
             s << "\n:final:";
         else if (func->isAbstract())
             s << "\n:abstractmethod:";
