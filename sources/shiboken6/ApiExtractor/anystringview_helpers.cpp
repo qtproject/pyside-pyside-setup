@@ -16,15 +16,6 @@ QTextStream &operator<<(QTextStream &str, QAnyStringView asv)
     return str;
 }
 
-QDebug operator<<(QDebug debug, QAnyStringView asv)
-{
-    QDebugStateSaver saver(debug);
-    debug.noquote();
-    debug.nospace();
-    asv.visit([&debug](auto s) { debug << s; });
-    return debug;
-}
-
 static bool asv_containsImpl(QLatin1StringView v, char c)
 {
     return v.contains(uint16_t(c));
