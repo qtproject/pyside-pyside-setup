@@ -48,7 +48,6 @@ public:
     AbstractMetaFunctionPrivate()
         : m_constant(false),
           m_reverse(false),
-          m_explicit(false),
           m_pointerOperator(false),
           m_isCallOperator(false)
     {
@@ -87,10 +86,10 @@ public:
     AddedFunctionPtr m_addedFunction;
     SourceLocation m_sourceLocation;
     AbstractMetaFunction::Attributes m_attributes;
+    FunctionAttributes m_cppAttributes;
     AbstractMetaFunction::Flags m_flags;
     uint m_constant                 : 1;
     uint m_reverse                  : 1;
-    uint m_explicit                 : 1;
     uint m_pointerOperator          : 1;
     uint m_isCallOperator           : 1;
     mutable int m_cachedOverloadNumber = TypeSystem::OverloadNumberUnset;
@@ -122,7 +121,7 @@ AbstractMetaFunction::AbstractMetaFunction(const AddedFunctionPtr &addedFunc) :
     }
     AbstractMetaFunction::Attributes atts;
     if (addedFunc->isStatic())
-        atts |= AbstractMetaFunction::Static;
+        setCppAttribute(FunctionAttribute::Static);
     if (addedFunc->isClassMethod())
         atts |= AbstractMetaFunction::ClassMethod;
     setAttributes(atts);
@@ -215,12 +214,12 @@ void AbstractMetaFunction::setPointerOperator(bool value)
 
 bool AbstractMetaFunction::isExplicit() const
 {
-    return d->m_explicit;
+    return d->m_cppAttributes.testFlag(FunctionAttribute::Explicit);
 }
 
 void AbstractMetaFunction::setExplicit(bool isExplicit)
 {
-    d->m_explicit = isExplicit;
+    d->m_cppAttributes.setFlag(FunctionAttribute::Explicit, isExplicit);
 }
 
 bool AbstractMetaFunction::returnsBool() const
@@ -260,6 +259,21 @@ void AbstractMetaFunction::operator+=(AbstractMetaFunction::Attribute attribute)
 void AbstractMetaFunction::operator-=(AbstractMetaFunction::Attribute attribute)
 {
     d->m_attributes.setFlag(attribute, false);
+}
+
+FunctionAttributes AbstractMetaFunction::cppAttributes() const
+{
+    return d->m_cppAttributes;
+}
+
+void AbstractMetaFunction::setCppAttributes(FunctionAttributes a)
+{
+    d->m_cppAttributes = a;
+}
+
+void AbstractMetaFunction::setCppAttribute(FunctionAttribute a, bool on)
+{
+    d->m_cppAttributes.setFlag(a, on);
 }
 
 AbstractMetaFunction::Flags AbstractMetaFunction::flags() const
@@ -342,7 +356,7 @@ AbstractMetaFunction::CompareResult AbstractMetaFunction::compareTo(const Abstra
         result |= EqualImplementor;
 
     // Attributes
-    if (attributes() == other->attributes())
+    if (attributes() == other->attributes() && cppAttributes() == other->cppAttributes())
         result |= EqualAttributes;
 
     // Compare types
@@ -427,6 +441,10 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
 {
     auto *cpy = new AbstractMetaFunction;
     cpy->setAttributes(attributes());
+    auto ca = cppAttributes();
+    // Historical bug: explicit was not copied! (causing nontypetemplate_test.py fail)
+    ca.setFlag(FunctionAttribute::Explicit, false);
+    cpy->setCppAttributes(ca);
     cpy->setFlags(flags());
     cpy->setAccess(access());
     cpy->setName(name());
@@ -729,7 +747,8 @@ static bool modifiedUndeprecated(const FunctionModification &mod)
 bool AbstractMetaFunction::isDeprecated() const
 {
     const auto &mods = modifications(declaringClass());
-    return d->m_attributes.testFlag(Attribute::Deprecated)
+
+    return d->m_cppAttributes.testFlag(FunctionAttribute::Deprecated)
            ? std::none_of(mods.cbegin(), mods.cend(), modifiedUndeprecated)
            : std::any_of(mods.cbegin(), mods.cend(), modifiedDeprecated);
 }
@@ -1020,9 +1039,10 @@ QString AbstractMetaFunction::signatureComment() const
 QString AbstractMetaFunction::debugSignature() const
 {
     QString result;
-    const bool isOverride = attributes() & AbstractMetaFunction::OverriddenCppMethod;
-    const bool isFinal = attributes() & AbstractMetaFunction::FinalCppMethod;
-    if (!isOverride && !isFinal && (attributes() & AbstractMetaFunction::VirtualCppMethod))
+    const auto attributes = cppAttributes();
+    const bool isOverride = attributes.testFlag(FunctionAttribute::Override);
+    const bool isFinal = attributes.testFlag(FunctionAttribute::Final);
+    if (!isOverride && !isFinal && (attributes.testFlag(FunctionAttribute::Virtual)))
         result += u"virtual "_s;
     if (d->m_implementingClass)
         result += d->m_implementingClass->qualifiedCppName() + u"::"_s;
@@ -1386,7 +1406,7 @@ bool AbstractMetaFunction::isInplaceOperator() const
 
 bool AbstractMetaFunction::isVirtual() const
 {
-    return d->m_attributes.testFlag(AbstractMetaFunction::VirtualCppMethod);
+    return d->m_cppAttributes.testFlag(FunctionAttribute::Virtual);
 }
 
 QString AbstractMetaFunctionPrivate::modifiedName(const AbstractMetaFunction *q) const
@@ -1644,9 +1664,9 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &debug) const
         debug << " [userAdded]";
     if (isUserDeclared())
         debug << " [userDeclared]";
-    if (d->m_explicit)
+    if (d->m_cppAttributes.testFlag(FunctionAttribute::Explicit))
         debug << " [explicit]";
-    if (attributes().testFlag(AbstractMetaFunction::Deprecated))
+    if (d->m_cppAttributes.testFlag(FunctionAttribute::Deprecated))
         debug << " [deprecated]";
     if (d->m_pointerOperator)
         debug << " [operator->]";

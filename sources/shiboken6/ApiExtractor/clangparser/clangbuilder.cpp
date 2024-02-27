@@ -346,7 +346,7 @@ FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
     case CXAvailability_Available:
         break;
     case CXAvailability_Deprecated:
-        result->setDeprecated(true);
+        result->setAttribute(FunctionAttribute::Deprecated);
         break;
     case CXAvailability_NotAvailable: // "Foo(const Foo&) = delete;"
         result->setDeleted(true);
@@ -389,9 +389,9 @@ FunctionModelItem BuilderPrivate::createMemberFunction(const CXCursor &cursor,
     auto result = createFunction(cursor, functionType, isTemplateCode);
     result->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
     result->setConstant(clang_CXXMethod_isConst(cursor) != 0);
-    result->setStatic(clang_CXXMethod_isStatic(cursor) != 0);
-    result->setVirtual(clang_CXXMethod_isVirtual(cursor) != 0);
-    result->setAbstract(clang_CXXMethod_isPureVirtual(cursor) != 0);
+    result->setAttribute(FunctionAttribute::Static, clang_CXXMethod_isStatic(cursor) != 0);
+    result->setAttribute(FunctionAttribute::Virtual, clang_CXXMethod_isVirtual(cursor) != 0);
+    result->setAttribute(FunctionAttribute::Abstract, clang_CXXMethod_isPureVirtual(cursor) != 0);
     return result;
 }
 
@@ -407,7 +407,8 @@ void BuilderPrivate::qualifyConstructor(const CXCursor &cursor)
         && m_currentFunction->arguments().size() == 1
         && clang_CXXConstructor_isCopyConstructor(cursor) == 0
         && clang_CXXConstructor_isMoveConstructor(cursor) == 0) {
-        m_currentFunction->setExplicit(clang_CXXConstructor_isConvertingConstructor(cursor) == 0);
+        m_currentFunction->setAttribute(FunctionAttribute::Explicit,
+                                        clang_CXXConstructor_isConvertingConstructor(cursor) == 0);
     }
 }
 
@@ -1182,13 +1183,13 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         break;
     case CXCursor_CXXFinalAttr:
          if (d->m_currentFunction)
-             d->m_currentFunction->setFinal(true);
+            d->m_currentFunction->setAttribute(FunctionAttribute::Final);
          else if (d->m_currentClass)
              d->m_currentClass->setFinal(true);
         break;
     case CXCursor_CXXOverrideAttr:
         if (d->m_currentFunction)
-            d->m_currentFunction->setOverride(true);
+            d->m_currentFunction->setAttribute(FunctionAttribute::Override);
         break;
     case CXCursor_StaticAssert:
         // Check for Q_PROPERTY() (see PySide6/global.h.in for an explanation

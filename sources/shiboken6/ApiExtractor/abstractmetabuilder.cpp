@@ -1410,7 +1410,7 @@ void AbstractMetaBuilderPrivate::traverseFunctions(const ScopeModelItem& scopeIt
 
     for (AbstractMetaFunction *metaFunction : functions) {
         if (metaClass->isNamespace())
-            *metaFunction += AbstractMetaFunction::Static;
+            metaFunction->setCppAttribute(FunctionAttribute::Static);
 
         const auto propertyFunction = metaClass->searchPropertyFunction(metaFunction->name());
         if (propertyFunction.index >= 0) {
@@ -1781,7 +1781,7 @@ bool AbstractMetaBuilderPrivate::traverseAddedMemberFunction(const AddedFunction
 
     const AbstractMetaArgumentList fargs = metaFunction->arguments();
     if (metaClass->isNamespace())
-        *metaFunction += AbstractMetaFunction::Static;
+        metaFunction->setCppAttribute(FunctionAttribute::Static);
     if (metaFunction->name() == metaClass->name()) {
         metaFunction->setFunctionType(AbstractMetaFunction::ConstructorFunction);
         if (fargs.size() == 1) {
@@ -2046,7 +2046,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     if (functionItem->isFriend())
         return nullptr;
 
-    const bool deprecated = functionItem->isDeprecated();
+    const auto cppAttributes = functionItem->attributes();
+    const bool deprecated = cppAttributes.testFlag(FunctionAttribute::Deprecated);
     if (deprecated && m_skipDeprecated) {
         rejectFunction(functionItem, currentClass,
                        AbstractMetaBuilder::GenerationDisabled, u" is deprecated."_s);
@@ -2055,6 +2056,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
 
     AbstractMetaFunction::Flags flags;
     auto *metaFunction = new AbstractMetaFunction(functionName);
+    metaFunction->setCppAttributes(cppAttributes);
     const QByteArray cSignature = signature.toUtf8();
     const QString unresolvedSignature =
         QString::fromUtf8(QMetaObject::normalizedSignature(cSignature.constData()));
@@ -2062,27 +2064,11 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     if (functionItem->isHiddenFriend())
         flags.setFlag(AbstractMetaFunction::Flag::HiddenFriend);
     metaFunction->setSourceLocation(functionItem->sourceLocation());
-    if (deprecated)
-        *metaFunction += AbstractMetaFunction::Deprecated;
 
     // Additional check for assignment/move assignment down below
     metaFunction->setFunctionType(functionTypeFromCodeModel(functionItem->functionType()));
     metaFunction->setConstant(functionItem->isConstant());
     metaFunction->setExceptionSpecification(functionItem->exceptionSpecification());
-
-    if (functionItem->isAbstract())
-        *metaFunction += AbstractMetaFunction::Abstract;
-
-    if (functionItem->isVirtual()) {
-        *metaFunction += AbstractMetaFunction::VirtualCppMethod;
-        if (functionItem->isOverride())
-            *metaFunction += AbstractMetaFunction::OverriddenCppMethod;
-        if (functionItem->isFinal())
-            *metaFunction += AbstractMetaFunction::FinalCppMethod;
-    }
-
-    if (functionItem->isStatic())
-        *metaFunction += AbstractMetaFunction::Static;
 
     // Access rights
     metaFunction->setAccess(functionItem->accessPolicy());
@@ -2093,7 +2079,6 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
          metaFunction->setType(AbstractMetaType::createVoid());
         break;
     case AbstractMetaFunction::ConstructorFunction:
-        metaFunction->setExplicit(functionItem->isExplicit());
         metaFunction->setName(currentClass->name());
         metaFunction->setType(AbstractMetaType::createVoid());
         break;
@@ -2162,7 +2147,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             // If an invalid argument has a default value, simply remove it
             // unless the function is virtual (since the override in the
             // wrapper can then not correctly be generated).
-            if (arg->defaultValue() && !functionItem->isVirtual()) {
+            if (arg->defaultValue()
+                && !functionItem->attributes().testFlag(FunctionAttribute::Virtual)) {
                 if (!currentClass || currentClass->typeEntry()->generateCode()) {
                     const QString signature = qualifiedFunctionSignatureWithType(functionItem, className);
                     qCWarning(lcShiboken, "%s",

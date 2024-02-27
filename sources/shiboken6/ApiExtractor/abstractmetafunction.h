@@ -92,8 +92,6 @@ public:
     enum Attribute {
         None                        = 0x00000000,
 
-        Abstract                    = 0x00000002,
-        Static                      = 0x00000004,
         ClassMethod                 = 0x00000008,
 
         GetterFunction              = 0x00000020,
@@ -104,12 +102,8 @@ public:
         PropertyResetter            = 0x00000400,
         PropertyNotify              = 0x00000800,
 
-        VirtualCppMethod            = 0x00010000,
-        OverriddenCppMethod         = 0x00020000,
-        FinalCppMethod              = 0x00040000,
         // Add by meta builder (implicit constructors, inherited methods, etc)
         AddedMethod                 = 0x001000000,
-        Deprecated                  = 0x002000000 // Code annotation
     };
     Q_DECLARE_FLAGS(Attributes, Attribute)
     Q_FLAG(Attribute)
@@ -119,6 +113,10 @@ public:
 
     void operator+=(Attribute attribute);
     void operator-=(Attribute attribute);
+
+    FunctionAttributes cppAttributes() const;
+    void setCppAttributes(FunctionAttributes a);
+    void setCppAttribute(FunctionAttribute a, bool on = true);
 
     enum class Flag { // Internal flags not relevant for comparing functions
         // Binary operator whose leading/trailing argument was removed by metabuilder
@@ -447,12 +445,12 @@ private:
 
 inline bool AbstractMetaFunction::isAbstract() const
 {
-    return attributes().testFlag(Abstract);
+    return cppAttributes().testFlag(FunctionAttribute::Abstract);
 }
 
 inline bool AbstractMetaFunction::isStatic() const
 {
-    return attributes().testFlag(Static);
+    return cppAttributes().testFlag(FunctionAttribute::Static);
 }
 
 inline bool AbstractMetaFunction::isClassMethod() const

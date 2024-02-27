@@ -485,32 +485,18 @@ public:
 
     static std::optional<CodeModel::FunctionType> functionTypeFromName(QStringView name);
 
+    FunctionAttributes attributes() const { return m_attributes; }
+    void setAttributes(FunctionAttributes a) { m_attributes = a; }
+    void setAttribute(FunctionAttribute a, bool on = true) { m_attributes.setFlag(a, on); }
+
     bool isDeleted() const;
     void setDeleted(bool d);
-
-    bool isDeprecated() const;
-    void setDeprecated(bool d);
-
-    bool isVirtual() const;
-    void setVirtual(bool isVirtual);
-
-    bool isOverride() const;
-    void setOverride(bool o);
-
-    bool isFinal() const;
-    void setFinal(bool f);
 
     bool isInline() const;
     void setInline(bool isInline);
 
-    bool isExplicit() const;
-    void setExplicit(bool isExplicit);
-
     bool isHiddenFriend() const;
     void setHiddenFriend(bool f);
-
-    bool isAbstract() const;
-    void setAbstract(bool isAbstract);
 
     bool isVariadics() const;
     void setVariadics(bool isVariadics);
@@ -543,17 +529,12 @@ private:
     CodeModel::FunctionType _determineTypeHelper() const;
 
     ArgumentList m_arguments;
+    FunctionAttributes m_attributes;
     CodeModel::FunctionType m_functionType = CodeModel::Normal;
     union {
         struct {
             uint m_isDeleted: 1;
-            uint m_isVirtual: 1;
-            uint m_isOverride: 1;
-            uint m_isFinal: 1;
-            uint m_isDeprecated: 1;
             uint m_isInline: 1;
-            uint m_isAbstract: 1;
-            uint m_isExplicit: 1;
             uint m_isVariadics: 1;
             uint m_isHiddenFriend: 1;
             uint m_isInvokable : 1; // Qt

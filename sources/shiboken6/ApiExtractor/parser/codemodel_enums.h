@@ -4,6 +4,8 @@
 #ifndef CODEMODEL_ENUMS_H
 #define CODEMODEL_ENUMS_H
 
+#include <QtCore/qflags.h>
+
 enum ReferenceType {
     NoReference,
     LValueReference,
@@ -42,5 +44,18 @@ enum class Access
     Protected,
     Public
 };
+
+enum class FunctionAttribute {
+    Abstract   = 0x00000001,
+    Static     = 0x00000002,
+    Virtual    = 0x00000004,
+    Override   = 0x00000008,
+    Final      = 0x00000010,
+    Deprecated = 0x00000020, // Code annotation
+    Explicit   = 0x00000040, // Constructor
+};
+
+Q_DECLARE_FLAGS(FunctionAttributes, FunctionAttribute)
+Q_DECLARE_OPERATORS_FOR_FLAGS(FunctionAttributes)
 
 #endif // CODEMODEL_ENUMS_H

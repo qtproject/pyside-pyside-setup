@@ -1002,64 +1002,14 @@ void _FunctionModelItem::setDeleted(bool d)
     m_isDeleted = d;
 }
 
-bool _FunctionModelItem::isDeprecated() const
-{
-    return m_isDeprecated;
-}
-
-void _FunctionModelItem::setDeprecated(bool d)
-{
-    m_isDeprecated = d;
-}
-
-bool _FunctionModelItem::isVirtual() const
-{
-    return m_isVirtual;
-}
-
-void _FunctionModelItem::setVirtual(bool isVirtual)
-{
-    m_isVirtual = isVirtual;
-}
-
 bool _FunctionModelItem::isInline() const
 {
     return m_isInline;
 }
 
-bool _FunctionModelItem::isOverride() const
-{
-    return m_isOverride;
-}
-
-void _FunctionModelItem::setOverride(bool o)
-{
-    m_isOverride = o;
-}
-
-bool _FunctionModelItem::isFinal() const
-{
-    return m_isFinal;
-}
-
-void _FunctionModelItem::setFinal(bool f)
-{
-    m_isFinal = f;
-}
-
 void _FunctionModelItem::setInline(bool isInline)
 {
     m_isInline = isInline;
-}
-
-bool _FunctionModelItem::isExplicit() const
-{
-    return m_isExplicit;
-}
-
-void _FunctionModelItem::setExplicit(bool isExplicit)
-{
-    m_isExplicit = isExplicit;
 }
 
 bool _FunctionModelItem::isHiddenFriend() const
@@ -1070,16 +1020,6 @@ bool _FunctionModelItem::isHiddenFriend() const
 void _FunctionModelItem::setHiddenFriend(bool f)
 {
     m_isHiddenFriend = f;
-}
-
-bool _FunctionModelItem::isAbstract() const
-{
-    return m_isAbstract;
-}
-
-void _FunctionModelItem::setAbstract(bool isAbstract)
-{
-    m_isAbstract = isAbstract;
 }
 
 QString _FunctionModelItem::typeSystemSignature() const  // For dumping out type system files
@@ -1206,17 +1146,17 @@ void _FunctionModelItem::formatDebug(QDebug &d) const
         d << " [deleted!]";
     if (m_isInline)
         d << " [inline]";
-    if (m_isVirtual)
+    if (m_attributes.testFlag(FunctionAttribute::Virtual))
         d << " [virtual]";
-    if (m_isOverride)
+    if (m_attributes.testFlag(FunctionAttribute::Override))
         d << " [override]";
-    if (m_isDeprecated)
+    if (m_attributes.testFlag(FunctionAttribute::Deprecated))
         d << " [deprecated]";
-    if (m_isFinal)
+    if (m_attributes.testFlag(FunctionAttribute::Final))
         d << " [final]";
-    if (m_isAbstract)
+    if (m_attributes.testFlag(FunctionAttribute::Abstract))
         d << " [abstract]";
-    if (m_isExplicit)
+    if (m_attributes.testFlag(FunctionAttribute::Explicit))
         d << " [explicit]";
     if (m_isInvokable)
         d << " [invokable]";

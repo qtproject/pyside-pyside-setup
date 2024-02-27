@@ -276,7 +276,7 @@ ShibokenGenerator::FunctionGeneration ShibokenGenerator::functionGeneration(
     // Check on virtuals (including operators).
     const bool isAbstract = func->isAbstract();
     if (!(isAbstract || func->isVirtual())
-        || func->attributes().testFlag(AbstractMetaFunction::FinalCppMethod)
+        || func->cppAttributes().testFlag(FunctionAttribute::Final)
         || func->isModifiedFinal()) {
         return result;
     }
@@ -2255,8 +2255,9 @@ ShibokenGenerator::filterGroupedOperatorFunctions(const AbstractMetaClassCPtr &m
 
 static bool hidesBaseClassFunctions(const AbstractMetaFunctionCPtr &f)
 {
-    return 0 == (f->attributes()
-                 & (AbstractMetaFunction::OverriddenCppMethod | AbstractMetaFunction::FinalCppMethod));
+    auto attributes = f->cppAttributes();
+    return !attributes.testFlag(FunctionAttribute::Override)
+        && !attributes.testFlag(FunctionAttribute::Final);
 }
 
 void ShibokenGenerator::getInheritedOverloads(const AbstractMetaClassCPtr &scope,
