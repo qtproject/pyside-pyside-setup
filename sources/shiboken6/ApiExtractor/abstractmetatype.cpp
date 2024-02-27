@@ -968,9 +968,9 @@ AbstractMetaType::fromString(const QString &typeSignatureIn, QString *errorMessa
                 errorMessage->prepend(msgCannotBuildMetaType(typeSignature));
             return {};
         }
-        it = cache.insert(typeSignature, metaType.value());
         if (typeSignature != typeSignatureIn)
             cache.insert(typeSignatureIn, metaType.value());
+        it = cache.insert(typeSignature, metaType.value());
     }
     return it.value();
 }
