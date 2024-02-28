@@ -2472,6 +2472,7 @@
           <inject-code file="../glue/qtcore.cpp" snippet="unlock"/>
       </add-function>
     </object-type>
+    <object-type name="QIOPipe"/>
     <value-type name="QGenericArgumentHolder"/>
     <value-type name="QGenericReturnArgumentHolder"/>
   </namespace-type>

@@ -1,1 +1,2 @@
 #include <qtcorehelper.h>
+#include <qiopipe.h>

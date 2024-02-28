@@ -3,12 +3,16 @@
 
 project(QtCore)
 
+set(CMAKE_AUTOMOC ON)
+
 set(QtCore_DROPPED_ENTRIES )
 
 set(QtCore_static_sources
     "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.cpp"
     "${QtCore_SOURCE_DIR}/glue/core_snippets.cpp"
     "${QtCore_SOURCE_DIR}/glue/qtcorehelper.cpp"
+    "${QtCore_SOURCE_DIR}/glue/qiopipe.cpp"
+    "${pyside6_SOURCE_DIR}/qiopipe.h"
 )
 
 if(ENABLE_WIN)
@@ -163,6 +167,7 @@ ${QtCore_GEN_DIR}/qsystemsemaphore_wrapper.cpp
 ${QtCore_GEN_DIR}/qt_wrapper.cpp
 ${QtCore_GEN_DIR}/qtcorehelper_qgenericargumentholder_wrapper.cpp
 ${QtCore_GEN_DIR}/qtcorehelper_qgenericreturnargumentholder_wrapper.cpp
+${QtCore_GEN_DIR}/qtcorehelper_qiopipe_wrapper.cpp
 ${QtCore_GEN_DIR}/qtcorehelper_qmutexlocker_wrapper.cpp
 ${QtCore_GEN_DIR}/qtemporarydir_wrapper.cpp
 ${QtCore_GEN_DIR}/qtemporaryfile_wrapper.cpp
@@ -242,6 +247,7 @@ set(QtCore_include_dirs ${QtCore_SOURCE_DIR}
                         )
 set(QtCore_libraries  pyside6
                       ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
+                      Qt::CorePrivate
                       )
 
 create_pyside_module(NAME QtCore
@@ -281,4 +287,5 @@ if (APPLE)
     endforeach()
 endif()
 
-install(FILES ${pyside6_SOURCE_DIR}/qtcorehelper.h DESTINATION include/PySide6/QtCore/)
+install(FILES ${pyside6_SOURCE_DIR}/qtcorehelper.h ${pyside6_SOURCE_DIR}/qiopipe.h
+        DESTINATION include/PySide6/QtCore/)
