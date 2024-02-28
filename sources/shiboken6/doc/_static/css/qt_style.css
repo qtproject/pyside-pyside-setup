@@ -1,3 +1,17 @@
+.text-center {
+  text-align: center !important;
+}
+
+.text-center img {
+    padding-top: 10px;
+    height: 70px !important;
+}
+
+.cover-img img {
+  object-fit: cover;
+  height: 50%;
+}
+
 /* Tables */
 .section .docutils.container td {
     float:left;
@@ -39,4 +53,48 @@ table.docutils td ul > li {
   padding:0 3.9%; /* 0? */
   position:relative;
   overflow:visible
+}
+
+/* We cannot put a :download:`....` command inside
+ * a sphinx-design button, so we add some properties from the button
+ * to the download class to mimic it */
+code.download {
+  text-align: center;
+  color: var(--color-brand-primary);
+  display: block;
+  border-color: transparent;
+  background-color: transparent;
+  border: 1px solid var(--color-brand-primary) !important;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  font-weight: 400;
+  vertical-align: middle;
+  padding: .375rem .75rem;
+  user-select: none;
+  line-height: 1.5;
+  transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+code.download:hover {
+  color: white;
+  background-color: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+  text-decoration: none;
+  padding: .375rem .75rem;
+}
+
+dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.glossary):not(.simple):first-child > dt {
+  font-size: +2.25rem;
+  font-weight: 700;
+  color: #ff00dd;
+}
+
+.theme-toggle svg{
+  width: +1.25rem;
+  height: +2.25rem;
+}
+
+.sd-card-title code span {
+  font-size: +1rem;
+  color: var(--color-brand-primary);
 }

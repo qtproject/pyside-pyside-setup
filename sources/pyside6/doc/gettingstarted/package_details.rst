@@ -90,57 +90,149 @@ from 6.3.0, grouped by different topics:
 Project development
 ~~~~~~~~~~~~~~~~~~~
 
-* ``pyside6-project``, to build Qt Designer forms (``.ui`` files),
-  resource files (``.qrc``) and QML type files (``.qmltype``) from
-  a ``.pyproject`` file.
+.. grid:: 2
+    :gutter: 3 3 4 5
+
+    .. grid-item-card:: ``pyside6-project``
+
+        to build Qt Designer forms (``.ui`` files), resource files (``.qrc``)
+        and QML type files (``.qmltype``) from a ``.pyproject`` file.
+
 
 Widget Development
 ~~~~~~~~~~~~~~~~~~
 
-* ``pyside6-designer``, drag-and-drop tool for designing Widget UIs (generates ``.ui`` files,
-    see :ref:`using_ui_files`).
-* ``pyside6-uic``, to generate Python code from ``.ui`` form files.
-* ``pyside6-rcc``, to generate serialized data from ``.qrc`` resources files.
-  Keep in mind these files can be used in other non-widget projects.
+.. grid:: 2
+    :gutter: 3 3 4 5
+
+    .. grid-item-card:: ``pyside6-designer``
+        :link: pyside6-designer
+        :link-type: ref
+
+        drag-and-drop tool for designing Widget UIs (generates ``.ui`` files,
+        see :ref:`using_ui_files`).
+
+    .. grid-item-card:: ``pyside6-uic``
+        :link: pyside6-uic
+        :link-type: ref
+
+        to generate Python code from ``.ui`` form files.
+
+    .. grid-item-card:: ``pyside6-rcc``
+        :link: pyside6-rcc
+        :link-type: ref
+
+        to generate serialized data from ``.qrc`` resources files.
+        Keep in mind these files can be used in other non-widget projects.
+
 
 QML Development
 ~~~~~~~~~~~~~~~
 
-* ``pyside6-qmllint``, that verifies the syntactic validity of QML files.
-* ``pyside6-qmltyperegistrar``, to read metatypes files and generate
-  files that contain the necessary code to register all the types marked with
-  relevant macros.
-* ``pyside6-qmlimportscanner``, to identify the QML modules imported from a
-    project/QML files and dump the result as a JSON array.
-* ``pyside6-qmlcachegen``, to compile QML to bytecode at compile time for bundling inside the
-    binary.
+.. grid:: 2
+    :gutter: 3 3 4 5
+
+    .. grid-item-card:: ``pyside6-qmllint``
+        :link: pyside6-qmllint
+        :link-type: ref
+
+        that verifies the syntactic validity of QML files.
+
+    .. grid-item-card:: ``pyside6-qmlregistrar``
+        :link: pyside6-qmlregistrar
+        :link-type: ref
+
+        to read metatypes files and generate files that contain the necessary
+        code to register all the types marked with relevant macros.
+
+    .. grid-item-card:: ``pyside6-qmlimportscanner``
+        :link: pyside6-qmlimportscanner
+        :link-type: ref
+
+        to identify the QML modules imported from a
+        project/QML files and dump the result as a JSON array.
+
+    .. grid-item-card:: ``pyside6-qmlcachegen``
+        :link: pyside6-qmlcachegen
+        :link-type: ref
+
+        to compile QML to bytecode at compile time for bundling inside the
+        binary.
 
 Translations
 ~~~~~~~~~~~~
 
-* ``pyside6-linguist``, for translating text in applications (see :ref:`translations`).
-* ``pyside6-lrelease``, to create run-time translation files for the application.
-* ``pyside6-lupdate``, to synchronize source code and translations.
+.. grid:: 2
+    :gutter: 3 3 4 5
+
+    .. grid-item-card:: ``pyside6-linguist``
+        :link: pyside6-linguist
+        :link-type: ref
+
+        for translating text in applications (see :ref:`translations`).
+
+    .. grid-item-card:: ``pyside6-lrelease``
+        :link: pyside6-lrelease
+        :link-type: ref
+
+        to create run-time translation files for the application.
+
+    .. grid-item-card:: ``pyside6-lupdate``
+        :link: pyside6-lupdate
+        :link-type: ref
+
+        to synchronize source code and translations.
 
 Qt Help
 ~~~~~~~
 
-* ``pyside6-assistant``, for viewing online documentation in Qt Help file format.
-  Read more about the formats on the `QtHelp Framework`_ page.
+.. grid:: 2
+    :gutter: 3 3 4 5
+
+    .. grid-item-card:: ``pyside6-assistant``
+        :link: pyside6-assistant
+        :link-type: ref
+
+        for viewing online documentation in Qt Help file format.
+        Read more about the formats on the `QtHelp Framework`_ page.
 
 .. _`QtHelp Framework`: https://doc.qt.io/qt-6/qthelp-framework.html
 
 PySide Utilities
 ~~~~~~~~~~~~~~~~
 
-* ``pyside6-genpyi``, to generate Python stubs (``.pyi`` files) for Qt modules.
-* ``pyside6-metaobjectdump``, a tool to print out the metatype information in
-  JSON to be used as input for ``qmltyperegistrar``.
+.. grid:: 2
+    :gutter: 3 3 4 5
+
+    .. grid-item-card:: ``pyside6-genpyi``
+        :link: pyside6-genpyi
+        :link-type: ref
+
+        to generate Python stubs (``.pyi`` files) for Qt modules.
+
+    .. grid-item-card:: ``pyside6-metaobjectdump``
+        :link: pyside6-metaobjectdump
+        :link-type: ref
+
+        a tool to print out the metatype information in JSON to be used as
+        input for ``qmltyperegistrar``.
 
 Deployment
 ~~~~~~~~~~
 
-* :ref:`pyside6-deploy <pyside6-deploy>`, to deploy PySide6 applications to desktop platforms -
-  Linux, Windows and macOS.
-* ``pyside6-android-deploy``, to deploy PySide6 application as an Android app
-  targeting different Android platforms - aarch64, armv7a, i686, x86_64.
+.. grid:: 2
+    :gutter: 3 3 4 5
+
+    .. grid-item-card:: ``pyside6-deploy``
+        :link: pyside6-deploy
+        :link-type: ref
+
+        to deploy PySide6 applications to desktop platforms - Linux, Windows
+        and macOS.
+
+    .. grid-item-card:: ``pyside6-android-deploy``
+        :link: pyside6-android-deploy
+        :link-type: ref
+
+        to deploy PySide6 application as an Android app targeting different
+        Android platforms - aarch64, armv7a, i686, x86_64.
