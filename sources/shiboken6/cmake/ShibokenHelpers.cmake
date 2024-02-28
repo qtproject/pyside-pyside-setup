@@ -257,7 +257,7 @@ macro(shiboken_check_if_limited_api)
                 libs = r'${Python_LIBRARIES}'
                 libs = libs.split(';')
                 for lib in libs:
-                    if '\\\\' in lib and Path(lib).is_file():
+                    if ('\\\\' in lib or '/' in lib) and Path(lib).is_file():
                         lib = Path(lib)
                         prefix = lib.parent
                         py = lib.name
