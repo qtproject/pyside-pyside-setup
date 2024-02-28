@@ -94,3 +94,7 @@ dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.glossary):not(.
   height: +2.25rem;
 }
 
+.sd-card-title code span {
+  font-size: +1rem;
+  color: var(--color-brand-primary);
+}
