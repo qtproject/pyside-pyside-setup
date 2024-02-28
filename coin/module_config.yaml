@@ -18,7 +18,7 @@ accept_configuration:
           not_contains_value: UseLegacyInstructions
         - condition: property  # MinGW and msvc2015 are not supported
           property: target.compiler
-          not_in_values: [Mingw, MSVC2015]
+          not_in_values: [Mingw, MSVC2015,Clang]
         - condition: property  # Webassembly
           property: target.osVersion
           not_equals_value: WebAssembly
@@ -30,23 +30,21 @@ accept_configuration:
           not_contains_value: DebianPackaging
     - condition: and
       conditions:
-        - condition: property  # No cross compilation
-          property: host.osVersion
-          equals_value: MacOS_10_15
+        - condition: property
+          property: host.os
+          equals_value: MacOS
         - condition: property
           property: features
           contains_value: TestOnly
         - condition: property
           property: features
           contains_value: Packaging
-    - condition: and
-      conditions:
         - condition: property
-          property: host.osVersion
-          equals_value: MacOS_11_00
+          property: target.os
+          not_contains_value: Android
         - condition: property
-          property: features
-          contains_value: Packaging
+          property: target.os
+          not_contains_value: IOS
     - condition: and
       conditions:
         - condition: property
