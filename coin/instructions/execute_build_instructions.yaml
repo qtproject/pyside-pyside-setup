@@ -42,18 +42,11 @@ instructions:
          Failed to execute build instructions on macOS
   - type: EnvironmentVariable
     variableName: PYSIDE_SIGNING_DIR
-    variableValue: "{{.AgentWorkingDir}}\\pyside\\{{.Env.TESTED_MODULE_COIN}}\\build\\qfpa-p3.8\\package_for_wheels"
-    enable_if:
-        condition: property
-        property: host.osVersion
-        contains_value: "Windows_11"
-  - type: EnvironmentVariable
-    variableName: PYSIDE_SIGNING_DIR
     variableValue: "{{.AgentWorkingDir}}\\pyside\\{{.Env.TESTED_MODULE_COIN}}\\build\\qfpa-p3.10\\package_for_wheels"
     enable_if:
         condition: property
-        property: host.osVersion
-        contains_value: "Windows_10"
+        property: host.os
+        equals_value: Windows
   - type: ExecuteCommand
     command: "{{.Env.interpreter}} -m pip install -U pip setuptools==69.1.1 --user"
     maxTimeInSeconds: 14400

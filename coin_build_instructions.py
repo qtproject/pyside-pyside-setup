@@ -157,10 +157,7 @@ if __name__ == "__main__":
         python_ver = "3.11"
     wheel_package_dir = "qfpa-p3.6"
     if CI_TARGET_OS in ["Windows"]:
-        if (os.environ.get("HOST_OSVERSION_COIN")).startswith("windows_10"):
-            python_ver = "3.10.0"
-        else:
-            python_ver = "3.8.1"
+        python_ver = "3.10.0"
     if CI_TEST_PHASE in ["ALL", "BUILD"]:
         call_setup(python_ver, "BUILD")
     # Until CI has a feature to set more dynamic signing dir, make sure it actually exist

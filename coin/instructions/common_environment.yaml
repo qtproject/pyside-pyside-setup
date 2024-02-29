@@ -35,6 +35,18 @@ instructions:
             property: host.os
             equals_value: Windows
     - type: EnvironmentVariable
+      variableName: PYTHON3_PATH
+      variableValue: "{{ index .Env \"PYTHON3.10.0-64_PATH\"}}"
+      enable_if:
+        condition: and
+        conditions:
+          - condition: property
+            property: host.osVersion
+            equals_value: Windows_11_22H2
+          - condition: property
+            property: host.os
+            equals_value: Windows
+    - type: EnvironmentVariable
       variableName: TARGET_ARCHITECTURE
       variableValue: amd64_x86
       enable_if:
@@ -118,7 +130,7 @@ instructions:
          equals_value: MacOS
     - type: PrependToEnvironmentVariable
       variableName: PATH
-      variableValue: "{{.Env.PYTHON3_PATH}};"
+      variableValue: "{{ index .Env \"PYTHON3.10.0-64_PATH\"}};"
       enable_if:
          condition: property
          property: host.os
