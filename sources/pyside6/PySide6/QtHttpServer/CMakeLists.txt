@@ -12,6 +12,7 @@ set(QtHttpServer_SRC
     ${QtHttpServer_GEN_DIR}/qhttpserverresponse_wrapper.cpp
     ${QtHttpServer_GEN_DIR}/qhttpserverrouter_wrapper.cpp
     ${QtHttpServer_GEN_DIR}/qhttpserverrouterrule_wrapper.cpp
+    ${QtHttpServer_GEN_DIR}/qhttpserverwebsocketupgraderesponse_wrapper.cpp
 # module is always needed
     ${QtHttpServer_GEN_DIR}/qthttpserver_module_wrapper.cpp)
 

@@ -96,6 +96,7 @@
         <!-- PYSIDE-1726, after qtbase/696d94b132b2f352b5e6b889ad91c2437417fae8,
              the function is defined with dummy types when Vulkan is not present. -->
         <modify-function signature="^fromVulkanImage\(.*$" remove="all"/>
+        <enum-type name="Flag" flags="Flags" since="6.8"/>
     </value-type>
 
     <object-type name="QQuickTextDocument">
@@ -183,6 +184,7 @@
         </value-type>
         <value-type name="GraphicsPipelineState">
             <enum-type name="BlendFactor"/>
+            <enum-type name="BlendOp" since="6.8"/>
             <enum-type name="ColorMaskComponent" flags="ColorMask"/>
             <enum-type name="CullMode"/>
             <enum-type name="PolygonMode"/>

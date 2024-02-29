@@ -10,11 +10,26 @@
       <include file-name="qtgraphs_helper.h" location="global"/>
    </extra-includes>
 
+  <load-typesystem name="QtQuick/typesystem_quick.xml" generate="no" />
+
   <load-typesystem name="templates/datavisualization_common.xml" generate="no" />
-  <load-typesystem name="QtQuickWidgets/typesystem_quickwidgets.xml" generate="no" />
 
   <function signature="qDefaultSurfaceFormat(bool)"/>
 
+   <namespace-type name="QtGraphs3D">
+     <enum-type name="ElementType"/>
+     <enum-type name="GridLineType"/>
+     <enum-type name="OptimizationHint" flags="OptimizationHints"/>
+     <enum-type name="RenderingMode"/>
+     <enum-type name="SelectionFlag" flags="SelectionFlags"/>
+     <enum-type name="ShadowQuality"/>
+     <enum-type name="CameraPreset" since="6.7"/>
+   </namespace-type>
+
+   <value-type name="QGraphsLine" since="6.8">
+       <modify-function signature="create(QJSValue)" remove="all"/>
+       <modify-function signature="swap(QGraphsLine&amp;)" remove="all"/>
+   </value-type>
 
   <object-type name="QAbstract3DAxis">
     <enum-type name="AxisOrientation"/>
@@ -44,6 +59,7 @@
   <object-type name="QAbstractDataProxy">
     <enum-type name="DataType"/>
   </object-type>
+  <object-type name="QAreaSeries" since="6.8"/>
   <object-type name="QBar3DSeries">
     <modify-function signature="setDataProxy(QBarDataProxy*)">
       <modify-argument index="1">
@@ -53,7 +69,9 @@
   </object-type>
   <value-type name="QBarDataItem"/>
   <object-type name="QBarDataProxy">
+      <enum-type name="RemoveLabels" since="6.8"/>
   </object-type>
+  <object-type name="QBarModelMapper" since="6.8"/>
   <object-type name="QCustom3DItem"/>
   <object-type name="QCustom3DLabel"/>
   <object-type name="QCustom3DVolume">
@@ -63,6 +81,7 @@
                        snippet="qcustom3dvolume-settexturedata"/>
       </add-function>
   </object-type>
+  <object-type name="QDateTimeAxis" since="6.8"/>
   <object-type name="QHeightMapSurfaceDataProxy"/>
   <object-type name="QItemModelBarDataProxy">
     <enum-type name="MultiMatchBehavior"/>
@@ -71,6 +90,7 @@
   <object-type name="QItemModelSurfaceDataProxy">
     <enum-type name="MultiMatchBehavior"/>
   </object-type>
+  <value-type name="QLegendData" since="6.8"/>
   <object-type name="QScatter3DSeries">
     <modify-function signature="setDataProxy(QScatterDataProxy*)">
       <modify-argument index="1">
@@ -78,10 +98,17 @@
       </modify-argument>
     </modify-function>
   </object-type>
+  <object-type name="QPieModelMapper" since="6.8"/>
+  <object-type name="QPieSeries" since="6.8"/>
+  <object-type name="QPieSlice" since="6.8">
+      <enum-type name="LabelPosition"/>
+  </object-type>
   <value-type name="QScatterDataItem"/>
   <object-type name="QScatterDataProxy">
   </object-type>
+  <object-type name="QSplineSeries" since="6.8"/>
   <object-type name="QSurface3DSeries">
+    <enum-type name="Shading" since="6.8"/>
     <enum-type name="DrawFlag" flags="DrawFlags"/>
     <modify-function signature="QSurface3DSeries(QSurfaceDataProxy*,QObject*)">
       <modify-argument index="1">
@@ -109,148 +136,15 @@
         ``deltaZ``, respectively.
         </inject-documentation>
     </add-function>
-
-  </object-type>
-  <object-type name="Q3DBars">
-    <modify-function signature="addAxis(QAbstract3DAxis*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="releaseAxis(QAbstract3DAxis*)">
-      <modify-argument index="1">
-        <reference-count action="set"/>
-      </modify-argument>
-      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
-    </modify-function>
-    <modify-function signature="setColumnAxis(QCategory3DAxis*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setRowAxis(QCategory3DAxis*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-  </object-type>
-  <object-type name="Q3DScatter">
-    <modify-function signature="addAxis(QValue3DAxis*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="releaseAxis(QValue3DAxis*)">
-      <modify-argument index="1">
-        <reference-count action="set"/>
-      </modify-argument>
-      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
-    </modify-function>
-    <modify-function signature="setAxisX(QValue3DAxis*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setAxisY(QValue3DAxis*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setAxisZ(QValue3DAxis*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
   </object-type>
   <object-type name="Q3DScene"/>
-  <object-type name="Q3DSurface">
-    <modify-function signature="addAxis(QValue3DAxis*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="releaseAxis(QValue3DAxis*)">
-      <modify-argument index="1">
-        <reference-count action="set"/>
-      </modify-argument>
-      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
-    </modify-function>
-    <modify-function signature="setAxisX(QValue3DAxis*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setAxisY(QValue3DAxis*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setAxisZ(QValue3DAxis*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-  </object-type>
-  <object-type name="QAbstract3DGraph">
-    <enum-type name="ElementType"/>
-    <enum-type name="OptimizationHint" flags="OptimizationHints"/>
-    <enum-type name="RenderingMode"/>
-    <enum-type name="SelectionFlag" flags="SelectionFlags"/>
-    <enum-type name="ShadowQuality"/>
-    <enum-type name="CameraPreset" since="6.7"/>
-    <modify-function signature="addCustomItem(QCustom3DItem*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="addInputHandler(QAbstract3DInputHandler*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="addTheme(Q3DTheme*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="releaseCustomItem(QCustom3DItem*)">
-      <modify-argument index="1">
-        <reference-count action="set"/>
-      </modify-argument>
-      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
-    </modify-function>
-    <modify-function signature="releaseInputHandler(QAbstract3DInputHandler*)">
-      <modify-argument index="1">
-        <reference-count action="set"/>
-      </modify-argument>
-      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
-    </modify-function>
-    <modify-function signature="releaseTheme(Q3DTheme*)">
-      <modify-argument index="1">
-        <reference-count action="set"/>
-      </modify-argument>
-      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
-    </modify-function>
-    <modify-function signature="setActiveInputHandler(QAbstract3DInputHandler*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setActiveTheme(Q3DTheme*)">
-      <modify-argument index="1">
-        <parent index="this" action="add"/>
-      </modify-argument>
-    </modify-function>
-  </object-type>
-  <object-type name="Q3DInputHandler"/>
-  <object-type name="QAbstract3DInputHandler">
-    <enum-type name="InputView"/>
-  </object-type>
-  <object-type name="QTouch3DInputHandler"/>
-  <object-type name="Q3DTheme">
+  <object-type name="QGraphsTheme" since="6.8">
+    <enum-type name="ColorScheme"/>
     <enum-type name="ColorStyle"/>
+    <enum-type name="ForceTheme"/>
     <enum-type name="Theme"/>
   </object-type>
+  <value-type name="QGraphsThemeDirtyBitField" since="6.8"/>
 
   <!-- 2D -->
   <object-type name="QBarCategoryAxis"/>
@@ -258,8 +152,9 @@
     <enum-type name="AxisType"/>
   </object-type>
   <object-type name="QValueAxis"/>
-  <object-type name="QAbstractBarSeries">
+  <object-type name="QBarSeries">
     <enum-type name="LabelsPosition"/>
+    <enum-type name="BarsType" since="6.8"/>
     <modify-function signature="append(QBarSet*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -270,7 +165,7 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <modify-function signature="insert(int,QBarSet*)">
+    <modify-function signature="insert(qsizetype,QBarSet*)">
       <modify-argument index="2">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -281,19 +176,13 @@
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QBarSeries"/>
   <object-type name="QBarSet"/>
   <object-type name="QLineSeries"/>
   <object-type name="QAbstractSeries">
     <enum-type name="SeriesType"/>
   </object-type>
   <object-type name="QScatterSeries"/>
-  <object-type name="QGraphTheme">
-    <enum-type name="ColorTheme"/>
-  </object-type>
-  <object-type name="QSeriesTheme">
-    <enum-type name="SeriesColorTheme"/>
-  </object-type>
+  <object-type name="QXYModelMapper" since="6.8"/>
   <object-type name="QXYSeries">
   </object-type>
 

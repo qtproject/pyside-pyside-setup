@@ -18,6 +18,7 @@ ${QtHelp_GEN_DIR}/qhelpindexmodel_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpindexwidget_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelplink_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpsearchengine_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpsearchenginecore_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpsearchquery_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpsearchquerywidget_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpsearchresult_wrapper.cpp

@@ -529,6 +529,8 @@ module_classes = {
         "QAbstractOpenGLFunctions",
         "QAbstractTextDocumentLayout",
         "QAccessible",
+        "QAccessibleAnnouncementEvent",
+        "QAccessibleAttributesInterface",
         "QAccessibleEditableTextInterface",
         "QAccessibleEvent",
         "QAccessibleInterface",

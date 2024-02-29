@@ -199,6 +199,7 @@ def wheel_files_pyside_addons() -> list[ModuleData]:
         module_QtCharts(),
         module_QtDataVisualization(),
         module_QtGraphs(),
+        module_QtGraphsWidgets(),
         module_QtMultimedia(),
         module_QtMultimediaWidgets(),
         module_QtNetworkAuth(),
@@ -838,6 +839,12 @@ def module_QtDataVisualization() -> ModuleData:
 
 def module_QtGraphs() -> ModuleData:
     data = ModuleData("Graphs")
+
+    return data
+
+
+def module_QtGraphsWidgets() -> ModuleData:
+    data = ModuleData("GraphsWidgets")
 
     return data
 

@@ -9,24 +9,29 @@
     <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
 
     <value-type name="QCompressedHelpInfo"/>
-    <value-type name="QHelpContentItem">
+    <object-type name="QHelpContentItem"> <!-- Non-copyable, non-movable in 6.8 -->
       <modify-function signature="parent()const">
         <modify-argument index="return">
           <define-ownership owner="default"/>
         </modify-argument>
       </modify-function>
-    </value-type>
+    </object-type>
     <object-type name="QHelpContentModel" polymorphic-id-expression="qobject_cast&lt;QHelpContentModel*&gt;(%B)"/>
     <object-type name="QHelpContentWidget"/>
     <value-type name="QHelpGlobal"/>
     <object-type name="QHelpEngine"/>
-    <object-type name="QHelpEngineCore"/>
+    <object-type name="QHelpEngineCore">
+       <!-- Uses QFuture -->
+       <modify-function signature="requestIndexForCurrentFilter()const" remove="all"/>
+       <modify-function signature="requestIndex(QString)const" remove="all"/>
+    </object-type>
     <value-type name="QHelpFilterData"/>
     <object-type name="QHelpFilterEngine"/>
     <object-type name="QHelpFilterSettingsWidget"/>
     <object-type name="QHelpIndexModel"/>
     <object-type name="QHelpIndexWidget"/>
     <value-type name="QHelpLink"/>
+    <object-type name="QHelpSearchEngineCore"/>
     <object-type name="QHelpSearchEngine"/>
     <value-type name="QHelpSearchQuery">
         <enum-type name="FieldName"/>

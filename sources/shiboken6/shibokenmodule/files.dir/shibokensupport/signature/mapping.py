@@ -499,6 +499,7 @@ def init_PySide6_QtCore():
         "PyByteArray": bytearray,
         "PyBytes": typing.Union[bytes, bytearray, memoryview],
         "PyTuple": typing.Tuple,
+        "QDeadlineTimer.Forever": PySide6.QtCore.QDeadlineTimer.ForeverConstant.Forever,
         "QDeadlineTimer(QDeadlineTimer.Forever)": Instance("PySide6.QtCore.QDeadlineTimer"),
         "PySide6.QtCore.QUrl.ComponentFormattingOptions":
             PySide6.QtCore.QUrl.ComponentFormattingOption,  # mismatch option/enum, why???

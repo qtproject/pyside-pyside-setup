@@ -7,6 +7,7 @@ set(QtWebEngineCore_SRC
 ${QtWebEngineCore_GEN_DIR}/qwebenginecertificateerror_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineclientcertificateselection_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineclientcertificatestore_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebengineclienthints_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecontextmenurequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_filterrequest_wrapper.cpp

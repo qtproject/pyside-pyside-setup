@@ -105,12 +105,14 @@
                    file="../glue/qtgui.cpp"
                    snippet="qaccessible-pysidefactory"/>
       <value-type name="State"/>
+      <enum-type name="AnnouncementPoliteness" since="6.8"/>
       <enum-type name="Event"/>
       <enum-type name="Role"/>
       <enum-type name="Text"/>
       <enum-type name="RelationFlag" flags="Relation"/>
       <enum-type name="InterfaceType"/>
       <enum-type name="TextBoundaryType"/>
+      <enum-type name="Attribute" since="6.8"/>
       <add-function signature="installFactory(PyCallable)" static="yes">
           <inject-code class="target" position="beginning"
                        file="../glue/qtgui.cpp"
@@ -119,6 +121,7 @@
   </value-type>
 
   <object-type name="QAccessibleActionInterface"/>
+  <object-type name="QAccessibleAttributesInterface" since="6.8"/>
   <object-type name="QAccessibleEditableTextInterface"/>
   <object-type name="QAccessibleInterface"/>
   <object-type name="QAccessibleObject" qt-register-metatype="base"/>
@@ -129,6 +132,8 @@
 
   <object-type name="QAccessibleEvent"
                polymorphic-id-expression="%B-&gt;type() == QAccessible::InvalidEvent"/>
+  <object-type name="QAccessibleAnnouncementEvent"
+               polymorphic-id-expression="%B-&gt;type() == QAccessible::Announcement"/>
   <object-type name="QAccessibleStateChangeEvent"
                polymorphic-id-expression="%B-&gt;type() == QAccessible::StateChanged"/>
   <object-type name="QAccessibleTableModelChangeEvent"
@@ -1017,9 +1022,11 @@
   </namespace-type>
 
   <value-type name="QColorSpace">
+      <enum-type name="ColorModel" since="6.8"/>
       <enum-type name="NamedColorSpace"/>
       <enum-type name="Primaries"/>
       <enum-type name="TransferFunction"/>
+      <enum-type name="TransformModel" since="6.8"/>
   </value-type>
 
   <value-type name="QColorTransform"/>
@@ -1116,6 +1123,8 @@
   <value-type name="QLinearGradient" polymorphic-id-expression="%B-&gt;type() == QGradient::LinearGradient"/>
   <object-type name="QPaintDevice">
       <enum-type name="PaintDeviceMetric"/>
+      <!-- inline error -->
+      <modify-function signature="getDecodedMetricF(QPaintDevice::PaintDeviceMetric,QPaintDevice::PaintDeviceMetric)const" remove="all"/>
   </object-type>
   <object-type name="QPagedPaintDevice">
     <enum-type name="PdfVersion"/>
@@ -3078,6 +3087,7 @@
   <value-type name="QPageLayout">
       <enum-type name="Mode"/>
       <enum-type name="Orientation"/>
+      <enum-type name="OutOfBoundsPolicy" since="6.8"/>
       <enum-type name="Unit"/>
   </value-type>
   <value-type name="QPageRanges">
@@ -3098,7 +3108,9 @@
       <enum-type name="TypeInterpretation"/>
       <enum-type name="YUVLayout"/>
   </value-type>
-  <object-type name="QPdfWriter"/>
+  <object-type name="QPdfWriter">
+      <enum-type name="ColorModel" since="6.8"/>
+  </object-type>
   <object-type name="QPointingDevice">
     <enum-type name="PointerType" flags="PointerTypes"/>
     <enum-type name="GrabTransition"/>

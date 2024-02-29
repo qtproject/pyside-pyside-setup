@@ -15,6 +15,9 @@ ${QtNetwork_GEN_DIR}/qdnslookup_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qdnsmailexchangerecord_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qdnsservicerecord_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qdnstextrecord_wrapper.cpp
+${QtNetwork_GEN_DIR}/qdnstlsassociationrecord_wrapper.cpp
+${QtNetwork_GEN_DIR}/qformdatabuilder_wrapper.cpp
+${QtNetwork_GEN_DIR}/qformdatapartbuilder_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhostaddress_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhostinfo_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhstspolicy_wrapper.cpp

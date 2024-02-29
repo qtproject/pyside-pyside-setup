@@ -12,6 +12,7 @@ ${QtNetworkAuth_GEN_DIR}/qoauth1signature_wrapper.cpp
 ${QtNetworkAuth_GEN_DIR}/qoauth2authorizationcodeflow_wrapper.cpp
 ${QtNetworkAuth_GEN_DIR}/qoauthhttpserverreplyhandler_wrapper.cpp
 ${QtNetworkAuth_GEN_DIR}/qoauthoobreplyhandler_wrapper.cpp
+${QtNetworkAuth_GEN_DIR}/qoauthurischemereplyhandler_wrapper.cpp
 # module is always needed
 ${QtNetworkAuth_GEN_DIR}/qtnetworkauth_module_wrapper.cpp
 )

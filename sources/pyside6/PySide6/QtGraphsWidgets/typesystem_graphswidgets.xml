@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+// Copyright (C) 2024 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+-->
+<typesystem package="PySide6.QtGraphsWidgets"
+            namespace-begin="QT_BEGIN_NAMESPACE" namespace-end="QT_END_NAMESPACE">
+
+  <load-typesystem name="QtQuickWidgets/typesystem_quickwidgets.xml" generate="no" />
+  <load-typesystem name="QtGraphs/typesystem_graphs.xml" generate="no" />
+
+  <object-type name="Q3DBarsWidgetItem">
+    <modify-function signature="addAxis(QAbstract3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="releaseAxis(QAbstract3DAxis*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
+    </modify-function>
+    <modify-function signature="setColumnAxis(QCategory3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setRowAxis(QCategory3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="Q3DScatterWidgetItem">
+    <modify-function signature="addAxis(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="releaseAxis(QValue3DAxis*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
+    </modify-function>
+    <modify-function signature="setAxisX(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setAxisY(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setAxisZ(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="Q3DSurfaceWidgetItem">
+    <modify-function signature="addAxis(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="releaseAxis(QValue3DAxis*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
+    </modify-function>
+    <modify-function signature="setAxisX(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setAxisY(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="setAxisZ(QValue3DAxis*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+  <object-type name="Q3DGraphsWidgetItem">
+    <modify-function signature="addCustomItem(QCustom3DItem*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="addTheme(QGraphsTheme*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+    <modify-function signature="releaseCustomItem(QCustom3DItem*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
+    </modify-function>
+    <modify-function signature="releaseTheme(QGraphsTheme*)">
+      <modify-argument index="1">
+        <reference-count action="set"/>
+      </modify-argument>
+      <inject-code file="../glue/qtdatavisualization.cpp" snippet="releaseownership"/>
+    </modify-function>
+    <modify-function signature="setActiveTheme(QGraphsTheme*)">
+      <modify-argument index="1">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
+  </object-type>
+
+</typesystem>

@@ -35,4 +35,7 @@
   <object-type name="QHttpServerResponse"/>
   <object-type name="QHttpServerRouter"/>
   <object-type name="QHttpServerRouterRule"/>
+  <object-type name="QHttpServerWebSocketUpgradeResponse" since="6.8">
+      <enum-type name="ResponseType"/>
+  </object-type>
 </typesystem>

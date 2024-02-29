@@ -578,6 +578,7 @@
     <enum-type name="ClipOperation"/>
     <enum-type name="ConnectionType"/>
     <enum-type name="ContextMenuPolicy"/>
+    <enum-type name="ContextMenuTrigger" since="6.8"/>
     <enum-type name="CoordinateSystem" since="4.6"/>
     <enum-type name="Corner"/>
     <enum-type name="CursorShape"/>
@@ -637,6 +638,7 @@
     <enum-type name="TextFormat"/>
     <enum-type name="TextInteractionFlag" flags="TextInteractionFlags"/>
     <enum-type name="TileRule" since="4.6"/>
+    <enum-type name="TimerId" since="6.8"/>
     <enum-type name="TimerType"/>
     <enum-type name="TimeSpec"/>
     <enum-type name="ToolBarArea" flags="ToolBarAreas"/>
@@ -2802,7 +2804,6 @@
 
     <!-- ### Replaced by write<TYPE> methods -->
     <modify-function signature="operator&gt;&gt;(qint8&amp;)" remove="all"/>
-    <modify-function signature="operator&gt;&gt;(bool&amp;)" remove="all"/>
     <modify-function signature="operator&gt;&gt;(quint8&amp;)" remove="all"/>
     <modify-function signature="operator&gt;&gt;(qint16&amp;)" remove="all"/>
     <modify-function signature="operator&gt;&gt;(quint16&amp;)" remove="all"/>
@@ -2817,7 +2818,6 @@
 
     <!-- ### Replaced by read<TYPE> methods -->
     <modify-function signature="operator&lt;&lt;(qint8)" remove="all"/>
-    <modify-function signature="operator&lt;&lt;(bool)" remove="all"/>
     <modify-function signature="operator&lt;&lt;(quint8)" remove="all"/>
     <modify-function signature="operator&lt;&lt;(qint16)" remove="all"/>
     <modify-function signature="operator&lt;&lt;(quint16)" remove="all"/>
@@ -3051,6 +3051,7 @@
     <modify-function signature="reserveThread()" allow-thread="yes"/>
     <modify-function signature="setMaxThreadCount(int)" allow-thread="yes"/>
     <modify-function signature="waitForDone(int)" allow-thread="yes"/>
+    <modify-function signature="waitForDone(QDeadlineTimer)" allow-thread="yes"/>
     <modify-function signature="start(QRunnable*,int)" allow-thread="yes">
       <modify-argument index="1">
         <parent index="this" action="add"/>

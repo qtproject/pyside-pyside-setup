@@ -102,9 +102,12 @@
     <value-type name="QOAuth1Signature">
         <enum-type name="HttpRequestMethod"/>
     </value-type>
-    <object-type name="QOAuth2AuthorizationCodeFlow"/>
+    <object-type name="QOAuth2AuthorizationCodeFlow">
+        <enum-type name="PkceMethod" since="6.8"/>
+    </object-type>
     <object-type name="QOAuthHttpServerReplyHandler"/>
     <object-type name="QOAuthOobReplyHandler"/>
+    <object-type name="QOAuthUriSchemeReplyHandler" since="6.8"/>
 
     <suppress-warning text="^.*Typedef used on signal QAbstractOAuth.*$"/>
 </typesystem>

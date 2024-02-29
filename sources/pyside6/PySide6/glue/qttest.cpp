@@ -20,5 +20,5 @@ if (emitter == nullptr || signature.isEmpty()) {
     PyErr_SetString(PyExc_ValueError, error.constData());
     return -1;
 }
-%0 = new QSignalSpyWrapper(emitter, signature.constData());
+%0 = new QSignalSpy(emitter, signature.constData());
 // @snippet qsignalspy-signal

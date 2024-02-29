@@ -9,6 +9,11 @@
     <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
 
     <rejection class="QQmlPrivate"/>
+    <rejection class="*" enum-name="QmlIsAnonymous"/>
+    <rejection class="*" enum-name="QmlIsUncreatable"/>
+    <rejection class="*" enum-name="QmlIsSingleton"/>
+    <rejection class="*" enum-name="QmlIsInterface"/>
+    <rejection class="*" enum-name="QmlIsSequence"/>
 
     <inject-code class="target" position="declaration">
     // Volatile Bool Ptr type definition for QQmlIncubationController::incubateWhile(std::atomic&lt;bool&gt; *, int)

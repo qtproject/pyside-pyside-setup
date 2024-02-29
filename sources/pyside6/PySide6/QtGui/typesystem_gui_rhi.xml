@@ -65,6 +65,7 @@
   <object-type name="QRhiTexture" since="6.6" private="yes">
       <enum-type name="Format"/>
       <enum-type name="Flag" flags="Flags"/>
+      <value-type name="ViewFormat" private="yes" since="6.8"/>
   </object-type>
   <object-type name="QRhiSampler" since="6.6" private="yes">
       <enum-type name="Filter"/>

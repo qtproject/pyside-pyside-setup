@@ -13,6 +13,7 @@
     <object-type name="QQuickWebEngineProfile">
         <enum-type name="HttpCacheType"/>
         <enum-type name="PersistentCookiesPolicy"/>
+        <enum-type name="PersistentPermissionsPolicy" since="6.8"/>
     </object-type>
 
 </typesystem>

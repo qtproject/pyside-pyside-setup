@@ -57,6 +57,7 @@ ${QtGui_GEN_DIR}/qrhitexturerendertargetdescription_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhitexturesubresourceuploaddescription_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhitextureuploaddescription_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhitextureuploadentry_wrapper.cpp
+${QtGui_GEN_DIR}/qrhitexture_viewformat_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhivertexinputattribute_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhivertexinputbinding_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhivertexinputlayout_wrapper.cpp
@@ -85,6 +86,8 @@ ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_selection_wrapper.cpp
 ${QtGui_GEN_DIR}/qabstracttextdocumentlayout_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessible_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleactioninterface_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibleannouncementevent_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibleattributesinterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleeditabletextinterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleobject_wrapper.cpp

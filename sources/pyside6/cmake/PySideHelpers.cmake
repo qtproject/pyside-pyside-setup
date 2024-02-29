@@ -118,6 +118,7 @@ macro(collect_optional_modules)
         SvgWidgets
         DataVisualization
         Graphs
+        GraphsWidgets
         Bluetooth)
     find_package(Qt${QT_MAJOR_VERSION}UiTools)
     if(Qt${QT_MAJOR_VERSION}UiTools_FOUND)
