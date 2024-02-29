@@ -2376,6 +2376,7 @@
   <value-type name="QOperatingSystemVersionBase" since="6.3">
       <enum-type name="OSType"/>
   </value-type>
+  <value-type name="QOperatingSystemVersionUnexported" since="6.3" generate="false"/>
   <value-type name="QOperatingSystemVersion">
       <enum-type name="OSType"/>
       <modify-function signature="QOperatingSystemVersion(const QOperatingSystemVersionBase&amp;)" remove="all"/>
