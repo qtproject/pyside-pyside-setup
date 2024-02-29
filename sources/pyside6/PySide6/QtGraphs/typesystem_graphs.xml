@@ -289,10 +289,6 @@
   <object-type name="QScatterSeries"/>
   <object-type name="QGraphTheme">
     <enum-type name="ColorTheme"/>
-    <!-- missing symbols -->
-    <modify-function signature="graphSeriesCount()const" remove="all"/>
-    <modify-function signature="setGraphSeriesCount(int)" remove="all"/>
-    <modify-function signature="graphSeriesColor(int)const" remove="all"/>
   </object-type>
   <object-type name="QSeriesTheme">
     <enum-type name="SeriesColorTheme"/>
