@@ -12,9 +12,6 @@ Requirements
 * ``sphinx`` package for the documentation (optional).
 * Check the platform dependencies of `Qt for Windows`_.
 
-.. note:: Python 3.8.0 was missing some API required for PySide/Shiboken so it's not possible
-    to use it for a Windows build.
-
 .. note:: The Python provided by the Microsoft Store is not compatible with PySide. Please
     use https://python.org/download to get a Python Interpreter.
 

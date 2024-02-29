@@ -61,7 +61,6 @@ class Config(object):
         self.python_version_classifiers = [
             'Programming Language :: Python',
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: 3.9',
             'Programming Language :: Python :: 3.10',
             'Programming Language :: Python :: 3.11',
@@ -116,7 +115,7 @@ class Config(object):
         setup_kwargs['zip_safe'] = False
         setup_kwargs['cmdclass'] = cmd_class_dict
         setup_kwargs['version'] = package_version
-        setup_kwargs['python_requires'] = ">=3.8, <3.13"
+        setup_kwargs['python_requires'] = ">=3.9, <3.13"
 
         if log_level == LogLevel.QUIET:
             # Tells setuptools to be quiet, and only print warnings or errors.

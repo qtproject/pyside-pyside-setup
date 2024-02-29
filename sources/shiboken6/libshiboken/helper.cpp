@@ -79,7 +79,6 @@ static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str, bool 
             str << " [readying]";
         if (obj->tp_flags & Py_TPFLAGS_METHOD_DESCRIPTOR)
             str << " [method_descriptor]";
-#if PY_VERSION_HEX >= 0x03090000
 #  ifndef Py_LIMITED_API
         if (obj->tp_flags & Py_TPFLAGS_HAVE_VECTORCALL)
             str << " [vectorcall]";
@@ -97,7 +96,6 @@ static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str, bool 
             str << " [sequence]";
 #       endif // !Py_LIMITED_API
 #  endif // 3.10
-#endif // 3.9
         if (obj->tp_basicsize != 0)
             str << ", basicsize=" << obj->tp_basicsize;
         if (verbose) {

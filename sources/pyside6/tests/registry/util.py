@@ -71,14 +71,8 @@ def linux_distribution():
     # distro package, ASAP! The distro has been extracted from Python,
     # because it changes more often than the Python version.
     distribution = []
-    try:
-        import distro
-        distribution = distro.linux_distribution()
-    except ImportError:
-        # platform.linux_distribution() was removed in 3.8
-        if sys.version_info[:2] < (3, 8):
-            import platform
-            distribution = platform.linux_distribution()
+    import distro
+    distribution = distro.linux_distribution()
     if distribution:
         return "".join(distribution[:2]).lower()
     warnings.warn('Cannot determine Linux distribution, please install distro',

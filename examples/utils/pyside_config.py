@@ -196,7 +196,7 @@ def find_package_path(dir_name):
     return None
 
 
-# Return version as "3.7"
+# Return version as "x.y" (e.g. 3.9, 3.12, etc)
 def python_version():
     return str(sys.version_info[0]) + '.' + str(sys.version_info[1])
 

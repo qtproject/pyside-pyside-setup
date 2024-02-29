@@ -690,7 +690,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         else:
             raise SetupError("option limited-api must be 'yes' or 'no' "
                              "(default yes if applicable, i.e. Python "
-                             "version >= 3.8 and release build if on Windows)")
+                             "version >= 3.9 and release build if on Windows)")
 
         if OPTION["DISABLE_PYI"]:
             cmake_cmd.append("-DDISABLE_PYI=yes")
@@ -741,7 +741,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         cmake_cmd.append(f"-DPACKAGE_SETUP_PY_PACKAGE_TIMESTAMP={timestamp}")
 
         if extension.lower() in [SHIBOKEN]:
-            cmake_cmd.append("-DUSE_PYTHON_VERSION=3.8")
+            cmake_cmd.append("-DUSE_PYTHON_VERSION=3.9")
 
         cmake_cmd += platform_cmake_options()
 

@@ -4,11 +4,6 @@
 #ifndef PEP384IMPL_H
 #define PEP384IMPL_H
 
-// PYSIDE-1436: Adapt to Python 3.10
-#if PY_VERSION_HEX < 0x030900A4
-#  define Py_SET_REFCNT(obj, refcnt) ((Py_REFCNT(obj) = (refcnt)), (void)0)
-#endif
-
 extern "C"
 {
 
