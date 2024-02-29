@@ -3,6 +3,9 @@
 Adapt to new Qt versions
 ========================
 
+Adapting to source changes
+--------------------------
+
 The dev branch of PySide is switched to a new Qt minor version
 after its API review is finished and the API is stable.
 
@@ -41,3 +44,11 @@ The Qt source code should be checked for new overloads
 The resolution needs to be decided for each individual case,
 mostly by removing old functions and using ``<declare-function>``
 to declare new API.
+
+Bumping the version
+-------------------
+
+To instruct ``COIN`` to use the next version of Qt, adapt the files
+``coin/dependencies.yaml`` and/or ``product_dependencies.yaml`` accordingly.
+Next, the wheel names should be changed by adapting
+``sources/shiboken6/.cmake.conf`` and ``sources/pyside6/.cmake.conf``.
