@@ -83,51 +83,51 @@ qsizetype ClassDocumentation::indexOfProperty(const QString &name) const
     return -1;
 }
 
-enum class WebXmlTag
+enum class WebXmlCodeTag
 {
     Class, Description, Enum, Function, Header, Parameter, Property, Typedef, Other
 };
 
-static WebXmlTag tag(QStringView name)
+static WebXmlCodeTag tag(QStringView name)
 {
     if (name == u"class" || name == u"namespace")
-        return WebXmlTag::Class;
+        return WebXmlCodeTag::Class;
     if (name == u"enum")
-        return WebXmlTag::Enum;
+        return WebXmlCodeTag::Enum;
     if (name == u"function")
-        return WebXmlTag::Function;
+        return WebXmlCodeTag::Function;
     if (name == u"description")
-        return WebXmlTag::Description;
+        return WebXmlCodeTag::Description;
     if (name == u"header")
-        return WebXmlTag::Header;
+        return WebXmlCodeTag::Header;
     if (name == u"parameter")
-        return WebXmlTag::Parameter;
+        return WebXmlCodeTag::Parameter;
     if (name == u"property")
-        return WebXmlTag::Property;
+        return WebXmlCodeTag::Property;
     if (name == u"typedef")
-        return WebXmlTag::Typedef;
-    return WebXmlTag::Other;
+        return WebXmlCodeTag::Typedef;
+    return WebXmlCodeTag::Other;
 }
 
-static void parseWebXmlElement(WebXmlTag tag, const QXmlStreamAttributes &attributes,
+static void parseWebXmlElement(WebXmlCodeTag tag, const QXmlStreamAttributes &attributes,
                                ClassDocumentation *cd)
 {
     switch (tag) {
-    case WebXmlTag::Class:
+    case WebXmlCodeTag::Class:
         cd->name = attributes.value(u"name"_s).toString();
         cd->type = ClassDocumentation::Class;
         break;
-    case WebXmlTag::Header:
+    case WebXmlCodeTag::Header:
         cd->name = attributes.value(u"name"_s).toString();
         cd->type = ClassDocumentation::Header;
         break;
-    case WebXmlTag::Enum: {
+    case WebXmlCodeTag::Enum: {
         EnumDocumentation ed;
         ed.name = attributes.value(u"name"_s).toString();
         cd->enums.append(ed);
     }
         break;
-    case WebXmlTag::Function: {
+    case WebXmlCodeTag::Function: {
         FunctionDocumentation fd;
         fd.name = attributes.value(u"name"_s).toString();
         fd.signature = attributes.value(u"signature"_s).toString();
@@ -136,11 +136,11 @@ static void parseWebXmlElement(WebXmlTag tag, const QXmlStreamAttributes &attrib
         cd->functions.append(fd);
     }
         break;
-    case WebXmlTag::Parameter:
+    case WebXmlCodeTag::Parameter:
         Q_ASSERT(!cd->functions.isEmpty());
         cd->functions.last().parameters.append(attributes.value(u"type"_s).toString());
         break;
-    case WebXmlTag::Property: {
+    case WebXmlCodeTag::Property: {
         PropertyDocumentation pd;
         pd.name = attributes.value(u"name"_s).toString();
         pd.brief = attributes.value(u"brief"_s).toString();
@@ -202,7 +202,7 @@ std::optional<ClassDocumentation> parseWebXml(const QString &fileName, QString *
         return std::nullopt;
     }
 
-    WebXmlTag lastTag = WebXmlTag::Other;
+    WebXmlCodeTag lastTag = WebXmlCodeTag::Other;
     QXmlStreamReader reader(&file);
     while (!reader.atEnd()) {
         switch (reader.readNext()) {
@@ -210,27 +210,27 @@ std::optional<ClassDocumentation> parseWebXml(const QString &fileName, QString *
             const auto currentTag = tag(reader.name());
             parseWebXmlElement(currentTag, reader.attributes(), &result);
             switch (currentTag) { // Store relevant tags in lastTag
-            case WebXmlTag::Class:
-            case WebXmlTag::Function:
-            case WebXmlTag::Enum:
-            case WebXmlTag::Header:
-            case WebXmlTag::Property:
-            case WebXmlTag::Typedef:
+            case WebXmlCodeTag::Class:
+            case WebXmlCodeTag::Function:
+            case WebXmlCodeTag::Enum:
+            case WebXmlCodeTag::Header:
+            case WebXmlCodeTag::Property:
+            case WebXmlCodeTag::Typedef:
                 lastTag = currentTag;
                 break;
-            case WebXmlTag::Description: { // Append the description to the element
+            case WebXmlCodeTag::Description: { // Append the description to the element
                 QString *target = nullptr;
                 switch (lastTag) {
-                case WebXmlTag::Class:
+                case WebXmlCodeTag::Class:
                     target = &result.description;
                     break;
-                case WebXmlTag::Function:
+                case WebXmlCodeTag::Function:
                     target = &result.functions.last().description;
                     break;
-                case WebXmlTag::Enum:
+                case WebXmlCodeTag::Enum:
                     target = &result.enums.last().description;
                     break;
-                case WebXmlTag::Property:
+                case WebXmlCodeTag::Property:
                     target = &result.properties.last().description;
                 default:
                     break;
