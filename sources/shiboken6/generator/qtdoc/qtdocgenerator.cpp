@@ -54,6 +54,7 @@ static inline QString classScope(const AbstractMetaClassCPtr &metaClass)
 struct DocPackage
 {
     QStringList classPages;
+    QStringList decoratorPages;
     AbstractMetaFunctionCList globalFunctions;
     AbstractMetaEnumList globalEnums;
 };
@@ -173,6 +174,47 @@ static TextStream &operator<<(TextStream &s, const docRef &dr)
 {
     s << ':' << dr.m_kind << ":`" << dr.m_name << '`';
     return s;
+}
+
+static QString fileNameToTocEntry(const QString &fileName)
+{
+    constexpr auto rstSuffix = ".rst"_L1;
+
+    QString result = fileName;
+    if (result.endsWith(rstSuffix))
+        result.chop(rstSuffix.size()); // Remove the .rst extension
+    // skip namespace if necessary
+    auto lastDot = result.lastIndexOf(u'.');
+    if (lastDot != -1)
+        result.remove(0, lastDot + 1);
+    return result;
+}
+
+static void readExtraDoc(const QFileInfo &fi,
+                         const QString &moduleName,
+                         const QString &outputDir,
+                         DocPackage *docPackage, QStringList *extraTocEntries)
+{
+    // Strip to "Property.rst" in output directory
+    const QString newFileName = fi.fileName().mid(moduleName.size() + 1);
+    QFile sourceFile(fi.absoluteFilePath());
+    if (!sourceFile.open(QIODevice::ReadOnly|QIODevice::Text)) {
+        qCWarning(lcShibokenDoc, "%s", qPrintable(msgCannotOpenForReading(sourceFile)));
+        return;
+    }
+    const QByteArray contents = sourceFile.readAll();
+    sourceFile.close();
+    QFile targetFile(outputDir + u'/' + newFileName);
+    if (!targetFile.open(QIODevice::WriteOnly|QIODevice::Text)) {
+        qCWarning(lcShibokenDoc, "%s", qPrintable(msgCannotOpenForWriting(targetFile)));
+        return;
+    }
+    targetFile.write(contents);
+    if (contents.contains("decorator::"))
+        docPackage->decoratorPages.append(newFileName);
+    else
+        docPackage->classPages.append(newFileName);
+    extraTocEntries->append(fileNameToTocEntry(newFileName));
 }
 
 // Format a short documentation reference (automatically dropping the prefix
@@ -889,26 +931,12 @@ void QtDocGenerator::writeFunctionDocumentation(TextStream &s, const AbstractMet
     writeInjectDocumentation(s, TypeSystem::DocModificationAppend, modifications, func, scope);
 }
 
-static QString fileNameToToEntry(const QString &fileName)
-{
-    constexpr auto rstSuffix = ".rst"_L1;
-
-    QString result = fileName;
-    if (result.endsWith(rstSuffix))
-        result.chop(rstSuffix.size()); // Remove the .rst extension
-    // skip namespace if necessary
-    auto lastDot = result.lastIndexOf(u'.');
-    if (lastDot != -1)
-        result.remove(0, lastDot + 1);
-    return result;
-}
-
 static QStringList fileListToToc(const QStringList &items)
 {
     QStringList result;
     result.reserve(items.size());
     std::transform(items.cbegin(), items.cend(), std::back_inserter(result),
-                   fileNameToToEntry);
+                   fileNameToTocEntry);
     return result;
 }
 
@@ -1066,20 +1094,8 @@ void QtDocGenerator::writeModuleDocumentation()
             const QString filter = moduleName + u".?*.rst"_s;
             const auto fileList =
                 extraSectionDir.entryInfoList({filter}, QDir::Files, QDir::Name);
-            for (const auto &fi : fileList) {
-                // Strip to "Property.rst" in output directory
-                const QString newFileName = fi.fileName().mid(moduleName.size() + 1);
-                docPackage.classPages.append(newFileName);
-                extraTocEntries.append(fileNameToToEntry(newFileName));
-                const QString newFilePath = outputDir + u'/' + newFileName;
-                if (QFile::exists(newFilePath))
-                    QFile::remove(newFilePath);
-                if (!QFile::copy(fi.absoluteFilePath(), newFilePath)) {
-                    qCDebug(lcShibokenDoc).noquote().nospace() << "Error copying extra doc "
-                        << QDir::toNativeSeparators(fi.absoluteFilePath())
-                        << " to " << QDir::toNativeSeparators(newFilePath);
-                }
-            }
+            for (const auto &fi : fileList)
+                readExtraDoc(fi, moduleName, outputDir, &docPackage, &extraTocEntries);
         }
 
         removeExtraDocs(extraTocEntries, &docPackage.globalFunctions);
@@ -1117,6 +1133,8 @@ void QtDocGenerator::writeModuleDocumentation()
 
         writeFancyToc(s, "List of Classes", fileListToToc(docPackage.classPages),
                       "class"_L1);
+        writeFancyToc(s, "List of Decorators", fileListToToc(docPackage.decoratorPages),
+                      "deco"_L1);
         writeFancyToc(s, "List of Functions", functionListToToc(docPackage.globalFunctions),
                       "py:func"_L1);
         writeFancyToc(s, "List of Enumerations", enumListToToc(docPackage.globalEnums),

@@ -1,9 +1,4 @@
 .. currentmodule:: PySide6.QtQml
-.. _QmlSingleton:
-
-QmlSingleton decorator
-**********************
-
 .. py:decorator:: QmlSingleton
 
 Declares the decorated type to be a singleton in QML. This only takes effect if

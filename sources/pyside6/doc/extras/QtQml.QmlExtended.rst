@@ -1,9 +1,4 @@
 .. currentmodule:: PySide6.QtQml
-.. _QmlExtended:
-
-QmlExtended
-***********
-
 .. py:decorator:: QmlExtended
 
 Declares that the enclosing type uses the type passed as an extension to

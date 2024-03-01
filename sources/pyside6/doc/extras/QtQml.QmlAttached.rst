@@ -1,9 +1,4 @@
 .. currentmodule:: PySide6.QtQml
-.. _QmlAttached:
-
-QmlAttached
-***********
-
 .. py:decorator:: QmlAttached
 
 This decorator declares that the enclosing type attaches the type passed as

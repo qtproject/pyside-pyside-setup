@@ -1,9 +1,4 @@
 .. currentmodule:: PySide6.QtQml
-.. _QmlUncreatable:
-
-QmlUncreatable
-**************
-
 .. py:decorator:: QmlUncreatable
 
 Declares that the decorated type shall not be creatable from QML. This takes
