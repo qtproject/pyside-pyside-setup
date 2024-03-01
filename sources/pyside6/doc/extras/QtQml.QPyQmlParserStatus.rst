@@ -1,8 +1,5 @@
 .. currentmodule:: PySide6.QtQml
-.. _QPyQmlParserStatus:
-
-QPyQmlParserStatus
-******************
+.. py:class:: QPyQmlParserStatus
 
 QPyQmlParserStatus is the base class for implementing
 `QQmlParserStatus class`_ .

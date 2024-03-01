@@ -1,8 +1,5 @@
 .. currentmodule:: PySide6.QtDesigner
-.. _QPyDesignerContainerExtension:
-
-QPyDesignerContainerExtension
-*****************************
+.. py:class:: QPyDesignerContainerExtension
 
 QPyDesignerContainerExtension is the base class for implementing
 `QDesignerContainerExtension class`_

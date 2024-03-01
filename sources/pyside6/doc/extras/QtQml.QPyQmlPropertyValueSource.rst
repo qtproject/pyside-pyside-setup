@@ -1,8 +1,5 @@
 .. currentmodule:: PySide6.QtQml
-.. _QPyQmlPropertyValueSource:
-
-QPyQmlPropertyValueSource
-*************************
+.. py:class:: QPyQmlPropertyValueSource
 
 QPyQmlPropertyValueSource is the base class for implementing
 `QQmlPropertyValueSource class`_ .

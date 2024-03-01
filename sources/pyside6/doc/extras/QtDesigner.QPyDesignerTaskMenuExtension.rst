@@ -1,8 +1,5 @@
 .. currentmodule:: PySide6.QtDesigner
-.. _QPyDesignerTaskMenuExtension:
-
-QPyDesignerTaskMenuExtension
-****************************
+.. py:class:: QPyDesignerTaskMenuExtension
 
 QPyDesignerTaskMenuExtension is the base class for implementing
 `QDesignerTaskMenuExtension class`_

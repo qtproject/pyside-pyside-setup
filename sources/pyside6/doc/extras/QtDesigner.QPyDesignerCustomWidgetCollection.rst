@@ -1,8 +1,5 @@
 .. currentmodule:: PySide6.QtDesigner
-.. _QPyDesignerCustomWidgetCollection:
-
-QPyDesignerCustomWidgetCollection
-*********************************
+.. py:class:: QPyDesignerCustomWidgetCollection
 
 Synopsis
 --------

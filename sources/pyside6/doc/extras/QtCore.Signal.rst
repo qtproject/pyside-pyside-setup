@@ -1,8 +1,5 @@
 .. currentmodule:: PySide6.QtCore
-.. _Signal:
-
-Qt Signal
-*********
+.. py:class:: Signal
 
 Synopsis
 --------

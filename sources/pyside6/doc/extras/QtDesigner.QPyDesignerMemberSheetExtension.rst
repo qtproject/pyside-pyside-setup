@@ -1,8 +1,5 @@
 .. currentmodule:: PySide6.QtDesigner
-.. _QPyDesignerMemberSheetExtension:
-
-QPyDesignerMemberSheetExtension
-*******************************
+.. py:class:: QPyDesignerMemberSheetExtension
 
 QPyDesignerMemberSheetExtension is the base class for implementing
 `QDesignerMemberSheetExtension class`_
