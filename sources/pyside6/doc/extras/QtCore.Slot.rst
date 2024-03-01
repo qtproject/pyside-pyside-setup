@@ -1,57 +1,42 @@
 .. currentmodule:: PySide6.QtCore
-.. _Slot:
+.. py:decorator:: Slot([type1 [, type2...]] [, name="" [, result=None, [tag=""]]])
 
-Qt Slots
-********
+   :param name: str
+   :param result: type
+   :param tag: str
 
-Detailed Description
---------------------
+``Slot`` takes a list of Python types of the arguments.
 
-    PySide6 adopt PyQt's new signal and slot syntax as-is. The PySide6
-    implementation is functionally compatible with the PyQt one, with the
-    exceptions listed below.
+The optional named argument ``name`` defines the slot name. If nothing is
+passed, the slot name will be the decorated function name.
 
-    PyQt's new signal and slot style utilizes method and decorator names
-    specific to their implementation. These will be generalized according to
-    the table below:
+The optional named argument ``result`` specifies the return type.
 
-    =======  =======================  =============
-    Module   PyQt factory function    PySide class
-    =======  =======================  =============
-    QtCore   pyqtSignal               Signal
-    QtCore   pyqtSlot                 Slot
-    =======  =======================  =============
+The optional named argument ``tag`` specifies a value to be returned
+by ``QMetaMethod.tag()``.
 
-    .. class:: PySide6.QtCore.Slot([type1 [, type2...]] [, name="" [, result=None, [tag=""]]])
+This implementation is functionally compatible with the PyQt one.
 
-            :param name: str
-            :param result: type
-            :param tag: str
+=======  ===========  ======
+Module   PyQt         PySide
+=======  ===========  ======
+QtCore   pyqtSignal   Signal
+QtCore   pyqtSlot     Slot
+=======  ===========  ======
 
-    ``Slot`` takes a list of Python types of the arguments.
-
-    The optional named argument ``name`` defines the slot name. If nothing is
-    passed, the slot name will be the decorated function name.
-
-    The optional named argument ``result`` specifies the return type.
-
-    The optional named argument ``tag`` specifies a value to be returned
-    by ``QMetaMethod.tag()``.
-
-    .. seealso:: :ref:`signals-and-slots`
+.. seealso:: :ref:`signals-and-slots`
 
 Q_INVOKABLE
 -----------
 
-    There is no equivalent of the Q_INVOKABLE macro of Qt
-    since PySide6 slots can actually have return values.
-    If you need to create a invokable method that returns some value,
-    declare it as a slot, e.g.:
+There is no equivalent of the Q_INVOKABLE macro of Qt
+since PySide6 slots can actually have return values.
+If you need to create a invokable method that returns some value,
+declare it as a slot, e.g.:
 
-    ::
+::
 
-        class Foo(QObject):
-
-            @Slot(float, result=int)
-            def getFloatReturnInt(self, f):
-                return int(f)
+    class Foo(QObject):
+        @Slot(float, result=int)
+        def getFloatReturnInt(self, f):
+            return int(f)
