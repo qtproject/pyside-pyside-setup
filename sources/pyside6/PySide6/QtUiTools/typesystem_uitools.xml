@@ -14,8 +14,10 @@
       <inject-code class="native" position="beginning" file="../glue/qtuitools.cpp" snippet="uitools-loadui"/>
       <inject-code file="../glue/qtuitools.cpp" snippet="quiloader"/>
       <add-function signature="registerCustomWidget(PyObject*@customWidgetType@)" return-type="void">
-         <inject-documentation format="target" mode="append" file="../doc/qtuitools.rst"/>
-         <inject-code class="target" position="beginning" file="../glue/qtuitools.cpp" snippet="quiloader-registercustomwidget"/>
+         <inject-documentation format="target" mode="append" file="../doc/qtuitools.rst"
+                               snippet="quiloader-registercustomwidget"/>
+         <inject-code class="target" position="beginning" file="../glue/qtuitools.cpp"
+                      snippet="quiloader-registercustomwidget"/>
       </add-function>
       <modify-function signature="createAction(QObject*,const QString&amp;)">
         <modify-argument index="return">
@@ -77,6 +79,8 @@
     -->
     <add-function signature="loadUiType(const QString&amp; @uifile@)" return-type="PyObject*">
       <inject-code file="../glue/qtuitools.cpp" snippet="loaduitype"/>
+      <inject-documentation format="target" mode="append" file="../doc/qtuitools.rst"
+                            snippet="loaduitype"/>
     </add-function>
 
 
