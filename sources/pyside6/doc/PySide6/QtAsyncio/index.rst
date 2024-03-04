@@ -131,6 +131,11 @@ coroutine has finished, while ``quit_qapp`` determines if the
 QCoreApplication should be shut down after asyncio has finished. It is
 possible for asyncio to finish while the QCoreApplication is kept alive.
 
+An argument ``handle_sigint`` determines whether QtAsyncio should handle
+SIGINT (Ctrl+C) and shut down the event loop when it is received. The
+default is ``False``. Set this to ``True`` if you want QtAsyncio to take
+care of handling SIGINT instead of your program.
+
 Coroutines explained
 ^^^^^^^^^^^^^^^^^^^^
 
