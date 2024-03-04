@@ -11,10 +11,9 @@ This example shows how to customize Qt Quick Controls by implementing a simple f
 # import FileSystemModule.rc_app
 
 from editormodels import FileSystemModel  # noqa: F401
-import PySide6
 from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
-from PySide6.QtCore import QCommandLineParser
+from PySide6.QtCore import QCommandLineParser, qVersion
 
 import sys
 
@@ -22,7 +21,7 @@ if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
     app.setOrganizationName("QtProject")
     app.setApplicationName("File System Explorer")
-    app.setApplicationVersion(PySide6.__version__)
+    app.setApplicationVersion(qVersion())
     app.setWindowIcon(QIcon("FileSystemModule/icons/app_icon.svg"))
 
     parser = QCommandLineParser()
