@@ -59,7 +59,8 @@ class QAsyncioExecutorWrapper(QObject):
 class QAsyncioEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
     def __init__(self,
                  application: typing.Optional[QCoreApplication] = None,
-                 quit_qapp: bool = True) -> None:
+                 quit_qapp: bool = True,
+                 handle_sigint: bool = False) -> None:
         super().__init__()
         if application is None:
             if QCoreApplication.instance() is None:
@@ -70,7 +71,8 @@ class QAsyncioEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
         self._quit_qapp = quit_qapp
         self._event_loop: typing.Optional[asyncio.AbstractEventLoop] = None
 
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
+        if handle_sigint:
+            signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     def get_event_loop(self) -> asyncio.AbstractEventLoop:
         if self._event_loop is None:
