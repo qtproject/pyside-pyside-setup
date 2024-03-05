@@ -874,23 +874,29 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaClassCPtr &c
     }
 }
 
+// Sort entries for a TOC by first character, dropping the
+// leading common Qt prefixes like 'Q'.
+static QChar sortKey(const QString &key)
+{
+    const auto size = key.size();
+    if (size >= 2 && key.at(0) == u'Q' && key.at(1).isUpper())
+        return key.at(1); // "QClass" -> 'C'
+    if (size >= 3 && key.startsWith("Q_"_L1))
+        return key.at(2).toUpper(); // "Q_ARG" -> 'A'
+    if (size >= 4 && key.startsWith("QT_"_L1))
+        return key.at(3).toUpper(); // "QT_TR" -> 'T'
+    auto idx = 0;
+    for (; idx < size && key.at(idx) == u'_'; ++idx) {
+    } // "__init__" -> 'I'
+    return idx < size ? key.at(idx).toUpper() : u'A';
+}
+
 static void writeFancyToc(TextStream& s, const QStringList& items)
 {
     using TocMap = QMap<QChar, QStringList>;
     TocMap tocMap;
-    QChar idx;
-    for (QString item : items) {
-        if (item.isEmpty())
-            continue;
-        item.chop(4); // Remove the .rst extension
-        // skip namespace if necessary
-        const QString className = item.split(u'.').last();
-        if (className.startsWith(u'Q') && className.length() > 1)
-            idx = className[1];
-        else
-            idx = className[0];
-        tocMap[idx] << item;
-    }
+    for (const QString &item : items)
+        tocMap[sortKey(item)] << item;
 
     static const qsizetype numColumns = 4;
 
