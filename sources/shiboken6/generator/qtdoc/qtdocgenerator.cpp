@@ -960,6 +960,23 @@ static QStringList enumListToToc(const AbstractMetaEnumList &enums)
     return result;
 }
 
+// Sort entries for a TOC by first character, dropping the
+// leading common Qt prefixes like 'Q'.
+static QChar sortKey(const QString &key)
+{
+    const auto size = key.size();
+    if (size >= 2 && key.at(0) == u'Q' && key.at(1).isUpper())
+        return key.at(1); // "QClass" -> 'C'
+    if (size >= 3 && key.startsWith("Q_"_L1))
+        return key.at(2).toUpper(); // "Q_ARG" -> 'A'
+    if (size >= 4 && key.startsWith("QT_"_L1))
+        return key.at(3).toUpper(); // "QT_TR" -> 'T'
+    auto idx = 0;
+    for (; idx < size && key.at(idx) == u'_'; ++idx) {
+    } // "__init__" -> 'I'
+    return idx < size ? key.at(idx).toUpper() : u'A';
+}
+
 static void writeFancyToc(TextStream& s, QAnyStringView title,
                           const QStringList& items,
                           QLatin1StringView referenceType)
@@ -970,12 +987,8 @@ static void writeFancyToc(TextStream& s, QAnyStringView title,
         return;
 
     TocMap tocMap;
-
-    for (const QString &item : items) {
-        const QChar idx = item.size() > 1 && item.startsWith(u'Q')
-            ? item.at(1) : item.at(0);
-        tocMap[idx] << item;
-    }
+    for (const QString &item : items)
+        tocMap[sortKey(item)] << item;
 
     static const qsizetype numColumns = 4;
 
