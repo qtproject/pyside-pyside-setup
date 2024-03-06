@@ -2088,6 +2088,8 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
 {
     TypeSystem::SnakeCase snakeCase = TypeSystem::SnakeCase::Unspecified;
     QString subModuleOf;
+    QString namespaceBegin;
+    QString namespaceEnd;
 
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
@@ -2124,6 +2126,10 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
             }
         } else if (name == subModuleOfAttribute) {
             subModuleOf = attributes->takeAt(i).value().toString();
+        } else if (name == "namespace-begin"_L1) {
+            namespaceBegin = attributes->takeAt(i).value().toString();
+        } else if (name == "namespace-end"_L1) {
+            namespaceEnd = attributes->takeAt(i).value().toString();
         }
     }
 
@@ -2144,6 +2150,10 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
     }
     moduleEntry->setCodeGeneration(m_generate);
     moduleEntry->setSnakeCase(snakeCase);
+    if (!namespaceBegin.isEmpty())
+        moduleEntry->setNamespaceBegin(namespaceBegin);
+    if (!namespaceEnd.isEmpty())
+        moduleEntry->setNamespaceEnd(namespaceEnd);
 
     if ((m_generate == TypeEntry::GenerateForSubclass ||
          m_generate == TypeEntry::GenerateNothing) && !m_defaultPackage.isEmpty())

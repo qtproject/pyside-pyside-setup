@@ -27,6 +27,12 @@ public:
     QString subModuleOf() const;
     void setSubModule(const QString &);
 
+    const QString &namespaceBegin() const;
+    void setNamespaceBegin(const QString &n);
+
+    const QString &namespaceEnd() const;
+    void setNamespaceEnd(const QString &n);
+
 protected:
     explicit TypeSystemTypeEntry(TypeEntryPrivate *d);
 };
