@@ -879,8 +879,8 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaClassCPtr &c
 static QChar sortKey(const QString &key)
 {
     const auto size = key.size();
-    if (size >= 2 && key.at(0) == u'Q' && key.at(1).isUpper())
-        return key.at(1); // "QClass" -> 'C'
+    if (size >= 2 && (key.at(0) == u'Q' || key.at(0) == u'q') && key.at(1).isUpper())
+        return key.at(1); // "QClass" -> 'C', "qSin()" -> 'S'
     if (size >= 3 && key.startsWith("Q_"_L1))
         return key.at(2).toUpper(); // "Q_ARG" -> 'A'
     if (size >= 4 && key.startsWith("QT_"_L1))
