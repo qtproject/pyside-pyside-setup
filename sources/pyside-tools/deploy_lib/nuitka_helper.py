@@ -109,7 +109,7 @@ class Nuitka:
             # for each file. This will preserve the directory structure of QML resources.
             qml_args.extend(
                 [f"--include-data-files={qml_file.resolve()}="
-                 f"./{qml_file.resolve().relative_to(source_file.parent)}"
+                 f"./{qml_file.resolve().relative_to(source_file.resolve().parent)}"
                  for qml_file in qml_files]
             )
             # add qml plugin. The `qml`` plugin name is not present in the module json files shipped

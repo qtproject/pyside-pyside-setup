@@ -13,7 +13,7 @@ from pkginfo import Wheel
 
 from . import (extract_and_copy_jar, get_wheel_android_arch, find_lib_dependencies,
                get_llvm_readobj, find_qtlibs_in_wheel, platform_map, create_recipe)
-from .. import (Config, find_pyside_modules, get_all_pyside_modules, MAJOR_VERSION)
+from .. import (Config, get_all_pyside_modules, MAJOR_VERSION)
 
 ANDROID_NDK_VERSION = "26b"
 ANDROID_NDK_VERSION_NUMBER_SUFFIX = "10909125"
@@ -26,9 +26,9 @@ class AndroidConfig(Config):
     """
     def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
                  android_data, existing_config_file: bool = False,
-                 extra_ignore_dirs: list[str] = None):
+                 extra_ignore_dirs: list[str] = None, name: str = None):
         super().__init__(config_file=config_file, source_file=source_file, python_exe=python_exe,
-                         dry_run=dry_run, existing_config_file=existing_config_file)
+                         dry_run=dry_run, existing_config_file=existing_config_file, name=name)
 
         self.extra_ignore_dirs = extra_ignore_dirs
 
@@ -99,11 +99,11 @@ class AndroidConfig(Config):
         if jars_dir_temp and Path(jars_dir_temp).resolve().exists():
             self.jars_dir = Path(jars_dir_temp).resolve()
 
-        self._arch = None
-        if self.get_value("buildozer", "arch"):
-            self.arch = self.get_value("buildozer", "arch")
+        android_arch = self.get_value("buildozer", "arch")
+        if android_arch:
+            self._arch = android_arch
         else:
-            self._find_and_set_arch()
+            self.arch = self._find_arch()
 
         # maps to correct platform name incase the instruction set was specified
         self._arch = platform_map[self.arch]
@@ -113,31 +113,33 @@ class AndroidConfig(Config):
         self.qt_libs_path: zipfile.Path = find_qtlibs_in_wheel(wheel_pyside=self.wheel_pyside)
         logging.info(f"[DEPLOY] Qt libs path inside wheel: {str(self.qt_libs_path)}")
 
-        if self.get_value("qt", "modules"):
-            self.modules = self.get_value("qt", "modules").split(",")
+        modls = self.get_value("qt", "modules")
+        if modls:
+            self._modules = modls.split(",")
         else:
-            self._find_and_set_pysidemodules()
-            self._find_and_set_qtquick_modules()
-            self.modules += self._find_dependent_qt_modules()
+            modls = self._find_pysidemodules()
+            modls += self._find_qtquick_modules()
+            modls += self._find_dependent_qt_modules(modules=modls)
             # remove duplicates
-            self.modules = list(set(self.modules))
+            self.modules = list(set(modls))
 
         # gets the xml dependency files from Qt installation path
-        self._dependency_files = []
-        self._find_and_set_dependency_files()
+        self.dependency_files = self._find_dependency_files()
 
         dependent_plugins = []
         self._local_libs = []
-        if self.get_value("buildozer", "local_libs"):
-            self._local_libs = self.get_value("buildozer", "local_libs").split(",")
+        loc_libs = self.get_value("buildozer", "local_libs")
+        if loc_libs:
+            self._local_libs = loc_libs.split(",")
         else:
             # the local_libs can also store dependent plugins
             local_libs, dependent_plugins = self._find_local_libs()
             self.local_libs = list(set(local_libs))
 
         self._qt_plugins = []
-        if self.get_value("android", "plugins"):
-            self._qt_plugins = self.get_value("android", "plugins").split(",")
+        qt_plgns = self.get_value("android", "plugins")
+        if qt_plgns:
+            self._qt_plugins = qt_plgns.split(",")
         elif dependent_plugins:
             self._find_plugin_dependencies(dependent_plugins)
             self.qt_plugins = list(set(dependent_plugins))
@@ -263,31 +265,29 @@ class AndroidConfig(Config):
     def dependency_files(self, dependency_files):
         self._dependency_files = dependency_files
 
-    def _find_and_set_pysidemodules(self):
-        self.modules = find_pyside_modules(project_dir=self.project_dir,
-                                           extra_ignore_dirs=self.extra_ignore_dirs,
-                                           project_data=self.project_data)
-        logging.info("The following PySide modules were found from the python files of "
-                     f"the project {self.modules}")
-
-    def find_and_set_jars_dir(self):
+    def find_jars_dir(self):
         """Extract out and copy .jar files to {generated_files_path}
         """
+        jars_dir = None
         if not self.dry_run:
             logging.info("[DEPLOY] Extract and copy jar files from PySide6 wheel to "
                          f"{self.generated_files_path}")
-            self.jars_dir = extract_and_copy_jar(wheel_path=self.wheel_pyside,
-                                                 generated_files_path=self.generated_files_path)
+            jars_dir = extract_and_copy_jar(wheel_path=self.wheel_pyside,
+                                            generated_files_path=self.generated_files_path)
 
-    def _find_and_set_arch(self):
+        return jars_dir
+
+    def _find_arch(self):
         """Find architecture from wheel name
         """
-        self.arch = get_wheel_android_arch(wheel=self.wheel_pyside)
-        if not self.arch:
+        arch = get_wheel_android_arch(wheel=self.wheel_pyside)
+        if not arch:
             raise RuntimeError("[DEPLOY] PySide wheel corrupted. Wheel name should end with"
                                "platform name")
 
-    def _find_dependent_qt_modules(self):
+        return arch
+
+    def _find_dependent_qt_modules(self, modules: list[str]) -> list[str]:
         """
         Given pysidedeploy_config.modules, find all the other dependent Qt modules. This is
         done by using llvm-readobj (readelf) to find the dependent libraries from the module
@@ -309,7 +309,7 @@ class AndroidConfig(Config):
             archive.extractall(tmpdir)
             qt_libs_tmpdir = Path(tmpdir) / lib_path_suffix
             # find the lib folder where Qt libraries are stored
-            for module_name in sorted(self.modules):
+            for module_name in sorted(modules):
                 qt_module_path = qt_libs_tmpdir / f"libQt6{module_name}_{self.arch}.so"
                 if not qt_module_path.exists():
                     raise FileNotFoundError(f"[DEPLOY] libQt6{module_name}_{self.arch}.so not found"
@@ -322,7 +322,7 @@ class AndroidConfig(Config):
             match = lib_pattern.search(dependency)
             if match:
                 module = match.group("mod_name")
-                if module not in self.modules:
+                if module not in modules:
                     dependent_modules.add(module)
 
         # check if the PySide6 binary for the Qt module actually exists
@@ -335,21 +335,23 @@ class AndroidConfig(Config):
 
         return dependent_modules
 
-    def _find_and_set_dependency_files(self) -> list[zipfile.Path]:
+    def _find_dependency_files(self) -> list[zipfile.Path]:
         """
         Based on `modules`, returns the Qt6{module}_{arch}-android-dependencies.xml file, which
         contains the various dependencies of the module, like permissions, plugins etc
         """
         needed_dependency_files = [(f"Qt{MAJOR_VERSION}{module}_{self.arch}"
                                     "-android-dependencies.xml") for module in self.modules]
-
+        found_dependency_files = []
         for dependency_file_name in needed_dependency_files:
             dependency_file = self.qt_libs_path / dependency_file_name
             if dependency_file.exists():
-                self._dependency_files.append(dependency_file)
+                found_dependency_files.append(dependency_file)
 
         logging.info("[DEPLOY] The following dependency files were found: "
-                     f"{*self._dependency_files, }")
+                     f"{*found_dependency_files, }")
+
+        return found_dependency_files
 
     def _find_local_libs(self):
         local_libs = set()
@@ -431,12 +433,13 @@ class AndroidConfig(Config):
                             if plugin_infix_name not in dependent_plugins:
                                 dependent_plugins.append(plugin_infix_name)
 
-    def verify_and_set_recipe_dir(self):
+    def find_recipe_dir(self):
         # create recipes
         # https://python-for-android.readthedocs.io/en/latest/recipes/
         # These recipes are manually added through buildozer.spec file to be used by
         # python_for_android while building the distribution
 
+        recipe_dir = None
         if not self.recipes_exist() and not self.dry_run:
             logging.info("[DEPLOY] Creating p4a recipes for PySide6 and shiboken6")
             version = Wheel(self.wheel_pyside).version
@@ -449,5 +452,6 @@ class AndroidConfig(Config):
             create_recipe(version=version, component=f"shiboken{MAJOR_VERSION}",
                           wheel_path=self.wheel_shiboken,
                           generated_files_path=self.generated_files_path)
-            self.recipe_dir = ((self.generated_files_path
-                                / "recipes").resolve())
+            recipe_dir = ((self.generated_files_path
+                           / "recipes").resolve())
+        return recipe_dir

@@ -75,7 +75,8 @@ class Config(BaseConfig):
     """
 
     def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
-                 existing_config_file: bool = False, extra_ignore_dirs: list[str] = None):
+                 existing_config_file: bool = False, extra_ignore_dirs: list[str] = None,
+                 name: str = None):
         super().__init__(config_file=config_file, existing_config_file=existing_config_file)
 
         self.extra_ignore_dirs = extra_ignore_dirs
@@ -95,46 +96,55 @@ class Config(BaseConfig):
             )
         )
 
-        self.title = self.get_value("app", "title")
+        # set application name
+        self.title = self.set_or_fetch(config_property_val=name, config_property_key="title")
 
         # set application icon
         config_icon = self.get_value("app", "icon")
         if config_icon:
-            self.icon = str(Path(config_icon).resolve())
+            self._icon = str(Path(config_icon).resolve())
         else:
             self.icon = DEFAULT_APP_ICON
 
-        self.project_dir = None
-        if self.get_value("app", "project_dir"):
-            self.project_dir = Path(self.get_value("app", "project_dir")).absolute()
+        proj_dir = self.get_value("app", "project_dir")
+        if proj_dir:
+            self._project_dir = Path(proj_dir).resolve()
         else:
-            self._find_and_set_project_dir()
+            self.project_dir = self._find_project_dir()
 
-        self.exe_dir = None
-        if self.get_value("app", "exec_directory"):
-            self.exe_dir = Path(self.get_value("app", "exec_directory")).absolute()
+        exe_directory = self.get_value("app", "exec_directory")
+        if exe_directory:
+            self._exe_dir = Path(exe_directory).absolute()
         else:
-            self._find_and_set_exe_dir()
+            self.exe_dir = self._find_exe_dir()
 
-        self.project_data: ProjectData = None
-        if self.get_value("app", "project_file"):
-            project_file = Path(self.get_value("app", "project_file")).absolute()
-            self.project_data = ProjectData(project_file=project_file)
+        self._project_file = None
+        proj_file = self.get_value("app", "project_file")
+        if proj_file:
+            self._project_file = self.project_dir / proj_file
         else:
-            self._find_and_set_project_file()
+            proj_file = self._find_project_file()
+            if proj_file:
+                self.project_file = proj_file
 
-        self.qml_files = []
+        self.project_data = None
+        if self.project_file and self.project_file.exists():
+            self.project_data = ProjectData(project_file=self.project_file)
+
+        self._qml_files = []
         config_qml_files = self.get_value("qt", "qml_files")
         if config_qml_files and self.project_dir and self.existing_config_file:
-            self.qml_files = [Path(self.project_dir) / file for file in config_qml_files.split(",")]
+            self._qml_files = [Path(self.project_dir)
+                               / file for file in config_qml_files.split(",")]
         else:
-            self._find_and_set_qml_files()
+            self.qml_files = self._find_qml_files()
 
-        self.excluded_qml_plugins = []
-        if self.get_value("qt", "excluded_qml_plugins") and self.existing_config_file:
-            self.excluded_qml_plugins = self.get_value("qt", "excluded_qml_plugins").split(",")
+        self._excluded_qml_plugins = []
+        excl_qml_plugins = self.get_value("qt", "excluded_qml_plugins")
+        if excl_qml_plugins and self.existing_config_file:
+            self._excluded_qml_plugins = excl_qml_plugins.split(",")
         else:
-            self._find_and_set_excluded_qml_plugins()
+            self.excluded_qml_plugins = self._find_excluded_qml_plugins()
 
         self._generated_files_path = self.project_dir / "deployment"
 
@@ -173,6 +183,9 @@ class Config(BaseConfig):
     @qml_files.setter
     def qml_files(self, qml_files):
         self._qml_files = qml_files
+        self.set_value("qt", "qml_files",
+                       ",".join([str(file.absolute().relative_to(self.project_dir.absolute()))
+                                 for file in self.qml_files]))
 
     @property
     def project_dir(self):
@@ -181,6 +194,16 @@ class Config(BaseConfig):
     @project_dir.setter
     def project_dir(self, project_dir):
         self._project_dir = project_dir
+        self.set_value("app", "project_dir", str(project_dir))
+
+    @property
+    def project_file(self):
+        return self._project_file
+
+    @project_file.setter
+    def project_file(self, project_file):
+        self._project_file = project_file
+        self.set_value("app", "project_file", str(project_file.relative_to(self.project_dir)))
 
     @property
     def title(self):
@@ -189,7 +212,6 @@ class Config(BaseConfig):
     @title.setter
     def title(self, title):
         self._title = title
-        self.set_value("app", "title", title)
 
     @property
     def icon(self):
@@ -207,6 +229,7 @@ class Config(BaseConfig):
     @source_file.setter
     def source_file(self, source_file: Path):
         self._source_file = source_file
+        self.set_value("app", "input_file", str(source_file))
 
     @property
     def python_path(self):
@@ -231,6 +254,8 @@ class Config(BaseConfig):
     @excluded_qml_plugins.setter
     def excluded_qml_plugins(self, excluded_qml_plugins):
         self._excluded_qml_plugins = excluded_qml_plugins
+        if excluded_qml_plugins:  # check required for Android
+            self.set_value("qt", "excluded_qml_plugins", ",".join(excluded_qml_plugins))
 
     @property
     def exe_dir(self):
@@ -239,6 +264,7 @@ class Config(BaseConfig):
     @exe_dir.setter
     def exe_dir(self, exe_dir: Path):
         self._exe_dir = exe_dir
+        self.set_value("app", "exec_directory", str(exe_dir))
 
     @property
     def modules(self):
@@ -249,15 +275,19 @@ class Config(BaseConfig):
         self._modules = modules
         self.set_value("qt", "modules", ",".join(modules))
 
-    def _find_and_set_qml_files(self):
-        """Fetches all the qml_files in the folder and sets them if the
-        field qml_files is empty in the config_dir"""
+    def _find_qml_files(self):
+        """
+        Fetches all the qml_files in the folder and sets them if the
+        field qml_files is empty in the config_file
+        """
 
+        qml_files = []
         if self.project_data:
-            qml_files = self.project_data.qml_files
+            qml_files = [(self.project_dir / str(qml_file)) for qml_file in
+                         self.project_data.qml_files]
             for sub_project_file in self.project_data.sub_projects_files:
-                qml_files.extend(ProjectData(project_file=sub_project_file).qml_files)
-            self.qml_files = qml_files
+                qml_files.extend([self.project_dir / str(qml_file) for qml_file in
+                                  ProjectData(project_file=sub_project_file).qml_files])
         else:
             qml_files_temp = None
             if self.source_file and self.python_path:
@@ -275,79 +305,61 @@ class Config(BaseConfig):
 
                 if qml_files_temp:
                     extra_qml_files = [Path(file) for file in qml_files_temp]
-                    self.qml_files.extend(extra_qml_files)
+                    qml_files.extend(extra_qml_files)
 
-        if self.qml_files:
-            self.set_value(
-                "qt",
-                "qml_files",
-                ",".join([str(file.absolute().relative_to(self.project_dir))
-                          for file in self.qml_files]),
-            )
-            logging.info("[DEPLOY] QML files identified and set in config_file")
+        return qml_files
 
-    def _find_and_set_project_dir(self):
+    def _find_project_dir(self) -> Path:
         # there is no other way to find the project_dir than assume it is the parent directory
         # of source_file
-        self.project_dir = self.source_file.parent
+        project_dir = self.source_file.parent
+        return project_dir
 
-        # update input_file path
-        self.set_value("app", "input_file", str(self.source_file.relative_to(self.project_dir)))
-
-        if self.project_dir != Path.cwd():
-            self.set_value("app", "project_dir", str(self.project_dir))
-        else:
-            self.set_value("app", "project_dir", str(self.project_dir.relative_to(Path.cwd())))
-
-    def _find_and_set_project_file(self):
+    def _find_project_file(self) -> Path:
         if self.project_dir:
             files = list(self.project_dir.glob("*.pyproject"))
         else:
-            logging.exception("[DEPLOY] Project directory not set in config file")
-            raise
+            raise RuntimeError("[DEPLOY] Project directory not set in config file")
 
         if not files:
             logging.info("[DEPLOY] No .pyproject file found. Project file not set")
         elif len(files) > 1:
-            logging.warning("DEPLOY: More that one .pyproject files found. Project file not set")
-            raise
+            warnings.warn("DEPLOY: More that one .pyproject files found. Project file not set")
         else:
-            self.project_data = ProjectData(files[0])
-            self.set_value("app", "project_file", str(files[0].relative_to(self.project_dir)))
-            logging.info(f"[DEPLOY] Project file {files[0]} found and set in config file")
+            return files[0]
 
-    def _find_and_set_excluded_qml_plugins(self):
+        return None
+
+    def _find_excluded_qml_plugins(self) -> set:
+        excluded_qml_plugins = None
         if self.qml_files:
             self.qml_modules = set(run_qmlimportscanner(qml_files=tuple(self.qml_files),
                                                         # tuple is needed to make it hashable
                                                         dry_run=self.dry_run))
-            self.excluded_qml_plugins = EXCLUDED_QML_PLUGINS.difference(self.qml_modules)
+            excluded_qml_plugins = EXCLUDED_QML_PLUGINS.difference(self.qml_modules)
 
             # needed for dry_run testing
-            self.excluded_qml_plugins = sorted(self.excluded_qml_plugins)
+            excluded_qml_plugins = sorted(excluded_qml_plugins)
 
-            if self.excluded_qml_plugins:
-                self.set_value("qt", "excluded_qml_plugins", ",".join(self.excluded_qml_plugins))
+        return excluded_qml_plugins
 
-    def _find_and_set_exe_dir(self):
+    def _find_exe_dir(self) -> Path:
+        exe_dir = None
         if self.project_dir == Path.cwd():
-            self.exe_dir = self.project_dir.relative_to(Path.cwd())
+            exe_dir = self.project_dir.relative_to(Path.cwd())
         else:
-            self.exe_dir = self.project_dir
-        self.exe_dir = Path(
-            self.set_or_fetch(
-                config_property_val=self.exe_dir, config_property_key="exec_directory"
-            )
-        ).absolute()
+            exe_dir = self.project_dir
+        return exe_dir
 
-    def _find_and_set_pysidemodules(self):
-        self.modules = find_pyside_modules(project_dir=self.project_dir,
-                                           extra_ignore_dirs=self.extra_ignore_dirs,
-                                           project_data=self.project_data)
+    def _find_pysidemodules(self):
+        modules = find_pyside_modules(project_dir=self.project_dir,
+                                      extra_ignore_dirs=self.extra_ignore_dirs,
+                                      project_data=self.project_data)
         logging.info("The following PySide modules were found from the Python files of "
-                     f"the project {self.modules}")
+                     f"the project {modules}")
+        return modules
 
-    def _find_and_set_qtquick_modules(self):
+    def _find_qtquick_modules(self):
         """Identify if QtQuick is used in QML files and add them as dependency
         """
         extra_modules = []
@@ -361,7 +373,7 @@ class Config(BaseConfig):
         if "QtQuick.Controls" in self.qml_modules:
             extra_modules.append("QuickControls2")
 
-        self.modules += extra_modules
+        return extra_modules
 
 
 class DesktopConfig(Config):
@@ -373,16 +385,19 @@ class DesktopConfig(Config):
 
     def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
                  existing_config_file: bool = False, extra_ignore_dirs: list[str] = None,
-                 mode: str = "onefile"):
+                 mode: str = "onefile", name: str = None):
         super().__init__(config_file, source_file, python_exe, dry_run, existing_config_file,
-                         extra_ignore_dirs)
+                         extra_ignore_dirs, name=name)
         self.dependency_reader = QtDependencyReader(dry_run=self.dry_run)
-        if self.get_value("qt", "modules"):
-            self.modules = self.get_value("qt", "modules").split(",")
+        modls = self.get_value("qt", "modules")
+        if modls:
+            self._modules = modls.split(",")
         else:
-            self._find_and_set_pysidemodules()
-            self._find_and_set_qtquick_modules()
-            self._find_dependent_qt_modules()
+            modls = self._find_pysidemodules()
+            modls += self._find_qtquick_modules()
+            modls += self._find_dependent_qt_modules(modules=modls)
+            # remove duplicates
+            self.modules = list(set(modls))
 
         self._qt_plugins = []
         if self.get_value("qt", "plugins"):
@@ -397,7 +412,7 @@ class DesktopConfig(Config):
             if nuitka_macos_permissions:
                 self._permissions = nuitka_macos_permissions.split(",")
             else:
-                self._find_and_set_permissions()
+                self.permissions = self._find_permissions()
 
         self._mode = self.NuitkaMode.ONEFILE
         if self.get_value("nuitka", "mode") == self.NuitkaMode.STANDALONE.value:
@@ -432,24 +447,24 @@ class DesktopConfig(Config):
         self._mode = mode
         self.set_value("nuitka", "mode", mode.value)
 
-    def _find_dependent_qt_modules(self):
+    def _find_dependent_qt_modules(self, modules: list[str]) -> list[str]:
         """
         Given pysidedeploy_config.modules, find all the other dependent Qt modules.
         """
-        all_modules = set(self.modules)
+        all_modules = set(modules)
 
         if not self.dependency_reader.lib_reader:
             warnings.warn(f"[DEPLOY] Unable to find {self.dependency_reader.lib_reader_name}. This "
                           "tool helps to find the Qt module dependencies of the application. "
                           "Skipping checking for dependencies.", category=RuntimeWarning)
-            return
+            return []
 
-        for module_name in self.modules:
+        for module_name in modules:
             self.dependency_reader.find_dependencies(module=module_name, used_modules=all_modules)
 
-        self.modules = list(all_modules)
+        return list(all_modules)
 
-    def _find_and_set_permissions(self):
+    def _find_permissions(self):
         """
         Finds and sets the usage description string required for each permission requested by the
         macOS application.
@@ -468,4 +483,4 @@ class DesktopConfig(Config):
             if perm_category in PERMISSION_MAP:
                 permissions.append(PERMISSION_MAP[perm_category])
 
-        self.permissions = permissions
+        return permissions

@@ -20,7 +20,7 @@ def is_python_file(file: Path) -> bool:
 class ProjectData:
     def __init__(self, project_file: Path) -> None:
         """Parse the project."""
-        self._project_file = project_file
+        self._project_file = project_file.resolve()
         self._sub_projects_files: list[Path] = []
 
         # All sources except subprojects

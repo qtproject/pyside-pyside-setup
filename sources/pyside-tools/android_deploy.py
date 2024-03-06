@@ -90,7 +90,7 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
     config = AndroidConfig(config_file=config_file, source_file=main_file,
                            python_exe=python.exe, dry_run=dry_run, android_data=android_data,
                            existing_config_file=config_file_exists,
-                           extra_ignore_dirs=extra_ignore_dirs)
+                           extra_ignore_dirs=extra_ignore_dirs, name=name)
 
     if not config.wheel_pyside and not config.wheel_shiboken:
         raise RuntimeError(f"[DEPLOY] No PySide{MAJOR_VERSION} and Shiboken{MAJOR_VERSION} wheels"
@@ -100,17 +100,13 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
 
     python.install_dependencies(config=config, packages="android_packages", is_android=True)
 
-    # set application name
-    if name:
-        config.title = name
-
     try:
         config.modules += list(set(extra_modules).difference(set(config.modules)))
 
         # this cannot be done when config file is initialized because cleanup() removes it
         # so this can only be done after the cleanup()
-        config.find_and_set_jars_dir()
-        config.verify_and_set_recipe_dir()
+        config.jars_dir = config.find_jars_dir()
+        config.recipe_dir = config.find_recipe_dir()
 
         # TODO: include qml files from pysidedeploy.spec rather than from extensions
         # buildozer currently includes all the files with .qml extension

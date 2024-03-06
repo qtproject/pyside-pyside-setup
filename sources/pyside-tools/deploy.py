@@ -103,11 +103,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
 
     config = DesktopConfig(config_file=config_file, source_file=main_file, python_exe=python.exe,
                            dry_run=dry_run, existing_config_file=config_file_exists,
-                           extra_ignore_dirs=extra_ignore_dirs, mode=mode)
-
-    # set application name
-    if name:
-        config.title = name
+                           extra_ignore_dirs=extra_ignore_dirs, mode=mode, name=name)
 
     cleanup(config=config)
 
@@ -127,7 +123,8 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
         config.update_config()
 
     if config.qml_files:
-        logging.info(f"[DEPLOY] Included QML files: {config.qml_files}")
+        logging.info("[DEPLOY] Included QML files: "
+                     f"{[str(qml_file) for qml_file in config.qml_files]}")
 
     if init:
         # config file created above. Exiting.

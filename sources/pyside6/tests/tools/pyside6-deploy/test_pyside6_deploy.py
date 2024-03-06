@@ -148,8 +148,8 @@ class TestPySide6DeployWidgets(DeployTestBase):
 
         # # test config file contents
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
-        self.assertEqual(config_obj.get_value("app", "input_file"), "tetrix.py")
-        self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
+        self.assertTrue(config_obj.get_value("app", "input_file").endswith("tetrix.py"))
+        self.assertTrue(config_obj.get_value("app", "project_dir").endswith("tetrix"))
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
         self.assertEqual(config_obj.get_value("python", "packages"),
                          "Nuitka==2.4.8")
@@ -264,8 +264,8 @@ class TestPySide6DeployQml(DeployTestBase):
 
         # test config file contents
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
-        self.assertEqual(config_obj.get_value("app", "input_file"), "main.py")
-        self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
+        self.assertTrue(config_obj.get_value("app", "input_file").endswith("main.py"))
+        self.assertTrue(config_obj.get_value("app", "project_dir").endswith("editingmodel"))
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
         self.assertEqual(config_obj.get_value("python", "packages"),
                          "Nuitka==2.4.8")
@@ -392,7 +392,7 @@ class TestPySide6DeployWebEngine(DeployTestBase):
 
         # test config file contents
         config_obj = self.deploy_lib.BaseConfig(config_file=config_file)
-        self.assertEqual(config_obj.get_value("app", "input_file"), "quicknanobrowser.py")
+        self.assertTrue(config_obj.get_value("app", "input_file").endswith("quicknanobrowser.py"))
         self.assertEqual(config_obj.get_value("qt", "qml_files"), ",".join(qml_files))
         self.assertEqual(
             config_obj.get_value("qt", "excluded_qml_plugins"),
