@@ -43,8 +43,13 @@ It can have a number of attributes, described below.
 
 .. code-block:: xml
 
-    <typesystem package="..." submodule-of="..." allow-thread="..."
-                exception-handling="..." snake-case="yes | no | both" >
+    <typesystem package="..."
+                submodule-of="..."
+                allow-thread="..."
+                exception-handling="..."
+                snake-case="yes | no | both"
+                namespace-begin="..."
+                namespace-end="..." >
     </typesystem>
 
 The **package** attribute is a string describing the package to be used,
@@ -73,6 +78,13 @@ limitations to this though:
 - When static and non-static overloads of a class member function
   exist (as is the case for example for ``QFileInfo::exists()``),
   the snake case name must be used.
+
+The *optional* **namespace-begin** and **namespace-end** attributes will be
+generated around the forward declarations in the module header. This is
+intended for libraries which can optionally use inline namespaces
+to allow for linking several versions of them together.
+For example, for *Qt*, one would specify ``QT_BEGIN_NAMESPACE``,
+``QT_END_NAMESPACE``, respectively.
 
 .. _load-typesystem:
 
@@ -141,8 +153,8 @@ already specified in the QtCore typesystem (see :ref:`primitive-cpp-types`).
             until="..."
             target-lang-api-name="..."
             default-constructor="..."
-            preferred-conversion="yes | no" />
-            view-on="..."
+            preferred-conversion="yes | no"
+            view-on="..." />
     </typesystem>
 
 The **name** attribute is the name of the primitive in C++.

@@ -541,6 +541,11 @@ static void writeForwardDeclarations(TextStream &s,
 {
     NameSpaces nameSpaces;
 
+    s << '\n';
+    auto typeSystemEntry = TypeDatabase::instance()->defaultTypeSystemType();
+    if (!typeSystemEntry->namespaceBegin().isEmpty())
+        s << typeSystemEntry->namespaceBegin() << '\n';
+
     for (const auto &c : classList) {
         if (auto encl = c->enclosingClass()) {
             Q_ASSERT(encl->isNamespace());
@@ -569,6 +574,9 @@ static void writeForwardDeclarations(TextStream &s,
         if (nsp.nameSpace->enclosingClass() == nullptr)
             writeNamespaceForwardDeclarationRecursion(s, i, nameSpaces);
     }
+
+    if (!typeSystemEntry->namespaceEnd().isEmpty())
+        s << typeSystemEntry->namespaceEnd() << '\n';
 }
 
 // Include parameters required for the module/private module header
