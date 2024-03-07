@@ -396,8 +396,8 @@ class CommandMixin(object):
 
         # By default they are False, so we check if they changed with xor
         if bool(OPTION["QUIET"]) != bool(OPTION["VERBOSE_BUILD"]):
-            log.warn("Using --quiet and --verbose-build is deprecated. "
-                     "Please use --log-level=quiet or --log-level=verbose instead.")
+            log.warning("Using --quiet and --verbose-build is deprecated. "
+                        "Please use --log-level=quiet or --log-level=verbose instead.")
             # We assign a string value instead of the enum
             # because is what we get from the command line.
             # Later we assign the enum
@@ -425,8 +425,8 @@ class CommandMixin(object):
         OPTION['SHORTER_PATHS'] = self.shorter_paths
         OPTION['DOC_BUILD_ONLINE'] = self.doc_build_online
         if self.unity:
-            log.warn("Using --unity no longer has any effect, "
-                     "Unity build mode is now the default.")
+            log.warning("Using --unity no longer has any effect, "
+                        "Unity build mode is now the default.")
         OPTION['UNITY'] = not self.no_unity
         OPTION['UNITY_BUILD_BATCH_SIZE'] = self.unity_build_batch_size
 

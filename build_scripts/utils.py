@@ -949,7 +949,7 @@ def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
                 _path = Path(os.getenv(var, ""))
                 _pExe = _path / "python.exe"
                 if not _pExe.is_file():
-                    log.warn(f"Can't find python.exe from {_pExe}, using default python3")
+                    log.warning(f"Can't find python.exe from {_pExe}, using default python3")
                     _pExe = Path(os.getenv("PYTHON3_32_PATH")) / "python.exe"
             else:
                 _pExe = Path(os.getenv("PYTHON2_32_PATH")) / "python.exe"
@@ -960,7 +960,7 @@ def get_qtci_virtualEnv(python_ver, host, hostArch, targetArch):
                 _path = Path(os.getenv(var, ""))
                 _pExe = _path / "python.exe"
                 if not _pExe.is_file():
-                    log.warn(f"Can't find python.exe from {_pExe}, using default python3")
+                    log.warning(f"Can't find python.exe from {_pExe}, using default python3")
                     _pExe = Path(os.getenv("PYTHON3_PATH")) / "python.exe"
         env_python = f"{_env}\\Scripts\\python.exe"
         env_pip = f"{_env}\\Scripts\\pip.exe"
