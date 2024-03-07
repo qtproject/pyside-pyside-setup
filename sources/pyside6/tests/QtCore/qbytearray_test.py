@@ -6,6 +6,7 @@
 import ctypes
 import os
 import pickle
+import struct
 import sys
 import unittest
 
@@ -255,6 +256,13 @@ class QByteArraySliceAssignment(unittest.TestCase):
         byte_array = QByteArray(orig_bytes)
         actual_bytes = bytes(byte_array)
         self.assertEqual(orig_bytes, actual_bytes)
+
+    def testUnpack(self):
+        b = QByteArray(b'\x19\x00\x00\x00\xc4\t\x00\x00')
+        t = struct.unpack('<ii', b)
+        self.assertEqual(len(t), 2)
+        self.assertEqual(t[0], 25)
+        self.assertEqual(t[1], 2500)
 
 
 class QCompressTest(unittest.TestCase):
