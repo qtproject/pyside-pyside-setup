@@ -1128,5 +1128,47 @@ QDebug operator<<(QDebug debug, const debugPyObject &o)
     return debug;
 }
 
-} //namespace PySide
+debugPyBuffer::debugPyBuffer(Py_buffer *b) noexcept : m_buffer(b)
+{
+}
 
+static void formatPy_ssizeArray(QDebug &debug, const char *name, const Py_ssize_t *array, int len)
+{
+    debug << ", " << name << '=';
+    if (array != nullptr) {
+        debug << '[';
+        for (int i = 0; i < len; ++i)
+            debug << array[i] << ' ';
+        debug << ']';
+    } else {
+        debug << '0';
+    }
+}
+
+PYSIDE_API QDebug operator<<(QDebug debug, const debugPyBuffer &b)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "Py_buffer(";
+    if (b.m_buffer != nullptr) {
+        debug << "obj=" << b.m_buffer->obj
+              << ", buf=" << b.m_buffer->buf << ", len=" << b.m_buffer->len
+              << ", readonly=" <<  b.m_buffer->readonly
+              << ", itemsize=" <<  b.m_buffer->itemsize << ", format=";
+        if (b.m_buffer->format != nullptr)
+            debug << '"' << b.m_buffer->format << '"';
+        else
+            debug << '0';
+        debug << ", ndim=" << b.m_buffer->ndim;
+        formatPy_ssizeArray(debug, "shape", b.m_buffer->shape, b.m_buffer->ndim);
+        formatPy_ssizeArray(debug, "strides", b.m_buffer->strides, b.m_buffer->ndim);
+        formatPy_ssizeArray(debug, "suboffsets", b.m_buffer->suboffsets, b.m_buffer->ndim);
+    } else {
+        debug << '0';
+    }
+    debug << ')';
+    return debug;
+}
+
+} // namespace PySide

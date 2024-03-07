@@ -55,6 +55,15 @@ struct debugPyObject
 
 PYSIDE_API QDebug operator<<(QDebug debug, const debugPyObject &o);
 
+struct debugPyBuffer
+{
+    PYSIDE_API explicit debugPyBuffer(Py_buffer *b) noexcept;
+
+    Py_buffer *m_buffer;
+};
+
+PYSIDE_API QDebug operator<<(QDebug debug, const debugPyBuffer &b);
+
 } //namespace PySide
 
 #endif // PYSIDESTRING_H
