@@ -1733,14 +1733,23 @@
       </modify-argument>
       <modify-argument index="1" pyi-type="Optional[PySide6.QtCore.QObject]"/>
     </modify-function>
-    <modify-function signature="connect(const QObject*,const char*,const char*,Qt::ConnectionType)const">
+    <!-- Manual overload order fixes PYSIDE-2627
+
+         The addition of the qobject-connect-4-context overload resulted in an
+         automatic overload ordering that prevented the right overload from
+         ever being called if the callable was a QObject. Set a manual order to
+         fix this. -->
+    <modify-function signature="connect(const QObject*,const char*,const char*,Qt::ConnectionType)const"
+                     overload-number="0">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-1"/>
     </modify-function>
     <!-- static version -->
-    <modify-function signature="connect(const QObject*,QMetaMethod,const QObject*,QMetaMethod,Qt::ConnectionType)">
+    <modify-function signature="connect(const QObject*,QMetaMethod,const QObject*,QMetaMethod,Qt::ConnectionType)"
+                     overload-number="1">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-2"/>
     </modify-function>
-    <modify-function signature="connect(const QObject*,const char*,const QObject*,const char*,Qt::ConnectionType)">
+    <modify-function signature="connect(const QObject*,const char*,const QObject*,const char*,Qt::ConnectionType)"
+                     overload-number="2">
         <modify-argument index="5">
             <rename to="type"/>
         </modify-argument>
@@ -1748,20 +1757,20 @@
     </modify-function>
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect"/>
     <add-function signature="connect(const QObject*@sender@,const char*@signal@,PyCallable*@functor@,Qt::ConnectionType@type@=Qt::AutoConnection)"
-                  return-type="QMetaObject::Connection" static="yes">
+                  return-type="QMetaObject::Connection" static="yes" overload-number="3">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-4"/>
     </add-function>
     <add-function signature="connect(const QObject*@sender@,const char*@signal@,const QObject*@context@,PyCallable*@functor@,Qt::ConnectionType@type@=Qt::AutoConnection)"
-                  return-type="QMetaObject::Connection" static="yes">
+                  return-type="QMetaObject::Connection" static="yes" overload-number="4">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-4-context"/>
     </add-function>
     <!-- static version -->
     <add-function signature="connect(const char*@signal@,PyCallable*@functor@,Qt::ConnectionType@type@=Qt::AutoConnection)"
-                  return-type="QMetaObject::Connection">
+                  return-type="QMetaObject::Connection" overload-number="5">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-5"/>
     </add-function>
     <add-function signature="connect(const char*@signal@,const QObject*@receiver@,const char*@method@,Qt::ConnectionType@type@=Qt::AutoConnection)"
-                  return-type="QMetaObject::Connection">
+                  return-type="QMetaObject::Connection" overload-number="6">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-connect-6"/>
     </add-function>
 
