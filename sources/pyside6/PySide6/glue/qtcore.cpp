@@ -802,10 +802,10 @@ static int SbkQByteArray_getbufferproc(PyObject *obj, Py_buffer *view, int flags
     view->len = cppSelf->size();
     view->readonly = 0;
     view->itemsize = 1;
-    view->format = const_cast<char *>("c");
+    view->format = (flags & PyBUF_FORMAT) == PyBUF_FORMAT ? const_cast<char *>("B") : nullptr;
     view->ndim = 1;
     view->shape = (flags & PyBUF_ND) == PyBUF_ND ? &(view->len) : nullptr;
-    view->strides = &view->itemsize;
+    view->strides = (flags & PyBUF_STRIDES) == PyBUF_STRIDES ? &(view->itemsize) : nullptr;
     view->suboffsets = nullptr;
     view->internal = nullptr;
 
