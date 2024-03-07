@@ -55,7 +55,7 @@ cd C:\pyside-setup\examples\widgetbinding
 ```bash
 mkdir build
 cd build
-cmake -H.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake -S.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release
 ninja
 ninja install
 cd ..
