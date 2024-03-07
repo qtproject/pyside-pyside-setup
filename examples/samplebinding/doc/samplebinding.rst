@@ -181,7 +181,7 @@ On Windows:
 
     mkdir build
     cd build
-    cmake -H.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl.exe
+    cmake -S.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl.exe
     ninja
     ninja install
     cd ..
@@ -220,13 +220,13 @@ passing the compiler on the command line:
 
 .. code-block:: bash
 
-    cmake -H.. -B. -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
+    cmake -S.. -B. -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
 
 or by using the -G option:
 
 .. code-block:: bash
 
-    cmake -H.. -B. -G "Visual Studio 14 Win64"
+    cmake -S.. -B. -G "Visual Studio 14 Win64"
 
 If the ``-G "Visual Studio 14 Win64"`` option is used, a ``sln`` file
 will be generated, and can be used with ``MSBuild``

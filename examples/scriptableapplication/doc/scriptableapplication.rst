@@ -84,7 +84,7 @@ On Windows:
 
     mkdir build
     cd build
-    cmake -H.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release
+    cmake -S.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release
     ninja
     ./scriptableapplication
 
@@ -127,13 +127,13 @@ passing the compiler on the command line:
 
 .. code-block:: bash
 
-    cmake -H.. -B. -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
+    cmake -S.. -B. -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
 
 or using the -G option:
 
 .. code-block:: bash
 
-    cmake -H.. -B. -G "Visual Studio 14 Win64" -DCMAKE_BUILD_TYPE=Release
+    cmake -S.. -B. -G "Visual Studio 14 Win64" -DCMAKE_BUILD_TYPE=Release
 
 
 If the ``-G "Visual Studio 14 Win64"`` option is used, a ``sln`` file
