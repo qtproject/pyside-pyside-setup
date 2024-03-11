@@ -33,8 +33,12 @@ def run(coro: typing.Optional[typing.Coroutine] = None,
     #
     # More details:
     # https://discuss.python.org/t/removing-the-asyncio-policy-system-asyncio-set-event-loop-policy-in-python-3-15/37553  # noqa: E501
+    default_policy = asyncio.get_event_loop_policy()
     asyncio.set_event_loop_policy(
         QAsyncioEventLoopPolicy(quit_qapp=quit_qapp, handle_sigint=handle_sigint))
+
+    ret = None
+    exc = None
 
     if keep_running:
         if coro:
@@ -42,8 +46,15 @@ def run(coro: typing.Optional[typing.Coroutine] = None,
         asyncio.get_event_loop().run_forever()
     else:
         if coro:
-            return asyncio.run(coro, debug=debug)
+            ret = asyncio.run(coro, debug=debug)
         else:
-            raise RuntimeError(
+            exc = RuntimeError(
                 "QtAsyncio was set to keep running after the coroutine "
                 "finished, but no coroutine was provided.")
+
+    asyncio.set_event_loop_policy(default_policy)
+
+    if ret:
+        return ret
+    if exc:
+        raise exc
