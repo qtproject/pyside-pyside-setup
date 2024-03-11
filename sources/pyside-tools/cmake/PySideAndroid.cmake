@@ -16,11 +16,8 @@ macro(create_and_install_qt_javabindings)
     set(android_main_srcs "${QT6_INSTALL_PREFIX}/src/android/java/src/org/qtproject/qt/android/bindings")
     set(java_sources
         ${android_main_srcs}/QtActivity.java
-        ${android_main_srcs}/QtActivityLoader.java
         ${android_main_srcs}/QtApplication.java
-        ${android_main_srcs}/QtLoader.java
         ${android_main_srcs}/QtService.java
-        ${android_main_srcs}/QtServiceLoader.java
     )
     # set android.jar from the sdk, for compiling the java files into .jar
     set(sdk_jar_location "${ANDROID_SDK_ROOT}/platforms/${ANDROID_PLATFORM}/android.jar")
