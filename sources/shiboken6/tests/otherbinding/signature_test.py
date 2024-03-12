@@ -16,8 +16,6 @@ init_paths()
 from other import OtherObjectType
 from shiboken_test_helper import objectFullname
 
-from shiboken6 import Shiboken
-
 from shibokensupport.signature import get_signature
 
 
@@ -29,7 +27,7 @@ class SignatureTest(unittest.TestCase):
     def testNamespaceFromOtherModule(self):
         argType = get_signature(OtherObjectType.enumAsInt).parameters["value"].annotation
         self.assertEqual(objectFullname(argType),
-            "sample.SampleNamespace.SomeClass.PublicScopedEnum")
+                         "sample.SampleNamespace.SomeClass.PublicScopedEnum")
 
 
 if __name__ == '__main__':

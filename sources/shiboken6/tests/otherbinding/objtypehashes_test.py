@@ -9,9 +9,9 @@ from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
-from sample import *
-from other import *
+from sample import HandleHolder
 from shiboken6 import Shiboken
+
 
 class TestHashFuncs (unittest.TestCase):
 
@@ -28,7 +28,6 @@ class TestHashFuncs (unittest.TestCase):
 
         hash1_2 = hash(obj1)
         self.assertEqual(hash1_2, hash1)
-
 
 
 if __name__ == '__main__':

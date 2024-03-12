@@ -16,6 +16,7 @@ init_paths()
 from sample import Collector, ObjectType
 from other import OtherObjectType
 
+
 class CollectorOtherObjectType(unittest.TestCase):
     '''Test cases for Collector << OtherObjectType'''
 
@@ -33,6 +34,6 @@ class CollectorOtherObjectType(unittest.TestCase):
         collector << obj
         self.assertEqual(collector.items()[0], obj.identifier() * 2)
 
+
 if __name__ == '__main__':
     unittest.main()
-

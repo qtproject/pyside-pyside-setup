@@ -13,8 +13,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from other import (OtherValueWithUnitUser, ValueWithUnitIntInch,
-                   ValueWithUnitIntMillimeter)
+from other import (OtherValueWithUnitUser, ValueWithUnitIntMillimeter)
 from sample import (ValueWithUnitDoubleMillimeter)
 
 
