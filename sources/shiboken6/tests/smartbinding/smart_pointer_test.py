@@ -262,7 +262,7 @@ class SmartPointerTests(unittest.TestCase):
         self.assertTrue(five > four)
 
         self.assertRaises(NotImplementedError,
-                          lambda : Obj.createNullSharedPtrInteger() == four)
+                          lambda: Obj.createNullSharedPtrInteger() == four)
 
     def testSmartPointerObjectComparison(self):
         """Test a pointee class without comparison operators."""
