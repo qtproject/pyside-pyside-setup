@@ -14,6 +14,7 @@ from shiboken_paths import init_paths
 init_paths()
 from other import Number
 
+
 class UserDefinedPrimitiveTypeFromRequiredModuleTest(unittest.TestCase):
 
     def testUsersPrimitiveFromRequiredModuleAsArgument(self):
@@ -27,6 +28,7 @@ class UserDefinedPrimitiveTypeFromRequiredModuleTest(unittest.TestCase):
         number = Number(12)
         cpx = number.toComplex()
         self.assertEqual(number.value(), int(cpx.real))
+
 
 if __name__ == '__main__':
     unittest.main()

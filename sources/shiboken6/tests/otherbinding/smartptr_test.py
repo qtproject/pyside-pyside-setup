@@ -13,8 +13,6 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from smart import Integer
-from sample import Str
 from other import SmartPtrTester
 
 

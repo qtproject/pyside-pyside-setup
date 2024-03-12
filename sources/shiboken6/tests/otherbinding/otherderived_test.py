@@ -17,6 +17,7 @@ init_paths()
 from sample import Abstract, Derived
 from other import OtherDerived, Number
 
+
 class Multiple(Derived, Number):
     def __init__(self):
         Derived.__init__(self, 42)
@@ -24,6 +25,7 @@ class Multiple(Derived, Number):
 
     def testCall(self):
         return True
+
 
 class OtherDeviant(OtherDerived):
     def __init__(self):
@@ -39,6 +41,7 @@ class OtherDeviant(OtherDerived):
 
     def className(self):
         return 'OtherDeviant'
+
 
 class MultipleTest(unittest.TestCase):
     '''Test case for Multiple derived class'''
@@ -58,6 +61,7 @@ class MultipleTest(unittest.TestCase):
         self.assertTrue(o.value(), 42)
         self.assertTrue(o.testCall())
 
+
 class OtherDerivedTest(unittest.TestCase):
     '''Test case for OtherDerived class'''
 
@@ -68,13 +72,15 @@ class OtherDerivedTest(unittest.TestCase):
         self.assertTrue(inherited_methods.issubset(dir(OtherDerived)))
 
     def testReimplementedPureVirtualMethodCall(self):
-        '''Test if a Python override of a implemented pure virtual method is correctly called from C++.'''
+        '''Test if a Python override of a implemented pure virtual method is
+           correctly called from C++.'''
         d = OtherDeviant()
         d.callPureVirtual()
         self.assertTrue(d.pure_virtual_called)
 
     def testReimplementedVirtualMethodCall(self):
-        '''Test if a Python override of a reimplemented virtual method is correctly called from C++.'''
+        '''Test if a Python override of a reimplemented virtual method is
+           correctly called from C++.'''
         d = OtherDeviant()
         d.callUnpureVirtual()
         self.assertTrue(d.unpure_virtual_called)
@@ -86,7 +92,8 @@ class OtherDerivedTest(unittest.TestCase):
         self.assertEqual(d.getClassName(), 'OtherDerived')
 
     def testReimplementedVirtualMethodCallReturningString(self):
-        '''Test if a Python override of a reimplemented virtual method is correctly called from C++.'''
+        '''Test if a Python override of a reimplemented virtual method is
+           correctly called from C++.'''
         d = OtherDeviant()
         self.assertEqual(d.className(), 'OtherDeviant')
         self.assertEqual(d.getClassName(), 'OtherDeviant')
@@ -97,6 +104,6 @@ class OtherDerivedTest(unittest.TestCase):
         d = OtherDerived(objId)
         self.assertEqual(Abstract.getObjectId(d), objId)
 
+
 if __name__ == '__main__':
     unittest.main()
-

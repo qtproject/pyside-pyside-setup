@@ -18,8 +18,10 @@ init_paths()
 from sample import NoImplicitConversion
 from other import ExtendsNoImplicitConversion
 
+
 class ConversionOperatorForClassWithoutImplicitConversionsTest(unittest.TestCase):
-    '''Tests calling NoImplicitConversion constructor using a ExtendsNoImplicitConversion parameter.'''
+    '''Tests calling NoImplicitConversion constructor using a
+       ExtendsNoImplicitConversion parameter.'''
 
     def testNoImplicitConversion(self):
         '''Basic test to see if the NoImplicitConversion is Ok.'''
@@ -27,27 +29,33 @@ class ConversionOperatorForClassWithoutImplicitConversionsTest(unittest.TestCase
         # NoImplicitConversion.receivesNoImplicitConversionByValue(NoImplicitConversion)
         self.assertEqual(obj.objId(), NoImplicitConversion.receivesNoImplicitConversionByValue(obj))
         # NoImplicitConversion.receivesNoImplicitConversionByPointer(NoImplicitConversion*)
-        self.assertEqual(obj.objId(), NoImplicitConversion.receivesNoImplicitConversionByPointer(obj))
+        self.assertEqual(obj.objId(),
+                         NoImplicitConversion.receivesNoImplicitConversionByPointer(obj))
         # NoImplicitConversion.receivesNoImplicitConversionByReference(NoImplicitConversion&)
-        self.assertEqual(obj.objId(), NoImplicitConversion.receivesNoImplicitConversionByReference(obj))
+        self.assertEqual(obj.objId(),
+                         NoImplicitConversion.receivesNoImplicitConversionByReference(obj))
 
     def testPassingExtendsNoImplicitConversionAsNoImplicitConversionByValue(self):
-        '''Gives an ExtendsNoImplicitConversion object to a function expecting a NoImplicitConversion, passing by value.'''
+        '''Gives an ExtendsNoImplicitConversion object to a function expecting a
+           NoImplicitConversion, passing by value.'''
         obj = ExtendsNoImplicitConversion(123)
         self.assertEqual(obj.objId(), NoImplicitConversion.receivesNoImplicitConversionByValue(obj))
 
     def testPassingExtendsNoImplicitConversionAsNoImplicitConversionByReference(self):
-        '''Gives an ExtendsNoImplicitConversion object to a function expecting a NoImplicitConversion, passing by reference.'''
+        '''Gives an ExtendsNoImplicitConversion object to a function expecting a
+           NoImplicitConversion, passing by reference.'''
         obj = ExtendsNoImplicitConversion(123)
-        self.assertEqual(obj.objId(), NoImplicitConversion.receivesNoImplicitConversionByReference(obj))
+        self.assertEqual(obj.objId(),
+                         NoImplicitConversion.receivesNoImplicitConversionByReference(obj))
 
     def testPassingExtendsNoImplicitConversionAsNoImplicitConversionByPointer(self):
-        '''Gives an ExtendsNoImplicitConversion object to a function expecting a NoImplicitConversion, passing by pointer.
-           This should not be accepted, since pointers should not be converted.'''
+        '''Gives an ExtendsNoImplicitConversion object to a function expecting
+           a NoImplicitConversion, passing by pointer. This should not be
+           accepted, since pointers should not be converted.'''
         obj = ExtendsNoImplicitConversion(123)
-        self.assertRaises(TypeError, NoImplicitConversion.receivesNoImplicitConversionByPointer, obj)
+        self.assertRaises(TypeError,
+                          NoImplicitConversion.receivesNoImplicitConversionByPointer, obj)
 
 
 if __name__ == '__main__':
     unittest.main()
-

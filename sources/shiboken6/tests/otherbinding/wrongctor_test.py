@@ -10,17 +10,19 @@ from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
-from sample import *
-from other import *
+from sample import Abstract, ObjectType
+from other import OtherDerived
+
 
 class Foo(OtherDerived):
     def __init__(self):
-        Abstract.__init__(self, 2) # this should raise an exception
+        Abstract.__init__(self, 2)  # this should raise an exception
+
 
 class Foo2(ObjectType, OtherDerived):
     def __init__(self):
         ObjectType.__init__(self)
-        Abstract.__init__(self, 2) # this should raise an exception
+        Abstract.__init__(self, 2)  # this should raise an exception
 
 
 class WrongCtorTest(unittest.TestCase):

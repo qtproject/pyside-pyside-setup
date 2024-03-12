@@ -16,6 +16,7 @@ init_paths()
 from sample import Point
 from other import Number
 
+
 class PointOperationsWithNumber(unittest.TestCase):
     '''Test cases for libsample's Point multiply operator defined in libother module.'''
 
@@ -39,6 +40,6 @@ class PointOperationsWithNumber(unittest.TestCase):
         num = Number(11)
         self.assertEqual(pt * num.value(), pt * 11)
 
+
 if __name__ == '__main__':
     unittest.main()
-

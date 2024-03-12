@@ -21,6 +21,7 @@ dst = workdir / 'test_module.py'
 shutil.copyfile(src, dst)
 sys.path.append(os.fspath(workdir))
 
+
 class TestModuleReloading(unittest.TestCase):
 
     def testModuleReloading(self):
@@ -31,6 +32,7 @@ class TestModuleReloading(unittest.TestCase):
             self.assertTrue(oldObject is test_module.obj)
             reload(test_module)
             self.assertFalse(oldObject is test_module.obj)
+
 
 if __name__ == "__main__":
     unittest.main()
