@@ -64,6 +64,6 @@ class PrivateCtorTest(unittest.TestCase):
         self.assertEqual(pd3.instanceCalls(), calls + 2)
         self.assertEqual(sys.getrefcount(pd3), refcnt)
 
+
 if __name__ == '__main__':
     unittest.main()
-

@@ -6,14 +6,12 @@
 
 import os
 import sys
-import time
 import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
-from random import random
 
 from sample import ObjectType, Event
 
@@ -41,7 +39,7 @@ class TestEventLoop(unittest.TestCase):
         objs = [ObjectType(), NoOverride(), Override()]
 
         evaluated = ObjectType.processEvent(objs,
-                                        Event(Event.BASIC_EVENT))
+                                            Event(Event.BASIC_EVENT))
 
         self.assertEqual(evaluated, 3)
         self.assertTrue(objs[2].called)

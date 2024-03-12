@@ -15,6 +15,7 @@ init_paths()
 
 from sample import Echo
 
+
 class TestEcho(unittest.TestCase):
     '''Simple test case for Echo.echo'''
 
@@ -26,7 +27,8 @@ class TestEcho(unittest.TestCase):
 
     def testCallOperator(self):
         e = Echo()
-        self.assertEqual(e("Hello", 3), "Hello3");
+        self.assertEqual(e("Hello", 3), "Hello3")
+
+
 if __name__ == '__main__':
     unittest.main()
-

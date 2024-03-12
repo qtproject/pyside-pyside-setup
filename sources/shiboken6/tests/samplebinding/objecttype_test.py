@@ -68,7 +68,7 @@ class ObjectTypeTest(unittest.TestCase):
     def testNextInFocusChainCycle(self):
         parent = ObjectType()
         child = ObjectType(parent)
-        next_focus = child.nextInFocusChain()
+        next_focus = child.nextInFocusChain()  # noqa: F841
 
         Shiboken.invalidate(parent)
 
@@ -104,6 +104,7 @@ class ObjectTypeTest(unittest.TestCase):
         o = ObjectType()
         with self.assertRaises(AttributeError):
             o.typo
+
 
 if __name__ == '__main__':
     unittest.main()

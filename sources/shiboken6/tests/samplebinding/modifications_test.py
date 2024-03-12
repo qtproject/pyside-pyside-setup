@@ -16,6 +16,7 @@ init_paths()
 
 from sample import Modifications, Point, ByteArray
 
+
 class ExtModifications(Modifications):
     def __init__(self):
         Modifications.__init__(self)
@@ -42,12 +43,14 @@ class ModificationsTest(unittest.TestCase):
         gc.collect()
 
     def testRenamedMethodAvailability(self):
-        '''Test if Modification class really have renamed the 'className' virtual method to 'name'.'''
+        '''Test if Modification class really have renamed the 'className'
+           virtual method to 'name'.'''
         self.assertTrue('className' not in dir(Modifications))
         self.assertTrue('name' in dir(Modifications))
 
     def testReimplementationOfRenamedVirtualMethod(self):
-        '''Test if class inheriting from Modification class have the reimplementation of renamed virtual method called.'''
+        '''Test if class inheriting from Modification class have the reimplementation
+           of renamed virtual method called.'''
         em = ExtModifications()
         self.assertEqual(self.mods.name(), 'Modifications')
         self.assertEqual(em.name(), 'ExtModifications')
@@ -68,12 +71,14 @@ class ModificationsTest(unittest.TestCase):
         self.assertEqual(self.mods.doublePlus(7), 14)
 
     def testDefaultValueRemoval(self):
-        '''Test if default value was removed from first argument of Modifications::increment(int).'''
+        '''Test if default value was removed from first argument of
+           Modifications::increment(int).'''
         self.assertRaises(TypeError, self.mods.increment)
         self.assertEqual(self.mods.increment(7), 8)
 
     def testDefaultValueReplacement(self):
-        '''Test if default values for both arguments of Modifications::power(int, int) were modified.'''
+        '''Test if default values for both arguments of Modifications::power(int, int)
+           were modified.'''
         # original default values: int power(int base = 1, int exponent = 0);
         self.assertNotEqual(self.mods.power(4), 1)
         # modified default values: int power(int base = 2, int exponent = 1);
@@ -82,12 +87,14 @@ class ModificationsTest(unittest.TestCase):
         self.assertEqual(self.mods.power(5, 3), 5**3)
 
     def testSetNewDefaultValue(self):
-        '''Test if default value was correctly set to 10 for first argument of Modifications::timesTen(int).'''
+        '''Test if default value was correctly set to 10 for first argument of
+           Modifications::timesTen(int).'''
         self.assertEqual(self.mods.timesTen(7), 70)
         self.assertEqual(self.mods.timesTen(), 100)
 
     def testArgumentRemovalAndReturnTypeModificationWithTypesystemTemplates1(self):
-        '''Test modifications to method signature and return value using type system templates (case 1).'''
+        '''Test modifications to method signature and return value using type
+           system templates (case 1).'''
         result, ok = self.mods.pointToPair(Point(2, 5))
         self.assertEqual(type(ok), bool)
         self.assertEqual(type(result), tuple)
@@ -98,7 +105,8 @@ class ModificationsTest(unittest.TestCase):
         self.assertEqual(result[1], 5.0)
 
     def testArgumentRemovalAndReturnTypeModificationWithTypesystemTemplates2(self):
-        '''Test modifications to method signature and return value using type system templates (case 2).'''
+        '''Test modifications to method signature and return value using
+           type system templates (case 2).'''
         result, ok = self.mods.multiplyPointCoordsPlusValue(Point(2, 5), 4.1)
         self.assertEqual(type(ok), bool)
         self.assertEqual(type(result), float)
@@ -112,9 +120,11 @@ class ModificationsTest(unittest.TestCase):
         self.assertEqual(self.mods.overloaded(1, True, 2), Modifications.Overloaded_ibii)
         # the others weren't modified
         self.assertEqual(self.mods.overloaded(1, True, 2, False), Modifications.Overloaded_ibib)
-        self.assertEqual(self.mods.overloaded(1, False, 2, Point(3, 4)), Modifications.Overloaded_ibiP)
+        self.assertEqual(self.mods.overloaded(1, False, 2, Point(3, 4)),
+                         Modifications.Overloaded_ibiP)
         self.assertRaises(TypeError, self.mods.overloaded, 1, True, Point(2, 3), Point(4, 5))
-        self.assertEqual(self.mods.over(1, True, Point(2, 3), Point(4, 5)), Modifications.Overloaded_ibPP)
+        self.assertEqual(self.mods.over(1, True, Point(2, 3), Point(4, 5)),
+                         Modifications.Overloaded_ibPP)
 
     def testPointArrayModification(self):
         points = (Point(1, 1), Point(2, 2))

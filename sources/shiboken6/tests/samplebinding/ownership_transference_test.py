@@ -16,6 +16,7 @@ init_paths()
 
 from sample import ObjectType, BlackBox
 
+
 class BlackBoxTest(unittest.TestCase):
     '''The BlackBox class has cases of ownership transference between C++ and Python.'''
 
@@ -29,12 +30,13 @@ class BlackBoxTest(unittest.TestCase):
         o2.setObjectName('object2')
         o2_refcnt = sys.getrefcount(o2)
         bb = BlackBox()
-        o1_ticket = bb.keepObjectType(o1)
+        o1_ticket = bb.keepObjectType(o1)  # noqa: F841
         o2_ticket = bb.keepObjectType(o2)
         self.assertEqual(set(bb.objects()), set([o1, o2]))
         self.assertEqual(str(o1.objectName()), 'object1')
         self.assertEqual(str(o2.objectName()), 'object2')
-        self.assertEqual(sys.getrefcount(o1), o1_refcnt + 1) # PySide give +1 ref to object with c++ ownership
+        # PySide give +1 ref to object with c++ ownership
+        self.assertEqual(sys.getrefcount(o1), o1_refcnt + 1)
         self.assertEqual(sys.getrefcount(o2), o2_refcnt + 1)
         o2 = bb.retrieveObjectType(o2_ticket)
         self.assertEqual(sys.getrefcount(o2), o2_refcnt)
@@ -48,9 +50,9 @@ class BlackBoxTest(unittest.TestCase):
     def testBlackBoxReleasingUnknownObjectType(self):
         '''Asks BlackBox to release an unknown ObjectType.'''
         o1 = ObjectType()
-        o2 = ObjectType()
+        o2 = ObjectType()  # noqa: F841
         bb = BlackBox()
-        o1_ticket = bb.keepObjectType(o1)
+        o1_ticket = bb.keepObjectType(o1)  # noqa: F841
         o3 = bb.retrieveObjectType(-5)
         self.assertEqual(o3, None)
 
@@ -59,11 +61,11 @@ class BlackBoxTest(unittest.TestCase):
         '''Ownership transference using a C++ created object.'''
         o1 = ObjectType.create()
         o1.setObjectName('object1')
-        o1_refcnt = sys.getrefcount(o1)
+        o1_refcnt = sys.getrefcount(o1)  # noqa: F841
         bb = BlackBox()
-        o1_ticket = bb.keepObjectType(o1)
+        o1_ticket = bb.keepObjectType(o1)  # noqa: F841
         self.assertRaises(RuntimeError, o1.objectName)
+
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -15,13 +15,16 @@ init_paths()
 
 from sample import NonDefaultCtor
 
+
 class DerivedNonDefaultCtor (NonDefaultCtor):
     def returnMyselfVirtual(self):
-        return NonDefaultCtor(self.value()+1)
+        return NonDefaultCtor(self.value() + 1)
+
 
 class AnotherDerivedNonDefaultCtor (NonDefaultCtor):
     def __init__(self, some_string):
         pass
+
 
 class NonDefaultCtorTest(unittest.TestCase):
 
@@ -43,8 +46,8 @@ class NonDefaultCtorTest(unittest.TestCase):
         self.assertEqual(c.callReturnMyselfVirtual().value(), 4)
 
     def testCtorOverload(self):
-        c = AnotherDerivedNonDefaultCtor("testing")
+        c = AnotherDerivedNonDefaultCtor("testing")  # noqa: F841
+
 
 if __name__ == '__main__':
     unittest.main()
-

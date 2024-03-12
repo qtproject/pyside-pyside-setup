@@ -13,12 +13,10 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-import shiboken6
 # This is needed after the introduction of BUILD_DIR.
 
 import sample
 from sample import SampleNamespace, ObjectType, Event
-from shibokensupport.signature import get_signature
 
 
 def createTempFile():
@@ -69,8 +67,10 @@ class EnumTest(unittest.TestCase):
 
     def testEnumItemAsDefaultValueToIntArgument(self):
         '''Calls function with an enum item as default value to an int argument.'''
-        self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(), SampleNamespace.ZeroIn)
-        self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(SampleNamespace.ZeroOut), SampleNamespace.ZeroOut)
+        self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(),
+                         SampleNamespace.ZeroIn)
+        self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(SampleNamespace.ZeroOut),  # noqa E:501
+                         SampleNamespace.ZeroOut)
         self.assertEqual(SampleNamespace.enumItemAsDefaultValueToIntArgument(123), 123)
 
     def testAnonymousGlobalEnums(self):
@@ -101,7 +101,8 @@ class EnumTest(unittest.TestCase):
     def testEnumArgumentWithDefaultValue(self):
         '''Option enumArgumentWithDefaultValue(Option opt = UnixTime);'''
         self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(), SampleNamespace.UnixTime)
-        self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(SampleNamespace.RandomNumber), SampleNamespace.RandomNumber)
+        self.assertEqual(SampleNamespace.enumArgumentWithDefaultValue(SampleNamespace.RandomNumber),  # noqa E:501
+                         SampleNamespace.RandomNumber)
 
 
 class MyEvent(Event):
@@ -135,4 +136,3 @@ class EnumOperators(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

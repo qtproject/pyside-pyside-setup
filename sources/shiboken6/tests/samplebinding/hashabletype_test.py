@@ -13,7 +13,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import *
+from sample import ObjectType, Str
+
 
 class HashableTest(unittest.TestCase):
 
@@ -29,6 +30,6 @@ class HashableTest(unittest.TestCase):
         h[o] = 2
         self.assertTrue(h.get(o), 2)
 
+
 if __name__ == '__main__':
     unittest.main()
-

@@ -33,7 +33,7 @@ class DeleteParentTest(unittest.TestCase):
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
         self.assertRaises(RuntimeError, child.objectName)
-        self.assertEqual(sys.getrefcount(child), refcount_before-1)
+        self.assertEqual(sys.getrefcount(child), refcount_before - 1)
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testParentDestructorMultipleChildren(self):

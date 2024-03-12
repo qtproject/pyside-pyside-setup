@@ -14,6 +14,7 @@ from shiboken_paths import init_paths
 init_paths()
 from sample import InjectCode
 
+
 class MyInjectCode(InjectCode):
     def __init__(self):
         InjectCode.__init__(self)
@@ -22,10 +23,11 @@ class MyInjectCode(InjectCode):
     def arrayMethod(self, values):
         return self.multiplier * sum(values)
 
+
 class InjectCodeTest(unittest.TestCase):
 
     @unittest.skipIf(hasattr(sys, "pypy_version_info"),
-                             "PyPy type objects cannot be modified (yet) after creation")
+                     "PyPy type objects cannot be modified (yet) after creation")
     def testTypeNativeBeginning_TypeTargetBeginning(self):
         ic = InjectCode()
         self.assertEqual(str(ic), "Hi! I'm the inject code dummy class.")
@@ -71,22 +73,24 @@ class InjectCodeTest(unittest.TestCase):
         self.assertEqual(result, sum(values))
 
     def testCallReimplementedVirtualMethodWithArgumentRemovalAndArgumentTypeModification(self):
-        '''Calls a reimplemented virtual method that had its first argument removed and the second modified.'''
+        '''Calls a reimplemented virtual method that had its first argument removed
+           and the second modified.'''
         ic = MyInjectCode()
         values = (1, 2, 3, 4, 5)
         result = ic.callArrayMethod(values)
         self.assertEqual(result, ic.multiplier * sum(values))
 
     def testUsageOfTypeSystemCheckVariableOnPrimitiveType(self):
-        '''When the sequence item is convertible to an integer -1 is returned, or -2 if its not convertible.'''
+        '''When the sequence item is convertible to an integer -1 is returned,
+           or -2 if its not convertible.'''
         ic = InjectCode()
         values = (1, 2, 3, 4, '5', 6.7)
         result = ic.arrayMethod(values)
 
-        fixedValues = [v for v in values if isinstance(v, int)]\
-                    + [-1 for v in values if isinstance(v, float)]\
-                    + [-2 for v in values if not isinstance(v, int) and not isinstance(v, float)]
-        self.assertEqual(result, sum(fixedValues))
+        ints = [v for v in values if isinstance(v, int)]
+        floats = [-1 for v in values if isinstance(v, float)]
+        other = [-2 for v in values if not isinstance(v, int) and not isinstance(v, float)]
+        self.assertEqual(result, sum(ints + floats + other))
 
 
 class IntArrayTest(unittest.TestCase):
@@ -109,6 +113,7 @@ class IntArrayTest(unittest.TestCase):
         args = [1, 2, 0, 3]
         ic = InjectCode()
         self.assertEqual(sum([1, 2]) + len([1, 2]), ic.sumArrayAndLength(args))
+
 
 if __name__ == '__main__':
     unittest.main()

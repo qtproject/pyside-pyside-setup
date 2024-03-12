@@ -12,6 +12,7 @@ from shiboken_paths import init_paths
 init_paths()
 import sample
 
+
 class PrimitiveReferenceArgumentTest(unittest.TestCase):
 
     def testIntReferenceArgument(self):
@@ -28,6 +29,7 @@ class PrimitiveReferenceArgumentTest(unittest.TestCase):
         self.assertEqual(sample.acceptOddBoolReference(False), False)
         self.assertNotEqual(sample.acceptOddBoolReference(True), False)
         self.assertNotEqual(sample.acceptOddBoolReference(False), True)
+
 
 if __name__ == '__main__':
     unittest.main()

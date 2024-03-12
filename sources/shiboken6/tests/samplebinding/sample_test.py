@@ -15,6 +15,7 @@ init_paths()
 
 import sample
 
+
 class ModuleTest(unittest.TestCase):
     '''Test case for module and global functions'''
 
@@ -50,7 +51,6 @@ class ModuleTest(unittest.TestCase):
         sample.testNullPtrT(None)
         self.assertRaises(TypeError, sample.testNullPtrT, 42)
 
-
     def testRValueRefsWithValueTypes(self):
         """Passing value types by rvalue refs: For value types, nothing should
            happen since the argument is copied in the call and the copy is
@@ -74,4 +74,3 @@ class ModuleTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

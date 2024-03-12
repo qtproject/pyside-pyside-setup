@@ -16,8 +16,8 @@ from sample import IntWrapper
 class IntWrapperTest(unittest.TestCase):
 
     def testOperators(self):
-        ten1  = IntWrapper(10)
-        ten2  = IntWrapper(10)
+        ten1 = IntWrapper(10)
+        ten2 = IntWrapper(10)
         twenty = IntWrapper(20)
         self.assertTrue(ten1 == ten2)
         self.assertTrue(ten1 != twenty)

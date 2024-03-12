@@ -12,6 +12,7 @@ init_paths()
 
 from sample import Data, Intersection, Union
 
+
 class TestFilters(unittest.TestCase):
 
     def testAnd(self):
@@ -22,6 +23,7 @@ class TestFilters(unittest.TestCase):
         inter = f1 & f2
 
         self.assertEqual(type(inter), Intersection)
+
 
 if __name__ == '__main__':
     unittest.main()

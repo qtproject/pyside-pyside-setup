@@ -13,10 +13,13 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import *
+from sample import (CustomOverloadSequence, ImplicitBase, ImplicitConv,
+                    ImplicitTarget, SortedOverload)
+
 
 class Dummy(object):
     pass
+
 
 class SimpleOverloadSorting(unittest.TestCase):
 
@@ -62,6 +65,7 @@ class DeepOverloadSorting(unittest.TestCase):
     def testImplicit(self):
         '''Deep Overload - (int, ImplicitBase *)'''
         self.assertEqual(self.obj.overloadDeep(1, ImplicitBase()), "ImplicitBase")
+
 
 class EnumOverIntSorting(unittest.TestCase):
     def testEnumOverInt(self):

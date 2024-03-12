@@ -11,17 +11,17 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import *
+from sample import Base1, MDerived1
+
 
 class VisibilityChangeTest(unittest.TestCase):
 
     def testVisibilityChange(self):
         b1 = Base1()
-        b1.publicMethod() # ok...
+        b1.publicMethod()  # ok...
         d1 = MDerived1()
-        self.assertRaises(TypeError, d1.publicMethod);
+        self.assertRaises(TypeError, d1.publicMethod)
+
 
 if __name__ == '__main__':
     unittest.main()
-
-

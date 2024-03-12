@@ -14,7 +14,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import *
+from sample import ObjectType
+
 
 class ReturnOfChildTest(unittest.TestCase):
     '''The BlackBox class has cases of ownership transference between C++ and Python.'''
@@ -37,6 +38,6 @@ class ReturnOfChildTest(unittest.TestCase):
         gc.collect()
         self.assertRaises(RuntimeError, child.objectName)
 
+
 if __name__ == '__main__':
     unittest.main()
-

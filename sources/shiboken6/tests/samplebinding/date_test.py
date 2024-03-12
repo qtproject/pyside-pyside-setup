@@ -16,6 +16,7 @@ from datetime import date
 
 from sample import SbkDate
 
+
 class DateConversionTest(unittest.TestCase):
 
     def testConstructorWithDateObject(self):
@@ -32,6 +33,6 @@ class DateConversionTest(unittest.TestCase):
         self.assertTrue(cDate.month(), pyDate.month)
         self.assertTrue(cDate.year(), pyDate.year)
 
+
 if __name__ == '__main__':
     unittest.main()
-

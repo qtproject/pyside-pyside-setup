@@ -15,8 +15,10 @@ init_paths()
 
 from sample import PointerHolder
 
+
 class TestPointerHolder(unittest.TestCase):
-    '''Test cases for a class that holds an arbitraty pointer and is modified to hold an PyObject.'''
+    '''Test cases for a class that holds an arbitraty pointer and
+       is modified to hold an PyObject.'''
 
     def testStoringAndRetrievingPointer(self):
         ph = PointerHolder('Hello')
@@ -31,9 +33,9 @@ class TestPointerHolder(unittest.TestCase):
         a = (1, 2, 3)
         refcnt = sys.getrefcount(a)
         ph = PointerHolder(a)
-        ptr = ph.pointer()
+        ptr = ph.pointer()  # noqa: F841
         self.assertEqual(sys.getrefcount(a), refcnt + 1)
+
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -4,7 +4,6 @@
 
 '''Test cases for constructor and method signature decisor on Time class.'''
 
-import sys
 import os
 import sys
 import unittest
@@ -16,6 +15,7 @@ init_paths()
 import datetime
 
 from sample import Time, ImplicitConv, ObjectType
+
 
 class TimeTest(unittest.TestCase):
     '''Test cases for constructor and method signature decisor on Time class.
@@ -115,6 +115,6 @@ class TimeTest(unittest.TestCase):
         py = datetime.time(12, 32, 5)
         self.assertNotEqual(time, py)
 
+
 if __name__ == '__main__':
     unittest.main()
-

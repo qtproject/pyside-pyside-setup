@@ -14,7 +14,8 @@ init_paths()
 from sample import Photon
 
 '''This tests classes that inherit from template classes,
-simulating a situation found in Qt's phonon module.'''
+   simulating a situation found in Qt's phonon module.'''
+
 
 class TemplateInheritingClassTest(unittest.TestCase):
     def testClassBasics(self):
@@ -56,6 +57,7 @@ class TemplateInheritingClassTest(unittest.TestCase):
         obj2 = Photon.ValueDuplicator(321)
         self.assertEqual(obj2, obj2.passPointerThrough(obj2))
         self.assertRaises(TypeError, obj1.passPointerThrough, obj2)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -15,6 +15,7 @@ init_paths()
 
 from sample import Point, BlackBox
 
+
 class OwnershipInvalidateNonPolymorphicTest(unittest.TestCase):
     '''The BlackBox class has cases of ownership transference between Python and C++.'''
 
@@ -27,6 +28,6 @@ class OwnershipInvalidateNonPolymorphicTest(unittest.TestCase):
         p1_ret = bb.retrievePoint(p1_ticket)
         self.assertEqual(p1_ret, Point(10, 20))
 
+
 if __name__ == '__main__':
     unittest.main()
-

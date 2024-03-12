@@ -15,6 +15,7 @@ init_paths()
 
 from sample import Size
 
+
 class PointTest(unittest.TestCase):
     '''Test case for Size class, including operator overloads.'''
 
@@ -94,6 +95,6 @@ class PointTest(unittest.TestCase):
         self.assertTrue(s1 > s2)
         self.assertFalse(s2 > s1)
 
+
 if __name__ == '__main__':
     unittest.main()
-

@@ -12,6 +12,7 @@ from shiboken_paths import init_paths
 init_paths()
 from sample import ObjectTypeHolder
 
+
 class TestObjectTypeReferenceAsVirtualMethodArgument(unittest.TestCase):
 
     def testBasic(self):
@@ -24,6 +25,7 @@ class TestObjectTypeReferenceAsVirtualMethodArgument(unittest.TestCase):
                 return objectType.objectName().prepend(('ThisIs'))
         holder = Holder('TheObjectFromC++')
         self.assertEqual(holder.callPassObjectTypeAsReference(), 'ThisIsTheObjectFromC++')
+
 
 if __name__ == '__main__':
     unittest.main()

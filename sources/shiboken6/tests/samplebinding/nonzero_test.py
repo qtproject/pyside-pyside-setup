@@ -13,6 +13,7 @@ init_paths()
 
 from sample import Color, Brush
 
+
 class TestNonZeroOperator(unittest.TestCase):
     def testColor(self):
         """Color has a Qt-style isNull()"""

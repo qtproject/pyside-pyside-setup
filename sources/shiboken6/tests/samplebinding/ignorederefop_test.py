@@ -9,12 +9,14 @@ from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
-from sample import *
+from sample import Reference
+
 
 class TestLackOfDereferenceOperators (unittest.TestCase):
     def testIf(self):
         r = Reference()
         self.assertFalse(hasattr(r, "__mul__"))
+
 
 if __name__ == '__main__':
     unittest.main()

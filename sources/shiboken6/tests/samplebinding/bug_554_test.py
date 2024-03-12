@@ -11,15 +11,15 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import *
+from sample import ObjectType
+
 
 class Bug554:
     def crash(self):
         class Crasher(ObjectType):
             pass
 
+
 if __name__ == '__main__':
     bug = Bug554()
     bug.crash()
-
-

@@ -16,6 +16,7 @@ init_paths()
 
 from sample import VirtualMethods, Str
 
+
 class ExtendedVirtualMethods(VirtualMethods):
     def __init__(self):
         VirtualMethods.__init__(self)
@@ -61,7 +62,7 @@ class ExtendedVirtualMethods(VirtualMethods):
         self.callMe_called += 1
 
     def getMargins(self):
-        return tuple([m*2 for m in VirtualMethods.getMargins(self)])
+        return tuple([m * 2 for m in VirtualMethods.getMargins(self)])
 
 
 class VirtualMethodsTest(unittest.TestCase):
@@ -185,7 +186,8 @@ class VirtualMethodsTest(unittest.TestCase):
         removed_arg_value = 2011
         default_value = 3000
         result = self.evm.callSum4(a0, removed_arg_value, a1)
-        self.assertEqual(result, (a0 - removed_arg_value + a1 + default_value) * self.evm.multiplier)
+        self.assertEqual(result,
+                         (a0 - removed_arg_value + a1 + default_value) * self.evm.multiplier)
         self.assertTrue(self.evm.sum4_called)
 
     def testOverridenMethodResultModification(self):
@@ -217,15 +219,15 @@ class VirtualMethodsTest(unittest.TestCase):
     def testExtendedAllArgumentsRemoved(self):
         values = (10, 20, 30, 40)
         self.evm.setMargins(*values)
-        double = tuple([m*2 for m in values])
+        double = tuple([m * 2 for m in values])
         self.assertEqual(self.evm.getMargins(), double)
 
     def testExtendedAllArgumentsRemovedCallVirtual(self):
         values = (10, 20, 30, 40)
         self.evm.setMargins(*values)
-        double = tuple([m*2 for m in values])
+        double = tuple([m * 2 for m in values])
         self.assertEqual(self.evm.callGetMargins(), double)
+
 
 if __name__ == '__main__':
     unittest.main()
-

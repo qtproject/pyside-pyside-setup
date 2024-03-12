@@ -8,7 +8,7 @@ try:
     if bool(sysconfig.get_config_var('Py_DEBUG')):
         sys.exit(0)
     import numpy
-except:
+except:  # noqa: E722
     sys.exit(0)
 
 import os
@@ -20,6 +20,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 from sample import PointF
+
 
 class TestNumpyTypes(unittest.TestCase):
 
@@ -35,6 +36,6 @@ class TestNumpyTypes(unittest.TestCase):
         self.assertAlmostEqual(p.x(), x)
         self.assertAlmostEqual(p.y(), y)
 
+
 if __name__ == "__main__":
     unittest.main()
-

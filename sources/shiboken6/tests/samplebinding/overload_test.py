@@ -21,11 +21,10 @@ def raisesWithErrorMessage(func, arguments, errorType, errorMsg):
     try:
         func(*arguments)
         return False
-    except Exception as err:
-        if type(err) != TypeError:
-            return False
-        if not errorMsg in str(err):
-            return False
+    except TypeError as err:
+        return errorMsg in str(err)
+    except Exception:
+        return False
     return True
 
 
@@ -178,12 +177,13 @@ class OverloadTest(unittest.TestCase):
     def testAcceptSequencePyObject(self):
         # Overload.acceptSequence(void*)
         overload = Overload()
+
         class Foo(object):
             pass
+
         foo = Foo()
         self.assertEqual(overload.acceptSequence(foo), Overload.Function5)
 
 
 if __name__ == '__main__':
     unittest.main()
-

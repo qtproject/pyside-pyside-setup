@@ -13,7 +13,9 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import returnNullPrimitivePointer, returnNullValueTypePointer, returnNullObjectTypePointer
+from sample import (returnNullPrimitivePointer, returnNullValueTypePointer,
+                    returnNullObjectTypePointer)
+
 
 class ReturnNullTest(unittest.TestCase):
     '''Test case for functions that could return a NULL pointer.'''
@@ -33,6 +35,6 @@ class ReturnNullTest(unittest.TestCase):
         o = returnNullValueTypePointer()
         self.assertEqual(o, None)
 
+
 if __name__ == '__main__':
     unittest.main()
-

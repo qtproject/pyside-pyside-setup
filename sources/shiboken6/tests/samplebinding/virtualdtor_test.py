@@ -16,9 +16,11 @@ init_paths()
 
 from sample import VirtualDtor
 
+
 class ExtendedVirtualDtor(VirtualDtor):
     def __init__(self):
         VirtualDtor.__init__(self)
+
 
 class VirtualDtorTest(unittest.TestCase):
     '''Test case for virtual destructor.'''
@@ -59,4 +61,3 @@ class VirtualDtorTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -15,6 +15,7 @@ init_paths()
 
 from sample import VirtualMethods, Str
 
+
 class ExtendedVirtualMethods(VirtualMethods):
     def __init__(self):
         VirtualMethods.__init__(self)
@@ -72,6 +73,6 @@ class ReferenceToPointerTest(unittest.TestCase):
         self.assertTrue(ok)
         self.assertEqual(string, Str(obj.prefix + 'foo'))
 
+
 if __name__ == '__main__':
     unittest.main()
-

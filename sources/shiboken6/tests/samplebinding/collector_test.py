@@ -33,6 +33,7 @@ class CollectorTest(unittest.TestCase):
         self.assertEqual(collector.size(), 5)
         self.assertEqual(collector.items(), [2, 3, 5, 7, 11])
 
+
 class CollectorExternalOperator(unittest.TestCase):
     '''Test cases for external operators of Collector'''
 
@@ -57,4 +58,3 @@ class CollectorObjectType(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -15,8 +15,10 @@ init_paths()
 
 from sample import countCharacters
 
+
 class ReceiveNullCStringTest(unittest.TestCase):
-    '''Test case for a function that could receive a NULL pointer in a '[const] char*' parameter.'''
+    '''Test case for a function that could receive a NULL pointer in a '[const] char*'
+       parameter.'''
 
     def testBasic(self):
         '''The test function should be working for the basic cases.'''
@@ -29,6 +31,6 @@ class ReceiveNullCStringTest(unittest.TestCase):
         '''The test function returns '-1' when receives a None value instead of a string.'''
         self.assertEqual(countCharacters(None), -1)
 
+
 if __name__ == '__main__':
     unittest.main()
-

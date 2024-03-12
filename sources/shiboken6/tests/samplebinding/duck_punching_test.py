@@ -16,6 +16,7 @@ init_paths()
 
 from sample import VirtualMethods, SimpleFile, Point
 
+
 def MethodTypeCompat(func, instance):
     return types.MethodType(func, instance)
 
@@ -24,9 +25,11 @@ class Duck(VirtualMethods):
     def __init__(self):
         VirtualMethods.__init__(self)
 
+
 class Monkey(SimpleFile):
     def __init__(self, filename):
         SimpleFile.__init__(self, filename)
+
 
 class DuckPunchingTest(unittest.TestCase):
     '''Test case for duck punching (aka "monkey patching").'''
@@ -56,7 +59,8 @@ class DuckPunchingTest(unittest.TestCase):
 
         result2 = vm.virtualMethod0(pt, val, cpx, b)
         self.assertEqual(result1, result2)
-        self.assertEqual(result1, VirtualMethods.virtualMethod0(vm, pt, val, cpx, b) * self.multiplier)
+        self.assertEqual(result1,
+                         VirtualMethods.virtualMethod0(vm, pt, val, cpx, b) * self.multiplier)
 
         # This is done to decrease the refcount of the vm object
         # allowing the object wrapper to be deleted before the
@@ -66,7 +70,8 @@ class DuckPunchingTest(unittest.TestCase):
         vm.virtualMethod0 = None
 
     def testMonkeyPatchOnVirtualMethodWithInheritance(self):
-        '''Injects new 'virtualMethod0' on an object that inherits from VirtualMethods and makes C++ call it.'''
+        '''Injects new 'virtualMethod0' on an object that inherits from
+           VirtualMethods and makes C++ call it.'''
         duck = Duck()
         pt, val, cpx, b = Point(1.1, 2.2), 4, complex(3.3, 4.4), True
 
@@ -85,7 +90,8 @@ class DuckPunchingTest(unittest.TestCase):
 
         result2 = duck.virtualMethod0(pt, val, cpx, b)
         self.assertEqual(result1, result2)
-        self.assertEqual(result1, VirtualMethods.virtualMethod0(duck, pt, val, cpx, b) * self.multiplier)
+        self.assertEqual(result1,
+                         VirtualMethods.virtualMethod0(duck, pt, val, cpx, b) * self.multiplier)
 
         duck.virtualMethod0 = None
 
@@ -150,4 +156,3 @@ class DuckPunchingTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

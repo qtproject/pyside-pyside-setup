@@ -13,6 +13,7 @@ init_paths()
 
 from sample import OnlyCopy, FriendOfOnlyCopy
 
+
 class ClassWithOnlyCopyCtorTest(unittest.TestCase):
     def testGetOne(self):
         obj = FriendOfOnlyCopy.createOnlyCopy(123)
@@ -33,6 +34,7 @@ class ClassWithOnlyCopyCtorTest(unittest.TestCase):
     def testPassAsReference(self):
         obj = FriendOfOnlyCopy.createOnlyCopy(123)
         self.assertEqual(obj.value(), OnlyCopy.getValueFromReference(obj))
+
 
 if __name__ == '__main__':
     unittest.main()

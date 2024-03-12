@@ -15,6 +15,7 @@ init_paths()
 
 from sample import ImplicitConv, ObjectType
 
+
 class ImplicitConvTest(unittest.TestCase):
     '''Test case for implicit conversions'''
 
@@ -43,4 +44,3 @@ class ImplicitConvTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

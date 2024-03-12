@@ -15,6 +15,7 @@ init_paths()
 
 from sample import Color, Pen, SampleNamespace
 
+
 class TestPen(unittest.TestCase):
     '''Simple test case for Pen.'''
 

@@ -15,6 +15,7 @@ init_paths()
 
 from sample import CtorConvRule
 
+
 class TestCtorConvRule(unittest.TestCase):
     '''Simple test case for CtorConvRule'''
 
@@ -24,6 +25,6 @@ class TestCtorConvRule(unittest.TestCase):
         obj = CtorConvRule(value)
         self.assertEqual(obj.value(), value + 1)
 
+
 if __name__ == '__main__':
     unittest.main()
-

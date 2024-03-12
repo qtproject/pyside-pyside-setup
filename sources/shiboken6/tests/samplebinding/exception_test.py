@@ -13,6 +13,7 @@ init_paths()
 
 from sample import ExceptionTest
 
+
 class CppExceptionTest(unittest.TestCase):
 
     def testVoid(self):
@@ -23,14 +24,14 @@ class CppExceptionTest(unittest.TestCase):
 
         try:
             et.voidThrowStdException(True)
-        except:
+        except:  # noqa: E722
             exceptionCount += 1
 
         et.voidThrowInt(False)
 
         try:
             et.voidThrowInt(True)
-        except:
+        except:  # noqa: E722
             exceptionCount += 1
 
         self.assertEqual(exceptionCount, 2)
@@ -39,18 +40,18 @@ class CppExceptionTest(unittest.TestCase):
         exceptionCount = 0
         et = ExceptionTest()
 
-        result = et.intThrowStdException(False);
+        result = et.intThrowStdException(False)
 
         try:
-            result = et.intThrowStdException(True);
-        except:
+            result = et.intThrowStdException(True)
+        except:  # noqa: E722
             exceptionCount += 1
 
-        result = et.intThrowInt(False);
+        result = et.intThrowInt(False)
 
         try:
-            result = et.intThrowInt(True);
-        except:
+            result = et.intThrowInt(True)  # noqa: F841
+        except:  # noqa: E722
             exceptionCount += 1
 
         self.assertEqual(exceptionCount, 2)
@@ -60,8 +61,8 @@ class CppExceptionTest(unittest.TestCase):
                when return ownership modifications are generated."""
             exceptionCount = 0
             try:
-                et = ExceptionTest.create(True);
-            except:
+                et = ExceptionTest.create(True)  # noqa: F841
+            except:  # noqa: E722
                 exceptionCount += 1
             self.assertEqual(exceptionCount, 1)
 

@@ -13,6 +13,7 @@ init_paths()
 
 from sample import ObjectType
 
+
 class NamedArgsTest(unittest.TestCase):
 
     def testOneArgument(self):
@@ -35,18 +36,15 @@ class NamedArgsTest(unittest.TestCase):
         o.setObjectNameWithSize(size=6, name="pyside")
         self.assertEqual(o.objectName(), "pyside")
 
-
     def testUseDefaultValues(self):
         o = ObjectType()
 
         o.setObjectNameWithSize(size=3)
-        self.assertEqual(o.objectName(), "<un") # use name='unknown' default argument
+        self.assertEqual(o.objectName(), "<un")  # use name='unknown' default argument
 
         o.setObjectSplittedName("")
-        self.assertEqual(o.objectName(), "<unknown>") # user prefix='<unk' and suffix='nown>'
-
+        self.assertEqual(o.objectName(), "<unknown>")  # user prefix='<unk' and suffix='nown>'
 
 
 if __name__ == '__main__':
     unittest.main()
-

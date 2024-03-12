@@ -14,15 +14,15 @@ init_paths()
 import sample
 from shiboken6 import Shiboken
 
+
 class DeleteTest(unittest.TestCase):
     def testNonCppWrapperClassDelete(self):
-        """Would segfault when shiboken.delete called on obj not created from
-        Python """
+        """Would segfault when shiboken.delete called on obj not created from Python."""
         obj = sample.ObjectType()
         child = obj.createChild(None)
         Shiboken.delete(child)
         assert not Shiboken.isValid(child)
 
+
 if __name__ == '__main__':
     unittest.main()
-

@@ -14,9 +14,10 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import *
+from sample import Point, Str, StrList, VirtualDaughter, VirtualMethods
 
 import warnings
+
 
 class ExtendedVirtualMethods(VirtualMethods):
     def __init__(self):
@@ -36,6 +37,7 @@ class ExtendedVirtualMethods(VirtualMethods):
         # check if recursion is caused by injected code that calls C++.
         return VirtualMethods.recursionOnModifiedVirtual(self, arg) + 10
 
+
 class ExtendedVirtualDaughter(VirtualDaughter):
     def __init__(self, name):
         VirtualDaughter.__init__(self, name)
@@ -45,6 +47,7 @@ class ExtendedVirtualDaughter(VirtualDaughter):
         self.grand_daughter_name_called = True
         return VirtualDaughter.name(self).prepend('Extended')
 
+
 class ExtendedExtendedVirtualDaughter(ExtendedVirtualDaughter):
     def __init__(self, name):
         ExtendedVirtualDaughter.__init__(self, name)
@@ -53,6 +56,7 @@ class ExtendedExtendedVirtualDaughter(ExtendedVirtualDaughter):
     def name(self):
         self.grand_grand_daughter_name_called = True
         return ExtendedVirtualDaughter.name(self).prepend('Extended')
+
 
 class VirtualMethodsTest(unittest.TestCase):
     '''Test case for virtual methods'''
@@ -66,7 +70,8 @@ class VirtualMethodsTest(unittest.TestCase):
         gc.collect()
 
     def testReimplementedVirtualMethod0(self):
-        '''Test Python override of a virtual method with various different parameters is correctly called from C++.'''
+        '''Test Python override of a virtual method with various different parameters
+           is correctly called from C++.'''
         vm = VirtualMethods()
         evm = ExtendedVirtualMethods()
         pt = Point(1.1, 2.2)
@@ -120,6 +125,6 @@ class PrettyErrorMessageTest(unittest.TestCase):
         obj = ExtendedVirtualMethods()
         self.assertRaises(RuntimeWarning, obj.callStrListToStdList, StrList())
 
+
 if __name__ == '__main__':
     unittest.main()
-

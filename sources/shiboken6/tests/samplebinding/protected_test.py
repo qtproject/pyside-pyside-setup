@@ -16,41 +16,50 @@ init_paths()
 
 from sample import cacheSize
 from sample import ProtectedNonPolymorphic, ProtectedVirtualDestructor
-from sample import ProtectedPolymorphic, ProtectedPolymorphicDaughter, ProtectedPolymorphicGrandDaughter
+from sample import (ProtectedPolymorphic, ProtectedPolymorphicDaughter,
+                    ProtectedPolymorphicGrandDaughter)
 from sample import createProtectedProperty, ProtectedProperty, ProtectedEnumClass
 from sample import PrivateDtor
 from sample import Event, ObjectType, Point
+
 
 class ExtendedProtectedPolymorphic(ProtectedPolymorphic):
     def __init__(self, name):
         ProtectedPolymorphic.__init__(self, name)
         self.protectedName_called = False
+
     def protectedName(self):
         self.protectedName_called = True
         self._name = 'Extended' + ProtectedPolymorphic.protectedName(self)
         return self._name
 
+
 class ExtendedProtectedPolymorphicDaughter(ProtectedPolymorphicDaughter):
     def __init__(self, name):
         self.protectedName_called = False
         ProtectedPolymorphicDaughter.__init__(self, name)
+
     def protectedName(self):
         self.protectedName_called = True
         self._name = 'ExtendedDaughter' + ProtectedPolymorphicDaughter.protectedName(self)
         return self._name
 
+
 class ExtendedProtectedPolymorphicGrandDaughter(ProtectedPolymorphicGrandDaughter):
     def __init__(self, name):
         self.protectedName_called = False
         ProtectedPolymorphicGrandDaughter.__init__(self, name)
+
     def protectedName(self):
         self.protectedName_called = True
         self._name = 'ExtendedGrandDaughter' + ProtectedPolymorphicGrandDaughter.protectedName(self)
         return self._name
 
+
 class ExtendedProtectedVirtualDestructor(ProtectedVirtualDestructor):
     def __init__(self):
         ProtectedVirtualDestructor.__init__(self)
+
 
 class ProtectedNonPolymorphicTest(unittest.TestCase):
     '''Test cases for protected method in a class without virtual methods.'''
@@ -81,6 +90,7 @@ class ProtectedNonPolymorphicTest(unittest.TestCase):
         self.assertEqual(p.dataTypeName(1), 'integer')
         self.assertEqual(p.dataTypeName(Point(1, 2)), 'pointer')
 
+
 class ProtectedPolymorphicTest(unittest.TestCase):
     '''Test cases for protected method in a class with virtual methods.'''
 
@@ -110,6 +120,8 @@ class ProtectedPolymorphicTest(unittest.TestCase):
         self.assertTrue(p.protectedName_called)
         self.assertEqual(p.protectedName(), name)
         self.assertEqual(ProtectedPolymorphic.protectedName(p), original_name)
+
+
 class ProtectedPolymorphicDaugherTest(unittest.TestCase):
     '''Test cases for protected method in a class inheriting for a class with virtual methods.'''
 
@@ -152,6 +164,7 @@ class ProtectedPolymorphicGrandDaugherTest(unittest.TestCase):
         self.assertTrue(p.protectedName_called)
         self.assertEqual(p.protectedName(), name)
         self.assertEqual(ProtectedPolymorphicGrandDaughter.protectedName(p), original_name)
+
 
 class ProtectedVirtualDtorTest(unittest.TestCase):
     '''Test cases for protected virtual destructor.'''
@@ -200,14 +213,17 @@ class ProtectedVirtualDtorTest(unittest.TestCase):
 class ExtendedProtectedEnumClass(ProtectedEnumClass):
     def __init__(self):
         ProtectedEnumClass.__init__(self)
+
     def protectedEnumMethod(self, value):
         if value == ProtectedEnumClass.ProtectedItem0:
             return ProtectedEnumClass.ProtectedItem1
         return ProtectedEnumClass.ProtectedItem0
+
     def publicEnumMethod(self, value):
         if value == ProtectedEnumClass.PublicItem0:
             return ProtectedEnumClass.PublicItem1
         return ProtectedEnumClass.PublicItem0
+
 
 class ProtectedEnumTest(unittest.TestCase):
     '''Test cases for protected enum.'''
@@ -223,47 +239,66 @@ class ProtectedEnumTest(unittest.TestCase):
 
         self.assertEqual(type(ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedEnum)
 
-        self.assertEqual(obj.protectedEnumMethod(ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedItem0)
-        self.assertEqual(obj.protectedEnumMethod(ProtectedEnumClass.ProtectedItem1), ProtectedEnumClass.ProtectedItem1)
-
-        self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedItem0)
-        self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem1), ProtectedEnumClass.ProtectedItem1)
+        self.assertEqual(obj.protectedEnumMethod(ProtectedEnumClass.ProtectedItem0),
+                         ProtectedEnumClass.ProtectedItem0)
+        self.assertEqual(obj.protectedEnumMethod(ProtectedEnumClass.ProtectedItem1),
+                         ProtectedEnumClass.ProtectedItem1)
+        self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem0),
+                         ProtectedEnumClass.ProtectedItem0)
+        self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem1),
+                         ProtectedEnumClass.ProtectedItem1)
 
     def testProtectedMethodWithPublicEnumArgument(self):
         '''Calls protected method with public enum argument.'''
         obj = ProtectedEnumClass()
 
-        self.assertEqual(obj.publicEnumMethod(ProtectedEnumClass.PublicItem0), ProtectedEnumClass.PublicItem0)
-        self.assertEqual(obj.publicEnumMethod(ProtectedEnumClass.PublicItem1), ProtectedEnumClass.PublicItem1)
+        self.assertEqual(obj.publicEnumMethod(ProtectedEnumClass.PublicItem0),
+                         ProtectedEnumClass.PublicItem0)
+        self.assertEqual(obj.publicEnumMethod(ProtectedEnumClass.PublicItem1),
+                         ProtectedEnumClass.PublicItem1)
 
-        self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem0), ProtectedEnumClass.PublicItem0)
-        self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem1), ProtectedEnumClass.PublicItem1)
+        self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem0),
+                         ProtectedEnumClass.PublicItem0)
+        self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem1),
+                         ProtectedEnumClass.PublicItem1)
 
     def testOverriddenProtectedMethodWithProtectedEnumArgument(self):
         '''Calls overridden protected method with protected enum argument.'''
         obj = ExtendedProtectedEnumClass()
 
-        self.assertEqual(obj.protectedEnumMethod(ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedItem1)
-        self.assertEqual(obj.protectedEnumMethod(ProtectedEnumClass.ProtectedItem1), ProtectedEnumClass.ProtectedItem0)
+        self.assertEqual(obj.protectedEnumMethod(ProtectedEnumClass.ProtectedItem0),
+                         ProtectedEnumClass.ProtectedItem1)
+        self.assertEqual(obj.protectedEnumMethod(ProtectedEnumClass.ProtectedItem1),
+                         ProtectedEnumClass.ProtectedItem0)
 
-        self.assertEqual(ProtectedEnumClass.protectedEnumMethod(obj, ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedItem0)
-        self.assertEqual(ProtectedEnumClass.protectedEnumMethod(obj, ProtectedEnumClass.ProtectedItem1), ProtectedEnumClass.ProtectedItem1)
+        self.assertEqual(ProtectedEnumClass.protectedEnumMethod(obj, ProtectedEnumClass.ProtectedItem0),  # noqa: E501
+                         ProtectedEnumClass.ProtectedItem0)
+        self.assertEqual(ProtectedEnumClass.protectedEnumMethod(obj,
+                         ProtectedEnumClass.ProtectedItem1), ProtectedEnumClass.ProtectedItem1)
 
-        self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem0), ProtectedEnumClass.ProtectedItem1)
-        self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem1), ProtectedEnumClass.ProtectedItem0)
+        self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem0),
+                         ProtectedEnumClass.ProtectedItem1)
+        self.assertEqual(obj.callProtectedEnumMethod(ProtectedEnumClass.ProtectedItem1),
+                         ProtectedEnumClass.ProtectedItem0)
 
     def testOverriddenProtectedMethodWithPublicEnumArgument(self):
         '''Calls overridden protected method with public enum argument.'''
         obj = ExtendedProtectedEnumClass()
 
-        self.assertEqual(obj.publicEnumMethod(ProtectedEnumClass.PublicItem0), ProtectedEnumClass.PublicItem1)
-        self.assertEqual(obj.publicEnumMethod(ProtectedEnumClass.PublicItem1), ProtectedEnumClass.PublicItem0)
+        self.assertEqual(obj.publicEnumMethod(ProtectedEnumClass.PublicItem0),
+                         ProtectedEnumClass.PublicItem1)
+        self.assertEqual(obj.publicEnumMethod(ProtectedEnumClass.PublicItem1),
+                         ProtectedEnumClass.PublicItem0)
 
-        self.assertEqual(ProtectedEnumClass.publicEnumMethod(obj, ProtectedEnumClass.PublicItem0), ProtectedEnumClass.PublicItem0)
-        self.assertEqual(ProtectedEnumClass.publicEnumMethod(obj, ProtectedEnumClass.PublicItem1), ProtectedEnumClass.PublicItem1)
+        self.assertEqual(ProtectedEnumClass.publicEnumMethod(obj, ProtectedEnumClass.PublicItem0),
+                         ProtectedEnumClass.PublicItem0)
+        self.assertEqual(ProtectedEnumClass.publicEnumMethod(obj, ProtectedEnumClass.PublicItem1),
+                         ProtectedEnumClass.PublicItem1)
 
-        self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem0), ProtectedEnumClass.PublicItem1)
-        self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem1), ProtectedEnumClass.PublicItem0)
+        self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem0),
+                         ProtectedEnumClass.PublicItem1)
+        self.assertEqual(obj.callPublicEnumMethod(ProtectedEnumClass.PublicItem1),
+                         ProtectedEnumClass.PublicItem0)
 
 
 class ProtectedPropertyTest(unittest.TestCase):
@@ -361,6 +396,6 @@ class PrivateDtorProtectedMethodTest(unittest.TestCase):
         self.assertEqual(obj.instanceCalls(), 2)
         self.assertEqual(obj.instanceCalls(), obj.protectedInstanceCalls())
 
+
 if __name__ == '__main__':
     unittest.main()
-

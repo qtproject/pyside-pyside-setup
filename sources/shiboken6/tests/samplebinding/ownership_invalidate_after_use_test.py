@@ -21,10 +21,12 @@ class ExtObjectType(ObjectType):
         ObjectType.__init__(self)
         self.type_of_last_event = None
         self.last_event = None
+
     def event(self, event):
         self.last_event = event
         self.type_of_last_event = event.eventType()
         return True
+
 
 class MyObjectType (ObjectType):
     def __init__(self):
@@ -35,7 +37,7 @@ class MyObjectType (ObjectType):
         self.callInvalidateEvent(ev)
         try:
             ev.eventType()
-        except:
+        except:  # noqa: E722
             self.fail = True
             raise
         return True
@@ -43,21 +45,25 @@ class MyObjectType (ObjectType):
     def invalidateEvent(self, ev):
         pass
 
+
 class ExtObjectTypeDerived(ObjectTypeDerived):
     def __init__(self):
         ObjectTypeDerived.__init__(self)
         self.type_of_last_event = None
         self.last_event = None
+
     def event(self, event):
         self.last_event = event
         self.type_of_last_event = event.eventType()
         return True
 
+
 class OwnershipInvalidateAfterUseTest(unittest.TestCase):
     '''Ownership tests for cases of invalidation of Python wrapper after use.'''
 
     def testInvalidateAfterUse(self):
-        '''In ObjectType.event(Event*) the wrapper object created for Event must me marked as invalid after the method is called.'''
+        '''In ObjectType.event(Event*) the wrapper object created for Event
+           must me marked as invalid after the method is called.'''
         eot = ExtObjectType()
         eot.causeEvent(Event.SOME_EVENT)
         self.assertEqual(eot.type_of_last_event, Event.SOME_EVENT)
@@ -84,6 +90,6 @@ class OwnershipInvalidateAfterUseTest(unittest.TestCase):
         self.assertEqual(eot.type_of_last_event, Event.SOME_EVENT)
         self.assertRaises(RuntimeError, eot.last_event.eventType)
 
+
 if __name__ == '__main__':
     unittest.main()
-

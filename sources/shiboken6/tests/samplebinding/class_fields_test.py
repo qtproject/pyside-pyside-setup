@@ -15,6 +15,7 @@ init_paths()
 
 from sample import Derived, Point, ObjectType
 
+
 class TestAccessingCppFields(unittest.TestCase):
     '''Simple test case for accessing the exposed C++ class fields.'''
 
@@ -36,7 +37,7 @@ class TestAccessingCppFields(unittest.TestCase):
         self.assertEqual(d.primitiveField, int(value))
 
         # attribution with invalid type
-        self.assertRaises(TypeError, lambda : setattr(d, 'primitiveField', None))
+        self.assertRaises(TypeError, lambda: setattr(d, 'primitiveField', None))
 
     def testAccessingRenamedFields(self):
         '''Reads and writes a renamed field.'''
@@ -72,7 +73,7 @@ class TestAccessingCppFields(unittest.TestCase):
         self.assertNotEqual(d.userPrimitiveField, old_value)
 
         # attribution with invalid type
-        self.assertRaises(TypeError, lambda : setattr(d, 'userPrimitiveField', None))
+        self.assertRaises(TypeError, lambda: setattr(d, 'userPrimitiveField', None))
 
     def testAccessingValueTypeField(self):
         '''Reads and writes a value type (in this case a 'Point') field.'''
@@ -80,7 +81,7 @@ class TestAccessingCppFields(unittest.TestCase):
         self.assertEqual(type(d.valueTypeField), Point)
 
         # attribution
-        old_value = d.valueTypeField
+        old_value = d.valueTypeField  # noqa: F841
         new_value = Point(-10, 537)
         d.valueTypeField = new_value
         self.assertEqual(d.valueTypeField, new_value)
@@ -92,7 +93,7 @@ class TestAccessingCppFields(unittest.TestCase):
         self.assertEqual(d.valueTypeField.y(), 20)
 
         # attribution with invalid type
-        self.assertRaises(TypeError, lambda : setattr(d, 'valueTypeField', 123))
+        self.assertRaises(TypeError, lambda: setattr(d, 'valueTypeField', 123))
 
     def testAccessingObjectTypeField(self):
         '''Reads and writes a object type (in this case an 'ObjectType') field.'''
@@ -111,7 +112,7 @@ class TestAccessingCppFields(unittest.TestCase):
         self.assertEqual(d.objectTypeField, value)
 
         # attribution with invalid type
-        self.assertRaises(TypeError, lambda : setattr(d, 'objectTypeField', 123))
+        self.assertRaises(TypeError, lambda: setattr(d, 'objectTypeField', 123))
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefCountingAccessingObjectTypeField(self):
@@ -155,7 +156,7 @@ class TestAccessingCppFields(unittest.TestCase):
         # attribution
         old_value = d.bitField
         new_value = 1
-        d.bitField= new_value
+        d.bitField = new_value
         self.assertEqual(d.bitField, new_value)
         self.assertNotEqual(d.bitField, old_value)
 
@@ -165,7 +166,7 @@ class TestAccessingCppFields(unittest.TestCase):
         self.assertEqual(d.bitField, int(value))
 
         # attribution with invalid type
-        self.assertRaises(TypeError, lambda : setattr(d, 'bitField', None))
+        self.assertRaises(TypeError, lambda: setattr(d, 'bitField', None))
 
 
 if __name__ == '__main__':

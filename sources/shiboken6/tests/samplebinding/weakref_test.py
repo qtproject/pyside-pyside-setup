@@ -30,7 +30,7 @@ class WeakrefBasicTest(unittest.TestCase):
     def testBasic(self):
         '''ObjectType weakref'''
         obj = ObjectType()
-        ref = weakref.ref(obj, self.cb)
+        ref = weakref.ref(obj, self.cb)  # noqa: F841
         del obj
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
@@ -39,7 +39,7 @@ class WeakrefBasicTest(unittest.TestCase):
     def testPrivateDtor(self):
         '''PrivateDtor weakref'''
         obj = PrivateDtor.instance()
-        ref = weakref.ref(obj, self.cb)
+        ref = weakref.ref(obj, self.cb)  # noqa: F841
         del obj
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()

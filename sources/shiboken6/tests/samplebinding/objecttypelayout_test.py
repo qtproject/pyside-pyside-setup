@@ -14,7 +14,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import *
+from sample import ObjectType, ObjectTypeLayout
 
 
 class ObjectTypeLayoutTest(unittest.TestCase):
@@ -22,15 +22,14 @@ class ObjectTypeLayoutTest(unittest.TestCase):
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testOwnershipOverride(self):
-        l = ObjectTypeLayout()
+        lt = ObjectTypeLayout()
 
-        o1 = ObjectType(l)
+        o1 = ObjectType(lt)
         o1.setObjectName('o1')
 
         self.assertEqual(sys.getrefcount(o1), 3)
-        l.takeChild('o1')
+        lt.takeChild('o1')
         self.assertEqual(sys.getrefcount(o1), 2)
-
 
     def testSetNullLayout(self):
         '''ObjectType.setLayout(0).'''
@@ -57,7 +56,7 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         self.assertEqual(c3.parent(), None)
 
         p1.setLayout(layout)
-        del p1 # This must kill c1, c2 and c3
+        del p1  # This must kill c1, c2 and c3
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
 
@@ -81,7 +80,7 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         self.assertEqual(c3.parent(), None)
 
         p1.setLayout(layout)
-        del p1 # This must kill c1, c2 and c3
+        del p1  # This must kill c1, c2 and c3
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
 
@@ -91,7 +90,8 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         self.assertRaises(RuntimeError, layout.objectName)
 
     def testObjectTypeLayoutTransference(self):
-        '''Transfer a layout from one ObjectType to another, so that all the items in the layout get reparented.'''
+        '''Transfer a layout from one ObjectType to another, so that all the items in
+           the layout get reparented.'''
         p1 = ObjectType()
         p2 = ObjectType()
         c1 = ObjectType()
@@ -154,7 +154,8 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         self.assertRaises(RuntimeError, l2.objectName)
 
     def testObjectTypeLayoutInsideAnotherLayoutAndEveryoneCreatedInCpp(self):
-        '''Adds one ObjectTypeLayout to another and sets the parent to an ObjectType. All the objects are created in C++.'''
+        '''Adds one ObjectTypeLayout to another and sets the parent to an ObjectType.
+           All the objects are created in C++.'''
         p1 = ObjectType.create()
 
         l1 = ObjectTypeLayout.create()
@@ -192,7 +193,8 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         self.assertRaises(RuntimeError, l2.objectName)
 
     def testTransferNestedLayoutsBetweenObjects(self):
-        '''Adds one ObjectTypeLayout to another, sets the parent to an ObjectType and then transfer it to another object.'''
+        '''Adds one ObjectTypeLayout to another, sets the parent to an ObjectType
+           and then transfer it to another object.'''
         p1 = ObjectType()
         p2 = ObjectType()
 
@@ -243,8 +245,8 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         self.assertRaises(RuntimeError, l2.objectName)
 
     def testTransferNestedLayoutsBetweenObjectsAndEveryoneCreatedInCpp(self):
-        '''Adds one ObjectTypeLayout to another, sets the parent to an ObjectType and then transfer it to another object.
-        All the objects are created in C++.'''
+        '''Adds one ObjectTypeLayout to another, sets the parent to an ObjectType and then
+           transfer it to another object. All the objects are created in C++.'''
         p1 = ObjectType.create()
         p2 = ObjectType.create()
 
@@ -294,6 +296,6 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         self.assertRaises(RuntimeError, l1.objectName)
         self.assertRaises(RuntimeError, l2.objectName)
 
+
 if __name__ == '__main__':
     unittest.main()
-

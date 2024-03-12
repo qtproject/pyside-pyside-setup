@@ -15,6 +15,7 @@ init_paths()
 
 from sample import Str, StrList
 
+
 class StrListTest(unittest.TestCase):
     '''Test cases for StrList class that inherits from std::list<Str>.'''
 
@@ -87,6 +88,7 @@ class StrListTest(unittest.TestCase):
         sl.append(Str('Bar'))
         self.assertEqual(len(sl), 2)
         self.assertEqual(sl, (Str('Foo'), 'Bar'))
+
 
 if __name__ == '__main__':
     unittest.main()

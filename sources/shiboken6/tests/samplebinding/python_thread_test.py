@@ -36,7 +36,7 @@ class Producer(threading.Thread):
 
     def run(self):
         while self.runs < self.max_runs:
-            value = int(random()*10) % 10
+            value = int(random() * 10) % 10
             self.bucket.push(value)
             self.production_list.append(value)
             logging.debug(f'PRODUCER - pushed {value}')
@@ -66,6 +66,7 @@ class Consumer(threading.Thread):
                 logging.debug('CONSUMER - empty bucket')
             time.sleep(0.01)
 
+
 class ProducerConsumer(unittest.TestCase):
     '''Basic test case for producer-consumer QThread'''
 
@@ -89,9 +90,6 @@ class ProducerConsumer(unittest.TestCase):
         cons.join()
 
         self.assertEqual(prod.production_list, cons.consumption_list)
-
-
-
 
 
 if __name__ == '__main__':

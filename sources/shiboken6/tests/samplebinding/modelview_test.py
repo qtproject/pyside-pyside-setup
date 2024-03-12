@@ -2,7 +2,8 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
-'''Test case for objects that keep references to other object without owning them (e.g. model/view relationships).'''
+'''Test case for objects that keep references to other object without owning them
+   (e.g. model/view relationships).'''
 
 import os
 import sys
@@ -17,8 +18,10 @@ from sample import ObjectModel, ObjectType, ObjectView
 
 object_name = 'test object'
 
+
 class MyObject(ObjectType):
     pass
+
 
 class ListModelKeepsReference(ObjectModel):
     def __init__(self, parent=None):
@@ -28,6 +31,7 @@ class ListModelKeepsReference(ObjectModel):
 
     def data(self):
         return self.obj
+
 
 class ListModelDoesntKeepsReference(ObjectModel):
     def data(self):
@@ -55,4 +59,3 @@ class ModelViewTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
