@@ -13,9 +13,11 @@ init_paths()
 
 from minimal import MinBoolUser
 
+
 class DerivedMinBoolUser (MinBoolUser):
     def returnMyselfVirtual(self):
         return MinBoolUser()
+
 
 class MinBoolTest(unittest.TestCase):
 
@@ -23,22 +25,22 @@ class MinBoolTest(unittest.TestCase):
         mbuTrue = MinBoolUser()
         mbuFalse = MinBoolUser()
         mbuTrue.setMinBool(True)
-        self.assertEqual(mbuFalse.minBool(), False)
-        self.assertEqual(mbuTrue.minBool(), True)
-        self.assertEqual(mbuTrue.callInvertedMinBool(), False)
+        self.assertFalse(mbuFalse.minBool())
+        self.assertTrue(mbuTrue.minBool())
+        self.assertFalse(mbuTrue.callInvertedMinBool())
 
-        self.assertEqual(mbuTrue.minBool() == True, True)
-        self.assertEqual(False == mbuFalse.minBool(), True)
-        self.assertEqual(mbuTrue.minBool() == mbuFalse.minBool(), False)
+        self.assertTrue(mbuTrue.minBool())
+        self.assertFalse(mbuFalse.minBool())
+        self.assertTrue(mbuTrue.minBool() != mbuFalse.minBool())
 
-        self.assertEqual(mbuFalse.minBool() != True, True)
-        self.assertEqual(True != mbuFalse.minBool(), True)
-        self.assertEqual(mbuTrue.minBool() != mbuFalse.minBool(), True)
+        self.assertFalse(mbuFalse.minBool())
+        self.assertFalse(mbuFalse.minBool())
+        self.assertTrue(mbuTrue.minBool() != mbuFalse.minBool())
 
     def testVirtuals(self):
         dmbu = DerivedMinBoolUser()
         self.assertEqual(dmbu.invertedMinBool(), True)
 
+
 if __name__ == '__main__':
     unittest.main()
-

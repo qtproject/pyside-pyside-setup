@@ -12,6 +12,7 @@ from shiboken_paths import init_paths
 init_paths()
 from minimal import Obj
 
+
 class ExtObj(Obj):
     def __init__(self, objId):
         Obj.__init__(self, objId)
@@ -91,4 +92,3 @@ class ObjTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
