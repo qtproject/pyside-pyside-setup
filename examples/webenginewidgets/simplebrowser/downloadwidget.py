@@ -34,8 +34,10 @@ class DownloadWidget(QFrame):
         self._download = download
         self._time_added = QElapsedTimer()
         self._time_added.start()
-        self._cancel_icon = QIcon(":process-stop.png")
-        self._remove_icon = QIcon(":edit-clear.png")
+        self._cancel_icon = QIcon.fromTheme(QIcon.ThemeIcon.ProcessStop,
+                                            QIcon(":process-stop.png"))
+        self._remove_icon = QIcon.fromTheme(QIcon.ThemeIcon.EditClear,
+                                            QIcon(":edit-clear.png"))
 
         self._ui = Ui_DownloadWidget()
         self._ui.setupUi(self)

@@ -55,7 +55,8 @@ class WebView(QWebEngineView):
         self.renderProcessTerminated.connect(self._render_process_terminated)
 
         self._error_icon = QIcon(":dialog-error.png")
-        self._loading_icon = QIcon(":view-refresh.png")
+        self._loading_icon = QIcon.fromTheme(QIcon.ThemeIcon.ViewRefresh,
+                                             QIcon(":view-refresh.png"))
         self._default_icon = QIcon(":text-html.png")
 
     @Slot()

@@ -45,8 +45,10 @@ class BrowserWindow(QMainWindow):
         self._profile = profile
         self._tab_widget = TabWidget(profile, self)
 
-        self._stop_icon = QIcon(":process-stop.png")
-        self._reload_icon = QIcon(":view-refresh.png")
+        self._stop_icon = QIcon.fromTheme(QIcon.ThemeIcon.ProcessStop,
+                                          QIcon(":process-stop.png"))
+        self._reload_icon = QIcon.fromTheme(QIcon.ThemeIcon.ViewRefresh,
+                                            QIcon(":view-refresh.png"))
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setFocusPolicy(Qt.ClickFocus)
@@ -357,7 +359,9 @@ class BrowserWindow(QMainWindow):
         back_shortcuts.append(QKeySequence(Qt.Key_Back))
         self._history_back_action.setShortcuts(back_shortcuts)
         self._history_back_action.setIconVisibleInMenu(False)
-        self._history_back_action.setIcon(QIcon(":go-previous.png"))
+        back_icon = QIcon.fromTheme(QIcon.ThemeIcon.GoPrevious,
+                                    QIcon(":go-previous.png"))
+        self._history_back_action.setIcon(back_icon)
         self._history_back_action.setToolTip("Go back in history")
         self._history_back_action.triggered.connect(self._back)
         navigation_bar.addAction(self._history_back_action)
@@ -367,7 +371,9 @@ class BrowserWindow(QMainWindow):
         fwd_shortcuts.append(QKeySequence(Qt.Key_Forward))
         self._history_forward_action.setShortcuts(fwd_shortcuts)
         self._history_forward_action.setIconVisibleInMenu(False)
-        self._history_forward_action.setIcon(QIcon(":go-next.png"))
+        next_icon = QIcon.fromTheme(QIcon.ThemeIcon.GoNext,
+                                    QIcon(":go-next.png"))
+        self._history_forward_action.setIcon(next_icon)
         self._history_forward_action.setToolTip("Go forward in history")
         self._history_forward_action.triggered.connect(self._forward)
         navigation_bar.addAction(self._history_forward_action)
