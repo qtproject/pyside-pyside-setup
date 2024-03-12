@@ -5,5 +5,6 @@ exclude = rc_*.py,*_rc.py,ui_*.py
 per-file-ignores =
     # for init_test_paths() hack
     *_test_*.py:E402
+    *_test.py:E402
     __init__.py:F401,E402
 
