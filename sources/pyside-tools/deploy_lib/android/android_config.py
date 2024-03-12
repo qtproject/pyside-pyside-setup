@@ -14,7 +14,7 @@ from . import (extract_and_copy_jar, get_wheel_android_arch, find_lib_dependenci
                get_llvm_readobj, find_qtlibs_in_wheel, platform_map, create_recipe)
 from .. import (Config, find_pyside_modules, get_all_pyside_modules, MAJOR_VERSION)
 
-ANDROID_NDK_VERSION = "25c"
+ANDROID_NDK_VERSION = "26b"
 ANDROID_DEPLOY_CACHE = Path.home() / ".pyside6_android_deploy"
 
 
