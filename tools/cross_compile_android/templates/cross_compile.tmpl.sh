@@ -20,7 +20,8 @@ export RANLIB=$TOOLCHAIN/llvm-ranlib
 export LD=$TOOLCHAIN/ld
 export READELF=$TOOLCHAIN/llvm-readelf
 export CFLAGS='-fPIC -DANDROID'
-./configure --host=$HOST_ARCH --target=$HOST_ARCH --build=x86_64-pc-linux-gnu --enable-shared \
+./configure --host=$HOST_ARCH --target=$HOST_ARCH --build=x86_64-pc-linux-gnu \
+--with-build-python={{ host_python_path }}  --enable-shared \
 --enable-ipv6 ac_cv_file__dev_ptmx=yes ac_cv_file__dev_ptc=no --without-ensurepip \
 ac_cv_little_endian_double=yes
 make BLDSHARED="$CC -shared" CROSS-COMPILE=$TOOL_PREFIX- CROSS_COMPILE_TARGET=yes

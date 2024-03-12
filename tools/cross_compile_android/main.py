@@ -18,7 +18,7 @@ from android_utilities import (run_command, download_android_commandlinetools,
                                download_android_ndk, install_android_packages)
 
 # Note: Does not work with PyEnv. Your Host Python should contain openssl.
-PYTHON_VERSION = "3.10"
+PYTHON_VERSION = "3.11"
 
 SKIP_UPDATE_HELP = ("skip the updation of SDK packages build-tools, platform-tools to"
                     " latest version")
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     parser.add_argument("-v", "--verbose", help="run in verbose mode", action="store_const",
                         dest="loglevel", const=logging.INFO)
-    parser.add_argument("--api-level", type=str, default="31", help="Android API level to use")
+    parser.add_argument("--api-level", type=str, default="33", help="Android API level to use")
     parser.add_argument("--ndk-path", type=str, help="Path to Android NDK (Preferred r25c)")
     # sdk path is needed to compile all the Qt Java Acitivity files into Qt6AndroidBindings.jar
     parser.add_argument("--sdk-path", type=str, help="Path to Android SDK")
@@ -221,6 +221,7 @@ if __name__ == "__main__":
                     ndk_path=ndk_path,
                     api_level=platform_data.api_level,
                     android_py_install_path_prefix=pyside6_deploy_cache,
+                    host_python_path=sys.executable
                 )
 
                 logging.info(f"Writing Python cross compile script into {python_ccompile_script}")
@@ -295,5 +296,5 @@ if __name__ == "__main__":
                             f"--python-target-path={python_path}",
                             (f"--qt-target-path={qt_install_path}/"
                                 f"android_{platform_data.qt_plat_name}"),
-                            "--no-qt-tools", "--unity"]
+                            "--no-qt-tools", "--unity", "--module-subset=Core,Gui,Widgets"]
         run_command(qfp_ccompile_cmd, cwd=pyside_setup_dir, dry_run=dry_run, show_stdout=True)

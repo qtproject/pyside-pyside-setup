@@ -95,7 +95,7 @@ def prepare_standalone_package_linux(pyside_build, _vars, cross_build=False, is_
                 _filter=["*.so"],
                 recursive=True,
                 _vars=_vars)
-        if not is_pypy:
+        if not is_pypy and not is_android:
             copydir("{install_dir}/plugins/designer",
                     plugins_target / "designer",
                     _filter=["*.so"],

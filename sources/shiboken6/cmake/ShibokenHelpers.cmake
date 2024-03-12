@@ -206,7 +206,7 @@ macro(get_python_extension_suffix)
         # it is unable to set Python_CONFIG i.e. find `python3-config` script
         # This workaround sets the Python_SOABI manually for this platform.
         if(CMAKE_SYSTEM_NAME STREQUAL "Android" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
-            set(Python_SOABI "cpython-310}")
+            set(Python_SOABI "cpython-311}")
         endif()
         if(NOT Python_SOABI)
             message(FATAL_ERROR "Python_SOABI variable is empty.")
