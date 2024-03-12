@@ -21,6 +21,7 @@ init_paths()
 
 from sample import IntArray2, IntArray3
 
+
 class NonTypeTemplateTest(unittest.TestCase):
 
     def testNonTypeTemplate(self):
@@ -32,7 +33,7 @@ class NonTypeTemplateTest(unittest.TestCase):
     def testArrayInitializer(self):
         if not hasNumPy:
             return
-        array3 = IntArray3(numpy.array([1, 2, 3], dtype = 'int32'))
+        array3 = IntArray3(numpy.array([1, 2, 3], dtype='int32'))
         self.assertEqual(array3.sum(), 6)
 
 

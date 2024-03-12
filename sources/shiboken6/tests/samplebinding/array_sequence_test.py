@@ -14,6 +14,7 @@ from shiboken_paths import init_paths
 init_paths()
 import sample
 
+
 class ArrayTester(unittest.TestCase):
     '''Test case for arrays.'''
 
@@ -29,6 +30,7 @@ class ArrayTester(unittest.TestCase):
     def testDoubleArray(self):
         doubleList = [1.2, 2.3, 3.4, 4.5]
         self.assertEqual(sample.sumDoubleArray(doubleList), 11.4)
+
 
 if __name__ == '__main__':
     unittest.main()

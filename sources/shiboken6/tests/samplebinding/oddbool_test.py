@@ -15,10 +15,12 @@ init_paths()
 
 from sample import OddBoolUser, ComparisonTester, SpaceshipComparisonTester
 
+
 class DerivedOddBoolUser (OddBoolUser):
     def returnMyselfVirtual(self):
         return OddBoolUser()
     pass
+
 
 class OddBoolTest(unittest.TestCase):
 
@@ -30,13 +32,13 @@ class OddBoolTest(unittest.TestCase):
         self.assertEqual(obuTrue.oddBool(), True)
         self.assertEqual(obuTrue.callInvertedOddBool(), False)
 
-        self.assertEqual(obuTrue.oddBool() == True, True)
-        self.assertEqual(False == obuFalse.oddBool(), True)
-        self.assertEqual(obuTrue.oddBool() == obuFalse.oddBool(), False)
+        self.assertTrue(obuTrue.oddBool())
+        self.assertFalse(obuFalse.oddBool())
+        self.assertTrue(obuTrue.oddBool() != obuFalse.oddBool())
 
-        self.assertEqual(obuFalse.oddBool() != True, True)
-        self.assertEqual(True != obuFalse.oddBool(), True)
-        self.assertEqual(obuTrue.oddBool() != obuFalse.oddBool(), True)
+        self.assertFalse(obuFalse.oddBool())
+        self.assertFalse(obuFalse.oddBool())
+        self.assertTrue(obuTrue.oddBool() != obuFalse.oddBool())
 
     def testVirtuals(self):
         dobu = DerivedOddBoolUser()

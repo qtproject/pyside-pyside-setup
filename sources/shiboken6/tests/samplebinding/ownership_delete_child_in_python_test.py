@@ -35,5 +35,6 @@ class DeleteChildInPython(unittest.TestCase):
         new_child = parent.children()[0]
         self.assertEqual(new_child.objectName(), name)
 
+
 if __name__ == '__main__':
     unittest.main()

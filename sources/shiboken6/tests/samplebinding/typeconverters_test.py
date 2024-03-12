@@ -15,6 +15,7 @@ init_paths()
 
 import sample
 
+
 class GetPythonTypeByNameTest(unittest.TestCase):
 
     '''Uses an added function with inject code that uses the libshiboken

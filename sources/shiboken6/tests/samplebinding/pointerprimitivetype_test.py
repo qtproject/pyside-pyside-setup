@@ -27,7 +27,6 @@ from shiboken_paths import init_paths
 init_paths()
 from sample import IntArray2, VirtualMethods
 
-import shiboken6
 from shibokensupport.signature import get_signature
 
 import typing

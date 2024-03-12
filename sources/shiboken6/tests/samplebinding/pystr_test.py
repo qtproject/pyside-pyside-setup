@@ -15,6 +15,7 @@ init_paths()
 
 from sample import Point
 
+
 class PyStrTest(unittest.TestCase):
     '''Test case for definition of __str__ method.'''
 
@@ -23,6 +24,6 @@ class PyStrTest(unittest.TestCase):
         pt = Point(5, 2)
         self.assertEqual(str(pt), 'Point(5.0, 2.0)')
 
+
 if __name__ == '__main__':
     unittest.main()
-

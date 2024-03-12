@@ -38,7 +38,7 @@ class ModelWrongReturnTest(unittest.TestCase):
     def testWrongTypeReturn(self):
         model = ListModelWrong()
         view = ObjectView(model)
-        self.assertRaises(RuntimeWarning, view.getRawModelData) # calls model.data()
+        self.assertRaises(RuntimeWarning, view.getRawModelData)  # calls model.data()
 
 
 if __name__ == '__main__':

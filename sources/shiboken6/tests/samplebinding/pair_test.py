@@ -15,6 +15,7 @@ init_paths()
 
 from sample import PairUser
 
+
 class ExtendedPairUser(PairUser):
     def __init__(self):
         PairUser.__init__(self)
@@ -23,6 +24,7 @@ class ExtendedPairUser(PairUser):
     def createPair(self):
         self.create_pair_called = True
         return (7, 13)
+
 
 class PairConversionTest(unittest.TestCase):
     '''Test case for std::pair container conversions'''
@@ -48,14 +50,16 @@ class PairConversionTest(unittest.TestCase):
         self.assertEqual(cp, (cpx0, cpx1))
 
     def testSumPair(self):
-        '''Test method that sums the items of a pair using values of the types expected by C++ (int and double)'''
+        '''Test method that sums the items of a pair using values of the types
+           expected by C++ (int and double)'''
         pu = PairUser()
         pair = (3, 7.13)
         result = pu.sumPair(pair)
         self.assertEqual(result, sum(pair))
 
     def testSumPairDifferentTypes(self):
-        '''Test method that sums the items of a pair using values of types different from the ones expected by C++ (int and double)'''
+        '''Test method that sums the items of a pair using values of types different
+           from the ones expected by C++ (int and double)'''
         pu = PairUser()
         pair = (3.3, 7)
         result = pu.sumPair(pair)
@@ -71,7 +75,8 @@ class PairConversionTest(unittest.TestCase):
         self.assertEqual(result, pair)
 
     def testConversionInBothDirectionsWithSimilarContainer(self):
-        '''Test converting a list, instead of the expected tuple, from Python to C++ and the other way around.'''
+        '''Test converting a list, instead of the expected tuple, from Python to C++
+           and the other way around.'''
         pu = PairUser()
         pair = [3, 5]
         pu.setPair(pair)
@@ -79,6 +84,6 @@ class PairConversionTest(unittest.TestCase):
         self.assertNotEqual(result, pair)
         self.assertEqual(result, tuple(pair))
 
+
 if __name__ == '__main__':
     unittest.main()
-

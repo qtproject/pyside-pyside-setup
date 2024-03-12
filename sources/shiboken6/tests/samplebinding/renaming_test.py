@@ -16,8 +16,6 @@ init_paths()
 
 from sample import RenamedValue, RenamedUser
 
-from shiboken6 import Shiboken
-
 from shibokensupport.signature import get_signature
 
 
@@ -35,7 +33,6 @@ class RenamingTest(unittest.TestCase):
         actual_signature = str(get_signature(rename_user.useRenamedValue))
         self.assertTrue(re.match(r"^\(self,\s*?v:\s*?sample.RenamedValue\)\s*?->\s*?None$",
                                  actual_signature))
-
 
 
 if __name__ == '__main__':

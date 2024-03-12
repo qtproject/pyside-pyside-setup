@@ -16,6 +16,7 @@ init_paths()
 from sample import VoidHolder, Point
 from shiboken6 import Shiboken
 
+
 class VoidHolderTest(unittest.TestCase):
     '''Test case for void pointer manipulation.'''
 
@@ -44,6 +45,6 @@ class VoidHolderTest(unittest.TestCase):
         voidholder = VoidHolder()
         self.assertEqual(voidholder.voidPointer(), None)
 
+
 if __name__ == '__main__':
     unittest.main()
-

@@ -13,6 +13,7 @@ init_paths()
 
 from sample import SizeF
 
+
 class NumericalTypedefTest(unittest.TestCase):
 
     def testNumericalTypedefExact(self):
@@ -31,6 +32,7 @@ class NumericalTypedefTest(unittest.TestCase):
         self.assertEqual(SizeF.passTypedefOfUnsignedShort(123), 123)
         self.assertEqual(SizeF.passTypedefOfUnsignedShort(321), 321)
         self.assertNotEqual(SizeF.passTypedefOfUnsignedShort(123), 0)
+
 
 if __name__ == '__main__':
     unittest.main()

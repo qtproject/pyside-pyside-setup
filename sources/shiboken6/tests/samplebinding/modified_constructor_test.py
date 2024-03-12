@@ -4,7 +4,6 @@
 
 '''Tests cases for ConstructorWithModifiedArgument class.'''
 
-import sys
 import os
 import sys
 import unittest
@@ -14,7 +13,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import *
+from sample import ModifiedConstructor
 
 
 class ConstructorWithModifiedArgumentTest(unittest.TestCase):
@@ -24,6 +23,6 @@ class ConstructorWithModifiedArgumentTest(unittest.TestCase):
         sampleClass = ModifiedConstructor("10")
         self.assertTrue(sampleClass.retrieveValue(), 10)
 
+
 if __name__ == '__main__':
     unittest.main()
-

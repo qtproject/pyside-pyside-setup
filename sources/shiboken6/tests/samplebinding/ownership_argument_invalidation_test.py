@@ -15,6 +15,7 @@ init_paths()
 
 from sample import Polygon, Point
 
+
 class WrapperValidityOfArgumentsTest(unittest.TestCase):
     '''Wrapper validity tests for arguments.'''
 
@@ -25,17 +26,19 @@ class WrapperValidityOfArgumentsTest(unittest.TestCase):
         self.assertRaises(RuntimeError, Polygon.doublePolygonScale, poly)
 
     def testInvalidArgumentToConstructor(self):
-        '''Call to constructor using invalidated Python wrapper as argument should raise RuntimeError.'''
+        '''Call to constructor using invalidated Python wrapper as argument
+           should raise RuntimeError.'''
         pt = Point(1, 2)
         Polygon.stealOwnershipFromPython(pt)
         self.assertRaises(RuntimeError, Polygon, pt)
 
     def testInvalidArgumentWithImplicitConversion(self):
-        '''Call to method using invalidated Python wrapper to be implicitly converted should raise RuntimeError.'''
+        '''Call to method using invalidated Python wrapper to be implicitly converted
+           should raise RuntimeError.'''
         pt = Point(1, 2)
         Polygon.stealOwnershipFromPython(pt)
         self.assertRaises(RuntimeError, Polygon.doublePolygonScale, pt)
 
+
 if __name__ == '__main__':
     unittest.main()
-

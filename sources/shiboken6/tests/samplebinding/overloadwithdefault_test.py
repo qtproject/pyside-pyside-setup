@@ -39,6 +39,6 @@ class OverloadTest(unittest.TestCase):
         overload = Overload()
         self.assertEqual(overload.strBufferOverloads(bytes('', "UTF-8"), 0), Overload.Function1)
 
+
 if __name__ == '__main__':
     unittest.main()
-

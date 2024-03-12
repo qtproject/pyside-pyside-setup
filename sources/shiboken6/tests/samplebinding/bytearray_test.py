@@ -34,7 +34,7 @@ class ByteArrayConcatenationOperatorTest(unittest.TestCase):
 
     def testConcatPythonStringAndByteArray(self):
         # Test concatenation of a Python string with a ByteArray, in this order.
-        concat_python_string_add_qbytearray_worked = True
+        concat_python_string_add_qbytearray_worked = True  # noqa: F841
         ba = ByteArray('foo')
         result = 'bar\x00' + ba
         self.assertEqual(type(result), ByteArray)
@@ -80,14 +80,14 @@ class ByteArrayOperatorAt(unittest.TestCase):
         # ByteArray[x] where x is a valid index (reverse order).
         string = 'abcdefgh'
         obj = ByteArray(string)
-        for i in range(len(string)-1, 0, -1):
+        for i in range(len(string) - 1, 0, -1):
             self.assertEqual(obj[i], bytes(string[i], "UTF8"))
 
     def testOutOfRange(self):
         # ByteArray[x] where x is out of index.
         string = '1234567'
         obj = ByteArray(string)
-        self.assertRaises(IndexError, lambda :obj[len(string)])
+        self.assertRaises(IndexError, lambda: obj[len(string)])
 
     def testNullStrings(self):
         ba = ByteArray('\x00')

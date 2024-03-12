@@ -15,6 +15,7 @@ init_paths()
 
 from sample import MapUser
 
+
 class ExtendedMapUser(MapUser):
     def __init__(self):
         MapUser.__init__(self)
@@ -22,10 +23,11 @@ class ExtendedMapUser(MapUser):
 
     def createMap(self):
         self.create_map_called = True
-        return {'two' : (complex(2.2, 2.2), 2),
-                'three' : (complex(3.3, 3.3), 3),
-                'five' : (complex(5.5, 5.5), 5),
-                'seven' : (complex(7.7, 7.7), 7)}
+        return {'two': (complex(2.2, 2.2), 2),
+                'three': (complex(3.3, 3.3), 3),
+                'five': (complex(5.5, 5.5), 5),
+                'seven': (complex(7.7, 7.7), 7)}
+
 
 class MapConversionTest(unittest.TestCase):
     '''Test case for std::map container conversions'''
@@ -44,7 +46,7 @@ class MapConversionTest(unittest.TestCase):
     def testConversionInBothDirections(self):
         '''Test converting a map from Python to C++ and back again.'''
         mu = MapUser()
-        map_ = {'odds' : [2, 4, 6], 'evens' : [3, 5, 7], 'primes' : [3, 4, 6]}
+        map_ = {'odds': [2, 4, 6], 'evens': [3, 5, 7], 'primes': [3, 4, 6]}
         mu.setMap(map_)
         result = mu.getMap()
         self.assertEqual(result, map_)
@@ -52,9 +54,10 @@ class MapConversionTest(unittest.TestCase):
     def testConversionMapIntKeyValueTypeValue(self):
         '''C++ signature: MapUser::passMapIntValueType(const std::map<int, const ByteArray>&)'''
         mu = MapUser()
-        map_ = {0 : 'string'}
+        map_ = {0: 'string'}
         result = mu.passMapIntValueType(map_)
         self.assertEqual(map_, result)
+
 
 if __name__ == '__main__':
     unittest.main()

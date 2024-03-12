@@ -16,6 +16,7 @@ init_paths()
 import sample
 from sample import Abstract, Derived, DerivedUsingCt, OverloadedFuncEnum
 
+
 class Deviant(Derived):
     def __init__(self):
         Derived.__init__(self)
@@ -30,6 +31,7 @@ class Deviant(Derived):
 
     def className(self):
         return 'Deviant'
+
 
 class DerivedTest(unittest.TestCase):
     '''Test case for Derived class'''
@@ -59,18 +61,21 @@ class DerivedTest(unittest.TestCase):
         self.assertEqual(type(result), OverloadedFuncEnum)
 
     def testOverloadedMethodCallWithWrongNumberOfArguments(self):
-        '''Test if a call to an overloaded method with the wrong number of arguments raises an exception.'''
+        '''Test if a call to an overloaded method with the wrong number of arguments
+           raises an exception.'''
         derived = Derived()
         self.assertRaises(TypeError, derived.otherOverloaded, 1, 2, True)
 
     def testReimplementedPureVirtualMethodCall(self):
-        '''Test if a Python override of a implemented pure virtual method is correctly called from C++.'''
+        '''Test if a Python override of a implemented pure virtual method is
+           correctly called from C++.'''
         d = Deviant()
         d.callPureVirtual()
         self.assertTrue(d.pure_virtual_called)
 
     def testReimplementedVirtualMethodCall(self):
-        '''Test if a Python override of a reimplemented virtual method is correctly called from C++.'''
+        '''Test if a Python override of a reimplemented virtual method is
+           correctly called from C++.'''
         d = Deviant()
         d.callUnpureVirtual()
         self.assertTrue(d.unpure_virtual_called)
@@ -82,7 +87,8 @@ class DerivedTest(unittest.TestCase):
         self.assertEqual(d.getClassName(), 'Derived')
 
     def testReimplementedVirtualMethodCallReturningString(self):
-        '''Test if a Python override of a reimplemented virtual method is correctly called from C++.'''
+        '''Test if a Python override of a reimplemented virtual method is
+           correctly called from C++.'''
         d = Deviant()
         self.assertEqual(d.className(), 'Deviant')
         self.assertEqual(d.getClassName(), 'Deviant')
@@ -106,7 +112,8 @@ class DerivedTest(unittest.TestCase):
         self.assertEqual(Abstract.getObjectId(d), objId)
 
     def testObjectCreationWithParentType(self):
-        '''Derived class creates an instance of itself in C++ and returns it as a pointer to its ancestor Abstract.'''
+        '''Derived class creates an instance of itself in C++ and returns it as
+           a pointer to its ancestor Abstract.'''
         obj = Derived.createObject()
         self.assertEqual(type(obj), Derived)
 
@@ -118,4 +125,3 @@ class DerivedTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

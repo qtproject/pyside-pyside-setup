@@ -17,6 +17,7 @@ init_paths()
 
 from sample import HandleHolder
 
+
 class HandleHolderTest(unittest.TestCase):
     def testCreation(self):
         holder = HandleHolder(HandleHolder.createHandle())
@@ -32,6 +33,7 @@ class HandleHolderTest(unittest.TestCase):
         holder = HandleHolder(8)
         holder2 = HandleHolder(holder.handle2())
         self.assertTrue(holder.compare2(holder2))
+
 
 if __name__ == '__main__':
     unittest.main()

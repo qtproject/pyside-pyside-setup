@@ -16,6 +16,7 @@ import sys
 
 from sample import ObjectType
 
+
 class ExtObjectType(ObjectType):
     def __init__(self):
         ObjectType.__init__(self)
@@ -108,4 +109,3 @@ class ReparentingTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

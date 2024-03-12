@@ -16,7 +16,6 @@ from sample import ObjectView
 from sample import ObjectModel
 
 
-
 class ObjTest(unittest.TestCase):
 
     def test_cyclic_dependency_withParent(self):
@@ -37,7 +36,7 @@ class ObjTest(unittest.TestCase):
         # turn off automatic garbage collection, to be able to trigger it
         # at the 'right' time
         gc.disable()
-        alive = lambda :sum(isinstance(o, CyclicObject) for o in gc.get_objects() )
+        alive = lambda: sum(isinstance(o, CyclicObject) for o in gc.get_objects())  # noqa: E731
 
         #
         # first proof that the wizard is only destructed by the garbage
@@ -70,7 +69,7 @@ class ObjTest(unittest.TestCase):
         # turn off automatic garbage collection, to be able to trigger it
         # at the 'right' time
         gc.disable()
-        alive = lambda :sum(isinstance(o, CyclicObject) for o in gc.get_objects() )
+        alive = lambda: sum(isinstance(o, CyclicObject) for o in gc.get_objects())  # noqa: E731
 
         #
         # first proof that the wizard is only destructed by the garbage
@@ -85,6 +84,6 @@ class ObjTest(unittest.TestCase):
         gc.collect()
         self.assertFalse(alive())
 
+
 if __name__ == '__main__':
     unittest.main()
-

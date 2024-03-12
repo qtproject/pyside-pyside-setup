@@ -14,6 +14,7 @@ from shiboken_paths import init_paths
 init_paths()
 from sample import SampleNamespace, ObjectType, Point
 
+
 class TestAddedFunctionsWithSimilarTypes(unittest.TestCase):
     '''Adds new signatures very similar to already existing ones.'''
 
@@ -37,6 +38,7 @@ class TestAddedFunctionsWithSimilarTypes(unittest.TestCase):
         self.assertEqual(SampleNamespace.passReferenceToObjectType(obj, multiplier), control)
         control = len(obj.objectName())
         self.assertEqual(SampleNamespace.passReferenceToObjectType(obj), control)
+
 
 if __name__ == '__main__':
     unittest.main()

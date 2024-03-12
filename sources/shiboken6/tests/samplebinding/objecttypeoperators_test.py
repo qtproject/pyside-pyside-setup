@@ -10,7 +10,8 @@ from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
-from sample import *
+from sample import ObjectTypeOperators
+
 
 class ObjectTypeOperatorsTest(unittest.TestCase):
 
@@ -26,7 +27,7 @@ class ObjectTypeOperatorsTest(unittest.TestCase):
 
     def testPointerOpeators(self):
         a = ObjectTypeOperators("a")
-        b = ObjectTypeOperators("b")
+        b = ObjectTypeOperators("b")  # noqa: F841
         self.assertEqual(a + "bc", "abc")
         self.assertEqual("bc" + a, "bca")
         self.assertEqual("a", a)
@@ -35,6 +36,7 @@ class ObjectTypeOperatorsTest(unittest.TestCase):
     def testOperatorInjection(self):
         a = ObjectTypeOperators("a")
         self.assertNotEqual(a, "b")
+
 
 if __name__ == '__main__':
     unittest.main()

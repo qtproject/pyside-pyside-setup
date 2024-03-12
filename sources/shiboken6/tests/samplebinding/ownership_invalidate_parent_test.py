@@ -34,7 +34,7 @@ class InvalidateParentTest(unittest.TestCase):
         grandchild2.setParent(child2)
         bbox = BlackBox()
 
-        bbox.keepObjectType(parent) # Should invalidate the parent
+        bbox.keepObjectType(parent)  # Should invalidate the parent
 
         self.assertRaises(RuntimeError, parent.objectName)
         # some children still valid they are wrapper classes
@@ -43,6 +43,6 @@ class InvalidateParentTest(unittest.TestCase):
         self.assertEqual(grandchild1.objectName(), "grandchild1")
         self.assertRaises(RuntimeError, grandchild2.objectName)
 
+
 if __name__ == '__main__':
     unittest.main()
-

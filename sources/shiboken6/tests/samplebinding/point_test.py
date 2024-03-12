@@ -15,6 +15,7 @@ init_paths()
 
 from sample import Point
 
+
 class PointTest(unittest.TestCase):
     '''Test case for Point class, including operator overloads.'''
 
@@ -91,6 +92,7 @@ class PointTest(unittest.TestCase):
         pt2 = Point(10.0, 10.0)
         expected = Point((pt1.x() + pt2.x()) / 2.0, (pt1.y() + pt2.y()) / 2.0)
         self.assertEqual(pt1.midpoint(pt2), expected)
+
 
 if __name__ == '__main__':
     unittest.main()

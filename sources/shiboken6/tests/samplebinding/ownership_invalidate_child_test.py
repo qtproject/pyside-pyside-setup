@@ -49,6 +49,6 @@ class InvalidateChildTest(unittest.TestCase):
         self.assertEqual(child1.objectName(), 'child1')
         self.assertRaises(RuntimeError, child2.objectName)
 
+
 if __name__ == '__main__':
     unittest.main()
-

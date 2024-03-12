@@ -33,12 +33,16 @@ class TypeDeallocTest(unittest.TestCase):
 
     def testScopeEnd(self):
         ref = None
+
         def scope():
+
             class Ext(Point):
                 pass
-            o = Ext()
+
+            o = Ext()  # noqa: F841
             global ref
             ref = weakref.ref(Ext, self.callback)
+
         scope()
         gc.collect()
         self.assertTrue(self.called)
@@ -46,7 +50,7 @@ class TypeDeallocTest(unittest.TestCase):
     def testDeleteType(self):
         class Ext(Point):
             pass
-        ref = weakref.ref(Ext, self.callback)
+        ref = weakref.ref(Ext, self.callback)  # noqa: F841
         del Ext
         gc.collect()
         self.assertTrue(self.called)
@@ -54,4 +58,3 @@ class TypeDeallocTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

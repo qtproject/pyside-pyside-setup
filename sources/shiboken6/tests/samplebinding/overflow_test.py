@@ -13,7 +13,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import *
+from sample import (Point, doubleLongLong, doubleShort, doubleUnsignedInt,
+                    doubleUnsignedLongLong)
 
 
 class OverflowTest(unittest.TestCase):
@@ -25,14 +26,16 @@ class OverflowTest(unittest.TestCase):
             return super().assertRaises(*args, **kwds)
 
     def testUnsignedInt(self):
-        '''C++ function receives an unsigned int argument and raise OverflowError if the value is negative.'''
+        '''C++ function receives an unsigned int argument and raise OverflowError
+           if the value is negative.'''
         val = 100
         self.assertEqual(doubleUnsignedInt(val), 2 * val)
         val *= -1
         self.assertRaises(OverflowError, doubleUnsignedInt, val)
 
     def testLongLong(self):
-        '''C++ function receives an long long argument and raise OverflowError if the value is negative.'''
+        '''C++ function receives an long long argument and raise OverflowError
+           if the value is negative.'''
         val = 100
         self.assertEqual(doubleLongLong(val), 2 * val)
         val = int(100)
@@ -41,7 +44,8 @@ class OverflowTest(unittest.TestCase):
         self.assertRaises(OverflowError, doubleLongLong, val)
 
     def testUnsignedLongLong(self):
-        '''C++ function receives an unsigned long long argument and raise OverflowError if the value is negative.'''
+        '''C++ function receives an unsigned long long argument and raise OverflowError
+           if the value is negative.'''
         val = 100
         self.assertEqual(doubleUnsignedLongLong(val), 2 * val)
         val = int(100)
@@ -59,13 +63,13 @@ class OverflowTest(unittest.TestCase):
     def testShortOverflow(self):
         '''Calls function with short parameter using an overflowing value.'''
         doubleShort(-3)
-        self.assertRaises(OverflowError, doubleShort, 0xFFFF*-1)
+        self.assertRaises(OverflowError, doubleShort, 0xFFFF * -1)
         self.assertRaises(OverflowError, doubleShort, 0xFFFF + 1)
 
     def testOverflowOnCtor(self):
         '''Calls object ctor with int parameter using overflowing values.'''
         self.assertRaises(OverflowError, Point, 42415335332353253, 42415335332353253)
 
+
 if __name__ == '__main__':
     unittest.main()
-

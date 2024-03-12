@@ -12,6 +12,7 @@ from shiboken_paths import init_paths
 init_paths()
 from sample import ObjectType
 
+
 class TestTypeDestructorDoubleFree(unittest.TestCase):
     def testTypeDestructorDoubleFree(self):
         '''Causes the type destructors of two derived classes to be called.'''
@@ -22,13 +23,16 @@ class TestTypeDestructorDoubleFree(unittest.TestCase):
             obj = ExtObj1()
             child = ObjectType(parent=obj)
             self.assertEqual(obj.takeChild(child), child)
+
             class ExtObj2(ObjectType):
                 def __init__(self):
                     ObjectType.__init__(self)
+
             obj = ExtObj2()
             child = ObjectType(parent=obj)
             self.assertEqual(obj.takeChild(child), child)
         scope()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -13,6 +13,7 @@ init_paths()
 
 from sample import IntList
 
+
 class IntListTest(unittest.TestCase):
 
     def testAutoFunctionsToBaseList(self):
@@ -73,6 +74,7 @@ class IntListTest(unittest.TestCase):
         self.assertEqual(len(il), 3)
         self.assertEqual(il[1], int(432.1))
         self.assertRaises(TypeError, il.__setitem__, 2, '78')
+
 
 if __name__ == '__main__':
     unittest.main()

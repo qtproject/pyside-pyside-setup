@@ -13,7 +13,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import *
+from sample import Reference, Str
+
 
 class ExtendedReference(Reference):
     def __init__(self):
@@ -48,7 +49,7 @@ class ReferenceTest(unittest.TestCase):
     def testCantSegFaultWhenReceiveNone(self):
         '''do not segfault when receiving None as argument.'''
         s = Str()
-        self.assertTrue(None == s)
+        self.assertFalse(bool(s))
 
     def testMethodThatReceivesConstReference(self):
         '''Test a method that receives a const reference to an object as argument.'''
@@ -57,29 +58,33 @@ class ReferenceTest(unittest.TestCase):
         self.assertEqual(Reference.usesConstReference(r), objId)
 
     def testModificationOfReference(self):
-        '''Tests if the identity of a reference argument is preserved when passing it to be altered in C++.'''
+        '''Tests if the identity of a reference argument is preserved when passing
+           it to be altered in C++.'''
         objId = 123
         r1 = Reference(objId)
         r1.alterReferenceIdVirtual(r1)
         self.assertEqual(r1.objId(), objId * Reference.multiplier())
 
     def testModificationOfReferenceCallingAVirtualIndirectly(self):
-        '''Tests if the identity of a reference argument is preserved when passing it to be altered in C++ through a method that calls a virtual method.'''
+        '''Tests if the identity of a reference argument is preserved when passing it
+           to be altered in C++ through a method that calls a virtual method.'''
         objId = 123
         r1 = Reference(objId)
         r1.callAlterReferenceIdVirtual(r1)
         self.assertEqual(r1.objId(), objId * Reference.multiplier())
 
     def testModificationOfReferenceCallingAReimplementedVirtualIndirectly(self):
-        '''Test if a Python override of a virtual method with a reference parameter called from C++ alters the argument properly.'''
+        '''Test if a Python override of a virtual method with a reference parameter
+           called from C++ alters the argument properly.'''
         objId = 123
         r = Reference(objId)
         er = ExtendedReference()
-        result = er.callAlterReferenceIdVirtual(r)
+        result = er.callAlterReferenceIdVirtual(r)  # noqa: F841
         self.assertEqual(r.objId(), objId * er.multiplier)
 
     def testReimplementedVirtualMethodCallWithReferenceParameter(self):
-        '''Test if a Python override of a virtual method with a reference parameter is correctly called from C++.'''
+        '''Test if a Python override of a virtual method with a reference parameter
+           is correctly called from C++.'''
         inc = 9
         objId = 123
         r = Reference(objId)
@@ -88,7 +93,8 @@ class ReferenceTest(unittest.TestCase):
         self.assertEqual(result, objId + inc + er.reference_inc)
 
     def testReimplementedVirtualMethodCallWithConstReferenceParameter(self):
-        '''Test if a Python override of a virtual method with a const reference parameter is correctly called from C++.'''
+        '''Test if a Python override of a virtual method with a const reference
+           parameter is correctly called from C++.'''
         inc = 9
         objId = 123
         r = Reference(objId)
@@ -96,6 +102,6 @@ class ReferenceTest(unittest.TestCase):
         result = er.callUsesConstReferenceVirtual(r, inc)
         self.assertEqual(result, objId + inc + er.const_reference_inc)
 
+
 if __name__ == '__main__':
     unittest.main()
-

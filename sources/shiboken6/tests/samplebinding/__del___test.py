@@ -16,10 +16,12 @@ import sample
 
 delCalled = False
 
+
 class MyObject(sample.ObjectType):
     def __del__(self):
         global delCalled
         delCalled = True
+
 
 class TestDel(unittest.TestCase):
     def testIt(self):
@@ -29,6 +31,6 @@ class TestDel(unittest.TestCase):
         gc.collect()
         self.assertTrue(delCalled)
 
+
 if __name__ == '__main__':
     unittest.main()
-

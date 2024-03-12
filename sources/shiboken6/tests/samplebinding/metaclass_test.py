@@ -10,32 +10,40 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import *
+from sample import Point
+
 
 class MetaA(type):
     pass
 
+
 class A(object):
     __metaclass__ = MetaA
+
 
 MetaB = type(Point)
 B = Point
 
+
 class MetaC(MetaA, MetaB):
     pass
+
+
 class C(A, B):
     __metaclass__ = MetaC
+
 
 class D(C):
     pass
 
+
 class TestMetaClass(unittest.TestCase):
     def testIt(self):
-        w1 = C() # works
+        w1 = C()  # works
         w1.setX(1)
         w1.setY(2)
 
-        w2 = D() # should work!
+        w2 = D()  # should work!
         w2.setX(3)
         w2.setY(4)
 

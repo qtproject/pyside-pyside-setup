@@ -14,8 +14,6 @@ init_paths()
 import sample
 from shiboken_test_helper import objectFullname
 
-from shiboken6 import Shiboken
-
 from shibokensupport.signature import get_signature
 
 
@@ -46,9 +44,8 @@ class TestEnumFromRemovedNamespace(unittest.TestCase):
         sample.UnremovedNamespace.RemovedNamespace3_AnonymousEnum_Value0
 
     def testNestedFunctionFromRemovedNamespace(self):
-            self.assertEqual(sample.UnremovedNamespace.nestedMathSum(1, 2), 3)
+        self.assertEqual(sample.UnremovedNamespace.nestedMathSum(1, 2), 3)
 
 
 if __name__ == '__main__':
     unittest.main()
-

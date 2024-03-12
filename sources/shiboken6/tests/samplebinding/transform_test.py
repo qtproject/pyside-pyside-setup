@@ -15,6 +15,7 @@ init_paths()
 
 from sample import Point, applyHomogeneousTransform
 
+
 class TransformTest(unittest.TestCase):
     '''Test cases for modifying a function with > 9 arguments.'''
 
@@ -31,6 +32,7 @@ class TransformTest(unittest.TestCase):
         p = Point(3, 4)
         r = applyHomogeneousTransform(p, 1, 0, 0, 0, 1, 0, 0, 0, 0)
         self.assertTrue(r is None)
+
 
 if __name__ == '__main__':
     unittest.main()

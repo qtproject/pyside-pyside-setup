@@ -12,6 +12,7 @@ from shiboken_paths import init_paths
 init_paths()
 import sample
 
+
 class PStrListTest(unittest.TestCase):
 
     def testPStrList(self):
@@ -25,6 +26,7 @@ class PStrListTest(unittest.TestCase):
         b = 'str1'
         lst = sample.createListOfPStr(a, b)
         self.assertEqual(lst, [a, b])
+
 
 if __name__ == '__main__':
     unittest.main()

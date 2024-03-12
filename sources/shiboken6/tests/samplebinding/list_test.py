@@ -15,6 +15,7 @@ init_paths()
 
 from sample import ListUser, Point, PointF
 
+
 class ExtendedListUser(ListUser):
     def __init__(self):
         ListUser.__init__(self)
@@ -23,6 +24,7 @@ class ExtendedListUser(ListUser):
     def createList(self):
         self.create_list_called = True
         return [2, 3, 5, 7, 13]
+
 
 class ListConversionTest(unittest.TestCase):
     '''Test case for std::list container conversions'''
@@ -69,7 +71,8 @@ class ListConversionTest(unittest.TestCase):
         self.assertEqual(result, lst)
 
     def testConversionInBothDirectionsWithSimilarContainer(self):
-        '''Test converting a tuple, instead of the expected list, from Python to C++ and back again.'''
+        '''Test converting a tuple, instead of the expected list,
+           from Python to C++ and back again.'''
         lu = ListUser()
         lst = (3, 5, 7)
         lu.setList(lst)
@@ -96,6 +99,6 @@ class ListConversionTest(unittest.TestCase):
         self.assertEqual(ListUser.ListOfPointF, ListUser.listOfPoints([PointF()]))
         self.assertEqual(ListUser.ListOfPoint, ListUser.listOfPoints([Point()]))
 
+
 if __name__ == '__main__':
     unittest.main()
-

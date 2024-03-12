@@ -2,8 +2,6 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
-'''Test case for objects that keep references to other object without owning them (e.g. model/view relationships).'''
-
 import os
 import sys
 import unittest
@@ -15,8 +13,10 @@ init_paths()
 
 from sample import ObjectModel, ObjectView
 
+
 class TestKeepReference(unittest.TestCase):
-    '''Test case for objects that keep references to other object without owning them (e.g. model/view relationships).'''
+    '''Test case for objects that keep references to other object without
+       owning them (e.g. model/view relationships).'''
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testReferenceCounting(self):
@@ -48,15 +48,16 @@ class TestKeepReference(unittest.TestCase):
         self.assertEqual(sys.getrefcount(model), refcount1)
 
     def testReferreedObjectSurvivalAfterContextEnd(self):
-        '''Model-like object assigned to a view-like object must survive after get out of context.'''
+        '''Model-like object assigned to a view-like object must survive
+           after get out of context.'''
         def createModelAndSetToView(view):
             model = ObjectModel()
             model.setObjectName('created model')
             view.setModel(model)
         view = ObjectView()
         createModelAndSetToView(view)
-        model = view.model()
+        model = view.model()    # noqa: F841
+
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -13,7 +13,10 @@ init_paths()
 
 from sample import Point
 
-class ExtPoint(Point): pass
+
+class ExtPoint(Point):
+    pass
+
 
 class TestWritableClassDict(unittest.TestCase):
     def testSetattrOnClass(self):
@@ -28,6 +31,7 @@ class TestWritableClassDict(unittest.TestCase):
         self.assertEqual(ExtPoint.bar, 321)
         pt = ExtPoint()
         self.assertEqual(pt.bar, 321)
+
 
 if __name__ == '__main__':
     unittest.main()

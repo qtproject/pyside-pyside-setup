@@ -13,6 +13,7 @@ init_paths()
 
 from sample import ModelIndex, ReferentModelIndex, PersistentModelIndex
 
+
 class TestCastOperator(unittest.TestCase):
 
     def testCastOperatorReturningValue(self):
@@ -30,4 +31,3 @@ class TestCastOperator(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -10,7 +10,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import *
+from sample import ObjectTypeByValue
 
 
 class ObjectTypeByValueTest (unittest.TestCase):
@@ -21,6 +21,7 @@ class ObjectTypeByValueTest (unittest.TestCase):
         obj.prop.protectedValueTypeProperty.setX(1.0)
         # just to make sure it will segfault
         obj.prop.protectedValueTypeProperty.setY(2.0)
+
 
 if __name__ == "__main__":
     unittest.main()

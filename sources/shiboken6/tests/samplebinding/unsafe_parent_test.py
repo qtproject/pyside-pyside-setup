@@ -15,6 +15,7 @@ init_paths()
 
 from sample import ObjectType
 
+
 class DerivedObjectType(ObjectType):
     def isPython(self):
         return True
@@ -22,12 +23,13 @@ class DerivedObjectType(ObjectType):
     def createChild(self, parent):
         return DerivedObjectType(parent)
 
+
 class ParentTest(unittest.TestCase):
 
     def testUunsafeParent(self):
         o = DerivedObjectType()
         o.callVirtualCreateChild()
 
+
 if __name__ == '__main__':
     unittest.main()
-

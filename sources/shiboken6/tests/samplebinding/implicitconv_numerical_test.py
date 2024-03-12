@@ -27,6 +27,7 @@ if is64bitArchitecture and sys.platform != 'win32':
     cLongMin = -9223372036854775808
     cLongMax = 9223372036854775807
 
+
 class NumericTester(unittest.TestCase):
     '''Helper class for numeric comparison testing'''
 

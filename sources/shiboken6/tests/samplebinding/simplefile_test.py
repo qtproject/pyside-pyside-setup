@@ -15,6 +15,7 @@ init_paths()
 
 from sample import SimpleFile
 
+
 class SimpleFileTest(unittest.TestCase):
     '''Test cases for SimpleFile class.'''
 
@@ -54,6 +55,6 @@ class SimpleFileTest(unittest.TestCase):
         self.assertRaises(IOError, f.open)
         self.assertEqual(f.size(), 0)
 
+
 if __name__ == '__main__':
     unittest.main()
-

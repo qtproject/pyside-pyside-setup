@@ -13,10 +13,11 @@ init_paths()
 
 from sample import Derived
 
+
 class TestInnerClass(unittest.TestCase):
     def testInstaciate(self):
-        d = Derived.SomeInnerClass()
+        d = Derived.SomeInnerClass()  # noqa: F841
+
 
 if __name__ == '__main__':
     unittest.main()
-

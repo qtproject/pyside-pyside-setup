@@ -15,14 +15,16 @@ init_paths()
 
 from sample import SampleNamespace
 
+
 class ScopeAndInheritanceTest(unittest.TestCase):
     '''Test cases for finding scope in cases involving inheritance.'''
 
     def testMethodCorrectlyWrapper(self):
         '''A method returning a type declared in the scope of the method's
         class parent must be found and the method correctly exported.'''
-        meth = getattr(SampleNamespace.DerivedFromNamespace, 'methodReturningTypeFromParentScope')
+        meth = getattr(SampleNamespace.DerivedFromNamespace,  # noqa: F841
+                       'methodReturningTypeFromParentScope')
+
 
 if __name__ == '__main__':
     unittest.main()
-

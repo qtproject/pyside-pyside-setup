@@ -15,9 +15,11 @@ init_paths()
 
 from sample import Abstract
 
+
 class Incomplete(Abstract):
     def __init__(self):
         Abstract.__init__(self)
+
 
 class Concrete(Abstract):
     def __init__(self):
@@ -60,12 +62,7 @@ class AbstractTest(unittest.TestCase):
         # Python and calling it from C++ is undefined until it's decided how to
         # cast the Python data types to void pointers
         c = Concrete()
-        self.assertEqual(c.pureVirtualReturningVoidPtr(),42)
-
-    def testReimplementedVirtualMethodCall(self):
-        '''Test if instanciation of an abstract class raises the correct exception.'''
-        i = Concrete()
-        self.assertRaises(NotImplementedError, i.callPureVirtual)
+        self.assertEqual(c.pureVirtualReturningVoidPtr(), 42)
 
     def testReimplementedVirtualMethodCall(self):
         '''Test if a Python override of a virtual method is correctly called from C++.'''
@@ -85,6 +82,6 @@ class AbstractTest(unittest.TestCase):
         c.callVirtualGettingEnum(Abstract.Short)
         self.assertTrue(c.virtual_getting_enum)
 
+
 if __name__ == '__main__':
     unittest.main()
-

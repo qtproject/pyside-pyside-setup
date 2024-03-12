@@ -25,13 +25,12 @@ def defineNewStyle():
 
 
 class ObjectTypeTest(unittest.TestCase):
-    '''Test cases to avoid declaring Shiboken classes with multiple inheritance from old style classes.'''
+    '''Test cases to avoid declaring Shiboken classes with multiple inheritance
+       from old style classes.'''
 
     def testObjectTypeNewStype(self):
         defineNewStyle()
 
 
-
 if __name__ == '__main__':
     unittest.main()
-

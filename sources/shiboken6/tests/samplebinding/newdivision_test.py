@@ -10,16 +10,16 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import *
+from sample import Point
 
 
 class TestNewDivision(unittest.TestCase):
 
     def testIt(self):
         p = Point(4, 4)
-        p2 = p/2
+        p2 = p / 2
         self.assertEqual(p2, Point(2, 2))
+
 
 if __name__ == "__main__":
     unittest.main()
-

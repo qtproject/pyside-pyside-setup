@@ -22,24 +22,26 @@ try:
 except ImportError:
     pass
 
+
 class ArrayTester(unittest.TestCase):
     '''Test case for NumPy arrays.'''
 
     def testIntArray(self):
-        intList = numpy.array([1, 2, 3, 4], dtype = 'int32')
+        intList = numpy.array([1, 2, 3, 4], dtype='int32')
         self.assertEqual(sample.sumIntArray(intList), 10)
 
     def testDoubleArray(self):
-        doubleList = numpy.array([1, 2, 3, 4], dtype = 'double')
+        doubleList = numpy.array([1, 2, 3, 4], dtype='double')
         self.assertEqual(sample.sumDoubleArray(doubleList), 10)
 
     def testIntMatrix(self):
-        intMatrix = numpy.array([[1, 2, 3], [4, 5, 6]], dtype = 'int32')
+        intMatrix = numpy.array([[1, 2, 3], [4, 5, 6]], dtype='int32')
         self.assertEqual(sample.sumIntMatrix(intMatrix), 21)
 
     def testDoubleMatrix(self):
-        doubleMatrix = numpy.array([[1, 2, 3], [4, 5, 6]], dtype = 'double')
+        doubleMatrix = numpy.array([[1, 2, 3], [4, 5, 6]], dtype='double')
         self.assertEqual(sample.sumDoubleMatrix(doubleMatrix), 21)
+
 
 if __name__ == '__main__' and hasNumPy:
     unittest.main()
