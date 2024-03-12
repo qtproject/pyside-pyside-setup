@@ -38,7 +38,7 @@
 #include "globalreceiverv2.h"
 
 static PyObject *metaObjectAttr = nullptr;
-static PyObject *parseArguments(const QList< QByteArray >& paramTypes, void **args);
+static PyObject *parseArguments(const QMetaMethod &method, void **args);
 static bool emitShortCircuitSignal(QObject *source, int signalIndex, PyObject *args);
 static void destroyMetaObject(PyObject *obj)
 {
@@ -66,6 +66,29 @@ static const char *metaCallName(QMetaObject::Call call)
     };
     auto it = mapping.constFind(call);
     return it != mapping.constEnd() ? it.value() : "<Unknown>";
+}
+
+static QByteArray methodSignature(const QMetaMethod &method)
+{
+    QByteArray result;
+    if (auto *t = method.typeName()) {
+        result += t;
+        result += ' ';
+    }
+    result += method.methodSignature();
+    return result;
+}
+
+static QByteArray msgCannotConvertParameter(const QMetaMethod &method, qsizetype p)
+{
+    return "Cannot call meta function \""_ba + methodSignature(method)
+           + "\" because parameter " + QByteArray::number(p) + " of type \""_ba
+           + method.parameterTypeName(p) + "\" cannot be converted."_ba;
+}
+
+static QByteArray msgCannotConvertReturn(const QMetaMethod &method)
+{
+    return "The return value of \""_ba + methodSignature(method) + "\" cannot be converted."_ba;
 }
 
 namespace PySide {
@@ -537,34 +560,27 @@ int SignalManager::callPythonMetaMethod(const QMetaMethod &method, void **args, 
     Q_ASSERT(pyMethod);
 
     Shiboken::GilState gil;
-    PyObject *pyArguments = nullptr;
-
-    if (isShortCuit){
-        pyArguments = reinterpret_cast<PyObject *>(args[1]);
-    } else {
-        pyArguments = parseArguments(method.parameterTypes(), args);
-    }
+    PyObject *pyArguments = isShortCuit
+        ? reinterpret_cast<PyObject *>(args[1]) : parseArguments(method, args);
 
     if (pyArguments) {
         QScopedPointer<Shiboken::Conversions::SpecificConverter> retConverter;
         const char *returnType = method.typeName();
-        if (returnType && std::strcmp("", returnType) && std::strcmp("void", returnType)) {
+        if (returnType != nullptr && returnType[0] != 0 && std::strcmp("void", returnType) != 0) {
             retConverter.reset(new Shiboken::Conversions::SpecificConverter(returnType));
             if (!retConverter->isValid()) {
-                PyErr_Format(PyExc_RuntimeError, "Can't find converter for '%s' to call Python meta method.", returnType);
+                PyErr_SetString(PyExc_RuntimeError, msgCannotConvertReturn(method).constData());
                 return -1;
             }
         }
 
         Shiboken::AutoDecRef retval(PyObject_CallObject(pyMethod, pyArguments));
 
-        if (!isShortCuit && pyArguments){
+        if (!isShortCuit && pyArguments)
             Py_DECREF(pyArguments);
-        }
 
-        if (!retval.isNull() && retval != Py_None && !PyErr_Occurred() && retConverter) {
+        if (!retval.isNull() && retval != Py_None && !PyErr_Occurred() && retConverter)
             retConverter->toCpp(retval, args[0]);
-        }
     }
 
     return -1;
@@ -708,22 +724,22 @@ const QMetaObject *SignalManager::retrieveMetaObject(PyObject *self)
     return builder->update();
 }
 
-static PyObject *parseArguments(const QList<QByteArray>& paramTypes, void **args)
+static PyObject *parseArguments(const QMetaMethod &method, void **args)
 {
+    const auto &paramTypes = method.parameterTypes();
     const qsizetype argsSize = paramTypes.size();
     PyObject *preparedArgs = PyTuple_New(argsSize);
 
     for (qsizetype i = 0; i < argsSize; ++i) {
         void *data = args[i+1];
-        const char *dataType = paramTypes[i].constData();
-        Shiboken::Conversions::SpecificConverter converter(dataType);
-        if (converter) {
-            PyTuple_SET_ITEM(preparedArgs, i, converter.toPython(data));
-        } else {
-            PyErr_Format(PyExc_TypeError, "Can't call meta function because I have no idea how to handle %s", dataType);
+        auto param = paramTypes.at(i);
+        Shiboken::Conversions::SpecificConverter converter(param.constData());
+        if (!converter) {
+            PyErr_SetString(PyExc_TypeError, msgCannotConvertParameter(method, i).constData());
             Py_DECREF(preparedArgs);
             return nullptr;
         }
+        PyTuple_SET_ITEM(preparedArgs, i, converter.toPython(data));
     }
     return preparedArgs;
 }
