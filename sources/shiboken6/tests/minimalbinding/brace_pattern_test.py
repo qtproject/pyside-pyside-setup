@@ -11,7 +11,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from shiboken6 import Shiboken
+from shiboken6 import Shiboken  # noqa: F401
 
 from shibokensupport.signature.lib.tool import build_brace_pattern
 
@@ -21,8 +21,9 @@ against a slower reference implementation.
 The pattern is crucial, because it is used heavily in signature.parser .
 """
 
-# A slow reference parser for braces and strings
+
 def check(s):
+    """A slow reference parser for braces and strings"""
     open, close = "[{(<", "]})>"
     escape, quote = "\\", '"'
     instring = blind = False
@@ -41,8 +42,7 @@ def check(s):
             stack.append(c)
         elif c in close:
             pos = close.index(c)
-            if ((len(stack) > 0) and
-                (open[pos] == stack[len(stack)-1])):
+            if len(stack) > 0 and open[pos] == stack[len(stack) - 1]:
                 stack.pop()
             else:
                 return False

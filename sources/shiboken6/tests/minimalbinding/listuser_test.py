@@ -32,7 +32,7 @@ class ExtListUser(ListUser):
         return [not mb1, not mb2]
 
     def oredMinBoolList(self, minBoolList):
-        return not reduce(lambda a, b: a|b, minBoolList)
+        return not reduce(lambda a, b: a | b, minBoolList)
 
     def createValList(self, num):
         return [Val(i) for i in range(0, num * 2, 2)]
@@ -303,14 +303,16 @@ class ListOfIntListConversionTest(unittest.TestCase):
     def testSumListOfIntListsFromExtendedClass(self):
         lu = ExtListUser()
         lst = [range(4)] * 4
-        self.assertEqual(lu.sumListOfIntLists(lst), sum([sum(line) for line in [range(4)] * 4]) * 2)
-        self.assertEqual(lu.callSumListOfIntLists(lst), sum([sum(line) for line in [range(4)] * 4]) * 2)
+        self.assertEqual(lu.sumListOfIntLists(lst),
+                         sum([sum(line) for line in [range(4)] * 4]) * 2)
+        self.assertEqual(lu.callSumListOfIntLists(lst),
+                         sum([sum(line) for line in [range(4)] * 4]) * 2)
 
     def testOpaqueContainer(self):
         lu = ListUser()
 
         # Set via Python
-        python_list = [1,2]
+        python_list = [1, 2]
         lu.setStdIntList(python_list)
         self.assertEqual(len(lu.m_stdIntList), 2)
         self.assertEqual(lu.m_stdIntList[0], 1)
@@ -331,8 +333,8 @@ class ListOfIntListConversionTest(unittest.TestCase):
         self.assertEqual(lu.m_stdIntList[2], 5)
 
         # Access list via getter
-        l = lu.getIntList()
-        l.append(6)
+        il = lu.getIntList()
+        il.append(6)
         self.assertEqual(len(lu.m_stdIntList), 4)
         self.assertEqual(lu.m_stdIntList[3], 6)
 
