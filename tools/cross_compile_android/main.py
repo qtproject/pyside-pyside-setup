@@ -296,5 +296,5 @@ if __name__ == "__main__":
                             f"--python-target-path={python_path}",
                             (f"--qt-target-path={qt_install_path}/"
                                 f"android_{platform_data.qt_plat_name}"),
-                            "--no-qt-tools", "--unity", "--module-subset=Core,Gui,Widgets"]
+                            "--no-qt-tools"]
         run_command(qfp_ccompile_cmd, cwd=pyside_setup_dir, dry_run=dry_run, show_stdout=True)
