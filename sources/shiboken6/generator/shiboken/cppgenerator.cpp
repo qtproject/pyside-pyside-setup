@@ -116,6 +116,25 @@ TextStream &operator<<(TextStream &s, CppGenerator::ErrorReturn r)
     return s;
 }
 
+static constexpr auto converterVar = "converter"_L1;
+
+struct registerConverterName
+{
+    explicit registerConverterName(QAnyStringView typeName,
+                                   QAnyStringView varName = converterVar) :
+        m_typeName(typeName), m_varName(varName) {}
+
+    QAnyStringView m_typeName;
+    QAnyStringView m_varName;
+};
+
+TextStream &operator<<(TextStream &s, const registerConverterName &r)
+{
+    s << "Shiboken::Conversions::registerConverterName(" << r.m_varName
+        <<  ", \"" << r.m_typeName << "\");\n";
+    return s;
+}
+
 // Protocol function name / function parameters / return type
 struct ProtocolEntry
 {
@@ -1756,9 +1775,8 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
 
     auto writeConversions = [&s](const QString &signature)
     {
-        s << "Shiboken::Conversions::registerConverterName(converter, \"" << signature << "\");\n"
-            << "Shiboken::Conversions::registerConverterName(converter, \"" << signature << "*\");\n"
-            << "Shiboken::Conversions::registerConverterName(converter, \"" << signature << "&\");\n";
+        s << registerConverterName(signature) << registerConverterName(signature + u'*')
+            << registerConverterName(signature + u'&');
     };
 
     auto writeConversionsForType = [writeConversions](const QString &fullTypeName)
@@ -4078,21 +4096,19 @@ void CppGenerator::writePrimitiveConverterInitialization(TextStream &s,
         s << '&' << type->targetLangApiName() << "_Type";
     QString typeName = fixedCppTypeName(type);
     s << ", " << cppToPythonFunctionName(typeName, typeName) << ");\n"
-        << "Shiboken::Conversions::registerConverterName(" << converter << ", \""
-        << type->qualifiedCppName() << "\");\n";
+        << registerConverterName(type->qualifiedCppName(), converter);
     writeCustomConverterRegister(s, customConversion, converter);
 }
 
-static void registerEnumConverterScopes(TextStream &s, QString signature)
+static void registerConverterInScopes(TextStream &s, QStringView signature,
+                                      QAnyStringView varName = converterVar)
 {
     while (true) {
-        s << "Shiboken::Conversions::registerConverterName(converter, \""
-          << signature << "\");\n";
-        const auto qualifierPos = signature.indexOf(u"::");
-        if (qualifierPos != -1)
-            signature.remove(0, qualifierPos + 2);
-        else
+        s << registerConverterName(signature, varName);
+        const auto qualifierPos = signature.indexOf("::"_L1);
+        if (qualifierPos == -1)
             break;
+        signature = signature.sliced(qualifierPos + 2);
     }
 }
 
@@ -4119,13 +4135,11 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const Abstrac
     s << "Shiboken::Enum::setTypeConverter(" << enumPythonVar
         << ", converter);\n";
 
-    registerEnumConverterScopes(s, enumType->qualifiedCppName());
+    registerConverterInScopes(s, enumType->qualifiedCppName());
     if (auto flags = enumType->flags())
         s << "// Register converter for flag '" << flags->qualifiedCppName() << "'.\n"
-            << "Shiboken::Conversions::registerConverterName(converter, \""
-            << flags->name() << "\");\n" // QMetaType
-            << "Shiboken::Conversions::registerConverterName(converter, \""
-            << flags->originalName() << "\");\n"; // Signals with flags
+            << registerConverterName(flags->name()) // QMetaType
+            << registerConverterName(flags->originalName()); // Signals with flags
 
     s << outdent << "}\n";
 }
@@ -4133,9 +4147,10 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const Abstrac
 QString CppGenerator::writeContainerConverterInitialization(TextStream &s,
                                                             const AbstractMetaType &type)
 {
-    QByteArray cppSignature = QMetaObject::normalizedSignature(type.cppSignature().toUtf8());
+    const auto cppSignature =
+        QString::fromUtf8(QMetaObject::normalizedSignature(type.cppSignature().toUtf8()));
     s << "// Register converter for type '" << cppSignature << "'.\n";
-    QString converter = converterObject(type);
+    const QString converter = converterObject(type);
     s << converter << " = Shiboken::Conversions::createConverter(";
 
     Q_ASSERT(type.typeEntry()->isContainer());
@@ -4151,19 +4166,17 @@ QString CppGenerator::writeContainerConverterInitialization(TextStream &s,
     const QString typeName = fixedCppTypeName(type);
     s << ", " << cppToPythonFunctionName(typeName, targetTypeName) << ");\n";
 
+    s << registerConverterName(cppSignature, converter);
+    if (usePySideExtensions() && cppSignature.startsWith("const "_L1)
+        && cppSignature.endsWith(u'&')) {
+        auto underlyingType = QStringView{cppSignature}.sliced(6, cppSignature.size() - 7);
+        s << registerConverterName(underlyingType, converter);
+    }
+
     for (const auto &conv : typeEntry->customConversion()->targetToNativeConversions()) {
         const QString &sourceTypeName = conv.sourceTypeName();
         QString toCpp = pythonToCppFunctionName(sourceTypeName, typeName);
         QString isConv = convertibleToCppFunctionName(sourceTypeName, typeName);
-        s << "Shiboken::Conversions::registerConverterName(" << converter
-            << ", \"" << cppSignature << "\");\n";
-        if (usePySideExtensions() && cppSignature.startsWith("const ")
-            && cppSignature.endsWith("&")) {
-            cppSignature.chop(1);
-            cppSignature.remove(0, sizeof("const ") / sizeof(char) - 1);
-            s << "Shiboken::Conversions::registerConverterName(" << converter
-                << ", \"" << cppSignature << "\");\n";
-        }
         writeAddPythonToCppConversion(s, converter, toCpp, isConv);
     }
     return converter;
@@ -6332,14 +6345,7 @@ bool CppGenerator::finishGeneration()
         if (!pte->referencesType())
             continue;
         TypeEntryCPtr referencedType = basicReferencedTypeEntry(pte);
-        QString converter = converterObject(referencedType);
-        QStringList cppSignature = pte->qualifiedCppName().split(u"::"_s, Qt::SkipEmptyParts);
-        while (!cppSignature.isEmpty()) {
-            QString signature = cppSignature.join(u"::"_s);
-            s << "Shiboken::Conversions::registerConverterName("
-                << converter << ", \"" << signature << "\");\n";
-            cppSignature.removeFirst();
-        }
+        registerConverterInScopes(s, pte->qualifiedCppName(), converterObject(referencedType));
     }
 
     s << '\n';
