@@ -289,7 +289,7 @@ if __name__ == "__main__":
         # run the cross compile script
         logging.info(f"Running Qt for Python cross-compile for platform {platform_data.plat_name}")
         qfp_ccompile_cmd = [sys.executable, "setup.py", "bdist_wheel", "--parallel=9",
-                            "--standalone", "--limited-api=yes",
+                            "--standalone",
                             f"--cmake-toolchain-file={str(qfp_toolchain.resolve())}",
                             f"--qt-host-path={qt_install_path}/gcc_64",
                             f"--plat-name=android_{platform_data.plat_name}",
