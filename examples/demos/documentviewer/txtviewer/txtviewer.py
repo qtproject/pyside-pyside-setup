@@ -28,7 +28,7 @@ class TxtViewer(AbstractViewer):
     def setupTxtUi(self):
         editMenu = self.addMenu("Edit")
         editToolBar = self.addToolBar("Edit")
-        cutIcon = QIcon.fromTheme("edit-cut",
+        cutIcon = QIcon.fromTheme(QIcon.ThemeIcon.EditCut,
                                   QIcon(":/demos/documentviewer/images/cut.png"))
         cutAct = QAction(cutIcon, "Cut", self)
         cutAct.setShortcuts(QKeySequence.Cut)
@@ -37,7 +37,7 @@ class TxtViewer(AbstractViewer):
         editMenu.addAction(cutAct)
         editToolBar.addAction(cutAct)
 
-        copyIcon = QIcon.fromTheme("edit-copy",
+        copyIcon = QIcon.fromTheme(QIcon.ThemeIcon.EditCopy,
                                    QIcon(":/demos/documentviewer/images/copy.png"))
         copyAct = QAction(copyIcon, "Copy", self)
         copyAct.setShortcuts(QKeySequence.Copy)
@@ -46,7 +46,7 @@ class TxtViewer(AbstractViewer):
         editMenu.addAction(copyAct)
         editToolBar.addAction(copyAct)
 
-        pasteIcon = QIcon.fromTheme("edit-paste",
+        pasteIcon = QIcon.fromTheme(QIcon.ThemeIcon.EditPaste,
                                     QIcon(":/demos/documentviewer/images/paste.png"))
         pasteAct = QAction(pasteIcon, "Paste", self)
         pasteAct.setShortcuts(QKeySequence.Paste)

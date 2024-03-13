@@ -184,13 +184,13 @@ class JsonViewer(AbstractViewer):
         menu = self.addMenu("Json")
         tb = self.addToolBar("Json Actions")
 
-        zoomInIcon = QIcon.fromTheme("zoom-in")
+        zoomInIcon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomIn)
         a = menu.addAction(zoomInIcon, "&+Expand all", self._tree.expandAll)
         tb.addAction(a)
         a.setPriority(QAction.LowPriority)
         a.setShortcut(QKeySequence.New)
 
-        zoomOutIcon = QIcon.fromTheme("zoom-out")
+        zoomOutIcon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomOut)
         a = menu.addAction(zoomOutIcon, "&-Collapse all", self._tree.collapseAll)
         tb.addAction(a)
         a.setPriority(QAction.LowPriority)

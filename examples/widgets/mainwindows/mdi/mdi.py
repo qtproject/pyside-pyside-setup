@@ -271,17 +271,17 @@ class MainWindow(QMainWindow):
 
     def create_actions(self):
 
-        icon = QIcon.fromTheme("document-new")
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.DocumentNew)
         self._new_act = QAction(icon, "&New", self,
                                 shortcut=QKeySequence.New, statusTip="Create a new file",
                                 triggered=self.new_file)
 
-        icon = QIcon.fromTheme("document-open")
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.DocumentOpen)
         self._open_act = QAction(icon, "&Open...", self,
                                  shortcut=QKeySequence.Open, statusTip="Open an existing file",
                                  triggered=self.open)
 
-        icon = QIcon.fromTheme("document-save")
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.DocumentSave)
         self._save_act = QAction(icon, "&Save", self,
                                  shortcut=QKeySequence.Save,
                                  statusTip="Save the document to disk", triggered=self.save)
@@ -291,23 +291,24 @@ class MainWindow(QMainWindow):
                                     statusTip="Save the document under a new name",
                                     triggered=self.save_as)
 
-        self._exit_act = QAction("E&xit", self, shortcut=QKeySequence.Quit,
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.ApplicationExit)
+        self._exit_act = QAction(icon, "E&xit", self, shortcut=QKeySequence.Quit,
                                  statusTip="Exit the application",
                                  triggered=QApplication.instance().closeAllWindows)
 
-        icon = QIcon.fromTheme("edit-cut")
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.EditCut)
         self._cut_act = QAction(icon, "Cu&t", self,
                                 shortcut=QKeySequence.Cut,
                                 statusTip="Cut the current selection's contents to the clipboard",
                                 triggered=self.cut)
 
-        icon = QIcon.fromTheme("edit-copy")
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.EditCopy)
         self._copy_act = QAction(icon, "&Copy", self,
                                  shortcut=QKeySequence.Copy,
                                  statusTip="Copy the current selection's contents to the clipboard",
                                  triggered=self.copy)
 
-        icon = QIcon.fromTheme("edit-paste")
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.EditPaste)
         self._paste_act = QAction(icon, "&Paste", self,
                                   shortcut=QKeySequence.Paste,
                                   statusTip="Paste the clipboard's contents into the current "
@@ -341,7 +342,8 @@ class MainWindow(QMainWindow):
         self._separator_act = QAction(self)
         self._separator_act.setSeparator(True)
 
-        self._about_act = QAction("&About", self,
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.HelpAbout)
+        self._about_act = QAction(icon, "&About", self,
                                   statusTip="Show the application's About box",
                                   triggered=self.about)
 

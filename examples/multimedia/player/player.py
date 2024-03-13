@@ -44,43 +44,43 @@ class MainWindow(QMainWindow):
         self.addToolBar(tool_bar)
 
         file_menu = self.menuBar().addMenu("&File")
-        icon = QIcon.fromTheme("document-open")
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.DocumentOpen)
         open_action = QAction(icon, "&Open...", self,
                               shortcut=QKeySequence.Open, triggered=self.open)
         file_menu.addAction(open_action)
         tool_bar.addAction(open_action)
-        icon = QIcon.fromTheme("application-exit")
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.ApplicationExit)
         exit_action = QAction(icon, "E&xit", self,
                               shortcut="Ctrl+Q", triggered=self.close)
         file_menu.addAction(exit_action)
 
         play_menu = self.menuBar().addMenu("&Play")
         style = self.style()
-        icon = QIcon.fromTheme("media-playback-start.png",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.MediaPlaybackStart,
                                style.standardIcon(QStyle.SP_MediaPlay))
         self._play_action = tool_bar.addAction(icon, "Play")
         self._play_action.triggered.connect(self._player.play)
         play_menu.addAction(self._play_action)
 
-        icon = QIcon.fromTheme("media-skip-backward-symbolic.svg",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.MediaSkipBackward,
                                style.standardIcon(QStyle.SP_MediaSkipBackward))
         self._previous_action = tool_bar.addAction(icon, "Previous")
         self._previous_action.triggered.connect(self.previous_clicked)
         play_menu.addAction(self._previous_action)
 
-        icon = QIcon.fromTheme("media-playback-pause.png",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.MediaPlaybackPause,
                                style.standardIcon(QStyle.SP_MediaPause))
         self._pause_action = tool_bar.addAction(icon, "Pause")
         self._pause_action.triggered.connect(self._player.pause)
         play_menu.addAction(self._pause_action)
 
-        icon = QIcon.fromTheme("media-skip-forward-symbolic.svg",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.MediaSkipForward,
                                style.standardIcon(QStyle.SP_MediaSkipForward))
         self._next_action = tool_bar.addAction(icon, "Next")
         self._next_action.triggered.connect(self.next_clicked)
         play_menu.addAction(self._next_action)
 
-        icon = QIcon.fromTheme("media-playback-stop.png",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.MediaPlaybackStop,
                                style.standardIcon(QStyle.SP_MediaStop))
         self._stop_action = tool_bar.addAction(icon, "Stop")
         self._stop_action.triggered.connect(self._ensure_stopped)
@@ -99,8 +99,9 @@ class MainWindow(QMainWindow):
         self._volume_slider.valueChanged.connect(self._audio_output.setVolume)
         tool_bar.addWidget(self._volume_slider)
 
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.HelpAbout)
         about_menu = self.menuBar().addMenu("&About")
-        about_qt_act = QAction("About &Qt", self, triggered=qApp.aboutQt)  # noqa: F821
+        about_qt_act = QAction(icon, "About &Qt", self, triggered=qApp.aboutQt)  # noqa: F821
         about_menu.addAction(about_qt_act)
 
         self._video_widget = QVideoWidget()

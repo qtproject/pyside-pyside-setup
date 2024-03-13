@@ -101,13 +101,14 @@ class TextEdit(QMainWindow):
         tb = self.addToolBar("File self.actions")
         menu = self.menuBar().addMenu("&File")
 
-        icon = QIcon.fromTheme("document-new", QIcon(RSRC_PATH + "/filenew.png"))
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.DocumentNew,
+                               QIcon(RSRC_PATH + "/filenew.png"))
         a = menu.addAction(icon, "&New", self.file_new)
         tb.addAction(a)
         a.setPriority(QAction.LowPriority)
         a.setShortcut(QKeySequence.New)
 
-        icon = QIcon.fromTheme("document-open",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.DocumentOpen,
                                QIcon(RSRC_PATH + "/fileopen.png"))
         a = menu.addAction(icon, "&Open...", self.file_open)
         a.setShortcut(QKeySequence.Open)
@@ -115,7 +116,7 @@ class TextEdit(QMainWindow):
 
         menu.addSeparator()
 
-        icon = QIcon.fromTheme("document-save",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.DocumentSave,
                                QIcon(RSRC_PATH + "/filesave.png"))
         self._action_save = menu.addAction(icon, "&Save", self.file_save)
         self._action_save.setShortcut(QKeySequence.Save)
@@ -126,7 +127,7 @@ class TextEdit(QMainWindow):
         a.setPriority(QAction.LowPriority)
         menu.addSeparator()
 
-        icon = QIcon.fromTheme("document-print",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.DocumentPrint,
                                QIcon(RSRC_PATH + "/fileprint.png"))
         a = menu.addAction(icon, "&Print...", self.file_print)
         a.setPriority(QAction.LowPriority)
@@ -151,32 +152,36 @@ class TextEdit(QMainWindow):
         tb = self.addToolBar("Edit self.actions")
         menu = self.menuBar().addMenu("&Edit")
 
-        icon = QIcon.fromTheme("edit-undo",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.EditUndo,
                                QIcon(RSRC_PATH + "/editundo.png"))
         self._action_undo = menu.addAction(icon, "&Undo", self._text_edit.undo)
         self._action_undo.setShortcut(QKeySequence.Undo)
         tb.addAction(self._action_undo)
 
-        icon = QIcon.fromTheme("edit-redo", QIcon(RSRC_PATH + "/editredo.png"))
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.EditRedo,
+                               QIcon(RSRC_PATH + "/editredo.png"))
         self._action_redo = menu.addAction(icon, "&Redo", self._text_edit.redo)
         self._action_redo.setPriority(QAction.LowPriority)
         self._action_redo.setShortcut(QKeySequence.Redo)
         tb.addAction(self._action_redo)
         menu.addSeparator()
 
-        icon = QIcon.fromTheme("edit-cut", QIcon(RSRC_PATH + "/editcut.png"))
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.EditCut,
+                               QIcon(RSRC_PATH + "/editcut.png"))
         self._action_cut = menu.addAction(icon, "Cu&t", self._text_edit.cut)
         self._action_cut.setPriority(QAction.LowPriority)
         self._action_cut.setShortcut(QKeySequence.Cut)
         tb.addAction(self._action_cut)
 
-        icon = QIcon.fromTheme("edit-copy", QIcon(RSRC_PATH + "/editcopy.png"))
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.EditCopy,
+                               QIcon(RSRC_PATH + "/editcopy.png"))
         self._action_copy = menu.addAction(icon, "&Copy", self._text_edit.copy)
         self._action_copy.setPriority(QAction.LowPriority)
         self._action_copy.setShortcut(QKeySequence.Copy)
         tb.addAction(self._action_copy)
 
-        icon = QIcon.fromTheme("edit-paste", QIcon(RSRC_PATH + "/editpaste.png"))
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.EditPaste,
+                               QIcon(RSRC_PATH + "/editpaste.png"))
         self._action_paste = menu.addAction(icon, "&Paste", self._text_edit.paste)
         self._action_paste.setPriority(QAction.LowPriority)
         self._action_paste.setShortcut(QKeySequence.Paste)
@@ -190,7 +195,7 @@ class TextEdit(QMainWindow):
         tb = self.addToolBar("Format self.actions")
         menu = self.menuBar().addMenu("F&ormat")
 
-        icon = QIcon.fromTheme("format-text-bold",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.FormatTextBold,
                                QIcon(RSRC_PATH + "/textbold.png"))
         self._action_text_bold = menu.addAction(icon, "&Bold", self.text_bold)
         self._action_text_bold.setShortcut(Qt.CTRL | Qt.Key_B)
@@ -201,7 +206,7 @@ class TextEdit(QMainWindow):
         tb.addAction(self._action_text_bold)
         self._action_text_bold.setCheckable(True)
 
-        icon = QIcon.fromTheme("format-text-italic",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.FormatTextItalic,
                                QIcon(RSRC_PATH + "/textitalic.png"))
         self._action_text_italic = menu.addAction(icon, "&Italic", self.text_italic)
         self._action_text_italic.setPriority(QAction.LowPriority)
@@ -212,7 +217,7 @@ class TextEdit(QMainWindow):
         tb.addAction(self._action_text_italic)
         self._action_text_italic.setCheckable(True)
 
-        icon = QIcon.fromTheme("format-text-underline",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.FormatTextUnderline,
                                QIcon(RSRC_PATH + "/textunder.png"))
         self._action_text_underline = menu.addAction(icon, "&Underline",
                                                      self.text_underline)
@@ -226,36 +231,36 @@ class TextEdit(QMainWindow):
 
         menu.addSeparator()
 
-        icon = QIcon.fromTheme("format-justify-left",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.FormatJustifyLeft,
                                QIcon(RSRC_PATH + "/textleft.png"))
         self._action_align_left = QAction(icon, "&Left", self)
         self._action_align_left.setShortcut(Qt.CTRL | Qt.Key_L)
         self._action_align_left.setCheckable(True)
         self._action_align_left.setPriority(QAction.LowPriority)
-        icon = QIcon.fromTheme("format-justify-center",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.FormatJustifyCenter,
                                QIcon(RSRC_PATH + "/textcenter.png"))
         self._action_align_center = QAction(icon, "C&enter", self)
         self._action_align_center.setShortcut(Qt.CTRL | Qt.Key_E)
         self._action_align_center.setCheckable(True)
         self._action_align_center.setPriority(QAction.LowPriority)
-        icon = QIcon.fromTheme("format-justify-right",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.FormatJustifyRight,
                                QIcon(RSRC_PATH + "/textright.png"))
         self._action_align_right = QAction(icon, "&Right", self)
         self._action_align_right.setShortcut(Qt.CTRL | Qt.Key_R)
         self._action_align_right.setCheckable(True)
         self._action_align_right.setPriority(QAction.LowPriority)
-        icon = QIcon.fromTheme("format-justify-fill",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.FormatJustifyFill,
                                QIcon(RSRC_PATH + "/textjustify.png"))
         self._action_align_justify = QAction(icon, "&Justify", self)
         self._action_align_justify.setShortcut(Qt.CTRL | Qt.Key_J)
         self._action_align_justify.setCheckable(True)
         self._action_align_justify.setPriority(QAction.LowPriority)
-        icon = QIcon.fromTheme("format-indent-more",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.FormatIndentMore,
                                QIcon(RSRC_PATH + "/format-indent-more.png"))
         self._action_indent_more = menu.addAction(icon, "&Indent", self.indent)
         self._action_indent_more.setShortcut(Qt.CTRL | Qt.Key_BracketRight)
         self._action_indent_more.setPriority(QAction.LowPriority)
-        icon = QIcon.fromTheme("format-indent-less",
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.FormatIndentLess,
                                QIcon(RSRC_PATH + "/format-indent-less.png"))
         self._action_indent_less = menu.addAction(icon, "&Unindent",
                                                   self.unindent)

@@ -62,13 +62,17 @@ class PdfViewer(AbstractViewer):
 
         actionZoomIn = self._toolBar.addAction("Zoom in")
         actionZoomIn.setToolTip("Increase zoom level")
-        actionZoomIn.setIcon(QIcon(":/demos/documentviewer/images/zoom-in.png"))
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomIn,
+                               QIcon(":/demos/documentviewer/images/zoom-in.png"))
+        actionZoomIn.setIcon(icon)
         self._toolBar.addAction(actionZoomIn)
         actionZoomIn.triggered.connect(self.onActionZoomInTriggered)
 
         actionZoomOut = self._toolBar.addAction("Zoom out")
         actionZoomOut.setToolTip("Decrease zoom level")
-        actionZoomOut.setIcon(QIcon(":/demos/documentviewer/images/zoom-out.png"))
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomIn,
+                               QIcon(":/demos/documentviewer/images/zoom-out.png"))
+        actionZoomOut.setIcon(icon)
         self._toolBar.addAction(actionZoomOut)
         actionZoomOut.triggered.connect(self.onActionZoomOutTriggered)
 

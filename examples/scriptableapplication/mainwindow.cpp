@@ -41,18 +41,18 @@ MainWindow::MainWindow()
     diagnosticAction->setShortcut(Qt::CTRL | Qt::Key_D);
     fileMenu->addAction(tr("&Invoke testFunction1()"),
                         this, &MainWindow::testFunction1);
-    const QIcon quitIcon = QIcon::fromTheme("application-exit"_L1);
+    const QIcon quitIcon = QIcon::fromTheme(QIcon::ThemeIcon::ApplicationExit);
     auto *quitAction = fileMenu->addAction(quitIcon, tr("&Quit"),
                                            qApp, &QCoreApplication::quit);
     quitAction->setShortcut(Qt::CTRL | Qt::Key_Q);
 
     auto *editMenu = menuBar()->addMenu(tr("&Edit"));
-    const QIcon clearIcon = QIcon::fromTheme("edit-clear"_L1);
+    const QIcon clearIcon = QIcon::fromTheme(QIcon::ThemeIcon::EditClear);
     auto *clearAction = editMenu->addAction(clearIcon, tr("&Clear"),
                                             m_scriptEdit, &QPlainTextEdit::clear);
 
     auto *helpMenu = menuBar()->addMenu(tr("&Help"));
-    const QIcon aboutIcon = QIcon::fromTheme("help-about"_L1);
+    const QIcon aboutIcon = QIcon::fromTheme(QIcon::ThemeIcon::HelpAbout);
     auto *aboutAction = helpMenu->addAction(aboutIcon, tr("&About Qt"),
                                             qApp, &QApplication::aboutQt);
 
