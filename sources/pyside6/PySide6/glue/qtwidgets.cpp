@@ -217,11 +217,21 @@ if (_widget) {
 #ifndef _QLAYOUT_HELP_FUNCTIONS_
 #define _QLAYOUT_HELP_FUNCTIONS_ // Guard for jumbo builds
 
+static const char msgInvalidParameterAdd[] =
+    "Invalid parameter None passed to addLayoutOwnership().";
+static const char msgInvalidParameterRemoval[] =
+    "Invalid parameter None passed to removeLayoutOwnership().";
+
 void addLayoutOwnership(QLayout *layout, QLayoutItem *item);
 void removeLayoutOwnership(QLayout *layout, QWidget *widget);
 
 inline void addLayoutOwnership(QLayout *layout, QWidget *widget)
 {
+    if (layout == nullptr || widget == nullptr) {
+        PyErr_SetString(PyExc_RuntimeError, msgInvalidParameterAdd);
+        return;
+    }
+
     //transfer ownership to parent widget
     QWidget *lw = layout->parentWidget();
     QWidget *pw = widget->parentWidget();
@@ -248,6 +258,11 @@ inline void addLayoutOwnership(QLayout *layout, QWidget *widget)
 
 inline void addLayoutOwnership(QLayout *layout, QLayout *other)
 {
+    if (layout == nullptr || other == nullptr) {
+        PyErr_SetString(PyExc_RuntimeError, msgInvalidParameterAdd);
+        return;
+    }
+
     //transfer all children widgets from other to layout parent widget
     QWidget *parent = layout->parentWidget();
     if (!parent) {
@@ -274,8 +289,11 @@ inline void addLayoutOwnership(QLayout *layout, QLayout *other)
 
 inline void addLayoutOwnership(QLayout *layout, QLayoutItem *item)
 {
-    if (!item)
+
+    if (layout == nullptr || item == nullptr) {
+        PyErr_SetString(PyExc_RuntimeError, msgInvalidParameterAdd);
         return;
+    }
 
     if (QWidget *w = item->widget()) {
         addLayoutOwnership(layout, w);
@@ -291,6 +309,11 @@ inline void addLayoutOwnership(QLayout *layout, QLayoutItem *item)
 
 static void removeWidgetFromLayout(QLayout *layout, QWidget *widget)
 {
+    if (layout == nullptr || widget == nullptr) {
+        PyErr_SetString(PyExc_RuntimeError, msgInvalidParameterRemoval);
+        return;
+    }
+
     if (QWidget *parent = widget->parentWidget()) {
         //give the ownership to parent
         Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QWidget *](parent));
@@ -308,9 +331,8 @@ static void removeWidgetFromLayout(QLayout *layout, QWidget *widget)
 
 inline void removeLayoutOwnership(QLayout *layout, QLayoutItem *item)
 {
-
-    if (item == nullptr) {
-        PyErr_Format(PyExc_RuntimeError, "Item for removal from layout is None, or invalid.");
+    if (layout == nullptr || item == nullptr) {
+        PyErr_SetString(PyExc_RuntimeError, msgInvalidParameterRemoval);
         return;
     }
 
@@ -329,8 +351,10 @@ inline void removeLayoutOwnership(QLayout *layout, QLayoutItem *item)
 
 inline void removeLayoutOwnership(QLayout *layout, QWidget *widget)
 {
-    if (!widget)
+    if (layout == nullptr || widget == nullptr) {
+        PyErr_SetString(PyExc_RuntimeError, msgInvalidParameterRemoval);
         return;
+    }
 
     for (int i = 0, i_max = layout->count(); i < i_max; ++i) {
         QLayoutItem *item = layout->itemAt(i);
@@ -347,9 +371,10 @@ inline void removeLayoutOwnership(QLayout *layout, QWidget *widget)
 %CPPSELF.setAlignment(%1);
 // @snippet qlayout-setalignment
 
-// @snippet addownership-0
-addLayoutOwnership(%CPPSELF, %0);
-// @snippet addownership-0
+// @snippet addownership-item-at
+if (%0 != nullptr)
+    addLayoutOwnership(%CPPSELF, %0);
+// @snippet addownership-item-at
 
 // @snippet addownership-1
 addLayoutOwnership(%CPPSELF, %1);
