@@ -459,6 +459,7 @@ def module_QtQml() -> ModuleData:
         "libQt6QmlCore",
         "libQt6QmlLocalStorage",
         "libQt6QmlModels",
+        "libQt6QmlNetwork",
         "libQt6QmlWorkerScript",
         "libQt6QmlXmlListModel",
         "libQt6QmlCompiler"
@@ -560,6 +561,7 @@ def module_QtQuick() -> ModuleData:
         "libQt6QuickTemplates2",
         "libQt6QuickTest",
         "libQt6QuickTimeline",
+        "libQt6QuickTimelineBlendTrees",
     ]
 
     # Adding GraphicalEffects files
@@ -575,7 +577,19 @@ def module_QtQuick() -> ModuleData:
 
 def module_QtQuickControls2() -> ModuleData:
     data = ModuleData("QuickControls2")
+    data.qtlib.append("libQt6QuickControls2FusionStyleImpl")
+    data.qtlib.append("libQt6QuickControls2Material")
+    data.qtlib.append("libQt6QuickControls2")
+    data.qtlib.append("libQt6QuickControls2BasicStyleImpl")
+    data.qtlib.append("libQt6QuickControls2Imagine")
+    data.qtlib.append("libQt6QuickControls2Fusion")
+    data.qtlib.append("libQt6QuickControls2Basic")
+    data.qtlib.append("libQt6QuickControls2ImagineStyleImpl")
+    data.qtlib.append("libQt6QuickControls2MaterialStyleImpl")
     data.qtlib.append("libQt6QuickControls2Impl")
+    data.qtlib.append("libQt6QuickControls2Universal")
+    data.qtlib.append("libQt6QuickControls2UniversalStyleImpl")
+
     data.metatypes.append("qt6quickcontrols2impl_relwithdebinfo_metatypes.json")
 
     return data
