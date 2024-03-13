@@ -2013,7 +2013,7 @@ Py_INCREF(callable);
     Shiboken::AutoDecRef locale(PyImport_ImportModule("locale"));
     Shiboken::AutoDecRef getLocale(PyObject_GetAttrString(locale, "getlocale"));
     Shiboken::AutoDecRef systemLocale(PyObject_CallObject(getLocale, nullptr));
-    Shiboken::AutoDecRef localeCode(PyTuple_GetItem(systemLocale, 0));
+    PyObject* localeCode = PyTuple_GetItem(systemLocale, 0);
     %RETURN_TYPE %0;
     if (localeCode != Py_None) {
         QString localeCodeStr = PySide::pyStringToQString(localeCode);
