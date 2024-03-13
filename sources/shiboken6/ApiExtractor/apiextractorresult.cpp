@@ -50,6 +50,11 @@ const InstantiatedSmartPointers &ApiExtractorResult::instantiatedSmartPointers()
     return m_instantiatedSmartPointers;
 }
 
+const QMultiHash<QString, QString> &ApiExtractorResult::typedefTargetToName() const
+{
+    return m_typedefTargetToName;
+}
+
 ApiExtractorFlags ApiExtractorResult::flags() const
 {
     return m_flags;

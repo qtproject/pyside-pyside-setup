@@ -80,6 +80,8 @@ public:
     void addInstantiation(const TypeInfo &i);
     void clearInstantiations();
 
+    bool isPlain() const; // neither const,volatile, no indirections/references, array
+
     bool isStdType() const;
 
     std::pair<qsizetype, qsizetype>

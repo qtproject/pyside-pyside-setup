@@ -8,11 +8,14 @@
 
 #include <QtWidgets/QApplication>
 
+#include <QtCore/QList>
 #include <QtCore/QObject>
 #include <QtCore/QMetaType>
 #include <QtCore/QVariant>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
+
+using IntList = QList<int>;
 
 class IntValue
 {
@@ -44,6 +47,7 @@ public:
     void emitSignalWithDefaultValue_bool();
 
     void emitSignalWithTypedefValue(int value);
+    void emitSignalWithContainerTypedefValue(const IntList &il);
 
     void emitFlagsSignal(Qt::Alignment alignment);
 
@@ -59,6 +63,7 @@ signals:
     void childrenChanged(const QList<QObject*>&);
     void signalWithDefaultValue(bool value = false);
     void signalWithTypedefValue(TypedefValue value);
+    void signalWithContainerTypedefValue(const IntList &il);
     void flagsSignal(Qt::Alignment alignment);
 
 private:

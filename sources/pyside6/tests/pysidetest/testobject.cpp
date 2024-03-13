@@ -30,6 +30,11 @@ void TestObject::emitSignalWithTypedefValue(int value)
     emit signalWithTypedefValue(TypedefValue(value));
 }
 
+void TestObject::emitSignalWithContainerTypedefValue(const IntList &il)
+{
+    emit signalWithContainerTypedefValue(il);
+}
+
 void TestObject::emitFlagsSignal(Qt::Alignment alignment)
 {
     emit flagsSignal(alignment);

@@ -4145,7 +4145,8 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const Abstrac
 }
 
 QString CppGenerator::writeContainerConverterInitialization(TextStream &s,
-                                                            const AbstractMetaType &type)
+                                                            const AbstractMetaType &type,
+                                                            const ApiExtractorResult &api)
 {
     const auto cppSignature =
         QString::fromUtf8(QMetaObject::normalizedSignature(type.cppSignature().toUtf8()));
@@ -4179,6 +4180,17 @@ QString CppGenerator::writeContainerConverterInitialization(TextStream &s,
         QString isConv = convertibleToCppFunctionName(sourceTypeName, typeName);
         writeAddPythonToCppConversion(s, converter, toCpp, isConv);
     }
+
+    auto typedefItPair = api.typedefTargetToName().equal_range(type.cppSignature());
+    if (typedefItPair.first != typedefItPair.second) {
+        auto *typeDb = TypeDatabase::instance();
+        s << "// Register converters for type aliases of " << cppSignature << "'.\n";
+        for (auto it = typedefItPair.first; it != typedefItPair.second; ++it) {
+            if (!typeDb->findType(it.value()))
+                s << registerConverterName(it.value(), converter);
+        }
+    }
+
     return converter;
 }
 
@@ -6300,7 +6312,7 @@ bool CppGenerator::finishGeneration()
     if (!containers.isEmpty()) {
         s << '\n';
         for (const AbstractMetaType &container : containers) {
-            const QString converterObj = writeContainerConverterInitialization(s, container);
+            const QString converterObj = writeContainerConverterInitialization(s, container, api());
             const auto it = opaqueContainers.constFind(container);
             if (it !=  opaqueContainers.constEnd()) {
                 writeSetPythonToCppPointerConversion(s, converterObj,

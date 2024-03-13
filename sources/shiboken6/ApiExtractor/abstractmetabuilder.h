@@ -54,6 +54,7 @@ public:
     const AbstractMetaFunctionCList &globalFunctions() const;
     const AbstractMetaEnumList &globalEnums() const;
     const QHash<TypeEntryCPtr, AbstractMetaEnum> &typeEntryToEnumsHash() const;
+    const QMultiHash<QString, QString> &typedefTargetToName() const;
 
     bool build(const QByteArrayList &arguments,
                ApiExtractorFlags apiExtractorFlags = {},

@@ -421,6 +421,7 @@ std::optional<ApiExtractorResult> ApiExtractor::run(ApiExtractorFlags flags)
     result.m_globalEnums = d->m_builder->globalEnums();
     result.m_enums = d->m_builder->typeEntryToEnumsHash();
     result.m_flags = flags;
+    result.m_typedefTargetToName = d->m_builder->typedefTargetToName();
     qSwap(result.m_instantiatedContainers, collectContext.instantiatedContainers);
     qSwap(result.m_instantiatedSmartPointers, collectContext.instantiatedSmartPointers);
     return result;

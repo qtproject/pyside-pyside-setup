@@ -266,6 +266,12 @@ void TypeInfo::clearInstantiations()
         d->m_instantiations.clear();
 }
 
+bool TypeInfo::isPlain() const
+{
+    return d->m_constant == 0 && d->m_volatile == 0 && d->m_referenceType == NoReference
+        &&  d->m_indirections.isEmpty() && d->m_arrayElements.isEmpty();
+}
+
 TypeInfo TypeInfo::resolveType(TypeInfo const &__type, const ScopeModelItem &__scope)
 {
     CodeModel *__model = __scope->model();

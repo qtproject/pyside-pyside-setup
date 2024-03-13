@@ -10,6 +10,7 @@
 #include "typesystem_typedefs.h"
 
 #include <QtCore/QHash>
+#include <QtCore/QMultiHash>
 
 #include <optional>
 
@@ -43,6 +44,8 @@ public:
     const AbstractMetaTypeList &instantiatedContainers() const;
     const InstantiatedSmartPointers &instantiatedSmartPointers() const;
 
+    const QMultiHash<QString, QString> &typedefTargetToName() const;
+
     // Query functions for the generators
     std::optional<AbstractMetaEnum>
         findAbstractMetaEnum(TypeEntryCPtr typeEntry) const;
@@ -66,6 +69,7 @@ private:
     AbstractMetaTypeList m_instantiatedContainers;
     InstantiatedSmartPointers m_instantiatedSmartPointers;
     QHash<TypeEntryCPtr, AbstractMetaEnum> m_enums;
+    QMultiHash<QString, QString> m_typedefTargetToName;
     ApiExtractorFlags m_flags;
 
     friend class ApiExtractor;

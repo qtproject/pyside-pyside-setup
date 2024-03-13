@@ -17,6 +17,7 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QList>
 #include <QtCore/QMap>
+#include <QtCore/QMultiHash>
 #include <QtCore/QSet>
 
 #include <optional>
@@ -77,6 +78,9 @@ public:
     AbstractMetaClassPtr traverseTypeDef(const FileModelItem &dom,
                                        const TypeDefModelItem &typeDef,
                                        const AbstractMetaClassPtr &currentClass);
+    AbstractMetaClassPtr traverseTypeDefHelper(const FileModelItem &dom,
+                                               const TypeDefModelItem &typeDef,
+                                               const AbstractMetaClassPtr &currentClass);
     void traverseTypesystemTypedefs();
     AbstractMetaClassPtr traverseClass(const FileModelItem &dom,
                                      const ClassModelItem &item,
@@ -240,6 +244,7 @@ public:
     QFileInfoList m_globalHeaders;
     QStringList m_headerPaths;
     mutable QHash<QString, Include> m_resolveIncludeHash;
+    QMultiHash<QString, QString> m_typedefTargetToName;
     QList<TypeClassEntry> m_typeSystemTypeDefs; // look up metatype->class for type system typedefs
     ApiExtractorFlags m_apiExtractorFlags;
     bool m_skipDeprecated = false;

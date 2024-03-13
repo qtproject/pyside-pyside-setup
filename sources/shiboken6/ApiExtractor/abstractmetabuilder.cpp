@@ -161,6 +161,11 @@ const QHash<TypeEntryCPtr, AbstractMetaEnum> &AbstractMetaBuilder::typeEntryToEn
     return d->m_enums;
 }
 
+const QMultiHash<QString, QString> &AbstractMetaBuilder::typedefTargetToName() const
+{
+    return d->m_typedefTargetToName;
+}
+
 void AbstractMetaBuilderPrivate::checkFunctionModifications() const
 {
     const auto &entries = TypeDatabase::instance()->entries();
@@ -963,9 +968,31 @@ std::optional<AbstractMetaEnum>
     return metaEnum;
 }
 
-AbstractMetaClassPtr AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelItem &,
-                                                               const TypeDefModelItem &typeDef,
-                                                               const AbstractMetaClassPtr &currentClass)
+AbstractMetaClassPtr
+    AbstractMetaBuilderPrivate::traverseTypeDef(const FileModelItem &dom,
+                                                const TypeDefModelItem &typeDef,
+                                                const AbstractMetaClassPtr &currentClass)
+{
+    auto result = traverseTypeDefHelper(dom, typeDef, currentClass);
+    if (!result && typeDef->type().isPlain()) {
+        const auto &type = typeDef->type();
+        QString fullName;
+        if (currentClass)
+            fullName += currentClass->qualifiedCppName() + "::"_L1;
+        fullName += typeDef->name();
+        QString targetName = typeDef->type().toString();
+        m_typedefTargetToName.insert(targetName, fullName);
+        const QByteArray normalized = QMetaObject::normalizedType(targetName.toUtf8().constData());
+        if (targetName != QLatin1StringView(normalized))
+            m_typedefTargetToName.insert(QString::fromUtf8(normalized), fullName);
+    }
+    return result;
+}
+
+AbstractMetaClassPtr
+    AbstractMetaBuilderPrivate::traverseTypeDefHelper(const FileModelItem &,
+                                                      const TypeDefModelItem &typeDef,
+                                                      const AbstractMetaClassPtr &currentClass)
 {
     TypeDatabase *types = TypeDatabase::instance();
     QString className = stripTemplateArgs(typeDef->name());

@@ -460,7 +460,8 @@ private:
                                                       const CustomConversionPtr &customConversion);
     static void writeEnumConverterInitialization(TextStream &s, const AbstractMetaEnum &metaEnum);
     static QString writeContainerConverterInitialization(TextStream &s,
-                                                         const AbstractMetaType &type);
+                                                         const AbstractMetaType &type,
+                                                         const ApiExtractorResult &api);
     void writeSmartPointerConverterInitialization(TextStream &s, const AbstractMetaType &ype) const;
     static void writeExtendedConverterInitialization(TextStream &s,
                                                      const TypeEntryCPtr &externalType,
