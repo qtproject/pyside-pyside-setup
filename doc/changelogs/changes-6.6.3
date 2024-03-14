@@ -1,0 +1,60 @@
+Qt for Python 6.6.3 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - pyside6-project now also builds translation (.qm) files.
+ - [PYSIDE-769]  QtAsyncio: Fix a missing attribute error on Windows. Fix
+ - [PYSIDE-2641] QtAsyncio.run() not returning the result of a coroutine. It
+                 is now possible to disable the signal handler for SIGINT by
+                 passing a parameter to run(). The loop policy is reset after
+                 run() finishes.
+ - [PYSIDE-1112] Documentation: The list of tools has been updated.
+ - [PYSIDE-1112] Documentation: A page on the pyside6-project tool
+                 has been added.
+ - [PYSIDE-1955] Type hints: Add support for classmethods
+ - [PYSIDE-2206] An exit crash of the audiooutput example has been fixed.
+ - [PYSIDE-2263] Type hints: Support for class attributes has been added.
+ - [PYSIDE-2468] Documentation on the PySide6 Permission API has been added.
+ - [PYSIDE-2590] Some fixes have been made be able to cope with namespaced Qt
+                 builds.
+ - [PYSIDE-2599] The conversion of QVariant<->QMatrix<n>x<m> has been fixed.
+ - [PYSIDE-2603] Documentation: A broken link to the widget styling tutorial
+                 has been fixed.
+ - [PYSIDE-2610] Inheritance from QAbstractTextureImage/
+                 QTextureImageDataGenerator has been fixed.
+ - [PYSIDE-2612] Plain CMake builds with Limited API on Windows have been
+                 fixed.
+ - [PYSIDE-2613] Connecting to signals with QFlags<> arguments has been fixed.
+ - [PYSIDE-2627] A regression breaking calling Signal.connect() with
+                 QObject-derived callables has been fixed.
+ - [PYSIDE-2628] A crash using struct.unpack() on a QByteArray with
+                 Limited API has been fixed.
+ - [PYSIDE-2638] A crash when adding None to a QLayout has been fixed.
+ - [PYSIDE-2639] macOS: A segmentation fault in QLocale.system() has been
+                 fixed.
+ - [PYSIDE-2640] pyside6-qml now uses a QQuickView when the rootobject is a
+                 QQuickItem.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-2505] Command line option parsing has been improved to skip empty
+                 tokens when in include paths.
+ - [PYSIDE-2619] An ODR violation in shibobken code has been fixed, enabling
+                 LTO.
