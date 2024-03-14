@@ -16,7 +16,7 @@ from typing import List, Set
 from PySide6.QtCore import QCoreApplication, Qt, QLibraryInfo, QUrl, SignalInstance
 from PySide6.QtGui import QGuiApplication, QSurfaceFormat
 from PySide6.QtQml import QQmlApplicationEngine, QQmlComponent
-from PySide6.QtQuick import QQuickView, QQuickWindow
+from PySide6.QtQuick import QQuickView, QQuickItem
 from PySide6.QtWidgets import QApplication
 
 
@@ -227,7 +227,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     qquick_view = False
-    if isinstance(rootObjects[0], QQuickWindow) and qquick_present:
+    if isinstance(rootObjects[0], QQuickItem) and qquick_present:
         logging.info("qml: loading with QQuickView")
         viewer = QQuickView()
         viewer.setSource(qml_file)
