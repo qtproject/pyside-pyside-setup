@@ -76,7 +76,7 @@ class QAsyncioEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
 
     def get_event_loop(self) -> asyncio.AbstractEventLoop:
         if self._event_loop is None:
-            self._event_loop = QAsyncioEventLoop(self._application)
+            self._event_loop = QAsyncioEventLoop(self._application, quit_qapp=self._quit_qapp)
         return self._event_loop
 
     def set_event_loop(self, loop: typing.Optional[asyncio.AbstractEventLoop]) -> None:
@@ -190,6 +190,7 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
     def _about_to_quit_cb(self):
         if not self._quit_from_inside:
             self._quit_from_outside = True
+            self.close()
 
     def stop(self) -> None:
         if self._future_to_complete is not None:
@@ -208,14 +209,12 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
         return self._closed
 
     def close(self) -> None:
-        if self.is_running():
+        if self.is_running() and not self._quit_from_outside:
             raise RuntimeError("Cannot close a running event loop")
         if self.is_closed():
             return
         if self._default_executor is not None:
             self._default_executor.shutdown(wait=False)
-        if self._quit_qapp:
-            self._application.shutdown()
         self._closed = True
 
     async def shutdown_asyncgens(self) -> None:
@@ -275,6 +274,8 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
     def call_soon_threadsafe(self, callback: typing.Callable, *args: typing.Any,
                              context:
                              typing.Optional[contextvars.Context] = None) -> asyncio.Handle:
+        if self.is_closed():
+            raise RuntimeError("Event loop is closed")
         if context is None:
             context = contextvars.copy_context()
         return self._call_soon_impl(callback, *args, context=context, is_threadsafe=True)
@@ -299,8 +300,6 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
                       is_threadsafe: typing.Optional[bool] = False) -> asyncio.TimerHandle:
         if not isinstance(when, (int, float)):
             raise TypeError("when must be an int or float")
-        if self.is_closed():
-            raise RuntimeError("Event loop is closed")
         return QAsyncioTimerHandle(when, callback, args, self, context, is_threadsafe=is_threadsafe)
 
     def call_at(self, when: typing.Union[int, float],
@@ -320,8 +319,6 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
                     coro: typing.Union[collections.abc.Generator, collections.abc.Coroutine],
                     *, name: typing.Optional[str] = None,
                     context: typing.Optional[contextvars.Context] = None) -> tasks.QAsyncioTask:
-        if self.is_closed():
-            raise RuntimeError("Event loop is closed")
         if self._task_factory is None:
             task = tasks.QAsyncioTask(coro, loop=self, name=name, context=context)
         else:
