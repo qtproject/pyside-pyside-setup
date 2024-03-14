@@ -160,6 +160,14 @@ QML Development
         to compile QML to bytecode at compile time for bundling inside the
         binary.
 
+    .. grid-item-card:: ``pyside6-qml``
+        :link: qml-chapter6-plugins-example
+        :link-type: ref
+
+        to enable quick prototyping with QML files. This tool mimics the capabilities of Qt's
+        ``qml`` runtime utility by directly invoking QQmlEngine/QQuickView. For usage, see
+        :ref:`qml-chapter6-plugins-example`.
+
 Translations
 ~~~~~~~~~~~~
 
