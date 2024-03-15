@@ -55,8 +55,11 @@ LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct)
     auto startPos = dotPos + 1;
     AutoDecRef modName(String::fromCppStringView(names.substr(0, dotPos)));
     auto *modOrType = PyDict_GetItem(sysModules, modName);
-    if (!modOrType)
-        modOrType = PyImport_Import(modName);
+    if (modOrType == nullptr) {
+        PyErr_Format(PyExc_SystemError, "Module %s should already be in sys.modules",
+                                        PyModule_GetName(modOrType));
+        return nullptr;
+    }
 
     do {
         dotPos = names.find('.', startPos);
@@ -78,6 +81,7 @@ static PyTypeObject *incarnateType(PyObject *module, const char *name,
     auto funcIter = nameToFunc.find(name);
     if (funcIter == nameToFunc.end()) {
         // attribute does really not exist.
+        PyErr_SetNone(PyExc_AttributeError);
         return nullptr;
     }
     // - call this function that returns a PyTypeObject
@@ -137,31 +141,43 @@ void resolveLazyClasses(PyObject *module)
     }
 }
 
-// PYSIDE-2404: Use module getattr to do on-demand initialization.
-static PyObject *_module_getattr_template(PyObject * /* self */, PyObject *args)
-{
-    // An attribute was not found. Look it up in the shadow dict, resolve it
-    // and put it into the module dict afterwards.
-    PyObject *module{};
-    PyObject *attrName{};
-    if (!PyArg_ParseTuple(args, "OO", &module, &attrName))
-        return nullptr;
+// PYSIDE-2404: Override the gettattr function of modules.
+static getattrofunc origModuleGetattro{};
 
+// PYSIDE-2404: Use the patched module getattr to do on-demand initialization.
+//              This modifies _all_ modules but should have no impact.
+static PyObject *PyModule_lazyGetAttro(PyObject *module, PyObject *name)
+{
+    // - check if the attribute is present and return it.
+    auto *attr = PyObject_GenericGetAttr(module, name);
+    // - we handle AttributeError, only.
+    if (!(attr == nullptr && PyErr_ExceptionMatches(PyExc_AttributeError)))
+        return attr;
+
+    PyErr_Clear();
     // - locate the module in the moduleTofuncs mapping
     auto tableIter = moduleToFuncs.find(module);
-    assert(tableIter != moduleToFuncs.end());
-    // - locate the name and retrieve the generating function
-    const char *attrNameStr = Shiboken::String::toCString(attrName);
-    auto &nameToFunc = tableIter->second;
+    // - if this is not our module, use the original
+    if (tableIter == moduleToFuncs.end())
+        return origModuleGetattro(module, name);
 
+    // - locate the name and retrieve the generating function
+    const char *attrNameStr = Shiboken::String::toCString(name);
+    auto &nameToFunc = tableIter->second;
+    // - create the real type (incarnateType checks this)
     auto *type = incarnateType(module, attrNameStr, nameToFunc);
     auto *ret = reinterpret_cast<PyObject *>(type);
-    if (ret == nullptr) // attribute does really not exist. Should not happen.
-        PyErr_SetNone(PyExc_AttributeError);
+    // - if attribute does really not exist use the original
+    if (ret == nullptr && PyErr_ExceptionMatches(PyExc_AttributeError)) {
+        PyErr_Clear();
+        return origModuleGetattro(module, name);
+    }
+
     return ret;
 }
 
 // PYSIDE-2404: Supply a new module dir for not yet visible entries.
+//              This modification is only for "our" modules.
 static PyObject *_module_dir_template(PyObject * /* self */, PyObject *args)
 {
     static PyObject *const _dict = Shiboken::String::createStaticString("__dict__");
@@ -184,8 +200,7 @@ static PyObject *_module_dir_template(PyObject * /* self */, PyObject *args)
     return ret;
 }
 
-PyMethodDef module_methods[] = {
-    {"__getattr__", (PyCFunction)_module_getattr_template, METH_VARARGS, nullptr},
+static PyMethodDef module_methods[] = {
     {"__dir__", (PyCFunction)_module_dir_template, METH_VARARGS, nullptr},
     {nullptr, nullptr, 0, nullptr}
 };
@@ -281,6 +296,9 @@ void AddTypeCreationFunction(PyObject *module,
                              const char *name,
                              TypeCreationFunction func)
 {
+    static const char *flag = getenv("PYSIDE6_OPTION_LAZY");
+    static const int value = flag != nullptr ? std::atoi(flag) : 1;
+
     // - locate the module in the moduleTofuncs mapping
     auto tableIter = moduleToFuncs.find(module);
     assert(tableIter != moduleToFuncs.end());
@@ -301,8 +319,6 @@ void AddTypeCreationFunction(PyObject *module,
     //   3  - lazy loading for any module.
     //
     // By default we lazy load all known modules (option = 1).
-    const auto *flag = getenv("PYSIDE6_OPTION_LAZY");
-    const int value = flag != nullptr ? std::atoi(flag) : 1;
 
     if (value == 0                                  // completely disabled
         || canNotLazyLoad(module)                   // for some reason we cannot lazy load
@@ -398,40 +414,21 @@ static PyMethodDef lazy_methods[] = {
     {nullptr, nullptr, 0, nullptr}
 };
 
-// PYSIDE-2404: Nuitka is stealing our `__getattr__` entry from the
-//              module dicts. Until we remove this vulnerability from
-//              our modules, we disable Lazy Init when Nuitka is present.
-static bool isNuitkaPresent()
-{
-    static PyObject *const sysModules = PyImport_GetModuleDict();
-    static PyObject *const compiled = Shiboken::String::createStaticString("__compiled__");
-
-    PyObject *key{}, *value{};
-    Py_ssize_t pos = 0;
-    while (PyDict_Next(sysModules, &pos, &key, &value)) {
-        if (PyObject_HasAttr(value, compiled))
-            return true;
-    }
-    return false;
-}
-
 PyObject *create(const char * /* modName */, void *moduleData)
 {
+    static auto *sysModules = PyImport_GetModuleDict();
     static auto *builtins = PyEval_GetBuiltins();
     static auto *partial = Pep_GetPartialFunction();
     static bool lazy_init{};
-    static bool nuitkaPresent = isNuitkaPresent();
 
     Shiboken::init();
     auto *module = PyModule_Create(reinterpret_cast<PyModuleDef *>(moduleData));
 
-    // Setup of a getattr function for "missing" classes and a dir replacement.
-    for (int idx = 0; module_methods[idx].ml_name != nullptr; ++idx) {
-        auto *pyFuncPlus = PyCFunction_NewEx(&module_methods[idx], nullptr, nullptr);
-        // Turn this function into a bound object, so we have access to the module.
-        auto *pyFunc = PyObject_CallFunctionObjArgs(partial, pyFuncPlus, module, nullptr);
-        PyModule_AddObject(module, module_methods[idx].ml_name, pyFunc);  // steals reference
-    }
+    // Setup of a dir function for "missing" classes.
+    auto *moduleDirTemplate = PyCFunction_NewEx(module_methods, nullptr, nullptr);
+    // Turn this function into a bound object, so we have access to the module.
+    auto *moduleDir = PyObject_CallFunctionObjArgs(partial, moduleDirTemplate, module, nullptr);
+    PyModule_AddObject(module, module_methods->ml_name, moduleDir);  // steals reference
     // Insert an initial empty table for the module.
     NameToTypeFunctionMap empty;
     moduleToFuncs.insert(std::make_pair(module, empty));
@@ -440,18 +437,24 @@ PyObject *create(const char * /* modName */, void *moduleData)
     if (isImportStar(module))
         dontLazyLoad.insert(PyModule_GetName(module));
 
-    // For now, we also need to disable Lazy Init when Nuitka is there.
-    if (nuitkaPresent)
-        dontLazyLoad.insert(PyModule_GetName(module));
-
-    // Also add the lazy import redirection.
     if (!lazy_init) {
+        // Install the getattr patch.
+        origModuleGetattro = PyModule_Type.tp_getattro;
+        PyModule_Type.tp_getattro = PyModule_lazyGetAttro;
+        // Add the lazy import redirection.
         origImportFunc = PyDict_GetItemString(builtins, "__import__");
-        // The single function to be called.
         auto *func = PyCFunction_NewEx(lazy_methods, nullptr, nullptr);
         PyDict_SetItemString(builtins, "__import__", func);
+        // Everything is set.
         lazy_init = true;
     }
+    // PYSIDE-2404: Nuitka inserts some additional code in standalone mode
+    //              in an invisible virtual module (i.e. `QtCore-postLoad`)
+    //              that gets imported before the running import can call
+    //              `_PyImport_FixupExtensionObject` which does the insertion
+    //              into `sys.modules`. This can cause a race condition.
+    // Insert the module early into the module dict to prevend recursion.
+    PyDict_SetItemString(sysModules, PyModule_GetName(module), module);
     return module;
 }
 
