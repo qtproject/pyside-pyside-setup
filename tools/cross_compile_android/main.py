@@ -86,7 +86,8 @@ if __name__ == "__main__":
 
     parser.add_argument("-v", "--verbose", help="run in verbose mode", action="store_const",
                         dest="loglevel", const=logging.INFO)
-    parser.add_argument("--api-level", type=str, default="33", help="Android API level to use")
+    parser.add_argument("--api-level", type=str, default="26",
+                        help="Minimum Android API level to use")
     parser.add_argument("--ndk-path", type=str, help="Path to Android NDK (Preferred r25c)")
     # sdk path is needed to compile all the Qt Java Acitivity files into Qt6AndroidBindings.jar
     parser.add_argument("--sdk-path", type=str, help="Path to Android SDK")
@@ -184,8 +185,8 @@ if __name__ == "__main__":
             platform_data = PlatformData("x86_64", api_level, "x86_64", "x86_64", "x86-64", "64")
 
         # python path is valid, if Python for android installation exists in python_path
-        python_path = (pyside6_deploy_cache / f"Python-{platform_data.plat_name}-linux-android"
-                       / "_install")
+        python_path = (pyside6_deploy_cache
+                       / f"Python-{platform_data.plat_name}-linux-android" / "_install")
         valid_python_path = python_path.exists()
         if Path(python_path).exists():
             expected_dirs = ["lib", "include"]
@@ -214,6 +215,10 @@ if __name__ == "__main__":
                 )
 
             if not python_ccompile_script.exists():
+                host_system_config_name = run_command("./config.guess", cwd=cpython_dir,
+                                                      dry_run=dry_run, show_stdout=True,
+                                                      capture_stdout=True).strip()
+
                 # use jinja2 to create cross_compile.sh script
                 template = environment.get_template("cross_compile.tmpl.sh")
                 content = template.render(
@@ -222,7 +227,9 @@ if __name__ == "__main__":
                     api_level=platform_data.api_level,
                     android_py_install_path_prefix=pyside6_deploy_cache,
                     host_python_path=sys.executable,
-                    python_version=PYTHON_VERSION
+                    python_version=PYTHON_VERSION,
+                    host_system_name=host_system_config_name,
+                    host_platform_name=sys.platform
                 )
 
                 logging.info(f"Writing Python cross compile script into {python_ccompile_script}")
@@ -280,15 +287,22 @@ if __name__ == "__main__":
             # give run permission to cross compile script
             qfp_toolchain.chmod(qfp_toolchain.stat().st_mode | stat.S_IEXEC)
 
+        if sys.platform == "linux":
+            host_qt_install_suffix = "gcc_64"
+        elif sys.platform == "darwin":
+            host_qt_install_suffix = "macos"
+        else:
+            raise RuntimeError("Qt for Python cross compilation not supported on this platform")
+
         # run the cross compile script
         logging.info(f"Running Qt for Python cross-compile for platform {platform_data.plat_name}")
         qfp_ccompile_cmd = [sys.executable, "setup.py", "bdist_wheel", "--parallel=9",
                             "--standalone",
                             f"--cmake-toolchain-file={str(qfp_toolchain.resolve())}",
-                            f"--qt-host-path={qt_install_path}/gcc_64",
+                            f"--qt-host-path={qt_install_path}/{host_qt_install_suffix}",
                             f"--plat-name=android_{platform_data.plat_name}",
                             f"--python-target-path={python_path}",
                             (f"--qt-target-path={qt_install_path}/"
-                                f"android_{platform_data.qt_plat_name}"),
+                             f"android_{platform_data.qt_plat_name}"),
                             "--no-qt-tools"]
         run_command(qfp_ccompile_cmd, cwd=pyside_setup_dir, dry_run=dry_run, show_stdout=True)
