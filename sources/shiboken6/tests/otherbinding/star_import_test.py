@@ -24,18 +24,20 @@ other_loaded = 1 if sys.modules.get(OTHER_NAME) else 0
 
 from minimal import *       # noqa: F403
 
+shiboken_loaded += 2 if sys.modules.get(SHIBOKEN_NAME) else 0
 minimal_loaded += 2 if sys.modules.get(MINIMAL_NAME) else 0
 other_loaded += 2 if sys.modules.get(OTHER_NAME) else 0
 
 from other import Number    # noqa: F403
 from other import *         # noqa: F403
 
+shiboken_loaded += 4 if sys.modules.get(SHIBOKEN_NAME) else 0
 minimal_loaded += 4 if sys.modules.get(MINIMAL_NAME) else 0
 other_loaded = +4 if sys.modules.get(OTHER_NAME) else 0
 
 import shiboken6.Shiboken   # noqa: F401 F403
 
-shiboken_loaded = 8 if sys.modules.get(SHIBOKEN_NAME) else 0
+shiboken_loaded += 8 if sys.modules.get(SHIBOKEN_NAME) else 0
 
 
 class ValTest(unittest.TestCase):
@@ -87,9 +89,10 @@ class StarImportTest(unittest.TestCase):
     """
 
     def testStar(self):
-        self.assertEqual(shiboken_loaded, 8)
-        self.assertEqual(minimal_loaded, 6)
         self.assertEqual(other_loaded, 4)
+        self.assertEqual(minimal_loaded, 6)
+        self.assertEqual(shiboken_loaded, 14)
+        # Interesting effect: Did not expect that shiboken is loaded at all.
 
 
 if __name__ == '__main__':
