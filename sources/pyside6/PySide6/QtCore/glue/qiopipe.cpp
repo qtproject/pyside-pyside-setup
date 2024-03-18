@@ -5,6 +5,7 @@
 
 #include <QtCore/private/qobject_p.h>
 #include <QtCore/qdebug.h>
+#include <QtCore/qiodevice.h>
 #include <QtCore/qpointer.h>
 
 #include <memory>
