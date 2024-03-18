@@ -20,7 +20,7 @@ import zipfile
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 from dataclasses import dataclass
-from enum import Enum
+from enum import IntEnum, Enum
 from pathlib import Path
 from textwrap import dedent
 
@@ -28,6 +28,12 @@ from textwrap import dedent
 class Format(Enum):
     RST = 0
     MD = 1
+
+
+class ModuleType(IntEnum):
+    ESSENTIALS = 0
+    ADDONS = 1
+    M2M = 2
 
 
 SUFFIXES = {Format.RST: "rst", Format.MD: "md"}
@@ -98,6 +104,87 @@ def add_indent(s, level):
 def check_img_ext(i):
     """Check whether path is an image."""
     return i.suffix in IMAGE_SUFFIXES
+
+
+@dataclass
+class ModuleDescription:
+    """Specifies a sort key and type for a Qt module."""
+    sort_key: int = 0
+    module_type: ModuleType = ModuleType.ESSENTIALS
+    description: str = ''
+
+
+MODULE_DESCRIPTIONS = {
+    "async": ModuleDescription(16, ModuleType.ESSENTIALS, ''),
+    "corelib": ModuleDescription(15, ModuleType.ESSENTIALS, ''),
+    "dbus": ModuleDescription(22, ModuleType.ESSENTIALS, ''),
+    "designer": ModuleDescription(11, ModuleType.ESSENTIALS, ''),
+    "gui": ModuleDescription(25, ModuleType.ESSENTIALS, ''),
+    "network": ModuleDescription(20, ModuleType.ESSENTIALS, ''),
+    "opengl": ModuleDescription(26, ModuleType.ESSENTIALS, ''),
+    "qml": ModuleDescription(0, ModuleType.ESSENTIALS, ''),
+    "quick": ModuleDescription(1, ModuleType.ESSENTIALS, ''),
+    "quickcontrols": ModuleDescription(2, ModuleType.ESSENTIALS, ''),
+    "samplebinding": ModuleDescription(30, ModuleType.ESSENTIALS, ''),
+    "scriptableapplication": ModuleDescription(30, ModuleType.ESSENTIALS, ''),
+    "sql": ModuleDescription(21, ModuleType.ESSENTIALS, ''),
+    "uitools": ModuleDescription(12, ModuleType.ESSENTIALS, ''),
+    "widgetbinding": ModuleDescription(30, ModuleType.ESSENTIALS, ''),
+    "widgets": ModuleDescription(10, ModuleType.ESSENTIALS, ''),
+    "xml": ModuleDescription(24, ModuleType.ESSENTIALS, ''),
+    "Qt Demos": ModuleDescription(0, ModuleType.ADDONS, ''),  # from Qt repos
+    "3d": ModuleDescription(30, ModuleType.ADDONS, ''),
+    "axcontainer": ModuleDescription(20, ModuleType.ADDONS, ''),
+    "bluetooth": ModuleDescription(20, ModuleType.ADDONS, ''),
+    "charts": ModuleDescription(12, ModuleType.ADDONS, ''),
+    "datavisualization": ModuleDescription(11, ModuleType.ADDONS, ''),
+    "demos": ModuleDescription(0, ModuleType.ADDONS, ''),
+    "external": ModuleDescription(20, ModuleType.ADDONS, ''),
+    "graphs": ModuleDescription(10, ModuleType.ADDONS, ''),
+    "httpserver": ModuleDescription(0, ModuleType.ADDONS, ''),
+    "location": ModuleDescription(20, ModuleType.ADDONS, ''),
+    "multimedia": ModuleDescription(12, ModuleType.ADDONS, ''),
+    "networkauth": ModuleDescription(20, ModuleType.ADDONS, ''),
+    "pdf": ModuleDescription(20, ModuleType.ADDONS, ''),
+    "pdfwidgets": ModuleDescription(20, ModuleType.ADDONS, ''),
+    "quick3d": ModuleDescription(20, ModuleType.ADDONS, ''),
+    "remoteobjects": ModuleDescription(20, ModuleType.ADDONS, ''),
+    "serialbus": ModuleDescription(30, ModuleType.ADDONS, ''),
+    "serialport": ModuleDescription(30, ModuleType.ADDONS, ''),
+    "spatialaudio": ModuleDescription(20, ModuleType.ADDONS, ''),
+    "speech": ModuleDescription(20, ModuleType.ADDONS, ''),
+    "statemachine": ModuleDescription(30, ModuleType.ADDONS, ''),
+    "webchannel": ModuleDescription(30, ModuleType.ADDONS, ''),
+    "webenginequick": ModuleDescription(15, ModuleType.ADDONS, ''),
+    "webenginewidgets": ModuleDescription(16, ModuleType.ADDONS, ''),
+    "coap": ModuleDescription(0, ModuleType.M2M, ''),
+    "mqtt": ModuleDescription(0, ModuleType.M2M, ''),
+    "opcua": ModuleDescription(0, ModuleType.M2M, '')
+}
+
+
+def module_sort_key(name):
+    """Return key for sorting modules."""
+    description = MODULE_DESCRIPTIONS.get(name)
+    module_type = int(description.module_type) if description else 5
+    sort_key = description.sort_key if description else 100
+    return f"{module_type}:{sort_key:04}:{name}"
+
+
+def module_title(name):
+    """Return title for a module."""
+    result = name.title()
+    description = MODULE_DESCRIPTIONS.get(name)
+    if description:
+        if description.description:
+            result += " - " + description.description
+        if description.module_type == ModuleType.M2M:
+            result += " (M2M)"
+        elif description.module_type == ModuleType.ADDONS:
+            result += " (Add-ons)"
+        else:
+            result += " (Essentials)"
+    return result
 
 
 @dataclass
@@ -578,11 +665,13 @@ if __name__ == "__main__":
     index_files = []
     with open(f"{EXAMPLES_DOC}/index.rst", "w") as f:
         f.write(BASE_CONTENT)
-        for module_name, e in sorted(examples.items()):
+        for module_name in sorted(examples.keys(), key=module_sort_key):
+            e = examples.get(module_name)
             for i in e:
                 index_files.append(i.doc_file)
-            f.write(f"{module_name.title()}\n")
-            f.write(f"{'*' * len(module_name.title())}\n")
+            title = module_title(module_name)
+            f.write(f"{title}\n")
+            f.write(f"{'*' * len(title)}\n")
             f.write(get_module_gallery(e))
         f.write("\n\n")
         f.write(footer_index)
