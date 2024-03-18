@@ -501,7 +501,7 @@ def write_example(example_root, pyproject_file, pyside_example=True):
 def sort_examples(example):
     result = {}
     for module in example.keys():
-        result[module] = sorted(example.get(module), key=lambda e: e.doc_file)
+        result[module] = sorted(example.get(module), key=lambda e: e.example)
     return result
 
 
