@@ -585,10 +585,15 @@ def write_example(example_root, pyproject_file, pyside_example=True):
     return (p.module_name, result)
 
 
+def example_sort_key(example: ExampleData):
+    name = example.example
+    return "AAA" + name if "gallery" in name else name
+
+
 def sort_examples(example):
     result = {}
     for module in example.keys():
-        result[module] = sorted(example.get(module), key=lambda e: e.example)
+        result[module] = sorted(example.get(module), key=example_sort_key)
     return result
 
 
