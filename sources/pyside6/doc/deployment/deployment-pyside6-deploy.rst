@@ -7,8 +7,8 @@ pyside6-deploy: the deployment tool for Qt for Python
 platforms. It is a wrapper around `Nuitka <https://nuitka.net/>`_, a Python compiler that
 compiles your Python code to C code, and links with libpython to produce the final executable.
 
-The final executable produced has a ``.exe`` suffix on Windows. For Linux and macOS, they have a
-``.bin`` suffix.
+The final executable produced has a ``.exe`` suffix on Windows, ``.bin`` on Linux and ``.app`` on
+macOS.
 
 How to use it?
 ==============
@@ -63,7 +63,7 @@ multiple keys (parameters being controlled) assigned to a value. The advantages 
 two folds:
 
 #. Using the command line, you can control the deployment parameters without specifying them each
-   time.. It is saved permanently in a file, and any subsequent runs much later in time
+   time. It is saved permanently in a file, and any subsequent runs much later in time
    would enable the user to be aware of their last deployment parameters.
 
 #. Since these parameters are saved into a file, they can be checked into version control. This
@@ -85,6 +85,9 @@ The relevant parameters for ``pyside6-deploy`` are:
     #qt-creator-python-project-file-pyproject>`_ file. Such a file makes sure that the deployment
     process never considers unnecessary files when bundling the executable.
   * ``exec_directory``: The directory where the final executable is generated.
+  * ``icon``: The icon used for the application. For Windows, the icon image should be of ``.ico``
+    format, for macOS it should be of ``.icns`` format, and for linux all standard image formats
+    are accepted.
 
 **python**
   * ``python_path``: Path to the Python executable. It is recommended to run the deployment
@@ -111,8 +114,28 @@ The relevant parameters for ``pyside6-deploy`` are:
     The reason why only the presence of the above 6 Qt modules is searched for is because they
     have the most size heavy binaries among all the Qt modules. With this, you can drastically
     reduce the size of your executables.
+  * ``modules``: Comma-separated list of all the Qt modules used by the application. Just like the
+    other configuration options in `pysidedeploy.spec`, this option is also computed automatically
+    by ``pyside6-deploy``. However, if the user wants to explicitly include certain Qt modules, the
+    module names can be appended to this list without the `Qt` prefix.
+    e.g. Network instead of QtNetwork
+  * ``plugins``: Comma-separated list of all the Qt plugins used by the application. Just like the
+    other configuration options in `pysidedeploy.spec`, this option is also computed automatically
+    by ``pyside6-deploy``. However, if the user wants to explicitly include certain Qt plugins,
+    the plugin names can be appended to this list. To see all the plugins bundled with PySide6,
+    see the `plugins` folder in the `site-packages` on your Python where PySide6 is installed. The
+    plugin name correspond to their folder name.
 
 **nuitka**
+  * ``macos.permissions``: Only relevant for macOS. This option lists the  permissions used by the
+    macOS application, as found in the ``Info.plist`` file of the macOS application bundle, using
+    the so-called UsageDescription strings. The permissions are normally automatically found by
+    ``pyside6-deploy``. However the user can also explicitly specify them using the format
+    `<UsageDescriptionKey>:<Short Description>`. For example, the Camera permission is specified
+    as::
+
+      NSCameraUsageDescription:CameraAccess
+
   * ``extra_args``: Any extra Nuitka arguments specified. It is specified as space-separated
     command line arguments i.e. just like how you would specify it when you use Nuitka through
     the command line. By default, it contains the following arguments::
@@ -142,9 +165,9 @@ Here are all the command line options of ``pyside6-deploy``:
     pyside6-deploy /path/to/main --init
 
 
-* **-v/--verbose**: Runs ``pyside6-deploy`` in verbose mode
+* **-v/--verbose**: Runs ``pyside6-deploy`` in verbose mode.
 
-* **--dry-run**: Displays the final Nuitka command being run
+* **--dry-run**: Displays the final Nuitka command being run.
 
 * **--keep-deployment-files**: When this option is added, it retains the build folders created by
    Nuitka during the deployment process.
@@ -153,3 +176,12 @@ Here are all the command line options of ``pyside6-deploy``:
   ``pyside6-deploy`` prompts the user to create a Python virtual environment, if not already in one.
   With this option, the current Python environment is used irrespective of whether the current
   Python environment is a virtual environment or not.
+
+* **--name**: Application name.
+
+* **--extra-ignore-dirs**: Comma-separated directory names inside the project directory. These
+  directories will be skipped when searching for Python files relevant to the project.
+
+* **--extra-modules**:  Comma-separated list of Qt modules to be added to the application,
+  in case they are not found automatically. The module name can either be specified
+  by omitting the prefix of Qt or including it eg: both Network and QtNetwork works.
