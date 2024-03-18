@@ -139,8 +139,8 @@ QML Development
 
         that verifies the syntactic validity of QML files.
 
-    .. grid-item-card:: ``pyside6-qmlregistrar``
-        :link: pyside6-qmlregistrar
+    .. grid-item-card:: ``pyside6-qmltyperegistrar``
+        :link: pyside6-qmltyperegistrar
         :link-type: ref
 
         to read metatypes files and generate files that contain the necessary
