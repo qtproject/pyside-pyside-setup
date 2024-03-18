@@ -17,8 +17,9 @@ Here are a few distribution options that you can use:
 
 If you are considering Option 3, then starting with 6.4, we ship a new tool called `pyside6-deploy`
 that deploys your PySide6 application to all desktop platforms - Windows, Linux, and macOS. To know
-more about how to use the tool see :ref:`pyside6-deploy`. Additionally, you can also use other
-popular deployment tools shown below:
+more about how to use the tool see :ref:`pyside6-deploy`. For Android deployment, see
+:ref:`pyside6-android-deploy`. Additionally, you can also use other popular deployment tools shown
+below:
 
 * `fbs`_
 * `PyInstaller`_
@@ -145,6 +146,7 @@ Here's a set of tutorials on how to use these tools:
     :maxdepth: 2
 
     deployment-pyside6-deploy.rst
+    deployment-pyside6-android-deploy.rst
     deployment-fbs.rst
     deployment-pyinstaller.rst
     deployment-cxfreeze.rst

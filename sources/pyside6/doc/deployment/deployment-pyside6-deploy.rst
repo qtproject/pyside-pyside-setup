@@ -10,6 +10,12 @@ compiles your Python code to C code, and links with libpython to produce the fin
 The final executable produced has a ``.exe`` suffix on Windows, ``.bin`` on Linux and ``.app`` on
 macOS.
 
+.. note:: Although using a virtual environment for Python is recommended for ``pyside6-deploy``, do
+    not add the virtual environment to the application directory you are trying to deploy.
+    ``pyside6-deploy`` will try to package this venv folder and will eventually fail.
+
+.. _how_pysidedeploy:
+
 How to use it?
 ==============
 
@@ -61,6 +67,8 @@ As mentioned in the `Approach 2 <approach_two>`_ above, you can use this file to
 parameters of the deployment process. The file has multiple sections, with each section containing
 multiple keys (parameters being controlled) assigned to a value. The advantages of such a file are
 two folds:
+
+.. _pysidedeployspec_advantages:
 
 #. Using the command line, you can control the deployment parameters without specifying them each
    time. It is saved permanently in a file, and any subsequent runs much later in time
