@@ -24,7 +24,7 @@ custom bars color and border properties. These properties will override the poss
 theme set for the ``AbstractSeries.``
 
 LineGraph
---------
+---------
 
 The second graph of the example is a line graph. It also starts by defining a
 ``GraphsView`` element. A custom ``GraphTheme`` is created to get a custom appearance.
