@@ -8,14 +8,14 @@ This script generates the .pyi files for all PySide modules.
 """
 
 import argparse
-import inspect
+import inspect  # noqa: F401
 import logging
 import os
 import sys
-import typing
+import typing  # noqa: F401
 
 from pathlib import Path
-from types import SimpleNamespace
+from types import SimpleNamespace  # noqa: F401
 
 # Can we use forward references?
 USE_PEP563 = sys.version_info[:2] >= (3, 7)
@@ -25,7 +25,7 @@ def generate_all_pyi(outpath, options):
     ps = os.pathsep
     if options.sys_path:
         # make sure to propagate the paths from sys_path to subprocesses
-        normpath = lambda x: os.fspath(Path(x).resolve())
+        normpath = lambda x: os.fspath(Path(x).resolve())  # noqa: E731
         sys_path = [normpath(_) for _ in options.sys_path]
         sys.path[0:0] = sys_path
         pypath = ps.join(sys_path)
@@ -63,15 +63,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="This script generates the .pyi file for all PySide modules.")
     parser.add_argument("modules", nargs="+",
-        help="'all' or the names of modules to build (QtCore QtGui etc.)")
+                        help="'all' or the names of modules to build (QtCore QtGui etc.)")
     parser.add_argument("--quiet", action="store_true", help="Run quietly")
-    parser.add_argument("--check", action="store_true", help="Test the output if on Python 3")
     parser.add_argument("--outpath",
-        help="the output directory (default = binary location)")
+                        help="the output directory (default = binary location)")
     parser.add_argument("--sys-path", nargs="+",
-        help="a list of strings prepended to sys.path")
+                        help="a list of strings prepended to sys.path")
     parser.add_argument("--feature", nargs="+", choices=["snake_case", "true_property"], default=[],
-        help="""a list of feature names. Example: `--feature snake_case true_property`""")
+                        help="""a list of feature names. """
+                        """Example: `--feature snake_case true_property`. """
+                        """Currently not available for PyPy.""")
     options = parser.parse_args()
 
     qtest_env = os.environ.get("QTEST_ENVIRONMENT", "")
