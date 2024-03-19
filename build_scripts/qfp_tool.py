@@ -327,6 +327,16 @@ def build(target: str):
     print(f'--- Done({elapsed_time}s) ---')
 
 
+def build_base_docs():
+    arguments = [read_config_python_binary(), "setup.py", "build_base_docs", "--log-level",
+                 "quiet"]
+    for build_arg in read_config_build_arguments():
+        if build_arg.startswith("--qt-src-dir="):
+            arguments.append(build_arg)
+            break
+    execute(arguments)
+
+
 def run_tests():
     """Run tests redirected into a log file with a time stamp"""
     logfile_name = datetime.datetime.today().strftime("test_%Y%m%d_%H%M.txt")
@@ -361,6 +371,8 @@ def create_argument_parser(desc):
                         help='cmake + Make (continue broken build)')
     parser.add_argument('--test', '-t', action='store_true',
                         help='Run tests')
+    parser.add_argument('--Documentation', '-D', action='store_true',
+                        help='Run build_base_docs')
     parser.add_argument('--version', '-v', action='version', version='%(prog)s 1.0')
     parser.add_argument('--verbose', '-V', action='store_true',
                         help='Turn off --quiet specified in build arguments')
@@ -398,8 +410,8 @@ if __name__ == '__main__':
     elif options.Make:
         build_mode = BuildMode.RECONFIGURE
 
-    if build_mode == BuildMode.NONE and not (options.clean or options.reset
-                                             or options.pull or options.test):
+    if build_mode == BuildMode.NONE and not (options.clean or options.reset or options.pull
+                                             or options.Documentation or options.test):
         argument_parser.print_help()
         sys.exit(0)
 
@@ -435,6 +447,9 @@ if __name__ == '__main__':
     if build_mode != BuildMode.NONE:
         target = 'build' if options.no_install else 'install'
         build(target)
+
+    if options.Documentation:
+        build_base_docs()
 
     if options.test:
         sys.exit(run_tests())
