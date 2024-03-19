@@ -161,12 +161,12 @@ QML Development
         binary.
 
     .. grid-item-card:: ``pyside6-qml``
-        :link: qml-chapter6-plugins-example
+        :link: pyside6-qml
         :link-type: ref
 
-        to enable quick prototyping with QML files. This tool mimics the capabilities of Qt's
-        ``qml`` runtime utility by directly invoking QQmlEngine/QQuickView. For usage, see
-        :ref:`qml-chapter6-plugins-example`.
+        to enable quick prototyping with QML files. This tool mimics some of
+        the capabilities of Qt's ``QML`` runtime utility by
+        directly invoking QQmlEngine/QQuickView.
 
 Translations
 ~~~~~~~~~~~~
