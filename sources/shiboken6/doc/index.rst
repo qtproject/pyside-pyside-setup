@@ -91,6 +91,18 @@ Documentation
     .. grid-item-card::
         :class-item: text-center
 
+        Generating Python stub files.
+        +++
+        .. button-ref:: shiboken-genpyi
+            :color: primary
+            :outline:
+            :expand:
+
+            shiboken6-genpyi
+
+    .. grid-item-card::
+        :class-item: text-center
+
         Known issues and FAQ.
         +++
         .. button-ref:: considerations
@@ -109,4 +121,5 @@ Documentation
    shibokenmodule.rst
    typesystem.rst
    examples/index.rst
+   shiboken-genpyi.rst
    considerations.rst

@@ -288,9 +288,6 @@ def generate_pyi(import_name, outpath, options):
                 wr.print(line)
     if not options.quiet:
         options.logger.info(f"Generated: {outfilepath}")
-    # PYSIDE-1735: .pyi files are no longer compatible with Python, because
-    #              enum classes contain ellipsis which a Python enum forbids.
-    #              We will implement tests with Mypy, instead.
 
 
 def main():
@@ -307,7 +304,6 @@ def main():
     parser.add_argument("module",
         help="The full path name of an importable module binary (.pyd, .so)")  # noqa E:128
     parser.add_argument("--quiet", action="store_true", help="Run quietly")
-    parser.add_argument("--check", action="store_true", help="Test the output")
     parser.add_argument("--outpath",
         help="the output directory (default = location of module binary)")  # noqa E:128
     options = parser.parse_args()
