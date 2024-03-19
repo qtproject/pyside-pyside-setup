@@ -29,6 +29,7 @@ ${QtGui_GEN_DIR}/qrhigles2initparams_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhigles2nativehandles_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhigraphicspipeline_targetblend_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhigraphicspipeline_wrapper.cpp
+${QtGui_GEN_DIR}/qrhigraphicspipeline_stencilopstate_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhiinitparams_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhinativehandles_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhinullinitparams_wrapper.cpp
