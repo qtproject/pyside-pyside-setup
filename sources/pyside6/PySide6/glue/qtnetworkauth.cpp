@@ -15,7 +15,7 @@ void QAbstractOAuthModifyFunctor::operator()(QAbstractOAuth::Stage stage,
 {
     auto *callable = object();
     if (!PyCallable_Check(callable)) {
-        qWarning("Argument 1 of %FUNCTION_NAME must be a callable.");
+        qWarning("Argument 1 of setModifyParametersFunction() must be a callable.");
         return;
     }
     Shiboken::GilState state;
