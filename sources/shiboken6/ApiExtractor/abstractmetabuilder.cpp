@@ -3421,7 +3421,7 @@ void AbstractMetaBuilderPrivate::parseQ_Properties(const AbstractMetaClassPtr &m
         if (spec.has_value()) {
             spec->setIndex(i);
             metaClass->addPropertySpec(spec.value());
-        } else {
+        } else if (!errorMessage.isEmpty()) {
             QString message;
             QTextStream str(&message);
             str << metaClass->sourceLocation() << errorMessage;

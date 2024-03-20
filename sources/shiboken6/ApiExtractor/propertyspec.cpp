@@ -189,14 +189,15 @@ void QPropertySpec::setGenerateGetSetDef(bool generateGetSetDef)
 TypeSystemProperty QPropertySpec::typeSystemPropertyFromQ_Property(const QString &declarationIn,
                                                                    QString *errorMessage)
 {
-    enum class PropertyToken { None, Read, Write, Designable, Reset, Notify };
+    enum class PropertyToken { None, Read, Write, Designable, Reset, Notify, Member };
 
     static const QHash<QString, PropertyToken> tokenLookup = {
         {"READ"_L1, PropertyToken::Read},
         {"WRITE"_L1, PropertyToken::Write},
         {"DESIGNABLE"_L1, PropertyToken::Designable},
         {"RESET"_L1, PropertyToken::Reset},
-        {"NOTIFY"_L1, PropertyToken::Notify}
+        {"NOTIFY"_L1, PropertyToken::Notify},
+        {"MEMBER"_L1, PropertyToken::Member}
     };
 
     errorMessage->clear();
@@ -242,6 +243,10 @@ TypeSystemProperty QPropertySpec::typeSystemPropertyFromQ_Property(const QString
         case PropertyToken::Notify:
             result.notify = propertyTokens.at(pos + 1);
             break;
+        case PropertyToken::Member:
+            // Ignore MEMBER tokens introduced by QTBUG-16852 as Python
+            // properties are anyways generated for fields.
+            return {};
 
         case PropertyToken::None:
             break;
