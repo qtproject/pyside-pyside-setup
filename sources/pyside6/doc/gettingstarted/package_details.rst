@@ -175,19 +175,19 @@ Translations
     :gutter: 3 3 4 5
 
     .. grid-item-card:: ``pyside6-linguist``
-        :link: translations
+        :link: pyside6-linguist
         :link-type: ref
 
         for translating text in applications.
 
     .. grid-item-card:: ``pyside6-lrelease``
-        :link: translations
+        :link: pyside6-lrelease
         :link-type: ref
 
         to create run-time translation files for the application.
 
     .. grid-item-card:: ``pyside6-lupdate``
-        :link: translations
+        :link: pyside6-lupdate
         :link-type: ref
 
         to synchronize source code and translations.
