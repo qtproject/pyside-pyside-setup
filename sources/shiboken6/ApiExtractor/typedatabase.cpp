@@ -944,7 +944,7 @@ bool TypeDatabase::isSuppressedWarning(QStringView s) const
         return false;
     auto wit = std::find_if(d->m_suppressedWarnings.cbegin(), d->m_suppressedWarnings.cend(),
                             [&s] (const SuppressedWarning &e) {
-                                return e.pattern.match(s).hasMatch();
+                                return e.pattern.matchView(s).hasMatch();
                             });
     const bool found = wit != d->m_suppressedWarnings.cend();
     if (found)
