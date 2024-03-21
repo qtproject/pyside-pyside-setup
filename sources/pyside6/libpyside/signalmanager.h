@@ -78,6 +78,7 @@ public:
 
     // Disconnect all signals managed by Globalreceiver
     void clear();
+    void purgeEmptyGlobalReceivers();
 
     // Utility function to call a python method usign args received in qt_metacall
     static int callPythonMetaMethod(const QMetaMethod& method, void** args, PyObject* obj, bool isShortCuit);
