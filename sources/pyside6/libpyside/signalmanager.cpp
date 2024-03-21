@@ -21,6 +21,7 @@
 #include <sbkstaticstrings.h>
 #include <sbkerrors.h>
 
+#include <QtCore/QCoreApplication>
 #include <QtCore/QByteArrayView>
 #include <QtCore/QDebug>
 #include <QtCore/QHash>
@@ -313,8 +314,21 @@ void SignalManager::setQmlMetaCallErrorHandler(QmlMetaCallErrorHandler handler)
     SignalManagerPrivate::m_qmlMetaCallErrorHandler = handler;
 }
 
+static void qAppAboutToQuit()
+{
+    SignalManager::instance().purgeEmptyGlobalReceivers();
+}
+
 QObject *SignalManager::globalReceiver(QObject *sender, PyObject *callback, QObject *receiver)
 {
+    static bool registerQuitHandler =  true;
+    if (registerQuitHandler) {
+        if (auto *app = QCoreApplication::instance()) {
+            registerQuitHandler = false;
+            QObject::connect(app, &QCoreApplication::aboutToQuit, qAppAboutToQuit);
+        }
+    }
+
     auto &globalReceivers = m_d->m_globalReceivers;
     const GlobalReceiverKey key = GlobalReceiverV2::key(callback);
     auto it = globalReceivers.find(key);
@@ -328,10 +342,15 @@ QObject *SignalManager::globalReceiver(QObject *sender, PyObject *callback, QObj
     return it.value().get();
 }
 
+void SignalManager::purgeEmptyGlobalReceivers()
+{
+    m_d->purgeEmptyGlobalReceivers();
+}
+
 void SignalManager::notifyGlobalReceiver(QObject *receiver)
 {
     reinterpret_cast<GlobalReceiverV2 *>(receiver)->notify();
-    m_d->purgeEmptyGlobalReceivers();
+    purgeEmptyGlobalReceivers();
 }
 
 void SignalManager::releaseGlobalReceiver(const QObject *source, QObject *receiver)
