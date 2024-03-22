@@ -323,9 +323,22 @@ static QString compilerFromCMake(const QString &defaultCompiler)
     // Exclude macOS since cmakeCompiler returns the full path instead of the
     // /usr/bin/clang shim, which results in the default SDK sysroot path
     // missing (PYSIDE-1032)
-    const QString &cmakeCompiler = compilerFromCMake();
-    return platform() != Platform::macOS && !cmakeCompiler.isEmpty()
-           ? cmakeCompiler : defaultCompiler;
+    if (platform() == Platform::macOS)
+        return defaultCompiler;
+    QString cmakeCompiler = compilerFromCMake();
+    if (cmakeCompiler.isEmpty())
+        return defaultCompiler;
+    QFileInfo fi(cmakeCompiler);
+    // Should be absolute by default, but a user may specify -DCMAKE_CXX_COMPILER=cl.exe
+    if (fi.isRelative())
+        return cmakeCompiler;
+    if (fi.exists())
+        return fi.absoluteFilePath();
+    // The compiler may not exist in case something like icecream or
+    // a non-standard-path was used on the build machine. Check
+    // the executable.
+    cmakeCompiler = QStandardPaths::findExecutable(fi.fileName());
+    return cmakeCompiler.isEmpty() ? defaultCompiler : cmakeCompiler;
 }
 
 static void appendClangBuiltinIncludes(HeaderPaths *p)
