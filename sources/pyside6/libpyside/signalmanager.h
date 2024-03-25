@@ -82,7 +82,7 @@ public:
     // Utility function to call a python method usign args received in qt_metacall
     static int callPythonMetaMethod(const QMetaMethod& method, void** args, PyObject* obj, bool isShortCuit);
 
-    static void deleteGobalReceiver(const QObject *globalReceiver);
+    static void deleteGlobalReceiver(const QObject *globalReceiver);
 
 private:
     struct SignalManagerPrivate;

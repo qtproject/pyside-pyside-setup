@@ -229,9 +229,9 @@ struct SignalManager::SignalManagerPrivate
     SignalManagerPrivate() noexcept = default;
     ~SignalManagerPrivate() { clear(); }
 
-    void deleteGobalReceiver(const QObject *gr);
+    void deleteGlobalReceiver(const QObject *gr);
     void clear();
-    void purgeEmptyGobalReceivers();
+    void purgeEmptyGlobalReceivers();
 
     GlobalReceiverV2Map m_globalReceivers;
     static SignalManager::QmlMetaCallErrorHandler m_qmlMetaCallErrorHandler;
@@ -329,7 +329,7 @@ QObject *SignalManager::globalReceiver(QObject *sender, PyObject *callback, QObj
 void SignalManager::notifyGlobalReceiver(QObject *receiver)
 {
     reinterpret_cast<GlobalReceiverV2 *>(receiver)->notify();
-    m_d->purgeEmptyGobalReceivers();
+    m_d->purgeEmptyGlobalReceivers();
 }
 
 void SignalManager::releaseGlobalReceiver(const QObject *source, QObject *receiver)
@@ -337,15 +337,15 @@ void SignalManager::releaseGlobalReceiver(const QObject *source, QObject *receiv
     auto gr = static_cast<GlobalReceiverV2 *>(receiver);
     gr->decRef(source);
     if (gr->isEmpty())
-        m_d->deleteGobalReceiver(gr);
+        m_d->deleteGlobalReceiver(gr);
 }
 
-void SignalManager::deleteGobalReceiver(const QObject *gr)
+void SignalManager::deleteGlobalReceiver(const QObject *gr)
 {
-    SignalManager::instance().m_d->deleteGobalReceiver(gr);
+    SignalManager::instance().m_d->deleteGlobalReceiver(gr);
 }
 
-void SignalManager::SignalManagerPrivate::deleteGobalReceiver(const QObject *gr)
+void SignalManager::SignalManagerPrivate::deleteGlobalReceiver(const QObject *gr)
 {
     for (auto it = m_globalReceivers.begin(), end = m_globalReceivers.end(); it != end; ++it) {
         if (it.value().get() == gr) {
@@ -370,7 +370,7 @@ static bool isEmptyGlobalReceiver(const GlobalReceiverV2Ptr &g)
     return g->isEmpty();
 }
 
-void SignalManager::SignalManagerPrivate::purgeEmptyGobalReceivers()
+void SignalManager::SignalManagerPrivate::purgeEmptyGlobalReceivers()
 {
     // Delete repetitively (see comment in clear()).
     while (true) {
