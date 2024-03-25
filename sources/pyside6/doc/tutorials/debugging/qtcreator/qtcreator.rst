@@ -1,9 +1,9 @@
 Debugging PySide with Qt Creator (Linux)
 ****************************************
 
-As opposed to VSCode, presently Qt Creator does not support mixed mode debugging.
+As opposed to VSCode, presently *Qt Creator* does not support mixed mode debugging.
 However, we can debug the C++ implementation of the corresponding Python PySide
-code. Unlike VSCode, Qt Creator provides a very easy interface to attach GDB to
+code. Unlike VSCode, *Qt Creator* provides a very easy interface to attach GDB to
 the Python interpreter. It saves you from doing all the extra configuration
 steps, that have to be done with VSCode.
 

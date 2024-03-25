@@ -109,7 +109,7 @@ simplify the installation step::
 Complementary to the wheels, you will be able to download the sources
 as well.
 
-.. note:: Wheels installed this way will be detectable by `Qt Creator`_, which
+.. note:: Wheels installed this way will be detectable by `*Qt Creator*`_, which
    will offer you to install them for your current Python interpreter.
 
 Using account.qt.io
@@ -180,11 +180,11 @@ the wheels are::
 Qt Creator Integration
 ----------------------
 
-Qt Creator offers the option to create new |project| projects from the main
+*Qt Creator* offers the option to create new |project| projects from the main
 wizard.
 
 To execute the projects, make sure that the proper *Python Interpreter* is
-selected, so Qt Creator can use the commercial modules you just installed.
+selected, so *Qt Creator* can use the commercial modules you just installed.
 Go to *Edit -> Preferences* where you can find the *Python* option
 that will show the following:
 
@@ -197,7 +197,7 @@ select the main Python executable from your environment. This can be found on
 ``path_to_your_env/bin/python`` (macOS and Linux), or
 ``path_to_your_env\python.exe`` (Windows).
 
-As an alternative, you can launch Qt Creator from within the virtual
+As an alternative, you can launch *Qt Creator* from within the virtual
 environment, detecting your installation automatically.
 
 Migrating from other versions

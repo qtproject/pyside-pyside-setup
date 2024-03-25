@@ -97,8 +97,8 @@ the QML file, and optionally, elements defined in Python that are exposed
 to QML to be used.
 
 You can write ``.qml`` files by hand, but also you can use tools like the
-QML Designer that is embedded in Qt Creator. Additionally, there are commercial
-tools like Qt Design Studio that allow you to load designs from other design
+*QML Designer* that is embedded in *Qt Creator*. Additionally, there are commercial
+tools like *Qt Design Studio* that allow you to load designs from other design
 applications.
 
 Here you can find an example of how a ``.qml`` file looks like.
@@ -128,11 +128,11 @@ message on it.
 Qt Creator Python Project File ``.pyproject``
 ---------------------------------------------
 
-For Qt Creator to load and handle Python based projects, a special file is
+For *Qt Creator* to load and handle Python based projects, a special file is
 needed, because C++ based projects could be handle from ``.qmake`` or
 ``CMakeLists.txt`` file, which are not used with Python-based projects.
 
-Old versions of Qt Creator, provided a simple format with the ``.pyqtc``
+Old versions of *Qt Creator*, provided a simple format with the ``.pyqtc``
 extension, which were plain-text files with one-file-per-line::
 
     library/server.py

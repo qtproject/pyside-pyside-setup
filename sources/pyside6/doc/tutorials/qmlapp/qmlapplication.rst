@@ -15,15 +15,15 @@ defined in the QML file.
 Before you begin, install the following prerequisites:
 
 * The `PySide6 <https://pypi.org/project/PySide6/>`_ Python packages.
-* Qt Creator v4.9 beta1 or later from
+* *Qt Creator* from
   `https://download.qt.io
   <https://download.qt.io/snapshots/qtcreator/>`_.
 
 
 The following step-by-step instructions guide you through application
-development process using Qt Creator:
+development process using *Qt Creator*:
 
-#. Open Qt Creator and select **File > New File or Project..** menu item
+#. Open *Qt Creator* and select **File > New File or Project..** menu item
    to open following dialog:
 
    .. image:: newpyproject.png

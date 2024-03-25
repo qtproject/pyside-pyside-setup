@@ -5,10 +5,10 @@ When debugging PySide code, very often you would also like to debug the
 corresponding C++ extension of the PySide module. This is done by attaching your
 debugger to the Python interpreter. In this tutorial, we are going to take you
 through a comprehensive guide in building Qt 6, using the built Qt 6 to build
-PySide6, and then starting a debugging process in either Qt Creator or VSCode.
+PySide6, and then starting a debugging process in either *Qt Creator* or VSCode.
 
 With VSCode, you should be able to see the combined call stacks for both C++ and
-Python together. With Qt Creator, unfortunately you would only be able to
+Python together. With *Qt Creator*, unfortunately you would only be able to
 debug the native C++ code of the PySide module; that is you won't be able to set
 breakpoints inside the Python code.
 
@@ -116,7 +116,7 @@ It is recommended to use a Python virtual environment rather than installing in 
 Debugging the process using your preferred IDE
 ----------------------------------------------
 
-The following sections guide you through the setup for Qt Creator or VSCode.
+The following sections guide you through the setup for *Qt Creator* or VSCode.
 
 .. toctree::
    :glob:

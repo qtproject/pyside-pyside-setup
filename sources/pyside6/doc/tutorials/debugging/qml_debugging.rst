@@ -1,7 +1,7 @@
 Using Qt Creator's QML Debugger for a PySide6 QML Application
 *************************************************************
 
-Besides the C++ debugger, Qt Creator provides a `QML debugger`_ which lets you
+Besides the C++ debugger, *Qt Creator* provides a `QML debugger`_ which lets you
 inspect JavaScript code. It works by connecting to a socket server run by the
 ``QmlEngine`` instance. The port is passed on the command line. To enable it,
 add the below code to your QML application:

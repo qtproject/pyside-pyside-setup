@@ -26,9 +26,9 @@ feature checks need to be added to ``CMakeList.txt`` (see for example
 The process consists of running a build and evaluating the log file.
 The script
 `shiboken2tasks.py <https://code.qt.io/cgit/qt-creator/qt-creator.git/tree/scripts/shiboken2tasks.py>`_
-from the Qt Creator repository can be used to convert the shiboken warnings
+from the *Qt Creator* repository can be used to convert the shiboken warnings
 into a `task file <https://doc.qt.io/qtcreator/creator-task-lists.html>`_
-for display in the build issues pane of Qt Creator.
+for display in the build issues pane of *Qt Creator*.
 
 Warnings about new enumerations will be shown there; they should be added
 to type system file using a ``since`` attribute.

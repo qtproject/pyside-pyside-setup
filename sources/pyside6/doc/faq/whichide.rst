@@ -4,7 +4,7 @@ Which IDEs Are Compatible?
 ==========================
 
 |project|, as any other Python module, can be used in any Python-compatible
-IDE, but not all of them will provide extra functionality like Qt Creator does.
+IDE, but not all of them will provide extra functionality like *Qt Creator* does.
 
 Besides writing files, there are some external steps you might want to perform
 in order to help the development of your applications:
@@ -48,7 +48,7 @@ PyCharm
 -------
 
 You can configure PyCharm to enable external tools, in |project| terms,
-*Qt Widgets Designer*, and Qt Creator. Go to
+*Qt Widgets Designer*, and *Qt Creator*. Go to
 ``File > Settings > tools > PyCharm External Tools``, and include the following
 information to add them to your project.
 Later, you will be able to right click a ``.ui`` file, and select
