@@ -52,7 +52,7 @@ widget reports its size requirements to the layout through the
 :meth:`sizePolicy<PySide6.QtWidgets.QWidget.sizePolicy>` properties,
 and the layout distributes the available space accordingly.
 
-:ref:`Qt Designer<using_ui_files>` is a powerful tool for interactively
+:ref:`Qt Widgets Designer<using_ui_files>` is a powerful tool for interactively
 creating and arranging widgets in layouts.
 
 Model/View Classes

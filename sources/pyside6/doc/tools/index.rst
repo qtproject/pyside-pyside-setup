@@ -27,8 +27,9 @@ Project development
         :link: pyside6-project
         :link-type: ref
 
-        to build Qt Designer forms (``.ui`` files), resource files (``.qrc``)
-        and QML type files (``.qmltype``) from a ``.pyproject`` file.
+        to build *Qt Widgets Designer* forms (``.ui`` files),
+        resource files (``.qrc``) and QML type files (``.qmltype``)
+        from a ``.pyproject`` file.
 
 Widget Development
 ~~~~~~~~~~~~~~~~~~

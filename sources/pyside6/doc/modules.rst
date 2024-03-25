@@ -44,7 +44,7 @@ Qt Modules Supported by Qt for Python
 
     .. grid-item-card:: :mod:`QtDesigner <PySide6.QtDesigner>`
 
-        Provides classes to extend Qt Designer.
+        Provides classes to extend *Qt Widgets Designer*.
 
     .. grid-item-card:: :mod:`QtGui <PySide6.QtGui>`
 
@@ -173,7 +173,7 @@ Qt Modules Supported by Qt for Python
 
     .. grid-item-card:: :mod:`QtUiTools <PySide6.QtUiTools>`
 
-        Provides classes to handle forms created with Qt Designer.
+        Provides classes to handle forms created with *Qt Widgets Designer*.
 
     .. grid-item-card:: :mod:`Qt WebChannel <PySide6.QtWebChannel>`
 

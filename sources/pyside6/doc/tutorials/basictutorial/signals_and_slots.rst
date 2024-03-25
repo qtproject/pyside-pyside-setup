@@ -79,7 +79,7 @@ Signals can also be connected to free functions:
 Connections can be spelled out in code or, for widget forms,
 designed in the
 `Signal-Slot Editor <https://doc.qt.io/qt-6/designer-connection-mode.html>`_
-of Qt Designer.
+of *Qt Widgets Designer*.
 
 The Signal Class
 ----------------
