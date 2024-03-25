@@ -162,7 +162,7 @@ void DynamicSlotDataV2::onCallbackDestroyed(void *data)
     auto self = reinterpret_cast<DynamicSlotDataV2 *>(data);
     self->m_weakRef = nullptr;
     Py_BEGIN_ALLOW_THREADS
-    SignalManager::instance().deleteGobalReceiver(self->m_parent);
+    SignalManager::instance().deleteGlobalReceiver(self->m_parent);
     Py_END_ALLOW_THREADS
 }
 
