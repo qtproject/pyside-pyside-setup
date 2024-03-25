@@ -19,9 +19,7 @@ set(QtTextToSpeech_include_dirs ${QtTextToSpeech_SOURCE_DIR}
                                 ${QtCore_GEN_DIR})
 
 set(QtTextToSpeech_libraries    pyside6
-                                ${Qt${QT_MAJOR_VERSION}Multimedia_LIBRARIES}
-                                ${Qt${QT_MAJOR_VERSION}TextToSpeech_LIBRARIES}
-                                ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES})
+                                ${Qt${QT_MAJOR_VERSION}TextToSpeech_LIBRARIES})
 
 set(QtTextToSpeech_deps QtCore QtMultimedia)
 

@@ -18,13 +18,12 @@ set(QtSvg_include_dirs  ${QtSvg_SOURCE_DIR}
                         ${Qt${QT_MAJOR_VERSION}Svg_INCLUDE_DIRS}
                         ${libpyside_SOURCE_DIR}
                         ${QtCore_GEN_DIR}
-                        ${QtGui_GEN_DIR}
-                        )
+                        ${QtGui_GEN_DIR})
+
 set(QtSvg_libraries     pyside6
-                        ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                        ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                        ${Qt${QT_MAJOR_VERSION}Svg_LIBRARIES}
-                        )
+                        ${Qt${QT_MAJOR_VERSION}Svg_LIBRARIES})
+
+
 set(QtSvg_deps QtGui)
 
 create_pyside_module(NAME QtSvg

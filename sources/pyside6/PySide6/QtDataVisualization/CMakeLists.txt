@@ -54,10 +54,8 @@ set(QtDataVisualization_include_dirs ${QtDataVisualization_SOURCE_DIR}
                           ${QtCore_GEN_DIR}
                           ${QtGui_GEN_DIR})
 
-set(QtDataVisualization_libraries    pyside6
-                          ${Qt${QT_MAJOR_VERSION}DataVisualization_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES})
+set(QtDataVisualization_libraries pyside6
+                                  ${Qt${QT_MAJOR_VERSION}DataVisualization_LIBRARIES})
 
 set(QtDataVisualization_deps QtCore QtGui)
 

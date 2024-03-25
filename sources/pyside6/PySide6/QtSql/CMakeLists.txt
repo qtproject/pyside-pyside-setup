@@ -35,13 +35,13 @@ set(QtSql_include_dirs  ${QtSql_SOURCE_DIR}
                         ${libpyside_SOURCE_DIR}
                         ${QtCore_GEN_DIR}
                         ${QtGui_GEN_DIR}
-                        ${QtWidgets_GEN_DIR}
-                        )
+                        ${QtWidgets_GEN_DIR})
+
+# Link to QtWidgets to enable QSqlRelationalDelegate
 set(QtSql_libraries     pyside6
-                        ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                        ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
                         ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
                         ${Qt${QT_MAJOR_VERSION}Sql_LIBRARIES})
+
 set(QtSql_deps QtWidgets)
 
 create_pyside_module(NAME QtSql

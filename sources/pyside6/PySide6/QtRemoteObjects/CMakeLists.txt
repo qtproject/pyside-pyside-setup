@@ -32,8 +32,6 @@ set(QtRemoteObjects_include_dirs ${QtRemoteObjects_SOURCE_DIR}
                                  ${QtCore_GEN_DIR})
 
 set(QtRemoteObjects_libraries    pyside6
-                                 ${SHIBOKEN_PYTHON_LIBRARIES}
-                                 ${SHIBOKEN_LIBRARY}
                                  ${Qt${QT_MAJOR_VERSION}RemoteObjects_LIBRARIES})
 
 set(QtRemoteObjects_deps QtCore QtNetwork)

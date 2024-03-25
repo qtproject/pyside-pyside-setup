@@ -26,8 +26,6 @@ set(QtNetworkAuth_include_dirs ${QtNetworkAuth_SOURCE_DIR}
                                ${QtNetworkAuth_GEN_DIR})
 
 set(QtNetworkAuth_libraries pyside6
-                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
                             ${Qt${QT_MAJOR_VERSION}NetworkAuth_LIBRARIES})
 
 set(QtNetworkAuth_deps QtNetwork)

@@ -26,12 +26,6 @@ set(QtQuickTest_include_dirs ${QtQuickTest_SOURCE_DIR}
                              ${QtQuickTest_GEN_DIR})
 
 set(QtQuickTest_libraries pyside6
-                          ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}OpenGL_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Qml_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Quick_LIBRARIES}
                           ${Qt${QT_MAJOR_VERSION}QuickTest_LIBRARIES})
 
 set(QtQuickTest_deps QtGui QtOpenGL QtNetwork QtQml QtQuick)

@@ -30,13 +30,6 @@ set(QtQuickWidgets_include_dirs  ${QtQuickWidgets_SOURCE_DIR}
                                  ${QtQuickWidgets_GEN_DIR})
 
 set(QtQuickWidgets_libraries pyside6
-                             ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                             ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                             ${Qt${QT_MAJOR_VERSION}OpenGL_LIBRARIES}
-                             ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
-                             ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
-                             ${Qt${QT_MAJOR_VERSION}Quick_LIBRARIES}
-                             ${Qt${QT_MAJOR_VERSION}Qml_LIBRARIES}
                              ${Qt${QT_MAJOR_VERSION}QuickWidgets_LIBRARIES})
 
 set(QtQuickWidgets_deps QtGui QtOpenGL QtQml QtQuick QtWidgets QtNetwork)

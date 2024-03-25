@@ -63,8 +63,6 @@ set(QtQml_include_dirs  ${QtQml_SOURCE_DIR}
                         ${QtQml_GEN_DIR})
 
 set(QtQml_libraries pyside6 pyside6qml
-                    ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                    ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
                     ${Qt${QT_MAJOR_VERSION}Qml_LIBRARIES})
 
 set(QtQml_deps QtNetwork)

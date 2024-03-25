@@ -51,11 +51,8 @@ set(QtMultimedia_include_dirs   ${QtMultimedia_SOURCE_DIR}
                                 ${QtNetwork_GEN_DIR})
 
 set(QtMultimedia_libraries  pyside6
-                            ${Qt${QT_MAJOR_VERSION}Multimedia_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
-                            )
+                            ${Qt${QT_MAJOR_VERSION}Multimedia_LIBRARIES})
+
 set(QtMultimedia_deps QtCore QtGui QtNetwork)
 
 create_pyside_module(NAME QtMultimedia

@@ -210,13 +210,11 @@ set(QtWidgets_include_dirs  ${QtWidgets_SOURCE_DIR}
                             ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
                             ${libpyside_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
-                            ${QtGui_GEN_DIR}
-                            )
+                            ${QtGui_GEN_DIR})
+
 set(QtWidgets_libraries pyside6
-                        ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                        ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                        ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
-                        )
+                        ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES})
+
 set(QtWidgets_deps QtGui)
 
 create_pyside_module(NAME QtWidgets

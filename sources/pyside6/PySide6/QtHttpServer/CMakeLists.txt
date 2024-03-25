@@ -28,11 +28,7 @@ set(QtHttpServer_include_dirs ${QtHttpServer_SOURCE_DIR}
                                 ${QtWebSockets_GEN_DIR})
 
 set(QtHttpServer_libraries pyside6
-                           ${Qt${QT_MAJOR_VERSION}HttpServer_LIBRARIES}
-                           ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                           ${Qt${QT_MAJOR_VERSION}Concurrent_LIBRARIES}
-                           ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
-                           ${Qt${QT_MAJOR_VERSION}WebSockets_LIBRARIES})
+                           ${Qt${QT_MAJOR_VERSION}HttpServer_LIBRARIES})
 
 set(QtHttpServer_deps QtCore QtConcurrent QtNetwork QtWebSockets)
 

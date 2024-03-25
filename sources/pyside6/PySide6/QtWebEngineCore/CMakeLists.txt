@@ -54,17 +54,10 @@ set(QtWebEngineCore_include_dirs
                             ${QtWidgets_GEN_DIR}
                             ${QtNetwork_GEN_DIR}
                             ${QtPrintSupport_GEN_DIR}
-                            ${QtWebChannel_GEN_DIR}
-                            )
+                            ${QtWebChannel_GEN_DIR})
+
 set(QtWebEngineCore_libraries pyside6
-                            ${Qt${QT_MAJOR_VERSION}WebEngineCore_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}PrintSupport_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}WebChannel_LIBRARIES}
-                            )
+                              ${Qt${QT_MAJOR_VERSION}WebEngineCore_LIBRARIES})
 
 set(QtWebEngineCore_deps QtCore QtGui QtNetwork QtPrintSupport QtWebChannel)
 
