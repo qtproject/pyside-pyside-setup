@@ -476,9 +476,9 @@ to get the HTML files), you can go to the generated
 You can add ``-j X``, to perform the build process in parallel with
 X processes.
 
-.. note:: The :command:`apidoc` make target builds offline documentation in ``QCH`` (Qt Creator Help)
-   format by default. You can switch to building for the online use with the ``--doc-build-online``
-   configure option.
+.. note:: The :command:`apidoc` make target builds offline documentation in ``QCH``
+   (Qt Compressed Help) format by default. You can switch to building for the
+   online use with the ``--doc-build-online`` configure option.
 
 The target executes several steps:
 
@@ -503,13 +503,13 @@ formatting, you can re-run ``sphinx`` in the ``doc`` directory::
 Viewing offline documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The offline documentation (QCH) can be viewed using the Qt Creator IDE or Qt Assistant, which is
-a standalone application for viewing QCH files.
+The offline documentation (QCH) can be viewed using the *Qt Creator* IDE or
+*Qt Assistant*, which is a standalone application for viewing QCH files.
 
-To view the QCH using Qt Creator, following the instructions outlined in
-`Using Qt Creator Help Mode <https://doc.qt.io/qtcreator/creator-help.html>`_. If you chose to
-use Qt Assistant instead, use the following command to register the QCH file before launching
-Qt Assistant::
+To view the QCH using *Qt Creator*, following the instructions outlined in
+`Using Qt Creator Help Mode <https://doc.qt.io/qtcreator/creator-help.html>`_.
+If you chose to use *Qt Assistant* instead, use the following command to register
+the QCH file before launching *Qt Assistant*::
 
     assistant -register PySide.qch
 

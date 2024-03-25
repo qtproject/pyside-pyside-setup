@@ -4,7 +4,7 @@ pyside6-rcc
 ===========
 
 .. note:: This tool is automatically called by :ref:`pyside6-project`
-   so you don't need to call it manually. Qt Creator will take care
+   so you don't need to call it manually. *Qt Creator* will take care
    of this step as well while executing a project.
 
 

@@ -8,7 +8,7 @@ This page describes the use of
 graphical interfaces based on Qt Widgets for your Qt for Python project.
 *Qt Widgets Designer* is a graphical UI design tool which is available as a
 standalone binary (``pyside6-designer``) or embedded into the
-`Qt Creator IDE <https://doc.qt.io/qtcreator>`_. Its use within **Qt Creator**
+`Qt Creator IDE <https://doc.qt.io/qtcreator>`_. Its use within *Qt Creator*
 is described at
 `Using Qt Widgets Designer <https://doc.qt.io/qtcreator/creator-using-qt-designer.html>`_.
 
@@ -19,7 +19,7 @@ The designs are stored in ``.ui`` files, which is an XML-based format. It will
 be converted to Python or C++ code populating a widget instance at project build
 time by the `pyside6-uic <https://doc.qt.io/qt-6/uic.html>`_ tool.
 
-To create a new Qt Design Form in **Qt Creator**, choose
+To create a new Qt Design Form in *Qt Creator*, choose
 ``File/New File Or Project`` and "Main Window" for template. Save it as
 ``mainwindow.ui``. Add a ``QPushButton`` to the center of the centralwidget.
 

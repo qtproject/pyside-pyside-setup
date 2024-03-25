@@ -18,7 +18,7 @@ Add bindings
 - Add it to ``build_scripts/wheel_files.py`` (plugins, translations).
 - Copy an existing module to ``sources/pyside6/PySide6/<name>``.
 - Adapt the ``typesystem.xml`` and ``CMakeList.txt`` (using for example
-  Qt Creator's case-preserving replace function).
+  *Qt Creator*'s case-preserving replace function).
 - Make sure the dependencies are correct.
 - Find the exported public classes, add them to the ``typesystem.xml`` file,
   checking whether they are ``value-type`` or ``object-type``. Add their enums
@@ -33,8 +33,8 @@ Add bindings
   typically hidden behind a progress message.
 - A convenient way of doing this is using
   ``qt-creator/scripts/shiboken2tasks.py`` from the
-  `Qt Creator repository <https://code.qt.io/cgit/qt-creator/qt-creator.git>`_
-  converting them to a ``.tasks`` file which can be loaded into Qt Creator's
+  `*Qt Creator* repository <https://code.qt.io/cgit/qt-creator/qt-creator.git>`_
+  converting them to a ``.tasks`` file which can be loaded into *Qt Creator*'s
   issue pane.
 - Link errors may manifest when ``generate_pyi`` imports the module trying
   to create signatures. They indicate a missing source file entry
