@@ -21,6 +21,21 @@ macro(unmake_path varname)
    string(REPLACE "${PATH_SEP}" ";" ${varname} "${ARGN}")
 endmacro()
 
+# Check for presence of QtOpenGL and modify module variables
+# accordingly
+macro(check_qt_opengl module include_var deps_var dropped_entries_var)
+    if (Qt${QT_MAJOR_VERSION}OpenGL_FOUND)
+        message(STATUS "Qt${QT_MAJOR_VERSION}${module}: Building with OpenGL")
+        list(APPEND ${include_var} ${Qt${QT_MAJOR_VERSION}OpenGL_INCLUDE_DIRS}
+                                   ${QtOpenGL_GEN_DIR})
+        list(APPEND ${deps_var} QtOpenGL)
+    else()
+        message(STATUS "Qt${QT_MAJOR_VERSION}${module}: Dropping OpenGL")
+        # This is a dummy entry creating a conditional typesystem keyword
+        list(APPEND ${dropped_entries_var} "QtOpenGL")
+    endif()
+endmacro()
+
 # set size optimization flags for pyside6
 macro(append_size_optimization_flags _module_name)
     if(NOT QFP_NO_OVERRIDE_OPTIMIZATION_FLAGS)

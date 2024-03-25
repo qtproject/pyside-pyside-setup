@@ -3,6 +3,8 @@
 
 project(Qt3DRender)
 
+set(Qt3DRender_DROPPED_ENTRIES)
+
 set(Qt3DRender_SRC
 ${Qt3DRender_GEN_DIR}/qsharedpointer_propertyreaderinterface_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qsharedpointer_qtextureimagedata_wrapper.cpp
@@ -131,17 +133,19 @@ set(Qt3DRender_include_dirs
                      ${pyside6_SOURCE_DIR}
                      ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
                      ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}OpenGL_INCLUDE_DIRS}
                      ${libpyside_SOURCE_DIR}
                      ${QtCore_GEN_DIR}
                      ${QtGui_GEN_DIR}
-                     ${QtOpenGL_GEN_DIR}
+
                      ${Qt3DCore_GEN_DIR})
 
 set(Qt3DRender_libraries pyside6
                      ${Qt${QT_MAJOR_VERSION}3DRender_LIBRARIES})
 
-set(Qt3DRender_deps Qt3DCore QtOpenGL)
+set(Qt3DRender_deps Qt3DCore)
+
+check_qt_opengl("3DRender" Qt3DRender_include_dirs Qt3DRender_deps
+                Qt3DRender_DROPPED_ENTRIES)
 
 create_pyside_module(NAME Qt3DRender
                      INCLUDE_DIRS Qt3DRender_include_dirs
@@ -149,4 +153,5 @@ create_pyside_module(NAME Qt3DRender
                      DEPS Qt3DRender_deps
                      TYPESYSTEM_PATH Qt3DRender_SOURCE_DIR
                      SOURCES Qt3DRender_SRC
-                     TYPESYSTEM_NAME ${Qt3DRender_BINARY_DIR}/typesystem_3drender.xml)
+                     TYPESYSTEM_NAME ${Qt3DRender_BINARY_DIR}/typesystem_3drender.xml
+                     DROPPED_ENTRIES Qt3DRender_DROPPED_ENTRIES)

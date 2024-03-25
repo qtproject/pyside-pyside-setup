@@ -3,6 +3,8 @@
 
 project(QtGraphs)
 
+set(QtGraphs_DROPPED_ENTRIES)
+
 list(APPEND QtGraphs_src "${QtGraphs_SOURCE_DIR}/qtgraphs_helper.cpp")
 
 set(QtGraphs_SRC
@@ -63,7 +65,6 @@ set(QtGraphs_include_dirs ${QtGraphs_SOURCE_DIR}
                           ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}Qml_INCLUDE_DIRS}
-                          ${Qt${QT_MAJOR_VERSION}OpenGL_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}Quick_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}QuickWidgets_INCLUDE_DIRS}
                           ${Qt${QT_MAJOR_VERSION}Graphs_INCLUDE_DIRS}
@@ -74,7 +75,6 @@ set(QtGraphs_include_dirs ${QtGraphs_SOURCE_DIR}
                           ${QtGui_GEN_DIR}
                           ${QtWidgets_GEN_DIR}
                           ${QtQml_GEN_DIR}
-                          ${QtOpenGL_GEN_DIR}
                           ${QtQuick_GEN_DIR}
                           ${QtQuickWidgets_GEN_DIR}
                           ${QtQuick3D_GEN_DIR})
@@ -82,7 +82,10 @@ set(QtGraphs_include_dirs ${QtGraphs_SOURCE_DIR}
 set(QtGraphs_libraries    pyside6
                           ${Qt${QT_MAJOR_VERSION}Graphs_LIBRARIES})
 
-set(QtGraphs_deps QtCore QtNetwork QtGui QtWidgets QtQml QtOpenGL QtQuick QtQuickWidgets QtQuick3D)
+set(QtGraphs_deps QtCore QtNetwork QtGui QtWidgets QtQml QtQuick QtQuickWidgets QtQuick3D)
+
+check_qt_opengl("Graphs" QtGraphs_include_dirs QtGraphs_deps
+                QtGraphs_DROPPED_ENTRIES)
 
 create_pyside_module(NAME QtGraphs
                      INCLUDE_DIRS QtGraphs_include_dirs
@@ -90,7 +93,8 @@ create_pyside_module(NAME QtGraphs
                      DEPS QtGraphs_deps
                      TYPESYSTEM_PATH QtGraphs_SOURCE_DIR
                      SOURCES QtGraphs_SRC
-                     STATIC_SOURCES QtGraphs_src)
+                     STATIC_SOURCES QtGraphs_src
+                     DROPPED_ENTRIES QtGraphs_DROPPED_ENTRIES)
 
 install(FILES ${pyside6_SOURCE_DIR}/qtgraphs_helper.h
         DESTINATION include/PySide6/QtGraphs)

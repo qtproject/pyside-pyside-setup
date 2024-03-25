@@ -25,8 +25,6 @@ ${QtGui_GEN_DIR}/qrhicommandbuffer_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhicomputepipeline_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhidepthstencilclearvalue_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhidriverinfo_wrapper.cpp
-${QtGui_GEN_DIR}/qrhigles2initparams_wrapper.cpp
-${QtGui_GEN_DIR}/qrhigles2nativehandles_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhigraphicspipeline_targetblend_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhigraphicspipeline_wrapper.cpp
 ${QtGui_GEN_DIR}/qrhigraphicspipeline_stencilopstate_wrapper.cpp
@@ -175,9 +173,6 @@ ${QtGui_GEN_DIR}/qmovie_wrapper.cpp
 ${QtGui_GEN_DIR}/qnativegestureevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qnativeinterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qoffscreensurface_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglcontextgroup_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglextrafunctions_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglfunctions_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagedpaintdevice_wrapper.cpp
 ${QtGui_GEN_DIR}/qpagelayout_wrapper.cpp
 ${QtGui_GEN_DIR}/qpageranges_wrapper.cpp
@@ -221,7 +216,6 @@ ${QtGui_GEN_DIR}/qsinglepointevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qstandarditem_wrapper.cpp
 ${QtGui_GEN_DIR}/qstandarditemmodel_wrapper.cpp
 ${QtGui_GEN_DIR}/qstatustipevent_wrapper.cpp
-${QtGui_GEN_DIR}/qopenglcontext_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessible_state_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleinterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qscreen_wrapper.cpp
@@ -296,6 +290,22 @@ if("xcb" IN_LIST QtGui_enabled_features)
 elseif(WIN32)
     list(APPEND QtGui_SRC
          ${QtGui_GEN_DIR}/qnativeinterface_qwindowsscreen_wrapper.cpp)
+endif()
+
+if("opengl" IN_LIST QtGui_enabled_features OR "opengles2" IN_LIST QtGui_enabled_features
+   OR "opengles3" IN_LIST QtGui_enabled_features)
+    list(APPEND QtGui_SRC
+         ${QtGui_GEN_DIR}/qopenglcontextgroup_wrapper.cpp
+         ${QtGui_GEN_DIR}/qopenglextrafunctions_wrapper.cpp
+         ${QtGui_GEN_DIR}/qopenglfunctions_wrapper.cpp
+         ${QtGui_GEN_DIR}/qopenglcontext_wrapper.cpp
+         ${QtGui_GEN_DIR}/qrhigles2initparams_wrapper.cpp
+         ${QtGui_GEN_DIR}/qrhigles2nativehandles_wrapper.cpp)
+else()
+    list(APPEND QtGui_DROPPED_ENTRIES
+         QOpenGLContext QOpenGLContextGroup QOpenGLPaintDevice
+         QOpenGLExtraFunctions QOpenGLFunctions
+         QRhiGles2InitParams QRhiGles2NativeHandles)
 endif()
 
 set(QtGui_private_include_dirs
