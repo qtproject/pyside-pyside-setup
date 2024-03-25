@@ -38,13 +38,7 @@ set(QtQuick3D_include_dirs  ${QtQuick3D_SOURCE_DIR}
                           ${QtQuick3D_GEN_DIR})
 
 set(QtQuick3D_libraries pyside6
-                      ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}OpenGL_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Qml_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Quick_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Quick3D_LIBRARIES})
+                        ${Qt${QT_MAJOR_VERSION}Quick3D_LIBRARIES})
 
 set(QtQuick3D_deps QtGui QtOpenGL QtNetwork QtQml QtQuick)
 

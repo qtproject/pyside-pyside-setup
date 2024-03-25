@@ -87,8 +87,6 @@ set(QtOpenGL_include_dirs   ${QtOpenGL_SOURCE_DIR}
                             ${QtOpenGL_GEN_DIR}
                             )
 set(QtOpenGL_libraries      pyside6
-                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
                             ${Qt${QT_MAJOR_VERSION}OpenGL_LIBRARIES})
 set(QtOpenGL_deps QtGui)
 

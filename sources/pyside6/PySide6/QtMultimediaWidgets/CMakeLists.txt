@@ -26,12 +26,8 @@ set(QtMultimediaWidgets_include_dirs ${QtMultimediaWidgets_SOURCE_DIR}
                                      ${QtMultimedia_GEN_DIR})
 
 set(QtMultimediaWidgets_libraries    pyside6
-                                     ${Qt${QT_MAJOR_VERSION}Multimedia_LIBRARIES}
-                                     ${Qt${QT_MAJOR_VERSION}MultimediaWidgets_LIBRARIES}
-                                     ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                                     ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                                     ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
-                                     ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES})
+                                     ${Qt${QT_MAJOR_VERSION}MultimediaWidgets_LIBRARIES})
+
 
 set(QtMultimediaWidgets_deps QtCore QtGui QtNetwork QtWidgets QtMultimedia)
 

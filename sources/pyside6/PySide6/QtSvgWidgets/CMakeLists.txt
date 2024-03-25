@@ -21,16 +21,10 @@ set(QtSvgWidgets_include_dirs ${QtSvgWidgets_SOURCE_DIR}
                               ${QtCore_GEN_DIR}
                               ${QtGui_GEN_DIR}
                               ${QtWidgets_GEN_DIR}
-                              ${QtSvg_GEN_DIR}
-                              )
+                              ${QtSvg_GEN_DIR})
 
 set(QtSvgWidgets_libraries pyside6
-                           ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                           ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                           ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
-                           ${Qt${QT_MAJOR_VERSION}Svg_LIBRARIES}
-                           ${Qt${QT_MAJOR_VERSION}SvgWidgets_LIBRARIES}
-                           )
+                           ${Qt${QT_MAJOR_VERSION}SvgWidgets_LIBRARIES})
 
 set(QtSvgWidgets_deps QtSvg QtWidgets)
 

@@ -29,13 +29,7 @@ set(QtQuickControls2_include_dirs ${QtQuickControls2_SOURCE_DIR}
                                   ${QtQuickControls2_GEN_DIR})
 
 set(QtQuickControls2_libraries pyside6
-                      ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}OpenGL_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Qml_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Quick_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}QuickControls2_LIBRARIES})
+                               ${Qt${QT_MAJOR_VERSION}QuickControls2_LIBRARIES})
 
 set(QtQuickControls2_deps QtGui QtOpenGL QtNetwork QtQml QtQuick)
 

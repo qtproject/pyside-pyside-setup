@@ -28,12 +28,8 @@ set(QtSpatialAudio_include_dirs ${QtSpatialAudio_SOURCE_DIR}
                                 ${QtMultimedia_GEN_DIR})
 
 set(QtSpatialAudio_libraries pyside6
-                             ${Qt${QT_MAJOR_VERSION}SpatialAudio_LIBRARIES}
-                             ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                             ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                             ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
-                             ${Qt${QT_MAJOR_VERSION}Multimedia_LIBRARIES}
-                             )
+                             ${Qt${QT_MAJOR_VERSION}SpatialAudio_LIBRARIES})
+
 set(QtSpatialAudio_deps QtCore QtGui QtNetwork QtMultimedia)
 
 create_pyside_module(NAME QtSpatialAudio

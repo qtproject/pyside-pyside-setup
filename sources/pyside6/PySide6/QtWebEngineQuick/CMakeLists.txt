@@ -19,15 +19,10 @@ set(QtWebEngineQuick_include_dirs
                             ${libpyside_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
                             ${QtNetwork_GEN_DIR}
-                            ${QtQml_GEN_DIR}
-                            )
+                            ${QtQml_GEN_DIR})
 
 set(QtWebEngineQuick_libraries pyside6
-                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}Qml_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}WebEngineQuick_LIBRARIES}
-                            )
+                               ${Qt${QT_MAJOR_VERSION}WebEngineQuick_LIBRARIES})
 
 set(QtWebEngineQuick_deps QtQml QtNetwork QtCore)
 

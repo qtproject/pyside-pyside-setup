@@ -73,10 +73,7 @@ set(QtCharts_include_dirs ${QtCharts_SOURCE_DIR}
                           ${QtWidgets_GEN_DIR})
 
 set(QtCharts_libraries    pyside6
-                          ${Qt${QT_MAJOR_VERSION}Charts_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES})
+                          ${Qt${QT_MAJOR_VERSION}Charts_LIBRARIES})
 
 set(QtCharts_deps QtCore QtGui QtWidgets)
 

@@ -51,14 +51,11 @@ set(QtDesigner_include_dirs ${QtDesigner_SOURCE_DIR}
                             ${QtDesigner_BINARY_DIR}
                             ${QtCore_GEN_DIR}
                             ${QtGui_GEN_DIR}
-                            ${QtWidgets_GEN_DIR}
-                            )
+                            ${QtWidgets_GEN_DIR})
+
 set(QtDesigner_libraries pyside6
-                         ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                         ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                         ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
-                         ${Qt${QT_MAJOR_VERSION}Designer_LIBRARIES}
-                         )
+                         ${Qt${QT_MAJOR_VERSION}Designer_LIBRARIES})
+
 set(QtDesigner_deps QtWidgets)
 
 create_pyside_module(NAME QtDesigner

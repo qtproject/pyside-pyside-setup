@@ -29,10 +29,7 @@ set(QtPdf_include_dirs ${QtPdf_SOURCE_DIR}
                        ${QtNetwork_GEN_DIR})
 
 set(QtPdf_libraries pyside6
-    ${Qt${QT_MAJOR_VERSION}Pdf_LIBRARIES}
-    ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-    ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-    ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES})
+                    ${Qt${QT_MAJOR_VERSION}Pdf_LIBRARIES})
 
 set(QtPdf_deps QtCore QtGui QtNetwork)
 

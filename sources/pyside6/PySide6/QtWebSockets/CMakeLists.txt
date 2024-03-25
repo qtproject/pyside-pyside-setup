@@ -22,13 +22,10 @@ set(QtWebSockets_include_dirs ${QtWebSockets_SOURCE_DIR}
                         ${libpyside_SOURCE_DIR}
                         ${QtCore_GEN_DIR}
                         ${QtWebSockets_GEN_DIR}
-                        ${QtNetwork_GEN_DIR}
-                        )
-set(QtWebSockets_libraries    pyside6
-                        ${Qt${QT_MAJOR_VERSION}WebSockets_LIBRARIES}
-                        ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
-                        ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                        )
+                        ${QtNetwork_GEN_DIR})
+
+set(QtWebSockets_libraries pyside6
+                           ${Qt${QT_MAJOR_VERSION}WebSockets_LIBRARIES})
 
 set(QtWebSockets_deps QtNetwork)
 

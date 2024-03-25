@@ -26,12 +26,7 @@ set(QtPdfWidgets_include_dirs ${QtPdfWidgets_SOURCE_DIR}
                               ${QtPdf_GEN_DIR})
 
 set(QtPdfWidgets_libraries pyside6
-    ${Qt${QT_MAJOR_VERSION}Pdf_LIBRARIES}
-    ${Qt${QT_MAJOR_VERSION}PdfWidgets_LIBRARIES}
-    ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-    ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-    ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
-    ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES})
+                           ${Qt${QT_MAJOR_VERSION}PdfWidgets_LIBRARIES})
 
 set(QtPdfWidgets_deps QtCore QtGui QtNetwork QtWidgets QtPdf)
 

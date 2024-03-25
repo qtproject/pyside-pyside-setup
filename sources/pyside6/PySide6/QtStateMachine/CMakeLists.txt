@@ -26,13 +26,11 @@ set(QtStateMachine_include_dirs  ${QtStateMachine_SOURCE_DIR}
                             ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
                             ${libpyside_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
-                            ${QtGui_GEN_DIR}
-                            )
+                            ${QtGui_GEN_DIR})
+
 set(QtStateMachine_libraries pyside6
-                        ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                        ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                        ${Qt${QT_MAJOR_VERSION}StateMachine_LIBRARIES}
-                        )
+                             ${Qt${QT_MAJOR_VERSION}StateMachine_LIBRARIES})
+
 set(QtStateMachine_deps QtGui)
 
 create_pyside_module(NAME QtStateMachine

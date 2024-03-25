@@ -25,15 +25,12 @@ set(QtUiTools_include_dirs  ${QtUiTools_SOURCE_DIR}
                             ${plugins_SOURCE_DIR}
                             ${QtCore_GEN_DIR}
                             ${QtGui_GEN_DIR}
-                            ${QtWidgets_GEN_DIR}
-                            )
+                            ${QtWidgets_GEN_DIR})
+
 set(QtUiTools_libraries     pyside6
                             uiplugin
-                            ${Qt${QT_MAJOR_VERSION}UiTools_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                            ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
-                            )
+                            ${Qt${QT_MAJOR_VERSION}UiTools_LIBRARIES})
+
 set(QtUiTools_deps QtWidgets)
 
 configure_file("${QtUiTools_SOURCE_DIR}/QtUiTools_global.pre.h.in"

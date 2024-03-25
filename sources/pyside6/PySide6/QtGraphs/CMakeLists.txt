@@ -80,16 +80,7 @@ set(QtGraphs_include_dirs ${QtGraphs_SOURCE_DIR}
                           ${QtQuick3D_GEN_DIR})
 
 set(QtGraphs_libraries    pyside6
-                          ${Qt${QT_MAJOR_VERSION}Graphs_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Qml_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}OpenGL_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Quick_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}QuickWidgets_LIBRARIES}
-                          ${Qt${QT_MAJOR_VERSION}Quick3D_LIBRARIES})
+                          ${Qt${QT_MAJOR_VERSION}Graphs_LIBRARIES})
 
 set(QtGraphs_deps QtCore QtNetwork QtGui QtWidgets QtQml QtOpenGL QtQuick QtQuickWidgets QtQuick3D)
 

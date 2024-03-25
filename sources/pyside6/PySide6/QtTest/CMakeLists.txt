@@ -27,14 +27,15 @@ set(QtTest_include_dirs ${QtTest_SOURCE_DIR}
                         ${libpyside_SOURCE_DIR}
                         ${QtCore_GEN_DIR}
                         ${QtGui_GEN_DIR}
-                        ${QtWidgets_GEN_DIR}
-                        )
+                        ${QtWidgets_GEN_DIR})
+
+# Link to QtGui/QtWidgets to enable gui/widget-specific inline functions
 set(QtTest_libraries    pyside6
                         ${Qt${QT_MAJOR_VERSION}Test_LIBRARIES}
                         ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
                         ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                        ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                        )
+                        ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES})
+
 set(QtTest_deps  QtWidgets)
 
 create_pyside_module(NAME QtTest

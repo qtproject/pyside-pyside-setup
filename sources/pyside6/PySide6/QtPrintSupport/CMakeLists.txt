@@ -25,14 +25,11 @@ set(QtPrintSupport_include_dirs ${QtPrintSupport_SOURCE_DIR}
                                 ${libpyside_SOURCE_DIR}
                                 ${QtCore_GEN_DIR}
                                 ${QtGui_GEN_DIR}
-                                ${QtWidgets_GEN_DIR}
-                                )
+                                ${QtWidgets_GEN_DIR})
+
 set(QtPrintSupport_libraries    pyside6
-                                ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                                ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                                ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
-                                ${Qt${QT_MAJOR_VERSION}PrintSupport_LIBRARIES}
-                                )
+                                ${Qt${QT_MAJOR_VERSION}PrintSupport_LIBRARIES})
+
 set(QtPrintSupport_deps QtWidgets)
 create_pyside_module(NAME QtPrintSupport
                      INCLUDE_DIRS QtPrintSupport_include_dirs

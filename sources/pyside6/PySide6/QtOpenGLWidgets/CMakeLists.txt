@@ -21,10 +21,6 @@ set(QtOpenGLWidgets_include_dirs ${QtOpenGLWidgets_SOURCE_DIR}
                                  ${QtOpenGLWidgets_GEN_DIR})
 
 set(QtOpenGLWidgets_libraries pyside6
-                              ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                              ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                              ${Qt${QT_MAJOR_VERSION}OpenGL_LIBRARIES}
-                              ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
                               ${Qt${QT_MAJOR_VERSION}OpenGLWidgets_LIBRARIES})
 
 set(QtOpenGLWidgets_deps QtOpenGL QtWidgets)

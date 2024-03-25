@@ -40,9 +40,6 @@ set(QtHelp_include_dirs ${QtHelp_SOURCE_DIR}
                         ${QtCore_GEN_DIR}
                         )
 set(QtHelp_libraries  pyside6
-                      ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES}
-                      ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
                       ${Qt${QT_MAJOR_VERSION}Help_LIBRARIES})
 
 set(QtHelp_deps QtWidgets)
