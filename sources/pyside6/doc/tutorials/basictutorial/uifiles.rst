@@ -220,8 +220,8 @@ Qt for Python provides a simple interface for this which is similar to
 :meth:`registerCustomWidget()<PySide6.QtUiTools.QUiLoader.registerCustomWidget>`.
 
 The widget needs to be provided as a Python module, as shown by
-the widgetbinding example (file ``wigglywidget.py``) or
-the taskmenuextension example (file ``tictactoe.py``).
+the :ref:`widgetbinding-example` (file ``wigglywidget.py``) or
+the :ref:`task-menu-extension-example` (file ``tictactoe.py``).
 
 Registering this with Qt Designer is done by providing
 a registration script named ``register*.py`` and pointing

@@ -1,7 +1,5 @@
-# WigglyWidget
-
-The original Qt/C++ example can be found here:
-https://doc.qt.io/qt-6/qtwidgets-widgets-wiggly-example.html
+(widgetbinding-example)=
+# WigglyWidget Example
 
 This example shows how to interact with a custom widget from two
 different ways:

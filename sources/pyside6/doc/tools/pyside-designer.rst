@@ -85,8 +85,7 @@ We provide a helper class, ``QPyDesignerCustomWidgetCollection``, to
 simplify the registration process.
 
 If you are interested in all the details of this specific case, you can
-check the `example's page`_.
+check the :ref:`task-menu-extension-example`.
 
 .. _`Qt Widget Designer`: https://doc.qt.io/qt-6/qtdesigner-manual.html
 .. _`Qt Widget Designer Manual`: https://doc.qt.io/qt-6/qtdesigner-manual.html
-.. _`example's page`: https://doc.qt.io/qtforpython-6/examples/example_designer_taskmenuextension.html
