@@ -7,8 +7,11 @@
 <typesystem package="PySide6.Qt3DRender"
             namespace-begin="QT_BEGIN_NAMESPACE" namespace-end="QT_END_NAMESPACE">
     <load-typesystem name="Qt3DCore/typesystem_3dcore.xml" generate="no"/>
+    <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
     <!-- PYSIDE-2610: QOpenGLTexture's enums are used -->
+    <?if !no_QtOpenGL?>
     <load-typesystem name="QtOpenGL/typesystem_opengl.xml" generate="no"/>
+    <?endif?>
     <smart-pointer-type name="QSharedPointer" type="shared" getter="data"
                         reset-method="reset"
                         instantiations="Qt3DRender::PropertyReaderInterface=Qt3DRender::PropertyReaderInterfacePtr,Qt3DRender::QTextureImageData=Qt3DRender::QTextureImageDataPtr,Qt3DRender::QTextureImageDataGenerator=Qt3DRender::QTextureImageDataGeneratorPtr"/>

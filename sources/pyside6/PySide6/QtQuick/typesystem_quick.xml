@@ -7,8 +7,11 @@
             namespace-begin="QT_BEGIN_NAMESPACE" namespace-end="QT_END_NAMESPACE">
     <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
     <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
+    <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
     <!-- QQuickFramebufferObject::Renderer needs QOpenGLFramebufferObject -->
+    <?if !no_QtOpenGL?>
     <load-typesystem name="QtOpenGL/typesystem_opengl.xml" generate="no"/>
+    <?endif?>
     <load-typesystem name="QtQml/typesystem_qml.xml" generate="no"/>
 
     <smart-pointer-type name="QSharedPointer" type="shared" getter="data"

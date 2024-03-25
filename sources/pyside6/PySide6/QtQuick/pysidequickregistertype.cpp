@@ -9,7 +9,10 @@
 #include <shiboken.h>
 
 #include <QtQuick/QQuickPaintedItem>
-#include <QtQuick/QQuickFramebufferObject>
+
+#if QT_CONFIG(opengl) || QT_CONFIG(opengles2) || QT_CONFIG(opengles3)
+#  include <QtQuick/QQuickFramebufferObject>
+#endif
 
 bool pyTypeObjectInheritsFromClass(PyTypeObject *pyObjType, const char *classPtrName)
 {
@@ -51,8 +54,10 @@ bool quickRegisterType(PyObject *pyObj, QQmlPrivate::RegisterTypeAndRevisions *t
 
     return registerTypeIfInheritsFromClass<QQuickPaintedItem>("QQuickPaintedItem*",
                                                               pyObjType, type)
+#if QT_CONFIG(opengl) || QT_CONFIG(opengles2) || QT_CONFIG(opengles3)
         || registerTypeIfInheritsFromClass<QQuickFramebufferObject>("QQuickFramebufferObject*",
                                                                     pyObjType, type)
+#endif
         || registerTypeIfInheritsFromClass<QQuickItem>("QQuickItem*",
                                                        pyObjType, type);
 }
@@ -62,7 +67,9 @@ void PySide::initQuickSupport(PyObject *module)
     Q_UNUSED(module);
     // We need to manually register a pointer version of these types in order for them to be used as property types.
     qRegisterMetaType<QQuickPaintedItem*>("QQuickPaintedItem*");
+#if QT_CONFIG(opengl) || QT_CONFIG(opengles2) || QT_CONFIG(opengles3)
     qRegisterMetaType<QQuickFramebufferObject*>("QQuickFramebufferObject*");
+#endif
     qRegisterMetaType<QQuickItem*>("QQuickItem*");
 
     Qml::setQuickRegisterItemFunction(quickRegisterType);
