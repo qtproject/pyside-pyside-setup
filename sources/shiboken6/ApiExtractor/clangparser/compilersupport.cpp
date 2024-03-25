@@ -94,6 +94,12 @@ bool setPlatform(const QString &name)
     return result;
 }
 
+// 3/2024: Use a recent MSVC2022 for libclang 18.X
+static QByteArray msvcCompatVersion()
+{
+    return libClangVersion() >= QVersionNumber(0, 64) ? "19.39"_ba : "19.26"_ba;
+}
+
 static bool runProcess(const QString &program, const QStringList &arguments,
                        QByteArray *stdOutIn = nullptr, QByteArray *stdErrIn = nullptr)
 {
@@ -365,9 +371,10 @@ QByteArrayList emulatedCompilerOptions()
     HeaderPaths headerPaths;
     switch (compiler()) {
     case Compiler::Msvc:
-        result.append(QByteArrayLiteral("-fms-compatibility-version=19.26.28806"));
+        result.append("-fms-compatibility-version="_ba + msvcCompatVersion());
         result.append(QByteArrayLiteral("-fdelayed-template-parsing"));
         result.append(QByteArrayLiteral("-Wno-microsoft-enum-value"));
+        result.append("/Zc:__cplusplus"_ba);
         // Fix yvals_core.h:  STL1000: Unexpected compiler version, expected Clang 7 or newer (MSVC2017 update)
         result.append(QByteArrayLiteral("-D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH"));
         if (needsClangBuiltinIncludes())
