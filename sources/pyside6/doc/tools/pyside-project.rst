@@ -28,7 +28,8 @@ The tool has several subcommands. New projects can be created using
 the below commands, passing the project name (directory):
 
 *new-ui*
-    Creates a new QtWidgets project with a Qt Designer-based main window.
+    Creates a new QtWidgets project with a *Qt Widgets Designer*-based main
+    window.
 
 *new-widget*
     Creates a new QtWidgets project with a main window.

@@ -26,7 +26,8 @@ The usage is explained in :ref:`designer_custom_widgets`.
 
 .. py:staticmethod:: QPyDesignerCustomWidgetCollection.registerCustomWidget(type[, xml=""[, tool_tip=""[, icon=""[, group=""[container=False]]]]])
 
-   Registers an instance of a Python-implemented QWidget by type with Qt Designer.
+   Registers an instance of a Python-implemented QWidget by type with
+   *Qt Widgets Designer*.
 
    The optional keyword arguments correspond to the getters of
    `QDesignerCustomWidgetInterface`_ :
@@ -44,7 +45,7 @@ The usage is explained in :ref:`designer_custom_widgets`.
 
     Adds a custom widget (implementation of
     `QDesignerCustomWidgetInterface`_)
-    with Qt Designer.
+    with *Qt Widgets Designer*.
 
    :param QDesignerCustomWidgetInterface custom_widget: Custom widget instance
 

@@ -15,8 +15,8 @@ From a terminal:
   :command:`pyside6-uic -i form.ui -o ui_form.py`
 * Generating a Python file from a ``.qrc`` file:
   :command:`pyside6-rcc -i resources.qrc -o rc_resources.py`
-* Opening Qt Designer with the command :command:`pyside6-designer` to
-  edit/create ``.ui`` files.
+* Opening *Qt Widgets Designer* with the command :command:`pyside6-designer`
+  to edit/create ``.ui`` files.
 
 External add-ons/plugins from your favorite IDE might include configuration
 steps to run these commands, or open external tools like Designer and
@@ -47,8 +47,10 @@ that you can install from VS Code while writing the following on the Quick Open 
 PyCharm
 -------
 
-You can configure PyCharm to enable external tools, in |project| terms, Qt Designer, and
-Qt Creator. Go to ``File > Settings > tools > PyCharm External Tools``, and include the following
+You can configure PyCharm to enable external tools, in |project| terms,
+*Qt Widgets Designer*, and Qt Creator. Go to
+``File > Settings > tools > PyCharm External Tools``, and include the following
 information to add them to your project.
-Later, you will be able to right click a ``.ui`` file, and select ``Qt Designer``,
-``pyside6-uic``, or any tool that you configured this way.
+Later, you will be able to right click a ``.ui`` file, and select
+``Qt Widgets Designer``, ``pyside6-uic``, or any tool that you configured this
+way.

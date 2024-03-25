@@ -3,7 +3,7 @@
 pyside6-designer
 ================
 
-``pyside6-designer`` is a tool that wraps the `Qt Widget Designer`_,
+``pyside6-designer`` is a tool that wraps the `Qt Widgets Designer`_,
 to enable you to design Qt Widgets applications with a *drag-and-drop*
 approach.
 
@@ -46,13 +46,13 @@ with the help of the :ref:`pyside6-uic` tool. You can find
 more details of this process in: :ref:`using_ui_files`.
 
 If you are interested in more functionality of the tool, you can check
-the official `Qt Widget Designer Manual`_.
+the official `Qt Widgets Designer Manual`_.
 
 
 Custom Widgets
 --------------
 
-One of the features that the `Qt Widget Designer`_ provides is the possibility
+One of the features that the `Qt Widgets Designer`_ provides is the possibility
 of loading custom widgets, in order to facilitate the development with ad-hoc
 widgets.
 
@@ -80,12 +80,12 @@ is located. The registration file for the tic-tac-toe widget looks like this:
 
 As you can see in the previous code, ``TicTacToe`` is the custom widget,
 imported from a different file, and the ``TicTacToePlugin`` is the interface
-layer for `Qt Widget Designer`_ to recognize it.
+layer for `Qt Widgets Designer`_ to recognize it.
 We provide a helper class, ``QPyDesignerCustomWidgetCollection``, to
 simplify the registration process.
 
 If you are interested in all the details of this specific case, you can
 check the :ref:`task-menu-extension-example`.
 
-.. _`Qt Widget Designer`: https://doc.qt.io/qt-6/qtdesigner-manual.html
-.. _`Qt Widget Designer Manual`: https://doc.qt.io/qt-6/qtdesigner-manual.html
+.. _`Qt Widgets Designer`: https://doc.qt.io/qt-6/qtdesigner-manual.html
+.. _`Qt Widgets Designer Manual`: https://doc.qt.io/qt-6/qtdesigner-manual.html

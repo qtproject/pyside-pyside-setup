@@ -36,9 +36,10 @@ functionality to your applications.
 User Interface Definition File ``.ui``
 --------------------------------------
 
-When using Qt Designer, you can create user interfaces using Qt Widgets with
-the WYSIWYG form editor, this interface is represented as a widget tree using
-XML. Here is an extract of the beginning of a ``.ui`` file:
+When using *Qt Widgets Designer*, you can create user interfaces using
+Qt Widgets with the WYSIWYG form editor, this interface is represented
+as a widget tree using XML. Here is an extract of the beginning of a
+``.ui`` file:
 
 .. code-block:: xml
 

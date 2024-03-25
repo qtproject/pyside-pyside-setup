@@ -4,13 +4,13 @@ Using ``.ui`` files from Designer or QtCreator with ``QUiLoader`` and ``pyside6-
 *************************************************************************************
 
 This page describes the use of
-`Qt Designer <https://doc.qt.io/qt-6/qtdesigner-manual.html>`_ to create
+`Qt Widgets Designer <https://doc.qt.io/qt-6/qtdesigner-manual.html>`_ to create
 graphical interfaces based on Qt Widgets for your Qt for Python project.
-**Qt Designer** is a graphical UI design tool which is available as a
+*Qt Widgets Designer* is a graphical UI design tool which is available as a
 standalone binary (``pyside6-designer``) or embedded into the
 `Qt Creator IDE <https://doc.qt.io/qtcreator>`_. Its use within **Qt Creator**
 is described at
-`Using Qt Designer <https://doc.qt.io/qtcreator/creator-using-qt-designer.html>`_.
+`Using Qt Widgets Designer <https://doc.qt.io/qtcreator/creator-using-qt-designer.html>`_.
 
 .. image:: uifiles.png
    :alt: Designer and the equivalent code
@@ -206,14 +206,15 @@ command prompt:
 
 .. _designer_custom_widgets:
 
-Custom Widgets in Qt Designer
-=============================
+Custom Widgets in Qt Widgets Designer
+=====================================
 
-**Qt Designer** is able to use user-provided (custom) widgets. They are shown
-in the widget box and can be dragged onto the form just like Qt's widgets (see
-`Using Custom Widgets with Qt Designer <https://doc.qt.io/qt-6/designer-using-custom-widgets.html>`_
-). Normally, this requires implementing the widget as a plugin to Qt Designer
-written in C++ implementing its
+*Qt Widgets Designer* is able to use user-provided (custom) widgets.
+They are shown in the widget box and can be dragged onto the form just like
+Qt's widgets (see
+`Using Custom Widgets with Qt Widgets Designer <https://doc.qt.io/qt-6/designer-using-custom-widgets.html>`_
+). Normally, this requires implementing the widget as a plugin to
+*Qt Widgets Designer* written in C++ implementing its
 `QDesignerCustomWidgetInterface`_ .
 
 Qt for Python provides a simple interface for this which is similar to
@@ -223,7 +224,7 @@ The widget needs to be provided as a Python module, as shown by
 the :ref:`widgetbinding-example` (file ``wigglywidget.py``) or
 the :ref:`task-menu-extension-example` (file ``tictactoe.py``).
 
-Registering this with Qt Designer is done by providing
+Registering this with *Qt Widgets Designer* is done by providing
 a registration script named ``register*.py`` and pointing
 the path-type environment variable ``PYSIDE_DESIGNER_PLUGINS``
 to the directory.
@@ -263,19 +264,19 @@ The code of the registration script looks as follows:
 
 QPyDesignerCustomWidgetCollection provides an implementation of
 `QDesignerCustomWidgetCollectionInterface`_
-exposing custom widgets to **Qt Designer** with static convenience functions
-for registering types or adding instances of
+exposing custom widgets to *Qt Widgets Designer* with static convenience
+functions for registering types or adding instances of
 `QDesignerCustomWidgetInterface`_ .
 
 The function
 :meth:`registerCustomWidget()<PySide6.QtDesigner.QPyDesignerCustomWidgetCollection.registerCustomWidget>`
-is used to register a widget type with **Qt Designer**. In the simple case, it
+is used to register a widget type with *Qt Widgets Designer*. In the simple case, it
 can be used like ``QUiLoader.registerCustomWidget()``. It takes the custom widget
 type and some optional keyword arguments passing values that correspond to the
 getters of
 `QDesignerCustomWidgetInterface`_ :
 
-When launching **Qt Designer** via its launcher ``pyside6-designer``,
+When launching *Qt Widgets Designer* via its launcher ``pyside6-designer``,
 the custom widget should be visible in the widget box.
 
 For advanced usage, it is also possible to pass the function an implementation
@@ -289,15 +290,15 @@ corresponding C++
 .. _QDesignerCustomWidgetCollectionInterface: https://doc.qt.io/qt-6/qdesignercustomwidgetcollectioninterface.html
 .. _QDesignerCustomWidgetInterface: https://doc.qt.io/qt-6/qdesignercustomwidgetinterface.html
 
-Troubleshooting the Qt Designer Plugin
-++++++++++++++++++++++++++++++++++++++
+Troubleshooting the Qt Widgets Designer Plugin
+++++++++++++++++++++++++++++++++++++++++++++++
 
 - The launcher ``pyside6-designer`` must be used. The standalone
-  **Qt Designer** will not load the plugin.
+  *Qt Widgets Designer* will not load the plugin.
 - The menu item **Help/About Plugin** brings up a dialog showing the plugins
   found and potential load error messages.
 - Check the console or Windows Debug view for further error messages.
 - Due to the buffering of output by Python, error messages may appear
-  only after **Qt Designer** has terminated.
+  only after *Qt Widgets Designer* has terminated.
 - When building Qt for Python, be sure to set the ``--standalone`` option
   for the plugin to be properly installed.
