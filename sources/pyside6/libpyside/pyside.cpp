@@ -1062,9 +1062,15 @@ static void formatPyObjectValue(PyObject *obj, QDebug &debug)
 {
     if (PyType_Check(obj) != 0)
         debug << "type: \"" << pyTypeName(obj) << '"';
-    else if (PyLong_Check(obj) != 0)
-        debug << PyLong_AsLongLong(obj);
-    else if (PyFloat_Check(obj) != 0)
+    else if (PyLong_Check(obj) != 0) {
+        const auto llv = PyLong_AsLongLong(obj);
+        if (PyErr_Occurred() != PyExc_OverflowError) {
+            debug << llv;
+        } else {
+            PyErr_Clear();
+            debug << "0x" << Qt::hex << PyLong_AsUnsignedLongLong(obj) << Qt::dec;
+        }
+    } else if (PyFloat_Check(obj) != 0)
         debug << PyFloat_AsDouble(obj);
     else if (PyUnicode_Check(obj) != 0)
         debug << '"' << pyStringToQString(obj) << '"';
