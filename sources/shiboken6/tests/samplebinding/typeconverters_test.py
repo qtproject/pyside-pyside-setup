@@ -177,6 +177,14 @@ class PrimitiveConversionTest(unittest.TestCase):
         point.setX(large_int)
         self.assertEqual(round(point.x()), large_int)
 
+    def testUnsignedLongLongAsFloat(self):
+        """PYSIDE-2652: When passing an unsigned long long to a function taking float,
+           an unsigned 64bit conversion should be done."""
+        point = sample.PointF(1, 2)
+        large_int = 2**63
+        point.setX(large_int)
+        self.assertEqual(round(point.x()), large_int)
+
 
 if __name__ == '__main__':
     unittest.main()
