@@ -330,8 +330,15 @@ static void formatPyObjectHelper(PyObject *obj, std::ostream &str)
     }
     formatPyTypeObject(obj->ob_type, str, false);
     str << ", ";
-    if (PyLong_Check(obj))
-        str << PyLong_AsLong(obj);
+    if (PyLong_Check(obj)) {
+        const auto llv = PyLong_AsLongLong(obj);
+        if (PyErr_Occurred() != PyExc_OverflowError) {
+            str << llv;
+        } else {
+            PyErr_Clear();
+            str << "0x" << std::hex << PyLong_AsUnsignedLongLong(obj) << std::dec;
+        }
+    }
     else if (PyFloat_Check(obj))
         str << PyFloat_AsDouble(obj);
     else if (PyUnicode_Check(obj))
