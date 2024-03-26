@@ -491,7 +491,9 @@
   <object-type name="QDateEdit"/>
   <object-type name="QDialog">
     <enum-type name="DialogCode" python-type="IntEnum"/>
-    <modify-function signature="exec()" allow-thread="yes"/>
+    <modify-function signature="exec()" allow-thread="yes">
+        <inject-code file="../glue/qtwidgets.cpp" snippet="qdialog-exec-remove-parent-relation"/>
+    </modify-function>
     <add-function signature="exec_()" return-type="int">
         <inject-code file="../glue/qtwidgets.cpp" snippet="qapplication-exec"/>
     </add-function>

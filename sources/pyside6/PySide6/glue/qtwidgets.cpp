@@ -803,6 +803,14 @@ const QByteArray signature = QByteArrayLiteral("2") + method.methodSignature();
 %END_ALLOW_THREADS
 // @snippet qwizardpage-registerfield
 
+// The constructor heuristics generate setting a parent-child relationship
+// when creating a QDialog with parent. This causes the dialog to leak
+// when it synchronous exec() is used instead of asynchronous show().
+// In that case, remove the parent-child relationship.
+// @snippet qdialog-exec-remove-parent-relation
+Shiboken::Object::removeParent(reinterpret_cast<SbkObject *>(%PYSELF));
+// @snippet qdialog-exec-remove-parent-relation
+
 /*********************************************************************
  * CONVERSIONS
  ********************************************************************/
