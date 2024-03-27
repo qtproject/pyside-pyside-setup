@@ -53,8 +53,9 @@ information about a particular change.
  - [PYSIDE-2206] The colorpaletteclient demo as well as the hellographs and
                  simplerhiwidget examples have been added.
  - [PYSIDE-2215] Intersphinx support has been improved.
+ - [PYSIDE-2280] A type for os.PathLike type hints has been added.
  - [PYSIDE-2404] Application startup time has been significantly decreased
-                 by registering the types on demand. The importing of numpy
+                 by creating the types on demand. The importing of numpy
                  has also been deferred since it caused quite some delay.
  - [PYSIDE-2432] A static create() function for decorated QML singletons
                  has been added.
@@ -85,6 +86,9 @@ information about a particular change.
                  to decorate slots with those names (for example,
                  "QRemoteObjectSourceLocation").
  - [PYSIDE-2639] Segmentation fault with QLocale.system() has been fixed.
+ - [PYSIDE-2652] A bug when passing values of unsigned long long type
+                 exceeding the long long maximum value to float
+                 parameters has been fixed.
  - [QTBUG-119785] The Filesystemexplorer-example has been updated.
 
 ****************************************************************************
