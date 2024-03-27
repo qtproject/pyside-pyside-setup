@@ -574,7 +574,24 @@ def module_QtQuick() -> ModuleData:
 
 def module_QtQuickControls2() -> ModuleData:
     data = ModuleData("QuickControls2")
+    data.qtlib.append("libQt6QuickControls2")
+    data.qtlib.append("libQt6QuickControls2Basic")
+    data.qtlib.append("libQt6QuickControls2BasicStyleImpl")
+    data.qtlib.append("libQt6QuickControls2Fusion")
+    data.qtlib.append("libQt6QuickControls2FusionStyleImpl")
+    data.qtlib.append("libQt6QuickControls2Imagine")
+    data.qtlib.append("libQt6QuickControls2ImagineStyleImpl")
     data.qtlib.append("libQt6QuickControls2Impl")
+    data.qtlib.append("libQt6QuickControls2Material")
+    data.qtlib.append("libQt6QuickControls2MaterialStyleImpl")
+    data.qtlib.append("libQt6QuickControls2Universal")
+    data.qtlib.append("libQt6QuickControls2UniversalStyleImpl")
+    if sys.platform == "win32":
+        data.qtlib.append("libQt6QuickControls2WindowsStyleImpl")
+    elif sys.platform == "darwin":
+        data.qtlib.append("libQt6QuickControls2IOSStyleImpl")
+        data.qtlib.append("libQt6QuickControls2MacOSStyleImpl")
+
     data.metatypes.append("qt6quickcontrols2impl_relwithdebinfo_metatypes.json")
 
     return data
