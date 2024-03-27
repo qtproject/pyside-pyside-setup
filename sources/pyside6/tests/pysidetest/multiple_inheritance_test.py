@@ -12,7 +12,7 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtWidgets import QMainWindow, QLabel
+from PySide6.QtWidgets import QMainWindow, QLabel, QWidget
 
 
 def xprint(*args, **kw):
@@ -71,7 +71,8 @@ class C(A, B):
         xprint('C: after init')
 
 
-# mro ('F', 'D', 'QCursor', 'E', 'QLabel', 'QFrame', 'QWidget', 'QObject', 'QPaintDevice', 'Object', 'object')
+# mro ('F', 'D', 'QCursor', 'E', 'QLabel', 'QFrame', 'QWidget', 'QObject',
+#      'QPaintDevice', 'Object', 'object')
 class D(QtGui.QCursor):
     def __init__(self, anna=77, **kw):
         xprint(f'D: before init kw = {kw}')
@@ -94,7 +95,8 @@ class F(D, E, QtWidgets.QLabel):
         xprint('F: after init')
 
 
-# mro ('I', 'G', 'QTextDocument', 'H', 'QLabel', 'QFrame', 'QWidget', 'QObject', 'QPaintDevice', 'Object', 'object')
+# mro ('I', 'G', 'QTextDocument', 'H', 'QLabel', 'QFrame', 'QWidget', 'QObject',
+#      'QPaintDevice', 'Object', 'object')
 # Similar, but this time we want to reach `H` without support from `super`.
 class G(QtGui.QTextDocument):
     pass
@@ -108,7 +110,7 @@ class H:
         xprint('H: after init')
 
 
-class I(G, H, QtWidgets.QLabel):
+class II(G, H, QtWidgets.QLabel):
     pass
 
 
@@ -145,7 +147,7 @@ class AdditionalMultipleInheritanceTest(UsesQApplication):
 
     def testGHI(self):
         xprint()
-        res = I(age=7)
+        res = II(age=7)
         self.assertEqual(res.age, 7)
         xprint()
 
@@ -153,6 +155,34 @@ class AdditionalMultipleInheritanceTest(UsesQApplication):
         # This crashed with
         # TypeError: object.__init__() takes exactly one argument (the instance to initialize)
         MainWindow()
+
+
+# PYSIDE-2654: Additional missing init test.
+#              This must work if no __init__ is defined (Ui_Form)
+class Ui_Form(object):
+    pass
+
+
+class Mixin:
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+
+
+class Card(Mixin, QWidget):
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent=parent)
+
+
+class Demo(Card, Ui_Form):
+    def __init__(self) -> None:
+        super().__init__()
+
+
+class MissingInitFunctionTest(UsesQApplication):
+    def testMissing(self):
+        Demo()
+        # Tests if this works. Would crash without the extra
+        # check for object.__init__
 
 
 if __name__ == "__main__":

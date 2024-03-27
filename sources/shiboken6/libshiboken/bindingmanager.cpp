@@ -408,6 +408,8 @@ bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
     using Shiboken::AutoDecRef;
 
     static PyObject *const _init = String::createStaticString("__init__");
+    static PyObject *objectInit =
+        PyObject_GetAttr(reinterpret_cast<PyObject *>(&PyBaseObject_Type), _init);
 
     // A native C++ self cannot have multiple inheritance.
     if (!Object::isUserType(self))
@@ -441,6 +443,10 @@ bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
     if (subType == &PyBaseObject_Type)
         return false;
     AutoDecRef func(PyObject_GetAttr(obSubType, _init));
+    // PYSIDE-2654: If this has no implementation then we get object.__init__
+    //              but that is the same case like above.
+    if (func == objectInit)
+        return false;
     // PYSIDE-2294: We need to explicitly ignore positional args in a mixin class.
     SBK_UNUSED(args);
     AutoDecRef newArgs(PyTuple_New(1));
