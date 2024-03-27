@@ -18,7 +18,7 @@ QT_FORWARD_DECLARE_CLASS(QDataStream)
 namespace PySide
 {
 
-/// Thin wrapper for PyObject increasing reference count in constructor, but *NOT* in destructor
+// Thin wrapper for PyObject, increasing reference count in constructor but *NOT* in destructor
 class PYSIDE_API PyObjectWrapper
 {
 public:
