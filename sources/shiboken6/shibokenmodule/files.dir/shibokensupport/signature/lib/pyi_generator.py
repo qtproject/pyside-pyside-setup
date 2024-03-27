@@ -161,7 +161,7 @@ class Formatter(Writer):
     @contextmanager
     def attribute(self, attr_name, attr_value):
         spaces = indent * self.level
-        self.print(f"{spaces}{attr_name:25}: ...  # type: {type(attr_value).__qualname__}")
+        self.print(f"{spaces}{attr_name:25} = ...  # type: {type(attr_value).__qualname__}")
         yield
 
     @contextmanager
