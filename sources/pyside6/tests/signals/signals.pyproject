@@ -1,0 +1,19 @@
+{
+    "files": ["anonymous_slot_leak_test.py", "args_dont_match_test.py",
+              "bug_189.py", "bug_311.py", "bug_312.py", "bug_319.py", "bug_79.py",
+              "decorators_test.py", "disconnect_test.py", "invalid_callback_test.py",
+              "lambda_gui_test.py", "lambda_test.py", "leaking_signal_test.py",
+              "multiple_connections_gui_test.py", "multiple_connections_test.py",
+              "pysignal_test.py", "qobject_callable_connect_test.py", "qobject_destroyed_test.py",
+              "qobject_receivers_test.py", "qobject_sender_test.py", "ref01_test.py",
+              "ref02_test.py", "ref03_test.py", "ref04_test.py", "ref05_test.py",
+              "ref06_test.py", "segfault_proxyparent_test.py",
+              "self_connect_test.py", "short_circuit_test.py",
+              "signal2signal_connect_test.py", "signal_across_threads.py",
+              "signal_autoconnect_test.py", "signal_connectiontype_support_test.py",
+              "signal_emission_gui_test.py", "signal_emission_test.py",
+              "signal_enum_test.py", "signal_func_test.py", "signal_manager_refcount_test.py",
+              "signal_newenum_test.py", "signal_number_limit_test.py",
+              "signal_object_test.py", "signal_signature_test.py", "signal_with_primitive_type_test.py",
+              "slot_reference_count_test.py", "static_metaobject_test.py"]
+}
