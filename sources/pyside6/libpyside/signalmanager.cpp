@@ -26,6 +26,7 @@
 #include <QtCore/QDebug>
 #include <QtCore/QHash>
 #include <QtCore/QScopedPointer>
+#include <QtCore/QTimerEvent>
 
 #include <algorithm>
 #include <limits>
@@ -43,6 +44,9 @@ using namespace Qt::StringLiterals;
 static PyObject *metaObjectAttr = nullptr;
 static PyObject *parseArguments(const QMetaMethod &method, void **args);
 static bool emitShortCircuitSignal(QObject *source, int signalIndex, PyObject *args);
+
+static bool qAppRunning = false;
+
 static void destroyMetaObject(PyObject *obj)
 {
     void *ptr = PyCapsule_GetPointer(obj, nullptr);
@@ -225,6 +229,39 @@ using GlobalReceiverV2Map = QHash<PySide::GlobalReceiverKey, GlobalReceiverV2Ptr
 
 using namespace PySide;
 
+// Listen for destroy() of main thread objects and ensure cleanup
+class SignalManagerDestroyListener : public QObject
+{
+    Q_OBJECT
+public:
+    Q_DISABLE_COPY_MOVE(SignalManagerDestroyListener)
+
+    using QObject::QObject;
+
+public Q_SLOTS:
+    void destroyNotify(const QObject *);
+
+protected:
+    void timerEvent(QTimerEvent *event) override;
+
+private:
+    int m_timerId = -1;
+};
+
+void SignalManagerDestroyListener::destroyNotify(const QObject *)
+{
+    if (qAppRunning && m_timerId == -1)
+        m_timerId = startTimer(0);
+}
+
+void SignalManagerDestroyListener::timerEvent(QTimerEvent *event)
+{
+    if (event->timerId() == m_timerId) {
+        killTimer(std::exchange(m_timerId, -1));
+        SignalManager::instance().purgeEmptyGlobalReceivers();
+    }
+}
+
 struct SignalManager::SignalManagerPrivate
 {
     Q_DISABLE_COPY_MOVE(SignalManagerPrivate)
@@ -243,6 +280,8 @@ struct SignalManager::SignalManagerPrivate
     static int qtPropertyMetacall(QObject *object, QMetaObject::Call call,
                                   int id, void **args);
     static int qtMethodMetacall(QObject *object, int id, void **args);
+
+    QPointer<SignalManagerDestroyListener> m_listener;
 };
 
 SignalManager::QmlMetaCallErrorHandler
@@ -316,16 +355,27 @@ void SignalManager::setQmlMetaCallErrorHandler(QmlMetaCallErrorHandler handler)
 
 static void qAppAboutToQuit()
 {
+    qAppRunning = false;
     SignalManager::instance().purgeEmptyGlobalReceivers();
+}
+
+static bool isInMainThread(const QObject *o)
+{
+    if (o->isWidgetType() || o->isWindowType() || o->isQuickItemType())
+        return true;
+    auto *app = QCoreApplication::instance();
+    return app != nullptr && app->thread() == o->thread();
 }
 
 QObject *SignalManager::globalReceiver(QObject *sender, PyObject *callback, QObject *receiver)
 {
-    static bool registerQuitHandler =  true;
-    if (registerQuitHandler) {
+    if (m_d->m_listener.isNull() && !QCoreApplication::closingDown()) {
         if (auto *app = QCoreApplication::instance()) {
-            registerQuitHandler = false;
+            // The signal manager potentially outlives QCoreApplication, ensure deletion
+            m_d->m_listener = new SignalManagerDestroyListener(app);
+            m_d->m_listener->setObjectName("qt_pyside_signalmanagerdestroylistener");
             QObject::connect(app, &QCoreApplication::aboutToQuit, qAppAboutToQuit);
+            qAppRunning = true;
         }
     }
 
@@ -336,8 +386,17 @@ QObject *SignalManager::globalReceiver(QObject *sender, PyObject *callback, QObj
         auto gr = std::make_shared<GlobalReceiverV2>(callback, receiver);
         it = globalReceivers.insert(key, gr);
     }
-    if (sender)
+
+    if (sender != nullptr) {
         it.value()->incRef(sender); // create a link reference
+
+        // For main thread-objects, add a notification for destroy (PYSIDE-2646, 2141)
+        if (qAppRunning && !m_d->m_listener.isNull() && isInMainThread(sender)) {
+            QObject::connect(sender, &QObject::destroyed,
+                             m_d->m_listener, &SignalManagerDestroyListener::destroyNotify,
+                             Qt::UniqueConnection);
+        }
+    }
 
     return it.value().get();
 }
@@ -776,3 +835,5 @@ static bool emitShortCircuitSignal(QObject *source, int signalIndex, PyObject *a
     source->qt_metacall(QMetaObject::InvokeMetaMethod, signalIndex, signalArgs);
     return true;
 }
+
+#include "signalmanager.moc"

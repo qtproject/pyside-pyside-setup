@@ -7,13 +7,14 @@
 import os
 import sys
 import unittest
+import weakref
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, Signal, SIGNAL, QProcess
+from PySide6.QtCore import QCoreApplication, QObject, Signal, SIGNAL, QProcess
 
 from helper.usesqapplication import UsesQApplication
 
@@ -95,6 +96,27 @@ class QtSigLambda(UsesQApplication):
 
         self.assertTrue(dummy.called)
         self.assertEqual(dummy.exit_code, proc.exitCode())
+
+    def testRelease(self):
+        """PYSIDE-2646: Test whether main thread target slot lambda/methods
+           (and their captured objects) are released by the signal manager
+           after a while."""
+
+        def do_connect(sender):
+            receiver = Receiver()
+            sender.void_signal.connect(lambda: setattr(receiver, 'called', True))
+            return receiver
+
+        sender = Sender()
+        receiver = weakref.ref(do_connect(sender))
+        sender.emit_void()
+        self.assertTrue(receiver().called)
+        del sender
+        for i in range(3):
+            if not receiver():
+                break
+            QCoreApplication.processEvents()
+        self.assertFalse(receiver())
 
 
 if __name__ == '__main__':
