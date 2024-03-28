@@ -13,12 +13,27 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL, QProcess
+from PySide6.QtCore import QObject, Signal, SIGNAL, QProcess
 
 from helper.usesqapplication import UsesQApplication
 
 
-class Dummy(QObject):
+class Sender(QObject):
+    void_signal = Signal()
+    int_signal = Signal(int)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._delayed_int = 0
+
+    def emit_void(self):
+        self.void_signal.emit()
+
+    def emit_int(self, v):
+        self.int_signal.emit(v)
+
+
+class Receiver(QObject):
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -28,45 +43,58 @@ class BasicCase(unittest.TestCase):
 
     def testSimplePythonSignalNoArgs(self):
         # Connecting a lambda to a simple python signal without arguments
-        obj = Dummy()
-        QObject.connect(obj, SIGNAL('foo()'),
-                        lambda: setattr(obj, 'called', True))
-        obj.emit(SIGNAL('foo()'))
-        self.assertTrue(obj.called)
+        receiver = Receiver()
+        sender = Sender()
+        sender.void_signal.connect(lambda: setattr(receiver, 'called', True))
+        sender.emit_void()
+        self.assertTrue(receiver.called)
 
     def testSimplePythonSignal(self):
         # Connecting a lambda to a simple python signal witharguments
-        obj = Dummy()
+        receiver = Receiver()
+        sender = Sender()
         arg = 42
-        QObject.connect(obj, SIGNAL('foo(int)'),
-                        lambda x: setattr(obj, 'arg', 42))
-        obj.emit(SIGNAL('foo(int)'), arg)
-        self.assertEqual(obj.arg, arg)
+        sender.int_signal.connect(lambda x: setattr(receiver, 'arg', arg))
+        sender.emit_int(arg)
+        self.assertEqual(receiver.arg, arg)
+
+    def testSimplePythonSignalNoArgsString(self):
+        # Connecting a lambda to a simple python signal without arguments
+        receiver = Receiver()
+        sender = Sender()
+        QObject.connect(sender, SIGNAL('void_signal()'),
+                        lambda: setattr(receiver, 'called', True))
+        sender.emit_void()
+        self.assertTrue(receiver.called)
+
+    def testSimplePythonSignalString(self):
+        # Connecting a lambda to a simple python signal witharguments
+        receiver = Receiver()
+        sender = Sender()
+        arg = 42
+        QObject.connect(sender, SIGNAL('int_signal(int)'),
+                        lambda x: setattr(receiver, 'arg', arg))
+        sender.emit_int(arg)
+        self.assertEqual(receiver.arg, arg)
 
 
 class QtSigLambda(UsesQApplication):
 
     qapplication = True
 
-    def testNoArgs(self):
-        '''Connecting a lambda to a signal without arguments'''
-        proc = QProcess()
-        dummy = Dummy()
-        QObject.connect(proc, SIGNAL('started()'),
-                        lambda: setattr(dummy, 'called', True))
-        proc.start(sys.executable, ['-c', '""'])
-        proc.waitForFinished()
-        self.assertTrue(dummy.called)
-
     def testWithArgs(self):
-        '''Connecting a lambda to a signal with arguments'''
+        '''Connecting a lambda to a signal with and without arguments'''
         proc = QProcess()
-        dummy = Dummy()
-        QObject.connect(proc, SIGNAL('finished(int)'),
-                        lambda x: setattr(dummy, 'called', x))
+        dummy = Receiver()
+        proc.started.connect(lambda: setattr(dummy, 'called', True))
+        proc.finished.connect(lambda x: setattr(dummy, 'exit_code', x))
+
         proc.start(sys.executable, ['-c', '""'])
-        proc.waitForFinished()
-        self.assertEqual(dummy.called, proc.exitCode())
+        self.assertTrue(proc.waitForStarted())
+        self.assertTrue(proc.waitForFinished())
+
+        self.assertTrue(dummy.called)
+        self.assertEqual(dummy.exit_code, proc.exitCode())
 
 
 if __name__ == '__main__':
