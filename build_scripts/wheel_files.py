@@ -848,6 +848,10 @@ def module_QtMultimedia() -> ModuleData:
     data.translations.append("qtmultimedia_*")
     data.plugins = get_module_plugins(json_data)
 
+    if sys.platform == "win32":
+        data.extra_files.extend(["avcodec-60.dll", "avformat-60.dll", "avutil-58.dll",
+                                 "swresample-4.dll", "swscale-7.dll"])
+
     return data
 
 
