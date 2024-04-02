@@ -31,6 +31,8 @@
 #include <limits>
 #include <memory>
 
+using namespace Qt::StringLiterals;
+
 #if QSLOT_CODE != 1 || QSIGNAL_CODE != 2
 #error QSLOT_CODE and/or QSIGNAL_CODE changed! change the hardcoded stuff to the correct value!
 #endif
