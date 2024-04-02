@@ -16,7 +16,8 @@ from PySide6.QtCore import QObject, SIGNAL
 
 
 class SignalManagerRefCount(unittest.TestCase):
-    """Simple test case to check if the signal_manager is erroneously incrementing the object refcounter"""
+    """Simple test case to check if the signal_manager is erroneously incrementing the
+       object refcounter."""
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testObjectRefcount(self):
@@ -33,4 +34,3 @@ class SignalManagerRefCount(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

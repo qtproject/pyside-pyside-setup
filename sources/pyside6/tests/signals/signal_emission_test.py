@@ -16,7 +16,6 @@ init_test_paths(False)
 
 from PySide6.QtCore import QObject, SIGNAL, SLOT, QProcess, QTimeLine
 
-from helper.basicpyslotcase import BasicPySlotCase
 from helper.usesqapplication import UsesQApplication
 
 

@@ -27,7 +27,7 @@ class MyObject(QWidget):
 class AutoConnectionTest(unittest.TestCase):
 
     def testConnection(self):
-        app = QApplication([])
+        app = QApplication([])  # noqa: F841
 
         win = MyObject()
         btn = QPushButton("click", win)

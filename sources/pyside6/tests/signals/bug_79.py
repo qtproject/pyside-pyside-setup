@@ -30,7 +30,7 @@ class ConnectTest(unittest.TestCase):
 
     def testNoLeaks_ConnectAndDisconnect(self):
         self._called = None
-        app = QApplication([])
+        app = QApplication([])  # noqa: F841
         o = QTreeView()
         o.setModel(QStandardItemModel())
         o.selectionModel().destroyed.connect(self.callback)

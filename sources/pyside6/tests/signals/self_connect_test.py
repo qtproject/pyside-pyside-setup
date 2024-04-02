@@ -13,9 +13,8 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL, SLOT
+from PySide6.QtCore import QObject, Slot, SIGNAL, SLOT
 from PySide6.QtWidgets import QPushButton, QWidget
-from PySide6.QtCore import QObject, Slot
 
 from helper.usesqapplication import UsesQApplication
 
@@ -25,7 +24,7 @@ class Receiver(QObject):
         super().__init__(p)
         self.triggered = False
 
-    @Slot(bool,int)
+    @Slot(bool, int)
     def default_parameter_slot(self, bool_value, int_value=0):
         self.triggered = True
 

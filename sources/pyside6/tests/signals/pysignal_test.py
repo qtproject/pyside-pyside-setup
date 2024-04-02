@@ -14,7 +14,7 @@ init_test_paths(False)
 from PySide6.QtCore import QObject, SIGNAL, SLOT, Qt
 
 try:
-    from PySide6.QtWidgets import QSpinBox, QApplication, QWidget
+    from PySide6.QtWidgets import QSpinBox, QApplication, QWidget  # noqa: F401
     hasQtGui = True
 except ImportError:
     hasQtGui = False
@@ -97,7 +97,7 @@ class PythonSigSlot(unittest.TestCase):
     def tearDown(self):
         try:
             del self.args
-        except:
+        except:  # noqa: E722
             pass
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()

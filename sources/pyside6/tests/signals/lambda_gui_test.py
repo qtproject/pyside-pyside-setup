@@ -33,7 +33,7 @@ if hasQtGui:
             # Connecting a lambda to a QPushButton.clicked()
             obj = QPushButton('label')
             ctr = Control()
-            func = lambda: setattr(ctr, 'arg', True)
+            func = lambda: setattr(ctr, 'arg', True)  # noqa: E731
             obj.clicked.connect(func)
             obj.click()
             self.assertTrue(ctr.arg)
@@ -44,7 +44,7 @@ if hasQtGui:
             obj = QSpinBox()
             ctr = Control()
             arg = 444
-            func = lambda x: setattr(ctr, 'arg', 444)
+            func = lambda x: setattr(ctr, 'arg', 444)  # noqa: E731
             obj.valueChanged.connect(func)
             obj.setValue(444)
             self.assertEqual(ctr.arg, arg)
