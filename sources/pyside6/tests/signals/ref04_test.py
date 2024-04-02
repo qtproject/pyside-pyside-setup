@@ -53,17 +53,6 @@ class UserSignalTest(unittest.TestCase):
         self.emitter.mySignal.emit()
         self.assertEqual(self.counter, 2)
 
-#    def testConnectWithConfigureMethod(self):
-#
-#        def slot():
-#            self.counter += 1
-#
-#        self.emitter.pyqtConfigure(mySignal=slot)
-#        self.assertEqual(self.counter, 0)
-#        self.emitter.mySignal.emit()
-#        self.assertEqual(self.counter, 1)
-
 
 if __name__ == '__main__':
     unittest.main()
-

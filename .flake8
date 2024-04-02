@@ -6,5 +6,7 @@ per-file-ignores =
     # for init_test_paths() hack
     *_test_*.py:E402
     *_test.py:E402
+    *bug_*.py:E402
     test_*.py:E402
+    signal_across_threads.py:E402
     __init__.py:F401,E402

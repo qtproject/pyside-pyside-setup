@@ -34,11 +34,11 @@ class TestSignal2SignalConnect(unittest.TestCase):
         # Delete used resources
         try:
             del self.sender
-        except:
+        except:  # noqa: E722
             pass
         try:
             del self.forwarder
-        except:
+        except:  # noqa: E722
             pass
         del self.args
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
@@ -116,5 +116,3 @@ class TestSignal2SignalConnect(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-

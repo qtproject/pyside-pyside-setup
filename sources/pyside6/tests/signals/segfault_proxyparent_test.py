@@ -44,7 +44,7 @@ class SegfaultCase(unittest.TestCase):
     def tearDown(self):
         try:
             del self.args
-        except:
+        except:  # noqa: E722
             pass
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
@@ -73,4 +73,3 @@ class SegfaultCase(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -10,7 +10,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QCoreApplication, QObject, QTimeLine, SIGNAL
+from PySide6.QtCore import QCoreApplication, QTimeLine
 
 
 class SignalPrimitiveTypeTest(unittest.TestCase):
@@ -36,5 +36,3 @@ class SignalPrimitiveTypeTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-

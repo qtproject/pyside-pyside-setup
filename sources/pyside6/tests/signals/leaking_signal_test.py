@@ -4,7 +4,6 @@
 import os
 import sys
 import unittest
-import weakref
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
@@ -21,7 +20,7 @@ class LeakingSignal(unittest.TestCase):
         class Emitter(QObject):
             my_signal = Signal(object)
 
-        emitter = Emitter()
+        emitter = Emitter()  # noqa: F841
 
 
 if __name__ == '__main__':

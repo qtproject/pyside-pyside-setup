@@ -14,7 +14,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL, SLOT
+from PySide6.QtCore import SIGNAL
 
 try:
     from PySide6.QtWidgets import QSpinBox, QPushButton
