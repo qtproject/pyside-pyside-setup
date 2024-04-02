@@ -895,8 +895,13 @@ static void writeFancyToc(TextStream& s, const QStringList& items)
 {
     using TocMap = QMap<QChar, QStringList>;
     TocMap tocMap;
-    for (const QString &item : items)
+
+    for (QString item : items) {
+        if (item.isEmpty())
+            continue;
+        item.chop(4); // Remove the .rst extension
         tocMap[sortKey(item)] << item;
+    }
 
     static const qsizetype numColumns = 4;
 
