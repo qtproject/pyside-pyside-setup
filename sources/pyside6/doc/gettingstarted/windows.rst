@@ -16,7 +16,7 @@ Requirements
     to use it for a Windows build.
 
 .. note:: The Python provided by the Microsoft Store is not compatible with PySide. Please
-    use https://python.org/download to get a Python Interpreter.
+    use https://www.python.org/downloads/ to get a Python Interpreter.
 
 .. _MSVC2022: https://visualstudio.microsoft.com/downloads/
 .. _OpenSSL: https://sourceforge.net/projects/openssl/
