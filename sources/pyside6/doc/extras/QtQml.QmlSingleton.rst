@@ -2,7 +2,7 @@
 .. py:decorator:: QmlSingleton
 
 Declares the decorated type to be a singleton in QML. This only takes effect if
-the type is a Q_OBJECT and is available in QML (by having a QmlElement decorator).
+the type is a QObject and is available in QML (by having a QmlElement decorator).
 The QQmlEngine will try to create a singleton instance using the type's default
 constructor.
 
