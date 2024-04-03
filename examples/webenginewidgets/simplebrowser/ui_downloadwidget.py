@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'downloadwidget.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.0
+## Created by: Qt User Interface Compiler version 6.7.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -40,7 +40,7 @@ class Ui_DownloadWidget(object):
 
         self.m_cancelButton = QPushButton(DownloadWidget)
         self.m_cancelButton.setObjectName(u"m_cancelButton")
-        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.m_cancelButton.sizePolicy().hasHeightForWidth())

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'camera.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.0
+## Created by: Qt User Interface Compiler version 6.7.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -47,7 +47,7 @@ class Ui_Camera(object):
         self.tab_2.setObjectName(u"tab_2")
         self.gridLayout = QGridLayout(self.tab_2)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.verticalSpacer_2 = QSpacerItem(20, 161, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer_2 = QSpacerItem(20, 161, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.gridLayout.addItem(self.verticalSpacer_2, 3, 0, 1, 1)
 
@@ -92,7 +92,7 @@ class Ui_Camera(object):
 
         self.gridLayout_2.addWidget(self.stopButton, 2, 0, 1, 1)
 
-        self.verticalSpacer = QSpacerItem(20, 76, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer = QSpacerItem(20, 76, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.gridLayout_2.addItem(self.verticalSpacer, 3, 0, 1, 1)
 
@@ -114,7 +114,7 @@ class Ui_Camera(object):
 
         self.stackedWidget = QStackedWidget(self.centralwidget)
         self.stackedWidget.setObjectName(u"stackedWidget")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.stackedWidget.sizePolicy().hasHeightForWidth())
@@ -147,7 +147,7 @@ class Ui_Camera(object):
         self.gridLayout_4.setObjectName(u"gridLayout_4")
         self.lastImagePreviewLabel = QLabel(self.previewPage)
         self.lastImagePreviewLabel.setObjectName(u"lastImagePreviewLabel")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.lastImagePreviewLabel.sizePolicy().hasHeightForWidth())
