@@ -11,7 +11,11 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL
+from PySide6.QtCore import QObject, Signal
+
+
+class Sender(QObject):
+    the_signal = Signal(int, int, int)
 
 
 class ArgsDontMatch(unittest.TestCase):
@@ -21,9 +25,9 @@ class ArgsDontMatch(unittest.TestCase):
 
     def testConnectSignalToSlotWithLessArgs(self):
         self.ok = False
-        obj1 = QObject()
-        QObject.connect(obj1, SIGNAL('the_signal(int, int, int)'), self.callback)
-        obj1.emit(SIGNAL('the_signal(int, int, int)'), 1, 2, 3)
+        obj1 = Sender()
+        obj1.the_signal.connect(self.callback)
+        obj1.the_signal.emit(1, 2, 3)
 
         self.assertTrue(self.ok)
 

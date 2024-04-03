@@ -13,7 +13,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL
+from PySide6.QtCore import QObject
 
 
 class InvalidCallback(unittest.TestCase):
@@ -34,8 +34,7 @@ class InvalidCallback(unittest.TestCase):
 
     def testIntegerCb(self):
         # Test passing an int as callback to QObject.connect
-        self.assertRaises(TypeError, QObject.connect, self.obj,
-                          SIGNAL('destroyed()'), 42)
+        self.assertRaises(TypeError, self.obj.destroyed.connect, 42)
 
 
 if __name__ == '__main__':

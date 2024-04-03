@@ -12,12 +12,14 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL
+from PySide6.QtCore import QObject, Signal
 
 
 class Dummy(QObject):
+    foo = Signal()
+
     def dispatch(self):
-        self.emit(SIGNAL('foo()'))
+        self.foo.emit()
 
 
 class PythonSignalRefCount(unittest.TestCase):
@@ -35,10 +37,10 @@ class PythonSignalRefCount(unittest.TestCase):
 
         self.assertEqual(sys.getrefcount(cb), 2)
 
-        QObject.connect(self.emitter, SIGNAL('foo()'), cb)
+        self.emitter.foo.connect(cb)
         self.assertEqual(sys.getrefcount(cb), 3)
 
-        QObject.disconnect(self.emitter, SIGNAL('foo()'), cb)
+        self.emitter.foo.disconnect(cb)
         self.assertEqual(sys.getrefcount(cb), 2)
 
 
@@ -60,7 +62,7 @@ class CppSignalRefCount(unittest.TestCase):
         self.emitter.destroyed.connect(cb)
         self.assertEqual(sys.getrefcount(cb), 3)
 
-        QObject.disconnect(self.emitter, SIGNAL('destroyed()'), cb)
+        self.emitter.destroyed.disconnect(cb)
         self.assertEqual(sys.getrefcount(cb), 2)
 
 

@@ -10,13 +10,16 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL, Qt
+from PySide6.QtCore import QObject, Signal, Qt
 
 
-class Dummy(QObject):
+class Sender(QObject):
     """Dummy class used in this test."""
+
+    foo = Signal()
+
     def __init__(self, parent=None):
-        QObject.__init__(self, parent)
+        super().__init__(parent)
 
 
 class TestConnectionTypeSupport(unittest.TestCase):
@@ -26,11 +29,11 @@ class TestConnectionTypeSupport(unittest.TestCase):
 
     def testNoArgs(self):
         """Connect signal using a Qt.ConnectionType as argument"""
-        obj1 = Dummy()
+        obj1 = Sender()
 
-        QObject.connect(obj1, SIGNAL('foo()'), self.callback, Qt.DirectConnection)
+        obj1.foo.connect(self.callback, Qt.DirectConnection)
         self.args = tuple()
-        obj1.emit(SIGNAL('foo()'), *self.args)
+        obj1.foo.emit(*self.args)
 
         self.assertTrue(self.called)
 

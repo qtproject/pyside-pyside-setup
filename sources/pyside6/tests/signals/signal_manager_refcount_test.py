@@ -12,7 +12,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL
+from PySide6.QtCore import QObject
 
 
 class SignalManagerRefCount(unittest.TestCase):
@@ -28,7 +28,7 @@ class SignalManagerRefCount(unittest.TestCase):
         refcount = sys.getrefcount(obj)
         obj.destroyed.connect(callback)
         self.assertEqual(refcount, sys.getrefcount(obj))
-        QObject.disconnect(obj, SIGNAL('destroyed()'), callback)
+        obj.destroyed.disconnect(callback)
         self.assertEqual(refcount, sys.getrefcount(obj))
 
 

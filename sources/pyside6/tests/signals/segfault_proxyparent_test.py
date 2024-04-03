@@ -11,7 +11,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL
+from PySide6.QtCore import QObject, Signal
 
 # Description of the problem
 # After creating an PyObject that inherits from QObject, connecting it,
@@ -20,16 +20,19 @@ from PySide6.QtCore import QObject, SIGNAL
 
 # Somehow the underlying QObject also points to the same position.
 
-# In PyQt4, the connection works fine with the same memory behavior,
-# so it looks like specific to SIP.
 
+class Sender(QObject):
 
-class Dummy(QObject):
+    bar = Signal(int)
+
     def __init__(self, parent=None):
         QObject.__init__(self, parent)
 
 
 class Joe(QObject):
+
+    bar = Signal(int)
+
     def __init__(self, parent=None):
         QObject.__init__(self, parent)
 
@@ -55,19 +58,19 @@ class SegfaultCase(unittest.TestCase):
 
     def testSegfault(self):
         """Regression: Segfault for qobjects in the same memory position."""
-        obj = Dummy()
-        QObject.connect(obj, SIGNAL('bar(int)'), self.callback)
+        obj = Sender()
+        obj.bar.connect(self.callback)
         self.args = (33,)
-        obj.emit(SIGNAL('bar(int)'), self.args[0])
+        obj.bar.emit(self.args[0])
         self.assertTrue(self.called)
         del obj
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
 
         obj = Joe()
-        QObject.connect(obj, SIGNAL('bar(int)'), self.callback)
+        obj.bar.connect(self.callback)
         self.args = (33,)
-        obj.emit(SIGNAL('bar(int)'), self.args[0])
+        obj.bar.emit(self.args[0])
         self.assertTrue(self.called)
 
 

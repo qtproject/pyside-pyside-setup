@@ -11,31 +11,31 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL, SLOT, Qt
-
-try:
-    from PySide6.QtWidgets import QSpinBox, QApplication, QWidget  # noqa: F401
-    hasQtGui = True
-except ImportError:
-    hasQtGui = False
+from PySide6.QtCore import QObject, Signal, Qt
+from PySide6.QtWidgets import QSpinBox, QApplication, QWidget  # noqa: F401
 
 from helper.usesqapplication import UsesQApplication
 
 
-class Dummy(QObject):
-    """Dummy class used in this test."""
+TEST_LIST = ["item1", "item2", "item3"]
+
+
+class Sender(QObject):
+    """Sender class used in this test."""
+
+    foo = Signal()
+    foo_int = Signal(int)
+    dummy = Signal(str)
+    dummy2 = Signal(str, list)
+
     def __init__(self, parent=None):
-        QObject.__init__(self, parent)
+        super().__init__(parent)
 
     def callDummy(self):
-        self.emit(SIGNAL("dummy(PyObject)"), "PyObject")
+        self.dummy.emit("PyObject")
 
     def callDummy2(self):
-        lst = []
-        lst.append("item1")
-        lst.append("item2")
-        lst.append("item3")
-        self.emit(SIGNAL("dummy2(PyObject, PyObject)"), "PyObject0", lst)
+        self.dummy2.emit("PyObject0", TEST_LIST)
 
 
 class PyObjectType(UsesQApplication):
@@ -46,35 +46,33 @@ class PyObjectType(UsesQApplication):
 
     def mySlot2(self, arg0, arg1):
         self.assertEqual(arg0, "PyObject0")
-        self.assertEqual(arg1[0], "item1")
-        self.assertEqual(arg1[1], "item2")
-        self.assertEqual(arg1[2], "item3")
+        self.assertEqual(arg1, TEST_LIST)
         self.callCount += 1
         if self.running:
             self.app.quit()
 
     def setUp(self):
-        super(PyObjectType, self).setUp()
+        super().setUp()
         self.callCount = 0
         self.running = False
 
     def testWithOneArg(self):
-        o = Dummy()
-        o.connect(SIGNAL("dummy(PyObject)"), self.mySlot)
+        o = Sender()
+        o.dummy.connect(self.mySlot)
         o.callDummy()
         self.assertEqual(self.callCount, 1)
 
     def testWithTwoArg(self):
-        o = Dummy()
-        o.connect(SIGNAL("dummy2(PyObject,PyObject)"), self.mySlot2)
+        o = Sender()
+        o.dummy2.connect(self.mySlot2)
         o.callDummy2()
         self.assertEqual(self.callCount, 1)
 
     def testAsyncSignal(self):
         self.called = False
         self.running = True
-        o = Dummy()
-        o.connect(SIGNAL("dummy2(PyObject,PyObject)"), self.mySlot2, Qt.QueuedConnection)
+        o = Sender()
+        o.dummy2.connect(self.mySlot2, Qt.QueuedConnection)
         o.callDummy2()
         self.app.exec()
         self.assertEqual(self.callCount, 1)
@@ -82,8 +80,8 @@ class PyObjectType(UsesQApplication):
     def testTwice(self):
         self.called = False
         self.running = True
-        o = Dummy()
-        o.connect(SIGNAL("dummy2(PyObject,PyObject)"), self.mySlot2, Qt.QueuedConnection)
+        o = Sender()
+        o.dummy2.connect(self.mySlot2, Qt.QueuedConnection)
         o.callDummy2()
         o.callDummy2()
         self.app.exec()
@@ -108,98 +106,98 @@ class PythonSigSlot(unittest.TestCase):
 
     def testNoArgs(self):
         """Python signal and slots without arguments"""
-        obj1 = Dummy()
+        obj1 = Sender()
 
-        QObject.connect(obj1, SIGNAL('foo()'), self.callback)
+        obj1.foo.connect(self.callback)
         self.args = tuple()
-        obj1.emit(SIGNAL('foo()'), *self.args)
+        obj1.foo.emit(*self.args)
 
         self.assertTrue(self.called)
 
     def testWithArgs(self):
         """Python signal and slots with integer arguments"""
-        obj1 = Dummy()
+        obj1 = Sender()
 
-        QObject.connect(obj1, SIGNAL('foo(int)'), self.callback)
+        obj1.foo_int.connect(self.callback)
         self.args = (42,)
-        obj1.emit(SIGNAL('foo(int)'), *self.args)
+        obj1.foo_int.emit(*self.args)
 
         self.assertTrue(self.called)
 
     def testDisconnect(self):
-        obj1 = Dummy()
+        obj1 = Sender()
 
-        QObject.connect(obj1, SIGNAL('foo(int)'), self.callback)
-        QObject.disconnect(obj1, SIGNAL('foo(int)'), self.callback)
+        obj1.foo_int.connect(self.callback)
+        self.assertTrue(obj1.foo_int.disconnect(self.callback))
 
         self.args = (42, )
-        obj1.emit(SIGNAL('foo(int)'), *self.args)
+        obj1.foo_int.emit(*self.args)
 
         self.assertTrue(not self.called)
 
 
-if hasQtGui:
-    class SpinBoxPySignal(UsesQApplication):
-        """Tests the connection of python signals to QSpinBox qt slots."""
+class SpinBoxPySignal(UsesQApplication):
+    """Tests the connection of python signals to QSpinBox qt slots."""
 
-        def setUp(self):
-            super(SpinBoxPySignal, self).setUp()
-            self.obj = Dummy()
-            self.spin = QSpinBox()
-            self.spin.setValue(0)
+    def setUp(self):
+        super().setUp()
+        self.obj = Sender()
+        self.spin = QSpinBox()
+        self.spin.setValue(0)
 
-        def tearDown(self):
-            super(SpinBoxPySignal, self).tearDown()
-            del self.obj
-            del self.spin
-            # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
-            gc.collect()
+    def tearDown(self):
+        super().tearDown()
+        del self.obj
+        del self.spin
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
-        def testValueChanged(self):
-            """Emission of a python signal to QSpinBox setValue(int)"""
-            QObject.connect(self.obj, SIGNAL('dummy(int)'), self.spin, SLOT('setValue(int)'))
-            self.assertEqual(self.spin.value(), 0)
+    def testValueChanged(self):
+        """Emission of a python signal to QSpinBox setValue(int)"""
 
-            self.obj.emit(SIGNAL('dummy(int)'), 4)
-            self.assertEqual(self.spin.value(), 4)
+        self.obj.foo_int.connect(self.spin.setValue)
+        self.assertEqual(self.spin.value(), 0)
 
-        def testValueChangedMultiple(self):
-            """Multiple emissions of a python signal to QSpinBox setValue(int)"""
-            QObject.connect(self.obj, SIGNAL('dummy(int)'), self.spin, SLOT('setValue(int)'))
-            self.assertEqual(self.spin.value(), 0)
+        self.obj.foo_int.emit(4)
+        self.assertEqual(self.spin.value(), 4)
 
-            self.obj.emit(SIGNAL('dummy(int)'), 4)
-            self.assertEqual(self.spin.value(), 4)
+    def testValueChangedMultiple(self):
+        """Multiple emissions of a python signal to QSpinBox setValue(int)"""
+        self.obj.foo_int.connect(self.spin.setValue)
+        self.assertEqual(self.spin.value(), 0)
 
-            self.obj.emit(SIGNAL('dummy(int)'), 77)
-            self.assertEqual(self.spin.value(), 77)
+        self.obj.foo_int.emit(4)
+        self.assertEqual(self.spin.value(), 4)
+
+        self.obj.foo_int.emit(77)
+        self.assertEqual(self.spin.value(), 77)
 
 
-if hasQtGui:
-    class WidgetPySignal(UsesQApplication):
-        """Tests the connection of python signals to QWidget qt slots."""
+class WidgetPySignal(UsesQApplication):
+    """Tests the connection of python signals to QWidget qt slots."""
 
-        def setUp(self):
-            super(WidgetPySignal, self).setUp()
-            self.obj = Dummy()
-            self.widget = QWidget()
+    def setUp(self):
+        super(WidgetPySignal, self).setUp()
+        self.obj = Sender()
+        self.widget = QWidget()
 
-        def tearDown(self):
-            super(WidgetPySignal, self).tearDown()
-            del self.obj
-            del self.widget
-            # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
-            gc.collect()
+    def tearDown(self):
+        super(WidgetPySignal, self).tearDown()
+        del self.obj
+        del self.widget
+        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
+        gc.collect()
 
-        def testShow(self):
-            """Emission of a python signal to QWidget slot show()"""
-            self.widget.hide()
+    def testShow(self):
+        """Emission of a python signal to QWidget slot show()"""
+        self.widget.hide()
 
-            QObject.connect(self.obj, SIGNAL('dummy()'), self.widget, SLOT('show()'))
-            self.assertTrue(not self.widget.isVisible())
+        self.obj.foo.connect(self.widget.show)
+        self.assertTrue(not self.widget.isVisible())
 
-            self.obj.emit(SIGNAL('dummy()'))
-            self.assertTrue(self.widget.isVisible())
+        self.obj.foo.emit()
+        self.assertTrue(self.widget.isVisible())
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -12,43 +12,39 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL
-
-try:
-    from PySide6.QtWidgets import QSpinBox, QPushButton
-    hasQtGui = True
-except ImportError:
-    hasQtGui = False
+from PySide6.QtWidgets import QSpinBox, QPushButton
 
 from helper.usesqapplication import UsesQApplication
 
-if hasQtGui:
-    class Control:
-        def __init__(self):
-            self.arg = False
 
-    class QtGuiSigLambda(UsesQApplication):
+class Control:
+    def __init__(self):
+        self.arg = False
 
-        def testButton(self):
-            # Connecting a lambda to a QPushButton.clicked()
-            obj = QPushButton('label')
-            ctr = Control()
-            func = lambda: setattr(ctr, 'arg', True)  # noqa: E731
-            obj.clicked.connect(func)
-            obj.click()
-            self.assertTrue(ctr.arg)
-            QObject.disconnect(obj, SIGNAL('clicked()'), func)
 
-        def testSpinButton(self):
-            # Connecting a lambda to a QPushButton.clicked()
-            obj = QSpinBox()
-            ctr = Control()
-            arg = 444
-            func = lambda x: setattr(ctr, 'arg', 444)  # noqa: E731
-            obj.valueChanged.connect(func)
-            obj.setValue(444)
-            self.assertEqual(ctr.arg, arg)
-            QObject.disconnect(obj, SIGNAL('valueChanged(int)'), func)
+class QtWidgetsSigLambda(UsesQApplication):
+
+    def testButton(self):
+        # Connecting a lambda to a QPushButton.clicked()
+        obj = QPushButton('label')
+        ctr = Control()
+        func = lambda: setattr(ctr, 'arg', True)  # noqa: E731
+        obj.clicked.connect(func)
+        obj.click()
+        self.assertTrue(ctr.arg)
+        self.assertTrue(obj.clicked.disconnect(func))
+
+    def testSpinButton(self):
+        # Connecting a lambda to a QPushButton.clicked()
+        obj = QSpinBox()
+        ctr = Control()
+        arg = 444
+        func = lambda x: setattr(ctr, 'arg', 444)  # noqa: E731
+        obj.valueChanged.connect(func)
+        obj.setValue(444)
+        self.assertEqual(ctr.arg, arg)
+        self.assertTrue(obj.valueChanged.disconnect(func))
+
 
 if __name__ == '__main__':
     unittest.main()

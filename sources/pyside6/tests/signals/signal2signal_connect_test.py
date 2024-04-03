@@ -13,7 +13,20 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL
+from PySide6.QtCore import QObject, Signal
+
+
+class Sender(QObject):
+
+    mysignal_int = Signal(int)
+    mysignal_int_int = Signal(int, int)
+    mysignal_string = Signal(str)
+
+
+class Forwarder(Sender):
+
+    forward = Signal()
+    forward_qobject = Signal(QObject)
 
 
 def cute_slot():
@@ -25,8 +38,8 @@ class TestSignal2SignalConnect(unittest.TestCase):
 
     def setUp(self):
         # Set up the basic resources needed
-        self.sender = QObject()
-        self.forwarder = QObject()
+        self.sender = Sender()
+        self.forwarder = Forwarder()
         self.args = None
         self.called = False
 
@@ -63,47 +76,37 @@ class TestSignal2SignalConnect(unittest.TestCase):
             raise TypeError("Invalid arguments")
 
     def testSignalWithoutArguments(self):
-        QObject.connect(self.sender, SIGNAL("destroyed()"),
-                        self.forwarder, SIGNAL("forward()"))
-        QObject.connect(self.forwarder, SIGNAL("forward()"),
-                        self.callback_noargs)
+        self.sender.destroyed.connect(self.forwarder.forward)
+        self.forwarder.forward.connect(self.callback_noargs)
         del self.sender
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
         self.assertTrue(self.called)
 
     def testSignalWithOnePrimitiveTypeArgument(self):
-        QObject.connect(self.sender, SIGNAL("mysignal(int)"),
-                        self.forwarder, SIGNAL("mysignal(int)"))
-        QObject.connect(self.forwarder, SIGNAL("mysignal(int)"),
-                        self.callback_args)
+        self.sender.mysignal_int.connect(self.forwarder.mysignal_int)
+        self.forwarder.mysignal_int.connect(self.callback_args)
         self.args = (19,)
-        self.sender.emit(SIGNAL('mysignal(int)'), *self.args)
+        self.sender.mysignal_int.emit(*self.args)
         self.assertTrue(self.called)
 
     def testSignalWithMultiplePrimitiveTypeArguments(self):
-        QObject.connect(self.sender, SIGNAL("mysignal(int,int)"),
-                        self.forwarder, SIGNAL("mysignal(int,int)"))
-        QObject.connect(self.forwarder, SIGNAL("mysignal(int,int)"),
-                        self.callback_args)
+        self.sender.mysignal_int_int.connect(self.forwarder.mysignal_int_int)
+        self.forwarder.mysignal_int_int.connect(self.callback_args)
         self.args = (23, 29)
-        self.sender.emit(SIGNAL('mysignal(int,int)'), *self.args)
+        self.sender.mysignal_int_int.emit(*self.args)
         self.assertTrue(self.called)
 
     def testSignalWithOneStringArgument(self):
-        QObject.connect(self.sender, SIGNAL("mysignal(QString)"),
-                        self.forwarder, SIGNAL("mysignal(QString)"))
-        QObject.connect(self.forwarder, SIGNAL("mysignal(QString)"),
-                        self.callback_args)
+        self.sender.mysignal_string.connect(self.forwarder.mysignal_string)
+        self.forwarder.mysignal_string.connect(self.callback_args)
         self.args = ('myargument',)
-        self.sender.emit(SIGNAL('mysignal(QString)'), *self.args)
+        self.sender.mysignal_string.emit(*self.args)
         self.assertTrue(self.called)
 
     def testSignalWithOneQObjectArgument(self):
-        QObject.connect(self.sender, SIGNAL('destroyed(QObject*)'),
-                        self.forwarder, SIGNAL('forward(QObject*)'))
-        QObject.connect(self.forwarder, SIGNAL('forward(QObject*)'),
-                        self.callback_qobject)
+        self.sender.destroyed.connect(self.forwarder.forward_qobject)
+        self.forwarder.forward_qobject.connect(self.callback_qobject)
 
         obj_name = 'sender'
         self.sender.setObjectName(obj_name)

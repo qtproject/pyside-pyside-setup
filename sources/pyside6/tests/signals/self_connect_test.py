@@ -13,7 +13,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, Slot, SIGNAL, SLOT
+from PySide6.QtCore import QObject, Slot
 from PySide6.QtWidgets import QPushButton, QWidget
 
 from helper.usesqapplication import UsesQApplication
@@ -33,7 +33,7 @@ class SelfConnect(UsesQApplication):
 
     def testButtonClickClose(self):
         button = QPushButton()
-        button.connect(button, SIGNAL('clicked()'), SLOT('close()'))
+        button.clicked.connect(button.close)
 
         button.show()
         self.assertTrue(button.isVisible())
@@ -43,7 +43,7 @@ class SelfConnect(UsesQApplication):
     def testWindowButtonClickClose(self):
         button = QPushButton()
         window = QWidget()
-        window.connect(button, SIGNAL('clicked()'), SLOT('close()'))
+        button.clicked.connect(window.close)
 
         window.show()
         self.assertTrue(window.isVisible())

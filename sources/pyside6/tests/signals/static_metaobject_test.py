@@ -14,13 +14,22 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL, Slot
+from PySide6.QtCore import QObject, Signal, Slot, SIGNAL
 from helper.usesqapplication import UsesQApplication
 
 
+class Sender(QObject):
+
+    foo = Signal()
+    foo2 = Signal()
+
+
 class MyObject(QObject):
+
+    foo2 = Signal()
+
     def __init__(self, parent=None):
-        QObject.__init__(self, parent)
+        super().__init__(parent)
         self._slotCalledCount = 0
 
     # this '@Slot()' is needed to get the right sort order in testSharedSignalEmission.
@@ -33,7 +42,8 @@ class MyObject(QObject):
 class StaticMetaObjectTest(UsesQApplication):
 
     def testSignalPropagation(self):
-        o = MyObject()
+        """Old style, dynamic signal creation."""
+        o = QObject()
         o2 = MyObject()
 
         # SIGNAL foo not created yet
@@ -55,17 +65,17 @@ class StaticMetaObjectTest(UsesQApplication):
         self.assertEqual(o.metaObject().indexOfSignal("foo()"), -1)
 
     def testSharedSignalEmission(self):
-        o = QObject()
+        o = Sender()
         m = MyObject()
 
-        o.connect(SIGNAL("foo2()"), m.mySlot)
-        m.connect(SIGNAL("foo2()"), m.mySlot)
-        o.emit(SIGNAL("foo2()"))
+        o.foo2.connect(m.mySlot)
+        m.foo2.connect(m.mySlot)
+        o.foo2.emit()
         self.assertEqual(m._slotCalledCount, 1)
         del o
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        m.emit(SIGNAL("foo2()"))
+        m.foo2.emit()
         self.assertEqual(m._slotCalledCount, 2)
 
 
