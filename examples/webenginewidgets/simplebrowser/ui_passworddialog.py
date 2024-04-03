@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'passworddialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.0
+## Created by: Qt User Interface Compiler version 6.7.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -34,7 +34,7 @@ class Ui_PasswordDialog(object):
 
         self.m_infoLabel = QLabel(PasswordDialog)
         self.m_infoLabel.setObjectName(u"m_infoLabel")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.m_infoLabel.sizePolicy().hasHeightForWidth())

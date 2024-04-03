@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.3
+## Created by: Qt User Interface Compiler version 6.7.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -110,7 +110,7 @@ class Ui_MainWindow(object):
         self.splitter.addWidget(self.tabWidget)
         self.scrollArea = QScrollArea(self.splitter)
         self.scrollArea.setObjectName(u"scrollArea")
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.scrollArea.sizePolicy().hasHeightForWidth())
@@ -142,7 +142,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
         self.mainToolBar = QToolBar(MainWindow)
         self.mainToolBar.setObjectName(u"mainToolBar")
-        MainWindow.addToolBar(Qt.TopToolBarArea, self.mainToolBar)
+        MainWindow.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.mainToolBar)
 
         self.menubar.addAction(self.qtFileMenu.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())

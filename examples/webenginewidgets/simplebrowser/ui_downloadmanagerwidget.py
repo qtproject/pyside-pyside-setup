@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'downloadmanagerwidget.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.0
+## Created by: Qt User Interface Compiler version 6.7.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -49,7 +49,7 @@ class Ui_DownloadManagerWidget(object):
         self.m_itemsLayout.setContentsMargins(3, 3, 3, 3)
         self.m_zeroItemsLabel = QLabel(self.m_items)
         self.m_zeroItemsLabel.setObjectName(u"m_zeroItemsLabel")
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.m_zeroItemsLabel.sizePolicy().hasHeightForWidth())

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.0
+## Created by: Qt User Interface Compiler version 6.7.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (QApplication, QHeaderView, QMainWindow, QMenu,
     QMenuBar, QSizePolicy, QSplitter, QStatusBar,
     QTabWidget, QToolBar, QTreeView, QVBoxLayout,
     QWidget)
-import resources_rc
+import rc_resources
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -123,7 +123,7 @@ class Ui_MainWindow(object):
         self.splitter.setOrientation(Qt.Horizontal)
         self.tabWidget = QTabWidget(self.splitter)
         self.tabWidget.setObjectName(u"tabWidget")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.tabWidget.sizePolicy().hasHeightForWidth())
@@ -152,7 +152,7 @@ class Ui_MainWindow(object):
         self.splitter.addWidget(self.tabWidget)
         self.pdfView = QPdfView(self.splitter)
         self.pdfView.setObjectName(u"pdfView")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy1.setHorizontalStretch(10)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.pdfView.sizePolicy().hasHeightForWidth())
@@ -179,7 +179,7 @@ class Ui_MainWindow(object):
         self.mainToolBar.setObjectName(u"mainToolBar")
         self.mainToolBar.setMovable(False)
         self.mainToolBar.setFloatable(False)
-        MainWindow.addToolBar(Qt.TopToolBarArea, self.mainToolBar)
+        MainWindow.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.mainToolBar)
         self.statusBar = QStatusBar(MainWindow)
         self.statusBar.setObjectName(u"statusBar")
         MainWindow.setStatusBar(self.statusBar)

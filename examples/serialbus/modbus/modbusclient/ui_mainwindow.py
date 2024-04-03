@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.1
+## Created by: Qt User Interface Compiler version 6.7.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -61,7 +61,7 @@ class Ui_MainWindow(object):
         self.gridLayout.setObjectName(u"gridLayout")
         self.label_27 = QLabel(self.centralWidget)
         self.label_27.setObjectName(u"label_27")
-        sizePolicy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.label_27.sizePolicy().hasHeightForWidth())
@@ -71,7 +71,7 @@ class Ui_MainWindow(object):
 
         self.connectButton = QPushButton(self.centralWidget)
         self.connectButton.setObjectName(u"connectButton")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.connectButton.sizePolicy().hasHeightForWidth())
@@ -81,7 +81,7 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.connectButton, 0, 7, 1, 1)
 
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.gridLayout.addItem(self.horizontalSpacer, 0, 4, 1, 1)
 
@@ -115,7 +115,7 @@ class Ui_MainWindow(object):
 
         self.portEdit = QLineEdit(self.centralWidget)
         self.portEdit.setObjectName(u"portEdit")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.portEdit.sizePolicy().hasHeightForWidth())
@@ -255,7 +255,7 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout.addWidget(self.writeTable)
 
-        self.horizontalSpacer_2 = QSpacerItem(13, 17, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer_2 = QSpacerItem(13, 17, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout.addItem(self.horizontalSpacer_2)
 

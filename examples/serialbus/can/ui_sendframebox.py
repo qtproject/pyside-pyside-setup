@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'sendframebox.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.1
+## Created by: Qt User Interface Compiler version 6.7.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -88,7 +88,7 @@ class Ui_SendFrameBox(object):
 
         self.frameIdEdit = QLineEdit(SendFrameBox)
         self.frameIdEdit.setObjectName(u"frameIdEdit")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.frameIdEdit.sizePolicy().hasHeightForWidth())
@@ -109,7 +109,7 @@ class Ui_SendFrameBox(object):
 
         self.payloadEdit = QLineEdit(SendFrameBox)
         self.payloadEdit.setObjectName(u"payloadEdit")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(2)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.payloadEdit.sizePolicy().hasHeightForWidth())

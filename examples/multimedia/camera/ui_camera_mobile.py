@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'camera_mobile.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.2
+## Created by: Qt User Interface Compiler version 6.7.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -42,7 +42,7 @@ class Ui_Camera(object):
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.captureWidget = QTabWidget(self.centralwidget)
         self.captureWidget.setObjectName(u"captureWidget")
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.captureWidget.sizePolicy().hasHeightForWidth())
@@ -63,7 +63,7 @@ class Ui_Camera(object):
 
         self.label = QLabel(self.tab_2)
         self.label.setObjectName(u"label")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
@@ -109,7 +109,7 @@ class Ui_Camera(object):
 
         self.verticalLayout_2 = QVBoxLayout()
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalSpacer = QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer = QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout_2.addItem(self.verticalSpacer)
 
@@ -137,7 +137,7 @@ class Ui_Camera(object):
 
         self.stackedWidget = QStackedWidget(self.centralwidget)
         self.stackedWidget.setObjectName(u"stackedWidget")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy2.setHorizontalStretch(1)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.stackedWidget.sizePolicy().hasHeightForWidth())
@@ -160,7 +160,7 @@ class Ui_Camera(object):
         self.gridLayout_5.setObjectName(u"gridLayout_5")
         self.viewfinder = QVideoWidget(self.viewfinderPage)
         self.viewfinder.setObjectName(u"viewfinder")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.viewfinder.sizePolicy().hasHeightForWidth())
@@ -175,7 +175,7 @@ class Ui_Camera(object):
         self.gridLayout_4.setObjectName(u"gridLayout_4")
         self.lastImagePreviewLabel = QLabel(self.previewPage)
         self.lastImagePreviewLabel.setObjectName(u"lastImagePreviewLabel")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy4.setHorizontalStretch(0)
         sizePolicy4.setVerticalStretch(0)
         sizePolicy4.setHeightForWidth(self.lastImagePreviewLabel.sizePolicy().hasHeightForWidth())

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'imagesettings.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.0
+## Created by: Qt User Interface Compiler version 6.7.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -65,7 +65,7 @@ class Ui_ImageSettingsUi(object):
 
         self.gridLayout.addWidget(self.groupBox_2, 0, 0, 1, 1)
 
-        self.verticalSpacer = QSpacerItem(20, 14, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer = QSpacerItem(20, 14, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.gridLayout.addItem(self.verticalSpacer, 1, 0, 1, 1)
 

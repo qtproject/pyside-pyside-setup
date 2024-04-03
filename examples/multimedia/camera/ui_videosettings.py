@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'videosettings.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.0
+## Created by: Qt User Interface Compiler version 6.7.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -84,7 +84,7 @@ class Ui_VideoSettingsUi(object):
 
         self.widget = QWidget(VideoSettingsUi)
         self.widget.setObjectName(u"widget")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.widget.sizePolicy().hasHeightForWidth())
@@ -151,7 +151,7 @@ class Ui_VideoSettingsUi(object):
 
         self.gridLayout_3.addWidget(self.widget, 2, 0, 1, 1)
 
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.gridLayout_3.addItem(self.verticalSpacer, 3, 0, 1, 1)
 

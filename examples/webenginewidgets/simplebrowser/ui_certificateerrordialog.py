@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'certificateerrordialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.0
+## Created by: Qt User Interface Compiler version 6.7.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -35,7 +35,7 @@ class Ui_CertificateErrorDialog(object):
 
         self.m_errorLabel = QLabel(CertificateErrorDialog)
         self.m_errorLabel.setObjectName(u"m_errorLabel")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.m_errorLabel.sizePolicy().hasHeightForWidth())
@@ -47,7 +47,7 @@ class Ui_CertificateErrorDialog(object):
 
         self.m_infoLabel = QLabel(CertificateErrorDialog)
         self.m_infoLabel.setObjectName(u"m_infoLabel")
-        sizePolicy1 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.m_infoLabel.sizePolicy().hasHeightForWidth())
@@ -57,7 +57,7 @@ class Ui_CertificateErrorDialog(object):
 
         self.verticalLayout.addWidget(self.m_infoLabel)
 
-        self.verticalSpacer = QSpacerItem(20, 16, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer = QSpacerItem(20, 16, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout.addItem(self.verticalSpacer)
 
