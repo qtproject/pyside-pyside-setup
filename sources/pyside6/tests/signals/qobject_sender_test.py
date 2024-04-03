@@ -13,13 +13,17 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QCoreApplication, QObject, QTimer, SIGNAL
+from PySide6.QtCore import QCoreApplication, QObject, QTimer, Signal
 from helper.usesqapplication import UsesQApplication
 
 
 class ExtQTimer(QTimer):
     def __init__(self):
         super().__init__()
+
+
+class Sender(QObject):
+    foo = Signal()
 
 
 class Receiver(QObject):
@@ -37,10 +41,10 @@ class ObjectSenderTest(unittest.TestCase):
     '''Test case for QObject.sender() method.'''
 
     def testSenderPythonSignal(self):
-        sender = QObject()
+        sender = Sender()
         recv = Receiver()
-        QObject.connect(sender, SIGNAL('foo()'), recv.callback)
-        sender.emit(SIGNAL('foo()'))
+        sender.foo.connect(recv.callback)
+        sender.foo.emit()
         self.assertEqual(sender, recv.the_sender)
 
 
@@ -48,10 +52,10 @@ class ObjectSenderCheckOnReceiverTest(unittest.TestCase):
     '''Test case for QObject.sender() method, this one tests the equality on the Receiver object.'''
 
     def testSenderPythonSignal(self):
-        sender = QObject()
+        sender = Sender()
         recv = Receiver()
-        QObject.connect(sender, SIGNAL('foo()'), recv.callback)
-        sender.emit(SIGNAL('foo()'))
+        sender.foo.connect(recv.callback)
+        sender.foo.emit()
         self.assertEqual(sender, recv.the_sender)
 
 

@@ -11,7 +11,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL, QProcess
+from PySide6.QtCore import QObject, Signal, QProcess
 
 from helper.basicpyslotcase import BasicPySlotCase
 from helper.usesqapplication import UsesQApplication
@@ -20,7 +20,7 @@ from helper.usesqapplication import UsesQApplication
 class MultipleSignalConnections(unittest.TestCase):
     '''Base class for multiple signal connection testing'''
 
-    def run_many(self, sender, signal, emitter, receivers, args=None):
+    def run_many(self, signal, emitter, receivers, args=None):
         """Utility method to connect a list of receivers to a signal.
         sender - QObject that will emit the signal
         signal - string with the signal signature
@@ -33,7 +33,7 @@ class MultipleSignalConnections(unittest.TestCase):
             args = tuple()
         for rec in receivers:
             rec.setUp()
-            self.assertTrue(QObject.connect(sender, SIGNAL(signal), rec.cb))
+            self.assertTrue(signal.connect(rec.cb))
             rec.args = tuple(args)
 
         emitter(*args)
@@ -48,13 +48,14 @@ class PythonMultipleSlots(UsesQApplication, MultipleSignalConnections):
     def testPythonSignal(self):
         """Multiple connections to a python signal (short-circuit)"""
 
-        class Dummy(QObject):
-            pass
+        class Sender(QObject):
 
-        sender = Dummy()
+            foobar = Signal(int)
+
+        sender = Sender()
         receivers = [BasicPySlotCase() for x in range(10)]
-        self.run_many(sender, 'foobar(int)', partial(sender.emit,
-                      SIGNAL('foobar(int)')), receivers, (0, ))
+        self.run_many(sender.foobar, partial(sender.foobar.emit),
+                      receivers, (0, ))
 
 
 class QProcessMultipleSlots(UsesQApplication, MultipleSignalConnections):
@@ -67,9 +68,10 @@ class QProcessMultipleSlots(UsesQApplication, MultipleSignalConnections):
 
         def start_proc(*args):
             sender.start(sys.executable, ['-c', '""'])
-            sender.waitForFinished()
+            self.assertTrue(sender.waitForStarted())
+            self.assertTrue(sender.waitForFinished())
 
-        self.run_many(sender, 'started()', start_proc, receivers)
+        self.run_many(sender.started, start_proc, receivers)
 
     def testQProcessFinished(self):
         '''Multiple connections to QProcess.finished(int)'''
@@ -78,9 +80,10 @@ class QProcessMultipleSlots(UsesQApplication, MultipleSignalConnections):
 
         def start_proc(*args):
             sender.start(sys.executable, ['-c', '""'])
-            sender.waitForFinished()
+            self.assertTrue(sender.waitForStarted())
+            self.assertTrue(sender.waitForFinished())
 
-        self.run_many(sender, 'finished(int)', start_proc, receivers, (0,))
+        self.run_many(sender.finished, start_proc, receivers, (0, QProcess.ExitStatus.NormalExit))
 
 
 if __name__ == '__main__':

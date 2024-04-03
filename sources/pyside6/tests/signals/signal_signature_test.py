@@ -20,6 +20,10 @@ called = False
 name = "Old"
 
 
+class Sender(QObject):
+    dummySignal = Signal()
+
+
 class Obj(QObject):
     dummySignalArgs = Signal(str)
     numberSignal = Signal(int)
@@ -78,9 +82,9 @@ class TestConnectNotifyWithNewStyleSignals(UsesQApplication):
 
     def testStaticSlot(self):
         global called
-        sender = Obj()
-        sender.connect(sender, SIGNAL("dummySignal()"), Obj.static_method)
-        sender.emit(SIGNAL("dummySignal()"))
+        sender = Sender()
+        sender.dummySignal.connect(Obj.static_method)
+        sender.dummySignal.emit()
         self.assertTrue(called)
 
     def testStaticSlotArgs(self):

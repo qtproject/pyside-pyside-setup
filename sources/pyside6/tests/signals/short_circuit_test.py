@@ -11,11 +11,17 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL
+from PySide6.QtCore import QObject, Signal
 
 
-class Dummy(QObject):
-    """Dummy class used in this test."""
+class Sender(QObject):
+    """Sender class used in this test."""
+
+    foo = Signal()
+    foo_int = Signal(int)
+    foo_int_int_string = Signal(int, int, str)
+    foo_int_qobject = Signal(int, QObject)
+
     def __init__(self, parent=None):
         QObject.__init__(self, parent)
 
@@ -38,40 +44,40 @@ class ShortCircuitSignals(unittest.TestCase):
 
     def testNoArgs(self):
         """Short circuit signal without arguments"""
-        obj1 = Dummy()
-        QObject.connect(obj1, SIGNAL('foo()'), self.callback)
+        obj1 = Sender()
+        obj1.foo.connect(self.callback)
         self.args = tuple()
-        obj1.emit(SIGNAL('foo()'), *self.args)
+        obj1.foo.emit(*self.args)
         self.assertTrue(self.called)
 
     def testWithArgs(self):
         """Short circuit signal with integer arguments"""
-        obj1 = Dummy()
+        obj1 = Sender()
 
-        QObject.connect(obj1, SIGNAL('foo(int)'), self.callback)
+        obj1.foo_int.connect(self.callback)
         self.args = (42,)
-        obj1.emit(SIGNAL('foo(int)'), *self.args)
+        obj1.foo_int.emit(*self.args)
 
         self.assertTrue(self.called)
 
     def testMultipleArgs(self):
         """Short circuit signal with multiple arguments"""
-        obj1 = Dummy()
+        obj1 = Sender()
 
-        QObject.connect(obj1, SIGNAL('foo(int,int,QString)'), self.callback)
+        obj1.foo_int_int_string.connect(self.callback)
         self.args = (42, 33, 'char')
-        obj1.emit(SIGNAL('foo(int,int,QString)'), *self.args)
+        obj1.foo_int_int_string.emit(*self.args)
 
         self.assertTrue(self.called)
 
     def testComplexArgs(self):
         """Short circuit signal with complex arguments"""
-        obj1 = Dummy()
+        obj1 = Sender()
 
-        QObject.connect(obj1, SIGNAL('foo(int,QObject*)'), self.callback)
+        obj1.foo_int_qobject.connect(self.callback)
         self.args = (42, obj1)
-        obj1.emit(SIGNAL('foo(int,QObject*)'), *self.args)
 
+        obj1.foo_int_qobject.emit(*self.args)
         self.assertTrue(self.called)
 
 

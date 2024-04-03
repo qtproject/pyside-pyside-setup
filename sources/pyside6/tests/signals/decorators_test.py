@@ -11,7 +11,11 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, Slot, SIGNAL, SLOT
+from PySide6.QtCore import QObject, Slot, Signal
+
+
+class Sender(QObject):
+    mySignal = Signal()
 
 
 class MyObject(QObject):
@@ -57,9 +61,10 @@ class StaticMetaObjectTest(unittest.TestCase):
         self.assertTrue(m.indexOfSlot('mySlot4(QString,int)') > 0)
 
     def testEmission(self):
+        sender = Sender()
         o = MyObject()
-        o.connect(SIGNAL("mySignal()"), o, SLOT("mySlot()"))
-        o.emit(SIGNAL("mySignal()"))
+        sender.mySignal.connect(o.mySlot)
+        sender.mySignal.emit()
         self.assertTrue(o._slotCalledCount == 1)
 
     def testResult(self):

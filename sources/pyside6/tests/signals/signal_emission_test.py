@@ -14,7 +14,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL, SLOT, QProcess, QTimeLine
+from PySide6.QtCore import QObject, Signal, SIGNAL, QProcess, QTimeLine
 
 from helper.usesqapplication import UsesQApplication
 
@@ -25,7 +25,7 @@ class ArgsOnEmptySignal(UsesQApplication):
     def testArgsToNoArgsSignal(self):
         '''Passing arguments to a signal without arguments'''
         process = QProcess()
-        self.assertRaises(TypeError, process.emit, SIGNAL('started()'), 42)
+        self.assertRaises(TypeError, process.started.emit, 42)
 
 
 class MoreArgsOnEmit(UsesQApplication):
@@ -34,12 +34,14 @@ class MoreArgsOnEmit(UsesQApplication):
     def testMoreArgs(self):
         '''Passing more arguments than needed'''
         process = QProcess()
-        self.assertRaises(TypeError, process.emit, SIGNAL('finished(int)'), 55, 55)
+        self.assertRaises(TypeError, process.finished.emit, 55, QProcess.ExitStatus.NormalExit, 42)
 
 
-class Dummy(QObject):
-    '''Dummy class'''
-    pass
+class Sender(QObject):
+    '''Sender class'''
+
+    dummy = Signal()
+    dummy_int = Signal(int)
 
 
 class PythonSignalToCppSlots(UsesQApplication):
@@ -48,12 +50,11 @@ class PythonSignalToCppSlots(UsesQApplication):
     def testWithoutArgs(self):
         '''Connect python signal to QTimeLine.toggleDirection()'''
         timeline = QTimeLine()
-        dummy = Dummy()
-        QObject.connect(dummy, SIGNAL('dummy()'),
-                        timeline, SLOT('toggleDirection()'))
+        sender = Sender()
+        sender.dummy.connect(timeline.toggleDirection)
 
         orig_dir = timeline.direction()
-        dummy.emit(SIGNAL('dummy()'))
+        sender.dummy.emit()
         new_dir = timeline.direction()
 
         if orig_dir == QTimeLine.Forward:
@@ -64,13 +65,12 @@ class PythonSignalToCppSlots(UsesQApplication):
     def testWithArgs(self):
         '''Connect python signals to QTimeLine.setCurrentTime(int)'''
         timeline = QTimeLine()
-        dummy = Dummy()
+        sender = Sender()
 
-        QObject.connect(dummy, SIGNAL('dummy(int)'),
-                        timeline, SLOT('setCurrentTime(int)'))
+        sender.dummy_int.connect(timeline.setCurrentTime)
 
         current = timeline.currentTime()
-        dummy.emit(SIGNAL('dummy(int)'), current + 42)
+        sender.dummy_int.emit(current + 42)
         self.assertEqual(timeline.currentTime(), current + 42)
 
 
@@ -82,13 +82,13 @@ class CppSignalsToCppSlots(UsesQApplication):
         process = QProcess()
         timeline = QTimeLine()
 
-        QObject.connect(process, SIGNAL('finished(int, QProcess::ExitStatus)'),
-                        timeline, SLOT('toggleDirection()'))
+        process.finished.connect(timeline.toggleDirection)
 
         orig_dir = timeline.direction()
 
         process.start(sys.executable, ['-c', '"print 42"'])
-        process.waitForFinished()
+        self.assertTrue(process.waitForStarted())
+        self.assertTrue(process.waitForFinished())
 
         new_dir = timeline.direction()
 
@@ -111,9 +111,9 @@ class DynamicSignalsToFuncPartial(UsesQApplication):
     def testIt(self):
         global called
         called = False
-        o = QObject()
-        o.connect(o, SIGNAL("ASignal()"), functools.partial(someSlot, "partial .."))
-        o.emit(SIGNAL("ASignal()"))
+        o = Sender()
+        o.dummy.connect(functools.partial(someSlot, "partial .."))
+        o.dummy.emit()
         self.assertTrue(called)
 
 

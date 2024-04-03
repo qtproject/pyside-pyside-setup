@@ -10,22 +10,16 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL
-
-try:
-    from PySide6.QtWidgets import QPushButton, QSpinBox
-    hasQtGui = True
-except ImportError:
-    hasQtGui = False
+from PySide6.QtWidgets import QPushButton, QSpinBox
 
 from helper.basicpyslotcase import BasicPySlotCase
 from helper.usesqapplication import UsesQApplication
 
 
-class MultipleSignalConnections(unittest.TestCase):
-    '''Base class for multiple signal connection testing'''
+class QtGuiMultipleSlots(UsesQApplication):
+    '''Multiple connections to QtGui signals'''
 
-    def run_many(self, sender, signal, emitter, receivers, args=None):
+    def run_many(self, signal, emitter, receivers, args=None):
         """Utility method to connect a list of receivers to a signal.
         sender - QObject that will emit the signal
         signal - string with the signal signature
@@ -39,7 +33,7 @@ class MultipleSignalConnections(unittest.TestCase):
 
         for rec in receivers:
             rec.setUp()
-            QObject.connect(sender, SIGNAL(signal), rec.cb)
+            signal.connect(rec.cb)
             rec.args = tuple(args)
 
         emitter(*args)
@@ -47,24 +41,20 @@ class MultipleSignalConnections(unittest.TestCase):
         for rec in receivers:
             self.assertTrue(rec.called)
 
+    def testButtonClick(self):
+        """Multiple connections to QPushButton.clicked()"""
+        sender = QPushButton('button')
+        receivers = [BasicPySlotCase() for x in range(30)]
+        self.run_many(sender.clicked, sender.click, receivers)
 
-if hasQtGui:
-    class QtGuiMultipleSlots(UsesQApplication, MultipleSignalConnections):
-        '''Multiple connections to QtGui signals'''
+    def testSpinBoxValueChanged(self):
+        """Multiple connections to QSpinBox.valueChanged(int)"""
+        sender = QSpinBox()
+        # FIXME if number of receivers if higher than 50, segfaults
+        receivers = [BasicPySlotCase() for x in range(10)]
+        self.run_many(sender.valueChanged, sender.setValue,
+                      receivers, (1,))
 
-        def testButtonClick(self):
-            """Multiple connections to QPushButton.clicked()"""
-            sender = QPushButton('button')
-            receivers = [BasicPySlotCase() for x in range(30)]
-            self.run_many(sender, 'clicked()', sender.click, receivers)
-
-        def testSpinBoxValueChanged(self):
-            """Multiple connections to QSpinBox.valueChanged(int)"""
-            sender = QSpinBox()
-            # FIXME if number of receivers if higher than 50, segfaults
-            receivers = [BasicPySlotCase() for x in range(10)]
-            self.run_many(sender, 'valueChanged(int)', sender.setValue,
-                          receivers, (1,))
 
 if __name__ == '__main__':
     unittest.main()
