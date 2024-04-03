@@ -127,7 +127,7 @@
     <enum-type name="LoadStatus"/>
   </value-type>
 
-  <object-type name="QWebEngineRegisterProtocolHandlerRequest"/>
+  <value-type name="QWebEngineRegisterProtocolHandlerRequest"/>
 
   <value-type name="QWebEngineFindTextResult"/>
 
