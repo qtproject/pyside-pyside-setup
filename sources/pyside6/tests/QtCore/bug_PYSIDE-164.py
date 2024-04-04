@@ -10,16 +10,19 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QCoreApplication, QEventLoop, QObject, Qt, QThread, QTimer, SIGNAL
+from PySide6.QtCore import QCoreApplication, QEventLoop, QObject, Qt, QThread, Signal
 
 
 class Emitter(QThread):
+
+    signal = Signal(int)
+
     def __init__(self):
         super().__init__()
 
     def run(self):
         print("Before emit.")
-        self.emit(SIGNAL("signal(int)"), 0)
+        self.signal.emit(0)
         print("After emit.")
 
 
@@ -36,12 +39,11 @@ class Receiver(QObject):
 class TestBugPYSIDE164(unittest.TestCase):
 
     def testBlockingSignal(self):
-        app = QCoreApplication.instance() or QCoreApplication([])
+        app = QCoreApplication.instance() or QCoreApplication([])  # noqa: F841
         eventloop = QEventLoop()
         emitter = Emitter()
         receiver = Receiver(eventloop)
-        emitter.connect(emitter, SIGNAL("signal(int)"),
-                        receiver.receive, Qt.BlockingQueuedConnection)
+        emitter.signal.connect(receiver.receive, Qt.BlockingQueuedConnection)
         emitter.start()
         retval = eventloop.exec()
         emitter.wait(2000)

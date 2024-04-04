@@ -105,15 +105,6 @@ class qmetaobject_test(unittest.TestCase):
 
         o.connect(o2, SIGNAL("bars()"), o.slot)
         self.assertTrue(o2.metaObject().indexOfMethod("bars()") > -1)
-        #self.assertTrue(o.metaObject().indexOfMethod("bar()") == -1)
-        #self.assertTrue(o.metaObject().indexOfMethod("slot()") > -1)
-
-        #slot_index = o.metaObject().indexOfMethod("slot()")
-
-        #o.connect(o, SIGNAL("foo()"), o2, SIGNAL("bar()"))
-        #signal_index = o.metaObject().indexOfMethod("foo()");
-
-        #self.assertTrue(slot_index != signal_index)
 
     # PYSIDE-784, plain Qt objects should not have intermediary
     # metaObjects.
@@ -125,7 +116,7 @@ class qmetaobject_test(unittest.TestCase):
     # PYSIDE-1827, slots with non-QObject object types should work
     # (metatypes are registered)
     def test_ObjectSlotSignal(self):
-        app = QCoreApplication()
+        app = QCoreApplication()  # noqa: F841
         sender = SemaphoreSender()
         receiver = SemaphoreReceiver()
         sender.signal.connect(receiver.receiverSlot, Qt.QueuedConnection)

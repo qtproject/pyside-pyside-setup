@@ -11,7 +11,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QCoreApplication, QObject, QTimer, SIGNAL, SLOT
+from PySide6.QtCore import QCoreApplication, QObject, QTimer
 
 """
 This is a simple slot test that was updated to use the qApp "macro".
@@ -28,24 +28,23 @@ class objTest(QObject):
 
     def slot(self):
         self.ok = True
-        qApp.quit()
+        qApp.quit()  # noqa: F821
 
 
 class slotTest(unittest.TestCase):
     def quit_app(self):
-        qApp.quit()
+        qApp.quit()  # noqa: F821
 
     def testBasic(self):
         timer = QTimer()
         timer.setInterval(100)
 
         my_obj = objTest()
-        my_slot = SLOT("slot()")
-        QObject.connect(timer, SIGNAL("timeout()"), my_obj, my_slot)
+        timer.timeout.connect(my_obj.slot)
         timer.start(100)
 
         QTimer.singleShot(1000, self.quit_app)
-        qApp.exec()
+        qApp.exec()  # noqa: F821
 
         self.assertTrue(my_obj.ok)
 

@@ -14,7 +14,12 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL, QFile, QSignalBlocker
+from PySide6.QtCore import QObject, Signal, QFile, QSignalBlocker
+
+
+class Sender(QObject):
+    mysignal = Signal()
+    mysignal_int_int = Signal(int, int)
 
 
 class TestSignalsBlockedBasic(unittest.TestCase):
@@ -61,7 +66,7 @@ class TestSignalsBlocked(unittest.TestCase):
 
     def setUp(self):
         # Set up the basic resources needed
-        self.obj = QObject()
+        self.obj = Sender()
         self.args = tuple()
         self.called = False
 
@@ -81,27 +86,28 @@ class TestSignalsBlocked(unittest.TestCase):
 
     def testShortCircuitSignals(self):
         # Blocking of Python short-circuit signals
-        QObject.connect(self.obj, SIGNAL('mysignal()'), self.callback)
+        self.obj.mysignal.connect(self.callback)
 
-        self.obj.emit(SIGNAL('mysignal()'))
+        self.obj.mysignal.emit()
         self.assertTrue(self.called)
 
         self.called = False
         self.obj.blockSignals(True)
-        self.obj.emit(SIGNAL('mysignal()'))
+        self.obj.mysignal.emit()
         self.assertTrue(not self.called)
 
     def testPythonSignals(self):
         # Blocking of Python typed signals
-        QObject.connect(self.obj, SIGNAL('mysignal(int,int)'), self.callback)
+
+        self.obj.mysignal_int_int.connect(self.callback)
         self.args = (1, 3)
 
-        self.obj.emit(SIGNAL('mysignal(int,int)'), *self.args)
+        self.obj.mysignal_int_int.emit(*self.args)
         self.assertTrue(self.called)
 
         self.called = False
         self.obj.blockSignals(True)
-        self.obj.emit(SIGNAL('mysignal(int,int)'), *self.args)
+        self.obj.mysignal_int_int.emit(*self.args)
         self.assertTrue(not self.called)
 
 
@@ -130,7 +136,7 @@ class TestQFileSignalBlocking(unittest.TestCase):
     def testAboutToCloseBlocking(self):
         # QIODevice.aboutToClose() blocking
 
-        QObject.connect(self.qfile, SIGNAL('aboutToClose()'), self.callback)
+        self.qfile.aboutToClose.connect(self.callback)
 
         self.assertTrue(self.qfile.open(QFile.ReadOnly))
         self.qfile.close()
