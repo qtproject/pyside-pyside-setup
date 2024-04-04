@@ -12,14 +12,16 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL, QFile, QThread, QTimer, Qt
+from PySide6.QtCore import Signal, QThread
 from helper.usesqapplication import UsesQApplication
 
 
 class MyThread(QThread):
 
+    test = Signal(str)
+
     def run(self):
-        self.emit(SIGNAL("test(const QString&)"), "INdT - PySide")
+        self.test.emit("INdT - PySide")
 
 
 class TestThreadSignal(UsesQApplication):
@@ -33,7 +35,7 @@ class TestThreadSignal(UsesQApplication):
 
     def testThread(self):
         t = MyThread()
-        QObject.connect(t, SIGNAL("test(const QString&)"), self._callback)
+        t.test.connect(self._callback)
         t.start()
 
         self.app.exec()

@@ -12,7 +12,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, SIGNAL, SLOT
+from PySide6.QtCore import QObject, Signal, SIGNAL, SLOT
 from helper.usesqapplication import UsesQApplication
 
 
@@ -21,6 +21,9 @@ def cute_slot():
 
 
 class Obj(QObject):
+
+    foo = Signal()
+
     def __init__(self):
         super().__init__()
         self.con_notified = False
@@ -51,37 +54,44 @@ class TestQObjectConnectNotify(UsesQApplication):
     def testBasic(self):
         sender = Obj()
         receiver = QObject()
+        sender.destroyed.connect(receiver.deleteLater)
+        self.assertTrue(sender.con_notified)
+        self.assertEqual(sender.signal.methodSignature(), "destroyed()")
+        self.assertTrue(sender.destroyed.disconnect(receiver.deleteLater))
+        self.assertTrue(sender.dis_notified)
+
+    def testBasicString(self):
+        sender = Obj()
+        receiver = QObject()
         sender.connect(SIGNAL("destroyed()"), receiver, SLOT("deleteLater()"))
         self.assertTrue(sender.con_notified)
         # When connecting to a regular slot, and not a python callback function, QObject::connect
         # will use the non-cloned method signature, so connecting to destroyed() will actually
         # connect to destroyed(QObject*).
         self.assertEqual(sender.signal.methodSignature(), "destroyed(QObject*)")
-        sender.disconnect(SIGNAL("destroyed()"), receiver, SLOT("deleteLater()"))
+        self.assertTrue(sender.disconnect(SIGNAL("destroyed()"), receiver, SLOT("deleteLater()")))
         self.assertTrue(sender.dis_notified)
 
     def testPySignal(self):
         sender = Obj()
         receiver = QObject()
-        sender.connect(SIGNAL("foo()"), receiver, SLOT("deleteLater()"))
+        sender.foo.connect(receiver.deleteLater)
         self.assertTrue(sender.con_notified)
-        sender.disconnect(SIGNAL("foo()"), receiver, SLOT("deleteLater()"))
+        self.assertTrue(sender.foo.disconnect(receiver.deleteLater))
         self.assertTrue(sender.dis_notified)
 
     def testPySlots(self):
         sender = Obj()
-        receiver = QObject()
-        sender.connect(SIGNAL("destroyed()"), cute_slot)
+        sender.destroyed.connect(cute_slot)
         self.assertTrue(sender.con_notified)
-        sender.disconnect(SIGNAL("destroyed()"), cute_slot)
+        self.assertTrue(sender.destroyed.disconnect(cute_slot))
         self.assertTrue(sender.dis_notified)
 
     def testpyAll(self):
         sender = Obj()
-        receiver = QObject()
-        sender.connect(SIGNAL("foo()"), cute_slot)
+        sender.foo.connect(cute_slot)
         self.assertTrue(sender.con_notified)
-        sender.disconnect(SIGNAL("foo()"), cute_slot)
+        self.assertTrue(sender.foo.disconnect(cute_slot))
         self.assertTrue(sender.dis_notified)
 
 
