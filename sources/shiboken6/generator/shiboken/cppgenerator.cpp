@@ -58,6 +58,8 @@ using namespace Qt::StringLiterals;
 
 static const char shibokenErrorsOccurred[] = "Shiboken::Errors::occurred() != nullptr";
 
+static constexpr auto virtualMethodStaticReturnVar = "result"_L1;
+
 static QString mangleName(QString name)
 {
     if (name == u"None" || name == u"False" || name == u"True" || name == u"from")
@@ -968,12 +970,19 @@ void CppGenerator::writeVirtualMethodCppCall(TextStream &s,
 }
 
 // Determine the return statement (void or a result value).
-QString CppGenerator::virtualMethodReturn(TextStream &s, const ApiExtractorResult &api,
-                                          const AbstractMetaFunctionCPtr &func,
-                                          const FunctionModificationList &functionModifications)
+
+CppGenerator::VirtualMethodReturn
+    CppGenerator::virtualMethodReturn(const ApiExtractorResult &api,
+                                      const AbstractMetaFunctionCPtr &func,
+                                      const FunctionModificationList &functionModifications)
 {
-    if (func->isVoid())
-        return u"return;"_s;
+    VirtualMethodReturn result;
+    if (func->isVoid()) {
+        result.statement = "return;"_L1;
+        return result;
+    }
+
+    result.statement = "return "_L1;
     const AbstractMetaType &returnType = func->type();
     for (const FunctionModification &mod : functionModifications) {
         for (const ArgumentModification &argMod : mod.argument_mods()) {
@@ -994,8 +1003,8 @@ QString CppGenerator::virtualMethodReturn(TextStream &s, const ApiExtractorResul
                     offset = match.capturedStart(1);
                 }
                 DefaultValue defaultReturnExpr(DefaultValue::Custom, expr);
-                return u"return "_s + defaultReturnExpr.returnValue()
-                       + u';';
+                result.statement += defaultReturnExpr.returnValue() + u';';
+                return result;
             }
         }
     }
@@ -1007,16 +1016,13 @@ QString CppGenerator::virtualMethodReturn(TextStream &s, const ApiExtractorResul
         errorMsg = msgCouldNotFindMinimalConstructor(errorMsg,
                                                      func->type().cppSignature(),
                                                      errorMessage);
-        qCWarning(lcShiboken).noquote().nospace() << errorMsg;
-        s  << "\n#error " << errorMsg << '\n';
+        throw Exception(errorMsg);
     }
-    if (returnType.referenceType() == LValueReference) {
-        s << "static " << returnType.typeEntry()->qualifiedCppName()
-            << " result;\n";
-        return u"return result;"_s;
-    }
-    return u"return "_s + defaultReturnExpr->returnValue()
-           + u';';
+
+    result.needsReference = returnType.referenceType() == LValueReference;
+    result.statement += (result.needsReference
+        ? virtualMethodStaticReturnVar : defaultReturnExpr->returnValue()) + u';';
+    return result;
 }
 
 // Create an argument for Py_BuildValue() when writing virtual methods.
@@ -1117,6 +1123,12 @@ static const char noArgsCallCondition[] =
 static const char inverseNoArgsCallCondition[] =
     "#if defined(PYPY_VERSION) || (defined(Py_LIMITED_API) && Py_LIMITED_API < 0x030A0000)\n";
 
+static inline void writeVirtualMethodStaticReturnVar(TextStream &s, const AbstractMetaFunctionCPtr &func)
+{
+    s << "static " << func->type().typeEntry()->qualifiedCppName() << ' '
+        << virtualMethodStaticReturnVar << ";\n";
+}
+
 void CppGenerator::writeVirtualMethodNative(TextStream &s,
                                             const AbstractMetaFunctionCPtr &func,
                                             int cacheIndex) const
@@ -1130,13 +1142,16 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                                                     Generator::OriginalTypeDescription)
       << "\n{\n" << indent;
 
-    const QString returnStatement = virtualMethodReturn(s, api(), func,
-                                                        func->modifications());
+    const auto returnStatement = virtualMethodReturn(api(), func,
+                                                     func->modifications());
+
+    if (returnStatement.needsReference)
+        writeVirtualMethodStaticReturnVar(s, func);
 
     const bool isAbstract = func->isAbstract();
     if (isAbstract && func->isModifiedRemoved()) {
         qCWarning(lcShiboken, "%s", qPrintable(msgPureVirtualFunctionRemoved(func.get())));
-        s << returnStatement << '\n' << outdent << "}\n\n";
+        s << returnStatement.statement << '\n' << outdent << "}\n\n";
         return;
     }
 
@@ -1165,7 +1180,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     s << "if (m_PyMethodCache[" << cacheIndex << "])" << (multi_line ? " {\n" : "\n")
         << indent;
     writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
-                              returnStatement, false);
+                              returnStatement.statement, false);
     s << outdent;
     if (multi_line)
         s << "}\n";
@@ -1174,7 +1189,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 
     // Get out of virtual method call if someone already threw an error.
     s << "if (" << shibokenErrorsOccurred << ")\n" << indent
-        << returnStatement << '\n' << outdent;
+        << returnStatement.statement << '\n' << outdent;
 
     // PYSIDE-1019: Add info about properties
     int propFlag = 0;
@@ -1198,7 +1213,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     if (useOverrideCaching(func->ownerClass()))
         s << "m_PyMethodCache[" << cacheIndex << "] = true;\n";
     writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
-                              returnStatement, true);
+                              returnStatement.statement, true);
     s << outdent << "}\n\n"; //WS
 
     writeVirtualMethodPythonOverride(s, func, snips, returnStatement);
@@ -1207,7 +1222,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
                                                     const AbstractMetaFunctionCPtr &func,
                                                     const CodeSnipList &snips,
-                                                    const QString &returnStatement) const
+                                                    const VirtualMethodReturn &returnStatement) const
 {
     writeConversionRule(s, func, TypeSystem::TargetLangCode, false);
 
@@ -1303,7 +1318,7 @@ void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
         s << "if (" << PYTHON_RETURN_VAR << ".isNull()) {\n" << indent
             << "// An error happened in python code!\n"
             << "Shiboken::Errors::storeErrorOrPrint();\n"
-            << returnStatement << "\n" << outdent
+            << returnStatement.statement << "\n" << outdent
         << "}\n";
 
         if (invalidateReturn) {
@@ -1330,7 +1345,7 @@ void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
                         << func->ownerClass()->name() << "\", funcName, "
                         << getVirtualFunctionReturnTypeName(func) << ", "
                         << "Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);\n"
-                        << returnStatement << '\n' << outdent
+                        << returnStatement.statement << '\n' << outdent
                     << "}\n";
 
                 } else {
@@ -1352,7 +1367,7 @@ void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
                         << func->ownerClass()->name() << "\", funcName, "
                         << getVirtualFunctionReturnTypeName(func) << ", "
                         << "Py_TYPE(" << PYTHON_RETURN_VAR << ")->tp_name);\n"
-                        << returnStatement << '\n' << outdent
+                        << returnStatement.statement << '\n' << outdent
                     << "}\n";
 
                 }

@@ -49,6 +49,13 @@ protected:
     bool finishGeneration() override;
 
 private:
+    struct VirtualMethodReturn
+    {
+        QString statement;
+        bool needsReference = false;
+    };
+
+
     void generateSmartPointerClass(TextStream &s, const GeneratorContext &classContext);
     void generateIncludes(TextStream &s, const GeneratorContext &classContext,
                           const IncludeGroupList &includes = {},
@@ -79,14 +86,15 @@ private:
     void writeVirtualMethodPythonOverride(TextStream &s,
                                           const AbstractMetaFunctionCPtr &func,
                                           const CodeSnipList &snips,
-                                          const QString &returnStatement) const;
+                                          const VirtualMethodReturn &returnStatement) const;
     void writeVirtualMethodCppCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    const QString &funcName, const QList<CodeSnip> &snips,
                                    const AbstractMetaArgument *lastArg, const TypeEntryCPtr &retType,
                                    const QString &returnStatement, bool hasGil) const;
-    static QString virtualMethodReturn(TextStream &s, const ApiExtractorResult &api,
-                                       const AbstractMetaFunctionCPtr &func,
-                                       const FunctionModificationList &functionModifications);
+
+    static VirtualMethodReturn virtualMethodReturn(const ApiExtractorResult &api,
+                                                   const AbstractMetaFunctionCPtr &func,
+                                                   const FunctionModificationList &functionModifications);
     void writeMetaObjectMethod(TextStream &s, const GeneratorContext &classContext) const;
     static void writeMetaCast(TextStream &s, const GeneratorContext &classContext);
 
