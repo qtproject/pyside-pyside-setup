@@ -42,8 +42,11 @@ information about a particular change.
                  list has been changed to show relevant examples first.
  - [PYSIDE-1275] QObject.disconnect() now returns False with a warning instead
                  of raising an exception for non-fatal cases.
- - [PYSIDE-1612] Deployment: Issues when using pyenv have been fixed.
-                 The finding of dependent modules has been improved.
+ - [PYSIDE-1612] Deployment: Issues when using pyenv have been fixed. The
+                 finding of dependent modules has been improved. On Windows,
+                 this now requires the dumpbin tool, which is added to the path
+                 by calling the vcvarsall.bat script of Microsoft Visual
+                 Studio.
  - [PYSIDE-1612] Android Deployment: The NDK version in the tool has been
                  updated. Python has been updated to 3.11. CMake version 3.23
                  is now required. The wheels are no longer built with
@@ -89,6 +92,10 @@ information about a particular change.
  - [PYSIDE-2652] A bug when passing values of unsigned long long type
                  exceeding the long long maximum value to float
                  parameters has been fixed.
+ - [PYSIDE-2663] A crash in QtWebEngine browsing https://outlook.com has been
+                 fixed.
+ - [PYSIDE-2668] A bug when comparing QOperatingSystemVersion::OSType
+                 has been fixed.
  - [QTBUG-119785] The Filesystemexplorer-example has been updated.
 
 ****************************************************************************
