@@ -76,6 +76,10 @@ private:
     void writeVirtualMethodNative(TextStream &s,
                                   const AbstractMetaFunctionCPtr &func,
                                   int cacheIndex) const;
+    void writeVirtualMethodPythonOverride(TextStream &s,
+                                          const AbstractMetaFunctionCPtr &func,
+                                          const CodeSnipList &snips,
+                                          const QString &returnStatement) const;
     void writeVirtualMethodCppCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    const QString &funcName, const QList<CodeSnip> &snips,
                                    const AbstractMetaArgument *lastArg, const TypeEntryCPtr &retType,
