@@ -1201,6 +1201,14 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                               returnStatement, true);
     s << outdent << "}\n\n"; //WS
 
+    writeVirtualMethodPythonOverride(s, func, snips, returnStatement);
+}
+
+void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
+                                                    const AbstractMetaFunctionCPtr &func,
+                                                    const CodeSnipList &snips,
+                                                    const QString &returnStatement) const
+{
     writeConversionRule(s, func, TypeSystem::TargetLangCode, false);
 
     bool invalidateReturn = false;
@@ -1223,7 +1231,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     auto arguments = func->arguments();
     auto removedEnd = std::stable_partition(arguments.begin(), arguments.end(),
                                             isArgumentNotRemoved);
-    if (isAbstract) { // Base function is not called, indicate unused arguments.
+    if (func->isAbstract()) { // Base function is not called, indicate unused arguments.
         for (auto it = removedEnd; it != arguments.end(); ++it)
             s << sbkUnusedVariableCast(it->name());
     }
@@ -1381,6 +1389,7 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 
     if (!func->isVoid()) {
         s << "return ";
+        TypeEntryCPtr retType = func->type().typeEntry();
         if (avoidProtectedHack() && retType->isEnum()) {
             auto metaEnum = api().findAbstractMetaEnum(retType);
             bool isProtectedEnum = metaEnum.has_value() && metaEnum->isProtected();
