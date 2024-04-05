@@ -193,3 +193,25 @@ Here are all the command line options of ``pyside6-deploy``:
 * **--extra-modules**:  Comma-separated list of Qt modules to be added to the application,
   in case they are not found automatically. The module name can either be specified
   by omitting the prefix of Qt or including it eg: both Network and QtNetwork works.
+
+Considerations
+===============
+
+For deployment to work efficiently by bundling only the necessary plugins, the following utilities
+are required to be installed on the system:
+
+.. list-table::
+   :header-rows: 1
+
+   * - OS
+     - Dependencies
+     - Installation
+   * - Windows
+     - dumpbin
+     - Shipped with MSVC. Run `vcvarsall.bat` to add it to PATH
+   * - Linux
+     - readelf
+     - Available by default
+   * - macOS
+     - dyld_info
+     - Available by default from macOS 12 and upwards
