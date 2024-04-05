@@ -391,7 +391,8 @@ class DesktopConfig(Config):
         if self.get_value("qt", "plugins"):
             self._qt_plugins = self.get_value("qt", "plugins").split(",")
         else:
-            self.qt_plugins = self.dependency_reader.find_plugin_dependencies(self.modules)
+            self.qt_plugins = self.dependency_reader.find_plugin_dependencies(self.modules,
+                                                                              python_exe)
 
         self._permissions = []
         if sys.platform == "darwin":
