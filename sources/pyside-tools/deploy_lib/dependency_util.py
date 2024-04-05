@@ -285,13 +285,22 @@ class QtDependencyReader:
         else:
             logging.info(f"[DEPLOY] No Qt dependencies found for {module}")
 
-    def find_plugin_dependencies(self, used_modules: List[str]) -> List[str]:
+    def find_plugin_dependencies(self, used_modules: List[str], python_exe: Path) -> List[str]:
         """
         Given the modules used by the application, returns all the required plugins
         """
         plugins = set()
-        pyside_mod_plugin_jsons = ["PySide6_Essentials.json", "PySide6_Addons.json"]
-        for pyside_mod_plugin_json_name in pyside_mod_plugin_jsons:
+        pyside_wheels = ["PySide6_Essentials", "PySide6_Addons"]
+        # TODO from 3.12 use list(dist.name for dist in importlib.metadata.distributions())
+        _, installed_packages = run_command(command=[str(python_exe), "-m", "pip", "freeze"],
+                                            dry_run=False, fetch_output=True)
+        installed_packages = [p.decode().split('==')[0] for p in installed_packages.split()]
+        for pyside_wheel in pyside_wheels:
+            if pyside_wheel not in installed_packages:
+                # the wheel is not installed and hence no plugins are checked for its modules
+                logging.warning((f"[DEPLOY] The package {pyside_wheel} is not installed. "))
+                continue
+            pyside_mod_plugin_json_name = f"{pyside_wheel}.json"
             pyside_mod_plugin_json_file = self.pyside_install_dir / pyside_mod_plugin_json_name
             if not pyside_mod_plugin_json_file.exists():
                 warnings.warn(f"[DEPLOY] Unable to find {pyside_mod_plugin_json_file}.",
