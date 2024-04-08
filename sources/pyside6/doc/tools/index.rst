@@ -112,13 +112,13 @@ Translations
         for translating text in applications.
 
     .. grid-item-card:: ``pyside6-lrelease``
-        :link: pyside6-linguist
+        :link: pyside6-lrelease
         :link-type: ref
 
         to create run-time translation files for the application.
 
     .. grid-item-card:: ``pyside6-lupdate``
-        :link: pyside6-linguist
+        :link: pyside6-lupdate
         :link-type: ref
 
         to synchronize source code and translations.
