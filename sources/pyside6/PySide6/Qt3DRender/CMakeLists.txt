@@ -142,7 +142,7 @@ set(Qt3DRender_include_dirs
 set(Qt3DRender_libraries pyside6
                      ${Qt${QT_MAJOR_VERSION}3DRender_LIBRARIES})
 
-set(Qt3DRender_deps)
+set(Qt3DRender_deps Qt3DCore)
 
 check_qt_opengl("3DRender" Qt3DRender_include_dirs Qt3DRender_deps
                 Qt3DRender_DROPPED_ENTRIES)
