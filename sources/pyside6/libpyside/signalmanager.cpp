@@ -813,11 +813,6 @@ static PyObject *parseArguments(const QMetaMethod &method, void **args)
     for (qsizetype i = 0; i < argsSize; ++i) {
         void *data = args[i+1];
         auto param = paramTypes.at(i);
-#if QT_VERSION < QT_VERSION_CHECK(7, 0, 0)
-        // Qt 6.7 renamed namespace "QAudio"->"QtAudio" except for signals
-        if (param.startsWith("QAudio::"_ba))
-            param.insert(1, 't');
-#endif
         Shiboken::Conversions::SpecificConverter converter(param.constData());
         if (!converter) {
             PyErr_SetString(PyExc_TypeError, msgCannotConvertParameter(method, i).constData());

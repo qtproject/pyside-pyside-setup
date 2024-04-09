@@ -19,7 +19,7 @@ from typing import Optional
 import PySide6
 from PySide6.QtCore import QByteArray, QMargins, Qt, Slot, qWarning
 from PySide6.QtGui import QPainter, QPalette
-from PySide6.QtMultimedia import QtAudio, QAudioDevice, QAudioFormat, QAudioSource, QMediaDevices
+from PySide6.QtMultimedia import QAudio, QAudioDevice, QAudioFormat, QAudioSource, QMediaDevices
 from PySide6.QtWidgets import (QApplication, QComboBox, QPushButton, QSlider, QVBoxLayout,
                                QWidget, QLabel)
 
@@ -164,10 +164,10 @@ class InputTest(QWidget):
         self.m_audio_info = AudioInfo(format)
 
         self.m_audio_input = QAudioSource(device_info, format)
-        initial_volume = QtAudio.convertVolume(
+        initial_volume = QAudio.convertVolume(
             self.m_audio_input.volume(),
-            QtAudio.LinearVolumeScale,
-            QtAudio.LogarithmicVolumeScale,
+            QAudio.LinearVolumeScale,
+            QAudio.LogarithmicVolumeScale,
         )
         self.m_volume_slider.setValue(int(round(initial_volume * 100)))
         self.toggle_mode()
@@ -196,10 +196,10 @@ class InputTest(QWidget):
     def toggle_suspend(self):
         # toggle suspend/resume
         state = self.m_audio_input.state()
-        if (state == QtAudio.SuspendedState) or (state == QtAudio.StoppedState):
+        if (state == QAudio.SuspendedState) or (state == QAudio.StoppedState):
             self.m_audio_input.resume()
             self.m_suspend_resume_button.setText("Suspend recording")
-        elif state == QtAudio.ActiveState:
+        elif state == QAudio.ActiveState:
             self.m_audio_input.suspend()
             self.m_suspend_resume_button.setText("Resume recording")
         # else no-op
@@ -212,8 +212,8 @@ class InputTest(QWidget):
 
     @Slot(int)
     def slider_changed(self, value):
-        linearVolume = QtAudio.convertVolume(
-            value / float(100), QtAudio.LogarithmicVolumeScale, QtAudio.LinearVolumeScale
+        linearVolume = QAudio.convertVolume(
+            value / float(100), QAudio.LogarithmicVolumeScale, QAudio.LinearVolumeScale
         )
 
         self.m_audio_input.setVolume(linearVolume)

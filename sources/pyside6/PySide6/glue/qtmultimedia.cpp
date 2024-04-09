@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 // @snippet qvideoframe-bits
+#include "object.h"
 %BEGIN_ALLOW_THREADS
 %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(%1);
 %END_ALLOW_THREADS
@@ -23,5 +24,5 @@ const auto size = %CPPSELF.byteCount();
 
 // @snippet qtaudio-namespace-compatibility-alias
 Py_INCREF(pyType);
-PyModule_AddObject(module, "QAudio", reinterpret_cast<PyObject *>(pyType));
+PyModule_AddObject(module, "QtAudio", reinterpret_cast<PyObject *>(pyType));
 // @snippet qtaudio-namespace-compatibility-alias
