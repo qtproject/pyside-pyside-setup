@@ -34,6 +34,7 @@ class ScreenCapturePreview(QWidget):
         self._screen_label = QLabel("Select screen to capture:", self)
         self._video_widget_label = QLabel("Capture output:", self)
         self._start_stop_button = QPushButton(self)
+        self._status_label = QLabel(self)
 
         self._screen_list_model = ScreenListModel(self)
 
@@ -65,6 +66,7 @@ class ScreenCapturePreview(QWidget):
         grid_layout.addWidget(self._video_widget, 1, 1, 4, 1)
         grid_layout.addWidget(self._window_label, 2, 0)
         grid_layout.addWidget(self._window_list_view, 3, 0)
+        grid_layout.addWidget(self._status_label, 5, 0, 1, 2)
 
         grid_layout.setColumnStretch(1, 1)
         grid_layout.setRowStretch(1, 1)
@@ -86,6 +88,7 @@ class ScreenCapturePreview(QWidget):
 
     @Slot(QItemSelection)
     def on_current_screen_selection_changed(self, selection):
+        self.clear_error_string()
         indexes = selection.indexes()
         if indexes:
             self._screen_capture.setScreen(self._screen_list_model.screen(indexes[0]))
@@ -96,6 +99,7 @@ class ScreenCapturePreview(QWidget):
 
     @Slot(QItemSelection)
     def on_current_window_selection_changed(self, selection):
+        self.clear_error_string()
         indexes = selection.indexes()
         if indexes:
             window = self._window_list_model.window(indexes[0])
@@ -115,16 +119,23 @@ class ScreenCapturePreview(QWidget):
 
     @Slot(QWindowCapture.Error, str)
     def on_window_capture_error_occured(self, error, error_string):
-        QMessageBox.warning(self, "QWindowCapture: Error occurred",
-                            error_string)
+        self.set_error_string("QWindowCapture: Error occurred " + error_string)
 
     @Slot(QScreenCapture.Error, str)
     def on_screen_capture_error_occured(self, error, error_string):
-        QMessageBox.warning(self, "QScreenCapture: Error occurred",
-                            error_string)
+        self.set_error_string("QScreenCapture: Error occurred " + error_string)
+
+    def set_error_string(self, t):
+        self._status_label.setStyleSheet("background-color: rgb(255, 0, 0);")
+        self._status_label.setText(t)
+
+    def clear_error_string(self):
+        self._status_label.clear()
+        self._status_label.setStyleSheet("")
 
     @Slot()
     def on_start_stop_button_clicked(self):
+        self.clear_error_string()
         self.update_active(self._source_type, not self.is_active())
 
     def update_start_stop_button_text(self):
