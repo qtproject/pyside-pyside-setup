@@ -63,7 +63,8 @@ private:
     static void writeInitFunc(TextStream &declStr, TextStream &callStr,
                               const QString &initFunctionName,
                               const TypeEntryCPtr &enclosingEntry,
-                              const QString &pythonName, bool lazy = true);
+                              const QString &pythonName,
+                              const QString &lazyGroup = {});
     static void writeCacheResetNative(TextStream &s, const GeneratorContext &classContext);
     void writeConstructorNative(TextStream &s, const GeneratorContext &classContext,
                                 const AbstractMetaFunctionCPtr &func) const;
