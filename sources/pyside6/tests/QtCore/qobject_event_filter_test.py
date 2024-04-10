@@ -63,6 +63,17 @@ class FilteredObject(QObject):
             self.app.quit()
 
 
+class PolymorphicIdFilterObject(QObject):
+    """PYSIDE-2675: Check whether QChildEvent.added() is accessible via PolymorphicId"""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.added = False
+
+    def event(self, event):
+        self.added = event.added()
+        return False
+
+
 class TestQObjectEventFilterPython(UsesQApplication):
     '''QObject.eventFilter - Reimplemented in python
     Filters 5 TimerEvents and then bypasses the other events to the
@@ -92,6 +103,11 @@ class TestQObjectEventFilterPython(UsesQApplication):
 
         self.assertEqual(filtered.times_called, 5)
         self.assertEqual(self.obj_filter.events_handled, 5)
+
+    def testPolymorphicId(self):
+        testObject = PolymorphicIdFilterObject()
+        t2 = QObject(testObject)  # noqa: F841
+        self.assertTrue(testObject.added)
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testInstallEventFilterRefCountAfterDelete(self):
