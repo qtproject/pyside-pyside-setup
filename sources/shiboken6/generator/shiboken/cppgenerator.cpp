@@ -5420,6 +5420,12 @@ void CppGenerator::writeClassRegister(TextStream &s,
     s << "PyTypeObject *init_" << initFunctionName
         << "(PyObject *" << enclosingObjectVariable << ")\n{\n" << indent;
 
+    const QString globalTypeVarExpr = !classContext.forSmartPointer()
+                                      ? cpythonTypeNameExtSet(classTypeEntry)
+                                      : cpythonTypeNameExtSet(classContext.preciseType());
+    s << "if (" << globalTypeVarExpr << " != nullptr)\n" << indent
+        << "return " << globalTypeVarExpr << ";\n\n" << outdent;
+
     // Multiple inheritance
     QString pyTypeBasesVariable = chopType(pyTypeName) + u"_Type_bases"_s;
     const auto &baseClasses = metaClass->typeSystemBaseClasses();
@@ -5510,11 +5516,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     if (usePySideExtensions() && !classContext.forSmartPointer())
         s << "SbkObjectType_SetPropertyStrings(pyType, "
                     << chopType(pyTypeName) << "_PropertyStrings);\n";
-
-    if (!classContext.forSmartPointer())
-        s << cpythonTypeNameExtSet(classTypeEntry) << " = pyType;\n\n";
-    else
-        s << cpythonTypeNameExtSet(classContext.preciseType()) << " = pyType;\n\n";
+    s << globalTypeVarExpr << " = pyType;\n\n";
 
     // Register conversions for the type.
     writeConverterRegister(s, metaClass, classContext);
