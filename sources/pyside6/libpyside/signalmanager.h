@@ -18,7 +18,7 @@ QT_FORWARD_DECLARE_CLASS(QDataStream)
 namespace PySide
 {
 
-/// Thin wrapper for PyObject which increases the reference count at the constructor but *NOT* at destructor.
+// Thin wrapper for PyObject, increasing reference count in constructor but *NOT* in destructor
 class PYSIDE_API PyObjectWrapper
 {
 public:
@@ -38,9 +38,8 @@ public:
     // FIXME: To be removed in Qt7
     // This was done to make QAbstractItemModel::data() work without explicit conversion of
     // QVariant(PyObjectWrapper) to QVariant(int). This works because QAbstractItemModel::data()
-    // inturn calls legacyEnumValueFromModelData(const QVariant &data). But this function will
-    // be removed in Qt7.
-    // The proper fix would be to associate PyObjectWrapper to the corresponding C++ Enum.
+    // in turn calls legacyEnumValueFromModelData(const QVariant &data), which will be removed
+    // in Qt7. A true fix would be to associate PyObjectWrapper to the corresponding C++ Enum.
     int toInt() const;
 
 private:
@@ -69,19 +68,19 @@ public:
     bool emitSignal(QObject* source, const char* signal, PyObject* args);
     static int qt_metacall(QObject* object, QMetaObject::Call call, int id, void** args);
 
-    // Used to register a new signal/slot on QMetaobject of source.
+    // Used to register a new signal/slot to QMetaObject with QObject as source
     static bool registerMetaMethod(QObject* source, const char* signature, QMetaMethod::MethodType type);
     static int registerMetaMethodGetIndex(QObject* source, const char* signature, QMetaMethod::MethodType type);
 
-    // used to discovery metaobject
+    // Used to discover QMetaObject
     static const QMetaObject* retrieveMetaObject(PyObject* self);
 
-    // Disconnect all signals managed by Globalreceiver
+    // Disconnect all signals managed by GlobalReceiver
     void clear();
     void purgeEmptyGlobalReceivers();
 
-    // Utility function to call a python method usign args received in qt_metacall
-    static int callPythonMetaMethod(const QMetaMethod& method, void** args, PyObject* obj, bool isShortCuit);
+    // Utility function to call a Python method using args received in qt_metacall
+    static int callPythonMetaMethod(const QMetaMethod& method, void** args, PyObject* obj, bool isShortcut);
 
     static void deleteGlobalReceiver(const QObject *globalReceiver);
 
