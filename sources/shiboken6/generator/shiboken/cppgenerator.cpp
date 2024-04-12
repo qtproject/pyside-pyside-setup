@@ -5718,6 +5718,24 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
     }
 }
 
+void CppGenerator::replacePolymorphicIdPlaceHolders(const AbstractMetaClassCPtr &metaClass,
+                                                    QString *id)
+{
+    if (id->contains("%1"_L1)) {
+        QString replacement = " reinterpret_cast< "_L1 + m_gsp + metaClass->qualifiedCppName()
+                              + " *>(cptr)"_L1;
+        id->replace("%1"_L1, replacement);
+    }
+    if (id->contains("%B"_L1)) {
+        auto baseClass = metaClass;
+        while (!baseClass->typeEntry()->isPolymorphicBase() && baseClass->baseClass())
+            baseClass = baseClass->baseClass();
+        QString replacement = " reinterpret_cast< "_L1 + m_gsp + baseClass->qualifiedCppName()
+                              + " *>(cptr)"_L1;
+        id->replace("%B"_L1, replacement);
+    }
+}
+
 void CppGenerator::writeTypeDiscoveryFunction(TextStream &s,
                                               const AbstractMetaClassCPtr &metaClass)
 {
@@ -5729,9 +5747,7 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s,
         << sbkUnusedVariableCast("instanceType");
 
     if (!polymorphicExpr.isEmpty()) {
-        polymorphicExpr.replace(u"%1"_s, " reinterpret_cast< "_L1
-                                + m_gsp + metaClass->qualifiedCppName()
-                                         + " *>(cptr)"_L1);
+        replacePolymorphicIdPlaceHolders(metaClass, &polymorphicExpr);
         s << " if (" << polymorphicExpr << ")\n" << indent
             << "return cptr;\n" << outdent;
     } else if (metaClass->isPolymorphic()) {
