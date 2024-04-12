@@ -16,7 +16,7 @@
         </modify-argument>
       </modify-function>
     </value-type>
-    <object-type name="QHelpContentModel" polymorphic-id-expression="qobject_cast&lt;QHelpContentModel*&gt;(%1)"/>
+    <object-type name="QHelpContentModel" polymorphic-id-expression="qobject_cast&lt;QHelpContentModel*&gt;(%B)"/>
     <object-type name="QHelpContentWidget"/>
     <object-type name="QHelpEngine"/>
     <object-type name="QHelpEngineCore"/>
