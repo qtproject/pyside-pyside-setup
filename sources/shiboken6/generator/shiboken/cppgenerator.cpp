@@ -1216,6 +1216,11 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
                               returnStatement.statement, true);
     s << outdent << "}\n\n"; //WS
 
+    if (!snips.isEmpty()) {
+        writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionPyOverride,
+                       TypeSystem::ShellCode, func, false, lastArg);
+    }
+
     writeVirtualMethodPythonOverride(s, func, snips, returnStatement);
 }
 
