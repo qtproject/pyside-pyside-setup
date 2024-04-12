@@ -5942,16 +5942,23 @@ void CppGenerator::writeNbBoolFunction(const GeneratorContext &context,
 void CppGenerator::writeInitFunc(TextStream &declStr, TextStream &callStr,
                                  const QString &initFunctionName,
                                  const TypeEntryCPtr &enclosingEntry,
-                                 const QString &pythonName)
+                                 const QString &pythonName, bool lazy)
 {
+    const QString functionName = "init_"_L1 + initFunctionName;
     const bool hasParent = enclosingEntry && enclosingEntry->type() != TypeEntry::TypeSystemType;
-    declStr << "PyTypeObject *init_" << initFunctionName << "(PyObject *"
+    declStr << "PyTypeObject *" << functionName << "(PyObject *"
         << (hasParent ? "enclosingClass" : "module") << ");\n";
-    if (hasParent) {
+
+    if (!lazy) {
+        const QString enclosing = hasParent
+            ? "reinterpret_cast<PyObject *>("_L1 + cpythonTypeNameExt(enclosingEntry) + u')'
+            : "module"_L1;
+        callStr << functionName << '(' << enclosing << ");\n";
+    } else if (hasParent) {
         const QString &enclosingName = enclosingEntry->name();
         const auto parts = QStringView{enclosingName}.split(u"::", Qt::SkipEmptyParts);
         callStr << "Shiboken::Module::AddTypeCreationFunction("
-            << "module, \"" << pythonName << "\", " << "init_" << initFunctionName << ", \"";
+            << "module, \"" << pythonName << "\", " << functionName << ", \"";
         for (qsizetype i = 0; i < parts.size(); ++i) {
             if (i > 0)
                callStr << "\", \"";
