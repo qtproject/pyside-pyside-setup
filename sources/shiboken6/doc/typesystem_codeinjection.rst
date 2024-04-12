@@ -74,6 +74,9 @@ function.
 |               |shell |declaration|Used only for virtual functions. This code is injected at the |
 |               |      |           |top.                                                          |
 |               |      +-----------+--------------------------------------------------------------+
+|               |      |override   |Used only for virtual functions. The code is injected before  |
+|               |      |           |the code calling the Python override.                         |
+|               |      +-----------+--------------------------------------------------------------+
 |               |      |beginning  |Used only for virtual functions. The code is injected when the|
 |               |      |           |function does not has a Python implementation, then the code  |
 |               |      |           |is inserted before c++ call                                   |

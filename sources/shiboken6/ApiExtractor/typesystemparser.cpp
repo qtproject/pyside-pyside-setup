@@ -331,7 +331,8 @@ ENUM_LOOKUP_BEGIN(TypeSystem::CodeSnipPosition, Qt::CaseInsensitive,
     {
         {u"beginning", TypeSystem::CodeSnipPositionBeginning},
         {u"end", TypeSystem::CodeSnipPositionEnd},
-        {u"declaration", TypeSystem::CodeSnipPositionDeclaration}
+        {u"declaration", TypeSystem::CodeSnipPositionDeclaration},
+        {u"override", TypeSystem::CodeSnipPositionPyOverride}
     };
 ENUM_LOOKUP_LINEAR_SEARCH
 
