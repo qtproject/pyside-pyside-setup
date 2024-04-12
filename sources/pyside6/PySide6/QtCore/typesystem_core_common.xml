@@ -703,7 +703,8 @@
     <enum-type name="ClockType" since="4.7"/>
   </value-type>
 
-  <object-type name="QAbstractTableModel" polymorphic-id-expression="qobject_cast&lt;QAbstractTableModel*&gt;(%1)">
+  <object-type name="QAbstractTableModel"
+               polymorphic-id-expression="qobject_cast&lt;QAbstractTableModel*&gt;(%B)">
     <extra-includes>
       <include file-name="QStringList" location="global"/>
       <include file-name="QSize" location="global"/>
@@ -1694,7 +1695,8 @@
 
   <value-type name="QItemSelectionRange">
   </value-type>
-  <object-type name="QAbstractProxyModel" polymorphic-id-expression="qobject_cast&lt;QAbstractProxyModel*&gt;(%1)">
+  <object-type name="QAbstractProxyModel"
+               polymorphic-id-expression="qobject_cast&lt;QAbstractProxyModel*&gt;(%B)">
     <extra-includes>
       <include file-name="QItemSelection" location="global"/>
       <include file-name="QStringList" location="global"/>
@@ -1898,7 +1900,8 @@
        </modify-argument>
    </modify-function>
   </object-type>
-  <object-type name="QAbstractListModel" polymorphic-id-expression="qobject_cast&lt;QAbstractListModel*&gt;(%1)">
+  <object-type name="QAbstractListModel"
+               polymorphic-id-expression="qobject_cast&lt;QAbstractListModel*&gt;(%B)">
     <extra-includes>
       <include file-name="QStringList" location="global"/>
       <include file-name="QSize" location="global"/>
@@ -2765,15 +2768,18 @@
                      file="../glue/qtcore.cpp" snippet="repr-qevent"/>
     </add-function>
   </object-type>
-  <object-type name="QChildEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::ChildAdded || %1-&gt;type() == QEvent::ChildPolished || %1-&gt;type() == QEvent::ChildRemoved">
+  <object-type name="QChildEvent"
+               polymorphic-id-expression="%B-&gt;type() == QEvent::ChildAdded || %B-&gt;type() == QEvent::ChildPolished || %B-&gt;type() == QEvent::ChildRemoved">
     <modify-function signature="child()const">
       <modify-argument index="return">
          <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QTimerEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Timer"/>
-  <object-type name="QDynamicPropertyChangeEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::DynamicPropertyChange"/>
+  <object-type name="QTimerEvent"
+               polymorphic-id-expression="%B-&gt;type() == QEvent::Timer"/>
+  <object-type name="QDynamicPropertyChangeEvent"
+               polymorphic-id-expression="%B-&gt;type() == QEvent::DynamicPropertyChange"/>
 
 
   <object-type name="QDataStream" stream="yes">

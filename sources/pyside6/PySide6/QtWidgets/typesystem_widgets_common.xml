@@ -47,7 +47,7 @@
   <function signature="qDrawPlainRoundedRect(QPainter*,int,int,int,int,qreal,qreal,const QColor&amp;,int,const QBrush*)" since="6.7"/>
   <function signature="qDrawPlainRoundedRect(QPainter*,const QRect&amp;,qreal,qreal,const QColor&amp;,int,const QBrush *)" since="6.7"/>
 
-  <object-type name="QStyleOption" polymorphic-id-expression="%1-&gt;type == QStyleOption::SO_Default"
+  <object-type name="QStyleOption" polymorphic-id-expression="%B-&gt;type == QStyleOption::SO_Default"
                polymorphic-name-function="styleOptionType">
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp"
                  snippet="qstyleoption-typename"/>
@@ -55,45 +55,54 @@
     <enum-type name="StyleOptionType"/>
     <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionGraphicsItem" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionGraphicsItem *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionGraphicsItem"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionGraphicsItem *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionSizeGrip" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionSizeGrip *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionSizeGrip"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionSizeGrip *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionButton" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionButton *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionButton"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionButton *&gt;(%B) != nullptr">
       <enum-type name="ButtonFeature" flags="ButtonFeatures"/>
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionComboBox" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionComboBox *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionComboBox"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionComboBox *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionComplex" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionComplex *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionComplex"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionComplex *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionDockWidget" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionDockWidget *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionDockWidget"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionDockWidget *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionFocusRect" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionFocusRect *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionFocusRect" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionFocusRect *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionFrame" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionFrame *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionFrame"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionFrame *&gt;(%B) != nullptr">
       <enum-type name="FrameFeature" flags="FrameFeatures"/>
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionGroupBox" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionGroupBox *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionGroupBox"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionGroupBox *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionHeader" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionHeader *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionHeader"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionHeader *&gt;(%B) != nullptr">
       <enum-type name="SectionPosition"/>
       <enum-type name="SelectedPosition"/>
       <enum-type name="SortIndicator"/>
@@ -104,29 +113,35 @@
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionMenuItem" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionMenuItem *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionMenuItem"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionMenuItem *&gt;(%B) != nullptr">
       <enum-type name="CheckType"/>
       <enum-type name="MenuItemType"/>
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionProgressBar" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionProgressBar *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionProgressBar"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionProgressBar *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionRubberBand" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionRubberBand *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionRubberBand"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionRubberBand *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionSlider" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionSlider *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionSlider"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionSlider *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionSpinBox" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionSpinBox *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionSpinBox"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionSpinBox *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionTab" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionTab *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionTab"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionTab *&gt;(%B) != nullptr">
       <enum-type name="CornerWidget" flags="CornerWidgets"/>
       <enum-type name="SelectedPosition"/>
       <enum-type name="StyleOptionType"/>
@@ -134,36 +149,41 @@
       <enum-type name="TabFeature" flags="TabFeatures"/>
       <enum-type name="TabPosition"/>
   </object-type>
-  <object-type name="QStyleOptionTabBarBase" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionTabBarBase *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionTabBarBase"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionTabBarBase *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionTabWidgetFrame" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionTabWidgetFrame *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionTabWidgetFrame"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionTabWidgetFrame *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionTitleBar" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionTitleBar *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionTitleBar" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionTitleBar *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
   </object-type>
-  <object-type name="QStyleOptionToolBar" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionToolBar *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionToolBar"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionToolBar *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
       <enum-type name="ToolBarFeature" flags="ToolBarFeatures"/>
       <enum-type name="ToolBarPosition"/>
   </object-type>
-  <object-type name="QStyleOptionToolBox" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionToolBox *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionToolBox"
+               polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionToolBox *&gt;(%B) != nullptr">
       <enum-type name="SelectedPosition"/>
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
       <enum-type name="TabPosition"/>
   </object-type>
-  <object-type name="QStyleOptionToolButton" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionToolButton *&gt;(%1) != nullptr">
+  <object-type name="QStyleOptionToolButton" polymorphic-id-expression="qstyleoption_cast&lt;const QStyleOptionToolButton *&gt;(%B) != nullptr">
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
       <enum-type name="ToolButtonFeature" flags="ToolButtonFeatures"/>
   </object-type>
-  <value-type name="QStyleOptionViewItem" polymorphic-id-expression="%1-&gt;type == QStyleOptionViewItem::Type &amp;&amp; %1-&gt;version == QStyleOptionViewItem::Version">
+  <value-type name="QStyleOptionViewItem"
+              polymorphic-id-expression="%B-&gt;type == QStyleOptionViewItem::Type &amp;&amp; %B-&gt;version == QStyleOptionViewItem::Version">
       <enum-type name="Position"/>
       <enum-type name="StyleOptionType"/>
       <enum-type name="StyleOptionVersion"/>
@@ -1069,12 +1089,14 @@
       </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QWidgetItem" polymorphic-id-expression="%1-&gt;widget()"/>
+  <object-type name="QWidgetItem" polymorphic-id-expression="%B-&gt;widget()"/>
 
-  <object-type name="QGraphicsSceneContextMenuEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneContextMenu">
+  <object-type name="QGraphicsSceneContextMenuEvent"
+               polymorphic-id-expression="%B-&gt;type() == QEvent::GraphicsSceneContextMenu">
       <enum-type name="Reason"/>
   </object-type>
-  <object-type name="QGraphicsSceneDragDropEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneDragEnter || %1-&gt;type() == QEvent::GraphicsSceneDragLeave || %1-&gt;type() == QEvent::GraphicsSceneDragMove || %1-&gt;type() == QEvent::GraphicsSceneDrop" >
+  <object-type name="QGraphicsSceneDragDropEvent"
+               polymorphic-id-expression="%B-&gt;type() == QEvent::GraphicsSceneDragEnter || %B-&gt;type() == QEvent::GraphicsSceneDragLeave || %B-&gt;type() == QEvent::GraphicsSceneDragMove || %B-&gt;type() == QEvent::GraphicsSceneDrop" >
     <!-- ### "setMimeData(const QMimeData*)" is an internal method. -->
     <modify-function signature="setMimeData(const QMimeData*)" remove="all"/>
     <!-- ### "setSource(QWidget*)" is an internal method. -->
@@ -1085,14 +1107,21 @@
     <!-- ### "setWidget(QWidget*)" is an internal method. -->
     <modify-function signature="setWidget(QWidget*)" remove="all"/>
   </object-type>
-  <object-type name="QGraphicsSceneMoveEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneMove"/>
-  <object-type name="QGraphicsSceneResizeEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneResize"/>
-  <object-type name="QGraphicsSceneHelpEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneHelp"/>
-  <object-type name="QGraphicsSceneHoverEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneHoverEnter || %1-&gt;type() == QEvent::GraphicsSceneHoverLeave || %1-&gt;type() == QEvent::GraphicsSceneHoverMove"/>
-  <object-type name="QGraphicsSceneMouseEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneMouseDoubleClick || %1-&gt;type() == QEvent::GraphicsSceneMouseMove || %1-&gt;type() == QEvent::GraphicsSceneMousePress || %1-&gt;type() == QEvent::GraphicsSceneMouseRelease"/>
-  <object-type name="QGraphicsSceneWheelEvent" copyable="false" polymorphic-id-expression="%1-&gt;type() == QEvent::GraphicsSceneWheel"/>
+  <object-type name="QGraphicsSceneMoveEvent"
+               polymorphic-id-expression="%B-&gt;type() == QEvent::GraphicsSceneMove"/>
+  <object-type name="QGraphicsSceneResizeEvent"
+               polymorphic-id-expression="%B-&gt;type() == QEvent::GraphicsSceneResize"/>
+  <object-type name="QGraphicsSceneHelpEvent"
+               polymorphic-id-expression="%B-&gt;type() == QEvent::GraphicsSceneHelp"/>
+  <object-type name="QGraphicsSceneHoverEvent"
+               polymorphic-id-expression="%B-&gt;type() == QEvent::GraphicsSceneHoverEnter || %B-&gt;type() == QEvent::GraphicsSceneHoverLeave || %B-&gt;type() == QEvent::GraphicsSceneHoverMove"/>
+  <object-type name="QGraphicsSceneMouseEvent"
+               polymorphic-id-expression="%B-&gt;type() == QEvent::GraphicsSceneMouseDoubleClick || %B-&gt;type() == QEvent::GraphicsSceneMouseMove || %B-&gt;type() == QEvent::GraphicsSceneMousePress || %B-&gt;type() == QEvent::GraphicsSceneMouseRelease"/>
+  <object-type name="QGraphicsSceneWheelEvent"
+               polymorphic-id-expression="%B-&gt;type() == QEvent::GraphicsSceneWheel"/>
 
-  <object-type name="QGestureEvent" polymorphic-id-expression="%1-&gt;type() == QEvent::Gesture || %1-&gt;type() == QEvent::GestureOverride" since="4.6">
+  <object-type name="QGestureEvent"
+               polymorphic-id-expression="%B-&gt;type() == QEvent::Gesture || %B-&gt;type() == QEvent::GestureOverride" since="4.6">
     <modify-function signature="activeGestures()const">
       <modify-argument index="return">
         <define-ownership owner="default"/>
@@ -2890,7 +2919,7 @@
 
   <object-type name="QCommandLinkButton"/>
   <!-- FIXME PYSIDE7: Move to QtGui -->
-  <object-type name="QFileSystemModel" polymorphic-id-expression="qobject_cast&lt;QFileSystemModel*&gt;(%1)">
+  <object-type name="QFileSystemModel" polymorphic-id-expression="qobject_cast&lt;QFileSystemModel*&gt;(%B)">
     <enum-type name="Roles" python-type="IntEnum"/>
     <enum-type name="Option" flags="Options"/>
     <modify-function signature="setIconProvider(QAbstractFileIconProvider*)">
