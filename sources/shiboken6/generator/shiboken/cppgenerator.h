@@ -192,6 +192,8 @@ private:
     static void writeTypeCheck(TextStream& s, const std::shared_ptr<OverloadDataNode> &overloadData,
                         const QString &argumentName);
 
+    static void replacePolymorphicIdPlaceHolders(const AbstractMetaClassCPtr &metaClass,
+                                                 QString *id);
     static void writeTypeDiscoveryFunction(TextStream &s,
                                            const AbstractMetaClassCPtr &metaClass);
 

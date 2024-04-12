@@ -88,6 +88,7 @@ constexpr auto pyiTypeAttribute = "pyi-type"_L1;
 constexpr auto overloadNumberAttribute = "overload-number"_L1;
 constexpr auto ownershipAttribute = "owner"_L1;
 constexpr auto packageAttribute = "package"_L1;
+constexpr auto polymorphicBaseAttribute = "polymorphic-base"_L1;
 constexpr auto positionAttribute = "position"_L1;
 constexpr auto preferredConversionAttribute = "preferred-conversion"_L1;
 constexpr auto preferredTargetLangTypeAttribute = "preferred-target-lang-type"_L1;
@@ -1810,8 +1811,10 @@ void TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
             ctype->setGenericClass(v);
         } else if (name == targetLangNameAttribute) {
             ctype->setTargetLangName(attributes->takeAt(i).value().toString());
-        } else if (name == u"polymorphic-base") {
-            ctype->setPolymorphicIdValue(attributes->takeAt(i).value().toString());
+        } else if (name == polymorphicBaseAttribute) {
+            const bool v = convertBoolean(attributes->takeAt(i).value(),
+                                          polymorphicBaseAttribute, false);
+            ctype->setIsPolymorphicBase(v);
         } else if (name == u"polymorphic-name-function") {
             ctype->setPolymorphicNameFunction(attributes->takeAt(i).value().toString());
         } else if (name == u"polymorphic-id-expression") {
