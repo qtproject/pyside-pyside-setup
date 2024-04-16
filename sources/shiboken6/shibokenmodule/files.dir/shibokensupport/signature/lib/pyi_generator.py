@@ -287,7 +287,7 @@ def generate_pyi(import_name, outpath, options):
                         wr.print(f"from {mod} import {import_args}")
                 wr.print()
                 wr.print()
-                wr.print("NoneType = type(None)")
+                wr.print("NoneType: TypeAlias = type[None]")
                 wr.print()
             else:
                 wr.print(line)
