@@ -93,6 +93,7 @@ constexpr auto positionAttribute = "position"_L1;
 constexpr auto preferredConversionAttribute = "preferred-conversion"_L1;
 constexpr auto preferredTargetLangTypeAttribute = "preferred-target-lang-type"_L1;
 constexpr auto pythonEnumTypeAttribute = "python-type"_L1;
+constexpr auto pythonOverrideAttribute = "python-override"_L1;
 constexpr auto cppEnumTypeAttribute = "cpp-type"_L1;
 constexpr auto qtMetaObjectFunctionsAttribute = "qt-metaobject"_L1;
 constexpr auto qtMetaTypeAttribute = "qt-register-metatype"_L1;
@@ -2601,6 +2602,7 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
     QString returnType;
     bool staticFunction = false;
     bool classMethod = false;
+    bool pythonOverride = false;
     QString access;
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
@@ -2616,6 +2618,9 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
                                             classmethodAttribute, false);
         } else if (name == accessAttribute) {
             access = attributes->takeAt(i).value().toString();
+        } else if (name == pythonOverrideAttribute) {
+            pythonOverride = convertBoolean(attributes->takeAt(i).value(),
+                                            pythonOverrideAttribute, false);
         }
     }
 
@@ -2639,6 +2644,7 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
 
     func->setStatic(staticFunction);
     func->setClassMethod(classMethod);
+    func->setPythonOverride(pythonOverride);
     func->setTargetLangPackage(m_defaultPackage);
 
     // Create signature for matching modifications

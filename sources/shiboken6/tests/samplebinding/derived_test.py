@@ -33,6 +33,15 @@ class Deviant(Derived):
         return 'Deviant'
 
 
+class ImplementVirtualWithOutParameter(Derived):
+    def __init__(self, value):
+        super().__init__()
+        self._value = value
+
+    def virtualWithOutParameter(self):
+        return self._value
+
+
 class DerivedTest(unittest.TestCase):
     '''Test case for Derived class'''
 
@@ -121,6 +130,13 @@ class DerivedTest(unittest.TestCase):
         '''Test whether a constructor of the base class declared by using works'''
         obj = DerivedUsingCt(42)
         self.assertEqual(obj.value(), 42)
+
+    def testVirtualWithOutParameter(self):
+        d = Derived()
+        self.assertEqual(d.callVirtualWithOutParameter(), 42)
+
+        d = ImplementVirtualWithOutParameter(1)
+        self.assertEqual(d.callVirtualWithOutParameter(), 1)
 
 
 if __name__ == '__main__':

@@ -1147,6 +1147,10 @@ void ShibokenGenerator::writeFunctionArguments(TextStream &s,
                                                Options options) const
 {
     int argUsed = 0;
+    if (func->isUserAddedPythonOverride()) {
+        s << "Shiboken::GilState &gil, PyObject *" << PYTHON_OVERRIDE_VAR;
+        argUsed += 2;
+    }
     for (const auto &arg : func->arguments()) {
         if (options.testFlag(Generator::SkipRemovedArguments) && arg.isModifiedRemoved())
             continue;
@@ -1183,6 +1187,8 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunctionCPtr &fun
 {
     StringStream s(TextStream::Language::Cpp);
     // The actual function
+    if (!options.testFlag(Option::SkipDefaultValues) && func->isStatic()) // Declaration
+        s << "static ";
     if (func->isEmptyFunction() || func->needsReturnType())
         s << functionReturnType(func, options) << ' ';
     else

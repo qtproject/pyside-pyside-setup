@@ -274,8 +274,15 @@ void *qt_metacast(const char *_clname) override;
         s << "static void pysideInitQtMetaTypes();\n";
 
     s << "void resetPyMethodCache();\n"
-      << outdent << "private:\n" << indent
-      << "mutable bool m_PyMethodCache[" << maxOverrides << "];\n"
+        << outdent << "private:\n" << indent;
+
+    if (!metaClass->userAddedPythonOverrides().isEmpty()) {
+        for (const auto &f : metaClass->userAddedPythonOverrides())
+            s << functionSignature(f, {}, {}, Generator::OriginalTypeDescription) << ";\n";
+        s << '\n';
+    }
+
+    s << "mutable bool m_PyMethodCache[" << maxOverrides << "];\n"
       << outdent << "};\n\n";
 }
 
@@ -286,8 +293,6 @@ void HeaderGenerator::writeMemberFunctionWrapper(TextStream &s,
 {
     Q_ASSERT(!func->isConstructor() && !func->isOperatorOverload());
     s << "inline ";
-    if (func->isStatic())
-        s << "static ";
     s << functionSignature(func, {}, postfix, Generator::OriginalTypeDescription)
       << " { ";
     if (!func->isVoid())

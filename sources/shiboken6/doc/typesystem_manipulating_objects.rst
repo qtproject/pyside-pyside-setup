@@ -282,6 +282,7 @@ logic. This can be done using the :ref:`inject-code` node.
                        access="public | protected"
                        overload-number="number"
                        static="yes | no" classmethod="yes | no"
+                       python-override ="yes | no"
                        since="..."/>
      </object-type>
 
@@ -319,6 +320,10 @@ within the `signature` field
     </add-function>
 
 See :ref:`sequence-protocol` for adding the respective functions.
+
+The *optional* attribute ``python-override`` indicates a special type
+of added function, a python-override that will be generated into
+the native wrapper (see :ref:`modifying-virtual-functions`).
 
 .. _declare-function:
 
@@ -500,3 +505,52 @@ configuration (see also option :ref:`drop-type-entries`) intended
 for building several configurations from one generated source tree,
 but still requires listing the correct source files in the
 ``CMakeLists.txt`` file.
+
+.. _modifying-virtual-functions:
+
+Modifying virtual functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Some C++ virtual functions are unsuitable for Python bindings:
+
+.. code-block:: c
+
+    virtual void getInt(int *result) const;
+
+In that case, you would modify it to return the integer instead (or a tuple
+in case of several out-parameters):
+
+.. code-block:: c
+
+    virtual int getInt() const;
+
+For the binding itself, use the common argument modifications (removing
+arguments, modifying return types with injected code snippets) to modify the
+signature.
+
+To make it possible to reimplement the function in Python with the modified
+signature, add a ``python-override`` function with that signature, using an
+arbitrary name for disambiguation:
+
+.. code-block:: xml
+
+       <add-function signature="getIntPyOverride()"
+                     return-type="int" python-override="true"/>
+
+This causes a static function performing the call into Python for the override
+to be generated into the native wrapper.
+
+In the existing virtual function, inject a code snippet at the ``shell`` /
+``override`` position which calls the newly added function. The first 2
+arguments are the `Global interpreter lock handle` (``Shiboken::GilState``) and
+the Python method determined by the override check (``PyObject *``). The
+snippet then converts the arguments and return values and returns after that:
+
+.. code-block:: xml
+
+       <modify-function signature="getInt(int*)const">
+           <inject-code class="shell" position="override">
+           *result = getIntPyOverride(gil, pyOverride.object());
+           return;
+           </inject-code>
+       </modify-function>
