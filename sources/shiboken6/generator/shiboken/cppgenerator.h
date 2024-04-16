@@ -87,6 +87,8 @@ private:
                                           const AbstractMetaFunctionCPtr &func,
                                           const CodeSnipList &snips,
                                           const VirtualMethodReturn &returnStatement) const;
+    void writeUserAddedPythonOverride(TextStream &s,
+                                      const AbstractMetaFunctionCPtr &func) const;
     void writeVirtualMethodCppCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    const QString &funcName, const QList<CodeSnip> &snips,
                                    const AbstractMetaArgument *lastArg, const TypeEntryCPtr &retType,

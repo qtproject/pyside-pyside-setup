@@ -49,6 +49,18 @@ void Abstract::show(PrintFormat format) const
     std::cout << '>';
 }
 
+void Abstract::virtualWithOutParameter(int &x) const
+{
+    x = 42;
+}
+
+int Abstract::callVirtualWithOutParameter() const
+{
+    int x;
+    virtualWithOutParameter(x);
+    return x;
+}
+
 void Abstract::callVirtualGettingEnum(PrintFormat p)
 {
     virtualGettingAEnum(p);

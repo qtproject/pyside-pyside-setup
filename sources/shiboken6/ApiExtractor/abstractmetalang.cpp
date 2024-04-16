@@ -102,6 +102,7 @@ public:
 
     AbstractMetaClassCPtr m_templateBaseClass;
     AbstractMetaFunctionCList m_functions;
+    AbstractMetaFunctionCList m_userAddedPythonOverrides;
     AbstractMetaFieldList m_fields;
     AbstractMetaEnumList m_enums;
     QList<QPropertySpec> m_propertySpecs;
@@ -323,6 +324,11 @@ const AbstractMetaFunctionCList &AbstractMetaClass::functions() const
     return d->m_functions;
 }
 
+const AbstractMetaFunctionCList &AbstractMetaClass::userAddedPythonOverrides() const
+{
+    return d->m_userAddedPythonOverrides;
+}
+
 void AbstractMetaClassPrivate::sortFunctions()
 {
     std::sort(m_functions.begin(), m_functions.end(), function_sorter);
@@ -390,7 +396,13 @@ void AbstractMetaClass::addFunction(const AbstractMetaClassPtr &klass,
     // to function properly. Such as function modifications
     nonConstF->setImplementingClass(klass);
 
-    klass->d->addFunction(function);
+    if (function->isUserAddedPythonOverride()) {
+        nonConstF->setConstant(false);
+        nonConstF->setCppAttribute(FunctionAttribute::Static);
+        klass->d->m_userAddedPythonOverrides.append(function);
+    } else {
+        klass->d->addFunction(function);
+    }
 }
 
 bool AbstractMetaClass::hasSignal(const AbstractMetaFunction *other) const
@@ -1452,6 +1464,12 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
     }
 
     for (const auto &superClassC : d->m_baseClasses) {
+        for (const auto &pof : superClassC->userAddedPythonOverrides()) {
+            auto *clonedPof = pof->copy();
+            clonedPof->setOwnerClass(klass);
+            d->m_userAddedPythonOverrides.append(AbstractMetaFunctionCPtr{clonedPof});
+        }
+
         auto superClass = std::const_pointer_cast<AbstractMetaClass>(superClassC);
         AbstractMetaClass::fixFunctions(superClass);
         // Since we always traverse the complete hierarchy we are only

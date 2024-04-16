@@ -592,6 +592,11 @@ bool AbstractMetaFunction::isUserAdded() const
     return d->m_addedFunction && !d->m_addedFunction->isDeclaration();
 }
 
+bool AbstractMetaFunction::isUserAddedPythonOverride() const
+{
+    return d->m_addedFunction && d->m_addedFunction->isPythonOverride();
+}
+
 bool AbstractMetaFunction::isUserDeclared() const
 {
     return d->m_addedFunction && d->m_addedFunction->isDeclaration();

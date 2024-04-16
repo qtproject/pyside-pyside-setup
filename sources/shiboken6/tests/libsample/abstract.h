@@ -74,6 +74,9 @@ public:
 
     virtual void hideFunction(HideType *arg) = 0;
 
+    virtual void virtualWithOutParameter(int &x) const;
+    int callVirtualWithOutParameter() const;
+
 protected:
     virtual const char *className() const { return "Abstract"; }
 

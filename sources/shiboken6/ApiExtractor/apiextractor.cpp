@@ -669,6 +669,8 @@ ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(Instantiation
         return;
     for (const auto &func : metaClass->functions())
         collectInstantiatedContainersAndSmartPointers(context, func);
+    for (const auto &func : metaClass->userAddedPythonOverrides())
+        collectInstantiatedContainersAndSmartPointers(context, func);
     for (const AbstractMetaField &field : metaClass->fields())
         addInstantiatedContainersAndSmartPointers(context, field.type(), field.name());
 

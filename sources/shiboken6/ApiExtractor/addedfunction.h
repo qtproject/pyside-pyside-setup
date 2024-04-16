@@ -79,6 +79,9 @@ struct AddedFunction
     bool isDeclaration() const { return m_isDeclaration; } // <declare-function>
     void setDeclaration(bool value) { m_isDeclaration = value; }
 
+    bool isPythonOverride() const { return m_isPythonOverride; }
+    void setPythonOverride(bool o) { m_isPythonOverride = o; }
+
     const FunctionModificationList &modifications() const { return m_modifications; }
     FunctionModificationList &modifications() { return m_modifications; }
 
@@ -101,6 +104,7 @@ private:
     bool m_isClassMethod = false;
     bool m_isStatic = false;
     bool m_isDeclaration = false;
+    bool m_isPythonOverride = false;
 };
 
 QDebug operator<<(QDebug d, const AddedFunction::Argument &a);

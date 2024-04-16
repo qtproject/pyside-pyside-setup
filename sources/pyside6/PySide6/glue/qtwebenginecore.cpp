@@ -48,3 +48,17 @@ void QWebEngineNotificationFunctor::operator()
 // @snippet qwebengineprofile-setnotificationpresenter
 %CPPSELF.%FUNCTION_NAME(QWebEngineNotificationFunctor(%PYARG_1));
 // @snippet qwebengineprofile-setnotificationpresenter
+
+// @snippet qwebenginepage-javascriptprompt-virtual-redirect
+std::pair<bool, QString> resultPair = javaScriptPromptPyOverride(gil, pyOverride.object(), securityOrigin, msg, defaultValue);
+result->assign(resultPair.second);
+return resultPair.first;
+// @snippet qwebenginepage-javascriptprompt-virtual-redirect
+
+// @snippet qwebenginepage-javascriptprompt-return
+QString str;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1, %2, %3, &str);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](str));
+// @snippet qwebenginepage-javascriptprompt-return

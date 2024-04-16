@@ -66,6 +66,7 @@ public:
     ~AbstractMetaClass();
 
     const AbstractMetaFunctionCList &functions() const;
+    const AbstractMetaFunctionCList &userAddedPythonOverrides() const;
     void setFunctions(const AbstractMetaFunctionCList &functions);
     static void addFunction(const AbstractMetaClassPtr &klass,
                             const AbstractMetaFunctionCPtr &function);

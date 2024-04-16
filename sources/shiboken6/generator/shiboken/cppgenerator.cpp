@@ -624,6 +624,9 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
             writeDestructorNative(s, classContext);
     }
 
+    for (const auto &f : metaClass->userAddedPythonOverrides())
+        writeUserAddedPythonOverride(s, f);
+
     StringStream smd(TextStream::Language::Cpp);
     StringStream md(TextStream::Language::Cpp);
     StringStream signatureStream(TextStream::Language::Cpp);
@@ -1129,6 +1132,29 @@ static inline void writeVirtualMethodStaticReturnVar(TextStream &s, const Abstra
         << virtualMethodStaticReturnVar << ";\n";
 }
 
+static void writeFuncNameVar(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                             const QString &funcName)
+{
+    // PYSIDE-1019: Add info about properties
+    int propFlag = 0;
+    if (func->isPropertyReader())
+        propFlag |= 1;
+    if (func->isPropertyWriter())
+        propFlag |= 2;
+    if (propFlag && func->isStatic())
+        propFlag |= 4;
+    QString propStr;
+    if (propFlag != 90)
+        propStr = QString::number(propFlag) + u':';
+
+    if (propFlag != 0)
+        s << "// This method belongs to a property.\n";
+    s << "static const char *funcName = \"";
+    if (propFlag != 0)
+        s << propFlag << ':';
+    s << funcName << "\";\n";
+}
+
 void CppGenerator::writeVirtualMethodNative(TextStream &s,
                                             const AbstractMetaFunctionCPtr &func,
                                             int cacheIndex) const
@@ -1191,23 +1217,9 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
     s << "if (" << shibokenErrorsOccurred << ")\n" << indent
         << returnStatement.statement << '\n' << outdent;
 
-    // PYSIDE-1019: Add info about properties
-    int propFlag = 0;
-    if (func->isPropertyReader())
-        propFlag |= 1;
-    if (func->isPropertyWriter())
-        propFlag |= 2;
-    if (propFlag && func->isStatic())
-        propFlag |= 4;
-    QString propStr;
-    if (propFlag)
-        propStr = QString::number(propFlag) + u':';
-
     s << "static PyObject *nameCache[2] = {};\n";
-    if (propFlag)
-        s << "// This method belongs to a property.\n";
-    s << "static const char *funcName = \"" << propStr << funcName << "\";\n"
-        << "Shiboken::AutoDecRef " << PYTHON_OVERRIDE_VAR
+    writeFuncNameVar(s, func, funcName);
+    s << "Shiboken::AutoDecRef " << PYTHON_OVERRIDE_VAR
         << "(Shiboken::BindingManager::instance().getOverride(this, nameCache, funcName));\n"
         << "if (" << PYTHON_OVERRIDE_VAR << ".isNull()) {\n" << indent;
     if (useOverrideCaching(func->ownerClass()))
@@ -1428,6 +1440,28 @@ void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
     }
 
     s << outdent << "}\n\n";
+}
+
+void CppGenerator::writeUserAddedPythonOverride(TextStream &s,
+                                                const AbstractMetaFunctionCPtr &func) const
+{
+    TypeEntryCPtr retType = func->type().typeEntry();
+    const QString funcName = func->isOperatorOverload()
+        ? pythonOperatorFunctionName(func) : func->definitionNames().constFirst();
+
+    const CodeSnipList snips = func->hasInjectedCode()
+        ? func->injectedCodeSnips() : CodeSnipList();
+
+    QString prefix = wrapperName(func->ownerClass()) + u"::"_s;
+    s << '\n' << functionSignature(func, prefix, QString(), Generator::SkipDefaultValues |
+                                   Generator::OriginalTypeDescription)
+      << "\n{\n" << indent << sbkUnusedVariableCast("gil");
+
+    writeFuncNameVar(s, func, funcName);
+
+    const auto returnStatement = virtualMethodReturn(api(), func,
+                                                     func->modifications());
+    writeVirtualMethodPythonOverride(s, func, snips, returnStatement);
 }
 
 void CppGenerator::writeMetaObjectMethod(TextStream &s,
