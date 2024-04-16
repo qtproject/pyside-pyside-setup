@@ -18,7 +18,8 @@ PYSIDE_UNIX_BIN_TOOLS = ["lupdate",
                          "qmllint",
                          "qmlformat",
                          "qmlls",
-                         "qsb",]
+                         "qsb",
+                         "balsam"]
 
 # tools that are bundled as .app in macOS, but are normal executables in Linux and Windows
 PYSIDE_UNIX_BUNDLED_TOOLS = ["assistant",

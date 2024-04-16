@@ -231,5 +231,9 @@ def qsb():
     qt_tool_wrapper("qsb", sys.argv[1:])
 
 
+def balsam():
+    qt_tool_wrapper("balsam", sys.argv[1:])
+
+
 if __name__ == "__main__":
     main()
