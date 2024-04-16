@@ -775,6 +775,7 @@ def module_QtQuick3D() -> ModuleData:
     data.metatypes.extend(_metatypes)
     data.extra_files.append("Qt/plugins/assetimporters/libassimp*")
     data.extra_files.append("qsb*")
+    data.extra_files.append("balsam*")
 
     return data
 

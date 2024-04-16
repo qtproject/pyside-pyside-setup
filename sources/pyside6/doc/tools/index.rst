@@ -187,5 +187,19 @@ Shader Tools
         :link: pyside6-qsb
         :link-type: ref
 
-        a command line tool provided by the Qt Shader Tools module to
+        a command-line tool provided by the Qt Shader Tools modules to
         generate and inspect .qsb files.
+
+Qt Quick 3D
+~~~~~~~~~~~
+
+.. grid:: 2
+    :gutter: 3 3 4 5
+
+    .. grid-item-card:: ``pyside6-balsam``
+        :link: pyside6-balsam
+        :link-type: ref
+
+        a command line tool that takes assets created in digital content
+        creation tools like Maya, 3ds Max or Blender and converts them into an
+        efficient runtime format for use with Qt Quick 3D.
