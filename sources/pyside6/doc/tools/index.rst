@@ -176,3 +176,16 @@ Deployment
 
         to deploy PySide6 application as an Android app targeting different
         Android platforms - aarch64, armv7a, i686, x86_64.
+
+Shader Tools
+~~~~~~~~~~~~
+
+.. grid:: 2
+    :gutter: 3 3 4 5
+
+    .. grid-item-card:: ``pyside6-qsb``
+        :link: pyside6-qsb
+        :link-type: ref
+
+        a command line tool provided by the Qt Shader Tools module to
+        generate and inspect .qsb files.

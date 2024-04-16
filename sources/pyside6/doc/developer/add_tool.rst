@@ -44,6 +44,8 @@ Add a Qt tool wrapper
 - Add the tool in ``sources/pyside-tools/pyside_tool.py``.
 - Add the tool in ``build_scripts/__init__.py`` to create the setuptools entry points
   i.e. this enable using the tool from the console as "pyside6-<tool_name>"
-- Add an entry to ``sources/pyside6/doc/gettingstarted/package_details.rst``.
+- Add an entry to ``sources/pyside6/doc/tools/index.rst`` and the detailed
+  documentation to ``sources/pyside6/doc/tools/<tool_name>.rst``.
 - Include the necessary Qt binaries explicitly on ``build_scripts/wheel_files.py``
-- Build with ``--standalone``, verify it is working.
+- Add the necessary files to ``build_scripts/wheel_files.py``.
+- Build with ``--standalone``, verify it is working. Also, check if the wheel bundles the tool.

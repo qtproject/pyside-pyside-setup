@@ -227,5 +227,9 @@ def android_deploy():
         pyside_script_wrapper("android_deploy.py")
 
 
+def qsb():
+    qt_tool_wrapper("qsb", sys.argv[1:])
+
+
 if __name__ == "__main__":
     main()
