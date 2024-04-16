@@ -16,6 +16,7 @@ QT_MODULES = "QT_MODULES"
 
 METATYPES_JSON_SUFFIX = "metatypes.json"
 TRANSLATION_SUFFIX = ".ts"
+SHADER_SUFFIXES = ".vert", ".frag"
 
 
 class Singleton(type):
