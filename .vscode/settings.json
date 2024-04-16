@@ -15,5 +15,6 @@
     "python.testing.unittestEnabled": true,
     "flake8.args": [
         "--config=.flake8"
-    ]
+    ],
+    "grammarly.files.include": ["**/*.rst", "**/*.md"],
 }
