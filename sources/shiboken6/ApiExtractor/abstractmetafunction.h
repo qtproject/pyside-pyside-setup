@@ -92,8 +92,6 @@ public:
     enum Attribute {
         None                        = 0x00000000,
 
-        Friendly                    = 0x00000001,
-
         Abstract                    = 0x00000002,
         Static                      = 0x00000004,
         ClassMethod                 = 0x00000008,
@@ -107,8 +105,6 @@ public:
         PropertyWriter              = 0x00000200,
         PropertyResetter            = 0x00000400,
         PropertyNotify              = 0x00000800,
-
-        Invokable                   = 0x00001000,
 
         VirtualCppMethod            = 0x00010000,
         OverriddenCppMethod         = 0x00020000,
@@ -144,7 +140,6 @@ public:
     bool isAbstract() const;
     bool isClassMethod() const;
     bool isStatic() const;
-    bool isInvokable() const;
     bool isPropertyReader() const;
     bool isPropertyWriter() const;
     bool isPropertyResetter() const;
@@ -471,11 +466,6 @@ inline bool AbstractMetaFunction::isStatic() const
 inline bool AbstractMetaFunction::isClassMethod() const
 {
     return attributes().testFlag(ClassMethod);
-}
-
-inline bool AbstractMetaFunction::isInvokable() const
-{
-    return attributes().testFlag(Invokable);
 }
 
 inline bool AbstractMetaFunction::isPropertyReader() const

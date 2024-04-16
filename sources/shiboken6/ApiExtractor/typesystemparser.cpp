@@ -301,7 +301,6 @@ ENUM_LOOKUP_BEGIN(FunctionModification::ModifierFlag, Qt::CaseSensitive,
         {u"private", FunctionModification::Private},
         {u"public", FunctionModification::Public},
         {u"protected", FunctionModification::Protected},
-        {u"friendly", FunctionModification::Friendly},
         {u"rename", FunctionModification::Rename},
         {u"final", FunctionModification::Final},
         {u"non-final", FunctionModification::NonFinal}
