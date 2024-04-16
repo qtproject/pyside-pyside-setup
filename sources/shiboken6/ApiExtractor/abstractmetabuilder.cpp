@@ -1554,16 +1554,12 @@ void AbstractMetaBuilderPrivate::applyFunctionModifications(AbstractMetaFunction
             func->setOriginalName(func->name());
             func->setName(mod.renamedToName());
         } else if (mod.isAccessModifier()) {
-            funcRef -= AbstractMetaFunction::Friendly;
-
             if (mod.isPublic())
                 funcRef.modifyAccess(Access::Public);
             else if (mod.isProtected())
                 funcRef.modifyAccess(Access::Protected);
             else if (mod.isPrivate())
                 funcRef.modifyAccess(Access::Private);
-            else if (mod.isFriendly())
-                funcRef += AbstractMetaFunction::Friendly;
         }
 
         if (mod.isFinal())
@@ -2098,9 +2094,6 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     } else {
         *metaFunction += AbstractMetaFunction::FinalInTargetLang;
     }
-
-    if (functionItem->isInvokable())
-        *metaFunction += AbstractMetaFunction::Invokable;
 
     if (functionItem->isStatic()) {
         *metaFunction += AbstractMetaFunction::Static;

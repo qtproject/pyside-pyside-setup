@@ -509,9 +509,6 @@ public:
     bool isHiddenFriend() const;
     void setHiddenFriend(bool f);
 
-    bool isInvokable() const; // Qt
-    void setInvokable(bool isInvokable); // Qt
-
     bool isAbstract() const;
     void setAbstract(bool isAbstract);
 

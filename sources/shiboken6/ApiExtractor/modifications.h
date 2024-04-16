@@ -141,8 +141,7 @@ public:
     enum ModifierFlag {
         Private =               0x0001,
         Protected =             0x0002,
-        Public =                0x0003,
-        Friendly =              0x0004,
+        Public =                0x0004,
         AccessModifierMask =    0x000f,
 
         Final =                 0x0010,
@@ -191,10 +190,6 @@ public:
     {
         return accessModifier() == Public;
     }
-    bool isFriendly() const
-    {
-        return accessModifier() == Friendly;
-    }
     bool isFinal() const
     {
         return modifiers().testFlag(Final);
@@ -203,7 +198,6 @@ public:
     {
         return modifiers().testFlag(NonFinal);
     }
-    QString accessModifierString() const;
 
     bool isDeprecated() const
     {

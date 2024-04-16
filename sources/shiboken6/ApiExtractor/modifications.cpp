@@ -14,20 +14,6 @@
 
 using namespace Qt::StringLiterals;
 
-// ---------------------- Modification
-QString FunctionModification::accessModifierString() const
-{
-    if (isPrivate())
-        return u"private"_s;
-    if (isProtected())
-        return u"protected"_s;
-    if (isPublic())
-        return u"public"_s;
-    if (isFriendly())
-        return u"friendly"_s;
-    return {};
-}
-
 // ---------------------- FieldModification
 
 class FieldModificationData : public QSharedData

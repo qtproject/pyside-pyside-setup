@@ -1082,17 +1082,6 @@ void _FunctionModelItem::setAbstract(bool isAbstract)
     m_isAbstract = isAbstract;
 }
 
-// Qt
-bool _FunctionModelItem::isInvokable() const
-{
-    return m_isInvokable;
-}
-
-void _FunctionModelItem::setInvokable(bool isInvokable)
-{
-    m_isInvokable = isInvokable;
-}
-
 QString _FunctionModelItem::typeSystemSignature() const  // For dumping out type system files
 {
     QString result;
