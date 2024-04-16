@@ -27,7 +27,7 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 
 from project import (QmlProjectData, check_qml_decorators, is_python_file,
                      QMLDIR_FILE, MOD_CMD, METATYPES_JSON_SUFFIX,
-                     TRANSLATION_SUFFIX,
+                     SHADER_SUFFIXES, TRANSLATION_SUFFIX,
                      requires_rebuild, run_command, remove_path,
                      ProjectData, resolve_project_file, new_project,
                      ProjectType, ClOptions)
@@ -49,6 +49,7 @@ LRELEASE_CMD = "pyside6-lrelease"
 LUPDATE_CMD = "pyside6-lupdate"
 QMLTYPEREGISTRAR_CMD = "pyside6-qmltyperegistrar"
 QMLLINT_CMD = "pyside6-qmllint"
+QSB_CMD = "pyside6-qsb"
 DEPLOY_CMD = "pyside6-deploy"
 
 NEW_PROJECT_TYPES = {"new-quick": ProjectType.QUICK,
@@ -142,6 +143,11 @@ class Project:
             qm_file = f"{file.parent}/{file.stem}.qm"
             cmd = [LRELEASE_CMD, os.fspath(file), "-qm", qm_file]
             return ([Path(qm_file)], cmd)
+
+        if file.suffix in SHADER_SUFFIXES:
+            qsb_file = f"{file.parent}/{file.stem}.qsb"
+            cmd = [QSB_CMD, "-o", qsb_file, os.fspath(file)]
+            return ([Path(qsb_file)], cmd)
 
         return ([], None)
 
