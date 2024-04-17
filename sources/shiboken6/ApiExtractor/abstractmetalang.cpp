@@ -177,22 +177,16 @@ AbstractMetaFunctionCList AbstractMetaClass::functionsInTargetLang() const
     FunctionQueryOptions default_flags = FunctionQueryOption::NormalFunctions
         | FunctionQueryOption::Visible | FunctionQueryOption::NotRemoved;
 
-    // Only public functions in final classes
-    // default_flags |= isFinal() ? WasPublic : 0;
-    FunctionQueryOptions public_flags;
-    if (isFinalInTargetLang())
-        public_flags |= FunctionQueryOption::WasPublic;
-
     // Constructors
     AbstractMetaFunctionCList returned = queryFunctions(FunctionQueryOption::AnyConstructor
-                                                        | default_flags | public_flags);
+                                                        | default_flags);
 
     returned += queryFunctions(FunctionQueryOption::NonStaticFunctions
-                               | default_flags | public_flags);
+                               | default_flags);
 
     // Static functions
     returned += queryFunctions(FunctionQueryOption::StaticFunctions
-                               | default_flags | public_flags);
+                               | default_flags);
 
     // Empty, private functions, since they aren't caught by the other ones
     returned += queryFunctions(FunctionQueryOption::Empty | FunctionQueryOption::Invisible);
@@ -1167,9 +1161,6 @@ bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQue
     if (query.testFlag(FunctionQueryOption::Empty) && !f->isEmptyFunction())
         return false;
 
-    if (query.testFlag(FunctionQueryOption::WasPublic) && !f->wasPublic())
-        return false;
-
     if (query.testFlag(FunctionQueryOption::ClassImplements) && f->ownerClass() != f->implementingClass())
         return false;
 
@@ -1467,12 +1458,6 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
         // interrested in what each super class implements, not what
         // we may have propagated from their base classes again.
         AbstractMetaFunctionCList superFuncs;
-        // Super classes can never be final
-        if (superClass->isFinalInTargetLang()) {
-            qCWarning(lcShiboken).noquote().nospace()
-                << "Final class '" << superClass->name() << "' set to non-final, as it is extended by other classes";
-            *superClass -= AbstractMetaClass::FinalInTargetLang;
-        }
         superFuncs = superClass->queryFunctions(FunctionQueryOption::ClassImplements);
         // We are not interested in signals as no bindings are generated for them;
         // they cause documentation warnings.

@@ -1451,17 +1451,11 @@ void AbstractMetaBuilderPrivate::traverseFunctions(const ScopeModelItem& scopeIt
             }
         }
 
-        const bool isInvalidDestructor = metaFunction->isDestructor() && metaFunction->isPrivate();
-        const bool isInvalidConstructor = metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction
-            && metaFunction->isPrivate();
-        if (isInvalidConstructor)
-            metaClass->setHasPrivateConstructor(true);
-        if ((isInvalidDestructor || isInvalidConstructor)
-            && !metaClass->hasNonPrivateConstructor()) {
-            *metaClass += AbstractMetaClass::FinalInTargetLang;
-        } else if (metaFunction->isConstructor() && !metaFunction->isPrivate()) {
-            *metaClass -= AbstractMetaClass::FinalInTargetLang;
-            metaClass->setHasNonPrivateConstructor(true);
+        if (metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction) {
+            if (metaFunction->isPrivate())
+                metaClass->setHasPrivateConstructor(true);
+            else
+                metaClass->setHasNonPrivateConstructor(true);
         }
 
         if (!metaFunction->isDestructor()
