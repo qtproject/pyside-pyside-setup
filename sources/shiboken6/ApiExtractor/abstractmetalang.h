@@ -352,11 +352,6 @@ private:
     QScopedPointer<AbstractMetaClassPrivate> d;
 };
 
-inline bool AbstractMetaClass::isFinalInTargetLang() const
-{
-    return attributes().testFlag(FinalInTargetLang);
-}
-
 inline bool AbstractMetaClass::isAbstract() const
 {
     return attributes().testFlag(Abstract);

@@ -16,7 +16,6 @@ enum class FunctionQueryOption {
     Signals                      = 0x0000100, // Only signals
     NormalFunctions              = 0x0000200, // Only functions that aren't signals
     Visible                      = 0x0000400, // Only public and protected functions
-    WasPublic                    = 0x0001000, // Only functions that were originally public
     NonStaticFunctions           = 0x0004000, // No static functions
     Empty                        = 0x0008000, // Empty overrides of abstract functions
     Invisible                    = 0x0010000, // Only private functions
