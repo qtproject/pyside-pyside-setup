@@ -96,8 +96,6 @@ public:
         Static                      = 0x00000004,
         ClassMethod                 = 0x00000008,
 
-        FinalInTargetLang           = 0x00000010,
-
         GetterFunction              = 0x00000020,
         SetterFunction              = 0x00000040,
 
@@ -136,7 +134,6 @@ public:
     Flags flags() const;
     void setFlags(Flags f);
 
-    bool isFinalInTargetLang() const;
     bool isAbstract() const;
     bool isClassMethod() const;
     bool isStatic() const;
@@ -447,11 +444,6 @@ private:
 
     QScopedPointer<AbstractMetaFunctionPrivate> d;
 };
-
-inline bool AbstractMetaFunction::isFinalInTargetLang() const
-{
-    return attributes().testFlag(FinalInTargetLang);
-}
 
 inline bool AbstractMetaFunction::isAbstract() const
 {

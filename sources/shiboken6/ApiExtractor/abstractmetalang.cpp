@@ -187,14 +187,7 @@ AbstractMetaFunctionCList AbstractMetaClass::functionsInTargetLang() const
     AbstractMetaFunctionCList returned = queryFunctions(FunctionQueryOption::AnyConstructor
                                                         | default_flags | public_flags);
 
-    // Final functions
-    returned += queryFunctions(FunctionQueryOption::FinalInTargetLangFunctions
-                               | FunctionQueryOption::NonStaticFunctions
-                               | default_flags | public_flags);
-
-    // Virtual functions
-    returned += queryFunctions(FunctionQueryOption::VirtualInTargetLangFunctions
-                               | FunctionQueryOption::NonStaticFunctions
+    returned += queryFunctions(FunctionQueryOption::NonStaticFunctions
                                | default_flags | public_flags);
 
     // Static functions
@@ -815,8 +808,7 @@ void AbstractMetaClassPrivate::addConstructor(AbstractMetaFunction::FunctionType
     auto *f = createFunction(q->name(), t, access, arguments, AbstractMetaType::createVoid(), q);
     if (access != Access::Private)
          m_hasNonPrivateConstructor = true;
-    f->setAttributes(AbstractMetaFunction::FinalInTargetLang
-                     | AbstractMetaFunction::AddedMethod);
+    f->setAttributes(AbstractMetaFunction::AddedMethod);
     addFunction(AbstractMetaFunctionCPtr(f));
 }
 
@@ -1169,9 +1161,6 @@ bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQue
     if (query.testFlag(FunctionQueryOption::Visible) && f->isPrivate())
         return false;
 
-    if (query.testFlag(FunctionQueryOption::VirtualInTargetLangFunctions) && f->isFinalInTargetLang())
-        return false;
-
     if (query.testFlag(FunctionQueryOption::Invisible) && !f->isPrivate())
         return false;
 
@@ -1182,9 +1171,6 @@ bool AbstractMetaClass::queryFunction(const AbstractMetaFunction *f, FunctionQue
         return false;
 
     if (query.testFlag(FunctionQueryOption::ClassImplements) && f->ownerClass() != f->implementingClass())
-        return false;
-
-    if (query.testFlag(FunctionQueryOption::FinalInTargetLangFunctions) && !f->isFinalInTargetLang())
         return false;
 
     if (query.testFlag(FunctionQueryOption::VirtualInCppFunctions) && !f->isVirtual())
@@ -1527,24 +1513,6 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
                             && !attributes.testFlag(AbstractMetaFunction::FinalCppMethod)) {
                             *f += AbstractMetaFunction::OverriddenCppMethod;
                         }
-                        // Same function, propegate virtual...
-                        if (!(cmp & AbstractMetaFunction::EqualAttributes)) {
-                            if (!f->isEmptyFunction()) {
-                                if (!sf->isFinalInTargetLang() && f->isFinalInTargetLang()) {
-                                    *f -= AbstractMetaFunction::FinalInTargetLang;
-                                }
-#if 0
-                                if (!f->isFinalInTargetLang() && f->isPrivate()) {
-                                    f->setFunctionType(AbstractMetaFunction::EmptyFunction);
-                                    f->setVisibility(AbstractMetaAttributes::Protected);
-                                    *f += AbstractMetaAttributes::FinalInTargetLang;
-                                    qCWarning(lcShiboken, "private virtual function '%s' in '%s'",
-                                              qPrintable(f->signature()),
-                                              qPrintable(f->implementingClass()->name()));
-                                }
-#endif
-                            }
-                        }
 
                         if (f->access() != sf->access()) {
                             qCWarning(lcShiboken, "%s",
@@ -1560,44 +1528,12 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass)
                             // Private overrides of abstract functions have to go into the class or
                             // the subclasses will not compile as non-abstract classes.
                             // But they don't need to be implemented, since they can never be called.
-                            if (f->isPrivate()) {
+                            if (f->isPrivate())
                                 f->setFunctionType(AbstractMetaFunction::EmptyFunction);
-                                *f += AbstractMetaFunction::FinalInTargetLang;
-                            }
                         }
 
                         // Set the class which first declares this function, afawk
                         f->setDeclaringClass(sf->declaringClass());
-
-                        if (sf->isFinalInTargetLang() && !sf->isPrivate() && !f->isPrivate() && !sf->isStatic() && !f->isStatic()) {
-                            // Shadowed funcion, need to make base class
-                            // function non-virtual
-                            if (f->implementingClass() != sf->implementingClass()
-                                && inheritsFrom(f->implementingClass(), sf->implementingClass())) {
-
-                                // Check whether the superclass method has been redefined to non-final
-
-                                bool hasNonFinalModifier = false;
-                                bool isBaseImplPrivate = false;
-                                const FunctionModificationList &mods = sf->modifications(sf->implementingClass());
-                                for (const FunctionModification &mod : mods) {
-                                    if (mod.isNonFinal()) {
-                                        hasNonFinalModifier = true;
-                                        break;
-                                    }
-                                    if (mod.isPrivate()) {
-                                        isBaseImplPrivate = true;
-                                        break;
-                                    }
-                                }
-
-                                if (!hasNonFinalModifier && !isBaseImplPrivate) {
-                                    qCWarning(lcShiboken, "%s",
-                                              qPrintable(msgShadowingFunction(sf.get(), f.get())));
-                                }
-                            }
-                        }
-
                     }
 
                     if (cmp & AbstractMetaFunction::EqualDefaultValueOverload) {

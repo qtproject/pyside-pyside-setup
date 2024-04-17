@@ -386,7 +386,6 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
 
     streamFunction->setArguments(arguments);
 
-    *streamFunction += AbstractMetaFunction::FinalInTargetLang;
     streamFunction->setAccess(Access::Public);
 
     AbstractMetaClassPtr funcClass;
@@ -1561,11 +1560,6 @@ void AbstractMetaBuilderPrivate::applyFunctionModifications(AbstractMetaFunction
             else if (mod.isPrivate())
                 funcRef.modifyAccess(Access::Private);
         }
-
-        if (mod.isFinal())
-            funcRef += AbstractMetaFunction::FinalInTargetLang;
-        else if (mod.isNonFinal())
-            funcRef -= AbstractMetaFunction::FinalInTargetLang;
     }
 }
 
@@ -2091,14 +2085,10 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             *metaFunction += AbstractMetaFunction::OverriddenCppMethod;
         if (functionItem->isFinal())
             *metaFunction += AbstractMetaFunction::FinalCppMethod;
-    } else {
-        *metaFunction += AbstractMetaFunction::FinalInTargetLang;
     }
 
-    if (functionItem->isStatic()) {
+    if (functionItem->isStatic())
         *metaFunction += AbstractMetaFunction::Static;
-        *metaFunction += AbstractMetaFunction::FinalInTargetLang;
-    }
 
     // Access rights
     metaFunction->setAccess(functionItem->accessPolicy());
