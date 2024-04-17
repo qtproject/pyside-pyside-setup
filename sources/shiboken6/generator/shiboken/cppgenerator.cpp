@@ -5494,7 +5494,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     if (metaClass->baseClassNames().size() > 1)
         s << pyTypeBasesVariable << ',' << '\n';
     else
-        s << "0,\n";
+        s << "nullptr,\n";
 
     // 8:wrapperflags
     QByteArrayList wrapperFlags;
@@ -5750,7 +5750,7 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s,
 
     if (!polymorphicExpr.isEmpty()) {
         replacePolymorphicIdPlaceHolders(metaClass, &polymorphicExpr);
-        s << " if (" << polymorphicExpr << ")\n" << indent
+        s << "if (" << polymorphicExpr << ")\n" << indent
             << "return cptr;\n" << outdent;
     } else if (metaClass->isPolymorphic()) {
         const auto &ancestors = metaClass->allTypeSystemAncestors();
