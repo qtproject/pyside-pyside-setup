@@ -99,7 +99,7 @@ Documentation
 
         PySide API reference.
         +++
-        .. button-ref:: api
+        .. button-ref:: pyside-api
             :color: primary
             :outline:
             :expand:
