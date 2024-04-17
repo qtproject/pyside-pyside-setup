@@ -11,6 +11,3 @@ numpy==1.26.3; python_version >= '3.9'
 
 # For examples
 PyOpenGL
-
-# For tests
-pyinstaller==3.6; platform_machine != 'aarch64'
