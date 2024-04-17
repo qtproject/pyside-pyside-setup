@@ -120,7 +120,7 @@ AbstractMetaFunction::AbstractMetaFunction(const AddedFunctionPtr &addedFunc) :
         setAccess(Access::Public);
         break;
     }
-    AbstractMetaFunction::Attributes atts = AbstractMetaFunction::FinalInTargetLang;
+    AbstractMetaFunction::Attributes atts;
     if (addedFunc->isStatic())
         atts |= AbstractMetaFunction::Static;
     if (addedFunc->isClassMethod())

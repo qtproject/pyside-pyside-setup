@@ -11,7 +11,6 @@ enum class FunctionQueryOption {
     Constructors                 = 0x0000002, // Constructors except copy/move
     CopyConstructor              = 0x0000004, // Only copy constructors
     //Destructors                  = 0x0000002, // Only destructors. Not included in class.
-    FinalInTargetLangFunctions   = 0x0000008, // Only functions that are non-virtual in TargetLang
     ClassImplements              = 0x0000020, // Only functions implemented by the current class
     StaticFunctions              = 0x0000080, // Only static functions
     Signals                      = 0x0000100, // Only signals
@@ -22,7 +21,6 @@ enum class FunctionQueryOption {
     Empty                        = 0x0008000, // Empty overrides of abstract functions
     Invisible                    = 0x0010000, // Only private functions
     VirtualInCppFunctions        = 0x0020000, // Only functions that are virtual in C++
-    VirtualInTargetLangFunctions = 0x0080000, // Only functions which are virtual in TargetLang
     NotRemoved                   = 0x0400000, // Only functions that have not been removed
     OperatorOverloads            = 0x2000000, // Only functions that are operator overloads
     GenerateExceptionHandling    = 0x4000000,
