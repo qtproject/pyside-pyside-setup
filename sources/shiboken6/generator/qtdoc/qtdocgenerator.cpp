@@ -147,8 +147,13 @@ static bool shouldSkip(const AbstractMetaFunctionCPtr &func)
 static bool functionSort(const AbstractMetaFunctionCPtr &func1, const AbstractMetaFunctionCPtr &func2)
 {
     const bool ctor1 = func1->isConstructor();
-    const bool ctor2 = func2->isConstructor();
-    return ctor1 != ctor2 ? ctor1 : func1->name() < func2->name();
+    if (ctor1 != func2->isConstructor())
+        return ctor1;
+    const QString &name1 = func1->name();
+    const QString &name2 = func2->name();
+    if (name1 != name2)
+        return name1 < name2;
+    return func1->arguments().size() < func2->arguments().size();
 }
 
 static inline QVersionNumber versionOf(const TypeEntryCPtr &te)
@@ -1421,7 +1426,7 @@ GeneratorDocumentation
     std::remove_copy_if(allFunctions.cbegin(), allFunctions.cend(),
                         std::back_inserter(result.allFunctions), shouldSkip);
 
-    std::sort(result.allFunctions.begin(), result.allFunctions.end(), functionSort);
+    std::stable_sort(result.allFunctions.begin(), result.allFunctions.end(), functionSort);
 
     for (const auto &func : std::as_const(result.allFunctions)) {
         if (func->isStatic())
