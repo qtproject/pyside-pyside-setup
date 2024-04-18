@@ -50,7 +50,7 @@ LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct)
     // As soon as types[index] gets filled, we can stop.
 
     std::string_view names(typeStruct.fullName);
-    bool usePySide = names.substr(0, 8) == std::string("PySide6.");
+    const bool usePySide = names.compare(0, 8, "PySide6.") == 0;
     auto dotPos = usePySide ? names.find('.', 8) : names.find('.');
     auto startPos = dotPos + 1;
     AutoDecRef modName(String::fromCppStringView(names.substr(0, dotPos)));
