@@ -24,6 +24,19 @@ Build on the command line
 
 - Consider using ``build_scripts/qp5_tool.py``.
 
+Build with address sanitizer (Linux)
+====================================
+
+ASAN needs to be told to not exit on memory leaks and its library
+needs to be pre-loaded. Assuming the library is found
+at ``/usr/lib/gcc/x86_64-linux-gnu/11``:
+
+.. code-block:: bash
+
+    export ASAN_OPTIONS=detect_leaks=0
+    export LD_PRELOAD=/usr/lib/gcc/x86_64-linux-gnu/11/libasan.so
+    pyside-setup install [...] --sanitize-address
+
 De-Virtualize the Python Files
 ==============================
 
