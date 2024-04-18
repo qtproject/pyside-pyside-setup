@@ -46,7 +46,8 @@ else()
                         "${TOOLS_PATH}/qmlformat${CMAKE_EXECUTABLE_SUFFIX}"
                         "${TOOLS_PATH}/qmlls${CMAKE_EXECUTABLE_SUFFIX}"
                         "${TOOLS_PATH}/qsb${CMAKE_EXECUTABLE_SUFFIX}"
-                        "${TOOLS_PATH}/balsam${CMAKE_EXECUTABLE_SUFFIX}")
+                        "${TOOLS_PATH}/balsam${CMAKE_EXECUTABLE_SUFFIX}"
+                        "${TOOLS_PATH}/balsamui${CMAKE_EXECUTABLE_SUFFIX}")
 
         if (APPLE)
             list(APPEND directories "${TOOLS_PATH}/Assistant.app"
