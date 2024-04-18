@@ -59,6 +59,9 @@ public:
      */
     void visitAllPyObjects(ObjectVisitor visitor, void *data);
 
+    bool dumpTypeGraph(const char *fileName) const;
+    void dumpWrapperMap();
+
 private:
     ~BindingManager();
     BindingManager();
