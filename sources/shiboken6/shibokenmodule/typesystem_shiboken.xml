@@ -49,6 +49,14 @@
         <inject-code file="shibokenmodule.cpp" snippet="getallvalidwrappers"/>
     </add-function>
 
+    <add-function signature="dumpTypeGraph(const char *@fileName@)" return-type="bool">
+        <inject-code file="shibokenmodule.cpp" snippet="dumptypegraph"/>
+    </add-function>
+
+    <add-function signature="dumpWrapperMap()">
+        <inject-code file="shibokenmodule.cpp" snippet="dumpwrappermap"/>
+    </add-function>
+
     <extra-includes>
         <include file-name="sbkversion.h" location="local"/>
         <include file-name="voidptr.h" location="local"/>

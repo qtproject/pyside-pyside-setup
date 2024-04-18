@@ -116,6 +116,15 @@ To import the module:
 
     This method should be used **only** for debug purposes by developers.
 
+ .. function:: dumpTypeGraph(file_name)
+
+    Dumps the inheritance graph of the types existing in libshiboken
+    to ``.dot`` file for use with `Graphviz <https://graphviz.org/>`_.
+
+.. function:: dumpWrapperMap()
+
+    Dumps the map of wrappers existing in libshiboken to standard error.
+
  .. py:class:: VoidPtr(address, size = -1, writeable = 0)
 
      :param address: (PyBuffer, SbkObject, int, VoidPtr)

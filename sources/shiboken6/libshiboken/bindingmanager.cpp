@@ -15,8 +15,11 @@
 #include <cstddef>
 #include <cstring>
 #include <fstream>
+#include <iostream>
 #include <mutex>
+#include <string_view>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace Shiboken
 {
@@ -27,6 +30,8 @@ class Graph
 {
 public:
     using NodeList = std::vector<PyTypeObject *>;
+    using NodeSet = std::unordered_set<const PyTypeObject *>;
+
     using Edges = std::unordered_map<PyTypeObject *, NodeList>;
 
     Edges m_edges;
@@ -38,25 +43,8 @@ public:
         m_edges[from].push_back(to);
     }
 
-#ifndef NDEBUG
-    void dumpDotGraph() const
-    {
-        std::ofstream file("/tmp/shiboken_graph.dot");
-
-        file << "digraph D {\n";
-
-        for (const auto &p : m_edges) {
-            auto *node1 = p.first;
-            const NodeList &nodeList = p.second;
-            for (const PyTypeObject *o : nodeList) {
-                auto *node2 = o;
-                file << '"' << node2->tp_name << "\" -> \""
-                    << node1->tp_name << "\"\n";
-            }
-        }
-        file << "}\n";
-    }
-#endif
+    bool dumpTypeGraph(const char *fileName) const;
+    NodeSet nodeSet() const;
 
     PyTypeObject *identifyType(void **cptr, PyTypeObject *type, PyTypeObject *baseType) const
     {
@@ -85,24 +73,53 @@ public:
     }
 };
 
-
-#ifndef NDEBUG
-static void showWrapperMap(const WrapperMap &wrapperMap)
+static void formatDotNode(const char *nameC, std::ostream &file)
 {
-    if (Shiboken::pyVerbose() > 0) {
-        fprintf(stderr, "-------------------------------\n");
-        fprintf(stderr, "WrapperMap: %p (size: %d)\n", &wrapperMap, (int) wrapperMap.size());
-        for (auto it = wrapperMap.begin(), end = wrapperMap.end(); it != end; ++it) {
-            const SbkObject *sbkObj = it->second;
-            fprintf(stderr, "key: %p, value: %p (%s, refcnt: %d)\n", it->first,
-                    static_cast<const void *>(sbkObj),
-                    (Py_TYPE(sbkObj))->tp_name,
-                    int(Py_REFCNT(reinterpret_cast<const PyObject *>(sbkObj))));
-        }
-        fprintf(stderr, "-------------------------------\n");
+    std::string_view name(nameC);
+    auto lastDot = name.rfind('.');
+    file << "    \"" << name << "\" [ label=";
+    if (lastDot != std::string::npos) {
+        file << '"' << name.substr(lastDot + 1) << "\" tooltip=\""
+             << name.substr(0, lastDot) << '"';
+    } else {
+        file << '"' << name << '"';
     }
+    file << " ]\n";
 }
-#endif
+
+Graph::NodeSet Graph::nodeSet() const
+{
+    NodeSet result;
+    for (const auto &p : m_edges) {
+        result.insert(p.first);
+        for (const PyTypeObject *node2 : p.second)
+            result.insert(node2);
+    }
+    return result;
+}
+
+bool Graph::dumpTypeGraph(const char *fileName) const
+{
+    std::ofstream file(fileName);
+    if (!file.good())
+        return false;
+
+    file << "digraph D {\n";
+
+    // Define nodes with short names
+    for (const auto *node : nodeSet())
+        formatDotNode(node->tp_name, file);
+
+    // Write edges
+    for (const auto &p : m_edges) {
+        auto *node1 = p.first;
+        const NodeList &nodeList = p.second;
+        for (const PyTypeObject *node2 : nodeList)
+            file << "    \"" << node2->tp_name << "\" -> \"" << node1->tp_name << "\"\n";
+    }
+    file << "}\n";
+    return true;
+}
 
 struct BindingManager::BindingManagerPrivate {
     using DestructorEntries = std::vector<DestructorEntry>;
@@ -189,7 +206,8 @@ BindingManager::~BindingManager()
     debugRemoveFreeHook();
 #endif
 #ifndef NDEBUG
-    showWrapperMap(m_d->wrapperMapper);
+    if (Shiboken::pyVerbose() > 0)
+        dumpWrapperMap();
 #endif
     /* Cleanup hanging references. We just invalidate them as when
      * the BindingManager is being destroyed the interpreter is alredy
@@ -393,6 +411,27 @@ void BindingManager::visitAllPyObjects(ObjectVisitor visitor, void *data)
         if (hasWrapper(p.first))
             visitor(p.second, data);
     }
+}
+
+bool BindingManager::dumpTypeGraph(const char *fileName) const
+{
+    return m_d->classHierarchy.dumpTypeGraph(fileName);
+}
+
+void BindingManager::dumpWrapperMap()
+{
+    const auto &wrapperMap = m_d->wrapperMapper;
+    std::cerr <<  "-------------------------------\n"
+        << "WrapperMap size: " << wrapperMap.size() << " Types: "
+        << m_d->classHierarchy.nodeSet().size() << '\n';
+    for (auto it = wrapperMap.begin(), end = wrapperMap.end(); it != end; ++it) {
+        const SbkObject *sbkObj = it->second;
+        std::cerr << "key: " << it->first << ", value: "
+            << static_cast<const void *>(sbkObj) << " ("
+            << (Py_TYPE(sbkObj))->tp_name << ", refcnt: "
+            << Py_REFCNT(reinterpret_cast<const PyObject *>(sbkObj)) << ")\n";
+    }
+    std::cerr << "-------------------------------\n";
 }
 
 static bool isPythonType(PyTypeObject *type)

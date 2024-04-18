@@ -91,6 +91,15 @@ for (auto *o : setAll) {
 return listAll;
 // @snippet getallvalidwrappers
 
+// @snippet dumptypegraph
+const bool ok = Shiboken::BindingManager::instance().dumpTypeGraph(%1);
+%PYARG_0 = %CONVERTTOPYTHON[bool](ok);
+// @snippet dumptypegraph
+
+// @snippet dumpwrappermap
+Shiboken::BindingManager::instance().dumpWrapperMap();
+// @snippet dumpwrappermap
+
 // @snippet init
 // Add __version__ and __version_info__ attributes to the module
 PyObject* version = PyTuple_New(5);
