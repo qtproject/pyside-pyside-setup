@@ -203,3 +203,9 @@ Qt Quick 3D
         a command line tool that takes assets created in digital content
         creation tools like Maya, 3ds Max or Blender and converts them into an
         efficient runtime format for use with Qt Quick 3D.
+
+    .. grid-item-card:: ``pyside6-balsamui``
+        :link: pyside6-balsamui
+        :link-type: ref
+
+        a graphical user interface for the ``pyside6-balsam`` tool.

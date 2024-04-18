@@ -235,5 +235,9 @@ def balsam():
     qt_tool_wrapper("balsam", sys.argv[1:])
 
 
+def balsamui():
+    qt_tool_wrapper("balsamui", sys.argv[1:])
+
+
 if __name__ == "__main__":
     main()
