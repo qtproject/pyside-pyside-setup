@@ -595,7 +595,8 @@ class QAsyncioTimerHandle(QAsyncioHandle, asyncio.TimerHandle):
         QAsyncioHandle.__init__(self, callback, args, loop, context, is_threadsafe)
 
         self._when = when
-        self._timeout = int(max(self._when - self._loop.time(), 0) * 1000)
+        time = self._loop.time()
+        self._timeout = round(max(self._when - time, 0) * 1000)
 
         QAsyncioHandle._start(self)
 
