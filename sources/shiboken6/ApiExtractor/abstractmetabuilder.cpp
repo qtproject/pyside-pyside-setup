@@ -1451,12 +1451,12 @@ void AbstractMetaBuilderPrivate::traverseFunctions(const ScopeModelItem& scopeIt
             }
         }
 
-        if (metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction) {
-            if (metaFunction->isPrivate())
-                metaClass->setHasPrivateConstructor(true);
-            else
-                metaClass->setHasNonPrivateConstructor(true);
+        if (metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction
+            && metaFunction->isPrivate()) {
+            metaClass->setHasPrivateConstructor(true);
         }
+        if (metaFunction->isConstructor() && !metaFunction->isPrivate()) // Including Copy CT
+            metaClass->setHasNonPrivateConstructor(true);
 
         if (!metaFunction->isDestructor()
             && !(metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction)) {
