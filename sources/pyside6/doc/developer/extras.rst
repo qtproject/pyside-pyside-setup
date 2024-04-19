@@ -35,7 +35,7 @@ at ``/usr/lib/gcc/x86_64-linux-gnu/11``:
 
     export ASAN_OPTIONS=detect_leaks=0
     export LD_PRELOAD=/usr/lib/gcc/x86_64-linux-gnu/11/libasan.so
-    pyside-setup install [...] --sanitize-address
+    python setup.py build [...] --sanitize-address
 
 De-Virtualize the Python Files
 ==============================
