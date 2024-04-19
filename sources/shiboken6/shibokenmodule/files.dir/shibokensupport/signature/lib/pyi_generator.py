@@ -179,6 +179,7 @@ FROM_IMPORTS = [
     (None, ["builtins"]),
     (None, ["os"]),
     (None, ["enum"]),
+    ("collections.abc", ["Iterable"]),
     ("typing", sorted(typing.__all__)),
     ("PySide6.QtCore", ["PyClassProperty", "Signal", "SignalInstance"]),
     ("shiboken6", ["Shiboken"]),
@@ -198,6 +199,10 @@ def filter_from_imports(from_struct, text):
             #              but only if the class is not also defined here.
             if (f"class {each}(") not in text:
                 if re.search(rf"(\b|@){each}\b([^\s\(:]|\n)", text):
+                    lis.append(each)
+                # Search if a type is present in the return statement
+                # of function declarations: '... -> here:'
+                if re.search(rf"->.*{each}.*:", text):
                     lis.append(each)
         if not lis:
             nfs.pop()
