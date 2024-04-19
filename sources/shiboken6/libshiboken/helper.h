@@ -112,7 +112,8 @@ LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugSbkObject
 LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugPyTypeObject &o);
 LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugPyBuffer &b);
 LIBSHIBOKEN_API std::ostream &operator<<(std::ostream &str, const debugPyArrayObject &b);
-
+LIBSHIBOKEN_API std::ios_base &debugVerbose(std::ios_base &s);
+LIBSHIBOKEN_API std::ios_base &debugBrief(std::ios_base &s);
 } // namespace Shiboken
 
 
