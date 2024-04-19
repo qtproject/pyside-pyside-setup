@@ -29,6 +29,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
 
         self._future_to_await: typing.Optional[asyncio.Future] = None
         self._cancel_message: typing.Optional[str] = None
+        self._cancelled = False
 
         asyncio._register_task(self)  # type: ignore[arg-type]
 
@@ -90,6 +91,15 @@ class QAsyncioTask(futures.QAsyncioFuture):
                 result.add_done_callback(
                     self._step, context=self._context)  # type: ignore[arg-type]
                 self._future_to_await = result
+                if self._cancelled:
+                    # If the task was cancelled, then a new future should be
+                    # cancelled as well. Otherwise, in some scenarios like
+                    # a loop inside the task and with bad timing, if the new
+                    # future is not cancelled, the task would continue running
+                    # in this loop despite having been cancelled. This bad
+                    # timing can occur especially if the first future finishes
+                    # very quickly.
+                    self._future_to_await.cancel(self._cancel_message)
             elif result is None:
                 self._loop.call_soon(self._step, context=self._context)
             else:
@@ -136,6 +146,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
         self._handle.cancel()
         if self._future_to_await is not None:
             self._future_to_await.cancel(msg)
+        self._cancelled = True
         return True
 
     def uncancel(self) -> None:
