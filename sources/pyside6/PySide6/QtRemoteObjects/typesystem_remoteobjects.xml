@@ -7,6 +7,7 @@
             namespace-begin="QT_BEGIN_NAMESPACE" namespace-end="QT_END_NAMESPACE">
     <load-typesystem name="templates/core_common.xml" generate="no"/>
     <load-typesystem name="QtCore/typesystem_core.xml" generate="no"/>
+    <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
 
     <rejection class="QRemoteObjectStringLiterals"/>
     <rejection class="*" function-name="getTypeNameAndMetaobjectFromClassInfo"/>
@@ -16,6 +17,7 @@
         <enum-type name="QRemoteObjectPacketTypeEnum"/>
     </namespace-type>
     <object-type name="QAbstractItemModelReplica"/>
+    <object-type name="QConnectionAbstractServer"/>
     <object-type name="QRemoteObjectAbstractPersistedStore"/>
     <object-type name="QRemoteObjectDynamicReplica"/>
     <object-type name="QRemoteObjectHost"/>
@@ -37,6 +39,11 @@
     </object-type>
     <object-type name="QRemoteObjectSettingsStore"/>
     <value-type name="QRemoteObjectSourceLocationInfo"/>
+    <object-type name="QtROClientFactory"/>
+    <object-type name="QtROClientIoDevice"/>
+    <object-type name="QtROIoDeviceBase"/>
+    <object-type name="QtROServerFactory"/>
+    <object-type name="QtROServerIoDevice"/>
 
     <suppress-warning text="^.*Typedef used on signal QRemoteObject.*$"/>
     <suppress-warning text="^QRemoteObjectPendingCallWatcher inherits from a non polymorphic type.*$"/>

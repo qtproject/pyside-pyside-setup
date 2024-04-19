@@ -154,6 +154,9 @@
           <inject-code file="../glue/qtmultimedia.cpp" snippet="qvideoframe-bits"/>
         </modify-function>
         <modify-function signature="bits(int)const" remove="all"/>
+        <value-type name="PaintOptions">
+            <enum-type name="PaintFlag" flags="PaintFlags"/>
+        </value-type>
     </value-type>
     <value-type name="QVideoFrameFormat" since="6.1">
         <enum-type name="ColorSpace" since="6.4"/>
@@ -163,6 +166,11 @@
         <enum-type name="PixelFormat"/>
         <enum-type name="YCbCrColorSpace"/>
     </value-type>
+
+    <object-type name="QWaveDecoder">
+        <!-- No implementation -->
+        <modify-function signature="setIODevice(QIODevice*)" remove="all"/>
+    </object-type>
 
     <object-type name="QWindowCapture" since="6.6">
         <enum-type name="Error"/>

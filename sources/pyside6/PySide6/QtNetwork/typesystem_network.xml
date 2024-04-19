@@ -76,11 +76,15 @@
     </object-type>
     <object-type name="QDtlsClientVerifier">
         <configuration condition="QT_CONFIG(dtls)"/>
+        <value-type name="GeneratorParameters">
+            <configuration condition="QT_CONFIG(dtls)"/>
+        </value-type>
     </object-type>
 
     <value-type name="QHstsPolicy">
         <enum-type name="PolicyFlag" flags="PolicyFlags"/>
     </value-type>
+    <value-type name="QHttp1Configuration"/>
     <value-type name="QHttpHeaders" since="6.7">
         <enum-type name="WellKnownHeader"/>
     </value-type>

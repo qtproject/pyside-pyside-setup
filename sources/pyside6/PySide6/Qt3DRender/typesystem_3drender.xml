@@ -68,6 +68,7 @@
         <object-type name="QCullFace">
             <enum-type name="CullingMode"/>
         </object-type>
+        <object-type name="QDebugOverlay"/>
         <object-type name="QDepthRange"/>
         <object-type name="QDepthTest">
             <enum-type name="DepthFunction"/>

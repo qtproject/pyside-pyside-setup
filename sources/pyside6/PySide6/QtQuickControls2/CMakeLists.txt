@@ -7,6 +7,7 @@ set (QtQuickControls2_DROPPED_ENTRIES)
 
 set(QtQuickControls2_SRC
 ${QtQuickControls2_GEN_DIR}/qquickstyle_wrapper.cpp
+${QtQuickControls2_GEN_DIR}/qquickattachedpropertypropagator_wrapper.cpp
 # module is always needed
 ${QtQuickControls2_GEN_DIR}/qtquickcontrols2_module_wrapper.cpp
 )

@@ -8,6 +8,7 @@ ${QtHelp_GEN_DIR}/qcompressedhelpinfo_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpcontentitem_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpcontentmodel_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpcontentwidget_wrapper.cpp
+${QtHelp_GEN_DIR}/qhelpglobal_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpengine_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpenginecore_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpfilterdata_wrapper.cpp

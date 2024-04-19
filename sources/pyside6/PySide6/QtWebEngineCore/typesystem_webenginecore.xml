@@ -17,6 +17,9 @@
   <function signature="qWebEngineChromiumSecurityPatchVersion()"/>
   <function signature="qWebEngineVersion()"/>
 
+  <value-type name="QWebEngineClientCertificateSelection"/>
+  <object-type name="QWebEngineClientCertificateStore"/>
+
   <object-type name="QWebEngineCookieStore">
     <inject-code class="native" position="beginning" file="../glue/qtwebenginecore.cpp"
                  snippet="qwebenginecookiestore-functor"/>
@@ -59,6 +62,11 @@
   </value-type>
   <object-type name="QWebEngineHistoryModel">
     <enum-type name="Roles"/>
+  </object-type>
+
+  <object-type name="QWebEngineNavigationRequest">
+      <enum-type name="NavigationType"/>
+      <enum-type name="NavigationRequestAction"/>
   </object-type>
 
   <object-type name="QWebEngineNotification"/>
@@ -173,6 +181,10 @@
       <enum-type name="PinEntryError"/>
       <enum-type name="RequestFailureReason"/>
   </object-type>
+  <namespace-type name="QWebEngineGlobalSettings">
+      <enum-type name="SecureDnsMode"/>
+      <value-type name="DnsMode"/>
+  </namespace-type>
 
   <!-- QtQml is pulled in via QtWebEngineCoreDepends. -->
   <suppress-warning text="^Scoped enum 'QQml.*' does not have a type entry.*$"/>

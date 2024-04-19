@@ -50,6 +50,7 @@
             </modify-argument>
           </modify-function>
         </object-type>
+        <object-type name="QCoreAspect"/>
         <object-type name="QCoreSettings"/>
         <object-type name="QGeometry"/>
         <object-type name="QGeometryView">

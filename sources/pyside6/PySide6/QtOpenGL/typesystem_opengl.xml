@@ -625,7 +625,7 @@
   </object-type>
   <value-type name="QOpenGLFramebufferObjectFormat"/>
   <object-type name="QAbstractOpenGLFunctions"/>
-  <value-type  name="QOpenGLPixelTransferOptions"/>
+  <value-type name="QOpenGLPixelTransferOptions"/>
   <object-type name="QOpenGLShader">
     <enum-type name="ShaderTypeBit" flags="ShaderType"/>
   </object-type>

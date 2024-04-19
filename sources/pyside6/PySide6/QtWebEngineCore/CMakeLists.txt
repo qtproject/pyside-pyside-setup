@@ -5,6 +5,8 @@ project(QtWebEngineCore)
 
 set(QtWebEngineCore_SRC
 ${QtWebEngineCore_GEN_DIR}/qwebenginecertificateerror_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebengineclientcertificateselection_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebengineclientcertificatestore_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecontextmenurequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_filterrequest_wrapper.cpp
@@ -13,10 +15,13 @@ ${QtWebEngineCore_GEN_DIR}/qwebenginedownloadrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefilesystemaccessrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefindtextresult_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefullscreenrequest_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebengineglobalsettings_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebengineglobalsettings_dnsmode_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginehistory_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginehistoryitem_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginehistorymodel_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginehttprequest_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebenginenavigationrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineloadinginfo_wrapper.cpp
 # FIXME ${QtWebEngineCore_GEN_DIR}/qwebenginemediasourcemodel_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginenewwindowrequest_wrapper.cpp

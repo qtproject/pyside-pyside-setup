@@ -10,6 +10,13 @@
     <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
     <load-typesystem name="QtSerialPort/typesystem_serialport.xml" generate="no"/>
 
+    <namespace-type name="QtCanBus">
+        <enum-type name="DataSource"/>
+        <enum-type name="DataFormat"/>
+        <enum-type name="MultiplexState"/>
+        <enum-type name="UniqueId"/>
+    </namespace-type>
+
     <object-type name="QCanBus">
         <!-- Remove errorMessage argument, return tuple instead.  -->
         <modify-function signature="availableDevices(QString,QString*)const">
@@ -62,6 +69,18 @@
         <enum-type name="FrameError" flags="FrameErrors"/>
         <value-type name="TimeStamp"/>
     </value-type>
+    <object-type name="QCanDbcFileParser">
+        <enum-type name="Error"/>
+    </object-type>
+    <object-type name="QCanFrameProcessor">
+        <enum-type name="Error"/>
+        <value-type name="ParseResult"/>
+    </object-type>
+    <value-type name="QCanMessageDescription"/>
+    <value-type name="QCanSignalDescription">
+        <value-type name="MultiplexValueRange"/>
+    </value-type>
+    <value-type name="QCanUniqueIdDescription"/>
     <object-type name="QModbusClient"/>
     <value-type name="QModbusDataUnit">
         <enum-type name="RegisterType"/>
@@ -82,6 +101,8 @@
         <enum-type name="FunctionCode"/>
         <modify-field name="ExceptionByte" remove="true"/> <!-- Link error -->
     </object-type>
+    <object-type name="QModbusExceptionResponse"/>
+    <object-type name="QModbusResponse"/>
     <object-type name="QModbusReply">
         <enum-type name="ReplyType"/>
     </object-type>

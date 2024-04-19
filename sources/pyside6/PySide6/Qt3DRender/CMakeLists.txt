@@ -28,6 +28,7 @@ ${Qt3DRender_GEN_DIR}/qt3drender_qclipplane_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qcolormask_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qcomputecommand_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qcullface_wrapper.cpp
+${Qt3DRender_GEN_DIR}/qt3drender_qdebugoverlay_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qdepthrange_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qdepthtest_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_qdirectionallight_wrapper.cpp
