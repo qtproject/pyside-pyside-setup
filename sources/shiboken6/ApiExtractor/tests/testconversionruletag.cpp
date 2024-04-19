@@ -23,7 +23,7 @@ void TestConversionRuleTag::testConversionRuleTagWithFile()
     // temp file used later
     constexpr auto conversionData = "Hi! I'm a conversion rule."_L1;
     QTemporaryFile file;
-    file.open();
+    QVERIFY(file.open());
     QCOMPARE(file.write(conversionData.constData()), conversionData.size());
     file.close();
 

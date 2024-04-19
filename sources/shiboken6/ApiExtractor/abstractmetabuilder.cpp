@@ -3540,16 +3540,22 @@ static QList<std::shared_ptr<MetaClass> >
     if (!result.isValid() && graph.nodeCount()) {
         QTemporaryFile tempFile(QDir::tempPath() + u"/cyclic_depXXXXXX.dot"_s);
         tempFile.setAutoRemove(false);
-        tempFile.open();
-        graph.dumpDot(tempFile.fileName(),
-                      [] (const AbstractMetaClassCPtr &c) { return c->name(); });
+        const bool ok = tempFile.open();
+        if (ok) {
+            graph.dumpDot(tempFile.fileName(),
+                          [] (const AbstractMetaClassCPtr &c) { return c->name(); });
+        }
 
         QString message;
         QTextStream str(&message);
         str << "Cyclic dependency of classes found:";
         for (const auto &c : result.cyclic)
             str << ' ' << c->name();
-        str << ". Graph can be found at \"" << QDir::toNativeSeparators(tempFile.fileName()) << '"';
+        str << '.';
+        if (ok) {
+            str << " Graph can be found at \""
+                << QDir::toNativeSeparators(tempFile.fileName()) << '"';
+        }
         qCWarning(lcShiboken, "%s", qPrintable(message));
     }
 
