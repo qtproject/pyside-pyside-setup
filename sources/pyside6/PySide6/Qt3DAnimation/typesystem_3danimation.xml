@@ -37,6 +37,7 @@
         <object-type name="QBlendedClipAnimator"/>
         <value-type name="QChannel"/>
         <value-type name="QChannelComponent"/>
+        <object-type name="QCallbackMapping"/>
         <object-type name="QChannelMapper" since="6.1"/>
         <object-type name="QChannelMapping"/>
         <object-type name="QClipAnimator"/>

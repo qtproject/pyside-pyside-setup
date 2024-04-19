@@ -31,8 +31,10 @@ ${QtMultimedia_GEN_DIR}/qscreencapture_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qsoundeffect_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qtvideo_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qvideoframe_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qvideoframe_paintoptions_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qvideoframeformat_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qvideosink_wrapper.cpp
+${QtMultimedia_GEN_DIR}/qwavedecoder_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qwindowcapture_wrapper.cpp
 
 # module is always needed

@@ -8,5 +8,6 @@
     <load-typesystem name="QtQuick/typesystem_quick.xml" generate="no"/>
 
     <object-type name="QQuickStyle"/>
+    <object-type name="QQuickAttachedPropertyPropagator"/>
 
 </typesystem>

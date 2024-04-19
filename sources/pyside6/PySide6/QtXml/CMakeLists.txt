@@ -9,6 +9,7 @@ ${QtXml_GEN_DIR}/qdomcdatasection_wrapper.cpp
 ${QtXml_GEN_DIR}/qdomcharacterdata_wrapper.cpp
 ${QtXml_GEN_DIR}/qdomcomment_wrapper.cpp
 ${QtXml_GEN_DIR}/qdomdocument_wrapper.cpp
+${QtXml_GEN_DIR}/qdomdocument_parseresult_wrapper.cpp
 ${QtXml_GEN_DIR}/qdomdocumentfragment_wrapper.cpp
 ${QtXml_GEN_DIR}/qdomdocumenttype_wrapper.cpp
 ${QtXml_GEN_DIR}/qdomelement_wrapper.cpp

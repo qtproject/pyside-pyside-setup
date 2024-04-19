@@ -23,6 +23,7 @@ ${QtPositioning_GEN_DIR}/qgeosatelliteinfo_wrapper.cpp
 ${QtPositioning_GEN_DIR}/qgeosatelliteinfosource_wrapper.cpp
 ${QtPositioning_GEN_DIR}/qgeoshape_wrapper.cpp
 ${QtPositioning_GEN_DIR}/qnmeapositioninfosource_wrapper.cpp
+${QtPositioning_GEN_DIR}/qnmeasatelliteinfosource_wrapper.cpp
 # module is always needed
 ${QtPositioning_GEN_DIR}/qtpositioning_module_wrapper.cpp
 )

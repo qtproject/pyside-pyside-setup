@@ -19,6 +19,7 @@ ${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationcliploader_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationcontroller_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qanimationgroup_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qblendedclipanimator_wrapper.cpp
+${Qt3DAnimation_GEN_DIR}/qt3danimation_qcallbackmapping_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qchannel_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qchannelcomponent_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qchannelmapper_wrapper.cpp

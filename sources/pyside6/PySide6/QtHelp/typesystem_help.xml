@@ -18,6 +18,7 @@
     </value-type>
     <object-type name="QHelpContentModel" polymorphic-id-expression="qobject_cast&lt;QHelpContentModel*&gt;(%B)"/>
     <object-type name="QHelpContentWidget"/>
+    <value-type name="QHelpGlobal"/>
     <object-type name="QHelpEngine"/>
     <object-type name="QHelpEngineCore"/>
     <value-type name="QHelpFilterData"/>

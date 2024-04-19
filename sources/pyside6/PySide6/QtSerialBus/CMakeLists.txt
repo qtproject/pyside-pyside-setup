@@ -8,25 +8,35 @@ set(QtSerialBus_DROPPED_ENTRIES )
 
 set(QtSerialBus_SRC
     ${QtSerialBus_GEN_DIR}/qcanbus_wrapper.cpp
-    ${QtSerialBus_GEN_DIR}/qcanbusdevice_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qcanbusdevice_filter_wrapper.cpp
+    ${QtSerialBus_GEN_DIR}/qcanbusdevice_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qcanbusdeviceinfo_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qcanbusfactory_wrapper.cpp
-    ${QtSerialBus_GEN_DIR}/qcanbusframe_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qcanbusframe_timestamp_wrapper.cpp
+    ${QtSerialBus_GEN_DIR}/qcanbusframe_wrapper.cpp
+    ${QtSerialBus_GEN_DIR}/qcandbcfileparser_wrapper.cpp
+    ${QtSerialBus_GEN_DIR}/qcanframeprocessor_parseresult_wrapper.cpp
+    ${QtSerialBus_GEN_DIR}/qcanframeprocessor_wrapper.cpp
+    ${QtSerialBus_GEN_DIR}/qcanmessagedescription_wrapper.cpp
+    ${QtSerialBus_GEN_DIR}/qcansignaldescription_multiplexvaluerange_wrapper.cpp
+    ${QtSerialBus_GEN_DIR}/qcansignaldescription_wrapper.cpp
+    ${QtSerialBus_GEN_DIR}/qcanuniqueiddescription_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qmodbusclient_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qmodbusdataunit_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qmodbusdevice_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qmodbusdeviceidentification_wrapper.cpp
+    ${QtSerialBus_GEN_DIR}/qmodbusexceptionresponse_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qmodbuspdu_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qmodbusreply_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qmodbusrequest_wrapper.cpp
+    ${QtSerialBus_GEN_DIR}/qmodbusresponse_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qmodbusrtuserialclient_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qmodbusrtuserialserver_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qmodbusserver_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qmodbustcpclient_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qmodbustcpconnectionobserver_wrapper.cpp
     ${QtSerialBus_GEN_DIR}/qmodbustcpserver_wrapper.cpp
+    ${QtSerialBus_GEN_DIR}/qtcanbus_wrapper.cpp
 # module is always needed
     ${QtSerialBus_GEN_DIR}/qtserialbus_module_wrapper.cpp
 )

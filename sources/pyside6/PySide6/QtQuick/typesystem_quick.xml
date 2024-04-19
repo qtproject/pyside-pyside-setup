@@ -112,6 +112,7 @@
         <enum-type name="RenderStage"/>
         <enum-type name="SceneGraphError"/>
         <enum-type name="TextRenderType"/>
+        <value-type name="GraphicsStateInfo"/>
     </object-type>
 
     <object-type name="QSGBasicGeometryNode">
@@ -167,6 +168,10 @@
         </modify-function>
     </object-type>
 
+    <object-type name="QSGImageNode">
+        <enum-type name="TextureCoordinatesTransformFlag" flags="TextureCoordinatesTransformMode"/>
+    </object-type>
+
     <object-type name="QSGMaterial">
         <enum-type name="Flag" flags="Flags"/>
     </object-type>
@@ -176,16 +181,25 @@
         <value-type name="RenderState">
             <enum-type name="DirtyState" flags="DirtyStates"/>
         </value-type>
+        <value-type name="GraphicsPipelineState">
+            <enum-type name="BlendFactor"/>
+            <enum-type name="ColorMaskComponent" flags="ColorMask"/>
+            <enum-type name="CullMode"/>
+            <enum-type name="PolygonMode"/>
+        </value-type>
         <modify-function signature="updateSampledImage(QSGMaterialShader::RenderState&amp;,int,QSGTexture**,QSGMaterial*,QSGMaterial*)" remove="all"/>
         <!-- Private QRhi class -->
         <modify-function signature="setShader(QSGMaterialShader::Stage,QShader)" remove="all"/>
     </object-type>
     <object-type name="QSGMaterialType"/>
+    <object-type name="QSGNinePatchNode"/>
     <object-type name="QSGNode">
         <enum-type name="DirtyStateBit" flags="DirtyState"/>
         <enum-type name="Flag" flags="Flags"/>
         <enum-type name="NodeType"/>
     </object-type>
+    <object-type name="QSGNodeVisitor"/>
+
     <object-type name="QSGOpacityNode"/>
     <object-type name="QSGOpaqueTextureMaterial"/>
     <object-type name="QSGSimpleRectNode"/>
@@ -210,6 +224,7 @@
         <enum-type name="RenderingFlag" flags="RenderingFlags"/>
         <object-type name="RenderState"/>
     </object-type>
+    <object-type name="QSGRootNode"/>
     <object-type name="QSGTexture">
         <enum-type name="AnisotropyLevel"/>
         <enum-type name="Filtering"/>

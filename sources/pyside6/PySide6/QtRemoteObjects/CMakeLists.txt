@@ -5,6 +5,7 @@ project(QtRemoteObjects)
 
 set(QtRemoteObjects_SRC
 ${QtRemoteObjects_GEN_DIR}/qabstractitemmodelreplica_wrapper.cpp
+${QtRemoteObjects_GEN_DIR}/qconnectionabstractserver_wrapper.cpp
 ${QtRemoteObjects_GEN_DIR}/qremoteobjectabstractpersistedstore_wrapper.cpp
 ${QtRemoteObjects_GEN_DIR}/qremoteobjectdynamicreplica_wrapper.cpp
 ${QtRemoteObjects_GEN_DIR}/qremoteobjecthost_wrapper.cpp
@@ -18,6 +19,11 @@ ${QtRemoteObjects_GEN_DIR}/qremoteobjectreplica_wrapper.cpp
 ${QtRemoteObjects_GEN_DIR}/qtremoteobjects_wrapper.cpp
 ${QtRemoteObjects_GEN_DIR}/qremoteobjectsettingsstore_wrapper.cpp
 ${QtRemoteObjects_GEN_DIR}/qremoteobjectsourcelocationinfo_wrapper.cpp
+${QtRemoteObjects_GEN_DIR}/qtroclientfactory_wrapper.cpp
+${QtRemoteObjects_GEN_DIR}/qtroclientiodevice_wrapper.cpp
+${QtRemoteObjects_GEN_DIR}/qtroiodevicebase_wrapper.cpp
+${QtRemoteObjects_GEN_DIR}/qtroserverfactory_wrapper.cpp
+${QtRemoteObjects_GEN_DIR}/qtroserveriodevice_wrapper.cpp
 
 # module is always needed
 ${QtRemoteObjects_GEN_DIR}/qtremoteobjects_module_wrapper.cpp
@@ -29,7 +35,8 @@ set(QtRemoteObjects_include_dirs ${QtRemoteObjects_SOURCE_DIR}
                                  ${SHIBOKEN_INCLUDE_DIR}
                                  ${libpyside_SOURCE_DIR}
                                  ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                                 ${QtCore_GEN_DIR})
+                                 ${QtCore_GEN_DIR}
+                                 ${QtNetwork_GEN_DIR})
 
 set(QtRemoteObjects_libraries    pyside6
                                  ${Qt${QT_MAJOR_VERSION}RemoteObjects_LIBRARIES})

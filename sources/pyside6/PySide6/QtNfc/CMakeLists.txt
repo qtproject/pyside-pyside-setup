@@ -14,6 +14,7 @@ set(QtNfc_SRC
     ${QtNfc_GEN_DIR}/qndefnfcurirecord_wrapper.cpp
     ${QtNfc_GEN_DIR}/qnearfieldmanager_wrapper.cpp
     ${QtNfc_GEN_DIR}/qnearfieldtarget_wrapper.cpp
+    ${QtNfc_GEN_DIR}/qnearfieldtarget_requestid_wrapper.cpp
 # module is always needed
     ${QtNfc_GEN_DIR}/qtnfc_module_wrapper.cpp)
 

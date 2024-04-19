@@ -18,6 +18,7 @@ ${QtNetwork_GEN_DIR}/qdnstextrecord_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhostaddress_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhostinfo_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhstspolicy_wrapper.cpp
+${QtNetwork_GEN_DIR}/qhttp1configuration_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhttpheaders_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhttpmultipart_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qhttppart_wrapper.cpp
@@ -84,7 +85,8 @@ if("dtls" IN_LIST QtNetwork_disabled_features)
 else()
     list(APPEND QtNetwork_SRC
          ${QtNetwork_GEN_DIR}/qdtls_wrapper.cpp
-         ${QtNetwork_GEN_DIR}/qdtlsclientverifier_wrapper.cpp)
+         ${QtNetwork_GEN_DIR}/qdtlsclientverifier_wrapper.cpp
+         ${QtNetwork_GEN_DIR}/qdtlsclientverifier_generatorparameters_wrapper.cpp)
     message(STATUS "Qt${QT_MAJOR_VERSION}Network: Adding DTLS classes")
 endif()
 
