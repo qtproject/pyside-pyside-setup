@@ -13,6 +13,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <climits>
 #include <cstring>
 #include <cstdarg>
 #include <cctype>
@@ -43,14 +44,21 @@ static std::optional<int> getIntAttr(PyObject *obj, const char *what)
     return std::nullopt;
 }
 
+static bool verbose = false;
+
 static void formatTypeTuple(PyObject *t, const char *what, std::ostream &str);
 
 static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str, bool verbose)
 {
-    if (obj) {
+    if (obj == nullptr) {
+        str << '0';
+        return;
+    }
+
+    str << '"' << obj->tp_name << '"';
+    if (verbose) {
         bool immutableType = false;
-        str << '"' << obj->tp_name << "\", 0x" << std::hex
-            << obj->tp_flags << std::dec;
+        str << ", 0x" << std::hex << obj->tp_flags << std::dec;
         if (obj->tp_flags & Py_TPFLAGS_HEAPTYPE)
             str << " [heaptype]";
         if (obj->tp_flags & Py_TPFLAGS_BASETYPE)
@@ -108,8 +116,6 @@ static void formatPyTypeObject(const PyTypeObject *obj, std::ostream &str, bool 
                 }
             }
         }
-    } else {
-        str << '0';
     }
 }
 
@@ -206,6 +212,8 @@ static void formatPyUnicode(PyObject *obj, std::ostream &str)
 {
     // Note: The below call create the PyCompactUnicodeObject.utf8 representation
     str << '"' << _PepUnicode_AsString(obj) << '"';
+    if (!verbose)
+        return;
 
     str << " (" << PyUnicode_GetLength(obj) << ')';
     const auto kind = _PepUnicode_KIND(obj);
@@ -322,7 +330,11 @@ static void formatPyObjectHelper(PyObject *obj, std::ostream &str)
         str << "False";
         return;
     }
-    str << "refs=" << Py_REFCNT(obj) << ", ";
+    const auto refs = Py_REFCNT(obj);
+    if (refs == UINT_MAX) // _Py_IMMORTAL_REFCNT
+        str << "immortal, ";
+    else
+        str << "refs=" << refs << ", ";
     if (PyType_Check(obj)) {
         str << "type: ";
         formatPyTypeObject(reinterpret_cast<PyTypeObject *>(obj), str, true);
@@ -422,6 +434,18 @@ std::ostream &operator<<(std::ostream &str, const debugPyBuffer &b)
     str << ", shape=" << b.m_buffer.shape << ", strides=" << b.m_buffer.strides
         << ", suboffsets=" << b.m_buffer.suboffsets << ')';
     return str;
+}
+
+std::ios_base &debugVerbose(std::ios_base &s)
+{
+    verbose = true;
+    return s;
+}
+
+std::ios_base &debugBrief(std::ios_base &s)
+{
+    verbose = false;
+    return s;
 }
 
 #ifdef _WIN32
