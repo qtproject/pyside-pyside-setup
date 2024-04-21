@@ -65,14 +65,24 @@ void disassembleFrame(const char *marker)
     static PyObject *dismodule = PyImport_ImportModule("dis");
     static PyObject *disco = PyObject_GetAttrString(dismodule, "disco");
     static PyObject *const _f_lasti = Shiboken::String::createStaticString("f_lasti");
+    static PyObject *const _f_lineno = Shiboken::String::createStaticString("f_lineno");
     static PyObject *const _f_code = Shiboken::String::createStaticString("f_code");
-    auto *frame = reinterpret_cast<PyObject *>(PyEval_GetFrame());
-    AutoDecRef f_lasti(PyObject_GetAttr(frame, _f_lasti));
-    AutoDecRef f_code(PyObject_GetAttr(frame, _f_code));
+    static PyObject *const _co_filename = Shiboken::String::createStaticString("co_filename");
     AutoDecRef ignore{};
-    fprintf(stdout, "\n%s BEGIN\n", marker);
-    ignore.reset(PyObject_CallFunctionObjArgs(disco, f_code.object(), f_lasti.object(), nullptr));
-    fprintf(stdout, "%s END\n\n", marker);
+    auto *frame = reinterpret_cast<PyObject *>(PyEval_GetFrame());
+    if (frame == nullptr) {
+        fprintf(stdout, "\n%s BEGIN no frame END\n\n", marker);
+    } else {
+        AutoDecRef f_lasti(PyObject_GetAttr(frame, _f_lasti));
+        AutoDecRef f_lineno(PyObject_GetAttr(frame, _f_lineno));
+        AutoDecRef f_code(PyObject_GetAttr(frame, _f_code));
+        AutoDecRef co_filename(PyObject_GetAttr(f_code, _co_filename));
+        long line = PyLong_AsLong(f_lineno);
+        const char *fname = String::toCString(co_filename);
+        fprintf(stdout, "\n%s BEGIN line=%ld %s\n", marker, line, fname);
+        ignore.reset(PyObject_CallFunctionObjArgs(disco, f_code.object(), f_lasti.object(), nullptr));
+        fprintf(stdout, "%s END line=%ld %s\n\n", marker, line, fname);
+    }
 #if PY_VERSION_HEX >= 0x030C0000 && !Py_LIMITED_API
     if (error_type)
         PyErr_DisplayException(error_value);
