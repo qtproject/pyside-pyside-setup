@@ -1,11 +1,9 @@
 .. currentmodule:: PySide6.QtCore
-.. _ClassInfo:
+.. py:decorator:: ClassInfo
 
-ClassInfo
-*********
-
-This class is used to associate extra information to the class, which is available
-using QObject.metaObject(). Qt and PySide doesn't use this information.
+This decorator is used to associate extra information to the class, which is available
+using ``QObject.metaObject()``. This information is used by the
+*Qt D-Bus* and *Qt Qml* modules.
 
 The extra information takes the form of a dictionary with key and value in a literal string.
 
@@ -16,7 +14,7 @@ If the key needs to contain special characters (spaces, commas, '::', start with
 it is also possible to pass a python dictionary with arbitrary strings for both the key and
 value and enabling special characters in the key.
 
-.. note:: This Class is a implementation of Q_CLASSINFO macro.
+.. note:: This decorator is a implementation of the Q_CLASSINFO macro.
 
 
 Example
