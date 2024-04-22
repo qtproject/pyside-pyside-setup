@@ -15,8 +15,9 @@ have a ``slices`` property that accepts a list of ``PieSlice`` items:
    :lines: 4-32
 
 To do this, we replace the ``pieSlice`` property in ``PieChart`` with a
-``slices`` property, declared as a class variable of the ``QQmlListProperty``
-type. The ``QQmlListProperty`` class enables the creation of list properties in
+``slices`` property, declared as a class variable of the
+:class:`~PySide6.QtQml.ListProperty` type.
+The ``ListProperty`` class enables the creation of list properties in
 QML extensions. We replace the ``pieSlice()`` function with a ``slices()``
 function that returns a list of slices, and add an internal ``appendSlice()``
 function (discussed below). We also use a list to store the internal list of
@@ -31,13 +32,13 @@ slices as ``_slices``:
    :lines: 75-79
 
 Although the ``slices`` property does not have an associated setter, it is
-still modifiable because of the way ``QQmlListProperty`` works. We indicate
+still modifiable because of the way ``ListProperty`` works. We indicate
 that the internal ``PieChart.appendSlice()`` function is to be called whenever
 a request is made from QML to add items to the list.
 
 The ``appendSlice()`` function simply sets the parent item as before, and adds
 the new item to the ``_slices`` list. As you can see, the append function for
-a ``QQmlListProperty`` is called with two arguments: the list property, and the
+a ``ListProperty`` is called with two arguments: the list property, and the
 item that is to be appended.
 
 The ``PieSlice`` class has also been modified to include ``fromAngle`` and
