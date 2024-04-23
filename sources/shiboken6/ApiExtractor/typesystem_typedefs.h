@@ -68,6 +68,7 @@ using TypedefEntryCPtr = std::shared_ptr<const TypedefEntry>;
 using TypeSystemTypeEntryCPtr = std::shared_ptr<const TypeSystemTypeEntry>;
 using ValueTypeEntryCPtr = std::shared_ptr<const ValueTypeEntry>;
 
+using ComplexTypeEntryCList = QList<ComplexTypeEntryCPtr>;
 using ContainerTypeEntryCList = QList<ContainerTypeEntryCPtr>;
 using NamespaceTypeEntryList = QList<NamespaceTypeEntryPtr>;
 using PrimitiveTypeEntryCList = QList<PrimitiveTypeEntryCPtr>;
