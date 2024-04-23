@@ -131,4 +131,4 @@ if __name__ == "__main__":
 
     main_window.show()
 
-    QtAsyncio.run(eratosthenes.start())
+    QtAsyncio.run(eratosthenes.start(), handle_sigint=True)
