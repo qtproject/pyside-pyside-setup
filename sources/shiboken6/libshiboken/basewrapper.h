@@ -229,13 +229,12 @@ enum WrapperFlags
  *  \returns                true if the initialization went fine, false otherwise.
  */
 LIBSHIBOKEN_API PyTypeObject *introduceWrapperType(PyObject *enclosingObject,
-                                                    const char *typeName,
-                                                    const char *originalName,
-                                                    PyType_Spec *typeSpec,
-                                                    ObjectDestructor cppObjDtor,
-                                                    PyTypeObject *baseType,
-                                                    PyObject *baseTypes,
-                                                    unsigned wrapperFlags = 0);
+                                                   const char *typeName,
+                                                   const char *originalName,
+                                                   PyType_Spec *typeSpec,
+                                                   ObjectDestructor cppObjDtor,
+                                                   PyObject *bases,
+                                                   unsigned wrapperFlags = 0);
 
 /**
  *  Set the subtype init hook for a type.

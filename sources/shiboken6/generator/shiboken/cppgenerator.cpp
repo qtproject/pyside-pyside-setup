@@ -60,6 +60,8 @@ static const char shibokenErrorsOccurred[] = "Shiboken::Errors::occurred() != nu
 
 static constexpr auto virtualMethodStaticReturnVar = "result"_L1;
 
+static constexpr auto sbkObjectTypeF = "SbkObject_TypeF()"_L1;
+
 static QString mangleName(QString name)
 {
     if (name == u"None" || name == u"False" || name == u"True" || name == u"from")
@@ -4356,7 +4358,6 @@ void CppGenerator::writeClassDefinition(TextStream &s,
     QString tp_hash;
     QString tp_call;
     const QString className = chopType(cpythonTypeName(metaClass));
-    QString baseClassName;
     AbstractMetaFunctionCList ctors;
     const auto &allCtors = metaClass->queryFunctions(FunctionQueryOption::AnyConstructor);
     for (const auto &f : allCtors) {
@@ -4365,9 +4366,6 @@ void CppGenerator::writeClassDefinition(TextStream &s,
             ctors.append(f);
         }
     }
-
-    if (!metaClass->baseClass())
-        baseClassName = u"SbkObject_TypeF()"_s;
 
     bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
 
@@ -4702,7 +4700,7 @@ void CppGenerator::writeTpTraverseFunction(TextStream &s, const AbstractMetaClas
     s << "static int " << baseName
         << "_traverse(PyObject *self, visitproc visit, void *arg)\n{\n" << indent
         << "auto traverseProc = "
-        << pyTypeGetSlot("traverseproc", "SbkObject_TypeF()", "Py_tp_traverse") << ";\n"
+        << pyTypeGetSlot("traverseproc", sbkObjectTypeF, "Py_tp_traverse") << ";\n"
         << "return traverseProc(self, visit, arg);\n"
         << outdent << "}\n";
 }
@@ -4712,7 +4710,7 @@ void CppGenerator::writeTpClearFunction(TextStream &s, const AbstractMetaClassCP
     QString baseName = cpythonBaseName(metaClass);
     s << "static int " << baseName << "_clear(PyObject *self)\n{\n" << indent
        << "auto clearProc = "
-       << pyTypeGetSlot("inquiry", "SbkObject_TypeF()", "Py_tp_clear") << ";\n"
+       << pyTypeGetSlot("inquiry", sbkObjectTypeF, "Py_tp_clear") << ";\n"
        << "return clearProc(self);\n"
        << outdent << "}\n";
 }
@@ -5441,6 +5439,40 @@ QString CppGenerator::destructorClassName(const AbstractMetaClassCPtr &metaClass
     return metaClass->qualifiedCppName();
 }
 
+// Return the base type entries for introduceWrapperType()
+static ComplexTypeEntryCList pyBaseTypeEntries(const AbstractMetaClassCPtr &metaClass)
+{
+    ComplexTypeEntryCList result;
+    if (metaClass->isNamespace()) {
+        if (auto extended = metaClass->extendedNamespace())
+            result.append(extended->typeEntry());
+        return result;
+    }
+
+    const auto &baseClasses = metaClass->typeSystemBaseClasses();
+    for (auto base : baseClasses) {
+        for (; base != nullptr; base = base->baseClass()) { // Find a type that is not disabled.
+            const auto ct = base->typeEntry()->codeGeneration();
+            if (ct == TypeEntry::GenerateCode || ct == TypeEntry::GenerateForSubclass)
+                break;
+        }
+        result.append(base->typeEntry());
+    }
+    return result;
+}
+
+// Return the base type strings for introduceWrapperType()
+QStringList CppGenerator::pyBaseTypes(const AbstractMetaClassCPtr &metaClass)
+{
+    const auto &baseEntries = pyBaseTypeEntries(metaClass);
+    QStringList result;
+    for (const auto &baseEntry : baseEntries)
+        result.append("reinterpret_cast<PyObject *>("_L1 + cpythonTypeNameExt(baseEntry) + u')');
+    if (result.isEmpty()) // no base classes -> SbkObjectType.
+        result.append(sbkObjectTypeF);
+    return result;
+}
+
 void CppGenerator::writeClassRegister(TextStream &s,
                                       const AbstractMetaClassCPtr &metaClass,
                                       const GeneratorContext &classContext,
@@ -5467,18 +5499,15 @@ void CppGenerator::writeClassRegister(TextStream &s,
 
     // Multiple inheritance
     QString pyTypeBasesVariable = chopType(pyTypeName) + u"_Type_bases"_s;
-    const auto &baseClasses = metaClass->typeSystemBaseClasses();
-    if (metaClass->baseClassNames().size() > 1) {
-        s << "PyObject *" << pyTypeBasesVariable
-            << " = PyTuple_Pack(" << baseClasses.size() << ',' << '\n' << indent;
-        for (qsizetype i = 0, size = baseClasses.size(); i < size; ++i) {
-            if (i)
-                s << ",\n";
-            s << "reinterpret_cast<PyObject *>("
-                << cpythonTypeNameExt(baseClasses.at(i)->typeEntry()) << ')';
-        }
-        s << ");\n\n" << outdent;
+    const QStringList pyBases = pyBaseTypes(metaClass);
+    s << "Shiboken::AutoDecRef " << pyTypeBasesVariable << "(PyTuple_Pack("
+        << pyBases.size() << ",\n" << indent;
+    for (qsizetype i = 0, size = pyBases.size(); i < size; ++i) {
+        if (i)
+            s << ",\n";
+        s << pyBases.at(i);
     }
+    s << "));\n\n" << outdent;
 
     // Create type and insert it in the module or enclosing class.
     const QString typePtr = u"_"_s + chopType(pyTypeName)
@@ -5513,27 +5542,8 @@ void CppGenerator::writeClassRegister(TextStream &s,
         s << "&Shiboken::callCppDestructor< " << globalScopePrefix(classContext)
             << dtorClassName << " >,\n";
 
-    // 6:baseType: Find a type that is not disabled.
-    auto base = metaClass->isNamespace()
-        ? metaClass->extendedNamespace() : metaClass->baseClass();
-    if (!metaClass->isNamespace()) {
-        for (; base != nullptr; base = base->baseClass()) {
-            const auto ct = base->typeEntry()->codeGeneration();
-            if (ct == TypeEntry::GenerateCode || ct == TypeEntry::GenerateForSubclass)
-                break;
-        }
-    }
-    if (base) {
-        s << cpythonTypeNameExt(base->typeEntry()) << ",\n";
-    } else {
-        s << "nullptr,\n";
-    }
-
     // 7:baseTypes
-    if (metaClass->baseClassNames().size() > 1)
-        s << pyTypeBasesVariable << ',' << '\n';
-    else
-        s << "nullptr,\n";
+    s << pyTypeBasesVariable << ".object()," << '\n';
 
     // 8:wrapperflags
     QByteArrayList wrapperFlags;

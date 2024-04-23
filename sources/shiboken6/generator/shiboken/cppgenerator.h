@@ -400,6 +400,7 @@ private:
                             const AbstractMetaClassCPtr &metaClass,
                             const GeneratorContext &classContext,
                             const QString &signatures) const;
+    static QStringList pyBaseTypes(const AbstractMetaClassCPtr &metaClass);
     static QString destructorClassName(const AbstractMetaClassCPtr &metaClass,
                                        const GeneratorContext &classContext);
     static void writeStaticFieldInitialization(TextStream &s,

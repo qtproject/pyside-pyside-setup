@@ -970,17 +970,16 @@ introduceWrapperType(PyObject *enclosingObject,
                      const char *originalName,
                      PyType_Spec *typeSpec,
                      ObjectDestructor cppObjDtor,
-                     PyTypeObject *baseType,
-                     PyObject *baseTypes,
+                     PyObject *bases,
                      unsigned wrapperFlags)
 {
-    auto *base = baseType ? baseType : SbkObject_TypeF();
-    typeSpec->slots[0].pfunc = reinterpret_cast<void *>(base);
-    auto *bases = baseTypes ? baseTypes : PyTuple_Pack(1, base);
+    const auto basesSize = PySequence_Fast_GET_SIZE(bases);
+    assert(basesSize > 0);
+    typeSpec->slots[0].pfunc = PySequence_Fast_GET_ITEM(bases, 0);
 
     auto *type = SbkType_FromSpecBasesMeta(typeSpec, bases, SbkObjectType_TypeF());
 
-    for (int i = 0; i < PySequence_Fast_GET_SIZE(bases); ++i) {
+    for (Py_ssize_t i = 0; i < basesSize; ++i) {
         auto *st = reinterpret_cast<PyTypeObject *>(PySequence_Fast_GET_ITEM(bases, i));
         BindingManager::instance().addClassInheritance(st, type);
     }
