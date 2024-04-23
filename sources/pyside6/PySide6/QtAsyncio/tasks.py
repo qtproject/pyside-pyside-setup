@@ -64,19 +64,18 @@ class QAsyncioTask(futures.QAsyncioFuture):
         result = None
         self._future_to_await = None
 
+        if asyncio.futures.isfuture(exception_or_future):
+            try:
+                exception_or_future.result()
+            except BaseException as e:
+                exception_or_future = e
+
         try:
             asyncio._enter_task(self._loop, self)  # type: ignore[arg-type]
-            if exception_or_future is None:
-                result = self._coro.send(None)
-            elif asyncio.futures.isfuture(exception_or_future):
-                try:
-                    exception_or_future.result()
-                except BaseException as e:
-                    result = self._coro.throw(e)
-                else:
-                    result = self._coro.send(None)
-            elif isinstance(exception_or_future, BaseException):
+            if isinstance(exception_or_future, BaseException):
                 result = self._coro.throw(exception_or_future)
+            else:
+                result = self._coro.send(None)
         except StopIteration as e:
             self._state = futures.QAsyncioFuture.FutureState.DONE_WITH_RESULT
             self._result = e.value
