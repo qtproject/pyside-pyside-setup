@@ -26,28 +26,44 @@ namespace Shiboken
 
 using WrapperMap = std::unordered_map<const void *, SbkObject *>;
 
-class Graph
+template <class NodeType>
+class BaseGraph
 {
 public:
-    using NodeList = std::vector<PyTypeObject *>;
-    using NodeSet = std::unordered_set<const PyTypeObject *>;
+    using NodeList = std::vector<NodeType>;
+    using NodeSet = std::unordered_set<NodeType>;
 
-    using Edges = std::unordered_map<PyTypeObject *, NodeList>;
+    using Edges = std::unordered_map<NodeType, NodeList>;
 
     Edges m_edges;
 
-    Graph() = default;
+    BaseGraph() = default;
 
-    void addEdge(PyTypeObject *from, PyTypeObject *to)
+    void addEdge(NodeType from, NodeType to)
     {
         m_edges[from].push_back(to);
     }
 
+    NodeSet nodeSet() const
+    {
+        NodeSet result;
+        for (const auto &p : m_edges) {
+            result.insert(p.first);
+            for (const auto node2 : p.second)
+                result.insert(node2);
+        }
+        return result;
+    }
+};
+
+class Graph : public BaseGraph<PyTypeObject *>
+{
+public:
+    Graph() = default;
+
     BindingManager::TypeCptrPair identifyType(void *cptr, PyTypeObject *type, PyTypeObject *baseType) const;
 
     bool dumpTypeGraph(const char *fileName) const;
-    NodeSet nodeSet() const;
-
 };
 
 BindingManager::TypeCptrPair Graph::identifyType(void *cptr, PyTypeObject *type, PyTypeObject *baseType) const
@@ -82,17 +98,6 @@ static void formatDotNode(const char *nameC, std::ostream &file)
         file << '"' << name << '"';
     }
     file << " ]\n";
-}
-
-Graph::NodeSet Graph::nodeSet() const
-{
-    NodeSet result;
-    for (const auto &p : m_edges) {
-        result.insert(p.first);
-        for (const PyTypeObject *node2 : p.second)
-            result.insert(node2);
-    }
-    return result;
 }
 
 bool Graph::dumpTypeGraph(const char *fileName) const
