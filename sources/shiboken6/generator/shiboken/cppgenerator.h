@@ -395,6 +395,7 @@ private:
     static void writeSignatureStrings(TextStream &s, const QString &signatures,
                                       const QString &arrayName,
                                       const char *comment);
+    void writeInitInheritance(TextStream &s) const;
     void writeClassRegister(TextStream &s,
                             const AbstractMetaClassCPtr &metaClass,
                             const GeneratorContext &classContext,
@@ -480,6 +481,8 @@ private:
                                                          const AbstractMetaType &type,
                                                          const ApiExtractorResult &api);
     void writeSmartPointerConverterInitialization(TextStream &s, const AbstractMetaType &ype) const;
+
+    static QString typeInitStruct(const TypeEntryCPtr &te);
     static void writeExtendedConverterInitialization(TextStream &s,
                                                      const TypeEntryCPtr &externalType,
                                                      const AbstractMetaClassCList &conversions);
