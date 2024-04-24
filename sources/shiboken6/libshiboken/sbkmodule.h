@@ -51,11 +51,6 @@ LIBSHIBOKEN_API void AddTypeCreationFunction(PyObject *module,
                                              const char *name,
                                              TypeCreationFunction func);
 
-LIBSHIBOKEN_API void AddGroupedTypeCreationFunction(PyObject *module,
-                                                    const char *name,
-                                                    TypeCreationFunction func,
-                                                    const char *lazyGroup);
-
 LIBSHIBOKEN_API void AddTypeCreationFunction(PyObject *module,
                                              const char *name,
                                              TypeCreationFunction func,

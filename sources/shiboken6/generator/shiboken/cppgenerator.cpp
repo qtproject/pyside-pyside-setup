@@ -5769,18 +5769,6 @@ void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const Generato
     }
 }
 
-// Note: This is an incomplete function that does not work without a
-// surrounding functionality. It's purpose is to make sure that exactly
-// this expression always is used, although the first clause is never true in PySide.
-// Without it can create false positives.
-static AbstractMetaClassCPtr getPolymorphicBaseClass(const AbstractMetaClassCPtr &metaClass)
-{
-  auto baseClass = metaClass;
-  while (!baseClass->typeEntry()->isPolymorphicBase() && baseClass->baseClass())
-        baseClass = baseClass->baseClass();
-  return baseClass;
-}
-
 void CppGenerator::replacePolymorphicIdPlaceHolders(const AbstractMetaClassCPtr &metaClass,
                                                     QString *id)
 {
@@ -5790,7 +5778,9 @@ void CppGenerator::replacePolymorphicIdPlaceHolders(const AbstractMetaClassCPtr 
         id->replace("%1"_L1, replacement);
     }
     if (id->contains("%B"_L1)) {
-        auto baseClass = getPolymorphicBaseClass(metaClass);
+        auto baseClass = metaClass;
+        while (!baseClass->typeEntry()->isPolymorphicBase() && baseClass->baseClass())
+            baseClass = baseClass->baseClass();
         QString replacement = " reinterpret_cast< "_L1 + m_gsp + baseClass->qualifiedCppName()
                               + " *>(cptr)"_L1;
         id->replace("%B"_L1, replacement);
@@ -6019,15 +6009,19 @@ void CppGenerator::writeNbBoolFunction(const GeneratorContext &context,
 void CppGenerator::writeInitFunc(TextStream &declStr, TextStream &callStr,
                                  const QString &initFunctionName,
                                  const TypeEntryCPtr &enclosingEntry,
-                                 const QString &pythonName,
-                                 const QString &lazyGroup)
+                                 const QString &pythonName, bool lazy)
 {
-
     const QString functionName = "init_"_L1 + initFunctionName;
     const bool hasParent = enclosingEntry && enclosingEntry->type() != TypeEntry::TypeSystemType;
     declStr << "PyTypeObject *" << functionName << "(PyObject *"
         << (hasParent ? "enclosingClass" : "module") << ");\n";
-    if (hasParent) {
+
+    if (!lazy) {
+        const QString enclosing = hasParent
+            ? "reinterpret_cast<PyObject *>("_L1 + cpythonTypeNameExt(enclosingEntry) + u')'
+            : "module"_L1;
+        callStr << functionName << '(' << enclosing << ");\n";
+    } else if (hasParent) {
         const QString &enclosingName = enclosingEntry->name();
         const auto parts = QStringView{enclosingName}.split(u"::", Qt::SkipEmptyParts);
         callStr << "Shiboken::Module::AddTypeCreationFunction("
@@ -6039,13 +6033,9 @@ void CppGenerator::writeInitFunc(TextStream &declStr, TextStream &callStr,
         }
         callStr << "\");\n";
     } else {
-        const char *funcName = lazyGroup.isEmpty()
-            ? "AddTypeCreationFunction" : "AddGroupedTypeCreationFunction";
-        callStr << "Shiboken::Module::" << funcName  << "(module, \""
-                << pythonName << "\", " << functionName;
-        if (!lazyGroup.isEmpty())
-            callStr << ", \"" << lazyGroup << "\"";
-        callStr << ");\n";
+        callStr << "Shiboken::Module::AddTypeCreationFunction("
+            << "module, \"" << pythonName << "\", "
+            << "init_" << initFunctionName << ");\n";
     }
 }
 
@@ -6060,12 +6050,6 @@ static void writeSubModuleHandling(TextStream &s, const QString &moduleName,
         << "if (PyModule_AddObject(parentModule.object(), \"" << moduleName
         << "\", module) < 0)\n"
         << indent << "return nullptr;\n" << outdent << outdent << "}\n";
-}
-
-static AbstractMetaClassCPtr getLazyGroupBaseClass(const AbstractMetaClassCPtr &metaClass)
-{
-    return needsTypeDiscoveryFunction(metaClass) && !isQObject(metaClass)
-           ? getPolymorphicBaseClass(metaClass) : nullptr;
 }
 
 bool CppGenerator::finishGeneration()
@@ -6099,18 +6083,6 @@ bool CppGenerator::finishGeneration()
         s_globalFunctionDef << methodDefinitionEntries(overloadData);
     }
 
-    // Collect the lazy group base classes first, because we need to add
-    // these base classes into the group, too.
-    std::set<AbstractMetaClassCPtr> lazyGroupBaseClasses{};
-    for (const auto &cls : api().classes()){
-        auto te = cls->typeEntry();
-        if (shouldGenerate(te)) {
-            auto lazyGroupCls = getLazyGroupBaseClass(cls);
-            if (lazyGroupCls)
-                lazyGroupBaseClasses.insert(lazyGroupCls);
-        }
-    }
-
     AbstractMetaClassCList classesWithStaticFields;
     for (const auto &cls : api().classes()){
         auto te = cls->typeEntry();
@@ -6120,17 +6092,9 @@ bool CppGenerator::finishGeneration()
                 s_classInitDecl << te->configCondition() << '\n';
                 s_classPythonDefines << te->configCondition() << '\n';
             }
-            auto lazyGroupCls = getLazyGroupBaseClass(cls);
-            if (!lazyGroupCls) {
-                auto it = lazyGroupBaseClasses.find(cls);
-                if (it != lazyGroupBaseClasses.end())
-                    lazyGroupCls = cls;
-            }
             writeInitFunc(s_classInitDecl, s_classPythonDefines,
                           getSimpleClassInitFunctionName(cls),
-                          targetLangEnclosingEntry(te), cls->name(),
-                          lazyGroupCls ? lazyGroupCls->typeEntry()->qualifiedTargetLangName()
-                                       : QString());
+                          targetLangEnclosingEntry(te), cls->name());
             if (cls->hasStaticFields()) {
                 s_classInitDecl << "PyTypeObject *"
                     << getSimpleClassStaticFieldsInitFunctionName(cls) << "(PyObject *module);\n";
