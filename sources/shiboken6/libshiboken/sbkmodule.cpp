@@ -31,82 +31,6 @@ static ModuleTypesMap moduleTypes;
 static ModuleConvertersMap moduleConverters;
 static ModuleToFuncsMap moduleToFuncs;
 
-/*****************************************************************************
-
-    How Do Lazy Groups Work?
-    ------------------------
-
-When polymorphic classes are in use, then we have to deal with classes
-which might not yet be visible. They are located by type discovery functions.
-
-In order to allow these functions to do their work, the needed classes
-must be existent in time. That is what lazy groups are doing:
-
-    They provide the minimum set of sufficient classes that might be
-    needed by the type discovery functions.
-
-Lazy groups are determined by the cppgenerator when polymorphic functions
-are analyzed. They are communicated to sbkmodule by a LazyGroup parameter.
-
-
-The Idea
---------
-
-When the creating functions of a module are collected for lazy evaluation,
-we build a data structure that keeps the lazy groups together. In this
-phase, there is no other special action.
-
-As soon as a single element of a group gets used by getattr, the whole action
-takes place:
-
-- All elements in the same group are touched by getattr as well, meaning
-- The whole group becomes existent at once.
-
-After that action, a group is not evaluated again because it is switched
-to immediate mode.
-
-
-Importing Another Module
-------------------------
-
-If a group has not been touched and a new module with new group members
-is added, the elements are simply accumulated in the group as before.
-
-If a group has already been touched, then it is in immediate mode, and all
-new elements must be created as well.
-
-
-The Implementation
-------------------
-
-There is a structure LazyPool which contains
-
-    - classToGroup  members->group      n:1
-
-    - groupState    groups->state       1:1
-
-The classToGroup is the central structure that controls group membership.
-The groupState enum makes sure that the group members are initialized
-together at once and only once.
-
-*****************************************************************************/
-
-/// Lazy Groups
-///
-/// Accumulated in lists, but completely incarnated if a member is accessed.
-struct LazyGroupStructure {
-    enum State {
-        NoGroup,                // No group at all
-        FirstSeen,              // Seen first by getattr
-        Handled                 // Normal processing like no group
-    };
-
-    std::unordered_map<std::string, std::string> classToGroup;
-    std::unordered_map<std::string, State> groupState;
-};
-
-static LazyGroupStructure LazyPool;
-
 namespace Shiboken
 {
 namespace Module
@@ -175,8 +99,7 @@ static PyTypeObject *incarnateType(PyObject *module, const char *name,
     Py_INCREF(res);
     PyModule_AddObject(module, name, res);   // steals reference
     // - remove the entry, if not by something cleared.
-    funcIter = nameToFunc.find(name);
-    if (funcIter != nameToFunc.end())
+    if (!nameToFunc.empty())
         nameToFunc.erase(funcIter);
     // - return the PyTypeObject.
     return type;
@@ -221,34 +144,10 @@ void resolveLazyClasses(PyObject *module)
 // PYSIDE-2404: Override the gettattr function of modules.
 static getattrofunc origModuleGetattro{};
 
-static LazyGroupStructure::State getGroupStateAndLock(const std::string &groupName)
-{
-    if (groupName.empty())
-        return LazyGroupStructure::NoGroup;
-
-    auto stateIt = LazyPool.groupState.find(groupName);
-    if (stateIt == LazyPool.groupState.end()) {
-        LazyPool.groupState.insert(std::make_pair(groupName, LazyGroupStructure::FirstSeen));
-        return LazyGroupStructure::FirstSeen;
-    }
-
-    auto result = stateIt->second;
-    if (stateIt->second == LazyGroupStructure::FirstSeen)
-        stateIt->second = LazyGroupStructure::Handled;
-    return result;
-}
-
-static std::string getGroupName(const std::string &key)
-{
-    auto git = LazyPool.classToGroup.find(key);
-    return git != LazyPool.classToGroup.end() ? git->second : std::string{};
-}
-
 // PYSIDE-2404: Use the patched module getattr to do on-demand initialization.
 //              This modifies _all_ modules but should have no impact.
 static PyObject *PyModule_lazyGetAttro(PyObject *module, PyObject *name)
 {
-    static auto *sysModules = PyImport_GetModuleDict();
     // - check if the attribute is present and return it.
     auto *attr = PyObject_GenericGetAttr(module, name);
     // - we handle AttributeError, only.
@@ -262,19 +161,9 @@ static PyObject *PyModule_lazyGetAttro(PyObject *module, PyObject *name)
     if (tableIter == moduleToFuncs.end())
         return origModuleGetattro(module, name);
 
+    // - locate the name and retrieve the generating function
     const char *attrNameStr = Shiboken::String::toCString(name);
-    auto key = std::string(PyModule_GetName(module)) + '.' + attrNameStr;
-
-    // - see if we have a group. Initializes the process if seen first.
-    const auto &groupName = getGroupName(key);
-    auto state = getGroupStateAndLock(groupName);
-
-    // - retrieve the generating function
     auto &nameToFunc = tableIter->second;
-
-    // - make sure that the state gets past possible action
-    getGroupStateAndLock(groupName);
-
     // - create the real type (incarnateType checks this)
     auto *type = incarnateType(module, attrNameStr, nameToFunc);
     auto *ret = reinterpret_cast<PyObject *>(type);
@@ -284,31 +173,6 @@ static PyObject *PyModule_lazyGetAttro(PyObject *module, PyObject *name)
         return origModuleGetattro(module, name);
     }
 
-    if (state != LazyPool.FirstSeen)
-        return ret;
-
-    // The state is now FirstSeen. So we are the one instance who handles it
-    // and no one else again.
-    // This was crucial to avoid duplication in recursive calls.
-
-    // - incarnate the whole group
-    for (auto it = LazyPool.classToGroup.cbegin(), end = LazyPool.classToGroup.cend();
-         it != end; ++it) {
-        if (it->second == groupName) {
-            // - obtain the module name
-            std::string_view names(it->first);
-            const bool usePySide = names.compare(0, 8, "PySide6.") == 0;
-            auto dotPos = usePySide ? names.find('.', 8) : names.find('.');
-            auto startPos = dotPos + 1;
-            AutoDecRef modName(String::fromCppStringView(names.substr(0, dotPos)));
-            module = PyDict_GetItem(sysModules, modName);
-            assert(module != nullptr);
-            // - isolate the type name
-            auto typeName = names.substr(startPos);
-            // - create the type
-            PyModule_lazyGetAttro(module, String::fromCString(typeName.data()));
-        }
-    }
     return ret;
 }
 
@@ -428,24 +292,9 @@ static bool shouldLazyLoad(PyObject *module)
     return std::strncmp(modName, "PySide6.", 8) == 0;
 }
 
-static bool groupMaterialized(const char *group)
-{
-    auto iter = LazyPool.groupState.find(group);
-    return iter != LazyPool.groupState.end();
-}
-
-static void addToGroup(PyObject *module, const char *shortName, const char *group)
-{
-    auto name = std::string(PyModule_GetName(module)) + '.' + shortName;
-
-    // - insert into the group members
-    LazyPool.classToGroup.insert(std::make_pair(name, group));
-}
-
-static void addTypeCreationFunction(PyObject *module,
-                                    const char *name,
-                                    TypeCreationFunction func,
-                                    const char *lazyGroup = nullptr)
+void AddTypeCreationFunction(PyObject *module,
+                             const char *name,
+                             TypeCreationFunction func)
 {
     static const char *flag = getenv("PYSIDE6_OPTION_LAZY");
     static const int value = flag != nullptr ? std::atoi(flag) : 1;
@@ -462,10 +311,6 @@ static void addTypeCreationFunction(PyObject *module,
     else
         nit->second = pair;
 
-    const bool hasLazyGroup = lazyGroup != nullptr;
-    if (hasLazyGroup)
-        addToGroup(module, name, lazyGroup);
-
     // PYSIDE-2404: Lazy Loading
     //
     // Options:
@@ -478,26 +323,10 @@ static void addTypeCreationFunction(PyObject *module,
     if (value == 0                                  // completely disabled
         || canNotLazyLoad(module)                   // for some reason we cannot lazy load
         || (value == 1 && !shouldLazyLoad(module))  // not a known module
-        || (hasLazyGroup && groupMaterialized(lazyGroup))
         ) {
         PyTypeObject *type = func(module);
         PyModule_AddObject(module, name, reinterpret_cast<PyObject *>(type));   // steals reference
     }
-}
-
-void AddTypeCreationFunction(PyObject *module,
-                             const char *name,
-                             TypeCreationFunction func)
-{
-    addTypeCreationFunction(module, name, func);
-}
-
-void AddGroupedTypeCreationFunction(PyObject *module,
-                                    const char *name,
-                                    TypeCreationFunction func,
-                                    const char *lazyGroup)
-{
-    addTypeCreationFunction(module, name, func, lazyGroup);
 }
 
 void AddTypeCreationFunction(PyObject *module,
