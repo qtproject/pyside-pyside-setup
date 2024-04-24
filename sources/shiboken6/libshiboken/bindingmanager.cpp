@@ -43,35 +43,32 @@ public:
         m_edges[from].push_back(to);
     }
 
+    BindingManager::TypeCptrPair identifyType(void *cptr, PyTypeObject *type, PyTypeObject *baseType) const;
+
     bool dumpTypeGraph(const char *fileName) const;
     NodeSet nodeSet() const;
 
-    PyTypeObject *identifyType(void **cptr, PyTypeObject *type, PyTypeObject *baseType) const
-    {
-        auto edgesIt = m_edges.find(type);
-        if (edgesIt != m_edges.end()) {
-            const NodeList &adjNodes = m_edges.find(type)->second;
-            for (PyTypeObject *node : adjNodes) {
-                PyTypeObject *newType = identifyType(cptr, node, baseType);
-                if (newType)
-                    return newType;
-            }
-        }
-        void *typeFound = nullptr;
-        auto *sotp = PepType_SOTP(type);
-        if (sotp->type_discovery)
-            typeFound = sotp->type_discovery(*cptr, baseType);
-        if (typeFound) {
-            // This "typeFound != type" is needed for backwards compatibility with old modules using a newer version of
-            // libshiboken because old versions of type_discovery function used to return a PyTypeObject *instead of
-            // a possible variation of the C++ instance pointer (*cptr).
-            if (typeFound != type)
-                *cptr = typeFound;
-            return type;
-        }
-        return nullptr;
-    }
 };
+
+BindingManager::TypeCptrPair Graph::identifyType(void *cptr, PyTypeObject *type, PyTypeObject *baseType) const
+{
+    auto edgesIt = m_edges.find(type);
+    if (edgesIt != m_edges.end()) {
+        const NodeList &adjNodes = edgesIt->second;
+        for (PyTypeObject *node : adjNodes) {
+            auto newType = identifyType(cptr, node, baseType);
+            if (newType.first != nullptr)
+                return newType;
+        }
+    }
+
+    auto *sotp = PepType_SOTP(type);
+    if (sotp->type_discovery != nullptr) {
+        if (void *derivedCPtr = sotp->type_discovery(cptr, baseType))
+            return {type, derivedCPtr};
+    }
+    return {nullptr, nullptr};
+}
 
 static void formatDotNode(const char *nameC, std::ostream &file)
 {
@@ -132,9 +129,6 @@ struct BindingManager::BindingManagerPrivate {
     std::recursive_mutex wrapperMapLock;
     Graph classHierarchy;
     DestructorEntries deleteInMainThread;
-    bool destroying;
-
-    BindingManagerPrivate() : destroying(false) {}
 
     bool releaseWrapper(void *cptr, SbkObject *wrapper, const int *bases = nullptr);
     bool releaseWrapperHelper(void *cptr, SbkObject *wrapper);
@@ -386,10 +380,18 @@ void BindingManager::addClassInheritance(PyTypeObject *parent, PyTypeObject *chi
     m_d->classHierarchy.addEdge(parent, child);
 }
 
+BindingManager::TypeCptrPair BindingManager::findDerivedType(void *cptr, PyTypeObject *type) const
+{
+    return m_d->classHierarchy.identifyType(cptr, type, type);
+}
+
+// FIXME PYSIDE7: remove, just for compatibility
 PyTypeObject *BindingManager::resolveType(void **cptr, PyTypeObject *type)
 {
-    PyTypeObject *identifiedType = m_d->classHierarchy.identifyType(cptr, type, type);
-    return identifiedType ? identifiedType : type;
+    auto result = findDerivedType(*cptr, type);
+    if (result.second != nullptr)
+        *cptr = result.second;
+    return result.first != nullptr ? result.first : type;
 }
 
 std::set<PyObject *> BindingManager::getAllPyObjects()
