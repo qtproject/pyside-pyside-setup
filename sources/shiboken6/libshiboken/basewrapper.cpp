@@ -1460,10 +1460,15 @@ PyObject *newObject(PyTypeObject *instanceType,
 {
     // Try to find the exact type of cptr.
     if (!isExactType) {
-        if (PyTypeObject *exactType = ObjectType::typeForTypeName(typeName))
+        if (PyTypeObject *exactType = ObjectType::typeForTypeName(typeName)) {
             instanceType = exactType;
-        else
-            instanceType = BindingManager::instance().resolveType(&cptr, instanceType);
+        } else {
+            auto resolved = BindingManager::instance().findDerivedType(cptr, instanceType);
+            if (resolved.first != nullptr) {
+                instanceType = resolved.first;
+                cptr = resolved.second;
+            }
+        }
     }
 
     bool shouldCreate = true;

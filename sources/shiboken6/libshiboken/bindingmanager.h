@@ -5,8 +5,10 @@
 #define BINDINGMANAGER_H
 
 #include "sbkpython.h"
-#include <set>
 #include "shibokenmacros.h"
+
+#include <set>
+#include <utility>
 
 struct SbkObject;
 
@@ -39,6 +41,14 @@ public:
     PyObject *getOverride(const void *cptr, PyObject *nameCache[], const char *methodName);
 
     void addClassInheritance(PyTypeObject *parent, PyTypeObject *child);
+    /// Try to find the correct type of cptr via type discovery knowing that it's at least
+    /// of type \p type. If a derived class is found, it returns a cptr cast to the type
+    /// (which may be different in case of  multiple inheritance.
+    /// \param cptr a pointer to the instance of type \p type
+    /// \param type type of cptr
+    using TypeCptrPair = std::pair<PyTypeObject *, void *>;
+    TypeCptrPair findDerivedType(void *cptr, PyTypeObject *type) const;
+
     /**
      * Try to find the correct type of *cptr knowing that it's at least of type \p type.
      * In case of multiple inheritance this function may change the contents of cptr.
@@ -46,7 +56,7 @@ public:
      * \param type type of *cptr
      * \warning This function is slow, use it only as last resort.
      */
-    PyTypeObject *resolveType(void **cptr, PyTypeObject *type);
+    [[deprecated]] PyTypeObject *resolveType(void **cptr, PyTypeObject *type);
 
     std::set<PyObject *> getAllPyObjects();
 
