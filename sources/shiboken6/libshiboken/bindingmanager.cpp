@@ -7,6 +7,7 @@
 #include "bindingmanager.h"
 #include "gilstate.h"
 #include "helper.h"
+#include "sbkmodule.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkfeature_base.h"
@@ -20,6 +21,29 @@
 #include <string_view>
 #include <unordered_map>
 #include <unordered_set>
+
+// GraphNode for the dependency graph. It keeps a pointer to
+// the TypeInitStruct to be able to lazily create the type and hashes
+// by the full type name.
+struct GraphNode
+{
+    explicit GraphNode(Shiboken::Module::TypeInitStruct *i) : name(i->fullName), initStruct(i) {}
+    explicit GraphNode(const char *n) : name(n), initStruct(nullptr) {} // Only for searching
+
+    std::string_view name;
+    Shiboken::Module::TypeInitStruct *initStruct;
+
+    friend bool operator==(const GraphNode &n1, const GraphNode &n2) { return n1.name == n2.name; }
+    friend bool operator!=(const GraphNode &n1, const GraphNode &n2) { return n1.name != n2.name; }
+};
+
+template <>
+struct std::hash<GraphNode> {
+    size_t operator()(const GraphNode &n) const noexcept
+    {
+        return std::hash<std::string_view>{}(n.name);
+    }
+};
 
 namespace Shiboken
 {
@@ -56,26 +80,43 @@ public:
     }
 };
 
-class Graph : public BaseGraph<PyTypeObject *>
+class Graph : public BaseGraph<GraphNode>
 {
 public:
-    Graph() = default;
+    using TypeCptrPair = BindingManager::TypeCptrPair;
 
-    BindingManager::TypeCptrPair identifyType(void *cptr, PyTypeObject *type, PyTypeObject *baseType) const;
+    TypeCptrPair identifyType(void *cptr, PyTypeObject *type, PyTypeObject *baseType) const
+    {
+        return identifyType(cptr, GraphNode(type->tp_name), type, baseType);
+    }
 
     bool dumpTypeGraph(const char *fileName) const;
+
+private:
+    TypeCptrPair identifyType(void *cptr, const GraphNode &typeNode, PyTypeObject *type,
+                              PyTypeObject *baseType) const;
 };
 
-BindingManager::TypeCptrPair Graph::identifyType(void *cptr, PyTypeObject *type, PyTypeObject *baseType) const
+Graph::TypeCptrPair Graph::identifyType(void *cptr,
+                                        const GraphNode &typeNode, PyTypeObject *type,
+                                        PyTypeObject *baseType) const
 {
-    auto edgesIt = m_edges.find(type);
+    assert(typeNode.initStruct != nullptr || type != nullptr);
+    auto edgesIt = m_edges.find(typeNode);
     if (edgesIt != m_edges.end()) {
         const NodeList &adjNodes = edgesIt->second;
-        for (PyTypeObject *node : adjNodes) {
-            auto newType = identifyType(cptr, node, baseType);
+        for (const auto &node : adjNodes) {
+            auto newType = identifyType(cptr, node, nullptr, baseType);
             if (newType.first != nullptr)
                 return newType;
         }
+    }
+
+    if (type == nullptr) {
+        if (typeNode.initStruct->type == nullptr) // Layzily create type
+            type = Shiboken::Module::get(*typeNode.initStruct);
+        else
+            type = typeNode.initStruct->type;
     }
 
     auto *sotp = PepType_SOTP(type);
@@ -86,9 +127,8 @@ BindingManager::TypeCptrPair Graph::identifyType(void *cptr, PyTypeObject *type,
     return {nullptr, nullptr};
 }
 
-static void formatDotNode(const char *nameC, std::ostream &file)
+static void formatDotNode(std::string_view name, std::ostream &file)
 {
-    std::string_view name(nameC);
     auto lastDot = name.rfind('.');
     file << "    \"" << name << "\" [ label=";
     if (lastDot != std::string::npos) {
@@ -109,15 +149,15 @@ bool Graph::dumpTypeGraph(const char *fileName) const
     file << "digraph D {\n";
 
     // Define nodes with short names
-    for (const auto *node : nodeSet())
-        formatDotNode(node->tp_name, file);
+    for (const auto &node : nodeSet())
+        formatDotNode(node.name, file);
 
     // Write edges
     for (const auto &p : m_edges) {
-        auto *node1 = p.first;
+        const auto &node1 = p.first;
         const NodeList &nodeList = p.second;
-        for (const PyTypeObject *node2 : nodeList)
-            file << "    \"" << node2->tp_name << "\" -> \"" << node1->tp_name << "\"\n";
+        for (const auto &node2 : nodeList)
+            file << "    \"" << node2.name << "\" -> \"" << node1.name << "\"\n";
     }
     file << "}\n";
     return true;
@@ -380,9 +420,10 @@ PyObject *BindingManager::getOverride(const void *cptr,
     return nullptr;
 }
 
-void BindingManager::addClassInheritance(PyTypeObject *parent, PyTypeObject *child)
+void BindingManager::addClassInheritance(Module::TypeInitStruct *parent,
+                                         Module::TypeInitStruct *child)
 {
-    m_d->classHierarchy.addEdge(parent, child);
+    m_d->classHierarchy.addEdge(GraphNode(parent), GraphNode(child));
 }
 
 BindingManager::TypeCptrPair BindingManager::findDerivedType(void *cptr, PyTypeObject *type) const

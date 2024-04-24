@@ -1007,11 +1007,6 @@ introduceWrapperType(PyObject *enclosingObject,
 
     auto *type = SbkType_FromSpecBasesMeta(typeSpec, bases, SbkObjectType_TypeF());
 
-    for (Py_ssize_t i = 0; i < basesSize; ++i) {
-        auto *st = reinterpret_cast<PyTypeObject *>(PySequence_Fast_GET_ITEM(bases, i));
-        BindingManager::instance().addClassInheritance(st, type);
-    }
-
     auto sotp = PepType_SOTP(type);
     if (wrapperFlags & DeleteInMainThread)
         sotp->delete_in_main_thread = 1;

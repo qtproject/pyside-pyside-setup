@@ -61,6 +61,7 @@ static const char shibokenErrorsOccurred[] = "Shiboken::Errors::occurred() != nu
 static constexpr auto virtualMethodStaticReturnVar = "result"_L1;
 
 static constexpr auto sbkObjectTypeF = "SbkObject_TypeF()"_L1;
+static const char initInheritanceFunction[] = "initInheritance";
 
 static QString mangleName(QString name)
 {
@@ -4260,6 +4261,12 @@ QString CppGenerator::writeContainerConverterInitialization(TextStream &s,
     return converter;
 }
 
+QString CppGenerator::typeInitStruct(const TypeEntryCPtr &te)
+{
+    return cppApiVariableName(te->targetLangPackage()) + u'['
+        + getTypeIndexVariableName(te) + u']';
+}
+
 void CppGenerator::writeExtendedConverterInitialization(TextStream &s,
                                                         const TypeEntryCPtr &externalType,
                                                         const AbstractMetaClassCList &conversions)
@@ -4267,15 +4274,13 @@ void CppGenerator::writeExtendedConverterInitialization(TextStream &s,
     s << "// Extended implicit conversions for " << externalType->qualifiedTargetLangName()
       << ".\n";
     for (const auto &sourceClass : conversions) {
-        const QString converterVar = cppApiVariableName(externalType->targetLangPackage()) + u'['
-            + getTypeIndexVariableName(externalType) + u']';
         QString sourceTypeName = fixedCppTypeName(sourceClass->typeEntry());
         QString targetTypeName = fixedCppTypeName(externalType);
         QString toCpp = pythonToCppFunctionName(sourceTypeName, targetTypeName);
         QString isConv = convertibleToCppFunctionName(sourceTypeName, targetTypeName);
         if (!externalType->isPrimitive())
             s << cpythonTypeNameExt(externalType) << ";\n";
-        writeAddPythonToCppConversion(s, converterVar, toCpp, isConv);
+        writeAddPythonToCppConversion(s, typeInitStruct(externalType), toCpp, isConv);
     }
 }
 
@@ -5473,6 +5478,27 @@ QStringList CppGenerator::pyBaseTypes(const AbstractMetaClassCPtr &metaClass)
     return result;
 }
 
+void CppGenerator::writeInitInheritance(TextStream &s) const
+{
+    s << "static void " << initInheritanceFunction << "()\n{\n" << indent
+        << "auto &bm = Shiboken::BindingManager::instance();\n"
+        << sbkUnusedVariableCast("bm");
+    for (const auto &cls : api().classes()){
+        auto te = cls->typeEntry();
+        if (shouldGenerate(te)) {
+            const auto &baseEntries = pyBaseTypeEntries(cls);
+            if (!baseEntries.isEmpty()) {
+                const QString childTypeInitStruct = typeInitStruct(cls->typeEntry());
+                for (const auto &baseEntry : baseEntries) {
+                    s << "bm.addClassInheritance(&" << typeInitStruct(baseEntry) << ",\n"
+                      << Pad(' ', 23) << '&' << childTypeInitStruct << ");\n";
+                }
+            }
+        }
+    }
+    s << outdent << "}\n\n";
+}
+
 void CppGenerator::writeClassRegister(TextStream &s,
                                       const AbstractMetaClassCPtr &metaClass,
                                       const GeneratorContext &classContext,
@@ -6337,6 +6363,8 @@ bool CppGenerator::finishGeneration()
     // PYSIDE-510: Create a signatures string for the introspection feature.
     writeSignatureStrings(s, signatureStream.toString(), moduleName(), "global functions");
 
+    writeInitInheritance(s);
+
     // Write module init function
     const QString globalModuleVar = pythonModuleObjectName();
     s << "extern \"C\" LIBSHIBOKEN_EXPORT PyObject *PyInit_"
@@ -6474,7 +6502,8 @@ bool CppGenerator::finishGeneration()
         }
     }
 
-    s << "\nif (" << shibokenErrorsOccurred << ") {\n" << indent
+    s << '\n' << initInheritanceFunction << "();\n"
+        << "\nif (" << shibokenErrorsOccurred << ") {\n" << indent
         << "PyErr_Print();\n"
         << "Py_FatalError(\"can't initialize module " << moduleName() << "\");\n"
         << outdent << "}\n";

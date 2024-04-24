@@ -15,6 +15,10 @@ struct SbkObject;
 namespace Shiboken
 {
 
+namespace Module {
+struct TypeInitStruct;
+}
+
 struct DestructorEntry;
 
 using ObjectVisitor = void (*)(SbkObject *, void *);
@@ -40,7 +44,7 @@ public:
     SbkObject *retrieveWrapper(const void *cptr);
     PyObject *getOverride(const void *cptr, PyObject *nameCache[], const char *methodName);
 
-    void addClassInheritance(PyTypeObject *parent, PyTypeObject *child);
+    void addClassInheritance(Module::TypeInitStruct *parent, Module::TypeInitStruct *child);
     /// Try to find the correct type of cptr via type discovery knowing that it's at least
     /// of type \p type. If a derived class is found, it returns a cptr cast to the type
     /// (which may be different in case of  multiple inheritance.
