@@ -46,7 +46,6 @@ In the following example, notice how the resources are listed in ``icons.qrc``
 
 ::
 
-    </ui>
     <!DOCTYPE RCC><RCC version="1.0">
     <qresource>
         <file>icons/play.png</file>
