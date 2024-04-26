@@ -1205,7 +1205,7 @@
     <modify-function signature="getColor(const QColor&amp;,QWidget*,const QString&amp;,QFlags&lt;QColorDialog::ColorDialogOption>)" allow-thread="yes"/>
   </object-type>
 
-  <object-type name="QLayout">
+  <object-type name="QLayout" polymorphic-base="true">
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp"
                  snippet="qwidget-retrieveobjectname"/>
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qlayout-help-functions"/>
@@ -1980,7 +1980,7 @@
     <modify-function signature="removeItemWidget(QListWidgetItem*)" allow-thread="yes"/>
   </object-type>
 
-  <object-type name="QWidget" delete-in-main-thread="true">
+  <object-type name="QWidget" delete-in-main-thread="true" polymorphic-base="true">
     <!-- see QWindow::nativeEvent(), QAbstractNativeEventFilter::nativeEventFilter() -->
     <inject-code class="native" position="beginning" file="../glue/qtwidgets.cpp" snippet="qwidget-addaction-glue"/>
     <inject-code class="native" position="beginning">

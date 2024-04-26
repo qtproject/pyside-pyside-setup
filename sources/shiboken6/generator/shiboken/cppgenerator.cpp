@@ -5828,7 +5828,7 @@ void CppGenerator::writeTypeDiscoveryFunction(TextStream &s,
     } else if (metaClass->isPolymorphic()) {
         const auto &ancestors = metaClass->allTypeSystemAncestors();
         for (const auto &ancestor : ancestors) {
-            if (ancestor->baseClass())
+            if (ancestor->baseClass() && !ancestor->typeEntry()->isPolymorphicBase())
                 continue;
             if (ancestor->isPolymorphic()) {
                 s << "if (instanceType == Shiboken::SbkType< " << m_gsp

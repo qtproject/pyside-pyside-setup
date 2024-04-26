@@ -2572,7 +2572,7 @@
     </extra-includes>
   </primitive-type>
 
-  <object-type name="QWindow" delete-in-main-thread="true">
+  <object-type name="QWindow" delete-in-main-thread="true" polymorphic-base="true">
     <enum-type name="AncestorMode"/>
     <enum-type name="Visibility"/>
     <modify-function signature="raise()" rename="raise_"/>

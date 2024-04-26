@@ -53,7 +53,7 @@
     <object-type name="QQuickImageResponse"/>
 
     <object-type name="QQuickTransform"/>
-    <object-type name="QQuickItem" delete-in-main-thread="true">
+    <object-type name="QQuickItem" delete-in-main-thread="true" polymorphic-base="true">
         <value-type name="UpdatePaintNodeData"/>
         <enum-type name="Flag" flags="Flags"/>
         <enum-type name="ItemChange"/>
