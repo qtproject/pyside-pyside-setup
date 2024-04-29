@@ -169,7 +169,7 @@ qsizetype propListCount(QQmlListProperty<QObject> *propList)
         return 0;
     }
 
-    int cppResult = 0;
+    qsizetype cppResult = 0;
     auto *converter = Shiboken::Conversions::PrimitiveTypeConverter<qsizetype>();
     if (auto *pythonToCpp = Shiboken::Conversions::isPythonToCppConvertible(converter, retVal))
         pythonToCpp(retVal, &cppResult);
