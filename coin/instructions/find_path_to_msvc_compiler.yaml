@@ -18,6 +18,13 @@ instructions:
       condition: property
       property: host.compiler
       equals_value: MSVC2019
+  - type: EnvironmentVariable
+    variableName: VC_SCRIPT
+    variableValue: "\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+    enable_if:
+      condition: property
+      property: host.compiler
+      equals_value: MSVC2022
   - type: WriteFile
     fileContents: "call \"{{.Env.VC_SCRIPT}}\" {{.Env.TARGET_ARCHITECTURE}} \r\ncmd /c %*"
     filename: "c:\\users\\qt\\MSVC.bat"
