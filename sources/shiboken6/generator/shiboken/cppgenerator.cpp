@@ -1639,7 +1639,7 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
             << "if (pyOut) {\n" << indent
             << "Py_INCREF(pyOut);\nreturn pyOut;\n" << outdent
             << "}\n"
-            << "bool changedTypeName = false;\n"
+            << "bool exactType = false;\n"
             << "auto *tCppIn = reinterpret_cast<const " << typeName << R"( *>(cppIn);
 const char *typeName = )";
 
@@ -1649,15 +1649,11 @@ const char *typeName = )";
         else
             c << nameFunc << "(tCppIn);\n";
         c << R"(auto *sbkType = Shiboken::ObjectType::typeForTypeName(typeName);
-if (sbkType != nullptr && Shiboken::ObjectType::hasSpecialCastFunction(sbkType)) {
-    typeName = Shiboken::typeNameOf(typeid(*tCppIn).name());
-    changedTypeName = true;
-}
+if (sbkType != nullptr && Shiboken::ObjectType::hasSpecialCastFunction(sbkType))
+    exactType = true;
 )"
             << "PyObject *result = Shiboken::Object::newObject(" << cpythonType
-            << R"(, const_cast<void *>(cppIn), false, /* exactType */ changedTypeName, typeName);
-if (changedTypeName)
-    delete [] typeName;
+            << R"(, const_cast<void *>(cppIn), false, exactType, typeName);
 return result;)";
     }
     std::swap(targetTypeName, sourceTypeName);
