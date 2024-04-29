@@ -1055,6 +1055,26 @@ bool hasSpecialCastFunction(PyTypeObject *sbkType)
     return d != nullptr && d->mi_specialcast != nullptr;
 }
 
+// Find whether base is a direct single line base class of type
+// (no multiple inheritance), that is, a C++ pointer cast can safely be done.
+static bool isDirectAncestor(PyTypeObject *type, PyTypeObject *base)
+{
+    if (type == base)
+        return true;
+    if (PyTuple_Size(type->tp_bases) == 0)
+        return false;
+    auto *sbkObjectType = SbkObject_TypeF();
+    auto *firstBase = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_bases, 0));
+    return firstBase != sbkObjectType
+           && PyType_IsSubtype(type, sbkObjectType) != 0
+           && isDirectAncestor(firstBase, base);
+}
+
+bool canDowncastTo(PyTypeObject *baseType, PyTypeObject *targetType)
+{
+    return isDirectAncestor(targetType, baseType);
+}
+
 } // namespace ObjectType
 
 
@@ -1466,7 +1486,7 @@ PyObject *newObjectForPointer(PyTypeObject *instanceType,
     // PYSIDE-868: In case of multiple inheritance, (for example,
     // a function returning a QPaintDevice * from a QWidget *),
     // use instance type to avoid pointer offset errors.
-    return exactType != nullptr && Shiboken::ObjectType::hasSpecialCastFunction(exactType)
+    return exactType != nullptr && !Shiboken::ObjectType::canDowncastTo(instanceType, exactType)
         ? newObjectForType(instanceType, cptr, hasOwnership)
         : newObjectWithHeuristicsHelper(instanceType, exactType, cptr, hasOwnership);
 }

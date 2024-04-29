@@ -265,6 +265,14 @@ LIBSHIBOKEN_API PyTypeObject *typeForTypeName(const char *typeName);
  * \since 5.12
  */
 LIBSHIBOKEN_API bool hasSpecialCastFunction(PyTypeObject *sbkType);
+
+/// Returns whether a C++ pointer of \p baseType can be safely downcast
+/// to \p targetType (base is a direct, single line base class of targetType).
+/// (is a direct, single-line inheritance)
+/// \param baseType   Python type of base class
+/// \param targetType Python type of derived class
+/// \since 6.8
+LIBSHIBOKEN_API bool canDowncastTo(PyTypeObject *baseType, PyTypeObject *targetType);
 }
 
 namespace Object {
