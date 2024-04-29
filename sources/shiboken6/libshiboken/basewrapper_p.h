@@ -114,7 +114,8 @@ struct SbkObjectTypePrivate
 
     /// True if this type holds two or more C++ instances, e.g.: a Python class which inherits from two C++ classes.
     unsigned int is_multicpp : 1;
-    /// True if this type was defined by the user.
+    /// True if this type was defined by the user (a class written in Python inheriting
+    /// a class provided by a Shiboken binding).
     unsigned int is_user_type : 1;
     /// Tells is the type is a value type or an object-type, see BEHAVIOUR_ *constants.
     unsigned int type_behaviour : 2;
