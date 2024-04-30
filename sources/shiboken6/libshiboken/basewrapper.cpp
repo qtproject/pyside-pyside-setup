@@ -1441,8 +1441,10 @@ static PyObject *newObjectWithHeuristicsHelper(PyTypeObject *instanceType,
                                                void *cptr,
                                                bool hasOwnership)
 {
-    // Try to find the exact type of cptr.
-    if (exactType == nullptr) {
+    // Try to find the exact type of cptr. For hierarchies with
+    // non-virtual destructors, typeid() will return the base name.
+    // Try type discovery in these cases.
+    if (exactType == nullptr || exactType == instanceType) {
         auto resolved = BindingManager::instance().findDerivedType(cptr, instanceType);
         if (resolved.first != nullptr) {
             exactType = resolved.first;

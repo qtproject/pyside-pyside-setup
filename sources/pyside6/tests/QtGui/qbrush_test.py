@@ -13,7 +13,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QBrush
+from PySide6.QtGui import QColor, QBrush, QConicalGradient
 
 from helper.usesqapplication import UsesQApplication
 
@@ -29,6 +29,14 @@ class Constructor(UsesQApplication):
 
         obj = QBrush(Qt.blue)
         self.assertEqual(obj.color(), Qt.blue)
+
+    def testGradient(self):
+        """Test type discovery on class hierarchies with non-virtual
+           destructors by specifying a polymorphic-id-expression without
+           polymorphic-name-function."""
+        gradient = QConicalGradient()
+        brush = QBrush(gradient)
+        self.assertEqual(type(brush.gradient()), type(gradient))
 
 
 if __name__ == '__main__':
