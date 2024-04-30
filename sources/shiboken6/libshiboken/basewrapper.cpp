@@ -1424,25 +1424,64 @@ SbkObject *findColocatedChild(SbkObject *wrapper,
     return nullptr;
 }
 
+// Legacy, for compatibility only.
 PyObject *newObject(PyTypeObject *instanceType,
                     void *cptr,
                     bool hasOwnership,
                     bool isExactType,
                     const char *typeName)
 {
+    return isExactType
+        ? newObjectForType(instanceType, cptr, hasOwnership)
+        : newObjectWithHeuristics(instanceType, cptr, hasOwnership, typeName);
+}
+
+static PyObject *newObjectWithHeuristicsHelper(PyTypeObject *instanceType,
+                                               PyTypeObject *exactType,
+                                               void *cptr,
+                                               bool hasOwnership)
+{
     // Try to find the exact type of cptr.
-    if (!isExactType) {
-        if (PyTypeObject *exactType = ObjectType::typeForTypeName(typeName)) {
-            instanceType = exactType;
-        } else {
-            auto resolved = BindingManager::instance().findDerivedType(cptr, instanceType);
-            if (resolved.first != nullptr) {
-                instanceType = resolved.first;
-                cptr = resolved.second;
-            }
+    if (exactType == nullptr) {
+        auto resolved = BindingManager::instance().findDerivedType(cptr, instanceType);
+        if (resolved.first != nullptr) {
+            exactType = resolved.first;
+            cptr = resolved.second;
         }
     }
 
+    return newObjectForType(exactType != nullptr ? exactType : instanceType,
+                            cptr, hasOwnership);
+}
+
+PyObject *newObjectForPointer(PyTypeObject *instanceType,
+                              void *cptr,
+                              bool hasOwnership,
+                              const char *typeName)
+{
+    // Try to find the exact type of cptr.
+    PyTypeObject *exactType = ObjectType::typeForTypeName(typeName);
+    // PYSIDE-868: In case of multiple inheritance, (for example,
+    // a function returning a QPaintDevice * from a QWidget *),
+    // use instance type to avoid pointer offset errors.
+    return exactType != nullptr && Shiboken::ObjectType::hasSpecialCastFunction(exactType)
+        ? newObjectForType(instanceType, cptr, hasOwnership)
+        : newObjectWithHeuristicsHelper(instanceType, exactType, cptr, hasOwnership);
+}
+
+
+PyObject *newObjectWithHeuristics(PyTypeObject *instanceType,
+                                  void *cptr,
+                                  bool hasOwnership,
+                                  const char *typeName)
+{
+    return newObjectWithHeuristicsHelper(instanceType,
+                                         ObjectType::typeForTypeName(typeName),
+                                         cptr, hasOwnership);
+}
+
+PyObject *newObjectForType(PyTypeObject *instanceType, void *cptr, bool hasOwnership)
+{
     bool shouldCreate = true;
     bool shouldRegister = true;
     SbkObject *self = nullptr;

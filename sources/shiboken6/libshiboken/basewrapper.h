@@ -297,7 +297,8 @@ LIBSHIBOKEN_API SbkObject *findColocatedChild(SbkObject *wrapper,
                                               const PyTypeObject *instanceType);
 
 /**
- *  Bind a C++ object to Python.
+ *  Bind a C++ object to Python. Forwards to
+ *  newObjectWithHeuristics(), newObjectForType() depending on \p isExactType.
  * \param instanceType equivalent Python type for the C++ object.
  * \param hasOwnership if true, Python will try to delete the underlying C++ object when there's no more refs.
  * \param isExactType if false, Shiboken will use some heuristics to detect the correct Python type of this C++
@@ -310,6 +311,40 @@ LIBSHIBOKEN_API PyObject *newObject(PyTypeObject *instanceType,
                                     bool hasOwnership = true,
                                     bool isExactType = false,
                                     const char *typeName = nullptr);
+
+/// Bind a C++ object to Python for polymorphic pointers. Calls
+/// newObjectWithHeuristics() with an additional check for multiple
+/// inheritance, in which case it will fall back to instanceType.
+/// \param instanceType Equivalent Python type for the C++ object.
+/// \param hasOwnership if true, Python will try to delete the underlying C++ object
+///                     when there's no more refs.
+/// \param typeName     If non-null, this will be used as helper to find the correct
+///                     Python type for this object (obtained by typeid().name().
+LIBSHIBOKEN_API PyObject *newObjectForPointer(PyTypeObject *instanceType,
+                                              void *cptr,
+                                              bool hasOwnership = true,
+                                              const char *typeName = nullptr);
+
+/// Bind a C++ object to Python using some heuristics to detect the correct
+/// Python type of this C++ object. In any case \p instanceType must be provided;
+/// it'll be used as search starting point and as fallback.
+/// \param instanceType Equivalent Python type for the C++ object.
+/// \param hasOwnership if true, Python will try to delete the underlying C++ object
+///                     C++ object when there are no more references.
+///                     when there's no more refs.
+/// \param typeName     If non-null, this will be used as helper to find the correct
+///                     Python type for this object (obtained by typeid().name().
+LIBSHIBOKEN_API PyObject *newObjectWithHeuristics(PyTypeObject *instanceType,
+                                                  void *cptr,
+                                                  bool hasOwnership = true,
+                                                  const char *typeName = nullptr);
+
+/// Bind a C++ object to Python using the given type.
+/// \param instanceType Equivalent Python type for the C++ object.
+/// \param hasOwnership if true, Python will try to delete the underlying
+///                     C++ object when there are no more references.
+LIBSHIBOKEN_API PyObject *newObjectForType(PyTypeObject *instanceType,
+                                           void *cptr, bool hasOwnership = true);
 
 /**
  *  Changes the valid flag of a PyObject, invalid objects will raise an exception when someone tries to access it.

@@ -738,7 +738,7 @@ PyObject *getWrapperForQObject(QObject *cppSelf, PyTypeObject *sbk_type)
         }
     }
 
-    pyOut = Shiboken::Object::newObject(sbk_type, cppSelf, false, false, typeName(cppSelf));
+    pyOut = Shiboken::Object::newObjectWithHeuristics(sbk_type, cppSelf, false, typeName(cppSelf));
 
     return pyOut;
 }

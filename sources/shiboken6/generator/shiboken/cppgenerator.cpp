@@ -1590,6 +1590,27 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMeta
     s << '\n';
 }
 
+static void writePointerToPythonConverter(TextStream &c,
+                                          const AbstractMetaClassCPtr &metaClass,
+                                          const QString &typeName,
+                                          const QString &cpythonType)
+{
+    c << "auto *pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(cppIn));\n"
+        << "if (pyOut) {\n" << indent
+        << "Py_INCREF(pyOut);\nreturn pyOut;\n" << outdent
+        << "}\n"
+        << "auto *tCppIn = reinterpret_cast<const " << typeName << R"( *>(cppIn);
+const char *typeName = )";
+
+    const QString nameFunc = metaClass->typeEntry()->polymorphicNameFunction();
+    if (nameFunc.isEmpty())
+        c << "typeid(*tCppIn).name();\n";
+    else
+        c << nameFunc << "(tCppIn);\n";
+    c << "return Shiboken::Object::newObjectForPointer("
+        << cpythonType << ", const_cast<void *>(cppIn), false, typeName);\n";
+}
+
 void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClassCPtr &metaClass,
                                            const GeneratorContext &classContext) const
 {
@@ -1635,26 +1656,7 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
         c << "return PySide::getWrapperForQObject(reinterpret_cast<"
             << typeName << " *>(const_cast<void *>(cppIn)), " << cpythonType << ");\n";
     } else {
-        c << "auto *pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(cppIn));\n"
-            << "if (pyOut) {\n" << indent
-            << "Py_INCREF(pyOut);\nreturn pyOut;\n" << outdent
-            << "}\n"
-            << "bool exactType = false;\n"
-            << "auto *tCppIn = reinterpret_cast<const " << typeName << R"( *>(cppIn);
-const char *typeName = )";
-
-        const QString nameFunc = metaClass->typeEntry()->polymorphicNameFunction();
-        if (nameFunc.isEmpty())
-            c << "typeid(*tCppIn).name();\n";
-        else
-            c << nameFunc << "(tCppIn);\n";
-        c << R"(auto *sbkType = Shiboken::ObjectType::typeForTypeName(typeName);
-if (sbkType != nullptr && Shiboken::ObjectType::hasSpecialCastFunction(sbkType))
-    exactType = true;
-)"
-            << "PyObject *result = Shiboken::Object::newObject(" << cpythonType
-            << R"(, const_cast<void *>(cppIn), false, exactType, typeName);
-return result;)";
+        writePointerToPythonConverter(c, metaClass, typeName, cpythonType);
     }
     std::swap(targetTypeName, sourceTypeName);
     writeCppToPythonFunction(s, c.toString(), sourceTypeName, targetTypeName);
