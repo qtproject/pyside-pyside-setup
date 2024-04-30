@@ -536,37 +536,8 @@ type system has this attribute set, the heuristics will be applied
 to all classes. In shiboken 7, it will be mandatory to set the
 attribute.
 
-The *optional* **polymorphic-id-expression** attribute specifies an
-expression checking whether a base class pointer is of the matching
-type. For example, in a ``virtual eventHandler(BaseEvent *e)``
-function, this is used to construct a Python wrapper matching
-the derived class (for example, a ``MouseEvent`` or similar).
-The attribute value may contain placeholders:
-
-%1
-    Fully qualified class name
-
-%B
-    Fully qualified name of the base class (found by base class
-    search or as indicated by **polymorphic-base**).
-
-To check for a class inheriting ``BaseEvent``, specify:
-
-.. code-block:: xml
-
-        <object-type name="MouseEvent"
-                     polymorphic-id-expression="%B-&gt;type() == BaseEvent::MouseEvent"/>
-
-The *optional* **polymorphic-name-function** specifies the name of a
-function returning the type name of a derived class on the base class
-type entry. Normally, ``typeid(ptr).name()`` is used for this.
-However, this fails if the type hierarchy does not have virtual functions.
-In this case, a function is required which typically decides depending
-on some type enumeration.
-
-The *optional* **polymorphic-base** attribute indicates
-whether the class is the base class of a class hierarchy
-(used for the *%B* placeholder in **polymorphic-id-expression**).
+For the *optional* **polymorphic-id-expression**, **polymorphic-name-function**
+and **polymorphic-base** attributes, see :ref:`typediscovery-attributes`.
 
 interface-type
 ^^^^^^^^^^^^^^

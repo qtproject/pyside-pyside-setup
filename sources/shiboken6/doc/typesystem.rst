@@ -65,3 +65,4 @@ Extra options and Python caveats
 
    typesystem_solving_compilation.rst
    typesystem_specialfunctions.rst
+   typediscovery.rst
