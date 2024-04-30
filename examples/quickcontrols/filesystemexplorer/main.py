@@ -22,7 +22,7 @@ if __name__ == '__main__':
     app.setOrganizationName("QtProject")
     app.setApplicationName("File System Explorer")
     app.setApplicationVersion(qVersion())
-    app.setWindowIcon(QIcon("FileSystemModule/icons/app_icon.svg"))
+    app.setWindowIcon(QIcon(sys.path[0] + "/FileSystemModule/icons/app_icon.svg"))
 
     parser = QCommandLineParser()
     parser.setApplicationDescription("Qt Filesystemexplorer Example")
