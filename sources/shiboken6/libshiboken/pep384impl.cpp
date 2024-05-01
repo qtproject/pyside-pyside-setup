@@ -1009,9 +1009,12 @@ long _PepRuntimeVersion()
 
 SbkObjectTypePrivate *PepType_SOTP(PyTypeObject *type)
 {
+    // PYSIDE-2676: Use the meta type explicitly.
+    //              A derived type would fail the offset calculation.
+    static auto *meta = SbkObjectType_TypeF();
     assert(SbkObjectType_Check(type));
     auto *obType = reinterpret_cast<PyObject *>(type);
-    void *data = PyObject_GetTypeData(obType, Py_TYPE(obType));
+    void *data = PyObject_GetTypeData(obType, meta);
     return reinterpret_cast<SbkObjectTypePrivate *>(data);
 }
 
@@ -1061,11 +1064,12 @@ static thread_local SbkObjectTypePrivate *SOTP_value{};
 
 SbkObjectTypePrivate *PepType_SOTP(PyTypeObject *type)
 {
+    static auto *meta = SbkObjectType_TypeF();
     static bool use_312 = _PepRuntimeVersion() >= 0x030C00;
     assert(SbkObjectType_Check(type));
     if (use_312) {
         auto *obType = reinterpret_cast<PyObject *>(type);
-        void *data = PepObject_GetTypeData(obType, Py_TYPE(obType));
+        void *data = PepObject_GetTypeData(obType, meta);
         return reinterpret_cast<SbkObjectTypePrivate *>(data);
     }
     if (type == SOTP_key)
@@ -1091,18 +1095,6 @@ void PepType_SOTP_delete(PyTypeObject *type)
 }
 
 #endif // !defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030C0000
-
-void _PepPostInit_SbkObject_Type(PyTypeObject *type)
-{
-    // Special init for SbkObject_Type.
-    // A normal initialization would recurse PepType_SOTP.
-    if (_PepRuntimeVersion() >= 0x030C00) {
-        auto *obType = reinterpret_cast<PyObject *>(type);
-        void *data = PepObject_GetTypeData(obType, Py_TYPE(obType));
-        auto *sbkExt = reinterpret_cast<SbkObjectTypePrivate *>(data);
-        std::fill_n(reinterpret_cast<char *>(data), sizeof(*sbkExt), 0);
-    }
-}
 
 /*
  * SbkEnumType extender
