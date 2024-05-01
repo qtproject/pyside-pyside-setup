@@ -265,8 +265,6 @@ static PyTypeObject *createObjectType()
                                         offsetof(SbkObject, ob_dict),
                                         offsetof(SbkObject, weakreflist),
                                         nullptr);    // bufferprocs
-    // Initialize the hidden data area.
-    _PepPostInit_SbkObject_Type(type);
     return type;
 }
 
