@@ -129,31 +129,6 @@ static PyGetSetDef SbkObjectType_tp_getset[] = {
 
 static PyTypeObject *createObjectTypeType()
 {
-    // PYSIDE-2676: When using the new type extension, we need to use an
-    //              extra meta type that provides the extra size.
-    //              This is a hairy part of Python 3.12 .
-    //
-    // The problem here is that we use the type extension both in types
-    // and also in meta types. This was invisible with extender dicts.
-    // Please study carefully:
-    // https://docs.python.org/3/c-api/type.html#c.PyType_Spec.basicsize
-
-    PyType_Slot SbkObjectTypeMeta_Type_slots[] = {
-        {Py_tp_base, static_cast<void *>(&PyType_Type)},
-        {Py_tp_alloc, reinterpret_cast<void *>(PyType_GenericAlloc)},
-        {0, nullptr}
-    };
-
-    PyType_Spec SbkObjectTypeMeta_Type_spec = {
-        "1:Shiboken.ObjectTypeMeta",
-        -long(sizeof(SbkObjectTypePrivate)),
-        0, // sizeof(PyMemberDef), not for PyPy without a __len__ defined
-        Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_TYPE_SUBCLASS,
-        SbkObjectTypeMeta_Type_slots,
-    };
-
-    auto specMeta = &SbkObjectTypeMeta_Type_spec;
-
     PyType_Slot SbkObjectType_Type_slots[] = {
         {Py_tp_dealloc, reinterpret_cast<void *>(SbkObjectType_tp_dealloc)},
         {Py_tp_getattro, reinterpret_cast<void *>(mangled_type_getattro)},
@@ -191,14 +166,9 @@ static PyTypeObject *createObjectTypeType()
         SbkObjectType_Type_slots,
     };
 
-    if (_PepRuntimeVersion() >= 0x030C00) {
-        auto *meta = SbkType_FromSpec(specMeta);
-        auto spec = &SbkObjectType_Type_spec_312;
-        return SbkType_FromSpecWithMeta(spec, meta);
-    }
-
-    auto spec = &SbkObjectType_Type_spec;
-    return SbkType_FromSpec(spec);
+    return SbkType_FromSpec(_PepRuntimeVersion() >= 0x030C00 ?
+                            &SbkObjectType_Type_spec_312 :
+                            &SbkObjectType_Type_spec);
 }
 
 PyTypeObject *SbkObjectType_TypeF(void)
@@ -295,6 +265,8 @@ static PyTypeObject *createObjectType()
                                         offsetof(SbkObject, ob_dict),
                                         offsetof(SbkObject, weakreflist),
                                         nullptr);    // bufferprocs
+    // Initialize the hidden data area.
+    _PepPostInit_SbkObject_Type(type);
     return type;
 }
 
