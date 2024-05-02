@@ -8,6 +8,8 @@
 
 #include <QtCore/QByteArray>
 
+QT_FORWARD_DECLARE_CLASS(QMetaObjectBuilder)
+
 // The QmlUncreatable decorator modifies QmlElement to register an uncreatable
 // type. Due to the (reverse) execution order of decorators, it needs to follow
 // QmlElement.
@@ -19,5 +21,6 @@ extern "C"
 void initQmlUncreatable(PyObject *module);
 
 void setUncreatableClassInfo(PyTypeObject *type, const QByteArray &reason);
+void setUncreatableClassInfo(QMetaObjectBuilder *builder, const QByteArray &reason);
 
 #endif // PYSIDEQMLUNCREATABLE_H

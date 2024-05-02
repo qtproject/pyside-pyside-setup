@@ -10,6 +10,7 @@
 #include <sbkcppstring.h>
 
 #include <QtCore/qbytearray.h>
+#include <private/qmetaobjectbuilder_p.h>
 
 using namespace Qt::StringLiterals;
 
@@ -108,4 +109,10 @@ void setUncreatableClassInfo(PyTypeObject *type, const QByteArray &reason)
     PySide::ClassInfo::setClassInfo(type, {
         {"QML.Creatable"_ba, "false"_ba},
         {"QML.UncreatableReason"_ba, reason} });
+}
+
+void setUncreatableClassInfo(QMetaObjectBuilder *builder, const QByteArray &reason)
+{
+    builder->addClassInfo("QML.Creatable", "false");
+    builder->addClassInfo("QML.UncreatableReason", reason);
 }

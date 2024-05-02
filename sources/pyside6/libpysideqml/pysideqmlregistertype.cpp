@@ -28,6 +28,7 @@
 #include <QtQml/QJSValue>
 #include <QtQml/QQmlListProperty>
 #include <private/qqmlmetatype_p.h>
+#include <private/qmetaobjectbuilder_p.h>
 
 #include <memory>
 
@@ -191,19 +192,15 @@ namespace PySide::Qml {
 
 // Modern (6.7) type registration using RegisterTypeAndRevisions
 // and information set to QMetaClassInfo.
-static int qmlRegisterType(PyObject *pyObj, PyObject *pyClassInfoObj,
-                           const ImportData &importData)
+static int qmlRegisterType(PyObject *pyObj,
+                           const ImportData &importData,
+                           const QMetaObject *metaObject,
+                           const QMetaObject *classInfoMetaObject = nullptr)
 {
-    using namespace Shiboken;
-
     PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
-    if (!isQObjectDerived(pyObjType, true))
-        return -1;
 
-    const QMetaObject *metaObject = PySide::retrieveMetaObject(pyObjType);
-    Q_ASSERT(metaObject);
-    const QMetaObject *classInfoMetaObject = pyObj == pyClassInfoObj
-        ? metaObject : PySide::retrieveMetaObject(pyClassInfoObj);
+    if (classInfoMetaObject == nullptr)
+        classInfoMetaObject = metaObject;
 
     // Register as simple QObject rather than Qt Quick item.
     // Incref the type object, don't worry about decref'ing it because
@@ -270,18 +267,44 @@ static int qmlRegisterType(PyObject *pyObj, PyObject *pyClassInfoObj,
     return qmlTypeId;
 }
 
+static int qmlRegisterType(PyObject *pyObj, PyObject *pyClassInfoObj,
+                           const ImportData &importData)
+{
+    PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
+    if (!isQObjectDerived(pyObjType, true))
+        return -1;
+
+    const QMetaObject *metaObject = PySide::retrieveMetaObject(pyObjType);
+    Q_ASSERT(metaObject);
+    const QMetaObject *classInfoMetaObject = pyObj == pyClassInfoObj
+        ? metaObject : PySide::retrieveMetaObject(pyClassInfoObj);
+    return qmlRegisterType(pyObj, importData, metaObject, classInfoMetaObject);
+}
+
 // Legacy (pre 6.7) compatibility helper for the free register functions.
 int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int versionMinor,
                     const char *qmlName, const char *noCreationReason,
                     bool creatable)
 {
     auto *type = checkTypeObject(pyObj, "qmlRegisterType()");
-    if (type == nullptr || !PySide::isQObjectDerived(type, true)
-        || !setClassInfo(type, qmlElementKey, qmlName))
+    if (type == nullptr || !PySide::isQObjectDerived(type, true))
         return -1;
+
+    const QMetaObject *metaObject = PySide::retrieveMetaObject(type);
+    Q_ASSERT(metaObject);
+
+    // PYSIDE-2709: Use a separate QMetaObject for the class information
+    // as modifying metaObject breaks inheritance.
+    QMetaObjectBuilder classInfobuilder(&QObject::staticMetaObject);
+    classInfobuilder.addClassInfo(qmlElementKey, qmlName);
     if (!creatable)
-        setUncreatableClassInfo(type, noCreationReason);
-    return qmlRegisterType(pyObj, pyObj, {uri, versionMajor, versionMinor});
+        setUncreatableClassInfo(&classInfobuilder, noCreationReason);
+    auto *classInfoMetaObject = classInfobuilder.toMetaObject();
+
+    const int qmlTypeId = qmlRegisterType(pyObj, {uri, versionMajor, versionMinor},
+                                          metaObject, classInfoMetaObject);
+    free(classInfoMetaObject);
+    return qmlTypeId;
 }
 
 // Singleton helpers
