@@ -5122,10 +5122,15 @@ QString CppGenerator::signatureParameter(const AbstractMetaArgument &arg) const
     const AbstractMetaFunctionCList conversions =
         api().implicitConversions(metaType);
     for (const auto &f : conversions) {
-        if (f->isConstructor() && !f->arguments().isEmpty())
-            signatures << f->arguments().constFirst().type().pythonSignature();
-        else if (f->isConversionOperator())
+        if (f->isConstructor() && !f->arguments().isEmpty()) {
+            // PYSIDE-2712: modified types from converting constructors are not always correct
+            // candidates if they are modified by the type system reference
+            if (!f->arguments().constFirst().isTypeModified()) {
+                signatures << f->arguments().constFirst().type().pythonSignature();
+            }
+        } else if (f->isConversionOperator()) {
             signatures << f->ownerClass()->fullName();
+        }
     }
 
     const qsizetype size = signatures.size();
