@@ -1,0 +1,61 @@
+Qt for Python 6.7.1 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - [PYSIDE-487]  A number of missing classes have been added.
+ - [PYSIDE-2629] Tooling: pyside6-qsb, pyside6-balsam and pyside6-balsamui
+                 have been added.
+ - [PYSIDE-2644] QtAsyncio: An issue with tasks with loop not cancelling
+                 has been fixed.
+ - [PYSIDE-2663] A crash when browsing https://outlook.com has been fixed.
+ - [PYSIDE-2665] A syntax error in the pyi-files has been fixed.
+ - [PYSIDE-2668] The comparison of QOperatingSystemVersion.OSType has been
+                 fixed.
+ - [PYSIDE-2675] Lazy Load: An issue with polymorphic classes has been
+                 fixed.
+ - [PYSIDE-2676] A crash with Python 3.12 when creating classes from
+                 meta classes has been fixed.
+ - [PYSIDE-2685] An error in the pyi-files related to the import of
+                 NoneType has been fixed.
+ - [PYSIDE-2686] Missing imports for types of return values
+                 have been added to the  pyi-files.
+ - [PYSIDE-2698] A crash when querying the size of QtQml.ListProperty
+                 has been fixed and documentation for QtQml.ListProperty
+                 has been added.
+ - [PYSIDE-2705] Warnings about failures of QObject.disconnect() can
+                 now be suppressed.
+ - [PYSIDE-2709] A bug using legacy qmlRegisterType() for class hierarchies
+                 has been fixed.
+ - [QTBUG-123997] Multimedia: The renaming of the namespace QAudio to
+                  QtAudio has been undone following a revert in Qt.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-2590] An attribute for global inline namespace scopes has been
+                 added.
+ - [PYSIDE-2602] Generate Python override code for added virtuals
+ - [PYSIDE-2602] Support for virtual functions with return type
+                 modifications has been added and the function
+                 QWebEnginePage.javaScriptPrompt()
+                 has been fixed accordingly.
+ - [PYSIDE-2675] A code snippet placeholder for the base class for
+                 polymorphic-id-expressions has been added, fixing
+                 a potentially undefined behavior when using the
+                 derived classes.
