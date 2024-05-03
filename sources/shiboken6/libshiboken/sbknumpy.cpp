@@ -29,10 +29,8 @@ static void initNumPy()
     // Expanded from macro "import_array" in __multiarray_api.h
     // Make sure to read about the magic defines PY_ARRAY_UNIQUE_SYMBOL etc.,
     // when changing this or spreading the code over several source files.
-    if (_import_array() < 0) {
+    if (_import_array() < 0)
         PyErr_Print();
-        PyErr_Clear();
-    }
 }
 #endif // HAVE_NUMPY
 
