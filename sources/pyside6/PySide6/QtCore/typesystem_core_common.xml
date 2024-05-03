@@ -1759,9 +1759,6 @@
     </modify-function>
     <!-- End of Invalidate-after-use fix -->
     <modify-function signature="parent()const">
-      <modify-argument index="this">
-        <parent index="return" action="add"/>
-      </modify-argument>
       <modify-argument index="return">
         <define-ownership class="target" owner="default"/>
       </modify-argument>
