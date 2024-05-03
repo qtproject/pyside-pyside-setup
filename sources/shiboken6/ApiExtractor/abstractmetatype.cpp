@@ -543,6 +543,7 @@ void AbstractMetaType::decideUsagePattern()
         pattern = ObjectPattern;
     }
     setTypeUsagePattern(pattern);
+    Q_ASSERT(pattern != ContainerPattern || !d->m_instantiations.isEmpty());
 }
 
 bool AbstractMetaTypeData::hasTemplateChildren() const

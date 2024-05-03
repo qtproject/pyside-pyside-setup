@@ -481,6 +481,21 @@ QString msgCannotFindTypeEntryForSmartPointer(const QString &t, const QString &s
         + u"\" for instantiation of \""_s +smartPointerType + u"\"."_s;
 }
 
+QString msgInheritTemplateIssue(const AbstractMetaClassPtr &subclass,
+                                const TypeInfo &info,
+                                const QString &what)
+{
+    return "While inheriting template "_L1 + subclass->name()
+           + " from "_L1 + info.toString() + ": "_L1 + what;
+}
+
+QString msgIgnoringTemplateParameter(const QString &typeName,
+                                     const char *why)
+{
+    return "Ignoring template parameter "_L1 + typeName +
+           ": "_L1 + QLatin1StringView(why);
+}
+
 QString msgInvalidSmartPointerType(const TypeInfo &i)
 {
     return u"Invalid smart pointer type \""_s +i.toString() + u"\"."_s;
