@@ -1574,7 +1574,8 @@ bool AbstractMetaBuilderPrivate::setupInheritance(const AbstractMetaClassPtr &me
                                              &info, &baseContainerType);
         if (templ) {
             setupInheritance(templ);
-            inheritTemplate(metaClass, templ, info);
+            if (!inheritTemplate(metaClass, templ, info))
+                return false;
             metaClass->typeEntry()->setBaseContainerType(templ->typeEntry());
             return true;
         }
@@ -3143,53 +3144,80 @@ AbstractMetaClassPtr
     return result;
 }
 
+
+static std::optional<AbstractMetaType>
+    inheritTemplateParameter(const AbstractMetaClassPtr &subclass,
+                             const AbstractMetaClassCPtr &templateClass,
+                             const TypeInfo &info, QString *errorMessage)
+{
+    QString typeName = info.qualifiedName().join("::"_L1);
+    TypeDatabase *typeDb = TypeDatabase::instance();
+    TypeEntryPtr t;
+    // Check for a non-type template integer parameter, that is, for a base
+    // "template <int R, int C> Matrix<R, C>" and subclass
+    // "typedef Matrix<2,3> Matrix2x3;". If so, create dummy entries of
+    // EnumValueTypeEntry for the integer values encountered on the fly.
+    if (isNumber(typeName)) {
+        t = typeDb->findType(typeName);
+        if (!t) {
+            auto parent = typeSystemTypeEntry(subclass->typeEntry());
+            t = TypeDatabase::instance()->addConstantValueTypeEntry(typeName, parent);
+        }
+    } else {
+        QStringList possibleNames;
+        possibleNames << subclass->qualifiedCppName() + "::"_L1 + typeName;
+        possibleNames << templateClass->qualifiedCppName() + "::"_L1 + typeName;
+        if (subclass->enclosingClass())
+            possibleNames << subclass->enclosingClass()->qualifiedCppName() + "::"_L1 + typeName;
+        possibleNames << typeName;
+
+        for (const QString &possibleName : std::as_const(possibleNames)) {
+            t = typeDb->findType(possibleName);
+            if (t)
+                break;
+        }
+    }
+
+    if (!t) {
+        *errorMessage = msgIgnoringTemplateParameter(typeName,
+                            "The corresponding type was not found in the typesystem.");
+        return std::nullopt;
+    }
+
+    if (t->isContainer()) {
+        *errorMessage = msgIgnoringTemplateParameter(typeName,
+                            "Template inheritance from nested containers is not supported");
+        return std::nullopt;
+    }
+    AbstractMetaType result(t);
+    result.setConstant(info.isConstant());
+    result.setReferenceType(info.referenceType());
+    result.setIndirectionsV(info.indirectionsV());
+    result.decideUsagePattern();
+    return result;
+}
+
 bool AbstractMetaBuilderPrivate::inheritTemplate(const AbstractMetaClassPtr &subclass,
                                                  const AbstractMetaClassCPtr &templateClass,
                                                  const TypeInfo &info)
 {
     AbstractMetaTypeList  templateTypes;
 
+    QString errorMessage;
     for (const TypeInfo &i : info.instantiations()) {
-        QString typeName = i.qualifiedName().join(u"::"_s);
-        TypeDatabase *typeDb = TypeDatabase::instance();
-        TypeEntryPtr t;
-        // Check for a non-type template integer parameter, that is, for a base
-        // "template <int R, int C> Matrix<R, C>" and subclass
-        // "typedef Matrix<2,3> Matrix2x3;". If so, create dummy entries of
-        // EnumValueTypeEntry for the integer values encountered on the fly.
-        if (isNumber(typeName)) {
-            t = typeDb->findType(typeName);
-            if (!t) {
-                auto parent = typeSystemTypeEntry(subclass->typeEntry());
-                t = TypeDatabase::instance()->addConstantValueTypeEntry(typeName, parent);
-            }
+        const auto typeO = inheritTemplateParameter(subclass, templateClass, i, &errorMessage);
+        if (typeO.has_value()) {
+            templateTypes.append(typeO.value());
         } else {
-            QStringList possibleNames;
-            possibleNames << subclass->qualifiedCppName() + u"::"_s + typeName;
-            possibleNames << templateClass->qualifiedCppName() + u"::"_s + typeName;
-            if (subclass->enclosingClass())
-                possibleNames << subclass->enclosingClass()->qualifiedCppName() + u"::"_s + typeName;
-            possibleNames << typeName;
-
-            for (const QString &possibleName : std::as_const(possibleNames)) {
-                t = typeDb->findType(possibleName);
-                if (t)
-                    break;
-            }
+            errorMessage = msgInheritTemplateIssue(subclass, info, errorMessage);
+            qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
         }
-
-        if (t) {
-            AbstractMetaType temporaryType(t);
-            temporaryType.setConstant(i.isConstant());
-            temporaryType.setReferenceType(i.referenceType());
-            temporaryType.setIndirectionsV(i.indirectionsV());
-            temporaryType.decideUsagePattern();
-            templateTypes << temporaryType;
-        } else {
-            qCWarning(lcShiboken).noquote().nospace()
-                << "Ignoring template parameter " << typeName << " from "
-                << info.toString() << ". The corresponding type was not found in the typesystem.";
-        }
+    }
+    if (templateTypes.isEmpty()) {
+         errorMessage = msgInheritTemplateIssue(subclass, info,
+                                                "No template parameters could be inherited"_L1);
+         qCWarning(lcShiboken, "%s", qPrintable(errorMessage));
+         return false;
     }
     return inheritTemplate(subclass, templateClass, templateTypes);
 }
