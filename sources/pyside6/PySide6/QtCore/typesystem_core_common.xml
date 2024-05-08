@@ -2552,6 +2552,11 @@
         </modify-argument>
         <inject-code file="../glue/qtcore.cpp" snippet="qtranslator-load"/>
     </modify-function>
+    <modify-function signature="translate(const char*,const char*, const char*,int)const">
+        <modify-argument index="1" pyi-type="str"/>
+        <modify-argument index="2" pyi-type="str"/>
+        <modify-argument index="3" pyi-type="Optional[str]"/>
+    </modify-function>
   </object-type>
   <object-type name="QWaitCondition">
     <configuration condition="QT_CONFIG(thread)"/>
