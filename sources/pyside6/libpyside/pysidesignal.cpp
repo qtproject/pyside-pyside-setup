@@ -653,8 +653,11 @@ static PyObject *signalInstanceGetItem(PyObject *self, PyObject *key)
 static inline void warnDisconnectFailed(PyObject *aSlot, const QByteArray &signature)
 {
     if (PyErr_Occurred() != nullptr) { // avoid "%S" invoking str() when an error is set.
+        PyObject *exc{}, *inst{}, *tb{};
+        PyErr_Fetch(&exc, &inst, &tb);
         PyErr_WarnFormat(PyExc_RuntimeWarning, 0, "Failed to disconnect (%s) from signal \"%s\".",
                          Py_TYPE(aSlot)->tp_name, signature.constData());
+        PyErr_Restore(exc, inst, tb);
     } else {
         PyErr_WarnFormat(PyExc_RuntimeWarning, 0, "Failed to disconnect (%S) from signal \"%s\".",
                          aSlot, signature.constData());
