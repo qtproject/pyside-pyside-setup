@@ -45,7 +45,7 @@ static PyObject *QUiLoadedLoadUiFromDevice(QUiLoader *self, QIODevice *dev, QWid
     }
 
     if (!PyErr_Occurred())
-        PyErr_SetString(PyExc_RuntimeError, "Unable to open/read ui device");
+        PyErr_Format(PyExc_RuntimeError, "Unable to open/read ui device");
     return nullptr;
 }
 

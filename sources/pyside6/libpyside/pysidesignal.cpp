@@ -484,14 +484,10 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
         return nullptr;
 
     PySideSignalInstance *source = reinterpret_cast<PySideSignalInstance *>(self);
-    if (!source->d) {
-        PyErr_Format(PyExc_RuntimeError, "cannot connect uninitialized SignalInstance");
-        return nullptr;
-    }
-    if (source->deleted) {
-        PyErr_Format(PyExc_RuntimeError, "Signal source has been deleted");
-        return nullptr;
-    }
+    if (!source->d)
+        return PyErr_Format(PyExc_RuntimeError, "cannot connect uninitialized SignalInstance");
+    if (source->deleted)
+        return PyErr_Format(PyExc_RuntimeError, "Signal source has been deleted");
 
     Shiboken::AutoDecRef pyArgs(PyList_New(0));
 
@@ -564,10 +560,8 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
         Shiboken::AutoDecRef tupleArgs(PyList_AsTuple(pyArgs));
         Shiboken::AutoDecRef pyMethod(PyObject_GetAttr(source->d->source,
                                                        PySide::PySideName::qtConnect()));
-        if (pyMethod.isNull()) { // PYSIDE-79: check if pyMethod exists.
-            PyErr_SetString(PyExc_RuntimeError, "method 'connect' vanished!");
-            return nullptr;
-        }
+        if (pyMethod.isNull())  // PYSIDE-79: check if pyMethod exists.
+            return PyErr_Format(PyExc_RuntimeError, "method 'connect' vanished!");
         PyObject *result = PyObject_CallObject(pyMethod, tupleArgs);
         if (connection_Check(result))
             return result;
@@ -587,17 +581,13 @@ static int argCountInSignature(const char *signature)
 static PyObject *signalInstanceEmit(PyObject *self, PyObject *args)
 {
     PySideSignalInstance *source = reinterpret_cast<PySideSignalInstance *>(self);
-    if (!source->d) {
-        PyErr_Format(PyExc_RuntimeError, "cannot emit uninitialized SignalInstance");
-        return nullptr;
-    }
+    if (!source->d)
+        return PyErr_Format(PyExc_RuntimeError, "cannot emit uninitialized SignalInstance");
 
     // PYSIDE-2201: Check if the object has vanished meanwhile.
     //              Tried to revive it without exception, but this gives problems.
-    if (source->deleted) {
-        PyErr_Format(PyExc_RuntimeError, "The SignalInstance object was already deleted");
-        return nullptr;
-    }
+    if (source->deleted)
+        return PyErr_Format(PyExc_RuntimeError, "The SignalInstance object was already deleted");
 
     Shiboken::AutoDecRef pyArgs(PyList_New(0));
     int numArgsGiven = PySequence_Fast_GET_SIZE(args);
@@ -657,8 +647,7 @@ static PyObject *signalInstanceGetItem(PyObject *self, PyObject *key)
         message += '"' + data->d->signature + '"';
     }
 
-    PyErr_SetString(PyExc_IndexError, message.constData());
-    return nullptr;
+    return PyErr_Format(PyExc_IndexError, message.constData());
 }
 
 static inline void warnDisconnectFailed(PyObject *aSlot, const QByteArray &signature)
@@ -675,10 +664,9 @@ static inline void warnDisconnectFailed(PyObject *aSlot, const QByteArray &signa
 static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
 {
     auto source = reinterpret_cast<PySideSignalInstance *>(self);
-    if (!source->d) {
-        PyErr_Format(PyExc_RuntimeError, "cannot disconnect uninitialized SignalInstance");
-        return nullptr;
-    }
+    if (!source->d)
+        return PyErr_Format(PyExc_RuntimeError, "cannot disconnect uninitialized SignalInstance");
+
     Shiboken::AutoDecRef pyArgs(PyList_New(0));
 
     PyObject *slot = Py_None;
@@ -761,10 +749,8 @@ static PyObject *signalCall(PyObject *self, PyObject *args, PyObject *kw)
     // The only way calling a signal can succeed (the Python equivalent of C++'s operator() )
     // is when a method with the same name as the signal is attached to an object.
     // An example is QProcess::error() (don't check the docs, but the source code of qprocess.h).
-    if (!signal->homonymousMethod) {
-        PyErr_SetString(PyExc_TypeError, "native Qt signal is not callable");
-        return nullptr;
-    }
+    if (!signal->homonymousMethod)
+        return PyErr_Format(PyExc_TypeError, "native Qt signal is not callable");
 
     // Check if there exists a method with the same name as the signal, which is also a static
     // method in C++ land.

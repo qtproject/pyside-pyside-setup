@@ -912,10 +912,8 @@ return %CPPSELF.rectCount();
 // @snippet qregion-len
 
 // @snippet qregion-getitem
-if (_i < 0 || _i >= %CPPSELF.rectCount()) {
-    PyErr_SetString(PyExc_IndexError, "index out of bounds");
-    return nullptr;
-}
+if (_i < 0 || _i >= %CPPSELF.rectCount())
+    return PyErr_Format(PyExc_IndexError, "index out of bounds");
 
 const QRect cppResult = *(%CPPSELF.cbegin() + _i);
 return %CONVERTTOPYTHON[QRect](cppResult);

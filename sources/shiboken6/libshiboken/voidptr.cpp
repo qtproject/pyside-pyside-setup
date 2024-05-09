@@ -156,10 +156,9 @@ PyObject *SbkVoidPtrObject_int(PyObject *v)
 PyObject *toBytes(PyObject *self, PyObject * /* args */)
 {
     auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(self);
-    if (sbkObject->size < 0) {
-        PyErr_SetString(PyExc_IndexError, "VoidPtr does not have a size set.");
-        return nullptr;
-    }
+    if (sbkObject->size < 0)
+        return PyErr_Format(PyExc_IndexError, "VoidPtr does not have a size set.");
+
     PyObject *bytes = PyBytes_FromStringAndSize(reinterpret_cast<const char *>(sbkObject->cptr),
                                                 sbkObject->size);
     Py_XINCREF(bytes);
