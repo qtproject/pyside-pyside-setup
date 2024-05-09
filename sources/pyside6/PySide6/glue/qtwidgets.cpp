@@ -792,10 +792,8 @@ const char *styleOptionType(const QStyleOption *o)
 // @snippet qwizardpage-registerfield
 auto *signalInst = reinterpret_cast<PySideSignalInstance *>(%PYARG_4);
 const auto data = PySide::Signal::getEmitterData(signalInst);
-if (data.methodIndex == -1) {
-    PyErr_SetString(PyExc_RuntimeError, "QWizardPage::registerField(): Unable to retrieve signal emitter.");
-    return nullptr;
-}
+if (data.methodIndex == -1)
+    return PyErr_Format(PyExc_RuntimeError, "QWizardPage::registerField(): Unable to retrieve signal emitter.");
 const auto method = data.emitter->metaObject()->method(data.methodIndex);
 const QByteArray signature = QByteArrayLiteral("2") + method.methodSignature();
 %BEGIN_ALLOW_THREADS

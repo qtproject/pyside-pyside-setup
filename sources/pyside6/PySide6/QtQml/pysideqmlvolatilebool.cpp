@@ -63,10 +63,8 @@ QtQml_VolatileBoolObject_set(QtQml_VolatileBoolObject *self, PyObject *args)
     }
 
     ok = PyObject_IsTrue(value);
-    if (ok < 0) {
-        PyErr_SetString(PyExc_TypeError, "Not a boolean value.");
-        return nullptr;
-    }
+    if (ok < 0)
+        return PyErr_Format(PyExc_TypeError, "Not a boolean value.");
 
     *self->flag = ok > 0;
 

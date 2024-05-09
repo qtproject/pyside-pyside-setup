@@ -340,9 +340,7 @@ PyObject *invokeMetaMethodWithReturn(const InvokeMetaMethodFuncWithReturn &f,
                               a6.toGenericArgument(), a7.toGenericArgument(), a8.toGenericArgument(),
                               a9.toGenericArgument());
     PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
-    if (!callResult) {
-        PyErr_SetString(PyExc_RuntimeError, "QMetaMethod invocation failed.");
-        return nullptr;
-    }
+    if (!callResult)
+        return PyErr_Format(PyExc_RuntimeError, "QMetaMethod invocation failed.");
     return convertGenericReturnArgument(r.data(), r.metaType());
 }

@@ -392,7 +392,7 @@ QObject *SingletonQObjectCreationBase::handleReturnValue(PyObject *retVal)
     using Shiboken::Conversions::isPythonToCppPointerConvertible;
     // Make sure the callback returns something we can convert, else the entire application will crash.
     if (retVal == nullptr) {
-        PyErr_SetString(PyExc_TypeError, "Callback returns 0 value.");
+        PyErr_Format(PyExc_TypeError, "Callback returns 0 value.");
         return nullptr;
     }
     if (isPythonToCppPointerConvertible(qObjectType(), retVal) == nullptr) {

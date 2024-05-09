@@ -74,10 +74,9 @@ public:
 
     static PyObject *tpNewInvalid(PyTypeObject * /* subtype */, PyObject * /* args */, PyObject * /* kwds */)
     {
-        PyErr_Format(PyExc_NotImplementedError,
+        return PyErr_Format(PyExc_NotImplementedError,
                      "Opaque containers of type '%s' cannot be instantiated.",
                      typeid(SequenceContainer).name());
-        return nullptr;
     }
 
     static int tpInit(PyObject * /* self */, PyObject * /* args */, PyObject * /* kwds */)
@@ -105,10 +104,8 @@ public:
     static PyObject *sqGetItem(PyObject *self, Py_ssize_t i)
     {
         auto *d = get(self);
-        if (i < 0 || i >= Py_ssize_t(d->m_list->size())) {
-            PyErr_SetString(PyExc_IndexError, "index out of bounds");
-            return nullptr;
-        }
+        if (i < 0 || i >= Py_ssize_t(d->m_list->size()))
+            return PyErr_Format(PyExc_IndexError, "index out of bounds");
         auto it = std::cbegin(*d->m_list);
         std::advance(it, i);
         return ShibokenContainerValueConverter<value_type>::convertValueToPython(*it);
@@ -133,14 +130,10 @@ public:
     static PyObject *push_back(PyObject *self, PyObject *pyArg)
     {
         auto *d = get(self);
-        if (!ShibokenContainerValueConverter<value_type>::checkValue(pyArg)) {
-            PyErr_SetString(PyExc_TypeError, "wrong type passed to append.");
-            return nullptr;
-        }
-        if (d->m_const) {
-            PyErr_SetString(PyExc_TypeError, msgModifyConstContainer);
-            return nullptr;
-        }
+        if (!ShibokenContainerValueConverter<value_type>::checkValue(pyArg))
+            return PyErr_Format(PyExc_TypeError, "wrong type passed to append.");
+        if (d->m_const)
+            return PyErr_Format(PyExc_TypeError, msgModifyConstContainer);
 
         OptionalValue value = ShibokenContainerValueConverter<value_type>::convertValueToCpp(pyArg);
         if (!value.has_value())
@@ -152,14 +145,10 @@ public:
     static PyObject *push_front(PyObject *self, PyObject *pyArg)
     {
         auto *d = get(self);
-        if (!ShibokenContainerValueConverter<value_type>::checkValue(pyArg)) {
-            PyErr_SetString(PyExc_TypeError, "wrong type passed to append.");
-            return nullptr;
-        }
-        if (d->m_const) {
-            PyErr_SetString(PyExc_TypeError, msgModifyConstContainer);
-            return nullptr;
-        }
+        if (!ShibokenContainerValueConverter<value_type>::checkValue(pyArg))
+            return PyErr_Format(PyExc_TypeError, "wrong type passed to append.");
+        if (d->m_const)
+            return PyErr_Format(PyExc_TypeError, msgModifyConstContainer);
 
         OptionalValue value = ShibokenContainerValueConverter<value_type>::convertValueToCpp(pyArg);
         if (!value.has_value())
@@ -171,10 +160,8 @@ public:
     static PyObject *clear(PyObject *self)
     {
         auto *d = get(self);
-        if (d->m_const) {
-            PyErr_SetString(PyExc_TypeError, msgModifyConstContainer);
-            return nullptr;
-        }
+        if (d->m_const)
+            return PyErr_Format(PyExc_TypeError, msgModifyConstContainer);
 
         d->m_list->clear();
         Py_RETURN_NONE;
@@ -183,10 +170,8 @@ public:
     static PyObject *pop_back(PyObject *self)
     {
         auto *d = get(self);
-        if (d->m_const) {
-            PyErr_SetString(PyExc_TypeError, msgModifyConstContainer);
-            return nullptr;
-        }
+        if (d->m_const)
+            return PyErr_Format(PyExc_TypeError, msgModifyConstContainer);
 
         d->m_list->pop_back();
         Py_RETURN_NONE;
@@ -195,10 +180,8 @@ public:
     static PyObject *pop_front(PyObject *self)
     {
         auto *d = get(self);
-        if (d->m_const) {
-            PyErr_SetString(PyExc_TypeError, msgModifyConstContainer);
-            return nullptr;
-        }
+        if (d->m_const)
+            return PyErr_Format(PyExc_TypeError, msgModifyConstContainer);
 
         d->m_list->pop_front();
         Py_RETURN_NONE;
@@ -208,21 +191,16 @@ public:
     static PyObject *reserve(PyObject *self, PyObject *pyArg)
     {
         auto *d = get(self);
-        if (PyLong_Check(pyArg) == 0) {
-            PyErr_SetString(PyExc_TypeError, "wrong type passed to reserve().");
-            return nullptr;
-        }
-        if (d->m_const) {
-            PyErr_SetString(PyExc_TypeError, msgModifyConstContainer);
-            return nullptr;
-        }
+        if (PyLong_Check(pyArg) == 0)
+            return PyErr_Format(PyExc_TypeError, "wrong type passed to reserve().");
+        if (d->m_const)
+            return PyErr_Format(PyExc_TypeError, msgModifyConstContainer);
 
         if constexpr (ShibokenContainerHasReserve<SequenceContainer>::value) {
             const Py_ssize_t size = PyLong_AsSsize_t(pyArg);
             d->m_list->reserve(size);
         } else {
-            PyErr_SetString(PyExc_TypeError, "Container does not support reserve().");
-            return nullptr;
+            return PyErr_Format(PyExc_TypeError, "Container does not support reserve().");
         }
 
         Py_RETURN_NONE;

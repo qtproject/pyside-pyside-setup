@@ -632,20 +632,16 @@ if (ret == nullptr) {
 // @snippet qbytearray-mgetitem
 if (PyIndex_Check(_key)) {
     const Py_ssize_t _i = PyNumber_AsSsize_t(_key, PyExc_IndexError);
-    if (_i < 0 || _i >= %CPPSELF.size()) {
-        PyErr_SetString(PyExc_IndexError, "index out of bounds");
-        return nullptr;
-    }
+    if (_i < 0 || _i >= %CPPSELF.size())
+        return PyErr_Format(PyExc_IndexError, "index out of bounds");
     char res[2] = {%CPPSELF.at(_i), '\0'};
     return PyBytes_FromStringAndSize(res, 1);
 }
 
-if (PySlice_Check(_key) == 0) {
-    PyErr_Format(PyExc_TypeError,
+if (PySlice_Check(_key) == 0)
+    return PyErr_Format(PyExc_TypeError,
                  "list indices must be integers or slices, not %.200s",
                  Py_TYPE(_key)->tp_name);
-    return nullptr;
-}
 
 Py_ssize_t start, stop, step, slicelength;
 if (PySlice_GetIndicesEx(_key, %CPPSELF.size(), &start, &stop, &step, &slicelength) < 0)
