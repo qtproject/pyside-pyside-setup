@@ -125,6 +125,11 @@ To import the module:
 
     Dumps the map of wrappers existing in libshiboken to standard error.
 
+.. function:: dumpConverters()
+
+    Dumps the map of named converters existing in libshiboken to standard
+    error.
+
  .. py:class:: VoidPtr(address, size = -1, writeable = 0)
 
      :param address: (PyBuffer, SbkObject, int, VoidPtr)

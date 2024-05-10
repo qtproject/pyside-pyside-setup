@@ -531,6 +531,9 @@ SbkConverter *createConverterObject(PyTypeObject *type,
                                     IsConvertibleToCppFunc toCppPointerCheckFunc,
                                     CppToPythonFunc pointerToPythonFunc,
                                     CppToPythonFunc copyToPythonFunc);
+
+LIBSHIBOKEN_API void dumpConverters();
+
 } // namespace Shiboken::Conversions
 
 #endif // SBK_CONVERTER_P_H

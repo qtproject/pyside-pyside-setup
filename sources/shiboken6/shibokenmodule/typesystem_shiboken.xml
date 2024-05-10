@@ -57,9 +57,14 @@
         <inject-code file="shibokenmodule.cpp" snippet="dumpwrappermap"/>
     </add-function>
 
+    <add-function signature="dumpConverters()">
+        <inject-code file="shibokenmodule.cpp" snippet="dumpconverters"/>
+    </add-function>
+
     <extra-includes>
         <include file-name="sbkversion.h" location="local"/>
         <include file-name="voidptr.h" location="local"/>
+        <include file-name="sbkconverter_p.h" location="local"/>
     </extra-includes>
      <inject-code position="end" file="shibokenmodule.cpp" snippet="init"/>
 </typesystem>

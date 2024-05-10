@@ -12,7 +12,11 @@
 #include "voidptr.h"
 
 #include <string>
+#include <cstring>
+#include <iostream>
 #include <unordered_map>
+#include <map>
+#include <set>
 
 static SbkConverter **PrimitiveTypeConverters;
 
@@ -70,6 +74,99 @@ void init()
     converters["std::nullptr_t"] = primitiveTypeConverters[SBK_NULLPTR_T_IDX];
 
     initArrayConverters();
+}
+
+static void dumpPyTypeObject(std::ostream &str, PyTypeObject *t)
+{
+    str << "\nPython type ";
+    if (t == nullptr) {
+        str << "<None>";
+        return;
+    }
+    str << '"' << t->tp_name << '"';
+    if (t->tp_base != nullptr && t->tp_base != &PyBaseObject_Type)
+        str << '(' << t->tp_base->tp_name << ')';
+}
+
+static void dumpSbkConverter(std::ostream &str, const SbkConverter *c)
+{
+    str << "SbkConverter " << static_cast<const void *>(c) << ": ";
+    if (c->pointerToPython != nullptr)
+        str << ", C++ pointer->Python";
+    if (c->copyToPython != nullptr)
+        str << ", copy->Python";
+    if (c->toCppPointerConversion.second != nullptr)
+        str << ", Python->C++ pointer";
+    if (!c->toCppConversions.empty())
+        str << ", " << c->toCppConversions.size() << " Python->C++ conversions";
+}
+
+// Less than operator for a PyTypeObject for dumping the converter map
+static bool pyTypeObjectLessThan(const PyTypeObject *t1, const PyTypeObject *t2)
+{
+    const bool isNull1 = t1 == nullptr;
+    const bool isNull2 = t2 == nullptr;
+    if (isNull1 || isNull2)
+        return isNull1 && !isNull2;
+    // Internal types (lower case) first
+    const bool isInternal1 = std::islower(t1->tp_name[0]);
+    const bool isInternal2 = std::islower(t2->tp_name[0]);
+    if (isInternal1 != isInternal2)
+        return !isInternal2;
+    return std::strcmp(t1->tp_name, t2->tp_name) < 0;
+}
+
+void dumpConverters()
+{
+    struct PyTypeObjectLess {
+
+        bool operator()(const PyTypeObject *t1, const PyTypeObject *t2) const {
+            return pyTypeObjectLessThan(t1, t2);
+        }
+    };
+
+    using StringSet = std::set<std::string>;
+    using SbkConverterNamesMap = std::unordered_map<SbkConverter *, StringSet>;
+    using PyTypeObjectConverterMap = std::map<PyTypeObject *, SbkConverterNamesMap,
+                                              PyTypeObjectLess>;
+
+    auto &str = std::cerr;
+
+    // Sort the entries by the associated PyTypeObjects and converters
+    PyTypeObjectConverterMap pyTypeObjectConverterMap;
+    for (const auto &converter : converters) {
+        auto *sbkConverter = converter.second;
+        auto *typeObject = sbkConverter->pythonType;
+        auto typeIt = pyTypeObjectConverterMap.find(typeObject);
+        if (typeIt == pyTypeObjectConverterMap.end())
+            typeIt = pyTypeObjectConverterMap.insert(std::make_pair(typeObject,
+                                                                    SbkConverterNamesMap{})).first;
+        SbkConverterNamesMap &sbkConverterMap = typeIt->second;
+        auto convIt = sbkConverterMap.find(sbkConverter);
+        if (convIt == sbkConverterMap.end())
+            convIt = sbkConverterMap.insert(std::make_pair(sbkConverter,
+                                                           StringSet{})).first;
+        convIt->second.insert(converter.first);
+    }
+
+     for (const auto &tc : pyTypeObjectConverterMap) {
+         dumpPyTypeObject(str, tc.first);
+         str << ", " << tc.second.size() << " converter(s):\n";
+         for (const auto &cn : tc.second) {
+             str << "    ";
+             dumpSbkConverter(str, cn.first);
+             str << ", " << cn.second.size() << " alias(es):";
+             int i = 0;
+             for (const auto &name : cn.second) {
+                 if ((i++ % 5) == 0)
+                     str << "\n        ";
+                 str << " \"" << name << '"';
+             }
+             str << '\n';
+         }
+    }
+
+    str << '\n';
 }
 
 SbkConverter *createConverterObject(PyTypeObject *type,
