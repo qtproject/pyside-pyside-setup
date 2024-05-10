@@ -28,8 +28,8 @@ def run(coro: typing.Optional[typing.Coroutine] = None,
     # subsequent removal in Python 3.15. At that point, part of the current
     # logic of the QAsyncioEventLoopPolicy constructor will have to be moved
     # here and/or to a loop factory class (to be provided as an argument to
-    # asyncio.run()), namely setting up the QCoreApplication and the SIGINT
-    # handler.
+    # asyncio.run()). In particular, this concerns the logic of setting up the
+    # QCoreApplication and the SIGINT handler.
     #
     # More details:
     # https://discuss.python.org/t/removing-the-asyncio-policy-system-asyncio-set-event-loop-policy-in-python-3-15/37553  # noqa: E501
