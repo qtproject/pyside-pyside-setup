@@ -26,6 +26,19 @@ __all__ = [
 
 
 class QAsyncioExecutorWrapper(QObject):
+    """
+    Executors in asyncio allow running synchronous code in a separate thread or
+    process without blocking the event loop or interrupting the asynchronous
+    program flow. Callables are scheduled for execution by calling submit() or
+    map() on an executor object.
+
+    Executors require a bit of extra work for QtAsyncio, as we can't use
+    naked Python threads; instead, we must make sure that the thread created
+    by executor.submit() has an event loop. This is achieved by not submitting
+    the callable directly, but a small wrapper that attaches a QEventLoop to
+    the executor thread, and then creates a zero-delay singleshot timer to push
+    the actual callable for the executor into this new event loop.
+    """
 
     def __init__(self, func: typing.Callable, *args: typing.Tuple) -> None:
         super().__init__()
@@ -37,6 +50,7 @@ class QAsyncioExecutorWrapper(QObject):
 
     def _cb(self):
         try:
+            # Call the synchronous callable that we submitted with submit() or map().
             self._result = self._func(*self._args)
         except BaseException as e:
             self._exception = e
@@ -57,6 +71,17 @@ class QAsyncioExecutorWrapper(QObject):
 
 
 class QAsyncioEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
+    """
+    Event loop policies are expected to be deprecated with Python 3.13, with
+    subsequent removal in Python 3.15. At that point, part of the current
+    logic of the QAsyncioEventLoopPolicy constructor will have to be moved
+    to QtAsyncio.run() and/or to a loop factory class (to be provided as an
+    argument to asyncio.run()). In particular, this concerns the logic of
+    setting up the QCoreApplication and the SIGINT handler.
+
+    More details:
+    https://discuss.python.org/t/removing-the-asyncio-policy-system-asyncio-set-event-loop-policy-in-python-3-15/37553
+    """
     def __init__(self,
                  application: typing.Optional[QCoreApplication] = None,
                  quit_qapp: bool = True,
@@ -68,7 +93,14 @@ class QAsyncioEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
             else:
                 application = QCoreApplication.instance()
         self._application: QCoreApplication = application  # type: ignore[assignment]
+
+        # Configure whether the QCoreApplication at the core of QtAsyncio
+        # should be shut down when asyncio finishes. A special case where one
+        # would want to disable this is test suites that want to reuse a single
+        # QCoreApplication instance across all unit tests, which would fail if
+        # this instance is shut down every time.
         self._quit_qapp = quit_qapp
+
         self._event_loop: typing.Optional[asyncio.AbstractEventLoop] = None
 
         if handle_sigint:
@@ -99,6 +131,14 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
     """
 
     class ShutDownThread(QThread):
+        """
+        Used to shut down the default executor when calling
+        shutdown_default_executor(). As the executor is a ThreadPoolExecutor,
+        it must be shut down in a separate thread as all the threads from the
+        thread pool must join, which we want to do without blocking the event
+        loop.
+        """
+
         def __init__(self, future: futures.QAsyncioFuture, loop: "QAsyncioEventLoop") -> None:
             super().__init__()
             self._future = future
@@ -123,22 +163,48 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
         QObject.__init__(self)
 
         self._application: QCoreApplication = application
+
+        # Configure whether the QCoreApplication at the core of QtAsyncio
+        # should be shut down when asyncio finishes. A special case where one
+        # would want to disable this is test suites that want to reuse a single
+        # QCoreApplication instance across all unit tests, which would fail if
+        # this instance is shut down every time.
         self._quit_qapp = quit_qapp
+
         self._thread = QThread.currentThread()
 
         self._closed = False
 
+        # These two flags are used to determine whether the loop was stopped
+        # from inside the loop (i.e., coroutine or callback called stop()) or
+        # from outside the loop (i.e., the QApplication is being shut down, for
+        # example, by the user closing the window or by calling
+        # QApplication.quit()). The different cases can trigger slightly
+        # different behaviors (see the comments where the flags are used).
+        # There are two variables for this as in a third case the loop is still
+        # running and both flags are False.
         self._quit_from_inside = False
         self._quit_from_outside = False
 
+        # A set of all asynchronous generators that are currently running.
         self._asyncgens: typing.Set[collections.abc.AsyncGenerator] = set()
 
         # Starting with Python 3.11, this must be an instance of
         # ThreadPoolExecutor.
         self._default_executor = concurrent.futures.ThreadPoolExecutor()
 
+        # The exception handler, if set with set_exception_handler(). The
+        # exception handler is currently called in two places: One, if an
+        # asynchonrous generator raises an exception when closed, and two, if
+        # an exception is raised during the execution of a task. Currently, the
+        # default exception handler just prints the exception to the console.
         self._exception_handler: typing.Optional[typing.Callable] = self.default_exception_handler
+
+        # The task factory, if set with set_task_factory(). Otherwise, a new
+        # task is created with the QAsyncioTask constructor.
         self._task_factory: typing.Optional[typing.Callable] = None
+
+        # The future that is currently being awaited with run_until_complete().
         self._future_to_complete: typing.Optional[futures.QAsyncioFuture] = None
 
         self._debug = bool(os.getenv("PYTHONASYNCIODEBUG", False))
@@ -148,6 +214,10 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
     # Running and stopping the loop
 
     def _run_until_complete_cb(self, future: futures.QAsyncioFuture) -> None:
+        """
+        A callback that stops the loop when the future is done, used when
+        running the loop with run_until_complete().
+        """
         if not future.cancelled():
             if isinstance(future.exception(), (SystemExit, KeyboardInterrupt)):
                 return
@@ -188,7 +258,12 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
         asyncio.events._set_running_loop(None)
 
     def _about_to_quit_cb(self):
+        """ A callback for the aboutToQuit signal of the QCoreApplication. """
         if not self._quit_from_inside:
+            # If the aboutToQuit signal is emitted, the user is closing the
+            # application window or calling QApplication.quit(). In this case,
+            # we want to close the event loop, and we consider this a quit from
+            # outside the loop.
             self._quit_from_outside = True
             self.close()
 
@@ -197,8 +272,15 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
             if self._future_to_complete.done():
                 self._future_to_complete = None
             else:
+                # Do not stop the loop if there is a future still being awaited
+                # with run_until_complete().
                 return
+
         self._quit_from_inside = True
+
+        # The user might want to keep the QApplication running after the event
+        # event loop finishes, which they can control with the quit_qapp
+        # argument.
         if self._quit_qapp:
             self._application.quit()
 
@@ -298,6 +380,7 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
                       callback: typing.Callable, *args: typing.Any,
                       context: typing.Optional[contextvars.Context] = None,
                       is_threadsafe: typing.Optional[bool] = False) -> asyncio.TimerHandle:
+        """ All call_at() and call_later() methods map to this method. """
         if not isinstance(when, (int, float)):
             raise TypeError("when must be an int or float")
         return QAsyncioTimerHandle(when, callback, args, self, context, is_threadsafe=is_threadsafe)
@@ -482,6 +565,13 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
             raise RuntimeError("Event loop is closed")
         if executor is None:
             executor = self._default_executor
+
+        # Executors require a bit of extra work for QtAsyncio, as we can't use
+        # naked Python threads; instead, we must make sure that the thread
+        # created by executor.submit() has an event loop. This is achieved by
+        # not submitting the callable directly, but a small wrapper that
+        # attaches a QEventLoop to the executor thread, and then pushes the
+        # actual callable for the executor into this new event loop.
         wrapper = QAsyncioExecutorWrapper(func, *args)
         return asyncio.futures.wrap_future(
             executor.submit(wrapper.do), loop=self
@@ -541,6 +631,12 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
 
 
 class QAsyncioHandle():
+    """
+    The handle enqueues a callback to be executed by the event loop, and allows
+    for this callback to be cancelled before it is executed. This callback will
+    typically execute the step function for a task. This makes the handle one
+    of the main components of asyncio.
+    """
     class HandleState(enum.Enum):
         PENDING = enum.auto()
         CANCELLED = enum.auto()
@@ -561,6 +657,9 @@ class QAsyncioHandle():
         self._start()
 
     def _schedule_event(self, timeout: int, func: typing.Callable) -> None:
+        # Do not schedule events from asyncio when the app is quit from outside
+        # the event loop, as this would cause events to be enqueued after the
+        # event loop was destroyed.
         if not self._loop.is_closed() and not self._loop._quit_from_outside:
             if self._is_threadsafe:
                 QTimer.singleShot(timeout, self._loop, func)
@@ -572,6 +671,10 @@ class QAsyncioHandle():
 
     @Slot()
     def _cb(self) -> None:
+        """
+        A slot, enqueued into the event loop, that wraps around the actual
+        callback, typically the step function of a task.
+        """
         if self._state == QAsyncioHandle.HandleState.PENDING:
             if self._context is not None:
                 self._context.run(self._callback, *self._args)
@@ -581,7 +684,9 @@ class QAsyncioHandle():
 
     def cancel(self) -> None:
         if self._state == QAsyncioHandle.HandleState.PENDING:
-            # The old timer that was created in _start will still trigger but _cb won't do anything.
+            # The old timer that was created in _start will still trigger but
+            # _cb won't do anything, therefore the callback is effectively
+            # cancelled.
             self._state = QAsyncioHandle.HandleState.CANCELLED
 
     def cancelled(self) -> bool:
@@ -600,9 +705,11 @@ class QAsyncioTimerHandle(QAsyncioHandle, asyncio.TimerHandle):
 
         QAsyncioHandle._start(self)
 
-    # Override this so that timer.start() is only called once at the end
-    # of the constructor for both QtHandle and QtTimerHandle.
     def _start(self) -> None:
+        """
+        Overridden so that timer.start() is only called once at the end of the
+        constructor for both QtHandle and QtTimerHandle.
+        """
         pass
 
     def when(self) -> float:
