@@ -20,17 +20,22 @@ class QAsyncioTask(futures.QAsyncioFuture):
                  context: typing.Optional[contextvars.Context] = None) -> None:
         super().__init__(loop=loop, context=context)
 
-        self._coro = coro
+        self._coro = coro  # The coroutine for which this task was created.
         self._name = name if name else "QtTask"
 
+        # The task creates a handle for its coroutine. The handle enqueues the
+        # task's step function as its callback in the event loop.
         self._handle = self._loop.call_soon(self._step, context=self._context)
 
-        self._cancellation_requests = 0
-
+        # The task step function executes the coroutine until it finishes,
+        # raises an exception or returns a future. If a future was returned,
+        # the task will await its completion (or exception).
         self._future_to_await: typing.Optional[asyncio.Future] = None
-        self._cancel_message: typing.Optional[str] = None
-        self._cancelled = False
 
+        self._cancelled = False
+        self._cancel_message: typing.Optional[str] = None
+
+        # https://docs.python.org/3/library/asyncio-extending.html#task-lifetime-support
         asyncio._register_task(self)  # type: ignore[arg-type]
 
     def __repr__(self) -> str:
@@ -59,6 +64,14 @@ class QAsyncioTask(futures.QAsyncioFuture):
     def _step(self,
               exception_or_future: typing.Union[
                   BaseException, futures.QAsyncioFuture, None] = None) -> None:
+        """
+        The step function is the heart of a task. It is scheduled in the event
+        loop repeatedly, executing the coroutine "step" by "step" (i.e.,
+        iterating through the asynchronous generator) until it finishes with an
+        exception or successfully. Each step can optionally receive an
+        exception or a future as a result from a previous step to handle.
+        """
+
         if self.done():
             return
         result = None
@@ -72,7 +85,15 @@ class QAsyncioTask(futures.QAsyncioFuture):
 
         try:
             asyncio._enter_task(self._loop, self)  # type: ignore[arg-type]
+
+            # It is at this point that the coroutine is resumed for the current
+            # step (i.e. asynchronous generator iteration). It will now be
+            # executed until it yields (and potentially returns a future),
+            # raises an exception, is cancelled, or finishes successfully.
+
             if isinstance(exception_or_future, BaseException):
+                # If the coroutine doesn't handle this exception, it propagates
+                # to the caller.
                 result = self._coro.throw(exception_or_future)
             else:
                 result = self._coro.send(None)
@@ -87,6 +108,9 @@ class QAsyncioTask(futures.QAsyncioFuture):
             self._exception = e
         else:
             if asyncio.futures.isfuture(result):
+                # If the coroutine yields a future, the task will await its
+                # completion, and at that point the step function will be
+                # called again.
                 result.add_done_callback(
                     self._step, context=self._context)  # type: ignore[arg-type]
                 self._future_to_await = result
@@ -100,12 +124,16 @@ class QAsyncioTask(futures.QAsyncioFuture):
                     # very quickly.
                     self._future_to_await.cancel(self._cancel_message)
             elif result is None:
+                # If no future was yielded, we schedule the step function again
+                # without any arguments.
                 self._loop.call_soon(self._step, context=self._context)
             else:
+                # This is not supposed to happen.
                 exception = RuntimeError(f"Bad task result: {result}")
                 self._loop.call_soon(self._step, exception, context=self._context)
         finally:
             asyncio._leave_task(self._loop, self)  # type: ignore[arg-type]
+
             if self._exception:
                 self._loop.call_exception_handler({
                     "message": (str(self._exception) if self._exception
@@ -117,8 +145,11 @@ class QAsyncioTask(futures.QAsyncioFuture):
                                if asyncio.futures.isfuture(exception_or_future)
                                else None)
                 })
+
             if self.done():
                 self._schedule_callbacks()
+
+                # https://docs.python.org/3/library/asyncio-extending.html#task-lifetime-support
                 asyncio._unregister_task(self)  # type: ignore[arg-type]
 
     def get_stack(self, *, limit=None) -> typing.List[typing.Any]:
@@ -144,6 +175,8 @@ class QAsyncioTask(futures.QAsyncioFuture):
         self._cancel_message = msg
         self._handle.cancel()
         if self._future_to_await is not None:
+            # A task that is awaiting a future must also cancel this future in
+            # order for the cancellation to be successful.
             self._future_to_await.cancel(msg)
         self._cancelled = True
         return True

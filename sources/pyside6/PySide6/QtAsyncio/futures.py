@@ -36,9 +36,10 @@ class QAsyncioFuture():
         self._result: typing.Any = None
         self._exception: typing.Optional[BaseException] = None
 
-        self._callbacks: typing.List[typing.Callable] = list()
-
         self._cancel_message: typing.Optional[str] = None
+
+        # List of callbacks that are called when the future is done.
+        self._callbacks: typing.List[typing.Callable] = list()
 
     def __await__(self):
         if not self.done():
@@ -51,6 +52,7 @@ class QAsyncioFuture():
     __iter__ = __await__
 
     def _schedule_callbacks(self, context: typing.Optional[contextvars.Context] = None):
+        """ A future can optionally have callbacks that are called when the future is done. """
         for cb in self._callbacks:
             self._loop.call_soon(
                 cb, self, context=context if context else self._context)
