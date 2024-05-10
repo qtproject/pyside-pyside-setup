@@ -1598,11 +1598,17 @@ static void writePointerToPythonConverter(TextStream &c,
     c << "auto *pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(cppIn));\n"
         << "if (pyOut) {\n" << indent
         << "Py_INCREF(pyOut);\nreturn pyOut;\n" << outdent
-        << "}\n"
-        << "auto *tCppIn = reinterpret_cast<const " << typeName << R"( *>(cppIn);
-const char *typeName = )";
+        << "}\n";
 
     const QString nameFunc = metaClass->typeEntry()->polymorphicNameFunction();
+    if (nameFunc.isEmpty() && !metaClass->hasVirtualDestructor()) {
+        c << "return Shiboken::Object::newObjectWithHeuristics("
+            << cpythonType << ", const_cast<void *>(cppIn), false);\n";
+        return;
+    }
+
+    c   << "auto *tCppIn = reinterpret_cast<const " << typeName << R"( *>(cppIn);
+const char *typeName = )";
     if (nameFunc.isEmpty())
         c << "typeid(*tCppIn).name();\n";
     else
