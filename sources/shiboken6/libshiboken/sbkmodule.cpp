@@ -10,18 +10,23 @@
 
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 #include <cstring>
+
+/// This hash maps module objects to arrays of converters.
+using ModuleConvertersMap = std::unordered_map<PyObject *, SbkConverter **> ;
 
 /// This hash maps module objects to arrays of Python types.
 using ModuleTypesMap = std::unordered_map<PyObject *, Shiboken::Module::TypeInitStruct *> ;
 
-/// This hash maps module objects to arrays of converters.
-using ModuleConvertersMap = std::unordered_map<PyObject *, SbkConverter **>;
+struct TypeCreationStruct
+{
+    Shiboken::Module::TypeCreationFunction func;
+    std::vector<std::string> subtypeNames;
+};
 
-/// This hash maps type names to type creation functions.
-using TypeCreationFunctionModulePair =
-    std::pair<Shiboken::Module::TypeCreationFunction, PyObject *>;
-using NameToTypeFunctionMap = std::unordered_map<std::string, TypeCreationFunctionModulePair>;
+/// This hash maps type names to type creation structs.
+using NameToTypeFunctionMap = std::unordered_map<std::string, TypeCreationStruct> ;
 
 /// This hash maps module objects to maps of names to functions.
 using ModuleToFuncsMap = std::unordered_map<PyObject *, NameToTypeFunctionMap> ;
@@ -74,6 +79,39 @@ LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct)
     return typeStruct.type;
 }
 
+static void incarnateHelper(PyObject *module, const std::string_view names,
+                            const NameToTypeFunctionMap &nameToFunc)
+{
+    auto dotPos = names.find('.');
+    std::string::size_type startPos = 0;
+    auto *modOrType{module};
+    while (dotPos != std::string::npos) {
+        auto typeName = names.substr(startPos, dotPos - startPos);
+        AutoDecRef obTypeName(String::fromCppStringView(typeName));
+        modOrType = PyObject_GetAttr(modOrType, obTypeName);
+        startPos = dotPos + 1;
+        dotPos = names.find('.', startPos);
+    }
+    // now we have the type to create.
+    auto funcIter = nameToFunc.find(std::string(names));
+    // - call this function that returns a PyTypeObject
+    auto tcStruct = funcIter->second;
+    auto initFunc = tcStruct.func;
+    PyTypeObject *type = initFunc(modOrType);
+    auto name = names.substr(startPos);
+    PyObject_SetAttrString(modOrType, name.data(), reinterpret_cast<PyObject *>(type));
+}
+
+static void incarnateSubtypes(PyObject *module,
+                              const std::vector<std::string> &nameList,
+                              NameToTypeFunctionMap &nameToFunc)
+{
+    for (auto const & tableIter : nameList) {
+        std::string_view names(tableIter);
+        incarnateHelper(module, names, nameToFunc);
+    }
+}
+
 static PyTypeObject *incarnateType(PyObject *module, const char *name,
                                    NameToTypeFunctionMap &nameToFunc)
 {
@@ -85,13 +123,15 @@ static PyTypeObject *incarnateType(PyObject *module, const char *name,
         return nullptr;
     }
     // - call this function that returns a PyTypeObject
-    auto pair = funcIter->second;
-    auto initFunc = pair.first;
-    auto *modOrType = pair.second;
+    auto tcStruct = funcIter->second;
+    auto initFunc = tcStruct.func;
+    auto *modOrType{module};
 
     // PYSIDE-2404: Make sure that no switching happens during type creation.
     auto saveFeature = initSelectableFeature(nullptr);
     PyTypeObject *type = initFunc(modOrType);
+    if (!tcStruct.subtypeNames.empty())
+        incarnateSubtypes(module, tcStruct.subtypeNames, nameToFunc);
     initSelectableFeature(saveFeature);
 
     // - assign this object to the name in the module
@@ -164,7 +204,7 @@ static PyObject *PyModule_lazyGetAttro(PyObject *module, PyObject *name)
     // - locate the name and retrieve the generating function
     const char *attrNameStr = Shiboken::String::toCString(name);
     auto &nameToFunc = tableIter->second;
-    // - create the real type (incarnateType checks this)
+    // - create the real type and handle subtypes
     auto *type = incarnateType(module, attrNameStr, nameToFunc);
     auto *ret = reinterpret_cast<PyObject *>(type);
     // - if attribute does really not exist use the original
@@ -172,7 +212,6 @@ static PyObject *PyModule_lazyGetAttro(PyObject *module, PyObject *name)
         PyErr_Clear();
         return origModuleGetattro(module, name);
     }
-
     return ret;
 }
 
@@ -292,24 +331,11 @@ static bool shouldLazyLoad(PyObject *module)
     return std::strncmp(modName, "PySide6.", 8) == 0;
 }
 
-void AddTypeCreationFunction(PyObject *module,
-                             const char *name,
-                             TypeCreationFunction func)
+void checkIfShouldLoadImmediately(PyObject *module, const std::string &name,
+                                  const NameToTypeFunctionMap &nameToFunc)
 {
     static const char *flag = getenv("PYSIDE6_OPTION_LAZY");
     static const int value = flag != nullptr ? std::atoi(flag) : 1;
-
-    // - locate the module in the moduleTofuncs mapping
-    auto tableIter = moduleToFuncs.find(module);
-    assert(tableIter != moduleToFuncs.end());
-    // - Assign the name/generating function pair.
-    auto &nameToFunc = tableIter->second;
-    TypeCreationFunctionModulePair pair{func, module};
-    auto nit = nameToFunc.find(name);
-    if (nit == nameToFunc.end())
-        nameToFunc.insert(std::make_pair(name, pair));
-    else
-        nit->second = pair;
 
     // PYSIDE-2404: Lazy Loading
     //
@@ -319,56 +345,56 @@ void AddTypeCreationFunction(PyObject *module,
     //   3  - lazy loading for any module.
     //
     // By default we lazy load all known modules (option = 1).
-
     if (value == 0                                  // completely disabled
         || canNotLazyLoad(module)                   // for some reason we cannot lazy load
         || (value == 1 && !shouldLazyLoad(module))  // not a known module
         ) {
-        PyTypeObject *type = func(module);
-        PyModule_AddObject(module, name, reinterpret_cast<PyObject *>(type));   // steals reference
+        incarnateHelper(module, name, nameToFunc);
     }
 }
 
 void AddTypeCreationFunction(PyObject *module,
                              const char *name,
-                             TypeCreationFunction func,
-                             const char *containerName)
+                             TypeCreationFunction func)
 {
-    // This version could be delayed as well, but for the few cases
-    // we simply fetch the container type and insert directly.
-    AutoDecRef obContainerType(PyObject_GetAttrString(module, containerName));
-    PyTypeObject *type = func(obContainerType);
-    PyObject_SetAttrString(obContainerType, name, reinterpret_cast<PyObject *>(type));   // steals reference
+    // - locate the module in the moduleTofuncs mapping
+    auto tableIter = moduleToFuncs.find(module);
+    assert(tableIter != moduleToFuncs.end());
+    // - Assign the name/generating function tcStruct.
+    auto &nameToFunc = tableIter->second;
+    TypeCreationStruct tcStruct{func, {}};
+    auto nit = nameToFunc.find(name);
+    if (nit == nameToFunc.end())
+        nameToFunc.insert(std::make_pair(name, tcStruct));
+    else
+        nit->second = tcStruct;
+
+    checkIfShouldLoadImmediately(module, name, nameToFunc);
 }
 
 void AddTypeCreationFunction(PyObject *module,
-                             const char *name,
+                             const char *containerName,
                              TypeCreationFunction func,
-                             const char *outerContainerName,
-                             const char *innerContainerName)
+                             const char *namePath)
 {
-    // This version has even more indirection. It is very rare, and
-    // we handle it directly.
-    AutoDecRef obOuterType(PyObject_GetAttrString(module, outerContainerName));
-    AutoDecRef obInnerType(PyObject_GetAttrString(obOuterType, innerContainerName));
-    PyTypeObject *type = func(obInnerType);
-    PyObject_SetAttrString(obInnerType, name, reinterpret_cast<PyObject *>(type));   // steals reference
-}
+    // - locate the module in the moduleTofuncs mapping
+    auto tableIter = moduleToFuncs.find(module);
+    assert(tableIter != moduleToFuncs.end());
+    // - Assign the name/generating function tcStruct.
+    auto &nameToFunc = tableIter->second;
+    auto nit = nameToFunc.find(containerName);
 
-void AddTypeCreationFunction(PyObject *module,
-                             const char *name,
-                             TypeCreationFunction func,
-                             const char *containerName3,
-                             const char *containerName2,
-                             const char *containerName)
-{
-    // This version has even mode indirection. It is very rare, and
-    // we handle it directly.
-    AutoDecRef obContainerType3(PyObject_GetAttrString(module, containerName3));
-    AutoDecRef obContainerType2(PyObject_GetAttrString(obContainerType3, containerName2));
-    AutoDecRef obContainerType(PyObject_GetAttrString(obContainerType2, containerName));
-    PyTypeObject *type = func(obContainerType);
-    PyObject_SetAttrString(obContainerType, name, reinterpret_cast<PyObject *>(type));   // steals reference
+    // - insert namePath into the subtype vector of the main type.
+    nit->second.subtypeNames.push_back(namePath);
+    // - insert it also as its own entry.
+    nit = nameToFunc.find(namePath);
+    TypeCreationStruct tcStruct{func, {}};
+    if (nit == nameToFunc.end())
+        nameToFunc.insert(std::make_pair(namePath, tcStruct));
+    else
+        nit->second = tcStruct;
+
+    checkIfShouldLoadImmediately(module, namePath, nameToFunc);
 }
 
 PyObject *import(const char *moduleName)

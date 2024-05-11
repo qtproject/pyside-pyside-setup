@@ -6059,18 +6059,14 @@ void CppGenerator::writeInitFunc(TextStream &declStr, TextStream &callStr,
     } else if (hasParent) {
         const QString &enclosingName = enclosingEntry->name();
         const auto parts = QStringView{enclosingName}.split(u"::", Qt::SkipEmptyParts);
+        const QString namePathPrefix = enclosingEntry->name().replace("::"_L1, "."_L1);
         callStr << "Shiboken::Module::AddTypeCreationFunction("
-            << "module, \"" << pythonName << "\", " << functionName << ", \"";
-        for (qsizetype i = 0; i < parts.size(); ++i) {
-            if (i > 0)
-               callStr << "\", \"";
-            callStr << parts.at(i);
-        }
-        callStr << "\");\n";
+            << "module, \"" << parts[0] << "\", "
+            << functionName << ", \"" << namePathPrefix << '.' << pythonName << "\");\n";
     } else {
         callStr << "Shiboken::Module::AddTypeCreationFunction("
             << "module, \"" << pythonName << "\", "
-            << "init_" << initFunctionName << ");\n";
+            << functionName << ");\n";
     }
 }
 
