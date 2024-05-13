@@ -124,9 +124,12 @@
     <function signature="qmlProtectModule(const char*,int)" doc-file="qqmlengine"/>
     <function signature="qmlRegisterModule(const char*,int,int)" doc-file="qqmlengine"/>
     <function signature="qmlTypeId(const char*,int,int,const char*)" doc-file="qqmlengine"/>
-    <function signature="qmlRegisterType(const QUrl &amp;,const char *,int,int,const char *)"/>
-    <function signature="qmlRegisterSingletonType(const QUrl &amp;,const char *,int,int,const char *)"/>
-    <function signature="qmlRegisterUncreatableMetaObject(const QMetaObject&amp;,const char*,int,int, const char*,const QString&amp;)"/>
+    <function signature="qmlRegisterType(const QUrl &amp;,const char *,int,int,const char *)"
+              doc-file="qqmlengine"/>
+    <function signature="qmlRegisterSingletonType(const QUrl &amp;,const char *,int,int,const char *)"
+              doc-file="qqmlengine"/>
+    <function signature="qmlRegisterUncreatableMetaObject(const QMetaObject&amp;,const char*,int,int, const char*,const QString&amp;)"
+              doc-file="qqmlengine"/>
 
     <enum-type identified-by-value="QML_HAS_ATTACHED_PROPERTIES">
         <extra-includes>
