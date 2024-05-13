@@ -1466,7 +1466,8 @@ static PyObject *newObjectWithHeuristicsHelper(PyTypeObject *instanceType,
     // Try type discovery in these cases.
     if (exactType == nullptr || exactType == instanceType) {
         auto resolved = BindingManager::instance().findDerivedType(cptr, instanceType);
-        if (resolved.first != nullptr) {
+        if (resolved.first != nullptr
+            && Shiboken::ObjectType::canDowncastTo(instanceType, resolved.first)) {
             exactType = resolved.first;
             cptr = resolved.second;
         }
