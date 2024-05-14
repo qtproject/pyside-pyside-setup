@@ -24,7 +24,7 @@ class thread_function():
 
 class Task(QRunnable):
     def run(self):
-        QThread.sleep(2)  # Sleep 2 seconds
+        QThread.msleep(100)
 
 
 class QThreadPoolTest(unittest.TestCase):
@@ -34,15 +34,15 @@ class QThreadPoolTest(unittest.TestCase):
         for i in range(3):
             task = Task()
             QThreadPool.globalInstance().start(task)
-            time.sleep(1)  # Sleep 1 second
+            time.sleep(0.05)
 
-        QThreadPool.globalInstance().waitForDone()
+        self.assertTrue(QThreadPool.globalInstance().waitForDone())
 
     def testCallable(self):
         global thread_function_called
         tp = QThreadPool.globalInstance()
         tp.start(thread_function)
-        tp.waitForDone()
+        self.assertTrue(tp.waitForDone())
         self.assertTrue(thread_function_called)
 
 
