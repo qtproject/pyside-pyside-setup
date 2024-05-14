@@ -997,6 +997,8 @@ def module_QtSerialBus() -> ModuleData:
 def module_QtVirtualKeyboard() -> ModuleData:
     data = ModuleData("VirtualKeyboard")
     data.plugins.append("virtualkeyboard")
+    data.qtlib.append("libQt6VirtualKeyboardSettings")
+
     return data
 
 
