@@ -84,11 +84,9 @@ static PyObject *convertToPrimitiveType(const QVariant &out, int metaTypeId)
         return PyFloat_FromDouble(out.toFloat());
     case QMetaType::Bool:
         if (out.toBool()) {
-            Py_INCREF(Py_True);
-            return Py_True;
+            Py_RETURN_TRUE;
         }
-        Py_INCREF(Py_False);
-        return Py_False;
+        Py_RETURN_FALSE;
     default:
         break;
     }
