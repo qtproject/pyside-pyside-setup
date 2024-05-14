@@ -105,13 +105,13 @@ static PyType_Spec typeprobe_spec = {
 static void
 check_PyTypeObject_valid()
 {
-    auto *obtype = reinterpret_cast<PyObject *>(&PyType_Type);
-    auto *probe_tp_base = reinterpret_cast<PyTypeObject *>(
-        PyObject_GetAttr(obtype, Shiboken::PyMagicName::base()));
+    auto *typetype = &PyType_Type;
+    auto *obtype = reinterpret_cast<PyObject *>(typetype);
+    auto *probe_tp_base_obj = PyObject_GetAttr(obtype, Shiboken::PyMagicName::base());
+    auto *probe_tp_base = reinterpret_cast<PyTypeObject *>(probe_tp_base_obj);
     auto *probe_tp_bases = PyObject_GetAttr(obtype, Shiboken::PyMagicName::bases());
-    auto *check = reinterpret_cast<PyTypeObject *>(
-        PyType_FromSpecWithBases(&typeprobe_spec, probe_tp_bases));
-    auto *typetype = reinterpret_cast<PyTypeObject *>(obtype);
+    auto *checkObj = PyType_FromSpecWithBases(&typeprobe_spec, probe_tp_bases);
+    auto *check = reinterpret_cast<PyTypeObject *>(checkObj);
     PyObject *w = PyObject_GetAttr(obtype, Shiboken::PyMagicName::weakrefoffset());
     long probe_tp_weakrefoffset = PyLong_AsLong(w);
     PyObject *d = PyObject_GetAttr(obtype, Shiboken::PyMagicName::dictoffset());
@@ -149,8 +149,8 @@ check_PyTypeObject_valid()
         || probe_tp_mro             != typetype->tp_mro
         || Py_TPFLAGS_DEFAULT       != (check->tp_flags & Py_TPFLAGS_DEFAULT))
         Py_FatalError("The structure of type objects has changed!");
-    Py_DECREF(check);
-    Py_DECREF(probe_tp_base);
+    Py_DECREF(checkObj);
+    Py_DECREF(probe_tp_base_obj);
     Py_DECREF(w);
     Py_DECREF(d);
     Py_DECREF(probe_tp_bases);
