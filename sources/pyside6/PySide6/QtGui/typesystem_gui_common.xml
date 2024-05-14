@@ -122,6 +122,7 @@
   <object-type name="QAccessibleEditableTextInterface"/>
   <object-type name="QAccessibleInterface"/>
   <object-type name="QAccessibleObject" qt-register-metatype="base"/>
+  <object-type name="QAccessibleSelectionInterface" since="6.7"/>
   <object-type name="QAccessibleTableCellInterface"/>
   <object-type name="QAccessibleTextInterface"/>
   <object-type name="QAccessibleValueInterface"/>

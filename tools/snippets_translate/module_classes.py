@@ -532,6 +532,7 @@ module_classes = {
         "QAccessibleEvent",
         "QAccessibleInterface",
         "QAccessibleObject",
+        "QAccessibleSelectionInterface",
         "QAccessibleStateChangeEvent",
         "QAccessibleTableCellInterface",
         "QAccessibleTableModelChangeEvent",
