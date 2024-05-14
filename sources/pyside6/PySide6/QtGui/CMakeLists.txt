@@ -88,6 +88,7 @@ ${QtGui_GEN_DIR}/qaccessibleactioninterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleeditabletextinterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibleobject_wrapper.cpp
+${QtGui_GEN_DIR}/qaccessibleselectioninterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessiblestatechangeevent_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibletablecellinterface_wrapper.cpp
 ${QtGui_GEN_DIR}/qaccessibletablemodelchangeevent_wrapper.cpp
