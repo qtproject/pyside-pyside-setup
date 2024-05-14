@@ -237,7 +237,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
         if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
             _vars['built_modules'] = generated_config['built_modules']
             if sys.platform == 'darwin':
-                prepare_standalone_package_macos(pyside_build, _vars)
+                prepare_standalone_package_macos(pyside_build, _vars, is_android=is_android)
             else:
                 prepare_standalone_package_linux(pyside_build, _vars, cross_build,
                                                  is_android=is_android)

@@ -47,7 +47,7 @@ class PysideBuildWheel(_bdist_wheel, CommandMixin):
 
     def finalize_options(self):
         CommandMixin.mixin_finalize_options(self)
-        if sys.platform == 'darwin':
+        if sys.platform == 'darwin' and not self.is_cross_compile:
             # Override the platform name to contain the correct
             # minimum deployment target.
             # This is used in the final wheel name.

@@ -202,12 +202,6 @@ macro(get_python_extension_suffix)
     # Python_SOABI is only set by CMake 3.17+
     # TODO: Lower this to CMake 3.16 if possible.
     if(SHIBOKEN_IS_CROSS_BUILD)
-        # For android platform armv7a FindPython module return Python_SOABI as empty because
-        # it is unable to set Python_CONFIG i.e. find `python3-config` script
-        # This workaround sets the Python_SOABI manually for this platform.
-        if(CMAKE_SYSTEM_NAME STREQUAL "Android" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
-            set(Python_SOABI "cpython-311}")
-        endif()
         if(NOT Python_SOABI)
             message(FATAL_ERROR "Python_SOABI variable is empty.")
         endif()
@@ -320,6 +314,17 @@ macro(shiboken_find_required_python)
             "${_shiboken_backup_CMAKE_FIND_ROOT_PATH_MODE_PROGRAM}")
         set(CMAKE_FIND_ROOT_PATH
             "${_shiboken_backup_CMAKE_FIND_ROOT_PATH}")
+
+        # For Android platform sometimes the FindPython module returns Python_SOABI as empty in
+        # certain scenarios eg: armv7a target, macOS host etc. This is because
+        # it is unable to set Python_CONFIG i.e. `python3-config` script
+        # This workaround sets the Python_SOABI manually for this Android platform.
+        # This needs to be updated manually if the Python version for Android cross compilation
+        # changes.
+        # TODO: Find a better way to set Python_SOABI for Android platform
+        if(CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT Python_SOABI)
+            set(Python_SOABI "cpython-311")
+        endif()
     else()
         find_package(
             Python
