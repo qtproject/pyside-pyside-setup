@@ -35,6 +35,12 @@ class Nuitka:
                                      "generic"  # plugins that error with Nuitka
                                      ]
 
+        # .webp are considered to be dlls by Nuitka instead of data files causing
+        # the packaging to fail
+        # https://github.com/Nuitka/Nuitka/issues/2854
+        # TODO: Remove .webp when the issue is fixed
+        self.files_to_ignore = [".cpp.o", ".qsb", ".webp"]
+
     @staticmethod
     def icon_option():
         if sys.platform == "linux":
@@ -80,6 +86,14 @@ class Nuitka:
                 for plugin in excluded_qml_plugins:
                     dll_name = plugin.replace("Qt", f"Qt{MAJOR_VERSION}")
                     qml_args.append(f"--noinclude-dlls={prefix}{dll_name}*")
+
+            # Exclude .qen json files from QtQuickEffectMaker
+            # These files are not relevant for PySide6 applications
+            qml_args.append("--noinclude-dlls=*/qml/QtQuickEffectMaker/*")
+
+        # Exclude files that cannot be processed by Nuitka
+        for file in self.files_to_ignore:
+            extra_args.append(f"--noinclude-dlls=*{file}")
 
         output_dir = source_file.parent / "deployment"
         if not dry_run:

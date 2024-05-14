@@ -63,6 +63,9 @@ class DeployTestBase(LongSortedOptionTest):
         cls.deploy_lib = importlib.import_module("deploy_lib")
         cls.deploy = importlib.import_module("deploy")
         sys.modules["deploy"] = cls.deploy
+        files_to_ignore = [".cpp.o", ".qsb", ".webp"]
+        cls.dlls_ignore_nuitka = " ".join([f"--noinclude-dlls=*{file}"
+                                           for file in files_to_ignore])
 
         # required for comparing long strings
         cls.maxDiff = None
@@ -107,6 +110,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
             f" --enable-plugin=pyside6 --output-dir={str(self.deployment_files)} --quiet"
             f" --noinclude-qt-translations"
             f" --include-qt-plugins={plugins_nuitka}"
+            f" {self.dlls_ignore_nuitka}"
         )
         if sys.platform.startswith("linux"):
             self.expected_run_cmd += f" --linux-icon={str(self.linux_icon)} --onefile"
@@ -189,6 +193,7 @@ class TestPySide6DeployQml(DeployTestBase):
         self.deployment_files = self.temp_example_qml / "deployment"
         self.first_qml_file = "main.qml"
         self.second_qml_file = "MovingRectangle.qml"
+
         # All the plugins included. This is different from plugins_nuitka, because Nuitka bundles
         # some plugins by default
         self.all_plugins = ["accessiblebridge", "egldeviceintegrations", "generic", "iconengines",
@@ -203,6 +208,8 @@ class TestPySide6DeployQml(DeployTestBase):
             f"{sys.executable} -m nuitka {str(self.main_file)} --follow-imports"
             f" --enable-plugin=pyside6 --output-dir={str(self.deployment_files)} --quiet"
             f" --noinclude-qt-translations"
+            f" {self.dlls_ignore_nuitka}"
+            " --noinclude-dlls=*/qml/QtQuickEffectMaker/*"
             f" --include-qt-plugins={plugins_nuitka}"
             f" --include-data-files={str(self.temp_example_qml / self.first_qml_file)}="
             f"./main.qml --include-data-files="
@@ -334,6 +341,8 @@ class TestPySide6DeployWebEngine(DeployTestBase):
             f" --noinclude-qt-translations --include-qt-plugins=all"
             f" {data_files_cmd}"
             f" --include-qt-plugins={plugins_nuitka}"
+            f" {self.dlls_ignore_nuitka}"
+            " --noinclude-dlls=*/qml/QtQuickEffectMaker/*"
         )
 
         if sys.platform != "win32":
