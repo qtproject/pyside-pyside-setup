@@ -713,8 +713,7 @@ static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
     }
 
     warnDisconnectFailed(slot, source->d->signature);
-    Py_INCREF(Py_False);
-    return Py_False;
+    Py_RETURN_FALSE;
 }
 
 // PYSIDE-68: Supply the missing __get__ function

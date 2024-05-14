@@ -49,7 +49,10 @@ static void QtQml_VolatileBoolObject_dealloc(PyObject *self)
 static PyObject *
 QtQml_VolatileBoolObject_get(QtQml_VolatileBoolObject *self)
 {
-    return *self->flag ? Py_True : Py_False;
+    if (*self->flag) {
+        Py_RETURN_TRUE;
+    }
+    Py_RETURN_FALSE;
 }
 
 static PyObject *

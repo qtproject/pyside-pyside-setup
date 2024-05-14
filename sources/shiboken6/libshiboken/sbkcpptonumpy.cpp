@@ -49,17 +49,17 @@ PyObject *createByteArray1(Py_ssize_t, const uint8_t *)
 
 PyObject *createDoubleArray1(Py_ssize_t, const double *)
 {
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyObject *createFloatArray1(Py_ssize_t, const float *)
 {
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 PyObject *createIntArray1(Py_ssize_t, const int *)
 {
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 #endif // !HAVE_NUMPY
