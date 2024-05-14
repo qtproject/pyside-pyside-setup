@@ -313,6 +313,15 @@ set(QtGui_private_include_dirs
     ${Qt${QT_MAJOR_VERSION}Core_PRIVATE_INCLUDE_DIRS}
     ${Qt${QT_MAJOR_VERSION}Gui_PRIVATE_INCLUDE_DIRS})
 
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
+    if (QT_FEATURE_opengles2)
+        # add openGL ES 2.0
+        find_package(GLESv2 REQUIRED)
+    else()
+        message(FATAL_ERROR "QtGui requires OpenGL ES 2.0 on Android")
+    endif()
+endif()
+
 configure_file("${QtGui_SOURCE_DIR}/QtGui_global.post.h.in"
                "${QtGui_BINARY_DIR}/QtGui_global.post.h" @ONLY)
 

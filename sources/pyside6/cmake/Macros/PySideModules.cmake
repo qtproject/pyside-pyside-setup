@@ -194,6 +194,35 @@ macro(create_pyside_module)
         --lean-headers
         --api-version=${SUPPORTED_QT_VERSION})
 
+    # check if building for Android with a macOS host
+    # This is not needed for Linux because OpenGLES2 development binaries in
+    # linux can be installed by installing 'libgles2-mesa-dev' package which
+    # comes as a default requirement for building PySide6. As such for
+    # cross-compiling in linux, we use the clang compiler from the installed
+    # libclang itself.
+    if(CMAKE_ANDROID_ARCH_LLVM_TRIPLE AND CMAKE_HOST_APPLE)
+        message(STATUS "Building for Android with arch ${CMAKE_ANDROID_ARCH_LLVM_TRIPLE}")
+        list(APPEND shiboken_command "--clang-option=--target=${CMAKE_ANDROID_ARCH_LLVM_TRIPLE}")
+
+        # CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX does not contain the ANDROID_PLATFORM i.e. it ends with
+        # the form 'aarch64-linux-android-'. Remove the last '-' and add the corresponding clang
+        # based on ANDROID_PLATFORM making it 'aarch64-linux-android26-clang++'
+
+        # Get the length of the string
+        string(LENGTH "${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}" _length)
+
+        # Subtract 1 from the length to get the characters till '-'
+        math(EXPR _last_index "${_length} - 1")
+
+        # Get the substring from the start to the character before the last one
+        string(SUBSTRING "${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}" 0 "${_last_index}"
+               SHIBOKEN_ANDROID_COMPILER_PREFIX)
+
+        # use the compiler from the Android NDK
+        list(APPEND shiboken_command
+            "--compiler-path=${SHIBOKEN_ANDROID_COMPILER_PREFIX}${CMAKE_ANDROID_API}-clang++")
+    endif()
+
     if(CMAKE_HOST_APPLE)
         set(shiboken_framework_include_dir_list ${QT_FRAMEWORK_INCLUDE_DIR})
         make_path(shiboken_framework_include_dirs ${shiboken_framework_include_dir_list})

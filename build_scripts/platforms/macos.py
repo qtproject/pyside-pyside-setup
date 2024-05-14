@@ -21,7 +21,7 @@ def _macos_patch_executable(name, _vars=None):
     macos_add_rpath(rpath, binary)
 
 
-def prepare_standalone_package_macos(pyside_build, _vars):
+def prepare_standalone_package_macos(pyside_build, _vars, is_android=False):
     built_modules = _vars['built_modules']
 
     constrain_modules = None
@@ -119,7 +119,11 @@ def prepare_standalone_package_macos(pyside_build, _vars):
         ignored_modules = []
         if not pyside_build.is_webengine_built(built_modules):
             ignored_modules.extend(['libQt6WebEngine*.dylib'])
+
         accepted_modules = ['libQt6*.6.dylib']
+        if is_android:
+            accepted_modules = ['libQt6*.so', '*-android-dependencies.xml']
+
         if constrain_modules:
             accepted_modules = [f"libQt6{module}*.6.dylib" for module in constrain_modules]
 
@@ -156,6 +160,8 @@ def prepare_standalone_package_macos(pyside_build, _vars):
         # <qt>/plugins/* -> <setup>/{st_package_name}/Qt/plugins
         plugins_target = destination_qt_dir / "plugins"
         filters = ["*.dylib"]
+        if is_android:
+            filters = ["*.so"]
         copydir("{qt_plugins_dir}", plugins_target,
                 _filter=filters,
                 recursive=True,

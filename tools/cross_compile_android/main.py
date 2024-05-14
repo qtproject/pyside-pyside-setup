@@ -18,6 +18,7 @@ from android_utilities import (run_command, download_android_commandlinetools,
                                download_android_ndk, install_android_packages)
 
 # Note: Does not work with PyEnv. Your Host Python should contain openssl.
+# also update the version in ShibokenHelpers.cmake if Python version changes.
 PYTHON_VERSION = "3.11"
 
 SKIP_UPDATE_HELP = ("skip the updation of SDK packages build-tools, platform-tools to"

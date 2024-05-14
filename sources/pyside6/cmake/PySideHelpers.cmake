@@ -138,13 +138,18 @@ macro(check_os)
     set(ENABLE_MAC "0")
     set(ENABLE_WIN "0")
 
-    if(CMAKE_HOST_APPLE)
-        set(ENABLE_MAC "1")
-    elseif(CMAKE_HOST_WIN32)
-        set(ENABLE_WIN "1")
-        set(ENABLE_UNIX "0")
-    elseif(NOT CMAKE_HOST_UNIX)
-        message(FATAL_ERROR "OS not supported")
+    # check if Android, if so, set ENABLE_UNIX=1
+    # this is needed to avoid including the wrapper specific to macOS when building for Android
+    # from a macOS host
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+        if(CMAKE_HOST_APPLE)
+            set(ENABLE_MAC "1")
+        elseif(CMAKE_HOST_WIN32)
+            set(ENABLE_WIN "1")
+            set(ENABLE_UNIX "0")
+        elseif(NOT CMAKE_HOST_UNIX)
+            message(FATAL_ERROR "OS not supported")
+        endif()
     endif()
 endmacro()
 

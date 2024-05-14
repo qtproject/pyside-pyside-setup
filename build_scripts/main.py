@@ -508,7 +508,11 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         log.info("-" * 3)
         if sys.platform == 'win32':
             log.info(f"OpenSSL dll directory: {OPTION['OPENSSL']}")
-        if sys.platform == 'darwin':
+        # for cross-compilation it is possible to use a macOS host, but
+        # pyside_macos_deployment_target is not relevant for the target.
+        # The only exception here is when we are trying to cross-compile from intel mac to m1 mac.
+        # This case is not supported yet.
+        if sys.platform == 'darwin' and not self.is_cross_compile:
             pyside_macos_deployment_target = (macos_pyside_min_deployment_target())
             log.info(f"MACOSX_DEPLOYMENT_TARGET set to: {pyside_macos_deployment_target}")
         log.info("=" * 30)
@@ -745,7 +749,9 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
         cmake_cmd += platform_cmake_options()
 
-        if sys.platform == 'darwin':
+        # for a macOS host, cross-compilation is possible, but for the host system as such
+        # we only build shiboken. Hence the following code can be skipped.
+        if sys.platform == 'darwin' and not self.is_cross_compile:
             if OPTION["MACOS_ARCH"]:
                 # also tell cmake which architecture to use
                 cmake_cmd.append(f"-DCMAKE_OSX_ARCHITECTURES:STRING={OPTION['MACOS_ARCH']}")
