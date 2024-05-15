@@ -6,8 +6,8 @@
 
 #include <sbkpython.h>
 
-#include <QtDataVisualization/QSurfaceDataProxy>
-#include <QtCore/QList>
+#include <QtDataVisualization/qsurfacedataproxy.h>
+#include <QtCore/qlist.h>
 
 namespace QtDataVisualizationHelper {
 

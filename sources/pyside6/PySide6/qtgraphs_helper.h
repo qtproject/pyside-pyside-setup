@@ -6,8 +6,8 @@
 
 #include <sbkpython.h>
 
-#include <QtGraphs/QSurfaceDataProxy>
-#include <QtCore/QList>
+#include <QtGraphs/qsurfacedataproxy.h>
+#include <QtCore/qlist.h>
 
 namespace QtGraphsHelper {
 
