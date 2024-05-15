@@ -27,7 +27,9 @@
 #include "signature_p.h"
 #include "voidptr.h"
 
+#include <string>
 #include <iostream>
+#include <sstream>
 
 #if defined(__APPLE__)
 #include <dlfcn.h>
@@ -771,6 +773,19 @@ namespace Shiboken
 
 void _initMainThreadId(); // helper.cpp
 
+static std::string msgFailedToInitializeType(const char *description)
+{
+    std::ostringstream stream;
+    stream << "[libshiboken] Failed to initialize " << description;
+    if (auto *error = PepErr_GetRaisedException()) {
+        if (auto *str = PyObject_Str(error))
+            stream << ": " << Shiboken::String::toCString(str);
+        Py_DECREF(error);
+    }
+    stream << '.';
+    return stream.str();
+}
+
 namespace Conversions { void init(); }
 
 void init()
@@ -786,11 +801,13 @@ void init()
     //Init private data
     Pep384_Init();
 
-    if (PyType_Ready(SbkObjectType_TypeF()) < 0)
-        Py_FatalError("[libshiboken] Failed to initialize Shiboken.BaseWrapperType metatype.");
+    auto *type = SbkObjectType_TypeF();
+    if (type == nullptr || PyType_Ready(type) < 0)
+        Py_FatalError(msgFailedToInitializeType("Shiboken.BaseWrapperType metatype").c_str());
 
-    if (PyType_Ready(SbkObject_TypeF()) < 0)
-        Py_FatalError("[libshiboken] Failed to initialize Shiboken.BaseWrapper type.");
+    type = SbkObject_TypeF();
+    if (type == nullptr || PyType_Ready(type) < 0)
+        Py_FatalError(msgFailedToInitializeType("Shiboken.BaseWrapper type").c_str());
 
     VoidPtr::init();
 
