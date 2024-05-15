@@ -6,6 +6,7 @@
 <typesystem package="PySide6.QtWebEngineQuick"
             namespace-begin="QT_BEGIN_NAMESPACE" namespace-end="QT_END_NAMESPACE">
     <load-typesystem name="QtQml/typesystem_qml.xml" generate="no"/>
+    <load-typesystem name="QtWebEngineCore/typesystem_webenginecore.xml" generate="no"/>
 
     <namespace-type name="QtWebEngineQuick"/> <!-- initialize() -->
 
