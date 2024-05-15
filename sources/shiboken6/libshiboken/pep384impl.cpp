@@ -482,6 +482,22 @@ Pep_GetVerboseFlag()
 }
 #endif // Py_LIMITED_API
 
+// Support for pyerrors.h
+
+#if defined(Py_LIMITED_API) || PY_VERSION_HEX < 0x030C0000
+// Emulate PyErr_GetRaisedException() using the deprecated PyErr_Fetch()/PyErr_Store()
+PyObject *PepErr_GetRaisedException()
+{
+    PyObject *type{};
+    PyObject *value{};
+    PyObject *traceback{};
+    PyErr_Fetch(&type, &value, &traceback);
+    Py_XINCREF(value);
+    PyErr_Restore(type, value, traceback);
+    return value;
+}
+#endif // Limited or < 3.12
+
 /*****************************************************************************
  *
  * Support for code.h

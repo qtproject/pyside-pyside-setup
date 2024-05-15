@@ -188,6 +188,13 @@ LIBSHIBOKEN_API int Pep_GetFlag(const char *name);
 LIBSHIBOKEN_API int Pep_GetVerboseFlag(void);
 #endif
 
+// pyerrors.h
+#if defined(Py_LIMITED_API) || PY_VERSION_HEX < 0x030C0000
+LIBSHIBOKEN_API PyObject *PepErr_GetRaisedException();
+#else
+#  define PepErr_GetRaisedException PyErr_GetRaisedException
+#endif
+
 /*****************************************************************************
  *
  * RESOLVED: unicodeobject.h
