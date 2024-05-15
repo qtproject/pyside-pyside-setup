@@ -1022,6 +1022,8 @@ void QSingleShotTimerFunctor::operator()()
     Shiboken::GilState state;
     Shiboken::AutoDecRef arglist(PyTuple_New(0));
     Shiboken::AutoDecRef ret(PyObject_CallObject(object(), arglist));
+    if (Shiboken::Errors::occurred())
+        Shiboken::Errors::storeErrorOrPrint();
     release(); // single shot
 }
 // @snippet qtimer-singleshot-functorclass
