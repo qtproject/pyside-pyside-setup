@@ -1677,8 +1677,9 @@
     <add-function signature="operator==(const QItemSelection&amp;)" return-type="bool"/>
     <add-function signature="operator!=(const QItemSelection&amp;)" return-type="bool"/>
     <!-- For some reason, the empty selection is not seen. Maybe related to the new [default]
-         tag in Qt6? -->
-    <declare-function signature="QItemSelection()" return-type="QItemSelection" />
+         tag in Qt6?
+         PYSIDE-2756: The return-type attribute is unnecessary -->
+    <declare-function signature="QItemSelection()"/>
     <!-- The __add__ function creates a result list, instead of using the inherited type.
          Fixed by adding with the correct type. -->
     <add-function signature="operator+(QItemSelection)" return-type="QItemSelection">
