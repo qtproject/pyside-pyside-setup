@@ -43,7 +43,6 @@ using namespace Qt::StringLiterals;
 
 static PyObject *metaObjectAttr = nullptr;
 static PyObject *parseArguments(const QMetaMethod &method, void **args);
-static bool emitShortCircuitSignal(QObject *source, int signalIndex, PyObject *args);
 
 static bool qAppRunning = false;
 
@@ -474,16 +473,7 @@ bool SignalManager::emitSignal(QObject *source, const char *signal, PyObject *ar
     signal++;
 
     int signalIndex = source->metaObject()->indexOfSignal(signal);
-    if (signalIndex != -1) {
-        // cryptic but works!
-        // if the signature doesn't have a '(' it's a shor circuited signal, i.e. std::find
-        // returned the string null terminator.
-        bool isShortCircuit = !*std::find(signal, signal + std::strlen(signal), '(');
-        return isShortCircuit
-            ? emitShortCircuitSignal(source, signalIndex, args)
-            : MetaFunction::call(source, signalIndex, args);
-    }
-    return false;
+    return signalIndex != -1 && MetaFunction::call(source, signalIndex, args);
 }
 
 // Handle errors from meta calls. Requires GIL and PyErr_Occurred()
@@ -589,7 +579,7 @@ int SignalManager::SignalManagerPrivate::qtMethodMetacall(QObject *object,
             PyErr_Format(PyExc_AttributeError, "Slot '%s::%s' not found.",
                          metaObject->className(), method.methodSignature().constData());
         } else {
-            SignalManager::callPythonMetaMethod(method, args, pyMethod, false);
+            SignalManager::callPythonMetaMethod(method, args, pyMethod);
         }
     }
     // WARNING Isn't safe to call any metaObject and/or object methods beyond this point
@@ -635,13 +625,12 @@ int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, 
     return id;
 }
 
-int SignalManager::callPythonMetaMethod(const QMetaMethod &method, void **args, PyObject *pyMethod, bool isShortCuit)
+int SignalManager::callPythonMetaMethod(const QMetaMethod &method, void **args, PyObject *pyMethod)
 {
     Q_ASSERT(pyMethod);
 
     Shiboken::GilState gil;
-    PyObject *pyArguments = isShortCuit
-        ? reinterpret_cast<PyObject *>(args[1]) : parseArguments(method, args);
+    PyObject *pyArguments = parseArguments(method, args);
 
     if (pyArguments) {
         QScopedPointer<Shiboken::Conversions::SpecificConverter> retConverter;
@@ -656,8 +645,7 @@ int SignalManager::callPythonMetaMethod(const QMetaMethod &method, void **args, 
 
         Shiboken::AutoDecRef retval(PyObject_CallObject(pyMethod, pyArguments));
 
-        if (!isShortCuit && pyArguments)
-            Py_DECREF(pyArguments);
+        Py_DECREF(pyArguments);
 
         if (!retval.isNull() && retval != Py_None && !PyErr_Occurred() && retConverter)
             retConverter->toCpp(retval, args[0]);
@@ -822,13 +810,6 @@ static PyObject *parseArguments(const QMetaMethod &method, void **args)
         PyTuple_SET_ITEM(preparedArgs, i, converter.toPython(data));
     }
     return preparedArgs;
-}
-
-static bool emitShortCircuitSignal(QObject *source, int signalIndex, PyObject *args)
-{
-    void *signalArgs[2] = {nullptr, args};
-    source->qt_metacall(QMetaObject::InvokeMetaMethod, signalIndex, signalArgs);
-    return true;
 }
 
 #include "signalmanager.moc"

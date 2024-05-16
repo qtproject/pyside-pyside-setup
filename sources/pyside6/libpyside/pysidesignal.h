@@ -142,12 +142,10 @@ PYSIDE_API QByteArray getCallbackSignature(const char *signal, QObject *receiver
  * This function parses the signature and then returns a list of argument types.
  *
  * @param   signature       The signal signature
- * @param   isShortCircuit  If this is a shortCircuit(python<->python) signal
  * @return  Return true if this is a Qt Signal, otherwise return false
  * @todo    replace return type by QList<QByteArray>
  **/
-QByteArrayList getArgsFromSignature(const char *signature,
-                                    bool *isShortCircuit = nullptr);
+QByteArrayList getArgsFromSignature(const char *signature);
 
 } // namespace PySide::Signal
 

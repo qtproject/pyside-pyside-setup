@@ -1187,13 +1187,11 @@ EmitterData getEmitterData(PySideSignalInstance *signal)
     return result;
 }
 
-QByteArrayList getArgsFromSignature(const char *signature, bool *isShortCircuit)
+QByteArrayList getArgsFromSignature(const char *signature)
 {
     QByteArray qsignature = QByteArray(signature).trimmed();
     QByteArrayList result;
 
-    if (isShortCircuit)
-        *isShortCircuit = !qsignature.contains(u'(');
     if (qsignature.contains("()") || qsignature.contains("(void)"))
         return result;
     if (qsignature.endsWith(')')) {
@@ -1277,24 +1275,21 @@ QByteArray getCallbackSignature(const char *signal, QObject *receiver,
         functionName = Shiboken::String::toCString(slotArgs.functionName);
     Q_ASSERT(!functionName.isEmpty());
 
-    bool isShortCircuit = false;
-
     if (functionName.startsWith('<') && functionName.endsWith('>')) { // fix "<lambda>"
         functionName[0] = '_';
         functionName[functionName.size() - 1] = '_';
     }
     QByteArray signature = encodeName ? codeCallbackName(callback, functionName) : functionName;
-    QByteArrayList args = getArgsFromSignature(signal, &isShortCircuit);
+    QByteArrayList args = getArgsFromSignature(signal);
 
-    if (!isShortCircuit) {
-        signature.append(u'(');
-        if (numArgs == -1)
-            numArgs = std::numeric_limits<qsizetype>::max();
+    signature.append(u'(');
+    if (numArgs != -1) {
         while (!args.isEmpty() && (args.size() > (numArgs - useSelf)))
             args.removeLast();
-        signature.append(args.join(','));
-        signature.append(')');
     }
+    signature.append(args.join(','));
+    signature.append(')');
+
     return signature;
 }
 

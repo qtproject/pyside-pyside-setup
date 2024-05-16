@@ -274,9 +274,8 @@ int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void **args)
     if (setSenderDynamicProperty)
         m_receiver->setProperty(senderDynamicProperty, QVariant::fromValue(sender()));
 
-    const bool isShortCuit = std::strchr(slot.methodSignature(), '(') == nullptr;
     Shiboken::AutoDecRef callback(m_data->callback());
-    SignalManager::callPythonMetaMethod(slot, args, callback, isShortCuit);
+    SignalManager::callPythonMetaMethod(slot, args, callback);
 
     if (setSenderDynamicProperty)
         m_receiver->setProperty(senderDynamicProperty, QVariant{});
