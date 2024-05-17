@@ -481,6 +481,8 @@ PyObject *create(const char * /* modName */, void *moduleData)
     //              into `sys.modules`. This can cause a race condition.
     // Insert the module early into the module dict to prevend recursion.
     PyDict_SetItemString(sysModules, PyModule_GetName(module), module);
+    // Clear the non-existing name cache because we have a new module.
+    Shiboken::Conversions::clearNegativeLazyCache();
     return module;
 }
 

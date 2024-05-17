@@ -15,6 +15,7 @@
 #include <cstring>
 #include <iostream>
 #include <unordered_map>
+#include <unordered_set>
 #include <map>
 #include <set>
 
@@ -519,18 +520,36 @@ void registerConverterName(SbkConverter *converter, const char *typeName)
         converters.insert(std::make_pair(typeName, converter));
 }
 
-static std::string getRealTypeName(const char *name)
+static std::string getRealTypeName(const std::string &typeName)
 {
-    std::string typeName(name);
     auto size = typeName.size();
     if (std::isalnum(typeName[size - 1]) == 0)
         return typeName.substr(0, size - 1);
     return typeName;
 }
 
-SbkConverter *getConverter(const char *typeName)
+// PYSIDE-2404: Build a negative cache of already failed lookups.
+//              The resulting list must be reset after each new import,
+//              because that can change results. Also clear the cache after
+//              reaching some threashold.
+static std::unordered_set<std::string> nonExistingTypeNames{};
+
+// Arbitrary size limit to prevent random name overflows.
+static constexpr std::size_t negativeCacheLimit = 50;
+
+static void rememberAsNonexistent(const std::string &typeName)
 {
+    if (nonExistingTypeNames.size() > negativeCacheLimit)
+        clearNegativeLazyCache();
+    converters.insert(std::make_pair(typeName, nullptr));
+    nonExistingTypeNames.insert(typeName);
+}
+
+SbkConverter *getConverter(const char *typeNameC)
+{
+    std::string typeName = typeNameC;
     auto it = converters.find(typeName);
+    // PYSIDE-2404: This can also contain explicit nullptr as a negative cache.
     if (it != converters.end())
         return it->second;
     // PYSIDE-2404: Did not find the name. Load the lazy classes
@@ -539,12 +558,24 @@ SbkConverter *getConverter(const char *typeName)
     it = converters.find(typeName);
     if (it != converters.end())
         return it->second;
+    // Cache the negative result. Don't forget to clear the cache for new modules.
+    rememberAsNonexistent(typeName);
+
     if (Shiboken::pyVerbose() > 0) {
         const std::string message =
             std::string("Can't find type resolver for type '") + typeName + "'.";
         PyErr_WarnEx(PyExc_RuntimeWarning, message.c_str(), 0);
     }
     return nullptr;
+}
+
+void clearNegativeLazyCache()
+{
+    for (const auto &typeName : nonExistingTypeNames) {
+        auto it = converters.find(typeName);
+        converters.erase(it);
+    }
+    nonExistingTypeNames.clear();
 }
 
 SbkConverter *primitiveTypeConverter(int index)
