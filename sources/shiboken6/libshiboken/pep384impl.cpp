@@ -738,11 +738,8 @@ PyTypeObject *PepStaticMethod_TypePtr = nullptr;
 static PyTypeObject *
 getStaticMethodType(void)
 {
-    // this works for Python 3, only
-    //    "StaticMethodType = type(str.__dict__['maketrans'])\n";
     static const char prog[] =
-        "from xxsubtype import spamlist\n"
-        "result = type(spamlist.__dict__['staticmeth'])\n";
+        "result = type(str.__dict__['maketrans'])\n";
     return reinterpret_cast<PyTypeObject *>(PepRun_GetResult(prog));
 }
 
