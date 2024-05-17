@@ -43,6 +43,7 @@
 #include <QtCore/QMutex>
 #include <QtCore/QStack>
 #include <QtCore/QThread>
+#include <QtCore/private/qobject_p.h>
 
 #include <algorithm>
 #include <cstring>
@@ -62,6 +63,20 @@ extern bool qRegisterResourceData(int, const unsigned char *, const unsigned cha
 QT_END_NAMESPACE
 
 Q_LOGGING_CATEGORY(lcPySide, "qt.pyside.libpyside", QtCriticalMsg)
+
+static QObjectData *qt_object_private(const QObject *o)
+{
+    class FriendlyQObject : public QObject {
+    public:
+        using QObject::d_ptr;
+    };
+    return static_cast<const FriendlyQObject *>(o)->d_ptr.data();
+}
+
+static bool hasDynamicMetaObject(const QObject *o)
+{
+    return qt_object_private(o)->metaObject != nullptr;
+}
 
 namespace PySide
 {
@@ -675,6 +690,32 @@ static void invalidatePtr(any_t *object)
 
 static const char invalidatePropertyName[] = "_PySideInvalidatePtr";
 
+// PYSIDE-2749: Skip over internal QML classes and classes
+// with dynamic meta objects when looking for the best matching
+// type to avoid unnessarily triggering the lazy load mechanism
+// for classes that do not have a binding from things like eventFilter().
+static inline bool isInternalObject(const char *name)
+{
+    return std::strstr(name, "QMLTYPE") != nullptr || std::strstr(name, "QQmlPrivate") != nullptr;
+}
+
+static const QMetaObject *metaObjectCandidate(const QObject *o)
+{
+    auto *metaObject = o->metaObject();
+    // Skip QML helper types and Python objects
+    if (hasDynamicMetaObject(o)) {
+        if (auto *super = metaObject->superClass())
+            metaObject = super;
+    }
+    for (auto *candidate = metaObject; candidate != nullptr; candidate = candidate->superClass()) {
+        if (!isInternalObject(candidate->className())) {
+            metaObject = candidate;
+            break;
+        }
+    }
+    return metaObject;
+}
+
 // PYSIDE-1214, when creating new wrappers for classes inheriting QObject but
 // not exposed to Python, try to find the best-matching (most-derived) Qt
 // class by walking up the meta objects.
@@ -682,7 +723,8 @@ static const char *typeName(const QObject *cppSelf)
 {
     const char *typeName = typeid(*cppSelf).name();
     if (!Shiboken::Conversions::getConverter(typeName)) {
-        for (auto metaObject = cppSelf->metaObject(); metaObject; metaObject = metaObject->superClass()) {
+        auto *metaObject = metaObjectCandidate(cppSelf);
+        for (; metaObject != nullptr; metaObject = metaObject->superClass()) {
             const char *name = metaObject->className();
             if (Shiboken::Conversions::getConverter(name)) {
                 typeName = name;
