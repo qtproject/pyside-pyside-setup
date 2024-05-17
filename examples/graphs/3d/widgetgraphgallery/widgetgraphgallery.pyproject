@@ -1,8 +1,6 @@
 {
     "files": ["main.py",
-              "axesinputhandler.py",
               "bargraph.py",
-              "custominputhandler.py",
               "graphmodifier.py",
               "highlightseries.py",
               "rainfalldata.py",

@@ -3,22 +3,29 @@
 from __future__ import annotations
 
 import os
-from math import sqrt, sin
+from enum import Enum
+from math import sqrt, sin, cos, degrees
 from pathlib import Path
 
 from PySide6.QtCore import QObject, QPropertyAnimation, Qt, Slot
 from PySide6.QtGui import (QColor, QFont, QImage, QLinearGradient,
-                           QQuaternion, QVector3D)
-from PySide6.QtGraphs import (QAbstract3DGraph, QCustom3DItem,
+                           QQuaternion, QVector2D, QVector3D, QWheelEvent)
+from PySide6.QtGraphs import (QCustom3DItem,
                               QCustom3DLabel, QHeightMapSurfaceDataProxy,
                               QValue3DAxis, QSurfaceDataItem,
                               QSurfaceDataProxy, QSurface3DSeries,
-                              Q3DInputHandler, Q3DTheme)
+                              QtGraphs3D, QGraphsTheme)
 
 
 from highlightseries import HighlightSeries
 from topographicseries import TopographicSeries
-from custominputhandler import CustomInputHandler
+
+
+class InputState(Enum):
+    StateNormal = 0
+    StateDraggingX = 1
+    StateDraggingZ = 2
+    StateDraggingY = 3
 
 
 SAMPLE_COUNT_X = 150
@@ -27,6 +34,7 @@ HEIGHTMAP_GRID_STEP_X = 6
 HEIGHTMAP_GRID_STEP_Z = 6
 SAMPLE_MIN = -8.0
 SAMPLE_MAX = 8.0
+SPEED_MODIFIER = 20.0
 
 AREA_WIDTH = 8000.0
 AREA_HEIGHT = 8000.0
@@ -38,6 +46,7 @@ class SurfaceGraphModifier(QObject):
 
     def __init__(self, surface, label, parent):
         super().__init__(parent)
+        self._state = InputState.StateNormal
         self._data_path = Path(__file__).resolve().parent / "data"
         self._graph = surface
         self._textField = label
@@ -61,6 +70,15 @@ class SurfaceGraphModifier(QObject):
         self._heightMapWidth = 0
         self._heightMapHeight = 0
 
+        self._axisXMinValue = 0.0
+        self._axisXMaxValue = 0.0
+        self._axisXMinRange = 0.0
+        self._axisZMinValue = 0.0
+        self._axisZMaxValue = 0.0
+        self._axisZMinRange = 0.0
+        self._areaMinValue = 0.0
+        self._areaMaxValue = 0.0
+
         self._selectionAnimation = None
         self._titleLabel = None
         self._previouslyAnimatedItem = None
@@ -71,12 +89,12 @@ class SurfaceGraphModifier(QObject):
         self._highlightWidth = 0
         self._highlightHeight = 0
 
-        self._customInputHandler = None
-        self._defaultInputHandler = Q3DInputHandler()
-
         self._graph.setCameraZoomLevel(85.0)
-        self._graph.setCameraPreset(QAbstract3DGraph.CameraPreset.IsometricRight)
-        self._graph.activeTheme().setType(Q3DTheme.Theme.Retro)
+        self._graph.setCameraPreset(QtGraphs3D.CameraPreset.IsometricRight)
+        theme = self._graph.activeTheme()
+        theme.setTheme(QGraphsTheme.Theme.MixSeries)
+        theme.setLabelBackgroundVisible(False)
+        theme.setLabelBorderVisible(False)
 
         self._x_axis = QValue3DAxis()
         self._y_axis = QValue3DAxis()
@@ -128,19 +146,19 @@ class SurfaceGraphModifier(QObject):
         grOne.setColorAt(0.5, Qt.darkGray)
         grOne.setColorAt(1.0, Qt.gray)
         self._heightMapSeriesOne.setBaseGradient(grOne)
-        self._heightMapSeriesOne.setColorStyle(Q3DTheme.ColorStyle.RangeGradient)
+        self._heightMapSeriesOne.setColorStyle(QGraphsTheme.ColorStyle.RangeGradient)
 
         grTwo = QLinearGradient()
         grTwo.setColorAt(0.39, Qt.blue)
         grTwo.setColorAt(0.4, Qt.white)
         self._heightMapSeriesTwo.setBaseGradient(grTwo)
-        self._heightMapSeriesTwo.setColorStyle(Q3DTheme.ColorStyle.RangeGradient)
+        self._heightMapSeriesTwo.setColorStyle(QGraphsTheme.ColorStyle.RangeGradient)
 
         grThree = QLinearGradient()
         grThree.setColorAt(0.0, Qt.white)
         grThree.setColorAt(0.05, Qt.black)
         self._heightMapSeriesThree.setBaseGradient(grThree)
-        self._heightMapSeriesThree.setColorStyle(Q3DTheme.ColorStyle.RangeGradient)
+        self._heightMapSeriesThree.setColorStyle(QGraphsTheme.ColorStyle.RangeGradient)
 
         # Custom items and label
         self._graph.selectedElementChanged.connect(self.handleElementSelected)
@@ -180,11 +198,8 @@ class SurfaceGraphModifier(QObject):
         self._highlight.handleGradientChange(AREA_WIDTH * ASPECT_RATIO)
         self._graph.axisY().maxChanged.connect(self._highlight.handleGradientChange)
 
-        self._customInputHandler = CustomInputHandler(self._graph)
-        self._customInputHandler.setHighlightSeries(self._highlight)
-        self._customInputHandler.setAxes(self._x_axis, self._y_axis, self._z_axis)
-        self._customInputHandler.setLimits(0.0, AREA_WIDTH, MIN_RANGE)
-        self._customInputHandler.setAspectRatio(ASPECT_RATIO)
+        self._graph.wheel.connect(self.onWheel)
+        self._graph.dragged.connect(self.handleAxisDragging)
 
     def fillSqrtSinProxy(self):
         stepX = (SAMPLE_MAX - SAMPLE_MIN) / float(SAMPLE_COUNT_X - 1)
@@ -209,16 +224,16 @@ class SurfaceGraphModifier(QObject):
     def enableSqrtSinModel(self, enable):
         if enable:
             self._sqrtSinSeries.setDrawMode(QSurface3DSeries.DrawSurfaceAndWireframe)
-            self._sqrtSinSeries.setFlatShadingEnabled(True)
+            self._sqrtSinSeries.setShading(QSurface3DSeries.Shading.Flat)
 
             self._graph.axisX().setLabelFormat("%.2f")
             self._graph.axisZ().setLabelFormat("%.2f")
             self._graph.axisX().setRange(SAMPLE_MIN, SAMPLE_MAX)
             self._graph.axisY().setRange(0.0, 2.0)
             self._graph.axisZ().setRange(SAMPLE_MIN, SAMPLE_MAX)
-            self._graph.axisX().setLabelAutoRotation(30.0)
-            self._graph.axisY().setLabelAutoRotation(90.0)
-            self._graph.axisZ().setLabelAutoRotation(30.0)
+            self._graph.axisX().setLabelAutoAngle(30.0)
+            self._graph.axisY().setLabelAutoAngle(90.0)
+            self._graph.axisZ().setLabelAutoAngle(30.0)
 
             self._graph.removeSeries(self._heightMapSeriesOne)
             self._graph.removeSeries(self._heightMapSeriesTwo)
@@ -237,8 +252,6 @@ class SurfaceGraphModifier(QObject):
             self._graph.axisY().setTitle("")
             self._graph.axisZ().setTitle("")
 
-            self._graph.setActiveInputHandler(self._defaultInputHandler)
-
             # Reset range sliders for Sqrt & Sin
             self._rangeMinX = SAMPLE_MIN
             self._rangeMinZ = SAMPLE_MIN
@@ -256,6 +269,8 @@ class SurfaceGraphModifier(QObject):
             self._axisMaxSliderZ.setMinimum(1)
             self._axisMaxSliderZ.setMaximum(SAMPLE_COUNT_Z - 1)
             self._axisMaxSliderZ.setValue(SAMPLE_COUNT_Z - 1)
+
+            self._graph.setZoomEnabled(True)
 
     @Slot(bool)
     def enableHeightMapModel(self, enable):
@@ -284,8 +299,6 @@ class SurfaceGraphModifier(QObject):
             self._graph.addSeries(self._heightMapSeriesTwo)
             self._graph.addSeries(self._heightMapSeriesThree)
 
-            self._graph.setActiveInputHandler(self._defaultInputHandler)
-
             self._titleLabel.setVisible(True)
             self._graph.axisX().setTitleVisible(True)
             self._graph.axisY().setTitleVisible(True)
@@ -311,6 +324,11 @@ class SurfaceGraphModifier(QObject):
             self._axisMaxSliderZ.setMaximum(mapGridCountZ - 1)
             self._axisMaxSliderZ.setValue(mapGridCountZ - 1)
 
+            self._graph.wheel.disconnect(self.onWheel)
+            self._graph.dragged.disconnect(self.handleAxisDragging)
+            self._graph.setDefaultInputHandler()
+            self._graph.setZoomEnabled(True)
+
     @Slot(bool)
     def enableTopographyModel(self, enable):
         if enable:
@@ -319,9 +337,9 @@ class SurfaceGraphModifier(QObject):
             self._graph.axisX().setRange(0.0, AREA_WIDTH)
             self._graph.axisY().setRange(100.0, AREA_WIDTH * ASPECT_RATIO)
             self._graph.axisZ().setRange(0.0, AREA_HEIGHT)
-            self._graph.axisX().setLabelAutoRotation(30.0)
-            self._graph.axisY().setLabelAutoRotation(90.0)
-            self._graph.axisZ().setLabelAutoRotation(30.0)
+            self._graph.axisX().setLabelAutoAngle(30.0)
+            self._graph.axisY().setLabelAutoAngle(90.0)
+            self._graph.axisZ().setLabelAutoAngle(30.0)
 
             self._graph.removeSeries(self._heightMapSeriesOne)
             self._graph.removeSeries(self._heightMapSeriesTwo)
@@ -337,8 +355,6 @@ class SurfaceGraphModifier(QObject):
             self._graph.axisX().setTitle("")
             self._graph.axisY().setTitle("")
             self._graph.axisZ().setTitle("")
-
-            self._graph.setActiveInputHandler(self._customInputHandler)
 
             # Reset range sliders for topography map
             self._rangeMinX = 0.0
@@ -357,6 +373,19 @@ class SurfaceGraphModifier(QObject):
             self._axisMaxSliderZ.setMinimum(200)
             self._axisMaxSliderZ.setMaximum(AREA_HEIGHT)
             self._axisMaxSliderZ.setValue(AREA_HEIGHT)
+
+            self._areaMinValue = 0
+            self._areaMaxValue = AREA_WIDTH
+            self._axisXMinValue = self._areaMinValue
+            self._axisXMaxValue = self._areaMaxValue
+            self._axisZMinValue = self._areaMinValue
+            self._axisZMaxValue = self._areaMaxValue
+            self._axisXMinRange = MIN_RANGE
+            self._axisZMinRange = MIN_RANGE
+
+            self._graph.wheel.connect(self.onWheel)
+            self._graph.dragged.connect(self.handleAxisDragging)
+            self._graph.setZoomEnabled(False)
 
     def adjustXMin(self, min):
         minX = self._stepX * float(min) + self._rangeMinX
@@ -420,7 +449,7 @@ class SurfaceGraphModifier(QObject):
         gr.setColorAt(1.0, Qt.yellow)
 
         self._sqrtSinSeries.setBaseGradient(gr)
-        self._sqrtSinSeries.setColorStyle(Q3DTheme.ColorStyle.RangeGradient)
+        self._sqrtSinSeries.setColorStyle(QGraphsTheme.ColorStyle.RangeGradient)
 
     def setGreenToRedGradient(self):
         gr = QLinearGradient()
@@ -430,7 +459,7 @@ class SurfaceGraphModifier(QObject):
         gr.setColorAt(1.0, Qt.darkRed)
 
         self._sqrtSinSeries.setBaseGradient(gr)
-        self._sqrtSinSeries.setColorStyle(Q3DTheme.ColorStyle.RangeGradient)
+        self._sqrtSinSeries.setColorStyle(QGraphsTheme.ColorStyle.RangeGradient)
 
     @Slot(bool)
     def toggleItemOne(self, show):
@@ -551,8 +580,8 @@ class SurfaceGraphModifier(QObject):
 
     @Slot(bool)
     def toggleShadows(self, shadows):
-        sq = (QAbstract3DGraph.ShadowQualityMedium
-              if shadows else QAbstract3DGraph.ShadowQualityNone)
+        sq = (QtGraphs3D.ShadowQualityMedium
+              if shadows else QtGraphs3D.ShadowQualityNone)
         self._graph.setShadowQuality(sq)
 
     @Slot(bool)
@@ -565,7 +594,7 @@ class SurfaceGraphModifier(QObject):
 
     def handleElementSelected(self, type):
         self.resetSelection()
-        if type == QAbstract3DGraph.ElementCustomItem:
+        if type == QtGraphs3D.ElementType.CustomItem:
             item = self._graph.selectedCustomItem()
             text = ""
             if isinstance(item, QCustom3DItem):
@@ -582,7 +611,7 @@ class SurfaceGraphModifier(QObject):
             self._selectionAnimation.setStartValue(item.scaling())
             self._selectionAnimation.setEndValue(item.scaling() * 1.5)
             self._selectionAnimation.start()
-        elif type == QAbstract3DGraph.ElementSeries:
+        elif type == QtGraphs3D.ElementType.Series:
             text = "Surface ("
             series = self._graph.selectedSeries()
             if series:
@@ -590,16 +619,19 @@ class SurfaceGraphModifier(QObject):
                 text += f"{point.x()}, {point.y()}"
             text += ")"
             self._textField.setText(text)
-        elif (type.value > QAbstract3DGraph.ElementSeries.value
-              and type < QAbstract3DGraph.ElementCustomItem.value):
+        elif (type.value > QtGraphs3D.ElementType.Series.value
+              and type.value < QtGraphs3D.ElementType.CustomItem.value):
             index = self._graph.selectedLabelIndex()
             text = ""
-            if type == QAbstract3DGraph.ElementAxisXLabel:
+            if type == QtGraphs3D.ElementType.AxisXLabel:
                 text += "Axis X label: "
-            elif type == QAbstract3DGraph.ElementAxisYLabel:
+                self._state = InputState.StateDraggingX
+            elif type == QtGraphs3D.ElementType.AxisYLabel:
                 text += "Axis Y label: "
+                self._state = InputState.StateDraggingY
             else:
                 text += "Axis Z label: "
+                self._state = InputState.StateDraggingZ
             text += str(index)
             self._textField.setText(text)
         else:
@@ -612,21 +644,21 @@ class SurfaceGraphModifier(QObject):
         self._previouslyAnimatedItem = None
 
     def toggleModeNone(self):
-        self._graph.setSelectionMode(QAbstract3DGraph.SelectionNone)
+        self._graph.setSelectionMode(QtGraphs3D.SelectionFlag.None_)
 
     def toggleModeItem(self):
-        self._graph.setSelectionMode(QAbstract3DGraph.SelectionItem)
+        self._graph.setSelectionMode(QtGraphs3D.SelectionFlag.Item)
 
     def toggleModeSliceRow(self):
-        sm = (QAbstract3DGraph.SelectionItemAndRow
-              | QAbstract3DGraph.SelectionSlice
-              | QAbstract3DGraph.SelectionMultiSeries)
+        sm = (QtGraphs3D.SelectionFlag.ItemAndRow
+              | QtGraphs3D.SelectionFlag.Slice
+              | QtGraphs3D.SelectionFlag.MultiSeries)
         self._graph.setSelectionMode(sm)
 
     def toggleModeSliceColumn(self):
-        sm = (QAbstract3DGraph.SelectionItemAndColumn
-              | QAbstract3DGraph.SelectionSlice
-              | QAbstract3DGraph.SelectionMultiSeries)
+        sm = (QtGraphs3D.SelectionFlag.ItemAndColumn
+              | QtGraphs3D.SelectionFlag.Slice
+              | QtGraphs3D.SelectionFlag.MultiSeries)
         self._graph.setSelectionMode(sm)
 
     def setAxisMinSliderX(self, slider):
@@ -640,3 +672,91 @@ class SurfaceGraphModifier(QObject):
 
     def setAxisMaxSliderZ(self, slider):
         self._axisMaxSliderZ = slider
+
+    def checkConstraints(self):
+        if self._axisXMinValue < self._areaMinValue:
+            self._axisXMinValue = self._areaMinValue
+        if self._axisXMaxValue > self._areaMaxValue:
+            self._axisXMaxValue = self._areaMaxValue
+        # Don't allow too much zoom in
+        range = self._axisXMaxValue - self._axisXMinValue
+        if range < self._axisXMinRange:
+            adjust = (self._axisXMinRange - range) / 2.0
+            self._axisXMinValue -= adjust
+            self._axisXMaxValue += adjust
+
+        if self._axisZMinValue < self._areaMinValue:
+            self._axisZMinValue = self._areaMinValue
+        if self._axisZMaxValue > self._areaMaxValue:
+            self._axisZMaxValue = self._areaMaxValue
+        # Don't allow too much zoom in
+        range = self._axisZMaxValue - self._axisZMinValue
+        if range < self._axisZMinRange:
+            adjust = (self._axisZMinRange - range) / 2.0
+            self._axisZMinValue -= adjust
+            self._axisZMaxValue += adjust
+
+    @Slot(QVector2D)
+    def handleAxisDragging(self, delta):
+
+        distance = float(0)
+
+        # Get scene orientation from active camera
+        xRotation = self._graph.cameraXRotation()
+
+        # Calculate directional drag multipliers based on rotation
+        xMulX = cos(degrees(xRotation))
+        xMulY = sin(degrees(xRotation))
+        zMulX = sin(degrees(xRotation))
+        zMulY = cos(degrees(xRotation))
+
+        # Get the drag amount
+        move = delta.toPoint()
+
+        # Adjust axes
+        if self._state == InputState.StateDraggingX:
+            distance = (move.x() * xMulX - move.y() * xMulY) * SPEED_MODIFIER
+            self._axisXMinValue -= distance
+            self._axisXMaxValue -= distance
+            if self._axisXMinValue < self._areaMinValue:
+                dist = self._axisXMaxValue - self._axisXMinValue
+                self._axisXMinValue = self._areaMinValue
+                self._axisXMaxValue = self._axisXMinValue + dist
+
+            if self._axisXMaxValue > self._areaMaxValue:
+                dist = self._axisXMaxValue - self._axisXMinValue
+                self._axisXMaxValue = self._areaMaxValue
+                self._axisXMinValue = self._axisXMaxValue - dist
+
+            self._graph.axisX().setRange(self._axisXMinValue, self._axisXMaxValue)
+        elif self._state == InputState.StateDraggingZ:
+            distance = (move.x() * zMulX + move.y() * zMulY) * SPEED_MODIFIER
+            self._axisZMinValue += distance
+            self._axisZMaxValue += distance
+            if self._axisZMinValue < self._areaMinValue:
+                dist = self._axisZMaxValue - self._axisZMinValue
+                self._axisZMinValue = self._areaMinValue
+                self._axisZMaxValue = self._axisZMinValue + dist
+
+            if self._axisZMaxValue > self._areaMaxValue:
+                dist = self._axisZMaxValue - self._axisZMinValue
+                self._axisZMaxValue = self._areaMaxValue
+                self._axisZMinValue = self._axisZMaxValue - dist
+
+            self._graph.axisZ().setRange(self._axisZMinValue, self._axisZMaxValue)
+
+    @Slot(QWheelEvent)
+    def onWheel(self, event):
+        delta = float(event.angleDelta().y())
+
+        self._axisXMinValue += delta
+        self._axisXMaxValue -= delta
+        self._axisZMinValue += delta
+        self._axisZMaxValue -= delta
+        self.checkConstraints()
+
+        y = (self._axisXMaxValue - self._axisXMinValue) * ASPECT_RATIO
+
+        self._graph.axisX().setRange(self._axisXMinValue, self._axisXMaxValue)
+        self._graph.axisY().setRange(100.0, y)
+        self._graph.axisZ().setRange(self._axisZMinValue, self._axisZMaxValue)

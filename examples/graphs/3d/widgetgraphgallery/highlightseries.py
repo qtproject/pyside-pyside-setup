@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from PySide6.QtCore import QPoint, Qt, Slot
 from PySide6.QtGui import QLinearGradient, QVector3D
-from PySide6.QtGraphs import (QSurface3DSeries, QSurfaceDataItem, Q3DTheme)
+from PySide6.QtGraphs import (QSurface3DSeries, QSurfaceDataItem,
+                              QGraphsTheme)
 
 
 DARK_RED_POS = 1.0
@@ -26,12 +27,12 @@ class HighlightSeries(QSurface3DSeries):
         self._topographicSeries = None
         self._minHeight = 0.0
         self.setDrawMode(QSurface3DSeries.DrawSurface)
-        self.setFlatShadingEnabled(True)
+        self.setShading(QSurface3DSeries.Shading.Flat)
         self.setVisible(False)
 
     def setTopographicSeries(self, series):
         self._topographicSeries = series
-        array = self._topographicSeries.dataProxy().array()
+        array = self._topographicSeries.dataArray()
         self._srcWidth = len(array[0])
         self._srcHeight = len(array)
         self._topographicSeries.selectedPointChanged.connect(self.handlePositionChange)
@@ -63,8 +64,7 @@ class HighlightSeries(QSurface3DSeries):
         if endZ > (self._srcHeight - 1):
             endZ = self._srcHeight - 1
 
-        srcProxy = self._topographicSeries.dataProxy()
-        srcArray = srcProxy.array()
+        srcArray = self._topographicSeries.dataArray()
 
         dataArray = []
         for i in range(int(startZ), int(endZ)):
@@ -92,4 +92,4 @@ class HighlightSeries(QSurface3DSeries):
         gr.setColorAt(DARK_RED_POS * ratio, Qt.darkRed)
 
         self.setBaseGradient(gr)
-        self.setColorStyle(Q3DTheme.ColorStyle.RangeGradient)
+        self.setColorStyle(QGraphsTheme.ColorStyle.RangeGradient)

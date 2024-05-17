@@ -2,15 +2,14 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
 
-from math import cos, degrees, sqrt
+from enum import Enum
+from math import sin, cos, degrees, sqrt
 
 from PySide6.QtCore import QObject, Signal, Slot, Qt
-from PySide6.QtGui import QVector3D
-from PySide6.QtGraphs import (QAbstract3DGraph, QAbstract3DSeries,
+from PySide6.QtGui import QVector2D, QVector3D
+from PySide6.QtGraphs import (QAbstract3DSeries,
                               QScatterDataItem, QScatterDataProxy,
-                              QScatter3DSeries, Q3DTheme)
-
-from axesinputhandler import AxesInputHandler
+                              QScatter3DSeries, QtGraphs3D, QGraphsTheme)
 
 
 NUMBER_OF_ITEMS = 10000
@@ -19,10 +18,17 @@ LOWER_NUMBER_OF_ITEMS = 900
 LOWER_CURVE_DIVIDER = 0.75
 
 
+class InputState(Enum):
+    StateNormal = 0
+    StateDraggingX = 1
+    StateDraggingZ = 2
+    StateDraggingY = 3
+
+
 class ScatterDataModifier(QObject):
 
     backgroundEnabledChanged = Signal(bool)
-    gridEnabledChanged = Signal(bool)
+    gridVisibleChanged = Signal(bool)
     shadowQualityChanged = Signal(int)
 
     def __init__(self, scatter, parent):
@@ -32,15 +38,14 @@ class ScatterDataModifier(QObject):
 
         self._style = QAbstract3DSeries.Mesh.Sphere
         self._smooth = True
-        self._inputHandler = AxesInputHandler(scatter)
         self._autoAdjust = True
         self._itemCount = LOWER_NUMBER_OF_ITEMS
         self._CURVE_DIVIDER = LOWER_CURVE_DIVIDER
-        self._inputHandler = AxesInputHandler(scatter)
 
-        self._graph.activeTheme().setType(Q3DTheme.Theme.StoneMoss)
-        self._graph.setShadowQuality(QAbstract3DGraph.ShadowQuality.SoftHigh)
-        self._graph.setCameraPreset(QAbstract3DGraph.CameraPreset.Front)
+        self._graph.activeTheme().setTheme(QGraphsTheme.Theme.MixSeries)
+        self._graph.activeTheme().setColorScheme(QGraphsTheme.ColorScheme.Dark)
+        self._graph.setShadowQuality(QtGraphs3D.ShadowQuality.SoftHigh)
+        self._graph.setCameraPreset(QtGraphs3D.CameraPreset.Front)
         self._graph.setCameraZoomLevel(80.0)
 
         self._proxy = QScatterDataProxy()
@@ -48,15 +53,14 @@ class ScatterDataModifier(QObject):
         self._series.setItemLabelFormat("@xTitle: @xLabel @yTitle: @yLabel @zTitle: @zLabel")
         self._series.setMeshSmooth(self._smooth)
         self._graph.addSeries(self._series)
-        self._preset = QAbstract3DGraph.CameraPreset.FrontLow.value
+        self._preset = QtGraphs3D.CameraPreset.FrontLow.value
 
-        # Give ownership of the handler to the graph and make it the active
-        # handler
-        self._graph.setActiveInputHandler(self._inputHandler)
+        self._state = InputState.StateNormal
+        self._dragSpeedModifier = float(15)
 
-        # Give our axes to the input handler
-        self._inputHandler.setAxes(self._graph.axisX(), self._graph.axisZ(),
-                                   self._graph.axisY())
+        self._graph.selectedElementChanged.connect(self.handleElementSelected)
+        self._graph.dragged.connect(self.handleAxisDragging)
+        self._graph.setDragButton(Qt.LeftButton)
 
         self.addData()
 
@@ -94,35 +98,34 @@ class ScatterDataModifier(QObject):
     @Slot(int)
     def changeTheme(self, theme):
         currentTheme = self._graph.activeTheme()
-        currentTheme.setType(Q3DTheme.Theme(theme))
-        self.backgroundEnabledChanged.emit(currentTheme.isBackgroundEnabled())
-        self.gridEnabledChanged.emit(currentTheme.isGridEnabled())
+        currentTheme.setTheme(QGraphsTheme.Theme(theme))
+        self.backgroundEnabledChanged.emit(currentTheme.isPlotAreaBackgroundVisible())
+        self.gridVisibleChanged.emit(currentTheme.isGridVisible())
 
     @Slot()
     def changePresetCamera(self):
-        camera = self._graph.scene().activeCamera()
-        camera.setCameraPreset(QAbstract3DGraph.CameraPreset(self._preset))
+        self._graph.setCameraPreset(QtGraphs3D.CameraPreset(self._preset))
 
         self._preset += 1
-        if self._preset > QAbstract3DGraph.CameraPreset.DirectlyBelow.value:
-            self._preset = QAbstract3DGraph.CameraPreset.FrontLow.value
+        if self._preset > QtGraphs3D.CameraPreset.DirectlyBelow.value:
+            self._preset = QtGraphs3D.CameraPreset.FrontLow.value
 
-    @Slot(QAbstract3DGraph.ShadowQuality)
+    @Slot(QtGraphs3D.ShadowQuality)
     def shadowQualityUpdatedByVisual(self, sq):
         self.shadowQualityChanged.emit(sq.value)
 
     @Slot(int)
     def changeShadowQuality(self, quality):
-        sq = QAbstract3DGraph.ShadowQuality(quality)
+        sq = QtGraphs3D.ShadowQuality(quality)
         self._graph.setShadowQuality(sq)
 
     @Slot(int)
-    def setBackgroundEnabled(self, enabled):
-        self._graph.activeTheme().setBackgroundEnabled(enabled == Qt.Checked.value)
+    def setPlotAreaBackgroundVisible(self, enabled):
+        self._graph.activeTheme().setPlotAreaBackgroundVisible(enabled == Qt.Checked.value)
 
     @Slot(int)
-    def setGridEnabled(self, enabled):
-        self._graph.activeTheme().setGridEnabled(enabled == Qt.Checked.value)
+    def setGridVisible(self, enabled):
+        self._graph.activeTheme().setGridVisible(enabled == Qt.Checked.value)
 
     @Slot()
     def toggleItemCount(self):
@@ -141,10 +144,55 @@ class ScatterDataModifier(QObject):
         if not self._autoAdjust:
             self._graph.axisX().setAutoAdjustRange(True)
             self._graph.axisZ().setAutoAdjustRange(True)
-            self._inputHandler.setDragSpeedModifier(1.5)
+            self._dragSpeedModifier = 1.5
             self._autoAdjust = True
         else:
             self._graph.axisX().setRange(-10.0, 10.0)
             self._graph.axisZ().setRange(-10.0, 10.0)
-            self._inputHandler.setDragSpeedModifier(15.0)
+            self._dragSpeedModifier = float(15)
             self._autoAdjust = False
+
+    @Slot(QtGraphs3D.ElementType)
+    def handleElementSelected(self, type):
+        if type == QtGraphs3D.ElementType.AxisXLabel:
+            self._state = InputState.StateDraggingX
+        elif type == QtGraphs3D.ElementType.AxisYLabel:
+            self._state = InputState.StateDraggingY
+        elif type == QtGraphs3D.ElementType.AxisZLabel:
+            self._state = InputState.StateDraggingZ
+        else:
+            self._state = InputState.StateNormal
+
+    @Slot(QVector2D)
+    def handleAxisDragging(self, delta):
+        distance = 0.0
+        # Get scene orientation from active camera
+        xRotation = self._graph.cameraXRotation()
+        yRotation = self._graph.cameraYRotation()
+
+        # Calculate directional drag multipliers based on rotation
+        xMulX = cos(degrees(xRotation))
+        xMulY = sin(degrees(xRotation))
+        zMulX = sin(degrees(xRotation))
+        zMulY = cos(degrees(xRotation))
+
+        # Get the drag amount
+        move = delta.toPoint()
+
+        # Flip the effect of y movement if we're viewing from below
+        yMove = -move.y() if yRotation < 0 else move.y()
+
+        # Adjust axes
+        if self._state == InputState.StateDraggingX:
+            axis = self._graph.axisX()
+            distance = (move.x() * xMulX - yMove * xMulY) / self._dragSpeedModifier
+            axis.setRange(axis.min() - distance, axis.max() - distance)
+        elif self._state == InputState.StateDraggingZ:
+            axis = self._graph.axisZ()
+            distance = (move.x() * zMulX + yMove * zMulY) / self._dragSpeedModifier
+            axis.setRange(axis.min() + distance, axis.max() + distance)
+        elif self._state == InputState.StateDraggingY:
+            axis = self._graph.axisY()
+            # No need to use adjusted y move here
+            distance = move.y() / self._dragSpeedModifier
+            axis.setRange(axis.min() + distance, axis.max() + distance)

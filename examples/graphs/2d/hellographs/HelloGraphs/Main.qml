@@ -30,23 +30,24 @@ Item {
             GraphsView {
                 anchors.fill: parent
                 anchors.margins: 16
-                theme: GraphTheme {
-                    colorTheme: GraphTheme.ColorThemeDark
+                axisX: BarCategoryAxis {
+                    categories: [2024, 2025, 2026]
+                    gridVisible: false
+                    subGridVisible: false
+                }
+                axisY: ValueAxis {
+                    min: 20
+                    max: 100
+                    tickInterval: 10
+                    subTickCount: 9
+                }
+                theme: GraphsTheme {
+                    colorScheme: Qt.Dark
+                    theme: GraphsTheme.Theme.QtGreen
                 }
                 //! [bargraph]
                 //! [barseries]
                 BarSeries {
-                    axisX: BarCategoryAxis {
-                        categories: [2024, 2025, 2026]
-                        gridVisible: false
-                        minorGridVisible: false
-                    }
-                    axisY: ValueAxis {
-                        min: 20
-                        max: 100
-                        tickInterval: 10
-                        minorTickCount: 9
-                    }
                     //! [barseries]
                     //! [barset]
                     BarSet {
@@ -72,19 +73,32 @@ Item {
             GraphsView {
                 anchors.fill: parent
                 anchors.margins: 16
-                theme: GraphTheme {
+                theme: GraphsTheme {
                     readonly property color c1: "#DBEB00"
                     readonly property color c2: "#373F26"
                     readonly property color c3: Qt.lighter(c2, 1.5)
-                    colorTheme: GraphTheme.ColorThemeDark
-                    gridMajorBarsColor: c3
-                    gridMinorBarsColor: c2
-                    axisXMajorColor: c3
-                    axisYMajorColor: c3
-                    axisXMinorColor: c2
-                    axisYMinorColor: c2
-                    axisXLabelsColor: c1
-                    axisYLabelsColor: c1
+                    colorScheme: Qt.Dark
+                    seriesColors: ["#2CDE85", "#DBEB00"]
+                    grid.mainColor: c3
+                    grid.subColor: c2
+                    axisX.mainColor: c3
+                    axisY.mainColor: c3
+                    axisX.subColor: c2
+                    axisY.subColor: c2
+                    axisX.labelTextColor: c1
+                    axisY.labelTextColor: c1
+                }
+                axisX: ValueAxis {
+                    max: 5
+                    tickInterval: 1
+                    subTickCount: 9
+                    labelDecimals: 1
+                }
+                axisY: ValueAxis {
+                    max: 10
+                    tickInterval: 1
+                    subTickCount: 4
+                    labelDecimals: 1
                 }
                 //! [linegraph]
 
@@ -99,31 +113,11 @@ Item {
                 }
                 //! [linemarker]
 
-                //! [lineseriestheme]
-                SeriesTheme {
-                    id: seriesTheme
-                    colors: ["#2CDE85", "#DBEB00"]
-                }
-                //! [lineseriestheme]
-
                 //! [lineseries1]
                 LineSeries {
                     id: lineSeries1
-                    theme: seriesTheme
-                    axisX: ValueAxis {
-                        max: 5
-                        tickInterval: 1
-                        minorTickCount: 9
-                        labelDecimals: 1
-                    }
-                    axisY: ValueAxis {
-                        max: 10
-                        tickInterval: 1
-                        minorTickCount: 4
-                        labelDecimals: 1
-                    }
                     width: 4
-                    pointMarker: Marker { }
+                    pointDelegate: Marker { }
                     XYPoint { x: 0; y: 0 }
                     XYPoint { x: 1; y: 2.1 }
                     XYPoint { x: 2; y: 3.3 }
@@ -136,9 +130,8 @@ Item {
                 //! [lineseries2]
                 LineSeries {
                     id: lineSeries2
-                    theme: seriesTheme
                     width: 4
-                    pointMarker: Marker { }
+                    pointDelegate: Marker { }
                     XYPoint { x: 0; y: 5.0 }
                     XYPoint { x: 1; y: 3.3 }
                     XYPoint { x: 2; y: 7.1 }

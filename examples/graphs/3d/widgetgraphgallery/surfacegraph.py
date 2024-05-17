@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (QGroupBox, QCheckBox, QLabel, QHBoxLayout,
                                QPushButton, QRadioButton, QSizePolicy, QSlider,
                                QVBoxLayout, QWidget)
 from PySide6.QtQuickWidgets import QQuickWidget
-from PySide6.QtGraphs import Q3DSurface
+from PySide6.QtGraphsWidgets import Q3DSurfaceWidgetItem
 
 
 def gradientBtoYPB_Pixmap():
@@ -72,15 +72,18 @@ class SurfaceGraph(QObject):
 
     def __init__(self, minimum_graph_size, maximum_graph_size):
         super().__init__()
-        self._surfaceGraph = Q3DSurface()
+
+        surfaceGraphWidget = QQuickWidget()
+        surfaceGraph = Q3DSurfaceWidgetItem()
+        surfaceGraph.setWidget(surfaceGraphWidget)
         self._surfaceWidget = QWidget()
         hLayout = QHBoxLayout(self._surfaceWidget)
-        self._surfaceGraph.setMinimumSize(minimum_graph_size)
-        self._surfaceGraph.setMaximumSize(maximum_graph_size)
-        self._surfaceGraph.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self._surfaceGraph.setFocusPolicy(Qt.StrongFocus)
-        self._surfaceGraph.setResizeMode(QQuickWidget.SizeRootObjectToView)
-        hLayout.addWidget(self._surfaceGraph, 1)
+        surfaceGraphWidget.setMinimumSize(minimum_graph_size)
+        surfaceGraphWidget.setMaximumSize(maximum_graph_size)
+        surfaceGraphWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        surfaceGraphWidget.setFocusPolicy(Qt.StrongFocus)
+        surfaceGraphWidget.setResizeMode(QQuickWidget.SizeRootObjectToView)
+        hLayout.addWidget(surfaceGraphWidget, 1)
         vLayout = QVBoxLayout()
         hLayout.addLayout(vLayout)
         vLayout.setAlignment(Qt.AlignTop)
@@ -214,7 +217,7 @@ class SurfaceGraph(QObject):
         vLayout.addWidget(heightMapGroupBox)
         vLayout.addWidget(enableTexture)
         # Create the controller
-        modifier = SurfaceGraphModifier(self._surfaceGraph, labelSelectedItem, self)
+        modifier = SurfaceGraphModifier(surfaceGraph, labelSelectedItem, self)
         # Connect widget controls to controller
         heightMapModelRB.toggled.connect(modifier.enableHeightMapModel)
         sqrtSinModelRB.toggled.connect(modifier.enableSqrtSinModel)

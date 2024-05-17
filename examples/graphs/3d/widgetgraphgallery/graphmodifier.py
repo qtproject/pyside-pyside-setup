@@ -8,9 +8,9 @@ import numpy as np
 
 from PySide6.QtCore import QObject, QPropertyAnimation, Signal, Slot
 from PySide6.QtGui import QFont, QVector3D
-from PySide6.QtGraphs import (QAbstract3DGraph, QAbstract3DSeries,
+from PySide6.QtGraphs import (QAbstract3DSeries,
                               QBarDataItem, QBar3DSeries, QCategory3DAxis,
-                              QValue3DAxis, Q3DTheme)
+                              QValue3DAxis, QtGraphs3D, QGraphsTheme)
 
 from rainfalldata import RainfallData
 
@@ -42,8 +42,8 @@ TEMP_HELSINKI = np.array([
 class GraphModifier(QObject):
 
     shadowQualityChanged = Signal(int)
-    backgroundEnabledChanged = Signal(bool)
-    gridEnabledChanged = Signal(bool)
+    backgroundVisibleChanged = Signal(bool)
+    gridVisibleChanged = Signal(bool)
     fontChanged = Signal(QFont)
     fontSizeChanged = Signal(int)
 
@@ -76,11 +76,11 @@ class GraphModifier(QObject):
         self._defaultTarget = []
         self._customData = None
 
-        self._graph.setShadowQuality(QAbstract3DGraph.ShadowQuality.SoftMedium)
+        self._graph.setShadowQuality(QtGraphs3D.ShadowQuality.SoftMedium)
         theme = self._graph.activeTheme()
-        theme.setBackgroundEnabled(False)
-        theme.setFont(QFont("Times New Roman", self._fontSize))
-        theme.setLabelBackgroundEnabled(True)
+        theme.setPlotAreaBackgroundVisible(False)
+        theme.setLabelFont(QFont("Times New Roman", self._fontSize))
+        theme.setLabelBackgroundVisible(True)
         self._graph.setMultiSeriesUniform(True)
 
         self._months = ["January", "February", "March", "April", "May", "June",
@@ -94,14 +94,14 @@ class GraphModifier(QObject):
         self._temperatureAxis.setSubSegmentCount(self._subSegments)
         self._temperatureAxis.setRange(self._minval, self._maxval)
         self._temperatureAxis.setLabelFormat("%.1f " + self._celsiusString)
-        self._temperatureAxis.setLabelAutoRotation(30.0)
+        self._temperatureAxis.setLabelAutoAngle(30.0)
         self._temperatureAxis.setTitleVisible(True)
 
         self._yearAxis.setTitle("Year")
-        self._yearAxis.setLabelAutoRotation(30.0)
+        self._yearAxis.setLabelAutoAngle(30.0)
         self._yearAxis.setTitleVisible(True)
         self._monthAxis.setTitle("Month")
-        self._monthAxis.setLabelAutoRotation(30.0)
+        self._monthAxis.setLabelAutoAngle(30.0)
         self._monthAxis.setTitleVisible(True)
 
         self._graph.setValueAxis(self._temperatureAxis)
@@ -208,54 +208,54 @@ class GraphModifier(QObject):
         # Restore camera target in case animation has changed it
         self._graph.setCameraTargetPosition(QVector3D(0.0, 0.0, 0.0))
 
-        self._preset = QAbstract3DGraph.CameraPreset.Front.value
+        self._preset = QtGraphs3D.CameraPreset.Front.value
 
-        self._graph.setCameraPreset(QAbstract3DGraph.CameraPreset(self._preset))
+        self._graph.setCameraPreset(QtGraphs3D.CameraPreset(self._preset))
 
         self._preset += 1
-        if self._preset > QAbstract3DGraph.CameraPreset.DirectlyBelow.value:
-            self._preset = QAbstract3DGraph.CameraPreset.FrontLow.value
+        if self._preset > QtGraphs3D.CameraPreset.DirectlyBelow.value:
+            self._preset = QtGraphs3D.CameraPreset.FrontLow.value
 
     @Slot(int)
     def changeTheme(self, theme):
         currentTheme = self._graph.activeTheme()
-        currentTheme.setType(Q3DTheme.Theme(theme))
-        self.backgroundEnabledChanged.emit(currentTheme.isBackgroundEnabled())
-        self.gridEnabledChanged.emit(currentTheme.isGridEnabled())
-        self.fontChanged.emit(currentTheme.font())
-        self.fontSizeChanged.emit(currentTheme.font().pointSize())
+        currentTheme.setTheme(QGraphsTheme.Theme(theme))
+        self.backgroundVisibleChanged.emit(currentTheme.isBackgroundVisible())
+        self.gridVisibleChanged.emit(currentTheme.isGridVisible())
+        self.fontChanged.emit(currentTheme.labelFont())
+        self.fontSizeChanged.emit(currentTheme.labelFont().pointSize())
 
     def changeLabelBackground(self):
         theme = self._graph.activeTheme()
-        theme.setLabelBackgroundEnabled(not theme.isLabelBackgroundEnabled())
+        theme.setLabelBackgroundVisible(not theme.isLabelBackgroundVisible())
 
     @Slot(int)
     def changeSelectionMode(self, selectionMode):
         comboBox = self.sender()
         if comboBox:
             flags = comboBox.itemData(selectionMode)
-            self._graph.setSelectionMode(QAbstract3DGraph.SelectionFlags(flags))
+            self._graph.setSelectionMode(QtGraphs3D.SelectionFlags(flags))
 
     def changeFont(self, font):
         newFont = font
-        self._graph.activeTheme().setFont(newFont)
+        self._graph.activeTheme().setLabelFont(newFont)
 
     def changeFontSize(self, fontsize):
         self._fontSize = fontsize
-        font = self._graph.activeTheme().font()
+        font = self._graph.activeTheme().labelFont()
         font.setPointSize(self._fontSize)
-        self._graph.activeTheme().setFont(font)
+        self._graph.activeTheme().setLabelFont(font)
 
-    @Slot(QAbstract3DGraph.ShadowQuality)
+    @Slot(QtGraphs3D.ShadowQuality)
     def shadowQualityUpdatedByVisual(self, sq):
         # Updates the UI component to show correct shadow quality
         self.shadowQualityChanged.emit(sq.value)
 
     @Slot(int)
     def changeLabelRotation(self, rotation):
-        self._temperatureAxis.setLabelAutoRotation(float(rotation))
-        self._monthAxis.setLabelAutoRotation(float(rotation))
-        self._yearAxis.setLabelAutoRotation(float(rotation))
+        self._temperatureAxis.setLabelAutoAngle(float(rotation))
+        self._monthAxis.setLabelAutoAngle(float(rotation))
+        self._yearAxis.setLabelAutoAngle(float(rotation))
 
     @Slot(bool)
     def setAxisTitleVisibility(self, enabled):
@@ -339,25 +339,23 @@ class GraphModifier(QObject):
             self.changeDataMode(True)
 
     def changeShadowQuality(self, quality):
-        sq = QAbstract3DGraph.ShadowQuality(quality)
+        sq = QtGraphs3D.ShadowQuality(quality)
         self._graph.setShadowQuality(sq)
         self.shadowQualityChanged.emit(quality)
 
     def rotateX(self, rotation):
         self._xRotation = rotation
-        camera = self._graph.scene().activeCamera()
-        camera.setCameraPosition(self._xRotation, self._yRotation)
+        self._graph.setCameraPosition(self._xRotation, self._yRotation)
 
     def rotateY(self, rotation):
         self._yRotation = rotation
-        camera = self._graph.scene().activeCamera()
-        camera.setCameraPosition(self._xRotation, self._yRotation)
+        self._graph.setCameraPosition(self._xRotation, self._yRotation)
 
-    def setBackgroundEnabled(self, enabled):
-        self._graph.activeTheme().setBackgroundEnabled(bool(enabled))
+    def setPlotAreaBackgroundVisible(self, enabled):
+        self._graph.activeTheme().setPlotAreaBackgroundVisible(bool(enabled))
 
-    def setGridEnabled(self, enabled):
-        self._graph.activeTheme().setGridEnabled(bool(enabled))
+    def setGridVisible(self, enabled):
+        self._graph.activeTheme().setGridVisible(bool(enabled))
 
     def setSmoothBars(self, smooth):
         self._smooth = bool(smooth)

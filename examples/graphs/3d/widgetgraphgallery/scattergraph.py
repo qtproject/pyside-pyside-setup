@@ -7,7 +7,8 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QCommandLinkButton,
                                QLabel, QHBoxLayout, QSizePolicy,
                                QVBoxLayout, QWidget, )
 from PySide6.QtQuickWidgets import QQuickWidget
-from PySide6.QtGraphs import (QAbstract3DSeries, Q3DScatter)
+from PySide6.QtGraphs import QAbstract3DSeries
+from PySide6.QtGraphsWidgets import Q3DScatterWidgetItem
 
 from scatterdatamodifier import ScatterDataModifier
 
@@ -16,15 +17,17 @@ class ScatterGraph(QObject):
 
     def __init__(self, minimum_graph_size, maximum_graph_size):
         super().__init__()
-        self._scatterGraph = Q3DScatter()
+
+        scatterGraph = Q3DScatterWidgetItem()
+        scatterGraphWidget = QQuickWidget()
+        scatterGraph.setWidget(scatterGraphWidget)
         self._scatterWidget = QWidget()
         hLayout = QHBoxLayout(self._scatterWidget)
-        self._scatterGraph.setMinimumSize(minimum_graph_size)
-        self._scatterGraph.setMaximumSize(maximum_graph_size)
-        self._scatterGraph.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self._scatterGraph.setFocusPolicy(Qt.StrongFocus)
-        self._scatterGraph.setResizeMode(QQuickWidget.SizeRootObjectToView)
-        hLayout.addWidget(self._scatterGraph, 1)
+        scatterGraphWidget.setMinimumSize(minimum_graph_size)
+        scatterGraphWidget.setMaximumSize(maximum_graph_size)
+        scatterGraphWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        scatterGraphWidget.setFocusPolicy(Qt.StrongFocus)
+        hLayout.addWidget(scatterGraphWidget, 1)
 
         vLayout = QVBoxLayout()
         hLayout.addLayout(vLayout)
@@ -45,7 +48,7 @@ class ScatterGraph(QObject):
         rangeButton.setIconSize(QSize(0, 0))
 
         backgroundCheckBox = QCheckBox(self._scatterWidget)
-        backgroundCheckBox.setText("Show background")
+        backgroundCheckBox.setText("Show graph background")
         backgroundCheckBox.setChecked(True)
 
         gridCheckBox = QCheckBox(self._scatterWidget)
@@ -97,26 +100,26 @@ class ScatterGraph(QObject):
         vLayout.addWidget(QLabel("Adjust shadow quality"))
         vLayout.addWidget(shadowQuality, 1, Qt.AlignTop)
 
-        self._modifier = ScatterDataModifier(self._scatterGraph, self)
+        modifier = ScatterDataModifier(scatterGraph, self)
 
-        cameraButton.clicked.connect(self._modifier.changePresetCamera)
-        itemCountButton.clicked.connect(self._modifier.toggleItemCount)
-        rangeButton.clicked.connect(self._modifier.toggleRanges)
+        cameraButton.clicked.connect(modifier.changePresetCamera)
+        itemCountButton.clicked.connect(modifier.toggleItemCount)
+        rangeButton.clicked.connect(modifier.toggleRanges)
 
-        backgroundCheckBox.stateChanged.connect(self._modifier.setBackgroundEnabled)
-        gridCheckBox.stateChanged.connect(self._modifier.setGridEnabled)
-        smoothCheckBox.stateChanged.connect(self._modifier.setSmoothDots)
+        backgroundCheckBox.stateChanged.connect(modifier.setPlotAreaBackgroundVisible)
+        gridCheckBox.stateChanged.connect(modifier.setGridVisible)
+        smoothCheckBox.stateChanged.connect(modifier.setSmoothDots)
 
-        self._modifier.backgroundEnabledChanged.connect(backgroundCheckBox.setChecked)
-        self._modifier.gridEnabledChanged.connect(gridCheckBox.setChecked)
-        itemStyleList.currentIndexChanged.connect(self._modifier.changeStyle)
+        modifier.backgroundEnabledChanged.connect(backgroundCheckBox.setChecked)
+        modifier.gridVisibleChanged.connect(gridCheckBox.setChecked)
+        itemStyleList.currentIndexChanged.connect(modifier.changeStyle)
 
-        themeList.currentIndexChanged.connect(self._modifier.changeTheme)
+        themeList.currentIndexChanged.connect(modifier.changeTheme)
 
-        shadowQuality.currentIndexChanged.connect(self._modifier.changeShadowQuality)
+        shadowQuality.currentIndexChanged.connect(modifier.changeShadowQuality)
 
-        self._modifier.shadowQualityChanged.connect(shadowQuality.setCurrentIndex)
-        self._scatterGraph.shadowQualityChanged.connect(self._modifier.shadowQualityUpdatedByVisual)
+        modifier.shadowQualityChanged.connect(shadowQuality.setCurrentIndex)
+        scatterGraph.shadowQualityChanged.connect(modifier.shadowQualityUpdatedByVisual)
 
     def scatterWidget(self):
         return self._scatterWidget

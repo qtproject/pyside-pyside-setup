@@ -6,10 +6,10 @@ import sys
 
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QVector3D
-from PySide6.QtGraphs import (Q3DSurface, QSurfaceDataItem,
-                              QSurface3DSeries)
-from PySide6.QtWidgets import QApplication
+from PySide6.QtGraphs import (QSurfaceDataItem, QSurface3DSeries)
+from PySide6.QtGraphsWidgets import (Q3DSurfaceWidgetItem)
 from PySide6.QtQuickWidgets import QQuickWidget
+from PySide6.QtWidgets import QApplication
 
 
 DESCRIPTION = """Minimal Qt Graphs Surface Example
@@ -23,7 +23,9 @@ if __name__ == '__main__':
 
     print(DESCRIPTION)
 
-    surface = Q3DSurface()
+    window = QQuickWidget()
+    surface = Q3DSurfaceWidgetItem()
+    surface.setWidget(window)
     axis = surface.axisX()
     axis.setTitle("X")
     axis.setTitleVisible(True)
@@ -48,8 +50,10 @@ if __name__ == '__main__':
 
     available_height = app.primaryScreen().availableGeometry().height()
     width = available_height * 4 / 5
-    surface.resize(QSize(width, width))
-    surface.setResizeMode(QQuickWidget.SizeRootObjectToView)
-    surface.show()
+    window.resize(QSize(width, width))
+    window.show()
 
-    sys.exit(app.exec())
+    exit_code = app.exec()
+    surface = None
+    del window
+    sys.exit(exit_code)

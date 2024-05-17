@@ -10,35 +10,38 @@ from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QFontComboBox
                                QLabel, QPushButton, QHBoxLayout, QSizePolicy,
                                QRadioButton, QSlider, QVBoxLayout, QWidget)
 from PySide6.QtQuickWidgets import QQuickWidget
-from PySide6.QtGraphs import (QAbstract3DGraph, QAbstract3DSeries, Q3DBars)
+from PySide6.QtGraphs import QAbstract3DSeries, QtGraphs3D
+from PySide6.QtGraphsWidgets import Q3DBarsWidgetItem
 
 
 class BarGraph(QObject):
 
     def __init__(self, minimum_graph_size, maximum_graph_size):
         super().__init__()
-        self._barsGraph = Q3DBars()
+
+        barsGraph = Q3DBarsWidgetItem()
+        barsGraphWidget = QQuickWidget()
+        barsGraph.setWidget(barsGraphWidget)
         self._barsWidget = QWidget()
         hLayout = QHBoxLayout(self._barsWidget)
-        self._barsGraph.setMinimumSize(minimum_graph_size)
-        self._barsGraph.setMaximumSize(maximum_graph_size)
-        self._barsGraph.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self._barsGraph.setFocusPolicy(Qt.StrongFocus)
-        self._barsGraph.setResizeMode(QQuickWidget.SizeRootObjectToView)
-        hLayout.addWidget(self._barsGraph, 1)
+        barsGraphWidget.setMinimumSize(minimum_graph_size)
+        barsGraphWidget.setMaximumSize(maximum_graph_size)
+        barsGraphWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        barsGraphWidget.setFocusPolicy(Qt.StrongFocus)
+        hLayout.addWidget(barsGraphWidget, 1)
 
         vLayout = QVBoxLayout()
         hLayout.addLayout(vLayout)
 
         themeList = QComboBox(self._barsWidget)
-        themeList.addItem("Qt")
-        themeList.addItem("Primary Colors")
-        themeList.addItem("Digia")
-        themeList.addItem("Stone Moss")
-        themeList.addItem("Army Blue")
-        themeList.addItem("Retro")
-        themeList.addItem("Ebony")
-        themeList.addItem("Isabelle")
+        themeList.addItem("QtGreen")
+        themeList.addItem("QtGreenNeon")
+        themeList.addItem("MixSeries")
+        themeList.addItem("OrangeSeries")
+        themeList.addItem("YellowSeries")
+        themeList.addItem("BlueSeries")
+        themeList.addItem("PurpleSeries")
+        themeList.addItem("GreySeries")
         themeList.setCurrentIndex(0)
 
         labelButton = QPushButton(self._barsWidget)
@@ -64,37 +67,37 @@ class BarGraph(QObject):
         zoomToSelectedButton.setText("Zoom to selected bar")
 
         selectionModeList = QComboBox(self._barsWidget)
-        selectionModeList.addItem("None", QAbstract3DGraph.SelectionNone)
-        selectionModeList.addItem("Bar", QAbstract3DGraph.SelectionItem)
-        selectionModeList.addItem("Row", QAbstract3DGraph.SelectionRow)
-        sel = QAbstract3DGraph.SelectionItemAndRow
+        selectionModeList.addItem("None", QtGraphs3D.SelectionFlag.None_)
+        selectionModeList.addItem("Bar", QtGraphs3D.SelectionFlag.Item)
+        selectionModeList.addItem("Row", QtGraphs3D.SelectionFlag.Row)
+        sel = QtGraphs3D.SelectionFlag.ItemAndRow
         selectionModeList.addItem("Bar and Row", sel)
-        selectionModeList.addItem("Column", QAbstract3DGraph.SelectionColumn)
-        sel = QAbstract3DGraph.SelectionItemAndColumn
+        selectionModeList.addItem("Column", QtGraphs3D.SelectionFlag.Column)
+        sel = QtGraphs3D.SelectionFlag.ItemAndColumn
         selectionModeList.addItem("Bar and Column", sel)
-        sel = QAbstract3DGraph.SelectionRowAndColumn
+        sel = QtGraphs3D.SelectionFlag.RowAndColumn
         selectionModeList.addItem("Row and Column", sel)
-        sel = QAbstract3DGraph.SelectionItemRowAndColumn
+        sel = QtGraphs3D.SelectionFlag.RowAndColumn
         selectionModeList.addItem("Bar, Row and Column", sel)
-        sel = QAbstract3DGraph.SelectionSlice | QAbstract3DGraph.SelectionRow
+        sel = QtGraphs3D.SelectionFlag.Slice | QtGraphs3D.SelectionFlag.Row
         selectionModeList.addItem("Slice into Row", sel)
-        sel = QAbstract3DGraph.SelectionSlice | QAbstract3DGraph.SelectionItemAndRow
+        sel = QtGraphs3D.SelectionFlag.Slice | QtGraphs3D.SelectionFlag.ItemAndRow
         selectionModeList.addItem("Slice into Row and Item", sel)
-        sel = QAbstract3DGraph.SelectionSlice | QAbstract3DGraph.SelectionColumn
+        sel = QtGraphs3D.SelectionFlag.Slice | QtGraphs3D.SelectionFlag.Column
         selectionModeList.addItem("Slice into Column", sel)
-        sel = (QAbstract3DGraph.SelectionSlice
-               | QAbstract3DGraph.SelectionItemAndColumn)
+        sel = (QtGraphs3D.SelectionFlag.Slice
+               | QtGraphs3D.SelectionFlag.ItemAndColumn)
         selectionModeList.addItem("Slice into Column and Item", sel)
-        sel = (QAbstract3DGraph.SelectionItemRowAndColumn
-               | QAbstract3DGraph.SelectionMultiSeries)
+        sel = (QtGraphs3D.SelectionFlag.ItemRowAndColumn
+               | QtGraphs3D.SelectionFlag.MultiSeries)
         selectionModeList.addItem("Multi: Bar, Row, Col", sel)
-        sel = (QAbstract3DGraph.SelectionSlice
-               | QAbstract3DGraph.SelectionItemAndRow
-               | QAbstract3DGraph.SelectionMultiSeries)
+        sel = (QtGraphs3D.SelectionFlag.Slice
+               | QtGraphs3D.SelectionFlag.ItemAndRow
+               | QtGraphs3D.SelectionFlag.MultiSeries)
         selectionModeList.addItem("Multi, Slice: Row, Item", sel)
-        sel = (QAbstract3DGraph.SelectionSlice
-               | QAbstract3DGraph.SelectionItemAndColumn
-               | QAbstract3DGraph.SelectionMultiSeries)
+        sel = (QtGraphs3D.SelectionFlag.Slice
+               | QtGraphs3D.SelectionFlag.ItemAndColumn
+               | QtGraphs3D.SelectionFlag.MultiSeries)
         selectionModeList.addItem("Multi, Slice: Col, Item", sel)
         selectionModeList.setCurrentIndex(1)
 
@@ -219,50 +222,51 @@ class BarGraph(QObject):
         vLayout.addWidget(modeWeather, 0, Qt.AlignTop)
         vLayout.addWidget(modeCustomProxy, 1, Qt.AlignTop)
 
-        self._modifier = GraphModifier(self._barsGraph, self)
+        modifier = GraphModifier(barsGraph, self)
+        modifier.changeTheme(themeList.currentIndex())
 
-        rotationSliderX.valueChanged.connect(self._modifier.rotateX)
-        rotationSliderY.valueChanged.connect(self._modifier.rotateY)
+        rotationSliderX.valueChanged.connect(modifier.rotateX)
+        rotationSliderY.valueChanged.connect(modifier.rotateY)
 
-        labelButton.clicked.connect(self._modifier.changeLabelBackground)
-        cameraButton.clicked.connect(self._modifier.changePresetCamera)
-        zoomToSelectedButton.clicked.connect(self._modifier.zoomToSelectedBar)
+        labelButton.clicked.connect(modifier.changeLabelBackground)
+        cameraButton.clicked.connect(modifier.changePresetCamera)
+        zoomToSelectedButton.clicked.connect(modifier.zoomToSelectedBar)
 
-        backgroundCheckBox.stateChanged.connect(self._modifier.setBackgroundEnabled)
-        gridCheckBox.stateChanged.connect(self._modifier.setGridEnabled)
-        smoothCheckBox.stateChanged.connect(self._modifier.setSmoothBars)
-        seriesCheckBox.stateChanged.connect(self._modifier.setSeriesVisibility)
-        reverseValueAxisCheckBox.stateChanged.connect(self._modifier.setReverseValueAxis)
-        reflectionCheckBox.stateChanged.connect(self._modifier.setReflection)
+        backgroundCheckBox.stateChanged.connect(modifier.setPlotAreaBackgroundVisible)
+        gridCheckBox.stateChanged.connect(modifier.setGridVisible)
+        smoothCheckBox.stateChanged.connect(modifier.setSmoothBars)
+        seriesCheckBox.stateChanged.connect(modifier.setSeriesVisibility)
+        reverseValueAxisCheckBox.stateChanged.connect(modifier.setReverseValueAxis)
+        reflectionCheckBox.stateChanged.connect(modifier.setReflection)
 
-        self._modifier.backgroundEnabledChanged.connect(backgroundCheckBox.setChecked)
-        self._modifier.gridEnabledChanged.connect(gridCheckBox.setChecked)
+        modifier.backgroundVisibleChanged.connect(backgroundCheckBox.setChecked)
+        modifier.gridVisibleChanged.connect(gridCheckBox.setChecked)
 
-        rangeList.currentIndexChanged.connect(self._modifier.changeRange)
+        rangeList.currentIndexChanged.connect(modifier.changeRange)
 
-        barStyleList.currentIndexChanged.connect(self._modifier.changeStyle)
+        barStyleList.currentIndexChanged.connect(modifier.changeStyle)
 
-        selectionModeList.currentIndexChanged.connect(self._modifier.changeSelectionMode)
+        selectionModeList.currentIndexChanged.connect(modifier.changeSelectionMode)
 
-        themeList.currentIndexChanged.connect(self._modifier.changeTheme)
+        themeList.currentIndexChanged.connect(modifier.changeTheme)
 
-        shadowQuality.currentIndexChanged.connect(self._modifier.changeShadowQuality)
+        shadowQuality.currentIndexChanged.connect(modifier.changeShadowQuality)
 
-        self._modifier.shadowQualityChanged.connect(shadowQuality.setCurrentIndex)
-        self._barsGraph.shadowQualityChanged.connect(self._modifier.shadowQualityUpdatedByVisual)
+        modifier.shadowQualityChanged.connect(shadowQuality.setCurrentIndex)
+        barsGraph.shadowQualityChanged.connect(modifier.shadowQualityUpdatedByVisual)
 
-        fontSizeSlider.valueChanged.connect(self._modifier.changeFontSize)
-        fontList.currentFontChanged.connect(self._modifier.changeFont)
+        fontSizeSlider.valueChanged.connect(modifier.changeFontSize)
+        fontList.currentFontChanged.connect(modifier.changeFont)
 
-        self._modifier.fontSizeChanged.connect(fontSizeSlider.setValue)
-        self._modifier.fontChanged.connect(fontList.setCurrentFont)
+        modifier.fontSizeChanged.connect(fontSizeSlider.setValue)
+        modifier.fontChanged.connect(fontList.setCurrentFont)
 
-        axisTitlesVisibleCB.stateChanged.connect(self._modifier.setAxisTitleVisibility)
-        axisTitlesFixedCB.stateChanged.connect(self._modifier.setAxisTitleFixed)
-        axisLabelRotationSlider.valueChanged.connect(self._modifier.changeLabelRotation)
+        axisTitlesVisibleCB.stateChanged.connect(modifier.setAxisTitleVisibility)
+        axisTitlesFixedCB.stateChanged.connect(modifier.setAxisTitleFixed)
+        axisLabelRotationSlider.valueChanged.connect(modifier.changeLabelRotation)
 
-        modeWeather.toggled.connect(self._modifier.setDataModeToWeather)
-        modeCustomProxy.toggled.connect(self._modifier.setDataModeToCustom)
+        modeWeather.toggled.connect(modifier.setDataModeToWeather)
+        modeCustomProxy.toggled.connect(modifier.setDataModeToCustom)
         modeWeather.toggled.connect(seriesCheckBox.setEnabled)
         modeWeather.toggled.connect(rangeList.setEnabled)
         modeWeather.toggled.connect(axisTitlesVisibleCB.setEnabled)

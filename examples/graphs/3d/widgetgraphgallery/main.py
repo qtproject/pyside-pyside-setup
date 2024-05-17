@@ -14,29 +14,37 @@ from scattergraph import ScatterGraph
 from surfacegraph import SurfaceGraph
 
 
+class MainWidget(QTabWidget):
+    """Tab widget for creating own tabs for Q3DBars, Q3DScatter, and Q3DSurface"""
+
+    def __init__(self, p=None):
+        super().__init__(p)
+
+        screen_size = self.screen().size()
+        minimum_graph_size = QSize(screen_size.width() / 2, screen_size.height() / 1.75)
+
+        # Create bar graph
+        self._bars = BarGraph(minimum_graph_size, screen_size)
+        # Create scatter graph
+        self._scatter = ScatterGraph(minimum_graph_size, screen_size)
+        # Create surface graph
+        self._surface = SurfaceGraph(minimum_graph_size, screen_size)
+
+        # Add bars widget
+        self.addTab(self._bars.barsWidget(), "Bar Graph")
+        # Add scatter widget
+        self.addTab(self._scatter.scatterWidget(), "Scatter Graph")
+        # Add surface widget
+        self.addTab(self._surface.surfaceWidget(), "Surface Graph")
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    # Create a tab widget for creating own tabs for Q3DBars, Q3DScatter, and Q3DSurface
-    tabWidget = QTabWidget()
+    tabWidget = MainWidget()
     tabWidget.setWindowTitle("Widget Gallery")
 
-    screen_size = tabWidget.screen().size()
-    minimum_graph_size = QSize(screen_size.width() / 2, screen_size.height() / 1.75)
-
-    # Create bar graph
-    bars = BarGraph(minimum_graph_size, screen_size)
-    # Create scatter graph
-    scatter = ScatterGraph(minimum_graph_size, screen_size)
-    # Create surface graph
-    surface = SurfaceGraph(minimum_graph_size, screen_size)
-
-    # Add bars widget
-    tabWidget.addTab(bars.barsWidget(), "Bar Graph")
-    # Add scatter widget
-    tabWidget.addTab(scatter.scatterWidget(), "Scatter Graph")
-    # Add surface widget
-    tabWidget.addTab(surface.surfaceWidget(), "Surface Graph")
-
     tabWidget.show()
-    sys.exit(app.exec())
+    exit_code = app.exec()
+    del tabWidget
+    sys.exit(exit_code)
