@@ -531,6 +531,10 @@ SbkConverter *createConverterObject(PyTypeObject *type,
                                     IsConvertibleToCppFunc toCppPointerCheckFunc,
                                     CppToPythonFunc pointerToPythonFunc,
                                     CppToPythonFunc copyToPythonFunc);
+
+/// Interface for sbkmodule which must reset cache when new module is loaded.
+LIBSHIBOKEN_API void clearNegativeLazyCache();
+
 } // namespace Shiboken::Conversions
 
 #endif // SBK_CONVERTER_P_H
