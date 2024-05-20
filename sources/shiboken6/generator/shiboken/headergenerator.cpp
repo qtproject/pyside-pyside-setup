@@ -706,8 +706,12 @@ bool HeaderGenerator::finishGeneration()
         macrosStream << ti;
     macrosStream << "};\n\n";
 
+    // FIXME: Remove backwards compatible variable in PySide 7.
     macrosStream << "// This variable stores all Python types exported by this module.\n";
     macrosStream << "extern Shiboken::Module::TypeInitStruct *" << cppApiVariableName() << ";\n\n";
+    macrosStream << "// This variable stores all Python types exported by this module ";
+    macrosStream << "in a backwards compatible way with identical indexing.\n";
+    macrosStream << "[[deprecated]] extern PyTypeObject **" << cppApiVariableNameOld() << ";\n\n";
     macrosStream << "// This variable stores the Python module object exported by this module.\n";
     macrosStream << "extern PyObject *" << pythonModuleObjectName() << ";\n\n";
     macrosStream << "// This variable stores all type converters exported by this module.\n";
