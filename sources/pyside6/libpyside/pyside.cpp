@@ -688,13 +688,6 @@ static const char *typeName(const QObject *cppSelf)
                 typeName = name;
                 break;
             }
-            // PYSIDE-2404: Did not find the name. Load the lazy classes
-            //              which have this name and try again.
-            Shiboken::Module::loadLazyClassesWithName(name);
-            if (Shiboken::Conversions::getConverter(name)) {
-                typeName = name;
-                break;
-            }
         }
     }
     return typeName;
