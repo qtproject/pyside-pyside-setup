@@ -801,14 +801,7 @@ PyTypeObject *getPythonTypeObject(const SbkConverter *converter)
 
 PyTypeObject *getPythonTypeObject(const char *typeName)
 {
-    auto *type = getPythonTypeObject(getConverter(typeName));
-    if (type == nullptr) {
-        // PYSIDE-2404: Did not find the name. Load the lazy classes
-        //              which have this name and try again.
-        Shiboken::Module::loadLazyClassesWithName(getRealTypeName(typeName).c_str());
-        type = getPythonTypeObject(getConverter(typeName));
-    }
-    return type;
+    return getPythonTypeObject(getConverter(typeName));
 }
 
 bool pythonTypeIsValueType(const SbkConverter *converter)
