@@ -137,6 +137,10 @@ void dumpConverters()
     PyTypeObjectConverterMap pyTypeObjectConverterMap;
     for (const auto &converter : converters) {
         auto *sbkConverter = converter.second;
+        if (sbkConverter == nullptr) {
+            str << "Non-existent: \"" << converter.first << "\"\n";
+            continue;
+        }
         auto *typeObject = sbkConverter->pythonType;
         auto typeIt = pyTypeObjectConverterMap.find(typeObject);
         if (typeIt == pyTypeObjectConverterMap.end())
