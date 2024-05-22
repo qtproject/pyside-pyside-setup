@@ -11,7 +11,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QDir
+from PySide6.QtCore import QDir, QDirListing
 
 
 class QDirTest(unittest.TestCase):
@@ -34,6 +34,15 @@ class QDirTest(unittest.TestCase):
         self.assertEqual(a, c)
 
         self.assertEqual(b, c)
+
+
+class QDirListingTest(unittest.TestCase):
+    '''Test case for QDirListing'''
+
+    def test(self):
+        dir_listing = QDirListing(QDir.homePath())
+        for entry in dir_listing:
+            pass
 
 
 if __name__ == '__main__':

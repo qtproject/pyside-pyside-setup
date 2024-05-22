@@ -4,6 +4,7 @@
 #ifndef QTCOREHELPER_H
 #define QTCOREHELPER_H
 
+#include <QtCore/qdirlisting.h>
 #include <QtCore/qmutex.h>
 #include <QtCore/qobjectdefs.h>
 
@@ -113,6 +114,28 @@ namespace QtCoreHelper {
 
     private:
         std::shared_ptr<QGenericReturnArgumentData> d;
+    };
+
+    struct QDirListingIteratorPrivate;
+
+    class QDirListingIterator
+    {
+    public:
+        explicit QDirListingIterator(const QDirListing &dl);
+        QDirListingIterator();
+
+        QDirListingIterator(const QDirListingIterator &);
+        QDirListingIterator &operator=(const QDirListingIterator &);
+        QDirListingIterator(QDirListingIterator &&) noexcept;
+        QDirListingIterator &operator=(QDirListingIterator &&) noexcept;
+        ~QDirListingIterator();
+
+        bool next();
+        const QDirListing::DirEntry &value() const;
+        bool atEnd() const;
+
+    private:
+        std::shared_ptr<QDirListingIteratorPrivate> d;
     };
 
 } // namespace QtCoreHelper

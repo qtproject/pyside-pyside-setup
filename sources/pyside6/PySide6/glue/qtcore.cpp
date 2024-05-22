@@ -2126,3 +2126,23 @@ PyRun_String(R"PY(if True:
 
 )PY", Py_file_input, _inputDict, _inputDict);
 // @snippet qt-modifier
+
+// @snippet qdirlisting-iter
+auto result = QtCoreHelper::QDirListingIterator(*%CPPSELF);
+%PYARG_0 = %CONVERTTOPYTHON[QtCoreHelper::QDirListingIterator](result);
+// @snippet qdirlisting-iter
+
+// @snippet qdirlistingiterator-next
+if (%CPPSELF.next()) {
+    Py_INCREF(%PYSELF);
+    %PYARG_0 = %PYSELF;
+}
+// @snippet qdirlistingiterator-next
+
+// @snippet qdirlisting-direntry-repr
+QByteArray result = '<' + QByteArray(Py_TYPE(%PYSELF)->tp_name)
+                    + " object at 0x"
+                    + QByteArray::number(quintptr(%PYSELF), 16) + " (\""
+                    + %CPPSELF.absoluteFilePath().toUtf8() + "\")>";
+%PYARG_0 = Shiboken::String::fromCString(result.constData());
+// @snippet qdirlisting-direntry-repr

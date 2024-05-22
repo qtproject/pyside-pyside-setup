@@ -957,6 +957,23 @@
     </add-function>
   </value-type>
 
+  <object-type name="QDirListing" since="6.8">
+    <extra-includes>
+      <include file-name="qtcorehelper.h" location="local"/>
+    </extra-includes>
+    <enum-type name="IteratorFlag" flags="IteratorFlags"/>
+    <value-type name="DirEntry">
+      <add-function signature="__repr__" return-type="PyObject*">
+          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                       snippet="qdirlisting-direntry-repr"/>
+      </add-function>
+    </value-type>
+    <add-function signature="__iter__()" return-type="PyObject*">
+        <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                     snippet="qdirlisting-iter"/>
+    </add-function>
+  </object-type>
+
   <value-type name="QPermission" since="6.5">
       <configuration condition="QT_CONFIG(permissions)"/>
   </value-type>
@@ -2482,6 +2499,17 @@
     <object-type name="QIOPipe"/>
     <value-type name="QGenericArgumentHolder"/>
     <value-type name="QGenericReturnArgumentHolder"/>
+    <value-type name="QDirListingIterator">
+        <add-function signature="__iter__()" return-type="PyObject*">
+          <inject-code class="target" position="beginning">
+            <insert-template name="__iter__"/>
+          </inject-code>
+        </add-function>
+        <add-function signature="__next__()" return-type="PyObject*">
+          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                       snippet="qdirlistingiterator-next"/>
+        </add-function>
+    </value-type>
   </namespace-type>
 
   <!-- Qt5 addition -->

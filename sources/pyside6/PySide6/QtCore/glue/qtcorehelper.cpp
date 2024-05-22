@@ -103,6 +103,72 @@ const void *QGenericReturnArgumentHolder::data() const
     return d->m_argument.data();
 }
 
+// QDirListing::const_iterator has no copy semantics (shared internal state, QTBUG-125512).
+// The Python iterable semantics (calling __next__() first before retrieving the first value)
+// can therefore not be implemented as "return iterator++;". Wrap a helper class
+// around it that does a no-op in the first call to __next__().
+struct QDirListingIteratorPrivate
+{
+    enum State { First, Iterating, End };
+
+    explicit QDirListingIteratorPrivate(const QDirListing &dl) :
+        iterator(dl.cbegin()), state(First) {}
+    QDirListingIteratorPrivate() : state(End) {}
+
+    bool next();
+
+    QDirListing::const_iterator iterator;
+    State state;
+};
+
+inline bool QDirListingIteratorPrivate::next()
+{
+    switch (state) {
+    case First:
+        state = iterator != QDirListing::const_iterator{} ? Iterating : End;
+        break;
+    case Iterating:
+        if (++iterator == QDirListing::const_iterator{})
+            state = End;
+        break;
+    case End:
+        break;
+    }
+    return state != End;
+}
+
+QDirListingIterator::QDirListingIterator(const QDirListing &dl) :
+    d(std::make_shared<QDirListingIteratorPrivate>(dl))
+{
+}
+
+QDirListingIterator::QDirListingIterator() :
+    d(std::make_shared<QDirListingIteratorPrivate>())
+{
+}
+
+QDirListingIterator::QDirListingIterator(const QDirListingIterator &) = default;
+QDirListingIterator &QDirListingIterator::operator=(const QDirListingIterator &) = default;
+QDirListingIterator::QDirListingIterator(QDirListingIterator &&) noexcept = default;
+QDirListingIterator &QDirListingIterator::operator=(QDirListingIterator &&) noexcept = default;
+QDirListingIterator::~QDirListingIterator() = default;
+
+bool QDirListingIterator::next()
+{
+    return d->next();
+}
+
+const QDirListing::DirEntry &QDirListingIterator::value() const
+{
+    Q_ASSERT(d->state == QDirListingIteratorPrivate::Iterating);
+    return *d->iterator;
+}
+
+bool QDirListingIterator::atEnd() const
+{
+    return d->state == QDirListingIteratorPrivate::End;
+}
+
 } // namespace QtCoreHelper
 
 QT_END_NAMESPACE

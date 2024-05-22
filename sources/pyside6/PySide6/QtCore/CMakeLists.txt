@@ -67,6 +67,8 @@ ${QtCore_GEN_DIR}/qdatetime_wrapper.cpp
 ${QtCore_GEN_DIR}/qdeadlinetimer_wrapper.cpp
 ${QtCore_GEN_DIR}/qdir_wrapper.cpp
 ${QtCore_GEN_DIR}/qdiriterator_wrapper.cpp
+${QtCore_GEN_DIR}/qdirlisting_wrapper.cpp
+${QtCore_GEN_DIR}/qdirlisting_direntry_wrapper.cpp
 ${QtCore_GEN_DIR}/qdynamicpropertychangeevent_wrapper.cpp
 ${QtCore_GEN_DIR}/qeasingcurve_wrapper.cpp
 ${QtCore_GEN_DIR}/qelapsedtimer_wrapper.cpp
@@ -165,6 +167,7 @@ ${QtCore_GEN_DIR}/qstringlistmodel_wrapper.cpp
 ${QtCore_GEN_DIR}/qsysinfo_wrapper.cpp
 ${QtCore_GEN_DIR}/qsystemsemaphore_wrapper.cpp
 ${QtCore_GEN_DIR}/qt_wrapper.cpp
+${QtCore_GEN_DIR}/qtcorehelper_qdirlistingiterator_wrapper.cpp
 ${QtCore_GEN_DIR}/qtcorehelper_qgenericargumentholder_wrapper.cpp
 ${QtCore_GEN_DIR}/qtcorehelper_qgenericreturnargumentholder_wrapper.cpp
 ${QtCore_GEN_DIR}/qtcorehelper_qiopipe_wrapper.cpp
