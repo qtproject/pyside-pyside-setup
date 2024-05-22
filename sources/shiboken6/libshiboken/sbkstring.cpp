@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "sbkstring.h"
+#include "sbkenum.h"
 #include "sbkstaticstrings_p.h"
 #include "autodecref.h"
 
@@ -12,6 +13,11 @@ namespace Shiboken::String
 bool checkIterable(PyObject *obj)
 {
     return PyObject_HasAttr(obj, Shiboken::PyMagicName::iter());
+}
+
+bool checkIterableArgument(PyObject *obj)
+{
+    return checkIterable(obj) && !Shiboken::Enum::check(obj);
 }
 
 static PyObject *initPathLike()
