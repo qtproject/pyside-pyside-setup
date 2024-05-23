@@ -496,6 +496,31 @@ PyObject *PepErr_GetRaisedException()
     PyErr_Restore(type, value, traceback);
     return value;
 }
+
+struct PepException_HEAD
+{
+    PyObject_HEAD
+    PyObject *x1; // dict
+    PyObject *args;
+};
+
+// PyException_GetArgs/PyException_SetArgs were added to the stable API in 3.12
+PyObject *PepException_GetArgs(PyObject *ex)
+{
+    auto *h = reinterpret_cast<PepException_HEAD *>(ex);
+    Py_XINCREF(h->args);
+    return h->args;
+}
+
+LIBSHIBOKEN_API void PepException_SetArgs(PyObject *ex, PyObject *args)
+{
+    auto *h = reinterpret_cast<PepException_HEAD *>(ex);
+    Py_XINCREF(args);
+    auto *old = h->args; // Py_XSETREF()
+    h->args = args;
+    Py_XDECREF(old);
+
+}
 #endif // Limited or < 3.12
 
 /*****************************************************************************

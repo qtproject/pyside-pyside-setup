@@ -191,8 +191,12 @@ LIBSHIBOKEN_API int Pep_GetVerboseFlag(void);
 // pyerrors.h
 #if defined(Py_LIMITED_API) || PY_VERSION_HEX < 0x030C0000
 LIBSHIBOKEN_API PyObject *PepErr_GetRaisedException();
+LIBSHIBOKEN_API PyObject *PepException_GetArgs(PyObject *ex);
+LIBSHIBOKEN_API void PepException_SetArgs(PyObject *ex, PyObject *args);
 #else
 #  define PepErr_GetRaisedException PyErr_GetRaisedException
+#  define PepException_GetArgs PyException_GetArgs
+#  define PepException_SetArgs PyException_SetArgs
 #endif
 
 /*****************************************************************************
