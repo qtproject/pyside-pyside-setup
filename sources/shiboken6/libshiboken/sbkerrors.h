@@ -50,6 +50,11 @@ LIBSHIBOKEN_API void setWrongContainerType();
 /// This replaces `PyErr_Print`, which cannot report errors as exception.
 /// To be used in contexts where raising errors is impossible.
 LIBSHIBOKEN_API void storeErrorOrPrint();
+
+/// Call storeErrorOrPrint() and print the context to report
+/// errors when calling Python overrides of virtual functions.
+LIBSHIBOKEN_API void storePythonOverrideErrorOrPrint(const char *className, const char *funcName);
+
 /// Handle an error as in PyErr_Occurred(), but also check for errors which
 /// were captured by `storeErrorOrPrint`.
 /// To be used in normal error checks.

@@ -1337,7 +1337,8 @@ void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
 
         s << "if (" << PYTHON_RETURN_VAR << ".isNull()) {\n" << indent
             << "// An error happened in python code!\n"
-            << "Shiboken::Errors::storeErrorOrPrint();\n"
+            << "Shiboken::Errors::storePythonOverrideErrorOrPrint(\""
+            << func->ownerClass()->name() << "\", funcName);\n"
             << returnStatement.statement << "\n" << outdent
         << "}\n";
 

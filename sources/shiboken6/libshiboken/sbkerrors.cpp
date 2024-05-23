@@ -6,6 +6,11 @@
 #include "helper.h"
 #include "gilstate.h"
 
+#include <cstdio>
+#include <string>
+
+using namespace std::literals::string_literals;
+
 namespace Shiboken
 {
 
@@ -93,6 +98,21 @@ void setWrongContainerType()
     PyErr_SetString(PyExc_TypeError, "Wrong type passed to container conversion.");
 }
 
+// Prepend something to an exception message provided it is a single string
+// argument.
+static bool prependToExceptionMessage(PyObject *exc, const char *context)
+{
+    Shiboken::AutoDecRef args(PepException_GetArgs(exc));
+    if (args.isNull() || PyTuple_Check(args.object()) == 0 || PyTuple_Size(args) != 1)
+        return false;
+    auto *oldMessage = PyTuple_GetItem(args, 0);
+    if (oldMessage == nullptr || PyUnicode_CheckExact(oldMessage) == 0)
+        return false;
+    auto *newMessage = PyUnicode_FromFormat("%s%U", context, oldMessage);
+    PepException_SetArgs(exc, PyTuple_Pack(1, newMessage));
+    return true;
+}
+
 struct ErrorStore {
     PyObject *type;
     PyObject *exc;
@@ -101,15 +121,40 @@ struct ErrorStore {
 
 static thread_local ErrorStore savedError{};
 
+static bool hasPythonContext()
+{
+    return _pythonContextStack & 1;
+}
+
 void storeErrorOrPrint()
 {
     // This error happened in a function with no way to return an error state.
     // Therefore, we handle the error when we are error checking, anyway.
     // But we do that only when we know that an error handler can pick it up.
-    if (_pythonContextStack & 1)
+    if (hasPythonContext())
         PyErr_Fetch(&savedError.type, &savedError.exc, &savedError.traceback);
     else
         PyErr_Print();
+}
+
+// Like storeErrorOrPrint() with additional context info that is prepended
+// to the exception message or printed.
+static void storeErrorOrPrintWithContext(const char *context)
+{
+    if (hasPythonContext()) {
+        PyErr_Fetch(&savedError.type, &savedError.exc, &savedError.traceback);
+        prependToExceptionMessage(savedError.exc, context);
+    } else {
+        std::fputs(context, stderr);
+        PyErr_Print();
+    }
+}
+
+void storePythonOverrideErrorOrPrint(const char *className, const char *funcName)
+{
+    const std::string context = "Error calling Python override of "s
+                                + className + "::"s + funcName + "(): "s;
+    storeErrorOrPrintWithContext(context.c_str());
 }
 
 PyObject *occurred()
