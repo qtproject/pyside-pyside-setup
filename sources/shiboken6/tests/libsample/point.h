@@ -38,7 +38,7 @@ public:
 
     // The != operator is not implemented for the purpose of testing
     // for the absense of the __ne__ method in the Python binding.
-    bool operator==(const Point &other);
+    bool operator==(const Point &other) const;
 
     Point operator+(const Point &other);
     Point operator-(const Point &other);

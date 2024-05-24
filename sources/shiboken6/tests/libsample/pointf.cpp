@@ -26,7 +26,7 @@ void PointF::show() const
     std::cout << "(x: " << m_x << ", y: " << m_y << ")";
 }
 
-bool PointF::operator==(const PointF &other)
+bool PointF::operator==(const PointF &other) const
 {
     return m_x == other.m_x && m_y == other.m_y;
 }

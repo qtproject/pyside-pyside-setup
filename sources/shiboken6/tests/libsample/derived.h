@@ -26,7 +26,7 @@ public:
     public:
         void uselessMethod() {}
         SomeInnerClass operator+(const SomeInnerClass &other) { return other; }
-        bool operator==(const SomeInnerClass &) { return true; }
+        bool operator==(const SomeInnerClass &) const { return true; }
     };
 
     explicit Derived(int id = -1) noexcept;
