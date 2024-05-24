@@ -19,6 +19,9 @@ target_sources(PySidePlugin PRIVATE
 )
 
 # See libshiboken/CMakeLists.txt
+
+target_compile_definitions(PySidePlugin PRIVATE -DQT_NO_KEYWORDS=1)
+
 if(PYTHON_LIMITED_API)
     target_compile_definitions(PySidePlugin PRIVATE "-DPy_LIMITED_API=0x03050000")
 endif()
