@@ -6412,9 +6412,14 @@ bool CppGenerator::finishGeneration()
 
         s << "{nullptr, nullptr}\n" << outdent << "};\n"
             << "// The new global structure consisting of (type, name) pairs.\n"
-            << cppApiVariableName() << " = cppApi;\n"
-            << "// The backward compatible alias with upper case indexes.\n"
-            << cppApiVariableNameOld() << " = reinterpret_cast<PyTypeObject **>(cppApi);\n\n";
+            << cppApiVariableName() << " = cppApi;\n";
+        if (usePySideExtensions())
+            s << "QT_WARNING_PUSH\nQT_WARNING_DISABLE_DEPRECATED\n";
+        s << "// The backward compatible alias with upper case indexes.\n"
+            << cppApiVariableNameOld() << " = reinterpret_cast<PyTypeObject **>(cppApi);\n";
+        if (usePySideExtensions())
+            s << "QT_WARNING_POP\n";
+        s << '\n';
     }
 
     s << "// Create an array of primitive type converters for the current module.\n"
