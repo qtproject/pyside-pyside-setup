@@ -34,7 +34,7 @@ void Point::show() const
     std::cout << "(x: " << m_x << ", y: " << m_y << ")";
 }
 
-bool Point::operator==(const Point &other)
+bool Point::operator==(const Point &other) const
 {
     return m_x == other.m_x && m_y == other.m_y;
 }
