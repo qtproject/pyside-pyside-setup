@@ -24,6 +24,6 @@ export CFLAGS='-fPIC -DANDROID'
 --with-build-python={{ host_python_path }}  --enable-shared \
 --enable-ipv6 ac_cv_file__dev_ptmx=yes ac_cv_file__dev_ptc=no --without-ensurepip \
 ac_cv_little_endian_double=yes
-make BLDSHARED="$CC -shared" CROSS-COMPILE=$TOOL_PREFIX- CROSS_COMPILE_TARGET=yes
-make install BLDSHARED="$CC -shared" CROSS-COMPILE=$TOOL_PREFIX- \
-CROSS_COMPILE_TARGET=yes prefix={{ android_py_install_path_prefix }}/Python-$HOST_ARCH/_install
+make BLDSHARED="$CC -shared" CROSS-COMPILE=$TOOL_PREFIX- CROSS_COMPILE_TARGET=yes \
+INSTSONAME=libpython{{ python_version }}.so
+make install prefix={{ android_py_install_path_prefix }}/Python-$HOST_ARCH/_install

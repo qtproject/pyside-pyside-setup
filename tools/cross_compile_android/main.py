@@ -221,7 +221,8 @@ if __name__ == "__main__":
                     ndk_path=ndk_path,
                     api_level=platform_data.api_level,
                     android_py_install_path_prefix=pyside6_deploy_cache,
-                    host_python_path=sys.executable
+                    host_python_path=sys.executable,
+                    python_version=PYTHON_VERSION
                 )
 
                 logging.info(f"Writing Python cross compile script into {python_ccompile_script}")
@@ -239,13 +240,6 @@ if __name__ == "__main__":
             logging.info(f"Running Python cross-compile for platform {platform_data.plat_name}")
             run_command([f"./{python_ccompile_script.name}"], cwd=cpython_dir, dry_run=dry_run,
                         show_stdout=True)
-
-            # run patchelf to change the SONAME of libpython from libpython3.x.so.1.0 to
-            # libpython3.x.so, to match with python_for_android's Python library. Otherwise,
-            # the Qfp binaries won't be able to link to Python
-            run_command(["patchelf", "--set-soname", f"libpython{PYTHON_VERSION}.so",
-                        f"libpython{PYTHON_VERSION}.so.1.0"], cwd=Path(python_path) / "lib",
-                        dry_run=dry_run)
 
             logging.info(
                 f"Cross compile Python for Android platform {platform_data.plat_name}. "
