@@ -33,7 +33,7 @@ enum class Platform {
 namespace clang {
 QVersionNumber libClangVersion();
 
-QByteArrayList emulatedCompilerOptions();
+QByteArrayList emulatedCompilerOptions(LanguageLevel level);
 LanguageLevel emulatedCompilerLanguageLevel();
 
 const char *languageLevelOption(LanguageLevel l);

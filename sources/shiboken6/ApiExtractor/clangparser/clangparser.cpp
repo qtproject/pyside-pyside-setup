@@ -235,6 +235,7 @@ static QByteArray msgCreateTranslationUnit(const QByteArrayList &clangArgs, unsi
 static CXTranslationUnit createTranslationUnit(CXIndex index,
                                                const QByteArrayList &args,
                                                bool addCompilerSupportArguments,
+                                               LanguageLevel level,
                                                unsigned flags = 0)
 {
     // courtesy qdoc
@@ -255,7 +256,7 @@ static CXTranslationUnit createTranslationUnit(CXIndex index,
 
     QByteArrayList clangArgs;
     if (addCompilerSupportArguments) {
-        clangArgs += emulatedCompilerOptions();
+        clangArgs += emulatedCompilerOptions(level);
         clangArgs += defaultArgs;
     }
     clangArgs += detectVulkan();
@@ -280,7 +281,7 @@ static CXTranslationUnit createTranslationUnit(CXIndex index,
  */
 
 bool parse(const QByteArrayList  &clangArgs, bool addCompilerSupportArguments,
-           unsigned clangFlags, BaseVisitor &bv)
+           LanguageLevel level, unsigned clangFlags, BaseVisitor &bv)
 {
     CXIndex index = clang_createIndex(0 /* excludeDeclarationsFromPCH */,
                                       1 /* displayDiagnostics */);
@@ -291,7 +292,7 @@ bool parse(const QByteArrayList  &clangArgs, bool addCompilerSupportArguments,
 
     CXTranslationUnit translationUnit =
         createTranslationUnit(index, clangArgs, addCompilerSupportArguments,
-                              clangFlags);
+                              level, clangFlags);
     if (!translationUnit)
         return false;
 

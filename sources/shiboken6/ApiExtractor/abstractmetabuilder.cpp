@@ -461,7 +461,7 @@ FileModelItem AbstractMetaBuilderPrivate::buildDom(QByteArrayList arguments,
                           + clang::languageLevelOption(level));
     }
     FileModelItem result = clang::parse(arguments, addCompilerSupportArguments,
-                                        clangFlags, builder)
+                                        level, clangFlags, builder)
         ? builder.dom() : FileModelItem();
     const clang::BaseVisitor::Diagnostics &diagnostics = builder.diagnostics();
     if (const auto diagnosticsCount = diagnostics.size()) {

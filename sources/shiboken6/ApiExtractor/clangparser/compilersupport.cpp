@@ -365,14 +365,15 @@ static void appendClangBuiltinIncludes(HeaderPaths *p)
 }
 
 // Returns clang options needed for emulating the host compiler
-QByteArrayList emulatedCompilerOptions()
+QByteArrayList emulatedCompilerOptions(LanguageLevel level)
 {
     QByteArrayList result;
     HeaderPaths headerPaths;
     switch (compiler()) {
     case Compiler::Msvc:
         result.append("-fms-compatibility-version="_ba + msvcCompatVersion());
-        result.append(QByteArrayLiteral("-fdelayed-template-parsing"));
+        if (level < LanguageLevel::Cpp20)
+            result.append("-fdelayed-template-parsing"_ba);
         result.append(QByteArrayLiteral("-Wno-microsoft-enum-value"));
         result.append("/Zc:__cplusplus"_ba);
         // Fix yvals_core.h:  STL1000: Unexpected compiler version, expected Clang 7 or newer (MSVC2017 update)

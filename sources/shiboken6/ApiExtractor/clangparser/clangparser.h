@@ -14,6 +14,8 @@
 #include <string_view>
 #include <utility>
 
+enum class LanguageLevel;
+
 namespace clang {
 
 struct Diagnostic;
@@ -79,7 +81,7 @@ private:
 
 bool parse(const QByteArrayList  &clangArgs,
            bool addCompilerSupportArguments,
-           unsigned clangFlags, BaseVisitor &ctx);
+           LanguageLevel level, unsigned clangFlags, BaseVisitor &ctx);
 
 } // namespace clang
 
