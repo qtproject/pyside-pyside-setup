@@ -39,6 +39,13 @@ class BuildozerConfig(BaseConfig):
         self.set_value("app", "p4a.bootstrap", "qt")
         self.set_value('app', "p4a.local_recipes", str(pysidedeploy_config.recipe_dir))
 
+        # add p4a branch
+        # by default the master branch is used
+        # https://github.com/kivy/python-for-android/commit/b92522fab879dbfc0028966ca3c59ef46ab7767d
+        # has not been merged to master yet. So, we use the develop branch for now
+        # TODO: remove this once the above commit is merged to master
+        self.set_value("app", "p4a.branch", "develop")
+
         # add permissions
         permissions = self.__find_permissions(pysidedeploy_config.dependency_files)
         permissions = ", ".join(permissions)
