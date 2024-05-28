@@ -7,7 +7,7 @@ selected when using the online installer.
 Requirements
 ------------
 
-* `MSVC2022`_ or (MSVC2019) for Python 3 on Windows,
+* `MSVC2022`_ for Python 3 on Windows,
 * `OpenSSL`_ (optional for SSL support, Qt must have been configured using the same SSL library).
 * ``sphinx`` package for the documentation (optional).
 * Check the platform dependencies of `Qt for Windows`_.
@@ -38,7 +38,7 @@ Setting up CLANG
 
 libclang can be downloaded from the
 `Qt servers <https://download.qt.io/development_releases/prebuilt/libclang>`_.
-for example, ``libclang-release_140-based-windows-vs2019_64.7z``.
+for example, ``libclang-release_18.1.5-based-windows-vs2019_64.7z``.
 
 Note that from version 12 onwards, the prebuilt Windows binaries from
 `LLVM <https://www.llvm.org>`_ no longer contain CMake configuration files; so
@@ -57,13 +57,17 @@ Cloning the official repository can be done by::
 
     git clone https://code.qt.io/pyside/pyside-setup
 
-Checking out the version that we want to build, for example, 6.5::
+Checking out the version that we want to build, for example, 6.8::
 
-    cd pyside-setup && git checkout 6.5
+    cd pyside-setup && git checkout 6.8
 
 Install the general dependencies::
 
     pip install -r requirements.txt
+
+For building the documentation::
+
+    pip install -r requirements-doc.txt
 
 .. note:: Keep in mind you need to use the same version as your Qt installation
 
@@ -71,7 +75,7 @@ Building PySide
 ~~~~~~~~~~~~~~~
 
 Check your Qt installation path, to specifically use that version of qtpaths to build PySide.
-for example, ``C:\Qt\6.5.0\msvc2019_64\bin\qtpaths.exe``.
+for example, ``C:\Qt\6.8.0\msvc2019_64\bin\qtpaths.exe``.
 
 Build can take a few minutes, so it is recommended to use more than one CPU core::
 
