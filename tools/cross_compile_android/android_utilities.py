@@ -3,6 +3,7 @@
 
 import logging
 import shutil
+import re
 import os
 import stat
 import sys
@@ -17,6 +18,7 @@ from tqdm import tqdm
 # the tag number does not matter much since we update the sdk later
 DEFAULT_SDK_TAG = 6514223
 ANDROID_NDK_VERSION = "26b"
+ANDROID_NDK_VERSION_NUMBER_SUFFIX = "10909125"
 
 
 def run_command(command: List[str], cwd: str = None, ignore_fail: bool = False,
@@ -83,9 +85,9 @@ class SdkManager:
                     accept_prompts=accept_license, show_stdout=show_stdout)
 
 
-def _unpack(zip_file: Path, destination: Path):
+def extract_zip(file: Path, destination: Path):
     """
-    Unpacks the zip_file into destination preserving all permissions
+    Unpacks the zip file into destination preserving all permissions
 
     TODO: Try to use zipfile module. Currently we cannot use zipfile module here because
     extractAll() does not preserve permissions.
@@ -97,8 +99,24 @@ def _unpack(zip_file: Path, destination: Path):
         raise RuntimeError("Unable to find program unzip. Use `sudo apt-get install unzip`"
                            "to install it")
 
-    command = [unzip, zip_file, "-d", destination]
+    command = [unzip, file, "-d", destination]
     run_command(command=command, show_stdout=True)
+
+
+def extract_dmg(file: Path, destination: Path):
+    output = run_command(['hdiutil', 'attach', '-nobrowse', '-readonly', file],
+                         show_stdout=True, capture_stdout=True)
+
+    # find the mounted volume
+    mounted_vol_name = re.search(r'/Volumes/(.*)', output).group(1)
+    if not mounted_vol_name:
+        raise RuntimeError(f"Unable to find mounted volume for file {file}")
+
+    # copy files
+    shutil.copytree(f'/Volumes/{mounted_vol_name}/', destination, dirs_exist_ok=True)
+
+    # Detach mounted volume
+    run_command(['hdiutil', 'detach', f'/Volumes/{mounted_vol_name}'])
 
 
 def _download(url: str, destination: Path):
@@ -110,7 +128,6 @@ def _download(url: str, destination: Path):
     with DownloadProgressBar(unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1]) as t:
         download_path, headers = request.urlretrieve(url=url, filename=destination,
                                                      reporthook=t.update_to)
-    assert headers["Content-Type"] == "application/zip"
     assert Path(download_path).resolve() == destination
 
 
@@ -119,22 +136,40 @@ def download_android_ndk(ndk_path: Path):
     Downloads the given ndk_version into ndk_path
     """
     ndk_path = ndk_path / "android-ndk"
-    ndk_zip_path = ndk_path / f"android-ndk-r{ANDROID_NDK_VERSION}-linux.zip"
-    ndk_version_path = ndk_path / f"android-ndk-r{ANDROID_NDK_VERSION}"
+    ndk_extension = "dmg" if sys.platform == "darwin" else "zip"
+    ndk_zip_path = ndk_path / f"android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.{ndk_extension}"
+    ndk_version_path = ""
+    if sys.platform == "linux":
+        ndk_version_path = ndk_path / f"android-ndk-r{ANDROID_NDK_VERSION}"
+    elif sys.platform == "darwin":
+        ndk_version_path = (ndk_path
+                            / f"AndroidNDK{ANDROID_NDK_VERSION_NUMBER_SUFFIX}.app/Contents/NDK")
+    else:
+        raise RuntimeError(f"Unsupported platform {sys.platform}")
 
     if ndk_version_path.exists():
         print(f"NDK path found in {str(ndk_version_path)}")
     else:
         ndk_path.mkdir(parents=True, exist_ok=True)
         url = (f"https://dl.google.com/android/repository"
-               f"/android-ndk-r{ANDROID_NDK_VERSION}-linux.zip")
+               f"/android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.{ndk_extension}")
 
         print(f"Downloading Android Ndk version r{ANDROID_NDK_VERSION}")
         _download(url=url, destination=ndk_zip_path)
 
         print("Unpacking Android Ndk")
-        _unpack(zip_file=(ndk_path / f"android-ndk-r{ANDROID_NDK_VERSION}-linux.zip"),
-                destination=ndk_path)
+        if sys.platform == "darwin":
+            extract_dmg(file=(ndk_path
+                              / f"android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.{ndk_extension}"
+                              ),
+                        destination=ndk_path)
+            ndk_version_path = (ndk_version_path
+                                / f"AndroidNDK{ANDROID_NDK_VERSION_NUMBER_SUFFIX}.app/Contents/NDK")
+        else:
+            extract_zip(file=(ndk_path
+                              / f"android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.{ndk_extension}"
+                              ),
+                        destination=ndk_path)
 
     return ndk_version_path
 
@@ -143,10 +178,12 @@ def download_android_commandlinetools(android_sdk_dir: Path):
     """
     Downloads Android commandline tools into cltools_path.
     """
+    sdk_platform = sys.platform if sys.platform != "darwin" else "mac"
     android_sdk_dir = android_sdk_dir / "android-sdk"
     url = ("https://dl.google.com/android/repository/"
-           f"commandlinetools-linux-{DEFAULT_SDK_TAG}_latest.zip")
-    cltools_zip_path = android_sdk_dir / f"commandlinetools-linux-{DEFAULT_SDK_TAG}_latest.zip"
+           f"commandlinetools-{sdk_platform}-{DEFAULT_SDK_TAG}_latest.zip")
+    cltools_zip_path = (android_sdk_dir
+                        / f"commandlinetools-{sdk_platform}-{DEFAULT_SDK_TAG}_latest.zip")
     cltools_path = android_sdk_dir / "tools"
 
     if cltools_path.exists():
@@ -155,11 +192,11 @@ def download_android_commandlinetools(android_sdk_dir: Path):
         android_sdk_dir.mkdir(parents=True, exist_ok=True)
 
         print("Download Android Command Line Tools: "
-              f"commandlinetools-linux-{DEFAULT_SDK_TAG}_latest.zip")
+              f"commandlinetools-{sys.platform}-{DEFAULT_SDK_TAG}_latest.zip")
         _download(url=url, destination=cltools_zip_path)
 
         print("Unpacking Android Command Line Tools")
-        _unpack(zip_file=cltools_zip_path, destination=android_sdk_dir)
+        extract_zip(file=cltools_zip_path, destination=android_sdk_dir)
 
     return android_sdk_dir
 
@@ -203,6 +240,10 @@ def find_latest_buildtools_version(sdk_manager: SdkManager):
 
     if not available_build_tools_v:
         raise RuntimeError('Unable to find any build tools available for download')
+
+    # find the latest build tools version that is not a release candidate
+    # release candidates end has rc in the version number
+    available_build_tools_v = [v for v in available_build_tools_v if "rc" not in str(v)]
 
     return max(available_build_tools_v)
 
