@@ -56,18 +56,6 @@ LIBSHIBOKEN_API void AddTypeCreationFunction(PyObject *module,
                                              TypeCreationFunction func,
                                              const char *containerName);
 
-LIBSHIBOKEN_API void AddTypeCreationFunction(PyObject *module,
-                                             const char *name,
-                                             TypeCreationFunction func,
-                                             const char *outerContainerName,
-                                             const char *innerContainerName);
-
-LIBSHIBOKEN_API void AddTypeCreationFunction(PyObject *module,
-                                             const char *name,
-                                             TypeCreationFunction func,
-                                             const char *containerName3,
-                                             const char *containerName2,
-                                             const char *containerName);
 /**
  *  Registers the list of types created by \p module.
  *  \param module   Module where the types were created.
