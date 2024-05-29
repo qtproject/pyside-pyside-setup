@@ -475,6 +475,7 @@ static const char *Property_SignatureStrings[] = {
     "PySide6.QtCore.Property.read(self,fget:typing.Callable)->PySide6.QtCore.Property",
     "PySide6.QtCore.Property.setter(self,fset:typing.Callable)->PySide6.QtCore.Property",
     "PySide6.QtCore.Property.write(self,fset:typing.Callable)->PySide6.QtCore.Property",
+    "PySide6.QtCore.Property.__call__(self, func:typing.Callable)->PySide6.QtCore.Property",
     nullptr}; // Sentinel
 
 void init(PyObject *module)
