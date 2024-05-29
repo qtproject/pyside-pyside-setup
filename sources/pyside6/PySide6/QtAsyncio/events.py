@@ -50,17 +50,21 @@ class QAsyncioExecutorWrapper(QObject):
 
     def _cb(self):
         try:
-            # Call the synchronous callable that we submitted with submit() or map().
+            # Call the synchronous callable that we submitted with submit() or
+            # map().
             self._result = self._func(*self._args)
         except BaseException as e:
             self._exception = e
         self._loop.exit()
 
     def do(self):
-        # This creates a new event loop and dispatcher for the thread, if not already created.
+        # This creates a new event loop and dispatcher for the thread, if not
+        # already created.
         self._loop = QEventLoop()
         asyncio.events._set_running_loop(self._loop)
+
         QTimer.singleShot(0, self._loop, lambda: self._cb())
+
         self._loop.exec()
         if self._exception is not None:
             raise self._exception
@@ -656,18 +660,23 @@ class QAsyncioHandle():
         self._state = QAsyncioHandle.HandleState.PENDING
         self._start()
 
+    def _start(self) -> None:
+        self._schedule_event(self._timeout, lambda: self._cb())
+
     def _schedule_event(self, timeout: int, func: typing.Callable) -> None:
         # Do not schedule events from asyncio when the app is quit from outside
         # the event loop, as this would cause events to be enqueued after the
         # event loop was destroyed.
         if not self._loop.is_closed() and not self._loop._quit_from_outside:
             if self._is_threadsafe:
+                # This singleShot overload will push func into self._loop
+                # instead of the current thread's loop. This allows scheduling
+                # a callback from a different thread, which is necessary for
+                # thread-safety.
+                # https://docs.python.org/3/library/asyncio-dev.html#asyncio-multithreading
                 QTimer.singleShot(timeout, self._loop, func)
             else:
                 QTimer.singleShot(timeout, func)
-
-    def _start(self) -> None:
-        self._schedule_event(self._timeout, lambda: self._cb())
 
     @Slot()
     def _cb(self) -> None:
