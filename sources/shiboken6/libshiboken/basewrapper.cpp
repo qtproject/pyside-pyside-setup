@@ -988,8 +988,7 @@ introduceWrapperType(PyObject *enclosingObject,
                      PyObject *bases,
                      unsigned wrapperFlags)
 {
-    const auto basesSize = PySequence_Fast_GET_SIZE(bases);
-    assert(basesSize > 0);
+    assert(PySequence_Fast_GET_SIZE(bases) > 0);
     typeSpec->slots[0].pfunc = PySequence_Fast_GET_ITEM(bases, 0);
 
     auto *type = SbkType_FromSpecBasesMeta(typeSpec, bases, SbkObjectType_TypeF());
