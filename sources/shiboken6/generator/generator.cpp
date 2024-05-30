@@ -231,10 +231,9 @@ QString Generator::getFileNameBaseForSmartPointer(const AbstractMetaType &smartP
     const AbstractMetaType innerType = smartPointerType.getSmartPointerInnerType();
     smartPointerType.typeEntry()->qualifiedCppName();
     QString fileName = smartPointerType.typeEntry()->qualifiedCppName().toLower();
-    fileName.replace(u"::"_s, u"_"_s);
-    fileName.append(u"_"_s);
+    fileName.append(u'_');
     fileName.append(innerType.name().toLower());
-
+    fileName.replace(u"::"_s, u"_"_s); // std::shared_ptr<std::string>
     return fileName;
 }
 

@@ -50,6 +50,13 @@ class StdSharedPtrTests(unittest.TestCase):
         p = StdSharedPtrTestBench.createInt()
         StdSharedPtrTestBench.printInt(p)
 
+    def testString(self):
+        np = StdSharedPtrTestBench.createNullString()
+        StdSharedPtrTestBench.printString(np)
+        self.assertFalse(np)
+        p = StdSharedPtrTestBench.createString("bla")
+        StdSharedPtrTestBench.printString(p)
+
     def testVirtuals(self):
         """Test whether code generating virtual function overrides is generated
            correctly."""
