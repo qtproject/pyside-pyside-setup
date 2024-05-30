@@ -5,20 +5,20 @@ from __future__ import annotations
 from . import events
 from . import futures
 
+from typing import Any
+
 import asyncio
 import collections.abc
 import concurrent.futures
 import contextvars
-import typing
 
 
 class QAsyncioTask(futures.QAsyncioFuture):
     """ https://docs.python.org/3/library/asyncio-task.html """
 
-    def __init__(self, coro: typing.Union[collections.abc.Generator, collections.abc.Coroutine], *,
-                 loop: typing.Optional["events.QAsyncioEventLoop"] = None,
-                 name: typing.Optional[str] = None,
-                 context: typing.Optional[contextvars.Context] = None) -> None:
+    def __init__(self, coro: collections.abc.Generator | collections.abc.Coroutine, *,
+                 loop: "events.QAsyncioEventLoop | None" = None, name: str | None = None,
+                 context: contextvars.Context | None = None) -> None:
         super().__init__(loop=loop, context=context)
 
         self._coro = coro  # The coroutine for which this task was created.
@@ -31,10 +31,10 @@ class QAsyncioTask(futures.QAsyncioFuture):
         # The task step function executes the coroutine until it finishes,
         # raises an exception or returns a future. If a future was returned,
         # the task will await its completion (or exception).
-        self._future_to_await: typing.Optional[asyncio.Future] = None
+        self._future_to_await: asyncio.Future | None = None
 
         self._cancelled = False
-        self._cancel_message: typing.Optional[str] = None
+        self._cancel_message: str | None = None
 
         # https://docs.python.org/3/library/asyncio-extending.html#task-lifetime-support
         asyncio._register_task(self)  # type: ignore[arg-type]
@@ -54,17 +54,16 @@ class QAsyncioTask(futures.QAsyncioFuture):
     class QtTaskApiMisuseError(Exception):
         pass
 
-    def set_result(self, result: typing.Any) -> None:  # type: ignore[override]
+    def set_result(self, result: Any) -> None:  # type: ignore[override]
         # This function is not inherited from the Future APIs.
         raise QAsyncioTask.QtTaskApiMisuseError("Tasks cannot set results")
 
-    def set_exception(self, exception: typing.Any) -> None:  # type: ignore[override]
+    def set_exception(self, exception: Any) -> None:  # type: ignore[override]
         # This function is not inherited from the Future APIs.
         raise QAsyncioTask.QtTaskApiMisuseError("Tasks cannot set exceptions")
 
     def _step(self,
-              exception_or_future: typing.Union[
-                  BaseException, futures.QAsyncioFuture, None] = None) -> None:
+              exception_or_future: BaseException | futures.QAsyncioFuture | None = None) -> None:
         """
         The step function is the heart of a task. It is scheduled in the event
         loop repeatedly, executing the coroutine "step" by "step" (i.e.,
@@ -153,7 +152,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
                 # https://docs.python.org/3/library/asyncio-extending.html#task-lifetime-support
                 asyncio._unregister_task(self)  # type: ignore[arg-type]
 
-    def get_stack(self, *, limit=None) -> typing.List[typing.Any]:
+    def get_stack(self, *, limit=None) -> list[Any]:
         # TODO
         raise NotImplementedError("QtTask.get_stack is not implemented")
 
@@ -161,7 +160,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
         # TODO
         raise NotImplementedError("QtTask.print_stack is not implemented")
 
-    def get_coro(self) -> typing.Union[collections.abc.Generator, collections.abc.Coroutine]:
+    def get_coro(self) -> collections.abc.Generator | collections.abc.Coroutine:
         return self._coro
 
     def get_name(self) -> str:
@@ -170,7 +169,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
     def set_name(self, value) -> None:
         self._name = str(value)
 
-    def cancel(self, msg: typing.Optional[str] = None) -> bool:
+    def cancel(self, msg: str | None = None) -> bool:
         if self.done():
             return False
         self._cancel_message = msg
