@@ -1,5 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+from __future__ import annotations
 
 from .events import (
     QAsyncioEventLoopPolicy, QAsyncioEventLoop, QAsyncioHandle, QAsyncioTimerHandle
@@ -7,8 +8,9 @@ from .events import (
 from .futures import QAsyncioFuture
 from .tasks import QAsyncioTask
 
+from typing import Coroutine, Any
+
 import asyncio
-import typing
 
 __all__ = [
     "QAsyncioEventLoopPolicy", "QAsyncioEventLoop",
@@ -17,11 +19,9 @@ __all__ = [
 ]
 
 
-def run(coro: typing.Optional[typing.Coroutine] = None,
-        keep_running: bool = True,
-        quit_qapp: bool = True, *,
-        handle_sigint: bool = False,
-        debug: typing.Optional[bool] = None) -> typing.Any:
+def run(coro: Coroutine | None = None,
+        keep_running: bool = True, quit_qapp: bool = True, *, handle_sigint: bool = False,
+        debug: bool | None = None) -> Any:
     """
     Run the QtAsyncio event loop.
 

@@ -1,12 +1,14 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+from __future__ import annotations
 
 from . import events
+
+from typing import Any, Callable
 
 import asyncio
 import contextvars
 import enum
-import typing
 
 
 class QAsyncioFuture():
@@ -23,8 +25,8 @@ class QAsyncioFuture():
         DONE_WITH_RESULT = enum.auto()
         DONE_WITH_EXCEPTION = enum.auto()
 
-    def __init__(self, *, loop: typing.Optional["events.QAsyncioEventLoop"] = None,
-                 context: typing.Optional[contextvars.Context] = None) -> None:
+    def __init__(self, *, loop: "events.QAsyncioEventLoop | None" = None,
+                 context: contextvars.Context | None = None) -> None:
         self._loop: "events.QAsyncioEventLoop"
         if loop is None:
             self._loop = asyncio.events.get_event_loop()  # type: ignore[assignment]
@@ -33,13 +35,13 @@ class QAsyncioFuture():
         self._context = context
 
         self._state = QAsyncioFuture.FutureState.PENDING
-        self._result: typing.Any = None
-        self._exception: typing.Optional[BaseException] = None
+        self._result: Any = None
+        self._exception: BaseException | None = None
 
-        self._cancel_message: typing.Optional[str] = None
+        self._cancel_message: str | None = None
 
         # List of callbacks that are called when the future is done.
-        self._callbacks: typing.List[typing.Callable] = list()
+        self._callbacks: list[Callable] = list()
 
     def __await__(self):
         if not self.done():
@@ -51,13 +53,13 @@ class QAsyncioFuture():
 
     __iter__ = __await__
 
-    def _schedule_callbacks(self, context: typing.Optional[contextvars.Context] = None):
+    def _schedule_callbacks(self, context: contextvars.Context | None = None):
         """ A future can optionally have callbacks that are called when the future is done. """
         for cb in self._callbacks:
             self._loop.call_soon(
                 cb, self, context=context if context else self._context)
 
-    def result(self) -> typing.Union[typing.Any, Exception]:
+    def result(self) -> Any | Exception:
         if self._state == QAsyncioFuture.FutureState.DONE_WITH_RESULT:
             return self._result
         if self._state == QAsyncioFuture.FutureState.DONE_WITH_EXCEPTION and self._exception:
@@ -69,7 +71,7 @@ class QAsyncioFuture():
                 raise asyncio.CancelledError
         raise asyncio.InvalidStateError
 
-    def set_result(self, result: typing.Any) -> None:
+    def set_result(self, result: Any) -> None:
         self._result = result
         self._state = QAsyncioFuture.FutureState.DONE_WITH_RESULT
         self._schedule_callbacks()
@@ -85,20 +87,20 @@ class QAsyncioFuture():
     def cancelled(self) -> bool:
         return self._state == QAsyncioFuture.FutureState.CANCELLED
 
-    def add_done_callback(self, cb: typing.Callable, *,
-                          context: typing.Optional[contextvars.Context] = None) -> None:
+    def add_done_callback(self, cb: Callable, *,
+                          context: contextvars.Context | None = None) -> None:
         if self.done():
             self._loop.call_soon(
                 cb, self, context=context if context else self._context)
         else:
             self._callbacks.append(cb)
 
-    def remove_done_callback(self, cb: typing.Callable) -> int:
+    def remove_done_callback(self, cb: Callable) -> int:
         original_len = len(self._callbacks)
         self._callbacks = [_cb for _cb in self._callbacks if _cb != cb]
         return original_len - len(self._callbacks)
 
-    def cancel(self, msg: typing.Optional[str] = None) -> bool:
+    def cancel(self, msg: str | None = None) -> bool:
         if self.done():
             return False
         self._state = QAsyncioFuture.FutureState.CANCELLED
@@ -106,7 +108,7 @@ class QAsyncioFuture():
         self._schedule_callbacks()
         return True
 
-    def exception(self) -> typing.Optional[BaseException]:
+    def exception(self) -> BaseException | None:
         if self._state == QAsyncioFuture.FutureState.CANCELLED:
             raise asyncio.CancelledError
         if self.done():
