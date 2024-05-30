@@ -20,6 +20,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/smart/stdsharedptrtestbench_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/smart/stdsharedptrvirtualmethodtester_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/smart/std_shared_ptr_integer_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/smart/std_shared_ptr_int_wrapper.cpp
+${CMAKE_CURRENT_BINARY_DIR}/smart/std_shared_ptr_std_string_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/smart/std_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/smart/std_optional_int_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/smart/std_optional_integer_wrapper.cpp

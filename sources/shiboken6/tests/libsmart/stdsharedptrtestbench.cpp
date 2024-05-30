@@ -51,6 +51,26 @@ void StdSharedPtrTestBench::printInt(const std::shared_ptr<int> &p)
     std::cerr << '\n';
 }
 
+std::shared_ptr<std::string> StdSharedPtrTestBench::createString(const char *text)
+{
+    return std::make_shared<std::string>(text);
+}
+
+std::shared_ptr<std::string> StdSharedPtrTestBench::createNullString()
+{
+    return {};
+}
+
+void StdSharedPtrTestBench::printString(const std::shared_ptr<std::string> &p)
+{
+    std::cerr << __FUNCTION__ << ' ';
+    if (p.get())
+        std::cerr << '"' << *p << '"';
+    else
+        std::cerr << "nullptr";
+    std::cerr << '\n';
+}
+
 StdSharedPtrVirtualMethodTester::StdSharedPtrVirtualMethodTester() = default;
 StdSharedPtrVirtualMethodTester::~StdSharedPtrVirtualMethodTester() = default;
 
