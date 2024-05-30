@@ -62,8 +62,8 @@ LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct)
     AutoDecRef modName(String::fromCppStringView(names.substr(0, dotPos)));
     auto *modOrType = PyDict_GetItem(sysModules, modName);
     if (modOrType == nullptr) {
-        PyErr_Format(PyExc_SystemError, "Module %s should already be in sys.modules",
-                                        PyModule_GetName(modOrType));
+        PyErr_Format(PyExc_SystemError, "Module \"%U\" should already be in sys.modules",
+                                        modName.object());
         return nullptr;
     }
 
