@@ -2555,7 +2555,8 @@ void ShibokenGenerator::collectFullTypeNamesArray(QStringList &typeNames)
         int smartPointerCountIndex = getMaxTypeIndex();
         for (const auto &smp : api().instantiatedSmartPointers()) {
             auto entry = smp.type.typeEntry();
-            typeNames[smartPointerCountIndex] = entry->qualifiedTargetLangName();
+            typeNames[smartPointerCountIndex] =
+                smp.specialized->typeEntry()->qualifiedTargetLangName();
             ++smartPointerCountIndex;
         }
     }

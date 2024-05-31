@@ -6149,7 +6149,7 @@ bool CppGenerator::finishGeneration()
 
         writeInitFunc(s_classInitDecl, s_classPythonDefines,
                       getInitFunctionName(context),
-                      enclosingTypeEntry, smp.type.name());
+                      enclosingTypeEntry, smp.specialized->name());
         includes.insert(smp.type.instantiations().constFirst().typeEntry()->include());
     }
 
