@@ -204,9 +204,9 @@ class Config(object):
                 _pyside_tools = available_pyside_tools(qt_tools_path=qt_install_path)
 
                 # replacing pyside6-android_deploy by pyside6-android-deploy for consistency
-                # Also, the tool should not exist in any other platform than Linux
+                # Also, the tool should not exist in any other platform than Linux and macOS
                 _console_scripts = []
-                if ("android_deploy" in _pyside_tools) and sys.platform.startswith("linux"):
+                if ("android_deploy" in _pyside_tools) and sys.platform in ["linux", "darwin"]:
                     _console_scripts = [(f"{PYSIDE}-android-deploy ="
                                         " PySide6.scripts.pyside_tool:android_deploy")]
                 _pyside_tools.remove("android_deploy")

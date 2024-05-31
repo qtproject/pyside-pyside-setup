@@ -1,6 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
-
+import sys
 import logging
 import zipfile
 from dataclasses import dataclass
@@ -91,7 +91,7 @@ def get_llvm_readobj(ndk_path: Path) -> Path:
     '''
     # TODO: Requires change if Windows platform supports Android Deployment or if we
     # support host other than linux-x86_64
-    return (ndk_path / "toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readobj")
+    return (ndk_path / f"toolchains/llvm/prebuilt/{sys.platform}-x86_64/bin/llvm-readobj")
 
 
 def find_lib_dependencies(llvm_readobj: Path, lib_path: Path, used_dependencies: Set[str] = None,

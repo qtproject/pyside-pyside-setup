@@ -124,7 +124,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
 
             script_dirs = ["qtpy2cpp_lib", "deploy_lib", "project"]
 
-            if sys.platform.startswith("linux"):
+            if sys.platform in ["linux", "darwin"]:
                 scripts.append("android_deploy.py")
                 scripts.append("requirements-android.txt")
                 script_dirs.extend(["deploy_lib/android",
