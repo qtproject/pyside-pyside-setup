@@ -49,6 +49,8 @@ class StdSharedPtrTests(unittest.TestCase):
         self.assertFalse(np)
         p = StdSharedPtrTestBench.createInt()
         StdSharedPtrTestBench.printInt(p)
+        ip = std.StdIntPtr(42)
+        StdSharedPtrTestBench.printInt(ip)
 
     def testString(self):
         np = StdSharedPtrTestBench.createNullString()

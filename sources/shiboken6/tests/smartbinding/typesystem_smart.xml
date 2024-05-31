@@ -50,7 +50,7 @@
                             value-check-method="operator bool"
                             ref-count-method="use_count"
                             reset-method="reset"
-                            instantiations="Integer,int,std::string">
+                            instantiations="Integer,int=StdIntPtr,std::string">
             <include file-name="memory" location="global"/>
         </smart-pointer-type>
 
