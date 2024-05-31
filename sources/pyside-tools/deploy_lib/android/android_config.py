@@ -1,6 +1,7 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 import re
+import sys
 import tempfile
 import logging
 import zipfile
@@ -15,6 +16,7 @@ from . import (extract_and_copy_jar, get_wheel_android_arch, find_lib_dependenci
 from .. import (Config, find_pyside_modules, get_all_pyside_modules, MAJOR_VERSION)
 
 ANDROID_NDK_VERSION = "26b"
+ANDROID_NDK_VERSION_NUMBER_SUFFIX = "10909125"
 ANDROID_DEPLOY_CACHE = Path.home() / ".pyside6_android_deploy"
 
 
@@ -58,6 +60,11 @@ class AndroidConfig(Config):
             else:
                 ndk_path_temp = (ANDROID_DEPLOY_CACHE / "android-ndk"
                                  / f"android-ndk-r{ANDROID_NDK_VERSION}")
+                if sys.platform == "darwin":
+                    ndk_path_temp = (
+                        ANDROID_DEPLOY_CACHE / "android-ndk"
+                        / f"AndroidNDK{ANDROID_NDK_VERSION_NUMBER_SUFFIX}.app/Contents/NDK"
+                    )
                 if ndk_path_temp.exists():
                     self.ndk_path = ndk_path_temp
 

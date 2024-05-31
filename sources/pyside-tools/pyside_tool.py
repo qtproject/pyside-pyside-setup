@@ -214,8 +214,9 @@ def deploy():
 
 
 def android_deploy():
-    if not sys.platform == "linux":
-        print("pyside6-android-deploy only works from a Linux host")
+    if sys.platform == "win32":
+        print("pyside6-android-deploy only works from a Unix host and not a Windows host",
+              file=sys.stderr)
     else:
         android_requirements_file = Path(__file__).parent / "requirements-android.txt"
         with open(android_requirements_file, 'r', encoding='UTF-8') as file:
