@@ -33,7 +33,6 @@ MODULE_EXPORT PyObject *PyInit_QtExampleIcons(void)
 int main(int argc, char *argv[])
 {
 #ifndef PYPY_VERSION
-    Py_SetProgramName(L"module-test");
     Py_Initialize();
 #endif
     PyInit_QtExampleIcons();
