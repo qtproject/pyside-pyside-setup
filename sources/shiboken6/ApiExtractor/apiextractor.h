@@ -73,8 +73,7 @@ public:
     static AbstractMetaClassPtr
         inheritTemplateClass(const ComplexTypeEntryPtr &te,
                              const AbstractMetaClassCPtr &templateClass,
-                             const AbstractMetaTypeList &templateTypes,
-                             InheritTemplateFlags flags = {});
+                             const AbstractMetaTypeList &templateTypes);
 
 private:
     ApiExtractorPrivate *d;

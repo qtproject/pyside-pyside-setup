@@ -100,10 +100,9 @@ public:
                                 const AbstractMetaTypeList &templateTypes);
 
     static AbstractMetaClassPtr
-        inheritTemplateClass(const ComplexTypeEntryPtr &te,
-                             const AbstractMetaClassCPtr &templateClass,
-                             const AbstractMetaTypeList &templateTypes,
-                             InheritTemplateFlags flags = {});
+    inheritTemplateClass(const ComplexTypeEntryPtr &te,
+                         const AbstractMetaClassCPtr &templateClass,
+                         const AbstractMetaTypeList &templateTypes);
 
     /// Performs a template specialization of the member function.
     /// \param function Member function
