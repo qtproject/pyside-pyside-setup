@@ -456,11 +456,10 @@ AbstractMetaFunctionPtr
 
 AbstractMetaClassPtr ApiExtractor::inheritTemplateClass(const ComplexTypeEntryPtr &te,
                                                       const AbstractMetaClassCPtr &templateClass,
-                                                      const AbstractMetaTypeList &templateTypes,
-                                                      InheritTemplateFlags flags)
+                                                      const AbstractMetaTypeList &templateTypes)
 {
     return AbstractMetaBuilder::inheritTemplateClass(te, templateClass,
-                                                     templateTypes, flags);
+                                                     templateTypes);
 }
 
 QString ApiExtractorPrivate::getSimplifiedContainerTypeName(const AbstractMetaType &type)
@@ -606,7 +605,6 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
     const auto ste = std::static_pointer_cast<const SmartPointerTypeEntry>(smp.smartPointer->typeEntry());
     QString name = ste->getTargetName(smp.type);
     auto parentTypeEntry = ste->parent();
-    InheritTemplateFlags flags;
 
     auto colonPos = name.lastIndexOf(u"::");
     const bool withinNameSpace = colonPos != -1;
@@ -617,19 +615,18 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
         if (nameSpaces.isEmpty())
             throw Exception(msgNamespaceNotFound(name));
         parentTypeEntry = nameSpaces.constFirst();
-    } else {
-        flags.setFlag(InheritTemplateFlag::SetEnclosingClass);
     }
 
     TypedefEntryPtr typedefEntry(new TypedefEntry(name, ste->name(), ste->version(),
                                                   parentTypeEntry));
     typedefEntry->setTargetLangPackage(ste->targetLangPackage());
     auto instantiationEntry = TypeDatabase::initializeTypeDefEntry(typedefEntry, ste);
+    instantiationEntry->setParent(parentTypeEntry);
 
     smp.specialized = ApiExtractor::inheritTemplateClass(instantiationEntry, smp.smartPointer,
-                                                         {instantiatedType}, flags);
+                                                         {instantiatedType});
     Q_ASSERT(smp.specialized);
-    if (withinNameSpace) { // move class to desired namespace
+    if (parentTypeEntry->type() != TypeEntry::TypeSystemType) { // move class to desired namespace
         const auto enclClass = AbstractMetaClass::findClass(m_builder->classes(), parentTypeEntry);
         Q_ASSERT(enclClass);
         auto specialized = std::const_pointer_cast<AbstractMetaClass>(smp.specialized);

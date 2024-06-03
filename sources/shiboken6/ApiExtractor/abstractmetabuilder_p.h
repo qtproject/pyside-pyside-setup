@@ -190,8 +190,7 @@ public:
                                 const TypeInfo &info);
     static bool inheritTemplate(const AbstractMetaClassPtr &subclass,
                                 const AbstractMetaClassCPtr &templateClass,
-                                const AbstractMetaTypeList &templateTypes,
-                                InheritTemplateFlags flags = {});
+                                const AbstractMetaTypeList &templateTypes);
 
     static AbstractMetaFunctionPtr
         inheritTemplateFunction(const AbstractMetaFunctionCPtr &function,

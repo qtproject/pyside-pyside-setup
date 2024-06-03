@@ -6138,9 +6138,7 @@ bool CppGenerator::finishGeneration()
     for (const auto &smp : api().instantiatedSmartPointers()) {
         GeneratorContext context = contextForSmartPointer(smp.specialized, smp.type);
         const auto enclosingClass = context.metaClass()->enclosingClass();
-        auto enclosingTypeEntry = enclosingClass
-            ? enclosingClass->typeEntry()
-            : targetLangEnclosingEntry(smp.type.typeEntry());
+        auto enclosingTypeEntry = targetLangEnclosingEntry(smp.specialized->typeEntry());
 
         writeInitFunc(s_classInitDecl, s_classPythonDefines,
                       getInitFunctionName(context),

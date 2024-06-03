@@ -3129,15 +3129,14 @@ std::optional<AbstractMetaType>
 AbstractMetaClassPtr
     AbstractMetaBuilder::inheritTemplateClass(const ComplexTypeEntryPtr &te,
                                               const AbstractMetaClassCPtr &templateClass,
-                                              const AbstractMetaTypeList &templateTypes,
-                                              InheritTemplateFlags flags)
+                                              const AbstractMetaTypeList &templateTypes)
 {
     auto result = std::make_shared<AbstractMetaClass>();
     result->setTypeDef(true);
 
     result->setTypeEntry(te);
     if (!AbstractMetaBuilderPrivate::inheritTemplate(result, templateClass,
-                                                     templateTypes, flags)) {
+                                                     templateTypes)) {
         return {};
     }
     AbstractMetaBuilderPrivate::inheritTemplateFunctions(result);
@@ -3224,12 +3223,9 @@ bool AbstractMetaBuilderPrivate::inheritTemplate(const AbstractMetaClassPtr &sub
 
 bool AbstractMetaBuilderPrivate::inheritTemplate(const AbstractMetaClassPtr &subclass,
                                                  const AbstractMetaClassCPtr &templateClass,
-                                                 const AbstractMetaTypeList &templateTypes,
-                                                 InheritTemplateFlags flags)
+                                                 const AbstractMetaTypeList &templateTypes)
 {
     subclass->setTemplateBaseClass(templateClass);
-    if (flags.testFlag(InheritTemplateFlag::SetEnclosingClass))
-        subclass->setEnclosingClass(templateClass->enclosingClass());
     subclass->setTemplateBaseClassInstantiations(templateTypes);
     subclass->setBaseClass(templateClass->baseClass());
     return true;
