@@ -106,7 +106,7 @@ static bool runProcess(const QString &program, const QStringList &arguments,
     QProcess process;
     process.start(program, arguments, QProcess::ReadWrite);
     if (!process.waitForStarted()) {
-        qWarning().noquote().nospace() << "Unable to start "
+        qCWarning(lcShiboken).noquote().nospace() << "Unable to start "
             << process.program() << ": " << process.errorString();
         return false;
     }
@@ -119,18 +119,18 @@ static bool runProcess(const QString &program, const QStringList &arguments,
         *stdOutIn = process.readAllStandardOutput();
 
     if (!finished) {
-        qWarning().noquote().nospace() << process.program() << " timed out: " << stdErr;
+        qCWarning(lcShiboken).noquote().nospace() << process.program() << " timed out: " << stdErr;
         process.kill();
         return false;
     }
 
     if (process.exitStatus() != QProcess::NormalExit) {
-        qWarning().noquote().nospace() << process.program() << " crashed: " << stdErr;
+        qCWarning(lcShiboken).noquote().nospace() << process.program() << " crashed: " << stdErr;
         return false;
     }
 
     if (process.exitCode() != 0) {
-        qWarning().noquote().nospace() <<  process.program() << " exited "
+        qCWarning(lcShiboken).noquote().nospace() <<  process.program() << " exited "
             << process.exitCode() << ": " << stdErr;
         return false;
     }
@@ -263,8 +263,8 @@ static QString queryLlvmConfigDir(const QString &arg)
         return {};
     const QString path = QFile::decodeName(stdOut.trimmed());
     if (!QFileInfo::exists(path)) {
-        qWarning(R"(%s: "%s" as returned by llvm-config "%s" does not exist.)",
-                 __FUNCTION__, qPrintable(QDir::toNativeSeparators(path)), qPrintable(arg));
+        qCWarning(lcShiboken, R"(%s: "%s" as returned by llvm-config "%s" does not exist.)",
+                  __FUNCTION__, qPrintable(QDir::toNativeSeparators(path)), qPrintable(arg));
         return {};
     }
     return path;
@@ -277,7 +277,8 @@ static QString findClangLibDir()
             const QString path = QFile::decodeName(qgetenv(envVar)) + u"/lib"_s;
             if (QFileInfo::exists(path))
                 return path;
-            qWarning("%s: %s as pointed to by %s does not exist.", __FUNCTION__, qPrintable(path), envVar);
+            qCWarning(lcShiboken, "%s: %s as pointed to by %s does not exist.",
+                      __FUNCTION__, qPrintable(path), envVar);
         }
     }
     return queryLlvmConfigDir(u"--libdir"_s);
@@ -295,7 +296,8 @@ static QString findClangBuiltInIncludesDir()
         const QFileInfoList versionDirs =
             clangDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
         if (versionDirs.isEmpty())
-            qWarning("%s: No subdirectories found in %s.", __FUNCTION__, qPrintable(clangDirName));
+            qCWarning(lcShiboken, "%s: No subdirectories found in %s.",
+                      __FUNCTION__, qPrintable(clangDirName));
         for (const QFileInfo &fi : versionDirs) {
             const QString fileName = fi.fileName();
             if (fileName.at(0).isDigit()) {
