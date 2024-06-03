@@ -290,8 +290,17 @@ static QString findClangBuiltInIncludesDir()
     const QString clangPathLibDir = findClangLibDir();
     if (!clangPathLibDir.isEmpty()) {
         QString candidate;
+        QString clangDirName = clangPathLibDir + u"/clang"_s;
+        // PYSIDE-2769: llvm-config --libdir may report /usr/lib64 on manylinux_2_28_x86_64
+        // whereas the includes are under /usr/lib/clang/../include.
+        if (!QFileInfo::exists(clangDirName) && clangPathLibDir.endsWith("64"_L1)) {
+            const QString fallback = clangPathLibDir.sliced(0, clangPathLibDir.size() - 2);
+            clangDirName = fallback + u"/clang"_s;
+            qCWarning(lcShiboken, "%s: Falling back from %s to %s.",
+                      __FUNCTION__, qPrintable(clangPathLibDir), qPrintable(fallback));
+        }
+
         QVersionNumber lastVersionNumber(1, 0, 0);
-        const QString clangDirName = clangPathLibDir + u"/clang"_s;
         QDir clangDir(clangDirName);
         const QFileInfoList versionDirs =
             clangDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
