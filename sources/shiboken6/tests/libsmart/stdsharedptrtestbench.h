@@ -25,6 +25,10 @@ public:
     static std::shared_ptr<int> createNullInt();
     static void printInt(const std::shared_ptr<int> &);
 
+    static std::shared_ptr<double> createDouble(double v = 42);
+    static std::shared_ptr<double> createNullDouble();
+    static void printDouble(const std::shared_ptr<double> &);
+
     static std::shared_ptr<std::string> createString(const char *text);
     static std::shared_ptr<std::string> createNullString();
     static void printString(const std::shared_ptr<std::string> &);

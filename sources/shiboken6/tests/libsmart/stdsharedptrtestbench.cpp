@@ -51,6 +51,26 @@ void StdSharedPtrTestBench::printInt(const std::shared_ptr<int> &p)
     std::cerr << '\n';
 }
 
+std::shared_ptr<double> StdSharedPtrTestBench::createDouble(double v)
+{
+     return std::make_shared<double>(v);
+}
+
+std::shared_ptr<double> StdSharedPtrTestBench::createNullDouble()
+{
+    return {};
+}
+
+void StdSharedPtrTestBench::printDouble(const std::shared_ptr<double> &p)
+{
+    std::cerr << __FUNCTION__ << ' ';
+    if (p.get())
+        std::cerr << *p;
+    else
+        std::cerr << "nullptr";
+    std::cerr << '\n';
+}
+
 std::shared_ptr<std::string> StdSharedPtrTestBench::createString(const char *text)
 {
     return std::make_shared<std::string>(text);

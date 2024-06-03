@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
-from smart import Integer, StdSharedPtrTestBench, StdSharedPtrVirtualMethodTester, std
+from smart import Integer, StdDoublePtr, StdSharedPtrTestBench, StdSharedPtrVirtualMethodTester, std
 
 
 def call_func_on_ptr(ptr):
@@ -51,6 +51,15 @@ class StdSharedPtrTests(unittest.TestCase):
         StdSharedPtrTestBench.printInt(p)
         ip = std.StdIntPtr(42)
         StdSharedPtrTestBench.printInt(ip)
+
+    def testDouble(self):
+        np = StdSharedPtrTestBench.createNullDouble()
+        StdSharedPtrTestBench.printDouble(np)
+        self.assertFalse(np)
+        p = StdSharedPtrTestBench.createDouble(67)
+        StdSharedPtrTestBench.printDouble(p)
+        dp = StdDoublePtr(42)
+        StdSharedPtrTestBench.printDouble(dp)
 
     def testString(self):
         np = StdSharedPtrTestBench.createNullString()

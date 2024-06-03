@@ -721,6 +721,9 @@ found in the code will be generated. The type name might optionally
 be followed an equal sign and the Python type name, for example
 ``instantiations="int=IntPtr,double=DoublePtr"``.
 It is also possible to specify a namespace delimited by ``::``.
+By default, the type will be in the namespace of the smart pointer,
+for example, ``std`` for ``std::shared_ptr``. Preceding
+the type name by ``::`` causes it to be in the global namespace.
 
 The *optional* attribute **type** specifies the type:
 

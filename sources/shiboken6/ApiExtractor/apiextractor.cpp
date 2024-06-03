@@ -606,6 +606,15 @@ void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContex
     QString name = ste->getTargetName(smp.type);
     auto parentTypeEntry = ste->parent();
 
+    // FIXME PYSIDE 7: Make global scope the default behavior?
+    // Note: Also requires changing SmartPointerTypeEntry::getTargetName()
+    // to not strip namespaces from unnamed instances.
+    const bool globalScope = name.startsWith("::"_L1);
+    if (globalScope) {
+        name.remove(0, 2);
+        parentTypeEntry = typeSystemTypeEntry(ste);
+    }
+
     auto colonPos = name.lastIndexOf(u"::");
     const bool withinNameSpace = colonPos != -1;
     if (withinNameSpace) { // user defined
