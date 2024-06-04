@@ -43,6 +43,9 @@ public:
 
     const AbstractMetaTypeList &instantiatedContainers() const;
     const InstantiatedSmartPointers &instantiatedSmartPointers() const;
+    std::optional<InstantiatedSmartPointer>
+        findSmartPointerInstantiation(const SmartPointerTypeEntryCPtr &pointer,
+                                      const TypeEntryCPtr &pointee) const;
 
     const QMultiHash<QString, QString> &typedefTargetToName() const;
 

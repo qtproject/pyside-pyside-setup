@@ -413,6 +413,7 @@ private:
 
     void writeSignatureInfo(TextStream &s, const OverloadData &overloads) const;
     QString signatureParameter(const AbstractMetaArgument &arg) const;
+    QString pythonSignature(const AbstractMetaType &type) const;
     /// Writes the implementation of all methods part of python sequence protocol
     void writeSequenceMethods(TextStream &s,
                               const AbstractMetaClassCPtr &metaClass,
@@ -550,9 +551,6 @@ private:
     static bool hasBoolCast(const AbstractMetaClassCPtr &metaClass)
     { return boolCast(metaClass).has_value(); }
 
-    std::optional<AbstractMetaType>
-        findSmartPointerInstantiation(const SmartPointerTypeEntryCPtr &pointer,
-                                      const TypeEntryCPtr &pointee) const;
     void clearTpFuncs();
     static QString chopType(QString s);
 

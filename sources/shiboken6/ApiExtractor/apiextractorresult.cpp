@@ -50,6 +50,18 @@ const InstantiatedSmartPointers &ApiExtractorResult::instantiatedSmartPointers()
     return m_instantiatedSmartPointers;
 }
 
+std::optional<InstantiatedSmartPointer>
+    ApiExtractorResult::findSmartPointerInstantiation(const SmartPointerTypeEntryCPtr &pointer,
+                                                      const TypeEntryCPtr &pointee) const
+{
+    for (const auto &smp : m_instantiatedSmartPointers) {
+        const auto &i = smp.type;
+        if (i.typeEntry() == pointer && i.instantiations().at(0).typeEntry() == pointee)
+            return smp;
+    }
+    return std::nullopt;
+}
+
 const QMultiHash<QString, QString> &ApiExtractorResult::typedefTargetToName() const
 {
     return m_typedefTargetToName;

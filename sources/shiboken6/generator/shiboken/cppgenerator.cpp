@@ -5105,6 +5105,17 @@ QList<PyMethodDefEntry>
     return result;
 }
 
+QString CppGenerator::pythonSignature(const AbstractMetaType &type) const
+{
+    if (type.isSmartPointer() && !type.instantiations().isEmpty()) {
+        const auto ste = std::static_pointer_cast<const SmartPointerTypeEntry>(type.typeEntry());
+        const auto instantiationTe = type.instantiations().constFirst().typeEntry();
+        if (auto opt = api().findSmartPointerInstantiation(ste, instantiationTe))
+            return opt->specialized->typeEntry()->qualifiedTargetLangName();
+    }
+    return type.pythonSignature();
+}
+
 // Format the type signature of a function parameter
 QString CppGenerator::signatureParameter(const AbstractMetaArgument &arg) const
 {
@@ -5116,7 +5127,7 @@ QString CppGenerator::signatureParameter(const AbstractMetaArgument &arg) const
         metaType = *viewOn;
     s << arg.name() << ':';
 
-    QStringList signatures(metaType.pythonSignature());
+    QStringList signatures(pythonSignature(metaType));
 
     // Implicit conversions (C++): Check for converting constructors
     // "QColor(Qt::GlobalColor)" or conversion operators
@@ -5127,7 +5138,7 @@ QString CppGenerator::signatureParameter(const AbstractMetaArgument &arg) const
             // PYSIDE-2712: modified types from converting constructors are not always correct
             // candidates if they are modified by the type system reference
             if (!f->arguments().constFirst().isTypeModified()) {
-                signatures << f->arguments().constFirst().type().pythonSignature();
+                signatures << pythonSignature(f->arguments().constFirst().type());
             }
         } else if (f->isConversionOperator()) {
             signatures << f->ownerClass()->fullName();
@@ -5188,7 +5199,7 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
 
         QString returnType = f->pyiTypeReplaced(0); // pyi or modified type
         if (returnType.isEmpty() && !f->isVoid())
-            returnType = f->type().pythonSignature();
+            returnType = pythonSignature(f->type());
         if (!returnType.isEmpty())
             s << "->" << returnType;
 
