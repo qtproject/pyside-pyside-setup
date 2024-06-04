@@ -8,6 +8,7 @@ import warnings
 from configparser import ConfigParser
 from typing import List
 from pathlib import Path
+from enum import Enum
 
 from project import ProjectData
 from . import (DEFAULT_APP_ICON, find_pyside_modules, find_permission_categories,
@@ -375,8 +376,13 @@ class Config(BaseConfig):
 class DesktopConfig(Config):
     """Wrapper class around pysidedeploy.spec, but specific to Desktop deployment
     """
+    class NuitkaMode(Enum):
+        ONEFILE = "onefile"
+        STANDALONE = "standalone"
+
     def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
-                 existing_config_file: bool = False, extra_ignore_dirs: List[str] = None):
+                 existing_config_file: bool = False, extra_ignore_dirs: List[str] = None,
+                 mode: str = "onefile"):
         super().__init__(config_file, source_file, python_exe, dry_run, existing_config_file,
                          extra_ignore_dirs)
         self.dependency_reader = QtDependencyReader(dry_run=self.dry_run)
@@ -402,6 +408,12 @@ class DesktopConfig(Config):
             else:
                 self._find_and_set_permissions()
 
+        self._mode = self.NuitkaMode.ONEFILE
+        if self.get_value("nuitka", "mode") == self.NuitkaMode.STANDALONE.value:
+            self._mode = self.NuitkaMode.STANDALONE
+        elif mode == self.NuitkaMode.STANDALONE.value:
+            self.mode = self.NuitkaMode.STANDALONE
+
     @property
     def qt_plugins(self):
         return self._qt_plugins
@@ -419,6 +431,15 @@ class DesktopConfig(Config):
     def permissions(self, permissions):
         self._permissions = permissions
         self.set_value("nuitka", "macos.permissions", ",".join(permissions))
+
+    @property
+    def mode(self):
+        return self._mode
+
+    @mode.setter
+    def mode(self, mode: NuitkaMode):
+        self._mode = mode
+        self.set_value("nuitka", "mode", mode.value)
 
     def _find_dependent_qt_modules(self):
         """

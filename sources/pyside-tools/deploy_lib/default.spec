@@ -65,6 +65,9 @@ plugins =
 # eg: NSCameraUsageDescription:CameraAccess
 macos.permissions =
 
+# mode of using Nuitka. Accepts standalone or onefile. Default is onefile.
+mode = onefile
+
 # (str) specify any extra nuitka arguments
 # eg: extra_args = --show-modules --follow-stdlib
 extra_args = --quiet --noinclude-qt-translations

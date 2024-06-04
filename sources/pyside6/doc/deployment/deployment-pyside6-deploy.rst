@@ -144,6 +144,12 @@ The relevant parameters for ``pyside6-deploy`` are:
 
       NSCameraUsageDescription:CameraAccess
 
+  * ``mode``: Accepts one of the options: ``onefile`` or ``standalone``. The default is ``onefile``.
+    This option corresponds to the mode in which Nuitka is run. The onefile mode creates a single
+    executable file, while the standalone mode creates a directory with the executable and all the
+    necessary files. The standalone mode is useful when you want to distribute the application as a
+    directory with dependencies and other files required by the app.
+
   * ``extra_args``: Any extra Nuitka arguments specified. It is specified as space-separated
     command line arguments i.e. just like how you would specify it when you use Nuitka through
     the command line. By default, it contains the following arguments::
