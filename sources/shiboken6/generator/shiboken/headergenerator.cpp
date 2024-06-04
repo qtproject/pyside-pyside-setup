@@ -198,9 +198,6 @@ void HeaderGenerator::writeWrapperClassDeclaration(TextStream &s,
     const auto typeEntry = metaClass->typeEntry();
     InheritedOverloadSet inheritedOverloads;
 
-    // write license comment
-    s << licenseComment();
-
     // Class
     s << "class " << wrapperName
       << " : public " << metaClass->qualifiedCppName()
