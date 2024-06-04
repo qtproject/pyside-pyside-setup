@@ -49,10 +49,20 @@ TOOL_DESCRIPTION = dedent(f"""
                           Linux = .bin
                           """)
 
+HELP_MODE = dedent("""
+                   The mode in which the application is deployed. The options are: onefile,
+                   standalone. The default value is onefile.
+
+                   This options translates to the mode Nuitka uses to create the executable.
+
+                   macOS by default uses the --standalone option.
+                   """)
+
 
 def main(main_file: Path = None, name: str = None, config_file: Path = None, init: bool = False,
          loglevel=logging.WARNING, dry_run: bool = False, keep_deployment_files: bool = False,
-         force: bool = False, extra_ignore_dirs: str = None, extra_modules_grouped: str = None):
+         force: bool = False, extra_ignore_dirs: str = None, extra_modules_grouped: str = None,
+         mode: bool = False):
 
     logging.basicConfig(level=loglevel)
     if config_file and not config_file.exists() and not main_file.exists():
@@ -91,7 +101,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
 
     config = DesktopConfig(config_file=config_file, source_file=main_file, python_exe=python.exe,
                            dry_run=dry_run, existing_config_file=config_file_exists,
-                           extra_ignore_dirs=extra_ignore_dirs)
+                           extra_ignore_dirs=extra_ignore_dirs, mode=mode)
 
     # set application name
     if name:
@@ -135,7 +145,8 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
                                                excluded_qml_plugins=config.excluded_qml_plugins,
                                                icon=config.icon,
                                                dry_run=dry_run,
-                                               permissions=config.permissions)
+                                               permissions=config.permissions,
+                                               mode=config.mode)
     except Exception:
         print(f"[DEPLOY] Exception occurred: {traceback.format_exc()}")
     finally:
@@ -182,7 +193,11 @@ if __name__ == "__main__":
 
     parser.add_argument("--extra-modules", type=str, help=HELP_EXTRA_MODULES)
 
+    parser.add_argument("--mode", choices=["onefile", "standalone"], default="desktop",
+                        help=HELP_MODE)
+
     args = parser.parse_args()
 
     main(args.main_file, args.name, args.config_file, args.init, args.loglevel, args.dry_run,
-         args.keep_deployment_files, args.force, args.extra_ignore_dirs, args.extra_modules)
+         args.keep_deployment_files, args.force, args.extra_ignore_dirs, args.extra_modules,
+         args.mode)

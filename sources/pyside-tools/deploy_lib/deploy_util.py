@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from . import EXE_FORMAT
-from .config import Config
+from .config import Config, DesktopConfig
 
 
 def config_option_exists():
@@ -61,17 +61,21 @@ def create_config_file(dry_run: bool = False, config_file: Path = None, main_fil
     return config_file
 
 
-def finalize(config: Config):
+def finalize(config: DesktopConfig):
     """
         Copy the executable into the final location
         For Android deployment, this is done through buildozer
     """
-    generated_exec_path = config.generated_files_path / (config.source_file.stem + EXE_FORMAT)
+    dist_format = EXE_FORMAT
+    if config.mode == DesktopConfig.NuitkaMode.STANDALONE and sys.platform != "darwin":
+        dist_format = ".dist"
+
+    generated_exec_path = config.generated_files_path / (config.source_file.stem + dist_format)
     if generated_exec_path.exists() and config.exe_dir:
-        if sys.platform == "darwin":
-            shutil.copytree(generated_exec_path, config.exe_dir / (config.title + EXE_FORMAT),
+        if sys.platform == "darwin" or config.mode == DesktopConfig.NuitkaMode.STANDALONE:
+            shutil.copytree(generated_exec_path, config.exe_dir / (config.title + dist_format),
                             dirs_exist_ok=True)
         else:
             shutil.copy(generated_exec_path, config.exe_dir)
         print("[DEPLOY] Executed file created in "
-              f"{str(config.exe_dir / (config.source_file.stem + EXE_FORMAT))}")
+              f"{str(config.exe_dir / (config.source_file.stem + dist_format))}")

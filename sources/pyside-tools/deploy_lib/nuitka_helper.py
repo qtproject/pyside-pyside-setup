@@ -1,6 +1,9 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
+# enables to use typehints for classes that has not been defined yet or imported
+# used for resolving circular imports
+from __future__ import annotations
 import logging
 import os
 import sys
@@ -8,6 +11,7 @@ from pathlib import Path
 from typing import List
 
 from . import MAJOR_VERSION, run_command
+from .config import DesktopConfig
 
 
 class Nuitka:
@@ -52,10 +56,12 @@ class Nuitka:
 
     def create_executable(self, source_file: Path, extra_args: str, qml_files: List[Path],
                           qt_plugins: List[str], excluded_qml_plugins: List[str], icon: str,
-                          dry_run: bool, permissions: List[str]):
+                          dry_run: bool, permissions: List[str],
+                          mode: DesktopConfig.NuitkaMode):
         qt_plugins = [plugin for plugin in qt_plugins if plugin not in self.qt_plugins_to_ignore]
         extra_args = extra_args.split()
 
+        # macOS uses the --standalone option by default to create an app bundle
         if sys.platform == "darwin":
             # create an app bundle
             extra_args.extend(["--standalone", "--macos-create-app-bundle"])
@@ -63,7 +69,7 @@ class Nuitka:
             for permission in permissions:
                 extra_args.append(permission_pattern.format(permission=permission))
         else:
-            extra_args.append("--onefile")
+            extra_args.append(f"--{mode.value}")
 
         qml_args = []
         if qml_files:

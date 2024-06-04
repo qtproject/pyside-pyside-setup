@@ -174,6 +174,16 @@ class TestPySide6DeployWidgets(DeployTestBase):
             self.deploy.main(main_file=fake_main_file, config_file=self.config_file)
         self.assertTrue("Directory does not contain main.py file." in str(context.exception))
 
+    def testStandaloneMode(self, mock_plugins):
+        mock_plugins.return_value = self.all_plugins
+        # remove --onefile from self.expected_run_cmd and replace it with --standalone
+        self.expected_run_cmd = self.expected_run_cmd.replace(" --onefile", " --standalone")
+        # test standalone mode
+        original_output = self.deploy.main(self.main_file, mode="standalone", dry_run=True,
+                                           force=True)
+
+        self.assertEqual(original_output, self.expected_run_cmd)
+
 
 @unittest.skipIf(sys.platform == "darwin" and int(platform.mac_ver()[0].split('.')[0]) <= 11,
                  "Test only works on macOS version 12+")
