@@ -86,18 +86,6 @@ static ComparisonOperatorList smartPointeeComparisons(const GeneratorContext &co
     return result;
 }
 
-std::optional<AbstractMetaType>
-    CppGenerator::findSmartPointerInstantiation(const SmartPointerTypeEntryCPtr &pointer,
-                                                const TypeEntryCPtr &pointee) const
-{
-    for (const auto &smp : api().instantiatedSmartPointers()) {
-        const auto &i = smp.type;
-        if (i.typeEntry() == pointer && i.instantiations().at(0).typeEntry() == pointee)
-            return i;
-    }
-    return {};
-}
-
 static bool hasParameterPredicate(const AbstractMetaFunctionCPtr &f)
 {
     return !f->arguments().isEmpty();
@@ -252,8 +240,8 @@ void CppGenerator::writeSmartPointerConverterFunctions(TextStream &s,
     for (const auto &base : baseClasses) {
         auto baseTe = base->typeEntry();
         if (smartPointerTypeEntry->matchesInstantiation(baseTe)) {
-            if (auto opt = findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
-                const auto smartTargetType = opt.value();
+            if (auto opt = api().findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
+                const auto &smartTargetType = opt.value().type;
                 s << "// SmartPointer derived class: "
                   << smartTargetType.cppSignature() << "\n";
                 writePythonToCppConversionFunctions(s, smartPointerType,
@@ -308,8 +296,8 @@ void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s,
 
     for (const auto &base : classes) {
         auto baseTe = base->typeEntry();
-        if (auto opt = findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
-            const auto smartTargetType = opt.value();
+        if (auto opt = api().findSmartPointerInstantiation(smartPointerTypeEntry, baseTe)) {
+            const auto &smartTargetType = opt.value().type;
             s << "// Convert to SmartPointer derived class: ["
               << smartTargetType.cppSignature() << "]\n";
             const QString converter = u"Shiboken::Conversions::getConverter(\""_s
