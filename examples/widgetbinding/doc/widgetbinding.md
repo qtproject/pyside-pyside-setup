@@ -40,20 +40,24 @@ The most important files are:
 Now create a `build/` directory, and from inside run `cmake` to use
 the provided `CMakeLists.txt`:
 
-macOS/Linux:
+Run CMake on macOS/Linux:
 ```bash
 cd ~/pyside-setup/examples/widgetbinding
+cd build
+cmake .. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release
 ```
 
-On Windows:
+Run CMake on Windows:
 ```bash
 cd C:\pyside-setup\examples\widgetbinding
-```
-
-```bash
 mkdir build
 cd build
-cmake -S.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake .. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl.exe
+```
+
+To build:
+```bash
+
 ninja
 ninja install
 cd ..

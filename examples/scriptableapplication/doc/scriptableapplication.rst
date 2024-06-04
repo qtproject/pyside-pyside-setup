@@ -72,21 +72,22 @@ macOS/Linux:
 .. code-block:: bash
 
     cd ~/pyside-setup/examples/scriptableapplication
+    mkdir build
+    cd build
+    cmake .. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release
+    ninja
+    ./scriptableapplication
 
 On Windows:
 
 .. code-block:: bash
 
     cd C:\pyside-setup\examples\scriptableapplication
-
-
-.. code-block:: bash
-
     mkdir build
     cd build
-    cmake -S.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release
+    cmake .. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl.exe
     ninja
-    ./scriptableapplication
+    .\scriptableapplication.exe
 
 Using QMake
 +++++++++++

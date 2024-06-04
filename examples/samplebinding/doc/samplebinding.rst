@@ -165,23 +165,27 @@ Using CMake
 You can build and run this example by executing the following commands
 (slightly adapted to your file system layout) in a terminal:
 
-macOS/Linux:
+Run CMake on macOS/Linux:
 
 .. code-block:: bash
 
     cd ~/pyside-setup/examples/samplebinding
+    mkdir build
+    cd build
+    cmake .. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release
 
-On Windows:
+Run CMake on Windows:
 
 .. code-block:: bash
 
     cd C:\pyside-setup\examples\samplebinding
-
-.. code-block:: bash
-
     mkdir build
     cd build
-    cmake -S.. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl.exe
+    cmake .. -B. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl.exe
+
+To build:
+
+.. code-block:: bash
     ninja
     ninja install
     cd ..
