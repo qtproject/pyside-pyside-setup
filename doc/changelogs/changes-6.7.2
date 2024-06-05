@@ -1,0 +1,50 @@
+Qt for Python 6.7.2 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - [PYSIDE-1612] Android Deployment now used the development branch of p4a.
+ - [PYSIDE-2712] Type hints: Modified types are no longer considered
+                 as eligible implicit conversions.
+ - [PYSIDE-2745] Exceptions occurring in a slot connected to a
+                 0-delay singleShot timer signal are no longer suppressed.
+ - [PYSIDE-2747] Running on Fedora 40 with Python 3.12.3-2 has been fixed.
+ - [PYSIDE-2748] Type hints: QTranslator.translate() has been fixed.
+ - [PYSIDE-2749] Lazy Load: A performance regression showing in Qt event
+                 filters has been fixed.
+ - [PYSIDE-2750] Qt6VirtualKeyboardSettings have been added to the wheel.
+ - [PYSIDE-2756] Type hints: The return type of QItemSelection.__init__()
+                 has been fixed.
+ - [PYSIDE-2758] QQuickWebEngineProfile.setUrlRequestInterceptor()
+                 has been added.
+ - [PYSIDE-2759] The ownership of cache object passed to
+                 QNetworkAccessManager.setCache() has been fixed.
+ - [PYSIDE-2762] Type hints: The return type of
+                 QModelIndex.internalPointer() has been fixed.
+ - [PYSIDE-2767] Type hints: An error checking the property decorator
+                 has been fixed.
+ - [PYSIDE-2768] Type hints: smart pointer signatures have been fixed.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-2764] The missing declaration of the deprecated variable
+                 cppApiVariableNameOld has been added to the generated
+                 headers.
+ - [PYSIDE-2769] Finding the clang include directories on
+                 manylinux_2_28_x86_64 has been fixed.
