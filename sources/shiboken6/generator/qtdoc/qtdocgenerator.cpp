@@ -1565,7 +1565,14 @@ QtXmlToSphinxLink QtDocGenerator::resolveLink(const QtXmlToSphinxLink &link) con
 QtXmlToSphinxDocGeneratorInterface::Image
     QtDocGenerator::resolveImage(const QString &href, const QString &context) const
 {
-    const QString &relativeSourceDir = href;
+    QString relativeSourceDir;
+    // FIXME PYSIDE 7: Is the doxygen code path still needed?
+    if (!m_options.doxygen)
+        relativeSourceDir = QtDocParser::qdocModuleDir(context);
+    if (!relativeSourceDir.isEmpty())
+        relativeSourceDir += u'/';
+    relativeSourceDir += href;
+
     const QString source = m_options.parameters.docDataDir + u'/' + relativeSourceDir;
     if (!QFileInfo::exists(source))
         throw Exception(msgCannotFindImage(href, context,source));

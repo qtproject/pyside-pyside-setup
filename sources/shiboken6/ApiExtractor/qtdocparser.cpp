@@ -37,6 +37,27 @@ Documentation QtDocParser::retrieveModuleDocumentation()
     return retrieveModuleDocumentation(packageName());
 }
 
+// Return the qdoc dir "PySide6.QtGui.QPainter" -> "qtgui/webxml" (QTBUG-119500)
+QString QtDocParser::qdocModuleDir(const QString &pythonType)
+{
+    QString package = pythonType;
+    if (package.startsWith("PySide6."_L1))
+        package.remove(0, 8);
+    auto dot = package.indexOf(u'.');
+    if (dot != -1)
+        package.truncate(dot);
+    return package.toLower() + "/webxml"_L1;
+}
+
+static QString xmlFileNameRoot(const AbstractMetaClassPtr &metaClass)
+{
+    QString className = metaClass->qualifiedCppName().toLower();
+    className.replace("::"_L1, "-"_L1);
+
+    return QtDocParser::qdocModuleDir(metaClass->typeEntry()->targetLangPackage())
+           + u'/' + className;
+}
+
 static void formatPreQualifications(QTextStream &str, const AbstractMetaType &type)
 {
     if (type.isConstant())
@@ -208,12 +229,15 @@ static QString extractBrief(QString *value)
 // Find the webxml file for global functions/enums
 // by the doc-file typesystem attribute or via include file.
 static QString findGlobalWebXmLFile(const QString &documentationDataDirectory,
+                                    const QString &package,
                                     const QString &docFile,
                                     const Include &include)
 {
     QString result;
+    const QString root = documentationDataDirectory + u'/'
+                         + QtDocParser::qdocModuleDir(package) + u'/';
     if (!docFile.isEmpty()) {
-        result = documentationDataDirectory + u'/' + docFile;
+        result = root + docFile;
         if (!result.endsWith(webxmlSuffix))
             result += webxmlSuffix;
         return QFileInfo::exists(result) ? result : QString{};
@@ -221,8 +245,7 @@ static QString findGlobalWebXmLFile(const QString &documentationDataDirectory,
     if (include.name().isEmpty())
         return {};
     // qdoc "\headerfile <QtLogging>" directive produces "qtlogging.webxml"
-    result = documentationDataDirectory + u'/' +
-             QFileInfo(include.name()).baseName() + webxmlSuffix;
+    result = root + QFileInfo(include.name()).baseName() + webxmlSuffix;
     if (QFileInfo::exists(result))
         return result;
     // qdoc "\headerfile <qdrawutil.h>" produces "qdrawutil-h.webxml"
@@ -237,7 +260,7 @@ void  QtDocParser::fillGlobalFunctionDocumentation(const AbstractMetaFunctionPtr
         return;
 
     const QString sourceFileName =
-        findGlobalWebXmLFile(documentationDataDirectory(), te->docFile(), te->include());
+        findGlobalWebXmLFile(documentationDataDirectory(), te->targetLangPackage(), te->docFile(), te->include());
     if (sourceFileName.isEmpty())
         return;
 
@@ -260,7 +283,7 @@ void QtDocParser::fillGlobalEnumDocumentation(AbstractMetaEnum &e)
 {
     auto te = e.typeEntry();
     const QString sourceFileName =
-        findGlobalWebXmLFile(documentationDataDirectory(), te->docFile(), te->include());
+        findGlobalWebXmLFile(documentationDataDirectory(), te->targetLangPackage(), te->docFile(), te->include());
     if (sourceFileName.isEmpty())
         return;
 
@@ -288,9 +311,7 @@ void QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
         context = context->enclosingClass();
     }
 
-    QString sourceFileRoot = documentationDataDirectory() + u'/'
-        + metaClass->qualifiedCppName().toLower();
-    sourceFileRoot.replace(u"::"_s, u"-"_s);
+    QString sourceFileRoot = documentationDataDirectory() + u'/' + xmlFileNameRoot(metaClass);
 
     QFileInfo sourceFile(sourceFileRoot + webxmlSuffix);
     if (!sourceFile.exists())

@@ -246,7 +246,7 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/PySide6/Q
                        --api-version=${SUPPORTED_QT_VERSION}
                        --typesystem-paths="${QDOC_TYPESYSTEM_PATH}"
                        --library-source-dir=${QT_SRC_DIR}
-                       --documentation-data-dir=${DOC_DATA_DIR}/webxml
+                       --documentation-data-dir=${DOC_DATA_DIR}
                        --output-directory=${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}
                        --documentation-code-snippets-dir=${CODE_SNIPPET_ROOT}
                        --snippets-path-rewrite=${QT_ROOT_PATH}:${CODE_SNIPPET_ROOT}

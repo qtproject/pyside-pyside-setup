@@ -19,6 +19,8 @@ public:
     Documentation retrieveModuleDocumentation() override;
     Documentation retrieveModuleDocumentation(const QString& name) override;
 
+    static QString qdocModuleDir(const QString &pythonType);
+
 private:
     static QString functionDocumentation(const QString &sourceFileName,
                                          const ClassDocumentation &classDocumentation,
