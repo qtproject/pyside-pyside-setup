@@ -1240,36 +1240,17 @@ WebXmlTag QtXmlToSphinx::parentTag() const
 
 // Copy images that are placed in a subdirectory "images" under the webxml files
 // by qdoc to a matching subdirectory under the "rst/PySide6/<module>" directory
-static bool copyImage(const QString &href, const QString &docDataDir,
-                      const QString &context, const QString &outputDir,
+static bool copyImage(const QString &docDataDir, const QString &relativeSourceFile,
+                      const QString &outputDir, const QString &relativeTargetFile,
                       const QLoggingCategory &lc, QString *errorMessage)
 {
-    const QChar slash = u'/';
-    const auto lastSlash = href.lastIndexOf(slash);
-    const QString imagePath = lastSlash != -1 ? href.left(lastSlash) : QString();
-    const QString imageFileName = lastSlash != -1 ? href.right(href.size() - lastSlash - 1) : href;
-    QFileInfo imageSource(docDataDir + slash + href);
-    if (!imageSource.exists()) {
-        QTextStream(errorMessage) << "Image " << href << " does not exist in "
-            << QDir::toNativeSeparators(docDataDir);
-        return false;
-    }
-    // Determine directory from context, "Pyside2.QtGui.QPainter" ->"Pyside2/QtGui".
-    // FIXME: Not perfect yet, should have knowledge about namespaces (DataVis3D) or
-    // nested classes "Pyside2.QtGui.QTouchEvent.QTouchPoint".
-    QString relativeTargetDir = context;
-    const auto lastDot = relativeTargetDir.lastIndexOf(u'.');
-    if (lastDot != -1)
-        relativeTargetDir.truncate(lastDot);
-    relativeTargetDir.replace(u'.', slash);
-    if (!imagePath.isEmpty())
-        relativeTargetDir += slash + imagePath;
-
-    const QString targetDir = outputDir + slash + relativeTargetDir;
-    const QString targetFileName = targetDir + slash + imageFileName;
+    QString targetFileName = outputDir + u'/' + relativeTargetFile;
     if (QFileInfo::exists(targetFileName))
         return true;
-    if (!QFileInfo::exists(targetDir)) {
+
+    QString relativeTargetDir = relativeTargetFile;
+    relativeTargetDir.truncate(qMax(relativeTargetDir.lastIndexOf(u'/'), qsizetype(0)));
+    if (!relativeTargetDir.isEmpty() && !QFileInfo::exists(outputDir + u'/' + relativeTargetDir)) {
         const QDir outDir(outputDir);
         if (!outDir.mkpath(relativeTargetDir)) {
             QTextStream(errorMessage) << "Cannot create " << QDir::toNativeSeparators(relativeTargetDir)
@@ -1278,28 +1259,29 @@ static bool copyImage(const QString &href, const QString &docDataDir,
         }
     }
 
-    QFile source(imageSource.absoluteFilePath());
+    QFile source(docDataDir + u'/' + relativeSourceFile);
     if (!source.copy(targetFileName)) {
         QTextStream(errorMessage) << "Cannot copy " << QDir::toNativeSeparators(source.fileName())
             << " to " << QDir::toNativeSeparators(targetFileName) << ": "
             << source.errorString();
         return false;
     }
-    qCDebug(lc).noquote().nospace() << __FUNCTION__ << " href=\""
-        << href << "\", context=\"" << context << "\", docDataDir=\""
-        << docDataDir << "\", outputDir=\"" << outputDir << "\", copied \""
-        << source.fileName() << "\"->\"" << targetFileName << '"';
+
+    qCDebug(lc).noquote().nospace() << __FUNCTION__ << " \"" << relativeSourceFile
+        << "\"->\"" << relativeTargetFile << '"';
     return true;
 }
 
 bool QtXmlToSphinx::copyImage(const QString &href) const
 {
     QString errorMessage;
-    const bool result =
-        ::copyImage(href, m_parameters.docDataDir, m_context,
-                    m_parameters.outputDirectory,
-                    m_generator->loggingCategory(),
-                    &errorMessage);
+    const auto imagePaths = m_generator->resolveImage(href, m_context);
+    const bool result = ::copyImage(m_parameters.docDataDir,
+                                    imagePaths.source,
+                                    m_parameters.outputDirectory,
+                                    imagePaths.target,
+                                    m_generator->loggingCategory(),
+                                    &errorMessage);
     if (!result)
         throw Exception(errorMessage);
     return result;

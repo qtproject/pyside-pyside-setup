@@ -995,3 +995,10 @@ QString msgInvalidLanguageLevel(const QString &l)
 {
     return u"Invalid argument for language level: \""_s + l + u"\"."_s;
 }
+
+QString msgCannotFindImage(const QString &href, const QString &context,
+                           const QString &candidate)
+{
+    return "Cannot resolve image "_L1 + href + " for "_L1 + context
+           + " (tried "_L1 + QDir::toNativeSeparators(candidate) + ")."_L1;
+}

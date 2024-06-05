@@ -1566,3 +1566,26 @@ QtXmlToSphinxLink QtDocGenerator::resolveLink(const QtXmlToSphinxLink &link) con
     }
     return resolved;
 }
+
+QtXmlToSphinxDocGeneratorInterface::Image
+    QtDocGenerator::resolveImage(const QString &href, const QString &context) const
+{
+    QString relativeSourceDir = href;
+    const QString source = m_options.parameters.docDataDir + u'/' + relativeSourceDir;
+    if (!QFileInfo::exists(source))
+        throw Exception(msgCannotFindImage(href, context,source));
+
+    // Determine target directory from context, "Pyside2.QtGui.QPainter" ->"Pyside2/QtGui".
+    // FIXME: Not perfect yet, should have knowledge about namespaces (DataVis3D) or
+    // nested classes "Pyside2.QtGui.QTouchEvent.QTouchPoint".
+    QString relativeTargetDir = context;
+    const auto lastDot = relativeTargetDir.lastIndexOf(u'.');
+    if (lastDot != -1)
+        relativeTargetDir.truncate(lastDot);
+    relativeTargetDir.replace(u'.', u'/');
+    if (!relativeTargetDir.isEmpty())
+        relativeTargetDir += u'/';
+    relativeTargetDir += href;
+
+    return {relativeSourceDir, relativeTargetDir};
+}

@@ -53,6 +53,15 @@ public:
 
     virtual QtXmlToSphinxLink resolveLink(const QtXmlToSphinxLink &) const = 0;
 
+    // Resolve images paths relative to doc data directory/output directory.
+    struct Image
+    {
+        QString source;
+        QString target;
+    };
+
+    virtual Image resolveImage(const QString &href, const QString &context) const = 0;
+
     virtual ~QtXmlToSphinxDocGeneratorInterface() = default;
 };
 

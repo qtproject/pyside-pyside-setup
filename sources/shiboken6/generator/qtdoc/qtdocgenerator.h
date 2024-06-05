@@ -48,6 +48,7 @@ public:
                                     const QString &methodName) const override;
     const QLoggingCategory &loggingCategory() const override;
     QtXmlToSphinxLink resolveLink(const QtXmlToSphinxLink &) const override;
+    Image resolveImage(const QString &href, const QString &context) const override;
 
     static QString getFuncName(const AbstractMetaFunctionCPtr &cppFunc);
     static QString formatArgs(const AbstractMetaFunctionCPtr &func);

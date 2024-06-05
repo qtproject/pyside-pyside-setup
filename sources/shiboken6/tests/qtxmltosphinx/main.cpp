@@ -40,6 +40,7 @@ public:
                                     const QString &) const override;
     const QLoggingCategory &loggingCategory() const override;
     QtXmlToSphinxLink resolveLink(const QtXmlToSphinxLink &link) const override;
+    Image resolveImage(const QString &href, const QString &) const;
 };
 
 // QtXmlToSphinxDocGeneratorInterface
@@ -63,9 +64,16 @@ const QLoggingCategory &QtXmlToSphinxDocGenerator::loggingCategory() const
     return lcQtXmlToSphinx();
 }
 
-QtXmlToSphinxLink QtXmlToSphinxDocGenerator::resolveLink(const QtXmlToSphinxLink &link) const
+QtXmlToSphinxLink
+    QtXmlToSphinxDocGenerator::resolveLink(const QtXmlToSphinxLink &link) const
 {
     return link;
+}
+
+QtXmlToSphinxDocGeneratorInterface::Image
+    QtXmlToSphinxDocGenerator::resolveImage(const QString &href, const QString &) const
+{
+    return {href, href};
 }
 
 static bool run(const QString &fileName)

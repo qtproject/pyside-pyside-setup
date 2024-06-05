@@ -261,4 +261,7 @@ QString msgMissingProjectFileMarker(const QString &name, const QByteArray &start
 
 QString msgInvalidLanguageLevel(const QString &l);
 
+QString msgCannotFindImage(const QString &href, const QString &context,
+                           const QString &candidate);
+
 #endif // MESSAGES_H

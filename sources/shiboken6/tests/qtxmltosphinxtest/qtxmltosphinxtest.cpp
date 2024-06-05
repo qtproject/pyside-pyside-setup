@@ -39,6 +39,12 @@ QtXmlToSphinxLink QtXmlToSphinxTest::resolveLink(const QtXmlToSphinxLink &link) 
     return link;
 }
 
+QtXmlToSphinxDocGeneratorInterface::Image
+    QtXmlToSphinxTest::resolveImage(const QString &href, const QString &) const
+{
+    return {href, href};
+}
+
 QString QtXmlToSphinxTest::transformXml(const QString &xml) const
 {
     return QtXmlToSphinx(this, m_parameters, xml).result();
