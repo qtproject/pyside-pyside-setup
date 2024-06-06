@@ -25,6 +25,9 @@ accept_configuration:
         - condition: property  # Windows on Arm
           property: target.arch
           not_equals_value: ARM64
+        - condition: property  # Windows on Arm host build
+          property: target.arch
+          not_equals_value: AARCH64
         - condition: property
           property: features
           not_contains_value: DebianPackaging
@@ -62,6 +65,21 @@ accept_configuration:
         - condition: property
           property: features
           contains_value: Packaging
+    - condition: and # Restore LoA config
+      conditions:
+        - condition: property
+          property: host.osVersion
+          equals_value: Debian_11_6
+        - condition: property
+          property: host.arch
+          equals_value: AARCH64
+        - condition: property
+          property: features
+          not_contains_value: DebianPackaging
+        - condition: property
+          property: features
+          contains_value: Packaging
+
 
 machine_type:
   Build:
