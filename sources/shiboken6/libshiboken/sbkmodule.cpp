@@ -331,11 +331,22 @@ static bool shouldLazyLoad(PyObject *module)
     return std::strncmp(modName, "PySide6.", 8) == 0;
 }
 
+static int lazyLoadDefault()
+{
+#ifndef PYPY_VERSION
+    int result = 1;
+#else
+    int result = 0;
+#endif
+    if (auto *flag = getenv("PYSIDE6_OPTION_LAZY"))
+        result = std::atoi(flag);
+    return result;
+}
+
 void checkIfShouldLoadImmediately(PyObject *module, const std::string &name,
                                   const NameToTypeFunctionMap &nameToFunc)
 {
-    static const char *flag = getenv("PYSIDE6_OPTION_LAZY");
-    static const int value = flag != nullptr ? std::atoi(flag) : 1;
+    static const int value = lazyLoadDefault();
 
     // PYSIDE-2404: Lazy Loading
     //
