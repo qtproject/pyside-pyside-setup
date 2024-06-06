@@ -11,7 +11,6 @@ from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
 from pathlib import Path
 from shutil import copy, rmtree, copytree
-from typing import List, Optional, Tuple
 
 import build  # type: ignore
 import pyproject_hooks
@@ -33,7 +32,7 @@ class SetupData:
     version: str
     description: str
     readme: str
-    console_scripts: List[str]
+    console_scripts: list[str]
 
 
 def get_version_from_package(name: str, package_path: Path) -> str:
@@ -47,7 +46,7 @@ def get_version_from_package(name: str, package_path: Path) -> str:
     return version, f"{name}.__init__.__version__"
 
 
-def create_module_plugin_json(wheel_name: str, data: List[ModuleData], package_path: Path):
+def create_module_plugin_json(wheel_name: str, data: list[ModuleData], package_path: Path):
     all_plugins = {}
 
     for module in data:
@@ -61,7 +60,7 @@ def create_module_plugin_json(wheel_name: str, data: List[ModuleData], package_p
             json.dump(all_plugins, fp, indent=4)
 
 
-def get_manifest(wheel_name: str, data: List[ModuleData], package_path: Path) -> str:
+def get_manifest(wheel_name: str, data: list[ModuleData], package_path: Path) -> str:
     lines = []
 
     for module in data:
@@ -222,7 +221,7 @@ def generate_setup_py(artifacts: Path, setup: SetupData):
     return content
 
 
-def wheel_shiboken_generator(package_path: Path) -> Tuple[SetupData, None]:
+def wheel_shiboken_generator(package_path: Path) -> tuple[SetupData, None]:
     setup = SetupData(
         name="shiboken6_generator",
         version=get_version_from_package("shiboken6_generator", package_path),
@@ -237,7 +236,7 @@ def wheel_shiboken_generator(package_path: Path) -> Tuple[SetupData, None]:
     return setup, None
 
 
-def wheel_shiboken_module(package_path: Path) -> Tuple[SetupData, None]:
+def wheel_shiboken_module(package_path: Path) -> tuple[SetupData, None]:
     setup = SetupData(
         name="shiboken6",
         version=get_version_from_package("shiboken6", package_path),
@@ -249,7 +248,7 @@ def wheel_shiboken_module(package_path: Path) -> Tuple[SetupData, None]:
     return setup, None
 
 
-def wheel_pyside6_essentials(package_path: Path) -> Tuple[SetupData, List[ModuleData]]:
+def wheel_pyside6_essentials(package_path: Path) -> tuple[SetupData, list[ModuleData]]:
     packaged_qt_tools_path = package_path / "PySide6"
     set_pyside_package_path(packaged_qt_tools_path)
     _pyside_tools = available_pyside_tools(packaged_qt_tools_path, package_for_wheels=True)
@@ -277,7 +276,7 @@ def wheel_pyside6_essentials(package_path: Path) -> Tuple[SetupData, List[Module
     return setup, data
 
 
-def wheel_pyside6_addons(package_path: Path) -> Tuple[SetupData, List[ModuleData]]:
+def wheel_pyside6_addons(package_path: Path) -> tuple[SetupData, list[ModuleData]]:
     setup = SetupData(
         name="PySide6_Addons",
         version=get_version_from_package("PySide6", package_path),  # we use 'PySide6' here
@@ -291,7 +290,7 @@ def wheel_pyside6_addons(package_path: Path) -> Tuple[SetupData, List[ModuleData
     return setup, data
 
 
-def wheel_pyside6(package_path: Path) -> Tuple[SetupData, Optional[List[ModuleData]]]:
+def wheel_pyside6(package_path: Path) -> tuple[SetupData, list[ModuleData] | None]:
     setup = SetupData(
         name="PySide6",
         version=get_version_from_package("PySide6", package_path),
@@ -303,7 +302,7 @@ def wheel_pyside6(package_path: Path) -> Tuple[SetupData, Optional[List[ModuleDa
     return setup, None
 
 
-def wheel_pyside6_examples(package_path: Path) -> Tuple[SetupData, Optional[List[ModuleData]]]:
+def wheel_pyside6_examples(package_path: Path) -> tuple[SetupData, list[ModuleData] | None]:
     setup = SetupData(
         name="PySide6_Examples",
         version=get_version_from_package("PySide6", package_path),
@@ -482,7 +481,7 @@ if __name__ == "__main__":
         print("-- Copy configuration files to create the wheel")
         if name == "PySide6_Examples":
             copy_examples_for_wheel(package_path)
-        _files: List[Path] = base_files + [Path(setup.readme)]
+        _files: list[Path] = base_files + [Path(setup.readme)]
         for fname in _files:
             copy(fname, package_path)
 

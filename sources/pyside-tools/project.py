@@ -22,7 +22,6 @@ handled per project file.
 """
 import sys
 import os
-from typing import List, Tuple, Optional
 from pathlib import Path
 from argparse import ArgumentParser, RawTextHelpFormatter
 
@@ -58,7 +57,7 @@ NEW_PROJECT_TYPES = {"new-quick": ProjectType.QUICK,
                      "new-widget": ProjectType.WIDGET}
 
 
-def _sort_sources(files: List[Path]) -> List[Path]:
+def _sort_sources(files: list[Path]) -> list[Path]:
     """Sort the sources for building, ensure .qrc is last since it might depend
        on generated files."""
 
@@ -77,9 +76,9 @@ class Project:
         self.cl_options = ClOptions()
 
         # Files for QML modules using the QmlElement decorators
-        self._qml_module_sources: List[Path] = []
-        self._qml_module_dir: Optional[Path] = None
-        self._qml_dir_file: Optional[Path] = None
+        self._qml_module_sources: list[Path] = []
+        self._qml_module_dir: Path | None = None
+        self._qml_dir_file: Path | None = None
         self._qml_project_data = QmlProjectData()
         self._qml_module_check()
 
@@ -114,7 +113,7 @@ class Project:
             print(f"{self.project.project_file.name}, {count} QML file(s),"
                   f" {self._qml_project_data}")
 
-    def _get_artifacts(self, file: Path) -> Tuple[List[Path], Optional[List[str]]]:
+    def _get_artifacts(self, file: Path) -> tuple[list[Path], list[str] | None]:
         """Return path and command for a file's artifact"""
         if file.suffix == ".ui":  # Qt form files
             py_file = f"{file.parent}/ui_{file.stem}.py"

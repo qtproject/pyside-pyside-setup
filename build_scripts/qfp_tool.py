@@ -12,7 +12,6 @@ import warnings
 from argparse import ArgumentParser, RawTextHelpFormatter
 from enum import Enum, auto
 from pathlib import Path
-from typing import List
 
 DESC = """
 Utility script for working with Qt for Python.
@@ -102,14 +101,14 @@ def which(needle: str):
     return None
 
 
-def command_log_string(args: List[str], directory: Path):
+def command_log_string(args: list[str], directory: Path):
     result = f'[{directory.name}]'
     for arg in args:
         result += f' "{arg}"' if ' ' in arg else f' {arg}'
     return result
 
 
-def execute(args: List[str]):
+def execute(args: list[str]):
     """Execute a command and print to log"""
     log_string = command_log_string(args, Path.cwd())
     print(log_string)

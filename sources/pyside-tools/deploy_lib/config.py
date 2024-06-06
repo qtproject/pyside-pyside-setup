@@ -7,7 +7,6 @@ import configparser
 import logging
 import warnings
 from configparser import ConfigParser
-from typing import List
 from pathlib import Path
 from enum import Enum
 
@@ -76,7 +75,7 @@ class Config(BaseConfig):
     """
 
     def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
-                 existing_config_file: bool = False, extra_ignore_dirs: List[str] = None):
+                 existing_config_file: bool = False, extra_ignore_dirs: list[str] = None):
         super().__init__(config_file=config_file, existing_config_file=existing_config_file)
 
         self.extra_ignore_dirs = extra_ignore_dirs
@@ -383,7 +382,7 @@ class DesktopConfig(Config):
         STANDALONE = "standalone"
 
     def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
-                 existing_config_file: bool = False, extra_ignore_dirs: List[str] = None,
+                 existing_config_file: bool = False, extra_ignore_dirs: list[str] = None,
                  mode: str = "onefile"):
         super().__init__(config_file, source_file, python_exe, dry_run, existing_config_file,
                          extra_ignore_dirs)

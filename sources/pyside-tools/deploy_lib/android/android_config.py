@@ -8,7 +8,6 @@ import logging
 import zipfile
 import xml.etree.ElementTree as ET
 
-from typing import List
 from pathlib import Path
 from pkginfo import Wheel
 
@@ -27,7 +26,7 @@ class AndroidConfig(Config):
     """
     def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
                  android_data, existing_config_file: bool = False,
-                 extra_ignore_dirs: List[str] = None):
+                 extra_ignore_dirs: list[str] = None):
         super().__init__(config_file=config_file, source_file=source_file, python_exe=python_exe,
                          dry_run=dry_run, existing_config_file=existing_config_file)
 
@@ -336,7 +335,7 @@ class AndroidConfig(Config):
 
         return dependent_modules
 
-    def _find_and_set_dependency_files(self) -> List[zipfile.Path]:
+    def _find_and_set_dependency_files(self) -> list[zipfile.Path]:
         """
         Based on `modules`, returns the Qt6{module}_{arch}-android-dependencies.xml file, which
         contains the various dependencies of the module, like permissions, plugins etc
@@ -385,7 +384,7 @@ class AndroidConfig(Config):
 
         return list(local_libs), list(plugins)
 
-    def _find_plugin_dependencies(self, dependent_plugins: List[str]):
+    def _find_plugin_dependencies(self, dependent_plugins: list[str]):
         # The `bundled` element in the dependency xml files points to the folder where
         # additional dependencies for the application exists. Inspecting the depenency files
         # in android, this always points to the specific Qt plugin dependency folder.

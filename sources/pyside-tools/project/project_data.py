@@ -6,7 +6,6 @@ import json
 import os
 import subprocess
 import sys
-from typing import List, Tuple
 from pathlib import Path
 from . import (METATYPES_JSON_SUFFIX, PROJECT_FILE_SUFFIX, TRANSLATION_SUFFIX,
                qt_metatype_json_dir, MOD_CMD, QML_IMPORT_MAJOR_VERSION,
@@ -22,21 +21,21 @@ class ProjectData:
     def __init__(self, project_file: Path) -> None:
         """Parse the project."""
         self._project_file = project_file
-        self._sub_projects_files: List[Path] = []
+        self._sub_projects_files: list[Path] = []
 
         # All sources except subprojects
-        self._files: List[Path] = []
+        self._files: list[Path] = []
         # QML files
-        self._qml_files: List[Path] = []
+        self._qml_files: list[Path] = []
         # Python files
         self.main_file: Path = None
-        self._python_files: List[Path] = []
+        self._python_files: list[Path] = []
         # ui files
-        self._ui_files: List[Path] = []
+        self._ui_files: list[Path] = []
         # qrc files
-        self._qrc_files: List[Path] = []
+        self._qrc_files: list[Path] = []
         # ts files
-        self._ts_files: List[Path] = []
+        self._ts_files: list[Path] = []
 
         with project_file.open("r") as pyf:
             pyproject = json.load(pyf)
@@ -129,7 +128,7 @@ class QmlProjectData:
         self._import_name: str = ""
         self._import_major_version: int = 0
         self._import_minor_version: int = 0
-        self._qt_modules: List[str] = []
+        self._qt_modules: list[str] = []
 
     def registrar_options(self):
         result = [
@@ -142,7 +141,7 @@ class QmlProjectData:
         ]
         if self._qt_modules:
             # Add Qt modules as foreign types
-            foreign_files: List[str] = []
+            foreign_files: list[str] = []
             meta_dir = qt_metatype_json_dir()
             for mod in self._qt_modules:
                 mod_id = mod[2:].lower()
@@ -199,7 +198,7 @@ class QmlProjectData:
         return len(self._import_name) > 0 and self._import_major_version > 0
 
 
-def _has_qml_decorated_class(class_list: List) -> bool:
+def _has_qml_decorated_class(class_list: list) -> bool:
     """Check for QML-decorated classes in the moc json output."""
     for d in class_list:
         class_infos = d.get("classInfos")
@@ -210,7 +209,7 @@ def _has_qml_decorated_class(class_list: List) -> bool:
     return False
 
 
-def check_qml_decorators(py_file: Path) -> Tuple[bool, QmlProjectData]:
+def check_qml_decorators(py_file: Path) -> tuple[bool, QmlProjectData]:
     """Check if a Python file has QML-decorated classes by running a moc check
     and return whether a class was found and the QML data."""
     data = None

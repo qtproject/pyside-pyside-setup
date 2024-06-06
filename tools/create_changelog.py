@@ -9,7 +9,6 @@ import textwrap
 from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
 from pathlib import Path
 from subprocess import PIPE, Popen, check_output
-from typing import Dict, List, Tuple
 
 content_header = """Qt for Python @VERSION is a @TYPE release.
 
@@ -184,7 +183,7 @@ def get_commit_content(sha: str) -> str:
     return out.decode("utf-8")
 
 
-def git_get_sha1s(versions: List[str], pattern: str):
+def git_get_sha1s(versions: list[str], pattern: str):
     """Return a list of SHA1s matching a pattern"""
     command = "git rev-list --reverse --grep '^{}'".format(pattern)
     command += " {}..{}".format(versions[0], versions[1])
@@ -214,7 +213,7 @@ def git_get_sha1s(versions: List[str], pattern: str):
     return [s.decode("utf-8") for s in out_sha1.splitlines() if s not in pick_to_sha1]
 
 
-def git_command(versions: List[str], pattern: str):
+def git_command(versions: list[str], pattern: str):
     task_number_re = re.compile(r'^.*-(\d+)\s*$')
     for sha in git_get_sha1s(versions, pattern):
         content = get_commit_content(sha).splitlines()
@@ -242,15 +241,15 @@ def git_command(versions: List[str], pattern: str):
                 pyside6_commits[sha] = entry
 
 
-def create_fixes_log(versions: List[str]) -> None:
+def create_fixes_log(versions: list[str]) -> None:
     git_command(versions, "Fixes: ")
 
 
-def create_task_log(versions: List[str]) -> None:
+def create_task_log(versions: list[str]) -> None:
     git_command(versions, "Task-number: ")
 
 
-def extract_change_log(commit_message: List[str]) -> Tuple[str, int, str]:
+def extract_change_log(commit_message: list[str]) -> tuple[str, int, str]:
     """Extract a tuple of (component, task-number, change log paragraph)
        from a commit message of the form [ChangeLog][shiboken6] description..."""
     result = ''
@@ -285,7 +284,7 @@ def extract_change_log(commit_message: List[str]) -> Tuple[str, int, str]:
     return (component, task_nr_int, format_text(result))
 
 
-def create_change_log(versions: List[str]) -> None:
+def create_change_log(versions: list[str]) -> None:
     for sha in git_get_sha1s(versions, r"\[ChangeLog\]"):
         change_log = extract_change_log(get_commit_content(sha).splitlines())
         component, task_nr, text = change_log
@@ -295,7 +294,7 @@ def create_change_log(versions: List[str]) -> None:
             pyside6_changelogs.append((task_nr, text))
 
 
-def format_commit_msg(entry: Dict[str, str]) -> str:
+def format_commit_msg(entry: dict[str, str]) -> str:
     task = entry["task"].replace("Fixes: ", "").replace("Task-number: ", "")
     title = entry["title"]
     if title.startswith("shiboken6: "):
@@ -305,27 +304,27 @@ def format_commit_msg(entry: Dict[str, str]) -> str:
     return format_text(f"[{task}] {title}")
 
 
-def gen_list(d: Dict[str, Dict[str, str]]) -> str:
+def gen_list(d: dict[str, dict[str, str]]) -> str:
     return "\n".join(format_commit_msg(v)
                      for _, v in d.items())
 
 
-def sort_dict(d: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, str]]:
+def sort_dict(d: dict[str, dict[str, str]]) -> dict[str, dict[str, str]]:
     return dict(sorted(d.items(), key=lambda kv: kv[1]['task-number']))
 
 
-def sort_changelog(c: List[Tuple[int, str]]) -> List[Tuple[int, str]]:
+def sort_changelog(c: list[tuple[int, str]]) -> list[tuple[int, str]]:
     return sorted(c, key=lambda task_text_tuple: task_text_tuple[0])
 
 
 if __name__ == "__main__":
 
     args = parse_options()
-    pyside6_commits: Dict[str, Dict[str, str]] = {}
-    shiboken6_commits: Dict[str, Dict[str, str]] = {}
+    pyside6_commits: dict[str, dict[str, str]] = {}
+    shiboken6_commits: dict[str, dict[str, str]] = {}
     # Changelogs are tuples of task number/formatted text
-    pyside6_changelogs: List[Tuple[int, str]] = []
-    shiboken6_changelogs: List[Tuple[int, str]] = []
+    pyside6_changelogs: list[tuple[int, str]] = []
+    shiboken6_changelogs: list[tuple[int, str]] = []
 
     exclude_pick_to = args.exclude
 

@@ -9,7 +9,6 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import List
 
 from . import MAJOR_VERSION, run_command
 from .config import DesktopConfig
@@ -55,9 +54,9 @@ class Nuitka:
         else:
             return "--macos-app-icon"
 
-    def create_executable(self, source_file: Path, extra_args: str, qml_files: List[Path],
-                          qt_plugins: List[str], excluded_qml_plugins: List[str], icon: str,
-                          dry_run: bool, permissions: List[str],
+    def create_executable(self, source_file: Path, extra_args: str, qml_files: list[Path],
+                          qt_plugins: list[str], excluded_qml_plugins: list[str], icon: str,
+                          dry_run: bool, permissions: list[str],
                           mode: DesktopConfig.NuitkaMode):
         qt_plugins = [plugin for plugin in qt_plugins if plugin not in self.qt_plugins_to_ignore]
         extra_args = extra_args.split()

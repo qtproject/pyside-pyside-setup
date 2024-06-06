@@ -2,8 +2,6 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
 
-from typing import List
-
 from PySide6.QtCore import QMimeDatabase, QMimeType, QModelIndex, QObject, Qt, qWarning
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 
@@ -30,7 +28,7 @@ class MimeTypeModel(QStandardItemModel):
 
     def populate(self):
         mime_database = QMimeDatabase()
-        all_types: List[QMimeType] = mime_database.allMimeTypes()
+        all_types: list[QMimeType] = mime_database.allMimeTypes()
 
         # Move top level types to rear end of list, sort this partition,
         # create top level items and truncate the list.

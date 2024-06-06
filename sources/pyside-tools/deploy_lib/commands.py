@@ -6,7 +6,6 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
 
 """
 All utility functions for deployment
@@ -38,7 +37,7 @@ def run_command(command, dry_run: bool, fetch_output: bool = False):
     return command_str, output
 
 
-def run_qmlimportscanner(qml_files: List[Path], dry_run: bool):
+def run_qmlimportscanner(qml_files: list[Path], dry_run: bool):
     """
         Runs pyside6-qmlimportscanner to find all the imported qml modules
     """

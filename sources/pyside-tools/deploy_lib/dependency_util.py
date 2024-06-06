@@ -12,14 +12,13 @@ import logging
 import shutil
 import sys
 from pathlib import Path
-from typing import List, Set
 from functools import lru_cache
 
 from . import IMPORT_WARNING_PYSIDE, run_command
 
 
 @lru_cache(maxsize=None)
-def get_py_files(project_dir: Path, extra_ignore_dirs: List[Path] = None, project_data=None):
+def get_py_files(project_dir: Path, extra_ignore_dirs: list[Path] = None, project_data=None):
     """Finds and returns all the Python files in the project
     """
     py_candidates = []
@@ -79,7 +78,7 @@ def get_ast(py_file: Path):
     return tree
 
 
-def find_permission_categories(project_dir: Path, extra_ignore_dirs: List[Path] = None,
+def find_permission_categories(project_dir: Path, extra_ignore_dirs: list[Path] = None,
                                project_data=None):
     """Given the project directory, finds all the permission categories required by the
     project. eg: Camera, Bluetooth, Contacts etc.
@@ -127,7 +126,7 @@ def find_permission_categories(project_dir: Path, extra_ignore_dirs: List[Path] 
     return all_perm_categories
 
 
-def find_pyside_modules(project_dir: Path, extra_ignore_dirs: List[Path] = None,
+def find_pyside_modules(project_dir: Path, extra_ignore_dirs: list[Path] = None,
                         project_data=None):
     """
     Searches all the python files in the project to find all the PySide modules used by
@@ -235,7 +234,7 @@ class QtDependencyReader:
     def lib_reader(self):
         return self._lib_reader
 
-    def find_dependencies(self, module: str, used_modules: Set[str] = None):
+    def find_dependencies(self, module: str, used_modules: set[str] = None):
         """
         Given a Qt module, find all the other Qt modules it is dependent on and add it to the
         'used_modules' set
@@ -286,7 +285,7 @@ class QtDependencyReader:
         else:
             logging.info(f"[DEPLOY] No Qt dependencies found for {module}")
 
-    def find_plugin_dependencies(self, used_modules: List[str], python_exe: Path) -> List[str]:
+    def find_plugin_dependencies(self, used_modules: list[str], python_exe: Path) -> list[str]:
         """
         Given the modules used by the application, returns all the required plugins
         """

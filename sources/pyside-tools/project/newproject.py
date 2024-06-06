@@ -7,12 +7,11 @@ import os
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import List, Tuple
 
 """New project generation code."""
 
 
-Project = List[Tuple[str, str]]  # tuple of (filename, contents).
+Project = list[tuple[str, str]]  # tuple of (filename, contents).
 
 
 class ProjectType(Enum):

@@ -7,7 +7,6 @@ import logging
 import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
-from typing import List
 
 from . import AndroidConfig
 from .. import BaseConfig, run_command
@@ -77,7 +76,7 @@ class BuildozerConfig(BaseConfig):
 
         self.update_config()
 
-    def __find_permissions(self, dependency_files: List[zipfile.Path]):
+    def __find_permissions(self, dependency_files: list[zipfile.Path]):
         permissions = set()
         for dependency_file in dependency_files:
             xml_content = dependency_file.read_text()
@@ -86,7 +85,7 @@ class BuildozerConfig(BaseConfig):
                 permissions.add(permission.attrib['name'])
         return permissions
 
-    def __find_jars(self, dependency_files: List[zipfile.Path], jars_dir: Path):
+    def __find_jars(self, dependency_files: list[zipfile.Path], jars_dir: Path):
         jars, init_classes = set(), set()
         for dependency_file in dependency_files:
             xml_content = dependency_file.read_text()

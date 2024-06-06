@@ -6,7 +6,6 @@ from __future__ import annotations
 import json
 import sys
 from dataclasses import Field, dataclass, field
-from typing import Dict, List
 
 
 _pyside_package_path = None
@@ -50,23 +49,23 @@ class ModuleData:
     name: str
     ext: str = ""
     # Libraries not related to Qt modules
-    lib: List[str] = field(default_factory=list)
+    lib: list[str] = field(default_factory=list)
     # Libraries related to Qt modules
-    qtlib: List[str] = field(default_factory=list)
+    qtlib: list[str] = field(default_factory=list)
     # Files from the Qt/qml directory
-    qml: List[str] = field(default_factory=list)
-    pyi: List[str] = field(default_factory=list)
-    translations: List[str] = field(default_factory=list)
-    typesystems: List[str] = field(default_factory=list)
-    include: List[str] = field(default_factory=list)
-    glue: List[str] = field(default_factory=list)
-    metatypes: List[str] = field(default_factory=list)
-    plugins: List[str] = field(default_factory=list)
+    qml: list[str] = field(default_factory=list)
+    pyi: list[str] = field(default_factory=list)
+    translations: list[str] = field(default_factory=list)
+    typesystems: list[str] = field(default_factory=list)
+    include: list[str] = field(default_factory=list)
+    glue: list[str] = field(default_factory=list)
+    metatypes: list[str] = field(default_factory=list)
+    plugins: list[str] = field(default_factory=list)
 
     # For special cases when a file/directory doesn't fall into
     # the previous categories.
-    extra_dirs: List[str] = field(default_factory=list)
-    extra_files: List[str] = field(default_factory=list)
+    extra_dirs: list[str] = field(default_factory=list)
+    extra_files: list[str] = field(default_factory=list)
 
     # Once the object is created, this method will be executed
     # and automatically will initialize some of the files that are
@@ -131,7 +130,7 @@ class ModuleData:
             return f"{s}.*{self.ext}*"
 
     @classmethod
-    def get_fields(cls) -> Dict[str, Field]:
+    def get_fields(cls) -> dict[str, Field]:
         return cls.__dataclass_fields__
 
     @staticmethod
@@ -151,7 +150,7 @@ class ModuleData:
 # for each module that will be included in the wheel.
 
 # PySide wheel
-def wheel_files_pyside_essentials() -> List[ModuleData]:
+def wheel_files_pyside_essentials() -> list[ModuleData]:
     files = [
         module_QtCore(),
         module_QtGui(),
@@ -187,7 +186,7 @@ def wheel_files_pyside_essentials() -> List[ModuleData]:
 
 
 # PySide Addons wheel
-def wheel_files_pyside_addons() -> List[ModuleData]:
+def wheel_files_pyside_addons() -> list[ModuleData]:
     files = [
         module_Qt3DAnimation(),
         module_Qt3DCore(),

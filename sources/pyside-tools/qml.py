@@ -12,7 +12,6 @@ import sys
 import os
 from pathlib import Path
 from pprint import pprint
-from typing import List, Set
 
 from PySide6.QtCore import QCoreApplication, Qt, QLibraryInfo, QUrl, SignalInstance
 from PySide6.QtGui import QGuiApplication, QSurfaceFormat
@@ -21,7 +20,7 @@ from PySide6.QtQuick import QQuickView, QQuickItem
 from PySide6.QtWidgets import QApplication
 
 
-def import_qml_modules(qml_parent_path: Path, module_paths: List[Path] = []):
+def import_qml_modules(qml_parent_path: Path, module_paths: list[Path] = []):
     '''
     Import all the python modules in the qml_parent_path. This way all the classes
     containing the @QmlElement/@QmlNamedElement are also imported
@@ -43,7 +42,7 @@ def import_qml_modules(qml_parent_path: Path, module_paths: List[Path] = []):
             elif module_path.exists() and module_path.suffix == ".py":
                 search_file_paths.append(module_path)
 
-    def import_module(import_module_paths: Set[Path]):
+    def import_module(import_module_paths: set[Path]):
         """Import the modules in 'import_module_paths'"""
         for module_path in import_module_paths:
             module_name = module_path.name[:-3]

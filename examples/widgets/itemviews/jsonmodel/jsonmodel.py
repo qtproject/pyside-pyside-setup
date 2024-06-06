@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
-from typing import Any, List, Dict, Union
+from typing import Any
 
 from PySide6.QtWidgets import QTreeView, QApplication, QHeaderView
 from PySide6.QtCore import QAbstractItemModel, QModelIndex, QObject, Qt, QFileInfo
@@ -72,7 +72,7 @@ class TreeItem:
 
     @classmethod
     def load(
-        cls, value: Union[List, Dict], parent: "TreeItem" = None, sort=True
+        cls, value: list | dict, parent: "TreeItem" = None, sort=True
     ) -> "TreeItem":
         """Create a 'root' TreeItem from a nested list or a nested dictonary
 

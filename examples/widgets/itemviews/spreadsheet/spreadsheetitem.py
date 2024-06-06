@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
 
-from typing import Any, Tuple
+from typing import Any
 from PySide6.QtCore import QMetaType, Qt
 from PySide6.QtWidgets import QTableWidget, QTableWidgetItem
 
@@ -107,7 +107,7 @@ class SpreadSheetItem(QTableWidgetItem):
 
         return result
 
-    def decode_pos(pos: str) -> Tuple[int, int]:
+    def decode_pos(pos: str) -> tuple[int, int]:
         if (not pos):
             col = -1
             row = -1

@@ -12,12 +12,11 @@ from PySide6.QtWidgets import (QColorDialog, QComboBox, QDialog, QFontDialog,
 from spreadsheetdelegate import SpreadSheetDelegate
 from spreadsheetitem import SpreadSheetItem
 
-from typing import Optional
 from numbers import Number
 
 
 class SpreadSheet(QMainWindow):
-    def __init__(self, rows: Number, cols: Number, parent: Optional[QWidget] = None) -> None:
+    def __init__(self, rows: Number, cols: Number, parent: QWidget | None = None) -> None:
         super().__init__(parent)
 
         self._tool_bar = QToolBar(self)

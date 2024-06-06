@@ -7,11 +7,9 @@ from PySide6.QtCore import (QAbstractItemModel, QDate, QModelIndex, QObject,
 from PySide6.QtWidgets import (QCompleter, QDateTimeEdit, QLineEdit,
                                QStyleOptionViewItem, QStyledItemDelegate, QWidget)
 
-from typing import Optional
-
 
 class SpreadSheetDelegate(QStyledItemDelegate):
-    def __init__(self, parent: Optional[QObject] = None) -> None:
+    def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
 
     def create_editor(self, parent: QWidget,

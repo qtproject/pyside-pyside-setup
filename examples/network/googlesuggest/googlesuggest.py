@@ -2,8 +2,6 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
 
-from typing import List
-
 from PySide6.QtCore import (QByteArray, QEvent, QObject, QPoint, Qt, QTimer,
                             QXmlStreamReader, Slot)
 from PySide6.QtGui import QPalette
@@ -78,7 +76,7 @@ class GSuggestCompletion(QObject):
             return consumed
         return False
 
-    def show_completion(self, choices: List[str]):
+    def show_completion(self, choices: list[str]):
         if not choices:
             return
         pal = self.editor.palette()
@@ -122,7 +120,7 @@ class GSuggestCompletion(QObject):
     @Slot(QNetworkReply)
     def handle_network_data(self, network_reply: QNetworkReply):
         if network_reply.error() == QNetworkReply.NoError:
-            choices: List[str] = []
+            choices: list[str] = []
 
             response: QByteArray = network_reply.readAll()
             xml = QXmlStreamReader(str(response))

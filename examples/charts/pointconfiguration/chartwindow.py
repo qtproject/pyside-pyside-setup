@@ -8,7 +8,6 @@ from PySide6.QtGui import QColor, QIcon, QPainter
 from PySide6.QtWidgets import QMainWindow, QLineEdit, QLabel, QComboBox
 from PySide6.QtWidgets import QCheckBox, QWidget, QGridLayout, QHBoxLayout
 from PySide6.QtCharts import QLineSeries, QXYSeries, QChart, QChartView
-from typing import Union
 
 
 PointConfig = QXYSeries.PointConfiguration
@@ -96,7 +95,7 @@ class ChartWindow(QMainWindow):
         self._select_point(4)
 
     @Slot(QPointF)
-    def _select_point(self, point: Union[QPointF, int]):
+    def _select_point(self, point: QPointF | int):
         try:
             index = (self._series.points().index(point.toPoint()) if
                      isinstance(point, QPointF) else point)

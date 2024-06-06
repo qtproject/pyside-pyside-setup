@@ -5,12 +5,11 @@ from __future__ import annotations
 import sys
 import subprocess
 from pathlib import Path
-from typing import List, Dict, Optional
 
 from . import QTPATHS_CMD, PROJECT_FILE_SUFFIX, ClOptions
 
 
-def run_command(command: List[str], cwd: str = None, ignore_fail: bool = False):
+def run_command(command: list[str], cwd: str = None, ignore_fail: bool = False):
     """Run a command observing quiet/dry run"""
     cloptions = ClOptions()
     if not cloptions.quiet or cloptions.dry_run:
@@ -21,7 +20,7 @@ def run_command(command: List[str], cwd: str = None, ignore_fail: bool = False):
             sys.exit(ex)
 
 
-def requires_rebuild(sources: List[Path], artifact: Path) -> bool:
+def requires_rebuild(sources: list[Path], artifact: Path) -> bool:
     """Returns whether artifact needs to be rebuilt depending on sources"""
     if not artifact.is_file():
         return True
@@ -59,10 +58,10 @@ def package_dir() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
-_qtpaths_info: Dict[str, str] = {}
+_qtpaths_info: dict[str, str] = {}
 
 
-def qtpaths() -> Dict[str, str]:
+def qtpaths() -> dict[str, str]:
     """Run qtpaths and return a dict of values."""
     global _qtpaths_info
     if not _qtpaths_info:
@@ -74,7 +73,7 @@ def qtpaths() -> Dict[str, str]:
     return _qtpaths_info
 
 
-_qt_metatype_json_dir: Optional[Path] = None
+_qt_metatype_json_dir: Path | None = None
 
 
 def qt_metatype_json_dir() -> Path:
@@ -96,7 +95,7 @@ def qt_metatype_json_dir() -> Path:
     return _qt_metatype_json_dir
 
 
-def resolve_project_file(cmdline: str) -> Optional[Path]:
+def resolve_project_file(cmdline: str) -> Path | None:
     """Return the project file from the command  line value, either
     from the file argument or directory"""
     project_file = Path(cmdline).resolve() if cmdline else Path.cwd()

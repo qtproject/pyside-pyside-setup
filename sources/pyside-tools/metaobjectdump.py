@@ -9,7 +9,7 @@ import sys
 import tokenize
 from argparse import ArgumentParser, RawTextHelpFormatter
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Union
 
 
 DESCRIPTION = """Parses Python source code to create QObject metatype
@@ -39,32 +39,38 @@ ITEM_MODELS = ["QAbstractListModel", "QAbstractProxyModel",
 QOBJECT_DERIVED = ["QObject", "QQuickItem", "QQuickPaintedItem"] + ITEM_MODELS
 
 
+# Python 3.9 does not support this syntax, yet
+# AstDecorator = ast.Name | ast.Call
+# AstPySideTypeSpec = ast.Name | ast.Constant
 AstDecorator = Union[ast.Name, ast.Call]
 AstPySideTypeSpec = Union[ast.Name, ast.Constant]
 
 
-ClassList = List[dict]
+ClassList = list[dict]
 
 
-PropertyEntry = Dict[str, Union[str, int, bool]]
+# PropertyEntry = dict[str, str | int | bool]
+PropertyEntry = dict[str, Union[str, int, bool]]
 
-Argument = Dict[str, str]
-Arguments = List[Argument]
-Signal = Dict[str, Union[str, Arguments]]
-Slot = Dict[str, Union[str, Arguments]]
+Argument = dict[str, str]
+Arguments = list[Argument]
+# Signal = dict[str, str | Arguments]
+# Slot = dict[str, str | Arguments]
+Signal = dict[str, Union[str, Arguments]]
+Slot = dict[str, Union[str, Arguments]]
 
 
-def _decorator(name: str, value: str) -> Dict[str, str]:
+def _decorator(name: str, value: str) -> dict[str, str]:
     """Create a QML decorator JSON entry"""
     return {"name": name, "value": value}
 
 
-def _attribute(node: ast.Attribute) -> Tuple[str, str]:
+def _attribute(node: ast.Attribute) -> tuple[str, str]:
     """Split an attribute."""
     return node.value.id, node.attr
 
 
-def _name(node: Union[ast.Name, ast.Attribute]) -> str:
+def _name(node: ast.Name | ast.Attribute) -> str:
     """Return the name of something that is either an attribute or a name,
        such as base classes or call.func"""
     if isinstance(node, ast.Attribute):
@@ -83,14 +89,14 @@ def _python_to_cpp_type(type: str) -> str:
     return c if c else type
 
 
-def _parse_property_kwargs(keywords: List[ast.keyword], prop: PropertyEntry):
+def _parse_property_kwargs(keywords: list[ast.keyword], prop: PropertyEntry):
     """Parse keyword arguments of @Property"""
     for k in keywords:
         if k.arg == "notify":
             prop["notify"] = _name(k.value)
 
 
-def _parse_assignment(node: ast.Assign) -> Tuple[Optional[str], Optional[ast.AST]]:
+def _parse_assignment(node: ast.Assign) -> tuple[str | None, ast.AST | None]:
     """Parse an assignment and return a tuple of name, value."""
     if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
         var_name = node.targets[0].id
@@ -145,10 +151,10 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
         self._context = context
         self._json_class_list: ClassList = []
         # Property by name, which will be turned into the JSON List later
-        self._properties: List[PropertyEntry] = []
-        self._signals: List[Signal] = []
+        self._properties: list[PropertyEntry] = []
+        self._signals: list[Signal] = []
         self._within_class: bool = False
-        self._qt_modules: Set[str] = set()
+        self._qt_modules: set[str] = set()
         self._qml_import_name = ""
         self._qml_import_major_version = 0
         self._qml_import_minor_version = 0
@@ -159,7 +165,7 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
     def qml_import_name(self) -> str:
         return self._qml_import_name
 
-    def qml_import_version(self) -> Tuple[int, int]:
+    def qml_import_version(self) -> tuple[int, int]:
         return (self._qml_import_major_version, self._qml_import_minor_version)
 
     def qt_modules(self):
@@ -216,7 +222,7 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
         if bases:
             data["superClasses"] = bases
 
-        class_decorators: List[dict] = []
+        class_decorators: list[dict] = []
         for d in node.decorator_list:
             self._parse_class_decorator(d, class_decorators)
 
@@ -248,7 +254,7 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
                 self._parse_function_decorator(node.name, d)
 
     def _parse_class_decorator(self, node: AstDecorator,
-                               class_decorators: List[dict]):
+                               class_decorators: list[dict]):
         """Parse ClassInfo decorators."""
         if isinstance(node, ast.Call):
             name = _func_name(node)
@@ -299,7 +305,7 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
         return -1
 
     def _create_property_entry(self, name: str, type: str,
-                               getter: Optional[str] = None) -> PropertyEntry:
+                               getter: str | None = None) -> PropertyEntry:
         """Create a property JSON entry."""
         result: PropertyEntry = {"name": name, "type": type,
                                  "index": len(self._properties)}
@@ -391,7 +397,7 @@ def create_arg_parser(desc: str) -> ArgumentParser:
 
 
 def parse_file(file: Path, context: VisitorContext,
-               suppress_file: bool = False) -> Optional[Dict]:
+               suppress_file: bool = False) -> dict | None:
     """Parse a file and return its json data"""
     ast_tree = MetaObjectDumpVisitor.create_ast(file)
     visitor = MetaObjectDumpVisitor(context)

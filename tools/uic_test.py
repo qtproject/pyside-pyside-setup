@@ -10,7 +10,6 @@ import tempfile
 from argparse import ArgumentParser, RawTextHelpFormatter
 from pathlib import Path
 from textwrap import dedent
-from typing import Optional, Tuple
 
 VERSION = 6
 
@@ -21,7 +20,7 @@ DESC = """Runs uic on a set of UI files and displays the resulting widgets."""
 TEMP_DIR = Path(tempfile.gettempdir())
 
 
-def get_class_name(file: Path) -> Tuple[Optional[str], Optional[str]]:
+def get_class_name(file: Path) -> tuple[str | None, str | None]:
     """Return class name and widget name of UI file."""
     pattern = re.compile(r'^\s*<widget class="(\w+)" name="(\w+)"\s*>.*$')
     for line in Path(file).read_text().splitlines():

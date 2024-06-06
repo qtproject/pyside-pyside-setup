@@ -10,7 +10,6 @@ from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from enum import Enum
 from pathlib import Path
 from textwrap import dedent
-from typing import Dict, List
 
 from override import python_example_snippet_mapping
 from converter import snippet_translate
@@ -185,7 +184,7 @@ def is_valid_file(x):
     return True
 
 
-def get_snippet_ids(line: str, pattern: re.Pattern) -> List[str]:
+def get_snippet_ids(line: str, pattern: re.Pattern) -> list[str]:
     # Extract the snippet ids for a line '//! [1] //! [2]'
     result = []
     for m in pattern.finditer(line):
@@ -193,7 +192,7 @@ def get_snippet_ids(line: str, pattern: re.Pattern) -> List[str]:
     return result
 
 
-def overriden_snippet_lines(lines: List[str], start_id: str) -> List[str]:
+def overriden_snippet_lines(lines: list[str], start_id: str) -> list[str]:
     """Wrap an overridden snippet with marker and id lines."""
     id_string = f"//! [{start_id}]"
     result = [OVERRIDDEN_SNIPPET, id_string]
@@ -202,7 +201,7 @@ def overriden_snippet_lines(lines: List[str], start_id: str) -> List[str]:
     return result
 
 
-def get_snippet_override(start_id: str, rel_path: str) -> List[str]:
+def get_snippet_override(start_id: str, rel_path: str) -> list[str]:
     """Check if the snippet is overridden by a local file under
        sources/pyside6/doc/snippets."""
     file_start_id = start_id.replace(' ', '_')
@@ -214,14 +213,14 @@ def get_snippet_override(start_id: str, rel_path: str) -> List[str]:
     return overriden_snippet_lines(lines, start_id)
 
 
-def _get_snippets(lines: List[str],
+def _get_snippets(lines: list[str],
                   comment: str,
-                  pattern: re.Pattern) -> Dict[str, List[str]]:
+                  pattern: re.Pattern) -> dict[str, list[str]]:
     """Helper to extract (potentially overlapping) snippets from a C++ file
        indicated by pattern ("//! [1]") and return them as a dict by <id>."""
-    snippets: Dict[str, List[str]] = {}
-    snippet: List[str]
-    done_snippets : List[str] = []
+    snippets: dict[str, list[str]] = {}
+    snippet: list[str]
+    done_snippets: list[str] = []
 
     i = 0
     while i < len(lines):
@@ -260,7 +259,7 @@ def _get_snippets(lines: List[str],
     return snippets
 
 
-def get_python_example_snippet_override(start_id: str, rel_path: str) -> List[str]:
+def get_python_example_snippet_override(start_id: str, rel_path: str) -> list[str]:
     """Check if the snippet is overridden by a python example snippet."""
     key = (os.fspath(rel_path), start_id)
     value = python_example_snippet_mapping().get(key)
@@ -276,7 +275,7 @@ def get_python_example_snippet_override(start_id: str, rel_path: str) -> List[st
     return overriden_snippet_lines(lines, start_id)
 
 
-def get_snippets(lines: List[str], rel_path: str) -> List[List[str]]:
+def get_snippets(lines: list[str], rel_path: str) -> list[list[str]]:
     """Extract (potentially overlapping) snippets from a C++ file indicated
        by '//! [1]'."""
     result = _get_snippets(lines, '//', CPP_SNIPPET_PATTERN)

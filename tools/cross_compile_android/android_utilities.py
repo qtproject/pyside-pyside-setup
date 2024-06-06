@@ -12,7 +12,6 @@ import subprocess
 
 from urllib import request
 from pathlib import Path
-from typing import List
 from packaging import version
 from tqdm import tqdm
 
@@ -22,7 +21,7 @@ ANDROID_NDK_VERSION = "26b"
 ANDROID_NDK_VERSION_NUMBER_SUFFIX = "10909125"
 
 
-def run_command(command: List[str], cwd: str = None, ignore_fail: bool = False,
+def run_command(command: list[str], cwd: str | None = None, ignore_fail: bool = False,
                 dry_run: bool = False, accept_prompts: bool = False, show_stdout: bool = False,
                 capture_stdout: bool = False):
 

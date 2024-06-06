@@ -6,7 +6,6 @@ import logging
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Set
 from zipfile import ZipFile
 
 from jinja2 import Environment, FileSystemLoader
@@ -26,8 +25,8 @@ class AndroidData:
 
 
 def create_recipe(version: str, component: str, wheel_path: str, generated_files_path: Path,
-                  qt_modules: List[str] = None, local_libs: List[str] = None,
-                  plugins: List[str] = None):
+                  qt_modules: list[str] = None, local_libs: list[str] = None,
+                  plugins: list[str] = None):
     '''
     Create python_for_android recipe for PySide6 and shiboken6
     '''
@@ -95,7 +94,7 @@ def get_llvm_readobj(ndk_path: Path) -> Path:
     return (ndk_path / f"toolchains/llvm/prebuilt/{sys.platform}-x86_64/bin/llvm-readobj")
 
 
-def find_lib_dependencies(llvm_readobj: Path, lib_path: Path, used_dependencies: Set[str] = None,
+def find_lib_dependencies(llvm_readobj: Path, lib_path: Path, used_dependencies: set[str] = None,
                           dry_run: bool = False):
     """
     Find all the Qt dependencies of a library using llvm_readobj

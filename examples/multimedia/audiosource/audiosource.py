@@ -15,7 +15,6 @@ QIODevice have python bindings that needs to be fixed.
 """
 import os
 import sys
-from typing import Optional
 
 import PySide6
 from PySide6.QtCore import QByteArray, QMargins, Qt, Slot, qWarning
@@ -57,7 +56,7 @@ class AudioInfo:
 
 
 class RenderArea(QWidget):
-    def __init__(self, parent: Optional[PySide6.QtWidgets.QWidget] = None) -> None:
+    def __init__(self, parent: PySide6.QtWidgets.QWidget | None = None) -> None:
         super().__init__(parent=parent)
         self.m_level = 0
         self.setBackgroundRole(QPalette.Base)
