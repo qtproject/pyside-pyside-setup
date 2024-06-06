@@ -172,7 +172,7 @@ def edit_config_file():
 """
 Config file handling, cache and read function
 """
-config_dict = {}
+config_dict: dict = {}
 
 
 def read_config_file(file_name):
@@ -263,15 +263,15 @@ def read_config_python_binary() -> str:
 
 def get_config_file(base_name) -> Path:
     global user
-    home = os.getenv('HOME')
+    home = os.getenv('HOME', default="")
     if IS_WINDOWS:
         # Set a HOME variable on Windows such that scp. etc.
         # feel at home (locating .ssh).
         if not home:
-            home = os.getenv('HOMEDRIVE') + os.getenv('HOMEPATH')
+            home = os.getenv('HOMEDRIVE', default="") + os.getenv('HOMEPATH', default="")
             os.environ['HOME'] = home
         user = os.getenv('USERNAME')
-        config_file = Path(os.getenv('APPDATA')) / base_name
+        config_file = Path(os.getenv('APPDATA', default="")) / base_name
     else:
         user = os.getenv('USER')
         config_dir = Path(home) / '.config'
@@ -290,7 +290,7 @@ def build(target: str):
     acceleration = read_acceleration_config()
     if not IS_WINDOWS and acceleration == Acceleration.INCREDIBUILD:
         arguments.append(INCREDIBUILD_CONSOLE)
-        arguments.appendh('--avoid')  # caching, v0.96.74
+        arguments.append('--avoid')  # caching, v0.96.74
     arguments.extend([read_config_python_binary(), 'setup.py', target])
     build_arguments = read_config_build_arguments()
     if opt_verbose and LOG_LEVEL_OPTION in build_arguments:

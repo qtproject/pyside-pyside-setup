@@ -232,7 +232,7 @@ def git_command(versions: List[str], pattern: str):
         task_number_match = task_number_re.match(task)
         if task_number_match:
             task_number = int(task_number_match.group(1))
-        entry = {"title": title, "task": task, "task-number": task_number}
+        entry = {"title": title, "task": task, "task-number": str(task_number)}
         if "shiboken" in title:
             if sha not in shiboken6_commits:
                 shiboken6_commits[sha] = entry
@@ -310,7 +310,7 @@ def gen_list(d: Dict[str, Dict[str, str]]) -> str:
 
 
 def sort_dict(d: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, str]]:
-    return dict(sorted(d.items(), key=lambda kv: kv[1]['task-number']))
+    return dict(sorted(d.items(), key=lambda kv: int(kv[1]['task-number'])))
 
 
 def sort_changelog(c: List[Tuple[int, str]]) -> List[Tuple[int, str]]:

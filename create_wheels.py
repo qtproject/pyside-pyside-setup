@@ -29,13 +29,13 @@ PYSIDE_DESCRIPTION = "Python bindings for the Qt cross-platform application and 
 @dataclass
 class SetupData:
     name: str
-    version: str
+    version: tuple[str, str]
     description: str
     readme: str
     console_scripts: List[str]
 
 
-def get_version_from_package(name: str, package_path: Path) -> str:
+def get_version_from_package(name: str, package_path: Path) -> tuple[str, str]:
     # Get version from the already configured '__init__.py' file
     version = ""
     with open(package_path / name / "__init__.py") as f:
@@ -122,7 +122,11 @@ def get_platform_tag() -> str:
 
         module_name = config_py.name[:-3]
         _spec = importlib.util.spec_from_file_location(f"{module_name}", config_py)
+        if _spec is None:
+            raise RuntimeError(f"Unable to create ModuleSpec from {str(config_py)}")
         _module = importlib.util.module_from_spec(_spec)
+        if _spec.loader is None:
+            raise RuntimeError(f"ModuleSpec for {module_name} has no valid loader.")
         _spec.loader.exec_module(module=_module)
         target = _module.__qt_macos_min_deployment_target__
 
