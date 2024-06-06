@@ -99,16 +99,19 @@ def extract_zip(file: Path, destination: Path):
         raise RuntimeError("Unable to find program unzip. Use `sudo apt-get install unzip`"
                            "to install it")
 
-    command = [unzip, file, "-d", destination]
+    command = [unzip, str(file), "-d", str(destination)]
     run_command(command=command, show_stdout=True)
 
 
 def extract_dmg(file: Path, destination: Path):
-    output = run_command(['hdiutil', 'attach', '-nobrowse', '-readonly', file],
+    output = run_command(['hdiutil', 'attach', '-nobrowse', '-readonly', str(file)],
                          show_stdout=True, capture_stdout=True)
 
     # find the mounted volume
-    mounted_vol_name = re.search(r'/Volumes/(.*)', output).group(1)
+    result = re.search(r'/Volumes/(.*)', output)
+    if not result:
+        raise RuntimeError(f"Unable to find mounted volume for file {file}")
+    mounted_vol_name = result.group(1)
     if not mounted_vol_name:
         raise RuntimeError(f"Unable to find mounted volume for file {file}")
 

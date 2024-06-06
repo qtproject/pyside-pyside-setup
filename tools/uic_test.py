@@ -78,7 +78,7 @@ if __name__ == '__main__':
     failed = 0
     count = len(options.files)
     for i, file in enumerate(options.files):
-        print(f'{i+1}/{count} {file}')
+        print(f'{i + 1}/{count} {file}')
         if not test_file(file, options.uic):
             failed += 1
     if failed != 0:

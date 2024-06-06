@@ -201,7 +201,7 @@ def overriden_snippet_lines(lines: list[str], start_id: str) -> list[str]:
     return result
 
 
-def get_snippet_override(start_id: str, rel_path: str) -> list[str]:
+def get_snippet_override(start_id: str, rel_path: Path) -> list[str]:
     """Check if the snippet is overridden by a local file under
        sources/pyside6/doc/snippets."""
     file_start_id = start_id.replace(' ', '_')
@@ -243,14 +243,14 @@ def _get_snippets(lines: list[str],
             # Find the end of the snippet
             j = i
             while j < len(lines):
-                l = lines[j]
+                line = lines[j]
                 j += 1
 
                 # Add the line to the snippet
-                snippet.append(l)
+                snippet.append(line)
 
                 # Check if the snippet is complete
-                if start_id in get_snippet_ids(l, pattern):
+                if start_id in get_snippet_ids(line, pattern):
                     # End of snippet
                     snippet[len(snippet) - 1] = id_line
                     snippets[start_id] = snippet
@@ -259,7 +259,7 @@ def _get_snippets(lines: list[str],
     return snippets
 
 
-def get_python_example_snippet_override(start_id: str, rel_path: str) -> list[str]:
+def get_python_example_snippet_override(start_id: str, rel_path: Path) -> list[str]:
     """Check if the snippet is overridden by a python example snippet."""
     key = (os.fspath(rel_path), start_id)
     value = python_example_snippet_mapping().get(key)
@@ -275,7 +275,7 @@ def get_python_example_snippet_override(start_id: str, rel_path: str) -> list[st
     return overriden_snippet_lines(lines, start_id)
 
 
-def get_snippets(lines: list[str], rel_path: str) -> list[list[str]]:
+def get_snippets(lines: list[str], rel_path: Path) -> list[list[str]]:
     """Extract (potentially overlapping) snippets from a C++ file indicated
        by '//! [1]'."""
     result = _get_snippets(lines, '//', CPP_SNIPPET_PATTERN)
@@ -288,7 +288,7 @@ def get_snippets(lines: list[str], rel_path: str) -> list[list[str]]:
         if snippet:
             result[snippet_id] = snippet
 
-    return result.values()
+    return list(result.values())
 
 
 def get_license_from_file(lines):

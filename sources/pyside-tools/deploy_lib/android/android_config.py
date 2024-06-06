@@ -349,7 +349,7 @@ class AndroidConfig(Config):
                 self._dependency_files.append(dependency_file)
 
         logging.info("[DEPLOY] The following dependency files were found: "
-                     f"{*self._dependency_files,}")
+                     f"{*self._dependency_files, }")
 
     def _find_local_libs(self):
         local_libs = set()
