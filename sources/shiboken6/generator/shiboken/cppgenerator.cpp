@@ -59,6 +59,7 @@ using namespace Qt::StringLiterals;
 static const char shibokenErrorsOccurred[] = "Shiboken::Errors::occurred() != nullptr";
 
 static constexpr auto virtualMethodStaticReturnVar = "result"_L1;
+static constexpr auto initFuncPrefix = "init_"_L1;
 
 static constexpr auto sbkObjectTypeF = "SbkObject_TypeF()"_L1;
 static const char initInheritanceFunction[] = "initInheritance";
@@ -6053,16 +6054,20 @@ void CppGenerator::writeNbBoolFunction(const GeneratorContext &context,
 
 // Write declaration and invocation of the init function for the module init
 // function.
-void CppGenerator::writeInitFunc(TextStream &declStr, TextStream &callStr,
-                                 const QString &initFunctionName,
-                                 const TypeEntryCPtr &enclosingEntry,
-                                 const QString &pythonName, bool lazy)
+static void writeInitFuncDecl(TextStream &declStr,
+                              const QString &functionName)
 {
-    const QString functionName = "init_"_L1 + initFunctionName;
-    const bool hasParent = enclosingEntry && enclosingEntry->type() != TypeEntry::TypeSystemType;
-    declStr << "PyTypeObject *" << functionName << "(PyObject *"
-        << (hasParent ? "enclosingClass" : "module") << ");\n";
+    declStr << "PyTypeObject *" << functionName  << "(PyObject *enclosing);\n";
+}
 
+// Write declaration and invocation of the init function for the module init
+// function.
+void CppGenerator::writeInitFuncCall(TextStream &callStr,
+                                     const QString &functionName,
+                                     const TypeEntryCPtr &enclosingEntry,
+                                     const QString &pythonName, bool lazy)
+{
+    const bool hasParent = enclosingEntry && enclosingEntry->type() != TypeEntry::TypeSystemType;
     if (!lazy) {
         const QString enclosing = hasParent
             ? "reinterpret_cast<PyObject *>("_L1 + cpythonTypeNameExt(enclosingEntry) + u')'
@@ -6135,9 +6140,10 @@ bool CppGenerator::finishGeneration()
                 s_classInitDecl << te->configCondition() << '\n';
                 s_classPythonDefines << te->configCondition() << '\n';
             }
-            writeInitFunc(s_classInitDecl, s_classPythonDefines,
-                          getSimpleClassInitFunctionName(cls),
-                          targetLangEnclosingEntry(te), cls->name());
+            const QString initFunc = initFuncPrefix + getSimpleClassInitFunctionName(cls);
+            writeInitFuncDecl(s_classInitDecl, initFunc);
+            writeInitFuncCall(s_classPythonDefines, initFunc,
+                              targetLangEnclosingEntry(te), cls->name());
             if (cls->hasStaticFields()) {
                 s_classInitDecl << "PyTypeObject *"
                     << getSimpleClassStaticFieldsInitFunctionName(cls) << "(PyObject *module);\n";
@@ -6156,9 +6162,10 @@ bool CppGenerator::finishGeneration()
         const auto enclosingClass = context.metaClass()->enclosingClass();
         auto enclosingTypeEntry = targetLangEnclosingEntry(smp.specialized->typeEntry());
 
-        writeInitFunc(s_classInitDecl, s_classPythonDefines,
-                      getInitFunctionName(context),
-                      enclosingTypeEntry, smp.specialized->name());
+        const QString initFunc = initFuncPrefix + getInitFunctionName(context);
+        writeInitFuncDecl(s_classInitDecl, initFunc);
+        writeInitFuncCall(s_classPythonDefines,
+                          initFunc, enclosingTypeEntry, smp.specialized->name());
         includes.insert(smp.type.instantiations().constFirst().typeEntry()->include());
     }
 
