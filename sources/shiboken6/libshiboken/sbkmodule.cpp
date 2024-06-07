@@ -300,7 +300,6 @@ static bool isImportStar(PyObject *module)
 
 // PYSIDE-2404: These modules produce ambiguous names which we cannot handle, yet.
 static std::unordered_set<std::string> dontLazyLoad{
-    "sample",
     "smart",
     "testbinding"
 };
