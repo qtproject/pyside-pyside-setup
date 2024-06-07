@@ -306,6 +306,8 @@ static PyTypeObject *createEnumForPython(PyObject *scopeOrModule,
         enumName = PyDict_GetItem(sotp->enumTypeDict, name);
     }
 
+    SBK_UNUSED(getPyEnumMeta()); // enforce PyEnumModule creation
+    assert(PyEnumModule != nullptr);
     AutoDecRef PyEnumType(PyObject_GetAttr(PyEnumModule, enumName));
     assert(PyEnumType.object());
     bool isFlag = PyObject_IsSubclass(PyEnumType, PyFlag);
