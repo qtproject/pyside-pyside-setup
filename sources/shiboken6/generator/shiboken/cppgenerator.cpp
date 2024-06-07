@@ -5619,6 +5619,9 @@ void CppGenerator::writeClassRegister(TextStream &s,
     writeConverterRegister(s, metaClass, classContext);
     s << '\n';
 
+    if (classContext.forSmartPointer())
+        writeSmartPointerConverterInitialization(s, classContext.preciseType());
+
     // class inject-code target/beginning
     if (!classTypeEntry->codeSnips().isEmpty()) {
         writeClassCodeSnips(s, classTypeEntry->codeSnips(),
@@ -6359,18 +6362,6 @@ bool CppGenerator::finishGeneration()
         s << '\n';
     }
 
-    // Implicit smart pointers conversions
-    const auto &smartPointersList = api().instantiatedSmartPointers();
-    if (!smartPointersList.isEmpty()) {
-        s << "// SmartPointers converters.\n\n";
-        for (const auto &smp : smartPointersList) {
-            s << "// C++ to Python conversion for smart pointer type '"
-                << smp.type.cppSignature() << "'.\n";
-            writeSmartPointerConverterFunctions(s, smp.type);
-        }
-        s << '\n';
-    }
-
     s << "static struct PyModuleDef moduledef = {\n"
         << "    /* m_base     */ PyModuleDef_HEAD_INIT,\n"
         << "    /* m_name     */ \"" << moduleName() << "\",\n"
@@ -6483,14 +6474,6 @@ bool CppGenerator::finishGeneration()
         for (const auto &d : opaqueContainers)
             s << d.registrationCode;
         s << '\n';
-    }
-
-    if (!smartPointersList.isEmpty()) {
-        s << '\n';
-        for (const auto &smp : smartPointersList) {
-            writeSmartPointerConverterInitialization(s, smp.type);
-            s << '\n';
-        }
     }
 
     if (!extendedConverters.isEmpty()) {

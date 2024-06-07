@@ -213,6 +213,8 @@ void CppGenerator::generateSmartPointerClass(TextStream &s, const GeneratorConte
     s << '\n';
 
     writeConverterFunctions(s, metaClass, classContext);
+    // Implicit smart pointers conversions
+    writeSmartPointerConverterFunctions(s, classContext.preciseType());
     writeClassRegister(s, metaClass, classContext, signatureStream);
 
     // class inject-code native/end
