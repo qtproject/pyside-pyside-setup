@@ -27,6 +27,24 @@ def run(coro: typing.Optional[typing.Coroutine] = None,
 
     If there is no instance of a QCoreApplication, QGuiApplication or
     QApplication yet, a new instance of QCoreApplication is created.
+
+    :param coro:            The coroutine to run. Optional if keep_running is
+                            True.
+    :param keep_running:    If True, QtAsyncio (the asyncio event loop) will
+                            continue running after the coroutine finished, or
+                            run "forever" if no coroutine was provided.
+                            If False, QtAsyncio will stop after the
+                            coroutine finished. A coroutine must be provided if
+                            this argument is set to False.
+    :param quit_qapp:       If True, the QCoreApplication will quit when
+                            QtAsyncio (the asyncio event loop) stops.
+                            If False, the QCoreApplication will remain active
+                            after QtAsyncio stops, and can continue to be used.
+    :param handle_sigint:   If True, the SIGINT signal will be handled by the
+                            event loop, causing it to stop.
+    :param debug:           If True, the event loop will run in debug mode.
+                            If False, the event loop will run in normal mode.
+                            If None, the default behavior is used.
     """
 
     # Event loop policies are expected to be deprecated with Python 3.13, with
@@ -54,7 +72,7 @@ def run(coro: typing.Optional[typing.Coroutine] = None,
             ret = asyncio.run(coro, debug=debug)
         else:
             exc = RuntimeError(
-                "QtAsyncio was set to keep running after the coroutine "
+                "QtAsyncio was set not to keep running after the coroutine "
                 "finished, but no coroutine was provided.")
 
     asyncio.set_event_loop_policy(default_policy)
