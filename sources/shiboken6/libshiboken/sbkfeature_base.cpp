@@ -92,8 +92,12 @@ void disassembleFrame(const char *marker)
     PyErr_Restore(error_type, error_value, error_traceback);
 }
 
-// python 3.12
-static int const CALL = 171;
+// Python 3.13
+static int const LOAD_ATTR_313 = 82;
+static int const CALL_313 = 53;
+static int const PUSH_NULL_313 = 34;
+// Python 3.12
+static int const CALL_312 = 171;
 // Python 3.11
 static int const PRECALL = 166;
 // we have "big instructions" with gaps after them
@@ -105,13 +109,16 @@ static int const LOAD_METHOD = 160;
 static int const CALL_METHOD = 161;
 // Python 3.6
 static int const CALL_FUNCTION = 131;
-static int const LOAD_ATTR = 106;
+static int const LOAD_ATTR_312 = 106;
 // NoGil (how long will this exist in this form?)
 static int const LOAD_METHOD_NOGIL = 55;
 static int const CALL_METHOD_NOGIL = 72;
 
 static bool currentOpcode_Is_CallMethNoArgs()
 {
+    static auto number = _PepRuntimeVersion();
+    static int LOAD_ATTR = number < 0x030D00 ? LOAD_ATTR_312 : LOAD_ATTR_313;
+    static int CALL = number < 0x030D00 ? CALL_312 : CALL_313;
     // PYSIDE-2221: Special case for the NoGil version:
     //              Find out if we have such a version.
     //              We could also ask the variable `Py_NOGIL`.
@@ -148,7 +155,6 @@ static bool currentOpcode_Is_CallMethNoArgs()
     }
     uint8_t opcode2 = co_code[f_lasti + 2];
     uint8_t oparg2 = co_code[f_lasti + 3];
-    static auto number = _PepRuntimeVersion();
     if (number < 0x030B00)
         return opcode1 == LOAD_METHOD && opcode2 == CALL_METHOD && oparg2 == 0;
 
@@ -158,7 +164,7 @@ static bool currentOpcode_Is_CallMethNoArgs()
         //       don't need to take care of them.
         if (opcode1 == LOAD_METHOD)
             f_lasti += LOAD_METHOD_GAP_311;
-        else if (opcode1 == LOAD_ATTR)
+        else if (opcode1 == LOAD_ATTR_312)
             f_lasti += LOAD_ATTR_GAP_311;
         else
             return false;
@@ -176,6 +182,11 @@ static bool currentOpcode_Is_CallMethNoArgs()
     else
         return false;
 
+    if (number >= 0x030D00) {
+        int opcode3 = co_code[f_lasti + 2];
+        if (opcode3 == PUSH_NULL_313)
+            f_lasti += 2;
+    }
     opcode2 = co_code[f_lasti + 2];
     oparg2 = co_code[f_lasti + 3];
 

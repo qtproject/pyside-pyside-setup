@@ -1,4 +1,4 @@
-# Copyright (C) 2022 The Qt Company Ltd.
+# Copyright (C) 2024 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 import os
@@ -50,6 +50,8 @@ class ListConnectionTest(unittest.TestCase):
 # PYSIDE-1735: We are testing that opcodes do what they are supposed to do.
 #              This is needed in the PyEnum forgiveness mode where we need
 #              to introspect the code if an Enum was called with no args.
+
+# flake8: noqa
 class InvestigateOpcodesTest(unittest.TestCase):
 
     def probe_function1(self):
@@ -162,20 +164,36 @@ class InvestigateOpcodesTest(unittest.TestCase):
             self.assertEqual(self.read_code(self.probe_function2, adaptive=True), result_3)
             self.assertEqual(self.get_sizes(self.probe_function2, adaptive=True), sizes_3)
 
-        if sys.version_info[:2] >= (3, 12):
+        if sys.version_info[:2] == (3, 12):
 
-            result_1 = [('RESUME', 151, 0),
-                        ('LOAD_GLOBAL', 116, 0),
-                        ('LOAD_ATTR', 106, 2),
-                        ('STORE_FAST', 125, 1),
+            result_1 = [('RESUME',       151, 0),
+                        ('LOAD_GLOBAL',  116, 0),
+                        ('LOAD_ATTR',    106, 2),
+                        ('STORE_FAST',   125, 1),
                         ('RETURN_CONST', 121, 0)]
 
-            result_2 = [('RESUME', 151, 0),
-                        ('LOAD_GLOBAL', 116, 1),
-                        ('LOAD_ATTR', 106, 2),
-                        ('CALL', 171, 0),
-                        ('STORE_FAST', 125, 1),
+            result_2 = [('RESUME',       151, 0),
+                        ('LOAD_GLOBAL',  116, 1),
+                        ('LOAD_ATTR',    106, 2),
+                        ('CALL',         171, 0),
+                        ('STORE_FAST',   125, 1),
                         ('RETURN_CONST', 121, 0)]
+
+        if sys.version_info[:2] >= (3, 13):
+
+            result_1 = [('RESUME',       149, 0),
+                        ('LOAD_GLOBAL',   91, 0),
+                        ('LOAD_ATTR',     82, 2),
+                        ('STORE_FAST',   110, 1),
+                        ('RETURN_CONST', 103, 0)]
+
+            result_2 = [('RESUME',       149, 0),
+                        ('LOAD_GLOBAL',   91, 0),
+                        ('LOAD_ATTR',     82, 2),
+                        ('PUSH_NULL',     34, None),
+                        ('CALL',          53, 0),
+                        ('STORE_FAST',   110, 1),
+                        ('RETURN_CONST', 103, 0)]
 
         self.assertEqual(self.read_code(self.probe_function1), result_1)
         self.assertEqual(self.read_code(self.probe_function2), result_2)
@@ -183,4 +201,3 @@ class InvestigateOpcodesTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

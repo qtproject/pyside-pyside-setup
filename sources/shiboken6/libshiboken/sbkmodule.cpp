@@ -248,6 +248,9 @@ static PyMethodDef module_methods[] = {
 // Python 3.8 - 3.12
 static int const LOAD_CONST_312 = 100;
 static int const IMPORT_NAME_312 = 108;
+// Python 3.13
+static int const LOAD_CONST_313 = 83;
+static int const IMPORT_NAME_313 = 75;
 
 static bool isImportStar(PyObject *module)
 {
@@ -259,6 +262,9 @@ static bool isImportStar(PyObject *module)
     static PyObject *const _co_code = Shiboken::String::createStaticString("co_code");
     static PyObject *const _co_consts = Shiboken::String::createStaticString("co_consts");
     static PyObject *const _co_names = Shiboken::String::createStaticString("co_names");
+
+    static int LOAD_CONST = _PepRuntimeVersion() < 0x030D00 ? LOAD_CONST_312 : LOAD_CONST_313;
+    static int IMPORT_NAME = _PepRuntimeVersion() < 0x030D00 ? IMPORT_NAME_312 : IMPORT_NAME_313;
 
     auto *obFrame = reinterpret_cast<PyObject *>(PyEval_GetFrame());
     if (obFrame == nullptr)
@@ -279,7 +285,7 @@ static bool isImportStar(PyObject *module)
         PyBytes_AsStringAndSize(dec_co_code, &co_code, &code_len);
         uint8_t opcode2 = co_code[f_lasti];
         uint8_t opcode1 = co_code[f_lasti - 2];
-        if (opcode1 == LOAD_CONST_312 && opcode2 == IMPORT_NAME_312) {
+        if (opcode1 == LOAD_CONST && opcode2 == IMPORT_NAME) {
             uint8_t oparg1 = co_code[f_lasti - 1];
             uint8_t oparg2 = co_code[f_lasti + 1];
             AutoDecRef dec_co_consts(PyObject_GetAttr(dec_f_code, _co_consts));
@@ -482,7 +488,6 @@ PyObject *create(const char * /* modName */, void *moduleData)
         Py_INCREF(origImportFunc);
         AutoDecRef func(PyCFunction_NewEx(lazy_methods, nullptr, nullptr));
         PyDict_SetItemString(builtins, "__import__", func);
-        // Everything is set.
         lazy_init = true;
     }
     // PYSIDE-2404: Nuitka inserts some additional code in standalone mode
