@@ -81,7 +81,7 @@ QTextStream &operator<<(QTextStream &str, const RejectEntry &re)
     return str;
 }
 
-static void applyCachedFunctionModifications(AbstractMetaFunction *metaFunction,
+static void applyCachedFunctionModifications(const AbstractMetaFunctionPtr &metaFunction,
                                              const FunctionModificationList &functionMods)
 {
     for (const FunctionModification &mod : functionMods) {
@@ -317,7 +317,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
         return;
     }
 
-    AbstractMetaFunction *metaFunction = traverseFunction(item, baseoperandClass);
+    auto metaFunction = traverseFunction(item, baseoperandClass);
     if (metaFunction == nullptr)
         return;
 
@@ -350,7 +350,7 @@ void AbstractMetaBuilderPrivate::traverseOperatorFunction(const FunctionModelIte
     }
     metaFunction->setFlags(flags);
     metaFunction->setAccess(Access::Public);
-    AbstractMetaClass::addFunction(baseoperandClass, AbstractMetaFunctionCPtr(metaFunction));
+    AbstractMetaClass::addFunction(baseoperandClass, metaFunction);
     if (!metaFunction->arguments().isEmpty()) {
         const auto include = metaFunction->arguments().constFirst().type().typeEntry()->include();
         baseoperandClass->typeEntry()->addArgumentInclude(include);
@@ -371,7 +371,7 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
    if (streamedClass == nullptr)
        return false;
 
-   AbstractMetaFunction *streamFunction = traverseFunction(item, streamedClass);
+   auto streamFunction = traverseFunction(item, streamedClass);
    if (!streamFunction)
        return false;
 
@@ -401,7 +401,7 @@ bool AbstractMetaBuilderPrivate::traverseStreamOperator(const FunctionModelItem 
         funcClass = streamClass;
     }
 
-    AbstractMetaClass::addFunction(funcClass, AbstractMetaFunctionCPtr(streamFunction));
+    AbstractMetaClass::addFunction(funcClass, streamFunction);
     auto funcTe = funcClass->typeEntry();
     if (funcClass == streamClass)
         funcTe->addArgumentInclude(streamedClass->typeEntry()->include());
@@ -555,17 +555,16 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
         if (!funcEntry || !funcEntry->generateCode())
             continue;
 
-        AbstractMetaFunction *metaFunc = traverseFunction(func, nullptr);
-        if (!metaFunc)
+        auto metaFuncPtr = traverseFunction(func, nullptr);
+        if (!metaFuncPtr)
             continue;
 
-        AbstractMetaFunctionCPtr metaFuncPtr(metaFunc);
-        if (!funcEntry->hasSignature(metaFunc->minimalSignature()))
+        if (!funcEntry->hasSignature(metaFuncPtr->minimalSignature()))
             continue;
 
-        metaFunc->setTypeEntry(funcEntry);
-        applyFunctionModifications(metaFunc);
-        metaFunc->applyTypeModifications();
+        metaFuncPtr->setTypeEntry(funcEntry);
+        applyFunctionModifications(metaFuncPtr);
+        metaFuncPtr->applyTypeModifications();
 
         setInclude(funcEntry, func->fileName());
 
@@ -1348,7 +1347,7 @@ void AbstractMetaBuilderPrivate::traverseFields(const ScopeModelItem &scope_item
     }
 }
 
-void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaFunction *metaFunction)
+void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(const AbstractMetaFunctionPtr &metaFunction)
 {
     if (!metaFunction->isConversionOperator())
         return;
@@ -1372,13 +1371,13 @@ void AbstractMetaBuilderPrivate::fixReturnTypeOfConversionOperator(AbstractMetaF
     metaFunction->setType(metaType);
 }
 
-AbstractMetaFunctionRawPtrList
+AbstractMetaFunctionList
     AbstractMetaBuilderPrivate::classFunctionList(const ScopeModelItem &scopeItem,
                                                   AbstractMetaClass::Attributes *constructorAttributes,
                                                   const AbstractMetaClassPtr &currentClass)
 {
     *constructorAttributes = {};
-    AbstractMetaFunctionRawPtrList result;
+    AbstractMetaFunctionList result;
     const FunctionList &scopeFunctionList = scopeItem->functions();
     result.reserve(scopeFunctionList.size());
     const bool isNamespace = currentClass->isNamespace();
@@ -1388,7 +1387,7 @@ AbstractMetaFunctionRawPtrList
         } else if (function->isSpaceshipOperator() && !function->isDeleted()) {
             if (currentClass)
                 AbstractMetaClass::addSynthesizedComparisonOperators(currentClass);
-        } else if (auto *metaFunction = traverseFunction(function, currentClass)) {
+        } else if (auto metaFunction = traverseFunction(function, currentClass)) {
             result.append(metaFunction);
         } else if (!function->isDeleted() && function->functionType() == CodeModel::Constructor) {
             auto arguments = function->arguments();
@@ -1404,11 +1403,11 @@ void AbstractMetaBuilderPrivate::traverseFunctions(const ScopeModelItem& scopeIt
                                                    const AbstractMetaClassPtr &metaClass)
 {
     AbstractMetaClass::Attributes constructorAttributes;
-    const AbstractMetaFunctionRawPtrList functions =
+    const AbstractMetaFunctionList functions =
         classFunctionList(scopeItem, &constructorAttributes, metaClass);
     metaClass->setAttributes(metaClass->attributes() | constructorAttributes);
 
-    for (AbstractMetaFunction *metaFunction : functions) {
+    for (const auto &metaFunction : functions) {
         if (metaClass->isNamespace())
             metaFunction->setCppAttribute(FunctionAttribute::Static);
 
@@ -1461,22 +1460,19 @@ void AbstractMetaBuilderPrivate::traverseFunctions(const ScopeModelItem& scopeIt
         if (!metaFunction->isDestructor()
             && !(metaFunction->isPrivate() && metaFunction->functionType() == AbstractMetaFunction::ConstructorFunction)) {
 
-            if (metaFunction->isSignal() && metaClass->hasSignal(metaFunction))
-                qCWarning(lcShiboken, "%s", qPrintable(msgSignalOverloaded(metaClass, metaFunction)));
+            if (metaFunction->isSignal() && metaClass->hasSignal(metaFunction.get()))
+                qCWarning(lcShiboken, "%s", qPrintable(msgSignalOverloaded(metaClass,
+                                                                           metaFunction.get())));
 
             if (metaFunction->isConversionOperator())
                 fixReturnTypeOfConversionOperator(metaFunction);
 
-            AbstractMetaClass::addFunction(metaClass, AbstractMetaFunctionCPtr(metaFunction));
+            AbstractMetaClass::addFunction(metaClass, metaFunction);
             applyFunctionModifications(metaFunction);
         } else if (metaFunction->isDestructor()) {
             metaClass->setHasPrivateDestructor(metaFunction->isPrivate());
             metaClass->setHasProtectedDestructor(metaFunction->isProtected());
             metaClass->setHasVirtualDestructor(metaFunction->isVirtual());
-        }
-        if (!metaFunction->ownerClass()) {
-            delete metaFunction;
-            metaFunction = nullptr;
         }
     }
 
@@ -1539,7 +1535,7 @@ QStringList AbstractMetaBuilder::definitionNames(const QString &name,
     return result;
 }
 
-void AbstractMetaBuilderPrivate::applyFunctionModifications(AbstractMetaFunction *func)
+void AbstractMetaBuilderPrivate::applyFunctionModifications(const AbstractMetaFunctionPtr &func)
 {
     AbstractMetaFunction& funcRef = *func;
     for (const FunctionModification &mod : func->modifications(func->implementingClass())) {
@@ -1677,15 +1673,14 @@ static AbstractMetaFunction::FunctionType functionTypeFromName(const QString &);
 bool AbstractMetaBuilderPrivate::traverseAddedGlobalFunction(const AddedFunctionPtr &addedFunc,
                                                              QString *errorMessage)
 {
-    AbstractMetaFunction *metaFunction =
-        traverseAddedFunctionHelper(addedFunc, nullptr, errorMessage);
+    auto metaFunction = traverseAddedFunctionHelper(addedFunc, nullptr, errorMessage);
     if (metaFunction == nullptr)
         return false;
-    m_globalFunctions << AbstractMetaFunctionCPtr(metaFunction);
+    m_globalFunctions << metaFunction;
     return true;
 }
 
-AbstractMetaFunction *
+AbstractMetaFunctionPtr
     AbstractMetaBuilderPrivate::traverseAddedFunctionHelper(const AddedFunctionPtr &addedFunc,
                                                             const AbstractMetaClassPtr &metaClass /* = {} */,
                                                             QString *errorMessage)
@@ -1696,10 +1691,10 @@ AbstractMetaFunction *
             msgAddedFunctionInvalidReturnType(addedFunc->name(),
                                               addedFunc->returnType().qualifiedName(),
                                               *errorMessage, metaClass);
-        return nullptr;
+        return {};
     }
 
-    auto *metaFunction = new AbstractMetaFunction(addedFunc);
+    auto metaFunction = std::make_shared<AbstractMetaFunction>(addedFunc);
     metaFunction->setType(returnType.value());
     metaFunction->setFunctionType(functionTypeFromName(addedFunc->name()));
 
@@ -1717,8 +1712,7 @@ AbstractMetaFunction *
                 msgAddedFunctionInvalidArgType(addedFunc->name(),
                                                arg.typeInfo.qualifiedName(), i + 1,
                                                *errorMessage, metaClass);
-            delete metaFunction;
-            return nullptr;
+            return {};
         }
         type->decideUsagePattern();
 
@@ -1775,8 +1769,7 @@ bool AbstractMetaBuilderPrivate::traverseAddedMemberFunction(const AddedFunction
                                                              const AbstractMetaClassPtr &metaClass,
                                                              QString *errorMessage)
 {
-    AbstractMetaFunction *metaFunction =
-        traverseAddedFunctionHelper(addedFunc, metaClass, errorMessage);
+    auto metaFunction = traverseAddedFunctionHelper(addedFunc, metaClass, errorMessage);
     if (metaFunction == nullptr)
         return false;
 
@@ -1796,12 +1789,13 @@ bool AbstractMetaBuilderPrivate::traverseAddedMemberFunction(const AddedFunction
 
     metaFunction->setDeclaringClass(metaClass);
     metaFunction->setImplementingClass(metaClass);
-    AbstractMetaClass::addFunction(metaClass, AbstractMetaFunctionCPtr(metaFunction));
+    AbstractMetaClass::addFunction(metaClass, metaFunction);
     metaClass->setHasNonPrivateConstructor(true);
     return true;
 }
 
-void AbstractMetaBuilderPrivate::fixArgumentNames(AbstractMetaFunction *func, const FunctionModificationList &mods)
+void AbstractMetaBuilderPrivate::fixArgumentNames(const AbstractMetaFunctionPtr &func,
+                                                  const FunctionModificationList &mods)
 {
     AbstractMetaArgumentList &arguments = func->arguments();
 
@@ -1920,7 +1914,7 @@ static AbstractMetaFunction::FunctionType functionTypeFromName(const QString &na
 
 // Apply the <array> modifications of the arguments
 static bool applyArrayArgumentModifications(const FunctionModificationList &functionMods,
-                                            AbstractMetaFunction *func,
+                                            const AbstractMetaFunctionPtr &func,
                                             QString *errorMessage)
 {
     for (const FunctionModification &mod : functionMods) {
@@ -1981,13 +1975,14 @@ void AbstractMetaBuilderPrivate::rejectFunction(const FunctionModelItem &functio
     m_rejectedFunctions.insert({reason, signatureWithType, sortKey, rejectReason});
 }
 
-AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const FunctionModelItem &functionItem,
-                                                                   const AbstractMetaClassPtr &currentClass)
+AbstractMetaFunctionPtr
+    AbstractMetaBuilderPrivate::traverseFunction(const FunctionModelItem &functionItem,
+                                                 const AbstractMetaClassPtr &currentClass)
 {
     const auto *tdb = TypeDatabase::instance();
 
     if (!functionItem->templateParameters().isEmpty())
-        return nullptr;
+        return {};
 
     if (functionItem->isDeleted()) {
         switch (functionItem->functionType()) {
@@ -2001,7 +1996,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         default:
             break;
         }
-        return nullptr;
+        return {};
     }
     const QString &functionName = functionItem->name();
     const QString className = currentClass != nullptr ?
@@ -2011,7 +2006,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         // Skip enum helpers generated by Q_ENUM
         if ((currentClass == nullptr || currentClass->isNamespace())
             && (functionName == u"qt_getEnumMetaObject" || functionName == u"qt_getEnumName")) {
-                return nullptr;
+                return {};
             }
 
         // Clang: Skip qt_metacast(), qt_metacall(), expanded from Q_OBJECT
@@ -2019,10 +2014,10 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         if (currentClass != nullptr) {
             if (functionName == u"qt_check_for_QGADGET_macro"
                 || functionName.startsWith(u"qt_meta")) {
-                return nullptr;
+                return {};
             }
             if (functionName == u"metaObject" && className != u"QObject")
-                return nullptr;
+                return {};
         }
     } // PySide extensions
 
@@ -2030,7 +2025,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     if (tdb->isFunctionRejected(className, functionName, &rejectReason)) {
         rejectFunction(functionItem, currentClass,
                        AbstractMetaBuilder::GenerationDisabled, rejectReason);
-        return nullptr;
+        return {};
     }
 
     const QString &signature = functionSignature(functionItem);
@@ -2041,22 +2036,22 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             qCInfo(lcShiboken, "%s::%s was rejected by the type database (%s).",
                    qPrintable(className), qPrintable(signature), qPrintable(rejectReason));
         }
-        return nullptr;
+        return {};
     }
 
     if (functionItem->isFriend())
-        return nullptr;
+        return {};
 
     const auto cppAttributes = functionItem->attributes();
     const bool deprecated = cppAttributes.testFlag(FunctionAttribute::Deprecated);
     if (deprecated && m_skipDeprecated) {
         rejectFunction(functionItem, currentClass,
                        AbstractMetaBuilder::GenerationDisabled, u" is deprecated."_s);
-        return nullptr;
+        return {};
     }
 
     AbstractMetaFunction::Flags flags;
-    auto *metaFunction = new AbstractMetaFunction(functionName);
+    auto metaFunction = std::make_shared<AbstractMetaFunction>(functionName);
     metaFunction->setCppAttributes(cppAttributes);
     const QByteArray cSignature = signature.toUtf8();
     const QString unresolvedSignature =
@@ -2089,8 +2084,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         if (tdb->isReturnTypeRejected(className, returnType.toString(), &rejectReason)) {
             rejectFunction(functionItem, currentClass,
                            AbstractMetaBuilder::GenerationDisabled, rejectReason);
-            delete metaFunction;
-            return nullptr;
+            return {};
         }
 
         TranslateTypeFlags flags;
@@ -2104,8 +2098,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
                       qPrintable(msgSkippingFunction(functionItem, signature, reason)));
             rejectFunction(functionItem, currentClass,
                            AbstractMetaBuilder::UnmatchedReturnType, reason);
-            delete metaFunction;
-            return nullptr;
+            return {};
         }
 
         metaFunction->setType(type.value());
@@ -2136,8 +2129,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
         if (tdb->isArgumentTypeRejected(className, arg->type().toString(), &rejectReason)) {
             rejectFunction(functionItem, currentClass,
                            AbstractMetaBuilder::GenerationDisabled, rejectReason);
-            delete metaFunction;
-            return nullptr;
+            return {};
         }
 
         TranslateTypeFlags flags;
@@ -2164,8 +2156,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
                       qPrintable(msgSkippingFunction(functionItem, signature, reason)));
             rejectFunction(functionItem, currentClass,
                            AbstractMetaBuilder::UnmatchedArgumentType, reason);
-            delete metaFunction;
-            return nullptr;
+            return {};
         }
 
         auto metaType = metaTypeO.value();
@@ -2188,8 +2179,8 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
     AbstractMetaArgumentList &metaArguments = metaFunction->arguments();
 
     const FunctionModificationList functionMods = currentClass
-        ? AbstractMetaFunction::findClassModifications(metaFunction, currentClass)
-        : AbstractMetaFunction::findGlobalModifications(metaFunction);
+        ? AbstractMetaFunction::findClassModifications(metaFunction.get(), currentClass)
+        : AbstractMetaFunction::findGlobalModifications(metaFunction.get());
 
     applyCachedFunctionModifications(metaFunction, functionMods);
 
@@ -2214,7 +2205,7 @@ AbstractMetaFunction *AbstractMetaBuilderPrivate::traverseFunction(const Functio
             && metaFunction->argumentName(i + 1, false, currentClass).isEmpty()) {
             qCWarning(lcShiboken, "%s",
                       qPrintable(msgUnnamedArgumentDefaultExpression(currentClass, i + 1,
-                                                                     className, metaFunction)));
+                                                                     className, metaFunction.get())));
         }
 
     }
@@ -3315,7 +3306,7 @@ AbstractMetaFunctionPtr
     }
 
     QString errorMessage;
-    if (!applyArrayArgumentModifications(f->modifications(subclass), f.get(),
+    if (!applyArrayArgumentModifications(f->modifications(subclass), f,
                                          &errorMessage)) {
         qCWarning(lcShiboken, "While specializing %s (%s): %s",
                   qPrintable(subclass->name()), qPrintable(templateClass->name()),
