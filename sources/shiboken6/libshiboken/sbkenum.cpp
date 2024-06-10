@@ -3,6 +3,7 @@
 
 #include "sbkenum.h"
 #include "sbkstring.h"
+#include "helper.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
 #include "sbkconverter.h"

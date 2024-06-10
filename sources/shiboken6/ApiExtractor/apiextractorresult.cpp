@@ -7,6 +7,7 @@
 
 #include "enumtypeentry.h"
 #include "flagstypeentry.h"
+#include "smartpointertypeentry.h"
 
 ApiExtractorResult::ApiExtractorResult() = default;
 

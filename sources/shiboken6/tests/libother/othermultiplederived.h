@@ -6,6 +6,7 @@
 
 #include "libothermacros.h"
 #include "multiple_derived.h"
+#include "objecttype.h"
 #include "virtualmethods.h"
 
 class ObjectType;
