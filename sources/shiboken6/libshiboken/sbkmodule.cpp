@@ -453,9 +453,10 @@ PyObject *create(const char * /* modName */, void *moduleData)
         // Install the getattr patch.
         origModuleGetattro = PyModule_Type.tp_getattro;
         PyModule_Type.tp_getattro = PyModule_lazyGetAttro;
-        // Add the lazy import redirection.
+        // Add the lazy import redirection, keeping a reference.
         origImportFunc = PyDict_GetItemString(builtins, "__import__");
-        auto *func = PyCFunction_NewEx(lazy_methods, nullptr, nullptr);
+        Py_INCREF(origImportFunc);
+        AutoDecRef func(PyCFunction_NewEx(lazy_methods, nullptr, nullptr));
         PyDict_SetItemString(builtins, "__import__", func);
         // Everything is set.
         lazy_init = true;
