@@ -98,20 +98,21 @@ public:
                                                  const QSet<QString> &enumsDeclarations);
     void traverseEnums(const ScopeModelItem &item, const AbstractMetaClassPtr &parent,
                        const QStringList &enumsDeclarations);
-    AbstractMetaFunctionRawPtrList classFunctionList(const ScopeModelItem &scopeItem,
-                                                     AbstractMetaClass::Attributes *constructorAttributes,
-                                                     const AbstractMetaClassPtr &currentClass);
+    AbstractMetaFunctionList classFunctionList(const ScopeModelItem &scopeItem,
+                                               AbstractMetaClass::Attributes *constructorAttributes,
+                                               const AbstractMetaClassPtr &currentClass);
     void traverseFunctions(const ScopeModelItem& item,
                            const AbstractMetaClassPtr &parent);
-    static void applyFunctionModifications(AbstractMetaFunction *func);
+    static void applyFunctionModifications(const AbstractMetaFunctionPtr &func);
     void traverseFields(const ScopeModelItem &item, const AbstractMetaClassPtr &parent);
     bool traverseStreamOperator(const FunctionModelItem &functionItem,
                                 const AbstractMetaClassPtr &currentClass);
     void traverseOperatorFunction(const FunctionModelItem &item,
                                   const AbstractMetaClassPtr &currentClass);
-    AbstractMetaFunction *traverseAddedFunctionHelper(const AddedFunctionPtr &addedFunc,
-                                                      const AbstractMetaClassPtr &metaClass,
-                                                      QString *errorMessage);
+    AbstractMetaFunctionPtr
+        traverseAddedFunctionHelper(const AddedFunctionPtr &addedFunc,
+                                    const AbstractMetaClassPtr &metaClass,
+                                    QString *errorMessage);
     bool traverseAddedGlobalFunction(const AddedFunctionPtr &addedFunc,
                                      QString *errorMessage);
     bool traverseAddedMemberFunction(const AddedFunctionPtr &addedFunc,
@@ -121,8 +122,9 @@ public:
                         const AbstractMetaClassPtr &currentClass,
                         AbstractMetaBuilder::RejectReason reason,
                         const QString &rejectReason);
-        AbstractMetaFunction *traverseFunction(const FunctionModelItem &function,
-                                           const AbstractMetaClassPtr &currentClass);
+    AbstractMetaFunctionPtr
+        traverseFunction(const FunctionModelItem &function,
+                         const AbstractMetaClassPtr &currentClass);
     std::optional<AbstractMetaField> traverseField(const VariableModelItem &field,
                                                    const AbstractMetaClassCPtr &cls);
     void checkFunctionModifications() const;
@@ -142,7 +144,7 @@ public:
      *   said class.
      *   \param metaFunction conversion operator function to be fixed.
      */
-    static void fixReturnTypeOfConversionOperator(AbstractMetaFunction *metaFunction);
+    static void fixReturnTypeOfConversionOperator(const AbstractMetaFunctionPtr &metaFunction);
 
     void parseQ_Properties(const AbstractMetaClassPtr &metaClass,
                            const QStringList &declarations);
@@ -212,7 +214,8 @@ public:
 
     void sortLists();
     void setInclude(const TypeEntryPtr &te, const QString &path) const;
-    static void fixArgumentNames(AbstractMetaFunction *func, const FunctionModificationList &mods);
+    static void fixArgumentNames(const AbstractMetaFunctionPtr &func,
+                                 const FunctionModificationList &mods);
 
     void fillAddedFunctions(const AbstractMetaClassPtr &metaClass);
     AbstractMetaClassCPtr resolveTypeSystemTypeDef(const AbstractMetaType &t) const;

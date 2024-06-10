@@ -30,6 +30,7 @@ using AbstractMetaEnumValueList = QList<AbstractMetaEnumValue>;
 using AbstractMetaFieldList = QList<AbstractMetaField>;
 using AbstractMetaFunctionRawPtrList = QList<AbstractMetaFunction *>;
 using AbstractMetaFunctionCList = QList<AbstractMetaFunctionCPtr>;
+using AbstractMetaFunctionList = QList<AbstractMetaFunctionPtr>;
 using AbstractMetaTypeList = QList<AbstractMetaType>;
 using UsingMembers = QList<UsingMember>;
 
