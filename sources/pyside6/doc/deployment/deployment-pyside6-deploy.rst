@@ -14,6 +14,9 @@ macOS.
     not add the virtual environment to the application directory you are trying to deploy.
     ``pyside6-deploy`` will try to package this venv folder and will eventually fail.
 
+.. note:: The default version of Nuitka used with the tool is version ``2.3.2``. This can be
+    updated to a newer version by updating your ``pysidedeploy.spec`` file.
+
 .. _how_pysidedeploy:
 
 How to use it?
