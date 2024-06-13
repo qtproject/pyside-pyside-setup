@@ -311,6 +311,10 @@ macro(create_pyside_module)
                               ${generate_pyi_options})
         add_dependencies("${module_NAME}_pyi" ${module_NAME})
 
+        if(TARGET shibokenmodule)
+            add_dependencies("${module_NAME}_pyi" shibokenmodule)
+        endif()
+
         install(FILES "${CMAKE_CURRENT_BINARY_DIR}/../${module_NAME}.pyi"
                 DESTINATION "${PYTHON_SITE_PACKAGES}/PySide6")
     endif()
