@@ -193,7 +193,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--extra-modules", type=str, help=HELP_EXTRA_MODULES)
 
-    parser.add_argument("--mode", choices=["onefile", "standalone"], default="desktop",
+    parser.add_argument("--mode", choices=["onefile", "standalone"], default="onefile",
                         help=HELP_MODE)
 
     args = parser.parse_args()
