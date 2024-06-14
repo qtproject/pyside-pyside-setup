@@ -224,3 +224,29 @@ are required to be installed on the system:
    * - macOS
      - dyld_info
      - Available by default from macOS 12 and upwards
+
+Creating a bug report
+=====================
+
+If you are unsure if the bug is from ``pyside6-deploy`` or ``Nuitka``:
+
+#. Create a bug report in Qt for Python. See instructions
+   `here <https://wiki.qt.io/Qt_for_Python/Reporting_Bugs/>`_.
+
+#. Run ``pyside6-deploy`` command with the ``--verbose`` option and replace ``--quiet`` with
+   ``--verbose`` in the ``extra_args`` parameter in the ``pysidedeploy.spec`` file. Attach the
+   output from stdout to the bug report.
+
+#. Attach a minimal example that reproduces the bug with the bug report.
+
+If you think the bug originates from ``Nuitka``:
+
+#. Try using a newer version of ``Nuitka``. You can change this from the ``packages`` parameter in
+   your generated ``pysidedeploy.spec`` file.
+
+#. If the bug persists, create a bug report on the
+   `Nuitka GitHub page <https://github.com/Nuitka/Nuitka/issues>`_.
+
+   * Run ``pyside6-deploy`` with the ``--dry-run`` option to see the actual ``Nuitka`` command
+     generated. Attach the ``Nuitka`` command ran to the bug report.
+   * Follow the Nuitka bug report template to create a bug report.
