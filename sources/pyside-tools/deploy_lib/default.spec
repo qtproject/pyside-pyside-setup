@@ -25,8 +25,6 @@ icon =
 python_path =
 
 # python packages to install
-# ordered-set: increase compile time performance of nuitka packaging
-# zstandard: provides final executable size optimization
 packages = Nuitka==2.3.2
 
 # buildozer: for deploying Android application
