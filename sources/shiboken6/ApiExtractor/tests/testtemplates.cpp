@@ -159,7 +159,7 @@ void func(List<int>* arg) {}
     AbstractMetaFunctionCList globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.size(), 1);
 
-    const auto func = globalFuncs.constFirst();
+    const auto &func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), u"func(List<int>*)");
     QCOMPARE(func->arguments().constFirst().type().cppSignature(),
              u"List<int> *");
@@ -184,7 +184,7 @@ void func(List<int>& arg) {}
     const auto globalFuncs = builder->globalFunctions();
     QCOMPARE(globalFuncs.size(), 1);
 
-    const auto func = globalFuncs.constFirst();
+    const auto &func = globalFuncs.constFirst();
     QCOMPARE(func->minimalSignature(), u"func(List<int>&)");
     QCOMPARE(func->arguments().constFirst().type().cppSignature(),
              u"List<int> &");

@@ -234,8 +234,8 @@ void printUsage()
 
 static inline void printVerAndBanner()
 {
-    std::cout << appName << " v" << SHIBOKEN_VERSION << std::endl;
-    std::cout << "Copyright (C) 2016 The Qt Company Ltd." << std::endl;
+    std::cout << appName << " v" << SHIBOKEN_VERSION
+        << "\nCopyright (C) 2016 The Qt Company Ltd.\n";
 }
 
 static inline void errorPrint(const QString &s, const QStringList &arguments)
@@ -348,7 +348,7 @@ int shibokenMain(const QStringList &argV)
     }
 
     if (commonOptions.typeSystemFileName.isEmpty()) {
-        std::cout << "You must specify a Type System file." << std::endl << helpHint;
+        std::cout << "You must specify a Type System file.\n" << helpHint;
         return EXIT_FAILURE;
     }
 
@@ -396,7 +396,7 @@ int shibokenMain(const QStringList &argV)
         TypeDatabase::instance()->logUnmatched();
 
     const QByteArray doneMessage = ReportHandler::doneMessage();
-    std::cout << doneMessage.constData() << std::endl;
+    std::cout << doneMessage.constData() << '\n';
 
     return EXIT_SUCCESS;
 }
@@ -428,7 +428,7 @@ int wmain(int argc, wchar_t *argv[])
     try {
         ex = shibokenMain(argV);
     }  catch (const std::exception &e) {
-        std::cerr << appName << " error: " << e.what() << std::endl;
+        std::cerr << appName << " error: " << e.what() << '\n';
         ex = EXIT_FAILURE;
     }
     return ex;

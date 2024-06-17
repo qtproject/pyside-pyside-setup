@@ -26,8 +26,9 @@ std::shared_ptr<XQuery> XQuery::create(const QString &focus, QString *errorMessa
 #if defined(HAVE_LIBXSLT)
     return libXml_createXQuery(focus, errorMessage);
 #else
+    Q_UNUSED(focus);
     *errorMessage = QLatin1StringView(__FUNCTION__) + u" is not implemented."_s;
-    return std::shared_ptr<XQuery>();
+    return {};
 #endif
 }
 
@@ -36,6 +37,7 @@ QString xsl_transform(const QString &xml, const QString &xsl, QString *errorMess
 #if defined(HAVE_LIBXSLT)
     return libXslt_transform(xml, xsl, errorMessage);
 #else
+    Q_UNUSED(xsl);
     *errorMessage = QLatin1StringView(__FUNCTION__) + u" is not implemented."_s;
     return xml;
 #endif

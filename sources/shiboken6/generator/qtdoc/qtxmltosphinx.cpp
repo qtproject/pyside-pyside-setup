@@ -1208,7 +1208,7 @@ static QString fixLinkText(const QtXmlToSphinxLink *linkContext,
     }
     // For the language reference documentation, strip the module name.
     // Clear the link text if that matches the function/class/enumeration name.
-    const int lastSep = linktext.lastIndexOf(u"::");
+    const auto lastSep = linktext.lastIndexOf(u"::");
     if (lastSep != -1)
         linktext.remove(0, lastSep + 2);
     else

@@ -1230,7 +1230,7 @@ static QString checkSignatureError(const QString& signature, const QString& tag)
                                    "and return types should not be part of the signature.")
                                    .arg(tag, signature);
     }
-    return QString();
+    return {};
 }
 
 inline TypeEntryCPtr TypeSystemParser::currentParentTypeEntry() const
@@ -2568,7 +2568,7 @@ bool TypeSystemParser::parseModifyField(const ConditionalStreamReader &,
 static bool parseOverloadNumber(const QXmlStreamAttribute &attribute, int *overloadNumber,
                                 QString *errorMessage)
 {
-    bool ok;
+    bool ok{};
     *overloadNumber = attribute.value().toInt(&ok);
     if (!ok || *overloadNumber < 0) {
         *errorMessage = msgInvalidAttributeValue(attribute);
@@ -3028,7 +3028,7 @@ bool TypeSystemParser::readCodeSnippet(QXmlStreamAttributes *attributes, CodeSni
     const auto snippetOptional = readFileSnippet(attributes);
     if (!snippetOptional.has_value())
         return false;
-    const auto snippet = snippetOptional.value();
+    const auto &snippet = snippetOptional.value();
 
     QString source = snippet.fileName;
     if (!snippet.snippetLabel.isEmpty())

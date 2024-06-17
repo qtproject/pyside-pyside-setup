@@ -92,7 +92,7 @@ TypeInfo TypeInfo::combine(const TypeInfo &__lhs, const TypeInfo &__rhs)
     if (__rhs.referenceType() > __result.referenceType())
         __result.setReferenceType(__rhs.referenceType());
 
-    const auto indirections = __rhs.indirectionsV();
+    const auto &indirections = __rhs.indirectionsV();
     for (auto i : indirections)
         __result.addIndirection(i);
 
@@ -274,13 +274,12 @@ bool TypeInfo::isPlain() const
 
 TypeInfo TypeInfo::resolveType(TypeInfo const &__type, const ScopeModelItem &__scope)
 {
-    CodeModel *__model = __scope->model();
-    Q_ASSERT(__model != nullptr);
-
-    return TypeInfo::resolveType(__model->findItem(__type.qualifiedName(), __scope),  __type, __scope);
+    return TypeInfo::resolveType(CodeModel::findItem(__type.qualifiedName(), __scope),
+                                 __type, __scope);
 }
 
-TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, const ScopeModelItem &__scope)
+TypeInfo TypeInfo::resolveType(const CodeModelItem &__item, TypeInfo const &__type,
+                               const ScopeModelItem &__scope)
 {
     // Copy the type and replace with the proper qualified name. This
     // only makes sence to do if we're actually getting a resolved
@@ -293,8 +292,8 @@ TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, con
     }
 
     if (TypeDefModelItem __typedef = std::dynamic_pointer_cast<_TypeDefModelItem>(__item)) {
-        const TypeInfo combined = TypeInfo::combine(__typedef->type(), otherType);
-        const CodeModelItem nextItem = __scope->model()->findItem(combined.qualifiedName(), __scope);
+        TypeInfo combined = TypeInfo::combine(__typedef->type(), otherType);
+        const CodeModelItem nextItem = CodeModel::findItem(combined.qualifiedName(), __scope);
         if (!nextItem)
             return combined;
         // PYSIDE-362, prevent recursion on opaque structs like
@@ -302,7 +301,7 @@ TypeInfo TypeInfo::resolveType(CodeModelItem __item, TypeInfo const &__type, con
         if (nextItem.get() ==__item.get()) {
             std::cerr << "** WARNING Bailing out recursion of " << __FUNCTION__
                 << "() on " << qPrintable(__type.qualifiedName().join(u"::"_s))
-                << std::endl;
+                << '\n';
             return otherType;
         }
         return resolveType(nextItem, combined, __scope);

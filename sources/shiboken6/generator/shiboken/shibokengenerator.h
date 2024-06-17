@@ -257,7 +257,7 @@ protected:
     static QString cpythonTypeNameExt(const TypeEntryCPtr &type);
     static QString cpythonTypeNameExt(const AbstractMetaType &type);
     static QString cpythonCheckFunction(TypeEntryCPtr type);
-    static QString cpythonCheckFunction(AbstractMetaType metaType);
+    static QString cpythonCheckFunction(const AbstractMetaType &metaType);
     static QString cpythonIsConvertibleFunction(const TypeEntryCPtr &type);
     static QString cpythonIsConvertibleFunction(const AbstractMetaType &metaType);
     static QString cpythonIsConvertibleFunction(const AbstractMetaArgument &metaArg);

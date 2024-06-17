@@ -67,7 +67,7 @@ bool AbstractMetaBuilderPrivate::isQualifiedCppIdentifier(QStringView e)
 
 static bool isIntegerConstant(const QStringView expr)
 {
-    bool isNumber;
+    bool isNumber{};
     auto n = expr.toInt(&isNumber, /* guess base: 0x or decimal */ 0);
     Q_UNUSED(n);
     return isNumber;
@@ -75,7 +75,7 @@ static bool isIntegerConstant(const QStringView expr)
 
 static bool isFloatConstant(const QStringView expr)
 {
-    bool isNumber;
+    bool isNumber{};
     auto d = expr.toDouble(&isNumber);
     Q_UNUSED(d);
     return isNumber;
@@ -92,7 +92,7 @@ QString AbstractMetaBuilderPrivate::fixEnumDefault(const AbstractMetaType &type,
     if (isIntegerConstant(expr))
         return expr;
 
-    const QString field = qualifyStaticField(klass, expr);
+    QString field = qualifyStaticField(klass, expr);
     if (!field.isEmpty())
         return field;
 
@@ -164,7 +164,7 @@ QString AbstractMetaBuilderPrivate::fixEnumDefault(const AbstractMetaType &type,
             qualified.prepend(resolveEnumValueScopePrefix(metaEnum, token));
         qualifiedTokens.append(qualified);
     }
-    const QString qualifiedExpression = qualifiedTokens.join(u" | "_s);
+    QString qualifiedExpression = qualifiedTokens.join(u" | "_s);
     if (!typeCast)
         return qualifiedExpression;
 

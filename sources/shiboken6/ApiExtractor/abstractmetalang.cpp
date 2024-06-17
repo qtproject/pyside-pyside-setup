@@ -885,7 +885,7 @@ void AbstractMetaClass::addSynthesizedComparisonOperators(const AbstractMetaClas
 
     static const char *operators[]
         = {"operator==", "operator!=", "operator<", "operator<=", "operator>", "operator>="};
-    for (auto *op : operators) {
+    for (const auto *op : operators) {
         auto *f = AbstractMetaClassPrivate::createFunction(QLatin1StringView(op),
                                                            AbstractMetaFunction::ComparisonOperator,
                                                            Access::Public, arguments,
@@ -1924,7 +1924,7 @@ void AbstractMetaClass::setSourceLocation(const SourceLocation &sourceLocation)
     d->m_sourceLocation = sourceLocation;
 }
 
-AbstractMetaClassCList allBaseClasses(const AbstractMetaClassCPtr metaClass)
+AbstractMetaClassCList allBaseClasses(const AbstractMetaClassCPtr &metaClass)
 {
     AbstractMetaClassCList result;
     recurseClassHierarchy(metaClass, [&result] (const AbstractMetaClassCPtr &c) {

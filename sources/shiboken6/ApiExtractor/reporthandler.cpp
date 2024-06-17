@@ -103,11 +103,11 @@ void ReportHandler::setPrefix(const QString &p)
 void ReportHandler::messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &text)
 {
     // Check for file location separator added by SourceLocation
-    int fileLocationPos = text.indexOf(u":\t");
+    auto fileLocationPos = text.indexOf(u":\t");
     if (type == QtWarningMsg) {
         if (m_silent || m_reportedWarnings.contains(text))
             return;
-        if (auto db = TypeDatabase::instance()) {
+        if (auto *db = TypeDatabase::instance()) {
             const bool suppressed = fileLocationPos >= 0
                 ? db->isSuppressedWarning(QStringView{text}.mid(fileLocationPos + 2))
                 : db->isSuppressedWarning(text);

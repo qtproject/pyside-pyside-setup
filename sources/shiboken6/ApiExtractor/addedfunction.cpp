@@ -84,7 +84,7 @@ Arguments splitParameters(QStringView paramString, QString *errorMessage)
         // Check defaultValue, "int @b@=5"
         const auto equalPos = t.lastIndexOf(u'=');
         if (equalPos != -1) {
-            const int defaultValuePos = equalPos + 1;
+            const auto defaultValuePos = equalPos + 1;
             argument.defaultValue =
                 t.mid(defaultValuePos, t.size() - defaultValuePos).trimmed().toString();
         }
@@ -92,8 +92,8 @@ Arguments splitParameters(QStringView paramString, QString *errorMessage)
         // Check @name@
         const auto atPos = typeString.indexOf(u'@');
         if (atPos != -1) {
-            const int namePos = atPos + 1;
-            const int nameEndPos = typeString.indexOf(u'@', namePos);
+            const auto namePos = atPos + 1;
+            const auto nameEndPos = typeString.indexOf(u'@', namePos);
             if (nameEndPos == -1) {
                 if (errorMessage != nullptr) {
                     *errorMessage = u"Mismatched @ in \""_s
@@ -142,8 +142,8 @@ AddedFunction::AddedFunctionPtr
         ? callOperator.size() : 0;
     const auto openParenPos = signature.indexOf(u'(', parenSearchStartPos);
     if (openParenPos < 0) {
-        return AddedFunctionPtr(new AddedFunction(signature.toString(),
-                                                  arguments, returnType));
+        return std::make_shared<AddedFunction>(signature.toString(),
+                                               arguments, returnType);
     }
 
     const QString name = signature.left(openParenPos).trimmed().toString();

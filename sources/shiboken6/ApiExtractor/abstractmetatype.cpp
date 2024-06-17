@@ -257,7 +257,7 @@ bool AbstractMetaType::applyArrayModification(QString *errorMessage)
     }
     // Element type to be used for ArrayHandle<>, strip constness.
 
-    auto elementType = new AbstractMetaType(*this);
+    auto *elementType = new AbstractMetaType(*this);
     auto indir = indirectionsV();
     indir.pop_front();
     elementType->setIndirectionsV(indir);
@@ -610,7 +610,7 @@ QString AbstractMetaTypeData::formatSignature(bool minimal) const
     if (m_pattern == AbstractMetaType::ArrayPattern) {
         // Build nested array dimensions a[2][3] in correct order
         result += m_arrayElementType->minimalSignature();
-        const int arrayPos = result.indexOf(u'[');
+        const auto arrayPos = result.indexOf(u'[');
         if (arrayPos != -1)
             result.insert(arrayPos, formatArraySize(m_arrayElementCount));
         else

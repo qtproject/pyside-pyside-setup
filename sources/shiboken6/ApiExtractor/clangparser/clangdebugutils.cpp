@@ -146,10 +146,10 @@ QDebug operator<<(QDebug s, const CXSourceLocation &location)
 {
     QDebugStateSaver saver(s);
     s.nospace();
-    CXFile file; // void *
-    unsigned line;
-    unsigned column;
-    unsigned offset;
+    CXFile file{}; // void *
+    unsigned line{};
+    unsigned column{};
+    unsigned offset{};
     clang_getExpansionLocation(location, &file, &line, &column, &offset);
     const CXString cxFileName = clang_getFileName(file);
     // Has been observed to be 0 for invalid locations

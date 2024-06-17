@@ -82,7 +82,7 @@ public:
     explicit OverloadDataNode(const AbstractMetaFunctionCPtr &func,
                               OverloadDataRootNode *parent,
                               const AbstractMetaArgument &arg, int argPos,
-                              const QString argTypeReplaced = {});
+                              const QString &argTypeReplaced = {});
     void addOverload(const AbstractMetaFunctionCPtr &func);
 
     int argPos() const override { return m_argPos; }

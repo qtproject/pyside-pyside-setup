@@ -118,7 +118,8 @@ private:
 
     friend class TypeInfoTemplateArgumentHandler;
 
-    static TypeInfo resolveType(CodeModelItem item, TypeInfo const &__type, const ScopeModelItem &__scope);
+    static TypeInfo resolveType(const CodeModelItem &item, TypeInfo const &__type,
+                                const ScopeModelItem &__scope);
 };
 
 #ifndef QT_NO_DEBUG_STREAM

@@ -1216,7 +1216,7 @@ bool TypeDatabasePrivate::resolveSmartPointerInstantiations(const TypeDatabasePa
 {
     const auto &instantiations = context->smartPointerInstantiations;
     for (auto it = instantiations.cbegin(), end = instantiations.cend(); it != end; ++it) {
-        auto smartPointerEntry = it.key();
+        const auto &smartPointerEntry = it.key();
         const auto instantiationNames = splitTypeList(it.value());
         SmartPointerTypeEntry::Instantiations instantiations;
         instantiations.reserve(instantiationNames.size());

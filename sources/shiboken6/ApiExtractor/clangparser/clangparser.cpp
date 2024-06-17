@@ -127,10 +127,10 @@ std::string_view BaseVisitor::getCodeSnippet(const CXCursor &cursor)
 
 bool BaseVisitor::_handleVisitLocation(const CXSourceLocation &location)
 {
-    CXFile cxFile; // void *
-    unsigned line;
-    unsigned column;
-    unsigned offset;
+    CXFile cxFile{}; // void *
+    unsigned line{};
+    unsigned column{};
+    unsigned offset{};
     clang_getExpansionLocation(location, &cxFile, &line, &column, &offset);
 
     if (cxFile == m_currentCxFile) // Same file?
@@ -264,7 +264,7 @@ static CXTranslationUnit createTranslationUnit(CXIndex index,
     QScopedArrayPointer<const char *> argv(byteArrayListToFlatArgV(clangArgs));
     qDebug().noquote().nospace() << msgCreateTranslationUnit(clangArgs, flags);
 
-    CXTranslationUnit tu;
+    CXTranslationUnit tu{};
     CXErrorCode err = clang_parseTranslationUnit2(index, nullptr, argv.data(),
                                                   clangArgs.size(), nullptr, 0,
                                                   defaultFlags | flags, &tu);

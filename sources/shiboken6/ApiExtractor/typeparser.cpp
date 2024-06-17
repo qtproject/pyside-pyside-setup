@@ -32,8 +32,8 @@ public:
         InvalidToken
     };
 
-    Scanner(const QString &s)
-            : m_pos(0), m_length(s.length()), m_tokenStart(-1), m_chars(s.constData())
+    Scanner(const QString &s) :
+        m_length(s.length()), m_chars(s.constData())
     {
     }
 
@@ -43,9 +43,9 @@ public:
     QString msgParseError(const QString &why) const;
 
 private:
-    int m_pos;
-    int m_length;
-    int m_tokenStart;
+    qsizetype m_pos = 0;
+    qsizetype m_length;
+    qsizetype m_tokenStart = -1;
     const QChar *m_chars;
 };
 

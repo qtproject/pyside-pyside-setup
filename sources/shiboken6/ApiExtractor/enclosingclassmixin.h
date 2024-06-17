@@ -11,7 +11,7 @@ class AbstractMetaClass;
 class EnclosingClassMixin {
 public:
 
-    const AbstractMetaClassCPtr enclosingClass() const
+    AbstractMetaClassCPtr enclosingClass() const
         { return m_enclosingClass.lock(); }
     void setEnclosingClass(const AbstractMetaClassCPtr &cls)
         { m_enclosingClass = cls; }

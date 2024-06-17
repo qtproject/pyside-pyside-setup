@@ -241,7 +241,7 @@ struct ApiExtractorPrivate : public ApiExtractorOptions
                                                   const QString &code,
                                                   bool toPythonMacro);
     void addInstantiatedSmartPointer(InstantiationCollectContext &context,
-                                     const AbstractMetaType &type);
+                                     const AbstractMetaType &type) const;
 
     AbstractMetaBuilder *m_builder = nullptr;
 };
@@ -464,7 +464,7 @@ AbstractMetaClassPtr ApiExtractor::inheritTemplateClass(const ComplexTypeEntryPt
 
 QString ApiExtractorPrivate::getSimplifiedContainerTypeName(const AbstractMetaType &type)
 {
-    const QString signature = type.cppSignature();
+    QString signature = type.cppSignature();
     if (!type.typeEntry()->isContainer() && !type.typeEntry()->isSmartPointer())
         return signature;
     QString typeName = signature;
@@ -593,7 +593,7 @@ static void addOwnerModification(const AbstractMetaFunctionCList &functions,
 }
 
 void ApiExtractorPrivate::addInstantiatedSmartPointer(InstantiationCollectContext &context,
-                                                      const AbstractMetaType &type)
+                                                      const AbstractMetaType &type) const
 {
     InstantiatedSmartPointer smp;
     smp.type =  canonicalSmartPtrInstantiation(type);
@@ -661,7 +661,7 @@ ApiExtractorPrivate::collectInstantiatedContainersAndSmartPointers(Instantiation
 {
     addInstantiatedContainersAndSmartPointers(context, func->type(), func->signature());
     for (const AbstractMetaArgument &arg : func->arguments()) {
-        const auto argType = arg.type();
+        const auto &argType = arg.type();
         const auto type = argType.viewOn() != nullptr ? *argType.viewOn() : argType;
         addInstantiatedContainersAndSmartPointers(context, type, func->signature());
     }
@@ -798,7 +798,7 @@ ApiExtractorPrivate::collectContainerTypesFromConverterMacros(InstantiationColle
     qsizetype start = 0;
     QString errorMessage;
     while ((start = code.indexOf(convMacro, start)) != -1) {
-        int end = code.indexOf(u']', start);
+        const auto end = code.indexOf(u']', start);
         start += offset;
         if (code.at(start) != u'%') {
             QString typeString = code.mid(start, end - start);

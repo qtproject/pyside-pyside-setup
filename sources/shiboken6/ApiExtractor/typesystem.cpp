@@ -242,7 +242,7 @@ bool TypeEntry::isUniquePointer() const
 {
     if (m_d->m_type != SmartPointerType)
         return false;
-    auto *ste = static_cast<const SmartPointerTypeEntry *>(this);
+    const auto *ste = static_cast<const SmartPointerTypeEntry *>(this);
     return ste->smartPointerType() == TypeSystem::SmartPointerType::Unique;
 }
 
@@ -512,7 +512,7 @@ QString TypeEntry::targetLangEntryName() const
 {
     if (m_d->m_cachedTargetLangEntryName.isEmpty()) {
         m_d->m_cachedTargetLangEntryName = targetLangName();
-        const int lastDot = m_d->m_cachedTargetLangEntryName.lastIndexOf(u'.');
+        const auto lastDot = m_d->m_cachedTargetLangEntryName.lastIndexOf(u'.');
         if (lastDot != -1)
             m_d->m_cachedTargetLangEntryName.remove(0, lastDot + 1);
     }

@@ -453,7 +453,7 @@ OverloadDataNode::OverloadDataNode(const AbstractMetaFunctionCPtr &func,
                                    OverloadDataRootNode *parent,
                                    const AbstractMetaArgument &argument,
                                    int argPos,
-                                   const QString argTypeReplaced) :
+                                   const QString &argTypeReplaced) :
       m_argument(argument),
       m_argTypeReplaced(argTypeReplaced),
       m_parent(parent),

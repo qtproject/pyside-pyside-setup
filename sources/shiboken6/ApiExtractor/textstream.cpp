@@ -24,7 +24,7 @@ TextStream::~TextStream() = default;
 
 QChar TextStream::lastChar() const
 {
-    auto s = m_str.string();
+    const auto *s = m_str.string();
     return s != nullptr && !s->isEmpty() ? *(s->crbegin()) : QChar();
 }
 
@@ -43,7 +43,7 @@ void TextStream::outdent(int n)
 qint64 TextStream::pos() const
 {
     // QTextStream::pos() only works for QIODevice, be a bit smarter
-    if (auto s = m_str.string())
+    if (const auto *s = m_str.string())
         return s->size();
     // QIODevices need to flushed to tell the correct position.
     const_cast<QTextStream &>(m_str).flush();

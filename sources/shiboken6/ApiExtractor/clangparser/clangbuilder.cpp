@@ -19,9 +19,6 @@
 #include <QtCore/QStack>
 #include <QtCore/QList>
 
-#include <cstring>
-#include <ctype.h>
-
 using namespace Qt::StringLiterals;
 
 namespace clang {
@@ -269,7 +266,7 @@ static QString msgCannotDetermineException(const std::string_view &snippetV)
 {
     const auto newLine = snippetV.find('\n'); // Multiline noexcept specifications have been found in Qt
     const bool truncate = newLine != std::string::npos;
-    const qsizetype length = qsizetype(truncate ? newLine : snippetV.size());
+    const auto length = qsizetype(truncate ? newLine : snippetV.size());
     QString snippet = QString::fromUtf8(snippetV.data(), length);
     if (truncate)
         snippet += "..."_L1;
@@ -441,14 +438,14 @@ void BuilderPrivate::addField(const CXCursor &cursor)
 static QStringList qualifiedName(const QString &t)
 {
     QStringList result;
-    int end = t.indexOf(u'<');
+    auto end = t.indexOf(u'<');
     if (end == -1)
         end = t.indexOf(u'(');
     if (end == -1)
         end = t.size();
-    int lastPos = 0;
+    qsizetype lastPos = 0;
     while (true) {
-        const int nextPos = t.indexOf(u"::"_s, lastPos);
+        const auto nextPos = t.indexOf(u"::"_s, lastPos);
         if (nextPos < 0 || nextPos >= end)
             break;
         result.append(t.mid(lastPos, nextPos - lastPos));
@@ -579,7 +576,7 @@ TypeInfo BuilderPrivate::createTypeInfoUncached(const CXType &type,
     if (m_currentClass && typeName.startsWith(u"type-parameter-0-")) {
         if (cacheable != nullptr)
             *cacheable = false;
-        bool ok;
+        bool ok{};
         const int n = QStringView{typeName}.mid(17).toInt(&ok);
         if (ok) {
             auto currentTemplate = currentTemplateClass();
@@ -658,7 +655,7 @@ QString BuilderPrivate::cursorValueExpression(BaseVisitor *bv, const CXCursor &c
     const std::string_view snippet = bv->getCodeSnippet(cursor);
     auto equalSign = snippet.find('=');
     if (equalSign == std::string::npos)
-        return QString();
+        return {};
     ++equalSign;
     QString result = QString::fromLocal8Bit(snippet.data() + equalSign,
                                             qsizetype(snippet.size() - equalSign));
@@ -726,7 +723,7 @@ std::pair<QString, ClassModelItem> BuilderPrivate::getBaseClass(CXType type) con
     // "std::vector<T>").
     const QStringList &baseScope = it.value()->scope();
     if (!baseScope.isEmpty()) {
-        const int lastSep = baseClassName.lastIndexOf(u"::"_s);
+        const auto lastSep = baseClassName.lastIndexOf(u"::"_s);
         if (lastSep >= 0)
             baseClassName.remove(0, lastSep + u"::"_s.size());
         baseClassName.prepend(u"::"_s);
@@ -755,9 +752,9 @@ void BuilderPrivate::setFileName(const CXCursor &cursor, _CodeModelItem *item)
     }
 }
 
-Builder::Builder()
+Builder::Builder() :
+    d(new BuilderPrivate(this))
 {
-    d = new BuilderPrivate(this);
 }
 
 Builder::~Builder()

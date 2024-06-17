@@ -17,7 +17,7 @@ public:
     Q_DISABLE_COPY_MOVE(Builder)
 
     Builder();
-    ~Builder();
+    ~Builder() override;
 
     void setForceProcessSystemIncludes(const QStringList &systemIncludes);
 

@@ -552,7 +552,7 @@ QString ShibokenGenerator::cpythonWrapperCPtr(const TypeEntryCPtr &type,
                                               const QString &argName)
 {
     if (!type->isWrapperType())
-        return QString();
+        return {};
     return u"reinterpret_cast< "_s + getFullTypeName(type)
         + u" *>(Shiboken::Conversions::cppPointer("_s + cpythonTypeNameExt(type)
         + u", reinterpret_cast<SbkObject *>("_s + argName + u")))"_s;
@@ -874,7 +874,7 @@ bool ShibokenGenerator::isNullPtr(const QString &value)
         || value == u"NULLPTR" || value == u"{}";
 }
 
-QString ShibokenGenerator::cpythonCheckFunction(AbstractMetaType metaType)
+QString ShibokenGenerator::cpythonCheckFunction(const AbstractMetaType &metaType)
 {
     const auto typeEntry = metaType.typeEntry();
     if (typeEntry->isCustom()) {
@@ -1292,13 +1292,13 @@ static QString getArgumentsFromMethodCall(const QString &str)
     static QLatin1String funcCall("%CPPSELF.%FUNCTION_NAME");
     auto pos = str.indexOf(funcCall);
     if (pos == -1)
-        return QString();
+        return {};
     pos = pos + funcCall.size();
     while (str.at(pos) == u' ' || str.at(pos) == u'\t')
         ++pos;
     if (str.at(pos) == u'(')
         ++pos;
-    int begin = pos;
+    qsizetype begin = pos;
     int counter = 1;
     while (counter != 0) {
         if (str.at(pos) == u'(')
@@ -1753,13 +1753,13 @@ void ShibokenGenerator::replaceConverterTypeSystemVariable(TypeSystemConverterVa
                                               typeSystemConvName().value(converterVariable),
                                               message));
         }
-        const auto conversionType = conversionTypeO.value();
+        const auto &conversionType = conversionTypeO.value();
         QString conversion;
         switch (converterVariable) {
             case TypeSystemToCppFunction: {
                 StringStream c(TextStream::Language::Cpp);
-                int end = match.capturedStart();
-                int start = end;
+                const auto end = match.capturedStart();
+                auto start = end;
                 while (start > 0 && code.at(start) != u'\n')
                     --start;
                 while (code.at(start).isSpace())
@@ -2035,7 +2035,7 @@ ShibokenGenerator::FunctionGroups ShibokenGenerator::getGlobalFunctionGroups() c
 const GeneratorClassInfoCacheEntry &
     ShibokenGenerator::getGeneratorClassInfo(const AbstractMetaClassCPtr &scope)
 {
-    auto cache = generatorClassInfoCache();
+    auto *cache = generatorClassInfoCache();
     auto it = cache->find(scope);
     if (it == cache->end()) {
         it = cache->insert(scope, {});
@@ -2243,12 +2243,8 @@ ShibokenGenerator::filterGroupedOperatorFunctions(const AbstractMetaClassCPtr &m
             funcs.erase(std::find_if(funcs.begin(), funcs.end(), isDecrementOperator));
     }
     for (const auto &func : funcs) {
-        int args;
-        if (func->isComparisonOperator()) {
-            args = -1;
-        } else {
-            args = func->arguments().size();
-        }
+        const int args = func->isComparisonOperator()
+                         ? -1 : func->arguments().size();
         auto op = std::make_pair(func->name(), args);
         results[op].append(func);
     }
@@ -2513,7 +2509,7 @@ QString ShibokenGenerator::getTypeIndexVariableName(TypeEntryCPtr type)
     // Disambiguate namespaces per module to allow for extending them.
     if (type->isNamespace()) {
         QString package = type->targetLangPackage();
-        const int dot = package.lastIndexOf(u'.');
+        const auto dot = package.lastIndexOf(u'.');
         result += QStringView{package}.right(package.size() - (dot + 1));
     }
     result += _fixedCppTypeName(type->qualifiedCppName());
@@ -2530,7 +2526,7 @@ QString ShibokenGenerator::getTypeIndexVariableName(const AbstractMetaType &type
     return result;
 }
 
-void collectfromTypeEntry(TypeEntryCPtr entry, QStringList &typeNames)
+void collectfromTypeEntry(const TypeEntryCPtr &entry, QStringList &typeNames)
 {
     if (entry->shouldGenerate()) {
         typeNames[entry->sbkIndex()] = entry->qualifiedTargetLangName();

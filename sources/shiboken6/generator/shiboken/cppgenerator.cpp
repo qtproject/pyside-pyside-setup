@@ -265,7 +265,7 @@ QString CppGenerator::chopType(QString s)
     return s;
 }
 
-static bool isStdSetterName(QString setterName, QString propertyName)
+static bool isStdSetterName(const QString &setterName, const QString &propertyName)
 {
    return setterName.size() == propertyName.size() + 3
           && setterName.startsWith(u"set")
@@ -645,7 +645,7 @@ void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classCon
         if (overloads.isEmpty())
             continue;
 
-        const auto rfunc = overloads.constFirst();
+        const auto &rfunc = overloads.constFirst();
         OverloadData overloadData(overloads, api());
 
         if (rfunc->isConstructor()) {
@@ -997,7 +997,7 @@ CppGenerator::VirtualMethodReturn
                 static const QRegularExpression regex("%(\\d+)"_L1);
                 Q_ASSERT(regex.isValid());
                 QString expr = argMod.replacedDefaultExpression();
-                for (int offset = 0; ; ) {
+                for (qsizetype offset = 0; ; ) {
                     const QRegularExpressionMatch match = regex.match(expr, offset);
                     if (!match.hasMatch())
                         break;
@@ -1985,7 +1985,7 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
     Q_ASSERT(ownerClass == context.metaClass());
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
-    bool initPythonArguments;
+    bool initPythonArguments{};
 
     // If method is a constructor...
     if (rfunc->isConstructor()) {
@@ -2620,7 +2620,7 @@ void CppGenerator::writeTypeCheck(TextStream &s,
     // This condition trusts that the OverloadData object will arrange for
     // PyLong type to come after the more precise numeric types (e.g. float and bool)
     AbstractMetaType argType = overloadData->modifiedArgType();
-    if (auto viewOn = argType.viewOn())
+    if (const auto *viewOn = argType.viewOn())
         argType = *viewOn;
     const bool numberType = numericTypes.size() == 1 || ShibokenGenerator::isPyInt(argType);
     bool rejectNull =
@@ -2674,7 +2674,7 @@ static inline QString arrayHandleType(const AbstractMetaTypeList &nestedArrayTyp
             + QString::number(nestedArrayTypes.constFirst().arrayElementCount())
             + u'>';
     }
-    return QString();
+    return {};
 }
 
 // Helper to write argument initialization code for a function argument
@@ -2880,7 +2880,7 @@ void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s,
     const auto rfunc = overloadData.referenceFunction();
     const AbstractMetaFunctionCList &functionOverloads = overloadData.overloads();
     for (qsizetype i = 0; i < functionOverloads.size(); ++i) {
-        const auto func = functionOverloads.at(i);
+        const auto &func = functionOverloads.at(i);
         s << "// " << i << ": ";
         if (func->isStatic())
             s << "static ";
@@ -3077,7 +3077,7 @@ void CppGenerator::writeFunctionCalls(TextStream &s, const OverloadData &overloa
                                 errorReturn);
     } else {
         for (qsizetype i = 0; i < overloads.size(); ++i) {
-            const auto func = overloads.at(i);
+            const auto &func = overloads.at(i);
             s << "case " << i << ": // " << func->signature() << "\n{\n" << indent;
             writeSingleFunctionCall(s, overloadData, func, context, errorReturn);
             s << "break;\n" << outdent << "}\n";
@@ -3434,7 +3434,7 @@ void CppGenerator::writePythonToCppConversionFunction(TextStream &s,
         // Containers of opaque containers are not handled here.
         const auto generatorArg = GeneratorArgument::fromMetaType(type);
         if (generatorArg.indirections > 0 && !type.generateOpaqueContainer()) {
-            for (int pos = 0; ; ) {
+            for (qsizetype pos = 0; ; ) {
                 const QRegularExpressionMatch match = convertToCppRegEx().match(code, pos);
                 if (!match.hasMatch())
                     break;
@@ -4682,7 +4682,7 @@ void CppGenerator::writeTypeAsNumberDefinition(TextStream &s, const AbstractMeta
 
     const QList<AbstractMetaFunctionCList> opOverloads = numberProtocolOperators(metaClass);
     for (const auto &opOverload : opOverloads) {
-        const auto rfunc = opOverload.at(0);
+        const auto &rfunc = opOverload.at(0);
         QString opName = ShibokenGenerator::pythonOperatorFunctionName(rfunc);
         nb[opName] = cpythonFunctionName(rfunc);
     }
@@ -5165,7 +5165,7 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
     const auto rfunc = overloadData.referenceFunction();
     QString funcName = fullPythonFunctionName(rfunc, false);
 
-    int idx = overloadData.overloads().length() - 1;
+    auto idx = overloadData.overloads().length() - 1;
     bool multiple = idx > 0;
 
     for (const auto &f : overloadData.overloads()) {
@@ -5354,7 +5354,7 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const AbstractMetaEnum
 
     QString enumVarTypeObj = cpythonTypeNameExtSet(enumTypeEntry);
     if (!cppEnum.isAnonymous()) {
-        int packageLevel = packageName().count(u'.') + 1;
+        auto packageLevel = packageName().count(u'.') + 1;
         s << "EType = Shiboken::Enum::"
             << "createPythonEnum"
             << '(' << enclosingObjectVariable << ",\n" << indent
@@ -5388,7 +5388,7 @@ void CppGenerator::writeSignalInitialization(TextStream &s, const AbstractMetaCl
             continue;
         const AbstractMetaArgumentList &arguments = cppSignal->arguments();
         for (const AbstractMetaArgument &arg : arguments) {
-            AbstractMetaType metaType = arg.type();
+            const AbstractMetaType &metaType = arg.type();
             const QByteArray origType =
                 QMetaObject::normalizedType(qPrintable(metaType.originalTypeDescription()));
             const QByteArray cppSig =
@@ -6172,7 +6172,7 @@ bool CppGenerator::finishGeneration()
         includes.insert(smp.type.instantiations().constFirst().typeEntry()->include());
     }
 
-    for (auto &instantiatedContainer : api().instantiatedContainers()) {
+    for (const auto &instantiatedContainer : api().instantiatedContainers()) {
         includes.insert(instantiatedContainer.typeEntry()->include());
         for (const auto &inst : instantiatedContainer.instantiations())
             includes.insert(inst.typeEntry()->include());
@@ -6180,7 +6180,7 @@ bool CppGenerator::finishGeneration()
 
     const ExtendedConverterData extendedConverters = getExtendedConverters();
     for (auto it = extendedConverters.cbegin(), end = extendedConverters.cend(); it != end; ++it) {
-        TypeEntryCPtr te = it.key();
+        const TypeEntryCPtr &te = it.key();
         includes.insert(te->include());
         for (const auto &metaClass : it.value())
             includes.insert(metaClass->typeEntry()->include());
@@ -6323,7 +6323,7 @@ bool CppGenerator::finishGeneration()
     if (!extendedConverters.isEmpty()) {
         s  << '\n' << "// Extended Converters.\n\n";
         for (ExtendedConverterData::const_iterator it = extendedConverters.cbegin(), end = extendedConverters.cend(); it != end; ++it) {
-            TypeEntryCPtr externalType = it.key();
+            const TypeEntryCPtr &externalType = it.key();
             s << "// Extended implicit conversions for "
                 << externalType->qualifiedTargetLangName() << '.' << '\n';
             for (const auto &sourceClass : it.value()) {
@@ -6415,7 +6415,7 @@ bool CppGenerator::finishGeneration()
 
         collectFullTypeNamesArray(typeNames);
 
-        for (auto typeName : typeNames)
+        for (const auto &typeName : typeNames)
             s << "{nullptr, \"" << typeName << "\"},\n";
 
         s << "{nullptr, nullptr}\n" << outdent << "};\n"

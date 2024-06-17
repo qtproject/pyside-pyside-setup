@@ -778,7 +778,8 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
         if (createRef)
             enumName.prepend(enumTypeEntry->targetLangPackage() + u'.');
         return "Combination of "_L1 + (createRef ? toRef(enumName) : enumName);
-    } else if (type.isEnum()) {
+    }
+    if (type.isEnum()) {
         auto enumTypeEntry = std::static_pointer_cast<const EnumTypeEntry>(type.typeEntry());
         auto enumName = enumTypeEntry->targetLangName();
         if (createRef)
@@ -1096,7 +1097,7 @@ void QtDocGenerator::writeModuleDocumentation()
         // information when neeeded. For example, the RST files in the extras directory
         // doesn't include the PySide# prefix in their names.
         QString moduleName = it.key();
-        const int lastIndex = moduleName.lastIndexOf(u'.');
+        const auto lastIndex = moduleName.lastIndexOf(u'.');
         if (lastIndex >= 0)
             moduleName.remove(0, lastIndex + 1);
 
@@ -1263,17 +1264,11 @@ void QtDocGenerator::writeAdditionalDocumentation() const
            successCount, count);
 }
 
-#ifdef __WIN32__
-#   define PATH_SEP ';'
-#else
-#   define PATH_SEP ':'
-#endif
-
 bool QtDocGenerator::doSetup()
 {
     if (m_options.parameters.codeSnippetDirs.isEmpty()) {
         m_options.parameters.codeSnippetDirs =
-            m_options.parameters.libSourceDir.split(QLatin1Char(PATH_SEP));
+            m_options.parameters.libSourceDir.split(QDir::listSeparator());
     }
 
     if (m_docParser.isNull()) {
@@ -1357,7 +1352,7 @@ bool QtDocGeneratorOptionsParser::handleOption(const QString &key, const QString
         return true;
     }
     if (key == u"documentation-code-snippets-dir") {
-        m_options->parameters.codeSnippetDirs = value.split(QLatin1Char(PATH_SEP));
+        m_options->parameters.codeSnippetDirs = value.split(QDir::listSeparator());
         return true;
     }
 
@@ -1570,7 +1565,7 @@ QtXmlToSphinxLink QtDocGenerator::resolveLink(const QtXmlToSphinxLink &link) con
 QtXmlToSphinxDocGeneratorInterface::Image
     QtDocGenerator::resolveImage(const QString &href, const QString &context) const
 {
-    QString relativeSourceDir = href;
+    const QString &relativeSourceDir = href;
     const QString source = m_options.parameters.docDataDir + u'/' + relativeSourceDir;
     if (!QFileInfo::exists(source))
         throw Exception(msgCannotFindImage(href, context,source));

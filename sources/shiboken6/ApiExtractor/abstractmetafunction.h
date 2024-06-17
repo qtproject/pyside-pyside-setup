@@ -363,7 +363,7 @@ public:
     const FunctionModificationList &modifications(AbstractMetaClassCPtr implementor = {}) const;
     void clearModificationsCache();
 
-    const DocModificationList addedFunctionDocModifications() const;
+    DocModificationList addedFunctionDocModifications() const;
 
     static FunctionModificationList findClassModifications(const AbstractMetaFunction *f,
                                                            AbstractMetaClassCPtr implementor);
@@ -372,7 +372,8 @@ public:
     /**
      * Return the argument name if there is a modification the renamed value will be returned
      */
-    QString argumentName(int index, bool create = true, AbstractMetaClassCPtr cl = {}) const;
+    QString argumentName(int index, bool create = true,
+                         const AbstractMetaClassCPtr &cl = {}) const;
 
     int propertySpecIndex() const;
     void setPropertySpecIndex(int i);

@@ -384,7 +384,7 @@ TypeEntryCPtr parentManagementEntry(const AbstractMetaClassCPtr &klass);
 inline bool hasParentManagement(const AbstractMetaClassCPtr &c)
 { return bool(parentManagementEntry(c)); }
 
-AbstractMetaClassCList allBaseClasses(const AbstractMetaClassCPtr metaClass);
+AbstractMetaClassCList allBaseClasses(const AbstractMetaClassCPtr &metaClass);
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaClass::CppWrapper);
 

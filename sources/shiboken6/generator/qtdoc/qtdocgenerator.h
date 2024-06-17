@@ -28,7 +28,7 @@ public:
     Q_DISABLE_COPY_MOVE(QtDocGenerator)
 
     QtDocGenerator();
-    ~QtDocGenerator();
+    ~QtDocGenerator() override;
 
     bool doSetup() override;
 

@@ -63,7 +63,7 @@ static void formatFunctionUnqualifiedArgTypeQuery(QTextStream &str,
         const auto flagsEntry = std::static_pointer_cast<const FlagsTypeEntry>(metaType.typeEntry());
         QString name = flagsEntry->qualifiedCppName();
         if (name.endsWith(u'>') && name.startsWith(u"QFlags<")) {
-            const int lastColon = name.lastIndexOf(u':');
+            const auto lastColon = name.lastIndexOf(u':');
             if (lastColon != -1) {
                 name.replace(lastColon + 1, name.size() - lastColon - 1, metaType.name());
                 name.remove(0, 7);
@@ -76,7 +76,7 @@ static void formatFunctionUnqualifiedArgTypeQuery(QTextStream &str,
         break;
     case AbstractMetaType::ContainerPattern: { // QVector<int>
         str << metaType.typeEntry()->qualifiedCppName() << '<';
-        const auto instantiations = metaType.instantiations();
+        const auto &instantiations = metaType.instantiations();
         for (qsizetype i = 0, size = instantiations.size(); i < size; ++i) {
             if (i)
                 str << ", ";
@@ -413,7 +413,7 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
         qCWarning(lcShibokenDoc).noquote().nospace()
             << "Can't find qdoc file for module " <<  name << ", tried: "
             << QDir::toNativeSeparators(sourceFile);
-        return Documentation();
+        return {};
     }
 
     QString errorMessage;

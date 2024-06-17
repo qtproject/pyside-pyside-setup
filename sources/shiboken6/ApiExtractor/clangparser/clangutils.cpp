@@ -61,10 +61,10 @@ SourceLocation getCursorLocation(const CXCursor &cursor)
 
 CXString getFileNameFromLocation(const CXSourceLocation &location)
 {
-    CXFile file;
-    unsigned line;
-    unsigned column;
-    unsigned offset;
+    CXFile file{};
+    unsigned line{};
+    unsigned column{};
+    unsigned offset{};
     clang_getExpansionLocation(location, &file, &line, &column, &offset);
     return clang_getFileName(file);
 }

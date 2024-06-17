@@ -423,7 +423,7 @@ bool AbstractMetaFunction::isConstOverloadOf(const AbstractMetaFunction *other) 
     }
 
     // Match "const Foo &getFoo() const" / "Foo &getFoo()" / "Foo getFoo() const"
-    const auto otherType = other->type();
+    const auto &otherType = other->type();
     if (d->m_type.name() != otherType.name()
         || d->m_type.indirectionsV() != otherType.indirectionsV()) {
         return false;
@@ -653,7 +653,7 @@ ArgumentOwner AbstractMetaFunction::argumentOwner(const AbstractMetaClassCPtr &c
             return argumentMod.owner();
         }
     }
-    return ArgumentOwner();
+    return {};
 }
 
 QString AbstractMetaFunction::conversionRule(TypeSystem::Language language, int key) const
@@ -670,7 +670,7 @@ QString AbstractMetaFunction::conversionRule(TypeSystem::Language language, int 
         }
     }
 
-    return QString();
+    return {};
 }
 
 bool AbstractMetaFunction::hasConversionRule(TypeSystem::Language language, int idx) const
@@ -962,7 +962,8 @@ void AbstractMetaFunction::applyTypeModifications()
                 && !d->applyTypeModification(this, am.modifiedType(),
                                              n, &errorMessage)) {
                 throw Exception(errorMessage);
-            } else if (am.isRemoved() && n != 0) {
+            }
+            if (am.isRemoved() && n != 0) {
                 if (n < 1 || n > d->m_arguments.size()) {
                     errorMessage =
                         msgArgumentRemovalFailed(this, n,
@@ -1112,7 +1113,7 @@ void AbstractMetaFunction::clearModificationsCache()
     d->m_modificationCache.clear();
 }
 
-const DocModificationList AbstractMetaFunction::addedFunctionDocModifications() const
+DocModificationList AbstractMetaFunction::addedFunctionDocModifications() const
 {
     return d->m_addedFunction
         ? d->m_addedFunction->docModifications() : DocModificationList{};
@@ -1120,7 +1121,7 @@ const DocModificationList AbstractMetaFunction::addedFunctionDocModifications() 
 
 QString AbstractMetaFunction::argumentName(int index,
                                            bool /* create */,
-                                           AbstractMetaClassCPtr  /* implementor */) const
+                                           const AbstractMetaClassCPtr & /* implementor */) const
 {
     return d->m_arguments[--index].name();
 }

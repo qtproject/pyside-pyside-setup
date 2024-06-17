@@ -128,7 +128,7 @@ void HeaderGenerator::generateClass(TextStream &s, const GeneratorContext &class
 
     // Includes
     s << metaClass->typeEntry()->include() << '\n';
-    for (auto &inst : metaClass->templateBaseClassInstantiations())
+    for (const auto &inst : metaClass->templateBaseClassInstantiations())
         s << inst.typeEntry()->include();
 
     if (classContext.useWrapper())
@@ -523,7 +523,7 @@ static qsizetype indexOf(const NameSpaces &nsps, const AbstractMetaClassCPtr &ne
 static void writeNamespaceForwardDeclarationRecursion(TextStream &s, qsizetype idx,
                                                       const NameSpaces &nameSpaces)
 {
-    auto &root = nameSpaces.at(idx);
+    const auto &root = nameSpaces.at(idx);
     s << '\n';
     if (root.nameSpace->isInlineNamespace())
         s << "inline ";

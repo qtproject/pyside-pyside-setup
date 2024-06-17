@@ -195,7 +195,7 @@ FileModelItem _CodeModelItem::file() const
     return model()->findFile(fileName());
 }
 
-void _CodeModelItem::getStartPosition(int *line, int *column)
+void _CodeModelItem::getStartPosition(int *line, int *column) const
 {
     *line = m_startLine;
     *column = m_startColumn;
@@ -207,7 +207,7 @@ void _CodeModelItem::setStartPosition(int line, int column)
     m_startColumn = column;
 }
 
-void _CodeModelItem::getEndPosition(int *line, int *column)
+void _CodeModelItem::getEndPosition(int *line, int *column) const
 {
     *line = m_endLine;
     *column = m_endColumn;
@@ -704,10 +704,10 @@ _ScopeModelItem::FindEnumByValueReturn
     if (const auto e = scope->findEnumByValueHelper(fullValue, enumValue))
         return e;
 
-    if (auto *enclosingScope = scope->enclosingScope()) {
+    if (const auto *enclosingScope = scope->enclosingScope()) {
         // The enclosing scope may have several sibling namespaces of that name.
         if (searchSiblingNamespaces && scope->kind() == Kind_Namespace) {
-            if (auto *enclosingNamespace = dynamic_cast<const _NamespaceModelItem *>(enclosingScope)) {
+            if (const auto *enclosingNamespace = dynamic_cast<const _NamespaceModelItem *>(enclosingScope)) {
                 for (const auto &sibling : enclosingNamespace->namespaces()) {
                     if (sibling.get() != scope && sibling->name() == scope->name()) {
                         if (const auto e = findEnumByValueRecursion(sibling.get(),
@@ -724,7 +724,7 @@ _ScopeModelItem::FindEnumByValueReturn
     }
 
     // PYSIDE-331: We need to also search the base classes.
-    if (auto *classItem = dynamic_cast<const _ClassModelItem *>(scope)) {
+    if (const auto *classItem = dynamic_cast<const _ClassModelItem *>(scope)) {
         for (const auto &base : classItem->baseClasses()) {
             if (base.klass) {
                 auto *c = base.klass.get();
@@ -769,7 +769,7 @@ _NamespaceModelItem::_NamespaceModelItem(CodeModel *model, const QString &name, 
 
 _NamespaceModelItem::~_NamespaceModelItem() = default;
 
-void _NamespaceModelItem::addNamespace(NamespaceModelItem item)
+void _NamespaceModelItem::addNamespace(const NamespaceModelItem &item)
 {
     item->setEnclosingScope(this);
     m_namespaces.append(item);
