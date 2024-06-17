@@ -186,6 +186,7 @@ Run CMake on Windows:
 To build:
 
 .. code-block:: bash
+
     ninja
     ninja install
     cd ..
