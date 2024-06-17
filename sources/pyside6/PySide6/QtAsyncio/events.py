@@ -63,7 +63,10 @@ class QAsyncioExecutorWrapper(QObject):
         self._loop = QEventLoop()
         asyncio.events._set_running_loop(self._loop)
 
-        QTimer.singleShot(0, self._loop, lambda: self._cb())
+        # The do() function will always be executed from the new executor
+        # thread and never from outside, so using the overload without the
+        # context argument is sufficient.
+        QTimer.singleShot(0, lambda: self._cb())
 
         self._loop.exec()
         if self._exception is not None:
