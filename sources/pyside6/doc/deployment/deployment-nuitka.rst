@@ -117,16 +117,3 @@ for data compression. Then you can run::
 This process takes a bit longer, but in the end you have one executable ``hello.bin``::
 
     ./hello.bin
-
-
-Some Caveats
-============
-
-
-Nuitka issue on macOS
----------------------
-
-Nuitka currently has a problem with the macOS bundle files on current macOS versions.
-That has the effect that ``--standalone`` and ``--onefile`` create a crashing application.
-Older versions which don't have the recent macOS API changes from 2020 will work.
-We are currently trying to fix that problem.
