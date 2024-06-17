@@ -109,7 +109,7 @@ simplify the installation step::
 Complementary to the wheels, you will be able to download the sources
 as well.
 
-.. note:: Wheels installed this way will be detectable by `*Qt Creator*`_, which
+.. note:: Wheels installed this way will be detectable by `Qt Creator`_, which
    will offer you to install them for your current Python interpreter.
 
 Using account.qt.io

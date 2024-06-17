@@ -3,16 +3,16 @@
 pyside6-qml
 ===========
 
-``pyside6-qml``  mimics some capabilities of Qt's `qml <qml_runtime>`_ runtime utility by directly
+``pyside6-qml``  mimics some capabilities of Qt's `qml`_ runtime utility by directly
 invoking QQmlEngine/QQuickView. It enables prototyping with QML/QtQuick without the need to write
-any Python code that loads the QML files either through `QQmlApplicationEngine <qqmlappengine>`_ or
-the `QQuickView <qquickview>`_ class. The tool also detects the QML classes implemented in Python
+any Python code that loads the QML files either through `QQmlApplicationEngine`_ or
+the `QQuickView`_ class. The tool also detects the QML classes implemented in Python
 and registers them with the QML type system.
 
 Usage
 -----
 
-Consider the example `Extending QML - Plugins Example <extending_qml_example>`_. This example does
+Consider the example `Extending QML - Plugins Example`_. This example does
 not have a Python file with a ``main`` function that initializes a QmlEngine to load the QML file
 ``app.qml``. You can run the example by running
 
@@ -50,8 +50,8 @@ Options
 * **--verbose/-v**: Run ``pyside6-qml`` in verbose mode. When run in this mode, pyside6-qml prints
   log messages during various stages of processing.
 
-Options that align with `QML <qml_runtime>`_ runtime utility
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Options that align with the `qml`_ runtime utility
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * **--app-typ/-a**: Specifies which application class to use. It takes one of the three values -
   ``core, gui, widget``. The default value is *gui*.
@@ -78,7 +78,7 @@ Options that align with `QML <qml_runtime>`_ runtime utility
 
 * **--disable-context-sharing**: Disable the use of a shared GL context for QtQuick Windows".
 
-.. _`qml_runtime`: https://doc.qt.io/qt-6/qtquick-qml-runtime.html
-.. _`qqmlappengine`: https://doc.qt.io/qt-6/qqmlapplicationengine.html
-.. _`qquickview`: https://doc.qt.io/qt-6/qquickview.html
-.. _`extending_qml_example`: https://doc.qt.io/qtforpython-6/examples/example_qml_tutorials_extending-qml_chapter6-plugins.html
+.. _`qml`: https://doc.qt.io/qt-6/qtquick-qml-runtime.html
+.. _`QQmlApplicationEngine`: https://doc.qt.io/qt-6/qqmlapplicationengine.html
+.. _`QQuickView`: https://doc.qt.io/qt-6/qquickview.html
+.. _`Extending QML - Plugins Example`: https://doc.qt.io/qtforpython-6/examples/example_qml_tutorials_extending-qml_chapter6-plugins.html
