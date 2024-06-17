@@ -38,4 +38,4 @@ if __name__ == "__main__":
     main_window = MainWindow()
     main_window.show()
 
-    QtAsyncio.run(handle_sigint=True)
+    QtAsyncio.run(qapp=app, handle_sigint=True)

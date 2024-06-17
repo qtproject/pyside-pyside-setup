@@ -91,16 +91,10 @@ class QAsyncioEventLoopPolicy(asyncio.AbstractEventLoopPolicy):
     https://discuss.python.org/t/removing-the-asyncio-policy-system-asyncio-set-event-loop-policy-in-python-3-15/37553
     """
     def __init__(self,
-                 application: typing.Optional[QCoreApplication] = None,
                  quit_qapp: bool = True,
                  handle_sigint: bool = False) -> None:
         super().__init__()
-        if application is None:
-            if QCoreApplication.instance() is None:
-                application = QCoreApplication()
-            else:
-                application = QCoreApplication.instance()
-        self._application: QCoreApplication = application  # type: ignore[assignment]
+        self._application = QCoreApplication.instance() or QCoreApplication()
 
         # Configure whether the QCoreApplication at the core of QtAsyncio
         # should be shut down when asyncio finishes. A special case where one

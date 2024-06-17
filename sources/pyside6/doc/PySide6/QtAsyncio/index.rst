@@ -118,6 +118,9 @@ or
 to run the coroutine and then stop the event loop upon its completion.
 This latter case behaves identically to ``asyncio.run(my_coroutine())``.
 
+If there is no instance of a QCoreApplication, QGuiApplication or
+QApplication yet, a new instance of QCoreApplication is created.
+
 An additional optional argument ``quit_qapp`` can be passed to ``run()``
 to configure whether the QCoreApplication at the core of QtAsyncio
 should be shut down when asyncio finishes. A special case where one

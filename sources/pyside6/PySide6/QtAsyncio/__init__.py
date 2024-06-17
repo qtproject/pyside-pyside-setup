@@ -23,7 +23,12 @@ def run(coro: typing.Optional[typing.Coroutine] = None,
         quit_qapp: bool = True, *,
         handle_sigint: bool = False,
         debug: typing.Optional[bool] = None) -> typing.Any:
-    """Run the QtAsyncio event loop."""
+    """
+    Run the QtAsyncio event loop.
+
+    If there is no instance of a QCoreApplication, QGuiApplication or
+    QApplication yet, a new instance of QCoreApplication is created.
+    """
 
     # Event loop policies are expected to be deprecated with Python 3.13, with
     # subsequent removal in Python 3.15. At that point, part of the current
