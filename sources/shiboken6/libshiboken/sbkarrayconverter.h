@@ -70,7 +70,7 @@ template <class T, int columns>
 class Array2Handle
 {
 public:
-    typedef T RowType[columns];
+    using RowType = T[columns];
 
     Array2Handle() = default;
 

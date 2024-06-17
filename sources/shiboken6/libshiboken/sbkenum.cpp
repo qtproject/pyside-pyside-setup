@@ -9,8 +9,7 @@
 #include "sbkconverter.h"
 #include "basewrapper.h"
 #include "autodecref.h"
-#include "sbkpython.h"
-#include "signature.h"
+#include "sbktypefactory.h"
 
 #include <cstring>
 #include <vector>
@@ -143,7 +142,8 @@ static PyObject *missing_func(PyObject * /* self */ , PyObject *args)
     static auto *const _mro = Shiboken::String::createStaticString("__mro__");
     static auto *const _class = Shiboken::String::createStaticString("__class__");
 
-    PyObject *klass{}, *value{};
+    PyObject *klass{};
+    PyObject *value{};
     if (!PyArg_UnpackTuple(args, "missing", 2, 2, &klass, &value))
         Py_RETURN_NONE;
     if (!PyLong_Check(value))

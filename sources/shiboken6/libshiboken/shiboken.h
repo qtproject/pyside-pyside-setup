@@ -19,6 +19,7 @@
 #include "sbkmodule.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
+#include "sbktypefactory.h"
 #include "shibokenmacros.h"
 #include "shibokenbuffer.h"
 #include "signature.h"

@@ -7,10 +7,7 @@
 #include "sbkpython.h"
 #include "shibokenmacros.h"
 
-namespace Shiboken
-{
-
-namespace Buffer
+namespace Shiboken::Buffer
 {
     enum Type {
         ReadOnly,
@@ -51,7 +48,6 @@ namespace Buffer
      */
     LIBSHIBOKEN_API void *copyData(PyObject *pyObj, Py_ssize_t *size = nullptr);
 
-} // namespace Buffer
-} // namespace Shiboken
+} // namespace Shiboken::Buffer
 
 #endif

@@ -192,7 +192,7 @@ static PyObject *PyModule_lazyGetAttro(PyObject *module, PyObject *name)
     // - check if the attribute is present and return it.
     auto *attr = PyObject_GenericGetAttr(module, name);
     // - we handle AttributeError, only.
-    if (!(attr == nullptr && PyErr_ExceptionMatches(PyExc_AttributeError)))
+    if (attr != nullptr || PyErr_ExceptionMatches(PyExc_AttributeError) == 0)
         return attr;
 
     PyErr_Clear();
@@ -280,7 +280,7 @@ static bool isImportStar(PyObject *module)
         AutoDecRef dec_co_code(PyObject_GetAttr(dec_f_code, _co_code));
         AutoDecRef dec_f_lasti(PyObject_GetAttr(dec_frame, _f_lasti));
         Py_ssize_t f_lasti = PyLong_AsSsize_t(dec_f_lasti);
-        Py_ssize_t code_len;
+        Py_ssize_t code_len{};
         char *co_code{};
         PyBytes_AsStringAndSize(dec_co_code, &co_code, &code_len);
         uint8_t opcode2 = co_code[f_lasti];
@@ -401,7 +401,7 @@ void AddTypeCreationFunction(PyObject *module,
     auto nit = nameToFunc.find(containerName);
 
     // - insert namePath into the subtype vector of the main type.
-    nit->second.subtypeNames.push_back(namePath);
+    nit->second.subtypeNames.emplace_back(namePath);
     // - insert it also as its own entry.
     nit = nameToFunc.find(namePath);
     TypeCreationStruct tcStruct{func, {}};

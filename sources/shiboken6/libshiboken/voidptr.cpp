@@ -6,6 +6,7 @@
 #include "sbkconverter.h"
 #include "basewrapper.h"
 #include "basewrapper_p.h"
+#include "sbktypefactory.h"
 
 extern "C"
 {
@@ -41,7 +42,7 @@ PyObject *SbkVoidPtrObject_new(PyTypeObject *type, PyObject * /* args */, PyObje
 
 int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
 {
-    PyObject *addressObject;
+    PyObject *addressObject{};
     Py_ssize_t size = -1;
     int isWritable = 0;
     auto *sbkSelf = reinterpret_cast<SbkVoidPtrObject *>(self);

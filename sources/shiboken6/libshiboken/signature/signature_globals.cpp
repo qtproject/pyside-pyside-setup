@@ -120,7 +120,7 @@ static safe_globals_struc *init_phase_1()
 
         return p;
 
-    } while (0);
+    } while (false);
 
     PyErr_Print();
     Py_FatalError("could not initialize part 1");
@@ -130,10 +130,8 @@ static safe_globals_struc *init_phase_1()
 static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
 {
     do {
-        PyMethodDef *ml;
-
         // The single function to be called, but maybe more to come.
-        for (ml = methods; ml->ml_name != nullptr; ml++) {
+        for (PyMethodDef *ml = methods; ml->ml_name != nullptr; ++ml) {
             PyObject *v = PyCFunction_NewEx(ml, nullptr, nullptr);
             if (v == nullptr
                 || PyObject_SetAttrString(p->helper_module, ml->ml_name, v) != 0)
@@ -220,10 +218,8 @@ static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
 static void handler(int sig) {
 #if defined(__GLIBC__)
     void *array[30];
-    size_t size;
-
     // get void *'s for all entries on the stack
-    size = backtrace(array, 30);
+    const int size = backtrace(array, 30);
 
     // print out all the frames to stderr
 #endif

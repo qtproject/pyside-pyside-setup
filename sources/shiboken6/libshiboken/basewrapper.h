@@ -6,7 +6,6 @@
 
 #include "sbkpython.h"
 #include "shibokenmacros.h"
-#include "sbktypefactory.h"
 
 #include <vector>
 #include <string>

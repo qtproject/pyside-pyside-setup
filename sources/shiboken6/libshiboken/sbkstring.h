@@ -7,9 +7,7 @@
 #include "sbkpython.h"
 #include "shibokenmacros.h"
 
-namespace Shiboken
-{
-namespace String
+namespace Shiboken::String
 {
     LIBSHIBOKEN_API bool check(PyObject *obj);
     LIBSHIBOKEN_API bool checkIterable(PyObject *obj);
@@ -33,10 +31,6 @@ namespace String
     LIBSHIBOKEN_API PyObject *getSnakeCaseName(PyObject *name, bool lower);
     LIBSHIBOKEN_API PyObject *repr(PyObject *o);
 
-} // namespace String
-} // namespace Shiboken
-
+} // namespace Shiboken::String
 
 #endif
-
-

@@ -7,13 +7,12 @@
 #include "helper.h"
 #include "pep384ext.h"
 #include "sbkconverter.h"
-#include "sbkenum.h"
 #include "sbkerrors.h"
 #include "sbkfeature_base.h"
-#include "sbkmodule.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
+#include "sbktypefactory.h"
 #include "autodecref.h"
 #include "gilstate.h"
 #include <string>
@@ -50,7 +49,7 @@ bool walkThroughBases(PyTypeObject *currentType, Predicate predicate)
     const Py_ssize_t numBases = PyTuple_Size(bases);
     bool result = false;
     for (Py_ssize_t i = 0; !result && i < numBases; ++i) {
-        auto type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(bases, i));
+        auto *type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(bases, i));
         if (PyType_IsSubtype(type, SbkObject_TypeF()) != 0) {
             result = PepType_SOTP(type)->is_user_type
                      ? walkThroughBases(type, predicate) : predicate(type);
@@ -249,7 +248,7 @@ PyTypeObject *SbkObjectType_TypeF(void)
 
 static PyObject *SbkObjectGetDict(PyObject *pObj, void *)
 {
-    auto ret = SbkObject_GetDict_NoRef(pObj);
+    auto *ret = SbkObject_GetDict_NoRef(pObj);
     Py_XINCREF(ret);
     return ret;
 }
@@ -264,17 +263,15 @@ static int SbkObject_tp_traverse(PyObject *self, visitproc visit, void *arg)
     auto *sbkSelf = reinterpret_cast<SbkObject *>(self);
 
     //Visit children
-    Shiboken::ParentInfo *pInfo = sbkSelf->d->parentInfo;
-    if (pInfo) {
+    if (auto *pInfo = sbkSelf->d->parentInfo) {
         for (SbkObject *c : pInfo->children)
              Py_VISIT(c);
     }
 
     //Visit refs
-    Shiboken::RefCountMap *rInfo = sbkSelf->d->referredObjects;
-    if (rInfo) {
-        for (auto it = rInfo->begin(), end = rInfo->end(); it != end; ++it)
-            Py_VISIT(it->second);
+    if (auto *rInfo = sbkSelf->d->referredObjects) {
+        for (const auto &p : *rInfo)
+            Py_VISIT(p.second);
     }
 
     if (sbkSelf->ob_dict)
@@ -422,7 +419,9 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
         }
     }
 
-    PyObject *error_type, *error_value, *error_traceback;
+    PyObject *error_type{};
+    PyObject *error_value{};
+    PyObject *error_traceback{};
 
     /* Save the current exception, if any. */
     PyErr_Fetch(&error_type, &error_value, &error_traceback);
@@ -537,7 +536,7 @@ PyObject *MakeQAppWrapper(PyTypeObject *type)
     static PyObject *qApp_last = nullptr;
 
     // protecting from multiple application instances
-    if (!(type == nullptr || qApp_last == Py_None)) {
+    if (type != nullptr && qApp_last != Py_None) {
         const char *res_name = qApp_last != nullptr
             ? PepType_GetNameStr(Py_TYPE(qApp_last)) : "<Unknown>";
         const char *type_name = PepType_GetNameStr(type);
@@ -575,9 +574,9 @@ static PyTypeObject *SbkObjectType_tp_new(PyTypeObject *metatype, PyObject *args
     // Before we changed to heap types, it was sufficient to remove the
     // Py_TPFLAGS_BASETYPE flag. That does not work, because PySide does
     // not respect this flag itself!
-    PyObject *name;
-    PyObject *pyBases;
-    PyObject *dict;
+    PyObject *name{};
+    PyObject *pyBases{};
+    PyObject *dict{};
     static const char *kwlist[] = { "name", "bases", "dict", nullptr};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO!O!:sbktype", const_cast<char **>(kwlist),
@@ -696,9 +695,8 @@ PyObject *SbkQApp_tp_new(PyTypeObject *subtype, PyObject *, PyObject *)
     auto *self = reinterpret_cast<SbkObject *>(obSelf);
     if (self == nullptr)
         return nullptr;
-    auto ret = _setupNew(obSelf, subtype);
-    auto priv = self->d;
-    priv->isQAppSingleton = 1;
+    auto *ret = _setupNew(obSelf, subtype);
+    self->d->isQAppSingleton = 1;
     return ret;
 }
 
@@ -716,7 +714,7 @@ PyObject *FallbackRichCompare(PyObject *self, PyObject *other, int op)
 {
     // This is a very simple implementation that supplies a simple identity.
     static const char * const opstrings[] = {"<", "<=", "==", "!=", ">", ">="};
-    PyObject *res;
+    PyObject *res{};
 
     switch (op) {
 
@@ -1002,7 +1000,7 @@ introduceWrapperType(PyObject *enclosingObject,
 
     auto *type = SbkType_FromSpecBasesMeta(typeSpec, bases, SbkObjectType_TypeF());
 
-    auto sotp = PepType_SOTP(type);
+    auto *sotp = PepType_SOTP(type);
     if (wrapperFlags & DeleteInMainThread)
         sotp->delete_in_main_thread = 1;
     sotp->type_behaviour = (wrapperFlags & Value) != 0
@@ -1170,7 +1168,7 @@ bool wasCreatedByPython(SbkObject *pyObj)
 
 void callCppDestructors(SbkObject *pyObj)
 {
-    auto priv = pyObj->d;
+    auto *priv = pyObj->d;
     if (priv->isQAppSingleton && DestroyQApplication) {
         // PYSIDE-1470: Allow to destroy the application from Shiboken.
         DestroyQApplication();
@@ -1304,10 +1302,9 @@ static void recursive_invalidate(SbkObject *self, std::set<SbkObject *> &seen)
     }
 
     // If has ref to other objects invalidate all
-    if (self->d->referredObjects) {
-        RefCountMap &refCountMap = *(self->d->referredObjects);
-        for (auto it = refCountMap.begin(), end = refCountMap.end(); it != end; ++it)
-            recursive_invalidate(it->second, seen);
+    if (auto *rInfo = self->d->referredObjects) {
+        for (const auto &p : *rInfo)
+            recursive_invalidate(p.second, seen);
     }
 }
 

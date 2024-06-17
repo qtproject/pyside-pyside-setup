@@ -424,7 +424,9 @@ static int PySide_FinishSignatures(PyObject *module, const char *signatures[])
      * to the PyCFunction attributes. Therefore I simplified things
      * and always use our own mapping.
      */
-    PyObject *key, *func, *obdict = PyModule_GetDict(module);
+    PyObject *key{};
+    PyObject *func{};
+    PyObject *obdict = PyModule_GetDict(module);
     Py_ssize_t pos = 0;
 
     while (PyDict_Next(obdict, &pos, &key, &func))
@@ -538,7 +540,7 @@ static PyObject *adjustFuncName(const char *func_name)
     assert(PyType_Check(obtype));   // This was not true for __init__!
 
     // Find the feature flags
-    auto type = reinterpret_cast<PyTypeObject *>(obtype.object());
+    auto *type = reinterpret_cast<PyTypeObject *>(obtype.object());
     AutoDecRef dict(PepType_GetDict(type));
     int id = currentSelectId(type);
     id = id < 0 ? 0 : id;   // if undefined, set to zero
@@ -585,7 +587,9 @@ void SetError_Argument(PyObject *args, const char *func_name, PyObject *info)
 
     // PYSIDE-1305: Handle errors set by fillQtProperties.
     if (PyErr_Occurred()) {
-        PyObject *e, *v, *t;
+        PyObject *e{};
+        PyObject *v{};
+        PyObject *t{};
         // Note: These references are all borrowed.
         PyErr_Fetch(&e, &v, &t);
         Py_DECREF(e);
@@ -606,7 +610,8 @@ void SetError_Argument(PyObject *args, const char *func_name, PyObject *info)
         PyErr_Print();
         Py_FatalError("seterror_argument did not receive a result");
     }
-    PyObject *err, *msg;
+    PyObject *err{};
+    PyObject *msg{};
     if (!PyArg_UnpackTuple(res, func_name, 2, 2, &err, &msg)) {
         PyErr_Print();
         Py_FatalError("unexpected failure in seterror_argument");

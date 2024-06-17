@@ -120,12 +120,10 @@ static int handle_doc_in_progress = 0;
 static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
 {
     AutoDecRef ob_type_mod(GetClassOrModOf(ob));
-    const char *name;
     bool isModule = PyModule_Check(ob_type_mod.object());
-    if (isModule)
-        name = PyModule_GetName(ob_type_mod.object());
-    else
-        name = reinterpret_cast<PyTypeObject *>(ob_type_mod.object())->tp_name;
+    const char *name = isModule
+        ? PyModule_GetName(ob_type_mod.object())
+        : reinterpret_cast<PyTypeObject *>(ob_type_mod.object())->tp_name;
     PyObject *res{};
 
     if (handle_doc_in_progress || name == nullptr
@@ -205,14 +203,14 @@ int PySide_PatchTypes(void)
         AutoDecRef wrap_descr(PyObject_GetAttrString(
                                     reinterpret_cast<PyObject *>(Py_TYPE(Py_True)), "__add__"));
         // abbreviations for readability
-        auto md_gs = new_PyMethodDescr_getsets;
-        auto md_doc = &old_md_doc_descr;
-        auto cf_gs = new_PyCFunction_getsets;
-        auto cf_doc = &old_cf_doc_descr;
-        auto sm_gs = new_PyStaticMethod_getsets;
-        auto sm_doc = &old_sm_doc_descr;
-        auto wd_gs = new_PyWrapperDescr_getsets;
-        auto wd_doc = &old_wd_doc_descr;
+        auto *md_gs = new_PyMethodDescr_getsets;
+        auto *md_doc = &old_md_doc_descr;
+        auto *cf_gs = new_PyCFunction_getsets;
+        auto *cf_doc = &old_cf_doc_descr;
+        auto *sm_gs = new_PyStaticMethod_getsets;
+        auto *sm_doc = &old_sm_doc_descr;
+        auto *wd_gs = new_PyWrapperDescr_getsets;
+        auto *wd_doc = &old_wd_doc_descr;
 
         if (meth_descr.isNull() || wrap_descr.isNull()
             || PyType_Ready(Py_TYPE(meth_descr)) < 0

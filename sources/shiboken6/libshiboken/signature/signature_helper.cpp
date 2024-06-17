@@ -17,6 +17,8 @@
 
 #include "signature_p.h"
 
+#include <cstring>
+
 using namespace Shiboken;
 
 extern "C" {
@@ -115,11 +117,11 @@ static PyObject *_func_with_new_name(PyTypeObject *type,
      * but does not create a descriptor.
      * XXX Maybe we can get rid of this, completely?
      */
-    auto obtype = reinterpret_cast<PyObject *>(type);
-    int len = strlen(new_name);
-    auto name = new char[len + 1];
-    strcpy(name, new_name);
-    auto new_meth = new PyMethodDef;
+    auto *obtype = reinterpret_cast<PyObject *>(type);
+    const size_t len = std::strlen(new_name);
+    auto *name = new char[len + 1];
+    std::strcpy(name, new_name);
+    auto *new_meth = new PyMethodDef;
     new_meth->ml_name = name;
     new_meth->ml_meth = meth->ml_meth;
     new_meth->ml_flags = meth->ml_flags;
@@ -196,8 +198,8 @@ static PyObject *_build_new_entry(PyObject *new_name, PyObject *value)
         if (list.isNull())
             return nullptr;
         for (int idx = 0; idx < len; ++idx) {
-            auto multi_entry = PyList_GetItem(multi, idx);
-            auto dup = PyDict_Copy(multi_entry);
+            auto *multi_entry = PyList_GetItem(multi, idx);
+            auto *dup = PyDict_Copy(multi_entry);
             if (PyDict_SetItem(dup, PyName::name(), new_name) < 0)
                 return nullptr;
             if (PyList_SetItem(list, idx, dup) < 0)
@@ -215,7 +217,8 @@ static PyObject *_build_new_entry(PyObject *new_name, PyObject *value)
 int insert_snake_case_variants(PyObject *dict)
 {
     AutoDecRef snake_dict(PyDict_New());
-    PyObject *key, *value;
+    PyObject *key{};
+    PyObject *value{};
     Py_ssize_t pos = 0;
     while (PyDict_Next(dict, &pos, &key, &value)) {
         AutoDecRef name(String::getSnakeCaseName(key, true));
@@ -363,8 +366,8 @@ int _build_func_to_type(PyObject *obtype)
             if (descr == nullptr)
                 return -1;
             char mangled_name[200];
-            strcpy(mangled_name, meth->ml_name);
-            strcat(mangled_name, ".overload");
+            std::strcpy(mangled_name, meth->ml_name);
+            std::strcat(mangled_name, ".overload");
             if (PyDict_SetItemString(dict, mangled_name, descr) < 0)
                 return -1;
             if (meth->ml_flags & METH_STATIC) {

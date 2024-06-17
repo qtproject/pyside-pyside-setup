@@ -5,6 +5,7 @@
 
 #include <pep384ext.h>
 #include <signature.h>
+#include <sbktypefactory.h>
 
 #include <QtCore/QDebug>
 

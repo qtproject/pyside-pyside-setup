@@ -230,10 +230,9 @@ void BindingManager::BindingManagerPrivate::assignWrapper(SbkObject *wrapper, co
     }
 }
 
-BindingManager::BindingManager()
+BindingManager::BindingManager() :
+    m_d(new BindingManager::BindingManagerPrivate)
 {
-    m_d = new BindingManager::BindingManagerPrivate;
-
 #ifdef SHIBOKEN_INSTALL_FREE_DEBUG_HOOK
     debugInstallFreeHook();
 #endif
@@ -504,10 +503,11 @@ bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
 
     auto *startType = Py_TYPE(self);
     auto *mro = startType->tp_mro;
-    Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
+    Py_ssize_t idx = 0;
+    const Py_ssize_t n = PyTuple_GET_SIZE(mro);
     auto classNameLen = std::strrchr(fullName, '.') - fullName;
     /* No need to check the last one: it's gonna be skipped anyway.  */
-    for (idx = 0; idx + 1 < n; ++idx) {
+    for ( ; idx + 1 < n; ++idx) {
         auto *lookType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
         const char *lookName = lookType->tp_name;
         auto lookLen = long(std::strlen(lookName));

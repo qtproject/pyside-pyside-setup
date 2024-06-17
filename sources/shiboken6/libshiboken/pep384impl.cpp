@@ -896,15 +896,13 @@ PepRun_GetResult(const char *command)
     /*
      * Evaluate a string and return the variable `result`
      */
-    PyObject *d, *v, *res;
-
-    d = PyDict_New();
+    PyObject *d = PyDict_New();
     if (d == nullptr
         || PyDict_SetItem(d, Shiboken::PyMagicName::builtins(), PyEval_GetBuiltins()) < 0) {
         return nullptr;
     }
-    v = PyRun_String(command, Py_file_input, d, d);
-    res = v ? PyDict_GetItem(d, Shiboken::PyName::result()) : nullptr;
+    PyObject *v = PyRun_String(command, Py_file_input, d, d);
+    PyObject *res = v ? PyDict_GetItem(d, Shiboken::PyName::result()) : nullptr;
     Py_XDECREF(v);
     Py_DECREF(d);
     return res;
@@ -912,7 +910,7 @@ PepRun_GetResult(const char *command)
 
 PyTypeObject *PepType_Type_tp_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds)
 {
-    auto ret = PyType_Type.tp_new(metatype, args, kwds);
+    auto *ret = PyType_Type.tp_new(metatype, args, kwds);
     return reinterpret_cast<PyTypeObject *>(ret);
 }
 
@@ -941,7 +939,7 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
         Py_INCREF(name);
         return name;
     }
-    size_t nlen = PyUnicode_GET_LENGTH(name);
+    const Py_ssize_t nlen = PyUnicode_GET_LENGTH(name);
     /* Don't mangle __id__ or names with dots. */
     if ((PyUnicode_READ_CHAR(name, nlen-1) == '_' &&
          PyUnicode_READ_CHAR(name, nlen-2) == '_') ||
@@ -955,9 +953,9 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
     // PYSIDE-1436: _Py_Mangle is no longer exposed; implement it always.
     // The rest of this function is our own implementation of _Py_Mangle.
     // Please compare the original function in compile.c .
-    size_t plen = PyUnicode_GET_LENGTH(privateobj.object());
+    Py_ssize_t plen = PyUnicode_GET_LENGTH(privateobj.object());
     /* Strip leading underscores from class name */
-    size_t ipriv = 0;
+    Py_ssize_t ipriv = 0;
     while (PyUnicode_READ_CHAR(privateobj.object(), ipriv) == '_')
         ipriv++;
     if (ipriv == plen) {
@@ -971,8 +969,8 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
                         "private identifier too large to be mangled");
         return nullptr;
     }
-    size_t const amount = ipriv + 1 + plen + nlen;
-    size_t const big_stack = 1000;
+    const Py_ssize_t amount = ipriv + 1 + plen + nlen;
+    const Py_ssize_t big_stack = 1000;
     wchar_t bigbuf[big_stack];
     wchar_t *resbuf = amount <= big_stack ? bigbuf : (wchar_t *)malloc(sizeof(wchar_t) * amount);
     if (!resbuf)

@@ -180,7 +180,7 @@ SbkConverter *createConverterObject(PyTypeObject *type,
                                            CppToPythonFunc pointerToPythonFunc,
                                            CppToPythonFunc copyToPythonFunc)
 {
-    auto converter = new SbkConverter;
+    auto *converter = new SbkConverter;
     converter->pythonType = type;
     // PYSIDE-595: All types are heaptypes now, so provide reference.
     Py_XINCREF(type);
