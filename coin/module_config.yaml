@@ -51,20 +51,9 @@ accept_configuration:
         - condition: property
           property: target.os
           not_contains_value: IOS
-    - condition: and
-      conditions:
         - condition: property
           property: host.osVersion
-          equals_value: MacOS_11_00
-        - condition: property
-          property: host.arch
-          equals_value: ARM64
-        - condition: property
-          property: features
-          contains_value: TestOnly
-        - condition: property
-          property: features
-          contains_value: Packaging
+          not_equals_value: MacOS_12
     - condition: and # Restore LoA config
       conditions:
         - condition: property
