@@ -37,8 +37,7 @@ using namespace Qt::StringLiterals;
 #if QSLOT_CODE != 1 || QSIGNAL_CODE != 2
 #error QSLOT_CODE and/or QSIGNAL_CODE changed! change the hardcoded stuff to the correct value!
 #endif
-#define PYSIDE_SLOT '1'
-#define PYSIDE_SIGNAL '2'
+
 #include "globalreceiverv2.h"
 
 static PyObject *metaObjectAttr = nullptr;
@@ -49,7 +48,7 @@ static bool qAppRunning = false;
 static void destroyMetaObject(PyObject *obj)
 {
     void *ptr = PyCapsule_GetPointer(obj, nullptr);
-    auto meta = reinterpret_cast<PySide::MetaObjectBuilder *>(ptr);
+    auto *meta = reinterpret_cast<PySide::MetaObjectBuilder *>(ptr);
     SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(meta);
     if (wrapper)
         Shiboken::BindingManager::instance().releaseWrapper(wrapper);
@@ -77,7 +76,7 @@ static const char *metaCallName(QMetaObject::Call call)
 static QByteArray methodSignature(const QMetaMethod &method)
 {
     QByteArray result;
-    if (auto *t = method.typeName()) {
+    if (const auto *t = method.typeName()) {
         result += t;
         result += ' ';
     }
@@ -236,6 +235,7 @@ public:
     Q_DISABLE_COPY_MOVE(SignalManagerDestroyListener)
 
     using QObject::QObject;
+    ~SignalManagerDestroyListener() override = default;
 
 public Q_SLOTS:
     void destroyNotify(const QObject *);
@@ -301,7 +301,7 @@ static PythonToCppFunc is_PyObject_PythonToCpp_PyObject_PTR_Convertible(PyObject
 }
 static PyObject *PyObject_PTR_CppToPython_PyObject(const void *cppIn)
 {
-    auto pyOut = reinterpret_cast<PyObject *>(const_cast<void *>(cppIn));
+    auto *pyOut = reinterpret_cast<PyObject *>(const_cast<void *>(cppIn));
     if (pyOut)
         Py_INCREF(pyOut);
     return pyOut;
@@ -413,7 +413,7 @@ void SignalManager::notifyGlobalReceiver(QObject *receiver)
 
 void SignalManager::releaseGlobalReceiver(const QObject *source, QObject *receiver)
 {
-    auto gr = static_cast<GlobalReceiverV2 *>(receiver);
+    auto *gr = static_cast<GlobalReceiverV2 *>(receiver);
     gr->decRef(source);
     if (gr->isEmpty())
         m_d->deleteGlobalReceiver(gr);
@@ -461,7 +461,7 @@ void SignalManager::SignalManagerPrivate::purgeEmptyGlobalReceivers()
     }
 }
 
-int SignalManager::globalReceiverSlotIndex(QObject *receiver, const char *signature) const
+int SignalManager::globalReceiverSlotIndex(QObject *receiver, const char *signature)
 {
     return static_cast<GlobalReceiverV2 *>(receiver)->addSlot(signature);
 }
@@ -528,7 +528,9 @@ int SignalManager::SignalManagerPrivate::qtPropertyMetacall(QObject *object,
     if (PyErr_Occurred()) {
         // PYSIDE-2160: An unknown type was reported. Indicated by StopIteration.
         if (PyErr_ExceptionMatches(PyExc_StopIteration)) {
-            PyObject *excType, *excValue, *excTraceback;
+            PyObject *excType{};
+            PyObject *excValue{};
+            PyObject *excTraceback{};
             PyErr_Fetch(&excType, &excValue, &excTraceback);
             bool ign = call == QMetaObject::WriteProperty;
             PyErr_WarnFormat(PyExc_RuntimeWarning, 0,
@@ -585,7 +587,7 @@ int SignalManager::SignalManagerPrivate::qtMethodMetacall(QObject *object,
     // WARNING Isn't safe to call any metaObject and/or object methods beyond this point
     //         because the object can be deleted inside the called slot.
 
-    if (gil.get() == nullptr)
+    if (gil == nullptr)
         gil.reset(new Shiboken::GilState);
 
     if (PyErr_Occurred())

@@ -116,7 +116,7 @@ MetaObjectBuilder::MetaObjectBuilder(PyTypeObject *type, const QMetaObject *meta
 
 MetaObjectBuilder::~MetaObjectBuilder()
 {
-    for (auto *metaObject : m_d->m_cachedMetaObjects)
+    for (const auto *metaObject : m_d->m_cachedMetaObjects)
         free(const_cast<QMetaObject*>(metaObject));
     delete m_d->m_builder;
     delete m_d;
@@ -249,7 +249,7 @@ void MetaObjectBuilderPrivate::removeMethod(QMetaMethod::MethodType mtype,
                                             int index)
 {
     index -= m_baseObject->methodCount();
-    auto builder = ensureBuilder();
+    auto *builder = ensureBuilder();
     Q_ASSERT(index >= 0 && index < builder->methodCount());
     switch (mtype) {
     case QMetaMethod::Constructor:
@@ -351,7 +351,7 @@ void MetaObjectBuilder::addInfo(const char *key, const char *value)
 
 void MetaObjectBuilderPrivate::addInfo(const QMap<QByteArray, QByteArray> &info)
 {
-    auto builder = ensureBuilder();
+    auto *builder = ensureBuilder();
     for (auto i = info.constBegin(), end = info.constEnd(); i != end; ++i)
         builder->addClassInfo(i.key(), i.value());
     m_dirty = true;
@@ -371,7 +371,7 @@ void MetaObjectBuilder::addEnumerator(const char *name, bool flag, bool scoped,
 void MetaObjectBuilderPrivate::addEnumerator(const char *name, bool flag, bool scoped,
                                              const MetaObjectBuilder::EnumValues &entries)
 {
-    auto builder = ensureBuilder();
+    auto *builder = ensureBuilder();
     int have_already = builder->indexOfEnumerator(name);
     if (have_already >= 0)
         builder->removeEnumerator(have_already);
@@ -387,7 +387,7 @@ void MetaObjectBuilderPrivate::addEnumerator(const char *name, bool flag, bool s
 void MetaObjectBuilderPrivate::removeProperty(int index)
 {
     index -= m_baseObject->propertyCount();
-    auto builder = ensureBuilder();
+    auto *builder = ensureBuilder();
     Q_ASSERT(index >= 0 && index < builder->propertyCount());
     builder->removeProperty(index);
     m_dirty = true;
@@ -517,7 +517,7 @@ QString MetaObjectBuilder::formatMetaObject(const QMetaObject *metaObject)
     QTextStream str(&result);
     str << "PySide" << QT_VERSION_MAJOR << ".QtCore.QMetaObject(\""
         << metaObject->className() << '"';
-    if (auto *s = metaObject->superClass())
+    if (const auto *s = metaObject->superClass())
         str << " inherits \"" << s->className() << '"';
     str << ":\n";
 
@@ -572,13 +572,13 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
 
     std::vector<PyTypeObject *> basesToCheck;
     // Prepend the actual type that we are parsing.
-    basesToCheck.reserve(1u + basesCount);
+    basesToCheck.reserve(1U + basesCount);
     basesToCheck.push_back(type);
 
-    auto sbkObjTypeF = SbkObject_TypeF();
-    auto baseObjType = reinterpret_cast<PyTypeObject *>(&PyBaseObject_Type);
+    auto *sbkObjTypeF = SbkObject_TypeF();
+    auto *baseObjType = reinterpret_cast<PyTypeObject *>(&PyBaseObject_Type);
     for (Py_ssize_t i = 0; i < basesCount; ++i) {
-        auto baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, i));
+        auto *baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, i));
         if (baseType != sbkObjTypeF && baseType != baseObjType
             && !PySide::isQObjectDerived(baseType, false)) {
             basesToCheck.push_back(baseType);
@@ -655,7 +655,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
         AutoDecRef obName(PyObject_GetAttr(obEnumType, PyMagicName::name()));
         // Everything has been checked already in resolveDelayedQEnums.
         // Therefore, we don't need to error-check here again.
-        auto name = String::toCString(obName);
+        const auto *name = String::toCString(obName);
         AutoDecRef members(PyObject_GetAttr(obEnumType, PyMagicName::members()));
         AutoDecRef items(PyMapping_Items(members));
         Py_ssize_t nr_items = PySequence_Length(items);
@@ -666,7 +666,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
             AutoDecRef key(PySequence_GetItem(item, 0));
             AutoDecRef member(PySequence_GetItem(item, 1));
             AutoDecRef value(PyObject_GetAttr(member, Shiboken::PyName::value()));
-            auto ckey = String::toCString(key);
+            const auto *ckey = String::toCString(key);
             auto ivalue = PyLong_AsSsize_t(value);
             entries.push_back(std::make_pair(ckey, int(ivalue)));
         }

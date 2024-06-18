@@ -72,7 +72,7 @@ protected:
     /// \param self self
     /// \param args Arguments
     /// \return 0 if the parameter is correct, else -1 (for tp_init())
-    int convertToString(PyObject *self, PyObject *args);
+    static int convertToString(PyObject *self, PyObject *args);
 
 private:
     QByteArray m_string;
@@ -92,7 +92,7 @@ protected:
     /// \param self self
     /// \param args Arguments
     /// \return 0 if the parameter is correct, else -1 (for tp_init())
-    int convertToType(PyObject *self, PyObject *args);
+    static int convertToType(PyObject *self, PyObject *args);
 
 private:
     PyTypeObject *m_type = nullptr;
@@ -127,8 +127,8 @@ struct Methods
 
     static void tp_free(void *self)
     {
-        auto pySelf = reinterpret_cast<PyObject *>(self);
-        auto decorator = reinterpret_cast<PySideClassDecorator *>(self);
+        auto *pySelf = reinterpret_cast<PyObject *>(self);
+        auto *decorator = reinterpret_cast<PySideClassDecorator *>(self);
         delete decorator->d;
         PepExt_TypeCallFree(Py_TYPE(pySelf)->tp_base, self);
     }

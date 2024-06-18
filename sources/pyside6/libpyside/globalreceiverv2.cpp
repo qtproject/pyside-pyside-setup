@@ -17,9 +17,6 @@
 
 #include <cstring>
 
-#define RECEIVER_DESTROYED_SLOT_NAME "__receiverDestroyed__(QObject*)"
-
-
 namespace PySide
 {
 
@@ -121,7 +118,8 @@ GlobalReceiverKey DynamicSlotDataV2::key(PyObject *callback)
     if (PyMethod_Check(callback)) {
         // PYSIDE-1422: Avoid hash on self which might be unhashable.
         return {PyMethod_GET_SELF(callback), PyMethod_GET_FUNCTION(callback)};
-    } else if (PySide::isCompiledMethod(callback)) {
+    }
+    if (PySide::isCompiledMethod(callback)) {
         // PYSIDE-1589: Fix for slots in compiled functions
         Shiboken::AutoDecRef self(PyObject_GetAttr(callback, PySide::PySideName::im_self()));
         Shiboken::AutoDecRef func(PyObject_GetAttr(callback, PySide::PySideName::im_func()));
@@ -159,10 +157,10 @@ int DynamicSlotDataV2::addSlot(const char *signature)
 
 void DynamicSlotDataV2::onCallbackDestroyed(void *data)
 {
-    auto self = reinterpret_cast<DynamicSlotDataV2 *>(data);
+    auto *self = reinterpret_cast<DynamicSlotDataV2 *>(data);
     self->m_weakRef = nullptr;
     Py_BEGIN_ALLOW_THREADS
-    SignalManager::instance().deleteGlobalReceiver(self->m_parent);
+    SignalManager::deleteGlobalReceiver(self->m_parent);
     Py_END_ALLOW_THREADS
 }
 

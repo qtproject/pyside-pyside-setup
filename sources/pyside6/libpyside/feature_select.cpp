@@ -192,7 +192,7 @@ static bool addNewDict(PyTypeObject *type, int select_id)
         return false;
     setSelectId(new_dict, select_id);
     // insert the dict into the ring
-    auto next_dict = nextInCircle(dict);
+    auto *next_dict = nextInCircle(dict);
     setNextDict(dict, new_dict);
     setNextDict(new_dict, next_dict);
     PepType_SetDict(type, new_dict);
@@ -347,9 +347,9 @@ static inline void SelectFeatureSet(PyTypeObject *type)
     last_select_id = select_id;
 
     auto *mro = type->tp_mro;
-    Py_ssize_t idx, n = PyTuple_GET_SIZE(mro);
+    const Py_ssize_t n = PyTuple_GET_SIZE(mro);
     // We leave 'Shiboken.Object' and 'object' alone, therefore "n - 2".
-    for (idx = 0; idx < n - 2; idx++) {
+    for (Py_ssize_t idx = 0; idx < n - 2; idx++) {
         auto *sub_type = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
         SelectFeatureSetSubtype(sub_type, select_id);
     }
@@ -444,10 +444,10 @@ static PyObject *methodWithNewName(PyTypeObject *type,
      * Create a method with a lower case name.
      */
     auto *obtype = reinterpret_cast<PyObject *>(type);
-    int len = strlen(new_name);
-    auto name = new char[len + 1];
+    const auto len = strlen(new_name);
+    auto *name = new char[len + 1];
     strcpy(name, new_name);
-    auto new_meth = new PyMethodDef;
+    auto *new_meth = new PyMethodDef;
     new_meth->ml_name = name;
     new_meth->ml_meth = meth->ml_meth;
     new_meth->ml_flags = meth->ml_flags;
@@ -479,7 +479,8 @@ static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, in
     /*
      * Add objects with lower names to `type->tp_dict` from 'prev_dict`.
      */
-    PyObject *key, *value;
+    PyObject *key{};
+    PyObject *value{};
     Py_ssize_t pos = 0;
 
     // We first copy the things over which will not be changed:
@@ -555,7 +556,7 @@ static PyObject *createProperty(PyTypeObject *type, PyObject *getter, PyObject *
     return prop;
 }
 
-static const QByteArrayList parseFields(const char *propStr, bool *stdWrite)
+static QByteArrayList parseFields(const char *propStr, bool *stdWrite)
 {
     /*
      * Break the string into subfields at ':' and add defaults.
@@ -630,7 +631,7 @@ static QByteArrayList GetPropertyStringsMro(PyTypeObject *type)
     // We leave 'Shiboken.Object' and 'object' alone, therefore "n - 2".
     for (Py_ssize_t idx = 0; idx < n - 2; idx++) {
         auto *subType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
-        auto props = SbkObjectType_GetPropertyStrings(subType);
+        auto *props = SbkObjectType_GetPropertyStrings(subType);
         if (props != nullptr)
             for (; *props != nullptr; ++props)
                 res << QByteArray(*props);
@@ -673,7 +674,7 @@ static bool feature_02_true_property(PyTypeObject *type, PyObject *prev_dict, in
         return true;
 
     for (const auto &propStr : std::as_const(props)) {
-        bool isStdWrite;
+        bool isStdWrite{};
         auto fields = parseFields(propStr, &isStdWrite);
         bool haveWrite = fields.size() == 3;
         PyObject *name = make_snake_case(fields[0], lower);
@@ -758,7 +759,7 @@ static PyGetSetDef property_getset[] = {
 static bool patch_property_impl()
 {
     // Turn `__doc__` into a computed attribute without changing writability.
-    auto gsp = property_getset;
+    auto *gsp = property_getset;
     auto *type = &PyProperty_Type;
     AutoDecRef dict(PepType_GetDict(type));
     AutoDecRef descr(PyDescr_NewGetSet(type, gsp));

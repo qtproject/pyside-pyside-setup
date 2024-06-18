@@ -94,7 +94,7 @@ PyTypeObject *PySideProperty_TypeF(void)
 PySidePropertyPrivate::PySidePropertyPrivate() noexcept = default;
 PySidePropertyPrivate::~PySidePropertyPrivate() = default;
 
-PyObject *PySidePropertyPrivate::getValue(PyObject *source)
+PyObject *PySidePropertyPrivate::getValue(PyObject *source) const
 {
     if (fget) {
         Shiboken::AutoDecRef args(PyTuple_New(1));
@@ -188,7 +188,7 @@ static PyObject *qpropertyTpNew(PyTypeObject *subtype, PyObject * /* args */, Py
 static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 {
     PyObject *type{};
-    auto data = reinterpret_cast<PySideProperty *>(self);
+    auto *data = reinterpret_cast<PySideProperty *>(self);
     PySidePropertyPrivate *pData = data->d;
 
     static const char *kwlist[] = {"type", "fget", "fset", "freset", "fdel", "doc", "notify",
@@ -298,7 +298,7 @@ _property_copy(PyObject *old, PyObject *get, PyObject *set, PyObject *reset, PyO
     else
         doc = pData->doc;
 
-    auto notify = pData->notify ? pData->notify : Py_None;
+    auto *notify = pData->notify ? pData->notify : Py_None;
 
     PyObject *obNew = PyObject_CallFunction(type, const_cast<char *>("OOOOOsO" "bbb" "bbb"),
         pData->pyTypeObject, get, set, reset, del, doc.data(), notify,
@@ -338,39 +338,43 @@ static PyObject *qPropertyCall(PyObject *self, PyObject *args, PyObject * /* kw 
 
 static PyObject *qProperty_fget(PyObject *self, void *)
 {
-    auto func = reinterpret_cast<PySideProperty *>(self)->d->fget;
-    auto ret = func != nullptr ? func : Py_None;
-    Py_INCREF(ret);
-    return ret;
+    auto *func = reinterpret_cast<PySideProperty *>(self)->d->fget;
+    if (func == nullptr)
+        Py_RETURN_NONE;
+    Py_INCREF(func);
+    return func;
 }
 
 static PyObject *qProperty_fset(PyObject *self, void *)
 {
-    auto func = reinterpret_cast<PySideProperty *>(self)->d->fset;
-    auto ret = func != nullptr ? func : Py_None;
-    Py_INCREF(ret);
-    return ret;
+    auto *func = reinterpret_cast<PySideProperty *>(self)->d->fset;
+    if (func == nullptr)
+        Py_RETURN_NONE;
+    Py_INCREF(func);
+    return func;
 }
 
 static PyObject *qProperty_freset(PyObject *self, void *)
 {
-    auto func = reinterpret_cast<PySideProperty *>(self)->d->freset;
-    auto ret = func != nullptr ? func : Py_None;
-    Py_INCREF(ret);
-    return ret;
+    auto *func = reinterpret_cast<PySideProperty *>(self)->d->freset;
+    if (func == nullptr)
+        Py_RETURN_NONE;
+    Py_INCREF(func);
+    return func;
 }
 
 static PyObject *qProperty_fdel(PyObject *self, void *)
 {
-    auto func = reinterpret_cast<PySideProperty *>(self)->d->fdel;
-    auto ret = func != nullptr ? func : Py_None;
-    Py_INCREF(ret);
-    return ret;
+    auto *func = reinterpret_cast<PySideProperty *>(self)->d->fdel;
+    if (func == nullptr)
+        Py_RETURN_NONE;
+    Py_INCREF(func);
+    return func;
 }
 
 static PyObject *qPropertyDocGet(PyObject *self, void *)
 {
-    auto data = reinterpret_cast<PySideProperty *>(self);
+    auto *data = reinterpret_cast<PySideProperty *>(self);
     PySidePropertyPrivate *pData = data->d;
 
     QByteArray doc(pData->doc);
@@ -389,9 +393,11 @@ static PyObject *qPropertyDocGet(PyObject *self, void *)
              * subclass instance instead, otherwise it gets shadowed by
              * __doc__ in the class's dict.
              */
-            auto get_doc_obj = get_doc.object();
-            int err = PyObject_SetAttr(self, PyMagicName::doc(), get_doc);
-            return err < 0 ? nullptr : (Py_INCREF(get_doc_obj), get_doc_obj);
+            auto *get_doc_obj = get_doc.object();
+            if (PyObject_SetAttr(self, PyMagicName::doc(), get_doc) < 0)
+                return nullptr;
+            Py_INCREF(get_doc_obj);
+            return get_doc_obj;
         }
         PyErr_Clear();
     }
@@ -400,7 +406,7 @@ static PyObject *qPropertyDocGet(PyObject *self, void *)
 
 static int qPropertyDocSet(PyObject *self, PyObject *value, void *)
 {
-    auto data = reinterpret_cast<PySideProperty *>(self);
+    auto *data = reinterpret_cast<PySideProperty *>(self);
     PySidePropertyPrivate *pData = data->d;
 
     if (String::check(value)) {

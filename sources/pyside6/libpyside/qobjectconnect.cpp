@@ -8,7 +8,8 @@
 #include "pysideutils.h"
 #include "signalmanager.h"
 
-#include "shiboken.h"
+#include <sbkstring.h>
+#include <sbkstaticstrings.h>
 #include "basewrapper.h"
 #include "autodecref.h"
 
@@ -29,7 +30,7 @@ static bool isMethodDecorator(PyObject *method, bool is_pymethod, PyObject *self
 
     // PYSIDE-1523: Each could be a compiled method or a normal method here, for the
     // compiled ones we can use the attributes.
-    PyObject *function1;
+    PyObject *function1{};
     if (PyMethod_Check(otherMethod.object())) {
         function1 = PyMethod_GET_FUNCTION(otherMethod.object());
     } else {
@@ -40,7 +41,7 @@ static bool isMethodDecorator(PyObject *method, bool is_pymethod, PyObject *self
         // Not retaining a reference in line with what PyMethod_GET_FUNCTION does.
     }
 
-    PyObject *function2;
+    PyObject *function2{};
     if (is_pymethod) {
         function2 = PyMethod_GET_FUNCTION(method);
     } else {
@@ -85,7 +86,7 @@ static const char *getQualifiedName(PyObject *ob)
 static bool isDeclaredIn(PyObject *method, const char *className)
 {
     bool result = false;
-    if (auto *qualifiedNameC = getQualifiedName(PyMethod_Function(method))) {
+    if (const auto *qualifiedNameC = getQualifiedName(PyMethod_Function(method))) {
         std::string_view qualifiedName(qualifiedNameC);
         if (const auto dot = qualifiedName.rfind('.'); dot != std::string::npos)
             result = qualifiedName.substr(0, dot) == className;
@@ -147,7 +148,7 @@ static GetReceiverResult getReceiver(QObject *source, const char *signal,
          }
     }
 
-    const auto receiverThread = result.receiver ? result.receiver->thread() : nullptr;
+    auto *receiverThread = result.receiver ? result.receiver->thread() : nullptr;
 
     if (result.usingGlobalReceiver) {
         PySide::SignalManager &signalManager = PySide::SignalManager::instance();
@@ -281,7 +282,7 @@ QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *sign
 
     PySide::SignalManager &signalManager = PySide::SignalManager::instance();
 
-    PySideQSlotObject *slotObject = new PySideQSlotObject(callback);
+    auto *slotObject = new PySideQSlotObject(callback);
 
     QMetaObject::Connection connection{};
     Py_BEGIN_ALLOW_THREADS // PYSIDE-2367, prevent threading deadlocks with connectNotify()

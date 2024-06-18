@@ -63,10 +63,10 @@ public:
 
     QObject* globalReceiver(QObject *sender, PyObject *callback, QObject *receiver = nullptr);
     void releaseGlobalReceiver(const QObject* sender, QObject* receiver);
-    int globalReceiverSlotIndex(QObject* sender, const char* slotSignature) const;
+    static int globalReceiverSlotIndex(QObject* sender, const char* slotSignature);
     void notifyGlobalReceiver(QObject* receiver);
 
-    bool emitSignal(QObject* source, const char* signal, PyObject* args);
+    static bool emitSignal(QObject* source, const char* signal, PyObject* args);
     static int qt_metacall(QObject* object, QMetaObject::Call call, int id, void** args);
 
     // Used to register a new signal/slot on QMetaobject of source.

@@ -218,10 +218,10 @@ static QByteArrayList _SbkType_LookupProperty(PyTypeObject *type,
     auto n = PyTuple_GET_SIZE(mro);
     auto len = std::strlen(origName);
     for (Py_ssize_t idx = 0; idx < n; idx++) {
-        PyTypeObject *base = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
+        auto *base = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
         if (!SbkObjectType_Check(base))
             continue;
-        auto props = SbkObjectType_GetPropertyStrings(base);
+        auto *props = SbkObjectType_GetPropertyStrings(base);
         if (props == nullptr || *props == nullptr)
             continue;
         for (; *props != nullptr; ++props) {
@@ -255,11 +255,12 @@ static bool _setProperty(PyObject *qObj, PyObject *name, PyObject *value, bool *
     using Shiboken::AutoDecRef;
 
     QByteArray propName(Shiboken::String::toCString(name));
-    auto type = Py_TYPE(qObj);
+    auto *type = Py_TYPE(qObj);
     int flags = currentSelectId(type);
     int prop_flag = flags & 0x02;
     auto found = false;
-    QByteArray getterName{}, setterName{};
+    QByteArray getterName;
+    QByteArray setterName;
 
     auto fields = _SbkType_LookupProperty(type, propName, flags);
     if (!fields.isEmpty()) {
@@ -331,7 +332,7 @@ static std::optional<QMetaMethod> findSignal(const QMetaObject *mo,
         if (method.methodType() == QMetaMethod::Signal && method.name() == name)
             return method;
     }
-    auto *base = mo->superClass();
+    const auto *base = mo->superClass();
     return base != nullptr ? findSignal(base, name) : std::nullopt;
 }
 
@@ -339,7 +340,8 @@ bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj,
                       PyObject *kwds, bool allowErrors)
 {
 
-    PyObject *key, *value;
+    PyObject *key{};
+    PyObject *value{};
     Py_ssize_t pos = 0;
     int flags = currentSelectId(Py_TYPE(qObj));
     int snake_flag = flags & 0x01;
@@ -396,9 +398,9 @@ void runCleanupFunctions()
 
 static void destructionVisitor(SbkObject *pyObj, void *data)
 {
-    auto realData = reinterpret_cast<void **>(data);
-    auto pyQApp = reinterpret_cast<SbkObject *>(realData[0]);
-    auto pyQObjectType = reinterpret_cast<PyTypeObject *>(realData[1]);
+    auto *realData = reinterpret_cast<void **>(data);
+    auto *pyQApp = reinterpret_cast<SbkObject *>(realData[0]);
+    auto *pyQObjectType = reinterpret_cast<PyTypeObject *>(realData[1]);
 
     if (pyObj != pyQApp && PyObject_TypeCheck(pyObj, pyQObjectType)) {
         if (Shiboken::Object::hasOwnership(pyObj) && Shiboken::Object::isValid(pyObj, false)) {
@@ -446,7 +448,7 @@ std::size_t getSizeOfQObject(PyTypeObject *type)
 void initDynamicMetaObject(PyTypeObject *type, const QMetaObject *base, std::size_t cppObjSize)
 {
     //create DynamicMetaObject based on python type
-    auto userData = new TypeUserData(reinterpret_cast<PyTypeObject *>(type), base, cppObjSize);
+    auto *userData = new TypeUserData(reinterpret_cast<PyTypeObject *>(type), base, cppObjSize);
     userData->mo.update();
     Shiboken::ObjectType::setTypeUserData(type, userData, Shiboken::callCppDestructor<TypeUserData>);
 
@@ -469,7 +471,7 @@ TypeUserData *retrieveTypeUserData(PyTypeObject *pyTypeObj)
 
 TypeUserData *retrieveTypeUserData(PyObject *pyObj)
 {
-    auto pyTypeObj = PyType_Check(pyObj)
+    auto *pyTypeObj = PyType_Check(pyObj)
         ? reinterpret_cast<PyTypeObject *>(pyObj) : Py_TYPE(pyObj);
     return retrieveTypeUserData(pyTypeObj);
 }
@@ -482,7 +484,7 @@ const QMetaObject *retrieveMetaObject(PyTypeObject *pyTypeObj)
 
 const QMetaObject *retrieveMetaObject(PyObject *pyObj)
 {
-    auto pyTypeObj = PyType_Check(pyObj)
+    auto *pyTypeObj = PyType_Check(pyObj)
         ? reinterpret_cast<PyTypeObject *>(pyObj) : Py_TYPE(pyObj);
     return retrieveMetaObject(pyTypeObj);
 }
@@ -497,7 +499,7 @@ void initQObjectSubType(PyTypeObject *type, PyObject *args, PyObject * /* kwds *
     TypeUserData *userData = nullptr;
 
     for (int i = 0; i < numBases; ++i) {
-        auto base = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(bases, i));
+        auto *base = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(bases, i));
         if (PyType_IsSubtype(base, qObjType)) {
             userData = retrieveTypeUserData(base);
             break;
@@ -555,7 +557,9 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
 
     // Search on metaobject (avoid internal attributes started with '__')
     if (!attr) {
-        PyObject *type, *value, *traceback;
+        PyObject *type{};
+        PyObject *value{};
+        PyObject *traceback{};
         PyErr_Fetch(&type, &value, &traceback);     // This was omitted for a loong time.
 
         int flags = currentSelectId(Py_TYPE(self));
@@ -569,16 +573,14 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
             // Note: before implementing this property handling, the meta function code
             // below created meta functions which was quite wrong.
             auto *subdict = _PepType_Lookup(Py_TYPE(self), PySideMagicName::property_methods());
-            PyObject *propName = PyDict_GetItem(subdict, name);
-            if (propName) {
+            if (PyObject *propName = PyDict_GetItem(subdict, name)) {
                 // We really have a property name and need to fetch the fget or fset function.
                 static PyObject *const _fget = Shiboken::String::createStaticString("fget");
                 static PyObject *const _fset = Shiboken::String::createStaticString("fset");
                 static PyObject *const _fdel = Shiboken::String::createStaticString("fdel");
                 static PyObject *const arr[3] = {_fget, _fset, _fdel};
-                auto prop = _PepType_Lookup(Py_TYPE(self), propName);
-                for (int idx = 0; idx < 3; ++idx) {
-                    auto *trial = arr[idx];
+                auto *prop = _PepType_Lookup(Py_TYPE(self), propName);
+                for (auto *trial : arr) {
                     auto *res = PyObject_GetAttr(prop, trial);
                     if (res) {
                         AutoDecRef elemName(PyObject_GetAttr(res, PySideMagicName::name()));
@@ -612,18 +614,15 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
                 if (methMatch) {
                     if (method.methodType() == QMetaMethod::Signal) {
                         signalList.append(method);
-                    } else {
-                        PySideMetaFunction *func = MetaFunction::newObject(cppSelf, i);
-                        if (func) {
-                            PyObject *result = reinterpret_cast<PyObject *>(func);
-                            PyObject_SetAttr(self, name, result);
-                            return result;
-                        }
+                    } else if (auto *func = MetaFunction::newObject(cppSelf, i)) {
+                        auto *result = reinterpret_cast<PyObject *>(func);
+                        PyObject_SetAttr(self, name, result);
+                        return result;
                     }
                 }
             }
             if (!signalList.isEmpty()) {
-                PyObject *pySignal = reinterpret_cast<PyObject *>(
+                auto *pySignal = reinterpret_cast<PyObject *>(
                     Signal::newObjectFromMethod(self, signalList));
                 PyObject_SetAttr(self, name, pySignal);
                 return pySignal;
@@ -701,13 +700,13 @@ static inline bool isInternalObject(const char *name)
 
 static const QMetaObject *metaObjectCandidate(const QObject *o)
 {
-    auto *metaObject = o->metaObject();
+    const auto *metaObject = o->metaObject();
     // Skip QML helper types and Python objects
     if (hasDynamicMetaObject(o)) {
-        if (auto *super = metaObject->superClass())
+        if (const auto *super = metaObject->superClass())
             metaObject = super;
     }
-    for (auto *candidate = metaObject; candidate != nullptr; candidate = candidate->superClass()) {
+    for (const auto *candidate = metaObject; candidate != nullptr; candidate = candidate->superClass()) {
         if (!isInternalObject(candidate->className())) {
             metaObject = candidate;
             break;
@@ -723,7 +722,7 @@ static const char *typeName(const QObject *cppSelf)
 {
     const char *typeName = typeid(*cppSelf).name();
     if (!Shiboken::Conversions::getConverter(typeName)) {
-        auto *metaObject = metaObjectCandidate(cppSelf);
+        const auto *metaObject = metaObjectCandidate(cppSelf);
         for (; metaObject != nullptr; metaObject = metaObject->superClass()) {
             const char *name = metaObject->className();
             if (Shiboken::Conversions::getConverter(name)) {
@@ -751,7 +750,7 @@ PyTypeObject *getTypeForQObject(const QObject *cppSelf)
 
 PyObject *getWrapperForQObject(QObject *cppSelf, PyTypeObject *sbk_type)
 {
-    PyObject *pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(cppSelf));
+    auto *pyOut = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(cppSelf));
     if (pyOut) {
         Py_INCREF(pyOut);
         return pyOut;
@@ -805,7 +804,7 @@ PyObject *qStringToPyUnicode(QStringView s)
 QString pyStringToQString(PyObject *str)
 {
     if (str == Py_None)
-        return QString();
+        return {};
 
     if (PyUnicode_Check(str) != 0)
         return pyUnicodeToQString(str);
@@ -815,7 +814,7 @@ QString pyStringToQString(PyObject *str)
         if (asciiBuffer)
             return QString::fromLatin1(asciiBuffer);
     }
-    return QString();
+    return {};
 }
 
 // PySide-1499: Provide an efficient, correct PathLike interface
@@ -824,7 +823,7 @@ QString pyPathToQString(PyObject *path)
     // For empty constructors path can be nullptr
     // fallback to an empty QString in that case.
     if (!path)
-        return QString();
+        return {};
 
     // str or bytes pass through
     if (PyUnicode_Check(path) || PyBytes_Check(path))
@@ -833,7 +832,7 @@ QString pyPathToQString(PyObject *path)
     // Let PyOS_FSPath do its work and then fix the result for Windows.
     Shiboken::AutoDecRef strPath(PyOS_FSPath(path));
     if (strPath.isNull())
-        return QString();
+        return {};
     return QDir::fromNativeSeparators(pyStringToQString(strPath));
 }
 
@@ -1062,8 +1061,8 @@ static void formatPySequence(PyObject *obj, QDebug &debug)
 
 static void formatPyDict(PyObject *obj, QDebug &debug)
 {
-    PyObject *key;
-    PyObject *value;
+    PyObject *key{};
+    PyObject *value{};
     Py_ssize_t pos = 0;
     bool first = true;
     debug << '{';

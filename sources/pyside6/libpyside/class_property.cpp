@@ -79,7 +79,7 @@ PyTypeObject *PyClassPropertyType_TypeF()
 // We call `__init__` while pretending to be a PyProperty_Type instance.
 static int PyClassProperty_tp_init(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    auto hold = Py_TYPE(self);
+    auto *hold = Py_TYPE(self);
     self->ob_type = &PyProperty_Type;
     auto ret = PepExt_Type_GetInitSlot(&PyProperty_Type)(self, args, kwargs);
     self->ob_type = hold;
@@ -126,7 +126,7 @@ static int SbkObjectType_meta_setattro(PyObject *obj, PyObject *name, PyObject *
 {
     // Use `_PepType_Lookup()` instead of `PyObject_GetAttr()` in order to get the raw
     // descriptor (`property`) instead of calling `tp_descr_get` (`property.__get__()`).
-    auto type = reinterpret_cast<PyTypeObject *>(obj);
+    auto *type = reinterpret_cast<PyTypeObject *>(obj);
     PySide::Feature::Select(type);
     PyObject *descr = _PepType_Lookup(type, name);
 
@@ -134,7 +134,7 @@ static int SbkObjectType_meta_setattro(PyObject *obj, PyObject *name, PyObject *
     //   1. `Type.class_prop = value`              --> descr_set: `Type.class_prop.__set__(value)`
     //   2. `Type.class_prop = other_class_prop`   --> setattro:  replace existing `class_prop`
     //   3. `Type.regular_attribute = value`       --> setattro:  regular attribute assignment
-    const auto class_prop = reinterpret_cast<PyObject *>(PyClassProperty_TypeF());
+    auto *class_prop = reinterpret_cast<PyObject *>(PyClassProperty_TypeF());
     const auto call_descr_set = descr && PyObject_IsInstance(descr, class_prop)
                                 && !PyObject_IsInstance(value, class_prop);
     if (call_descr_set) {
@@ -171,7 +171,7 @@ void init(PyObject *module)
         return;
 
     Py_INCREF(PyClassProperty_TypeF());
-    auto classproptype = reinterpret_cast<PyObject *>(PyClassProperty_TypeF());
+    auto *classproptype = reinterpret_cast<PyObject *>(PyClassProperty_TypeF());
     PyModule_AddObject(module, "PyClassProperty", classproptype);
 }
 

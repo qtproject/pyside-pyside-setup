@@ -26,7 +26,7 @@ public:
 
     virtual void metaCall(PyObject *source, QMetaObject::Call call, void **args);
 
-    PyObject *getValue(PyObject *source);
+    PyObject *getValue(PyObject *source) const;
     int setValue(PyObject *source, PyObject *value);
     int reset(PyObject *source);
 

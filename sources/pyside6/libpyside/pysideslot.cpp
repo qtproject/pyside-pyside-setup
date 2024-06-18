@@ -84,7 +84,7 @@ int slotTpInit(PyObject *self, PyObject *args, PyObject *kw)
         return -1;
     }
 
-    PySideSlot *data = reinterpret_cast<PySideSlot *>(self);
+    auto *data = reinterpret_cast<PySideSlot *>(self);
     if (!data->slotData)
         data->slotData = new SlotData;
     for(Py_ssize_t i = 0, i_max = PyTuple_Size(args); i < i_max; i++) {
@@ -120,7 +120,7 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
     Py_INCREF(callback);
 
     if (PyCallable_Check(callback)) {
-        PySideSlot *data = reinterpret_cast<PySideSlot *>(self);
+        auto *data = reinterpret_cast<PySideSlot *>(self);
 
         if (!data->slotData)
             data->slotData = new SlotData;

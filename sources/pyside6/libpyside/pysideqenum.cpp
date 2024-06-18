@@ -75,7 +75,7 @@ static PyObject *analyzePyEnum(PyObject *pyenum)
 
 static Py_ssize_t get_lineno()
 {
-    PyObject *frame = reinterpret_cast<PyObject *>(PyEval_GetFrame());  // borrowed ref
+    auto *frame = reinterpret_cast<PyObject *>(PyEval_GetFrame());  // borrowed ref
     AutoDecRef ob_lineno(PyObject_GetAttr(frame, Shiboken::PyName::f_lineno()));
     if (ob_lineno.isNull() || !PyLong_Check(ob_lineno))
         return -1;
@@ -84,7 +84,7 @@ static Py_ssize_t get_lineno()
 
 static bool is_module_code()
 {
-    PyObject *frame = reinterpret_cast<PyObject *>(PyEval_GetFrame());  // borrowed ref
+    auto *frame = reinterpret_cast<PyObject *>(PyEval_GetFrame());  // borrowed ref
     AutoDecRef ob_code(PyObject_GetAttr(frame, Shiboken::PyName::f_code()));
     if (ob_code.isNull())
         return false;
@@ -133,14 +133,14 @@ PyObject *QEnumMacro(PyObject *pyenum, bool flag)
         return nullptr;
     if (bool(computedFlag) != flag) {
         AutoDecRef name(PyObject_GetAttr(pyenum, PyMagicName::qualname()));
-        auto cname = String::toCString(name);
+        const auto *cname = String::toCString(name);
         const char *e = "Enum";
         const char *f = "Flag";
         PyErr_Format(PyExc_TypeError, "expected '%s' but got '%s' (%.200s)",
                                       flag ? f : e, flag ? e : f, cname);
         return nullptr;
     }
-    auto ok = analyzePyEnum(pyenum);
+    auto *ok = analyzePyEnum(pyenum);
     if (ok == nullptr)
         return nullptr;
     if (is_module_code()) {
@@ -169,7 +169,7 @@ std::vector<PyObject *> resolveDelayedQEnums(PyTypeObject *containerType)
      */
     if (enumCollector.empty())
         return {};
-    PyObject *obContainerType = reinterpret_cast<PyObject *>(containerType);
+    auto *obContainerType = reinterpret_cast<PyObject *>(containerType);
     Py_ssize_t lineno = get_lineno();
 
     std::vector<PyObject *> result;

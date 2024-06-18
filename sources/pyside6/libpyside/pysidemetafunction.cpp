@@ -51,15 +51,15 @@ PyTypeObject *PySideMetaFunction_TypeF(void)
 
 void functionFree(void *self)
 {
-    PySideMetaFunction *function = reinterpret_cast<PySideMetaFunction *>(self);
+    auto *function = reinterpret_cast<PySideMetaFunction *>(self);
     delete function->d;
 }
 
 PyObject *functionCall(PyObject *self, PyObject *args, PyObject * /* kw */)
 {
-    PySideMetaFunction *function = reinterpret_cast<PySideMetaFunction *>(self);
+    auto *function = reinterpret_cast<PySideMetaFunction *>(self);
 
-    PyObject *retVal;
+    PyObject *retVal{};
     if (!PySide::MetaFunction::call(function->d->qobject, function->d->methodIndex, args, &retVal))
         return nullptr;
     return retVal;
@@ -123,12 +123,12 @@ bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
         return false;
     }
 
-    QVariant *methValues = new QVariant[numArgs];
+    auto *methValues = new QVariant[numArgs];
     void **methArgs = new void *[numArgs];
 
     // Prepare room for return type
     const char *returnType = method.typeName();
-    if (returnType && std::strcmp("void", returnType))
+    if (returnType && std::strcmp("void", returnType) != 0)
         argTypes.prepend(returnType);
     else
         argTypes.prepend(QByteArray());

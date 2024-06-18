@@ -54,7 +54,7 @@ PyObject *ClassInfoPrivate::tp_call(PyObject *self, PyObject *args, PyObject * /
     if (pData->m_alreadyWrapped)
         return PyErr_Format(PyExc_TypeError, "This instance of ClassInfo() was already used to wrap an object");
 
-    PyTypeObject *klassType = reinterpret_cast<PyTypeObject *>(klass);
+    auto *klassType = reinterpret_cast<PyTypeObject *>(klass);
     if (!PySide::ClassInfo::setClassInfo(klassType, pData->m_data))
         return PyErr_Format(PyExc_TypeError, "This decorator can only be used on classes that are subclasses of QObject");
 

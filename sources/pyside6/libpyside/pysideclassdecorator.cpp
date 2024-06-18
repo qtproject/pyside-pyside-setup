@@ -38,7 +38,7 @@ PyObject *DecoratorPrivate::tp_call_check(PyObject *args, CheckMode checkMode) c
         return nullptr;
     }
 
-    auto type = reinterpret_cast<PyTypeObject *>(arg);
+    auto *type = reinterpret_cast<PyTypeObject *>(arg);
 
     if (checkMode != CheckMode::None && !Shiboken::ObjectType::checkType(type)) {
         PyErr_Format(PyExc_TypeError,
