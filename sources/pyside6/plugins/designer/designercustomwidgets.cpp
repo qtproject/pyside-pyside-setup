@@ -17,6 +17,7 @@
 #include <QtCore/QVariant>
 
 #include <string_view>
+#include <utility>
 
 using namespace Qt::StringLiterals;
 
@@ -123,26 +124,29 @@ static bool runPyScriptFile(const QString &fileName, QString *errorMessage)
     return ok;
 }
 
+static std::pair<int, int> pythonVersion()
+{
+    // read environment set by pyside_tool.py
+    bool majorOk{};
+    bool minorOk{};
+    const int majorVersion = qEnvironmentVariableIntValue("PY_MAJOR_VERSION", &majorOk);
+    const int minorVersion = qEnvironmentVariableIntValue("PY_MINOR_VERSION", &minorOk);
+    if (majorOk && minorVersion)
+        return {majorVersion, minorVersion};
+    return {PY_MAJOR_VERSION, PY_MINOR_VERSION};
+}
+
 static void initVirtualEnvironment()
 {
     static const char virtualEnvVar[] = "VIRTUAL_ENV";
-    // As of Python 3.8/Windows, Python is no longer able to run stand-alone in
-    // a virtualenv due to missing libraries. Add the path to the modules
-    // instead. macOS seems to be showing the same issues.
+    // Since Python 3.8 (Windows, macOS), Python is no longer able to run stand
+    // -alone in a virtualenv due to missing libraries. Add the path to the modules
+    // instead.
 
     const auto os = QOperatingSystemVersion::currentType();
 
-    bool ok;
-    int majorVersion = qEnvironmentVariableIntValue("PY_MAJOR_VERSION", &ok);
-    int minorVersion = qEnvironmentVariableIntValue("PY_MINOR_VERSION", &ok);
-    if (!ok) {
-        majorVersion = PY_MAJOR_VERSION;
-        minorVersion = PY_MINOR_VERSION;
-    }
-
     if (!qEnvironmentVariableIsSet(virtualEnvVar)
-        || (os != QOperatingSystemVersion::MacOS && os != QOperatingSystemVersion::Windows)
-        || (majorVersion == 3 && minorVersion < 8)) {
+        || (os != QOperatingSystemVersion::MacOS && os != QOperatingSystemVersion::Windows)) {
         return;
     }
 
@@ -155,11 +159,13 @@ static void initVirtualEnvironment()
     case QOperatingSystemVersion::Windows:
         pythonPath.append(virtualEnvPath + R"(\Lib\site-packages)");
         break;
-    case QOperatingSystemVersion::MacOS:
+    case QOperatingSystemVersion::MacOS: {
+        const auto version = pythonVersion();
         pythonPath.append(virtualEnvPath + "/lib/python"_ba +
-                          QByteArray::number(majorVersion) + '.'
-                          + QByteArray::number(minorVersion)
+                          QByteArray::number(version.first) + '.'
+                          + QByteArray::number(version.second)
                           + "/site-packages"_ba);
+    }
         break;
     default:
         break;
