@@ -43,7 +43,7 @@ static void createInto(void *memory, void *type)
     QMutexLocker locker(&PySide::nextQObjectMemoryAddrMutex());
     PySide::setNextQObjectMemoryAddr(memory);
     Shiboken::GilState state;
-    PyObject *obj = PyObject_CallObject(reinterpret_cast<PyObject *>(type), 0);
+    PyObject *obj = PyObject_CallObject(reinterpret_cast<PyObject *>(type), nullptr);
     if (!obj || PyErr_Occurred())
         PyErr_Print();
     PySide::setNextQObjectMemoryAddr(nullptr);
@@ -76,7 +76,7 @@ static PyTypeObject *qQJSValueType()
 // Check if o inherits from baseClass
 static bool inheritsFrom(const QMetaObject *o, const char *baseClass)
 {
-    for (auto *base = o->superClass(); base ; base = base->superClass()) {
+    for (const auto *base = o->superClass(); base ; base = base->superClass()) {
         if (qstrcmp(base->className(), baseClass) == 0)
             return true;
     }
@@ -171,7 +171,7 @@ static PyTypeObject *checkTypeObject(PyObject *pyObj, const char *what)
 static bool setClassInfo(PyTypeObject *type, const QByteArray &key, const QByteArray &value)
 {
     if (!PySide::ClassInfo::setClassInfo(type, key, value)) {
-        PyErr_Format(PyExc_TypeError, "Setting class info \"%s\" to \"%s\" on \"%s\" failed.",
+        PyErr_Format(PyExc_TypeError, R"(Setting class info "%s" to "%s" on "%s" failed.)",
                      key.constData(), value.constData(), type->tp_name);
         return false;
     }
@@ -197,7 +197,7 @@ static int qmlRegisterType(PyObject *pyObj,
                            const QMetaObject *metaObject,
                            const QMetaObject *classInfoMetaObject = nullptr)
 {
-    PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
+    auto *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
 
     if (classInfoMetaObject == nullptr)
         classInfoMetaObject = metaObject;
@@ -270,7 +270,7 @@ static int qmlRegisterType(PyObject *pyObj,
 static int qmlRegisterType(PyObject *pyObj, PyObject *pyClassInfoObj,
                            const ImportData &importData)
 {
-    PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
+    auto *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
     if (!isQObjectDerived(pyObjType, true))
         return -1;
 
@@ -456,7 +456,7 @@ static int qmlRegisterSingletonTypeV2(PyObject *pyObj, PyObject *pyClassInfoObj,
                                       const ImportData &importData,
                                       const SingletonQObjectCreation &callback)
 {
-    PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
+    auto *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
     if (!isQObjectDerived(pyObjType, true))
         return -1;
 
@@ -501,7 +501,7 @@ static int qmlRegisterSingletonType(PyObject *pyObj, const ImportData &importDat
     const QMetaObject *metaObject = nullptr;
 
     if (isQObject) {
-        PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
+        auto *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
 
         if (!isQObjectDerived(pyObjType, true))
             return -1;
@@ -583,7 +583,7 @@ static int qmlRegisterSingletonInstance(PyObject *pyObj, const ImportData &impor
     using namespace Shiboken;
 
     // Check if the Python Type inherit from QObject
-    PyTypeObject *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
+    auto *pyObjType = reinterpret_cast<PyTypeObject *>(pyObj);
 
     if (!isQObjectDerived(pyObjType, true))
         return -1;
@@ -698,7 +698,7 @@ PyObject *qmlElementMacro(PyObject *pyObj, const char *decoratorName,
     const auto importDataO = getGlobalImportData(decoratorName);
     if (!importDataO.has_value())
         return nullptr;
-    const auto importData = importDataO.value();
+    const auto &importData = importDataO.value();
 
     int result{};
     if (mode == RegisterMode::Singleton) {

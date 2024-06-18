@@ -46,7 +46,7 @@ const char *PySideQmlExtendedPrivate::name() const
 
 extern "C" {
 
-static PyTypeObject *createPySideQmlExtendedType(void)
+static PyTypeObject *createPySideQmlExtendedType()
 {
     auto typeSlots =
         PySide::ClassDecorator::Methods<PySideQmlExtendedPrivate>::typeSlots();

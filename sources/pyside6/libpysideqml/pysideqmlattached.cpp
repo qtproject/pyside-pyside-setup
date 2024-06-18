@@ -50,7 +50,7 @@ const char *PySideQmlAttachedPrivate::name() const
 
 extern "C" {
 
-static PyTypeObject *createPySideQmlAttachedType(void)
+static PyTypeObject *createPySideQmlAttachedType()
 {
     auto typeSlots =
         PySide::ClassDecorator::Methods<PySideQmlAttachedPrivate>::typeSlots();
@@ -92,7 +92,7 @@ static QObject *attachedFactoryHelper(PyTypeObject *attachingType, QObject *o)
 
     static const char methodName[] = "qmlAttachedProperties";
     static PyObject *const pyMethodName = Shiboken::String::createStaticString(methodName);
-    PyObject *attachingTypeObj = reinterpret_cast<PyObject *>(attachingType);
+    auto *attachingTypeObj = reinterpret_cast<PyObject *>(attachingType);
     Shiboken::AutoDecRef pyResult(PyObject_CallMethodObjArgs(attachingTypeObj, pyMethodName,
                                                              attachingTypeObj /* self */,
                                                              converter.toPython(&o),
@@ -178,7 +178,7 @@ PySide::Qml::QmlExtensionInfo qmlAttachedInfo(PyTypeObject *t,
     if (!info || info->attachedType == nullptr)
         return result;
 
-    auto *name = reinterpret_cast<PyTypeObject *>(t)->tp_name;
+    const auto *name = reinterpret_cast<PyTypeObject *>(t)->tp_name;
     if (nextAttachingType >= MAX_ATTACHING_TYPES) {
         qWarning("Unable to initialize attached type \"%s\": "
                  "The limit %d of  attached types has been reached.",

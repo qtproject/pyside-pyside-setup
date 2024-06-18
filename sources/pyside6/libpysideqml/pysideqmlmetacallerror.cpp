@@ -40,7 +40,9 @@ std::optional<int> qmlMetaCallErrorHandler(QObject *object)
     if (engine->currentStackFrame == nullptr)
         return {};
 
-    PyObject *errType, *errValue, *errTraceback;
+    PyObject *errType{};
+    PyObject *errValue{};
+    PyObject *errTraceback{};
     PyErr_Fetch(&errType, &errValue, &errTraceback);
     // PYSIDE-464: The error is only valid before PyErr_Restore,
     // PYSIDE-464: therefore we take local copies.

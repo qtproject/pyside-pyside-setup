@@ -47,7 +47,7 @@ static int propListTpInit(PyObject *self, PyObject *args, PyObject *kwds)
                                    "designable", "scriptable", "stored",
                                    "user", "constant", "final",
                                    nullptr};
-    PySideProperty *pySelf = reinterpret_cast<PySideProperty *>(self);
+    auto *pySelf = reinterpret_cast<PySideProperty *>(self);
 
     auto *data = static_cast<QmlListPropertyPrivate *>(pySelf->d);
 
@@ -192,7 +192,7 @@ QObject *propListAt(QQmlListProperty<QObject> *propList, qsizetype index)
     auto *data = reinterpret_cast<QmlListPropertyPrivate *>(propList->data);
     Shiboken::AutoDecRef retVal(PyObject_CallObject(data->at, args));
 
-    QObject *result = 0;
+    QObject *result = nullptr;
     if (PyErr_Occurred())
         PyErr_Print();
     else if (PyType_IsSubtype(Py_TYPE(retVal), data->type))
@@ -262,7 +262,7 @@ void QmlListPropertyPrivate::metaCall(PyObject *source, QMetaObject::Call call, 
     if (call != QMetaObject::ReadProperty)
         return;
 
-    QObject *qobj;
+    QObject *qobj{};
     PyTypeObject *qobjectType = qObjectType();
     Shiboken::Conversions::pythonToCppPointer(qobjectType, source, &qobj);
     QQmlListProperty<QObject> declProp(
