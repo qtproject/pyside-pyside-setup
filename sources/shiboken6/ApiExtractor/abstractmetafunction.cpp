@@ -289,27 +289,28 @@ void AbstractMetaFunction::setFlags(Flags f)
 /*******************************************************************************
  * Indicates that this function has a modification that removes it
  */
+
+static bool fmIsRemoved(const FunctionModification &mod) { return mod.isRemoved(); }
+
 bool AbstractMetaFunction::isModifiedRemoved(AbstractMetaClassCPtr cls) const
 {
     if (!isInGlobalScope() && !cls)
         cls = d->m_implementingClass;
-    for (const auto &mod : modifications(cls)) {
-        if (mod.isRemoved())
-            return true;
-    }
+    const auto &mods = modifications(cls);
+    return std::any_of(mods.cbegin(), mods.cend(), fmIsRemoved);
+}
 
-    return false;
+static bool isFinal(const FunctionModification &mod)
+{
+    return mod.modifiers().testFlag(FunctionModification::Final);
 }
 
 bool AbstractMetaFunction::isModifiedFinal(AbstractMetaClassCPtr cls) const
 {
     if (!isInGlobalScope() && cls == nullptr)
         cls = d->m_implementingClass;
-    for (const auto &mod : modifications(cls)) {
-        if (mod.modifiers().testFlag(FunctionModification::Final))
-            return true;
-    }
-    return false;
+    const auto &mods = modifications(cls);
+    return std::any_of(mods.cbegin(), mods.cend(), isFinal);
 }
 
 bool AbstractMetaFunction::isVoid() const
@@ -465,17 +466,17 @@ AbstractMetaFunction *AbstractMetaFunction::copy() const
     return cpy;
 }
 
+static bool usesRValueReference(const AbstractMetaArgument &a)
+{
+    return a.type().referenceType() == RValueReference;
+}
+
 bool AbstractMetaFunction::usesRValueReferences() const
 {
-    if (d->m_functionType == MoveConstructorFunction || d->m_functionType == MoveAssignmentOperatorFunction)
-        return true;
-    if (d->m_type.referenceType() == RValueReference)
-        return true;
-    for (const AbstractMetaArgument &a : d->m_arguments) {
-        if (a.type().referenceType() == RValueReference)
-            return true;
-    }
-    return false;
+    return d->m_functionType == MoveConstructorFunction
+        || d->m_functionType == MoveAssignmentOperatorFunction
+        || d->m_type.referenceType() == RValueReference
+        || std::any_of(d->m_arguments.cbegin(), d->m_arguments.cend(), usesRValueReference);
 }
 
 bool AbstractMetaFunction::generateBinding() const
@@ -1162,14 +1163,15 @@ bool AbstractMetaFunction::isCallOperator() const
     return d->m_name == u"operator()";
 }
 
+static bool isCodeInjection(const FunctionModification &mod)
+{
+    return mod.isCodeInjection();
+}
+
 bool AbstractMetaFunction::hasInjectedCode() const
 {
     const FunctionModificationList &mods = modifications(ownerClass());
-    for (const FunctionModification &mod : mods) {
-        if (mod.isCodeInjection())
-            return true;
-    }
-    return false;
+    return std::any_of(mods.cbegin(), mods.cend(), isCodeInjection);
 }
 
 // Traverse the code snippets, return true if predicate returns true
@@ -1587,13 +1589,15 @@ bool AbstractMetaFunction::injectedCodeUsesArgument(int argumentIndex) const
                              }, TypeSystem::CodeSnipPositionAny);
 }
 
+static bool isModifiedToPrivate(const FunctionModification &mod)
+{
+    return mod.modifiers().testFlag(FunctionModification::Private);
+}
+
 bool AbstractMetaFunction::isVisibilityModifiedToPrivate() const
 {
-    for (const auto &mod : modifications()) {
-        if (mod.modifiers().testFlag(FunctionModification::Private))
-            return true;
-    }
-    return false;
+    const auto &mods = modifications();
+    return std::any_of(mods.cbegin(), mods.cend(), isModifiedToPrivate);
 }
 
 struct ComparisonOperator

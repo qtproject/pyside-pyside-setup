@@ -494,82 +494,69 @@ OverloadDataNode *OverloadDataRootNode::addOverloadDataNode(const AbstractMetaFu
     return overloadData.get();
 }
 
+static bool isNonVoidOverload(const AbstractMetaFunctionCPtr &func)
+{
+    return func->isTypeModified()
+        ? func->modifiedTypeName() != "void"_L1
+        : !func->argumentRemoved(0) && !func->type().isVoid();
+}
+
 bool OverloadData::hasNonVoidReturnType() const
 {
-    for (const auto &func : m_overloads) {
-        if (func->isTypeModified()) {
-            if (func->modifiedTypeName() != u"void")
-                return true;
-        } else {
-            if (!func->argumentRemoved(0) && !func->type().isVoid())
-                return true;
-        }
-    }
-    return false;
+    return std::any_of(m_overloads.cbegin(), m_overloads.cend(),
+                       isNonVoidOverload);
+}
+
+static bool functionHasVarargs(const AbstractMetaFunctionCPtr &func)
+{
+    const auto &args = func->arguments();
+    return args.size() > 1 && args.constLast().type().isVarargs();
 }
 
 bool OverloadData::hasVarargs() const
 {
-    for (const auto &func : m_overloads) {
-        AbstractMetaArgumentList args = func->arguments();
-        if (args.size() > 1 && args.constLast().type().isVarargs())
-            return true;
-    }
-    return false;
+    return std::any_of(m_overloads.cbegin(), m_overloads.cend(),
+                       functionHasVarargs);
+}
+
+static bool isStaticFunction(const AbstractMetaFunctionCPtr &func)
+{
+    return func->isStatic();
 }
 
 bool OverloadData::hasStaticFunction(const AbstractMetaFunctionCList &overloads)
 {
-    for (const auto &func : overloads) {
-        if (func->isStatic())
-            return true;
-    }
-    return false;
+    return std::any_of(overloads.cbegin(), overloads.cend(), isStaticFunction);
 }
 
 bool OverloadData::hasStaticFunction() const
 {
-    for (const auto &func : m_overloads) {
-        if (func->isStatic())
-            return true;
-    }
-    return false;
+    return std::any_of(m_overloads.cbegin(), m_overloads.cend(), isStaticFunction);
+}
+
+static bool isClassMethod(const AbstractMetaFunctionCPtr &func)
+{
+    return func->isClassMethod();
 }
 
 bool OverloadData::hasClassMethod(const AbstractMetaFunctionCList &overloads)
 {
-    for (const auto &func : overloads) {
-        if (func->isClassMethod())
-            return true;
-    }
-    return false;
+    return std::any_of(overloads.cbegin(), overloads.cend(), isClassMethod);
 }
 
 bool OverloadData::hasClassMethod() const
 {
-    for (const auto &func : m_overloads) {
-        if (func->isClassMethod())
-            return true;
-    }
-    return false;
+    return std::any_of(m_overloads.cbegin(), m_overloads.cend(), isClassMethod);
 }
 
 bool OverloadData::hasInstanceFunction(const AbstractMetaFunctionCList &overloads)
 {
-    for (const auto &func : overloads) {
-        if (!func->isStatic())
-            return true;
-    }
-    return false;
+    return !std::all_of(overloads.cbegin(), overloads.cend(), isStaticFunction);
 }
 
 bool OverloadData::hasInstanceFunction() const
 {
-    for (const auto &func : m_overloads) {
-        if (!func->isStatic())
-            return true;
-    }
-    return false;
+    return !std::all_of(m_overloads.cbegin(), m_overloads.cend(), isStaticFunction);
 }
 
 bool OverloadData::hasStaticAndInstanceFunctions(const AbstractMetaFunctionCList &overloads)
@@ -611,13 +598,14 @@ const AbstractMetaArgument *OverloadDataNode::overloadArgument(const AbstractMet
     return &func->arguments().at(m_argPos + removed);
 }
 
+static bool hasDefaultValue(const OverloadDataNodePtr &o)
+{
+    return o->getFunctionWithDefaultValue() != nullptr;
+}
+
 bool OverloadDataRootNode::nextArgumentHasDefaultValue() const
 {
-    for (const auto &overloadData : m_children) {
-        if (overloadData->getFunctionWithDefaultValue())
-            return true;
-    }
-    return false;
+     return std::any_of(m_children.cbegin(), m_children.cend(), hasDefaultValue);
 }
 
 static const OverloadDataRootNode *_findNextArgWithDefault(const OverloadDataRootNode *overloadData)
@@ -642,11 +630,10 @@ const OverloadDataRootNode *OverloadDataRootNode::findNextArgWithDefault() const
 
 bool OverloadDataRootNode::isFinalOccurrence(const AbstractMetaFunctionCPtr &func) const
 {
-    for (const auto &pd : m_children) {
-        if (pd->overloads().contains(func))
-            return false;
-    }
-    return true;
+    auto containsPredicate = [&func](const OverloadDataNodePtr &o) {
+        return o->overloads().contains(func);
+    };
+    return std::none_of(m_children.cbegin(), m_children.cend(), containsPredicate);
 }
 
 AbstractMetaFunctionCPtr OverloadDataRootNode::getFunctionWithDefaultValue() const
@@ -893,23 +880,20 @@ bool OverloadData::pythonFunctionWrapperUsesListOfArguments() const
 
 bool OverloadData::hasArgumentWithDefaultValue() const
 {
-    if (maxArgs() == 0)
-        return false;
-    for (const auto &func : m_overloads) {
-        if (hasArgumentWithDefaultValue(func))
-            return true;
-    }
-    return false;
+    return maxArgs() != 0
+           && std::any_of(m_overloads.cbegin(), m_overloads.cend(),
+                          qOverload<const AbstractMetaFunctionCPtr &>(hasArgumentWithDefaultValue));
+}
+
+static bool isArgumentWithDefaultValue(const AbstractMetaArgument &arg)
+{
+    return !arg.isModifiedRemoved() && arg.hasDefaultValueExpression();
 }
 
 bool OverloadData::hasArgumentWithDefaultValue(const AbstractMetaFunctionCPtr &func)
 {
     const AbstractMetaArgumentList &arguments = func->arguments();
-    for (const AbstractMetaArgument &arg : arguments) {
-        if (!arg.isModifiedRemoved() && arg.hasDefaultValueExpression())
-            return true;
-    }
-    return false;
+    return std::any_of(arguments.cbegin(), arguments.cend(), isArgumentWithDefaultValue);
 }
 
 AbstractMetaArgumentList OverloadData::getArgumentsWithDefaultValues(const AbstractMetaFunctionCPtr &func)

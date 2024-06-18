@@ -231,51 +231,64 @@ AbstractMetaFunctionCList AbstractMetaClass::operatorOverloads(OperatorQueryOpti
     return returned;
 }
 
+static bool isArithmeticOperatorOverload(const AbstractMetaFunctionCPtr &f)
+{
+    return f->ownerClass() == f->implementingClass()
+           && f->isArithmeticOperator() && !f->isPrivate();
+}
+
 bool AbstractMetaClass::hasArithmeticOperatorOverload() const
 {
-    for (const auto & f: d->m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isArithmeticOperator() && !f->isPrivate())
-            return true;
-    }
-    return false;
+    return std::any_of(d->m_functions.cbegin(), d->m_functions.cend(),
+                       isArithmeticOperatorOverload);
+}
+
+static bool isIncDecrementOperatorOverload(const AbstractMetaFunctionCPtr &f)
+{
+    return f->ownerClass() == f->implementingClass()
+           && f->isIncDecrementOperator() && !f->isPrivate();
 }
 
 bool AbstractMetaClass::hasIncDecrementOperatorOverload() const
 {
-    for (const auto & f: d->m_functions) {
-        if (f->ownerClass() == f->implementingClass()
-            && f->isIncDecrementOperator() && !f->isPrivate()) {
-            return true;
-        }
-    }
-    return false;
+    return std::any_of(d->m_functions.cbegin(), d->m_functions.cend(),
+                       isIncDecrementOperatorOverload);
+}
+
+static bool isBitwiseOperatorOverload(const AbstractMetaFunctionCPtr &f)
+{
+    return f->ownerClass() == f->implementingClass()
+           && f->isBitwiseOperator() && !f->isPrivate();
 }
 
 bool AbstractMetaClass::hasBitwiseOperatorOverload() const
 {
-    for (const auto & f: d->m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isBitwiseOperator() && !f->isPrivate())
-            return true;
-    }
-    return false;
+    return std::any_of(d->m_functions.cbegin(), d->m_functions.cend(),
+                       isBitwiseOperatorOverload);
+}
+
+static bool isComparisonOperatorOverload(const AbstractMetaFunctionCPtr &f)
+{
+    return f->ownerClass() == f->implementingClass()
+           && f->isComparisonOperator() && !f->isPrivate();
 }
 
 bool AbstractMetaClass::hasComparisonOperatorOverload() const
 {
-    for (const auto &f : d->m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isComparisonOperator() && !f->isPrivate())
-            return true;
-    }
-    return false;
+    return std::any_of(d->m_functions.cbegin(), d->m_functions.cend(),
+                       isComparisonOperatorOverload);
+}
+
+static bool isLogicalOperatorOverload(const AbstractMetaFunctionCPtr &f)
+{
+    return f->ownerClass() == f->implementingClass()
+           && f->isLogicalOperator() && !f->isPrivate();
 }
 
 bool AbstractMetaClass::hasLogicalOperatorOverload() const
 {
-    for (const auto &f : d->m_functions) {
-        if (f->ownerClass() == f->implementingClass() && f->isLogicalOperator() && !f->isPrivate())
-            return true;
-    }
-    return false;
+    return std::any_of(d->m_functions.cbegin(), d->m_functions.cend(),
+                       isLogicalOperatorOverload);
 }
 
 const AbstractMetaFieldList &AbstractMetaClass::fields() const

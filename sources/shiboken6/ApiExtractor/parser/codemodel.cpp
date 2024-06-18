@@ -347,11 +347,10 @@ void _ClassModelItem::setTemplateParameters(const TemplateParameterList &templat
 
 bool _ClassModelItem::extendsClass(const QString &name) const
 {
-    for (const BaseClass &bc : m_baseClasses) {
-        if (bc.name == name)
-            return true;
-    }
-    return false;
+    return std::any_of(m_baseClasses.cbegin(), m_baseClasses.cend(),
+                       [&name](const BaseClass &bc) {
+                           return bc.name == name;
+                       });
 }
 
 _ClassModelItem::_ClassModelItem(CodeModel *model, int kind)

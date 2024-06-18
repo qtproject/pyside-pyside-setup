@@ -153,11 +153,10 @@ using ProtocolEntries = QList<ProtocolEntry>;
 
 static bool contains(const ProtocolEntries &l, const QString &needle)
 {
-    for (const auto &m : l) {
-        if (m.name == needle)
-            return true;
-    }
-    return false;
+    return std::any_of(l.cbegin(), l.cend(),
+                       [&needle](const ProtocolEntry &e) {
+                           return e.name == needle;
+                       });
 }
 
 // Maps special function names to function parameters and return types
@@ -4297,12 +4296,11 @@ QString CppGenerator::multipleInheritanceInitializerFunctionName(const AbstractM
 
 bool CppGenerator::supportsMappingProtocol(const AbstractMetaClassCPtr &metaClass)
 {
-    for (const auto &m : mappingProtocols()) {
-        if (metaClass->hasFunction(m.name))
-            return true;
-    }
-
-    return false;
+    const auto &protocols = mappingProtocols();
+    return  std::any_of(protocols.cbegin(), protocols.cend(),
+                        [&metaClass](const ProtocolEntry &e) {
+                            return metaClass->hasFunction(e.name);
+                        });
 }
 
 bool CppGenerator::supportsNumberProtocol(const AbstractMetaClassCPtr &metaClass)

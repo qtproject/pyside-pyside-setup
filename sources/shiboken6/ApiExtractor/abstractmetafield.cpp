@@ -15,6 +15,8 @@
 
 #include <QtCore/QDebug>
 
+#include <algorithm>
+
 using namespace Qt::StringLiterals;
 
 class AbstractMetaFieldData : public QSharedData
@@ -56,25 +58,20 @@ std::optional<AbstractMetaField>
 /*******************************************************************************
  * Indicates that this field has a modification that removes it
  */
+static bool isRemoved(const FieldModification &mod) { return mod.isRemoved(); }
+
 bool AbstractMetaField::isModifiedRemoved() const
 {
     const FieldModificationList &mods = modifications();
-    for (const FieldModification &mod : mods) {
-        if (mod.isRemoved())
-            return true;
-    }
-
-    return false;
+    return std::any_of(mods.cbegin(), mods.cend(), isRemoved);
 }
+
+static bool isOpaqueContainer(const FieldModification &mod) { return mod.isOpaqueContainer(); }
 
 bool AbstractMetaField::generateOpaqueContainer() const
 {
     const FieldModificationList &mods = modifications();
-    for (const FieldModification &mod : mods) {
-        if (mod.isOpaqueContainer())
-            return true;
-    }
-    return false;
+    return std::any_of(mods.cbegin(), mods.cend(), isOpaqueContainer);
 }
 
 const AbstractMetaType &AbstractMetaField::type() const
