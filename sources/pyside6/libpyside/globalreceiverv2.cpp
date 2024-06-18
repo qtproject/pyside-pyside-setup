@@ -85,12 +85,16 @@ DynamicSlotDataV2::DynamicSlotDataV2(PyObject *callback, GlobalReceiverV2 *paren
 
     if (PyMethod_Check(callback)) {
         m_isMethod = true;
-        // To avoid increment instance reference keep the callback information
+        // A method given by "signal.connect(foo.method)" is a temporarily created
+        // callable/partial function where self is bound as a first parameter.
+        // It can be split into self and the function. Keeping a reference on
+        // the callable itself would prevent object deletion. Instead, keep a
+        // reference on the function and listen for destruction of the object
+        // using a weak reference with notification.
         m_callback = PyMethod_GET_FUNCTION(callback);
         Py_INCREF(m_callback);
         m_pythonSelf = PyMethod_GET_SELF(callback);
 
-        //monitor class from method lifetime
         m_weakRef = WeakRef::create(m_pythonSelf, DynamicSlotDataV2::onCallbackDestroyed, this);
     } else if (PySide::isCompiledMethod(callback)) {
         // PYSIDE-1523: PyMethod_Check is not accepting compiled form, we just go by attributes.
