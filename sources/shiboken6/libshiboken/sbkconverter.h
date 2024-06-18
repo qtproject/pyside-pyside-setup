@@ -339,27 +339,29 @@ LIBSHIBOKEN_API bool pythonTypeIsObjectType(const SbkConverter *converter);
 /// Returns true if the Python type associated with the converter is a wrapper type.
 LIBSHIBOKEN_API bool pythonTypeIsWrapperType(const SbkConverter *converter);
 
-#define SBK_PY_LONG_LONG_IDX            0
+enum  : int {
+SBK_PY_LONG_LONG_IDX =             0,
 // Qt5: name collision in QtCore after QBool is replaced by bool
-#define SBK_BOOL_IDX_1                  1
-#define SBK_CHAR_IDX                    2
-#define SBK_CONSTCHARPTR_IDX            3
-#define SBK_DOUBLE_IDX                  4
-#define SBK_FLOAT_IDX                   5
-#define SBK_INT_IDX                     6
-#define SBK_SIGNEDINT_IDX               6
-#define SBK_LONG_IDX                    7
-#define SBK_SHORT_IDX                   8
-#define SBK_SIGNEDCHAR_IDX              9
-#define SBK_STD_STRING_IDX             10
-#define SBK_STD_WSTRING_IDX            11
-#define SBK_UNSIGNEDPY_LONG_LONG_IDX   12
-#define SBK_UNSIGNEDCHAR_IDX           13
-#define SBK_UNSIGNEDINT_IDX            14
-#define SBK_UNSIGNEDLONG_IDX           15
-#define SBK_UNSIGNEDSHORT_IDX          16
-#define SBK_VOIDPTR_IDX                17
-#define SBK_NULLPTR_T_IDX              18
+SBK_BOOL_IDX_1 =                   1,
+SBK_CHAR_IDX =                     2,
+SBK_CONSTCHARPTR_IDX =             3,
+SBK_DOUBLE_IDX =                   4,
+SBK_FLOAT_IDX =                    5,
+SBK_INT_IDX =                      6,
+SBK_SIGNEDINT_IDX =                6,
+SBK_LONG_IDX =                     7,
+SBK_SHORT_IDX =                    8,
+SBK_SIGNEDCHAR_IDX =               9,
+SBK_STD_STRING_IDX =              10,
+SBK_STD_WSTRING_IDX =             11,
+SBK_UNSIGNEDPY_LONG_LONG_IDX =    12,
+SBK_UNSIGNEDCHAR_IDX =            13,
+SBK_UNSIGNEDINT_IDX =             14,
+SBK_UNSIGNEDLONG_IDX =            15,
+SBK_UNSIGNEDSHORT_IDX =           16,
+SBK_VOIDPTR_IDX =                 17,
+SBK_NULLPTR_T_IDX =               18
+};
 
 template<typename T> SbkConverter *PrimitiveTypeConverter() { return nullptr; }
 template<> inline SbkConverter *PrimitiveTypeConverter<PY_LONG_LONG>() { return primitiveTypeConverter(SBK_PY_LONG_LONG_IDX); }
