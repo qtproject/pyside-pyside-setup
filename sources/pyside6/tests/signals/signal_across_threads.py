@@ -1,5 +1,6 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
+from __future__ import annotations
 
 '''Test case for PYSIDE-1354: Ensure that slots are invoked from the receiver's
 thread context when using derived classes (and thus, a global receiver).'''

@@ -1,5 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+from __future__ import annotations
 
 from PySide6.QtWidgets import QMenu
 from PySide6.QtCore import Signal, Slot

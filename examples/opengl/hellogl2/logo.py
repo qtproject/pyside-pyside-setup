@@ -1,6 +1,7 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # Copyright (C) 2013 Riverbank Computing Limited.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+from __future__ import annotations
 
 import math
 

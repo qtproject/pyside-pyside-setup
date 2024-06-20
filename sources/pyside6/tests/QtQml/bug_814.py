@@ -2,6 +2,7 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # Copyright (C) 2011 Thomas Perl <m@thp.io>
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
+from __future__ import annotations
 
 # Test case for PySide bug 814
 # http://bugs.pyside.org/show_bug.cgi?id=814

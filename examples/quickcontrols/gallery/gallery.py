@@ -1,5 +1,6 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+from __future__ import annotations
 
 """
 The gallery example is a simple application with a drawer menu that contains

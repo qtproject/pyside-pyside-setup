@@ -1,5 +1,6 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+from __future__ import annotations
 
 # enables to use typehints for classes that has not been defined yet or imported
 # used for resolving circular imports

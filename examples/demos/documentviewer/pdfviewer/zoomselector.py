@@ -1,5 +1,6 @@
 # Copyright (C) 2017 Klaralvdalens Datakonsult AB (KDAB).
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+from __future__ import annotations
 
 from PySide6.QtWidgets import QComboBox
 from PySide6.QtCore import Signal, Slot

@@ -1,5 +1,6 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+from __future__ import annotations
 
 from mimetypemodel import MimeTypeModel
 from PySide6.QtCore import (QDir, QFileInfo, QMimeDatabase, QModelIndex, Qt,

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
+from __future__ import annotations
 
 '''Tests calling NoImplicitConversion using a ExtendsNoImplicitConversion parameter,
    being that the latter defines a new conversion operator for the former, and this one

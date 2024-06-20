@@ -1,6 +1,7 @@
 # Copyright (C) 2020 Mikhail Svetkin <mikhail.svetkin@gmail.com>
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+from __future__ import annotations
 
 """PySide6 port of the /httpserver/afterrequest from from Qt"""
 

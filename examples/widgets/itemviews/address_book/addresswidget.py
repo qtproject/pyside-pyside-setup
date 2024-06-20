@@ -1,6 +1,7 @@
 # Copyright (C) 2011 Arun Srinivasan <rulfzid@gmail.com>
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+from __future__ import annotations
 
 try:
     import cpickle as pickle

@@ -1,5 +1,6 @@
 # Copyright (C) 2024 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+from __future__ import annotations
 
 """
 This example shows how to customize Qt Quick Controls by implementing a simple filesystem explorer.
