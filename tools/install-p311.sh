@@ -18,6 +18,18 @@ if [ ! -d "/Users/qt/python311/bin" ]; then
 
     cd Python-3.11.9/
     ./configure --prefix=/Users/qt/python311 --with-openssl=/usr/local/opt/openssl --enable-optimizations
+    if [ $? -ne 0 ]; then
+        echo "Failed to configure Python."
+        exit 1
+    fi
     make
+    if [ $? -ne 0 ]; then
+        echo "Failed to compile Python."
+        exit 1
+    fi
     make install
+    if [ $? -ne 0 ]; then
+        echo "Failed to install Python."
+        exit 1
+    fi
 fi
