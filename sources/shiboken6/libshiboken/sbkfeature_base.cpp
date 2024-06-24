@@ -127,6 +127,8 @@ static bool currentOpcode_Is_CallMethNoArgs()
     // We look into the currently active operation if we are going to call
     // a method with zero arguments.
     auto *frame = PyEval_GetFrame();
+    if (frame == nullptr) // PYSIDE-2796, has been observed to fail
+        return false;
 #if !Py_LIMITED_API && !defined(PYPY_VERSION)
     auto *f_code = PyFrame_GetCode(frame);
 #else
