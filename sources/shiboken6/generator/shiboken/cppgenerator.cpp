@@ -1875,8 +1875,6 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
             writeConversions(smartPointerName + u'<' + signature + u'>');
             lst.removeFirst();
         }
-
-        writeConversionsForType(smartPointerType);
     }
 
     s << "Shiboken::Conversions::registerConverterName(converter, typeid(" << m_gsp;
