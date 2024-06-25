@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "cppgenerator.h"
+#include "anystringview_helpers.h"
 #include "configurablescope.h"
 #include "generatorargument.h"
 #include "generatorstrings.h"
@@ -124,21 +125,76 @@ TextStream &operator<<(TextStream &s, CppGenerator::ErrorReturn r)
 
 static constexpr auto converterVar = "converter"_L1;
 
-struct registerConverterName
+// Helper streamable class for generating code registering converters
+class registerConverterName
 {
+public:
+    enum Flag
+    {
+        Indirections = 0x1, // Also register "Type*", "Type&"
+        PartiallyQualifiedAliases = 0x2, // Also register "B" when passed "A::B"
+        TypeId = 0x4 // Use typeid().name() for the string passed in
+    };
+    Q_DECLARE_FLAGS(Flags, Flag)
+
     explicit registerConverterName(QAnyStringView typeName,
-                                   QAnyStringView varName = converterVar) :
-        m_typeName(typeName), m_varName(varName) {}
+                                   QAnyStringView varName = {},
+                                   Flags flags = {}) noexcept:
+        m_typeName(typeName), m_varName(varName), m_flags(flags) {}
+
+    void format(TextStream &s) const;
+
+    inline friend TextStream &operator<<(TextStream &s, const registerConverterName &r)
+    {
+        r.format(s);
+        return s;
+    }
+
+private:
+    static void formatEntry(TextStream &s, QAnyStringView typeName,
+                            QAnyStringView varName, Flags flags,
+                            const char *indirection = "");
 
     QAnyStringView m_typeName;
     QAnyStringView m_varName;
+    Flags m_flags;
 };
 
-TextStream &operator<<(TextStream &s, const registerConverterName &r)
+Q_DECLARE_OPERATORS_FOR_FLAGS(registerConverterName::Flags)
+
+void registerConverterName::formatEntry(TextStream &s, QAnyStringView typeName,
+                                        QAnyStringView varName, Flags flags,
+                                        const char *indirection)
 {
-    s << "Shiboken::Conversions::registerConverterName(" << r.m_varName
-        <<  ", \"" << r.m_typeName << "\");\n";
-    return s;
+    s << "Shiboken::Conversions::registerConverterName("
+          << varName << ", ";
+    if (flags.testFlag(TypeId))
+        s << "typeid(" << typeName << indirection << ").name()";
+    else
+        s << '"' << typeName << indirection << '"';
+    s << ");\n";
+}
+
+void registerConverterName::format(TextStream &s) const
+{
+    QAnyStringView typeName = m_typeName;
+    const QAnyStringView varName = m_varName.isEmpty() ? converterVar : m_varName;
+    auto flags = m_flags;
+
+    while (true) {
+        formatEntry(s, typeName, varName, flags);
+        if (flags.testFlag(Indirections)) {
+            formatEntry(s, typeName, varName, flags, "*");
+            formatEntry(s, typeName, varName, flags, "&");
+        }
+
+        if (!flags.testFlag(PartiallyQualifiedAliases))
+            break;
+        auto pos = asv_indexOf(typeName, "::");
+        if (pos < 0)
+            break;
+        typeName = typeName.sliced(pos + 2);
+    }
 }
 
 // Protocol function name / function parameters / return type
@@ -1844,51 +1900,35 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
     }
     s << outdent << ");\n\n";
 
-    auto writeConversions = [&s](const QString &signature)
-    {
-        s << registerConverterName(signature) << registerConverterName(signature + u'*')
-            << registerConverterName(signature + u'&');
-    };
-
-    auto writeConversionsForType = [writeConversions](const QString &fullTypeName)
-    {
-        QStringList lst = fullTypeName.split(u"::"_s,
-                                               Qt::SkipEmptyParts);
-        while (!lst.isEmpty()) {
-            QString signature = lst.join(u"::"_s);
-            writeConversions(signature);
-            lst.removeFirst();
-        }
-    };
-
-
     if (!classContext.forSmartPointer()) {
-        writeConversionsForType(metaClass->qualifiedCppName());
+        s << registerConverterName(metaClass->qualifiedCppName(), {},
+                                   registerConverterName::Indirections
+                                   | registerConverterName::PartiallyQualifiedAliases);
     } else {
-        const QString &smartPointerType = classContext.preciseType().instantiations().at(0).cppSignature();
+        QString pointeeType = classContext.preciseType().instantiations().at(0).cppSignature();
         const QString &smartPointerName = classContext.preciseType().typeEntry()->name();
 
-        QStringList lst = smartPointerType.split(u"::"_s,
-                                               Qt::SkipEmptyParts);
-        while (!lst.isEmpty()) {
-            QString signature = lst.join(u"::"_s);
-            writeConversions(smartPointerName + u'<' + signature + u'>');
-            lst.removeFirst();
+        registerConverterName::Flags flags = registerConverterName::Indirections;
+        while (true) {
+            s << registerConverterName(smartPointerName + u'<' + pointeeType + u'>', {}, flags);
+            auto pos = pointeeType.indexOf("::"_L1);
+            if (pos < 0)
+                break;
+            pointeeType.remove(0, pos + 2);
         }
     }
 
-    s << "Shiboken::Conversions::registerConverterName(converter, typeid(" << m_gsp;
-    QString qualifiedCppNameInvocation;
+    QString qualifiedCppNameInvocation = m_gsp;
     if (!classContext.forSmartPointer())
-        qualifiedCppNameInvocation = metaClass->qualifiedCppName();
+        qualifiedCppNameInvocation += metaClass->qualifiedCppName();
     else
-        qualifiedCppNameInvocation = classContext.preciseType().cppSignature();
-
-    s << qualifiedCppNameInvocation << ").name());\n";
+        qualifiedCppNameInvocation += classContext.preciseType().cppSignature();
+    s << registerConverterName(qualifiedCppNameInvocation, {},
+                               registerConverterName::TypeId);
 
     if (classContext.useWrapper()) {
-        s << "Shiboken::Conversions::registerConverterName(converter, typeid("
-            << classContext.wrapperName() << ").name());\n";
+        s << registerConverterName(classContext.wrapperName(), {},
+                                   registerConverterName::TypeId);
     }
 
     if (!typeEntry->isValue() && !typeEntry->isSmartPointer())
@@ -1900,7 +1940,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
     targetTypeName = sourceTypeName + u"_COPY"_s;
     QString toCpp = pythonToCppFunctionName(sourceTypeName, targetTypeName);
     QString isConv = convertibleToCppFunctionName(sourceTypeName, targetTypeName);
-    writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
+    writeAddPythonToCppConversion(s, converterVar, toCpp, isConv);
 
     // User provided implicit conversions.
 
@@ -1926,7 +1966,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
         }
         QString toCpp = pythonToCppFunctionName(sourceType, targetType);
         QString isConv = convertibleToCppFunctionName(sourceType, targetType);
-        writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
+        writeAddPythonToCppConversion(s, converterVar, toCpp, isConv);
     }
 
     if (typeEntry->isValue()) {
@@ -4170,18 +4210,6 @@ void CppGenerator::writePrimitiveConverterInitialization(TextStream &s,
     writeCustomConverterRegister(s, customConversion, converter);
 }
 
-static void registerConverterInScopes(TextStream &s, QStringView signature,
-                                      QAnyStringView varName = converterVar)
-{
-    while (true) {
-        s << registerConverterName(signature, varName);
-        const auto qualifierPos = signature.indexOf("::"_L1);
-        if (qualifierPos == -1)
-            break;
-        signature = signature.sliced(qualifierPos + 2);
-    }
-}
-
 void CppGenerator::writeEnumConverterInitialization(TextStream &s, const AbstractMetaEnum &metaEnum)
 {
     if (metaEnum.isPrivate() || metaEnum.isAnonymous())
@@ -4203,9 +4231,10 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const Abstrac
     const QString isConv = convertibleToCppFunctionName(typeName, typeName);
     writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
     s << "Shiboken::Enum::setTypeConverter(" << enumPythonVar
-        << ", converter);\n";
+        << ", converter);\n"
+        << registerConverterName(enumType->qualifiedCppName(), {},
+                                 registerConverterName::PartiallyQualifiedAliases);
 
-    registerConverterInScopes(s, enumType->qualifiedCppName());
     if (auto flags = enumType->flags())
         s << "// Register converter for flag '" << flags->qualifiedCppName() << "'.\n"
             << registerConverterName(flags->name()) // QMetaType
@@ -6490,7 +6519,8 @@ bool CppGenerator::finishGeneration()
         if (!pte->referencesType())
             continue;
         TypeEntryCPtr referencedType = basicReferencedTypeEntry(pte);
-        registerConverterInScopes(s, pte->qualifiedCppName(), converterObject(referencedType));
+        s << registerConverterName(pte->qualifiedCppName(), converterObject(referencedType),
+                                   registerConverterName::PartiallyQualifiedAliases);
     }
 
     s << '\n';

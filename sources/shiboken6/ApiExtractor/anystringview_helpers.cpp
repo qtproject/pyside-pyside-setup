@@ -54,3 +54,25 @@ bool asv_contains(QAnyStringView asv, const char *needle)
 {
     return asv.visit([needle](auto s) { return asv_containsImpl(s, needle); });
 }
+
+static qsizetype asv_indexOfImpl(QLatin1StringView v, const char *needle)
+{
+    return v.indexOf(QLatin1StringView(needle));
+}
+
+static qsizetype asv_indexOfImpl(QUtf8StringView v, const char *needle)
+{
+    const char *data = v.data();
+    const char *match = std::strstr(data, needle);
+    return match != nullptr ? qsizetype(match - data) : qsizetype(-1);
+}
+
+static qsizetype asv_indexOfImpl(QStringView v, const char *needle)
+{
+    return v.indexOf(QLatin1StringView(needle));
+}
+
+qsizetype asv_indexOf(QAnyStringView asv, const char *needle)
+{
+    return asv.visit([needle](auto s) { return asv_indexOfImpl(s, needle); });
+}
