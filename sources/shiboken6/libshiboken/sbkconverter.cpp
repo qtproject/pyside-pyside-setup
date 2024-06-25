@@ -522,6 +522,15 @@ void registerConverterName(SbkConverter *converter, const char *typeName)
     auto iter = converters.find(typeName);
     if (iter == converters.end())
         converters.insert(std::make_pair(typeName, converter));
+    else
+        iter->second = converter;
+}
+
+void registerConverterAlias(SbkConverter *converter, const char *typeName)
+{
+    auto iter = converters.find(typeName);
+    if (iter == converters.end())
+        converters.insert(std::make_pair(typeName, converter));
 }
 
 static std::string getRealTypeName(const std::string &typeName)

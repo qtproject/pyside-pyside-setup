@@ -20,6 +20,7 @@ add_definitions(-DRXX_ALLOCATOR_INIT_0)
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 set(pysidetest_SRC
+connection.h
 containertest.cpp containertest.h
 flagstest.cpp flagstest.h
 hiddenobject.cpp hiddenobject.h
@@ -32,6 +33,7 @@ testqvariantenum.cpp testqvariantenum.h
 )
 
 set(testbinding_SRC
+${CMAKE_CURRENT_BINARY_DIR}/testbinding/connection_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/containertest_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/flagsnamespace_classforenum_wrapper.cpp
 ${CMAKE_CURRENT_BINARY_DIR}/testbinding/testobject_wrapper.cpp

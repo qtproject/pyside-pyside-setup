@@ -133,7 +133,8 @@ public:
     {
         Indirections = 0x1, // Also register "Type*", "Type&"
         PartiallyQualifiedAliases = 0x2, // Also register "B" when passed "A::B"
-        TypeId = 0x4 // Use typeid().name() for the string passed in
+        TypeId = 0x4, // Use typeid().name() for the string passed in
+        Alias = 0x8 // This is an alias
     };
     Q_DECLARE_FLAGS(Flags, Flag)
 
@@ -166,8 +167,9 @@ void registerConverterName::formatEntry(TextStream &s, QAnyStringView typeName,
                                         QAnyStringView varName, Flags flags,
                                         const char *indirection)
 {
-    s << "Shiboken::Conversions::registerConverterName("
-          << varName << ", ";
+    s << "Shiboken::Conversions::registerConverter"
+        << (flags.testFlag(Alias) ? "Alias" : "Name")
+        << '(' << varName << ", ";
     if (flags.testFlag(TypeId))
         s << "typeid(" << typeName << indirection << ").name()";
     else
@@ -194,6 +196,7 @@ void registerConverterName::format(TextStream &s) const
         if (pos < 0)
             break;
         typeName = typeName.sliced(pos + 2);
+        flags.setFlag(Alias);
     }
 }
 
@@ -1915,6 +1918,7 @@ void CppGenerator::writeConverterRegister(TextStream &s, const AbstractMetaClass
             if (pos < 0)
                 break;
             pointeeType.remove(0, pos + 2);
+            flags.setFlag(registerConverterName::Alias);
         }
     }
 
@@ -6520,7 +6524,8 @@ bool CppGenerator::finishGeneration()
             continue;
         TypeEntryCPtr referencedType = basicReferencedTypeEntry(pte);
         s << registerConverterName(pte->qualifiedCppName(), converterObject(referencedType),
-                                   registerConverterName::PartiallyQualifiedAliases);
+                                   registerConverterName::Alias
+                                   | registerConverterName::PartiallyQualifiedAliases);
     }
 
     s << '\n';

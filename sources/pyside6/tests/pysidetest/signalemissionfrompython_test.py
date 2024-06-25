@@ -13,10 +13,24 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(True)
 
-from testbinding import TestObject
-from PySide6.QtCore import QObject, SIGNAL
+# Note: For PYSIDE-2792/testConnectionSignal()), QMetaObject needs to be
+# forcibly created before Connection.
+from PySide6.QtCore import QObject, SIGNAL, Slot, QMetaObject  # noqa: F401
+from testbinding import TestObject, Connection
 
 '''Tests the behaviour of signals with default values when emitted from Python.'''
+
+
+class Receiver(QObject):
+    """Test receiver for PYSIDE-2792 (testConnectionSignal)."""
+
+    def __init__(self, p=None):
+        super().__init__(p)
+        self.received_handle = -1
+
+    @Slot(Connection)
+    def connectionSlot(self, c):
+        self.received_handle = c.handle()
 
 
 class SignalEmissionFromPython(unittest.TestCase):
@@ -48,6 +62,15 @@ class SignalEmissionFromPython(unittest.TestCase):
         self.obj2.emitSignalWithDefaultValue_void()
         self.assertEqual(self.one_called, 1)
         self.assertEqual(self.two_called, 2)
+
+    def testConnectionSignal(self):
+        """PYSIDE-2792: Test whether a signal parameter of type 'Connection'
+           clashes with QMetaObject.Connection."""
+        receiver = Receiver()
+        qmetaobject_conn = self.obj1.connectionSignal.connect(receiver.connectionSlot)
+        self.assertTrue(qmetaobject_conn)
+        self.obj1.emitConnectionSignal(42)
+        self.assertEqual(receiver.received_handle, 42)
 
     def testConnectOldStyleEmitVoidSignal(self):
         def callbackOne():
@@ -94,4 +117,3 @@ class SignalEmissionFromPython(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

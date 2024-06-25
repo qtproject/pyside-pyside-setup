@@ -5,6 +5,7 @@
 #define PYSIDETEST_GLOBAL_H
 
 // PySide global.h file
+#include "connection.h"
 #include "containertest.h"
 #include "testobject.h"
 #include "testview.h"

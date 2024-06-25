@@ -28,6 +28,8 @@ public:
 
 using TypedefValue = IntValue;
 
+class Connection;
+
 class PYSIDETEST_API TestObject : public QObject
 {
     Q_OBJECT
@@ -41,6 +43,7 @@ public:
     void addChild(QObject* c) { m_children.append(c); emit childrenChanged(m_children); }
 
     void emitIdValueSignal();
+    void emitConnectionSignal(int handle);
     void emitStaticMethodDoubleSignal();
 
     void emitSignalWithDefaultValue_void();
@@ -58,6 +61,7 @@ public:
 
 signals:
     void idValue(int newValue);
+    void connectionSignal(const Connection &c);
     void justASignal();
     void staticMethodDouble();
     void childrenChanged(const QList<QObject*>&);

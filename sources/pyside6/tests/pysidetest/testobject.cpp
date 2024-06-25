@@ -2,12 +2,19 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "testobject.h"
+#include "connection.h"
 
 #include <QtCore/QDebug>
 
 void TestObject::emitIdValueSignal()
 {
     emit idValue(m_idValue);
+}
+
+void TestObject::emitConnectionSignal(int handle)
+{
+    Connection connection(handle);
+    emit connectionSignal(connection);
 }
 
 void TestObject::emitStaticMethodDoubleSignal()

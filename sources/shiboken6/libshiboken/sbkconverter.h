@@ -266,7 +266,13 @@ LIBSHIBOKEN_API void nonePythonToCppNullPtr(PyObject *, void *cppOut);
 [[deprecated]] LIBSHIBOKEN_API bool isImplicitConversion(PyTypeObject *type, PythonToCppFunc toCpp);
 
 /// Registers a converter with a type name that may be used to retrieve the converter.
+/// Use for fully qualified names (main type). This will overwrite existing converters
+/// of the same name.
 LIBSHIBOKEN_API void registerConverterName(SbkConverter *converter, const char *typeName);
+
+/// Registers a converter with a type name that may be used to retrieve the converter
+/// unless there is already a converter for the name. Use for partially qualified names.
+LIBSHIBOKEN_API void registerConverterAlias(SbkConverter *converter, const char *typeName);
 
 /// Returns the converter for a given type name, or NULL if it wasn't registered before.
 LIBSHIBOKEN_API SbkConverter *getConverter(const char *typeName);
