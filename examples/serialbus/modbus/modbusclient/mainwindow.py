@@ -1,14 +1,12 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-import functools
 from enum import IntEnum
 
 from PySide6.QtCore import QUrl, Slot
 from PySide6.QtGui import QStandardItemModel, QStandardItem
 from PySide6.QtWidgets import QMainWindow
-from PySide6.QtSerialBus import (QModbusDataUnit,
-                                 QModbusDevice, QModbusReply,
+from PySide6.QtSerialBus import (QModbusDataUnit, QModbusDevice,
                                  QModbusRtuSerialClient, QModbusTcpClient)
 
 from ui_mainwindow import Ui_MainWindow
@@ -188,7 +186,7 @@ class MainWindow(QMainWindow):
                                                     self.ui.serverEdit.value())
         if reply:
             if not reply.isFinished():
-                reply.finished.connect(functools.partial(self.onReadReady, reply))
+                reply.finished.connect(self.onReadReady)
             else:
                 del reply  # broadcast replies return immediately
         else:
@@ -196,7 +194,8 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage(message, 5000)
 
     @Slot()
-    def onReadReady(self, reply):
+    def onReadReady(self):
+        reply = self.sender()
         if not reply:
             return
 
@@ -248,13 +247,16 @@ class MainWindow(QMainWindow):
                 # broadcast replies return immediately
                 reply.deleteLater()
             else:
-                reply.finished.connect(functools.partial(self._write_finished, reply))
+                reply.finished.connect(self._write_finished)
         else:
             message = "Write error: " + self._modbus_device.errorString()
             self.statusBar().showMessage(message, 5000)
 
-    @Slot(QModbusReply)
-    def _write_finished(self, reply):
+    @Slot()
+    def _write_finished(self):
+        reply = self.sender()
+        if not reply:
+            return
         error = reply.error()
         if error == QModbusDevice.ProtocolError:
             e = reply.errorString()
@@ -289,7 +291,7 @@ class MainWindow(QMainWindow):
                                                          self.ui.serverEdit.value())
         if reply:
             if not reply.isFinished():
-                reply.finished.connect(functools.partial(self.onReadReady, reply))
+                reply.finished.connect(self.onReadReady)
             else:
                 del reply  # broadcast replies return immediately
         else:
