@@ -6,6 +6,7 @@
 
 #include "sbkpython.h"
 #include "shibokenmacros.h"
+#include "sbkmodule.h"
 
 #include <vector>
 #include <string>
@@ -137,18 +138,20 @@ void callCppDestructor(void *cptr)
 /// setErrorAboutWrongArguments now gets overload information from the signature module.
 /// The extra info argument can contain additional data about the error.
 LIBSHIBOKEN_API void setErrorAboutWrongArguments(PyObject *args, const char *funcName,
-                                                 PyObject *info);
+                                                 PyObject *info, const char *className = nullptr);
 
-/// Return values for the different retun variants.
+/// Return values for the different return variants.
 /// This is used instead of goto.
-LIBSHIBOKEN_API PyObject *returnWrongArguments(PyObject *args, const char *funcName,
-                                               PyObject *info);
+/// Either funcname should contain the full function name, or the module and class
+/// are taken from the TypeInitStruct.
+LIBSHIBOKEN_API PyObject *returnWrongArguments(PyObject *args, const char *funcName, PyObject *info,
+                                               Module::TypeInitStruct initStruct = {nullptr, nullptr});
 
-LIBSHIBOKEN_API int returnWrongArguments_Zero(PyObject *args, const char *funcName,
-                                                    PyObject *info);
+LIBSHIBOKEN_API int returnWrongArguments_Zero(PyObject *args, const char *funcName, PyObject *info,
+                                              Module::TypeInitStruct initStruct = {nullptr, nullptr});
 
-LIBSHIBOKEN_API int returnWrongArguments_MinusOne(PyObject *args, const char *funcName,
-                                                        PyObject *info);
+LIBSHIBOKEN_API int returnWrongArguments_MinusOne(PyObject *args, const char *funcName, PyObject *info,
+                                                  Module::TypeInitStruct initStruct = {nullptr, nullptr});
 
 /// A simple special version for the end of rich comparison.
 LIBSHIBOKEN_API PyObject *returnFromRichCompare(PyObject *result);

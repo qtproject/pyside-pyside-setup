@@ -488,8 +488,8 @@ static bool isPythonType(PyTypeObject *type)
     return !ObjectType::checkType(type) || ObjectType::isUserType(type);
 }
 
-bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
-                                       const char *fullName)
+static bool _callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
+                               std::string_view className)
 {
     using Shiboken::AutoDecRef;
 
@@ -505,13 +505,10 @@ bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
     auto *mro = startType->tp_mro;
     Py_ssize_t idx = 0;
     const Py_ssize_t n = PyTuple_GET_SIZE(mro);
-    auto classNameLen = std::strrchr(fullName, '.') - fullName;
     /* No need to check the last one: it's gonna be skipped anyway.  */
     for ( ; idx + 1 < n; ++idx) {
         auto *lookType = reinterpret_cast<PyTypeObject *>(PyTuple_GET_ITEM(mro, idx));
-        const char *lookName = lookType->tp_name;
-        auto lookLen = long(std::strlen(lookName));
-        if (std::strncmp(lookName, fullName, classNameLen) == 0 && lookLen == classNameLen)
+        if (className == lookType->tp_name)
             break;
     }
     // We are now at the first non-Python class `QObject`.
@@ -543,6 +540,25 @@ bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
     // Note: This can fail, so please always check the error status.
     AutoDecRef result(PyObject_Call(func, newArgs, kwds));
     return true;
+}
+
+bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
+                       const char *fullName)
+{
+    // fullName is the full dotted name of module, class and function.
+    // We need to cut off the rightmost field to get the module.class name.
+    auto className = std::string_view(fullName);
+    auto pos = className.rfind('.');
+    assert(pos != std::string_view::npos);
+    className = className.substr(0, pos);
+    return _callInheritedInit(self, args, kwds, className);
+}
+
+bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
+                       Module::TypeInitStruct typeStruct)
+{
+    // TypeInitStruct must contain the module.class name.
+    return _callInheritedInit(self, args, kwds, typeStruct.fullName);
 }
 
 } // namespace Shiboken

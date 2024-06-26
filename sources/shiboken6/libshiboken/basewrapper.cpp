@@ -831,26 +831,40 @@ void initShibokenSupport(PyObject *module)
 
 // setErrorAboutWrongArguments now gets overload info from the signature module.
 // Info can be nullptr and contains extra info.
-void setErrorAboutWrongArguments(PyObject *args, const char *funcName, PyObject *info)
+void setErrorAboutWrongArguments(PyObject *args, const char *funcName, PyObject *info,
+                                 const char *className)
 {
+    if (className != nullptr) {
+        std::string text = std::string(className);
+        text += '.';
+        text += funcName;
+        SetError_Argument(args, text.c_str(), info);
+        return;
+    }
     SetError_Argument(args, funcName, info);
 }
 
-PyObject *returnWrongArguments(PyObject *args, const char *funcName, PyObject *info)
+PyObject *returnWrongArguments(PyObject *args, const char *funcName, PyObject *info,
+                               Module::TypeInitStruct initStruct)
 {
-    setErrorAboutWrongArguments(args, funcName, info);
+    const auto *className = initStruct.fullName ? initStruct.fullName : nullptr;
+    setErrorAboutWrongArguments(args, funcName, info, className);
     return {};
 }
 
-int returnWrongArguments_Zero(PyObject *args, const char *funcName, PyObject *info)
+int returnWrongArguments_Zero(PyObject *args, const char *funcName, PyObject *info,
+                              Module::TypeInitStruct initStruct)
 {
-    setErrorAboutWrongArguments(args, funcName, info);
+    const auto *className = initStruct.fullName ? initStruct.fullName : nullptr;
+    setErrorAboutWrongArguments(args, funcName, info, className);
     return 0;
 }
 
-int returnWrongArguments_MinusOne(PyObject *args, const char *funcName, PyObject *info)
+int returnWrongArguments_MinusOne(PyObject *args, const char *funcName, PyObject *info,
+                                  Module::TypeInitStruct initStruct)
 {
-    setErrorAboutWrongArguments(args, funcName, info);
+    const auto *className = initStruct.fullName ? initStruct.fullName : nullptr;
+    setErrorAboutWrongArguments(args, funcName, info, className);
     return -1;
 }
 
