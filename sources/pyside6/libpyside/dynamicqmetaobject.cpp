@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "dynamicqmetaobject.h"
+#include "pysidelogging_p.h"
 #include "pysideqobject.h"
 #include "pysidesignal.h"
 #include "pysidesignal_p.h"
@@ -277,6 +278,15 @@ int MetaObjectBuilderPrivate::getPropertyNotifyId(PySideProperty *property) cons
     return notifyId;
 }
 
+static QByteArray msgInvalidPropertyType(const QByteArray &className,
+                                         const QByteArray &propertyName,
+                                         const QByteArray &propertyType)
+{
+    return "QMetaObjectBuilder: Failed to add property \""_ba + propertyName
+           + "\" to \""_ba + className + "\": Invalid property type \""
+           + propertyType + "\"."_ba;
+}
+
 QMetaPropertyBuilder
     MetaObjectBuilderPrivate::createProperty(PySideProperty *property,
                                              const QByteArray &propertyName)
@@ -302,8 +312,13 @@ QMetaPropertyBuilder
             }
         }
     }
-    return builder->addProperty(propertyName, property->d->typeName,
-                                propertyNotifyId);
+    const auto metaType = QMetaType::fromName(property->d->typeName);
+    if (!metaType.isValid()) {
+        const auto &msg = msgInvalidPropertyType(m_builder->className(), propertyName,
+                                                 property->d->typeName);
+         PyErr_WarnEx(PyExc_RuntimeWarning, msg.constData(), 0);
+    }
+    return builder->addProperty(propertyName, property->d->typeName, metaType, propertyNotifyId);
 }
 
 int MetaObjectBuilderPrivate::addProperty(const QByteArray &propertyName,
