@@ -41,7 +41,8 @@ if (PySide::SignalManager::registerMetaMethod(%1, signalName.constData(),
 // http://bugs.openbossa.org/show_bug.cgi?id=362
 // PYSIDE-2256: The label was removed
 if (!PyObject_TypeCheck(%1, PySideSignalInstance_TypeF()))
-    return Shiboken::returnWrongArguments(args, fullName, errInfo);
+    return Shiboken::returnWrongArguments(args, "addTransition", errInfo,
+        SbkPySide6_QtStateMachineTypeStructs[SBK_QAbstractTransition_IDX]);
 PySideSignalInstance *signalInstance = reinterpret_cast<PySideSignalInstance *>(%1);
 auto sender = %CONVERTTOCPP[QObject *](PySide::Signal::getObject(signalInstance));
 QSignalTransition *%0 = %CPPSELF->%FUNCTION_NAME(sender, PySide::Signal::getSignature(signalInstance),%2);

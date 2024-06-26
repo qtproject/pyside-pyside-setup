@@ -2067,9 +2067,11 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
     if (needsArgumentErrorHandling(overloadData))
         s << "Shiboken::AutoDecRef errInfo{};\n";
 
-    s << "static const char fullName[] = \"" << fullPythonFunctionName(rfunc, true)
-        << "\";\nSBK_UNUSED(fullName)\n"
-        << "Shiboken::PythonContextMarker pcm;\n";
+    bool needsFullName = !context.hasClass();
+    if (needsFullName)
+        s << "static const char fullName[] = \"" << fullPythonFunctionName(rfunc, true)
+            << "\";\nSBK_UNUSED(fullName)\n";
+    s << "Shiboken::PythonContextMarker pcm;\n";
     // PYSIDE-2335: Mark blocking calls like `exec` or `run` as such.
     bool isBlockingFunction = rfunc->name() == u"exec"_s || rfunc->name() == u"exec_"_s
                               || rfunc->name() == u"run"_s;
@@ -2166,8 +2168,9 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     // Handles Python Multiple Inheritance
     QString pre = needsMetaObject ? u"bool usesPyMI = "_s : u""_s;
     s << "\n// PyMI support\n"
-        << pre << "Shiboken::callInheritedInit(self, args, kwds, fullName);\n"
-        << "if (" << shibokenErrorsOccurred << ")\n"
+        << pre << "Shiboken::callInheritedInit(self, args, kwds, "
+        << (classContext.hasClass() ? typeInitStruct(classContext) : "fullName"_L1)
+        << ");\nif (" << shibokenErrorsOccurred << ")\n"
         << indent << errorReturn << outdent << "\n";
 
     writeFunctionCalls(s, overloadData, classContext, errorReturn);
@@ -2516,15 +2519,22 @@ QString CppGenerator::returnErrorWrongArguments(const OverloadData &overloadData
 {
     Q_UNUSED(context);
     const auto rfunc = overloadData.referenceFunction();
+    QString exprRest;
+    if (context.hasClass()) {
+        const QString &name = rfunc->isConstructor() ? "__init__"_L1 : rfunc->name();
+        exprRest = ", \""_L1 + name + "\", errInfo, "_L1 + typeInitStruct(context) + ")"_L1;
+    } else {
+        exprRest = ", fullName, errInfo)"_L1;
+    }
     QString argsVar = overloadData.pythonFunctionWrapperUsesListOfArguments()
         ? u"args"_s : PYTHON_ARG;
     switch (errorReturn) {
     case ErrorReturn::Default:
-        return u"Shiboken::returnWrongArguments("_s + argsVar + u", fullName, errInfo)"_s;
+        return u"Shiboken::returnWrongArguments("_s + argsVar + exprRest;
     case ErrorReturn::Zero:
-        return u"Shiboken::returnWrongArguments_Zero("_s + argsVar + u", fullName, errInfo)"_s;
+        return u"Shiboken::returnWrongArguments_Zero("_s + argsVar + exprRest;
     case ErrorReturn::MinusOne:
-        return u"Shiboken::returnWrongArguments_MinusOne("_s + argsVar + u", fullName, errInfo)"_s;
+        return u"Shiboken::returnWrongArguments_MinusOne("_s + argsVar + exprRest;
     case ErrorReturn::Void:
         Q_ASSERT(false);
     }
