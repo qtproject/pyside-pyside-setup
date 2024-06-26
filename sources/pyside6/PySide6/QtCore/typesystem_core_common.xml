@@ -1626,7 +1626,8 @@
 
   <value-type name="QModelRoleData"/>
 
-  <object-type name="QAbstractItemModel">
+  <!-- Register meta type for QML properties -->
+  <object-type name="QAbstractItemModel" qt-register-metatype="yes">
     <enum-type name="CheckIndexOption" flags="CheckIndexOptions"/>
     <enum-type name="LayoutChangeHint"/>
      <!-- This function was replaced by a added function -->
