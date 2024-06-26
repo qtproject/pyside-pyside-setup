@@ -270,6 +270,7 @@ instructions:
       command: "tools/install-p311.sh"
       maxTimeInSeconds: 14400
       maxTimeBetweenOutput: 1200
+      ignoreExitCode: true
       enable_if:
           condition: and
           conditions:
