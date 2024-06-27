@@ -112,7 +112,7 @@ class MainWindow(QMainWindow):
         elif index == ModbusConnection.TCP:
             self._modbus_device = QModbusTcpClient(self)
             if not self.ui.portEdit.text():
-                self.ui.portEdit.setText("127.0.0.1:502")
+                self.ui.portEdit.setText("127.0.0.1:50200")
 
         self._modbus_device.errorOccurred.connect(self._show_device_errorstring)
 
