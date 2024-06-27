@@ -81,7 +81,28 @@
         <value-type name="MultiplexValueRange"/>
     </value-type>
     <value-type name="QCanUniqueIdDescription"/>
-    <object-type name="QModbusClient"/>
+    <object-type name="QModbusClient">
+        <modify-function signature="sendReadRequest(QModbusDataUnit,int)">
+            <modify-argument index="0"> <!-- Suppress return value heuristics -->
+                <define-ownership class="target" owner="default"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="sendWriteRequest(QModbusDataUnit,int)">
+            <modify-argument index="0"> <!-- Suppress return value heuristics -->
+                <define-ownership class="target" owner="default"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="sendReadWriteRequest(QModbusDataUnit,QModbusDataUnit,int)">
+            <modify-argument index="0"> <!-- Suppress return value heuristics -->
+                <define-ownership class="target" owner="default"/>
+            </modify-argument>
+        </modify-function>
+        <modify-function signature="sendRawRequest(QModbusRequest,int)">
+            <modify-argument index="0"> <!-- Suppress return value heuristics -->
+                <define-ownership class="target" owner="default"/>
+            </modify-argument>
+        </modify-function>
+    </object-type>
     <value-type name="QModbusDataUnit">
         <enum-type name="RegisterType"/>
     </value-type>
