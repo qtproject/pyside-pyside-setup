@@ -72,7 +72,12 @@ def get_numpy_location():
         if 'site-' in p:
             numpy = Path(p).resolve() / 'numpy'
             if numpy.is_dir():
-                return os.fspath(numpy / 'core' / 'include')
+                candidate = numpy / '_core' / 'include'  # Version 2
+                if not candidate.is_dir():
+                    candidate = numpy / 'core' / 'include'  # Version 1
+                if candidate.is_dir():
+                    return os.fspath(candidate)
+                log.warning(f"Cannot find numpy include dir under {numpy}")
     return None
 
 
