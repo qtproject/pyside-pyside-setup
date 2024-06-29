@@ -4,6 +4,7 @@
 #ifndef ANYSTRINGVIEW_STREAM_H
 #define ANYSTRINGVIEW_STREAM_H
 
+#include <QtCore/QtTypes>
 #include <QtCore/QtClassHelperMacros>
 
 QT_FORWARD_DECLARE_CLASS(QAnyStringView)
