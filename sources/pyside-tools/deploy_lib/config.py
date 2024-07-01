@@ -350,7 +350,7 @@ class Config(BaseConfig):
         """Identify if QtQuick is used in QML files and add them as dependency
         """
         extra_modules = []
-        if not self.qml_modules:
+        if not self.qml_modules and self.qml_files:
             self.qml_modules = set(run_qmlimportscanner(qml_files=self.qml_files,
                                                         dry_run=self.dry_run))
 
