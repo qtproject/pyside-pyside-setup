@@ -62,9 +62,6 @@ class TestConnectNotifyWithNewStyleSignals(UsesQApplication):
         sender = Obj()
         receiver = QObject()
         sender.connect(SIGNAL('destroyed()'), receiver, SLOT('deleteLater()'))
-        # When connecting to a regular slot, and not a python callback function, QObject::connect
-        # will use the non-cloned method signature, so connectinc to destroyed() will actually
-        # connect to destroyed(QObject*).
         self.assertEqual(sender.signal.methodSignature(), 'destroyed(QObject*)')
 
     def testOldStyleWithPythonCallback(self):

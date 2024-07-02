@@ -258,7 +258,7 @@ QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *sign
     if (receiver.usingGlobalReceiver)
         signalManager.notifyGlobalReceiver(receiver.receiver);
 
-    const QMetaMethod signalMethod = receiver.receiver->metaObject()->method(signalIndex);
+    const QMetaMethod signalMethod = source->metaObject()->method(signalIndex);
     static_cast<FriendlyQObject *>(source)->connectNotify(signalMethod);
     return connection;
 }
@@ -298,7 +298,7 @@ QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *sign
     if (receiver.usingGlobalReceiver)
         signalManager.notifyGlobalReceiver(receiver.receiver);
 
-    const QMetaMethod signalMethod = receiver.receiver->metaObject()->method(signalIndex);
+    const QMetaMethod signalMethod = source->metaObject()->method(signalIndex);
     static_cast<FriendlyQObject *>(source)->connectNotify(signalMethod);
     return connection;
 }
