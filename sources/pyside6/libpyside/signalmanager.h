@@ -80,8 +80,11 @@ public:
     void clear();
     void purgeEmptyGlobalReceivers();
 
-    // Utility function to call a python method usign args received in qt_metacall
-    static int callPythonMetaMethod(const QMetaMethod& method, void** args, PyObject* obj);
+    // Utility function to call a python method using args received in qt_metacall
+    static int callPythonMetaMethod(QMetaMethod method, void **args, PyObject *callable);
+    static int callPythonMetaMethod(const QByteArrayList &parameterTypes,
+                                    const char *returnType /* = nullptr */,
+                                    void **args, PyObject *callable);
 
     static void deleteGlobalReceiver(const QObject *globalReceiver);
 
