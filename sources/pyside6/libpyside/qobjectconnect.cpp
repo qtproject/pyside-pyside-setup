@@ -282,7 +282,10 @@ QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *sign
 
     PySide::SignalManager &signalManager = PySide::SignalManager::instance();
 
-    auto *slotObject = new PySideQSlotObject(callback);
+    const QMetaMethod signalMethod = source->metaObject()->method(signalIndex);
+    auto *slotObject = new PySideQSlotObject(callback,
+                                             signalMethod.parameterTypes(),
+                                             signalMethod.typeName());
 
     QMetaObject::Connection connection{};
     Py_BEGIN_ALLOW_THREADS // PYSIDE-2367, prevent threading deadlocks with connectNotify()
@@ -298,7 +301,6 @@ QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *sign
     if (receiver.usingGlobalReceiver)
         signalManager.notifyGlobalReceiver(receiver.receiver);
 
-    const QMetaMethod signalMethod = source->metaObject()->method(signalIndex);
     static_cast<FriendlyQObject *>(source)->connectNotify(signalMethod);
     return connection;
 }

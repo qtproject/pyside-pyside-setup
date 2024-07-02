@@ -15,7 +15,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, Signal, SIGNAL, QProcess, QTimeLine
+from PySide6.QtCore import QObject, Signal, SIGNAL, QProcess, QTimeLine, Slot
 
 from helper.usesqapplication import UsesQApplication
 
@@ -43,6 +43,18 @@ class Sender(QObject):
 
     dummy = Signal()
     dummy_int = Signal(int)
+
+
+class Receiver(QObject):
+    '''Receiver class'''
+
+    def __init__(self, p=None):
+        super().__init__(p)
+        self.n = 0
+
+    @Slot(int)
+    def intSlot(self, n):
+        self.n = n
 
 
 class PythonSignalToCppSlots(UsesQApplication):
@@ -73,6 +85,18 @@ class PythonSignalToCppSlots(UsesQApplication):
         current = timeline.currentTime()
         sender.dummy_int.emit(current + 42)
         self.assertEqual(timeline.currentTime(), current + 42)
+
+
+class ConnectWithContext(UsesQApplication):
+    '''Test whether a connection with context QObject passes parameters.'''
+
+    def testIt(self):
+        sender = Sender()
+        receiver = Receiver()
+        context = sender
+        QObject.connect(sender, SIGNAL("dummy_int(int)"), context, receiver.intSlot)
+        sender.dummy_int.emit(42)
+        self.assertEqual(receiver.n, 42)
 
 
 class CppSignalsToCppSlots(UsesQApplication):

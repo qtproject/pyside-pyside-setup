@@ -15,22 +15,18 @@ namespace PySide
 
 class PySideQSlotObject : public QtPrivate::QSlotObjectBase
 {
-    PyObject *callable;
-
-    static void impl(int which, QSlotObjectBase *this_, QObject *receiver, void **args, bool *ret);
-
 public:
-    PySideQSlotObject(PyObject *callable) : QtPrivate::QSlotObjectBase(&impl), callable(callable)
-    {
-        Py_INCREF(callable);
-    }
+    explicit PySideQSlotObject(PyObject *callable, const QByteArrayList &parameterTypes,
+                               const char *returnType  = nullptr);
+    ~PySideQSlotObject();
 
-    ~PySideQSlotObject()
-    {
-        auto gstate = PyGILState_Ensure();
-        Py_DECREF(callable);
-        PyGILState_Release(gstate);
-    }
+private:
+    static void impl(int which, QSlotObjectBase *this_, QObject *receiver, void **args, bool *ret);
+    void call(void **args);
+
+    PyObject *m_callable;
+    const QByteArrayList m_parameterTypes;
+    const char *m_returnType;
 };
 
 
