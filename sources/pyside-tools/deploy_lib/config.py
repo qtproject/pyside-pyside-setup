@@ -11,8 +11,8 @@ from pathlib import Path
 from enum import Enum
 
 from project import ProjectData
-from . import (DEFAULT_APP_ICON, find_pyside_modules, find_permission_categories,
-               QtDependencyReader, run_qmlimportscanner)
+from . import (DEFAULT_APP_ICON, DEFAULT_IGNORE_DIRS, find_pyside_modules,
+               find_permission_categories, QtDependencyReader, run_qmlimportscanner)
 
 # Some QML plugins like QtCore are excluded from this list as they don't contribute much to
 # executable size. Excluding them saves the extra processing of checking for them in files
@@ -262,24 +262,12 @@ class Config(BaseConfig):
             qml_files_temp = None
             if self.source_file and self.python_path:
                 if not self.qml_files:
-                    qml_files_temp = list(self.source_file.parent.glob("**/*.qml"))
+                    # filter out files from DEFAULT_IGNORE_DIRS
+                    qml_files_temp = [file for file in self.source_file.parent.glob("**/*.qml")
+                                      if all(part not in file.parts for part in
+                                             DEFAULT_IGNORE_DIRS)]
 
-                # add all QML files, excluding the ones shipped with installed PySide6
-                # The QML files shipped with PySide6 gets added if venv is used,
-                # because of recursive glob
-                if self.python_path.parent.parent == self.source_file.parent:
-                    # python venv path is inside the main source dir
-                    qml_files_temp = list(
-                        set(qml_files_temp) - set(self.python_path.parent.parent.rglob("*.qml"))
-                    )
-
-                if len(qml_files_temp) > 500:
-                    if "site-packages" in str(qml_files_temp[-1]):
-                        raise RuntimeError(
-                            "You are including a lot of QML files from a local virtual env."
-                            " This can lead to errors in deployment."
-                        )
-                    else:
+                    if len(qml_files_temp) > 500:
                         warnings.warn(
                             "You seem to include a lot of QML files. This can lead to errors in "
                             "deployment."
@@ -288,6 +276,7 @@ class Config(BaseConfig):
                 if qml_files_temp:
                     extra_qml_files = [Path(file) for file in qml_files_temp]
                     self.qml_files.extend(extra_qml_files)
+
         if self.qml_files:
             self.set_value(
                 "qt",

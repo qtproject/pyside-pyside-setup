@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 from functools import lru_cache
 
-from . import IMPORT_WARNING_PYSIDE, run_command
+from . import IMPORT_WARNING_PYSIDE, DEFAULT_IGNORE_DIRS, run_command
 
 
 @lru_cache(maxsize=None)
@@ -22,7 +22,7 @@ def get_py_files(project_dir: Path, extra_ignore_dirs: list[Path] = None, projec
     """Finds and returns all the Python files in the project
     """
     py_candidates = []
-    ignore_dirs = ["__pycache__", "env", "venv", "deployment"]
+    ignore_dirs = ["__pycache__", *DEFAULT_IGNORE_DIRS]
 
     if project_data:
         py_candidates = project_data.python_files
@@ -135,6 +135,7 @@ def find_pyside_modules(project_dir: Path, extra_ignore_dirs: list[Path] = None,
     all_modules = set()
     mod_pattern = re.compile("PySide6.Qt(?P<mod_name>.*)")
 
+    @lru_cache
     def pyside_module_imports(py_file: Path):
         modules = []
         try:
