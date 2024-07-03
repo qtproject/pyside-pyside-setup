@@ -47,7 +47,15 @@ class testAudioDevices(UsesQApplication):
             return
         size = 256
         byte_array = QByteArray(size, '7')
-        buffer = QAudioBuffer(byte_array, self._devices[0].preferredFormat())
+        device = self._devices[0]
+        format = device.preferredFormat()
+        # Observed to be "Unknown" on Linux
+        if format.sampleFormat() == QAudioFormat.SampleFormat.Unknown:
+            sample_formats = device.supportedSampleFormats()
+            if sample_formats:
+                format.setSampleFormat(sample_formats[0])
+                format.setSampleRate(48000)
+        buffer = QAudioBuffer(byte_array, format)
         self.assertEqual(buffer.byteCount(), 256)
         data = buffer.data()
         actual_byte_array = QByteArray(bytearray(data))
