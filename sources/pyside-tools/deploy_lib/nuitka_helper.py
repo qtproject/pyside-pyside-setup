@@ -55,9 +55,38 @@ class Nuitka:
         else:
             return "--macos-app-icon"
 
-    def create_executable(self, source_file: Path, extra_args: str, qml_files: List[Path],
-                          qt_plugins: List[str], excluded_qml_plugins: List[str], icon: str,
-                          dry_run: bool, permissions: List[str],
+    def _create_windows_command(self, source_file: Path, command: list):
+        """
+        Special case for Windows where the command length is limited to 8191 characters.
+        """
+
+        # if the platform is windows and the command is more than 8191 characters, the command
+        # will fail with the error message "The command line is too long". To avoid this, we will
+        # we will move the source_file to the intermediate source file called deploy_main.py, and
+        # include the Nuitka options direcly in the main file as mentioned in
+        # https://nuitka.net/user-documentation/user-manual.html#nuitka-project-options
+
+        # convert command into a format recognized by Nuitka when written to the main file
+        # the first item is ignore because it is 'python -m nuitka'
+        nuitka_comment_options = []
+        for command_entry in command[4:]:
+            nuitka_comment_options.append(f"# nuitka-project: {command_entry}")
+        nuitka_comment_options_str = "\n".join(nuitka_comment_options)
+        nuitka_comment_options_str += "\n"
+
+        # read the content of the source file
+        new_source_content = (nuitka_comment_options_str
+                              + Path(source_file).read_text(encoding="utf-8"))
+
+        # create and write back the new source content to deploy_main.py
+        new_source_file = source_file.parent / "deploy_main.py"
+        new_source_file.write_text(new_source_content, encoding="utf-8")
+
+        return new_source_file
+
+    def create_executable(self, source_file: Path, extra_args: str, qml_files: list[Path],
+                          qt_plugins: list[str], excluded_qml_plugins: list[str], icon: str,
+                          dry_run: bool, permissions: list[str],
                           mode: DesktopConfig.NuitkaMode):
         qt_plugins = [plugin for plugin in qt_plugins if plugin not in self.qt_plugins_to_ignore]
 
@@ -122,5 +151,19 @@ class Nuitka:
             qt_plugins_str = ",".join(qt_plugins)
             command.append(f"--include-qt-plugins={qt_plugins_str}")
 
+        long_command = False
+        if sys.platform == "win32" and len(" ".join(str(cmd) for cmd in command)) > 7000:
+            logging.info("[DEPLOY] Nuitka command too long for Windows. "
+                         "Copying the contents of main Python file to an intermediate "
+                         "deploy_main.py file")
+            long_command = True
+            new_source_file = self._create_windows_command(source_file=source_file, command=command)
+            command = self.nuitka + [os.fspath(new_source_file)]
+
         command_str, _ = run_command(command=command, dry_run=dry_run)
+
+        # if deploy_main.py exists, delete it after the command is run
+        if long_command:
+            os.remove(source_file.parent / "deploy_main.py")
+
         return command_str

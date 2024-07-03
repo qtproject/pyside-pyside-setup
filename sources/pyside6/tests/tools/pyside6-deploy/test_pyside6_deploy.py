@@ -406,5 +406,41 @@ class TestPySide6DeployWebEngine(DeployTestBase):
         self.assertEqual(obtained_modules, expected_modules)
 
 
+@unittest.skipIf(sys.platform != "win32", "Test only works on Windows")
+class TestLongCommand(DeployTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        example_qml = cls.example_root / "qml" / "editingmodel"
+        cls.temp_example_qml = Path(
+            shutil.copytree(example_qml, Path(cls.temp_dir) / "editingmodel")
+        ).resolve()
+
+    def setUp(self):
+        os.chdir(self.temp_example_qml)
+        self.main_file = self.temp_example_qml / "main.py"
+
+    @patch('deploy_lib.nuitka_helper.os.remove')
+    @patch("deploy_lib.config.run_qmlimportscanner")
+    @patch('deploy.DesktopConfig.qml_files', new_callable=mock.PropertyMock)
+    def test_main_with_mocked_qml_files(self, mock_qml_files, mock_qmlimportscanner, mock_remove):
+        mock_qmlimportscanner.return_value = ["QtQuick"]
+        mock_qml_files.return_value = [self.temp_example_qml / "MovingRectangle.qml"
+                                       for _ in range(500)]
+
+        command_str = self.deploy.main(self.main_file, force=True, keep_deployment_files=True,
+                                       dry_run=True)
+        mock_remove.assert_called_once()
+
+        # check if command_str ends with deploy_main.py
+        self.assertTrue(command_str.endswith("deploy_main.py"))
+
+        # check if deploy_main.py startes with # nuitka-project:
+        with open(self.temp_example_qml / "deploy_main.py", "r") as file:
+            # check if 517 lines start with # nuitka-project:
+            self.assertEqual(len([line for line in file.readlines()
+                                  if line.startswith("# nuitka-project:")]), 517)
+
+
 if __name__ == "__main__":
     unittest.main()
