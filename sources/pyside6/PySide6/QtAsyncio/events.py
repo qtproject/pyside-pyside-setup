@@ -426,14 +426,15 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
             ssl_handshake_timeout=None,
             ssl_shutdown_timeout=None,
             happy_eyeballs_delay=None, interleave=None):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.create_connection() is not implemented yet")
 
     async def create_datagram_endpoint(self, protocol_factory,
                                        local_addr=None, remote_addr=None, *,
                                        family=0, proto=0, flags=0,
                                        reuse_address=None, reuse_port=None,
                                        allow_broadcast=None, sock=None):
-        raise NotImplementedError
+        raise NotImplementedError(
+            "QAsyncioEventLoop.create_datagram_endpoint() is not implemented yet")
 
     async def create_unix_connection(
             self, protocol_factory, path=None, *,
@@ -441,7 +442,8 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
             server_hostname=None,
             ssl_handshake_timeout=None,
             ssl_shutdown_timeout=None):
-        raise NotImplementedError
+        raise NotImplementedError(
+            "QAsyncioEventLoop.create_unix_connection() is not implemented yet")
 
     # Creating network servers
 
@@ -453,7 +455,7 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
             ssl_handshake_timeout=None,
             ssl_shutdown_timeout=None,
             start_serving=True):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.create_server() is not implemented yet")
 
     async def create_unix_server(
             self, protocol_factory, path=None, *,
@@ -461,20 +463,21 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
             ssl_handshake_timeout=None,
             ssl_shutdown_timeout=None,
             start_serving=True):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.create_unix_server() is not implemented yet")
 
     async def connect_accepted_socket(
             self, protocol_factory, sock,
             *, ssl=None,
             ssl_handshake_timeout=None,
             ssl_shutdown_timeout=None):
-        raise NotImplementedError
+        raise NotImplementedError(
+            "QAsyncioEventLoop.connect_accepted_socket() is not implemented yet")
 
     # Transferring files
 
     async def sendfile(self, transport, file, offset=0, count=None,
                        *, fallback=True):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.sendfile() is not implemented yet")
 
     # TLS Upgrade
 
@@ -483,76 +486,77 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
                         server_hostname=None,
                         ssl_handshake_timeout=None,
                         ssl_shutdown_timeout=None):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.start_tls() is not implemented yet")
 
     # Watching file descriptors
 
     def add_reader(self, fd, callback, *args):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.add_reader() is not implemented yet")
 
     def remove_reader(self, fd):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.remove_reader() is not implemented yet")
 
     def add_writer(self, fd, callback, *args):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.add_writer() is not implemented yet")
 
     def remove_writer(self, fd):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.remove_writer() is not implemented yet")
 
     # Working with socket objects directly
 
     async def sock_recv(self, sock, nbytes):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.sock_recv() is not implemented yet")
 
     async def sock_recv_into(self, sock, buf):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.sock_recv_into() is not implemented yet")
 
     async def sock_recvfrom(self, sock, bufsize):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.sock_recvfrom() is not implemented yet")
 
     async def sock_recvfrom_into(self, sock, buf, nbytes=0):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.sock_recvfrom_into() is not implemented yet")
 
     async def sock_sendall(self, sock, data):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.sock_sendall() is not implemented yet")
 
     async def sock_sendto(self, sock, data, address):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.sock_sendto() is not implemented yet")
 
     async def sock_connect(self, sock, address):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.sock_connect() is not implemented yet")
 
     async def sock_accept(self, sock):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.sock_accept() is not implemented yet")
 
     async def sock_sendfile(self, sock, file, offset=0, count=None, *,
                             fallback=None):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.sock_sendfile() is not implemented yet")
 
     # DNS
 
     async def getaddrinfo(self, host, port, *,
                           family=0, type=0, proto=0, flags=0):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.getaddrinfo() is not implemented yet")
 
     async def getnameinfo(self, sockaddr, flags=0):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.getnameinfo() is not implemented yet")
 
     # Working with pipes
 
     async def connect_read_pipe(self, protocol_factory, pipe):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.connect_read_pipe() is not implemented yet")
 
     async def connect_write_pipe(self, protocol_factory, pipe):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.connect_write_pipe() is not implemented yet")
 
     # Unix signals
 
     def add_signal_handler(self, sig, callback, *args):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.add_signal_handler() is not implemented yet")
 
     def remove_signal_handler(self, sig):
-        raise NotImplementedError
+        raise NotImplementedError(
+            "QAsyncioEventLoop.remove_signal_handler() is not implemented yet")
 
     # Executing code in thread or process pools
 
@@ -617,14 +621,14 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE,
                               **kwargs):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.subprocess_exec() is not implemented yet")
 
     async def subprocess_shell(self, protocol_factory, cmd, *,
                                stdin=subprocess.PIPE,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
                                **kwargs):
-        raise NotImplementedError
+        raise NotImplementedError("QAsyncioEventLoop.subprocess_shell() is not implemented yet")
 
 
 class QAsyncioHandle():
