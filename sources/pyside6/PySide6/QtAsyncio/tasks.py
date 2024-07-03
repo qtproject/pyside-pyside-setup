@@ -26,7 +26,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
 
         # The task creates a handle for its coroutine. The handle enqueues the
         # task's step function as its callback in the event loop.
-        self._handle = self._loop.call_soon(self._step, context=self._context)
+        self._loop.call_soon(self._step, context=self._context)
 
         # The task step function executes the coroutine until it finishes,
         # raises an exception or returns a future. If a future was returned,
@@ -182,7 +182,6 @@ class QAsyncioTask(futures.QAsyncioFuture):
             return False
         self._cancel_count += 1
         self._cancel_message = msg
-        self._handle.cancel()
         if self._future_to_await is not None:
             # A task that is awaiting a future must also cancel this future in
             # order for the cancellation to be successful.
