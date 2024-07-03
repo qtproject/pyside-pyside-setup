@@ -34,6 +34,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
         self._future_to_await: asyncio.Future | None = None
 
         self._cancelled = False
+        self._cancel_count = 0
         self._cancel_message: str | None = None
 
         # https://docs.python.org/3/library/asyncio-extending.html#task-lifetime-support
@@ -76,6 +77,10 @@ class QAsyncioTask(futures.QAsyncioFuture):
             return
         result = None
         self._future_to_await = None
+
+        if self._cancelled:
+            exception_or_future = asyncio.CancelledError(self._cancel_message)
+            self._cancelled = False
 
         if asyncio.futures.isfuture(exception_or_future):
             try:
@@ -135,10 +140,13 @@ class QAsyncioTask(futures.QAsyncioFuture):
             asyncio._leave_task(self._loop, self)  # type: ignore[arg-type]
 
             if self._exception:
+                message = str(self._exception)
+                if message == "None":
+                    message = ""
+                else:
+                    message = "An exception occurred during task execution"
                 self._loop.call_exception_handler({
-                    "message": (str(self._exception) if self._exception
-                                else "An exception occurred during task "
-                                "execution"),
+                    "message": message,
                     "exception": self._exception,
                     "task": self,
                     "future": (exception_or_future
@@ -172,6 +180,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
     def cancel(self, msg: str | None = None) -> bool:
         if self.done():
             return False
+        self._cancel_count += 1
         self._cancel_message = msg
         self._handle.cancel()
         if self._future_to_await is not None:
@@ -181,10 +190,10 @@ class QAsyncioTask(futures.QAsyncioFuture):
         self._cancelled = True
         return True
 
-    def uncancel(self) -> None:
-        # TODO
-        raise NotImplementedError("QtTask.uncancel is not implemented")
+    def uncancel(self) -> int:
+        if self._cancel_count > 0:
+            self._cancel_count -= 1
+        return self._cancel_count
 
-    def cancelling(self) -> bool:
-        # TODO
-        raise NotImplementedError("QtTask.cancelling is not implemented")
+    def cancelling(self) -> int:
+        return self._cancel_count
