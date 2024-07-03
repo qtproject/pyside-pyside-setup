@@ -809,6 +809,12 @@ const QByteArray signature = QByteArrayLiteral("2") + method.methodSignature();
 Shiboken::Object::removeParent(reinterpret_cast<SbkObject *>(%PYSELF));
 // @snippet qdialog-exec-remove-parent-relation
 
+// @snippet qmessagebox-open-connect-accept
+if (!PySide::callConnect(%PYSELF, SIGNAL(accepted()), %PYARG_1))
+    return nullptr;
+%CPPSELF.%FUNCTION_NAME();
+// @snippet qmessagebox-open-connect-accept
+
 /*********************************************************************
  * CONVERSIONS
  ********************************************************************/

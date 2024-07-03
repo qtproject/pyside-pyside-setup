@@ -2308,8 +2308,12 @@
     </modify-function>
     <extra-includes>
       <include file-name="QPixmap" location="global"/>
+      <include file-name="qobjectconnect.h" location="global"/>
     </extra-includes>
-
+    <add-function signature="open(PyCallable*@functor@)">
+        <inject-code class="target" position="beginning" file="../glue/qtwidgets.cpp"
+                     snippet="qmessagebox-open-connect-accept"/>
+    </add-function>
     <!-- FIXME PYSIDE-7: Remove deprecated overloads -->
     <modify-function signature="critical(QWidget*,const QString&amp;,const QString&amp;,QFlags&lt;QMessageBox::StandardButton&gt;,QMessageBox::StandardButton)" allow-thread="yes"/>
     <modify-function signature="critical(QWidget*,const QString&amp;,const QString&amp;,QMessageBox::StandardButton,QMessageBox::StandardButton)"

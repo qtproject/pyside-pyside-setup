@@ -42,6 +42,10 @@ PYSIDE_API QMetaObject::Connection
 PYSIDE_API bool qobjectDisconnectCallback(QObject *source, const char *signal,
                                           PyObject *callback);
 
+/// Helper for functions that forward arguments to QObject::connect(),
+/// for example, QTimer::singleShot().
+PYSIDE_API bool callConnect(PyObject *self, const char *signal, PyObject *argument);
+
 } // namespace PySide
 
 #endif // QOBJECTCONNECT_H

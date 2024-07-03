@@ -336,4 +336,22 @@ bool qobjectDisconnectCallback(QObject *source, const char *signal, PyObject *ca
     return true;
 }
 
+bool callConnect(PyObject *self, const char *signal, PyObject *argument)
+{
+    using Shiboken::AutoDecRef;
+
+    if (PyObject_TypeCheck(argument, PySideSignalInstance_TypeF()) == 0) {
+        AutoDecRef result(PyObject_CallMethod(self, "connect", "OsO", self, signal, argument));
+        return !result.isNull();
+    }
+
+    // Connecting signal to signal
+    auto *signalInstance = reinterpret_cast<PySideSignalInstance *>(argument);
+    AutoDecRef signalSignature(Shiboken::String::fromFormat("2%s", PySide::Signal::getSignature(signalInstance)));
+    AutoDecRef result(PyObject_CallMethod(self, "connect", "OsOO", self, signal,
+                                          PySide::Signal::getObject(signalInstance),
+                                          signalSignature.object()));
+    return !result.isNull();
+}
+
 } // namespace PySide

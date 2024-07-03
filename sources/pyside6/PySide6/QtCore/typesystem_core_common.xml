@@ -2579,6 +2579,7 @@
   <object-type name="QTimer">
     <extra-includes>
       <include file-name="pysidestaticstrings.h" location="global"/>
+      <include file-name="qobjectconnect.h" location="global"/>
     </extra-includes>
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp"
                  snippet="qtimer-singleshot-functorclass"/>

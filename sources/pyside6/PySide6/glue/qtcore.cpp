@@ -1061,25 +1061,8 @@ if (msec == 0) {
 
     QTimer * timer = %CONVERTTOCPP[QTimer *](pyTimer);
     timer->setSingleShot(true);
-
-    if (PyObject_TypeCheck(%2, PySideSignalInstance_TypeF())) {
-        PySideSignalInstance *signalInstance = reinterpret_cast<PySideSignalInstance *>(%2);
-        Shiboken::AutoDecRef signalSignature(Shiboken::String::fromFormat("2%s", PySide::Signal::getSignature(signalInstance)));
-        Shiboken::AutoDecRef result(
-            PyObject_CallMethod(pyTimer, "connect", "OsOO",
-                                pyTimer,
-                                SIGNAL(timeout()),
-                                PySide::Signal::getObject(signalInstance),
-                                signalSignature.object())
-        );
-    } else {
-        Shiboken::AutoDecRef result(
-            PyObject_CallMethod(pyTimer, "connect", "OsO",
-                                pyTimer,
-                                SIGNAL(timeout()),
-                                %PYARG_2)
-        );
-    }
+    if (!PySide::callConnect(pyTimer, SIGNAL(timeout()), %PYARG_2))
+        return nullptr;
 
     timer->connect(timer, &QTimer::timeout, timer, &QObject::deleteLater, Qt::DirectConnection);
     Shiboken::Object::releaseOwnership(reinterpret_cast<SbkObject *>(pyTimer));
