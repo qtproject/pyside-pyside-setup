@@ -240,6 +240,7 @@ QString Generator::getFileNameBaseForSmartPointer(const AbstractMetaType &smartP
 GeneratorContext Generator::contextForClass(const AbstractMetaClassCPtr &c) const
 {
     GeneratorContext result;
+    result.m_type = GeneratorContext::Class;
     result.m_metaClass = c;
     return result;
 }

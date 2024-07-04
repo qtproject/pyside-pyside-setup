@@ -148,6 +148,7 @@ private:
                             const AbstractMetaFunctionCList &overloads,
                             const GeneratorContext &classContext) const;
     static void writeArgumentsInitializer(TextStream &s, const OverloadData &overloadData,
+                                          const GeneratorContext &classContext,
                                           ErrorReturn errorReturn = ErrorReturn::Default);
     static void writeCppSelfConversion(TextStream &s,
                                        const GeneratorContext &context,
@@ -176,6 +177,7 @@ private:
                                   ErrorReturn errorReturn);
 
     static QString returnErrorWrongArguments(const OverloadData &overloadData,
+                                             const GeneratorContext &context,
                                              ErrorReturn errorReturn);
 
     static void writeFunctionReturnErrorCheckSection(TextStream &s,
@@ -285,6 +287,7 @@ private:
      *   \param overloadData the overload data describing all the possible overloads for the function/method
      */
     void writeOverloadedFunctionDecisor(TextStream &s, const OverloadData &overloadData,
+                                        const GeneratorContext &classContext,
                                         ErrorReturn errorReturn) const;
     /// Recursive auxiliar method to the other writeOverloadedFunctionDecisor.
     void writeOverloadedFunctionDecisorEngine(TextStream &s,
@@ -371,6 +374,7 @@ private:
                                              const AbstractMetaFunctionCPtr &func,
                                              bool usePyArgs,
                                              const OverloadData &overloadData,
+                                             const GeneratorContext &classContext,
                                              ErrorReturn errorReturn);
 
     /// Returns a string containing the name of an argument for the given function and argument index.
@@ -484,6 +488,7 @@ private:
     void writeSmartPointerConverterInitialization(TextStream &s, const AbstractMetaType &ype) const;
 
     static QString typeInitStruct(const TypeEntryCPtr &te);
+    static QString typeInitStruct(const GeneratorContext &context);
     static void writeExtendedConverterInitialization(TextStream &s,
                                                      const TypeEntryCPtr &externalType,
                                                      const AbstractMetaClassCList &conversions);
@@ -553,6 +558,8 @@ private:
 
     void clearTpFuncs();
     static QString chopType(QString s);
+
+    static QString typeInitStructHelper(const TypeEntryCPtr &te, const QString &varName);
 
     QHash<QString, QString> m_tpFuncs;
     QHash<QString, QString> m_nbFuncs;
