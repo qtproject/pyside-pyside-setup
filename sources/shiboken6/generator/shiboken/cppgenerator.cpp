@@ -1971,14 +1971,14 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
                                               ErrorReturn errorReturn)
 {
     const auto rfunc = overloadData.referenceFunction();
-    const auto ownerClass = rfunc->targetLangOwner();
-    Q_ASSERT(ownerClass == context.metaClass());
     int minArgs = overloadData.minArgs();
     int maxArgs = overloadData.maxArgs();
     bool initPythonArguments;
 
     // If method is a constructor...
     if (rfunc->isConstructor()) {
+        const auto ownerClass = rfunc->targetLangOwner();
+        Q_ASSERT(ownerClass == context.metaClass());
         // Check if the right constructor was called.
         if (!ownerClass->hasPrivateDestructor()) {
             s << "if (Shiboken::Object::isUserType(self) && "
@@ -2039,7 +2039,7 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
             && !overloadData.pythonFunctionWrapperUsesListOfArguments()) {
             s << "(" << PYTHON_ARG << " == 0 ? 0 : 1);\n";
         } else {
-            writeArgumentsInitializer(s, overloadData, errorReturn);
+            writeArgumentsInitializer(s, overloadData, context, errorReturn);
         }
     }
 }
@@ -2110,7 +2110,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     s << '\n';
 
     if (overloadData.maxArgs() > 0)
-        writeOverloadedFunctionDecisor(s, overloadData, errorReturn);
+        writeOverloadedFunctionDecisor(s, overloadData, classContext, errorReturn);
 
     // Handles Python Multiple Inheritance
     QString pre = needsMetaObject ? u"bool usesPyMI = "_s : u""_s;
@@ -2131,8 +2131,8 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
         << "}\n";
     if (overloadData.maxArgs() > 0)
         s << "if (cptr == nullptr)\n" << indent
-            << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n\n"
-            << outdent;
+            << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
+            << ";\n\n" << outdent;
 
     s << "Shiboken::Object::setValidCpp(sbkSelf, true);\n";
     // If the created C++ object has a C++ wrapper the ownership is assigned to Python
@@ -2155,8 +2155,8 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
             << "metaObject = cptr->metaObject(); // <- init python qt properties\n"
             << "if (!errInfo.isNull() && PyDict_Check(errInfo.object())) {\n" << indent
                 << "if (!PySide::fillQtProperties(self, metaObject, errInfo, usesPyMI))\n" << indent
-                    << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n"
-                    << outdent << outdent
+                    << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
+                    << ";\n" << outdent << outdent
             << "};\n";
     }
 
@@ -2258,12 +2258,12 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
             << "// Do not enter here if other object has implemented a reverse operator.\n"
             << "if (" << PYTHON_RETURN_VAR << " == nullptr) {\n" << indent;
         if (maxArgs > 0)
-            writeOverloadedFunctionDecisor(s, overloadData, ErrorReturn::Default);
+            writeOverloadedFunctionDecisor(s, overloadData, classContext, ErrorReturn::Default);
         writeFunctionCalls(s, overloadData, classContext, ErrorReturn::Default);
         s  << outdent << '\n' << "} // End of \"if (!" << PYTHON_RETURN_VAR << ")\"\n";
     } else { // binary shift operator
         if (maxArgs > 0)
-            writeOverloadedFunctionDecisor(s, overloadData, ErrorReturn::Default);
+            writeOverloadedFunctionDecisor(s, overloadData, classContext, ErrorReturn::Default);
         writeFunctionCalls(s, overloadData, classContext, ErrorReturn::Default);
     }
 
@@ -2286,6 +2286,7 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
 }
 
 void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &overloadData,
+                                             const GeneratorContext &classContext,
                                              ErrorReturn errorReturn)
 {
     const auto rfunc = overloadData.referenceFunction();
@@ -2326,7 +2327,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
         s << "errInfo.reset(Shiboken::checkInvalidArgumentCount(numArgs, "
             <<  minArgs << ", " << maxArgs << "));\n"
             << "if (!errInfo.isNull())\n" << indent
-            << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n"
+            << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn) << ";\n"
             << outdent;
     }
 
@@ -2339,7 +2340,7 @@ void CppGenerator::writeArgumentsInitializer(TextStream &s, const OverloadData &
             s << "numArgs == " << invalidArgsLength.at(i);
         }
         s << ")\n" << indent
-            << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n"
+            << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn) << ";\n"
             << outdent;
     }
     s  << '\n';
@@ -2459,8 +2460,10 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
 }
 
 QString CppGenerator::returnErrorWrongArguments(const OverloadData &overloadData,
-                                                       ErrorReturn errorReturn)
+                                                const GeneratorContext &context,
+                                                ErrorReturn errorReturn)
 {
+    Q_UNUSED(context);
     const auto rfunc = overloadData.referenceFunction();
     QString argsVar = overloadData.pythonFunctionWrapperUsesListOfArguments()
         ? u"args"_s : PYTHON_ARG;
@@ -2864,6 +2867,7 @@ void CppGenerator::writeNoneReturn(TextStream &s, const AbstractMetaFunctionCPtr
 
 void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s,
                                                   const OverloadData &overloadData,
+                                                  const GeneratorContext &classContext,
                                                   ErrorReturn errorReturn) const
 {
     s << "// Overloaded function decisor\n";
@@ -2892,8 +2896,8 @@ void CppGenerator::writeOverloadedFunctionDecisor(TextStream &s,
 
     s << "// Function signature not found.\n"
         << "if (overloadId == -1)\n" << indent
-            << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n\n"
-            << outdent;
+            << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
+            << ";\n\n" << outdent;
 }
 
 void CppGenerator::writeOverloadedFunctionDecisorEngine(TextStream &s,
@@ -3109,7 +3113,7 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
     const bool usePyArgs = overloadData.pythonFunctionWrapperUsesListOfArguments();
 
     // Handle named arguments.
-    writeNamedArgumentResolution(s, func, usePyArgs, overloadData, errorReturn);
+    writeNamedArgumentResolution(s, func, usePyArgs, overloadData, context, errorReturn);
 
     bool injectCodeCallsFunc = injectedCodeCallsCppFunction(context, func);
     bool mayHaveUnunsedArguments = !func->isUserAdded() && func->hasInjectedCode() && injectCodeCallsFunc;
@@ -3505,6 +3509,7 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s,
                                                 const AbstractMetaFunctionCPtr &func,
                                                 bool usePyArgs,
                                                 const OverloadData &overloadData,
+                                                const GeneratorContext &classContext,
                                                 ErrorReturn errorReturn)
 {
     const AbstractMetaArgumentList &args = OverloadData::getArgumentsWithDefaultValues(func);
@@ -3517,8 +3522,8 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s,
             s << "if (kwds != nullptr && PyDict_Size(kwds) > 0) {\n" << indent
                 << "errInfo.reset(kwds);\n"
                 << "Py_INCREF(errInfo.object());\n"
-                << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n"
-                << outdent << "}\n";
+                << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
+                << ";\n" << outdent << "}\n";
         }
         return;
     }
@@ -3541,14 +3546,14 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s,
             << "if (value != nullptr && " << pyArgName << " != nullptr ) {\n"
             << indent << "errInfo.reset(" << pyKeyName << ");\n"
             << "Py_INCREF(errInfo.object());\n"
-            << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n"
-            << outdent << "}\nif (value != nullptr) {\n" << indent
+            << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
+            << ";\n" << outdent << "}\nif (value != nullptr) {\n" << indent
             << pyArgName << " = value;\nif (!";
         const auto &type = arg.modifiedType();
         writeTypeCheck(s, type, pyArgName, isNumber(type.typeEntry()), {});
         s << ")\n" << indent
-            << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n"
-            << outdent << outdent
+            << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
+            << ";\n" << outdent << outdent
             << "}\nPyDict_DelItem(kwds_dup, " << pyKeyName << ");\n"
             << outdent << "}\n";
     }
@@ -3558,10 +3563,12 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s,
     // until extra keyword signals and properties are handled.
     s << "if (PyDict_Size(kwds_dup) > 0) {\n" << indent
         << "errInfo.reset(kwds_dup.release());\n";
-    if (!(func->isConstructor() && isQObject(func->ownerClass())))
-        s << "return " << returnErrorWrongArguments(overloadData, errorReturn) << ";\n";
-    else
+    if (!(func->isConstructor() && isQObject(func->ownerClass()))) {
+        s << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
+            << ";\n";
+    } else {
         s << "// fall through to handle extra keyword signals and properties\n";
+    }
     s << outdent << "}\n"
         << outdent << "}\n";
 }
@@ -4257,10 +4264,24 @@ QString CppGenerator::writeContainerConverterInitialization(TextStream &s,
     return converter;
 }
 
+QString CppGenerator::typeInitStructHelper(const TypeEntryCPtr &te, const QString &varName)
+{
+    return cppApiVariableName(te->targetLangPackage()) + u'[' + varName + u']';
+}
+
+QString CppGenerator::typeInitStruct(const GeneratorContext &context)
+{
+    Q_ASSERT(context.hasClass());
+    if (context.forSmartPointer()) {
+        auto te = context.preciseType().typeEntry();
+        return typeInitStructHelper(te, getTypeIndexVariableName(context.preciseType()));
+    }
+    return typeInitStruct(context.metaClass()->typeEntry());
+}
+
 QString CppGenerator::typeInitStruct(const TypeEntryCPtr &te)
 {
-    return cppApiVariableName(te->targetLangPackage()) + u'['
-        + getTypeIndexVariableName(te) + u']';
+    return typeInitStructHelper(te, getTypeIndexVariableName(te));
 }
 
 void CppGenerator::writeExtendedConverterInitialization(TextStream &s,

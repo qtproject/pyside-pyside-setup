@@ -16,6 +16,7 @@ QString GeneratorContext::wrapperName() const
 
 QString GeneratorContext::effectiveClassName() const
 {
+    Q_ASSERT(hasClass());
     if (m_type == SmartPointer)
         return m_preciseClassType.cppSignature();
     return m_type == WrappedClass ? m_wrappername : m_metaClass->qualifiedCppName();

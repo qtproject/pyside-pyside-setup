@@ -27,16 +27,34 @@ class GeneratorContext {
     friend class ShibokenGenerator;
     friend class Generator;
 public:
-    enum Type { Class, WrappedClass, SmartPointer };
+    enum Type { Class, WrappedClass, SmartPointer,
+                GlobalFunction // No class contained
+              };
 
     GeneratorContext() = default;
 
-    AbstractMetaClassCPtr metaClass() const { return m_metaClass; }
-    const AbstractMetaType &preciseType() const { return m_preciseClassType; }
-    AbstractMetaClassCPtr pointeeClass() const { return m_pointeeClass; }
+    const AbstractMetaClassCPtr &metaClass() const
+    {
+        Q_ASSERT(hasClass());
+        return m_metaClass;
+    }
+
+    const AbstractMetaType &preciseType() const
+    {
+        Q_ASSERT(forSmartPointer());
+        return m_preciseClassType;
+    }
+
+    AbstractMetaClassCPtr pointeeClass() const
+    {
+
+        Q_ASSERT(forSmartPointer());
+        return m_pointeeClass;
+    }
 
     bool forSmartPointer() const { return m_type == SmartPointer; }
     bool useWrapper() const { return m_type ==  WrappedClass; }
+    bool hasClass() const { return m_type != GlobalFunction; }
 
     QString wrapperName() const;
     /// Returns the wrapper name in case of useWrapper(), the qualified class
@@ -48,7 +66,7 @@ private:
     AbstractMetaClassCPtr m_pointeeClass;
     AbstractMetaType m_preciseClassType;
     QString m_wrappername;
-    Type m_type = Class;
+    Type m_type = GlobalFunction;
 };
 
 QDebug operator<<(QDebug debug, const GeneratorContext &c);
