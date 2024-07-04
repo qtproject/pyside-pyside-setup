@@ -20,8 +20,10 @@ No argument: Use a default Python for each platform (author specific).
                         b887919ea244a057f15be9c1cdc652538e3fe9a0
                         Yocto: allow LLVM 14 for building PySide
                         2025-01-23 18:18
+    --limited-api yes|no default=yes
 """
 import argparse
+import getpass
 import os
 import platform
 import re
@@ -32,17 +34,22 @@ from ast import literal_eval
 from pathlib import Path
 
 
-defaults = {
-    "Darwin":   "/Users/tismer/.pyenv/versions/3.12.5/bin/python3",     # noqa: E241
-    "Windows":  "d:/py312_64/python.exe",                               # noqa: E241
-    "Linux":    "/home/ctismer/.pyenv/versions/3.12.5/bin/python3",     # noqa: E241
+defaults = {    # Python, extras
+    "Darwin":   ("/Users/tismer/.pyenv/versions/3.12.5/bin/python3", []),   # noqa: E241
+    "Windows":  ("d:/py312_64/python.exe", []),                             # noqa: E241
+    "Linux":    ("/home/ctismer/.pyenv/versions/3.12.5/bin/python3", [])    # noqa: E241
 }
 
-reference = {
-    "Darwin":   26165741,   # noqa: E241
-    "Windows":  15324160,   # noqa: E241
-    "Linux":    19203176,   # noqa: E241
+reference = {   # Limited API no / yes
+    "Darwin":   (26165741, 26078531),   # noqa: E241
+    "Windows":  (15324160, 15631872),   # noqa: E241
+    "Linux":    (19203176, 19321976),   # noqa: E241
 }
+
+if "tismer" not in getpass.getuser():
+    # assume a colleague.
+    defaults["Linux"] = "python", ["--qt-src-dir", "/~/qt-69/qt-69/qtbase"]
+    # defaults["Windows"] = "...", [...]    # please insert your defaults
 
 
 def setup_project_dir():
@@ -101,12 +108,6 @@ def get_result_size(build_dir):
 
 setup_project_dir()
 plat = platform.system()
-options = [
-    "setup.py", "build", "--limited-api=no", "--skip-docs", "--no-qt-tools",
-    "--module-subset=Core,Gui,Widgets"]
-
-options_base = options + ["--unoptimize=all"]
-options_best = options
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -116,9 +117,11 @@ if __name__ == "__main__":
         Install the necessary modules automatically, which can save some trouble""")
     parser.add_argument("--absolute", "-a", action="store_true", help="""
         Measure against the state on 2025-01-23""")
-    args = parser.parse_args()
+    parser.add_argument("--limited-api", "-l", choices=["yes", "no"], default="yes", help="""
+        Use of limited API. Recommended because this is the CI default""")
 
-    python = args.python or defaults[plat] if plat in defaults else args.python
+    args = parser.parse_args()
+    python = args.python or defaults[plat][0] if plat in defaults else args.python
     python = Path(python).expanduser()
 
     if not python.exists:
@@ -138,9 +141,17 @@ if __name__ == "__main__":
         subprocess.run([python, "-m", "pip", "uninstall", "-y"] + needs_imports)
         subprocess.run([python, "-m", "pip", "install"] + needs_imports)
 
+    options = [
+        "setup.py", "build", "--limited-api=" + args.limited_api, "--skip-docs",
+        "--log-level", "quiet", "--unity", "--no-qt-tools",
+        "--module-subset=Core,Gui,Widgets"] + defaults[plat][1]
+    options_base = options + ["--unoptimize=all"]
+    options_best = options
+
+    use_limited_api = args.limited_api == "yes"
     skip = args.dry_run
     if args.absolute:
-        res_base = reference[plat]
+        res_base = reference[plat][use_limited_api]
     else:
         cmd = [python] + options_base
         if not skip:
@@ -159,7 +170,7 @@ if __name__ == "__main__":
     add_text = " on 2025-01-27" if args.absolute else ""
     print()
     print(f"Compiling with {python}")
-    print(f"Platform = {plat}")
+    print(f"Platform = {plat}   limited_api = {args.limited_api}")
     print(f"base size = {res_base}{add_text}")
     print(f"best size = {res_best}")
     print(f"improvement {(res_base - res_best) / res_base:%}")
