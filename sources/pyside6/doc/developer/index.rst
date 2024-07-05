@@ -20,6 +20,7 @@ Development Topics
    adapt_qt.rst
    extras.rst
    qtasyncio.rst
+   signalmanager.md
 
 Implementation details
 ----------------------
