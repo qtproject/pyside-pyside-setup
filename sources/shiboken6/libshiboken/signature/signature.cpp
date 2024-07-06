@@ -25,6 +25,8 @@
 
 #include <structmember.h>
 
+#include <algorithm>
+
 using namespace Shiboken;
 
 extern "C"
@@ -266,6 +268,8 @@ static PyObject *get_signature(PyObject * /* self */, PyObject *args)
     PyObject *ret = get_signature_intern(ob, modifier);
     if (ret != nullptr)
         return ret;
+    if (PyErr_Occurred())
+        return nullptr;
     Py_RETURN_NONE;
 }
 
@@ -350,6 +354,72 @@ static int PySide_BuildSignatureArgs(PyObject *obtype_mod, const char *signature
     return PyDict_SetItem(pyside_globals->map_dict, type_key, obtype_mod) == 0 ? 0 : -1;
 }
 
+static int PySide_BuildSignatureArgsByte(PyObject *obtype_mod, const uint8_t signatures[], size_t size)
+{
+    AutoDecRef type_key(GetTypeKey(obtype_mod));
+    AutoDecRef numkey(Py_BuildValue("(nn)", signatures, size));
+    if (type_key.isNull() || numkey.isNull()
+        || PyDict_SetItem(pyside_globals->arg_dict, type_key, numkey) < 0)
+        return -1;
+    return PyDict_SetItem(pyside_globals->map_dict, type_key, obtype_mod) == 0 ? 0 : -1;
+}
+
+// PYSIDE-2701: MS cannot use the name "_expand".
+static PyObject *byteExpand(PyObject *packed)
+{
+    const char commonMsg[] = "Please disable compression by passing  --unoptimize=compression";
+
+    static PyObject *compressModule = PyImport_ImportModule("zlib");
+    if (compressModule == nullptr)
+        return PyErr_Format(PyExc_ImportError,
+                            "The zlib module cannot be imported. %s", commonMsg);
+
+    static PyObject *expandFunc = PyObject_GetAttrString(compressModule, "decompress");
+    if (expandFunc == nullptr)
+        return PyErr_Format(PyExc_NameError,
+                            "The expand function of zlib was not fount. %s", commonMsg);
+    PyObject *unpacked = PyObject_CallFunctionObjArgs(expandFunc, packed, nullptr);
+    if (unpacked == nullptr)
+        return PyErr_Format(PyExc_ValueError,
+                            "Some packed strings could not be unpacked. %s", commonMsg);
+    return unpacked;
+}
+
+const char **bytesToStrings(const uint8_t signatures[], Py_ssize_t size)
+{
+    // PYSIDE-2701: Unpack a ZLIB compressed string.
+    // The result is a single char* with newlines after each string. Convert
+    // this into single char* objects that InitSignatureStrings expects.
+
+    const auto *chars = reinterpret_cast<const char *>(signatures);
+    PyObject *packed = PyBytes_FromStringAndSize(chars, size);
+
+    // The Qt compressor treats empty arrays specially.
+    PyObject *data = size > 0 ? byteExpand(packed) : PyBytes_FromStringAndSize(chars, 0);
+    if (data == nullptr)
+        return nullptr;
+
+    char *cdata{};
+    Py_ssize_t len{};
+    PyBytes_AsStringAndSize(data, &cdata, &len);
+    char *cdataEnd = cdata + len;
+    size_t nlines = std::count(cdata, cdataEnd, '\n');
+
+    char **lines = new char *[nlines + 1];
+    int pos = 0;
+    char *line = cdata;
+
+    for (char *p = cdata; p < cdataEnd; ++p) {
+        if (*p == '\n') {
+            lines[pos++] = line;
+            *p = 0;
+            line = p + 1;
+        }
+    }
+    lines[pos] = nullptr;
+    return const_cast<const char **>(lines);
+}
+
 PyObject *PySide_BuildSignatureProps(PyObject *type_key)
 {
     /*
@@ -360,8 +430,21 @@ PyObject *PySide_BuildSignatureProps(PyObject *type_key)
      */
     if (type_key == nullptr)
         return nullptr;
+    AutoDecRef strings{};
     PyObject *numkey = PyDict_GetItem(pyside_globals->arg_dict, type_key);
-    AutoDecRef strings(_address_to_stringlist(numkey));
+    if (PyTuple_Check(numkey)) {
+        PyObject *obAddress = PyTuple_GetItem(numkey, 0);
+        PyObject *obSize = PyTuple_GetItem(numkey, 1);
+        const size_t addr = PyLong_AsSize_t(obAddress);
+        const Py_ssize_t size = PyLong_AsSsize_t(obSize);
+        const char **cstrings = bytesToStrings(reinterpret_cast<const uint8_t *>(addr), size);
+        if (cstrings == nullptr)
+            return nullptr;
+        AutoDecRef locKey(Py_BuildValue("n", cstrings));
+        strings.reset(_address_to_stringlist(locKey));
+    } else {
+        strings.reset(_address_to_stringlist(numkey));
+    }
     if (strings.isNull())
         return nullptr;
     AutoDecRef arg_tup(Py_BuildValue("(OO)", type_key, strings.object()));
@@ -398,24 +481,8 @@ static bool get_lldebug_flag()
 
 #endif
 
-static int PySide_FinishSignatures(PyObject *module, const char *signatures[])
+static int _finishSignaturesCommon(PyObject *module)
 {
-#ifdef PYPY_VERSION
-    static const bool have_problem = get_lldebug_flag();
-    if (have_problem)
-        return 0; // crash with lldebug at `PyDict_Next`
-#endif
-    /*
-     * Initialization of module functions and resolving of static methods.
-     */
-    const char *name = PyModule_GetName(module);
-    if (name == nullptr)
-        return -1;
-
-    // we abuse the call for types, since they both have a __name__ attribute.
-    if (PySide_BuildSignatureArgs(module, signatures) < 0)
-        return -1;
-
     /*
      * Note: This function crashed when called from PySide_BuildSignatureArgs.
      * Probably this was an import timing problem.
@@ -429,20 +496,59 @@ static int PySide_FinishSignatures(PyObject *module, const char *signatures[])
     PyObject *obdict = PyModule_GetDict(module);
     Py_ssize_t pos = 0;
 
-    while (PyDict_Next(obdict, &pos, &key, &func))
+    // Here we collect all global functions to finish our mapping.
+    while (PyDict_Next(obdict, &pos, &key, &func)) {
         if (PyCFunction_Check(func))
             if (PyDict_SetItem(pyside_globals->map_dict, func, module) < 0)
                 return -1;
+    }
     // The finish_import function will not work the first time since phase 2
     // was not yet run. But that is ok, because the first import is always for
     // the shiboken module (or a test module).
+    const char *name = PyModule_GetName(module);
     if (pyside_globals->finish_import_func == nullptr) {
         assert(strncmp(name, "PySide6.", 8) != 0);
         return 0;
     }
+    // Call a Python function which has to finish something as well.
     AutoDecRef ret(PyObject_CallFunction(
         pyside_globals->finish_import_func, "(O)", module));
     return ret.isNull() ? -1 : 0;
+}
+
+static int PySide_FinishSignatures(PyObject *module, const char *signatures[])
+{
+#ifdef PYPY_VERSION
+    static const bool have_problem = get_lldebug_flag();
+    if (have_problem)
+        return 0; // crash with lldebug at `PyDict_Next`
+#endif
+
+    // Initialization of module functions and resolving of static methods.
+    const char *name = PyModule_GetName(module);
+    if (name == nullptr)
+        return -1;
+
+    // we abuse the call for types, since they both have a __name__ attribute.
+    if (PySide_BuildSignatureArgs(module, signatures) < 0)
+        return -1;
+    return _finishSignaturesCommon(module);
+}
+
+static int PySide_FinishSignaturesByte(PyObject *module, const uint8_t signatures[], size_t size)
+{
+#ifdef PYPY_VERSION
+    static const bool have_problem = get_lldebug_flag();
+    if (have_problem)
+        return 0; // crash with lldebug at `PyDict_Next`
+#endif
+    const char *name = PyModule_GetName(module);
+    if (name == nullptr)
+        return -1;
+
+    if (PySide_BuildSignatureArgsByte(module, signatures, size) < 0)
+        return -1;
+    return _finishSignaturesCommon(module);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -466,7 +572,21 @@ int InitSignatureStrings(PyTypeObject *type, const char *signatures[])
     return ret;
 }
 
-void FinishSignatureInitialization(PyObject *module, const char *signatures[])
+int InitSignatureBytes(PyTypeObject *type, const uint8_t signatures[], size_t size)
+{
+    // PYSIDE-2701: Store the compressed bytes and produce input for
+    //              InitSignatureStrings later.
+    init_shibokensupport_module();
+    auto *obType = reinterpret_cast<PyObject *>(type);
+    const int ret = PySide_BuildSignatureArgsByte(obType, signatures, size);
+    if (ret < 0 || _build_func_to_type(obType) < 0) {
+        PyErr_Print();
+        PyErr_SetNone(PyExc_ImportError);
+    }
+    return ret;
+}
+
+int FinishSignatureInitialization(PyObject *module, const char *signatures[])
 {
     /*
      * This function is called at the very end of a module initialization.
@@ -491,6 +611,26 @@ void FinishSignatureInitialization(PyObject *module, const char *signatures[])
         PyErr_Print();
         PyErr_SetNone(PyExc_ImportError);
     }
+    return 0;
+}
+
+int FinishSignatureInitBytes(PyObject *module, const uint8_t signatures[], size_t size)
+{
+    init_shibokensupport_module();
+
+#ifndef PYPY_VERSION
+    static const bool patch_types = true;
+#else
+    // PYSIDE-535: On PyPy we cannot patch builtin types. This can be
+    //             re-implemented later. For now, we use `get_signature`, instead.
+    static const bool patch_types = false;
+#endif
+
+    if ((patch_types && PySide_PatchTypes() < 0)
+        || PySide_FinishSignaturesByte(module, signatures, size) < 0) {
+        return -1;
+    }
+    return 0;
 }
 
 static PyObject *adjustFuncName(const char *func_name)

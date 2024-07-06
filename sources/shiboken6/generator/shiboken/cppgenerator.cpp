@@ -314,6 +314,15 @@ static const char includeQDebug[] =
 "#endif\n"
 "#include <QtCore/QDebug>\n";
 
+static QString compilerOptionOptimize()
+{
+    bool ok{};
+    int value = qEnvironmentVariableIntValue("PYSIDE6_COMOPT_COMPRESS", &ok);
+    if (!ok)
+        value = 1;
+    return "#define PYSIDE6_COMOPT_COMPRESS "_L1 + QString::number(value);
+}
+
 QString CppGenerator::chopType(QString s)
 {
     if (s.endsWith(u"_Type"))
@@ -494,6 +503,7 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
         cppIncludes << "iostream";
     }
 
+    s << '\n' << compilerOptionOptimize() << '\n';
     if (normalClass && usePySideExtensions()) {
         s << includeQDebug;
         if (metaClass->hasToStringCapability())
@@ -5488,6 +5498,26 @@ QString CppGenerator::getInitFunctionName(const GeneratorContext &context)
     return getSimpleClassInitFunctionName(context.metaClass());
 }
 
+static QString formatHex(const QByteArray &data)
+{
+    QString result;
+    QTextStream str(&result);
+    const auto oldFieldWidth = str.fieldWidth();
+    str.setIntegerBase(16);
+    str.setPadChar(u'0');
+    for (qsizetype c = 0, size = data.size(); c < size; ++c) {
+        if (c != 0)
+            str << (c % 16 == 0 ? ",\n" : ", ");
+        str << "0x";
+        str.setFieldWidth(2);
+        str << uchar(data.at(c));
+        str.setFieldWidth(oldFieldWidth);
+    }
+    return result;
+}
+
+static constexpr int compressionLevel = 9;      // almost no effect. Most blocks are small.
+
 void CppGenerator::writeSignatureStrings(TextStream &s,
                                          const QString &signatures,
                                          const QString &arrayName,
@@ -5495,16 +5525,36 @@ void CppGenerator::writeSignatureStrings(TextStream &s,
 {
     s << "// The signatures string for the " << comment << ".\n"
         << "// Multiple signatures have their index \"n:\" in front.\n"
+        << "#if PYSIDE6_COMOPT_COMPRESS == 0\n"
         << "static const char *" << arrayName << "_SignatureStrings[] = {\n" << indent;
     const auto lines = QStringView{signatures}.split(u'\n', Qt::SkipEmptyParts);
+
+    QByteArray buffer;
+    buffer.reserve(signatures.size());
     for (auto line : lines) {
         // must anything be escaped?
         if (line.contains(u'"') || line.contains(u'\\'))
             s << "R\"CPP(" << line << ")CPP\",\n";
         else
             s << '"' << line << "\",\n";
+        // collect also for compression
+        buffer += line.toLatin1();
+        buffer += '\n';
     }
-    s << NULL_PTR << "}; // Sentinel\n" << outdent << '\n';
+
+    // The Qt compressor has a 4-byte big endian length in front.
+    QByteArray compressed = qCompress(buffer, compressionLevel).sliced(4);
+    const auto binSize = compressed.size();
+    const auto adjustSize = qMax(binSize, 1);   // Windows
+    if (compressed.isEmpty())
+        compressed.append('\0');
+
+    s << NULL_PTR << "}; // Sentinel\n" << outdent
+        << "#else\n"
+        << "static constexpr size_t " << arrayName << "_SignatureByteSize = " << binSize << ";\n"
+        << "static constexpr uint8_t " << arrayName << "_SignatureBytes[" << adjustSize << "] = {\n"
+        << indent << formatHex(compressed) << outdent << "\n};\n"
+        << "#endif\n\n";
 }
 
 // Return the class name for which to invoke the destructor
@@ -5668,7 +5718,12 @@ void CppGenerator::writeClassRegister(TextStream &s,
 
     s << outdent << ");\nauto *pyType = " << pyTypeName << "; // references "
         << typePtr << "\n"
-        << "InitSignatureStrings(pyType, " << initFunctionName << "_SignatureStrings);\n";
+        << outdent << "#if PYSIDE6_COMOPT_COMPRESS == 0\n" << indent
+        << "InitSignatureStrings(pyType, " << initFunctionName << "_SignatureStrings);\n"
+        << outdent << "#else\n" << indent
+        << "InitSignatureBytes(pyType, " << initFunctionName << "_SignatureBytes, "
+        << initFunctionName << "_SignatureByteSize);\n"
+        << outdent << "#endif\n" << indent;
 
     if (usePySideExtensions() && !classContext.forSmartPointer())
         s << "SbkObjectType_SetPropertyStrings(pyType, "
@@ -6271,6 +6326,7 @@ bool CppGenerator::finishGeneration()
     if (!api().instantiatedContainers().isEmpty())
         s << "#include <sbkcontainer.h>\n#include <sbkstaticstrings.h>\n";
 
+    s << '\n' << compilerOptionOptimize() << '\n';
     if (usePySideExtensions()) {
         s << includeQDebug;
         s << R"(#include <pysidecleanup.h>
@@ -6610,8 +6666,12 @@ bool CppGenerator::finishGeneration()
     }
 
     // finish the rest of get_signature() initialization.
-    s << "FinishSignatureInitialization(module, " << moduleName()
-        << "_SignatureStrings);\n"
+    s << outdent << "#if PYSIDE6_COMOPT_COMPRESS == 0\n" << indent
+        << "FinishSignatureInitialization(module, " << moduleName() << "_SignatureStrings);\n"
+        << outdent << "#else\n" << indent
+        << "if (FinishSignatureInitBytes(module, " << moduleName() << "_SignatureBytes, "
+        << moduleName() << "_SignatureByteSize) < 0)\n" << indent << "return {};\n" << outdent
+        << outdent << "#endif\n" << indent
         << "\nreturn module;\n" << outdent << "}\n";
 
     file.done();
