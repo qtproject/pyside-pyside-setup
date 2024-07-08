@@ -1195,20 +1195,27 @@ EmitterData getEmitterData(PySideSignalInstance *signal)
 
 QByteArrayList getArgsFromSignature(const char *signature)
 {
-    QByteArray qsignature = QByteArray(signature).trimmed();
+    QByteArrayView qsignature = QByteArrayView(signature).trimmed();
     QByteArrayList result;
 
     if (qsignature.contains("()") || qsignature.contains("(void)"))
         return result;
-    if (qsignature.endsWith(')')) {
-        const auto paren = qsignature.indexOf('(');
-        if (paren >= 0) {
-            qsignature.chop(1);
-            qsignature.remove(0, paren + 1);
-            result = qsignature.split(u',');
-            for (auto &type : result)
-                type = type.trimmed();
+    if (!qsignature.endsWith(')'))
+        return result;
+    const auto paren = qsignature.indexOf('(');
+    if (paren < 0)
+        return result;
+
+    qsignature.chop(1);
+    qsignature = qsignature.sliced(paren + 1);
+    while (true) {
+        auto next = qsignature.indexOf(',');
+        if (next == -1) {
+            result.append(qsignature.trimmed().toByteArray());
+            break;
         }
+        result.append(qsignature.sliced(0, next).trimmed().toByteArray());
+        qsignature = qsignature.sliced(next + 1);
     }
     return result;
 }
