@@ -10,6 +10,7 @@ set(CMAKE_AUTOMOC ON)
 set(libpyside_HEADERS # installed below
     class_property.h
     dynamicqmetaobject.h
+    dynamicslot_p.h
     feature_select.h
     globalreceiverv2.h
     pysideclassdecorator_p.h
@@ -46,6 +47,7 @@ set(libpyside_HEADERS # installed below
 set(libpyside_SRC
     class_property.cpp
     dynamicqmetaobject.cpp
+    dynamicslot.cpp
     feature_select.cpp
     signalmanager.cpp
     globalreceiverv2.cpp

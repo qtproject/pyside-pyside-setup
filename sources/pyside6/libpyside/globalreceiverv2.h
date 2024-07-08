@@ -22,7 +22,7 @@ QT_FORWARD_DECLARE_CLASS(QDebug);
 namespace PySide
 {
 
-class DynamicSlotDataV2;
+class DynamicSlot;
 class GlobalReceiverV2;
 
 struct GlobalReceiverKey
@@ -82,10 +82,6 @@ public:
     /// Returns whether any senders are registered.
     bool isEmpty() const;
 
-    /// Use to retrieve the unique hash of this GlobalReceiver object
-    /// @return hash key
-    GlobalReceiverKey key() const;
-
     /// Use to retrieve the unique hash of the PyObject based on GlobalReceiver rules
     /// @param callback The Python callable object used to calculate the id
     /// @return hash key
@@ -102,7 +98,7 @@ private:
     void purgeDeletedSenders();
 
     MetaObjectBuilder m_metaObject;
-    DynamicSlotDataV2 *m_data;
+    DynamicSlot *m_data;
     using QObjectPointer = QPointer<const QObject>;
     QList<QObjectPointer> m_refs;
     QPointer<QObject> m_receiver;

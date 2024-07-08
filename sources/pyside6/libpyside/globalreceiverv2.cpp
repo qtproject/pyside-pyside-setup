@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "globalreceiverv2.h"
+#include "dynamicslot_p.h"
 #include "pysideweakref.h"
 #include "pysidestaticstrings.h"
 #include "pysideutils.h"
@@ -16,147 +17,28 @@
 #include <QtCore/QDebug>
 
 #include <cstring>
+#include <utility>
 
 namespace PySide
 {
 
-class DynamicSlotDataV2
-{
-    Q_DISABLE_COPY_MOVE(DynamicSlotDataV2)
-    public:
-        DynamicSlotDataV2(PyObject *callback, GlobalReceiverV2 *parent);
-        ~DynamicSlotDataV2();
-
-        PyObject *callback();
-        GlobalReceiverKey key() const { return {m_pythonSelf, m_callback}; }
-
-        static void onCallbackDestroyed(void *data);
-        static GlobalReceiverKey key(PyObject *callback);
-
-        void formatDebug(QDebug &debug) const;
-
-    private:
-        bool m_isMethod;
-        PyObject *m_callback;
-        PyObject *m_pythonSelf = nullptr;
-        PyObject *m_pyClass = nullptr;
-        PyObject *m_weakRef = nullptr;
-        GlobalReceiverV2 *m_parent;
-};
-
-void DynamicSlotDataV2::formatDebug(QDebug &debug) const
-{
-    debug << "method=" << m_isMethod << ", m_callback=" << m_callback;
-    if (m_callback != nullptr)
-        debug << '/' << Py_TYPE(m_callback)->tp_name;
-    debug << ", self=" << m_pythonSelf;
-    if (m_pythonSelf != nullptr)
-        debug << '/' << Py_TYPE(m_pythonSelf)->tp_name;
-    debug << ", m_pyClass=" << m_pyClass;
-    if (m_pyClass != nullptr)
-        debug << '/' << Py_TYPE(m_pyClass)->tp_name;
-}
-
-QDebug operator<<(QDebug debug, const DynamicSlotDataV2 *d)
-{
-    QDebugStateSaver saver(debug);
-    debug.noquote();
-    debug.nospace();
-    debug << "DynamicSlotDataV2(";
-    if (d)
-        d->formatDebug(debug);
-    else
-        debug << '0';
-    debug << ')';
-    return debug;
-}
-
-using namespace PySide;
-
-DynamicSlotDataV2::DynamicSlotDataV2(PyObject *callback, GlobalReceiverV2 *parent) :
-    m_parent(parent)
+GlobalReceiverKey GlobalReceiverV2::key(PyObject *callback)
 {
     Shiboken::GilState gil;
-
-    if (PyMethod_Check(callback)) {
-        m_isMethod = true;
-        // A method given by "signal.connect(foo.method)" is a temporarily created
-        // callable/partial function where self is bound as a first parameter.
-        // It can be split into self and the function. Keeping a reference on
-        // the callable itself would prevent object deletion. Instead, keep a
-        // reference on the function and listen for destruction of the object
-        // using a weak reference with notification.
-        m_callback = PyMethod_GET_FUNCTION(callback);
-        Py_INCREF(m_callback);
-        m_pythonSelf = PyMethod_GET_SELF(callback);
-
-        m_weakRef = WeakRef::create(m_pythonSelf, DynamicSlotDataV2::onCallbackDestroyed, this);
-    } else if (PySide::isCompiledMethod(callback)) {
-        // PYSIDE-1523: PyMethod_Check is not accepting compiled form, we just go by attributes.
-        m_isMethod = true;
-
-        m_callback = PyObject_GetAttr(callback, PySide::PySideName::im_func());
-        Py_DECREF(m_callback);
-
-        m_pythonSelf = PyObject_GetAttr(callback, PySide::PySideName::im_self());
-        Py_DECREF(m_pythonSelf);
-
-        //monitor class from method lifetime
-        m_weakRef = WeakRef::create(m_pythonSelf, DynamicSlotDataV2::onCallbackDestroyed, this);
-    } else {
-        m_isMethod = false;
-
-        m_callback = callback;
-        Py_INCREF(m_callback);
-    }
-}
-
-GlobalReceiverKey DynamicSlotDataV2::key(PyObject *callback)
-{
-    Shiboken::GilState gil;
-    if (PyMethod_Check(callback)) {
+    switch (DynamicSlot::slotType(callback)) {
+    case DynamicSlot::SlotType::Method:
         // PYSIDE-1422: Avoid hash on self which might be unhashable.
         return {PyMethod_GET_SELF(callback), PyMethod_GET_FUNCTION(callback)};
-    }
-    if (PySide::isCompiledMethod(callback)) {
+    case DynamicSlot::SlotType::CompiledMethod: {
         // PYSIDE-1589: Fix for slots in compiled functions
         Shiboken::AutoDecRef self(PyObject_GetAttr(callback, PySide::PySideName::im_self()));
         Shiboken::AutoDecRef func(PyObject_GetAttr(callback, PySide::PySideName::im_func()));
         return {self, func};
     }
+    case DynamicSlot::SlotType::Callable:
+        break;
+    }
     return {nullptr, callback};
-}
-
-PyObject *DynamicSlotDataV2::callback()
-{
-    PyObject *callback = m_callback;
-
-    //create a callback based on method data
-    if (m_isMethod)
-        callback = PepExt_Type_CallDescrGet(m_callback, m_pythonSelf, nullptr);
-    else
-        Py_INCREF(callback);
-
-    return callback;
-}
-
-void DynamicSlotDataV2::onCallbackDestroyed(void *data)
-{
-    auto *self = reinterpret_cast<DynamicSlotDataV2 *>(data);
-    self->m_weakRef = nullptr;
-    Py_BEGIN_ALLOW_THREADS
-    SignalManager::deleteGlobalReceiver(self->m_parent);
-    Py_END_ALLOW_THREADS
-}
-
-DynamicSlotDataV2::~DynamicSlotDataV2()
-{
-    Shiboken::GilState gil;
-
-    Py_XDECREF(m_weakRef);
-    m_weakRef = nullptr;
-
-    Py_DECREF(m_callback);
 }
 
 const char *GlobalReceiverV2::senderDynamicProperty = "_q_pyside_sender";
@@ -164,9 +46,9 @@ const char *GlobalReceiverV2::senderDynamicProperty = "_q_pyside_sender";
 GlobalReceiverV2::GlobalReceiverV2(PyObject *callback, QObject *receiver) :
     QObject(nullptr),
     m_metaObject("__GlobalReceiver__", &QObject::staticMetaObject),
+    m_data(DynamicSlot::create(callback, this)),
     m_receiver(receiver)
 {
-    m_data = new DynamicSlotDataV2(callback, this);
 }
 
 GlobalReceiverV2::~GlobalReceiverV2()
@@ -180,9 +62,7 @@ GlobalReceiverV2::~GlobalReceiverV2()
     // Callback is deleted, hence the last reference is decremented,
     // leading to the object being deleted, which emits destroyed(), which would try to invoke
     // the already deleted callback, and also try to delete the object again.
-    DynamicSlotDataV2 *data = m_data;
-    m_data = nullptr;
-    delete data;
+    delete std::exchange(m_data, nullptr);
 }
 
 int GlobalReceiverV2::addSlot(const QByteArray &signature)
@@ -227,16 +107,6 @@ bool GlobalReceiverV2::isEmpty() const
     return std::all_of(m_refs.cbegin(), m_refs.cend(), isNull);
 }
 
-GlobalReceiverKey GlobalReceiverV2::key() const
-{
-    return m_data->key();
-}
-
-GlobalReceiverKey GlobalReceiverV2::key(PyObject *callback)
-{
-    return DynamicSlotDataV2::key(callback);
-}
-
 const QMetaObject *GlobalReceiverV2::metaObject() const
 {
     return const_cast<GlobalReceiverV2 *>(this)->m_metaObject.update();
@@ -262,8 +132,7 @@ int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void **args)
     if (setSenderDynamicProperty)
         m_receiver->setProperty(senderDynamicProperty, QVariant::fromValue(sender()));
 
-    Shiboken::AutoDecRef callback(m_data->callback());
-    SignalManager::callPythonMetaMethod(slot, args, callback);
+    m_data->call(slot.parameterTypes(), slot.typeName(), args);
 
     if (setSenderDynamicProperty)
         m_receiver->setProperty(senderDynamicProperty, QVariant{});
