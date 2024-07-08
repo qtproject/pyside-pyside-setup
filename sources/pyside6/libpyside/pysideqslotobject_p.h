@@ -10,11 +10,16 @@
 #include <QtCore/QObject>
 #include <QtCore/qobjectdefs.h>
 
+#include <memory>
+
 namespace PySide
 {
 
+class DynamicSlot;
+
 class PySideQSlotObject : public QtPrivate::QSlotObjectBase
 {
+    Q_DISABLE_COPY_MOVE(PySideQSlotObject)
 public:
     explicit PySideQSlotObject(PyObject *callable, const QByteArrayList &parameterTypes,
                                const char *returnType  = nullptr);
@@ -24,7 +29,7 @@ private:
     static void impl(int which, QSlotObjectBase *this_, QObject *receiver, void **args, bool *ret);
     void call(void **args);
 
-    PyObject *m_callable;
+    std::unique_ptr<DynamicSlot> m_dynamicSlot;
     const QByteArrayList m_parameterTypes;
     const char *m_returnType;
 };

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "pysideqslotobject_p.h"
-#include "signalmanager.h"
+#include "dynamicslot_p.h"
 
 #include <gilstate.h>
 
@@ -13,23 +13,19 @@ PySideQSlotObject::PySideQSlotObject(PyObject *callable,
                                      const QByteArrayList &parameterTypes,
                                      const char *returnType) :
     QtPrivate::QSlotObjectBase(&impl),
-    m_callable(callable),
+    m_dynamicSlot(DynamicSlot::create(callable)),
     m_parameterTypes(parameterTypes),
     m_returnType(returnType)
 {
-    Py_INCREF(callable);
-}
-
-PySideQSlotObject::~PySideQSlotObject()
-{
-    Shiboken::GilState state;
-    Py_DECREF(m_callable);
 }
 
 void PySideQSlotObject::call(void **args)
 {
-    SignalManager::callPythonMetaMethod(m_parameterTypes, m_returnType, args, m_callable);
+    Shiboken::GilState state;
+    m_dynamicSlot->call(m_parameterTypes, m_returnType, args);
 }
+
+PySideQSlotObject::~PySideQSlotObject() = default;
 
 void PySideQSlotObject::impl(int which, QSlotObjectBase *this_, QObject *receiver,
                              void **args, bool *ret)
