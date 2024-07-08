@@ -64,7 +64,7 @@ public:
     /// Add a extra slot to this object
     /// @param  signature The signature of the slot to be added
     /// @return The index of this slot on metaobject
-    int addSlot(const char *signature);
+    int addSlot(const QByteArray &signature);
 
     /// Notify to GlobalReceiver about when a new connection was made
     void notify();
@@ -106,6 +106,7 @@ private:
     using QObjectPointer = QPointer<const QObject>;
     QList<QObjectPointer> m_refs;
     QPointer<QObject> m_receiver;
+    QMap<QByteArray, int> m_signatures;
 };
 
 QDebug operator<<(QDebug debug, const GlobalReceiverV2 *g);

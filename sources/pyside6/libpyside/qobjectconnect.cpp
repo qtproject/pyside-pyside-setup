@@ -230,9 +230,8 @@ QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *sign
             return {};
         }
 
-        const char *slotSignature = receiver.callbackSig.constData();
         slotIndex = receiver.usingGlobalReceiver
-            ? signalManager.globalReceiverSlotIndex(receiver.receiver, slotSignature)
+            ? signalManager.globalReceiverSlotIndex(receiver.receiver, receiver.callbackSig)
             : PySide::SignalManager::registerMetaMethodGetIndexBA(receiver.receiver,
                                                                   receiver.callbackSig,
                                                                   QMetaMethod::Slot);

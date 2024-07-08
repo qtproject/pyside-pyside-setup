@@ -27,11 +27,8 @@ class DynamicSlotDataV2
         DynamicSlotDataV2(PyObject *callback, GlobalReceiverV2 *parent);
         ~DynamicSlotDataV2();
 
-        int addSlot(const char *signature);
-        int id(const char *signature) const;
         PyObject *callback();
         GlobalReceiverKey key() const { return {m_pythonSelf, m_callback}; }
-        void notify();
 
         static void onCallbackDestroyed(void *data);
         static GlobalReceiverKey key(PyObject *callback);
@@ -44,7 +41,6 @@ class DynamicSlotDataV2
         PyObject *m_pythonSelf = nullptr;
         PyObject *m_pyClass = nullptr;
         PyObject *m_weakRef = nullptr;
-        QMap<QByteArray, int> m_signatures;
         GlobalReceiverV2 *m_parent;
 };
 
@@ -59,7 +55,6 @@ void DynamicSlotDataV2::formatDebug(QDebug &debug) const
     debug << ", m_pyClass=" << m_pyClass;
     if (m_pyClass != nullptr)
         debug << '/' << Py_TYPE(m_pyClass)->tp_name;
-    debug << ", signatures=" << m_signatures.keys();
 }
 
 QDebug operator<<(QDebug debug, const DynamicSlotDataV2 *d)
@@ -145,20 +140,6 @@ PyObject *DynamicSlotDataV2::callback()
     return callback;
 }
 
-int DynamicSlotDataV2::id(const char *signature) const
-{
-    const auto it = m_signatures.constFind(signature);
-    return it != m_signatures.cend() ? it.value() : -1;
-}
-
-int DynamicSlotDataV2::addSlot(const char *signature)
-{
-    int index = id(signature);
-    if (index == -1)
-        index = m_signatures[signature] = m_parent->metaObjectBuilder().addSlot(signature);
-    return index;
-}
-
 void DynamicSlotDataV2::onCallbackDestroyed(void *data)
 {
     auto *self = reinterpret_cast<DynamicSlotDataV2 *>(data);
@@ -204,9 +185,14 @@ GlobalReceiverV2::~GlobalReceiverV2()
     delete data;
 }
 
-int GlobalReceiverV2::addSlot(const char *signature)
+int GlobalReceiverV2::addSlot(const QByteArray &signature)
 {
-    return m_data->addSlot(signature);
+    auto it = m_signatures.find(signature);
+    if (it == m_signatures.end()) {
+        const int index = metaObjectBuilder().addSlot(signature);
+        it = m_signatures.insert(signature, index);
+    }
+    return it.value();
 }
 
 void GlobalReceiverV2::incRef(const QObject *link)
@@ -300,7 +286,8 @@ int GlobalReceiverV2::qt_metacall(QMetaObject::Call call, int id, void **args)
 
 void GlobalReceiverV2::formatDebug(QDebug &debug) const
 {
-    debug << "receiver=" << m_receiver << ", slot=" << m_data;
+    debug << "receiver=" << m_receiver
+        << ", signatures=" << m_signatures.keys() << ", slot=" << m_data;
     if (isEmpty())
         debug << ", empty";
     else

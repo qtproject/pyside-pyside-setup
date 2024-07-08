@@ -63,7 +63,7 @@ public:
 
     QObject* globalReceiver(QObject *sender, PyObject *callback, QObject *receiver = nullptr);
     void releaseGlobalReceiver(const QObject* sender, QObject* receiver);
-    static int globalReceiverSlotIndex(QObject* sender, const char* slotSignature);
+    static int globalReceiverSlotIndex(QObject* sender, const QByteArray &slotSignature);
     void notifyGlobalReceiver(QObject* receiver);
 
     static bool emitSignal(QObject* source, const char* signal, PyObject* args);

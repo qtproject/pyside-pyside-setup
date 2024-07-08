@@ -472,7 +472,7 @@ void SignalManager::SignalManagerPrivate::purgeEmptyGlobalReceivers()
     }
 }
 
-int SignalManager::globalReceiverSlotIndex(QObject *receiver, const char *signature)
+int SignalManager::globalReceiverSlotIndex(QObject *receiver, const QByteArray &signature)
 {
     return static_cast<GlobalReceiverV2 *>(receiver)->addSlot(signature);
 }
