@@ -31,9 +31,9 @@ public:
 
     int indexOfMethod(QMetaMethod::MethodType mtype, const QByteArray &signature) const;
     int indexOfProperty(const QByteArray &name) const;
-    int addSlot(const char *signature);
-    int addSlot(const char *signature, const char *type);
-    int addSignal(const char *signature);
+    int addSlot(const QByteArray &signature);
+    int addSlot(const QByteArray &signature, const QByteArray &type);
+    int addSignal(const QByteArray &signature);
     void removeMethod(QMetaMethod::MethodType mtype, int index);
     int addProperty(const char *property, PyObject *data);
     void addInfo(const char *key, const char *value);

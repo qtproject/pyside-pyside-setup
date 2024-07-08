@@ -823,47 +823,71 @@ QDebug operator<<(QDebug debug, const slotSignature &sig)
     return debug;
 }
 
-int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signature, QMetaMethod::MethodType type)
+static int addMetaMethod(QObject *source, const QByteArray &signature,
+                         QMetaMethod::MethodType type)
 {
-    if (!source) {
-        qWarning("SignalManager::registerMetaMethodGetIndex(\"%s\") called with source=nullptr.",
-                 signature);
+    const QMetaObject *metaObject = source->metaObject();
+    SbkObject *self = Shiboken::BindingManager::instance().retrieveWrapper(source);
+    if (!Shiboken::Object::hasCppWrapper(self)) {
+        qWarning().noquote().nospace() << __FUNCTION__
+            << ": Cannot add dynamic method \"" << signature << "\" (" << type
+            << ") to " << source << ": No Wrapper found.";
+        return -1;
+    }
+
+    auto *pySelf = reinterpret_cast<PyObject *>(self);
+    auto *dict = SbkObject_GetDict_NoRef(pySelf);
+    MetaObjectBuilder *dmo = metaBuilderFromDict(dict);
+    // Create a instance meta object
+    if (dmo == nullptr) {
+        dmo = new MetaObjectBuilder(Py_TYPE(pySelf), metaObject);
+        PyObject *pyDmo = PyCapsule_New(dmo, nullptr, destroyMetaObject);
+        PyObject_SetAttr(pySelf, metaObjectAttr, pyDmo);
+        Py_DECREF(pyDmo);
+    }
+
+    if (type == QMetaMethod::Slot) {
+        qCWarning(lcPySide).noquote().nospace()
+            << "Warning: Registering dynamic slot \""
+            << signature << "\" on \"" << source->metaObject()->className()
+            << "\". Consider annotating with " << slotSignature(signature);
+    }
+
+    return type == QMetaMethod::Signal ? dmo->addSignal(signature) : dmo->addSlot(signature);
+}
+
+static inline void warnNullSource(const char *signature)
+{
+    qWarning("SignalManager::registerMetaMethodGetIndex(\"%s\") called with source=nullptr.",
+             signature);
+}
+
+int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signature,
+                                              QMetaMethod::MethodType type)
+{
+    if (source == nullptr) {
+        warnNullSource(signature);
         return -1;
     }
     const QMetaObject *metaObject = source->metaObject();
-    int methodIndex = metaObject->indexOfMethod(signature);
-    // Create the dynamic signal is needed
-    if (methodIndex == -1) {
-        SbkObject *self = Shiboken::BindingManager::instance().retrieveWrapper(source);
-        if (!Shiboken::Object::hasCppWrapper(self)) {
-            qWarning().noquote().nospace() << __FUNCTION__
-                << ": Cannot add dynamic method \"" << signature << "\" (" << type
-                << ") to " << source << ": No Wrapper found.";
-            return -1;
-        }
-        auto *pySelf = reinterpret_cast<PyObject *>(self);
-        auto *dict = SbkObject_GetDict_NoRef(pySelf);
-        MetaObjectBuilder *dmo = metaBuilderFromDict(dict);
+    const int methodIndex = metaObject->indexOfMethod(signature);
+    // Create the dynamic signal if needed
+    return methodIndex != -1
+        ? methodIndex : addMetaMethod(source, QByteArray(signature), type);
+}
 
-        // Create a instance meta object
-        if (!dmo) {
-            dmo = new MetaObjectBuilder(Py_TYPE(pySelf), metaObject);
-            PyObject *pyDmo = PyCapsule_New(dmo, nullptr, destroyMetaObject);
-            PyObject_SetAttr(pySelf, metaObjectAttr, pyDmo);
-            Py_DECREF(pyDmo);
-        }
-
-        if (type == QMetaMethod::Slot) {
-            qCWarning(lcPySide).noquote().nospace()
-                << "Warning: Registering dynamic slot \""
-                << signature << "\" on \"" << source->metaObject()->className()
-                << "\". Consider annotating with " << slotSignature(signature);
-        }
-
-        return type == QMetaMethod::Signal
-            ? dmo->addSignal(signature) : dmo->addSlot(signature);
+int SignalManager::registerMetaMethodGetIndexBA(QObject* source, const QByteArray &signature,
+                                                QMetaMethod::MethodType type)
+{
+    if (source == nullptr) {
+        warnNullSource(signature.constData());
+        return -1;
     }
-    return methodIndex;
+    const QMetaObject *metaObject = source->metaObject();
+    const int methodIndex = metaObject->indexOfMethod(signature.constData());
+    // Create the dynamic signal if needed
+    return methodIndex != -1
+        ? methodIndex : addMetaMethod(source, signature, type);
 }
 
 const QMetaObject *SignalManager::retrieveMetaObject(PyObject *self)

@@ -207,7 +207,7 @@ int MetaObjectBuilderPrivate::addSlot(const QByteArray &signature)
         + ensureBuilder()->addSlot(signature).index();
 }
 
-int MetaObjectBuilder::addSlot(const char *signature)
+int MetaObjectBuilder::addSlot(const QByteArray &signature)
 {
     return m_d->addSlot(signature);
 }
@@ -227,7 +227,7 @@ int MetaObjectBuilderPrivate::addSlot(const QByteArray &signature,
     return m_baseObject->methodCount() + methodBuilder.index();
 }
 
-int MetaObjectBuilder::addSlot(const char *signature, const char *type)
+int MetaObjectBuilder::addSlot(const QByteArray &signature, const QByteArray &type)
 {
     return m_d->addSlot(signature, type);
 }
@@ -241,7 +241,7 @@ int MetaObjectBuilderPrivate::addSignal(const QByteArray &signature)
         + ensureBuilder()->addSignal(signature).index();
 }
 
-int MetaObjectBuilder::addSignal(const char *signature)
+int MetaObjectBuilder::addSignal(const QByteArray &signature)
 {
     return m_d->addSignal(signature);
 }

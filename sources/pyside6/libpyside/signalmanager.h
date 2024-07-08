@@ -70,8 +70,12 @@ public:
     static int qt_metacall(QObject* object, QMetaObject::Call call, int id, void** args);
 
     // Used to register a new signal/slot on QMetaobject of source.
-    static bool registerMetaMethod(QObject* source, const char* signature, QMetaMethod::MethodType type);
-    static int registerMetaMethodGetIndex(QObject* source, const char* signature, QMetaMethod::MethodType type);
+    static bool registerMetaMethod(QObject* source, const char* signature,
+                                   QMetaMethod::MethodType type);
+    static int registerMetaMethodGetIndex(QObject* source, const char *signature,
+                                          QMetaMethod::MethodType type);
+    static int registerMetaMethodGetIndexBA(QObject* source, const QByteArray &signature,
+                                            QMetaMethod::MethodType type);
 
     // used to discovery metaobject
     static const QMetaObject* retrieveMetaObject(PyObject* self);
