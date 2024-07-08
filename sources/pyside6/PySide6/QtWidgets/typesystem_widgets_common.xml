@@ -2447,6 +2447,7 @@
 
     <modify-function signature="pixmap(Qt::ReturnByValueConstant)const" remove="all"/>
     <modify-function signature="picture(Qt::ReturnByValueConstant)const" remove="all"/>
+    <!-- // FIXME PYSIDE7: PYSIDE-2808 Remove (resource cleanup)? -->
     <modify-function signature="setMovie(QMovie *)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
