@@ -127,7 +127,9 @@ macro(create_pyside_module)
         list(APPEND shiboken_include_dir_list ${${module_ADDITIONAL_INCLUDE_DIRS}})
     endif()
 
-    # Transform the path separators into something shiboken understands.
+    # Remove duplicates and transform the path separators into something
+    # shiboken understands.
+    list(REMOVE_DUPLICATES shiboken_include_dir_list)
     make_path(shiboken_include_dirs ${shiboken_include_dir_list})
 
     set(force_process_system_include_paths_list "")
