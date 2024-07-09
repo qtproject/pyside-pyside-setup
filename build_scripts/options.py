@@ -247,7 +247,14 @@ class CommandMixin(object):
         ('plat-name=', None, 'The platform name for which we are cross-compiling'),
         ('unity', None, 'Use CMake UNITY_BUILD_MODE (obsolete)'),
         ('no-unity', None, 'Disable CMake UNITY_BUILD_MODE'),
-        ('unity-build-batch-size=', None, 'Value of CMAKE_UNITY_BUILD_BATCH_SIZE')
+        ('unity-build-batch-size=', None, 'Value of CMAKE_UNITY_BUILD_BATCH_SIZE'),
+        # shiboken-force-process-system-headers option is specifically used to tell the clang
+        # inside shiboken to process the system headers, when building against a system Qt.
+        #
+        # This option is specific for Flatpak and OS distro builds of PySide6. So, use with
+        # caution as it may also try to parse other global headers.
+        ('shiboken-force-process-system-headers', None,
+         'When building PySide against system Qt, shiboken does not ignore the system Qt headers')
     ]
 
     def __init__(self):
@@ -309,6 +316,7 @@ class CommandMixin(object):
         self.unity = False
         self.no_unity = False
         self.unity_build_batch_size = "16"
+        self.shiboken_force_process_system_headers = False
 
         # When initializing a command other than the main one (so the
         # first one), we need to copy the user options from the main
@@ -429,6 +437,7 @@ class CommandMixin(object):
                         "Unity build mode is now the default.")
         OPTION['UNITY'] = not self.no_unity
         OPTION['UNITY_BUILD_BATCH_SIZE'] = self.unity_build_batch_size
+        OPTION['SHIBOKEN_FORCE_PROCESS_SYSTEM_HEADERS'] = self.shiboken_force_process_system_headers
 
         qtpaths_abs_path = None
         if self.qtpaths and Path(self.qtpaths).exists():
