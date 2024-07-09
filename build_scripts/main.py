@@ -591,6 +591,10 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             cmake_cmd.append(f"-DCMAKE_UNITY_BUILD_BATCH_SIZE={batch_size}")
             log.info("Using UNITY build")
 
+        if OPTION['SHIBOKEN_FORCE_PROCESS_SYSTEM_HEADERS']:
+            cmake_cmd.append("-DPYSIDE_TREAT_QT_INCLUDE_DIRS_AS_NON_SYSTEM=ON")
+            log.info("Shiboken will now process system Qt headers")
+
         cmake_cmd += [
             "-G", self.make_generator,
             f"-DBUILD_TESTS={self.build_tests}",
