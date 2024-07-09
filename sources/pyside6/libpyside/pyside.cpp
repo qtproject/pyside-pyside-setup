@@ -98,7 +98,7 @@ void init(PyObject *module)
     ClassProperty::init(module);
     MetaFunction::init(module);
     // Init signal manager, so it will register some meta types used by QVariant.
-    SignalManager::instance();
+    SignalManager::init();
     initQApp();
 }
 
@@ -426,7 +426,6 @@ void destroyQCoreApplication()
     QCoreApplication *app = QCoreApplication::instance();
     if (!app)
         return;
-    SignalManager::instance().clear();
 
     Shiboken::BindingManager &bm = Shiboken::BindingManager::instance();
     SbkObject *pyQApp = bm.retrieveWrapper(app);

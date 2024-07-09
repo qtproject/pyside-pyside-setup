@@ -374,7 +374,7 @@ PyModule_AddStringConstant(module, "__version__", qVersion());
 // @snippet qobject-connect-6
 
 // @snippet qobject-emit
-%RETURN_TYPE %0 = PySide::SignalManager::instance().emitSignal(%CPPSELF, %1, %PYARG_2);
+%RETURN_TYPE %0 = PySide::SignalManager::emitSignal(%CPPSELF, %1, %PYARG_2);
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
 // @snippet qobject-emit
 
@@ -424,7 +424,6 @@ Shiboken::Conversions::registerConverterName(SbkPySide6_QtCoreTypeConverters[SBK
 
 PySide::registerInternalQtConf();
 PySide::init(module);
-Py_AtExit(QtCoreModuleExit);
 // @snippet qt-pysideinit
 
 // @snippet qt-messagehandler
@@ -441,10 +440,6 @@ static void msgHandlerCallback(QtMsgType type, const QMessageLogContext &ctx, co
     const char *data = array.constData();
     PyTuple_SET_ITEM(arglist, 2, %CONVERTTOPYTHON[const char *](data));
     Shiboken::AutoDecRef ret(PyObject_CallObject(qtmsghandler, arglist));
-}
-static void QtCoreModuleExit()
-{
-    PySide::SignalManager::instance().clear();
 }
 // @snippet qt-messagehandler
 

@@ -7,13 +7,12 @@
 #include <sbkpython.h>
 
 #include <QtCore/QtCompare>
+#include <QtCore/QMetaObject>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
 namespace PySide
 {
-
-class GlobalReceiverV2;
 
 class DynamicSlot
 {
@@ -33,13 +32,17 @@ public:
     virtual void formatDebug(QDebug &debug) const = 0;
 
     static SlotType slotType(PyObject *callback);
-    static DynamicSlot *create(PyObject *callback, GlobalReceiverV2 *parent = nullptr);
+    static DynamicSlot *create(PyObject *callback);
 
 protected:
     DynamicSlot() noexcept = default;
 };
 
 QDebug operator<<(QDebug debug, const DynamicSlot *ds);
+
+void registerSlotConnection(QObject *source, int signalIndex, PyObject *callback,
+                            const QMetaObject::Connection &connection);
+bool disconnectSlot(QObject *source, int signalIndex, PyObject *callback);
 
 }
 

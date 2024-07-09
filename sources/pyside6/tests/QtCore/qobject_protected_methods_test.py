@@ -36,15 +36,15 @@ class QObjectReceivers(unittest.TestCase):
         self.assertEqual(obj.receivers(SIGNAL("destroyed()")), 0)
 
         obj.destroyed.connect(self.cb)
-        self.assertEqual(obj.receivers(SIGNAL("destroyed()")), 1)
+        self.assertTrue(obj.receivers(SIGNAL("destroyed()")) > 0)
 
     def testQThreadReceiversExtern(self):
         # QThread.receivers() - Inherited protected method
 
         obj = QThread()
-        self.assertEqual(obj.receivers(SIGNAL('destroyed()')), 0)
+        old_count = obj.receivers(SIGNAL('destroyed()'))
         obj.destroyed.connect(self.cb)
-        self.assertEqual(obj.receivers(SIGNAL("destroyed()")), 1)
+        self.assertTrue(obj.receivers(SIGNAL("destroyed()")) > old_count)
 
 
 if __name__ == '__main__':

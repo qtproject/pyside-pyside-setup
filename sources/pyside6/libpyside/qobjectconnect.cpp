@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "qobjectconnect.h"
+#include "dynamicslot_p.h"
 #include "pysideqobject.h"
 #include "pysideqslotobject_p.h"
 #include "pysidesignal.h"
@@ -58,7 +59,7 @@ struct GetReceiverResult
     QObject *receiver = nullptr;
     PyObject *self = nullptr;
     QByteArray callbackSig;
-    bool usingGlobalReceiver = false;
+    bool forceDynamicSlot = false;
     int slotIndex = -1;
 };
 
@@ -69,8 +70,8 @@ QDebug operator<<(QDebug d, const GetReceiverResult &r)
     d.noquote();
     d.nospace();
     d << "GetReceiverResult(receiver=" << r.receiver << ", self=" << r.self
-      << ", sig=\"" << r.callbackSig << "\", slotIndex=" << r.slotIndex
-      << ", usingGlobalReceiver=" << r.usingGlobalReceiver << ')';
+      << ", forceDynamicSlot=" << r.forceDynamicSlot
+      << ", sig=\"" << r.callbackSig << "\", slotIndex=" << r.slotIndex << ')';
     return d;
 }
 #endif // QT_NO_DEBUG_STREAM
@@ -94,16 +95,15 @@ static bool isDeclaredIn(PyObject *method, const char *className)
     return result;
 }
 
-static GetReceiverResult getReceiver(QObject *source, QMetaMethod signal,
-                                     PyObject *callback)
+static GetReceiverResult getReceiver(QMetaMethod signal, PyObject *callback)
 {
     GetReceiverResult result;
 
-    bool forceGlobalReceiver = false;
     if (PyMethod_Check(callback)) {
         result.self = PyMethod_GET_SELF(callback);
         result.receiver = PySide::convertToQObject(result.self, false);
-        forceGlobalReceiver = isMethodDecorator(callback, true, result.self);
+        // Prevent dynamic slot creation for decorators
+        result.forceDynamicSlot = isMethodDecorator(callback, true, result.self);
 #ifdef PYPY_VERSION
     } else if (Py_TYPE(callback) == PepBuiltinMethod_TypePtr) {
         result.self = PyObject_GetAttrString(callback, "__self__");
@@ -117,23 +117,23 @@ static GetReceiverResult getReceiver(QObject *source, QMetaMethod signal,
         result.self = PyObject_GetAttr(callback, Shiboken::PyName::im_self());
         Py_DECREF(result.self);
         result.receiver = PySide::convertToQObject(result.self, false);
-        forceGlobalReceiver = isMethodDecorator(callback, false, result.self);
+        // Prevent dynamic slot creation for decorators
+        result.forceDynamicSlot = isMethodDecorator(callback, false, result.self);
     } else if (PyCallable_Check(callback)) {
         // Ok, just a callable object
         result.receiver = nullptr;
         result.self = nullptr;
     }
 
-    result.usingGlobalReceiver = !result.receiver || forceGlobalReceiver;
+    result.callbackSig =
+        PySide::Signal::getCallbackSignature(signal, result.receiver, callback,
+                                             false);
 
     // Check if this callback is a overwrite of a non-virtual Qt slot (pre-Jira bug 1019).
     // Make it possible to connect to a MyWidget.show() although QWidget.show()
     // is a non-virtual slot which would be found by QMetaObject search.
     // FIXME PYSIDE7: This is arguably a bit of a misguided "feature", remove?
-    if (!result.usingGlobalReceiver && result.receiver && result.self) {
-        result.callbackSig =
-            PySide::Signal::getCallbackSignature(signal, result.receiver, callback,
-                                                 result.usingGlobalReceiver);
+    if (result.receiver && result.self) {
         const QMetaObject *metaObject = result.receiver->metaObject();
         result.slotIndex = metaObject->indexOfSlot(result.callbackSig.constData());
         if (PyMethod_Check(callback) != 0 && result.slotIndex != -1
@@ -143,25 +143,11 @@ static GetReceiverResult getReceiver(QObject *source, QMetaMethod signal,
                  metaObject = metaObject->superClass();
              // If the Python callback is not declared in the same class, assume it is
              // a Python override. Resort to global receiver (PYSIDE-2418).
-             if (!isDeclaredIn(callback, metaObject->className()))
-                 result.usingGlobalReceiver = true;
+             if (!isDeclaredIn(callback, metaObject->className())) {
+                 result.receiver = nullptr;
+                 result.slotIndex = -1;
+             }
          }
-    }
-
-    auto *receiverThread = result.receiver ? result.receiver->thread() : nullptr;
-
-    if (result.usingGlobalReceiver) {
-        PySide::SignalManager &signalManager = PySide::SignalManager::instance();
-        result.receiver = signalManager.globalReceiver(source, callback, result.receiver);
-        // PYSIDE-1354: Move the global receiver to the original receivers's thread
-        // so that autoconnections work correctly.
-        if (receiverThread && receiverThread != result.receiver->thread())
-            result.receiver->moveToThread(receiverThread);
-        result.callbackSig =
-            PySide::Signal::getCallbackSignature(signal, result.receiver, callback,
-                                                 result.usingGlobalReceiver);
-        const QMetaObject *metaObject = result.receiver->metaObject();
-        result.slotIndex = metaObject->indexOfSlot(result.callbackSig.constData());
     }
 
     return result;
@@ -213,54 +199,39 @@ QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *sign
         return {};
 
     // Extract receiver from callback
-    const GetReceiverResult receiver = getReceiver(source,
-                                                   source->metaObject()->method(signalIndex),
-                                                   callback);
-    if (receiver.receiver == nullptr && receiver.self == nullptr)
-        return {};
-
-    int slotIndex = receiver.slotIndex;
-
-    PySide::SignalManager &signalManager = PySide::SignalManager::instance();
-    if (slotIndex == -1) {
-        if (!receiver.usingGlobalReceiver && receiver.self
-            && !Shiboken::Object::hasCppWrapper(reinterpret_cast<SbkObject *>(receiver.self))) {
-            qWarning("You can't add dynamic slots on an object originated from C++.");
-            if (receiver.usingGlobalReceiver)
-                signalManager.releaseGlobalReceiver(source, receiver.receiver);
-
-            return {};
-        }
-
-        slotIndex = receiver.usingGlobalReceiver
-            ? signalManager.globalReceiverSlotIndex(receiver.receiver, receiver.callbackSig)
-            : PySide::SignalManager::registerMetaMethodGetIndexBA(receiver.receiver,
-                                                                  receiver.callbackSig,
-                                                                  QMetaMethod::Slot);
-
-        if (slotIndex == -1) {
-            if (receiver.usingGlobalReceiver)
-                signalManager.releaseGlobalReceiver(source, receiver.receiver);
-
-            return {};
-        }
+    const QMetaMethod signalMethod = source->metaObject()->method(signalIndex);
+    GetReceiverResult receiver = getReceiver(signalMethod, callback);
+    if (!receiver.forceDynamicSlot && receiver.receiver != nullptr && receiver.slotIndex == -1) {
+        receiver.slotIndex = PySide::SignalManager::registerMetaMethodGetIndexBA(receiver.receiver,
+                                                                                 receiver.callbackSig,
+                                                                                 QMetaMethod::Slot);
     }
 
     QMetaObject::Connection connection{};
     Py_BEGIN_ALLOW_THREADS // PYSIDE-2367, prevent threading deadlocks with connectNotify()
-    connection = QMetaObject::connect(source, signalIndex, receiver.receiver, slotIndex, type);
-    Py_END_ALLOW_THREADS
-    if (!connection) {
-        if (receiver.usingGlobalReceiver)
-            signalManager.releaseGlobalReceiver(source, receiver.receiver);
-        return {};
+    if (!receiver.forceDynamicSlot && receiver.receiver != nullptr && receiver.slotIndex != -1) {
+        connection = QMetaObject::connect(source, signalIndex,
+                                          receiver.receiver, receiver.slotIndex, type);
+    } else {
+        auto parameterTypes = signalMethod.parameterTypes();
+        // Slots might have fewer arguments.
+        if (!receiver.callbackSig.isEmpty()) {
+            const auto paramCount = receiver.callbackSig.endsWith("()")
+                                    ? qsizetype(0) : receiver.callbackSig.count(',') + 1;
+            if (parameterTypes.size() > paramCount)
+                parameterTypes.resize(paramCount);
+        }
+        auto *slotObject = new PySideQSlotObject(callback,
+                                                 parameterTypes,
+                                                 signalMethod.typeName());
+        connection = QObjectPrivate::connect(source, signalIndex, slotObject, type);
     }
+    Py_END_ALLOW_THREADS
+    if (!connection)
+        return {};
 
-    Q_ASSERT(receiver.receiver);
-    if (receiver.usingGlobalReceiver)
-        signalManager.notifyGlobalReceiver(receiver.receiver);
+    registerSlotConnection(source, signalIndex, callback, connection);
 
-    const QMetaMethod signalMethod = source->metaObject()->method(signalIndex);
     static_cast<FriendlyQObject *>(source)->connectNotify(signalMethod);
     return connection;
 }
@@ -298,34 +269,16 @@ bool qobjectDisconnectCallback(QObject *source, const char *signal, PyObject *ca
     if (!PySide::Signal::checkQtSignal(signal))
         return false;
 
-    const int signalIndex = source->metaObject()->indexOfSignal(signal + 1);
+    const auto *metaObject = source->metaObject();
+    const int signalIndex = metaObject->indexOfSignal(signal + 1);
     if (signalIndex == -1)
         return false;
 
-    // Extract receiver from callback
-    const GetReceiverResult receiver = getReceiver(nullptr,
-                                                   source->metaObject()->method(signalIndex),
-                                                   callback);
-    if (receiver.receiver == nullptr && receiver.self == nullptr)
+    if (!disconnectSlot(source, signalIndex, callback))
         return false;
 
-    const int slotIndex = receiver.slotIndex;
-
-    bool ok{};
-    Py_BEGIN_ALLOW_THREADS // PYSIDE-2367, prevent threading deadlocks with disconnectNotify()
-    ok = QMetaObject::disconnectOne(source, signalIndex, receiver.receiver, slotIndex);
-    Py_END_ALLOW_THREADS
-    if (!ok)
-        return false;
-
-    Q_ASSERT(receiver.receiver);
-    const QMetaMethod signalMethod = source->metaObject()->method(signalIndex);
+    const QMetaMethod signalMethod = metaObject->method(signalIndex);
     static_cast<FriendlyQObject *>(source)->disconnectNotify(signalMethod);
-
-    if (receiver.usingGlobalReceiver) { // might delete the receiver
-        PySide::SignalManager &signalManager = PySide::SignalManager::instance();
-        signalManager.releaseGlobalReceiver(source, receiver.receiver);
-    }
     return true;
 }
 

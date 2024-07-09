@@ -6,11 +6,9 @@
 #include "pysidelogging_p.h"
 #include "pysideproperty.h"
 #include "pysideproperty_p.h"
-#include "pysidecleanup.h"
 #include "pyside_p.h"
 #include "dynamicqmetaobject.h"
 #include "pysidemetafunction_p.h"
-#include "pysidestaticstrings.h"
 
 #include <autodecref.h>
 #include <basewrapper.h>
@@ -28,8 +26,6 @@
 #include <QtCore/QScopedPointer>
 #include <QtCore/QTimerEvent>
 
-#include <algorithm>
-#include <limits>
 #include <memory>
 
 using namespace Qt::StringLiterals;
@@ -38,11 +34,7 @@ using namespace Qt::StringLiterals;
 #error QSLOT_CODE and/or QSIGNAL_CODE changed! change the hardcoded stuff to the correct value!
 #endif
 
-#include "globalreceiverv2.h"
-
 static PyObject *metaObjectAttr = nullptr;
-
-static bool qAppRunning = false;
 
 static void destroyMetaObject(PyObject *obj)
 {
@@ -231,76 +223,20 @@ QDataStream &operator>>(QDataStream &in, PyObjectWrapper &myObj)
 
 };
 
-namespace PySide {
-using GlobalReceiverV2Ptr = std::shared_ptr<GlobalReceiverV2>;
-using GlobalReceiverV2Map = QHash<PySide::GlobalReceiverKey, GlobalReceiverV2Ptr>;
-}
-
 using namespace PySide;
 
-// Listen for destroy() of main thread objects and ensure cleanup
-class SignalManagerDestroyListener : public QObject
+struct SignalManagerPrivate
 {
-    Q_OBJECT
-public:
-    Q_DISABLE_COPY_MOVE(SignalManagerDestroyListener)
-
-    using QObject::QObject;
-    ~SignalManagerDestroyListener() override = default;
-
-public Q_SLOTS:
-    void destroyNotify(const QObject *);
-
-protected:
-    void timerEvent(QTimerEvent *event) override;
-
-private:
-    int m_timerId = -1;
-};
-
-void SignalManagerDestroyListener::destroyNotify(const QObject *)
-{
-    if (qAppRunning && m_timerId == -1)
-        m_timerId = startTimer(0);
-}
-
-void SignalManagerDestroyListener::timerEvent(QTimerEvent *event)
-{
-    if (event->timerId() == m_timerId) {
-        killTimer(std::exchange(m_timerId, -1));
-        SignalManager::instance().purgeEmptyGlobalReceivers();
-    }
-}
-
-struct SignalManager::SignalManagerPrivate
-{
-    Q_DISABLE_COPY_MOVE(SignalManagerPrivate)
-
-    SignalManagerPrivate() noexcept = default;
-    ~SignalManagerPrivate() { clear(); }
-
-    void deleteGlobalReceiver(const QObject *gr);
-    void clear();
-    void purgeEmptyGlobalReceivers();
-
-    GlobalReceiverV2Map m_globalReceivers;
     static SignalManager::QmlMetaCallErrorHandler m_qmlMetaCallErrorHandler;
 
     static void handleMetaCallError(QObject *object, int *result);
     static int qtPropertyMetacall(QObject *object, QMetaObject::Call call,
                                   int id, void **args);
     static int qtMethodMetacall(QObject *object, int id, void **args);
-
-    QPointer<SignalManagerDestroyListener> m_listener;
 };
 
 SignalManager::QmlMetaCallErrorHandler
-    SignalManager::SignalManagerPrivate::m_qmlMetaCallErrorHandler = nullptr;
-
-static void clearSignalManager()
-{
-    PySide::SignalManager::instance().clear();
-}
+    SignalManagerPrivate::m_qmlMetaCallErrorHandler = nullptr;
 
 static void PyObject_PythonToCpp_PyObject_PTR(PyObject *pyIn, void *cppOut)
 {
@@ -318,7 +254,7 @@ static PyObject *PyObject_PTR_CppToPython_PyObject(const void *cppIn)
     return pyOut;
 }
 
-SignalManager::SignalManager() : m_d(new SignalManagerPrivate)
+void SignalManager::init()
 {
     // Register Qt primitive typedefs used on signals.
     using namespace Shiboken;
@@ -336,145 +272,13 @@ SignalManager::SignalManager() : m_d(new SignalManagerPrivate)
     Shiboken::Conversions::registerConverterName(converter, "PyObjectWrapper");
     Shiboken::Conversions::registerConverterName(converter, "PySide::PyObjectWrapper");
 
-    PySide::registerCleanupFunction(clearSignalManager);
-
     if (!metaObjectAttr)
         metaObjectAttr = Shiboken::String::fromCString("__METAOBJECT__");
-}
-
-void SignalManager::clear()
-{
-    m_d->clear();
-}
-
-SignalManager::~SignalManager()
-{
-    delete m_d;
-}
-
-SignalManager &SignalManager::instance()
-{
-    static SignalManager me;
-    return me;
 }
 
 void SignalManager::setQmlMetaCallErrorHandler(QmlMetaCallErrorHandler handler)
 {
     SignalManagerPrivate::m_qmlMetaCallErrorHandler = handler;
-}
-
-static void qAppAboutToQuit()
-{
-    qAppRunning = false;
-    SignalManager::instance().purgeEmptyGlobalReceivers();
-}
-
-static bool isInMainThread(const QObject *o)
-{
-    if (o->isWidgetType() || o->isWindowType() || o->isQuickItemType())
-        return true;
-    auto *app = QCoreApplication::instance();
-    return app != nullptr && app->thread() == o->thread();
-}
-
-QObject *SignalManager::globalReceiver(QObject *sender, PyObject *callback, QObject *receiver)
-{
-    if (m_d->m_listener.isNull() && !QCoreApplication::closingDown()) {
-        if (auto *app = QCoreApplication::instance()) {
-            // The signal manager potentially outlives QCoreApplication, ensure deletion
-            m_d->m_listener = new SignalManagerDestroyListener(app);
-            m_d->m_listener->setObjectName("qt_pyside_signalmanagerdestroylistener");
-            QObject::connect(app, &QCoreApplication::aboutToQuit, qAppAboutToQuit);
-            qAppRunning = true;
-        }
-    }
-
-    auto &globalReceivers = m_d->m_globalReceivers;
-    const GlobalReceiverKey key = GlobalReceiverV2::key(callback);
-    auto it = globalReceivers.find(key);
-    if (it == globalReceivers.end()) {
-        auto gr = std::make_shared<GlobalReceiverV2>(callback, receiver);
-        it = globalReceivers.insert(key, gr);
-    }
-
-    if (sender != nullptr) {
-        it.value()->incRef(sender); // create a link reference
-
-        // For main thread-objects, add a notification for destroy (PYSIDE-2646, 2141)
-        if (qAppRunning && !m_d->m_listener.isNull() && isInMainThread(sender)) {
-            QObject::connect(sender, &QObject::destroyed,
-                             m_d->m_listener, &SignalManagerDestroyListener::destroyNotify,
-                             Qt::UniqueConnection);
-        }
-    }
-
-    return it.value().get();
-}
-
-void SignalManager::purgeEmptyGlobalReceivers()
-{
-    m_d->purgeEmptyGlobalReceivers();
-}
-
-void SignalManager::notifyGlobalReceiver(QObject *receiver)
-{
-    reinterpret_cast<GlobalReceiverV2 *>(receiver)->notify();
-    purgeEmptyGlobalReceivers();
-}
-
-void SignalManager::releaseGlobalReceiver(const QObject *source, QObject *receiver)
-{
-    auto *gr = static_cast<GlobalReceiverV2 *>(receiver);
-    gr->decRef(source);
-    if (gr->isEmpty())
-        m_d->deleteGlobalReceiver(gr);
-}
-
-void SignalManager::deleteGlobalReceiver(const QObject *gr)
-{
-    SignalManager::instance().m_d->deleteGlobalReceiver(gr);
-}
-
-void SignalManager::SignalManagerPrivate::deleteGlobalReceiver(const QObject *gr)
-{
-    for (auto it = m_globalReceivers.begin(), end = m_globalReceivers.end(); it != end; ++it) {
-        if (it.value().get() == gr) {
-            m_globalReceivers.erase(it);
-            break;
-        }
-    }
-}
-
-void SignalManager::SignalManagerPrivate::clear()
-{
-    // Delete receivers by always retrieving the current first element,
-    // because deleting a receiver can indirectly delete another one
-    // via ~DynamicSlotDataV2(). Using ~QHash/clear() could cause an
-    // iterator invalidation, and thus undefined behavior.
-    while (!m_globalReceivers.isEmpty())
-        m_globalReceivers.erase(m_globalReceivers.cbegin());
-}
-
-static bool isEmptyGlobalReceiver(const GlobalReceiverV2Ptr &g)
-{
-    return g->isEmpty();
-}
-
-void SignalManager::SignalManagerPrivate::purgeEmptyGlobalReceivers()
-{
-    // Delete repetitively (see comment in clear()).
-    while (true) {
-        auto it = std::find_if(m_globalReceivers.cbegin(), m_globalReceivers.cend(),
-                               isEmptyGlobalReceiver);
-        if (it == m_globalReceivers.cend())
-            break;
-        m_globalReceivers.erase(it);
-    }
-}
-
-int SignalManager::globalReceiverSlotIndex(QObject *receiver, const QByteArray &signature)
-{
-    return static_cast<GlobalReceiverV2 *>(receiver)->addSlot(signature);
 }
 
 bool SignalManager::emitSignal(QObject *source, const char *signal, PyObject *args)
@@ -488,7 +292,7 @@ bool SignalManager::emitSignal(QObject *source, const char *signal, PyObject *ar
 }
 
 // Handle errors from meta calls. Requires GIL and PyErr_Occurred()
-void SignalManager::SignalManagerPrivate::handleMetaCallError(QObject *object, int *result)
+void SignalManagerPrivate::handleMetaCallError(QObject *object, int *result)
 {
     // Bubbles Python exceptions up to the Javascript engine, if called from one
     if (m_qmlMetaCallErrorHandler) {
@@ -508,9 +312,9 @@ void SignalManager::SignalManagerPrivate::handleMetaCallError(QObject *object, i
 }
 
 // Handler for QMetaObject::ReadProperty/WriteProperty/ResetProperty:
-int SignalManager::SignalManagerPrivate::qtPropertyMetacall(QObject *object,
-                                                            QMetaObject::Call call,
-                                                            int id, void **args)
+int SignalManagerPrivate::qtPropertyMetacall(QObject *object,
+                                             QMetaObject::Call call,
+                                             int id, void **args)
 {
     const QMetaObject *metaObject = object->metaObject();
     int result = id - metaObject->propertyCount();
@@ -565,8 +369,8 @@ int SignalManager::SignalManagerPrivate::qtPropertyMetacall(QObject *object,
 }
 
 // Handler for QMetaObject::InvokeMetaMethod
-int SignalManager::SignalManagerPrivate::qtMethodMetacall(QObject *object,
-                                                          int id, void **args)
+int SignalManagerPrivate::qtMethodMetacall(QObject *object,
+                                           int id, void **args)
 {
     const QMetaObject *metaObject = object->metaObject();
     const QMetaMethod method = metaObject->method(id);
@@ -909,5 +713,3 @@ const QMetaObject *SignalManager::retrieveMetaObject(PyObject *self)
 
     return builder->update();
 }
-
-#include "signalmanager.moc"

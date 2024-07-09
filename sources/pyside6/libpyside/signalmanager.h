@@ -57,14 +57,9 @@ public:
 
     using QmlMetaCallErrorHandler = std::optional<int>(*)(QObject *object);
 
-    static SignalManager& instance();
+    static void init();
 
     static void setQmlMetaCallErrorHandler(QmlMetaCallErrorHandler handler);
-
-    QObject* globalReceiver(QObject *sender, PyObject *callback, QObject *receiver = nullptr);
-    void releaseGlobalReceiver(const QObject* sender, QObject* receiver);
-    static int globalReceiverSlotIndex(QObject* sender, const QByteArray &slotSignature);
-    void notifyGlobalReceiver(QObject* receiver);
 
     static bool emitSignal(QObject* source, const char* signal, PyObject* args);
     static int qt_metacall(QObject* object, QMetaObject::Call call, int id, void** args);
@@ -80,24 +75,11 @@ public:
     // used to discovery metaobject
     static const QMetaObject* retrieveMetaObject(PyObject* self);
 
-    // Disconnect all signals managed by Globalreceiver
-    void clear();
-    void purgeEmptyGlobalReceivers();
-
     // Utility function to call a python method using args received in qt_metacall
     static int callPythonMetaMethod(QMetaMethod method, void **args, PyObject *callable);
     static int callPythonMetaMethod(const QByteArrayList &parameterTypes,
                                     const char *returnType /* = nullptr */,
                                     void **args, PyObject *callable);
-
-    static void deleteGlobalReceiver(const QObject *globalReceiver);
-
-private:
-    struct SignalManagerPrivate;
-    SignalManagerPrivate* m_d;
-
-    SignalManager();
-    ~SignalManager();
 };
 
 }

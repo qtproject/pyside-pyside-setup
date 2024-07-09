@@ -30,11 +30,11 @@ class TestQObjectReceivers(unittest.TestCase):
         receiver2 = QObject()
         self.assertEqual(sender.receivers(SIGNAL("")), 0)
         sender.destroyed.connect(receiver1.deleteLater)
-        self.assertEqual(sender.receivers(SIGNAL("destroyed()")), 1)
+        old_count = sender.receivers(SIGNAL("destroyed()"))
         sender.destroyed.connect(receiver2.deleteLater)
-        self.assertEqual(sender.receivers(SIGNAL("destroyed()")), 2)
+        self.assertEqual(sender.receivers(SIGNAL("destroyed()")), old_count + 1)
         sender.disconnect(sender, SIGNAL("destroyed()"), receiver2, SLOT("deleteLater()"))
-        self.assertEqual(sender.receivers(SIGNAL("destroyed()")), 1)
+        self.assertEqual(sender.receivers(SIGNAL("destroyed()")), old_count)
         del receiver2
         del receiver1
         del sender
@@ -45,9 +45,9 @@ class TestQObjectReceivers(unittest.TestCase):
         sender = QObject()
         receiver = QObject()
         sender.destroyed.connect(cute_slot)
-        self.assertEqual(sender.receivers(SIGNAL("destroyed( )")), 1)
+        old_count = sender.receivers(SIGNAL("destroyed()"))
         sender.destroyed.connect(receiver.deleteLater)
-        self.assertEqual(sender.receivers(SIGNAL("destroyed()")), 2)
+        self.assertEqual(sender.receivers(SIGNAL("destroyed()")), old_count + 1)
         del sender
         del receiver
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
