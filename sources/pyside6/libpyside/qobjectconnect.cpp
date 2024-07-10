@@ -94,7 +94,7 @@ static bool isDeclaredIn(PyObject *method, const char *className)
     return result;
 }
 
-static GetReceiverResult getReceiver(QObject *source, const char *signal,
+static GetReceiverResult getReceiver(QObject *source, QMetaMethod signal,
                                      PyObject *callback)
 {
     GetReceiverResult result;
@@ -213,7 +213,9 @@ QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *sign
         return {};
 
     // Extract receiver from callback
-    const GetReceiverResult receiver = getReceiver(source, signal + 1, callback);
+    const GetReceiverResult receiver = getReceiver(source,
+                                                   source->metaObject()->method(signalIndex),
+                                                   callback);
     if (receiver.receiver == nullptr && receiver.self == nullptr)
         return {};
 
@@ -296,12 +298,17 @@ bool qobjectDisconnectCallback(QObject *source, const char *signal, PyObject *ca
     if (!PySide::Signal::checkQtSignal(signal))
         return false;
 
+    const int signalIndex = source->metaObject()->indexOfSignal(signal + 1);
+    if (signalIndex == -1)
+        return false;
+
     // Extract receiver from callback
-    const GetReceiverResult receiver = getReceiver(nullptr, signal, callback);
+    const GetReceiverResult receiver = getReceiver(nullptr,
+                                                   source->metaObject()->method(signalIndex),
+                                                   callback);
     if (receiver.receiver == nullptr && receiver.self == nullptr)
         return false;
 
-    const int signalIndex = source->metaObject()->indexOfSignal(signal + 1);
     const int slotIndex = receiver.slotIndex;
 
     bool ok{};

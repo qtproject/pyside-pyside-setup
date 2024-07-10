@@ -135,18 +135,8 @@ PYSIDE_API bool checkQtSignal(const char *signature);
  * @param   encodeName  Used to specify if the returned signature will be encoded with Qt signal/slot style
  * @return  Return the callback signature
  **/
-PYSIDE_API QByteArray getCallbackSignature(const char *signal, QObject *receiver,
+PYSIDE_API QByteArray getCallbackSignature(QMetaMethod signal, QObject *receiver,
                                            PyObject *callback, bool encodeName);
-
-/**
- * This function parses the signature and then returns a list of argument types.
- *
- * @param   signature       The signal signature
- * @return  Return true if this is a Qt Signal, otherwise return false
- * @todo    replace return type by QList<QByteArray>
- **/
-QByteArrayList getArgsFromSignature(const char *signature);
-
 } // namespace PySide::Signal
 
 #endif

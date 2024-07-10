@@ -1193,34 +1193,7 @@ EmitterData getEmitterData(PySideSignalInstance *signal)
     return result;
 }
 
-QByteArrayList getArgsFromSignature(const char *signature)
-{
-    QByteArrayView qsignature = QByteArrayView(signature).trimmed();
-    QByteArrayList result;
-
-    if (qsignature.contains("()") || qsignature.contains("(void)"))
-        return result;
-    if (!qsignature.endsWith(')'))
-        return result;
-    const auto paren = qsignature.indexOf('(');
-    if (paren < 0)
-        return result;
-
-    qsignature.chop(1);
-    qsignature = qsignature.sliced(paren + 1);
-    while (true) {
-        auto next = qsignature.indexOf(',');
-        if (next == -1) {
-            result.append(qsignature.trimmed().toByteArray());
-            break;
-        }
-        result.append(qsignature.sliced(0, next).trimmed().toByteArray());
-        qsignature = qsignature.sliced(next + 1);
-    }
-    return result;
-}
-
-QByteArray getCallbackSignature(const char *signal, QObject *receiver,
+QByteArray getCallbackSignature(QMetaMethod signal, QObject *receiver,
                                 PyObject *callback, bool encodeName)
 {
     QByteArray functionName;
@@ -1267,7 +1240,7 @@ QByteArray getCallbackSignature(const char *signal, QObject *receiver,
             for (int i = 0, count = mo->methodCount(); i < count; ++i) {
                 QMetaMethod me = mo->method(i);
                 if ((strncmp(me.methodSignature(), prefix, prefix.size()) == 0) &&
-                    QMetaObject::checkConnectArgs(signal, me.methodSignature())) {
+                    QMetaObject::checkConnectArgs(signal, me)) {
                     numArgs = me.parameterTypes().size() + useSelf;
                     break;
                 }
@@ -1293,14 +1266,19 @@ QByteArray getCallbackSignature(const char *signal, QObject *receiver,
         functionName[functionName.size() - 1] = '_';
     }
     QByteArray signature = encodeName ? codeCallbackName(callback, functionName) : functionName;
-    QByteArrayList args = getArgsFromSignature(signal);
+    QByteArrayList args = signal.parameterTypes();
 
     signature.append(u'(');
-    if (numArgs != -1) {
-        while (!args.isEmpty() && (args.size() > (numArgs - useSelf)))
-            args.removeLast();
+
+    int slotArgumentCount = signal.parameterCount();
+    if (numArgs != -1 && slotArgumentCount > (numArgs - useSelf))
+        slotArgumentCount = numArgs - useSelf;
+
+    for (int i = 0; i < slotArgumentCount; ++i) {
+        if (i > 0)
+            signature.append(',');
+        signature.append(signal.parameterTypeName(i));
     }
-    signature.append(args.join(','));
     signature.append(')');
 
     return signature;
