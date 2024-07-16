@@ -30,10 +30,12 @@ class QAsyncioTask(futures.QAsyncioFuture):
 
         # The task step function executes the coroutine until it finishes,
         # raises an exception or returns a future. If a future was returned,
-        # the task will await its completion (or exception).
+        # the task will await its completion (or exception). If the task is
+        # cancelled while it awaits a future, this future must also be
+        # cancelled in order for the cancellation to be successful.
         self._future_to_await: asyncio.Future | None = None
 
-        self._cancelled = False
+        self._cancelled = False  # PYSIDE-2644; see _step
         self._cancel_count = 0
         self._cancel_message: str | None = None
 
@@ -118,11 +120,17 @@ class QAsyncioTask(futures.QAsyncioFuture):
                 # called again.
                 result.add_done_callback(
                     self._step, context=self._context)  # type: ignore[arg-type]
+
+                # The task will await the completion (or exception) of this
+                # future. If the task is cancelled while it awaits a future,
+                # this future must also be cancelled.
                 self._future_to_await = result
+
                 if self._cancelled:
-                    # If the task was cancelled, then a new future should be
-                    # cancelled as well. Otherwise, in some scenarios like
-                    # a loop inside the task and with bad timing, if the new
+                    # PYSIDE-2644: If the task was cancelled at this step and a
+                    # new future was created to be awaited, then it should be
+                    # cancelled as well. Otherwise, in some scenarios like a
+                    # loop inside the task and with bad timing, if the new
                     # future is not cancelled, the task would continue running
                     # in this loop despite having been cancelled. This bad
                     # timing can occur especially if the first future finishes
@@ -186,7 +194,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
             # A task that is awaiting a future must also cancel this future in
             # order for the cancellation to be successful.
             self._future_to_await.cancel(msg)
-        self._cancelled = True
+        self._cancelled = True  # PYSIDE-2644; see _step
         return True
 
     def uncancel(self) -> int:
