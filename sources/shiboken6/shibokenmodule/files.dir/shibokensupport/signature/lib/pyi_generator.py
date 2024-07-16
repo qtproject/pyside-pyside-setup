@@ -27,9 +27,6 @@ from textwrap import dedent
 from shibokensupport.signature.lib.enum_sig import HintingEnumerator
 from shibokensupport.signature.lib.tool import build_brace_pattern
 
-# Can we use forward references?
-USE_PEP563 = sys.version_info[:2] >= (3, 7)
-
 indent = " " * 4
 
 
@@ -247,9 +244,6 @@ def generate_pyi(import_name, outpath, options):
     outfile = io.StringIO()
     fmt = Formatter(outfile, options)
     fmt.print(LICENSE_TEXT.strip())
-    if USE_PEP563:
-        fmt.print("from __future__ import annotations")
-        fmt.print()
     fmt.print(dedent(f'''\
         """
         This file contains the exact signatures for all functions in module
