@@ -707,6 +707,10 @@ class QAsyncioTimerHandle(QAsyncioHandle, asyncio.TimerHandle):
 
         self._when = when
         time = self._loop.time()
+
+        # PYSIDE-2644: Timeouts should be rounded up or down instead of only up
+        # as happens with int(). Otherwise, a timeout of e.g. 0.9 would be
+        # handled as 0, where 1 would be more appropriate.
         self._timeout = round(max(self._when - time, 0) * 1000)
 
         QAsyncioHandle._start(self)
