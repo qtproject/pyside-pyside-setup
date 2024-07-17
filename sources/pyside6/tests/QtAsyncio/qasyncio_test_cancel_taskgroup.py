@@ -6,10 +6,12 @@ from __future__ import annotations
 
 import asyncio
 import unittest
+import sys
 
 import PySide6.QtAsyncio as QtAsyncio
 
 
+@unittest.skipIf(sys.version_info < (3, 11), "Requires ExceptionGroup")
 class QAsyncioTestCaseCancelTaskGroup(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
@@ -48,7 +50,7 @@ class QAsyncioTestCaseCancelTaskGroup(unittest.TestCase):
         for coro in coros:
             try:
                 QtAsyncio.run(self.main(coro), keep_running=False)
-            except ExceptionGroup as e:
+            except ExceptionGroup as e:  # noqa: F821
                 self.assertEqual(len(e.exceptions), 1)
                 self.assertIsInstance(e.exceptions[0], RuntimeError)
                 self.assertFalse(self._loop_end_reached)
