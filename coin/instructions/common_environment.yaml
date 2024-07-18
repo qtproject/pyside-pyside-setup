@@ -209,7 +209,7 @@ instructions:
           property: target.os
           equals_value: Android
     - type: ExecuteCommand
-      command: "sudo apt-get install python3-pip libclang-11-dev clang -y"
+      command: "sudo apt-get install python3-pip -y"
       maxTimeInSeconds: 14400
       maxTimeBetweenOutput: 1200
       enable_if:
@@ -223,6 +223,48 @@ instructions:
               equals_value: AARCH64
       userMessageOnFailure: >
           Failed to install dependencies
+    - type: ExecuteCommand
+      command: "chmod +x coin/fetch_libclang_arm64.sh"
+      maxTimeInSeconds: 14400
+      maxTimeBetweenOutput: 1200
+      enable_if:
+          condition: and
+          conditions:
+            - condition: property
+              property: host.os
+              equals_value: Linux
+            - condition: property
+              property: host.arch
+              equals_value: AARCH64
+      userMessageOnFailure: >
+          Failed to make coin/fetch_libclang_arm64.sh executable
+    - type: ExecuteCommand
+      command: "coin/fetch_libclang_arm64.sh"
+      maxTimeInSeconds: 14400
+      maxTimeBetweenOutput: 1200
+      enable_if:
+          condition: and
+          conditions:
+            - condition: property
+              property: host.os
+              equals_value: Linux
+            - condition: property
+              property: host.arch
+              equals_value: AARCH64
+      userMessageOnFailure: >
+          Failed to download libclang from Qt servers
+    - type: EnvironmentVariable
+      variableName: LLVM_INSTALL_DIR
+      variableValue: "/home/qt/libclang"
+      enable_if:
+        condition: and
+        conditions:
+          - condition: property
+            property: target.arch
+            equals_value: AARCH64
+          - condition: property
+            property: host.os
+            equals_value: Linux
     - type: ExecuteCommand
       command: "python3 -m pip install -U setuptools==69.1.1"
       maxTimeInSeconds: 14400
@@ -238,18 +280,6 @@ instructions:
               equals_value: AARCH64
       userMessageOnFailure: >
           Failed to install setuptools
-    - type: EnvironmentVariable
-      variableName: LLVM_INSTALL_DIR
-      variableValue: "/usr/lib/llvm-11/lib"
-      enable_if:
-        condition: and
-        conditions:
-          - condition: property
-            property: target.arch
-            equals_value: AARCH64
-          - condition: property
-            property: host.os
-            equals_value: Linux
     - type: EnvironmentVariable
       variableName: interpreter
       variableValue: "python3.11"
