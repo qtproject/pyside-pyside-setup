@@ -19,6 +19,7 @@ Development Topics
    documentation.rst
    adapt_qt.rst
    extras.rst
+   qtasyncio.rst
 
 Implementation details
 ----------------------
