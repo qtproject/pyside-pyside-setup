@@ -144,10 +144,10 @@ Coroutines explained
 
 Coroutines are functions that can be paused (yield) and resumed. Behind
 this simple concept lies a complex mechanism that is abstracted by the
-asynchronous framework. This talk presents a diagram that attempts to
-illustrate the flow of a coroutine from the moment it's provided to the
-async framework until it's completed.
+asynchronous framework. `This talk <https://www.youtube.com/watch?v=XuqdTvisqkQ>`_
+presents the below diagram that attempts to illustrate the flow of a
+coroutine from the moment it's provided to the async framework until
+it's completed.
 
-.. image:: https://img.youtube.com/vi/XuqdTvisqkQ/mqdefault.jpg
-    :alt: Asynchronous programming with asyncio and Qt
-    :target: https://www.youtube.com/watch?v=XuqdTvisqkQ
+.. image:: coroutines.png
+   :alt: Coroutines explained
