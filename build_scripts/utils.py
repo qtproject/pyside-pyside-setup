@@ -125,6 +125,7 @@ def copyfile(src, dst, force=True, _vars=None, force_copy_symlink=False,
 
     # We use 'strict=False' to mimic os.path.realpath in case
     # the directory doesn't exist.
+    # TODO: This code can probably be removed when 'python setup.py install' usage is removed.
     link_target_path = src.resolve(strict=False)
     if link_target_path.parent == src.parent:
         link_target = Path(link_target_path.name)
@@ -135,7 +136,7 @@ def copyfile(src, dst, force=True, _vars=None, force_copy_symlink=False,
             os.chdir(target_dir)
             if link_name.exists():
                 if (link_name.is_symlink()
-                        and os.readlink(link_name) == link_target):
+                        and os.readlink(link_name) == str(link_target)):
                     log.info(f"Symlink already exists\n  {link_name} ->\n  {link_target}")
                     return dst
                 os.remove(link_name)
