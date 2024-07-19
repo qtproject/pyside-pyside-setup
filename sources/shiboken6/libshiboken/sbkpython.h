@@ -6,6 +6,9 @@
 
 #include "sbkversion.h"
 
+// PYSIDE-2701: This definition is needed for all Python formats with "#".
+#define PY_SSIZE_T_CLEAN
+
 // Qt's "slots" macro collides with the "slots" member variables
 // used in some Python structs. For compilers that support push_macro,
 // temporarily undefine it.
