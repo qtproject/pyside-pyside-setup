@@ -33,15 +33,16 @@ class QMimeDatabaseTest(unittest.TestCase):
         self.assertTrue(s1.isValid())
         self.assertEqual(s1.name(), "text/plain")
 
-        krita = db.mimeTypeForName("application/x-krita")
-        self.assertTrue(krita.isValid())
+        # Removed because of the move of to the Tika mimetypes.
+        # krita = db.mimeTypeForName("application/x-krita")
+        # self.assertTrue(krita.isValid())
 
         rdf = db.mimeTypeForName("application/rdf+xml")
         self.assertTrue(rdf.isValid())
         self.assertEqual(rdf.name(), "application/rdf+xml")
         self.assertTrue(rdf.comment())
         if "en" in QLocale().name():
-            self.assertEqual(rdf.comment(), "RDF file")
+            self.assertTrue(rdf.comment() in ("RDF file", "XML syntax for RDF graphs"))
 
         bzip2 = db.mimeTypeForName("application/x-bzip2")
         self.assertTrue(bzip2.isValid())
