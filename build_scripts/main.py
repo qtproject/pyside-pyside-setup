@@ -7,6 +7,7 @@ import os
 import platform
 import re
 import sys
+import subprocess
 import sysconfig
 import time
 from packaging.version import parse as parse_version
@@ -159,6 +160,22 @@ def prepare_build():
                 maybe_qt_src_dir = Path(install_prefix).parent / 'Src' / 'qtbase'
                 if maybe_qt_src_dir.exists():
                     qt_src_dir = maybe_qt_src_dir
+
+
+def get_soname(clang_lib_path: Path) -> str:
+    """Getting SONAME from a shared library using readelf. Works only on Linux.
+    """
+    clang_lib_path = Path(clang_lib_path)
+    try:
+        result = subprocess.run(['readelf', '-d', str(clang_lib_path)],
+                                capture_output=True, text=True, check=True)
+        for line in result.stdout.split('\n'):
+            if 'SONAME' in line:
+                soname = line.split('[')[1].split(']')[0]
+                return soname
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to get SONAME: {e}")
+    return None
 
 
 class PysideInstall(_install, CommandMixin):
@@ -1050,6 +1067,18 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             log.info(f"Copying libclang shared library {clang_lib_path} to the package "
                      f"folder as {basename}.")
             destination_path = destination_dir / basename
+
+            # It is possible that the resolved libclang has a different SONAME
+            # For example the actual libclang might be named libclang.so.14.0.0 and its
+            # SONAME might be libclang.so.13
+            # In this case, the ideal approach is to find the SONAME and create a symlink to the
+            # actual libclang in the destination directory. But, Python packaging (setuptools)
+            # does not support symlinks.
+            # So, we rename the actual libclang to the SONAME and copy it to the destination
+            if sys.platform == 'linux':
+                soname = get_soname(clang_lib_path)
+                if soname and soname != clang_lib_path.name:
+                    destination_path = destination_path.parent / soname
 
             # Need to modify permissions in case file is not writable
             # (a reinstall would cause a permission denied error).
