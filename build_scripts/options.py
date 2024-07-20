@@ -161,6 +161,7 @@ OPTION = {
     "VERBOSE_BUILD": has_option('verbose-build'),
     "SNAPSHOT_BUILD": has_option("snapshot-build"),
     "LIMITED_API": option_value("limited-api"),
+    "UNOPTIMIZE": option_value("unoptimize"),
     "DISABLE_PYI": has_option("disable-pyi"),
     "PACKAGE_TIMESTAMP": option_value("package-timestamp"),
     # This is used automatically by setuptools.command.install object, to

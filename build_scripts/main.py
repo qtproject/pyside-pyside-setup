@@ -726,6 +726,10 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
         if OPTION["DISABLE_PYI"]:
             cmake_cmd.append("-DDISABLE_PYI=yes")
 
+        if OPTION["UNOPTIMIZE"]:
+            value = OPTION["UNOPTIMIZE"]
+            cmake_cmd.append(f"-DSHIBOKEN_UNOPTIMIZE={value}")
+
         if OPTION["LOG_LEVEL"] == LogLevel.VERBOSE:
             cmake_cmd.append("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON")
         else:

@@ -316,11 +316,18 @@ static const char includeQDebug[] =
 
 static QString compilerOptionOptimize()
 {
-    bool ok{};
-    int value = qEnvironmentVariableIntValue("PYSIDE6_COMOPT_COMPRESS", &ok);
-    if (!ok)
-        value = 1;
-    return "#define PYSIDE6_COMOPT_COMPRESS "_L1 + QString::number(value);
+    static QString result;
+    if (result.isEmpty()) {
+        const auto optimizations = CppGenerator::optimizations();
+        QTextStream str(&result);
+        str << "#define PYSIDE6_COMOPT_FULLNAME "
+            << (optimizations.testFlag(Generator::RemoveFullnameField) ? '1' : '0')
+            << "\n#define PYSIDE6_COMOPT_COMPRESS "
+            << (optimizations.testFlag(Generator::CompressSignatureStrings) ? '1' : '0')
+            << "\n// TODO: #define PYSIDE6_COMOPT_FOLDING "
+            << (optimizations.testFlag(Generator::FoldCommonTailCode) ? '1' : '0') << '\n';
+    }
+    return result;
 }
 
 QString CppGenerator::chopType(QString s)
@@ -2026,6 +2033,13 @@ bool CppGenerator::needsArgumentErrorHandling(const OverloadData &overloadData)
         && isQObject(rfunc->ownerClass());
 }
 
+static bool canAvoidFullname(const GeneratorContext &context)
+{
+    // PYSIDE-2701: Make fullname suppression configurable.
+    return Generator::optimizations().testFlag(Generator::RemoveFullnameField)
+           && context.hasClass();
+}
+
 void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
                                               const OverloadData &overloadData,
                                               const GeneratorContext &context,
@@ -2077,7 +2091,7 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
     if (needsArgumentErrorHandling(overloadData))
         s << "Shiboken::AutoDecRef errInfo{};\n";
 
-    bool needsFullName = !context.hasClass();
+    bool needsFullName = !canAvoidFullname(context);
     if (needsFullName)
         s << "static const char fullName[] = \"" << fullPythonFunctionName(rfunc, true)
             << "\";\nSBK_UNUSED(fullName)\n";
@@ -2179,7 +2193,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     QString pre = needsMetaObject ? u"bool usesPyMI = "_s : u""_s;
     s << "\n// PyMI support\n"
         << pre << "Shiboken::callInheritedInit(self, args, kwds, "
-        << (classContext.hasClass() ? typeInitStruct(classContext) : "fullName"_L1)
+        << (canAvoidFullname(classContext) ? typeInitStruct(classContext) : "fullName"_L1)
         << ");\nif (" << shibokenErrorsOccurred << ")\n"
         << indent << errorReturn << outdent << "\n";
 
@@ -2530,7 +2544,7 @@ QString CppGenerator::returnErrorWrongArguments(const OverloadData &overloadData
     Q_UNUSED(context);
     const auto rfunc = overloadData.referenceFunction();
     QString exprRest;
-    if (context.hasClass()) {
+    if (canAvoidFullname(context)) {
         const QString &name = rfunc->isConstructor() ? "__init__"_L1 : rfunc->name();
         exprRest = ", \""_L1 + name + "\", errInfo, "_L1 + typeInitStruct(context) + ")"_L1;
     } else {

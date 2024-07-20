@@ -223,10 +223,14 @@ if(NOT PYTHON_SITE_PACKAGES)
 endif()
 
 shiboken_get_debug_level(debug_level)
+if(SHIBOKEN_UNOPTIMIZE)
+    SET(UNOPTIMIZE "--unoptimize=${SHIBOKEN_UNOPTIMIZE}")
+ENDIF()
 
 set(GENERATOR_EXTRA_FLAGS
     ${SHIBOKEN_GENERATOR_EXTRA_FLAGS}
     ${debug_level}
+    ${UNOPTIMIZE}
     --generator-set=shiboken
     --enable-parent-ctor-heuristic
     --enable-pyside-extensions

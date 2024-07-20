@@ -32,11 +32,13 @@ using namespace Qt::StringLiterals;
 
 static constexpr auto ENABLE_PYSIDE_EXTENSIONS = "enable-pyside-extensions"_L1;
 static constexpr auto AVOID_PROTECTED_HACK = "avoid-protected-hack"_L1;
+static constexpr auto DISABLED_OPTIMIZATIONS = "unoptimize"_L1;
 
 struct GeneratorOptions
 {
     bool usePySideExtensions = false;
     bool avoidProtectedHack = false;
+    Generator::CodeOptimization optimizations = Generator::AllCodeOptimizations;
 };
 
 struct Generator::GeneratorPrivate
@@ -96,7 +98,9 @@ QList<OptionDescription> Generator::options()
          u"Avoid the use of the '#define protected public' hack."_s},
         {ENABLE_PYSIDE_EXTENSIONS,
          u"Enable PySide extensions, such as support for signal/slots,\n"
-          "use this if you are creating a binding for a Qt-based library."_s}
+          "use this if you are creating a binding for a Qt-based library."_s},
+        {DISABLED_OPTIMIZATIONS,
+         "Disable optimization options"_L1}
     };
 }
 
@@ -106,6 +110,7 @@ public:
     explicit GeneratorOptionsParser(GeneratorOptions *o) : m_options(o) {}
 
     bool handleBoolOption(const QString &key, OptionSource source) override;
+    bool handleOption(const QString &key, const QString &value, OptionSource source) override;
 
 private:
     GeneratorOptions *m_options;
@@ -119,6 +124,32 @@ bool GeneratorOptionsParser::handleBoolOption(const QString & key, OptionSource 
         return ( m_options->usePySideExtensions = true);
     if (key == AVOID_PROTECTED_HACK)
         return ( m_options->avoidProtectedHack = true);
+    return false;
+}
+
+bool GeneratorOptionsParser::handleOption(const QString & key, const QString & value,
+                                          OptionSource source)
+{
+    if (source == OptionSource::CommandLineSingleDash)
+        return false;
+
+    if (key == DISABLED_OPTIMIZATIONS) {
+        const auto tokens = QStringView{value}.split(u',');
+        for (const auto &tok : tokens) {
+            if (tok == "fullname"_L1)
+                m_options->optimizations.setFlag(Generator::RemoveFullnameField, false);
+            else if (tok == "compression"_L1)
+                m_options->optimizations.setFlag(Generator::CompressSignatureStrings, false);
+            else if (tok == "folding"_L1)
+                m_options->optimizations.setFlag(Generator::FoldCommonTailCode, false);
+            else if (tok == "all"_L1)
+                m_options->optimizations = Generator::CodeOptimization(0);
+            else
+                return false;
+        }
+        return true;
+    }
+
     return false;
 }
 
@@ -304,6 +335,11 @@ bool Generator::usePySideExtensions()
 bool Generator::avoidProtectedHack()
 {
     return GeneratorPrivate::m_options.avoidProtectedHack;
+}
+
+Generator::CodeOptimization Generator::optimizations()
+{
+    return GeneratorPrivate::m_options.optimizations;
 }
 
 QString Generator::getFullTypeName(TypeEntryCPtr type)

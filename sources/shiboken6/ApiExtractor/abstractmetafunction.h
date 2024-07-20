@@ -475,7 +475,7 @@ inline bool AbstractMetaFunction::isPropertyResetter() const
     return attributes().testFlag(PropertyResetter);
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::CompareResult)
+Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::CompareResult);
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AbstractMetaFunction::Attributes);
 

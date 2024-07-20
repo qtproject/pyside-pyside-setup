@@ -30,7 +30,7 @@ QString getFilteredCppSignatureString(QString signature);
  *   you must subclass this to create your own generators.
  */
 class Generator
-{;
+{
 public:
     Q_DISABLE_COPY_MOVE(Generator)
 
@@ -54,6 +54,15 @@ public:
         KeepCase = 0x2
     };
     Q_DECLARE_FLAGS(FileNameFlags, FileNameFlag)
+
+    enum CodeOptimizationFlag {
+        RemoveFullnameField         = 0x00000001,
+        CompressSignatureStrings    = 0x00000002,
+        FoldCommonTailCode          = 0x00000004,
+
+        AllCodeOptimizations        = 0x000000ff
+    };
+    Q_DECLARE_FLAGS(CodeOptimization, CodeOptimizationFlag)
 
     Generator();
     virtual ~Generator();
@@ -99,6 +108,8 @@ public:
     /// Returns true if the generated code should not use the
     /// "#define protected public" hack.
     static bool avoidProtectedHack();
+    /// Returns optimization flags.
+    static CodeOptimization optimizations();
 
     /**
      *  Retrieves the name of the currently processed module.
@@ -226,6 +237,7 @@ private:
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::Options)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::FileNameFlags)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Generator::CodeOptimization)
 
 using GeneratorPtr = std::shared_ptr<Generator>;
 using Generators = QList<GeneratorPtr>;

@@ -149,6 +149,9 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/sample-binding.txt.in"
                "${CMAKE_CURRENT_BINARY_DIR}/sample-binding.txt" @ONLY)
 
 shiboken_get_tool_shell_wrapper(shiboken tool_wrapper)
+if(SHIBOKEN_UNOPTIMIZE)
+    SET(UNOPTIMIZE "--unoptimize=${SHIBOKEN_UNOPTIMIZE}")
+ENDIF()
 
 add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
@@ -157,6 +160,7 @@ add_custom_command(
         ${tool_wrapper}
         $<TARGET_FILE:Shiboken6::shiboken6>
         --project-file=${CMAKE_CURRENT_BINARY_DIR}/sample-binding.txt
+        ${UNOPTIMIZE}
         ${GENERATOR_EXTRA_FLAGS}
     DEPENDS ${sample_TYPESYSTEM} ${CMAKE_CURRENT_SOURCE_DIR}/global.h Shiboken6::shiboken6
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
