@@ -48,6 +48,7 @@ it includes the following Qt modules:
 * QtHttpServer
 * QtLocation
 * QtAsyncio
+* QtWebView
 
 ### Documentation and Bugs
 

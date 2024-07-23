@@ -36,5 +36,6 @@ dependencies: [
       "../../qt/qtwayland",
       "../../qt/qtwebchannel",
       "../../qt/qtwebengine",
-      "../../qt/qtwebsockets"
+      "../../qt/qtwebsockets",
+      "../../qt/qtwebview",
       ]
