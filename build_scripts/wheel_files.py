@@ -224,6 +224,7 @@ def wheel_files_pyside_addons() -> List[ModuleData]:
         module_QtHttpServer(),
         module_QtLocation(),
         module_QtAsyncio(),
+        module_QtWebView(),
     ]
     return files
 
@@ -1043,4 +1044,9 @@ def module_QtAsyncio() -> ModuleData:
 
 def module_QtExampleIcons() -> ModuleData:
     data = ModuleData("ExampleIcons")
+    return data
+
+
+def module_QtWebView() -> ModuleData:
+    data = ModuleData("WebView")
     return data

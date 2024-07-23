@@ -232,3 +232,7 @@ Qt Modules Supported by Qt for Python
     .. grid-item-card:: :mod:`QtAsyncio <PySide6.QtAsyncio>`
 
         Provides integration between asyncio and Qt's event loop.
+
+    .. grid-item-card:: :mod:`QtWebView <PySide6.QtWebView>`
+
+        Enables displaying web content in a QML application.

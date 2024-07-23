@@ -129,7 +129,7 @@ macro(collect_optional_modules)
         list(APPEND ALL_OPTIONAL_MODULES AxContainer)
     endif()
     list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineCore WebEngineWidgets
-         WebEngineQuick WebSockets HttpServer)
+         WebEngineQuick WebSockets HttpServer WebView)
     list(APPEND ALL_OPTIONAL_MODULES 3DCore 3DRender 3DInput 3DLogic 3DAnimation 3DExtras)
 endmacro()
 
