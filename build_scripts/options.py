@@ -259,6 +259,15 @@ class CommandMixin(object):
         # to include extra paths when parsing the headers. Use with caution.
         ('shiboken-extra-include-paths=', None,
          'Extra include paths for shiboken. Comma separated.'),
+        # flatpak option is used to build PySide6 for Flatpak. Flatpak is a special case where
+        # some of the headers for the Qt modules are located as system headers in /usr/include in
+        # the KDE flatpak SDK. Therefore --shiboken-force-process-system headers will be by
+        # default enabled when --flatpak is enabled.
+        # Apart from that, headers for certain Qt modules like QtWebEngine, QtPdf etc. are located
+        # in /app/include from the Flapak WebEngine baseapp. Therefore when the --flatpak option is
+        # enabled, the extra include path of /app/include will be added to the option
+        # --shiboken-extra-include-paths.
+        ('flatpak', None, 'Build PySide6 for Flatpak.'),
     ]
 
     def __init__(self):
@@ -322,6 +331,7 @@ class CommandMixin(object):
         self.unity_build_batch_size = "16"
         self.shiboken_force_process_system_headers = False
         self.shiboken_extra_include_paths = None
+        self.flatpak = False
 
         # When initializing a command other than the main one (so the
         # first one), we need to copy the user options from the main
@@ -444,6 +454,10 @@ class CommandMixin(object):
         OPTION['UNITY_BUILD_BATCH_SIZE'] = self.unity_build_batch_size
         OPTION['SHIBOKEN_FORCE_PROCESS_SYSTEM_HEADERS'] = self.shiboken_force_process_system_headers
         OPTION['SHIBOKEN_EXTRA_INCLUDE_PATHS'] = self.shiboken_extra_include_paths
+        OPTION['FLATPAK'] = self.flatpak
+        if OPTION['FLATPAK']:
+            OPTION['SHIBOKEN_FORCE_PROCESS_SYSTEM_HEADERS'] = True
+            OPTION['SHIBOKEN_EXTRA_INCLUDE_PATHS'] = '/app/include'
 
         qtpaths_abs_path = None
         if self.qtpaths and Path(self.qtpaths).exists():
