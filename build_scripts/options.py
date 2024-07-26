@@ -254,7 +254,11 @@ class CommandMixin(object):
         # This option is specific for Flatpak and OS distro builds of PySide6. So, use with
         # caution as it may also try to parse other global headers.
         ('shiboken-force-process-system-headers', None,
-         'When building PySide against system Qt, shiboken does not ignore the system Qt headers')
+         'When building PySide against system Qt, shiboken does not ignore the system Qt headers'),
+        # shiboken-extra-inlude-paths option is specifically used to tell the clang inside shiboken
+        # to include extra paths when parsing the headers. Use with caution.
+        ('shiboken-extra-include-paths=', None,
+         'Extra include paths for shiboken. Comma separated.'),
     ]
 
     def __init__(self):
@@ -317,6 +321,7 @@ class CommandMixin(object):
         self.no_unity = False
         self.unity_build_batch_size = "16"
         self.shiboken_force_process_system_headers = False
+        self.shiboken_extra_include_paths = None
 
         # When initializing a command other than the main one (so the
         # first one), we need to copy the user options from the main
@@ -438,6 +443,7 @@ class CommandMixin(object):
         OPTION['UNITY'] = not self.no_unity
         OPTION['UNITY_BUILD_BATCH_SIZE'] = self.unity_build_batch_size
         OPTION['SHIBOKEN_FORCE_PROCESS_SYSTEM_HEADERS'] = self.shiboken_force_process_system_headers
+        OPTION['SHIBOKEN_EXTRA_INCLUDE_PATHS'] = self.shiboken_extra_include_paths
 
         qtpaths_abs_path = None
         if self.qtpaths and Path(self.qtpaths).exists():

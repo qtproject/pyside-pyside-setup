@@ -612,6 +612,11 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             cmake_cmd.append("-DPYSIDE_TREAT_QT_INCLUDE_DIRS_AS_NON_SYSTEM=ON")
             log.info("Shiboken will now process system Qt headers")
 
+        if OPTION['SHIBOKEN_EXTRA_INCLUDE_PATHS']:
+            extra_include_paths = ';'.join(OPTION['SHIBOKEN_EXTRA_INCLUDE_PATHS'].split(','))
+            cmake_cmd.append(f"-DSHIBOKEN_FORCE_PROCESS_SYSTEM_INCLUDE_PATHS={extra_include_paths}")
+            log.info(f"Shiboken will now process system headers from: {extra_include_paths}")
+
         cmake_cmd += [
             "-G", self.make_generator,
             f"-DBUILD_TESTS={self.build_tests}",

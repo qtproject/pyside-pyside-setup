@@ -236,7 +236,17 @@ macro(collect_module_if_found shortname)
     # If the module was found, and also the module path is the same as the
     # Qt5Core base path, we will generate the list with the modules to be installed
     set(looked_in_message ". Looked in: ${${_name_dir}}")
-    if("${${_name_found}}" AND (("${found_basepath}" GREATER "0") OR ("${found_basepath}" EQUAL "0")))
+
+    # 'found_basepath' is used to ensure consistency that all the modules are from the same Qt
+    # directory which prevents issues from arising due to mixing versions or using incompatible Qt
+    # modules. When SHIBOKEN_FORCE_PROCESS_SYSTEM_INCLUDE_PATHS is not empty, we can ignore this
+    # requirement of 'found_basepath'.
+    # This is specifically useful for Flatpak build of PySide6 where For Flatpak the modules are in
+    # different directories. For Flatpak, although the modules are in different directories, they
+    # are all compatible.
+    if("${${_name_found}}" AND
+       ((("${found_basepath}" GREATER "0") OR ("${found_basepath}" EQUAL "0")) OR
+        (NOT SHIBOKEN_FORCE_PROCESS_SYSTEM_INCLUDE_PATHS STREQUAL "")))
         message(STATUS "${module_state} module ${name} found (${ARGN})${looked_in_message}")
         # record the shortnames for the tests
         list(APPEND all_module_shortnames ${shortname})
