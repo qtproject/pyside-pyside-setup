@@ -78,87 +78,88 @@ To use the generated file, add the following import at the top of your main Pyth
 Changes in the code
 ===================
 
-As you are modifying an existing example, you need to modify the following
-lines:
+As you are modifying an existing example, you need to modify the
+``player.py`` file. At the top, change
 
 .. code-block:: python
 
     from PySide6.QtGui import QIcon, QKeySequence
-    playIcon = self.style().standardIcon(QStyle.SP_MediaPlay)
-    previousIcon = self.style().standardIcon(QStyle.SP_MediaSkipBackward)
-    pauseIcon = self.style().standardIcon(QStyle.SP_MediaPause)
-    nextIcon = self.style().standardIcon(QStyle.SP_MediaSkipForward)
-    stopIcon = self.style().standardIcon(QStyle.SP_MediaStop)
 
-and replace them with the following:
+to:
 
 .. code-block:: python
 
     from PySide6.QtGui import QIcon, QKeySequence, QPixmap
-    playIcon = QIcon(QPixmap(":/icons/play.png"))
-    previousIcon = QIcon(QPixmap(":/icons/previous.png"))
-    pauseIcon = QIcon(QPixmap(":/icons/pause.png"))
-    nextIcon = QIcon(QPixmap(":/icons/forward.png"))
-    stopIcon = QIcon(QPixmap(":/icons/stop.png"))
 
-This ensures that the new icons are used instead of the default ones provided
-by the application theme.
-Notice that the lines are not consecutive, but are in different parts
-of the file.
-
-After all your imports, add the following
+Below the imports, add the following:
 
 .. code-block:: python
 
     import rc_icons
 
-Now, the constructor of your class should look like this:
+In the ``MainWindow.__init__()`` function, replace the code
+loading the icons from the theme by your custom icons:
+
+.. code-block:: python
+
+    playIcon = QIcon(QPixmap(":/icons/play.png"))
+    self._play_action = tool_bar.addAction(playIcon, "Play")
+
+When doing this for all icons, the constructor of your class should
+look like this:
 
 .. code-block:: python
 
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
 
-        self.playlist = QMediaPlaylist()
-        self.player = QMediaPlayer()
+        self._playlist = []
+        self._playlist_index = -1
+        self._audio_output = QAudioOutput()
+        self._player = QMediaPlayer()
+        self._player.setAudioOutput(self._audio_output)
 
-        toolBar = QToolBar()
-        self.addToolBar(toolBar)
+        self._player.errorOccurred.connect(self._player_error)
 
-        fileMenu = self.menuBar().addMenu("&File")
-        openAction = QAction(QIcon.fromTheme("document-open"),
-                             "&Open...", self, shortcut=QKeySequence.Open,
-                             triggered=self.open)
-        fileMenu.addAction(openAction)
-        exitAction = QAction(QIcon.fromTheme("application-exit"), "E&xit",
-                             self, shortcut="Ctrl+Q", triggered=self.close)
-        fileMenu.addAction(exitAction)
+        tool_bar = QToolBar()
+        self.addToolBar(tool_bar)
 
-        playMenu = self.menuBar().addMenu("&Play")
+        file_menu = self.menuBar().addMenu("&File")
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.DocumentOpen)
+        open_action = QAction(icon, "&Open...", self,
+                              shortcut=QKeySequence.Open, triggered=self.open)
+        file_menu.addAction(open_action)
+        tool_bar.addAction(open_action)
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.ApplicationExit)
+        exit_action = QAction(icon, "E&xit", self,
+                              shortcut="Ctrl+Q", triggered=self.close)
+        file_menu.addAction(exit_action)
+
+        play_menu = self.menuBar().addMenu("&Play")
         playIcon = QIcon(QPixmap(":/icons/play.png"))
-        self.playAction = toolBar.addAction(playIcon, "Play")
-        self.playAction.triggered.connect(self.player.play)
-        playMenu.addAction(self.playAction)
+        self._play_action = tool_bar.addAction(playIcon, "Play")
+        self._play_action.triggered.connect(self._player.play)
+        play_menu.addAction(self._play_action)
 
         previousIcon = QIcon(QPixmap(":/icons/previous.png"))
-        self.previousAction = toolBar.addAction(previousIcon, "Previous")
-        self.previousAction.triggered.connect(self.previousClicked)
-        playMenu.addAction(self.previousAction)
+        self._previous_action = tool_bar.addAction(previousIcon, "Previous")
+        self._previous_action.triggered.connect(self.previous_clicked)
+        play_menu.addAction(self._previous_action)
 
         pauseIcon = QIcon(QPixmap(":/icons/pause.png"))
-        self.pauseAction = toolBar.addAction(pauseIcon, "Pause")
-        self.pauseAction.triggered.connect(self.player.pause)
-        playMenu.addAction(self.pauseAction)
+        self._pause_action = tool_bar.addAction(pauseIcon, "Pause")
+        self._pause_action.triggered.connect(self._player.pause)
+        play_menu.addAction(self._pause_action)
 
         nextIcon = QIcon(QPixmap(":/icons/forward.png"))
-        self.nextAction = toolBar.addAction(nextIcon, "Next")
-        self.nextAction.triggered.connect(self.playlist.next)
-        playMenu.addAction(self.nextAction)
+        self._next_action = tool_bar.addAction(nextIcon, "Next")
+        self._next_action.triggered.connect(self.next_clicked)
+        play_menu.addAction(self._next_action)
 
         stopIcon = QIcon(QPixmap(":/icons/stop.png"))
-        self.stopAction = toolBar.addAction(stopIcon, "Stop")
-        self.stopAction.triggered.connect(self.player.stop)
-        playMenu.addAction(self.stopAction)
+        self._stop_action = tool_bar.addAction(stopIcon, "Stop")
+        self._stop_action.triggered.connect(self._ensure_stopped)
+        play_menu.addAction(self._stop_action)
 
         # many lines were omitted
 
