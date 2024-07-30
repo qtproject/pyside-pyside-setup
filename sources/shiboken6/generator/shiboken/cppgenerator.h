@@ -121,6 +121,7 @@ private:
         QString converterCheckFunctionName;
         QString pythonToConverterFunctionName;
         QString registrationCode;
+        bool hasQVariantConversion = false;
     };
 
     OpaqueContainerData

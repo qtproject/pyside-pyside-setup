@@ -144,6 +144,10 @@ LIBSHIBOKEN_API void setPythonToCppPointerFunctions(SbkConverter *converter,
 LIBSHIBOKEN_API void addPythonToCppValueConversion(SbkConverter *converter,
                                                    PythonToCppFunc pythonToCppFunc,
                                                    IsConvertibleToCppFunc isConvertibleToCppFunc);
+LIBSHIBOKEN_API void prependPythonToCppValueConversion(SbkConverter *converter,
+                                                       PythonToCppFunc pythonToCppFunc,
+                                                       IsConvertibleToCppFunc isConvertibleToCppFunc);
+
 LIBSHIBOKEN_API void addPythonToCppValueConversion(PyTypeObject *type,
                                                    PythonToCppFunc pythonToCppFunc,
                                                    IsConvertibleToCppFunc isConvertibleToCppFunc);

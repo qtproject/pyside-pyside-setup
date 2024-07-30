@@ -241,6 +241,14 @@ void addPythonToCppValueConversion(SbkConverter *converter,
     converter->toCppConversions.push_back(std::make_pair(isConvertibleToCppFunc, pythonToCppFunc));
 }
 
+void prependPythonToCppValueConversion(SbkConverter *converter,
+                                       PythonToCppFunc pythonToCppFunc,
+                                       IsConvertibleToCppFunc isConvertibleToCppFunc)
+{
+    converter->toCppConversions.insert(converter->toCppConversions.begin(),
+                                       std::make_pair(isConvertibleToCppFunc, pythonToCppFunc));
+}
+
 void addPythonToCppValueConversion(PyTypeObject *type,
                                    PythonToCppFunc pythonToCppFunc,
                                    IsConvertibleToCppFunc isConvertibleToCppFunc)

@@ -96,6 +96,31 @@ static void writeContainerCreationFunc(TextStream &s,
         << "}\n\n";
 }
 
+static void writeConverterCheckFunc(TextStream &s,
+                                    const QString &name,
+                                    const QString &checkFunction,
+                                    const QString &converterFunction)
+{
+    s << "extern \"C\" PythonToCppFunc " << name << "(PyObject *" << PYTHON_ARG << ")\n{\n"
+      << indent << "if (" << checkFunction << '(' << PYTHON_ARG << "))\n" << indent
+      << "return " << converterFunction << ";\n"
+      << outdent << "return {};\n" << outdent << "}\n\n";
+}
+
+static void writeConverterFunctionHeader(TextStream &s,
+                                         const QString &name,
+                                         const QString &typeName)
+{
+    s << "extern \"C\" void " << name << "(PyObject *" << PYTHON_ARG << ", void *cppOut)\n{\n"
+      << indent << "auto *d = ShibokenSequenceContainerPrivate<" << typeName
+      << ">::get(" << PYTHON_ARG << ");\n";
+}
+
+static inline void writeConverterFunctionFooter(TextStream &s)
+{
+    s << outdent << "}\n\n";
+}
+
 // Generate template specialization of value converter helper
 void CppGenerator::writeOpaqueContainerValueConverter(TextStream &s,
                                                       const AbstractMetaType &valueType) const
@@ -166,6 +191,7 @@ CppGenerator::OpaqueContainerData
     // methods
     const QString &containerName = containerType.name();
     const bool isStdVector = containerName  == u"std::vector";
+    result.hasQVariantConversion = usePySideExtensions() && containerName == "QList"_L1;
     const auto kind = containerTypeEntry->containerKind();
     const bool isFixed = kind == ContainerTypeEntry::SpanContainer || containerName == u"std::array";
     const QString methods = result.name + u"_methods"_s;
@@ -249,24 +275,39 @@ CppGenerator::OpaqueContainerData
 
     // SBK converter Python to C++
     result.pythonToConverterFunctionName = u"PythonToCpp"_s + result.name;
-    s << "extern \"C\" void " << result.pythonToConverterFunctionName
-        << "(PyObject *" << PYTHON_ARG << ", void *cppOut)\n{\n" << indent
-        << "auto *d = ShibokenSequenceContainerPrivate<" << cppSignature
-        << ">::get(" << PYTHON_ARG << ");\n"
-        << "*reinterpret_cast<" << cppSignature << "**>(cppOut) = d->m_list;\n"
-        << outdent << "}\n\n";
+    writeConverterFunctionHeader(s, result.pythonToConverterFunctionName, cppSignature);
+    s << "*reinterpret_cast<" << cppSignature << "**>(cppOut) = d->m_list;\n";
+    writeConverterFunctionFooter(s);
 
     // SBK check function for converting Python to C++ that returns the converter
     result.converterCheckFunctionName = u"is"_s + result.name + u"PythonToCppConvertible"_s;
-    s << "extern \"C\" PythonToCppFunc " << result.converterCheckFunctionName
-        << "(PyObject *" << PYTHON_ARG << ")\n{\n" << indent << "if ("
-        << result.checkFunctionName << '(' << PYTHON_ARG << "))\n" << indent
-        << "return " << result.pythonToConverterFunctionName << ";\n"
-        << outdent << "return {};\n" << outdent << "}\n\n";
+    writeConverterCheckFunc(s, result.converterCheckFunctionName, result.checkFunctionName,
+                            result.pythonToConverterFunctionName);
 
-    QTextStream(&result.registrationCode) << "ob_type = reinterpret_cast<PyObject *>("
-        << typeFName
-        << "());\nPy_XINCREF(ob_type);\nPyModule_AddObject(module, \""
+    TextStream registrationStr(&result.registrationCode, TextStream::Language::Cpp);
+    registrationStr << "ob_type = reinterpret_cast<PyObject *>("
+        << typeFName << "());\nPy_XINCREF(ob_type);\nPyModule_AddObject(module, \""
         << result.name << "\", ob_type);\n";
+
+    if (!result.hasQVariantConversion)
+        return result;
+
+    // PYSIDE-2820: Add a conversion to QVariant for QML. Note QVariant::fromValue()
+    // will work for all list types, but we restrict it to registered meta types for QML.
+    QString pythonToQVariantConverterFunctionName = "PythonToQVariant"_L1 + result.name;
+    QString pythonToQVariantCheckFunctionName = "is"_L1 + result.name +
+                                                "PythonToQVariantConvertible"_L1;
+    writeConverterFunctionHeader(s, pythonToQVariantConverterFunctionName, cppSignature);
+    s << "*reinterpret_cast<QVariant *>(cppOut) = QVariant::fromValue(*d->m_list);\n";
+    writeConverterFunctionFooter(s);
+    writeConverterCheckFunc(s, pythonToQVariantCheckFunctionName,
+                            result.checkFunctionName,
+                            pythonToQVariantConverterFunctionName);
+    registrationStr << "if constexpr (QMetaTypeId2<" << valueType.cppSignature()
+        << ">::Defined) {\n" << indent
+        << "Shiboken::Conversions::prependPythonToCppValueConversion(qVariantConverter,\n    "
+        << pythonToQVariantConverterFunctionName << ", "
+        << pythonToQVariantCheckFunctionName << ");\n" << outdent << "}\n";
+
     return result;
 }

@@ -6531,6 +6531,17 @@ bool CppGenerator::finishGeneration()
     if (!opaqueContainers.isEmpty()) {
         s << "\n// Opaque container type registration\n"
             << "PyObject *ob_type{};\n";
+        if (usePySideExtensions()) {
+            const bool hasQVariantConversion =
+                std::any_of(opaqueContainers.cbegin(), opaqueContainers.cend(),
+                            [](const OpaqueContainerData &d) { return d.hasQVariantConversion; });
+            if (hasQVariantConversion) {
+                const char qVariantConverterVar[] = "qVariantConverter";
+                s << "auto *" << qVariantConverterVar
+                  << " = Shiboken::Conversions::getConverter(\"QVariant\");\n"
+                  << "Q_ASSERT(" << qVariantConverterVar << " != nullptr);\n";
+            }
+        }
         for (const auto &d : opaqueContainers)
             s << d.registrationCode;
         s << '\n';
