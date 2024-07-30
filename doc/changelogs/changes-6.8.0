@@ -1,0 +1,61 @@
+Qt for Python 6.8.0 is a minor release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - [PYSIDE-769]  QtAsyncio: The application argument has been removed
+                 from the loop policy.
+ - [PYSIDE-2221] The code for signal connections for Python callables not
+                 targeting a QMetaMethod has be reimplemented to simplify
+                 code and prepare for removal of the GIL.
+ - [PYSIDE-2404] Lazy loading has been extended to smart pointers
+                 and nested types.
+ - [PYSIDE-2620] pyside6-svgtoqml has been added.
+ - [PYSIDE-2701] The size of the generated code has been reduced.
+ - [PYSIDE-2701] Python formats with "#" in it are now supported.
+ - [PYSIDE-2711] An undesired invalidation of QObjects/QWidgets after
+                 calling parent(Widget)() has been fixed.
+ - [PYSIDE-2766] Android wheels are now provided.
+ - [PYSIDE-2786] Modern typing syntax is now used in examples and QtAsyncio
+                 code, enabled by a future import for Python 3.9, too.
+ - [PYSIDE-2805] An overload taking a slot connected to QMessageBox.accepted
+                 has been added to QMessageBox.open().
+ - [PYSIDE-2810] The number of QByteArray conversions in libpyside's
+                 signal handling has been reduced.
+ - [PYSIDE-2820] Opaque containers of type QList can now be used for initial
+                 properties in QML.
+ - [PYSIDE-2803] Deployment: An issue in QML import scanning causing
+                 overly long command lines has been fixed.
+ - [PYSIDE-2837] The documentation has been restructured and updated.
+ - [PYSIDE-2859] QModelRoleDataSpan for implementing
+                 QAbstractItemModel.multiData() has been added.
+ - [PYSIDE-2840] Enumeration properties for Qt Designer custom widgets
+                 have been fixed.
+ - [PYSIDE-2845] QSemaphore.tryAcquire() has been fixed to work with
+                 the snake case feature. The existing C++ function
+                 try_acquire() has been removed.
+ - [PYSIDE-2846] Type hints: Many issues in the generated stub files
+                 have been fixed to enable checking with mypy.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-2792] Potential mismatches caused by nested classes
+                 when looking up converters by name have been fixed.
+ - [PYSIDE-1735] The generated code for enumerations has been refactored
+                 to consider underlying types.
