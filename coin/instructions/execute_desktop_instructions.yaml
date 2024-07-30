@@ -1,7 +1,7 @@
 type: Group
 instructions:
   - type: ExecuteCommand
-    command: "python3 -m pip install -U setuptools==67.7.2"
+    command: "python3 -m pip install -r requirements-coin.txt"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     enable_if:
@@ -9,7 +9,7 @@ instructions:
         property: host.os
         equals_value: MacOS
     userMessageOnFailure: >
-         Failed to install setuptools on macOS
+         Failed to install requirements-coin.txt dependencies on macOS
   - type: ExecuteCommand
     command: "python3 -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=/Users/qt/work/install  --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=ALL"
     maxTimeInSeconds: 14400
@@ -48,7 +48,7 @@ instructions:
         property: host.os
         equals_value: Windows
   - type: ExecuteCommand
-    command: "{{.Env.interpreter}} -m pip install -U pip setuptools==67.7.2 --user"
+    command: "{{.Env.interpreter}} -m pip install -r requirements-coin.txt --user"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     enable_if:
@@ -56,7 +56,7 @@ instructions:
         property: host.os
         equals_value: Linux
     userMessageOnFailure: >
-         Failed to install setuptools on Linux
+         Failed to install requirements-coin.txt dependencies on Linux
   - type: ExecuteCommand
     command: "{{.Env.interpreter}} -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=/home/qt/work/install --targetOs={{.Env.CI_OS}} --hostArch={{.Env.HOST_ARCH_COIN}} --targetArch={{.Env.TARGET_ARCH_COIN}}--phase=ALL"
     maxTimeInSeconds: 14400
@@ -68,7 +68,7 @@ instructions:
     userMessageOnFailure: >
          Failed to execute build instructions on Linux
   - type: ExecuteCommand
-    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -m pip install -U setuptools==67.7.2"
+    command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -m pip install -r requirements-coin.txt"
     maxTimeInSeconds: 14400
     maxTimeBetweenOutput: 1200
     enable_if:
@@ -76,7 +76,7 @@ instructions:
         property: host.os
         equals_value: Windows
     userMessageOnFailure: >
-         Failed to install setuptools on Windows
+         Failed to install requirements-coin.txt dependencies on Windows
   - type: ExecuteCommand
     command: "c:\\users\\qt\\MSVC.bat {{.Env.PYTHON3_PATH}}\\python.exe -u coin_build_instructions.py --os={{.Env.CI_OS}} {{.Env.CI_PACKAGING_FEATURE}} {{.Env.CI_USE_SCCACHE}} --instdir=\\Users\\qt\\work\\install --targetOs={{.Env.CI_OS}} --hostArch=X86_64 --targetArch={{.Env.CI_TARGET_ARCHITECTURE}} --phase=BUILD"
     maxTimeInSeconds: 14400

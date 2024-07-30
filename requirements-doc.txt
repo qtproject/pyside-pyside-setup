@@ -1,12 +1,12 @@
-sphinx==7.2.6
-sphinx-design==0.5.0
+sphinx==7.4.7
+sphinx-design==0.6.0
 sphinx-copybutton==0.5.2
-sphinx-tags==0.3.1
-sphinx-toolbox
-myst-parser==2.0.0
+sphinx-tags==0.4
+sphinx-toolbox==3.7.0
+myst-parser==3.0.1
 # FIXME: Using fork in order to enable the 'collapse_navbar=True'
 # option for the sphinx-theme. Upstream proposal:
 # https://github.com/pradyunsg/furo/pull/748#issuecomment-1895448722
 # furo==2023.9.10
 furo @ git+https://github.com/cmaureir/furo@add_collapse
-graphviz==0.20
+graphviz==0.20.3
