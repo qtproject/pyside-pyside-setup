@@ -1,0 +1,12 @@
+pip>=24.2
+setuptools==72.1.0
+importlib_metadata>=6
+importlib_resources>=5.10.2
+packaging>=24
+ordered-set>=3.1.1
+more_itertools>=8.8
+jaraco.text>=3.7
+importlib_metadata>=6
+tomli>=2.0.1
+wheel>=0.43.0
+platformdirs >= 2.6.2
