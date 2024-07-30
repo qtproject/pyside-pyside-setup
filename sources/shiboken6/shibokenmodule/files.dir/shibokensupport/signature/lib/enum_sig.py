@@ -15,6 +15,7 @@ import inspect
 import sys
 import types
 from shibokensupport.signature import get_signature as get_sig
+from enum import Enum
 
 
 """
@@ -158,6 +159,14 @@ class ExactEnumerator(object):
                 self.collision_track.add(thing_name)
 
         init_signature = getattr(klass, "__signature__", None)
+        # PYSIDE-2752: Enums without values will not have a constructor, so
+        # we set the init_signature to None, to avoid having an empty pyi
+        # entry, like:
+        #    class QCborTag(enum.IntEnum):
+        #  or
+        #    class BeginFrameFlag(enum.Flag):
+        if isinstance(klass, type(Enum)):
+            init_signature = None
         # sort by class then enum value
         enums.sort(key=lambda tup: (tup[1], tup[2].value))
 
