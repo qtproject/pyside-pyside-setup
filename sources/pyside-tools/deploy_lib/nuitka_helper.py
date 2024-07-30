@@ -7,6 +7,7 @@ from __future__ import annotations
 from __future__ import annotations
 import logging
 import os
+import shlex
 import sys
 from pathlib import Path
 
@@ -59,7 +60,8 @@ class Nuitka:
                           dry_run: bool, permissions: list[str],
                           mode: DesktopConfig.NuitkaMode):
         qt_plugins = [plugin for plugin in qt_plugins if plugin not in self.qt_plugins_to_ignore]
-        extra_args = extra_args.split()
+
+        extra_args = shlex.split(extra_args)
 
         # macOS uses the --standalone option by default to create an app bundle
         if sys.platform == "darwin":
