@@ -231,8 +231,10 @@ def _run_deploy_test(example, tmpdirname):
 
     suffix = "exe" if sys.platform == "win32" else "bin"
 
+    # fetch app->title from the config
+    app_title = parser.get("app", "title")
     if sys.platform != "darwin":
-        binary = f"{tmpdirname}/{main_file.stem}.{suffix}"
+        binary = f"{tmpdirname}/{app_title}.{suffix}"
     else:
         binary = f"{tmpdirname}/pyside_app_demo.app/Contents/MacOS/{main_file.stem}"
 

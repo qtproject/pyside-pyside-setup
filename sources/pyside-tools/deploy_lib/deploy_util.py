@@ -77,6 +77,6 @@ def finalize(config: DesktopConfig):
             shutil.copytree(generated_exec_path, config.exe_dir / (config.title + dist_format),
                             dirs_exist_ok=True)
         else:
-            shutil.copy(generated_exec_path, config.exe_dir)
+            shutil.copy(generated_exec_path, config.exe_dir / (config.title + dist_format))
         print("[DEPLOY] Executed file created in "
-              f"{str(config.exe_dir / (config.source_file.stem + dist_format))}")
+              f"{str(config.exe_dir / (config.title + dist_format))}")
