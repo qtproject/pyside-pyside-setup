@@ -218,12 +218,15 @@ class QtDependencyReader:
         """
         Finds the path to the Qt libs directory inside PySide6 package installation
         """
+        # PYSIDE-2785 consider dist-packages for Debian based systems
         for possible_site_package in site.getsitepackages():
-            if possible_site_package.endswith("site-packages"):
+            if possible_site_package.endswith(("site-packages", "dist-packages")):
                 self.pyside_install_dir = Path(possible_site_package) / "PySide6"
+                if self.pyside_install_dir.exists():
+                    break
 
         if not self.pyside_install_dir:
-            print("Unable to find site-packages. Exiting ...")
+            print("Unable to find where PySide6 is installed. Exiting ...")
             sys.exit(-1)
 
         if sys.platform == "win32":
