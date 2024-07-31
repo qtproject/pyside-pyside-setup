@@ -1,0 +1,73 @@
+Qt for Python 6.7.3 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - A --flatpak option has been added to setup.py, enabling a flatpak build
+   of Qt for Python.
+ - [PYSIDE-769]  QtAsyncio: The application argument has been removed
+                 from the loop policy.
+ - [PYSIDE-1612] Deployment: Nuitka has been updated to 2.3.7. Scanning for
+                 QML dependencies has been fixed to skip some directories.
+ - [PYSIDE-1612] Android Cross Compilation: INSTSONAME has been added.
+ - [PYSIDE-1877] Properties of type QAbstractItemModel can now be used in QML.
+ - [PYSIDE-2192] PySide Qt Gui applications can now be used in interactive
+                 mode, for example notebooks.
+ - [PYSIDE-2517] Type hints: The signatures of QObject.findChild()/
+                 findChildren() have been improved to reflect the type passed
+                 in.
+ - [PYSIDE-2622] Deployment: Nuitka --standalone mode is now supported.
+ - [PYSIDE-2656] QtMultimedia on macOS has been fixed.
+ - [PYSIDE-2702] An option to force processing system headers has been added
+                 for cases where Qt is installed into the system.
+ - [PYSIDE-2752] Type hints: A syntax error caused by empty Enums has been
+                 fixed.
+ - [PYSIDE-2766] Android Deployment: pyside6-android-deploy now works macOS,
+                 too.
+ - [PYSIDE-2785] Deployment: 'dist-packages' is now skipped similar
+                 to 'site-packages' when scanning for QML dependencies.
+ - [PYSIDE-2788] Type hints: The signature of QFormLayout.getLayoutPosition()
+                 has been fixed.
+ - [PYSIDE-2789] numpy 2.0 is now supported.
+ - [PYSIDE-2790] QtAsyncio: cancel count and uncancel() have been added.
+ - [PYSIDE-2796] A potential crash in currentOpcode_Is_CallMethNoArgs()
+                 has been fixed.
+ - [PYSIDE-2799] QtAsyncio: A hang when an exception occurs inside a
+                 TaskGroup body has been fixed.
+ - [PYSIDE-2803] Desktop Deployment: Overflows of command lines on Windows
+                 have been fixed.
+ - [PYSIDE-2806] Desktop Deployment: The application name has been fixed.
+ - [PYSIDE-2814] Deployment: Arguments with spaces can now be used for
+                 "extra_args" due to using shlex for splitting the command
+                 line arguments.
+ - [PYSIDE-2819] The correct libclang is now used for arm64.
+ - [PYSIDE-2825] QtWebView has been added.
+ - [PYSIDE-2828] Documentation: The .qrc tutorial has been updated.
+ - [PYSIDE-2833] The QML tutorials have been updated.
+ - [PYSIDE-2834] QDir.entry(Info)List(QDir.Filter, QDir.SortFlags)
+                 has been fixed to work with Python 3.11 and later.
+ - [PYSIDE-2836] PySide6/__init__.py now has a static list of modules,
+                 enabling code checkers to work.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+- [PYSIDE-2834] Enumerations have been excluded from argument type checks
+                for sequences. This addresses a problem showing in Python
+                3.11 causing the wrong function overloads to be used.
+- [PYSIDE-2780] A potential refcounting bug in Lazy loading has been fixed.
