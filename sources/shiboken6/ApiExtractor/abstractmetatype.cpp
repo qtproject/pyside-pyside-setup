@@ -620,8 +620,6 @@ QString AbstractMetaTypeData::formatSignature(bool minimal) const
     }
     if (!m_instantiations.isEmpty()) {
         result += u'<';
-        if (minimal)
-            result += u' ';
         const auto size = stripDefaultTemplateArgs(m_typeEntry, m_instantiations);
         for (qsizetype i = 0; i < size; ++i) {
             if (i > 0)
