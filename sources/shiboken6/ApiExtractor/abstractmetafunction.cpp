@@ -543,7 +543,8 @@ QString AbstractMetaFunctionPrivate::signature() const
                 m_cachedSignature += u", "_s;
             m_cachedSignature += t.cppSignature();
             // We need to have the argument names in the qdoc files
-            m_cachedSignature += u' ';
+            if (!m_cachedSignature.endsWith(u'*') && !m_cachedSignature.endsWith(u'&'))
+                m_cachedSignature += u' ';
             m_cachedSignature += a.name();
         }
         m_cachedSignature += u')';
