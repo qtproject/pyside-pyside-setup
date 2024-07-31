@@ -424,7 +424,7 @@ typedef Vector<int> IntVector;
 
     const auto method = vector->findFunction("method");
     QVERIFY(method);
-    QCOMPARE(method->signature(), u"method(const Vector<int> & vector)");
+    QCOMPARE(method->signature(), "method(const Vector<int> &vector)"_L1);
 
     const auto otherMethod = vector->findFunction("otherMethod");
     QVERIFY(otherMethod);
