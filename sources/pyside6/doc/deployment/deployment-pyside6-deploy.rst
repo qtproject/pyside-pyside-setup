@@ -10,10 +10,6 @@ compiles your Python code to C code, and links with libpython to produce the fin
 The final executable produced has a ``.exe`` suffix on Windows, ``.bin`` on Linux and ``.app`` on
 macOS.
 
-.. note:: Although using a virtual environment for Python is recommended for ``pyside6-deploy``, do
-    not add the virtual environment to the application directory you are trying to deploy.
-    ``pyside6-deploy`` will try to package this venv folder and will eventually fail.
-
 .. note:: The default version of Nuitka used with the tool is version ``2.3.7``. This can be
     updated to a newer version by updating your ``pysidedeploy.spec`` file.
 
