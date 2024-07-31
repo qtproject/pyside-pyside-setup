@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file alias="left-32.png">images/left-32.png</file>
+        <file alias="stop-32.png">images/stop-32.png</file>
+        <file alias="refresh-32.png">images/refresh-32.png</file>
+        <file alias="right-32.png">images/right-32.png</file>
+    </qresource>
+</RCC>
