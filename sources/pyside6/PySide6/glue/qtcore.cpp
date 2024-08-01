@@ -2071,7 +2071,7 @@ if ((classMethod && (count > 2)) || (!classMethod && (count > 1))) {
 
 bool arg_qpermission = (classMethod && (count == 2)) || (!classMethod && (count == 1));
 
-auto callback = [callable, count, arg_qpermission](const QPermission &permission) -> void
+auto callback = [callable, arg_qpermission](const QPermission &permission) -> void
 {
     Shiboken::GilState state;
     if (arg_qpermission) {
