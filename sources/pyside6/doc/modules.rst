@@ -197,6 +197,10 @@ Qt Modules Supported by Qt for Python
 
         Provides WebSocket communication compliant with RFC 6455.
 
+    .. grid-item-card:: :mod:`QtWebView <PySide6.QtWebView>`
+
+        Enables displaying web content in a QML application.
+
     .. grid-item-card:: :mod:`QtWidgets <PySide6.QtWidgets>`
 
         Extends Qt GUI with C++ widget functionality.
@@ -233,6 +237,3 @@ Qt Modules Supported by Qt for Python
 
         Provides integration between asyncio and Qt's event loop.
 
-    .. grid-item-card:: :mod:`QtWebView <PySide6.QtWebView>`
-
-        Enables displaying web content in a QML application.
