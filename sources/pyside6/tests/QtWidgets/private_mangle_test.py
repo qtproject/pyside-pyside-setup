@@ -16,8 +16,9 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QApplication, QWidget
-from PySide6 import QtWidgets
+from PySide6.QtWidgets import QApplication, QWidget  # noqa F401
+
+from helper.usesqapplication import UsesQApplication
 
 
 class Harness(QWidget):
@@ -58,13 +59,7 @@ class _Under(QWidget):
         self.method___result = self.sender()
 
 
-class TestMangle(unittest.TestCase):
-
-    def setUp(self):
-        QApplication()
-
-    def tearDown(self):
-        qApp.shutdown()
+class TestMangle(UsesQApplication):
 
     def testPrivateMangle(self):
         harness = Harness()
