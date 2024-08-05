@@ -29,7 +29,7 @@ application and PySide6 integration:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 63-76
+      :lines: 52-67
       :emphasize-lines: 4,9
 
    Notice that we only need a :code:`QQmlApplicationEngine` to
@@ -40,8 +40,8 @@ application and PySide6 integration:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 14-54
-      :emphasize-lines: 3,4,7
+      :lines: 14-49
+      :emphasize-lines: 4,5,8
 
    Notice that the registration happens thanks to the :code:`QmlElement`
    decorator, that underneath uses the reference to the :code:`Bridge`

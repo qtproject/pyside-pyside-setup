@@ -10,7 +10,7 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine, QmlElement
 from PySide6.QtQuickControls2 import QQuickStyle
 
-import style_rc
+import style_rc  # noqa F401
 
 # To be used on the @QmlElement decorator
 # (QML_IMPORT_MINOR_VERSION is optional)
@@ -25,41 +25,28 @@ class Bridge(QObject):
     def getColor(self, s):
         if s.lower() == "red":
             return "#ef9a9a"
-        elif s.lower() == "green":
+        if s.lower() == "green":
             return "#a5d6a7"
-        elif s.lower() == "blue":
+        if s.lower() == "blue":
             return "#90caf9"
-        else:
-            return "white"
+        return "white"
 
     @Slot(float, result=int)
     def getSize(self, s):
         size = int(s * 34)
-        if size <= 0:
-            return 1
-        else:
-            return size
+        return max(1, size)
 
     @Slot(str, result=bool)
     def getItalic(self, s):
-        if s.lower() == "italic":
-            return True
-        else:
-            return False
+        return s.lower() == "italic"
 
     @Slot(str, result=bool)
     def getBold(self, s):
-        if s.lower() == "bold":
-            return True
-        else:
-            return False
+        return s.lower() == "bold"
 
     @Slot(str, result=bool)
     def getUnderline(self, s):
-        if s.lower() == "underline":
-            return True
-        else:
-            return False
+        return s.lower() == "underline"
 
 
 if __name__ == '__main__':
@@ -75,4 +62,6 @@ if __name__ == '__main__':
     if not engine.rootObjects():
         sys.exit(-1)
 
-    sys.exit(app.exec())
+    ex = app.exec()
+    del engine
+    sys.exit(ex)
