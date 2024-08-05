@@ -473,6 +473,32 @@ static PySideSignalInstance *findSignalInstance(PySideSignalInstance *source, in
     return nullptr;
 }
 
+static PySideSignalInstance *findSignalInstanceForSlot(PySideSignalInstance *source,
+                                                       PyObject *slot)
+{
+    Q_ASSERT(slot != nullptr && slot != Py_None);
+
+    // Check signature of the slot (method or function) to match signal
+    const auto args = extractFunctionArgumentsFromSlot(slot);
+
+    if (args.function != nullptr && source->d->next != nullptr) {
+        auto slotArgRange = argCount(args);
+        if (args.isMethod) {
+            slotArgRange.min -= 1;
+            slotArgRange.max -= 1;
+        }
+
+        // Get signature args
+        // Iterate the possible types of connection for this signal and compare
+        // it with slot arguments
+        for (int slotArgs = slotArgRange.max; slotArgs >= slotArgRange.min; --slotArgs) {
+            if (auto *matchedSlot = findSignalInstance(source, slotArgs))
+                return matchedSlot;
+        }
+    }
+    return source;
+}
+
 static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject *kwds)
 {
     PyObject *slot = nullptr;
@@ -516,39 +542,13 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
             sourceWalk = reinterpret_cast<PySideSignalInstance *>(sourceWalk->d->next);
         }
     } else {
-        // Check signature of the slot (method or function) to match signal
-        const auto args = extractFunctionArgumentsFromSlot(slot);
-        PySideSignalInstance *matchedSlot = nullptr;
-
-        if (args.function != nullptr) {
-            auto slotArgRange = argCount(args);
-            if (args.isMethod) {
-                slotArgRange.min -= 1;
-                slotArgRange.max -= 1;
-            }
-
-            // Get signature args
-            // Iterate the possible types of connection for this signal and compare
-            // it with slot arguments
-            for (int slotArgs = slotArgRange.max;
-                 slotArgs >= slotArgRange.min && matchedSlot == nullptr; --slotArgs) {
-                 matchedSlot = findSignalInstance(source, slotArgs);
-            }
-        }
-
         // Adding references to pyArgs
         PyList_Append(pyArgs, source->d->source);
 
-        if (matchedSlot != nullptr) {
-            // If a slot matching the same number of arguments was found,
-            // include signature to the pyArgs
-            Shiboken::AutoDecRef signature(PySide::Signal::buildQtCompatible(matchedSlot->d->signature));
-            PyList_Append(pyArgs, signature);
-        } else {
-            // Try the first by default if the slot was not found
-            Shiboken::AutoDecRef signature(PySide::Signal::buildQtCompatible(source->d->signature));
-            PyList_Append(pyArgs, signature);
-        }
+        // Check signature of the slot (method or function) to match signal
+        PySideSignalInstance *matchedSlot = findSignalInstanceForSlot(source, slot);
+        Shiboken::AutoDecRef signature(PySide::Signal::buildQtCompatible(matchedSlot->d->signature));
+        PyList_Append(pyArgs, signature);
         PyList_Append(pyArgs, slot);
         match = true;
     }
@@ -695,9 +695,10 @@ static PyObject *signalInstanceDisconnect(PyObject *self, PyObject *args)
         PyList_Append(pyArgs, slot);
         match = true;
     } else {
-        //try the first signature
-        PyList_Append(pyArgs, source->d->source);
-        Shiboken::AutoDecRef signature(PySide::Signal::buildQtCompatible(source->d->signature));
+        // try the matching signature, fall back to first
+        auto *matchedSlot = slot != Py_None ? findSignalInstanceForSlot(source, slot) : source;
+        PyList_Append(pyArgs, matchedSlot->d->source);
+        Shiboken::AutoDecRef signature(PySide::Signal::buildQtCompatible(matchedSlot->d->signature));
         PyList_Append(pyArgs, signature);
 
         // disconnect all, so we need to use the c++ signature disconnect(qobj, signal, 0, 0)
