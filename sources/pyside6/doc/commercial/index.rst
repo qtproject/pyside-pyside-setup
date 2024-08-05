@@ -151,7 +151,7 @@ Operating System (macOS, Windows, or Linux). To learn more about what the
 packages contain, please check the :ref:`package_details` page.
 
 Once you download the packages, you are encouraged to create a Python virtual
-environment to install them - check the ref:`quick-start` page for how to do
+environment to install them - check the :ref:`getting-started` page for how to do
 it.
 With your activated environment on a terminal, run the following command (for
 macOS/Linux)::

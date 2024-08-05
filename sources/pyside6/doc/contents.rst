@@ -3,9 +3,10 @@
 .. toctree::
     :maxdepth: 2
 
-    quickstart.rst
+    gettingstarted.rst
     commercial/index.rst
-    gettingstarted/index.rst
+    building_from_source/index.rst
+    package_details.rst
     api.rst
     tools/index.rst
     tutorials/index.rst

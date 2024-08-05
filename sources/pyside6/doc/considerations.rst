@@ -395,8 +395,8 @@ Calendar. More about permission API can be read in this `Blog post`_.
 When a PySide6 application that uses the permission API is run in interpreted mode, i.e.,
 ``python <main_file>.py``, the code implementing the permission API *will not work*. The only way
 to make your PySide6 application using permission API work is to bundle the application. For Android,
-this means using the `pyside6-android-deploy`_ tool and for macOS, this means using the
-`pyside6-deploy`_ tool.
+this means using the :ref:`pyside6-android-deploy` tool and for macOS, this means using the
+:ref:`pyside6-deploy` tool.
 
 When running in interpreted mode, you can skip over the permission check/request using the following
 *if* condition
@@ -413,7 +413,7 @@ check if the application is run as a standalone application or run in interprete
 Android
 ~~~~~~~~
 
-For Android, `pyside6-android-deploy`_ takes care of identifying the necessary permissions needed by
+For Android, :ref:`pyside6-android-deploy` takes care of identifying the necessary permissions needed by
 the application and adding those permissions to the *AndroidManifest.xml* using the
 *<uses-permission>* element.
 
@@ -433,9 +433,7 @@ contain the *usage description* strings for the permissions required. You can ce
 *Info.plist* of the Python framework installation to make the Qt permission API work when running
 a PySide6 application from the terminal. However, this is not recommended. Therefore, the only
 viable solution is to bundle the PySide6 application as a macOS application bundle using
-`pyside6-deploy`_. This macOS application bundle will have its own Info.plist file.
+:ref:`pyside6-deploy`. This macOS application bundle will have its own Info.plist file.
 
 .. _`Blog post`: https://www.qt.io/blog/permission-apis-in-qt-6.5
 .. _`Camera Example`: https://doc.qt.io/qtforpython-6/examples/example_multimedia_camera.html#camera-example
-.. _`pyside6-android-deploy`: https://doc.qt.io/qtforpython-6/gettingstarted/package_details.html#deployment
-.. _`pyside6-deploy`: https://doc.qt.io/qtforpython-6/gettingstarted/package_details.html#deployment

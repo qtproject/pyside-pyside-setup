@@ -1,5 +1,5 @@
-Getting Started on macOS
-========================
+macOS
+=====
 
 Requirements
 ------------

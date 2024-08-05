@@ -29,24 +29,24 @@ applications.
 This project is available under the LGPLv3/GPLv3 and the `Qt commercial license`_.
 
 .. _Qt: https://doc.qt.io
-.. _PySide6: quickstart.html
+.. _PySide6: gettingstarted.html
 .. _`Qt commercial license`: https://www.qt.io/licensing/
-.. _`Porting from PySide2 to PySide6`: gettingstarted/porting_from2.html
+.. _`Porting from PySide2 to PySide6`: faq/porting_from2.html
 
 Quick Start
 ===========
 
 You can obtain the latest stable version by running ``pip install pyside6``.
-If you want to build it yourself, check the `getting started guide`_.
+If you want to build it yourself, check the `Building from Source`_ guide.
 
 To learn how to use it, check out `write your first application`_,
 and to learn what is installed with the ``pyside6``, check the
 `package content, structure, and tools`_ page.
 
 
-.. _`getting started guide`: gettingstarted/index.html
-.. _`write your first application`: quickstart.html
-.. _`package content, structure, and tools`: gettingstarted/package_details.html
+.. _`Building from Source`: building_from_source/index.html
+.. _`write your first application`: gettingstarted.html
+.. _`package content, structure, and tools`: package_details.html
 
 Documentation
 =============
@@ -60,7 +60,7 @@ Documentation
 
         Write your first Qt application.
         +++
-        .. button-ref:: quick-start
+        .. button-ref:: getting-started
             :color: primary
             :outline:
             :expand:
@@ -71,9 +71,9 @@ Documentation
         :img-top: images/Support.svg
         :class-item: text-center
 
-        Modules, docs, and cross compilation.
+        Building from Source.
         +++
-        .. button-ref:: gettingstarted/index
+        .. button-ref:: building_from_source/index
             :color: primary
             :outline:
             :expand:

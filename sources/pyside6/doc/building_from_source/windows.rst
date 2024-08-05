@@ -1,5 +1,5 @@
-Getting Started on Windows
-==========================
+Windows
+=======
 
 The Qt library has to be built with the same version of MSVC as Python and PySide, this can be
 selected when using the online installer.

@@ -1,13 +1,21 @@
-Getting Started
-===============
+Building from Source
+====================
+
+.. toctree::
+    :maxdepth: 1
+    :hidden:
+
+    linux.rst
+    macOS.rst
+    windows.rst
 
 .. important:: This page is focused on building |project| **from source**.
   If you just want to install |pymodname|, you need to run: :command:`pip install pyside6`.
 
-  For more details, refer to our :ref:`quick-start` guide. Additionally, you can check the
+  For more details, refer to our :ref:`getting-started` guide. Additionally, you can check the
   :ref:`FAQ <faq>` related to the project.
 
-.. _Quick Start: quickstart.html
+.. _Quick Start: gettingstarted.html
 
 General Requirements
 --------------------
@@ -30,16 +38,6 @@ website.
 
 Guides per platform
 -------------------
-
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-
-    linux.rst
-    macOS.rst
-    windows.rst
-    package_details.rst
-    porting_from2.rst
 
 You can refer to the following pages for platform specific instructions:
 

@@ -1,5 +1,5 @@
-Getting Started on Linux
-==========================
+Linux
+=====
 
 Requirements
 ------------

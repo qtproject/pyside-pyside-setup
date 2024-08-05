@@ -1,7 +1,7 @@
-.. _quick-start:
+.. _getting-started:
 
-Quick start
-===========
+Getting Started
+===============
 
 New to Qt? Check also the :ref:`faq-section` section at the end of this page.
 In case you own a Qt License, please refer to :ref:`commercial-page`.
@@ -16,7 +16,7 @@ Requirements
 
 Before you can install |project|, first you must install the following software:
 
-* Python 3.7+,
+* Python 3.8+,
 * We **highly** recommend using a virtual environment, such as
   `venv <https://docs.python.org/3/library/venv.html>`_ or
   `virtualenv <https://virtualenv.pypa.io/en/latest>`_
@@ -291,4 +291,5 @@ clarify questions before you start programming.
     faq/typesoffiles.rst
     faq/distribution.rst
     faq/whyqtforpython.rst
+    faq/porting_from2.rst
 

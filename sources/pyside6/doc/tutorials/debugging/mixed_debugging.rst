@@ -100,8 +100,7 @@ Add the **bin** and **lib** path to the environment variables
 Build PySide6 using the Qt 6 that you built earlier
 ----------------------------------------------------
 
-Follow the steps mentioned `Getting Started - Qt for Python
-<https://doc.qt.io/qtforpython/gettingstarted/index.html>`_
+Follow the steps mentioned in :doc:`Building from Source <../../building_from_source/index>` guide.
 
 You may manually select the modules to install using the ``--module-subset`` cli
 argument for `setup.py`. This was my installation script
