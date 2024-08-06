@@ -319,8 +319,8 @@ bool qobjectDisconnectCallback(QObject *source, const char *signal, PyObject *ca
         return false;
 
     Q_ASSERT(receiver.receiver);
-    const QMetaMethod slotMethod = receiver.receiver->metaObject()->method(slotIndex);
-    static_cast<FriendlyQObject *>(source)->disconnectNotify(slotMethod);
+    const QMetaMethod signalMethod = source->metaObject()->method(signalIndex);
+    static_cast<FriendlyQObject *>(source)->disconnectNotify(signalMethod);
 
     if (receiver.usingGlobalReceiver) { // might delete the receiver
         PySide::SignalManager &signalManager = PySide::SignalManager::instance();
