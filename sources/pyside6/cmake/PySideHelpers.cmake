@@ -183,6 +183,12 @@ macro(remove_skipped_modules)
             list(REMOVE_ITEM DISABLED_MODULES ${m})
         endif()
     endforeach()
+
+    # Special list of modules for the __init__.py.in file
+    foreach(im ${all_module_shortnames})
+        list(APPEND init_modules "\"Qt${im}\"")
+    endforeach()
+    string(REPLACE ";" ", " init_modules "${init_modules}")
 endmacro()
 
 macro(collect_module_if_found shortname)
