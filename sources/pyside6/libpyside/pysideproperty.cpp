@@ -253,11 +253,9 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
 static void qpropertyDeAlloc(PyObject *self)
 {
     qpropertyClear(self);
-    if (PepRuntime_38_flag) {
-        // PYSIDE-939: Handling references correctly.
-        // This was not needed before Python 3.8 (Python issue 35810)
-        Py_DECREF(Py_TYPE(self));
-    }
+    // PYSIDE-939: Handling references correctly.
+    // This was not needed before Python 3.8 (Python issue 35810)
+    Py_DECREF(Py_TYPE(self));
     PyObject_GC_UnTrack(self);
     PepExt_TypeCallFree(self);
 }

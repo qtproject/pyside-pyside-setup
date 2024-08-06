@@ -121,11 +121,10 @@ extern "C"
 // PYSIDE-939: A general replacement for object_dealloc.
 void Sbk_object_dealloc(PyObject *self)
 {
-    if (PepRuntime_38_flag) {
-        // PYSIDE-939: Handling references correctly.
-        // This was not needed before Python 3.8 (Python issue 35810)
-        Py_DECREF(Py_TYPE(self));
-    }
+    // PYSIDE-939: Handling references correctly.
+    // This was not needed before Python 3.8 (Python issue 35810)
+    Py_DECREF(Py_TYPE(self));
+
     PepExt_TypeCallFree(self);
 }
 
@@ -361,14 +360,13 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
     // is subclassed, that dealloc func will decref (see subtype_dealloc
     // in typeobject.c in the python sources)
     auto dealloc = PyType_GetSlot(pyType, Py_tp_dealloc);
-    bool needTypeDecref = dealloc == SbkDeallocWrapper
-        || dealloc == SbkDeallocWrapperWithPrivateDtor;
-    if (PepRuntime_38_flag) {
-        // PYSIDE-939: Additional rule: Also when a subtype is heap allocated,
-        // then the subtype_dealloc deref will be suppressed, and we need again
-        // to supply a decref.
-        needTypeDecref |= (pyType->tp_base->tp_flags & Py_TPFLAGS_HEAPTYPE) != 0;
-    }
+
+    // PYSIDE-939: Additional rule: Also when a subtype is heap allocated,
+    // then the subtype_dealloc deref will be suppressed, and we need again
+    // to supply a decref.
+    const bool needTypeDecref = dealloc == SbkDeallocWrapper
+        || dealloc == SbkDeallocWrapperWithPrivateDtor
+        || (pyType->tp_base->tp_flags & Py_TPFLAGS_HEAPTYPE) != 0;
 
 #if defined(__APPLE__)
     // Just checking once that our assumptions are right.
@@ -449,11 +447,9 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
 
     if (needTypeDecref)
         Py_DECREF(pyType);
-    if (PepRuntime_38_flag) {
-        // PYSIDE-939: Handling references correctly.
-        // This was not needed before Python 3.8 (Python issue 35810)
-        Py_DECREF(pyType);
-    }
+    // PYSIDE-939: Handling references correctly.
+    // This was not needed before Python 3.8 (Python issue 35810)
+    Py_DECREF(pyType);
 }
 
 static inline PyObject *_Sbk_NewVarObject(PyTypeObject *type)
@@ -515,11 +511,9 @@ void SbkObjectType_tp_dealloc(PyTypeObject *sbkType)
     Py_TRASHCAN_SAFE_END(pyObj);
 #  endif
 #endif
-    if (PepRuntime_38_flag) {
-        // PYSIDE-939: Handling references correctly.
-        // This was not needed before Python 3.8 (Python issue 35810)
-        Py_DECREF(Py_TYPE(pyObj));
-    }
+    // PYSIDE-939: Handling references correctly.
+    // This was not needed before Python 3.8 (Python issue 35810)
+    Py_DECREF(Py_TYPE(pyObj));
 }
 
 ////////////////////////////////////////////////////////////////////////////

@@ -582,8 +582,6 @@ LIBSHIBOKEN_API PyTypeObject *PepType_Type_tp_new(PyTypeObject *metatype,
 #define Py_TPFLAGS_METHOD_DESCRIPTOR (1UL << 17)
 #endif
 
-extern LIBSHIBOKEN_API int PepRuntime_38_flag;
-
 /*****************************************************************************
  *
  * Runtime support for Python 3.12 incompatibility

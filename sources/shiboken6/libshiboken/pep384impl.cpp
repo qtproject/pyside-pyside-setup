@@ -993,19 +993,6 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
  *
  */
 
-int PepRuntime_38_flag = 0;
-
-static void
-init_PepRuntime()
-{
-    // We expect a string of the form "\d\.\d+\."
-    const char *version = Py_GetVersion();
-    if (version[0] < '3')
-        return;
-    if (std::atoi(version + 2) >= 8)
-        PepRuntime_38_flag = 1;
-}
-
 static long _GetPepRuntimeVersion()
 {
     auto *version = PySys_GetObject("version_info");
@@ -1301,7 +1288,6 @@ static inline void *PepType_ExTP(PyTypeObject *type, size_t size)
 void
 Pep384_Init()
 {
-    init_PepRuntime();
 #ifdef Py_LIMITED_API
     check_PyTypeObject_valid();
     Pep_GetVerboseFlag();
