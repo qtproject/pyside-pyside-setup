@@ -8,12 +8,11 @@ user interface is specified as a tree of objects with properties. In
 this tutorial, we will show how to make a simple "Hello World"
 application with PySide6 and QML.
 
-A PySide6/QML application consists, at least, of two different files -
+A PySide6/QML application consists, mainly, of two different files -
 a file with the QML description of the user interface, and a python file
-that loads the QML file. To make things easier, let's save both files in
-the same directory.
+that loads the QML file.
 
-Here is a simple QML file called :code:`view.qml`:
+Here is a simple QML file called :code:`Main.qml`:
 
 .. code-block:: javascript
 
@@ -40,27 +39,38 @@ that reads "Hello World". The code :code:`anchors.centerIn: main` makes
 the text appear centered within the object with :code:`id: main`,
 which is the Rectangle in this case.
 
+Put the file into into a directory named :code:`Main` along
+with a file named :code:`qmldir` to describe a basic QML module:
+
+.. code-block:: text
+
+    module Main
+    Main 254.0 Main.qml
+
 Now, let's see how the code looks on the PySide6.
 Let's call it :code:`main.py`:
 
 .. code-block:: python
 
     import sys
-    from PySide6.QtWidgets import QApplication
+    from PySide6.QtGui import QGuiApplication
     from PySide6.QtQuick import QQuickView
 
     if __name__ == "__main__":
-        app = QApplication()
+        app = QGuiApplication()
         view = QQuickView()
-
-        view.setSource("view.qml")
+        view.engine().addImportPath(sys.path[0])
+        view.loadFromModule("Main", "Main")
         view.show()
-        sys.exit(app.exec())
+        ex = app.exec()
+        del view
+        sys.exit(ex)
 
 If you are already familiar with PySide6 and have followed our
 tutorials, you have already seen much of this code.
-The only novelties are that you must :code:`import QtQuick` and set the
-source of the :code:`QQuickView` object to the URL of your QML file.
+The only novelties are that you must :code:`import QtQuick`,
+add the directory to the import paths, and instruct the
+:code:`QQuickView` to load our module.
 Then, similar to what you do with any Qt widget, you call
 :code:`QQuickView.show()`.
 
