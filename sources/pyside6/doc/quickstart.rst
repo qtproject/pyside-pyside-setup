@@ -174,9 +174,10 @@ To do the same using Qt Quick:
 
 * **Declarative UI**
 
-  The UI can be described in the QML language (assigned to a Python variable)::
+  The UI can be described in the QML language:
 
-    QML = """
+  .. code-block:: javascript
+
     import QtQuick
     import QtQuick.Controls
     import QtQuick.Layouts
@@ -210,29 +211,35 @@ To do the same using Qt Quick:
             }
         }
     }
-    """
 
-  .. note:: Keep in mind ideally this content should go into
-    a ``qml`` file, but for simplicity, we are using a string variable.
+  Put the this into a file named :code:`Main.qml` into a directory named
+  :code:`Main` along with a file named :code:`qmldir` to describe a basic
+  QML module:
+
+  .. code-block:: text
+
+    module Main
+    Main 254.0 Main.qml
 
 * **Application execution**
 
   Now, add a main function where you instantiate a :ref:`QQmlApplicationEngine` and
   load the QML::
 
+    import sys
+    from PySide6.QtGui import QGuiApplication
+    from PySide6.QtQml import QQmlApplicationEngine
+
     if __name__ == "__main__":
         app = QGuiApplication(sys.argv)
         engine = QQmlApplicationEngine()
-        engine.loadData(QML.encode('utf-8'))
+        engine.addImportPath(sys.path[0])
+        engine.loadFromModule("Main", "Main")
         if not engine.rootObjects():
             sys.exit(-1)
         exit_code = app.exec()
         del engine
         sys.exit(exit_code)
-
-
-  .. note:: This is a simplified example. Normally, the QML code should be in a separate
-     :code:`.qml` file, which can be edited by design tools.
 
 .. _faq-section:
 
