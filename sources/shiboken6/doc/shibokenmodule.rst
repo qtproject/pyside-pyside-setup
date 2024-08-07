@@ -1,147 +1,176 @@
-.. module:: Shiboken
+.. py:module:: Shiboken
 
-.. |maya| unicode:: Maya U+2122
+    .. |maya| unicode:: Maya U+2122
 
-.. _shiboken-module:
+    .. _shiboken-module:
 
-Shiboken module
-***************
+    Shiboken module
+    ***************
 
-Functions
-^^^^^^^^^
+    Functions
+    ^^^^^^^^^
 
-.. container:: function_list
+    .. container:: function_list
 
-    *    def :meth:`isValid<shiboken.isValid>` (obj)
-    *    def :meth:`wrapInstance<shiboken.wrapInstance>` (address, type)
-    *    def :meth:`getCppPointer<shiboken.getCppPointer>` (obj)
-    *    def :meth:`delete<shiboken.delete>` (obj)
-    *    def :meth:`isOwnedByPython<shiboken.isOwnedByPython>` (obj)
-    *    def :meth:`wasCreatedByPython<shiboken.wasCreatedByPython>` (obj)
-    *    def :meth:`dump<shiboken.dump>` (obj)
-    *    def :meth:`disassembleFrame<shiboken.disassembleFrame>` (marker)
+        *    :py:func:`isValid`
+        *    :py:func:`wrapInstance`
+        *    :py:func:`getCppPointer`
+        *    :py:func:`delete`
+        *    :py:func:`ownedByPython`
+        *    :py:func:`createdByPython`
+        *    :py:func:`dump`
+        *    :py:func:`disassembleFrame`
+        *    :py:func:`dumpTypeGraph`
+        *    :py:func:`dumpWrapperMap`
+        *    :py:func:`dumpConverters`
 
-Detailed description
-^^^^^^^^^^^^^^^^^^^^
+    Classes
+    ^^^^^^^
 
-This Python module can be used to access internal information related to our
-binding technology. Access to this internal information is required to e.g.:
-integrate PySide with Qt based programs that offer Python scripting like |maya|
-or just for debug purposes.
+    .. container:: class_list
 
-Some function description refer to "Shiboken based objects", wich means
-Python objects instances of any Python Type created using Shiboken.
+        *    :py:class:`VoidPtr`
 
-To import the module:
+    Detailed description
+    ^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: python
+    This Python module can be used to access internal information related to our
+    binding technology. Access to this internal information is required to e.g.:
+    integrate PySide with Qt based programs that offer Python scripting like |maya|
+    or just for debug purposes.
 
-    from shiboken6 import Shiboken
+    Some function description refer to "Shiboken based objects", which means
+    Python objects instances of any Python Type created using Shiboken.
 
-.. function:: isValid(obj)
-
-    Given a Python object, returns True if the object methods can be called
-    without an exception being thrown. A Python wrapper becomes invalid when
-    the underlying C++ object is destroyed or unreachable.
-
-.. function:: wrapInstance(address, type)
-
-    Creates a Python wrapper for a C++ object instantiated at a given memory
-    address - the returned object type will be the same given by the user.
-
-    The type must be a Shiboken type, the C++ object will not be
-    destroyed when the returned Python object reach zero references.
-
-    If the address is invalid or doesn't point to a C++ object of given type
-    the behavior is undefined.
-
-.. function:: getCppPointer(obj)
-
-    Returns a tuple of longs that contain the memory addresses of the
-    C++ instances wrapped by the given object.
-
-.. function:: delete(obj)
-
-    Deletes the C++ object wrapped by the given Python object.
-
-.. function:: isOwnedByPython(obj)
-
-    Given a Python object, returns True if Python is responsible for deleting
-    the underlying C++ object, False otherwise.
-
-    If the object was not a Shiboken based object, a TypeError is
-    thrown.
-
-.. function:: wasCreatedByPython(obj)
-
-    Returns true if the given Python object was created by Python.
-
-.. function:: dump(obj)
-
-    Returns a string with implementation-defined information about the
-    object.
-    This method should be used **only** for debug purposes by developers
-    creating their own bindings as no guarantee is provided that
-    the string format will be the same across different versions.
-
-    If the object is not a Shiboken based object, a message is printed.
-
-.. function:: disassembleFrame(label)
-
-    Prints the current executing Python frame to stdout and flushes.
-    The disassembly is decorated by some label. Example:
+    To import the module:
 
     .. code-block:: python
 
-        lambda: 42
+        from shiboken6 import Shiboken
 
-    is shown from inside C++ as
+    .. py:function:: isValid(obj: object) -> bool
 
-    .. code-block:: c
+        Given a Python object, returns True if the object methods can be called
+        without an exception being thrown. A Python wrapper becomes invalid when
+        the underlying C++ object is destroyed or unreachable.
 
-        <label> BEGIN
-          1           0 LOAD_CONST               1 (42)
-                      2 RETURN_VALUE
-        <label> END
+        :param obj: Python object to validate.
 
-    When you want to set a breakpoint at the `disassembleFrame` function
-    and you use it from C++, you use the pure function name.
+    .. py:function:: wrapInstance(address: int, python_type: type) -> Shiboken.object
 
-    When you want to use it from Python, you can insert it into your Python
-    code and then maybe instead set a breakpoint at `SbkShibokenModule_disassembleFrame`
-    which is the generated wrapper.
+        Creates a Python wrapper for a C++ object instantiated at a given memory
+        address - the returned object type will be the same given by the user.
 
-    `label` is a simple string in C++. In Python, you can use any object;
-    internally the `str` function is called with it.
+        The type must be a Python type. The C++ object will not be
+        destroyed when the returned Python object reach zero references.
 
-    This method should be used **only** for debug purposes by developers.
+        If the address is invalid or doesn't point to a C++ object of given type
+        the behavior is undefined.
 
- .. function:: dumpTypeGraph(file_name)
+        :param int address: Address of the C++ object.
+        :param type python_type: Python type for the corresponding C++ object.
 
-    Dumps the inheritance graph of the types existing in libshiboken
-    to ``.dot`` file for use with `Graphviz <https://graphviz.org/>`_.
+    .. py:function:: getCppPointer(obj: Shiboken.object) -> tuple[int, ...]
 
-.. function:: dumpWrapperMap()
+        Returns a tuple of longs that contain the memory addresses of the
+        C++ instances wrapped by the given object.
 
-    Dumps the map of wrappers existing in libshiboken to standard error.
+        :param obj: Shiboken object.
 
-.. function:: dumpConverters()
+    .. py:function:: delete(obj: Shiboken.object)
 
-    Dumps the map of named converters existing in libshiboken to standard
-    error.
+        Deletes the C++ object wrapped by the given Python object.
 
- .. py:class:: VoidPtr(address, size = -1, writeable = 0)
+        :param obj: Shiboken object.
 
-     :param address: (PyBuffer, SbkObject, int, VoidPtr)
-     :param size: int
-     :param writeable: int
+    .. py:function:: ownedByPython(obj: Shiboken.object) -> bool
 
-     Represents a chunk of memory by address and size and implements the ``buffer`` protocol.
-     It can be constructed from a ``buffer``, a Shiboken based object, a memory address
-     or another VoidPtr instance.
+        Given a Shiboken object, returns True if Python is responsible for deleting
+        the underlying C++ object, False otherwise.
 
-     .. py:method:: toBytes()
+        If the object was not a Shiboken based object, a TypeError is
+        thrown.
 
-         :rtype: bytes
+        :param obj: Shiboken object.
 
-         Returns the contents as ``bytes``.
+    .. py:function:: createdByPython(obj: Shiboken.object) -> bool
+
+        Returns true if the given Python object was created by Python.
+
+        :param obj: Shiboken object.
+
+    .. py:function:: dump(obj: object) -> str
+
+        Returns a string with implementation-defined information about the
+        object.
+        This method should be used **only** for debug purposes by developers
+        creating their own bindings as no guarantee is provided that
+        the string format will be the same across different versions.
+
+        If the object is not a Shiboken based object, a message is printed.
+
+        :param obj: Python object.
+
+    .. py:function:: disassembleFrame(label: str)
+
+        Prints the current executing Python frame to stdout and flushes.
+        The disassembly is decorated by some label. Example:
+
+        .. code-block:: python
+
+            lambda: 42
+
+        is shown from inside C++ as
+
+        .. code-block:: c
+
+            <label> BEGIN
+            1           0 LOAD_CONST               1 (42)
+                        2 RETURN_VALUE
+            <label> END
+
+        When you want to set a breakpoint at the `disassembleFrame` function
+        and you use it from C++, you use the pure function name.
+
+        When you want to use it from Python, you can insert it into your Python
+        code and then maybe instead set a breakpoint at `SbkShibokenModule_disassembleFrame`
+        which is the generated wrapper.
+
+        `label` is a simple string in C++. In Python, you can use any object;
+        internally the `str` function is called with it.
+
+        This method should be used **only** for debug purposes by developers.
+
+        :param label: Python string.
+
+    .. py:function:: dumpTypeGraph(file_name: str) -> bool
+
+        Dumps the inheritance graph of the types existing in libshiboken
+        to ``.dot`` file for use with `Graphviz <https://graphviz.org/>`_.
+
+        :param file_name: Name of the file to write the graph.
+
+    .. py:function:: dumpWrapperMap()
+
+        Dumps the map of wrappers existing in libshiboken to standard error.
+
+    .. py:function:: dumpConverters()
+
+        Dumps the map of named converters existing in libshiboken to standard
+        error.
+
+    .. py:class:: VoidPtr(address, size = -1, writeable = 0)
+
+        :param address: (PyBuffer, SbkObject, int, VoidPtr)
+        :param size: int
+        :param writeable: int
+
+        Represents a chunk of memory by address and size and implements the ``buffer`` protocol.
+        It can be constructed from a ``buffer``, a Shiboken based object, a memory address
+        or another VoidPtr instance.
+
+        .. py:method:: toBytes()
+
+            :rtype: bytes
+
+            Returns the contents as ``bytes``.
