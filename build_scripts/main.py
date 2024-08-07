@@ -1339,7 +1339,7 @@ class PysideBaseDocs(Command, CommandMixin):
             elif self.name == SHIBOKEN:
                 self.sphinx_src = self.out_dir
 
-            sphinx_cmd = ["sphinx-build", "-b", "html", "-j", "auto", "-c",
+            sphinx_cmd = ["sphinx-build", "-b", "html", "-j", "auto", "-n", "-c",
                           str(self.sphinx_src), str(self.doc_dir),
                           str(self.out_dir)]
             if run_process(sphinx_cmd) != 0:
