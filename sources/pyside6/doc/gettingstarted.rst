@@ -253,32 +253,38 @@ clarify questions before you start programming.
     :gutter: 2
 
     .. grid-item-card:: What is Qt
-        :link: faq/whatisqt.html
+        :link: whatisqt
+        :link-type: ref
 
         Qt, QML, Widgets... What is the difference?
 
     .. grid-item-card:: Compatible IDEs
-        :link: faq/whichide.html
+        :link: whichide
+        :link-type: ref
 
         Which IDEs are compatible with PySide?
 
     .. grid-item-card:: Binding Generation
-        :link: faq/whatisshiboken.html
+        :link: whatisshiboken
+        :link-type: ref
 
         What is Shiboken?
 
     .. grid-item-card:: File types
-        :link: faq/typesoffiles.html
+        :link: typesoffiles
+        :link-type: ref
 
         File Types in PySide
 
     .. grid-item-card:: App distribution
-        :link: faq/distribution.html
+        :link: distribution
+        :link-type: ref
 
         Distributing your application to other systems and platforms
 
     .. grid-item-card:: Why Qt for Python?
-        :link: faq/whyqtforpython.html
+        :link: whyqtforpython
+        :link-type: ref
 
         As a Qt/C++ developer, why should I consider Qt for Python?
 
