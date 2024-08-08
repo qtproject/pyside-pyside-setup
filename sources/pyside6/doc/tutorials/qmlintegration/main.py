@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 
 from PySide6.QtCore import QObject, Slot
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine, QmlElement
 from PySide6.QtQuickControls2 import QQuickStyle
 
-import style_rc  # noqa F401
+import rc_style  # noqa F401
 
 # To be used on the @QmlElement decorator
 # (QML_IMPORT_MINOR_VERSION is optional)
@@ -53,11 +52,9 @@ if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
     QQuickStyle.setStyle("Material")
     engine = QQmlApplicationEngine()
-
-    # Get the path of the current directory, and then add the name
-    # of the QML file, to load it.
-    qml_file = Path(__file__).parent / 'view.qml'
-    engine.load(qml_file)
+    # Add the current directory to the import paths and load the main module.
+    engine.addImportPath(sys.path[0])
+    engine.loadFromModule("Main", "Main")
 
     if not engine.rootObjects():
         sys.exit(-1)

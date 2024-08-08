@@ -29,8 +29,8 @@ application and PySide6 integration:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 52-67
-      :emphasize-lines: 4,9
+      :lines: 51-64
+      :emphasize-lines: 6,7
 
    Notice that we only need a :code:`QQmlApplicationEngine` to
    :code:`load` the QML file.
@@ -41,7 +41,7 @@ application and PySide6 integration:
    .. literalinclude:: main.py
       :linenos:
       :lines: 14-49
-      :emphasize-lines: 4,5,8
+      :emphasize-lines: 3,4,7
 
    Notice that the registration happens thanks to the :code:`QmlElement`
    decorator, that underneath uses the reference to the :code:`Bridge`
@@ -61,7 +61,7 @@ application and PySide6 integration:
    This :code:`id` will help you to get a reference to the element
    that was registered from Python.
 
-   .. literalinclude:: view.qml
+   .. literalinclude:: Main/Main.qml
       :linenos:
       :lines: 45-55
       :emphasize-lines: 6-8
@@ -75,13 +75,20 @@ application and PySide6 integration:
    will return *False*, that is how we make sure only one is being
    applied to the text.
 
+#. Put the file into into a directory named :code:`Main` along
+   with a file named :code:`qmldir` to describe a basic QML module:
+
+   .. code-block:: text
+
+       module Main
+       Main 254.0 Main.qml
+
 #. Each slot verifies if the selected option contains the text associated
    to the property:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 42-47
-      :emphasize-lines: 4,6
+      :lines: 42-44
 
    Returning *True* or *False* allows you to activate and deactivate
    the properties of the QML UI elements.
@@ -91,7 +98,7 @@ application and PySide6 integration:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 34-39
+      :lines: 33-36
 
 #. Now, for changing the look of our application, you have two options:
 
@@ -109,13 +116,13 @@ application and PySide6 integration:
       .. literalinclude:: style.qrc
          :linenos:
 
-      Generate the *rc* file running, ``pyside6-rcc style.qrc -o style_rc.py``
+      Generate the *rc* file running, ``pyside6-rcc style.qrc -o rc_style.py``
       And finally import it from your ``main.py`` script.
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 4-12
-      :emphasize-lines: 9
+      :lines: 5-12
+      :emphasize-lines: 8
 
    You can read more about this configuration file
    `here <https://doc.qt.io/qt-5/qtquickcontrols2-configuration.html>`_.
@@ -124,5 +131,6 @@ application and PySide6 integration:
 
    .. image:: textproperties_material.png
 
-You can :download:`view.qml <view.qml>` and
-:download:`main.py <main.py>` to try this example.
+You can download :download:`Main.qml <Main/Main.qml>`,
+:download:`qmldir <Main/qmldir>` and :download:`main.py <main.py>`
+to try this example.
