@@ -10,10 +10,6 @@ import QtQuick.Layouts
 ApplicationWindow {
     id: window
     visible: true
-    x: initialX
-    y: initialY
-    width: initialWidth
-    height: initialHeight
     title: webView.title
 
     menuBar: ToolBar {
