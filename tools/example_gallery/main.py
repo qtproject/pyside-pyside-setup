@@ -221,7 +221,12 @@ def get_module_gallery(examples):
     for i in range(math.ceil(len(examples))):
         e = examples[i]
         suffix = SUFFIXES[e.file_format]
-        url = e.doc_file.replace(f".{suffix}", ".html")
+        # doc_file with suffix removed, to be used as a sphinx reference
+        doc_file_name = e.doc_file.replace(f".{suffix}", "")
+        # lower case sphinx reference
+        # this seems to be a bug or a requirement from sphinx
+        doc_file_name = doc_file_name.lower()
+
         name = e.example
         underline = e.module
 
@@ -244,7 +249,8 @@ def get_module_gallery(examples):
 
         gallery += f"{ind(1)}.. grid-item-card:: {name}\n"
         gallery += f"{ind(2)}:class-item: cover-img\n"
-        gallery += f"{ind(2)}:link: {url}\n"
+        gallery += f"{ind(2)}:link: {doc_file_name}\n"
+        gallery += f"{ind(2)}:link-type: ref\n"
         gallery += f"{ind(2)}:img-top: {img_name}\n\n"
         gallery += f"{ind(2)}{desc}\n"
 
@@ -550,9 +556,14 @@ def write_example(example_root, pyproject_file, pyside_example=True):
     headline = ""
     if files:
         doc_file = EXAMPLES_DOC / p.target_doc_file
+        sphnx_ref_example = p.target_doc_file.replace(f'.{SUFFIXES[p.file_format]}', '')
+        # lower case sphinx reference
+        # this seems to be a bug or a requirement from sphinx
+        sphnx_ref_example = sphnx_ref_example.lower()
+        content_f = f".. _{sphnx_ref_example}:\n\n"
         with open(doc_file, "w", encoding="utf-8") as out_f:
             if p.src_doc_file_path:
-                content_f = read_rst_file(p.example_dir, files, p.src_doc_file_path)
+                content_f += read_rst_file(p.example_dir, files, p.src_doc_file_path)
                 headline = get_headline(content_f, p.file_format)
                 if not headline:
                     print(f"example_gallery: No headline found in {doc_file}",
@@ -571,7 +582,7 @@ def write_example(example_root, pyproject_file, pyside_example=True):
                         resources.append(p.src_screenshot)
                 write_resources(resources, EXAMPLES_DOC)
             else:
-                content_f = get_header_title(p.example_dir)
+                content_f += get_header_title(p.example_dir)
             content_f += get_code_tabs(files, pyproject_file.parent, p.file_format)
             out_f.write(content_f)
 
