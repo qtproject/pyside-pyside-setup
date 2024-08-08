@@ -47,10 +47,8 @@ if __name__ == "__main__":
         pos = geometry.topLeft() + QPoint(offset.width(), offset.height())
         geometry = QRect(pos, size)
 
-    context.setContextProperty("initialX", geometry.x())
-    context.setContextProperty("initialY", geometry.y())
-    context.setContextProperty("initialWidth", geometry.width())
-    context.setContextProperty("initialHeight", geometry.height())
+    engine.setInitialProperties({"x": geometry.x(), "y": geometry.y(),
+                                 "width": geometry.width(), "height": geometry.height()})
     qml_file = Path(__file__).parent / "main.qml"
     engine.load(QUrl.fromLocalFile(qml_file))
 
