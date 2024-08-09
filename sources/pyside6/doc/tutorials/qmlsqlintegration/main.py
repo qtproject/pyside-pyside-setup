@@ -5,13 +5,13 @@ from __future__ import annotations
 import sys
 import logging
 
-from PySide6.QtCore import QDir, QFile, QUrl
+from PySide6.QtCore import QCoreApplication, QDir, QFile, QStandardPaths
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtSql import QSqlDatabase
 
 # We import the file just to trigger the QmlElement type registration.
-import sqlDialog
+import sqlDialog  # noqa E703
 
 logging.basicConfig(filename="chat.log", level=logging.DEBUG)
 logger = logging.getLogger("logger")
@@ -24,9 +24,10 @@ def connectToDatabase():
         if not database.isValid():
             logger.error("Cannot add database")
 
-    write_dir = QDir("")
+    app_data = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppDataLocation)
+    write_dir = QDir(app_data)
     if not write_dir.mkpath("."):
-        logger.error("Failed to create writable directory")
+        logger.error(f"Failed to create writable directory {app_data}")
 
     # Ensure that we have a writable location on all devices.
     abs_path = write_dir.absolutePath()
@@ -42,12 +43,17 @@ def connectToDatabase():
 
 if __name__ == "__main__":
     app = QGuiApplication()
+    QCoreApplication.setOrganizationName("QtProject")
+    QCoreApplication.setApplicationName("Chat Tutorial")
+
     connectToDatabase()
 
     engine = QQmlApplicationEngine()
-    engine.load(QUrl("chat.qml"))
+    engine.addImportPath(sys.path[0])
+    engine.loadFromModule("Main", "Main")
 
     if not engine.rootObjects():
         sys.exit(-1)
 
     app.exec()
+    del engine

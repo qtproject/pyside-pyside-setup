@@ -59,17 +59,6 @@ class SqlConversationModel(QSqlTableModel):
         self.select()
         logging.debug("Table was loaded successfully.")
 
-    def setRecipient(self, recipient):
-        if recipient == self.recipient:
-            pass
-
-        self.recipient = recipient
-
-        filter_str = (f"(recipient = '{self.recipient}' AND author = 'Me') OR "
-                      f"(recipient = 'Me' AND author='{self.recipient}')")
-        self.setFilter(filter_str)
-        self.select()
-
     def data(self, index, role):
         if role < Qt.UserRole:
             return QSqlTableModel.data(self, index, role)
@@ -82,18 +71,11 @@ class SqlConversationModel(QSqlTableModel):
     def roleNames(self):
         """Converts dict to hash because that's the result expected
         by QSqlTableModel"""
-        names = {}
-        author = "author".encode()
-        recipient = "recipient".encode()
-        timestamp = "timestamp".encode()
-        message = "message".encode()
 
-        names[hash(Qt.UserRole)] = author
-        names[hash(Qt.UserRole + 1)] = recipient
-        names[hash(Qt.UserRole + 2)] = timestamp
-        names[hash(Qt.UserRole + 3)] = message
-
-        return names
+        return {int(Qt.UserRole): b"author",
+                Qt.UserRole + 1: b"recipient",
+                Qt.UserRole + 2: b"timestamp",
+                Qt.UserRole + 3: b"message"}
 
     # This is a workaround because PySide doesn't provide Q_INVOKABLE
     # So we declare this as a Slot to be able to call it  from QML
