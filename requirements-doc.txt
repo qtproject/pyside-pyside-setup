@@ -3,6 +3,7 @@ sphinx-design==0.6.0
 sphinx-copybutton==0.5.2
 sphinx-tags==0.4
 sphinx-toolbox==3.7.0
+sphinx-reredirects==0.1.5
 myst-parser==3.0.1
 # FIXME: Using fork in order to enable the 'collapse_navbar=True'
 # option for the sphinx-theme. Upstream proposal:

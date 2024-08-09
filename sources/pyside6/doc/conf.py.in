@@ -31,7 +31,7 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.ifconfig',
     'sphinx.ext.graphviz', 'inheritance_diagram', 'pysideinclude',
     'sphinx.ext.viewcode',
     'sphinx_design', 'sphinx_copybutton', 'myst_parser', 'sphinx_tags',
-    'sphinx_toolbox.decorators']
+    'sphinx_toolbox.decorators', 'sphinx_reredirects']
 
 myst_enable_extensions = [
     "amsmath",
@@ -241,4 +241,15 @@ tags_create_tags = True
 tags_create_badges = True
 tags_badge_colors = {
     "Android": "info",
+}
+
+# link redirection in sphinx
+redirects = {
+    "gettingstarted/porting_from2.html": "../faq/porting_from2.html",
+    "gettingstarted/package_details.html": "../package_details.html",
+    "gettingstarted/index.html": "../building_from_source/index.html",
+    "gettingstarted/linux.html": "../building_from_source/linux.html",
+    "gettingstarted/windows.html": "../building_from_source/windows.html",
+    "gettingstarted/macOS.html": "../building_from_source/macOS.html",
+    "quickstart.html": "gettingstarted.html"
 }
