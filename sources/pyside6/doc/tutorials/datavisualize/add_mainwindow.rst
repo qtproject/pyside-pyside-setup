@@ -1,3 +1,6 @@
+.. _tutorial_add_mainwindow:
+
+
 Chapter 3 - Create an empty QMainWindow
 ==========================================
 

@@ -1,3 +1,6 @@
+.. _tutorial_treewidget:
+
+
 Displaying Data Using a Tree Widget
 ===================================
 

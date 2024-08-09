@@ -1,3 +1,6 @@
+.. _tutorial_dialog:
+
+
 Creating a Dialog Application
 =============================
 

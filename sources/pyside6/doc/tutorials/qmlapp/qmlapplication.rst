@@ -1,3 +1,5 @@
+.. _tutorial_qmlapplication:
+
 #########################
 QML Application Tutorial
 #########################

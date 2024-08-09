@@ -1,3 +1,6 @@
+.. _tutorial_add_tableview:
+
+
 Chapter 4 - Add a QTableView
 =============================
 

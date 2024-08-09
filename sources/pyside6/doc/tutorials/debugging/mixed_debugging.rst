@@ -1,3 +1,6 @@
+.. _tutorial_mixed_debugging:
+
+
 How To Debug a C++ Extension of a PySide6 Application?
 ******************************************************
 

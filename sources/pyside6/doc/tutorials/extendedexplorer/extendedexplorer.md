@@ -1,3 +1,5 @@
+(tutorial_extendedexplorer)=
+
 # Extending the file system explorer example
 
 This tutorial shows how to extend the

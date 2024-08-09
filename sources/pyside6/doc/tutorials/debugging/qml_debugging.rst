@@ -1,3 +1,6 @@
+.. _tutorial_qml_debugging:
+
+
 Using Qt Creator's QML Debugger for a PySide6 QML Application
 *************************************************************
 

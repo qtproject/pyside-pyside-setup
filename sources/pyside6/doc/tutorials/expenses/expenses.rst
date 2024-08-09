@@ -1,3 +1,6 @@
+.. _tutorial_expenses:
+
+
 Expenses Tool Tutorial
 ======================
 

@@ -1,3 +1,6 @@
+.. _tutorial_add_chart:
+
+
 Chapter 5 - Add a chart view
 =============================
 

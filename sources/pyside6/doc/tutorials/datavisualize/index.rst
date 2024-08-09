@@ -1,3 +1,6 @@
+.. _datavisualize_index:
+
+
 Data Visualization Tool Tutorial
 *********************************
 

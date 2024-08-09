@@ -1,3 +1,6 @@
+.. _tutorial_widgets:
+
+
 Your First QtWidgets Application
 *********************************
 

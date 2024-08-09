@@ -1,4 +1,5 @@
-.. _widgetstyling:
+.. _tutorial_widgetstyling:
+
 
 Styling the Widgets Application
 ===============================

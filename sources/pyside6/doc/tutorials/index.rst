@@ -20,70 +20,80 @@ names and how they look like.
 
     .. grid-item-card:: Basic Widget
         :class-item: cover-img
-        :link: basictutorial/widgets.html
+        :link: tutorial_widgets
+        :link-type: ref
         :img-top: basictutorial/widgets.png
 
         Your first QtWidgets Application
 
     .. grid-item-card:: Basic Button
         :class-item: cover-img
-        :link: basictutorial/clickablebutton.html
+        :link: tutorial_clickablebutton
+        :link-type: ref
         :img-top: basictutorial/clickablebutton.png
 
         Using a Simple Button
 
     .. grid-item-card:: Basic Connections
         :class-item: cover-img
-        :link: basictutorial/signals_and_slots.html
+        :link: tutorial_signals_and_slots
+        :link-type: ref
         :img-top: basictutorial/signals_slots.png
 
         Signals and Slots
 
     .. grid-item-card:: Basic Dialog
         :class-item: cover-img
-        :link: basictutorial/dialog.html
+        :link: tutorial_dialog
+        :link-type: ref
         :img-top: basictutorial/dialog.png
 
         Creating a Dialog Application
 
     .. grid-item-card:: Basic Table
         :class-item: cover-img
-        :link: basictutorial/tablewidget.html
+        :link: tutorial_tablewidget
+        :link-type: ref
         :img-top: basictutorial/tablewidget.png
 
         Displaying Data Using a Table Widget
 
     .. grid-item-card:: Basic Tree
         :class-item: cover-img
-        :link: basictutorial/treewidget.html
+        :link: tutorial_treewidget
+        :link-type: ref
         :img-top: basictutorial/treewidget.png
 
         Displaying Data Using a Tree Widget
 
     .. grid-item-card:: Basic ``ui`` files
         :class-item: cover-img
-        :link: basictutorial/uifiles.html
+        :link: tutorial_uifiles
+        :link-type: ref
         :img-top: basictutorial/uifiles.png
 
         Using .ui files from Designer or QtCreator with QUiLoader and pyside6-uic
 
     .. grid-item-card:: Basic ``qrc`` files
         :class-item: cover-img
-        :link: basictutorial/qrcfiles.html
+        :link: tutorial_qrcfiles
+        :link-type: ref
         :img-top: basictutorial/player-new.png
 
         Using .qrc Files (pyside6-rcc)
 
     .. grid-item-card:: Basic Translations
         :class-item: cover-img
-        :link: basictutorial/translations.html
+        :link: tutorial_translations
+        :link-type: ref
         :img-top: basictutorial/translations.png
 
         Translating Applications
 
     .. grid-item-card:: Basic Widget Style
         :class-item: cover-img
-        :link: basictutorial/widgetstyling.html
+        :link: tutorial_widgetstyling
+        :link-type: ref
         :img-top: basictutorial/widgetstyling-yes.png
 
         Styling the Widgets Application
@@ -111,35 +121,40 @@ Quick/QML: Basic tutorials
 
     .. grid-item-card:: Basic Quick
         :class-item: cover-img
-        :link: basictutorial/qml.html
+        :link: tutorial_qml
+        :link-type: ref
         :img-top: basictutorial/greenapplication.png
 
         Your First QtQuick/QML Application
 
     .. grid-item-card:: Basic QML Integration
         :class-item: cover-img
-        :link: qmlintegration/qmlintegration.html
+        :link: tutorial_qmlintegration
+        :link-type: ref
         :img-top: qmlintegration/textproperties_material.png
 
         Python-QML integration
 
     .. grid-item-card:: QML Application
         :class-item: cover-img
-        :link: qmlapp/qmlapplication.html
+        :link: tutorial_qmlapplication
+        :link-type: ref
         :img-top: qmlapp/qmlapplication.png
 
         QML Application Tutorial (QtCreator)
 
     .. grid-item-card:: Advanced QML Integration
         :class-item: cover-img
-        :link: qmlsqlintegration/qmlsqlintegration.html
+        :link: tutorial_qmlsqlintegration
+        :link-type: ref
         :img-top: qmlsqlintegration/example_list_view.png
 
         QML, SQL and PySide Integration Tutorial
 
     .. grid-item-card:: Extended Explorer
         :class-item: cover-img
-        :link: extendedexplorer/extendedexplorer.html
+        :link: tutorial_extendedexplorer
+        :link-type: ref
         :img-top: extendedexplorer/resources/extendedexplorer.webp
 
         Extending an Qt Quick Controls example
@@ -162,14 +177,16 @@ General Applications
 
     .. grid-item-card:: Data Visualization
         :class-item: cover-img
-        :link: datavisualize/index.html
+        :link: datavisualize_index
+        :link-type: ref
         :img-top: datavisualize/images/datavisualization_app.png
 
         Data Visualization Tool
 
     .. grid-item-card:: Expenses Application
         :class-item: cover-img
-        :link: expenses/expenses.html
+        :link: tutorial_expenses
+        :link-type: ref
         :img-top: expenses/expenses_tool.png
 
         Expenses administration tool

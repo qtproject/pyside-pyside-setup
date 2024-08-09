@@ -1,4 +1,5 @@
-.. _signals-and-slots:
+.. _tutorial_signals_and_slots:
+
 
 Signals and Slots
 =================

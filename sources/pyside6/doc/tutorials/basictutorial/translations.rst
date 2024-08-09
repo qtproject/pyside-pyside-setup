@@ -1,4 +1,5 @@
-.. _translations:
+.. _tutorial_translations:
+
 
 Translating Applications
 ========================

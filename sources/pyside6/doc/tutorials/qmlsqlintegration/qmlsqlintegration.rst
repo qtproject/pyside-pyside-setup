@@ -1,3 +1,5 @@
+.. _tutorial_qmlsqlintegration:
+
 QML, SQL and PySide Integration Tutorial
 ########################################
 

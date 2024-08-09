@@ -1,3 +1,6 @@
+.. _tutorial_tablewidget:
+
+
 Displaying Data Using a Table Widget
 ====================================
 

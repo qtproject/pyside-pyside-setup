@@ -1,3 +1,6 @@
+.. _tutorial_plot_datapoints:
+
+
 Chapter 6 - Plot the data in the ChartView
 ===========================================
 

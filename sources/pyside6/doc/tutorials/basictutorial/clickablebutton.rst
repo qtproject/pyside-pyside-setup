@@ -1,3 +1,6 @@
+.. _tutorial_clickablebutton:
+
+
 Using a Simple Button
 =====================
 

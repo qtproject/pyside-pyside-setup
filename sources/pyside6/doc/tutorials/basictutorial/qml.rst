@@ -1,3 +1,6 @@
+.. _tutorial_qml:
+
+
 Your First QtQuick/QML Application
 **********************************
 
