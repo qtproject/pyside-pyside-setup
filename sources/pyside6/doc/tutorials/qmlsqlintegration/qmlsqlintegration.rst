@@ -16,7 +16,7 @@ The database contains a single line to mock the beginning of a conversation.
 
 .. literalinclude:: sqlDialog.py
    :linenos:
-   :lines: 4-43
+   :lines: 5-44
 
 The ``SqlConversationModel`` class offers the read-only data model required for the non-editable
 contacts list. It derives from the :ref:`QSqlQueryModel` class, which is the logical choice for
@@ -28,14 +28,7 @@ of a chat application.
 
 .. literalinclude:: sqlDialog.py
    :linenos:
-   :lines: 47-59
-
-In ``setRecipient()``, you set a filter over the returned results from the database, and
-emit a signal every time the recipient of the message changes.
-
-.. literalinclude:: sqlDialog.py
-   :linenos:
-   :lines: 61-70
+   :lines: 48-60
 
 The ``data()`` function falls back to ``QSqlTableModel``'s implementation if the role is not a
 custom user role.
@@ -44,18 +37,16 @@ that field, and then use that index to find the value to be returned.
 
 .. literalinclude:: sqlDialog.py
    :linenos:
-   :lines: 72-79
+   :lines: 62-69
 
 
 In ``roleNames()``, we return a Python dictionary with our custom role and role names as key-values
 pairs, so we can use these roles in QML.
 Alternatively, it can be useful to declare an Enum to hold all of the role values.
-Note that ``names`` has to be a hash to be used as a dictionary key,
-and that's why we're using the ``hash`` function.
 
 .. literalinclude:: sqlDialog.py
    :linenos:
-   :lines: 81-95
+   :lines: 71-78
 
 The ``send_message()`` function uses the given recipient and message to insert a new record into
 the database.
@@ -64,14 +55,14 @@ since all the changes will be cached in the model until you do so.
 
 .. literalinclude:: sqlDialog.py
    :linenos:
-   :lines: 97-116
+   :lines: 80-99
 
-chat.qml
+Main.qml
 --------
 
-Let's look at the ``chat.qml`` file.
+Let's look at the ``Main.qml`` file.
 
-.. literalinclude:: chat.qml
+.. literalinclude:: Main/Main.qml
    :linenos:
    :lines: 4-6
 
@@ -84,9 +75,9 @@ Next, import the Qt Quick Controls module.
 Among other things, this provides access to ``ApplicationWindow``, which replaces the existing
 root type, Window:
 
-Let's step through the ``chat.qml`` file.
+Let's step through the ``Main/Main.qml`` file.
 
-.. literalinclude:: chat.qml
+.. literalinclude:: Main/Main.qml
    :linenos:
    :lines: 9-14
 
@@ -101,7 +92,7 @@ Once we've set these, we have a properly sized, empty window ready to be filled 
 Because we are exposing the :code:`SqlConversationModel` class to QML, we will
 declare a component to access it:
 
-.. literalinclude:: chat.qml
+.. literalinclude:: Main/Main.qml
    :linenos:
    :lines: 16-18
 
@@ -113,11 +104,11 @@ There are two ways of laying out items in QML: `Item Positioners`_ and `Qt Quick
   resizable user interfaces.
   Below, we use `ColumnLayout`_ to vertically lay out a `ListView`_ and a `Pane`_.
 
-  .. literalinclude:: chat.qml
+  .. literalinclude:: Main/Main.qml
      :linenos:
      :lines: 20-23
 
-  .. literalinclude:: chat.qml
+  .. literalinclude:: Main/Main.qml
      :linenos:
      :lines: 72-74
 
@@ -148,7 +139,7 @@ remaining space that is left after accommodating the Pane.
 
 Let's look at the ``Listview`` in detail:
 
-.. literalinclude:: chat.qml
+.. literalinclude:: Main/Main.qml
    :linenos:
    :lines: 23-70
 
@@ -177,7 +168,7 @@ At the bottom of the screen, we place a `TextArea`_ item to allow multi-line tex
 button to send the message.
 We use Pane to cover the area under these two items:
 
-.. literalinclude:: chat.qml
+.. literalinclude:: Main/Main.qml
    :linenos:
    :lines: 72-96
 
@@ -194,6 +185,10 @@ recipient and one possible sender for this conversation we're just using strings
 .. _displayMarginEnd: https://doc.qt.io/qt-5/qml-qtquick-listview.html#displayMarginEnd-prop
 .. _TextArea: https://doc.qt.io/qt-5/qml-qtquick-controls2-textarea.html
 
+``Main.qml`` needs to be put into a directory named :code:`Main` along
+with a file named ``qmldir`` to describe a basic QML module:
+
+.. literalinclude:: Main/qmldir
 
 main.py
 -------
@@ -203,14 +198,14 @@ messages levels that our application will generate (errors, warnings, and inform
 
 .. literalinclude:: main.py
    :linenos:
-   :lines: 4-16
+   :lines: 5-17
 
 ``connectToDatabase()`` creates a connection with the SQLite database, creating the actual file
 if it doesn't already exist.
 
 .. literalinclude:: main.py
    :linenos:
-   :lines: 19-39
+   :lines: 20-41
 
 A few interesting things happen in the ``main`` function:
 
@@ -227,6 +222,6 @@ Finally, the Qt application runs, and your program starts.
 
 .. literalinclude:: main.py
    :linenos:
-   :lines: 42-52
+   :lines: 45-59
 
 .. image:: example_list_view.png
