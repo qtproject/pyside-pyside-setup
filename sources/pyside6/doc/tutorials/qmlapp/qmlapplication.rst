@@ -42,8 +42,9 @@ development process using *Qt Creator*:
    This should create a ``main.py`` and ```main.pyproject`` files
    for the project.
 
-#. Download :download:`view.qml<view.qml>` and :download:`logo.png <logo.png>`
-   and move them to your project folder.
+#. Download :download:`Main.qml<Main/Main.qml>`, :download:`qmldir<Main/qmldir>`
+   and :download:`logo.png <Main/logo.png>` and place them in a subdirectory
+   named `Main` in your project folder. This creates a basic QML module.
 
 #. Double-click on ``main.pyproject`` to open it in edit mode, and append
    ``view.qml`` and ``logo.png`` to the **files** list. This is how your
@@ -52,7 +53,7 @@ development process using *Qt Creator*:
    .. code::
 
     {
-        "files": ["main.py", "view.qml", "logo.png"]
+        "files": ["main.py", "Main/Main.qml", "Main/logo.png", "Main/qmldir"]
     }
 
 #. Now that you have the necessary bits for the application, import the
@@ -61,8 +62,8 @@ development process using *Qt Creator*:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 3-23
-      :emphasize-lines: 7-9,14-17
+      :lines: 5-23
+      :emphasize-lines: 5-7,12-15
 
 #. Now, set up the application window using
    :ref:`PySide6.QtGui.QGuiApplication<qguiapplication>`, which manages the application-wide
@@ -70,8 +71,8 @@ development process using *Qt Creator*:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 3-28
-      :emphasize-lines: 23-25
+      :lines: 5-28
+      :emphasize-lines: 21-24
 
    .. note:: Setting the resize policy is important if you want the
       root item to resize itself to fit the window or vice-a-versa.
@@ -83,23 +84,23 @@ development process using *Qt Creator*:
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 3-33
-      :emphasize-lines: 28-31
+      :lines: 5-33
+      :emphasize-lines: 26-29
 
-#. Load the ``view.qml`` to the ``QQuickView`` and call ``show()`` to
+#. Load the ``Main.qml`` to the ``QQuickView`` and call ``show()`` to
    display the application window.
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 3-42
-      :emphasize-lines: 33-40
+      :lines: 5-43
+      :emphasize-lines: 31-39
 
 #. Finally, execute the application to start the event loop and clean up.
 
    .. literalinclude:: main.py
       :linenos:
-      :lines: 3-
-      :emphasize-lines: 42-44
+      :lines: 5-
+      :emphasize-lines: 41-43
 
 #. Your application is ready to be run now. Select **Projects** mode to
    choose the Python version to run it.
@@ -128,5 +129,5 @@ this application:
 Related information
 ********************
 
-* `QML Reference <https://doc.qt.io/qt-5/qmlreference.html>`_
+* `QML Reference <https://doc.qt.io/qt-6/qmlreference.html>`_
 * :doc:`../qmlintegration/qmlintegration`
