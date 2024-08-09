@@ -253,3 +253,10 @@ redirects = {
     "gettingstarted/macOS.html": "../building_from_source/macOS.html",
     "quickstart.html": "gettingstarted.html"
 }
+
+# ignore relative paths when linkcheck is running
+# sphinx-build -b linkcheck -j auto -n -c <folder_of_conf.py> <folder_of_rst> <output_dir>
+linkcheck_ignore = [
+    r'^\.\./',  # Ignore all paths starting with ../
+    r'^\./',    # Ignore all paths starting with ./
+]
