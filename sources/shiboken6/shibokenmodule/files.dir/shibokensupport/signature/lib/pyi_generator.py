@@ -90,6 +90,11 @@ class Formatter(Writer):
         optional_searcher = re.compile(pattern, flags=re.VERBOSE)
 
         def optional_replacer(source):
+            # PYSIDE-2517: findChild/findChildren type hints:
+            # PlaceHolderType fix to avoid the '~' from TypeVar.__repr__
+            if "~PlaceHolderType" in str(source):
+                source = str(source).replace("~PlaceHolderType", "PlaceHolderType")
+
             return optional_searcher.sub(replace, str(source))
         self.optional_replacer = optional_replacer
         # self.level is maintained by enum_sig.py
@@ -274,15 +279,23 @@ def generate_pyi(import_name, outpath, options):
                         wr.print("import " + imp)
                 wr.print()
                 for mod, imports in filter_from_imports(FROM_IMPORTS, text):
-                    import_args = ', '.join(imports)
+                    # Sorting, and getting uniques to avoid duplications
+                    # on "Iterable" having a couple of entries.
+                    import_args = ', '.join(sorted(set(imports)))
                     if mod is None:
                         # special case, a normal import
                         wr.print(f"import {import_args}")
                     else:
                         wr.print(f"from {mod} import {import_args}")
+                # Adding extra typing import for types that are used in
+                # the followed generated lines
+                wr.print("from typing import TypeAlias, TypeVar")
                 wr.print()
                 wr.print()
                 wr.print("NoneType: TypeAlias = type[None]")
+                # We use it only in QtCore at the moment, but this
+                # could be extended to other modules.
+                wr.print("PlaceHolderType = TypeVar(\"PlaceHolderType\", bound=QObject)")
                 wr.print()
             else:
                 wr.print(line)

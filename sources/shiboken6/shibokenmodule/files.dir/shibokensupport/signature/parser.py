@@ -297,6 +297,11 @@ def to_string(thing):
     # i.e. it must be an idempotent mapping.
     if isinstance(thing, str):
         return thing
+    # PYSIDE-2517: findChild/findChildren type hints:
+    # TypeVar doesn't have a __qualname__ attribute,
+    # so we fall back to use __name__ before the next condition.
+    if isinstance(thing, typing.TypeVar):
+        return get_name(thing)
     if hasattr(thing, "__name__") and thing.__module__ != "typing":
         m = thing.__module__
         dot = "." in str(thing) or m not in (thing.__qualname__, "builtins")

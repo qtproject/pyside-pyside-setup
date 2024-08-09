@@ -38,6 +38,11 @@ QImageCleanupFunction = typing.Callable
 # Until we can force it to create Optional[t] again, we use this.
 NoneType = type(None)
 
+# PYSIDE-2517: findChild/findChildren type hints:
+# Placeholder so it does not trigger an UNDEFINED error while building.
+# Later it will be bound to a QObject, within the QtCore types extensions
+PlaceHolderType = TypeVar("PlaceHolderType")
+
 _S = TypeVar("_S")
 
 MultiMap = typing.DefaultDict[str, typing.List[str]]
@@ -207,6 +212,7 @@ type_map.update({
     "int": int,
     "List": ArrayLikeVariable,
     "Optional": typing.Optional,
+    "Iterable": typing.Iterable,
     "long": int,
     "long long": int,
     "nullptr": None,
@@ -463,7 +469,7 @@ def init_smart():
 
 # The PySide Part
 def init_PySide6_QtCore():
-    from PySide6.QtCore import Qt, QUrl, QDir, QKeyCombination
+    from PySide6.QtCore import Qt, QUrl, QDir, QKeyCombination, QObject
     from PySide6.QtCore import QRect, QRectF, QSize, QPoint, QLocale, QByteArray
     from PySide6.QtCore import QMarginsF  # 5.9
     from PySide6.QtCore import SignalInstance
@@ -472,6 +478,7 @@ def init_PySide6_QtCore():
         from PySide6.QtCore import Connection
     except ImportError:
         pass
+
     type_map.update({
         "' '": " ",
         "'%'": "%",
@@ -486,6 +493,8 @@ def init_PySide6_QtCore():
         "size_t": int,
         "NULL": None,  # 5.6, MSVC
         "nullptr": None,  # 5.9
+        # PYSIDE-2517: findChild/findChildren type hints:
+        "PlaceHolderType": typing.TypeVar("PlaceHolderType", bound=QObject),
         "PyBuffer": typing.Union[bytes, bytearray, memoryview],
         "PyByteArray": bytearray,
         "PyBytes": typing.Union[bytes, bytearray, memoryview],

@@ -1845,7 +1845,7 @@
 
         </inject-documentation>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchild-2"/>
-      <modify-argument index="return">
+      <modify-argument index="return" pyi-type="Optional[PlaceHolderType]">
         <parent index="this" action="add"/>
       </modify-argument>
     </add-function>
@@ -1855,14 +1855,14 @@
         Like the method *findChild*, the first parameter should be the child's type.
         </inject-documentation>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren"/>
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="Iterable[PlaceHolderType]">
             <parent index="this" action="add"/>
         </modify-argument>
     </add-function>
     <add-function signature="findChildren(PyTypeObject*@type@,const QRegularExpression&amp;@pattern@,Qt::FindChildOptions@options@=Qt::FindChildrenRecursively)"
                   return-type="PySequence*" >
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren"/>
-        <modify-argument index="return">
+        <modify-argument index="return" pyi-type="Iterable[PlaceHolderType]">
             <parent index="this" action="add"/>
         </modify-argument>
     </add-function>
