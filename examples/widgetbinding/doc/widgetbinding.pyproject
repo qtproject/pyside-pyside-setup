@@ -6,5 +6,8 @@
               "../registerwigglywidget.py",
               "../wigglywidget.cpp",
               "../wigglywidget.h",
-              "../wigglywidget.py"]
+              "../wigglywidget.py",
+              "../CMakeLists.txt",
+              "../bindings.xml"
+      ]
 }
