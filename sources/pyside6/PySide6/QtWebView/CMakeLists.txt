@@ -25,7 +25,7 @@ set(QtWebView_libraries pyside6
 set(QtWebView_deps QtGui)
 
 # for Windows and Linux, QtWebView depends on QtWebEngine to render content
-if (WIN32 OR UNIX)
+if ((WIN32 OR UNIX) AND NOT APPLE)
     list(APPEND QtWebView_deps QtWebEngineCore QtWebEngineQuick)
 endif()
 
