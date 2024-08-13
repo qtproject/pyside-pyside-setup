@@ -505,7 +505,7 @@ static int _finishSignaturesCommon(PyObject *module)
     // The finish_import function will not work the first time since phase 2
     // was not yet run. But that is ok, because the first import is always for
     // the shiboken module (or a test module).
-    const char *name = PyModule_GetName(module);
+    [[maybe_unused]] const char *name = PyModule_GetName(module);
     if (pyside_globals->finish_import_func == nullptr) {
         assert(strncmp(name, "PySide6.", 8) != 0);
         return 0;
