@@ -66,23 +66,23 @@ In this example, ``func()`` would treat ``var`` as a local
 name without the ``global`` statement. This would lead to
 a ``NameError`` in the ``value is None`` handling, on
 accessing ``var``. For more information about this, see
-`Python refernce documentation <python refdoc>`_.
+`Python reference documentation <python-refdoc_>`_.
 
-.. _python refdoc: https://docs.python.org/3/reference/simple_stmts.html#the-global-statement
+.. _python-refdoc: https://docs.python.org/3/reference/simple_stmts.html#the-global-statement
 
 .. tip:: Python being an interpreted language, most often
-   the easiest way is to try your idea in the interperter.
+   the easiest way is to try your idea in the interpreter.
    You could call the ``help()`` function in the
    interpreter on any built-in function or keyword in
    Python. For example, a call to ``help(import)`` should
-   provide documentation about the ``import`` statment
+   provide documentation about the ``import`` statement
 
 Last but not the least, try out a few examples to
 familiarize yourself with the Python coding style and
 follow the guidelines outlined in the
-`PEP8 - Style Guide <pep8>`_.
+`PEP8 - Style Guide <pep8_>`_.
 
-.. _pep8: <https://www.python.org/dev/peps/pep-0008/#naming-conventions>
+.. _pep8: https://www.python.org/dev/peps/pep-0008/#naming-conventions
 
 .. code-block:: python
 

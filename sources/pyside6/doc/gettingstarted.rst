@@ -22,7 +22,7 @@ Before you can install |project|, first you must install the following software:
   `virtualenv <https://virtualenv.pypa.io/en/latest>`_
   and avoid installing PySide6 via ``pip`` in your system.
 
-.. note:: For Windows users, please use the interpreter from https://python.org/download
+.. note:: For Windows users, please use the interpreter from https://www.python.org/downloads/
     rather than the one installed from the Microsoft Store.
 
 Installation

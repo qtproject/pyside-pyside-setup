@@ -1,3 +1,5 @@
+.. _sphx_tag_android:
+
 My tags: Android
 ################
 

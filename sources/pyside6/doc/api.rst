@@ -29,7 +29,7 @@ These are the main modules that help you build a Widget-based UI.
 QML and Qt Quick
 ----------------
 
-Use these modules to interact with the `QML Language <https://doc.qt.io/qt-5.qmlapplications>`_,
+Use these modules to interact with the `QML Language <https://doc.qt.io/qt-6/qmlapplications.html>`_,
 from Python.
 
 .. grid:: 1 3 3 3

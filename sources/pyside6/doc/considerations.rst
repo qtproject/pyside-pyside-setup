@@ -197,7 +197,7 @@ With the above features selected, this reads:
     self.table.horizontal_header().section_resize_mode = QHeaderView.Stretch
 
 Additionally, properties can also be declared directly in Shiboken for
-non Qt-libraries, see :ref:`property-declare`.
+non Qt-libraries, see :ref:`property-declare <shiboken6:property-declare>`.
 
 More about features
 ~~~~~~~~~~~~~~~~~~~

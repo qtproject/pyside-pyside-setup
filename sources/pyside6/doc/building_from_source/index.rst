@@ -1,3 +1,5 @@
+.. _buildingfromsource:
+
 Building from Source
 ====================
 
@@ -391,7 +393,7 @@ Troubleshooting
 
       --shiboken-host-path=...
 
-.. _`Manjaro ARM`: https://manjaro.org/download/#ARM
+.. _`Manjaro ARM`: https://manjaro.org/products/download/arm
 .. _`Archlinux ARM`: https://archlinuxarm.org
 .. _`ARM Developer Cross Compilers`: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
 .. _`gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu.tar.xz`: https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu.tar.xz
@@ -505,7 +507,7 @@ The offline documentation (QCH) can be viewed using the *Qt Creator* IDE or
 *Qt Assistant*, which is a standalone application for viewing QCH files.
 
 To view the QCH using *Qt Creator*, following the instructions outlined in
-`Using Qt Creator Help Mode <https://doc.qt.io/qtcreator/creator-help.html>`_.
+`Using Qt Creator Help Mode <https://doc.qt.io/qtcreator/creator-how-to-add-external-documentation.html>`_.
 If you chose to use *Qt Assistant* instead, use the following command to register
 the QCH file before launching *Qt Assistant*::
 

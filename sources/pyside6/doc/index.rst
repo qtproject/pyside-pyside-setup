@@ -7,7 +7,7 @@
     which enables you to use Python to write your Qt applications.
     The project has two main components:
 
-    * `PySide6`_, so that you can use Qt6 APIs in your Python applications, and
+    * :ref:`PySide6 <getting-started>`, so that you can use Qt6 APIs in your Python applications, and
     * `Shiboken6 <shiboken6/index.html>`__, a binding generator tool, which can
       be used to expose C++ projects to Python, and a Python module with
       some utility functions.
@@ -18,35 +18,28 @@
     which enables you to use Python to write your Qt applications.
     The project has two main components:
 
-    * `PySide6`_, so that you can use Qt6 APIs in your Python applications, and
+    * :ref:`PySide6 <getting-started>`, so that you can use Qt6 APIs in your Python applications, and
     * `Shiboken6 <../shiboken6/index.html>`__, a binding generator tool, which can
       be used to expose C++ projects to Python, and a Python module with
       some utility functions.
 
-`Porting from PySide2 to PySide6`_ provides information on porting existing PySide2
-applications.
+:ref:`Porting from PySide2 to PySide6 <faq-porting-from2>` provides information on porting existing
+PySide2 applications.
 
 This project is available under the LGPLv3/GPLv3 and the `Qt commercial license`_.
 
 .. _Qt: https://doc.qt.io
-.. _PySide6: gettingstarted.html
-.. _`Qt commercial license`: https://www.qt.io/licensing/
-.. _`Porting from PySide2 to PySide6`: faq/porting_from2.html
+.. _`Qt commercial license`: https://www.qt.io/licensing/`
 
 Quick Start
 ===========
 
 You can obtain the latest stable version by running ``pip install pyside6``.
-If you want to build it yourself, check the `Building from Source`_ guide.
+If you want to build it yourself, check the :ref:`Building from Source <buildingfromsource>` guide.
 
-To learn how to use it, check out `write your first application`_,
+To learn how to use it, check out :ref:`write your first application <gettingstarted>`,
 and to learn what is installed with the ``pyside6``, check the
-`package content, structure, and tools`_ page.
-
-
-.. _`Building from Source`: building_from_source/index.html
-.. _`write your first application`: gettingstarted.html
-.. _`package content, structure, and tools`: package_details.html
+:ref:`package content, structure, and tools <package_details>` page.
 
 Documentation
 =============

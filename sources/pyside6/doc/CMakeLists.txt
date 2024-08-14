@@ -117,7 +117,7 @@ set(HAS_WEBENGINE_WIDGETS 0)
 set(SKIP_SPHINX_WARNINGS 1)
 if (FULLDOCSBUILD)
     set(SKIP_SPHINX_WARNINGS 0)
-    set(SHIBOKEN_INTERSPHINX_FILE "${CMAKE_BINARY_DIR}/doc/html/shiboken6/doc/html/objects.inv")
+    set(SHIBOKEN_INTERSPHINX_FILE "${CMAKE_BINARY_DIR}/doc/html/shiboken6/objects.inv")
     # For Qt modules that are part of the documentation build:
     #    - Configure the module docconf file
     #    - Write shiboken header consisting of pyside6_global.h and module includes

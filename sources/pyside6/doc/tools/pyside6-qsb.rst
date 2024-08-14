@@ -3,7 +3,7 @@
 pyside6-qsb
 ===========
 
-``pyside6-qsb`` is a tool that wraps the `qsb <QSB Manual>`_ tool. qsb is a
+``pyside6-qsb`` is a tool that wraps the `qsb <QSB Manual_>`_ tool. qsb is a
 command line tool provided by the `Qt Shader Tools`_ module. It integrates
 third-party libraries such as `glslang`_ and `SPIRV-Cross`_, optionally invokes
 external tools, such as ``fxc`` or ``spirv-opt``, and generates .qsb files.

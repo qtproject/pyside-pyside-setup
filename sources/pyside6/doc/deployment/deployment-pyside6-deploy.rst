@@ -62,7 +62,7 @@ directory), to take the parameters from that file. This can be done with the fol
 pysidedeploy.spec
 =================
 
-As mentioned in the `Approach 2 <approach_two>`_ above, you can use this file to control the various
+As mentioned in the :ref:`Approach 2 <approach_two>` above, you can use this file to control the various
 parameters of the deployment process. The file has multiple sections, with each section containing
 multiple keys (parameters being controlled) assigned to a value. The advantages of such a file are
 two folds:
@@ -227,7 +227,7 @@ Creating a bug report
 If you are unsure if the bug is from ``pyside6-deploy`` or ``Nuitka``:
 
 #. Create a bug report in Qt for Python. See instructions
-   `here <https://wiki.qt.io/Qt_for_Python/Reporting_Bugs/>`_.
+   `here <https://wiki.qt.io/Qt_for_Python/Reporting_Bugs>`_.
 
 #. Run ``pyside6-deploy`` command with the ``--verbose`` option and replace ``--quiet`` with
    ``--verbose`` in the ``extra_args`` parameter in the ``pysidedeploy.spec`` file. Attach the

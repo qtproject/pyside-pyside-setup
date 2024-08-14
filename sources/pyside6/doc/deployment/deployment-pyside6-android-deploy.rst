@@ -176,7 +176,7 @@ done only once per Qt version, irrespective of the number of applications you ar
 Currently, cross-compiling Qt for Python wheels only works with a Linux host. Follow these steps
 to cross-compile Qt for Python Android wheels.
 
-#. `Download <qt_download>`_ and install Qt version for which you would like to create Qt for Python
+#. `Download <qt_download_>`_ and install Qt version for which you would like to create Qt for Python
    wheels.
 
 #. Cloning the Qt for Python repository::

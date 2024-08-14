@@ -1,3 +1,5 @@
+.. _faq-porting-from2:
+
 Porting Applications from PySide2 to PySide6
 ============================================
 

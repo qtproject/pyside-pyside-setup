@@ -141,4 +141,4 @@ and ``@index``. These are replaced with the x value, y value, and index of the p
 More information about that can be found in the documentation for
 `QtCharts.QXYSeries.pointLabelsFormat`_.
 
-.. _`QtCharts.QXYSeries.pointLabelsFormat`: https://doc.qt.io/qtforpython/PySide6/QtCharts/QXYSeries.html#PySide6.QtCharts.PySide6.QtCharts.QXYSeries.pointLabelsFormat
+.. _`QtCharts.QXYSeries.pointLabelsFormat`: https://doc.qt.io/qt-6/qxyseries.html#pointLabelsFormat-prop

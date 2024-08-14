@@ -3,7 +3,7 @@
 pyside6-balsam
 ==============
 
-``pyside6-qsb`` is a tool that wraps the `balsam <Balsam Asset Import Tool>`_
+``pyside6-qsb`` is a tool that wraps the `balsam <Balsam Asset Import Tool_>`_
 tool provided with Qt Quick 3D. The Balsam tool is a command line application
 that is part of Qt Quick 3D's asset conditioning pipeline. The purpose is to
 take assets created in digital content creation tools like `Maya`_, `3ds Max`_
