@@ -15,9 +15,9 @@ C++ examples
     .. grid-item-card:: Scriptable Application
         :class-item: cover-img
         :link: ../../examples/example_scriptableapplication_scriptableapplication.html
-        :img-top: ../../../_images/example_no_image.png
+        :img-top: ../../../pyside6/doc/example_no_image.png
 
     .. grid-item-card:: Widget Binding
         :class-item: cover-img
         :link: ../../examples/example_widgetbinding_widgetbinding.html
-        :img-top: ../../../_images/example_no_image.png
+        :img-top: ../../../pyside6/doc/example_no_image.png

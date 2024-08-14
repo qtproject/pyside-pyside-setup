@@ -25,7 +25,7 @@ in the type system paths passed as command line argument.
 Note that this is not a standard externally parsed entity due to the limitations
 of the underlying parser.
 
-.. _typesystem:
+.. _typesystem_details:
 
 typesystem
 ^^^^^^^^^^
@@ -93,7 +93,7 @@ load-typesystem
 
 The ``load-typesystem`` node specifies which type systems to load when mapping
 multiple libraries to another language or basing one library on another, and
-it is a child of the :ref:`typesystem` node.
+it is a child of the :ref:`typesystem_details` node.
 
 .. code-block:: xml
 
@@ -116,7 +116,7 @@ rejection
 ^^^^^^^^^
 
 The ``rejection`` node rejects the given class, or the specified function
-or field, and it is a child of the :ref:`typesystem` node.
+or field, and it is a child of the :ref:`typesystem_details` node.
 
 .. code-block:: xml
 
@@ -141,7 +141,7 @@ primitive-type
 ^^^^^^^^^^^^^^
 
 The ``primitive-type`` node describes how a primitive type is mapped from C++ to
-the target language, and is a child of the :ref:`typesystem` node. It may
+the target language, and is a child of the :ref:`typesystem_details` node. It may
 contain :ref:`conversion-rule` child nodes. Note that most primitives are
 already specified in the QtCore typesystem (see :ref:`primitive-cpp-types`).
 
@@ -203,7 +203,7 @@ namespace-type
 ^^^^^^^^^^^^^^
 
 The ``namespace-type`` node maps the given C++ namespace to the target
-language, and it is a child of the :ref:`typesystem` node or other
+language, and it is a child of the :ref:`typesystem_details` node or other
 ``namespace-type`` nodes. It may contain :ref:`add-function`,
 :ref:`declare-function`, :ref:`enum-type`, :ref:`extra-includes`,
 :ref:`include-element`, :ref:`modify-function`, ``namespace-type``,
@@ -267,7 +267,7 @@ enum-type
 ^^^^^^^^^
 
 The ``enum-type`` node maps the given enum from C++ to the target language,
-and it is a child of the :ref:`typesystem` node. Use
+and it is a child of the :ref:`typesystem_details` node. Use
 :ref:`reject-enum-value` child nodes to reject values.
 
 .. code-block:: xml
@@ -350,7 +350,7 @@ value-type
 
 The ``value-type`` node indicates that the given C++ type is mapped onto the target
 language as a value type. This means that it is an object passed by value on C++,
-i.e. it is stored in the function call stack. It is a child of the :ref:`typesystem`
+i.e. it is stored in the function call stack. It is a child of the :ref:`typesystem_details`
 node or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethoddef`,
 :ref:`configuration-element`, :ref:`declare-function`, :ref:`conversion-rule`,
 :ref:`enum-type`, :ref:`extra-includes`, :ref:`include-element`, :ref:`modify-function`,
@@ -429,7 +429,7 @@ object-type
 
 The object-type node indicates that the given C++ type is mapped onto the target
 language as an object type. This means that it is an object passed by pointer on
-C++ and it is stored on the heap. It is a child of the :ref:`typesystem` node
+C++ and it is stored on the heap. It is a child of the :ref:`typesystem_details` node
 or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethoddef`,
 :ref:`configuration-element`, :ref:`declare-function`, :ref:`enum-type`,
 :ref:`extra-includes`, :ref:`include-element`, :ref:`modify-function`,
@@ -551,7 +551,7 @@ container-type
 
 The ``container-type`` node indicates that the given class is a container and
 must be handled using one of the conversion helpers provided by attribute **type**.
-It is a child of the :ref:`typesystem` node and may contain
+It is a child of the :ref:`typesystem_details` node and may contain
 :ref:`conversion-rule` child nodes.
 
 .. code-block:: xml
@@ -596,7 +596,7 @@ opaque-container
 The ``opaque-container`` element can be used to add further instantiations
 of :ref:`opaque containers <opaque-containers>` to existing container types
 (built-in or specified by :ref:`container-type` in included modules).
-It is a child of the :ref:`typesystem` node.
+It is a child of the :ref:`typesystem_details` node.
 
 .. code-block:: xml
 
@@ -616,7 +616,7 @@ The ``typedef-type`` node allows for specifying typedefs in the typesystem. They
 are mostly equivalent to spelling out the typedef in the included header, which
 is often complicated when trying to wrap libraries whose source code cannot be
 easily extended.
-It is a child of the :ref:`typesystem` node or other type nodes.
+It is a child of the :ref:`typesystem_details` node or other type nodes.
 
 .. code-block:: xml
 
@@ -652,7 +652,7 @@ The ``custom-type`` node simply makes the parser aware of the existence of a tar
 language type, thus avoiding errors when trying to find a type used in function
 signatures and other places. The proper handling of the custom type is meant to
 be done by a generator using the APIExractor.
-It is a child of the :ref:`typesystem` node.
+It is a child of the :ref:`typesystem_details` node.
 
 .. code-block:: xml
 
@@ -681,7 +681,7 @@ The ``smart pointer`` type node indicates that the given class is a smart pointe
 and requires inserting calls to **getter** to access the pointeee.
 Currently, the usage is limited to function return values.
 **ref-count-method** specifies the name of the method used to do reference counting.
-It is a child of the :ref:`typesystem` node or other type nodes.
+It is a child of the :ref:`typesystem_details` node or other type nodes.
 
 The *optional* attribute **instantiations** specifies for which instantiations
 of the smart pointer wrappers will be generated (comma-separated list).
@@ -785,7 +785,7 @@ function
 ^^^^^^^^
 
 The ``function`` node indicates that the given C++ global function is mapped
-onto the target language. It is a child of the :ref:`typesystem` node
+onto the target language. It is a child of the :ref:`typesystem_details` node
 and may contain a :ref:`modify-function` child node.
 
 .. code-block:: xml
@@ -825,7 +825,7 @@ file or a system include path (indicated by a trailing slash) to be
 parsed. Normally, include files considered to be system include
 files are skipped by the C++ code parser. Its primary use case
 is exposing classes from the STL library.
-It is a child of the :ref:`typesystem` node.
+It is a child of the :ref:`typesystem_details` node.
 
 .. code-block:: xml
 

@@ -209,3 +209,25 @@ Qt Quick 3D
         :link-type: ref
 
         a graphical user interface for the ``pyside6-balsam`` tool.
+
+.. toctree::
+    :hidden:
+
+    pyside-assistant
+    pyside-designer
+    pyside-genpyi
+    pyside-linguist
+    pyside-lrelease
+    pyside-lupdate
+    pyside-metaobjectdump
+    pyside-project
+    pyside-qml
+    pyside-qmlcachegen
+    pyside-qmllint
+    pyside-qmltyperegistrar
+    pyside-rcc
+    pyside-uic
+    pyside6-balsam
+    pyside6-balsamui
+    pyside6-qmlimportscanner
+    pyside6-qsb

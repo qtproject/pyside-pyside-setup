@@ -10,7 +10,7 @@ template
 
 The ``template`` node registers a template that can be used to avoid
 duplicate code when extending the generated code, and it is a child of the
-:ref:`typesystem` node.
+:ref:`typesystem_details` node.
 
 .. code-block:: xml
 

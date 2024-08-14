@@ -268,7 +268,7 @@ add-function
 
 The ``add-function`` node allows you to add a given function onto the target
 language, and it is a child of an :ref:`object-type` or :ref:`value-type` nodes if the
-function is supposed to be a method, or :ref:`namespace` and :ref:`typesystem` if
+function is supposed to be a method, or :ref:`namespace` and :ref:`typesystem_details` if
 the function is supposed to be a function inside a namespace or a global function.
 It may contain :ref:`modify-argument` nodes.
 
@@ -333,7 +333,7 @@ declare-function
 The ``declare-function`` node allows you to declare a function present in
 the type and it is a child of an :ref:`object-type` or :ref:`value-type` nodes
 if the function is supposed to be a method, or :ref:`namespace` and
-:ref:`typesystem` if the function is supposed to be a function inside a
+:ref:`typesystem_details` if the function is supposed to be a function inside a
 namespace or a global function. It may contain :ref:`modify-argument` nodes.
 
 .. code-block:: xml

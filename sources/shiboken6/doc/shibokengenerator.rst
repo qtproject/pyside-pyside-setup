@@ -60,7 +60,7 @@ the typesystem and, in most cases, the injected code.
     well to prevent the headers from being suppressed in the generated
     code.
 
-::ref:`typesystem`: XML files that provides the developer with a tool to customize the
+::ref:`typesystem_details`: XML files that provides the developer with a tool to customize the
              way that the generators will see the classes and functions. For
              example, functions can be renamed, have its signature changed and
              many other actions.
