@@ -14,7 +14,7 @@ the QML source files.
 Usage
 -----
 
-Invoking the tool in the directory of the :ref:`filesystemexplorer_example`
+Invoking the tool in the directory of the :ref:`example_quickcontrols_filesystemexplorer`
 example using:
 
 .. code-block:: bash

@@ -1,9 +1,7 @@
-.. _qml-extension-objects-example:
-
 Extending QML - Extension Objects Example
 =========================================
 
-This example builds on the the :ref:`qml-adding-types-example`.
+This example builds on the the :ref:`example_qml_tutorials_extending-qml-advanced_adding`.
 
 Shows how to use QmlExtended decorator to provide an extension object to a
 QLineEdit without modifying or subclassing it.

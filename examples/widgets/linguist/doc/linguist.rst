@@ -1,5 +1,3 @@
-.. _qt-linguist-example:
-
 Qt Linguist Example
 ===================
 

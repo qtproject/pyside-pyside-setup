@@ -3,7 +3,7 @@
 # Extending the file system explorer example
 
 This tutorial shows how to extend the
-[Filesystem Explorer Example](filesystemexplorer_example)
+[Filesystem Explorer Example](example_quickcontrols_filesystemexplorer)
 by adding a simple scheme manager. This feature will allow you to switch color
 schemes during the application's runtime. The color schemes will be declared in
 JSON format and made available through a custom Python-QML plugin.

@@ -1,14 +1,12 @@
-.. _qml-binding-example:
-
 Extending QML - Binding Example
 ===============================
 
-This example builds on the :ref:`qml-adding-types-example`,
-the :ref:`qml-advanced-advanced5-attached-properties`,
-the :ref:`qml-advanced3-default-properties`,
-the :ref:`qml-advanced2-inheritance-and-coercion`
-the :ref:`qml-object-and-list-property-types-example`
-and the :ref:`qml-advanced/advanced6-property-value-source`.
+This example builds on the :ref:`example_qml_tutorials_extending-qml-advanced_adding`,
+the :ref:`example_qml_tutorials_extending-qml-advanced_advanced5-attached-properties`,
+the :ref:`example_qml_tutorials_extending-qml-advanced_advanced3-default-properties`,
+the :ref:`example_qml_tutorials_extending-qml-advanced_advanced2-inheritance-and-coercion`
+the :ref:`example_qml_tutorials_extending-qml-advanced_properties`
+and the :ref:`example_qml_tutorials_extending-qml-advanced_advanced6-property-value-source`.
 
 Running the Example
 -------------------

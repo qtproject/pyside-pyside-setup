@@ -1,5 +1,3 @@
-.. _qml-chapter1-basics:
-
 Extending QML - Creating a New Type
 ===================================
 

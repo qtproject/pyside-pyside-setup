@@ -1,5 +1,3 @@
-.. _qml-advanced-advanced4-grouped-properties:
-
 Extending QML (advanced) - Grouped Properties
 =============================================
 

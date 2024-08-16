@@ -223,7 +223,7 @@ Qt for Python provides a simple interface for this which is similar to
 
 The widget needs to be provided as a Python module, as shown by
 the :ref:`widgetbinding-example` (file ``wigglywidget.py``) or
-the :ref:`task-menu-extension-example` (file ``tictactoe.py``).
+the :ref:`example_designer_taskmenuextension` (file ``tictactoe.py``).
 
 Registering this with *Qt Widgets Designer* is done by providing
 a registration script named ``register*.py`` and pointing

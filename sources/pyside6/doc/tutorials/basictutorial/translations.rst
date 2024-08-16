@@ -13,7 +13,7 @@ Qt Linguist
 `Qt Linguist`_ and
 its related tools can be used to provide translations for applications.
 
-The :ref:`qt-linguist-example` example illustrates this. The example is
+The :ref:`example_widgets_linguist` example illustrates this. The example is
 very simple, it has a menu and shows a list of programming languages with
 multiselection.
 
@@ -121,7 +121,7 @@ GNU gettext
 The `GNU gettext`_ module
 can be used to provide translations for applications.
 
-The :ref:`gettext-example` example illustrates this. The example is
+The :ref:`example_widgets_gettext` example illustrates this. The example is
 very simple, it has a menu and shows a list of programming languages with
 multiselection.
 

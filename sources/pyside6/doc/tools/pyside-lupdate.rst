@@ -13,7 +13,7 @@ updates ``.ts`` files (see :ref:`translations`).
 Usage
 -----
 
-To create or update the ``.ts`` file of the :ref:`qt-linguist-example`,
+To create or update the ``.ts`` file of the :ref:`example_widgets_linguist`,
 run:
 
 .. code-block:: bash

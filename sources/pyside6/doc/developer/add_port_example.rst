@@ -48,6 +48,10 @@ Add a new example
   in the ``doc`` directory containing some description explaining them
   (see the `samplebinding` example).
 
+.. note:: The ``example_gallery`` tools automatically prepends an
+          auto-generated anchor to the example documentation, please use those for
+          linking to the documentation.
+
 Port a Qt example
 -----------------
 

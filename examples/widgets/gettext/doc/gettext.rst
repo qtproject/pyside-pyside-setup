@@ -1,5 +1,3 @@
-.. _gettext-example:
-
 GNU gettext Example
 ===================
 

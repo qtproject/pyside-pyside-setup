@@ -1,5 +1,3 @@
-.. _qml-chapter3-bindings:
-
 Extending QML - Adding Property Bindings
 ========================================
 

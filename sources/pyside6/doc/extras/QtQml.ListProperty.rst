@@ -3,8 +3,8 @@
 
     The ``ListProperty`` class allows applications to expose list-like properties of
     :class:`~PySide6.QtCore.QObject`-derived classes to QML.
-    The usage is shown in the :ref:`qml-object-and-list-property-types-example`
-    and the :ref:`qml-chapter5-listproperties` example.
+    The usage is shown in the :ref:`example_qml_tutorials_extending-qml-advanced_properties`
+    and the :ref:`example_qml_tutorials_extending-qml_chapter5-listproperties` example.
 
     .. py:method:: __init__(type, append, count=None, at=None, clear=None, removeLast=None, doc="", notify=None, designable=True, scriptable=True, stored=True, user=False, constant=False, final=False)
 

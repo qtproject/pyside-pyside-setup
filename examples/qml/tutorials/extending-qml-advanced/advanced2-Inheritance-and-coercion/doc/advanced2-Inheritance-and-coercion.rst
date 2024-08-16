@@ -1,5 +1,3 @@
-.. _qml-advanced2-inheritance-and-coercion:
-
 Extending QML (advanced) - Inheritance and Coercion
 ===================================================
 

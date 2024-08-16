@@ -1,5 +1,3 @@
-.. _qml-chapter6-plugins-example:
-
 Extending QML - Plugins Example
 ===============================
 

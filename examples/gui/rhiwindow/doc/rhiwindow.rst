@@ -1,5 +1,3 @@
-.. _rhi-window-example:
-
 RHI Window Example
 ==================
 

@@ -1,5 +1,3 @@
-.. _task-menu-extension-example:
-
 Task Menu Extension Example
 ===========================
 

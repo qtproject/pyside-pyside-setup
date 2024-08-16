@@ -1,11 +1,9 @@
-.. _qml-object-and-list-property-types-example:
-
 Extending QML - Object and List Property Types Example
 ======================================================
 
 Exporting C++ Properties.
 
-This example builds on :ref:`qml-adding-types-example`.
+This example builds on :ref:`example_qml_tutorials_extending-qml-advanced_adding`.
 
 The Object and List Property Types example shows how to add object and list
 properties in QML. This example adds a BirthdayParty type that specifies a

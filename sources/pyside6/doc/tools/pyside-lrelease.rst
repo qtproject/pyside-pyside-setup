@@ -15,7 +15,7 @@ for translations (see :ref:`translations`).
 Usage
 -----
 
-To convert a ``.ts`` file of the :ref:`qt-linguist-example`
+To convert a ``.ts`` file of the :ref:`example_widgets_linguist`
 into its binary representation, run:
 
 .. code-block:: bash

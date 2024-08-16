@@ -1,5 +1,3 @@
-.. _qml-advanced1-base-project:
-
 Extending QML (advanced) - BirthdayParty Base Project
 =====================================================
 

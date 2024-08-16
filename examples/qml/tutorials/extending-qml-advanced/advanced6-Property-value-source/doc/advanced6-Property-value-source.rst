@@ -1,5 +1,3 @@
-.. _qml-advanced/advanced6-property-value-source:
-
 Extending QML (advanced) - Property Value Source
 ================================================
 

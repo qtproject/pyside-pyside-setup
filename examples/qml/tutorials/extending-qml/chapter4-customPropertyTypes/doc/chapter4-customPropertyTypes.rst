@@ -1,5 +1,3 @@
-.. _qml-chapter4-custompropertytypes:
-
 Extending QML - Using Custom Property Types
 ===========================================
 

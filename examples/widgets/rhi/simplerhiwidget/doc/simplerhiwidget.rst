@@ -1,12 +1,10 @@
-.. _rhi-widget-example:
-
 Simple RHI Widget Example
 =========================
 
 Shows how to render a triangle using ``QRhi``, Qt's 3D API and shading
 language abstraction layer.
 
-This example is, in many ways, the counterpart of the :ref:`rhi-window-example`
+This example is, in many ways, the counterpart of the :ref:`example_gui_rhiwindow`
 in the QWidget world. The ``QRhiWidget`` subclass in this applications renders
 a single triangle, using a simple graphics pipeline with basic vertex and
 fragment shaders. Unlike the plain ``QWindow``-based application, this example

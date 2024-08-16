@@ -1,5 +1,3 @@
-.. _qml-advanced3-default-properties:
-
 Extending QML (advanced) - Default Properties
 =============================================
 

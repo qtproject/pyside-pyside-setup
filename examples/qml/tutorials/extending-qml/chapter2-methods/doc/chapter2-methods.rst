@@ -1,5 +1,3 @@
-.. _qml-chapter2-methods:
-
 Extending QML - Connecting to C++ Methods and Signals
 =====================================================
 

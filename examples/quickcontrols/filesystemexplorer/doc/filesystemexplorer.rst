@@ -1,5 +1,3 @@
-.. _filesystemexplorer_example:
-
 Qt Quick Controls - Filesystem Explorer
 =======================================
 

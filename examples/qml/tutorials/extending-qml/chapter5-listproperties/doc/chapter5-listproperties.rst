@@ -1,5 +1,3 @@
-.. _qml-chapter5-listproperties:
-
 Extending QML - Using List Property Types
 =========================================
 

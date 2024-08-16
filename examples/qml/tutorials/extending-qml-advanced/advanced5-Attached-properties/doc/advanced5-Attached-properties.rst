@@ -1,5 +1,3 @@
-.. _qml-advanced-advanced5-attached-properties:
-
 Extending QML (advanced) - Attached Properties
 ==============================================
 
