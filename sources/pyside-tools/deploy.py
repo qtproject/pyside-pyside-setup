@@ -29,6 +29,7 @@ from __future__ import annotations
 
 """
 
+import sys
 import argparse
 import logging
 import traceback
@@ -131,6 +132,15 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
     if init:
         # config file created above. Exiting.
         logging.info(f"[DEPLOY]: Config file {config.config_file} created")
+        return
+
+    # If modules contain QtSql and the platform is macOS, then pyside6-deploy will not work
+    # currently. The fix ideally will have to come from Nuitka.
+    # See PYSIDE-2835
+    # TODO: Remove this check once the issue is fixed in Nuitka
+    # Nuitka Issue: https://github.com/Nuitka/Nuitka/issues/3079
+    if "Sql" in config.modules and sys.platform == "darwin":
+        print("[DEPLOY] QtSql Application is not supported on macOS with pyside6-deploy")
         return
 
     try:
