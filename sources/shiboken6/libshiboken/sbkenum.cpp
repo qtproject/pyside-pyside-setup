@@ -218,10 +218,15 @@ int enumOption{};
 
 bool check(PyObject *pyObj)
 {
+    return checkType(Py_TYPE(pyObj));
+}
+
+bool checkType(PyTypeObject *pyTypeObj)
+{
     init_enum();
 
     static PyTypeObject *meta = getPyEnumMeta();
-    return Py_TYPE(Py_TYPE(pyObj)) == reinterpret_cast<PyTypeObject *>(meta);
+    return Py_TYPE(pyTypeObj) == reinterpret_cast<PyTypeObject *>(meta);
 }
 
 PyObject *getEnumItemFromValue(PyTypeObject *enumType, EnumValueType itemValue)

@@ -52,6 +52,7 @@ LIBSHIBOKEN_API extern int enumOption;
 using EnumValueType = long long;
 
 LIBSHIBOKEN_API bool check(PyObject *obj);
+LIBSHIBOKEN_API bool checkType(PyTypeObject *pyTypeObj);
 
 LIBSHIBOKEN_API PyObject *newItem(PyTypeObject *enumType, EnumValueType itemValue,
                                   const char *itemName = nullptr);
