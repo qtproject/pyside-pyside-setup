@@ -64,6 +64,7 @@ static constexpr auto initFuncPrefix = "init_"_L1;
 
 static constexpr auto sbkObjectTypeF = "SbkObject_TypeF()"_L1;
 static constexpr auto enumConverterPythonType = "Enum"_L1;
+static constexpr auto flagsConverterPythonType = "Flag"_L1;
 static const char initInheritanceFunction[] = "initInheritance";
 
 static QString mangleName(QString name)
@@ -502,7 +503,8 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
         s << HeaderGenerator::protectedHackDefine;
 
     QByteArrayList cppIncludes{"typeinfo", "iterator", // for containers
-                               "cctype", "cstring"};
+                               "cctype", "cstring",
+                               "type_traits"}; // enum/underlying type
     // headers
     s << "// default includes\n";
     s << "#include <shiboken.h>\n";
@@ -1661,10 +1663,30 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMeta
 
     c.clear();
 
-    c << "const int castCppIn = int(*reinterpret_cast<const "
+    c << "using IntType = std::underlying_type_t<" << cppTypeName << ">;\n"
+         "const auto castCppIn = IntType(*reinterpret_cast<const "
         << cppTypeName << " *>(cppIn));\n" << "return "
         << "Shiboken::Enum::newItem(" << enumPythonType << ", castCppIn);\n";
+    s << '\n';
     writeCppToPythonFunction(s, c.toString(), typeName, enumConverterPythonType);
+    s << '\n';
+
+    auto flags = enumType->flags();
+    if (!flags)
+        return;
+    QString flagsType = "QFlags<"_L1 + cppTypeName + u'>';
+
+    c.clear();
+    c << "const auto value = "<< flagsType << "::fromInt(Shiboken::Enum::getValue(pyIn));\n"
+        << "*reinterpret_cast<" << flagsType << " *>(cppOut) = value;\n";
+    writePythonToCppFunction(s, c.toString(), flagsConverterPythonType, typeName);
+
+    c.clear();
+    c << "const auto flags = *reinterpret_cast<const " << flagsType
+        << " *>(cppIn);\n"
+        << "return Shiboken::Enum::newItem(" << enumPythonType << ", flags.toInt());\n";
+    s << '\n';
+    writeCppToPythonFunction(s, c.toString(), typeName, flagsConverterPythonType);
     s << '\n';
 }
 
@@ -4276,15 +4298,26 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const Abstrac
     QString toCpp = pythonToCppFunctionName(enumConverterPythonType, typeName);
     const QString isConv = convertibleToCppFunctionName(enumConverterPythonType, typeName);
     writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
-    s << "Shiboken::Enum::setTypeConverter(" << enumPythonVar
-        << ", converter);\n"
-        << registerConverterName(enumType->qualifiedCppName(), {},
-                                 registerConverterName::PartiallyQualifiedAliases);
+    s << registerConverterName(enumType->qualifiedCppName(), {},
+                               registerConverterName::PartiallyQualifiedAliases);
 
-    if (auto flags = enumType->flags())
+    QString flagsConverter = "nullptr"_L1;
+    if (auto flags = enumType->flags()) {
+        flagsConverter = "flagsConverter"_L1;
+        toCpp = pythonToCppFunctionName(flagsConverterPythonType, typeName);
+        s << "SbkConverter *" << flagsConverter
+            << " = Shiboken::Conversions::createConverter("
+            << enumPythonVar << ',' << '\n' << indent
+            << cppToPythonFunctionName(typeName, flagsConverterPythonType)
+            << ");\n" << outdent;
+        writeAddPythonToCppConversion(s, flagsConverter, toCpp, isConv);
         s << "// Register converter for flag '" << flags->qualifiedCppName() << "'.\n"
-            << registerConverterName(flags->name()) // QMetaType
-            << registerConverterName(flags->originalName()); // Signals with flags
+            << registerConverterName(flags->name(), flagsConverter) // QMetaType
+            << registerConverterName(flags->originalName(), flagsConverter); // Signals with flags
+    }
+
+    s << "Shiboken::Enum::setTypeConverter(" << enumPythonVar
+        << ", converter, " << flagsConverter << ");\n";
 
     s << outdent << "}\n";
 }

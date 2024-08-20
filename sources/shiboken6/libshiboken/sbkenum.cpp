@@ -274,10 +274,12 @@ EnumValueType getValue(PyObject *enumItem)
     return PyLong_AsLongLong(pyValue);
 }
 
-void setTypeConverter(PyTypeObject *type, SbkConverter *converter)
+void setTypeConverter(PyTypeObject *type, SbkConverter *converter,
+                      SbkConverter *flagsConverter)
 {
-    auto *enumType = reinterpret_cast<SbkEnumType *>(type);
-    PepType_SETP(enumType)->converter = converter;
+    SbkEnumTypePrivate *priv = PepType_SETP(reinterpret_cast<SbkEnumType *>(type));
+    priv->converter = converter;
+    priv->flagsConverter = flagsConverter;
 }
 
 static PyTypeObject *createEnumForPython(PyObject *scopeOrModule,

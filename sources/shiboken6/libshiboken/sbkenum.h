@@ -21,6 +21,7 @@ struct SbkEnumType;
 struct SbkEnumTypePrivate
 {
     SbkConverter *converter;
+    SbkConverter *flagsConverter;
 };
 
 /// PYSIDE-1735: Pass on the Python enum/flag information.
@@ -62,7 +63,8 @@ LIBSHIBOKEN_API PyObject *getEnumItemFromValue(PyTypeObject *enumType,
                                                EnumValueType itemValue);
 
 /// Sets the enum/flag's type converter.
-LIBSHIBOKEN_API void setTypeConverter(PyTypeObject *type, SbkConverter *converter);
+LIBSHIBOKEN_API void setTypeConverter(PyTypeObject *type, SbkConverter *converter,
+                                      SbkConverter *flagsConverter = nullptr);
 
 /// Creating Python enums for different types.
 LIBSHIBOKEN_API PyTypeObject *createPythonEnum(PyObject *module,

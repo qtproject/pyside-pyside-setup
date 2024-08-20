@@ -1132,10 +1132,8 @@ SbkEnumTypePrivate *PepType_SETP(SbkEnumType *enumType)
     if (enumType == SETP_key)
         return SETP_value;
     auto it = SETP_extender.find(enumType);
-    if (it == SETP_extender.end()) {
-        it = SETP_extender.insert({enumType, {}}).first;
-        memset(&it->second, 0, sizeof(SbkEnumTypePrivate));
-    }
+    if (it == SETP_extender.end())
+        it = SETP_extender.insert({enumType, SbkEnumTypePrivate{nullptr, nullptr}}).first;
     SETP_key = enumType;
     SETP_value = &it->second;
     return SETP_value;

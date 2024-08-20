@@ -705,8 +705,10 @@ QString ShibokenGenerator::converterObject(const TypeEntryCPtr &type)
                + cpythonTypeNameExt(type) + "))->converter"_L1;
     }
 
-    if (type->isEnum() || type->isFlags())
+    if (type->isEnum())
         return sbkEnumPrivate(cpythonTypeNameExt(type)) + "->converter"_L1;
+    if (type->isFlags())
+        return sbkEnumPrivate(cpythonTypeNameExt(type)) + "->flagsConverter"_L1;
 
     if (type->isArray()) {
         qCWarning(lcShiboken, "Warning: no idea how to handle the Qt type \"%s\"",
