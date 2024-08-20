@@ -80,22 +80,46 @@ class Formatter(Writer):
             typing.TypeVar.__repr__ = _typevar__repr__
         except TypeError:
             pass
+
         # Adding a pattern to substitute "Union[T, NoneType]" by "Optional[T]"
         # I tried hard to replace typing.Optional by a simple override, but
         # this became _way_ too much.
         # See also the comment in layout.py .
-        brace_pat = build_brace_pattern(3, ",")
-        pattern = fr"\b Union \s* \[ \s* {brace_pat} \s*, \s* NoneType \s* \]"
-        replace = r"Optional[\1]"
-        optional_searcher = re.compile(pattern, flags=re.VERBOSE)
+
+        # PYSIDE-2786: Since Python 3.9, we can use the "|" notation.
+        #              Transform "Union" and "Optional" this way.
+        brace_pat = build_brace_pattern(3, ",=")
+        opt_uni_searcher = re.compile(fr"""
+                \b                      # edge of a word
+                (Optional | Union)      # word to find
+                \s*                     # optional whitespace
+                (?= \[ )                # Lookahead enforces a square bracket
+                {brace_pat}             # braces tower, one capturing brace level
+            """, flags=re.VERBOSE)
+        brace_searcher = re.compile(brace_pat, flags=re.VERBOSE)
+        split = brace_searcher.split
 
         def optional_replacer(source):
+            source = str(source)
             # PYSIDE-2517: findChild/findChildren type hints:
             # PlaceHolderType fix to avoid the '~' from TypeVar.__repr__
-            if "~PlaceHolderType" in str(source):
-                source = str(source).replace("~PlaceHolderType", "PlaceHolderType")
+            if "~PlaceHolderType" in source:
+                source = source.replace("~PlaceHolderType", "PlaceHolderType")
 
-            return optional_searcher.sub(replace, str(source))
+            while match := opt_uni_searcher.search(source):
+                start = match.start()
+                end = match.end()
+                name = match.group(1)
+                body = match.group(2).strip()[1:-1]
+                # Note: this list is interspersed with "," and surrounded by "", see parser.py
+                parts = [x.strip() for x in split(body) if x.strip() not in ("", ",")]
+                if name == "Optional":
+                    parts.append("None")
+                parts = list(("None" if part == "NoneType" else part) for part in parts)
+                res = " | ".join(parts)
+                source = source[: start] + res + source[end :]
+            return source
+
         self.optional_replacer = optional_replacer
         # self.level is maintained by enum_sig.py
         # self.is_method() is true for non-plain functions.

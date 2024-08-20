@@ -37,6 +37,8 @@ def build_brace_pattern(level, separators):
     There are other regex engines available which allow recursive patterns,
     avoiding this problem completely. It might be considered to switch to
     such an engine if the external module is not a problem.
+
+    Note: This pattern has exactly one capturing group.
     """
     assert type(separators) is str
 
