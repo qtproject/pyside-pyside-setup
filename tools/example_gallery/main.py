@@ -259,14 +259,14 @@ def remove_licenses(s):
     return "\n".join(new_s)
 
 
-def make_zip_archive(zip_name, src, skip_dirs=None):
+def make_zip_archive(zip_file, src, skip_dirs=None):
     src_path = Path(src).expanduser().resolve(strict=True)
     if skip_dirs is None:
         skip_dirs = []
     if not isinstance(skip_dirs, list):
         print("Error: A list needs to be passed for 'skip_dirs'")
         return
-    with zipfile.ZipFile(src_path.parents[0] / Path(zip_name), 'w', zipfile.ZIP_DEFLATED) as zf:
+    with zipfile.ZipFile(zip_file, 'w', zipfile.ZIP_DEFLATED) as zf:
         for file in src_path.rglob('*'):
             skip = False
             _parts = file.relative_to(src_path).parts
@@ -291,11 +291,10 @@ def get_code_tabs(files, project_dir, file_format):
     content = "\n"
 
     # Prepare ZIP file, and copy to final destination
-    zip_name = f"{project_dir.name}.zip"
-    make_zip_archive(zip_name, project_dir, skip_dirs=["doc"])
-    zip_src = f"{project_dir}.zip"
-    zip_dst = EXAMPLES_DOC / zip_name
-    shutil.move(zip_src, zip_dst)
+    # Handle examples which only have a dummy pyproject file in the "doc" dir
+    zip_root = project_dir.parent if project_dir.name == "doc" else project_dir
+    zip_name = f"{zip_root.name}.zip"
+    make_zip_archive(EXAMPLES_DOC / zip_name, zip_root, skip_dirs=["doc"])
 
     if file_format == Format.RST:
         content += f":download:`Download this example <{zip_name}>`\n\n"
