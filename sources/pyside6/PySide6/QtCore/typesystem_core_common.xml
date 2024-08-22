@@ -2227,6 +2227,9 @@
     <add-function signature="__msetitem__">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qbytearray-msetitem"/>
     </add-function>
+    <modify-function signature="fromRawData(const char*, qsizetype)">
+      <modify-argument index="1" pyi-type="str"/>
+    </modify-function>
   </value-type>
   <primitive-type name="QByteArrayView" view-on="QByteArray">
     <conversion-rule>
