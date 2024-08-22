@@ -42,7 +42,7 @@ def run_command(command, dry_run: bool, fetch_output: bool = False):
 
 
 @lru_cache
-def run_qmlimportscanner(qml_files: list[Path], dry_run: bool):
+def run_qmlimportscanner(qml_files: tuple[Path], dry_run: bool):
     """
         Runs pyside6-qmlimportscanner to find all the imported qml modules in project_dir
     """

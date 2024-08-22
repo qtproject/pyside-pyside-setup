@@ -318,7 +318,8 @@ class Config(BaseConfig):
 
     def _find_and_set_excluded_qml_plugins(self):
         if self.qml_files:
-            self.qml_modules = set(run_qmlimportscanner(qml_files=self.qml_files,
+            self.qml_modules = set(run_qmlimportscanner(qml_files=tuple(self.qml_files),
+                                                        # tuple is needed to make it hashable
                                                         dry_run=self.dry_run))
             self.excluded_qml_plugins = EXCLUDED_QML_PLUGINS.difference(self.qml_modules)
 
