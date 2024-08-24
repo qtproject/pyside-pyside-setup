@@ -13,6 +13,7 @@ This script generates .pyi files for arbitrary modules.
 """
 
 import argparse
+import inspect
 import io
 import logging
 import os
@@ -62,6 +63,27 @@ class Formatter(Writer):
         self.options = options
         Writer.__init__(self, outfile, *args)
 
+    # Re-add the `typing` prefix that inspect would throw away.
+    # We do that by overwriting the relevant part of the function.
+
+    backup = inspect.formatannotation
+
+    @classmethod
+    def formatannotation(cls, annotation, base_module=None):
+        if getattr(annotation, '__module__', None) == 'typing':
+            # do not remove the prefix!
+            return repr(annotation)
+        # do the normal action.
+        return cls.backup(annotation, base_module)
+
+    @classmethod
+    def fix_typing_prefix(cls, signature):
+        # modify the module, format the signature, restore the module.
+        inspect.formatannotation = cls.formatannotation
+        stringized = str(signature)
+        inspect.formatannotation = cls.backup
+        return stringized
+
     # Adding a pattern to substitute "Union[T, NoneType]" by "Optional[T]"
     # I tried hard to replace typing.Optional by a simple override, but
     # this became _way_ too much.
@@ -72,7 +94,8 @@ class Formatter(Writer):
     brace_pat = build_brace_pattern(3, ",=")
     opt_uni_searcher = re.compile(fr"""
             \b                      # edge of a word
-            (Optional|Union)        # word to find
+            (typing\.Optional |
+             typing\.Union)         # word to find
             \s*                     # optional whitespace
             (?= \[ )                # Lookahead enforces a square bracket
             {brace_pat}             # braces tower, one capturing brace level
@@ -80,8 +103,8 @@ class Formatter(Writer):
     brace_searcher = re.compile(brace_pat, flags=re.VERBOSE)
     split = brace_searcher.split
 
+    @classmethod
     def optional_replacer(cls, source):
-        source = str(source)
         # PYSIDE-2517: findChild/findChildren type hints:
         # PlaceHolderType fix to avoid the '~' from TypeVar.__repr__
         if "~PlaceHolderType" in source:
@@ -94,7 +117,7 @@ class Formatter(Writer):
             body = match.group(2).strip()[1:-1]
             # Note: this list is interspersed with "," and surrounded by "", see parser.py
             parts = [x.strip() for x in cls.split(body) if x.strip() not in ("", ",")]
-            if name == "Optional":
+            if name == "typing.Optional":
                 parts.append("None")
             parts = list(("None" if part == "NoneType" else part) for part in parts)
             res = " | ".join(parts)
@@ -140,7 +163,7 @@ class Formatter(Writer):
         spaces = indent * self.level
         if isinstance(signature, list):
             for sig in signature:
-                self.print(f'{spaces}@overload')
+                self.print(f'{spaces}@typing.overload')
                 self._function(func_name, sig, spaces)
         else:
             self._function(func_name, signature, spaces, decorator)
@@ -155,6 +178,8 @@ class Formatter(Writer):
         elif self.is_method() and "self" not in signature.parameters:
             kind = "class" if "cls" in signature.parameters else "static"
             self.print(f'{spaces}@{kind}method')
+        # the formatting with the inspect module explicitly removes the `typing` prefix.
+        signature = self.fix_typing_prefix(signature)
         # from now on, the signature will be stringized.
         signature = self.optional_replacer(signature)
         self.print(f'{spaces}def {func_name}{signature}: ...')
@@ -175,7 +200,7 @@ class Formatter(Writer):
     @contextmanager
     def signal(self, class_name, sig_name, sig_str):
         spaces = indent * self.level
-        self.print(f"{spaces}{sig_name:25}: ClassVar[{class_name}] = ... # {sig_str}")
+        self.print(f"{spaces}{sig_name:25}: typing.ClassVar[{class_name}] = ... # {sig_str}")
         yield
 
 
@@ -187,7 +212,7 @@ FROM_IMPORTS = [
     (None, ["builtins"]),
     (None, ["os"]),
     (None, ["enum"]),
-    ("typing", sorted(typing.__all__)),
+    (None, ["typing"]),
     ("collections.abc", ["Iterable"]),
     ("PySide6.QtCore", ["PyClassProperty", "Signal", "SignalInstance"]),
     ("shiboken6", ["Shiboken"]),
@@ -292,15 +317,12 @@ def generate_pyi(import_name, outpath, options):
                         wr.print(f"import {import_args}")
                     else:
                         wr.print(f"from {mod} import {import_args}")
-                # Adding extra typing import for types that are used in
-                # the followed generated lines
-                wr.print("from typing import TypeAlias, TypeVar")
                 wr.print()
                 wr.print()
-                wr.print("NoneType: TypeAlias = type[None]")
+                wr.print("NoneType: typing.TypeAlias = type[None]")
                 # We use it only in QtCore at the moment, but this
                 # could be extended to other modules.
-                wr.print("PlaceHolderType = TypeVar(\"PlaceHolderType\", bound=QObject)")
+                wr.print("PlaceHolderType = typing.TypeVar(\"PlaceHolderType\", bound=QObject)")
                 wr.print()
             else:
                 wr.print(line)
