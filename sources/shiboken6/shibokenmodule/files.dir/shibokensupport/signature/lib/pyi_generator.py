@@ -57,72 +57,52 @@ class Formatter(Writer):
     The separation in formatter and enumerator is done to keep the
     unrelated tasks of enumeration and formatting apart.
     """
+
     def __init__(self, outfile, options, *args):
-        # XXX Find out which of these patches is still necessary!
         self.options = options
         Writer.__init__(self, outfile, *args)
-        # patching __repr__ to disable the __repr__ of typing.TypeVar:
-        """
-            def __repr__(self):
-                if self.__covariant__:
-                    prefix = '+'
-                elif self.__contravariant__:
-                    prefix = '-'
-                else:
-                    prefix = '~'
-                return prefix + self.__name__
-        """
-        def _typevar__repr__(self):
-            return f"typing.{self.__name__}"
-        # This is no longer necessary for modern typing versions.
-        # Ignore therefore if the repr is read-only and cannot be changed.
-        try:
-            typing.TypeVar.__repr__ = _typevar__repr__
-        except TypeError:
-            pass
 
-        # Adding a pattern to substitute "Union[T, NoneType]" by "Optional[T]"
-        # I tried hard to replace typing.Optional by a simple override, but
-        # this became _way_ too much.
-        # See also the comment in layout.py .
+    # Adding a pattern to substitute "Union[T, NoneType]" by "Optional[T]"
+    # I tried hard to replace typing.Optional by a simple override, but
+    # this became _way_ too much.
+    # See also the comment in layout.py .
 
-        # PYSIDE-2786: Since Python 3.9, we can use the "|" notation.
-        #              Transform "Union" and "Optional" this way.
-        brace_pat = build_brace_pattern(3, ",=")
-        opt_uni_searcher = re.compile(fr"""
-                \b                      # edge of a word
-                (Optional | Union)      # word to find
-                \s*                     # optional whitespace
-                (?= \[ )                # Lookahead enforces a square bracket
-                {brace_pat}             # braces tower, one capturing brace level
-            """, flags=re.VERBOSE)
-        brace_searcher = re.compile(brace_pat, flags=re.VERBOSE)
-        split = brace_searcher.split
+    # PYSIDE-2786: Since Python 3.9, we can use the "|" notation.
+    #              Transform "Union" and "Optional" this way.
+    brace_pat = build_brace_pattern(3, ",=")
+    opt_uni_searcher = re.compile(fr"""
+            \b                      # edge of a word
+            (Optional|Union)        # word to find
+            \s*                     # optional whitespace
+            (?= \[ )                # Lookahead enforces a square bracket
+            {brace_pat}             # braces tower, one capturing brace level
+        """, flags=re.VERBOSE)
+    brace_searcher = re.compile(brace_pat, flags=re.VERBOSE)
+    split = brace_searcher.split
 
-        def optional_replacer(source):
-            source = str(source)
-            # PYSIDE-2517: findChild/findChildren type hints:
-            # PlaceHolderType fix to avoid the '~' from TypeVar.__repr__
-            if "~PlaceHolderType" in source:
-                source = source.replace("~PlaceHolderType", "PlaceHolderType")
+    def optional_replacer(cls, source):
+        source = str(source)
+        # PYSIDE-2517: findChild/findChildren type hints:
+        # PlaceHolderType fix to avoid the '~' from TypeVar.__repr__
+        if "~PlaceHolderType" in source:
+            source = source.replace("~PlaceHolderType", "PlaceHolderType")
 
-            while match := opt_uni_searcher.search(source):
-                start = match.start()
-                end = match.end()
-                name = match.group(1)
-                body = match.group(2).strip()[1:-1]
-                # Note: this list is interspersed with "," and surrounded by "", see parser.py
-                parts = [x.strip() for x in split(body) if x.strip() not in ("", ",")]
-                if name == "Optional":
-                    parts.append("None")
-                parts = list(("None" if part == "NoneType" else part) for part in parts)
-                res = " | ".join(parts)
-                source = source[: start] + res + source[end :]
-            return source
+        while match := cls.opt_uni_searcher.search(source):
+            start = match.start()
+            end = match.end()
+            name = match.group(1)
+            body = match.group(2).strip()[1:-1]
+            # Note: this list is interspersed with "," and surrounded by "", see parser.py
+            parts = [x.strip() for x in cls.split(body) if x.strip() not in ("", ",")]
+            if name == "Optional":
+                parts.append("None")
+            parts = list(("None" if part == "NoneType" else part) for part in parts)
+            res = " | ".join(parts)
+            source = source[: start] + res + source[end :]
+        return source
 
-        self.optional_replacer = optional_replacer
-        # self.level is maintained by enum_sig.py
-        # self.is_method() is true for non-plain functions.
+    # self.level is maintained by enum_sig.py
+    # self.is_method() is true for non-plain functions.
 
     def section(self):
         if self.level == 0:
@@ -175,6 +155,7 @@ class Formatter(Writer):
         elif self.is_method() and "self" not in signature.parameters:
             kind = "class" if "cls" in signature.parameters else "static"
             self.print(f'{spaces}@{kind}method')
+        # from now on, the signature will be stringized.
         signature = self.optional_replacer(signature)
         self.print(f'{spaces}def {func_name}{signature}: ...')
 
@@ -206,8 +187,8 @@ FROM_IMPORTS = [
     (None, ["builtins"]),
     (None, ["os"]),
     (None, ["enum"]),
-    ("collections.abc", ["Iterable"]),
     ("typing", sorted(typing.__all__)),
+    ("collections.abc", ["Iterable"]),
     ("PySide6.QtCore", ["PyClassProperty", "Signal", "SignalInstance"]),
     ("shiboken6", ["Shiboken"]),
     ]
