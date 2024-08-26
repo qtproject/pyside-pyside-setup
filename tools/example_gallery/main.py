@@ -559,7 +559,15 @@ def write_example(example_root, pyproject_file, pyside_example=True):
         # lower case sphinx reference
         # this seems to be a bug or a requirement from sphinx
         sphnx_ref_example = sphnx_ref_example.lower()
-        content_f = f".. _{sphnx_ref_example}:\n\n"
+        content_f = ""
+        if p.file_format == Format.RST:
+            content_f = f".. _{sphnx_ref_example}:\n\n"
+        elif p.file_format == Format.MD:
+            content_f = f"({sphnx_ref_example})=\n\n"
+        else:
+            print(f"example_gallery: Invalid file format {p.file_format}", file=sys.stderr)
+            raise ValueError
+
         with open(doc_file, "w", encoding="utf-8") as out_f:
             if p.src_doc_file_path:
                 content_f += read_rst_file(p.example_dir, files, p.src_doc_file_path)
