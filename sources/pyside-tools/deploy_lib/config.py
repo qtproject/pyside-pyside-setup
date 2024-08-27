@@ -333,8 +333,7 @@ class Config(BaseConfig):
     def _find_excluded_qml_plugins(self) -> set:
         excluded_qml_plugins = None
         if self.qml_files:
-            self.qml_modules = set(run_qmlimportscanner(qml_files=tuple(self.qml_files),
-                                                        # tuple is needed to make it hashable
+            self.qml_modules = set(run_qmlimportscanner(project_dir=self.project_dir,
                                                         dry_run=self.dry_run))
             excluded_qml_plugins = EXCLUDED_QML_PLUGINS.difference(self.qml_modules)
 
@@ -364,7 +363,7 @@ class Config(BaseConfig):
         """
         extra_modules = []
         if not self.qml_modules and self.qml_files:
-            self.qml_modules = set(run_qmlimportscanner(qml_files=self.qml_files,
+            self.qml_modules = set(run_qmlimportscanner(project_dir=self.project_dir,
                                                         dry_run=self.dry_run))
 
         if "QtQuick" in self.qml_modules:

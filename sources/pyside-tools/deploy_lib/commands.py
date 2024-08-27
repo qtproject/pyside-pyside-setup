@@ -5,10 +5,9 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
-import shutil
-import tempfile
 from pathlib import Path
 from functools import lru_cache
+from . import DEFAULT_IGNORE_DIRS
 
 
 """
@@ -42,31 +41,23 @@ def run_command(command, dry_run: bool, fetch_output: bool = False):
 
 
 @lru_cache
-def run_qmlimportscanner(qml_files: tuple[Path], dry_run: bool):
+def run_qmlimportscanner(project_dir: Path, dry_run: bool):
     """
         Runs pyside6-qmlimportscanner to find all the imported qml modules in project_dir
     """
     qml_modules = []
-    # Create a temporary directory to copy all the .qml_files
-    # TODO: Modify qmlimportscanner code in qtdeclarative to include a flag to ignore directories
-    # Then, this copy into a temporary directory can be avoided
-    # See 36b425ea8bf36d47694ea69fa7d129b6d5a2ca2d in gerrit
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_path = Path(temp_dir)
-        # Copy only files with .qml suffix
-        for qml_file in qml_files:
-            if qml_file.suffix == ".qml":
-                shutil.copy2(qml_file.resolve(), temp_path / qml_file.name)
+    cmd = ["pyside6-qmlimportscanner", "-rootPath", str(project_dir)]
 
-        cmd = ["pyside6-qmlimportscanner", "-rootPath", str(temp_path)]
+    for ignore_dir in DEFAULT_IGNORE_DIRS:
+        cmd.extend(["-exclude", ignore_dir])
 
-        if dry_run:
-            run_command(command=cmd, dry_run=True)
+    if dry_run:
+        run_command(command=cmd, dry_run=True)
 
-        # Run qmlimportscanner during dry_run as well to complete the command being run by nuitka
-        _, json_string = run_command(command=cmd, dry_run=False, fetch_output=True)
-        json_string = json_string.decode("utf-8")
-        json_array = json.loads(json_string)
-        qml_modules = [item['name'] for item in json_array if item['type'] == "module"]
+    # Run qmlimportscanner during dry_run as well to complete the command being run by nuitka
+    _, json_string = run_command(command=cmd, dry_run=False, fetch_output=True)
+    json_string = json_string.decode("utf-8")
+    json_array = json.loads(json_string)
+    qml_modules = [item['name'] for item in json_array if item['type'] == "module"]
 
     return qml_modules
