@@ -4,6 +4,7 @@
 import sys
 import configparser
 import logging
+import tempfile
 import warnings
 from configparser import ConfigParser
 from typing import List
@@ -42,8 +43,26 @@ class BaseConfig:
 
     def update_config(self):
         logging.info(f"[DEPLOY] Creating {self.config_file}")
-        with open(self.config_file, "w+") as config_file:
-            self.parser.write(config_file, space_around_delimiters=True)
+
+        # This section of code is done to preserve the formatting of the original deploy.spec
+        # file where there is blank line before the comments
+        with tempfile.NamedTemporaryFile('w+', delete=False) as temp_file:
+            self.parser.write(temp_file, space_around_delimiters=True)
+            temp_file_path = temp_file.name
+
+        # Read the temporary file and write back to the original file with blank lines before
+        # comments
+        with open(temp_file_path, 'r') as temp_file, open(self.config_file, 'w') as config_file:
+            previous_line = None
+            for line in temp_file:
+                if (line.lstrip().startswith('#') and previous_line is not None
+                   and not previous_line.lstrip().startswith('#')):
+                    config_file.write('\n')
+                config_file.write(line)
+                previous_line = line
+
+        # Clean up the temporary file
+        Path(temp_file_path).unlink()
 
     def set_value(self, section: str, key: str, new_value: str, raise_warning: bool = True):
         try:
