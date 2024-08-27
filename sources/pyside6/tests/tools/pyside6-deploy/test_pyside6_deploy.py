@@ -277,7 +277,8 @@ class TestPySide6DeployQml(DeployTestBase):
             config_obj.get_value("qt", "excluded_qml_plugins"),
             "QtCharts,QtQuick3D,QtSensors,QtTest,QtWebEngine",
         )
-        expected_modules = {"Core", "Gui", "Qml", "Quick", "Network", "OpenGL", "QmlModels"}
+        expected_modules = {"Core", "Gui", "Qml", "Quick", "Network", "OpenGL", "QmlModels",
+                            "QmlWorkerScript", "QmlMeta"}
         if sys.platform != "win32":
             expected_modules.add("DBus")
         obtained_modules = set(config_obj.get_value("qt", "modules").split(","))
@@ -399,8 +400,8 @@ class TestPySide6DeployWebEngine(DeployTestBase):
             "QtCharts,QtQuick3D,QtSensors,QtTest",
         )
         expected_modules = {"Core", "Gui", "Quick", "Qml", "WebEngineQuick", "Network", "OpenGL",
-                            "Positioning", "WebEngineCore", "WebChannel", "WebChannelQuick",
-                            "QmlModels"}
+                            "QmlModels", "QmlWorkerScript", "QmlMeta", "WebEngineCore",
+                            "Positioning", "WebChannelQuick", "WebChannel"}
         if sys.platform != "win32":
             expected_modules.add("DBus")
         obtained_modules = set(config_obj.get_value("qt", "modules").split(","))
