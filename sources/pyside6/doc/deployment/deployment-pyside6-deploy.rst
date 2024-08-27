@@ -10,7 +10,7 @@ compiles your Python code to C code, and links with libpython to produce the fin
 The final executable produced has a ``.exe`` suffix on Windows, ``.bin`` on Linux and ``.app`` on
 macOS.
 
-.. note:: The default version of Nuitka used with the tool is version ``2.3.7``. This can be
+.. note:: The default version of Nuitka used with the tool is version ``2.4.8``. This can be
     updated to a newer version by updating your ``pysidedeploy.spec`` file.
 
 .. _how_pysidedeploy:
