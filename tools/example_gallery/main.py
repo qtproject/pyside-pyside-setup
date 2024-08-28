@@ -67,6 +67,8 @@ suffixes = {
 
 
 BASE_CONTENT = """\
+.. _pyside6_examples:
+
 Examples
 ========
 

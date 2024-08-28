@@ -3,32 +3,26 @@
 Getting Started
 ===============
 
-New to Qt? Check also the :ref:`faq-section` section at the end of this page.
-In case you own a Qt License, please refer to :ref:`commercial-page`.
+Here you can find the steps to install and create a simple application
+using the two technologies that Qt provides: Qt Widgets and Qt Quick.
 
-.. note:: Having Qt installed in your system will not interfere with your
-   PySide6 installation if you do it via ``pip install``, because the Python
-   packages (wheels) include already Qt binaries. Most notably, style plugins
-   from the system won't have any effect on PySide applications.
+.. note:: If you are new to Qt, you can check the :ref:`faq-section` section at
+   the end of this page to understand concepts, file types, compatibles IDEs,
+   etc.  In case you own a Qt License, please refer to :ref:`commercial-page`.
 
 Requirements
 ------------
 
 Before you can install |project|, first you must install the following software:
 
-* Python 3.8+,
+* `Official <https://www.python.org/downloads/>`_ Python 3.8+
 * We **highly** recommend using a virtual environment, such as
   `venv <https://docs.python.org/3/library/venv.html>`_ or
   `virtualenv <https://virtualenv.pypa.io/en/latest>`_
   and avoid installing PySide6 via ``pip`` in your system.
 
-.. note:: For Windows users, please use the interpreter from https://www.python.org/downloads/
-    rather than the one installed from the Microsoft Store.
-
 Installation
 ------------
-
-.. note:: For a commercial installation, refer to :ref:`commercial-page`.
 
 * **Creating and activating an environment**
   You can do this by running the following on a terminal:
@@ -48,9 +42,17 @@ Installation
   Check this animation on how to do it:
 
   .. image:: https://qt-wiki-uploads.s3.amazonaws.com/images/8/8a/Pyside6_install.gif
-     :alt: Installation GIF
+     :alt: PySide6 Installation GIF
+
+  .. note:: Having Qt installed in your system will not interfere with your
+     PySide6 installation if you do it via ``pip install``, because the Python
+     packages (wheels) already includes Qt binaries. Most notably, style plugins
+     from the system won't have any effect on PySide applications.
+
 
 * **Installing PySide6**
+
+  .. note:: For a commercial installation, refer to :ref:`commercial-page`.
 
   Now you are ready to install the |project| packages using ``pip``.
   From the terminal, run the following command:
@@ -68,14 +70,6 @@ Installation
 
       pip install --index-url=https://download.qt.io/snapshots/ci/pyside/6.4/latest pyside6 --trusted-host download.qt.io
 
-  .. note:: Starting with 6.4.3, PySide6 can be used from inside a
-    `conda <https://conda.io>`_ environment, but any manual changes you make to
-    the ``qt.conf`` file will be ignored. If you want to set custom values to
-    the Qt configuration, set them in a ``qt6.conf`` file instead.
-    Read more about `qt.conf`_.
-
-.. _`qt.conf`: https://doc.qt.io/qt-6/qt-conf.html
-
 * **Test your installation**
 
   Now that you have |project| installed, test your setup by running the following Python
@@ -89,14 +83,39 @@ Installation
     # Prints the Qt version used to compile PySide6
     print(PySide6.QtCore.__version__)
 
-.. note:: For more information about what's included in the ``pyside6``
-   package, check :ref:`package_details`.
+  .. note:: For more information about what's included in the ``pyside6``
+     package, check :ref:`package_details`.
 
-Create a Simple Qt Widgets Application
---------------------------------------
+
+Create your first Qt Application
+--------------------------------
+
+.. image:: https://qt-wiki-uploads.s3.amazonaws.com/images/e/eb/Pyside6_widgets_quick.gif
+   :alt: Qt Widgets and Qt Quick comparison header animation
+
+Qt provides two technologies to build User Interfaces:
+
+* Qt Widgets, an imperative programming and design approach that has been
+  around since the beginning of Qt, making it a stable and reliable technology
+  for UI applications.
+* Qt Quick, a declarative programming and design approach, which enables you to
+  create fluid UIs by describing them in terms of simple elements.
+
+Both technologies offer you the possibility to use *drag and drop* tools
+to create your interfaces. :ref:`pyside6-designer` for Qt Widgets (included
+when you install pyside6), and Qt Design Studio for Qt Quick (`Get it here`_).
+
+.. note:: After reading this page, it is recommended that you check the
+   :ref:`pyside6-project` tool to learn how to create projects automatically
+   without writing all the code by hand.
+
+.. _`Get it here`: https://doc.qt.io/qt-6/install-qt-design-studio.html
+
+Create your first Qt Application with Qt Widgets
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Your |project| setup is ready. You can explore it further by developing a simple application
-that prints "Hello World" in several languages. The following instructions will
+that prints ``"Hello World"`` in several languages. The following instructions will
 guide you through the development process:
 
 * **Imports**
@@ -152,15 +171,19 @@ guide you through the development process:
 
         sys.exit(app.exec())
 
-  Run your example by writing the following command: :command:`python hello_world.py`.
+  Run your example by writing the following command:
+
+  .. code-block:: bash
+
+    python hello_world.py
 
   Try clicking the button at the bottom to see which greeting you get.
 
-  .. image:: images/screenshot_hello.png
-     :alt: Hello World application
+  .. image:: images/screenshot_hello_widgets.png
+     :alt: Hello World application in Qt Widgets
 
-Create a Simple Quick Application
----------------------------------
+Create your first Qt Application with Qt Quick
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To do the same using Qt Quick:
 
@@ -240,6 +263,24 @@ To do the same using Qt Quick:
         exit_code = app.exec()
         del engine
         sys.exit(exit_code)
+
+  Run your example by writing the following command:
+
+  .. code-block:: bash
+
+    python main.py
+
+
+  Try clicking the button at the bottom to see which greeting you get.
+
+  .. image:: images/screenshot_hello_quick.png
+     :alt: Hello World application in Qt Quick
+
+Next steps
+----------
+
+Now that you have use both technologies, you can head to our
+:ref:`pyside6_examples` and :ref:`pyside6_tutorials` sections.
 
 .. _faq-section:
 

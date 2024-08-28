@@ -1,3 +1,5 @@
+.. _pyside6_tutorials:
+
 Tutorials
 =========
 
