@@ -464,7 +464,9 @@ def module_QtQml() -> ModuleData:
         "libQt6QmlNetwork",
         "libQt6QmlWorkerScript",
         "libQt6QmlXmlListModel",
-        "libQt6QmlCompiler"
+        "libQt6QmlCompiler",
+        "libQt6QmlMeta",
+        "libQt6LabsPlatform",
     ]
 
     _include = [
@@ -491,6 +493,8 @@ def module_QtQml() -> ModuleData:
         "qt6qmlmodels_relwithdebinfo_metatypes.json",
         "qt6qmlworkerscript_relwithdebinfo_metatypes.json",
         "qt6qmlxmllistmodel_relwithdebinfo_metatypes.json",
+        "qt6qmlmeta_relwithdebinfo_metatypes.json",
+        "qt6labsplatform_relwithdebinfo_metatypes.json",
     ]
 
     _qml = [
@@ -551,6 +555,8 @@ def module_QtQuick() -> ModuleData:
         "qt6quicktest_relwithdebinfo_metatypes.json",
         "qt6quicktestutilsprivate_relwithdebinfo_metatypes.json",
         "qt6quicktimeline_relwithdebinfo_metatypes.json",
+        "qt6quickvectorimage_relwithdebinfo_metatypes.json",
+        "qt6quickvectorimagegeneratorprivate_relwithdebinfo_metatypes.json",
     ]
     _qtlib = [
         "libQt6QuickEffects",
@@ -564,6 +570,8 @@ def module_QtQuick() -> ModuleData:
         "libQt6QuickTest",
         "libQt6QuickTimeline",
         "libQt6QuickTimelineBlendTrees",
+        "libQt6QuickVectorImage",
+        "libQt6QuickVectorImageGenerator"
     ]
 
     # Adding GraphicalEffects files
@@ -593,6 +601,7 @@ def module_QtQuickControls2() -> ModuleData:
     data.qtlib.append("libQt6QuickControls2UniversalStyleImpl")
     if sys.platform == "win32":
         data.qtlib.append("libQt6QuickControls2WindowsStyleImpl")
+        data.qtlib.append("libQt6QuickControls2FluentWinUI3StyleImpl")
     elif sys.platform == "darwin":
         data.qtlib.append("libQt6QuickControls2IOSStyleImpl")
         data.qtlib.append("libQt6QuickControls2MacOSStyleImpl")
@@ -749,6 +758,7 @@ def module_QtQuick3D() -> ModuleData:
         "libQt63DQuickInput",
         "libQt63DQuickRender",
         "libQt63DQuickScene2D",
+        "libQt6Quick3DXr",
     ]
 
     _metatypes = [
@@ -769,6 +779,7 @@ def module_QtQuick3D() -> ModuleData:
         "qt6quick3druntimerender_relwithdebinfo_metatypes.json",
         "qt6quick3dutils_relwithdebinfo_metatypes.json",
         "qt6shadertools_relwithdebinfo_metatypes.json",
+        "qt6quick3dxr_relwithdebinfo_metatypes.json"
     ]
 
     json_data = get_module_json_data("Quick3DAssetImport")
