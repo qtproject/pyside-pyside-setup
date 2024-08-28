@@ -241,5 +241,9 @@ def balsamui():
     qt_tool_wrapper("balsamui", sys.argv[1:])
 
 
+def svgtoqml():
+    qt_tool_wrapper("svgtoqml", sys.argv[1:])
+
+
 if __name__ == "__main__":
     main()

@@ -99,6 +99,12 @@ QML Development
         the capabilities of Qt's ``QML`` runtime utility by
         directly invoking QQmlEngine/QQuickView.
 
+    .. grid-item-card:: ``pyside6-svgtoqml``
+        :link: pyside6-svgtoqml
+        :link-type: ref
+
+        to convert SVG files to QML files.
+
 Translations
 ~~~~~~~~~~~~
 

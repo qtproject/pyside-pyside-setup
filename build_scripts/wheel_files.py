@@ -581,6 +581,7 @@ def module_QtQuick() -> ModuleData:
     data.metatypes.extend(_metatypes)
     json_data = get_module_json_data("Quick")
     data.plugins = get_module_plugins(json_data)
+    data.extra_files.append("svgtoqml*")
 
     return data
 
