@@ -408,18 +408,18 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             for ext in config.get_buildable_extensions():
                 self.build_extension(ext)
 
-            if OPTION["BUILDTESTS"]:
-                # we record the latest successful build and note the
-                # build directory for supporting the tests.
-                timestamp = time.strftime('%Y-%m-%d_%H%M%S')
-                build_history = setup_script_dir / 'build_history'
-                unique_dir = build_history / timestamp
-                unique_dir.mkdir(parents=True)
-                fpath = unique_dir / 'build_dir.txt'
-                with open(fpath, 'w') as f:
-                    print(self.build_dir, file=f)
-                    print(self.build_classifiers, file=f)
-                log.info(f"Created {build_history}")
+            # We always record the history, whether tests are built or not.
+            # Record the latest successful build and note the
+            # build directory for supporting the tests or other tools.
+            timestamp = time.strftime('%Y-%m-%d_%H%M%S')
+            build_history = setup_script_dir / 'build_history'
+            unique_dir = build_history / timestamp
+            unique_dir.mkdir(parents=True)
+            fpath = unique_dir / 'build_dir.txt'
+            with open(fpath, 'w') as f:
+                print(self.build_dir, file=f)
+                print(self.build_classifiers, file=f)
+            log.info(f"Created {build_history}")
 
         if not OPTION["SKIP_PACKAGING"]:
             # Build patchelf if needed
