@@ -38,12 +38,11 @@ Modifying types
 .. toctree::
    :maxdepth: 1
 
-   typesystem_arguments.rst
+   Function argument modifications <typesystem_arguments.rst>
    typesystem_codeinjection.rst
    typesystem_converters.rst
    typesystem_containers.rst
    typesystem_templates.rst
-   typesystem_modify_function.rst
    typesystem_manipulating_objects.rst
    typesystem_conversionrule.rst
    typesystem_documentation.rst
