@@ -154,8 +154,8 @@ modify-function
 The ``modify-function`` node allows you to modify a given C++ function when
 mapping it onto the target language, and it is a child of a :ref:`function`,
 :ref:`namespace`, :ref:`object-type` or a :ref:`value-type` node.
-Use the :ref:`modify-argument` node to specify which argument the
-modification affects.
+Nested :ref:`modify-argument` nodes can used to modify arguments
+or return values.
 
 .. code-block:: xml
 
