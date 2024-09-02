@@ -1759,7 +1759,7 @@ static inline bool isNone(const PyObject *o)
     return o == nullptr || o == Py_None;
 }
 
-static void removeRefCountKey(SbkObject *self, const char *key)
+static void removeRefCountKey(SbkObject *self, const std::string &key)
 {
     if (self->d->referredObjects) {
         const auto iterPair = self->d->referredObjects->equal_range(key);
@@ -1770,8 +1770,10 @@ static void removeRefCountKey(SbkObject *self, const char *key)
     }
 }
 
-void keepReference(SbkObject *self, const char *key, PyObject *referredObject, bool append)
+void keepReference(SbkObject *self, const char *keyC, PyObject *referredObject, bool append)
 {
+    std::string key(keyC);
+
     if (isNone(referredObject)) {
         removeRefCountKey(self, key);
         return;
@@ -1803,7 +1805,7 @@ void keepReference(SbkObject *self, const char *key, PyObject *referredObject, b
 void removeReference(SbkObject *self, const char *key, PyObject *referredObject)
 {
     if (!isNone(referredObject))
-        removeRefCountKey(self, key);
+        removeRefCountKey(self, std::string(key));
 }
 
 void clearReferences(SbkObject *self)
