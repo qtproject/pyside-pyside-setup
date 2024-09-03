@@ -285,7 +285,6 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
         copy_translations = False
         copy_qt_conf = False
         copy_qt_permanent_artifacts = False
-        copy_clang = True
 
     # <qt>/bin/*.dll and Qt *.exe -> <setup>/{st_package_name}
     qt_artifacts_permanent = [

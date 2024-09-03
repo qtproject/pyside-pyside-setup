@@ -208,6 +208,9 @@ instructions:
         - condition: property
           property: target.os
           equals_value: Android
+        - condition: property
+          property: host.os
+          equals_value: Windows
     - type: ExecuteCommand
       command: "sudo apt-get install python3-pip -y"
       maxTimeInSeconds: 14400
