@@ -61,6 +61,7 @@ static const char shibokenErrorsOccurred[] = "Shiboken::Errors::occurred() != nu
 static constexpr auto virtualMethodStaticReturnVar = "result"_L1;
 
 static constexpr auto sbkObjectTypeF = "SbkObject_TypeF()"_L1;
+static constexpr auto enumConverterPythonType = "Enum"_L1;
 static const char initInheritanceFunction[] = "initInheritance";
 
 static QString mangleName(QString name)
@@ -1576,17 +1577,17 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMeta
     c << "*reinterpret_cast<" << cppTypeName << " *>(cppOut) = value;\n";
 
     ConfigurableScope configScope(s, enumType);
-    writePythonToCppFunction(s, c.toString(), typeName, typeName);
+    writePythonToCppFunction(s, c.toString(), enumConverterPythonType, typeName);
 
     QString pyTypeCheck = u"PyObject_TypeCheck(pyIn, "_s + enumPythonType + u')';
-    writeIsPythonConvertibleToCppFunction(s, typeName, typeName, pyTypeCheck);
+    writeIsPythonConvertibleToCppFunction(s, enumConverterPythonType, typeName, pyTypeCheck);
 
     c.clear();
 
     c << "const int castCppIn = int(*reinterpret_cast<const "
         << cppTypeName << " *>(cppIn));\n" << "return "
         << "Shiboken::Enum::newItem(" << enumPythonType << ", castCppIn);\n";
-    writeCppToPythonFunction(s, c.toString(), typeName, typeName);
+    writeCppToPythonFunction(s, c.toString(), typeName, enumConverterPythonType);
     s << '\n';
 }
 
@@ -4197,10 +4198,10 @@ void CppGenerator::writeEnumConverterInitialization(TextStream &s, const Abstrac
     const QString typeName = fixedCppTypeName(enumType);
     s << "SbkConverter *converter = Shiboken::Conversions::createConverter("
         << enumPythonVar << ',' << '\n' << indent
-        << cppToPythonFunctionName(typeName, typeName) << ");\n" << outdent;
+        << cppToPythonFunctionName(typeName, enumConverterPythonType) << ");\n" << outdent;
 
-    const QString toCpp = pythonToCppFunctionName(typeName, typeName);
-    const QString isConv = convertibleToCppFunctionName(typeName, typeName);
+    QString toCpp = pythonToCppFunctionName(enumConverterPythonType, typeName);
+    const QString isConv = convertibleToCppFunctionName(enumConverterPythonType, typeName);
     writeAddPythonToCppConversion(s, u"converter"_s, toCpp, isConv);
     s << "Shiboken::Enum::setTypeConverter(" << enumPythonVar
         << ", converter);\n";
