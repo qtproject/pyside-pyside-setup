@@ -191,26 +191,6 @@ instructions:
          condition: property
          property: target.compiler
          equals_value: ICC_18
-    - type: EnvironmentVariable
-      variableName: LLVM_INSTALL_DIR
-      variableValue: "{{.Env.LLVM_DYNAMIC_LIBS_100}}"
-      disable_if:
-        condition: or
-        conditions:
-        - condition: and
-          conditions:
-            - condition: property
-              property: target.arch
-              equals_value: X86_64-ARM64 # When target arch is universal binary, we can use the default libclang
-            - condition: property
-              property: host.os
-              equals_value: MacOS
-        - condition: property
-          property: target.os
-          equals_value: Android
-        - condition: property
-          property: host.os
-          equals_value: Windows
     - type: ExecuteCommand
       command: "sudo apt-get install python3-pip -y"
       maxTimeInSeconds: 14400

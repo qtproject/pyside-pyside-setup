@@ -1073,6 +1073,11 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
         if clang_lib_path.exists():
             basename = clang_lib_path.name
+            # In case of static libclang we don't need the lib file inside the wheel
+            if '.a' == clang_lib_path.suffix:
+                log.info("Skip copying libclang archive to the package.")
+                return
+
             log.info(f"Copying libclang shared library {clang_lib_path} to the package "
                      f"folder as {basename}.")
             destination_path = destination_dir / basename
