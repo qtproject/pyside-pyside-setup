@@ -171,16 +171,22 @@ class Config(BaseConfig):
 
     def set_or_fetch(self, config_property_val, config_property_key, config_property_group="app"):
         """
-        If the value corresponding to the key exists in the config file, then return it.
-        Otherwise, set the value to the config file and return it.
-        Otherwise, raise an exception
+        Set the configuration value if provided, otherwise fetch the existing value.
+        Raise an exception if neither is available.
+
+        :param value: The value to set if provided.
+        :param key: The configuration key.
+        :param group: The configuration group (default is "app").
+        :return: The configuration value.
+        :raises RuntimeError: If no value is provided and no existing value is found.
         """
         existing_value = self.get_value(config_property_group, config_property_key)
-        if existing_value:
-            return existing_value
-        elif config_property_val:
+
+        if config_property_val:
             self.set_value(config_property_group, config_property_key, str(config_property_val))
             return config_property_val
+        elif existing_value:
+            return existing_value
         else:
             raise RuntimeError(
                 f"[DEPLOY] No value for {config_property_key} specified in config file or as cli"
