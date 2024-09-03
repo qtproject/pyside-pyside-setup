@@ -688,27 +688,37 @@ QString ShibokenGenerator::converterObject(const AbstractMetaType &type)
     return converterObject(typeEntry);
 }
 
+static QString sbkEnumPrivate(const QString &name)
+{
+    return "PepType_SETP(reinterpret_cast<SbkEnumType *>("_L1 + name  + "))"_L1;
+}
+
 QString ShibokenGenerator::converterObject(const TypeEntryCPtr &type)
 {
-    if (isExtendedCppPrimitive(type))
-        return QString::fromLatin1("Shiboken::Conversions::PrimitiveTypeConverter<%1>()")
-                                  .arg(type->qualifiedCppName());
-    if (type->isWrapperType())
-        return QString::fromLatin1("PepType_SOTP(reinterpret_cast<PyTypeObject *>(%1))->converter")
-                                  .arg(cpythonTypeNameExt(type));
+    if (isExtendedCppPrimitive(type)) {
+        return "Shiboken::Conversions::PrimitiveTypeConverter<"_L1
+               + type->qualifiedCppName() + ">()"_L1;
+    }
+
+    if (type->isWrapperType()) {
+        return "PepType_SOTP(reinterpret_cast<PyTypeObject *>("_L1
+               + cpythonTypeNameExt(type) + "))->converter"_L1;
+    }
+
     if (type->isEnum() || type->isFlags())
-        return QString::fromLatin1("PepType_SETP(reinterpret_cast<SbkEnumType *>(%1))->converter")
-                                  .arg(cpythonTypeNameExt(type));
+        return sbkEnumPrivate(cpythonTypeNameExt(type)) + "->converter"_L1;
 
     if (type->isArray()) {
-        qDebug() << "Warning: no idea how to handle the Qt5 type " << type->qualifiedCppName();
+        qCWarning(lcShiboken, "Warning: no idea how to handle the Qt type \"%s\"",
+                  qPrintable(type->qualifiedCppName()));
         return {};
     }
 
     /* the typedef'd primitive types case */
     auto pte = std::dynamic_pointer_cast<const PrimitiveTypeEntry>(type);
     if (!pte) {
-        qDebug() << "Warning: the Qt5 primitive type is unknown" << type->qualifiedCppName();
+        qCWarning(lcShiboken, "Warning: the Qt primitive type \"%s\" is unknown",
+                  qPrintable(type->qualifiedCppName()));
         return {};
     }
     pte = basicReferencedTypeEntry(pte);
