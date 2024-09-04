@@ -912,8 +912,10 @@ void HeaderGenerator::writeTypeFunctions(TextStream &s, const QString &typeFunct
 
 void HeaderGenerator::writeProtectedEnumSurrogate(TextStream &s, const AbstractMetaEnum &cppEnum)
 {
-    if (avoidProtectedHack() && cppEnum.isProtected())
-        s << "enum " << protectedEnumSurrogateName(cppEnum) << " {};\n";
+    if (avoidProtectedHack() && cppEnum.isProtected()) {
+        s << "enum " << protectedEnumSurrogateName(cppEnum) << " : " <<
+          cppEnum.underlyingType() << " {};\n";
+    }
 }
 
 void HeaderGenerator::writeSbkTypeFunction(TextStream &s, const AbstractMetaEnum &cppEnum)
