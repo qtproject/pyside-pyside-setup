@@ -7,6 +7,11 @@ if(BUILD_TESTS)
     find_package(Qt${QT_MAJOR_VERSION}Test 6.0 REQUIRED)
 endif()
 
+# PYSIDE-2854, namespace std not seen by clang
+if(APPLE)
+    set(MINIMAL_TESTS 1)
+endif()
+
 add_subdirectory(libminimal)
 if(NOT DEFINED MINIMAL_TESTS)
     add_subdirectory(libsample)
