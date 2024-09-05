@@ -233,6 +233,13 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
                 "{st_build_dir}/{st_package_name}/jar",
                 _vars=_vars)
 
+    # some libraries specific to Android from 6.8
+    # eg: the libav* libraries are required for the multimedia module
+    if is_android and config.is_internal_pyside_build():
+        copydir("{qt_lib_dir}", destination_qt_dir / "lib",
+                _filter=["libav*.so", "libsw*.so"],
+                recursive=False, _vars=_vars, force_copy_symlinks=True)
+
     # Copy Qt libs to package
     if OPTION["STANDALONE"]:
         if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
