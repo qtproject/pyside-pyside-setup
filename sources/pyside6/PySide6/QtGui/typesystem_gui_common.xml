@@ -197,7 +197,7 @@
 
   <value-type name="QTransform">
     <enum-type name="TransformationType"/>
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
                <replace from="%REPR_FORMAT" to="%f, %f, %f, %f, %f, %f, %f, %f, %f"/>
@@ -207,7 +207,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code">
               <replace from="%REDUCE_FORMAT" to="ddddddddd"/>
@@ -330,11 +330,11 @@
     <enum-type name="SequenceMatch"/>
     <enum-type name="StandardKey"/>
 
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qkeysequence-repr"/>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code">
               <replace from="%REDUCE_FORMAT" to="iiii"/>
@@ -461,7 +461,7 @@
     <add-function signature="operator==(const QPolygon&amp;)" return-type="bool"/>
     <add-function signature="operator!=(const QPolygon&amp;)" return-type="bool"/>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qpolygon-reduce">
             <insert-template name="reduce_code">
               <replace from="%REDUCE_FORMAT" to="N"/>
@@ -787,12 +787,12 @@
     <extra-includes>
       <include file-name="QVariant" location="global"/>
     </extra-includes>
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="qcolor_repr"/>
         </inject-code>
     </add-function>
-    <add-function signature="__str__" return-type="PyObject*">
+    <add-function signature="__str__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="qcolor_repr"/>
         </inject-code>
@@ -800,7 +800,7 @@
     <add-function signature="__setstate__(PyObject*)" return-type="PyObject">
         <inject-code file="../glue/qtgui.cpp" snippet="qcolor-setstate"/>
     </add-function>
-    <add-function signature="__reduce__" return-type="PyObject">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning" file="../glue/qtgui.cpp" snippet="qcolor-reduce"/>
     </add-function>
 
@@ -1334,21 +1334,21 @@
       <enum-type name="State"/>
   </value-type>
   <object-type name="QDragEnterEvent" polymorphic-id-expression="%B-&gt;type() == QEvent::DragEnter">
-      <add-function signature="__repr__" return-type="PyObject">
+      <add-function signature="__repr__" return-type="str">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
           </inject-code>
       </add-function>
   </object-type>
   <object-type name="QDragLeaveEvent" polymorphic-id-expression="%B-&gt;type() == QEvent::DragLeave">
-      <add-function signature="__repr__" return-type="PyObject">
+      <add-function signature="__repr__" return-type="str">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
           </inject-code>
       </add-function>
   </object-type>
   <object-type name="QDragMoveEvent" polymorphic-id-expression="%B-&gt;type() == QEvent::DragMove">
-      <add-function signature="__repr__" return-type="PyObject">
+      <add-function signature="__repr__" return-type="str">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
           </inject-code>
@@ -1360,7 +1360,7 @@
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
-    <add-function signature="__repr__" return-type="PyObject">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_qdebug_gui"/>
         </inject-code>
@@ -1374,7 +1374,7 @@
   <object-type name="QFileOpenEvent" polymorphic-id-expression="%B-&gt;type() == QEvent::FileOpen"/>
   <object-type name="QFocusEvent"
                polymorphic-id-expression="%B-&gt;type() == QEvent::FocusIn || %B-&gt;type() == QEvent::FocusOut">
-      <add-function signature="__repr__" return-type="PyObject">
+      <add-function signature="__repr__" return-type="str">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
           </inject-code>
@@ -1394,7 +1394,7 @@
     <value-type name="Attribute">
       <include file-name="QInputMethodEvent" location="global"/>
     </value-type>
-    <add-function signature="__repr__" return-type="PyObject">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_qdebug_gui"/>
         </inject-code>
@@ -1405,7 +1405,7 @@
                polymorphic-id-expression="%B-&gt;type() == QEvent::InputMethodQuery"/>
 
   <object-type name="QMoveEvent" polymorphic-id-expression="%B-&gt;type() == QEvent::Move">
-      <add-function signature="__repr__" return-type="PyObject">
+      <add-function signature="__repr__" return-type="str">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
           </inject-code>
@@ -1418,7 +1418,7 @@
      <enum-type name="SurfaceEventType"/>
   </object-type>
   <object-type name="QResizeEvent" polymorphic-id-expression="%B-&gt;type() == QEvent::Resize">
-      <add-function signature="__repr__" return-type="PyObject">
+      <add-function signature="__repr__" return-type="str">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
           </inject-code>
@@ -1434,7 +1434,7 @@
                polymorphic-id-expression="%B-&gt;type() == QEvent::StatusTip"/>
   <object-type name="QTabletEvent"
                polymorphic-id-expression="%B-&gt;type() == QEvent::TabletMove || %B-&gt;type() == QEvent::TabletPress || %B-&gt;type() == QEvent::TabletRelease">
-      <add-function signature="__repr__" return-type="PyObject">
+      <add-function signature="__repr__" return-type="str">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
           </inject-code>
@@ -1445,7 +1445,7 @@
   <object-type name="QWhatsThisClickedEvent"
                polymorphic-id-expression="%B-&gt;type() == QEvent::WhatsThisClicked"/>
   <object-type name="QWheelEvent" polymorphic-id-expression="%B-&gt;type() == QEvent::Wheel">
-      <add-function signature="__repr__" return-type="PyObject">
+      <add-function signature="__repr__" return-type="str">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
           </inject-code>
@@ -1454,7 +1454,7 @@
 
   <object-type name="QWindowStateChangeEvent"
                polymorphic-id-expression="%B-&gt;type() == QEvent::WindowStateChange">
-      <add-function signature="__repr__" return-type="PyObject">
+      <add-function signature="__repr__" return-type="str">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
           </inject-code>
@@ -1466,7 +1466,7 @@
       <add-function signature="operator!=(QKeySequence::StandardKey)">
           <inject-code class="target" file="../glue/qtgui.cpp" snippet="qkeyevent-operatornotequal"/>
       </add-function>
-      <add-function signature="__repr__" return-type="PyObject">
+      <add-function signature="__repr__" return-type="str">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
           </inject-code>
@@ -1483,7 +1483,7 @@
       <modify-function signature="y() const" deprecated="yes"/>
       <modify-function signature="globalX() const" deprecated="yes"/>
       <modify-function signature="globalY() const" deprecated="yes"/>
-      <add-function signature="__repr__" return-type="PyObject">
+      <add-function signature="__repr__" return-type="str">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
           </inject-code>
@@ -1494,7 +1494,7 @@
       <enum-type name="ScrollState"/>
   </object-type>
   <object-type name="QPointerEvent" copyable= "false">
-      <add-function signature="__repr__" return-type="PyObject">
+      <add-function signature="__repr__" return-type="str">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
           </inject-code>
@@ -2020,7 +2020,7 @@
     <modify-function signature="QMatrix2x2(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="4"/>
@@ -2029,7 +2029,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
               <replace from="%MATRIX_TYPE" to="float"/>
@@ -2057,7 +2057,7 @@
     <modify-function signature="QMatrix2x3(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="6"/>
@@ -2066,7 +2066,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
               <replace from="%MATRIX_TYPE" to="float"/>
@@ -2094,7 +2094,7 @@
     <modify-function signature="QMatrix2x4(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="8"/>
@@ -2103,7 +2103,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
               <replace from="%MATRIX_TYPE" to="float"/>
@@ -2131,7 +2131,7 @@
     <modify-function signature="QMatrix3x2(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="6"/>
@@ -2140,7 +2140,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
               <replace from="%MATRIX_TYPE" to="float"/>
@@ -2168,7 +2168,7 @@
     <modify-function signature="QMatrix3x3(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="9"/>
@@ -2177,7 +2177,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
               <replace from="%MATRIX_TYPE" to="float"/>
@@ -2205,7 +2205,7 @@
     <modify-function signature="QMatrix3x4(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="12"/>
@@ -2214,7 +2214,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
               <replace from="%MATRIX_TYPE" to="float"/>
@@ -2242,7 +2242,7 @@
     <modify-function signature="QMatrix4x2(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="8"/>
@@ -2251,7 +2251,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
               <replace from="%MATRIX_TYPE" to="float"/>
@@ -2279,7 +2279,7 @@
     <modify-function signature="QMatrix4x3(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="12"/>
@@ -2288,7 +2288,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
               <replace from="%MATRIX_TYPE" to="float"/>
@@ -2336,7 +2336,7 @@
     <modify-function signature="__dummy(const QList&lt;float &gt; &amp;)" remove="all"/>
     <!-- that was the trick ^^^^^^^^^^^^^^^^^^^^^^ -->
 
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code_matrix">
                <replace from="%MATRIX_SIZE" to="16"/>
@@ -2345,7 +2345,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code_matrix">
               <replace from="%MATRIX_TYPE" to="float"/>
@@ -2407,7 +2407,7 @@
     _______ end of matrix block _______ -->
 
   <value-type name="QQuaternion" since="4.6">
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
                <replace from="%REPR_FORMAT" to="%f, %f, %f, %f"/>
@@ -2416,7 +2416,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code">
               <replace from="%REDUCE_FORMAT" to="dddd"/>
@@ -2449,7 +2449,7 @@
   </value-type>
 
   <object-type name="QTouchEvent" since="4.6">
-      <add-function signature="__repr__" return-type="PyObject">
+      <add-function signature="__repr__" return-type="str">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
           </inject-code>
@@ -2462,7 +2462,7 @@
   </object-type>
 
   <value-type name="QVector2D" since="4.6">
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
                <replace from="%REPR_FORMAT" to="%f, %f"/>
@@ -2471,7 +2471,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code">
               <replace from="%REDUCE_FORMAT" to="dd"/>
@@ -2494,7 +2494,7 @@
     <extra-includes>
       <include file-name="QMatrix4x4" location="global"/>
     </extra-includes>
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
                <replace from="%REPR_FORMAT" to="%f, %f, %f"/>
@@ -2503,7 +2503,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code">
               <replace from="%REDUCE_FORMAT" to="ddd"/>
@@ -2526,7 +2526,7 @@
     <extra-includes>
       <include file-name="QMatrix4x4" location="global"/>
     </extra-includes>
-    <add-function signature="__repr__" return-type="PyObject*">
+    <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
                <replace from="%REPR_FORMAT" to="%f, %f, %f, %f"/>
@@ -2535,7 +2535,7 @@
         </inject-code>
     </add-function>
 
-    <add-function signature="__reduce__" return-type="PyObject*">
+    <add-function signature="__reduce__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="reduce_code">
               <replace from="%REDUCE_FORMAT" to="dddd"/>

@@ -1733,7 +1733,7 @@
     </object-type>
 
     <value-type name="Point">
-        <add-function signature="__str__" return-type="PyObject*">
+        <add-function signature="__str__" return-type="str">
             <inject-code class="target" position="beginning">
             int x1 = (int) %CPPSELF.x();
             int x2 = ((int) (%CPPSELF.x() * 100)) - (x1 * 100);
@@ -1742,7 +1742,7 @@
             %PYARG_0 = Shiboken::String::fromFormat("Point(%d.%d, %d.%d)", x1, x2, y1, y2);
             </inject-code>
         </add-function>
-        <add-function signature="__repr__" return-type="PyObject*">
+        <add-function signature="__repr__" return-type="str">
             <inject-code class="target" position="beginning">
             int x1 = (int) %CPPSELF.x();
             int x2 = ((int) (%CPPSELF.x() * 10)) - (x1 * 10);
@@ -1752,7 +1752,7 @@
             </inject-code>
         </add-function>
 
-        <add-function signature="__reduce__" return-type="PyObject*">
+        <add-function signature="__reduce__" return-type="str">
             <inject-code class="target" position="beginning">
             PyObject* type = PyObject_Type(%PYSELF);
             PyObject* args = NULL;
@@ -1796,7 +1796,7 @@
     </value-type>
 
     <value-type name="PointF">
-        <add-function signature="__str__" return-type="PyObject*">
+        <add-function signature="__str__" return-type="str">
             <inject-code class="target" position="beginning">
             int x1 = (int) %CPPSELF.x();
             int x2 = ((int) (%CPPSELF.x() * 100)) - (x1 * 100);
@@ -1805,7 +1805,7 @@
             %PYARG_0 = Shiboken::String::fromFormat("PointF(%d.%d, %d.%d)", x1, x2, y1, y2);
             </inject-code>
         </add-function>
-        <add-function signature="__repr__" return-type="PyObject*">
+        <add-function signature="__repr__" return-type="str">
             <inject-code class="target" position="beginning">
             int x1 = (int) %CPPSELF.x();
             int x2 = ((int) (%CPPSELF.x() * 10)) - (x1 * 10);
@@ -1815,7 +1815,7 @@
             </inject-code>
         </add-function>
 
-        <add-function signature="__reduce__" return-type="PyObject*">
+        <add-function signature="__reduce__" return-type="str">
             <inject-code class="target" position="beginning">
             PyObject *type = PyObject_Type(%PYSELF);
             PyObject *args = NULL;
@@ -2018,7 +2018,7 @@
     </value-type>
 
     <value-type name="Str" hash-function="strHash">
-        <add-function signature="__str__" return-type="PyObject*">
+        <add-function signature="__str__" return-type="str">
             <inject-code class="target" position="beginning">
                 %PYARG_0 = Shiboken::String::fromCString(%CPPSELF.cstring());
             </inject-code>
@@ -2161,7 +2161,7 @@
                 %PYARG_0 = %CONVERTTOPYTHON[ByteArray](ba);
             </inject-code>
         </add-function>
-        <add-function signature="__repr__" return-type="PyObject*">
+        <add-function signature="__repr__" return-type="str">
             <inject-code class="target" position="beginning">
             ByteArray b(Py_TYPE(%PYSELF)->tp_name);
             PyObject* aux = Shiboken::String::fromStringAndSize(%CPPSELF.data(), %CPPSELF.size());

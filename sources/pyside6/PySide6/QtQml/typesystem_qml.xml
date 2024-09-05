@@ -198,7 +198,7 @@
         <value-type name="PropertyPair"/>
     </object-type>
     <value-type name="QQmlError">
-        <add-function signature="__repr__" return-type="PyObject*">
+        <add-function signature="__repr__" return-type="str">
             <inject-code class="target" position="beginning" file="../glue/qtqml.cpp" snippet="qmlerrror-repr"/>
         </add-function>
     </value-type>
