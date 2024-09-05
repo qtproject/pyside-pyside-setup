@@ -1330,17 +1330,38 @@ class PysideBaseDocs(Command, CommandMixin):
                 raise SetupError(f"Error running CMake for {self.doc_dir}")
 
             if self.name == PYSIDE:
+                def run_script(script_path, args=None):
+                    cmd = [sys.executable, os.fspath(script_path)]
+                    if args:
+                        cmd.extend(args)
+                    if run_process(cmd) != 0:
+                        raise SetupError(f"Error running {script_path}")
+
                 self.sphinx_src = self.out_dir / "base"
+                # Generates the .rst files from the examples
                 example_gallery = config.setup_script_dir / "tools" / "example_gallery" / "main.py"
-                assert example_gallery.is_file()
-                example_gallery_cmd = [sys.executable, os.fspath(example_gallery)]
-                if OPTION["LOG_LEVEL"] == LogLevel.QUIET:
-                    example_gallery_cmd.append("--quiet")
-                qt_src_dir = OPTION['QT_SRC']
-                if qt_src_dir:
-                    example_gallery_cmd.extend(["--qt-src-dir", qt_src_dir])
-                if run_process(example_gallery_cmd) != 0:
-                    raise SetupError(f"Error running example gallery for {self.doc_dir}")
+                if example_gallery.is_file():
+                    example_gallery_args = []
+                    if OPTION["LOG_LEVEL"] == LogLevel.QUIET:
+                        example_gallery_args.append("--quiet")
+                    qt_src_dir = OPTION['QT_SRC']
+                    if qt_src_dir:
+                        example_gallery_args.extend(["--qt-src-dir", qt_src_dir])
+                    run_script(example_gallery, example_gallery_args)
+                else:
+                    log.warning("Example gallery script for generating .rst for examples"
+                                f"not found: {example_gallery}")
+
+                # Generates the .rst files from the release notes
+                release_notes = config.setup_script_dir / "tools" / "release_notes" / "main.py"
+                if release_notes.is_file():
+                    release_notes_args = []
+                    if OPTION["LOG_LEVEL"] != LogLevel.QUIET:
+                        release_notes_args.append("--verbose")
+                    run_script(release_notes, release_notes_args)
+                else:
+                    log.warning("Release notes script for generating .rst for release notes"
+                                f"not found: {release_notes}")
             elif self.name == SHIBOKEN:
                 self.sphinx_src = self.out_dir
 

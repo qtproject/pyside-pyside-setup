@@ -12,6 +12,9 @@ sources/pyside6/doc/codesnippets/*
 # Auto-generated examples
 sources/pyside6/doc/examples/*
 
+# Auto-generated release notes
+sources/pyside6/doc/release_notes/*
+
 distribute-*.egg
 distribute-*.tar.gz
 explore2

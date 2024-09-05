@@ -15,6 +15,7 @@
     deployment/index.rst
     considerations.rst
     developer/index.rst
+    release_notes/index.rst
 
 ..
     Intersphinx references in toctrees is not supported
