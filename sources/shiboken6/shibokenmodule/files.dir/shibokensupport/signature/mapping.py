@@ -494,7 +494,7 @@ def init_PySide6_QtCore():
         "NULL": None,  # 5.6, MSVC
         "nullptr": None,  # 5.9
         # PYSIDE-2517: findChild/findChildren type hints:
-        "PlaceHolderType": typing.TypeVar("PlaceHolderType", bound=QObject),
+        "PlaceHolderType": typing.TypeVar("PlaceHolderType", bound=PySide6.QtCore.QObject),
         "PyBuffer": typing.Union[bytes, bytearray, memoryview],
         "PyByteArray": bytearray,
         "PyBytes": typing.Union[bytes, bytearray, memoryview],
