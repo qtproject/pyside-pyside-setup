@@ -125,10 +125,10 @@ inline bool QDirListingIteratorPrivate::next()
 {
     switch (state) {
     case First:
-        state = iterator != QDirListing::const_iterator{} ? Iterating : End;
+        state = iterator != QDirListing::sentinel{} ? Iterating : End;
         break;
     case Iterating:
-        if (++iterator == QDirListing::const_iterator{})
+        if (++iterator == QDirListing::sentinel{})
             state = End;
         break;
     case End:
