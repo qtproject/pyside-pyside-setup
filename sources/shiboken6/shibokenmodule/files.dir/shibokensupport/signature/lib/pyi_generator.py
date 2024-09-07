@@ -199,7 +199,8 @@ class Formatter(Writer):
     @contextmanager
     def attribute(self, attr_name, attr_value):
         spaces = indent * self.level
-        self.print(f"{spaces}{attr_name:25} = ...  # type: {type(attr_value).__qualname__}")
+        # PYSIDE-2846: The comment "# type:" is reserved for mypy.
+        self.print(f"{spaces}{attr_name:25} = ...  ## type: {type(attr_value).__qualname__}")
         yield
 
     @contextmanager

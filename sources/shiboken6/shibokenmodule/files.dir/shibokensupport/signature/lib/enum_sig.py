@@ -15,6 +15,7 @@ by producing a lot of clarity.
 import inspect
 import sys
 import types
+import typing
 from shibokensupport.signature import get_signature as get_sig
 from enum import Enum
 
@@ -237,6 +238,9 @@ class ExactEnumerator(object):
         if decorator in self.collision_track:
             decorator = f"builtins.{decorator}"
         signature = self.get_signature(func, decorator)
+        # PYSIDE-2846: Special cases of signatures which inherit from object.
+        if func_name == "__dir__":
+            signature = inspect.Signature([], return_annotation=typing.Iterable[str])
         if signature is not None:
             with self.fmt.function(func_name, signature, decorator) as key:
                 ret[key] = signature

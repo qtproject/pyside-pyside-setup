@@ -108,7 +108,7 @@ s1.addTransition(button.clicked, s1h)&lt;/code>
   </object-type>
 
   <object-type name="QSignalTransition">
-    <add-function signature="QSignalTransition(PyObject*,QState*)" return-type="QSignalTransition*">
+    <add-function signature="QSignalTransition(PyObject*,QState*)">
         <modify-argument index="2">
             <replace-default-expression with="0"/>
         </modify-argument>
