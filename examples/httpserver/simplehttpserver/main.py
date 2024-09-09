@@ -8,7 +8,7 @@ from __future__ import annotations
 import sys
 
 from PySide6.QtCore import QCoreApplication
-from PySide6.QtNetwork import QHostAddress
+from PySide6.QtNetwork import QHttpHeaders, QTcpServer
 from PySide6.QtHttpServer import QHttpServer
 
 
@@ -16,8 +16,11 @@ def route(request):
     return "Hello world"
 
 
-def after_request(response, request):
-    response.setHeader(b"Server", b"Super server!")
+def after_request(request, response):
+    headers = response.headers()
+    headers.append(QHttpHeaders.WellKnownHeader.WWWAuthenticate,
+                   'Basic realm="Simple example", charset="UTF-8"')
+    response.setHeaders(headers)
 
 
 if __name__ == '__main__':
@@ -25,12 +28,13 @@ if __name__ == '__main__':
     httpServer = QHttpServer()
     httpServer.route("/", route)
 
-    httpServer.afterRequest(after_request)
+    httpServer.addAfterRequestHandler(httpServer, after_request)
 
-    port = httpServer.listen(QHostAddress.Any)
-    if port == 0:
+    tcpServer = QTcpServer()
+    if not tcpServer.listen() or not httpServer.bind(tcpServer):
         print("Server failed to listen on a port.", file=sys.stderr)
         sys.exit(-1)
+    port = tcpServer.serverPort()
 
     print(f"Running on http://127.0.0.1:{port}/ (Press CTRL+\\ to quit)")
 
