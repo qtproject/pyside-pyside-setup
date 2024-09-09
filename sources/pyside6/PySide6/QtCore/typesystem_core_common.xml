@@ -1643,7 +1643,24 @@
     <modify-function signature="exit(int)" allow-thread="yes"/>
   </object-type>
 
-  <value-type name="QModelRoleData"/>
+  <value-type name="QModelRoleData">
+      <add-function signature="setData(const QVariant &amp;@data@)">
+          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                       snippet="qmodelroledata-setdata"/>
+      </add-function>
+  </value-type>
+
+  <value-type name="QModelRoleDataSpan">
+      <modify-function signature="dataForRole(int)const" remove="all"/>
+      <add-function signature="__len__">
+          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                       snippet="qmodelroledataspan-len"/>
+      </add-function>
+      <add-function signature="__getitem__">
+          <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
+                       snippet="qmodelroledataspan-getitem"/>
+      </add-function>
+  </value-type>
 
   <!-- Register meta type for QML properties -->
   <object-type name="QAbstractItemModel" qt-register-metatype="yes">

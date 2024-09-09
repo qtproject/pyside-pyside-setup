@@ -118,6 +118,7 @@ ${QtCore_GEN_DIR}/qmimedatabase_wrapper.cpp
 ${QtCore_GEN_DIR}/qmimetype_wrapper.cpp
 ${QtCore_GEN_DIR}/qmodelindex_wrapper.cpp
 ${QtCore_GEN_DIR}/qmodelroledata_wrapper.cpp
+${QtCore_GEN_DIR}/qmodelroledataspan_wrapper.cpp
 ${QtCore_GEN_DIR}/qmutex_wrapper.cpp
 ${QtCore_GEN_DIR}/qnativeipckey_wrapper.cpp
 ${QtCore_GEN_DIR}/qobject_wrapper.cpp

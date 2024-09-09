@@ -20,15 +20,25 @@ class MyModel (QAbstractListModel):
     pass
 
 
+class MyMultiDataModel(QAbstractListModel):
+
+    def multiData(self, index, roleSpans):
+        if index.isValid():
+            for rd in roleSpans:
+                if rd.role() == Qt.ItemDataRole.DisplayRole:
+                    rd.setData(f"test {index.row()} {index.column()}")
+
+
 class TestQModelIndexInternalPointer(unittest.TestCase):
 
     def testInternalPointer(self):
         m = MyModel()
         foo = QObject()
         idx = m.createIndex(0, 0, foo)
-        check = m.checkIndex(idx, QAbstractItemModel.CheckIndexOption.IndexIsValid
-                                  | QAbstractItemModel.CheckIndexOption.DoNotUseParent
-                                  | QAbstractItemModel.CheckIndexOption.ParentIsInvalid)
+        flags = (QAbstractItemModel.CheckIndexOption.IndexIsValid
+                 | QAbstractItemModel.CheckIndexOption.DoNotUseParent
+                 | QAbstractItemModel.CheckIndexOption.ParentIsInvalid)
+        check = m.checkIndex(idx, flags)
         self.assertTrue(check)
 
     def testPassQPersistentModelIndexAsQModelIndex(self):
@@ -47,7 +57,11 @@ class TestQModelIndexInternalPointer(unittest.TestCase):
         proxyData = str(proxyModel.data(proxyIndex, Qt.DisplayRole))
         self.assertEqual(sourceData, proxyData)
 
+    def testMultiDataModel(self):
+        """Test whether QAbstractItemModel.multiData() can be implemented
+           using QModelRoleData/QModelRoleDataSpan (ATM syntax only)."""
+        model = MyMultiDataModel()  # noqa: F841
+
 
 if __name__ == '__main__':
     unittest.main()
-

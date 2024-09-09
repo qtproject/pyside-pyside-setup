@@ -565,6 +565,26 @@ Py_XDECREF(result);
 return !result ? -1 : 0;
 // @snippet qbitarray-setitem
 
+// @snippet qmodelroledata-setdata
+// Call template <typename T> void QModelRoleData::setData(T &&value)
+%CPPSELF.%FUNCTION_NAME(%1);
+// @snippet qmodelroledata-setdata
+
+// @snippet qmodelroledataspan-len
+return %CPPSELF.size();
+// @snippet qmodelroledataspan-len
+
+// @snippet qmodelroledataspan-getitem
+const Py_ssize_t size = %CPPSELF.size();
+if (_i < 0 || _i >= size) {
+    Shiboken::Errors::setIndexOutOfBounds(_i, 0, size);
+    return nullptr;
+}
+// Return a pointer to allow for modification using  QModelRoleData::setData()
+QModelRoleData *item = &((*%CPPSELF)[_i]);
+return %CONVERTTOPYTHON[QModelRoleData *](item);
+// @snippet qmodelroledataspan-getitem
+
 // @snippet default-enter
 Py_INCREF(%PYSELF);
 pyResult = %PYSELF;
