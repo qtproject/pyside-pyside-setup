@@ -29,22 +29,23 @@ bool cppResult = %CPPSELF.%FUNCTION_NAME(rule,
 %PYARG_0 = %CONVERTTOPYTHON[bool](cppResult);
 // @snippet qhttpserver-route
 
-// @snippet qhttpserver-afterrequest
-auto *callable = %PYARG_1;
+// @snippet qhttpserver-addafterrequesthandler
+auto *callable = %PYARG_2;
 
-%CPPSELF.%FUNCTION_NAME([callable](QHttpServerResponse &&response,
-                                   const QHttpServerRequest &request) {
+auto callback = [callable](const QHttpServerRequest &request,
+                           QHttpServerResponse &response) {
     Shiboken::GilState state;
     Shiboken::AutoDecRef arglist(PyTuple_New(2));
     auto *responsePtr = &response;
     auto *requestPtr = &request;
     PyTuple_SET_ITEM(arglist, 0,
-                     %CONVERTTOPYTHON[QHttpServerResponse *](responsePtr));
-    PyTuple_SET_ITEM(arglist, 1,
                      %CONVERTTOPYTHON[QHttpServerRequest *](requestPtr));
+    PyTuple_SET_ITEM(arglist, 1,
+                     %CONVERTTOPYTHON[QHttpServerResponse *](responsePtr));
     PyObject_CallObject(callable, arglist);
     if (PyErr_Occurred())
         PyErr_Print();
-    return std::move(response);
-});
-// @snippet qhttpserver-afterrequest
+};
+
+%CPPSELF.%FUNCTION_NAME(%1, callback);
+// @snippet qhttpserver-addafterrequesthandler

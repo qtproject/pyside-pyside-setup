@@ -21,9 +21,9 @@
         <inject-code class="target" position="beginning" file="../glue/qhttpserver.cpp"
                      snippet="qhttpserver-route"/>
       </add-function>
-      <add-function signature="afterRequest(PyCallable @callback@)">
+      <add-function signature="addAfterRequestHandler(QObject*@context@,PyCallable @callback@)">
         <inject-code class="target" position="beginning" file="../glue/qhttpserver.cpp"
-                     snippet="qhttpserver-afterrequest"/>
+                     snippet="qhttpserver-addafterrequesthandler"/>
       </add-function>
   </object-type>
   <object-type name="QHttpServerResponder">
