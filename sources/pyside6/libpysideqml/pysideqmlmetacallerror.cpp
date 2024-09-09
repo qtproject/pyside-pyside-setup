@@ -55,10 +55,12 @@ std::optional<int> qmlMetaCallErrorHandler(QObject *object)
     PyErr_Print();    // Note: PyErr_Print clears the error.
 
     if (isSyntaxError)
-        return engine->throwSyntaxError(errString);
-    if (isTypeError)
-        return engine->throwTypeError(errString);
-    return engine->throwError(errString);
+        engine->throwSyntaxError(errString);
+    else if (isTypeError)
+        engine->throwTypeError(errString);
+    else
+        engine->throwError(errString);
+    return -1;
 #else
     Q_UNUSED(object);
     qWarning("libpyside6qml was built without QML private API support, error handling will not work.");
