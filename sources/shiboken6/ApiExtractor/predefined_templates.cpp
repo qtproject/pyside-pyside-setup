@@ -83,8 +83,8 @@ return %out;
 
 static QString pyDictToCppMap(bool isQMap)
 {
-    return uR"(PyObject *key;
-PyObject *value;
+    return uR"(PyObject *key{};
+PyObject *value{};
 %out.clear();
 Py_ssize_t pos = 0;
 while (PyDict_Next(%in, &pos, &key, &value)) {
@@ -150,8 +150,8 @@ static QString cppMultiHashToPyDict(bool isQMultiHash)
 // Convert Dict of Lists to a STL or Qt multi hash/map
 static QString pyDictToCppMultiHash(bool isQMultiHash)
 {
-    return uR"(PyObject *key;
-    PyObject *values;
+    return uR"(PyObject *key{};
+    PyObject *values{};
     %out.clear();
     Py_ssize_t pos = 0;
     while (PyDict_Next(%in, &pos, &key, &values)) {

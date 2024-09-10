@@ -231,8 +231,8 @@ static QVariant QVariant_convertToVariantMap(PyObject *map)
     Shiboken::AutoDecRef keys(PyDict_Keys(map));
     if (!QVariant_isStringList(keys))
         return {};
-    PyObject *key;
-    PyObject *value;
+    PyObject *key{};
+    PyObject *value{};
     QMap<QString,QVariant> ret;
     while (PyDict_Next(map, &pos, &key, &value)) {
         QString cppKey = %CONVERTTOCPP[QString](key);
@@ -1330,7 +1330,7 @@ Py_END_ALLOW_THREADS
         PyObject *shutDownFunc = PyObject_GetAttrString(module, "__moduleShutdown");
         Shiboken::AutoDecRef args(PyTuple_New(1));
         PyTuple_SET_ITEM(args, 0, shutDownFunc);
-        Shiboken::AutoDecRef retval(PyObject_Call(regFunc, args, 0));
+        Shiboken::AutoDecRef retval(PyObject_Call(regFunc, args, nullptr));
         Q_ASSERT(!retval.isNull());
     }
 }
@@ -1670,7 +1670,7 @@ if (converterO.has_value())
     return converterO.value().toPython(cppInRef.data());
 
 PyErr_Format(PyExc_RuntimeError, "Can't find converter for '%s'.", %in.typeName());
-return 0;
+return nullptr;
 // @snippet return-qvariant
 
 // @snippet return-qjsonobject

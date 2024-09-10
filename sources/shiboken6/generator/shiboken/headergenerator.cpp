@@ -289,7 +289,6 @@ void HeaderGenerator::writeMemberFunctionWrapper(TextStream &s,
                                                  const QString &postfix) const
 {
     Q_ASSERT(!func->isConstructor() && !func->isOperatorOverload());
-    s << "inline ";
     s << functionSignature(func, {}, postfix, Generator::OriginalTypeDescription)
       << " { ";
     if (!func->isVoid())

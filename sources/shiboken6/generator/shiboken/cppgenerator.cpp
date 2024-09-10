@@ -938,8 +938,10 @@ void CppGenerator::writeConstructorNative(TextStream &s, const GeneratorContext 
     const QString qualifiedName = classContext.wrapperName() + u"::"_s;
     s << functionSignature(func, qualifiedName, QString(),
                            OriginalTypeDescription | SkipDefaultValues);
-    s << " : ";
-    writeFunctionCall(s, func);
+    if (!func->arguments().isEmpty()) {
+        s << " : ";
+        writeFunctionCall(s, func);
+    }
     s << "\n{\n" << indent;
     if (wrapperDiagnostics())
         s << R"(std::cerr << __FUNCTION__ << ' ' << this << '\n';)" << '\n';
@@ -2160,8 +2162,6 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     s << sbkUnusedVariableCast("kwds");
 
     const bool needsMetaObject = usePySideExtensions() && isQObject(metaClass);
-    if (needsMetaObject)
-        s << "const QMetaObject *metaObject;\n";
 
     s << "auto *sbkSelf = reinterpret_cast<SbkObject *>(self);\n";
 
@@ -2177,8 +2177,6 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
             s << sbkUnusedVariableCast("sbkSelf")
                 << sbkUnusedVariableCast("type")
                 << sbkUnusedVariableCast("myType");
-            if (needsMetaObject)
-                s << sbkUnusedVariableCast("metaObject");
             s << "Shiboken::Errors::setInstantiateAbstractClassDisabledWrapper(\""
                 << metaClass->qualifiedCppName() << "\");\n" << errorReturn << outdent
                 << "}\n\n";
@@ -2253,7 +2251,7 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     if (needsMetaObject) {
         s << "\n// QObject setup\n"
             << "PySide::Signal::updateSourceObject(self);\n"
-            << "metaObject = cptr->metaObject(); // <- init python qt properties\n"
+            << "const auto *metaObject = cptr->metaObject(); // <- init python qt properties\n"
             << "if (!errInfo.isNull() && PyDict_Check(errInfo.object())) {\n" << indent
                 << "if (!PySide::fillQtProperties(self, metaObject, errInfo, usesPyMI))\n" << indent
                     << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
