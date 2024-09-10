@@ -243,13 +243,14 @@ class Project:
             return
 
         source_files = self.project.python_files + self.project.ui_files
-        cmd_prefix = [LUPDATE_CMD] + [p.name for p in source_files]
+        project_dir = self.project.project_file.parent
+        cmd_prefix = [LUPDATE_CMD] + [os.fspath(p.relative_to(project_dir)) for p in source_files]
         cmd_prefix.append("-ts")
         for ts_file in self.project.ts_files:
             if requires_rebuild(source_files, ts_file):
                 cmd = cmd_prefix
                 cmd.append(ts_file.name)
-                run_command(cmd, cwd=self.project.project_file.parent)
+                run_command(cmd, cwd=project_dir)
 
 
 if __name__ == "__main__":
