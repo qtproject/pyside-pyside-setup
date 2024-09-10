@@ -46,7 +46,7 @@ return 16;
 // @snippet qipv6address-getitem
 if (_i >= 16) {
     PyErr_SetString(PyExc_IndexError, "index out of bounds");
-    return 0;
+    return nullptr;
 }
 if (_i < 0)
     _i = 16 - qAbs(_i);

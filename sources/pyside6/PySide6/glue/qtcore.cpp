@@ -548,9 +548,10 @@ return %CPPSELF.size();
 // @snippet qbitarray-len
 
 // @snippet qbitarray-getitem
-if (_i < 0 || _i >= %CPPSELF.size()) {
-    PyErr_SetString(PyExc_IndexError, "index out of bounds");
-    return 0;
+const Py_ssize_t size = %CPPSELF.size();
+if (_i < 0 || _i >= size) {
+    Shiboken::Errors::setIndexOutOfBounds(_i, 0, size);
+    return nullptr;
 }
 bool ret = %CPPSELF.at(_i);
 return %CONVERTTOPYTHON[bool](ret);
@@ -625,8 +626,11 @@ if (ret == nullptr) {
 // @snippet qbytearray-mgetitem
 if (PyIndex_Check(_key)) {
     const Py_ssize_t _i = PyNumber_AsSsize_t(_key, PyExc_IndexError);
-    if (_i < 0 || _i >= %CPPSELF.size())
-        return PyErr_Format(PyExc_IndexError, "index out of bounds");
+    const Py_ssize_t size = %CPPSELF.size();
+    if (_i < 0 || _i >= size) {
+        Shiboken::Errors::setIndexOutOfBounds(_i, 0, size);
+        return nullptr;
+    }
     char res[2] = {%CPPSELF.at(_i), '\0'};
     return PyBytes_FromStringAndSize(res, 1);
 }
@@ -919,15 +923,16 @@ return %CPPSELF.size();
 // @snippet qbytearray-len
 
 // @snippet qbytearray-getitem
-if (_i < 0 || _i >= %CPPSELF.size()) {
-    PyErr_SetString(PyExc_IndexError, "index out of bounds");
-    return 0;
-} else {
-    char res[2];
-    res[0] = %CPPSELF.at(_i);
-    res[1] = 0;
-    return PyBytes_FromStringAndSize(res, 1);
+const Py_ssize_t size = %CPPSELF.size();
+if (_i < 0 || _i >= size) {
+    Shiboken::Errors::setIndexOutOfBounds(_i, 0, size);
+    return nullptr;
 }
+
+char res[2];
+res[0] = %CPPSELF.at(_i);
+res[1] = 0;
+return PyBytes_FromStringAndSize(res, 1);
 // @snippet qbytearray-getitem
 
 // @snippet qbytearray-setitem

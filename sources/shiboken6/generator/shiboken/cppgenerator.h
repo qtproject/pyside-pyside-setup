@@ -29,6 +29,7 @@ public:
         Default, // "{}"
         Zero,
         MinusOne,
+        NullPtr,
         Void
     };
 
@@ -533,8 +534,7 @@ private:
     /// Write default implementations for sequence protocol
     void writeDefaultSequenceMethods(TextStream &s, const GeneratorContext &context) const;
     /// Helper function for writeStdListWrapperMethods.
-    static void writeIndexError(TextStream &s, const QString &errorMsg,
-                                ErrorReturn errorReturn);
+    static void writeIndexError(TextStream &s, ErrorReturn errorReturn);
 
     static QString writeReprFunctionHeader(TextStream &s, const GeneratorContext &context);
     static QString writeReprFunction(TextStream &s,

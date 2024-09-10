@@ -41,6 +41,12 @@ void PythonContextMarker::setBlocking()
 namespace Errors
 {
 
+void setIndexOutOfBounds(Py_ssize_t value, Py_ssize_t minValue, Py_ssize_t maxValue)
+{
+    PyErr_Format(PyExc_IndexError,
+                 "index %zd out of bounds %zd..%zd", value, minValue, maxValue);
+}
+
 void setInstantiateAbstractClass(const char *name)
 {
     PyErr_Format(PyExc_NotImplementedError,

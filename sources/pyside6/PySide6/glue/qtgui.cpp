@@ -310,9 +310,10 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](%1));
 // @snippet qtextline-cursortox
 
 // @snippet qkeysequence-getitem
-if (_i < 0 || _i >= %CPPSELF.count()) {
-    PyErr_SetString(PyExc_IndexError, "index out of bounds");
-    return 0;
+const Py_ssize_t size = %CPPSELF.count();
+if (_i < 0 || _i >= size) {
+    Shiboken::Errors::setIndexOutOfBounds(_i, 0, size);
+    return nullptr;
 }
 QKeyCombination item = (*%CPPSELF)[_i];
 return %CONVERTTOPYTHON[QKeyCombination](item);
@@ -912,8 +913,11 @@ return %CPPSELF.rectCount();
 // @snippet qregion-len
 
 // @snippet qregion-getitem
-if (_i < 0 || _i >= %CPPSELF.rectCount())
-    return PyErr_Format(PyExc_IndexError, "index out of bounds");
+const Py_ssize_t size = %CPPSELF.rectCount();
+if (_i < 0 || _i >= size) {
+    Shiboken::Errors::setIndexOutOfBounds(_i, 0, size);
+    return nullptr;
+}
 
 const QRect cppResult = *(%CPPSELF.cbegin() + _i);
 return %CONVERTTOPYTHON[QRect](cppResult);

@@ -118,6 +118,9 @@ TextStream &operator<<(TextStream &s, CppGenerator::ErrorReturn r)
     case CppGenerator::ErrorReturn::MinusOne:
         s << " -1";
         break;
+    case CppGenerator::ErrorReturn::NullPtr:
+        s << " nullptr";
+        break;
     case CppGenerator::ErrorReturn::Void:
         break;
     }
@@ -2575,6 +2578,7 @@ QString CppGenerator::returnErrorWrongArguments(const OverloadData &overloadData
         ? u"args"_s : PYTHON_ARG;
     switch (errorReturn) {
     case ErrorReturn::Default:
+    case ErrorReturn::NullPtr:
         return u"Shiboken::returnWrongArguments("_s + argsVar + exprRest;
     case ErrorReturn::Zero:
         return u"Shiboken::returnWrongArguments_Zero("_s + argsVar + exprRest;
@@ -6898,7 +6902,7 @@ void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
     s << "PyObject *" << namePrefix
         << "__getitem__(PyObject *self, Py_ssize_t _i)\n{\n" << indent;
     writeCppSelfDefinition(s, context, errorReturn);
-    writeIndexError(s, u"index out of bounds"_s, errorReturn);
+    writeIndexError(s, ErrorReturn::NullPtr);
 
     s << metaClass->qualifiedCppName() << "::const_iterator _item = "
         << CPP_SELF_VAR << "->begin();\n"
@@ -6924,7 +6928,7 @@ void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
         << indent;
     errorReturn = ErrorReturn::MinusOne;
     writeCppSelfDefinition(s, context, errorReturn);
-    writeIndexError(s, u"list assignment index out of range"_s, errorReturn);
+    writeIndexError(s, errorReturn);
 
     s << PYTHON_TO_CPPCONVERSION_STRUCT << ' ' << PYTHON_TO_CPP_VAR << ";\n"
         << "if (!";
@@ -6942,11 +6946,11 @@ void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
 
     s << "return {};\n" << outdent << "}\n";
 }
-void CppGenerator::writeIndexError(TextStream &s, const QString &errorMsg,
-                                   ErrorReturn errorReturn)
+void CppGenerator::writeIndexError(TextStream &s, ErrorReturn errorReturn)
 {
-    s << "if (_i < 0 || _i >= (Py_ssize_t) " << CPP_SELF_VAR << "->size()) {\n"
-        << indent << "PyErr_SetString(PyExc_IndexError, \"" << errorMsg << "\");\n"
+    s << "const Py_ssize_t size = " << CPP_SELF_VAR << "->size();\n"
+        << "if (_i < 0 || _i >= size) {\n"
+        << indent << "Shiboken::Errors::setIndexOutOfBounds(_i, 0, size);\n"
         << errorReturn << outdent << "}\n";
 }
 
