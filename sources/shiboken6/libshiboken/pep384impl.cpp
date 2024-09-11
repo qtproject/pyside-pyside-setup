@@ -1299,3 +1299,17 @@ Pep384_Init()
 }
 
 } // extern "C"
+
+LIBSHIBOKEN_API bool PepExt_Weakref_IsAlive(PyObject *weakRef)
+{
+#if defined(Py_LIMITED_API) || PY_VERSION_HEX < 0x030D0000
+    return PyWeakref_GetObject(weakRef) != Py_None;
+#else
+    // FIXME: Make this the default code path once Limited API has been raised to 3.13
+    // Note: PyWeakref_GetObject() will be removed in 3.15.
+    PyObject *pobj = nullptr;
+    const bool result = PyWeakref_GetRef(weakRef, &pobj) == 1;
+    Py_XDECREF(pobj);
+    return result;
+#endif
+}

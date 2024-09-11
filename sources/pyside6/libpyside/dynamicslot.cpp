@@ -150,7 +150,7 @@ TrackingMethodDynamicSlot::~TrackingMethodDynamicSlot()
         Shiboken::GilState gil;
         // weakrefs must not be de-refed after the object has been deleted,
         // else they get negative refcounts.
-        if (PyWeakref_GetObject(m_weakRef) != Py_None)
+        if (PepExt_Weakref_IsAlive(m_weakRef))
             Py_DECREF(m_weakRef);
     }
 }

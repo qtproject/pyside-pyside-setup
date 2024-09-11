@@ -4,6 +4,8 @@
 #ifndef PEP384IMPL_H
 #define PEP384IMPL_H
 
+#include "shibokenmacros.h"
+
 extern "C"
 {
 
