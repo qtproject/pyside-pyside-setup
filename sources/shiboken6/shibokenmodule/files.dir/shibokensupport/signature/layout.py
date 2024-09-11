@@ -182,9 +182,12 @@ def create_signature(props, key):
         # empty signatures string
         return
     if isinstance(props["multi"], list):
-        # multi sig: call recursively
-        return list(create_signature(elem, key)
-                    for elem in props["multi"])
+        # multi sig: call recursively.
+        # PYSIDE-2846: Fold duplicate signatures away
+        res = list(set(list(create_signature(elem, key)
+                            for elem in props["multi"])))
+        return res if len(res) > 1 else res[0]
+
     if type(key) is tuple:
         _, modifier = key
     else:
