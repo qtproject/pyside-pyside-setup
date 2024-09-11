@@ -389,7 +389,6 @@ QByteArrayList emulatedCompilerOptions(LanguageLevel level)
         result.append("/Zc:__cplusplus"_ba);
         // Fix yvals_core.h:  STL1000: Unexpected compiler version, expected Clang 7 or newer (MSVC2017 update)
         result.append(QByteArrayLiteral("-D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH"));
-        result.append("-DQT_NO_INT128"_ba); // 6.8: Causes parse errors MSSTL/clang STL, QTBUG-127787
         if (needsClangBuiltinIncludes())
             appendClangBuiltinIncludes(&headerPaths);
         break;
