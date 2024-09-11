@@ -1049,7 +1049,7 @@ bool QtDocGenerator::writeInheritanceFile()
 {
     QFile inheritanceFile(m_options.inheritanceFile);
     if (!inheritanceFile.open(QIODevice::WriteOnly | QIODevice::Text))
-        throw Exception(msgCannotOpenForWriting(m_options.inheritanceFile));
+        throw Exception(msgCannotOpenForWriting(inheritanceFile));
 
     QJsonObject dict;
     for (const auto &c : api().classes()) {
