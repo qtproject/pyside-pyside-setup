@@ -80,7 +80,6 @@ int add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp, PyObject **doc_descr)
         if (PyDict_SetItemString(dict, gsp->name, descr) < 0)
             return -1;
     }
-    PyType_Modified(type);
     return 0;
 }
 
