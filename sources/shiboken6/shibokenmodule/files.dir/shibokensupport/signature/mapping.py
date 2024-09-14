@@ -219,7 +219,7 @@ type_map.update({
     "PyCallable": typing.Callable,
     "PyObject": object,
     "PyObject*": object,
-    "PyArrayObject": ArrayLikeVariable, # numpy
+    "PyArrayObject": ArrayLikeVariable(typing.Any),  # numpy
     "PyPathLike": typing.Union[str, bytes, os.PathLike[str]],
     "PySequence": typing.Iterable,  # important for numpy
     "PyTypeObject": type,
