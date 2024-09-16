@@ -2558,6 +2558,8 @@
     <configuration condition="QT_CONFIG(thread)"/>
     <modify-function signature="acquire(int)" allow-thread="yes"/>
     <modify-function signature="tryAcquire(int,int)" allow-thread="yes"/>
+    <!-- PYSIDE-2845, clashes with snake-case -->
+    <modify-function signature="try_acquire()" remove="yes"/>
   </object-type>
   <object-type name="QSemaphoreReleaser">
     <configuration condition="QT_CONFIG(thread)"/>
