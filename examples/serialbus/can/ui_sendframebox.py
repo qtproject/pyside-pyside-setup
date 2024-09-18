@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'sendframebox.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -23,10 +23,10 @@ class Ui_SendFrameBox(object):
     def setupUi(self, SendFrameBox):
         if not SendFrameBox.objectName():
             SendFrameBox.setObjectName(u"SendFrameBox")
-        SendFrameBox.resize(485, 206)
+        SendFrameBox.resize(505, 219)
         self.verticalLayout_4 = QVBoxLayout(SendFrameBox)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.verticalLayout_4.setSizeConstraint(QLayout.SetMinimumSize)
+        self.verticalLayout_4.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
         self.frameTypeBox = QGroupBox(SendFrameBox)
         self.frameTypeBox.setObjectName(u"frameTypeBox")
         self.frameTypeBox.setCheckable(False)
@@ -78,7 +78,7 @@ class Ui_SendFrameBox(object):
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.horizontalLayout_3.setSizeConstraint(QLayout.SetMinimumSize)
+        self.horizontalLayout_3.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.frameIdLabel = QLabel(SendFrameBox)

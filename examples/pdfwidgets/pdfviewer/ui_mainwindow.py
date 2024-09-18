@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -36,7 +36,7 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon = QIcon.fromTheme(iconThemeName)
         else:
-            icon.addFile(u":/icons/images/document-open.svgz", QSize(), QIcon.Normal, QIcon.Off)
+            icon.addFile(u":/icons/images/document-open.svgz", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.actionOpen.setIcon(icon)
         self.actionQuit = QAction(MainWindow)
@@ -56,7 +56,7 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon3 = QIcon.fromTheme(iconThemeName)
         else:
-            icon3.addFile(u":/icons/images/zoom-in.svgz", QSize(), QIcon.Normal, QIcon.Off)
+            icon3.addFile(u":/icons/images/zoom-in.svgz", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.actionZoom_In.setIcon(icon3)
         self.actionZoom_Out = QAction(MainWindow)
@@ -66,7 +66,7 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon4 = QIcon.fromTheme(iconThemeName)
         else:
-            icon4.addFile(u":/icons/images/zoom-out.svgz", QSize(), QIcon.Normal, QIcon.Off)
+            icon4.addFile(u":/icons/images/zoom-out.svgz", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.actionZoom_Out.setIcon(icon4)
         self.actionPrevious_Page = QAction(MainWindow)
@@ -76,7 +76,7 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon5 = QIcon.fromTheme(iconThemeName)
         else:
-            icon5.addFile(u":/icons/images/go-previous-view-page.svgz", QSize(), QIcon.Normal, QIcon.Off)
+            icon5.addFile(u":/icons/images/go-previous-view-page.svgz", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.actionPrevious_Page.setIcon(icon5)
         self.actionNext_Page = QAction(MainWindow)
@@ -86,7 +86,7 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon6 = QIcon.fromTheme(iconThemeName)
         else:
-            icon6.addFile(u":/icons/images/go-next-view-page.svgz", QSize(), QIcon.Normal, QIcon.Off)
+            icon6.addFile(u":/icons/images/go-next-view-page.svgz", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.actionNext_Page.setIcon(icon6)
         self.actionContinuous = QAction(MainWindow)
@@ -96,13 +96,13 @@ class Ui_MainWindow(object):
         self.actionBack.setObjectName(u"actionBack")
         self.actionBack.setEnabled(False)
         icon7 = QIcon()
-        icon7.addFile(u":/icons/images/go-previous-view.svgz", QSize(), QIcon.Normal, QIcon.Off)
+        icon7.addFile(u":/icons/images/go-previous-view.svgz", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionBack.setIcon(icon7)
         self.actionForward = QAction(MainWindow)
         self.actionForward.setObjectName(u"actionForward")
         self.actionForward.setEnabled(False)
         icon8 = QIcon()
-        icon8.addFile(u":/icons/images/go-next-view.svgz", QSize(), QIcon.Normal, QIcon.Off)
+        icon8.addFile(u":/icons/images/go-next-view.svgz", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionForward.setIcon(icon8)
         self.centralWidget = QWidget(MainWindow)
         self.centralWidget.setObjectName(u"centralWidget")
@@ -120,7 +120,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.splitter = QSplitter(self.widget)
         self.splitter.setObjectName(u"splitter")
-        self.splitter.setOrientation(Qt.Horizontal)
+        self.splitter.setOrientation(Qt.Orientation.Horizontal)
         self.tabWidget = QTabWidget(self.splitter)
         self.tabWidget.setObjectName(u"tabWidget")
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
@@ -128,7 +128,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.tabWidget.sizePolicy().hasHeightForWidth())
         self.tabWidget.setSizePolicy(sizePolicy)
-        self.tabWidget.setTabPosition(QTabWidget.West)
+        self.tabWidget.setTabPosition(QTabWidget.TabPosition.West)
         self.tabWidget.setDocumentMode(False)
         self.bookmarkTab = QWidget()
         self.bookmarkTab.setObjectName(u"bookmarkTab")
@@ -167,7 +167,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QMenuBar(MainWindow)
         self.menuBar.setObjectName(u"menuBar")
-        self.menuBar.setGeometry(QRect(0, 0, 700, 23))
+        self.menuBar.setGeometry(QRect(0, 0, 700, 26))
         self.menuFile = QMenu(self.menuBar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuHelp = QMenu(self.menuBar)

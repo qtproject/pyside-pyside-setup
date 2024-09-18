@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'connectdialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -63,7 +63,7 @@ class Ui_ConnectDialog(object):
         self.ringBufferLimitBox.setMinimum(10)
         self.ringBufferLimitBox.setMaximum(10000000)
         self.ringBufferLimitBox.setSingleStep(10)
-        self.ringBufferLimitBox.setStepType(QAbstractSpinBox.AdaptiveDecimalStepType)
+        self.ringBufferLimitBox.setStepType(QAbstractSpinBox.StepType.AdaptiveDecimalStepType)
         self.ringBufferLimitBox.setValue(1000)
 
         self.horizontalLayout_2.addWidget(self.ringBufferLimitBox)
@@ -99,7 +99,7 @@ class Ui_ConnectDialog(object):
 
         self.rawFilterEdit = QLineEdit(self.configurationBox)
         self.rawFilterEdit.setObjectName(u"rawFilterEdit")
-        self.rawFilterEdit.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.rawFilterEdit.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
         self.gridLayout_4.addWidget(self.rawFilterEdit, 0, 1, 1, 1)
 
@@ -110,7 +110,7 @@ class Ui_ConnectDialog(object):
 
         self.errorFilterEdit = QLineEdit(self.configurationBox)
         self.errorFilterEdit.setObjectName(u"errorFilterEdit")
-        self.errorFilterEdit.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.errorFilterEdit.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
         self.gridLayout_4.addWidget(self.errorFilterEdit, 1, 1, 1, 1)
 

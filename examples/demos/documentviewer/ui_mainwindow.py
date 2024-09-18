@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -27,12 +27,12 @@ class Ui_MainWindow(object):
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(983, 602)
         icon = QIcon()
-        icon.addFile(u":/demos/documentviewer/images/qt-logo.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u":/demos/documentviewer/images/qt-logo.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         MainWindow.setWindowIcon(icon)
         self.actionOpen = QAction(MainWindow)
         self.actionOpen.setObjectName(u"actionOpen")
         icon1 = QIcon()
-        icon1.addFile(u":/demos/documentviewer/images/open.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(u":/demos/documentviewer/images/open.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionOpen.setIcon(icon1)
         self.actionAbout = QAction(MainWindow)
         self.actionAbout.setObjectName(u"actionAbout")
@@ -41,18 +41,18 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon2 = QIcon.fromTheme(iconThemeName)
         else:
-            icon2.addFile(u":/demos/documentviewer/images/help-about.svgz", QSize(), QIcon.Normal, QIcon.Off)
+            icon2.addFile(u":/demos/documentviewer/images/help-about.svgz", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.actionAbout.setIcon(icon2)
         self.actionForward = QAction(MainWindow)
         self.actionForward.setObjectName(u"actionForward")
         icon3 = QIcon()
-        icon3.addFile(u":/demos/documentviewer/images/go-next.svgz", QSize(), QIcon.Normal, QIcon.Off)
+        icon3.addFile(u":/demos/documentviewer/images/go-next.svgz", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionForward.setIcon(icon3)
         self.actionBack = QAction(MainWindow)
         self.actionBack.setObjectName(u"actionBack")
         icon4 = QIcon()
-        icon4.addFile(u":/demos/documentviewer/images/go-previous.svgz", QSize(), QIcon.Normal, QIcon.Off)
+        icon4.addFile(u":/demos/documentviewer/images/go-previous.svgz", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionBack.setIcon(icon4)
         self.actionPrint = QAction(MainWindow)
         self.actionPrint.setObjectName(u"actionPrint")
@@ -62,29 +62,23 @@ class Ui_MainWindow(object):
         if QIcon.hasThemeIcon(iconThemeName):
             icon5 = QIcon.fromTheme(iconThemeName)
         else:
-            icon5.addFile(u":/demos/documentviewer/images/print2x.png", QSize(), QIcon.Normal, QIcon.Off)
+            icon5.addFile(u":/demos/documentviewer/images/print2x.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
 
         self.actionPrint.setIcon(icon5)
         self.actionAboutQt = QAction(MainWindow)
         self.actionAboutQt.setObjectName(u"actionAboutQt")
         icon6 = QIcon()
-        icon6.addFile(u":/demos/documentviewer/images/qt-logo.png", QSize(), QIcon.Normal, QIcon.Off)
-        icon6.addFile(u":/demos/documentviewer/images/qt-logo.png", QSize(), QIcon.Normal, QIcon.On)
+        icon6.addFile(u":/demos/documentviewer/images/qt-logo.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon6.addFile(u":/demos/documentviewer/images/qt-logo.png", QSize(), QIcon.Mode.Normal, QIcon.State.On)
         self.actionAboutQt.setIcon(icon6)
         self.actionRecent = QAction(MainWindow)
         self.actionRecent.setObjectName(u"actionRecent")
         icon7 = QIcon()
-        icon7.addFile(u":/demos/documentviewer/images/document-open-recent.svgz", QSize(), QIcon.Normal, QIcon.Off)
+        icon7.addFile(u":/demos/documentviewer/images/document-open-recent.svgz", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionRecent.setIcon(icon7)
         self.actionQuit = QAction(MainWindow)
         self.actionQuit.setObjectName(u"actionQuit")
-        icon8 = QIcon()
-        iconThemeName = u"application-exit"
-        if QIcon.hasThemeIcon(iconThemeName):
-            icon8 = QIcon.fromTheme(iconThemeName)
-        else:
-            icon8.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-
+        icon8 = QIcon(QIcon.fromTheme(u"application-exit"))
         self.actionQuit.setIcon(icon8)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
@@ -97,10 +91,10 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.splitter = QSplitter(self.viewArea)
         self.splitter.setObjectName(u"splitter")
-        self.splitter.setOrientation(Qt.Horizontal)
+        self.splitter.setOrientation(Qt.Orientation.Horizontal)
         self.tabWidget = QTabWidget(self.splitter)
         self.tabWidget.setObjectName(u"tabWidget")
-        self.tabWidget.setTabPosition(QTabWidget.West)
+        self.tabWidget.setTabPosition(QTabWidget.TabPosition.West)
         self.bookmarkTab = QWidget()
         self.bookmarkTab.setObjectName(u"bookmarkTab")
         self.tabWidget.addTab(self.bookmarkTab, "")
@@ -119,7 +113,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 798, 479))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 798, 472))
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.splitter.addWidget(self.scrollArea)
 
@@ -131,7 +125,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 983, 23))
+        self.menubar.setGeometry(QRect(0, 0, 983, 26))
         self.qtFileMenu = QMenu(self.menubar)
         self.qtFileMenu.setObjectName(u"qtFileMenu")
         self.menuHelp = QMenu(self.menubar)

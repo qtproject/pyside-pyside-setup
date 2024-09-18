@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -33,24 +33,24 @@ class Ui_MainWindow(object):
         self.actionConnect = QAction(MainWindow)
         self.actionConnect.setObjectName(u"actionConnect")
         icon = QIcon()
-        icon.addFile(u":/images/connect.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u":/images/connect.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionConnect.setIcon(icon)
         self.actionDisconnect = QAction(MainWindow)
         self.actionDisconnect.setObjectName(u"actionDisconnect")
         icon1 = QIcon()
-        icon1.addFile(u":/images/disconnect.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(u":/images/disconnect.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionDisconnect.setIcon(icon1)
         self.actionQuit = QAction(MainWindow)
         self.actionQuit.setObjectName(u"actionQuit")
         icon2 = QIcon()
-        icon2.addFile(u":/images/application-exit.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon2.addFile(u":/images/application-exit.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionQuit.setIcon(icon2)
         self.actionAboutQt = QAction(MainWindow)
         self.actionAboutQt.setObjectName(u"actionAboutQt")
         self.actionClearLog = QAction(MainWindow)
         self.actionClearLog.setObjectName(u"actionClearLog")
         icon3 = QIcon()
-        icon3.addFile(u":/images/clear.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon3.addFile(u":/images/clear.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionClearLog.setIcon(icon3)
         self.actionPluginDocumentation = QAction(MainWindow)
         self.actionPluginDocumentation.setObjectName(u"actionPluginDocumentation")
@@ -80,10 +80,10 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.receivedFramesView = ReceivedFramesView(self.receivedMessagesBox)
         self.receivedFramesView.setObjectName(u"receivedFramesView")
-        self.receivedFramesView.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.receivedFramesView.setProperty("showDropIndicator", False)
+        self.receivedFramesView.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.receivedFramesView.setProperty(u"showDropIndicator", False)
         self.receivedFramesView.setDragDropOverwriteMode(False)
-        self.receivedFramesView.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.receivedFramesView.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
 
         self.verticalLayout_2.addWidget(self.receivedFramesView)
 
@@ -111,7 +111,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QMenuBar(MainWindow)
         self.menuBar.setObjectName(u"menuBar")
-        self.menuBar.setGeometry(QRect(0, 0, 634, 22))
+        self.menuBar.setGeometry(QRect(0, 0, 634, 26))
         self.menuCalls = QMenu(self.menuBar)
         self.menuCalls.setObjectName(u"menuCalls")
         self.menuHelp = QMenu(self.menuBar)

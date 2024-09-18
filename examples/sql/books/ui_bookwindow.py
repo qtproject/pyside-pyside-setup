@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'bookwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -39,7 +39,7 @@ class Ui_BookWindow(object):
         self.vboxLayout1.setContentsMargins(9, 9, 9, 9)
         self.bookTable = QTableView(self.groupBox)
         self.bookTable.setObjectName(u"bookTable")
-        self.bookTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.bookTable.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
 
         self.vboxLayout1.addWidget(self.bookTable)
 

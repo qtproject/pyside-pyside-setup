@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'imagesettings.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -58,7 +58,7 @@ class Ui_ImageSettingsUi(object):
         self.imageQualitySlider = QSlider(self.groupBox_2)
         self.imageQualitySlider.setObjectName(u"imageQualitySlider")
         self.imageQualitySlider.setMaximum(4)
-        self.imageQualitySlider.setOrientation(Qt.Horizontal)
+        self.imageQualitySlider.setOrientation(Qt.Orientation.Horizontal)
 
         self.gridLayout_2.addWidget(self.imageQualitySlider, 4, 1, 1, 1)
 
@@ -71,8 +71,8 @@ class Ui_ImageSettingsUi(object):
 
         self.buttonBox = QDialogButtonBox(ImageSettingsUi)
         self.buttonBox.setObjectName(u"buttonBox")
-        self.buttonBox.setOrientation(Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
+        self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
 
         self.gridLayout.addWidget(self.buttonBox, 2, 0, 1, 1)
 

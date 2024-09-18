@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>485</width>
-    <height>206</height>
+    <width>505</width>
+    <height>219</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_4">
    <property name="sizeConstraint">
-    <enum>QLayout::SetMinimumSize</enum>
+    <enum>QLayout::SizeConstraint::SetMinimumSize</enum>
    </property>
    <item>
     <widget class="QGroupBox" name="frameTypeBox">
@@ -122,7 +122,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <property name="sizeConstraint">
-      <enum>QLayout::SetMinimumSize</enum>
+      <enum>QLayout::SizeConstraint::SetMinimumSize</enum>
      </property>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">

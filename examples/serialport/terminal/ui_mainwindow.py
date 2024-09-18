@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -33,27 +33,27 @@ class Ui_MainWindow(object):
         self.actionConnect = QAction(MainWindow)
         self.actionConnect.setObjectName(u"actionConnect")
         icon = QIcon()
-        icon.addFile(u":/images/connect.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u":/images/connect.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionConnect.setIcon(icon)
         self.actionDisconnect = QAction(MainWindow)
         self.actionDisconnect.setObjectName(u"actionDisconnect")
         icon1 = QIcon()
-        icon1.addFile(u":/images/disconnect.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(u":/images/disconnect.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionDisconnect.setIcon(icon1)
         self.actionConfigure = QAction(MainWindow)
         self.actionConfigure.setObjectName(u"actionConfigure")
         icon2 = QIcon()
-        icon2.addFile(u":/images/settings.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon2.addFile(u":/images/settings.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionConfigure.setIcon(icon2)
         self.actionClear = QAction(MainWindow)
         self.actionClear.setObjectName(u"actionClear")
         icon3 = QIcon()
-        icon3.addFile(u":/images/clear.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon3.addFile(u":/images/clear.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionClear.setIcon(icon3)
         self.actionQuit = QAction(MainWindow)
         self.actionQuit.setObjectName(u"actionQuit")
         icon4 = QIcon()
-        icon4.addFile(u":/images/application-exit.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon4.addFile(u":/images/application-exit.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionQuit.setIcon(icon4)
         self.centralWidget = QWidget(MainWindow)
         self.centralWidget.setObjectName(u"centralWidget")
@@ -64,7 +64,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QMenuBar(MainWindow)
         self.menuBar.setObjectName(u"menuBar")
-        self.menuBar.setGeometry(QRect(0, 0, 400, 19))
+        self.menuBar.setGeometry(QRect(0, 0, 400, 26))
         self.menuCalls = QMenu(self.menuBar)
         self.menuCalls.setObjectName(u"menuCalls")
         self.menuTools = QMenu(self.menuBar)

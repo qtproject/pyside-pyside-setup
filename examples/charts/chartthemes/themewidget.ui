@@ -56,7 +56,7 @@
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -77,24 +77,64 @@
    <signal>currentIndexChanged(int)</signal>
    <receiver>ThemeWidgetForm</receiver>
    <slot>update_ui()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
   </connection>
   <connection>
    <sender>antialiasCheckBox</sender>
    <signal>toggled(bool)</signal>
    <receiver>ThemeWidgetForm</receiver>
    <slot>update_ui()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
   </connection>
   <connection>
    <sender>legendComboBox</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>ThemeWidgetForm</receiver>
    <slot>update_ui()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
   </connection>
   <connection>
    <sender>animatedComboBox</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>ThemeWidgetForm</receiver>
    <slot>update_ui()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
   </connection>
  </connections>
  <slots>

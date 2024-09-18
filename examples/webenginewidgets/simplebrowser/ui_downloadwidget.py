@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'downloadwidget.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -23,6 +23,7 @@ class Ui_DownloadWidget(object):
     def setupUi(self, DownloadWidget):
         if not DownloadWidget.objectName():
             DownloadWidget.setObjectName(u"DownloadWidget")
+        DownloadWidget.resize(144, 103)
         DownloadWidget.setStyleSheet(u"#DownloadWidget {\n"
 "  background: palette(button);\n"
 "  border: 1px solid palette(dark);\n"
@@ -30,7 +31,7 @@ class Ui_DownloadWidget(object):
 "}")
         self.m_topLevelLayout = QGridLayout(DownloadWidget)
         self.m_topLevelLayout.setObjectName(u"m_topLevelLayout")
-        self.m_topLevelLayout.setSizeConstraint(QLayout.SetMinAndMaxSize)
+        self.m_topLevelLayout.setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
         self.m_dstName = QLabel(DownloadWidget)
         self.m_dstName.setObjectName(u"m_dstName")
         self.m_dstName.setStyleSheet(u"font-weight: bold\n"

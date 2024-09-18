@@ -54,7 +54,7 @@
        <item>
         <widget class="QSplitter" name="splitter">
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Orientation::Horizontal</enum>
          </property>
          <widget class="QTabWidget" name="tabWidget">
           <property name="sizePolicy">
@@ -64,7 +64,7 @@
            </sizepolicy>
           </property>
           <property name="tabPosition">
-           <enum>QTabWidget::West</enum>
+           <enum>QTabWidget::TabPosition::West</enum>
           </property>
           <property name="currentIndex">
            <number>0</number>
@@ -134,7 +134,7 @@
      <x>0</x>
      <y>0</y>
      <width>700</width>
-     <height>23</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

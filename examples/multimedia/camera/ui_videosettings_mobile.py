@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'videosettings_mobile.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -24,7 +24,7 @@ class Ui_VideoSettingsUi(object):
     def setupUi(self, VideoSettingsUi):
         if not VideoSettingsUi.objectName():
             VideoSettingsUi.setObjectName(u"VideoSettingsUi")
-        VideoSettingsUi.resize(329, 591)
+        VideoSettingsUi.resize(329, 610)
         self.gridLayout_3 = QGridLayout(VideoSettingsUi)
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.widget = QWidget(VideoSettingsUi)
@@ -76,7 +76,7 @@ class Ui_VideoSettingsUi(object):
         self.qualitySlider = QSlider(self.groupBox)
         self.qualitySlider.setObjectName(u"qualitySlider")
         self.qualitySlider.setMaximum(4)
-        self.qualitySlider.setOrientation(Qt.Horizontal)
+        self.qualitySlider.setOrientation(Qt.Orientation.Horizontal)
 
         self.verticalLayout.addWidget(self.qualitySlider)
 
@@ -127,8 +127,8 @@ class Ui_VideoSettingsUi(object):
 
         self.buttonBox = QDialogButtonBox(self.groupBox_2)
         self.buttonBox.setObjectName(u"buttonBox")
-        self.buttonBox.setOrientation(Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
+        self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
 
         self.gridLayout_2.addWidget(self.buttonBox, 7, 0, 1, 1)
 
@@ -143,7 +143,7 @@ class Ui_VideoSettingsUi(object):
 
         self.fpsSlider = QSlider(self.groupBox_2)
         self.fpsSlider.setObjectName(u"fpsSlider")
-        self.fpsSlider.setOrientation(Qt.Horizontal)
+        self.fpsSlider.setOrientation(Qt.Orientation.Horizontal)
 
         self.horizontalLayout.addWidget(self.fpsSlider)
 

@@ -2,5 +2,15 @@
 <ui version="4.0">
  <class>Form</class>
  <widget class="QFrame" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>100</width>
+    <height>30</height>
+   </rect>
+  </property>
  </widget>
+ <resources/>
+ <connections/>
 </ui>

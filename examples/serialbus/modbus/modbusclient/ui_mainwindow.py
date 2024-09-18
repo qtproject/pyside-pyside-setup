@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -28,27 +28,27 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(516, 378)
+        MainWindow.resize(601, 378)
         MainWindow.setMaximumSize(QSize(16777215, 1000))
         self.actionConnect = QAction(MainWindow)
         self.actionConnect.setObjectName(u"actionConnect")
         icon = QIcon()
-        icon.addFile(u":/images/connect.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u":/images/connect.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionConnect.setIcon(icon)
         self.actionDisconnect = QAction(MainWindow)
         self.actionDisconnect.setObjectName(u"actionDisconnect")
         icon1 = QIcon()
-        icon1.addFile(u":/images/disconnect.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(u":/images/disconnect.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionDisconnect.setIcon(icon1)
         self.actionExit = QAction(MainWindow)
         self.actionExit.setObjectName(u"actionExit")
         icon2 = QIcon()
-        icon2.addFile(u":/images/application-exit.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon2.addFile(u":/images/application-exit.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionExit.setIcon(icon2)
         self.actionOptions = QAction(MainWindow)
         self.actionOptions.setObjectName(u"actionOptions")
         icon3 = QIcon()
-        icon3.addFile(u":/images/settings.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon3.addFile(u":/images/settings.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionOptions.setIcon(icon3)
         self.centralWidget = QWidget(MainWindow)
         self.centralWidget.setObjectName(u"centralWidget")
@@ -195,7 +195,7 @@ class Ui_MainWindow(object):
 
         self.writeValueTable = QTreeView(self.writeGroupBox)
         self.writeValueTable.setObjectName(u"writeValueTable")
-        self.writeValueTable.setProperty("showDropIndicator", True)
+        self.writeValueTable.setProperty(u"showDropIndicator", True)
         self.writeValueTable.setAlternatingRowColors(True)
         self.writeValueTable.setRootIsDecorated(False)
         self.writeValueTable.setUniformRowHeights(True)
@@ -286,7 +286,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusBar)
         self.menuBar = QMenuBar(MainWindow)
         self.menuBar.setObjectName(u"menuBar")
-        self.menuBar.setGeometry(QRect(0, 0, 516, 21))
+        self.menuBar.setGeometry(QRect(0, 0, 601, 26))
         self.menuDevice = QMenu(self.menuBar)
         self.menuDevice.setObjectName(u"menuDevice")
         self.menuToo_ls = QMenu(self.menuBar)

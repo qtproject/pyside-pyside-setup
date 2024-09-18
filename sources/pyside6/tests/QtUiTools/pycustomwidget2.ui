@@ -13,7 +13,6 @@
   <property name="windowTitle">
    <string/>
   </property>
-
   <widget class="MyWidget" name="custom">
    <property name="geometry">
     <rect>
@@ -24,8 +23,7 @@
     </rect>
    </property>
   </widget>
-
- <widget class="MyWidget" name="custom2">
+  <widget class="MyWidget" name="custom2">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -34,7 +32,7 @@
      <height>23</height>
     </rect>
    </property>
- </widget>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>

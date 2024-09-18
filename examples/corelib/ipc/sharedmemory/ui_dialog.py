@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'dialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -32,7 +32,7 @@ class Ui_Dialog(object):
 
         self.label = QLabel(Dialog)
         self.label.setObjectName(u"label")
-        self.label.setAlignment(Qt.AlignCenter)
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label.setWordWrap(True)
 
         self.gridLayout.addWidget(self.label, 1, 0, 1, 1)

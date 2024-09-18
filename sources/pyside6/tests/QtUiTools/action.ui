@@ -1,16 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-    <class>main_window</class>
-    <widget class="QMainWindow" name="main_window">
-      <widget class="QWidget" name="centralwidget"/>
-      <widget class="QMenuBar" name="menubar"/>
-      <widget class="QStatusBar" name="statusbar">
-        <action name="actionFoo">
-          <property name="text">
-            <string>foo</string>
-          </property>
-        </action>
-      </widget>
-    </widget>
-    <resources/>
-    <connections/>
+ <class>main_window</class>
+ <widget class="QMainWindow" name="main_window">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>16</width>
+    <height>69</height>
+   </rect>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>16</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar">
+   <action name="actionFoo">
+    <property name="text">
+     <string>foo</string>
+    </property>
+   </action>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
 </ui>

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'passworddialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -28,7 +28,7 @@ class Ui_PasswordDialog(object):
         self.gridLayout.setObjectName(u"gridLayout")
         self.m_iconLabel = QLabel(PasswordDialog)
         self.m_iconLabel.setObjectName(u"m_iconLabel")
-        self.m_iconLabel.setAlignment(Qt.AlignCenter)
+        self.m_iconLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.gridLayout.addWidget(self.m_iconLabel, 0, 0, 1, 1)
 
@@ -60,14 +60,14 @@ class Ui_PasswordDialog(object):
 
         self.m_passwordLineEdit = QLineEdit(PasswordDialog)
         self.m_passwordLineEdit.setObjectName(u"m_passwordLineEdit")
-        self.m_passwordLineEdit.setEchoMode(QLineEdit.Password)
+        self.m_passwordLineEdit.setEchoMode(QLineEdit.EchoMode.Password)
 
         self.gridLayout.addWidget(self.m_passwordLineEdit, 2, 1, 1, 1)
 
         self.buttonBox = QDialogButtonBox(PasswordDialog)
         self.buttonBox.setObjectName(u"buttonBox")
-        self.buttonBox.setOrientation(Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
+        self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
 
         self.gridLayout.addWidget(self.buttonBox, 3, 0, 1, 2)
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>516</width>
+    <width>601</width>
     <height>378</height>
    </rect>
   </property>
@@ -61,7 +61,7 @@
       <item row="0" column="4">
        <spacer name="horizontalSpacer">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -387,7 +387,7 @@
       <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -437,8 +437,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>516</width>
-     <height>21</height>
+     <width>601</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuDevice">

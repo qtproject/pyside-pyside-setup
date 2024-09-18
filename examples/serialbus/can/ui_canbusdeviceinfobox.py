@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'canbusdeviceinfobox.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -22,7 +22,7 @@ class Ui_CanBusDeviceInfoBox(object):
     def setupUi(self, CanBusDeviceInfoBox):
         if not CanBusDeviceInfoBox.objectName():
             CanBusDeviceInfoBox.setObjectName(u"CanBusDeviceInfoBox")
-        CanBusDeviceInfoBox.resize(319, 217)
+        CanBusDeviceInfoBox.resize(319, 257)
         self.verticalLayout = QVBoxLayout(CanBusDeviceInfoBox)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.pluginLabel = QLabel(CanBusDeviceInfoBox)

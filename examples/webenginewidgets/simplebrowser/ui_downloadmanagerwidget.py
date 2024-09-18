@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'downloadmanagerwidget.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -28,7 +28,7 @@ class Ui_DownloadManagerWidget(object):
 "}")
         self.m_topLevelLayout = QVBoxLayout(DownloadManagerWidget)
         self.m_topLevelLayout.setObjectName(u"m_topLevelLayout")
-        self.m_topLevelLayout.setSizeConstraint(QLayout.SetNoConstraint)
+        self.m_topLevelLayout.setSizeConstraint(QLayout.SizeConstraint.SetNoConstraint)
         self.m_topLevelLayout.setContentsMargins(0, 0, 0, 0)
         self.m_scrollArea = QScrollArea(DownloadManagerWidget)
         self.m_scrollArea.setObjectName(u"m_scrollArea")
@@ -36,12 +36,13 @@ class Ui_DownloadManagerWidget(object):
 "  margin: 2px;\n"
 "  border: none;\n"
 "}")
-        self.m_scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.m_scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.m_scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        self.m_scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.m_scrollArea.setWidgetResizable(True)
-        self.m_scrollArea.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
+        self.m_scrollArea.setAlignment(Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignTop)
         self.m_items = QWidget()
         self.m_items.setObjectName(u"m_items")
+        self.m_items.setGeometry(QRect(0, 0, 382, 208))
         self.m_items.setStyleSheet(u"#m_items {background: palette(mid)}")
         self.m_itemsLayout = QVBoxLayout(self.m_items)
         self.m_itemsLayout.setSpacing(2)
@@ -55,7 +56,7 @@ class Ui_DownloadManagerWidget(object):
         sizePolicy.setHeightForWidth(self.m_zeroItemsLabel.sizePolicy().hasHeightForWidth())
         self.m_zeroItemsLabel.setSizePolicy(sizePolicy)
         self.m_zeroItemsLabel.setStyleSheet(u"color: palette(shadow)")
-        self.m_zeroItemsLabel.setAlignment(Qt.AlignCenter)
+        self.m_zeroItemsLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.m_itemsLayout.addWidget(self.m_zeroItemsLabel)
 

@@ -33,7 +33,7 @@
          <item>
           <widget class="ReceivedFramesView" name="receivedFramesView">
            <property name="editTriggers">
-            <set>QAbstractItemView::NoEditTriggers</set>
+            <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
            </property>
            <property name="showDropIndicator" stdset="0">
             <bool>false</bool>
@@ -42,7 +42,7 @@
             <bool>false</bool>
            </property>
            <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectRows</enum>
+            <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
            </property>
           </widget>
          </item>
@@ -58,7 +58,7 @@
            <item>
             <spacer name="horizontalSpacer">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -83,7 +83,7 @@
      <x>0</x>
      <y>0</y>
      <width>634</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuCalls">

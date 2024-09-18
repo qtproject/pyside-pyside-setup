@@ -28,11 +28,11 @@
        <item>
         <widget class="QSplitter" name="splitter">
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Orientation::Horizontal</enum>
          </property>
          <widget class="QTabWidget" name="tabWidget">
           <property name="tabPosition">
-           <enum>QTabWidget::West</enum>
+           <enum>QTabWidget::TabPosition::West</enum>
           </property>
           <property name="currentIndex">
            <number>0</number>
@@ -70,7 +70,7 @@
              <x>0</x>
              <y>0</y>
              <width>798</width>
-             <height>479</height>
+             <height>472</height>
             </rect>
            </property>
           </widget>
@@ -88,7 +88,7 @@
      <x>0</x>
      <y>0</y>
      <width>983</width>
-     <height>23</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="qtFileMenu">
@@ -234,8 +234,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset theme="application-exit">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="application-exit"/>
    </property>
    <property name="text">
     <string>Quit</string>

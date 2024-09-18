@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -48,7 +48,7 @@ class Ui_MainWindow(object):
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.label_5.sizePolicy().hasHeightForWidth())
         self.label_5.setSizePolicy(sizePolicy1)
-        self.label_5.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.label_5.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
         self.gridLayout.addWidget(self.label_5, 4, 0, 1, 1)
 
@@ -56,7 +56,7 @@ class Ui_MainWindow(object):
         self.label_3.setObjectName(u"label_3")
         sizePolicy1.setHeightForWidth(self.label_3.sizePolicy().hasHeightForWidth())
         self.label_3.setSizePolicy(sizePolicy1)
-        self.label_3.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.label_3.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
         self.gridLayout.addWidget(self.label_3, 3, 0, 1, 1)
 
@@ -64,7 +64,7 @@ class Ui_MainWindow(object):
         self.label_4.setObjectName(u"label_4")
         sizePolicy1.setHeightForWidth(self.label_4.sizePolicy().hasHeightForWidth())
         self.label_4.setSizePolicy(sizePolicy1)
-        self.label_4.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.label_4.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
         self.gridLayout.addWidget(self.label_4, 5, 0, 1, 1)
 
@@ -73,13 +73,13 @@ class Ui_MainWindow(object):
         self.pitch.setMinimum(-10)
         self.pitch.setMaximum(10)
         self.pitch.setSingleStep(1)
-        self.pitch.setOrientation(Qt.Horizontal)
+        self.pitch.setOrientation(Qt.Orientation.Horizontal)
 
         self.gridLayout.addWidget(self.pitch, 3, 2, 1, 1)
 
         self.label_6 = QLabel(self.centralwidget)
         self.label_6.setObjectName(u"label_6")
-        self.label_6.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.label_6.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
         self.gridLayout.addWidget(self.label_6, 6, 0, 1, 1)
 
@@ -89,7 +89,7 @@ class Ui_MainWindow(object):
         self.volume.setSingleStep(5)
         self.volume.setPageStep(20)
         self.volume.setValue(70)
-        self.volume.setOrientation(Qt.Horizontal)
+        self.volume.setOrientation(Qt.Orientation.Horizontal)
 
         self.gridLayout.addWidget(self.volume, 1, 2, 1, 1)
 
@@ -112,7 +112,7 @@ class Ui_MainWindow(object):
         self.label.setObjectName(u"label")
         sizePolicy1.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
         self.label.setSizePolicy(sizePolicy1)
-        self.label.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.label.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
         self.gridLayout.addWidget(self.label, 2, 0, 1, 1)
 
@@ -120,7 +120,7 @@ class Ui_MainWindow(object):
         self.label_2.setObjectName(u"label_2")
         sizePolicy1.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
         self.label_2.setSizePolicy(sizePolicy1)
-        self.label_2.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.label_2.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
         self.gridLayout.addWidget(self.label_2, 1, 0, 1, 1)
 
@@ -128,7 +128,7 @@ class Ui_MainWindow(object):
         self.rate.setObjectName(u"rate")
         self.rate.setMinimum(-10)
         self.rate.setMaximum(10)
-        self.rate.setOrientation(Qt.Horizontal)
+        self.rate.setOrientation(Qt.Orientation.Horizontal)
 
         self.gridLayout.addWidget(self.rate, 2, 2, 1, 1)
 

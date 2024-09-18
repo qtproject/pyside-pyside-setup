@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'camera_mobile.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -56,8 +56,8 @@ class Ui_Camera(object):
         self.exposureCompensation.setMinimum(-4)
         self.exposureCompensation.setMaximum(4)
         self.exposureCompensation.setPageStep(2)
-        self.exposureCompensation.setOrientation(Qt.Horizontal)
-        self.exposureCompensation.setTickPosition(QSlider.TicksAbove)
+        self.exposureCompensation.setOrientation(Qt.Orientation.Horizontal)
+        self.exposureCompensation.setTickPosition(QSlider.TickPosition.TicksAbove)
 
         self.gridLayout.addWidget(self.exposureCompensation, 4, 0, 1, 1)
 
@@ -75,7 +75,7 @@ class Ui_Camera(object):
         self.takeImageButton.setObjectName(u"takeImageButton")
         self.takeImageButton.setEnabled(False)
         icon = QIcon()
-        icon.addFile(u":/images/shutter.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u":/images/shutter.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.takeImageButton.setIcon(icon)
 
         self.gridLayout.addWidget(self.takeImageButton, 0, 0, 1, 1)
@@ -180,7 +180,7 @@ class Ui_Camera(object):
         sizePolicy4.setVerticalStretch(0)
         sizePolicy4.setHeightForWidth(self.lastImagePreviewLabel.sizePolicy().hasHeightForWidth())
         self.lastImagePreviewLabel.setSizePolicy(sizePolicy4)
-        self.lastImagePreviewLabel.setFrameShape(QFrame.Box)
+        self.lastImagePreviewLabel.setFrameShape(QFrame.Shape.Box)
 
         self.gridLayout_4.addWidget(self.lastImagePreviewLabel, 0, 0, 1, 1)
 
@@ -191,7 +191,7 @@ class Ui_Camera(object):
         Camera.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(Camera)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 668, 22))
+        self.menubar.setGeometry(QRect(0, 0, 668, 26))
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuDevices = QMenu(self.menubar)
