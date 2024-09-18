@@ -25,8 +25,8 @@ window = Window()
 
 dock1 = QDockWidget()
 dock2 = QDockWidget()
-window.addDockWidget(Qt.LeftDockWidgetArea, dock1)
-window.addDockWidget(Qt.LeftDockWidgetArea, dock2)
+window.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock1)
+window.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, dock2)
 window.tabifyDockWidget(dock1, dock2)
 
 window.show()

@@ -25,7 +25,7 @@ class Person:
 @QmlElement
 @QmlSingleton
 class PersonModel (QAbstractListModel):
-    MyRole = Qt.UserRole + 1
+    MyRole = Qt.ItemDataRole.UserRole + 1
 
     def __init__(self, data, parent=None):
         super().__init__(parent)
@@ -34,7 +34,7 @@ class PersonModel (QAbstractListModel):
     def roleNames(self):
         roles = {
             PersonModel.MyRole: QByteArray(b'myrole'),
-            Qt.DisplayRole: QByteArray(b'display')
+            Qt.ItemDataRole.DisplayRole: QByteArray(b'display')
         }
         return roles
 
@@ -43,9 +43,9 @@ class PersonModel (QAbstractListModel):
 
     def data(self, index, role):
         d = self._data[index.row()]
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             return d.name
-        if role == Qt.DecorationRole:
+        if role == Qt.ItemDataRole.DecorationRole:
             return Qt.black
         if role == PersonModel.MyRole:
             return d.myrole
@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
     qml_file = os.fspath(Path(__file__).resolve().parent / 'view.qml')
     view.setSource(QUrl.fromLocalFile(qml_file))
-    if view.status() == QQuickView.Error:
+    if view.status() == QQuickView.Status.Error:
         sys.exit(-1)
     view.show()
 

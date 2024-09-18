@@ -32,7 +32,7 @@ class ReceivedFramesView(QTableView):
     def set_model(self, model):
         super().setModel(model)
         for i in range(0, model.columnCount()):
-            size = model.headerData(i, Qt.Horizontal, Qt.SizeHintRole)
+            size = model.headerData(i, Qt.Orientation.Horizontal, Qt.ItemDataRole.SizeHintRole)
             self.setColumnWidth(i, size.width())
 
     def keyPressEvent(self, event):

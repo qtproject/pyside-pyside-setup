@@ -67,7 +67,7 @@ class TestChart(QMainWindow):
         self.chart.legend().setAlignment(Qt.AlignBottom)
 
         self._chart_view = QChartView(self.chart)
-        self._chart_view.setRenderHint(QPainter.Antialiasing)
+        self._chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         self.setCentralWidget(self._chart_view)
 

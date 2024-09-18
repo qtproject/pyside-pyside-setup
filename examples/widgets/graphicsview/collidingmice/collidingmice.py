@@ -164,7 +164,7 @@ if __name__ == '__main__':
         scene.addItem(mouse)
 
     view = QGraphicsView(scene)
-    view.setRenderHint(QPainter.Antialiasing)
+    view.setRenderHint(QPainter.RenderHint.Antialiasing)
     view.setBackgroundBrush(QBrush(QPixmap(':/images/cheese.jpg')))
     view.setCacheMode(QGraphicsView.CacheBackground)
     view.setViewportUpdateMode(QGraphicsView.BoundingRectViewportUpdate)

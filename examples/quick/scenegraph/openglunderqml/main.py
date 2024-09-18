@@ -14,14 +14,14 @@ from squircle import Squircle  # noqa: F401
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
 
-    QQuickWindow.setGraphicsApi(QSGRendererInterface.OpenGL)
+    QQuickWindow.setGraphicsApi(QSGRendererInterface.GraphicsApi.OpenGL)
 
     view = QQuickView()
-    view.setResizeMode(QQuickView.SizeRootObjectToView)
+    view.setResizeMode(QQuickView.ResizeMode.SizeRootObjectToView)
     qml_file = Path(__file__).parent / "main.qml"
     view.setSource(QUrl.fromLocalFile(qml_file))
 
-    if view.status() == QQuickView.Error:
+    if view.status() == QQuickView.Status.Error:
         sys.exit(-1)
     view.show()
 

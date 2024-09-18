@@ -100,7 +100,7 @@ class MainWidget(QWidget):
         self.chart.legend().setVisible(True)
         self.chart.legend().setAlignment(Qt.AlignBottom)
 
-        self.chart_view.setRenderHint(QPainter.Antialiasing)
+        self.chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
 
     def show_legend_spinbox(self):
         self.legend_settings.setVisible(True)

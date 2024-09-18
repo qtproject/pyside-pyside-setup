@@ -22,7 +22,7 @@ class MyWidget(QWidget):
 
         lcd = QLCDNumber(2)
 
-        slider = QSlider(Qt.Horizontal)
+        slider = QSlider(Qt.Orientation.Horizontal)
         slider.setRange(0, 99)
         slider.setValue(0)
 

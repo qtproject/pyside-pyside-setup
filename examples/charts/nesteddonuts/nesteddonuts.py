@@ -22,7 +22,7 @@ class Widget(QWidget):
         self.setMinimumSize(800, 600)
         self.donuts = []
         self.chart_view = QChartView()
-        self.chart_view.setRenderHint(QPainter.Antialiasing)
+        self.chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.chart = self.chart_view.chart()
         self.chart.legend().setVisible(False)
         self.chart.setTitle("Nested donuts demo")

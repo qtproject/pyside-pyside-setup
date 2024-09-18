@@ -15,6 +15,6 @@ if __name__ == "__main__":
     sheet = SpreadSheet(10, 6)
     sheet.setWindowIcon(QPixmap(":/images/interview.png"))
     sheet.show()
-    sheet.layout().setSizeConstraint(QLayout.SetFixedSize)
+    sheet.layout().setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
 
     sys.exit(app.exec())

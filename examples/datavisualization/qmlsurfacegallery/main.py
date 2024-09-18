@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     qml_file = Path(__file__).resolve().parent / "qml" / "qmlsurfacegallery" / "main.qml"
     viewer.setSource(QUrl.fromLocalFile(qml_file))
-    viewer.setResizeMode(QQuickView.SizeRootObjectToView)
+    viewer.setResizeMode(QQuickView.ResizeMode.SizeRootObjectToView)
     viewer.show()
 
     ex = app.exec()

@@ -228,7 +228,7 @@ class DetailsDialog(QDialog):
 
         for row in range(len(self.items)):
             text = self._items_table.item(row, 0).text()
-            quantity = int(self._items_table.item(row, 1).data(Qt.DisplayRole))
+            quantity = int(self._items_table.item(row, 1).data(Qt.ItemDataRole.DisplayRole))
             order_list.append((text, max(0, quantity)))
 
         return order_list

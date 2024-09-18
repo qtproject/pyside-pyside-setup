@@ -43,7 +43,7 @@ class PandasModel(QAbstractTableModel):
         if not index.isValid():
             return None
 
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             return str(self._dataframe.iloc[index.row(), index.column()])
 
         return None
@@ -55,8 +55,8 @@ class PandasModel(QAbstractTableModel):
 
         Return dataframe index as vertical header data and columns as horizontal header data.
         """
-        if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
+        if role == Qt.ItemDataRole.DisplayRole:
+            if orientation == Qt.Orientation.Horizontal:
                 return str(self._dataframe.columns[section])
 
             if orientation == Qt.Vertical:

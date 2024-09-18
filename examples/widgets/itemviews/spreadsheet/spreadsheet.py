@@ -76,30 +76,30 @@ class SpreadSheet(QMainWindow):
         self._cell_sum_action.triggered.connect(self.action_sum)
 
         self._cell_add_action = QAction("&Add", self)
-        self._cell_add_action.setShortcut(Qt.CTRL | Qt.Key_Plus)
+        self._cell_add_action.setShortcut(Qt.Modifier.CTRL | Qt.Key.Key_Plus)
         self._cell_add_action.triggered.connect(self.action_add)
 
         self._cell_sub_action = QAction("&Subtract", self)
-        self._cell_sub_action.setShortcut(Qt.CTRL | Qt.Key_Minus)
+        self._cell_sub_action.setShortcut(Qt.Modifier.CTRL | Qt.Key.Key_Minus)
         self._cell_sub_action.triggered.connect(self.action_subtract)
 
         self._cell_mul_action = QAction("&Multiply", self)
-        self._cell_mul_action.setShortcut(Qt.CTRL | Qt.Key_multiply)
+        self._cell_mul_action.setShortcut(Qt.Modifier.CTRL | Qt.Key.Key_multiply)
         self._cell_mul_action.triggered.connect(self.action_multiply)
 
         self._cell_div_action = QAction("&Divide", self)
-        self._cell_div_action.setShortcut(Qt.CTRL | Qt.Key_division)
+        self._cell_div_action.setShortcut(Qt.Modifier.CTRL | Qt.Key.Key_division)
         self._cell_div_action.triggered.connect(self.action_divide)
 
         self._font_action = QAction("Font...", self)
-        self._font_action.setShortcut(Qt.CTRL | Qt.Key_F)
+        self._font_action.setShortcut(Qt.Modifier.CTRL | Qt.Key.Key_F)
         self._font_action.triggered.connect(self.select_font)
 
         self._color_action = QAction(QPixmap(16, 16), "Background &Color...", self)
         self._color_action.triggered.connect(self.select_color)
 
         self._clear_action = QAction("Clear", self)
-        self._clear_action.setShortcut(Qt.Key_Delete)
+        self._clear_action.setShortcut(Qt.Key.Key_Delete)
         self._clear_action.triggered.connect(self.clear)
 
         self._about_spreadsheet = QAction("About Spreadsheet", self)
@@ -137,7 +137,7 @@ class SpreadSheet(QMainWindow):
     @Slot(QTableWidgetItem)
     def update_status(self, item: QTableWidgetItem) -> None:
         if item and item == self._table.currentItem():
-            self.statusBar().showMessage(str(item.data(Qt.StatusTipRole)), 1000)
+            self.statusBar().showMessage(str(item.data(Qt.ItemDataRole.StatusTipRole)), 1000)
             self._cell_label.setText(
                 "Cell: ({})".format(
                     SpreadSheetItem.encode_pos(self._table.row(item), self._table.column(item))
@@ -174,7 +174,7 @@ class SpreadSheet(QMainWindow):
         if item != self._table.currentItem():
             return
         if item:
-            self._formula_input.setText(str(item.data(Qt.EditRole)))
+            self._formula_input.setText(str(item.data(Qt.ItemDataRole.EditRole)))
         else:
             self._formula_input.clear()
 
@@ -187,7 +187,7 @@ class SpreadSheet(QMainWindow):
         if not item:
             self._table.setItem(row, col, SpreadSheetItem(text))
         else:
-            item.setData(Qt.EditRole, text)
+            item.setData(Qt.ItemDataRole.EditRole, text)
         self._table.viewport().update()
 
     @Slot()
@@ -248,7 +248,7 @@ class SpreadSheet(QMainWindow):
         cell1_col_input.setCurrentIndex(c1_col)
 
         operator_label = QLabel(opText, group)
-        operator_label.setAlignment(Qt.AlignHCenter)
+        operator_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         cell2_label = QLabel(c2Text, group)
         cell2_row_input = QComboBox(group)
@@ -260,7 +260,7 @@ class SpreadSheet(QMainWindow):
         cell2_col_input.setCurrentIndex(c2_col)
 
         equals_label = QLabel("=", group)
-        equals_label.setAlignment(Qt.AlignHCenter)
+        equals_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         out_label = QLabel(outText, group)
         out_row_input = QComboBox(group)
@@ -405,10 +405,10 @@ class SpreadSheet(QMainWindow):
         self.addAction(self._font_action)
         self.addAction(self._second_separator)
         self.addAction(self._clear_action)
-        self.setContextMenuPolicy(Qt.ActionsContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.ActionsContextMenu)
 
     def setup_contents(self) -> None:
-        title_background = QBrush(Qt.lightGray)
+        title_background = QBrush(Qt.GlobalColor.lightGray)
         title_font = self._table.font()
         title_font.setBold(True)
 
@@ -469,7 +469,7 @@ class SpreadSheet(QMainWindow):
         self._table.setItem(8, 2, SpreadSheetItem("1240"))
 
         self._table.setItem(9, 2, SpreadSheetItem())
-        self._table.item(9, 2).setBackground(Qt.lightGray)
+        self._table.item(9, 2).setBackground(Qt.GlobalColor.lightGray)
 
         # column 3
         self._table.setItem(0, 3, SpreadSheetItem("Currency"))
@@ -487,7 +487,7 @@ class SpreadSheet(QMainWindow):
         self._table.setItem(8, 3, SpreadSheetItem("USD"))
 
         self._table.setItem(9, 3, SpreadSheetItem())
-        self._table.item(9, 3).setBackground(Qt.lightGray)
+        self._table.item(9, 3).setBackground(Qt.GlobalColor.lightGray)
 
         # column 4
         self._table.setItem(0, 4, SpreadSheetItem("Ex. Rate"))

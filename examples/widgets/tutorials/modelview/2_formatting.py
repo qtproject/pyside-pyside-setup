@@ -22,34 +22,34 @@ class MyModel(QAbstractTableModel):
         return 3
 
 #! [1]
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         row = index.row()
         col = index.column()
         # generate a log message when this method gets called
         print(f"row {row}, col{col}, role {role}")
 
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             if row == 0 and col == 1:
                 return "<--left"
             if row == 1 and col == 1:
                 return "right-->"
             return f"Row{row}, Column{col + 1}"
 
-        elif role == Qt.FontRole:
+        elif role == Qt.ItemDataRole.FontRole:
             if row == 0 and col == 0:  # change font only for cell(0,0)
                 bold_font = QFont()
                 bold_font.setBold(True)
                 return bold_font
 
-        elif role == Qt.BackgroundRole:
+        elif role == Qt.ItemDataRole.BackgroundRole:
             if row == 1 and col == 2:  # change background only for cell(1,2)
                 return QBrush(Qt.red)
 
-        elif role == Qt.TextAlignmentRole:
+        elif role == Qt.ItemDataRole.TextAlignmentRole:
             if row == 1 and col == 1:  # change text alignment only for cell(1,1)
                 return Qt.AlignRight | Qt.AlignVCenter
 
-        elif role == Qt.CheckStateRole:
+        elif role == Qt.ItemDataRole.CheckStateRole:
             if row == 1 and col == 0:  # add a checkbox to cell(1,0)
                 return Qt.Checked
 

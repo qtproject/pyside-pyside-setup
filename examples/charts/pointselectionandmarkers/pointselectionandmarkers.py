@@ -49,7 +49,7 @@ if __name__ == "__main__":
     chart.legend().setVisible(False)
 
     chart_view = QChartView(chart)
-    chart_view.setRenderHint(QPainter.Antialiasing)
+    chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
 
     control_widget = QWidget(window)
     control_layout = QGridLayout(control_widget)

@@ -356,12 +356,12 @@ class WidgetGallery(QDialog):
 
         slider = QSlider()
         init_widget(slider, "slider")
-        slider.setOrientation(Qt.Horizontal)
+        slider.setOrientation(Qt.Orientation.Horizontal)
         slider.setValue(40)
 
         scrollbar = QScrollBar()
         init_widget(scrollbar, "scrollBar")
-        scrollbar.setOrientation(Qt.Horizontal)
+        scrollbar.setOrientation(Qt.Orientation.Horizontal)
         scrollbar.setValue(60)
 
         dial = QDial()

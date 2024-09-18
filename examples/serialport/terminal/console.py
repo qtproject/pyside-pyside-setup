@@ -7,8 +7,8 @@ from PySide6.QtGui import QPalette
 from PySide6.QtWidgets import QPlainTextEdit
 
 
-UNHANDLED_KEYS = [Qt.Key_Backspace, Qt.Key_Left, Qt.Key_Right, Qt.Key_Up,
-                  Qt.Key_Down]
+UNHANDLED_KEYS = [Qt.Key.Key_Backspace, Qt.Key.Key_Left, Qt.Key.Key_Right, Qt.Key.Key_Up,
+                  Qt.Key.Key_Down]
 
 
 class Console(QPlainTextEdit):

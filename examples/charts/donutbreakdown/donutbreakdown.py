@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
     window = QMainWindow()
     chart_view = QChartView(donut_breakdown)
-    chart_view.setRenderHint(QPainter.Antialiasing)
+    chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
     window.setCentralWidget(chart_view)
     available_geometry = window.screen().availableGeometry()
     size = available_geometry.height() * 0.75

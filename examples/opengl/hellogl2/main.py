@@ -17,9 +17,9 @@ try:
     from glwidget import GLWidget
 except ImportError:
     app = QApplication(sys.argv)
-    message_box = QMessageBox(QMessageBox.Critical, "OpenGL hellogl",
+    message_box = QMessageBox(QMessageBox.Icon.Critical, "OpenGL hellogl",
                               "PyOpenGL must be installed to run this example.",
-                              QMessageBox.Close)
+                              QMessageBox.StandardButton.Close)
     message_box.setDetailedText("Run:\npip install PyOpenGL PyOpenGL_accelerate")
     message_box.exec()
     sys.exit(1)
@@ -43,15 +43,15 @@ if __name__ == '__main__':
         fmt.setSamples(4)
     if options.coreprofile:
         fmt.setVersion(3, 2)
-        fmt.setProfile(QSurfaceFormat.CoreProfile)
+        fmt.setProfile(QSurfaceFormat.OpenGLContextProfile.CoreProfile)
     QSurfaceFormat.setDefaultFormat(fmt)
 
     GLWidget.set_transparent(options.transparent)
 
     main_window = MainWindow()
     if options.transparent:
-        main_window.setAttribute(Qt.WA_TranslucentBackground)
-        main_window.setAttribute(Qt.WA_NoSystemBackground, False)
+        main_window.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        main_window.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, False)
 
     main_window.show()
 

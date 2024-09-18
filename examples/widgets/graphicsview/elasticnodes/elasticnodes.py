@@ -244,7 +244,7 @@ class GraphWidget(QGraphicsView):
         scene.setSceneRect(-200, -200, 400, 400)
         self.setScene(scene)
         self.setCacheMode(QGraphicsView.CacheBackground)
-        self.setRenderHint(QPainter.Antialiasing)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QGraphicsView.AnchorViewCenter)
 

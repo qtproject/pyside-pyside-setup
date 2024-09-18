@@ -14,7 +14,7 @@ class NotificationPopup(QWidget):
         super().__init__(parent)
         self.notification = None
         self.m_icon, self.m_title, self.m_message = QLabel(), QLabel(), QLabel()
-        self.setWindowFlags(Qt.ToolTip)
+        self.setWindowFlags(Qt.WindowType.ToolTip)
 
         rootLayout = QHBoxLayout(self)
         rootLayout.addWidget(self.m_icon)
@@ -26,7 +26,7 @@ class NotificationPopup(QWidget):
         bodyLayout.addLayout(titleLayout)
 
         titleLayout.addWidget(self.m_title)
-        titleLayout.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding))
+        titleLayout.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding))
 
         close = QPushButton("Close")
         titleLayout.addWidget(close)
@@ -64,6 +64,6 @@ class NotificationPopup(QWidget):
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
         QWidget.mouseReleaseEvent(event)
-        if self.notification and event.button() == Qt.LeftButton:
+        if self.notification and event.button() == Qt.MouseButton.LeftButton:
             self.notification.click()
             self.onClosed()

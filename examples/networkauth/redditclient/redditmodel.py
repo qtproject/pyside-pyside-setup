@@ -31,7 +31,7 @@ class RedditModel(QAbstractTableModel):
     def data(self, index, role):
         if not index.isValid():
             return None
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             children_object = self._threads[index.row()]
             data_object = children_object["data"]
             return data_object["title"]

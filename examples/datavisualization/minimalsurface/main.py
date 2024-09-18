@@ -24,7 +24,7 @@ if __name__ == '__main__':
     print(DESCRIPTION)
 
     surface = Q3DSurface()
-    surface.setFlags(surface.flags() ^ Qt.FramelessWindowHint)
+    surface.setFlags(surface.flags() ^ Qt.WindowType.FramelessWindowHint)
     axis = surface.axisX()
     axis.setTitle("X")
     axis.setTitleVisible(True)

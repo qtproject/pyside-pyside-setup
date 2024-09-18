@@ -50,11 +50,11 @@ class TestChart(QMainWindow):
         self.chart.addSeries(self.series)
         self.chart.setTitle("Simple areachart example")
         self.chart.createDefaultAxes()
-        self.chart.axes(Qt.Horizontal)[0].setRange(0, 20)
+        self.chart.axes(Qt.Orientation.Horizontal)[0].setRange(0, 20)
         self.chart.axes(Qt.Vertical)[0].setRange(0, 10)
 
         self._chart_view = QChartView(self.chart)
-        self._chart_view.setRenderHint(QPainter.Antialiasing)
+        self._chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         self.setCentralWidget(self._chart_view)
 

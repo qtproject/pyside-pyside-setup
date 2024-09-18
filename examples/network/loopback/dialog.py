@@ -132,7 +132,7 @@ class Dialog(QDialog):
         self.client_status_label.setText(f"Sent {self.bytes_written / (1024 ** 2)} MB")
 
     def display_error(self, socket_error: QAbstractSocket.SocketError):
-        if socket_error == QAbstractSocket.RemoteHostClosedError:
+        if socket_error == QAbstractSocket.SocketError.RemoteHostClosedError:
             return
 
         QMessageBox.information(

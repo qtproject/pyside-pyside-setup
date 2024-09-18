@@ -68,11 +68,11 @@ class AddressWidget(QTabWidget):
             # Step 2: get the index of the newly created row and use it.
             # to set the name
             ix = self._table_model.index(0, 0, QModelIndex())
-            self._table_model.setData(ix, address["name"], Qt.EditRole)
+            self._table_model.setData(ix, address["name"], Qt.ItemDataRole.EditRole)
 
             # Step 3: lather, rinse, repeat for the address.
             ix = self._table_model.index(0, 1, QModelIndex())
-            self._table_model.setData(ix, address["address"], Qt.EditRole)
+            self._table_model.setData(ix, address["address"], Qt.ItemDataRole.EditRole)
 
             # Remove the newAddressTab, as we now have at least one
             # address in the model.
@@ -99,9 +99,9 @@ class AddressWidget(QTabWidget):
 
         row = proxy_model.mapToSource(indexes[0]).row()
         ix = self._table_model.index(row, 0, QModelIndex())
-        name = self._table_model.data(ix, Qt.DisplayRole)
+        name = self._table_model.data(ix, Qt.ItemDataRole.DisplayRole)
         ix = self._table_model.index(row, 1, QModelIndex())
-        address = self._table_model.data(ix, Qt.DisplayRole)
+        address = self._table_model.data(ix, Qt.ItemDataRole.DisplayRole)
 
         # Open an addDialogWidget, and only allow the user to edit the address.
         add_dialog = AddDialogWidget()
@@ -116,7 +116,7 @@ class AddressWidget(QTabWidget):
             new_address = add_dialog.address
             if new_address != address:
                 ix = self._table_model.index(row, 1, QModelIndex())
-                self._table_model.setData(ix, new_address, Qt.EditRole)
+                self._table_model.setData(ix, new_address, Qt.ItemDataRole.EditRole)
 
     @Slot()
     def remove_entry(self):

@@ -27,10 +27,10 @@ class MyModel(QAbstractTableModel):
         return 3
 
 #! [2]
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         row = index.row()
         col = index.column()
-        if role == Qt.DisplayRole and row == 0 and col == 0:
+        if role == Qt.ItemDataRole.DisplayRole and row == 0 and col == 0:
             return QTime.currentTime().toString()
         return None
 #! [2]
@@ -41,7 +41,7 @@ class MyModel(QAbstractTableModel):
         # we identify the top left cell
         top_left = self.createIndex(0, 0)
         # emit a signal to make the view reread identified data
-        self.dataChanged.emit(top_left, top_left, [Qt.DisplayRole])
+        self.dataChanged.emit(top_left, top_left, [Qt.ItemDataRole.DisplayRole])
 #! [3]
 
 

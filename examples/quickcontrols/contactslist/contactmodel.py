@@ -19,10 +19,10 @@ class ContactModel(QAbstractListModel):
 
     @QEnum
     class ContactRole(IntEnum):
-        FullNameRole = Qt.DisplayRole
-        AddressRole = Qt.UserRole
-        CityRole = Qt.UserRole + 1
-        NumberRole = Qt.UserRole + 2
+        FullNameRole = Qt.ItemDataRole.DisplayRole
+        AddressRole = Qt.ItemDataRole.UserRole
+        CityRole = Qt.ItemDataRole.UserRole + 1
+        NumberRole = Qt.ItemDataRole.UserRole + 2
 
     @dataclass
     class Contact:

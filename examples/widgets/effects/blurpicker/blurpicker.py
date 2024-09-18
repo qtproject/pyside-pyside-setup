@@ -37,7 +37,7 @@ class BlurPicker(QGraphicsView):
         self._animation.setDuration(400)
         self._animation.setEasingCurve(QEasingCurve.InOutSine)
 
-        self.setRenderHint(QPainter.Antialiasing, True)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing, True)
         self.setFrameStyle(QFrame.NoFrame)
 
     @Property(float)

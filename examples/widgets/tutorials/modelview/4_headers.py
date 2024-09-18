@@ -20,8 +20,8 @@ class MyModel(QAbstractTableModel):
     def columnCount(self, parent=None):
         return 3
 
-    def data(self, index, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole:
             row = index.row() + 1
             column = index.column() + 1
             return f"Row{row}, Column{column}"
@@ -29,7 +29,7 @@ class MyModel(QAbstractTableModel):
 
 #! [1]
     def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+        if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal:
             return ["first", "second", "third"][section]
         return None
 #! [1]

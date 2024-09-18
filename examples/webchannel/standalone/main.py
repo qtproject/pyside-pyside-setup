@@ -1,4 +1,5 @@
-# Copyright (C) 2016 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Milian Wolff <milian.wolff@kdab.com>
+# Copyright (C) 2016 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com,
+#   author Milian Wolff <milian.wolff@kdab.com>
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
@@ -32,8 +33,8 @@ if __name__ == '__main__':
 
     # setup the QWebSocketServer
     server = QWebSocketServer("QWebChannel Standalone Example Server",
-                              QWebSocketServer.NonSecureMode)
-    if not server.listen(QHostAddress.LocalHost, 12345):
+                              QWebSocketServer.SslMode.NonSecureMode)
+    if not server.listen(QHostAddress.SpecialAddress.LocalHost, 12345):
         print("Failed to open web socket server.")
         sys.exit(-1)
 

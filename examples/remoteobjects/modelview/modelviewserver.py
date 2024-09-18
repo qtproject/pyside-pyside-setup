@@ -21,15 +21,15 @@ class TimerHandler(QObject):
     def change_data(self):
         for i in range(10, 50):
             self._model.setData(self._model.index(i, 1),
-                                QColor(Qt.blue), Qt.BackgroundRole)
+                                QColor(Qt.blue), Qt.ItemDataRole.BackgroundRole)
 
     def insert_data(self):
         self._model.insertRows(2, 9)
         for i in range(2, 11):
             self._model.setData(self._model.index(i, 1),
-                                QColor(Qt.green), Qt.BackgroundRole)
+                                QColor(Qt.green), Qt.ItemDataRole.BackgroundRole)
             self._model.setData(self._model.index(i, 1),
-                                "InsertedRow", Qt.DisplayRole)
+                                "InsertedRow", Qt.ItemDataRole.DisplayRole)
 
     def remove_data(self):
         self._model.removeRows(2, 4)
@@ -77,12 +77,12 @@ if __name__ == '__main__':
 
     # Needed by QMLModelViewClient
     role_names = {
-        Qt.DisplayRole: QByteArray(b'_text'),
-        Qt.BackgroundRole: QByteArray(b'_color')
+        Qt.ItemDataRole.DisplayRole: QByteArray(b'_text'),
+        Qt.ItemDataRole.BackgroundRole: QByteArray(b'_color')
     }
     source_model.setItemRoleNames(role_names)
 
-    roles = [Qt.DisplayRole, Qt.BackgroundRole]
+    roles = [Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.BackgroundRole]
 
     print("Creating registry host")
     node = QRemoteObjectRegistryHost(QUrl("local:registry"))

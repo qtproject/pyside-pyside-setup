@@ -529,7 +529,7 @@ class SettingsTree(QTreeWidget):
             key = ancestor.text(0) + '/' + key
             ancestor = ancestor.parent()
 
-        self.settings.setValue(key, item.data(2, Qt.UserRole))
+        self.settings.setValue(key, item.data(2, Qt.ItemDataRole.UserRole))
 
         if self.auto_refresh:
             self.refresh()
@@ -543,7 +543,7 @@ class SettingsTree(QTreeWidget):
                 child = self.child_at(parent, child_index)
                 child.setText(1, '')
                 child.setText(2, '')
-                child.setData(2, Qt.UserRole, None)
+                child.setData(2, Qt.ItemDataRole.UserRole, None)
                 self.move_item_forward(parent, child_index, divider_index)
             else:
                 child = self.create_item(group, parent, divider_index)
@@ -581,7 +581,7 @@ class SettingsTree(QTreeWidget):
                         value = self.settings.value(key, type=value_type)
                 child.setText(1, value.__class__.__name__)
             child.setText(2, VariantDelegate.display_text(value))
-            child.setData(2, Qt.UserRole, value)
+            child.setData(2, Qt.ItemDataRole.UserRole, value)
 
         while divider_index < self.child_count(parent):
             self.delete_item(parent, divider_index)
@@ -638,7 +638,7 @@ class VariantDelegate(QItemDelegate):
 
     def paint(self, painter, option, index):
         if index.column() == 2:
-            value = index.model().data(index, Qt.UserRole)
+            value = index.model().data(index, Qt.ItemDataRole.UserRole)
             if not self.is_supported_type(value):
                 my_option = QStyleOptionViewItem(option)
                 my_option.state &= ~QStyle.State_Enabled
@@ -651,7 +651,7 @@ class VariantDelegate(QItemDelegate):
         if index.column() != 2:
             return None
 
-        original_value = index.model().data(index, Qt.UserRole)
+        original_value = index.model().data(index, Qt.ItemDataRole.UserRole)
         if not self.is_supported_type(original_value):
             return None
 
@@ -672,7 +672,7 @@ class VariantDelegate(QItemDelegate):
     def setEditorData(self, editor, index):
         if not editor:
             return
-        value = index.model().data(index, Qt.UserRole)
+        value = index.model().data(index, Qt.ItemDataRole.UserRole)
         if isinstance(editor, QCheckBox):
             editor.setCheckState(Qt.Checked if value else Qt.Unchecked)
         elif isinstance(editor, QSpinBox):
@@ -689,7 +689,7 @@ class VariantDelegate(QItemDelegate):
             state, text, _ = validator.validate(text, 0)
             if state != QValidator.Acceptable:
                 return None
-        original_value = index.model().data(index, Qt.UserRole)
+        original_value = index.model().data(index, Qt.ItemDataRole.UserRole)
         return self._type_checker.from_string(text, original_value)
 
     def setModelData(self, editor, model, index):
@@ -701,8 +701,8 @@ class VariantDelegate(QItemDelegate):
         else:
             value = self.value_from_lineedit(editor, model, index)
         if value is not None:
-            model.setData(index, value, Qt.UserRole)
-            model.setData(index, self.display_text(value), Qt.DisplayRole)
+            model.setData(index, value, Qt.ItemDataRole.UserRole)
+            model.setData(index, self.display_text(value), Qt.ItemDataRole.DisplayRole)
 
     @staticmethod
     def is_supported_type(value):

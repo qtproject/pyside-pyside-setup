@@ -48,8 +48,8 @@ class ApplicationWindow(QMainWindow):
         # Sliders (Left)
         min = 0
         max = 360
-        self.slider_azim = QSlider(minimum=min, maximum=max, orientation=Qt.Horizontal)
-        self.slider_elev = QSlider(minimum=min, maximum=max, orientation=Qt.Horizontal)
+        self.slider_azim = QSlider(minimum=min, maximum=max, orientation=Qt.Orientation.Horizontal)
+        self.slider_elev = QSlider(minimum=min, maximum=max, orientation=Qt.Orientation.Horizontal)
 
         self.slider_azim_layout = QHBoxLayout()
         self.slider_azim_layout.addWidget(QLabel(f"{min}"))

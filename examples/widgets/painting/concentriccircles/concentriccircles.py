@@ -43,7 +43,7 @@ class CircleWidget(QWidget):
 
     def paintEvent(self, event):
         with QPainter(self) as painter:
-            painter.setRenderHint(QPainter.Antialiasing, self.antialiased)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing, self.antialiased)
             painter.translate(self.width() / 2, self.height() / 2)
 
             for diameter in range(0, 256, 9):

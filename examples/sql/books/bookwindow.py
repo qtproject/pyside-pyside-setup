@@ -35,11 +35,12 @@ class BookWindow(QMainWindow, Ui_BookWindow):
         model.setRelation(genre_idx, QSqlRelation("genres", "id", "name"))
 
         # Set the localized header captions:
-        model.setHeaderData(author_idx, Qt.Horizontal, self.tr("Author Name"))
-        model.setHeaderData(genre_idx, Qt.Horizontal, self.tr("Genre"))
-        model.setHeaderData(model.fieldIndex("title"), Qt.Horizontal, self.tr("Title"))
-        model.setHeaderData(model.fieldIndex("year"), Qt.Horizontal, self.tr("Year"))
-        model.setHeaderData(model.fieldIndex("rating"), Qt.Horizontal, self.tr("Rating"))
+        model.setHeaderData(author_idx, Qt.Orientation.Horizontal, self.tr("Author Name"))
+        model.setHeaderData(genre_idx, Qt.Orientation.Horizontal, self.tr("Genre"))
+        model.setHeaderData(model.fieldIndex("title"), Qt.Orientation.Horizontal, self.tr("Title"))
+        model.setHeaderData(model.fieldIndex("year"), Qt.Orientation.Horizontal, self.tr("Year"))
+        model.setHeaderData(model.fieldIndex("rating"),
+                            Qt.Orientation.Horizontal, self.tr("Rating"))
 
         if not model.select():
             print(model.lastError())

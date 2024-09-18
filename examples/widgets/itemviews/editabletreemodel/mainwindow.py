@@ -21,8 +21,8 @@ class MainWindow(QMainWindow):
 
         self.view = QTreeView()
         self.view.setAlternatingRowColors(True)
-        self.view.setSelectionBehavior(QAbstractItemView.SelectItems)
-        self.view.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self.view.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectItems)
+        self.view.setHorizontalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.view.setAnimated(False)
         self.view.setAllColumnsShowFocus(True)
         self.setCentralWidget(self.view)
@@ -91,13 +91,13 @@ class MainWindow(QMainWindow):
 
         for column in range(model.columnCount(index)):
             child: QModelIndex = model.index(0, column, index)
-            model.setData(child, "[No data]", Qt.EditRole)
-            if not model.headerData(column, Qt.Horizontal):
-                model.setHeaderData(column, Qt.Horizontal, "[No header]",
-                                    Qt.EditRole)
+            model.setData(child, "[No data]", Qt.ItemDataRole.EditRole)
+            if not model.headerData(column, Qt.Orientation.Horizontal):
+                model.setHeaderData(column, Qt.Orientation.Horizontal, "[No header]",
+                                    Qt.ItemDataRole.EditRole)
 
         selection_model.setCurrentIndex(
-            model.index(0, 0, index), QItemSelectionModel.ClearAndSelect
+            model.index(0, 0, index), QItemSelectionModel.SelectionFlag.ClearAndSelect
         )
         self.update_actions()
 
@@ -108,8 +108,8 @@ class MainWindow(QMainWindow):
 
         changed: bool = model.insertColumn(column + 1)
         if changed:
-            model.setHeaderData(column + 1, Qt.Horizontal, "[No header]",
-                                Qt.EditRole)
+            model.setHeaderData(column + 1, Qt.Orientation.Horizontal, "[No header]",
+                                Qt.ItemDataRole.EditRole)
 
         self.update_actions()
 
@@ -126,7 +126,7 @@ class MainWindow(QMainWindow):
 
         for column in range(model.columnCount(parent)):
             child: QModelIndex = model.index(index.row() + 1, column, parent)
-            model.setData(child, "[No data]", Qt.EditRole)
+            model.setData(child, "[No data]", Qt.ItemDataRole.EditRole)
 
     @Slot()
     def remove_column(self) -> None:

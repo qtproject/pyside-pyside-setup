@@ -78,7 +78,7 @@ class ColorItem(QGraphicsItem):
 
             with QPainter(pixmap) as painter:
                 painter.translate(15, 15)
-                painter.setRenderHint(QPainter.Antialiasing)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing)
                 self.paint(painter, None, None)
 
             pixmap.setMask(pixmap.createHeuristicMask())
@@ -245,7 +245,7 @@ if __name__ == '__main__':
     scene.addItem(robot)
 
     view = QGraphicsView(scene)
-    view.setRenderHint(QPainter.Antialiasing)
+    view.setRenderHint(QPainter.RenderHint.Antialiasing)
     view.setViewportUpdateMode(QGraphicsView.BoundingRectViewportUpdate)
     view.setBackgroundBrush(QColor(230, 200, 167))
     view.setWindowTitle("Drag and Drop Robot")

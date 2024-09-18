@@ -134,7 +134,7 @@ class InputTest(QWidget):
         self.m_device_box.activated[int].connect(self.device_changed)
         self.layout.addWidget(self.m_device_box)
 
-        self.m_volume_slider = QSlider(Qt.Horizontal, self)
+        self.m_volume_slider = QSlider(Qt.Orientation.Horizontal, self)
         self.m_volume_slider.setRange(0, 100)
         self.m_volume_slider.setValue(100)
         self.m_volume_slider.valueChanged.connect(self.slider_changed)

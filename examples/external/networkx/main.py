@@ -34,9 +34,9 @@ class Node(QGraphicsObject):
         self._radius = 30
         self._rect = QRectF(0, 0, self._radius * 2, self._radius * 2)
 
-        self.setFlag(QGraphicsItem.ItemIsMovable)
-        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges)
-        self.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges)
+        self.setCacheMode(QGraphicsItem.CacheMode.DeviceCoordinateCache)
 
     def boundingRect(self) -> QRectF:
         """Override from QGraphicsItem
@@ -55,20 +55,20 @@ class Node(QGraphicsObject):
             painter (QPainter)
             option (QStyleOptionGraphicsItem)
         """
-        painter.setRenderHints(QPainter.Antialiasing)
+        painter.setRenderHints(QPainter.RenderHint.Antialiasing)
         painter.setPen(
             QPen(
                 QColor(self._color).darker(),
                 2,
-                Qt.SolidLine,
-                Qt.RoundCap,
-                Qt.RoundJoin,
+                Qt.PenStyle.SolidLine,
+                Qt.PenCapStyle.RoundCap,
+                Qt.PenJoinStyle.RoundJoin,
             )
         )
         painter.setBrush(QBrush(QColor(self._color)))
         painter.drawEllipse(self.boundingRect())
         painter.setPen(QPen(QColor("white")))
-        painter.drawText(self.boundingRect(), Qt.AlignCenter, self._name)
+        painter.drawText(self.boundingRect(), Qt.AlignmentFlag.AlignCenter, self._name)
 
     def add_edge(self, edge):
         """Add an edge to this node
@@ -88,7 +88,7 @@ class Node(QGraphicsObject):
         Returns:
             Any
         """
-        if change == QGraphicsItem.ItemPositionHasChanged:
+        if change == QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged:
             for edge in self._edges:
                 edge.adjust()
 
@@ -205,7 +205,7 @@ class Edge(QGraphicsItem):
         """
 
         if self._source and self._dest:
-            painter.setRenderHints(QPainter.Antialiasing)
+            painter.setRenderHints(QPainter.RenderHint.Antialiasing)
 
             painter.setPen(
                 QPen(

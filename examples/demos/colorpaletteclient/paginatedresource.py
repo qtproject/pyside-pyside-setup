@@ -28,9 +28,9 @@ class ColorUser:
 
 @QmlElement
 class ColorUserModel (QAbstractListModel):
-    IdRole = Qt.UserRole + 1
-    EmailRole = Qt.UserRole + 2
-    AvatarRole = Qt.UserRole + 3
+    IdRole = Qt.ItemDataRole.UserRole + 1
+    EmailRole = Qt.ItemDataRole.UserRole + 2
+    AvatarRole = Qt.ItemDataRole.UserRole + 3
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -87,10 +87,10 @@ class Color:
 
 @QmlElement
 class ColorModel (QAbstractListModel):
-    IdRole = Qt.UserRole + 1
-    ColorRole = Qt.UserRole + 2
-    NameRole = Qt.UserRole + 3
-    PantoneValueRole = Qt.UserRole + 4
+    IdRole = Qt.ItemDataRole.UserRole + 1
+    ColorRole = Qt.ItemDataRole.UserRole + 2
+    NameRole = Qt.ItemDataRole.UserRole + 3
+    PantoneValueRole = Qt.ItemDataRole.UserRole + 4
 
     def __init__(self, parent=None):
         super().__init__(parent)

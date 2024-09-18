@@ -19,7 +19,7 @@ class Receiver(QObject):
         super().__init__()
         self.result = 0
 
-    @Slot(Qt.Alignment, str)
+    @Slot(Qt.AlignmentFlag, str)
     def handler(self, e, s):
         print('handler', e, "type=", type(e).__name__, s)
         self.result += 1

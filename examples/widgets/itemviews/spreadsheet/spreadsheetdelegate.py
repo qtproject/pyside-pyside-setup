@@ -26,7 +26,8 @@ class SpreadSheetDelegate(QStyledItemDelegate):
         # create a completer with the strings in the column as model
         allStrings = QStringListModel()
         for i in range(1, index.model().rowCount()):
-            strItem = str(index.model().data(index.sibling(i, index.column()), Qt.EditRole))
+            strItem = str(index.model().data(index.sibling(i, index.column()),
+                                             Qt.ItemDataRole.EditRole))
 
             if not allStrings.contains(strItem):
                 allStrings.append(strItem)
@@ -45,14 +46,14 @@ class SpreadSheetDelegate(QStyledItemDelegate):
     def set_editor_data(self, editor: QWidget, index: QModelIndex) -> None:
         edit = QLineEdit(editor)
         if edit:
-            edit.setText(str(index.model().data(index, Qt.EditRole)))
+            edit.setText(str(index.model().data(index, Qt.ItemDataRole.EditRole)))
             return
 
         dateEditor = QDateTimeEdit(editor)
         if dateEditor:
             dateEditor.setDate(
                 QDate.fromString(
-                    str(index.model().data(index, Qt.EditRole)), "d/M/yyyy"))
+                    str(index.model().data(index, Qt.ItemDataRole.EditRole)), "d/M/yyyy"))
 
     def set_model_data(self, editor: QWidget,
                        model: QAbstractItemModel, index: QModelIndex) -> None:

@@ -5,8 +5,8 @@ from __future__ import annotations
 from PySide6.QtCore import QMimeDatabase, QMimeType, QModelIndex, QObject, Qt, qWarning
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 
-mimeTypeRole = Qt.UserRole + 1
-iconQueriedRole = Qt.UserRole + 2
+mimeTypeRole = Qt.ItemDataRole.UserRole + 1
+iconQueriedRole = Qt.ItemDataRole.UserRole + 2
 
 
 def createRow(t: QMimeType):

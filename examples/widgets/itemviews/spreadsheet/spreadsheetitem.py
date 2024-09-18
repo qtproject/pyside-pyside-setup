@@ -14,25 +14,25 @@ class SpreadSheetItem(QTableWidgetItem):
         return super().__init_subclass__()
 
     def data(self, role: int) -> Any:
-        if role == Qt.EditRole or role == Qt.StatusTipRole:
+        if role == Qt.ItemDataRole.EditRole or role == Qt.ItemDataRole.StatusTipRole:
             return self.formula()
 
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             return self.display()
 
         t = str(self.display())
 
-        if role == Qt.ForegroundRole:
+        if role == Qt.ItemDataRole.ForegroundRole:
             try:
                 number = int(t)
-                color = Qt.red if number < 0 else Qt.blue
+                color = Qt.GlobalColor.red if number < 0 else Qt.GlobalColor.blue
             except ValueError:
-                color = Qt.black
+                color = Qt.GlobalColor.black
             return color
 
-        if role == Qt.TextAlignmentRole:
+        if role == Qt.ItemDataRole.TextAlignmentRole:
             if t and (t[0].isdigit() or t[0] == '-'):
-                return int(Qt.AlignRight | Qt.AlignVCenter)
+                return int(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
 
         return super().data(role)
 
@@ -52,7 +52,7 @@ class SpreadSheetItem(QTableWidgetItem):
         return result
 
     def formula(self) -> None:
-        return str(super().data(Qt.DisplayRole))
+        return str(super().data(Qt.ItemDataRole.DisplayRole))
 
     def compute_formula(self, formula: str, widget: QTableWidget, this) -> QMetaType.Type.QVariant:
         # check if the string is actually a formula or not

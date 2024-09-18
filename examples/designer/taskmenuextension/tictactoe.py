@@ -64,7 +64,7 @@ class TicTacToe(QWidget):
 
     def paintEvent(self, event):
         with QPainter(self) as painter:
-            painter.setRenderHint(QPainter.Antialiasing)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
             painter.setPen(QPen(Qt.darkGreen, 1))
             painter.drawLine(self._cell_width(), 0,

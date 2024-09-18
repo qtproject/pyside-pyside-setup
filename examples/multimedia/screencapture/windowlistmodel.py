@@ -16,7 +16,7 @@ class WindowListModel(QAbstractListModel):
         return len(self._window_list)
 
     def data(self, index, role):
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             window = self._window_list[index.row()]
             return window.description()
         return None

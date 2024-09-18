@@ -15,11 +15,11 @@ if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
 
     # Use platform-specific defaults when no command-line arguments given.
-    graphicsApi = QRhi.OpenGLES2
+    graphicsApi = QRhi.Implementation.OpenGLES2
     if sys.platform == "win32":
-        graphicsApi = QRhi.D3D11
+        graphicsApi = QRhi.Implementation.D3D11
     elif sys.platform == "darwin":
-        graphicsApi = QRhi.Metal
+        graphicsApi = QRhi.Implementation.Metal
 
     parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter,
                             description="QRhi render example")
@@ -33,15 +33,15 @@ if __name__ == "__main__":
                         help="Metal")
     args = parser.parse_args()
     if args.null:
-        graphicsApi = QRhi.Null
+        graphicsApi = QRhi.Implementation.Null
     elif args.opengl:
-        graphicsApi = QRhi.OpenGLES2
+        graphicsApi = QRhi.Implementation.OpenGLES2
     elif args.d3d11:
-        graphicsApi = QRhi.D3D11
+        graphicsApi = QRhi.Implementation.D3D11
     elif args.d3d12:
-        graphicsApi = QRhi.D3D12
+        graphicsApi = QRhi.Implementation.D3D12
     elif args.metal:
-        graphicsApi = QRhi.Metal
+        graphicsApi = QRhi.Implementation.Metal
 
     # graphicsApi = QRhi.Vulkan?  detect? needs QVulkanInstance
 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     # we get on macOS is not sufficient.
     if sys.platform == "darwin":
         fmt.setVersion(4, 1)
-        fmt.setProfile(QSurfaceFormat.CoreProfile)
+        fmt.setProfile(QSurfaceFormat.OpenGLContextProfile.CoreProfile)
     QSurfaceFormat.setDefaultFormat(fmt)
 
     window = HelloWindow(graphicsApi)

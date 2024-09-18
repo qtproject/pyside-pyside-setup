@@ -21,7 +21,7 @@ class ScreenListModel(QAbstractListModel):
     def data(self, index, role):
         screen_list = QGuiApplication.screens()
 
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             screen = screen_list[index.row()]
             w = screen.size().width()
             h = screen.size().height()

@@ -24,9 +24,9 @@ SAMPLE_MIN = -8.0
 SAMPLE_MAX = 8.0
 
 
-X_ROLE = Qt.UserRole + 1
-Y_ROLE = Qt.UserRole + 2
-Z_ROLE = Qt.UserRole + 3
+X_ROLE = Qt.ItemDataRole.UserRole + 1
+Y_ROLE = Qt.ItemDataRole.UserRole + 2
+Z_ROLE = Qt.ItemDataRole.UserRole + 3
 
 
 class SqrtSinModel(QAbstractTableModel):
@@ -65,7 +65,7 @@ class SqrtSinModel(QAbstractTableModel):
     def columnCount(self, index=QModelIndex()):
         return self._x.size
 
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         row = index.row()
         col = index.column()
         if role == X_ROLE:

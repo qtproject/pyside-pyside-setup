@@ -29,14 +29,14 @@ class MyModel(QAbstractTableModel):
     def columnCount(self, parent=None):
         return COLS
 
-    def data(self, index, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole and self.checkIndex(index):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole and self.checkIndex(index):
             return self._grid_data[index.row()][index.column()]
         return None
 
 #! [1]
     def setData(self, index, value, role):
-        if role != Qt.EditRole or not self.checkIndex(index):
+        if role != Qt.ItemDataRole.EditRole or not self.checkIndex(index):
             return False
         # save value from editor to member m_gridData
         self._grid_data[index.row()][index.column()] = value

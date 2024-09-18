@@ -12,7 +12,7 @@ def rectangle(point_type, image_size):
     image = QImage(image_size, image_size, QImage.Format_RGB32)
     painter = QPainter()
     painter.begin(image)
-    painter.setRenderHint(QPainter.Antialiasing)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
     painter.fillRect(0, 0, image_size, image_size, point_type[2])
     painter.end()
     return image
@@ -27,7 +27,7 @@ def circle(point_type, image_size):
     image.fill(QColor(0, 0, 0, 0))
     painter = QPainter()
     painter.begin(image)
-    painter.setRenderHint(QPainter.Antialiasing)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
     painter.setBrush(point_type[2])
     pen = painter.pen()
     pen.setWidth(0)

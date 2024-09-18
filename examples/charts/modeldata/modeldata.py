@@ -38,10 +38,10 @@ class CustomTableModel(QAbstractTableModel):
         return self.column_count
 
     def headerData(self, section, orientation, role):
-        if role != Qt.DisplayRole:
+        if role != Qt.ItemDataRole.DisplayRole:
             return None
 
-        if orientation == Qt.Horizontal:
+        if orientation == Qt.Orientation.Horizontal:
             if section % 2 == 0:
                 return "x"
             else:
@@ -49,12 +49,12 @@ class CustomTableModel(QAbstractTableModel):
         else:
             return str(section + 1)
 
-    def data(self, index, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole:
             return self.input_data[index.row()][index.column()]
-        elif role == Qt.EditRole:
+        elif role == Qt.ItemDataRole.EditRole:
             return self.input_data[index.row()][index.column()]
-        elif role == Qt.BackgroundRole:
+        elif role == Qt.ItemDataRole.BackgroundRole:
             for color, rect in self.mapping.items():
                 if rect.contains(index.column(), index.row()):
                     return QColor(color)
@@ -62,8 +62,8 @@ class CustomTableModel(QAbstractTableModel):
             return QColor(Qt.white)
         return None
 
-    def setData(self, index, value, role=Qt.EditRole):
-        if index.isValid() and role == Qt.EditRole:
+    def setData(self, index, value, role=Qt.ItemDataRole.EditRole):
+        if index.isValid() and role == Qt.ItemDataRole.EditRole:
             self.input_data[index.row()][index.column()] = float(value)
             self.dataChanged.emit(index, index)
             return True
@@ -123,7 +123,7 @@ class TableWidget(QWidget):
 
         self.chart.createDefaultAxes()
         self.chart_view = QChartView(self.chart)
-        self.chart_view.setRenderHint(QPainter.Antialiasing)
+        self.chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.chart_view.setMinimumSize(640, 480)
 
         # create main layout

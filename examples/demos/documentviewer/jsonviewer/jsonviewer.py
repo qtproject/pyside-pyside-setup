@@ -105,19 +105,20 @@ class JsonItemModel(QAbstractItemModel):
             return None
 
         item = self.itemFromIndex(index)
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             if index.column() == 0:
                 return item.key()
             if index.column() == 1:
                 return item.value()
-        elif role == Qt.EditRole:
+        elif role == Qt.ItemDataRole.EditRole:
             if index.column() == 1:
                 return item.value()
         return None
 
     def headerData(self, section, orientation, role):
         return (self._headers[section]
-                if role == Qt.DisplayRole and orientation == Qt.Horizontal else None)
+                if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal
+                else None)
 
     def index(self, row, column, parent=QModelIndex()):
         if not self.hasIndex(row, column, parent):
@@ -218,7 +219,7 @@ class JsonViewer(AbstractViewer):
             index = self._tree.model().index(i, 0)
             self._toplevel.addItem(index.data())
             item = self._toplevel.item(i)
-            item.setData(Qt.UserRole, index)
+            item.setData(Qt.ItemDataRole.UserRole, index)
             item.setToolTip(f"Toplevel Item {i}")
 
         self._toplevel.setAcceptDrops(True)
@@ -278,7 +279,7 @@ class JsonViewer(AbstractViewer):
         return self._tree.model() is not None
 
     def indexOf(self, item):
-        return QModelIndex(item.data(Qt.UserRole))
+        return QModelIndex(item.data(Qt.ItemDataRole.UserRole))
 
     @Slot(QListWidgetItem)
     def onTopLevelItemClicked(self, item):
@@ -360,14 +361,14 @@ class JsonViewer(AbstractViewer):
         if not index.isValid():
             return
 
-        item = QListWidgetItem(index.data(Qt.DisplayRole), self._toplevel)
-        item.setData(Qt.UserRole, index)
+        item = QListWidgetItem(index.data(Qt.ItemDataRole.DisplayRole), self._toplevel)
+        item.setData(Qt.ItemDataRole.UserRole, index)
 
         # Set a tooltip that shows where the item is located in the tree
         parent = index.parent()
-        tooltip = index.data(Qt.DisplayRole).toString()
+        tooltip = index.data(Qt.ItemDataRole.DisplayRole).toString()
         while parent.isValid():
-            tooltip = parent.data(Qt.DisplayRole).toString() + "." + tooltip
+            tooltip = parent.data(Qt.ItemDataRole.DisplayRole).toString() + "." + tooltip
             parent = parent.parent()
 
         item.setToolTip(tooltip)

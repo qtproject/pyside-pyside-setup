@@ -38,10 +38,11 @@ if __name__ == '__main__':
     view.setPage(WebEnginePage(view))
 
     def set_feature_permission(origin: QUrl, feature: QWebEnginePage.Feature):
-        if feature != QWebEnginePage.Notifications:
+        if feature != QWebEnginePage.Feature.Notifications:
             return
 
-        view.page().setFeaturePermission(origin, feature, QWebEnginePage.PermissionGrantedByUser)
+        view.page().setFeaturePermission(origin, feature,
+                                         QWebEnginePage.PermissionPolicy.PermissionGrantedByUser)
 
     view.page().featurePermissionRequested.connect(set_feature_permission)
     profile = view.page().profile()

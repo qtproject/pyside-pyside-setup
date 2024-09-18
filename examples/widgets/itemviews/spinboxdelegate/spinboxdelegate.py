@@ -33,7 +33,7 @@ class SpinBoxDelegate(QStyledItemDelegate):
 
 #! [2]
     def setEditorData(self, editor, index):
-        value = index.model().data(index, Qt.EditRole)
+        value = index.model().data(index, Qt.ItemDataRole.EditRole)
         editor.setValue(value)
 #! [2]
 
@@ -41,7 +41,7 @@ class SpinBoxDelegate(QStyledItemDelegate):
     def setModelData(self, editor, model, index):
         editor.interpretText()
         value = editor.value()
-        model.setData(index, value, Qt.EditRole)
+        model.setData(index, value, Qt.ItemDataRole.EditRole)
 #! [3]
 
 #! [4]

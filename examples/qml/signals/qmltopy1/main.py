@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     qml_file = os.fspath(Path(__file__).resolve().parent / 'view.qml')
     view.setSource(QUrl.fromLocalFile(qml_file))
-    if view.status() == QQuickView.Error:
+    if view.status() == QQuickView.Status.Error:
         sys.exit(-1)
     view.show()
     res = app.exec()

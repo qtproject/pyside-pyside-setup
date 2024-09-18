@@ -35,34 +35,34 @@ class AudioWidget(QWidget):
         file_layout.addWidget(self._file_dialog_button)
         form.addRow(file_layout)
 
-        self._azimuth = QSlider(Qt.Horizontal)
+        self._azimuth = QSlider(Qt.Orientation.Horizontal)
         self._azimuth.setRange(-180, 180)
         form.addRow("Azimuth (-180 - 180 degree):", self._azimuth)
 
-        self._elevation = QSlider(Qt.Horizontal)
+        self._elevation = QSlider(Qt.Orientation.Horizontal)
         self._elevation.setRange(-90, 90)
         form.addRow("Elevation (-90 - 90 degree)", self._elevation)
 
-        self._distance = QSlider(Qt.Horizontal)
+        self._distance = QSlider(Qt.Orientation.Horizontal)
         self._distance.setRange(0, 1000)
         self._distance.setValue(100)
         form.addRow("Distance (0 - 10 meter):", self._distance)
 
-        self._occlusion = QSlider(Qt.Horizontal)
+        self._occlusion = QSlider(Qt.Orientation.Horizontal)
         self._occlusion.setRange(0, 400)
         form.addRow("Occlusion (0 - 4):", self._occlusion)
 
-        self._room_dimension = QSlider(Qt.Horizontal)
+        self._room_dimension = QSlider(Qt.Orientation.Horizontal)
         self._room_dimension.setRange(0, 10000)
         self._room_dimension.setValue(1000)
         form.addRow("Room dimension (0 - 100 meter):", self._room_dimension)
 
-        self._reverb_gain = QSlider(Qt.Horizontal)
+        self._reverb_gain = QSlider(Qt.Orientation.Horizontal)
         self._reverb_gain.setRange(0, 500)
         self._reverb_gain.setValue(0)
         form.addRow("Reverb gain (0-5):", self._reverb_gain)
 
-        self._reflection_gain = QSlider(Qt.Horizontal)
+        self._reflection_gain = QSlider(Qt.Orientation.Horizontal)
         self._reflection_gain.setRange(0, 500)
         self._reflection_gain.setValue(0)
         form.addRow("Reflection gain (0-5):", self._reflection_gain)

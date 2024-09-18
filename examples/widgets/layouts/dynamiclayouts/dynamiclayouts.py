@@ -64,7 +64,7 @@ class Dialog(QDialog):
         self._button_box.setOrientation(orientation)
         new_size_hint = self._button_box.sizeHint() + QSize(spacing, spacing)
 
-        if orientation == Qt.Horizontal:
+        if orientation == Qt.Orientation.Horizontal:
             self._main_layout.addWidget(self._button_box, 2, 0)
             self.resize(self.size() + QSize(-old_size_hint.width(), new_size_hint.height()))
         else:
@@ -101,7 +101,7 @@ class Dialog(QDialog):
         buttons_orientation_label = QLabel("Orientation of buttons:")
 
         buttons_orientation_combo_box = QComboBox()
-        buttons_orientation_combo_box.addItem("Horizontal", Qt.Horizontal)
+        buttons_orientation_combo_box.addItem("Horizontal", Qt.Orientation.Horizontal)
         buttons_orientation_combo_box.addItem("Vertical", Qt.Vertical)
         buttons_orientation_combo_box.currentIndexChanged[int].connect(
             self.buttons_orientation_changed)

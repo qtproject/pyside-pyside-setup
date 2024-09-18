@@ -145,7 +145,7 @@ class ThemeWidget(QWidget):
             lower_series = upper_series
 
         chart.createDefaultAxes()
-        axis_x = chart.axes(Qt.Horizontal)[0]
+        axis_x = chart.axes(Qt.Orientation.Horizontal)[0]
         axis_x.setRange(0, self.value_count - 1)
         axis_y = chart.axes(Qt.Vertical)[0]
         axis_y.setRange(0, self.value_max)
@@ -188,7 +188,7 @@ class ThemeWidget(QWidget):
             chart.addSeries(series)
 
         chart.createDefaultAxes()
-        axis_x = chart.axes(Qt.Horizontal)[0]
+        axis_x = chart.axes(Qt.Orientation.Horizontal)[0]
         axis_x.setRange(0, self.value_max)
         axis_y = chart.axes(Qt.Vertical)[0]
         axis_y.setRange(0, self.value_count)
@@ -227,7 +227,7 @@ class ThemeWidget(QWidget):
             chart.addSeries(series)
 
         chart.createDefaultAxes()
-        axis_x = chart.axes(Qt.Horizontal)[0]
+        axis_x = chart.axes(Qt.Orientation.Horizontal)[0]
         axis_x.setRange(0, self.value_max)
         axis_y = chart.axes(Qt.Vertical)[0]
         axis_y.setRange(0, self.value_count)
@@ -248,7 +248,7 @@ class ThemeWidget(QWidget):
             chart.addSeries(series)
 
         chart.createDefaultAxes()
-        axis_x = chart.axes(Qt.Horizontal)[0]
+        axis_x = chart.axes(Qt.Orientation.Horizontal)[0]
         axis_x.setRange(0, self.value_max)
         axis_y = chart.axes(Qt.Vertical)[0]
         axis_y.setRange(0, self.value_count)
@@ -294,7 +294,7 @@ class ThemeWidget(QWidget):
         # Update antialiasing
         checked = self.ui.antialiasCheckBox.isChecked()
         for chart in self.charts:
-            chart.setRenderHint(QPainter.Antialiasing, checked)
+            chart.setRenderHint(QPainter.RenderHint.Antialiasing, checked)
 
         # Update animation options
         idx = self.ui.animatedComboBox.currentIndex()

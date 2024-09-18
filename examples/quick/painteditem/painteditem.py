@@ -41,7 +41,7 @@ class TextBalloon(QQuickPaintedItem):
 
         painter.setBrush(brush)
         painter.setPen(Qt.NoPen)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         itemSize = self.size()
 
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     qml_file = Path(__file__).parent / "main.qml"
     view.setSource(QUrl.fromLocalFile(qml_file))
 
-    if view.status() == QQuickView.Error:
+    if view.status() == QQuickView.Status.Error:
         sys.exit(-1)
     view.show()
 

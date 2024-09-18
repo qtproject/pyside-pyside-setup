@@ -162,9 +162,9 @@ class Window(QWidget):
                     curve_path.lineTo(to)
                     t += 1.0 / curve_scale
 
-                painter.setRenderHint(QPainter.Antialiasing, True)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
                 painter.strokePath(curve_path, QColor(32, 32, 32))
-                painter.setRenderHint(QPainter.Antialiasing, False)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)
 
                 item = QListWidgetItem()
                 item.setIcon(QIcon(pix))

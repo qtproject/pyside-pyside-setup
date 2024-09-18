@@ -23,7 +23,7 @@ class TreeModel(QAbstractItemModel):
         if not index.isValid():
             return None
 
-        if role != Qt.DisplayRole and role != Qt.EditRole:
+        if role != Qt.ItemDataRole.DisplayRole and role != Qt.ItemDataRole.EditRole:
             return None
 
         item: TreeItem = self.get_item(index)
@@ -32,9 +32,9 @@ class TreeModel(QAbstractItemModel):
 
     def flags(self, index: QModelIndex) -> Qt.ItemFlags:
         if not index.isValid():
-            return Qt.NoItemFlags
+            return Qt.ItemFlag.NoItemFlags
 
-        return Qt.ItemIsEditable | QAbstractItemModel.flags(self, index)
+        return Qt.ItemFlag.ItemIsEditable | QAbstractItemModel.flags(self, index)
 
     def get_item(self, index: QModelIndex = QModelIndex()) -> TreeItem:
         if index.isValid():
@@ -45,8 +45,8 @@ class TreeModel(QAbstractItemModel):
         return self.root_item
 
     def headerData(self, section: int, orientation: Qt.Orientation,
-                   role: int = Qt.DisplayRole):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+                   role: int = Qt.ItemDataRole.DisplayRole):
+        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
             return self.root_item.data(section)
 
         return None
@@ -133,20 +133,21 @@ class TreeModel(QAbstractItemModel):
         return parent_item.child_count()
 
     def setData(self, index: QModelIndex, value, role: int) -> bool:
-        if role != Qt.EditRole:
+        if role != Qt.ItemDataRole.EditRole:
             return False
 
         item: TreeItem = self.get_item(index)
         result: bool = item.set_data(index.column(), value)
 
         if result:
-            self.dataChanged.emit(index, index, [Qt.DisplayRole, Qt.EditRole])
+            self.dataChanged.emit(index, index,
+                                  [Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.EditRole])
 
         return result
 
     def setHeaderData(self, section: int, orientation: Qt.Orientation, value,
                       role: int = None) -> bool:
-        if role != Qt.EditRole or orientation != Qt.Horizontal:
+        if role != Qt.ItemDataRole.EditRole or orientation != Qt.Orientation.Horizontal:
             return False
 
         result: bool = self.root_item.set_data(section, value)

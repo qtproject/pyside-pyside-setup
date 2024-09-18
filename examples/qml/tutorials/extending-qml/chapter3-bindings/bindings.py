@@ -34,7 +34,7 @@ class PieChart (QQuickPaintedItem):
     def paint(self, painter):
         pen = QPen(self._color, 2)
         painter.setPen(pen)
-        painter.setRenderHints(QPainter.Antialiasing, True)
+        painter.setRenderHints(QPainter.RenderHint.Antialiasing, True)
         painter.drawPie(self.boundingRect().adjusted(1, 1, -1, -1), 90 * 16, 290 * 16)
 
     @Property(QColor, notify=colorChanged, final=True)
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     view.setResizeMode(QQuickView.SizeRootObjectToView)
     qml_file = os.fspath(Path(__file__).resolve().parent / 'app.qml')
     view.setSource(QUrl.fromLocalFile(qml_file))
-    if view.status() == QQuickView.Error:
+    if view.status() == QQuickView.Status.Error:
         sys.exit(-1)
     view.show()
     res = app.exec()

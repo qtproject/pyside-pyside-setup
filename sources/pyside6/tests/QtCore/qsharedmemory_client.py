@@ -26,7 +26,8 @@ if __name__ == '__main__':
         print('Pass segment name', file=sys.stderr)
         sys.exit(-1)
     shared_memory = QSharedMemory(sys.argv[1])
-    if not shared_memory.attach(QSharedMemory.ReadOnly):
+    name = "I have no name"     # Fixme: What should be there?
+    if not shared_memory.attach(QSharedMemory.AccessMode.ReadOnly):
         raise SystemError(f'attach to "{name}" failed')
     if not shared_memory.lock():
         raise SystemError(f'lock of "{name}" failed')

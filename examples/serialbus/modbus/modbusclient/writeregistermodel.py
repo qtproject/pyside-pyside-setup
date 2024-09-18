@@ -41,23 +41,23 @@ class WriteRegisterModel(QAbstractTableModel):
         assert self.m_coils.size() == Column.ROW_COUNT
         assert len(self.m_holdingRegisters) == Column.ROW_COUNT
 
-        if column == Column.NUM_COLUMN and role == Qt.DisplayRole:
+        if column == Column.NUM_COLUMN and role == Qt.ItemDataRole.DisplayRole:
             return f"{row}"
 
-        if column == Column.COILS_COLUMN and role == Qt.CheckStateRole:  # coils
+        if column == Column.COILS_COLUMN and role == Qt.ItemDataRole.CheckStateRole:  # coils
             return Qt.Checked if self.m_coils[row] else Qt.Unchecked
 
         # holding registers
-        if column == Column.HOLDING_COLUMN and role == Qt.DisplayRole:
+        if column == Column.HOLDING_COLUMN and role == Qt.ItemDataRole.DisplayRole:
             reg = self.m_holdingRegisters[row]
             return f"0x{reg:x}"
         return None
 
     def headerData(self, section, orientation, role):
-        if role != Qt.DisplayRole:
+        if role != Qt.ItemDataRole.DisplayRole:
             return None
 
-        if orientation == Qt.Horizontal:
+        if orientation == Qt.Orientation.Horizontal:
             if section == Column.NUM_COLUMN:
                 return "#"
             if section == Column.COILS_COLUMN:
@@ -75,7 +75,7 @@ class WriteRegisterModel(QAbstractTableModel):
         assert self.m_coils.size() == Column.ROW_COUNT
         assert len(self.m_holdingRegisters) == Column.ROW_COUNT
 
-        if column == Column.COILS_COLUMN and role == Qt.CheckStateRole:  # coils
+        if column == Column.COILS_COLUMN and role == Qt.ItemDataRole.CheckStateRole:  # coils
             s = Qt.CheckState(int(value))
             if s == Qt.Checked:
                 self.m_coils.setBit(row)
@@ -84,7 +84,8 @@ class WriteRegisterModel(QAbstractTableModel):
             self.dataChanged.emit(index, index)
             return True
 
-        if column == Column.HOLDING_COLUMN and role == Qt.EditRole:  # holding registers
+        if column == Column.HOLDING_COLUMN and role == Qt.ItemDataRole.EditRole:
+            # holding registers
             base = 16 if value.startswith("0x") else 10
             self.m_holdingRegisters[row] = int(value, base=base)
             self.dataChanged.emit(index, index)

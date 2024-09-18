@@ -16,7 +16,7 @@ QML_IMPORT_MAJOR_VERSION = 1
 @QmlElement
 class BaseModel(QAbstractListModel):
 
-    RatioRole = Qt.UserRole + 1
+    RatioRole = Qt.ItemDataRole.UserRole + 1
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -28,7 +28,7 @@ class BaseModel(QAbstractListModel):
     def roleNames(self):
         default = super().roleNames()
         default[self.RatioRole] = QByteArray(b"ratio")
-        default[Qt.BackgroundRole] = QByteArray(b"backgroundColor")
+        default[Qt.ItemDataRole.BackgroundRole] = QByteArray(b"backgroundColor")
         return default
 
     def data(self, index, role: int):
@@ -36,9 +36,9 @@ class BaseModel(QAbstractListModel):
             ret = None
         elif not index.isValid():
             ret = None
-        elif role == Qt.DisplayRole:
+        elif role == Qt.ItemDataRole.DisplayRole:
             ret = self.db[index.row()]["text"]
-        elif role == Qt.BackgroundRole:
+        elif role == Qt.ItemDataRole.BackgroundRole:
             ret = self.db[index.row()]["bgColor"]
         elif role == self.RatioRole:
             ret = self.db[index.row()]["ratio"]
@@ -49,7 +49,7 @@ class BaseModel(QAbstractListModel):
     def setData(self, index, value, role):
         if not index.isValid():
             return False
-        if role == Qt.EditRole:
+        if role == Qt.ItemDataRole.EditRole:
             self.db[index.row()]["text"] = value
         return True
 

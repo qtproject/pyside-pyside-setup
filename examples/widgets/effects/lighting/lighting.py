@@ -32,7 +32,7 @@ class Lighting(QGraphicsView):
         timer.setInterval(30)
         timer.start()
 
-        self.setRenderHint(QPainter.Antialiasing)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setFrameStyle(QFrame.NoFrame)
 
     def setup_scene(self):

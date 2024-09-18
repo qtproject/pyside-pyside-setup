@@ -17,12 +17,15 @@ class ReceivedFramesModelColumns(IntEnum):
     count = 6
 
 
-clipboard_text_role = Qt.UserRole + 1
+clipboard_text_role = Qt.ItemDataRole.UserRole + 1
 
 
-column_alignment = [Qt.AlignRight | Qt.AlignVCenter, Qt.AlignRight | Qt.AlignVCenter,
-                    Qt.AlignCenter, Qt.AlignRight | Qt.AlignVCenter,
-                    Qt.AlignRight | Qt.AlignVCenter, Qt.AlignLeft | Qt.AlignVCenter]
+column_alignment = [Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
+                    Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
+                    Qt.AlignmentFlag.AlignCenter,
+                    Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
+                    Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
+                    Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter]
 
 
 class ReceivedFramesModel(QAbstractTableModel):
@@ -40,7 +43,7 @@ class ReceivedFramesModel(QAbstractTableModel):
         return True
 
     def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+        if role == Qt.AlignmentFlag.DisplayRole and orientation == Qt.AlignmentFlag.Horizontal:
             if section == ReceivedFramesModelColumns.number:
                 return "#"
             if section == ReceivedFramesModelColumns.timestamp:
@@ -54,7 +57,7 @@ class ReceivedFramesModel(QAbstractTableModel):
             if section == ReceivedFramesModelColumns.data:
                 return "Data"
 
-        if role == Qt.SizeHintRole and orientation == Qt.Horizontal:
+        if role == Qt.AlignmentFlag.SizeHintRole and orientation == Qt.AlignmentFlag.Horizontal:
             if section == ReceivedFramesModelColumns.number:
                 return QSize(80, 25)
             if section == ReceivedFramesModelColumns.timestamp:
@@ -74,9 +77,9 @@ class ReceivedFramesModel(QAbstractTableModel):
             return None
         row = index.row()
         column = index.column()
-        if role == Qt.TextAlignmentRole:
+        if role == Qt.AlignmentFlag.TextAlignmentRole:
             return column_alignment[index.column()]
-        if role == Qt.DisplayRole:
+        if role == Qt.AlignmentFlag.DisplayRole:
             return self.m_framesQueue[row][column]
         if role == clipboard_text_role:
             f = self.m_framesQueue[row][column]

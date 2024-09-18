@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         chart.legend().setAlignment(Qt.AlignBottom)
 
         chart_view = QChartView(chart)
-        chart_view.setRenderHint(QPainter.Antialiasing)
+        chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         self.setCentralWidget(chart_view)
 

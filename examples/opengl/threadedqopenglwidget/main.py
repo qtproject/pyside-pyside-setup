@@ -17,9 +17,9 @@ try:
 except ImportError:
     app = QApplication(sys.argv)
     message = "PyOpenGL must be installed to run this example."
-    message_box = QMessageBox(QMessageBox.Critical,
+    message_box = QMessageBox(QMessageBox.Icon.Critical,
                               "Threaded QOpenGLWidget Example",
-                              message, QMessageBox.Close)
+                              message, QMessageBox.StandardButton.Close)
     detail = "Run:\npip install PyOpenGL PyOpenGL_accelerate"
     message_box.setDetailedText(detail)
     message_box.exec()
@@ -70,9 +70,9 @@ if __name__ == "__main__":
     top_gl_widget.setToolTip(tool_tip)
     print(tool_tip)
 
-    close_shortcut = QShortcut(Qt.CTRL | Qt.Key_Q, top_gl_widget)
+    close_shortcut = QShortcut(Qt.Modifier.CTRL | Qt.Key.Key_Q, top_gl_widget)
     close_shortcut.activated.connect(QApplication.closeAllWindows)
-    close_shortcut.setContext(Qt.ApplicationShortcut)
+    close_shortcut.setContext(Qt.ShortcutContext.ApplicationShortcut)
 
     mw1 = None
     mw2 = None

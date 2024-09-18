@@ -54,7 +54,7 @@ class MainWindow(QMainWindow):
     def selection_changed_slot(self, new_selection, old_selection):
         # get the text of the selected item
         index = self._tree_view.selectionModel().currentIndex()
-        selected_text = index.data(Qt.DisplayRole)
+        selected_text = index.data(Qt.ItemDataRole.DisplayRole)
         # find out the hierarchy level of the selected item
         hierarchy_level = 1
         seek_root = index

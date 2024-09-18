@@ -82,7 +82,7 @@ class RenderArea(QWidget):
             painter.setPen(self.pen)
             painter.setBrush(self.brush)
             if self.antialiased:
-                painter.setRenderHint(QPainter.Antialiasing)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
             for x in range(0, self.width(), 100):
                 for y in range(0, self.height(), 100):
@@ -130,7 +130,7 @@ class RenderArea(QWidget):
             painter.drawRect(QRect(0, 0, self.width() - 1, self.height() - 1))
 
 
-id_role = Qt.UserRole
+id_role = Qt.ItemDataRole.UserRole
 
 
 class Window(QWidget):

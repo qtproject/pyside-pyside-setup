@@ -30,7 +30,7 @@ class Foo(QPyTextObject):
 
 class QAbstractTextDocumentLayoutTest(UsesQApplication):
 
-    objectType = QTextFormat.UserObject + 1
+    objectType = QTextFormat.ObjectTypes.UserObject + 1
 
     def foo(self):
         fmt = QTextCharFormat()
@@ -47,7 +47,8 @@ class QAbstractTextDocumentLayoutTest(UsesQApplication):
         self.textEdit.show()
 
         interface = Foo()
-        self.textEdit.document().documentLayout().registerHandler(QAbstractTextDocumentLayoutTest.objectType, interface)
+        self.textEdit.document().documentLayout().registerHandler(
+            QAbstractTextDocumentLayoutTest.objectType, interface)
 
         QTimer.singleShot(0, self.foo)
         self.app.exec()
@@ -57,4 +58,3 @@ class QAbstractTextDocumentLayoutTest(UsesQApplication):
 
 if __name__ == "__main__":
     unittest.main()
-

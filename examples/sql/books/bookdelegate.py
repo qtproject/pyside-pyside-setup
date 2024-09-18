@@ -46,7 +46,7 @@ class BookDelegate(QSqlRelationalDelegate):
             if option.state & QStyle.State_Selected:
                 painter.fillRect(option.rect,
                                  option.palette.color(color_group, QPalette.Highlight))
-            rating = model.data(index, Qt.DisplayRole)
+            rating = model.data(index, Qt.ItemDataRole.DisplayRole)
             width = self.star.width()
             height = self.star.height()
             x = option.rect.x()

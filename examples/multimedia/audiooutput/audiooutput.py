@@ -140,7 +140,8 @@ class AudioTest(QMainWindow):
 
         volume_box = QHBoxLayout()
         volume_label = QLabel("Volume:")
-        self.m_volumeSlider = QSlider(Qt.Horizontal, minimum=0, maximum=100, singleStep=10)
+        self.m_volumeSlider = QSlider(Qt.Orientation.Horizontal,
+                                      minimum=0, maximum=100, singleStep=10)
         self.m_volumeSlider.valueChanged.connect(self.volume_changed)
 
         volume_box.addWidget(volume_label)

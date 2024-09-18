@@ -143,9 +143,9 @@ def add_mail(model, subject, sender, date):
 def create_mail_model(parent):
     model = QStandardItemModel(0, 3, parent)
 
-    model.setHeaderData(0, Qt.Horizontal, "Subject")
-    model.setHeaderData(1, Qt.Horizontal, "Sender")
-    model.setHeaderData(2, Qt.Horizontal, "Date")
+    model.setHeaderData(0, Qt.Orientation.Horizontal, "Subject")
+    model.setHeaderData(1, Qt.Orientation.Horizontal, "Sender")
+    model.setHeaderData(2, Qt.Orientation.Horizontal, "Date")
 
     add_mail(model, "Happy New Year!", "Grace K. <grace@software-inc.com>",
              QDateTime(QDate(2006, 12, 31), QTime(17, 3)))

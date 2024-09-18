@@ -207,14 +207,14 @@ class ConclusionPage(QWizardPage):
     def setVisible(self, visible: bool):
         super().setVisible(visible)
         if visible:
-            self.wizard().setButtonText(QWizard.CustomButton1, "&Print")
-            self.wizard().setOption(QWizard.HaveCustomButton1, True)
+            self.wizard().setButtonText(QWizard.WizardButton.CustomButton1, "&Print")
+            self.wizard().setOption(QWizard.WizardOption.HaveCustomButton1, True)
 
             if not self.custom_button_clicked_signal_connected:
                 self.custom_button_clicked_signal_connected = True
                 self.wizard().customButtonClicked.connect(self.print_button_clicked)
         else:
-            self.wizard().setOption(QWizard.HaveCustomButton1, False)
+            self.wizard().setOption(QWizard.WizardOption.HaveCustomButton1, False)
 
             if self.custom_button_clicked_signal_connected:
                 self.custom_button_clicked_signal_connected = False

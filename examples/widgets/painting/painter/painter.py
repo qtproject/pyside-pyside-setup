@@ -72,7 +72,7 @@ class PainterWidget(QWidget):
         """
         current_pos = event.position().toPoint()
         self.painter.begin(self.pixmap)
-        self.painter.setRenderHints(QPainter.Antialiasing, True)
+        self.painter.setRenderHints(QPainter.RenderHint.Antialiasing, True)
         self.painter.setPen(self.pen)
         self.painter.drawLine(self.previous_pos, current_pos)
         self.painter.end()

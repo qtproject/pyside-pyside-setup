@@ -21,8 +21,8 @@ class MyModel(QAbstractTableModel):
     def columnCount(self, parent=None):
         return 3
 
-    def data(self, index, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole:
             row = index.row() + 1
             column = index.column() + 1
             return f"Row{row}, Column{column}"

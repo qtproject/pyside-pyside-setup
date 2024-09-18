@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
         play_menu.addAction(self._stop_action)
 
         self._volume_slider = QSlider()
-        self._volume_slider.setOrientation(Qt.Horizontal)
+        self._volume_slider.setOrientation(Qt.Orientation.Horizontal)
         self._volume_slider.setMinimum(0)
         self._volume_slider.setMaximum(100)
         available_width = self.screen().availableGeometry().width()

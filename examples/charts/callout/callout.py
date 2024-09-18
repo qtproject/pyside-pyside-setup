@@ -149,7 +149,7 @@ class View(QGraphicsView):
         self._chart.createDefaultAxes()
         self._chart.setAcceptHoverEvents(True)
 
-        self.setRenderHint(QPainter.Antialiasing)
+        self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.scene().addItem(self._chart)
 
         self._coordX = QGraphicsSimpleTextItem(self._chart)

@@ -63,7 +63,7 @@ class BorderLayout(QLayout):
         self.add(QWidgetItem(widget), position)
 
     def expandingDirections(self) -> Qt.Orientations:
-        return Qt.Horizontal | Qt.Vertical
+        return Qt.Orientation.Horizontal | Qt.Vertical
 
     def hasHeightForWidth(self) -> bool:
         return False

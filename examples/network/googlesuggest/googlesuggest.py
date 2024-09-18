@@ -45,28 +45,28 @@ class GSuggestCompletion(QObject):
     def eventFilter(self, obj: QObject, ev: QEvent):
         if obj is not self.popup:
             return False
-        if ev.type() == QEvent.MouseButtonPress:
+        if ev.type() == QEvent.Type.MouseButtonPress:
             self.popup.hide()
             self.editor.setFocus()
             return True
 
-        if ev.type() == QEvent.KeyPress:
+        if ev.type() == QEvent.Type.KeyPress:
             consumed = False
             key = ev.key()
-            if key in (Qt.Key_Enter, Qt.Key_Return):
+            if key in (Qt.Key.Key_Enter, Qt.Key.Key_Return):
                 self.done_completion()
                 consumed = True
-            elif key == Qt.Key_Escape:
+            elif key == Qt.Key.Key_Escape:
                 self.editor.setFocus()
                 self.popup.hide()
                 consumed = True
             elif key in (
-                Qt.Key_Up,
-                Qt.Key_Down,
-                Qt.Key_Home,
-                Qt.Key_End,
-                Qt.Key_PageUp,
-                Qt.Key_PageDown,
+                Qt.Key.Key_Up,
+                Qt.Key.Key_Down,
+                Qt.Key.Key_Home,
+                Qt.Key.Key_End,
+                Qt.Key.Key_PageUp,
+                Qt.Key.Key_PageDown,
             ):
                 pass
             else:
@@ -80,7 +80,7 @@ class GSuggestCompletion(QObject):
         if not choices:
             return
         pal = self.editor.palette()
-        color = pal.color(QPalette.Disabled, QPalette.WindowText)
+        color = pal.color(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText)
 
         self.popup.setUpdatesEnabled(False)
         self.popup.clear()
@@ -119,14 +119,14 @@ class GSuggestCompletion(QObject):
 
     @Slot(QNetworkReply)
     def handle_network_data(self, network_reply: QNetworkReply):
-        if network_reply.error() == QNetworkReply.NoError:
+        if network_reply.error() == QNetworkReply.NetworkError.NoError:
             choices: list[str] = []
 
             response: QByteArray = network_reply.readAll()
             xml = QXmlStreamReader(str(response))
             while not xml.atEnd():
                 xml.readNext()
-                if xml.tokenType() == QXmlStreamReader.StartElement:
+                if xml.tokenType() == QXmlStreamReader.TokenType.StartElement:
                     if xml.name() == "suggestion":
                         s = xml.attributes().value("data")
                         choices.append(s)

@@ -38,7 +38,7 @@ class LightWidget(QWidget):
         if not self._on_val:
             return
         with QPainter(self) as painter:
-            painter.setRenderHint(QPainter.Antialiasing)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
             painter.setBrush(self.color)
             painter.drawEllipse(0, 0, self.width(), self.height())
 

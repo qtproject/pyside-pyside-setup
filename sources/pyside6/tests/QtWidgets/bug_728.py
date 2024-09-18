@@ -36,5 +36,7 @@ timer.setInterval(50)
 timer.timeout.connect(timerHandler)
 timer.start()
 
-# This test for a dead lock in QFileDialog.getOpenFileNames, the test fail with a timeout if the dead lock exists.
-QFileDialog.getOpenFileNames(None, "caption", QDir.homePath(), None, "", QFileDialog.DontUseNativeDialog)
+# This test for a dead lock in QFileDialog.getOpenFileNames,
+# the test fail with a timeout if the dead lock exists.
+QFileDialog.getOpenFileNames(None, "caption", QDir.homePath(), None, "",
+                             QFileDialog.Option.DontUseNativeDialog)

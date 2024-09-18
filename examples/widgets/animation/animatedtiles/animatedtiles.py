@@ -191,7 +191,7 @@ if __name__ == '__main__':
     view.setViewportUpdateMode(QGraphicsView.BoundingRectViewportUpdate)
     view.setBackgroundBrush(QBrush(bg_pix))
     view.setCacheMode(QGraphicsView.CacheBackground)
-    view.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
+    view.setRenderHints(QPainter.RenderHint.Antialiasing | QPainter.SmoothPixmapTransform)
     view.show()
 
     states = QStateMachine()

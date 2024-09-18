@@ -37,7 +37,7 @@ class FileListModel(QAbstractListModel):
     def rowCount(self, parent=QModelIndex()):
         return self._file_count
 
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         if not index.isValid():
             return None
 
@@ -45,15 +45,15 @@ class FileListModel(QAbstractListModel):
         if row >= len(self._file_list) or row < 0:
             return None
 
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             return self._file_list[row].fileName()
 
-        if role == Qt.BackgroundRole:
+        if role == Qt.ItemDataRole.BackgroundRole:
             batch = row // BATCH_SIZE
             palette = qApp.palette()  # noqa: F821
             return palette.base() if batch % 2 == 0 else palette.alternateBase()
 
-        if role == Qt.DecorationRole:
+        if role == Qt.ItemDataRole.DecorationRole:
             return self._icon_provider.icon(self._file_list[row])
 
         return None

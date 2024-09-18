@@ -18,7 +18,7 @@ class LCDRange(QWidget):
         super().__init__(parent)
 
         lcd = QLCDNumber(2)
-        slider = QSlider(Qt.Horizontal)
+        slider = QSlider(Qt.Orientation.Horizontal)
         slider.setRange(0, 99)
         slider.setValue(0)
         slider.valueChanged.connect(lcd.display)

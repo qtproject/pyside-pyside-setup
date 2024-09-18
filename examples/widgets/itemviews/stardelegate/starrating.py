@@ -41,7 +41,7 @@ class StarRating(object):
         """ Paint the stars (and/or diamonds if we're in editing mode). """
         painter.save()
 
-        painter.setRenderHint(QPainter.Antialiasing, True)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
         painter.setPen(Qt.NoPen)
 
         if isEditable:

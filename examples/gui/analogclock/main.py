@@ -45,7 +45,7 @@ class AnalogClockWindow(QRasterWindow):
         side = min(width, height)
 
         painter.fillRect(0, 0, width, height, self._background_color)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.translate(width / 2, height / 2)
         painter.scale(side / 200.0, side / 200.0)
 
