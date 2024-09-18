@@ -7,11 +7,19 @@
 
 // @snippet qcanbus-available-devices
 QString errorMessage;
-const QList<QCanBusDeviceInfo> result = %CPPSELF.%FUNCTION_NAME(%1, &errorMessage);
+const QList<QCanBusDeviceInfo> result = %CPPSELF.%FUNCTION_NAME(&errorMessage);
 %PYARG_0 = PyTuple_New(2);
 PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[QList<QCanBusDeviceInfo>](result));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](errorMessage));
 // @snippet qcanbus-available-devices
+
+// @snippet qcanbus-available-devices-plugin
+QString errorMessage;
+const QList<QCanBusDeviceInfo> result = %CPPSELF.%FUNCTION_NAME(%1, &errorMessage);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[QList<QCanBusDeviceInfo>](result));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](errorMessage));
+// @snippet qcanbus-available-devices-plugin
 
 // @snippet qcanbus-createdevice
 PyObject *pyDevice{};
