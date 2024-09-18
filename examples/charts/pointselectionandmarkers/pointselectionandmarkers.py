@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     @Slot(int)
     def display_unselected_points(checkbox_state):
-        if checkbox_state:
+        if checkbox_state == Qt.CheckState.Checked:
             series.setLightMarker(
                 Utilities.get_point_representation(
                     Utilities.point_type(char_point_combobox.currentIndex()), marker_size))
@@ -97,7 +97,7 @@ if __name__ == "__main__":
 
     show_unselected_points_label = QLabel("Display unselected points: ")
     show_unselected_points_checkbox.setChecked(True)
-    show_unselected_points_checkbox.stateChanged.connect(display_unselected_points)
+    show_unselected_points_checkbox.checkStateChanged.connect(display_unselected_points)
 
     control_label = QLabel("Marker and Selection Controls")
     control_label.setAlignment(Qt.AlignHCenter)

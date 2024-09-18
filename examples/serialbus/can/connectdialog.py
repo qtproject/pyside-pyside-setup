@@ -51,7 +51,7 @@ class ConnectDialog(QDialog):
         self.m_ui.useConfigurationBox.toggled.connect(self.m_ui.configurationBox.setEnabled)
         self.m_ui.pluginListBox.currentTextChanged.connect(self.plugin_changed)
         self.m_ui.interfaceListBox.currentTextChanged.connect(self.interface_changed)
-        self.m_ui.ringBufferBox.stateChanged.connect(self._ring_buffer_changed)
+        self.m_ui.ringBufferBox.checkStateChanged.connect(self._ring_buffer_changed)
 
         self.m_ui.rawFilterEdit.hide()
         self.m_ui.rawFilterLabel.hide()
@@ -62,7 +62,7 @@ class ConnectDialog(QDialog):
 
     @Slot(int)
     def _ring_buffer_changed(self, state):
-        self.m_ui.ringBufferLimitBox.setEnabled(state == Qt.CheckState.Checked.value)
+        self.m_ui.ringBufferLimitBox.setEnabled(state == Qt.CheckState.Checked)
 
     def settings(self):
         return self.m_currentSettings
