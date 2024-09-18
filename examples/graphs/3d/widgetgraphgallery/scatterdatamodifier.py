@@ -91,7 +91,7 @@ class ScatterDataModifier(QObject):
 
     @Slot(int)
     def setSmoothDots(self, smooth):
-        self._smooth = smooth == Qt.Checked.value
+        self._smooth = smooth == Qt.CheckState.Checked
         series = self._graph.seriesList()[0]
         series.setMeshSmooth(self._smooth)
 
@@ -120,12 +120,13 @@ class ScatterDataModifier(QObject):
         self._graph.setShadowQuality(sq)
 
     @Slot(int)
-    def setPlotAreaBackgroundVisible(self, enabled):
-        self._graph.activeTheme().setPlotAreaBackgroundVisible(enabled == Qt.Checked.value)
+    def setPlotAreaBackgroundVisible(self, state):
+        enabled = state == Qt.CheckState.Checked
+        self._graph.activeTheme().setPlotAreaBackgroundVisible(enabled)
 
     @Slot(int)
-    def setGridVisible(self, enabled):
-        self._graph.activeTheme().setGridVisible(enabled == Qt.Checked.value)
+    def setGridVisible(self, state):
+        self._graph.activeTheme().setGridVisible(state == Qt.Checked.value)
 
     @Slot()
     def toggleItemCount(self):

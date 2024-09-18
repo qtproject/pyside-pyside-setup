@@ -276,11 +276,11 @@ class SurfaceGraphModifier(QObject):
     def enableHeightMapModel(self, enable):
         if enable:
             self._heightMapSeriesOne.setDrawMode(QSurface3DSeries.DrawSurface)
-            self._heightMapSeriesOne.setFlatShadingEnabled(False)
+            self._heightMapSeriesOne.setShading(QSurface3DSeries.Shading.Flat)
             self._heightMapSeriesTwo.setDrawMode(QSurface3DSeries.DrawSurface)
-            self._heightMapSeriesTwo.setFlatShadingEnabled(False)
+            self._heightMapSeriesTwo.setShading(QSurface3DSeries.Shading.Flat)
             self._heightMapSeriesThree.setDrawMode(QSurface3DSeries.DrawSurface)
-            self._heightMapSeriesThree.setFlatShadingEnabled(False)
+            self._heightMapSeriesThree.setShading(QSurface3DSeries.Shading.Flat)
 
             self._graph.axisX().setLabelFormat("%.1f N")
             self._graph.axisZ().setLabelFormat("%.1f E")
@@ -580,8 +580,8 @@ class SurfaceGraphModifier(QObject):
 
     @Slot(bool)
     def toggleShadows(self, shadows):
-        sq = (QtGraphs3D.ShadowQualityMedium
-              if shadows else QtGraphs3D.ShadowQualityNone)
+        sq = (QtGraphs3D.ShadowQuality.Medium
+              if shadows else QtGraphs3D.ShadowQuality.None_)
         self._graph.setShadowQuality(sq)
 
     @Slot(bool)

@@ -117,10 +117,6 @@ class BarGraph(QObject):
         reverseValueAxisCheckBox.setText("Reverse value axis")
         reverseValueAxisCheckBox.setChecked(False)
 
-        reflectionCheckBox = QCheckBox(self._barsWidget)
-        reflectionCheckBox.setText("Show reflections")
-        reflectionCheckBox.setChecked(False)
-
         rotationSliderX = QSlider(Qt.Orientation.Horizontal, self._barsWidget)
         rotationSliderX.setTickInterval(30)
         rotationSliderX.setTickPosition(QSlider.TicksBelow)
@@ -198,7 +194,6 @@ class BarGraph(QObject):
         vLayout.addWidget(backgroundCheckBox)
         vLayout.addWidget(gridCheckBox)
         vLayout.addWidget(smoothCheckBox)
-        vLayout.addWidget(reflectionCheckBox)
         vLayout.addWidget(seriesCheckBox)
         vLayout.addWidget(reverseValueAxisCheckBox)
         vLayout.addWidget(axisTitlesVisibleCB)
@@ -232,12 +227,11 @@ class BarGraph(QObject):
         cameraButton.clicked.connect(modifier.changePresetCamera)
         zoomToSelectedButton.clicked.connect(modifier.zoomToSelectedBar)
 
-        backgroundCheckBox.stateChanged.connect(modifier.setPlotAreaBackgroundVisible)
-        gridCheckBox.stateChanged.connect(modifier.setGridVisible)
-        smoothCheckBox.stateChanged.connect(modifier.setSmoothBars)
-        seriesCheckBox.stateChanged.connect(modifier.setSeriesVisibility)
-        reverseValueAxisCheckBox.stateChanged.connect(modifier.setReverseValueAxis)
-        reflectionCheckBox.stateChanged.connect(modifier.setReflection)
+        backgroundCheckBox.checkStateChanged.connect(modifier.setPlotAreaBackgroundVisible)
+        gridCheckBox.checkStateChanged.connect(modifier.setGridVisible)
+        smoothCheckBox.checkStateChanged.connect(modifier.setSmoothBars)
+        seriesCheckBox.checkStateChanged.connect(modifier.setSeriesVisibility)
+        reverseValueAxisCheckBox.checkStateChanged.connect(modifier.setReverseValueAxis)
 
         modifier.backgroundVisibleChanged.connect(backgroundCheckBox.setChecked)
         modifier.gridVisibleChanged.connect(gridCheckBox.setChecked)
@@ -261,8 +255,8 @@ class BarGraph(QObject):
         modifier.fontSizeChanged.connect(fontSizeSlider.setValue)
         modifier.fontChanged.connect(fontList.setCurrentFont)
 
-        axisTitlesVisibleCB.stateChanged.connect(modifier.setAxisTitleVisibility)
-        axisTitlesFixedCB.stateChanged.connect(modifier.setAxisTitleFixed)
+        axisTitlesVisibleCB.checkStateChanged.connect(modifier.setAxisTitleVisibility)
+        axisTitlesFixedCB.checkStateChanged.connect(modifier.setAxisTitleFixed)
         axisLabelRotationSlider.valueChanged.connect(modifier.changeLabelRotation)
 
         modeWeather.toggled.connect(modifier.setDataModeToWeather)

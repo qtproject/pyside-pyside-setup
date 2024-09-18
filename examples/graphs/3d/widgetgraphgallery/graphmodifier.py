@@ -6,7 +6,7 @@ from __future__ import annotations
 from math import atan, degrees
 import numpy as np
 
-from PySide6.QtCore import QObject, QPropertyAnimation, Signal, Slot
+from PySide6.QtCore import QObject, QPropertyAnimation, Qt, Signal, Slot
 from PySide6.QtGui import QFont, QVector3D
 from PySide6.QtGraphs import (QAbstract3DSeries,
                               QBarDataItem, QBar3DSeries, QCategory3DAxis,
@@ -258,13 +258,15 @@ class GraphModifier(QObject):
         self._yearAxis.setLabelAutoAngle(float(rotation))
 
     @Slot(bool)
-    def setAxisTitleVisibility(self, enabled):
+    def setAxisTitleVisibility(self, state):
+        enabled = state == Qt.CheckState.Checked
         self._temperatureAxis.setTitleVisible(enabled)
         self._monthAxis.setTitleVisible(enabled)
         self._yearAxis.setTitleVisible(enabled)
 
     @Slot(bool)
-    def setAxisTitleFixed(self, enabled):
+    def setAxisTitleFixed(self, state):
+        enabled = state == Qt.CheckState.Checked
         self._temperatureAxis.setTitleFixed(enabled)
         self._monthAxis.setTitleFixed(enabled)
         self._yearAxis.setTitleFixed(enabled)
@@ -351,26 +353,24 @@ class GraphModifier(QObject):
         self._yRotation = rotation
         self._graph.setCameraPosition(self._xRotation, self._yRotation)
 
-    def setPlotAreaBackgroundVisible(self, enabled):
-        self._graph.activeTheme().setPlotAreaBackgroundVisible(bool(enabled))
+    def setPlotAreaBackgroundVisible(self, state):
+        enabled = state == Qt.CheckState.Checked
+        self._graph.activeTheme().setPlotAreaBackgroundVisible(enabled)
 
-    def setGridVisible(self, enabled):
-        self._graph.activeTheme().setGridVisible(bool(enabled))
+    def setGridVisible(self, state):
+        self._graph.activeTheme().setGridVisible(state == Qt.CheckState.Checked)
 
-    def setSmoothBars(self, smooth):
-        self._smooth = bool(smooth)
+    def setSmoothBars(self, state):
+        self._smooth = state == Qt.CheckState.Checked
         self._primarySeries.setMeshSmooth(self._smooth)
         self._secondarySeries.setMeshSmooth(self._smooth)
         self._customData.customSeries().setMeshSmooth(self._smooth)
 
-    def setSeriesVisibility(self, enabled):
-        self._secondarySeries.setVisible(bool(enabled))
+    def setSeriesVisibility(self, state):
+        self._secondarySeries.setVisible(state == Qt.CheckState.Checked)
 
-    def setReverseValueAxis(self, enabled):
-        self._graph.valueAxis().setReversed(enabled)
-
-    def setReflection(self, enabled):
-        self._graph.setReflection(enabled)
+    def setReverseValueAxis(self, state):
+        self._graph.valueAxis().setReversed(state == Qt.CheckState.Checked)
 
     def changeDataMode(self, customData):
         # Change between weather data and data from custom proxy

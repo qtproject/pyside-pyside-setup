@@ -106,9 +106,9 @@ class ScatterGraph(QObject):
         itemCountButton.clicked.connect(modifier.toggleItemCount)
         rangeButton.clicked.connect(modifier.toggleRanges)
 
-        backgroundCheckBox.stateChanged.connect(modifier.setPlotAreaBackgroundVisible)
-        gridCheckBox.stateChanged.connect(modifier.setGridVisible)
-        smoothCheckBox.stateChanged.connect(modifier.setSmoothDots)
+        backgroundCheckBox.checkStateChanged.connect(modifier.setPlotAreaBackgroundVisible)
+        gridCheckBox.checkStateChanged.connect(modifier.setGridVisible)
+        smoothCheckBox.checkStateChanged.connect(modifier.setSmoothDots)
 
         modifier.backgroundEnabledChanged.connect(backgroundCheckBox.setChecked)
         modifier.gridVisibleChanged.connect(gridCheckBox.setChecked)
