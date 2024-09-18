@@ -43,7 +43,7 @@ class ReceivedFramesModel(QAbstractTableModel):
         return True
 
     def headerData(self, section, orientation, role):
-        if role == Qt.AlignmentFlag.DisplayRole and orientation == Qt.AlignmentFlag.Horizontal:
+        if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal:
             if section == ReceivedFramesModelColumns.number:
                 return "#"
             if section == ReceivedFramesModelColumns.timestamp:
@@ -57,7 +57,7 @@ class ReceivedFramesModel(QAbstractTableModel):
             if section == ReceivedFramesModelColumns.data:
                 return "Data"
 
-        if role == Qt.AlignmentFlag.SizeHintRole and orientation == Qt.AlignmentFlag.Horizontal:
+        if role == Qt.ItemDataRole.SizeHintRole and orientation == Qt.Orientation.Horizontal:
             if section == ReceivedFramesModelColumns.number:
                 return QSize(80, 25)
             if section == ReceivedFramesModelColumns.timestamp:
@@ -77,9 +77,9 @@ class ReceivedFramesModel(QAbstractTableModel):
             return None
         row = index.row()
         column = index.column()
-        if role == Qt.AlignmentFlag.TextAlignmentRole:
+        if role == Qt.ItemDataRole.TextAlignmentRole:
             return column_alignment[index.column()]
-        if role == Qt.AlignmentFlag.DisplayRole:
+        if role == Qt.ItemDataRole.AlignmentFlag.DisplayRole:
             return self.m_framesQueue[row][column]
         if role == clipboard_text_role:
             f = self.m_framesQueue[row][column]

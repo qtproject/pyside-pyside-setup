@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
             self.m_ui.actionDeviceInformation.setEnabled(True)
             self.m_ui.sendFrameBox.setEnabled(True)
             config_bit_rate = self.m_can_device.configurationParameter(QCanBusDevice.BitRateKey)
-            if config_bit_rate > 0:
+            if config_bit_rate is not None and config_bit_rate > 0:
                 is_can_fd = bool(self.m_can_device.configurationParameter(QCanBusDevice.CanFdKey))
                 config_data_bit_rate = self.m_can_device.configurationParameter(
                     QCanBusDevice.DataBitRateKey)
