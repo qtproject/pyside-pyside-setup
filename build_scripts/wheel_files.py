@@ -574,9 +574,6 @@ def module_QtQuick() -> ModuleData:
         "libQt6QuickVectorImageGenerator"
     ]
 
-    # Adding GraphicalEffects files
-    data.qml.append("Qt5Compat/GraphicalEffects")
-
     data.qtlib.extend(_qtlib)
     data.metatypes.extend(_metatypes)
     json_data = get_module_json_data("Quick")
@@ -790,6 +787,9 @@ def module_QtQuick3D() -> ModuleData:
     data.extra_files.append("Qt/plugins/assetimporters/libassimp*")
     data.extra_files.append("qsb*")
     data.extra_files.append("balsam*")
+
+    # Adding GraphicalEffects files
+    data.qml.append("Qt5Compat/GraphicalEffects")
 
     return data
 
