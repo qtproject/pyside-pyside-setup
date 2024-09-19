@@ -10,7 +10,7 @@ authors = [
 description = PROJECT_DESCRIPTION
 readme = PROJECT_README
 dynamic = ["version"]
-requires-python = ">=3.9, <3.13"
+requires-python = ">=3.9, <3.14"
 keywords = ["Qt"]
 license = {text = "LGPL"}
 dependencies = PROJECT_DEPENDENCIES
