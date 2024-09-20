@@ -54,6 +54,7 @@ def get_all_pyside_modules():
     return [module[2:] for module in PySide6.__all__]
 
 
+from .design_studio import DesignStudio
 from .commands import run_command, run_qmlimportscanner
 from .dependency_util import find_pyside_modules, find_permission_categories, QtDependencyReader
 from .nuitka_helper import Nuitka

@@ -444,5 +444,97 @@ class TestLongCommand(DeployTestBase):
                                   if line.startswith("# nuitka-project:")]), 517)
 
 
+@unittest.skipIf(sys.platform == "darwin" and int(platform.mac_ver()[0].split('.')[0]) <= 11,
+                 "Test only works on macOS version 12+")
+@patch("deploy_lib.config.QtDependencyReader.find_plugin_dependencies")
+class DSProjectTest(DeployTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        # setup a test DS Python project
+        base_path = Path(cls.temp_dir) / "PythonProject"
+
+        files = [
+            base_path / "Python" / "autogen" / "settings.py",
+            base_path / "Python" / "main.py",
+            base_path / "PythonProject" / "test.qml",
+            base_path / "PythonProjectContent" / "test.qml"
+        ]
+
+        # Create the files
+        for file in files:
+            file.parent.mkdir(parents=True, exist_ok=True)
+            file.touch(exist_ok=True)
+
+        cls.temp_example = base_path
+
+    def setUp(self):
+        os.chdir(self.temp_example)
+        self.temp_example = self.temp_example.resolve()
+        self.main_file = self.temp_example / "Python" / "main.py"
+        self.main_patch_file = self.temp_example / "Python" / "main_patch.py"
+        self.deployment_files = self.temp_example / "Python" / "deployment"
+
+        self.expected_run_cmd = (
+            f"{sys.executable} -m nuitka {self.main_patch_file} --follow-imports"
+            f" --enable-plugin=pyside6 --output-dir={self.deployment_files} --quiet"
+            f" --noinclude-qt-translations"
+            f" --include-data-dir={self.temp_example / 'PythonProjectContent'}="
+            "./PythonProjectContent"
+            f" --include-data-dir={self.temp_example / 'Python'}=./Python"
+            f" --include-data-dir={self.temp_example / 'PythonProject'}=./PythonProject"
+            f" {self.dlls_ignore_nuitka}"
+            f" --noinclude-dlls=*/qml/QtQuickEffectMaker/*"
+            f" --include-qt-plugins=qml"
+        )
+
+        if sys.platform != "win32":
+            self.expected_run_cmd += (
+                " --noinclude-dlls=libQt6Charts* --noinclude-dlls=libQt6Quick*"
+                " --noinclude-dlls=libQt6Quick3D* --noinclude-dlls=libQt6Sensors*"
+                " --noinclude-dlls=libQt6Test* --noinclude-dlls=libQt6WebEngine*"
+            )
+        else:
+            self.expected_run_cmd += (
+                " --noinclude-dlls=Qt6Charts* --noinclude-dlls=Qt6Quick*"
+                " --noinclude-dlls=Qt6Quick3D* --noinclude-dlls=Qt6Sensors*"
+                " --noinclude-dlls=Qt6Test* --noinclude-dlls=Qt6WebEngine*"
+            )
+
+        if sys.platform.startswith("linux"):
+            self.expected_run_cmd += f" --linux-icon={str(self.linux_icon)} --onefile"
+        elif sys.platform == "darwin":
+            self.expected_run_cmd += (f" --macos-app-icon={str(self.macos_icon)}"
+                                      " --macos-create-app-bundle --standalone")
+        elif sys.platform == "win32":
+            self.expected_run_cmd += f" --windows-icon-from-ico={str(self.win_icon)} --onefile"
+
+        if is_pyenv_python():
+            self.expected_run_cmd += " --static-libpython=no"
+
+        self.config_file = self.temp_example / "Python" / "pysidedeploy.spec"
+
+    def testDryRun(self, mock_plugins):
+        with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:  # noqa: F841
+            original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
+            self.assertEqual(original_output, self.expected_run_cmd)
+
+    @patch("deploy_lib.dependency_util.QtDependencyReader.get_qt_libs_dir")
+    def testConfigFile(self, mock_sitepackages, mock_plugins):
+        mock_sitepackages.return_value = Path(_get_qt_lib_dir())
+        # create config file
+        with patch("deploy_lib.config.run_qmlimportscanner") as mock_qmlimportscanner:  # noqa: F841
+            init_result = self.deploy.main(self.main_file, init=True, force=True)
+            self.assertEqual(init_result, None)
+
+        # test config file contents
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
+
+        self.assertTrue(config_obj.get_value("app", "input_file").endswith("main.py"))
+        self.assertTrue(config_obj.get_value("app", "project_dir").endswith("PythonProject"))
+        self.config_file.unlink()
+
+
 if __name__ == "__main__":
     unittest.main()

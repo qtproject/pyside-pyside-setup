@@ -11,7 +11,7 @@ import shlex
 import sys
 from pathlib import Path
 
-from . import MAJOR_VERSION, run_command
+from . import MAJOR_VERSION, DesignStudio, run_command
 from .config import DesktopConfig
 
 
@@ -104,14 +104,23 @@ class Nuitka:
 
         qml_args = []
         if qml_files:
-            # This will generate options for each file using:
-            #     --include-data-files=ABSOLUTE_PATH_TO_FILE=RELATIVE_PATH_TO ROOT
-            # for each file. This will preserve the directory structure of QML resources.
-            qml_args.extend(
-                [f"--include-data-files={qml_file.resolve()}="
-                 f"./{qml_file.resolve().relative_to(source_file.resolve().parent)}"
-                 for qml_file in qml_files]
-            )
+            if DesignStudio.isDSProject(source_file):
+                ds = DesignStudio(source_file)
+                # include all subdirectories of ds.project_directory as data directories
+                # this will contain all the qml files and other resources
+                for subdir in ds.project_dir.iterdir():
+                    if subdir.is_dir():
+                        extra_args.append(f"--include-data-dir={subdir}="
+                                          f"./{subdir.name}")
+            else:
+                # This will generate options for each file using:
+                #     --include-data-files=ABSOLUTE_PATH_TO_FILE=RELATIVE_PATH_TO ROOT
+                # for each file. This will preserve the directory structure of QML resources.
+                qml_args.extend(
+                    [f"--include-data-files={qml_file.resolve()}="
+                     f"./{qml_file.resolve().relative_to(source_file.resolve().parent)}"
+                     for qml_file in qml_files]
+                )
             # add qml plugin. The `qml`` plugin name is not present in the module json files shipped
             # with Qt and hence not in `qt_plugins``. However, Nuitka uses the 'qml' plugin name to
             # include the necessary qml plugins. There we have to add it explicitly for a qml

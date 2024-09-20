@@ -12,7 +12,7 @@ from pathlib import Path
 from enum import Enum
 
 from project import ProjectData
-from . import (DEFAULT_APP_ICON, DEFAULT_IGNORE_DIRS, find_pyside_modules,
+from . import (DEFAULT_APP_ICON, DEFAULT_IGNORE_DIRS, DesignStudio, find_pyside_modules,
                find_permission_categories, QtDependencyReader, run_qmlimportscanner)
 
 # Some QML plugins like QtCore are excluded from this list as they don't contribute much to
@@ -165,7 +165,10 @@ class Config(BaseConfig):
         else:
             self.excluded_qml_plugins = self._find_excluded_qml_plugins()
 
-        self._generated_files_path = self.project_dir / "deployment"
+        if DesignStudio.isDSProject(self.source_file):
+            self._generated_files_path = self.project_dir / "Python" / "deployment"
+        else:
+            self._generated_files_path = self.project_dir / "deployment"
 
         self.modules = []
 
@@ -208,9 +211,10 @@ class Config(BaseConfig):
     @qml_files.setter
     def qml_files(self, qml_files):
         self._qml_files = qml_files
-        self.set_value("qt", "qml_files",
-                       ",".join([str(file.absolute().relative_to(self.project_dir.absolute()))
-                                 for file in self.qml_files]))
+        qml_files = [str(file.absolute().relative_to(self.project_dir.absolute()))
+                     if file.absolute().is_relative_to(self.project_dir) else str(file.absolute())
+                     for file in self.qml_files]
+        self.set_value("qt", "qml_files", ",".join(qml_files))
 
     @property
     def project_dir(self):
@@ -254,6 +258,11 @@ class Config(BaseConfig):
     @source_file.setter
     def source_file(self, source_file: Path):
         self._source_file = source_file
+        # FIXME: Remove when new DS is released
+        # for DS project, set self._source_file to main_patch.py, but don't change the value
+        # in the config file as main_patch.py is a temporary file
+        if DesignStudio.isDSProject(source_file):
+            self._source_file = DesignStudio(source_file).ds_source_file
         self.set_value("app", "input_file", str(source_file))
 
     @property
@@ -314,30 +323,28 @@ class Config(BaseConfig):
                 qml_files.extend([self.project_dir / str(qml_file) for qml_file in
                                   ProjectData(project_file=sub_project_file).qml_files])
         else:
-            qml_files_temp = None
-            if self.source_file and self.python_path:
-                if not self.qml_files:
-                    # filter out files from DEFAULT_IGNORE_DIRS
-                    qml_files_temp = [file for file in self.source_file.parent.glob("**/*.qml")
-                                      if all(part not in file.parts for part in
-                                             DEFAULT_IGNORE_DIRS)]
+            # Filter out files from DEFAULT_IGNORE_DIRS
+            qml_files = [
+                file for file in self.project_dir.glob("**/*.qml")
+                if all(part not in file.parts for part in DEFAULT_IGNORE_DIRS)
+            ]
 
-                    if len(qml_files_temp) > 500:
-                        warnings.warn(
-                            "You seem to include a lot of QML files. This can lead to errors in "
-                            "deployment."
-                        )
-
-                if qml_files_temp:
-                    extra_qml_files = [Path(file) for file in qml_files_temp]
-                    qml_files.extend(extra_qml_files)
+            if len(qml_files) > 500:
+                warnings.warn(
+                    "You seem to include a lot of QML files from "
+                    f"{self.project_dir}. This can lead to errors in deployment."
+                )
 
         return qml_files
 
     def _find_project_dir(self) -> Path:
-        # there is no other way to find the project_dir than assume it is the parent directory
-        # of source_file
-        project_dir = self.source_file.parent
+        if DesignStudio.isDSProject(self.source_file):
+            ds = DesignStudio(self.source_file)
+            project_dir = ds.project_dir
+        else:
+            # there is no other way to find the project_dir than assume it is the parent directory
+            # of source_file
+            project_dir = self.source_file.parent
         return project_dir
 
     def _find_project_file(self) -> Path:
