@@ -84,8 +84,7 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
     if config_file_exists:
         logging.info(f"[DEPLOY] Using existing config file {config_file}")
     else:
-        config_file = create_config_file(dry_run=dry_run, config_file=config_file,
-                                         main_file=main_file)
+        config_file = create_config_file(main_file=main_file, dry_run=dry_run)
 
     config = AndroidConfig(config_file=config_file, source_file=main_file,
                            python_exe=python.exe, dry_run=dry_run, android_data=android_data,

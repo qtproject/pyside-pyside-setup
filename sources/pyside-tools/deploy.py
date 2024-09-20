@@ -67,6 +67,12 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
          mode: bool = False):
 
     logging.basicConfig(level=loglevel)
+
+    # in case pyside6-deploy is run from a completely different location than the project
+    # directory
+    if main_file and main_file.exists():
+        config_file = main_file.parent / "pysidedeploy.spec"
+
     if config_file and not config_file.exists() and not main_file.exists():
         raise RuntimeError(dedent("""
             Directory does not contain main.py file.
@@ -93,13 +99,12 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
                 extra_modules.append(extra_module)
 
     python = PythonExecutable(dry_run=dry_run, init=init, force=force)
-    config_file_exists = config_file and Path(config_file).exists()
+    config_file_exists = config_file and config_file.exists()
 
     if config_file_exists:
         logging.info(f"[DEPLOY] Using existing config file {config_file}")
     else:
-        config_file = create_config_file(dry_run=dry_run, config_file=config_file,
-                                         main_file=main_file)
+        config_file = create_config_file(main_file=main_file, dry_run=dry_run, )
 
     config = DesktopConfig(config_file=config_file, source_file=main_file, python_exe=python.exe,
                            dry_run=dry_run, existing_config_file=config_file_exists,
