@@ -169,12 +169,12 @@ def make_signature_nameless(signature):
         signature.parameters[key].__class__ = NamelessParameter
 
 
-_POSITIONAL_ONLY         = inspect._POSITIONAL_ONLY  # noqa E:201
-_POSITIONAL_OR_KEYWORD   = inspect._POSITIONAL_OR_KEYWORD  # noqa E:201
-_VAR_POSITIONAL          = inspect._VAR_POSITIONAL  # noqa E:201
-_KEYWORD_ONLY            = inspect._KEYWORD_ONLY  # noqa E:201
-_VAR_KEYWORD             = inspect._VAR_KEYWORD  # noqa E:201
-_empty                   = inspect._empty  # noqa E:201
+_POSITIONAL_ONLY         = inspect.Parameter.POSITIONAL_ONLY  # noqa E:201
+_POSITIONAL_OR_KEYWORD   = inspect.Parameter.POSITIONAL_OR_KEYWORD  # noqa E:201
+_VAR_POSITIONAL          = inspect.Parameter.VAR_POSITIONAL  # noqa E:201
+_KEYWORD_ONLY            = inspect.Parameter.KEYWORD_ONLY  # noqa E:201
+_VAR_KEYWORD             = inspect.Parameter.VAR_KEYWORD  # noqa E:201
+_empty                   = inspect.Parameter.empty  # noqa E:201
 
 
 def create_signature(props, key):

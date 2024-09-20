@@ -241,6 +241,8 @@ class ExactEnumerator(object):
         # PYSIDE-2846: Special cases of signatures which inherit from object.
         if func_name == "__dir__":
             signature = inspect.Signature([], return_annotation=typing.Iterable[str])
+        elif func_name == "__repr__":
+            signature = inspect.Signature([], return_annotation=str)
         if signature is not None:
             with self.fmt.function(func_name, signature, decorator) as key:
                 ret[key] = signature
