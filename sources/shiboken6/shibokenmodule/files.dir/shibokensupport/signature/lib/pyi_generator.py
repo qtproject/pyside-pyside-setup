@@ -16,7 +16,6 @@ import argparse
 import inspect
 import io
 import logging
-import os
 import re
 import sys
 import typing
@@ -296,6 +295,8 @@ def generate_pyi(import_name, outpath, options):
         """
         This file contains the exact signatures for all functions in module
         {import_name}, except for defaults which are replaced by "...".
+
+        # mypy: disable-error-code="override, overload-overlap"
         """
         '''))
     HintingEnumerator(fmt).module(import_name)
