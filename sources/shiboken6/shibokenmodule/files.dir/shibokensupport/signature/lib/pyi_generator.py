@@ -335,9 +335,10 @@ def generate_pyi(import_name, outpath, options):
                 wr.print()
                 wr.print("NoneType: typing.TypeAlias = type[None]")
                 # We use it only in QtCore at the moment, but this
-                # could be extended to other modules.
-                wr.print("PlaceHolderType = typing.TypeVar(\"PlaceHolderType\", "
-                         "bound=PySide6.QtCore.QObject)")
+                # could be extended to other modules. (must import QObject then)
+                if import_name == "PySide6.QtCore":
+                    wr.print("PlaceHolderType = typing.TypeVar(\"PlaceHolderType\", "
+                             "bound=PySide6.QtCore.QObject)")
                 wr.print()
             else:
                 wr.print(line)
