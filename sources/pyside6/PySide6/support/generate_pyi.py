@@ -7,6 +7,7 @@ generate_pyi.py
 
 This script generates the .pyi files for all PySide modules.
 """
+# mypy: disable-error-code="import-not-found"
 
 import argparse
 import inspect  # noqa: F401

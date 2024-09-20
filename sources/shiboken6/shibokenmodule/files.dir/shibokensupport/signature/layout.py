@@ -177,6 +177,82 @@ _VAR_KEYWORD             = inspect.Parameter.VAR_KEYWORD  # noqa E:201
 _empty                   = inspect.Parameter.empty  # noqa E:201
 
 
+default_weights = {
+    typing.Any: 1000,   # noqa E:241
+    bool:        101,   # noqa E:241
+    int:         102,   # noqa E:241
+    float:       103,   # noqa E:241
+}
+
+
+def get_ordering_key(anno):
+    """
+    This is the main sorting algorithm for annotations.
+    For a normal type, we use the tuple
+
+        (- length of mro(anno), 1, name)
+
+    For Union expressions, we use the minimum
+
+        (- minlen of mro(anno), len(getargs(anno)), name)
+
+    This way, Union annotations are always sorted behind normal types.
+    Addition of a `name` field ensures a unique ordering.
+
+    A special case are numeric types, which have also an ordering between them.
+    They can be handled separately, since they are all of the shortest mro.
+    """
+    typing_type = typing.get_origin(anno)
+    is_union = typing_type is typing.Union
+    if is_union:
+        # This is some Union-like construct.
+        typing_args = typing.get_args(anno)
+        parts = len(typing_args)
+
+        if defaults := list(ann for ann in typing_args if ann in default_weights):
+            # Special: look into the default weights and use the largest.
+            leng = 0
+            for ann in defaults:
+                w = default_weights[ann]
+                if w > leng:
+                    leng = w
+                    anno = ann
+        else:
+            # Normal: Use the union arg with the shortest mro().
+            leng = 9999
+            for ann in typing_args:
+                lng = len(ann.mro())
+                if lng < leng:
+                    leng = lng
+                    anno = ann
+    else:
+        leng = len(anno.mro()) if anno not in (type, None, typing.Any) else 0
+        parts = 1
+    if anno in default_weights:
+        leng = - default_weights[anno]
+    # In 3.10 only None has no name. 3.9 is worse concerning typing constructs.
+    name = anno.__name__ if hasattr(anno, "__name__") else "None"
+    # Put typing containers after the plain type.
+    if typing_type and not is_union:
+        return (-leng + 100, parts, name)
+    return (-leng, parts, name)
+
+
+def sort_by_inheritance(signatures):
+    # First decorate all signatures with a key built by the mro.
+    for idx, sig in enumerate(signatures):
+        sort_order = []
+        for param in list(sig.parameters.values()):
+            sort_order.append(get_ordering_key(param.annotation))
+        signatures[idx] = sort_order, sig
+
+    # Sort the signatures and remove the key column again.
+    signatures = sorted(signatures, key=lambda x: x[0])
+    for idx, sig in enumerate(signatures):
+        signatures[idx] = sig[1]
+    return signatures
+
+
 def create_signature(props, key):
     if not props:
         # empty signatures string
@@ -186,6 +262,8 @@ def create_signature(props, key):
         # PYSIDE-2846: Fold duplicate signatures away
         res = list(set(list(create_signature(elem, key)
                             for elem in props["multi"])))
+        # PYSIDE-2846: Sort multi-signatures by inheritance in order to avoid shadowing.
+        res = sort_by_inheritance(res)
         return res if len(res) > 1 else res[0]
 
     if type(key) is tuple:
