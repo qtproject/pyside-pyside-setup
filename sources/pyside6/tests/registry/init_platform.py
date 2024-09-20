@@ -27,7 +27,7 @@ def qt_build():
     try:
         from PySide6.QtCore import QLibraryInfo
         result = QLibraryInfo.build()
-    except:
+    except Exception:
         pass
     return result
 
@@ -85,20 +85,20 @@ def set_ospaths(build_dir):
 
 set_ospaths(all_build_dir)
 
-import PySide6
+import PySide6  # noqa: E402
 
 all_modules = list("PySide6." + _ for _ in PySide6.__all__)
 
 # now we should be able to do all imports:
 if not have_build_dir:
     sys.path.insert(0, os.path.join(pyside_build_dir, "tests", "pysidetest"))
-import testbinding
+import testbinding  # noqa: E402 F401
 all_modules.append("testbinding")
 
-from shiboken6 import Shiboken
+from shiboken6 import Shiboken  # noqa: E402 F401
 all_modules.append("shiboken6.Shiboken")
 
-from shibokensupport.signature.lib.enum_sig import SimplifyingEnumerator
+from shibokensupport.signature.lib.enum_sig import SimplifyingEnumerator  # noqa: E402
 
 # Make sure not to get .pyc in Python2.
 sourcepath = os.path.splitext(__file__)[0] + ".py"
@@ -120,21 +120,21 @@ class Formatter(object):
         print(*args, file=self.outfile, **kw) if self.outfile else None
 
     @contextmanager
-    def module(self, mod_name):
-        self.print(f"")
+    def module(self, mod_name, *other):
+        self.print()
         self.print(f"# Module {mod_name}")
-        self.print(f"sig_dict.update({{")
+        self.print("sig_dict.update({")
         yield
         self.print(f'    }}) if "{mod_name}" in sys.modules else None')
 
     @contextmanager
-    def klass(self, class_name, class_str):
+    def klass(self, class_name, class_str, *other):
         self.print()
         self.print(f"# class {self.mod_name}.{class_name}:")
         yield
 
     @contextmanager
-    def function(self, func_name, signature):
+    def function(self, func_name, signature, *other):
         if self.last_level > self.level:
             self.print()
         self.last_level = self.level
@@ -175,7 +175,7 @@ def generate_all():
         fmt = Formatter(outfile)
         enu = SimplifyingEnumerator(fmt)
         lines = f.readlines()
-        license_line = next((lno for lno, line in enumerate(lines)
+        license_line = next((lno for lno, line in enumerate(lines)  # noqa: F841
                              if "$QT_END_LICENSE$" in line))
         fmt.print("#recreate       # uncomment this to enforce generation")
         fmt.print(LICENSE_TEXT)
