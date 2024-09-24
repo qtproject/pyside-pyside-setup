@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/../qtlocation/src/location/doc/qtlocation.qdocconf)
+include(../pyside-config.qdocconf)

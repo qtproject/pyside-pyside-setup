@@ -1,0 +1,2 @@
+include(@QT_SRC_DIR@/../qtquick3d/src/quick3d/doc/qtquick3d.qdocconf)
+include(../pyside-config.qdocconf)
