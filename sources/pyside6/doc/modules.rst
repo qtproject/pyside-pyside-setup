@@ -50,9 +50,23 @@ Qt Modules Supported by Qt for Python
 
         Extends QtCore with GUI functionality.
 
+    .. grid-item-card:: :mod:`Qt Graphs <PySide6.QtGraphs>`
+
+        Provides functionality for visualizing data in 3D as bar, scatter, and
+        surface graphs, as well as 2D in area, bar, donut, line, pie, scatter, and
+        spline graphs.
+
     .. grid-item-card:: :mod:`QtHelp <PySide6.QtHelp>`
 
         Provides classes for integrating online documentation in applications.
+
+    .. grid-item-card:: :mod:`Qt HTTP Server <PySide6.QtHttpServer>`
+
+        A framework for embedding an HTTP server into a Qt application.
+
+    .. grid-item-card:: :mod:`Qt Location <PySide6.QtLocation>`
+
+        Provides QML and Python interfaces to create location-aware applications.
 
     .. grid-item-card:: :mod:`Qt Multimedia <PySide6.QtMultimedia>`
 
@@ -109,6 +123,10 @@ Qt Modules Supported by Qt for Python
     .. grid-item-card:: :mod:`QtQuick <PySide6.QtQuick>`
 
         Provides classes for embedding Qt Quick in Qt applications.
+
+    .. grid-item-card:: :mod:`Qt Quick 3D <PySide6.QtQuick3D>`
+
+        Provides a high-level API for creating 3D content or UIs based on Qt Quick.
 
     .. grid-item-card:: :mod:`QtQuickControls2 <PySide6.QtQuickControls2>`
 
@@ -170,6 +188,11 @@ Qt Modules Supported by Qt for Python
     .. grid-item-card:: :mod:`QtTest <PySide6.QtTest>`
 
         Provides classes for unit testing Qt applications and libraries.
+
+    .. grid-item-card:: :mod:`QtTextToSpeech <PySide6.QtTextToSpeech>`
+
+        Provides support for synthesizing speech from text and playing it as audio
+        output.
 
     .. grid-item-card:: :mod:`QtUiTools <PySide6.QtUiTools>`
 
