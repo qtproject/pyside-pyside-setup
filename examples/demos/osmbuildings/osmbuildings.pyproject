@@ -1,0 +1,5 @@
+{
+    "files": ["main.py", "manager.py", "request.py",
+              "OSMBuildings/Main.qml", "OSMBuildings/OSMCameraController.qml",
+              "OSMBuildings/customshadertiles.frag"]
+}
