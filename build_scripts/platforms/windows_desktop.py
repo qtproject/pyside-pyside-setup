@@ -288,11 +288,11 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
 
     # <qt>/bin/*.dll and Qt *.exe -> <setup>/{st_package_name}
     qt_artifacts_permanent = [
-        "avcodec-60.dll",
-        "avformat-60.dll",
-        "avutil-58.dll",
-        "swresample-4.dll",
-        "swscale-7.dll",
+        "avcodec-*.dll",
+        "avformat-*.dll",
+        "avutil-*.dll",
+        "swresample-*.dll",
+        "swscale-*.dll",
         "opengl*.dll",
         "designer.exe",
         "linguist.exe",
