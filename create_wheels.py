@@ -401,6 +401,8 @@ if __name__ == "__main__":
         help="The directory where PySide was build (must contain a "
              "'package_for_wheels' folder"
     )
+    parser.add_argument("--no-examples", "-e", action="store_true",
+                        help="Do not build examples wheel")
     options = parser.parse_args()
 
     # Sanity check between the available modules,
@@ -443,8 +445,9 @@ if __name__ == "__main__":
         "PySide6_Essentials": wheel_pyside6_essentials,
         "PySide6_Addons": wheel_pyside6_addons,
         "PySide6": wheel_pyside6,
-        "PySide6_Examples": wheel_pyside6_examples,
     }
+    if not options.no_examples:
+        wheels["PySide6_Examples"] = wheel_pyside6_examples
 
     for name, wheel_info in wheels.items():
 
