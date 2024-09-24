@@ -852,13 +852,13 @@ def module_QtMultimedia() -> ModuleData:
     data.plugins = get_module_plugins(json_data)
 
     platform_files = {
-        "win32": ["avcodec-60.dll", "avformat-60.dll", "avutil-58.dll", "swresample-4.dll",
-                  "swscale-7.dll"],
-        "darwin": [f"Qt/lib/{dependency_lib}" for dependency_lib in ["libavcodec.60.dylib",
-                                                                     "libavformat.60.dylib",
-                                                                     "libavutil.58.dylib",
-                                                                     "libswresample.4.dylib",
-                                                                     "libswscale.7.dylib"]]}
+        "win32": ["avcodec-*.dll", "avformat-*.dll", "avutil-*.dll", "swresample-*.dll",
+                  "swscale-*.dll"],
+        "darwin": [f"Qt/lib/{dependency_lib}" for dependency_lib in ["libavcodec.*.dylib",
+                                                                     "libavformat.*.dylib",
+                                                                     "libavutil.*.dylib",
+                                                                     "libswresample.*.dylib",
+                                                                     "libswscale.*.dylib"]]}
 
     extra_files = platform_files.get(sys.platform, [])
     data.extra_files.extend(extra_files)
