@@ -50,6 +50,10 @@ Qt Modules Supported by Qt for Python
         surface graphs, as well as 2D in area, bar, donut, line, pie, scatter, and
         spline graphs.
 
+    .. grid-item-card:: :mod:`QtGraphs Widgets <PySide6.QtGraphsWidgets>`
+
+        Provides the widget-based graphs API.
+
     .. grid-item-card:: :mod:`Qt Help <PySide6.QtHelp>`
 
         Classes for integrating documentation into applications.

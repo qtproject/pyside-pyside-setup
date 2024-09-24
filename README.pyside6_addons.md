@@ -23,6 +23,7 @@ it includes the following Qt modules:
 * QtCharts
 * QtDataVisualization
 * QtGraphs
+* QtGraphsWidgets
 * QtMultimedia
 * QtMultimediaWidgets
 * QtNetworkAuth
