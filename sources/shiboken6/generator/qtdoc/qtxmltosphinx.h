@@ -20,6 +20,7 @@ QT_END_NAMESPACE
 class QtXmlToSphinxDocGeneratorInterface;
 struct QtXmlToSphinxParameters;
 struct QtXmlToSphinxLink;
+struct QtXmlToSphinxImage;
 
 enum class WebXmlTag;
 
@@ -98,10 +99,8 @@ public:
                            const QString& context);
     ~QtXmlToSphinx();
 
-    QString result() const
-    {
-        return m_result;
-    }
+    const QString &result() const { return m_result; }
+    const QList<QtXmlToSphinxImage> &images() const { return m_images; }
 
     static void stripPythonQualifiers(QString *s);
 
@@ -166,6 +165,7 @@ private:
     QStack<WebXmlTag> m_tagStack;
     TextStream m_output;
     QString m_result;
+    QList<QtXmlToSphinxImage> m_images;
 
     QStack<StringSharedPtr> m_buffers; // Maintain address stability since it used in TextStream
 
@@ -208,7 +208,6 @@ private:
     void pushOutputBuffer();
     QString popOutputBuffer();
     void writeTable(Table& table);
-    bool copyImage(const QString &href) const;
     void callHandler(WebXmlTag t, QXmlStreamReader &);
     void formatCurrentTable();
 };

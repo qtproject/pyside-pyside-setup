@@ -39,6 +39,7 @@
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
+#include <QtCore/QOperatingSystemVersion>
 #include <QtCore/QSet>
 
 #include <algorithm>
@@ -96,6 +97,23 @@ static bool operator<(const GeneratorDocumentation::Property &lhs,
                       const GeneratorDocumentation::Property &rhs)
 {
     return lhs.name < rhs.name;
+}
+
+struct ResolvedDocImage
+{
+    QString name;
+    QString absoluteSourceFilePath;
+    QString targetDir;
+};
+
+QDebug operator<<(QDebug debug, const ResolvedDocImage &i)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "ResolvedDocImage(\"" << i.name << "\", \"" << i.absoluteSourceFilePath
+          << "\" -> \"" << i.targetDir << "\")";
+    return debug;
 }
 
 static QString propertyRefTarget(const QString &name)
@@ -325,24 +343,28 @@ QString QtDocGenerator::fileNameForContext(const GeneratorContext &context) cons
 }
 
 void QtDocGenerator::writeFormattedBriefText(TextStream &s, const Documentation &doc,
-                                             const QString &scope) const
+                                             const QString &scope,
+                                             QtXmlToSphinxImages *images) const
 {
-    writeFormattedText(s, doc.brief(), doc.format(), scope);
+    writeFormattedText(s, doc.brief(), doc.format(), scope, images);
 }
 
 void QtDocGenerator::writeFormattedDetailedText(TextStream &s, const Documentation &doc,
-                                                const QString &scope) const
+                                                const QString &scope,
+                                                QtXmlToSphinxImages *images) const
 {
-    writeFormattedText(s, doc.detailed(), doc.format(), scope);
+    writeFormattedText(s, doc.detailed(), doc.format(), scope, images);
 }
 
 void QtDocGenerator::writeFormattedText(TextStream &s, const QString &doc,
                                         Documentation::Format format,
-                                        const QString &scope) const
+                                        const QString &scope,
+                                        QtXmlToSphinxImages *images) const
 {
     if (format == Documentation::Native) {
         QtXmlToSphinx x(this, m_options.parameters, doc, scope);
         s << x;
+        images->append(x.images());
     } else {
         const auto lines = QStringView{doc}.split(u'\n');
         int typesystemIndentation = std::numeric_limits<int>::max();
@@ -414,15 +436,17 @@ void QtDocGenerator::generateClass(TextStream &s, const QString &targetDir,
     m_packages[metaClass->package()].classPages << fileNameForContext(classContext);
 
     m_docParser->setPackageName(metaClass->package());
-    m_docParser->fillDocumentation(std::const_pointer_cast<AbstractMetaClass>(metaClass));
+    const QString sourceFile =
+        m_docParser->fillDocumentation(std::const_pointer_cast<AbstractMetaClass>(metaClass));
 
     s << currentModule(metaClass->package()) << pyClass(metaClass->name());
     Indentation indent(s);
 
+    QtXmlToSphinxImages parsedImages;
     auto documentation = metaClass->documentation();
     const QString scope = classScope(metaClass);
     if (documentation.hasBrief())
-        writeFormattedBriefText(s, documentation, scope);
+        writeFormattedBriefText(s, documentation, scope, &parsedImages);
 
     if (!metaClass->baseClasses().isEmpty()) {
         if (m_options.inheritanceDiagram) {
@@ -462,20 +486,23 @@ void QtDocGenerator::generateClass(TextStream &s, const QString &targetDir,
 
     s << '\n' << headline("Detailed Description") << ".. _More:\n";
 
-    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass);
-    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass))
-        writeFormattedDetailedText(s, documentation, scope);
-    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass);
+    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass,
+                             &parsedImages);
+    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, &parsedImages))
+        writeFormattedDetailedText(s, documentation, scope, &parsedImages);
+    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass, &parsedImages);
 
-    writeEnums(s, metaClass->enums(), scope);
+    writeEnums(s, metaClass->enums(), scope, &parsedImages);
 
     if (!doc.properties.isEmpty())
-        writeProperties(s, doc, metaClass);
+        writeProperties(s, doc, metaClass, &parsedImages);
 
     if (!metaClass->isNamespace())
-        writeFields(s, metaClass);
+        writeFields(s, metaClass, &parsedImages);
 
-    writeFunctions(s, doc.allFunctions, metaClass, scope);
+    writeFunctions(s, doc.allFunctions, metaClass, scope, &parsedImages);
+
+    copyParsedImages(parsedImages, {sourceFile}, targetDir);
 }
 
 void QtDocGenerator::writeFunctionToc(TextStream &s, const QString &title,
@@ -515,7 +542,8 @@ void QtDocGenerator::writePropertyToc(TextStream &s,
 
 void QtDocGenerator::writeProperties(TextStream &s,
                                      const GeneratorDocumentation &doc,
-                                     const AbstractMetaClassCPtr &cppClass) const
+                                     const AbstractMetaClassCPtr &cppClass,
+                                     QtXmlToSphinxImages *images) const
 {
     s << "\n.. note:: Properties can be used directly when "
         << "``from __feature__ import true_property`` is used or via accessor "
@@ -526,8 +554,10 @@ void QtDocGenerator::writeProperties(TextStream &s,
         const QString type = translateToPythonType(prop.type, cppClass, /* createRef */ false);
         s <<  ".. py:property:: " << propertyRefTarget(prop.name)
             << "\n   :type: " << type << "\n\n\n";
-        if (!prop.documentation.isEmpty())
-            writeFormattedText(s, prop.documentation.detailed(), Documentation::Native, scope);
+        if (!prop.documentation.isEmpty()) {
+            writeFormattedText(s, prop.documentation.detailed(), Documentation::Native,
+                               scope, images);
+        }
         s << "**Access functions:**\n";
         if (prop.getter)
             s << " * " << functionRef(prop.getter->name()) << '\n';
@@ -542,12 +572,12 @@ void QtDocGenerator::writeProperties(TextStream &s,
 }
 
 void QtDocGenerator::writeEnums(TextStream &s, const AbstractMetaEnumList &enums,
-                                const QString &scope) const
+                                const QString &scope, QtXmlToSphinxImages *images) const
 {
     for (const AbstractMetaEnum &en : enums) {
         s << pyClass(en.name());
         Indentation indent(s);
-        writeFormattedDetailedText(s, en.documentation(), scope);
+        writeFormattedDetailedText(s, en.documentation(), scope, images);
         const auto version = versionOf(en.typeEntry());
         if (!version.isNull())
             s << rstVersionAdded(version);
@@ -555,14 +585,15 @@ void QtDocGenerator::writeEnums(TextStream &s, const AbstractMetaEnumList &enums
 
 }
 
-void QtDocGenerator::writeFields(TextStream &s, const AbstractMetaClassCPtr &cppClass) const
+void QtDocGenerator::writeFields(TextStream &s, const AbstractMetaClassCPtr &cppClass,
+                                 QtXmlToSphinxImages *images) const
 {
     constexpr auto section_title = ".. attribute:: "_L1;
 
     const QString scope = classScope(cppClass);
     for (const AbstractMetaField &field : cppClass->fields()) {
         s << section_title << cppClass->fullName() << "." << field.name() << "\n\n";
-        writeFormattedDetailedText(s, field.documentation(), scope);
+        writeFormattedDetailedText(s, field.documentation(), scope, images);
     }
 }
 
@@ -674,18 +705,19 @@ void QtDocGenerator::writeDocSnips(TextStream &s,
 bool QtDocGenerator::writeDocModifications(TextStream &s,
                                            const DocModificationList &mods,
                                            TypeSystem::DocModificationMode mode,
-                                           const QString &scope) const
+                                           const QString &scope,
+                                           QtXmlToSphinxImages *images) const
 {
     bool didSomething = false;
     for (const DocModification &mod : mods) {
         if (mod.mode() == mode) {
             switch (mod.format()) {
             case TypeSystem::NativeCode:
-                writeFormattedText(s, mod.code(), Documentation::Native, scope);
+                writeFormattedText(s, mod.code(), Documentation::Native, scope, images);
                 didSomething = true;
                 break;
             case TypeSystem::TargetLangCode:
-                writeFormattedText(s, mod.code(), Documentation::Target, scope);
+                writeFormattedText(s, mod.code(), Documentation::Target, scope, images);
                 didSomething = true;
                 break;
             default:
@@ -698,11 +730,12 @@ bool QtDocGenerator::writeDocModifications(TextStream &s,
 
 bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
                                               TypeSystem::DocModificationMode mode,
-                                              const AbstractMetaClassCPtr &cppClass) const
+                                              const AbstractMetaClassCPtr &cppClass,
+                                              QtXmlToSphinxImages *images) const
 {
     const bool didSomething =
         writeDocModifications(s, DocParser::getDocModifications(cppClass),
-                              mode, classScope(cppClass));
+                              mode, classScope(cppClass), images);
     s << '\n';
 
     // FIXME PYSIDE-7: Deprecate the use of doc string on glue code.
@@ -717,9 +750,10 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
                                               TypeSystem::DocModificationMode mode,
                                               const DocModificationList &modifications,
                                               const AbstractMetaFunctionCPtr &func,
-                                              const QString &scope) const
+                                              const QString &scope,
+                                              QtXmlToSphinxImages *images) const
 {
-    const bool didSomething = writeDocModifications(s, modifications, mode, scope);
+    const bool didSomething = writeDocModifications(s, modifications, mode, scope, images);
     s << '\n';
 
     // FIXME PYSIDE-7: Deprecate the use of doc string on glue code.
@@ -871,19 +905,21 @@ static bool containsFunctionDirective(const DocModification &dm)
 }
 
 void QtDocGenerator::writeFunctions(TextStream &s, const AbstractMetaFunctionCList &funcs,
-                                    const AbstractMetaClassCPtr &cppClass, const QString &scope)
+                                    const AbstractMetaClassCPtr &cppClass, const QString &scope,
+                                    QtXmlToSphinxImages *images) const
 {
     QString lastName;
     for (const auto &func : funcs) {
         const bool indexed = func->name() != lastName;
         lastName = func->name();
-        writeFunction(s, func, cppClass, scope, indexed);
+        writeFunction(s, func, images, cppClass, scope, indexed);
     }
 }
 
 void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                                   QtXmlToSphinxImages *images,
                                    const AbstractMetaClassCPtr &cppClass,
-                                   const QString &scope, bool indexed)
+                                   const QString &scope, bool indexed) const
 {
     const auto modifications = DocParser::getDocModifications(func, cppClass);
 
@@ -910,7 +946,7 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr
             s << rstDeprecationNote("function");
     }
 
-    writeFunctionDocumentation(s, func, modifications, scope);
+    writeFunctionDocumentation(s, func, modifications, scope, images);
 
     if (auto propIndex = func->propertySpecIndex(); propIndex >= 0) {
         const QString name = cppClass->propertySpecs().at(propIndex).name();
@@ -928,15 +964,19 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr
 
 void QtDocGenerator::writeFunctionDocumentation(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                                 const DocModificationList &modifications,
-                                                const QString &scope) const
+                                                const QString &scope,
+                                                QtXmlToSphinxImages *images) const
 
 {
-    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, modifications, func, scope);
-    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, modifications, func, scope)) {
-        writeFormattedBriefText(s, func->documentation(), scope);
-        writeFormattedDetailedText(s, func->documentation(), scope);
+    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, modifications,
+                             func, scope, images);
+    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, modifications,
+                                  func, scope, images)) {
+        writeFormattedBriefText(s, func->documentation(), scope, images);
+        writeFormattedDetailedText(s, func->documentation(), scope, images);
     }
-    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, modifications, func, scope);
+    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, modifications,
+                             func, scope, images);
 }
 
 static QStringList fileListToToc(const QStringList &items)
@@ -1090,6 +1130,7 @@ void QtDocGenerator::writeModuleDocumentation()
         key.replace(u'.', u'/');
         QString outputDir = outputDirectory() + u'/' + key;
         FileOut output(outputDir + u"/index.rst"_s);
+        QtXmlToSphinxImages parsedImages;
         TextStream& s = output.stream;
 
         const QString &title = it.key();
@@ -1149,6 +1190,7 @@ void QtDocGenerator::writeModuleDocumentation()
                 QtXmlToSphinx::stripPythonQualifiers(&context);
                 QtXmlToSphinx x(this, m_options.parameters, moduleDoc.detailed(), context);
                 s << x;
+                parsedImages += x.images();
             } else {
                 s << moduleDoc.detailed();
             }
@@ -1164,6 +1206,7 @@ void QtDocGenerator::writeModuleDocumentation()
                       "any"_L1);
 
         output.done();
+        copyParsedImages(parsedImages, {}, outputDir);
 
         if (hasGlobals)
             writeGlobals(it.key(), outputDir + u'/' + globalsPage, docPackage);
@@ -1175,20 +1218,22 @@ void QtDocGenerator::writeGlobals(const QString &package,
                                   const DocPackage &docPackage)
 {
     FileOut output(fileName);
+    QtXmlToSphinxImages parsedImages;
     TextStream &s = output.stream;
 
     // Write out functions with injected documentation
     if (!docPackage.globalFunctions.isEmpty()) {
         s << currentModule(package) << headline("Functions");
-        writeFunctions(s, docPackage.globalFunctions, {}, {});
+        writeFunctions(s, docPackage.globalFunctions, {}, {}, &parsedImages);
     }
 
     if (!docPackage.globalEnums.isEmpty()) {
         s << headline("Enumerations");
-        writeEnums(s, docPackage.globalEnums, package);
+        writeEnums(s, docPackage.globalEnums, package, &parsedImages);
     }
 
     output.done();
+    copyParsedImages(parsedImages, {}, QFileInfo(fileName).absolutePath());
 }
 
 static inline QString msgNonExistentAdditionalDocFile(const QString &dir,
@@ -1410,6 +1455,8 @@ bool QtDocGenerator::convertToRst(const QString &sourceFileName,
     FileOut targetFile(targetFileName);
     QtXmlToSphinx x(this, m_options.parameters, sourceFile, context);
     targetFile.stream << x;
+    copyParsedImages(x.images(), {sourceFileName},
+                     QFileInfo(targetFileName).absolutePath());
     targetFile.done();
     return true;
 }
@@ -1562,32 +1609,120 @@ QtXmlToSphinxLink QtDocGenerator::resolveLink(const QtXmlToSphinxLink &link) con
     return resolved;
 }
 
-QtXmlToSphinxDocGeneratorInterface::Image
-    QtDocGenerator::resolveImage(const QString &href, const QString &context) const
+// Determine image target directory from context,
+// "Pyside2.QtGui.QPainter" ->"Pyside2/QtGui" for the rare case of resolving
+// an image by scope/module.
+// FIXME: Not perfect yet, should have knowledge about namespaces (DataVis3D) or
+// nested classes "Pyside2.QtGui.QTouchEvent.QTouchPoint".
+static QString imageRelativeTargetDirFromContext(const QString &scope,
+                                                 const QString &hrefBase)
 {
-    QString relativeSourceDir;
-    // FIXME PYSIDE 7: Is the doxygen code path still needed?
-    if (!m_options.doxygen)
-        relativeSourceDir = QtDocParser::qdocModuleDir(context);
-    if (!relativeSourceDir.isEmpty())
-        relativeSourceDir += u'/';
-    relativeSourceDir += href;
-
-    const QString source = m_options.parameters.docDataDir + u'/' + relativeSourceDir;
-    if (!QFileInfo::exists(source))
-        throw Exception(msgCannotFindImage(href, context,source));
-
-    // Determine target directory from context, "Pyside2.QtGui.QPainter" ->"Pyside2/QtGui".
-    // FIXME: Not perfect yet, should have knowledge about namespaces (DataVis3D) or
-    // nested classes "Pyside2.QtGui.QTouchEvent.QTouchPoint".
-    QString relativeTargetDir = context;
+    QString relativeTargetDir = scope;
     const auto lastDot = relativeTargetDir.lastIndexOf(u'.');
     if (lastDot != -1)
         relativeTargetDir.truncate(lastDot);
     relativeTargetDir.replace(u'.', u'/');
-    if (!relativeTargetDir.isEmpty())
-        relativeTargetDir += u'/';
-    relativeTargetDir += href;
+    relativeTargetDir += hrefBase;
+    return relativeTargetDir;
+}
 
-    return {relativeSourceDir, relativeTargetDir};
+ResolvedDocImage
+QtDocGenerator::resolveImage(const QtXmlToSphinxImage &image,
+                             const QStringList &sourceDirs,
+                             const QString &targetDir) const
+{
+    QString hrefBase;
+    QString hrefName = image.href; // split "images/a.png"
+    if (const auto lastSlash = image.href.lastIndexOf(u'/'); lastSlash != -1) {
+        hrefName = image.href.sliced(lastSlash + 1);
+        hrefBase = u'/' + image.href.sliced(0, lastSlash);
+    }
+
+    QStringList candidates;
+    // 1st: Resolve relative to document
+    for (const auto &sourceDir : sourceDirs) {
+        candidates.append(sourceDir + u'/' + image.href);
+        if (QFileInfo::exists(candidates.constLast()))
+            return {hrefName, candidates.constLast(), targetDir + hrefBase};
+    }
+
+    // 2nd: Check in docDataDir (doxygen) FIXME PYSIDE 7: Is this still needed?
+    candidates.append(m_options.parameters.docDataDir + u'/' + image.href);
+    if (QFileInfo::exists(candidates.constLast())) {
+        return {hrefName, candidates.constLast(),
+                m_options.parameters.outputDirectory + hrefBase};
+    }
+
+    // 3rd: Try to resolve via scope/module (relative to output directory).
+    // It should rarely happen since resolution against the source file should
+    // mostly work, only for some cases of injected XML documentation.
+    if (!m_options.doxygen && !image.scope.isEmpty()) {
+        candidates.append(m_options.parameters.docDataDir + u'/' +
+                          QtDocParser::qdocModuleDir(image.scope) + u'/' + image.href);
+        if (QFileInfo::exists(candidates.constLast())) {
+            return {hrefName, candidates.constLast(),
+                    m_options.parameters.outputDirectory + u'/'
+                    + imageRelativeTargetDirFromContext(image.scope, hrefBase)};
+        }
+    }
+
+    throw Exception(msgCannotFindImage(image.href, image.scope, candidates));
+    return {};
+}
+
+static constexpr Qt::CaseSensitivity fileSysCaseSensitivity =
+    QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows
+        ? Qt::CaseInsensitive : Qt::CaseSensitive;
+
+// Poor man's relative-to-dir function.
+static QString relativeTo(const QString &path, const QString &dir)
+{
+    const auto dirSize = dir.size();
+    const auto pathSize = path.size();
+    if (dirSize == pathSize && path.compare(dir, fileSysCaseSensitivity) == 0)
+        return {};
+    if (path.size() > dirSize && path.startsWith(dir, fileSysCaseSensitivity)
+        && path.at(dirSize) == u'/') {
+        return path.sliced(dirSize + 1);
+    }
+
+    throw Exception(msgNotRelative(path, dir));
+    return {};
+}
+
+// Copy a parsed image from WebXML to doc/base, creating all needed directories
+static void copyParsedImage(const ResolvedDocImage &image, QDir &targetDir)
+{
+    const QString targetFileName = image.targetDir + u'/' + image.name;
+    if (QFileInfo::exists(targetFileName))
+        return;
+
+    if (!QFileInfo::exists(image.targetDir)
+        && !targetDir.mkpath(relativeTo(image.targetDir, targetDir.absolutePath()))) {
+        throw Exception(msgCannotCreateDir(image.targetDir));
+    }
+    QFile source(image.absoluteSourceFilePath);
+    if (!source.copy(targetFileName))
+        throw Exception(msgCannotCopy(image.absoluteSourceFilePath, targetFileName));
+}
+
+// Copy parsed images from WebXML to doc/base
+void QtDocGenerator::copyParsedImages(const QtXmlToSphinxImages &images,
+                                      const QStringList &sourceDocumentFiles,
+                                      const QString &targetDocumentDir) const
+{
+    if (images.isEmpty())
+        return;
+
+    QStringList sourceDirs;
+    for (const auto &sourceDocumentFile : sourceDocumentFiles) {
+        const QString sourceDir = QFileInfo(sourceDocumentFile).absolutePath();
+        if (!sourceDirs.contains(sourceDir))
+            sourceDirs.append(sourceDir);
+    }
+
+    QDir targetDir(targetDocumentDir);
+
+    for (const auto &image : images)
+         copyParsedImage(resolveImage(image, sourceDirs, targetDocumentDir), targetDir);
 }

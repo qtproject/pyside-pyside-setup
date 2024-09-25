@@ -7,6 +7,17 @@
 #include <QtCore/QStringList>
 
 QT_FORWARD_DECLARE_CLASS(QLoggingCategory)
+QT_FORWARD_DECLARE_CLASS(QDebug)
+
+struct QtXmlToSphinxImage
+{
+    QString scope;
+    QString href;
+};
+
+QDebug operator<<(QDebug debug, const QtXmlToSphinxImage &i);
+
+using QtXmlToSphinxImages = QList<QtXmlToSphinxImage>;
 
 struct QtXmlToSphinxParameters
 {
@@ -52,15 +63,6 @@ public:
     virtual const QLoggingCategory &loggingCategory() const = 0;
 
     virtual QtXmlToSphinxLink resolveLink(const QtXmlToSphinxLink &) const = 0;
-
-    // Resolve images paths relative to doc data directory/output directory.
-    struct Image
-    {
-        QString source;
-        QString target;
-    };
-
-    virtual Image resolveImage(const QString &href, const QString &context) const = 0;
 
     virtual ~QtXmlToSphinxDocGeneratorInterface() = default;
 };

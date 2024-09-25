@@ -19,6 +19,15 @@
 
 using namespace Qt::StringLiterals;
 
+QDebug operator<<(QDebug debug, const QtXmlToSphinxImage &i)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "QtXmlToSphinxImage(\"" << i.href << "\", \"" << i.scope << "\")";
+    return debug;
+}
+
 // Helpers for extracting qdoc snippets "#/// [id]"
 static QString fileNameOfDevice(const QIODevice *inputFile, QAnyStringView defaultName = "<stdin>")
 {
@@ -1262,62 +1271,13 @@ WebXmlTag QtXmlToSphinx::parentTag() const
     return index >= 0 ? m_tagStack.at(index) : WebXmlTag::Unknown;
 }
 
-// Copy images that are placed in a subdirectory "images" under the webxml files
-// by qdoc to a matching subdirectory under the "rst/PySide6/<module>" directory
-static bool copyImage(const QString &docDataDir, const QString &relativeSourceFile,
-                      const QString &outputDir, const QString &relativeTargetFile,
-                      const QLoggingCategory &lc, QString *errorMessage)
-{
-    QString targetFileName = outputDir + u'/' + relativeTargetFile;
-    if (QFileInfo::exists(targetFileName))
-        return true;
-
-    QString relativeTargetDir = relativeTargetFile;
-    relativeTargetDir.truncate(qMax(relativeTargetDir.lastIndexOf(u'/'), qsizetype(0)));
-    if (!relativeTargetDir.isEmpty() && !QFileInfo::exists(outputDir + u'/' + relativeTargetDir)) {
-        const QDir outDir(outputDir);
-        if (!outDir.mkpath(relativeTargetDir)) {
-            QTextStream(errorMessage) << "Cannot create " << QDir::toNativeSeparators(relativeTargetDir)
-                << " under " << QDir::toNativeSeparators(outputDir);
-            return false;
-        }
-    }
-
-    QFile source(docDataDir + u'/' + relativeSourceFile);
-    if (!source.copy(targetFileName)) {
-        QTextStream(errorMessage) << "Cannot copy " << QDir::toNativeSeparators(source.fileName())
-            << " to " << QDir::toNativeSeparators(targetFileName) << ": "
-            << source.errorString();
-        return false;
-    }
-
-    qCDebug(lc).noquote().nospace() << __FUNCTION__ << " \"" << relativeSourceFile
-        << "\"->\"" << relativeTargetFile << '"';
-    return true;
-}
-
-bool QtXmlToSphinx::copyImage(const QString &href) const
-{
-    QString errorMessage;
-    const auto imagePaths = m_generator->resolveImage(href, m_context);
-    const bool result = ::copyImage(m_parameters.docDataDir,
-                                    imagePaths.source,
-                                    m_parameters.outputDirectory,
-                                    imagePaths.target,
-                                    m_generator->loggingCategory(),
-                                    &errorMessage);
-    if (!result)
-        throw Exception(errorMessage);
-    return result;
-}
-
 void QtXmlToSphinx::handleImageTag(QXmlStreamReader& reader)
 {
     if (reader.tokenType() != QXmlStreamReader::StartElement)
         return;
     const QString href = reader.attributes().value(u"href"_s).toString();
-    if (copyImage(href))
-        m_output << ".. image:: " <<  href << "\n\n";
+    m_images.append({m_context, href});
+    m_output << ".. image:: " <<  href << "\n\n";
 }
 
 void QtXmlToSphinx::handleInlineImageTag(QXmlStreamReader& reader)
@@ -1325,8 +1285,7 @@ void QtXmlToSphinx::handleInlineImageTag(QXmlStreamReader& reader)
     if (reader.tokenType() != QXmlStreamReader::StartElement)
         return;
     const QString href = reader.attributes().value(u"href"_s).toString();
-    if (!copyImage(href))
-        return;
+    m_images.append({m_context, href});
     // Handle inline images by substitution references. Insert a unique tag
     // enclosed by '|' and define it further down. Determine tag from the base
     //file name with number.

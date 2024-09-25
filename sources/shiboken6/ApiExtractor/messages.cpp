@@ -997,8 +997,30 @@ QString msgInvalidLanguageLevel(const QString &l)
 }
 
 QString msgCannotFindImage(const QString &href, const QString &context,
-                           const QString &candidate)
+                           const QStringList &candidates)
 {
-    return "Cannot resolve image "_L1 + href + " for "_L1 + context
-           + " (tried "_L1 + QDir::toNativeSeparators(candidate) + ")."_L1;
+    QString result = "Cannot resolve image "_L1 + href + " for "_L1 + context
+                     + " (tried "_L1;
+    for (const auto &candidate : candidates)
+        result += QDir::toNativeSeparators(candidate) + u' ';
+    result += ")."_L1;
+    return result;
+}
+
+QString msgNotRelative(const QString &path, const QString &dir)
+{
+    return QDir::toNativeSeparators(path)
+           + " is not under "_L1 + QDir::toNativeSeparators(dir) + u'.';
+}
+
+QString msgCannotCreateDir(const QString &dir)
+{
+    return "Cannot create "_L1 + QDir::toNativeSeparators(dir) + u'.';
+}
+
+QString msgCannotCopy(const QFile &source, const QString &target)
+{
+    return "Cannot copy "_L1 + QDir::toNativeSeparators(source.fileName())
+        + " to "_L1 + QDir::toNativeSeparators(target)
+        + ": "_L1 + source.errorString();
 }

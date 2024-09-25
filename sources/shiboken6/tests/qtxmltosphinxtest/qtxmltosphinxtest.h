@@ -19,7 +19,6 @@ public:
                                     const QString &) const override;
     const QLoggingCategory &loggingCategory() const override;
     QtXmlToSphinxLink resolveLink(const QtXmlToSphinxLink &link) const override;
-    Image resolveImage(const QString &href, const QString &context) const override;
 
 private slots:
     void testTable_data();

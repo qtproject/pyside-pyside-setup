@@ -19,6 +19,8 @@ struct DocGeneratorOptions;
 struct GeneratorDocumentation;
 struct DocPackage;
 
+struct ResolvedDocImage;
+
 /**
 *   The DocGenerator generates documentation from library being binded.
 */
@@ -48,7 +50,6 @@ public:
                                     const QString &methodName) const override;
     const QLoggingCategory &loggingCategory() const override;
     QtXmlToSphinxLink resolveLink(const QtXmlToSphinxLink &) const override;
-    Image resolveImage(const QString &href, const QString &context) const override;
 
     static QString getFuncName(const AbstractMetaFunctionCPtr &cppFunc);
     static QString formatArgs(const AbstractMetaFunctionCPtr &func);
@@ -63,17 +64,21 @@ protected:
 
 private:
     void writeEnums(TextStream &s, const AbstractMetaEnumList &enums,
-                    const QString &scope) const;
+                    const QString &scope, QtXmlToSphinxImages *images) const;
 
-    void writeFields(TextStream &s, const AbstractMetaClassCPtr &cppClass) const;
+    void writeFields(TextStream &s, const AbstractMetaClassCPtr &cppClass,
+                     QtXmlToSphinxImages *images) const;
     void writeFunctions(TextStream &s, const AbstractMetaFunctionCList &funcs,
-                        const AbstractMetaClassCPtr &cppClass, const QString &scope);
+                        const AbstractMetaClassCPtr &cppClass, const QString &scope,
+                        QtXmlToSphinxImages *images) const;
     void writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
+                       QtXmlToSphinxImages *images,
                        const AbstractMetaClassCPtr &cppClass = {},
-                       const QString &scope = {}, bool indexed = true);
+                       const QString &scope = {}, bool indexed = true) const;
     void writeFunctionDocumentation(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                     const DocModificationList &modifications,
-                                    const QString &scope) const;
+                                    const QString &scope,
+                                    QtXmlToSphinxImages *images) const;
     void writeFunctionParametersType(TextStream &s, const AbstractMetaClassCPtr &cppClass,
                                      const AbstractMetaFunctionCPtr &func) const;
     static void writeFunctionToc(TextStream &s, const QString &title,
@@ -82,26 +87,32 @@ private:
                                  const GeneratorDocumentation &doc);
     void writeProperties(TextStream &s,
                          const GeneratorDocumentation &doc,
-                         const AbstractMetaClassCPtr &cppClass) const;
+                         const AbstractMetaClassCPtr &cppClass,
+                         QtXmlToSphinxImages *images) const;
     void writeParameterType(TextStream &s, const AbstractMetaClassCPtr &cppClass,
                             const AbstractMetaArgument &arg) const;
     void writeFormattedText(TextStream &s, const QString &doc,
                             Documentation::Format format,
-                            const QString &scope = {}) const;
+                            const QString &scope,
+                            QtXmlToSphinxImages *images) const;
     void writeFormattedBriefText(TextStream &s, const Documentation &doc,
-                                 const QString &scope = {}) const;
+                                 const QString &scope, QtXmlToSphinxImages *images) const;
     void writeFormattedDetailedText(TextStream &s, const Documentation &doc,
-                                    const QString &scope = {}) const;
+                                    const QString &scope,
+                                    QtXmlToSphinxImages *images) const;
 
     bool writeInjectDocumentation(TextStream &s, TypeSystem::DocModificationMode mode,
-                                  const AbstractMetaClassCPtr &cppClass) const;
+                                  const AbstractMetaClassCPtr &cppClass,
+                                  QtXmlToSphinxImages *images) const;
     bool writeInjectDocumentation(TextStream &s, TypeSystem::DocModificationMode mode,
                                   const DocModificationList &modifications,
                                   const AbstractMetaFunctionCPtr &func,
-                                  const QString &scope = {}) const;
+                                  const QString &scope,
+                                  QtXmlToSphinxImages *images) const;
     bool writeDocModifications(TextStream &s, const DocModificationList &mods,
                                TypeSystem::DocModificationMode mode,
-                               const QString &scope = {}) const;
+                               const QString &scope,
+                               QtXmlToSphinxImages *images) const;
     static void writeDocSnips(TextStream &s, const CodeSnipList &codeSnips,
                               TypeSystem::CodeSnipPosition position, TypeSystem::Language language);
 
@@ -110,7 +121,12 @@ private:
                       const DocPackage &docPackage);
     void writeAdditionalDocumentation() const;
     bool writeInheritanceFile();
-
+    ResolvedDocImage resolveImage(const QtXmlToSphinxImage &image,
+                                  const QStringList &sourceDirs,
+                                  const QString &targetDir) const;
+    void copyParsedImages(const QtXmlToSphinxImages &images,
+                          const QStringList &sourceDocumentFiles,
+                          const QString &targetDocumentFile) const;
     QString translateToPythonType(const AbstractMetaType &type,
                                   const AbstractMetaClassCPtr &cppClass,
                                   bool createRef = true) const;

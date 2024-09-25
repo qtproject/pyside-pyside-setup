@@ -262,6 +262,12 @@ QString msgMissingProjectFileMarker(const QString &name, const QByteArray &start
 QString msgInvalidLanguageLevel(const QString &l);
 
 QString msgCannotFindImage(const QString &href, const QString &context,
-                           const QString &candidate);
+                           const QStringList &candidates);
+
+QString msgNotRelative(const QString &path, const QString &dir);
+
+QString msgCannotCreateDir(const QString &dir);
+
+QString msgCannotCopy(const QFile &source, const QString &target);
 
 #endif // MESSAGES_H
