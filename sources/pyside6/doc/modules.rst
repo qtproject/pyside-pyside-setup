@@ -10,45 +10,39 @@ Qt Modules Supported by Qt for Python
 .. grid:: 1 3 3 3
     :gutter: 2
 
-    .. grid-item-card:: :mod:`QtBluetooth <PySide6.QtBluetooth>`
+    .. grid-item-card:: :mod:`Qt Bluetooth <PySide6.QtBluetooth>`
 
-        The Bluetooth API provides connectivity between Bluetooth enabled
-        devices.
+        Provides access to Bluetooth hardware.
 
+    .. grid-item-card:: :mod:`Qt Charts <PySide6.QtCharts>`
 
-    .. grid-item-card:: :mod:`QtCharts <PySide6.QtCharts>`
+        UI Components for displaying visually pleasing charts,
+        driven by static or dynamic data models.
 
-        Provides a set of easy to use chart components.
+    .. grid-item-card:: :mod:`Qt Concurrent <PySide6.QtConcurrent>`
 
-    .. grid-item-card:: :mod:`QtConcurrent <PySide6.QtConcurrent>`
+        Classes for writing multi-threaded programs without using low-level
+        threading primitives.
 
-        Provides high-level APIs that make it possible to write multi-threaded
-        programs without using low-level threading primitives such as mutexes,
-        read-write locks, wait conditions, or semaphores.
+    .. grid-item-card:: :mod:`Qt Core <PySide6.QtCore>`
 
+        Core non-graphical classes used by other modules.
 
-    .. grid-item-card:: :mod:`QtCore <PySide6.QtCore>`
+    .. grid-item-card:: :mod:`Qt Data Visualization <PySide6.QtDataVisualization>`
 
-        Provides core non-GUI functionality.
+        UI Components for creating stunning 3D data visualizations.
 
-    .. grid-item-card:: :mod:`QtDataVisualization <PySide6.QtDataVisualization>`
+    .. grid-item-card:: :mod:`Qt D-Bus <PySide6.QtDBus>`
 
-        Provides a way to visualize data in 3D as bar, scatter, and surface
-        graphs.
+        Classes for inter-process communication over the D-Bus protocol.
 
-    .. grid-item-card:: :mod:`QtDBus <PySide6.QtDBus>`
-
-        D-Bus is an Inter-Process Communication (IPC) and Remote Procedure
-        Calling (RPC) mechanism originally developed for Linux to replace
-        existing and competing IPC solutions with one unified protocol
-
-    .. grid-item-card:: :mod:`QtDesigner <PySide6.QtDesigner>`
+    .. grid-item-card:: :mod:`Qt Designer <PySide6.QtDesigner>`
 
         Provides classes to extend *Qt Widgets Designer*.
 
-    .. grid-item-card:: :mod:`QtGui <PySide6.QtGui>`
+    .. grid-item-card:: :mod:`Qt GUI <PySide6.QtGui>`
 
-        Extends QtCore with GUI functionality.
+        Base classes for graphical user interface (GUI) components.
 
     .. grid-item-card:: :mod:`Qt Graphs <PySide6.QtGraphs>`
 
@@ -56,9 +50,9 @@ Qt Modules Supported by Qt for Python
         surface graphs, as well as 2D in area, bar, donut, line, pie, scatter, and
         spline graphs.
 
-    .. grid-item-card:: :mod:`QtHelp <PySide6.QtHelp>`
+    .. grid-item-card:: :mod:`Qt Help <PySide6.QtHelp>`
 
-        Provides classes for integrating online documentation in applications.
+        Classes for integrating documentation into applications.
 
     .. grid-item-card:: :mod:`Qt HTTP Server <PySide6.QtHttpServer>`
 
@@ -70,85 +64,85 @@ Qt Modules Supported by Qt for Python
 
     .. grid-item-card:: :mod:`Qt Multimedia <PySide6.QtMultimedia>`
 
-        Provides API for multimedia-specific use cases.
+        A rich set of QML types and Python classes to handle multimedia content.
+        Also includes APIs to handle camera access.
 
     .. grid-item-card:: :mod:`Qt Multimedia Widgets <PySide6.QtMultimediaWidgets>`
 
         Provides the widget-based multimedia API.
 
-    .. grid-item-card:: :mod:`QtNetwork <PySide6.QtNetwork>`
+    .. grid-item-card:: :mod:`Qt Network
 
-        Offers classes that let you to write TCP/IP clients and servers.
+        Classes to make network programming easier and more portable.<PySide6.QtNetwork>`
 
     .. grid-item-card:: :mod:`Qt Network Authorization <PySide6.QtNetworkAuth>`
 
-        Provides a set of APIs that enable Qt applications to obtain limited
-        access to online accounts and HTTP services without exposing users'
-        passwords.
+        Provides support for OAuth-based authorization to online services.
 
-    .. grid-item-card:: :mod:`QtNfc <PySide6.QtNfc>`
+    .. grid-item-card:: :mod:`Qt NFC <PySide6.QtNfc>`
 
-        The NFC API provides connectivity between NFC enabled devices.
+        Provides access to Near-Field communication (NFC) hardware. On desktop
+        platforms NDEF access is only supported for Type 4 tags.
 
-    .. grid-item-card:: :mod:`QtOpenGL <PySide6.QtOpenGL>`
+    .. grid-item-card:: :mod:`Qt OpenGL <PySide6.QtOpenGL>`
 
-        Offers classes that make it easy to use OpenGL in Qt applications.
+        Classes that make it easy to use OpenGL in Qt applications.
 
-    .. grid-item-card:: :mod:`QtOpenGL Widgets <PySide6.QtOpenGLWidgets>`
+    .. grid-item-card:: :mod:`Qt OpenGL Widgets <PySide6.QtOpenGLWidgets>`
 
-        Provides the OpenGLWidget class enabling OpenGL rendering for
-        a certain part of the widget tree.
+        Provides a widget for rendering OpenGL graphics.
 
     .. grid-item-card:: :mod:`Qt Positioning <PySide6.QtPositioning>`
 
-        Provides access to position, satellite info and area monitoring
-        classes.
+        Provides access to position, satellite info and area monitoring classes.
 
     .. grid-item-card:: :mod:`Qt PDF <PySide6.QtPdf>`
 
-        Classes and functions for rendering PDF documents.
+        Classes and functions for rendering PDF documents on desktop platforms.
 
     .. grid-item-card:: :mod:`Qt PDF Widgets <PySide6.QtPdfWidgets>`
 
         A PDF viewer widget.
 
-    .. grid-item-card:: :mod:`QtPrintSupport <PySide6.QtPrintSupport>`
+    .. grid-item-card:: :mod:`Qt Print Support <PySide6.QtPrintSupport>`
 
-        Provides extensive cross-platform support for printing.
+        Classes to make printing easier and more portable.
 
-    .. grid-item-card:: :mod:`QtQml <PySide6.QtQml>`
+    .. grid-item-card:: :mod:`Qt Qml <PySide6.QtQml>`
 
-        Python API for Qt QML.
+        Classes for QML and JavaScript languages.
 
-    .. grid-item-card:: :mod:`QtQuick <PySide6.QtQuick>`
+    .. grid-item-card:: :mod:`Qt Quick <PySide6.QtQuick>`
 
-        Provides classes for embedding Qt Quick in Qt applications.
+        A declarative framework for building highly dynamic applications
+        with custom UIs.
 
     .. grid-item-card:: :mod:`Qt Quick 3D <PySide6.QtQuick3D>`
 
         Provides a high-level API for creating 3D content or UIs based on Qt Quick.
 
-    .. grid-item-card:: :mod:`QtQuickControls2 <PySide6.QtQuickControls2>`
+    .. grid-item-card:: :mod:`Qt Quick Controls <PySide6.QtQuickControls2>`
 
-        Provides classes for setting up the controls from C++.
+        Lightweight QML types for creating performant user interfaces for
+        desktop, embedded, and mobile devices.
 
-    .. grid-item-card:: :mod:`QtQuickTest <PySide6.QtQuickTest>`
+    .. grid-item-card:: :mod:`Qt Quick Test <PySide6.QtQuickTest>`
 
-       A unit test framework for QML applications where test cases are written as JavaScript functions.
+        A unit test framework for QML applications where test cases are written as JavaScript functions.
 
-    .. grid-item-card:: :mod:`QtQuickWidgets <PySide6.QtQuickWidgets>`
+    .. grid-item-card:: :mod:`Qt Quick Widgets <PySide6.QtQuickWidgets>`
 
-        Provides the QQuickWidget class for embedding Qt Quick in widget-based applications.
+        Provides a Python widget class for displaying a Qt Quick user interface.
 
-    .. grid-item-card:: :mod:`QtRemoteObjects <PySide6.QtRemoteObjects>`
+    .. grid-item-card:: :mod:`Qt Remote Objects <PySide6.QtRemoteObjects>`
 
-        Inter-Process Communication (IPC) module developed for Qt. This module
-        extends Qt's existing functionalities to enable information exchange
-        between processes or computers, easily.
+        Provides an easy to use mechanism for sharing a QObject's API
+        (Properties/Signals/Slots) between processes or devices.
 
-    .. grid-item-card:: :mod:`Qt Scxml <PySide6.QtScxml>`
+    .. grid-item-card:: :mod:`Qt SCXML <PySide6.QtScxml>`
 
-        Provides classes to create and use state machines from SCXML files.
+        Provides classes and tools for creating state machines from SCXML files and
+        embedding them in applications.
 
     .. grid-item-card:: :mod:`Qt Sensors <PySide6.QtSensors>`
 
@@ -165,27 +159,28 @@ Qt Modules Supported by Qt for Python
 
     .. grid-item-card:: :mod:`Qt Spatial Audio <PySide6.QtSpatialAudio>`
 
-        Provides APIs for modeling sound source and their surrounds in 3D
-        space.
+        Provides support for spatial audio. Create sound scenes in 3D space containing
+        different sound sources and room related properties such as reverb.
 
-    .. grid-item-card:: :mod:`QtSql <PySide6.QtSql>`
+    .. grid-item-card:: :mod:`Qt SQL <PySide6.QtSql>`
 
-        Helps you provide seamless database integration to your Qt
-        applications.
+        Classes for database integration using SQL.
 
-    .. grid-item-card:: :mod:`QtStateMachine <PySide6.QtStateMachine>`
+    .. grid-item-card:: :mod:`Qt State Machine <PySide6.QtStateMachine>`
 
         Provides classes for creating and executing state graphs.
 
-    .. grid-item-card:: :mod:`QtSvg <PySide6.QtSvg>`
+    .. grid-item-card:: :mod:`Qt SVG <PySide6.QtSvg>`
 
-        Provides classes for displaying the contents of SVG files.
+        Classes for displaying the contents of SVG files. Supports a subset of the
+        SVG 1.2 Tiny standard. A separate library (Qt SVG Widgets) provides support
+        for rendering SVG files in a widget UI.
 
-    .. grid-item-card:: :mod:`QtSvgWidgets <PySide6.QtSvgWidgets>`
+    .. grid-item-card:: :mod:`Qt SVG Widgets <PySide6.QtSvgWidgets>`
 
-        Provides a widget that is used to display the contents of SVG files.
+        Provides support for rendering SVG files in a widget UI.
 
-    .. grid-item-card:: :mod:`QtTest <PySide6.QtTest>`
+    .. grid-item-card:: :mod:`Qt Test <PySide6.QtTest>`
 
         Provides classes for unit testing Qt applications and libraries.
 
@@ -194,22 +189,23 @@ Qt Modules Supported by Qt for Python
         Provides support for synthesizing speech from text and playing it as audio
         output.
 
-    .. grid-item-card:: :mod:`QtUiTools <PySide6.QtUiTools>`
+    .. grid-item-card:: :mod:`Qt UI Tools <PySide6.QtUiTools>`
 
-        Provides classes to handle forms created with *Qt Widgets Designer*.
+        Classes for loading QWidget based forms created in *Qt Widgets Designer*
+        dynamically, at runtime.
 
     .. grid-item-card:: :mod:`Qt WebChannel <PySide6.QtWebChannel>`
 
         Provides access to QObject or QML objects from HTML clients for
         seamless integration of Qt applications with HTML/JavaScript clients.
 
-    .. grid-item-card:: :mod:`QtWebEngine Core C++ Classes <PySide6.QtWebEngineCore>`
+    .. grid-item-card:: :mod:`QtWebEngine Core Classes <PySide6.QtWebEngineCore>`
 
         Provides public API shared by both QtWebEngine and QtWebEngineWidgets.
 
-    .. grid-item-card:: :mod:`QtWebEngine Widgets C++ Classes <PySide6.QtWebEngineWidgets>`
+    .. grid-item-card:: :mod:`QtWebEngine Widgets Classes <PySide6.QtWebEngineWidgets>`
 
-        Provides C++ classes for rendering web content in a QWidget based
+        Provides Python classes for rendering web content in a QWidget based
         application.
 
     .. grid-item-card:: :mod:`QtWebEngine QML Types <PySide6.QtWebEngineQuick>`
@@ -220,43 +216,46 @@ Qt Modules Supported by Qt for Python
 
         Provides WebSocket communication compliant with RFC 6455.
 
-    .. grid-item-card:: :mod:`QtWebView <PySide6.QtWebView>`
+    .. grid-item-card:: :mod:`Qt WebView <PySide6.QtWebView>`
 
-        Enables displaying web content in a QML application.
+        Displays web content in a QML application by using APIs native to the platform,
+        without the need to include a full web browser stack.
 
-    .. grid-item-card:: :mod:`QtWidgets <PySide6.QtWidgets>`
+    .. grid-item-card:: :mod:`Qt Widgets <PySide6.QtWidgets>`
 
-        Extends Qt GUI with C++ widget functionality.
+        Classes to extend Qt GUI with Python widgets.
 
-    .. grid-item-card:: :mod:`QtXml <PySide6.QtXml>`
+    .. grid-item-card:: :mod:`Qt XML <PySide6.QtXml>`
 
-        Provides a C++ implementation of DOM.
+        Handling of XML in a Document Object Model (DOM) API.
 
-    .. grid-item-card:: :mod:`Qt3DAnimation <PySide6.Qt3DAnimation>`
+    .. grid-item-card:: :mod:`Qt 3D Animation Classes <PySide6.Qt3DAnimation>`
 
-        Provides basic elements required to animate 3D objects.
+        The Qt 3D Animation modules provides a set of prebuilt elements to
+        help you get started with Qt 3D.
 
-    .. grid-item-card:: :mod:`Qt3D Core <PySide6.Qt3DCore>`
+    .. grid-item-card:: :mod:`Qt 3D Core Classes <PySide6.Qt3DCore>`
 
-        Contains functionality to support near-realtime simulation systems.
+        The Qt 3D module contains functionality to support near-realtime
+        simulation systems.
 
-    .. grid-item-card:: :mod:`Qt3D Extras <PySide6.Qt3DExtras>`
+    .. grid-item-card:: :mod:`Qt 3D Extras Classes <PySide6.Qt3DExtras>`
 
         Provides a set of prebuilt elements to help you get started with Qt 3D.
 
-    .. grid-item-card:: :mod:`Qt3D Input <PySide6.Qt3DInput>`
+    .. grid-item-card:: :mod:`Qt 3D Input Classes<PySide6.Qt3DInput>`
 
-        Provides classes for handling user input in applications using Qt 3D.
+        Provides classes for handling user input in
+        applications using Qt3D.
 
-    .. grid-item-card:: :mod:`Qt3D Logic <PySide6.Qt3DLogic>`
+    .. grid-item-card:: :mod:`Qt 3D Logic Classes <PySide6.Qt3DLogic>`
 
         Enables synchronizing frames with the Qt 3D backend.
 
-    .. grid-item-card:: :mod:`Qt3D Render <PySide6.Qt3DRender>`
+    .. grid-item-card:: :mod:`Qt 3D Render Classes <PySide6.Qt3DRender>`
 
         Contains functionality to support 2D and 3D rendering using Qt 3D.
 
     .. grid-item-card:: :mod:`QtAsyncio <PySide6.QtAsyncio>`
 
         Provides integration between asyncio and Qt's event loop.
-
