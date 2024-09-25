@@ -253,9 +253,7 @@ def copy_qt_dependency_dlls(_vars, destination_qt_dir, artifacts):
 
     with tempfile.TemporaryDirectory() as temp_path:
         redist_url = "https://download.qt.io/development_releases/prebuilt/vcredist/"
-        zip_file = "pyside_qt_deps_64_2019.7z"
-        if "{target_arch}".format(**_vars) == "32":
-            zip_file = "pyside_qt_deps_32_2019.7z"
+        zip_file = "pyside_qt_deps_673_64_2019.7z"
         try:
             download_and_extract_7z(redist_url + zip_file, temp_path)
         except Exception as e:
