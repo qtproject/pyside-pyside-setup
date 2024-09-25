@@ -1404,11 +1404,9 @@ bool QtDocGenerator::convertToRst(const QString &sourceFileName,
             *errorMessage = msgCannotOpenForReading(sourceFile);
         return false;
     }
-    const QString doc = QString::fromUtf8(sourceFile.readAll());
-    sourceFile.close();
 
     FileOut targetFile(targetFileName);
-    QtXmlToSphinx x(this, m_options.parameters, doc, context);
+    QtXmlToSphinx x(this, m_options.parameters, sourceFile, context);
     targetFile.stream << x;
     targetFile.done();
     return true;

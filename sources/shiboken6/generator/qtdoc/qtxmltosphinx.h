@@ -91,7 +91,11 @@ public:
     explicit QtXmlToSphinx(const QtXmlToSphinxDocGeneratorInterface *docGenerator,
                            const QtXmlToSphinxParameters &parameters,
                            const QString& doc,
-                           const QString& context = QString());
+                           const QString& context);
+    explicit QtXmlToSphinx(const QtXmlToSphinxDocGeneratorInterface *docGenerator,
+                           const QtXmlToSphinxParameters &parameters,
+                           QIODevice &ioDevice,
+                           const QString& context);
     ~QtXmlToSphinx();
 
     QString result() const
@@ -106,9 +110,14 @@ public:
                                QString *errorMessage);
 
 private:
+    explicit QtXmlToSphinx(const QtXmlToSphinxDocGeneratorInterface *docGenerator,
+                           const QtXmlToSphinxParameters &parameters,
+                           const QString& context = QString());
+
     using StringSharedPtr = std::shared_ptr<QString>;
 
     QString transform(const QString& doc);
+    QString transform(QXmlStreamReader& reader);
 
     void handleHeadingTag(QXmlStreamReader& reader);
     void handleParaTag(QXmlStreamReader& reader);

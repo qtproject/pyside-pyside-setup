@@ -19,6 +19,16 @@
 
 using namespace Qt::StringLiterals;
 
+// Helpers for extracting qdoc snippets "#/// [id]"
+static QString fileNameOfDevice(const QIODevice *inputFile, QAnyStringView defaultName = "<stdin>")
+{
+    if (inputFile != nullptr) {
+        if (const auto *file = qobject_cast<const QFile *>(inputFile))
+            return QDir::toNativeSeparators(file->fileName());
+    }
+    return defaultName.toString();
+}
+
 QString msgTagWarning(const QXmlStreamReader &reader, const QString &context,
                       const QString &tag, const QString &message)
 {
@@ -265,12 +275,29 @@ static const WebXmlTagHash &webXmlTagHash()
 
 QtXmlToSphinx::QtXmlToSphinx(const QtXmlToSphinxDocGeneratorInterface *docGenerator,
                              const QtXmlToSphinxParameters &parameters,
-                             const QString& doc, const QString& context)
-        : m_output(static_cast<QString *>(nullptr)),
-          m_context(context),
-          m_generator(docGenerator), m_parameters(parameters)
+                             const QString& doc, const QString& context) :
+    QtXmlToSphinx(docGenerator, parameters, context)
 {
     m_result = transform(doc);
+}
+
+QtXmlToSphinx::QtXmlToSphinx(const QtXmlToSphinxDocGeneratorInterface *docGenerator,
+                             const QtXmlToSphinxParameters &parameters,
+                             QIODevice &ioDevice,
+                             const QString& context) :
+    QtXmlToSphinx(docGenerator, parameters, context)
+{
+    QXmlStreamReader reader(&ioDevice);
+    m_result = transform(reader);
+}
+
+QtXmlToSphinx::QtXmlToSphinx(const QtXmlToSphinxDocGeneratorInterface *docGenerator,
+                             const QtXmlToSphinxParameters &parameters,
+                             const QString& context)
+    : m_output(static_cast<QString *>(nullptr)),
+    m_context(context),
+    m_generator(docGenerator), m_parameters(parameters)
+{
 }
 
 QtXmlToSphinx::~QtXmlToSphinx() = default;
@@ -463,9 +490,13 @@ QString QtXmlToSphinx::transform(const QString& doc)
     if (doc.trimmed().isEmpty())
         return doc;
 
-    pushOutputBuffer();
-
     QXmlStreamReader reader(doc);
+    return transform(reader);
+}
+
+QString QtXmlToSphinx::transform(QXmlStreamReader& reader)
+{
+    pushOutputBuffer();
 
     m_output << autoTranslatedPlaceholder;
     Indentation indentation(m_output);
@@ -474,10 +505,9 @@ QString QtXmlToSphinx::transform(const QString& doc)
         QXmlStreamReader::TokenType token = reader.readNext();
         if (reader.hasError()) {
             QString message;
-            QTextStream(&message) << "XML Error "
-                << reader.errorString() << " at " << reader.lineNumber()
-                << ':' << reader.columnNumber() << '\n' << doc;
-            m_output << message;
+            QTextStream(&message) << fileNameOfDevice(reader.device())
+                << ':' << reader.lineNumber() << ':' << reader.columnNumber()
+                << ": XML Error: " << reader.errorString();
             throw Exception(message);
             break;
         }
@@ -512,6 +542,7 @@ QString QtXmlToSphinx::transform(const QString& doc)
     Q_ASSERT(m_buffers.isEmpty());
     setAutoTranslatedNote(&retval);
     return retval;
+
 }
 
 static QString resolveFile(const QStringList &locations, const QString &path)
@@ -607,13 +638,6 @@ QtXmlToSphinx::Snippet QtXmlToSphinx::readSnippetFromLocations(const QString &pa
 
     *errorMessage = msgSnippetsResolveError(path, locations);
     return {{}, Snippet::Error};
-}
-
-// Helpers for extracting qdoc snippets "#/// [id]"
-static QString fileNameOfDevice(const QIODevice *inputFile)
-{
-    const auto *file = qobject_cast<const QFile *>(inputFile);
-    return file ? QDir::toNativeSeparators(file->fileName()) : u"<stdin>"_s;
 }
 
 static QString msgSnippetNotFound(const QIODevice &inputFile,
