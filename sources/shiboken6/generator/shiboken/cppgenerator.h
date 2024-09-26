@@ -46,7 +46,8 @@ public:
 
 protected:
     QString fileNameForContext(const GeneratorContext &context) const override;
-    void generateClass(TextStream &s, const GeneratorContext &classContext) override;
+    void generateClass(TextStream &s, const QString &targetDir,
+                       const GeneratorContext &classContext) override;
     bool finishGeneration() override;
 
 private:

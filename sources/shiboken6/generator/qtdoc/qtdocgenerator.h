@@ -57,7 +57,8 @@ protected:
     bool shouldGenerate(const TypeEntryCPtr &) const override;
     static QString fileNameSuffix();
     QString fileNameForContext(const GeneratorContext &context) const override;
-    void generateClass(TextStream &ts, const GeneratorContext &classContext) override;
+    void generateClass(TextStream &ts, const QString &targetDir,
+                       const GeneratorContext &classContext) override;
     bool finishGeneration() override;
 
 private:

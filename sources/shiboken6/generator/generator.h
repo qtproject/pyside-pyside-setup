@@ -211,7 +211,9 @@ protected:
      *   \param  s   text stream to write the generated output
      *   \param  metaClass  the class that should be generated
      */
-    virtual void generateClass(TextStream &s, const GeneratorContext &classContext) = 0;
+    virtual void generateClass(TextStream &s,
+                               const QString &targetDir,
+                               const GeneratorContext &classContext) = 0;
     virtual bool finishGeneration() = 0;
 
     /**

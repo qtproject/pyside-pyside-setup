@@ -246,12 +246,11 @@ bool Generator::generateFileForContext(const GeneratorContext &context)
     if (fileName.isEmpty())
         return true;
 
-    QString filePath = outputDirectory() + u'/'
-        + subDirectoryForPackage(typeEntry->targetLangPackage())
-        + u'/' + fileName;
-    FileOut fileOut(filePath);
+    const QString targetDirectory = outputDirectory() + u'/'
+        + subDirectoryForPackage(typeEntry->targetLangPackage());
+    FileOut fileOut(targetDirectory + u'/' + fileName);
 
-    generateClass(fileOut.stream, context);
+    generateClass(fileOut.stream, targetDirectory, context);
 
     fileOut.done();
     return true;

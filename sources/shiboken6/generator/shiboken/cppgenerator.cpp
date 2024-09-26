@@ -620,7 +620,9 @@ static void writeAddedTypeSignatures(TextStream &s, const ComplexTypeEntryCPtr &
 /// Function used to write the class generated binding code on the buffer
 /// \param s the output buffer
 /// \param classContext the pointer to metaclass information
-void CppGenerator::generateClass(TextStream &s, const GeneratorContext &classContext)
+void CppGenerator::generateClass(TextStream &s,
+                                 const QString & /* targetDir */,
+                                 const GeneratorContext &classContext)
 {
     if (classContext.forSmartPointer()) {
         generateSmartPointerClass(s, classContext);
