@@ -12,7 +12,7 @@ class QtDocParser : public DocParser
 {
 public:
     QtDocParser() = default;
-    void fillDocumentation(const AbstractMetaClassPtr &metaClass) override;
+    QString fillDocumentation(const AbstractMetaClassPtr &metaClass) override;
     void fillGlobalFunctionDocumentation(const AbstractMetaFunctionPtr &f) override;
     void fillGlobalEnumDocumentation(AbstractMetaEnum &e) override;
 

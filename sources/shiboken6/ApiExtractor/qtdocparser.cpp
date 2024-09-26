@@ -299,10 +299,10 @@ void QtDocParser::fillGlobalEnumDocumentation(AbstractMetaEnum &e)
     }
 }
 
-void QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
+QString QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
 {
     if (!metaClass)
-        return;
+        return {};
 
     auto context = metaClass->enclosingClass();
     while (context) {
@@ -320,7 +320,7 @@ void QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
         qCWarning(lcShibokenDoc).noquote().nospace()
             << "Can't find qdoc file for class " << metaClass->name() << ", tried: "
             << QDir::toNativeSeparators(sourceFile.absoluteFilePath());
-        return;
+       return {};
     }
 
     const QString sourceFileName = sourceFile.absoluteFilePath();
@@ -329,7 +329,7 @@ void QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
     const auto classDocumentationO = parseWebXml(sourceFileName, &errorMessage);
     if (!classDocumentationO.has_value()) {
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
-        return;
+        return {};
     }
 
     const auto &classDocumentation = classDocumentationO.value();
@@ -384,6 +384,8 @@ void QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
                       qPrintable(msgCannotFindDocumentation(sourceFileName, metaClass, meta_enum, {})));
         }
     }
+
+    return sourceFileName;
 }
 
 bool QtDocParser::extractEnumDocumentation(const ClassDocumentation &classDocumentation,

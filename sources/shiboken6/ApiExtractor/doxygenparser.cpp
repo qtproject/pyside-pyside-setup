@@ -41,10 +41,10 @@ Documentation DoxygenParser::retrieveModuleDocumentation()
         return retrieveModuleDocumentation(packageName());
 }
 
-void DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
+QString DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
 {
     if (!metaClass)
-        return;
+        return {};
 
     QString doxyFileSuffix;
     if (metaClass->enclosingClass()) {
@@ -70,14 +70,14 @@ void DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
             << "Can't find doxygen file for class " << metaClass->name() << ", tried: "
             << QDir::toNativeSeparators(documentationDataDirectory())
             <<  "/{struct|class|namespace}"<< doxyFileSuffix;
-        return;
+        return {};
     }
 
     QString errorMessage;
     XQueryPtr xquery = XQuery::create(doxyFilePath, &errorMessage);
     if (!xquery) {
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
-        return;
+        return {};
     }
 
     static const QList<std::pair<Documentation::Type, QString>> docTags = {
@@ -166,7 +166,7 @@ void DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
     //Fields
     for (AbstractMetaField &field : metaClass->fields()) {
         if (field.isPrivate())
-            return;
+            continue;
 
         Documentation fieldDoc;
         for (const auto &tag : docTags) {
@@ -196,6 +196,7 @@ void DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
         meta_enum.setDocumentation(Documentation(doc, {}));
     }
 
+    return doxyFilePath;
 }
 
 Documentation DoxygenParser::retrieveModuleDocumentation(const QString& name){
