@@ -143,39 +143,44 @@ class Formatter(Writer):
         yield
 
     @contextmanager
-    def klass(self, class_name, class_str):
+    def klass(self, class_name, class_str, has_misc_error=None):
+        err_ignore = "  # type: ignore[misc]"
+        opt_comment = err_ignore if has_misc_error else ""
         spaces = indent * self.level
         while "." in class_name:
             class_name = class_name.split(".", 1)[-1]
             class_str = class_str.split(".", 1)[-1]
         if self.have_body:
-            self.print(f"{spaces}class {class_str}:")
+            self.print(f"{spaces}class {class_str}:{opt_comment}")
         else:
-            self.print(f"{spaces}class {class_str}: ...")
+            self.print(f"{spaces}class {class_str}: ...{opt_comment}")
         yield
 
     @contextmanager
-    def function(self, func_name, signature, decorator=None):
+    def function(self, func_name, signature, decorator=None, aug_ass=None):
         if func_name == "__init__":
             self.print()
         key = func_name
         spaces = indent * self.level
+        err_ignore = "  # type: ignore[misc]"
         if isinstance(signature, list):
             # PYSIDE-2846: mypy does not handle inconsistent static methods
             #              in overload chains. Check this and disable the error.
-            err_ignore = "    # type: ignore[misc]"
-            opt_comment = err_ignore if is_inconsistent_overload(self, signature) else ""
+            #              Also disable errors in augmented assignments.
+            opt_comment = (err_ignore if is_inconsistent_overload(self, signature)
+                           or aug_ass else "")
             for sig in signature:
                 self.print(f'{spaces}@typing.overload{opt_comment}')
                 opt_comment = ""
                 self._function(func_name, sig, spaces)
         else:
-            self._function(func_name, signature, spaces, decorator)
+            opt_comment = err_ignore if aug_ass else ""
+            self._function(func_name, signature, spaces, decorator, opt_comment)
         if func_name == "__init__":
             self.print()
         yield key
 
-    def _function(self, func_name, signature, spaces, decorator=None):
+    def _function(self, func_name, signature, spaces, decorator=None, opt_comment=""):
         if decorator:
             # In case of a PyClassProperty the classmethod decorator is not used.
             self.print(f'{spaces}@{decorator}')
@@ -186,7 +191,7 @@ class Formatter(Writer):
         signature = self.fix_typing_prefix(signature)
         # from now on, the signature will be stringized.
         signature = self.optional_replacer(signature)
-        self.print(f'{spaces}def {func_name}{signature}: ...')
+        self.print(f'{spaces}def {func_name}{signature}: ...{opt_comment}')
 
     @contextmanager
     def enum(self, class_name, enum_name, value):
