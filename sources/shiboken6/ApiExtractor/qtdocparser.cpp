@@ -425,14 +425,15 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
 {
     // TODO: This method of acquiring the module name supposes that the target language uses
     // dots as module separators in package names. Improve this.
-    QString moduleName = name;
-    moduleName.remove(0, name.lastIndexOf(u'.') + 1);
-    if (moduleName == u"QtQuickControls2")
-        moduleName.chop(1);
-    const QString prefix = documentationDataDirectory() + u'/'
-        + moduleName.toLower();
+    QString completeModuleName = name;
+    if (completeModuleName.endsWith("QtQuickControls2"_L1))
+        completeModuleName.chop(1);
+    const QString moduleName = completeModuleName.sliced(name.lastIndexOf(u'.') + 1);
+    const QString lowerModuleName = moduleName.toLower();
 
-    const QString sourceFile = prefix + u"-index.webxml"_s;
+    const QString prefix = documentationDataDirectory() + u'/'
+                           + qdocModuleDir(completeModuleName) + u'/' + lowerModuleName;
+    const QString sourceFile = prefix + "-index.webxml"_L1;
     if (!QFile::exists(sourceFile)) {
         qCWarning(lcShibokenDoc).noquote().nospace()
             << "Can't find qdoc file for module " <<  name << ", tried: "
@@ -455,7 +456,7 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
     }
 
     // If a QML module info file exists, insert a link to the Qt docs.
-    const QFileInfo qmlModuleFi(prefix + u"-qmlmodule.webxml"_s);
+    const QFileInfo qmlModuleFi(prefix + "-qmlmodule.webxml"_L1);
     if (qmlModuleFi.isFile()) {
         QString docString = doc.detailed();
         const int pos = docString.lastIndexOf(u"</description>");
