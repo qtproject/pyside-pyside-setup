@@ -3,7 +3,7 @@ Provides a set of UI controls for Qt Quick.
 Qt Quick Controls provides a set of controls that can be used to build complete
 interfaces in Qt Quick. The module was introduced in Qt 5.7.
 
-    .. image:: images/qtquickcontrols2-styles.png
+    .. image:: images/qtquickcontrols-styles.png
 
 Qt Quick Controls comes with a selection customizable styles. See
 :ref:`Styling Qt Quick Controls<Styling-Qt-Quick-Controls>` for more details.

@@ -1120,6 +1120,29 @@ static inline void removeExtraDocs(const QStringList &extraTocEntries,
                      functions->end());
 }
 
+// Extract images from RstDocs
+static bool imagesFromRstDocs(const QByteArray &rstDoc, const QString &scope,
+                              QtXmlToSphinxImages *images)
+{
+    bool result = false;
+    static const QByteArray imageTag = ".. image:: "_ba;
+
+    for (qsizetype pos = 0; pos < rstDoc.size(); ) {
+        pos = rstDoc.indexOf(imageTag, pos);
+        if (pos == -1)
+            break;
+        pos += imageTag.size();
+        const auto newLinePos = rstDoc.indexOf('\n', pos);
+        if (newLinePos == -1)
+            break;
+        const auto image = rstDoc.sliced(pos, newLinePos - pos).trimmed();
+        images->append({scope, QString::fromUtf8(image)});
+        result = true;
+        pos = newLinePos + 1;
+    }
+    return result;
+}
+
 void QtDocGenerator::writeModuleDocumentation()
 {
     for (auto it = m_packages.begin(), end = m_packages.end(); it != end; ++it) {
@@ -1177,25 +1200,33 @@ void QtDocGenerator::writeModuleDocumentation()
         s << "\n\n" << outdent << outdent << headline("Detailed Description");
 
         // module doc is always wrong and C++istic, so go straight to the extra directory!
-        QFile moduleDoc(m_options.extraSectionDir + u'/' + moduleName
-                        + u".rst"_s);
+        const QString moduleDocRstFileName = m_options.extraSectionDir + u'/' + moduleName + u".rst"_s;
         QStringList sourceFileNames;
-        if (moduleDoc.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            s << moduleDoc.readAll();
+
+        QString context = it.key();
+        // Get the WebXML source file for image resolution if we
+        // are re-using images from it in our .rst.
+        QtXmlToSphinx::stripPythonQualifiers(&context);
+        const Documentation webXmlModuleDoc = m_docParser->retrieveModuleDocumentation(it.key());
+        if (webXmlModuleDoc.hasSourceFile())
+            sourceFileNames.append(webXmlModuleDoc.sourceFile());
+        if (QFileInfo::exists(moduleDocRstFileName)) {
+            QFile moduleDoc(moduleDocRstFileName);
+            if (!moduleDoc.open(QIODevice::ReadOnly | QIODevice::Text))
+                throw Exception(msgCannotOpenForReading(moduleDoc));
+            const QByteArray rstDoc = moduleDoc.readAll();
+            s << rstDoc;
             moduleDoc.close();
-        } else {
+            if (imagesFromRstDocs(rstDoc, context, &parsedImages))
+                sourceFileNames.append(moduleDocRstFileName);
+        } else if (!webXmlModuleDoc.isEmpty()) {
             // try the normal way
-            Documentation moduleDoc = m_docParser->retrieveModuleDocumentation(it.key());
-            if (moduleDoc.hasSourceFile())
-                sourceFileNames.append(moduleDoc.sourceFile());
-            if (moduleDoc.format() == Documentation::Native) {
-                QString context = it.key();
-                QtXmlToSphinx::stripPythonQualifiers(&context);
-                QtXmlToSphinx x(this, m_options.parameters, moduleDoc.detailed(), context);
+            if (webXmlModuleDoc.format() == Documentation::Native) {
+                QtXmlToSphinx x(this, m_options.parameters, webXmlModuleDoc.detailed(), context);
                 s << x;
                 parsedImages += x.images();
             } else {
-                s << moduleDoc.detailed();
+                s << webXmlModuleDoc.detailed();
             }
         }
 
