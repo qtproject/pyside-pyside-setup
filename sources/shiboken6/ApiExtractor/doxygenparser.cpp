@@ -86,6 +86,7 @@ QString DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
     };
     // Get class documentation
     Documentation classDoc;
+    classDoc.setSourceFile(doxyFilePath);
 
     for (const auto &tag : docTags) {
         const QString classQuery = u"/doxygen/compounddef/"_s + tag.second;
@@ -140,6 +141,7 @@ QString DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
             }
         }
         Documentation funcDoc;
+        funcDoc.setSourceFile(doxyFilePath);
         for (const auto &tag : docTags) {
             QString funcQuery(query);
             if (!isProperty) {
@@ -169,6 +171,7 @@ QString DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
             continue;
 
         Documentation fieldDoc;
+        fieldDoc.setSourceFile(doxyFilePath);
         for (const auto &tag : docTags) {
             QString query = u"/doxygen/compounddef/sectiondef/memberdef/name[text()=\""_s
                             + field.name() + u"\"]/../"_s + tag.second;
@@ -193,7 +196,7 @@ QString DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
             qCWarning(lcShibokenDoc, "%s",
                       qPrintable(msgCannotFindDocumentation(doxyFilePath, metaClass, meta_enum, query)));
         }
-        meta_enum.setDocumentation(Documentation(doc, {}));
+        meta_enum.setDocumentation(Documentation(doc, {}, doxyFilePath));
     }
 
     return doxyFilePath;
@@ -220,6 +223,6 @@ Documentation DoxygenParser::retrieveModuleDocumentation(const QString& name){
     // Module documentation
     QString query = u"/doxygen/compounddef/detaileddescription"_s;
     const QString doc = getDocumentation(xquery, query, DocModificationList());
-    return Documentation(doc, {});
+    return Documentation(doc, {}, sourceFile);
 }
 

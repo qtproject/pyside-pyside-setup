@@ -1179,12 +1179,15 @@ void QtDocGenerator::writeModuleDocumentation()
         // module doc is always wrong and C++istic, so go straight to the extra directory!
         QFile moduleDoc(m_options.extraSectionDir + u'/' + moduleName
                         + u".rst"_s);
+        QStringList sourceFileNames;
         if (moduleDoc.open(QIODevice::ReadOnly | QIODevice::Text)) {
             s << moduleDoc.readAll();
             moduleDoc.close();
         } else {
             // try the normal way
             Documentation moduleDoc = m_docParser->retrieveModuleDocumentation(it.key());
+            if (moduleDoc.hasSourceFile())
+                sourceFileNames.append(moduleDoc.sourceFile());
             if (moduleDoc.format() == Documentation::Native) {
                 QString context = it.key();
                 QtXmlToSphinx::stripPythonQualifiers(&context);
@@ -1206,7 +1209,7 @@ void QtDocGenerator::writeModuleDocumentation()
                       "any"_L1);
 
         output.done();
-        copyParsedImages(parsedImages, {}, outputDir);
+        copyParsedImages(parsedImages, sourceFileNames, outputDir);
 
         if (hasGlobals)
             writeGlobals(it.key(), outputDir + u'/' + globalsPage, docPackage);
@@ -1218,22 +1221,33 @@ void QtDocGenerator::writeGlobals(const QString &package,
                                   const DocPackage &docPackage)
 {
     FileOut output(fileName);
+    QStringList docFiles;
     QtXmlToSphinxImages parsedImages;
     TextStream &s = output.stream;
 
     // Write out functions with injected documentation
     if (!docPackage.globalFunctions.isEmpty()) {
+        for (const auto &func : docPackage.globalFunctions) {
+            const Documentation &doc = func->documentation();
+            if (doc.hasSourceFile() && !docFiles.contains(doc.sourceFile()))
+                docFiles.append(doc.sourceFile());
+        }
         s << currentModule(package) << headline("Functions");
         writeFunctions(s, docPackage.globalFunctions, {}, {}, &parsedImages);
     }
 
     if (!docPackage.globalEnums.isEmpty()) {
         s << headline("Enumerations");
+        for (const auto &globalEnum : docPackage.globalEnums) {
+            const Documentation &doc = globalEnum.documentation();
+            if (doc.hasSourceFile() && !docFiles.contains(doc.sourceFile()))
+                docFiles.append(doc.sourceFile());
+        }
         writeEnums(s, docPackage.globalEnums, package, &parsedImages);
     }
 
     output.done();
-    copyParsedImages(parsedImages, {}, QFileInfo(fileName).absolutePath());
+    copyParsedImages(parsedImages, docFiles, QFileInfo(fileName).absolutePath());
 }
 
 static inline QString msgNonExistentAdditionalDocFile(const QString &dir,

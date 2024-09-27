@@ -275,7 +275,7 @@ void  QtDocParser::fillGlobalFunctionDocumentation(const AbstractMetaFunctionPtr
                               {}, f, &errorMessage);
     if (!errorMessage.isEmpty())
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
-    const Documentation documentation(detailed, {});
+    Documentation documentation(detailed, {}, sourceFileName);
     f->setDocumentation(documentation);
 }
 
@@ -293,7 +293,7 @@ void QtDocParser::fillGlobalEnumDocumentation(AbstractMetaEnum &e)
         qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
         return;
     }
-    if (!extractEnumDocumentation(classDocumentationO.value(), e)) {
+    if (!extractEnumDocumentation(classDocumentationO.value(), sourceFileName, e)) {
         qCWarning(lcShibokenDoc, "%s",
                   qPrintable(msgCannotFindDocumentation(sourceFileName, {}, e, {})));
     }
@@ -334,7 +334,7 @@ QString QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
 
     const auto &classDocumentation = classDocumentationO.value();
     for (const auto &p : classDocumentation.properties) {
-        Documentation doc(p.description, p.brief);
+        Documentation doc(p.description, p.brief, sourceFileName);
         metaClass->setPropertyDocumentation(p.name, doc);
     }
 
@@ -349,6 +349,7 @@ QString QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
     const QString brief = extractBrief(&docString);
 
     Documentation doc;
+    doc.setSourceFile(sourceFileName);
     if (!brief.isEmpty())
         doc.setValue(brief, Documentation::Brief);
     doc.setValue(docString);
@@ -362,7 +363,7 @@ QString QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
                                   metaClass, func, &errorMessage);
         if (!errorMessage.isEmpty())
             qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
-        const Documentation documentation(detailed, {});
+        const Documentation documentation(detailed, {}, sourceFileName);
         std::const_pointer_cast<AbstractMetaFunction>(func)->setDocumentation(documentation);
     }
 #if 0
@@ -379,7 +380,7 @@ QString QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
 #endif
     // Enums
     for (AbstractMetaEnum &meta_enum : metaClass->enums()) {
-        if (!extractEnumDocumentation(classDocumentation, meta_enum)) {
+        if (!extractEnumDocumentation(classDocumentation, sourceFileName, meta_enum)) {
             qCWarning(lcShibokenDoc, "%s",
                       qPrintable(msgCannotFindDocumentation(sourceFileName, metaClass, meta_enum, {})));
         }
@@ -389,9 +390,9 @@ QString QtDocParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
 }
 
 bool QtDocParser::extractEnumDocumentation(const ClassDocumentation &classDocumentation,
+                                           const QString &sourceFileName,
                                            AbstractMetaEnum &meta_enum)
 {
-    Documentation enumDoc;
     const auto index = classDocumentation.indexOfEnum(meta_enum.name());
     if (index == -1)
         return false;
@@ -405,7 +406,7 @@ bool QtDocParser::extractEnumDocumentation(const ClassDocumentation &classDocume
             doc.insert(firstPara + 6, note);
         }
     }
-    enumDoc.setValue(doc);
+    Documentation enumDoc(doc, {}, sourceFileName);
     meta_enum.setDocumentation(enumDoc);
     return true;
 }
@@ -446,7 +447,7 @@ Documentation QtDocParser::retrieveModuleDocumentation(const QString& name)
         return {};
     }
 
-    Documentation doc(docString, {});
+    Documentation doc(docString, {}, sourceFile);
     if (doc.isEmpty()) {
         qCWarning(lcShibokenDoc, "%s",
                   qPrintable(msgCannotFindDocumentation(sourceFile, "module", name)));

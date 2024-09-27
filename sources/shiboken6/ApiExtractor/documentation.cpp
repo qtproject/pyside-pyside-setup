@@ -7,8 +7,12 @@
 
 Documentation::Documentation(const QString &detailed,
                              const QString &brief,
+                             const QString &sourceFile,
                              Format fmt) :
-    m_detailed(detailed.trimmed()), m_brief(brief.trimmed()), m_format(fmt)
+    m_detailed(detailed.trimmed()),
+    m_brief(brief.trimmed()),
+    m_sourceFile(sourceFile),
+    m_format(fmt)
 {
 }
 
@@ -54,6 +58,8 @@ QDebug operator<<(QDebug debug, const Documentation &d)
     debug << "Documentation(";
     if (!d.isEmpty()) {
         debug << "format=" << d.format();
+        if (d.hasSourceFile())
+            debug << ", file=\"" << d.sourceFile() << '"';
         if (!d.brief().isEmpty())
             debug << ", brief=\"" << d.brief() << '"';
         if (!d.detailed().isEmpty())

@@ -26,6 +26,7 @@ public:
     Documentation() = default;
     explicit Documentation(const QString &detailed,
                            const QString &brief,
+                           const QString &sourceFile,
                            Format fmt = Documentation::Native);
 
     bool isEmpty() const;
@@ -44,17 +45,22 @@ public:
     const QString &brief() const { return m_brief; }
     void setBrief(const QString &brief);
 
+    bool hasSourceFile() const { return !m_sourceFile.isEmpty(); }
+    const QString &sourceFile() const { return m_sourceFile; }
+    void setSourceFile(const QString &newSourceFile) { m_sourceFile = newSourceFile; }
+
 private:
     friend bool comparesEqual(const Documentation &lhs,
                               const  Documentation &rhs) noexcept
     {
         return lhs.m_format == rhs.m_format && lhs.m_detailed == rhs.m_detailed
-               && lhs.m_brief == rhs.m_brief;
+               && lhs.m_brief == rhs.m_brief && lhs.m_sourceFile == rhs.m_sourceFile;
     }
     Q_DECLARE_EQUALITY_COMPARABLE(Documentation)
 
     QString m_detailed;
     QString m_brief;
+    QString m_sourceFile;
     Format m_format = Documentation::Native;
 };
 

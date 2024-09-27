@@ -34,6 +34,7 @@ private:
                                               const AbstractMetaFunctionCPtr &func,
                                               QString *errorMessage);
     static bool extractEnumDocumentation(const ClassDocumentation &classDocumentation,
+                                         const QString &sourceFileName,
                                          AbstractMetaEnum &meta_enum);
 
 };
