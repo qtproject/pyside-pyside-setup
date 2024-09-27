@@ -543,6 +543,11 @@ QString TypeDatabase::loadedTypeSystemNames() const
     return result;
 }
 
+QList<TypeSystemTypeEntryCPtr> TypeDatabase::typeSystemEntries() const
+{
+    return d->m_typeSystemEntries;
+}
+
 TypeSystemTypeEntryCPtr TypeDatabasePrivate::defaultTypeSystemType() const
 {
     return m_typeSystemEntries.value(0, nullptr);

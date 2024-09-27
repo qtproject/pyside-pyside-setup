@@ -27,6 +27,10 @@ public:
     QString subModuleOf() const;
     void setSubModule(const QString &);
 
+    bool hasDocTargetLangPackage() const;
+    QString docTargetLangPackage() const;
+    void setDocTargetLangPackage(const QString &p);
+
     const QString &namespaceBegin() const;
     void setNamespaceBegin(const QString &n);
 

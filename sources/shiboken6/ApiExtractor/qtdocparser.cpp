@@ -9,6 +9,7 @@
 #include "abstractmetalang.h"
 #include "abstractmetatype.h"
 #include "documentation.h"
+#include "exception.h"
 #include "modifications.h"
 #include "messages.h"
 #include "propertyspec.h"
@@ -17,11 +18,14 @@
 #include "complextypeentry.h"
 #include "functiontypeentry.h"
 #include "enumtypeentry.h"
+#include "typesystemtypeentry.h"
+#include "typedatabase.h"
 
 #include "qtcompat.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QFile>
+#include <QtCore/QHash>
 #include <QtCore/QUrl>
 
 using namespace Qt::StringLiterals;
@@ -37,16 +41,49 @@ Documentation QtDocParser::retrieveModuleDocumentation()
     return retrieveModuleDocumentation(packageName());
 }
 
+// Return the package of a type "PySide6.QtGui.QPainter" -> "PySide6.QtGui"
+static QStringView packageFromPythonType(QStringView pythonType)
+{
+    qsizetype pos = pythonType.startsWith(u"PySide6.") ? 8 : 0;
+    auto dot = pythonType.indexOf(u'.', pos);
+    return dot != -1 ? pythonType.sliced(0, dot) : pythonType;
+}
+
 // Return the qdoc dir "PySide6.QtGui.QPainter" -> "qtgui/webxml" (QTBUG-119500)
+static QString qdocModuleDirFromPackage(QStringView package)
+{
+    if (package.startsWith(u"PySide6."))
+        package = package.sliced(8);
+    return package.toString().toLower() + "/webxml"_L1;
+}
+
+// Populate a cache of package to WebXML dir
+static QHash<QString, QString> getPackageToModuleDir()
+{
+    QHash<QString, QString> result;
+    const auto &typeSystemEntries = TypeDatabase::instance()->typeSystemEntries();
+    for (const auto &te : typeSystemEntries) {
+        const QString &package = te->name();
+        const QString &docPackage = te->hasDocTargetLangPackage()
+                                    ? te->docTargetLangPackage() : package;
+        result.insert(package, qdocModuleDirFromPackage(docPackage));
+    }
+    return result;
+}
+
 QString QtDocParser::qdocModuleDir(const QString &pythonType)
 {
-    QString package = pythonType;
-    if (package.startsWith("PySide6."_L1))
-        package.remove(0, 8);
-    auto dot = package.indexOf(u'.');
-    if (dot != -1)
-        package.truncate(dot);
-    return package.toLower() + "/webxml"_L1;
+    static const QHash<QString, QString> packageToModuleDir = getPackageToModuleDir();
+
+    const QStringView package = packageFromPythonType(pythonType);
+    const auto it = packageToModuleDir.constFind(package);
+    if (it == packageToModuleDir.cend()) {
+        const QString known = packageToModuleDir.keys().join(", "_L1);
+        qCWarning(lcShibokenDoc, "Type from unknown package: \"%s\" (known: %s).",
+                  qPrintable(pythonType), qPrintable(known));
+        return qdocModuleDirFromPackage(package);
+    }
+    return it.value();
 }
 
 static QString xmlFileNameRoot(const AbstractMetaClassPtr &metaClass)

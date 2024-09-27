@@ -104,6 +104,7 @@ public:
     TypeSystemTypeEntryCPtr findTypeSystemType(const QString &name) const;
     TypeSystemTypeEntryCPtr defaultTypeSystemType() const;
     QString loadedTypeSystemNames() const;
+    QList<TypeSystemTypeEntryCPtr > typeSystemEntries() const;
     QString defaultPackageName() const;
 
     TypeEntryPtr findType(const QString &name) const;

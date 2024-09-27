@@ -88,6 +88,7 @@ constexpr auto pyiTypeAttribute = "pyi-type"_L1;
 constexpr auto overloadNumberAttribute = "overload-number"_L1;
 constexpr auto ownershipAttribute = "owner"_L1;
 constexpr auto packageAttribute = "package"_L1;
+constexpr auto docPackageAttribute = "doc-package"_L1;
 constexpr auto polymorphicBaseAttribute = "polymorphic-base"_L1;
 constexpr auto positionAttribute = "position"_L1;
 constexpr auto preferredConversionAttribute = "preferred-conversion"_L1;
@@ -2094,11 +2095,14 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
     QString subModuleOf;
     QString namespaceBegin;
     QString namespaceEnd;
+    QString docPackage;
 
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == packageAttribute) {
             m_defaultPackage = attributes->takeAt(i).value().toString();
+        } else if (name == docPackageAttribute) {
+           docPackage = attributes->takeAt(i).value().toString();
         } else if (name == defaultSuperclassAttribute) {
             m_defaultSuperclass = attributes->takeAt(i).value().toString();
         } else if (name == exceptionHandlingAttribute) {
@@ -2152,6 +2156,8 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
                                                   currentParentTypeEntry()));
         moduleEntry->setSubModule(subModuleOf);
     }
+    if (!docPackage.isEmpty())
+        moduleEntry->setDocTargetLangPackage(docPackage);
     moduleEntry->setCodeGeneration(m_generate);
     moduleEntry->setSnakeCase(snakeCase);
     if (!namespaceBegin.isEmpty())

@@ -49,7 +49,8 @@ It can have a number of attributes, described below.
                 exception-handling="..."
                 snake-case="yes | no | both"
                 namespace-begin="..."
-                namespace-end="..." >
+                namespace-end="..."
+                doc-package="..." >
     </typesystem>
 
 The **package** attribute is a string describing the package to be used,
@@ -85,6 +86,12 @@ intended for libraries which can optionally use inline namespaces
 to allow for linking several versions of them together.
 For example, for *Qt*, one would specify ``QT_BEGIN_NAMESPACE``,
 ``QT_END_NAMESPACE``, respectively.
+
+The *optional* attribute **doc-package** specifies an alternate package name
+for the documentation. This is used for finding the ``qdoc`` or ``doxygen``
+files for the documentation generation. It is mainly relevant for Qt where for
+example the documentation of the ``QtMultimediaWidgets`` module is generated
+into the ``QtMultimedia`` module.
 
 .. _load-typesystem:
 

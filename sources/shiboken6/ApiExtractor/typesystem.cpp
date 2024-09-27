@@ -669,6 +669,7 @@ public:
     QString m_subModuleOf;
     QString m_namespaceBegin;
     QString m_namespaceEnd;
+    QString m_docTargetLangPackage;
 };
 
 TypeSystemTypeEntry::TypeSystemTypeEntry(const QString &entryName, const QVersionNumber &vr,
@@ -716,6 +717,24 @@ void TypeSystemTypeEntry::setSubModule(const QString &s)
 {
     S_D(TypeSystemTypeEntry);
     d->m_subModuleOf = s;
+}
+
+bool TypeSystemTypeEntry::hasDocTargetLangPackage() const
+{
+    S_D(const TypeSystemTypeEntry);
+    return !d->m_docTargetLangPackage.isEmpty();
+}
+
+QString TypeSystemTypeEntry::docTargetLangPackage() const
+{
+    S_D(const TypeSystemTypeEntry);
+    return d->m_docTargetLangPackage;
+}
+
+void TypeSystemTypeEntry::setDocTargetLangPackage(const QString &p)
+{
+    S_D(TypeSystemTypeEntry);
+    d->m_docTargetLangPackage = p;
 }
 
 const QString &TypeSystemTypeEntry::namespaceBegin() const
