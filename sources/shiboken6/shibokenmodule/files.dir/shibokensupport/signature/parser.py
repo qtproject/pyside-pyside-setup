@@ -513,44 +513,13 @@ def fix_variables(props, line):
     props.defaults = tuple(defaults)
 
 
-def fixup_multilines(lines):
-    """
-    Multilines can collapse when certain distinctions between C++ types
-    vanish after mapping to Python.
-    This function fixes this by re-computing multiline-ness.
-    """
-    res = []
-    multi_lines = []
-    for line in lines:
-        multi = re.match(r"([0-9]+):", line)
-        if multi:
-            idx, rest = int(multi.group(1)), line[multi.end():]
-            multi_lines.append(rest)
-            if idx > 0:
-                continue
-            # remove duplicates
-            multi_lines = sorted(set(multi_lines))
-            # renumber or return a single line
-            nmulti = len(multi_lines)
-            if nmulti > 1:
-                for idx, line in enumerate(multi_lines):
-                    res.append(f"{nmulti-idx-1}:{line}")
-            else:
-                res.append(multi_lines[0])
-            multi_lines = []
-        else:
-            res.append(line)
-    return res
-
-
 def pyside_type_init(type_key, sig_strings):
     dprint()
     dprint(f"Initialization of type key '{type_key}'")
     update_mapping()
-    lines = fixup_multilines(sig_strings)
     ret = {}
     multi_props = []
-    for line in lines:
+    for line in sig_strings:
         props = calculate_props(line)
         shortname = props["name"]
         multi = props["multi"]

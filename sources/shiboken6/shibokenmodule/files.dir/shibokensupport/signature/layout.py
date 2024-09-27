@@ -253,17 +253,55 @@ def sort_by_inheritance(signatures):
     return signatures
 
 
+def _remove_ambiguous_signatures_body(signatures):
+    # By the sorting of signatures, duplicates will always be adjacent.
+    last_ann = last_sig = None
+    last_idx = -1
+    to_delete = []
+    found = False
+    for idx, sig in enumerate(signatures):
+        annos = []
+        for param in list(sig.parameters.values()):
+            annos.append(param.annotation)
+        if annos == last_ann:
+            found = True
+            if sig.return_annotation is last_sig.return_annotation:
+                # we can use any duplicate
+                to_delete.append(idx)
+            else:
+                # delete the one which has non-empty result
+                to_delete.append(idx if not sig.return_annotation else last_idx)
+        last_ann = annos
+        last_sig = sig
+        last_idx = idx
+
+    if not found:
+        return False, signatures
+    new_sigs = []
+    for idx, sig in enumerate(signatures):
+        if idx not in to_delete:
+            new_sigs.append(sig)
+    return True, new_sigs
+
+
+def remove_ambiguous_signatures(signatures):
+    # This may run more than once because of indexing.
+    found, new_sigs = _remove_ambiguous_signatures_body(signatures)
+    if found:
+        _, new_sigs = _remove_ambiguous_signatures_body(new_sigs)
+    return new_sigs
+
+
 def create_signature(props, key):
     if not props:
         # empty signatures string
         return
     if isinstance(props["multi"], list):
         # multi sig: call recursively.
-        # PYSIDE-2846: Fold duplicate signatures away
-        res = list(set(list(create_signature(elem, key)
-                            for elem in props["multi"])))
+        res = list(create_signature(elem, key) for elem in props["multi"])
         # PYSIDE-2846: Sort multi-signatures by inheritance in order to avoid shadowing.
         res = sort_by_inheritance(res)
+        res = remove_ambiguous_signatures(res)
         return res if len(res) > 1 else res[0]
 
     if type(key) is tuple:
