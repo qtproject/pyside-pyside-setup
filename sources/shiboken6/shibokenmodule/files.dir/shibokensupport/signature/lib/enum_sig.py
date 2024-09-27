@@ -52,6 +52,20 @@ class ExactEnumerator(object):
     is desired.
     """
 
+    # PYSIDE-2846: This set holds functions with `__i<f>__` != `__<f>__` signature.
+    mypy_aug_ass_errors = set()
+
+    augmented_assignments = {
+        "__iadd__": "__add__",
+        "__isub__": "__sub__",
+        "__imul__": "__mul__",
+        "__idiv__": "__div__",
+    }
+
+    # PYSIDE-2846: Inheritance errors which are in QtDesigner
+    mypy_misc_class_errors = set()
+    mypy_misc_class_errors.add("QPyDesignerPropertySheetExtension")
+
     def __init__(self, formatter, result_type=dict):
         global EnumMeta, Signal, SignalInstance
         try:
@@ -85,6 +99,8 @@ class ExactEnumerator(object):
         with self.fmt.module(mod_name):
             module = sys.modules[mod_name]
             members = inspect.getmembers(module, inspect.isclass)
+            # PYSIDE-2846: Make sure not to get QTextFrame.iterator :(
+            members = list(x for x in members if "." not in x[0])
             functions = inspect.getmembers(module, inspect.isroutine)
             ret = self.result_type()
             self.fmt.class_name = None
@@ -160,6 +176,17 @@ class ExactEnumerator(object):
             if thing_name in self.collision_candidates:
                 self.collision_track.add(thing_name)
 
+        # PYSIDE-2846: Mark inconsistency between __iadd__ and __add__ etc.
+        for aug_ass in self.augmented_assignments:
+            if aug_ass in klass.__dict__:
+                other = self.augmented_assignments[aug_ass]
+                if other in klass.__dict__:
+                    aug_sig = self.get_signature(klass.__dict__[aug_ass])
+                    other_sig = self.get_signature(klass.__dict__[other])
+                    if aug_sig != other_sig:
+                        func = klass.__dict__[aug_ass]
+                        self.mypy_aug_ass_errors.add(func)
+
         init_signature = getattr(klass, "__signature__", None)
         # PYSIDE-2752: Enums without values will not have a constructor, so
         # we set the init_signature to None, to avoid having an empty pyi
@@ -180,7 +207,8 @@ class ExactEnumerator(object):
         self.fmt.have_body = bool(subclasses or sigs or properties or enums or  # noqa W:504
                                   init_signature or signals or attributes)
 
-        with self.fmt.klass(class_name, class_str):
+        has_misc_error = class_name in self.mypy_misc_class_errors
+        with self.fmt.klass(class_name, class_str, has_misc_error):
             self.fmt.level += 1
             self.fmt.class_name = class_name
             if hasattr(self.fmt, "enum"):
@@ -244,7 +272,8 @@ class ExactEnumerator(object):
         elif func_name == "__repr__":
             signature = inspect.Signature([], return_annotation=str)
         if signature is not None:
-            with self.fmt.function(func_name, signature, decorator) as key:
+            aug_ass = func in self.mypy_aug_ass_errors
+            with self.fmt.function(func_name, signature, decorator, aug_ass) as key:
                 ret[key] = signature
         del self.func
         return ret
