@@ -75,7 +75,7 @@ Qt Modules Supported by Qt for Python
 
         Provides the widget-based multimedia API.
 
-    .. grid-item-card:: :mod:`Qt Network
+    .. grid-item-card:: :mod:`Qt Network <PySide6.QtNetwork>`
 
         Classes to make network programming easier and more portable.<PySide6.QtNetwork>`
 
