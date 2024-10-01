@@ -102,6 +102,9 @@ QString msgStrippingArgument(const FunctionModelItem &f, int i,
                              const ArgumentModelItem &arg,
                              const QString &reason);
 
+QString msgStrippingQtDisambiguatedArgument(const FunctionModelItem &f,
+                                            const QString &originalSignature);
+
 QString msgEnumNotDefined(const EnumTypeEntryCPtr &t);
 
 QString msgUnknownBase(const AbstractMetaClassCPtr &metaClass,

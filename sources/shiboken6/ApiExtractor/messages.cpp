@@ -408,6 +408,16 @@ QString msgStrippingArgument(const FunctionModelItem &f, int i,
     return result;
 }
 
+QString msgStrippingQtDisambiguatedArgument(const FunctionModelItem &f,
+                                            const QString &originalSignature)
+{
+    QString result;
+    QTextStream str(&result);
+    str << f->sourceLocation() << "Stripping last argument of "
+        << originalSignature << " (QT6_DECL_NEW_OVERLOAD_TAIL).";
+    return result;
+}
+
 QString msgEnumNotDefined(const EnumTypeEntryCPtr &t)
 {
     QString result;

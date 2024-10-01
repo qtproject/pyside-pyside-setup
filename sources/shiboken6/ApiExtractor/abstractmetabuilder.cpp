@@ -1975,6 +1975,29 @@ void AbstractMetaBuilderPrivate::rejectFunction(const FunctionModelItem &functio
     m_rejectedFunctions.insert({reason, signatureWithType, sortKey, rejectReason});
 }
 
+// Check for special Qt argument types which should be ignored.
+enum class QtSpecialArgument
+{
+    None,
+    PrivateSignal,
+    Disambiguated // by QT6_DECL_NEW_OVERLOAD_TAIL
+};
+
+static QtSpecialArgument qtSpecialArgument(CodeModel::FunctionType functionType,
+                                           const ArgumentList &arguments)
+{
+    if (arguments.isEmpty())
+        return QtSpecialArgument::None;
+    const QStringList &lastArgumentType = arguments.constLast()->type().qualifiedName();
+    if (functionType == CodeModel::Signal && lastArgumentType.constLast() == "QPrivateSignal"_L1)
+        return QtSpecialArgument::PrivateSignal;
+    if (lastArgumentType.size() == 2 && lastArgumentType.constFirst() == "Qt"_L1
+        && lastArgumentType.constLast() == "Disambiguated_t"_L1) {
+        return QtSpecialArgument::Disambiguated;
+    }
+    return QtSpecialArgument::None;
+}
+
 AbstractMetaFunctionPtr
     AbstractMetaBuilderPrivate::traverseFunction(const FunctionModelItem &functionItem,
                                                  const AbstractMetaClassPtr &currentClass)
@@ -2107,13 +2130,22 @@ AbstractMetaFunctionPtr
     }
 
     ArgumentList arguments = functionItem->arguments();
-    // Add private signals for documentation purposes
-    if (!arguments.isEmpty()
-        && m_apiExtractorFlags.testFlag(ApiExtractorFlag::UsePySideExtensions)
-        && functionItem->functionType() == CodeModel::Signal
-        && arguments.constLast()->type().qualifiedName().constLast() == u"QPrivateSignal") {
-        flags.setFlag(AbstractMetaFunction::Flag::PrivateSignal);
-        arguments.removeLast();
+    if (m_apiExtractorFlags.testFlag(ApiExtractorFlag::UsePySideExtensions)) {
+        switch (qtSpecialArgument(functionItem->functionType(), arguments)) {
+        case QtSpecialArgument::None:
+            break;
+        case QtSpecialArgument::PrivateSignal:
+            flags.setFlag(AbstractMetaFunction::Flag::PrivateSignal);
+            arguments.removeLast(); // Add private signals for documentation purposes
+            break;
+        case QtSpecialArgument::Disambiguated: {
+            const QString signature = qualifiedFunctionSignatureWithType(functionItem, className);
+            qCWarning(lcShiboken, "%s",
+                      qPrintable(msgStrippingQtDisambiguatedArgument(functionItem, signature)));
+            arguments.removeLast(); // Strip QT6_DECL_NEW_OVERLOAD_TAIL
+        }
+            break;
+        }
     }
 
     if (arguments.size() == 1) {

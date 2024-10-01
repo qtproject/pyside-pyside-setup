@@ -1772,9 +1772,6 @@
         <reference-count action="set"/>
       </modify-argument>
     </modify-function>
-    <!-- FIXME PYSIDE 7: Remove this (QT6_DECL_NEW_OVERLOAD_TAIL) -->
-    <modify-function signature="^moveToThread\(.*\)" remove="all"/>
-    <declare-function signature="moveToThread(QThread*)" return-type="bool"/>
     <modify-function signature="deleteLater()">
       <modify-argument index="this">
         <define-ownership owner="c++"/>
