@@ -77,7 +77,7 @@ Qt Modules Supported by Qt for Python
 
     .. grid-item-card:: :mod:`Qt Network <PySide6.QtNetwork>`
 
-        Classes to make network programming easier and more portable.<PySide6.QtNetwork>`
+        Classes to make network programming easier and more portable.
 
     .. grid-item-card:: :mod:`Qt Network Authorization <PySide6.QtNetworkAuth>`
 
