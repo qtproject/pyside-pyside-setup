@@ -419,7 +419,7 @@ private:
     QList<PyMethodDefEntry> methodDefinitionEntries(const OverloadData &overloadData) const;
 
     void writeSignatureInfo(TextStream &s, const OverloadData &overloads) const;
-    QString signatureParameter(const AbstractMetaArgument &arg) const;
+    QString signatureParameter(const AbstractMetaArgument &arg, bool implicitConversions) const;
     QString pythonSignature(const AbstractMetaType &type) const;
     /// Writes the implementation of all methods part of python sequence protocol
     void writeSequenceMethods(TextStream &s,

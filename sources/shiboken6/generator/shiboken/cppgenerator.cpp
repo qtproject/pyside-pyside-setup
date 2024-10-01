@@ -5240,7 +5240,7 @@ QString CppGenerator::pythonSignature(const AbstractMetaType &type) const
 }
 
 // Format the type signature of a function parameter
-QString CppGenerator::signatureParameter(const AbstractMetaArgument &arg) const
+QString CppGenerator::signatureParameter(const AbstractMetaArgument &arg, bool implicitConversions) const
 {
     QString result;
     QTextStream s(&result);
@@ -5254,8 +5254,8 @@ QString CppGenerator::signatureParameter(const AbstractMetaArgument &arg) const
 
     // Implicit conversions (C++): Check for converting constructors
     // "QColor(Qt::GlobalColor)" or conversion operators
-    const AbstractMetaFunctionCList conversions =
-        api().implicitConversions(metaType);
+    const AbstractMetaFunctionCList conversions = implicitConversions ?
+        api().implicitConversions(metaType) : AbstractMetaFunctionCList{};
     for (const auto &f : conversions) {
         if (f->isConstructor() && !f->arguments().isEmpty()) {
             // PYSIDE-2712: modified types from converting constructors are not always correct
@@ -5296,6 +5296,7 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
         // Toplevel functions like `PySide6.QtCore.QEnum` are always self-less.
         if (!(f->isStatic()) && f->ownerClass())
             args << PYTHON_SELF_VAR;
+        const bool implicitConversions = f->functionType() != AbstractMetaFunction::CopyConstructorFunction;
         const auto &arguments = f->arguments();
         for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
             const auto n = i + 1;
@@ -5303,7 +5304,7 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
             if (!f->argumentRemoved(n)) {
                 QString t = f->pyiTypeReplaced(n);
                 if (t.isEmpty()) {
-                    t = signatureParameter(arg);
+                    t = signatureParameter(arg, implicitConversions);
                 } else {
                     t.prepend(u':');
                     t.prepend(arg.name());
