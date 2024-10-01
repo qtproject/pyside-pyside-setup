@@ -269,14 +269,14 @@ instructions:
       enable_if:
          condition: property
          property: host.osVersion
-         in_values: [RHEL_8_6, RHEL_8_8]
+         in_values: [RHEL_8_6, RHEL_8_8, RHEL_8_10]
     - type: EnvironmentVariable
       variableName: interpreter
       variableValue: "python3"
       enable_if: # Enable for others than rhl 8.*
         condition: property
         property: host.osVersion
-        not_in_values: [RHEL_8_6, RHEL_8_8]
+        not_in_values: [RHEL_8_6, RHEL_8_8, RHEL_8_10]
     # ToDo: can be removed after 3.11 is available on qt5#3.8 on macOS
     # start of ToDo
     - type: ExecuteCommand
