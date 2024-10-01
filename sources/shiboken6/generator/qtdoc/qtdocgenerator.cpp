@@ -1748,7 +1748,7 @@ static void copyParsedImage(const ResolvedDocImage &image, QDir &targetDir)
     }
     QFile source(image.absoluteSourceFilePath);
     if (!source.copy(targetFileName))
-        throw Exception(msgCannotCopy(image.absoluteSourceFilePath, targetFileName));
+        throw Exception(msgCannotCopy(source, targetFileName));
 }
 
 // Copy parsed images from WebXML to doc/base
