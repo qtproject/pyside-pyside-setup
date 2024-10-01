@@ -8,23 +8,20 @@ Basic modules
 
 These are the main modules that help you build a Widget-based UI.
 
-.. grid:: 1 3 3 3
+.. grid:: 1 3 4 4
     :gutter: 2
 
-    .. grid-item-card:: :mod:`QtCore <PySide6.QtCore>`
+    .. grid-item-card:: :mod:`Qt Core <PySide6.QtCore>`
 
-        Provides core non-GUI functionality, like signal and slots, properties,
-        base classes of item models, serialization, and more.
+        Core non-graphical classes used by other modules.
 
-    .. grid-item-card:: :mod:`QtGui <PySide6.QtGui>`
+    .. grid-item-card:: :mod:`Qt GUI <PySide6.QtGui>`
 
-        Extends QtCore with GUI functionality: Events, windows and screens,
-        OpenGL and raster-based 2D painting, as well as images.
+        Base classes for graphical user interface (GUI) components.
 
-    .. grid-item-card:: :mod:`QtWidgets <PySide6.QtWidgets>`
+    .. grid-item-card:: :mod:`Qt Widgets <PySide6.QtWidgets>`
 
-        Provides ready to use Widgets for your application, including graphical
-        elements for your UI.
+        Classes to extend Qt GUI with Python widgets.
 
 QML and Qt Quick
 ----------------
@@ -32,21 +29,26 @@ QML and Qt Quick
 Use these modules to interact with the `QML Language <https://doc.qt.io/qt-6/qmlapplications.html>`_,
 from Python.
 
-.. grid:: 1 3 3 3
+.. grid:: 1 3 4 4
     :gutter: 2
 
-    .. grid-item-card:: :mod:`QtQml <PySide6.QtQml>`
+    .. grid-item-card:: :mod:`Qt Qml <PySide6.QtQml>`
 
-        The base Python API to interact with the module.
+        Classes for QML and JavaScript languages.
 
-    .. grid-item-card:: :mod:`QtQuick <PySide6.QtQuick>`
+    .. grid-item-card:: :mod:`Qt Quick <PySide6.QtQuick>`
 
-        Provides classes to embed Qt Quick in Qt applications.
+        A declarative framework for building highly dynamic applications
+        with custom UIs.
 
-    .. grid-item-card:: :mod:`QtQuickWidgets <PySide6.QtQuickWidgets>`
+    .. grid-item-card:: :mod:`Qt Quick Controls <PySide6.QtQuickControls2>`
 
-        Provides the QQuickWidget class to embed Qt Quick in widget-based
-        applications.
+        Lightweight QML types for creating performant user interfaces for
+        desktop, embedded, and mobile devices.
+
+    .. grid-item-card:: :mod:`Qt Quick Widgets <PySide6.QtQuickWidgets>`
+
+        Provides a Python widget class for displaying a Qt Quick user interface.
 
 All the modules
 ---------------

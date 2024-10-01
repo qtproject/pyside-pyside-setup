@@ -35,6 +35,7 @@ Topics
 ^^^^^^
 
     * `Getting Started <https://doc.qt.io/qt-6/qtquickcontrols2-gettingstarted.html>`_
+    * `QML types <https://doc.qt.io/qt-6/qtquick-controls-qmlmodule.html>`_
     * `Guidelines <https://doc.qt.io/qt-6/qtquickcontrols2-guidelines.html>`_
     * `Styling <https://doc.qt.io/qt-6/qtquickcontrols2-styles.html>`_
     * `Icons <https://doc.qt.io/qt-6/qtquickcontrols2-icons.html>`_
