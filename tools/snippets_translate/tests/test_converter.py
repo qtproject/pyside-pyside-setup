@@ -6,7 +6,7 @@ from converter import snippet_translate as st
 
 
 def multi_st(lines):
-    result = [st(l) for l in lines.split("\n")]
+    result = [st(line) for line in lines.split("\n")]
     return "\n".join(result)
 
 
@@ -102,7 +102,7 @@ def test_cast():
         == "elapsed = (elapsed + QTimer(sender()).interval()) % 1000"
     )
     assert (
-         st("a = qobject_cast<type*>(data) * 9 + static_cast<int>(42)")
+         st("a = qobject_cast<type*>(data) * 9 + static_cast<int>(42)")  # noqa: E126
          == "a = type(data) * 9 + int(42)"
     )
 
@@ -121,15 +121,15 @@ def test_double_colon():
 def test_connects():
     assert (
         st("connect(button, &QPushButton::clicked, this, &MyClass::slotClicked);")
-        ==  "button.clicked.connect(self.slotClicked)"
+        == "button.clicked.connect(self.slotClicked)"
     )
     assert (
         st("connect(m_ui->button, &QPushButton::clicked, this, &MyClass::slotClicked);")
-        ==  "m_ui.button.clicked.connect(self.slotClicked)"
+        == "m_ui.button.clicked.connect(self.slotClicked)"
     )
     assert (
         st("connect(button.get(), &QPushButton::clicked, this, &MyClass::slotClicked);")
-        ==  "button.clicked.connect(self.slotClicked)"
+        == "button.clicked.connect(self.slotClicked)"
     )
 
 
@@ -204,7 +204,7 @@ def test_for():
     assert st("for (int i = 0; i <= 10; i++)") == "for i in range(0, 11):"
     assert st("for (int i = 10; i >= 0; i--)") == "for i in range(-1, 10, -1):"
 
-    ## if contains "begin()" and "end()", do a 'for it in var'
+    # # if contains "begin()" and "end()", do a 'for it in var'
     assert (
         st(
             "for (QHash<int, QString>::const_iterator it = hash.cbegin(),"
@@ -433,7 +433,8 @@ def test_special_cases():
     # assert st("QDebug operator<<(QDebug dbg, const Message &message)") == "def __str__(self):"
 
     # TODO: Maybe play with the format?
-    # assert st('m_o.append(tr("version: %1.%2").arg(a).arg(b))') == 'm_o.append(tr("version: {1}.{2}".format(a, b)'
+    # assert st('m_o.append(tr("version: %1.%2").arg(a).arg(b))')
+    #           == 'm_o.append(tr("version: {1}.{2}".format(a, b)'
 
 
 def test_lambdas():

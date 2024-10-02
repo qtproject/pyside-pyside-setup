@@ -56,12 +56,12 @@ switch_branch = 0
 def snippet_translate(x):
     global switch_var, switch_branch
 
-    ## Cases which are not C++
-    ## TODO: Maybe expand this with lines that doesn't need to be translated
+    # # Cases which are not C++
+    # # TODO: Maybe expand this with lines that doesn't need to be translated
     if x.strip().startswith("content-type: text/html"):
         return x
 
-    ## General Rules
+    # # General Rules
 
     # Remove ';' at the end of the lines
     has_semicolon = x.endswith(";")
@@ -180,7 +180,7 @@ def snippet_translate(x):
     if "nullptr" in x:
         x = x.replace("nullptr", "None")
 
-    ## Special Cases Rules
+    # # Special Cases Rules
     xs = x.strip()
     # Special case for 'main'
     if xs.startswith("int main("):
@@ -298,8 +298,7 @@ def snippet_translate(x):
         # with only alpha numeric content
         if VAR4_PATTERN.search(xs) and not xs.endswith(")"):
             v = x.rstrip()
-            if (not v.endswith(" True") and not v.endswith(" False")
-                and not v.endswith(" None")):
+            if (not v.endswith(" True") and not v.endswith(" False") and not v.endswith(" None")):
                 x = f"{v}()"
         return dstrip(x)
 

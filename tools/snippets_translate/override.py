@@ -80,33 +80,33 @@ def python_example_snippet_mapping():
                        / "stringlistmodel.py")
         for i in range(10):
             snippet_id = str(i)
-            result[(qt_path, snippet_id)] = pyside_path,  snippet_id
+            result[(qt_path, snippet_id)] = pyside_path, snippet_id
 
         qt_path = "qtbase/src/widgets/doc/snippets/qlistview-dnd/model.cpp"
         pyside_path = (TUTORIAL_EXAMPLES_PATH / "modelviewprogramming"
                        / "qlistview-dnd.py")
         for i in range(11):
             snippet_id = str(i)
-            result[(qt_path, snippet_id)] = pyside_path,  snippet_id
+            result[(qt_path, snippet_id)] = pyside_path, snippet_id
 
         qt_path = "qtconnectivity/examples/bluetooth/heartrate_game/devicefinder.cpp"
         pyside_path = EXAMPLES_PATH / "bluetooth" / "heartrate_game" / "devicefinder.py"
         for i in range(5):
             snippet_id = f"devicediscovery-{i}"
-            result[(qt_path, snippet_id)] = pyside_path,  snippet_id
+            result[(qt_path, snippet_id)] = pyside_path, snippet_id
 
         qt_path = "qtconnectivity/examples/bluetooth/heartrate_game/devicehandler.cpp"
         pyside_path = EXAMPLES_PATH / "bluetooth" / "heartrate_game" / "devicehandler.py"
         for snippet_id in ["Connect-Signals-1", "Connect-Signals-2",
                            "Filter HeartRate service 2", "Find HRM characteristic",
                            "Reading value"]:
-            result[(qt_path, snippet_id)] = pyside_path,  snippet_id
+            result[(qt_path, snippet_id)] = pyside_path, snippet_id
 
         qt_path = "qtconnectivity/examples/bluetooth/heartrate_server/main.cpp"
         pyside_path = EXAMPLES_PATH / "bluetooth" / "heartrate_server" / "heartrate_server.py"
         for snippet_id in ["Advertising Data", "Start Advertising", "Service Data",
                            "Provide Heartbeat"]:
-            result[(qt_path, snippet_id)] = pyside_path,  snippet_id
+            result[(qt_path, snippet_id)] = pyside_path, snippet_id
 
         _python_example_snippet_mapping = result
 
