@@ -87,7 +87,7 @@ def handle_inc_dec(x, operator):
     clean_x = x.strip()
     if clean_x.startswith(operator) or clean_x.endswith(operator):
         x = x.replace(operator, "")
-        x = f"{x} = {clean_x.replace(operator, '')} {operator[0]} 1"
+        x = f"{x} {operator[0]}= 1"
     return x
 
 

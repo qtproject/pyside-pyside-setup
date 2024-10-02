@@ -36,8 +36,8 @@ def test_curly_braces():
 
 
 def test_inc_dec():
-    assert st("++i;") == "i = i + 1"
-    assert st("i--;") == "i = i - 1"
+    assert st("++i;") == "i += 1"
+    assert st("i--;") == "i -= 1"
 
 
 def test_and_or():
