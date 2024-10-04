@@ -2138,12 +2138,13 @@ AbstractMetaFunctionPtr
             flags.setFlag(AbstractMetaFunction::Flag::PrivateSignal);
             arguments.removeLast(); // Add private signals for documentation purposes
             break;
-        case QtSpecialArgument::Disambiguated: {
-            const QString signature = qualifiedFunctionSignatureWithType(functionItem, className);
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgStrippingQtDisambiguatedArgument(functionItem, signature)));
+        case QtSpecialArgument::Disambiguated:
             arguments.removeLast(); // Strip QT6_DECL_NEW_OVERLOAD_TAIL
-        }
+            if (!currentClass || currentClass->typeEntry()->generateCode()) {
+                const QString signature = qualifiedFunctionSignatureWithType(functionItem, className);
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgStrippingQtDisambiguatedArgument(functionItem, signature)));
+            }
             break;
         }
     }
