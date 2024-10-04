@@ -1,5 +1,6 @@
 {
     "files": ["../bindings.h",
+              "../bindings.xml",
               "../dialog.py",
               "../macros.h",
               "../main.py",
@@ -8,6 +9,5 @@
               "../wigglywidget.h",
               "../wigglywidget.py",
               "../CMakeLists.txt",
-              "../bindings.xml"
-      ]
+              "../../utils/pyside_config.py"]
 }

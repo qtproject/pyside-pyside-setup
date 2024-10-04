@@ -7,5 +7,6 @@
               "../main.py",
               "../truck.cpp",
               "../truck.h",
-              "../CMakeLists.txt"]
+              "../CMakeLists.txt",
+              "../../utils/pyside_config.py"]
 }
