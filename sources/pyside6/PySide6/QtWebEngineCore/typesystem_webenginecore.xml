@@ -74,6 +74,9 @@
   <object-type name="QWebEngineNotification"/>
 
   <object-type name="QWebEnginePage">
+     <extra-includes>
+         <include file-name="glue/webenginepage_functors.h" location="global"/>
+     </extra-includes>
     <enum-type name="LifecycleState"/>
     <enum-type name="WebAction"/>
     <enum-type name="FindFlag" flags="FindFlags"/>
@@ -106,9 +109,14 @@
         <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
                      snippet="qwebenginepage-convertto"/>
     </add-function>
-    <add-function signature="runJavaScript(const QString &amp;@scriptSource@,quint32@worldId@,PyCallable*@resultCallback@)">
+    <modify-function signature="^runJavaScript\(.*\)$" remove="yes"/>
+    <add-function signature="runJavaScript(const QString &amp;@scriptSource@,PyCallable*@resultCallback@)">
         <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
-                     snippet="qwebenginepage-runjavascript"/>
+                     snippet="qwebenginepage-runjavascript-2"/>
+    </add-function>
+    <add-function signature="runJavaScript(const QString &amp;@scriptSource@,quint32@worldId@=0,PyCallable*@resultCallback@={})">
+        <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
+                     snippet="qwebenginepage-runjavascript-3"/>
     </add-function>
   </object-type>
 

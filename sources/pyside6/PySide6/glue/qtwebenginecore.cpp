@@ -115,41 +115,25 @@ Py_INCREF(callable);
 %CPPSELF.%FUNCTION_NAME(callback);
 // @snippet qwebenginepage-convertto
 
-// @snippet qwebenginepage-runjavascript
-auto callable = %PYARG_3;
-auto callback = [callable](const QVariant &result)
-{
-    Shiboken::GilState state;
-    Shiboken::AutoDecRef arglist(PyTuple_New(1));
-    switch (result.type()) {
-    case QVariant::Bool: {
-        const bool value = result.toBool();
-        PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QString](value));
-    }
-    break;
-    case QVariant::Int:
-    case QVariant::UInt:
-    case QVariant::LongLong:
-    case QVariant::ULongLong:
-    case QVariant::Double: {
-        const double number = result.toDouble();
-        PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[double](number));
-    }
-    break;
-    default: {
-        const QString value = result.toString();
-        PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QString](value));
-    }
-    break;
-    }
-    // PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[bool](found));
-    Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
-    Py_DECREF(callable);
-};
+// @snippet qwebenginepage-runjavascript-2
+using RunJavascriptCallback = std::function<void(const QVariant &)>;
 
-Py_INCREF(callable);
-%CPPSELF.%FUNCTION_NAME(%1, %2, callback);
-// @snippet qwebenginepage-runjavascript
+if (%PYARG_2 != nullptr && %PYARG_2 != Py_None) {
+    %CPPSELF.%FUNCTION_NAME(%1, RunJavascriptCallback(RunJavascriptFunctor(%PYARG_2)));
+} else {
+    %CPPSELF.%FUNCTION_NAME(%1, 0, RunJavascriptCallback{});
+}
+// @snippet qwebenginepage-runjavascript-2
+
+// @snippet qwebenginepage-runjavascript-3
+using RunJavascriptCallback = std::function<void(const QVariant &)>;
+
+if (%PYARG_3 != nullptr && %PYARG_3 != Py_None) {
+    %CPPSELF.%FUNCTION_NAME(%1, %2, RunJavascriptCallback(RunJavascriptFunctor(%PYARG_3)));
+} else {
+    %CPPSELF.%FUNCTION_NAME(%1, %2, RunJavascriptCallback{});
+}
+// @snippet qwebenginepage-runjavascript-3
 
 // @snippet qwebenginepage-printtopdf
 auto callable = %PYARG_1;

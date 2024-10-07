@@ -3,6 +3,11 @@
 
 project(QtWebEngineCore)
 
+set(QtWebEngineCore_static_sources
+    "${QtWebEngineCore_SOURCE_DIR}/glue/webenginepage_functors.cpp"
+    "${QtWebEngineCore_SOURCE_DIR}/glue/webenginepage_functors.h"
+)
+
 set(QtWebEngineCore_SRC
 ${QtWebEngineCore_GEN_DIR}/qwebenginecertificateerror_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineclientcertificateselection_wrapper.cpp
@@ -69,6 +74,7 @@ set(QtWebEngineCore_deps QtCore QtGui QtNetwork QtPrintSupport QtWebChannel)
 
 create_pyside_module(NAME QtWebEngineCore
                      INCLUDE_DIRS QtWebEngineCore_include_dirs
+                     STATIC_SOURCES QtWebEngineCore_static_sources
                      LIBRARIES QtWebEngineCore_libraries
                      DEPS QtWebEngineCore_deps
                      TYPESYSTEM_PATH QtWebEngineCore_SOURCE_DIR
