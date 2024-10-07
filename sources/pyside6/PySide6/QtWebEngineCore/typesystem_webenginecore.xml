@@ -100,14 +100,26 @@
     <add-function signature="findText(const QString &amp;@subString@,QWebEnginePage::FindFlags@options@,PyCallable*@resultCallback@)">
         <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
                      snippet="qwebenginepage-findtext"/>
+        <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                              snippet="qwebenginepage-findtext"/>
+        <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                              snippet="qwebenginepage-async-note"/>
     </add-function>
     <add-function signature="toPlainText(PyCallable*@resultCallback@) const">
         <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
                      snippet="qwebenginepage-convertto"/>
+        <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                              snippet="qwebenginepage-toplaintext"/>
+        <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                              snippet="qwebenginepage-async-note"/>
     </add-function>
     <add-function signature="toHtml(PyCallable*@resultCallback@) const">
         <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
                      snippet="qwebenginepage-convertto"/>
+        <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                              snippet="qwebenginepage-tohtml"/>
+        <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                              snippet="qwebenginepage-async-note"/>
     </add-function>
     <modify-function signature="^runJavaScript\(.*\)$" remove="yes"/>
     <add-function signature="runJavaScript(const QString &amp;@scriptSource@,PyCallable*@resultCallback@)">
@@ -117,6 +129,10 @@
     <add-function signature="runJavaScript(const QString &amp;@scriptSource@,quint32@worldId@=0,PyCallable*@resultCallback@={})">
         <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
                      snippet="qwebenginepage-runjavascript-3"/>
+        <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                              snippet="qwebenginepage-runjavascript"/>
+        <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                              snippet="qwebenginepage-async-note"/>
     </add-function>
   </object-type>
 
