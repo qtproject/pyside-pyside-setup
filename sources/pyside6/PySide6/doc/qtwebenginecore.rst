@@ -58,3 +58,18 @@ values specified in ``layout``, while the range of pages printed is taken from
 .. note:: The ``QWebEnginePage.WebAction.Stop`` web action can be used to
           interrupt this operation.
 // @snippet qwebenginepage-printtopdf
+
+// @snippet qwebenginepage-findframebyname
+Returns the frame with the given ``name``. If there are multiple frames with
+the same name, which one is returned is arbitrary. If no frame was found,
+returns ``None``.
+// @snippet qwebenginepage-findframebyname
+
+// @snippet qwebengineframe-printtopdf
+Renders the current content of the frame into a PDF document and returns a byte
+array containing the PDF data as parameter to ``resultCallback``. Printing uses
+a page size of A4, portrait layout, and includes the full range of pages.
+
+.. note:: The ``QWebEnginePage.WebAction.Stop`` web action can be used to
+          interrupt this operation.
+// @snippet qwebengineframe-printtopdf

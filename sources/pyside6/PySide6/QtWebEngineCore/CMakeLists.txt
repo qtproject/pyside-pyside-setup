@@ -6,6 +6,8 @@ project(QtWebEngineCore)
 set(QtWebEngineCore_static_sources
     "${QtWebEngineCore_SOURCE_DIR}/glue/webenginepage_functors.cpp"
     "${QtWebEngineCore_SOURCE_DIR}/glue/webenginepage_functors.h"
+    "${QtWebEngineCore_SOURCE_DIR}/glue/webengineframe.cpp"
+    "${QtWebEngineCore_SOURCE_DIR}/glue/webengineframe.h"
 )
 
 set(QtWebEngineCore_SRC
@@ -20,6 +22,7 @@ ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_filterrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginedownloadrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefilesystemaccessrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefindtextresult_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebengineframe_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefullscreenrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineglobalsettings_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineglobalsettings_dnsmode_wrapper.cpp
