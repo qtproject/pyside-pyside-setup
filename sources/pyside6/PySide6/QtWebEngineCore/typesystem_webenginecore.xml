@@ -136,6 +136,11 @@
     </add-function>
   </object-type>
 
+  <value-type name="QWebEnginePermission" since="6.8">
+    <enum-type name="PermissionType"/>
+    <enum-type name="State"/>
+  </value-type>
+
   <object-type name="QWebEngineProfile">
     <extra-includes>
         <include file-name="QtWebEngineCore/QWebEngineNotification" location="global"/>

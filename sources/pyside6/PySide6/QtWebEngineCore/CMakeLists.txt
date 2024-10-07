@@ -33,6 +33,7 @@ ${QtWebEngineCore_GEN_DIR}/qwebengineloadinginfo_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginenewwindowrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginenotification_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginepage_wrapper.cpp
+${QtWebEngineCore_GEN_DIR}/qwebenginepermission_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineprofile_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginequotarequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineregisterprotocolhandlerrequest_wrapper.cpp
