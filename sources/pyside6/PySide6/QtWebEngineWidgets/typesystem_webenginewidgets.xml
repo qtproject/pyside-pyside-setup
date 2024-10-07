@@ -14,7 +14,8 @@
 
   <object-type name="QWebEngineView">
       <add-function signature="findText(const QString &amp;@subString@,QWebEnginePage::FindFlags@options@,PyCallable*@resultCallback@)">
-          <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-findtext"/>
+          <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
+                       snippet="qwebenginepage-findtext"/>
       </add-function>
   </object-type>
 
