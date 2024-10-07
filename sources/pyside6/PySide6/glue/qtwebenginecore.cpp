@@ -136,20 +136,7 @@ if (%PYARG_3 != nullptr && %PYARG_3 != Py_None) {
 // @snippet qwebenginepage-runjavascript-3
 
 // @snippet qwebenginepage-printtopdf
-auto callable = %PYARG_1;
-auto callback = [callable](const QByteArray &pdf)
-{
-    if (!PyCallable_Check(callable)) {
-        qWarning("Argument 1 of %FUNCTION_NAME must be a callable.");
-        return;
-    }
-    Shiboken::GilState state;
-    Shiboken::AutoDecRef arglist(PyTuple_New(1));
-    PyTuple_SET_ITEM(arglist, 0, %CONVERTTOPYTHON[QByteArray](pdf));
-    Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
-    Py_DECREF(callable);
-};
+using PrintToPdfCallback = std::function<void(const QByteArray &)>;
 
-Py_INCREF(callable);
-%CPPSELF.%FUNCTION_NAME(callback, %2);
+%CPPSELF.%FUNCTION_NAME(PrintToPdfCallback(PrintToPdfFunctor(%PYARG_1)), %2, %3);
 // @snippet qwebenginepage-printtopdf
