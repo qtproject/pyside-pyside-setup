@@ -140,3 +140,20 @@ using PrintToPdfCallback = std::function<void(const QByteArray &)>;
 
 %CPPSELF.%FUNCTION_NAME(PrintToPdfCallback(PrintToPdfFunctor(%PYARG_1)), %2, %3);
 // @snippet qwebenginepage-printtopdf
+
+// @snippet qwebenginepage-findframebyname
+auto frameOptional = %CPPSELF.%FUNCTION_NAME(%1);
+if (frameOptional.has_value()) {
+    const %RETURN_TYPE &frame = frameOptional.value();
+    %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](frame);
+} else {
+    Py_INCREF(Py_None);
+    %PYARG_0 = Py_None;
+}
+// @snippet qwebenginepage-findframebyname
+
+// @snippet qwebengineframe-printtopdf
+using PrintToPdfCallback = std::function<void(const QByteArray &)>;
+
+%CPPSELF.%FUNCTION_NAME(PrintToPdfCallback(PrintToPdfFunctor(%PYARG_1)));
+// @snippet qwebengineframe-printtopdf

@@ -11,6 +11,10 @@
   <load-typesystem name="QtPrintSupport/typesystem_printsupport.xml" generate="no"/>
   <load-typesystem name="QtWebChannel/typesystem_webchannel.xml" generate="no"/>
 
+   <extra-includes>
+       <include file-name="glue/webengineframe.h" location="global"/>
+   </extra-includes>
+
    <rejection class="extensions"/>
 
   <function signature="qWebEngineChromiumVersion()"/>
@@ -55,6 +59,35 @@
     <modify-function signature="swap(QWebEngineFileSystemAccessRequest&amp;)" remove="all"/>
   </value-type>
 
+  <value-type name="QWebEngineFrame" default-constructor="defaultConstructedWebEngineFrame()"
+              since="6.8">
+     <extra-includes>
+         <include file-name="glue/webenginepage_functors.h" location="global"/>
+         <include file-name="glue/webengineframe.h" location="global"/>
+     </extra-includes>
+    <modify-function signature="^runJavaScript\(.*\)$" remove="yes"/>
+    <add-function signature="runJavaScript(const QString &amp;@scriptSource@,PyCallable*@resultCallback@)">
+        <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
+                     snippet="qwebenginepage-runjavascript-2"/>
+    </add-function>
+    <add-function signature="runJavaScript(const QString &amp;@scriptSource@,quint32@worldId@,PyCallable*@resultCallback@={})">
+        <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
+                     snippet="qwebenginepage-runjavascript-3"/>
+        <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                              snippet="qwebenginepage-runjavascript"/>
+        <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                              snippet="qwebenginepage-async-note"/>
+    </add-function>
+    <add-function signature="printToPdf(PyCallable*@resultCallback@)">
+        <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
+                     snippet="qwebengineframe-printtopdf"/>
+        <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                              snippet="qwebengineframe-printtopdf"/>
+        <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                              snippet="qwebenginepage-async-note"/>
+    </add-function>
+  </value-type>
+
   <value-type name="QWebEngineFullScreenRequest"/>
 
   <object-type name="QWebEngineHistory"/>
@@ -97,6 +130,12 @@
       <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
                    snippet="qwebenginepage-javascriptprompt-return"/>
     </modify-function>
+    <add-function signature="findFrameByName(QString@name@)" return-type="QWebEngineFrame">
+       <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
+                    snippet="qwebenginepage-findframebyname"/>
+       <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                             snippet="qwebenginepage-findframebyname"/>
+    </add-function>
     <add-function signature="findText(const QString &amp;@subString@,QWebEnginePage::FindFlags@options@,PyCallable*@resultCallback@)">
         <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
                      snippet="qwebenginepage-findtext"/>
