@@ -134,6 +134,14 @@
         <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
                               snippet="qwebenginepage-async-note"/>
     </add-function>
+    <add-function signature="printToPdf(PyCallable*@resultCallback@,const QPageLayout &amp;@pageLayout@=QPageLayout(QPageSize(QPageSize::A4),QPageLayout::Portrait,QMarginsF()),const QPageRanges &amp;@ranges@={})">
+        <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
+                     snippet="qwebenginepage-printtopdf"/>
+        <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                              snippet="qwebenginepage-printtopdf"/>
+        <inject-documentation format="target" mode="append" file="../doc/qtwebenginecore.rst"
+                              snippet="qwebenginepage-async-note"/>
+    </add-function>
   </object-type>
 
   <value-type name="QWebEnginePermission" since="6.8">

@@ -8,6 +8,7 @@
 
 #include <QtCore/QtClassHelperMacros>
 
+QT_FORWARD_DECLARE_CLASS(QByteArray)
 QT_FORWARD_DECLARE_CLASS(QVariant)
 
 QT_BEGIN_NAMESPACE
@@ -17,6 +18,13 @@ struct RunJavascriptFunctor : public Shiboken::PyObjectHolder
     using Shiboken::PyObjectHolder::PyObjectHolder;
 
     void operator()(const QVariant &result);
+};
+
+struct PrintToPdfFunctor : public Shiboken::PyObjectHolder
+{
+    using Shiboken::PyObjectHolder::PyObjectHolder;
+
+    void operator()(const QByteArray &pdf);
 };
 
 QT_END_NAMESPACE

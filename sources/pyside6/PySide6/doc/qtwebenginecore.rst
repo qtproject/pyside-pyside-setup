@@ -46,3 +46,15 @@ Only plain data can be returned from JavaScript as the result value.
 .. note:: Do not execute lengthy routines in the callback function, because
           it might block the rendering of the web engine page.
 // @snippet qwebenginepage-runjavascript
+
+// @snippet qwebenginepage-printtopdf
+Renders the current content of the page into a PDF document and returns a byte
+array containing the PDF data as parameter to ``resultCallback``.
+
+The page size and orientation of the produced PDF document are taken from the
+values specified in ``layout``, while the range of pages printed is taken from
+``ranges`` with the default being printing all pages.
+
+.. note:: The ``QWebEnginePage.WebAction.Stop`` web action can be used to
+          interrupt this operation.
+// @snippet qwebenginepage-printtopdf
