@@ -13,7 +13,7 @@
   <load-typesystem name="QtPrintSupport/typesystem_printsupport.xml" generate="no"/>
 
   <object-type name="QWebEngineView">
-      <add-function signature="findText(const QString &amp;,QWebEnginePage::FindFlags,PyObject*)">
+      <add-function signature="findText(const QString &amp;@subString@,QWebEnginePage::FindFlags@options@,PyCallable*@resultCallback@)">
           <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-findtext"/>
       </add-function>
   </object-type>

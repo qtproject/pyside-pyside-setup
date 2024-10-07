@@ -94,16 +94,16 @@
       <inject-code class="target" position="beginning" file="../glue/qtwebenginecore.cpp"
                    snippet="qwebenginepage-javascriptprompt-return"/>
     </modify-function>
-    <add-function signature="findText(const QString &amp;,QWebEnginePage::FindFlags,PyObject*)">
+    <add-function signature="findText(const QString &amp;@subString@,QWebEnginePage::FindFlags@options@,PyCallable*@resultCallback@)">
         <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-findtext"/>
     </add-function>
-    <add-function signature="toPlainText(PyObject*) const">
+    <add-function signature="toPlainText(PyCallable*@resultCallback@) const">
         <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-convertto"/>
     </add-function>
-    <add-function signature="toHtml(PyObject*) const">
+    <add-function signature="toHtml(PyCallable*@resultCallback@) const">
         <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-convertto"/>
     </add-function>
-    <add-function signature="runJavaScript(const QString &amp;,quint32,PyObject*)">
+    <add-function signature="runJavaScript(const QString &amp;@scriptSource@,quint32@worldId@,PyCallable*@resultCallback@)">
         <inject-code class="target" position="beginning" file="../glue/qtwebenginewidgets.cpp" snippet="qwebenginepage-runjavascript"/>
     </add-function>
   </object-type>
