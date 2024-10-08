@@ -1040,7 +1040,12 @@ static void writeFancyToc(TextStream& s, QAnyStringView title,
     for (const QString &item : items)
         tocMap[sortKey(item)] << item;
 
-    static const qsizetype numColumns = 4;
+    qsizetype maxColumnCount = 0;
+    for (auto it = tocMap.cbegin(), end = tocMap.cend(); it != end; ++it) {
+        if (it.value().size() > maxColumnCount)
+            maxColumnCount = it.value().size();
+    }
+    const auto columnCount = 1 + std::min(maxColumnCount, qsizetype(3)); // With header
 
     QtXmlToSphinx::Table table;
     for (auto it = tocMap.cbegin(), end = tocMap.cend(); it != end; ++it) {
@@ -1048,7 +1053,7 @@ static void writeFancyToc(TextStream& s, QAnyStringView title,
         const QString charEntry = u"**"_s + it.key() + u"**"_s;
         row << QtXmlToSphinx::TableCell(charEntry);
         for (const QString &item : std::as_const(it.value())) {
-            if (row.size() >= numColumns) {
+            if (row.size() >= columnCount) {
                 table.appendRow(row);
                 row.clear();
                 row << QtXmlToSphinx::TableCell(QString{});
@@ -1056,8 +1061,14 @@ static void writeFancyToc(TextStream& s, QAnyStringView title,
             const QString entry = "* :"_L1 + referenceType + ":`"_L1 + item + u'`';
             row << QtXmlToSphinx::TableCell(entry);
         }
-        if (row.size() > 1)
+        if (row.size() > 1) {
+            if (const auto padColSpan = columnCount - row.size(); padColSpan > 0) {
+                QtXmlToSphinx::TableCell padding(QString{});
+                padding.colSpan = int(padColSpan);
+                row.append(padding);
+            }
             table.appendRow(row);
+        }
     }
 
     table.normalize();
