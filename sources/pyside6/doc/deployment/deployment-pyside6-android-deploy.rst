@@ -16,23 +16,108 @@ The final output is a `.apk` or a `.aab` file created within the project's sourc
 determines whether a `.apk` or a `.aab` is created.
 
 .. warning:: Currently, users are required to cross-compile Qt for Python to generate the wheels
-    required for a specific Android target architecture. This requirement will disappear when
-    there are official Qt for Python Android wheels (*in progress*). Because of this
-    requirement ``pyside6-android-deploy`` will be considered in **Technical Preview**.
-    Instructions on cross-compiling Qt for Python for Android can be found
-    :ref:`here <cross_compile_android>`.
+    required for `armeabi-v7a` and `x86` Andorid platforms. Instructions on cross-compiling
+    Qt for Python for Android can be found :ref:`here <cross_compile_android>`.
 
-.. note:: ``pyside6-android-deploy`` only works on a Linux host at the moment. This constraint
-    is also because Qt for Python cross-compilation for Android currently only works on Linux
-    systems.
+.. note:: ``pyside6-android-deploy`` only works with a Unix (Linux or macOS) host at the moment.
+
+Prerequisites
+=============
+
+Before using ``pyside6-android-deploy``, ensure that the following prerequisites are met:
+
+.. _android_prerequisites:
+
+Download Android NDK and SDK
+----------------------------
+
+The NDK required corresponds to the NDK version required by the Qt version you are using. See
+`Qt for Android <https://doc.qt.io/qt-6/android.html>`_ for more information.
+
+The easiest way to download the Android NDK is through a script located in the Qt for Python
+repository. To run the script, follow these steps:
+
+#. Clone the Qt for Python repository::
+
+.. code-block:: bash
+
+    git clone https://code.qt.io/pyside/pyside-setup
+
+#. Run the script::
+
+.. code-block:: bash
+
+    cd pyside-setup
+    python tools/cross_compile_android/main.py --download-only --skip-update --auto-accept-license
+
+The script will download the Android NDK and SDK packages required into your home
+directory as a directory called ``.pyside6-android-deploy``. ``pyside6-android-deploy`` will
+automatically detect the NDK and SDK from this cache directory.
+
+If you want to try to download the NDK and SDK manually, you can do so from the following steps
+(for Qt 6.8):
+
+1. Download the sdkmanager using the instructions provided in the `Android Studio
+   documentation <https://developer.android.com/studio/command-line/sdkmanager>`_.
+
+2. Using the sdkmanager download the following packages (for Qt 6.8)::
+
+   "platform-tools", "platforms;android-34", "build-tools;35.0.0"
+
+  and install the NDK using the following command (for Qt 6.8)::
+
+   "ndk;26.1.10909125"
+
+.. note:: The NDK version and the SDK packages required corresponds to the requirements from the
+      Qt version you are using. See `Qt for Android <https://doc.qt.io/qt-6/android.html>`_ for more
+      information.
+
+Download the Qt for Python Android wheels
+-----------------------------------------
+
+There are two ways to download the Qt for Python Android wheels:
+
+1. Download the wheels from the `Qt for Python downloads page`_.
+
+2. Use :ref:`qtpip` download the wheels with the following command:
+
+.. code-block:: bash
+
+    qtpip download PySide6 --android --arch aarch64
+
+for the `aarch64` architecture. The available architectures are `aarch64` and `x86_64`.
 
 How to use it?
 ==============
 
-Like ``pyside6-deploy``, there are :ref:`two different ways <how_pysidedeploy>` with which
+Like :ref:`pyside6-deploy`, there are :ref:`two different ways <how_pysidedeploy>` with which
 you can deploy your PySide6 application using ``pyside6-android-deploy``. The only difference is
 that for ``pyside6-android-deploy`` to work, the main Python entry point file should be named
 ``main.py``.
+
+To deploy the application, run the following command:
+
+.. code-block:: bash
+
+    pyside6-android-deploy --name "MyApp"
+        --wheel-pyside=path_to_downloaded_PySide_wheel
+        --wheel-shiboken=path_to_downloaded_Shiboken_wheel
+        --ndk-path=path_to_ndk
+        --sdk-path=path_to_sdk
+
+The ``--ndk-path`` and ``--sdk-path`` options are optional if you used the script provided in the
+:ref:`android_prerequisites` section to download the NDK and SDK.
+
+For any subsequent deployments, you can use the ``pysidedeploy.spec`` file to control the various
+parameters of the deployment process. The command to deploy the application using the
+``pysidedeploy.spec`` file is:
+
+.. code-block:: bash
+
+    pyside6-android-deploy --config-file path_to_pysidedeploy.spec
+
+The `config-file` option is optional if you are running the command from the project directory
+where ``pysidedeploy.spec`` is located.
 
 .. _pysideandroiddeploy:
 
@@ -209,3 +294,4 @@ to cross-compile Qt for Python Android wheels.
 .. _`python-for-android`: https://python-for-android.readthedocs.io/en/latest/
 .. _`qt_download`: https://www.qt.io/download
 .. _`cpython`: https://pypi.org/project/Cython/
+.. _`Qt for Python downloads page`: https://download.qt.io/official_releases/QtForPython/pyside6/
