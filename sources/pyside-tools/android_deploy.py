@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
+import sys
 import argparse
 import logging
 import shutil
@@ -187,8 +188,9 @@ if __name__ == "__main__":
                         required=not config_option_exists())
 
     parser.add_argument("--ndk-path", type=lambda p: Path(p).resolve(),
-                        help=("Path to Android NDK. If omitted, the tool's cache at "
-                              ".pyside6_android_deploy is checked to find the NDK")
+                        help=("Path to Android NDK. The required version is r26b."
+                              "If not provided, the tool will check its cache at "
+                              ".pyside6_android_deploy to find the NDK.")
                         )
 
     parser.add_argument("--sdk-path", type=lambda p: Path(p).resolve(),
@@ -202,6 +204,11 @@ if __name__ == "__main__":
     parser.add_argument("--extra-modules", type=str, help=HELP_EXTRA_MODULES)
 
     args = parser.parse_args()
+
+    # check if the Python version is greater than 3.12
+    if sys.version_info >= (3, 12):
+        raise RuntimeError("[DEPLOY] Android deployment requires Python version 3.11 or lower. "
+                           "This is due to a restriction in buildozer.")
 
     main(args.name, args.wheel_pyside, args.wheel_shiboken, args.ndk_path, args.sdk_path,
          args.config_file, args.init, args.loglevel, args.dry_run, args.keep_deployment_files,
