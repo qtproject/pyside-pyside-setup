@@ -72,6 +72,13 @@ def occp_exists():
     return "-occp" in sys.argv or "--only-cross-compile-python" in sys.argv
 
 
+def download_only_exists():
+    '''
+    check if '--download-only' exists in command line arguments
+    '''
+    return "--download-only" in sys.argv
+
+
 class CloneProgress(RemoteProgress):
     def __init__(self):
         super().__init__()
@@ -99,11 +106,15 @@ if __name__ == "__main__":
                         dest="loglevel", const=logging.INFO)
     parser.add_argument("--api-level", type=str, default="34",
                         help="Minimum Android API level to use")
-    parser.add_argument("--ndk-path", type=str, help="Path to Android NDK (Preferred r25c)")
+    parser.add_argument("--ndk-path", type=str, help="Path to Android NDK (Preferred r26b)")
     # sdk path is needed to compile all the Qt Java Acitivity files into Qt6AndroidBindings.jar
     parser.add_argument("--sdk-path", type=str, help="Path to Android SDK")
-    parser.add_argument("--qt-install-path", type=str, required=not occp_exists(),
-                        help="Qt installation path eg: /home/Qt/6.5.0")
+    parser.add_argument(
+        "--qt-install-path",
+        type=str,
+        required=not (occp_exists() or download_only_exists()),
+        help="Qt installation path eg: /home/Qt/6.8.0"
+    )
 
     parser.add_argument("-occp", "--only-cross-compile-python", action="store_true",
                         help="Only cross compiles Python for the specified Android platform")
@@ -123,6 +134,9 @@ if __name__ == "__main__":
     parser.add_argument("--coin", action="store_true",
                         help=COIN_RUN_HELP)
 
+    parser.add_argument("--download-only", action="store_true",
+                        help="Only download Android NDK and SDK")
+
     args = parser.parse_args()
 
     logging.basicConfig(level=args.loglevel)
@@ -141,6 +155,7 @@ if __name__ == "__main__":
     auto_accept_license = args.auto_accept_license
     clean_cache = args.clean_cache
     coin = args.coin
+    download_only = args.download_only
 
     # auto download Android NDK and SDK
     pyside6_deploy_cache = Path.home() / ".pyside6_android_deploy"
@@ -170,16 +185,21 @@ if __name__ == "__main__":
                 if toolchain_path.is_file():
                     toolchain_path.unlink()
 
-    if not ndk_path:
-        # Download android ndk
-        ndk_path = download_android_ndk(pyside6_deploy_cache)
+    if download_only:
+        if not ndk_path:
+            # Download android ndk
+            ndk_path = download_android_ndk(pyside6_deploy_cache)
 
-    if not sdk_path:
-        # download and unzip command-line tools
-        sdk_path = download_android_commandlinetools(pyside6_deploy_cache)
-        # install and update required android packages
-        install_android_packages(android_sdk_dir=sdk_path, android_api=api_level, dry_run=dry_run,
-                                 accept_license=auto_accept_license, skip_update=skip_update)
+        if not sdk_path:
+            # download and unzip command-line tools
+            sdk_path = download_android_commandlinetools(pyside6_deploy_cache)
+            # install and update required android packages
+            install_android_packages(android_sdk_dir=sdk_path, android_api=api_level,
+                                     dry_run=dry_run, accept_license=auto_accept_license,
+                                     skip_update=skip_update)
+
+        print(f"Android NDK and SDK downloaded successfully into {pyside6_deploy_cache}")
+        sys.exit(0)
 
     templates_path = Path(__file__).parent / "templates"
 
