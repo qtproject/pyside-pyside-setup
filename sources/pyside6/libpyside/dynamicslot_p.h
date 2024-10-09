@@ -22,7 +22,8 @@ public:
     {
         Callable,
         Method,
-        CompiledMethod
+        CompiledMethod,
+        C_Function
     };
 
     virtual ~DynamicSlot() = default;
