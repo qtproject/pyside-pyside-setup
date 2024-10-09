@@ -796,6 +796,12 @@ def linux_run_read_elf(executable_path):
 def linux_set_rpaths(patchelf, executable_path, rpath_string):
     """ Patches the `executable_path` with a new rpath string. """
 
+    path = Path(executable_path)
+    mode = path.stat().st_mode
+    if (mode & stat.S_IWUSR) == 0:
+        log.info(f"patchelf: {executable_path} is read-only, making writeable.")
+        path.chmod(mode | stat.S_IWUSR)
+
     cmd = [str(patchelf), '--set-rpath', str(rpath_string), str(executable_path)]
 
     if run_process(cmd) != 0:
