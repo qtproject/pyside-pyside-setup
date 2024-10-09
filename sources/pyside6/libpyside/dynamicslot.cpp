@@ -28,6 +28,8 @@ DynamicSlot::SlotType DynamicSlot::slotType(PyObject *callback)
         return SlotType::Method;
     if (PySide::isCompiledMethod(callback) != 0)
         return SlotType::CompiledMethod;
+    if (PyCFunction_Check(callback) != 0)
+        return SlotType::C_Function;
     return SlotType::Callable;
 }
 
@@ -200,6 +202,7 @@ DynamicSlot* DynamicSlot::create(PyObject *callback)
         Py_DECREF(pythonSelf);
         return new PysideReceiverMethodSlot(function, pythonSelf);
     }
+    case SlotType::C_Function: // Treat C-function as normal callables
     case SlotType::Callable:
         break;
     }
@@ -239,7 +242,7 @@ struct ConnectionKey
     const QObject *sender;
     int senderIndex;
     const PyObject *object;
-    const PyObject *method;
+    const void *method;
 
     friend constexpr size_t qHash(const ConnectionKey &k, size_t seed = 0) noexcept
     {
@@ -269,7 +272,7 @@ QDebug operator<<(QDebug debug, const ConnectionKey &k)
     debug << ", index=" << k.senderIndex << ", target="
           << PySide::debugPyObject(const_cast<PyObject *>(k.object));
     if (k.method != nullptr)
-        debug << ", method=" << PySide::debugPyObject(const_cast<PyObject *>(k.method));
+        debug << ", method=" << k.method;
     debug << ')';
     return debug;
 }
@@ -296,7 +299,7 @@ static ConnectionKey connectionKey(const QObject *sender, int senderIndex,
                                    PyObject *callback)
 {
     PyObject *object{};
-    PyObject *method{};
+    void *method{};
 
     switch (DynamicSlot::slotType(callback)) {
     case DynamicSlot::SlotType::Method:
@@ -314,6 +317,10 @@ static ConnectionKey connectionKey(const QObject *sender, int senderIndex,
     }
     case DynamicSlot::SlotType::Callable:
         method = callback;
+        break;
+    case DynamicSlot::SlotType::C_Function:
+        object = PyCFunction_GetSelf(callback);
+        method = reinterpret_cast<void *>(PyCFunction_GetFunction(callback));
         break;
     }
 
