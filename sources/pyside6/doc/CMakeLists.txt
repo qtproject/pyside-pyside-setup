@@ -112,6 +112,20 @@ add_custom_command(OUTPUT "${EXAMPLE_TOOL_TARGET}"
                    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
                    COMMENT "Generating example gallery...")
 
+# Generate the release notes
+set(RELEASED_NOTES_TARGET "${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/release_notes")
+set(RELEASE_NOTES_OPTIONS --target "${RELEASED_NOTES_TARGET}")
+set(RELEASE_NOTES_TOOL "${TOOLS_DIR}/release_notes/main.py")
+if (NOT QUIET_BUILD)
+    list(APPEND RELEASE_NOTES_OPTIONS "-v")
+endif()
+
+add_custom_target("release_notes" DEPENDS "${RELEASED_NOTES_TARGET}")
+add_custom_command(OUTPUT "${RELEASED_NOTES_TARGET}"
+                   COMMAND ${python_executable} ${RELEASE_NOTES_TOOL} ${RELEASE_NOTES_OPTIONS}
+                   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+                   COMMENT "Generating release notes...")
+
 set(SHIBOKEN_INTERSPHINX_FILE "${ROOT}/pyside6/shiboken6/objects.inv")
 set(HAS_WEBENGINE_WIDGETS 0)
 set(SKIP_SPHINX_WARNINGS 1)
@@ -278,7 +292,7 @@ add_custom_target("licensedocrsts"
     COMMENT "Creating 3rdparty license documentation..."
 )
 
-add_dependencies(docrsts example_gallery)
+add_dependencies(docrsts example_gallery release_notes)
 
 if (FULLDOCSBUILD)
     add_dependencies(apidoc docrsts licensedocrsts)
