@@ -15,7 +15,7 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 
 SECTION_NAMES = ["PySide6", "Shiboken6", "PySide2", "Shiboken2"]
 DIR = Path(__file__).parent
-OUTPUT_DIR = Path(f"{DIR}/../../sources/pyside6/doc/release_notes").resolve()
+DEFAULT_OUTPUT_DIR = Path(f"{DIR}/../../sources/pyside6/doc/release_notes").resolve()
 CHANGELOG_DIR = Path(f"{DIR}/../../doc/changelogs").resolve()
 
 BASE_CONTENT = """\
@@ -124,7 +124,7 @@ def parse_changelogs() -> str:
     return changelogs
 
 
-def write_md_file(section: str, changelogs: list[Changelog]):
+def write_md_file(section: str, changelogs: list[Changelog], output_dir: Path):
     '''
     For each section create a .md file with the following content:
 
@@ -138,7 +138,7 @@ def write_md_file(section: str, changelogs: list[Changelog]):
     - Change 2
     ....
     '''
-    file_path = OUTPUT_DIR / f"{section.lower()}_release_notes.md"
+    file_path = output_dir / f"{section.lower()}_release_notes.md"
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(f"# {section}\n")
         for changelog in changelogs:
@@ -151,9 +151,9 @@ def write_md_file(section: str, changelogs: list[Changelog]):
                 file.write("\n")
 
 
-def generate_index_file():
+def generate_index_file(output_dir: Path):
     """Generate the index RST file."""
-    index_path = OUTPUT_DIR / "index.rst"
+    index_path = output_dir / "index.rst"
     index_path.write_text(BASE_CONTENT, encoding='utf-8')
 
 
@@ -162,21 +162,25 @@ def main():
                             formatter_class=RawTextHelpFormatter)
     parser.add_argument("-v", "--verbose", help="run in verbose mode", action="store_const",
                         dest="loglevel", const=logging.INFO)
+    parser.add_argument("--target", "-t", help="Directory to output the generated files",
+                        type=Path, default=DEFAULT_OUTPUT_DIR)
     args = parser.parse_args()
 
     logging.basicConfig(level=args.loglevel)
 
+    output_dir = args.target.resolve()
+
     # create the output directory if it does not exist
     # otherwise remove its contents
-    if OUTPUT_DIR.is_dir():
-        shutil.rmtree(OUTPUT_DIR, ignore_errors=True)
-        logging.info(f"[RELEASE_DOC] Removed existing {OUTPUT_DIR}")
+    if output_dir.is_dir():
+        shutil.rmtree(output_dir, ignore_errors=True)
+        logging.info(f"[RELEASE_DOC] Removed existing {output_dir}")
 
-    logging.info(f"[RELEASE_DOC] Creating {OUTPUT_DIR}")
-    OUTPUT_DIR.mkdir(exist_ok=True)
+    logging.info(f"[RELEASE_DOC] Creating {output_dir}")
+    output_dir.mkdir(exist_ok=True)
 
     logging.info("[RELEASE_DOC] Generating index.md file")
-    generate_index_file()
+    generate_index_file(output_dir)
 
     logging.info("[RELEASE_DOC] Parsing changelogs")
     changelogs = parse_changelogs()
@@ -186,7 +190,7 @@ def main():
 
     for section in SECTION_NAMES:
         logging.info(f"[RELEASE_DOC] Generating {section.lower()}_release_notes.md file")
-        write_md_file(section, changelogs)
+        write_md_file(section, changelogs, output_dir)
 
 
 if __name__ == "__main__":
