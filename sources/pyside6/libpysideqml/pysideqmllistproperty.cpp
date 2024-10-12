@@ -280,8 +280,11 @@ void QmlListPropertyPrivate::metaCall(PyObject *source, QMetaObject::Call call, 
 }
 
 static const char *PropertyList_SignatureStrings[] = {
-    "PySide6.QtQml.ListProperty(self,type:type,append:typing.Callable,"
-        "at:typing.Callable=None,clear:typing.Callable=None,count:typing.Callable=None)",
+    "PySide6.QtQml.ListProperty(self,type:type,"
+        "append:typing.Optional[typing.Callable[...,typing.Any]]=None,"
+        "at:typing.Optional[typing.Callable[...,typing.Any]]=None,"
+        "clear:typing.Optional[typing.Callable[...,typing.Any]]=None,"
+        "count:typing.Optional[typing.Callable[...,typing.Any]]=None)",
     nullptr // Sentinel
 };
 

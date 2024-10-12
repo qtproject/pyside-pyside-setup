@@ -337,6 +337,9 @@ def _resolve_type(thing, line, level, var_handler, func_name=None):
 
     # Now the nested structures are handled.
     if "[" in thing:
+        # Special case: Callable[[],
+        if thing == "[]":
+            return thing
         # handle primitive arrays
         if re.search(r"\[\d*\]$", thing):
             thing = _resolve_arraytype(thing, line)
