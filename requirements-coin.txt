@@ -10,3 +10,4 @@ importlib_metadata>=6
 tomli>=2.0.1
 wheel>=0.43.0
 platformdirs >= 2.6.2
+mypy>=1.11.2

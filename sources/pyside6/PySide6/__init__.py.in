@@ -8,6 +8,8 @@ __all__ = [@init_modules@]
 __version__ = "@FINAL_PACKAGE_VERSION@"
 __version_info__ = (@BINDING_API_MAJOR_VERSION@, @BINDING_API_MINOR_VERSION@, @BINDING_API_MICRO_VERSION@, "@BINDING_API_PRE_RELEASE_VERSION_TYPE@", "@BINDING_API_PRE_RELEASE_VERSION@")
 
+SKIP_MYPY_TEST = bool("@SKIP_MYPY_TEST@")
+
 
 def _additional_dll_directories(package_dir):
     # Find shiboken6 relative to the package directory.
