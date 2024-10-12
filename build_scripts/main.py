@@ -860,6 +860,9 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
             # cross-compiling pyside.
             cmake_cmd.append(f"-DQFP_SHIBOKEN_TARGET_PATH={self.install_dir}")
 
+        if OPTION["SKIP_MYPY_TEST"]:
+            cmake_cmd.append("-DSKIP_MYPY_TEST=1")
+
         if self.cmake_toolchain_file:
             cmake_cmd.append(f"-DCMAKE_TOOLCHAIN_FILE={self.cmake_toolchain_file}")
 

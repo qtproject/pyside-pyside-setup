@@ -26,6 +26,7 @@ Additional options:
   --shiboken-host-path                 Path to host shiboken package when cross-compiling
   --qt-host-path                       Path to host Qt installation when cross-compiling
   --disable-pyi                        Disable .pyi file generation
+  --skip-mypy-test                     Skip the mypy test which can take long in debug builds
 """
 
 
@@ -163,6 +164,7 @@ OPTION = {
     "LIMITED_API": option_value("limited-api"),
     "UNOPTIMIZE": option_value("unoptimize"),
     "DISABLE_PYI": has_option("disable-pyi"),
+    "SKIP_MYPY_TEST": has_option("skip-mypy-test"),
     "PACKAGE_TIMESTAMP": option_value("package-timestamp"),
     # This is used automatically by setuptools.command.install object, to
     # specify the final installation location.

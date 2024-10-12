@@ -138,6 +138,7 @@ target_link_libraries(testbinding
 add_dependencies(testbinding pyside6 QtCore QtGui QtWidgets pysidetest)
 create_generator_target(testbinding)
 
+PYSIDE_TEST(mypy_correctness_test.py)
 PYSIDE_TEST(constructor_properties_test.py)
 PYSIDE_TEST(container_test.py)
 PYSIDE_TEST(decoratedslot_test.py)
