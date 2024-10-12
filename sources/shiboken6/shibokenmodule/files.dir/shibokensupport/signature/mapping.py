@@ -32,7 +32,7 @@ class ellipsis(object):
 ellipsis = ellipsis()
 Point = typing.Tuple[int, int]
 Variant = typing.Any
-QImageCleanupFunction = typing.Callable
+QImageCleanupFunction = typing.Callable[..., typing.Any]
 
 # unfortunately, typing.Optional[t] expands to typing.Union[t, NoneType]
 # Until we can force it to create Optional[t] again, we use this.
@@ -216,7 +216,7 @@ type_map.update({
     "long": int,
     "long long": int,
     "nullptr": None,
-    "PyCallable": typing.Callable,
+    "PyCallable": typing.Callable[..., typing.Any],
     "PyObject": object,
     "PyObject*": object,
     "PyArrayObject": ArrayLikeVariable(typing.Any),  # numpy
@@ -308,7 +308,7 @@ type_map.update({
     # This can be refined by importing numpy.typing optionally, but better than nothing.
     "numpy.ndarray": typing.List[typing.Any],
     "std.array[int, 4]": typing.List[int],
-    "std.array[float, 4]": typing.List[float]
+    "std.array[float, 4]": typing.List[float],
 })
 
 type_map.update({
