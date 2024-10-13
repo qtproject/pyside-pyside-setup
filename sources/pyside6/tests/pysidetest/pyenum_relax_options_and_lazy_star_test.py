@@ -93,10 +93,12 @@ def testprog64(option):
         """))
 
 
-def testprog128(option):
+def testprog128_lazy_star(option):
     return runtest(dedent(f"""
         sys.pyside6_option_python_enum = {option}
         from PySide6 import QtCore
+        # triggers a lazy star import error:
+        from PySide6.QtCore import *
         QtCore.Qt.Key(1234567)
         """))
 
@@ -129,8 +131,8 @@ class TestPyEnumRelaxOption(unittest.TestCase):
         self.assertFalse(testprog64(64))
 
     def test_Missing(self):
-        self.assertTrue(testprog128(1))
-        self.assertFalse(testprog128(128))
+        self.assertTrue(testprog128_lazy_star(1))
+        self.assertFalse(testprog128_lazy_star(128))
 
 
 if __name__ == "__main__":

@@ -93,8 +93,10 @@ static void incarnateHelper(PyObject *module, const std::string_view names,
         startPos = dotPos + 1;
         dotPos = names.find('.', startPos);
     }
-    // now we have the type to create.
+    // now we have the type to create. (May be done already)
     auto funcIter = nameToFunc.find(std::string(names));
+    if (funcIter == nameToFunc.end())
+        return;
     // - call this function that returns a PyTypeObject
     auto tcStruct = funcIter->second;
     auto initFunc = tcStruct.func;
@@ -174,11 +176,15 @@ void resolveLazyClasses(PyObject *module)
     // - see if there are still unloaded elements
     auto &nameToFunc = tableIter->second;
 
-    // - incarnate all types.
+    // - incarnate all toplevel types. Subtypes will be handled there.
     while (!nameToFunc.empty()) {
         auto it = nameToFunc.begin();
         auto attrNameStr = it->first;
-        incarnateType(module, attrNameStr.c_str(), nameToFunc);
+        if (attrNameStr.find('.') == std::string::npos) {
+            incarnateType(module, attrNameStr.c_str(), nameToFunc);
+        } else {
+            nameToFunc.erase(it);
+        }
     }
 }
 
