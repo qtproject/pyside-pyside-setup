@@ -23,7 +23,7 @@
         <object-type name="QAdditiveClipBlend"/>
         <object-type name="QAnimationAspect"/>
         <object-type name="QAnimationCallback">
-            <enum-type name="Flag"/>
+            <enum-type name="Flag" flags="Flags"/>
         </object-type>
         <object-type name="QAnimationClip"/>
         <object-type name="QAnimationClipLoader">
