@@ -271,6 +271,20 @@ PyObject *_get_class_of_descr(PyObject *ob)
     return PyObject_GetAttr(ob, PyMagicName::objclass());
 }
 
+PyObject *_address_ptr_to_stringlist(const char **sig_strings)
+{
+    PyObject *res_list = PyList_New(0);
+    if (res_list == nullptr)
+        return nullptr;
+    for (; *sig_strings != nullptr; ++sig_strings) {
+        const char *sig_str = *sig_strings;
+        AutoDecRef pystr(Py_BuildValue("s", sig_str));
+        if (pystr.isNull() || PyList_Append(res_list, pystr) < 0)
+            return nullptr;
+    }
+    return res_list;
+}
+
 PyObject *_address_to_stringlist(PyObject *numkey)
 {
     /*
@@ -280,20 +294,10 @@ PyObject *_address_to_stringlist(PyObject *numkey)
      * When needed in `PySide_BuildSignatureProps`, the strings are
      * finally materialized.
      */
-    Py_ssize_t address = PyNumber_AsSsize_t(numkey, PyExc_ValueError);
-    if (address == -1 && PyErr_Occurred())
+    void *address = PyLong_AsVoidPtr(numkey);
+    if (address == nullptr && PyErr_Occurred())
         return nullptr;
-    char **sig_strings = reinterpret_cast<char **>(address);
-    PyObject *res_list = PyList_New(0);
-    if (res_list == nullptr)
-        return nullptr;
-    for (; *sig_strings != nullptr; ++sig_strings) {
-        char *sig_str = *sig_strings;
-        AutoDecRef pystr(Py_BuildValue("s", sig_str));
-        if (pystr.isNull() || PyList_Append(res_list, pystr) < 0)
-            return nullptr;
-    }
-    return res_list;
+    return _address_ptr_to_stringlist(reinterpret_cast<const char **>(address));
 }
 
 int _build_func_to_type(PyObject *obtype)

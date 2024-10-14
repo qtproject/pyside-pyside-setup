@@ -343,7 +343,7 @@ static int PySide_BuildSignatureArgs(PyObject *obtype_mod, const char *signature
      * address of a string array. It will not be turned into a real
      * string list until really used by Python. This is quite optimal.
      */
-    AutoDecRef numkey(Py_BuildValue("n", signatures));
+    AutoDecRef numkey(PyLong_FromVoidPtr(signatures));
     if (type_key.isNull() || numkey.isNull()
         || PyDict_SetItem(pyside_globals->arg_dict, type_key, numkey) < 0)
         return -1;
@@ -354,10 +354,13 @@ static int PySide_BuildSignatureArgs(PyObject *obtype_mod, const char *signature
     return PyDict_SetItem(pyside_globals->map_dict, type_key, obtype_mod) == 0 ? 0 : -1;
 }
 
-static int PySide_BuildSignatureArgsByte(PyObject *obtype_mod, const uint8_t signatures[], size_t size)
+static int PySide_BuildSignatureArgsByte(PyObject *obtype_mod, const uint8_t *signatures,
+                                         size_t size)
 {
     AutoDecRef type_key(GetTypeKey(obtype_mod));
-    AutoDecRef numkey(Py_BuildValue("(nn)", signatures, size));
+    AutoDecRef numkey(PyTuple_New(2));
+    PyTuple_SetItem(numkey.object(), 0, PyLong_FromVoidPtr(const_cast<uint8_t *>(signatures)));
+    PyTuple_SetItem(numkey.object(), 1, PyLong_FromSize_t(size));
     if (type_key.isNull() || numkey.isNull()
         || PyDict_SetItem(pyside_globals->arg_dict, type_key, numkey) < 0)
         return -1;
@@ -435,13 +438,12 @@ PyObject *PySide_BuildSignatureProps(PyObject *type_key)
     if (PyTuple_Check(numkey)) {
         PyObject *obAddress = PyTuple_GetItem(numkey, 0);
         PyObject *obSize = PyTuple_GetItem(numkey, 1);
-        const size_t addr = PyLong_AsSize_t(obAddress);
+        const void *addr = PyLong_AsVoidPtr(obAddress);
         const Py_ssize_t size = PyLong_AsSsize_t(obSize);
         const char **cstrings = bytesToStrings(reinterpret_cast<const uint8_t *>(addr), size);
         if (cstrings == nullptr)
             return nullptr;
-        AutoDecRef locKey(Py_BuildValue("n", cstrings));
-        strings.reset(_address_to_stringlist(locKey));
+        strings.reset(_address_ptr_to_stringlist(cstrings));
     } else {
         strings.reset(_address_to_stringlist(numkey));
     }
