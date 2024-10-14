@@ -105,7 +105,7 @@ upload_pyside: &upload_pyside
 
 instructions:
      LicenseCheck:
-      - !include "{{pyside/pyside-setup}}/execute_license_check.yaml"
+      - !include "{{qt/qtbase}}/run_license_check.yaml"
      Build:
       - !include "{{pyside/pyside-setup}}/common_environment.yaml"
       - !include "{{pyside/pyside-setup}}/find_path_to_msvc_compiler.yaml"
