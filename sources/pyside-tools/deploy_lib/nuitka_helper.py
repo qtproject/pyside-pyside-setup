@@ -11,7 +11,7 @@ import shlex
 import sys
 from pathlib import Path
 
-from . import MAJOR_VERSION, DesignStudio, run_command
+from . import MAJOR_VERSION, DesignStudio, run_command, DEFAULT_IGNORE_DIRS
 from .config import DesktopConfig
 
 
@@ -113,13 +113,26 @@ class Nuitka:
                         extra_args.append(f"--include-data-dir={subdir}="
                                           f"./{subdir.name}")
             else:
+                # include all the subdirectories in the project directory as data directories
+                # This includes all the qml modules
+                all_relevant_subdirs = []
+                for subdir in source_file.parent.iterdir():
+                    if subdir.is_dir() and subdir.name not in DEFAULT_IGNORE_DIRS:
+                        extra_args.append(f"--include-data-dir={subdir}="
+                                          f"./{subdir.name}")
+                        all_relevant_subdirs.append(subdir)
+
+                # find all the qml files that are not included via the data directories
+                extra_qml_files = [file for file in qml_files
+                                   if file.parent not in all_relevant_subdirs]
+
                 # This will generate options for each file using:
                 #     --include-data-files=ABSOLUTE_PATH_TO_FILE=RELATIVE_PATH_TO ROOT
-                # for each file. This will preserve the directory structure of QML resources.
+                # for each file.
                 qml_args.extend(
                     [f"--include-data-files={qml_file.resolve()}="
                      f"./{qml_file.resolve().relative_to(source_file.resolve().parent)}"
-                     for qml_file in qml_files]
+                     for qml_file in extra_qml_files]
                 )
             # add qml plugin. The `qml`` plugin name is not present in the module json files shipped
             # with Qt and hence not in `qt_plugins``. However, Nuitka uses the 'qml' plugin name to
