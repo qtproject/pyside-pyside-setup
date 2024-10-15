@@ -59,6 +59,7 @@ class ModuleData:
     typesystems: list[str] = field(default_factory=list)
     include: list[str] = field(default_factory=list)
     glue: list[str] = field(default_factory=list)
+    doc_glue: list[str] = field(default_factory=list)
     metatypes: list[str] = field(default_factory=list)
     plugins: list[str] = field(default_factory=list)
 
@@ -87,6 +88,7 @@ class ModuleData:
         self.typesystems.append(f"typesystem_{_lo}.xml")
         self.include.append(f"Qt{self.name}/*.h")
         self.glue.append(f"qt{_lo}.cpp")
+        self.doc_glue.append(f"qt{_lo}.rst")
         if not len(self.metatypes):
             self.metatypes.append(f"qt6{_lo}_relwithdebinfo_metatypes.json")
 
@@ -122,6 +124,7 @@ class ModuleData:
         self.typesystems = [f"typesystems/{i}" for i in self.typesystems]
         self.include = [f"include/{i}" for i in self.include]
         self.glue = [f"glue/{i}" for i in self.glue]
+        self.doc_glue = [f"doc/{i}" for i in self.doc_glue]
 
     def macos_pyside_wrappers_lib(self, s):
         if s.startswith("Qt"):

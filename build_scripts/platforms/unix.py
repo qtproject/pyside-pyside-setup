@@ -199,10 +199,10 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
 
             # <install>/share/{st_package_name}/glue/* ->
             #   <setup>/{st_package_name}/glue
-            copydir(
-                "{install_dir}/share/{st_package_name}/glue",
-                "{st_build_dir}/{st_package_name}/glue",
-                _vars=_vars)
+            for glue in ['glue', 'doc']:
+                source = "{install_dir}/share/{st_package_name}/" + glue
+                target = "{st_build_dir}/{st_package_name}/" + glue
+                copydir(source, target, _vars=_vars)
 
         if not is_android:
             # <source>/pyside6/{st_package_name}/support/* ->
