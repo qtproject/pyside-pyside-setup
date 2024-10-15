@@ -153,10 +153,9 @@ def prepare_packages_win32(pyside_build, _vars):
 
         # <install>/share/{st_package_name}/glue/* ->
         #   <setup>/{st_package_name}/glue
-        copydir(
-            "{install_dir}/share/{st_package_name}/glue",
-            destination_dir / "glue",
-            _vars=_vars)
+        for glue in ['glue', 'doc']:
+            source = "{install_dir}/share/{st_package_name}/" + glue
+            copydir(source, destination_dir / glue, _vars=_vars)
 
         # <source>/pyside6/{st_package_name}/support/* ->
         #   <setup>/{st_package_name}/support/*
