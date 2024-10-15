@@ -5,7 +5,7 @@ Distributing Your Application to Other Systems/Platforms
 
 After developing a couple of applications, you might want to distribute them to
 other users. In case you do not have much experience with Python packages, you
-might have even asked: *How do I create a Python executable?*.
+might have even asked: *How do I create a Python executable?*
 
 If you come from compiled programming languages, deployment is something
 almost trivial, but for Python is a bit difficult.
@@ -15,7 +15,7 @@ distributing your virtual environment content to other users.
 
 .. important:: As Python does not support WebAssembly and mobile platforms,
    such as Android and iOS, you cannot deploy applications to these platforms
-   directly, and you require advanced processes to do so.
+   directly. Deploying applications to these platforms require advanced processes.
 
 .. note:: For embedded systems, you currently need to build |project| for your
    target platform, and deploy the installation alongside your application.
