@@ -228,7 +228,7 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
     Py_XINCREF(pData->pyTypeObject);
     pData->typeName = PySide::Signal::getTypeName(type);
 
-    if (pData->typeName.isEmpty())
+    if (type == Py_None || pData->typeName.isEmpty())
         PyErr_SetString(PyExc_TypeError, "Invalid property type or type name.");
     else if (pData->constant && ((pData->fset && pData->fset != Py_None)
                                  || (pData->notify && pData->notify != Py_None)))
