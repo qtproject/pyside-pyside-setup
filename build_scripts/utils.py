@@ -1174,3 +1174,7 @@ def copy_qt_metatypes(destination_qt_dir, _vars):
     copydir(qt_meta_types_dir, destination_qt_dir / rel_meta_data_dir,
             _filter=["*.json"],
             recursive=False, _vars=_vars, force_copy_symlinks=True)
+
+
+def in_coin():
+    return os.environ.get('COIN_LAUNCH_PARAMETERS', None) is not None
