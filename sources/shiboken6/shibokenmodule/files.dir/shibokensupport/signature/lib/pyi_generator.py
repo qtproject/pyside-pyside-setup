@@ -118,10 +118,10 @@ class Formatter(Writer):
             parts = [x.strip() for x in cls.split(body) if x.strip() not in ("", ",")]
             if name == "typing.Optional":
                 parts.append("None")
-            parts = list(("None" if part == "NoneType" else part) for part in parts)
             res = " | ".join(parts)
             source = source[: start] + res + source[end :]
-        return source
+        # Replace all "NoneType" strings by "None" which is a typing convention.
+        return source.replace("NoneType", "None")
 
     # self.level is maintained by enum_sig.py
     # self.is_method() is true for non-plain functions.
@@ -333,7 +333,6 @@ def generate_pyi(import_name, outpath, options):
                         wr.print(f"from {mod} import {import_args}")
                 wr.print()
                 wr.print()
-                wr.print("NoneType: typing.TypeAlias = type[None]")
                 # We use it only in QtCore at the moment, but this
                 # could be extended to other modules. (must import QObject then)
                 if import_name == "PySide6.QtCore":
