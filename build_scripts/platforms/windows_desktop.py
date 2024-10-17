@@ -12,7 +12,7 @@ from ..log import log
 from ..config import config
 from ..options import OPTION
 from ..utils import (copydir, copyfile, copy_qt_metatypes,
-                     download_and_extract_7z, filter_match, makefile)
+                     download_and_extract_7z, filter_match, makefile, in_coin)
 from .. import PYSIDE, SHIBOKEN, PYSIDE_WINDOWS_BIN_TOOLS
 
 
@@ -217,8 +217,7 @@ msvc_redist = [
 
 
 def copy_msvc_redist_files(destination_dir):
-    in_coin = os.environ.get('COIN_LAUNCH_PARAMETERS', None)
-    if in_coin is None:
+    if not in_coin():
         log.info("Qt dependency DLLs (MSVC redist) will not be copied.")
         return
 
@@ -244,10 +243,9 @@ def copy_msvc_redist_files(destination_dir):
         raise FileNotFoundError(msg)
 
 
-def copy_qt_dependency_dlls(_vars, destination_qt_dir, artifacts):
+def download_qt_dependency_dlls(_vars, destination_qt_dir, artifacts):
     # Extract Qt dependency dlls when building on Qt CI.
-    in_coin = os.environ.get('COIN_LAUNCH_PARAMETERS', None)
-    if in_coin is None:
+    if not in_coin():
         log.info("Qt dependency DLLs will not be downloaded and extracted.")
         return
 
@@ -284,37 +282,29 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
         copy_qt_permanent_artifacts = False
 
     # <qt>/bin/*.dll and Qt *.exe -> <setup>/{st_package_name}
-    qt_artifacts_permanent = [
+    qt_multimedia_artifacts_permanent = [
         "avcodec-*.dll",
         "avformat-*.dll",
         "avutil-*.dll",
         "swresample-*.dll",
-        "swscale-*.dll",
-        "opengl*.dll",
-        "designer.exe",
-        "linguist.exe",
-        "lrelease.exe",
-        "lupdate.exe",
-        "lconvert.exe",
-        "qtdiag.exe"
+        "swscale-*.dll"
     ]
 
-    # Choose which EGL library variants to copy.
-    qt_artifacts_egl = [
-        "libEGL{}.dll",
-        "libGLESv2{}.dll"
-    ]
-    if pyside_build.qtinfo.build_type != 'debug_and_release':
-        egl_suffix = '*'
-    elif pyside_build.debug:
-        egl_suffix = 'd'
-    else:
-        egl_suffix = ''
-    qt_artifacts_egl = [a.format(egl_suffix) for a in qt_artifacts_egl]
+    def qt_rhi_artifacts_permanent():
+        result = ["opengl*.dll"]
+        if pyside_build.qtinfo.build_type != 'debug_and_release':
+            suffix = '*'
+        elif pyside_build.debug:
+            suffix = 'd'
+        else:
+            suffix = ''
+        result.append(f"libEGL{suffix}.dll")  # Needed in Qt 6 (ANGLE)?
+        result.append(f"libGLESv2{suffix}.dll")
+        return result
 
     if copy_qt_permanent_artifacts:
-        artifacts = qt_artifacts_permanent + qt_artifacts_egl
-        copy_qt_dependency_dlls(_vars, destination_qt_dir, artifacts)
+        artifacts = qt_multimedia_artifacts_permanent + qt_rhi_artifacts_permanent()
+        download_qt_dependency_dlls(_vars, destination_qt_dir, artifacts)
 
     # <qt>/bin/*.dll and Qt *.pdbs -> <setup>/{st_package_name} part two
     # File filter to copy only debug or only release files.
