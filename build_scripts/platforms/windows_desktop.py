@@ -251,7 +251,7 @@ def download_qt_dependency_dlls(_vars, destination_qt_dir, artifacts):
 
     with tempfile.TemporaryDirectory() as temp_path:
         redist_url = "https://download.qt.io/development_releases/prebuilt/vcredist/"
-        zip_file = "pyside_qt_deps_680_64_2022.7z"
+        zip_file = "pyside_qt_deps_681_64_2022.7z"
         try:
             download_and_extract_7z(redist_url + zip_file, temp_path)
         except Exception as e:
@@ -303,8 +303,14 @@ def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):
         return result
 
     if copy_qt_permanent_artifacts:
-        artifacts = qt_multimedia_artifacts_permanent + qt_rhi_artifacts_permanent()
-        download_qt_dependency_dlls(_vars, destination_qt_dir, artifacts)
+        download_qt_dependency_dlls(_vars, destination_qt_dir, qt_rhi_artifacts_permanent())
+        if not copydir("{qt_bin_dir}", destination_qt_dir,
+                       _filter=qt_multimedia_artifacts_permanent,
+                       recursive=False, _vars=_vars):
+            msg = "The multimedia artifacts were not found."
+            log.warning(msg)
+            if in_coin():  # Allow local developer builds without -DQT_DEPLOY_FFMPEG...
+                raise FileNotFoundError(msg)
 
     # <qt>/bin/*.dll and Qt *.pdbs -> <setup>/{st_package_name} part two
     # File filter to copy only debug or only release files.
