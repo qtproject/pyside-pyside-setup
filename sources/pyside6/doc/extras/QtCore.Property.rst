@@ -63,6 +63,10 @@ Despite the fact that the latter has an extra ``freset`` function, the usage
 of properties is almost the same. The main difference is that ``QtCore.Property``
 requires a ``type`` parameter.
 
+
+.. note:: ``Python`` property objects do *not* work in QML; ``QtCore.Property``
+          needs to be used.
+
 In the above example, the following lines would be equivalent properties:
 
 .. code-block:: python
