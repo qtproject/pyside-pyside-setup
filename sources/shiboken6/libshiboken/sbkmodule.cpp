@@ -166,6 +166,7 @@ void loadLazyClassesWithName(const char *name)
 
 // PYSIDE-2404: Completely load all not yet loaded classes.
 //              This is needed to resolve a star import.
+// PYSIDE-2898: Use a name list to pick the toplevel types.
 void resolveLazyClasses(PyObject *module)
 {
     // - locate the module in the moduleTofuncs mapping
@@ -176,15 +177,19 @@ void resolveLazyClasses(PyObject *module)
     // - see if there are still unloaded elements
     auto &nameToFunc = tableIter->second;
 
-    // - incarnate all toplevel types. Subtypes will be handled there.
-    while (!nameToFunc.empty()) {
-        auto it = nameToFunc.begin();
-        auto attrNameStr = it->first;
-        if (attrNameStr.find('.') == std::string::npos) {
-            incarnateType(module, attrNameStr.c_str(), nameToFunc);
-        } else {
-            nameToFunc.erase(it);
-        }
+    // - keep a filtered list of names without the subtypes
+    std::vector<std::string> names{};
+    names.reserve(nameToFunc.size());
+    for (const auto &funcIter : nameToFunc) {
+        if (funcIter.first.find('.') == std::string::npos)
+            names.push_back(funcIter.first);
+    }
+
+    // - incarnate all toplevel types. Subtypes are handled there.
+    for (const auto &nameIter : names) {
+        auto funcIter = nameToFunc.find(nameIter);
+        if (funcIter != nameToFunc.end())
+            incarnateType(module, nameIter.c_str(), nameToFunc);
     }
 }
 

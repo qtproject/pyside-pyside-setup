@@ -42,13 +42,12 @@ def runtest(program):
         print(preamble, program, file=fp)
         fp.close()
         try:
-            subprocess.run([sys.executable, fp.name], check=True, capture_output=True)
-            return True
-        except subprocess.CalledProcessError as e:
-            print(f"\ninfo: {e.__class__.__name__}: {e.stderr}")
-            return False
+            ret = subprocess.run([sys.executable, fp.name], check=False, capture_output=True)
         finally:
             os.unlink(fp.name)
+        for line in ret.stdout.decode("utf-8").split("\n"):
+            print(line)
+        return ret.returncode == 0
 
 
 def testprog2(option):
@@ -97,8 +96,13 @@ def testprog128_lazy_star(option):
     return runtest(dedent(f"""
         sys.pyside6_option_python_enum = {option}
         from PySide6 import QtCore
+
         # triggers a lazy star import error:
         from PySide6.QtCore import *
+        # triggers a NameError
+        QDirListing.DirEntry
+        # End of lazy star
+
         QtCore.Qt.Key(1234567)
         """))
 
