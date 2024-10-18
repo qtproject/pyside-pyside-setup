@@ -3,6 +3,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Window
 import QtQuick3D
 import QtQuick3D.Helpers
@@ -18,8 +19,44 @@ Window {
     OSMManager {
         id: osmManager
 
+        onBuildingsDataReady: function( geoVariantsList, tileX, tileY, zoomLevel ){
+            buildingModels.addModel(geoVariantsList, tileX, tileY, zoomLevel)
+        }
+
         onMapsDataReady: function( mapData, tileX, tileY, zoomLevel ){
             mapModels.addModel(mapData, tileX, tileY, zoomLevel)
+        }
+    }
+
+    Component {
+        id: chunkModelBuilding
+        Node {
+            id: node
+            property variant geoVariantsList: null
+            property int tileX: 0
+            property int tileY: 0
+            property int zoomLevel: 0
+            Model {
+                id: model
+                scale: Qt.vector3d(1, 1, 1)
+
+                OSMGeometry {
+                    id: osmGeometry
+                    Component.onCompleted: updateData( node.geoVariantsList )
+                    onGeometryReady:{
+                        model.geometry = osmGeometry
+                    }
+                }
+                materials: [
+
+                    CustomMaterial {
+                        shadingMode: CustomMaterial.Shaded
+                        cullMode: Material.BackFaceCulling
+                        vertexShader: "customshaderbuildings.vert"
+                        fragmentShader: "customshaderbuildings.frag"
+                    }
+                ]
+            }
         }
     }
 
@@ -108,6 +145,20 @@ Window {
             color: Qt.rgba(1.0, 1.0, 0.95, 1.0)
             ambientColor: Qt.rgba(0.5, 0.45, 0.45, 1.0)
             rotation: Quaternion.fromEulerAngles(-10, -45, 0)
+        }
+
+        Node {
+            id: buildingModels
+
+            function addModel(geoVariantsList, tileX, tileY, zoomLevel)
+            {
+                chunkModelBuilding.createObject( buildingModels, {
+                                                    "geoVariantsList": geoVariantsList,
+                                                    "tileX": tileX,
+                                                    "tileY": tileY,
+                                                    "zoomLevel": zoomLevel
+                                                } )
+            }
         }
 
         Node {
@@ -232,4 +283,16 @@ Window {
             }
         }
     }
+
+    Action {
+        id: quitAction
+        shortcut: StandardKey.Quit
+        onTriggered: close()
+    }
+
+    onClosing: function(close) {
+        osmManager.stop();
+        close.accepted = true;
+    }
+
 }

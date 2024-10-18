@@ -1,6 +1,8 @@
 {
-    "files": ["main.py", "manager.py", "request.py",
+    "files": ["main.py", "manager.py", "request.py", "geometry.py",
               "OSMBuildings/Main.qml", "OSMBuildings/OSMCameraController.qml",
               "OSMBuildings/qmldir",
+              "OSMBuildings/customshaderbuildings.frag",
+              "OSMBuildings/customshaderbuildings.vert",
               "OSMBuildings/customshadertiles.frag"]
 }

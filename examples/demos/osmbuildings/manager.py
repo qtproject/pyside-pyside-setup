@@ -4,7 +4,7 @@
 from PySide6.QtQuick3D import QQuick3DTextureData
 from PySide6.QtQml import QmlElement
 from PySide6.QtGui import QImage, QVector3D
-from PySide6.QtCore import QByteArray, QObject, Property, Slot, Signal
+from PySide6.QtCore import QByteArray, QObject, QThreadPool, Property, Slot, Signal
 
 from request import OSMTileData, OSMRequest
 
@@ -17,7 +17,9 @@ QML_IMPORT_MAJOR_VERSION = 1
 @QmlElement
 class OSMManager(QObject):
 
+    buildingsDataReady = Signal(list, int, int, int)
     mapsDataReady = Signal(QByteArray, int, int, int)
+    buildings = True
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -26,13 +28,30 @@ class OSMManager(QObject):
         self.m_startBuildingTileY = 10746
         self.m_tileSizeX = 37
         self.m_tileSizeY = 37
+        self.m_request.buildingsDataReady.connect(self._slotBuildingsDataReady)
         self.m_request.mapsDataReady.connect(self._slotMapsDataReady)
+        self.m_buildingsHash = set()
+
+    @Slot()
+    def stop(self):
+        self.m_request.stop()
+        self.m_request.buildingsDataReady.disconnect(self._slotBuildingsDataReady)
+        self.m_request.mapsDataReady.disconnect(self._slotMapsDataReady)
+        # Stop the threads started by OSMGeometry in the global pool
+        QThreadPool.globalInstance().waitForDone()
 
     def tileSizeX(self):
         return self.m_tileSizeX
 
     def tileSizeY(self):
         return self.m_tileSizeY
+
+    @Slot(list, int, int, int)
+    def _slotBuildingsDataReady(self, geoVariantsList, tileX, tileY, zoomLevel):
+        self.m_buildingsHash.add(OSMTileData(tileX, tileY, zoomLevel))
+        self.buildingsDataReady.emit(geoVariantsList, tileX - self.m_startBuildingTileX,
+                                     tileY - self.m_startBuildingTileY,
+                                     zoomLevel)
 
     @Slot(QByteArray, int, int, int)
     def _slotMapsDataReady(self, mapData, tileX, tileY, zoomLevel):
@@ -71,10 +90,14 @@ class OSMManager(QObject):
 
         queue.sort(key=tile_sort_key)
 
+        if self.buildings:
+            self.m_request.getBuildingsData(queue.copy())
         self.m_request.getMapsData(queue.copy())
 
     def addBuildingRequestToQueue(self, queue, tileX, tileY, zoomLevel=15):
-        queue.append(OSMTileData(tileX, tileY, zoomLevel))
+        data = OSMTileData(tileX, tileY, zoomLevel)
+        if data not in self.m_buildingsHash:
+            queue.append(data)
 
     @Slot(result=bool)
     def isDemoToken(self):
