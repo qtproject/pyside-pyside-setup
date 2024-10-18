@@ -1,7 +1,6 @@
 import os
 import sys
 from pathlib import Path
-from textwrap import dedent
 
 # __all__ is also corrected below.
 __all__ = [@init_modules@]
@@ -18,7 +17,7 @@ def _additional_dll_directories(package_dir):
     if root.suffix == '.zip':
         return []
     shiboken6 = root / 'shiboken6'
-    if shiboken6.is_dir(): # Standard case, only shiboken6 is needed
+    if shiboken6.is_dir():  # Standard case, only shiboken6 is needed
         return [shiboken6]
     # The below code is for the build process when generate_pyi.py
     # is executed in the build directory. We need libpyside and Qt in addition.
@@ -31,9 +30,9 @@ def _additional_dll_directories(package_dir):
         result.append(libpysideqml)
     for path in os.environ.get('PATH').split(';'):
         if path:
-             if (Path(path) / 'qmake.exe').exists():
-                 result.append(path)
-                 break
+            if (Path(path) / 'qmake.exe').exists():
+                result.append(path)
+                break
     return result
 
 
