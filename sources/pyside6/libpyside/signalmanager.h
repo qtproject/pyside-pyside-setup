@@ -80,6 +80,7 @@ public:
     static int callPythonMetaMethod(const QByteArrayList &parameterTypes,
                                     const char *returnType /* = nullptr */,
                                     void **args, PyObject *callable);
+    static void handleMetaCallError();
 };
 
 }
