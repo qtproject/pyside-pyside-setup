@@ -300,7 +300,11 @@ void SignalManagerPrivate::handleMetaCallError(QObject *object, int *result)
         if (idOpt.has_value())
             *result = idOpt.value();
     }
+    SignalManager::handleMetaCallError();
+}
 
+void SignalManager::handleMetaCallError()
+{
     const int reclimit = Py_GetRecursionLimit();
     // Inspired by Python's errors.c: PyErr_GivenExceptionMatches() function.
     // Temporarily bump the recursion limit, so that PyErr_Print will not raise a recursion
