@@ -65,6 +65,10 @@ void CallbackDynamicSlot::call(const QByteArrayList &parameterTypes, const char 
                                void **cppArgs)
 {
     SignalManager::callPythonMetaMethod(parameterTypes, returnType, cppArgs, m_callback);
+    // SignalManager::callPythonMetaMethod might have failed, in that case we have to print the
+    // error so it considered "handled".
+    if (PyErr_Occurred() != nullptr)
+        SignalManager::handleMetaCallError();
 }
 
 void CallbackDynamicSlot::formatDebug(QDebug &debug) const
@@ -116,6 +120,10 @@ void MethodDynamicSlot::call(const QByteArrayList &parameterTypes, const char *r
                                                            m_pythonSelf, nullptr));
     SignalManager::callPythonMetaMethod(parameterTypes, returnType,
                                         cppArgs, callable.object());
+    // SignalManager::callPythonMetaMethod might have failed, in that case we have to print the
+    // error so it considered "handled".
+    if (PyErr_Occurred() != nullptr)
+        SignalManager::handleMetaCallError();
 }
 
 void MethodDynamicSlot::formatDebug(QDebug &debug) const
