@@ -2,8 +2,8 @@ import os
 import sys
 from pathlib import Path
 
-# __all__ is also corrected below.
-__all__ = [@init_modules@]
+# __all__ is computed below.
+__pre_all__ = [@init_modules@]
 __version__ = "@FINAL_PACKAGE_VERSION@"
 __version_info__ = (@BINDING_API_MAJOR_VERSION@, @BINDING_API_MINOR_VERSION@, @BINDING_API_MICRO_VERSION@, "@BINDING_API_PRE_RELEASE_VERSION_TYPE@", "@BINDING_API_PRE_RELEASE_VERSION@")
 
@@ -96,20 +96,13 @@ def _find_all_qt_modules():
     # Since the wheel split, the __all__ variable cannot be computed statically,
     # because we don't know all modules in advance.
 
-    # Instead, we look into the file system and quickly build a list of all
-    # existing .pyi files, because importing is not desired and also impossible during import.
-    # By using the initially created list, we can keep some order intact.
+    # Instead, we use __getattr__ which is supported since Python 3.7
+    # and create the __all__ list on demand when needed.
     location = Path(__file__).resolve().parent
-
-    # Note: We should _not_ call this function while still building, but use the existing value!
-    in_build = Path("@CMAKE_BINARY_DIR@") in location.parents
-
-    if in_build:
-        return __all__
-
     files = os.listdir(location)
-    unordered = set(name[:-4] for name in files if name.startswith("Qt") and name.endswith(".pyi"))
-    ordered_part = __all__
+    unordered = set(name[: name.find(".")] for name in files if name.startswith("Qt") and (
+                                                                name.endswith((".pyd", ".so"))))
+    ordered_part = __pre_all__
     result = []
     for name in ordered_part:
         if name in unordered:
@@ -119,5 +112,13 @@ def _find_all_qt_modules():
     return result
 
 
-__all__ = _find_all_qt_modules()
+# Provide the __all__ variable only on access.
+def __getattr__(name: str) -> list[str]:
+    if name == "__all__":
+        global __all__
+        __all__ = _find_all_qt_modules()
+        return __all__
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}' :)")
+
+
 _setupQtDirectories()
