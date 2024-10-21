@@ -59,20 +59,6 @@ def elapsed():
     return int(time.time() - start_time)
 
 
-def _fix_pyside_init_py(path):
-    """For reproducible builds, strip out the part that contains the build-directory
-       from PySide's __init__.py (PYSIDE-2895/QTBUG-105926)."""
-    START_MARKER = "\n    # Note: We should _not_ call this function"
-    END_MARKER = "return __all__\n"
-    contents = path.read_text(encoding='utf-8')
-    start = contents.find(START_MARKER)
-    end = contents.find(END_MARKER, start + len(START_MARKER)) if start != -1 else -1
-    if end == -1:
-        raise SetupError(f"Unable to fix {path}")
-    fixed_contents = contents[:start] + contents[end + len(END_MARKER):]
-    path.write_text(fixed_contents, encoding='utf-8')
-
-
 def get_setuptools_extension_modules():
     # Setting py_limited_api on the extension is the "correct" thing
     # to do, but it doesn't actually do anything, because we
@@ -480,9 +466,6 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
                 except Exception as e:
                     log.warning(f'problem renaming "{self.st_build_dir}"')
                     log.warning(f'ignored error: {type(e).__name__}: {e}')
-
-                if config.is_internal_pyside_build():
-                    _fix_pyside_init_py(_dst / "__init__.py")
 
         else:
             log.info("Skipped preparing and building packages.")
