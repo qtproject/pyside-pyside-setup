@@ -4,8 +4,9 @@
 Signals and Slots
 =================
 
-Due to the nature of Qt, ``QObject``\s require a way to communicate, and that's
-the reason for this mechanism to be a **central feature of Qt**.
+Due to the nature of Qt, :class:`~PySide6.QtCore.QObject`\s
+require a way to communicate, and that's the reason for this mechanism to
+be a **central feature of Qt**.
 
 In simple terms, you can understand **Signal and Slots** in the same way you
 interact with the lights in your house. When you move the light switch
@@ -26,8 +27,9 @@ etc.
     there are essential differences that make it an unintuitive approach,
     like ensuring the type correctness of callback arguments, and some others.
 
-All classes that inherit from ``QObject`` or one of its subclasses, like
-``QWidget`` can contain signals and slots. **Signals are emitted by objects**
+All classes that inherit from :class:`~PySide6.QtCore.QObject` or one of its
+subclasses, like :class:`~PySide6.QtWidgets.QWidget`, can contain signals and
+slots. **Signals are emitted by objects**
 when they change their state in a way that may be interesting to other objects.
 This is all the object does to communicate. It does not know or care whether
 anything is receiving the signals it emits. This is true information
@@ -44,12 +46,14 @@ a signal directly to another signal. (This will emit the second signal
 immediately whenever the first is emitted.)
 
 Qt's widgets have many predefined signals and slots. For example,
-``QAbstractButton`` (base class of buttons in Qt) has a ``clicked()``
-signal and ``QLineEdit`` (single line input field) has a slot named
-``clear()``. So, a text input field with a button to clear the text
-could be implemented by placing a ``QToolButton`` to the right of the
-``QLineEdit`` and connecting its ``clicked()`` signal to the slot
-``clear()``. This is done using the ``connect()`` method of the signal:
+:class:`~PySide6.QtWidgets.QAbstractButton` (base class of buttons in Qt)
+has a ``clicked()`` signal and :class:`~PySide6.QtWidgets.QLineEdit`
+(single line input field) has a slot named ``clear()``.
+So, a text input field with a button to clear the text
+could be implemented by placing a :class:`~PySide6.QtWidgets.QToolButton`
+to the right of the ``QLineEdit`` and connecting its ``clicked()`` signal to the slot
+``clear()``. This is done using the :meth:`~PySide6.QtCore.Signal.connect`
+method of the signal:
 
 .. code-block:: python
 
@@ -57,8 +61,10 @@ could be implemented by placing a ``QToolButton`` to the right of the
     line_edit = QLineEdit()
     button.clicked.connect(line_edit.clear)
 
-``connect()`` returns a ``QMetaObject.Connection`` object, which can be
-used with the ``disconnect()`` method to sever the connection.
+:meth:`~PySide6.QtCore.Signal.connect` returns a
+:class:`~PySide6.QtCore.QMetaObject.Connection` object, which can be
+used with the :meth:`~PySide6.QtCore.Signal.disconnect` method to sever
+the connection.
 
 Signals can also be connected to free functions:
 
@@ -82,13 +88,17 @@ designed in the
 `Signal-Slot Editor <https://doc.qt.io/qt-6/designer-connection-mode.html>`_
 of *Qt Widgets Designer*.
 
+The :meth:`~PySide6.QtCore.Signal.connect` function takes an optional parameter
+of :class:`~PySide6.QtCore.Qt.ConnectionType` that specifies the behavior
+with regards to threads and event loops.
+
 The Signal Class
 ----------------
 
 When writing classes in Python, signals are declared as class level
-variables of the class ``QtCore.Signal()``. A QWidget-based button
-that emits a ``clicked()`` signal could look as
-follows:
+variables of the class :class:`~PySide6.QtCore.Signal`.
+A :class:`~PySide6.QtWidgets.QWidget`-based button that emits a
+``clicked()`` signal could look as follows:
 
 .. code-block:: python
 
@@ -147,8 +157,8 @@ The Slot Class
 --------------
 
 Slots in QObject-derived classes should be indicated by the decorator
-``@QtCore.Slot()``. Again, to define a signature just pass the types
-similar to the ``QtCore.Signal()`` class.
+:deco:`~PySide6.QtCore.Slot`. Again, to define a signature just pass the types
+similar to the :class:`~PySide6.QtCore.Signal` class.
 
 .. code-block:: python
 
@@ -164,9 +174,9 @@ nothing is passed as name then the new slot will have the same name as the
 function that is being decorated.
 
 We recommend marking all methods used by signal connections with a
-``@QtCore.Slot()`` decorator. Not doing causes run-time overhead due to the
-method being added to the ``QMetaObject`` when creating the connection. This is
-particularly important for ``QObject`` classes registered with QML, where
+:deco:`~PySide6.QtCore.Slot` decorator. Not doing causes run-time overhead
+due to the method being added to the ``QMetaObject`` when creating the connection.
+This is particularly important for ``QObject`` classes registered with QML, where
 missing decorators can introduce bugs.
 
 Missing decorators can be diagnosed by setting activating warnings of the
@@ -261,4 +271,4 @@ when introspecting ``QMetaObject``:
     for m in range(mo.methodOffset(), mo.methodCount()):
         print(mo.method(m).methodSignature())
 
-Slots should be decorated using :ref:`@Slot <slot-decorator>`.
+Slots should be decorated using :deco:`~PySide6.QtCore.Slot`.
