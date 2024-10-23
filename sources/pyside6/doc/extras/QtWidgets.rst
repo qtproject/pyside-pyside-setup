@@ -63,7 +63,7 @@ classes that manage the way data is presented to the user. Data-driven
 applications which use lists and tables are structured to separate the
 data and view using models, views, and delegates.
 
-    .. image:: images/windows-treeview.png
+    .. image:: images/fusion-treeview.png
 
 Graphics View
 ^^^^^^^^^^^^^
