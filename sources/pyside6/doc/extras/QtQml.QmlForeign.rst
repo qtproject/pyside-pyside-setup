@@ -1,28 +1,28 @@
 .. currentmodule:: PySide6.QtQml
 .. py:decorator:: QmlForeign
 
-This decorator can be used to change the type that is created by QML.
+    This decorator can be used to change the type that is created by QML.
 
-This is useful for registering types that cannot be amended by adding the
-QmlElement decorator, for example because they belong to 3rdparty libraries.
+    This is useful for registering types that cannot be amended by adding the
+    :deco:`QmlElement` decorator, for example because they belong to 3rdparty libraries.
 
-.. code-block:: python
+    .. code-block:: python
 
-    QML_IMPORT_NAME = "com.library.name"
-    QML_IMPORT_MAJOR_VERSION = 1
-    QML_IMPORT_MINOR_VERSION = 0 # Optional
+        QML_IMPORT_NAME = "com.library.name"
+        QML_IMPORT_MAJOR_VERSION = 1
+        QML_IMPORT_MINOR_VERSION = 0 # Optional
 
-    @QmlNamedElement("QWidget")
-    @QmlForeign(QWidget)
-    class ForeignWidgetHelperClass(QObject):
-          ...
+        @QmlNamedElement("QWidget")
+        @QmlForeign(QWidget)
+        class ForeignWidgetHelperClass(QObject):
+              ...
 
-Afterwards the class may be used in QML:
+    Afterwards the class may be used in QML:
 
-.. code-block:: javascript
+    .. code-block:: javascript
 
-    import com.library.name 1.0
+        import com.library.name 1.0
 
-    QWidget {
-        // ...
-    }
+        QWidget {
+            // ...
+        }
