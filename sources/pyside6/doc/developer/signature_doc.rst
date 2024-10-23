@@ -110,26 +110,26 @@ The C++ code involved with the signature module is completely in the file
 shiboken6/libshiboken/signature.cpp . All other functionality is implemented in
 the ``signature`` Python package. It has the following structure::
 
- sources/shiboken6/shibokenmodule/files.dir/shibokensupport
- ├── __init__.py
- ├── feature.py
- ├── fix-complaints.py
- ├── shibokensupport.pyproject
- └── signature
-     ├── PSF-3.7.0.txt
-     ├── __init__.py
-     ├── errorhandler.py
-     ├── importhandler.py
-     ├── layout.py
-     ├── lib
-     │   ├── __init__.py
-     │   ├── enum_sig.py
-     │   ├── pyi_generator.py
-     │   └── tool.py
-     ├── loader.py
-     ├── mapping.py
-     ├── parser.py
-     └── qt_attribution.json
+    sources/shiboken6/shibokenmodule/files.dir/shibokensupport
+    ├── __init__.py
+    ├── feature.py
+    ├── fix-complaints.py
+    ├── shibokensupport.pyproject
+    └── signature
+        ├── PSF-3.7.0.txt
+        ├── __init__.py
+        ├── errorhandler.py
+        ├── importhandler.py
+        ├── layout.py
+        ├── lib
+        │   ├── __init__.py
+        │   ├── enum_sig.py
+        │   ├── pyi_generator.py
+        │   └── tool.py
+        ├── loader.py
+        ├── mapping.py
+        ├── parser.py
+        └── qt_attribution.json
 
 Really important are the **parser**, **mapping**, **errorhandler**, **enum_sig**,
 **layout** and **loader** modules. The rest is needed to create Python 2 compatibility
@@ -348,6 +348,23 @@ Additionally, the ``__doc__`` attribute of PySide methods was not set.
 It was easy to get a nice ``help()`` feature by creating signatures
 as default content for docstrings.
 This was implemented in ``Qt For Python 5.12.1``.
+
+
+Update and Future of the Signature Module
+-----------------------------------------
+
+.. code-block:: bash
+
+    PYSIDE-2101: The __signature__ attribute is gone due to rlcompleter.
+
+End of 2022, a change to the rlcompleter module made it impossible to further
+support an unofficial ``__signature__`` attribute in PySide. From then on,
+the functionality of signatures was kept by a ``get_signature`` function.
+
+Over the years, the requirements for the correctness of the generated pyi files
+have increased drastically, and a lot of effort went into making the generated
+``.pyi`` files correct for the current ``mypy`` tool. Mode information
+about the kind of errors corrected can be found in the :ref:`mypy-correctnes` section.
 
 
 Literature
