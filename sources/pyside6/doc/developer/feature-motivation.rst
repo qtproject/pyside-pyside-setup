@@ -44,8 +44,8 @@ be influenced by this decision and can stay unchanged.
 Why dunder, and why not __future__?
 -----------------------------------
 
-Especially in Python 2, but in a few cases also in Python 3, there is
-the future statement
+In a few cases in Python 3, for example to allow new typing syntax in 3.9
+from more recent versions, there is the future statement
 
 .. code-block:: python
 

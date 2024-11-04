@@ -62,19 +62,16 @@ supported. We redefined it as macro ``Py_VerboseFlag`` which calls ``Pep_Verbose
 unicodeobject.h
 ~~~~~~~~~~~~~~~
 
-The macro ``PyUnicode_GET_SIZE`` was removed and replaced by ``PepUnicode_GetLength``
-which evaluates to ``PyUnicode_GetSize`` for Python 2 and ``PyUnicode_GetLength`` for Python 3.
 Since Python 3.3, ``PyUnicode_GetSize`` would have the bad side effect of requiring the GIL!
 
 
 dictobject.h
 ~~~~~~~~~~~~
 
-``PyDict_GetItem`` also exists in a ``PyDict_GetItemWithError`` version that does
-not suppress errors. This suppression has the side effect of touching global
-structures. This function exists in Python 2 only since Python 2.7.12 and has
-a different name. We simply implemented the function.
-Needed to avoid the GIL when accessing dictionaries.
+``PyDict_GetItem`` also exists in a ``PyDict_GetItemWithError`` version that
+does not suppress errors. This suppression has the side effect of touching
+global structures. We simply implemented the function. Needed to avoid the GIL
+when accessing dictionaries.
 
 
 methodobject.h

@@ -3,7 +3,7 @@
 The signature C extension
 =========================
 
-This module is a C extension for CPython 3.X.
+This module is a C extension for CPython 3.5 and up.
 Its purpose is to provide support for the ``__signature__`` attribute
 of builtin PyCFunction objects.
 
@@ -130,9 +130,9 @@ the ``signature`` Python package. It has the following structure::
         ├── parser.py
         └── qt_attribution.json
 
-Really important are the **parser**, **mapping**, **errorhandler**, **enum_sig**,
-**layout** and **loader** modules. The rest is needed to create Python 2 compatibility
-or be compatible with embedding and installers.
+Really important are the **parser**, **mapping**, **errorhandler**,
+**enum_sig**, **layout** and **loader** modules. The rest is needed to be
+compatible with embedding and installers.
 
 
 **loader.py**
@@ -171,16 +171,6 @@ or be compatible with embedding and installers.
     As more applications used the signature module, different formatting of signatures
     was needed. To support that, we created the function ``create_signature``, which
     has a parameter to choose from some predefined layouts.
-
-
-**typing27.py**
-    Python 2 has no typing module at all. This is a backport of the minimum that is needed.
-
-
-**backport_inspect.py**
-    Python 2 has an inspect module, but lacks the signature functions, completely.
-    This module adds the missing functionality, which is merged at runtime into
-    the inspect module.
 
 
 Multiple Arities
