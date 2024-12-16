@@ -133,7 +133,13 @@
   <object-type name="QAccessibleObject" qt-register-metatype="base"/>
   <object-type name="QAccessibleSelectionInterface" since="6.7"/>
   <object-type name="QAccessibleTableCellInterface"/>
-  <object-type name="QAccessibleTextInterface"/>
+  <object-type name="QAccessibleTextInterface">
+    <modify-function signature="attributes(int,int*,int*)const" remove="all"/>
+    <modify-function signature="selection(int,int*,int*)const" remove="all"/>
+    <modify-function signature="textAfterOffset(int,QAccessible::TextBoundaryType,int*,int*) const" remove="all"/>
+    <modify-function signature="textAtOffset(int,QAccessible::TextBoundaryType,int*,int*) const" remove="all"/>
+    <modify-function signature="textBeforeOffset(int,QAccessible::TextBoundaryType,int*,int*) const" remove="all"/>
+  </object-type>
   <object-type name="QAccessibleValueInterface"/>
 
   <object-type name="QAccessibleEvent"
@@ -270,6 +276,7 @@
 
   <value-type name="QGlyphRun">
     <enum-type name="GlyphRunFlag" flags="GlyphRunFlags"/>
+    <modify-function signature="setRawData(const quint32*,const QPointF*,int)" remove="all"/>
   </value-type>
 
   <value-type name="QStaticText">
@@ -2897,6 +2904,7 @@
       <modify-function signature="glEndTransformFeedback()" remove="all"/>
       <modify-function signature="glPauseTransformFeedback()" remove="all"/>
       <modify-function signature="glResumeTransformFeedback()" remove="all"/>
+      <modify-function signature="glGetnUniformfv(unsigned int,int,int,float*)" remove="all"/>
       <modify-function signature="^glClearBuffer.*\(.*\*.*$">
           <modify-argument index="3"><array/></modify-argument>
       </modify-function>
