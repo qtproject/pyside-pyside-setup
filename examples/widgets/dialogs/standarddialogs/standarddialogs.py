@@ -8,7 +8,7 @@ from __future__ import annotations
 import sys
 from textwrap import dedent
 
-from PySide6.QtCore import QDir, Qt, Slot
+from PySide6.QtCore import QDir, QLibraryInfo, QLocale, QTranslator, Qt, Slot
 from PySide6.QtGui import QFont, QPalette
 from PySide6.QtWidgets import (QApplication, QColorDialog, QCheckBox, QDialog,
                                QErrorMessage, QFontDialog, QFileDialog, QFrame,
@@ -432,6 +432,10 @@ class Dialog(QDialog):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    translator = QTranslator(app)
+    if translator.load(QLocale.system(), "qtbase", "_",
+                       QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)):
+        app.installTranslator(translator)
     dialog = Dialog()
     availableGeometry = dialog.screen().availableGeometry()
     dialog.resize(availableGeometry.width() / 3, availableGeometry.height() * 2 / 3)
