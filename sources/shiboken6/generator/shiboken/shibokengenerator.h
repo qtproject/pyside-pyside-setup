@@ -165,8 +165,8 @@ protected:
      *   \param arg_count the number of function arguments
      */
     QString functionSignature(const AbstractMetaFunctionCPtr &func,
-                              const QString &prepend = QString(),
-                              const QString &append = QString(),
+                              const QString &className = {},
+                              const QString &append = {},
                               Options options = NoOption,
                               int arg_count = -1) const;
 

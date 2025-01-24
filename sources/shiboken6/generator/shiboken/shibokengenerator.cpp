@@ -1192,14 +1192,15 @@ QString ShibokenGenerator::functionReturnType(const AbstractMetaFunctionCPtr &fu
 }
 
 QString ShibokenGenerator::functionSignature(const AbstractMetaFunctionCPtr &func,
-                                             const QString &prepend,
+                                             const QString &className,
                                              const QString &append,
                                              Options options,
                                              int /* argCount */) const
 {
     StringStream s(TextStream::Language::Cpp);
     // The actual function
-    if (!options.testFlag(Option::SkipDefaultValues) && func->isStatic()) // Declaration
+    const bool isDeclaration = !options.testFlag(Option::SkipDefaultValues);
+    if (isDeclaration && func->isStatic())
         s << "static ";
     if (func->isEmptyFunction() || func->needsReturnType())
         s << functionReturnType(func, options) << ' ';
@@ -1211,7 +1212,9 @@ QString ShibokenGenerator::functionSignature(const AbstractMetaFunctionCPtr &fun
     if (func->isConstructor())
         name = wrapperName(func->ownerClass());
 
-    s << prepend << name << append << '(';
+    if (!isDeclaration && !className.isEmpty())
+        s << className << "::";
+    s << name << append << '(';
     writeFunctionArguments(s, func, options);
     s << ')';
 
