@@ -123,6 +123,11 @@ void HeaderGenerator::generateSmartPointerClass(TextStream &s,
     doGenerateClass(s, classContext);
 }
 
+QString HeaderGenerator::headerGuard(const QString &className)
+{
+    return "SBK_"_L1 + getFilteredCppSignatureString(className.toUpper()) + "_H"_L1;
+}
+
 void HeaderGenerator::doGenerateClass(TextStream &s, const GeneratorContext &classContext) const
 {
     const AbstractMetaClassCPtr metaClass = classContext.metaClass();
@@ -131,11 +136,11 @@ void HeaderGenerator::doGenerateClass(TextStream &s, const GeneratorContext &cla
     s << licenseComment();
 
     QString wrapperName = classContext.effectiveClassName();
-    QString outerHeaderGuard = getFilteredCppSignatureString(wrapperName);
+    QString outerHeaderGuard = headerGuard(classContext.effectiveClassName());
 
     // Header
-    s << "#ifndef SBK_" << outerHeaderGuard << "_H\n";
-    s << "#define SBK_" << outerHeaderGuard << "_H\n\n";
+    s << "#ifndef " << outerHeaderGuard << '\n'
+      << "#define " << outerHeaderGuard << "\n\n";
 
     if (!avoidProtectedHack())
         s << protectedHackDefine;
@@ -148,7 +153,7 @@ void HeaderGenerator::doGenerateClass(TextStream &s, const GeneratorContext &cla
     if (classContext.useWrapper())
         writeWrapperClass(s, wrapperName, classContext);
 
-    s << "#endif // SBK_" << outerHeaderGuard << "_H\n\n";
+    s << "#endif // " << outerHeaderGuard << '\n';
 }
 
 void HeaderGenerator::writeWrapperClass(TextStream &s,
@@ -192,16 +197,15 @@ void HeaderGenerator::writeInheritedWrapperClassDeclaration(TextStream &s,
                                                             const GeneratorContext &classContext) const
 {
     const QString wrapperName = classContext.effectiveClassName();
-    const QString innerHeaderGuard =
-        getFilteredCppSignatureString(wrapperName).toUpper();
+    const QString innerHeaderGuard = headerGuard(wrapperName);
 
-    s << "#  ifndef SBK_" << innerHeaderGuard << "_H\n"
-      << "#  define SBK_" << innerHeaderGuard << "_H\n\n"
+    s << "#  ifndef " << innerHeaderGuard << '\n'
+      << "#  define " << innerHeaderGuard << "\n\n"
       << "// Inherited base class:\n";
 
     writeWrapperClassDeclaration(s, wrapperName, classContext);
 
-    s << "#  endif // SBK_" << innerHeaderGuard << "_H\n\n";
+    s << "#  endif // " << innerHeaderGuard << "\n\n";
 }
 
 void HeaderGenerator::writeWrapperClassDeclaration(TextStream &s,

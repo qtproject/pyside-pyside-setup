@@ -39,6 +39,7 @@ private:
     using InheritedOverloadSet = QSet<AbstractMetaFunctionCPtr>;
     using IndexValues = QList<IndexValue>;
 
+    static QString headerGuard(const QString &className);
     void doGenerateClass(TextStream &s, const GeneratorContext &classContext) const;
     IndexValues collectTypeIndexes(const AbstractMetaClassCList &classList);
     IndexValues collectConverterIndexes() const;
