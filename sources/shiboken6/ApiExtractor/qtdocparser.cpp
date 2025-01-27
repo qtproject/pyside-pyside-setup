@@ -469,6 +469,7 @@ bool QtDocParser::extractEnumDocumentation(const ClassDocumentation &classDocume
             doc.insert(firstPara + 6, note);
         }
     }
+    doc.replace("::None</term>"_L1, "::None\\_</term>"_L1);
     Documentation enumDoc(doc, {}, sourceFileName);
     meta_enum.setDocumentation(enumDoc);
     return true;
