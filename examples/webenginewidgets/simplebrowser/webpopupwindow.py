@@ -13,7 +13,6 @@ class WebPopupWindow(QWidget):
 
     def __init__(self, view, profile, parent=None):
         super().__init__(parent, Qt.Window)
-        self.m_urlLineEdit = QLineEdit(self)
         self._url_line_edit = QLineEdit()
         self._fav_action = QAction(self)
         self._view = view

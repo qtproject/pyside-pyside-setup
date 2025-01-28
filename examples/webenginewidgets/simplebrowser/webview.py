@@ -5,21 +5,24 @@ from __future__ import annotations
 from functools import partial
 
 from PySide6.QtWebEngineCore import (QWebEngineFileSystemAccessRequest,
-                                     QWebEnginePage)
+                                     QWebEnginePage,
+                                     QWebEngineWebAuthUxRequest)
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
 from PySide6.QtWidgets import QDialog, QMessageBox, QStyle
 from PySide6.QtGui import QIcon
 from PySide6.QtNetwork import QAuthenticator
-from PySide6.QtCore import QTimer, Signal, Slot
+from PySide6.QtCore import QTimer, Signal, Slot, Qt
 
 from webpage import WebPage
 from webpopupwindow import WebPopupWindow
 from ui_passworddialog import Ui_PasswordDialog
 from ui_certificateerrordialog import Ui_CertificateErrorDialog
+from webauthdialog import WebAuthDialog
 
 
 def question_for_feature(feature):
+
     if feature == QWebEnginePage.Geolocation:
         return "Allow %1 to access your location information?"
     if feature == QWebEnginePage.MediaAudioCapture:
@@ -59,6 +62,7 @@ class WebView(QWebEngineView):
         self._loading_icon = QIcon.fromTheme(QIcon.ThemeIcon.ViewRefresh,
                                              QIcon(":view-refresh.png"))
         self._default_icon = QIcon(":text-html.png")
+        self.auth_dialog = None
 
     @Slot()
     def _load_started(self):
@@ -105,6 +109,7 @@ class WebView(QWebEngineView):
                 self.handle_proxy_authentication_required)
             old_page.registerProtocolHandlerRequested.disconnect(
                 self.handle_register_protocol_handler_requested)
+            old_page.webAuthUxRequested.disconnect(self.handle_web_auth_ux_requested)
             old_page.fileSystemAccessRequested.disconnect(self.handle_file_system_access_requested)
 
         self.create_web_action_trigger(page, QWebEnginePage.WebAction.Forward)
@@ -118,6 +123,7 @@ class WebView(QWebEngineView):
         page.proxyAuthenticationRequired.connect(self.handle_proxy_authentication_required)
         page.registerProtocolHandlerRequested.connect(
             self.handle_register_protocol_handler_requested)
+        page.webAuthUxRequested.connect(self.handle_web_auth_ux_requested)
         page.fileSystemAccessRequested.connect(self.handle_file_system_access_requested)
 
     def load_progress(self):
@@ -264,6 +270,28 @@ class WebView(QWebEngineView):
         else:
             # Set authenticator null if dialog is cancelled
             auth = QAuthenticator()
+
+    def handle_web_auth_ux_requested(self, request):
+        if self.auth_dialog:
+            self.auth_dialog.deleteLater()
+
+        self.auth_dialog = WebAuthDialog(request, self.window())
+        self.auth_dialog.setModal(False)
+        self.auth_dialog.setWindowFlags(self.auth_dialog.windowFlags()
+                                        & ~Qt.WindowContextHelpButtonHint)
+
+        request.stateChanged.connect(self.on_state_changed)
+        self.auth_dialog.show()
+
+    def on_state_changed(self, state):
+        if state in (QWebEngineWebAuthUxRequest.WebAuthUxState.Completed,
+                     QWebEngineWebAuthUxRequest.WebAuthUxState.Cancelled):
+            if self.auth_dialog:
+                self.auth_dialog.deleteLater()
+                self.auth_dialog = None
+        else:
+            if self.auth_dialog:
+                self.auth_dialog.update_display()
 
     def handle_register_protocol_handler_requested(self, request):
         host = request.origin().host()

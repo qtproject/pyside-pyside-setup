@@ -16,6 +16,7 @@ from browser import Browser
 
 import data.rc_simplebrowser  # noqa: F401
 
+
 if __name__ == "__main__":
     parser = ArgumentParser(description="Qt Widgets Web Browser",
                             formatter_class=RawTextHelpFormatter)
@@ -34,13 +35,15 @@ if __name__ == "__main__":
     QLoggingCategory.setFilterRules("qt.webenginecontext.debug=true")
 
     s = QWebEngineProfile.defaultProfile().settings()
-    s.setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, True)
-    s.setAttribute(QWebEngineSettings.WebAttribute.DnsPrefetchEnabled, True)
+    s.setAttribute(QWebEngineSettings.PluginsEnabled, True)
+    s.setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
+    s.setAttribute(QWebEngineSettings.ScreenCaptureEnabled, True)
 
     browser = Browser()
     window = browser.create_hidden_window()
 
-    url = QUrl.fromUserInput(args.url) if args.url else QUrl("https://www.qt.io")
+    url = QUrl.fromUserInput(args.url) if args.url else QUrl("chrome://qt")
     window.tab_widget().set_url(url)
     window.show()
+
     sys.exit(app.exec())
