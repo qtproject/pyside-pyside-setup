@@ -67,7 +67,7 @@ class PdfViewer(AbstractViewer):
         actionZoomIn.setToolTip("Increase zoom level")
         actionZoomIn.triggered.connect(self.onActionZoomInTriggered)
 
-        icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomIn,
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomOut,
                                QIcon(":/demos/documentviewer/images/zoom-out.png"))
         actionZoomOut = self._toolBar.addAction(icon, "Zoom out", QKeySequence.StandardKey.ZoomOut)
         actionZoomOut.setToolTip("Decrease zoom level")

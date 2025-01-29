@@ -1,0 +1,11 @@
+``ImageViewer`` displays images as supported by ``QImageReader``, using
+a QLabel.
+
+In the constructor, we increase the allocation limit of ``QImageReader`` to
+allow for larger photos.
+
+In the ``openFile()`` function, we load the image and determine its size.
+If it is larger than the screen, we downscale it to screen size, maintaining
+the aspect ratio. This calculation has to be done in native pixels, and
+the device pixel ratio needs to be set on the resulting pixmap for it to
+appear crisp.

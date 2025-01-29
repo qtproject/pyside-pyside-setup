@@ -4,6 +4,7 @@
               "main.py",
               "mainwindow.py",
               "mainwindow.ui",
+              "imageviewer/imageviewer.py",
               "jsonviewer/jsonviewer.py",
               "pdfviewer/pdfviewer.py",
               "pdfviewer/zoomselector.py",
