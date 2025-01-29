@@ -67,7 +67,7 @@ Documentation
     .. grid-item-card::
         :class-item: text-center
 
-        Reference and functionallities.
+        Reference and functionality.
         +++
         .. button-ref:: typesystem
             :color: primary

@@ -60,6 +60,7 @@ Port a Qt example
   ``snippets-translate``).
 - Note that our examples need to have unique names due to the doc build.
 - Verify that all slots are decorated using ``@Slot``.
+- Enumerations should be fully qualified (PYSIDE-1735).
 - Add a ``.pyproject`` file (verify later on that docs build).
 - Add a ``doc`` directory and descriptive ``.rst`` file,
   and a screenshot if suitable (use ``optipng`` to reduce file size).

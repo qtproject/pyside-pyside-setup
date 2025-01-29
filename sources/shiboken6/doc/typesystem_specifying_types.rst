@@ -889,8 +889,6 @@ for enclosing added functions referring to those classes within
 Other keywords can be specified using the
 :ref:`--keywords <conditional_keywords>` command line option.
 
-.. _private_types:
-
 Defining Entities
 ^^^^^^^^^^^^^^^^^
 
@@ -903,6 +901,8 @@ It is possible to define entities using a simple processing instruction:
 
 This allows for defining function signatures depending on platform
 in conjunction with :ref:`conditional_processing`.
+
+.. _private_types:
 
 Private Types
 ^^^^^^^^^^^^^
