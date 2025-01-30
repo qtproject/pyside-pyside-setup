@@ -562,7 +562,7 @@ static QString resolveFile(const QStringList &locations, const QString &path)
         if (QFileInfo::exists(location))
             return location;
     }
-    return QString();
+    return {};
 }
 
 enum class SnippetType
@@ -1610,7 +1610,7 @@ void QtXmlToSphinx::Table::formatDebug(QDebug &debug) const
 
 void QtXmlToSphinx::stripPythonQualifiers(QString *s)
 {
-    const int lastSep = s->lastIndexOf(u'.');
+    const auto lastSep = s->lastIndexOf(u'.');
     if (lastSep != -1)
         s->remove(0, lastSep + 1);
 }

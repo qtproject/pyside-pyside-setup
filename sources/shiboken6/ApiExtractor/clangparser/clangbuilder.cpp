@@ -190,7 +190,7 @@ public:
     bool visitHeader(const QString &fileName) const;
     static const char *specialSystemHeaderReason(SpecialSystemHeader sh);
 
-    void setFileName(const CXCursor &cursor, _CodeModelItem *item);
+    void setFileName(const CXCursor &cursor, _CodeModelItem *item) const;
 
     BaseVisitor *m_baseVisitor;
     CodeModel *m_model;
@@ -225,7 +225,7 @@ public:
 bool BuilderPrivate::addClass(const CXCursor &cursor, CodeModel::ClassType t)
 {
     QString className = getCursorSpelling(cursor);
-    m_currentClass.reset(new _ClassModelItem(m_model, className));
+    m_currentClass = std::make_shared<_ClassModelItem>(m_model, className);
     setFileName(cursor, m_currentClass.get());
     m_currentClass->setClassType(t);
     // Some inner class? Note that it does not need to be (lexically) contained in a
@@ -631,7 +631,7 @@ ClassModelItem BuilderPrivate::currentTemplateClass() const
 void BuilderPrivate::startTemplateTypeAlias(const CXCursor &cursor)
 {
     const QString target = getCursorSpelling(cursor);
-    m_currentTemplateTypeAlias.reset(new _TemplateTypeAliasModelItem(m_model, target));
+    m_currentTemplateTypeAlias = std::make_shared<_TemplateTypeAliasModelItem>(m_model, target);
     setFileName(cursor, m_currentTemplateTypeAlias.get());
     m_currentTemplateTypeAlias->setScope(m_scope);
 }
@@ -741,7 +741,7 @@ void BuilderPrivate::addBaseClass(const CXCursor &cursor)
     m_currentClass->addBaseClass({baseClass.first, baseClass.second, access});
 }
 
-void BuilderPrivate::setFileName(const CXCursor &cursor, _CodeModelItem *item)
+void BuilderPrivate::setFileName(const CXCursor &cursor, _CodeModelItem *item) const
 {
     const SourceRange range = getCursorRange(cursor);
     QString file = m_baseVisitor->getFileName(range.first.file);
@@ -982,7 +982,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
 #endif
             kind = EnumClass;
         }
-        d->m_currentEnum.reset(new _EnumModelItem(d->m_model, name));
+        d->m_currentEnum = std::make_shared<_EnumModelItem>(d->m_model, name);
         d->setFileName(cursor, d->m_currentEnum.get());
         d->m_currentEnum->setScope(d->m_scope);
         d->m_currentEnum->setEnumKind(kind);
@@ -1009,7 +1009,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         else
             enumValue.setUnsignedValue(clang_getEnumConstantDeclUnsignedValue(cursor));
         auto enumConstant = std::make_shared<_EnumeratorModelItem>(d->m_model, name);
-        enumConstant->setStringValue(d->cursorValueExpression(this, cursor));
+        enumConstant->setStringValue(BuilderPrivate::cursorValueExpression(this, cursor));
         enumConstant->setValue(enumValue);
         if (clang_getCursorAvailability(cursor) == CXAvailability_Deprecated)
             enumConstant->setDeprecated(true);
@@ -1092,7 +1092,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         // Treat namespaces separately to allow for extending namespaces
         // in subsequent modules.
         NamespaceModelItem namespaceItem = parentNamespaceItem->findNamespace(name);
-        namespaceItem.reset(new _NamespaceModelItem(d->m_model, name));
+        namespaceItem = std::make_shared<_NamespaceModelItem>(d->m_model, name);
         d->setFileName(cursor, namespaceItem.get());
         namespaceItem->setScope(d->m_scope);
         namespaceItem->setType(type);
@@ -1105,12 +1105,12 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         // and function pointer typedefs.
         if (!d->m_currentArgument && d->m_currentFunction) {
             const QString name = getCursorSpelling(cursor);
-            d->m_currentArgument.reset(new _ArgumentModelItem(d->m_model, name));
+            d->m_currentArgument = std::make_shared<_ArgumentModelItem>(d->m_model, name);
             const auto type = clang_getCursorType(cursor);
             d->m_currentArgument->setScopeResolution(hasScopeResolution(type));
             d->m_currentArgument->setType(d->createTypeInfo(type));
             d->m_currentFunction->addArgument(d->m_currentArgument);
-            QString defaultValueExpression = d->cursorValueExpression(this, cursor);
+            QString defaultValueExpression = BuilderPrivate::cursorValueExpression(this, cursor);
             if (!defaultValueExpression.isEmpty()) {
                 d->m_currentArgument->setDefaultValueExpression(defaultValueExpression);
                 d->m_currentArgument->setDefaultValue(true);

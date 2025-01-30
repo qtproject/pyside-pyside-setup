@@ -356,9 +356,9 @@ int shibokenMain(const QStringList &argV)
     extractor.setTypeSystem(commonOptions.typeSystemFileName);
 
     ApiExtractorFlags apiExtractorFlags;
-    if (generators.constFirst()->usePySideExtensions())
+    if (Generator::usePySideExtensions())
         apiExtractorFlags.setFlag(ApiExtractorFlag::UsePySideExtensions);
-    if (generators.constFirst()->avoidProtectedHack())
+    if (Generator::avoidProtectedHack())
         apiExtractorFlags.setFlag(ApiExtractorFlag::AvoidProtectedHack);
     const std::optional<ApiExtractorResult> apiOpt = extractor.run(apiExtractorFlags);
 

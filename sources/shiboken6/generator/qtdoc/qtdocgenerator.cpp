@@ -1791,7 +1791,7 @@ static QString imageRelativeTargetDirFromContext(const QString &scope,
 ResolvedDocImage
 QtDocGenerator::resolveImage(const QtXmlToSphinxImage &image,
                              const QStringList &sourceDirs,
-                             const QString &targetDir) const
+                             const QString &targetDir)
 {
     QString hrefBase;
     QString hrefName = image.href; // split "images/a.png"
@@ -1871,7 +1871,7 @@ static void copyParsedImage(const ResolvedDocImage &image, QDir &targetDir)
 // Copy parsed images from WebXML to doc/base
 void QtDocGenerator::copyParsedImages(const QtXmlToSphinxImages &images,
                                       const QStringList &sourceDocumentFiles,
-                                      const QString &targetDocumentDir) const
+                                      const QString &targetDocumentDir)
 {
     if (images.isEmpty())
         return;

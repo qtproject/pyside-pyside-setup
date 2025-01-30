@@ -294,7 +294,7 @@ QString AbstractMetaType::originalTypeDescription() const
 void AbstractMetaType::setOriginalTemplateType(const AbstractMetaType &type)
 {
     if (!d->m_originalTemplateType || *d->m_originalTemplateType != type)
-        d->m_originalTemplateType.reset(new AbstractMetaType(type));
+        d->m_originalTemplateType = std::make_shared<AbstractMetaType>(type);
 }
 
 const AbstractMetaType *AbstractMetaType::originalTemplateType() const
@@ -446,7 +446,7 @@ const AbstractMetaType *AbstractMetaType::arrayElementType() const
 void AbstractMetaType::setArrayElementType(const AbstractMetaType &t)
 {
     if (!d->m_arrayElementType || *d->m_arrayElementType != t) {
-        d->m_arrayElementType.reset(new AbstractMetaType(t));
+        d->m_arrayElementType = std::make_shared<AbstractMetaType>(t);
         d->m_signaturesDirty = true;
     }
 }
@@ -679,7 +679,7 @@ QString AbstractMetaTypeData::formatPythonSignature() const
     if (m_pattern == AbstractMetaType::ArrayPattern) {
         // Build nested array dimensions a[2][3] in correct order
         result += m_arrayElementType->formatPythonSignature();
-        const int arrayPos = result.indexOf(u'[');
+        const auto arrayPos = result.indexOf(u'[');
         if (arrayPos != -1)
             result.insert(arrayPos, formatArraySize(m_arrayElementCount));
         else
@@ -795,7 +795,7 @@ const AbstractMetaType *AbstractMetaType::viewOn() const
 void AbstractMetaType::setViewOn(const AbstractMetaType &v)
 {
     if (!d->m_viewOn || *d->m_viewOn != v)
-        d->m_viewOn.reset(new AbstractMetaType(v));
+        d->m_viewOn = std::make_shared<AbstractMetaType>(v);
 }
 
 AbstractMetaType AbstractMetaType::createVoid()

@@ -620,11 +620,8 @@ AbstractMetaFunctionCPtr AbstractMetaClass::findQtIsNullMethod() const
 
 bool AbstractMetaClass::hasProtectedFields() const
 {
-    for (const AbstractMetaField &field : d->m_fields) {
-        if (field.isProtected())
-            return true;
-    }
-    return false;
+    return std::any_of(d->m_fields.cbegin(), d->m_fields.cend(),
+                       [](const AbstractMetaField &f) { return f.isProtected(); });
 }
 
 const TypeEntryCList &AbstractMetaClass::templateArguments() const

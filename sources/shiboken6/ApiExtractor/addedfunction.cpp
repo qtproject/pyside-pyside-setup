@@ -54,6 +54,8 @@ static qsizetype parameterTokenEnd(qsizetype startPos, QStringView paramString)
         case ']':
             --nestingLevel;
             break;
+        default:
+            break;
         }
     }
     return end;

@@ -953,7 +953,7 @@ PrimitiveTypeEntryPtr PrimitiveTypeEntry::referencedTypeEntry() const
     return d->m_referencedTypeEntry;
 }
 
-void PrimitiveTypeEntry::setReferencedTypeEntry(PrimitiveTypeEntryPtr referencedTypeEntry)
+void PrimitiveTypeEntry::setReferencedTypeEntry(const PrimitiveTypeEntryPtr &referencedTypeEntry)
 {
     S_D(PrimitiveTypeEntry);
     d->m_referencedTypeEntry = referencedTypeEntry;
@@ -1915,7 +1915,7 @@ ComplexTypeEntryPtr TypedefEntry::target() const
     return d->m_target;
 }
 
-void TypedefEntry::setTarget(ComplexTypeEntryPtr target)
+void TypedefEntry::setTarget(const ComplexTypeEntryPtr &target)
 {
     S_D(TypedefEntry);
     d->m_target = target;

@@ -28,8 +28,6 @@ QString SourceFileCache::getFileName(CXFile file)
 std::string_view SourceFileCache::getCodeSnippet(const CXCursor &cursor,
                                                  QString *errorMessage)
 {
-    static const char empty[] = "";
-
     if (errorMessage)
         errorMessage->clear();
 
@@ -37,12 +35,12 @@ std::string_view SourceFileCache::getCodeSnippet(const CXCursor &cursor,
     // Quick check for equal locations: Frequently happens if the code is
     // the result of a macro expansion
     if (range.first == range.second)
-         return std::string_view(empty, 0);
+        return {};
 
     if (range.first.file != range.second.file) {
         if (errorMessage)
             *errorMessage = "Range spans several files"_L1;
-        return std::string_view(empty, 0);
+        return {};
     }
 
     auto it = m_fileBufferCache.find(range.first.file);
@@ -51,7 +49,7 @@ std::string_view SourceFileCache::getCodeSnippet(const CXCursor &cursor,
         if (fileName.isEmpty()) {
             if (errorMessage)
                  *errorMessage = "Range has no file"_L1;
-            return std::string_view(empty, 0);
+            return {};
         }
         QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly)) {
@@ -60,7 +58,7 @@ std::string_view SourceFileCache::getCodeSnippet(const CXCursor &cursor,
                 str << "Cannot open \"" << QDir::toNativeSeparators(fileName)
                     << "\": " << file.errorString();
             }
-            return std::string_view(empty, 0);
+            return {};
         }
         it = m_fileBufferCache.insert(range.first.file, file.readAll());
     }
@@ -76,7 +74,7 @@ std::string_view SourceFileCache::getCodeSnippet(const CXCursor &cursor,
                 << QDir::toNativeSeparators(getFileName(range.first.file))
                 << "\" (" << contents.size() << ')';
         }
-        return std::string_view(empty, 0);
+        return {};
     }
 
     return std::string_view(contents.constData() + pos, end - pos);

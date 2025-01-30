@@ -152,20 +152,16 @@ void OptionsParser::process(Options *o)
 
 bool OptionsParserList::handleBoolOption(const QString &key, OptionSource source)
 {
-    for (const auto &p : std::as_const(m_parsers)) {
-        if (p->handleBoolOption(key, source))
-            return true;
-    }
-    return false;
+    auto pred = [&key, source](const OptionsParserPtr &p) { return p->handleBoolOption(key, source); };
+    return std::any_of(m_parsers.cbegin(), m_parsers.cend(), pred);
 }
 
 bool OptionsParserList::handleOption(const QString &key, const QString &value, OptionSource source)
 {
-    for (const auto &p : std::as_const(m_parsers)) {
-        if (p->handleOption(key, value, source))
-            return true;
-    }
-    return false;
+    auto pred = [&key, &value, source](const OptionsParserPtr &p) {
+        return p->handleOption(key, value, source);
+    };
+    return std::any_of(m_parsers.cbegin(), m_parsers.cend(), pred);
 }
 
 static void processOption(const QString &o, OptionSource source,

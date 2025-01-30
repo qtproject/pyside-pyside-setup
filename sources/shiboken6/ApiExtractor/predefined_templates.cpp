@@ -254,8 +254,8 @@ QByteArray containerTypeSystemSnippet(const char *name, const char *type,
                                       const char *targetToNativeType,
                                       const char *targetToNative)
 {
-    QByteArray result = QByteArrayLiteral("<container-type name=\"")
-            + name + QByteArrayLiteral("\" type=\"") + type + R"(">
+    QByteArray result = "<container-type name=\""_ba
+            + name + "\" type=\""_ba + type + R"(">
     <include file-name=")" + include + R"(" location="global"/>
     <conversion-rule>
         <native-to-target>
@@ -263,16 +263,16 @@ QByteArray containerTypeSystemSnippet(const char *name, const char *type,
         </native-to-target>
 )";
     if (targetToNativeType != nullptr) {
-        result += QByteArrayLiteral(R"(        <target-to-native>
-            <add-conversion type=")") + targetToNativeType
-                + QByteArrayLiteral(R"(">
-                <insert-template name=")") + targetToNative + QByteArrayLiteral(R"("/>
+        result += R"(        <target-to-native>
+            <add-conversion type=")"_ba + targetToNativeType
+                + R"(">
+                <insert-template name=")"_ba + targetToNative + R"("/>
             </add-conversion>
         </target-to-native>
-)");
+)"_ba;
         }
-result += QByteArrayLiteral(R"(    </conversion-rule>
+result += R"(    </conversion-rule>
 </container-type>
-)");
+)"_ba;
     return result;
 }

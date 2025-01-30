@@ -220,7 +220,7 @@ TypeSystemProperty QPropertySpec::typeSystemPropertyFromQ_Property(const QString
         return result;
     }
 
-    const auto firstToken = qsizetype(it - propertyTokens.cbegin());
+    const auto firstToken = it - propertyTokens.cbegin();
     if (firstToken < 2) {
         *errorMessage = u"Insufficient number of tokens in property specification"_s;
         return result;

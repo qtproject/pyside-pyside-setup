@@ -138,6 +138,8 @@ Scanner::Token Scanner::nextToken(QString *errorMessage)
                 tok = VolatileToken;
             }
             break;
+        default:
+            break;
         }
     }
 

@@ -503,7 +503,7 @@ void _ScopeModelItem::addEnum(const EnumModelItem &item)
     // A forward declaration of an enum ("enum class Foo;") is undistinguishable
     // from an enum without values ("enum class QCborTag {}"), so, add all
     // enums and replace existing ones without values by ones with values.
-    const int index = indexOfEnum(item->name());
+    const auto index = indexOfEnum(item->name());
     if (index >= 0) {
         if (item->hasValues() && !m_enums.at(index)->hasValues())
             m_enums[index] = item;

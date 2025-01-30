@@ -174,8 +174,8 @@ public:
 
     // Top level QIODevice parsing for tests.
     bool parseFile(QIODevice *device, bool generate = true);
-    bool parseFile(const std::shared_ptr<TypeDatabaseParserContext> &context,
-                   QIODevice *device, bool generate = true);
+    static bool parseFile(const std::shared_ptr<TypeDatabaseParserContext> &context,
+                          QIODevice *device, bool generate = true);
 
     static bool setApiVersion(const QString &package, const QString &version);
     static void clearApiVersions();

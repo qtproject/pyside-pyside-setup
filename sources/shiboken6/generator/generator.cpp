@@ -164,7 +164,7 @@ QString Generator::fileNameForContextHelper(const GeneratorContext &context,
 
 {
     if (!context.forSmartPointer()) {
-        const auto metaClass = context.metaClass();
+        const auto &metaClass = context.metaClass();
         QString fileNameBase = flags.testFlag(FileNameFlag::UnqualifiedName)
             ? metaClass->name() : metaClass->qualifiedCppName();
         if (!flags.testFlag(FileNameFlag::KeepCase))
@@ -696,7 +696,7 @@ QString Generator::globalScopePrefix(const GeneratorContext &classContext)
 }
 
 template<typename T>
-static QString getClassTargetFullName_(T t, bool includePackageName)
+static QString getClassTargetFullName_(const T &t, bool includePackageName)
 {
     QString name = t->name();
     AbstractMetaClassCPtr context = t->enclosingClass();

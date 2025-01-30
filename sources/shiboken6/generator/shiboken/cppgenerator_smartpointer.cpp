@@ -96,7 +96,7 @@ void CppGenerator::generateSmartPointerClass(TextStream &s,
                                              const GeneratorContext &classContext)
 {
     s.setLanguage(TextStream::Language::Cpp);
-    AbstractMetaClassCPtr metaClass = classContext.metaClass();
+    const AbstractMetaClassCPtr &metaClass = classContext.metaClass();
     const auto typeEntry = std::static_pointer_cast<const SmartPointerTypeEntry>(metaClass->typeEntry());
     const bool hasPointeeClass = classContext.pointeeClass() != nullptr;
     const auto smartPointerType = typeEntry->smartPointerType();
@@ -321,7 +321,7 @@ void CppGenerator::writeSmartPointerRichCompareFunction(TextStream &s,
     static const char selfPointeeVar[] = "cppSelfPointee";
     static const char cppArg0PointeeVar[] = "cppArg0Pointee";
 
-    const auto metaClass = context.metaClass();
+    const auto &metaClass = context.metaClass();
     QString baseName = cpythonBaseName(metaClass);
     writeRichCompareFunctionHeader(s, baseName, context);
 
@@ -410,7 +410,7 @@ void CppGenerator::writeSmartPointerGetattroFunction(TextStream &s,
                                                      const BoolCastFunctionOptional &boolCast)
 {
     Q_ASSERT(context.forSmartPointer());
-    const auto metaClass = context.metaClass();
+    const auto &metaClass = context.metaClass();
     writeGetattroDefinition(s, metaClass);
     s << "PyObject *tmp = PyObject_GenericGetAttr(self, name);\n"
       << "if (tmp)\n" << indent << "return tmp;\n" << outdent

@@ -89,8 +89,8 @@ public:
     TextStream &operator<<(qsizetype t) { putSizeType(t); return *this; }
 #endif
 
-    inline TextStream &operator<<(const QTextStreamManipulator &m) { m_str << m; return *this; }
-    inline TextStream &operator<<(ManipulatorFunc f) { f(*this); return *this; }
+    TextStream &operator<<(const QTextStreamManipulator &m) { m_str << m; return *this; }
+    TextStream &operator<<(ManipulatorFunc f) { f(*this); return *this; }
 
     void putRepetitiveChars(char c, int count);
 

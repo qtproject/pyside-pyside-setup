@@ -34,7 +34,7 @@ public:
      *   Defines type referenced by this entry.
      *   \param referencedTypeEntry type referenced by this entry
      */
-    void setReferencedTypeEntry(PrimitiveTypeEntryPtr referencedTypeEntry);
+    void setReferencedTypeEntry(const PrimitiveTypeEntryPtr &referencedTypeEntry);
 
     /// Returns whether this entry references another entry.
     bool referencesType() const;

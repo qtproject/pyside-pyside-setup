@@ -261,7 +261,7 @@ struct TypeDatabasePrivate : public TypeDatabaseOptions
     TypeEntryPtr resolveTypeDefEntry(const TypedefEntryPtr &typedefEntry, QString *errorMessage);
     template <class String>
     bool isSuppressedWarningHelper(const String &s) const;
-    bool resolveSmartPointerInstantiations(const TypeDatabaseParserContextPtr &context);
+    bool resolveSmartPointerInstantiations(const TypeDatabaseParserContextPtr &context) const;
     void formatDebug(QDebug &d) const;
     void formatBuiltinTypes(QDebug &d) const;
 
@@ -1171,7 +1171,7 @@ bool TypeDatabasePrivate::parseFile(QIODevice *device, TypeDatabase *db, bool ge
 bool TypeDatabase::parseFile(const TypeDatabaseParserContextPtr &context,
                              QIODevice *device, bool generate)
 {
-    return d->parseFile(context, device, generate);
+    return TypeDatabasePrivate::parseFile(context, device, generate);
 }
 
 bool TypeDatabasePrivate::parseFile(const TypeDatabaseParserContextPtr &context,
@@ -1210,6 +1210,8 @@ static QStringList splitTypeList(const QString &s)
                 lastPos = i + 1;
             }
             break;
+        default:
+            break;
         }
     }
     if (lastPos < size)
@@ -1217,7 +1219,7 @@ static QStringList splitTypeList(const QString &s)
     return result;
 }
 
-bool TypeDatabasePrivate::resolveSmartPointerInstantiations(const TypeDatabaseParserContextPtr &context)
+bool TypeDatabasePrivate::resolveSmartPointerInstantiations(const TypeDatabaseParserContextPtr &context) const
 {
     const auto &instantiations = context->smartPointerInstantiations;
     for (auto it = instantiations.cbegin(), end = instantiations.cend(); it != end; ++it) {
@@ -1404,9 +1406,9 @@ bool TypeDatabase::setApiVersion(const QString& packageWildcardPattern, const QS
     if (versionNumber.isNull())
         return false;
     ApiVersions &versions = *apiVersions();
-    for (qsizetype i = 0, size = versions.size(); i < size; ++i) {
-        if (versions.at(i).first.pattern() == packagePattern) {
-            versions[i].second = versionNumber;
+    for (auto &version : versions) {
+        if (version.first.pattern() == packagePattern) {
+            version.second = versionNumber;
             return true;
         }
     }
@@ -1423,10 +1425,10 @@ bool TypeDatabase::checkApiVersion(const QString &package,
     const ApiVersions &versions = *apiVersions();
     if (versions.isEmpty()) // Nothing specified: use latest.
         return true;
-    for (qsizetype i = 0, size = versions.size(); i < size; ++i) {
-        if (versions.at(i).first.match(package).hasMatch())
-            return versions.at(i).second >= vr.since
-                && versions.at(i).second <= vr.until;
+    for (const auto &version : versions) {
+        if (version.first.match(package).hasMatch())
+            return version.second >= vr.since
+                && version.second <= vr.until;
     }
     return false;
 }

@@ -130,7 +130,7 @@ QString HeaderGenerator::headerGuard(const QString &className)
 
 void HeaderGenerator::doGenerateClass(TextStream &s, const GeneratorContext &classContext) const
 {
-    const AbstractMetaClassCPtr metaClass = classContext.metaClass();
+    const AbstractMetaClassCPtr &metaClass = classContext.metaClass();
 
     // write license comment
     s << licenseComment();
@@ -160,7 +160,7 @@ void HeaderGenerator::writeWrapperClass(TextStream &s,
                                         const QString &wrapperName,
                                         const GeneratorContext &classContext) const
 {
-    const auto metaClass = classContext.metaClass();
+    const auto &metaClass = classContext.metaClass();
 
     if (avoidProtectedHack()) {
         const auto includeGroups = classIncludes(metaClass);
@@ -212,7 +212,7 @@ void HeaderGenerator::writeWrapperClassDeclaration(TextStream &s,
                                                    const QString &wrapperName,
                                                    const GeneratorContext &classContext) const
 {
-    const AbstractMetaClassCPtr metaClass = classContext.metaClass();
+    const AbstractMetaClassCPtr &metaClass = classContext.metaClass();
     const auto typeEntry = metaClass->typeEntry();
     InheritedOverloadSet inheritedOverloads;
 

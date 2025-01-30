@@ -1340,7 +1340,7 @@ QString ShibokenGenerator::getCodeSnippets(const CodeSnipList &codeSnips,
 
 void ShibokenGenerator::processClassCodeSnip(QString &code, const GeneratorContext &context) const
 {
-    auto metaClass = context.metaClass();
+    const auto &metaClass = context.metaClass();
     // Replace template variable by the Python Type object
     // for the class context in which the variable is used.
     code.replace(u"%PYTHONTYPEOBJECT"_s,
@@ -1881,8 +1881,8 @@ ShibokenGenerator::AttroCheck
     AttroCheck result;
     if (classNeedsGetattroOverloadFunctionImpl(functionGroups))
         result |= AttroCheckFlag::GetattroOverloads;
-    if (metaClass->queryFirstFunction(metaClass->functions(),
-                                      FunctionQueryOption::GetAttroFunction)) {
+    if (AbstractMetaClass::queryFirstFunction(metaClass->functions(),
+                                              FunctionQueryOption::GetAttroFunction)) {
         result |= AttroCheckFlag::GetattroUser;
     }
     if (usePySideExtensions() && metaClass->qualifiedCppName() == qObjectT)
@@ -1892,8 +1892,8 @@ ShibokenGenerator::AttroCheck
         if (std::any_of(funcs.cbegin(), funcs.cend(), isVirtualOverride))
             result |= AttroCheckFlag::SetattroMethodOverride;
     }
-    if (metaClass->queryFirstFunction(metaClass->functions(),
-                                      FunctionQueryOption::SetAttroFunction)) {
+    if (AbstractMetaClass::queryFirstFunction(metaClass->functions(),
+                                              FunctionQueryOption::SetAttroFunction)) {
         result |= AttroCheckFlag::SetattroUser;
     }
     // PYSIDE-1255: If setattro is generated for a class inheriting

@@ -441,22 +441,22 @@ private:
                                             QString &code) const;
 
     /// Replaces the %CONVERTTOPYTHON type system variable.
-    inline void replaceConvertToPythonTypeSystemVariable(QString &code) const
+    void replaceConvertToPythonTypeSystemVariable(QString &code) const
     {
         replaceConverterTypeSystemVariable(TypeSystemToPythonFunction, code);
     }
     /// Replaces the %CONVERTTOCPP type system variable.
-    inline void replaceConvertToCppTypeSystemVariable(QString &code) const
+    void replaceConvertToCppTypeSystemVariable(QString &code) const
     {
         replaceConverterTypeSystemVariable(TypeSystemToCppFunction, code);
     }
     /// Replaces the %ISCONVERTIBLE type system variable.
-    inline void replaceIsConvertibleToCppTypeSystemVariable(QString &code) const
+    void replaceIsConvertibleToCppTypeSystemVariable(QString &code) const
     {
         replaceConverterTypeSystemVariable(TypeSystemIsConvertibleFunction, code);
     }
     /// Replaces the %CHECKTYPE type system variable.
-    inline void replaceTypeCheckTypeSystemVariable(QString &code) const
+    void replaceTypeCheckTypeSystemVariable(QString &code) const
     {
         replaceConverterTypeSystemVariable(TypeSystemCheckFunction, code);
     }

@@ -557,8 +557,8 @@ ENUM_LOOKUP_BEGIN(TypeSystem::Visibility, Qt::CaseSensitive,
 };
 ENUM_LOOKUP_LINEAR_SEARCH
 
-static int indexOfAttribute(const QXmlStreamAttributes &atts,
-                            QAnyStringView name)
+static qsizetype indexOfAttribute(const QXmlStreamAttributes &atts,
+                                  QAnyStringView name)
 {
     for (qsizetype i = 0, size = atts.size(); i < size; ++i) {
         if (atts.at(i).qualifiedName() == name)
@@ -1375,8 +1375,7 @@ FlagsTypeEntryPtr
     m_context->db->addFlagsType(ftype);
     m_context->db->addType(ftype);
 
-    const int revisionIndex =
-        indexOfAttribute(*attributes, u"flags-revision");
+    const auto revisionIndex = indexOfAttribute(*attributes, u"flags-revision");
     ftype->setRevision(revisionIndex != -1
                        ? attributes->takeAt(revisionIndex).value().toInt()
                        : enumEntry->revision());
@@ -1717,8 +1716,7 @@ ValueTypeEntryPtr
     if (!applyCommonAttributes(reader, typeEntry, attributes))
         return nullptr;
     applyComplexTypeAttributes(reader, typeEntry, attributes);
-    const int defaultCtIndex =
-        indexOfAttribute(*attributes, u"default-constructor");
+    const auto defaultCtIndex = indexOfAttribute(*attributes, u"default-constructor");
     if (defaultCtIndex != -1)
          typeEntry->setDefaultConstructor(attributes->takeAt(defaultCtIndex).value().toString());
     return typeEntry;
@@ -2203,8 +2201,8 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
         std::const_pointer_cast<TypeSystemTypeEntry>(m_context->db->findTypeSystemType(m_defaultPackage));
     const bool add = !moduleEntry;
     if (add) {
-        moduleEntry.reset(new TypeSystemTypeEntry(m_defaultPackage, since,
-                                                  currentParentTypeEntry()));
+        moduleEntry = std::make_shared<TypeSystemTypeEntry>(m_defaultPackage, since,
+                                                            currentParentTypeEntry());
         moduleEntry->setSubModule(subModuleOf);
     }
     if (!docPackage.isEmpty())
@@ -2484,7 +2482,7 @@ bool TypeSystemParser::parseModifyArgument(const ConditionalStreamReader &,
         return false;
     }
 
-    int idx;
+    int idx = 0;
     if (!parseArgumentIndex(index, &idx, &m_error))
         return false;
 
@@ -2507,8 +2505,7 @@ bool TypeSystemParser::parseNoNullPointer(const ConditionalStreamReader &reader,
     ArgumentModification &lastArgMod = m_contextStack.top()->functionMods.last().argument_mods().last();
     lastArgMod.setNoNullPointers(true);
 
-    const int defaultValueIndex =
-        indexOfAttribute(*attributes, u"default-value");
+    const auto defaultValueIndex = indexOfAttribute(*attributes, u"default-value");
     if (defaultValueIndex != -1) {
         const QXmlStreamAttribute attribute = attributes->takeAt(defaultValueIndex);
         qCWarning(lcShiboken, "%s",
@@ -3675,7 +3672,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
                 m_error = msgMissingAttribute(nameAttribute);
                 return false;
             }
-            m_templateEntry.reset(new TemplateEntry(attributes.takeAt(nameIndex).value().toString()));
+            m_templateEntry = std::make_shared<TemplateEntry>(attributes.takeAt(nameIndex).value().toString());
         }
             break;
         case StackElement::InsertTemplate:

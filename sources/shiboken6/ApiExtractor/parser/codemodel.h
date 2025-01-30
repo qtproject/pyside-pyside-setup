@@ -66,7 +66,6 @@ public:
     };
     Q_ENUM(ClassType)
 
-public:
     CodeModel();
     virtual ~CodeModel();
 
@@ -115,7 +114,6 @@ public:
         Kind_Variable = 10 << FirstKind | Kind_Member
     };
 
-public:
     virtual ~_CodeModelItem();
 
     int kind() const;

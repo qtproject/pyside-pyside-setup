@@ -556,11 +556,9 @@ bool FunctionModification::matches(const QStringList &functionSignatures) const
     if (!d->m_signature.isEmpty())
         return functionSignatures.contains(d->m_signature);
 
-    for (const auto &s : functionSignatures) {
-        if (d->m_signaturePattern.match(s).hasMatch())
-            return true;
-    }
-    return false;
+    const auto &pattern = d->m_signaturePattern;
+    return std::any_of(functionSignatures.cbegin(), functionSignatures.end(),
+                       [&pattern] (const QString &s) { return pattern.match(s).hasMatch(); });
 }
 
 bool FunctionModification::setSignature(const QString &s, QString *errorMessage)

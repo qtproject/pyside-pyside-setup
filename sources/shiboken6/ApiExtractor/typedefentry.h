@@ -25,7 +25,7 @@ public:
     void setSource(const ComplexTypeEntryCPtr &source);
 
     ComplexTypeEntryPtr target() const;
-    void setTarget(ComplexTypeEntryPtr target);
+    void setTarget(const ComplexTypeEntryPtr &target);
 
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
