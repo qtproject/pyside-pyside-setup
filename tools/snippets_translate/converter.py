@@ -13,6 +13,7 @@ from handlers import (handle_array_declarations, handle_casts, handle_class,
                       handle_type_var_declaration, handle_useless_qt_classes,
                       handle_new,
                       handle_void_functions, handle_qt_connects)
+from enum_migration import qualify_enums
 from parse_utils import dstrip, get_indent, remove_ref
 
 
@@ -85,6 +86,8 @@ def snippet_translate(x):
     qt_connects = handle_qt_connects(x)
     if qt_connects:
         return qt_connects
+
+    x = qualify_enums(x)
 
     # Handle "->"
     if "->" in x:

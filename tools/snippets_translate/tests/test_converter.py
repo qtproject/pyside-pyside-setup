@@ -68,6 +68,10 @@ def test_else():
     assert st("else {") == "else:"
 
 
+def test_qualify_enumerations():
+    assert st("Qt::Key_A") == "Qt.Key.Key_A"
+
+
 def test_new():
     assert st("a = new Something(...);") == "a = Something(...)"
     assert st("a = new Something") == "a = Something()"
