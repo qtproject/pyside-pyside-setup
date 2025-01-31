@@ -545,9 +545,9 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
 
                     match = true;
                 }
-                targetWalk = reinterpret_cast<PySideSignalInstance *>(targetWalk->d->next);
+                targetWalk = targetWalk->d->next;
             }
-            sourceWalk = reinterpret_cast<PySideSignalInstance *>(sourceWalk->d->next);
+            sourceWalk = sourceWalk->d->next;
         }
     } else {
         // Adding references to pyArgs

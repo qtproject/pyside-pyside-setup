@@ -54,6 +54,7 @@ class PYSIDE_API SignalManager
 {
 public:
     Q_DISABLE_COPY_MOVE(SignalManager)
+    ~SignalManager() = default;
 
     using QmlMetaCallErrorHandler = std::optional<int>(*)(QObject *object);
 

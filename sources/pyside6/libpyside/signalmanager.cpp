@@ -407,7 +407,7 @@ int SignalManagerPrivate::qtMethodMetacall(QObject *object,
     //         because the object can be deleted inside the called slot.
 
     if (gil == nullptr)
-        gil.reset(new Shiboken::GilState);
+        gil = std::make_unique<Shiboken::GilState>();
 
     if (PyErr_Occurred())
         handleMetaCallError(object, &result);

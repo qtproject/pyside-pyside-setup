@@ -1,8 +1,8 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-#ifndef __PYSIDEWEAKREF__
-#define __PYSIDEWEAKREF__
+#ifndef PYSIDEWEAKREF_H
+#define PYSIDEWEAKREF_H
 
 #include <pysidemacros.h>
 #include <sbkpython.h>
@@ -15,4 +15,4 @@ PYSIDE_API PyObject* create(PyObject* ob, PySideWeakRefFunction func, void* user
 
 } // namespace PySide::WeakRef
 
-#endif
+#endif // PYSIDEWEAKREF_H
