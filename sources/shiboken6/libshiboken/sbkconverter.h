@@ -88,13 +88,13 @@ public:
 
     explicit SpecificConverter(const char *typeName);
 
-    inline SbkConverter *converter() { return m_converter; }
-    inline operator SbkConverter *() const { return m_converter; }
+    SbkConverter *converter() { return m_converter; }
+    operator SbkConverter *() const { return m_converter; }
 
-    inline bool isValid() { return m_type != InvalidConversion; }
-    inline operator bool() const { return m_type != InvalidConversion; }
+    bool isValid() { return m_type != InvalidConversion; }
+    operator bool() const { return m_type != InvalidConversion; }
 
-    inline Type conversionType() { return m_type; }
+    Type conversionType() { return m_type; }
 
     PyObject *toPython(const void *cppIn);
     void toCpp(PyObject *pyIn, void *cppOut);

@@ -290,7 +290,7 @@ void BindingManager::releaseWrapper(SbkObject *sbkObj)
     auto *d = PepType_SOTP(sbkType);
     int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(Py_TYPE(sbkObj)) : 1);
 
-    void ** cptrs = reinterpret_cast<SbkObject *>(sbkObj)->d->cptr;
+    void **cptrs = sbkObj->d->cptr;
     const int *mi_offsets = d != nullptr ? d->mi_offsets : nullptr;
     for (int i = 0; i < numBases; ++i) {
         if (cptrs[i] != nullptr)
@@ -392,11 +392,10 @@ PyObject *BindingManager::getOverride(const void *cptr,
     if (method != nullptr) {
         PyObject *mro = Py_TYPE(wrapper)->tp_mro;
 
-        int size = PyTuple_Size(mro);
         bool defaultFound = false;
         // The first class in the mro (index 0) is the class being checked and it should not be tested.
         // The last class in the mro (size - 1) is the base Python object class which should not be tested also.
-        for (int idx = 1; idx < size - 1; ++idx) {
+        for (Py_ssize_t idx = 1, size = PyTuple_Size(mro); idx < size - 1; ++idx) {
             auto *parent = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
             AutoDecRef parentDict(PepType_GetDict(parent));
             if (parentDict) {
@@ -468,9 +467,9 @@ void BindingManager::dumpWrapperMap()
     std::cerr <<  "-------------------------------\n"
         << "WrapperMap size: " << wrapperMap.size() << " Types: "
         << m_d->classHierarchy.nodeSet().size() << '\n';
-    for (auto it = wrapperMap.begin(), end = wrapperMap.end(); it != end; ++it) {
-        const SbkObject *sbkObj = it->second;
-        std::cerr << "key: " << it->first << ", value: "
+    for (auto it : wrapperMap) {
+        const SbkObject *sbkObj = it.second;
+        std::cerr << "key: " << it.first << ", value: "
             << static_cast<const void *>(sbkObj) << " ("
             << (Py_TYPE(sbkObj))->tp_name << ", refcnt: "
             << Py_REFCNT(reinterpret_cast<const PyObject *>(sbkObj)) << ")\n";

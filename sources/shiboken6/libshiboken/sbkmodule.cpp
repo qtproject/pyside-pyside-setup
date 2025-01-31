@@ -102,7 +102,8 @@ static void incarnateHelper(PyObject *module, const std::string_view names,
     auto initFunc = tcStruct.func;
     PyTypeObject *type = initFunc(modOrType);
     auto name = names.substr(startPos);
-    PyObject_SetAttrString(modOrType, name.data(), reinterpret_cast<PyObject *>(type));
+    AutoDecRef nameP(PyUnicode_FromStringAndSize(name.data(), name.size()));
+    PyObject_SetAttr(modOrType, nameP, reinterpret_cast<PyObject *>(type));
 }
 
 static void incarnateSubtypes(PyObject *module,
@@ -542,10 +543,10 @@ SbkConverter **getTypeConverters(PyObject *module)
 // Replace the dictionary of a module by a different dict.
 // The dict should be filled with the content of the old dict, before.
 // Reason: Creating a module dict with __missing__ support.
-typedef struct {
+struct StartOf_PyModuleObject {
     PyObject_HEAD
     PyObject *md_dict;
-} StartOf_PyModuleObject;
+};
 
 bool replaceModuleDict(PyObject *module, PyObject *modClass, PyObject *dict)
 {

@@ -5,12 +5,10 @@
 #include "basewrapper_p.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
-#include "sbkstaticstrings.h"
 #include "pep384impl.h"
 
 #include <algorithm>
 #include <optional>
-
 #include <iomanip>
 #include <iostream>
 #include <climits>
@@ -176,8 +174,8 @@ static void formatPyTuple(PyObject *obj, std::ostream &str)
 
 static void formatPyDict(PyObject *obj, std::ostream &str)
 {
-    PyObject *key;
-    PyObject *value;
+    PyObject *key{};
+    PyObject *value{};
     Py_ssize_t pos = 0;
     str << '{';
     while (PyDict_Next(obj, &pos, &key, &value) != 0) {
@@ -501,7 +499,7 @@ bool listToArgcArgv(PyObject *argList, int *argc, char ***argv, const char *defa
         PyObject *appName = PyDict_GetItem(globals, Shiboken::PyMagicName::file());
         (*argv)[0] = strdup(appName ? Shiboken::String::toCString(appName) : defaultAppName);
     } else {
-        for (int i = 0; i < numArgs; ++i) {
+        for (Py_ssize_t i = 0; i < numArgs; ++i) {
             PyObject *item = PyList_GET_ITEM(args.object(), i);
             char *string = nullptr;
             if (Shiboken::String::check(item)) {
@@ -527,7 +525,7 @@ int *sequenceToIntArray(PyObject *obj, bool zeroTerminated)
     Py_ssize_t size = PySequence_Size(seq.object());
     int *array = new int[size + (zeroTerminated ? 1 : 0)];
 
-    for (int i = 0; i < size; i++) {
+    for (Py_ssize_t i = 0; i < size; i++) {
         Shiboken::AutoDecRef item(PySequence_GetItem(seq.object(), i));
         if (!PyLong_Check(item)) {
             PyErr_SetString(PyExc_TypeError, "Sequence of ints expected");
@@ -557,7 +555,7 @@ int warning(PyObject *category, int stacklevel, const char *format, ...)
 
     // check the necessary memory
     int size = vsnprintf(nullptr, 0, format, args) + 1;
-    auto message = new char[size];
+    auto *message = new char[size];
     int result = 0;
     if (message) {
         // format the message

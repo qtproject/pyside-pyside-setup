@@ -307,7 +307,7 @@ static PyTypeObject *createEnumForPython(PyObject *scopeOrModule,
     static PyObject *enumName = String::createStaticString("IntEnum");
     if (PyType_Check(scopeOrModule)) {
         // For global objects, we have no good solution, yet where to put the int info.
-        auto type = reinterpret_cast<PyTypeObject *>(scopeOrModule);
+        auto *type = reinterpret_cast<PyTypeObject *>(scopeOrModule);
         auto *sotp = PepType_SOTP(type);
         if (!sotp->enumFlagsDict)
             initEnumFlagsDict(type);

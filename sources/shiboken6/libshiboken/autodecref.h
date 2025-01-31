@@ -48,11 +48,11 @@ public:
     [[nodiscard]] PyObject *object() const { return m_pyObj; }
     [[nodiscard]] operator PyObject *() const { return m_pyObj; }
 #ifndef Py_LIMITED_API
-    [[deprecated]] inline operator PyTupleObject *()
+    [[deprecated]] operator PyTupleObject *()
     { return reinterpret_cast<PyTupleObject *>(m_pyObj); }
 #endif
-    inline operator bool() const { return m_pyObj != nullptr; }
-    inline PyObject *operator->() { return m_pyObj; }
+    operator bool() const { return m_pyObj != nullptr; }
+    PyObject *operator->() { return m_pyObj; }
 
     template<typename T>
     [[deprecated]] T cast()
