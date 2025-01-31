@@ -4,9 +4,8 @@
 #include "reporthandler.h"
 #include "typedatabase.h"
 
-#include "qtcompat.h"
-
 #include <QtCore/QElapsedTimer>
+#include <QtCore/QOperatingSystemVersion>
 #include <QtCore/QSet>
 #include <cstring>
 #include <cstdarg>
@@ -14,17 +13,18 @@
 
 using namespace Qt::StringLiterals;
 
-#if defined(_WINDOWS) || defined(NOCOLOR)
-    #define COLOR_END ""
-    #define COLOR_WHITE ""
-    #define COLOR_YELLOW ""
-    #define COLOR_GREEN ""
-#else
-    #define COLOR_END "\033[0m"
-    #define COLOR_WHITE "\033[1;37m"
-    #define COLOR_YELLOW "\033[1;33m"
-    #define COLOR_GREEN "\033[0;32m"
+static const auto COLOR_END = "\033[0m"_ba;
+static const auto COLOR_YELLOW = "\033[1;33m"_ba;
+static const auto COLOR_GREEN = "\033[0;32m"_ba;
+
+static constexpr bool useTerminalColors()
+{
+    return QOperatingSystemVersion::currentType() != QOperatingSystemVersion::Windows
+#ifdef NOCOLOR
+        && false
 #endif
+        ;
+}
 
 static bool m_silent = false;
 static int m_warningCount = 0;
@@ -174,10 +174,13 @@ void ReportHandler::endProgress()
     std::fputs(m_progressMessage.constData(), stdout);
     if (m_progressMessage.size() < 60)
         indentStdout(60 - m_progressMessage.size());
-    const char *endMessage = m_step_warning == 0
-        ?  "[" COLOR_GREEN "OK" COLOR_END "]\n"
-        : "[" COLOR_YELLOW "WARNING" COLOR_END "]\n";
-    std::fputs(endMessage, stdout);
+    static const QByteArray ok = '['
+        + (useTerminalColors() ? COLOR_GREEN + "OK"_ba + COLOR_END : "OK"_ba)
+        + "]\n"_ba;
+    static const QByteArray warning = '['
+        + (useTerminalColors() ? COLOR_YELLOW + "WARNING"_ba + COLOR_END : "WARNING"_ba)
+        + "]\n"_ba;
+    std::fputs(m_step_warning == 0 ? ok.constData() : warning.constData(), stdout);
     std::fflush(stdout);
     m_progressMessage.clear();
     m_step_warning = 0;
