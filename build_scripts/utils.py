@@ -1124,7 +1124,7 @@ def copy_qt_metatypes(destination_qt_dir, _vars):
 
 
 def in_coin():
-    return os.environ.get('COIN_LAUNCH_PARAMETERS', None) is not None
+    return os.environ.get('COIN_UNIQUE_JOB_ID', None) is not None
 
 
 def parse_modules(modules: str) -> str:
