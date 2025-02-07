@@ -16,6 +16,10 @@ No argument: Use a default Python for each platform (author specific).
     --python <python>   use that specific python interpreter
     --dry-run           try it first without compilation
     --pip               automatically install the needed modules
+    --absolute          compare against the status from
+                        b887919ea244a057f15be9c1cdc652538e3fe9a0
+                        Yocto: allow LLVM 14 for building PySide
+                        2025-01-23 18:18
 """
 import argparse
 import os
@@ -27,10 +31,17 @@ import sys
 from ast import literal_eval
 from pathlib import Path
 
+
 defaults = {
-    "Darwin": "/Users/tismer/.pyenv/versions/3.12.5/bin/python3",
-    "Windows": "d:/py312_64/python.exe",
-    "Linux": "/home/ctismer/.pyenv/versions/3.12.5/bin/python3",
+    "Darwin":   "/Users/tismer/.pyenv/versions/3.12.5/bin/python3",     # noqa: E241
+    "Windows":  "d:/py312_64/python.exe",                               # noqa: E241
+    "Linux":    "/home/ctismer/.pyenv/versions/3.12.5/bin/python3",     # noqa: E241
+}
+
+reference = {
+    "Darwin":   26165741,   # noqa: E241
+    "Windows":  15324160,   # noqa: E241
+    "Linux":    19203176,   # noqa: E241
 }
 
 
@@ -103,6 +114,8 @@ if __name__ == "__main__":
     parser.add_argument("--dry-run", "-d", action="store_true")
     parser.add_argument("--pip", action="store_true", help="""
         Install the necessary modules automatically, which can save some trouble""")
+    parser.add_argument("--absolute", "-a", action="store_true", help="""
+        Measure against the state on 2025-01-23""")
     args = parser.parse_args()
 
     python = args.python or defaults[plat] if plat in defaults else args.python
@@ -126,12 +139,15 @@ if __name__ == "__main__":
         subprocess.run([python, "-m", "pip", "install"] + needs_imports)
 
     skip = args.dry_run
-    cmd = [python] + options_base
-    if not skip:
-        subprocess.run(cmd)
+    if args.absolute:
+        res_base = reference[plat]
+    else:
+        cmd = [python] + options_base
+        if not skip:
+            subprocess.run(cmd)
 
-    build_dir = get_build_dir()
-    res_base = get_result_size(build_dir)
+        build_dir = get_build_dir()
+        res_base = get_result_size(build_dir)
 
     cmd = [python] + options_best
     if not skip:
@@ -140,10 +156,11 @@ if __name__ == "__main__":
     build_dir = get_build_dir()
     res_best = get_result_size(build_dir)
 
+    add_text = " on 2025-01-27" if args.absolute else ""
     print()
     print(f"Compiling with {python}")
     print(f"Platform = {plat}")
-    print(f"base size = {res_base}")
+    print(f"base size = {res_base}{add_text}")
     print(f"best size = {res_best}")
     print(f"improvement {(res_base - res_best) / res_base:%}")
     if skip:
