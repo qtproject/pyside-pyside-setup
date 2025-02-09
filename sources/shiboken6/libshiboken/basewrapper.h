@@ -115,6 +115,11 @@ LIBSHIBOKEN_API void disassembleFrame(const char *marker);
 /// PYSIDE-2230: Check if an object is an SbkObject.
 LIBSHIBOKEN_API bool SbkObjectType_Check(PyTypeObject *type);
 
+/// PYSIDE-2701: Some improvements from folding optimizations.
+LIBSHIBOKEN_API PyObject *Sbk_ReturnFromPython_None();
+LIBSHIBOKEN_API PyObject *Sbk_ReturnFromPython_Result(PyObject *pyResult);
+LIBSHIBOKEN_API PyObject *Sbk_ReturnFromPython_Self(PyObject *self);
+
 } // extern "C"
 
 namespace Shiboken

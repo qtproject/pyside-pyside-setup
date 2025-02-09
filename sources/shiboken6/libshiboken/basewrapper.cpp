@@ -736,6 +736,34 @@ bool SbkObjectType_Check(PyTypeObject *type)
     return Py_TYPE(type) == meta || PyType_IsSubtype(Py_TYPE(type), meta);
 }
 
+// Global functions from folding.
+
+PyObject *Sbk_ReturnFromPython_None()
+{
+    if (Shiboken::Errors::occurred() != nullptr) {
+        return {};
+    }
+    Py_RETURN_NONE;
+}
+
+PyObject *Sbk_ReturnFromPython_Result(PyObject *pyResult)
+{
+    if (Shiboken::Errors::occurred() != nullptr || pyResult == nullptr) {
+        Py_XDECREF(pyResult);
+        return {};
+    }
+    return pyResult;
+}
+
+PyObject *Sbk_ReturnFromPython_Self(PyObject *self)
+{
+    if (Shiboken::Errors::occurred() != nullptr) {
+        return {};
+    }
+    Py_INCREF(self);
+    return self;
+}
+
 } //extern "C"
 
 

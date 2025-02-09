@@ -2371,17 +2371,14 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
 
     s << '\n';
 
-    writeFunctionReturnErrorCheckSection(s, ErrorReturn::Default,
-                                         hasReturnValue && !rfunc->isInplaceOperator());
-
     if (hasReturnValue) {
         if (rfunc->isInplaceOperator()) {
-            s << "Py_INCREF(self);\nreturn self;\n";
+            s << "return Sbk_ReturnFromPython_Self(self);\n";
         } else {
-            s << "return " << PYTHON_RETURN_VAR << ";\n";
+            s << "return Sbk_ReturnFromPython_Result(" << PYTHON_RETURN_VAR <<");\n";
         }
     } else {
-        s << "Py_RETURN_NONE;\n";
+        s << " return Sbk_ReturnFromPython_None();\n";
     }
 
     s<< outdent << "}\n\n";
