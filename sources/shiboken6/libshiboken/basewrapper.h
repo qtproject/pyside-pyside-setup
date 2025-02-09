@@ -7,6 +7,7 @@
 #include "sbkpython.h"
 #include "shibokenmacros.h"
 #include "sbkmodule.h"
+#include "gilstate.h"
 
 #include <vector>
 #include <string>
@@ -119,7 +120,9 @@ LIBSHIBOKEN_API bool SbkObjectType_Check(PyTypeObject *type);
 LIBSHIBOKEN_API PyObject *Sbk_ReturnFromPython_None();
 LIBSHIBOKEN_API PyObject *Sbk_ReturnFromPython_Result(PyObject *pyResult);
 LIBSHIBOKEN_API PyObject *Sbk_ReturnFromPython_Self(PyObject *self);
-
+LIBSHIBOKEN_API PyObject *Sbk_GetPyOverride(const void *voidThis, Shiboken::GilState &gil,
+                                            const char *funcName, bool *resultCache,
+                                            PyObject **nameCache);
 } // extern "C"
 
 namespace Shiboken

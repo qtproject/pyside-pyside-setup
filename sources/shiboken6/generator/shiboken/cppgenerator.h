@@ -95,7 +95,8 @@ private:
     void writeVirtualMethodCppCall(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    const QString &funcName, const QList<CodeSnip> &snips,
                                    const AbstractMetaArgument *lastArg, const TypeEntryCPtr &retType,
-                                   const QString &returnStatement, bool hasGil) const;
+                                   const QString &returnStatement,
+                                   bool ownsGil, bool hasGilVar) const;
 
     static VirtualMethodReturn virtualMethodReturn(const ApiExtractorResult &api,
                                                    const AbstractMetaFunctionCPtr &func,

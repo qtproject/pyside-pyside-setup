@@ -6,9 +6,9 @@
 namespace Shiboken
 {
 
-GilState::GilState()
+GilState::GilState(bool acquire)
 {
-    if (Py_IsInitialized()) {
+    if (acquire && Py_IsInitialized()) {
         m_gstate = PyGILState_Ensure();
         m_locked = true;
     }
@@ -17,6 +17,14 @@ GilState::GilState()
 GilState::~GilState()
 {
     release();
+}
+
+void GilState::acquire()
+{
+    if (Py_IsInitialized()) {
+        m_gstate = PyGILState_Ensure();
+        m_locked = true;
+    }
 }
 
 void GilState::release()

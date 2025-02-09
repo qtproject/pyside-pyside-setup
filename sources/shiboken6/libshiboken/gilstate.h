@@ -18,8 +18,9 @@ public:
     GilState &operator=(const GilState &) = delete;
     GilState &operator=(GilState &&) = delete;
 
-    GilState();
+    explicit GilState(bool acquire=true);
     ~GilState();
+    void acquire();
     void release();
     void abandon();
 private:

@@ -1019,15 +1019,14 @@ QString CppGenerator::getVirtualFunctionReturnTypeName(const AbstractMetaFunctio
         + typeEntry->qualifiedCppName() + u" >()->tp_name"_s;
 }
 
-// When writing an overridden method of a wrapper class, write the part
-// calling the C++ function in case no overload in Python exists.
 void CppGenerator::writeVirtualMethodCppCall(TextStream &s,
                                              const AbstractMetaFunctionCPtr &func,
                                              const QString &funcName,
                                              const CodeSnipList &snips,
                                              const AbstractMetaArgument *lastArg,
                                              const TypeEntryCPtr &retType,
-                                             const QString &returnStatement, bool hasGil) const
+                                             const QString &returnStatement,
+                                             bool ownsGil, bool hasGilVar) const
 {
     if (!snips.isEmpty()) {
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionBeginning,
@@ -1035,15 +1034,15 @@ void CppGenerator::writeVirtualMethodCppCall(TextStream &s,
     }
 
     if (func->isAbstract()) {
-        if (!hasGil)
-            s << "Shiboken::GilState gil;\n";
+        if (!ownsGil)
+            s << (hasGilVar ? "gil.acquire();\n" : "Shiboken::GilState gil;\n");
         s << "Shiboken::Errors::setPureVirtualMethodError(\""
             << func->ownerClass()->name() << '.' << funcName << "\");\n"
             << returnStatement << '\n';
         return;
     }
 
-    if (hasGil)
+    if (ownsGil)
         s << "gil.release();\n";
 
     if (retType)
@@ -1289,32 +1288,15 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
            << cacheIndex << R"( << "]=" << m_PyMethodCache[)" << cacheIndex
            << R"(] << '\n';)" << '\n';
     }
-    // PYSIDE-803: Build a boolean cache for unused overrides
-    const bool multi_line = func->isVoid() || !snips.isEmpty() || isAbstract;
-    s << "if (m_PyMethodCache[" << cacheIndex << "])" << (multi_line ? " {\n" : "\n")
-        << indent;
-    writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
-                              returnStatement.statement, false);
-    s << outdent;
-    if (multi_line)
-        s << "}\n";
-
-    s << "Shiboken::GilState gil;\n";
-
-    // Get out of virtual method call if someone already threw an error.
-    s << "if (" << shibokenErrorsOccurred << ")\n" << indent
-        << returnStatement.statement << '\n' << outdent;
-
-    s << "static PyObject *nameCache[2] = {};\n";
     writeFuncNameVar(s, func, funcName);
-    s << "Shiboken::AutoDecRef " << PYTHON_OVERRIDE_VAR
-        << "(Shiboken::BindingManager::instance().getOverride(this, nameCache, funcName));\n"
-        << "if (" << PYTHON_OVERRIDE_VAR << ".isNull()) {\n" << indent
-        << "m_PyMethodCache[" << cacheIndex << "] = true;\n";
+    s << "static PyObject *nameCache[2] = {};\n"
+      << "Shiboken::GilState gil(false);\n"
+      << "Shiboken::AutoDecRef " << PYTHON_OVERRIDE_VAR << "(Sbk_GetPyOverride("
+      << "this, gil, funcName, &m_PyMethodCache[" << cacheIndex << "], nameCache));\n"
+      << "if (pyOverride.isNull()) {\n" << indent;
     writeVirtualMethodCppCall(s, func, funcName, snips, lastArg, retType,
-                              returnStatement.statement, true);
-    s << outdent << "}\n\n"; //WS
-
+                              returnStatement.statement, false, true);
+    s << outdent << "}\n";
     if (!snips.isEmpty()) {
         writeCodeSnips(s, snips, TypeSystem::CodeSnipPositionPyOverride,
                        TypeSystem::ShellCode, func, false, lastArg);
@@ -1322,7 +1304,6 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 
     writeVirtualMethodPythonOverride(s, func, snips, returnStatement);
 }
-
 void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
                                                     const AbstractMetaFunctionCPtr &func,
                                                     const CodeSnipList &snips,

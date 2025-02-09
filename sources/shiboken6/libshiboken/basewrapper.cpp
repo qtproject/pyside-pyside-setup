@@ -738,6 +738,7 @@ bool SbkObjectType_Check(PyTypeObject *type)
 
 // Global functions from folding.
 
+// The common end.
 PyObject *Sbk_ReturnFromPython_None()
 {
     if (Shiboken::Errors::occurred() != nullptr) {
@@ -762,6 +763,26 @@ PyObject *Sbk_ReturnFromPython_Self(PyObject *self)
     }
     Py_INCREF(self);
     return self;
+}
+
+// The virtual function call
+PyObject *Sbk_GetPyOverride(const void *voidThis, Shiboken::GilState &gil, const char *funcName,
+                            bool *resultCache, PyObject **nameCache)
+{
+    PyObject *pyOverride{};
+    if (!*resultCache) {
+        gil.acquire();
+        pyOverride = Shiboken::BindingManager::instance().getOverride(voidThis, nameCache, funcName);
+        if (pyOverride == nullptr) {
+            *resultCache = true;
+            gil.release();
+        } else if (Shiboken::Errors::occurred() != nullptr) {
+            // Give up.
+            Py_XDECREF(pyOverride);
+            pyOverride = nullptr;
+        }
+    }
+    return pyOverride;
 }
 
 } //extern "C"
