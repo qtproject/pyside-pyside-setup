@@ -31,6 +31,11 @@ class QFontTest(UsesQApplication):
         self.assertEqual(len(families), 1)
         self.assertEqual(families[0], font_name)
 
+    def testTagConstruction(self):
+        tag1 = QFont.Tag("head")
+        tag2 = QFont.Tag.fromValue(tag1.value())
+        self.assertEqual(tag1.value(), tag2.value())
+
 
 if __name__ == '__main__':
     unittest.main()

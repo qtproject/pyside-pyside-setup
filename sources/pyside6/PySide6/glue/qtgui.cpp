@@ -502,6 +502,44 @@ else
     PyErr_SetString(PyExc_TypeError, "QVariant must be holding a QColor");
 // @snippet qcolor
 
+// @snippet qfont-tag-from-str-helper
+using FontTagOptional = std::optional<QFont::Tag>;
+static std::optional<QFont::Tag> qFontTagFromString(PyObject *unicode)
+{
+    FontTagOptional result;
+    if (PyUnicode_GetLength(unicode) == 4)
+        result = QFont::Tag::fromString(PySide::pyUnicodeToQString(unicode));
+    if (!result.has_value())
+        PyErr_SetString(PyExc_TypeError,
+                        "QFont::Tag(): The tag name must be exactly 4 characters long.");
+    return result;
+}
+// @snippet qfont-tag-from-str-helper
+
+// @snippet qfont-tag-init-str
+const FontTagOptional tagO = qFontTagFromString(%PYARG_1);
+if (tagO.has_value())
+    %0 = new QFont::Tag(tagO.value());
+// @snippet qfont-tag-init-str
+
+// @snippet qfont-tag-fromString
+const FontTagOptional tagO = qFontTagFromString(%PYARG_1);
+if (tagO.has_value()) {
+    const auto &tag = tagO.value();
+    %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](tag);
+}
+// @snippet qfont-tag-fromString
+
+// @snippet qfont-tag-fromValue
+const FontTagOptional tagO = QFont::Tag::fromValue(PyLong_AsUnsignedLong(%PYARG_1));
+if (tagO.has_value()) {
+    const auto &tag = tagO.value();
+    %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](tag);
+} else {
+    PyErr_SetString(PyExc_TypeError, "QFont::Tag::fromValue(): Invalid value passed.");
+}
+// @snippet qfont-tag-fromValue
+
 // @snippet qfontmetricsf-boundingrect
 int *array = nullptr;
 bool errorOccurred = false;

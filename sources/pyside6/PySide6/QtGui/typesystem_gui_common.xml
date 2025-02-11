@@ -632,7 +632,24 @@
     <extra-includes>
       <include file-name="QStringList" location="global"/>
     </extra-includes>
-    <value-type name="Tag" since="6.7"/>
+    <value-type name="Tag" since="6.7">
+        <inject-code class="native" position="beginning"
+                     file="../glue/qtgui.cpp" snippet="qfont-tag-from-str-helper"/>
+        <add-function signature="Tag(QString@name@)">
+            <inject-code class="target" position="beginning"
+                         file="../glue/qtgui.cpp" snippet="qfont-tag-init-str"/>
+        </add-function>
+        <add-function signature="fromString(QString@name@)"
+                      static="true" return-type="QFont::Tag">
+            <inject-code class="target" position="beginning"
+                         file="../glue/qtgui.cpp" snippet="qfont-tag-fromString"/>
+        </add-function>
+        <add-function signature="fromValue(int@value@)"
+                      static="true" return-type="QFont::Tag">
+            <inject-code class="target" position="beginning"
+                         file="../glue/qtgui.cpp" snippet="qfont-tag-fromValue"/>
+        </add-function>
+    </value-type>
     <!-- PYSIDE-1685: QFont(QString) should be checked first, else it will be interpreted as sequence -->
     <modify-function signature="QFont(const QString&amp;,int,int, bool)" overload-number="0"/>
     <modify-function signature="QFont(const QStringList &amp;,int,int, bool)" overload-number="1"/>
