@@ -44,6 +44,15 @@ def signal_check(thing):
     return thing and type(thing) in (Signal, SignalInstance)
 
 
+def is_inconsistent_overload(signatures):
+    if not isinstance(signatures, list):
+        return False
+    count = 0
+    for sig in signatures:
+        count += 1 if "self" in sig.parameters else 0
+    return count != 0 and count != len(signatures)
+
+
 class ExactEnumerator:
     """
     ExactEnumerator enumerates all signatures in a module as they are.
@@ -270,6 +279,9 @@ class ExactEnumerator:
         if decorator in self.collision_track:
             decorator = f"builtins.{decorator}"
         signature = self.get_signature(func, decorator)
+        incon_err = False
+        if is_inconsistent_overload(signature):
+            incon_err = True
         # PYSIDE-2846: Special cases of signatures which inherit from object.
         _self = inspect.Parameter("self", DEFAULT_PARAM_KIND)
         if func_name == "__dir__":
@@ -278,7 +290,7 @@ class ExactEnumerator:
             signature = inspect.Signature([_self], return_annotation=str)
         if signature is not None:
             aug_ass = func in self.mypy_aug_ass_errors
-            with self.fmt.function(func_name, signature, decorator, aug_ass) as key:
+            with self.fmt.function(func_name, signature, decorator, aug_ass, incon_err) as key:
                 ret[key] = signature
         del self.func
         return ret

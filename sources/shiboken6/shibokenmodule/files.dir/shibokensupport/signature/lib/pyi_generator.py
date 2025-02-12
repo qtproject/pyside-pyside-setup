@@ -157,19 +157,25 @@ class Formatter(Writer):
         yield
 
     @contextmanager
-    def function(self, func_name, signature, decorator=None, aug_ass=None):
+    def function(self, func_name, signature, decorator=None, aug_ass=None, incon_err=None):
         if func_name == "__init__":
             self.print()
         key = func_name
         spaces = indent * self.level
         err_ignore = "  # type: ignore[misc]"
+        if incon_err:
+            err_ignore = "  # type: ignore[misc, overload-cannot-match]"
         if isinstance(signature, list):
             # PYSIDE-2846: Disable errors in augmented assignments.
-            opt_comment = (err_ignore if aug_ass else "")
+            opt_comment = (err_ignore if aug_ass or incon_err else "")
             for sig in signature:
                 self.print(f'{spaces}@typing.overload{opt_comment}')
-                opt_comment = ""
-                self._function(func_name, sig, spaces)
+                if incon_err:
+                    # need to mark all overloads
+                    pass
+                else:
+                    opt_comment = ""
+                self._function(func_name, sig, spaces, None, opt_comment)
         else:
             opt_comment = err_ignore if aug_ass else ""
             self._function(func_name, signature, spaces, decorator, opt_comment)
