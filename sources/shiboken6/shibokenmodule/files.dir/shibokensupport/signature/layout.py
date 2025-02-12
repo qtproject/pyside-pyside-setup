@@ -258,23 +258,29 @@ def sort_by_inheritance(signatures):
     return signatures
 
 
-def best_to_remove(signatures, idx1, idx2, name=None):
+def best_to_remove(signatures, idx1, idx2, name):
     # Both have identical annotation.
     sig1 = signatures[idx1]
     sig2 = signatures[idx2]
     ra1 = sig1.return_annotation
     ra2 = sig2.return_annotation
-    # Both have equal return annotation.
+    # Both have equal return annotations
     if ra1 == ra2:
         for p1, p2 in zip(sig1.parameters.values(), sig2.parameters.values()):
-            # Use the first with a default.
+            # Keep the first with a default.
             if p1.default is not _empty or p2.default is not _empty:
-                return idx1 if p1.default is not _empty else idx2
-    # Use the one with a return annotation.
-    return idx1 if ra1 is not None else idx2
+                # Note: We return what to remove!
+                return idx2 if p1.default is not _empty else idx1
+    if ra1 and ra2:
+        # Both have a return annotation.
+        # Remove the probably uglier of the two. This is likely to be the
+        # first one without effort because i.E. arg1 comes early in sorting.
+        return idx1
+    # Remove the one without a return annotation.
+    return idx1 if ra2 is not None else idx2
 
 
-def _remove_ambiguous_signatures_body(signatures, name=None):
+def _remove_ambiguous_signatures_body(signatures, name):
     # By the sorting of signatures, duplicates will always be adjacent.
     last_ann = None
     last_idx = -1
@@ -299,11 +305,11 @@ def _remove_ambiguous_signatures_body(signatures, name=None):
     return True, new_sigs
 
 
-def remove_ambiguous_signatures(signatures, name=None):
+def remove_ambiguous_signatures(signatures, name):
     # This may run more than once because of indexing.
-    found, new_sigs = _remove_ambiguous_signatures_body(signatures)
+    found, new_sigs = _remove_ambiguous_signatures_body(signatures, name)
     while found:
-        found, new_sigs = _remove_ambiguous_signatures_body(new_sigs)
+        found, new_sigs = _remove_ambiguous_signatures_body(new_sigs, name)
     return new_sigs
 
 
@@ -314,11 +320,11 @@ def create_signature(props, key):
     if isinstance(props["multi"], list):
         # multi sig: call recursively.
         # For debugging: Print the name!
-        # name = props["multi"][0]["fullname"]
+        name = props["multi"][0]["fullname"]
         res = list(create_signature(elem, key) for elem in props["multi"])
         # PYSIDE-2846: Sort multi-signatures by inheritance in order to avoid shadowing.
         res = sort_by_inheritance(res)
-        res = remove_ambiguous_signatures(res, name=None)
+        res = remove_ambiguous_signatures(res, name)
         return res if len(res) > 1 else res[0]
 
     if type(key) is tuple:
