@@ -5655,10 +5655,11 @@ static ComplexTypeEntryCList pyBaseTypeEntries(const AbstractMetaClassCPtr &meta
     for (auto base : baseClasses) {
         for (; base != nullptr; base = base->baseClass()) { // Find a type that is not disabled.
             const auto ct = base->typeEntry()->codeGeneration();
-            if (ct == TypeEntry::GenerateCode || ct == TypeEntry::GenerateForSubclass)
+            if (ct == TypeEntry::GenerateCode || ct == TypeEntry::GenerateForSubclass) {
+                result.append(base->typeEntry());
                 break;
+            }
         }
-        result.append(base->typeEntry());
     }
     return result;
 }
