@@ -5,9 +5,9 @@ from __future__ import annotations
 import sys
 import random
 
-from PySide6.QtWidgets import (QApplication, QLabel,
-     QPushButton, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QVBoxLayout, QWidget
 from PySide6.QtCore import Qt, Slot
+
 
 class MyWidget(QWidget):
     def __init__(self):
@@ -29,6 +29,7 @@ class MyWidget(QWidget):
     @Slot()
     def magic(self):
         self.text.setText(random.choice(self.hello))
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

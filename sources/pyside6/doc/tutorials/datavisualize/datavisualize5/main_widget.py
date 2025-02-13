@@ -2,11 +2,10 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
 
-from PySide6.QtCore import QDateTime, Qt
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import (QWidget, QHeaderView, QHBoxLayout, QTableView,
                                QSizePolicy)
-from PySide6.QtCharts import QChart, QChartView, QLineSeries, QDateTimeAxis, QValueAxis
+from PySide6.QtCharts import QChart, QChartView
 
 from table_model import CustomTableModel
 
@@ -41,12 +40,12 @@ class Widget(QWidget):
         self.main_layout = QHBoxLayout()
         size = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
-        ## Left layout
+        # Left layout
         size.setHorizontalStretch(1)
         self.table_view.setSizePolicy(size)
         self.main_layout.addWidget(self.table_view)
 
-        ## Right Layout
+        # Right Layout
         size.setHorizontalStretch(4)
         self.chart_view.setSizePolicy(size)
         self.main_layout.addWidget(self.chart_view)

@@ -14,7 +14,7 @@ class DragDropListModel(QStringListModel):
     """A simple model that uses a QStringList as its data source."""
 
     def __init__(self, strings, parent=None):
-          super().__init__(strings, parent)
+        super().__init__(strings, parent)
 
 #! [0]
 
@@ -27,6 +27,7 @@ class DragDropListModel(QStringListModel):
 
         return True
 #! [0]
+
 #! [1]
     def dropMimeData(self, data, action, row, column, parent):
         if not self.canDropMimeData(data, action, row, column, parent):

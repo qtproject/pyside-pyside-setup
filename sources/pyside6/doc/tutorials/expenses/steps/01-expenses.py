@@ -11,6 +11,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Tutorial")
 
+
 if __name__ == "__main__":
     # Qt Application
     app = QApplication(sys.argv)

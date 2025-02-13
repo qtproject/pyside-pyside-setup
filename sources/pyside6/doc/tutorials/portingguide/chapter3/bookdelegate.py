@@ -2,12 +2,12 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
 
-import copy, os
+import copy
 from PySide6.QtSql import QSqlRelationalDelegate
-from PySide6.QtWidgets import (QItemDelegate, QSpinBox, QStyledItemDelegate,
-    QStyle, QStyleOptionViewItem)
-from PySide6.QtGui import QMouseEvent, QPixmap, QPalette, QImage
-from PySide6.QtCore import QEvent, QSize, Qt, QUrl
+from PySide6.QtWidgets import QSpinBox, QStyle
+from PySide6.QtGui import QPixmap, QPalette
+from PySide6.QtCore import QEvent, QSize, Qt
+
 
 class BookDelegate(QSqlRelationalDelegate):
     """Books delegate to rate the books"""
@@ -44,7 +44,7 @@ class BookDelegate(QSqlRelationalDelegate):
 
             if option.state & QStyle.State_Selected:
                 painter.fillRect(option.rect,
-                    option.palette.color(color_group, QPalette.Highlight))
+                                 option.palette.color(color_group, QPalette.Highlight))
             rating = model.data(index, Qt.DisplayRole)
             width = self.star.width()
             height = self.star.height()

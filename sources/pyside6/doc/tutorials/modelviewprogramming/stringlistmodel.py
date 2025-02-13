@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 
 from PySide6.QtWidgets import (QApplication, QListView)
-from PySide6.QtCore import QAbstractListModel, QStringListModel, QModelIndex, Qt
+from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt
 
 
 #! [0]
@@ -117,7 +117,7 @@ if __name__ == '__main__':
     model.insertRows(5, 7, QModelIndex())
     for row in range(5, 12):
         index = model.index(row, 0, QModelIndex())
-        model.setData(index, f"{row+1}")
+        model.setData(index, f"{row + 1}")
 
 #! [main5]
     view.show()

@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (QAction, QApplication, QHeaderView, QHBoxLayout, 
                                QVBoxLayout, QWidget)
 from PySide6.QtCharts import QtCharts
 
-from __feature__ import snake_case, true_property
+from __feature__ import snake_case, true_property  # noqa: F401
 
 
 class Widget(QWidget):
