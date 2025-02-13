@@ -17,11 +17,9 @@ It will create an executable archive of the files on the command line.
 """
 
 import sys
-import os
 import argparse
-import pickle
 from textwrap import dedent
-from pathlib import path
+from pathlib import Path
 
 
 def source_archive(module, modname):
@@ -32,7 +30,6 @@ def source_archive(module, modname):
     # modname = module.__name__
     # Do not use: Some modules rename themselves!
     version = ".".join(map(str, sys.version_info[:3]))
-    shortname = fname.stem
     preamble = dedent(fr"""
         # BEGIN SOURCE ARCHIVE    Python {version}  module {modname}
 
@@ -66,7 +63,7 @@ if __name__ == "__main__":
     print("modules:", args.modules)
     ret = license_header() + read_all(args.modules)
     ma_mi = "_".join(map(str, sys.version_info[:2]))
-    outpath = Path(__file__).parents[2] / Path("shibokenmodule",
-        "files.dir", "shibokensupport", f"python_minilib_{ma_mi}.py")
+    outpath = Path(__file__).parents[2] / Path("shibokenmodule", "files.dir",
+                                               "shibokensupport", f"python_minilib_{ma_mi}.py")
     with outpath.open("w") as f:
         f.write(ret)

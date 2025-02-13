@@ -22,10 +22,7 @@ It is embedded into 'signature.cpp' as "embed/signature_bootstrap.inc".
 imports were in the functions. Moved them outside into the globals.
 """
 
-recursion_trap = 0
-
 import base64
-import importlib
 import io
 import os
 import sys
@@ -35,6 +32,9 @@ import zipfile
 from contextlib import contextmanager
 from importlib.machinery import ModuleSpec
 from pathlib import Path
+
+
+recursion_trap = 0
 
 
 def bootstrap():
@@ -60,7 +60,7 @@ def bootstrap():
         for key in list(key for key in sys.modules if key.startswith(prefix)):
             del sys.modules[key]
         try:
-            import shibokensupport
+            import shibokensupport  # noqa: F401
             yield
         except Exception as e:
             f = sys.stderr
@@ -84,12 +84,11 @@ def bootstrap():
         from shibokensupport.signature import loader
     return loader
 
-# Newer functionality:
-# This function checks if the support directory exist and returns it.
-# If does not exist, we try to create it and return it.
-# Otherwise, we return None.
 
 def find_incarnated_files():
+    """Newer functionality: This function checks if the support directory exist and
+       returns it. If does not exist, we try to create it and return it. Otherwise,
+       we return None."""
     import shiboken6 as root
     files_dir = Path(root.__file__).resolve().parent / "files.dir"
     handle_embedding_switch(files_dir)
@@ -99,7 +98,7 @@ def find_incarnated_files():
         # But that has the side-effect that we need to delay the feature
         # initialization until all function pointers are set.
         # See `post_init_func` in signature_globals.cpp .
-        import shibokensupport.signature.loader
+        import shibokensupport.signature.loader  # noqa: F401
         del sys.path[0]
         return files_dir
     return None
@@ -129,7 +128,7 @@ def reincarnate_files(files_dir):
     try:
         # First check mkdir to get an error when we cannot write.
         files_dir.mkdir(exist_ok=True)
-    except os.error as e:
+    except os.error:
         print(f"SBK_EMBED=False: Warning: Cannot write into {files_dir}")
         return None
     try:
@@ -147,6 +146,7 @@ def reincarnate_files(files_dir):
 # a temporary zip file.
 # PYSIDE-1621: make zip file access totally virtual
 
+
 def prepare_zipfile():
     """
     Old approach:
@@ -162,7 +162,7 @@ def prepare_zipfile():
     """
 
     # 'zipstring_sequence' comes from signature.cpp
-    zipbytes = base64.b64decode(''.join(zipstring_sequence))
+    zipbytes = base64.b64decode(''.join(zipstring_sequence))   # noqa: F821
     vzip = zipfile.ZipFile(io.BytesIO(zipbytes))
     return sys.meta_path, EmbeddableZipImporter(vzip)
 
@@ -178,7 +178,7 @@ class EmbeddableZipImporter:
             return None
 
         self.zfile = zip_file
-        self._mod2path = {p2m(_.filename) : _.filename for _ in zip_file.filelist}
+        self._mod2path = {p2m(_.filename): _.filename for _ in zip_file.filelist}
 
     def find_spec(self, fullname, path, target=None):
         path = self._mod2path.get(fullname)

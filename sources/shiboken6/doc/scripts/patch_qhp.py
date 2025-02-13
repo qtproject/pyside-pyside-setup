@@ -8,7 +8,7 @@ import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 
 
-DESC="""Qhp file updater
+DESC = """Qhp file updater
 
 Replaces virtual folder ids in .qhp files preparing for
 registering the documentation in Qt Assistant."""
@@ -49,7 +49,7 @@ if __name__ == '__main__':
                             help='String to be injected into the Qhp file.')
     arg_parser.add_argument("--pyside", "-p", action="store_true",
                             help="Strip the PySide module path off the index entries.")
-    arg_parser.add_argument("file", type=str,  help='Qhp filename.')
+    arg_parser.add_argument("file", type=str, help='Qhp filename.')
     options = arg_parser.parse_args()
     virtual_folder = options.vfolder
     strip_pyside_module = options.pyside
