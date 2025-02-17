@@ -11,12 +11,22 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(True)
 
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, Signal, Slot, SIGNAL, SLOT
 from testbinding import TestObject
 
 
-class Foo(QObject):
+class Sender(QObject):
     bar = Signal()
+
+
+class Receiver(QObject):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.called = 0
+
+    @Slot()
+    def receiver(self):
+        self.called += 1
 
 
 class TestDisconnect(unittest.TestCase):
@@ -29,19 +39,61 @@ class TestDisconnect(unittest.TestCase):
     def testIt(self):
         self.called1 = False
         self.called2 = False
-        f = Foo()
-        f.bar.connect(self.theSlot1)
-        f.bar.connect(self.theSlot2)
-        f.bar.emit()
+        s = Sender()
+        s.bar.connect(self.theSlot1)
+        s.bar.connect(self.theSlot2)
+        s.bar.emit()
         self.assertTrue(self.called1)
         self.assertTrue(self.called2)
 
         self.called1 = False
         self.called2 = False
-        f.bar.disconnect()
-        f.bar.emit()
+        self.assertTrue(s.bar.disconnect())  # Disconnect sender
+        s.bar.emit()
         self.assertFalse(self.called1)
         self.assertFalse(self.called2)
+
+    def testCallable(self):
+        s = Sender()
+        r = Receiver()
+        s.bar.connect(r.receiver)
+        s.bar.emit()
+        self.assertEqual(r.called, 1)
+        self.assertTrue(s.bar.disconnect(r.receiver))
+        s.bar.emit()
+        self.assertEqual(r.called, 1)
+
+    def testStringBased(self):
+        s = Sender()
+        r = Receiver()
+        QObject.connect(s, SIGNAL("bar()"), r, SLOT("receiver()"))
+        s.bar.emit()
+        self.assertEqual(r.called, 1)
+        self.assertTrue(QObject.disconnect(s, SIGNAL("bar()"), r, SLOT("receiver()")))
+        s.bar.emit()
+        self.assertEqual(r.called, 1)
+
+    def testMixStringBasedCallable(self):
+        """PYSIDE-3020, Disconnect a string-based connection by passing a callable."""
+        s = Sender()
+        r = Receiver()
+        QObject.connect(s, SIGNAL("bar()"), r, SLOT("receiver()"))
+        s.bar.emit()
+        self.assertEqual(r.called, 1)
+        self.assertTrue(s.bar.disconnect(r.receiver))
+        s.bar.emit()
+        self.assertEqual(r.called, 1)
+
+    def testMixCallableStringBased(self):
+        """PYSIDE-3020, test vice versa."""
+        s = Sender()
+        r = Receiver()
+        s.bar.connect(r.receiver)
+        s.bar.emit()
+        self.assertEqual(r.called, 1)
+        self.assertTrue(QObject.disconnect(s, SIGNAL("bar()"), r, SLOT("receiver()")))
+        s.bar.emit()
+        self.assertEqual(r.called, 1)
 
     def testDuringCallback(self):
         """ Test to see if the C++ object for a connection is accessed after the

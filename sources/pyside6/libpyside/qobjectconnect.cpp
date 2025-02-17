@@ -274,8 +274,15 @@ bool qobjectDisconnectCallback(QObject *source, const char *signal, PyObject *ca
     if (signalIndex == -1)
         return false;
 
-    if (!disconnectSlot(source, signalIndex, callback))
-        return false;
+    if (!disconnectSlot(source, signalIndex, callback)) {
+        // PYSIDE-3020: Check for disconnecting a string-based connection by passing a callable?
+        auto receiver = getReceiver(metaObject->method(signalIndex), callback);
+        if (receiver.receiver == nullptr || receiver.slotIndex == -1
+            || !QMetaObject::disconnect(source, signalIndex,
+                                        receiver.receiver, receiver.slotIndex)) {
+            return false;
+        }
+    }
 
     const QMetaMethod signalMethod = metaObject->method(signalIndex);
     static_cast<FriendlyQObject *>(source)->disconnectNotify(signalMethod);
