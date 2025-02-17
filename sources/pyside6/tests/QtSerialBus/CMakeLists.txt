@@ -1,1 +1,1 @@
-# Please add some tests, here
+PYSIDE_TEST(serialbus.py)

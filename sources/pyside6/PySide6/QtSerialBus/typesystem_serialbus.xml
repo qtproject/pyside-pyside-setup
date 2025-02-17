@@ -86,6 +86,8 @@
         <value-type name="TimeStamp"/>
     </value-type>
     <object-type name="QCanDbcFileParser">
+        <modify-function signature="parse(const QString&amp;)" overload-number="0"/>
+        <modify-function signature="parse(const QStringList&amp;)" overload-number="1"/>
         <enum-type name="Error"/>
     </object-type>
     <object-type name="QCanFrameProcessor">
