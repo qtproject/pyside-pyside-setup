@@ -369,6 +369,29 @@ for (Py_ssize_t i = 0; i < count; ++i){
 %0 = new %TYPE(QPixmap::fromImage(%1));
 // @snippet qpixmap
 
+// @snippet qpixmap-load-xpm
+Shiboken::AutoDecRef strList(PySequence_Fast(%PYARG_1, "Invalid sequence."));
+Py_ssize_t lineCount = PySequence_Size(strList.object());
+for (Py_ssize_t line = 0; line < lineCount; ++line) {
+    Shiboken::AutoDecRef _obj(PySequence_GetItem(strList.object(), line));
+    if (!Shiboken::String::check(_obj)) {
+        PyErr_SetString(PyExc_TypeError, "The argument must be a sequence of strings.");
+        break;
+    }
+}
+// PySIDE-1735: Enums are now implemented in Python, so we need to avoid asserts.
+if (PyErr_Occurred())
+    break;
+
+Shiboken::AutoArrayPointer<const char*> xpm(lineCount);
+for (Py_ssize_t line = 0; line < lineCount; ++line) {
+    Shiboken::AutoDecRef _obj(PySequence_GetItem(strList.object(), line));
+    xpm[line] = Shiboken::String::toCString(_obj);
+}
+
+%0 = new %TYPE(xpm);
+// @snippet qpixmap-load-xpm
+
 // @snippet qicon-addpixmap
 const auto path = PySide::pyPathToQString(%PYARG_1);
 %CPPSELF->addPixmap(path);
@@ -495,6 +518,44 @@ switch (%CPPSELF.spec()) {
 }
 // @snippet qcolor-totuple
 
+// @snippet qcolor-repr
+QString repr;
+switch (%CPPSELF.spec()) {
+case QColor::Rgb: {
+    float r, g, b, a;
+    %CPPSELF.getRgbF(&r, &g, &b, &a);
+    repr = QString::asprintf("PySide6.QtGui.QColor.fromRgbF(%.6f, %.6f, %.6f, %.6f)",
+                             r, g, b, a);
+    break;
+}
+case QColor::Hsv: {
+    float h, s, v, a;
+    %CPPSELF.getHsvF(&h, &s, &v, &a);
+    repr = QString::asprintf("PySide6.QtGui.QColor.fromHsvF(%.6f, %.6f, %.6f, %.6f)",
+                             h, s, v, a);
+    break;
+}
+case QColor::Cmyk: {
+    float c, m, y, k, a;
+    %CPPSELF.getCmykF(&c, &m, &y, &k, &a);
+    repr = QString::asprintf("PySide6.QtGui.QColor.fromCmykF(%.6f, %.6f, %.6f, %.6f, %.6f)",
+                             c, m, y, k, a);
+    break;
+}
+case QColor::Hsl: {
+    float h, s, l, a;
+    %CPPSELF.getHslF(&h, &s, &l, &a);
+    repr = QString::asprintf("PySide6.QtGui.QColor.fromHslF(%.6f, %.6f, %.6f, %.6f)",
+                             h, s, l, a);
+    break;
+}
+default:
+    repr = QLatin1StringView("PySide6.QtGui.QColor()");
+    break;
+}
+%PYARG_0 = Shiboken::String::fromCString(qPrintable(repr));
+// @snippet qcolor-repr
+
 // @snippet qcolor
 if (%1.type() == QVariant::Color)
     %0 = new %TYPE(%1.value<QColor>());
@@ -539,6 +600,17 @@ if (tagO.has_value()) {
     PyErr_SetString(PyExc_TypeError, "QFont::Tag::fromValue(): Invalid value passed.");
 }
 // @snippet qfont-tag-fromValue
+
+// @snippet qfontmetrics-qfontcharfix
+if (Shiboken::String::len(%PYARG_1) == 1) {
+    const char *str = Shiboken::String::toCString(%PYARG_1);
+    const QChar ch(static_cast<unsigned short>(str[0]));
+    %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(ch);
+    %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+} else {
+    PyErr_SetString(PyExc_TypeError, "String must have only one character");
+}
+// @snippet qfontmetrics-qfontcharfix
 
 // @snippet qfontmetricsf-boundingrect
 int *array = nullptr;

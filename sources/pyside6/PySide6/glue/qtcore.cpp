@@ -2167,3 +2167,21 @@ QByteArray result = '<' + QByteArray(Py_TYPE(%PYSELF)->tp_name)
                     + %CPPSELF.absoluteFilePath().toUtf8() + "\")>";
 %PYARG_0 = Shiboken::String::fromCString(result.constData());
 // @snippet qdirlisting-direntry-repr
+
+// @snippet return-native-eventfilter-conversion
+%RETURN_TYPE %out = false;
+if (PySequence_Check(%PYARG_0) != 0 && PySequence_Size(%PYARG_0) == 2) {
+    Shiboken::AutoDecRef pyItem(PySequence_GetItem(%PYARG_0, 0));
+    %out = %CONVERTTOCPP[bool](pyItem);
+    if (result) {
+        Shiboken::AutoDecRef pyResultItem(PySequence_GetItem(pyResult, 1));
+        *result = %CONVERTTOCPP[qintptr](pyResultItem);
+    }
+}
+// @snippet return-native-eventfilter-conversion
+
+// @snippet return-native-eventfilter
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
+PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[qintptr](*result_out));
+// @snippet return-native-eventfilter

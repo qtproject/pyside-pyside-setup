@@ -2004,9 +2004,8 @@
             <insert-template name="return_native_eventfilter_conversion"/>
         </conversion-rule>
       </modify-argument>
-      <inject-code position="end">
-          <insert-template name="return_native_eventfilter"/>
-      </inject-code>
+      <inject-code position="end"
+                   file="../glue/qtcore.cpp" snippet="return-native-eventfilter"/>
     </modify-function>
 
     <extra-includes>
