@@ -50,8 +50,4 @@
         }
     </template>
 
-    <template name="pysequencesize_int">
-        Py_ssize_t %out = PySequence_Size(%PYARG_1);
-    </template>
-
 </typesystem>

@@ -1867,6 +1867,191 @@
     <enum-type name="PaintEngineFeature" flags="PaintEngineFeatures"/>
     <enum-type name="PolygonDrawMode"/>
     <enum-type name="Type"/>
+
+    <modify-function signature="drawLines(const QLine*,int)">
+      <modify-argument index="1">
+        <replace-type modified-type="PySequence"/>
+        <conversion-rule class="native">
+          <insert-template name="pysequence-to-c-array"> <!-- Binding -->
+            <replace from="%TYPE" to="QLine"/>
+          </insert-template>
+        </conversion-rule>
+        <conversion-rule class="target"> <!-- Virtual override -->
+          <insert-template name="c-array-to-pysequence">
+            <replace from="%TYPE" to="QLine"/>
+            <replace from="%COUNT" to="lineCount"/>
+          </insert-template>
+        </conversion-rule>
+      </modify-argument>
+      <modify-argument index="2">
+        <remove-argument/>
+        <conversion-rule class="native"> <!-- Provide parameter for binding -->
+          <insert-template name="pysequencesize_int"/>
+        </conversion-rule>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="drawLines(const QLineF*,int)">
+      <modify-argument index="1">
+        <replace-type modified-type="PySequence"/>
+        <conversion-rule class="native">
+          <insert-template name="pysequence-to-c-array"> <!-- Binding -->
+            <replace from="%TYPE" to="QLineF"/>
+          </insert-template>
+        </conversion-rule>
+        <conversion-rule class="target"> <!-- Virtual override -->
+          <insert-template name="c-array-to-pysequence">
+            <replace from="%TYPE" to="QLineF"/>
+            <replace from="%COUNT" to="lineCount"/>
+          </insert-template>
+        </conversion-rule>
+      </modify-argument>
+      <modify-argument index="2">
+        <remove-argument/>
+        <conversion-rule class="native"> <!-- Provide parameter for binding -->
+          <insert-template name="pysequencesize_int"/>
+        </conversion-rule>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="drawPoints(const QPoint*,int)">
+      <modify-argument index="1">
+        <replace-type modified-type="PySequence"/>
+        <conversion-rule class="native">
+          <insert-template name="pysequence-to-c-array"> <!-- Binding -->
+            <replace from="%TYPE" to="QPoint"/>
+          </insert-template>
+        </conversion-rule>
+        <conversion-rule class="target"> <!-- Virtual override -->
+          <insert-template name="c-array-to-pysequence">
+            <replace from="%TYPE" to="QPoint"/>
+            <replace from="%COUNT" to="pointCount"/>
+          </insert-template>
+        </conversion-rule>
+      </modify-argument>
+      <modify-argument index="2">
+        <remove-argument/>
+        <conversion-rule class="native"> <!-- Provide parameter for binding -->
+          <insert-template name="pysequencesize_int"/>
+        </conversion-rule>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="drawPoints(const QPointF*,int)">
+      <modify-argument index="1">
+        <replace-type modified-type="PySequence"/>
+        <conversion-rule class="native">
+          <insert-template name="pysequence-to-c-array"> <!-- Binding -->
+            <replace from="%TYPE" to="QPointF"/>
+          </insert-template>
+        </conversion-rule>
+        <conversion-rule class="target"> <!-- Virtual override -->
+          <insert-template name="c-array-to-pysequence">
+            <replace from="%TYPE" to="QPointF"/>
+            <replace from="%COUNT" to="pointCount"/>
+          </insert-template>
+        </conversion-rule>
+      </modify-argument>
+      <modify-argument index="2">
+        <remove-argument/>
+        <conversion-rule class="native"> <!-- Provide parameter for binding -->
+          <insert-template name="pysequencesize_int"/>
+        </conversion-rule>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="drawPolygon(const QPoint*,int,QPaintEngine::PolygonDrawMode)">
+      <modify-argument index="1">
+        <replace-type modified-type="PySequence"/>
+        <conversion-rule class="native">
+          <insert-template name="pysequence-to-c-array"> <!-- Binding -->
+            <replace from="%TYPE" to="QPoint"/>
+          </insert-template>
+        </conversion-rule>
+        <conversion-rule class="target"> <!-- Virtual override -->
+          <insert-template name="c-array-to-pysequence">
+            <replace from="%TYPE" to="QPoint"/>
+            <replace from="%COUNT" to="pointCount"/>
+          </insert-template>
+        </conversion-rule>
+      </modify-argument>
+      <modify-argument index="2">
+        <remove-argument/>
+        <conversion-rule class="native"> <!-- Provide parameter for binding -->
+          <insert-template name="pysequencesize_int"/>
+        </conversion-rule>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="drawPolygon(const QPointF*,int,QPaintEngine::PolygonDrawMode)">
+      <modify-argument index="1">
+        <replace-type modified-type="PySequence"/>
+        <conversion-rule class="native">
+          <insert-template name="pysequence-to-c-array"> <!-- Binding -->
+            <replace from="%TYPE" to="QPointF"/>
+          </insert-template>
+        </conversion-rule>
+        <conversion-rule class="target"> <!-- Virtual override -->
+          <insert-template name="c-array-to-pysequence">
+            <replace from="%TYPE" to="QPointF"/>
+            <replace from="%COUNT" to="pointCount"/>
+          </insert-template>
+        </conversion-rule>
+      </modify-argument>
+      <modify-argument index="2">
+        <remove-argument/>
+        <conversion-rule class="native"> <!-- Provide parameter for binding -->
+          <insert-template name="pysequencesize_int"/>
+        </conversion-rule>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="drawRects(const QRect*,int)">
+      <modify-argument index="1">
+        <replace-type modified-type="PySequence"/>
+        <conversion-rule class="native">
+          <insert-template name="pysequence-to-c-array"> <!-- Binding -->
+            <replace from="%TYPE" to="QRect"/>
+          </insert-template>
+        </conversion-rule>
+        <conversion-rule class="target"> <!-- Virtual override -->
+          <insert-template name="c-array-to-pysequence">
+            <replace from="%TYPE" to="QRect"/>
+            <replace from="%COUNT" to="rectCount"/>
+          </insert-template>
+        </conversion-rule>
+      </modify-argument>
+      <modify-argument index="2">
+        <remove-argument/>
+        <conversion-rule class="native"> <!-- Provide parameter for binding -->
+          <insert-template name="pysequencesize_int"/>
+        </conversion-rule>
+      </modify-argument>
+    </modify-function>
+
+    <modify-function signature="drawRects(const QRectF*,int)">
+      <modify-argument index="1">
+        <replace-type modified-type="PySequence"/>
+        <conversion-rule class="native">
+          <insert-template name="pysequence-to-c-array"> <!-- Binding -->
+            <replace from="%TYPE" to="QRectF"/>
+          </insert-template>
+        </conversion-rule>
+        <conversion-rule class="target"> <!-- Virtual override -->
+          <insert-template name="c-array-to-pysequence">
+            <replace from="%TYPE" to="QRectF"/>
+            <replace from="%COUNT" to="rectCount"/>
+          </insert-template>
+        </conversion-rule>
+      </modify-argument>
+      <modify-argument index="2">
+        <remove-argument/>
+        <conversion-rule class="native"> <!-- Provide parameter for binding -->
+          <insert-template name="pysequencesize_int"/>
+        </conversion-rule>
+      </modify-argument>
+    </modify-function>
+
     <modify-function signature="begin(QPaintDevice*)">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
@@ -1912,12 +2097,7 @@
             <insert-template name="qpainter_drawlist"/>
         </inject-code>
     </add-function>
-    <!-- ### Overloads using QList<T> does the job of these methods -->
-    <modify-function signature="drawLines(const QLine*,int)" remove="all"/>
-    <modify-function signature="drawLines(const QPoint*,int)" remove="all"/>
-    <modify-function signature="drawLines(const QPointF*,int)" remove="all"/>
-    <modify-function signature="drawRects(const QRect*,int)" remove="all"/>
-    <!-- ### -->
+
     <!-- PYSIDE-1540: Preferably use the QPolygon overloads first to avoid
          a costly sequence type check on QPolygon. -->
     <modify-function signature="drawPoints(const QPoint*,int)" remove="all"/>
