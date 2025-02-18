@@ -1053,3 +1053,20 @@ QString msgCannotFindQDocFile(const AbstractMetaClassCPtr &metaClass,
         << "), tried: " << nativeCandidates.join(", "_L1);
     return result;
 }
+
+QString msgCannotCall(const AbstractMetaFunctionCPtr &func,
+                      int arg, bool injectCodeCallsFunc, bool hasConversionRule)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "No way to generate a binding call for \"" << func->ownerClass()->name() << "::"
+        << func->signature() << '"';
+    if (func->isUserAdded())
+        str << " (user added)";
+    str << " with the modifications for argument " << (arg + 1) << ':';
+    if (!injectCodeCallsFunc)
+        str << " There is no code injection calling the function.";
+    if (!hasConversionRule)
+        str << " There is no conversion rule.";
+    return result;
+}

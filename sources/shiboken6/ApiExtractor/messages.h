@@ -276,4 +276,7 @@ QString msgCannotCopy(const QFile &source, const QString &target);
 QString msgCannotFindQDocFile(const AbstractMetaClassCPtr &metaClass,
                               const QStringList &candidates);
 
+QString msgCannotCall(const AbstractMetaFunctionCPtr &func,
+                      int arg, bool injectCodeCallsFunc, bool hasConversionRule);
+
 #endif // MESSAGES_H

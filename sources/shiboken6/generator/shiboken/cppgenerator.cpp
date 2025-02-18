@@ -3224,11 +3224,7 @@ void CppGenerator::writeSingleFunctionCall(TextStream &s,
             } else if (!injectCodeCallsFunc && !func->isUserAdded() && !hasConversionRule) {
                 // When an argument is removed from a method signature and no other means of calling
                 // the method are provided (as with code injection) the generator must abort.
-                QString m;
-                QTextStream(&m) << "No way to call '" << func->ownerClass()->name()
-                    << "::" << func->signature()
-                    << "' with the modifications described in the type system.";
-                throw Exception(m);
+                throw Exception(msgCannotCall(func, argIdx, injectCodeCallsFunc, hasConversionRule));
             }
             removedArgs++;
             continue;
