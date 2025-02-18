@@ -524,13 +524,16 @@ in case of several out-parameters):
 
     virtual int getInt() const;
 
-For the binding itself, use the common argument modifications (removing
-arguments, modifying return types with injected code snippets) to modify the
-signature.
+In most cases, this can be achieved by specifying conversion rules for
+arguments (see :ref:`conversionrule-on-arguments`, :ref:`modify-argument`)
+for the Python wrapper as well as C++ wrapper code.
 
-To make it possible to reimplement the function in Python with the modified
-signature, add a ``python-override`` function with that signature, using an
-arbitrary name for disambiguation:
+For cases where this is not possible, code implementing a Python override can
+be generated for arbitrary signatures.
+
+Taking the above example, to make it possible to reimplement the function in
+Python with the modified signature, add a ``python-override`` function with
+that signature, using an arbitrary name for disambiguation:
 
 .. code-block:: xml
 

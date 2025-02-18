@@ -6,9 +6,10 @@ modify-argument
 Function argument modifications consist of a list of ``modify-argument`` nodes
 contained in :ref:`modify-function`, :ref:`add-function` or
 :ref:`declare-function` nodes. Nested :ref:`remove-argument`,
-:ref:`replace-default-expression`, :ref:`remove-default-expression`,
-:ref:`replace-type`, :ref:`reference-count` and :ref:`define-ownership`
-nodes specify the details of the modification.
+:ref:`rename-to`, :ref:`remove-default-expression`, :ref:`replace-default-expression`,
+:ref:`replace-type`, :ref:`define-ownership`, :ref:`parent-on-arguments`,
+:ref:`reference-count`, :ref:`conversionrule-on-arguments` and
+and :ref:`replace-value` nodes specify the details of the modification.
 
 .. code-block:: xml
 
@@ -194,7 +195,7 @@ counting, since the model should be kept alive as long as the view lives.
 Remember that our hypothetical view cannot become a :ref:`parent` of the
 model, since the said model could be used by other views as well.
 
-.. _parent:
+.. _parent-on-arguments:
 
 parent
 ^^^^^^
@@ -236,7 +237,8 @@ It is then a child of the :ref:`modify-argument` node:
     </modify-argument>
 
 The ``class`` attribute accepts one of the following values to define the
-conversion direction to be either ``target-to-native`` or ``native-to-target``:
+conversion direction to be either ``target-to-native`` (Python to C++)
+or ``native-to-target`` (C++ to Python):
 
 * ``native``: Defines the conversion direction to be ``target-to-native``.
               It is similar to the existing ``<target-to-native>`` element.
@@ -246,9 +248,27 @@ conversion direction to be either ``target-to-native`` or ``native-to-target``:
               It is similar to the existing ``<native-to-target>`` element.
               See :ref:`Conversion Rule Tag <conversion-rule-tag>` for more information.
 
+The conversions appear in the generated code (see :ref:`codegenerationterminology`)
+as follows:
+
++--------------+----------------+-------------+
+|              | Python Wrapper | C++ Wrapper |
++--------------+----------------+-------------+
+|Parameters    | ``native``     | ``target``  |
++--------------+----------------+-------------+
+|Return value  | ``target``     | ``native``  |
++--------------+----------------+-------------+
+
 This node is typically used in combination with the :ref:`replace-type` and
 :ref:`remove-argument` nodes. The given code is used instead of the generator's
 conversion code.
+
+An example for removing an argument might be a C++ function accepting a C-style
+array and a length parameter, which is modified to receive a Python list
+instead. The array parameter's type would be modified to ``PySequence`` with
+``native`` conversion rule; and the length parameter would be removed,
+specifying a native ``native`` conversion rule which would determine the value
+from the size of the Python sequence passed.
 
 Writing %N in the code (where N is a number), will insert the name of the
 nth argument. Alternatively, %in and %out which will be replaced with the
@@ -260,6 +280,10 @@ output variable must be declared explicitly, for example:
     <conversion-rule class="native">
     bool %out = (bool) %in;
     </conversion-rule>
+
+.. note::
+    Conversion rules for the `C++ Wrapper` only need to be specified if the
+    function is virtual and overidable.
 
 .. note::
 
