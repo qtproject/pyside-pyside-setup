@@ -19,6 +19,8 @@ used literally as strings like "signature", "existence", etc.
 """
 
 import inspect
+import sys
+import types
 import typing
 
 from types import SimpleNamespace
@@ -28,6 +30,28 @@ from shibokensupport.signature.parser import using_snake_case
 from shibokensupport.signature import make_snake_case_name
 
 DEFAULT_PARAM_KIND = inspect.Parameter.POSITIONAL_ONLY
+
+
+def formatannotation(annotation, base_module=None):
+    if getattr(annotation, '__module__', None) == 'typing':
+        return repr(annotation).replace('typing.', '')
+    if isinstance(annotation, types.GenericAlias):
+        return str(annotation)
+    if isinstance(annotation, type):
+        if annotation.__module__ in ('builtins', base_module):
+            return annotation.__qualname__
+        return annotation.__module__ + '.' + annotation.__qualname__
+    return repr(annotation)
+
+
+# PYSIDE-3012: Patching Python < 3.9.8 or Python < 3.10.1
+def install_typing_patch():
+    v = sys.version_info[:3]
+    if v[1] == 9 and v[2] < 8 or v[1] == 10 and v[2] < 1:
+        inspect.formatannotation = formatannotation
+
+
+install_typing_patch()
 
 
 class SignatureLayout(SimpleNamespace):

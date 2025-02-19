@@ -10,6 +10,7 @@ import re
 import sys
 import typing
 import warnings
+import abc
 
 from types import SimpleNamespace
 from shibokensupport.signature.mapping import (type_map, type_map_tuple, update_mapping,
@@ -243,7 +244,7 @@ def get_name(thing):
 
 def _resolve_value(thing, valtype, line):
     if thing in ("0", "None") and valtype:
-        if valtype.startswith("PySide6.") or valtype.startswith("typing."):
+        if valtype.startswith(("PySide6.", "typing.", "collections.abc.")):
             return None
         mapped = type_map.get(valtype)
         # typing.Any: '_SpecialForm' object has no attribute '__name__'
@@ -297,13 +298,16 @@ def to_string(thing):
     # so we fall back to use __name__ before the next condition.
     if isinstance(thing, typing.TypeVar):
         return get_name(thing)
-    if hasattr(thing, "__name__") and thing.__module__ != "typing":
+    if hasattr(thing, "__name__") and thing.__module__ not in ("typing", "collections.abc"):
         m = thing.__module__
         dot = "." in str(thing) or m not in (thing.__qualname__, "builtins")
         name = get_name(thing)
         ret = m + "." + name if dot else name
         assert (eval(ret, globals(), namespace))
         return ret
+    elif type(thing) is abc.ABCMeta:
+        # collections.abc.Sequence without argument is very different from typing.
+        return f"{thing.__module__}.{thing.__name__}"
     # Note: This captures things from the typing module:
     return str(thing)
 
