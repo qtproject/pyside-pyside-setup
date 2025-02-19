@@ -342,4 +342,5 @@
     <!-- Suppress anonymous enum warning -->
     <suppress-warning text="Anonymous enum (QmlCurrentSingletonTypeRegistrationVersion) does not have a type entry"/>
     <suppress-warning text="Enum 'QQmlModuleImportSpecialVersions' does not have a type entry"/>
+    <suppress-warning text="^Unable to decide type of property: .*QQmlListProperty.*Unable to translate type.*QQmlListProperty.*Cannot find type entry for.*QQmlListProperty.*$"/>
 </typesystem>

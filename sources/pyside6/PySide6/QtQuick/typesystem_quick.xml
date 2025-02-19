@@ -250,5 +250,6 @@
     <suppress-warning text="^signature.*fromVulkanImage.*not found.*$"/>
     <suppress-warning text="^signature.*fromPhysicalDevice.*not found.*$"/>
     <suppress-warning text="^signature.*fromDeviceObjects.*not found.*$"/>
+    <suppress-warning text="^Unable to decide type of property:.*QQuickGradient.*Unable to translate type.*QQuickGradient.*Cannot find type entry for.*QQuickGradient.*$"/>
 
 </typesystem>
