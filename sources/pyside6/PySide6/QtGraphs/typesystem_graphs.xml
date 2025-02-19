@@ -12,8 +12,6 @@
 
   <load-typesystem name="QtQuick/typesystem_quick.xml" generate="no" />
 
-  <load-typesystem name="templates/datavisualization_common.xml" generate="no" />
-
   <function signature="qDefaultSurfaceFormat(bool)"/>
 
    <namespace-type name="QtGraphs3D">

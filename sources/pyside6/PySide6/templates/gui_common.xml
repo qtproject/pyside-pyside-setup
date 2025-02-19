@@ -42,14 +42,6 @@
         delete [] xpm;
     </template>
 
-    <template name="qmatrix_map">
-        %ARG1_TYPE a, b;
-        %CPPSELF.%FUNCTION_NAME(%1, %2, &amp;a, &amp;b);
-        %PYARG_0 = PyTuple_New(2);
-        PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%ARG1_TYPE](a));
-        PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[%ARG1_TYPE](b));
-    </template>
-
     <template name="qimage_buffer_constructor">
         Py_INCREF(%PYARG_1);
         auto ptr = reinterpret_cast&lt;uchar*&gt;(Shiboken::Buffer::getPointer(%PYARG_1));
@@ -143,21 +135,6 @@
 
     <template name="inplace_add">
         *%CPPSELF += %1;
-        return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
-    </template>
-
-    <template name="inplace_sub">
-        *%CPPSELF -= %1;
-        return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
-    </template>
-
-    <template name="inplace_mult">
-        *%CPPSELF *= %1;
-        return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
-    </template>
-
-    <template name="inplace_div">
-        *%CPPSELF /= %1;
         return %CONVERTTOPYTHON[%RETURN_TYPE](*%CPPSELF);
     </template>
 

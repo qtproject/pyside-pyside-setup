@@ -60,24 +60,6 @@
         <insert-template name="tuple_retval_ok"/>
     </template>
 
-    <template name="fix_bool*,arg,arg">
-        bool ok_;
-        %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;ok_, %2, %3);
-        <insert-template name="tuple_retval_ok"/>
-    </template>
-
-    <template name="fix_bool*,arg,arg,arg">
-        bool ok_;
-        %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;ok_, %2, %3, %4);
-        <insert-template name="tuple_retval_ok"/>
-    </template>
-
-    <template name="fix_bool*,arg,arg,arg,arg">
-        bool ok_;
-        %RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&amp;ok_, %2, %3, %4, %5);
-        <insert-template name="tuple_retval_ok"/>
-    </template>
-
     <!-- QInputDialog: these should allow threads -->
     <template name="fix_arg,arg,arg,arg,arg,arg,arg,bool*,arg">
         bool ok_;
@@ -147,12 +129,6 @@
         <insert-template name="tuple_abcd_same_type"/>
     </template>
 
-    <template name="fix_number*,number*,number*,number*,args">
-        $TYPE a, b, c, d;
-        %CPPSELF->::%TYPE::%FUNCTION_NAME(&amp;a, &amp;b, &amp;c, &amp;d, %ARGUMENT_NAMES);
-        <insert-template name="tuple_abcd_same_type"/>
-    </template>
-
     <template name="fix_native_return_number*,number*,number*,number*">
         PyObject* _obj = %PYARG_0.object();
         Shiboken::AutoDecRef _obj0(PySequence_GetItem(_obj, 0));
@@ -191,16 +167,6 @@
         %PYARG_0 = PyTuple_New(2);
         PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[$TYPE](a));
         PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[$TYPE](b));
-    </template>
-
-    <template name="fix_arg,int*,int*">
-    %RETURN_TYPE _ret;
-    int a, b;
-    _ret = %CPPSELF.%FUNCTION_NAME(%1, &amp;a, &amp;b);
-    %PYARG_0 = PyTuple_New(3);
-    PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](_ret));
-    PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[int](a));
-    PyTuple_SetItem(%PYARG_0, 2, %CONVERTTOPYTHON[int](b));
     </template>
 
     <template name="return_tuple_QValidator_QString_int">
