@@ -143,7 +143,7 @@ class ExactEnumerator:
                 name = base.__module__ + "." + name
             bases_list.append(name)
         bases_str = ', '.join(bases_list)
-        class_str = f"{class_name}({bases_str})"
+        class_str = f"{class_name}" if bases_str == "object" else f"{class_name}({bases_str})"
         # class_members = inspect.getmembers(klass)
         # gives us also the inherited things.
         class_members = sorted(list(klass.__dict__.items()))

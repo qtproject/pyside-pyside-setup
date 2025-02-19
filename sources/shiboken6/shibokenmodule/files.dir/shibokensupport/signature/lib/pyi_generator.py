@@ -244,7 +244,7 @@ def filter_from_imports(from_struct, text):
         for each in imports:
             # PYSIDE-1603: We search text that is a usage of the class `each`,
             #              but only if the class is not also defined here.
-            if (f"class {each}(") not in text:
+            if f"class {each}(" not in text and f"class {each}:" not in text:
                 if re.search(rf"(\b|@){each}\b([^\s\(:]|\n)", text):
                     lis.append(each)
                 # Search if a type is present in the return statement
