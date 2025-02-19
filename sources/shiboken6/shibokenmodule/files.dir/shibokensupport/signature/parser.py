@@ -10,6 +10,7 @@ import re
 import sys
 import typing
 import warnings
+import collections.abc
 import abc
 
 from types import SimpleNamespace
@@ -415,7 +416,7 @@ def handle_argvar(obj):
     Currently, the best approximation is types.Sequence.
     We want to change that to types.Iterable in the near future.
     """
-    return _handle_generic(obj, typing.Sequence)
+    return _handle_generic(obj, collections.abc.Sequence)
 
 
 def handle_retvar(obj):
@@ -495,7 +496,7 @@ def fix_variables(props, line):
     for idx, name in enumerate(varnames):
         ann = safe_annos[name]
         if isinstance(ann, ArrayLikeVariable):
-            ann = typing.Sequence[ann.type]
+            ann = collections.abc.Sequence[ann.type]
             annos[name] = ann
         if not isinstance(ann, ResultVariable):
             continue

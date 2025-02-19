@@ -227,7 +227,7 @@ FROM_IMPORTS = [
     (None, ["os"]),
     (None, ["enum"]),
     (None, ["typing"]),
-    ("collections.abc", ["Iterable"]),
+    (None, ["collections"]),
     ("PySide6.QtCore", ["PyClassProperty", "Signal", "SignalInstance"]),
     ("shiboken6", ["Shiboken"]),
     ]

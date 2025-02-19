@@ -471,19 +471,19 @@ namespace PySide::Property {
 
 static const char *Property_SignatureStrings[] = {
     "PySide6.QtCore.Property(self,type:type,"
-        "fget:typing.Optional[typing.Callable[[typing.Any],typing.Any]],"
-        "fset:typing.Optional[typing.Callable[[typing.Any,typing.Any],None]],"
-        "freset:typing.Optional[typing.Callable[[typing.Any,typing.Any],None]],"
+        "fget:typing.Optional[collections.abc.Callable[[typing.Any],typing.Any]],"
+        "fset:typing.Optional[collections.abc.Callable[[typing.Any,typing.Any],None]],"
+        "freset:typing.Optional[collections.abc.Callable[[typing.Any,typing.Any],None]],"
         "doc:str=None,"
-        "notify:typing.Optional[typing.Callable[[],None]],"
+        "notify:typing.Optional[collections.abc.Callable[[],None]],"
         "designable:bool=True,scriptable:bool=True,"
         "stored:bool=True,user:bool=False,constant:bool=False,final:bool=False)",
-    "PySide6.QtCore.Property.deleter(self,fdel:typing.Callable[[typing.Any],None])->PySide6.QtCore.Property",
-    "PySide6.QtCore.Property.getter(self,fget:typing.Callable[[typing.Any],typing.Any])->PySide6.QtCore.Property",
-    "PySide6.QtCore.Property.read(self,fget:typing.Callable[[typing.Any],typing.Any])->PySide6.QtCore.Property",
-    "PySide6.QtCore.Property.setter(self,fset:typing.Callable[[typing.Any,typing.Any],None])->PySide6.QtCore.Property",
-    "PySide6.QtCore.Property.write(self,fset:typing.Callable[[typing.Any,typing.Any],None])->PySide6.QtCore.Property",
-    "PySide6.QtCore.Property.__call__(self, func:typing.Callable[...,typing.Any])->PySide6.QtCore.Property",
+    "PySide6.QtCore.Property.deleter(self,fdel:collections.abc.Callable[[typing.Any],None])->PySide6.QtCore.Property",
+    "PySide6.QtCore.Property.getter(self,fget:collections.abc.Callable[[typing.Any],typing.Any])->PySide6.QtCore.Property",
+    "PySide6.QtCore.Property.read(self,fget:collections.abc.Callable[[typing.Any],typing.Any])->PySide6.QtCore.Property",
+    "PySide6.QtCore.Property.setter(self,fset:collections.abc.Callable[[typing.Any,typing.Any],None])->PySide6.QtCore.Property",
+    "PySide6.QtCore.Property.write(self,fset:collections.abc.Callable[[typing.Any,typing.Any],None])->PySide6.QtCore.Property",
+    "PySide6.QtCore.Property.__call__(self, func:collections.abc.Callable[...,typing.Any])->PySide6.QtCore.Property",
     nullptr}; // Sentinel
 
 void init(PyObject *module)

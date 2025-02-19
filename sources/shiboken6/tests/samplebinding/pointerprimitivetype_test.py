@@ -31,6 +31,7 @@ from sample import IntArray2, VirtualMethods
 from shibokensupport.signature import get_signature
 
 import typing
+import collections
 
 
 class PointerPrimitiveTypeTest(unittest.TestCase):
@@ -45,7 +46,7 @@ class PointerPrimitiveTypeTest(unittest.TestCase):
         self.assertTrue(found)
         ann = sig.parameters["data"].annotation
         self.assertEqual(ann.__args__, (int,))
-        self.assertTrue(issubclass(ann.__origin__, typing.Iterable))
+        self.assertTrue(issubclass(ann.__origin__, collections.abc.Iterable))
 
     def testReturnVarSignature(self):
         # signature="getMargins(int*,int*,int*,int*)const">

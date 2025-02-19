@@ -18,6 +18,7 @@ import os
 import struct
 import sys
 import typing
+import collections
 
 from pathlib import Path
 from typing import TypeVar, Generic
@@ -38,7 +39,7 @@ if not hasattr(typing, "Self"):
 ellipsis = ellipsis()
 Point = typing.Tuple[int, int]
 Variant = typing.Any
-QImageCleanupFunction = typing.Callable[..., typing.Any]
+QImageCleanupFunction = collections.abc.Callable[..., typing.Any]
 
 # unfortunately, typing.Optional[t] expands to typing.Union[t, NoneType]
 # Until we can force it to create Optional[t] again, we use this.
@@ -223,16 +224,16 @@ type_map.update({
     "int": int,
     "List": ArrayLikeVariable,
     "Optional": typing.Optional,
-    "Iterable": typing.Iterable,
+    "Iterable": collections.abc.Iterable,
     "long": int,
     "long long": int,
     "nullptr": None,
-    "PyCallable": typing.Callable[..., typing.Any],
+    "PyCallable": collections.abc.Callable[..., typing.Any],
     "PyObject": object,
     "PyObject*": object,
     "PyArrayObject": ArrayLikeVariable(typing.Any),  # numpy
     "PyPathLike": typing.Union[str, bytes, os.PathLike[str]],
-    "PySequence": typing.Iterable,  # important for numpy
+    "PySequence": collections.abc.Iterable,  # important for numpy
     "PyTypeObject": type,
     "QChar": str,
     "QHash": typing.Dict,

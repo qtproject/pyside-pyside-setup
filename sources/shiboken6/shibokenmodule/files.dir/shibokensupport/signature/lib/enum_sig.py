@@ -15,7 +15,7 @@ by producing a lot of clarity.
 import inspect
 import sys
 import types
-import typing
+import collections
 from shibokensupport.signature import get_signature as get_sig
 from shibokensupport.signature.layout import DEFAULT_PARAM_KIND
 from enum import Enum
@@ -285,7 +285,7 @@ class ExactEnumerator:
         # PYSIDE-2846: Special cases of signatures which inherit from object.
         _self = inspect.Parameter("self", DEFAULT_PARAM_KIND)
         if func_name == "__dir__":
-            signature = inspect.Signature([_self], return_annotation=typing.Iterable[str])
+            signature = inspect.Signature([_self], return_annotation=collections.abc.Iterable[str])
         elif func_name == "__repr__":
             signature = inspect.Signature([_self], return_annotation=str)
         if signature is not None:

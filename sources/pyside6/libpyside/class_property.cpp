@@ -153,13 +153,13 @@ namespace PySide::ClassProperty {
 
 static const char *PyClassProperty_SignatureStrings[] = {
     "PySide6.QtCore.PyClassProperty(cls,"
-        "fget:typing.Optional[typing.Callable[[typing.Any],typing.Any]]=None,"
-        "fset:typing.Optional[typing.Callable[[typing.Any,typing.Any],None]]=None,"
-        "fdel:typing.Optional[typing.Callable[[typing.Any],None]]=None,"
+        "fget:typing.Optional[collections.abc.Callable[[typing.Any],typing.Any]]=None,"
+        "fset:typing.Optional[collections.abc.Callable[[typing.Any,typing.Any],None]]=None,"
+        "fdel:typing.Optional[collections.abc.Callable[[typing.Any],None]]=None,"
         "doc:typing.Optional[str]=None)",
-    "PySide6.QtCore.PyClassProperty.getter(cls,fget:typing.Callable[[typing.Any],typing.Any])->PySide6.QtCore.PyClassProperty",
-    "PySide6.QtCore.PyClassProperty.setter(cls,fset:typing.Callable[[typing.Any,typing.Any],None])->PySide6.QtCore.PyClassProperty",
-    "PySide6.QtCore.PyClassProperty.deleter(cls,fdel:typing.Callable[[typing.Any],None])->PySide6.QtCore.PyClassProperty",
+    "PySide6.QtCore.PyClassProperty.getter(cls,fget:collections.abc.Callable[[typing.Any],typing.Any])->PySide6.QtCore.PyClassProperty",
+    "PySide6.QtCore.PyClassProperty.setter(cls,fset:collections.abc.Callable[[typing.Any,typing.Any],None])->PySide6.QtCore.PyClassProperty",
+    "PySide6.QtCore.PyClassProperty.deleter(cls,fdel:collections.abc.Callable[[typing.Any],None])->PySide6.QtCore.PyClassProperty",
     nullptr}; // Sentinel
 
 void init(PyObject *module)
