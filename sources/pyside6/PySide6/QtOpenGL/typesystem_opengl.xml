@@ -7,7 +7,6 @@
             namespace-begin="QT_BEGIN_NAMESPACE" namespace-end="QT_END_NAMESPACE">
   <load-typesystem name="QtCore/typesystem_core.xml" generate="no" />
   <load-typesystem name="QtGui/typesystem_gui.xml" generate="no" />
-  <load-typesystem name="templates/opengl_common.xml" generate="no" />
 
   <rejection class="^QOpenGL.*$" argument-type="^const GLboolean ?\*$"/>
   <rejection class="^QOpenGL.*$" argument-type="^GLchar\*$"/>

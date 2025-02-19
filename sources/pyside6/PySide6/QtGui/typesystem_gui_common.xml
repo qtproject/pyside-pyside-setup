@@ -8,7 +8,6 @@
   <load-typesystem name="templates/common.xml" generate="no"/>
   <load-typesystem name="templates/core_common.xml" generate="no"/>
   <load-typesystem name="templates/gui_common.xml" generate="no"/>
-  <load-typesystem name="templates/opengl_common.xml" generate="no"/>
 
   <rejection class="^Q.*$" argument-type="^QPlatform.*$"/>
   <function signature="qAlpha(uint)"/>
@@ -3245,9 +3244,8 @@
           <modify-argument index="return">
               <replace-type modified-type="QString"/>
           </modify-argument>
-          <inject-code class="target" position="beginning">
-            <insert-template name="glGetString_return_QString"/>
-          </inject-code>
+          <inject-code class="target" position="end" file="../glue/qtgui.cpp"
+                       snippet="glgetstring-return"/>
       </modify-function>
       <modify-function signature="glShaderBinary(GLint,const GLuint*,GLenum,const void*,GLint)">
           <modify-argument index="2"><array/></modify-argument>

@@ -105,8 +105,6 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/widgets_common.xml
         DESTINATION share/PySide6${pyside_SUFFIX}/typesystems)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/datavisualization_common.xml
         DESTINATION share/PySide6${pyside_SUFFIX}/typesystems)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/templates/opengl_common.xml
-        DESTINATION share/PySide6${pyside_SUFFIX}/typesystems)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pyside6_global.h
         DESTINATION include/${BINDING_NAME}${pyside6_SUFFIX})
 
