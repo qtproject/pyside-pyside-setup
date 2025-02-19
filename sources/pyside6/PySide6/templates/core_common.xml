@@ -236,8 +236,8 @@
         Py_INCREF(%PYARG_0);
     </template>
 
-    <!-- Helpers for modifying "bool nativeEventFilter(QByteArray, void*, long *result)"
-         to return a tuple of bool,long -->
+    <!-- Helpers for modifying "bool nativeEventFilter(QByteArray, void*, qintptr *result)"
+         to return a tuple of bool,qintptr -->
     <template name="return_native_eventfilter_conversion_variables">
         qintptr resultVar{0};
         qintptr *%out = &amp;resultVar;
@@ -249,7 +249,7 @@
             %out = %CONVERTTOCPP[bool](pyItem);
             if (result) {
                 Shiboken::AutoDecRef pyResultItem(PySequence_GetItem(pyResult, 1));
-                *result = %CONVERTTOCPP[long](pyResultItem);
+                *result = %CONVERTTOCPP[qintptr](pyResultItem);
             }
         }
     </template>
@@ -257,7 +257,7 @@
     <template name="return_native_eventfilter">
         %PYARG_0 = PyTuple_New(2);
         PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
-        PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[long](*result_out));
+        PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[qintptr](*result_out));
     </template>
 
     <!-- templates for __reduce__ -->
