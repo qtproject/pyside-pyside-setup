@@ -1460,11 +1460,16 @@
         <modify-argument index="3">
             <replace-type modified-type="PySequence"/>
             <conversion-rule class="native">
-                <insert-template name="qgraphicsitem_pysequence"/>
+                <insert-template name="pysequence-to-c-array">
+                    <replace from="%TYPE" to="QGraphicsItem*"/>
+                </insert-template>
             </conversion-rule>
 
             <conversion-rule class="target">
-                <insert-template name="qgraphicsitem_pyobject"/>
+                <insert-template name="c-array-to-pysequence">
+                    <replace from="%TYPE" to="QGraphicsItem*"/>
+                    <replace from="%COUNT" to="numItems"/>
+                </insert-template>
             </conversion-rule>
         </modify-argument>
 
