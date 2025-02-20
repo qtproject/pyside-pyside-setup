@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <typesystem package="sample">
+
+     <inject-code class="native" position="beginning"
+                  file="samplesnippets.cpp" snippet="module-helpers"/>
+
     <primitive-type name="ObjectType::Identifier"/>
     <primitive-type name="std::nullptr_t"/>
 
@@ -18,19 +22,6 @@
         </conversion-rule>
     </primitive-type>
 
-    <inject-code class="native" position="beginning">
-    static bool Check2TupleOfNumbers(PyObject* pyIn) {
-        if (!PySequence_Check(pyIn) || !(PySequence_Size(pyIn) == 2))
-            return false;
-        Shiboken::AutoDecRef pyReal(PySequence_GetItem(pyIn, 0));
-        if (!PyNumber_Check(pyReal))
-            return false;
-        Shiboken::AutoDecRef pyImag(PySequence_GetItem(pyIn, 1));
-        if (!PyNumber_Check(pyImag))
-            return false;
-        return true;
-    }
-    </inject-code>
     <primitive-type name="Complex" target-lang-api-name="PyComplex">
         <include file-name="complex.h" location="global"/>
         <conversion-rule>
@@ -91,13 +82,6 @@
             </target-to-native>
         </conversion-rule>
     </primitive-type>
-
-    <inject-code class="native" position="beginning">
-        static bool checkPyCapsuleOrPyCObject(PyObject* pyObj)
-        {
-            return PyCapsule_CheckExact(pyObj);
-        }
-    </inject-code>
 
     <primitive-type name="PrimitiveStructPtr">
         <include file-name="handle.h" location="local"/>
@@ -291,64 +275,25 @@
     </add-function>
 
     <add-function signature="getConversionTypeString(const char*)" return-type="PyObject">
-        <inject-code class="target" position="beginning">
-        Shiboken::Conversions::SpecificConverter converter(%1);
-        const char* %0 = 0;
-        switch (converter.conversionType()) {
-        case Shiboken::Conversions::SpecificConverter::CopyConversion:
-            %0 = "Copy conversion";
-            break;
-        case Shiboken::Conversions::SpecificConverter::PointerConversion:
-            %0 = "Pointer conversion";
-            break;
-        case Shiboken::Conversions::SpecificConverter::ReferenceConversion:
-            %0 = "Reference conversion";
-            break;
-        default:
-            %0 = "Invalid conversion";
-        }
-        %PYARG_0 = %CONVERTTOPYTHON[const char*](%0);
-        </inject-code>
+        <inject-code class="target" position="beginning"
+                     file="samplesnippets.cpp" snippet="getConversionTypeString"/>
     </add-function>
 
-    <inject-code class="native" position="beginning">
-    static PyObject* __convertCppValuesToPython(const char** typeName, void** values, int size)
-    {
-        PyObject* result = PyTuple_New(size);
-        for (int i = 0; i &lt; size; ++i) {
-            Shiboken::Conversions::SpecificConverter converter(typeName[i]);
-            PyTuple_SetItem(result, i, converter.toPython(values[i]));
-        }
-        return result;
-    }
-    </inject-code>
     <add-function signature="convertValueTypeToCppAndThenToPython(Point,Point*,Point&amp;)" return-type="PyObject">
-        <inject-code class="target" position="beginning">
-        const char* typeNames[] = { "Point", "Point*", "Point&amp;" };
-        void* values[] = { &amp;%1, &amp;%2, &amp;(%3) };
-        %PYARG_0 = __convertCppValuesToPython(typeNames, values, 3);
-        </inject-code>
+        <inject-code class="target" position="beginning"
+                     file="samplesnippets.cpp" snippet="convertValueTypeToCppAndThenToPython"/>
     </add-function>
     <add-function signature="convertObjectTypeToCppAndThenToPython(ObjectType*,ObjectType&amp;)" return-type="PyObject">
-        <inject-code class="target" position="beginning">
-        const char* typeNames[] = { "ObjectType*", "ObjectType&amp;" };
-        void* values[] = { &amp;%1, &amp;(%2) };
-        %PYARG_0 = __convertCppValuesToPython(typeNames, values, 2);
-        </inject-code>
+        <inject-code class="target" position="beginning"
+                     file="samplesnippets.cpp" snippet="convertObjectTypeToCppAndThenToPython"/>
     </add-function>
     <add-function signature="convertListOfIntegersToCppAndThenToPython(std::list&lt;int&gt;)" return-type="PyObject">
-        <inject-code class="target" position="beginning">
-        const char* typeNames[] = { "std::list&lt;int&gt;" };
-        void* values[] = { &amp;%1 };
-        %PYARG_0 = __convertCppValuesToPython(typeNames, values, 1);
-        </inject-code>
+        <inject-code class="target" position="beginning"
+                     file="samplesnippets.cpp" snippet="convertListOfIntegersToCppAndThenToPython"/>
     </add-function>
     <add-function signature="convertIntegersToCppAndThenToPython(int,int)" return-type="PyObject">
-        <inject-code class="target" position="beginning">
-        const char* typeNames[] = { "int", "int" };
-        void* values[] = { &amp;%1, &amp;%2 };
-        %PYARG_0 = __convertCppValuesToPython(typeNames, values, 2);
-        </inject-code>
+        <inject-code class="target" position="beginning"
+                     file="samplesnippets.cpp" snippet="convertIntegersToCppAndThenToPython"/>
     </add-function>
 
     <template name="cpp_indexed_list_to_pylist_conversion">
@@ -635,33 +580,8 @@
                 <parent index="1" action="add"/>
             </modify-argument>
         </modify-function>
-        <inject-code class="native" position="beginning">
-        static void reparent_layout_items(PyObject* parent, PyObject* layout)
-        {
-            // CHECKTYPE and ISCONVERTIBLE are used here for test purposes, don't change them.
-            if (!%CHECKTYPE[ObjectTypeLayout*](layout) &amp;&amp; !%ISCONVERTIBLE[ObjectTypeLayout*](layout))
-                return;
-            /* %CHECKTYPE[ObjectTypeLayout*](layout) */
-            /* %ISCONVERTIBLE[ObjectTypeLayout*](layout) */
-            ObjectTypeLayout* var;
-            var = %CONVERTTOCPP[ObjectTypeLayout*](layout);
-            // TODO-CONVERTER: erase this
-            /*
-            ObjectTypeLayout* var2 = %CONVERTTOCPP[ObjectTypeLayout*](layout);
-            */
-            const ObjectTypeList&amp; objChildren = var->objects();
-            ObjectTypeList::const_iterator it = objChildren.begin();
-            for (; it != objChildren.end(); ++it) {
-                if ((*it)->isLayoutType()) {
-                    ObjectTypeLayout* l = reinterpret_cast&lt;ObjectTypeLayout*>(*it);
-                    reparent_layout_items(parent, %CONVERTTOPYTHON[ObjectTypeLayout*](l));
-                    Shiboken::Object::setParent(layout, %CONVERTTOPYTHON[ObjectTypeLayout*](l));
-                } else {
-                    Shiboken::Object::setParent(parent, %CONVERTTOPYTHON[ObjectType*](*it));
-                }
-            }
-        }
-        </inject-code>
+        <inject-code class="native" position="beginning"
+                     file="samplesnippets.cpp" snippet="reparent-layout-items"/>
         <modify-function signature="setLayout(ObjectTypeLayout*)">
             <modify-argument index="1">
                 <parent index="this" action="add"/>
@@ -1210,15 +1130,8 @@
           <modify-argument index="return">
             <replace-type modified-type="(status, object)"/>
           </modify-argument>
-          <inject-code class="target" position="beginning">
-          ObjectType* tmpObject = 0;
-          %BEGIN_ALLOW_THREADS
-          %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(&amp;tmpObject);
-          %END_ALLOW_THREADS
-          %PYARG_0 = PyTuple_New(2);
-          PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](%0));
-          PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[ObjectType*](tmpObject));
-          </inject-code>
+          <inject-code class="target" position="beginning"
+                       file="samplesnippets.cpp" snippet="nonConversionRuleForArgumentWithDefaultValue"/>
         </modify-function>
         <modify-function signature="passOddBool(OddBool)" rename="invertBoolean">
           <inject-code class="target" position="beginning">
@@ -1327,7 +1240,7 @@
         </modify-function>
         <modify-function signature="callMe()">
             <inject-code class="native" position="end">
-                PyObject_Call(%PYTHON_METHOD_OVERRIDE, %PYTHON_ARGUMENTS, NULL);
+                PyObject_Call(%PYTHON_METHOD_OVERRIDE, %PYTHON_ARGUMENTS, nullptr);
             </inject-code>
         </modify-function>
         <modify-function signature="createStr(const char*, Str*&amp;)">
@@ -1344,14 +1257,14 @@
                 </conversion-rule>
             </modify-argument>
             <inject-code class="target" position="beginning">
-                Str* _str_arg_ = 0;
-                %RETURN_TYPE %0 = %CPPSELF.%TYPE::%FUNCTION_NAME(%1, _str_arg_);
+                Str *strArg = nullptr;
+                %RETURN_TYPE %0 = %CPPSELF.%TYPE::%FUNCTION_NAME(%1, strArg);
             </inject-code>
             <inject-code class="target" position="end">
                 %PYARG_0 = PyTuple_New(2);
                 PyObject* _item_ = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
                 PyTuple_SetItem(%PYARG_0, 0, _item_);
-                _item_ = %CONVERTTOPYTHON[Str*](_str_arg_);
+                _item_ = %CONVERTTOPYTHON[Str*](strArg);
                 PyTuple_SetItem(%PYARG_0, 1, _item_);
             </inject-code>
         </modify-function>
@@ -1374,37 +1287,6 @@
                 PyTuple_SetItem(%PYARG_0, 1, _item_);
             </inject-code>
         </modify-function>
-        <template name="fix_int*,int*,int*,int*">
-        int a0, a1, a2, a3;
-        %BEGIN_ALLOW_THREADS
-        %CPPSELF->::%TYPE::%FUNCTION_NAME(&amp;a0, &amp;a1, &amp;a2, &amp;a3);
-        %END_ALLOW_THREADS
-        %PYARG_0 = PyTuple_New(4);
-        PyTuple_SetItem(%PYARG_0, 0, %CONVERTTOPYTHON[int](a0));
-        PyTuple_SetItem(%PYARG_0, 1, %CONVERTTOPYTHON[int](a1));
-        PyTuple_SetItem(%PYARG_0, 2, %CONVERTTOPYTHON[int](a2));
-        PyTuple_SetItem(%PYARG_0, 3, %CONVERTTOPYTHON[int](a3));
-        </template>
-        <template name="fix_native_return_int*,int*,int*,int*">
-            PyObject* _obj = %PYARG_0;
-            Shiboken::AutoDecRef _obj0(PySequence_GetItem(_obj, 0));
-            Shiboken::AutoDecRef _obj1(PySequence_GetItem(_obj, 1));
-            Shiboken::AutoDecRef _obj2(PySequence_GetItem(_obj, 2));
-            Shiboken::AutoDecRef _obj3(PySequence_GetItem(_obj, 3));
-            if (!PySequence_Check(_obj)
-                || PySequence_Size(_obj) != 4
-                || !PyNumber_Check(_obj0)
-                || !PyNumber_Check(_obj1)
-                || !PyNumber_Check(_obj2)
-                || !PyNumber_Check(_obj3)) {
-                PyErr_SetString(PyExc_TypeError, "Sequence of 4 numbers expected");
-            } else {
-                *%1 = %CONVERTTOCPP[int](_obj0);
-                *%2 = %CONVERTTOCPP[int](_obj1);
-                *%3 = %CONVERTTOCPP[int](_obj2);
-                *%4 = %CONVERTTOCPP[int](_obj3);
-            }
-        </template>
         <modify-function signature="getMargins(int*,int*,int*,int*)const">
             <modify-argument index="return" pyi-type="Tuple[int, int, int, int]">
                 <replace-type modified-type="PyObject" />
@@ -1422,12 +1304,10 @@
                 <remove-argument/>
                 <remove-default-expression/>
             </modify-argument>
-            <inject-code class="target" position="beginning">
-                <insert-template name="fix_int*,int*,int*,int*"/>
-            </inject-code>
-            <inject-code class="native" position="end">
-                <insert-template name="fix_native_return_int*,int*,int*,int*"/>
-            </inject-code>
+            <inject-code class="target" position="beginning"
+                         file="samplesnippets.cpp" snippet="fix-margins-parameters"/>
+            <inject-code class="native" position="end"
+                         file="samplesnippets.cpp" snippet="fix-margins-return"/>
         </modify-function>
         <modify-function signature="callGetMargins(int*,int*,int*,int*)const">
             <modify-argument index="0">
@@ -1446,9 +1326,8 @@
                 <remove-argument/>
                 <remove-default-expression/>
             </modify-argument>
-            <inject-code class="target" position="beginning">
-                <insert-template name="fix_int*,int*,int*,int*"/>
-            </inject-code>
+            <inject-code class="target" position="beginning"
+                         file="samplesnippets.cpp" snippet="fix-margins-parameters"/>
         </modify-function>
         <modify-function signature="recursionOnModifiedVirtual(Str)const">
             <inject-code class="target" position="beginning">
@@ -1497,52 +1376,21 @@
             <modify-argument index="11">
                 <remove-argument/>
             </modify-argument>
-            <inject-code class="target" position="beginning">
-                bool ok_;
-                %RETURN_TYPE retval_ =
-                    %FUNCTION_NAME(%1, %2, %3, %4, %5, %6, %7, %8, %9, %10, &amp;ok_);
-                if (!ok_)
-                    %PYARG_0 = Py_None;
-                else
-                    %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](retval_);
-            </inject-code>
+            <inject-code class="target" position="beginning"
+                         file="samplesnippets.cpp" snippet="applyHomogeneousTransform"/>
         </modify-function>
     </function>
 
     <!-- Tests add-function for nested template types -->
     <add-function signature="sum2d(std::list&lt;std::list&lt;int&gt; &gt;)" return-type="int">
-        <inject-code class="target" position="beginning">
-            typedef std::list&lt;int&gt; Inner;
-            typedef std::list&lt;Inner&gt; Outer;
-
-            int result = 0;
-
-            Outer::const_iterator oiter, oend = %1.end();
-            for (oiter = %1.begin(); oiter != oend; ++oiter) {
-                const Inner&amp; inner = *oiter;
-                Inner::const_iterator iiter, iend = inner.end();
-                for (iiter = inner.begin(); iiter != iend; ++iiter)
-                    result += *iiter;
-            }
-
-            %PYARG_0 = %CONVERTTOPYTHON[int](result);
-        </inject-code>
+        <inject-code class="target" position="beginning"
+                     file="samplesnippets.cpp" snippet="sum2d"/>
     </add-function>
 
     <!-- Tests add-function for nested template types -->
     <add-function signature="sumproduct(std::list&lt;std::pair&lt;int, int&gt; &gt;)" return-type="int">
-        <inject-code class="target" position="beginning">
-            typedef std::pair&lt;int, int&gt; Pair;
-            typedef std::list&lt;Pair&gt; List;
-
-            int result = 0;
-
-            List::const_iterator iter, end = %1.end();
-            for (iter = %1.begin(); iter != end; ++iter)
-                result += iter->first * iter->second;
-
-            %PYARG_0 = %CONVERTTOPYTHON[int](result);
-        </inject-code>
+        <inject-code class="target" position="beginning"
+                     file="samplesnippets.cpp" snippet="sumproduct"/>
     </add-function>
 
 
@@ -1556,27 +1404,8 @@
             <modify-argument index="1">
                 <replace-type modified-type="PyObject"/>
             </modify-argument>
-            <inject-code class="target" position="beginning">
-            int* array = NULL;
-            bool errorOccurred = false;
-
-            if (PySequence_Check(%PYARG_1)) {
-                if((array = Shiboken::sequenceToIntArray(%PYARG_1, true)) == NULL &amp;&amp; PyErr_Occurred()) {
-                    PyErr_SetString(PyExc_TypeError, "Should be a sequence of ints");
-                    errorOccurred = true;
-                }
-            } else {
-                PyErr_SetString(PyExc_TypeError, "Should be a sequence of ints");
-                errorOccurred = true;
-            }
-
-            if (!errorOccurred) {
-                %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(array);
-                if (array)
-                    delete[] array;
-                %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
-            }
-            </inject-code>
+            <inject-code class="target" position="beginning"
+                         file="samplesnippets.cpp" snippet="sumArrayAndLength"/>
         </modify-function>
 
         <modify-function signature="arrayMethod(int, int*) const">
@@ -1616,17 +1445,8 @@
             <modify-argument index="2">
                 <replace-type modified-type="PySequence"/>
             </modify-argument>
-            <inject-code class="target" position="beginning">
-            Py_ssize_t numItems = PySequence_Size(%PYARG_1);
-            int *cppItems = new int[numItems];
-            for (int i = 0; i &lt; numItems; i++) {
-                Shiboken::AutoDecRef _obj(PySequence_GetItem(%PYARG_1, i));
-                cppItems[i] = %CONVERTTOCPP[int](_obj);
-            }
-            %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(numItems, cppItems);
-            %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
-            delete[] cppItems;
-            </inject-code>
+            <inject-code class="target" position="beginning"
+                         file="samplesnippets.cpp" snippet="callArrayMethod"/>
         </modify-function>
 
         <!--
@@ -1673,19 +1493,8 @@
             <modify-argument index="2">
                 <remove-argument />
             </modify-argument>
-            <inject-code class="target" position="beginning">
-            int argc;
-            char** argv;
-            if (!Shiboken::listToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
-                PyErr_SetString(PyExc_TypeError, "error");
-                return 0;
-            }
-            %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(argc, argv);
-            %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
-            for (int i = 0; i &lt; argc; ++i)
-                free(argv[i]);
-            delete[] argv;
-            </inject-code>
+            <inject-code class="target" position="beginning"
+                         file="samplesnippets.cpp" snippet="test-argc-argv"/>
         </modify-function>
 
         <!-- Tested in InjectCodeTest.testArgsModification2 -->
@@ -1696,19 +1505,8 @@
             <modify-argument index="2">
                 <remove-argument />
             </modify-argument>
-            <inject-code class="target" position="beginning">
-            int argc;
-            char** argv;
-            if (!Shiboken::listToArgcArgv(%PYARG_1, &amp;argc, &amp;argv)) {
-                PyErr_SetString(PyExc_TypeError, "error");
-                return 0;
-            }
-            %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(argc, argv);
-            %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
-            for (int i = 0; i &lt; argc; ++i)
-                free(argv[i]);
-            delete[] argv;
-            </inject-code>
+            <inject-code class="target" position="beginning"
+                         file="samplesnippets.cpp" snippet="test-argc-argv"/>
         </modify-function>
     </value-type>
 
@@ -1729,7 +1527,7 @@
             <modify-argument index="1">
                 <replace-type modified-type="PyObject" />
                 <conversion-rule class="native">
-                unsigned char* %out = 0;
+                unsigned char *%out = nullptr;
                 </conversion-rule>
             </modify-argument>
         </modify-function>
@@ -1743,33 +1541,17 @@
 
     <value-type name="Point">
         <add-function signature="__str__" return-type="str">
-            <inject-code class="target" position="beginning">
-            int x1 = (int) %CPPSELF.x();
-            int x2 = ((int) (%CPPSELF.x() * 100)) - (x1 * 100);
-            int y1 = (int) %CPPSELF.y();
-            int y2 = ((int) (%CPPSELF.y() * 100)) - (y1 * 100);
-            %PYARG_0 = Shiboken::String::fromFormat("Point(%d.%d, %d.%d)", x1, x2, y1, y2);
-            </inject-code>
+            <inject-code class="target" position="beginning"
+                         file="samplesnippets.cpp" snippet="point-str"/>
         </add-function>
         <add-function signature="__repr__" return-type="str">
-            <inject-code class="target" position="beginning">
-            int x1 = (int) %CPPSELF.x();
-            int x2 = ((int) (%CPPSELF.x() * 10)) - (x1 * 10);
-            int y1 = (int) %CPPSELF.y();
-            int y2 = ((int) (%CPPSELF.y() * 10)) - (y1 * 10);
-            %PYARG_0 = Shiboken::String::fromFormat("&lt;Point object at %p: (%d.%d, %d.%d)&gt;", %CPPSELF, x1, x2, y1, y2);
-            </inject-code>
+            <inject-code class="target" position="beginning"
+                         file="samplesnippets.cpp" snippet="point-repr"/>
         </add-function>
 
         <add-function signature="__reduce__" return-type="str">
-            <inject-code class="target" position="beginning">
-            PyObject* type = PyObject_Type(%PYSELF);
-            PyObject* args = NULL;
-
-            args = Py_BuildValue("(dd)", %CPPSELF.x(), %CPPSELF.y());
-
-            %PYARG_0 = Py_BuildValue("(OO)", type, args);
-            </inject-code>
+            <inject-code class="target" position="beginning"
+                         file="samplesnippets.cpp" snippet="point-reduce"/>
         </add-function>
 
         <modify-function signature="midpoint(const Point&amp;, Point*)const">
@@ -1806,33 +1588,16 @@
 
     <value-type name="PointF">
         <add-function signature="__str__" return-type="str">
-            <inject-code class="target" position="beginning">
-            int x1 = (int) %CPPSELF.x();
-            int x2 = ((int) (%CPPSELF.x() * 100)) - (x1 * 100);
-            int y1 = (int) %CPPSELF.y();
-            int y2 = ((int) (%CPPSELF.y() * 100)) - (y1 * 100);
-            %PYARG_0 = Shiboken::String::fromFormat("PointF(%d.%d, %d.%d)", x1, x2, y1, y2);
-            </inject-code>
+                      file="samplesnippets.cpp" snippet="point-str"/>
         </add-function>
         <add-function signature="__repr__" return-type="str">
-            <inject-code class="target" position="beginning">
-            int x1 = (int) %CPPSELF.x();
-            int x2 = ((int) (%CPPSELF.x() * 10)) - (x1 * 10);
-            int y1 = (int) %CPPSELF.y();
-            int y2 = ((int) (%CPPSELF.y() * 10)) - (y1 * 10);
-            %PYARG_0 = Shiboken::String::fromFormat("&lt;PointF object at %p: (%d.%d, %d.%d)&gt;", %CPPSELF, x1, x2, y1, y2);
-            </inject-code>
+            <inject-code class="target" position="beginning"
+                         file="samplesnippets.cpp" snippet="point-repr"/>
         </add-function>
 
         <add-function signature="__reduce__" return-type="str">
-            <inject-code class="target" position="beginning">
-            PyObject *type = PyObject_Type(%PYSELF);
-            PyObject *args = NULL;
-
-            args = Py_BuildValue("(dd)", %CPPSELF.x(), %CPPSELF.y());
-
-            %PYARG_0 = Py_BuildValue("(OO)", type, args);
-            </inject-code>
+            <inject-code class="target" position="beginning"
+                         file="samplesnippets.cpp" snippet="point-reduce"/>
         </add-function>
 
         <modify-function signature="midpoint(const PointF&amp;, PointF*)const">
@@ -1871,41 +1636,19 @@
         <extra-includes>
           <include file-name="datetime.h" location="global"/>
         </extra-includes>
+        <inject-code class="native" position="beginning"
+                     file="samplesnippets.cpp"  snippet="time-comparison"/>
         <enum-type name="NumArgs"/>
         <add-function signature="operator!=(const PyObject*)" return-type="PyObject">
           <inject-code>
-            if (!PyDateTimeAPI)
-                PyDateTime_IMPORT;
-            if (PyTime_Check(%1)) {
-                int pyH = PyDateTime_TIME_GET_HOUR(%1);
-                int pyM = PyDateTime_TIME_GET_MINUTE(%1);
-                int pyS = PyDateTime_TIME_GET_SECOND(%1);
-                if ((pyH == %CPPSELF.hour()) &amp;&amp;
-                    (pyM == %CPPSELF.minute()) &amp;&amp;
-                    (pyS == %CPPSELF.second()))
-                    %PYARG_0 = Py_False;
-                else
-                    %PYARG_0 = Py_True;
-                Py_INCREF(%PYARG_0);
-            }
+          %PYARG_0 = compareTime(%CPPSELF, %1, true) ? Py_False : Py_True;
+          Py_INCREF(%PYARG_0);
           </inject-code>
         </add-function>
         <add-function signature="operator==(const PyObject*)" return-type="PyObject">
           <inject-code>
-            if (!PyDateTimeAPI)
-                PyDateTime_IMPORT;
-            if (PyTime_Check(%1)) {
-                int pyH = PyDateTime_TIME_GET_HOUR(%1);
-                int pyM = PyDateTime_TIME_GET_MINUTE(%1);
-                int pyS = PyDateTime_TIME_GET_SECOND(%1);
-                if ((pyH == %CPPSELF.hour()) &amp;&amp;
-                    (pyM == %CPPSELF.minute()) &amp;&amp;
-                    (pyS == %CPPSELF.second()))
-                    %PYARG_0 = Py_True;
-                else
-                    %PYARG_0 = Py_False;
-                Py_INCREF(%PYARG_0);
-            }
+          %PYARG_0 = compareTime(%CPPSELF, %1, false) ? Py_True : Py_False;
+          Py_INCREF(%PYARG_0);
           </inject-code>
         </add-function>
 
@@ -1961,7 +1704,7 @@
                 {
                     Shiboken::AutoDecRef strList(PySequence_Fast(%PYARG_1, "The argument must be a sequence."));
                     const Py_ssize_t lineCount = PySequence_Size(strList.object());
-                    for (int line = 0; line &lt; lineCount; ++line) {
+                    for (Py_ssize_t line = 0; line &lt; lineCount; ++line) {
                         Shiboken::AutoDecRef _obj(PySequence_GetItem(strList.object(), line));
                         bool isString = Shiboken::String::check(_obj);
                         if (!isString) {
@@ -1973,7 +1716,7 @@
                 // PySIDE-1735: Enums are now implemented in Python, so we need to avoid asserts.
                 if (PyErr_Occurred())
                     break;
-                const char** %out = 0;
+                const char **%out = nullptr;
                 </conversion-rule>
             </modify-argument>
         </modify-function>
@@ -1981,7 +1724,7 @@
             <modify-argument index="1">
                 <replace-type modified-type="PyObject" />
                 <conversion-rule class="native">
-                void* %out = 0;
+                void *%out = nullptr;
                 </conversion-rule>
             </modify-argument>
         </modify-function>
@@ -2102,7 +1845,7 @@
                 <replace-type modified-type="PyBytes"/>
             </modify-argument>
             <inject-code class="target" position="beginning">
-            PyObject* data = 0;
+            PyObject *data = nullptr;
             if (PyUnicode_CheckExact(%PYARG_1)) {
                 data = PyUnicode_AsASCIIString(%PYARG_1);
             } else {
