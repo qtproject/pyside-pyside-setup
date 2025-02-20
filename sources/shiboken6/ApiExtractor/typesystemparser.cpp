@@ -10,6 +10,7 @@
 #include "customconversion.h"
 #include "customtypenentry.h"
 #include "documentation_enums.h"
+#include "filecache.h"
 #include "flagstypeentry.h"
 #include "functiontypeentry.h"
 #include "namespacetypeentry.h"
@@ -172,34 +173,14 @@ static inline bool hasFileSnippetAttributes(const QXmlStreamAttributes *attribut
     return attributes->hasAttribute(fileAttribute);
 }
 
-// Extract a snippet from a file within annotation "// @snippet label".
-std::optional<QString>
-    extractSnippet(const QString &code, const QString &snippetLabel)
+static QRegularExpression snippetPattern(const QString &snippetLabel)
 {
-    if (snippetLabel.isEmpty())
-        return code;
     const QString pattern = R"(^\s*//\s*@snippet\s+)"_L1
-        + QRegularExpression::escape(snippetLabel)
-        + R"(\s*$)"_L1;
-    const QRegularExpression snippetRe(pattern);
-    Q_ASSERT(snippetRe.isValid());
-
-    bool useLine = false;
-    bool foundLabel = false;
-    QString result;
-    const auto lines = QStringView{code}.split(u'\n');
-    for (const auto &line : lines) {
-        if (snippetRe.matchView(line).hasMatch()) {
-            foundLabel = true;
-            useLine = !useLine;
-            if (!useLine)
-                break; // End of snippet reached
-        } else if (useLine)
-            result += line.toString() + u'\n';
-    }
-    if (!foundLabel)
-        return {};
-    return CodeSnipAbstract::fixSpaces(result);
+                            + QRegularExpression::escape(snippetLabel)
+                            + R"(\s*$)"_L1;
+    QRegularExpression result(pattern);
+    Q_ASSERT(result.isValid());
+    return result;
 }
 
 template <class EnumType>
@@ -2342,17 +2323,9 @@ bool TypeSystemParser::parseCustomConversion(const ConditionalStreamReader &,
             if (lang != TypeSystem::TargetLangCode)
                 return true;
 
-            QFile conversionSource(sourceFile);
-            if (!conversionSource.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                m_error = msgCannotOpenForReading(conversionSource);
+            const auto conversionRuleOptional = readFileSnippetContents(sourceFile, snippetLabel);
+            if (!conversionRuleOptional.has_value())
                 return false;
-            }
-            const auto conversionRuleOptional =
-                extractSnippet(QString::fromUtf8(conversionSource.readAll()), snippetLabel);
-            if (!conversionRuleOptional.has_value()) {
-                m_error = msgCannotFindSnippet(sourceFile, snippetLabel);
-                return false;
-            }
             valueTypeEntry->setTargetConversionRule(conversionRuleOptional.value());
         }
         return true;
@@ -3038,6 +3011,20 @@ bool TypeSystemParser::parseParentOwner(const ConditionalStreamReader &,
     return true;
 }
 
+std::optional<QString>
+    TypeSystemParser::readFileSnippetContents(const QString &fileName,
+                                              const QString &snippetName)
+{
+    static FileCache cache;
+
+    const auto result = snippetName.isEmpty() ? cache.fileContents(fileName)
+        : cache.fileSnippet(fileName, snippetName, snippetPattern(snippetName));
+
+    if (!result.has_value())
+        m_error = cache.errorString();
+    return result;
+}
+
 std::optional<TypeSystemParser::Snippet>
     TypeSystemParser::readFileSnippet(QXmlStreamAttributes *attributes)
 {
@@ -3056,24 +3043,10 @@ std::optional<TypeSystemParser::Snippet>
     }
     const QString resolved = m_context->db->modifiedTypesystemFilepath(result.fileName,
                                                                        m_currentPath);
-    if (!QFile::exists(resolved)) {
-        m_error = u"File for inject code not exist: "_s
-                  + QDir::toNativeSeparators(result.fileName);
+    auto snippetO = readFileSnippetContents(resolved, result.snippetLabel);
+    if (!snippetO.has_value())
         return std::nullopt;
-    }
-    QFile codeFile(resolved);
-    if (!codeFile.open(QIODevice::Text | QIODevice::ReadOnly)) {
-        m_error = msgCannotOpenForReading(codeFile);
-        return std::nullopt;
-    }
-    const auto contentOptional = extractSnippet(QString::fromUtf8(codeFile.readAll()),
-                                                result.snippetLabel);
-    codeFile.close();
-    if (!contentOptional.has_value()) {
-        m_error = msgCannotFindSnippet(resolved, result.snippetLabel);
-        return std::nullopt;
-    }
-    result.content = contentOptional.value();
+    result.content = snippetO.value();
     return result;
 }
 

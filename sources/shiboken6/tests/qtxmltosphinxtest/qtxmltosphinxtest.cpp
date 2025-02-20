@@ -6,8 +6,10 @@
 #include <QtTest/QTest>
 
 #include <QtCore/QBuffer>
+#include <QtCore/QDir>
 #include <QtCore/QDebug>
 #include <QtCore/QLoggingCategory>
+#include <QtCore/QTemporaryFile>
 
 using namespace Qt::StringLiterals;
 
@@ -503,7 +505,13 @@ void QtXmlToSphinxTest::testSnippetExtraction()
     QBuffer buffer(&file);
     QVERIFY(buffer.open(QIODevice::ReadOnly));
     QString errorMessage;
-    QString actual = QtXmlToSphinx::readSnippet(buffer, id, &errorMessage);
+
+    QTemporaryFile snippetFile(QDir::tempPath() + "/XXXXXX_snippet.txt"_L1);
+    QVERIFY(snippetFile.open());
+    snippetFile.write(file);
+    const QString fileName = snippetFile.fileName();
+    snippetFile.close();
+    QString actual = QtXmlToSphinx::readSnippet(fileName, id, &errorMessage);
     QVERIFY2(errorMessage.isEmpty(), qPrintable(errorMessage));
     QCOMPARE(actual, expected);
 }

@@ -18,6 +18,7 @@ set(qtxmltosphinx_SRC
     ${generator_src_dir}/qtdoc/qtxmltosphinx.cpp
     ${api_extractor_src_dir}/codesniphelpers.cpp
     ${api_extractor_src_dir}/textstream.cpp
+    ${api_extractor_src_dir}/filecache.cpp
     main.cpp)
 
 add_executable(qtxmltosphinx ${qtxmltosphinx_SRC})

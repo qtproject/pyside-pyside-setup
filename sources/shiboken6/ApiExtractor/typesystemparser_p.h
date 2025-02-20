@@ -256,6 +256,8 @@ private:
                               QXmlStreamAttributes *);
      bool parseParentOwner(const ConditionalStreamReader &, StackElement topElement,
                            QXmlStreamAttributes *);
+     std::optional<QString>
+         readFileSnippetContents(const QString &fileName, const QString &snippetName);
      std::optional<Snippet> readFileSnippet(QXmlStreamAttributes *attributes);
      bool readCodeSnippet(QXmlStreamAttributes *attributes, CodeSnip *snip);
      bool parseInjectCode(const ConditionalStreamReader &, StackElement topElement, QXmlStreamAttributes *);

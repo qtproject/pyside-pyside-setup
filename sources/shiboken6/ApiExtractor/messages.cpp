@@ -903,15 +903,6 @@ QString msgCannotFindView(const QString &viewedName, const QString &name)
         + u" for "_s + name;
 }
 
-QString msgCannotFindSnippet(const QString &file, const QString &snippetLabel)
-{
-    QString result;
-    QTextStream str(&result);
-    str << "Cannot find snippet \"" << snippetLabel << "\" in "
-        << QDir::toNativeSeparators(file) << '.';
-    return result;
-}
-
 QString msgSnippetError(const QString &context, const char *what)
 {
     return "Error processing code snippet of "_L1 + context

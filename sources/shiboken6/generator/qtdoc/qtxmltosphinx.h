@@ -104,8 +104,7 @@ public:
 
     static void stripPythonQualifiers(QString *s);
 
-    // For testing
-    static QString readSnippet(QIODevice &inputFile, const QString &identifier,
+    static QString readSnippet(const QString &location, const QString &identifier,
                                QString *errorMessage);
 
 private:
@@ -203,8 +202,6 @@ private:
                                      const QString &identifier,
                                      const QString &fallbackPath,
                                      QString *errorMessage);
-    static QString readFromLocation(const QString &location, const QString &identifier,
-                             QString *errorMessage);
     void pushOutputBuffer();
     QString popOutputBuffer();
     void writeTable(Table& table);

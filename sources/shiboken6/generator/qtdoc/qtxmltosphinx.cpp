@@ -3,6 +3,7 @@
 
 #include "qtxmltosphinx.h"
 #include "exception.h"
+#include <filecache.h>
 #include "qtxmltosphinxinterface.h"
 #include <codesniphelpers.h>
 #include "rstformat.h"
@@ -605,7 +606,7 @@ QtXmlToSphinx::Snippet QtXmlToSphinx::readSnippetFromLocations(const QString &pa
     // use existing fallback paths first.
     const auto type = snippetType(path);
     if (type == SnippetType::Other && !fallbackPath.isEmpty()) {
-        const QString code = readFromLocation(fallbackPath, identifier, errorMessage);
+        const QString code = readSnippet(fallbackPath, identifier, errorMessage);
         return {code, code.isNull() ? Snippet::Error : Snippet::Fallback};
     }
 
@@ -620,7 +621,7 @@ QtXmlToSphinx::Snippet QtXmlToSphinx::readSnippetFromLocations(const QString &pa
             if (!rewrittenPath.isEmpty()) {
                 rewrittenPath.replace(m_parameters.codeSnippetRewriteOld,
                                       m_parameters.codeSnippetRewriteNew);
-                const QString code = readFromLocation(rewrittenPath, identifier, errorMessage);
+                const QString code = readSnippet(rewrittenPath, identifier, errorMessage);
                 m_containsAutoTranslations = true;
                 return {code, code.isNull() ? Snippet::Error : Snippet::Converted};
             }
@@ -628,20 +629,20 @@ QtXmlToSphinx::Snippet QtXmlToSphinx::readSnippetFromLocations(const QString &pa
 
         resolvedPath = resolveFile(locations, pySnippetName(path, type));
         if (!resolvedPath.isEmpty()) {
-            const QString code = readFromLocation(resolvedPath, identifier, errorMessage);
+            const QString code = readSnippet(resolvedPath, identifier, errorMessage);
             return {code, code.isNull() ? Snippet::Error : Snippet::Converted};
         }
     }
 
     resolvedPath = resolveFile(locations, path);
     if (!resolvedPath.isEmpty()) {
-        const QString code = readFromLocation(resolvedPath, identifier, errorMessage);
+        const QString code = readSnippet(resolvedPath, identifier, errorMessage);
         return {code, code.isNull() ? Snippet::Error : Snippet::Resolved};
     }
 
     if (!fallbackPath.isEmpty()) {
         *errorMessage = msgFallbackWarning(path, identifier, fallbackPath);
-        const QString code = readFromLocation(fallbackPath, identifier, errorMessage);
+        const QString code = readSnippet(fallbackPath, identifier, errorMessage);
         return {code, code.isNull() ? Snippet::Error : Snippet::Fallback};
     }
 
@@ -649,102 +650,39 @@ QtXmlToSphinx::Snippet QtXmlToSphinx::readSnippetFromLocations(const QString &pa
     return {{}, Snippet::Error};
 }
 
-static QString msgSnippetNotFound(const QIODevice &inputFile,
-                                  const QString &identifier)
-{
-    return u"Code snippet file found ("_s + fileNameOfDevice(&inputFile)
-           + u"), but snippet ["_s + identifier + u"] not found."_s;
-}
-
-static QString msgEmptySnippet(const QIODevice &inputFile, int lineNo,
+static QString msgEmptySnippet(const QString &inputFile,
                                const QString &identifier)
 {
-    return u"Empty code snippet ["_s + identifier + u"] at "_s
-           + fileNameOfDevice(&inputFile) + u':' + QString::number(lineNo);
+    return "Empty code snippet ["_L1 + identifier + "] in "_L1
+           + QDir::toNativeSeparators(inputFile);
 }
 
-// Pattern to match qdoc snippet IDs with "#/// [id]" comments and helper to find ID
-static const QRegularExpression &snippetIdPattern()
+// Pattern to match qdoc snippet IDs "#/// [id]" or "# ![id1] # ![id2]"
+static QRegularExpression snippetIdPattern(const QString &snippetId)
 {
-    static const QRegularExpression result(uR"RX((//|#) *! *\[([^]]+)\])RX"_s);
+    QString pattern = "(//|#) *! *\\["_L1
+                      + QRegularExpression::escape(snippetId) + "\\]"_L1;
+    QRegularExpression result(pattern);
     Q_ASSERT(result.isValid());
     return result;
 }
 
-static bool matchesSnippetId(QRegularExpressionMatchIterator it,
-                             const QString &identifier)
-{
-    while (it.hasNext()) {
-        if (it.next().captured(2) == identifier)
-            return true;
-    }
-    return false;
-}
-
-QString QtXmlToSphinx::readSnippet(QIODevice &inputFile, const QString &identifier,
+QString QtXmlToSphinx::readSnippet(const QString &location, const QString &identifier,
                                    QString *errorMessage)
 {
-    const QByteArray identifierBA = identifier.toUtf8();
-    // Lambda that matches the snippet id
-    const auto snippetIdPred = [&identifierBA, &identifier](const QByteArray &lineBA)
-    {
-        const bool isComment = lineBA.contains('/') || lineBA.contains('#');
-        if (!isComment || !lineBA.contains(identifierBA))
-            return false;
-        const QString line = QString::fromUtf8(lineBA);
-        return matchesSnippetId(snippetIdPattern().globalMatch(line), identifier);
-    };
+    static FileCache cache;
 
-    // Find beginning, skip over
-    int lineNo = 1;
-    for (; !inputFile.atEnd() && !snippetIdPred(inputFile.readLine());
-         ++lineNo) {
-    }
-
-    if (inputFile.atEnd()) {
-        *errorMessage = msgSnippetNotFound(inputFile, identifier);
+    const auto result = identifier.isEmpty() ? cache.fileContents(location)
+        : cache.fileSnippet(location, identifier, snippetIdPattern(identifier));
+    if (!result.has_value()) {
+        *errorMessage = cache.errorString();
         return {};
     }
 
-    QString code;
-    for (; !inputFile.atEnd(); ++lineNo) {
-        const QString line = QString::fromUtf8(inputFile.readLine());
-        auto it = snippetIdPattern().globalMatch(line);
-        if (it.hasNext()) { // Skip snippet id lines
-            if (matchesSnippetId(it, identifier))
-                break;
-        } else {
-            code += line;
-        }
-    }
+    if (result.value().isEmpty())
+        *errorMessage = msgEmptySnippet(location, identifier);
 
-    if (code.isEmpty())
-        *errorMessage = msgEmptySnippet(inputFile, lineNo, identifier);
-
-    return code;
-}
-
-QString QtXmlToSphinx::readFromLocation(const QString &location, const QString &identifier,
-                                        QString *errorMessage)
-{
-    QFile inputFile;
-    inputFile.setFileName(location);
-    if (!inputFile.open(QIODevice::ReadOnly)) {
-        QTextStream(errorMessage) << "Could not read code snippet file: "
-            << QDir::toNativeSeparators(inputFile.fileName())
-            << ": " << inputFile.errorString();
-        return {}; // null
-    }
-
-    QString code = u""_s; // non-null
-    if (identifier.isEmpty()) {
-        while (!inputFile.atEnd())
-            code += QString::fromUtf8(inputFile.readLine());
-        return CodeSnipHelpers::fixSpaces(code);
-    }
-
-    code = readSnippet(inputFile, identifier, errorMessage);
-    return code.isEmpty() ? QString{} : CodeSnipHelpers::fixSpaces(code); // maintain isNull()
+    return CodeSnipHelpers::fixSpaces(result.value());
 }
 
 void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
@@ -990,7 +928,7 @@ void QtXmlToSphinx::handleSnippetTag(QXmlStreamReader& reader)
 
         if (m_parameters.snippetComparison && snippet.result == Snippet::Converted
             && !fallbackPath.isEmpty()) {
-            const QString fallbackCode = readFromLocation(fallbackPath, identifier, &errorMessage);
+            const QString fallbackCode = readSnippet(fallbackPath, identifier, &errorMessage);
             debug(msgSnippetComparison(location, identifier, snippet.code, fallbackCode));
         }
 
@@ -1423,7 +1361,7 @@ void QtXmlToSphinx::handleQuoteFileTag(QXmlStreamReader& reader)
         QString location = reader.text().toString();
         location.prepend(m_parameters.libSourceDir + u'/');
         QString errorMessage;
-        QString code = readFromLocation(location, QString(), &errorMessage);
+        QString code = readSnippet(location, QString(), &errorMessage);
         if (!errorMessage.isEmpty())
             warn(msgTagWarning(reader, m_context, m_lastTagName, errorMessage));
         m_output << "::\n\n";

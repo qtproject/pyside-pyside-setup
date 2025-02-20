@@ -139,10 +139,10 @@ It is recommended to store the QML type id, e.g. as a static member in the
 singleton class. The lookup via qmlTypeId() is costly.
 // @snippet qqmlengine-singletoninstance-qmltypeid
 
-// @snippet qqmlengine-singletoninstance-typename Returns the instance of a
-singleton type named typeName from the module specified by uri.
-For ``QObject``-derived singleton types, the ``QObject`` instance is returned,
-otherwise a ``QJSValue`` or ``None``.
+// @snippet qqmlengine-singletoninstance-typename
+Returns the instance of a singleton type named typeName from the module specified
+by uri. For ``QObject``-derived singleton types, the ``QObject`` instance is
+returned, otherwise a ``QJSValue`` or ``None``.
 
 This method can be used as an alternative to calling qmlTypeId followed by the
 id based overload of singletonInstance. This is convenient when one only needs

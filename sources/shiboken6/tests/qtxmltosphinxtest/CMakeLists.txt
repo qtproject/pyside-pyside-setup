@@ -17,6 +17,7 @@ set(qtxmltosphinxtest_SRC
     ${generator_src_dir}/qtdoc/qtxmltosphinx.cpp
     ${api_extractor_src_dir}/codesniphelpers.cpp
     ${api_extractor_src_dir}/textstream.cpp
+    ${api_extractor_src_dir}/filecache.cpp
     qtxmltosphinxtest.cpp
     qtxmltosphinxtest.h)
 
