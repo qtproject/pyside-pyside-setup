@@ -23,7 +23,7 @@ static QString msgCannotFindSnippet(const QString &file, const QString &snippetL
 static QString msgUnterminatedSnippet(const QString &file, const QString &snippetLabel)
 {
     return "Snippet \""_L1  + snippetLabel + "\" in \""_L1
-           + QDir::toNativeSeparators(file) + "\ is not terminated."_L1;
+           + QDir::toNativeSeparators(file) + "\" is not terminated."_L1;
 }
 
 static QString msgCannotOpenFileForReading(const QFile &f)
