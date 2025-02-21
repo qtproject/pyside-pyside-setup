@@ -779,12 +779,12 @@ bool AbstractMetaTypeData::equals(const AbstractMetaTypeData &rhs) const
 
 bool comparesEqual(const AbstractMetaType &lhs, const AbstractMetaType &rhs) noexcept
 {
-    return lhs.d->equals(*rhs.d);
+    return lhs.d.constData() == rhs.d.constData() || lhs.d->equals(*rhs.d);
 }
 
 bool AbstractMetaType::isEquivalent(const AbstractMetaType &rhs) const
 {
-    return  d->isEquivalent(*rhs.d);
+    return d.constData() == rhs.d.constData() || d->isEquivalent(*rhs.d);
 }
 
 const AbstractMetaType *AbstractMetaType::viewOn() const
