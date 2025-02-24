@@ -30,8 +30,6 @@
     enum 'QGraphicsPolygonItem::Type' does not have a type entry or is not an enum
   """
   -->
-  <rejection class="QMdi"/>
-
   <function signature="qDrawShadeLine(QPainter*,int,int,int,int,const QPalette&amp;,bool,int,int)"/>
   <function signature="qDrawShadeLine(QPainter*,const QPoint,const QPoint,const QPalette&amp;,bool,int,int)"/>
   <function signature="qDrawShadeRect(QPainter*,int,int,int,int,const QPalette&amp;,bool,int,int,const QBrush*)"/>

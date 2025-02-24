@@ -28,8 +28,6 @@
     <enum-type name="PrintEnginePropertyKey"/>
   </object-type>
   <value-type name="QPrinterInfo"/>
-  <rejection class="QPrinter" function-name="printerSelectionOption"/>
-  <rejection class="QPrinter" function-name="setPrinterSelectionOption"/>
 
   <object-type name="QPrinter" >
     <enum-type name="ColorMode"/>
