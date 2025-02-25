@@ -811,31 +811,6 @@ Pep_GetPartialFunction(void)
  * Newly introduced convenience functions
  *
  */
-#ifdef Py_LIMITED_API
-
-PyObject *
-PyImport_GetModule(PyObject *name)
-{
-    PyObject *modules = PyImport_GetModuleDict();
-    if (modules == nullptr) {
-        PyErr_SetString(PyExc_RuntimeError, "unable to get sys.modules");
-        return nullptr;
-    }
-    Py_INCREF(modules);
-    PyObject *m{};
-    if (PyDict_CheckExact(modules)) {
-        m = PyDict_GetItemWithError(modules, name);  /* borrowed */
-        Py_XINCREF(m);
-    } else {
-        m = PyObject_GetItem(modules, name);
-        if (m == nullptr && PyErr_ExceptionMatches(PyExc_KeyError))
-            PyErr_Clear();
-    }
-    Py_DECREF(modules);
-    return m;
-}
-
-#endif // Py_LIMITED_API
 
 // 2020-06-16: For simplicity of creating arbitrary things, this function
 // is now made public.
