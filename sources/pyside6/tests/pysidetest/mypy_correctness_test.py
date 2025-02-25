@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
 import unittest
 import subprocess
@@ -26,6 +27,21 @@ qtest_env = os.environ.get("QTEST_ENVIRONMENT", "")
 is_ci = qtest_env == "ci"
 # When we are in COIN, we enforce mypy existence, to prevent misconfigurations.
 USE_MYPY = True if is_ci else HAVE_MYPY
+
+
+def dump_erroneous_pyi_files(err_lines, pyi_dir):
+    seen = set()
+    for err_line in err_lines:
+        if match := re.search(r"Qt\w+\.pyi", err_line):
+            if (pyi := match.group(0)) not in seen:
+                seen.add(pyi)
+                print(f"----- dump of {pyi} -----")
+                with open(Path(pyi_dir) / pyi) as f:
+                    line_no = 0
+                    for line in f:
+                        line_no += 1
+                        print(f"{pyi}:{line_no} {line.rstrip()}")
+                print()
 
 
 @unittest.skipIf(not USE_MYPY, "The mypy test was skipped because mypy is not installed")
@@ -58,9 +74,13 @@ class MypyCorrectnessTest(unittest.TestCase):
         time_pre = time.time()
         ret = subprocess.run(cmd, capture_output=True)
         time_post = time.time()
-        for line in ret.stdout.decode("utf-8").split("\n"):
+        err_lines = ret.stdout.decode("utf-8").split("\n")
+        for line in err_lines:
             print(line)
         print(f"Time used for mypy test = {(time_post - time_pre):.5} s")
+        print(self.pyside_dir)
+        if ret.returncode != 0:
+            dump_erroneous_pyi_files(err_lines, self.pyside_dir)
         self.assertEqual(ret.returncode, 0)
 
 
