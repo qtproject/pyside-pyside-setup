@@ -1296,13 +1296,13 @@ std::optional<AbstractMetaField>
     metaField.setEnclosingClass(cls);
 
     TypeInfo fieldType = field->type();
-    auto metaType = translateType(fieldType, cls);
+    auto metaType = translateType(fieldType, cls, {}, &rejectReason);
 
     if (!metaType.has_value()) {
-        const QString type = TypeInfo::resolveType(fieldType, currentScope()).qualifiedName().join(u"::"_s);
         if (cls->typeEntry()->generateCode()) {
-             qCWarning(lcShiboken, "%s",
-                       qPrintable(msgSkippingField(field, cls->name(), type)));
+            const QString signature = qualifiedFieldSignatureWithType(className, field);
+            m_rejectedFields.insert({AbstractMetaBuilder::UnmatchedFieldType,
+                                     signature, signature, rejectReason});
         }
         return {};
     }
@@ -2117,8 +2117,10 @@ AbstractMetaFunctionPtr
         if (!type.has_value()) {
             const QString reason = msgUnmatchedReturnType(functionItem, errorMessage);
             const QString signature = qualifiedFunctionSignatureWithType(functionItem, className);
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgSkippingFunction(functionItem, signature, reason)));
+            if (functionItem->attributes().testFlag(FunctionAttribute::Abstract)) { // Potential compilation error
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgSkippingFunction(functionItem, signature, reason)));
+            }
             rejectFunction(functionItem, currentClass,
                            AbstractMetaBuilder::UnmatchedReturnType, reason);
             return {};
@@ -2185,8 +2187,10 @@ AbstractMetaFunctionPtr
             }
             const QString reason = msgUnmatchedParameterType(arg, i, errorMessage);
             const QString signature = qualifiedFunctionSignatureWithType(functionItem, className);
-            qCWarning(lcShiboken, "%s",
-                      qPrintable(msgSkippingFunction(functionItem, signature, reason)));
+            if (functionItem->attributes().testFlag(FunctionAttribute::Abstract)) { // Potential compilation error
+                qCWarning(lcShiboken, "%s",
+                          qPrintable(msgSkippingFunction(functionItem, signature, reason)));
+            }
             rejectFunction(functionItem, currentClass,
                            AbstractMetaBuilder::UnmatchedArgumentType, reason);
             return {};
@@ -3485,6 +3489,7 @@ static void writeRejectLogFile(const QString &name,
         {AbstractMetaBuilder::RedefinedToNotClass, "Type redefined to not be a class"_ba},
         {AbstractMetaBuilder::UnmatchedReturnType, "Unmatched return type"_ba},
         {AbstractMetaBuilder::UnmatchedArgumentType, "Unmatched argument type"_ba},
+        {AbstractMetaBuilder::UnmatchedFieldType, "Unmatched field type"_ba},
         {AbstractMetaBuilder::UnmatchedOperator, "Unmatched operator"_ba},
         {AbstractMetaBuilder::Deprecated, "Deprecated"_ba}
     };

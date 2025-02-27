@@ -37,6 +37,7 @@ public:
         RedefinedToNotClass,
         UnmatchedArgumentType,
         UnmatchedReturnType,
+        UnmatchedFieldType,
         UnmatchedOperator,
         Deprecated,
         NoReason
