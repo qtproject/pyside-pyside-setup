@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from . import events
 from . import futures
+import traceback
 
 from typing import Any
 
@@ -38,6 +39,8 @@ class QAsyncioTask(futures.QAsyncioFuture):
         self._cancelled = False  # PYSIDE-2644; see _step
         self._cancel_count = 0
         self._cancel_message: str | None = None
+        # Store traceback in case of Exception. Useful when exception happens in coroutine
+        self._tb: str = None
 
         # https://docs.python.org/3/library/asyncio-extending.html#task-lifetime-support
         asyncio._register_task(self)  # type: ignore[arg-type]
@@ -113,6 +116,7 @@ class QAsyncioTask(futures.QAsyncioFuture):
         except BaseException as e:
             self._state = futures.QAsyncioFuture.FutureState.DONE_WITH_EXCEPTION
             self._exception = e
+            self._tb = traceback.format_exc()
         else:
             if asyncio.futures.isfuture(result):
                 # If the coroutine yields a future, the task will await its
@@ -159,7 +163,8 @@ class QAsyncioTask(futures.QAsyncioFuture):
                     "task": self,
                     "future": (exception_or_future
                                if asyncio.futures.isfuture(exception_or_future)
-                               else None)
+                               else None),
+                    "traceback": self._tb
                 })
 
             if self.done():

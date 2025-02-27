@@ -598,7 +598,9 @@ class QAsyncioEventLoop(asyncio.BaseEventLoop, QObject):
     def default_exception_handler(self, context: dict[str, Any]) -> None:
         # TODO
         if context["message"]:
-            print(context["message"])
+            print(f"{context["message"]} from task {context["task"]._name},"+
+                    "read the following traceback:")
+            print(context["traceback"])
 
     def call_exception_handler(self, context: dict[str, Any]) -> None:
         if self._exception_handler is not None:
