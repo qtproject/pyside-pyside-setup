@@ -469,6 +469,9 @@ bool QtDocParser::extractEnumDocumentation(const ClassDocumentation &classDocume
             doc.insert(firstPara + 6, note);
         }
     }
+    // Fully qualify enums: "<term>QFrame::NoFrame" -> "<term>QFrame::FrameShape::NoFrame"
+    const QString classQualifier = "<term>"_L1 + classDocumentation.name + "::"_L1;
+    doc.replace(classQualifier, classQualifier + meta_enum.name() + "::"_L1);
     doc.replace("::None</term>"_L1, "::None\\_</term>"_L1);
     Documentation enumDoc(doc, {}, sourceFileName);
     meta_enum.setDocumentation(enumDoc);
