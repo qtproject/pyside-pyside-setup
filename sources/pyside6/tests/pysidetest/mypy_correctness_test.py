@@ -78,7 +78,7 @@ class MypyCorrectnessTest(unittest.TestCase):
         for line in err_lines:
             print(line)
         print(f"Time used for mypy test = {(time_post - time_pre):.5} s")
-        if ret.returncode != 0:
+        if ret.returncode != 0 and os.environ.get("QTEST_ENVIRONMENT", "") == "ci":
             dump_erroneous_pyi_files(err_lines, self.pyside_dir)
         self.assertEqual(ret.returncode, 0)
 
