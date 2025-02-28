@@ -182,8 +182,10 @@ QMetaObject::Connection qobjectConnect(QObject *source, QMetaMethod signal,
                                        QObject *receiver, QMetaMethod slot,
                                        Qt::ConnectionType type)
 {
-    return qobjectConnect(source, signal.methodSignature().constData(),
-                          receiver, slot.methodSignature().constData(), type);
+    PySide::SignalManager::registerMetaMethod(receiver,
+                                              slot.methodSignature().constData(),
+                                              slot.methodType());
+    return QObject::connect(source, signal, receiver, slot, type);
 }
 
 QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *signal,

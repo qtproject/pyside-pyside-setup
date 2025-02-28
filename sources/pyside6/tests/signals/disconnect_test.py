@@ -95,6 +95,25 @@ class TestDisconnect(unittest.TestCase):
         s.bar.emit()
         self.assertEqual(r.called, 1)
 
+    def testMetaMethod(self):
+        s = Sender()
+        r = Receiver()
+        sender_mo = s.metaObject()
+        signal_index = sender_mo.indexOfMethod("bar()")
+        self.assertTrue(signal_index != -1)
+        signal_method = sender_mo.method(signal_index)
+        receiver_mo = r.metaObject()
+        slot_index = receiver_mo.indexOfMethod("receiver()")
+        self.assertTrue(slot_index != -1)
+        slot_method = receiver_mo.method(slot_index)
+        conn_id = QObject.connect(s, signal_method, r, slot_method)
+        self.assertTrue(conn_id)
+        s.bar.emit()
+        self.assertEqual(r.called, 1)
+        self.assertTrue(QObject.disconnect(s, signal_method, r, slot_method))
+        s.bar.emit()
+        self.assertEqual(r.called, 1)
+
     def testDuringCallback(self):
         """ Test to see if the C++ object for a connection is accessed after the
         method returns.  This causes a segfault if the memory that was used by the
