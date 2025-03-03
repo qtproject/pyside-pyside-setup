@@ -109,21 +109,21 @@ def dprint(*args, **kw):
             sys.stdout.flush()
 
 
-_cache = {}
+class ArglistParser:
+    def __init__(self):
+        regex = build_brace_pattern(level=3, separators=",")
+        rec = re.compile(regex, flags=re.VERBOSE)
+        self._finditer = rec.finditer
+
+    def parse(self, argstr):
+        return list(x.group(1).strip() for x in self._finditer(argstr))
+
+
+arglistParser = ArglistParser()
 
 
 def _parse_arglist(argstr):
-    # The following is a split re. The string is broken into pieces which are
-    # between the recognized strings. Because the re has groups, both the
-    # strings and the separators are returned, where the strings are not
-    # interesting at all: They are just the commata.
-    key = "_parse_arglist"
-    if key not in _cache:
-        regex = build_brace_pattern(level=3, separators=",")
-        _cache[key] = re.compile(regex, flags=re.VERBOSE)
-    split = _cache[key].split
-    # Note: this list is interspersed with "," and surrounded by ""
-    return [x.strip() for x in split(argstr) if x.strip() not in ("", ",")]
+    return arglistParser.parse(argstr)
 
 
 def _parse_line(line):
@@ -333,7 +333,7 @@ def get_from_another_module(thing):
                 type_map[thing] = res
                 return res
             except AttributeError:
-                # Maybe it was anothr module...
+                # Maybe it was another module...
                 pass
     return None
 
