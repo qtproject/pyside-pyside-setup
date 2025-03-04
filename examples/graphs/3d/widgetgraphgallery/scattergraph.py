@@ -5,7 +5,7 @@ from __future__ import annotations
 from PySide6.QtCore import QObject, QSize, Qt
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QCommandLinkButton,
                                QLabel, QHBoxLayout, QSizePolicy,
-                               QVBoxLayout, QWidget, )
+                               QVBoxLayout, QWidget, QSlider)
 from PySide6.QtQuickWidgets import QQuickWidget
 from PySide6.QtGraphs import QAbstract3DSeries
 from PySide6.QtGraphsWidgets import Q3DScatterWidgetItem
@@ -42,10 +42,15 @@ class ScatterGraph(QObject):
         itemCountButton.setDescription("Switch between 900 and 10000 data points")
         itemCountButton.setIconSize(QSize(0, 0))
 
-        rangeButton = QCommandLinkButton(self._scatterWidget)
-        rangeButton.setText("Toggle axis ranges")
-        rangeButton.setDescription("Switch between automatic axis ranges and preset ranges")
-        rangeButton.setIconSize(QSize(0, 0))
+        range_min_slider = QSlider(Qt.Horizontal, self._scatterWidget)
+        range_min_slider.setMinimum(-10)
+        range_min_slider.setMaximum(1)
+        range_min_slider.setValue(-10)
+
+        range_max_slider = QSlider(Qt.Horizontal, self._scatterWidget)
+        range_max_slider.setMinimum(1)
+        range_max_slider.setMaximum(10)
+        range_max_slider.setValue(10)
 
         backgroundCheckBox = QCheckBox(self._scatterWidget)
         backgroundCheckBox.setText("Show graph background")
@@ -89,7 +94,8 @@ class ScatterGraph(QObject):
 
         vLayout.addWidget(cameraButton)
         vLayout.addWidget(itemCountButton)
-        vLayout.addWidget(rangeButton)
+        vLayout.addWidget(range_min_slider)
+        vLayout.addWidget(range_max_slider)
         vLayout.addWidget(backgroundCheckBox)
         vLayout.addWidget(gridCheckBox)
         vLayout.addWidget(smoothCheckBox)
@@ -104,13 +110,14 @@ class ScatterGraph(QObject):
 
         cameraButton.clicked.connect(modifier.changePresetCamera)
         itemCountButton.clicked.connect(modifier.toggleItemCount)
-        rangeButton.clicked.connect(modifier.toggleRanges)
+        range_min_slider.valueChanged.connect(modifier.adjust_minimum_range)
+        range_max_slider.valueChanged.connect(modifier.adjust_maximum_range)
 
-        backgroundCheckBox.checkStateChanged.connect(modifier.setPlotAreaBackgroundVisible)
+        backgroundCheckBox.checkStateChanged.connect(modifier.setBackgroundVisible)
         gridCheckBox.checkStateChanged.connect(modifier.setGridVisible)
         smoothCheckBox.checkStateChanged.connect(modifier.setSmoothDots)
 
-        modifier.backgroundEnabledChanged.connect(backgroundCheckBox.setChecked)
+        modifier.backgroundVisibleChanged.connect(backgroundCheckBox.setChecked)
         modifier.gridVisibleChanged.connect(gridCheckBox.setChecked)
         itemStyleList.currentIndexChanged.connect(modifier.changeStyle)
 

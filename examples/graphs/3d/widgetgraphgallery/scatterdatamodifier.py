@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import Enum
 from math import sin, cos, degrees, sqrt
 
-from PySide6.QtCore import QObject, Signal, Slot, Qt
+from PySide6.QtCore import QObject, Signal, Slot, Qt, QRandomGenerator
 from PySide6.QtGui import QVector2D, QVector3D
 from PySide6.QtGraphs import (QAbstract3DSeries,
                               QScatterDataItem, QScatterDataProxy,
@@ -27,7 +27,7 @@ class InputState(Enum):
 
 class ScatterDataModifier(QObject):
 
-    backgroundEnabledChanged = Signal(bool)
+    backgroundVisibleChanged = Signal(bool)
     gridVisibleChanged = Signal(bool)
     shadowQualityChanged = Signal(int)
 
@@ -42,11 +42,11 @@ class ScatterDataModifier(QObject):
         self._itemCount = LOWER_NUMBER_OF_ITEMS
         self._CURVE_DIVIDER = LOWER_CURVE_DIVIDER
 
-        self._graph.activeTheme().setTheme(QGraphsTheme.Theme.MixSeries)
-        self._graph.activeTheme().setColorScheme(QGraphsTheme.ColorScheme.Dark)
         self._graph.setShadowQuality(QtGraphs3D.ShadowQuality.SoftHigh)
         self._graph.setCameraPreset(QtGraphs3D.CameraPreset.Front)
         self._graph.setCameraZoomLevel(80.0)
+        self._graph.activeTheme().setTheme(QGraphsTheme.Theme.MixSeries)
+        self._graph.activeTheme().setColorScheme(QGraphsTheme.ColorScheme.Dark)
 
         self._proxy = QScatterDataProxy()
         self._series = QScatter3DSeries(self._proxy)
@@ -99,7 +99,7 @@ class ScatterDataModifier(QObject):
     def changeTheme(self, theme):
         currentTheme = self._graph.activeTheme()
         currentTheme.setTheme(QGraphsTheme.Theme(theme))
-        self.backgroundEnabledChanged.emit(currentTheme.isPlotAreaBackgroundVisible())
+        self.backgroundVisibleChanged.emit(currentTheme.isPlotAreaBackgroundVisible())
         self.gridVisibleChanged.emit(currentTheme.isGridVisible())
 
     @Slot()
@@ -113,45 +113,6 @@ class ScatterDataModifier(QObject):
     @Slot(QtGraphs3D.ShadowQuality)
     def shadowQualityUpdatedByVisual(self, sq):
         self.shadowQualityChanged.emit(sq.value)
-
-    @Slot(int)
-    def changeShadowQuality(self, quality):
-        sq = QtGraphs3D.ShadowQuality(quality)
-        self._graph.setShadowQuality(sq)
-
-    @Slot(int)
-    def setPlotAreaBackgroundVisible(self, state):
-        enabled = state == Qt.CheckState.Checked
-        self._graph.activeTheme().setPlotAreaBackgroundVisible(enabled)
-
-    @Slot(int)
-    def setGridVisible(self, state):
-        self._graph.activeTheme().setGridVisible(state == Qt.Checked.value)
-
-    @Slot()
-    def toggleItemCount(self):
-        if self._itemCount == NUMBER_OF_ITEMS:
-            self._itemCount = LOWER_NUMBER_OF_ITEMS
-            self._CURVE_DIVIDER = LOWER_CURVE_DIVIDER
-        else:
-            self._itemCount = NUMBER_OF_ITEMS
-            self._CURVE_DIVIDER = CURVE_DIVIDER
-
-        self._graph.seriesList()[0].dataProxy().resetArray([])
-        self.addData()
-
-    @Slot()
-    def toggleRanges(self):
-        if not self._autoAdjust:
-            self._graph.axisX().setAutoAdjustRange(True)
-            self._graph.axisZ().setAutoAdjustRange(True)
-            self._dragSpeedModifier = 1.5
-            self._autoAdjust = True
-        else:
-            self._graph.axisX().setRange(-10.0, 10.0)
-            self._graph.axisZ().setRange(-10.0, 10.0)
-            self._dragSpeedModifier = float(15)
-            self._autoAdjust = False
 
     @Slot(QtGraphs3D.ElementType)
     def handleElementSelected(self, type):
@@ -197,3 +158,69 @@ class ScatterDataModifier(QObject):
             # No need to use adjusted y move here
             distance = move.y() / self._dragSpeedModifier
             axis.setRange(axis.min() + distance, axis.max() + distance)
+
+    @Slot(int)
+    def changeShadowQuality(self, quality):
+        sq = QtGraphs3D.ShadowQuality(quality)
+        self._graph.setShadowQuality(sq)
+
+    @Slot(int)
+    def setBackgroundVisible(self, state):
+        enabled = state == Qt.CheckState.Checked
+        self._graph.activeTheme().setPlotAreaBackgroundVisible(enabled)
+
+    @Slot(int)
+    def setGridVisible(self, state):
+        self._graph.activeTheme().setGridVisible(state == Qt.Checked.value)
+
+    @Slot()
+    def toggleItemCount(self):
+        if self._itemCount == NUMBER_OF_ITEMS:
+            self._itemCount = LOWER_NUMBER_OF_ITEMS
+            self._CURVE_DIVIDER = LOWER_CURVE_DIVIDER
+        else:
+            self._itemCount = NUMBER_OF_ITEMS
+            self._CURVE_DIVIDER = CURVE_DIVIDER
+
+        self._graph.seriesList()[0].dataProxy().resetArray([])
+        self.addData()
+
+    @Slot()
+    def toggleRanges(self):
+        if not self._autoAdjust:
+            self._graph.axisX().setAutoAdjustRange(True)
+            self._graph.axisZ().setAutoAdjustRange(True)
+            self._dragSpeedModifier = 1.5
+            self._autoAdjust = True
+        else:
+            self._graph.axisX().setRange(-10.0, 10.0)
+            self._graph.axisZ().setRange(-10.0, 10.0)
+            self._dragSpeedModifier = float(15)
+            self._autoAdjust = False
+
+    def adjust_minimum_range(self, range):
+        if self._itemCount == LOWER_NUMBER_OF_ITEMS:
+            range *= 1.45
+        else:
+            range *= 4.95
+
+        self._graph.axisX().setMin(range)
+        self._graph.axisZ().setMin(range)
+        self._autoAdjust = False
+
+    def adjust_maximum_range(self, range):
+        if self._itemCount == LOWER_NUMBER_OF_ITEMS:
+            range *= 1.45
+        else:
+            range *= 4.95
+
+        self._graph.axisX().setMax(range)
+        self._graph.axisZ().setMax(range)
+        self._autoAdjust = False
+
+    def rand_vector() -> QVector3D:
+        generator = QRandomGenerator.global_()
+        x = float(generator.bounded(100)) / 2.0 - float(generator.bounded(100)) / 2.0
+        y = float(generator.bounded(100)) / 100.0 - float(generator.bounded(100)) / 100.0
+        z = float(generator.bounded(100)) / 2.0 - float(generator.bounded(100)) / 2.0
+        return QVector3D(x, y, z)

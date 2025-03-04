@@ -26,6 +26,7 @@ class HighlightSeries(QSurface3DSeries):
         self._position = {}
         self._topographicSeries = None
         self._minHeight = 0.0
+        self._height_adjustment = 5.0
         self.setDrawMode(QSurface3DSeries.DrawFlag.DrawSurface)
         self.setShading(QSurface3DSeries.Shading.Flat)
         self.setVisible(False)
@@ -72,7 +73,7 @@ class HighlightSeries(QSurface3DSeries):
             srcRow = srcArray[i]
             for j in range(startX, endX):
                 pos = srcRow.at(j).position()
-                pos.setY(pos.y() + 0.1)
+                pos.setY(pos.y() + self._height_adjustment)
                 item = QSurfaceDataItem(QVector3D(pos))
                 newRow.append(item)
             dataArray.append(newRow)
@@ -93,3 +94,8 @@ class HighlightSeries(QSurface3DSeries):
 
         self.setBaseGradient(gr)
         self.setColorStyle(QGraphsTheme.ColorStyle.RangeGradient)
+
+        self.handle_zoom_change(ratio)
+
+    def handle_zoom_change(self, zoom):
+        self._height_adjustment = (1.2 - zoom) * 10.0
