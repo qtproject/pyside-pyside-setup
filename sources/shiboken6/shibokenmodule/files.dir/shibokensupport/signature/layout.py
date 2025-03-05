@@ -19,10 +19,12 @@ used literally as strings like "signature", "existence", etc.
 """
 
 import inspect
+import operator
 import sys
 import types
 import typing
 
+from functools import reduce
 from types import SimpleNamespace
 from textwrap import dedent
 from shibokensupport.signature.mapping import ellipsis, missing_optional_return
@@ -125,78 +127,6 @@ typeerror = SignatureLayout(definition=False,
                             parameter_names=False)
 
 
-def define_nameless_parameter():
-    """
-    Create Nameless Parameters
-
-    A nameless parameter has a reduced string representation.
-    This is done by cloning the parameter type and overwriting its
-    __str__ method. The inner structure is still a valid parameter.
-    """
-    def __str__(self):
-        # for Python 2, we must change self to be an instance of P
-        klass = self.__class__
-        self.__class__ = P
-        txt = P.__str__(self)
-        self.__class__ = klass
-        txt = txt[txt.index(":") + 1:].strip() if ":" in txt else txt
-        return txt
-
-    P = inspect.Parameter
-    newname = "NamelessParameter"
-    bases = P.__bases__
-    body = dict(P.__dict__)  # get rid of mappingproxy
-    if "__slots__" in body:
-        # __slots__ would create duplicates
-        for name in body["__slots__"]:
-            del body[name]
-    body["__str__"] = __str__
-    return type(newname, bases, body)
-
-
-NamelessParameter = define_nameless_parameter()
-
-"""
-Note on the "Optional" feature:
-
-When an annotation has a default value that is None, then the
-type has to be wrapped into "typing.Optional".
-
-Note that only the None value creates an Optional expression,
-because the None leaves the domain of the variable.
-Defaults like integer values are ignored: They stay in the domain.
-
-That information would be lost when we use the "..." convention.
-
-Note that the typing module has the remarkable expansion
-
-    Optional[T]    is    Union[T, NoneType]
-
-We want to avoid that when generating the .pyi file.
-This is done by a regex in pyi_generator.py .
-The following would work in Python 3, but this is a version-dependent
-hack that also won't work in Python 2 and would be _very_ complex.
-"""
-# import sys
-# if sys.version_info[0] == 3:
-#     class hugo(list):pass
-#     typing._normalize_alias["hugo"] = "Optional"
-#     Optional = typing._alias(hugo, typing.T, inst=False)
-# else:
-#     Optional = typing.Optional
-
-
-def make_signature_nameless(signature):
-    """
-    Make a Signature Nameless
-
-    We use an existing signature and change the type of its parameters.
-    The signature looks different, but is totally intact.
-    """
-    for key in signature.parameters.keys():
-        signature.parameters[key].__class__ = NamelessParameter
-
-
 _POSITIONAL_ONLY         = inspect.Parameter.POSITIONAL_ONLY        # noqa E:201
 _POSITIONAL_OR_KEYWORD   = inspect.Parameter.POSITIONAL_OR_KEYWORD  # noqa E:201
 _VAR_POSITIONAL          = inspect.Parameter.VAR_POSITIONAL         # noqa E:201
@@ -230,6 +160,11 @@ def get_ordering_key(anno):
 
     A special case are numeric types, which have also an ordering between them.
     They can be handled separately, since they are all of the shortest mro.
+
+    PYSIDE-3012: For some reason, we failed to transform `Union[a, b]` directly
+                 into `a | b`. Something unknown about comparison must be different.
+                 Therefore the transform function was put on top.
+    XXX Get rid of the function and document the problem thoroughly.
     """
     typing_type = typing.get_origin(anno)
     is_union = typing_type is typing.Union
@@ -337,7 +272,7 @@ def remove_ambiguous_signatures(signatures, name):
     return new_sigs
 
 
-def create_signature(props, key):
+def create_signature_union(props, key):
     if not props:
         # empty signatures string
         return
@@ -345,7 +280,7 @@ def create_signature(props, key):
         # multi sig: call recursively.
         # For debugging: Print the name!
         name = props["multi"][0]["fullname"]
-        res = list(create_signature(elem, key) for elem in props["multi"])
+        res = list(create_signature_union(elem, key) for elem in props["multi"])
         # PYSIDE-2846: Sort multi-signatures by inheritance in order to avoid shadowing.
         res = sort_by_inheritance(res)
         res = remove_ambiguous_signatures(res, name)
@@ -426,13 +361,41 @@ def create_signature(props, key):
     ret_anno = annotations.get('return', _empty)
     if ret_anno is not _empty and props["fullname"] in missing_optional_return:
         ret_anno = typing.Optional[ret_anno]
-    sig = inspect.Signature(params,
-                            return_annotation=ret_anno,
-                            __validate_parameters__=False)
+    return inspect.Signature(params, return_annotation=ret_anno,
+                             __validate_parameters__=False)
 
-    # the special case of nameless parameters
-    if not layout.parameter_names:
-        make_signature_nameless(sig)
-    return sig
+
+def transform(signature):
+    # Change the annotations of the parameters to use "|" syntax.
+    parameters = []
+    changed = False
+    for idx, param in enumerate(signature.parameters.values()):
+        ann = param.annotation
+        if typing.get_origin(ann) is typing.Union:
+            args = typing.get_args(ann)
+            ann = reduce(operator.or_, args)
+            new_param = param.replace(annotation=ann)
+            changed = True
+        else:
+            new_param = param
+        parameters.append(new_param)
+
+    # Create the Signature anew. Replace would not allow errors (see Signal and Slot).
+    return inspect.Signature(parameters, return_annotation=signature.return_annotation,
+                             __validate_parameters__=False) if changed else signature
+
+
+def create_signature(props, key):
+    res = create_signature_union(props, key)
+    if type(res) is list:
+        for idx, sig in enumerate(res):
+            res[idx] = transform(sig)
+    else:
+        res = transform(res)
+    return res
+
+
+if sys.version_info[:2] < (3, 10):
+    create_signature = create_signature_union    # noqa F:811
 
 # end of file

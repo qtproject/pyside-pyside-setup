@@ -103,6 +103,16 @@ class Formatter(Writer):
     split = brace_searcher.split
 
     @classmethod
+    def last_fixups(cls, source):
+        # PYSIDE-2517: findChild/findChildren type hints:
+        # PlaceHolderType fix to avoid the '~' from TypeVar.__repr__
+        if "~PlaceHolderType" in source:
+            source = source.replace("~PlaceHolderType", "PlaceHolderType")
+        # Replace all "NoneType" strings by "None" which is a typing convention.
+        return source.replace("NoneType", "None")
+
+    # To be removed when minimum version is 3.10:
+    @classmethod
     def optional_replacer(cls, source):
         # PYSIDE-2517: findChild/findChildren type hints:
         # PlaceHolderType fix to avoid the '~' from TypeVar.__repr__
@@ -117,11 +127,14 @@ class Formatter(Writer):
             # Note: this list is interspersed with "," and surrounded by "", see parser.py
             parts = [x.strip() for x in cls.split(body) if x.strip() not in ("", ",")]
             if name == "typing.Optional":
-                parts.append("None")
+                parts.append("None ")
             res = " | ".join(parts)
             source = source[: start] + res + source[end :]
         # Replace all "NoneType" strings by "None" which is a typing convention.
         return source.replace("NoneType", "None")
+
+    if sys.version_info[:2] < (3, 10):
+        last_fixups = optional_replacer
 
     # self.level is maintained by enum_sig.py
     # self.is_method() is true for non-plain functions.

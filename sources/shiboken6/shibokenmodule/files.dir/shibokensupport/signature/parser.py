@@ -76,6 +76,9 @@ def _get_flag_enum_option():
     # _PepUnicode_AsString: Fix a broken promise
     if pyminver and pyminver >= (3, 10):
         warnings.warn(f"{p} _PepUnicode_AsString can now be replaced by PyUnicode_AsUTF8! ***")
+    # PYSIDE-3012: Emit a warning when we may simplify layout.py and pyi_generator.py
+    if pyminver and pyminver >= (3, 10):
+        warnings.warn(f"{p} layout.py and pyi_generator.py can now remove old code! ***")
     # PYSIDE-1960: Emit a warning when we may remove bufferprocs_py37.(cpp|h)
     if pyminver and pyminver >= (3, 11):
         warnings.warn(f"{p} The files bufferprocs_py37.(cpp|h) should be removed ASAP! ***")
