@@ -1,0 +1,52 @@
+Qt for Python 6.8.3 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - [PYSIDE-1735]  Most enumerations are now fully qualified in documentation
+                  and translated code snippets. Enum values automatically
+                  converted to "None_" are also correctly documented.
+ - [PYSIDE-2846]  The type annotation of the Slot() decorator has been fixed.
+ - [PYSIDE-2997]  Type hints: The signature of QMessageBox.information()
+                  has been fixed.
+ - [PYSIDE-3001]  QtAsyncio: The error messages printed on an exceptions
+                  in tasks have been improved.
+ - [PYSIDE-3002]  QPaintEngine's virtual functions taking a
+                  C-style array of geometry primitives have been fixed.
+ - [PYSIDE-3003]  Type hints: A bug causing overloads to be omitted has
+                  been fixed.
+ - [PYSIDE-3012]  Type hints: Since using Callable, Iterable and Sequence from
+                  typing is deprecated, they are imported from collections.abc.
+ - [PYSIDE-3012]  Type hints: Object inheritance has been removed from classes.
+ - [PYSIDE-3013]  QFont.Tag(str), QFont.Tag.fromString(), QFont.Tag.fromValue()
+                  have been added.
+ - [PYSIDE-3014]  QAbstractSpinBox.fixup() has been fixed.
+ - [PYSIDE-3017]  The overloads of QCanDbcFileParser.parse() have been fixed.
+ - [PYSIDE-3020]  A bug disconnecting a string-based connection by passing a
+                  callable has been fixed.
+ - [QTBUG-72968]  The type of the "result" parameter of the native event
+                  filters has been changed to "qintptr" for Qt 6.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - Warnings about rejected functions/fields have been removed or redirected
+   to the log files.
+ - [PYSIDE-2701]  The size of the generated modules has been reduced by
+                  factoring out common code from the code generated  for
+                   virtual functions.
