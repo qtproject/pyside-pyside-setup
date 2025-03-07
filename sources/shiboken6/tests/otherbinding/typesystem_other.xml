@@ -11,7 +11,7 @@
     <value-type name="Number" />
 
     <smart-pointer-type name="SharedPtr" type="shared" getter="data" ref-count-method="useCount"
-                        instantiations="Str"/>
+                        excluded-instantiations="Integer,int"/>
     <value-type name="SmartPtrTester"/>
 
     <typedef-type name="ValueWithUnitIntInch" source="ValueWithUnit&lt;int,LengthUnit::Inch&gt;"/>

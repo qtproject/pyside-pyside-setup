@@ -262,6 +262,10 @@ struct TypeDatabasePrivate : public TypeDatabaseOptions
     template <class String>
     bool isSuppressedWarningHelper(const String &s) const;
     bool resolveSmartPointerInstantiations(const TypeDatabaseParserContextPtr &context) const;
+    bool resolveSmartPointerInstantiations(const SmartPointerTypeEntryPtr &smartPointerEntry,
+                                           const QString &s) const;
+    bool resolveSmartPointerExclusions(const SmartPointerTypeEntryPtr &smartPointerEntry,
+                                       const QString &s) const;
     void formatDebug(QDebug &d) const;
     void formatBuiltinTypes(QDebug &d) const;
 
@@ -1219,38 +1223,76 @@ static QStringList splitTypeList(const QString &s)
     return result;
 }
 
+bool TypeDatabasePrivate::resolveSmartPointerInstantiations(
+    const SmartPointerTypeEntryPtr &smartPointerEntry, const QString &s) const
+{
+    const auto instantiationNames = splitTypeList(s);
+    SmartPointerTypeEntry::Instantiations instantiations;
+    instantiations.reserve(instantiationNames.size());
+    for (const auto &instantiation : instantiationNames) {
+        QString name;
+        QString type = instantiation;
+        const auto equalsPos = instantiation.indexOf(u'=');
+        if (equalsPos != -1) {
+            type.truncate(equalsPos);
+            name = instantiation.mid(equalsPos + 1);
+        }
+
+        const auto typeEntries = findCppTypes(type);
+        if (typeEntries.isEmpty()) {
+            const QString m = msgCannotFindTypeEntryForSmartPointer(type,
+                                                                    smartPointerEntry->name());
+            qCWarning(lcShiboken, "%s", qPrintable(m));
+            return false;
+        }
+        if (typeEntries.size() > 1) {
+            const QString m = msgAmbiguousTypesFound(type, typeEntries);
+            qCWarning(lcShiboken, "%s", qPrintable(m));
+            return false;
+        }
+        instantiations.append({name, typeEntries.constFirst()});
+    }
+    smartPointerEntry->setInstantiations(instantiations);
+    return true;
+}
+
+bool TypeDatabasePrivate::resolveSmartPointerExclusions(
+    const SmartPointerTypeEntryPtr &smartPointerEntry, const QString &s) const
+{
+    const auto excludedNames = splitTypeList(s);
+    TypeEntryCList excluded;
+
+    excluded.reserve(excludedNames.size());
+    for (const auto &excludedName : excludedNames) {
+        const auto typeEntries = findCppTypes(excludedName);
+        if (typeEntries.isEmpty()) {
+            const QString m = msgCannotFindTypeEntryForSmartPointer(excludedName,
+                                                                    smartPointerEntry->name());
+            qCWarning(lcShiboken, "%s", qPrintable(m));
+            return false;
+        }
+        if (typeEntries.size() > 1) {
+            const QString m = msgAmbiguousTypesFound(excludedName, typeEntries);
+            qCWarning(lcShiboken, "%s", qPrintable(m));
+            return false;
+        }
+        excluded.append(typeEntries.constFirst());
+    }
+    smartPointerEntry->setExcludedInstantiations(excluded);
+    return true;
+}
+
 bool TypeDatabasePrivate::resolveSmartPointerInstantiations(const TypeDatabaseParserContextPtr &context) const
 {
     const auto &instantiations = context->smartPointerInstantiations;
     for (auto it = instantiations.cbegin(), end = instantiations.cend(); it != end; ++it) {
-        const auto &smartPointerEntry = it.key();
-        const auto instantiationNames = splitTypeList(it.value());
-        SmartPointerTypeEntry::Instantiations instantiations;
-        instantiations.reserve(instantiationNames.size());
-        for (const auto &instantiation : instantiationNames) {
-            QString name;
-            QString type = instantiation;
-            const auto equalsPos = instantiation.indexOf(u'=');
-            if (equalsPos != -1) {
-                type.truncate(equalsPos);
-                name = instantiation.mid(equalsPos + 1);
-            }
-
-            const auto typeEntries = findCppTypes(type);
-            if (typeEntries.isEmpty()) {
-                const QString m = msgCannotFindTypeEntryForSmartPointer(type,
-                                                                        smartPointerEntry->name());
-                qCWarning(lcShiboken, "%s", qPrintable(m));
-                return false;
-            }
-            if (typeEntries.size() > 1) {
-                const QString m = msgAmbiguousTypesFound(type, typeEntries);
-                qCWarning(lcShiboken, "%s", qPrintable(m));
-                return false;
-            }
-            instantiations.append({name, typeEntries.constFirst()});
+        const auto &entry = it.value();
+        if ((!entry.instantiations.isEmpty()
+             && !resolveSmartPointerInstantiations(it.key(), entry.instantiations))
+            || (!entry.excludedInstantiations.isEmpty()
+                 && !resolveSmartPointerExclusions(it.key(), entry.excludedInstantiations))) {
+            return false;
         }
-        smartPointerEntry->setInstantiations(instantiations);
     }
     return true;
 }

@@ -728,7 +728,8 @@ will be generated into specific modules.
             value-check-method="..."
             null-check-method="..."
             reset-method="..."
-            instantiations="..."/>
+            instantiations="..."
+            excluded-instantiations="..."/>
         </typesystem>
 
 
@@ -741,7 +742,7 @@ that can be used to check for ``nullptr``.
 The *optional* attribute **reset-method** specifies a method
 that can be used to clear the pointer.
 
-The *optional* instantiations attribute specifies a comma-separated
+The *optional* **instantiations** attribute specifies a comma-separated
 list of instantiation types. When left empty, all instantiations
 found in the code will be generated. The type name might optionally
 be followed an equal sign and the Python type name, for example
@@ -750,6 +751,11 @@ It is also possible to specify a namespace delimited by ``::``.
 By default, the type will be in the namespace of the smart pointer,
 for example, ``std`` for ``std::shared_ptr``. Preceding
 the type name by ``::`` causes it to be in the global namespace.
+
+The *optional* **excluded-instantiations** attribute specifies a
+comma-separated list of types to be excluded from instantiating. Typically,
+this is used to exclude instantiations present in an underlying base module to
+prevent symbol clashes.
 
 The *optional* attribute **type** specifies the type:
 

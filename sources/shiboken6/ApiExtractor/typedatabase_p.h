@@ -14,7 +14,13 @@ class TypeDatabase;
 
 struct TypeDatabaseParserContext
 {
-    using SmartPointerInstantiations = QHash<SmartPointerTypeEntryPtr, QString>;
+    struct SmartPointerEntry
+    {
+        QString instantiations;
+        QString excludedInstantiations;
+    };
+
+    using SmartPointerInstantiations = QHash<SmartPointerTypeEntryPtr, SmartPointerEntry>;
     using OpaqueContainerHash = QHash<QString, OpaqueContainers>;
 
     TypeDatabase *db;

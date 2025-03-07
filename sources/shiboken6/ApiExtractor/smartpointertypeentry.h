@@ -41,9 +41,13 @@ public:
 
     TypeEntry *clone() const override;
 
+    bool matchesInstantiation(const TypeEntryCPtr &e) const;
+
     const Instantiations &instantiations() const;
     void setInstantiations(const Instantiations &i);
-    bool matchesInstantiation(const TypeEntryCPtr &e) const;
+
+    void setExcludedInstantiations(const TypeEntryCList &ex);
+    const TypeEntryCList &excludedInstantiations() const;
 
     QString getTargetName(const AbstractMetaType &metaType) const;
 

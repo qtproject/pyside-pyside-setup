@@ -2075,6 +2075,7 @@ public:
     QString m_nullCheckMethod;
     QString m_resetMethod;
     SmartPointerTypeEntry::Instantiations m_instantiations;
+    TypeEntryCList m_excludedInstantiations;
     TypeSystem::SmartPointerType m_smartPointerType;
 };
 
@@ -2170,6 +2171,18 @@ void SmartPointerTypeEntry::setInstantiations(const Instantiations &i)
     d->m_instantiations = i;
 }
 
+void SmartPointerTypeEntry::setExcludedInstantiations(const TypeEntryCList  &ex)
+{
+    S_D(SmartPointerTypeEntry);
+    d->m_excludedInstantiations = ex;
+}
+
+const TypeEntryCList &SmartPointerTypeEntry::excludedInstantiations() const
+{
+    S_D(const SmartPointerTypeEntry);
+    return d->m_excludedInstantiations;
+}
+
 SmartPointerTypeEntry::SmartPointerTypeEntry(SmartPointerTypeEntryPrivate *d) :
     ComplexTypeEntry(d)
 {
@@ -2179,7 +2192,8 @@ bool SmartPointerTypeEntry::matchesInstantiation(const TypeEntryCPtr &e) const
 {
     S_D(const SmartPointerTypeEntry);
     // No instantiations specified, or match
-    return d->m_instantiations.isEmpty() || d->instantiationIndex(e) != -1;
+    return !d->m_excludedInstantiations.contains(e)
+        && (d->m_instantiations.isEmpty() || d->instantiationIndex(e) != -1);
 }
 
 static QString fixSmartPointerName(QString name)
