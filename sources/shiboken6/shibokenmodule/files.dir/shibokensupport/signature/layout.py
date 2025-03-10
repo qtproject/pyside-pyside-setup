@@ -316,7 +316,7 @@ def create_signature_union(props, key):
         del annotations["return"]
 
     # Build a signature.
-    kind = DEFAULT_PARAM_KIND
+    kind = last = DEFAULT_PARAM_KIND
     params = []
     snake_flag = using_snake_case()
 
@@ -339,6 +339,8 @@ def create_signature_union(props, key):
         if default is not _empty:
             if kind != _KEYWORD_ONLY:
                 kind = _POSITIONAL_OR_KEYWORD
+                if last == _VAR_POSITIONAL:
+                    kind = _KEYWORD_ONLY
         if default is None:
             ann = typing.Optional[ann]
         if default is not _empty and layout.ellipsis:
@@ -355,6 +357,7 @@ def create_signature_union(props, key):
                 continue
             if snake_flag:
                 name = make_snake_case_name(name)
+        last = kind
         param = inspect.Parameter(name, kind, annotation=ann, default=default)
         params.append(param)
 
@@ -374,15 +377,11 @@ def transform(signature):
         if typing.get_origin(ann) is typing.Union:
             args = typing.get_args(ann)
             ann = reduce(operator.or_, args)
-            new_param = param.replace(annotation=ann)
+            param = param.replace(annotation=ann)
             changed = True
-        else:
-            new_param = param
-        parameters.append(new_param)
+        parameters.append(param)
 
-    # Create the Signature anew. Replace would not allow errors (see Signal and Slot).
-    return inspect.Signature(parameters, return_annotation=signature.return_annotation,
-                             __validate_parameters__=False) if changed else signature
+    return signature.replace(parameters=parameters) if changed else signature
 
 
 def create_signature(props, key):

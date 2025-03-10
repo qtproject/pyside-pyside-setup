@@ -206,7 +206,7 @@ class Formatter(Writer):
         # the formatting with the inspect module explicitly removes the `typing` prefix.
         signature = self.fix_typing_prefix(signature)
         # from now on, the signature will be stringized.
-        signature = self.optional_replacer(signature)
+        signature = self.last_fixups(signature)
         self.print(f'{spaces}def {func_name}{signature}: ...{opt_comment}')
 
     @contextmanager
