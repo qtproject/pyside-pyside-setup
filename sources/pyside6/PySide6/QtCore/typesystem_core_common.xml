@@ -1312,6 +1312,8 @@
             <insert-template name="return_internal_pointer" />
         </inject-code>
     </modify-function>
+    <!-- Remove  const variation in favor of using internalPointer -->
+    <modify-function signature="constInternalPointer()const" remove="all"/>
     <modify-function signature="operator QModelIndex()const">
         <modify-argument index="return">
             <parent index="this" action="add"/>
