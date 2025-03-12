@@ -59,6 +59,7 @@ struct DocClassEntry
     QString name;
     QString fullName;
     QString file;
+    bool nested = false;
 };
 
 static bool classEntryLessThan(const DocClassEntry &e1, const DocClassEntry &e2)
@@ -255,7 +256,7 @@ static void readExtraDoc(const QFileInfo &fi,
         auto dot = name.lastIndexOf(u'.');
         if (dot != -1)
             name.remove(0, dot + 1);
-        docPackage->classPages.append({name, fullClassName, newFileName});
+        docPackage->classPages.append({name, fullClassName, newFileName, false});
     }
     extraTocEntries->append(fileNameToTocEntry(newFileName));
 }
@@ -468,8 +469,9 @@ void QtDocGenerator::generateClassRecursion(TextStream &s, const QString &target
 
     qCDebug(lcShibokenDoc, "Generating Documentation for %s", qPrintable(metaClass->fullName()));
 
+    const bool nested = metaClass->enclosingClass() != nullptr;
     m_packages[metaClass->package()].classPages.append({metaClass->name(), metaClass->fullName(),
-                                                        fileNameForContext(classContext)});
+                                                        fileNameForContext(classContext), nested});
 
     doGenerateClass(s, targetDir, metaClass);
 
@@ -1242,6 +1244,10 @@ void QtDocGenerator::writeModuleDocumentation()
         QtXmlToSphinxImages parsedImages;
         TextStream& s = output.stream;
 
+        TypeSystemTypeEntryCPtr typeSystemEntry = typeDb->findTypeSystemType(it.key());
+        Q_ASSERT(typeSystemEntry);
+        const auto docMode = typeSystemEntry->docMode();
+
         const QString &title = it.key();
         s << ".. module:: " << title << "\n\n" << headline(title, '*');
 
@@ -1281,8 +1287,10 @@ void QtDocGenerator::writeModuleDocumentation()
             << ":maxdepth: 1\n\n";
         if (hasGlobals)
             s << globalsPage << '\n';
-        for (const auto &e : std::as_const(docPackage.classPages))
-            s << e.file << '\n';
+        for (const auto &e : std::as_const(docPackage.classPages)) {
+            if (!e.nested || docMode == TypeSystem::DocMode::Flat)
+                s << e.file << '\n';
+        }
         s << "\n\n" << outdent << outdent << headline("Detailed Description");
 
         // module doc is always wrong and C++istic, so go straight to the extra directory!
@@ -1324,10 +1332,7 @@ void QtDocGenerator::writeModuleDocumentation()
               << moduleDocumentation.qmlTypesUrl << ">`_\n\n";
         }
 
-        TypeSystemTypeEntryCPtr typeSystemEntry = typeDb->findTypeSystemType(it.key());
-        Q_ASSERT(typeSystemEntry);
-        writeFancyToc(s, "List of Classes", classEntryListToToc(docPackage.classPages,
-                                                                typeSystemEntry->docMode()),
+        writeFancyToc(s, "List of Classes", classEntryListToToc(docPackage.classPages, docMode),
                       "class"_L1);
         writeFancyToc(s, "List of Decorators", fileListToToc(docPackage.decoratorPages),
                       "deco"_L1);
