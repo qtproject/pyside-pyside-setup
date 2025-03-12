@@ -13,24 +13,28 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QWidget
 
 
 class MyWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+        self._info = None
+
     def paintEvent(self, e):
-        p = QPainter(self)
-        self._info = p.fontInfo()
-        self._app.quit()
+        with QPainter(self) as p:
+            self._info = p.fontInfo()
+        QTimer.singleShot(0, qApp.quit)  # noqa: F821
 
 
 class TestQPainter(UsesQApplication):
     def testFontInfo(self):
         w = MyWidget()
-        w._app = self.app
-        w._info = None
-        QTimer.singleShot(300, w.show)
+        w.show()
+        while not w.windowHandle().isExposed():
+            QCoreApplication.processEvents()
         self.app.exec()
         self.assertTrue(w._info)
 

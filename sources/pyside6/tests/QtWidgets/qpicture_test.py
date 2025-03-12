@@ -12,16 +12,20 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtGui import QPicture, QPainter
 from PySide6.QtWidgets import QWidget
 
 
 class MyWidget(QWidget):
+    def __init__(self, picture):
+        super().__init__()
+        self._picture = picture
+
     def paintEvent(self, e):
         with QPainter(self) as p:
             p.drawPicture(0, 0, self._picture)
-        self._app.quit()
+        QTimer.singleShot(0, qApp.quit)  # noqa: F821
 
 
 class QPictureTest(UsesQApplication):
@@ -36,11 +40,11 @@ class QPictureTest(UsesQApplication):
 
         self.assertEqual(picture2.data(), picture.data())
 
-        w = MyWidget()
-        w._picture = picture2
-        w._app = self.app
+        w = MyWidget(picture2)
 
-        QTimer.singleShot(300, w.show)
+        w.show()
+        while not w.windowHandle().isExposed():
+            QCoreApplication.processEvents()
         self.app.exec()
 
 

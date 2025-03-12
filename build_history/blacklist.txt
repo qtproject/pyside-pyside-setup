@@ -37,10 +37,6 @@
 # Open GL functions failures on macOS (2/2020)
 [QtQml::qqmlnetwork_test]
     linux ci    # extended, see PyPy section below
-[QtWidgets::bug_750]
-    darwin ci
-[QtWidgets::qpicture_test]
-    darwin ci
 [QtAsyncio::qasyncio_test_chain]
     win32
 [QtQml::bug_825]
