@@ -131,15 +131,15 @@ the database interaction code from Python and adds the REST API interaction code
 language: python
 caption: financemodel.py
 linenos: true
-emphasize-lines: 39-61, 104-114
+emphasize-lines: 45-55, 92-103
 ---
 ```
 </details>
 
-Two methods are overridden for the `FinanceModel` class - `fetchMore` and `canFetchMore`. These
-methods are used to fetch more data from the REST API when the model is scrolled to the end. The data
-is fetched in chunks of 10 entries at a time. Additionally, the `append` method is updated to send a
-POST request to the REST API to add a new finance entry.
+A new method `fetchAllData` is added to the `FinanceModel` class to fetch all the finance data from
+the REST API. This method is called when the application starts to populate the model with the
+existing finance data. Additionally, the `append` method is updated to send a POST request to the
+REST API to add a new finance entry.
 
 ### Updating the Main Python File for the Frontend
 
