@@ -2762,6 +2762,9 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
+    <modify-function signature="setText(const QString&amp;)">
+        <modify-argument index="1" pyi-type="Optional[str]"/>
+    </modify-function>
     <modify-function signature="setValidator(const QValidator*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
