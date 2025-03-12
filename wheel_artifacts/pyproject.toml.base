@@ -12,7 +12,7 @@ readme = "PROJECT_README"
 dynamic = ["version"]
 requires-python = ">=3.9, <3.14"
 keywords = ["Qt"]
-license = {text = "LGPL"}
+license = {text="LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only"}
 dependencies = "PROJECT_DEPENDENCIES"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -21,7 +21,9 @@ classifiers = [
     "Environment :: X11 Applications :: Qt",
     "Environment :: Win32 (MS Windows)",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     "License :: Other/Proprietary License",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX",
