@@ -482,10 +482,17 @@ static QString BuildEnumFlagInfo(const AbstractMetaEnum &cppEnum)
 }
 
 static void writePyGetSetDefEntry(TextStream &s, const QString &name,
-                                  const QString &getFunc, const QString &setFunc)
+                                  const QString &getFunc, const QString &setFunc, const QString &doc={})
 {
-    s << "{const_cast<char *>(\"" << mangleName(name) << "\"), " << getFunc << ", "
-        << (setFunc.isEmpty() ? NULL_PTR : setFunc) << ", nullptr, nullptr},\n";
+    s << "{\"" << mangleName(name) << "\", " << getFunc << ", "
+        << (setFunc.isEmpty() ? NULL_PTR : setFunc) << ", ";
+
+    if (doc.isEmpty())
+        s << "nullptr";
+    else
+        s << "\"" << doc << "\"";
+
+    s << ", nullptr},\n";
 }
 
 static bool generateRichComparison(const GeneratorContext &c)
@@ -923,8 +930,9 @@ void CppGenerator::generateClass(TextStream &s,
                 const QString setter = canGenerateSetter
                     ? cpythonSetterFunctionName(metaField) : QString();
                 const auto names = metaField.definitionNames();
+                const QString doc = metaField.type().pythonSignature();
                 for (const auto &name : names)
-                    writePyGetSetDefEntry(s, name, getter, setter);
+                    writePyGetSetDefEntry(s, name, getter, setter, doc);
             }
         }
 

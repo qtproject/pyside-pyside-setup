@@ -32,6 +32,38 @@ from shibokensupport.signature.lib.tool import build_brace_pattern
 
 indent = " " * 4
 
+TYPE_MAP = {
+    # Qt integer types
+    "qint64": "int",
+    "qint32": "int",
+    "qint16": "int",
+    "qsizetype": "int",
+    "quint32": "int",
+    "quint64": "int",
+    "size_t": "int",
+    "uint": "int",
+    "ushort": "int",
+    "ulong": "int",
+    "unsigned char": "int",
+    "unsigned int": "int",
+
+    # Qt floating types
+    "qreal": "float",
+
+    # Qt string-like
+    "QString": "str",
+    "QStringList": "typing.List[str]",
+    "QChar": "str",
+
+    # Qt containers (minimal)
+    "QList": "typing.List",
+    "QVariant": "typing.Any",
+
+    # C strings
+    "char*": "str",
+    "const char*": "str",
+}
+
 
 class Writer:
     def __init__(self, outfile, *args):
@@ -85,6 +117,29 @@ class Formatter(Writer):
         stringized = str(signature)
         inspect.formatannotation = cls.backup
         return stringized
+
+    @classmethod
+    def normalize_type(cls, type_repr: str) -> str:
+        if not type_repr:
+            return "typing.Any"
+        if type_repr in {"void", "void*"}:
+            return "typing.Any"
+        if any(x in type_repr for x in ("QRhi", ".ComponentType", ".Semantic")):
+            return "int"
+        if ( " " in type_repr and
+            not any(x in type_repr for x in ("*", "::", "<", ">", "[", "]"))):
+            return "typing.Any"
+        if type_repr.startswith("QList["):
+            inner = type_repr[len("QList["):-1]
+            inner = cls.normalize_type(inner)
+            return f"typing.List[{inner}]"
+        if type_repr.startswith("QMap[") or type_repr.startswith("QHash["):
+            inner = type_repr[type_repr.find("[") + 1:-1]
+            key, value = map(str.strip, inner.split(",", 1))
+            key = cls.normalize_type(key)
+            value = cls.normalize_type(value)
+            return f"typing.Dict[{key}, {value}]"
+        return TYPE_MAP.get(type_repr, type_repr)
 
     # Adding a pattern to substitute "Union[T, NoneType]" by "Optional[T]"
     # I tried hard to replace typing.Optional by a simple override, but
@@ -224,7 +279,12 @@ class Formatter(Writer):
         spaces = indent * self.level
         # PYSIDE-2903: Use a fully qualified name in the type comment.
         full_name = f"{type(attr_value).__module__}.{type(attr_value).__qualname__}"
-        self.print(f"{spaces}{attr_name:25} = ...  # type: {full_name}")
+        if full_name == "builtins.getset_descriptor":
+            # PYSIDE-3034: Public variable types added to __doc__
+            type_repr = self.normalize_type(attr_value.__doc__)
+        else:
+            type_repr = full_name
+        self.print(f"{spaces}{attr_name:25} = ...  # type: {type_repr}")
         yield
 
     @contextmanager
