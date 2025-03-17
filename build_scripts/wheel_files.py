@@ -539,6 +539,11 @@ def module_QtQml() -> ModuleData:
     data.qml.extend(_qml)
 
     data.extra_files.append("qmllint*")
+    # adds qmllint plugins
+    json_data_qmllint = get_module_json_data("QmlCompiler")
+    qml_lint_plugins = get_module_plugins(json_data_qmllint)
+    data.plugins += qml_lint_plugins
+
     data.extra_files.append("qmlformat*")
     data.extra_files.append("qmlls*")
 
