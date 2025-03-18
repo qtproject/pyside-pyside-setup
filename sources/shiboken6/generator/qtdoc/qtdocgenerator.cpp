@@ -843,7 +843,7 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
         return name;
 
     if (type.typeUsagePattern() == AbstractMetaType::PrimitivePattern) {
-        const auto &basicName = basicReferencedTypeEntry(type.typeEntry())->name();
+        const auto &basicName = type.basicPrimitiveName();
         if (AbstractMetaType::cppSignedIntTypes().contains(basicName)
             || AbstractMetaType::cppUnsignedIntTypes().contains(basicName)) {
             return intT;

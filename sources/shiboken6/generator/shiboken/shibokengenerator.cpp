@@ -2295,8 +2295,7 @@ static AbstractMetaFunctionCList filterFunctions(const OverloadRemovalRules &rem
         auto amt = f->arguments().at(argNo).type();
         if (!amt.passByValue() && !amt.passByConstRef()) // Only simple types so far
             return result;
-        types.append(amt.isPrimitive()
-                     ? basicReferencedTypeEntry(amt.typeEntry())->name() : amt.name());
+        types.append(amt.basicPrimitiveName());
     }
 
     // Apply rules and compile list of redundant functions

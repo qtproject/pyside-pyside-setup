@@ -10,6 +10,7 @@
 #include "enumtypeentry.h"
 #include "flagstypeentry.h"
 #include "cpptypeentry.h"
+#include "primitivetypeentry.h"
 
 #include "qtcompat.h"
 #include "typeinfo.h"
@@ -194,6 +195,12 @@ QString AbstractMetaType::package() const
 QString AbstractMetaType::name() const
 {
     return d->m_typeEntry->targetLangEntryName();
+}
+
+QString AbstractMetaType::basicPrimitiveName() const
+{
+    return d->m_typeEntry->isPrimitive()
+        ? basicReferencedTypeEntry(d->m_typeEntry)->name() : name();
 }
 
 QString AbstractMetaType::fullName() const

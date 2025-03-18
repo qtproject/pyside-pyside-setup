@@ -1174,8 +1174,7 @@ std::pair<QString, QChar> CppGenerator::virtualMethodNativeArg(const AbstractMet
     auto argTypeEntry = type.typeEntry();
     // Check for primitive types convertible by Py_BuildValue()
     if (argTypeEntry->isPrimitive() && !type.isCString()) {
-        const auto pte = basicReferencedTypeEntry(argTypeEntry);
-        auto it = formatUnits().constFind(pte->name());
+        auto it = formatUnits().constFind(type.basicPrimitiveName());
         if (it != formatUnits().constEnd())
             return {arg.name(), it.value()};
     }

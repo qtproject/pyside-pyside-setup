@@ -58,6 +58,8 @@ public:
 
     QString package() const;
     QString name() const;
+    /// For a C++ primitive type, resolve the name ("quint32"->"unsigned int")
+    QString basicPrimitiveName() const;
     QString fullName() const;
 
     void setTypeUsagePattern(TypeUsagePattern pattern);

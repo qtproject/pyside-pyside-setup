@@ -226,9 +226,8 @@ void AbstractMetaFunction::setExplicit(bool isExplicit)
 
 bool AbstractMetaFunction::returnsBool() const
 {
-    if (d->m_type.typeUsagePattern() != AbstractMetaType::PrimitivePattern)
-        return false;
-    return basicReferencedTypeEntry(d->m_type.typeEntry())->name() == u"bool";
+    return d->m_type.typeUsagePattern() == AbstractMetaType::PrimitivePattern
+        && d->m_type.basicPrimitiveName() == "bool"_L1;
 }
 
 bool AbstractMetaFunction::isOperatorBool() const

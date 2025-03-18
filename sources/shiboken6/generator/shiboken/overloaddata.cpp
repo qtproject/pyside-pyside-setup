@@ -31,17 +31,11 @@ using namespace Qt::StringLiterals;
 static QString getTypeName(const AbstractMetaType &type)
 {
     TypeEntryCPtr typeEntry = type.typeEntry();
-    if (typeEntry->isPrimitive())
-        typeEntry = basicReferencedTypeEntry(typeEntry);
-    QString typeName = typeEntry->name();
+    QString typeName = type.basicPrimitiveName();
     if (typeEntry->isContainer()) {
         QStringList types;
-        for (const auto &cType : type.instantiations()) {
-            TypeEntryCPtr typeEntry = cType.typeEntry();
-            if (typeEntry->isPrimitive())
-                typeEntry = basicReferencedTypeEntry(typeEntry);
-            types << typeEntry->name();
-        }
+        for (const auto &cType : type.instantiations())
+            types << cType.basicPrimitiveName();
         typeName += u'<' + types.join(u',') + u" >"_s;
     }
     return typeName;
@@ -182,7 +176,8 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
             // and being PointF implicitly convertible from Point, an list<T> instantiation with T
             // as Point must come before the PointF instantiation, or else list<Point> will never
             // be called. In the case of primitive types, list<double> must come before list<int>.
-            if (instantiation.isPrimitive() && (signedIntegerPrimitives.contains(instantiation.name()))) {
+            if (instantiation.isPrimitive()
+                && signedIntegerPrimitives.contains(instantiation.basicPrimitiveName())) {
                 for (const QString &primitive : std::as_const(nonIntegerPrimitives))
                     graph.addNode(getImplicitConversionTypeName(ov->argType(), instantiation, nullptr, primitive));
             } else {
@@ -262,7 +257,8 @@ void OverloadDataRootNode::sortNextOverloads(const ApiExtractorResult &api)
                 if (!graph.containsEdge(targetTypeEntryName, convertible)) // Avoid cyclic dependency.
                     graph.addEdge(convertible, targetTypeEntryName);
 
-                if (instantiation.isPrimitive() && (signedIntegerPrimitives.contains(instantiation.name()))) {
+                if (instantiation.isPrimitive()
+                    && signedIntegerPrimitives.contains(instantiation.basicPrimitiveName())) {
                     for (const QString &primitive : std::as_const(nonIntegerPrimitives)) {
                         QString convertibleTypeName =
                             getImplicitConversionTypeName(ov->argType(), instantiation, nullptr, primitive);
