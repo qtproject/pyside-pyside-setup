@@ -23,7 +23,7 @@ bool checkIterableArgument(PyObject *obj)
 static PyObject *initPathLike()
 {
     PyObject *PathLike{};
-    auto osmodule = PyImport_ImportModule("os");
+    auto *osmodule = PyImport_ImportModule("os");
     if (osmodule == nullptr
         || (PathLike = PyObject_GetAttrString(osmodule, "PathLike")) == nullptr) {
         PyErr_Print();

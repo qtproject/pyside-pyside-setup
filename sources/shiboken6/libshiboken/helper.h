@@ -58,8 +58,7 @@ class ArrayPointer
         ArrayPointer &operator=(const ArrayPointer &) = delete;
         ArrayPointer &operator=(ArrayPointer &&) = delete;
 
-
-        explicit ArrayPointer(Py_ssize_t size) { data = new T[size]; }
+        explicit ArrayPointer(Py_ssize_t size) : data(new T[size]) {}
         T &operator[](Py_ssize_t pos) { return data[pos]; }
         operator T *() const { return data; }
         ~ArrayPointer() { delete[] data; }

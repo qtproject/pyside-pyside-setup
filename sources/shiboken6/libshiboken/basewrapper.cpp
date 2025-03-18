@@ -1445,7 +1445,7 @@ bool isValid(PyObject *pyObj)
         return true;
     }
 
-    auto priv = reinterpret_cast<SbkObject *>(pyObj)->d;
+    auto *priv = reinterpret_cast<SbkObject *>(pyObj)->d;
 
     if (!priv->cppObjectCreated && isUserType(pyObj)) {
         PyErr_Format(PyExc_RuntimeError, "'__init__' method of object's base class (%s) not called.",

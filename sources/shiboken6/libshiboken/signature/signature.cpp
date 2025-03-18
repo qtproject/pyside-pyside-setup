@@ -174,7 +174,7 @@ PyObject *GetSignature_Function(PyObject *obfunc, PyObject *modifier)
         Py_RETURN_NONE;
 
     int flags = PyCFunction_GetFlags(obfunc);
-    PyObject *func_kind;
+    PyObject *func_kind{};
     if (PyModule_Check(obtype_mod.object()))
         func_kind = PyName::function();
     else if (flags & METH_CLASS)
@@ -258,7 +258,7 @@ PyObject *get_signature_intern(PyObject *ob, PyObject *modifier)
 
 static PyObject *get_signature(PyObject * /* self */, PyObject *args)
 {
-    PyObject *ob;
+    PyObject *ob{};
     PyObject *modifier = nullptr;
 
     if (!PyArg_ParseTuple(args, "O|O", &ob, &modifier))
@@ -731,14 +731,14 @@ static PyObject *adjustFuncName(const char *func_name)
     // Finally, generate the correct path expression.
     char _buf[250 + 1] = {};
     if (prop_name) {
-        auto _prop_name = String::toCString(prop_name);
+        const auto *_prop_name = String::toCString(prop_name);
         if (is_class_prop)
             snprintf(_buf, sizeof(_buf), "%s.__dict__['%s'].fset", _path, _prop_name);
         else
             snprintf(_buf, sizeof(_buf), "%s.%s.fset", _path, _prop_name);
     }
     else {
-        auto _name = String::toCString(name);
+        const auto *_name = String::toCString(name);
         snprintf(_buf, sizeof(_buf), "%s.%s", _path, _name);
     }
     return String::fromCString(_buf);
