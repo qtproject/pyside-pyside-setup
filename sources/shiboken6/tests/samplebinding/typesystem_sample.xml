@@ -515,7 +515,7 @@
     <object-type name="Abstract">
         <enum-type name="Type"/>
         <enum-type name="PrintFormat"/>
-        <modify-function signature="id()" rename="id_"/>
+        <modify-function signature="id()const" rename="id_"/>
         <modify-function signature="hideFunction(HideType*)" remove="all"/>
         <modify-field name="toBeRenamedField" rename="renamedField"/>
         <modify-field name="readOnlyField" write="false"/>

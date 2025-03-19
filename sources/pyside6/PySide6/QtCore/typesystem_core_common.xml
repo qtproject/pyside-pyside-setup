@@ -3332,25 +3332,25 @@
     <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qmetaobject-repr"/>
     </add-function>
-    <modify-function signature="indexOfClassInfo(const char *)">
+    <modify-function signature="indexOfClassInfo(const char *)const">
         <modify-argument index="1" pyi-type="str"/>
     </modify-function>
-    <modify-function signature="indexOfConstructor(const char *)">
+    <modify-function signature="indexOfConstructor(const char *)const">
         <modify-argument index="1" pyi-type="str"/>
     </modify-function>
-    <modify-function signature="indexOfEnumerator(const char *)">
+    <modify-function signature="indexOfEnumerator(const char *)const">
         <modify-argument index="1" pyi-type="str"/>
     </modify-function>
-    <modify-function signature="indexOfMethod(const char *)">
+    <modify-function signature="indexOfMethod(const char *)const">
         <modify-argument index="1" pyi-type="str"/>
     </modify-function>
-    <modify-function signature="indexOfProperty(const char *)">
+    <modify-function signature="indexOfProperty(const char *)const">
         <modify-argument index="1" pyi-type="str"/>
     </modify-function>
-    <modify-function signature="indexOfSignal(const char *)">
+    <modify-function signature="indexOfSignal(const char *)const">
         <modify-argument index="1" pyi-type="str"/>
     </modify-function>
-    <modify-function signature="indexOfSlot(const char *)">
+    <modify-function signature="indexOfSlot(const char *)const">
         <modify-argument index="1" pyi-type="str"/>
     </modify-function>
   </object-type>
