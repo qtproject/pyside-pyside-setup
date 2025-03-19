@@ -17,7 +17,7 @@ This module configures the different layouts which can be used.
 It also implements them in this file. The configurations are
 used literally as strings like "signature", "existence", etc.
 """
-
+# flake8: noqa E:731
 import inspect
 import operator
 import sys
@@ -27,7 +27,7 @@ import typing
 from functools import reduce
 from types import SimpleNamespace
 from textwrap import dedent
-from shibokensupport.signature.mapping import ellipsis, missing_optional_return
+from shibokensupport.signature.mapping import ellipsis, missing_optional_return, PlaceholderType
 from shibokensupport.signature.parser import using_snake_case
 from shibokensupport.signature import make_snake_case_name
 
@@ -144,6 +144,10 @@ default_weights = {
 }
 
 
+_ignore_mro = type, None, typing.Any, typing.TypeVar, typing.Type[PlaceholderType]
+mro_len = lambda ann: len(ann.mro()) if ann not in _ignore_mro and hasattr(ann, "mro") else 0
+
+
 def get_ordering_key(anno):
     """
     This is the main sorting algorithm for annotations.
@@ -185,12 +189,12 @@ def get_ordering_key(anno):
             # Normal: Use the union arg with the shortest mro().
             leng = 9999
             for ann in typing_args:
-                lng = len(ann.mro())
+                lng = mro_len(ann)
                 if lng < leng:
                     leng = lng
                     anno = ann
     else:
-        leng = len(anno.mro()) if anno not in (type, None, typing.Any) else 0
+        leng = mro_len(anno)
         parts = 1
     if anno in default_weights:
         leng = - default_weights[anno]
