@@ -72,7 +72,7 @@ public:
     mutable QString m_cachedMinimalSignature;
     mutable QString m_cachedSignature;
     mutable QString m_cachedModifiedName;
-    QString m_unresolvedSignature;
+    QStringList m_unresolvedSignatures;
 
     FunctionTypeEntryPtr m_typeEntry;
     AbstractMetaFunction::FunctionType m_functionType = AbstractMetaFunction::NormalFunction;
@@ -554,14 +554,14 @@ QString AbstractMetaFunction::classQualifiedSignature() const
     return result;
 }
 
-QString AbstractMetaFunction::unresolvedSignature() const
+QStringList AbstractMetaFunction::unresolvedSignatures() const
 {
-    return d->m_unresolvedSignature;
+    return d->m_unresolvedSignatures;
 }
 
-void AbstractMetaFunction::setUnresolvedSignature(const QString &s)
+void AbstractMetaFunction::setUnresolvedSignatures(const QStringList &s)
 {
-    d->m_unresolvedSignature = s;
+    d->m_unresolvedSignatures = s;
 }
 
 bool AbstractMetaFunction::isConstant() const
@@ -1024,8 +1024,10 @@ QString AbstractMetaFunction::minimalSignature() const
 QStringList AbstractMetaFunction::modificationSignatures() const
 {
     QStringList result{minimalSignature()};
-    if (d->m_unresolvedSignature != result.constFirst())
-        result.append(d->m_unresolvedSignature);
+    for (const auto &signature : std::as_const(d->m_unresolvedSignatures)) {
+        if (signature != result.constFirst())
+            result.append(signature);
+    }
     return result;
 }
 
@@ -1679,8 +1681,8 @@ void AbstractMetaFunction::formatDebugVerbose(QDebug &debug) const
     }
     const QString signature = minimalSignature();
     debug << "), signature=\"" << signature << '"';
-    if (signature != d->m_unresolvedSignature)
-        debug << ", unresolvedSignature=\"" << d->m_unresolvedSignature << '"';
+    if (!d->m_unresolvedSignatures.isEmpty())
+        debug << ", unresolvedSignatures=\"" << d->m_unresolvedSignatures << '"';
     if (d->m_constant)
         debug << " [const]";
     if (d->m_reverse)

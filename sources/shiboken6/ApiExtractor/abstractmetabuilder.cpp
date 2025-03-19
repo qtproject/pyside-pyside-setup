@@ -1802,11 +1802,17 @@ void AbstractMetaBuilderPrivate::fixArgumentNames(const AbstractMetaFunctionPtr 
 
 static QString functionSignature(const FunctionModelItem &functionItem)
 {
-    QStringList args;
+    QString result = functionItem->name() + u'(';
     const ArgumentList &arguments = functionItem->arguments();
-    for (const ArgumentModelItem &arg : arguments)
-        args << arg->type().toString();
-    return functionItem->name() + u'(' + args.join(u',') + u')';
+    for (qsizetype i = 0, size = arguments.size(); i < size; ++i) {
+        if (i > 0)
+            result += u',';
+        result += arguments.at(i)->type().toString();
+    }
+    result += u')';
+    if (functionItem->isConstant())
+        result += "const"_L1;
+    return result;
 }
 
 static inline QString qualifiedFunctionSignatureWithType(const FunctionModelItem &functionItem,
@@ -2054,15 +2060,28 @@ AbstractMetaFunctionPtr
         return {};
     }
 
-    const QString &signature = functionSignature(functionItem);
-    if (tdb->isFunctionRejected(className, signature, &rejectReason)) {
-        rejectFunction(functionItem, currentClass,
-                       AbstractMetaBuilder::GenerationDisabled, rejectReason);
-        if (ReportHandler::isDebug(ReportHandler::MediumDebug)) {
-            qCInfo(lcShiboken, "%s::%s was rejected by the type database (%s).",
-                   qPrintable(className), qPrintable(signature), qPrintable(rejectReason));
+    QStringList signatures{functionSignature(functionItem)};
+    // FIXME PYSIDE-7: "const" was historically not exactly matched, add a non-const
+    // signature for this to work. Remove in PYSIDE-7
+    if (functionItem->isConstant())
+        signatures.append(signatures.constFirst().left(signatures.constFirst().size() - 5));
+    for (qsizetype i = 0, size = signatures.size(); i < size; ++i) {
+        const QString normalized =
+            QString::fromUtf8(QMetaObject::normalizedSignature(signatures.at(i).toUtf8()));
+        if (normalized != signatures.at(i))
+            signatures.append(normalized);
+    }
+
+    for (const auto &signature : std::as_const(signatures)) {
+        if (tdb->isFunctionRejected(className, signature, &rejectReason)) {
+            rejectFunction(functionItem, currentClass,
+                           AbstractMetaBuilder::GenerationDisabled, rejectReason);
+            if (ReportHandler::isDebug(ReportHandler::MediumDebug)) {
+                qCInfo(lcShiboken, "%s::%s was rejected by the type database (%s).",
+                       qPrintable(className), qPrintable(signature), qPrintable(rejectReason));
+            }
+            return {};
         }
-        return {};
     }
 
     if (functionItem->isFriend())
@@ -2079,10 +2098,7 @@ AbstractMetaFunctionPtr
     AbstractMetaFunction::Flags flags;
     auto metaFunction = std::make_shared<AbstractMetaFunction>(functionName);
     metaFunction->setCppAttributes(cppAttributes);
-    const QByteArray cSignature = signature.toUtf8();
-    const QString unresolvedSignature =
-        QString::fromUtf8(QMetaObject::normalizedSignature(cSignature.constData()));
-    metaFunction->setUnresolvedSignature(unresolvedSignature);
+    metaFunction->setUnresolvedSignatures(signatures);
     if (functionItem->isHiddenFriend())
         flags.setFlag(AbstractMetaFunction::Flag::HiddenFriend);
     metaFunction->setSourceLocation(functionItem->sourceLocation());

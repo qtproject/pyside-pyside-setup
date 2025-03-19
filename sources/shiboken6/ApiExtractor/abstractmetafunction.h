@@ -296,8 +296,8 @@ public:
     QString classQualifiedSignature() const;
 
     /// Signature with unresolved typedefs as seen by the code parser
-    QString unresolvedSignature() const;
-    void setUnresolvedSignature(const QString &);
+    QStringList unresolvedSignatures() const;
+    void setUnresolvedSignatures(const QStringList &);
 
     bool isConstant() const;
     void setConstant(bool constant);
