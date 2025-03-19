@@ -1864,9 +1864,11 @@
         <inject-documentation format="target" mode="append"
                               file="../doc/qtcore.rst" snippet="qobject-findChild"/>
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchild-2"/>
-      <modify-argument index="return" pyi-type="Optional[PlaceholderType]">
-        <parent index="this" action="add"/>
-      </modify-argument>
+        <modify-argument index="return" pyi-type="Optional[PlaceholderType]">
+            <parent index="this" action="add"/>
+        </modify-argument>
+        <modify-argument index="1" pyi-type="typing.Type[PlaceholderType]">
+        </modify-argument>
     </add-function>
     <add-function signature="findChildren(PyTypeObject*@type@,const QString&amp;@name@={},Qt::FindChildOptions@options@=Qt::FindChildrenRecursively)"
                   return-type="PySequence*" >
@@ -1877,12 +1879,16 @@
         <modify-argument index="return" pyi-type="List[PlaceholderType]">
             <parent index="this" action="add"/>
         </modify-argument>
+        <modify-argument index="1" pyi-type="typing.Type[PlaceholderType]">
+        </modify-argument>
     </add-function>
     <add-function signature="findChildren(PyTypeObject*@type@,const QRegularExpression&amp;@pattern@,Qt::FindChildOptions@options@=Qt::FindChildrenRecursively)"
                   return-type="PySequence*" >
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-findchildren"/>
         <modify-argument index="return" pyi-type="List[PlaceholderType]">
             <parent index="this" action="add"/>
+        </modify-argument>
+        <modify-argument index="1" pyi-type="typing.Type[PlaceholderType]">
         </modify-argument>
     </add-function>
 
