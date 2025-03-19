@@ -48,7 +48,7 @@ NoneType = type(None)
 # PYSIDE-2517: findChild/findChildren type hints:
 # Placeholder so it does not trigger an UNDEFINED error while building.
 # Later it will be bound to a QObject, within the QtCore types extensions
-PlaceHolderType = TypeVar("PlaceHolderType")
+PlaceholderType = TypeVar("PlaceholderType")
 
 _S = TypeVar("_S")
 
@@ -498,7 +498,7 @@ def init_PySide6_QtCore():
         "NULL": None,  # 5.6, MSVC
         "nullptr": None,  # 5.9
         # PYSIDE-2517: findChild/findChildren type hints:
-        "PlaceHolderType": typing.TypeVar("PlaceHolderType", bound=PySide6.QtCore.QObject),
+        "PlaceholderType": typing.TypeVar("PlaceholderType", bound=PySide6.QtCore.QObject),
         "PyBuffer": typing.Union[bytes, bytearray, memoryview],
         "PyByteArray": bytearray,
         "PyBytes": typing.Union[bytes, bytearray, memoryview],

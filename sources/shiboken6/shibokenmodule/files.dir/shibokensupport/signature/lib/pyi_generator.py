@@ -105,9 +105,9 @@ class Formatter(Writer):
     @classmethod
     def last_fixups(cls, source):
         # PYSIDE-2517: findChild/findChildren type hints:
-        # PlaceHolderType fix to avoid the '~' from TypeVar.__repr__
-        if "~PlaceHolderType" in source:
-            source = source.replace("~PlaceHolderType", "PlaceHolderType")
+        # PlaceholderType fix to avoid the '~' from TypeVar.__repr__
+        if "~PlaceholderType" in source:
+            source = source.replace("~PlaceholderType", "PlaceholderType")
         # Replace all "NoneType" strings by "None" which is a typing convention.
         return source.replace("NoneType", "None")
 
@@ -115,9 +115,9 @@ class Formatter(Writer):
     @classmethod
     def optional_replacer(cls, source):
         # PYSIDE-2517: findChild/findChildren type hints:
-        # PlaceHolderType fix to avoid the '~' from TypeVar.__repr__
-        if "~PlaceHolderType" in source:
-            source = source.replace("~PlaceHolderType", "PlaceHolderType")
+        # PlaceholderType fix to avoid the '~' from TypeVar.__repr__
+        if "~PlaceholderType" in source:
+            source = source.replace("~PlaceholderType", "PlaceholderType")
 
         while match := cls.opt_uni_searcher.search(source):
             start = match.start()
@@ -351,7 +351,7 @@ def generate_pyi(import_name, outpath, options):
                 # We use it only in QtCore at the moment, but this
                 # could be extended to other modules. (must import QObject then)
                 if import_name == "PySide6.QtCore":
-                    wr.print("PlaceHolderType = typing.TypeVar(\"PlaceHolderType\", "
+                    wr.print("PlaceholderType = typing.TypeVar(\"PlaceholderType\", "
                              "bound=PySide6.QtCore.QObject)")
                 wr.print()
             else:

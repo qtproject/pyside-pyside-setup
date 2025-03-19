@@ -370,7 +370,7 @@ def create_signature_union(props, key):
 
 def transform(signature):
     # Change the annotations of the parameters to use "|" syntax.
-    parameters = []
+    params = []
     changed = False
     for idx, param in enumerate(signature.parameters.values()):
         ann = param.annotation
@@ -379,9 +379,13 @@ def transform(signature):
             ann = reduce(operator.or_, args)
             param = param.replace(annotation=ann)
             changed = True
-        parameters.append(param)
-
-    return signature.replace(parameters=parameters) if changed else signature
+        params.append(param)
+    ann = signature.return_annotation
+    if typing.get_origin(ann) is typing.Union:
+        args = typing.get_args(ann)
+        ann = reduce(operator.or_, args)
+        changed = True
+    return signature.replace(parameters=params, return_annotation=ann) if changed else signature
 
 
 def create_signature(props, key):
