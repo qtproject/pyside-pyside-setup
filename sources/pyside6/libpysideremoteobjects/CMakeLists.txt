@@ -21,7 +21,7 @@ if (NOT libpyside_SOURCE_DIR) # Building standalone
     get_target_property(pyside6_SOURCE_DIR PySide6::pyside6 INTERFACE_INCLUDE_DIRECTORIES)
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core RepParser RemoteObjects)
+find_package(Qt6 REQUIRED COMPONENTS Core RepParser RemoteObjects RemoteObjectsPrivate)
 
 set(libpysideremoteobjects_HEADERS
     pysidecapsulemethod_p.h
