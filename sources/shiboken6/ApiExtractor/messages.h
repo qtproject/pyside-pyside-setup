@@ -37,11 +37,16 @@ QString msgUnnamedArgumentDefaultExpression(const AbstractMetaClassCPtr &context
 
 QString msgArgumentIndexOutOfRange(const AbstractMetaFunction *func, int index);
 
+QString msgModificationCandidates(const AbstractMetaFunctionCPtr &function);
+
 QString msgNoFunctionForModification(const AbstractMetaClassCPtr &klass,
                                      const QString &signature,
                                      const QString &originalSignature,
                                      const QStringList &possibleSignatures,
                                      const AbstractMetaFunctionCList &allFunctions);
+
+QString msgModificationConstMismatch(const AbstractMetaFunctionCPtr &function,
+                                     const QString &modificationSignature);
 
 QString msgTypeModificationFailed(const QString &type, int n,
                                   const AbstractMetaFunction *func,

@@ -46,6 +46,20 @@ static QTextStream &operator<<(QTextStream &s, Access a)
     return s;
 }
 
+QString msgModificationCandidates(const AbstractMetaFunctionCPtr &function)
+{
+    QString result;
+    const auto &signatures = function->modificationSignatures();
+    for (qsizetype i = 0, size = signatures.size(); i < size; ++i) {
+        if (i > 0)
+            result += " / "_L1;
+        result += u'"' + signatures.at(i) + u'"';
+    }
+    if (auto klazz = function->implementingClass())
+        result += " in "_L1 + klazz->name();
+    return result;
+}
+
 QString msgNoFunctionForModification(const AbstractMetaClassCPtr &klass,
                                      const QString &signature,
                                      const QString &originalSignature,
@@ -72,6 +86,19 @@ QString msgNoFunctionForModification(const AbstractMetaClassCPtr &klass,
         if (maxCount < allFunctions.size())
             str << "    ...\n";
     }
+    return result;
+}
+
+QString msgModificationConstMismatch(const AbstractMetaFunctionCPtr &function,
+                                     const QString &modificationSignature)
+{
+    QString result;
+    QTextStream str(&result);
+    if (auto klazz = function->implementingClass())
+        str << klazz->typeEntry()->sourceLocation();
+    str << "signature \"" << modificationSignature
+        << "\" needs \"const\" to fully match \"" << function->classQualifiedSignature()
+        << "\". The partial matching will be removed in a future release.";
     return result;
 }
 

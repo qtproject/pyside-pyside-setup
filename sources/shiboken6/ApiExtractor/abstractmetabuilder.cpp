@@ -166,57 +166,57 @@ const QMultiHash<QString, QString> &AbstractMetaBuilder::typedefTargetToName() c
     return d->m_typedefTargetToName;
 }
 
+// Check whether a function modification can be found in a class, else
+// warn with candidates.
+static void checkModification(const FunctionModification &modification,
+                              const AbstractMetaClassPtr &clazz)
+
+{
+    const auto &functions = clazz->functions();
+
+    auto modificationPredicate = [&clazz, &modification](const AbstractMetaFunctionCPtr &f) {
+        return f->implementingClass() == clazz
+            && modification.matches(f->modificationSignatures());
+    };
+
+    const QString &signature = modification.signature();
+    auto it = std::find_if(functions.cbegin(), functions.cend(), modificationPredicate);
+    if (it != functions.cend()) {
+        if ((*it)->isConstant() && signature.endsWith(u')')) // Warn about missing const
+            qCWarning(lcShiboken, "%s", qPrintable(msgModificationConstMismatch(*it, signature)));
+        return;
+    }
+
+    const auto name = QStringView{signature}.left(signature.indexOf(u'(')).trimmed();
+
+    QStringList possibleSignatures;
+    for (const auto &function : functions) {
+        if (!function->isUserAdded() && !function->isUserDeclared()
+            && function->originalName() == name) {
+            possibleSignatures.append(msgModificationCandidates(function));
+        }
+    }
+
+    const QString msg = msgNoFunctionForModification(clazz, signature,
+                                                     modification.originalSignature(),
+                                                     possibleSignatures, clazz->functions());
+    qCWarning(lcShiboken, "%s", qPrintable(msg));
+}
+
 void AbstractMetaBuilderPrivate::checkFunctionModifications() const
 {
-    const auto &entries = TypeDatabase::instance()->entries();
-
-    for (auto it = entries.cbegin(), end = entries.cend(); it != end; ++it) {
-        TypeEntryCPtr entry = it.value();
-        if (!entry)
-            continue;
+    for (const auto &entry : TypeDatabase::instance()->entries()) {
         if (!entry->isComplex() || !entry->generateCode())
             continue;
 
         auto centry = std::static_pointer_cast<const ComplexTypeEntry>(entry);
-
-        if (!centry->generateCode())
+        const auto clazz = AbstractMetaClass::findClass(m_metaClasses, centry);
+        if (!clazz)
             continue;
 
-        FunctionModificationList modifications = centry->functionModifications();
-
-        for (const FunctionModification &modification : std::as_const(modifications)) {
-            QString signature = modification.signature();
-
-            QString name = signature.trimmed();
-            name.truncate(name.indexOf(u'('));
-
-            const auto clazz = AbstractMetaClass::findClass(m_metaClasses, centry);
-            if (!clazz)
-                continue;
-
-            bool found = false;
-            QStringList possibleSignatures;
-            for (const auto &function : clazz->functions()) {
-                if (function->implementingClass() == clazz
-                    && modification.matches(function->modificationSignatures())) {
-                    found = true;
-                    break;
-                }
-
-                if (function->originalName() == name) {
-                    const QString signatures = function->modificationSignatures().join(u'/');
-                    possibleSignatures.append(signatures + u" in "_s
-                                              + function->implementingClass()->name());
-                }
-            }
-
-            if (!found) {
-                qCWarning(lcShiboken).noquote().nospace()
-                    << msgNoFunctionForModification(clazz, signature,
-                                                    modification.originalSignature(),
-                                                    possibleSignatures, clazz->functions());
-            }
-        }
+        const FunctionModificationList &modifications = centry->functionModifications();
+        for (const FunctionModification &modification : modifications)
+            checkModification(modification, clazz);
     }
 }
 
