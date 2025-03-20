@@ -5,7 +5,7 @@
 #include <pysideclassdecorator_p.h>
 #include <pysideqmlregistertype_p.h>
 
-#include <shiboken.h>
+#include <sbktypefactory.h>
 #include <signature.h>
 
 class PySideQmlNamedElementPrivate : public PySide::ClassDecorator::StringDecoratorPrivate

@@ -7,9 +7,11 @@
 #include <signalmanager.h>
 #include <pysideclassdecorator_p.h>
 
-#include <shiboken.h>
-#include <signature.h>
+#include <gilstate.h>
+#include <sbkconverter.h>
 #include <sbkstring.h>
+#include <sbktypefactory.h>
+#include <signature.h>
 
 #include <QtCore/QDebug>
 

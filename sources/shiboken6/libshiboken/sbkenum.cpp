@@ -12,8 +12,6 @@
 #include "sbktypefactory.h"
 
 #include <cstring>
-#include <vector>
-#include <sstream>
 
 using namespace Shiboken;
 

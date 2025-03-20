@@ -5,11 +5,15 @@
 #include "pysideslot_p.h"
 #include "pysidestaticstrings.h"
 
-#include <shiboken.h>
+#include <autodecref.h>
+#include <basewrapper.h>
+#include <sbkstaticstrings.h>
+#include <sbkstring.h>
+#include <sbktypefactory.h>
+#include <signature.h>
 
 #include <QtCore/QMetaObject>
 #include <QtCore/QString>
-#include <signature.h>
 
 using namespace Shiboken;
 

@@ -5,7 +5,6 @@
 #include "sbkarrayconverter_p.h"
 #include "helper.h"
 #include "sbkconverter.h"
-#include "sbkconverter_p.h"
 
 #include <longobject.h>
 #include <floatobject.h>

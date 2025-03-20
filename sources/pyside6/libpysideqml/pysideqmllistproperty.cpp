@@ -4,9 +4,13 @@
 #include "pysideqmllistproperty_p.h"
 #include "pysideqmlregistertype_p.h"
 
-#include <shiboken.h>
+#include <autodecref.h>
+#include <gilstate.h>
 #include <pep384ext.h>
+#include <sbkconverter.h>
 #include <signature.h>
+#include <sbkstring.h>
+#include <sbktypefactory.h>
 
 #include <pysideproperty.h>
 #include <pysideproperty_p.h>

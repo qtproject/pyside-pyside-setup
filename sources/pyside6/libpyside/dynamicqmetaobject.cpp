@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "dynamicqmetaobject.h"
-#include "pysidelogging_p.h"
 #include "pysideqobject.h"
 #include "pysidesignal.h"
 #include "pysidesignal_p.h"
@@ -10,10 +9,12 @@
 #include "pysideproperty_p.h"
 #include "pysideslot_p.h"
 #include "pysideqenum.h"
-#include "pyside_p.h"
 #include "pysidestaticstrings.h"
 
-#include <shiboken.h>
+#include <autodecref.h>
+#include <gilstate.h>
+#include <sbkstaticstrings.h>
+#include <sbkstring.h>
 
 #include <QtCore/QByteArray>
 #include <QtCore/QObject>

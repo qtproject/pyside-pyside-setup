@@ -8,9 +8,12 @@
 #include <pyside_p.h>
 #include <pysideclassdecorator_p.h>
 
-#include <shiboken.h>
-#include <signature.h>
+#include <autodecref.h>
+#include <gilstate.h>
+#include <sbkconverter.h>
 #include <sbkstring.h>
+#include <sbktypefactory.h>
+#include <signature.h>
 
 #include <QtQml/qqml.h>
 

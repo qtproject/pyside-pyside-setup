@@ -8,8 +8,9 @@
 #include "pysideclassinfo_p.h"
 #include "dynamicqmetaobject.h"
 
-#include <shiboken.h>
 #include <signature.h>
+#include <sbktypefactory.h>
+#include <sbkstring.h>
 
 extern "C"
 {

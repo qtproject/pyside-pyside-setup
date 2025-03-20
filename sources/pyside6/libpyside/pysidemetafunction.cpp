@@ -4,7 +4,10 @@
 #include "pysidemetafunction.h"
 #include "pysidemetafunction_p.h"
 
-#include <shiboken.h>
+#include <autodecref.h>
+#include <basewrapper.h>
+#include <sbkconverter.h>
+#include <sbktypefactory.h>
 #include <signature.h>
 
 #include <QtCore/QMetaMethod>

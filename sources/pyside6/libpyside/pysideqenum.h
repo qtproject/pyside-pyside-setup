@@ -4,7 +4,10 @@
 #ifndef PYSIDE_QENUM_H
 #define PYSIDE_QENUM_H
 
+#include <sbkpython.h>
+
 #include <pysidemacros.h>
+
 #include <vector>
 
 namespace PySide::QEnum {

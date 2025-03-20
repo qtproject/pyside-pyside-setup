@@ -12,11 +12,12 @@
 #include <optional>
 
 // shiboken
-#include <shiboken.h>
+#include <autodecref.h>
+#include <sbkconverter.h>
 #include <sbkstring.h>
+#include <sbktypefactory.h>
 
 // pyside
-#include <pyside.h>
 #include <pysideqobject.h>
 #include <pysideclassinfo.h>
 #include <pyside_p.h>

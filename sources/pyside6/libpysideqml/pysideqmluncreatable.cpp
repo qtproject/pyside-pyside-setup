@@ -5,9 +5,9 @@
 #include <pysideclassdecorator_p.h>
 #include <pysideclassinfo.h>
 
-#include <shiboken.h>
-#include <signature.h>
 #include <sbkcppstring.h>
+#include <sbktypefactory.h>
+#include <signature.h>
 
 #include <QtCore/qbytearray.h>
 #include <private/qmetaobjectbuilder_p.h>

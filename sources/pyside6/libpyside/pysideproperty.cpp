@@ -7,8 +7,12 @@
 #include "pysidesignal.h"
 #include "pysidesignal_p.h"
 
-#include <shiboken.h>
+#include <autodecref.h>
 #include <pep384ext.h>
+#include <sbkconverter.h>
+#include <sbkstaticstrings.h>
+#include <sbkstring.h>
+#include <sbktypefactory.h>
 #include <signature.h>
 
 using namespace Shiboken;

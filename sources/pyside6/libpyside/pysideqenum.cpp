@@ -1,12 +1,14 @@
 // Copyright (C) 2020 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-#include <shiboken.h>
-
 #include "pysideqenum.h"
-#include "dynamicqmetaobject.h"
-#include "pyside_p.h"
 
+#include <autodecref.h>
+#include <sbkenum.h>
+#include <sbkstaticstrings.h>
+#include <sbkstring.h>
+
+#include <map>
 
 ///////////////////////////////////////////////////////////////
 //

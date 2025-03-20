@@ -1,17 +1,16 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
+#include "bindingmanager.h"
+
 #include "autodecref.h"
 #include "basewrapper.h"
 #include "basewrapper_p.h"
-#include "bindingmanager.h"
-#include "gilstate.h"
 #include "helper.h"
-#include "sbkmodule.h"
-#include "sbkstring.h"
-#include "sbkstaticstrings.h"
 #include "sbkfeature_base.h"
-#include "debugfreehook.h"
+#include "sbkmodule.h"
+#include "sbkstaticstrings.h"
+#include "sbkstring.h"
 
 #include <cstddef>
 #include <cstring>

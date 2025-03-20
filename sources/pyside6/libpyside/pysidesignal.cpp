@@ -10,9 +10,15 @@
 #include "qobjectconnect.h"
 #include "signalmanager.h"
 
-#include <shiboken.h>
+#include <autodecref.h>
 #include <helper.h>
+#include <pep384ext.h>
+#include <sbkconverter.h>
+#include <sbkenum.h>
 #include <sbkstaticstrings.h>
+#include <sbkstring.h>
+#include <sbktypefactory.h>
+#include <signature.h>
 
 #include <QtCore/QByteArray>
 #include <QtCore/QDebug>
@@ -20,10 +26,6 @@
 #include <QtCore/QObject>
 #include <QtCore/QMetaMethod>
 #include <QtCore/QMetaObject>
-#include <pep384ext.h>
-#include <signature.h>
-#include <sbkenum.h>
-#include <sbkconverter.h>
 
 #include <algorithm>
 #include <optional>

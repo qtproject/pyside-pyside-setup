@@ -4,7 +4,7 @@
 #ifndef PY_CUSTOM_WIDGET_H_
 #define PY_CUSTOM_WIDGET_H_
 
-#include <shiboken.h>
+#include <sbkpython.h>
 
 #include <QtUiPlugin/QDesignerCustomWidgetInterface>
 

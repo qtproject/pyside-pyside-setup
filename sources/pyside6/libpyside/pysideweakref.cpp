@@ -3,8 +3,8 @@
 
 #include "pysideweakref.h"
 
-#include <sbkpython.h>
-#include <shiboken.h>
+#include <basewrapper.h>
+#include <sbktypefactory.h>
 
 struct PySideCallableObject {
     PyObject_HEAD
