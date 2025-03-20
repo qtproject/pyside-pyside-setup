@@ -3636,6 +3636,55 @@
     </inject-code>
   </add-function>
 
+  <object-type name="QMessageLogger">
+    <inject-documentation format="target" mode="append"
+                          file="../doc/qtcore.rst" snippet="qmessagelogger"/>
+    <modify-function signature="debug(const char*)const">
+        <inject-code file="../glue/qtcore.cpp" snippet="qmessagelogger-format-string"/>
+        <modify-argument index="1" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="debug(const QLoggingCategory&amp;,const char*)const">
+        <inject-code file="../glue/qtcore.cpp" snippet="qmessagelogger-logcategory-format-string"/>
+        <modify-argument index="2" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="info(const char*)const">
+        <inject-code file="../glue/qtcore.cpp" snippet="qmessagelogger-format-string"/>
+        <modify-argument index="1" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="info(const QLoggingCategory&amp;,const char*)const">
+        <inject-code file="../glue/qtcore.cpp" snippet="qmessagelogger-logcategory-format-string"/>
+        <modify-argument index="2" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="warning(const char*)const">
+        <inject-code file="../glue/qtcore.cpp" snippet="qmessagelogger-format-string"/>
+        <modify-argument index="1" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="warning(const QLoggingCategory&amp;,const char*)const">
+        <inject-code file="../glue/qtcore.cpp" snippet="qmessagelogger-logcategory-format-string"/>
+        <modify-argument index="2" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="fatal(const char*)const">
+        <inject-code file="../glue/qtcore.cpp" snippet="qmessagelogger-format-string"/>
+        <modify-argument index="1" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="fatal(const QLoggingCategory&amp;,const char*)const">
+        <inject-code file="../glue/qtcore.cpp" snippet="qmessagelogger-logcategory-format-string"/>
+        <modify-argument index="2" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="critical(const char*)const">
+        <inject-code file="../glue/qtcore.cpp" snippet="qmessagelogger-format-string"/>
+        <modify-argument index="1" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="critical(const QLoggingCategory&amp;,const char*)const">
+        <inject-code file="../glue/qtcore.cpp" snippet="qmessagelogger-logcategory-format-string"/>
+        <modify-argument index="2" pyi-type="str"/>
+    </modify-function>
+    <modify-function signature="noDebug(const char*)const">
+        <inject-code file="../glue/qtcore.cpp" snippet="qmessagelogger-format-string"/>
+        <modify-argument index="1" pyi-type="str"/>
+    </modify-function>
+  </object-type>
+
   <suppress-warning text="^.*enum 'Qt::Initialization' does not have a type entry.*$"/>
   <suppress-warning text="^.*Enum 'QRandomGenerator::System'.*does not have a type entry.*$"/>
 

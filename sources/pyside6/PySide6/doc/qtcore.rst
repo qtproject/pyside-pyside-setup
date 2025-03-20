@@ -93,3 +93,26 @@ to a list.
     settings.value('var', type=list)  # Will get ["a"]
 
 // @snippet qsettings-value
+
+// @snippet qmessagelogger
+
+In Python, the :class:`QMessageLogger` is useful to connect an existing logging
+setup that uses the Python logging module to the Qt logging system. This allows
+you to leverage Qt's logging infrastructure while still using the familiar
+Python logging API.
+
+Example::
+
+    import logging
+    from PySide6.QtCore import QMessageLogger
+
+    class LogHandler(logging.Handler):
+        def emit(self, record: logging.LogRecord):
+            if record.levelno == logging.DEBUG:
+                logger = QMessageLogger(record.filename, record.lineno, record.funcName)
+                logger.debug(record.message)
+
+    logging.basicConfig(handlers=[LogHandler()])
+    logging.debug("Test debug message")
+
+// @snippet qmessagelogger

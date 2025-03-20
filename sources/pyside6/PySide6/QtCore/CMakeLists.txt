@@ -203,6 +203,7 @@ ${QtCore_GEN_DIR}/qxmlstreamnamespacedeclaration_wrapper.cpp
 ${QtCore_GEN_DIR}/qxmlstreamnotationdeclaration_wrapper.cpp
 ${QtCore_GEN_DIR}/qxmlstreamreader_wrapper.cpp
 ${QtCore_GEN_DIR}/qxmlstreamwriter_wrapper.cpp
+${QtCore_GEN_DIR}/qmessagelogger_wrapper.cpp
 
 ${SPECIFIC_OS_FILES}
 # module is always needed

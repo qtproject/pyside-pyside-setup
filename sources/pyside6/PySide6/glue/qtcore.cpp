@@ -1292,6 +1292,18 @@ Py_BEGIN_ALLOW_THREADS
 Py_END_ALLOW_THREADS
 // @snippet qdebug-format-string
 
+// @snippet qmessagelogger-format-string
+Py_BEGIN_ALLOW_THREADS
+%CPPSELF->%FUNCTION_NAME("%s", %1); // Uses placeholder for security reasons
+Py_END_ALLOW_THREADS
+// @snippet qmessagelogger-format-string
+
+// @snippet qmessagelogger-logcategory-format-string
+Py_BEGIN_ALLOW_THREADS
+%CPPSELF->%FUNCTION_NAME(%1, "%s", %2); // Uses placeholder for security reasons
+Py_END_ALLOW_THREADS
+// @snippet qmessagelogger-logcategory-format-string
+
 // @snippet qresource-registerResource
  auto ptr = reinterpret_cast<uchar *>(Shiboken::Buffer::getPointer(%PYARG_1));
  %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(const_cast<const uchar *>(ptr), %2);
