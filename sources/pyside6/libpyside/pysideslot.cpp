@@ -12,8 +12,8 @@
 #include <sbktypefactory.h>
 #include <signature.h>
 
-#include <QtCore/QMetaObject>
-#include <QtCore/QString>
+#include <QtCore/qmetaobject.h>
+#include <QtCore/qstring.h>
 
 using namespace Shiboken;
 

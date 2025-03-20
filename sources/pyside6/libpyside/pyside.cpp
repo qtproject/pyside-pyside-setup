@@ -35,15 +35,15 @@
 #include <sbkfeature_base.h>
 #include <sbkmodule.h>
 
-#include <QtCore/QByteArray>
-#include <QtCore/QCoreApplication>
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QFileInfo>
-#include <QtCore/QMetaMethod>
-#include <QtCore/QMutex>
-#include <QtCore/QStack>
-#include <QtCore/QThread>
+#include <QtCore/qbytearray.h>
+#include <QtCore/qcoreapplication.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qfileinfo.h>
+#include <QtCore/qmetaobject.h>
+#include <QtCore/qmutex.h>
+#include <QtCore/qstack.h>
+#include <QtCore/qthread.h>
 #include <QtCore/private/qobject_p.h>
 
 #include <algorithm>
@@ -56,7 +56,7 @@
 #ifdef Q_OS_WIN
 #  include <conio.h>
 #else
-#  include <QtCore/QDeadlineTimer>
+#  include <QtCore/qdeadlinetimer.h>
 #  include <QtCore/private/qcore_unix_p.h>
 #endif
 

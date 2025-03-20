@@ -9,7 +9,7 @@
 #include <sbkpython.h>
 #include <shibokenmacros.h>
 
-#include <QtCore/QMetaMethod>
+#include <QtCore/qmetaobject.h>
 
 #include <optional>
 

@@ -6,7 +6,7 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/QByteArray>
+#include <QtCore/qbytearray.h>
 
 PyTypeObject *qObjectType();
 

@@ -6,8 +6,8 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/QByteArray>
-#include <QtCore/QFlags>
+#include <QtCore/qbytearray.h>
+#include <QtCore/qflags.h>
 
 #include <memory>
 

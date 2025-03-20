@@ -7,8 +7,8 @@
 #include <sbkpython.h>
 #include <pysidemacros.h>
 
-#include <QtCore/QMetaObject>
-#include <QtCore/QMetaMethod>
+#include <QtCore/qmetaobject.h>
+#include <QtCore/qmetaobject.h>
 
 #include <utility>
 

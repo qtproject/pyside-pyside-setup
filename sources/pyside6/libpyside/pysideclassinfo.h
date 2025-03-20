@@ -8,8 +8,8 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/QByteArray>
-#include <QtCore/QList>
+#include <QtCore/qbytearray.h>
+#include <QtCore/qlist.h>
 
 namespace PySide::ClassInfo {
 

@@ -12,7 +12,7 @@
 #include <sbkstring.h>
 #include <signature_p.h>
 
-#include <QtCore/QStringList>
+#include <QtCore/qstringlist.h>
 
 //////////////////////////////////////////////////////////////////////////////
 //

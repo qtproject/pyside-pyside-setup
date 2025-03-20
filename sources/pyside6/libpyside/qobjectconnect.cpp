@@ -15,9 +15,9 @@
 #include "autodecref.h"
 #include <helper.h>
 
-#include <QtCore/QDebug>
-#include <QtCore/QMetaMethod>
-#include <QtCore/QObject>
+#include <QtCore/qdebug.h>
+#include <QtCore/qmetaobject.h>
+#include <QtCore/qobject.h>
 
 #include <QtCore/private/qobject_p.h>
 

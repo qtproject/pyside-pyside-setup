@@ -10,7 +10,7 @@
 #include <sbktypefactory.h>
 #include <signature.h>
 
-#include <QtCore/QMetaMethod>
+#include <QtCore/qmetaobject.h>
 
 extern "C"
 {

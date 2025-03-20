@@ -13,11 +13,11 @@
 #  undef copysign
 #endif
 
-#include <QtCore/QObject>
-#include <QtCore/QString>
+#include <QtCore/qobject.h>
+#include <QtCore/qstring.h>
 
-#include <QtQml/QQmlEngine>
-#include <QtQml/QQmlListProperty>
+#include <QtQml/qqmlengine.h>
+#include <QtQml/qqmllist.h>
 
 #if __has_include (<private/qv4engine_p.h>)
 #  define QML_PRIVATE_API_SUPPORT

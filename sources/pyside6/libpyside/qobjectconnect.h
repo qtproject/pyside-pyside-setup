@@ -8,7 +8,7 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/QMetaObject>
+#include <QtCore/qmetaobject.h>
 
 QT_FORWARD_DECLARE_CLASS(QObject)
 QT_FORWARD_DECLARE_CLASS(QMetaMethod)

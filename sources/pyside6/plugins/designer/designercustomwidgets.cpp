@@ -6,15 +6,15 @@
 
 #include "designercustomwidgets.h"
 
-#include <QtCore/QCoreApplication>
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfoList>
-#include <QtCore/QLoggingCategory>
-#include <QtCore/QOperatingSystemVersion>
-#include <QtCore/QTextStream>
-#include <QtCore/QVariant>
+#include <QtCore/qcoreapplication.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qfileinfo.h>
+#include <QtCore/qloggingcategory.h>
+#include <QtCore/qoperatingsystemversion.h>
+#include <QtCore/qtextstream.h>
+#include <QtCore/qvariant.h>
 
 #include <string_view>
 #include <utility>

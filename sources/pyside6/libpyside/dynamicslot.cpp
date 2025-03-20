@@ -12,11 +12,11 @@
 #include <gilstate.h>
 #include <pep384ext.h>
 
-#include <QtCore/QDebug>
-#include <QtCore/QtCompare>
-#include <QtCore/QCoreApplication>
-#include <QtCore/QHash>
-#include <QtCore/QPointer>
+#include <QtCore/qdebug.h>
+#include <QtCore/qcompare.h>
+#include <QtCore/qcoreapplication.h>
+#include <QtCore/qhash.h>
+#include <QtCore/qpointer.h>
 
 namespace PySide
 {

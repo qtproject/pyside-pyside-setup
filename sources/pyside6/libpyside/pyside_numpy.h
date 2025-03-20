@@ -9,9 +9,9 @@
 
 #include <pysidemacros.h>
 
-#include <QtCore/QList>
-#include <QtCore/QPoint>
-#include <QtCore/QPointF>
+#include <QtCore/qlist.h>
+#include <QtCore/qpoint.h>
+#include <QtCore/qpoint.h>
 
 namespace PySide::Numpy
 {

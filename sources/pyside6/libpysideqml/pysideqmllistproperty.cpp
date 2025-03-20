@@ -15,8 +15,8 @@
 #include <pysideproperty.h>
 #include <pysideproperty_p.h>
 
-#include <QtCore/QObject>
-#include <QtQml/QQmlListProperty>
+#include <QtCore/qobject.h>
+#include <QtQml/qqmllist.h>
 
 // This is the user data we store in the property.
 class QmlListPropertyPrivate : public PySidePropertyPrivate

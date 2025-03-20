@@ -6,7 +6,7 @@
 
 #include <sbkpython.h>
 
-#include <QtUiPlugin/QDesignerCustomWidgetInterface>
+#include <QtUiPlugin/customwidget.h>
 
 class PyCustomWidget: public QObject, public QDesignerCustomWidgetInterface
 {

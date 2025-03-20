@@ -4,7 +4,7 @@
 #ifndef PYSIDE_LOGGING_P_H
 #define PYSIDE_LOGGING_P_H
 
-#include <QtCore/QLoggingCategory>
+#include <QtCore/qloggingcategory.h>
 
 Q_DECLARE_LOGGING_CATEGORY(lcPySide)
 

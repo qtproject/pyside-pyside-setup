@@ -20,12 +20,11 @@
 #include <sbktypefactory.h>
 #include <signature.h>
 
-#include <QtCore/QByteArray>
-#include <QtCore/QDebug>
-#include <QtCore/QHash>
-#include <QtCore/QObject>
-#include <QtCore/QMetaMethod>
-#include <QtCore/QMetaObject>
+#include <QtCore/qbytearray.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qhash.h>
+#include <QtCore/qobject.h>
+#include <QtCore/qmetaobject.h>
 
 #include <algorithm>
 #include <optional>

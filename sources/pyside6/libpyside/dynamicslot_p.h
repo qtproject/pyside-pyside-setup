@@ -6,8 +6,8 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/QtCompare>
-#include <QtCore/QMetaObject>
+#include <QtCore/qcompare.h>
+#include <QtCore/qmetaobject.h>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 

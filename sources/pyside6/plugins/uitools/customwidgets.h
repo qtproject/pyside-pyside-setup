@@ -6,7 +6,7 @@
 
 #include <sbkpython.h>
 
-#include <QtUiPlugin/QDesignerCustomWidgetInterface>
+#include <QtUiPlugin/customwidget.h>
 
 #include <QtCore/qlist.h>
 

@@ -19,12 +19,12 @@
 #include <sbkstaticstrings.h>
 #include <sbkerrors.h>
 
-#include <QtCore/QCoreApplication>
-#include <QtCore/QByteArrayView>
-#include <QtCore/QDebug>
-#include <QtCore/QHash>
-#include <QtCore/QScopedPointer>
-#include <QtCore/QTimerEvent>
+#include <QtCore/qbytearrayview.h>
+#include <QtCore/qcoreapplication.h>
+#include <QtCore/qcoreevent.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qhash.h>
+#include <QtCore/qscopedpointer.h>
 
 #include <memory>
 

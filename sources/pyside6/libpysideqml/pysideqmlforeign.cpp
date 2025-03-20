@@ -13,7 +13,7 @@
 #include <sbktypefactory.h>
 #include <signature.h>
 
-#include <QtCore/QDebug>
+#include <QtCore/qdebug.h>
 
 // The QmlForeign decorator modifies QmlElement to create a different type
 // QmlElement.

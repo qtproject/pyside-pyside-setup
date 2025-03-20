@@ -6,7 +6,7 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/QHash>
+#include <QtCore/qhash.h>
 
 namespace PySide
 {

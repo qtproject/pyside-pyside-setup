@@ -4,7 +4,7 @@
 #ifndef PY_DESIGNER_CUSTOM_WIDGETS_H_
 #define PY_DESIGNER_CUSTOM_WIDGETS_H_
 
-#include <QtUiPlugin/QDesignerCustomWidgetCollectionInterface>
+#include <QtUiPlugin/customwidget.h>
 
 // A Qt Designer plugin proxying the QDesignerCustomWidgetCollectionInterface
 // instance set as as a dynamic property on QCoreApplication by the PySide6

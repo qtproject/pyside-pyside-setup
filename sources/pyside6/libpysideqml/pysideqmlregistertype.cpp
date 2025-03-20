@@ -22,12 +22,12 @@
 #include <pysideclassinfo.h>
 #include <pyside_p.h>
 
-#include <QtCore/QMutex>
-#include <QtCore/QTypeRevision>
+#include <QtCore/qmutex.h>
+#include <QtCore/qtyperevision.h>
 
 #include <QtQml/qqml.h>
-#include <QtQml/QJSValue>
-#include <QtQml/QQmlListProperty>
+#include <QtQml/qjsvalue.h>
+#include <QtQml/qqmllist.h>
 #include <private/qqmlmetatype_p.h>
 #include <private/qmetaobjectbuilder_p.h>
 

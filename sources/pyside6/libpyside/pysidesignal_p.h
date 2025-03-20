@@ -6,10 +6,10 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/QByteArray>
-#include <QtCore/QList>
-#include <QtCore/QObject>
-#include <QtCore/QPointer>
+#include <QtCore/qbytearray.h>
+#include <QtCore/qlist.h>
+#include <QtCore/qobject.h>
+#include <QtCore/qpointer.h>
 
 #include <memory>
 

@@ -9,8 +9,8 @@
 #include <sbkpython.h>
 #include <basewrapper.h>
 
-#include <QtCore/QList>
-#include <QtCore/QMetaMethod>
+#include <QtCore/qlist.h>
+#include <QtCore/qmetaobject.h>
 
 QT_BEGIN_NAMESPACE
 struct QMetaObject;

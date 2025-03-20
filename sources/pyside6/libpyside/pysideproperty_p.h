@@ -9,9 +9,9 @@
 #include "pysideproperty.h"
 #include <pysidemacros.h>
 
-#include <QtCore/QByteArray>
+#include <QtCore/qbytearray.h>
 #include <QtCore/qtclasshelpermacros.h>
-#include <QtCore/QMetaObject>
+#include <QtCore/qmetaobject.h>
 
 struct PySideProperty;
 

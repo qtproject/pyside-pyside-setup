@@ -9,7 +9,7 @@
 #include <sbkpython.h>
 #include <pep384ext.h>
 
-#include <QtCore/QByteArray>
+#include <QtCore/qbytearray.h>
 
 #include <array>
 #include <string>

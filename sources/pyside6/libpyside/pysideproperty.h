@@ -8,7 +8,7 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/QMetaObject>
+#include <QtCore/qmetaobject.h>
 
 class PySidePropertyPrivate;
 

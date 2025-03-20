@@ -10,8 +10,8 @@
 #include "pysideqmluncreatable.h"
 #include "pysideqmlmetacallerror_p.h"
 
-#include <QtQml/QQmlPropertyMap>
-#include <QtQml/QQmlComponent>
+#include <QtQml/qqmlpropertymap.h>
+#include <QtQml/qqmlcomponent.h>
 
 #include <signalmanager.h>
 

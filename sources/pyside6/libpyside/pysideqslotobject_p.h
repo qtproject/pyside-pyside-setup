@@ -7,7 +7,7 @@
 #include "pysidemacros.h"
 #include <sbkpython.h>
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 #include <QtCore/qobjectdefs.h>
 
 #include <memory>

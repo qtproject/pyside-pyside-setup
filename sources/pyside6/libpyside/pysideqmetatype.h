@@ -4,7 +4,7 @@
 #ifndef PYSIDEQMETATYPE_H
 #define PYSIDEQMETATYPE_H
 
-#include <QtCore/QMetaType>
+#include <QtCore/qmetatype.h>
 
 namespace PySide
 {

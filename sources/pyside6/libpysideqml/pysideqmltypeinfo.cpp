@@ -3,8 +3,8 @@
 
 #include "pysideqmltypeinfo_p.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QHash>
+#include <QtCore/qdebug.h>
+#include <QtCore/qhash.h>
 
 #include <algorithm>
 

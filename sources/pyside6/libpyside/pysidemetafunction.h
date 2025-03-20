@@ -8,7 +8,7 @@
 
 #include <sbkpython.h>
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 extern "C"
 {

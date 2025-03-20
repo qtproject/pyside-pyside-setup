@@ -16,11 +16,11 @@
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 
-#include <QtCore/QByteArray>
-#include <QtCore/QObject>
-#include <QtCore/QStringList>
-#include <QtCore/QTextStream>
-#include <QtCore/QList>
+#include <QtCore/qbytearray.h>
+#include <QtCore/qobject.h>
+#include <QtCore/qstringlist.h>
+#include <QtCore/qtextstream.h>
+#include <QtCore/qlist.h>
 #include <private/qmetaobjectbuilder_p.h>
 
 #include <cstring>

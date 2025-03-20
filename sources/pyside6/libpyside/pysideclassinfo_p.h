@@ -9,7 +9,7 @@
 #include "pysideclassdecorator_p.h"
 #include "pysideclassinfo.h"
 
-#include <QtCore/QMetaObject>
+#include <QtCore/qmetaobject.h>
 
 struct PySideClassInfo;
 
