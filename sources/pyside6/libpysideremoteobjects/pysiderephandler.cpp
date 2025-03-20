@@ -50,6 +50,10 @@ static QVariantList generateProperties(QMetaObject *meta, const ASTClass &astCla
 
 extern "C"
 {
+static PyObject *get_capsule_count()
+{
+    return PyLong_FromLong(capsule_count);
+}
 
 // Code for the PySideRepFile type
 static PyObject *RepFile_tp_string(PyObject *self);

@@ -8,6 +8,8 @@
 
 #include <QtCore/qmetaobject.h>
 
+int capsule_count = 0;
+
 using namespace Shiboken;
 
 PyObject *toPython(const QVariant &variant)

@@ -39,12 +39,7 @@ struct MethodCapsule
 // And it only runs when as all references to the type (and all instances) are
 // released, so it won't be used frequently.
 
-static int capsule_count = 0;
-
-static PyObject *get_capsule_count()
-{
-    return PyLong_FromLong(capsule_count);
-}
+extern int capsule_count;
 
 template <typename T>
 void Capsule_destructor(PyObject *capsule)
