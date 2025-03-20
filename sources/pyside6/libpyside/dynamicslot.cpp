@@ -8,6 +8,7 @@
 #include "signalmanager.h"
 
 #include <autodecref.h>
+#include <helper.h>
 #include <gilstate.h>
 #include <pep384ext.h>
 
@@ -26,7 +27,7 @@ DynamicSlot::SlotType DynamicSlot::slotType(PyObject *callback)
 {
     if (PyMethod_Check(callback) != 0)
         return SlotType::Method;
-    if (PySide::isCompiledMethod(callback) != 0)
+    if (Shiboken::isCompiledMethod(callback))
         return SlotType::CompiledMethod;
     if (PyCFunction_Check(callback) != 0)
         return SlotType::C_Function;

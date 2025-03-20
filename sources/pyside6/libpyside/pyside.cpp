@@ -28,6 +28,7 @@
 #include <basewrapper.h>
 #include <bindingmanager.h>
 #include <gilstate.h>
+#include <helper.h>
 #include <sbkconverter.h>
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
@@ -875,9 +876,7 @@ QString pyPathToQString(PyObject *path)
 
 bool isCompiledMethod(PyObject *callback)
 {
-    return PyObject_HasAttr(callback, PySide::PySideName::im_func())
-           && PyObject_HasAttr(callback, PySide::PySideName::im_self())
-           && PyObject_HasAttr(callback, PySide::PySideMagicName::code());
+    return Shiboken::isCompiledMethod(callback);
 }
 
 static const unsigned char qt_resource_name[] = {

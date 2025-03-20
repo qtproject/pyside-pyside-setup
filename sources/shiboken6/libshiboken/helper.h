@@ -43,6 +43,9 @@ LIBSHIBOKEN_API int *sequenceToIntArray(PyObject *obj, bool zeroTerminated = fal
 /// \returns Fixed name (allocated).
 LIBSHIBOKEN_API const char *typeNameOf(const char *typeIdName);
 
+/// Returns whether \a method is a compiled method (Nuitka).
+LIBSHIBOKEN_API bool isCompiledMethod(PyObject *method);
+
 /**
  *  Creates and automatically deallocates C++ arrays.
  */

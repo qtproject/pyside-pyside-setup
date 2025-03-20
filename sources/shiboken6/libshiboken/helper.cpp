@@ -621,6 +621,14 @@ const char *typeNameOf(const char *typeIdName)
     return result;
 }
 
+bool isCompiledMethod(PyObject *method)
+{
+    return method != nullptr && method != Py_None
+        && PyObject_HasAttr(method, PyName::im_self()) != 0
+        && PyObject_HasAttr(method, PyName::im_func()) != 0
+        && PyObject_HasAttr(method, Shiboken::PyMagicName::code()) != 0;
+}
+
 #if !defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030A0000 && !defined(PYPY_VERSION)
 static int _getPyVerbose()
 {

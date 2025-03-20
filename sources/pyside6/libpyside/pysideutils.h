@@ -35,6 +35,8 @@ PYSIDE_API QString pyStringToQString(PyObject *str);
 /// Provide an efficient, correct PathLike interface.
 PYSIDE_API QString pyPathToQString(PyObject *path);
 
+/// Returns whether \a method is a compiled method (Nuitka).
+/// \sa Shiboken::isCompiledMethod()
 PYSIDE_API bool isCompiledMethod(PyObject *callback);
 
 struct debugPyTypeObject

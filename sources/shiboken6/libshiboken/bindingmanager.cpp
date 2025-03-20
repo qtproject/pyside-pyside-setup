@@ -368,9 +368,7 @@ PyObject *BindingManager::getOverride(const void *cptr,
                 Py_DECREF(method);
                 method = nullptr;
             }
-        } else if (PyObject_HasAttr(method, PyName::im_self())
-                   && PyObject_HasAttr(method, PyName::im_func())
-                   && PyObject_HasAttr(method, Shiboken::PyMagicName::code())) {
+        } else if (isCompiledMethod(method)) {
             PyObject *im_self = PyObject_GetAttr(method, PyName::im_self());
             // Not retaining a reference inline with what PyMethod_GET_SELF does.
             Py_DECREF(im_self);

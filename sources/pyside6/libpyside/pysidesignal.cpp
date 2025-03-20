@@ -11,6 +11,7 @@
 #include "signalmanager.h"
 
 #include <shiboken.h>
+#include <helper.h>
 #include <sbkstaticstrings.h>
 
 #include <QtCore/QByteArray>
@@ -423,7 +424,7 @@ static FunctionArgumentsResult extractFunctionArgumentsFromSlot(PyObject *slot)
         ret.objCode = reinterpret_cast<PepCodeObject *>(PyFunction_GET_CODE(ret.function));
         ret.functionName = PepFunction_GetName(ret.function);
 
-    } else if (PySide::isCompiledMethod(slot)) {
+    } else if (Shiboken::isCompiledMethod(slot)) {
         // PYSIDE-1523: PyFunction_Check and PyMethod_Check are not accepting compiled forms, we
         // just go by attributes.
         ret.isMethod = true;
@@ -1363,7 +1364,7 @@ QByteArray codeCallbackName(PyObject *callback, const QByteArray &funcName)
         return funcName + QByteArray::number(quint64(self), 16) + QByteArray::number(quint64(func), 16);
     }
     // PYSIDE-1523: Handle the compiled case.
-    if (PySide::isCompiledMethod(callback)) {
+    if (Shiboken::isCompiledMethod(callback)) {
         // Not retaining references inline with what PyMethod_GET_(SELF|FUNC) does.
         Shiboken::AutoDecRef self(PyObject_GetAttr(callback, PySide::PySideName::im_self()));
         Shiboken::AutoDecRef func(PyObject_GetAttr(callback, PySide::PySideName::im_func()));

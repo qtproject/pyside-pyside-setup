@@ -13,6 +13,7 @@
 #include <sbkstaticstrings.h>
 #include "basewrapper.h"
 #include "autodecref.h"
+#include <helper.h>
 
 #include <QtCore/QDebug>
 #include <QtCore/QMetaMethod>
@@ -113,7 +114,7 @@ static GetReceiverResult getReceiver(QMetaMethod signal, PyObject *callback)
     } else if (PyCFunction_Check(callback)) {
         result.self = PyCFunction_GetSelf(callback);
         result.receiver = PySide::convertToQObject(result.self, false);
-    } else if (PySide::isCompiledMethod(callback)) {
+    } else if (Shiboken::isCompiledMethod(callback)) {
         result.self = PyObject_GetAttr(callback, Shiboken::PyName::im_self());
         Py_DECREF(result.self);
         result.receiver = PySide::convertToQObject(result.self, false);
