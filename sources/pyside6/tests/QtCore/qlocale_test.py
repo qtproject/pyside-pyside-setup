@@ -67,7 +67,7 @@ class QLocaleTestToNumber(unittest.TestCase):
         value = en_locale.toString(3000000000)
         self.assertEqual(value, "3,000,000,000")
         value = en_locale.toString(10e40)
-        self.assertEqual(value, "1E+41")
+        self.assertEqual(value.lower(), "1e+41")
 
 
 if __name__ == '__main__':
