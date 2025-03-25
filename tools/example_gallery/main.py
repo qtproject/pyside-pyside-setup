@@ -271,7 +271,7 @@ def get_module_gallery(examples):
                 print(f"example_gallery: No .rst or .md file found in {original_dir}")
                 continue
 
-            with original_file.open("r") as f:
+            with original_file.open("r", encoding="utf-8") as f:
                 # Read the first line
                 first_line = f.readline().strip()
 
