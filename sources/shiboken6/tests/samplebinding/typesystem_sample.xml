@@ -321,7 +321,7 @@
             </target-to-native>
         </conversion-rule>
     </container-type>
-    <add-function signature="cacheSize()" return-type="int">
+    <add-function signature="wrapperCount()" return-type="int">
         <inject-code class="target">
         %RETURN_TYPE %0 = Shiboken::BindingManager::instance().getAllPyObjects().size();
         %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
