@@ -15,7 +15,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import cacheSize
+from sample import wrapperCount
 from sample import ProtectedNonPolymorphic, ProtectedVirtualDestructor
 from sample import (ProtectedPolymorphic, ProtectedPolymorphicDaughter,
                     ProtectedPolymorphicGrandDaughter)
@@ -68,7 +68,7 @@ class ProtectedNonPolymorphicTest(unittest.TestCase):
     def tearDown(self):
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        self.assertEqual(cacheSize(), 0)
+        self.assertEqual(wrapperCount(), 0)
 
     def testProtectedCall(self):
         '''Calls a non-virtual protected method.'''
@@ -98,7 +98,7 @@ class ProtectedPolymorphicTest(unittest.TestCase):
     def tearDown(self):
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        self.assertEqual(cacheSize(), 0)
+        self.assertEqual(wrapperCount(), 0)
 
     def testProtectedCall(self):
         '''Calls a virtual protected method.'''
@@ -149,7 +149,7 @@ class ProtectedPolymorphicGrandDaugherTest(unittest.TestCase):
     def tearDown(self):
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        self.assertEqual(cacheSize(), 0)
+        self.assertEqual(wrapperCount(), 0)
 
     def testProtectedCallWithInstanceCreatedOnCpp(self):
         '''Calls a virtual protected method from parent class on an instance created in C++.'''
@@ -176,7 +176,7 @@ class ProtectedVirtualDtorTest(unittest.TestCase):
     def tearDown(self):
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        self.assertEqual(cacheSize(), 0)
+        self.assertEqual(wrapperCount(), 0)
 
     def testVirtualProtectedDtor(self):
         '''Original protected virtual destructor is being called.'''
@@ -232,7 +232,7 @@ class ProtectedEnumTest(unittest.TestCase):
     def tearDown(self):
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        self.assertEqual(cacheSize(), 0)
+        self.assertEqual(wrapperCount(), 0)
 
     def testProtectedMethodWithProtectedEnumArgument(self):
         '''Calls protected method with protected enum argument.'''
@@ -313,7 +313,7 @@ class ProtectedPropertyTest(unittest.TestCase):
         del self.obj
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        self.assertEqual(cacheSize(), 0)
+        self.assertEqual(wrapperCount(), 0)
 
     def testProtectedProperty(self):
         '''Writes and reads a protected integer property.'''
@@ -342,7 +342,7 @@ class ProtectedPropertyTest(unittest.TestCase):
 
     def testProtectedValueTypePropertyWrapperRegistration(self):
         '''Access colocated protected value type property.'''
-        cache_size = cacheSize()
+        wrapper_count = wrapperCount()
         point = Point(12, 34)
         obj = createProtectedProperty()
         obj.protectedValueTypeProperty
@@ -356,7 +356,7 @@ class ProtectedPropertyTest(unittest.TestCase):
         del obj, point, pointProperty
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        self.assertEqual(cacheSize(), cache_size)
+        self.assertEqual(wrapperCount(), wrapper_count)
 
     def testProtectedValueTypePointerProperty(self):
         '''Writes and reads a protected value type pointer property.'''
@@ -385,7 +385,7 @@ class PrivateDtorProtectedMethodTest(unittest.TestCase):
     def tearDown(self):
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
-        self.assertEqual(cacheSize(), 0)
+        self.assertEqual(wrapperCount(), 0)
 
     def testProtectedMethod(self):
         '''Calls protected method of a class with a private destructor.'''
