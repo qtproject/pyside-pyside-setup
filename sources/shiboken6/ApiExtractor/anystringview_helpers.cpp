@@ -4,9 +4,9 @@
 #include "anystringview_helpers.h"
 
 #include <QtCore/QString> // Must go before QAnyStringView for operator<<(QTextStream,QASV)!
-#include <QtCore/QAnyStringView>
-#include <QtCore/QDebug>
-#include <QtCore/QTextStream>
+#include <QtCore/qanystringview.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qtextstream.h>
 
 #include <cstring>
 

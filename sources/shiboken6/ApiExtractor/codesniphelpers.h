@@ -4,7 +4,7 @@
 #ifndef CODESNIPHELPERS_H
 #define CODESNIPHELPERS_H
 
-#include <QtCore/QString>
+#include <QtCore/qstring.h>
 
 class CodeSnipHelpers
 {

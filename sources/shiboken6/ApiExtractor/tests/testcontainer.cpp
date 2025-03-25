@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "testcontainer.h"
-#include <QtTest/QTest>
 #include "testutil.h"
+
 #include <abstractmetalang.h>
 #include <abstractmetatype.h>
 #include <complextypeentry.h>
 #include <containertypeentry.h>
+
+#include <QtTest/qtest.h>
 
 void TestContainer::testContainerType()
 {

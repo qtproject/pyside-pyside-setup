@@ -5,8 +5,8 @@
 #include "messages.h"
 #include "exception.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QTextStream>
+#include <QtCore/qdir.h>
+#include <QtCore/qtextstream.h>
 
 using namespace Qt::StringLiterals;
 

@@ -5,10 +5,11 @@
 #include "typedatabase.h"
 #include "messages.h"
 
-#include <QtCore/QElapsedTimer>
-#include <QtCore/QFile>
-#include <QtCore/QOperatingSystemVersion>
-#include <QtCore/QSet>
+#include <QtCore/qelapsedtimer.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qoperatingsystemversion.h>
+#include <QtCore/qset.h>
+
 #include <cstring>
 #include <cstdarg>
 #include <cstdio>

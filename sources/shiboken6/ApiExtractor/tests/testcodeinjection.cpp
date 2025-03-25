@@ -12,9 +12,10 @@
 
 #include <qtcompat.h>
 
-#include <QtCore/QDir>
-#include <QtCore/QFileInfo>
-#include <QtTest/QTest>
+#include <QtCore/qdir.h>
+#include <QtCore/qfileinfo.h>
+
+#include <QtTest/qtest.h>
 
 using namespace Qt::StringLiterals;
 

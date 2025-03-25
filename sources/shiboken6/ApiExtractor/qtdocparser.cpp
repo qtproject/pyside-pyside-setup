@@ -23,10 +23,10 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QHash>
-#include <QtCore/QUrl>
+#include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qhash.h>
+#include <QtCore/qurl.h>
 
 #include <algorithm>
 #include <iterator>

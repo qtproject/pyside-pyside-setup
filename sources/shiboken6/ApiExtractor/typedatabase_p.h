@@ -7,8 +7,8 @@
 #include "typesystem_typedefs.h"
 #include "containertypeentry.h"
 
-#include <QtCore/QHash>
-#include <QtCore/QString>
+#include <QtCore/qhash.h>
+#include <QtCore/qstring.h>
 
 class TypeDatabase;
 

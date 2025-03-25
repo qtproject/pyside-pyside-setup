@@ -4,11 +4,11 @@
 #include "qtxmltosphinxinterface.h"
 #include "qtxmltosphinx.h"
 
-#include <QtCore/QCommandLineParser>
-#include <QtCore/QCoreApplication>
-#include <QtCore/QDebug>
-#include <QtCore/QFile>
-#include <QtCore/QLoggingCategory>
+#include <QtCore/qcommandlineparser.h>
+#include <QtCore/qcoreapplication.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qloggingcategory.h>
 
 #include <exception>
 #include <iostream>

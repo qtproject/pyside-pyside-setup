@@ -6,9 +6,9 @@
 #include "reporthandler.h"
 #include "exception.h"
 
-#include <QtCore/QFileInfo>
-#include <QtCore/QDir>
-#include <QtCore/QDebug>
+#include <QtCore/qfileinfo.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qdebug.h>
 
 #include <cstdio>
 

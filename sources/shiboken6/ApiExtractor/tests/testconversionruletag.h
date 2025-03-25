@@ -4,7 +4,7 @@
 #ifndef TESTCONVERSIONRULE_H
 #define TESTCONVERSIONRULE_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestConversionRuleTag : public QObject
 {

@@ -4,7 +4,7 @@
 #ifndef TESTINSERTTEMPLATE_H
 #define TESTINSERTTEMPLATE_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestInsertTemplate : public QObject
 {

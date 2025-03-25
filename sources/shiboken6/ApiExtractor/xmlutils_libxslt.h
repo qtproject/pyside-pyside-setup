@@ -3,7 +3,7 @@
 #ifndef XMLUTILS_LIBXSLT_H
 #define XMLUTILS_LIBXSLT_H
 
-#include <QtCore/QString>
+#include <QtCore/qstring.h>
 
 #include <memory>
 

@@ -7,8 +7,8 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QSharedData>
+#include <QtCore/qdebug.h>
+#include <QtCore/qshareddata.h>
 
 using namespace Qt::StringLiterals;
 

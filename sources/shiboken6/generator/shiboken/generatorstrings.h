@@ -4,7 +4,7 @@
 #ifndef GENERATORSTRINGS_H
 #define GENERATORSTRINGS_H
 
-#include <QtCore/QString>
+#include <QtCore/qstring.h>
 
 QString CPP_ARG_N(int i);
 QString CPP_ARG_REMOVED(int i);

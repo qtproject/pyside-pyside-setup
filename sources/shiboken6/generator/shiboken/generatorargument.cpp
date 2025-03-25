@@ -6,8 +6,8 @@
 #include <messages.h>
 #include <typesystem.h>
 
-#include <QtCore/QDebug>
-#include <QtCore/QSet>
+#include <QtCore/qdebug.h>
+#include <QtCore/qset.h>
 
 static bool isCppPrimitiveString(const AbstractMetaType &type)
 {

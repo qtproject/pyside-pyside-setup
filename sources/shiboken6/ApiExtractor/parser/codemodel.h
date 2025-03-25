@@ -11,12 +11,11 @@
 #include "enumvalue.h"
 #include "typeinfo.h"
 
-#include <QtCore/QHash>
-#include <QtCore/QSet>
-#include <QtCore/QString>
-#include <QtCore/QStringList>
-#include <QtCore/QList>
-#include <QtCore/QWeakPointer>
+#include <QtCore/qhash.h>
+#include <QtCore/qset.h>
+#include <QtCore/qstring.h>
+#include <QtCore/qstringlist.h>
+#include <QtCore/qsharedpointer.h>
 
 #include <optional>
 #include <utility>

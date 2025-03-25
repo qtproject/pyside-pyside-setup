@@ -3,7 +3,8 @@
 
 #ifndef TESTADDFUNCTION_H
 #define TESTADDFUNCTION_H
-#include <QtCore/QObject>
+
+#include <QtCore/qobject.h>
 
 class TestAddFunction : public QObject
 {

@@ -4,7 +4,7 @@
 #ifndef TESTREMOVEIMPLCONV_H
 #define TESTREMOVEIMPLCONV_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestRemoveImplConv : public QObject
 {

@@ -4,7 +4,7 @@
 #ifndef TESTDTORINFORMATION_H
 #define TESTDTORINFORMATION_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class AbstractMetaBuilder;
 

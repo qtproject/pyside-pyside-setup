@@ -4,7 +4,7 @@
 #ifndef CTYPENAMES_H
 #define CTYPENAMES_H
 
-#include <QtCore/QString>
+#include <QtCore/qstring.h>
 
 constexpr auto boolT = QLatin1StringView("bool");
 constexpr auto intT = QLatin1StringView("int");

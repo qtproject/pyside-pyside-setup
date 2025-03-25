@@ -42,10 +42,10 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QDebug>
-#include <QtCore/QRegularExpression>
-#include <QtCore/QSet>
+#include <QtCore/qdir.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qregularexpression.h>
+#include <QtCore/qset.h>
 
 #include <algorithm>
 #include <limits>

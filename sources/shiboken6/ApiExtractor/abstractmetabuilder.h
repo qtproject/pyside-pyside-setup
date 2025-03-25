@@ -12,7 +12,7 @@
 
 #include "clangparser/compilersupport.h"
 
-#include <QtCore/QFileInfoList>
+#include <QtCore/qfileinfo.h>
 
 #include <optional>
 

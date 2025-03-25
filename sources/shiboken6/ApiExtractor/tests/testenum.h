@@ -4,7 +4,7 @@
 #ifndef TESTENUM_H
 #define TESTENUM_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestEnum : public QObject
 {

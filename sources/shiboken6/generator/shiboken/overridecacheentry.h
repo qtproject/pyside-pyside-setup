@@ -7,7 +7,7 @@
 #include <abstractmetafunction.h>
 #include <modifications.h>
 
-#include <QtCore/QHash>
+#include <QtCore/qhash.h>
 
 // Cache a (virtual function) by types and modifications for reusing Python
 // override code.

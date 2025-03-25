@@ -9,7 +9,7 @@
 #include "modifications_typedefs.h"
 #include "typesystem_typedefs.h"
 
-#include <QtCore/QString>
+#include <QtCore/qstring.h>
 
 class EnumTypeEntry;
 class FunctionTypeEntry;

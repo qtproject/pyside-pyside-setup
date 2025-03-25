@@ -4,8 +4,8 @@
 #ifndef HEADER_PATHS_H
 #define HEADER_PATHS_H
 
-#include <QtCore/QByteArray>
-#include <QtCore/QList>
+#include <QtCore/qbytearray.h>
+#include <QtCore/qlist.h>
 
 enum class HeaderType
 {

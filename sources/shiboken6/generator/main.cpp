@@ -16,10 +16,10 @@
 #include <reporthandler.h>
 #include <typedatabase.h>
 
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QLibrary>
-#include <QtCore/QVariant>
+#include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qlibrary.h>
+#include <QtCore/qvariant.h>
 
 #include "qtcompat.h"
 

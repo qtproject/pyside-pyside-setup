@@ -4,7 +4,7 @@
 #ifndef DOCUMENTATION_ENUMS_H
 #define DOCUMENTATION_ENUMS_H
 
-#include <QtCore/QtTypes>
+#include <QtCore/qtypes.h>
 
 enum class DocumentationTarget : uint8_t
 {

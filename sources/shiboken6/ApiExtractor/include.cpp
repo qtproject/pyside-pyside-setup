@@ -4,10 +4,10 @@
 #include "include.h"
 #include "textstream.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QHash>
-#include <QtCore/QTextStream>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qhash.h>
+#include <QtCore/qtextstream.h>
 
 #include "qtcompat.h"
 

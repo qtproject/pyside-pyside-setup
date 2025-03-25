@@ -7,8 +7,8 @@
 #include "customconversion_typedefs.h"
 #include "typesystem_typedefs.h"
 
-#include <QtCore/QList>
-#include <QtCore/QString>
+#include <QtCore/qlist.h>
+#include <QtCore/qstring.h>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 

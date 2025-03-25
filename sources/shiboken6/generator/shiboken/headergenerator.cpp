@@ -32,10 +32,10 @@
 #include <algorithm>
 #include <set>
 
-#include <QtCore/QDir>
-#include <QtCore/QTextStream>
-#include <QtCore/QVariant>
-#include <QtCore/QDebug>
+#include <QtCore/qdir.h>
+#include <QtCore/qtextstream.h>
+#include <QtCore/qvariant.h>
+#include <QtCore/qdebug.h>
 
 using namespace Qt::StringLiterals;
 

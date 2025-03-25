@@ -12,9 +12,9 @@
 
 #include <qtcompat.h>
 
-#include <QtCore/QCoreApplication>
-#include <QtCore/QTemporaryDir>
-#include <QtTest/QTest>
+#include <QtCore/qcoreapplication.h>
+#include <QtCore/qtemporarydir.h>
+#include <QtTest/qtest.h>
 
 using namespace Qt::StringLiterals;
 

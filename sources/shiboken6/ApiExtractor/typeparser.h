@@ -4,7 +4,7 @@
 #ifndef TYPEPARSER_H
 #define TYPEPARSER_H
 
-#include <QtCore/QString>
+#include <QtCore/qstring.h>
 
 class TypeInfo;
 

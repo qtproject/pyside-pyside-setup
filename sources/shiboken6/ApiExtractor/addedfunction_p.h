@@ -4,10 +4,10 @@
 #ifndef ADDEDFUNCTION_P_H
 #define ADDEDFUNCTION_P_H
 
-#include <QtCore/QtCompare>
-#include <QtCore/QList>
-#include <QtCore/QString>
-#include <QtCore/QStringView>
+#include <QtCore/qcompare.h>
+#include <QtCore/qlist.h>
+#include <QtCore/qstring.h>
+#include <QtCore/qstringview.h>
 
 QT_BEGIN_NAMESPACE
 class QDebug;

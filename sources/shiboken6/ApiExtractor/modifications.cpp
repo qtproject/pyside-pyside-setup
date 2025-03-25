@@ -6,8 +6,8 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QRegularExpression>
+#include <QtCore/qdebug.h>
+#include <QtCore/qregularexpression.h>
 
 #include <algorithm>
 #include <limits>

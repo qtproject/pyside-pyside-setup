@@ -6,10 +6,10 @@
 
 #include <clang-c/Index.h>
 
-#include <QtCore/QByteArrayList>
-#include <QtCore/QHash>
-#include <QtCore/QString>
-#include <QtCore/QList>
+#include <QtCore/qbytearraylist.h>
+#include <QtCore/qhash.h>
+#include <QtCore/qstring.h>
+#include <QtCore/qlist.h>
 
 #include <string_view>
 #include <utility>

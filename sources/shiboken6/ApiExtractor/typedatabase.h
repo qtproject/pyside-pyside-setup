@@ -8,9 +8,9 @@
 #include "modifications_typedefs.h"
 #include "typedatabase_typedefs.h"
 
-#include <QtCore/QRegularExpression>
-#include <QtCore/QStringList>
-#include <QtCore/QVersionNumber>
+#include <QtCore/qregularexpression.h>
+#include <QtCore/qstringlist.h>
+#include <QtCore/qversionnumber.h>
 
 #include <memory>
 

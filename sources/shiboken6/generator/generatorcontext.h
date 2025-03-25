@@ -6,7 +6,7 @@
 
 #include <abstractmetalang_typedefs.h>
 #include <abstractmetatype.h>
-#include <QtCore/QList>
+#include <QtCore/qlist.h>
 
 QT_FORWARD_DECLARE_CLASS(QDebug);
 

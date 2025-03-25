@@ -3,7 +3,8 @@
 
 #ifndef TESTARRAYARGUMENT_H
 #define TESTARRAYARGUMENT_H
-#include <QtCore/QObject>
+
+#include <QtCore/qobject.h>
 
 class TestArrayArgument : public QObject
 {

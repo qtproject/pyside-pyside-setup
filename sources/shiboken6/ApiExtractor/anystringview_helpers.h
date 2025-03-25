@@ -4,8 +4,8 @@
 #ifndef ANYSTRINGVIEW_STREAM_H
 #define ANYSTRINGVIEW_STREAM_H
 
-#include <QtCore/QtTypes>
-#include <QtCore/QtClassHelperMacros>
+#include <QtCore/qtypes.h>
+#include <QtCore/qtclasshelpermacros.h>
 
 QT_FORWARD_DECLARE_CLASS(QAnyStringView)
 QT_FORWARD_DECLARE_CLASS(QTextStream)

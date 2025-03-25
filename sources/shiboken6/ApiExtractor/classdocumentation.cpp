@@ -5,12 +5,10 @@
 #include "messages.h"
 #include "debughelpers_p.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QBuffer>
-#include <QtCore/QFile>
-#include <QtCore/QXmlStreamReader>
-#include <QtCore/QXmlStreamAttributes>
-#include <QtCore/QXmlStreamWriter>
+#include <QtCore/qdebug.h>
+#include <QtCore/qbuffer.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qxmlstream.h>
 
 #include <algorithm>
 

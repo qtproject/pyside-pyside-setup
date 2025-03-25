@@ -5,7 +5,7 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDebug>
+#include <QtCore/qdebug.h>
 
 using namespace Qt::StringLiterals;
 

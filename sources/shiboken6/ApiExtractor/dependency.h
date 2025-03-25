@@ -4,7 +4,7 @@
 #ifndef DEPENDENCY_H
 #define DEPENDENCY_H
 
-#include <QtCore/QList>
+#include <QtCore/qlist.h>
 
 #include <utility>
 

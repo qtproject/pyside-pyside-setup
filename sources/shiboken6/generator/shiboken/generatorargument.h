@@ -4,7 +4,7 @@
 #ifndef GENERATORARGUMENT_H
 #define GENERATORARGUMENT_H
 
-#include <QtCore/QFlags>
+#include <QtCore/qflags.h>
 #include <QtCore/qobjectdefs.h>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)

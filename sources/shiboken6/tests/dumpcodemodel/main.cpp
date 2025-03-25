@@ -5,16 +5,16 @@
 #include <parser/codemodel.h>
 #include <clangparser/compilersupport.h>
 
-#include <QtCore/QCoreApplication>
-#include <QtCore/QCommandLineOption>
-#include <QtCore/QCommandLineParser>
-#include <QtCore/QDateTime>
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QLibraryInfo>
-#include <QtCore/QVersionNumber>
-#include <QtCore/QXmlStreamWriter>
+#include <QtCore/qcoreapplication.h>
+#include <QtCore/qcommandlineoption.h>
+#include <QtCore/qcommandlineparser.h>
+#include <QtCore/qdatetime.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qlibraryinfo.h>
+#include <QtCore/qversionnumber.h>
+#include <QtCore/qxmlstream.h>
 
 #include <iostream>
 #include <algorithm>

@@ -4,7 +4,7 @@
 #ifndef QTXMLTOSPHINXINTERFACE_H
 #define QTXMLTOSPHINXINTERFACE_H
 
-#include <QtCore/QStringList>
+#include <QtCore/qstringlist.h>
 
 QT_FORWARD_DECLARE_CLASS(QLoggingCategory)
 QT_FORWARD_DECLARE_CLASS(QDebug)

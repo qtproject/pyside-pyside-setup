@@ -8,8 +8,8 @@
 #include "typesystem_typedefs.h"
 
 #include <QtCore/qobjectdefs.h>
-#include <QtCore/QString>
-#include <QtCore/QScopedPointer>
+#include <QtCore/qstring.h>
+#include <QtCore/qscopedpointer.h>
 
 class AbstractMetaType;
 class CustomTypeEntry;

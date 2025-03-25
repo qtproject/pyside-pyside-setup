@@ -13,7 +13,7 @@
 
 #include <qtcompat.h>
 
-#include <QtTest/QTest>
+#include <QtTest/qtest.h>
 
 using namespace Qt::StringLiterals;
 

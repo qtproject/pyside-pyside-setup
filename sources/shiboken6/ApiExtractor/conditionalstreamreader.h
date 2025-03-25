@@ -4,7 +4,7 @@
 #ifndef CONDITIONALSTREAMREADER_H
 #define CONDITIONALSTREAMREADER_H
 
-#include <QtCore/QXmlStreamReader>
+#include <QtCore/qxmlstream.h>
 
 #include <utility>
 

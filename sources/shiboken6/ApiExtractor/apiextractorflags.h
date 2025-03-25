@@ -4,7 +4,7 @@
 #ifndef APIEXTRACTORFLAGS_H
 #define APIEXTRACTORFLAGS_H
 
-#include <QtCore/QFlags>
+#include <QtCore/qflags.h>
 
 enum class ApiExtractorFlag
 {

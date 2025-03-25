@@ -34,10 +34,10 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QRegularExpression>
-#include <QtCore/QSet>
-#include <QtCore/QVarLengthArray>
+#include <QtCore/qdebug.h>
+#include <QtCore/qregularexpression.h>
+#include <QtCore/qset.h>
+#include <QtCore/qvarlengtharray.h>
 
 using namespace Qt::StringLiterals;
 

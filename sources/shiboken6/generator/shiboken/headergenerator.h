@@ -8,8 +8,8 @@
 #include "include.h"
 #include "modifications_typedefs.h"
 
-#include <QtCore/QList>
-#include <QtCore/QSet>
+#include <QtCore/qlist.h>
+#include <QtCore/qset.h>
 
 struct IndexValue;
 class AbstractMetaFunction;

@@ -23,10 +23,10 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QRegularExpression>
+#include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qfileinfo.h>
+#include <QtCore/qregularexpression.h>
 
 using namespace Qt::StringLiterals;
 

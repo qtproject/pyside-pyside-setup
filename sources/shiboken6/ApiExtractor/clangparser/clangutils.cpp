@@ -3,10 +3,10 @@
 
 #include "clangutils.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QHashFunctions>
-#include <QtCore/QProcess>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qhashfunctions.h>
+#include <QtCore/qprocess.h>
 
 #include <string_view>
 

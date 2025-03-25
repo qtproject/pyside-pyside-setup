@@ -6,12 +6,12 @@
 
 #include "dotview.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QFile>
-#include <QtCore/QHash>
-#include <QtCore/QList>
-#include <QtCore/QString>
-#include <QtCore/QTextStream>
+#include <QtCore/qdebug.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qhash.h>
+#include <QtCore/qlist.h>
+#include <QtCore/qstring.h>
+#include <QtCore/qtextstream.h>
 
 #include <algorithm>
 

@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "testreferencetopointer.h"
-#include <QtTest/QTest>
 #include "testutil.h"
+
 #include <abstractmetaargument.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <abstractmetatype.h>
 #include <typesystem.h>
+
+#include <QtTest/qtest.h>
 
 void TestReferenceToPointer::testReferenceToPointerArgument()
 {

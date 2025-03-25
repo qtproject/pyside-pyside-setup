@@ -4,9 +4,9 @@
 #ifndef FILECACHE_H
 #define FILECACHE_H
 
-#include <QtCore/QList>
-#include <QtCore/QString>
-#include <QtCore/QStringView>
+#include <QtCore/qlist.h>
+#include <QtCore/qstring.h>
+#include <QtCore/qstringview.h>
 
 #include <optional>
 

@@ -6,7 +6,7 @@
 
 #include <QtCore/qtypes.h>
 #include <QtCore/qtclasshelpermacros.h>
-#include <QtCore/QtCompare>
+#include <QtCore/qcompare.h>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 QT_FORWARD_DECLARE_CLASS(QString)

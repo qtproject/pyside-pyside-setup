@@ -4,8 +4,8 @@
 #ifndef OPTIONSPARSER_H
 #define OPTIONSPARSER_H
 
-#include <QtCore/QString>
-#include <QtCore/QStringList>
+#include <QtCore/qstring.h>
+#include <QtCore/qstringlist.h>
 
 #include <memory>
 

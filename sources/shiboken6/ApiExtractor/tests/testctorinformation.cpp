@@ -3,10 +3,12 @@
 
 #include "testctorinformation.h"
 #include "abstractmetabuilder.h"
-#include <QtTest/QTest>
 #include "testutil.h"
+
 #include <abstractmetalang.h>
 #include <typesystem.h>
+
+#include <QtTest/qtest.h>
 
 void TestCtorInformation::testCtorIsPrivate()
 {

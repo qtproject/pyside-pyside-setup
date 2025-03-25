@@ -29,18 +29,16 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QRegularExpression>
-#include <QtCore/QSet>
-#include <QtCore/QStringView>
-#include <QtCore/QStringAlgorithms>
-#include <QtCore/QVersionNumber>
-#include <QtCore/QXmlStreamAttributes>
-#include <QtCore/QXmlStreamReader>
-#include <QtCore/QXmlStreamEntityResolver>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qfileinfo.h>
+#include <QtCore/qregularexpression.h>
+#include <QtCore/qset.h>
+#include <QtCore/qstringview.h>
+#include <QtCore/qstringalgorithms.h>
+#include <QtCore/qversionnumber.h>
+#include <QtCore/qxmlstream.h>
 
 #include <algorithm>
 #include <optional>

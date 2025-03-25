@@ -4,7 +4,7 @@
 #ifndef TESTABSTRACTMETATYPE_H
 #define TESTABSTRACTMETATYPE_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestAbstractMetaType : public QObject
 {

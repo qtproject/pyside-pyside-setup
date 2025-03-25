@@ -8,9 +8,9 @@
 #include "include.h"
 #include "modifications_typedefs.h"
 
-#include <QtCore/QFlags>
-#include <QtCore/QSet>
-#include <QtCore/QHash>
+#include <QtCore/qflags.h>
+#include <QtCore/qset.h>
+#include <QtCore/qhash.h>
 
 #include <memory>
 #include <utility>

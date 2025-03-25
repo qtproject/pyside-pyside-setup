@@ -4,7 +4,7 @@
 #ifndef TESTREFCOUNTTAG_H
 #define TESTREFCOUNTTAG_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestRefCountTag : public QObject
 {

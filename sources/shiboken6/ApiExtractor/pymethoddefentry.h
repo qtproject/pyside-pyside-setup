@@ -4,8 +4,8 @@
 #ifndef PYMETHODDEFENTRY_H
 #define PYMETHODDEFENTRY_H
 
-#include <QtCore/QByteArrayList>
-#include <QtCore/QString>
+#include <QtCore/qbytearraylist.h>
+#include <QtCore/qstring.h>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 

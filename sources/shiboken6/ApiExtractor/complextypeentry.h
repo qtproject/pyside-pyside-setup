@@ -9,7 +9,7 @@
 #include "modifications_typedefs.h"
 #include "pymethoddefentry.h"
 
-#include <QtCore/QSet>
+#include <QtCore/qset.h>
 
 class ComplexTypeEntryPrivate;
 

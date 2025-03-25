@@ -6,8 +6,8 @@
 
 #include "documentation_enums.h"
 
-#include <QtCore/QString>
-#include <QtCore/QtCompare>
+#include <QtCore/qstring.h>
+#include <QtCore/qcompare.h>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 

@@ -7,8 +7,8 @@
 #include "modifications.h"
 #include "parser/typeinfo.h"
 
-#include <QtCore/QList>
-#include <QtCore/QString>
+#include <QtCore/qlist.h>
+#include <QtCore/qstring.h>
 
 #include <memory>
 

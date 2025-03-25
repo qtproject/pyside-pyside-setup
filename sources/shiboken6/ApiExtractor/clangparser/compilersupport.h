@@ -4,7 +4,7 @@
 #ifndef COMPILERSUPPORT_H
 #define COMPILERSUPPORT_H
 
-#include <QtCore/QByteArrayList>
+#include <QtCore/qbytearraylist.h>
 
 QT_FORWARD_DECLARE_CLASS(QVersionNumber)
 QT_FORWARD_DECLARE_CLASS(QString)

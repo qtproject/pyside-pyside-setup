@@ -4,7 +4,7 @@
 #ifndef TESTDROPTYPEENTRIES_H
 #define TESTDROPTYPEENTRIES_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestDropTypeEntries : public QObject
 {

@@ -7,9 +7,9 @@
 #include "codesniphelpers.h"
 #include "typesystem_enums.h"
 
-#include <QtCore/QList>
-#include <QtCore/QHash>
-#include <QtCore/QString>
+#include <QtCore/qlist.h>
+#include <QtCore/qhash.h>
+#include <QtCore/qstring.h>
 
 #include <variant>
 

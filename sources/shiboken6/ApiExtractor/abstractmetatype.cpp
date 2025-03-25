@@ -16,12 +16,12 @@
 #include "typeinfo.h"
 
 #ifndef QT_NO_DEBUG_STREAM
-#  include <QtCore/QDebug>
+#  include <QtCore/qdebug.h>
 #endif
 
-#include <QtCore/QHash>
-#include <QtCore/QSharedData>
-#include <QtCore/QStack>
+#include <QtCore/qhash.h>
+#include <QtCore/qshareddata.h>
+#include <QtCore/qstack.h>
 
 #include <memory>
 

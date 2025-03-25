@@ -14,11 +14,11 @@
 #include "modifications_typedefs.h"
 #include "typesystem_typedefs.h"
 
-#include <QtCore/QFileInfo>
-#include <QtCore/QList>
-#include <QtCore/QMap>
-#include <QtCore/QMultiHash>
-#include <QtCore/QSet>
+#include <QtCore/qfileinfo.h>
+#include <QtCore/qlist.h>
+#include <QtCore/qmap.h>
+#include <QtCore/qhash.h>
+#include <QtCore/qset.h>
 
 #include <optional>
 #include <set>

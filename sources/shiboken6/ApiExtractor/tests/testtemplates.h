@@ -4,7 +4,7 @@
 #ifndef TESTTEMPLATES_H
 #define TESTTEMPLATES_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestTemplates : public QObject
 {

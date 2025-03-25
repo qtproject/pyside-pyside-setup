@@ -4,7 +4,7 @@
 #ifndef SOURCE_LOCATION_H
 #define SOURCE_LOCATION_H
 
-#include <QtCore/QString>
+#include <QtCore/qstring.h>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 QT_FORWARD_DECLARE_CLASS(QTextStream)

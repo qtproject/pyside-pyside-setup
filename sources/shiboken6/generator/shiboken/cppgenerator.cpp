@@ -43,13 +43,13 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QMetaObject>
-#include <QtCore/QMetaType>
-#include <QtCore/QRegularExpression>
-#include <QtCore/QSet>
-#include <QtCore/QTextStream>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qmetaobject.h>
+#include <QtCore/qmetatype.h>
+#include <QtCore/qregularexpression.h>
+#include <QtCore/qset.h>
+#include <QtCore/qtextstream.h>
 
 #include <algorithm>
 #include <cstring>

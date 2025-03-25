@@ -4,7 +4,7 @@
 #ifndef TYPESYSTEM_TYPEDEFS_H
 #define TYPESYSTEM_TYPEDEFS_H
 
-#include <QtCore/QList>
+#include <QtCore/qlist.h>
 
 #include <memory>
 

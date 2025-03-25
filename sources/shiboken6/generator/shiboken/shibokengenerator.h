@@ -11,8 +11,8 @@
 #include "typesystem_typedefs.h"
 #include "typesystem_enums.h"
 
-#include <QtCore/QHash>
-#include <QtCore/QRegularExpression>
+#include <QtCore/qhash.h>
+#include <QtCore/qregularexpression.h>
 
 #include <array>
 #include <optional>

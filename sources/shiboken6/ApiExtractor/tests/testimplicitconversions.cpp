@@ -3,12 +3,14 @@
 
 #include "testimplicitconversions.h"
 #include "testutil.h"
+
 #include <abstractmetaargument.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <abstractmetatype.h>
 #include <complextypeentry.h>
-#include <QtTest/QTest>
+
+#include <QtTest/qtest.h>
 
 void TestImplicitConversions::testWithPrivateCtors()
 {

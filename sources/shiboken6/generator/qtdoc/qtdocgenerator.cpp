@@ -34,14 +34,14 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QTextStream>
-#include <QtCore/QFile>
-#include <QtCore/QDir>
-#include <QtCore/QJsonArray>
-#include <QtCore/QJsonDocument>
-#include <QtCore/QJsonObject>
-#include <QtCore/QOperatingSystemVersion>
-#include <QtCore/QSet>
+#include <QtCore/qtextstream.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qjsonarray.h>
+#include <QtCore/qjsondocument.h>
+#include <QtCore/qjsonobject.h>
+#include <QtCore/qoperatingsystemversion.h>
+#include <QtCore/qset.h>
 
 #include <algorithm>
 #include <limits>

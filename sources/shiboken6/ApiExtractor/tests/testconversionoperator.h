@@ -3,7 +3,8 @@
 
 #ifndef TESTCONVERSIONOPERATOR_H
 #define TESTCONVERSIONOPERATOR_H
-#include <QtCore/QObject>
+
+#include <QtCore/qobject.h>
 
 class TestConversionOperator : public QObject
 {

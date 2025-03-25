@@ -7,8 +7,8 @@
 #include <apiextractorresult.h>
 #include <abstractmetaargument.h>
 
-#include <QtCore/QBitArray>
-#include <QtCore/QList>
+#include <QtCore/qbitarray.h>
+#include <QtCore/qlist.h>
 
 #include <memory>
 

@@ -4,7 +4,7 @@
 #ifndef ABSTRACTMETALANG_ENUMS_H
 #define ABSTRACTMETALANG_ENUMS_H
 
-#include <QtCore/QFlags>
+#include <QtCore/qflags.h>
 
 enum class FunctionQueryOption {
     AnyConstructor               = 0x0000001, // Any constructor (copy/move)

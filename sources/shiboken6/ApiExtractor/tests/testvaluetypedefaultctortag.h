@@ -4,7 +4,7 @@
 #ifndef TESTVALUETYPEDEFAULTCTORTAG_H
 #define TESTVALUETYPEDEFAULTCTORTAG_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestValueTypeDefaultCtorTag : public QObject
 {

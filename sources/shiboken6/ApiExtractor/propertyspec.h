@@ -9,8 +9,8 @@ class AbstractMetaType;
 #include "abstractmetalang_typedefs.h"
 #include "typesystem_typedefs.h"
 
-#include <QtCore/QStringList>
-#include <QtCore/QSharedDataPointer>
+#include <QtCore/qstringlist.h>
+#include <QtCore/qshareddata.h>
 
 #include <optional>
 

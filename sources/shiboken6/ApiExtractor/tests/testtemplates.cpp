@@ -3,6 +3,7 @@
 
 #include "testtemplates.h"
 #include "testutil.h"
+
 #include <abstractmetaargument.h>
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
@@ -13,9 +14,9 @@
 
 #include <qtcompat.h>
 
-#include <QtCore/QTemporaryFile>
-#include <QtCore/QTextStream>
-#include <QtTest/QTest>
+#include <QtCore/qtemporaryfile.h>
+#include <QtCore/qtextstream.h>
+#include <QtTest/qtest.h>
 
 using namespace Qt::StringLiterals;
 

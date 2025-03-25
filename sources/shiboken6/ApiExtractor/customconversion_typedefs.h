@@ -4,7 +4,7 @@
 #ifndef CUSTOMCONVERSION_TYPEDEFS_H
 #define CUSTOMCONVERSION_TYPEDEFS_H
 
-#include <QtCore/QList>
+#include <QtCore/qlist.h>
 
 #include <memory>
 

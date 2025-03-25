@@ -10,7 +10,7 @@
 #include "textstream.h"
 #include "typedatabase.h"
 
-#include <QtCore/QDebug>
+#include <QtCore/qdebug.h>
 
 #include <algorithm>
 

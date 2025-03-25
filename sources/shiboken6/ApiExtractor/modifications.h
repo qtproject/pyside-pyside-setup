@@ -8,9 +8,9 @@
 #include "documentation_enums.h"
 #include "modifications_typedefs.h"
 
-#include <QtCore/QList>
-#include <QtCore/QSharedDataPointer>
-#include <QtCore/QString>
+#include <QtCore/qlist.h>
+#include <QtCore/qshareddata.h>
+#include <QtCore/qstring.h>
 
 class ArgumentModificationData;
 class CodeSnip;

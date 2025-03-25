@@ -4,8 +4,8 @@
 #include "clangdebugutils.h"
 #include "clangutils.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QString>
+#include <QtCore/qdebug.h>
+#include <QtCore/qstring.h>
 
 #ifndef QT_NO_DEBUG_STREAM
 

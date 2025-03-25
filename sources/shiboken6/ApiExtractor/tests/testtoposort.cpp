@@ -4,8 +4,8 @@
 #include "testtoposort.h"
 #include "graph.h"
 
-#include <QtTest/QTest>
-#include <QtCore/QDebug>
+#include <QtTest/qtest.h>
+#include <QtCore/qdebug.h>
 
 using IntGraph = Graph<int>;
 

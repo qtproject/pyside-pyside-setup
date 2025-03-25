@@ -9,14 +9,14 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QProcess>
-#include <QtCore/QStandardPaths>
-#include <QtCore/QStringList>
-#include <QtCore/QVersionNumber>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qfileinfo.h>
+#include <QtCore/qprocess.h>
+#include <QtCore/qstandardpaths.h>
+#include <QtCore/qstringlist.h>
+#include <QtCore/qversionnumber.h>
 
 #include <clang-c/Index.h>
 

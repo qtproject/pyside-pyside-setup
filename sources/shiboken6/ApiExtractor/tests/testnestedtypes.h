@@ -4,7 +4,7 @@
 #ifndef TESTNESTEDTYPES_H
 #define TESTNESTEDTYPES_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestNestedTypes : public QObject
 {

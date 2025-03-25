@@ -6,7 +6,7 @@
 
 #include "qtxmltosphinxinterface.h"
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class QtXmlToSphinxTest : public QObject, public QtXmlToSphinxDocGeneratorInterface
 {

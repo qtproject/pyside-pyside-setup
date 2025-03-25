@@ -4,7 +4,7 @@
 #ifndef TESTABSTRACTMETACLASS_H
 #define TESTABSTRACTMETACLASS_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestModifyFunction : public QObject
 {

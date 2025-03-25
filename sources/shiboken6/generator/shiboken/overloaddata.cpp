@@ -19,9 +19,9 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QTemporaryFile>
+#include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qtemporaryfile.h>
 
 #include <algorithm>
 #include <utility>

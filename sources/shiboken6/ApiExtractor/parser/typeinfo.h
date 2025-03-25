@@ -8,10 +8,10 @@
 #include "codemodel_enums.h"
 #include "codemodel_fwd.h"
 
-#include <QtCore/QString>
-#include <QtCore/QSharedDataPointer>
-#include <QtCore/QtCompare>
-#include <QtCore/QStringList>
+#include <QtCore/qstring.h>
+#include <QtCore/qshareddata.h>
+#include <QtCore/qcompare.h>
+#include <QtCore/qstringlist.h>
 
 #include <utility>
 

@@ -11,7 +11,7 @@
 #include "typesystem_typedefs.h"
 #include "enclosingclassmixin.h"
 
-#include <QtCore/QSharedDataPointer>
+#include <QtCore/qshareddata.h>
 
 #include <optional>
 

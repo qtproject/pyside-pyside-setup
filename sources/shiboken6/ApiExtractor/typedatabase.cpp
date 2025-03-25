@@ -31,14 +31,14 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QBuffer>
-#include <QtCore/QFile>
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QList>
-#include <QtCore/QRegularExpression>
-#include <QtCore/QVersionNumber>
-#include <QtCore/QXmlStreamReader>
+#include <QtCore/qbuffer.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qlist.h>
+#include <QtCore/qregularexpression.h>
+#include <QtCore/qversionnumber.h>
+#include <QtCore/qxmlstream.h>
 #include "reporthandler.h"
 
 #include <algorithm>

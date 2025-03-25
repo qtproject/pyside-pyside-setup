@@ -3,11 +3,11 @@
 
 #include "dotview.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QProcess>
-#include <QtCore/QTemporaryFile>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qprocess.h>
+#include <QtCore/qtemporaryfile.h>
 
 using namespace Qt::StringLiterals;
 

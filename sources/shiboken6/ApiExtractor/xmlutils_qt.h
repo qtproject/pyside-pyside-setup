@@ -3,7 +3,7 @@
 #ifndef XMLUTILS_QT_H
 #define XMLUTILS_QT_H
 
-#include <QtCore/QString>
+#include <QtCore/qstring.h>
 
 #include <memory>
 

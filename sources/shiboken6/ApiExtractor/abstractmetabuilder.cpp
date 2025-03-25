@@ -39,15 +39,15 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QMetaObject>
-#include <QtCore/QQueue>
-#include <QtCore/QRegularExpression>
-#include <QtCore/QTemporaryFile>
-#include <QtCore/QTextStream>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qfileinfo.h>
+#include <QtCore/qmetaobject.h>
+#include <QtCore/qqueue.h>
+#include <QtCore/qregularexpression.h>
+#include <QtCore/qtemporaryfile.h>
+#include <QtCore/qtextstream.h>
 
 #include <cstdio>
 #include <algorithm>

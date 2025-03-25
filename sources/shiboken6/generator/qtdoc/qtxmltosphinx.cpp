@@ -10,13 +10,13 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QFileInfo>
-#include <QtCore/QHash>
-#include <QtCore/QLoggingCategory>
-#include <QtCore/QRegularExpression>
-#include <QtCore/QXmlStreamReader>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qfileinfo.h>
+#include <QtCore/qhash.h>
+#include <QtCore/qloggingcategory.h>
+#include <QtCore/qregularexpression.h>
+#include <QtCore/qxmlstream.h>
 
 using namespace Qt::StringLiterals;
 

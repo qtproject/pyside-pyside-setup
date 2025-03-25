@@ -4,7 +4,7 @@
 #ifndef TESTNAMESPACE_H
 #define TESTNAMESPACE_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 // The class is named 'NamespaceTest' to avoid clashes with Qt COIN using
 // '-qtnamespace TestNamespace'.

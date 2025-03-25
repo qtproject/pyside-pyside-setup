@@ -3,12 +3,14 @@
 
 #include "testremoveimplconv.h"
 #include "testutil.h"
-#include <QtTest/QTest>
+
 #include <abstractmetaargument.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <abstractmetatype.h>
 #include <complextypeentry.h>
+
+#include <QtTest/qtest.h>
 
 // When a constructor able to trigger implicity conversions is removed
 // it should not appear in the implicity conversion list.

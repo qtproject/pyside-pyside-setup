@@ -3,13 +3,14 @@
 
 #include "qtxmltosphinxtest.h"
 #include "qtxmltosphinx.h"
-#include <QtTest/QTest>
 
-#include <QtCore/QBuffer>
-#include <QtCore/QDir>
-#include <QtCore/QDebug>
-#include <QtCore/QLoggingCategory>
-#include <QtCore/QTemporaryFile>
+#include <QtTest/qtest.h>
+
+#include <QtCore/qbuffer.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qloggingcategory.h>
+#include <QtCore/qtemporaryfile.h>
 
 using namespace Qt::StringLiterals;
 

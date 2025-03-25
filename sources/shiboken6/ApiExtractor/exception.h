@@ -4,7 +4,7 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
 
-#include <QtCore/QString>
+#include <QtCore/qstring.h>
 
 #include <string>
 #include <exception>

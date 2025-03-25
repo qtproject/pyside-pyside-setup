@@ -5,9 +5,10 @@
 #include "dummygenerator.h"
 #include "dummygentestconfig.h"
 
-#include <QtCore/QProcess>
-#include <QtCore/QTemporaryFile>
-#include <QtTest/QTest>
+#include <QtTest/qtest.h>
+
+#include <QtCore/qprocess.h>
+#include <QtCore/qtemporaryfile.h>
 
 #define GENERATED_CONTENTS  "// Generated code for class: Dummy"
 

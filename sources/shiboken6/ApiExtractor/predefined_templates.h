@@ -4,8 +4,8 @@
 #ifndef PREDEFINED_TEMPLATES_H
 #define PREDEFINED_TEMPLATES_H
 
-#include <QtCore/QList>
-#include <QtCore/QString>
+#include <QtCore/qlist.h>
+#include <QtCore/qstring.h>
 
 struct PredefinedTemplate
 {

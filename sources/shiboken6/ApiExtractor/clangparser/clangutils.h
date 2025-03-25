@@ -5,10 +5,10 @@
 #define CLANGUTILS_H
 
 #include <clang-c/Index.h>
-#include <QtCore/QString>
-#include <QtCore/QStringList>
-#include <QtCore/QtCompare>
-#include <QtCore/QList>
+#include <QtCore/qstring.h>
+#include <QtCore/qstringlist.h>
+#include <QtCore/qcompare.h>
+#include <QtCore/qlist.h>
 
 #include <functional>
 #include <utility>

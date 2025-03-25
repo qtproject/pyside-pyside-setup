@@ -3,13 +3,15 @@
 
 #ifndef TESTUTIL_H
 #define TESTUTIL_H
-#include <QtCore/QBuffer>
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QTemporaryFile>
-#include "abstractmetabuilder.h"
-#include "reporthandler.h"
-#include "typedatabase.h"
+
+#include <abstractmetabuilder.h>
+#include <reporthandler.h>
+#include <typedatabase.h>
+
+#include <QtCore/qbuffer.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qtemporaryfile.h>
 
 #include <exception>
 #include <memory>

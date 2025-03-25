@@ -4,7 +4,7 @@
 #ifndef TESTPRIMITIVETYPETAG_H
 #define TESTPRIMITIVETYPETAG_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestPrimitiveTypeTag : public QObject
 {

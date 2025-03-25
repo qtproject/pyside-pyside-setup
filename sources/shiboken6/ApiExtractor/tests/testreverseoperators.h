@@ -3,7 +3,7 @@
 
 #ifndef TESTREVERSEOPERATORS_H
 #define TESTREVERSEOPERATORS_H
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestReverseOperators : public QObject
 {

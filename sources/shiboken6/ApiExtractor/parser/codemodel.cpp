@@ -8,9 +8,9 @@
 #include <sourcelocation.h>
 #include <debughelpers_p.h>
 
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QRegularExpression>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qregularexpression.h>
 
 #include <algorithm>
 

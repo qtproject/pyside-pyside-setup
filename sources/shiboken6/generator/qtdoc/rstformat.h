@@ -6,10 +6,10 @@
 
 #include <textstream.h>
 
-#include <QtCore/QByteArray>
-#include <QtCore/QString>
-#include <QtCore/QTextStream>
-#include <QtCore/QVersionNumber>
+#include <QtCore/qbytearray.h>
+#include <QtCore/qstring.h>
+#include <QtCore/qtextstream.h>
+#include <QtCore/qversionnumber.h>
 
 struct rstVersionAdded
 {

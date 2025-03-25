@@ -3,7 +3,7 @@
 
 #ifndef TESTCONTAINER_H
 #define TESTCONTAINER_H
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestContainer : public QObject
 {

@@ -9,8 +9,7 @@
 #include "abstractmetalang_typedefs.h"
 #include "typesystem_typedefs.h"
 
-#include <QtCore/QHash>
-#include <QtCore/QMultiHash>
+#include <QtCore/qhash.h>
 
 #include <optional>
 

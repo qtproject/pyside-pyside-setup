@@ -4,7 +4,7 @@
 #ifndef TESTTYPEREVISION_H
 #define TESTTYPEREVISION_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestTypeRevision : public QObject
 {

@@ -4,8 +4,8 @@
 #ifndef TEXTSTREAM_H
 #define TEXTSTREAM_H
 
-#include <QtCore/QTextStream>
-#include <QtCore/QString>
+#include <QtCore/qtextstream.h>
+#include <QtCore/qstring.h>
 
 /// A text stream based on QTextStream with built-in indent.
 class TextStream

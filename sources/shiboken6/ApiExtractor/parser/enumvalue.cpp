@@ -3,9 +3,9 @@
 
 #include "enumvalue.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QString>
-#include <QtCore/QTextStream>
+#include <QtCore/qdebug.h>
+#include <QtCore/qstring.h>
+#include <QtCore/qtextstream.h>
 
 using namespace Qt::StringLiterals;
 

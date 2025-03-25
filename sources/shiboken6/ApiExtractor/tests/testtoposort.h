@@ -4,7 +4,7 @@
 #ifndef TESTTOPOSORT_H
 #define TESTTOPOSORT_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestTopoSort : public QObject
 {

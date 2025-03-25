@@ -4,7 +4,7 @@
 #ifndef TESTIMPLICITCONVERSIONS_H
 #define TESTIMPLICITCONVERSIONS_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class AbstractMetaBuilder;
 

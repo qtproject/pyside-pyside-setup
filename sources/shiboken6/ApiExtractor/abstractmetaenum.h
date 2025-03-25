@@ -9,8 +9,8 @@
 #include "parser/codemodel_enums.h"
 #include "typesystem_typedefs.h"
 
-#include <QtCore/QSharedDataPointer>
-#include <QtCore/QString>
+#include <QtCore/qshareddata.h>
+#include <QtCore/qstring.h>
 
 #include <optional>
 

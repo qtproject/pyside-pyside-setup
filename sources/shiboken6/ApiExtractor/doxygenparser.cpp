@@ -18,8 +18,8 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QFile>
-#include <QtCore/QDir>
+#include <QtCore/qfile.h>
+#include <QtCore/qdir.h>
 
 using namespace Qt::StringLiterals;
 

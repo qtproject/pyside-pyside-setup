@@ -4,9 +4,9 @@
 #include "typeparser.h"
 #include <typeinfo.h>
 
-#include <QtCore/QDebug>
-#include <QtCore/QStack>
-#include <QtCore/QTextStream>
+#include <QtCore/qdebug.h>
+#include <QtCore/qstack.h>
+#include <QtCore/qtextstream.h>
 
 using namespace Qt::StringLiterals;
 

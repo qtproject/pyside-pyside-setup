@@ -10,8 +10,8 @@
 #include "typesystem_typedefs.h"
 
 #include <QtCore/qobjectdefs.h>
-#include <QtCore/QScopedPointer>
-#include <QtCore/QStringList>
+#include <QtCore/qscopedpointer.h>
+#include <QtCore/qstringlist.h>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 

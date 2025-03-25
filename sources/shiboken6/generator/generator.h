@@ -6,7 +6,7 @@
 
 #include <abstractmetalang_typedefs.h>
 #include <typedatabase_typedefs.h>
-#include <QtCore/QList>
+#include <QtCore/qlist.h>
 
 #include <memory>
 #include <optional>

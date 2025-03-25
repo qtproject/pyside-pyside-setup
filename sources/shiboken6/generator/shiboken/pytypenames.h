@@ -4,7 +4,7 @@
 #ifndef PYTYPENAMES_H
 #define PYTYPENAMES_H
 
-#include <QtCore/QString>
+#include <QtCore/qstring.h>
 
 constexpr auto pyBoolT = QLatin1StringView ("PyBool");
 constexpr auto pyFloatT = QLatin1StringView ("PyFloat");

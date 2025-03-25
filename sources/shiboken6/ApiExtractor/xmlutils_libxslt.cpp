@@ -6,11 +6,11 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QByteArray>
-#include <QtCore/QCoreApplication>
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QString>
+#include <QtCore/qbytearray.h>
+#include <QtCore/qcoreapplication.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qstring.h>
 
 #include <libxslt/xsltutils.h>
 #include <libxslt/transform.h>

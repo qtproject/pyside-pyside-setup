@@ -7,12 +7,12 @@
 #include "compilersupport.h"
 #include "reporthandler.h"
 
-#include <QtCore/QByteArrayList>
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QScopedArrayPointer>
-#include <QtCore/QString>
+#include <QtCore/qbytearraylist.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qscopedpointer.h>
+#include <QtCore/qstring.h>
 
 using namespace Qt::StringLiterals;
 

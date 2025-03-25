@@ -10,9 +10,9 @@
 #include "typesystem_typedefs.h"
 #include "codesnip.h"
 
-#include <QtCore/QStack>
-#include <QtCore/QHash>
-#include <QtCore/QScopedPointer>
+#include <QtCore/qstack.h>
+#include <QtCore/qhash.h>
+#include <QtCore/qscopedpointer.h>
 
 #include <memory>
 #include <optional>

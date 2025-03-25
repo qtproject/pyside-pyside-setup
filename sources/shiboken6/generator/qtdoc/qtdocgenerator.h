@@ -3,9 +3,9 @@
 #ifndef DOCGENERATOR_H
 #define DOCGENERATOR_H
 
-#include <QtCore/QStringList>
-#include <QtCore/QMap>
-#include <QtCore/QScopedPointer>
+#include <QtCore/qstringlist.h>
+#include <QtCore/qmap.h>
+#include <QtCore/qscopedpointer.h>
 
 #include "generator.h"
 #include "documentation.h"

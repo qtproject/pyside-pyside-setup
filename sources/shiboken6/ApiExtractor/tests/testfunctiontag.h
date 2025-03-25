@@ -4,7 +4,7 @@
 #ifndef TESTFUNCTIONTAG_H
 #define TESTFUNCTIONTAG_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestFunctionTag : public QObject
 {

@@ -7,7 +7,7 @@
 #include "modifications_typedefs.h"
 #include "documentation.h"
 
-#include <QtCore/QString>
+#include <QtCore/qstring.h>
 
 #include <memory>
 

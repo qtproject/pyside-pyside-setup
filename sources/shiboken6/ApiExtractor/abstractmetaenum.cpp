@@ -9,7 +9,7 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDebug>
+#include <QtCore/qdebug.h>
 
 #include <algorithm>
 

@@ -10,7 +10,7 @@
 
 // QTBUG-98434, provide literals of Qt 6.4 for compatibility.
 
-#  include <QtCore/QString>
+#  include <QtCore/qstring.h>
 
 # define QLatin1StringView QLatin1String
 

@@ -3,7 +3,7 @@
 
 #include "codesniphelpers.h"
 
-#include <QtCore/QStringList>
+#include <QtCore/qstringlist.h>
 
 #include <algorithm>
 

@@ -14,10 +14,10 @@
 #include "complextypeentry.h"
 #include "xmlutils.h"
 
-#include <QtCore/QBuffer>
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QTextStream>
+#include <QtCore/qbuffer.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qtextstream.h>
 
 #include "qtcompat.h"
 

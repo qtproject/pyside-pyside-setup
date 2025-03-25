@@ -4,10 +4,10 @@
 #ifndef INCLUDE_H
 #define INCLUDE_H
 
-#include <QtCore/QtCompare>
-#include <QtCore/QHashFunctions>
-#include <QtCore/QString>
-#include <QtCore/QList>
+#include <QtCore/qcompare.h>
+#include <QtCore/qhashfunctions.h>
+#include <QtCore/qstring.h>
+#include <QtCore/qlist.h>
 
 QT_BEGIN_NAMESPACE
 class QTextStream;

@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "testmultipleinheritance.h"
-#include <QtTest/QTest>
 #include "testutil.h"
+
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>
+
+#include <QtTest/qtest.h>
 
 void TestMultipleInheritance::testVirtualClass()
 {

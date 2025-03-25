@@ -4,7 +4,7 @@
 #ifndef TESTREMOVEFIELD_H
 #define TESTREMOVEFIELD_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestRemoveField : public QObject
 {

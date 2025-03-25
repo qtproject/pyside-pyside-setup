@@ -3,8 +3,8 @@
 
 #include "conditionalstreamreader.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QHash>
+#include <QtCore/qdebug.h>
+#include <QtCore/qhash.h>
 
 using namespace Qt::StringLiterals;
 

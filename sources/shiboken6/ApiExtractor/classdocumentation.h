@@ -4,7 +4,7 @@
 #ifndef CLASSDOCUMENTATION_H
 #define CLASSDOCUMENTATION_H
 
-#include <QtCore/QStringList>
+#include <QtCore/qstringlist.h>
 
 #include <optional>
 

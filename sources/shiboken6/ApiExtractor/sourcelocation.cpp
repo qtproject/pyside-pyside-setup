@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "sourcelocation.h"
-#include <QtCore/QDir>
-#include <QtCore/QDebug>
+#include <QtCore/qdir.h>
+#include <QtCore/qdebug.h>
 
 SourceLocation::SourceLocation() = default;
 

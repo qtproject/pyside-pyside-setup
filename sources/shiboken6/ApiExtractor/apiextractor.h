@@ -10,8 +10,8 @@
 #include "clangparser/compilersupport.h"
 #include "typesystem_typedefs.h"
 
-#include <QtCore/QFileInfoList>
-#include <QtCore/QStringList>
+#include <QtCore/qfileinfo.h>
+#include <QtCore/qstringlist.h>
 
 #include <optional>
 

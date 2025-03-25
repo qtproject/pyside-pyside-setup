@@ -4,7 +4,7 @@
 #ifndef TESTEXTRAINCLUDE_H
 #define TESTEXTRAINCLUDE_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestExtraInclude : public QObject
 {

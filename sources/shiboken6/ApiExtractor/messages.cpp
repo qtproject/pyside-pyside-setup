@@ -17,11 +17,11 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QStringList>
-#include <QtCore/QXmlStreamReader>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qstringlist.h>
+#include <QtCore/qxmlstream.h>
 
 #include <algorithm>
 #include <iterator>

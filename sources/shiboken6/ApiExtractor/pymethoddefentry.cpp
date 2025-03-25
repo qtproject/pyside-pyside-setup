@@ -4,7 +4,7 @@
 #include "pymethoddefentry.h"
 #include "textstream.h"
 
-#include <QtCore/QDebug>
+#include <QtCore/qdebug.h>
 
 TextStream &operator<<(TextStream &str, const castToPyCFunction &c)
 {

@@ -11,13 +11,13 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QHash>
-#include <QtCore/QMap>
-#include <QtCore/QString>
-#include <QtCore/QStack>
-#include <QtCore/QList>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qhash.h>
+#include <QtCore/qmap.h>
+#include <QtCore/qstring.h>
+#include <QtCore/qstack.h>
+#include <QtCore/qlist.h>
 
 using namespace Qt::StringLiterals;
 

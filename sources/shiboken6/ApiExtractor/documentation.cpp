@@ -3,7 +3,7 @@
 
 #include "documentation.h"
 
-#include <QtCore/QDebug>
+#include <QtCore/qdebug.h>
 
 Documentation::Documentation(const QString &detailed,
                              const QString &brief,

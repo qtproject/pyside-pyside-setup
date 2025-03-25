@@ -4,7 +4,7 @@
 #ifndef DOTVIEW_H
 #define DOTVIEW_H
 
-#include <QtCore/QString>
+#include <QtCore/qstring.h>
 
 /// Show a dot digraph in an image viewer
 /// \param name base name for files

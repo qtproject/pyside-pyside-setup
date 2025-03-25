@@ -4,7 +4,7 @@
 #ifndef DEFAULTVALUE_H
 #define DEFAULTVALUE_H
 
-#include <QtCore/QString>
+#include <QtCore/qstring.h>
 
 QT_FORWARD_DECLARE_CLASS(QDebug);
 

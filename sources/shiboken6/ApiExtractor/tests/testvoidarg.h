@@ -3,7 +3,8 @@
 
 #ifndef TESTVOIDARG_H
 #define TESTVOIDARG_H
-#include <QtCore/QObject>
+
+#include <QtCore/qobject.h>
 
 class TestVoidArg : public QObject
 {

@@ -6,9 +6,9 @@
 
 #include <textstream.h>
 
-#include <QtCore/QList>
-#include <QtCore/QScopedPointer>
-#include <QtCore/QStack>
+#include <QtCore/qlist.h>
+#include <QtCore/qscopedpointer.h>
+#include <QtCore/qstack.h>
 
 #include <memory>
 

@@ -9,12 +9,12 @@
 #include "parser/codemodel_enums.h"
 #include "typedatabase_typedefs.h"
 
-#include <QtCore/QtCompare>
+#include <QtCore/qcompare.h>
 #include <QtCore/qobjectdefs.h>
-#include <QtCore/QHashFunctions>
-#include <QtCore/QSharedDataPointer>
-#include <QtCore/QList>
-#include <QtCore/QSet>
+#include <QtCore/qhashfunctions.h>
+#include <QtCore/qshareddata.h>
+#include <QtCore/qlist.h>
+#include <QtCore/qset.h>
 
 #include <optional>
 

@@ -4,7 +4,7 @@
 #ifndef TESTCTORINFORMATION_H
 #define TESTCTORINFORMATION_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class AbstractMetaBuilder;
 

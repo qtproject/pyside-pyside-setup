@@ -4,7 +4,7 @@
 #ifndef ABSTRACTMETAARGUMENT_H
 #define ABSTRACTMETAARGUMENT_H
 
-#include <QtCore/QSharedDataPointer>
+#include <QtCore/qshareddata.h>
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 

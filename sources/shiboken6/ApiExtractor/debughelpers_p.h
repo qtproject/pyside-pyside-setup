@@ -4,7 +4,7 @@
 #ifndef DEBUGHELPERS_P_H
 #define DEBUGHELPERS_P_H
 
-#include <QtCore/QDebug>
+#include <QtCore/qdebug.h>
 #include <memory>
 
 template <class T>

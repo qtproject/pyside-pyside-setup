@@ -4,7 +4,7 @@
 #ifndef TESTNUMERICALTYPEDEF_H
 #define TESTNUMERICALTYPEDEF_H
 
-#include <QtCore/QObject>
+#include <QtCore/qobject.h>
 
 class TestNumericalTypedef : public QObject
 {

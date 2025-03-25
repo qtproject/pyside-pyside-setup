@@ -12,10 +12,10 @@
 
 #include "qtcompat.h"
 
-#include <QtCore/QHash>
+#include <QtCore/qhash.h>
 
 #ifndef QT_NO_DEBUG_STREAM
-#  include <QtCore/QDebug>
+#  include <QtCore/qdebug.h>
 #endif
 
 #include <algorithm>

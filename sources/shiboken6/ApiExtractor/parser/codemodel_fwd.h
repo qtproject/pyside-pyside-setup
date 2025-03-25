@@ -6,7 +6,7 @@
 #ifndef CODEMODEL_FWD_H
 #define CODEMODEL_FWD_H
 
-#include <QtCore/QList>
+#include <QtCore/qlist.h>
 
 #include <memory>
 

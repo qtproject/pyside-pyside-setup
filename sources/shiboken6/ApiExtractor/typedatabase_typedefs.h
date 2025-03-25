@@ -6,9 +6,9 @@
 
 #include "typesystem_typedefs.h"
 
-#include <QtCore/QMultiMap>
-#include <QtCore/QString>
-#include <QtCore/QList>
+#include <QtCore/qmap.h>
+#include <QtCore/qstring.h>
+#include <QtCore/qlist.h>
 
 using TemplateEntryMap =QMap<QString, TemplateEntryPtr>;
 

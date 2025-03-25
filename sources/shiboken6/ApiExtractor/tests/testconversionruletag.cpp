@@ -11,9 +11,10 @@
 
 #include <qtcompat.h>
 
-#include <QtCore/QFile>
-#include <QtCore/QTemporaryFile>
-#include <QtTest/QTest>
+#include <QtCore/qfile.h>
+#include <QtCore/qtemporaryfile.h>
+
+#include <QtTest/qtest.h>
 
 using namespace Qt::StringLiterals;
 
