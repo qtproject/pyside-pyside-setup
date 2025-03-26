@@ -17,8 +17,8 @@ from tqdm import tqdm
 
 # the tag number does not matter much since we update the sdk later
 DEFAULT_SDK_TAG = 6514223
-ANDROID_NDK_VERSION = "26b"
-ANDROID_NDK_VERSION_NUMBER_SUFFIX = "10909125"
+ANDROID_NDK_VERSION = "27c"
+ANDROID_NDK_VERSION_NUMBER_SUFFIX = "12479018"
 
 
 def run_command(command: list[str], cwd: str | None = None, ignore_fail: bool = False,
