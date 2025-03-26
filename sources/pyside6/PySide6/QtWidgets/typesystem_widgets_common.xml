@@ -2558,6 +2558,11 @@
     <enum-type name="Shape"/>
     <enum-type name="SelectionBehavior"/>
     <enum-type name="ButtonPosition"/>
+    <modify-function signature="setTabButton(int,QTabBar::ButtonPosition,QWidget*)">
+      <modify-argument index="3" pyi-type="Optional[PySide6.QtWidgets.QWidget]">
+        <parent index="this" action="add"/>
+      </modify-argument>
+    </modify-function>
   </object-type>
   <object-type name="QRadioButton"/>
   <object-type name="QScrollBar"/>
