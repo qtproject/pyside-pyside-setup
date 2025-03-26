@@ -2438,7 +2438,7 @@
       </modify-argument>
     </modify-function>
     <modify-function signature="setCancelButton(QPushButton*)">
-      <modify-argument index="1">
+      <modify-argument index="1" pyi-type="Optional[PySide6.QtWidgets.QPushButton]">
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
