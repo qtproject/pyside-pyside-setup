@@ -163,16 +163,9 @@ def download_android_ndk(ndk_path: Path):
 
             print("Unpacking Android Ndk")
             if sys.platform == "darwin":
-                extract_dmg(file=(ndk_path
-                            / f"android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.{ndk_extension}"),
-                            destination=ndk_path)
-                ndk_version_path = (ndk_version_path
-                                    / (f"AndroidNDK{ANDROID_NDK_VERSION_NUMBER_SUFFIX}.app"
-                                       "/Contents/NDK"))
+                extract_dmg(file=ndk_zip_path, destination=ndk_path)
             else:
-                extract_zip(file=(ndk_path
-                            / f"android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.{ndk_extension}"),
-                            destination=ndk_path)
+                extract_zip(file=ndk_zip_path, destination=ndk_path)
         except Exception as e:
             print(f"Error occurred while downloading and unpacking Android NDK: {e}")
             if ndk_path.exists():
