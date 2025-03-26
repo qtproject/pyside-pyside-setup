@@ -157,19 +157,16 @@ def _mod_uses_pyside(module):
     try:
         source = inspect.getsource(module)
     except TypeError:
-        # this is a builtin module like sys
+        # This is a builtin module like sys.
         return False
     except OSError:
-        # this is a module withot source file
+        # This is a module without source file.
         return False
     except SyntaxError:
         # PYSIDE-2189: A UnicodeError happens in tokenize.py in find_cookie
         #              which is then creating a SyntaxError in inspect.
         # This is undocumented and a Python error, seen in Python 3.10.2 on Windows,
         # importing `pythoncom` of the win32 package.
-        return False
-    except Exception:
-        # PYSIDE-2393: pytest behaves weird when allowing any other error.
         return False
     return "PySide6" in source
 
