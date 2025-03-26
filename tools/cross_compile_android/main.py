@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
     parser.add_argument("-v", "--verbose", help="run in verbose mode", action="store_const",
                         dest="loglevel", const=logging.INFO)
-    parser.add_argument("--api-level", type=str, default="34",
+    parser.add_argument("--api-level", type=str, default="35",
                         help="Minimum Android API level to use")
     parser.add_argument("--ndk-path", type=str, help="Path to Android NDK (Preferred r26b)")
     # sdk path is needed to compile all the Qt Java Acitivity files into Qt6AndroidBindings.jar
