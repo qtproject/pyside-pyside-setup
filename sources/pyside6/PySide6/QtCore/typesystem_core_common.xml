@@ -27,7 +27,7 @@
     <overload-removal type="unsigned long" replaces="unsigned short"/>
     <overload-removal type="unsigned" replaces="unsigned short"/>
     <overload-removal type="unsigned long long" replaces="unsigned;unsigned int;unsigned long"/>
-    <overload-removal type="int" replaces="short;std::chrono::milliseconds"/>
+    <overload-removal type="int" replaces="short;std::chrono::milliseconds;std::chrono::seconds"/>
     <overload-removal type="long" replaces="short"/>
     <overload-removal type="long long" replaces="long;int"/>
 
@@ -213,7 +213,20 @@
         <native-to-target file="../glue/qtcore.cpp" snippet="chrono-to-pylong"/>
         <target-to-native>
             <add-conversion type="PyLong" file="../glue/qtcore.cpp"
-                            snippet="pylong-to-chrono-milliseconds"/>
+                            snippet="pylong-to-chrono"/>
+        </target-to-native>
+    </conversion-rule>
+  </primitive-type>
+
+  <primitive-type name="std::chrono::seconds" target-lang-api-name="PyLong">
+    <extra-includes>
+        <include file-name="chrono" location="global"/>
+    </extra-includes>
+    <conversion-rule>
+        <native-to-target file="../glue/qtcore.cpp" snippet="chrono-to-pylong"/>
+        <target-to-native>
+            <add-conversion type="PyLong" file="../glue/qtcore.cpp"
+                            snippet="pylong-to-chrono"/>
         </target-to-native>
     </conversion-rule>
   </primitive-type>

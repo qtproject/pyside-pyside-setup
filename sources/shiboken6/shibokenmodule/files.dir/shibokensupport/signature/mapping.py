@@ -283,6 +283,7 @@ type_map.update({
     "signed char": int,
     "signed long": int,
     "std.chrono.milliseconds": int,
+    "std.chrono.seconds": int,
     "std.list": typing.List,
     "std.map": typing.Dict,
     "std.nullptr_t": NoneType,

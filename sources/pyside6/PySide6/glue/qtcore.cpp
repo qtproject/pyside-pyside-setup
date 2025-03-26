@@ -1613,9 +1613,9 @@ return PyBytes_FromStringAndSize(%in.constData(), %in.size());
 return PyLong_FromLong(%in.count());
 // @snippet chrono-to-pylong
 
-// @snippet pylong-to-chrono-milliseconds
+// @snippet pylong-to-chrono
 %out = %OUTTYPE(PyLong_AsLongLong(%in));
-// @snippet pylong-to-chrono-milliseconds
+// @snippet pylong-to-chrono
 
 // @snippet return-pylong
 return PyLong_FromLong(%in);
