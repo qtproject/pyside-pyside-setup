@@ -78,9 +78,9 @@ class Config(metaclass=Singleton):
         self.setup_kwargs['long_description_content_type'] = 'text/markdown'
 
         self.setup_kwargs['keywords'] = _pyproject_data["keywords"]
-        _author, _email = _pyproject_data["authors"][0]
-        self.setup_kwargs['author'] = _author
-        self.setup_kwargs['author_email'] = _email
+        _author = _pyproject_data["authors"][0]
+        self.setup_kwargs['author'] = _author["name"]
+        self.setup_kwargs['author_email'] = _author["email"]
         self.setup_kwargs['url'] = _pyproject_data["urls"]["Homepage"]
         self.setup_kwargs['license'] = _pyproject_data["license"]["text"]
         self.setup_kwargs['python_requires'] = _pyproject_data["requires-python"]
