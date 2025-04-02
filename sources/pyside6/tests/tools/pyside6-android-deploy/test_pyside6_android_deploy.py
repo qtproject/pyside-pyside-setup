@@ -36,7 +36,7 @@ class DeployTestBase(unittest.TestCase):
         android_requirements_file = pyside_tools / "requirements-android.txt"
         with open(android_requirements_file, 'r', encoding='UTF-8') as file:
             while line := file.readline():
-                dependent_package = line.rstrip()
+                dependent_package = line.rstrip().split('==')[0]
                 if not bool(importlib.util.find_spec(dependent_package)):
                     command = [sys.executable, "-m", "pip", "install", dependent_package]
                     subprocess.run(command)

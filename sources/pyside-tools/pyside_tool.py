@@ -198,6 +198,18 @@ def metaobjectdump():
     pyside_script_wrapper("metaobjectdump.py")
 
 
+def _check_requirements(requirements_file):
+    """Check if all required packages are installed."""
+    missing_packages = []
+    with open(requirements_file, 'r', encoding='UTF-8') as file:
+        for line in file:
+            # versions
+            package = line.strip().split('==')[0]
+            if not importlib.util.find_spec(package):
+                missing_packages.append(line.strip())
+    return missing_packages
+
+
 def project():
     pyside_script_wrapper("project.py")
 
@@ -220,12 +232,15 @@ def android_deploy():
               file=sys.stderr)
     else:
         android_requirements_file = Path(__file__).parent / "requirements-android.txt"
-        with open(android_requirements_file, 'r', encoding='UTF-8') as file:
-            while line := file.readline():
-                dependent_package = line.rstrip()
-                if not bool(importlib.util.find_spec(dependent_package)):
-                    command = [sys.executable, "-m", "pip", "install", dependent_package]
-                    subprocess.run(command)
+        if android_requirements_file.exists():
+            missing_packages = _check_requirements(android_requirements_file)
+            if missing_packages:
+                print("The following packages are required but not installed:")
+                for package in missing_packages:
+                    print(f"  - {package}")
+                print("Please install them using:")
+                print(f"  pip install -r {android_requirements_file}")
+                sys.exit(1)
         pyside_script_wrapper("android_deploy.py")
 
 

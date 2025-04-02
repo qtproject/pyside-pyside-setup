@@ -1,3 +1,4 @@
 jinja2
 pkginfo
 tqdm
+packaging==24.1
