@@ -352,8 +352,8 @@ class Config(BaseConfig):
         try:
             return resolve_valid_project_file(pyproject_location)
         except ValueError as e:
-            logging.warning(f"[DEPLOY] Error resolving a valid project file. Project file not set. "
-                            f"Error:\n{e}. ")
+            logging.warning(f"[DEPLOY] Unable to resolve a valid project file. Proceeding without a"
+                            f" project file. Details:\n{e}.")
         return None
 
     def _find_excluded_qml_plugins(self) -> list[str] | None:
