@@ -475,11 +475,11 @@ namespace PySide::Property {
 
 static const char *Property_SignatureStrings[] = {
     "PySide6.QtCore.Property(self,type:type,"
-        "fget:typing.Optional[collections.abc.Callable[[typing.Any],typing.Any]],"
-        "fset:typing.Optional[collections.abc.Callable[[typing.Any,typing.Any],None]],"
-        "freset:typing.Optional[collections.abc.Callable[[typing.Any,typing.Any],None]],"
+        "fget:typing.Optional[collections.abc.Callable[[typing.Any],typing.Any]]=None,"
+        "fset:typing.Optional[collections.abc.Callable[[typing.Any,typing.Any],None]]=None,"
+        "freset:typing.Optional[collections.abc.Callable[[typing.Any,typing.Any],None]]=None,"
         "doc:str=None,"
-        "notify:typing.Optional[collections.abc.Callable[[],None]],"
+        "notify:typing.Optional[collections.abc.Callable[[],None]]=None,"
         "designable:bool=True,scriptable:bool=True,"
         "stored:bool=True,user:bool=False,constant:bool=False,final:bool=False)",
     "PySide6.QtCore.Property.deleter(self,fdel:collections.abc.Callable[[typing.Any],None])->PySide6.QtCore.Property",
