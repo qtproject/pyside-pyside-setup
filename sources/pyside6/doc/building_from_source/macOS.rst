@@ -74,7 +74,7 @@ For building the documentation::
 
 .. note:: Keep in mind you need to use the same version as your Qt installation
 
-.. note:: With `uv`_, use `uv pip install ...
+.. note:: With `uv`_, use ``uv pip install ...``
 
 Building PySide
 ~~~~~~~~~~~~~~~
