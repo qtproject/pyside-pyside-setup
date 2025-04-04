@@ -737,7 +737,7 @@
         <parent index="this" action="add"/>
       </modify-argument>
     </modify-function>
-    <!-- this fuction is declared when not defined QT_NO_TOOLBA -->
+    <!-- this function is declared when not defined QT_NO_TOOLBAR -->
     <modify-function signature="addToolBar(Qt::ToolBarArea,QToolBar*)">
       <modify-argument index="2">
         <parent index="this" action="add"/>

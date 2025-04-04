@@ -277,13 +277,13 @@
 
     <value-type name="QNetworkAddressEntry">
         <enum-type name="DnsEligibilityStatus"/>
-        <configuration condition="#ifndef QT_NO_NETWORKINTERFACE"/>
+        <configuration condition="#if QT_CONFIG(networkinterface)"/>
     </value-type>
 
     <value-type name="QNetworkInterface">
         <enum-type name="InterfaceFlag" flags="InterfaceFlags"/>
         <enum-type name="InterfaceType"/>
-        <configuration condition="#ifndef QT_NO_NETWORKINTERFACE"/>
+        <configuration condition="#if QT_CONFIG(networkinterface)"/>
     </value-type>
 
     <value-type name="QNetworkProxy">

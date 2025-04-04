@@ -3062,7 +3062,7 @@
     <enum-type name="LocateOption" flags="LocateOptions"/>
   </object-type>
   <object-type name="QSystemSemaphore">
-    <configuration condition="#ifndef QT_NO_SYSTEMSEMAPHORE"/>
+    <configuration condition="#if QT_CONFIG(systemsemaphore)" />
     <enum-type name="AccessMode"/>
     <enum-type name="SystemSemaphoreError"/>
   </object-type>
@@ -3576,7 +3576,7 @@
   <object-type name="QStringListModel"/>
 
    <object-type name="QSharedMemory">
-       <configuration condition="#ifndef QT_NO_SHAREDMEMORY"/>
+       <configuration condition="#if QT_CONFIG(sharedmemory)" />
        <enum-type name="AccessMode"/>
        <enum-type name="SharedMemoryError"/>
        <modify-function signature="data()">
