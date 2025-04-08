@@ -472,7 +472,8 @@ static char *strDup(const char *s) // strdup() using new[] for symmetry with the
 {
     auto len = std::strlen(s);
     auto *result = new char[1 + len];
-    std::strncpy(result, s, len);
+    // copy len-characters to avoid if we have a null terminator in the middle.
+    std::memcpy(result, s, len);
     result[len] = '\0';
     return result;
 }
