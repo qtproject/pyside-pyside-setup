@@ -349,6 +349,7 @@ public Q_SLOTS:
 
 void SenderSignalDeletionTracker::senderDestroyed(QObject *o)
 {
+    Shiboken::GilState gil; // PYSIDE-3072
     for (auto it = connectionHash.begin(); it != connectionHash.end(); ) {
         if (it.key().sender == o)
             it = connectionHash.erase(it);
