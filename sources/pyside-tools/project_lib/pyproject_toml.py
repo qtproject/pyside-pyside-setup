@@ -3,13 +3,73 @@
 from __future__ import annotations
 
 import sys
+# TODO: Remove this import when Python 3.11 is the minimum supported version
+if sys.version_info >= (3, 11):
+    import tomllib
 from pathlib import Path
 
-import tomlkit
-from tomlkit.toml_file import TOMLFile
 from . import PYPROJECT_JSON_PATTERN
 from .pyproject_parse_result import PyProjectParseResult
 from .pyproject_json import parse_pyproject_json
+
+
+def _parse_toml_content(content: str) -> dict:
+    """
+    Parse TOML content for project name and files list only.
+    """
+    result = {"project": {}, "tool": {"pyside6-project": {}}}
+    current_section = None
+
+    for line in content.splitlines():
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+
+        if line == '[project]':
+            current_section = 'project'
+        elif line == '[tool.pyside6-project]':
+            current_section = 'tool.pyside6-project'
+        elif '=' in line and current_section:
+            key, value = [part.strip() for part in line.split('=', 1)]
+
+            # Handle string values - name of the project
+            if value.startswith('"') and value.endswith('"'):
+                value = value[1:-1]
+            # Handle array of strings - files names
+            elif value.startswith('[') and value.endswith(']'):
+                items = value[1:-1].split(',')
+                value = [item.strip().strip('"') for item in items if item.strip()]
+
+            if current_section == 'project':
+                result['project'][key] = value
+            else:  # tool.pyside6-project
+                result['tool']['pyside6-project'][key] = value
+
+    return result
+
+
+def _write_toml_content(data: dict) -> str:
+    """
+    Write minimal TOML content with project and tool.pyside6-project sections.
+    """
+    lines = []
+
+    if 'project' in data and data['project']:
+        lines.append('[project]')
+        for key, value in sorted(data['project'].items()):
+            if isinstance(value, str):
+                lines.append(f'{key} = "{value}"')
+
+    if 'tool' in data and 'pyside6-project' in data['tool']:
+        lines.append('\n[tool.pyside6-project]')
+        for key, value in sorted(data['tool']['pyside6-project'].items()):
+            if isinstance(value, list):
+                items = [f'"{item}"' for item in sorted(value)]
+                lines.append(f'{key} = [{", ".join(items)}]')
+            else:
+                lines.append(f'{key} = "{value}"')
+
+    return '\n'.join(lines)
 
 
 def parse_pyproject_toml(pyproject_toml_file: Path) -> PyProjectParseResult:
@@ -17,36 +77,37 @@ def parse_pyproject_toml(pyproject_toml_file: Path) -> PyProjectParseResult:
     Parse a pyproject.toml file and return a PyProjectParseResult object.
     """
     result = PyProjectParseResult()
+
     try:
-        root_table = TOMLFile(pyproject_toml_file).read()
+        content = pyproject_toml_file.read_text(encoding='utf-8')
+        # TODO: Remove the manual parsing when Python 3.11 is the minimum supported version
+        if sys.version_info >= (3, 11):
+            root_table = tomllib.loads(content)  # Use tomllib for Python >= 3.11
+            print("Using tomllib for parsing TOML content")
+        else:
+            root_table = _parse_toml_content(content)  # Fallback to manual parsing
     except Exception as e:
         result.errors.append(str(e))
         return result
 
-    tool_table = root_table.get("tool")
-    if not tool_table:
-        result.errors.append("Missing [tool] table")
-        return result
-
-    pyside_table = tool_table.get("pyside6-project")
+    pyside_table = root_table.get("tool", {}).get("pyside6-project", {})
     if not pyside_table:
         result.errors.append("Missing [tool.pyside6-project] table")
         return result
 
-    files = pyside_table.get("files")
+    files = pyside_table.get("files", [])
     if not isinstance(files, list):
         result.errors.append("Missing or invalid files list")
         return result
 
+    # Convert paths
     for file in files:
         if not isinstance(file, str):
             result.errors.append(f"Invalid file: {file}")
             return result
-
         file_path = Path(file)
         if not file_path.is_absolute():
             file_path = (pyproject_toml_file.parent / file).resolve()
-
         result.files.append(file_path)
 
     return result
@@ -55,30 +116,19 @@ def parse_pyproject_toml(pyproject_toml_file: Path) -> PyProjectParseResult:
 def write_pyproject_toml(pyproject_file: Path, project_name: str, project_files: list[str]):
     """
     Create or update a pyproject.toml file with the specified content.
-
-    Raises a ValueError if the project file is not a valid TOML file.
-
-    :param pyproject_file: The pyproject.toml file path to create or update.
-    :param project_name: The name of the project.
-    :param project_files: The relative paths of the files to include in the project.
     """
-    if pyproject_file.exists():
-        try:
-            doc = TOMLFile(pyproject_file).read()
-        except Exception as e:
-            raise f"Error parsing TOML: {str(e)}"
-    else:
-        doc = tomlkit.document()
+    data = {
+        "project": {"name": project_name},
+        "tool": {
+            "pyside6-project": {"files": sorted(project_files)}
+        }
+    }
 
-    project_table = doc.setdefault("project", tomlkit.table())
-    project_table["name"] = project_name
-
-    tool_table = doc.setdefault("tool", tomlkit.table())
-    pyside_table = tool_table.setdefault("pyside6-project", tomlkit.table())
-
-    pyside_table["files"] = sorted(project_files)
-
-    pyproject_file.write_text(tomlkit.dumps(doc), encoding="utf-8")
+    try:
+        content = _write_toml_content(data)
+        pyproject_file.write_text(content, encoding='utf-8')
+    except Exception as e:
+        raise ValueError(f"Error writing TOML file: {str(e)}")
 
 
 def migrate_pyproject(pyproject_file: Path | str = None) -> int:
@@ -138,25 +188,25 @@ def migrate_pyproject(pyproject_file: Path | str = None) -> int:
     if pyproject_toml_file.exists():
         already_existing_file = True
         try:
-            doc = TOMLFile(pyproject_toml_file).read()
+            content = pyproject_toml_file.read_text(encoding='utf-8')
+            data = _parse_toml_content(content)
         except Exception as e:
-            raise f"Error parsing TOML: {str(e)}"
+            raise ValueError(f"Error parsing TOML: {str(e)}")
     else:
         already_existing_file = False
-        doc = tomlkit.document()
+        data = {"project": {}, "tool": {"pyside6-project": {}}}
 
-    project_table = doc.setdefault("project", tomlkit.table())
-    if "name" not in project_table:
-        project_table["name"] = project_name
+    # Update project name if not present
+    if "name" not in data["project"]:
+        data["project"]["name"] = project_name
 
-    tool_table = doc.setdefault("tool", tomlkit.table())
-    pyside_table = tool_table.setdefault("pyside6-project", tomlkit.table())
-
-    pyside_table["files"] = sorted(
+    # Update files list
+    data["tool"]["pyside6-project"]["files"] = sorted(
         p.relative_to(project_folder).as_posix() for p in output_files
     )
 
-    toml_content = tomlkit.dumps(doc).replace('\r\n', '\n').replace('\r', '\n')
+    # Generate TOML content
+    toml_content = _write_toml_content(data)
 
     if already_existing_file:
         print(f"WARNING: A pyproject.toml file already exists at \"{pyproject_toml_file}\"")
@@ -167,7 +217,7 @@ def migrate_pyproject(pyproject_file: Path | str = None) -> int:
             return 0
 
     try:
-        Path(pyproject_toml_file).write_text(toml_content)
+        pyproject_toml_file.write_text(toml_content)
     except Exception as e:
         print(f"Error writing to \"{pyproject_toml_file}\": {str(e)}", file=sys.stderr)
         return 1
