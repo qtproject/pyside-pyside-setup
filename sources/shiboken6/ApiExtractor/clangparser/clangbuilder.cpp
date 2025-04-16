@@ -935,6 +935,12 @@ static QString enumType(const CXCursor &cursor)
 
 BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
 {
+    // Skip inline code
+    if ((cursor.kind >= CXCursor_FirstExpr && cursor.kind <= CXCursor_LastExpr)
+        || (cursor.kind >= CXCursor_FirstStmt && cursor.kind <= CXCursor_LastStmt)) {
+        return Skip;
+    }
+
     switch (cursor.kind) {
     case CXCursor_CXXAccessSpecifier:
         d->m_currentFunctionType = CodeModel::Normal;
@@ -1035,8 +1041,6 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
     case CXCursor_FriendDecl:
         d->m_withinFriendDecl = true;
         break;
-    case CXCursor_CompoundStmt: // Function bodies
-        return Skip;
     case CXCursor_Constructor:
     case CXCursor_Destructor: // Note: Also use clang_CXXConstructor_is..Constructor?
     case CXCursor_CXXMethod:
