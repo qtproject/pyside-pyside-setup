@@ -101,10 +101,13 @@ def _find_all_qt_modules():
 
     # Instead, we use __getattr__ which is supported since Python 3.7
     # and create the __all__ list on demand when needed.
-    location = Path(__file__).resolve().parent
-    files = os.listdir(location)
-    unordered = set(name[: name.find(".")] for name in files if name.startswith("Qt") and (
-                                                                name.endswith((".pyd", ".so"))))
+    unordered = set()
+    pattern = "Qt*.pyd" if sys.platform == "win32" else "Qt*.so"
+    for module in Path(__file__).resolve().parent.glob(pattern):
+        name = module.name[:module.name.find(".")]
+        if name.endswith("_d"):  # Windows debug suffix?
+            name = name[:-2]
+        unordered.add(name)
     ordered_part = __pre_all__
     result = []
     for name in ordered_part:
