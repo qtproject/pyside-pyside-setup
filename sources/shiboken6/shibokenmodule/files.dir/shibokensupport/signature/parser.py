@@ -449,7 +449,11 @@ def calculate_props(line):
             ann = 'nullptr'     # maps to None
             tup = name, ann
             arglist[idx] = tup
-        annotations[name] = _resolve_type(ann, line, 0, handle_argvar, parsed.funcname)
+        # When the variable name from constructor and the property is the same,
+        # one overwrites the other. This is fixed here and the latter is omitted.
+        # The property variables added in layout.py
+        if name not in annotations:
+            annotations[name] = _resolve_type(ann, line, 0, handle_argvar, parsed.funcname)
         if len(tup) == 3:
             default = _resolve_value(tup[2], ann, line)
             # PYSIDE-2846: When creating signatures, the defaults should be hashable.
