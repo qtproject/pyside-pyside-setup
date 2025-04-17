@@ -84,10 +84,10 @@ def package_prefix_names():
     # Note: shiboken6_generator is not needed for compile_using_nuitka,
     # but building modules with cmake needs it.
     if NEW_WHEELS:
-        return ["shiboken6", "shiboken6_generator", "PySide6_Essentials", "PySide6_Addons",
-                "PySide6"]
+        return ["shiboken6", "shiboken6_generator", "pyside6_essentials", "pyside6_addons",
+                "pyside6"]
     else:
-        return ["shiboken6", "shiboken6_generator", "PySide6"]
+        return ["shiboken6", "shiboken6_generator", "pyside6"]
 
 
 def clean_egg_info():

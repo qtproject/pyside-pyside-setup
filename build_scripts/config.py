@@ -82,7 +82,7 @@ class Config(metaclass=Singleton):
         self.setup_kwargs['author'] = _author["name"]
         self.setup_kwargs['author_email'] = _author["email"]
         self.setup_kwargs['url'] = _pyproject_data["urls"]["Homepage"]
-        self.setup_kwargs['license'] = _pyproject_data["license"]["text"]
+        self.setup_kwargs['license'] = _pyproject_data["license"]
         self.setup_kwargs['python_requires'] = _pyproject_data["requires-python"]
 
         self.classifiers = _pyproject_data["classifiers"]
