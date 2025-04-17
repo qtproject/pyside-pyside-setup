@@ -433,6 +433,10 @@ static PyObject *qtmsghandler = nullptr;
 static void msgHandlerCallback(QtMsgType type, const QMessageLogContext &ctx, const QString &msg)
 {
     Shiboken::GilState state;
+    PyObject *excType{};
+    PyObject *excValue{};
+    PyObject *excTraceback{};
+    PyErr_Fetch(&excType, &excValue, &excTraceback);
     Shiboken::AutoDecRef arglist(PyTuple_New(3));
     PyTuple_SetItem(arglist, 0, %CONVERTTOPYTHON[QtMsgType](type));
     PyTuple_SetItem(arglist, 1, %CONVERTTOPYTHON[QMessageLogContext &](ctx));
@@ -440,6 +444,7 @@ static void msgHandlerCallback(QtMsgType type, const QMessageLogContext &ctx, co
     const char *data = array.constData();
     PyTuple_SetItem(arglist, 2, %CONVERTTOPYTHON[const char *](data));
     Shiboken::AutoDecRef ret(PyObject_CallObject(qtmsghandler, arglist));
+    PyErr_Restore(excType, excValue, excTraceback);
 }
 // @snippet qt-messagehandler
 
