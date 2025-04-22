@@ -198,6 +198,18 @@ instructions:
          property: target.compiler
          equals_value: ICC_18
     - type: EnvironmentVariable
+      variableName: PYTHON3_PATH
+      variableValue: "{{ index .Env \"PYTHON3.10.0-64_PATH\"}}"
+      enable_if:
+          condition: and
+          conditions:
+            - condition: property
+              property: host.os
+              equals_value: Windows
+            - condition: property
+              property: host.arch
+              equals_value: X86_64
+    - type: EnvironmentVariable
       variableName: ICC64_18_PATH # Seems a bit hard to maintain
       variableValue: /opt/intel/compilers_and_libraries_2018.1.163/linux/bin/intel64:/opt/intel/bin
       enable_if:
