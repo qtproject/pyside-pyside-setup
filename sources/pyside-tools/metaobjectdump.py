@@ -70,9 +70,11 @@ def _attribute(node: ast.Attribute) -> tuple[str, str]:
     return node.value.id, node.attr
 
 
-def _name(node: ast.Name | ast.Attribute) -> str:
+def _name(node: ast.Name | ast.Attribute | ast.Constant) -> str:
     """Return the name of something that is either an attribute or a name,
        such as base classes or call.func"""
+    if isinstance(node, ast.Constant):
+        return str(node.value)
     if isinstance(node, ast.Attribute):
         qualifier, name = _attribute(node)
         return f"{qualifier}.{node.attr}"
