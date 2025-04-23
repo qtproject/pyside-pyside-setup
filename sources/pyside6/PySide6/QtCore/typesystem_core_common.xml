@@ -31,16 +31,16 @@
     <overload-removal type="long" replaces="short"/>
     <overload-removal type="long long" replaces="long;int"/>
 
-    <function signature="qFastCos(qreal)" since="4.6"/>
-    <function signature="qFastSin(qreal)" since="4.6"/>
+    <function signature="qFastCos(qreal)"/>
+    <function signature="qFastSin(qreal)"/>
     <function signature="qFuzzyCompare(double,double)"/>
-    <function signature="qFuzzyIsNull(double)" since="4.6"/>
+    <function signature="qFuzzyIsNull(double)"/>
     <function signature="qIsFinite(double)"/>
     <function signature="qIsInf(double)"/>
     <function signature="qIsNaN(double)"/>
     <function signature="qIsNull(double)"/>
     <!-- Qt5: gone <function signature="qRound(qreal)"/> -->
-    <function signature="qtTrId(const char*,int)" since="4.6"/>
+    <function signature="qtTrId(const char*,int)"/>
     <function signature="qVersion()">
         <modify-function>
             <modify-argument index="return" pyi-type="str"/>
@@ -597,7 +597,7 @@
       <include file-name="QtCore/QProperty" location="global"/>
     </extra-includes>
     <enum-type name="AlignmentFlag" python-type="IntFlag" flags="Alignment"/>
-    <enum-type name="AnchorPoint" since="4.6"/>
+    <enum-type name="AnchorPoint"/>
     <enum-type name="ColorScheme" since="6.5"/>
     <enum-type name="ApplicationAttribute"/>
     <enum-type name="ApplicationState" flags="ApplicationStates"/>
@@ -613,7 +613,7 @@
     <enum-type name="ConnectionType"/>
     <enum-type name="ContextMenuPolicy"/>
     <enum-type name="ContextMenuTrigger" since="6.8"/>
-    <enum-type name="CoordinateSystem" since="4.6"/>
+    <enum-type name="CoordinateSystem"/>
     <enum-type name="Corner"/>
     <enum-type name="CursorShape"/>
     <enum-type name="DateFormat"/>
@@ -627,14 +627,14 @@
     <enum-type name="FindChildOption" flags="FindChildOptions"/>
     <enum-type name="FocusPolicy" python-type="IntFlag"/>
     <enum-type name="FocusReason"/>
-    <enum-type name="GestureFlag" flags="GestureFlags" since="4.6"/>
-    <enum-type name="GestureState" since="4.6"/>
-    <enum-type name="GestureType" python-type="IntEnum" since="4.6"/>
+    <enum-type name="GestureFlag" flags="GestureFlags"/>
+    <enum-type name="GestureState"/>
+    <enum-type name="GestureType" python-type="IntEnum"/>
     <enum-type name="GlobalColor"/>
     <enum-type name="HighDpiScaleFactorRoundingPolicy"/>
     <enum-type name="HitTestAccuracy"/>
     <enum-type name="ImageConversionFlag" flags="ImageConversionFlags"/>
-    <enum-type name="InputMethodHint" flags="InputMethodHints" since="4.6"/>
+    <enum-type name="InputMethodHint" flags="InputMethodHints"/>
     <enum-type name="InputMethodQuery" flags="InputMethodQueries"/>
     <enum-type name="EnterKeyType"/>
     <enum-type name="ItemDataRole" python-type="IntEnum"/>
@@ -651,7 +651,7 @@
     <enum-type name="MouseEventFlag" flags="MouseEventFlags"/>
     <enum-type name="MouseEventSource"/>
     <enum-type name="NativeGestureType"/>
-    <enum-type name="NavigationMode" since="4.6"/>
+    <enum-type name="NavigationMode"/>
     <enum-type name="Orientation" flags="Orientations"/>
     <enum-type name="PenCapStyle"/>
     <enum-type name="PenJoinStyle"/>
@@ -671,14 +671,14 @@
     <enum-type name="TextFlag" python-type="IntFlag"/>
     <enum-type name="TextFormat"/>
     <enum-type name="TextInteractionFlag" flags="TextInteractionFlags"/>
-    <enum-type name="TileRule" since="4.6"/>
+    <enum-type name="TileRule"/>
     <enum-type name="TimerId" since="6.8"/>
     <enum-type name="TimerType"/>
     <enum-type name="TimeSpec"/>
     <enum-type name="ToolBarArea" flags="ToolBarAreas"/>
     <enum-type name="ToolBarAreaSizes"/>
     <enum-type name="ToolButtonStyle"/>
-    <enum-type name="TouchPointState" flags="TouchPointStates" since="4.6"/>
+    <enum-type name="TouchPointState" flags="TouchPointStates"/>
     <enum-type name="TransformationMode"/>
     <enum-type name="UIEffect"/>
     <enum-type name="WhiteSpaceMode"/>
@@ -687,7 +687,7 @@
     <enum-type name="WindowModality"/>
     <enum-type name="WindowState" flags="WindowStates"/>
     <enum-type name="WindowType" python-type="IntFlag" flags="WindowFlags"/>
-    <enum-type name="CursorMoveStyle" since="4.8" revision="4800"/>
+    <enum-type name="CursorMoveStyle" revision="4800"/>
 
     <inject-code class="target" position="end" file="../glue/qtcore.cpp"
                  snippet="qt-modifier"/>
@@ -735,8 +735,8 @@
     <enum-type name="ForeverConstant"/>
   </value-type>
 
-  <value-type name="QElapsedTimer" since="4.7">
-    <enum-type name="ClockType" since="4.7"/>
+  <value-type name="QElapsedTimer">
+    <enum-type name="ClockType"/>
   </value-type>
 
   <object-type name="QAbstractTableModel"
@@ -1403,9 +1403,9 @@
     <enum-type name="LanguageCodeType" python-type="IntFlag" flags="LanguageCodeTypes" since="6.3"/>
     <enum-type name="MeasurementSystem"/>
     <enum-type name="NumberOption" flags="NumberOptions"/>
-    <enum-type name="Script" since="4.8" revision="4800"/>
-    <enum-type name="CurrencySymbolFormat" since="4.8" revision="4800"/>
-    <enum-type name="QuotationStyle" since="4.8" revision="4800"/>
+    <enum-type name="Script" revision="4800"/>
+    <enum-type name="CurrencySymbolFormat" revision="4800"/>
+    <enum-type name="QuotationStyle" revision="4800"/>
     <!--### All those C++ number types have the same representation in Python -->
     <modify-function signature="toString(qulonglong)const" remove="all"/>
     <modify-function signature="toString(ushort)const" remove="all"/>
@@ -2693,7 +2693,7 @@
 
   <object-type name="QCoreApplication">
     <!--Qt5: gone <enum-type name="Encoding"/> -->
-    <enum-type identified-by-value="ApplicationFlags" since="4.8" revision="4800"/>
+    <enum-type identified-by-value="ApplicationFlags" revision="4800"/>
     <extra-includes>
       <include file-name="QStringList" location="global"/>
       <include file-name="QTranslator" location="global"/>
@@ -2818,7 +2818,7 @@
 
 
   <object-type name="QDataStream" stream="yes">
-    <enum-type name="FloatingPointPrecision" since="4.6"/>
+    <enum-type name="FloatingPointPrecision"/>
     <enum-type name="Status"/>
     <enum-type name="Version" python-type="IntEnum"/>
     <enum-type name="ByteOrder"/>
@@ -3129,7 +3129,7 @@
   <object-type name="QXmlStreamReader">
     <enum-type name="Error"/>
     <enum-type name="TokenType"/>
-    <enum-type name="ReadElementTextBehaviour" since="4.6"/>
+    <enum-type name="ReadElementTextBehaviour"/>
   </object-type>
   <object-type name="QXmlStreamWriter">
     <!-- Removed because it expect QString to be mutable -->
@@ -3413,13 +3413,13 @@
   </value-type>
 
   <!-- From Qt4.6 -->
-  <object-type name="QAbstractAnimation" since="4.6">
+  <object-type name="QAbstractAnimation">
     <enum-type name="DeletionPolicy"/>
     <enum-type name="Direction"/>
     <enum-type name="State"/>
   </object-type>
 
-  <object-type name="QAnimationGroup" since="4.6">
+  <object-type name="QAnimationGroup">
     <modify-function signature="addAnimation(QAbstractAnimation*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -3452,7 +3452,7 @@
   <!-- We will use inject code to implement the function below -->
   <rejection class="QEasingCurve" function-name="setCustomType"/>
   <rejection class="QEasingCurve" function-name="customType"/>
-  <value-type name="QEasingCurve" since="4.6">
+  <value-type name="QEasingCurve">
     <extra-includes>
       <include file-name="pysideweakref.h" location="global"/>
       <include file-name="glue/qeasingcurve_glue.h" location="local"/>
@@ -3492,23 +3492,23 @@
     </extra-includes>
   </value-type>
 
-  <value-type name="QMargins" since="4.6"/>
+  <value-type name="QMargins"/>
   <value-type name="QMarginsF"/>
 
-  <object-type name="QParallelAnimationGroup" since="4.6"/>
+  <object-type name="QParallelAnimationGroup"/>
 
-  <object-type name="QPauseAnimation" since="4.6"/>
+  <object-type name="QPauseAnimation"/>
 
-  <value-type name="QProcessEnvironment" since="4.6">
+  <value-type name="QProcessEnvironment">
       <configuration condition="QT_CONFIG(processenvironment)"/>
       <enum-type name="Initialization" since="6.3"/>
   </value-type>
 
-  <object-type name="QPropertyAnimation" since="4.6"/>
+  <object-type name="QPropertyAnimation"/>
 
-  <object-type name="QSequentialAnimationGroup" since="4.6"/>
+  <object-type name="QSequentialAnimationGroup"/>
 
-  <object-type name="QVariantAnimation" since="4.6"/>
+  <object-type name="QVariantAnimation"/>
 
   <value-type name="QVersionNumber">
     <modify-function signature="fromString(QAnyStringView,qsizetype*)">

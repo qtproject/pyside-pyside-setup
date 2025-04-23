@@ -48,7 +48,7 @@
         <enum-type name="NetworkLayerProtocol"/>
         <enum-type name="PauseMode" flags="PauseModes"/>
         <enum-type name="SocketError"/>
-        <enum-type name="SocketOption" since="4.6"/>
+        <enum-type name="SocketOption"/>
         <enum-type name="SocketState"/>
         <enum-type name="SocketType"/>
         <modify-function signature="connectToHost(const QString&amp;,quint16,QFlags&lt;QIODeviceBase::OpenModeFlag>,QAbstractSocket::NetworkLayerProtocol)" allow-thread="yes"/>

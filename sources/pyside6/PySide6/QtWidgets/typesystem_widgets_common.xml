@@ -258,7 +258,7 @@
     <enum-type name="Extension"/>
     <enum-type name="GraphicsItemChange"/>
     <enum-type name="GraphicsItemFlag" flags="GraphicsItemFlags"/>
-    <enum-type name="PanelModality" since="4.6"/>
+    <enum-type name="PanelModality"/>
     <inject-code class="target" position="end" file="../glue/qtwidgets.cpp" snippet="qgraphicsitem"/>
     <modify-function signature="setParentItem(QGraphicsItem*)">
       <modify-argument index="this">
@@ -327,7 +327,7 @@
     <modify-function signature="inputMethodEvent(QInputMethodEvent*)">
       <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
-    <modify-function signature="isBlockedByModalPanel(QGraphicsItem**)const" since="4.6">
+    <modify-function signature="isBlockedByModalPanel(QGraphicsItem**)const">
       <modify-argument index="1">
         <remove-argument/>
       </modify-argument>
@@ -1121,7 +1121,7 @@
                polymorphic-id-expression="%B-&gt;type() == QEvent::GraphicsSceneWheel"/>
 
   <object-type name="QGestureEvent"
-               polymorphic-id-expression="%B-&gt;type() == QEvent::Gesture || %B-&gt;type() == QEvent::GestureOverride" since="4.6">
+               polymorphic-id-expression="%B-&gt;type() == QEvent::Gesture || %B-&gt;type() == QEvent::GestureOverride">
     <modify-function signature="activeGestures()const">
       <modify-argument index="return">
         <define-ownership owner="default"/>
@@ -1159,7 +1159,7 @@
     <enum-type name="ControlElement" python-type="IntEnum"/>
     <enum-type name="PixelMetric" python-type="IntEnum"/>
     <enum-type name="PrimitiveElement" python-type="IntEnum"/>
-    <enum-type name="RequestSoftwareInputPanel" since="4.6"/>
+    <enum-type name="RequestSoftwareInputPanel"/>
     <enum-type name="StandardPixmap" python-type="IntEnum"/>
     <enum-type name="StateFlag" flags="State"/>
     <enum-type name="StyleHint" python-type="IntEnum"/>
@@ -3324,10 +3324,10 @@
     </modify-function>
   </object-type>
 
-  <object-type name="QGesture" since="4.6">
+  <object-type name="QGesture">
       <enum-type name="GestureCancelPolicy"/>
   </object-type>
-  <object-type name="QGestureRecognizer" since="4.6">
+  <object-type name="QGestureRecognizer">
       <enum-type name="ResultFlag" flags="Result"/>
       <modify-function signature="create(QObject*)">
         <modify-argument index="return">
@@ -3340,28 +3340,28 @@
         </modify-argument>
       </modify-function>
   </object-type>
-  <object-type name="QTapAndHoldGesture" since="4.6"/>
-  <object-type name="QTapGesture" since="4.6"/>
-  <object-type name="QGraphicsAnchor" since="4.6"/>
-  <object-type name="QGraphicsAnchorLayout" since="4.6"/>
-  <object-type name="QGraphicsBlurEffect" since="4.6">
+  <object-type name="QTapAndHoldGesture"/>
+  <object-type name="QTapGesture"/>
+  <object-type name="QGraphicsAnchor"/>
+  <object-type name="QGraphicsAnchorLayout"/>
+  <object-type name="QGraphicsBlurEffect">
       <enum-type name="BlurHint" flags="BlurHints"/>
   </object-type>
-  <object-type name="QGraphicsColorizeEffect" since="4.6"/>
-  <object-type name="QGraphicsDropShadowEffect" since="4.6"/>
+  <object-type name="QGraphicsColorizeEffect"/>
+  <object-type name="QGraphicsDropShadowEffect"/>
 
-  <object-type name="QGraphicsEffect" since="4.6">
+  <object-type name="QGraphicsEffect">
       <enum-type name="ChangeFlag" flags="ChangeFlags"/>
       <enum-type name="PixmapPadMode"/>
   </object-type>
 
-  <object-type name="QGraphicsObject" since="4.6" default-superclass="QGraphicsItem"/>
-  <object-type name="QGraphicsOpacityEffect" since="4.6"/>
-  <object-type name="QGraphicsRotation" since="4.6"/>
-  <object-type name="QGraphicsScale" since="4.6"/>
-  <object-type name="QGraphicsTransform" since="4.6"/>
-  <object-type name="QPanGesture" since="4.6"/>
-  <object-type name="QPinchGesture" since="4.6">
+  <object-type name="QGraphicsObject" default-superclass="QGraphicsItem"/>
+  <object-type name="QGraphicsOpacityEffect"/>
+  <object-type name="QGraphicsRotation"/>
+  <object-type name="QGraphicsScale"/>
+  <object-type name="QGraphicsTransform"/>
+  <object-type name="QPanGesture"/>
+  <object-type name="QPinchGesture">
       <enum-type name="ChangeFlag" flags="ChangeFlags"/>
   </object-type>
 
@@ -3370,11 +3370,11 @@
       <enum-type name="TextureFormat"/>
   </object-type>
 
-  <object-type name="QSwipeGesture" since="4.6">
+  <object-type name="QSwipeGesture">
       <enum-type name="SwipeDirection"/>
   </object-type>
 
-  <value-type name="QTileRules" since="4.6"/>
+  <value-type name="QTileRules"/>
 
   <object-type name="QScroller">
       <enum-type name="State"/>

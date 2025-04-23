@@ -156,7 +156,7 @@
   <object-type name="QAction">
     <enum-type name="ActionEvent"/>
     <enum-type name="MenuRole"/>
-    <enum-type name="Priority" since="4.6"/>
+    <enum-type name="Priority"/>
     <!-- PYSIDE-1627 QAction::menu()/setMenu() are templates -->
     <add-function signature="menu()const" return-type="QObject*">
         <inject-code file="../glue/qtgui.cpp" snippet="qaction-menu"/>
@@ -434,7 +434,7 @@
     </modify-function>
   </value-type>
   <value-type name="QTextBlockFormat">
-    <enum-type name="LineHeightTypes" since="4.8" revision="4800"/>
+    <enum-type name="LineHeightTypes" revision="4800"/>
     <enum-type name="MarkerType"/>
   </value-type>
   <value-type name="QTextTableCellFormat"/>
@@ -626,7 +626,7 @@
     <enum-type name="StyleHint"/>
     <enum-type name="StyleStrategy" python-type="Flag"/>
     <enum-type name="Weight" python-type="IntEnum"/>
-    <enum-type name="HintingPreference" since="4.8" revision="4800"/>
+    <enum-type name="HintingPreference" revision="4800"/>
     <extra-includes>
       <include file-name="QStringList" location="global"/>
     </extra-includes>
@@ -741,13 +741,13 @@
     <!-- ### There is already an loadFromData with a QByteArray type (that is convertible from Python's str) as the first type. -->
     <modify-function signature="loadFromData(const uchar*,int,const char*)" remove="all"/>
 
-    <modify-function signature="constBits()const" since="4.7">
+    <modify-function signature="constBits()const">
         <inject-code file="../glue/qtgui.cpp" snippet="qimage-constbits"/>
     </modify-function>
     <modify-function signature="bits()">
         <inject-code file="../glue/qtgui.cpp" snippet="qimage-bits"/>
     </modify-function>
-    <modify-function signature="constScanLine(int)const" since="4.7">
+    <modify-function signature="constScanLine(int)const">
         <inject-code file="../glue/qtgui.cpp" snippet="qimage-constscanline"/>
         <modify-argument index="return">
             <replace-type modified-type="PyObject"/>
@@ -884,7 +884,7 @@
             </insert-template>
         </inject-code>
     </modify-function>
-    <modify-function signature="getHsl(int*,int*,int*,int*)const" since="4.6">
+    <modify-function signature="getHsl(int*,int*,int*,int*)const">
         <modify-argument index="0">
             <replace-type modified-type="PyObject*"/>
         </modify-argument>
@@ -907,7 +907,7 @@
             </insert-template>
         </inject-code>
     </modify-function>
-    <modify-function signature="getHslF(float*,float*,float*,float*)const" since="4.6">
+    <modify-function signature="getHslF(float*,float*,float*,float*)const">
         <modify-argument index="0">
             <replace-type modified-type="PyObject*"/>
         </modify-argument>
@@ -1159,7 +1159,7 @@
   </object-type>
   <object-type name="QPyTextObject"/>
 
-  <object-type name="QDesktopServices" since="4.2">
+  <object-type name="QDesktopServices">
     <modify-function signature="openUrl(const QUrl&amp;)" allow-thread="yes"/>
   </object-type>
   <object-type name="QDoubleValidator">
@@ -1824,7 +1824,7 @@
     <enum-type name="MarkdownFeature" flags="MarkdownFeatures"/>
     <enum-type name="MetaInformation"/>
     <enum-type name="ResourceType" python-type="IntEnum"/>
-    <enum-type name="Stacks" since="4.7"/>
+    <enum-type name="Stacks"/>
     <modify-function signature="setDocumentLayout(QAbstractTextDocumentLayout*)">
       <modify-argument index="1">
         <parent index="this" action="add"/>
@@ -1848,7 +1848,7 @@
     </modify-function>
     <modify-function signature="print(QPagedPaintDevice*)const" allow-thread="yes" rename="print_"/>
   </object-type>
-  <object-type name="QTextDocumentWriter" since="4.5"/>
+  <object-type name="QTextDocumentWriter"/>
   <object-type name="QTextTable">
     <extra-includes>
       <include file-name="QTextCursor" location="global"/>
@@ -2067,9 +2067,9 @@
       <include file-name="pyside_numpy.h" location="global"/>
     </extra-includes>
     <enum-type name="CompositionMode"/>
-    <enum-type name="PixmapFragmentHint" flags="PixmapFragmentHints" since="4.7"/>
+    <enum-type name="PixmapFragmentHint" flags="PixmapFragmentHints"/>
     <enum-type name="RenderHint" flags="RenderHints"/>
-    <value-type name="PixmapFragment" since="4.7">
+    <value-type name="PixmapFragment">
         <include file-name="QPainter" location="global"/>
     </value-type>
 
@@ -2216,7 +2216,7 @@
   </object-type>
 
   <value-type name="QGenericMatrix" generate="no"/>
-  <value-type name="QMatrix2x2" since="4.6">
+  <value-type name="QMatrix2x2">
     <modify-function signature="QMatrix2x2(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
@@ -2253,7 +2253,7 @@
     </add-function>
   </value-type>
 
-  <value-type name="QMatrix2x3" since="4.6">
+  <value-type name="QMatrix2x3">
     <modify-function signature="QMatrix2x3(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
@@ -2290,7 +2290,7 @@
     </add-function>
   </value-type>
 
-  <value-type name="QMatrix2x4" since="4.6">
+  <value-type name="QMatrix2x4">
     <modify-function signature="QMatrix2x4(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
@@ -2327,7 +2327,7 @@
     </add-function>
   </value-type>
 
-  <value-type name="QMatrix3x2" since="4.6">
+  <value-type name="QMatrix3x2">
     <modify-function signature="QMatrix3x2(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
@@ -2364,7 +2364,7 @@
     </add-function>
   </value-type>
 
-  <value-type name="QMatrix3x3" since="4.6">
+  <value-type name="QMatrix3x3">
     <modify-function signature="QMatrix3x3(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
@@ -2401,7 +2401,7 @@
     </add-function>
   </value-type>
 
-  <value-type name="QMatrix3x4" since="4.6">
+  <value-type name="QMatrix3x4">
     <modify-function signature="QMatrix3x4(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
@@ -2438,7 +2438,7 @@
     </add-function>
   </value-type>
 
-  <value-type name="QMatrix4x2" since="4.6">
+  <value-type name="QMatrix4x2">
     <modify-function signature="QMatrix4x2(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
@@ -2475,7 +2475,7 @@
     </add-function>
   </value-type>
 
-  <value-type name="QMatrix4x3" since="4.6">
+  <value-type name="QMatrix4x3">
     <modify-function signature="QMatrix4x3(const float*)" remove="all"/>
     <modify-function signature="copyDataTo(float*) const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
@@ -2512,7 +2512,7 @@
     </add-function>
   </value-type>
 
-  <value-type name="QMatrix4x4" since="4.6">
+  <value-type name="QMatrix4x4">
     <enum-type name="Flag" flags="Flags"/>
 
     <!-- Qt5: HAIRY TRICK ALERT ahead!
@@ -2606,7 +2606,7 @@
 
     _______ end of matrix block _______ -->
 
-  <value-type name="QQuaternion" since="4.6">
+  <value-type name="QQuaternion">
     <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
@@ -2648,7 +2648,7 @@
     </modify-function>
   </value-type>
 
-  <object-type name="QTouchEvent" since="4.6">
+  <object-type name="QTouchEvent">
       <add-function signature="__repr__" return-type="str">
           <inject-code class="target" position="beginning">
               <insert-template name="repr_qdebug_gui"/>
@@ -2661,7 +2661,7 @@
     <enum-type name="DeviceType" flags="DeviceTypes"/>
   </object-type>
 
-  <value-type name="QVector2D" since="4.6">
+  <value-type name="QVector2D">
     <add-function signature="__repr__" return-type="str">
         <inject-code class="target" position="beginning">
             <insert-template name="repr_code">
@@ -2690,7 +2690,7 @@
     </add-function>
 
   </value-type>
-  <value-type name="QVector3D" since="4.6">
+  <value-type name="QVector3D">
     <extra-includes>
       <include file-name="QMatrix4x4" location="global"/>
     </extra-includes>
@@ -2722,7 +2722,7 @@
     </add-function>
 
   </value-type>
-  <value-type name="QVector4D" since="4.6">
+  <value-type name="QVector4D">
     <extra-includes>
       <include file-name="QMatrix4x4" location="global"/>
     </extra-includes>
