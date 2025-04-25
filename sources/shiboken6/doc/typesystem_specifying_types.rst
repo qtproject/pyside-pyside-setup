@@ -501,11 +501,14 @@ contain :ref:`add-function`, :ref:`add-pymethoddef`,
          doc-file = "..." />
     </typesystem>
 
-The **name** attribute is the fully qualified C++ class name. If there is no
-C++ base class, the default-superclass attribute can be used to specify a
-superclass for the given type, in the generated target language API. The
+The **name** attribute is the fully qualified C++ class name. The
 **copyable** and **hash-function** attributes are the same as described for
 :ref:`value-type`.
+
+The *optional* **default-superclass** attribute can be used to specify a
+superclass for the given type in the generated target language API.
+This can be useful if the C++ base class is not exposed. The specified
+super class needs to be a direct base class of the class in question.
 
 The *optional* **force-abstract** attribute forces the class to be
 abstract, disabling its instantiation. The generator will normally detect
