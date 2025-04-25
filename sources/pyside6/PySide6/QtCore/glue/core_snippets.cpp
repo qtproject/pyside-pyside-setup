@@ -45,7 +45,14 @@ QMetaType QVariant_resolveMetaType(PyTypeObject *type)
     // that has added any python fields or slots to its object layout.
     // See https://mail.python.org/pipermail/python-list/2009-January/520733.html
     if (type->tp_bases) {
-        for (Py_ssize_t i = 0, size = PyTuple_Size(type->tp_bases); i < size; ++i) {
+        const auto size = PyTuple_Size(type->tp_bases);
+        Py_ssize_t i = 0;
+        // PYSIDE-1887, PYSIDE-86: Skip QObject base class of QGraphicsObject;
+        // it needs to use always QGraphicsItem as a QVariant type for
+        // QGraphicsItem::itemChange() to work.
+        if (qstrcmp(typeName, "QGraphicsObject*") == 0)
+            ++i;
+        for ( ; i < size; ++i) {
             auto baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_bases, i));
             const QMetaType derived = QVariant_resolveMetaType(baseType);
             if (derived.isValid())

@@ -50,6 +50,7 @@ class QGraphicsObjectReimpl(UsesQApplication):
         #   and then the QVariant was not associated with
         #   a QGraphicsItem but a QObjectItem because the base
         #   class was a QObject.
+        #   See also PYSIDE-1887, PYSIDE-3069
         gobjA = GObjA()
         gobjA.setParentItem(w)
         self.assertIs(type(w), type(gobjA.parentItem()))

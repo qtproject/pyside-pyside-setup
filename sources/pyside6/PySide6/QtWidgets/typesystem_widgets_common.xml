@@ -3355,7 +3355,7 @@
       <enum-type name="PixmapPadMode"/>
   </object-type>
 
-  <object-type name="QGraphicsObject" default-superclass="QGraphicsItem"/>
+  <object-type name="QGraphicsObject"/>
   <object-type name="QGraphicsOpacityEffect"/>
   <object-type name="QGraphicsRotation"/>
   <object-type name="QGraphicsScale"/>
