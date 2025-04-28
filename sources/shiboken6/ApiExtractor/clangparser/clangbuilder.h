@@ -8,6 +8,11 @@
 
 #include <codemodel_fwd.h>
 
+
+#if CINDEX_VERSION_MAJOR > 0 || CINDEX_VERSION_MINOR >= 63 // Clang 16
+#  define CLANG_HAS_ASSIGNMENT_OPERATOR_CHECK
+#endif
+
 namespace clang {
 
 class BuilderPrivate;

@@ -1117,8 +1117,22 @@ CodeModel::FunctionType _FunctionModelItem::_determineTypeHelper() const
     auto newType = newTypeOpt.value();
     // If clang did not pre-detect AssignmentOperator for some operator=(),
     // it is an assignment from another type which we are not interested in.
-    if (newType == CodeModel::AssignmentOperator)
+    if (newType == CodeModel::AssignmentOperator) {
+#ifndef CLANG_HAS_ASSIGNMENT_OPERATOR_CHECK
+        // For clang 14 (Yocto), add a manual check.
+        if (m_arguments.size() == 1 && !type().isVoid()
+            && type().qualifiedName() == m_arguments.constFirst()->type().qualifiedName()) {
+            switch (m_arguments.constFirst()->type().referenceType()) {
+            case NoReference:
+            case LValueReference:
+                return CodeModel::AssignmentOperator;
+            case RValueReference:
+                return CodeModel::MoveAssignmentOperator;
+            }
+        }
+#endif // !CLANG_HAS_ASSIGNMENT_OPERATOR_CHECK
         return CodeModel::OtherAssignmentOperator;
+    }
     // It's some sort of dereference operator?!
     if (m_arguments.isEmpty()) {
         switch (newType) {
