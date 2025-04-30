@@ -19,8 +19,14 @@ Requirements
 .. _OpenSSL: https://sourceforge.net/projects/openssl/
 .. _`Qt for Windows`: https://doc.qt.io/qt-6/windows.html
 
-Building from source on Windows 10
-----------------------------------
+Building from source on Windows
+-------------------------------
+
+Creating a Dev Drive
+~~~~~~~~~~~~~~~~~~~~
+
+We recommend using a `Dev Drive`_ for development work on Windows. This is a
+special partition with a fast file system that is excluded from virus scanning.
 
 Creating a virtual environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -143,3 +149,4 @@ Remember to properly set the environment variables for Qt and PySide::
     python examples\widgets\widgets\tetrix\tetrix.py
 
 .. _`uv`: https://docs.astral.sh/uv/
+.. _`Dev Drive`: https://learn.microsoft.com/en-us/windows/dev-drive/
