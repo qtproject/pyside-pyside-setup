@@ -31,7 +31,7 @@ instructions:
     userMessageOnFailure: >
          Failed to remove pyside-setup dir
   - type: InstallBinaryArchive
-    relativeStoragePath: "{{.Env.MODULE_ARTIFACTS_RELATIVE_STORAGE_PATH}}/artifacts.tar.gz"
+    relativeStoragePath: "{{.Env.MODULE_ARTIFACTS_RELATIVE_STORAGE_PATH}}/artifacts.tar.zst"
     directory: "pyside"
     maxTimeInSeconds: 1200
     maxTimeBetweenOutput: 1200
