@@ -2,14 +2,14 @@ type: Group
 instructions:
   - type: Group
     instructions:
-      - !include "{{pyside/pyside-setup}}/execute_android_instructions.yaml"
+      - !include "{{pyside/tqtc-pyside-setup}}/execute_android_instructions.yaml"
     enable_if:
       condition: property
       property: target.os
       equals_value: Android
   - type: Group
     instructions:
-      - !include "{{pyside/pyside-setup}}/execute_desktop_instructions.yaml"
+      - !include "{{pyside/tqtc-pyside-setup}}/execute_desktop_instructions.yaml"
     enable_if:
         condition: and
         conditions:

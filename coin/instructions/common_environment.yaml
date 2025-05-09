@@ -5,14 +5,14 @@ instructions:
       variableValue: "ci"
     - type: EnvironmentVariable
       variableName: PYSIDE_VIRTUALENV
-      variableValue: "{{.AgentWorkingDir}}\\pyside\\pyside-setup\\env"
+      variableValue: "{{.AgentWorkingDir}}\\pyside\\tqtc-pyside-setup\\env"
       enable_if:
           condition: property
           property: host.os
           equals_value: Windows
     - type: EnvironmentVariable
       variableName: PYSIDE_VIRTUALENV
-      variableValue: "{{.AgentWorkingDir}}/pyside/pyside-setup/env"
+      variableValue: "{{.AgentWorkingDir}}/pyside/tqtc-pyside-setup/env"
       enable_if:
         condition: or
         conditions:
