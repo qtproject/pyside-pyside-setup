@@ -27,6 +27,7 @@
 #include <QtCore/qscopedpointer.h>
 
 #include <memory>
+#include <utility>
 
 using namespace Qt::StringLiterals;
 
@@ -123,6 +124,17 @@ PyObjectWrapper::PyObjectWrapper(const PyObjectWrapper &other)
 {
     Shiboken::GilState gil;
     Py_XINCREF(m_me);
+}
+
+PyObjectWrapper::PyObjectWrapper(PyObjectWrapper &&other) noexcept
+ : m_me{std::exchange(other.m_me, nullptr)}
+{
+}
+
+PyObjectWrapper &PyObjectWrapper::operator=(PyObjectWrapper &&other) noexcept
+{
+    m_me = std::exchange(other.m_me, nullptr);
+    return *this;
 }
 
 PyObjectWrapper::~PyObjectWrapper()
