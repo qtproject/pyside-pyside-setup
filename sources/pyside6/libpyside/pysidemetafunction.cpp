@@ -3,11 +3,14 @@
 
 #include "pysidemetafunction.h"
 #include "pysidemetafunction_p.h"
+#include "signalmanager.h"
 
 #include <shiboken.h>
 #include <signature.h>
 
 #include <QtCore/QMetaMethod>
+
+using namespace Qt::StringLiterals;
 
 extern "C"
 {
@@ -161,6 +164,10 @@ bool call(QObject *self, int methodIndex, PyObject *args, PyObject **retVal)
                 QString tmp;
                 converter.toCpp(obj, &tmp);
                 methValues[i] = tmp;
+            } else if (metaType.id() == PyObjectWrapper::metaTypeId()) {
+                // Manual conversion, see PyObjectWrapper converter registration
+                methValues[i] = QVariant::fromValue(PyObjectWrapper(obj.object()));
+                methArgs[i] = methValues[i].data();
             } else {
                 converter.toCpp(obj, methArgs[i]);
             }
