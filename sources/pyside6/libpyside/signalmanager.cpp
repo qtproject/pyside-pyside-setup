@@ -24,6 +24,7 @@
 #include <QtCore/qcoreevent.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/qhash.h>
+#include <QtCore/qmetatype.h>
 #include <QtCore/qscopedpointer.h>
 
 #include <climits>
@@ -37,6 +38,8 @@ using namespace Qt::StringLiterals;
 #endif
 
 static PyObject *metaObjectAttr = nullptr;
+
+static int pyObjectWrapperMetaTypeId = QMetaType::UnknownType;
 
 static void destroyMetaObject(PyObject *obj)
 {
@@ -169,6 +172,10 @@ PyObjectWrapper::operator PyObject *() const
     return m_me;
 }
 
+int PyObjectWrapper::metaTypeId()
+{
+    return pyObjectWrapperMetaTypeId;
+}
 
 int PyObjectWrapper::toInt() const
 {
@@ -273,19 +280,11 @@ struct SignalManagerPrivate
 SignalManager::QmlMetaCallErrorHandler
     SignalManagerPrivate::m_qmlMetaCallErrorHandler = nullptr;
 
-static void PyObject_PythonToCpp_PyObject_PTR(PyObject *pyIn, void *cppOut)
+static PyObject *CopyCppToPythonPyObject(const void *cppIn)
 {
-    *reinterpret_cast<PyObject **>(cppOut) = pyIn;
-}
-static PythonToCppFunc is_PyObject_PythonToCpp_PyObject_PTR_Convertible(PyObject * /* pyIn */)
-{
-    return PyObject_PythonToCpp_PyObject_PTR;
-}
-static PyObject *PyObject_PTR_CppToPython_PyObject(const void *cppIn)
-{
-    auto *pyOut = reinterpret_cast<PyObject *>(const_cast<void *>(cppIn));
-    if (pyOut)
-        Py_INCREF(pyOut);
+    const auto *wrapper = reinterpret_cast<const PyObjectWrapper *>(cppIn);
+    PyObject *pyOut = *wrapper;
+    Py_XINCREF(pyOut);
     return pyOut;
 }
 
@@ -295,13 +294,16 @@ void SignalManager::init()
     using namespace Shiboken;
 
     // Register PyObject type to use in queued signal and slot connections
-    qRegisterMetaType<PyObjectWrapper>("PyObject");
+    pyObjectWrapperMetaTypeId = qRegisterMetaType<PyObjectWrapper>("PyObject");
     // Register QVariant(enum) conversion to QVariant(int)
     QMetaType::registerConverter<PyObjectWrapper, int>(&PyObjectWrapper::toInt);
 
-    SbkConverter *converter = Shiboken::Conversions::createConverter(&PyBaseObject_Type, nullptr);
-    Shiboken::Conversions::setCppPointerToPythonFunction(converter, PyObject_PTR_CppToPython_PyObject);
-    Shiboken::Conversions::setPythonToCppPointerFunctions(converter, PyObject_PythonToCpp_PyObject_PTR, is_PyObject_PythonToCpp_PyObject_PTR_Convertible);
+    // Register a shiboken converter for PyObjectWrapper->Python (value conversion).
+    // Python->PyObjectWrapper is not registered since the converters do not work for
+    // non-SbkObject types (falling back to plain pointer pass through).
+    // This conversion needs to be done manually via QVariant.
+    SbkConverter *converter = Shiboken::Conversions::createConverter(&PyBaseObject_Type,
+                                                                     CopyCppToPythonPyObject);
     Shiboken::Conversions::registerConverterName(converter, "PyObject");
     Shiboken::Conversions::registerConverterName(converter, "object");
     Shiboken::Conversions::registerConverterName(converter, "PyObjectWrapper");

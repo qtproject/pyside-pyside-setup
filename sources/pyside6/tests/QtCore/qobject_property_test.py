@@ -32,6 +32,26 @@ class MyObjectWithNotifyProperty(QObject):
     myProperty = Property(int, readP, fset=writeP, notify=notifyP)
 
 
+class OtherClass:
+    """Helper for QObjectWithOtherClassPropertyTest."""
+    pass
+
+
+class MyObjectWithOtherClassProperty(QObject):
+    """Helper for QObjectWithOtherClassPropertyTest."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._otherclass = None
+
+    def _get_otherclass(self):
+        return self._otherclass
+
+    def _set_otherclass(self, o):
+        self._otherclass = o
+
+    otherclass = Property(OtherClass, fget=_get_otherclass, fset=_set_otherclass)
+
+
 class PropertyWithNotify(unittest.TestCase):
     def called(self):
         self.called_ = True
@@ -48,6 +68,20 @@ class PropertyWithNotify(unittest.TestCase):
         o.setProperty("myProperty", 10)
         self.assertEqual(o.myProperty, 10)
         self.assertEqual(o.property("myProperty"), 10)
+
+
+class QObjectWithOtherClassPropertyTest(unittest.TestCase):
+    """PYSIDE-2193: For properties of custom classes not wrapped by shiboken,
+       QVariant<PyObjectWrapper> is used, which had refcount issues causing crashes.
+       Exercise the QVariant conversion by setting and retrieving via the
+       QVariant-based property()/setProperty() API."""
+    def testNotify(self):
+        obj = MyObjectWithOtherClassProperty()
+        obj.setProperty("otherclass", OtherClass())
+        for i in range(10):
+            pv = obj.property("otherclass")
+            print(pv)  # Exercise repr
+            self.assertTrue(type(pv) is OtherClass)
 
 
 if __name__ == '__main__':

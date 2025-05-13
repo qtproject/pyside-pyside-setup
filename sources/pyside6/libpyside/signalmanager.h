@@ -44,6 +44,8 @@ public:
     // The proper fix would be to associate PyObjectWrapper to the corresponding C++ Enum.
     int toInt() const;
 
+    static int metaTypeId();
+
 private:
     PyObject* m_me;
 };

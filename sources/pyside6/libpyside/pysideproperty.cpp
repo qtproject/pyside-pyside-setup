@@ -6,6 +6,7 @@
 #include "pysideproperty_p.h"
 #include "pysidesignal.h"
 #include "pysidesignal_p.h"
+#include "signalmanager.h"
 
 #include <autodecref.h>
 #include <pep384ext.h>
@@ -16,6 +17,8 @@
 #include <signature.h>
 
 using namespace Shiboken;
+
+using namespace Qt::StringLiterals;
 
 extern "C"
 {
@@ -148,16 +151,20 @@ void PySidePropertyPrivate::metaCall(PyObject *source, QMetaObject::Call call, v
     switch (call) {
     case QMetaObject::ReadProperty: {
         AutoDecRef value(getValue(source));
-        auto *obValue = value.object();
-        if (obValue) {
-            Conversions::SpecificConverter converter(typeName);
-            if (converter) {
-                converter.toCpp(obValue, args[0]);
-            } else {
-                // PYSIDE-2160: Report an unknown type name to the caller `qtPropertyMetacall`.
-                PyErr_SetObject(PyExc_StopIteration, obValue);
-            }
+        if (value.isNull())
+            return;
+        if (typeName == "PyObject"_ba) {
+            // Manual conversion, see PyObjectWrapper converter registration
+            auto *pw = reinterpret_cast<PySide::PyObjectWrapper *>(args[0]);
+            pw->reset(value.object());
+            return;
         }
+        if (Conversions::SpecificConverter converter(typeName); converter) {
+            converter.toCpp(value.object(), args[0]);
+            return;
+        }
+        // PYSIDE-2160: Report an unknown type name to the caller `qtPropertyMetacall`.
+        PyErr_SetObject(PyExc_StopIteration, value.object());
     }
         break;
 
