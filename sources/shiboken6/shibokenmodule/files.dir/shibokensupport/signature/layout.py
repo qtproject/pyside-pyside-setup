@@ -30,6 +30,7 @@ from textwrap import dedent
 from shibokensupport.signature.mapping import ellipsis, missing_optional_return, PlaceholderType
 from shibokensupport.signature.parser import using_snake_case
 from shibokensupport.signature import make_snake_case_name
+from collections.abc import Sequence, Iterable
 
 DEFAULT_PARAM_KIND = inspect.Parameter.POSITIONAL_ONLY
 
@@ -134,9 +135,14 @@ _KEYWORD_ONLY            = inspect.Parameter.KEYWORD_ONLY           # noqa E:201
 _VAR_KEYWORD             = inspect.Parameter.VAR_KEYWORD            # noqa E:201
 _empty                   = inspect.Parameter.empty                  # noqa E:201
 
-
+# PYSIDE-3098: Iterable and Sequence can occur together in an overload.
+#              This needs sorting in order of generality.
+# This happened in the NumPy support of PySide 6.10. Note that the ordering
+# of methods there is completely different and unrelated to this mypy sorting.
 default_weights = {
     typing.Any: 1000,   # noqa E:241
+    Iterable:    500,   # noqa E:241
+    Sequence:    400,   # noqa E:241
     bool:        101,   # noqa E:241
     int:         102,   # noqa E:241
     float:       103,   # noqa E:241
