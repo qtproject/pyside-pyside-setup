@@ -26,6 +26,7 @@
 #include <QtCore/qhash.h>
 #include <QtCore/qscopedpointer.h>
 
+#include <climits>
 #include <memory>
 #include <utility>
 
@@ -233,7 +234,29 @@ QDataStream &operator>>(QDataStream &in, PyObjectWrapper &myObj)
     return in;
 }
 
-};
+PYSIDE_API QDebug operator<<(QDebug debug, const PyObjectWrapper &myObj)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    // Do not repeat the type name as it is typically called from the QVariant debug
+    // operator, which outputs the type.
+    debug << '<';
+    if (PyObject *ob = myObj) {
+        const auto refs = Py_REFCNT(ob);
+        debug << Py_TYPE(ob)->tp_name << " at " << ob;
+        if (refs == UINT_MAX) // _Py_IMMORTAL_REFCNT
+            debug << ", immortal";
+        else
+            debug << ", refs=" << refs;
+    } else {
+        debug << '0';
+    }
+    debug << '>';
+    return debug;
+}
+
+} // namespace PySide
 
 using namespace PySide;
 

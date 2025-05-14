@@ -14,6 +14,7 @@
 #include <optional>
 
 QT_FORWARD_DECLARE_CLASS(QDataStream)
+QT_FORWARD_DECLARE_CLASS(QDebug)
 
 namespace PySide
 {
@@ -49,6 +50,7 @@ private:
 
 PYSIDE_API QDataStream &operator<<(QDataStream& out, const PyObjectWrapper& myObj);
 PYSIDE_API QDataStream &operator>>(QDataStream& in, PyObjectWrapper& myObj);
+PYSIDE_API QDebug operator<<(QDebug debug, const PyObjectWrapper &myObj);
 
 class PYSIDE_API SignalManager
 {
