@@ -40,15 +40,15 @@ import sys
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1] / "util"))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths()
 
-from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QTimer  # noqa: E402
+from PySide6.QtWidgets import QApplication  # noqa: E402
 
 
 app_instance = QApplication([])
 # If the following line is commented, application doesn't crash on exit anymore.
 app_instance2 = app_instance
-QTimer.singleShot(0, qApp.quit)
-app_instance.exec_()
+QTimer.singleShot(0, qApp.quit)  # noqa: F821
+app_instance.exec()

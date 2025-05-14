@@ -33,16 +33,16 @@ class QMenuAddAction(UsesQApplication):
 
     def testAddActionWithoutKeySequenceCallable(self):
         # bug #280
-        action = self.menu.addAction(self.app.tr('aaa'), lambda: 1)
+        action = self.menu.addAction(self.app.tr('aaa'), lambda: 1)  # noqa: F841
 
     def testAddActionKeySequenceCallable(self):
         # bug #228
-        action = self.menu.addAction(self.app.tr('aaa'), lambda: 1,
+        action = self.menu.addAction(self.app.tr('aaa'), lambda: 1,  # noqa: F841
                                      QKeySequence(self.app.tr('Ctrl+O')))
 
     def testAddActionKeySequenceSlot(self):
-        action = self.menu.addAction('Quit', self.app, SLOT('quit()'),
-                                     QKeySequence('Ctrl+O'))
+        action = self.menu.addAction('Quit', QKeySequence('Ctrl+O'),  # noqa: F841
+                                     self.app, SLOT('quit()'))
 
 
 class QMenuAddActionWithIcon(UsesQApplication):
@@ -61,16 +61,16 @@ class QMenuAddActionWithIcon(UsesQApplication):
 
     def testAddActionWithoutKeySequenceCallable(self):
         # bug #280
-        action = self.menu.addAction(self.icon, self.app.tr('aaa'), lambda: 1)
+        action = self.menu.addAction(self.icon, self.app.tr('aaa'), lambda: 1)  # noqa: F841
 
     def testAddActionKeySequenceCallable(self):
         # bug #228
-        action = self.menu.addAction(self.icon, self.app.tr('aaa'), lambda: 1,
-                                     QKeySequence(self.app.tr('Ctrl+O')))
+        action = self.menu.addAction(self.icon, self.app.tr('aaa'), lambda: 1,  # noqa: F841
+                                     QKeySequence(self.app.tr('Ctrl+O')))  # noqa: F841
 
     def testAddActionKeySequenceSlot(self):
-        action = self.menu.addAction(self.icon, 'Quit', self.app, SLOT('quit()'),
-                                     QKeySequence('Ctrl+O'))
+        action = self.menu.addAction(self.icon, 'Quit', QKeySequence('Ctrl+O'),  # noqa: F841
+                                     self.app, SLOT('quit()'))  # noqa: F841
 
 
 if __name__ == '__main__':
