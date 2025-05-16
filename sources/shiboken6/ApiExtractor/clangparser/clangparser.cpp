@@ -275,6 +275,15 @@ static CXTranslationUnit createTranslationUnit(CXIndex index,
     return tu;
 }
 
+static void setupTarget(CXTranslationUnit translationUnit)
+{
+    const CXTargetInfo targetInfo = clang_getTranslationUnitTargetInfo(translationUnit);
+    const auto tripleCS = clang_TargetInfo_getTriple(targetInfo);
+    clang::setPointerSize(clang_TargetInfo_getPointerWidth(targetInfo));
+    clang::setTargetTriple(QString::fromUtf8(clang_getCString(tripleCS)));
+    clang_disposeString(tripleCS);
+}
+
 /* clangFlags are flags to clang_parseTranslationUnit2() such as
  * CXTranslationUnit_KeepGoing (from CINDEX_VERSION_MAJOR/CINDEX_VERSION_MINOR 0.35)
  */
@@ -294,6 +303,8 @@ bool parse(const QByteArrayList  &clangArgs, bool addCompilerSupportArguments,
                               level, clangFlags);
     if (!translationUnit)
         return false;
+
+    setupTarget(translationUnit);
 
     CXCursor rootCursor = clang_getTranslationUnitCursor(translationUnit);
 

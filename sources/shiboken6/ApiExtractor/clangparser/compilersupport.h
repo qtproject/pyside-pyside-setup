@@ -51,6 +51,14 @@ void setCompilerPath(const QString &name);
 
 Platform platform();
 bool setPlatform(const QString &name);
+
+unsigned pointerSize(); // (bit)
+void setPointerSize(unsigned ps); // Set by parser
+
+QString targetTriple();
+void setTargetTriple(const QStringList &clangOptions); // Set from cmd line before parsing
+void setTargetTriple(const QString &t); // Updated by clang parser while parsing
+
 } // namespace clang
 
 #endif // COMPILERSUPPORT_H

@@ -59,6 +59,9 @@ bool setCompiler(const QString &name)
 
 QString _compilerPath; // Pre-defined compiler path (from command line)
 
+static unsigned _pointerSize = QT_POINTER_SIZE * 8;
+static QString _targetTriple;
+
 const QString &compilerPath()
 {
     return _compilerPath;
@@ -449,6 +452,35 @@ LanguageLevel languageLevelFromOption(const char *o)
             return m.level;
     }
     return LanguageLevel::Default;
+}
+
+unsigned pointerSize()
+{
+    return _pointerSize;
+}
+
+void setPointerSize(unsigned ps)
+{
+    _pointerSize = ps;
+}
+
+QString targetTriple()
+{
+    return _targetTriple;
+
+}
+void setTargetTriple(const QString &t)
+{
+    _targetTriple = t;
+}
+
+void setTargetTriple(const QStringList &clangOptions)
+{
+    static constexpr auto targetOption = "--target="_L1;
+    auto targetOptionPred = [](const QString &o) { return o.startsWith(targetOption); };
+    const auto it = std::find_if(clangOptions.cbegin(), clangOptions.cend(), targetOptionPred);
+    if (it != clangOptions.cend())
+        _targetTriple = it->sliced(targetOption.size());
 }
 
 } // namespace clang

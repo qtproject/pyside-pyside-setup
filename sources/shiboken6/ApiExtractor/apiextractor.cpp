@@ -370,6 +370,7 @@ bool ApiExtractorPrivate::runHelper(ApiExtractorFlags flags)
 
     bool addCompilerSupportArguments = true;
     if (clangOptionsSize > 0) {
+        clang::setTargetTriple(m_clangOptions);
         qsizetype i = 0;
         if (m_clangOptions.at(i) == u"-") {
             ++i;
