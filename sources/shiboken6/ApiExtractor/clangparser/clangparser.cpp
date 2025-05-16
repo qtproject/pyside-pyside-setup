@@ -282,6 +282,15 @@ static void setupTarget(CXTranslationUnit translationUnit)
     clang::setPointerSize(clang_TargetInfo_getPointerWidth(targetInfo));
     clang::setTargetTriple(QString::fromUtf8(clang_getCString(tripleCS)));
     clang_disposeString(tripleCS);
+
+    QString message;
+    {
+        QTextStream str(&message);
+        str << "CLANG v" << CINDEX_VERSION_MAJOR << '.' << CINDEX_VERSION_MINOR
+            << " targeting \"" << targetTriple() << "\", " << pointerSize() << "bit.";
+    }
+    qCInfo(lcShiboken, "%s", qPrintable(message));
+    ReportHandler::addGeneralMessage(message + u'\n');
 }
 
 /* clangFlags are flags to clang_parseTranslationUnit2() such as

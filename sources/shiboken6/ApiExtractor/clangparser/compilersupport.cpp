@@ -156,14 +156,15 @@ static void filterHomebrewHeaderPaths(HeaderPaths &headerPaths)
     if (homebrewPrefix.isEmpty())
         return;
 
-    qCInfo(lcShiboken) << "Found HOMEBREW_OPT with value:" << homebrewPrefix
-                       << "Assuming homebrew build environment.";
+    ReportHandler::addGeneralMessage("Found HOMEBREW_OPT with value:"_L1
+                                     + QString::fromUtf8(homebrewPrefix)
+                                     + "\nAssuming homebrew build environment."_L1);
 
     HeaderPaths::iterator it = headerPaths.begin();
     while (it != headerPaths.end()) {
         if (it->path.startsWith(homebrewPrefix)) {
-            qCInfo(lcShiboken) << "Filtering out homebrew include path: "
-                               << it->path;
+            ReportHandler::addGeneralMessage("Filtering out homebrew include path: "_L1
+                                             + QString::fromUtf8(it->path));
             it = headerPaths.erase(it);
         } else {
             ++it;
@@ -189,12 +190,6 @@ static HeaderPaths gppInternalIncludePaths(const QString &compiler)
     const QByteArrayList stdErrLines = stdErr.split('\n');
     bool isIncludeDir = false;
 
-    if (ReportHandler::isDebug(ReportHandler::MediumDebug))
-        qCInfo(lcShiboken()).noquote().nospace()
-            << "gppInternalIncludePaths:\n    compiler: " << compiler
-            << "\n    stdOut: " << stdOut
-            << "\n    stdErr: " << stdErr;
-
     for (const QByteArray &line : stdErrLines) {
         if (isIncludeDir) {
             if (line.startsWith(QByteArrayLiteral("End of search list"))) {
@@ -214,6 +209,17 @@ static HeaderPaths gppInternalIncludePaths(const QString &compiler)
 
     if (platform() == Platform::macOS)
         filterHomebrewHeaderPaths(result);
+
+    QString message;
+    {
+        QTextStream str(&message);
+        str << "gppInternalIncludePaths:\n    compiler: " << compiler  << '\n';
+        for (const auto &h : result)
+            str << "    " << h.path << '\n';
+        if (ReportHandler::isDebug(ReportHandler::MediumDebug))
+            str << "    stdOut: " << stdOut << "\n    stdErr: " << stdErr;
+    }
+    ReportHandler::addGeneralMessage(message);
 
     return result;
 }
@@ -368,11 +374,10 @@ static void appendClangBuiltinIncludes(HeaderPaths *p)
                   "(neither by checking the environment variables LLVM_INSTALL_DIR, CLANG_INSTALL_DIR "
                   " nor running llvm-config). This may lead to parse errors.");
     } else {
-        qCInfo(lcShiboken, "CLANG v%d.%d, builtins includes directory: %s",
-               CINDEX_VERSION_MAJOR, CINDEX_VERSION_MINOR,
-               qPrintable(clangBuiltinIncludesDir));
         p->append(HeaderPath{QFile::encodeName(clangBuiltinIncludesDir),
                              HeaderType::System});
+        ReportHandler::addGeneralMessage("CLANG builtins includes directory: "_L1
+                                         + clangBuiltinIncludesDir);
     }
 }
 
