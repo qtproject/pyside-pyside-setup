@@ -20,7 +20,7 @@ this_dir = os.path.dirname(this_file)
 build_scripts_dir = os.path.abspath(os.path.join(this_dir, ".."))
 
 sys.path.append(build_scripts_dir)
-from build_scripts.utils import detect_clang
+from build_scripts.utils import detect_clang    # noqa: E402
 
 
 class TestRunner:
@@ -78,11 +78,12 @@ class TestRunner:
         Helper for _find_ctest() that finds the ctest binary in a build
         system file (ninja, Makefile).
         """
-        look_for = "--force-new-ctest-process"
+        # Looking for a command ending this way:
+        look_for = "\\ctest.exe" if "win32" in sys.platform else "/ctest"
         line = None
         with open(file_name) as makefile:
             for line in makefile:
-                if look_for in line:
+                if look_for in line and line.lstrip().startswith("COMMAND"):
                     break
             else:
                 # We have probably forgotten to build the tests.
@@ -98,7 +99,8 @@ class TestRunner:
                 raise RuntimeError(msg)
         # the ctest program is on the left to look_for
         assert line, f"Did not find {look_for}"
-        ctest = re.search(r'(\S+|"([^"]+)")\s+' + look_for, line).groups()
+        look = re.escape(look_for)
+        ctest = re.search(fr'(\S+{look}|"([^"]+{look})")', line).groups()
         return ctest[1] or ctest[0]
 
     def _find_ctest(self):
