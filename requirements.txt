@@ -8,6 +8,4 @@ patchelf==0.17.2; sys_platform == 'linux'
 # 2.0.2 is the last version that supports Python 3.9
 numpy<=2.0.2; python_version <= '3.9'
 numpy==2.1.3; python_version > '3.9'
-mypy>=1.14.0; platform_machine == 'ARM64' and sys_platform == 'win32'
-mypy[faster-cache]>=1.14.0; platform_machine != 'ARM64' and sys_platform == 'win32'
-mypy[faster-cache]>=1.14.0; sys_platform != 'win32'
+mypy>=1.15.0    # note: 3.13 with disable-gil is not compiled yet
