@@ -352,6 +352,7 @@ def create_signature_union(props, key):
                 if last == _VAR_POSITIONAL:
                     kind = _KEYWORD_ONLY
         if default is None:
+            ann = typing.Union[ann]
             ann = typing.Optional[ann]
         if default is not _empty and layout.ellipsis:
             default = ellipsis
@@ -373,6 +374,7 @@ def create_signature_union(props, key):
 
     ret_anno = annotations.get('return', _empty)
     if ret_anno is not _empty and props["fullname"] in missing_optional_return:
+        ret_anno = typing.Union[ret_anno]
         ret_anno = typing.Optional[ret_anno]
     return inspect.Signature(params, return_annotation=ret_anno,
                              __validate_parameters__=False)
