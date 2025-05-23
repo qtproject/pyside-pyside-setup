@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import sys
 
-from PySide6.QtCore import QDir, QFile, Qt, QTextStream
+from PySide6.QtCore import QDir, QFile, QObject, Qt, QTextStream
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QFileDialog, QHeaderView,
                                QMainWindow, QMessageBox, QStyle, QTreeWidget,
@@ -93,6 +93,7 @@ class XbelTree(QTreeWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self._update_conn_id = None
         self.header().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.setHeaderLabels(("Title", "Location"))
 
@@ -131,17 +132,15 @@ class XbelTree(QTreeWidget):
         self.clear()
 
         # It might not be connected.
-        try:
-            self.itemChanged.disconnect(self.update_dom_element)
-        except RuntimeError:
-            pass
+        if self._update_conn_id:
+            QObject.disconnect(self._update_conn_id)
 
         child = root.firstChildElement('folder')
         while not child.isNull():
             self.parse_folder_element(child)
             child = child.nextSiblingElement('folder')
 
-        self.itemChanged.connect(self.update_dom_element)
+        self._update_conn_id = self.itemChanged.connect(self.update_dom_element)
 
         return True
 
