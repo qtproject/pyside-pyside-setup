@@ -2664,7 +2664,7 @@ std::optional<AbstractMetaType>
         qsizetype i = d ? d->m_scopes.size() - 1 : -1;
         while (i >= 0) {
             typeInfo = TypeInfo::resolveType(_typei, d->m_scopes.at(i--));
-            if (typeInfo.qualifiedName().join(u"::"_s) != _typei.qualifiedName().join(u"::"_s))
+            if (typeInfo.qualifiedName() != _typei.qualifiedName())
                 break;
         }
 
@@ -2757,7 +2757,7 @@ std::optional<AbstractMetaType>
 
     // 4. Special case QFlags (include instantiation in name)
     if (qualifiedName == u"QFlags") {
-        qualifiedName = typeInfo.toString();
+        qualifiedName = typeInfo.qualifiedInstantationName();
         typeInfo.clearInstantiations();
     }
 
@@ -2796,7 +2796,7 @@ std::optional<AbstractMetaType>
         // For non-type template parameters, create a dummy type entry on the fly
         // as is done for classes.
         if (!targType.has_value()) {
-            const QString value = ti.qualifiedName().join(u"::"_s);
+            const QString value = ti.qualifiedNameString();
             if (isNumber(value)) {
                 auto module = typeSystemTypeEntry(type);
                 TypeDatabase::instance()->addConstantValueTypeEntry(value, module);
@@ -3082,7 +3082,7 @@ AbstractMetaClassPtr
         QString prefix = i > 0 ? QStringList(scope.mid(0, i)).join(u"::"_s) + u"::"_s : QString();
         QString completeName = prefix + name;
         const TypeInfo parsed = TypeParser::parse(completeName, &errorMessage);
-        QString qualifiedName = parsed.qualifiedName().join(u"::"_s);
+        QString qualifiedName = parsed.qualifiedNameString();
         if (qualifiedName.isEmpty()) {
             qWarning().noquote().nospace() << "Unable to parse type \"" << completeName
                 << "\" while looking for template \"" << name << "\": " << errorMessage;
@@ -3196,7 +3196,7 @@ static std::optional<AbstractMetaType>
                              const AbstractMetaClassCPtr &templateClass,
                              const TypeInfo &info, QString *errorMessage)
 {
-    QString typeName = info.qualifiedName().join("::"_L1);
+    QString typeName = info.qualifiedNameString();
     TypeDatabase *typeDb = TypeDatabase::instance();
     TypeEntryPtr t;
     // Check for a non-type template integer parameter, that is, for a base

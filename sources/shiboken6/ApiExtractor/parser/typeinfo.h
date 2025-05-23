@@ -39,6 +39,11 @@ public:
 
     QStringList qualifiedName() const;
     void setQualifiedName(const QStringList &qualified_name);
+    // Returns "std::list"
+    QString qualifiedNameString() const;
+    // Returns qualifiedName() with instantions ("std::list<int>")
+    QString qualifiedInstantationName() const;
+
     void addName(const QString &);
 
     bool isVoid() const;

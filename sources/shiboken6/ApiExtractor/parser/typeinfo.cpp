@@ -110,6 +110,28 @@ QStringList TypeInfo::qualifiedName() const
     return d->m_qualifiedName;
 }
 
+QString TypeInfo::qualifiedNameString() const
+{
+    return d->m_qualifiedName.join("::"_L1);
+}
+
+QString TypeInfo::qualifiedInstantationName() const
+{
+    QString result = qualifiedNameString();
+    if (const auto instantiationCount = d->m_instantiations.size()) {
+        result += u'<';
+        for (qsizetype i = 0; i < instantiationCount; ++i) {
+            if (i)
+                result += ", "_L1;
+            result += d->m_instantiations.at(i).toString();
+        }
+        if (result.endsWith(u'>'))
+            result += u' ';
+        result += u'>';
+    }
+    return result;
+}
+
 void TypeInfo::setQualifiedName(const QStringList &qualified_name)
 {
     if (d->m_qualifiedName != qualified_name)
@@ -300,7 +322,7 @@ TypeInfo TypeInfo::resolveType(const CodeModelItem &__item, TypeInfo const &__ty
         // typedef struct xcb_connection_t xcb_connection_t;
         if (nextItem.get() ==__item.get()) {
             std::cerr << "** WARNING Bailing out recursion of " << __FUNCTION__
-                << "() on " << qPrintable(__type.qualifiedName().join(u"::"_s))
+                << "() on " << qPrintable(__type.qualifiedNameString())
                 << '\n';
             return otherType;
         }
@@ -385,19 +407,7 @@ QString TypeInfo::toString() const
     if (isVolatile())
         tmp += u"volatile "_s;
 
-    tmp += d->m_qualifiedName.join(u"::"_s);
-
-    if (const auto instantiationCount = d->m_instantiations.size()) {
-        tmp += u'<';
-        for (qsizetype i = 0; i < instantiationCount; ++i) {
-            if (i)
-                tmp += u", "_s;
-            tmp += d->m_instantiations.at(i).toString();
-        }
-        if (tmp.endsWith(u'>'))
-            tmp += u' ';
-        tmp += u'>';
-    }
+    tmp += qualifiedInstantationName();
 
     for (Indirection i : d->m_indirections)
         tmp.append(indirectionKeyword(i));
