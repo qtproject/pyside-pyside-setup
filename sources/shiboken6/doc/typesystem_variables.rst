@@ -16,6 +16,8 @@ implementation specifics.
 Variables
 =========
 
+In addition to the below listed variables, there are some variables specific to type
+conversion code (see :ref:`converter_variables_and_functions`).
 
 .. _cpp_return_argument:
 

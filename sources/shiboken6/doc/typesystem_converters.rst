@@ -16,7 +16,8 @@ C++ and vice-versa.
 
     // C++ class
     struct Complex {
-        Complex(double real, double imag);
+        explicit Complex(double real, double imag);
+
         double real() const;
         double imag() const;
     };
@@ -82,8 +83,9 @@ Here's how to do it:
 
   <!-- Code injection at module level. -->
   <inject-code class="native" position="beginning">
-  static bool Check2TupleOfNumbers(PyObject* pyIn) {
-      if (!PySequence_Check(pyIn) || !(PySequence_Size(pyIn) == 2))
+  static bool Check2TupleOfNumbers(PyObject *pyIn)
+  {
+      if (PySequence_Check(pyIn) == 0 || PySequence_Size(pyIn) != 2)
           return false;
       Shiboken::AutoDecRef pyReal(PySequence_GetItem(pyIn, 0));
       if (!PyNumber_Check(pyReal))
@@ -134,7 +136,8 @@ Container Conversions
 
 Converters for :ref:`container-type <container-type>` are pretty much the same as for other type,
 except that they make use of the type system variables
-:ref:`%INTYPE_# <intype_n>` and :ref:`%OUTTYPE_# <outtype_n>`.
+:ref:`%INTYPE_# <intype_n>` and :ref:`%OUTTYPE_# <outtype_n>` denoting the
+template parameters.
 |project| combines the conversion code for containers with the conversion
 defined (or automatically generated) for the containers.
 
@@ -147,13 +150,12 @@ defined (or automatically generated) for the containers.
 
           <native-to-target>
           PyObject* %out = PyDict_New();
-          %INTYPE::const_iterator it = %in.begin();
-          for (; it != %in.end(); ++it) {
-            %INTYPE_0 key = it->first;
-            %INTYPE_1 value = it->second;
-                    PyDict_SetItem(%out,
+          for (auto it = %in.cbegin(), end = %in.cend(); it != end; ++it) {
+            const auto &amp;key = it->first;
+            const auto &amp;value = it->second;
+            PyDict_SetItem(%out,
                            %CONVERTTOPYTHON[%INTYPE_0](key),
-                   %CONVERTTOPYTHON[%INTYPE_1](value));
+                           %CONVERTTOPYTHON[%INTYPE_1](value));
           }
           return %out;
           </native-to-target>
@@ -161,8 +163,8 @@ defined (or automatically generated) for the containers.
           <target-to-native>
 
             <add-conversion type="PyDict">
-            PyObject* key;
-            PyObject* value;
+            PyObject *key{};
+            PyObject *value{};
             Py_ssize_t pos = 0;
             while (PyDict_Next(%in, &amp;pos, &amp;key, &amp;value)) {
                 %OUTTYPE_0 cppKey = %CONVERTTOCPP[%OUTTYPE_0](key);
@@ -183,10 +185,10 @@ defined (or automatically generated) for the containers.
           For this case, a number of pre-defined conversion templates
           are provided (see :ref:`predefined_templates`).
 
-.. _variables_and_functions:
+.. _converter_variables_and_functions:
 
-Variables & Functions
-=====================
+Converter Variables & Functions
+===============================
 
 
 .. _in:
@@ -212,7 +214,7 @@ Variables & Functions
 .. _intype_n:
 
 **%INTYPE_#**
-  Replaced by the name of the #th type used in a container.
+  Replaced by the name of the #th template parameter type used in a container.
 
 
 .. _outtype:
@@ -225,7 +227,7 @@ Variables & Functions
 .. _outtype_n:
 
 **%OUTTYPE_#**
-  Replaced by the name of the #th type used in a container.
+  Replaced by the name of the #th template parameter type used in a container.
 
 
 .. _checktype:
