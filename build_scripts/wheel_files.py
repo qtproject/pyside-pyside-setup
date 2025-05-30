@@ -1037,6 +1037,7 @@ def module_QtVirtualKeyboard() -> ModuleData:
     data = ModuleData("VirtualKeyboard")
     data.plugins.append("virtualkeyboard")
     data.qtlib.append("libQt6VirtualKeyboardSettings")
+    data.qtlib.append("libQt6VirtualKeyboardQml")
 
     return data
 
