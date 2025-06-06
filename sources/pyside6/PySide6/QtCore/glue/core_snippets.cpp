@@ -50,8 +50,12 @@ QMetaType QVariant_resolveMetaType(PyTypeObject *type)
         // PYSIDE-1887, PYSIDE-86: Skip QObject base class of QGraphicsObject;
         // it needs to use always QGraphicsItem as a QVariant type for
         // QGraphicsItem::itemChange() to work.
-        if (qstrcmp(typeName, "QGraphicsObject*") == 0)
-            ++i;
+        if (qstrcmp(typeName, "QGraphicsObject*") == 0 && size > 1) {
+            auto *firstBaseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_bases, 0));
+            const char *firstBaseTypeName = Shiboken::ObjectType::getOriginalName(firstBaseType);
+            if (firstBaseTypeName != nullptr && qstrcmp(firstBaseTypeName, "QObject*") == 0)
+                ++i;
+        }
         for ( ; i < size; ++i) {
             auto baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_bases, i));
             const QMetaType derived = QVariant_resolveMetaType(baseType);

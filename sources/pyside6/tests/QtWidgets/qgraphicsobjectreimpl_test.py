@@ -53,7 +53,15 @@ class QGraphicsObjectReimpl(UsesQApplication):
         #   See also PYSIDE-1887, PYSIDE-3069
         gobjA = GObjA()
         gobjA.setParentItem(w)
+        print(gobjA.parentItem())
         self.assertIs(type(w), type(gobjA.parentItem()))
+
+        # PYSIDE-3115: QVariant conversion of the parent
+        # (Python class inheriting QGraphicsObject).
+        parentA = GObjA()
+        gobjA = GObjA()
+        gobjA.setParentItem(parentA)
+        self.assertIs(type(parentA), type(gobjA.parentItem()))
 
         gobjB = GObjB()
         gobjB.setParentItem(w)
