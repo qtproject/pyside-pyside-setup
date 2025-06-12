@@ -8,7 +8,7 @@
 #include "shibokenmacros.h"
 
 namespace Shiboken {
-class AutoDecRef;
+struct AutoDecRef;
 
 /// Maps a keyword argument by name to its parameter index
 struct ArgumentNameIndexMapping
