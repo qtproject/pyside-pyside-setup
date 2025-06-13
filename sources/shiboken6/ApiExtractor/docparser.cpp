@@ -22,10 +22,6 @@
 #include "qtcompat.h"
 
 #include <cstdlib>
-#ifdef HAVE_LIBXSLT
-#  include <libxslt/xsltutils.h>
-#  include <libxslt/transform.h>
-#endif
 
 #include <algorithm>
 
