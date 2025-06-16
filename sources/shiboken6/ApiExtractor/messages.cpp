@@ -20,6 +20,7 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qdir.h>
 #include <QtCore/qfile.h>
+#include <QtCore/qlibraryinfo.h>
 #include <QtCore/qstringlist.h>
 #include <QtCore/qxmlstream.h>
 
@@ -1099,7 +1100,8 @@ QString msgRemoveRedundantOverload(const AbstractMetaFunctionCPtr &func,
 
 QString msgCommandLineArguments(const QStringList &argv)
 {
-    QString result = "Command line:\n   "_L1;
+    QString result = "Host platform: "_L1 + QLatin1StringView(QLibraryInfo::build())
+                     + "\nCommand line:\n   "_L1;
     for (const QString &arg : argv) {
         result.append(u' ');
         const bool quote = arg.contains(u' ');

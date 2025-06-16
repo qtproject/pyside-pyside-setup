@@ -1194,7 +1194,12 @@ bool TypeDatabasePrivate::parseFile(const TypeDatabaseParserContextPtr &context,
                                     QIODevice *device, bool generate)
 {
     ConditionalStreamReader reader(device);
-    reader.setConditions(context->db->typesystemKeywords());
+    const auto typesystemKeywords = context->db->typesystemKeywords();
+    if (generate) {
+        ReportHandler::addGeneralMessage("Type System keywords: "_L1
+                                         + typesystemKeywords.join(", "_L1) + u'\n');
+    }
+    reader.setConditions(typesystemKeywords);
     TypeSystemParser handler(context, generate);
     const bool result = handler.parse(reader);
     if (!result) {
