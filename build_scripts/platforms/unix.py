@@ -236,7 +236,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
 
     # Some libraries specific to Linux/Android from 6.8
     # eg: the libav* libraries are required for the multimedia module
-    if config.is_internal_pyside_build() and sys.platform != "darwin":
+    if config.is_internal_pyside_build() and (sys.platform != "darwin" or is_android):
         qt_multimedia_filters = [f"lib{lib}*.so*" for lib in PYSIDE_MULTIMEDIA_LIBS]
         copydir("{qt_lib_dir}", destination_qt_dir / "lib",
                 _filter=qt_multimedia_filters,
