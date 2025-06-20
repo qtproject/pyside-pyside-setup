@@ -257,9 +257,12 @@ class Project:
         cmd_prefix = [LUPDATE_CMD] + [os.fspath(p.relative_to(project_dir)) for p in source_files]
         cmd_prefix.append("-ts")
         for ts_file in self.project.ts_files:
+            ts_dir = ts_file.parent
+            if not ts_dir.exists():
+                ts_dir.mkdir(parents=True, exist_ok=True)
             if requires_rebuild(source_files, ts_file):
                 cmd = cmd_prefix
-                cmd.append(ts_file.name)
+                cmd.append(os.fspath(ts_file))
                 run_command(cmd, cwd=project_dir)
 
 
