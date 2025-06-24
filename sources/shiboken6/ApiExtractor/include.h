@@ -47,7 +47,7 @@ public:
     int compare(const Include &rhs) const;
 
 private:
-    friend size_t qHash(Include &inc, size_t seed = 0) noexcept
+    friend size_t qHash(const Include &inc, size_t seed = 0) noexcept
     {
         return qHashMulti(seed, inc.m_type, inc.m_name);
     }
