@@ -150,7 +150,7 @@ instructions:
          equals_value: Windows
     - type: PrependToEnvironmentVariable
       variableName: PATH
-      variableValue: "{{.Env.PYTHON3_PATH}}/bin:"
+      variableValue: "{{.Env.PYTHON3_PATH}}:"
       enable_if:
          condition: property
          property: host.os
