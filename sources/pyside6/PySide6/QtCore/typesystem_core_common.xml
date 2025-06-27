@@ -2473,6 +2473,8 @@
   </object-type>
   <object-type name="QLibraryInfo">
     <enum-type name="LibraryPath"/>
+    <inject-code class="native" position="beginning"
+                 file="../glue/qtcore.cpp" snippet="qlibraryinfo_python_build"/>
     <modify-function signature="build()">
         <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="qlibraryinfo_build"/>
     </modify-function>

@@ -1763,18 +1763,51 @@ pthread_cleanup_pop(0);
 #endif
 // @snippet qthread_pthread_cleanup_uninstall
 
-// @snippet qlibraryinfo_build
-auto oldResult = pyResult;
-const auto version = _PepRuntimeVersion();
-pyResult = PyUnicode_FromFormat(
-#ifdef Py_LIMITED_API
-                                "%U [Python limited API %d.%d.%d]",
+// @snippet qlibraryinfo_python_build
+
+// For versions with one byte per digit.
+static QByteArray versionString(long version)
+{
+    return QByteArray::number((version >> 16) & 0xFF)
+           + '.' + QByteArray::number((version >> 8) & 0xFF)
+           + '.' + QByteArray::number(version & 0xFF);
+}
+
+static QByteArray pythonBuild()
+{
+    using namespace Qt::StringLiterals;
+
+#ifdef PYPY_VERSION
+    QByteArray result = "PyPy " PYPY_VERSION
 #else
-                                "%U [Python %d.%d.%d]",
+    QByteArray result = "Python"
 #endif
-                                oldResult, (version >> 16) & 0xFF,
-                                (version >> 8) & 0xFF, version & 0xFF);
-Py_DECREF(oldResult);
+#ifdef Py_LIMITED_API
+    " limited API"
+#endif
+#ifdef Py_GIL_DISABLED
+    " free threaded"
+#endif
+        ;
+    result += ' ';
+
+    const auto runTimeVersion = _PepRuntimeVersion();
+    const auto runTimeVersionB = versionString(runTimeVersion);
+    constexpr long buildVersion = PY_VERSION_HEX >> 8;
+    if (runTimeVersion == buildVersion) {
+        result += runTimeVersionB;
+    } else {
+        result += "run time: "_ba + runTimeVersionB + " built: "_ba
+                  + versionString(buildVersion);
+    }
+    return result;
+}
+// @snippet qlibraryinfo_python_build
+
+// @snippet qlibraryinfo_build
+QByteArray %0 = %CPPSELF.%FUNCTION_NAME();
+%0 += " [" + pythonBuild() + ']';
+%PYARG_0 = PyUnicode_FromString(%0.constData());
 // @snippet qlibraryinfo_build
 
 // @snippet qsharedmemory_data_readonly
