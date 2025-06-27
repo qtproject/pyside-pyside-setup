@@ -187,6 +187,25 @@ environment variable:
 
     export QT_LOGGING_RULES="qt.pyside.libpyside.warning=true"
 
+Thread affinity
++++++++++++++++
+
+In a multi-threaded application, signals can be emitted from senders belonging
+to a different thread than the receiver. For non-Slot type receivers, the code
+is then executed in the sender's thread context.
+
+However, for methods of :class:`~PySide6.QtCore.QObject` derived classes
+decorated with @Slot, this is usually different since they are associated with
+threads (see :meth:`~PySide6.QtCore.QObject.moveToThread`). This depends on
+last parameter of the :meth:`~PySide6.QtCore.QObject.connect` method which is
+of type :class:`PySide6.QtCore.Qt.ConnectionType`.
+
+When ``Qt.ConnectionType.AutoConnection`` (default) or
+``Qt.ConnectionType.QueuedConnection`` are passed, the receiver code will be
+executed in the thread context of the receiver object. This is useful for
+passing results from background threads into GUI classes, which need to use the
+main thread.
+
 .. _overloading-signals-and-slots:
 
 Overloading Signals and Slots with Different Types
