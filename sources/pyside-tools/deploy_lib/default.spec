@@ -33,6 +33,7 @@ android_packages = buildozer==1.5.0,cython==0.29.33
 
 # Paths to required QML files. Comma separated
 # Normally all the QML files required by the project are added automatically
+# Design Studio projects include the QML files using Qt resources
 qml_files =
 
 # Excluded qml plugin binaries

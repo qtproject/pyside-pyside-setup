@@ -30,15 +30,25 @@ def get_py_files(project_dir: Path, extra_ignore_dirs: tuple[Path] = None, proje
         qrc_candidates = project_data.qrc_files
 
         def add_uic_qrc_candidates(candidates, candidate_type):
-            possible_py_candidates = [(file.parent / f"{candidate_type}_{file.stem}.py")
-                                      for file in candidates
-                                      if (file.parent / f"{candidate_type}_{file.stem}.py").exists()
-                                      ]
+            possible_py_candidates = []
+            missing_files = []
+            for file in candidates:
+                py_file = file.parent / f"{candidate_type}_{file.stem}.py"
+                if py_file.exists():
+                    possible_py_candidates.append(py_file)
+                else:
+                    missing_files.append((str(file), str(py_file)))
 
-            if len(possible_py_candidates) != len(candidates):
-                warnings.warn(f"[DEPLOY] The number of {candidate_type} files and their "
-                              "corresponding Python files don't match.",
-                              category=RuntimeWarning)
+            if missing_files:
+                missing_details = "\n".join(
+                    f"{candidate_type.upper()} file: {src} -> Missing Python file: {dst}"
+                    for src, dst in missing_files
+                )
+                warnings.warn(
+                    f"[DEPLOY] The following {candidate_type} files do not have corresponding "
+                    f"Python files:\n {missing_details}",
+                    category=RuntimeWarning
+                )
 
             py_candidates.extend(possible_py_candidates)
 
@@ -46,7 +56,7 @@ def get_py_files(project_dir: Path, extra_ignore_dirs: tuple[Path] = None, proje
             add_uic_qrc_candidates(ui_candidates, "ui")
 
         if qrc_candidates:
-            add_uic_qrc_candidates(qrc_candidates, "qrc")
+            add_uic_qrc_candidates(qrc_candidates, "rc")
 
         return py_candidates
 
