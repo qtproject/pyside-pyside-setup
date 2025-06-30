@@ -296,7 +296,7 @@ class Camera(QMainWindow):
 
     @Slot(QAction)
     def updateCameraDevice(self, action):
-        self.setCamera(QCameraDevice(action))
+        self.setCamera(QCameraDevice(action.data()))
 
     @Slot()
     def displayViewfinder(self):
