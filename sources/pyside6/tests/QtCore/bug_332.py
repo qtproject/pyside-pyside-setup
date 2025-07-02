@@ -23,8 +23,9 @@ class Lock(QMutex):
 class TestBug(unittest.TestCase):
 
     def testCase(self):
-        l = Lock()
+        l = Lock()  # noqa: E741
         l.tryLock()  # this cause a assertion
+        l.unlock()
 
 
 if __name__ == '__main__':
