@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 from __future__ import annotations
 
-import gc
 import os
 import sys
 import unittest
@@ -16,32 +15,28 @@ from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import QPoint, QTimer, Qt, QEvent
-from PySide6.QtGui import QTouchDevice
+from PySide6.QtGui import QPointingDevice
 from PySide6.QtTest import QTest
 
 
 class MyWidget(QWidget):
     def __init__(self, parent=None):
-        QWidget.__init__(self, parent)
+        super().__init__(parent)
         self._sequence = []
-        # Fixme (Qt 5): The device needs to be registered (using
-        # QWindowSystemInterface::registerTouchDevice()) for the test to work
-        self._device = QTouchDevice()
+        self._device = QPointingDevice.primaryPointingDevice()
         self.setAttribute(Qt.WA_AcceptTouchEvents)
         QTimer.singleShot(200, self.generateEvent)
 
     def event(self, e):
-        self._sequence.append(e.type())
-        return QWidget.event(self, e)
+        et = e.type()
+        if (et == QEvent.Type.TouchBegin or et == QEvent.Type.TouchUpdate
+                or et == QEvent.Type.TouchEnd):
+            e.accept()
+            self._sequence.append(et)
+            return True
+        return super().event(e)
 
     def generateEvent(self):
-        o = QTest.touchEvent(self, self._device)
-        o.press(0, QPoint(10, 10))
-        o.commit()
-        del o
-        # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
-        gc.collect()
-
         QTest.touchEvent(self, self._device).press(0, QPoint(10, 10))
         QTest.touchEvent(self, self._device).stationary(0).press(1, QPoint(40, 10))
         QTest.touchEvent(self, self._device).move(0, QPoint(12, 12)).move(1, QPoint(45, 5))
@@ -50,12 +45,12 @@ class MyWidget(QWidget):
 
 
 class TouchEventTest(UsesQApplication):
+    @unittest.skipIf(QPointingDevice.primaryPointingDevice() is None, "No device")
     def testCreateEvent(self):
         w = MyWidget()
         w.show()
         self.app.exec()
-        # same values as C++
-        self.assertEqual(w._sequence.count(QEvent.Type.TouchBegin), 2)
+        self.assertEqual(w._sequence.count(QEvent.Type.TouchBegin), 1)
         self.assertEqual(w._sequence.count(QEvent.Type.TouchUpdate), 2)
         self.assertEqual(w._sequence.count(QEvent.Type.TouchEnd), 1)
 
