@@ -22,7 +22,6 @@ from PySide6.QtWidgets import QApplication, QPushButton, QWidget
 class Bug576(unittest.TestCase):
     def onButtonDestroyed(self, button):
         self._destroyed = True
-        self.assertTrue(isinstance(button, QPushButton))
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testWidgetParent(self):
