@@ -14,9 +14,14 @@ init_test_paths(False)
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QHeaderView
 
+received_column = None
+received_order = None
 
-def foo(a, b):
-    pass
+
+def foo(colum, order):
+    global received_column, received_order
+    received_column = colum
+    received_order = order
 
 
 class TestBug941 (unittest.TestCase):
@@ -26,7 +31,9 @@ class TestBug941 (unittest.TestCase):
         view = QHeaderView(Qt.Orientation.Horizontal)
         self.assertTrue(view.sortIndicatorChanged.connect(foo))
         # this can't raise an exception!
-        view.sortIndicatorChanged.emit(0, Qt.Orientation.Vertical)
+        view.sortIndicatorChanged.emit(0, Qt.SortOrder.DescendingOrder)
+        self.assertEqual(received_column, 0)
+        self.assertEqual(received_order, Qt.SortOrder.DescendingOrder)
 
 
 if __name__ == '__main__':
