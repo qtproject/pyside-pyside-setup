@@ -11,21 +11,48 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
+from PySide6.QtCore import QTimer
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QFontDialog
+from PySide6.QtWidgets import QApplication, QDialog, QFontDialog
 from helper.timedqapplication import TimedQApplication
+
+
+def is_exposed(widget):
+    result = False
+    if widget.isVisible():
+        handle = widget.windowHandle()
+        if handle:
+            result = handle.isExposed()
+    return result
 
 
 class TestFontDialog(TimedQApplication):
 
-    def testGetFont(self):
-        QFontDialog.getFont()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._timer = None
 
-    def testGetFontQDialog(self):
-        QFontDialog.getFont(QFont("FreeSans", 10))
+    def setUp(self, timeout=100):
+        super().setUp(timeout)
+        if not self._timer:
+            self._timer = QTimer()
+            self._timer.setInterval(50)
+            self._timer.timeout.connect(self._timer_handler)
+            self._timer.start()
+
+    def _timer_handler(self):
+        """Periodically check for the dialog to appear and close it."""
+        for widget in QApplication.topLevelWidgets():
+            if isinstance(widget, QDialog) and is_exposed(widget):
+                widget.accept()
 
     def testGetFontQDialogQString(self):
-        QFontDialog.getFont(QFont("FreeSans", 10), None, "Select font")
+        r = QFontDialog.getFont(QFont("FreeSans", 10), None, "Select font",
+                                QFontDialog.FontDialogOption.DontUseNativeDialog)
+        self.assertTrue(type(r) is tuple)
+        self.assertEqual(len(r), 2)
+        self.assertTrue(r[0])
+        self.assertTrue(type(r[1]) is QFont)
 
 
 if __name__ == '__main__':
