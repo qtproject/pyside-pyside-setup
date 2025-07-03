@@ -5408,7 +5408,10 @@ void CppGenerator::writeSignatureInfo(TextStream &s, const OverloadData &overloa
             for (const auto &spec : metaClass->propertySpecs()) {
                 auto typeEntry = spec.typeEntry();
                 QString text;
-                if (typeEntry->isFlags()) {
+                if (typeEntry->isEnum()) {
+                    const auto ete = std::static_pointer_cast<const EnumTypeEntry>(typeEntry);
+                    text = ete->qualifiedTargetLangName();
+                } else if (typeEntry->isFlags()) {
                     const auto fte = std::static_pointer_cast<const FlagsTypeEntry>(typeEntry);
                     text = fte->originator()->qualifiedTargetLangName();
                 } else {
