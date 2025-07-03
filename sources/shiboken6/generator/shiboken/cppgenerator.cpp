@@ -3748,7 +3748,7 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s,
         s << ')';
     }
     s << outdent << ") {\n" << indent
-        << "Py_INCREF(errInfo.object());\n"
+        << "Py_XINCREF(errInfo.object());\n" // PYSIDE-3133, 0 if conversion fails
         << "return " << returnErrorWrongArguments(overloadData, classContext, errorReturn)
         << ';' << outdent << "\n}\n";;
 
