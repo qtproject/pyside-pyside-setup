@@ -13,11 +13,14 @@ init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
 
+from PySide6.QtCore import QStandardPaths
 from PySide6.QtWidgets import QWidget, QFrame, QPushButton
 from PySide6.QtUiTools import loadUiType
 
 
 class loadUiTypeTester(UsesQApplication):
+
+    @unittest.skipUnless(bool(QStandardPaths.findExecutable("pyside6-uic")), "pyside6-uic missing")
     def testFunction(self):
         filePath = os.path.join(os.path.dirname(__file__), "minimal.ui")
         loaded = loadUiType(filePath)

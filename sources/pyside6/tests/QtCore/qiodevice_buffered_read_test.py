@@ -4,10 +4,17 @@ from __future__ import annotations
 
 '''Test cases for buffered read methods of QIODevice'''
 
-from PySide6.QtCore import QBuffer
-
 import enum
+import os
+import sys
 import unittest
+
+from pathlib import Path
+sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
+from init_paths import init_test_paths
+init_test_paths(False)
+
+from PySide6.QtCore import QBuffer
 
 
 class TestQIODeviceBufferedRead(unittest.TestCase):

@@ -4,9 +4,16 @@ from __future__ import annotations
 
 '''Client for the unit test of QSharedMemory'''
 
+import os
 import sys
 
-from PySide6.QtCore import QSharedMemory
+from pathlib import Path
+FILE = Path(__file__).resolve()
+sys.path.append(os.fspath(FILE.parents[1]))
+from init_paths import init_test_paths  # noqa: E402
+init_test_paths(False)
+
+from PySide6.QtCore import QSharedMemory  # noqa: E402
 
 
 def read_string(shared_memory):
