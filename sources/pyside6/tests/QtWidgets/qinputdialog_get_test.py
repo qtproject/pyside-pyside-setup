@@ -16,29 +16,46 @@ from PySide6.QtWidgets import QApplication, QInputDialog, QDialog
 from helper.usesqapplication import UsesQApplication
 
 
-def close_dialog():
-    for w in QApplication.topLevelWidgets():
-        if isinstance(w, QDialog):
-            w.reject()
+def is_exposed(widget):
+    result = False
+    if widget.isVisible():
+        handle = widget.windowHandle()
+        if handle:
+            result = handle.isExposed()
+    return result
 
 
 class TestInputDialog(UsesQApplication):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._timer = None
+
+    def setUp(self):
+        super().setUp()
+        if not self._timer:
+            self._timer = QTimer()
+            self._timer.setInterval(50)
+            self._timer.timeout.connect(self._timer_handler)
+            self._timer.start()
+
+    def _timer_handler(self):
+        """Periodically check for the dialog to appear and close it."""
+        for widget in QApplication.topLevelWidgets():
+            if isinstance(widget, QDialog) and is_exposed(widget):
+                widget.reject()
+
     def testGetDouble(self):
-        QTimer.singleShot(500, close_dialog)
         self.assertEqual(QInputDialog.getDouble(None, "title", "label"), (0.0, False))
 
     def testGetInt(self):
-        QTimer.singleShot(500, close_dialog)
         self.assertEqual(QInputDialog.getInt(None, "title", "label"), (0, False))
 
     def testGetItem(self):
-        QTimer.singleShot(500, close_dialog)
         (item, bool) = QInputDialog.getItem(None, "title", "label", ["1", "2", "3"])
         self.assertEqual(str(item), "1")
 
     def testGetText(self):
-        QTimer.singleShot(500, close_dialog)
         (text, bool) = QInputDialog.getText(None, "title", "label")
         self.assertEqual(str(text), "")
 
