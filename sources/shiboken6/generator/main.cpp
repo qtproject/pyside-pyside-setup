@@ -19,6 +19,7 @@
 #include <QtCore/qdir.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qlibrary.h>
+#include <QtCore/qscopeguard.h>
 #include <QtCore/qvariant.h>
 
 #include "qtcompat.h"
@@ -351,6 +352,11 @@ int shibokenMain(const QStringList &argV)
         return EXIT_FAILURE;
     }
 
+    auto logWriterFunc = [&commonOptions]() {
+        ReportHandler::writeGeneralLogFile(commonOptions.outputDirectory);
+    };
+    auto logWriter = qScopeGuard(logWriterFunc);
+
     extractor.setCppFileNames(cppFileNames);
     extractor.setTypeSystem(commonOptions.typeSystemFileName);
 
@@ -393,8 +399,6 @@ int shibokenMain(const QStringList &argV)
 
     if (commonOptions.logUnmatched)
         TypeDatabase::instance()->logUnmatched();
-
-    ReportHandler::writeGeneralLogFile(commonOptions.outputDirectory);
 
     const QByteArray doneMessage = ReportHandler::doneMessage();
     std::cout << doneMessage.constData() << '\n';
