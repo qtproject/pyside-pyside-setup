@@ -117,9 +117,13 @@ def test_project(project, args, blacklist, runs):
             # PYSIDE-1229: When a fatal error happens, bail out immediately!
             if item.fatal:
                 fatal = item
-        print()
+
+        print("\n  #### Top 20 slow tests:")
+        for item in results.get_slowest_tests(20):
+            print(f"    {item.mod_name:<50} {item.time:6}s")
+
         print(
-            f"Totals: {sum(r)} tests. "
+            f"\nTotals: {sum(r)} tests. "
             f"{r[0]} passed, {r[1]} failed, {r[2]} skipped, {r[3]} blacklisted, {r[4]} bpassed."
         )
         print()

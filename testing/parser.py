@@ -84,6 +84,10 @@ class TestResult:
     rich_result: str = ""
 
 
+def sort_time_key(item):
+    return item.time
+
+
 def _parse_tests(test_log):
     """
     Create a TestResult object for every entry.
@@ -161,3 +165,10 @@ class TestParser:
                 res = "FATAL"
             item.rich_result = res
             yield item
+
+    def get_slowest_tests(self, max_count):
+        result = self.results.copy()
+        result.sort(key=sort_time_key, reverse=True)
+        if len(result) > max_count:
+            result = result[0:max_count - 1]
+        return result
