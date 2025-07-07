@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import re
-from collections import namedtuple
+from dataclasses import dataclass
 from io import StringIO
 
 """
@@ -70,9 +70,18 @@ assert re.match(_TEST_PAT, _EXAMPLE.splitlines()[5], re.VERBOSE)
 assert len(re.match(_TEST_PAT, _EXAMPLE.splitlines()[5], re.VERBOSE).groups()) == 8
 assert len(re.match(_TEST_PAT, _EXAMPLE.splitlines()[7], re.VERBOSE).groups()) == 8
 
-TestResult = namedtuple(
-    "TestResult", "idx n sharp mod_name passed " "code time fatal rich_result".split()
-)
+
+@dataclass
+class TestResult:
+    idx: int = 0
+    n: int = 0
+    sharp: int = 0
+    mod_name: str = ""
+    passed: bool = False
+    code: str = ""
+    time: float = 0
+    fatal: bool = False
+    rich_result: str = ""
 
 
 def _parse_tests(test_log):
@@ -114,9 +123,9 @@ def _parse_tests(test_log):
         if idx + 1 != item.idx:
             # The numbering is disrupted. Provoke an error in this line!
             code = f"{code}, but lines are disrupted!"
-            result[idx] = item._replace(
-                passed=False, code=f"{item.code}, but lines are disrupted!", fatal=True
-            )
+            result[idx].passed = False
+            result[idx].code = f"{item.code}, but lines are disrupted!"
+            result[idx].fatal = True
             break
     return result
 
@@ -150,4 +159,5 @@ class TestParser:
             if item.fatal:
                 # PYSIDE-1229: Stop the testing completely when a fatal error exists
                 res = "FATAL"
-            yield item._replace(rich_result=res)
+            item.rich_result = res
+            yield item
