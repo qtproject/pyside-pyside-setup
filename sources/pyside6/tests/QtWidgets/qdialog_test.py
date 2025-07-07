@@ -13,8 +13,17 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import Slot, QTimer
-from PySide6.QtWidgets import QDialog, QMainWindow
+from PySide6.QtWidgets import QApplication, QDialog, QMainWindow
 from helper.timedqapplication import TimedQApplication
+
+
+def is_exposed(widget):
+    result = False
+    if widget.isVisible():
+        handle = widget.windowHandle()
+        if handle:
+            result = handle.isExposed()
+    return result
 
 
 class Window(QMainWindow):
@@ -22,6 +31,10 @@ class Window(QMainWindow):
         super().__init__()
         self.setWindowTitle("Main")
         self.dialog = None
+        self._timer = QTimer()
+        self._timer.setInterval(50)
+        self._timer.timeout.connect(self._timer_handler)
+        self._timer.start()
 
     @Slot()
     def execDialog(self):
@@ -32,6 +45,13 @@ class Window(QMainWindow):
         QTimer.singleShot(500, dialog.reject)
         dialog.exec()
         self.close()
+
+    @Slot()
+    def _timer_handler(self):
+        """Periodically check for the dialog to appear and close it."""
+        for widget in QApplication.topLevelWidgets():
+            if isinstance(widget, QDialog) and is_exposed(widget):
+                widget.reject()
 
 
 class DialogExecTest(TimedQApplication):
@@ -44,7 +64,9 @@ class DialogExecTest(TimedQApplication):
 
     def testExec(self):
         self._window.show()
-        QTimer.singleShot(500, self._window.execDialog)
+        while not is_exposed(self._window):
+            QApplication.processEvents()
+        QTimer.singleShot(0, self._window.execDialog)
         self.app.exec()
         self.assertTrue(self._window.dialog() is None)
 
