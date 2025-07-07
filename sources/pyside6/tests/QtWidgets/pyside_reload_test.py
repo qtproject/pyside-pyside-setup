@@ -5,40 +5,40 @@ from __future__ import annotations
 import importlib
 import importlib.util
 import os
-import shutil
 import sys
 import unittest
 
+from tempfile import TemporaryDirectory
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
 
-orig_path = os.path.join(os.path.dirname(__file__))
-workdir = os.getcwd()
-src = os.path.normpath(os.path.join(orig_path, '..', 'QtWidgets', 'test_module_template.py'))
-dst = os.path.join(workdir, 'test_module.py')
-shutil.copyfile(src, dst)
-sys.path.append(workdir)
-
-
 def reload_module(moduleName):
     importlib.reload(moduleName)
 
 
-def increment_module_value():
-    modfile = open(dst, 'a')
-    modfile.write('Sentinel.value += 1' + os.linesep)
-    modfile.flush()
-    modfile.close()
-    if not sys.dont_write_bytecode:
-        import importlib.util
-        cacheFile = importlib.util.cache_from_source(dst)
-        os.remove(cacheFile)
-
-
 class TestModuleReloading(unittest.TestCase):
+    def setUp(self):
+        orig_path = Path(__file__).resolve().parent
+        self._src = orig_path / 'test_module_template.py'
+        self._workdir = TemporaryDirectory()
+        self._dst = Path(self._workdir.name) / 'test_module.py'
+        self._dst.write_bytes(self._src.read_bytes())
+        sys.path.append(self._workdir.name)
+
+    def tearDown(self):
+        sys.path.remove(self._workdir.name)
+        self._workdir = None
+
+    def _increment_module_value(self):
+        with self._dst.open(mode='a') as modfile:
+            modfile.write('Sentinel.value += 1\n')
+        if not sys.dont_write_bytecode:
+            import importlib.util
+            cacheFile = importlib.util.cache_from_source(os.fspath(self._dst))
+            os.remove(cacheFile)
 
     def testModuleReloading(self):
         '''Test module reloading with on-the-fly modifications.'''
@@ -46,14 +46,14 @@ class TestModuleReloading(unittest.TestCase):
         import test_module
         self.assertEqual(test_module.Sentinel.value, 10)
 
-        increment_module_value()
+        self._increment_module_value()
         reload_module(sys.modules['test_module'])
         self.assertEqual(test_module.Sentinel.value, 11)
 
         reload_module(sys.modules['test_module'])
         self.assertEqual(test_module.Sentinel.value, 11)
 
-        increment_module_value()
+        self._increment_module_value()
         reload_module(sys.modules['test_module'])
         self.assertEqual(test_module.Sentinel.value, 12)
 
