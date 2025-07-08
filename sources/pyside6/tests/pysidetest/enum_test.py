@@ -75,7 +75,6 @@ class InvestigateOpcodesTest(unittest.TestCase):
 
     _sin = sys.implementation.name
 
-    @unittest.skipIf(hasattr(sys.flags, "nogil"), f"{_sin} has different opcodes")
     def testByteCode(self):
         import dis
         # opname, opcode, arg
