@@ -196,11 +196,11 @@ def prepare_packages_win32(pyside_build, _vars):
     if config.is_internal_shiboken_module_build():
         # The C++ std library dlls need to be packaged with the
         # shiboken module, because libshiboken uses C++ code.
-        copy_msvc_redist_files(destination_dir)
+        download_qt_dependency_dlls(_vars, destination_dir, msvc_redist)
 
     if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
         copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars)
-        copy_msvc_redist_files(destination_dir)
+        download_qt_dependency_dlls(_vars, destination_dir, msvc_redist)
 
 
 # MSVC redistributable file list.
@@ -216,33 +216,6 @@ msvc_redist = [
     "msvcp140_2.dll",
     "msvcp140_codecvt_ids.dll"
 ]
-
-
-def copy_msvc_redist_files(destination_dir):
-    if not in_coin():
-        log.info("Qt dependency DLLs (MSVC redist) will not be copied.")
-        return
-
-    # Make a directory where the files should be extracted.
-    if not destination_dir.exists():
-        destination_dir.mkdir(parents=True)
-
-    # Copy Qt dependency DLLs (MSVC) from PATH when building on Qt CI.
-    paths = os.environ["PATH"].split(os.pathsep)
-    for path in paths:
-        try:
-            for f in Path(path).glob("*140*.dll"):
-                if f.name in msvc_redist:
-                    copyfile(f, Path(destination_dir) / f.name)
-                    msvc_redist.remove(f.name)
-            if not msvc_redist:
-                break
-        except WindowsError:
-            continue
-
-    if msvc_redist:
-        msg = "The following Qt dependency DLLs (MSVC redist) were not found: {msvc_redist}"
-        raise FileNotFoundError(msg)
 
 
 def get_cache_dir():
