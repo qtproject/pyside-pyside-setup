@@ -13,7 +13,8 @@ from ..log import log
 from ..config import config
 from ..options import OPTION
 from ..utils import (copydir, copyfile, copy_qt_metatypes,
-                     download_and_extract_7z, filter_match, makefile, in_coin)
+                     download_and_extract_7z, filter_match, makefile, in_coin,
+                     coin_job_id)
 from .. import PYSIDE, SHIBOKEN, PYSIDE_WINDOWS_BIN_TOOLS, PYSIDE_MULTIMEDIA_LIBS
 
 
@@ -244,25 +245,41 @@ def copy_msvc_redist_files(destination_dir):
         raise FileNotFoundError(msg)
 
 
+def get_cache_dir():
+    """Return the name of a cache directory for storing artifacts for repetitive
+       runs of setup.py depending on COIN_UNIQUE_JOB_ID."""
+    job_id = coin_job_id()
+    dir = tempfile.gettempdir() + os.sep + "pyside" + job_id[0:job_id.find('-')]
+    return Path(dir)
+
+
+def download_and_extract_7z_to_cache(url, cache_dir):
+    """Download the artifacts to the cache directory unless it exists."""
+    if not cache_dir.is_dir():
+        cache_dir.mkdir(parents=True)
+    if not list(cache_dir.glob("*.dll")):
+        download_and_extract_7z(url, cache_dir)
+
+
 def download_qt_dependency_dlls(_vars, destination_qt_dir, artifacts):
     # Extract Qt dependency dlls when building on Qt CI.
     if not in_coin():
         log.info("Qt dependency DLLs will not be downloaded and extracted.")
         return
 
-    with tempfile.TemporaryDirectory() as temp_path:
-        redist_url = "https://download.qt.io/development_releases/prebuilt/vcredist/"
-        zip_file = "pyside_qt_deps_681_64_2022.7z"
-        if platform.machine() == "ARM64":
-            zip_file = "pyside_qt_deps_690_arm_2022.7z"
-        try:
-            download_and_extract_7z(redist_url + zip_file, temp_path)
-        except Exception as e:
-            log.warning(f"Download failed: {type(e).__name__}: {e}")
-            log.warning("download.qt.io is down, try with mirror")
-            redist_url = "https://master.qt.io/development_releases/prebuilt/vcredist/"
-            download_and_extract_7z(redist_url + zip_file, temp_path)
-        copydir(temp_path, destination_qt_dir, _filter=artifacts, recursive=False, _vars=_vars)
+    cache_dir = get_cache_dir()
+    redist_url = "https://download.qt.io/development_releases/prebuilt/vcredist/"
+    zip_file = "pyside_qt_deps_681_64_2022.7z"
+    if platform.machine() == "ARM64":
+        zip_file = "pyside_qt_deps_690_arm_2022.7z"
+    try:
+        download_and_extract_7z_to_cache(redist_url + zip_file, cache_dir)
+    except Exception as e:
+        log.warning(f"Download failed: {type(e).__name__}: {e}")
+        log.warning("download.qt.io is down, try with mirror")
+        redist_url = "https://master.qt.io/development_releases/prebuilt/vcredist/"
+        download_and_extract_7z_to_cache(redist_url + zip_file, cache_dir)
+    copydir(cache_dir, destination_qt_dir, _filter=artifacts, recursive=False, _vars=_vars)
 
 
 def copy_qt_artifacts(pyside_build, destination_qt_dir, copy_pdbs, _vars):

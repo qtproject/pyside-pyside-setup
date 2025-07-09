@@ -1123,8 +1123,12 @@ def copy_qt_metatypes(destination_qt_dir, _vars):
             recursive=False, _vars=_vars, force_copy_symlinks=True)
 
 
+def coin_job_id():
+    return os.environ.get("COIN_UNIQUE_JOB_ID", None)
+
+
 def in_coin():
-    return os.environ.get('COIN_UNIQUE_JOB_ID', None) is not None
+    return coin_job_id() is not None
 
 
 def parse_modules(modules: str) -> str:
