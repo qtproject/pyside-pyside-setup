@@ -242,7 +242,7 @@ def download_qt_dependency_dlls(_vars, destination_qt_dir, artifacts):
 
     cache_dir = get_cache_dir()
     redist_url = "https://download.qt.io/development_releases/prebuilt/vcredist/"
-    zip_file = "pyside_qt_deps_681_64_2022.7z"
+    zip_file = "pyside_qt_deps_684_64_2022.7z"
     if platform.machine() == "ARM64":
         zip_file = "pyside_qt_deps_690_arm_2022.7z"
     try:
