@@ -4941,7 +4941,8 @@ QString CppGenerator::writeCopyFunction(TextStream &s,
     const QString className = chopType(cpythonTypeName(metaClass));
     const QString funcName = className + u"__copy__"_s;
 
-    signatureStream << fullPythonClassName(metaClass) << ".__copy__(self)->typing.Self\n";
+    // PYSIDE-3135 replace _Self by Self when the minimum Python version is 3.11
+    signatureStream << fullPythonClassName(metaClass) << ".__copy__(self)->typing._Self\n";
     definitionStream << PyMethodDefEntry{u"__copy__"_s, funcName, {"METH_NOARGS"_ba}, {}}
                      << ",\n";
 

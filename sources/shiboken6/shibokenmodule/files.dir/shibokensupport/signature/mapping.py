@@ -30,11 +30,16 @@ class ellipsis:
         return "..."
 
 
+# PYSIDE-3135
+# Using _Self to avoid adding the parameter to typing in versions <3.11
+# Drop this when Python 3.11 is the minimum version
 if not hasattr(typing, "Self"):
     @typing._SpecialForm
     def Self(self, parameters):
         raise TypeError(f"{self} is not subscriptable")
-    typing.Self = Self
+    typing._Self = Self
+else:
+    typing._Self = typing.Self
 
 ellipsis = ellipsis()
 Point = typing.Tuple[int, int]
