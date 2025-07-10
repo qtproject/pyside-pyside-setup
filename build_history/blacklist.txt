@@ -10,10 +10,6 @@
     win32 ci
     linux
     darwin
-[QtMultimedia::audio_test]
-    linux
-    darwin
-    win32
 # Cannot create metal surface
 [QtMultimediaWidgets::qmultimediawidgets]
     darwin ci
