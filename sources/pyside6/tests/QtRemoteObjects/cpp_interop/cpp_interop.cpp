@@ -72,7 +72,8 @@ public:
         }
 
         m_node.setObjectName("cpp_node");
-        std::cerr << "harness: Host url:" << m_host.hostUrl().toEncoded().constData() << '\n';
+        std::cout << "harness: Host url:" << m_host.hostUrl().toEncoded().constData() << '\n';
+        std::cout.flush();
     }
 
 public slots:

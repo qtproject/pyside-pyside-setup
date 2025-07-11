@@ -27,6 +27,9 @@ from helper.usesqapplication import UsesQApplication
 
 
 """
+This test needs to be run from the build directory in
+order to locate the harness binary.
+
 The previous tests all verify Remote Objects integration, but only
 using Python for both Source and Replica.  We need to make sure there
 aren't any surprises in the interplay between Python and C++.
@@ -94,7 +97,7 @@ class Controller(QObject):
         # Start the C++ application
         self.process = QProcess()
         self.process.readyReadStandardOutput.connect(self.process_harness_output)
-        self.process.readyReadStandardError.connect(self.process_harness_output)
+        self.process.readyReadStandardError.connect(self.process_harness_stderr_output)
         urls = self.host.hostUrl().toDisplayString()
         print(f'Starting C++ application "{self._executable}" "{urls}"', file=sys.stderr)
         self.process.start(self._executable, [self.host.hostUrl().toDisplayString(), "Simple"])
@@ -134,17 +137,22 @@ class Controller(QObject):
         return source, replica
 
     def process_harness_output(self):
-        '''Process stderr from the C++ application'''
-        output = self.process.readAllStandardError().trimmed()
+        '''Process stdout from the C++ application, parse for URL'''
+        output = self.process.readAllStandardOutput().trimmed()
         lines = output.data().decode().split("\n")
         HOST_LINE = "harness: Host url:"
         for line in lines:
-            print(line, file=sys.stderr)
+            print("  stdout: ", line, file=sys.stderr)
             if line.startswith(HOST_LINE):
                 urls = line[len(HOST_LINE):].strip()
                 print(f'url="{urls}"', file=sys.stderr)
                 self.cpp_url = QUrl(urls)
                 self.ready.emit()
+
+    def process_harness_stderr_output(self):
+        '''Print stderr from the C++ application'''
+        output = self.process.readAllStandardError().trimmed()
+        print("  stderr: ", output.data().decode())
 
 
 class HarnessTest(UsesQApplication):
