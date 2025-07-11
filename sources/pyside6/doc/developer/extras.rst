@@ -22,20 +22,23 @@ To test the wheels:
 Build on the command line
 =========================
 
-- Consider using ``build_scripts/qp5_tool.py``.
+- Consider using ``build_scripts/qfp_tool.py``.
 
 Build with address sanitizer (Linux)
 ====================================
 
-ASAN needs to be told to not exit on memory leaks and its library
-needs to be pre-loaded. Assuming the library is found
-at ``/usr/lib/gcc/x86_64-linux-gnu/11``:
+`Address sanitizer <https://clang.llvm.org/docs/AddressSanitizer.html>`_
+(ASAN) needs to be told to not exit on memory leaks and its library needs to be
+pre-loaded. Assuming the library is found at
+``/usr/lib/gcc/x86_64-linux-gnu/11``:
 
 .. code-block:: bash
 
     export ASAN_OPTIONS=detect_leaks=0
     export LD_PRELOAD=/usr/lib/gcc/x86_64-linux-gnu/11/libasan.so
     python setup.py build [...] --sanitize-address
+
+Lately, this feature has been added to MVSC, too.
 
 De-Virtualize the Python Files
 ==============================
