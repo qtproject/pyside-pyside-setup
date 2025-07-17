@@ -2841,6 +2841,9 @@
     <add-function signature="exec_()" return-type="int">
         <inject-code file="../glue/qtgui.cpp" snippet="qguiapplication-exec"/>
     </add-function>
+    <modify-function signature="modalWindow()">
+        <modify-argument index="return" pyi-type="Optional[PySide6.QtGui.QWindow]"/>
+    </modify-function>
     <add-function signature="nativeInterface()const" return-type="PyObject">
         <modify-argument index="return"> <!-- Suppress return value heuristics -->
             <define-ownership class="target" owner="default"/>
@@ -2848,6 +2851,9 @@
         <inject-code class="target" position="beginning" file="../glue/qtgui.cpp"
                      snippet="qguiapplication-nativeInterface"/>
     </add-function>
+    <modify-function signature="screenAt(const QPoint &amp;)">
+        <modify-argument index="return" pyi-type="Optional[PySide6.QtGui.QScreen]"/>
+    </modify-function>
     <modify-function signature="setOverrideCursor(const QCursor&amp;)">
         <modify-argument index="return" pyi-type="PyObject">
             <replace-type modified-type="QtGuiHelper::QOverrideCursorGuard*"/>
