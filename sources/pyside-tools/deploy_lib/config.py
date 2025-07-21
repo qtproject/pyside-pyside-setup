@@ -218,6 +218,7 @@ class Config(BaseConfig):
         qml_files = [str(file.absolute().relative_to(self.project_dir.absolute()))
                      if file.absolute().is_relative_to(self.project_dir) else str(file.absolute())
                      for file in self.qml_files]
+        qml_files.sort()
         self.set_value("qt", "qml_files", ",".join(qml_files))
 
     @property
@@ -288,6 +289,7 @@ class Config(BaseConfig):
     def excluded_qml_plugins(self, excluded_qml_plugins):
         self._excluded_qml_plugins = excluded_qml_plugins
         if excluded_qml_plugins:  # check required for Android
+            excluded_qml_plugins.sort()
             self.set_value("qt", "excluded_qml_plugins", ",".join(excluded_qml_plugins))
 
     @property
@@ -306,6 +308,7 @@ class Config(BaseConfig):
     @modules.setter
     def modules(self, modules):
         self._modules = modules
+        modules.sort()
         self.set_value("qt", "modules", ",".join(modules))
 
     def _find_qml_files(self):
@@ -465,6 +468,7 @@ class DesktopConfig(Config):
     @qt_plugins.setter
     def qt_plugins(self, qt_plugins):
         self._qt_plugins = qt_plugins
+        qt_plugins.sort()
         self.set_value("qt", "plugins", ",".join(qt_plugins))
 
     @property
@@ -474,6 +478,7 @@ class DesktopConfig(Config):
     @permissions.setter
     def permissions(self, permissions):
         self._permissions = permissions
+        permissions.sort()
         self.set_value("nuitka", "macos.permissions", ",".join(permissions))
 
     @property
