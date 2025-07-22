@@ -1058,10 +1058,18 @@ void AbstractMetaBuilderPrivate::traverseTypesystemTypedefs()
             // Synthesize a AbstractMetaType which would be found by an
             // instantiation.
             AbstractMetaType sourceType;
-            sourceType.setTypeEntry(metaClass->templateBaseClass()->typeEntry());
-            sourceType.setInstantiations(metaClass->templateBaseClassInstantiations());
-            sourceType.decideUsagePattern();
-            m_typeSystemTypeDefs.append({sourceType, metaClass});
+            TypeEntryCPtr typeEntry;
+            if (auto templateBase = metaClass->templateBaseClass())
+                typeEntry = templateBase->typeEntry();
+            if (typeEntry) {
+                sourceType.setTypeEntry(typeEntry);
+                sourceType.setInstantiations(metaClass->templateBaseClassInstantiations());
+                sourceType.decideUsagePattern();
+                m_typeSystemTypeDefs.append({sourceType, metaClass});
+            } else {
+                qCWarning(lcShiboken, "Cannot find type entry for source of typedef \"%s\".",
+                          qPrintable(metaClass->qualifiedCppName()));
+            }
         }
     }
 }
