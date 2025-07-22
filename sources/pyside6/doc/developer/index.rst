@@ -37,3 +37,4 @@ many features and implementation details that the project has:
    mypy-correctness.rst
    feature-motivation.rst
    remoteobjects.md
+   fix_type_hints.rst
