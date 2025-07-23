@@ -284,6 +284,32 @@ def get_config_file(base_name) -> Path:
     return config_file
 
 
+def pip_list():
+    """List installed packages from the output lines of pip (shiboken6  6.9.0a1)."""
+    result = []
+    pattern = re.compile(r"^([^\s]+)\s+\d.*$")
+    for line in run_process_output(["pip", "list"]):
+        match = pattern.search(line)
+        if match:
+            result.append(match.group(1))
+    return result
+
+
+def uninstall_pyside():
+    """Uninstall all PySide related packages."""
+    packages = []
+    for p in pip_list():
+        if "shiboken" in p or "PySide" in p:
+            packages.append(p)
+    if not packages or opt_dry_run:
+        return
+    yes = "Y\n" * len(packages)
+    cmd = ["pip", "uninstall"] + packages
+    with subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE,
+                          stderr=subprocess.PIPE, text=True) as process:
+        print(process.communicate(input=yes)[0])
+
+
 def run_build(target: str):
     """Run configure and build steps"""
     arguments = []
@@ -398,6 +424,8 @@ def create_argument_parser(desc):
                         help='Run tests')
     parser.add_argument('--Documentation', '-D', action='store_true',
                         help='Run build_base_docs')
+    parser.add_argument('--uninstall', '-U', action='store_true',
+                        help='Uninstall packages')
     parser.add_argument('--version', '-v', action='version', version='%(prog)s 1.0')
     parser.add_argument('--verbose', '-V', action='store_true',
                         help='Turn off --quiet specified in build arguments')
@@ -436,7 +464,8 @@ if __name__ == '__main__':
         build_mode = BuildMode.RECONFIGURE
 
     if build_mode == BuildMode.NONE and not (options.clean or options.reset or options.pull
-                                             or options.Documentation or options.test):
+                                             or options.uninstall or options.Documentation
+                                             or options.test):
         argument_parser.print_help()
         sys.exit(0)
 
@@ -459,6 +488,9 @@ if __name__ == '__main__':
         os.chdir(cwd.parent)
 
     base_dir = Path.cwd().name
+
+    if options.uninstall:
+        uninstall_pyside()
 
     if options.clean:
         run_git(['clean', '-dxf'])
