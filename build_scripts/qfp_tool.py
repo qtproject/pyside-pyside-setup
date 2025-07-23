@@ -37,6 +37,7 @@ Jobs             Number of jobs to be run simultaneously
 Modules          Comma separated list of modules to be built
                  (for --module-subset=)
 Python           Python executable (Use python_d for debug builds on Windows)
+Wheel            (boolean) Install via wheels instead of running setup.py install
 
 Arbitrary keys can be defined and referenced by $(name):
 
@@ -76,6 +77,7 @@ GENERATOR_KEY = 'Generator'
 JOBS_KEY = 'Jobs'
 MODULES_KEY = 'Modules'
 PYTHON_KEY = 'Python'
+WHEEL_KEY = 'Wheel'
 
 DEFAULT_MODULES = "Core,Gui,Widgets,Network,Test,Qml,Quick,Multimedia,MultimediaWidgets"
 DEFAULT_CONFIG_FILE = f"Modules={DEFAULT_MODULES}\n"
@@ -282,10 +284,8 @@ def get_config_file(base_name) -> Path:
     return config_file
 
 
-def build(target: str):
+def run_build(target: str):
     """Run configure and build steps"""
-    start_time = time.time()
-
     arguments = []
     acceleration = read_acceleration_config()
     if not IS_WINDOWS and acceleration == Acceleration.INCREDIBUILD:
@@ -323,8 +323,33 @@ def build(target: str):
 
     execute(arguments)
 
-    elapsed_time = int(time.time() - start_time)
-    print(f'--- Done({elapsed_time}s) ---')
+
+def build(skip_install: bool):
+    """Run configure and build steps"""
+    start_time = time.time()
+    use_wheel = read_bool_config(WHEEL_KEY)
+    target = "build" if use_wheel or skip_install else "install"
+    run_build(target)
+    build_time_stamp = time.time()
+    elapsed_time = int(build_time_stamp - start_time)
+    print(f"--- Build done({elapsed_time}s) ---")
+    if not use_wheel or skip_install:
+        return
+    print()
+    wheel_dir = Path.cwd() / "dist"
+    if not opt_dry_run:
+        for w in wheel_dir.glob("*.whl"):
+            w.unlink()
+    create_wheel_cmd = [read_config_python_binary(), "create_wheels.py", "--no-examples"]
+    execute(create_wheel_cmd)
+    install_cmd = ["pip", "install", "--force-reinstall"]
+    for w in wheel_dir.glob("*.whl"):
+        if not w.name.startswith("pyside6-"):
+            install_cmd.append(os.fspath(w))
+    execute(install_cmd)
+    install_time_stamp = time.time()
+    elapsed_time = int(install_time_stamp - build_time_stamp)
+    print(f"--- Install done({elapsed_time}s) ---")
 
 
 def build_base_docs():
@@ -445,8 +470,7 @@ if __name__ == '__main__':
         run_git(['pull', '--rebase'])
 
     if build_mode != BuildMode.NONE:
-        target = 'build' if options.no_install else 'install'
-        build(target)
+        build(options.no_install)
 
     if options.Documentation:
         build_base_docs()
