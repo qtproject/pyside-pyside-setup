@@ -39,7 +39,7 @@ class MainSlice(QPieSlice):
 class DonutBreakdownChart(QChart):
     def __init__(self, parent=None):
         super().__init__(QChart.ChartTypeCartesian,
-                         parent, Qt.WindowFlags())
+                         parent, Qt.WindowFlags(0))
         self.main_series = QPieSeries()
         self.main_series.setPieSize(0.7)
         self.addSeries(self.main_series)
