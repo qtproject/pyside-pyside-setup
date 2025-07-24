@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import QtQuick
-import QtQuick.Controls
+import QtQuick.Controls.Fusion
 import QtWebEngine
 import QtQuick.Layouts
 
 Rectangle {
     id: downloadView
     color: "lightgray"
+    property var pendingDownloadRequest: null
 
     ListModel {
         id: downloadModel

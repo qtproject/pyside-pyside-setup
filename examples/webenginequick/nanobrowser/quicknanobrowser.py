@@ -54,7 +54,7 @@ if __name__ == '__main__':
                                  nargs='?', type=str)
     options = argument_parser.parse_args()
 
-    url = url_from_user_input(options.url) if options.url else QUrl("https://www.qt.io")
+    url = url_from_user_input(options.url) if options.url else QUrl("chrome://qt")
 
     app_args = sys.argv
     if options.single_process:
