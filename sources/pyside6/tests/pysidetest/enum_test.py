@@ -49,8 +49,12 @@ class ListConnectionTest(unittest.TestCase):
 
 
 # PYSIDE-1735: We are testing that opcodes do what they are supposed to do.
-#              This is needed in the PyEnum forgiveness mode where we need
-#              to introspect the code if an Enum was called with no args.
+#              This is needed in the PyEnum forgiveness mode (ENOPT_NO_ZERODEFAULT)
+#              where we need to introspect the code if an Enum was called with no args,
+#              enabling default construction like 'f = Qt.WindowFlags()'.
+#              Adapt for each Python version by checking the defines in the generated header opcode_ids.h
+# egrep '( RESUME | LOAD_GLOBAL | LOAD_ATTR | PUSH_NULL | CALL | STORE_FAST | RETURN_CONST )' opcode_ids.h
+# See also sbkfeature_base.cpp
 
 # flake8: noqa
 class InvestigateOpcodesTest(unittest.TestCase):
@@ -170,7 +174,7 @@ class InvestigateOpcodesTest(unittest.TestCase):
                         ('STORE_FAST',   125, 1),
                         ('RETURN_CONST', 121, 0)]
 
-        if sys.version_info[:2] >= (3, 13):
+        if sys.version_info[:2] == (3, 13):
 
             result_1 = [('RESUME',       149, 0),
                         ('LOAD_GLOBAL',   91, 0),
@@ -185,6 +189,25 @@ class InvestigateOpcodesTest(unittest.TestCase):
                         ('CALL',          53, 0),
                         ('STORE_FAST',   110, 1),
                         ('RETURN_CONST', 103, 0)]
+
+        if sys.version_info[:2] >= (3, 14):
+
+            result_1 = [('RESUME',       128, 0),
+                        ('LOAD_GLOBAL',   92, 0),
+                        ('LOAD_ATTR',     80, 2),
+                        ('STORE_FAST',   112, 1),
+                        ('LOAD_CONST',    82, 0),
+                        ('RETURN_VALUE',  35, None)
+                        ]
+
+            result_2 = [('RESUME',       128, 0),
+                        ('LOAD_GLOBAL',   92, 0),
+                        ('LOAD_ATTR',     80, 2),
+                        ('PUSH_NULL',     33, None),
+                        ('CALL',          52, 0),
+                        ('STORE_FAST',   112, 1),
+                        ('LOAD_CONST',    82, 0),
+                        ('RETURN_VALUE',  35, None)]
 
         self.assertEqual(self.read_code(self.probe_function1), result_1)
         self.assertEqual(self.read_code(self.probe_function2), result_2)
