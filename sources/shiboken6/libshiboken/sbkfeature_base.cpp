@@ -92,13 +92,35 @@ void disassembleFrame(const char *marker)
     PyErr_Restore(error_type, error_value, error_traceback);
 }
 
-// Python 3.13
-static int const LOAD_ATTR_313 = 82;
-static int const CALL_313 = 53;
-static int const PUSH_NULL_313 = 34;
-// Python 3.12
-static int const CALL_312 = 171;
-// Python 3.11
+// OpCodes: Adapt for each Python version by checking the defines in the generated header opcode_ids.h
+// egrep '( LOAD_ATTR | CALL | PUSH_NULL )' opcode_ids.h
+// See also test sources/pyside6/tests/pysidetest/enum_test.py
+
+static int constexpr LOAD_ATTR_OpCode(long pyVersion)
+{
+    if (pyVersion >= 0x030E00) // 3.14
+        return 80;
+    if (pyVersion >= 0x030D00) // 3.13
+        return 82;
+    return 106;
+}
+
+static int constexpr CALL_OpCode(long pyVersion)
+{
+    if (pyVersion >= 0x030E00) // 3.14
+        return 52;
+    if (pyVersion >= 0x030D00) // 3.13
+        return 53;
+    return 171;
+}
+
+static int constexpr PUSH_NULL_OpCode(long pyVersion)
+{
+    if (pyVersion >= 0x030E00) // 3.14
+        return 33;
+    return 34;
+}
+
 static int const PRECALL = 166;
 // we have "big instructions" with gaps after them
 static int const LOAD_METHOD_GAP_311 = 10 * 2;
@@ -107,15 +129,10 @@ static int const LOAD_ATTR_GAP = 9 * 2;
 // Python 3.7 - 3.10
 static int const LOAD_METHOD = 160;
 static int const CALL_METHOD = 161;
-// Python 3.6
-static int const CALL_FUNCTION = 131;
-static int const LOAD_ATTR_312 = 106;
 
 static bool currentOpcode_Is_CallMethNoArgs()
 {
-    static auto number = _PepRuntimeVersion();
-    static int LOAD_ATTR = number < 0x030D00 ? LOAD_ATTR_312 : LOAD_ATTR_313;
-    static int CALL = number < 0x030D00 ? CALL_312 : CALL_313;
+    static const auto number = _PepRuntimeVersion();
     static PyObject *flags = PySys_GetObject("flags");
     // We look into the currently active operation if we are going to call
     // a method with zero arguments.
@@ -145,16 +162,16 @@ static bool currentOpcode_Is_CallMethNoArgs()
     uint8_t opcode1 = co_code[f_lasti];
     uint8_t opcode2 = co_code[f_lasti + 2];
     uint8_t oparg2 = co_code[f_lasti + 3];
-    if (number < 0x030B00)
+    if (number < 0x030B00) // pre 3.11
         return opcode1 == LOAD_METHOD && opcode2 == CALL_METHOD && oparg2 == 0;
 
-    if (number < 0x030C00) {
+    if (number < 0x030C00) { // pre 3.12
         // With Python 3.11, the opcodes get bigger and change a bit.
         // Note: The new adaptive opcodes are elegantly hidden and we
         //       don't need to take care of them.
         if (opcode1 == LOAD_METHOD)
             f_lasti += LOAD_METHOD_GAP_311;
-        else if (opcode1 == LOAD_ATTR_312)
+        else if (opcode1 == LOAD_ATTR_OpCode(0x030C00)) // 3.12
             f_lasti += LOAD_ATTR_GAP_311;
         else
             return false;
@@ -167,20 +184,20 @@ static bool currentOpcode_Is_CallMethNoArgs()
     // With Python 3.12, the opcodes get again bigger and change a bit.
     // Note: The new adaptive opcodes are elegantly hidden and we
     //       don't need to take care of them.
-    if (opcode1 == LOAD_ATTR)
+    if (opcode1 == LOAD_ATTR_OpCode(number))
         f_lasti += LOAD_ATTR_GAP;
     else
         return false;
 
-    if (number >= 0x030D00) {
+    if (number >= 0x030D00) {  // starting with 3.13
         int opcode3 = co_code[f_lasti + 2];
-        if (opcode3 == PUSH_NULL_313)
+        if (opcode3 == PUSH_NULL_OpCode(number))
             f_lasti += 2;
     }
     opcode2 = co_code[f_lasti + 2];
     oparg2 = co_code[f_lasti + 3];
 
-    return opcode2 == CALL && oparg2 == 0;
+    return opcode2 == CALL_OpCode(number) && oparg2 == 0;
 }
 
 void initEnumFlagsDict(PyTypeObject *type)
