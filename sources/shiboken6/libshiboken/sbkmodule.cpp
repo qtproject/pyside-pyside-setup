@@ -264,6 +264,27 @@ static int const IMPORT_NAME_312 = 108;
 static int const LOAD_CONST_313 = 83;
 static int const IMPORT_NAME_313 = 75;
 
+// OpCodes: Adapt for each Python version by checking the defines in the generated header opcode_ids.h
+// egrep '( LOAD_CONST | IMPORT_NAME )' opcode_ids.h
+
+static int constexpr LOAD_CONST_OpCode(long pyVersion)
+{
+    if (pyVersion >= 0x030E00) // 3.14
+        return 82;
+    if (pyVersion >= 0x030D00) // 3.13
+        return 83;
+    return 100;
+}
+
+static int constexpr IMPORT_NAME_OpCode(long pyVersion)
+{
+    if (pyVersion >= 0x030E00) // 3.14
+        return 73;
+    if (pyVersion >= 0x030D00) // 3.13
+        return 75;
+    return 108;
+}
+
 static bool isImportStar(PyObject *module)
 {
     // Find out whether we have a star import. This must work even
@@ -275,8 +296,9 @@ static bool isImportStar(PyObject *module)
     static PyObject *const _co_consts = Shiboken::String::createStaticString("co_consts");
     static PyObject *const _co_names = Shiboken::String::createStaticString("co_names");
 
-    static int LOAD_CONST = _PepRuntimeVersion() < 0x030D00 ? LOAD_CONST_312 : LOAD_CONST_313;
-    static int IMPORT_NAME = _PepRuntimeVersion() < 0x030D00 ? IMPORT_NAME_312 : IMPORT_NAME_313;
+
+    static const int LOAD_CONST = LOAD_CONST_OpCode(_PepRuntimeVersion());
+    static const int IMPORT_NAME = IMPORT_NAME_OpCode(_PepRuntimeVersion());
 
     auto *obFrame = reinterpret_cast<PyObject *>(PyEval_GetFrame());
     if (obFrame == nullptr)
