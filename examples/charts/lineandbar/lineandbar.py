@@ -58,7 +58,7 @@ class TestChart(QMainWindow):
         self._axis_x.setRange("Jan", "Jun")
 
         self._axis_y = QValueAxis()
-        self.chart.addAxis(self._axis_x, Qt.AlignLeft)
+        self.chart.addAxis(self._axis_y, Qt.AlignLeft)
         self._line_series.attachAxis(self._axis_y)
         self._bar_series.attachAxis(self._axis_y)
         self._axis_y.setRange(0, 20)
