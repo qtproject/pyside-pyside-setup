@@ -16,7 +16,7 @@ class BasicPySlotCase:
     def tearDown(self):
         try:
             del self.args
-        except:
+        except:  # noqa: E722
             pass
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()

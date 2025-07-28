@@ -62,9 +62,9 @@ class Obj(QObject):
         self.dictSignal.emit(test_dict)
 
     @Slot(list)
-    def list_slot(self, l):
-        self._last_data = l
-        print("list_slot", l)
+    def list_slot(self, lst):
+        self._last_data = lst
+        print("list_slot", lst)
 
     @Slot(dict)
     def dict_slot(self, d):

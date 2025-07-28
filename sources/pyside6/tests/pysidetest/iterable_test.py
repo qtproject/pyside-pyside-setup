@@ -39,10 +39,10 @@ class PySequenceTest(unittest.TestCase):
         testfunc = QtCore.QUrl.fromStringList
         # use a generator (iterable)
         self.assertEqual(testfunc(gen(["asd", "ghj"])),
-            [PySide6.QtCore.QUrl('asd'), PySide6.QtCore.QUrl('ghj')])
+                         [PySide6.QtCore.QUrl('asd'), PySide6.QtCore.QUrl('ghj')])
         # use an iterator
         self.assertEqual(testfunc(iter(["asd", "ghj"])),
-            [PySide6.QtCore.QUrl('asd'), PySide6.QtCore.QUrl('ghj')])
+                         [PySide6.QtCore.QUrl('asd'), PySide6.QtCore.QUrl('ghj')])
         self.assertRaises(IndexError, testfunc, gen(["asd", "crash", "ghj"]))
         # testing QMatrix4x4
         testfunc = QtGui.QMatrix4x4

@@ -17,7 +17,7 @@ from PySide6.QtWidgets import QApplication
 class TestBug998 (unittest.TestCase):
     def testNoFocusWindow(self):
         widget = QApplication.focusWidget()
-        self.assertTrue(widget == None)
+        self.assertTrue(widget is None)
 
 
 if __name__ == '__main__':
