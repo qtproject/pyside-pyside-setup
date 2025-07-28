@@ -21,7 +21,7 @@ class TestBug967 (unittest.TestCase):
 
     def testIt(self):
         self.arg = None
-        app = QApplication([])
+        app = QApplication([])  # noqa: F841
         obj = QComboBox()
         obj.currentIndexChanged.connect(self.callback)
         obj.currentIndexChanged.emit(5)

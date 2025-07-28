@@ -26,7 +26,7 @@ class DiagramItem(QGraphicsPolygonItem):
 
 class BugTest(unittest.TestCase):
     def test(self):
-        app = QApplication(sys.argv)
+        app = QApplication(sys.argv)  # noqa: F841
         scene = QGraphicsScene()
         item = DiagramItem()
         item2 = DiagramItem()

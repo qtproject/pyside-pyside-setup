@@ -39,7 +39,7 @@ class DontTouchReference(UsesQApplication):
         # C++ object already deleted." when accessing the QTextTable
         del self.cursor
         self.assertEqual(sys.getrefcount(self.table), 2)
-        cell = self.table.cellAt(0, 0)
+        cell = self.table.cellAt(0, 0)  # noqa: F841
 
 
 if __name__ == "__main__":

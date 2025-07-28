@@ -24,7 +24,7 @@ class QAppPresence(unittest.TestCase):
 
 
 def main():
-    app = QApplication([])
+    app = QApplication([])  # noqa: F841
     unittest.main()
 
 

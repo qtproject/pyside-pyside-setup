@@ -39,7 +39,7 @@ class PropertyTest(unittest.TestCase):
     def testDecorator(self):
         self._obDestroyed = False
         o = MyObject()
-        weak = weakref.ref(o, self.destroyCB)
+        weak = weakref.ref(o, self.destroyCB)  # noqa: F841
         o.value = 10
         self.assertEqual(o._value, 10)
         self.assertEqual(o.value, 10)

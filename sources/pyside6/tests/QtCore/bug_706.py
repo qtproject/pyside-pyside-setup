@@ -29,7 +29,7 @@ class TestBug706(unittest.TestCase):
         self.start = None
         self.end = None
 
-        app = QCoreApplication([])
+        app = QCoreApplication([])  # noqa: F841
         model = MyModel()
         model.columnsAboutToBeInserted.connect(self.mySlot)
         model.columnsAboutToBeInserted.emit(QModelIndex(), 0, 1)

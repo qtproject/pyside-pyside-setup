@@ -15,9 +15,10 @@ from PySide6.QtWidgets import QStyleOptionGraphicsItem
 
 
 class Bug640(unittest.TestCase):
+    """crash!?"""
     def testIt(self):
         option = QStyleOptionGraphicsItem()
-        a = option.state  # crash!?
+        a = option.state  # noqa: F841
 
 
 if __name__ == "__main__":

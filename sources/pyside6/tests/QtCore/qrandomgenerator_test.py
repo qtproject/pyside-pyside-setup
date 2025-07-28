@@ -27,7 +27,7 @@ class QRandomGeneratorTest(unittest.TestCase):
 
     def testGenerator64(self):
         generator = QRandomGenerator64()
-        r = generator.generate()
+        r = generator.generate()  # noqa: F841
 
 
 if __name__ == '__main__':

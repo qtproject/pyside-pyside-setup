@@ -27,9 +27,9 @@ class ChildrenCoreApplication(unittest.TestCase):
         # 2- Create parent and childrens
         # 3- While keeping the children alive, call parent.children()
         # 4- Delete parent
-        app = QCoreApplication([])
+        app = QCoreApplication([])  # noqa: F841
         parent = QObject()
-        children = [QObject(parent) for x in range(25)]
+        children = [QObject(parent) for x in range(25)]  # noqa: F841
         # Uncomment the lines below to make the test pass
         # del children
         # del child2

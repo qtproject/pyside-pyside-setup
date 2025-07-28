@@ -26,7 +26,7 @@ class TestQActionLifeCycle(UsesQApplication):
         w = QWidget()
         menu = QMenu(w)
         act = menu.addAction("MENU")
-        _ref = weakref.ref(act, self.actionDestroyed)
+        _ref = weakref.ref(act, self.actionDestroyed)  # noqa: F841
         act = None
         self.assertFalse(self._actionDestroyed)
         menu.clear()
@@ -39,7 +39,7 @@ class TestQActionLifeCycle(UsesQApplication):
         w = QWidget()
         menuBar = QMenuBar(w)
         act = menuBar.addAction("MENU")
-        _ref = weakref.ref(act, self.actionDestroyed)
+        _ref = weakref.ref(act, self.actionDestroyed)  # noqa: F841
         act = None
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
@@ -54,7 +54,7 @@ class TestQActionLifeCycle(UsesQApplication):
         w = QWidget()
         toolBar = QToolBar(w)
         act = toolBar.addAction("MENU")
-        _ref = weakref.ref(act, self.actionDestroyed)
+        _ref = weakref.ref(act, self.actionDestroyed)  # noqa: F841
         act = None
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()

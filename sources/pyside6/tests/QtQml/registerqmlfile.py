@@ -19,7 +19,7 @@ from PySide6.QtQml import qmlRegisterType  # noqa: E402
 class TestQmlSupport(unittest.TestCase):
 
     def testIt(self):
-        app = QGuiApplication([])
+        app = QGuiApplication([])  # noqa: F841
 
         file = os.fspath(Path(__file__).resolve().parent / 'ModuleType.qml')
         url = QUrl.fromLocalFile(QDir.fromNativeSeparators(file))

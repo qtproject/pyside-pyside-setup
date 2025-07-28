@@ -34,7 +34,7 @@ def emit_upon_success(signal):
     def f_(f):
         def f__(self):
             result = f(self)
-            s = signal.__get__(self)
+            s = signal.__get__(self)  # noqa: F841
             print(result)
             return result
         return f__

@@ -19,7 +19,7 @@ from PySide6.QtBluetooth import QBluetoothLocalDevice  # noqa: E402
 
 class QBluetoothLocalDeviceTest(unittest.TestCase):
     def testInitialization(self):
-        device = QBluetoothLocalDevice()
+        device = QBluetoothLocalDevice()  # noqa: F841
 
 
 if __name__ == '__main__':

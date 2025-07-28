@@ -26,7 +26,7 @@ class TestMenuDerivedClass(unittest.TestCase):
         pass
 
     def testConnectSignal(self):
-        app = QApplication([])
+        app = QApplication([])  # noqa: F841
         m2 = M2()
         # Test if the aboutToShow signal was translated to correct type
         m2.aboutToShow.connect(self.aboutToShowHandler)
