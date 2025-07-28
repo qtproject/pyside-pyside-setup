@@ -15,7 +15,7 @@ from helper.helper import quickview_errorstring  # noqa: E402
 
 from PySide6.QtCore import Property, QTimer, QUrl, QObject, Slot  # noqa: E402
 from PySide6.QtGui import QGuiApplication  # noqa: E402
-from PySide6.QtQml import (qmlRegisterSingletonType, qmlRegisterSingletonInstance,
+from PySide6.QtQml import (qmlRegisterSingletonType, qmlRegisterSingletonInstance,  # noqa: E402
                            QmlElement, QmlSingleton, QJSValue)  # noqa: E402
 from PySide6.QtQuick import QQuickView  # noqa: E402
 

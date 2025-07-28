@@ -11,13 +11,13 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from PySide6.QtCore import QUuid
-from PySide6.QtBluetooth import (QBluetoothUuid, QLowEnergyServiceData,
-                                 QLowEnergyDescriptorData,
-                                 QLowEnergyCharacteristicData)
+from PySide6.QtCore import QUuid  # noqa: E402
+from PySide6.QtBluetooth import (QBluetoothUuid, QLowEnergyServiceData,  # noqa: E402
+                                 QLowEnergyDescriptorData,  # noqa: E402
+                                 QLowEnergyCharacteristicData)  # noqa: E402
 
 
 class QLowEnergyCharacteristicsTest(unittest.TestCase):

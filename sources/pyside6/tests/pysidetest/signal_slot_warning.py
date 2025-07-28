@@ -13,10 +13,10 @@ import warnings
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-import PySide6.QtCore as QtCore
+import PySide6.QtCore as QtCore  # noqa: E402
 
 
 class Whatever(QtCore.QObject):

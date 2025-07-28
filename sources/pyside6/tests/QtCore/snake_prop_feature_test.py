@@ -8,7 +8,7 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths # noqa: E402
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
 from PySide6.QtCore import Property, QSize

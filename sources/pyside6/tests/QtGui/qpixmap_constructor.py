@@ -9,12 +9,12 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap  # noqa: E402
 
-from helper.usesqapplication import UsesQApplication
+from helper.usesqapplication import UsesQApplication  # noqa: E402
 
 xpm = [
     "27 22 206 2",
