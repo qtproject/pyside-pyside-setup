@@ -26,7 +26,8 @@ class TestDestruction(UsesQApplication):
         fileName = QFile(file)
         loader = QUiLoader()
         main_win = loader.load(fileName)
-        self.assertEqual(sys.getrefcount(main_win), 2)
+        expected_ref_count = 1 if sys.version_info >= (3, 14) else 2
+        self.assertEqual(sys.getrefcount(main_win), expected_ref_count)
         fileName.close()
 
         tw = QTabWidget(main_win)

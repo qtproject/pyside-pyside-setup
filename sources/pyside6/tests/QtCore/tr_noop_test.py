@@ -16,6 +16,9 @@ from PySide6.QtCore import QT_TR_NOOP, QT_TR_NOOP_UTF8
 from PySide6.QtCore import QT_TRANSLATE_NOOP, QT_TRANSLATE_NOOP3, QT_TRANSLATE_NOOP_UTF8
 
 
+REF_COUNT_DELTA = 0 if sys.version_info >= (3, 14) else 1  # 3.14 borrows references
+
+
 class QtTrNoopTest(unittest.TestCase):
 
     def setUp(self):
@@ -31,35 +34,35 @@ class QtTrNoopTest(unittest.TestCase):
         refcnt = sys.getrefcount(self.txt)
         result = QT_TR_NOOP(self.txt)
         self.assertEqual(result, self.txt)
-        self.assertEqual(sys.getrefcount(result), refcnt + 1)
+        self.assertEqual(sys.getrefcount(result), refcnt + REF_COUNT_DELTA)
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testQtTrNoopUtf8(self):
         refcnt = sys.getrefcount(self.txt)
         result = QT_TR_NOOP_UTF8(self.txt)
         self.assertEqual(result, self.txt)
-        self.assertEqual(sys.getrefcount(result), refcnt + 1)
+        self.assertEqual(sys.getrefcount(result), refcnt + REF_COUNT_DELTA)
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testQtTranslateNoop(self):
         refcnt = sys.getrefcount(self.txt)
         result = QT_TRANSLATE_NOOP(None, self.txt)
         self.assertEqual(result, self.txt)
-        self.assertEqual(sys.getrefcount(result), refcnt + 1)
+        self.assertEqual(sys.getrefcount(result), refcnt + REF_COUNT_DELTA)
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testQtTranslateNoopUtf8(self):
         refcnt = sys.getrefcount(self.txt)
         result = QT_TRANSLATE_NOOP_UTF8(self.txt)
         self.assertEqual(result, self.txt)
-        self.assertEqual(sys.getrefcount(result), refcnt + 1)
+        self.assertEqual(sys.getrefcount(result), refcnt + REF_COUNT_DELTA)
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testQtTranslateNoop3(self):
         refcnt = sys.getrefcount(self.txt)
         result = QT_TRANSLATE_NOOP3(None, self.txt, None)
         self.assertEqual(result, self.txt)
-        self.assertEqual(sys.getrefcount(result), refcnt + 1)
+        self.assertEqual(sys.getrefcount(result), refcnt + REF_COUNT_DELTA)
 
 
 if __name__ == '__main__':

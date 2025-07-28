@@ -48,9 +48,10 @@ class DeleteParentTest(unittest.TestCase):
         del parent
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
+        EXPECTED_REF_COUNT = 3 if sys.version_info >= (3, 14) else 4
         for i, child in enumerate(children):
             self.assertRaises(RuntimeError, child.objectName)
-            self.assertEqual(sys.getrefcount(child), 4)
+            self.assertEqual(sys.getrefcount(child), EXPECTED_REF_COUNT)
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRecursiveParentDelete(self):
@@ -62,10 +63,11 @@ class DeleteParentTest(unittest.TestCase):
         del parent
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()
+        EXPECTED_REF_COUNT = 1 if sys.version_info >= (3, 14) else 2
         self.assertRaises(RuntimeError, child.objectName)
-        self.assertEqual(sys.getrefcount(child), 2)
+        self.assertEqual(sys.getrefcount(child), EXPECTED_REF_COUNT)
         self.assertRaises(RuntimeError, grandchild.objectName)
-        self.assertEqual(sys.getrefcount(grandchild), 2)
+        self.assertEqual(sys.getrefcount(grandchild), EXPECTED_REF_COUNT)
 
 
 if __name__ == '__main__':

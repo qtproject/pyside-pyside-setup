@@ -54,6 +54,8 @@ class KeepReferenceTest(UsesQApplication):
         refcount1 = sys.getrefcount(model1)
         view1 = QTableView()
         view1.setModel(model1)
+        if sys.version_info >= (3, 14):
+            refcount1 += 1
         self.assertEqual(sys.getrefcount(view1.model()), refcount1 + 1)
 
         view2 = QTableView()
@@ -69,9 +71,10 @@ class KeepReferenceTest(UsesQApplication):
         '''Tests reference count of model object referred by deceased view object.'''
         model = TestModel()
         refcount1 = sys.getrefcount(model)
+        delta = 2 if sys.version_info >= (3, 14) else 1
         view = QTableView()
         view.setModel(model)
-        self.assertEqual(sys.getrefcount(view.model()), refcount1 + 1)
+        self.assertEqual(sys.getrefcount(view.model()), refcount1 + delta)
 
         del view
         self.assertEqual(sys.getrefcount(model), refcount1)

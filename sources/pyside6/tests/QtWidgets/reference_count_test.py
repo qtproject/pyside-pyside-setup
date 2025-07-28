@@ -51,7 +51,8 @@ class ReferenceCount(UsesQApplication):
         self.wrp = weakref.ref(pol, pol_del)
 
         # refcount need be 3 because one ref for QGraphicsScene, and one to rect obj
-        self.assertEqual(sys.getrefcount(pol), 3)
+        expected_ref_count = 2 if sys.version_info >= (3, 14) else 3
+        self.assertEqual(sys.getrefcount(pol), expected_ref_count)
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testReferenceCount(self):
@@ -66,7 +67,8 @@ class ReferenceCount(UsesQApplication):
         self.wrr = weakref.ref(rect, rect_del)
 
         # refcount need be 3 because one ref for QGraphicsScene, and one to rect obj
-        self.assertEqual(sys.getrefcount(rect), 3)
+        expected_ref_count = 2 if sys.version_info >= (3, 14) else 3
+        self.assertEqual(sys.getrefcount(rect), expected_ref_count)
 
         del rect
         # not destroyed because one ref continue in QGraphicsScene

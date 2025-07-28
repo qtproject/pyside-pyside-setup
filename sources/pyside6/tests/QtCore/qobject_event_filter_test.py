@@ -114,14 +114,15 @@ class TestQObjectEventFilterPython(UsesQApplication):
     def testInstallEventFilterRefCountAfterDelete(self):
         '''Bug 910 - installEventFilter() increments reference count on target object
         http://bugs.pyside.org/show_bug.cgi?id=910'''
+        expected_ref_count = 1 if sys.version_info >= (3, 14) else 2
         obj = QObject()
         filt = QObject()
 
-        self.assertEqual(sys.getrefcount(obj), 2)
-        self.assertEqual(sys.getrefcount(filt), 2)
+        self.assertEqual(sys.getrefcount(obj), expected_ref_count)
+        self.assertEqual(sys.getrefcount(filt), expected_ref_count)
         obj.installEventFilter(filt)
-        self.assertEqual(sys.getrefcount(obj), 2)
-        self.assertEqual(sys.getrefcount(filt), 2)
+        self.assertEqual(sys.getrefcount(obj), expected_ref_count)
+        self.assertEqual(sys.getrefcount(filt), expected_ref_count)
 
         wref = weakref.ref(obj)
         del obj
@@ -133,14 +134,15 @@ class TestQObjectEventFilterPython(UsesQApplication):
         obj = QObject()
         filt = QObject()
 
-        self.assertEqual(sys.getrefcount(obj), 2)
-        self.assertEqual(sys.getrefcount(filt), 2)
+        expected_ref_count = 1 if sys.version_info >= (3, 14) else 2
+        self.assertEqual(sys.getrefcount(obj), expected_ref_count)
+        self.assertEqual(sys.getrefcount(filt), expected_ref_count)
         obj.installEventFilter(filt)
-        self.assertEqual(sys.getrefcount(obj), 2)
-        self.assertEqual(sys.getrefcount(filt), 2)
+        self.assertEqual(sys.getrefcount(obj), expected_ref_count)
+        self.assertEqual(sys.getrefcount(filt), expected_ref_count)
         obj.removeEventFilter(filt)
-        self.assertEqual(sys.getrefcount(obj), 2)
-        self.assertEqual(sys.getrefcount(filt), 2)
+        self.assertEqual(sys.getrefcount(obj), expected_ref_count)
+        self.assertEqual(sys.getrefcount(filt), expected_ref_count)
 
         wref = weakref.ref(obj)
         del obj

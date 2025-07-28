@@ -17,6 +17,9 @@ from PySide6.QtCore import (QCoreApplication, QObject, QParallelAnimationGroup,
 from PySide6.QtStateMachine import QEventTransition, QFinalState, QState, QStateMachine
 
 
+REF_COUNT_DELTA = 2 if sys.version_info >= (3, 14) else 1
+
+
 def addStates(transition):
     sx = QState()
     sy = QState()
@@ -73,7 +76,8 @@ class QAbstractTransitionTest(unittest.TestCase):
         transition.setTargetState(state1)
 
         self.assertEqual(transition.targetState(), state1)
-        self.assertEqual(sys.getrefcount(transition.targetState()), refcount1 + 1)
+        self.assertEqual(sys.getrefcount(transition.targetState()),
+                         refcount1 + REF_COUNT_DELTA)
 
         state2 = QState()
         refcount2 = sys.getrefcount(state2)
@@ -81,7 +85,8 @@ class QAbstractTransitionTest(unittest.TestCase):
         transition.setTargetState(state2)
 
         self.assertEqual(transition.targetState(), state2)
-        self.assertEqual(sys.getrefcount(transition.targetState()), refcount2 + 1)
+        self.assertEqual(sys.getrefcount(transition.targetState()),
+                         refcount2 + REF_COUNT_DELTA)
         self.assertEqual(sys.getrefcount(state1), refcount1)
 
         del transition
@@ -101,8 +106,10 @@ class QAbstractTransitionTest(unittest.TestCase):
 
         self.assertEqual(transition.targetStates(), states)
         self.assertEqual(transition.targetState(), state1)
-        self.assertEqual(sys.getrefcount(transition.targetStates()[0]), refcount1 + 1)
-        self.assertEqual(sys.getrefcount(transition.targetStates()[1]), refcount2 + 1)
+        self.assertEqual(sys.getrefcount(transition.targetStates()[0]),
+                         refcount1 + REF_COUNT_DELTA)
+        self.assertEqual(sys.getrefcount(transition.targetStates()[1]),
+                         refcount2 + REF_COUNT_DELTA)
 
         del states
         del transition
@@ -119,7 +126,8 @@ class QAbstractTransitionTest(unittest.TestCase):
         transition.setTargetState(state0)
 
         self.assertEqual(transition.targetState(), state0)
-        self.assertEqual(sys.getrefcount(transition.targetState()), refcount0 + 1)
+        self.assertEqual(sys.getrefcount(transition.targetState()),
+                         refcount0 + REF_COUNT_DELTA)
 
         state1 = QState()
         state2 = QState()
@@ -132,8 +140,10 @@ class QAbstractTransitionTest(unittest.TestCase):
         self.assertEqual(sys.getrefcount(state0), refcount0)
         self.assertEqual(transition.targetStates(), states)
         self.assertEqual(transition.targetState(), state1)
-        self.assertEqual(sys.getrefcount(transition.targetStates()[0]), refcount1 + 1)
-        self.assertEqual(sys.getrefcount(transition.targetStates()[1]), refcount2 + 1)
+        self.assertEqual(sys.getrefcount(transition.targetStates()[0]),
+                         refcount1 + REF_COUNT_DELTA)
+        self.assertEqual(sys.getrefcount(transition.targetStates()[1]),
+                         refcount2 + REF_COUNT_DELTA)
 
         del states
         del transition
@@ -154,8 +164,10 @@ class QAbstractTransitionTest(unittest.TestCase):
 
         self.assertEqual(transition.targetStates(), states)
         self.assertEqual(transition.targetState(), state1)
-        self.assertEqual(sys.getrefcount(transition.targetStates()[0]), refcount1 + 1)
-        self.assertEqual(sys.getrefcount(transition.targetStates()[1]), refcount2 + 1)
+        self.assertEqual(sys.getrefcount(transition.targetStates()[0]),
+                         refcount1 + REF_COUNT_DELTA)
+        self.assertEqual(sys.getrefcount(transition.targetStates()[1]),
+                         refcount2 + REF_COUNT_DELTA)
 
         state3 = QState()
         refcount3 = sys.getrefcount(state3)
@@ -163,7 +175,8 @@ class QAbstractTransitionTest(unittest.TestCase):
         transition.setTargetState(state3)
 
         self.assertEqual(transition.targetState(), state3)
-        self.assertEqual(sys.getrefcount(transition.targetState()), refcount3 + 1)
+        self.assertEqual(sys.getrefcount(transition.targetState()),
+                         refcount3 + REF_COUNT_DELTA)
 
         del states
 

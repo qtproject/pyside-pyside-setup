@@ -33,14 +33,15 @@ class TestUserDataRefCount(UsesQApplication):
         cursor = QTextCursor(doc)
         cursor.insertText("PySide Rocks")
         ud = TestUserData({"Life": 42})
-        self.assertEqual(sys.getrefcount(ud), 2)
+        base_ref_count = sys.getrefcount(ud)
         cursor.block().setUserData(ud)
-        self.assertEqual(sys.getrefcount(ud), 3)
+        self.assertEqual(sys.getrefcount(ud), base_ref_count + 1)
         ud2 = cursor.block().userData()
-        self.assertEqual(sys.getrefcount(ud), 4)
+        self.assertEqual(sys.getrefcount(ud), base_ref_count + 2)
         self.udata = weakref.ref(ud, None)
         del ud, ud2
-        self.assertEqual(sys.getrefcount(self.udata()), 2)
+        delta = 1 if sys.version_info >= (3, 14) else 0
+        self.assertEqual(sys.getrefcount(self.udata()), base_ref_count + delta)
 
 
 if __name__ == '__main__':

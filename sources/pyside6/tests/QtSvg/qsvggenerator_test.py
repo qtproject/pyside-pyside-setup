@@ -16,6 +16,9 @@ from PySide6.QtCore import QBuffer
 from PySide6.QtSvg import QSvgGenerator
 
 
+REF_COUNT_DELTA = 2 if sys.version_info >= (3, 14) else 1
+
+
 class QSvgGeneratorTest(unittest.TestCase):
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
@@ -27,7 +30,8 @@ class QSvgGeneratorTest(unittest.TestCase):
         generator.setOutputDevice(iodevice1)
 
         self.assertEqual(generator.outputDevice(), iodevice1)
-        self.assertEqual(sys.getrefcount(generator.outputDevice()), refcount1 + 1)
+        self.assertEqual(sys.getrefcount(generator.outputDevice()),
+                         refcount1 + REF_COUNT_DELTA)
 
         iodevice2 = QBuffer()
         refcount2 = sys.getrefcount(iodevice2)
@@ -35,7 +39,8 @@ class QSvgGeneratorTest(unittest.TestCase):
         generator.setOutputDevice(iodevice2)
 
         self.assertEqual(generator.outputDevice(), iodevice2)
-        self.assertEqual(sys.getrefcount(generator.outputDevice()), refcount2 + 1)
+        self.assertEqual(sys.getrefcount(generator.outputDevice()),
+                         refcount2 + REF_COUNT_DELTA)
         self.assertEqual(sys.getrefcount(iodevice1), refcount1)
 
         del generator

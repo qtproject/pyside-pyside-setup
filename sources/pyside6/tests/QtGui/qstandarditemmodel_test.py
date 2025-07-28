@@ -74,11 +74,12 @@ class QStandardItemModelRef(UsesQApplication):
 
         my_i = model.item(0, 0)
         # ref(my_i) + parent_ref + items list ref
-        self.assertEqual(sys.getrefcount(my_i), 4)
+        base_ref_count = 2 if sys.version_info >= (3, 14) else 3
+        self.assertEqual(sys.getrefcount(my_i), base_ref_count + 1)
 
         model.clear()
         # ref(my_i)
-        self.assertEqual(sys.getrefcount(my_i), 3)
+        self.assertEqual(sys.getrefcount(my_i), base_ref_count)
 
 
 if __name__ == '__main__':

@@ -61,7 +61,8 @@ class ParentRefCountCase(unittest.TestCase):
     def testConstructor(self):
         # QObject(QObject) refcount changes
         child = QObject(self.parent)
-        self.assertEqual(sys.getrefcount(child), 3)
+        expected_ref_count = 2 if sys.version_info >= (3, 14) else 3
+        self.assertEqual(sys.getrefcount(child), expected_ref_count)
 
 
 class ParentCase(unittest.TestCase):
