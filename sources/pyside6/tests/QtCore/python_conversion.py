@@ -11,12 +11,12 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-import datetime
+import datetime  # noqa: E402
 
-from PySide6.QtCore import QTime, QDateTime, QDate
+from PySide6.QtCore import QTime, QDateTime, QDate  # noqa: E402
 
 
 class TestDateTimeConversions (unittest.TestCase):

@@ -10,13 +10,13 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from helper.usesqapplication import UsesQApplication
-from PySide6.QtMultimediaWidgets import QGraphicsVideoItem, QVideoWidget
-from PySide6.QtWidgets import QGraphicsScene, QGraphicsView, QVBoxLayout, QWidget
-from PySide6.QtCore import QTimer
+from helper.usesqapplication import UsesQApplication  # noqa: E402
+from PySide6.QtMultimediaWidgets import QGraphicsVideoItem, QVideoWidget  # noqa: E402
+from PySide6.QtWidgets import QGraphicsScene, QGraphicsView, QVBoxLayout, QWidget  # noqa: E402
+from PySide6.QtCore import QTimer  # noqa: E402
 
 
 class MyWidget(QWidget):

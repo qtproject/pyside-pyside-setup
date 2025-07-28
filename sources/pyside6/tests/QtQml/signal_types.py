@@ -9,15 +9,15 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from helper.helper import quickview_errorstring
-from helper.timedqguiapplication import TimedQGuiApplication
+from helper.helper import quickview_errorstring  # noqa: E402
+from helper.timedqguiapplication import TimedQGuiApplication  # noqa: E402
 
-from PySide6.QtQuick import QQuickView
-from PySide6.QtCore import QObject, Signal, Slot, QUrl
-from PySide6.QtQml import QmlElement
+from PySide6.QtQuick import QQuickView  # noqa: E402
+from PySide6.QtCore import QObject, Signal, Slot, QUrl  # noqa: E402
+from PySide6.QtQml import QmlElement  # noqa: E402
 
 """PYSIDE-2098: Roundtrip test for signals using QVariantList/QVariantMap.
 

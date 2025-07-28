@@ -8,8 +8,8 @@ import sys
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(SRC_DIR)),
                              'shiboken6', 'tests'))
-from shiboken_paths import (get_dir_env_var, get_build_dir, add_python_dirs,
-                            add_lib_dirs, shiboken_paths)
+from shiboken_paths import (get_dir_env_var, get_build_dir, add_python_dirs,  # noqa: E402
+                            add_lib_dirs, shiboken_paths)  # noqa: E402
 
 
 def _get_qt_dir():

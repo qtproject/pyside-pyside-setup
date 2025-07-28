@@ -10,10 +10,10 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from PySide6.QtPositioning import QGeoPositionInfoSource
+from PySide6.QtPositioning import QGeoPositionInfoSource  # noqa: E402
 
 
 class QPositioningTestCase(unittest.TestCase):

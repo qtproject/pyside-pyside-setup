@@ -7,13 +7,13 @@ import sys
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[2]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from pathlib import Path
-from PySide6.QtCore import QObject, Slot
-from PySide6.QtQml import QQmlEngine, qmlRegisterType
-from PySide6.QtQuickTest import QUICK_TEST_MAIN_WITH_SETUP
+from pathlib import Path  # noqa: E402
+from PySide6.QtCore import QObject, Slot  # noqa: E402
+from PySide6.QtQml import QQmlEngine, qmlRegisterType  # noqa: E402
+from PySide6.QtQuickTest import QUICK_TEST_MAIN_WITH_SETUP  # noqa: E402
 
 
 """Copy of the equivalent test in qtdeclarative."""

@@ -10,11 +10,11 @@ import weakref
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from PySide6.QtWidgets import QMenu, QWidget, QMenuBar, QToolBar
-from helper.usesqapplication import UsesQApplication
+from PySide6.QtWidgets import QMenu, QWidget, QMenuBar, QToolBar  # noqa: E402
+from helper.usesqapplication import UsesQApplication  # noqa: E402
 
 
 class TestQActionLifeCycle(UsesQApplication):

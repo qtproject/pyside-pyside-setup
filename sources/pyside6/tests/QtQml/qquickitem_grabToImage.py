@@ -8,14 +8,14 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from helper.helper import quickview_errorstring
-from helper.timedqguiapplication import TimedQGuiApplication
-from PySide6.QtCore import QTimer, QUrl
-from PySide6.QtGui import QColor
-from PySide6.QtQuick import QQuickItem, QQuickView
+from helper.helper import quickview_errorstring  # noqa: E402
+from helper.timedqguiapplication import TimedQGuiApplication  # noqa: E402
+from PySide6.QtCore import QTimer, QUrl  # noqa: E402
+from PySide6.QtGui import QColor  # noqa: E402
+from PySide6.QtQuick import QQuickItem, QQuickView  # noqa: E402
 
 
 class TestGrabToSharedPointerImage(TimedQGuiApplication):

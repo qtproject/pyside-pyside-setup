@@ -9,10 +9,10 @@ import unittest
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
-from init_paths import init_test_paths
+from init_paths import init_test_paths  # noqa: E402
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, Signal, Property, Slot
+from PySide6.QtCore import QObject, Signal, Property, Slot  # noqa: E402
 
 '''Tests that the signal notify id of a property is correct, aka corresponds to the initially set
 notify method.'''
