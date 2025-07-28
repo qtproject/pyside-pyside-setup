@@ -31,11 +31,11 @@
 
     <!-- Convert an indexable C-style arrray %TYPE[%COUNT] to PySequence -->
     <template name="c-array-to-pysequence">
-        Shiboken::AutoDecRef object(PyList_New(0));
+        auto *object = PyList_New(0);
         for (int i = 0; i &lt; %COUNT; i++) {
             PyList_Append(object, %CONVERTTOPYTHON[%TYPE](%in[i]));
         }
-        PyObject *%out = object.object();
+        PyObject *%out = object;
     </template>
 
     <!-- Convert a PySequence to an indexable C-style arrray %TYPE[] via ArrayPointer -->
