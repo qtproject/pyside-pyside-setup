@@ -36,13 +36,13 @@ class PythonSignalRefCount(unittest.TestCase):
         def cb(*args):
             pass
 
-        self.assertEqual(sys.getrefcount(cb), 2)
+        base_ref_count = sys.getrefcount(cb)
 
         self.emitter.foo.connect(cb)
-        self.assertEqual(sys.getrefcount(cb), 3)
+        self.assertEqual(sys.getrefcount(cb), base_ref_count + 1)
 
         self.emitter.foo.disconnect(cb)
-        self.assertEqual(sys.getrefcount(cb), 2)
+        self.assertEqual(sys.getrefcount(cb), base_ref_count)
 
 
 class CppSignalRefCount(unittest.TestCase):
@@ -58,13 +58,13 @@ class CppSignalRefCount(unittest.TestCase):
         def cb(*args):
             pass
 
-        self.assertEqual(sys.getrefcount(cb), 2)
+        base_ref_count = sys.getrefcount(cb)
 
         self.emitter.destroyed.connect(cb)
-        self.assertEqual(sys.getrefcount(cb), 3)
+        self.assertEqual(sys.getrefcount(cb), base_ref_count + 1)
 
         self.emitter.destroyed.disconnect(cb)
-        self.assertEqual(sys.getrefcount(cb), 2)
+        self.assertEqual(sys.getrefcount(cb), base_ref_count)
 
 
 if __name__ == '__main__':

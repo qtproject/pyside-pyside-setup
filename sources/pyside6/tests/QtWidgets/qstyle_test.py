@@ -65,9 +65,9 @@ class SetStyleTest(UsesQApplication):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testSetStyleOwnership(self):
         style = QStyleFactory.create(QStyleFactory.keys()[0])
-        self.assertEqual(sys.getrefcount(style), 2)
+        base_ref_count = sys.getrefcount(style)
         QApplication.instance().setStyle(style)
-        self.assertEqual(sys.getrefcount(style), 3)
+        self.assertEqual(sys.getrefcount(style), base_ref_count + 1)
 
 
 if __name__ == '__main__':

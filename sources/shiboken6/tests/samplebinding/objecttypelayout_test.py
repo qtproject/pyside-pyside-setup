@@ -28,9 +28,9 @@ class ObjectTypeLayoutTest(unittest.TestCase):
         o1 = ObjectType(lt)
         o1.setObjectName('o1')
 
-        self.assertEqual(sys.getrefcount(o1), 3)
+        base_ref_count = sys.getrefcount(o1)
         lt.takeChild('o1')
-        self.assertEqual(sys.getrefcount(o1), 2)
+        self.assertEqual(sys.getrefcount(o1), base_ref_count - 1)
 
     def testSetNullLayout(self):
         '''ObjectType.setLayout(0).'''

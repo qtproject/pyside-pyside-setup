@@ -69,39 +69,41 @@ class QLayoutTest(UsesQApplication):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testOwnershipTransfer(self):
         b = QPushButton("teste")
+        base_ref_count = sys.getrefcount(b)
         layout = MyLayout()
 
         layout.addWidget(b)
 
-        self.assertEqual(sys.getrefcount(b), 2)
+        self.assertEqual(sys.getrefcount(b), base_ref_count)
 
         w = QWidget()
 
         # transfer ref
         w.setLayout(layout)
 
-        self.assertEqual(sys.getrefcount(b), 3)
+        self.assertEqual(sys.getrefcount(b), base_ref_count + 1)
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testReferenceTransfer(self):
         b = QPushButton("teste")
+        base_ref_count = sys.getrefcount(b)
         layout = QHBoxLayout()
 
         # keep ref
         layout.addWidget(b)
-        self.assertEqual(sys.getrefcount(b), 3)
+        self.assertEqual(sys.getrefcount(b), base_ref_count + 1)
 
         w = QWidget()
 
         # transfer ref
         w.setLayout(layout)
 
-        self.assertEqual(sys.getrefcount(b), 3)
+        self.assertEqual(sys.getrefcount(b), base_ref_count + 1)
 
         # release ref
         del w
 
-        self.assertEqual(sys.getrefcount(b), 2)
+        self.assertEqual(sys.getrefcount(b), base_ref_count)
 
     def testMissingFunctions(self):
         w = QWidget()

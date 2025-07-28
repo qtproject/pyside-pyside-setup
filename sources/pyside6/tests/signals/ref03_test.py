@@ -32,11 +32,11 @@ class DisconnectSignalsTest(unittest.TestCase):
         def destroyedSlot():
             pass
 
-        self.assertEqual(sys.getrefcount(destroyedSlot), 2)
+        base_ref_count = sys.getrefcount(destroyedSlot)
         self.emitter.destroyed.connect(destroyedSlot)
-        self.assertEqual(sys.getrefcount(destroyedSlot), 3)
+        self.assertEqual(sys.getrefcount(destroyedSlot), base_ref_count + 1)
         self.emitter.destroyed.disconnect(destroyedSlot)
-        self.assertEqual(sys.getrefcount(destroyedSlot), 2)
+        self.assertEqual(sys.getrefcount(destroyedSlot), base_ref_count)
 
 
 if __name__ == '__main__':

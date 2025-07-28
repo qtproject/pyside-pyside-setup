@@ -200,14 +200,14 @@ class TestParentOwnership(unittest.TestCase):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testParentDestructor(self):
         parent = QObject()
-        self.assertEqual(sys.getrefcount(parent), 2)
+        base_ref_count_parent = sys.getrefcount(parent)
 
         child = QObject(parent)
-        self.assertEqual(sys.getrefcount(child), 3)
-        self.assertEqual(sys.getrefcount(parent), 2)
+        base_ref_count_child = sys.getrefcount(child)
+        self.assertEqual(sys.getrefcount(parent), base_ref_count_parent)
 
         del parent
-        self.assertEqual(sys.getrefcount(child), 2)
+        self.assertEqual(sys.getrefcount(child), base_ref_count_child - 1)
 
         # this will fail because parent deleted child cpp object
         self.assertRaises(RuntimeError, lambda: child.objectName())
@@ -216,20 +216,20 @@ class TestParentOwnership(unittest.TestCase):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testMultipleChildren(self):
         o = QObject()
-        self.assertEqual(sys.getrefcount(o), 2)
+        base_ref_count_o = sys.getrefcount(o)
 
         c = QObject(o)
-        self.assertEqual(sys.getrefcount(c), 3)
-        self.assertEqual(sys.getrefcount(o), 2)
+        base_ref_count_c = sys.getrefcount(c)
+        self.assertEqual(sys.getrefcount(o), base_ref_count_o)
 
         c2 = QObject(o)
-        self.assertEqual(sys.getrefcount(o), 2)
-        self.assertEqual(sys.getrefcount(c), 3)
-        self.assertEqual(sys.getrefcount(c2), 3)
+        self.assertEqual(sys.getrefcount(o), base_ref_count_o)
+        self.assertEqual(sys.getrefcount(c), base_ref_count_c)
+        self.assertEqual(sys.getrefcount(c2), base_ref_count_c)
 
         del o
-        self.assertEqual(sys.getrefcount(c), 2)
-        self.assertEqual(sys.getrefcount(c2), 2)
+        self.assertEqual(sys.getrefcount(c), base_ref_count_c - 1)
+        self.assertEqual(sys.getrefcount(c2), base_ref_count_c - 1)
 
         # this will fail because parent deleted child cpp object
         self.assertRaises(RuntimeError, lambda: c.objectName())
@@ -239,20 +239,20 @@ class TestParentOwnership(unittest.TestCase):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRecursiveParent(self):
         o = QObject()
-        self.assertEqual(sys.getrefcount(o), 2)
+        base_ref_count_o = sys.getrefcount(o)
 
         c = QObject(o)
-        self.assertEqual(sys.getrefcount(c), 3)
-        self.assertEqual(sys.getrefcount(o), 2)
+        base_ref_count_c = sys.getrefcount(c)
+        self.assertEqual(sys.getrefcount(o), base_ref_count_o)
 
         c2 = QObject(c)
-        self.assertEqual(sys.getrefcount(o), 2)
-        self.assertEqual(sys.getrefcount(c), 3)
-        self.assertEqual(sys.getrefcount(c2), 3)
+        base_ref_count_c2 = sys.getrefcount(c2)
+        self.assertEqual(sys.getrefcount(o), base_ref_count_o)
+        self.assertEqual(sys.getrefcount(c), base_ref_count_c)
 
         del o
-        self.assertEqual(sys.getrefcount(c), 2)
-        self.assertEqual(sys.getrefcount(c2), 2)
+        self.assertEqual(sys.getrefcount(c), base_ref_count_c - 1)
+        self.assertEqual(sys.getrefcount(c2), base_ref_count_c2 - 1)
 
         # this will fail because parent deleted child cpp object
         self.assertRaises(RuntimeError, lambda: c.objectName())
@@ -262,16 +262,16 @@ class TestParentOwnership(unittest.TestCase):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testParentTransfer(self):
         o = QObject()
-        self.assertEqual(sys.getrefcount(o), 2)
+        base_ref_count = sys.getrefcount(o)
 
         c = QObject()
-        self.assertEqual(sys.getrefcount(c), 2)
+        self.assertEqual(sys.getrefcount(c), base_ref_count)
 
         c.setParent(o)
-        self.assertEqual(sys.getrefcount(c), 3)
+        self.assertEqual(sys.getrefcount(c), base_ref_count + 1)
 
         c.setParent(None)
-        self.assertEqual(sys.getrefcount(c), 2)
+        self.assertEqual(sys.getrefcount(c), base_ref_count)
 
         del c
         del o

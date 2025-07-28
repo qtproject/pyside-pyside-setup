@@ -22,11 +22,11 @@ class TestBug679(unittest.TestCase):
 
         scene = QGraphicsScene()
         hello = scene.addText("Hello")
+        base_ref_count = sys.getrefcount(hello)
         scene.addText("World")
 
-        self.assertEqual(sys.getrefcount(hello), 3)
         scene.clear()
-        self.assertEqual(sys.getrefcount(hello), 2)
+        self.assertEqual(sys.getrefcount(hello), base_ref_count - 1)
         self.assertEqual(len(scene.items()), 0)
         self.assertRaises(RuntimeError, hello.isVisible)  # the C++ object was deleted
 

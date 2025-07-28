@@ -24,10 +24,11 @@ class TestDestructor(unittest.TestCase):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testReference(self):
         o = QObject()
+        base_ref_count = sys.getrefcount(o)
         m = MyObject(o)
-        self.assertEqual(sys.getrefcount(o), 3)
+        self.assertEqual(sys.getrefcount(o), base_ref_count + 1)
         del m
-        self.assertEqual(sys.getrefcount(o), 2)
+        self.assertEqual(sys.getrefcount(o), base_ref_count)
 
 
 if __name__ == '__main__':
