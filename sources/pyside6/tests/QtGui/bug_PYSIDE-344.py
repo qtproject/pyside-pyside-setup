@@ -3,7 +3,8 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 from __future__ import annotations
 
-'''Test cases for PYSIDE-344, imul/idiv are used instead of mul/div, modifying the argument passed in'''
+'''Test cases for PYSIDE-344, imul/idiv are used instead of mul/div,
+   modifying the argument passed in'''
 
 import os
 import sys

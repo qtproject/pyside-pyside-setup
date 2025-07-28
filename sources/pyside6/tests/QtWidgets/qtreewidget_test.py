@@ -32,7 +32,7 @@ class QTreeWidgetTest(UsesQApplication):
         treeWidget.insertTopLevelItem(0, item)
         # Adding QPushButton inside the method
         treeWidget.setItemWidget(item, 1,
-            QPushButton('Push button on column 1'))
+                                 QPushButton('Push button on column 1'))
 
         # Getting the widget back
         w = treeWidget.itemWidget(treeWidget.itemAt(0, 1), 1)

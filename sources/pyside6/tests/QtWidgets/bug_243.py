@@ -21,8 +21,8 @@ class QAppPresence(unittest.TestCase):
     def testBug(self):
         app = QApplication(sys.argv)  # noqa: F841
         window = QMainWindow()
-        l = window.layout()
-        self.assertTrue(isinstance(l, QLayout))
+        layout = window.layout()
+        self.assertTrue(isinstance(layout, QLayout))
 
 
 if __name__ == '__main__':

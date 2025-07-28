@@ -31,7 +31,8 @@ class MyItemModel(QStandardItemModel):
 
 
 class TestBug660(unittest.TestCase):
-    '''QMimeData type deleted prematurely when overriding mime-type in QStandardItemModel drag and drop'''
+    '''QMimeData type deleted prematurely when overriding mime-type in QStandardItemModel
+       drag and drop'''
     def testIt(self):
         model = MyItemModel()
         model.mimeData([model.index(0, 0)])  # if it doesn't raise an exception it's all right!

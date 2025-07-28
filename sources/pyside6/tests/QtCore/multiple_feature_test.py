@@ -93,8 +93,8 @@ class FeaturesTest(unittest.TestCase):
                         """), "<string>", "exec"), globals(), edict)
         globals().update(edict)
         feature_list = feature._really_all_feature_names
-        func_list = [tst_bit0, tst_bit1, tst_bit2, tst_bit3,
-                     tst_bit4, tst_bit5, tst_bit6, tst_bit7]
+        func_list = [tst_bit0, tst_bit1, tst_bit2, tst_bit3,  # noqa: F821
+                     tst_bit4, tst_bit5, tst_bit6, tst_bit7]  # noqa: F821
 
         for idx in range(0x100):
             feature.reset()

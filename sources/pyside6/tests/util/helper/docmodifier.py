@@ -37,7 +37,7 @@ class DocModifier(type):
         # FIXME currently we have to define doc_filter on each subclass
         filter_function = dct.get('doc_filter')
         if not filter_function:
-            filter_function = lambda x: False
+            filter_function = lambda x: False  # noqa: E731
 
         for base in bases:
             for attr in [x for x in base.__dict__ if filter_function(x)]:
@@ -45,9 +45,9 @@ class DocModifier(type):
 
                 if original.__doc__:
                     copy = copy_func(original)
-                    copy.__doc__ = (dct.get('doc_prefix', '') +
-                                    original.__doc__ +
-                                    dct.get('doc_suffix', ''))
+                    copy.__doc__ = (dct.get('doc_prefix', '')
+                                    + original.__doc__
+                                    + dct.get('doc_suffix', ''))
                     dct[attr] = copy
 
         return type.__new__(mcs, name, bases, dct)
@@ -70,23 +70,23 @@ if __name__ == '__main__':
 
     class Implementing(BaseTest):
 
-        doc_filter = lambda x: x.startswith('test')
+        doc_filter = lambda x: x.startswith('test')  # noqa: E731
         doc_prefix = 'prefix'
         doc_suffix = 'suffix'
 
     class OnlyPrefix(BaseTest):
 
-        doc_filter = lambda x: x.startswith('test')
+        doc_filter = lambda x: x.startswith('test')  # noqa: E731
         doc_prefix = 'prefix'
 
     class OnlySuffix(BaseTest):
 
-        doc_filter = lambda x: x.startswith('test')
+        doc_filter = lambda x: x.startswith('test')  # noqa: E731
         doc_suffix = 'suffix'
 
     assert (Implementing.testBase.__doc__ == 'prefixbasesuffix')
-    assert (Implementing.testWithoutDoc.__doc__ == None)
+    assert (Implementing.testWithoutDoc.__doc__ is None)
     assert (OnlySuffix.testBase.__doc__ == 'basesuffix')
-    assert (OnlySuffix.testWithoutDoc.__doc__ == None)
+    assert (OnlySuffix.testWithoutDoc.__doc__ is None)
     assert (OnlyPrefix.testBase.__doc__ == 'prefixbase')
-    assert (OnlyPrefix.testWithoutDoc.__doc__ == None)
+    assert (OnlyPrefix.testWithoutDoc.__doc__ is None)

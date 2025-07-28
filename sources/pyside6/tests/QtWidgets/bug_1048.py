@@ -17,6 +17,6 @@ from PySide6.QtWidgets import QApplication, QGridLayout, QWidget
 a = QApplication([])
 
 w = QWidget()
-l = QGridLayout(w)
+layout = QGridLayout(w)
 
-l.itemAtPosition(0, 0)
+layout.itemAtPosition(0, 0)

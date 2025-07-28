@@ -26,8 +26,8 @@ class UsesQApplication(unittest.TestCase):
                                     if _.endswith((".QtCore", ".QtGui", ".QtWidgets")))[-1]]
         found = module.__name__.rsplit(".")[-1]
         cls = getattr(module, {"QtWidgets": "QApplication",
-                               "QtGui":     "QGuiApplication",
-                               "QtCore":    "QCoreApplication"}[found])
+                               "QtGui": "QGuiApplication",
+                               "QtCore": "QCoreApplication"}[found])
         # Simple way of making instance a singleton
         super().setUp()
         self.app = cls.instance() or cls([])

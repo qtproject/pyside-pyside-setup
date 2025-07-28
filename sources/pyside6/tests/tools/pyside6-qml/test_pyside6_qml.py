@@ -26,8 +26,8 @@ class TestPySide6QmlUnit(unittest.TestCase):
         self.pyside_root = self._dir.parents[4]
 
         self.pyqml_path = self.pyside_root / "sources" / "pyside-tools" / "qml.py"
-        self.core_qml_path = (self.pyside_root / "examples" / "qml" /
-                              "tutorials" / "extending-qml-advanced" / "adding")
+        self.core_qml_path = (self.pyside_root / "examples" / "qml"
+                              / "tutorials" / "extending-qml-advanced" / "adding")
 
         self.pyqml_run_cmd = [sys.executable, os.fspath(self.pyqml_path)]
 

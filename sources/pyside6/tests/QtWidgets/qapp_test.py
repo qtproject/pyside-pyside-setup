@@ -20,7 +20,7 @@ class QAppPresence(unittest.TestCase):
 
     def testQApp(self):
         # QtGui.qApp variable is instance of QApplication
-        self.assertTrue(isinstance(qApp, QApplication))
+        self.assertTrue(isinstance(qApp, QApplication))  # noqa: F821
 
 
 def main():

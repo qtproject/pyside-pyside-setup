@@ -44,7 +44,7 @@ from init_platform import enum_all, generate_all
 from util import (isolate_warnings, check_warnings, suppress_warnings, warn,
                   is_ci, qt_version, get_script_dir, get_effective_refpath,
                   get_refpath, import_refmodule)
-from PySide6 import *
+from PySide6 import *  # noqa
 
 refPath = get_refpath()
 effectiveRefPath = get_effective_refpath()
@@ -55,7 +55,7 @@ if os.path.exists(pyc) and not os.path.exists(effectiveRefPath):
 
 if refPath != effectiveRefPath:
     print("*** Falling back to ", effectiveRefPath, " since expected ",
-        refPath, " does not exist")
+          refPath, " does not exist")
 
 script_dir = get_script_dir()
 shortpath = os.path.relpath(effectiveRefPath, script_dir)
@@ -126,8 +126,8 @@ class TestSignaturesExists(unittest.TestCase):
             if key.startswith("sample.SampleNamespace"):
                 # We cannot work with sample namespaces after the change to __qualname__.
                 continue
-            if (key.startswith("smart.SharedPtr") or
-                re.match(r"PySide6\..*?\.QSharedPointer_", key)):
+            if (key.startswith("smart.SharedPtr")
+                    or re.match(r"PySide6\..*?\.QSharedPointer_", key)):
                 # These mangled names are not supported.
                 # We should fix them.
                 continue
@@ -135,9 +135,9 @@ class TestSignaturesExists(unittest.TestCase):
                 warn(f"missing key: '{key} value={value}'", stacklevel=3)
             else:
                 found_val = found_sigs[key]
-                if type(value) is list and (
-                        type(found_val) is tuple or
-                        len(found_val) < len(value)):
+                if type(value) is list and (  # noqa: W504
+                        type(found_val) is tuple
+                        or len(found_val) < len(value)):
                     # We check that nothing got lost. But it is ok when an older
                     # registry file does not know all variants, yet!
                     warn(multi_signature_msg(key, found_val, value), stacklevel=3)

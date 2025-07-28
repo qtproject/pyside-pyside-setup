@@ -32,7 +32,7 @@ exec(demo_coroutine_definition_code)
 
 class CoroutineRaisesStopIterationTestCase(unittest.TestCase):
     def setUp(self):
-        self.coroutine = demo_coroutine()
+        self.coroutine = demo_coroutine()  # noqa: F821
 
     def testCoroutine(self):
         with self.assertRaises(StopIteration):

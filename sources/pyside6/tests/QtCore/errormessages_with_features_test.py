@@ -88,7 +88,7 @@ class ErrormessagesWithFeatures(unittest.TestCase):
         print("\n\n" + cm.exception.args[0])
         self.assertTrue(self.probe in cm.exception.args[0])
         with self.assertRaises(TypeError) as cm:
-            qApp.quit_on_last_window_closed = object
+            qApp.quit_on_last_window_closed = object  # noqa: F821
         self.assertTrue(self.probe in cm.exception.args[0])
 
     def testDocIsWorking(self):

@@ -49,7 +49,7 @@ class NullQByteArrayOperatorIAdd(unittest.TestCase, BaseQByteArrayOperatorIAdd):
     '''Test case for operator QByteArray += on null QByteArrays'''
 
     doc_prefix = 'Null object'
-    doc_filter = lambda x: x.startswith('test')
+    doc_filter = lambda x: x.startswith('test')  # noqa: E731
 
     def setUp(self):
         self.obj = QByteArray()
@@ -60,7 +60,7 @@ class ValidQByteArrayOperatorIAdd(unittest.TestCase, BaseQByteArrayOperatorIAdd)
     '''Test case for operator QByteArray += on valid QByteArrays'''
 
     doc_prefix = 'Valid object'
-    doc_filter = lambda x: x.startswith('test')
+    doc_filter = lambda x: x.startswith('test')  # noqa: E731
 
     def setUp(self):
         self.obj = QByteArray(bytes('some byte array', "UTF-8"))
