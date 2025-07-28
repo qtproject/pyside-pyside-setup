@@ -22,10 +22,10 @@ class TestBug1002 (UsesQApplication):
     def testReturnWindow(self):
         widget = QWidget()
         button = QPushButton(widget)
-        self.assertEqual(sys.getrefcount(widget), 2)
+        base_ref_count = sys.getrefcount(widget)
         window = button.window()
-        self.assertEqual(sys.getrefcount(widget), 3)
-        self.assertEqual(sys.getrefcount(window), 3)
+        self.assertEqual(sys.getrefcount(widget), base_ref_count + 1)
+        self.assertEqual(sys.getrefcount(window), base_ref_count + 1)
 
         del widget
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion

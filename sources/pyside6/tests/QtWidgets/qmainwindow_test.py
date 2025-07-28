@@ -46,9 +46,9 @@ class TestMainWindow(UsesQApplication):
     def testRefCountToNull(self):
         w = QMainWindow()
         c = QWidget()
-        self.assertEqual(sys.getrefcount(c), 2)
+        base_ref_count = sys.getrefcount(c)
         w.setCentralWidget(c)
-        self.assertEqual(sys.getrefcount(c), 3)
+        self.assertEqual(sys.getrefcount(c), base_ref_count + 1)
         wr = weakref.ref(c, self.objDel)  # noqa: F841
         w.setCentralWidget(None)
         c = None
@@ -58,13 +58,14 @@ class TestMainWindow(UsesQApplication):
     def testRefCountToAnother(self):
         w = QMainWindow()
         c = QWidget()
-        self.assertEqual(sys.getrefcount(c), 2)
+        base_ref_count = sys.getrefcount(c)
         w.setCentralWidget(c)
-        self.assertEqual(sys.getrefcount(c), 3)
+        self.assertEqual(sys.getrefcount(c), base_ref_count + 1)
 
         c2 = QWidget()
+        base_ref_count = sys.getrefcount(c2)
         w.setCentralWidget(c2)
-        self.assertEqual(sys.getrefcount(c2), 3)
+        self.assertEqual(sys.getrefcount(c2), base_ref_count + 1)
 
         wr = weakref.ref(c, self.objDel)  # noqa: F841
         w.setCentralWidget(None)

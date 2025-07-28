@@ -31,13 +31,13 @@ class Bug576(unittest.TestCase):
 
         b = QPushButton("test")
         b.destroyed[QObject].connect(self.onButtonDestroyed)
-        self.assertEqual(sys.getrefcount(b), 2)
+        base_ref_count = sys.getrefcount(b)
         b.setParent(w)
-        self.assertEqual(sys.getrefcount(b), 3)
+        self.assertEqual(sys.getrefcount(b), base_ref_count + 1)
         b.parent()
-        self.assertEqual(sys.getrefcount(b), 3)
+        self.assertEqual(sys.getrefcount(b), base_ref_count + 1)
         b.setParent(None)
-        self.assertEqual(sys.getrefcount(b), 2)
+        self.assertEqual(sys.getrefcount(b), base_ref_count)
         del b
         # PYSIDE-535: Need to collect garbage in PyPy to trigger deletion
         gc.collect()

@@ -52,19 +52,19 @@ class ObjectTypeTest(unittest.TestCase):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testParentFromCpp(self):
         o = ObjectType()
-        self.assertEqual(sys.getrefcount(o), 2)
+        base_count = sys.getrefcount(o)  # 1 from 3.14 onwards, previously 2
         o.getCppParent().setObjectName('parent')
-        self.assertEqual(sys.getrefcount(o), 3)
+        self.assertEqual(sys.getrefcount(o), base_count + 1)
         o.getCppParent().setObjectName('parent')
-        self.assertEqual(sys.getrefcount(o), 3)
+        self.assertEqual(sys.getrefcount(o), base_count + 1)
         o.getCppParent().setObjectName('parent')
-        self.assertEqual(sys.getrefcount(o), 3)
+        self.assertEqual(sys.getrefcount(o), base_count + 1)
         o.getCppParent().setObjectName('parent')
-        self.assertEqual(sys.getrefcount(o), 3)
+        self.assertEqual(sys.getrefcount(o), base_count + 1)
         o.getCppParent().setObjectName('parent')
-        self.assertEqual(sys.getrefcount(o), 3)
+        self.assertEqual(sys.getrefcount(o), base_count + 1)
         o.destroyCppParent()
-        self.assertEqual(sys.getrefcount(o), 2)
+        self.assertEqual(sys.getrefcount(o), base_count)
 
     def testNextInFocusChainCycle(self):
         parent = ObjectType()

@@ -137,35 +137,35 @@ class InternalAdd(UsesQApplication):
         topLayout = QGridLayout()
 
         # unique reference
-        self.assertEqual(sys.getrefcount(w), 2)
-        self.assertEqual(sys.getrefcount(ow), 2)
+        base_ref_count_w = sys.getrefcount(w)
+        base_ref_count_ow = sys.getrefcount(ow)
 
         topLayout.addWidget(w, 0, 0)
         topLayout.addWidget(ow, 1, 0)
 
         # layout keep the referemce
-        self.assertEqual(sys.getrefcount(w), 3)
-        self.assertEqual(sys.getrefcount(ow), 3)
+        self.assertEqual(sys.getrefcount(w), base_ref_count_w + 1)
+        self.assertEqual(sys.getrefcount(ow), base_ref_count_ow + 1)
 
         mainLayout = QGridLayout()
 
         mainLayout.addLayout(topLayout, 1, 0, 1, 4)
 
         # the same reference
-        self.assertEqual(sys.getrefcount(w), 3)
-        self.assertEqual(sys.getrefcount(ow), 3)
+        self.assertEqual(sys.getrefcount(w), base_ref_count_w + 1)
+        self.assertEqual(sys.getrefcount(ow), base_ref_count_ow + 1)
 
         mw.setLayout(mainLayout)
 
         # now trasfer the ownership to mw
-        self.assertEqual(sys.getrefcount(w), 3)
-        self.assertEqual(sys.getrefcount(ow), 3)
+        self.assertEqual(sys.getrefcount(w), base_ref_count_w + 1)
+        self.assertEqual(sys.getrefcount(ow), base_ref_count_ow + 1)
 
         del mw
 
         # remove the ref and invalidate the widget
-        self.assertEqual(sys.getrefcount(w), 2)
-        self.assertEqual(sys.getrefcount(ow), 2)
+        self.assertEqual(sys.getrefcount(w), base_ref_count_w)
+        self.assertEqual(sys.getrefcount(ow), base_ref_count_ow)
 
 
 if __name__ == '__main__':

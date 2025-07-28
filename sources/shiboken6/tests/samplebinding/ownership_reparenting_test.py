@@ -45,11 +45,11 @@ class ReparentingTest(unittest.TestCase):
         '''Set the same parent twice to check if the ref continue the same'''
         obj = ObjectType()
         parent = ObjectType()
-        self.assertEqual(sys.getrefcount(obj), 2)
+        base_ref_count = sys.getrefcount(obj)
         obj.setParent(parent)
-        self.assertEqual(sys.getrefcount(obj), 3)
+        self.assertEqual(sys.getrefcount(obj), base_ref_count + 1)
         obj.setParent(parent)
-        self.assertEqual(sys.getrefcount(obj), 3)
+        self.assertEqual(sys.getrefcount(obj), base_ref_count + 1)
 
     def testReparentedExtObjectType(self):
         '''Reparent children from one extended parent to another.'''

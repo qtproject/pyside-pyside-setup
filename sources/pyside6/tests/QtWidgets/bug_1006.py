@@ -73,27 +73,28 @@ class TestBug1006 (TimedQApplication):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRemoveOrphanWidget(self):
         widget = QLabel()
+        base_ref_count = sys.getrefcount(widget)
         layout = QHBoxLayout()
         layout.addWidget(widget)
-        self.assertEqual(sys.getrefcount(widget), 3)
+        self.assertEqual(sys.getrefcount(widget), base_ref_count + 1)
 
         layout.removeWidget(widget)
         widget.setObjectName("MyWidget")
-        self.assertEqual(sys.getrefcount(widget), 2)
+        self.assertEqual(sys.getrefcount(widget), base_ref_count)
 
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRemoveChildWidget(self):
         parent = QLabel()
         widget = QLabel(parent)
-        self.assertEqual(sys.getrefcount(widget), 3)
+        base_ref_count = sys.getrefcount(widget)
 
         layout = QHBoxLayout()
         layout.addWidget(widget)
-        self.assertEqual(sys.getrefcount(widget), 3)
+        self.assertEqual(sys.getrefcount(widget), base_ref_count)
 
         layout.removeWidget(widget)
         widget.setObjectName("MyWidget")
-        self.assertEqual(sys.getrefcount(widget), 3)
+        self.assertEqual(sys.getrefcount(widget), base_ref_count)
 
 
 if __name__ == "__main__":

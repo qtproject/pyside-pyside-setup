@@ -27,15 +27,16 @@ class EventFilter(UsesQApplication):
     @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testRefCount(self):
         o = QObject()
+        base_ref_count = sys.getrefcount(o)
         filt = MyFilter()
         o.installEventFilter(filt)
-        self.assertEqual(sys.getrefcount(o), 2)
+        self.assertEqual(sys.getrefcount(o), base_ref_count)
 
         o.installEventFilter(filt)
-        self.assertEqual(sys.getrefcount(o), 2)
+        self.assertEqual(sys.getrefcount(o), base_ref_count)
 
         o.removeEventFilter(filt)
-        self.assertEqual(sys.getrefcount(o), 2)
+        self.assertEqual(sys.getrefcount(o), base_ref_count)
 
     def testObjectDestructorOrder(self):
         w = QWindow()
