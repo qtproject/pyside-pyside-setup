@@ -21,7 +21,7 @@ class TestBug988 (unittest.TestCase):
 
     def testIt(self):
         self.arg = None
-        app = QApplication([])
+        app = QApplication([])  # noqa: F841
         obj = QTabWidget()
         obj.currentChanged.connect(self.callback)
         obj.currentChanged.emit(5)

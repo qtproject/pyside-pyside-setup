@@ -25,7 +25,7 @@ class A(QMainWindow):
         v.setModel(a)
         self.setCentralWidget(v)
         # Test index() method (see PYSIDE-570, PYSIDE-331)
-        index = a.index(0, 0, QModelIndex())
+        index = a.index(0, 0, QModelIndex())  # noqa: F841
 
 
 app = QApplication([])

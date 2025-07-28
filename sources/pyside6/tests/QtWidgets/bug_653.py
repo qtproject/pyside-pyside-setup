@@ -17,7 +17,7 @@ from PySide6.QtWidgets import QApplication, QWizard, QWizardPage
 class TestBug653(unittest.TestCase):
     """Crash after calling QWizardPage.wizard()"""
     def testIt(self):
-        app = QApplication([])
+        app = QApplication([])  # noqa: F841
 
         wizard = QWizard()
         page = QWizardPage()

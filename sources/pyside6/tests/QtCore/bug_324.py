@@ -32,7 +32,7 @@ class Bug324(unittest.TestCase):
         self.value = val
 
     def testBug(self):
-        app = QCoreApplication([])
+        app = QCoreApplication([])  # noqa: F841
         bug = QBug()
         self.value = ''
         bug.done.connect(self.on_done)

@@ -62,7 +62,7 @@ class TestRepr (unittest.TestCase):
 
     def testIt(self):
 
-        app = QApplication([])
+        app = QApplication([])  # noqa: F841
 
         self.assertEqual("<__main__.MyQObject(0x", repr(MyQObject())[:22])
         self.assertEqual("<__main__.MyQWidget(0x", repr(MyQWidget())[:22])

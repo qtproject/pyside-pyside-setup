@@ -69,7 +69,7 @@ class SetAndGetTestCases(unittest.TestCase):
         f.test = 1
         set_counter = 0
 
-        ret = f.test
+        ret = f.test  # noqa: F841
         self.assertEqual(get_counter, 1)
         self.assertEqual(set_counter, 0)
 

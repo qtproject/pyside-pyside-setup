@@ -20,7 +20,7 @@ class QIconCtorWithNoneTest(TimedQGuiApplication):
 
     def testQIconCtorWithNone(self):
         icon = QIcon(None)
-        pixmap = icon.pixmap(48, 48)
+        pixmap = icon.pixmap(48, 48)  # noqa: F841
         self.app.exec()
 
 

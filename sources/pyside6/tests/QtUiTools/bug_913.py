@@ -19,7 +19,7 @@ from PySide6.QtUiTools import QUiLoader
 class TestBug913 (unittest.TestCase):
 
     def testIt(self):
-        app = QApplication([])
+        app = QApplication([])  # noqa: F841
 
         loader = QUiLoader()
         file = Path(__file__).resolve().parent / 'bug_913.ui'

@@ -82,7 +82,7 @@ class TestLayout(QObject):
 
 class TestQmlAttached(unittest.TestCase):
     def testIt(self):
-        app = QCoreApplication(sys.argv)
+        app = QCoreApplication(sys.argv)  # noqa: F841
         file = Path(__file__).resolve().parent / 'registerattached.qml'
         url = QUrl.fromLocalFile(file)
         engine = QQmlEngine()

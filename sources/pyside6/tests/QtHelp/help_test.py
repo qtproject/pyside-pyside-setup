@@ -19,7 +19,7 @@ from helper.usesqapplication import UsesQApplication
 class QHelpEngineCreation(UsesQApplication):
 
     def testConstructor(self):
-        helpEngine = QHelpEngine('mycollection.qch')
+        helpEngine = QHelpEngine('mycollection.qch')  # noqa: F841
 
 
 if __name__ == '__main__':

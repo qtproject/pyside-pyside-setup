@@ -19,7 +19,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QLayout
 class QAppPresence(unittest.TestCase):
 
     def testBug(self):
-        app = QApplication(sys.argv)
+        app = QApplication(sys.argv)  # noqa: F841
         window = QMainWindow()
         l = window.layout()
         self.assertTrue(isinstance(l, QLayout))

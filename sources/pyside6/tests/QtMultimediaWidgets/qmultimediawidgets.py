@@ -37,7 +37,7 @@ class QMultimediaWidgetsTest(UsesQApplication):
         w = MyWidget()
         w.show()
 
-        timer = QTimer.singleShot(100, self.app.quit)
+        timer = QTimer.singleShot(100, self.app.quit)  # noqa: F841
         self.app.exec()
 
 

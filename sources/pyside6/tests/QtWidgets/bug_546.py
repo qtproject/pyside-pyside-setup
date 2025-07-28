@@ -18,7 +18,7 @@ class TestBug546(unittest.TestCase):
 
     """Test to check a crash at exit"""
     def testIt(self):
-        app = QApplication([])
+        app = QApplication([])  # noqa: F841
         textEdit = QPlainTextEdit()
         completer = QCompleter(("foo", "bar"), textEdit)
         completer.setWidget(textEdit)

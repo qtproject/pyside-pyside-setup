@@ -92,7 +92,7 @@ class TestUnrecognizedOffending(unittest.TestCase):
     """
     def test_signatures_recognized(self):
         with isolate_warnings():
-            found_sigs = enum_all()
+            found_sigs = enum_all()  # noqa: F841
             if check_warnings():
                 raise RuntimeError("There are errors, see above.")
 

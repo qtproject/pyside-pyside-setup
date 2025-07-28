@@ -61,7 +61,7 @@ class InheritsCase(unittest.TestCase):
             def __init__(self):
                 self.member = 'member'
                 super().__init__()
-        obj0 = DerivedObject()
+        obj0 = DerivedObject()  # noqa: F841
         # The second instantiation of DerivedObject will generate an exception
         # that will not come to surface immediately.
         obj1 = DerivedObject()

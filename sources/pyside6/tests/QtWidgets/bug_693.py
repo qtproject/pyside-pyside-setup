@@ -28,7 +28,7 @@ class MyModel (QAbstractListModel):
 
 class TestBug693(unittest.TestCase):
     def testIt(self):
-        app = QApplication([])
+        app = QApplication([])  # noqa: F841
         model = MyModel()
         view = QListView()
         view.setModel(model)

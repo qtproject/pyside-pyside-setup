@@ -36,7 +36,7 @@ class QListWidgetItemConstructor(UsesQApplication):
 
     def testConstructorWithNone(self):
         # Bug 452 - QListWidgetItem() not casting NoneType to null correctly.
-        item = QListWidgetItem(None, 123)
+        item = QListWidgetItem(None, 123)  # noqa: F841
 
 
 if __name__ == '__main__':
