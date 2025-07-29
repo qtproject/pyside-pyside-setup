@@ -312,6 +312,8 @@ def to_string(thing):
     elif type(thing) is abc.ABCMeta:
         # collections.abc.Sequence without argument is very different from typing.
         return f"{thing.__module__}.{thing.__name__}"
+    elif str(thing) == "<class 'typing.Union'>":
+        return "typing.Union"
     # Note: This captures things from the typing module:
     return str(thing)
 
