@@ -223,9 +223,14 @@ class Config(BaseConfig):
         return self._project_dir
 
     @project_dir.setter
-    def project_dir(self, project_dir: Path):
+    def project_dir(self, project_dir: Path) -> None:
+        rel_path = (
+            project_dir.relative_to(self.config_file.parent)
+            if project_dir.is_relative_to(self.config_file.parent)
+            else project_dir
+        )
         self._project_dir = project_dir
-        self.set_value("app", "project_dir", str(project_dir))
+        self.set_value("app", "project_dir", str(rel_path))
 
     @property
     def project_file(self) -> Path:
@@ -258,9 +263,14 @@ class Config(BaseConfig):
         return self._source_file
 
     @source_file.setter
-    def source_file(self, source_file: Path):
+    def source_file(self, source_file: Path) -> None:
+        rel_path = (
+            source_file.relative_to(self.config_file.parent)
+            if source_file.is_relative_to(self.config_file.parent)
+            else source_file
+        )
         self._source_file = source_file
-        self.set_value("app", "input_file", str(source_file))
+        self.set_value("app", "input_file", str(rel_path))
 
     @property
     def python_path(self) -> Path:
