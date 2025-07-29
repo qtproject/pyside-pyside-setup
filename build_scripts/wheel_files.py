@@ -732,6 +732,8 @@ def module_Qt3DInput() -> ModuleData:
 
 def module_Qt3DLogic() -> ModuleData:
     data = ModuleData("3DLogic", qml=["Qt3D/Logic"])
+    json_data = get_module_json_data("3DLogic")
+    data.plugins = get_module_plugins(json_data)
 
     return data
 
@@ -766,10 +768,11 @@ def module_QtQuick3D() -> ModuleData:
         "libQt63DQuick",
         "libQt63DQuickAnimation",
         "libQt63DQuickExtras",
-        "libQt63DQuickExtras",
+        "libQt63DQuickLogic",
         "libQt63DQuickInput",
         "libQt63DQuickRender",
         "libQt63DQuickScene2D",
+        "libQt63DQuickScene3D",
         "libQt6Quick3DXr",
     ]
 
