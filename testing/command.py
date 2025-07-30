@@ -39,6 +39,7 @@ import argparse
 import os
 import sys
 from collections import OrderedDict
+from pathlib import Path
 from textwrap import dedent
 from timeit import default_timer as timer
 
@@ -163,7 +164,7 @@ def main():
     group.add_argument(
         "--blacklist",
         "-b",
-        type=argparse.FileType("r"),
+        type=str,
         default=blacklist_default,
         help=f"a Qt blacklist file (default: {blacklist_default})",
     )
@@ -191,7 +192,7 @@ def main():
     )
     parser_getcwd = subparsers.add_parser("getcwd")
     parser_getcwd.add_argument(
-        "filename", type=argparse.FileType("w"), help="write the build dir name into a file"
+        "filename", type=str, help="write the build dir name into a file"
     )
     parser_getcwd.add_argument(
         "--buildno",
@@ -209,8 +210,8 @@ def main():
             sys.exit(1)
 
     if args.subparser_name == "getcwd":
-        print(builds.selected.build_dir, file=args.filename)
-        print(builds.selected.build_dir, "written to file", args.filename.name)
+        Path(args.filename).write_text(builds.selected.build_dir + '\n')
+        print(builds.selected.build_dir, "written to file", args.filename)
         sys.exit(0)
     elif args.subparser_name == "test":
         runs = args.reruns
@@ -231,8 +232,7 @@ def main():
         sys.exit(1)
 
     if args.blacklist:
-        args.blacklist.close()
-        bl = BlackList(args.blacklist.name)
+        bl = BlackList(args.blacklist)
     else:
         bl = BlackList(None)
     if args.environ:
