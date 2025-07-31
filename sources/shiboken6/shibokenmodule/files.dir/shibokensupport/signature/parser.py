@@ -309,11 +309,10 @@ def to_string(thing):
         ret = m + "." + name if dot else name
         assert (eval(ret, globals(), namespace))
         return ret
-    elif type(thing) is abc.ABCMeta:
+    elif type(thing) in (abc.ABCMeta, type):
         # collections.abc.Sequence without argument is very different from typing.
+        # PYSIDE-3147 - type(typing.Union) is a type, not typing._SpecialForm.
         return f"{thing.__module__}.{thing.__name__}"
-    elif str(thing) == "<class 'typing.Union'>":
-        return "typing.Union"
     # Note: This captures things from the typing module:
     return str(thing)
 
