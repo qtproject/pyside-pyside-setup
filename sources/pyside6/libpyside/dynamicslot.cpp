@@ -133,41 +133,8 @@ void MethodDynamicSlot::formatDebug(QDebug &debug) const
         << ", function=" << PySide::debugPyObject(m_function) << ')';
 }
 
-// Store a weak reference on pythonSelf.
-class TrackingMethodDynamicSlot : public MethodDynamicSlot
-{
-    Q_DISABLE_COPY_MOVE(TrackingMethodDynamicSlot)
-public:
-    explicit TrackingMethodDynamicSlot(PyObject *function, PyObject *pythonSelf,
-                                       PyObject *weakRef);
-    ~TrackingMethodDynamicSlot() override;
-
-    void releaseWeakRef() { m_weakRef = nullptr; }
-
-private:
-    PyObject *m_weakRef;
-};
-
-TrackingMethodDynamicSlot::TrackingMethodDynamicSlot(PyObject *function, PyObject *pythonSelf,
-                                                     PyObject *weakRef) :
-    MethodDynamicSlot(function, pythonSelf),
-    m_weakRef(weakRef)
-{
-}
-
-TrackingMethodDynamicSlot::~TrackingMethodDynamicSlot()
-{
-    if (m_weakRef != nullptr) {
-        Shiboken::GilState gil;
-        // weakrefs must not be de-refed after the object has been deleted,
-        // else they get negative refcounts.
-        if (PepExt_Weakref_IsAlive(m_weakRef))
-            Py_DECREF(m_weakRef);
-    }
-}
-
 // Delete the connection on receiver deletion by weakref
-class PysideReceiverMethodSlot : public TrackingMethodDynamicSlot
+class PysideReceiverMethodSlot : public MethodDynamicSlot
 {
     Q_DISABLE_COPY_MOVE(PysideReceiverMethodSlot)
 public:
@@ -178,19 +145,21 @@ public:
 
 static void onPysideReceiverSlotDestroyed(void *data)
 {
-    auto *self = reinterpret_cast<PysideReceiverMethodSlot *>(data);
-    // Ensure the weakref is gone in case the connection stored in
-    // Qt's internals outlives Python.
-    self->releaseWeakRef();
+    auto *pythonSelf = reinterpret_cast<PyObject *>(data);
     Py_BEGIN_ALLOW_THREADS
-    disconnectReceiver(self->pythonSelf());
+    disconnectReceiver(pythonSelf);
     Py_END_ALLOW_THREADS
 }
 
 PysideReceiverMethodSlot::PysideReceiverMethodSlot(PyObject *function, PyObject *pythonSelf) :
-    TrackingMethodDynamicSlot(function, pythonSelf,
-                              WeakRef::create(pythonSelf, onPysideReceiverSlotDestroyed, this))
+    MethodDynamicSlot(function, pythonSelf)
 {
+    // PYSIDE-3148: The weakref is automatically deleted when the notification triggers.
+    // Note that notifications may trigger after deletion of TrackingMethodDynamicSlot in case
+    // of multiple connections to the same receiver, so, &DynamicSlot must not be used as user
+    // data. Also trying to actively deref a pending weak ref from ~TrackingMethodDynamicSlot()
+    // does not reliably prevent the notification from being triggered.
+    WeakRef::create(pythonSelf, onPysideReceiverSlotDestroyed, pythonSelf);
 }
 
 DynamicSlot* DynamicSlot::create(PyObject *callback)
