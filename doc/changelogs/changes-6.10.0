@@ -1,0 +1,81 @@
+Qt for Python 6.10.0 is a minor release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+* **************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - [PYSIDE-1735] @QEnum, @QFlag and QMetaEnum now support unsigned 64 bit
+                 values for QML usage (with the exception of Qt Widgets
+                 Designer), following the support added to Qt.
+ - [PYSIDE-2840] It is now possible to use @QEnum/@QFlag-decorated
+                 enumerations as properties of custom widgets in Qt Widgets
+                 Designer.
+ - [PYSIDE-2916] The invocation of functions overridden in Python
+                 has been optimized for speed.
+ - [PYSIDE-3012] type hints: The annotations of QPropertyAnimation
+                 have been fixed.
+ - [PYSIDE-3084] Enumerations are now stored as such instead of an opaque
+                 PyObjectWrapper in functions returning QVariant.
+ - [PYSIDE-3137] A warning occurring when doing the first signal connection
+                 from a thread has been fixed.
+ - [PYSIDE-3143] A bug causing events to be wrongly converted to
+                 QStandardItem has been fixed. Also, a leak of QStandardItem
+                 instances returned from QStandardItemModel functions
+                 has been fixed.
+ - [PYSIDE-3146] Deployment: Values generated into pysidedeploy.spec are
+                 now sorted.
+ - [PYSIDE-3147] Initial adaptations for the upcoming Python version 3.14
+                 have been done.
+ - [PYSIDE-3164] type hints: Enum values have been added to the stubs for
+                 improved type checking.
+ - [PYSIDE-3178] type hints: The return types of
+                 QPoint(F)/QSize(F).toTuple have been fixed.
+ - [QTBUG-110428] The QtExampleIcons module has been removed due to
+                  the removal of the underlying library in Qt.
+
+ ***************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - Template specializations like "std::optional<int>" can now be specified
+   as primitive types with converter code.
+ - [PYSIDE-2221] Multi-phase Python extension module initialization is now
+                 used for the non-deployed case.
+ - [PYSIDE-3011] It is now possible to inject code into the the wrapper
+                 class declaration, which can be used to import base class
+                 members via the "using" keyword.
+ - [PYSIDE-3105] The support for cross compiling (using the correct target
+                 for clang-based parsing) has been improved. Various options
+                 have been added to shiboken to be able to specify target
+                 platform and compiler.
+ - [PYSIDE-2854] libshiboken: The internal map instances has been changed
+                 to be a multimap to improve support for co-located objects.
+ - [PYSIDE-3107] An automatic conversion from T to std::optional<T>
+                 has been added (in case std::optional is specified in
+                 the type system).
+ - [PYSIDE-3138] A CMake package "Shiboken6Tools" has been introduced to make
+                 integrating Shiboken with CMake easier. This significantly
+                 reduces the amount of CMake code required by users,
+                 replacing the previous method of calling the executable
+                 directly with a Python script (`pyside_config.py`).
+ - [PYSIDE-3171] libshiboken's replacement functions providing functions
+                 missing from the limited API or appearing in future Python
+                 versions have been moved from sbkpython.h (providing a
+                 sanitized Python.h) to separate headers sbkpep.h and
+                 sbkpepbuffer.h (providing buffer API). This should not
+                 affect binding code as the generator includes the new
+                 headers, but may require adaption in client code using
+                 libshiboken/libpyside directly.
