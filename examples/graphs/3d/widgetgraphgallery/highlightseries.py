@@ -23,7 +23,7 @@ class HighlightSeries(QSurface3DSeries):
         self._height = 100
         self._srcWidth = 0
         self._srcHeight = 0
-        self._position = {}
+        self._position = QPoint()
         self._topographicSeries = None
         self._minHeight = 0.0
         self._height_adjustment = 5.0
@@ -52,16 +52,16 @@ class HighlightSeries(QSurface3DSeries):
         halfWidth = self._width / 2
         halfHeight = self._height / 2
 
-        startX = position.y() - halfWidth
+        startX = position.x() - halfWidth
         if startX < 0:
             startX = 0
-        endX = position.y() + halfWidth
+        endX = position.x() + halfWidth
         if endX > (self._srcWidth - 1):
             endX = self._srcWidth - 1
-        startZ = position.x() - halfHeight
+        startZ = position.y() - halfHeight
         if startZ < 0:
             startZ = 0
-        endZ = position.x() + halfHeight
+        endZ = position.y() + halfHeight
         if endZ > (self._srcHeight - 1):
             endZ = self._srcHeight - 1
 
@@ -71,10 +71,10 @@ class HighlightSeries(QSurface3DSeries):
         for i in range(int(startZ), int(endZ)):
             newRow = []
             srcRow = srcArray[i]
-            for j in range(startX, endX):
-                pos = srcRow.at(j).position()
+            for j in range(int(startX), int(endX)):
+                pos = QVector3D(srcRow[j].position())
                 pos.setY(pos.y() + self._height_adjustment)
-                item = QSurfaceDataItem(QVector3D(pos))
+                item = QSurfaceDataItem(pos)
                 newRow.append(item)
             dataArray.append(newRow)
         self.dataProxy().resetArray(dataArray)
