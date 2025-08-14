@@ -52,9 +52,11 @@ QMetaType QVariant_resolveMetaType(PyTypeObject *type)
         // QGraphicsItem::itemChange() to work.
         if (qstrcmp(typeName, "QGraphicsObject*") == 0 && size > 1) {
             auto *firstBaseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_bases, 0));
-            const char *firstBaseTypeName = Shiboken::ObjectType::getOriginalName(firstBaseType);
-            if (firstBaseTypeName != nullptr && qstrcmp(firstBaseTypeName, "QObject*") == 0)
-                ++i;
+            if (SbkObjectType_Check(firstBaseType)) {
+                const char *firstBaseTypeName = Shiboken::ObjectType::getOriginalName(firstBaseType);
+                if (firstBaseTypeName != nullptr && qstrcmp(firstBaseTypeName, "QObject*") == 0)
+                    ++i;
+            }
         }
         for ( ; i < size; ++i) {
             auto baseType = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_bases, i));
