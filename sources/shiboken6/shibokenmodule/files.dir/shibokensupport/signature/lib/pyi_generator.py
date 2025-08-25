@@ -3,6 +3,9 @@ LICENSE_TEXT = """
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 """
+MYPY_TEXT = """
+# mypy: disable-error-code="override, overload-overlap"
+"""
 
 # flake8: noqa E:402
 
@@ -311,10 +314,9 @@ def generate_pyi(import_name, outpath, options):
         """
         This file contains the exact signatures for all functions in module
         {import_name}, except for defaults which are replaced by "...".
-
-        # mypy: disable-error-code="override, overload-overlap"
         """
         '''))
+    fmt.print(MYPY_TEXT.strip())
     HintingEnumerator(fmt).module(import_name)
     fmt.print("# eof")
     # Postprocess: resolve the imports
