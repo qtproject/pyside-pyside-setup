@@ -1,6 +1,8 @@
 // Copyright (C) 2023 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import Backend
@@ -25,6 +27,9 @@ ListView {
     delegate: ContactDelegate {
         id: delegate
         width: listView.width
+
+        required property int index
+
         onPressAndHold: listView.pressAndHold(index)
     }
 

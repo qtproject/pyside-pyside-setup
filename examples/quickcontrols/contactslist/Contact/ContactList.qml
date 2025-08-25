@@ -17,10 +17,10 @@ ApplicationWindow {
     ContactDialog {
         id: contactDialog
         onFinished: function(fullName, address, city, number) {
-            if (currentContact == -1)
+            if (window.currentContact === -1)
                 contactView.model.append(fullName, address, city, number)
             else
-                contactView.model.set(currentContact, fullName, address, city, number)
+                contactView.model.set(window.currentContact, fullName, address, city, number)
         }
     }
 
@@ -35,23 +35,23 @@ ApplicationWindow {
             font.bold: true
             width: parent.width
             horizontalAlignment: Qt.AlignHCenter
-            text: currentContact >= 0 ? contactView.model.get(currentContact).fullName : ""
+            text: window.currentContact >= 0 ? contactView.model.get(window.currentContact).fullName : ""
         }
         MenuItem {
             text: qsTr("Edit...")
-            onTriggered: contactDialog.editContact(contactView.model.get(currentContact))
+            onTriggered: contactDialog.editContact(contactView.model.get(window.currentContact))
         }
         MenuItem {
             text: qsTr("Remove")
-            onTriggered: contactView.model.remove(currentContact)
+            onTriggered: contactView.model.remove(window.currentContact)
         }
     }
 
     ContactView {
         id: contactView
         anchors.fill: parent
-        onPressAndHold: {
-            currentContact = index
+        onPressAndHold: function(index) {
+            window.currentContact = index
             contactMenu.open()
         }
     }
@@ -63,7 +63,7 @@ ApplicationWindow {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         onClicked: {
-            currentContact = -1
+            window.currentContact = -1
             contactDialog.createContact()
         }
     }

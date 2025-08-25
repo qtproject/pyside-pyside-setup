@@ -80,7 +80,7 @@ class ContactModel(QAbstractListModel):
         default[ContactModel.ContactRole.NumberRole] = QByteArray(b"number")
         return default
 
-    @Slot(int)
+    @Slot(int, result="QVariantMap")
     def get(self, row: int):
         contact = self.m_contacts[row]
         return {"fullName": contact.fullName, "address": contact.address,
@@ -101,11 +101,11 @@ class ContactModel(QAbstractListModel):
             return
 
         self.m_contacts[row] = self.Contact(full_name, address, city, number)
-        self.dataChanged(self.index(row, 0), self.index(row, 0),
-                         [ContactModel.ContactRole.FullNameRole,
-                          ContactModel.ContactRole.AddressRole,
-                          ContactModel.ContactRole.CityRole,
-                          ContactModel.ContactRole.NumberRole])
+        roles = [ContactModel.ContactRole.FullNameRole,
+                 ContactModel.ContactRole.AddressRole,
+                 ContactModel.ContactRole.CityRole,
+                 ContactModel.ContactRole.NumberRole]
+        self.dataChanged.emit(self.index(row, 0), self.index(row, 0), roles)
 
     @Slot(int)
     def remove(self, row):
