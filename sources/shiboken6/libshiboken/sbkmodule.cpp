@@ -257,13 +257,6 @@ static PyMethodDef module_methods[] = {
     {nullptr, nullptr, 0, nullptr}
 };
 
-// Python 3.8 - 3.12
-static int const LOAD_CONST_312 = 100;
-static int const IMPORT_NAME_312 = 108;
-// Python 3.13
-static int const LOAD_CONST_313 = 83;
-static int const IMPORT_NAME_313 = 75;
-
 // OpCodes: Adapt for each Python version by checking the defines in the generated header opcode_ids.h
 // egrep '( LOAD_CONST | IMPORT_NAME )' opcode_ids.h
 
