@@ -216,7 +216,7 @@ class Formatter(Writer):
     def enum(self, class_name, enum_name, value):
         spaces = indent * self.level
         hexval = hex(value)
-        self.print(f"{spaces}{enum_name:25} = ...  # {hexval if value >= 0 else value}")
+        self.print(f"{spaces}{enum_name:25} = {hexval if value >= 0 else value}")
         yield
 
     @contextmanager
