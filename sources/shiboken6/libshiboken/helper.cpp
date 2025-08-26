@@ -492,10 +492,16 @@ bool listToArgcArgv(PyObject *argList, int *argcIn, char ***argvIn, const char *
         auto *argv = new char *[1];
         *argvIn = argv;
         *argcIn = 1;
-        if (PyObject *appName = PyDict_GetItem(PyEval_GetGlobals(), Shiboken::PyMagicName::file()))
-            argv[0] = strDup(Shiboken::String::toCString(appName));
-        else
-            argv[0] = strDup(defaultAppName ? defaultAppName : "PySideApplication");
+
+        const char *appNameC = nullptr;
+        Shiboken::AutoDecRef globals(PepEval_GetFrameGlobals());
+        if (!globals.isNull())  {
+            if (PyObject *appName = PyDict_GetItem(globals, Shiboken::PyMagicName::file()))
+                appNameC = Shiboken::String::toCString(appName);
+        }
+        if (appNameC == nullptr)
+            appNameC = defaultAppName ? defaultAppName : "PySideApplication";
+        argv[0] = strDup(appNameC);
         return true;
     }
 

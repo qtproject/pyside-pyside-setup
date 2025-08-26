@@ -298,13 +298,12 @@ static inline int getFeatureSelectId()
 {
     static auto *undef = PyLong_FromLong(-1);
     static auto *feature_dict = GetFeatureDict();
-    // these things are all borrowed
-    auto *globals = PyEval_GetGlobals();
-    if (globals == nullptr
-        || globals == cached_globals)
+
+    Shiboken::AutoDecRef globals(PepEval_GetFrameGlobals());
+    if (globals.isNull() || globals.object() == cached_globals)
         return last_select_id;
 
-    auto *modname = PyDict_GetItem(globals, PyMagicName::name());
+    auto *modname = PyDict_GetItem(globals.object(), PyMagicName::name());
     if (modname == nullptr)
         return last_select_id;
 

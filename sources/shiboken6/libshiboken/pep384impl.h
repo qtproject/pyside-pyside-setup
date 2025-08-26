@@ -549,6 +549,11 @@ LIBSHIBOKEN_API int PepType_SetDict(PyTypeObject *type, PyObject *dict);
 
 LIBSHIBOKEN_API void *PepType_GetSlot(PyTypeObject *type, int aSlot);
 
+// Runtime support for Python 3.13 stable ABI
+
+// Return dictionary of the global variables in the current execution frame
+LIBSHIBOKEN_API PyObject *PepEval_GetFrameGlobals();
+
 /*****************************************************************************
  *
  * Module Initialization

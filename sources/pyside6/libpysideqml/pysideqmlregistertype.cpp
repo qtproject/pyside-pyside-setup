@@ -98,8 +98,11 @@ static inline bool isQmlParserStatus(const QMetaObject *o)
 
 static QByteArray getGlobalString(const char *name)
 {
-    PyObject *globalVar = PyDict_GetItemString(PyEval_GetGlobals(), name);
+    Shiboken::AutoDecRef globals(PepEval_GetFrameGlobals());
+    if (globals.isNull())
+        return {};
 
+    PyObject *globalVar = PyDict_GetItemString(globals, name);
     if (globalVar == nullptr || PyUnicode_Check(globalVar) == 0)
         return {};
 
@@ -109,8 +112,11 @@ static QByteArray getGlobalString(const char *name)
 
 static int getGlobalInt(const char *name)
 {
-    PyObject *globalVar = PyDict_GetItemString(PyEval_GetGlobals(), name);
+    Shiboken::AutoDecRef globals(PepEval_GetFrameGlobals());
+    if (globals.isNull())
+        return -1;
 
+    PyObject *globalVar = PyDict_GetItemString(globals, name);
     if (globalVar == nullptr || PyLong_Check(globalVar) == 0)
         return -1;
 

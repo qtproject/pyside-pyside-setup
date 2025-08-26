@@ -1137,6 +1137,19 @@ void *PepType_GetSlot(PyTypeObject *type, int aSlot)
     return nullptr;
 }
 
+PyObject *PepEval_GetFrameGlobals()
+{
+    // PyEval_GetFrameGlobals() (added to stable ABI in 3.13) returns a new reference
+    // as opposed to deprecated PyEval_GetGlobals() which returns a borrowed reference
+#if !defined(PYPY_VERSION) && ((!defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030D0000) || (defined(Py_LIMITED_API) && Py_LIMITED_API >= 0x030D0000))
+    return PyEval_GetFrameGlobals();
+#else
+    PyObject *result = PyEval_GetGlobals();
+    Py_XINCREF(result);
+    return result;
+#endif
+}
+
 /***************************************************************************
  *
  * PYSIDE-535: The enum/flag error
