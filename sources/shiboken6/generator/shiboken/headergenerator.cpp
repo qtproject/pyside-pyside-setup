@@ -722,17 +722,25 @@ HeaderGenerator::IndexValues HeaderGenerator::collectConverterIndexes() const
 }
 
 // PYSIDE-2404: Write the enums in unchanged case for reuse in type imports.
-//              For conpatibility, we create them in uppercase, too and with
+//              For compatibility, we create them in uppercase, too and with
 //              doubled index for emulating the former type-only case.
 //
 // FIXME: Remove in PySide 7. (See the note in `parser.py`)
-//
-static IndexValue typeIndexUpper(struct IndexValue const &ti)
+
+static IndexValue indexUpper(IndexValue ti) // converter indexes (old macro compatibility)
 {
     QString modi = ti.name.toUpper();
     if (modi == ti.name)
-        modi = u"// "_s + modi;
-    return {modi, ti.value * 2, ti.comment};
+        modi.prepend("// "_L1);
+    ti.name = modi;
+    return ti;
+}
+
+static IndexValue typeIndexUpper(const IndexValue &ti) // type indexes (PYSIDE-2404)
+{
+    IndexValue result = indexUpper(ti);
+    result.value *= 2;
+    return result;
 }
 
 bool HeaderGenerator::finishGeneration()
@@ -782,7 +790,7 @@ bool HeaderGenerator::finishGeneration()
     const auto converterIndexes = collectConverterIndexes();
     macrosStream << "// Converter indices\nenum [[deprecated]] : int {\n";
     for (const auto &ci : converterIndexes)
-        macrosStream << typeIndexUpper(ci);
+        macrosStream << indexUpper(ci);
     macrosStream << "};\n\n";
 
     macrosStream << "// Converter indices\nenum : int {\n";
