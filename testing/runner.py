@@ -214,11 +214,13 @@ class TestRunner:
                 os.rename(tmp_name, self.logfile)
             self.partial = True
         else:
+            _ = ctest_process.communicate()
             self.partial = False
         finally:
             print("End of the test run")
             print()
         tee_process.wait()
+        ctest_process.wait()
 
     def run(self, label, rerun, timeout):
         cmd = self.ctestCommand, "--output-log", self.logfile
