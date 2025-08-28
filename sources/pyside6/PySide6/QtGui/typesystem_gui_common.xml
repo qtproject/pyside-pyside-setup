@@ -474,10 +474,10 @@
     <modify-function signature="QPolygon(int,const int*)" remove="all"/>
     <!-- ### A QList parameter, for no defined type, will generate wrong code. -->
     <modify-function signature="operator+=(QList&lt;QPoint&gt;)" remove="all"/>
-    <add-function signature="operator&lt;&lt;(QPoint)">
+    <add-function signature="operator&lt;&lt;(QPoint)" return-type="QPolygon">
         <inject-code file="../glue/qtgui.cpp" snippet="qpolygon-operatorlowerlower"/>
     </add-function>
-    <add-function signature="operator&lt;&lt;(QList&lt;QPoint&gt;)">
+    <add-function signature="operator&lt;&lt;(QList&lt;QPoint&gt;)" return-type="QPolygon">
         <inject-code file="../glue/qtgui.cpp" snippet="qpolygon-operatorlowerlower"/>
     </add-function>
     <!-- ### -->
@@ -489,7 +489,12 @@
     <!-- ### A QList parameter, for no defined type, will generate wrong code. -->
     <modify-function signature="operator+=(QList&lt;QPointF&gt;)" remove="all"/>
     <!-- ### See bug 777 -->
-    <modify-function signature="operator&lt;&lt;(QList&lt;QPointF&gt;)" remove="all"/>
+    <add-function signature="operator&lt;&lt;(QPointF)" return-type="QPolygonF">
+        <inject-code file="../glue/qtgui.cpp" snippet="qpolygonf-operatorlowerlower"/>
+    </add-function>
+    <add-function signature="operator&lt;&lt;(QList&lt;QPointF&gt;)" return-type="QPolygonF">
+        <inject-code file="../glue/qtgui.cpp" snippet="qpolygonf-operatorlowerlower"/>
+    </add-function>
     <!-- ### -->
   </value-type>
   <value-type name="QIcon" >
