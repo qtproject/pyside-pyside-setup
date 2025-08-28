@@ -365,6 +365,11 @@ for (Py_ssize_t i = 0; i < count; ++i){
 %PYARG_0 = %CONVERTTOPYTHON[QPolygon *](%CPPSELF);
 // @snippet qpolygon-operatorlowerlower
 
+// @snippet qpolygonf-operatorlowerlower
+*%CPPSELF << %1;
+%PYARG_0 = %CONVERTTOPYTHON[QPolygonF *](%CPPSELF);
+// @snippet qpolygonf-operatorlowerlower
+
 // @snippet qpixmap
 %0 = new %TYPE(QPixmap::fromImage(%1));
 // @snippet qpixmap
