@@ -822,10 +822,14 @@ PepRun_GetResult(const char *command)
      * Evaluate a string and return the variable `result`
      */
     PyObject *d = PyDict_New();
-    if (d == nullptr
-        || PyDict_SetItem(d, Shiboken::PyMagicName::builtins(), PyEval_GetBuiltins()) < 0) {
+    if (d == nullptr)
         return nullptr;
-    }
+
+    Shiboken::AutoDecRef builtins(PepEval_GetFrameBuiltins());
+    if (PyDict_SetItem(d, Shiboken::PyMagicName::builtins(), PyEval_GetBuiltins()) < 0)
+        return nullptr;
+    builtins.reset(nullptr);
+
     PyObject *v = PyRun_String(command, Py_file_input, d, d);
     PyObject *res = v ? PyDict_GetItem(d, Shiboken::PyName::result()) : nullptr;
     Py_XDECREF(v);
@@ -1145,6 +1149,19 @@ PyObject *PepEval_GetFrameGlobals()
     return PyEval_GetFrameGlobals();
 #else
     PyObject *result = PyEval_GetGlobals();
+    Py_XINCREF(result);
+    return result;
+#endif
+}
+
+PyObject *PepEval_GetFrameBuiltins()
+{
+    // PepEval_GetFrameBuiltins() (added to stable ABI in 3.13) returns a new reference
+    // as opposed to deprecated PyEval_GetBuiltins() which returns a borrowed reference
+#if !defined(PYPY_VERSION) && ((!defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030D0000) || (defined(Py_LIMITED_API) && Py_LIMITED_API >= 0x030D0000))
+    return PyEval_GetFrameBuiltins();
+#else
+    PyObject *result = PyEval_GetBuiltins();
     Py_XINCREF(result);
     return result;
 #endif

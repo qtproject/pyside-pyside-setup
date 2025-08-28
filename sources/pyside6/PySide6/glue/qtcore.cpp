@@ -2178,7 +2178,9 @@ Q_IMPORT_PLUGIN(QDarwinCalendarPermissionPlugin)
 // @snippet qt-modifier
 PyObject *_inputDict = PyDict_New();
 // Note: The builtins line is no longer needed since Python 3.10. Undocumented!
-PyDict_SetItemString(_inputDict, "__builtins__", PyEval_GetBuiltins());
+Shiboken::AutoDecRef builtins(PepEval_GetFrameBuiltins());
+PyDict_SetItemString(_inputDict, "__builtins__", builtins.object());
+builtins.reset(nullptr);
 PyDict_SetItemString(_inputDict, "QtCore", module);
 PyDict_SetItemString(_inputDict, "Qt", reinterpret_cast<PyObject *>(pyType));
 // Explicitly not dereferencing the result.

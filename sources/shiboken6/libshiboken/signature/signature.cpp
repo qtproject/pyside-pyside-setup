@@ -303,18 +303,18 @@ static PyObject *feature_import(PyObject * /* self */, PyObject *args, PyObject 
         return ret;
     // feature_import did not handle it, so call the normal import.
     Py_DECREF(ret);
-    static PyObject *builtins = PyEval_GetBuiltins();
-    PyObject *origImportFunc = PyDict_GetItemString(builtins, "__orig_import__");
+    Shiboken::AutoDecRef builtins(PepEval_GetFrameBuiltins());
+    PyObject *origImportFunc = PyDict_GetItemString(builtins.object(), "__orig_import__");
     if (origImportFunc == nullptr) {
         Py_FatalError("builtins has no \"__orig_import__\" function");
     }
     // PYSIDE-3054: Instead of just calling the original import, we temporarily
     //              reset the whole import function to the previous version.
     //              This prevents unforeseen recursions like in settrace.
-    PyObject *featureImportFunc = PyDict_GetItemString(builtins, "__import__");
+    PyObject *featureImportFunc = PyDict_GetItemString(builtins.object(), "__import__");
     Py_INCREF(origImportFunc);
     Py_INCREF(featureImportFunc);
-    PyDict_SetItemString(builtins, "__import__", origImportFunc);
+    PyDict_SetItemString(builtins.object(), "__import__", origImportFunc);
     ret = PyObject_Call(origImportFunc, args, kwds);
     if (ret) {
         // PYSIDE-2029: Intercept after the import to search for PySide usage.
@@ -326,7 +326,7 @@ static PyObject *feature_import(PyObject * /* self */, PyObject *args, PyObject 
             ret = nullptr;
         }
     }
-    PyDict_SetItemString(builtins, "__import__", featureImportFunc);
+    PyDict_SetItemString(builtins.object(), "__import__", featureImportFunc);
     Py_DECREF(origImportFunc);
     Py_DECREF(featureImportFunc);
     return ret;

@@ -486,7 +486,6 @@ static PyMethodDef lazy_methods[] = {
 PyObject *create(const char * /* modName */, void *moduleData)
 {
     static auto *sysModules = PyImport_GetModuleDict();
-    static auto *builtins = PyEval_GetBuiltins();
     static auto *partial = Pep_GetPartialFunction();
     static bool lazy_init{};
 
@@ -511,10 +510,11 @@ PyObject *create(const char * /* modName */, void *moduleData)
         origModuleGetattro = PyModule_Type.tp_getattro;
         PyModule_Type.tp_getattro = PyModule_lazyGetAttro;
         // Add the lazy import redirection, keeping a reference.
-        origImportFunc = PyDict_GetItemString(builtins, "__import__");
+        Shiboken::AutoDecRef builtins(PepEval_GetFrameBuiltins());
+        origImportFunc = PyDict_GetItemString(builtins.object(), "__import__");
         Py_INCREF(origImportFunc);
         AutoDecRef func(PyCFunction_NewEx(lazy_methods, nullptr, nullptr));
-        PyDict_SetItemString(builtins, "__import__", func);
+        PyDict_SetItemString(builtins.object(), "__import__", func);
         lazy_init = true;
     }
     // PYSIDE-2404: Nuitka inserts some additional code in standalone mode

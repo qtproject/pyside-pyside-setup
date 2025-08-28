@@ -56,9 +56,12 @@ static safe_globals_struc *init_phase_1()
         AutoDecRef bytes(PyBytes_FromStringAndSize(bytes_cast, sizeof(PySide_SignatureLoader)));
         if (bytes.isNull())
             break;
+
+        AutoDecRef builtins;
 #if defined(Py_LIMITED_API) || defined(SHIBOKEN_NO_EMBEDDING_PYC)
-        PyObject *builtins = PyEval_GetBuiltins();
-        PyObject *compile = PyDict_GetItem(builtins, PyName::compile());
+        builtins.reset(PepEval_GetFrameBuiltins());
+        PyObject *compile = PyDict_GetItem(builtins.object(), PyName::compile());
+        builtins.reset(nullptr);
         if (compile == nullptr)
             break;
         AutoDecRef code_obj(PyObject_CallFunction(compile, "Oss",
@@ -74,8 +77,10 @@ static safe_globals_struc *init_phase_1()
             break;
         // Initialize the module
         PyObject *mdict = PyModule_GetDict(p->helper_module);
-        if (PyDict_SetItem(mdict, PyMagicName::builtins(), PyEval_GetBuiltins()) < 0)
+        builtins.reset(PepEval_GetFrameBuiltins());
+        if (PyDict_SetItem(mdict, PyMagicName::builtins(), builtins.object()) < 0)
             break;
+        builtins.reset(nullptr);
 
         /*********************************************************************
          *
@@ -141,8 +146,9 @@ static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
             Py_DECREF(v);
         }
         // The first entry is __feature_import__, add documentation.
-        PyObject *builtins = PyEval_GetBuiltins();
-        PyObject *imp_func = PyDict_GetItemString(builtins, "__import__");
+        Shiboken::AutoDecRef builtins(PepEval_GetFrameBuiltins());
+        PyObject *imp_func = PyDict_GetItemString(builtins.object(), "__import__");
+        builtins.reset(nullptr);
         PyObject *imp_doc = PyObject_GetAttrString(imp_func, "__doc__");
         signature_methods[0].ml_doc = String::toCString(imp_doc);
 

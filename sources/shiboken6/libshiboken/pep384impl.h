@@ -554,6 +554,9 @@ LIBSHIBOKEN_API void *PepType_GetSlot(PyTypeObject *type, int aSlot);
 // Return dictionary of the global variables in the current execution frame
 LIBSHIBOKEN_API PyObject *PepEval_GetFrameGlobals();
 
+// Return a dictionary of the builtins in the current execution frame
+LIBSHIBOKEN_API PyObject *PepEval_GetFrameBuiltins();
+
 /*****************************************************************************
  *
  * Module Initialization
