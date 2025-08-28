@@ -486,7 +486,7 @@ static const char *Property_SignatureStrings[] = {
         "fset:typing.Optional[collections.abc.Callable[[typing.Any,typing.Any],None]]=None,"
         "freset:typing.Optional[collections.abc.Callable[[typing.Any,typing.Any],None]]=None,"
         "doc:str=None,"
-        "notify:typing.Optional[collections.abc.Callable[[],None]]=None,"
+        "notify:typing.Optional[PySide6.QtCore.Signal]=None,"
         "designable:bool=True,scriptable:bool=True,"
         "stored:bool=True,user:bool=False,constant:bool=False,final:bool=False)",
     "PySide6.QtCore.Property.deleter(self,fdel:collections.abc.Callable[[typing.Any],None])->PySide6.QtCore.Property",
