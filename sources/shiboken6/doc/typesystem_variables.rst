@@ -218,14 +218,14 @@ conversion code (see :ref:`converter_variables_and_functions`).
 
   .. code-block:: c++
 
-      long a = PyLong_AS_LONG(%PYARG_1);
+      long a = PyLong_AsLong(%PYARG_1);
 
 
   is equivalent of
 
   .. code-block:: c++
 
-      long a = PyLong_AS_LONG(PyTuple_GetItem(%PYTHON_ARGUMENTS, 0));
+      long a = PyLong_AsLong(PyTuple_GetItem(%PYTHON_ARGUMENTS, 0));
 
 
   The generator tries to be smart with attributions, but it will work for the
