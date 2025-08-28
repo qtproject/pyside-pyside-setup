@@ -321,7 +321,7 @@ int _build_func_to_type(PyObject *obtype)
 
     // PYSIDE-2404: Get the original dict for late initialization.
     //              The dict might have been switched before signature init.
-    static const auto *pyTypeType_tp_dict = PepType_GetDict(&PyType_Type);
+    static auto *pyTypeType_tp_dict = PepType_GetDict(&PyType_Type);
     if (Py_TYPE(dict) != Py_TYPE(pyTypeType_tp_dict)) {
         tpDict.reset(PyObject_GetAttr(dict, PyName::orig_dict()));
         dict = tpDict.object();

@@ -96,12 +96,13 @@ static const char *qmlUncreatable_SignatureStrings[] = {
 
 void initQmlUncreatable(PyObject *module)
 {
-    if (InitSignatureStrings(PySideQmlUncreatable_TypeF(), qmlUncreatable_SignatureStrings) < 0)
+    auto *qmlUncreatableType = PySideQmlUncreatable_TypeF();
+    if (InitSignatureStrings(qmlUncreatableType, qmlUncreatable_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PySideQmlUncreatable_TypeF());
-    PyModule_AddObject(module, "QmlUncreatable",
-                       reinterpret_cast<PyObject *>(PySideQmlUncreatable_TypeF()));
+    auto *obQmlUncreatableType = reinterpret_cast<PyObject *>(qmlUncreatableType);
+    Py_INCREF(obQmlUncreatableType);
+    PyModule_AddObject(module, "QmlUncreatable", obQmlUncreatableType);
 }
 
 void setUncreatableClassInfo(PyTypeObject *type, const QByteArray &reason)

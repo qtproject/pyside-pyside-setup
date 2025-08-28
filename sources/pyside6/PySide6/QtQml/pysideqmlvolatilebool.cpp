@@ -88,14 +88,10 @@ static PyMethodDef QtQml_VolatileBoolObject_methods[] = {
 static PyObject *
 QtQml_VolatileBoolObject_repr(QtQml_VolatileBoolObject *self)
 {
-    PyObject *s;
-
-    if (*self->flag)
-        s = PyBytes_FromFormat("%s(True)",
-                                Py_TYPE(self)->tp_name);
-    else
-        s = PyBytes_FromFormat("%s(False)",
-                                Py_TYPE(self)->tp_name);
+    const char *typeName = Py_TYPE(reinterpret_cast<PyObject *>(self))->tp_name;
+    PyObject *s = *self->flag
+        ? PyBytes_FromFormat("%s(True)", typeName)
+        : PyBytes_FromFormat("%s(False)", typeName);
     Py_XINCREF(s);
     return s;
 }
@@ -103,14 +99,10 @@ QtQml_VolatileBoolObject_repr(QtQml_VolatileBoolObject *self)
 static PyObject *
 QtQml_VolatileBoolObject_str(QtQml_VolatileBoolObject *self)
 {
-    PyObject *s;
-
-    if (*self->flag)
-        s = PyBytes_FromFormat("%s(True) -> %p",
-                                Py_TYPE(self)->tp_name, self->flag);
-    else
-        s = PyBytes_FromFormat("%s(False) -> %p",
-                                Py_TYPE(self)->tp_name, self->flag);
+    const char *typeName = Py_TYPE(reinterpret_cast<PyObject *>(self))->tp_name;
+    PyObject *s = *self->flag
+        ? PyBytes_FromFormat("%s(True) -> %p", typeName, self->flag)
+        : PyBytes_FromFormat("%s(False) -> %p", typeName, self->flag);
     Py_XINCREF(s);
     return s;
 }
@@ -150,13 +142,15 @@ static const char *VolatileBool_SignatureStrings[] = {
 
 void initQtQmlVolatileBool(PyObject *module)
 {
-    if (InitSignatureStrings(QtQml_VolatileBool_TypeF(), VolatileBool_SignatureStrings) < 0) {
+    auto *qmlVolatileBoolType = QtQml_VolatileBool_TypeF();
+    if (InitSignatureStrings(qmlVolatileBoolType, VolatileBool_SignatureStrings) < 0) {
         PyErr_Print();
         qWarning() << "Error initializing VolatileBool type.";
         return;
     }
 
-    Py_INCREF(QtQml_VolatileBool_TypeF());
-    PyModule_AddObject(module, PepType_GetNameStr(QtQml_VolatileBool_TypeF()),
-                       reinterpret_cast<PyObject *>(QtQml_VolatileBool_TypeF()));
+    auto *obQmlVolatileBoolType = reinterpret_cast<PyObject *>(qmlVolatileBoolType);
+    Py_INCREF(obQmlVolatileBoolType);
+    PyModule_AddObject(module, PepType_GetNameStr(qmlVolatileBoolType),
+                       obQmlVolatileBoolType);
 }

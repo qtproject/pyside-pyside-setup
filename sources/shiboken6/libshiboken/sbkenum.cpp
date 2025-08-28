@@ -226,7 +226,7 @@ bool checkType(PyTypeObject *pyTypeObj)
     init_enum();
 
     static PyTypeObject *meta = getPyEnumMeta();
-    return Py_TYPE(pyTypeObj) == reinterpret_cast<PyTypeObject *>(meta);
+    return Py_TYPE(reinterpret_cast<PyObject *>(pyTypeObj)) == meta;
 }
 
 PyObject *getEnumItemFromValue(PyTypeObject *enumType, EnumValueType itemValue)

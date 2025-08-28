@@ -26,7 +26,7 @@
 
 QMetaType QVariant_resolveMetaType(PyTypeObject *type)
 {
-    if (!PyObject_TypeCheck(type, SbkObjectType_TypeF()))
+    if (!PyObject_TypeCheck(reinterpret_cast<PyObject *>(type), SbkObjectType_TypeF()))
         return {};
     const char *typeName = Shiboken::ObjectType::getOriginalName(type);
     if (!typeName)

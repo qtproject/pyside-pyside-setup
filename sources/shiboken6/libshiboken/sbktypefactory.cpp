@@ -7,6 +7,7 @@
 #include "sbkstaticstrings.h"
 
 #include <cstring>
+#include <utility>
 
 extern "C"
 {
@@ -138,11 +139,10 @@ PyTypeObject *SbkType_FromSpec_BMDWB(PyType_Spec *spec,
     auto *type = reinterpret_cast<PyTypeObject *>(obType);
 
     if (meta) {
-        PyTypeObject *hold = Py_TYPE(type);
-        obType->ob_type = meta;
-        Py_INCREF(Py_TYPE(type));
+        PyTypeObject *hold = std::exchange(obType->ob_type, meta);
+        Py_INCREF(Py_TYPE(obType));
         if (hold->tp_flags & Py_TPFLAGS_HEAPTYPE)
-            Py_DECREF(hold);
+            Py_DECREF(reinterpret_cast<PyObject *>(hold));
     }
 
     if (dictoffset)

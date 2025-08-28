@@ -65,10 +65,11 @@ static const char *qmlNamedElement_SignatureStrings[] = {
 
 void initQmlNamedElement(PyObject *module)
 {
-    if (InitSignatureStrings(PySideQmlNamedElement_TypeF(), qmlNamedElement_SignatureStrings) < 0)
+    auto *qmlNamedElementType = PySideQmlNamedElement_TypeF();
+    if (InitSignatureStrings(qmlNamedElementType, qmlNamedElement_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PySideQmlNamedElement_TypeF());
-    PyModule_AddObject(module, "QmlNamedElement",
-                       reinterpret_cast<PyObject *>(PySideQmlNamedElement_TypeF()));
+    auto *obQmlNamedElementType = reinterpret_cast<PyObject *>(qmlNamedElementType);
+    Py_INCREF(obQmlNamedElementType);
+    PyModule_AddObject(module, "QmlNamedElement", obQmlNamedElementType);
 }
