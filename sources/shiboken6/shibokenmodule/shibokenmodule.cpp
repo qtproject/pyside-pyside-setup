@@ -11,8 +11,8 @@ auto *pyType = reinterpret_cast<PyTypeObject *>(%2);
 if (Shiboken::ObjectType::checkType(pyType)) {
     auto *ptr = reinterpret_cast<void *>(%1);
     if (auto *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(ptr)) {
-        Py_INCREF(wrapper);
         %PYARG_0 = reinterpret_cast<PyObject *>(wrapper);
+        Py_INCREF(%PYARG_0);
     } else {
         %PYARG_0 = Shiboken::Object::newObject(pyType, ptr, false, true);
     }

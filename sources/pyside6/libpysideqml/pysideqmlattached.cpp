@@ -166,12 +166,13 @@ void initQmlAttached(PyObject *module)
     std::fill(attachingTypes, attachingTypes + MAX_ATTACHING_TYPES, nullptr);
     AttachedFactoryInitializer<MAX_ATTACHING_TYPES - 1>::init();
 
-    if (InitSignatureStrings(PySideQmlAttached_TypeF(), qmlAttached_SignatureStrings) < 0)
+    auto *qmlAttachedType = PySideQmlAttached_TypeF();
+    if (InitSignatureStrings(qmlAttachedType, qmlAttached_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PySideQmlAttached_TypeF());
-    PyModule_AddObject(module, "QmlAttached",
-                       reinterpret_cast<PyObject *>(PySideQmlAttached_TypeF()));
+    auto *obQmlAttachedType = reinterpret_cast<PyObject *>(qmlAttachedType);
+    Py_INCREF(obQmlAttachedType);
+    PyModule_AddObject(module, "QmlAttached", obQmlAttachedType);
 }
 
 PySide::Qml::QmlExtensionInfo qmlAttachedInfo(PyTypeObject *t,

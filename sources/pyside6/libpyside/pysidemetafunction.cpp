@@ -85,8 +85,10 @@ void init(PyObject *module)
     if (InitSignatureStrings(PySideMetaFunction_TypeF(), MetaFunction_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PySideMetaFunction_TypeF());
-    PyModule_AddObject(module, "MetaFunction", reinterpret_cast<PyObject *>(PySideMetaFunction_TypeF()));
+    auto *metaFunctionType = PySideMetaFunction_TypeF();
+    auto *obMetaFunctionType = reinterpret_cast<PyObject *>(metaFunctionType);
+    Py_INCREF(obMetaFunctionType);
+    PyModule_AddObject(module, "MetaFunction", obMetaFunctionType);
 }
 
 PySideMetaFunction *newObject(QObject *source, int methodIndex)

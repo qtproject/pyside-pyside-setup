@@ -272,7 +272,7 @@ bool BindingManager::hasWrapper(const void *cptr)
 
 void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
 {
-    auto *instanceType = Py_TYPE(pyObj);
+    auto *instanceType = Shiboken::pyType(pyObj);
     auto *d = PepType_SOTP(instanceType);
 
     if (!d)
@@ -285,9 +285,9 @@ void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
 
 void BindingManager::releaseWrapper(SbkObject *sbkObj)
 {
-    auto *sbkType = Py_TYPE(sbkObj);
+    auto *sbkType = Shiboken::pyType(sbkObj);
     auto *d = PepType_SOTP(sbkType);
-    int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(Py_TYPE(sbkObj)) : 1);
+    int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(sbkType) : 1);
 
     void **cptrs = sbkObj->d->cptr;
     const int *mi_offsets = d != nullptr ? d->mi_offsets : nullptr;
@@ -465,11 +465,10 @@ void BindingManager::dumpWrapperMap()
         << "WrapperMap size: " << wrapperMap.size() << " Types: "
         << m_d->classHierarchy.nodeSet().size() << '\n';
     for (auto it : wrapperMap) {
-        const SbkObject *sbkObj = it.second;
+        auto *ob = reinterpret_cast<PyObject *>(it.second);
         std::cerr << "key: " << it.first << ", value: "
-            << static_cast<const void *>(sbkObj) << " ("
-            << (Py_TYPE(sbkObj))->tp_name << ", refcnt: "
-            << Py_REFCNT(reinterpret_cast<const PyObject *>(sbkObj)) << ")\n";
+            << static_cast<const void *>(ob) << " ("
+            << (Py_TYPE(ob))->tp_name << ", refcnt: " << Py_REFCNT(ob) << ")\n";
     }
     std::cerr << "-------------------------------\n";
 }

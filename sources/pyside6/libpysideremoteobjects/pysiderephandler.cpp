@@ -446,8 +446,10 @@ void init(PyObject *module)
     qRegisterMetaType<QRemoteObjectPendingCall>();
     qRegisterMetaType<QRemoteObjectPendingCallWatcher>();
 
-    Py_INCREF(PySideRepFile_TypeF());
-    PyModule_AddObject(module, "RepFile", reinterpret_cast<PyObject *>(PySideRepFile_TypeF()));
+    auto *repType = PySideRepFile_TypeF();
+    auto *obRepType = reinterpret_cast<PyObject *>(repType);
+    Py_INCREF(obRepType);
+    PyModule_AddObject(module, "RepFile", obRepType);
 
     // Add a test helper to verify type reference counting
     static PyMethodDef get_capsule_count_def = {

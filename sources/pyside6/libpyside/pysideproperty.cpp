@@ -499,11 +499,13 @@ static const char *Property_SignatureStrings[] = {
 
 void init(PyObject *module)
 {
-    if (InitSignatureStrings(PySideProperty_TypeF(), Property_SignatureStrings) < 0)
+    auto *propertyType = PySideProperty_TypeF();
+    if (InitSignatureStrings(propertyType, Property_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PySideProperty_TypeF());
-    PyModule_AddObject(module, "Property", reinterpret_cast<PyObject *>(PySideProperty_TypeF()));
+    auto *obPropertyType = reinterpret_cast<PyObject *>(propertyType);
+    Py_INCREF(obPropertyType);
+    PyModule_AddObject(module, "Property", obPropertyType);
 }
 
 bool checkType(PyObject *pyObj)

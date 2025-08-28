@@ -121,19 +121,20 @@ QWidget *PyDesignerCustomWidget::createWidget(QWidget *parent)
     PyTuple_SetItem(pyArgs, 0, pyParent); // tuple will keep pyParent reference
 
     // Call python constructor
-    auto result = reinterpret_cast<SbkObject *>(PyObject_CallObject(m_pyTypeObject, pyArgs));
-    if (!result) {
+    auto *obResult = PyObject_CallObject(m_pyTypeObject, pyArgs);
+    if (obResult == nullptr) {
         qWarning("Unable to create a Python custom widget of type \"%s\".", utf8Name());
         PyErr_Print();
         return nullptr;
     }
 
+    auto *result = reinterpret_cast<SbkObject *>(obResult);
     if (unknownParent) // if parent does not exist in python, transfer the ownership to cpp
         Shiboken::Object::releaseOwnership(result);
     else
-        Shiboken::Object::setParent(pyParent, reinterpret_cast<PyObject *>(result));
+        Shiboken::Object::setParent(pyParent, obResult);
 
-    return reinterpret_cast<QWidget *>(Shiboken::Object::cppPointer(result, Py_TYPE(result)));
+    return reinterpret_cast<QWidget *>(Shiboken::Object::cppPointer(result, Py_TYPE(obResult)));
 }
 
 void PyDesignerCustomWidget::initialize(QDesignerFormEditorInterface *core)

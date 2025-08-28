@@ -92,7 +92,7 @@ DestructorEntries getDestructorEntries(SbkObject *o)
 {
     DestructorEntries result;
     void **cptrs = o->d->cptr;
-    walkThroughBases(Py_TYPE(o), [&result, cptrs](PyTypeObject *node) {
+    walkThroughBases(Shiboken::pyType(o), [&result, cptrs](PyTypeObject *node) {
         auto *sotp = PepType_SOTP(node);
         auto index = result.size();
         result.push_back(DestructorEntry{sotp->cpp_dtor,
@@ -454,7 +454,7 @@ static inline PyObject *_Sbk_NewVarObject(PyTypeObject *type)
 {
     // PYSIDE-1970: Support __slots__, implemented by PyVarObject
     auto const baseSize = sizeof(SbkObject);
-    auto varCount = Py_SIZE(type);
+    auto varCount = Py_SIZE(reinterpret_cast<PyObject *>(type));
     auto *self = PyObject_GC_NewVar(PyObject, type, varCount);
     if (varCount)
         std::memset(reinterpret_cast<char *>(self) + baseSize, 0, varCount * sizeof(void *));
@@ -732,7 +732,8 @@ PyObject *FallbackRichCompare(PyObject *self, PyObject *other, int op)
 bool SbkObjectType_Check(PyTypeObject *type)
 {
     static auto *meta = SbkObjectType_TypeF();
-    return Py_TYPE(type) == meta || PyType_IsSubtype(Py_TYPE(type), meta);
+    auto *obType = reinterpret_cast<PyObject *>(type);
+    return Py_TYPE(obType) == meta || PyType_IsSubtype(Py_TYPE(obType), meta);
 }
 
 // Global functions from folding.
@@ -858,15 +859,16 @@ void init()
 // PYSIDE-1735: Initialize the whole Shiboken startup.
 void initShibokenSupport(PyObject *module)
 {
-    Py_INCREF(SbkObject_TypeF());
-    PyModule_AddObject(module, "Object", reinterpret_cast<PyObject *>(SbkObject_TypeF()));
+    auto *type = SbkObject_TypeF();
+    auto *obType = reinterpret_cast<PyObject *>(type);
+    Py_INCREF(obType);
+    PyModule_AddObject(module, "Object", obType);
 
     // PYSIDE-1735: When the initialization was moved into Shiboken import, this
     //              Py_INCREF became necessary. No idea why.
     Py_INCREF(module);
     init_shibokensupport_module();
 
-    auto *type = SbkObject_TypeF();
     if (InitSignatureStrings(type, SbkObject_SignatureStrings) < 0)
         Py_FatalError("Error in initShibokenSupport");
 }
@@ -1240,8 +1242,7 @@ void callCppDestructors(SbkObject *pyObj)
         DestroyQApplication();
         return;
     }
-    PyTypeObject *type = Py_TYPE(pyObj);
-    auto *sotp = PepType_SOTP(type);
+    auto *sotp = PepType_SOTP(Shiboken::pyType(pyObj));
     if (sotp->is_multicpp) {
         callDestructor(getDestructorEntries(pyObj));
     } else {
@@ -1298,7 +1299,8 @@ void getOwnership(PyObject *pyObj)
 void releaseOwnership(SbkObject *self)
 {
     // skip if the ownership have already moved to c++
-    auto *selfType = Py_TYPE(self);
+    auto *ob  = reinterpret_cast<PyObject *>(self);
+    auto *selfType = Py_TYPE(ob);
     if (!self->d->hasOwnership || Shiboken::Conversions::pythonTypeIsValueType(PepType_SOTP(selfType)->converter))
         return;
 
@@ -1307,7 +1309,7 @@ void releaseOwnership(SbkObject *self)
 
     // If We have control over object life
     if (self->d->containsCppWrapper)
-        Py_INCREF(reinterpret_cast<PyObject *>(self)); // keep the python object alive until the wrapper destructor call
+        Py_INCREF(ob); // keep the python object alive until the wrapper destructor call
     else
         invalidate(self); // If I do not know when this object will die We need to invalidate this to avoid use after
 }
@@ -1400,7 +1402,7 @@ void makeValid(SbkObject *self)
 
 void *cppPointer(SbkObject *pyObj, PyTypeObject *desiredType)
 {
-    PyTypeObject *pyType = Py_TYPE(pyObj);
+    PyTypeObject *pyType = Shiboken::pyType(pyObj);
     auto *sotp = PepType_SOTP(pyType);
     int idx = 0;
     if (sotp->is_multicpp)
@@ -1412,7 +1414,7 @@ void *cppPointer(SbkObject *pyObj, PyTypeObject *desiredType)
 
 std::vector<void *> cppPointers(SbkObject *pyObj)
 {
-    int n = getNumberOfCppBaseClasses(Py_TYPE(pyObj));
+    int n = getNumberOfCppBaseClasses(Shiboken::pyType(pyObj));
     std::vector<void *> ptrs(n);
     for (int i = 0; i < n; ++i)
         ptrs[i] = pyObj->d->cptr[i];
@@ -1422,7 +1424,7 @@ std::vector<void *> cppPointers(SbkObject *pyObj)
 
 bool setCppPointer(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr)
 {
-    PyTypeObject *type = Py_TYPE(sbkObj);
+    PyTypeObject *type = Shiboken::pyType(sbkObj);
     int idx = 0;
     if (PepType_SOTP(type)->is_multicpp)
         idx = getTypeIndexOnHierarchy(type, desiredType);
@@ -1440,11 +1442,12 @@ bool setCppPointer(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr)
 
 bool isValid(PyObject *pyObj)
 {
-    if (!pyObj || pyObj == Py_None
-        || PyType_Check(pyObj) != 0
-        || Py_TYPE(Py_TYPE(pyObj)) != SbkObjectType_TypeF()) {
+    if (pyObj == nullptr || pyObj == Py_None || PyType_Check(pyObj) != 0)
         return true;
-    }
+
+    PyTypeObject *type = Py_TYPE(pyObj);
+    if (Py_TYPE(reinterpret_cast<PyObject *>(type)) != SbkObjectType_TypeF())
+        return true;
 
     auto *priv = reinterpret_cast<SbkObject *>(pyObj)->d;
 
@@ -1469,17 +1472,18 @@ bool isValid(SbkObject *pyObj, bool throwPyError)
         return false;
 
     SbkObjectPrivate *priv = pyObj->d;
-    if (!priv->cppObjectCreated && isUserType(reinterpret_cast<PyObject *>(pyObj))) {
+    auto *ob = reinterpret_cast<PyObject *>(pyObj);
+    if (!priv->cppObjectCreated && isUserType(ob)) {
         if (throwPyError)
             PyErr_Format(PyExc_RuntimeError, "Base constructor of the object (%s) not called.",
-                         Py_TYPE(pyObj)->tp_name);
+                         Py_TYPE(ob)->tp_name);
         return false;
     }
 
     if (!priv->validCppObject) {
         if (throwPyError)
             PyErr_Format(PyExc_RuntimeError, "Internal C++ object (%s) already deleted.",
-                         (Py_TYPE(pyObj))->tp_name);
+                         (Py_TYPE(ob))->tp_name);
         return false;
     }
 
@@ -1499,7 +1503,7 @@ SbkObject *findColocatedChild(SbkObject *wrapper,
                               const PyTypeObject *instanceType)
 {
     // Degenerate case, wrapper is the correct wrapper.
-    if (reinterpret_cast<const void *>(Py_TYPE(wrapper)) == reinterpret_cast<const void *>(instanceType))
+    if (reinterpret_cast<const void *>(Shiboken::pyType(wrapper)) == reinterpret_cast<const void *>(instanceType))
         return wrapper;
 
     if (!(wrapper->d && wrapper->d->cptr))
@@ -1515,7 +1519,8 @@ SbkObject *findColocatedChild(SbkObject *wrapper,
         if (!(child->d && child->d->cptr))
             continue;
         if (child->d->cptr[0] == wrapper->d->cptr[0]) {
-            return reinterpret_cast<const void *>(Py_TYPE(child)) == reinterpret_cast<const void *>(instanceType)
+            auto *childType = Shiboken::pyType(child);
+            return reinterpret_cast<const void *>(childType) == reinterpret_cast<const void *>(instanceType)
                 ? child : findColocatedChild(child, instanceType);
         }
     }
@@ -1760,7 +1765,7 @@ void setParent(PyObject *parent, PyObject *child)
         parent_->d->parentInfo->children.insert(child_);
 
         // Add Parent ref
-        Py_INCREF(child_);
+        Py_INCREF(child);
 
         // Remove ownership
         child_->d->hasOwnership = false;
@@ -1796,7 +1801,7 @@ void deallocData(SbkObject *self, bool cleanup)
 
 void setTypeUserData(SbkObject *wrapper, void *userData, DeleteUserDataFunc d_func)
 {
-    auto *type = Py_TYPE(wrapper);
+    auto *type = Shiboken::pyType(wrapper);
     auto *sotp = PepType_SOTP(type);
     if (sotp->user_data)
         sotp->d_func(sotp->user_data);
@@ -1807,7 +1812,7 @@ void setTypeUserData(SbkObject *wrapper, void *userData, DeleteUserDataFunc d_fu
 
 void *getTypeUserData(SbkObject *wrapper)
 {
-    auto *type = Py_TYPE(wrapper);
+    auto *type = Shiboken::pyType(wrapper);
     return PepType_SOTP(type)->user_data;
 }
 
@@ -1880,14 +1885,15 @@ void clearReferences(SbkObject *self)
 
 static std::vector<PyTypeObject *> getBases(SbkObject *self)
 {
-    return ObjectType::isUserType(Py_TYPE(self))
-        ? getCppBaseClasses(Py_TYPE(self))
-        : std::vector<PyTypeObject *>(1, Py_TYPE(self));
+    auto *type = Shiboken::pyType(self);
+    return ObjectType::isUserType(type)
+        ? getCppBaseClasses(type)
+        : std::vector<PyTypeObject *>(1, type);
 }
 
 static bool isValueType(SbkObject *self)
 {
-    return PepType_SOTP(Py_TYPE(self))->type_behaviour == BEHAVIOUR_VALUETYPE;
+    return PepType_SOTP(Shiboken::pyType(self))->type_behaviour == BEHAVIOUR_VALUETYPE;
 }
 
 void _debugFormat(std::ostream &s, SbkObject *self)
@@ -1947,7 +1953,7 @@ std::string info(SbkObject *self)
          "validCppObject.... " << self->d->validCppObject << "\n"
          "wasCreatedByPython " << self->d->cppObjectCreated << "\n"
          "value......        " << isValueType(self) << "\n"
-         "reference count... " << reinterpret_cast<PyObject *>(self)->ob_refcnt << '\n';
+         "reference count... " << Py_REFCNT(reinterpret_cast<PyObject *>(self)) << '\n';
 
     if (self->d->parentInfo && self->d->parentInfo->parent) {
         s << "parent............ ";

@@ -306,9 +306,10 @@ void initQtQmlListProperty(PyObject *module)
     // Register QQmlListProperty metatype for use in QML
     qRegisterMetaType<QQmlListProperty<QObject>>();
 
-    Py_INCREF(reinterpret_cast<PyObject *>(PropertyList_TypeF()));
-    PyModule_AddObject(module, PepType_GetNameStr(PropertyList_TypeF()),
-                       reinterpret_cast<PyObject *>(PropertyList_TypeF()));
+    auto *propertyListType = PropertyList_TypeF();
+    auto *obPropertyListType = reinterpret_cast<PyObject *>(propertyListType);
+    Py_INCREF(obPropertyListType);
+    PyModule_AddObject(module, PepType_GetNameStr(propertyListType), obPropertyListType);
 }
 
 } // namespace PySide::Qml

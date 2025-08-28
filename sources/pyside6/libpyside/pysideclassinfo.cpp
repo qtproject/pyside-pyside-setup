@@ -116,8 +116,10 @@ void init(PyObject *module)
     if (InitSignatureStrings(PySideClassInfo_TypeF(), ClassInfo_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PySideClassInfo_TypeF());
-    PyModule_AddObject(module, "ClassInfo", reinterpret_cast<PyObject *>(PySideClassInfo_TypeF()));
+    auto *classInfoType = PySideClassInfo_TypeF();
+    auto *obClassInfoType  = reinterpret_cast<PyObject *>(classInfoType);
+    Py_INCREF(obClassInfoType);
+    PyModule_AddObject(module, "ClassInfo", obClassInfoType);
 }
 
 bool checkType(PyObject *pyObj)

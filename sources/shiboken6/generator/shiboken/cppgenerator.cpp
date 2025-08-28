@@ -1656,10 +1656,11 @@ void CppGenerator::writeMetaCast(TextStream &s,
     const QString qualifiedCppName = classContext.metaClass()->qualifiedCppName();
     s << "void *" << wrapperClassName << "::qt_metacast(const char *_clname)\n{\n"
         << indent << "if (_clname == nullptr)\n" << indent << "return {};\n" << outdent
-        << "SbkObject *pySelf = Shiboken::BindingManager::instance().retrieveWrapper(this);\n"
-        << "if (pySelf != nullptr && PySide::inherits(Py_TYPE(pySelf), _clname))\n"
+        << "if (SbkObject *pySelf = Shiboken::BindingManager::instance().retrieveWrapper(this)) {\n" << indent
+        << "auto *obSelf = reinterpret_cast<PyObject *>(pySelf);\n"
+        << "if (PySide::inherits(Py_TYPE(obSelf), _clname))\n"
         << indent << "return static_cast<void *>(const_cast< "
-        << wrapperClassName << " *>(this));\n" << outdent
+        << wrapperClassName << " *>(this));\n" << outdent << outdent << "}\n"
         << "return " << qualifiedCppName << "::qt_metacast(_clname);\n"
         << outdent << "}\n\n";
 }

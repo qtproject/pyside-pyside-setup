@@ -273,7 +273,7 @@ static inline void SelectFeatureSetSubtype(PyTypeObject *type, int select_id)
      * This is the selector for one sublass. We need to call this for
      * every subclass until no more subclasses or reaching the wanted id.
      */
-    static const auto *pyTypeType_tp_dict = PepType_GetDict(&PyType_Type);
+    static auto *pyTypeType_tp_dict = PepType_GetDict(&PyType_Type);
     AutoDecRef tpDict(PepType_GetDict(type));
     if (Py_TYPE(tpDict.object()) == Py_TYPE(pyTypeType_tp_dict)) {
         // On first touch, we initialize the dynamic naming.
@@ -328,7 +328,7 @@ static inline void SelectFeatureSet(PyTypeObject *type)
      * Generated functions call this directly.
      * Shiboken will assign it via a public hook of `basewrapper.cpp`.
      */
-    static const auto *pyTypeType_tp_dict = PepType_GetDict(&PyType_Type);
+    static auto *pyTypeType_tp_dict = PepType_GetDict(&PyType_Type);
     AutoDecRef tpDict(PepType_GetDict(type));
     if (Py_TYPE(tpDict.object()) == Py_TYPE(pyTypeType_tp_dict)) {
         // We initialize the dynamic features by using our own dict type.

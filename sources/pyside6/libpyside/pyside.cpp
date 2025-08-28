@@ -410,7 +410,8 @@ static void destructionVisitor(SbkObject *pyObj, void *data)
     auto *pyQApp = reinterpret_cast<SbkObject *>(realData[0]);
     auto *pyQObjectType = reinterpret_cast<PyTypeObject *>(realData[1]);
 
-    if (pyObj != pyQApp && PyObject_TypeCheck(pyObj, pyQObjectType)) {
+    auto *ob = reinterpret_cast<PyObject *>(pyObj);
+    if (pyObj != pyQApp && PyObject_TypeCheck(ob, pyQObjectType)) {
         if (Shiboken::Object::hasOwnership(pyObj) && Shiboken::Object::isValid(pyObj, false)) {
             Shiboken::Object::setValidCpp(pyObj, false);
 

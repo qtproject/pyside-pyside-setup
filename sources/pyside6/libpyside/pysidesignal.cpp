@@ -438,10 +438,10 @@ static FunctionArgumentsResult extractFunctionArgumentsFromSlot(PyObject *slot)
         // Not retaining a reference inline with what PepFunction_GetName does.
         Py_DECREF(ret.functionName);
 
-        ret.objCode = reinterpret_cast<PepCodeObject *>(
-                    PyObject_GetAttr(ret.function, PySide::PySideMagicName::code()));
+        auto *obObjCode = PyObject_GetAttr(ret.function, PySide::PySideMagicName::code());
+        ret.objCode = reinterpret_cast<PepCodeObject *>(obObjCode);
         // Not retaining a reference inline with what PyFunction_GET_CODE does.
-        Py_XDECREF(ret.objCode);
+        Py_XDECREF(obObjCode);
 
         // Should not happen, but lets handle it gracefully, maybe Nuitka one day
         // makes these optional, or somebody defined a type named like it without
@@ -456,10 +456,10 @@ static FunctionArgumentsResult extractFunctionArgumentsFromSlot(PyObject *slot)
         // Not retaining a reference inline with what PepFunction_GetName does.
         Py_DECREF(ret.functionName);
 
-        ret.objCode = reinterpret_cast<PepCodeObject *>(
-                    PyObject_GetAttr(ret.function, PySide::PySideMagicName::code()));
+        auto *obObjCode = PyObject_GetAttr(ret.function, PySide::PySideMagicName::code());
+        ret.objCode = reinterpret_cast<PepCodeObject *>(obObjCode);
         // Not retaining a reference inline with what PyFunction_GET_CODE does.
-        Py_XDECREF(ret.objCode);
+        Py_XDECREF(obObjCode);
 
         // Should not happen, but lets handle it gracefully, maybe Nuitka one day
         // makes these optional, or somebody defined a type named like it without
@@ -908,23 +908,26 @@ static const char *SignalInstance_SignatureStrings[] = {
 
 void init(PyObject *module)
 {
-    if (InitSignatureStrings(PySideMetaSignal_TypeF(), MetaSignal_SignatureStrings) < 0)
+    auto *metaSignalType = PySideMetaSignal_TypeF();
+    if (InitSignatureStrings(metaSignalType, MetaSignal_SignatureStrings) < 0)
         return;
-    Py_INCREF(PySideMetaSignal_TypeF());
-    auto *obMetaSignal_Type = reinterpret_cast<PyObject *>(PySideMetaSignal_TypeF());
-    PyModule_AddObject(module, "MetaSignal", obMetaSignal_Type);
+    auto *obMetaSignalType = reinterpret_cast<PyObject *>(metaSignalType);
+    Py_INCREF(obMetaSignalType);
+    PyModule_AddObject(module, "MetaSignal", obMetaSignalType);
 
-    if (InitSignatureStrings(PySideSignal_TypeF(), Signal_SignatureStrings) < 0)
+    auto *signalType = PySideSignal_TypeF();
+    if (InitSignatureStrings(signalType, Signal_SignatureStrings) < 0)
         return;
-    Py_INCREF(PySideSignal_TypeF());
-    auto *obSignal_Type = reinterpret_cast<PyObject *>(PySideSignal_TypeF());
-    PyModule_AddObject(module, "Signal", obSignal_Type);
+    auto *obSignalType = reinterpret_cast<PyObject *>(signalType);
+    Py_INCREF(obSignalType);
+    PyModule_AddObject(module, "Signal", obSignalType);
 
-    if (InitSignatureStrings(PySideSignalInstance_TypeF(), SignalInstance_SignatureStrings) < 0)
+    auto *signalInstanceType = PySideSignalInstance_TypeF();
+    if (InitSignatureStrings(signalInstanceType, SignalInstance_SignatureStrings) < 0)
         return;
-    Py_INCREF(PySideSignalInstance_TypeF());
-    auto *obSignalInstance_Type = reinterpret_cast<PyObject *>(PySideSignalInstance_TypeF());
-    PyModule_AddObject(module, "SignalInstance", obSignalInstance_Type);
+    auto *obSignalInstanceType = reinterpret_cast<PyObject *>(signalInstanceType);
+    Py_INCREF(obSignalInstanceType);
+    PyModule_AddObject(module, "SignalInstance", obSignalInstanceType);
 }
 
 bool checkType(PyObject *pyObj)

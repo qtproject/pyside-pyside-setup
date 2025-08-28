@@ -121,12 +121,13 @@ static QObject *extensionFactory(QObject *o)
 
 void initQmlExtended(PyObject *module)
 {
-    if (InitSignatureStrings(PySideQmlExtended_TypeF(), qmlExtended_SignatureStrings) < 0)
+    auto *qmlExtendedType = PySideQmlExtended_TypeF();
+    if (InitSignatureStrings(qmlExtendedType, qmlExtended_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PySideQmlExtended_TypeF());
-    PyModule_AddObject(module, "QmlExtended",
-                       reinterpret_cast<PyObject *>(PySideQmlExtended_TypeF()));
+    auto *obQmlExtendedType = reinterpret_cast<PyObject *>(qmlExtendedType);
+    Py_INCREF(obQmlExtendedType);
+    PyModule_AddObject(module, "QmlExtended", obQmlExtendedType);
 }
 
 PySide::Qml::QmlExtensionInfo qmlExtendedInfo(PyObject *t,

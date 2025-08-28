@@ -187,11 +187,9 @@ static const char falseString[] = "False" ;
 
 PyObject *SbkVoidPtrObject_repr(PyObject *v)
 {
-
-
     auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     PyObject *s = PyUnicode_FromFormat("%s(%p, %zd, %s)",
-                           Py_TYPE(sbkObject)->tp_name,
+                           Py_TYPE(v)->tp_name,
                            sbkObject->cptr,
                            sbkObject->size,
                            sbkObject->isWritable ? trueString : falseString);
@@ -203,7 +201,7 @@ PyObject *SbkVoidPtrObject_str(PyObject *v)
 {
     auto *sbkObject = reinterpret_cast<SbkVoidPtrObject *>(v);
     PyObject *s = PyUnicode_FromFormat("%s(Address %p, Size %zd, isWritable %s)",
-                           Py_TYPE(sbkObject)->tp_name,
+                           Py_TYPE(v)->tp_name,
                            sbkObject->cptr,
                            sbkObject->size,
                            sbkObject->isWritable ? trueString : falseString);
@@ -307,9 +305,10 @@ void init()
 void addVoidPtrToModule(PyObject *module)
 {
     if (voidPointerInitialized) {
-        Py_INCREF(SbkVoidPtr_TypeF());
-        PyModule_AddObject(module, PepType_GetNameStr(SbkVoidPtr_TypeF()),
-                           reinterpret_cast<PyObject *>(SbkVoidPtr_TypeF()));
+        auto *type = SbkVoidPtr_TypeF();
+        auto *obType = reinterpret_cast<PyObject *>(type);
+        Py_INCREF(obType);
+        PyModule_AddObject(module, PepType_GetNameStr(type), obType);
     }
 }
 

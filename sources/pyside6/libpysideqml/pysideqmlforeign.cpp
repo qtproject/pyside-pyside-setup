@@ -83,12 +83,13 @@ namespace PySide::Qml {
 
 void initQmlForeign(PyObject *module)
 {
-    if (InitSignatureStrings(PySideQmlForeign_TypeF(), qmlForeign_SignatureStrings) < 0)
+    auto *foreignType = PySideQmlForeign_TypeF();
+    if (InitSignatureStrings(foreignType, qmlForeign_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PySideQmlForeign_TypeF());
-    PyModule_AddObject(module, "QmlForeign",
-                       reinterpret_cast<PyObject *>(PySideQmlForeign_TypeF()));
+    auto *obForeignType = reinterpret_cast<PyObject *>(foreignType);
+    Py_INCREF(obForeignType);
+    PyModule_AddObject(module, "QmlForeign", obForeignType);
 }
 
 } // namespace PySide::Qml

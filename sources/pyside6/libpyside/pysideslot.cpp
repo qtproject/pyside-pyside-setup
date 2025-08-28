@@ -177,11 +177,13 @@ static const char *Slot_SignatureStrings[] = {
 
 void init(PyObject *module)
 {
-    if (InitSignatureStrings(PySideSlot_TypeF(), Slot_SignatureStrings) < 0)
+    auto *slotType = PySideSlot_TypeF();
+    if (InitSignatureStrings(slotType, Slot_SignatureStrings) < 0)
         return;
 
-    Py_INCREF(PySideSlot_TypeF());
-    PyModule_AddObject(module, "Slot", reinterpret_cast<PyObject *>(PySideSlot_TypeF()));
+    auto *obSlotType = reinterpret_cast<PyObject *>(slotType);
+    Py_INCREF(obSlotType);
+    PyModule_AddObject(module, "Slot", obSlotType);
 }
 
 } // namespace PySide::Slot

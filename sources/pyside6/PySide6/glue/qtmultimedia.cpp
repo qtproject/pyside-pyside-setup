@@ -23,6 +23,7 @@ const auto size = %CPPSELF.byteCount();
 // @snippet qaudiobuffer-const-data
 
 // @snippet qtaudio-namespace-compatibility-alias
-Py_INCREF(pyType);
-PyModule_AddObject(module, "QtAudio", reinterpret_cast<PyObject *>(pyType));
+auto *obType = reinterpret_cast<PyObject *>(pyType);
+Py_INCREF(obType);
+PyModule_AddObject(module, "QtAudio", obType);
 // @snippet qtaudio-namespace-compatibility-alias
