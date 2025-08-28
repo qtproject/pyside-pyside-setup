@@ -9,6 +9,8 @@
 #include <cstring>
 #include <utility>
 
+#include <cstring>
+
 extern "C"
 {
 
@@ -116,7 +118,7 @@ PyTypeObject *SbkType_FromSpec_BMDWB(PyType_Spec *spec,
     //    __name__     : "subclass"
 
     PyType_Spec new_spec = *spec;
-    const char *colon = strchr(spec->name, ':');
+    const char *colon = std::strchr(spec->name, ':');
     assert(colon);
     int package_level = atoi(spec->name);
     const char *mod = new_spec.name = colon + 1;

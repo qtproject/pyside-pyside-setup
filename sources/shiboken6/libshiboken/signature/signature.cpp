@@ -26,6 +26,7 @@
 #include <structmember.h>
 
 #include <algorithm>
+#include <cstring>
 
 using namespace Shiboken;
 
@@ -685,8 +686,8 @@ static PyObject *adjustFuncName(const char *func_name)
     static PyObject *ns = PyModule_GetDict(mapping);
 
     char _path[200 + 1] = {};
-    const char *_name = strrchr(func_name, '.');
-    strncat(_path, func_name, _name - func_name);
+    const char *_name = std::strrchr(func_name, '.');
+    std::strncat(_path, func_name, _name - func_name);
     ++_name;
 
     // This is a very cheap call into `mapping.py`.
