@@ -48,7 +48,7 @@ PySide6.QtCore.Property
                  freset: Optional[Callable] = None,
                  fdel: Optional[Callable] = None,
                  doc: str = '',
-                 notify: Optional[Callable] = None,
+                 notify: Optional[PySide6.QtCore.Signal] = None,
                  designable: bool = True,
                  scriptable: bool = True,
                  stored: bool = True, user: bool = False,
