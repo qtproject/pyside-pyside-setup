@@ -366,7 +366,7 @@ struct Primitive<bool> : OnePrimitive<bool>
     }
     static void toCpp(PyObject *pyIn, void *cppOut)
     {
-        *reinterpret_cast<bool *>(cppOut) = PyLong_AS_LONG(pyIn) != 0;
+        *reinterpret_cast<bool *>(cppOut) = PyLong_AsLong(pyIn) != 0;
     }
 };
 
