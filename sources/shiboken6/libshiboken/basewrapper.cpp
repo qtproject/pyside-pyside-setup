@@ -539,9 +539,10 @@ PyObject *MakeQAppWrapper(PyTypeObject *type)
 
     // monitoring the last application state
     PyObject *qApp_curr = type != nullptr ? _Sbk_NewVarObject(type) : Py_None;
-    static PyObject *builtins = PyEval_GetBuiltins();
-    if (PyDict_SetItem(builtins, Shiboken::PyName::qApp(), qApp_curr) < 0)
+    Shiboken::AutoDecRef builtins(PepEval_GetFrameBuiltins());
+    if (PyDict_SetItem(builtins.object(), Shiboken::PyName::qApp(), qApp_curr) < 0)
         return nullptr;
+    builtins.reset(nullptr);
     qApp_last = qApp_curr;
     // Note: This Py_INCREF would normally be wrong because the qApp
     // object already has a reference from PyObject_GC_New. But this is
