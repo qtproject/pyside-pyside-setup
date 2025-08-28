@@ -28,6 +28,8 @@
 
 #include "signature_p.h"
 
+#include <cstring>
+
 using namespace Shiboken;
 
 extern "C" {
@@ -127,7 +129,7 @@ static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
     PyObject *res{};
 
     if (handle_doc_in_progress || name == nullptr
-        || (isModule && strncmp(name, "PySide6.", 8) != 0)) {
+        || (isModule && std::strncmp(name, "PySide6.", 8) != 0)) {
         res = PyObject_CallMethodObjArgs(old_descr, PyMagicName::get(), ob, nullptr);
     } else {
         handle_doc_in_progress++;

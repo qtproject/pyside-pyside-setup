@@ -16,6 +16,8 @@
 
 #include "signature_p.h"
 
+#include <cstring>
+
 using namespace Shiboken;
 
 extern "C" {
@@ -247,7 +249,7 @@ void init_shibokensupport_module(void)
 #ifndef _WIN32
         // We enable the stack trace in CI, only.
         const char *testEnv = getenv("QTEST_ENVIRONMENT");
-        if (testEnv && strstr(testEnv, "ci"))
+        if (testEnv && std::strstr(testEnv, "ci"))
             signal(SIGSEGV, handler);   // install our handler
 #endif // _WIN32
 

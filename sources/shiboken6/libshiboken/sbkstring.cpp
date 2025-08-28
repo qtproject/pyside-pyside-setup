@@ -6,6 +6,9 @@
 #include "sbkstaticstrings_p.h"
 #include "autodecref.h"
 
+#include <cstring>
+#include <cctype>
+
 namespace Shiboken::String
 {
 
@@ -209,20 +212,20 @@ PyObject *getSnakeCaseName(const char *name, bool lower)
      * unchanged since that are the special OpenGL functions.
      */
     if (!lower
-        || strlen(name) < 3
-        || (name[0] == 'g' && name[1] == 'l' && isupper(name[2])))
+        || std::strlen(name) < 3
+        || (name[0] == 'g' && name[1] == 'l' && std::isupper(name[2])))
         return createStaticString(name);
 
     char new_name[200 + 1] = {};
     const char *p = name;
     char *q = new_name;
     for (; *p && q - new_name < 200; ++p, ++q) {
-        if (isupper(*p)) {
+        if (std::isupper(*p)) {
             if (p != name && isupper(*(p - 1)))
                 return createStaticString(name);
             *q = '_';
             ++q;
-            *q = tolower(*p);
+            *q = std::tolower(*p);
         }
         else {
             *q = *p;
