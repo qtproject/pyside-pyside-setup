@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include <sbkpython.h>
-#include <shiboken.h>
+#include <sbkconverter.h>
+#include <sbkstaticstrings.h>
 #include <pysideweakref.h>
 
 #include <QtCore/QEasingCurve>

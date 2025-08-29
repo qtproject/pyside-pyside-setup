@@ -7,7 +7,8 @@
  *          Frédéric <frederic.mantegazza at gbiloba.org>
  */
 
-#include <shiboken.h>
+#include <sbkpython.h>
+#include <sbkconverter.h>
 
 #include <QtUiTools/QUiLoader>
 #include <QtWidgets/QWidget>

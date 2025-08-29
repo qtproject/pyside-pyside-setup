@@ -6,7 +6,8 @@
 #include <pyside.h>
 #include <pysideqmlregistertype.h>
 #include <pyside_p.h>
-#include <shiboken.h>
+#include <sbkpython.h>
+#include <sbkconverter.h>
 
 #include <QtQuick/QQuickPaintedItem>
 

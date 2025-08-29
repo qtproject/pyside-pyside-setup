@@ -6,8 +6,12 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QVariant>
 
-#include <shiboken.h>
+#include <sbkpython.h>
+#include <autodecref.h>
+#include <basewrapper.h>
 #include <bindingmanager.h>
+#include <sbkconverter.h>
+#include <sbkstring.h>
 
 QT_BEGIN_NAMESPACE
 

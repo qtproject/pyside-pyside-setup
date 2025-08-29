@@ -5,7 +5,8 @@
 #include "qtcorehelper.h"
 #include "pysideqobject.h"
 
-#include "shiboken.h"
+#include "sbkpython.h"
+#include "sbkconverter.h"
 #ifndef Py_LIMITED_API
 #  include <datetime.h>
 #endif
