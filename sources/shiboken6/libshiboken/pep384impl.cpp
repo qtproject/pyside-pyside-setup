@@ -407,6 +407,8 @@ const char *_PepUnicode_AsString(PyObject *str)
             Py_FatalError("Error in " AT);
     }
     PyObject *bytesStr = PyUnicode_AsEncodedString(str, "utf8", nullptr);
+    if (bytesStr == nullptr)
+        Py_FatalError("Error in " AT);
     PyObject *entry = PyDict_GetItemWithError(cstring_dict, bytesStr);
     if (entry == nullptr) {
         int e = PyDict_SetItem(cstring_dict, bytesStr, bytesStr);
