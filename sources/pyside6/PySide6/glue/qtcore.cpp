@@ -670,9 +670,12 @@ if (PySlice_Check(_key) == 0)
                  "list indices must be integers or slices, not %.200s",
                  Py_TYPE(_key)->tp_name);
 
-Py_ssize_t start, stop, step, slicelength;
-if (PySlice_GetIndicesEx(_key, %CPPSELF.size(), &start, &stop, &step, &slicelength) < 0)
+Py_ssize_t start{};
+Py_ssize_t stop{};
+Py_ssize_t step{};
+if (PySlice_Unpack(_key, &start, &stop, &step) < 0)
     return nullptr;
+Py_ssize_t slicelength = PySlice_AdjustIndices(%CPPSELF.size(), &start, &stop, step);
 
 QByteArray ba;
 if (slicelength <= 0)
@@ -745,9 +748,12 @@ if (PySlice_Check(_key) == 0) {
     return -1;
 }
 
-Py_ssize_t start, stop, step, slicelength;
-if (PySlice_GetIndicesEx(_key, %CPPSELF.size(), &start, &stop, &step, &slicelength) < 0)
+Py_ssize_t start{};
+Py_ssize_t stop{};
+Py_ssize_t step{};
+if (PySlice_Unpack(_key, &start, &stop, &step) < 0)
     return -1;
+const Py_ssize_t slicelength = PySlice_AdjustIndices(%CPPSELF.size(), &start, &stop, step);
 
 // The parameter candidates are: bytes/str, bytearray, QByteArray itself.
 // Not supported are iterables containing ints between 0~255
