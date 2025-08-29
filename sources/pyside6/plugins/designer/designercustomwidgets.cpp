@@ -57,6 +57,7 @@ static QString pyStr(PyObject *o)
 static QString pyErrorMessage()
 {
     QString result = "<error information not available>"_L1;
+#if (defined(Py_LIMITED_API) && Py_LIMITED_API < 0x030C0000) || (!defined(Py_LIMITED_API) && PY_VERSION_HEX < 0x030C0000)
     PyObject *ptype = {};
     PyObject *pvalue = {};
     PyObject *ptraceback = {};
@@ -64,6 +65,12 @@ static QString pyErrorMessage()
     if (pvalue != nullptr)
         result = pyStr(pvalue);
     PyErr_Restore(ptype, pvalue, ptraceback);
+#else // <3.11
+    if (PyObject *pvalue = PyErr_GetRaisedException()) {
+        result = pyStr(pvalue);
+        Py_DECREF(pvalue);
+    }
+#endif
     return result;
 }
 
