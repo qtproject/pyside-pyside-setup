@@ -881,7 +881,7 @@ SpecificConverter::SpecificConverter(const char *typeName)
     m_converter = getConverter(typeName);
     if (!m_converter)
         return;
-    const Py_ssize_t len = strlen(typeName);
+    const Py_ssize_t len = std::strlen(typeName);
     char lastChar = typeName[len -1];
     if (lastChar == '&') {
         m_type = ReferenceConversion;

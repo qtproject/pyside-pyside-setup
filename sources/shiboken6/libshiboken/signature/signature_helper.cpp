@@ -32,7 +32,7 @@ static int _fixup_getset(PyTypeObject *type, const char *name, PyGetSetDef *new_
     PyGetSetDef *gsp = type->tp_getset;
     if (gsp != nullptr) {
         for (; gsp->name != nullptr; gsp++) {
-            if (strcmp(gsp->name, name) == 0) {
+            if (std::strcmp(gsp->name, name) == 0) {
                 new_gsp->set = gsp->set;
                 new_gsp->doc = gsp->doc;
                 new_gsp->closure = gsp->closure;
@@ -43,7 +43,7 @@ static int _fixup_getset(PyTypeObject *type, const char *name, PyGetSetDef *new_
     PyMemberDef *md = type->tp_members;
     if (md != nullptr)
         for (; md->name != nullptr; md++)
-            if (strcmp(md->name, name) == 0)
+            if (std::strcmp(md->name, name) == 0)
                 return 1;
     return 0;
 }
@@ -64,7 +64,7 @@ int add_more_getsets(PyTypeObject *type, PyGetSetDef *gsp, PyObject **doc_descr)
         PyObject *have_descr = PyDict_GetItemString(dict, gsp->name);
         if (have_descr != nullptr) {
             Py_INCREF(have_descr);
-            if (strcmp(gsp->name, "__doc__") == 0)
+            if (std::strcmp(gsp->name, "__doc__") == 0)
                 *doc_descr = have_descr;
             else
                 assert(false);

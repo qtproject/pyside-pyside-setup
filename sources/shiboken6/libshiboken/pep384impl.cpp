@@ -120,7 +120,7 @@ check_PyTypeObject_valid()
     Shiboken::AutoDecRef tpDict(PepType_GetDict(check));
     auto *checkDict = tpDict.object();
     if (false
-        || strcmp(probe_tp_name, check->tp_name) != 0
+        || std::strcmp(probe_tp_name, check->tp_name) != 0
         || probe_tp_basicsize       != check->tp_basicsize
         || probe_tp_dealloc         != check->tp_dealloc
         || probe_tp_repr            != check->tp_repr

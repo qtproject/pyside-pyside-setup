@@ -13,6 +13,8 @@
 
 #include <QtCore/QStringList>
 
+#include <cstring>
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // PYSIDE-1019: Support switchable extensions
@@ -444,9 +446,9 @@ static PyObject *methodWithNewName(PyTypeObject *type,
      * Create a method with a lower case name.
      */
     auto *obtype = reinterpret_cast<PyObject *>(type);
-    const auto len = strlen(new_name);
+    const auto len = std::strlen(new_name);
     auto *name = new char[len + 1];
-    strcpy(name, new_name);
+    std::strcpy(name, new_name);
     auto *new_meth = new PyMethodDef;
     new_meth->ml_name = name;
     new_meth->ml_meth = meth->ml_meth;

@@ -113,6 +113,8 @@ bool QVariant_isStringList(PyObject *list)
     return true;
 }
 
+#include <cstring>
+
 // Helpers for qAddPostRoutine
 
 namespace PySide {
@@ -235,7 +237,7 @@ QString qObjectTr(PyTypeObject *type, const char *sourceText, const char *disamb
         if (type == sbkObjectType)
             continue;
         const char *context = type->tp_name;
-        const char *dotpos = strrchr(context, '.');
+        const char *dotpos = std::strrchr(context, '.');
         if (dotpos != nullptr)
             context = dotpos + 1;
         result = QCoreApplication::translate(context, sourceText, disambiguation, n);

@@ -6,6 +6,8 @@
 #include "sbkstaticstrings_p.h"
 #include "autodecref.h"
 
+#include <cctype>
+
 namespace Shiboken::String
 {
 
@@ -217,12 +219,12 @@ PyObject *getSnakeCaseName(const char *name, bool lower)
     const char *p = name;
     char *q = new_name;
     for (; *p && q - new_name < 200; ++p, ++q) {
-        if (isupper(*p)) {
+        if (std::isupper(*p)) {
             if (p != name && isupper(*(p - 1)))
                 return createStaticString(name);
             *q = '_';
             ++q;
-            *q = tolower(*p);
+            *q = std::tolower(*p);
         }
         else {
             *q = *p;
