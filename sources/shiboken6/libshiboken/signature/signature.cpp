@@ -536,7 +536,7 @@ static int _finishSignaturesCommon(PyObject *module)
     // the shiboken module (or a test module).
     [[maybe_unused]] const char *name = PyModule_GetName(module);
     if (pyside_globals->finish_import_func == nullptr) {
-        assert(strncmp(name, "PySide6.", 8) != 0);
+        assert(std::strncmp(name, "PySide6.", 8) != 0);
         return 0;
     }
     // Call a Python function which has to finish something as well.

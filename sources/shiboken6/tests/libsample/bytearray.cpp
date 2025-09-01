@@ -59,7 +59,7 @@ ByteArray &ByteArray::append(char c)
 ByteArray &ByteArray::append(const char *data)
 {
     m_data.pop_back();
-    std::copy(data, data + strlen(data), std::back_inserter(m_data));
+    std::copy(data, data + std::strlen(data), std::back_inserter(m_data));
     m_data.push_back('\0');
     return *this;
 }

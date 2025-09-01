@@ -124,7 +124,7 @@ PyTypeObject *SbkType_FromSpec_BMDWB(PyType_Spec *spec,
 
     const char *qual = mod;
     for (int idx = package_level; idx > 0; --idx) {
-        const char *dot = strchr(qual, '.');
+        const char *dot = std::strchr(qual, '.');
         if (!dot)
             break;
         qual = dot + 1;
@@ -298,7 +298,7 @@ _PyType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
     }
 
     /* Set the type name and qualname */
-    s = strrchr(const_cast<char *>(spec->name), '.');
+    s = std::strrchr(const_cast<char *>(spec->name), '.');
     if (s == nullptr)
         s = (char*)spec->name;
     else
@@ -366,7 +366,7 @@ _PyType_FromSpecWithBases(PyType_Spec *spec, PyObject *bases)
         if (slot->slot == Py_tp_doc) {
             const char *old_doc = reinterpret_cast<char *>(slot->pfunc);
             //_PyType_DocWithoutSignature(type->tp_name, slot->pfunc);
-            size_t len = strlen(old_doc)+1;
+            size_t len = std::strlen(old_doc)+1;
             char *tp_doc = reinterpret_cast<char *>(PyObject_MALLOC(len));
             if (tp_doc == nullptr) {
                 type->tp_doc = nullptr;

@@ -282,14 +282,14 @@ void setTypeConverter(PyTypeObject *type, SbkConverter *converter,
 
 static void setModuleAndQualnameOnType(PyObject *type, const char *fullName)
 {
-    const char *colon = strchr(fullName, ':');
+    const char *colon = std::strchr(fullName, ':');
     assert(colon);
     int package_level = atoi(fullName);
     const char *mod = colon + 1;
 
     const char *qual = mod;
     for (int idx = package_level; idx > 0; --idx) {
-        const char *dot = strchr(qual, '.');
+        const char *dot = std::strchr(qual, '.');
         if (!dot)
             break;
         qual = dot + 1;
@@ -306,7 +306,7 @@ static PyTypeObject *createEnumForPython(PyObject *scopeOrModule,
                                          const char *fullName,
                                          PyObject *pyEnumItems)
 {
-    const char *dot = strrchr(fullName, '.');
+    const char *dot = std::strrchr(fullName, '.');
     AutoDecRef name(Shiboken::String::fromCString(dot ? dot + 1 : fullName));
 
     static PyObject *enumName = String::createStaticString("IntEnum");
@@ -473,7 +473,7 @@ PyTypeObject *createPythonEnum(const char *fullName, PyObject *pyEnumItems,
         return nullptr;
     }
 
-    const char *dot = strrchr(fullName, '.');
+    const char *dot = std::strrchr(fullName, '.');
     AutoDecRef name(Shiboken::String::fromCString(dot ? dot + 1 : fullName));
     AutoDecRef callArgs(Py_BuildValue("(OO)", name.object(), pyEnumItems));
     auto *newType = PyObject_Call(PyEnumType, callArgs, callDict);

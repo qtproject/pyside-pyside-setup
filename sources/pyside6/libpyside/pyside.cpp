@@ -673,7 +673,7 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
 
 bool inherits(PyTypeObject *objType, const char *class_name)
 {
-    if (strcmp(objType->tp_name, class_name) == 0)
+    if (std::strcmp(objType->tp_name, class_name) == 0)
         return true;
 
     PyTypeObject *base = objType->tp_base;

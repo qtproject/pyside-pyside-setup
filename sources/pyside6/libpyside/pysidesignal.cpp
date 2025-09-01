@@ -448,7 +448,7 @@ static FunctionArgumentsResult extractFunctionArgumentsFromSlot(PyObject *slot)
         // it being actually being that.
         if (ret.objCode == nullptr)
             ret.function = nullptr;
-    } else if (strcmp(Py_TYPE(slot)->tp_name, "compiled_function") == 0) {
+    } else if (std::strcmp(Py_TYPE(slot)->tp_name, "compiled_function") == 0) {
         ret.isMethod = false;
         ret.function = slot;
 
@@ -1278,7 +1278,7 @@ QByteArray getCallbackSignature(QMetaMethod signal, QObject *receiver,
             prefix += '(';
             for (int i = 0; i < mo->methodCount(); i++) {
                 QMetaMethod me = mo->method(i);
-                if ((strncmp(me.methodSignature(), prefix, prefix.size()) == 0) &&
+                if ((std::strncmp(me.methodSignature(), prefix, prefix.size()) == 0) &&
                     QMetaObject::checkConnectArgs(signal, me.methodSignature())) {
                     numArgs = me.parameterTypes().size() + useSelf;
                     break;
@@ -1298,7 +1298,7 @@ QByteArray getCallbackSignature(QMetaMethod signal, QObject *receiver,
             prefix += '(';
             for (int i = 0, count = mo->methodCount(); i < count; ++i) {
                 QMetaMethod me = mo->method(i);
-                if ((strncmp(me.methodSignature(), prefix, prefix.size()) == 0) &&
+                if ((std::strncmp(me.methodSignature(), prefix, prefix.size()) == 0) &&
                     QMetaObject::checkConnectArgs(signal, me)) {
                     numArgs = me.parameterTypes().size() + useSelf;
                     break;

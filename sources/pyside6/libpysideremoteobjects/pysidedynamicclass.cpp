@@ -25,6 +25,9 @@
 #include <QtRemoteObjects/qremoteobjectpendingcall.h>
 #include <QtRemoteObjects/qremoteobjectreplica.h>
 
+#include <cstring>
+#include <cctype>
+
 using namespace Shiboken;
 
 class FriendlyReplica : public QRemoteObjectReplica
@@ -167,7 +170,7 @@ struct SourceDefs
                 auto name = callData->name.sliced(4);
                 auto index = metaObject->indexOfProperty(name.constData());
                 if (index < 0) {
-                    name[0] = tolower(name[0]);  // Try lower case
+                    name[0] = std::tolower(name[0]);  // Try lower case
                     index = metaObject->indexOfProperty(name.constData());
                 }
                 // It is possible a .rep names a Slot "push" or "pushSomething" that
@@ -478,9 +481,9 @@ PyTypeObject *createDynamicClassImpl(QMetaObject *meta)
 PyTypeObject *createDynamicClass(QMetaObject *meta, PyObject *properties_capsule)
 {
     bool isSource;
-    if (strncmp(meta->superClass()->className(), "QObject", 7) == 0) {
+    if (std::strncmp(meta->superClass()->className(), "QObject", 7) == 0) {
         isSource = true;
-    } else if (strncmp(meta->superClass()->className(), "QRemoteObjectReplica", 20) == 0) {
+    } else if (std::strncmp(meta->superClass()->className(), "QRemoteObjectReplica", 20) == 0) {
         isSource = false;
     } else {
         PyErr_SetString(PyExc_RuntimeError,

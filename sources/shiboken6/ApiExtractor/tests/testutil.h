@@ -49,7 +49,7 @@ namespace TestUtil
         }
         QByteArrayList arguments;
         arguments.append(QFile::encodeName(tempSource.fileName()));
-        tempSource.write(cppCode, qint64(strlen(cppCode)));
+        tempSource.write(cppCode, qint64(qstrlen(cppCode)));
         tempSource.close();
 
         auto builder = std::make_unique<AbstractMetaBuilder>();

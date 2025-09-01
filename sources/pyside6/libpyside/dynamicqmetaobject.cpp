@@ -104,11 +104,11 @@ MetaObjectBuilder::MetaObjectBuilder(PyTypeObject *type, const QMetaObject *meta
 {
     m_d->m_baseObject = metaObject;
     const char *className = type->tp_name;
-    if (const char *lastDot = strrchr(type->tp_name, '.'))
+    if (const char *lastDot = std::strrchr(type->tp_name, '.'))
         className = lastDot + 1;
     // Different names indicate a Python class inheriting a Qt class.
     // Parse the type.
-    if (strcmp(className, metaObject->className()) != 0) {
+    if (std::strcmp(className, metaObject->className()) != 0) {
         m_d->m_builder = new QMetaObjectBuilder();
         m_d->m_builder->setClassName(className);
         m_d->m_builder->setSuperClass(metaObject);

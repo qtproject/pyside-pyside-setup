@@ -221,7 +221,7 @@ PyObject *getSnakeCaseName(const char *name, bool lower)
     char *q = new_name;
     for (; *p && q - new_name < 200; ++p, ++q) {
         if (std::isupper(*p)) {
-            if (p != name && isupper(*(p - 1)))
+            if (p != name && std::isupper(*(p - 1)))
                 return createStaticString(name);
             *q = '_';
             ++q;
