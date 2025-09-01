@@ -2249,7 +2249,10 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
 
     if (m_defaultPackage.isEmpty()) { // Extending default, see addBuiltInContainerTypes()
         auto moduleEntry = std::const_pointer_cast<TypeSystemTypeEntry>(m_context->db->defaultTypeSystemType());
-        Q_ASSERT(moduleEntry);
+        if (!moduleEntry) {
+            m_error = "No type system entry found (\"package\" attribute missing?)."_L1;
+            return {};
+        }
         m_defaultPackage = moduleEntry->name();
         return moduleEntry;
     }
@@ -3590,6 +3593,8 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
         switch (element) {
         case StackElement::Root:
             top->entry = parseRootElement(reader, versionRange.since, &attributes);
+            if (!top->entry)
+                return false;
             break;
         case StackElement::LoadTypesystem:
             if (!loadTypesystem(reader, &attributes))
