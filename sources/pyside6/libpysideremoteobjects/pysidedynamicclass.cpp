@@ -381,7 +381,7 @@ PyTypeObject *createDynamicClassImpl(QMetaObject *meta)
 
     auto fullTypeName = QByteArray{T::getTypePrefix()} + meta->className();
     PyType_Spec spec = {
-        fullTypeName.constData(),
+        qstrdup(fullTypeName.constData()),
         0,
         0,
         Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC,
