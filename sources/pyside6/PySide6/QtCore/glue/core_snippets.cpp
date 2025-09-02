@@ -249,10 +249,7 @@ QString qObjectTr(PyTypeObject *type, const char *sourceText, const char *disamb
         auto *type = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(mro, idx));
         if (type == sbkObjectType)
             continue;
-        const char *context = type->tp_name;
-        const char *dotpos = std::strrchr(context, '.');
-        if (dotpos != nullptr)
-            context = dotpos + 1;
+        const char *context = PepType_GetNameStr(type);
         result = QCoreApplication::translate(context, sourceText, disambiguation, n);
         if (result != oldResult)
             break;

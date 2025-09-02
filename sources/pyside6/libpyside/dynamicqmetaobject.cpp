@@ -103,9 +103,7 @@ MetaObjectBuilder::MetaObjectBuilder(PyTypeObject *type, const QMetaObject *meta
     : m_d(new MetaObjectBuilderPrivate)
 {
     m_d->m_baseObject = metaObject;
-    const char *className = type->tp_name;
-    if (const char *lastDot = std::strrchr(type->tp_name, '.'))
-        className = lastDot + 1;
+    const char *className = PepType_GetNameStr(type);
     // Different names indicate a Python class inheriting a Qt class.
     // Parse the type.
     if (std::strcmp(className, metaObject->className()) != 0) {
