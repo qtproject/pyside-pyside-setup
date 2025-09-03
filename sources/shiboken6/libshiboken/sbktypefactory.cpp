@@ -69,8 +69,9 @@ static PyObject *_PyType_FromSpecWithBasesHack(PyType_Spec *spec,
         }
 
         for (Py_ssize_t idx = 0, n = PyTuple_Size(bases); idx < n; ++idx) {
-            PyTypeObject *base = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(bases, idx));
-            PyTypeObject *meta = Py_TYPE(base);
+            PyObject *obBase = PyTuple_GetItem(bases, idx);
+            auto *base = reinterpret_cast<PyTypeObject *>(obBase);
+            PyTypeObject *meta = Py_TYPE(obBase);
             if (meta->tp_new != PyType_Type.tp_new) {
                 // make sure there is no second meta class
                 assert(keepMeta == nullptr);
@@ -140,7 +141,7 @@ PyTypeObject *SbkType_FromSpec_BMDWB(PyType_Spec *spec,
 
     if (meta) {
         PyTypeObject *hold = std::exchange(obType->ob_type, meta);
-        Py_INCREF(Py_TYPE(obType));
+        Py_INCREF(reinterpret_cast<PyObject *>(Py_TYPE(obType)));
         if (hold->tp_flags & Py_TPFLAGS_HEAPTYPE)
             Py_DECREF(reinterpret_cast<PyObject *>(hold));
     }
