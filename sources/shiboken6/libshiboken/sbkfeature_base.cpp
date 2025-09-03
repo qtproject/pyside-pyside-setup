@@ -133,7 +133,6 @@ static int const CALL_METHOD = 161;
 static bool currentOpcode_Is_CallMethNoArgs()
 {
     static const auto number = _PepRuntimeVersion();
-    static PyObject *flags = PySys_GetObject("flags");
     // We look into the currently active operation if we are going to call
     // a method with zero arguments.
     auto *frame = PyEval_GetFrame();
