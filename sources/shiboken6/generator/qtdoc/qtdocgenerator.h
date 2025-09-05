@@ -69,6 +69,9 @@ private:
                                 QList<GeneratorContext> *contexts);
     void doGenerateClass(TextStream &ts, const QString &targetDir,
                          const AbstractMetaClassCPtr &metaClass);
+    void writeDetailedDescription(TextStream &s,
+                                  const AbstractMetaClassCPtr &metaClass, const QString &scope,
+                                  QtXmlToSphinxImages *parsedImages) const;
     void writeEnums(TextStream &s, const AbstractMetaEnumList &enums,
                     const QString &scope, QtXmlToSphinxImages *images) const;
 

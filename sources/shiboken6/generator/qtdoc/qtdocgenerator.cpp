@@ -492,6 +492,21 @@ void QtDocGenerator::generateClassRecursion(TextStream &s, const QString &target
     }
 }
 
+void QtDocGenerator::writeDetailedDescription(TextStream &s,
+                                              const AbstractMetaClassCPtr &metaClass,
+                                              const QString &scope,
+                                              QtXmlToSphinxImages *parsedImages) const
+{
+    auto documentation = metaClass->documentation();
+    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass,
+                             parsedImages);
+    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass,
+                                  parsedImages))
+        writeFormattedDetailedText(s, documentation, scope, parsedImages);
+    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass,
+                             parsedImages);
+}
+
 void QtDocGenerator::doGenerateClass(TextStream &s, const QString &targetDir,
                                      const AbstractMetaClassCPtr &metaClass)
 {
@@ -547,11 +562,7 @@ void QtDocGenerator::doGenerateClass(TextStream &s, const QString &targetDir,
 
     s << '\n' << headline("Detailed Description") << ".. _More:\n";
 
-    writeInjectDocumentation(s, TypeSystem::DocModificationPrepend, metaClass,
-                             &parsedImages);
-    if (!writeInjectDocumentation(s, TypeSystem::DocModificationReplace, metaClass, &parsedImages))
-        writeFormattedDetailedText(s, documentation, scope, &parsedImages);
-    writeInjectDocumentation(s, TypeSystem::DocModificationAppend, metaClass, &parsedImages);
+    writeDetailedDescription(s, metaClass, scope, &parsedImages);
 
     writeEnums(s, metaClass->enums(), scope, &parsedImages);
 
