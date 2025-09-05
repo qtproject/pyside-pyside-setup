@@ -70,7 +70,6 @@ static PyObject *_PyType_FromSpecWithBasesHack(PyType_Spec *spec,
 
         for (Py_ssize_t idx = 0, n = PyTuple_Size(bases); idx < n; ++idx) {
             PyObject *obBase = PyTuple_GetItem(bases, idx);
-            auto *base = reinterpret_cast<PyTypeObject *>(obBase);
             PyTypeObject *meta = Py_TYPE(obBase);
             if (meta->tp_new != PyType_Type.tp_new) {
                 // make sure there is no second meta class
