@@ -352,6 +352,7 @@ code:
 <summary class="prominent-summary">main.py</summary>
 
 ```{literalinclude} ../../../../../../../../../examples/tutorials/finance_manager/part1/main.py
+---
 language: python
 caption: main.py
 linenos: true
