@@ -1,5 +1,6 @@
 sphinx==7.4.7
 sphinx-design==0.6.0
+sphinx-collapse
 sphinx-copybutton==0.5.2
 sphinx-tags==0.4
 sphinx-toolbox==3.7.0

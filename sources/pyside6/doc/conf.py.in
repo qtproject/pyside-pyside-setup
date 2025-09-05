@@ -33,7 +33,7 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.ifconfig',
     'sphinx.ext.graphviz', 'inheritance_diagram', 'pysideinclude',
     'sphinx.ext.viewcode',
     'sphinx_design', 'sphinx_copybutton', 'myst_parser', 'sphinx_tags',
-    'sphinx_toolbox.decorators', 'sphinx_reredirects']
+    'sphinx_toolbox.collapse', 'sphinx_toolbox.decorators', 'sphinx_reredirects']
 
 myst_enable_extensions = [
     "amsmath",
