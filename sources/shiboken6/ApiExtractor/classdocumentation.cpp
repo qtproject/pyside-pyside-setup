@@ -88,7 +88,7 @@ enum class WebXmlCodeTag
 
 static WebXmlCodeTag tag(QStringView name)
 {
-    if (name == u"class" || name == u"namespace")
+    if (name == "class"_L1 || name == "struct"_L1 || name == "namespace"_L1)
         return WebXmlCodeTag::Class;
     if (name == u"enum")
         return WebXmlCodeTag::Enum;
