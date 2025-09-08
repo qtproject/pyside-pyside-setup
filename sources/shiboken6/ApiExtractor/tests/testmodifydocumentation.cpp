@@ -28,7 +28,7 @@ R"(<typesystem package="Foo">
     </value-type>
     <value-type name='A'>
     <modify-documentation xpath='description/brief'>&lt;brief>Modified Brief&lt;/brief></modify-documentation>
-    <modify-documentation xpath='description/para[3]'>&lt;para>Some changed contents here&lt;/para></modify-documentation>
+    <modify-documentation xpath='description/para[4]'>&lt;para>Some changed contents here&lt;/para></modify-documentation>
     </value-type>
 </typesystem>
 )";
@@ -66,8 +66,7 @@ R"(<typesystem package="Foo">
 
 const char expectedDoc[] =
 R"(<?xml version="1.0"?>
-<description>oi
-<para>Paragraph number 1</para>
+<description><para>before brief</para><para>Paragraph number 1</para>
 <para>Paragraph number 2</para>
 <para>Some changed contents here</para>
 </description>

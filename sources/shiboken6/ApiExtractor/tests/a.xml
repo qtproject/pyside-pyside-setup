@@ -3,7 +3,7 @@
 <WebXML>
     <document>
         <class name="A">
-            <description>oi
+            <description><para>before brief</para>
                 <brief>Brief description</brief>
                 <para>Paragraph number 1</para>
                 <para>Paragraph number 2</para>

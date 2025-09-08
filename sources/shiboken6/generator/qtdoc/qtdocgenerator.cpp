@@ -507,6 +507,21 @@ void QtDocGenerator::writeDetailedDescription(TextStream &s,
                              parsedImages);
 }
 
+enum ClassDescriptionMode
+{
+    NoDescription,
+    BriefOnly,
+    DetailedOnly,
+    BriefAndDetailed,
+};
+
+static ClassDescriptionMode classDescriptionMode(const Documentation &doc)
+{
+    if (!doc.hasDetailed())
+        return doc.hasBrief() ? BriefOnly : NoDescription;
+    return doc.hasBrief() ? BriefAndDetailed : DetailedOnly;
+}
+
 void QtDocGenerator::doGenerateClass(TextStream &s, const QString &targetDir,
                                      const AbstractMetaClassCPtr &metaClass)
 {
@@ -521,8 +536,22 @@ void QtDocGenerator::doGenerateClass(TextStream &s, const QString &targetDir,
     QtXmlToSphinxImages parsedImages;
     auto documentation = metaClass->documentation();
     const QString scope = classScope(metaClass);
-    if (documentation.hasBrief())
+
+    const auto descriptionMode = classDescriptionMode(documentation);
+    switch (descriptionMode) {
+    case NoDescription:
+    case DetailedOnly:
+        break;
+    case BriefOnly:
         writeFormattedBriefText(s, documentation, scope, &parsedImages);
+        break;
+    case BriefAndDetailed: {
+        QString brief = documentation.brief();
+        brief.insert(brief.lastIndexOf(u'<'), "<rst> More_...</rst>"_L1);
+        writeFormattedText(s, brief, documentation.format(), scope, &parsedImages);
+    }
+        break;
+    }
 
     if (!metaClass->baseClasses().isEmpty()) {
         if (m_options.inheritanceDiagram) {
@@ -560,9 +589,17 @@ void QtDocGenerator::doGenerateClass(TextStream &s, const QString &targetDir,
          "    translation, you can also let us know by creating a ticket on\n"
          "    https:/bugreports.qt.io/projects/PYSIDE\n\n";
 
-    s << '\n' << headline("Detailed Description") << ".. _More:\n";
-
-    writeDetailedDescription(s, metaClass, scope, &parsedImages);
+    switch (descriptionMode) {
+    case DetailedOnly:
+    case BriefAndDetailed:
+        s << '\n' << headline("Detailed Description");
+        if (descriptionMode == BriefAndDetailed)
+            s << ".. _More:\n";
+        writeDetailedDescription(s, metaClass, scope, &parsedImages);
+        break;
+    default:
+        break;
+    }
 
     writeEnums(s, metaClass->enums(), scope, &parsedImages);
 
