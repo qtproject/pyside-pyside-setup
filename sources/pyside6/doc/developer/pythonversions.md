@@ -2,7 +2,8 @@
 
 ## Relevant preprocessor defines
 
-- The version range is determined by `wheel_artifacts/pyproject.toml.base`
+- The version range is determined by `wheel_artifacts/pyproject.toml.base`.
+  This file also defines the version tag (`py_limited_api = "cp310"`).
 - `PY_VERSION_HEX` Python version (defined in CPython headers)
 - `Py_LIMITED_API` Limited API minimum version, defined in several CMake files
 - `PYPY_VERSION`  [PyPy](https://pypy.org/) version (defined in PyPy headers)
@@ -16,8 +17,11 @@ The removal of Python versions is tied to their lifetime
 - Check the source code for preprocessor defines depending on
   values `Py_LIMITED_API`, `PY_VERSION_HEX` and simplify or
   remove conditions if possible.
+- Check the usages of `_PepRuntimeVersion()` for outdated versions
 - Run the tests and some examples. There might actually
-  some version checks in Python code that trigger.
+  some version checks in Python code that trigger
+  (see for example 
+   `sources/shiboken6/shibokenmodule/files.dir/shibokensupport/signature/parser.py:70`).
 
 ## Adapting to new Python versions
 
