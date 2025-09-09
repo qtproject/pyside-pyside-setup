@@ -1,6 +1,7 @@
 // Copyright (C) 2023 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
+import QtCore
 import QtQuick
 import QtQuick.Controls
 import QtLocation
@@ -221,7 +222,10 @@ ApplicationWindow {
             stackView.pop(page)
             switch (state) {
             case "FollowMe":
-                mapview.followme = !mapview.followme
+                if (!mapview.followme && (permission.status !== Qt.Granted))
+                    permissionDialog.open();
+                else
+                    mapview.followme = !mapview.followme
                 break
             case "MiniMap":
                 toggleMiniMapState()
@@ -455,6 +459,44 @@ support"
                 onTapped: {
                 }
             }
+        }
+    }
+
+    LocationPermission {
+        id: permission
+        accuracy: LocationPermission.Precise
+        availability: LocationPermission.WhenInUse
+    }
+
+    Dialog {
+        id: permissionDialog
+        anchors.centerIn: parent
+        padding: 20
+        standardButtons: (permission.status === Qt.Denied) ? Dialog.Close
+                                                           : Dialog.Close | Dialog.Ok
+        closePolicy: Dialog.NoAutoClose
+        title: qsTr("Permission")
+
+        Label {
+            id: permissionRequestText
+            text: (permission.status === Qt.Denied)
+                  ? qsTr("Grant the location permission then open the app again.")
+                  : qsTr("Location permission is needed.")
+        }
+
+        onAccepted: {
+            if (permission.status !== Qt.Denied)
+                permission.request();
+        }
+
+        onStandardButtonsChanged: {
+            if (standardButtons & Dialog.Ok)
+                standardButton(Dialog.Ok).text = qsTr("Request Permission");
+        }
+
+        Component.onCompleted: {
+            if (permission.status !== Qt.Granted)
+                open();
         }
     }
 }

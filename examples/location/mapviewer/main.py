@@ -47,6 +47,7 @@ if __name__ == "__main__":
     application = QGuiApplication(sys.argv)
     name = "QtLocation Mapviewer example"
     QCoreApplication.setApplicationName(name)
+    QGuiApplication.setDesktopFileName(QCoreApplication.applicationName())
 
     args = sys.argv[1:]
     if "--help" in args:
