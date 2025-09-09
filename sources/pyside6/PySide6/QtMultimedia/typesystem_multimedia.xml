@@ -13,9 +13,19 @@
         <enum-type name="Error"/>
         <enum-type name="State"/>
         <enum-type name="VolumeScale"/>
-        <inject-code class="target" position="end"
-                     file="../glue/qtmultimedia.cpp"
-                     snippet="qtaudio-namespace-compatibility-alias"/>
+        <!-- Compatibility alias that calls QtAudio::convertVolume() -->
+        <add-function signature="convertVolume(float@volume@,QAudio::VolumeScale@from@,QAudio::VolumeScale@to@)"
+                      return-type="float">
+            <inject-code file="../glue/qtmultimedia.cpp" snippet="qaudio-convertvolume"/>
+        </add-function>
+    </namespace-type>
+
+    <namespace-type name="QtAudio">
+<!-- FIXME Somehow expose the (typedef'ed) enums from QAudio in QtAudio?
+        <enum-type name="Error"/>
+        <enum-type name="State"/>
+        <enum-type name="VolumeScale"/>
+-->
     </namespace-type>
 
     <namespace-type name="QtVideo" since="6.7">
