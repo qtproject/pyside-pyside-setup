@@ -37,7 +37,10 @@
   <file>pages/DialPage.qml</file>
   <file>pages/DialogPage.qml</file>
   <file>pages/FramePage.qml</file>
+  <file>pages/GalleryConfig.qml</file>
   <file>pages/GroupBoxPage.qml</file>
+  <file>pages/MenuBarPage.qml</file>
+  <file>pages/MonthGridPage.qml</file>
   <file>pages/PageIndicatorPage.qml</file>
   <file>pages/ProgressBarPage.qml</file>
   <file>pages/RadioButtonPage.qml</file>
@@ -45,15 +48,20 @@
   <file>pages/ScrollBarPage.qml</file>
   <file>pages/ScrollIndicatorPage.qml</file>
   <file>pages/ScrollablePage.qml</file>
+  <file>pages/SearchFieldPage.qml</file>
   <file>pages/SliderPage.qml</file>
   <file>pages/SpinBoxPage.qml</file>
+  <file>pages/SplitViewPage.qml</file>
   <file>pages/StackViewPage.qml</file>
   <file>pages/SwipeViewPage.qml</file>
   <file>pages/SwitchPage.qml</file>
   <file>pages/TabBarPage.qml</file>
+  <file>pages/TableViewPage.qml</file>
   <file>pages/TextAreaPage.qml</file>
   <file>pages/TextFieldPage.qml</file>
+  <file>pages/ToolBarPage.qml</file>
   <file>pages/ToolTipPage.qml</file>
+  <file>pages/TreeViewPage.qml</file>
   <file>pages/TumblerPage.qml</file>
   <file>qmldir</file>
   <file>qtquickcontrols2.conf</file>

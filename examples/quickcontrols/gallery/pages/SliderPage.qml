@@ -15,16 +15,17 @@ ScrollablePage {
             width: parent.width
             wrapMode: Label.Wrap
             horizontalAlignment: Qt.AlignHCenter
-            text: "Slider is used to select a value by sliding a handle along a track."
+            text: qsTr("Slider is used to select a value by sliding a handle along a track.")
         }
 
         Slider {
-            id: slider
+            enabled: !GalleryConfig.disabled
             value: 0.5
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
         Slider {
+            enabled: !GalleryConfig.disabled
             orientation: Qt.Vertical
             value: 0.5
             anchors.horizontalCenter: parent.horizontalCenter

@@ -1,1 +1,2 @@
 module App
+singleton GalleryConfig 1.0 pages/GalleryConfig.qml

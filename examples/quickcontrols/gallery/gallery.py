@@ -35,9 +35,11 @@ if __name__ == "__main__":
 
     engine = QQmlApplicationEngine()
 
-    built_in_styles = ["Basic", "Fusion", "Imagine", "Material", "Universal"]
+    built_in_styles = ["Basic", "Fusion", "Imagine", "Material", "Universal", "FluentWinUI3"]
+
     if platform.system() == "Darwin":
         built_in_styles.append("macOS")
+        built_in_styles.append("iOS")
     elif platform.system() == "Windows":
         built_in_styles.append("Windows")
     engine.setInitialProperties({"builtInStyles": built_in_styles})
