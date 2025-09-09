@@ -10,7 +10,7 @@ from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog,
                                QMainWindow, QSlider, QStyle, QToolBar)
 from PySide6.QtMultimedia import (QAudioOutput, QMediaFormat,
-                                  QMediaPlayer, QAudio)
+                                  QMediaPlayer, QtAudio)
 from PySide6.QtMultimediaWidgets import QVideoWidget
 
 
@@ -186,9 +186,9 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def setVolume(self):
-        self.volumeValue = QAudio.convertVolume(self._volume_slider.value() / 100.0,
-                                                QAudio.VolumeScale.LogarithmicVolumeScale,
-                                                QAudio.VolumeScale.LinearVolumeScale)
+        self.volumeValue = QtAudio.convertVolume(self._volume_slider.value() / 100.0,
+                                                 QtAudio.VolumeScale.LogarithmicVolumeScale,
+                                                 QtAudio.VolumeScale.LinearVolumeScale)
         self._audio_output.setVolume(self.volumeValue)
 
 

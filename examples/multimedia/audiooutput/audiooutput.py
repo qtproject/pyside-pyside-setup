@@ -11,8 +11,7 @@ from struct import pack
 
 from PySide6.QtCore import (QByteArray, QIODevice, Qt, QSysInfo, QTimer,
                             qWarning, Slot)
-from PySide6.QtMultimedia import (QAudio, QAudioFormat,
-                                  QAudioSink, QMediaDevices)
+from PySide6.QtMultimedia import (QAudioFormat, QAudioSink, QMediaDevices, QtAudio)
 from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
                                QMainWindow, QPushButton, QSlider,
                                QVBoxLayout, QWidget)
@@ -211,7 +210,7 @@ class AudioTest(QMainWindow):
 
     @Slot()
     def pull_timer_expired(self):
-        if self.m_audioSink is not None and self.m_audioSink.state() != QAudio.State.StoppedState:
+        if self.m_audioSink is not None and self.m_audioSink.state() != QtAudio.State.StoppedState:
             bytes_free = self.m_audioSink.bytesFree()
             data = self.m_generator.read(bytes_free)
             if data:
@@ -236,28 +235,28 @@ class AudioTest(QMainWindow):
 
     @Slot()
     def toggle_suspend_resume(self):
-        if self.m_audioSink.state() == QAudio.State.SuspendedState:
+        if self.m_audioSink.state() == QtAudio.State.SuspendedState:
             qWarning("status: Suspended, resume()")
             self.m_audioSink.resume()
             self.m_suspendResumeButton.setText(self.SUSPEND_LABEL)
-        elif self.m_audioSink.state() == QAudio.State.ActiveState:
+        elif self.m_audioSink.state() == QtAudio.State.ActiveState:
             qWarning("status: Active, suspend()")
             self.m_audioSink.suspend()
             self.m_suspendResumeButton.setText(self.RESUME_LABEL)
-        elif self.m_audioSink.state() == QAudio.State.StoppedState:
+        elif self.m_audioSink.state() == QtAudio.State.StoppedState:
             qWarning("status: Stopped, resume()")
             self.m_audioSink.resume()
             self.m_suspendResumeButton.setText(self.SUSPEND_LABEL)
-        elif self.m_audioSink.state() == QAudio.State.IdleState:
+        elif self.m_audioSink.state() == QtAudio.State.IdleState:
             qWarning("status: IdleState")
 
     state_map = {
-        QAudio.State.ActiveState: "ActiveState",
-        QAudio.State.SuspendedState: "SuspendedState",
-        QAudio.State.StoppedState: "StoppedState",
-        QAudio.State.IdleState: "IdleState"}
+        QtAudio.State.ActiveState: "ActiveState",
+        QtAudio.State.SuspendedState: "SuspendedState",
+        QtAudio.State.StoppedState: "StoppedState",
+        QtAudio.State.IdleState: "IdleState"}
 
-    @Slot("QAudio::State")
+    @Slot("QtAudio::State")
     def handle_state_changed(self, state):
         state = self.state_map.get(state, 'Unknown')
         qWarning(f"state = {state}")
