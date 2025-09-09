@@ -148,8 +148,12 @@ def setup_virtualenv(python, exe, env, pip, log, ci):
     # Within Ubuntu 24.04 one can't install anything with pip to outside of
     # virtual env. Trust that we already have proper virtualenv installed.
     if os.environ.get("HOST_OSVERSION_COIN") != "ubuntu_24_04":
+        virtualenv_version = "20.7.2"
+        # 20.7.2 is too old for 3.13
+        if sys.version_info[1] > 12:
+            virtualenv_version = "20.32.0"
         run_instruction(
-            [str(python), "-m", "pip", "install", "--user", "virtualenv==20.7.2"],
+            [str(python), "-m", "pip", "install", "--user", "virtualenv==" + virtualenv_version],
             "Failed to pin virtualenv",
         )
     # installing to user base might not be in PATH by default.

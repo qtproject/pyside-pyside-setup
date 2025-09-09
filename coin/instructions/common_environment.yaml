@@ -328,6 +328,49 @@ instructions:
         condition: property
         property: host.osVersion
         not_in_values: [RHEL_8_6, RHEL_8_8, RHEL_8_10]
+
+    - type: ExecuteCommand
+      command: "pyenv install 3.13.7"
+      maxTimeInSeconds: 14400
+      maxTimeBetweenOutput: 1200
+      ignoreExitCode: true
+      enable_if:
+          condition: and
+          conditions:
+          - condition: property
+            property: host.osVersion
+            equals_value: MacOS_15
+          - condition: property
+            property: host.arch
+            equals_value: ARM64
+      userMessageOnFailure: >
+          Failed to install python 3.13
+    - type: PrependToEnvironmentVariable
+      variableName: PATH
+      variableValue: "/Users/qt/.pyenv/versions/3.13.7/bin:"
+      enable_if:
+          condition: and
+          conditions:
+          - condition: property
+            property: host.osVersion
+            equals_value: MacOS_15
+          - condition: property
+            property: host.arch
+            equals_value: ARM64
+    - type: EnvironmentVariable
+      variableName: interpreter
+      variableValue: "python3.13"
+      enable_if:
+          condition: and
+          conditions:
+          - condition: property
+            property: host.osVersion
+            equals_value: MacOS_15
+          - condition: property
+            property: host.arch
+            equals_value: ARM64
+
+
     # ToDo: can be removed after 3.11 is available on qt5#3.8 on macOS
     # start of ToDo
     - type: ExecuteCommand
