@@ -15,17 +15,18 @@ ScrollablePage {
             width: parent.width
             wrapMode: Label.Wrap
             horizontalAlignment: Qt.AlignHCenter
-            text: "RangeSlider is used to select a range specified by two values, by sliding each handle along a track."
+            text: qsTr("RangeSlider is used to select a range specified by two values, by sliding each handle along a track.")
         }
 
         RangeSlider {
-            id: slider
+            enabled: !GalleryConfig.disabled
             first.value: 0.25
             second.value: 0.75
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
         RangeSlider {
+            enabled: !GalleryConfig.disabled
             orientation: Qt.Vertical
             first.value: 0.25
             second.value: 0.75

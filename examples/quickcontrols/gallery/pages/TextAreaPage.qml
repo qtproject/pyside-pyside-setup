@@ -15,15 +15,16 @@ ScrollablePage {
             width: parent.width
             wrapMode: Label.Wrap
             horizontalAlignment: Qt.AlignHCenter
-            text: "TextArea is a multi-line text editor."
+            text: qsTr("TextArea is a multi-line text editor.")
         }
 
         TextArea {
+            enabled: !GalleryConfig.disabled
             width: page.availableWidth / 3
             anchors.horizontalCenter: parent.horizontalCenter
 
             wrapMode: TextArea.Wrap
-            text: "TextArea\n...\n...\n..."
+            text: qsTr("TextArea\n...\n...\n...")
         }
     }
 }

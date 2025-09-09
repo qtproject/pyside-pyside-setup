@@ -15,11 +15,12 @@ ScrollablePage {
             width: parent.width
             wrapMode: Label.Wrap
             horizontalAlignment: Qt.AlignHCenter
-            text: "The Dial is similar to a traditional dial knob that is found on devices such as "
-                + "stereos or industrial equipment. It allows the user to specify a value within a range."
+            text: qsTr("The Dial is similar to a traditional dial knob that is found on devices such as "
+                + "stereos or industrial equipment. It allows the user to specify a value within a range.")
         }
 
         Dial {
+            enabled: !GalleryConfig.disabled
             value: 0.5
             anchors.horizontalCenter: parent.horizontalCenter
         }

@@ -15,12 +15,13 @@ ScrollablePage {
             width: parent.width
             wrapMode: Label.Wrap
             horizontalAlignment: Qt.AlignHCenter
-            text: "DelayButton is a checkable button that incorporates a delay before the "
-                + "button is activated. This delay prevents accidental presses."
+            text: qsTr("DelayButton is a checkable button that incorporates a delay before the "
+                + "button is activated. This delay prevents accidental presses.")
         }
 
         DelayButton {
-            text: "DelayButton"
+            enabled: !GalleryConfig.disabled
+            text: qsTr("DelayButton")
             anchors.horizontalCenter: parent.horizontalCenter
         }
     }
