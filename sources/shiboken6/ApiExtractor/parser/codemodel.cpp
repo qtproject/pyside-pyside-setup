@@ -458,11 +458,6 @@ FunctionModelItem _ScopeModelItem::declaredFunction(const FunctionModelItem &ite
 
 _ScopeModelItem::~_ScopeModelItem() = default;
 
-void _ScopeModelItem::addEnumsDeclaration(const QString &enumsDeclaration)
-{
-    m_enumsDeclarations << enumsDeclaration;
-}
-
 void _ScopeModelItem::addClass(const ClassModelItem &item)
 {
     m_classes.append(item);
@@ -525,15 +520,13 @@ void _ScopeModelItem::appendScope(const _ScopeModelItem &other)
     m_templateTypeAliases += other.m_templateTypeAliases;
     m_variables += other.m_variables;
     m_functions += other.m_functions;
-    m_enumsDeclarations += other.m_enumsDeclarations;
 }
 
 bool _ScopeModelItem::isEmpty() const
 {
     return m_classes.isEmpty() && m_enums.isEmpty()
         && m_typeDefs.isEmpty() && m_templateTypeAliases.isEmpty()
-        && m_variables.isEmpty() && m_functions.isEmpty()
-        && m_enumsDeclarations.isEmpty();
+        && m_variables.isEmpty() && m_functions.isEmpty();
 }
 
 /* This function removes MSVC export declarations of non-type template
