@@ -25,7 +25,6 @@ class TypeInfoData : public QSharedData
 public:
     TypeInfoData();
 
-    bool isVoid() const;
     bool equals(const TypeInfoData &other) const;
     bool isStdType() const;
     void simplifyStdType();
@@ -48,6 +47,7 @@ public:
     };
 
     ReferenceType m_referenceType = NoReference;
+    TypeCategory m_category = TypeCategory::Other;
 };
 
 TypeInfoData::TypeInfoData() : flags(0)
@@ -143,18 +143,21 @@ void  TypeInfo::addName(const QString &n)
     d->m_qualifiedName.append(n);
 }
 
-bool TypeInfoData::isVoid() const
-{
-    return m_indirections.isEmpty() && m_referenceType == NoReference
-        && m_arguments.isEmpty() && m_arrayElements.isEmpty()
-        && m_instantiations.isEmpty()
-        && m_qualifiedName.size() == 1
-        && m_qualifiedName.constFirst() == u"void";
-}
-
 bool TypeInfo::isVoid() const
 {
-    return d->isVoid();
+    return d->m_category == TypeCategory::Void;
+}
+
+TypeCategory TypeInfo::typeCategory() const
+{
+    return d->m_category;
+
+}
+
+void TypeInfo::setTypeCategory(TypeCategory c)
+{
+    if (d->m_category != c)
+        d->m_category = c;
 }
 
 bool TypeInfo::isConstant() const
@@ -457,6 +460,7 @@ bool TypeInfoData::equals(const TypeInfoData &other) const
 
     return flags == other.flags
            && m_qualifiedName == other.m_qualifiedName
+           && m_category == other.m_category
            && (!m_functionPointer || m_arguments == other.m_arguments)
            && m_instantiations == other.m_instantiations;
 }
@@ -584,6 +588,23 @@ void TypeInfo::formatDebug(QDebug &debug) const
         debug << ", [const]";
     if (d->m_volatile)
         debug << ", [volatile]";
+    switch (d->m_category) {
+    case TypeCategory::Other:
+    case TypeCategory::Void:
+        break;
+    case TypeCategory::Builtin:
+        debug << ", [builtin]";
+        break;
+    case TypeCategory::Enum:
+        debug << ", [enum]";
+        break;
+    case TypeCategory::Pointer:
+        debug << ", [pointer]";
+        break;
+    case TypeCategory::Function:
+        debug << ", [function";
+        break;
+    }
     if (!d->m_indirections.isEmpty()) {
         debug << ", indirections=";
         for (auto i : d->m_indirections)

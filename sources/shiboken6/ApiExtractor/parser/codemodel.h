@@ -559,6 +559,8 @@ public:
     TypeInfo type() const;
     void setType(const TypeInfo &type);
 
+    TypeCategory underlyingTypeCategory() const;
+
     Access accessPolicy() const;
     void setAccessPolicy(Access accessPolicy);
 

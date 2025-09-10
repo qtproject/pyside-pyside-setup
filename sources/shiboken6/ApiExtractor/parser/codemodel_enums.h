@@ -58,4 +58,14 @@ enum class FunctionAttribute {
 Q_DECLARE_FLAGS(FunctionAttributes, FunctionAttribute)
 Q_DECLARE_OPERATORS_FOR_FLAGS(FunctionAttributes)
 
+// C++ type category for TypeInfo, reflecting clang's CXTypeKind
+enum class TypeCategory : unsigned char {
+    Other,
+    Builtin,
+    Enum,
+    Pointer,
+    Function,
+    Void
+};
+
 #endif // CODEMODEL_ENUMS_H

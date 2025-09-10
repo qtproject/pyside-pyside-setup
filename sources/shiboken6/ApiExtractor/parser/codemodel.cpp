@@ -1206,6 +1206,11 @@ void _TypeDefModelItem::setType(const TypeInfo &type)
     m_type = type;
 }
 
+TypeCategory _TypeDefModelItem::underlyingTypeCategory() const
+{
+    return m_type.typeCategory();
+}
+
 Access _TypeDefModelItem::accessPolicy() const
 {
     return m_accessPolicy;

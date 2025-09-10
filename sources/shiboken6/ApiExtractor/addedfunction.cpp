@@ -165,10 +165,12 @@ AddedFunction::AddedFunctionPtr
     }
 
     const auto paramString = signature.mid(openParenPos + 1, closingParenPos - openParenPos - 1);
-    const auto params = AddedFunctionParser::splitParameters(paramString, errorMessage);
+    auto params = AddedFunctionParser::splitParameters(paramString, errorMessage);
     if (params.isEmpty() && !errorMessage->isEmpty())
         return {};
-    for (const auto &p : params) {
+    if (params.size() == 1 && params.constFirst().type == "void"_L1)
+        params.clear(); // "void foo(void)" -> ""void foo()"
+    for (const auto &p : std::as_const(params)) {
         TypeInfo type = p.type == u"..."
             ? TypeInfo::varArgsType() : TypeParser::parse(p.type, errorMessage);
         if (!errorMessage->isEmpty()) {

@@ -1707,10 +1707,7 @@ AbstractMetaFunctionPtr
 
     const auto &args = addedFunc->arguments();
 
-    qsizetype argCount = args.size();
-    // Check "foo(void)"
-    if (argCount == 1 && args.constFirst().typeInfo.isVoid())
-        argCount = 0;
+    const qsizetype argCount = args.size();
     for (qsizetype i = 0; i < argCount; ++i) {
         const AddedFunction::Argument &arg = args.at(i);
         auto type = translateType(arg.typeInfo, metaClass, {}, errorMessage);
