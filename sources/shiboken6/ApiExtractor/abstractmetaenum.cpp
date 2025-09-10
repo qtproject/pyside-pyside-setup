@@ -96,8 +96,7 @@ void AbstractMetaEnumValue::setDocumentation(const Documentation &doc)
 class AbstractMetaEnumData : public QSharedData
 {
 public:
-    AbstractMetaEnumData()  : m_deprecated(false),
-        m_hasQenumsDeclaration(false), m_signed(true)
+    AbstractMetaEnumData()  : m_deprecated(false), m_signed(true)
     {
     }
 
@@ -113,7 +112,6 @@ public:
     EnumKind m_enumKind = CEnum;
     Access m_access = Access::Public;
     uint m_deprecated : 1;
-    uint m_hasQenumsDeclaration : 1;
     uint m_signed : 1;
 };
 
@@ -296,17 +294,6 @@ void AbstractMetaEnum::setEnumKind(EnumKind kind)
 bool AbstractMetaEnum::isAnonymous() const
 {
     return d->m_enumKind == AnonymousEnum;
-}
-
-bool AbstractMetaEnum::hasQEnumsDeclaration() const
-{
-    return d->m_hasQenumsDeclaration;
-}
-
-void AbstractMetaEnum::setHasQEnumsDeclaration(bool on)
-{
-    if (d->m_hasQenumsDeclaration != on)
-        d->m_hasQenumsDeclaration = on;
 }
 
 EnumTypeEntryCPtr AbstractMetaEnum::typeEntry() const

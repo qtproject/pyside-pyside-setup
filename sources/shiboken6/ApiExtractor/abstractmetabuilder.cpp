@@ -514,7 +514,7 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
     ReportHandler::startProgress("Generated enum model ("
                                  + QByteArray::number(enums.size()) + ").");
     for (const EnumModelItem &item : enums) {
-        auto metaEnum = traverseEnum(item, nullptr, QSet<QString>());
+        auto metaEnum = traverseEnum(item, nullptr);
         if (metaEnum.has_value()) {
             if (metaEnum->typeEntry()->generateCode())
                 m_globalEnums << metaEnum.value();
@@ -803,7 +803,7 @@ AbstractMetaClassPtr
         m_itemToClass.insert(namespaceItem.get(), metaClass);
     }
 
-    traverseEnums(namespaceItem, metaClass, namespaceItem->enumsDeclarations());
+    traverseEnums(namespaceItem, metaClass);
 
     pushScope(namespaceItem);
 
@@ -850,8 +850,7 @@ AbstractMetaClassPtr
 
 std::optional<AbstractMetaEnum>
     AbstractMetaBuilderPrivate::traverseEnum(const EnumModelItem &enumItem,
-                                             const AbstractMetaClassPtr &enclosing,
-                                             const QSet<QString> &enumsDeclarations)
+                                             const AbstractMetaClassPtr &enclosing)
 {
     QString qualifiedName = enumItem->qualifiedName().join(u"::"_s);
 
@@ -916,10 +915,6 @@ std::optional<AbstractMetaEnum>
     metaEnum.setDeprecated(enumItem->isDeprecated());
     metaEnum.setUnderlyingType(enumItem->underlyingType());
     metaEnum.setSigned(enumItem->isSigned());
-    if (enumsDeclarations.contains(qualifiedName)
-        || enumsDeclarations.contains(enumName)) {
-        metaEnum.setHasQEnumsDeclaration(true);
-    }
 
     auto enumTypeEntry = std::static_pointer_cast<EnumTypeEntry>(typeEntry);
     metaEnum.setTypeEntry(enumTypeEntry);
@@ -1171,7 +1166,7 @@ AbstractMetaClassPtr AbstractMetaBuilderPrivate::traverseClass(const FileModelIt
 
     parseQ_Properties(metaClass, classItem->propertyDeclarations());
 
-    traverseEnums(classItem, metaClass, classItem->enumsDeclarations());
+    traverseEnums(classItem, metaClass);
 
     // Inner classes
     {
@@ -1643,13 +1638,11 @@ bool AbstractMetaBuilderPrivate::setupInheritance(const AbstractMetaClassPtr &me
 }
 
 void AbstractMetaBuilderPrivate::traverseEnums(const ScopeModelItem &scopeItem,
-                                               const AbstractMetaClassPtr &metaClass,
-                                               const QStringList &enumsDeclarations)
+                                               const AbstractMetaClassPtr &metaClass)
 {
     const EnumList &enums = scopeItem->enums();
-    const QSet<QString> enumsDeclarationSet(enumsDeclarations.cbegin(), enumsDeclarations.cend());
     for (const EnumModelItem &enumItem : enums) {
-        auto metaEnum = traverseEnum(enumItem, metaClass, enumsDeclarationSet);
+        auto metaEnum = traverseEnum(enumItem, metaClass);
         if (metaEnum.has_value()) {
             metaClass->addEnum(metaEnum.value());
         }

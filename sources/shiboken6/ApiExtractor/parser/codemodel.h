@@ -210,9 +210,6 @@ public:
     TemplateTypeAliasModelItem findTemplateTypeAlias(QAnyStringView name) const;
     VariableModelItem findVariable(QAnyStringView name) const;
 
-    void addEnumsDeclaration(const QString &enumsDeclaration);
-    QStringList enumsDeclarations() const { return m_enumsDeclarations; }
-
     FunctionModelItem declaredFunction(const FunctionModelItem &item);
 
     bool isEmpty() const;
@@ -249,9 +246,6 @@ private:
     TemplateTypeAliasList m_templateTypeAliases;
     VariableList m_variables;
     FunctionList m_functions;
-
-private:
-    QStringList m_enumsDeclarations;
 };
 
 class _ClassModelItem: public _ScopeModelItem
