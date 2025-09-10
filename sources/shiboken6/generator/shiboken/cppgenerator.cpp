@@ -6822,7 +6822,8 @@ void CppGenerator::writeContainerConverterInitFunc(TextStream &s,
 void CppGenerator::writeOpaqueContainerConverterRegisterFunc(TextStream &s, const QString &funcName,
                                                              const OpaqueContainerTypeHash &opaqueContainers)
 {
-    s << "static void " << funcName << "(PyObject *module)\n{\n" << indent;
+    s << "static void " << funcName << "(PyObject *module)\n{\n" << indent
+        << "PyTypeObject *pyType{};\n";
     if (usePySideExtensions()) {
         const bool hasQVariantConversion =
             std::any_of(opaqueContainers.cbegin(), opaqueContainers.cend(),
