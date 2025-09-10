@@ -64,6 +64,20 @@ class TestClassesUnderNamespace(unittest.TestCase):
         cls.setValue(SampleNamespace.EnumWithinInlineNamespace.EWIN_Value1)
         self.assertEqual(cls.value(), SampleNamespace.EnumWithinInlineNamespace.EWIN_Value1)
 
+    def testEnumAlias(self):
+        """Test whether an enumeration can be aliased to another one and values
+           can be used interchangeably."""
+        expected = SampleNamespace.SomeClass.OptionAlias.None_
+        actual = SampleNamespace.SomeClass.passThroughOptionAlias(expected)
+        self.assertEqual(expected, actual)
+        actual = SampleNamespace.SomeClass.passThroughOption(expected)
+        self.assertEqual(expected, actual)
+        # The alias source values should also work
+        actual = SampleNamespace.SomeClass.passThroughOptionAlias(SampleNamespace.Option.None_)
+        self.assertEqual(expected, actual)
+        actual = SampleNamespace.SomeClass.passThroughOption(SampleNamespace.Option.None_)
+        self.assertEqual(expected, actual)
+
 
 if __name__ == '__main__':
     unittest.main()

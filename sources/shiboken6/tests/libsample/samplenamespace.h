@@ -5,6 +5,7 @@
 #define SAMPLENAMESPACE_H
 
 #include "libsamplemacros.h"
+#include "samplenamespace.h"
 #include "str.h"
 #include "point.h"
 #include "objecttype.h"
@@ -86,6 +87,12 @@ class LIBSAMPLE_API SomeClass
 public:
     enum class PublicScopedEnum { v1, v2 };
 
+    // Alias an enumeration
+    using OptionAlias = Option;
+    inline static constexpr auto None_ = Option::None_;
+    inline static constexpr auto RandomNumber = Option::RandomNumber;
+    inline static constexpr auto UnixTime  = Option::UnixTime;
+
     class SomeInnerClass
     {
     public:
@@ -107,16 +114,21 @@ public:
             inline int someMethod(SomeInnerClass *) { return 0; }
             virtual OkThisIsRecursiveEnough *someVirtualMethod(OkThisIsRecursiveEnough *arg)
             { return arg; }
-        };
+        }; // OkThisIsRecursiveEnough
     protected:
         enum ProtectedEnum {
             ProtectedItem0,
             ProtectedItem1
         };
-    };
+    }; // SomeInnerClass
+
     struct SomeOtherInnerClass {
         std::list<SomeInnerClass> someInnerClasses;
     };
+
+    static OptionAlias passThroughOptionAlias(OptionAlias ov);
+    static Option passThroughOption(Option ov);
+
 protected:
     enum ProtectedEnum {
         ProtectedItem0,

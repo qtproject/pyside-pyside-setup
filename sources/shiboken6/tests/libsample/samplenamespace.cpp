@@ -11,6 +11,16 @@
 namespace SampleNamespace
 {
 
+SomeClass::OptionAlias SomeClass::passThroughOptionAlias(OptionAlias ov)
+{
+    return ov;
+}
+
+Option SomeClass::passThroughOption(Option ov)
+{
+    return ov;
+}
+
 // PYSIDE-817, scoped enums must not be converted to int in the wrappers generated
 // for the protected hacks
 SomeClass::PublicScopedEnum SomeClass::protectedMethodReturningPublicScopedEnum() const

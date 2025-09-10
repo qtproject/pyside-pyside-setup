@@ -420,6 +420,7 @@
     -->
     <enum-type name="GlobalEnum"/>
     <enum-type name="GlobalOverloadFuncEnum"/>
+    <enum-type name="GlobalEnumAlias"/>
 
     <enum-type identified-by-value="AnonymousGlobalEnum_Value0"/>
 
@@ -437,6 +438,10 @@
             <enum-type name="SampleNamespace"/>
         </object-type>
         <value-type name="SomeClass">
+            <enum-type name="OptionAlias"/>
+            <modify-field name="None_" remove="true"/>
+            <modify-field name="RandomNumber" remove="true"/>
+            <modify-field name="RandomNumber" remove="true"/>
             <enum-type name="PublicScopedEnum"/>
             <value-type name="SomeInnerClass">
                 <object-type name="OkThisIsRecursiveEnough">

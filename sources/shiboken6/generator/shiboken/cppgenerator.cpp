@@ -1737,6 +1737,17 @@ void CppGenerator::writeEnumConverterFunctions(TextStream &s, const AbstractMeta
     writePythonToCppFunction(s, c.toString(), enumConverterPythonType, typeName);
 
     QString pyTypeCheck = u"PyObject_TypeCheck(pyIn, "_s + enumPythonType + u')';
+    switch (metaEnum.typeEntry()->aliasMode()) {
+    case EnumTypeEntry::NoAlias:
+        break;
+    case EnumTypeEntry::AliasSource:
+    case EnumTypeEntry::AliasTarget: {
+        const QString &aliasSourceType = cpythonTypeNameExt(metaEnum.typeEntry()->aliasTypeEntry());
+        pyTypeCheck += "\n    || PyObject_TypeCheck(pyIn, "_L1 + aliasSourceType + u')';
+    }
+        break;
+    }
+
     writeIsPythonConvertibleToCppFunction(s, enumConverterPythonType, typeName, pyTypeCheck);
 
     c.clear();
@@ -3538,9 +3549,16 @@ void CppGenerator::writeIsPythonConvertibleToCppFunction(TextStream &s,
         if (!condition.contains(u"pyIn"))
             s << sbkUnusedVariableCast("pyIn");
     }
-    s << "if (" << condition << ")\n" << indent
-        << "return " << pythonToCppFuncName << ";\n" << outdent
-        << "return {};\n" << outdent << "}\n";
+
+    const bool useBrace = condition.contains(u'\n');
+    s << "if (" << condition << ')';
+    if (useBrace)
+        s<< " {";
+    s << '\n' << indent
+      << "return " << pythonToCppFuncName << ";\n" << outdent;
+    if (useBrace)
+        s<< "}\n";
+    s << "return {};\n" << outdent << "}\n";
 }
 
 void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,

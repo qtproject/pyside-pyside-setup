@@ -1225,7 +1225,9 @@ public:
     FlagsTypeEntryPtr m_flags;
     QString m_cppType;
     QString m_docFile;
+    std::weak_ptr<const EnumTypeEntry> m_aliasTypeEntry;
     TypeSystem::PythonEnumType m_pythonEnumType = TypeSystem::PythonEnumType::Unspecified;
+    EnumTypeEntry::AliasMode m_aliasMode = EnumTypeEntry::AliasMode::NoAlias;
 };
 
 EnumTypeEntry::EnumTypeEntry(const QString &entryName,
@@ -1328,6 +1330,30 @@ void EnumTypeEntry::setDocFile(const QString &df)
 {
     S_D(EnumTypeEntry);
     d->m_docFile = df;
+}
+
+EnumTypeEntry::AliasMode EnumTypeEntry::aliasMode() const
+{
+    S_D(const EnumTypeEntry);
+    return d->m_aliasMode;
+}
+
+void EnumTypeEntry::setAliasMode(AliasMode am)
+{
+    S_D(EnumTypeEntry);
+    d->m_aliasMode = am;
+}
+
+EnumTypeEntryCPtr EnumTypeEntry::aliasTypeEntry() const
+{
+    S_D(const EnumTypeEntry);
+    return d->m_aliasTypeEntry.lock();
+}
+
+void EnumTypeEntry::setAliasTypeEntry(const EnumTypeEntryCPtr &entry)
+{
+    S_D(EnumTypeEntry);
+    d->m_aliasTypeEntry = entry;
 }
 
 TypeEntry *EnumTypeEntry::clone() const

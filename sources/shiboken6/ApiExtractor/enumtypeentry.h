@@ -13,6 +13,12 @@ class EnumTypeEntryPrivate;
 class EnumTypeEntry : public ConfigurableTypeEntry
 {
 public:
+    enum AliasMode : unsigned char {
+        NoAlias,
+        AliasSource, // Source of a C++ alias "using ThatEnum = ThisEnum";
+        AliasTarget // Target of a C++ alias "using ThisEnum = ThatEnum";
+    };
+
     explicit EnumTypeEntry(const QString &entryName,
                            const QVersionNumber &vr,
                            const TypeEntryCPtr &parent);
@@ -39,6 +45,12 @@ public:
 
     QString docFile() const;
     void setDocFile(const QString &df);
+
+    AliasMode aliasMode() const;
+    void setAliasMode(AliasMode am);
+
+    EnumTypeEntryCPtr aliasTypeEntry() const;
+    void setAliasTypeEntry(const EnumTypeEntryCPtr &entry);
 
     TypeEntry *clone() const override;
 #ifndef QT_NO_DEBUG_STREAM

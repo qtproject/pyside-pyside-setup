@@ -814,7 +814,7 @@ bool HeaderGenerator::finishGeneration()
     TextStream privateTypeFunctions(&privateParameters.typeFunctions, TextStream::Language::Cpp);
 
     for (const AbstractMetaEnum &cppEnum : api().globalEnums()) {
-        if (!cppEnum.isAnonymous()) {
+        if (!cppEnum.isAnonymous() && cppEnum.typeEntry()->aliasMode() != EnumTypeEntry::AliasSource) {
             const auto te = cppEnum.typeEntry();
             if (te->hasConfigCondition())
                 parameters.conditionalIncludes[te->configCondition()].append(te->include());
@@ -846,8 +846,10 @@ bool HeaderGenerator::finishGeneration()
 
         ConfigurableScope configScope(typeFunctionsStr, classType);
         for (const AbstractMetaEnum &cppEnum : metaClass->enums()) {
-            if (cppEnum.isAnonymous() || cppEnum.isPrivate())
+            if (cppEnum.isAnonymous() || cppEnum.isPrivate()
+                || cppEnum.typeEntry()->aliasMode() == EnumTypeEntry::AliasSource) {
                 continue;
+            }
             if (const auto inc = cppEnum.typeEntry()->include(); inc != classInclude)
                 par.includes.insert(inc);
             writeProtectedEnumSurrogate(protEnumsSurrogates, cppEnum);

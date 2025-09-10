@@ -21,6 +21,8 @@ enum GlobalEnum {
     ThirdThing
 };
 
+using GlobalEnumAlias = GlobalEnum;
+
 enum GlobalOverloadFuncEnum {
     GlobalOverloadFunc_i,
     GlobalOverloadFunc_d

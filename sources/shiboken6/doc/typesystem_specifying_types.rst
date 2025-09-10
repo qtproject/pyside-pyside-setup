@@ -347,6 +347,23 @@ production of ABI compatible bindings.
 The **flags-revision** attribute has the same purposes of **revision** attribute but
 is used for the QFlag related to this enum.
 
+An enum can also be a C++ type alias:
+
+.. code-block:: c++
+
+    enum Option { Value1 = 0; }
+
+    class SomeClass {
+        public:
+        using OptionAlias = Option;
+    };
+
+In this case, when specifying `<enum-type name="OptionAlias"...>` in
+`SomeClass`, an enumeration `OptionAlias` will be generated into the class. The
+values of `OptionAlias` and `Option` can be used interchangeably. This feature
+is specifically intended for renaming enumerations by deprecating; it works for
+at most one alias.
+
 .. _reject-enum-value:
 
 reject-enum-value

@@ -538,6 +538,15 @@ void AbstractMetaBuilderPrivate::traverseDom(const FileModelItem &dom,
         }
     }
 
+    const auto &globalTypeDefs = dom->typeDefs();
+    for (const auto &typeDef : globalTypeDefs) {
+        if (typeDef->underlyingTypeCategory() == TypeCategory::Enum) {
+            const auto metaEnum = traverseTypedefedEnum(dom, typeDef, {});
+            if (metaEnum.has_value())
+                m_globalEnums.append(metaEnum.value());
+        }
+    }
+
     const auto &namespaceTypeValues = dom->namespaces();
     ReportHandler::startProgress("Generated namespace model ("
                                  + QByteArray::number(namespaceTypeValues.size()) + ").");
@@ -827,11 +836,20 @@ AbstractMetaClassPtr
     // specific typedefs to be used as classes.
     const TypeDefList typeDefs = namespaceItem->typeDefs();
     for (const TypeDefModelItem &typeDef : typeDefs) {
-        const auto cls = traverseTypeDef(dom, typeDef, metaClass);
-        if (cls) {
-            metaClass->addInnerClass(cls);
-            cls->setEnclosingClass(metaClass);
-            addAbstractMetaClass(cls, typeDef.get());
+        switch (typeDef->underlyingTypeCategory()) {
+        case TypeCategory::Enum: {
+            const auto metaEnum = traverseTypedefedEnum(dom, typeDef, metaClass);
+            if (metaEnum.has_value())
+                metaClass->addEnum(metaEnum.value());
+        }
+            break;
+        default:
+            if (const auto cls = traverseTypeDef(dom, typeDef, metaClass)) {
+                metaClass->addInnerClass(cls);
+                cls->setEnclosingClass(metaClass);
+                addAbstractMetaClass(cls, typeDef.get());
+            }
+            break;
         }
     }
 
@@ -861,10 +879,10 @@ std::optional<AbstractMetaEnum>
     QString qualifiedName = enumItem->qualifiedNameString();
 
     TypeEntryPtr typeEntry;
-    const auto enclosingTypeEntry = enclosing ? enclosing->typeEntry() : TypeEntryCPtr{};
     if (enumItem->accessPolicy() == Access::Private) {
+        Q_ASSERT(enclosing);
         typeEntry = std::make_shared<EnumTypeEntry>(enumItem->qualifiedName().constLast(),
-                                                    QVersionNumber(0, 0), enclosingTypeEntry);
+                                                    QVersionNumber(0, 0), enclosing->typeEntry());
         TypeDatabase::instance()->addType(typeEntry);
     } else if (enumItem->enumKind() != AnonymousEnum) {
         typeEntry = TypeDatabase::instance()->findType(qualifiedName);
@@ -880,12 +898,17 @@ std::optional<AbstractMetaEnum>
                 break;
         }
     }
+    return createMetaEnum(enumItem, qualifiedName, typeEntry, enclosing);
+}
 
-    QString enumName = enumItem->name();
-
-    QString className;
-    if (enclosingTypeEntry)
-        className = enclosingTypeEntry->qualifiedCppName();
+std::optional<AbstractMetaEnum>
+    AbstractMetaBuilderPrivate::createMetaEnum(const EnumModelItem &enumItem,
+                                               const QString &qualifiedName,
+                                               const TypeEntryPtr &typeEntry,
+                                               const AbstractMetaClassPtr &enclosing)
+{
+    const QString enumName = enumItem->name();
+    const QString className = enclosing ? enclosing->typeEntry()->qualifiedCppName() : QString{};
 
     QString rejectReason;
     if (TypeDatabase::instance()->isEnumRejected(className, enumName, &rejectReason)) {
@@ -965,6 +988,49 @@ std::optional<AbstractMetaEnum>
     m_enums.insert(typeEntry, metaEnum);
 
     return metaEnum;
+}
+
+// Add typedef'ed enumerations ("Using MyEnum=SomeNamespace::MyEnum") for which
+// a type entry exists.
+std::optional<AbstractMetaEnum>
+    AbstractMetaBuilderPrivate::traverseTypedefedEnum(const FileModelItem &dom,
+                                                      const TypeDefModelItem &typeDefItem,
+                                                      const AbstractMetaClassPtr &enclosing)
+{
+    if (enclosing && typeDefItem->accessPolicy() != Access::Public)
+        return std::nullopt; // Only for global/public enums typedef'ed into classes/namespaces
+    auto modelItem = CodeModel::findItem(typeDefItem->type().qualifiedName(), dom);
+    if (!modelItem || modelItem->kind() != _CodeModelItem::Kind_Enum)
+        return std::nullopt;
+    auto enumItem = std::static_pointer_cast<_EnumModelItem>(modelItem);
+    if (enumItem->accessPolicy() != Access::Public)
+        return std::nullopt;
+    // Name in class
+    QString qualifiedName = enclosing
+        ? enclosing->qualifiedCppName() + "::"_L1 + typeDefItem->name() : typeDefItem->name();
+    auto targetTypeEntry = TypeDatabase::instance()->findType(qualifiedName);
+    if (!targetTypeEntry || !targetTypeEntry->isEnum() || !targetTypeEntry->generateCode())
+        return std::nullopt;
+    auto targetEnumTypeEntry = std::static_pointer_cast<EnumTypeEntry>(targetTypeEntry);
+    auto sourceTypeEntry = TypeDatabase::instance()->findType(enumItem->qualifiedNameString());
+    if (!sourceTypeEntry || !sourceTypeEntry->isEnum())
+        return std::nullopt;
+
+    auto sourceEnumTypeEntry = std::static_pointer_cast<EnumTypeEntry>(sourceTypeEntry);
+    if (sourceEnumTypeEntry == targetEnumTypeEntry) // Reject "typedef Enum1 { V1 } Enum1;"
+        return std::nullopt;
+
+    const QString message = "Enum \""_L1 + qualifiedName + "\" is an alias to \""_L1
+                            + enumItem->qualifiedNameString() + "\"."_L1;
+    ReportHandler::addGeneralMessage(message);
+    auto result = createMetaEnum(enumItem, qualifiedName, targetTypeEntry, enclosing);
+    if (result.has_value()) {
+        targetEnumTypeEntry->setAliasMode(EnumTypeEntry::AliasTarget);
+        targetEnumTypeEntry->setAliasTypeEntry(sourceEnumTypeEntry);
+        sourceEnumTypeEntry->setAliasMode(EnumTypeEntry::AliasSource);
+        sourceEnumTypeEntry->setAliasTypeEntry(targetEnumTypeEntry);
+    }
+    return result;
 }
 
 AbstractMetaClassPtr
@@ -1193,9 +1259,18 @@ AbstractMetaClassPtr AbstractMetaBuilderPrivate::traverseClass(const FileModelIt
     const TypeDefList typeDefs = classItem->typeDefs();
     for (const TypeDefModelItem &typeDef : typeDefs) {
         if (typeDef->accessPolicy() != Access::Private) {
-            if (const auto cls = traverseTypeDef(dom, typeDef, metaClass)) {
-                cls->setEnclosingClass(metaClass);
-                addAbstractMetaClass(cls, typeDef.get());
+            switch (typeDef->underlyingTypeCategory()) {
+            case TypeCategory::Enum: {
+                const auto metaEnum = traverseTypedefedEnum(dom, typeDef, metaClass);
+                if (metaEnum.has_value())
+                    metaClass->addEnum(metaEnum.value());
+            }
+                break;
+            default:
+                if (const auto cls = traverseTypeDef(dom, typeDef, metaClass)) {
+                    cls->setEnclosingClass(metaClass);
+                    addAbstractMetaClass(cls, typeDef.get());
+                }
             }
         }
     }
