@@ -765,7 +765,7 @@ AbstractMetaClassPtr
     AbstractMetaBuilderPrivate::traverseNamespace(const FileModelItem &dom,
                                                   const NamespaceModelItem &namespaceItem)
 {
-    QString namespaceName = currentScope()->qualifiedName().join(u"::"_s);
+    QString namespaceName = currentScope()->qualifiedNameString();
     if (!namespaceName.isEmpty())
         namespaceName.append(u"::"_s);
     namespaceName.append(namespaceItem->name());
@@ -859,7 +859,7 @@ std::optional<AbstractMetaEnum>
                                              const AbstractMetaClassPtr &enclosing,
                                              const QSet<QString> &enumsDeclarations)
 {
-    QString qualifiedName = enumItem->qualifiedName().join(u"::"_s);
+    QString qualifiedName = enumItem->qualifiedNameString();
 
     TypeEntryPtr typeEntry;
     const auto enclosingTypeEntry = enclosing ? enclosing->typeEntry() : TypeEntryCPtr{};

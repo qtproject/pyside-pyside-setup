@@ -171,7 +171,7 @@ static void msgFormatEnumType(Stream &str,
 {
     switch (enumItem->enumKind()) {
     case CEnum:
-        str << "Enum '" << enumItem->qualifiedName().join(u"::"_s) << '\'';
+        str << "Enum '" << enumItem->qualifiedNameString() << '\'';
         break;
     case AnonymousEnum: {
         const EnumeratorList &values = enumItem->enumerators();
@@ -194,7 +194,7 @@ static void msgFormatEnumType(Stream &str,
     }
         break;
     case EnumClass:
-        str << "Scoped enum '" << enumItem->qualifiedName().join(u"::"_s) << '\'';
+        str << "Scoped enum '" << enumItem->qualifiedNameString() << '\'';
         break;
     }
     if (!className.isEmpty())
