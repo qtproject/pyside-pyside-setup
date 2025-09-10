@@ -160,6 +160,11 @@ QStringList _CodeModelItem::qualifiedName() const
     return q;
 }
 
+QString _CodeModelItem::qualifiedNameString() const
+{
+    return qualifiedName().join("::"_L1);
+}
+
 QString _CodeModelItem::name() const
 {
     return m_name;
