@@ -21,11 +21,22 @@
     </namespace-type>
 
     <namespace-type name="QtAudio">
-<!-- FIXME Somehow expose the (typedef'ed) enums from QAudio in QtAudio?
         <enum-type name="Error"/>
         <enum-type name="State"/>
         <enum-type name="VolumeScale"/>
--->
+        <modify-field name="NoError" remove="true"/>
+        <modify-field name="OpenError" remove="true"/>
+        <modify-field name="IOError" remove="true"/>
+        <modify-field name="UnderrunError" remove="true"/>
+        <modify-field name="FatalError" remove="true"/>
+        <modify-field name="ActiveState" remove="true"/>
+        <modify-field name="SuspendedState" remove="true"/>
+        <modify-field name="StoppedState" remove="true"/>
+        <modify-field name="IdleState" remove="true"/>
+        <modify-field name="LinearVolumeScale" remove="true"/>
+        <modify-field name="CubicVolumeScale" remove="true"/>
+        <modify-field name="LogarithmicVolumeScale" remove="true"/>
+        <modify-field name="DecibelVolumeScale" remove="true"/>
     </namespace-type>
 
     <namespace-type name="QtVideo" since="6.7">
