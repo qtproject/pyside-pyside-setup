@@ -1206,11 +1206,21 @@ void _TypeDefModelItem::setType(const TypeInfo &type)
     m_type = type;
 }
 
+Access _TypeDefModelItem::accessPolicy() const
+{
+    return m_accessPolicy;
+}
+
+void _TypeDefModelItem::setAccessPolicy(Access accessPolicy)
+{
+    m_accessPolicy = accessPolicy;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 void _TypeDefModelItem::formatDebug(QDebug &d) const
 {
     _CodeModelItem::formatDebug(d);
-    d << ", type=" << m_type;
+    d << ", " << m_accessPolicy << ", type=" << m_type;
 }
 #endif // !QT_NO_DEBUG_STREAM
 

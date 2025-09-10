@@ -1192,10 +1192,11 @@ AbstractMetaClassPtr AbstractMetaBuilderPrivate::traverseClass(const FileModelIt
     // specific typedefs to be used as classes.
     const TypeDefList typeDefs = classItem->typeDefs();
     for (const TypeDefModelItem &typeDef : typeDefs) {
-        const auto cls = traverseTypeDef(dom, typeDef, metaClass);
-        if (cls) {
-            cls->setEnclosingClass(metaClass);
-            addAbstractMetaClass(cls, typeDef.get());
+        if (typeDef->accessPolicy() != Access::Private) {
+            if (const auto cls = traverseTypeDef(dom, typeDef, metaClass)) {
+                cls->setEnclosingClass(metaClass);
+                addAbstractMetaClass(cls, typeDef.get());
+            }
         }
     }
 

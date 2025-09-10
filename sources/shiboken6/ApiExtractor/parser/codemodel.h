@@ -559,11 +559,15 @@ public:
     TypeInfo type() const;
     void setType(const TypeInfo &type);
 
+    Access accessPolicy() const;
+    void setAccessPolicy(Access accessPolicy);
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug(QDebug &d) const override;
 #endif
 
 private:
+    Access m_accessPolicy = Access::Public;
     TypeInfo m_type;
 };
 

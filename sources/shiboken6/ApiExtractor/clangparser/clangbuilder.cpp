@@ -623,6 +623,7 @@ void BuilderPrivate::addTypeDef(const CXCursor &cursor, const CXType &cxType)
     setFileName(cursor, item.get());
     item->setType(createTypeInfo(cxType));
     item->setScope(m_scope);
+    item->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
     m_scopeStack.back()->addTypeDef(item);
 }
 
