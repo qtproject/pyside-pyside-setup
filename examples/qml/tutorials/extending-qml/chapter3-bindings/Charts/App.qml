@@ -1,4 +1,4 @@
-// Copyright (C) 2016 The Qt Company Ltd.
+// Copyright (C) 2017 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import Charts
@@ -30,11 +30,7 @@ Item {
     }
 
     Text {
-        anchors {
-            bottom: parent.bottom;
-            horizontalCenter: parent.horizontalCenter;
-            bottomMargin: 20
-        }
+        anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter; bottomMargin: 20 }
         text: "Click anywhere to change the chart color"
     }
 }

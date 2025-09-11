@@ -1,0 +1,4 @@
+module Charts
+typeinfo chapter5-listproperties.qmltypes
+depends QtQuick
+App 254.0 App.qml

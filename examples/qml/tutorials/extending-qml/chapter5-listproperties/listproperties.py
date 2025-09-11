@@ -4,11 +4,10 @@ from __future__ import annotations
 
 """PySide6 port of the qml/tutorials/extending-qml/chapter5-listproperties example from Qt v5.x"""
 
-import os
 from pathlib import Path
 import sys
 
-from PySide6.QtCore import Property, QUrl
+from PySide6.QtCore import Property
 from PySide6.QtGui import QGuiApplication, QPen, QPainter, QColor
 from PySide6.QtQml import QmlElement, ListProperty
 from PySide6.QtQuick import QQuickPaintedItem, QQuickView, QQuickItem
@@ -86,8 +85,8 @@ if __name__ == '__main__':
 
     view = QQuickView()
     view.setResizeMode(QQuickView.ResizeMode.SizeRootObjectToView)
-    qml_file = os.fspath(Path(__file__).resolve().parent / 'app.qml')
-    view.setSource(QUrl.fromLocalFile(qml_file))
+    view.engine().addImportPath(Path(__file__).parent)
+    view.loadFromModule("Charts", "App")
     if view.status() == QQuickView.Status.Error:
         sys.exit(-1)
     view.show()
