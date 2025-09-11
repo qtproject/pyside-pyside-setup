@@ -2,14 +2,20 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import QtQuick
+import QtQuick.Controls
 
 ListView {
-    width: 100; height: 100
+    id: listview
+    width: 200; height: 320
+    required model
+    ScrollBar.vertical: ScrollBar { }
 
     delegate: Rectangle {
-        color: model.modelData.color
-        height: 25
-        width: 100
-        Text { text: model.modelData.name }
+        width: listview.width; height: 25
+
+        required color
+        required property string name
+
+        Text { text: parent.name }
     }
 }

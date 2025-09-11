@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import QtQuick
-import QtQuick.Particles 2.0
+import QtQuick.Particles
 
 Rectangle {
     id: root
+    property bool keyDown: false
 
     gradient: Gradient {
-        GradientStop { position: 0; color: mouse.pressed ? "lightsteelblue" : "steelblue" }
+        GradientStop { position: 0; color: mouse.pressed ? "lightsteelblue" : (root.keyDown ? "blue" : "steelblue") }
         GradientStop { position: 1; color: "black" }
     }
 
@@ -158,4 +159,7 @@ Rectangle {
         id: mouse
         anchors.fill: parent
     }
+
+    Keys.onPressed: keyDown = true
+    Keys.onReleased: keyDown = false
 }

@@ -42,8 +42,8 @@ Window {
             position: Qt.vector3d(0, -200, 0)
             source: "#Cylinder"
             scale: Qt.vector3d(2, 0.2, 1)
-            materials: [ DefaultMaterial {
-                    diffuseColor: "red"
+            materials: [ PrincipledMaterial {
+                    baseColor: "red"
                 }
             ]
         }
@@ -52,8 +52,8 @@ Window {
             position: Qt.vector3d(0, 150, 0)
             source: "#Sphere"
 
-            materials: [ DefaultMaterial {
-                    diffuseColor: "blue"
+            materials: [ PrincipledMaterial {
+                    baseColor: "blue"
                 }
             ]
 

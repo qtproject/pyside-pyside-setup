@@ -22,13 +22,13 @@ Item {
         p2: Qt.point(t, 1 - t)
         p3: Qt.point(1 - t, t)
     }
-
     Text {
         anchors.bottom: line.bottom
+
         x: 20
         width: parent.width - 40
         wrapMode: Text.WordWrap
 
-        text: "This curve is a custom scene graph item, implemented using GL_LINE_STRIP"
+        text: qsTr("This curve is a custom scene graph item, implemented using line strips")
     }
 }
