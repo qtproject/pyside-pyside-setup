@@ -27,7 +27,13 @@ For example:
   $ flake8 --config pyside-setup/.flake8 your_file.py
   $ isort your_file.py
 
+Later on, the tool `tools/sync_examples.py` can be used to update the source
+files from Qt C++. Each difference produced by tool needs to checked with care,
+differences in `qmldir` files (`prefer` directive) might apply to C++ only.
 
+Also, be careful not to back-port old Qt Widgets Designer `.ui` files with
+unqualified enumerations. If a `.ui` file has additions, make sure to load and
+save it at least once.
 
 Add a new example
 -----------------
