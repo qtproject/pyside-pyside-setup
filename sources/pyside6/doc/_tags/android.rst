@@ -15,9 +15,9 @@ My tags: Android
     ../examples/example_multimedia_camera.rst
     ../examples/example_qml_editingmodel.rst
     ../examples/example_qml_usingmodel.rst
+    ../examples/example_quick_customitems_painteditem.rst
     ../examples/example_quick_models_objectlistmodel.rst
     ../examples/example_quick_models_stringlistmodel.rst
-    ../examples/example_quick_painteditem.rst
     ../examples/example_quickcontrols_contactslist.rst
     ../examples/example_quickcontrols_gallery.rst
     ../examples/example_widgets_widgets_digitalclock.rst
