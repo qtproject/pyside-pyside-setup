@@ -779,6 +779,7 @@
     <inject-code class="native" position="beginning" file="../glue/qtcore.cpp" snippet="qline-hash"/>
 
     <add-function signature="toTuple" return-type="PyObject*">
+        <modify-argument index="return" pyi-type="PyTuple[int, int, int, int]" />
         <inject-code class="target" position="beginning">
             <insert-template name="to_tuple">
                 <replace from="%TT_FORMAT" to="iiii"/>
@@ -808,6 +809,7 @@
     </add-function>
 
     <add-function signature="toTuple" return-type="PyObject*">
+        <modify-argument index="return" pyi-type="PyTuple[float, float, float, float]" />
         <inject-code class="target" position="beginning">
             <insert-template name="to_tuple">
                 <replace from="%TT_FORMAT" to="dddd"/>
@@ -1075,6 +1077,7 @@
     </add-function>
 
     <add-function signature="toTuple" return-type="PyObject*">
+        <modify-argument index="return" pyi-type="PyTuple[int, int]" />
         <inject-code class="target" position="beginning">
             <insert-template name="to_tuple">
                 <replace from="%TT_FORMAT" to="ii"/>
@@ -1108,6 +1111,7 @@
     </add-function>
 
     <add-function signature="toTuple" return-type="PyObject*">
+        <modify-argument index="return" pyi-type="PyTuple[float, float]" />
         <inject-code class="target" position="beginning">
             <insert-template name="to_tuple">
                 <replace from="%TT_FORMAT" to="dd"/>
@@ -1271,6 +1275,7 @@
     </add-function>
 
     <add-function signature="toTuple" return-type="PyObject*">
+        <modify-argument index="return" pyi-type="PyTuple[int, int]" />
         <inject-code class="target" position="beginning">
             <insert-template name="to_tuple">
                 <replace from="%TT_FORMAT" to="ii"/>
@@ -1304,6 +1309,7 @@
     </add-function>
 
     <add-function signature="toTuple" return-type="PyObject*">
+        <modify-argument index="return" pyi-type="PyTuple[float, float]" />
         <inject-code class="target" position="beginning">
             <insert-template name="to_tuple">
                 <replace from="%TT_FORMAT" to="dd"/>
