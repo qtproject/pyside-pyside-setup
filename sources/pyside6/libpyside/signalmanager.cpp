@@ -353,6 +353,18 @@ void SignalManager::handleMetaCallError()
     Py_SetRecursionLimit(reclimit);
 }
 
+const char *metaObjectCallName(QMetaObject::Call call)
+{
+    static const char *names[] = {
+        "InvokeMetaMethod", "ReadProperty", "WriteProperty", "ResetProperty",
+        "CreateInstance", "IndexOfMethod", "RegisterPropertyMetaType",
+        "RegisterMethodArgumentMetaType", "BindableProperty", "CustomCall",
+        "ConstructInPlace"};
+    constexpr size_t count = sizeof(names)/sizeof(names[0]);
+    static_assert(QMetaObject::ConstructInPlace == count - 1);
+    return call >= 0 && call < count ? names[call] : "<unknown>";
+}
+
 // Handler for QMetaObject::ReadProperty/WriteProperty/ResetProperty:
 int SignalManagerPrivate::qtPropertyMetacall(QObject *object,
                                              QMetaObject::Call call,
@@ -398,7 +410,7 @@ int SignalManagerPrivate::qtPropertyMetacall(QObject *object,
         }
 
         qWarning().noquote().nospace()
-            << "An error occurred executing the property metacall " << call
+            << "An error occurred executing the property metacall " << metaObjectCallName(call)
             << " on property \"" << mp.name() << "\" of " << object;
         handleMetaCallError(object, &result);
     }
