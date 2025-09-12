@@ -5,6 +5,7 @@
 
 #include "autodecref.h"
 #include "sbkstring.h"
+#include "sbkpep.h"
 #include "sbkstaticstrings_p.h"
 
 #include <algorithm>
