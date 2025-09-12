@@ -5,7 +5,7 @@ import sys
 
 from PySide6.QtBluetooth import (QBluetoothDeviceDiscoveryAgent,
                                  QBluetoothDeviceInfo)
-from PySide6.QtQml import QmlElement
+from PySide6.QtQml import QmlElement, QmlUncreatable
 from PySide6.QtCore import QTimer, Property, Signal, Slot, Qt
 
 from bluetoothbaseclass import BluetoothBaseClass
@@ -22,6 +22,7 @@ QML_IMPORT_MAJOR_VERSION = 1
 
 
 @QmlElement
+@QmlUncreatable("This class is not intended to be created directly")
 class DeviceFinder(BluetoothBaseClass):
 
     scanningChanged = Signal()
@@ -57,6 +58,7 @@ class DeviceFinder(BluetoothBaseClass):
                 qApp.requestPermission(permission, self, self.startSearch)  # noqa: F82 1
                 return
             elif permission_status == Qt.PermissionStatus.Denied:
+                self.icon = BluetoothBaseClass.IconType.IconError
                 return
             elif permission_status == Qt.PermissionStatus.Granted:
                 print("[HeartRateGame] Bluetooth Permission Granted")
@@ -75,6 +77,7 @@ class DeviceFinder(BluetoothBaseClass):
 #! [devicediscovery-2]
             self.scanningChanged.emit()
         self.info = "Scanning for devices..."
+        self.icon = BluetoothBaseClass.IconType.IconProgress
 
 #! [devicediscovery-3]
     @Slot(QBluetoothDeviceInfo)
@@ -83,6 +86,7 @@ class DeviceFinder(BluetoothBaseClass):
         if device.coreConfigurations() & QBluetoothDeviceInfo.LowEnergyCoreConfiguration:
             self.m_devices.append(DeviceInfo(device))
             self.info = "Low Energy device found. Scanning more..."
+            self.icon = BluetoothBaseClass.IconType.IconProgress
 #! [devicediscovery-3]
             self.devicesChanged.emit()
 #! [devicediscovery-4]
@@ -97,6 +101,7 @@ class DeviceFinder(BluetoothBaseClass):
             self.error = "Writing or reading from the device resulted in an error."
         else:
             self.error = "An unknown error has occurred."
+        self.icon = BluetoothBaseClass.IconType.IconError
 
     @Slot()
     def scanFinished(self):
@@ -107,11 +112,19 @@ class DeviceFinder(BluetoothBaseClass):
 
         if self.m_devices:
             self.info = "Scanning done."
+            self.icon = BluetoothBaseClass.IconType.IconBluetooth
         else:
             self.error = "No Low Energy devices found."
+            self.icon = BluetoothBaseClass.IconType.IconError
 
         self.scanningChanged.emit()
         self.devicesChanged.emit()
+
+    @Slot()
+    def resetMessages(self):
+        self.error = ""
+        self.info = "Start search to find devices"
+        self.icon = BluetoothBaseClass.IconType.IconSearch
 
     @Slot(str)
     def connectToService(self, address):
@@ -127,7 +140,7 @@ class DeviceFinder(BluetoothBaseClass):
         if currentDevice:
             self.m_deviceHandler.setDevice(currentDevice)
 
-        self.clearMessages()
+        self.resetMessages()
 
     @Property(bool, notify=scanningChanged)
     def scanning(self):

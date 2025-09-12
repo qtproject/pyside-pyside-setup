@@ -6,7 +6,6 @@ import QtQuick
 Rectangle {
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottom: parent.bottom
-    width: parent.width * 0.85
+    width: parent.width
     height: parent.height * 0.05
-    radius: height*0.5
 }

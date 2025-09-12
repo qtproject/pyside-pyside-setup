@@ -11,10 +11,15 @@ GamePage {
 
     errorMessage: deviceHandler.error
     infoMessage: deviceHandler.info
+    iconType: deviceHandler.icon
 
     property real __timeCounter: 0
     property real __maxTimeCount: 60
-    property string relaxText: qsTr("Relax!\nWhen you are ready, press Start. You have %1s time to increase heartrate so much as possible.\nGood luck!").arg(__maxTimeCount)
+
+    readonly property string relaxText: qsTr("Relax!")
+    readonly property string startText: qsTr("When you are ready,\npress Start.")
+    readonly property string instructionText: qsTr("You have %1s time to increase heart\nrate as much as possible.").arg(__maxTimeCount)
+    readonly property string goodLuckText: qsTr("Good luck!")
 
     signal showStatsPage
 
@@ -55,6 +60,10 @@ GamePage {
 
         Rectangle {
             id: circle
+
+            readonly property bool hintVisible: !measurePage.deviceHandler.measuring
+            readonly property real innerSpacing: Math.min(width * 0.05, 25)
+
             anchors.horizontalCenter: parent.horizontalCenter
             width: Math.min(measurePage.width, measurePage.height - GameSettings.fieldHeight * 4)
                    - 2 * GameSettings.fieldMargin
@@ -63,30 +72,127 @@ GamePage {
             color: GameSettings.viewColor
 
             Text {
-                id: hintText
-                anchors.centerIn: parent
-                anchors.verticalCenterOffset: -parent.height * 0.1
+                id: relaxTextBox
+                anchors {
+                    bottom: startTextBox.top
+                    bottomMargin: parent.innerSpacing
+                    horizontalCenter: parent.horizontalCenter
+                }
+                width: parent.width * 0.6
+                height: parent.height * 0.1
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
-                width: parent.width * 0.8
-                height: parent.height * 0.6
-                wrapMode: Text.WordWrap
                 text: measurePage.relaxText
-                visible: !measurePage.deviceHandler.measuring
+                visible: circle.hintVisible
                 color: GameSettings.textColor
                 fontSizeMode: Text.Fit
-                minimumPixelSize: 10
-                font.pixelSize: GameSettings.mediumFontSize
+                font.pixelSize: GameSettings.smallFontSize
+                font.bold: true
             }
 
             Text {
-                id: text
-                anchors.centerIn: parent
-                anchors.verticalCenterOffset: -parent.height * 0.15
-                font.pixelSize: parent.width * 0.45
+                id: startTextBox
+                anchors {
+                    bottom: heart.top
+                    bottomMargin: parent.innerSpacing
+                    horizontalCenter: parent.horizontalCenter
+                }
+                width: parent.width * 0.8
+                height: parent.height * 0.15
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                text: measurePage.startText
+                visible: circle.hintVisible
+                color: GameSettings.textColor
+                fontSizeMode: Text.Fit
+                font.pixelSize: GameSettings.tinyFontSize
+            }
+
+            Text {
+                id: measureTextBox
+                anchors {
+                    bottom: heart.top
+                    horizontalCenter: parent.horizontalCenter
+                }
+                width: parent.width * 0.7
+                height: parent.height * 0.35
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
                 text: measurePage.deviceHandler.hr
                 visible: measurePage.deviceHandler.measuring
+                color: GameSettings.heartRateColor
+                fontSizeMode: Text.Fit
+                font.pixelSize: GameSettings.hugeFontSize
+                font.bold: true
+            }
+
+            Image {
+                id: heart
+                anchors.centerIn: circle
+                width: parent.width * 0.2
+                height: width
+                fillMode: Image.PreserveAspectFit
+                source: "images/heart.png"
+                smooth: true
+                antialiasing: true
+
+                SequentialAnimation {
+                    id: heartAnim
+                    running: measurePage.deviceHandler.measuring
+                    loops: Animation.Infinite
+                    alwaysRunToEnd: true
+                    PropertyAnimation {
+                        target: heart
+                        property: "scale"
+                        to: 1.4
+                        duration: 500
+                        easing.type: Easing.InQuad
+                    }
+                    PropertyAnimation {
+                        target: heart
+                        property: "scale"
+                        to: 1.0
+                        duration: 500
+                        easing.type: Easing.OutQuad
+                    }
+                }
+            }
+
+            Text {
+                id: instructionTextBox
+                anchors {
+                    top: heart.bottom
+                    topMargin: parent.innerSpacing
+                    horizontalCenter: parent.horizontalCenter
+                }
+                width: parent.width * 0.8
+                height: parent.height * 0.15
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                text: measurePage.instructionText
+                visible: circle.hintVisible
                 color: GameSettings.textColor
+                fontSizeMode: Text.Fit
+                font.pixelSize: GameSettings.tinyFontSize
+            }
+
+            Text {
+                id: goodLuckBox
+                anchors {
+                    top: instructionTextBox.bottom
+                    topMargin: parent.innerSpacing
+                    horizontalCenter: parent.horizontalCenter
+                }
+                width: parent.width * 0.6
+                height: parent.height * 0.1
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                text: measurePage.goodLuckText
+                visible: circle.hintVisible
+                color: GameSettings.textColor
+                fontSizeMode: Text.Fit
+                font.pixelSize: GameSettings.smallFontSize
+                font.bold: true
             }
 
             Item {
@@ -101,14 +207,22 @@ GamePage {
                 Text {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width * 0.35
+                    horizontalAlignment: Text.AlignLeft
+                    verticalAlignment: Text.AlignVCenter
                     text: measurePage.deviceHandler.minHR
                     color: GameSettings.textColor
-                    font.pixelSize: GameSettings.hugeFontSize
+                    fontSizeMode: Text.Fit
+                    font.pixelSize: GameSettings.largeFontSize
 
                     Text {
                         anchors.left: parent.left
                         anchors.bottom: parent.top
-                        font.pixelSize: parent.font.pixelSize * 0.8
+                        horizontalAlignment: Text.AlignLeft
+                        verticalAlignment: Text.AlignVCenter
+                        width: parent.width
+                        fontSizeMode: Text.Fit
+                        font.pixelSize: GameSettings.mediumFontSize
                         color: parent.color
                         text: "MIN"
                     }
@@ -117,48 +231,24 @@ GamePage {
                 Text {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
+                    horizontalAlignment: Text.AlignRight
+                    verticalAlignment: Text.AlignVCenter
+                    width: parent.width * 0.35
                     text: measurePage.deviceHandler.maxHR
                     color: GameSettings.textColor
-                    font.pixelSize: GameSettings.hugeFontSize
+                    fontSizeMode: Text.Fit
+                    font.pixelSize: GameSettings.largeFontSize
 
                     Text {
                         anchors.right: parent.right
                         anchors.bottom: parent.top
-                        font.pixelSize: parent.font.pixelSize * 0.8
+                        horizontalAlignment: Text.AlignRight
+                        verticalAlignment: Text.AlignVCenter
+                        width: parent.width
+                        fontSizeMode: Text.Fit
+                        font.pixelSize: GameSettings.mediumFontSize
                         color: parent.color
                         text: "MAX"
-                    }
-                }
-            }
-
-            Image {
-                id: heart
-                anchors.horizontalCenter: minMaxContainer.horizontalCenter
-                anchors.verticalCenter: minMaxContainer.bottom
-                width: parent.width * 0.2
-                height: width
-                source: "images/heart.png"
-                smooth: true
-                antialiasing: true
-
-                SequentialAnimation {
-                    id: heartAnim
-                    running: measurePage.deviceHandler.alive
-                    loops: Animation.Infinite
-                    alwaysRunToEnd: true
-                    PropertyAnimation {
-                        target: heart
-                        property: "scale"
-                        to: 1.2
-                        duration: 500
-                        easing.type: Easing.InQuad
-                    }
-                    PropertyAnimation {
-                        target: heart
-                        property: "scale"
-                        to: 1.0
-                        duration: 500
-                        easing.type: Easing.OutQuad
                     }
                 }
             }
@@ -171,21 +261,43 @@ GamePage {
             width: circle.width
             height: GameSettings.fieldHeight
             radius: GameSettings.buttonRadius
+            border {
+                width: 1
+                color: GameSettings.sliderBorderColor
+            }
 
             Rectangle {
-                height: parent.height
+                anchors {
+                    top: parent.top
+                    topMargin: parent.border.width
+                    left: parent.left
+                    leftMargin: parent.border.width
+                }
+                height: parent.height - 2 * parent.border.width
+                width: Math.min(1.0, measurePage.__timeCounter / measurePage.__maxTimeCount)
+                       * (parent.width - 2 * parent.border.width)
                 radius: parent.radius
                 color: GameSettings.sliderColor
-                width: Math.min(
-                           1.0,
-                           measurePage.__timeCounter / measurePage.__maxTimeCount) * parent.width
+            }
+
+            Image {
+                readonly property int imgSize: GameSettings.fieldHeight * 0.5
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    left: parent.left
+                    leftMargin: GameSettings.fieldMargin * 0.5
+                }
+                source: "images/clock.svg"
+                sourceSize.width: imgSize
+                sourceSize.height: imgSize
+                fillMode: Image.PreserveAspectFit
             }
 
             Text {
                 anchors.centerIn: parent
-                color: "gray"
+                color: GameSettings.sliderTextColor
                 text: (measurePage.__maxTimeCount - measurePage.__timeCounter).toFixed(0) + " s"
-                font.pixelSize: GameSettings.bigFontSize
+                font.pixelSize: GameSettings.smallFontSize
             }
         }
     }
@@ -197,16 +309,17 @@ GamePage {
         anchors.bottomMargin: GameSettings.fieldMargin
         width: circle.width
         height: GameSettings.fieldHeight
-        enabled: !measurePage.deviceHandler.measuring
+        enabled: measurePage.deviceHandler.alive && !measurePage.deviceHandler.measuring
+                 && measurePage.errorMessage === ""
         radius: GameSettings.buttonRadius
 
         onClicked: measurePage.start()
 
         Text {
             anchors.centerIn: parent
-            font.pixelSize: GameSettings.tinyFontSize
+            font.pixelSize: GameSettings.microFontSize
             text: qsTr("START")
-            color: startButton.enabled ? GameSettings.textColor : GameSettings.disabledTextColor
+            color: GameSettings.textDarkColor
         }
     }
 }
