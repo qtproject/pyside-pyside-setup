@@ -9,3 +9,6 @@ application covers the scanning for Bluetooth Low Energy devices,
 connecting to a Heart Rate service on the device, writing
 characteristics and descriptors, and receiving updates from the device
 once the heart rate has changed.
+
+The command line option `--simulator` can be used to run the example against a
+demo server in case no Bluetooth hardware is available.

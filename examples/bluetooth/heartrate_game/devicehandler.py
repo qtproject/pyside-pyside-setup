@@ -69,31 +69,37 @@ class DeviceHandler(BluetoothBaseClass):
             self.m_demoTimer.start()
             self.updateDemoHR()
 
-    @Property(int)
     def addressType(self):
         if self.m_addressType == QLowEnergyController.RemoteAddressType.RandomAddress:
             return DeviceHandler.AddressType.RANDOM_ADDRESS
         return DeviceHandler.AddressType.PUBLIC_ADDRESS
 
-    @addressType.setter
-    def addressType(self, type):
+    @Slot(int)
+    def setAddressType(self, type):
         if type == DeviceHandler.AddressType.PUBLIC_ADDRESS:
             self.m_addressType = QLowEnergyController.RemoteAddressType.PublicAddress
         elif type == DeviceHandler.AddressType.RANDOM_ADDRESS:
             self.m_addressType = QLowEnergyController.RemoteAddressType.RandomAddress
 
+    @Slot()
+    def resetAddressType(self):
+        self.m_addressType = QLowEnergyController.RemoteAddressType.PublicAddress
+
     @Slot(QLowEnergyController.Error)
     def controllerErrorOccurred(self, device):
         self.error = "Cannot connect to remote device."
+        self.icon = BluetoothBaseClass.IconType.IconError
 
     @Slot()
     def controllerConnected(self):
         self.info = "Controller connected. Search services..."
+        self.icon = BluetoothBaseClass.IconType.IconProgress
         self.m_control.discoverServices()
 
     @Slot()
     def controllerDisconnected(self):
         self.error = "LowEnergy controller disconnected"
+        self.icon = BluetoothBaseClass.IconType.IconError
 
     def setDevice(self, device):
         self.clearMessages()
@@ -101,6 +107,7 @@ class DeviceHandler(BluetoothBaseClass):
 
         if simulator():
             self.info = "Demo device connected."
+            self.icon = BluetoothBaseClass.IconType.IconBluetooth
             return
 
         # Disconnect and delete old connection
@@ -152,6 +159,7 @@ class DeviceHandler(BluetoothBaseClass):
     def serviceDiscovered(self, gatt):
         if gatt == QBluetoothUuid(QBluetoothUuid.ServiceClassUuid.HeartRate):
             self.info = "Heart Rate service discovered. Waiting for service scan to be done..."
+            self.icon = BluetoothBaseClass.IconType.IconProgress
             self.m_foundHeartRateService = True
 
 #! [Filter HeartRate service 1]
@@ -159,6 +167,7 @@ class DeviceHandler(BluetoothBaseClass):
     @Slot()
     def serviceScanDone(self):
         self.info = "Service scan done."
+        self.icon = BluetoothBaseClass.IconType.IconProgress
 
         # Delete old service if available
         if self.m_service:
@@ -177,6 +186,8 @@ class DeviceHandler(BluetoothBaseClass):
             self.m_service.discoverDetails()
         else:
             self.error = "Heart Rate Service not found."
+            self.icon = BluetoothBaseClass.IconType.IconError
+
 #! [Filter HeartRate service 2]
 
 # Service functions
@@ -185,8 +196,10 @@ class DeviceHandler(BluetoothBaseClass):
     def serviceStateChanged(self, switch):
         if switch == QLowEnergyService.RemoteServiceDiscovering:
             self.info = "Discovering services..."
+            self.icon = BluetoothBaseClass.IconType.IconProgress
         elif switch == QLowEnergyService.RemoteServiceDiscovered:
             self.info = "Service discovered."
+            self.icon = BluetoothBaseClass.IconType.IconBluetooth
             hrChar = self.m_service.characteristic(
                 QBluetoothUuid(QBluetoothUuid.CharacteristicType.HeartRateMeasurement))
             if hrChar.isValid():
@@ -197,6 +210,7 @@ class DeviceHandler(BluetoothBaseClass):
                                                    QByteArray.fromHex(b"0100"))
             else:
                 self.error = "HR Data not found."
+                self.icon = BluetoothBaseClass.IconType.IconError
         self.aliveChanged.emit()
 #! [Find HRM characteristic]
 
@@ -308,3 +322,5 @@ class DeviceHandler(BluetoothBaseClass):
                                 + (0.2017 * 24)) / 4.184) * 60 * self.time / 3600
 
         self.statsChanged.emit()
+
+    addressType = Property(int, addressType, setAddressType, freset=resetAddressType)

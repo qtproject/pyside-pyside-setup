@@ -13,19 +13,44 @@ GamePage {
         anchors.centerIn: parent
         width: parent.width
 
-        Text {
+        Rectangle {
+            id: resultRect
             anchors.horizontalCenter: parent.horizontalCenter
-            font.pixelSize: GameSettings.hugeFontSize
-            color: GameSettings.textColor
-            text: qsTr("RESULT")
+            width: height
+            height: statsPage.height / 2 - GameSettings.fieldHeight
+            radius: height / 2
+            color: GameSettings.viewColor
+
+            Column {
+                anchors.centerIn: parent
+
+                Text {
+                    id: resultCaption
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: resultRect.width * 0.8
+                    height: resultRect.height * 0.15
+                    horizontalAlignment: Text.AlignHCenter
+                    fontSizeMode: Text.Fit
+                    font.pixelSize: GameSettings.bigFontSize
+                    color: GameSettings.textColor
+                    text: qsTr("RESULT")
+                }
+
+                Text {
+                    id: resultValue
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: resultRect.width * 0.8
+                    height: resultRect.height * 0.4
+                    horizontalAlignment: Text.AlignHCenter
+                    fontSizeMode: Text.Fit
+                    font.pixelSize: GameSettings.hugeFontSize
+                    font.bold: true
+                    color: GameSettings.heartRateColor
+                    text: (statsPage.deviceHandler.maxHR - statsPage.deviceHandler.minHR).toFixed(0)
+                }
+            }
         }
 
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            font.pixelSize: GameSettings.giganticFontSize * 3
-            color: GameSettings.textColor
-            text: (statsPage.deviceHandler.maxHR - statsPage.deviceHandler.minHR).toFixed(0)
-        }
 
         Item {
             height: GameSettings.fieldHeight
