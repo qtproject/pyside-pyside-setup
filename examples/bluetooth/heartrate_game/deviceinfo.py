@@ -27,7 +27,7 @@ class DeviceInfo(QObject):
     @Property(str, notify=deviceChanged)
     def deviceName(self):
         if simulator():
-            return "Demo device"
+            return "Demo BT device"
         return self.m_device.name()
 
     @Property(str, notify=deviceChanged)

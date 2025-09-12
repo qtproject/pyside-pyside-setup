@@ -16,43 +16,39 @@ GamePage {
 
     errorMessage: deviceFinder.error
     infoMessage: deviceFinder.info
+    iconType: deviceFinder.icon
+
+    Text {
+        id: viewCaption
+        anchors {
+            top: parent.top
+            topMargin: GameSettings.fieldMargin + connectPage.messageHeight
+            horizontalCenter: parent.horizontalCenter
+        }
+        width: parent.width - GameSettings.fieldMargin * 2
+        height: GameSettings.fieldHeight
+        horizontalAlignment: Text.AlignLeft
+        verticalAlignment: Text.AlignVCenter
+        color: GameSettings.textColor
+        font.pixelSize: GameSettings.smallFontSize
+        text: qsTr("Found Devices")
+    }
 
     Rectangle {
         id: viewContainer
-        anchors.top: parent.top
+        anchors.top: viewCaption.bottom
         // only BlueZ platform has address type selection
         anchors.bottom: connectPage.connectionHandler.requiresAddressType ? addressTypeButton.top
                                                                           : searchButton.top
-        anchors.topMargin: GameSettings.fieldMargin + connectPage.messageHeight
         anchors.bottomMargin: GameSettings.fieldMargin
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width - GameSettings.fieldMargin * 2
         color: GameSettings.viewColor
         radius: GameSettings.buttonRadius
 
-        Text {
-            id: title
-            width: parent.width
-            height: GameSettings.fieldHeight
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            color: GameSettings.textColor
-            font.pixelSize: GameSettings.mediumFontSize
-            text: qsTr("FOUND DEVICES")
-
-            BottomLine {
-                height: 1
-                width: parent.width
-                color: "#898989"
-            }
-        }
-
         ListView {
             id: devices
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.top: title.bottom
+            anchors.fill: parent
             model: connectPage.deviceFinder.devices
             clip: true
 
@@ -76,22 +72,22 @@ GamePage {
 
                 Text {
                     id: device
-                    font.pixelSize: GameSettings.smallFontSize
+                    font.pixelSize: GameSettings.microFontSize
                     text: box.modelData.deviceName
                     anchors.top: parent.top
-                    anchors.topMargin: parent.height * 0.1
-                    anchors.leftMargin: parent.height * 0.1
+                    anchors.topMargin: parent.height * 0.15
+                    anchors.leftMargin: parent.height * 0.15
                     anchors.left: parent.left
                     color: GameSettings.textColor
                 }
 
                 Text {
                     id: deviceAddress
-                    font.pixelSize: GameSettings.smallFontSize
+                    font.pixelSize: GameSettings.microFontSize
                     text: box.modelData.deviceAddress
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: parent.height * 0.1
-                    anchors.rightMargin: parent.height * 0.1
+                    anchors.bottomMargin: parent.height * 0.15
+                    anchors.rightMargin: parent.height * 0.15
                     anchors.right: parent.right
                     color: Qt.darker(GameSettings.textColor)
                 }
@@ -114,19 +110,19 @@ GamePage {
             State {
                 name: "public"
                 PropertyChanges {
-                    addressTypeText.text: qsTr("Public Address")
+                    addressTypeText.text: qsTr("PUBLIC ADDRESS")
                 }
                 PropertyChanges {
-                    connectPage.deviceHandler.addressType: DeviceHandler.PUBLIC_ADDRESS
+                    connectPage.deviceHandler.addressType: DeviceHandler.PublicAddress
                 }
             },
             State {
                 name: "random"
                 PropertyChanges {
-                    addressTypeText.text: qsTr("Random Address")
+                    addressTypeText.text: qsTr("RANDOM ADDRESS")
                 }
                 PropertyChanges {
-                    connectPage.deviceHandler.addressType: DeviceHandler.RANDOM_ADDRESS
+                    connectPage.deviceHandler.addressType: DeviceHandler.RandomAddress
                 }
             }
         ]
@@ -134,8 +130,8 @@ GamePage {
         Text {
             id: addressTypeText
             anchors.centerIn: parent
-            font.pixelSize: GameSettings.tinyFontSize
-            color: GameSettings.textColor
+            font.pixelSize: GameSettings.microFontSize
+            color: GameSettings.textDarkColor
         }
     }
 
@@ -151,9 +147,9 @@ GamePage {
 
         Text {
             anchors.centerIn: parent
-            font.pixelSize: GameSettings.tinyFontSize
+            font.pixelSize: GameSettings.microFontSize
             text: qsTr("START SEARCH")
-            color: searchButton.enabled ? GameSettings.textColor : GameSettings.disabledTextColor
+            color: GameSettings.textDarkColor
         }
     }
 }

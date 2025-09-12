@@ -52,7 +52,7 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 wrapMode: Text.WordWrap
-                font.pixelSize: GameSettings.mediumFontSize
+                font.pixelSize: GameSettings.smallFontSize
                 color: GameSettings.textColor
                 text: root.permissionError
                       ? qsTr("Bluetooth permissions are not granted. Please grant the permissions in the system settings.")
@@ -70,8 +70,8 @@ Item {
                 Text {
                     anchors.centerIn: parent
                     color: GameSettings.textColor
-                    font.pixelSize: GameSettings.bigFontSize
-                    text: qsTr("Quit")
+                    font.pixelSize: GameSettings.microFontSize
+                    text: qsTr("QUIT")
                 }
             }
         }

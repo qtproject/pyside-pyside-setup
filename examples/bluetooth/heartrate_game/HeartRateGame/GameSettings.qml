@@ -4,35 +4,49 @@
 pragma Singleton
 import QtQuick
 
-Item {
+QtObject {
     property int wHeight
     property int wWidth
 
     // Colors
-    readonly property color backgroundColor: "#2d3037"
-    readonly property color buttonColor: "#202227"
-    readonly property color buttonPressedColor: "#6ccaf2"
-    readonly property color disabledButtonColor: "#555555"
-    readonly property color viewColor: "#202227"
-    readonly property color delegate1Color: Qt.darker(viewColor, 1.2)
-    readonly property color delegate2Color: Qt.lighter(viewColor, 1.2)
+    readonly property color lightGreenColor: "#80ebb6"
+    readonly property color backgroundColor: "#2c3038"
+    readonly property color buttonColor: "#2cde85"
+    readonly property color buttonPressedColor: lightGreenColor
+    readonly property color disabledButtonColor: "#808080"
+    readonly property color viewColor: "#262626"
+    readonly property color delegate1Color: "#262626"
+    readonly property color delegate2Color: "#404040"
     readonly property color textColor: "#ffffff"
-    readonly property color textDarkColor: "#232323"
-    readonly property color disabledTextColor: "#777777"
-    readonly property color sliderColor: "#6ccaf2"
+    readonly property color textDarkColor: "#0d0d0d"
+    readonly property color textInfoColor: lightGreenColor
+    readonly property color sliderColor: "#00414a"
+    readonly property color sliderBorderColor: lightGreenColor
+    readonly property color sliderTextColor: lightGreenColor
     readonly property color errorColor: "#ba3f62"
-    readonly property color infoColor: "#3fba62"
+    readonly property color infoColor: lightGreenColor
+    readonly property color titleColor: "#202227"
+    readonly property color selectedTitleColor: "#19545c"
+    readonly property color hoverTitleColor: Qt.rgba(selectedTitleColor.r,
+                                                     selectedTitleColor.g,
+                                                     selectedTitleColor.b,
+                                                     0.25)
+    readonly property color bottomLineColor: "#e6e6e6"
+    readonly property color heartRateColor: "#f80067"
+
+    // All the fonts are given for the window of certain size.
+    // Resizing the window changes all the fonts accordingly
+    readonly property int defaultSize: 500
+    readonly property real fontScaleFactor: Math.min(wWidth, wHeight) / defaultSize
 
     // Font sizes
-    property real microFontSize: hugeFontSize * 0.2
-    property real tinyFontSize: hugeFontSize * 0.4
-    property real smallTinyFontSize: hugeFontSize * 0.5
-    property real smallFontSize: hugeFontSize * 0.6
-    property real mediumFontSize: hugeFontSize * 0.7
-    property real bigFontSize: hugeFontSize * 0.8
-    property real largeFontSize: hugeFontSize * 0.9
-    property real hugeFontSize: (wWidth + wHeight) * 0.03
-    property real giganticFontSize: (wWidth + wHeight) * 0.04
+    readonly property real microFontSize: 16 * fontScaleFactor
+    readonly property real tinyFontSize: 20 * fontScaleFactor
+    readonly property real smallFontSize: 24 * fontScaleFactor
+    readonly property real mediumFontSize: 32 * fontScaleFactor
+    readonly property real bigFontSize: 36 * fontScaleFactor
+    readonly property real largeFontSize: 54 * fontScaleFactor
+    readonly property real hugeFontSize: 128 * fontScaleFactor
 
     // Some other values
     property real fieldHeight: wHeight * 0.08
@@ -41,10 +55,6 @@ Item {
     property real buttonRadius: buttonHeight * 0.1
 
     // Some help functions
-    function widthForHeight(h, ss) {
-        return h / ss.height * ss.width
-    }
-
     function heightForWidth(w, ss) {
         return w / ss.width * ss.height
     }

@@ -23,7 +23,7 @@ Item {
     Timer {
         id: splashTimer
         interval: 1000
-        onTriggered: splashIsReady = true
+        onTriggered: root.splashIsReady = true
     }
 
     Component.onCompleted: splashTimer.start()

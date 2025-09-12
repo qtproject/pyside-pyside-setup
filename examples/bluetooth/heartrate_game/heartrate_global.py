@@ -8,7 +8,6 @@ _simulator = False
 
 
 def simulator():
-    global _simulator
     return _simulator
 
 

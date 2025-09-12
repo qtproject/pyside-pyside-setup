@@ -15,6 +15,7 @@ from PySide6.QtCore import QCoreApplication, QLoggingCategory
 from connectionhandler import ConnectionHandler
 from devicefinder import DeviceFinder
 from devicehandler import DeviceHandler
+from bluetoothbaseclass import BluetoothBaseClass  # noqa: F401
 from heartrate_global import set_simulator
 
 
