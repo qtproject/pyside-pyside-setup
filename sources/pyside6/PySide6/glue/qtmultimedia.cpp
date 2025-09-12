@@ -26,15 +26,3 @@ const auto size = %CPPSELF.byteCount();
 const float result = QtAudio::convertVolume(%1, %2, %3);
 %PYARG_0 = %CONVERTTOPYTHON[float](result);
 // @snippet qaudio-convertvolume
-
-// @snippet qtaudio-namespace-import-enums
-Shiboken::AutoDecRef qAudio(PyObject_GetAttrString(module, "QAudio"));
-if (!qAudio.isNull()) {
-    Shiboken::AutoDecRef qAudioTypeDict(PepType_GetDict(reinterpret_cast<PyTypeObject *>(qAudio.object())));
-    Shiboken::AutoDecRef qtAudioTypeDict(PepType_GetDict(pyType));
-    for (const auto *oldEnum : {"Error", "State", "VolumeScale"}) {
-        if (auto *enumType = PyDict_GetItemString(qAudioTypeDict, oldEnum))
-            PyDict_SetItemString(qtAudioTypeDict, oldEnum, enumType);
-    }
-}
-// @snippet qtaudio-namespace-import-enums
