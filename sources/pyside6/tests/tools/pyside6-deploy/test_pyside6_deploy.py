@@ -330,11 +330,6 @@ class TestPySide6DeployQml(DeployTestBase):
         expected_modules = {"Core", "Gui", "Qml", "Quick", "Network", "OpenGL", "QmlModels",
                             "QmlWorkerScript", "QmlMeta"}
 
-        # Exclude OpenGL if the platform is Windows and architecture is aarch64
-        # https://bugreports.qt.io/browse/QTBUG-126030
-        if sys.platform == "win32" and platform.machine() == "ARM64":
-            expected_modules.remove("OpenGL")
-
         if sys.platform != "win32":
             expected_modules.add("DBus")
         obtained_modules = set(config_obj.get_value("qt", "modules").split(","))
@@ -460,7 +455,7 @@ class TestPySide6DeployWebEngine(DeployTestBase):
 
         # Exclude specific modules if the platform is Windows and architecture is aarch64
         if sys.platform == "win32" and platform.machine() == "ARM64":
-            excluded_modules = {"OpenGL", "WebEngineCore", "Positioning", "WebChannelQuick",
+            excluded_modules = {"WebEngineCore", "Positioning", "WebChannelQuick",
                                 "WebChannel"}
             expected_modules.difference_update(excluded_modules)
 
