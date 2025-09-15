@@ -31,6 +31,9 @@ accept_configuration:
         - condition: property
           property: target.osVersion
           not_equals_value: VxWorks
+        - condition: property
+          property: host.osVersion
+          not_equals_value: Windows_11_22H2
     - condition: and
       conditions:
         - condition: property
