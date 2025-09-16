@@ -16,7 +16,7 @@ ApplicationWindow {
         id: menuBar
 
         dragWindow: root
-        implicitHeight: 27
+        implicitHeight: 30
         infoText: "About Qt"
     }
 

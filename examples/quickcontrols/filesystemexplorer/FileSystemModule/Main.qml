@@ -1,6 +1,5 @@
 // Copyright (C) 2023 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
-
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
@@ -22,7 +21,7 @@ ApplicationWindow {
     visible: true
     color: Colors.background
     flags: Qt.Window | Qt.FramelessWindowHint
-    title: qsTr("File System Explorer Example")
+    title: qsTr("File System Explorer")
 
     function getInfoText() : string {
         let out = root.currentFilePath

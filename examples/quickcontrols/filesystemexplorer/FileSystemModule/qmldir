@@ -1,8 +1,9 @@
 module FileSystemModule
+
 Main 1.0 Main.qml
 About 1.0 qml/About.qml
-Editor 1.0 qml/Editor.qml
 MyMenu 1.0 qml/MyMenu.qml
+Editor 1.0 qml/Editor.qml
 Sidebar 1.0 qml/Sidebar.qml
 MyMenuBar 1.0 qml/MyMenuBar.qml
 singleton Colors 1.0 qml/Colors.qml
