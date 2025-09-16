@@ -63,46 +63,47 @@ Rectangle {
         }
 
         Label {
-            text: activeMatch + "/" + numberOfMatches
-            visible: findTextField.text != ""
+            text: root.activeMatch + "/" + root.numberOfMatches
+            visible: findTextField.text !== ""
             color: "black"
         }
 
         Rectangle {
             border.width: 1
-            border.color: "#ddd"
-            width: 2
-            height: parent.height
-            anchors.topMargin: 5
-            anchors.bottomMargin: 5
+            border.color: "#dddddd"
+            Layout.preferredWidth: 2
+            Layout.preferredHeight: parent.height
         }
 
         ToolButton {
+            id: findBtnLeft
             text: "<"
-            enabled: numberOfMatches > 0
+            enabled: root.numberOfMatches > 0
             onClicked: root.findPrevious()
             contentItem: Text {
                 color: "black"
-                text: parent.text
+                text: findBtnLeft.text
             }
         }
 
         ToolButton {
+            id: findBtnRight
             text: ">"
-            enabled: numberOfMatches > 0
+            enabled: root.numberOfMatches > 0
             onClicked: root.findNext()
             contentItem: Text {
                 color: "black"
-                text: parent.text
+                text: findBtnRight.text
             }
         }
 
         ToolButton {
+            id: findBtnClose
             text: "x"
             onClicked: root.visible = false
             contentItem: Text {
                 color: "black"
-                text: parent.text
+                text: findBtnClose.text
             }
         }
     }

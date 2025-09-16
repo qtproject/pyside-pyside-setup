@@ -1,10 +1,10 @@
 // Copyright (C) 2022 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls.Fusion
-import QtWebEngine
-import QtQuick.Layouts
 
 Rectangle {
     id: downloadView
@@ -25,20 +25,26 @@ Rectangle {
         id: downloadItemDelegate
 
         Rectangle {
+            id: downloadItem
             width: listView.width
             height: childrenRect.height
             anchors.margins: 10
             radius: 3
             color: "transparent"
             border.color: "black"
+
+            required property int index
+
             Rectangle {
                 id: progressBar
 
-                property real progress: downloadModel.downloads[index]
-                                       ? downloadModel.downloads[index].receivedBytes / downloadModel.downloads[index].totalBytes : 0
+                property real progress: {
+                    let d = downloadModel.downloads[downloadItem.index]
+                    return d ? d.receivedBytes / d.totalBytes : 0
+                }
 
                 radius: 3
-                color: width == listView.width ? "green" : "#2b74c7"
+                color: width === listView.width ? "green" : "#2b74c7"
                 width: listView.width * progress
                 height: cancelButton.height
 
@@ -54,7 +60,10 @@ Rectangle {
                 }
                 Label {
                     id: label
-                    text: downloadModel.downloads[index] ? downloadModel.downloads[index].downloadDirectory + "/" + downloadModel.downloads[index].downloadFileName : qsTr("")
+                    text: {
+                        let d = downloadModel.downloads[downloadItem.index]
+                        return d ? d.downloadDirectory + "/" + d.downloadFileName : qsTr("")
+                    }
                     anchors {
                         verticalCenter: cancelButton.verticalCenter
                         left: parent.left
@@ -64,16 +73,16 @@ Rectangle {
                 Button {
                     id: cancelButton
                     anchors.right: parent.right
-                    icon.source: "qrc:/icons/process-stop.png"
+                    icon.source: "icons/3rdparty/process-stop.png"
                     onClicked: {
-                        var download = downloadModel.downloads[index];
+                        var download = downloadModel.downloads[downloadItem.index];
 
                         download.cancel();
 
                         downloadModel.downloads = downloadModel.downloads.filter(function (el) {
                             return el.id !== download.id;
                         });
-                        downloadModel.remove(index);
+                        downloadModel.remove(downloadItem.index);
                     }
                 }
             }
