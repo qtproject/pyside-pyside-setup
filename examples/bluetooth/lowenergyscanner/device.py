@@ -82,7 +82,8 @@ class Device(QObject):
 
     @Property(bool)
     def controller_error(self):
-        return self.controller and (self.controller.error() != QLowEnergyController.NoError)
+        return (self.controller is not None
+                and (self.controller.error() != QLowEnergyController.NoError))
 
     @Slot()
     def start_device_discovery(self):

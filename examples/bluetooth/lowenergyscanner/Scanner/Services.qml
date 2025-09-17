@@ -39,14 +39,14 @@ Rectangle {
 
     Connections {
         target: Device
-        function onservices_updated() {
+        function onServices_updated() {
             if (servicesview.count === 0)
                 info.dialogText = "No services found"
             else
                 info.visible = false
         }
 
-        function ondisconnected() {
+        function onDisconnected() {
             servicesPage.showDevices()
         }
     }
