@@ -50,7 +50,7 @@ def change_log(version: list) -> Path:
 
 
 def is_lts_version(version: list) -> bool:
-    return version[0] == 5 or version[1] in (2, 5)
+    return version[0] == 5 or version[1] in (2, 5, 8)
 
 
 def version_tag(version: list) -> str:
