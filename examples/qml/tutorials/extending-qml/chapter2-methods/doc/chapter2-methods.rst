@@ -5,10 +5,10 @@ This is the second of a series of 6 examples forming a tutorial about extending
 QML with Python.
 
 Suppose we want ``PieChart`` to have a ``clearChart()`` method that erases the
-chart and then emits a ``chartCleared`` signal. Our ``app.qml`` would be able
+chart and then emits a ``chartCleared`` signal. Our ``App.qml`` would be able
 to call ``clearChart()`` and receive ``chartCleared()`` signals like this:
 
-.. literalinclude:: app.qml
+.. literalinclude:: Charts/App.qml
     :lineno-start: 4
     :lines: 4-32
 

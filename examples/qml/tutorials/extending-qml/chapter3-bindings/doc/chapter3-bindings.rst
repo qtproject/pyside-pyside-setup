@@ -11,7 +11,7 @@ other types' values when property values are changed.
 Let's enable property bindings for the ``color`` property. That means if we
 have code like this:
 
-.. literalinclude:: app.qml
+.. literalinclude:: Charts/App.qml
     :lineno-start: 7
     :lines: 7-40
 

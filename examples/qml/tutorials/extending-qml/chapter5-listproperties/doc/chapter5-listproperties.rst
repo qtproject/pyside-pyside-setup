@@ -8,7 +8,7 @@ Right now, a ``PieChart`` can only have one ``PieSlice.`` Ideally a chart would
 have multiple slices, with different colors and sizes. To do this, we could
 have a ``slices`` property that accepts a list of ``PieSlice`` items:
 
-.. literalinclude:: app.qml
+.. literalinclude:: Charts/App.qml
    :lineno-start: 4
    :lines: 4-32
 

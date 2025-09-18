@@ -72,17 +72,17 @@ drawing operations with the ``QPainter`` API, we can just subclass
 The ``PieChart`` class defines the two properties, ``name`` and ``color``, with
 the ``Property`` decorator, and overrides ``QQuickPaintedItem.paint()``. The
 ``PieChart`` class is registered using the :deco:`~PySide6.QtQml.QmlElement`
-decorator, to allow it to be used from QML. If you don't register the class, ``app.qml``
+decorator, to allow it to be used from QML. If you don't register the class, ``App.qml``
 won't be able to create a ``PieChart``.
 
 QML Usage
 ---------
 
 Now that we have defined the ``PieChart`` type, we will use it from QML. The
-``app.qml`` file creates a ``PieChart`` item and displays the pie chart's details
+``App.qml`` file creates a ``PieChart`` item and displays the pie chart's details
 using a standard QML ``Text`` item:
 
-.. literalinclude:: app.qml
+.. literalinclude:: Charts/App.qml
     :lineno-start: 7
     :lines: 7-26
 
@@ -93,7 +93,7 @@ For example, a string like "640x480" can be automatically converted to a
 ``QSize`` value.
 
 We'll also create a main function that uses a :class:`~PySide6.QtQuick.QQuickView`
-to run and display ``app.qml``. Here is the application ``basics.py``:
+to run and display ``App.qml``. Here is the application ``basics.py``:
 
 .. literalinclude:: basics.py
     :lineno-start: 54

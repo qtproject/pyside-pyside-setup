@@ -41,7 +41,7 @@ For example, let's replace the use of the ``property`` with a type called
 ``PieSlice`` that has a ``color`` property. Instead of assigning a color,
 we assign an ``PieSlice`` value which itself contains a ``color``:
 
-.. literalinclude:: app.qml
+.. literalinclude:: Charts/App.qml
     :lineno-start: 4
     :lines: 4-22
 
