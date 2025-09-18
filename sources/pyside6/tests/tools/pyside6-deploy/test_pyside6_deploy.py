@@ -390,6 +390,7 @@ class TestPySide6DeployWebEngine(DeployTestBase):
             "DownloadView.qml",
             "FindBar.qml",
             "FullScreenNotification.qml",
+            "WebAuthDialog.qml"
         ]
         data_files_cmd = " ".join(
             [
