@@ -1,0 +1,50 @@
+Qt for Python 6.8.5 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - [PYSIDE-3147] Initial adaptations for the upcoming Python version 3.14
+                 have been done.
+ - [PYSIDE-2193] A crash retrieving a Python type QObject property
+                 (encapsulated in a QVariant) been fixed.
+ - [PYSIDE-2308] type hints: The type annotation of the notify parameter of
+                 QtCore.Property has been corrected.
+ - [PYSIDE-2956] The missing 3DQuickLogic plugin has been added.
+ - [PYSIDE-3047] type hints: The type annotations of QPolygon(F)'s
+                 operator<< have been corrected.
+ - [PYSIDE-3048] type hints: The type annotations now contain enum values.
+ - [PYSIDE-3146] Deployment: Values generated into pysidedeploy.spec are
+                 now sorted.
+ - [PYSIDE-3147] Fix charts examples to run with Python 3.14
+ - [PYSIDE-3148] A memory corruption occurring when connecting several
+                 signals to one non-QObject receiver has been fixed.
+ - [PYSIDE-3162] type hints: The 'from __future__ import annotations' have
+                 been removed from the stub files.
+ - [PYSIDE-3163] type hints: The mypy comment has been removed from the
+                 docstring.
+ - [PYSIDE-2206] The QtBluetooth/heartrate_game example has been updated.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-3144] A crash occurring when no source class can be found for
+                 typedef typesystem entries has been fixed.
+ - [PYSIDE-3173] A crash when encountering UTF-8 encoding errors has been
+                 changed to a fatal error.
+ - [PYSIDE-3175] A crash occurring when the typesystem's package attribute
+                 is missing has been fixed.
