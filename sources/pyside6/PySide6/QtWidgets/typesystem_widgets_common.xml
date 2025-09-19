@@ -233,7 +233,7 @@
   <object-type name="QLayoutItem">
 
     <modify-function signature="widget()const">
-      <modify-argument index="return">
+      <modify-argument index="return" pyi-type="Optional[QWidget]">
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
@@ -245,7 +245,7 @@
     </modify-function>
 
     <modify-function signature="spacerItem()">
-      <modify-argument index="return">
+      <modify-argument index="return" pyi-type="Optional[QSpacerItem]">
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
