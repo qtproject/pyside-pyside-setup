@@ -69,9 +69,10 @@ State init()
     Py_Initialize();
     qAddPostRoutine(cleanup);
     state = PythonInitialized;
-    const bool pythonInitialized = PyInit_AppLib() != nullptr;
+    auto *appLibModule = PyImport_ImportModule("AppLib");
     const bool pyErrorOccurred = PyErr_Occurred() != nullptr;
-    if (pythonInitialized && !pyErrorOccurred) {
+    if (appLibModule != nullptr && !pyErrorOccurred) {
+        Py_DECREF(appLibModule);
         state = AppModuleLoaded;
     } else {
         if (pyErrorOccurred)

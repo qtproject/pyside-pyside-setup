@@ -17,6 +17,13 @@ information about a particular change.
 *                                  PySide6                                 *
 ****************************************************************************
 
+PySide now uses multi-phase Python extension module initialization for the
+non-deployed case. For scripting appplications, this implies that it is no
+longer sufficient to call the Init() function of a module to load the module
+in order to be able to access its type structs for binding variables.
+Instead, PyImport_ImportModule() must be used (see scriptable application
+example).
+
  - [PYSIDE-1735] @QEnum, @QFlag and QMetaEnum now support unsigned 64 bit
                  values for QML usage (with the exception of Qt Widgets
                  Designer), following the support added to Qt.
