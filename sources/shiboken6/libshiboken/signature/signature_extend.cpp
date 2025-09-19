@@ -82,7 +82,7 @@ PyObject *pyside_md_get___signature__(PyObject *ob_md, PyObject *modifier)
     if (func.object() == Py_None)
         Py_RETURN_NONE;
     if (func.isNull())
-        Py_FatalError("missing mapping in MethodDescriptor");
+        Py_FatalError("libshiboken: missing mapping in MethodDescriptor");
     return pyside_cf_get___signature__(func, modifier);
 }
 

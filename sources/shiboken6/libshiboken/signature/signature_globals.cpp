@@ -131,7 +131,7 @@ static safe_globals_struc *init_phase_1()
     } while (false);
 
     PyErr_Print();
-    Py_FatalError("could not initialize part 1");
+    Py_FatalError("libshiboken/signature: could not initialize part 1");
     return nullptr;
 }
 
@@ -209,7 +209,7 @@ static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
     } while (0);
 
     PyErr_Print();
-    Py_FatalError("could not initialize part 2");
+    Py_FatalError("libshiboken/signature: could not initialize part 2");
     return -1;
 }
 

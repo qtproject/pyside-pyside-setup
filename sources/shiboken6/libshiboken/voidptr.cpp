@@ -297,7 +297,7 @@ static int voidPointerInitialized = false;
 void init()
 {
     if (PyType_Ready(SbkVoidPtr_TypeF()) < 0)
-        Py_FatalError("[libshiboken] Failed to initialize Shiboken.VoidPtr type.");
+        Py_FatalError("libshiboken: Failed to initialize Shiboken.VoidPtr type.");
     else
         voidPointerInitialized = true;
 }

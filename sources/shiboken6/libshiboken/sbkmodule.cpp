@@ -587,7 +587,7 @@ bool replaceModuleDict(PyObject *module, PyObject *modClass, PyObject *dict)
     auto *modict = PyModule_GetDict(module);
     auto *modIntern = reinterpret_cast<StartOf_PyModuleObject *>(module);
     if (modict != modIntern->md_dict)
-        Py_FatalError("The layout of modules is incompatible");
+        Py_FatalError("libshiboken: The layout of modules is incompatible");
     auto *hold = modIntern->md_dict;
     modIntern->md_dict = dict;
     Py_INCREF(dict);

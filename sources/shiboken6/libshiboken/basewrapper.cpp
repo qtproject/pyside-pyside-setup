@@ -871,7 +871,7 @@ void _initMainThreadId(); // helper.cpp
 static std::string msgFailedToInitializeType(const char *description)
 {
     std::ostringstream stream;
-    stream << "[libshiboken] Failed to initialize " << description;
+    stream << "libshiboken: Failed to initialize " << description;
     if (auto *error = PepErr_GetRaisedException()) {
         if (auto *str = PyObject_Str(error))
             stream << ": " << Shiboken::String::toCString(str);
@@ -924,7 +924,7 @@ void initShibokenSupport(PyObject *module)
     init_shibokensupport_module();
 
     if (InitSignatureStrings(type, SbkObject_SignatureStrings) < 0)
-        Py_FatalError("Error in initShibokenSupport");
+        Py_FatalError("libshiboken: Error in initShibokenSupport");
 }
 
 // setErrorAboutWrongArguments now gets overload info from the signature module.

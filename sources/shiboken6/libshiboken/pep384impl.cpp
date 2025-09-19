@@ -148,7 +148,7 @@ check_PyTypeObject_valid()
         || probe_tp_bases           != typetype->tp_bases
         || probe_tp_mro             != typetype->tp_mro
         || Py_TPFLAGS_DEFAULT       != (check->tp_flags & Py_TPFLAGS_DEFAULT))
-        Py_FatalError("The structure of type objects has changed!");
+        Py_FatalError("libshiboken: The structure of type objects has changed!");
     Py_DECREF(checkObj);
     Py_DECREF(probe_tp_base_obj);
     Py_DECREF(w);
@@ -551,7 +551,7 @@ static PyTypeObject *dt_getCheck(const char *name)
     PyObject *op = PyObject_GetAttrString(PyDateTimeAPI->module, name);
     if (op == nullptr) {
         fprintf(stderr, "datetime.%s not found\n", name);
-        Py_FatalError("aborting");
+        Py_FatalError("libshiboken: error initializing DateTime support, aborting");
     }
     return reinterpret_cast<PyTypeObject *>(op);
 }
@@ -565,10 +565,10 @@ init_DateTime(void)
     if (!initialized) {
         PyDateTimeAPI = (datetime_struc *)malloc(sizeof(datetime_struc));
         if (PyDateTimeAPI == nullptr)
-            Py_FatalError("PyDateTimeAPI malloc error, aborting");
+            Py_FatalError("libshiboken: PyDateTimeAPI malloc error, aborting");
         PyDateTimeAPI->module = PyImport_ImportModule("datetime");
         if (PyDateTimeAPI->module == nullptr)
-            Py_FatalError("datetime module not found, aborting");
+            Py_FatalError("libshiboken: datetime module not found, aborting");
         PyDateTimeAPI->DateType     = dt_getCheck("date");
         PyDateTimeAPI->DateTimeType = dt_getCheck("datetime");
         PyDateTimeAPI->TimeType     = dt_getCheck("time");
@@ -816,10 +816,10 @@ Pep_GetPartialFunction(void)
         functools = PyImport_ImportModule("functools");
     }
     if (!functools)
-        Py_FatalError("functools cannot be found");
+        Py_FatalError("libshiboken: functools cannot be found");
     result = PyObject_GetAttrString(functools, "partial");
     if (!result || !PyCallable_Check(result))
-        Py_FatalError("partial not found or not a function");
+        Py_FatalError("libshiboken: partial not found or not a function");
     initialized = true;
     return result;
 }

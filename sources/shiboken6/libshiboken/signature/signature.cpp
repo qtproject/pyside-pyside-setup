@@ -70,7 +70,7 @@ PyObject *GetClassOrModOf(PyObject *ob)
         return _get_class_of_descr(ob);
     if (Py_TYPE(ob) == &PyWrapperDescr_Type)
         return _get_class_of_descr(ob);
-    Py_FatalError("unexpected type in GetClassOrModOf");
+    Py_FatalError("libshiboken: unexpected type in GetClassOrModOf");
     return nullptr;
 }
 
@@ -91,7 +91,7 @@ PyObject *GetTypeKey(PyObject *ob)
     }
     AutoDecRef class_name(PyObject_GetAttr(ob, PyMagicName::qualname()));
     if (class_name.isNull()) {
-        Py_FatalError("Signature: missing class name in GetTypeKey");
+        Py_FatalError("libshiboken: missing class name in GetTypeKey");
         return nullptr;
     }
     return Py_BuildValue("(OO)", module_name.object(), class_name.object());
@@ -307,7 +307,7 @@ static PyObject *feature_import(PyObject * /* self */, PyObject *args, PyObject 
     Shiboken::AutoDecRef builtins(PepEval_GetFrameBuiltins());
     PyObject *origImportFunc = PyDict_GetItemString(builtins.object(), "__orig_import__");
     if (origImportFunc == nullptr) {
-        Py_FatalError("builtins has no \"__orig_import__\" function");
+        Py_FatalError("libshiboken: builtins has no \"__orig_import__\" function");
     }
     // PYSIDE-3054: Instead of just calling the original import, we temporarily
     //              reset the whole import function to the previous version.
@@ -770,7 +770,7 @@ void SetError_Argument(PyObject *args, const char *func_name, PyObject *info)
     AutoDecRef new_func_name(adjustFuncName(func_name));
     if (new_func_name.isNull()) {
         PyErr_Print();
-        Py_FatalError("seterror_argument failed to call update_mapping");
+        Py_FatalError("libshiboken: seterror_argument failed to call update_mapping");
     }
     if (info == nullptr)
         info = Py_None;
@@ -778,13 +778,13 @@ void SetError_Argument(PyObject *args, const char *func_name, PyObject *info)
                                                 args, new_func_name.object(), info, nullptr));
     if (res.isNull()) {
         PyErr_Print();
-        Py_FatalError("seterror_argument did not receive a result");
+        Py_FatalError("libshiboken: seterror_argument did not receive a result");
     }
     PyObject *err{};
     PyObject *msg{};
     if (!PyArg_UnpackTuple(res, func_name, 2, 2, &err, &msg)) {
         PyErr_Print();
-        Py_FatalError("unexpected failure in seterror_argument");
+        Py_FatalError("libshiboken: unexpected failure in seterror_argument");
     }
     PyErr_SetObject(err, msg);
 }

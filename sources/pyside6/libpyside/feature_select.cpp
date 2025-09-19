@@ -126,7 +126,7 @@ static void ensureNewDictType()
     if (new_dict_type == nullptr) {
         new_dict_type = createDerivedDictType();
         if (new_dict_type == nullptr)
-            Py_FatalError("PySide6: Problem creating ChameleonDict");
+            Py_FatalError("libshiboken: Problem creating ChameleonDict");
     }
 }
 
@@ -280,14 +280,14 @@ static inline void SelectFeatureSetSubtype(PyTypeObject *type, int select_id)
         // On first touch, we initialize the dynamic naming.
         // The dict type will be replaced after the first call.
         if (!replaceClassDict(type)) {
-            Py_FatalError("failed to replace class dict!");
+            Py_FatalError("libshiboken: failed to replace class dict!");
             return;
         }
     }
     if (!moveToFeatureSet(type, select_id)) {
         if (!createNewFeatureSet(type, select_id)) {
             PyErr_Print();
-            Py_FatalError("failed to create a new feature set!");
+            Py_FatalError("libshiboken: failed to create a new feature set!");
             return;
         }
     }
@@ -335,7 +335,7 @@ static inline void SelectFeatureSet(PyTypeObject *type)
     if (Py_TYPE(tpDict.object()) == Py_TYPE(pyTypeType_tp_dict)) {
         // We initialize the dynamic features by using our own dict type.
         if (!replaceClassDict(type)) {
-            Py_FatalError("failed to replace class dict!");
+            Py_FatalError("libshiboken: failed to replace class dict!");
             return;
         }
     }

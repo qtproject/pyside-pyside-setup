@@ -94,7 +94,7 @@ static PyObject *get_funcname(PyObject *ob)
     PyObject *func_name = PyObject_GetAttr(func, PyMagicName::name());
     Py_DECREF(func);
     if (func_name == nullptr)
-        Py_FatalError("unexpected name problem in compute_name_key");
+        Py_FatalError("libshiboken: unexpected name problem in compute_name_key");
     return func_name;
 }
 

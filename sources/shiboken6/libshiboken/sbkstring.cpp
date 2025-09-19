@@ -31,7 +31,7 @@ static PyObject *initPathLike()
     if (osmodule == nullptr
         || (PathLike = PyObject_GetAttrString(osmodule, "PathLike")) == nullptr) {
         PyErr_Print();
-        Py_FatalError("cannot import os.PathLike");
+        Py_FatalError("libshiboken: cannot import os.PathLike");
     }
     return PathLike;
 }

@@ -7002,7 +7002,7 @@ void CppGenerator::writeModuleExecFunction(TextStream &s, const QString &name,
     s << '\n' << initInheritanceFunction << "();\n"
         << "\nif (" << shibokenErrorsOccurred << ") {\n" << indent
         << "PyErr_Print();\n"
-        << "Py_FatalError(\"can't initialize module " << moduleName() << "\");\n"
+        << "Py_FatalError(\"shiboken: can't initialize module " << moduleName() << "\");\n"
         << outdent << "}\n";
 
     // module inject-code target/end

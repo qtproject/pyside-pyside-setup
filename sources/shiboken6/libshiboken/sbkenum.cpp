@@ -68,7 +68,7 @@ PyTypeObject *getPyEnumMeta()
             return reinterpret_cast<PyTypeObject *>(PyEnumMeta);
         }
     }
-    Py_FatalError("Python module 'enum' not found");
+    Py_FatalError("libshiboken: Python module 'enum' not found");
     return nullptr;
 }
 
@@ -78,7 +78,7 @@ void init_enum()
     if (isInitialized)
         return;
     if (!(isInitialized || _init_enum()))
-        Py_FatalError("could not init enum");
+        Py_FatalError("libshiboken: could not init enum");
 
     // PYSIDE-1735: Determine whether we should use the old or the new enum implementation.
     static PyObject *option = PySys_GetObject("pyside6_option_python_enum");
