@@ -183,9 +183,13 @@ static void formatPyDict(PyObject *obj, std::ostream &str)
     Py_ssize_t pos = 0;
     str << '{';
     while (PyDict_Next(obj, &pos, &key, &value) != 0) {
-        if (pos)
+        if (pos > 1)
             str << ", ";
-        str << Shiboken::debugPyObject(key) << '=' << Shiboken::debugPyObject(value);
+        if (PyUnicode_Check(key))
+            str << '"' << Shiboken::String::toCString(key) << '"';
+        else
+            str << Shiboken::debugPyObject(key);
+        str << ": " << Shiboken::debugPyObject(value);
     }
     str << '}';
 }
@@ -360,6 +364,8 @@ static void formatPyObjectHelper(PyObject *obj, std::ostream &str)
         formatPyFunction(obj, str);
     else if (PyMethod_Check(obj) != 0)
         formatPyMethod(obj, str);
+    else if (PyModule_Check(obj) != 0)
+        str << "Module \"" << PyModule_GetName(obj) << '"';
     else if (PepCode_Check(obj) != 0)
         formatPyCodeObject(obj, str);
     else if (PySequence_Check(obj))
