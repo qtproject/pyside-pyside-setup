@@ -2799,6 +2799,9 @@
       </modify-argument>
       <inject-code file="../glue/qtgui.cpp" snippet="qwindow-fromWinId"/>
     </modify-function>
+    <modify-function signature="setParent(QWindow*)">
+      <modify-argument index="1" pyi-type="Optional[QWindow]"/>
+    </modify-function>
     <modify-function signature="show()" allow-thread="yes"/>
     <modify-function signature="showFullScreen()" allow-thread="yes"/>
     <modify-function signature="showMaximized()" allow-thread="yes"/>
