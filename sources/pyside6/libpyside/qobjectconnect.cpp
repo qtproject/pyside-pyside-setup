@@ -212,8 +212,10 @@ QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *sign
     }
 
     QMetaObject::Connection connection{};
+    const bool connectByIndex = !receiver.forceDynamicSlot
+                                && receiver.receiver != nullptr && receiver.slotIndex != -1;
     Py_BEGIN_ALLOW_THREADS // PYSIDE-2367, prevent threading deadlocks with connectNotify()
-    if (!receiver.forceDynamicSlot && receiver.receiver != nullptr && receiver.slotIndex != -1) {
+    if (connectByIndex) {
         connection = QMetaObject::connect(source, signalIndex,
                                           receiver.receiver, receiver.slotIndex, type);
     } else {
@@ -234,7 +236,8 @@ QMetaObject::Connection qobjectConnectCallback(QObject *source, const char *sign
     if (!connection)
         return {};
 
-    registerSlotConnection(source, signalIndex, callback, connection);
+    if (!connectByIndex)
+        registerSlotConnection(source, signalIndex, callback, connection);
 
     static_cast<FriendlyQObject *>(source)->connectNotify(signalMethod);
     return connection;

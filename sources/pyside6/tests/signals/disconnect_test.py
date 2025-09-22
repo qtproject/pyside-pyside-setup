@@ -137,6 +137,20 @@ class TestDisconnect(unittest.TestCase):
         obj.signalWithDefaultValue.emit()
         self.assertTrue(self.called)
 
+    def testMultipleConnections(self):
+        """PYSIDE-3190: Signal.disconnect() should use the QMetaObject
+           code to disconnect, disconnecting multiple connections."""
+        s = Sender()
+        r = Receiver()
+        s.bar.connect(r.receiver)
+        s.bar.connect(r.receiver)
+        s.bar.emit()
+        print(r.called)
+        self.assertEqual(r.called, 2)
+        s.bar.disconnect(r.receiver)
+        s.bar.emit()
+        self.assertEqual(r.called, 2)
+
 
 if __name__ == '__main__':
     unittest.main()
