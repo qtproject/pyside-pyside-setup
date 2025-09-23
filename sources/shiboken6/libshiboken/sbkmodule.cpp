@@ -414,18 +414,19 @@ void AddTypeCreationFunction(PyObject *module,
 }
 
 void AddTypeCreationFunction(PyObject *module,
-                             const char *containerName,
+                             const char *enclosingName,
                              TypeCreationFunction func,
-                             const char *namePath)
+                             const char *subTypeNamePath)
 {
     // - locate the module in the moduleTofuncs mapping
     auto tableIter = moduleToFuncs.find(module);
     assert(tableIter != moduleToFuncs.end());
     // - Assign the name/generating function tcStruct.
     auto &nameToFunc = tableIter->second;
-    auto nit = nameToFunc.find(containerName);
+    auto nit = nameToFunc.find(enclosingName);
 
     // - insert namePath into the subtype vector of the main type.
+    std::string namePath(subTypeNamePath);
     nit->second.subtypeNames.emplace_back(namePath);
     // - insert it also as its own entry.
     nit = nameToFunc.find(namePath);
