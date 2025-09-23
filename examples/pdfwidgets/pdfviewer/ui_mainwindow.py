@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'mainwindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.0
+## Created by: Qt User Interface Compiler version 6.10.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -17,10 +17,10 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtPdfWidgets import QPdfView
-from PySide6.QtWidgets import (QApplication, QHeaderView, QMainWindow, QMenu,
-    QMenuBar, QSizePolicy, QSplitter, QStatusBar,
-    QTabWidget, QToolBar, QTreeView, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QHeaderView, QListView, QMainWindow,
+    QMenu, QMenuBar, QSizePolicy, QSplitter,
+    QStatusBar, QTabWidget, QToolBar, QTreeView,
+    QVBoxLayout, QWidget)
 import rc_resources
 
 class Ui_MainWindow(object):
@@ -104,6 +104,26 @@ class Ui_MainWindow(object):
         icon8 = QIcon()
         icon8.addFile(u":/icons/images/go-next-view.svgz", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.actionForward.setIcon(icon8)
+        self.actionFindNext = QAction(MainWindow)
+        self.actionFindNext.setObjectName(u"actionFindNext")
+        icon9 = QIcon()
+        iconThemeName = u"go-down"
+        if QIcon.hasThemeIcon(iconThemeName):
+            icon9 = QIcon.fromTheme(iconThemeName)
+        else:
+            icon9.addFile(u":/icons/images/go-down-search.svgz", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+
+        self.actionFindNext.setIcon(icon9)
+        self.actionFindPrevious = QAction(MainWindow)
+        self.actionFindPrevious.setObjectName(u"actionFindPrevious")
+        icon10 = QIcon()
+        iconThemeName = u"go-up"
+        if QIcon.hasThemeIcon(iconThemeName):
+            icon10 = QIcon.fromTheme(iconThemeName)
+        else:
+            icon10.addFile(u":/icons/images/go-up-search.svgz", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+
+        self.actionFindPrevious.setIcon(icon10)
         self.centralWidget = QWidget(MainWindow)
         self.centralWidget.setObjectName(u"centralWidget")
         self.verticalLayout = QVBoxLayout(self.centralWidget)
@@ -148,7 +168,37 @@ class Ui_MainWindow(object):
         self.tabWidget.addTab(self.bookmarkTab, "")
         self.pagesTab = QWidget()
         self.pagesTab.setObjectName(u"pagesTab")
+        self.verticalLayout_4 = QVBoxLayout(self.pagesTab)
+        self.verticalLayout_4.setSpacing(6)
+        self.verticalLayout_4.setContentsMargins(11, 11, 11, 11)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setContentsMargins(2, 2, 2, 2)
+        self.thumbnailsView = QListView(self.pagesTab)
+        self.thumbnailsView.setObjectName(u"thumbnailsView")
+        sizePolicy.setHeightForWidth(self.thumbnailsView.sizePolicy().hasHeightForWidth())
+        self.thumbnailsView.setSizePolicy(sizePolicy)
+        self.thumbnailsView.setIconSize(QSize(128, 128))
+        self.thumbnailsView.setMovement(QListView.Movement.Static)
+        self.thumbnailsView.setResizeMode(QListView.ResizeMode.Adjust)
+        self.thumbnailsView.setViewMode(QListView.ViewMode.IconMode)
+
+        self.verticalLayout_4.addWidget(self.thumbnailsView)
+
         self.tabWidget.addTab(self.pagesTab, "")
+        self.searchResultsTab = QWidget()
+        self.searchResultsTab.setObjectName(u"searchResultsTab")
+        self.verticalLayout_5 = QVBoxLayout(self.searchResultsTab)
+        self.verticalLayout_5.setSpacing(0)
+        self.verticalLayout_5.setContentsMargins(11, 11, 11, 11)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.verticalLayout_5.setContentsMargins(2, 2, 2, 2)
+        self.searchResultsView = QListView(self.searchResultsTab)
+        self.searchResultsView.setObjectName(u"searchResultsView")
+        self.searchResultsView.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+        self.verticalLayout_5.addWidget(self.searchResultsView)
+
+        self.tabWidget.addTab(self.searchResultsTab, "")
         self.splitter.addWidget(self.tabWidget)
         self.pdfView = QPdfView(self.splitter)
         self.pdfView.setObjectName(u"pdfView")
@@ -183,6 +233,9 @@ class Ui_MainWindow(object):
         self.statusBar = QStatusBar(MainWindow)
         self.statusBar.setObjectName(u"statusBar")
         MainWindow.setStatusBar(self.statusBar)
+        self.searchToolBar = QToolBar(MainWindow)
+        self.searchToolBar.setObjectName(u"searchToolBar")
+        MainWindow.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.searchToolBar)
 
         self.menuBar.addAction(self.menuFile.menuAction())
         self.menuBar.addAction(self.menuView.menuAction())
@@ -204,6 +257,8 @@ class Ui_MainWindow(object):
         self.mainToolBar.addSeparator()
         self.mainToolBar.addAction(self.actionBack)
         self.mainToolBar.addAction(self.actionForward)
+        self.searchToolBar.addAction(self.actionFindPrevious)
+        self.searchToolBar.addAction(self.actionFindNext)
 
         self.retranslateUi(MainWindow)
 
@@ -227,7 +282,7 @@ class Ui_MainWindow(object):
         self.actionAbout_Qt.setText(QCoreApplication.translate("MainWindow", u"About Qt", None))
         self.actionZoom_In.setText(QCoreApplication.translate("MainWindow", u"Zoom In", None))
 #if QT_CONFIG(shortcut)
-        self.actionZoom_In.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl++", None))
+        self.actionZoom_In.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+=", None))
 #endif // QT_CONFIG(shortcut)
         self.actionZoom_Out.setText(QCoreApplication.translate("MainWindow", u"Zoom Out", None))
 #if QT_CONFIG(shortcut)
@@ -250,10 +305,26 @@ class Ui_MainWindow(object):
 #if QT_CONFIG(tooltip)
         self.actionForward.setToolTip(QCoreApplication.translate("MainWindow", u"forward to next view", None))
 #endif // QT_CONFIG(tooltip)
+        self.actionFindNext.setText(QCoreApplication.translate("MainWindow", u"Find Next", None))
+#if QT_CONFIG(tooltip)
+        self.actionFindNext.setToolTip(QCoreApplication.translate("MainWindow", u"Find the next occurrence of the phrase", None))
+#endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(shortcut)
+        self.actionFindNext.setShortcut(QCoreApplication.translate("MainWindow", u"F3", None))
+#endif // QT_CONFIG(shortcut)
+        self.actionFindPrevious.setText(QCoreApplication.translate("MainWindow", u"Find Previous", None))
+#if QT_CONFIG(tooltip)
+        self.actionFindPrevious.setToolTip(QCoreApplication.translate("MainWindow", u"Find the previous occurrence of the phrase", None))
+#endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(shortcut)
+        self.actionFindPrevious.setShortcut(QCoreApplication.translate("MainWindow", u"Shift+F3", None))
+#endif // QT_CONFIG(shortcut)
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.bookmarkTab), QCoreApplication.translate("MainWindow", u"Bookmarks", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.pagesTab), QCoreApplication.translate("MainWindow", u"Pages", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.searchResultsTab), QCoreApplication.translate("MainWindow", u"Search Results", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
         self.menuView.setTitle(QCoreApplication.translate("MainWindow", u"View", None))
+        self.searchToolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"toolBar", None))
     # retranslateUi
 

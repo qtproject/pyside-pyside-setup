@@ -5,13 +5,15 @@ from __future__ import annotations
 import math
 import sys
 
-from PySide6.QtPdf import QPdfBookmarkModel, QPdfDocument
+from PySide6.QtPdf import QPdfBookmarkModel, QPdfDocument, QPdfSearchModel
 from PySide6.QtPdfWidgets import QPdfView
-from PySide6.QtWidgets import (QDialog, QFileDialog, QMainWindow, QMessageBox,
+from PySide6.QtWidgets import (QDialog, QFileDialog, QLineEdit, QMainWindow, QMessageBox,
                                QSpinBox)
-from PySide6.QtCore import QModelIndex, QPoint, QStandardPaths, QUrl, Slot
+from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtCore import QModelIndex, QPoint, QPointF, QStandardPaths, QUrl, Qt, Slot
 
 from zoomselector import ZoomSelector
+from searchresultdelegate import SearchResultDelegate
 from ui_mainwindow import Ui_MainWindow
 
 
@@ -50,11 +52,46 @@ class MainWindow(QMainWindow):
         self.ui.bookmarkView.setModel(bookmark_model)
         self.ui.bookmarkView.activated.connect(self.bookmark_selected)
 
-        self.ui.tabWidget.setTabEnabled(1, False)  # disable 'Pages' tab for now
+        self.ui.thumbnailsView.setModel(self.m_document.pageModel())
 
         self.ui.pdfView.setDocument(self.m_document)
 
         self.ui.pdfView.zoomFactorChanged.connect(self.m_zoomSelector.set_zoom_factor)
+
+        self.m_searchModel = QPdfSearchModel(self)
+        self.m_searchModel.setDocument(self.m_document)
+        self.m_searchField = QLineEdit(self)
+
+        self.ui.pdfView.setSearchModel(self.m_searchModel)
+        self.ui.searchToolBar.insertWidget(self.ui.actionFindPrevious, self.m_searchField)
+        self.m_findShortcut = QShortcut(QKeySequence.StandardKey.Find, self)
+        self.m_findShortcut.activated.connect(self.setSearchFocus)
+        self.m_searchField.setPlaceholderText("Find in document")
+        self.m_searchField.setMaximumWidth(400)
+        self.m_searchField.textEdited.connect(self.searchTextChanged)
+        self.ui.searchResultsView.setModel(self.m_searchModel)
+        self.m_delegate = SearchResultDelegate(self)
+        self.ui.searchResultsView.setItemDelegate(self.m_delegate)
+        sel_model = self.ui.searchResultsView.selectionModel()
+        sel_model.currentChanged.connect(self.searchResultSelected)
+
+    @Slot()
+    def setSearchFocus(self):
+        self.m_searchField.setFocus(Qt.FocusReason.ShortcutFocusReason)
+
+    @Slot()
+    def searchTextChanged(self, text):
+        self.m_searchModel.setSearchString(text)
+        self.ui.tabWidget.setCurrentWidget(self.ui.searchResultsTab)
+
+    @Slot(QModelIndex, QModelIndex)
+    def searchResultSelected(self, current, previous):
+        if not current.isValid():
+            return
+        page = current.data(QPdfSearchModel.Role.Page.value)
+        location = current.data(QPdfSearchModel.Role.Location.value)
+        self.ui.pdfView.pageNavigator().jump(page, location)
+        self.ui.pdfView.setCurrentSearchResultIndex(current.row())
 
     @Slot(QUrl)
     def open(self, doc_location):
@@ -95,6 +132,20 @@ class MainWindow(QMainWindow):
                 self.open(to_open)
 
     @Slot()
+    def on_actionFindNext_triggered(self):
+        next = self.ui.searchResultsView.currentIndex().row() + 1
+        if next >= self.m_searchModel.rowCount(QModelIndex()):
+            next = 0
+        self.ui.searchResultsView.setCurrentIndex(self.m_searchModel.index(next))
+
+    @Slot()
+    def on_actionFindPrevious_triggered(self):
+        prev = self.ui.searchResultsView.currentIndex().row() - 1
+        if prev < 0:
+            prev = self.m_searchModel.rowCount(QModelIndex()) - 1
+        self.ui.searchResultsView.setCurrentIndex(self.m_searchModel.index(prev))
+
+    @Slot()
     def on_actionQuit_triggered(self):
         self.close()
 
@@ -126,6 +177,11 @@ class MainWindow(QMainWindow):
     def on_actionNext_Page_triggered(self):
         nav = self.ui.pdfView.pageNavigator()
         nav.jump(nav.currentPage() + 1, QPoint(), nav.currentZoom())
+
+    @Slot(QModelIndex)
+    def on_thumbnailsView_activated(self, index):
+        nav = self.ui.pdfView.pageNavigator()
+        nav.jump(index.row(), QPointF(), nav.currentZoom())
 
     @Slot()
     def on_actionContinuous_triggered(self):
