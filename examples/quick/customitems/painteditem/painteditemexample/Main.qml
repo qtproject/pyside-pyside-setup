@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 import QtQuick
-import TextBalloonPlugin
+import TextBalloon
 
 Item {
     height: 480
@@ -20,14 +20,14 @@ Item {
     }
 
     ListView {
+        id: balloonView
         anchors.bottom: controls.top
         anchors.bottomMargin: 2
         anchors.top: parent.top
-        id: balloonView
         delegate: TextBalloon {
-            anchors.right: index % 2 == 0 ? undefined : balloonView.contentItem.right
+            anchors.right: index % 2 !== 0 ? parent?.right : undefined
             height: 60
-            rightAligned: index % 2 == 0 ? false : true
+            rightAligned: index % 2 !== 0
             width: balloonWidth
         }
         model: balloonModel
@@ -50,20 +50,15 @@ Item {
 
         Text {
             anchors.centerIn: parent
-            text: "Add another balloon"
+            text: qsTr("Add another balloon")
         }
 
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {
-                balloonModel.append({
-                                        "balloonWidth": Math.floor(
-                                                            Math.random(
-                                                                ) * 200 + 100)
-                                    })
-                balloonView.positionViewAtIndex(balloonView.count - 1,
-                                                ListView.End)
+                balloonModel.append({"balloonWidth": Math.floor(Math.random() * 200 + 100)})
+                balloonView.positionViewAtIndex(balloonView.count -1, ListView.End)
             }
             onEntered: {
                 parent.color = "#8ac953"

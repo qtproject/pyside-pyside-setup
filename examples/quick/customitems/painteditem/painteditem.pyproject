@@ -1,3 +1,4 @@
 {
-    "files": ["main.qml", "painteditem.py"]
+    "files": ["main.py", "painteditemexample/Main.qml", "painteditemexample/qmldir",
+              "TextBalloon/textballoon.py"]
 }
