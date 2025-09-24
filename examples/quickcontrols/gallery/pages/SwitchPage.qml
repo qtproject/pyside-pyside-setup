@@ -15,8 +15,8 @@ ScrollablePage {
             width: parent.width
             wrapMode: Label.Wrap
             horizontalAlignment: Qt.AlignHCenter
-            text: qsTr("Switch is an option button that can be dragged or toggled on or off. "
-                + "Switches are typically used to select between two states.")
+            text: "Switch is an option button that can be dragged or toggled on or off. "
+                + "Switches are typically used to select between two states."
         }
 
         Column {
@@ -24,13 +24,15 @@ ScrollablePage {
             anchors.horizontalCenter: parent.horizontalCenter
 
             Switch {
-                enabled: !GalleryConfig.disabled
-                text: qsTr("First")
+                text: "First"
             }
             Switch {
-                enabled: !GalleryConfig.disabled
-                text: qsTr("Second")
+                text: "Second"
                 checked: true
+            }
+            Switch {
+                text: "Third"
+                enabled: false
             }
         }
     }

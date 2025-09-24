@@ -6,7 +6,6 @@ import QtQuick.Controls
 
 Page {
     id: page
-    enabled: !GalleryConfig.disabled
 
     SwipeView {
         id: swipeView
@@ -28,8 +27,8 @@ Page {
                         width: parent.width
                         wrapMode: Label.Wrap
                         horizontalAlignment: Qt.AlignHCenter
-                        text: qsTr("TabBar is a bar with icons or text which allows the user "
-                              + "to switch between different subtasks, views, or modes.")
+                        text: "TabBar is a bar with icons or text which allows the user "
+                              + "to switch between different subtasks, views, or modes."
                     }
 
                     Image {
@@ -46,13 +45,13 @@ Page {
         currentIndex: swipeView.currentIndex
 
         TabButton {
-            text: qsTr("First")
+            text: "First"
         }
         TabButton {
-            text: qsTr("Second")
+            text: "Second"
         }
         TabButton {
-            text: qsTr("Third")
+            text: "Third"
         }
     }
 }

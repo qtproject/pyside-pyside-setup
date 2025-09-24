@@ -17,12 +17,11 @@ ScrollablePage {
             width: parent.width
             wrapMode: Label.Wrap
             horizontalAlignment: Qt.AlignHCenter
-            text: qsTr("A GroupBox provides a frame, a title on top of it, and a logical group of controls within that frame.")
+            text: "A GroupBox provides a frame, a title on top of it, and a logical group of controls within that frame."
         }
 
         GroupBox {
-            enabled: !GalleryConfig.disabled
-            title: qsTr("Title")
+            title: "Title"
             anchors.horizontalCenter: parent.horizontalCenter
 
             Column {
@@ -30,17 +29,17 @@ ScrollablePage {
                 width: page.itemWidth
 
                 RadioButton {
-                    text: qsTr("First")
+                    text: "First"
                     checked: true
                     width: parent.width
                 }
                 RadioButton {
                     id: button
-                    text: qsTr("Second")
+                    text: "Second"
                     width: parent.width
                 }
                 RadioButton {
-                    text: qsTr("Third")
+                    text: "Third"
                     width: parent.width
                 }
             }

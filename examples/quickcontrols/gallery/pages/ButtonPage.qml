@@ -12,30 +12,12 @@ ScrollablePage {
         spacing: 40
         width: parent.width
 
-        Row {
-            CheckBox {
-                id: checkedCheckBox
-                text: qsTr("Checked")
-            }
-
-            CheckBox {
-                id: flatCheckBox
-                text: qsTr("Flat")
-            }
-
-            CheckBox {
-                id: pressedCheckBox
-                enabled: !GalleryConfig.disabled
-                text: qsTr("Pressed")
-            }
-        }
-
         Label {
             width: parent.width
             wrapMode: Label.Wrap
             horizontalAlignment: Qt.AlignHCenter
-            text: qsTr("Button presents a push-button that can be pushed or clicked by the user. "
-                + "Buttons are normally used to perform an action, or to answer a question.")
+            text: "Button presents a push-button that can be pushed or clicked by the user. "
+                + "Buttons are normally used to perform an action, or to answer a question."
         }
 
         ColumnLayout {
@@ -43,28 +25,18 @@ ScrollablePage {
             anchors.horizontalCenter: parent.horizontalCenter
 
             Button {
-                enabled: !GalleryConfig.disabled
-                text: qsTr("Button")
-                checked: checkedCheckBox.checked
-                flat: flatCheckBox.checked
-                down: pressedCheckBox.checked ? true : undefined
+                text: "First"
                 Layout.fillWidth: true
             }
             Button {
-                enabled: !GalleryConfig.disabled
-                text: qsTr("Highlighted")
-                checked: checkedCheckBox.checked
-                flat: flatCheckBox.checked
-                down: pressedCheckBox.checked ? true : undefined
+                id: button
+                text: "Second"
                 highlighted: true
                 Layout.fillWidth: true
             }
-            RoundButton {
-                enabled: !GalleryConfig.disabled
-                text: qsTr("RoundButton")
-                checked: checkedCheckBox.checked
-                flat: flatCheckBox.checked
-                down: pressedCheckBox.checked ? true : undefined
+            Button {
+                text: "Third"
+                enabled: false
                 Layout.fillWidth: true
             }
         }

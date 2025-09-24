@@ -6,7 +6,7 @@ import QtQuick.Controls
 
 Flickable {
     id: flickable
-    enabled: !GalleryConfig.disabled
+
     contentHeight: pane.height
 
     Pane {
@@ -19,19 +19,13 @@ Flickable {
             spacing: 40
             width: parent.width
 
-            CheckBox {
-                id: alwaysOnCheckBox
-                width: parent.width
-                text: qsTr("Always on")
-            }
-
             Label {
                 width: parent.width
                 wrapMode: Label.Wrap
                 horizontalAlignment: Qt.AlignHCenter
-                text: qsTr("ScrollBar is an interactive bar that can be used to scroll to a specific position. "
+                text: "ScrollBar is an interactive bar that can be used to scroll to a specific position. "
                     + "A scroll bar can be either vertical or horizontal, and can be attached to any Flickable, "
-                    + "such as ListView and GridView.")
+                    + "such as ListView and GridView."
             }
 
             Image {
@@ -42,7 +36,5 @@ Flickable {
         }
     }
 
-    ScrollBar.vertical: ScrollBar {
-        policy: alwaysOnCheckBox.checked ? ScrollBar.AlwaysOn : ScrollBar.AsNeeded
-    }
+    ScrollBar.vertical: ScrollBar { }
 }

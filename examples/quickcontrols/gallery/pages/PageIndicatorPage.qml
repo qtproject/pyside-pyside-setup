@@ -15,7 +15,7 @@ ScrollablePage {
             width: parent.width
             wrapMode: Label.Wrap
             horizontalAlignment: Qt.AlignHCenter
-            text: qsTr("PageIndicator is used to indicate the currently active page in a container of pages.")
+            text: "PageIndicator is used to indicate the currently active page in a container of pages."
         }
 
         PageIndicator {

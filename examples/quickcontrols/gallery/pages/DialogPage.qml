@@ -18,58 +18,56 @@ ScrollablePage {
             width: parent.width
             wrapMode: Label.Wrap
             horizontalAlignment: Qt.AlignHCenter
-            text: qsTr("Dialog is a popup that is mostly used for short-term tasks "
-                + "and brief communications with the user.")
+            text: "Dialog is a popup that is mostly used for short-term tasks "
+                + "and brief communications with the user."
         }
 
         Button {
-            text: qsTr("Message")
+            text: "Message"
             anchors.horizontalCenter: parent.horizontalCenter
             width: page.buttonWidth
             onClicked: messageDialog.open()
 
             Dialog {
                 id: messageDialog
-                enabled: !GalleryConfig.disabled
 
                 x: (parent.width - width) / 2
                 y: (parent.height - height) / 2
 
-                title: qsTr("Message")
+                title: "Message"
 
                 Label {
-                    text: qsTr("Lorem ipsum dolor sit amet...")
+                    text: "Lorem ipsum dolor sit amet..."
                 }
             }
         }
 
         Button {
             id: button
-            text: qsTr("Confirmation")
+            text: "Confirmation"
             anchors.horizontalCenter: parent.horizontalCenter
             width: page.buttonWidth
             onClicked: confirmationDialog.open()
 
             Dialog {
                 id: confirmationDialog
-                enabled: !GalleryConfig.disabled
 
                 x: (parent.width - width) / 2
                 y: (parent.height - height) / 2
                 parent: Overlay.overlay
 
                 modal: true
-                title: qsTr("Confirmation")
+                title: "Confirmation"
                 standardButtons: Dialog.Yes | Dialog.No
 
                 Column {
                     spacing: 20
                     anchors.fill: parent
                     Label {
-                        text: qsTr("The document has been modified.\nDo you want to save your changes?")
+                        text: "The document has been modified.\nDo you want to save your changes?"
                     }
                     CheckBox {
-                        text: qsTr("Do not ask again")
+                        text: "Do not ask again"
                         anchors.right: parent.right
                     }
                 }
@@ -77,14 +75,13 @@ ScrollablePage {
         }
 
         Button {
-            text: qsTr("Content")
+            text: "Content"
             anchors.horizontalCenter: parent.horizontalCenter
             width: page.buttonWidth
             onClicked: contentDialog.open()
 
             Dialog {
                 id: contentDialog
-                enabled: !GalleryConfig.disabled
 
                 x: (parent.width - width) / 2
                 y: (parent.height - height) / 2
@@ -93,7 +90,7 @@ ScrollablePage {
                 parent: Overlay.overlay
 
                 modal: true
-                title: qsTr("Content")
+                title: "Content"
                 standardButtons: Dialog.Close
 
                 Flickable {
@@ -117,13 +114,13 @@ ScrollablePage {
 
                         Label {
                             width: parent.width
-                            text: qsTr("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc finibus "
+                            text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc finibus "
                                 + "in est quis laoreet. Interdum et malesuada fames ac ante ipsum primis "
                                 + "in faucibus. Curabitur eget justo sollicitudin enim faucibus bibendum. "
                                 + "Suspendisse potenti. Vestibulum cursus consequat mauris id sollicitudin. "
                                 + "Duis facilisis hendrerit consectetur. Curabitur sapien tortor, efficitur "
                                 + "id auctor nec, efficitur et nisl. Ut venenatis eros in nunc placerat, "
-                                + "eu aliquam enim suscipit.")
+                                + "eu aliquam enim suscipit."
                             wrapMode: Label.Wrap
                         }
                     }
@@ -140,14 +137,13 @@ ScrollablePage {
         }
 
         Button {
-            text: qsTr("Input")
+            text: "Input"
             anchors.horizontalCenter: parent.horizontalCenter
             width: page.buttonWidth
             onClicked: inputDialog.open()
 
             Dialog {
                 id: inputDialog
-                enabled: !GalleryConfig.disabled
 
                 x: (parent.width - width) / 2
                 y: (parent.height - height) / 2
@@ -155,7 +151,7 @@ ScrollablePage {
 
                 focus: true
                 modal: true
-                title: qsTr("Input")
+                title: "Input"
                 standardButtons: Dialog.Ok | Dialog.Cancel
 
                 ColumnLayout {
@@ -163,16 +159,16 @@ ScrollablePage {
                     anchors.fill: parent
                     Label {
                         elide: Label.ElideRight
-                        text: qsTr("Please enter the credentials:")
+                        text: "Please enter the credentials:"
                         Layout.fillWidth: true
                     }
                     TextField {
                         focus: true
-                        placeholderText: qsTr("Username")
+                        placeholderText: "Username"
                         Layout.fillWidth: true
                     }
                     TextField {
-                        placeholderText: qsTr("Password")
+                        placeholderText: "Password"
                         echoMode: TextField.PasswordEchoOnEdit
                         Layout.fillWidth: true
                     }

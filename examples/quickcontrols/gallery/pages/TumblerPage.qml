@@ -15,11 +15,10 @@ ScrollablePage {
             width: parent.width
             wrapMode: Label.Wrap
             horizontalAlignment: Qt.AlignHCenter
-            text: qsTr("Tumbler is used to select a value by spinning a wheel.")
+            text: "Tumbler is used to select a value by spinning a wheel."
         }
 
         Tumbler {
-            enabled: !GalleryConfig.disabled
             model: 10
             anchors.horizontalCenter: parent.horizontalCenter
         }

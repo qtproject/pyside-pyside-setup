@@ -15,13 +15,12 @@ ScrollablePage {
             width: parent.width
             wrapMode: Label.Wrap
             horizontalAlignment: Qt.AlignHCenter
-            text: qsTr("ComboBox is a combined button and popup list. It presents "
-                + "a list of options to the user that occupies minimal screen space.")
+            text: "ComboBox is a combined button and popup list. It presents "
+                + "a list of options to the user that occupies minimal screen space."
         }
 
         ComboBox {
-            enabled: !GalleryConfig.disabled
-            model: [qsTr("First"), qsTr("Second"), qsTr("Third")]
+            model: ["First", "Second", "Third"]
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
@@ -29,19 +28,18 @@ ScrollablePage {
             width: parent.width
             wrapMode: Label.Wrap
             horizontalAlignment: Qt.AlignHCenter
-            text: qsTr("ComboBox can be made editable. An editable combo box auto-"
-                + "completes its text based on what is available in the model.")
+            text: "ComboBox can be made \l editable. An editable combo box auto-"
+                + "completes its text based on what is available in the model."
         }
 
         ComboBox {
             id: comboBox
 
-            enabled: !GalleryConfig.disabled
             editable: true
             model: ListModel {
-                ListElement { text: qsTr("Banana") }
-                ListElement { text: qsTr("Apple") }
-                ListElement { text: qsTr("Coconut") }
+                ListElement { text: "Banana" }
+                ListElement { text: "Apple" }
+                ListElement { text: "Coconut" }
             }
             onAccepted: {
                 if (find(editText) === -1)

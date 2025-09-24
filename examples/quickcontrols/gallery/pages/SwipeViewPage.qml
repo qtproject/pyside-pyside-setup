@@ -11,7 +11,6 @@ Pane {
         id: view
         currentIndex: 1
         anchors.fill: parent
-        enabled: !GalleryConfig.disabled
 
         Repeater {
             model: 3
@@ -28,8 +27,8 @@ Pane {
                         width: parent.width
                         wrapMode: Label.Wrap
                         horizontalAlignment: Qt.AlignHCenter
-                        text: qsTr("SwipeView provides a navigation model that simplifies horizontal paged scrolling. "
-                        + "The page indicator on the bottom shows which is the presently active page.")
+                        text: "SwipeView provides a navigation model that simplifies horizontal paged scrolling. "
+                        + "The page indicator on the bottom shows which is the presently active page."
                     }
 
                     Image {
