@@ -42,7 +42,7 @@ Item {
                     subTickCount: 9
                 }
                 theme: GraphsTheme {
-                    colorScheme: Qt.Dark
+                    colorScheme: GraphsTheme.ColorScheme.Dark
                     theme: GraphsTheme.Theme.QtGreen
                 }
                 //! [bargraph]
@@ -77,7 +77,7 @@ Item {
                     readonly property color c1: "#DBEB00"
                     readonly property color c2: "#373F26"
                     readonly property color c3: Qt.lighter(c2, 1.5)
-                    colorScheme: Qt.Dark
+                    colorScheme: GraphsTheme.ColorScheme.Dark
                     seriesColors: ["#2CDE85", "#DBEB00"]
                     grid.mainColor: c3
                     grid.subColor: c2
