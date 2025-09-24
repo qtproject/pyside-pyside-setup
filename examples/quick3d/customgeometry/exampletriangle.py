@@ -8,7 +8,7 @@ from PySide6.QtGui import QVector3D
 from PySide6.QtQml import QmlElement
 from PySide6.QtQuick3D import QQuick3DGeometry
 
-QML_IMPORT_NAME = "ExampleTriangleGeometry"
+QML_IMPORT_NAME = "CustomGeometryExample"
 QML_IMPORT_MAJOR_VERSION = 1
 
 

@@ -1,3 +1,5 @@
 {
-    "files": ["examplepoint.py", "exampletriangle.py", "main.py", "main.qml", "resources.qrc"]
+    "files": ["examplepoint.py", "exampletriangle.py", "main.py",
+              "CustomGeometryExample/Main.qml", "CustomGeometryExample/TorusMesh.qml",
+              "CustomGeometryExample/qmldir", "CustomGeometryExample/qt_logo_rect.png"]
 }
