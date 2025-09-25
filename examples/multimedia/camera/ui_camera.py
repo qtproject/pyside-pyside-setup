@@ -19,8 +19,8 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QLabel,
     QMainWindow, QMenu, QMenuBar, QPushButton,
-    QSizePolicy, QSlider, QSpacerItem, QStackedWidget,
-    QStatusBar, QTabWidget, QWidget)
+    QSizePolicy, QSpacerItem, QStackedWidget, QStatusBar,
+    QTabWidget, QWidget)
 
 class Ui_Camera(object):
     def setupUi(self, Camera):
@@ -56,21 +56,6 @@ class Ui_Camera(object):
         self.takeImageButton.setEnabled(False)
 
         self.gridLayout.addWidget(self.takeImageButton, 0, 0, 1, 1)
-
-        self.exposureCompensation = QSlider(self.tab_2)
-        self.exposureCompensation.setObjectName(u"exposureCompensation")
-        self.exposureCompensation.setMinimum(-4)
-        self.exposureCompensation.setMaximum(4)
-        self.exposureCompensation.setPageStep(2)
-        self.exposureCompensation.setOrientation(Qt.Orientation.Horizontal)
-        self.exposureCompensation.setTickPosition(QSlider.TickPosition.TicksAbove)
-
-        self.gridLayout.addWidget(self.exposureCompensation, 5, 0, 1, 1)
-
-        self.label = QLabel(self.tab_2)
-        self.label.setObjectName(u"label")
-
-        self.gridLayout.addWidget(self.label, 4, 0, 1, 1)
 
         self.captureWidget.addTab(self.tab_2, "")
         self.tab = QWidget()
@@ -121,15 +106,15 @@ class Ui_Camera(object):
         self.stackedWidget.setSizePolicy(sizePolicy)
         palette = QPalette()
         brush = QBrush(QColor(255, 255, 255, 255))
-        brush.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Active, QPalette.Base, brush)
+        brush.setStyle(Qt.BrushStyle.SolidPattern)
+        palette.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.Base, brush)
         brush1 = QBrush(QColor(145, 145, 145, 255))
-        brush1.setStyle(Qt.SolidPattern)
-        palette.setBrush(QPalette.Active, QPalette.Window, brush1)
-        palette.setBrush(QPalette.Inactive, QPalette.Base, brush)
-        palette.setBrush(QPalette.Inactive, QPalette.Window, brush1)
-        palette.setBrush(QPalette.Disabled, QPalette.Base, brush1)
-        palette.setBrush(QPalette.Disabled, QPalette.Window, brush1)
+        brush1.setStyle(Qt.BrushStyle.SolidPattern)
+        palette.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.Window, brush1)
+        palette.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.Base, brush)
+        palette.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.Window, brush1)
+        palette.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Base, brush1)
+        palette.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Window, brush1)
         self.stackedWidget.setPalette(palette)
         self.viewfinderPage = QWidget()
         self.viewfinderPage.setObjectName(u"viewfinderPage")
@@ -193,7 +178,6 @@ class Ui_Camera(object):
         self.actionExit.triggered.connect(Camera.close)
         self.takeImageButton.clicked.connect(Camera.takeImage)
         self.muteButton.toggled.connect(Camera.setMuted)
-        self.exposureCompensation.valueChanged.connect(Camera.setExposureCompensation)
         self.actionSettings.triggered.connect(Camera.configureCaptureSettings)
         self.actionStartCamera.triggered.connect(Camera.startCamera)
         self.actionStopCamera.triggered.connect(Camera.stopCamera)
@@ -207,7 +191,7 @@ class Ui_Camera(object):
 
     def retranslateUi(self, Camera):
         Camera.setWindowTitle(QCoreApplication.translate("Camera", u"Camera", None))
-        self.actionExit.setText(QCoreApplication.translate("Camera", u"Quit", None))
+        self.actionExit.setText(QCoreApplication.translate("Camera", u"Close", None))
 #if QT_CONFIG(shortcut)
         self.actionExit.setShortcut(QCoreApplication.translate("Camera", u"Ctrl+Q", None))
 #endif // QT_CONFIG(shortcut)
@@ -216,7 +200,6 @@ class Ui_Camera(object):
         self.actionSettings.setText(QCoreApplication.translate("Camera", u"Change Settings", None))
         self.actionAbout_Qt.setText(QCoreApplication.translate("Camera", u"About Qt", None))
         self.takeImageButton.setText(QCoreApplication.translate("Camera", u"Capture Photo", None))
-        self.label.setText(QCoreApplication.translate("Camera", u"Exposure Compensation:", None))
         self.captureWidget.setTabText(self.captureWidget.indexOf(self.tab_2), QCoreApplication.translate("Camera", u"Image", None))
         self.recordButton.setText(QCoreApplication.translate("Camera", u"Record", None))
         self.pauseButton.setText(QCoreApplication.translate("Camera", u"Pause", None))

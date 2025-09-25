@@ -111,7 +111,6 @@ class Camera(QMainWindow):
         self._ui.captureWidget.currentChanged.connect(self.updateCaptureMode)
 
         self._ui.metaDataButton.clicked.connect(self.showMetaDataDialog)
-        self._ui.exposureCompensation.valueChanged.connect(self.setExposureCompensation)
 
         self.setCamera(QMediaDevices.defaultVideoInput())
 
@@ -277,10 +276,6 @@ class Camera(QMainWindow):
             self._ui.pauseButton.setEnabled(True)
             self._ui.stopButton.setEnabled(True)
             self._ui.metaDataButton.setEnabled(False)
-
-    @Slot(int)
-    def setExposureCompensation(self, index):
-        self.m_camera.setExposureCompensation(index * 0.5)
 
     @Slot()
     def displayRecorderError(self):
