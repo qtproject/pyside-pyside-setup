@@ -22,9 +22,21 @@ class PathType(IntEnum):
     CIRCLE_PATH = 1
 
 
+def createEasingCurve(curveType):
+    curve = QEasingCurve(curveType)
+    if curveType == QEasingCurve.Type.BezierSpline:
+        curve.addCubicBezierSegment(QPointF(0.4, 0.1), QPointF(0.6, 0.9), QPointF(1.0, 1.0))
+    elif curveType == QEasingCurve.Type.TCBSpline:
+        curve.addTCBSegment(QPointF(0.0, 0.0), 0, 0, 0)
+        curve.addTCBSegment(QPointF(0.3, 0.4), 0.2, 1, -0.2)
+        curve.addTCBSegment(QPointF(0.7, 0.6), -0.2, 1, 0.2)
+        curve.addTCBSegment(QPointF(1.0, 1.0), 0, 0, 0)
+    return curve
+
+
 class Animation(QPropertyAnimation):
-    def __init__(self, target, prop):
-        super().__init__(target, prop)
+    def __init__(self, target, prop, parent=None):
+        super().__init__(target, prop, parent)
         self.set_path_type(PathType.LINEAR_PATH)
 
     def set_path_type(self, pathType):
@@ -109,7 +121,7 @@ class Window(QWidget):
         self._scene.addItem(self._item.pixmap_item)
         self._ui.graphicsView.setScene(self._scene)
 
-        self._anim = Animation(self._item, b'pos')
+        self._anim = Animation(self._item, b'pos', self)
         self._anim.setEasingCurve(QEasingCurve.Type.OutBounce)
         self._ui.easingCurvePicker.setCurrentRow(0)
 
@@ -124,13 +136,15 @@ class Window(QWidget):
 
         brush = QBrush(gradient)
 
-        curve_types = [(f"QEasingCurve.{e.name}", e) for e in QEasingCurve.Type if e.value <= 40]
+        curve_count = QEasingCurve.Type.Custom.value
+        curve_types = [(f"QEasingCurve.{e.name}", e)
+                       for e in QEasingCurve.Type if e.value < curve_count]
 
         with QPainter(pix) as painter:
 
             for curve_name, curve_type in curve_types:
                 painter.fillRect(QRect(QPoint(0, 0), self._iconSize), brush)
-                curve = QEasingCurve(curve_type)
+                curve = createEasingCurve(curve_type)
 
                 painter.setPen(QColor(0, 0, 255, 64))
                 x_axis = self._iconSize.height() / 1.5
@@ -180,7 +194,7 @@ class Window(QWidget):
 
     def curve_changed(self, row):
         curve_type = QEasingCurve.Type(row)
-        self._anim.setEasingCurve(curve_type)
+        self._anim.setEasingCurve(createEasingCurve(curve_type))
         self._anim.setCurrentTime(0)
 
         is_elastic = (curve_type.value >= QEasingCurve.Type.InElastic.value
