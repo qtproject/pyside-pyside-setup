@@ -94,7 +94,7 @@ def example_sources(qt_example):
         for file in qt_example.glob(f"**/*.{suffix}"):
             if use_file(file):
                 result.append(file)
-    for file in qt_example.glob("**/qmldir"):
+    for file in qt_example.glob("**/qmldir*"):
         if use_file(file):
             result.append(file)
     return result
@@ -108,7 +108,7 @@ def detect_qml_module(pyside_example, sources):
        Read the qmldir file and check whether a module directory exists."""
     qml_dir_file = None
     for source in sources:
-        if source.name == "qmldir":
+        if source.name.startswith("qmldir"):  # "qmldir"/"qmldir.in"
             qml_dir_file = source
             break
     if not qml_dir_file:
