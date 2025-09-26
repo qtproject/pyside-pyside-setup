@@ -30,13 +30,6 @@
     win32
     linux
     darwin
-# PYSIDE 3179
-[QtRemoteObjects::repfile_test]
-    py3
-[QtRemoteObjects::dynamic_types_test]
-    py3
-[QtRemoteObjects::integration_test]
-    py3
 # Open GL functions failures on macOS (2/2020)
 [QtQml::qqmlnetwork_test]
     linux ci    # extended, see PyPy section below
@@ -87,9 +80,5 @@
 [QtQml::javascript_exceptions]
     pypy
 [QtQml::qqmlincubator_incubateWhile]
-    pypy        # gives timeout on macOS if I run video converter while testing   
+    pypy        # gives timeout on macOS if I run video converter while testing
 # 2022-03-04 PyPy: Currently 28 of 657 tests fail
-
-
-
-
