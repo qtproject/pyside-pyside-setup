@@ -38,7 +38,11 @@ using namespace Qt::StringLiterals;
 #error QSLOT_CODE and/or QSIGNAL_CODE changed! change the hardcoded stuff to the correct value!
 #endif
 
-static PyObject *metaObjectAttr = nullptr;
+PyObject *metaObjectAttr()
+{
+    static PyObject *const s = Shiboken::String::createStaticString("__METAOBJECT__");
+    return s;
+}
 
 static int pyObjectWrapperMetaTypeId = QMetaType::UnknownType;
 
@@ -309,9 +313,6 @@ void SignalManager::init()
     Shiboken::Conversions::registerConverterName(converter, "object");
     Shiboken::Conversions::registerConverterName(converter, "PyObjectWrapper");
     Shiboken::Conversions::registerConverterName(converter, "PySide::PyObjectWrapper");
-
-    if (!metaObjectAttr)
-        metaObjectAttr = Shiboken::String::fromCString("__METAOBJECT__");
 }
 
 void SignalManager::setQmlMetaCallErrorHandler(QmlMetaCallErrorHandler handler)
@@ -620,13 +621,13 @@ static MetaObjectBuilder *metaBuilderFromDict(PyObject *dict)
     // no GIL.
     // Note that "SignalManager::registerMetaMethodGetIndex" has write actions
     // that might involve the interpreter, but in that context the GIL is held.
-    if (!dict || !PyDict_Contains(dict, metaObjectAttr))
+    if (!dict || !PyDict_Contains(dict, metaObjectAttr()))
         return nullptr;
 
     // PYSIDE-813: The above assumption is not true in debug mode:
     // PyDict_GetItem would touch PyThreadState_GET and the global error state.
     // PyDict_GetItemWithError instead can work without GIL.
-    PyObject *pyBuilder = PyDict_GetItemWithError(dict, metaObjectAttr);
+    PyObject *pyBuilder = PyDict_GetItemWithError(dict, metaObjectAttr());
     return reinterpret_cast<MetaObjectBuilder *>(PyCapsule_GetPointer(pyBuilder, nullptr));
 }
 
@@ -700,7 +701,7 @@ static int addMetaMethod(QObject *source, const QByteArray &signature,
     if (dmo == nullptr) {
         dmo = new MetaObjectBuilder(Py_TYPE(pySelf), metaObject);
         PyObject *pyDmo = PyCapsule_New(dmo, nullptr, destroyMetaObject);
-        PyObject_SetAttr(pySelf, metaObjectAttr, pyDmo);
+        PyObject_SetAttr(pySelf, metaObjectAttr(), pyDmo);
         Py_DECREF(pyDmo);
     }
 
