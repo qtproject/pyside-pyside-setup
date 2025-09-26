@@ -1,9 +1,8 @@
 // Copyright (C) 2022 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-import QtQuick
-
 import People
+import QtQuick  // For QColor
 
 BirthdayParty {
     host: Boy {
@@ -15,7 +14,8 @@ BirthdayParty {
         name: "Leo Hodges"
         shoe { size: 10; color: "black"; brand: "Thebok"; price: 59.95 }
     }
-    Boy { name: "Jack Smith"
+    Boy {
+        name: "Jack Smith"
         shoe {
             size: 8
             color: "blue"
@@ -28,6 +28,6 @@ BirthdayParty {
         shoe.size: 7
         shoe.color: "red"
         shoe.brand: "Job Macobs"
-        shoe.price: 699.99
+        shoe.price: 99.99
     }
 }
