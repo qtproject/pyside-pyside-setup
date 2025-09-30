@@ -27,8 +27,10 @@ namespace PySide
 PYSIDE_API bool fillQtProperties(PyObject *qObj, const QMetaObject *metaObj,
                                  PyObject *kwds, bool allowErrors);
 
+/// Initialize the DynamicMetaObject helper for a wrapped Qt type (generated code)
 PYSIDE_API void initDynamicMetaObject(PyTypeObject *type, const QMetaObject *base,
                                       std::size_t cppObjSize);
+/// Initialize a Python-derived type
 PYSIDE_API void initQObjectSubType(PyTypeObject *type, PyObject *args, PyObject *kwds);
 
 /// Return the size in bytes of a type that inherits QObject.

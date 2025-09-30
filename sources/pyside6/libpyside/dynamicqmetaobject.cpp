@@ -102,29 +102,21 @@ QMetaObjectBuilder *MetaObjectBuilderPrivate::ensureBuilder()
     return m_builder;
 }
 
-MetaObjectBuilder::MetaObjectBuilder(const char *className, const QMetaObject *metaObject) :
-    m_d(new MetaObjectBuilderPrivate)
+MetaObjectBuilder::MetaObjectBuilder(const QMetaObject *metaObject)
+    : m_d(new MetaObjectBuilderPrivate)
 {
     m_d->m_baseObject = metaObject;
-    m_d->m_builder = new QMetaObjectBuilder();
-    m_d->m_builder->setClassName(className);
-    m_d->m_builder->setSuperClass(metaObject);
-    m_d->m_builder->setClassName(className);
 }
 
+// Parse the type in case of a Python class inheriting a Qt class.
 MetaObjectBuilder::MetaObjectBuilder(PyTypeObject *type, const QMetaObject *metaObject)
     : m_d(new MetaObjectBuilderPrivate)
 {
     m_d->m_baseObject = metaObject;
-    const char *className = PepType_GetNameStr(type);
-    // Different names indicate a Python class inheriting a Qt class.
-    // Parse the type.
-    if (std::strcmp(className, metaObject->className()) != 0) {
-        m_d->m_builder = new QMetaObjectBuilder();
-        m_d->m_builder->setClassName(className);
-        m_d->m_builder->setSuperClass(metaObject);
-        m_d->parsePythonType(type);
-    }
+    m_d->m_builder = new QMetaObjectBuilder();
+    m_d->m_builder->setClassName(PepType_GetNameStr(type));
+    m_d->m_builder->setSuperClass(metaObject);
+    m_d->parsePythonType(type);
 }
 
 MetaObjectBuilder::~MetaObjectBuilder()

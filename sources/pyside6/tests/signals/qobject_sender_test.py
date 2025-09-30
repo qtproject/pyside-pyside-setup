@@ -14,8 +14,10 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QCoreApplication, QObject, QTimer, Signal
+from PySide6.QtCore import QCoreApplication, QObject, QTimer, Signal, Slot
 from helper.usesqapplication import UsesQApplication
+
+import samenamesender
 
 
 class ExtQTimer(QTimer):
@@ -25,6 +27,30 @@ class ExtQTimer(QTimer):
 
 class Sender(QObject):
     foo = Signal()
+
+
+class SameNameSender(samenamesender.SameNameSender):
+    ''' Test sender class for SameNameSenderTest (PYSIDE-3201).'''
+    signal3 = Signal()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.signal1.connect(self.slot2)
+        self.signal2.connect(self.slot2)
+        self.signal3.connect(self.slot3)
+        self.slot3_invoked = False
+
+    @Slot()
+    def slot1(self):
+        pass
+
+    @Slot()
+    def slot2(self):
+        pass
+
+    @Slot()
+    def slot3(self):
+        self.slot3_invoked = True
 
 
 class Receiver(QObject):
@@ -112,6 +138,17 @@ class ObjectSenderWithQAppCheckOnReceiverTest(UsesQApplication):
         sender.start(10)
         self.app.exec()
         self.assertEqual(sender, recv.the_sender)
+
+
+class SameNameSenderTest(UsesQApplication):
+    '''PYSIDE-3201: Test whether the meta object system is confused by identical
+       class names.'''
+    def test(self):
+        sender = SameNameSender()
+        sender.signal1.emit()
+        sender.signal2.emit()
+        sender.signal3.emit()
+        self.assertTrue(sender.slot3_invoked)
 
 
 if __name__ == '__main__':

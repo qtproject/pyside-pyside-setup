@@ -458,21 +458,24 @@ std::size_t getSizeOfQObject(PyTypeObject *type)
     return retrieveTypeUserData(type)->cppObjSize;
 }
 
-void initDynamicMetaObject(PyTypeObject *type, const QMetaObject *base, std::size_t cppObjSize)
+static void initDynamicMetaObjectHelper(PyTypeObject *type,
+                                        TypeUserData *userData)
 {
-    //create DynamicMetaObject based on python type
-    auto *userData = new TypeUserData(reinterpret_cast<PyTypeObject *>(type), base, cppObjSize);
-    userData->mo.update();
     Shiboken::ObjectType::setTypeUserData(type, userData, Shiboken::callCppDestructor<TypeUserData>);
 
-    //initialize staticQMetaObject property
-    void *metaObjectPtr = const_cast<QMetaObject *>(userData->mo.update());
+    // initialize staticQMetaObject property
+    const void *metaObjectPtr = userData->mo.update();
     static SbkConverter *converter = Shiboken::Conversions::getConverter("QMetaObject");
     if (!converter)
         return;
     Shiboken::AutoDecRef pyMetaObject(Shiboken::Conversions::pointerToPython(converter, metaObjectPtr));
     PyObject_SetAttr(reinterpret_cast<PyObject *>(type),
                      Shiboken::PyName::qtStaticMetaObject(), pyMetaObject);
+}
+
+void initDynamicMetaObject(PyTypeObject *type, const QMetaObject *base, std::size_t cppObjSize)
+{
+    initDynamicMetaObjectHelper(type, new TypeUserData(base, cppObjSize));
 }
 
 TypeUserData *retrieveTypeUserData(PyTypeObject *pyTypeObj)
@@ -526,7 +529,9 @@ void initQObjectSubType(PyTypeObject *type, PyObject *args, PyObject * /* kwds *
     // PYSIDE-1463: Don't change feature selection durin subtype initialization.
     // This behavior is observed with PySide 6.
     PySide::Feature::Enable(false);
-    initDynamicMetaObject(type, userData->mo.update(), userData->cppObjSize);
+    // create DynamicMetaObject based on python type
+    auto *subTypeData = new TypeUserData(type, userData->mo.update(), userData->cppObjSize);
+    initDynamicMetaObjectHelper(type, subTypeData);
     PySide::Feature::Enable(true);
 }
 

@@ -14,8 +14,11 @@ namespace PySide
 // Struct associated with QObject's via Shiboken::Object::getTypeUserData()
 struct TypeUserData
 {
-    explicit TypeUserData(PyTypeObject* type,  const QMetaObject* metaobject, std::size_t size) :
+    explicit TypeUserData(PyTypeObject *type, const QMetaObject *metaobject, std::size_t size) :
         mo(type, metaobject), cppObjSize(size) {}
+    // Plain wrapped Qt types
+    explicit TypeUserData(const QMetaObject *metaobject, std::size_t size) :
+        mo(metaobject), cppObjSize(size) {}
 
     MetaObjectBuilder mo;
     std::size_t cppObjSize;
