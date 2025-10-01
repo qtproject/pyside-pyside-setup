@@ -4,7 +4,7 @@
 #include "sbkconverter.h"
 #include "sbkconverter_p.h"
 #include "sbkarrayconverter_p.h"
-#include "sbkmodule.h"
+#include "sbkmodule_p.h"
 #include "basewrapper_p.h"
 #include "bindingmanager.h"
 #include "autodecref.h"
@@ -595,7 +595,7 @@ SbkConverter *getConverter(const char *typeNameC)
         return it->second;
     // PYSIDE-2404: Did not find the name. Load the lazy classes
     //              which have this name and try again.
-    Shiboken::Module::loadLazyClassesWithName(getRealTypeName(typeName).c_str());
+    Shiboken::Module::loadLazyClassesWithNameStd(getRealTypeName(typeName));
     it = converters.find(typeName);
     if (it != converters.end())
         return it->second;

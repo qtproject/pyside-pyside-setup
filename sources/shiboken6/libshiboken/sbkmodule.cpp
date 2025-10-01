@@ -117,7 +117,7 @@ static void incarnateSubtypes(PyObject *module,
     }
 }
 
-static PyTypeObject *incarnateType(PyObject *module, const char *name,
+static PyTypeObject *incarnateType(PyObject *module, const std::string &name,
                                    NameToTypeFunctionMap &nameToFunc)
 {
     // - locate the name and retrieve the generating function
@@ -152,7 +152,7 @@ static PyTypeObject *incarnateType(PyObject *module, const char *name,
 // PYSIDE-2404: Make sure that the mentioned classes really exist.
 // Used in `Pyside::typeName`. Because the result will be cached by
 // the creation of the type(s), this is efficient.
-void loadLazyClassesWithName(const char *name)
+void loadLazyClassesWithNameStd(const std::string &name)
 {
     for (auto const & tableIter : moduleToFuncs) {
         auto nameToFunc = tableIter.second;
@@ -163,6 +163,11 @@ void loadLazyClassesWithName(const char *name)
             incarnateType(module, name, nameToFunc);
         }
     }
+}
+
+void loadLazyClassesWithName(const char *name)
+{
+    loadLazyClassesWithNameStd(std::string(name));
 }
 
 // PYSIDE-2404: Completely load all not yet loaded classes.

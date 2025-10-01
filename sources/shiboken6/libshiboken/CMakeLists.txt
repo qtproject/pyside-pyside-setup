@@ -75,7 +75,7 @@ sbkcppstring.cpp sbkcppstring.h sbkcpptonumpy.h
 sbkenum.cpp sbkenum.h
 sbkerrors.cpp sbkerrors.h
 sbkfeature_base.cpp sbkfeature_base.h
-sbkmodule.cpp sbkmodule.h
+sbkmodule.cpp sbkmodule.h sbkmodule_p.h
 sbknumpy.cpp sbknumpycheck.h
 sbknumpyview.h
 sbkpep.h
@@ -172,6 +172,7 @@ install(FILES
         sbkerrors.h
         sbkfeature_base.h
         sbkmodule.h
+        sbkmodule_p.h
         sbknumpycheck.h
         sbknumpyview.h
         sbkstring.h
