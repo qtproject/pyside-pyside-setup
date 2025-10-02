@@ -2758,10 +2758,7 @@ QString ShibokenGenerator::pythonModuleObjectName(const QString &moduleName)
 
 QString ShibokenGenerator::convertersVariableName(const QString &moduleName)
 {
-    QString result = cppApiVariableNameOld(moduleName);
-    result.chop(1);
-    result.append(u"Converters"_s);
-    return result;
+    return "Sbk"_L1 + moduleCppPrefix(moduleName) + "TypeConverters"_L1;
 }
 
 static QString processInstantiationsVariableName(const AbstractMetaType &type)
