@@ -12,6 +12,7 @@ obj.cpp obj.h
 spanuser.cpp spanuser.h
 typedef.cpp typedef.h
 val.h
+invisiblenamespace.h
 )
 
 add_library(libminimal SHARED ${libminimal_SRC})

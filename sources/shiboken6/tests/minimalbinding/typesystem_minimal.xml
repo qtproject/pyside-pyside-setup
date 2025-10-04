@@ -55,6 +55,12 @@
 
     <value-type name="MinBoolUser"/>
 
+    <namespace-type name="InvisibleNamespace" visible="no">
+        <namespace-type name="VisibleNamespace">
+            <value-type name="ValueType"/>
+        </namespace-type>
+    </namespace-type>
+
     <value-type name="ContainerUser">
         <modify-function signature="intVector()">
             <modify-argument index="return">

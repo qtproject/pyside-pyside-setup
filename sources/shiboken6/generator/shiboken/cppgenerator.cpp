@@ -6417,12 +6417,11 @@ void CppGenerator::writeInitFuncCall(TextStream &callStr,
             : "module"_L1;
         callStr << functionName << '(' << enclosing << ");\n";
     } else if (hasParent) {
-        const QString &enclosingName = enclosingEntry->name();
-        const auto parts = QStringView{enclosingName}.split(u"::", Qt::SkipEmptyParts);
-        const QString namePathPrefix = enclosingEntry->name().replace("::"_L1, "."_L1);
+        const QString &enclosingName = enclosingEntry->targetLangName();
+        const auto parts = QStringView{enclosingName}.split(u".", Qt::SkipEmptyParts);
         callStr << "Shiboken::Module::AddTypeCreationFunction("
             << "module, \"" << parts[0] << "\", "
-            << functionName << ", \"" << namePathPrefix << '.' << pythonName << "\");\n";
+            << functionName << ", \"" << enclosingName << '.' << pythonName << "\");\n";
     } else {
         callStr << "Shiboken::Module::AddTypeCreationFunction("
             << "module, \"" << pythonName << "\", "
