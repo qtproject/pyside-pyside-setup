@@ -3,22 +3,24 @@
 cmake_minimum_required(VERSION 3.18)
 
 include(CMakeFindDependencyMacro)
-find_dependency(Python COMPONENTS Interpreter Development)
+if(NOT CMAKE_CROSSCOMPILING)
+    find_dependency(Python COMPONENTS Interpreter Development)
 
-if(NOT SHIBOKEN6TOOLS_SKIP_FIND_DEPENDENCIES)
-    # Dynamically determine Python_SITELIB using Python itself
-    execute_process(
-        COMMAND ${Python_EXECUTABLE} -c
-        "import site; print(next(p for p in site.getsitepackages() if 'site-packages' in p))"
-        OUTPUT_VARIABLE Python_SITELIB
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    list(APPEND CMAKE_PREFIX_PATH
-        "${Python_SITELIB}/shiboken6/lib/cmake"
-        "${Python_SITELIB}/PySide6/lib/cmake"
-    )
-    find_dependency(Shiboken6 REQUIRED)
-    find_dependency(PySide6 REQUIRED)
+    if(NOT SHIBOKEN6TOOLS_SKIP_FIND_DEPENDENCIES)
+        # Dynamically determine Python_SITELIB using Python itself
+        execute_process(
+            COMMAND ${Python_EXECUTABLE} -c
+            "import site; print(next(p for p in site.getsitepackages() if 'site-packages' in p))"
+            OUTPUT_VARIABLE Python_SITELIB
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        list(APPEND CMAKE_PREFIX_PATH
+            "${Python_SITELIB}/shiboken6/lib/cmake"
+            "${Python_SITELIB}/PySide6/lib/cmake"
+        )
+        find_dependency(Shiboken6 REQUIRED)
+        find_dependency(PySide6 REQUIRED)
+    endif()
 endif()
 
 if(NOT TARGET Shiboken6::shiboken6)
