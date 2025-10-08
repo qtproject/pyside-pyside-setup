@@ -176,7 +176,7 @@ class RhiWindow(QWindow):
             self.m_rhi = QRhi.create(QRhi.Implementation.D3D12, params)
         elif self.m_graphicsApi == QRhi.Implementation.Metal:
             params = QRhiMetalInitParams()
-            self.m_rhi.reset(QRhi.create(QRhi.Implementation.Metal, params))
+            self.m_rhi = QRhi.create(QRhi.Implementation.Metal, params)
 
         if not self.m_rhi:
             qFatal("Failed to create RHI backend")
