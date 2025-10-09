@@ -16,7 +16,7 @@ The final output is a `.apk` or a `.aab` file created within the project's sourc
 determines whether a `.apk` or a `.aab` is created.
 
 .. warning:: Currently, users are required to cross-compile Qt for Python to generate the wheels
-    required for `armeabi-v7a` and `x86` Andorid platforms. Instructions on cross-compiling
+    required for `armeabi-v7a` and `x86` Android platforms. Instructions on cross-compiling
     Qt for Python for Android can be found :ref:`here <cross_compile_android>`.
 
 .. note:: ``pyside6-android-deploy`` only works with a Unix (Linux or macOS) host at the moment.
