@@ -189,10 +189,12 @@ install(TARGETS pyside6 EXPORT PySide6Targets
 set_target_properties(pyside6 PROPERTIES
     VERSION ${PYSIDE_SOVERSION})
 
-install(TARGETS pyside6 EXPORT PySide6WheelTargets
-                        LIBRARY DESTINATION "PySide6"
-                        ARCHIVE DESTINATION "PySide6"
-                        RUNTIME DESTINATION "PySide6")
+if(NOT is_pyside6_superproject_build)
+    install(TARGETS pyside6 EXPORT PySide6WheelTargets
+                            LIBRARY DESTINATION "PySide6"
+                            ARCHIVE DESTINATION "PySide6"
+                            RUNTIME DESTINATION "PySide6")
+endif()
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pyside6${pyside6_SUFFIX}.pc"
         DESTINATION "${LIB_INSTALL_DIR}/pkgconfig")
