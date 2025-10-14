@@ -182,7 +182,7 @@ void CppGenerator::generateSmartPointerClass(TextStream &s,
     const QString &methodsDefinitions = md.toString();
     const QString &singleMethodDefinitions = smd.toString();
 
-    const QString className = chopType(cpythonTypeName(typeEntry));
+    const QString className = cpythonBaseName(typeEntry);
 
     // Write single method definitions
     s << singleMethodDefinitions;

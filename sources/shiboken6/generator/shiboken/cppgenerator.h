@@ -592,7 +592,6 @@ private:
     { return boolCast(metaClass).has_value(); }
 
     void clearTpFuncs();
-    static QString chopType(QString s);
 
     static QString typeInitStructHelper(const TypeEntryCPtr &te, const QString &varName);
 

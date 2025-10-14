@@ -634,13 +634,6 @@ bool ShibokenGenerator::shouldRejectNullPointerArgument(const AbstractMetaFuncti
     return false;
 }
 
-QString ShibokenGenerator::cpythonBaseName(const AbstractMetaType &type)
-{
-    if (type.isCString())
-        return u"PyString"_s;
-    return cpythonBaseName(type.typeEntry());
-}
-
 QString ShibokenGenerator::cpythonBaseName(const AbstractMetaClassCPtr &metaClass)
 {
     return cpythonBaseName(metaClass->typeEntry());
@@ -664,25 +657,10 @@ QString ShibokenGenerator::containerCpythonBaseName(const ContainerTypeEntryCPtr
     return cPySequenceT;
 }
 
-QString ShibokenGenerator::cpythonBaseName(const TypeEntryCPtr &type)
+QString ShibokenGenerator::cpythonBaseName(const ComplexTypeEntryCPtr &type)
 {
-    QString baseName;
-    if (type->isWrapperType() || type->isNamespace()) { // && type->referenceType() == NoReference) {
-        baseName = u"Sbk_"_s + type->name();
-    } else if (type->isPrimitive()) {
-        const auto ptype = basicReferencedTypeEntry(type);
-        baseName = ptype->hasTargetLangApiType()
-                   ? ptype->targetLangApiName() : pythonPrimitiveTypeName(ptype->name());
-    } else if (type->isEnum()) {
-        baseName = cpythonEnumName(std::static_pointer_cast<const EnumTypeEntry>(type));
-    } else if (type->isFlags()) {
-        baseName = cpythonFlagsName(std::static_pointer_cast<const FlagsTypeEntry>(type));
-    } else if (type->isContainer()) {
-        const auto ctype = std::static_pointer_cast<const ContainerTypeEntry>(type);
-        baseName = containerCpythonBaseName(ctype);
-    } else {
-        baseName = cPyObjectT;
-    }
+    Q_ASSERT(type->isWrapperType() || type->isNamespace());
+    QString baseName = u"Sbk_"_s + type->name();
     return baseName.replace(u"::"_s, u"_"_s);
 }
 
@@ -691,7 +669,7 @@ QString ShibokenGenerator::cpythonTypeName(const AbstractMetaClassCPtr &metaClas
     return cpythonTypeName(metaClass->typeEntry());
 }
 
-QString ShibokenGenerator::cpythonTypeName(const TypeEntryCPtr &type)
+QString ShibokenGenerator::cpythonTypeName(const ComplexTypeEntryCPtr &type)
 {
     return cpythonBaseName(type) + u"_TypeF()"_s;
 }
