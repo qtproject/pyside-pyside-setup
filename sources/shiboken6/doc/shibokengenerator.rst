@@ -537,5 +537,5 @@ libraries and include paths.
 
 For complete usage examples, see:
 
-* `SampleBinding Example <../../pyside6/examples/example_samplebinding_samplebinding.html>`_
-* `WidgetBinding Example <../../pyside6/examples/example_widgetbinding_widgetbinding.html>`_
+* `SampleBinding Example <https://doc.qt.io/qtforpython-6/examples/example_samplebinding_samplebinding.html>`_
+* `WidgetBinding Example <https://doc.qt.io/qtforpython-6/examples/example_widgetbinding_widgetbinding.html>`_
