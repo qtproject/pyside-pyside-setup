@@ -372,6 +372,14 @@ def create_signature_union(props, key):
         param = inspect.Parameter(name, kind, annotation=ann, default=default)
         params.append(param)
 
+    # Find the index of variadic positional parameter, if any
+    # And update the parameter kind that comes after
+    idx = next((i for i, p in enumerate(params) if p.kind == _VAR_POSITIONAL), None)
+    if idx is not None:
+        for i, p in enumerate(params):
+            if i > idx and p.kind != _VAR_KEYWORD:
+                params[i] = p.replace(kind=_KEYWORD_ONLY)
+
     ret_anno = annotations.get('return', _empty)
     if ret_anno is not _empty and props["fullname"] in missing_optional_return:
         ret_anno = typing.Union[ret_anno]
