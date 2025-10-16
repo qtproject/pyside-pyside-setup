@@ -249,6 +249,11 @@ static CXTranslationUnit createTranslationUnit(CXIndex index,
                                      // https://github.com/darlinghq/darling/issues/204
 #endif
         "-Wno-constant-logical-operand",
+#if CINDEX_VERSION_MAJOR > 0 || CINDEX_VERSION_MINOR >= 64 // Clang 21
+        // QTBUG-141204: Suppress "character-conversion" warnings in Qt: qchar.h:... warning: implicit
+        // conversion from 'const char16_t' to 'char32_t' may change the meaning of the represented code unit.
+        "-Wno-character-conversion",
+#endif
         "-x",
         "c++" // Treat .h as C++, not C
     };
