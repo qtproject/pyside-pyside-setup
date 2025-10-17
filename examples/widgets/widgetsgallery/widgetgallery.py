@@ -34,7 +34,7 @@ COMPUTER_ICON = ":/qt-project.org/styles/commonstyle/images/computer-32.png"
 SYSTEMINFO = """<html><head/><body>
 <h3>Python</h3><p>{}</p>
 <h3>Qt Build</h3><p>{}</p>
-<h3>Operating System</h3><p>{}</p>
+<h3>Operating System</h3><p>"{}" / {}</p>
 <h3>Screens</h3>
 {}
 </body></html>"""
@@ -396,6 +396,7 @@ class WidgetGallery(QDialog):
         system_info = SYSTEMINFO.format(sys.version,
                                         QLibraryInfo.build(),
                                         QSysInfo.prettyProductName(),
+                                        QGuiApplication.platformName(),
                                         screen_info(self))
         self._systeminfo_textbrowser.setHtml(system_info)
 
