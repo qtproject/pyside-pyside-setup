@@ -15,7 +15,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import QObject, Property, QEnum, QFlag
+from PySide6.QtCore import QObject, Property, QEnum, QFlag, Qt
 
 
 class CustomWidgetBase(QObject):
@@ -48,6 +48,13 @@ class CustomWidget(CustomWidgetBase):
         self._testFlag = (CustomWidget.TestFlag.FlagValue0
                           | CustomWidget.TestFlag.FlagValue1)
         self._bigTestFlag = CustomWidget.BigTestFlag.BigFlagValue1
+        self._orientation = Qt.Orientation.Horizontal
+
+    def orientation(self):
+        return self._orientation
+
+    def setOrientation(self, new_val):
+        self._orientation = new_val
 
     def testEnum(self):
         return self._testEnum
@@ -67,6 +74,9 @@ class CustomWidget(CustomWidgetBase):
     def setBigTestFlag(self, new_val):
         self._bigTestFlag = new_val
 
+    # Qt C++ enum
+    orientation = Property(Qt.Orientation, orientation, setOrientation)
+    # Decorated Python enums
     testEnum = Property(CustomWidgetBase.TestEnum, testEnum, setTestEnum)
     testFlag = Property(CustomWidgetBase.TestFlag, getTestFlag, setTestFlag)
     bigTestFlag = Property(CustomWidgetBase.BigTestFlag,
@@ -77,9 +87,17 @@ class TestDesignerEnum(unittest.TestCase):
     """PYSIDE-2840: Test whether a custom widget with decorated enum/flag properties
        allows for modifying the values from C++."""
 
+    def setUp(self):
+        super().setUp()
+        self._cw = CustomWidget()
+
+    def tearDown(self):
+        super().tearDown()
+        self._cw = None
+
     def testEnum(self):
-        cw = CustomWidget()
         # Emulate Qt Widgets Designer setting a property
+        cw = self._cw
         cw.setProperty("testEnum", 3)
         self.assertEqual(cw.testEnum, CustomWidget.TestEnum.EnumValue3)
         # Emulate uic generated code
@@ -100,6 +118,18 @@ class TestDesignerEnum(unittest.TestCase):
         ok = cw.setProperty("bigTestFlag", CustomWidgetBase.BigTestFlag.BigFlagValue2)
         self.assertTrue(ok)
         self.assertEqual(cw.bigTestFlag, CustomWidget.BigTestFlag.BigFlagValue2)
+
+    def testMetaProperty(self):
+        mo = self._cw.metaObject()
+        index = mo.indexOfProperty("orientation")
+        self.assertTrue(index != -1)
+        self.assertTrue(mo.property(index).isEnumType())
+        index = mo.indexOfProperty("testEnum")
+        self.assertTrue(index != -1)
+        self.assertTrue(mo.property(index).isEnumType())
+        index = mo.indexOfProperty("testFlag")
+        self.assertTrue(index != -1)
+        self.assertTrue(mo.property(index).isEnumType())
 
 
 if __name__ == '__main__':
