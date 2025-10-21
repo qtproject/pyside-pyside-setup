@@ -12,7 +12,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from helper.usesqapplication import UsesQApplication
-from PySide6.QtCore import QCoreApplication, QTimer
+from PySide6.QtCore import QTimer
 from PySide6.QtGui import QPicture, QPainter
 from PySide6.QtWidgets import QWidget
 
@@ -43,8 +43,6 @@ class QPictureTest(UsesQApplication):
         w = MyWidget(picture2)
 
         w.show()
-        while not w.windowHandle().isExposed():
-            QCoreApplication.processEvents()
         self.app.exec()
 
 

@@ -12,6 +12,7 @@ from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtWidgets import QWidget, QMainWindow
+from PySide6.QtGui import QGuiApplication
 from helper.usesqapplication import UsesQApplication
 
 
@@ -47,10 +48,10 @@ class QWidgetVisible(UsesQApplication):
         widget.setVisible(True)
         self.assertTrue(widget.isVisible())
         self.assertTrue(widget.winId() != 0)
-        # skip this test on macOS since no native events are received
-        if sys.platform == 'darwin':
+        # skip this test on macOS/Wayland since no native events are received
+        if sys.platform == 'darwin' or QGuiApplication.platformName() == 'wayland':
             return
-        for i in range(10):
+        for i in range(100):
             if widget.nativeEventCount > 0:
                 break
             self.app.processEvents()
