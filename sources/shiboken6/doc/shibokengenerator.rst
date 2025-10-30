@@ -483,10 +483,12 @@ When passing the target triplet:
 CMake Usage
 ***********
 
-The ``Shiboken6Tools`` CMake package provides an easy way to invoke the Shiboken generator from
-CMake to create Python bindings for C++ libraries. This is achieved using the
-``shiboken_generator_create_binding`` CMake function. This function automates the process of
-generating binding sources and building the Python extension module.
+The ``Shiboken6Tools`` CMake package provides an easy way to invoke the
+Shiboken generator from CMake to create Python bindings for C++ libraries. It
+is contained in the ``shiboken6_generator`` wheel. This is achieved using the
+``shiboken_generator_create_binding`` CMake function. This function automates
+the process of generating binding sources and building the Python extension
+module.
 
 Function Signature
 ==================
