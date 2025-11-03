@@ -20,71 +20,71 @@ Before you can install |project|, first you must install the following software:
   `venv <https://docs.python.org/3/library/venv.html>`_ or
   `virtualenv <https://virtualenv.pypa.io/en/latest>`_
   and avoid installing PySide6 via ``pip`` in your system.
+* **No Qt installation is required**: having Qt installed in your system will not
+  interfere with your PySide6 installation if you do it via ``pip install``,
+  because the Python packages (wheels) already include Qt binaries. Most
+  notably, style plugins from the system won't have any effect on PySide
+  applications.
 
 Installation
 ------------
 
-* **Creating and activating an environment**
-  You can do this by running the following on a terminal:
+1. **Creating and activating an environment**
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  * Create environment (Your Python executable might be called ``python3``)::
+You can do this by running the following on a terminal:
 
-        python -m venv env
+* Create environment (Your Python executable might be called ``python3``)::
 
-  * Activate the environment (Linux and macOS)::
+      python -m venv env
 
-        source env/bin/activate
+* Activate the environment on Linux/macOS::
 
-  * Activate the environment (Windows)::
+      source env/bin/activate
 
-        env\Scripts\activate.bat
+  or in Windows::
 
-  Check this animation on how to do it:
-
-  .. image:: https://qt-wiki-uploads.s3.amazonaws.com/images/8/8a/Pyside6_install.gif
-     :alt: PySide6 Installation GIF
-
-  .. note:: Having Qt installed in your system will not interfere with your
-     PySide6 installation if you do it via ``pip install``, because the Python
-     packages (wheels) already includes Qt binaries. Most notably, style plugins
-     from the system won't have any effect on PySide applications.
+      env\Scripts\activate.bat
 
 
-* **Installing PySide6**
 
-  .. note:: For a commercial installation, refer to :ref:`commercial-page`.
+2. **Installing PySide6**
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Now you are ready to install the |project| packages using ``pip``.
-  From the terminal, run the following command:
+.. note:: For a commercial installation, refer to :ref:`commercial-page`.
 
-  * For the latest version::
+Now you are ready to install the |project| packages using ``pip``.
+From the terminal, run the following command:
 
-        pip install pyside6
+* For the latest version::
 
-  * For a specific version, like 6.10.1::
+    pip install pyside6
 
-        pip install pyside6==6.10.1
+* For a specific version, like 6.10.1::
 
-  * It is also possible to install a specific snapshot from our servers.
-    To do so, you can use the following command::
+    pip install pyside6==6.10.1
 
-      pip install --index-url=https://download.qt.io/snapshots/ci/pyside/6.10/latest pyside6 --trusted-host download.qt.io
+* It is also possible to install a specific snapshot from our servers.
+  To do so, you can use the following command::
 
-* **Test your installation**
+    pip install --index-url=https://download.qt.io/snapshots/ci/pyside/6.10/latest pyside6 --trusted-host download.qt.io
 
-  Now that you have |project| installed, test your setup by running the following Python
-  constructs to print version information::
+3. **Test your installation**
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    import PySide6.QtCore
+Now that you have |project| installed, test your setup by running the following Python
+constructs to print version information::
 
-    # Prints PySide6 version
-    print(PySide6.__version__)
+  import PySide6.QtCore
 
-    # Prints the Qt version used to compile PySide6
-    print(PySide6.QtCore.__version__)
+  # Prints PySide6 version
+  print(PySide6.__version__)
 
-  .. note:: For more information about what's included in the ``pyside6``
-     package, check :ref:`package_details`.
+  # Prints the Qt version used to compile PySide6
+  print(PySide6.QtCore.__version__)
+
+.. note:: For more information about what's included in the ``pyside6``
+   package, check :ref:`package_details`.
 
 
 Create your first Qt Application

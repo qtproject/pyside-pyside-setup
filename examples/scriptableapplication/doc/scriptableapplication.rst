@@ -25,18 +25,16 @@ which trigger the underlying C++ function.
 Building the project
 ********************
 
-This example can be built using ``CMake`` or ``QMake``,
+This example can be built using ``CMake``,
 but there are common requirements that you need to take into
 consideration:
 
 * Make sure that a --standalone PySide package (bundled with Qt libraries)
   is installed into the current active Python environment
   (system or virtualenv)
-* qmake has to be in your PATH:
 
   * so that CMake find_package(Qt6 COMPONENTS Core) works (used for include
     headers),
-  * used for building the application with qmake instead of CMake
 
 * use the same Qt version for building the example application, as was used
   for building PySide, this is to ensure binary compatibility between the
@@ -55,8 +53,7 @@ For Windows you will also need:
   compatible version of MSVC, to avoid mixing of C++ runtime libraries.
 
 Both build options will use the ``pyside_config.py`` file to configure the project
-using the current PySide/Shiboken installation (for qmake via ``pyside.pri``,
-and for CMake via the project ``CMakeLists.txt``).
+using the current PySide/Shiboken installation (for CMake via ``CMakeLists.txt``).
 
 
 Using CMake
@@ -89,32 +86,8 @@ On Windows:
     ninja
     .\scriptableapplication.exe
 
-Using QMake
-+++++++++++
-
-The file ``scriptableapplication.pro`` is the project file associated
-to the example when using qmake.
-
-You can build this example by executing:
-
-.. code-block:: bash
-
-    mkdir build
-    cd build
-    qmake ..
-    make # or nmake / jom for Windows
-
-
 Windows troubleshooting
 ***********************
-
-Using ``qmake`` should work out of the box, there was a known issue
-with directories and white spaces that is solved by using the
-"~1" character, so the path will change from:
-``c:\Program Files\Python310\libs``
-to
-``c:\Progra~1\Python310\libs``
-this will avoid the issues when the Makefiles are generated.
 
 It is possible when using ``CMake`` to pick up the wrong compiler
 for a different architecture, but it can be addressed explicitly
@@ -182,11 +155,11 @@ In practice this means the only supported configurations are:
 
 #. release config build of the application +
    PySide ``setup.py`` without ``--debug`` flag + ``python.exe`` for the
-   PySide build process + ``python39.dll`` for the linked in shared
+   PySide build process + ``python314.dll`` for the linked in shared
    library + release build of Qt.
 #. debug config build of the application +
    PySide ``setup.py`` *with* ``--debug`` flag + ``python_d.exe`` for the
-   PySide build process + ``python39_d.dll`` for the linked in shared
+   PySide build process + ``python314_d.dll`` for the linked in shared
    library + debug build of Qt.
 
 This is necessary because all the shared libraries in question have to
