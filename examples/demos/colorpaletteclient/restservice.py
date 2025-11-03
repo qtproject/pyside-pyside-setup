@@ -12,6 +12,19 @@ QML_IMPORT_NAME = "ColorPalette"
 QML_IMPORT_MAJOR_VERSION = 1
 
 
+class ApiKeyRequestFactory(QNetworkRequestFactory):
+    """Custom request factory that adds the reqres.in API key to all requests"""
+
+    def createRequest(self, path, query=None):
+        """Override to add API key header to every request"""
+        if query is None:
+            request = super().createRequest(path)
+        else:
+            request = super().createRequest(path, query)
+        request.setRawHeader(b"x-api-key", b"reqres-free-v1")
+        return request
+
+
 @QmlElement
 @ClassInfo(DefaultProperty="resources")
 class RestService(QPyQmlParserStatus):
@@ -24,7 +37,7 @@ class RestService(QPyQmlParserStatus):
         self.m_qnam = QNetworkAccessManager()
         self.m_qnam.setAutoDeleteReplies(True)
         self.m_manager = QRestAccessManager(self.m_qnam)
-        self.m_serviceApi = QNetworkRequestFactory()
+        self.m_serviceApi = ApiKeyRequestFactory()
 
     @Property(str, notify=urlChanged)
     def url(self):
