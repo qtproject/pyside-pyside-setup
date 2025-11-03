@@ -76,6 +76,40 @@ class TestDerivedObject(QStringListModel):
                      notify=valueChanged)
 
 
+class SpecialProperties(QObject):
+    _value = 1
+
+    def __init__(self):
+        super().__init__()
+        self._readWriteInt = 2
+        self._readWriteDecoratedInt = 3
+
+    def readOnlyInt(self):  # Class variable properties
+        return 4
+
+    def readWriteInt(self):
+        return self._readWriteInt
+
+    def setReadWriteInt(self, v):
+        self._readWriteInt = v
+
+    @Property(int)  # Property decorators
+    def readOnlyDecoratedInt(self):
+        return 5
+
+    @Property(int)
+    def readWriteDecoratedInt(self):
+        return self._readWriteDecoratedInt
+
+    @readWriteDecoratedInt.setter
+    def readWriteDecoratedInt(self, v):
+        self._readWriteDecoratedInt = v
+
+    constantValue = Property(int, lambda self: self._value, constant=True)
+    readOnlyInt = Property(int, readOnlyInt)
+    readWriteInt = Property(int, readWriteInt, fset=setReadWriteInt)
+
+
 class PropertyTest(unittest.TestCase):
 
     def test1Object(self):
@@ -103,6 +137,49 @@ class PropertyTest(unittest.TestCase):
         self.assertEqual(testObject.changed_emitted, 1)
         self.assertEqual(testObject.setter_called, 1)
         self.assertEqual(testObject.getter_called, 2)
+
+    def testSpecialProperties(self):
+        """PYSIDE-924, PYSIDE-3227, constant, read-only."""
+        testObject = SpecialProperties()
+        mo = testObject.metaObject()
+
+        i = mo.indexOfProperty("constantValue")
+        self.assertTrue(i != -1)
+        metaProperty = mo.property(i)
+        self.assertTrue(metaProperty.isConstant())
+        self.assertEqual(testObject.constantValue, 1)
+
+        i = mo.indexOfProperty("readWriteInt")
+        self.assertTrue(i != -1)
+        metaProperty = mo.property(i)
+        self.assertTrue(metaProperty.isWritable())
+        self.assertEqual(testObject.readWriteInt, 2)
+        testObject.readWriteInt = 42
+        self.assertEqual(testObject.readWriteInt, 42)
+
+        i = mo.indexOfProperty("readWriteDecoratedInt")
+        self.assertTrue(i != -1)
+        metaProperty = mo.property(i)
+        self.assertTrue(metaProperty.isWritable())
+        self.assertEqual(testObject.readWriteDecoratedInt, 3)
+        testObject.readWriteDecoratedInt = 42
+        self.assertEqual(testObject.readWriteDecoratedInt, 42)
+
+        i = mo.indexOfProperty("readOnlyInt")
+        self.assertTrue(i != -1)
+        metaProperty = mo.property(i)
+        self.assertFalse(metaProperty.isWritable())
+        self.assertEqual(testObject.readOnlyInt, 4)
+        with self.assertRaises(AttributeError):
+            testObject.readOnlyInt = 42
+
+        i = mo.indexOfProperty("readOnlyDecoratedInt")
+        self.assertTrue(i != -1)
+        metaProperty = mo.property(i)
+        self.assertFalse(metaProperty.isWritable())
+        self.assertEqual(testObject.readOnlyDecoratedInt, 5)
+        with self.assertRaises(AttributeError):
+            testObject.readOnlyDecoratedInt = 42
 
 
 if __name__ == '__main__':

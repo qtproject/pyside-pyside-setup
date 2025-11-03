@@ -46,6 +46,7 @@ static PyObject *qProperty_fdel(PyObject *, void *);
 
 static PyMethodDef PySidePropertyMethods[] = {
     {"getter", reinterpret_cast<PyCFunction>(qPropertyGetter), METH_O, nullptr},
+    // "name@setter" handling
     {"setter", reinterpret_cast<PyCFunction>(qPropertySetter), METH_O,  nullptr},
     {"resetter", reinterpret_cast<PyCFunction>(qPropertyResetter), METH_O,  nullptr},
     {"deleter", reinterpret_cast<PyCFunction>(qPropertyDeleter), METH_O, nullptr},
@@ -114,7 +115,7 @@ PyObject *PySidePropertyPrivate::getValue(PyObject *source) const
 
 int PySidePropertyPrivate::setValue(PyObject *source, PyObject *value)
 {
-    if (fset && value) {
+    if (fset != nullptr && fset != Py_None && value != nullptr) {
         Shiboken::AutoDecRef args(PyTuple_New(2));
         PyTuple_SetItem(args, 0, source);
         PyTuple_SetItem(args, 1, value);
@@ -123,7 +124,7 @@ int PySidePropertyPrivate::setValue(PyObject *source, PyObject *value)
         Shiboken::AutoDecRef result(PyObject_CallObject(fset, args));
         return (result.isNull() ? -1 : 0);
     }
-    if (fdel) {
+    if (fdel != nullptr && fdel != Py_None) {
         Shiboken::AutoDecRef args(PyTuple_New(1));
         PyTuple_SetItem(args, 0, source);
         Py_INCREF(source);
@@ -136,7 +137,7 @@ int PySidePropertyPrivate::setValue(PyObject *source, PyObject *value)
 
 int PySidePropertyPrivate::reset(PyObject *source)
 {
-    if (freset) {
+    if (freset != nullptr && freset != Py_None) {
         Shiboken::AutoDecRef args(PyTuple_New(1));
         Py_INCREF(source);
         PyTuple_SetItem(args, 0, source);
@@ -559,12 +560,12 @@ bool isReadable(const PySideProperty * /* self */)
 
 bool isWritable(const PySideProperty *self)
 {
-    return self->d->fset != nullptr;
+    return self->d->fset != nullptr && self->d->fset != Py_None;
 }
 
 bool hasReset(const PySideProperty *self)
 {
-    return self->d->freset != nullptr;
+    return self->d->freset != nullptr && self->d->freset != Py_None;
 }
 
 bool isDesignable(const PySideProperty *self)
