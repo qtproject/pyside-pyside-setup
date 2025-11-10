@@ -371,10 +371,9 @@ instructions:
             equals_value: ARM64
 
 
-    # ToDo: can be removed after 3.11 is available on qt5#3.8 on macOS
-    # start of ToDo
+    # Use pyenv to install Python 3.11 on macOS+Android
     - type: ExecuteCommand
-      command: "tools/install-p311.sh"
+      command: "pyenv install 3.11.9"
       maxTimeInSeconds: 14400
       maxTimeBetweenOutput: 1200
       ignoreExitCode: true
@@ -388,10 +387,10 @@ instructions:
             property: target.os
             equals_value: Android
       userMessageOnFailure: >
-          Failed to install python 3.11
+          Failed to install python 3.11 with pyenv
     - type: PrependToEnvironmentVariable
       variableName: PATH
-      variableValue: "/Users/qt/python311/bin:"
+      variableValue: "/Users/qt/.pyenv/versions/3.11.9/bin:"
       enable_if:
           condition: and
           conditions:
@@ -401,7 +400,6 @@ instructions:
           - condition: property
             property: target.os
             equals_value: Android
-    # end of ToDo
     - type: ExecuteCommand
       command: "virtualenv -p {{.Env.interpreter}} {{.AgentWorkingDir}}/env"
       maxTimeInSeconds: 14400
