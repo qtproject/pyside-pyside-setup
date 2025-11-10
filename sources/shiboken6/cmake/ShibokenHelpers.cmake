@@ -343,7 +343,7 @@ macro(shiboken_find_required_python)
             Python
             ${_shiboken_find_python_version_args}
             REQUIRED
-            COMPONENTS Development
+            COMPONENTS Development.Module
         )
         set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM
             "${_shiboken_backup_CMAKE_FIND_ROOT_PATH_MODE_PROGRAM}")
@@ -365,7 +365,7 @@ macro(shiboken_find_required_python)
             Python
             ${_shiboken_find_python_version_args}
             REQUIRED
-            COMPONENTS Interpreter Development
+            COMPONENTS Interpreter Development.Module
         )
     endif()
 
