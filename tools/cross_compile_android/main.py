@@ -104,6 +104,9 @@ if __name__ == "__main__":
 
     parser.add_argument("-v", "--verbose", help="run in verbose mode", action="store_const",
                         dest="loglevel", const=logging.INFO)
+    # As opposed to Qt, Qt for Python does not require API level 28 because it can be built with a
+    # higher API for toolchain compatibility, while still remaining compatible with Qt's runtime
+    # minimum.
     parser.add_argument("--api-level", type=str, default="35",
                         help="Minimum Android API level to use")
     parser.add_argument("--ndk-path", type=str, help="Path to Android NDK (Preferred r26b)")
