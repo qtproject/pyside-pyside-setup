@@ -20,10 +20,16 @@ macro(create_and_install_qt_javabindings)
         ${android_main_srcs}/QtService.java
     )
     # set android.jar from the sdk, for compiling the java files into .jar
-    set(sdk_jar_location "${ANDROID_SDK_ROOT}/platforms/android-${CMAKE_ANDROID_API}/android.jar")
-    file(GLOB sources_list LIST_DIRECTORIES true "${ANDROID_SDK_ROOT}/platforms/android-${CMAKE_ANDROID_API}/*")
+    # Use ANDROID_API_VERSION from environment if set, otherwise fall back to CMAKE_ANDROID_API
+    if(DEFINED ENV{ANDROID_API_VERSION})
+        set(ANDROID_SDK_API_LEVEL "$ENV{ANDROID_API_VERSION}")
+    else()
+        set(ANDROID_SDK_API_LEVEL "android-${CMAKE_ANDROID_API}")
+    endif()
+    set(sdk_jar_location "${ANDROID_SDK_ROOT}/platforms/${ANDROID_SDK_API_LEVEL}/android.jar")
+    file(GLOB sources_list LIST_DIRECTORIES true "${ANDROID_SDK_ROOT}/platforms/${ANDROID_SDK_API_LEVEL}/*")
     if (NOT EXISTS "${sdk_jar_location}")
-        message(FATAL_ERROR "Could not locate Android SDK jar for api '${CMAKE_ANDROID_API}' - ${sdk_jar_location}")
+        message(FATAL_ERROR "Could not locate Android SDK jar for api '${ANDROID_SDK_API_LEVEL}' - ${sdk_jar_location}")
     endif()
 
     # this variable is accessed by qt_internal_add_jar
