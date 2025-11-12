@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.18)
 
 include(CMakeFindDependencyMacro)
 if(NOT CMAKE_CROSSCOMPILING)
-    find_dependency(Python COMPONENTS Interpreter Development.Module)
+    find_dependency(Python COMPONENTS Interpreter Development)
 
     if(NOT SHIBOKEN6TOOLS_SKIP_FIND_DEPENDENCIES)
         # Dynamically determine Python_SITELIB using Python itself
