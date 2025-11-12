@@ -365,7 +365,7 @@ macro(shiboken_find_required_python)
             Python
             ${_shiboken_find_python_version_args}
             REQUIRED
-            COMPONENTS Interpreter Development
+            COMPONENTS Interpreter Development.Module
         )
     endif()
 
