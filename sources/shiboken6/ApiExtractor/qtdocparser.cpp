@@ -30,6 +30,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <optional>
 #include <utility>
 
 using namespace Qt::StringLiterals;
@@ -496,6 +497,23 @@ static QString qmlReferenceLink(const QFileInfo &qmlModuleFi)
         + u'/' + qmlModuleFi.baseName() + ".html"_L1;
 }
 
+// Find a webxml file containing QML types. Note: These files are empty;
+// we need to point to the web docs.
+static std::optional<QFileInfo> qmlModuleFile(const QString &dirPath,
+                                              const QString &lowerModuleName)
+{
+    static constexpr auto postFix = "-qmlmodule.webxml"_L1;
+    const QFileInfo moduleFile(dirPath + u'/' + lowerModuleName + postFix);
+    if (moduleFile.exists())
+        return moduleFile;
+    // Some file names are irregular, fall back to using a filter
+    const QFileInfoList qmlModuleFiles =
+        QDir(dirPath).entryInfoList({u'*' + postFix}, QDir::Files);
+    if (!qmlModuleFiles.isEmpty())
+        return qmlModuleFiles.constFirst();
+    return std::nullopt;
+}
+
 ModuleDocumentation QtDocParser::retrieveModuleDocumentation(const QString &name)
 {
     // TODO: This method of acquiring the module name supposes that the target language uses
@@ -530,11 +548,8 @@ ModuleDocumentation QtDocParser::retrieveModuleDocumentation(const QString &name
     ModuleDocumentation result{Documentation{docString, {}, sourceFile}, {}};
 
     // If a QML module info file exists, insert a link to the Qt docs.
-    // Use a filter as some file names are irregular.
     // Note: These files are empty; we need to point to the web docs.
-    const QFileInfoList qmlModuleFiles =
-        QDir(dirPath).entryInfoList({"*-qmlmodule.webxml"_L1}, QDir::Files);
-    if (!qmlModuleFiles.isEmpty())
-        result.qmlTypesUrl = qmlReferenceLink(qmlModuleFiles.constFirst());
+    if (const auto qmlModuleFileO = qmlModuleFile(dirPath, lowerModuleName))
+        result.qmlTypesUrl = qmlReferenceLink(qmlModuleFileO.value());
     return result;
 }
