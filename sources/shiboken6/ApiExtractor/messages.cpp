@@ -22,6 +22,7 @@
 #include <QtCore/qfile.h>
 #include <QtCore/qlibraryinfo.h>
 #include <QtCore/qstringlist.h>
+#include <QtCore/qsysinfo.h>
 #include <QtCore/qxmlstream.h>
 
 #include <algorithm>
@@ -1101,6 +1102,7 @@ QString msgRemoveRedundantOverload(const AbstractMetaFunctionCPtr &func,
 QString msgCommandLineArguments(const QStringList &argv)
 {
     QString result = "Host platform: "_L1 + QLatin1StringView(QLibraryInfo::build())
+                     + "\nHost OS      : "_L1 + QSysInfo::prettyProductName()
                      + "\nCommand line:\n   "_L1;
     for (const QString &arg : argv) {
         result.append(u' ');
