@@ -491,16 +491,10 @@ QByteArrayList detectVulkan()
 
 // For MSVC, we set the MS compatibility version and let Clang figure out its own
 // options and include paths.
-// For the others, we pass "-nostdinc" since libclang tries to add it's own system
-// include paths, which together with the clang compiler paths causes some clash
-// which causes std types not being found and construct -I/-F options from the
-// include paths of the host compiler.
-
-static QByteArray noStandardIncludeOption() { return QByteArrayLiteral("-nostdinc"); }
 
 // The clang builtin includes directory is used to find the definitions for
 // intrinsic functions and builtin types. It is necessary to use the clang
-// includes to prevent redefinition errors. The default toolchain includes
+// includes to prevent rqedefinition errors. The default toolchain includes
 // should be picked up automatically by clang without specifying
 // them implicitly.
 
@@ -653,7 +647,6 @@ QByteArrayList emulatedCompilerOptions(LanguageLevel level)
     case Compiler::Clang:
         headerPaths.append(gppInternalIncludePaths(compilerFromCMake(u"clang++"_s),
                                                    _compilerArguments));
-        result.append(noStandardIncludeOption());
         break;
     case Compiler::Gpp:
         if (needsClangBuiltinIncludes())
