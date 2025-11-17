@@ -82,6 +82,7 @@ class Callout(QGraphicsItem):
             path.lineTo(point2)
             path = path.simplified()
 
+        painter.setPen(QColor(0, 0, 0))
         painter.setBrush(QColor(255, 255, 255))
         painter.drawPath(path)
         painter.drawText(self._textRect, self._text)
@@ -183,7 +184,7 @@ class View(QGraphicsView):
                 self._chart.size().width() / 2 + 50,
                 self._chart.size().height() - 20)
             for callout in self._callouts:
-                callout.updateGeometry()
+                callout.update_geometry()
         QGraphicsView.resizeEvent(self, event)
 
     def mouseMoveEvent(self, event):
