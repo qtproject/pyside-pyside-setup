@@ -7,7 +7,7 @@ from __future__ import annotations
    originating from PyQt"""
 
 from PySide6.QtCore import QFile, QIODevice, QMimeData, QPoint, Qt, QTextStream
-from PySide6.QtGui import QDrag, QPalette, QPixmap
+from PySide6.QtGui import QDrag, QPixmap
 from PySide6.QtWidgets import QApplication, QFrame, QLabel, QWidget
 
 import draggabletext_rc  # noqa: F401
@@ -64,10 +64,6 @@ class DragWidget(QWidget):
             if x >= 195:
                 x = 5
                 y += word_label.height() + 2
-
-        new_palette = self.palette()
-        new_palette.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.white)
-        self.setPalette(new_palette)
 
         self.setAcceptDrops(True)
         self.setMinimumSize(400, max(200, y))
