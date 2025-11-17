@@ -60,13 +60,13 @@ def create_module_plugin_json(wheel_name: str, data: list[ModuleData], package_p
             json.dump(all_plugins, fp, indent=4)
 
 
-def get_manifest(wheel_name: str, data: list[ModuleData], package_path: Path) -> str:
+def get_manifest(wheel_name: str, data: list[ModuleData], package_path: Path, verbose: int) -> str:
     lines = []
 
     for module in data:
         # It's crucial to have this adjust method here
         # because it include all the necessary modifications to make
-        # our soltuion work on the three main platforms.
+        # our solution work on the three main platforms.
         module.adjusts_paths_and_extensions()
 
         for field in module.get_fields():
@@ -76,12 +76,15 @@ def get_manifest(wheel_name: str, data: list[ModuleData], package_path: Path) ->
             if field == "ext":
                 continue
             for line in getattr(module, field):
+                file = f"PySide6/{line}"
+                if verbose > 0 and "*" not in file and not Path(package_path / file).exists():
+                    print(f"Warning: {file} does not exist.", file=sys.stderr)
                 if field in ("extra_dirs", "qml", "plugins"):
-                    lines.append(f"graft PySide6/{line}")
+                    lines.append(f"graft {file}")
                 elif field == "qtlib" and sys.platform == "darwin":
-                    lines.append(f"graft PySide6/{line}")
+                    lines.append(f"graft {file}")
                 else:
-                    lines.append(f"include PySide6/{line}")
+                    lines.append(f"include {file}")
         lines.append("recursive-exclude PySide6 *qt.conf*")
         lines.append("")
 
@@ -372,7 +375,7 @@ def check_modules_consistency():
 
     if len(missing_modules):
         print("Warning: the following modules don't have a function "
-              f"in 'build_scripts/wheel_files.py':\n  {missing_modules}")
+              f"in 'build_scripts/wheel_files.py':\n  {missing_modules}", file=sys.stderr)
 
     # Check READMEs
     readme_modules = set()
@@ -386,12 +389,13 @@ def check_modules_consistency():
 
     if len(missing_modules_readme):
         print("Warning: the following modules are not in READMEs :"
-              f"\n  {missing_modules_readme}")
+              f"\n  {missing_modules_readme}", file=sys.stderr)
 
 
 if __name__ == "__main__":
 
     parser = ArgumentParser()
+    parser.add_argument('--verbose', '-v', type=int, help='Verbose level')
     # Command line option to find the build/<envname>a/package_for_wheels
     parser.add_argument(
         "--env", type=str, default=None,
@@ -415,7 +419,7 @@ if __name__ == "__main__":
 
     build_directory = get_build_directory(options)
 
-    verbose = False
+    verbose = options.verbose if options.verbose else 0
     # Setup paths
     current_path = Path(__file__).resolve().parent
     artifacts_path = Path("wheel_artifacts/")
@@ -484,7 +488,7 @@ if __name__ == "__main__":
         if data is None:
             manifest_content = get_simple_manifest(name)
         else:
-            manifest_content = get_manifest(name, data, package_path)
+            manifest_content = get_manifest(name, data, package_path, verbose)
         with open(package_path / "MANIFEST.in", "w") as f:
             f.write(manifest_content)
 
@@ -498,7 +502,7 @@ if __name__ == "__main__":
 
         # 6. call the build module to create the wheel
         print("-- Creating wheels")
-        if not verbose:
+        if verbose < 2:
             _runner = pyproject_hooks.quiet_subprocess_runner
         else:
             _runner = pyproject_hooks.default_subprocess_runner
