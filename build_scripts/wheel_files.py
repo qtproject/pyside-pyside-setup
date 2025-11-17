@@ -91,7 +91,7 @@ class ModuleData:
         self.glue.append(f"qt{_lo}.cpp")
         self.doc_glue.append(f"qt{_lo}.rst")
         if not len(self.metatypes):
-            self.metatypes.append(f"qt6{_lo}_relwithdebinfo_metatypes.json")
+            self.metatypes.append(f"qt6{_lo}_metatypes.json")
 
     # The PySide6 directory that gets packaged by the build_scripts
     # 'prepare_packages()' has a certain structure that depends on
@@ -106,9 +106,6 @@ class ModuleData:
             self.qtlib = [f"{i}.*dll".replace("lib", "") for i in self.qtlib]
             self.qml = [f"qml/{i}" for i in self.qml]
             self.translations = [f"translations/{i}" for i in self.translations]
-            self.metatypes = [
-                f"metatypes/{i}".replace("_relwithdebinfo", "") for i in self.metatypes
-            ]
             self.plugins = [f"plugins/{i}" for i in self.plugins]
         else:
             if sys.platform == "darwin":
@@ -339,10 +336,10 @@ def module_QtGui() -> ModuleData:
     ]
 
     _metatypes = [
-        "qt6eglfsdeviceintegrationprivate_relwithdebinfo_metatypes.json",
-        "qt6eglfskmssupportprivate_relwithdebinfo_metatypes.json",
-        "qt6kmssupportprivate_relwithdebinfo_metatypes.json",
-        "qt6xcbqpaprivate_relwithdebinfo_metatypes.json",
+        "qt6eglfsdeviceintegrationprivate_metatypes.json",
+        "qt6eglfskmssupportprivate_metatypes.json",
+        "qt6kmssupportprivate_metatypes.json",
+        "qt6xcbqpaprivate_metatypes.json",
     ]
 
     _qtlib = [
@@ -413,7 +410,7 @@ def module_QtDBus() -> ModuleData:
 def module_QtDesigner() -> ModuleData:
     data = ModuleData("Designer")
     data.qtlib.append("libQt6DesignerComponents")
-    data.metatypes.append("qt6designercomponentsprivate_relwithdebinfo_metatypes.json")
+    data.metatypes.append("qt6designercomponentsprivate_metatypes.json")
     json_data = get_module_json_data("Designer")
     data.plugins = get_module_plugins(json_data)
     data.extra_files.append("Qt/plugins/assetimporters/libuip*")
@@ -488,25 +485,25 @@ def module_QtQml() -> ModuleData:
     ]
 
     _metatypes = [
-        "qt6labsanimation_relwithdebinfo_metatypes.json",
-        "qt6labsfolderlistmodel_relwithdebinfo_metatypes.json",
-        "qt6labsqmlmodels_relwithdebinfo_metatypes.json",
-        "qt6labssettings_relwithdebinfo_metatypes.json",
-        "qt6labssharedimage_relwithdebinfo_metatypes.json",
-        "qt6labswavefrontmesh_relwithdebinfo_metatypes.json",
-        "qt6packetprotocolprivate_relwithdebinfo_metatypes.json",
-        "qt6qmlcompilerprivate_relwithdebinfo_metatypes.json",
-        "qt6qmlcompilerplusprivate_relwithdebinfo_metatypes.json",
-        "qt6qmlcore_relwithdebinfo_metatypes.json",
-        "qt6qmldebugprivate_relwithdebinfo_metatypes.json",
-        "qt6qmldomprivate_relwithdebinfo_metatypes.json",
-        "qt6qmllintprivate_relwithdebinfo_metatypes.json",
-        "qt6qmllocalstorage_relwithdebinfo_metatypes.json",
-        "qt6qmlmodels_relwithdebinfo_metatypes.json",
-        "qt6qmlworkerscript_relwithdebinfo_metatypes.json",
-        "qt6qmlxmllistmodel_relwithdebinfo_metatypes.json",
-        "qt6qmlmeta_relwithdebinfo_metatypes.json",
-        "qt6labsplatform_relwithdebinfo_metatypes.json",
+        "qt6labsanimation_metatypes.json",
+        "qt6labsfolderlistmodel_metatypes.json",
+        "qt6labsqmlmodels_metatypes.json",
+        "qt6labssettings_metatypes.json",
+        "qt6labssharedimage_metatypes.json",
+        "qt6labswavefrontmesh_metatypes.json",
+        "qt6packetprotocolprivate_metatypes.json",
+        "qt6qmlcompilerprivate_metatypes.json",
+        "qt6qmlcompilerplusprivate_metatypes.json",
+        "qt6qmlcore_metatypes.json",
+        "qt6qmldebugprivate_metatypes.json",
+        "qt6qmldomprivate_metatypes.json",
+        "qt6qmllintprivate_metatypes.json",
+        "qt6qmllocalstorage_metatypes.json",
+        "qt6qmlmodels_metatypes.json",
+        "qt6qmlworkerscript_metatypes.json",
+        "qt6qmlxmllistmodel_metatypes.json",
+        "qt6qmlmeta_metatypes.json",
+        "qt6labsplatform_metatypes.json",
     ]
 
     _qml = [
@@ -558,22 +555,22 @@ def module_QtQml() -> ModuleData:
 def module_QtQuick() -> ModuleData:
     data = ModuleData("Quick")
     _metatypes = [
-        "qt6quickcontrolstestutilsprivate_relwithdebinfo_metatypes.json",
-        "qt6quickdialogs2_relwithdebinfo_metatypes.json",
-        "qt6quickdialogs2quickimpl_relwithdebinfo_metatypes.json",
-        "qt6quickdialogs2utils_relwithdebinfo_metatypes.json",
-        "qt6quickeffectsprivate_relwithdebinfo_metatypes.json",
-        "qt6quicketest_relwithdebinfo_metatypes.json",
-        "qt6quicketestutilsprivate_relwithdebinfo_metatypes.json",
-        "qt6quicklayouts_relwithdebinfo_metatypes.json",
-        "qt6quickparticlesprivate_relwithdebinfo_metatypes.json",
-        "qt6quickshapesprivate_relwithdebinfo_metatypes.json",
-        "qt6quicktemplates2_relwithdebinfo_metatypes.json",
-        "qt6quicktest_relwithdebinfo_metatypes.json",
-        "qt6quicktestutilsprivate_relwithdebinfo_metatypes.json",
-        "qt6quicktimeline_relwithdebinfo_metatypes.json",
-        "qt6quickvectorimage_relwithdebinfo_metatypes.json",
-        "qt6quickvectorimagegeneratorprivate_relwithdebinfo_metatypes.json",
+        "qt6quickcontrolstestutilsprivate_metatypes.json",
+        "qt6quickdialogs2_metatypes.json",
+        "qt6quickdialogs2quickimpl_metatypes.json",
+        "qt6quickdialogs2utils_metatypes.json",
+        "qt6quickeffectsprivate_metatypes.json",
+        "qt6quicketest_metatypes.json",
+        "qt6quicketestutilsprivate_metatypes.json",
+        "qt6quicklayouts_metatypes.json",
+        "qt6quickparticlesprivate_metatypes.json",
+        "qt6quickshapesprivate_metatypes.json",
+        "qt6quicktemplates2_metatypes.json",
+        "qt6quicktest_metatypes.json",
+        "qt6quicktestutilsprivate_metatypes.json",
+        "qt6quicktimeline_metatypes.json",
+        "qt6quickvectorimage_metatypes.json",
+        "qt6quickvectorimagegeneratorprivate_metatypes.json",
     ]
     _qtlib = [
         "libQt6QuickEffects",
@@ -623,7 +620,7 @@ def module_QtQuickControls2() -> ModuleData:
         data.qtlib.append("libQt6QuickControls2IOSStyleImpl")
         data.qtlib.append("libQt6QuickControls2MacOSStyleImpl")
 
-    data.metatypes.append("qt6quickcontrols2impl_relwithdebinfo_metatypes.json")
+    data.metatypes.append("qt6quickcontrols2impl_metatypes.json")
 
     return data
 
@@ -695,9 +692,9 @@ def module_QtWayland() -> ModuleData:
     ]
 
     _metatypes = [
-        "qt6waylandclient_relwithdebinfo_metatypes.json",
-        "qt6waylandeglclienthwintegrationprivate_relwithdebinfo_metatypes.json",
-        "qt6wlshellintegrationprivate_relwithdebinfo_metatypes.json",
+        "qt6waylandclient_metatypes.json",
+        "qt6waylandeglclienthwintegrationprivate_metatypes.json",
+        "qt6wlshellintegrationprivate_metatypes.json",
     ]
 
     data.qtlib.extend(_qtlib)
@@ -782,24 +779,24 @@ def module_QtQuick3D() -> ModuleData:
     ]
 
     _metatypes = [
-        "qt63dquick_relwithdebinfo_metatypes.json",
-        "qt63dquickanimation_relwithdebinfo_metatypes.json",
-        "qt63dquickextras_relwithdebinfo_metatypes.json",
-        "qt63dquickinput_relwithdebinfo_metatypes.json",
-        "qt63dquickrender_relwithdebinfo_metatypes.json",
-        "qt63dquickscene2d_relwithdebinfo_metatypes.json",
-        "qt6quick3dassetimport_relwithdebinfo_metatypes.json",
-        "qt6quick3dassetutils_relwithdebinfo_metatypes.json",
-        "qt6quick3deffects_relwithdebinfo_metatypes.json",
-        "qt6quick3dglslparserprivate_relwithdebinfo_metatypes.json",
-        "qt6quick3dhelpers_relwithdebinfo_metatypes.json",
-        "qt6quick3diblbaker_relwithdebinfo_metatypes.json",
-        "qt6quick3dparticleeffects_relwithdebinfo_metatypes.json",
-        "qt6quick3dparticles_relwithdebinfo_metatypes.json",
-        "qt6quick3druntimerender_relwithdebinfo_metatypes.json",
-        "qt6quick3dutils_relwithdebinfo_metatypes.json",
-        "qt6shadertools_relwithdebinfo_metatypes.json",
-        "qt6quick3dxr_relwithdebinfo_metatypes.json"
+        "qt63dquick_metatypes.json",
+        "qt63dquickanimation_metatypes.json",
+        "qt63dquickextras_metatypes.json",
+        "qt63dquickinput_metatypes.json",
+        "qt63dquickrender_metatypes.json",
+        "qt63dquickscene2d_metatypes.json",
+        "qt6quick3dassetimport_metatypes.json",
+        "qt6quick3dassetutils_metatypes.json",
+        "qt6quick3deffects_metatypes.json",
+        "qt6quick3dglslparserprivate_metatypes.json",
+        "qt6quick3dhelpers_metatypes.json",
+        "qt6quick3diblbaker_metatypes.json",
+        "qt6quick3dparticleeffects_metatypes.json",
+        "qt6quick3dparticles_metatypes.json",
+        "qt6quick3druntimerender_metatypes.json",
+        "qt6quick3dutils_metatypes.json",
+        "qt6shadertools_metatypes.json",
+        "qt6quick3dxr_metatypes.json"
     ]
 
     json_data = get_module_json_data("Quick3DAssetImport")
@@ -849,7 +846,7 @@ def module_QtWebEngineWidgets() -> ModuleData:
 def module_QtWebEngineQuick() -> ModuleData:
     data = ModuleData("WebEngineQuick")
     data.qtlib.append("libQt6WebEngineQuickDelegatesQml")
-    data.metatypes.append("qt6webenginequickdelegatesqml_relwithdebinfo_metatypes.json")
+    data.metatypes.append("qt6webenginequickdelegatesqml_metatypes.json")
 
     return data
 
@@ -857,7 +854,7 @@ def module_QtWebEngineQuick() -> ModuleData:
 def module_QtCharts() -> ModuleData:
     data = ModuleData("Charts")
     data.qtlib.append("libQt6ChartsQml")
-    data.metatypes.append("qt6chartsqml_relwithdebinfo_metatypes.json")
+    data.metatypes.append("qt6chartsqml_metatypes.json")
 
     return data
 
@@ -865,7 +862,7 @@ def module_QtCharts() -> ModuleData:
 def module_QtDataVisualization() -> ModuleData:
     data = ModuleData("DataVisualization")
     data.qtlib.append("libQt6DataVisualizationQml")
-    data.metatypes.append("qt6datavisualizationqml_relwithdebinfo_metatypes.json")
+    data.metatypes.append("qt6datavisualizationqml_metatypes.json")
     data.typesystems.append("datavisualization_common.xml")
 
     return data
@@ -886,7 +883,7 @@ def module_QtGraphsWidgets() -> ModuleData:
 def module_QtMultimedia() -> ModuleData:
     data = ModuleData("Multimedia")
     data.qtlib.append("libQt6MultimediaQuick")
-    data.metatypes.append("qt6multimediaquickprivate_relwithdebinfo_metatypes.json")
+    data.metatypes.append("qt6multimediaquickprivate_metatypes.json")
 
     json_data = get_module_json_data("Multimedia")
     data.translations.append("qtmultimedia_*")
@@ -919,7 +916,7 @@ def module_QtNetworkAuth() -> ModuleData:
 def module_QtPositioning() -> ModuleData:
     data = ModuleData("Positioning")
     data.qtlib.append("libQt6PositioningQuick")
-    data.metatypes.append("qt6positioningquick_relwithdebinfo_metatypes.json")
+    data.metatypes.append("qt6positioningquick_metatypes.json")
     json_data = get_module_json_data("Positioning")
     data.plugins = get_module_plugins(json_data)
 
@@ -929,7 +926,7 @@ def module_QtPositioning() -> ModuleData:
 def module_QtRemoteObjects() -> ModuleData:
     data = ModuleData("RemoteObjects")
     data.qtlib.append("libQt6RemoteObjectsQml")
-    data.metatypes.append("qt6remoteobjectsqml_relwithdebinfo_metatypes.json")
+    data.metatypes.append("qt6remoteobjectsqml_metatypes.json")
 
     return data
 
@@ -937,7 +934,7 @@ def module_QtRemoteObjects() -> ModuleData:
 def module_QtSensors() -> ModuleData:
     data = ModuleData("Sensors")
     data.qtlib.append("libQt6SensorsQuick")
-    data.metatypes.append("qt6sensorsquick_relwithdebinfo_metatypes.json")
+    data.metatypes.append("qt6sensorsquick_metatypes.json")
     json_data = get_module_json_data("Sensors")
     data.plugins = get_module_plugins(json_data)
 
@@ -953,7 +950,7 @@ def module_QtSerialPort() -> ModuleData:
 
 def module_QtSpatialAudio() -> ModuleData:
     data = ModuleData("SpatialAudio")
-    data.metatypes.append("qt6spatialaudio_debug_metatypes.json")
+    data.metatypes.append("qt6spatialaudio_metatypes.json")
 
     return data
 
@@ -961,7 +958,7 @@ def module_QtSpatialAudio() -> ModuleData:
 def module_QtStateMachine() -> ModuleData:
     data = ModuleData("StateMachine")
     data.qtlib.append("libQt6StateMachineQml")
-    data.metatypes.append("qt6statemachineqml_relwithdebinfo_metatypes.json")
+    data.metatypes.append("qt6statemachineqml_metatypes.json")
 
     return data
 
@@ -969,7 +966,7 @@ def module_QtStateMachine() -> ModuleData:
 def module_QtScxml() -> ModuleData:
     data = ModuleData("Scxml")
     data.qtlib.append("libQt6ScxmlQml")
-    data.metatypes.append("qt6scxmlqml_relwithdebinfo_metatypes.json")
+    data.metatypes.append("qt6scxmlqml_metatypes.json")
     json_data = get_module_json_data("Scxml")
     data.plugins = get_module_plugins(json_data)
 
@@ -1057,13 +1054,13 @@ def module_QtHttpServer() -> ModuleData:
 
 def module_QtLanguageServer() -> ModuleData:
     data = ModuleData("LanguageServer")
-    data.metatypes.append("qt6languageserverprivate_relwithdebinfo_metatypes.json")
+    data.metatypes.append("qt6languageserverprivate_metatypes.json")
     return data
 
 
 def module_QtJsonRpc() -> ModuleData:
     data = ModuleData("JsonRpc")
-    data.metatypes.append("qt6jsonrpcprivate_relwithdebinfo_metatypes.json")
+    data.metatypes.append("qt6jsonrpcprivate_metatypes.json")
     return data
 
 
