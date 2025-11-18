@@ -106,6 +106,7 @@ class ModuleData:
             self.qtlib = [f"{i}.*dll".replace("lib", "") for i in self.qtlib]
             self.qml = [f"qml/{i}" for i in self.qml]
             self.translations = [f"translations/{i}" for i in self.translations]
+            self.metatypes = [f"metatypes/{i}" for i in self.metatypes]
             self.plugins = [f"plugins/{i}" for i in self.plugins]
         else:
             if sys.platform == "darwin":
