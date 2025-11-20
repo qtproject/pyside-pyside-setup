@@ -4,6 +4,6 @@ Player Example
 Media Player demonstrates a simple multimedia player that can play audio and or
 video files using various codecs.
 
-.. image:: player.png
-   :width: 400
+.. image:: player.webp
+   :width: 800
    :alt: Player Screenshot

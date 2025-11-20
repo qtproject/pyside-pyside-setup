@@ -1,3 +1,7 @@
 {
-    "files": ["player.py"]
+    "files": ["main.py",
+              "audiolevelmeter.py",
+              "player.py",
+              "playercontrols.py",
+              "videowidget.py"]
 }
