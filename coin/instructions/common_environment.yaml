@@ -4,6 +4,12 @@ instructions:
       variableName: QTEST_ENVIRONMENT
       variableValue: "ci"
     - type: EnvironmentVariable
+      variableName: PYTHON_BUILD_MIRROR_URL
+      variableValue: "https://ci-files01-hki.ci.qt.io/input/python/"
+    - type: EnvironmentVariable
+      variableName: PYTHON_BUILD_MIRROR_URL_SKIP_CHECKSUM
+      variableValue: "1"
+    - type: EnvironmentVariable
       variableName: PYSIDE_VIRTUALENV
       variableValue: "{{.AgentWorkingDir}}\\pyside\\pyside-setup\\env"
       enable_if:
