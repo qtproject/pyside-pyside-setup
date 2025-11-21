@@ -67,11 +67,17 @@ Port a Qt example
 - Note that our examples need to have unique names due to the doc build.
 - Verify that all slots are decorated using ``@Slot``.
 - Enumerations should be fully qualified (PYSIDE-1735).
+- Check the above by running the example with the environment variables:
+
+  .. code-block:: bash
+
+      export PYSIDE6_OPTION_PYTHON_ENUM=0x71
+      export QT_LOGGING_RULES=qt.pyside.libpyside.warning=true
+
 - Add a ``.pyproject`` file (verify later on that docs build).
-- Add a ``doc`` directory and descriptive ``.rst`` file,
+- Add a ``doc`` directory and descriptive ``.md`` or ``.rst`` file,
   and a screenshot if suitable (use ``optipng`` to reduce file size).
 - Add the ``"""Port of the ... example from Qt 6"""`` doc string.
-- Try to port variable and function names to snake case convention.
 - Remove C++ documentation from ``sources/pyside6/doc/additionaldocs.lst``.
 
 .. note:: Example screenshots in ``.png`` should be optimized by
