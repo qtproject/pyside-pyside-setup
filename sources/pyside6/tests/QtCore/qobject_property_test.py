@@ -9,11 +9,15 @@ import sys
 import unittest
 
 from pathlib import Path
+from typing import NamedTuple
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
 from PySide6.QtCore import QObject, Property, Signal
+
+
+Point = NamedTuple("Point", [("x", float), ("y", float)])
 
 
 class MyObjectWithNotifyProperty(QObject):
@@ -52,6 +56,23 @@ class MyObjectWithOtherClassProperty(QObject):
     otherclass = Property(OtherClass, fget=_get_otherclass, fset=_set_otherclass)
 
 
+class TestVariantPropertyObject(QObject):
+    """Helper for testing QVariant conversion in properties and signals
+       (PYSIDE-3206, PYSIDE-3244). It uses a property of list type that
+       can passed a QVariant list with various element types."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._property = None
+
+    def set_property(self, v):
+        self._property = v
+
+    def get_property(self):
+        return self._property
+
+    testProperty = Property(list, fget=get_property, fset=set_property)
+
+
 class PropertyWithNotify(unittest.TestCase):
     def called(self):
         self.called_ = True
@@ -82,6 +103,33 @@ class QObjectWithOtherClassPropertyTest(unittest.TestCase):
             pv = obj.property("otherclass")
             print(pv)  # Exercise repr
             self.assertTrue(type(pv) is OtherClass)
+
+
+class VariantPropertyTest(unittest.TestCase):
+    """Test QVariant conversion in properties and signals (PYSIDE-3206, PYSIDE-3244).
+       It uses a property of list type that is passed a QVariantList
+       with various element types when using QObject.setProperty()."""
+
+    def testIt(self):
+        to = TestVariantPropertyObject()
+        idx = to.metaObject().indexOfProperty("testProperty")
+        self.assertTrue(idx != -1)
+
+        # List
+        to.setProperty("testProperty", [[1, 2]])
+        self.assertEqual(type(to.get_property()[0]), list)
+
+        # Dict
+        to.setProperty("testProperty", [{"key": 42}])
+        self.assertEqual(type(to.get_property()[0]), dict)
+
+        # PYSIDE-3206 (DBus): Convert a tuple to a list
+        to.setProperty("testProperty", [(1, 2)])
+        self.assertEqual(type(to.get_property()[0]), list)
+
+        # PYSIDE-324: The tuple conversion must not occur for named tuples
+        to.setProperty("testProperty", [Point(1, 2)])
+        self.assertEqual(type(to.get_property()[0]), Point)
 
 
 if __name__ == '__main__':
