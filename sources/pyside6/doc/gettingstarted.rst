@@ -282,6 +282,10 @@ Next steps
 Now that you have use both technologies, you can head to our
 :ref:`pyside6_examples` and :ref:`pyside6_tutorials` sections.
 
+.. tip:: **Visual Studio Code Users**: If you use VSCode, check out the
+   :ref:`vscode-ext` which provides project templates, debugging support,
+   build tasks, and other productivity features for PySide6 development.
+
 .. _faq-section:
 
 Frequently Asked Questions

@@ -163,6 +163,19 @@ PySide Utilities
         a tool to print out the metatype information in JSON to be used as
         input for ``qmltyperegistrar``.
 
+IDE Integration
+~~~~~~~~~~~~~~~
+
+.. grid:: 2
+    :gutter: 3 3 4 5
+
+    .. grid-item-card:: Qt Python VSCode Extension
+        :link: vscode-ext
+        :link-type: ref
+
+        Visual Studio Code extension for PySide6 development with project
+        templates, debugging, build tasks, and more.
+
 Deployment
 ~~~~~~~~~~
 
@@ -237,3 +250,4 @@ Qt Quick 3D
     pyside6-balsamui
     pyside6-qmlimportscanner
     pyside6-qsb
+    vscode-ext
