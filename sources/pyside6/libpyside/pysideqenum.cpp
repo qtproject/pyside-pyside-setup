@@ -3,6 +3,8 @@
 
 #include "pysideqenum.h"
 
+#include <pysidelogging_p.h>
+
 #include <autodecref.h>
 #include <sbkconverter.h>
 #include <sbkenum.h>
@@ -156,6 +158,7 @@ QMetaType createEnumMetaTypeHelper(const QByteArray &name)
     QMetaType metaType(mti);
 
     metaType.id(); // enforce registration
+    qCDebug(lcPySide, "libpyside: Registering @QEnum meta type \"%s\".", name.constData());
     return metaType;
 }
 
