@@ -805,6 +805,10 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
         return nullptr;
 
     gil.acquire();
+    if (resultCache == Py_None) { // PYSIDE 3246, some other thread may have determined the override
+        gil.release();
+        return nullptr;
+    }
 
     if (resultCache != nullptr) // recreate the callable from function/self
         return PepExt_Type_CallDescrGet(resultCache, pySelf, nullptr);
