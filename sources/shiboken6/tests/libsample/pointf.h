@@ -60,6 +60,4 @@ LIBSAMPLE_API PointF operator*(int mult, const PointF &pt);
 LIBSAMPLE_API PointF operator-(const PointF &pt);
 LIBSAMPLE_API bool operator!(const PointF &pt);
 
-LIBSAMPLE_API PointF operator*(const PointF &pt, double multiplier);
-
 #endif // POINTF_H
