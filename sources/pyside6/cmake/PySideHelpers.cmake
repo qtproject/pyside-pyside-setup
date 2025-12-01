@@ -133,8 +133,12 @@ macro(collect_optional_modules)
     list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineCore WebEngineWidgets
          WebEngineQuick WebSockets HttpServer)
     find_package(Qt${QT_MAJOR_VERSION}WebEngineQuick)
-    # for Windows and Linux, QtWebView depends on QtWebEngine to render content
-    if(Qt${QT_MAJOR_VERSION}WebEngineQuick_FOUND OR APPLE)
+    # For Windows and Linux, QtWebView depends on QtWebEngine to render content.
+    # On Android and Apple platforms, QtWebView uses the native webview backend and
+    # does not require QtWebEngine.
+    if(APPLE OR ANDROID)
+        list(APPEND ALL_OPTIONAL_MODULES WebView)
+    elseif(Qt${QT_MAJOR_VERSION}WebEngineQuick_FOUND)
         list(APPEND ALL_OPTIONAL_MODULES WebView)
     endif()
     list(APPEND ALL_OPTIONAL_MODULES 3DCore 3DRender 3DInput 3DLogic 3DAnimation 3DExtras)
