@@ -21,7 +21,7 @@ accept_configuration:
           not_in_values: [Mingw, MSVC2015,Clang]
         - condition: property  # Webassembly
           property: target.osVersion
-          not_equals_value: WebAssembly
+          not_in_values: [WebAssembly, RHEL_8_10]
         - condition: property  # Windows on Arm
           property: target.arch
           not_equals_value: ARM64
