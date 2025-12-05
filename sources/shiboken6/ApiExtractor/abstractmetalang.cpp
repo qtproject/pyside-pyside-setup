@@ -172,7 +172,7 @@ bool AbstractMetaClass::isPolymorphic() const
 AbstractMetaFunctionCList AbstractMetaClass::queryFunctionsByName(const QString &name) const
 {
     AbstractMetaFunctionCList returned;
-    for (const auto &function : d->m_functions) {
+    for (const auto &function : std::as_const(d->m_functions)) {
         if (function->name() == name)
             returned.append(function);
     }
@@ -434,7 +434,7 @@ bool AbstractMetaClass::hasSignal(const AbstractMetaFunction *other) const
     if (!other->isSignal())
         return false;
 
-    for (const auto &f : d->m_functions) {
+    for (const auto &f : std::as_const(d->m_functions)) {
         if (f->isSignal() && f->compareTo(other) & AbstractMetaFunction::EqualName)
             return other->modifiedName() == f->modifiedName();
     }
@@ -1395,7 +1395,7 @@ void AbstractMetaClass::addEnum(const AbstractMetaEnum &e)
 std::optional<AbstractMetaEnum>
     AbstractMetaClass::findEnum(const QString &enumName) const
 {
-    for (const auto &e : d->m_enums) {
+    for (const auto &e : std::as_const(d->m_enums)) {
         if (e.name() == enumName)
             return e;
     }
@@ -1421,7 +1421,7 @@ std::optional<AbstractMetaEnumValue>
 
 void AbstractMetaClass::getEnumsToBeGenerated(AbstractMetaEnumList *enumList) const
 {
-    for (const AbstractMetaEnum &metaEnum : d->m_enums) {
+    for (const AbstractMetaEnum &metaEnum : std::as_const(d->m_enums)) {
         if (!metaEnum.isPrivate() && metaEnum.typeEntry()->generateCode())
             enumList->append(metaEnum);
     }
@@ -1496,7 +1496,7 @@ void AbstractMetaClassPrivate::addUsingConstructors(const AbstractMetaClassPtr &
         return;
     }
 
-    for (const auto &superClass : m_baseClasses) {
+    for (const auto &superClass : std::as_const(m_baseClasses)) {
         // Find any "using base-constructor" directives
         if (isUsingMember(superClass, superClass->name(), Access::Protected)) {
             // Add to derived class with parameter lists.
@@ -1538,7 +1538,7 @@ void AbstractMetaClass::fixFunctions(const AbstractMetaClassPtr &klass, bool avo
             nonRemovedFuncs.append(f);
     }
 
-    for (const auto &superClassC : d->m_baseClasses) {
+    for (const auto &superClassC : std::as_const(d->m_baseClasses)) {
         for (const auto &pof : superClassC->userAddedPythonOverrides()) {
             auto *clonedPof = pof->copy();
             clonedPof->setOwnerClass(klass);
@@ -1941,7 +1941,7 @@ void AbstractMetaClass::format(QDebug &debug) const
         debug << " [deleted move assignment]";
     if (!d->m_baseClasses.isEmpty()) {
         debug << ", inherits ";
-        for (const auto &b : d->m_baseClasses)
+        for (const auto &b : std::as_const(d->m_baseClasses))
             debug << " \"" << b->name() << '"';
     }
 

@@ -2289,7 +2289,7 @@ static AbstractMetaFunctionCList filterFunctions(const OverloadRemovalRules &rem
         if (const auto index = types.indexOf(rule.type); index != -1) {
             for (const auto &redundantType : rule.redundantTypes) {
                 if (const auto index2 = types.indexOf(redundantType); index2 != -1) {
-                    auto redundant = overloads.at(index2);
+                    const auto &redundant = overloads.at(index2);
                     if (!result.contains(redundant)) { // nested long->int->short rule?
                         ReportHandler::addGeneralMessage(msgRemoveRedundantOverload(redundant, rule.type));
                         result.append(redundant);
