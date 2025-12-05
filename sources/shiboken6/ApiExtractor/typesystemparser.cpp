@@ -1179,10 +1179,10 @@ bool TypeSystemParser::importFileElement(const QXmlStreamAttributes &atts)
         }
     }
     if (!foundFromOk || !foundToOk) {
-        QString fromError = QString::fromLatin1("Could not find quote-after-line='%1' in file '%2'.")
-                                                .arg(quoteFrom.toString(), fileName);
-        QString toError = QString::fromLatin1("Could not find quote-before-line='%1' in file '%2'.")
-                                              .arg(quoteTo.toString(), fileName);
+        QString fromError = "Could not find quote-after-line='%1' in file '%2'."_L1
+                            .arg(quoteFrom.toString(), fileName);
+        QString toError = "Could not find quote-before-line='%1' in file '%2'."_L1
+                          .arg(quoteTo.toString(), fileName);
 
         if (!foundToOk)
             m_error = toError;
@@ -2487,7 +2487,7 @@ static bool parseIndex(const QString &index, int *result, QString *errorMessage)
     bool ok = false;
     *result = index.toInt(&ok);
     if (!ok)
-        *errorMessage = QString::fromLatin1("Cannot convert '%1' to integer").arg(index);
+        *errorMessage = "Cannot convert '%1' to integer"_L1.arg(index);
     return ok;
 }
 
@@ -2699,8 +2699,8 @@ bool TypeSystemParser::parseAddFunction(const ConditionalStreamReader &,
         || topElement == StackElement::Root
         || topElement ==  StackElement::ContainerTypeEntry;
     if (!validParent) {
-        m_error = QString::fromLatin1("Add/Declare function requires a complex/container type or a root tag as parent"
-                                      ", was=%1").arg(tagFromElement(topElement));
+        m_error = "Add/Declare function requires a complex/container type or a root tag as parent, was=%1"_L1
+                  + tagFromElement(topElement);
         return false;
     }
 
@@ -2831,8 +2831,8 @@ bool TypeSystemParser::parseProperty(const ConditionalStreamReader &, StackEleme
                                      QXmlStreamAttributes *attributes)
 {
     if (!isComplexTypeEntry(topElement)) {
-        m_error = QString::fromLatin1("Add property requires a complex type as parent"
-                                      ", was=%1").arg(tagFromElement(topElement));
+        m_error = "Add property requires a complex type as parent, was=%1"_L1
+                  + tagFromElement(topElement);
         return false;
     }
 
@@ -2930,8 +2930,8 @@ bool TypeSystemParser::parseModifyFunction(const ConditionalStreamReader &reader
         || topElement == StackElement::TypedefTypeEntry
         || topElement == StackElement::FunctionTypeEntry;
     if (!validParent) {
-        m_error = QString::fromLatin1("Modify function requires complex type as parent"
-                                      ", was=%1").arg(tagFromElement(topElement));
+        m_error = "Modify function requires complex type as parent, was=%1"_L1
+                  + tagFromElement(topElement);
         return false;
     }
 

@@ -964,8 +964,8 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
             strType.remove(u"QHash"_s);
             strType.remove(u"QMap"_s);
             QStringList types = strType.split(u',');
-            strType = QString::fromLatin1("Dictionary with keys of type %1 and values of type %2.")
-                                         .arg(types[0], types[1]);
+            strType = "Dictionary with keys of type %1 and values of type %2."_L1
+                      .arg(types[0], types[1]);
         }
         return strType;
     }

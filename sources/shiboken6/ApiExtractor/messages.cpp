@@ -716,13 +716,13 @@ QString msgXpathDocModificationError(const DocModificationList& mods,
 
 QString msgCannotOpenForReading(const QFile &f)
 {
-    return QString::fromLatin1("Failed to open file '%1' for reading: %2")
+    return "Failed to open file '%1' for reading: %2"_L1
            .arg(QDir::toNativeSeparators(f.fileName()), f.errorString());
 }
 
 QString msgCannotOpenForWriting(const QFile &f)
 {
-    return QString::fromLatin1("Failed to open file '%1' for writing: %2")
+    return "Failed to open file '%1' for writing: %2"_L1
            .arg(QDir::toNativeSeparators(f.fileName()), f.errorString());
 }
 
@@ -1022,7 +1022,7 @@ QString msgUnknownArrayPointerConversion(const QString &s)
 QString msgMissingProjectFileMarker(const QString &name, const QByteArray &startMarker)
 {
     return u"First line of project file \""_s + QDir::toNativeSeparators(name)
-        + u"\" must be the string \""_s + QString::fromLatin1(startMarker) + u"\"."_s;
+        + u"\" must be the string \""_s + QLatin1StringView(startMarker) + u"\"."_s;
 }
 
 QString msgInvalidLanguageLevel(const QString &l)

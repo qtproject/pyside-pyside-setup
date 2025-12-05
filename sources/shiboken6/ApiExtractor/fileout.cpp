@@ -12,6 +12,8 @@
 
 #include <cstdio>
 
+using namespace Qt::StringLiterals;
+
 bool FileOut::m_dryRun = false;
 bool FileOut::m_diff = false;
 
@@ -175,8 +177,8 @@ FileOut::State FileOut::done()
     if (!FileOut::m_dryRun) {
         QDir dir(info.absolutePath());
         if (!dir.mkpath(dir.absolutePath())) {
-            const QString message = QString::fromLatin1("Unable to create directory '%1'")
-                                        .arg(QDir::toNativeSeparators(dir.absolutePath()));
+            const QString message = "Unable to create directory '%1'"_L1
+                                    .arg(QDir::toNativeSeparators(dir.absolutePath()));
             throw Exception(message);
         }
 

@@ -1000,8 +1000,9 @@ QString ShibokenGenerator::cpythonIsConvertibleFunction(const TypeEntryCPtr &typ
         result += u"("_s + cpythonTypeNameExt(type) + u", "_s;
         return result;
     }
-    return QString::fromLatin1("Shiboken::Conversions::isPythonToCppConvertible(%1, ")
-              .arg(converterObject(type));
+
+    return "Shiboken::Conversions::isPythonToCppConvertible("_L1
+           + converterObject(type) + ", "_L1;
 }
 
 QString ShibokenGenerator::cpythonIsConvertibleFunction(const AbstractMetaType &metaType)

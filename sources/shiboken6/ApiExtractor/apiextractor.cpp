@@ -613,8 +613,8 @@ ApiExtractorPrivate::addInstantiatedContainersAndSmartPointers(InstantiationColl
     if (type.hasTemplateChildren()) {
         const auto piece = isContainer ? "container"_L1 : "smart pointer"_L1;
         QString warning =
-            QString::fromLatin1("Skipping instantiation of %1 '%2' because it has template"
-                                " arguments.").arg(piece, type.originalTypeDescription());
+            "Skipping instantiation of %1 '%2' because it has template"
+            " arguments."_L1.arg(piece, type.originalTypeDescription());
         if (!contextName.isEmpty())
             warning.append(" Calling context: "_L1 + contextName);
 
