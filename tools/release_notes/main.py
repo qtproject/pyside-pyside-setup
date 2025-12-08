@@ -36,17 +36,27 @@ This section contains the release notes for different versions of Qt for Python.
 """
 
 
+JIRA_URL = "https://qt-project.atlassian.net/browse/"
+
+
 class Changelog:
+
+    # for matching lines like *    PySide6    * to identify the section
+    section_pattern = re.compile(r"\* +(\w+) +\*")
+    # for line that start with ' -' which lists the changes
+    line_pattern = re.compile(r"^ -")
+    # for line that contains a bug report like PYSIDE-<bug_number>
+    bug_number_pattern = re.compile(r"\[PYSIDE-\d+\]")
+    # version from changelog file name
+    version_pattern = re.compile(r"changes-(\d+)\.(\d+)\.(\d+)")
+
     def __init__(self, file_path: Path):
         self.file_path = file_path
-        self.version = file_path.name.split("-")[-1]
+        version_match = self.version_pattern.match(file_path.name)
+        assert (version_match)
+        self.version = (int(version_match.group(1)), int(version_match.group(2)),
+                        int(version_match.group(3)))
         self.sections = {section: [] for section in SECTION_NAMES}
-        # for matching lines like *    PySide6    * to identify the section
-        self.section_pattern = re.compile(r"\* +(\w+) +\*")
-        # for line that start with ' -' which lists the changes
-        self.line_pattern = re.compile(r"^ -")
-        # for line that contains a bug report like PYSIDE-<bug_number>
-        self.bug_number_pattern = re.compile(r"\[PYSIDE-\d+\]")
 
     def add_line(self, section, line):
         self.sections[section].append(line)
@@ -94,8 +104,7 @@ class Changelog:
                     # remove the square brackets
                     actual_bug_number = bug_number[1:-1]
                     bug_number_replacement = (
-                        f"[{actual_bug_number}]"
-                        f"(https://bugreports.qt.io/browse/{actual_bug_number})"
+                        f"[{actual_bug_number}]({JIRA_URL}/{actual_bug_number})"
                     )
                     line = re.sub(re.escape(bug_number), bug_number_replacement, line)
 
@@ -144,7 +153,8 @@ def write_md_file(section: str, changelogs: list[Changelog], output_dir: Path):
         for changelog in changelogs:
             section_contents = changelog.parsed_sections()[section]
             if section_contents:
-                file.write(f"## {changelog.version}\n\n")
+                v = changelog.version
+                file.write(f"## {v[0]}.{v[1]}.{v[2]}\n\n")
                 for lines in section_contents:
                     # separate each line with a newline
                     file.write(f"{lines}\n")
