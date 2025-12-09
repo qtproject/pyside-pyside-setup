@@ -75,6 +75,11 @@ To use the generated file, add the following import at the top of your main Pyth
 
     import rc_icons
 
+.. note:: The tool uses `Zstandard` as a compression algorithm, which at its default
+          compression level (implementation-defined) may produce results that are
+          not usable on other platforms. To ensure the files are usable on all
+          platforms, the compression level should be reduced or `zlib` should
+          be chosen as compression algorithm (see ``pyside6-rcc --help``).
 
 Changes in the code
 ===================
