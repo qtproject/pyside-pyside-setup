@@ -120,7 +120,7 @@
         </conversion-rule>
     </primitive-type>
 
-    <primitive-type name="std::optional&lt;long&gt;" target-langapi-name="PyObject">
+    <primitive-type name="std::optional&lt;long&gt;">
       <conversion-rule>
           <native-to-target>
           if (!%in.has_value())
