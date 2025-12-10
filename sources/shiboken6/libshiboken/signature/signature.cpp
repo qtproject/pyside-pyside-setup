@@ -309,27 +309,30 @@ static PyObject *feature_import(PyObject * /* self */, PyObject *args, PyObject 
     if (origImportFunc == nullptr) {
         Py_FatalError("libshiboken: builtins has no \"__orig_import__\" function");
     }
-    // PYSIDE-3054: Instead of just calling the original import, we temporarily
-    //              reset the whole import function to the previous version.
-    //              This prevents unforeseen recursions like in settrace.
-    PyObject *featureImportFunc = PyDict_GetItemString(builtins.object(), "__import__");
-    Py_INCREF(origImportFunc);
-    Py_INCREF(featureImportFunc);
-    PyDict_SetItemString(builtins.object(), "__import__", origImportFunc);
     ret = PyObject_Call(origImportFunc, args, kwds);
     if (ret) {
+        // PYSIDE-3054: Instead of just calling the original import, we temporarily
+        //              reset the whole import function to the previous version.
+        //              This prevents unforeseen recursions like in settrace.
+        PyObject *featureImportFunc = PyDict_GetItemString(builtins.object(), "__import__");
+        Py_INCREF(origImportFunc);
+        Py_INCREF(featureImportFunc);
+        PyDict_SetItemString(builtins.object(), "__import__", origImportFunc);
+
         // PYSIDE-2029: Intercept after the import to search for PySide usage.
         PyObject *post = PyObject_CallFunctionObjArgs(pyside_globals->feature_imported_func,
                                                       ret, nullptr);
         Py_XDECREF(post);
+
+        PyDict_SetItemString(builtins.object(), "__import__", featureImportFunc);
+        Py_DECREF(origImportFunc);
+        Py_DECREF(featureImportFunc);
+
         if (post == nullptr) {
             Py_DECREF(ret);
             ret = nullptr;
         }
     }
-    PyDict_SetItemString(builtins.object(), "__import__", featureImportFunc);
-    Py_DECREF(origImportFunc);
-    Py_DECREF(featureImportFunc);
     return ret;
 }
 

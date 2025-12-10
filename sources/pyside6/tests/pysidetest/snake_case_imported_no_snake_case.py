@@ -20,4 +20,4 @@ from PySide6.QtWidgets import QWidget  # noqa: E402
 def test_no_snake_case():
     print(__name__)
     widget = QWidget()
-    check = widget.sizeHint  # noqa
+    return widget.sizeHint()

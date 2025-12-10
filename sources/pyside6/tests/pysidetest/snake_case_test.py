@@ -21,18 +21,26 @@ if not is_pypy:
     from __feature__ import snake_case  # noqa
 from helper.usesqapplication import UsesQApplication
 
-import snake_case_sub
+import snake_case_imported
+import snake_case_imported_no_snake_case
 
 
 @unittest.skipIf(is_pypy, "__feature__ cannot yet be used with PyPy")
 class SnakeCaseNoPropagateTest(UsesQApplication):
 
-    def testSnakeCase(self):
-        # this worked
+    def testSnakeCaseImport(self):
+        """PYSIDE-3250: Test that snake case works when using it in imported modules."""
         widget = QWidget()
-        check = widget.size_hint  # noqa
+        r1 = widget.size_hint()
+        r2 = snake_case_imported.test()
+        self.assertEqual(r1, r2)
 
-        snake_case_sub.test_no_snake_case()
+    def testSnakeCaseImportNoSnakeCase(self):
+        """PYSIDE-2029: Tests that snake_case is isolated from imported modules."""
+        widget = QWidget()
+        r1 = widget.size_hint()
+        r2 = snake_case_imported_no_snake_case.test_no_snake_case()
+        self.assertEqual(r1, r2)
 
 
 if __name__ == '__main__':
