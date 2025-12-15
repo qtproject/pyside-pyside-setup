@@ -484,7 +484,7 @@ The target executes several steps:
 #. ``sphinx`` is run to produce the documentation in HTML format.
 
 Re-running the command will not execute step 1 unless the file
-``qdoc-output/webxml/qtcore-index.webxml`` is removed from the build tree.
+``qdoc-output/qtcore/webxml/qtcore-index.webxml`` is removed from the build tree.
 Similarly, step 2 will not be executed unless the file ``base/PySide6/QtCore/index.rst``
 is removed.
 
