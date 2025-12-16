@@ -247,6 +247,8 @@ set(CODE_SNIPPET_ROOT "${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/codesnippets"
 if (FULLDOCSBUILD)
 shiboken_get_tool_shell_wrapper(shiboken tool_wrapper)
 
+set(RHI_INCLUDE_DIR ${QT_INCLUDE_DIR}/QtGui/${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}/QtGui)
+
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/PySide6/QtCore/index.rst"
                    COMMAND
                        ${tool_wrapper}
@@ -254,7 +256,7 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/PySide6/Q
                        --generator-set=qtdoc
                        ${global_header}
                        --enable-pyside-extensions
-                       --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
+                       --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${RHI_INCLUDE_DIR}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
                        --api-version=${SUPPORTED_QT_VERSION}
                        --typesystem-paths="${QDOC_TYPESYSTEM_PATH}"
                        --library-source-dir=${QT_SRC_DIR}

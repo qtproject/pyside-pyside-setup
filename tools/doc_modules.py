@@ -118,6 +118,8 @@ def _write_global_header(modules, file):
     """Helper to write the global header for shiboken."""
     for module in modules:
         print(f"#include <{module}/{module}>", file=file)
+        if module == "QtGui":
+            print("#include <rhi/qrhi.h>", file=file)
 
 
 def write_global_header(modules, filename):
