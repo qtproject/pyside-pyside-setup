@@ -2,25 +2,22 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
 
-from PySide6.QtGui import QAction, QKeySequence
+from PySide6.QtGui import QIcon, QKeySequence
 from PySide6.QtWidgets import QMainWindow
 
 
 class MainWindow(QMainWindow):
     def __init__(self, widget):
-        QMainWindow.__init__(self)
+        super().__init__()
         self.setWindowTitle("Eartquakes information")
         self.setCentralWidget(widget)
         # Menu
         self.menu = self.menuBar()
-        self.file_menu = self.menu.addMenu("File")
+        file_menu = self.menu.addMenu("File")
 
         # Exit QAction
-        exit_action = QAction("Exit", self)
-        exit_action.setShortcut(QKeySequence.Quit)
-        exit_action.triggered.connect(self.close)
-
-        self.file_menu.addAction(exit_action)
+        file_menu.addAction(QIcon.fromTheme(QIcon.ThemeIcon.ApplicationExit),
+                            "Exit", QKeySequence.StandardKey.Quit, self.close)
 
         # Status Bar
         self.status = self.statusBar()

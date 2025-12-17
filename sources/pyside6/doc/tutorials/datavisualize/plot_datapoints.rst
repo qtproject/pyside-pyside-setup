@@ -1,23 +1,23 @@
 .. _tutorial_plot_datapoints:
 
 
-Chapter 6 - Plot the data in the ChartView
+Chapter 6 - Plot the data in the GraphsView
 ===========================================
 
-The last step of this tutorial is to plot the CSV data inside our QChart. For
-this, you need to go over our data and include the data on a QLineSeries.
+The last step of this tutorial is to plot the CSV data inside our GraphsView.
+For this, you need to go over our data and include the data on a QLineSeries.
 
 After adding the data to the series, you can modify the axis to properly
 display the QDateTime on the X-axis, and the magnitude values on the Y-axis.
 
 Here is the updated :code:`main_widget.py` that includes an additional
-function to plot data using a QLineSeries:
+function to plot data using a :class:`~PySide6.QtGraphs.QLineSeries`:
 
 .. literalinclude:: datavisualize6/main_widget.py
    :language: python
    :linenos:
-   :lines: 3-
-   :emphasize-lines: 33,56-91
+   :lines: 5-
+   :emphasize-lines: 31-42, 68-102
 
 Now, run the application to visualize the earthquake magnitudes
 data at different times.

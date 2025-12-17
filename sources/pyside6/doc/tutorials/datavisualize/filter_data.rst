@@ -17,7 +17,8 @@ be done by filtering the data that follows the condition, "magnitude > 0", to
 avoid faulty data or unexpected behavior.
 
 The Date column provides data in UTC format (for example,
-2018-12-11T21:14:44.682Z), so you could easily map it to a QDateTime object
+2018-12-11T21:14:44.682Z), so you could easily map it to a
+class:`~PySide6.QtCore.QDateTime` object
 defining the structure of the string. Additionally, you can adapt the time
 based on the timezone you are in, using QTimeZone.
 
@@ -26,7 +27,7 @@ The following script filters and formats the CSV data as described earlier:
 .. literalinclude:: datavisualize2/main.py
    :language: python
    :linenos:
-   :lines: 3-
+   :lines: 5-
 
-Now that you have a tuple of QDateTime and float data, try improving the
+Now that you have a tuple of ``QDateTime`` and float data, try improving the
 output further. That's what you'll learn in the following chapters.

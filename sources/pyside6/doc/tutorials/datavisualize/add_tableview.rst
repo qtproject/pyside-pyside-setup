@@ -8,21 +8,22 @@ Now that you have a QMainWindow, you can include a centralWidget to your
 interface. Usually, a QWidget is used to display data in most data-driven
 applications. Use a table view to display your data.
 
-The first step is to add a horizontal layout with just a QTableView. You
-can create a QTableView object and place it inside a QHBoxLayout. Once the
+The first step is to add a horizontal layout with just a
+class:`~PySide6.QtWidgets.QTableView`. You can create a QTableView object
+and place it inside a class:`~PySide6.QtWidgets.QHBoxLayout`. Once the
 QWidget is properly built, pass the object to the QMainWindow as its central
 widget.
 
 Remember that a QTableView needs a model to display information. In this case,
-you can use a QAbstractTableModel instance.
+you can use a class:`~PySide6.QtCore.QAbstractTableModel` instance.
 
 .. note:: You could also use the default item model that comes with a
-   QTableWidget instead. QTableWidget is a convenience class that reduces
-   your codebase considerably as you don't need to implement a data model.
-   However, it's less flexible than a QTableView, as QTableWidget cannot be
-   used with just any data. For more insight about Qt's model-view framework,
-   refer to the
-   `Model View Programming <https://doc.qt.io/qt-5/model-view-programming.html>`
+   class:`~PySide6.QtWidgets.QTableWidget` instead. QTableWidget is a
+   convenience class that reduces your codebase considerably as you don't need
+   to implement a data model. However, it's less flexible than a QTableView,
+   as QTableWidget cannot be used with just any data. For more insight about
+   Qt's model-view framework, refer to the
+   `Model View Programming <https://doc.qt.io/qt-6/model-view-programming.html>`
    documentation.
 
 Implementing the model for your QTableView, allows you to:
@@ -42,7 +43,7 @@ Here is a script that implements the CustomTableModel:
 .. literalinclude:: datavisualize4/table_model.py
    :language: python
    :linenos:
-   :lines: 3-
+   :lines: 5-
 
 Now, create a QWidget that has a QTableView, and connect it to your
 CustomTableModel.
@@ -50,8 +51,8 @@ CustomTableModel.
 .. literalinclude:: datavisualize4/main_widget.py
    :language: python
    :linenos:
-   :emphasize-lines: 12-17
-   :lines: 3-
+   :emphasize-lines: 12-12
+   :lines: 5-
 
 You also need minor changes to the :code:`main_window.py` and
 :code:`main.py` from chapter 3 to include the Widget inside the
@@ -62,11 +63,11 @@ In the following snippets you'll see those changes highlighted:
 .. literalinclude:: datavisualize4/main_window.py
    :language: python
    :linenos:
-   :lines: 3-
-   :emphasize-lines: 8,11
+   :lines: 5-
+   :emphasize-lines: 9
 
 .. literalinclude:: datavisualize4/main.py
    :language: python
    :linenos:
-   :lines: 3-
-   :emphasize-lines: 46-47
+   :lines: 5-
+   :emphasize-lines: 45-46

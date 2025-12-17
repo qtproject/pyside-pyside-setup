@@ -2,17 +2,17 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
 
-from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import (QWidget, QHeaderView, QHBoxLayout, QTableView,
                                QSizePolicy)
-from PySide6.QtCharts import QChart, QChartView
+from PySide6.QtQuickWidgets import QQuickWidget
+from PySide6.QtGraphs import QLineSeries, QDateTimeAxis, QValueAxis, QGraphsTheme
 
 from table_model import CustomTableModel
 
 
 class Widget(QWidget):
     def __init__(self, data):
-        QWidget.__init__(self)
+        super().__init__()
 
         # Getting the Model
         self.model = CustomTableModel(data)
@@ -24,21 +24,27 @@ class Widget(QWidget):
         # QTableView Headers
         self.horizontal_header = self.table_view.horizontalHeader()
         self.vertical_header = self.table_view.verticalHeader()
-        self.horizontal_header.setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.vertical_header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.horizontal_header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self.vertical_header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.horizontal_header.setStretchLastSection(True)
 
-        # Creating QChart
-        self.chart = QChart()
-        self.chart.setAnimationOptions(QChart.AllAnimations)
-
-        # Creating QChartView
-        self.chart_view = QChartView(self.chart)
-        self.chart_view.setRenderHint(QPainter.Antialiasing)
+        # Create QGraphView via QML
+        self.series = QLineSeries()
+        self.axis_x = QDateTimeAxis()
+        self.axis_y = QValueAxis()
+        self.quick_widget = QQuickWidget(self)
+        self.quick_widget.setResizeMode(QQuickWidget.ResizeMode.SizeRootObjectToView)
+        self.theme = QGraphsTheme()
+        initial_properties = {"theme": self.theme,
+                              "axisX": self.axis_x,
+                              "axisY": self.axis_y,
+                              "seriesList": self.series}
+        self.quick_widget.setInitialProperties(initial_properties)
+        self.quick_widget.loadFromModule("QtGraphs", "GraphsView")
 
         # QWidget Layout
-        self.main_layout = QHBoxLayout()
-        size = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.main_layout = QHBoxLayout(self)
+        size = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
 
         # Left layout
         size.setHorizontalStretch(1)
@@ -47,8 +53,5 @@ class Widget(QWidget):
 
         # Right Layout
         size.setHorizontalStretch(4)
-        self.chart_view.setSizePolicy(size)
-        self.main_layout.addWidget(self.chart_view)
-
-        # Set the layout to the QWidget
-        self.setLayout(self.main_layout)
+        self.quick_widget.setSizePolicy(size)
+        self.main_layout.addWidget(self.quick_widget)

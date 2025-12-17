@@ -25,27 +25,27 @@ class CustomTableModel(QAbstractTableModel):
         return self.column_count
 
     def headerData(self, section, orientation, role):
-        if role != Qt.DisplayRole:
+        if role != Qt.ItemDataRole.DisplayRole:
             return None
-        if orientation == Qt.Horizontal:
+        if orientation == Qt.Orientation.Horizontal:
             return ("Date", "Magnitude")[section]
         else:
             return f"{section}"
 
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         column = index.column()
         row = index.row()
 
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             if column == 0:
                 date = self.input_dates[row].toPython()
                 return str(date)[:-3]
             elif column == 1:
                 magnitude = self.input_magnitudes[row]
                 return f"{magnitude:.2f}"
-        elif role == Qt.BackgroundRole:
-            return QColor(Qt.white)
-        elif role == Qt.TextAlignmentRole:
-            return Qt.AlignRight
+        elif role == Qt.ItemDataRole.BackgroundRole:
+            return QColor(Qt.GlobalColor.white)
+        elif role == Qt.ItemDataRole.TextAlignmentRole:
+            return Qt.AlignmentFlag.AlignRight
 
         return None

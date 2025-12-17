@@ -1,0 +1,3 @@
+{
+    "files": ["main.py", "main_widget.py", "main_window.py", "table_model.py"]
+}

@@ -10,7 +10,7 @@ from table_model import CustomTableModel
 
 class Widget(QWidget):
     def __init__(self, data):
-        QWidget.__init__(self)
+        super().__init__()
 
         # Getting the Model
         self.model = CustomTableModel(data)
@@ -22,13 +22,13 @@ class Widget(QWidget):
         # QTableView Headers
         self.horizontal_header = self.table_view.horizontalHeader()
         self.vertical_header = self.table_view.verticalHeader()
-        self.horizontal_header.setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.vertical_header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.horizontal_header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self.vertical_header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.horizontal_header.setStretchLastSection(True)
 
         # QWidget Layout
         self.main_layout = QHBoxLayout()
-        size = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        size = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
 
         # Left layout
         size.setHorizontalStretch(1)
