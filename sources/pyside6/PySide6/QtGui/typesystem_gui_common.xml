@@ -2241,6 +2241,9 @@
         </insert-template>
       </inject-code>
     </add-function>
+    <add-function signature="__mgetitem__" return-type="PyObject*">
+        <inject-code file="../glue/qtgui.cpp" snippet="qmatrix-mgetitem"/>
+    </add-function>
   </value-type>
 
   <value-type name="QMatrix2x3">
@@ -2277,6 +2280,9 @@
           <replace from="%MATRIX_SIZE" to="6"/>
         </insert-template>
       </inject-code>
+    </add-function>
+    <add-function signature="__mgetitem__" return-type="PyObject*">
+        <inject-code file="../glue/qtgui.cpp" snippet="qmatrix-mgetitem"/>
     </add-function>
   </value-type>
 
@@ -2315,6 +2321,9 @@
         </insert-template>
       </inject-code>
     </add-function>
+    <add-function signature="__mgetitem__" return-type="PyObject*">
+        <inject-code file="../glue/qtgui.cpp" snippet="qmatrix-mgetitem"/>
+    </add-function>
   </value-type>
 
   <value-type name="QMatrix3x2">
@@ -2351,6 +2360,9 @@
           <replace from="%MATRIX_SIZE" to="6"/>
         </insert-template>
       </inject-code>
+    </add-function>
+    <add-function signature="__mgetitem__" return-type="PyObject*">
+        <inject-code file="../glue/qtgui.cpp" snippet="qmatrix-mgetitem"/>
     </add-function>
   </value-type>
 
@@ -2389,6 +2401,9 @@
         </insert-template>
       </inject-code>
     </add-function>
+    <add-function signature="__mgetitem__" return-type="PyObject*">
+        <inject-code file="../glue/qtgui.cpp" snippet="qmatrix-mgetitem"/>
+    </add-function>
   </value-type>
 
   <value-type name="QMatrix3x4">
@@ -2425,6 +2440,9 @@
           <replace from="%MATRIX_SIZE" to="12"/>
         </insert-template>
       </inject-code>
+    </add-function>
+    <add-function signature="__mgetitem__" return-type="PyObject*">
+        <inject-code file="../glue/qtgui.cpp" snippet="qmatrix-mgetitem"/>
     </add-function>
   </value-type>
 
@@ -2463,6 +2481,9 @@
         </insert-template>
       </inject-code>
     </add-function>
+    <add-function signature="__mgetitem__" return-type="PyObject*">
+        <inject-code file="../glue/qtgui.cpp" snippet="qmatrix-mgetitem"/>
+    </add-function>
   </value-type>
 
   <value-type name="QMatrix4x3">
@@ -2499,6 +2520,9 @@
           <replace from="%MATRIX_SIZE" to="12"/>
         </insert-template>
       </inject-code>
+    </add-function>
+    <add-function signature="__mgetitem__" return-type="PyObject*">
+        <inject-code file="../glue/qtgui.cpp" snippet="qmatrix-mgetitem"/>
     </add-function>
   </value-type>
 
@@ -2587,10 +2611,8 @@
     <modify-function signature="data()const" remove="all"/>
     <modify-function signature="constData()const" remove="all"/>
     <!-- ### -->
-    <modify-function signature="operator()(int,int)const" remove="all"/>
-    <modify-function signature="operator()(int,int)" remove="all"/>
     <add-function signature="__mgetitem__" return-type="PyObject*">
-       <inject-code file="../glue/qtgui.cpp" snippet="qmatrix4x4-mgetitem"/>
+      <inject-code file="../glue/qtgui.cpp" snippet="qmatrix-mgetitem"/>
     </add-function>
   </value-type>
 

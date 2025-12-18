@@ -858,7 +858,7 @@ for (Py_ssize_t i = 0; i < 16; ++i) {
 }
 // @snippet qmatrix4x4-copydatato
 
-// @snippet qmatrix4x4-mgetitem
+// @snippet qmatrix-mgetitem
 if (PySequence_Check(_key)) {
     Shiboken::AutoDecRef key(PySequence_Fast(_key, "Invalid matrix index."));
     if (PySequence_Size(key.object()) == 2) {
@@ -872,7 +872,7 @@ if (PySequence_Check(_key)) {
 }
 PyErr_SetString(PyExc_IndexError, "Invalid matrix index.");
 return 0;
-// @snippet qmatrix4x4-mgetitem
+// @snippet qmatrix-mgetitem
 
 // @snippet qguiapplication-init
 static void QGuiApplicationConstructor(PyObject *self, PyObject *pyargv, QGuiApplicationWrapper **cptr)
