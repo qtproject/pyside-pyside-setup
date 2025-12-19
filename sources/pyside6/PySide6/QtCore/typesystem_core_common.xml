@@ -336,8 +336,6 @@
             <add-conversion type="SbkObject" file="../glue/qtcore.cpp" snippet="conversion-sbkobject"/>
             <add-conversion type="PyDict" check="PyDict_CheckExact(%in)" file="../glue/qtcore.cpp" snippet="conversion-pydict"/>
             <add-conversion type="PyList" check="PyList_Check(%in)" file="../glue/qtcore.cpp" snippet="conversion-pylist"/>
-            <add-conversion type="PyTuple" check="PyTuple_CheckExact(%in)"
-                            file="../glue/qtcore.cpp" snippet="conversion-pylist"/>
             <add-conversion type="PyObject" file="../glue/qtcore.cpp" snippet="conversion-pyobject"/>
         </target-to-native>
     </conversion-rule>

@@ -106,9 +106,10 @@ class QObjectWithOtherClassPropertyTest(unittest.TestCase):
 
 
 class VariantPropertyTest(unittest.TestCase):
-    """Test QVariant conversion in properties and signals (PYSIDE-3206, PYSIDE-3244).
-       It uses a property of list type that is passed a QVariantList
-       with various element types when using QObject.setProperty()."""
+    """Test QVariant conversion in properties and signals (PYSIDE-3256,
+       PYSIDE-3244, PYSIDE-3206 [open]). It uses a property of list type
+       that is passed a QVariantList with various element types when
+       using QObject.setProperty()."""
 
     def testIt(self):
         to = TestVariantPropertyObject()
@@ -123,11 +124,11 @@ class VariantPropertyTest(unittest.TestCase):
         to.setProperty("testProperty", [{"key": 42}])
         self.assertEqual(type(to.get_property()[0]), dict)
 
-        # PYSIDE-3206 (DBus): Convert a tuple to a list
+        # Tuple (PYSIDE-3256)
         to.setProperty("testProperty", [(1, 2)])
-        self.assertEqual(type(to.get_property()[0]), list)
+        self.assertEqual(type(to.get_property()[0]), tuple)
 
-        # PYSIDE-324: The tuple conversion must not occur for named tuples
+        # Named Tuple (PYSIDE-3244)
         to.setProperty("testProperty", [Point(1, 2)])
         self.assertEqual(type(to.get_property()[0]), Point)
 
