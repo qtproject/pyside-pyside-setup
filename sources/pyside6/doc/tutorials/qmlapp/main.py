@@ -25,7 +25,7 @@ if __name__ == '__main__':
     # Set up the application window
     app = QGuiApplication(sys.argv)
     view = QQuickView()
-    view.setResizeMode(QQuickView.SizeRootObjectToView)
+    view.setResizeMode(QQuickView.ResizeMode.SizeRootObjectToView)
 
     # Expose the list to the Qml code
     my_model = QStringListModel()
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     view.loadFromModule("App", "Main")
 
     # Show the window
-    if view.status() == QQuickView.Error:
+    if view.status() == QQuickView.Status.Error:
         sys.exit(-1)
     view.show()
 

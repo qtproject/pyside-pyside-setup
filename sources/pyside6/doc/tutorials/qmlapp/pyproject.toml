@@ -1,0 +1,5 @@
+[project]
+name = "qml-application"
+
+[tool.pyside6-project]
+files = ["main.py", "App/Main.qml", "App/logo.png", "App/qmldir"]

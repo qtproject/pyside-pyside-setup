@@ -14,13 +14,12 @@ In this tutorial, you'll also learn how to provide data from Python
 as a QML initial property, which is then consumed by the ListView
 defined in the QML file.
 
-Before you begin, install the following prerequisites:
+Before you begin, install *Qt Creator* from
+`https://download.qt.io <https://download.qt.io/snapshots/qtcreator/>`_.
 
-* The `PySide6 <https://pypi.org/project/PySide6/>`_ Python packages.
-* *Qt Creator* from
-  `https://download.qt.io
-  <https://download.qt.io/snapshots/qtcreator/>`_.
-
+`Develop Qt for Python applications`_ describes how Python installations
+are handled by *Qt Creator*. By default, *Qt Creator* will prompt you
+to install PySide6 at the appropriate places.
 
 The following step-by-step instructions guide you through application
 development process using *Qt Creator*:
@@ -28,35 +27,37 @@ development process using *Qt Creator*:
 #. Open *Qt Creator* and select **File > New File or Project..** menu item
    to open following dialog:
 
-   .. image:: newpyproject.png
+   .. image:: newpyproject.webp
 
 #. Select **Qt for Python - Empty** from the list of application templates
    and select **Choose**.
 
-   .. image:: pyprojname.png
+   .. image:: pyprojname.webp
 
 #. Give a **Name** to your project, choose its location in the
    filesystem, and select **Finish** to create an empty ``main.py``
-   and ``main.pyproject``.
+   and ``pyproject.toml``.
 
-   .. image:: pyprojxplor.png
+   .. image:: pyprojxplor.webp
 
-   This should create a ``main.py`` and ```main.pyproject`` files
+   This should create a ``main.py`` and ```pyproject.toml`` files
    for the project.
 
 #. Download :download:`Main.qml<App/Main.qml>`, :download:`qmldir<App/qmldir>`
    and :download:`logo.png <App/logo.png>` and place them in a subdirectory
    named `App` in your project folder. This creates a basic QML module.
 
-#. Double-click on ``main.pyproject`` to open it in edit mode, and append
+#. Double-click on ``pyproject.toml``` to open it in edit mode, and append
    ``view.qml`` and ``logo.png`` to the **files** list. This is how your
    project file should look after this change:
 
    .. code::
 
-    {
-        "files": ["main.py", "App/Main.qml", "App/logo.png", "App/qmldir"]
-    }
+       [project]
+       name = "qml-application"
+
+       [tool.pyside6-project]
+       files = ["main.py", "App/Main.qml", "App/logo.png", "App/qmldir"]
 
 #. Now that you have the necessary bits for the application, import the
    Python modules in your ``main.py``, and download country data and
@@ -107,29 +108,19 @@ development process using *Qt Creator*:
 #. Your application is ready to be run now. Select **Projects** mode to
    choose the Python version to run it.
 
-   .. image:: projectsmode.png
+   .. image:: projectsmode.webp
 
 Run the application by using the ``CTRL+R`` keyboard shortcut to see if it
 looks like this:
 
 .. image:: qmlapplication.png
 
-You could also watch the following video tutorial for guidance to develop
-this application:
-
-.. raw:: html
-
-    <div style="position: relative; padding-bottom: 56.25%; height: 0;
-    overflow: hidden; max-width: 100%; height: auto;">
-        <iframe src="https://www.youtube.com/embed/JxfiUx60Mbg" frameborder="0"
-        allowfullscreen style="position: absolute; top: 0; left: 0;
-        width: 100%; height: 100%;">
-        </iframe>
-    </div>
-
 ********************
 Related information
 ********************
 
 * `QML Reference <https://doc.qt.io/qt-6/qmlreference.html>`_
+* `Develop Qt for Python applications <https://doc.qt.io/qtcreator/creator-python-development.html>`_
 * :doc:`../qmlintegration/qmlintegration`
+
+.. _`Develop Qt for Python applications`: https://doc.qt.io/qtcreator/creator-python-development.html
