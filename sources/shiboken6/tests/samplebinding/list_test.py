@@ -100,6 +100,16 @@ class ListConversionTest(unittest.TestCase):
         self.assertEqual(ListUser.ListOfPointF, ListUser.listOfPoints([PointF()]))
         self.assertEqual(ListUser.ListOfPoint, ListUser.listOfPoints([Point()]))
 
+    def testStdVector(self):
+        """PYSIDE-3259: Test std::vector<bool> in case some compiler
+           does the std::vector<bool> optimization."""
+        intList = [1, 2]
+        actual = ListUser.passThroughIntVector(intList)
+        self.assertEqual(intList, actual)
+        boolList = [True, False]
+        actual = ListUser.passThroughBoolVector(boolList)
+        self.assertEqual(boolList, actual)
+
 
 if __name__ == '__main__':
     unittest.main()

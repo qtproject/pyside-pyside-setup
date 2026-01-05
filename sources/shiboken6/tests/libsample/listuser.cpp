@@ -61,3 +61,14 @@ void ListUser::multiplyPointList(PointList &points, double multiplier)
         point->setY(point->y() * multiplier);
     }
 }
+
+std::vector<int> ListUser::passThroughIntVector(const std::vector<int> &v)
+{
+    return v;
+}
+
+std::vector<bool> ListUser::passThroughBoolVector(const std::vector<bool> &v)
+{
+    return v;
+}
+

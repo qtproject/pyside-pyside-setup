@@ -11,6 +11,7 @@
 #include "libsamplemacros.h"
 
 #include <list>
+#include <vector>
 
 class LIBSAMPLE_API ListUser
 {
@@ -44,6 +45,9 @@ public:
 
     inline void setList(std::list<int> lst) { m_lst = lst; }
     inline std::list<int> getList() const { return m_lst; }
+
+    static std::vector<int> passThroughIntVector(const std::vector<int> &v);
+    static std::vector<bool> passThroughBoolVector(const std::vector<bool> &v);
 
 private:
     std::list<int> m_lst;

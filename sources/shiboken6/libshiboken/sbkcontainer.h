@@ -50,6 +50,21 @@ public:
     enum { value = sizeof(test<T>(nullptr)) == sizeof(YesType) };
 };
 
+// PYSIDE-3259 Handling of the std::vector<bool> optimization for providing
+// a pointer for the SbkConverter. Use const-ref for the standard case to
+// avoid copies and instantiate a bool in case of std::vector<bool>.
+template <typename T>
+struct ShibokenContainerStdVectorValueType
+{
+    using Type = const T &;
+};
+
+template <>
+struct ShibokenContainerStdVectorValueType<bool>
+{
+    using Type = bool;
+};
+
 class ShibokenSequenceContainerPrivateBase
 {
 public:

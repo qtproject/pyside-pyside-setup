@@ -194,7 +194,7 @@ return %out;
      uR"(PyObject *%out = PyList_New(Py_ssize_t(%in.size()));
 Py_ssize_t idx = 0;
 for (auto it = std::cbegin(%in), end = std::cend(%in); it != end; ++it, ++idx) {
-    const auto &cppItem = *it;
+    ShibokenContainerStdVectorValueType<%INTYPE_0>::Type cppItem = *it;
     PyList_SetItem(%out, idx, %CONVERTTOPYTHON[%INTYPE_0](cppItem));
 }
 return %out;)"_s},
