@@ -376,6 +376,35 @@ instructions:
             property: host.arch
             equals_value: ARM64
 
+    - type: ExecuteCommand
+      command: "sudo subscription-manager refresh"
+      maxTimeInSeconds: 6000
+      maxTimeBetweenOutput: 1200
+      enable_if:
+          condition: property
+          property: host.osVersion
+          in_values: [RHEL_9_4, RHEL_9_6]
+      userMessageOnFailure: >
+        Failed to refresh subscription.
+
+    - type: ExecuteCommand
+      command: "sudo yum -y install python3.11-devel python3.11-pip"
+      maxTimeInSeconds: 14400
+      maxTimeBetweenOutput: 1200
+      enable_if:
+          condition: property
+          property: host.osVersion
+          in_values: [RHEL_9_4, RHEL_9_6]
+      userMessageOnFailure: >
+          Failed to install python 3.11
+
+    - type: EnvironmentVariable
+      variableName: interpreter
+      variableValue: "python3.11"
+      enable_if:
+          condition: property
+          property: host.osVersion
+          in_values: [RHEL_9_4, RHEL_9_6]
 
     # Use pyenv to install Python 3.11 on macOS+Android
     - type: ExecuteCommand
