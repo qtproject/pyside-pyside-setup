@@ -218,6 +218,14 @@ General Applications
     expenses/expenses.rst
     embedded/boot2qt.md
 
+Qt Creator
+----------
+
+* `Overview: Develop Qt for Python applications`_
+* `Tutorial: Qt Quick and Python`_
+* `Tutorial: Qt Widgets and Python`_
+* `Tutorial: Qt Widgets UI and Python`_
+
 Qt Design Studio
 ----------------
 
@@ -260,3 +268,8 @@ Debug a PySide6 Application
 
     debugging/mixed_debugging.rst
     debugging/qml_debugging.rst
+
+.. _`Overview: Develop Qt for Python applications`: https://doc.qt.io/qtcreator/creator-python-development.html
+.. _`Tutorial: Qt Quick and Python`: https://doc.qt.io/qtcreator/creator-tutorial-python-application-qt-quick.html
+.. _`Tutorial: Qt Widgets and Python`: https://doc.qt.io/qtcreator/creator-tutorial-python-application-qt-widgets.html
+.. _`Tutorial: Qt Widgets UI and Python`: https://doc.qt.io/qtcreator/creator-tutorial-python-application-qt-widgets-ui.html
