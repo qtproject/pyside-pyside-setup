@@ -76,7 +76,31 @@ accept_configuration:
         - condition: property
           property: features
           contains_value: Packaging
-
+    - condition: and
+      conditions:
+        - condition: property
+          property: target.os
+          equals_value: MacOS
+        - condition: property
+          property: features
+          contains_value: Packaging
+        - condition: property
+          property: target.arch
+          equals_value: X86_64-ARM64
+    - condition: and
+      conditions:
+        - condition: property
+          property: target.os
+          equals_value: Windows
+        - condition: property
+          property: features
+          contains_value: Packaging
+        - condition: property
+          property: target.arch
+          equals_value: X86_64
+        - condition: property
+          property: target.compiler
+          equals_value: Mingw
 machine_type:
   Build:
     cores: 8
