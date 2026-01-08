@@ -42,7 +42,7 @@ shader effects.
     * :ref:`Important-Concepts-In-Qt-Quick---User-Input`
     * :ref:`Important-Concepts-In-Qt-Quick---Positioning`
     * :ref:`Important-Concepts-in-Qt-Quick---States--Transitions-and-Animations`
-    * :ref:`Important-Concepts-In-Qt-Quick---Data---Models--Views-and-Data-Storage`
+    * :ref:`Important-Concepts-In-Qt-Quick---Data---Models--Views--and-Data-Storage`
     * :ref:`Important-Concepts-In-Qt-Quick---Graphical-Effects`
     * `MultiEffect <https://doc.qt.io/qt-6/qml-qtquick-effects-multieffect.html>`_
     * :ref:`Important-Concepts-In-Qt-Quick---Convenience-Types`

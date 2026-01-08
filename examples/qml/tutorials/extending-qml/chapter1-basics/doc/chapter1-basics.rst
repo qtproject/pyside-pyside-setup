@@ -84,7 +84,7 @@ using a standard QML ``Text`` item:
 
 .. literalinclude:: Charts/App.qml
     :lineno-start: 7
-    :lines: 7-26
+    :lines: 7-22
 
 Notice that although the color is specified as a string in QML, it is
 automatically converted to a :class:`~PySide6.QtGui.QColor` object for the PieChart

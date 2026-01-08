@@ -10,7 +10,7 @@ to call ``clearChart()`` and receive ``chartCleared()`` signals like this:
 
 .. literalinclude:: Charts/App.qml
     :lineno-start: 4
-    :lines: 4-32
+    :lines: 4-28
 
 To do this, we add a ``clearChart()``  method and a ``chartCleared()``  signal
 to our C++ class:

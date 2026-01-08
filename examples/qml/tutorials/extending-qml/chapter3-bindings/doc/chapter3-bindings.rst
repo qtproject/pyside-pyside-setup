@@ -13,7 +13,7 @@ have code like this:
 
 .. literalinclude:: Charts/App.qml
     :lineno-start: 7
-    :lines: 7-40
+    :lines: 7-36
 
 The ``color: chartA.color`` statement binds the ``color`` value of ``chartB``
 to the ``color`` of ``chartA.`` Whenever ``chartA`` 's ``color`` value changes,
