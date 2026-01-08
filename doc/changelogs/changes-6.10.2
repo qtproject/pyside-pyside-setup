@@ -20,6 +20,9 @@ information about a particular change.
  - [PYSIDE-2206] The multimedia player example has been updated.
  - [PYSIDE-3189] Type hints: Some missing optional return types have been
                  added.
+ - [PYSIDE-3231] Type hints: Element access for all QMatrix types
+                 has been fixed to consistently provide a call
+                 operator (operator()) as well as mgetitem (operator[][]).
  - [PYSIDE-3233] The Shiboken6Tools CMake module has been fixed to find
                  Python on manylinux_2_34.
  - [PYSIDE-3241] The metatype JSON files that had been missing from the
@@ -40,3 +43,6 @@ information about a particular change.
  - [PYSIDE-3235] Building for Yocto using a Clang toolchain has been fixed.
  - [PYSIDE-3246] A crash occurring when multiple threads attempt to
                  retrieve the same method override has been fixed.
+ - [PYSIDE-3259] The conversion generated for std::vector<bool> has been
+                 fixed for compilers that actually implement the
+                 std::vector<bool> optimization (Clang).
