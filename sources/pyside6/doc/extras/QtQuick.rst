@@ -66,7 +66,7 @@ Articles and Guides
 
 Further information for writing QML applications:
 
-    * :ref:`QML-Applications` - Essential information for application development with QML and Qt Quick
+    * :ref:`Getting started with Qt Quick applications <Getting-started-with-Qt-Quick-applications>` - Essential information for application development with QML and Qt Quick
     * :mod:`Qt Qml <PySide6.QtQml>` - Documentation for the Qt QML module, which provides the QML engine and language infrastructure
     * :ref:`Qt Quick How-tos<Qt-Quick-How-tos>` - shows how to achieve specific tasks in Qt Quick
 
