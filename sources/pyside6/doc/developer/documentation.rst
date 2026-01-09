@@ -44,24 +44,30 @@ shiboken/sphinx.
 
 A line in brackets denotes the output directory.
 
-The list can be created by the below script and some hand-editing. It will find
-almost all documents. Quite a number of them might be unreferenced, but there
-is no good way of filtering for this.
-Pages of examples that exist in Python should be removed.
+The list can be created by running the below script in the PySide6 build
+directory and some hand-editing. It will find almost all documents. Quite
+a number of them might be unreferenced, but there is no good way of filtering
+for this. Pages of examples that exist in Python should be removed.
 
 .. code-block:: bash
 
-    for F in *.webxml
-    do
-        echo "$F" | egrep '(-index|example|cmake|private-module|-changes-qt6|-module.web|-qmlmodule.web)' > /dev/null
-        if [ $? -ne 0 ]
-        then
-            if fgrep '<para>' "$F" > /dev/null # Exclude reference only
+    find_docs()
+    {
+        for F in $(find . -name "*.webxml")
+        do
+            echo "$F" | egrep '(-index|example|cmake|private-module|-changes-qt6|-module.web|-qmlmodule.web)' > /dev/null
+            if [ $? -ne 0 ]
             then
-                egrep "(<namespace|<class|<struct|<group|<union)" $F > /dev/null || echo $F
+                if fgrep '<para>' "$F" > /dev/null # Exclude reference only
+                then
+                    egrep "(<namespace|<class|<struct|<group|<union)" $F > /dev/null || echo $F
+                fi
             fi
-        fi
-    done
+        done
+    }
+
+    cd doc/qdoc-output
+    find_docs | cut -c3- | sort
 
 The overviews go into a directory named ``overviews``. There are also special
 pages containing lists of classes with brief, grouped by function. They mostly
