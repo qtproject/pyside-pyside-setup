@@ -18,6 +18,8 @@
 #include <QtCore/qregularexpression.h>
 #include <QtCore/qxmlstream.h>
 
+#include <cstring>
+
 using namespace Qt::StringLiterals;
 
 QDebug operator<<(QDebug debug, const QtXmlToSphinxImage &i)
@@ -688,15 +690,13 @@ QString QtXmlToSphinx::readSnippet(const QString &location, const QString &ident
 void QtXmlToSphinx::handleHeadingTag(QXmlStreamReader& reader)
 {
     static int headingSize = 0;
-    static char type;
-    static char types[] = { '-', '^' };
+    static char type{};
+    static constexpr const char types[] = R"(#*=-^")";
     QXmlStreamReader::TokenType token = reader.tokenType();
     if (token == QXmlStreamReader::StartElement) {
-        uint typeIdx = reader.attributes().value(u"level"_s).toUInt();
-        if (typeIdx >= sizeof(types))
-            type = types[sizeof(types)-1];
-        else
-            type = types[typeIdx];
+        // Levels are 1..n. We start at #2 since <page> already uses '#' (1) for the title.
+        const auto typeIdx = std::size_t(reader.attributes().value(u"level"_s).toUInt()); // level 1..n
+        type = types[std::min(typeIdx, std::strlen(types) - 1)];
     } else if (token == QXmlStreamReader::EndElement) {
         m_output << disableIndent << Pad(type, headingSize) << "\n\n"
             << enableIndent;
@@ -1305,7 +1305,7 @@ void QtXmlToSphinx::handlePageTag(QXmlStreamReader &reader)
        ? writeEscapedRstText(m_output, title)
        : writeEscapedRstText(m_output, fullTitle);
 
-    m_output << '\n' << Pad('*', size) << "\n\n"
+    m_output << '\n' << Pad('#', size) << "\n\n"
         << enableIndent;
 }
 
