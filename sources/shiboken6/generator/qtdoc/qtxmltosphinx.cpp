@@ -200,9 +200,9 @@ enum class WebXmlTag {
     heading, brief, para, italic, bold, see_also, snippet, dots, codeline,
     table, header, row, item, argument, teletype, link, inlineimage, image,
     list, term, raw, underline, superscript, code, badcode, legalese,
-    rst, section, quotefile,
+    rst, section, quotefile, target, keyword, page, group,
     // ignored tags
-    generatedlist, tableofcontents, quotefromfile, skipto, target, page, group,
+    generatedlist, tableofcontents, quotefromfile, skipto,
     // useless tags
     description, definition, printuntil, relation,
     // Doxygen tags
@@ -253,6 +253,7 @@ static const WebXmlTagHash &webXmlTagHash()
         {u"quotefromfile", WebXmlTag::quotefromfile},
         {u"skipto", WebXmlTag::skipto},
         {u"target", WebXmlTag::target},
+        {u"keyword", WebXmlTag::keyword},
         {u"page", WebXmlTag::page},
         {u"group", WebXmlTag::group},
         {u"description", WebXmlTag::description},
@@ -403,6 +404,7 @@ void QtXmlToSphinx::callHandler(WebXmlTag t, QXmlStreamReader &r)
         handleIgnoredTag(r);
         break;
     case WebXmlTag::target:
+    case WebXmlTag::keyword:
         handleTargetTag(r);
         break;
     case WebXmlTag::page:
@@ -1315,7 +1317,7 @@ void QtXmlToSphinx::handleTargetTag(QXmlStreamReader &reader)
         return;
     const auto  name = reader.attributes().value("name");
     if (!name.isEmpty())
-        m_output << rstLabel(name.toString());
+        m_output << disableIndent << rstLabel(name.toString()) << enableIndent;
 }
 
 void QtXmlToSphinx::handleIgnoredTag(QXmlStreamReader&)
