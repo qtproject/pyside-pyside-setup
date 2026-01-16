@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'camera_mobile.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.0
+## Created by: Qt User Interface Compiler version 6.10.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QHBoxLayout,
     QPushButton, QSizePolicy, QSlider, QSpacerItem,
     QStackedWidget, QStatusBar, QTabWidget, QVBoxLayout,
     QWidget)
+import rc_camera
 
 class Ui_Camera(object):
     def setupUi(self, Camera):

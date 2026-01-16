@@ -325,7 +325,9 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="camera.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>recordButton</sender>

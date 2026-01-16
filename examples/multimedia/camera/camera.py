@@ -2,16 +2,14 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
 
-import os
 import sys
-from pathlib import Path
 
 from PySide6.QtMultimedia import (QAudioInput, QCamera, QCameraDevice,
                                   QImageCapture, QMediaCaptureSession,
                                   QMediaDevices, QMediaMetaData,
                                   QMediaRecorder)
 from PySide6.QtWidgets import QDialog, QMainWindow, QMessageBox
-from PySide6.QtGui import QAction, QActionGroup, QIcon, QImage, QPixmap
+from PySide6.QtGui import QAction, QActionGroup, QImage, QPixmap
 from PySide6.QtCore import QDateTime, QDir, QTimer, Qt, Slot, qWarning
 
 from metadatadialog import MetaDataDialog
@@ -46,8 +44,6 @@ class Camera(QMainWindow):
 
         self._ui = Ui_Camera()
         self._ui.setupUi(self)
-        image = Path(__file__).parent / "shutter.svg"
-        self._ui.takeImageButton.setIcon(QIcon(os.fspath(image)))
         if not is_android:
             self._ui.actionAbout_Qt.triggered.connect(qApp.aboutQt)  # noqa: F821
 

@@ -8,5 +8,6 @@
               "metadatadialog.py",
               "videosettings.py",
               "videosettings.ui",
-              "videosettings_mobile.ui"]
+              "videosettings_mobile.ui",
+              "camera.qrc"]
 }

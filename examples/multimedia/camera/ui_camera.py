@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'camera.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.8.0
+## Created by: Qt User Interface Compiler version 6.10.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QLabel,
     QMainWindow, QMenu, QMenuBar, QPushButton,
     QSizePolicy, QSpacerItem, QStackedWidget, QStatusBar,
     QTabWidget, QWidget)
+import rc_camera
 
 class Ui_Camera(object):
     def setupUi(self, Camera):
@@ -54,6 +55,10 @@ class Ui_Camera(object):
         self.takeImageButton = QPushButton(self.tab_2)
         self.takeImageButton.setObjectName(u"takeImageButton")
         self.takeImageButton.setEnabled(False)
+        icon = QIcon()
+        icon.addFile(u":/images/shutter.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        self.takeImageButton.setIcon(icon)
+        self.takeImageButton.setIcon(icon)
 
         self.gridLayout.addWidget(self.takeImageButton, 0, 0, 1, 1)
 
