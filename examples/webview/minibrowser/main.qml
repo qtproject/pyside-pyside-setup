@@ -21,6 +21,7 @@ ApplicationWindow {
             ToolButton {
                 id: backButton
                 icon.source: "qrc:/left-32.png"
+                icon.color: "transparent"
                 onClicked: webView.goBack()
                 enabled: webView.canGoBack
                 Layout.preferredWidth: navigationBar.height
@@ -29,6 +30,7 @@ ApplicationWindow {
             ToolButton {
                 id: forwardButton
                 icon.source: "qrc:/right-32.png"
+                icon.color: "transparent"
                 onClicked: webView.goForward()
                 enabled: webView.canGoForward
                 Layout.preferredWidth: navigationBar.height
@@ -37,6 +39,7 @@ ApplicationWindow {
             ToolButton {
                 id: reloadButton
                 icon.source: webView.loading ? "qrc:/stop-32.png" : "qrc:/refresh-32.png"
+                icon.color: "transparent"
                 onClicked: webView.loading ? webView.stop() : webView.reload()
                 Layout.preferredWidth: navigationBar.height
             }
