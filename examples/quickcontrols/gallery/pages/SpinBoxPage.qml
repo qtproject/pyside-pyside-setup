@@ -24,6 +24,7 @@ ScrollablePage {
             value: 50
             anchors.horizontalCenter: parent.horizontalCenter
             editable: true
+            Accessible.name: qsTr("demo spinbox")
         }
     }
 }
