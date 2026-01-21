@@ -528,7 +528,7 @@ static int callPythonMetaMethodHelper(const QByteArrayList &paramTypes,
     }
 
     QScopedPointer<Shiboken::Conversions::SpecificConverter> retConverter;
-    if (isNonVoidReturn(returnType)) {
+    if (args[0] != nullptr && isNonVoidReturn(returnType)) {
         retConverter.reset(new Shiboken::Conversions::SpecificConverter(returnType));
         if (!retConverter->isValid())
             return CallResult::CallReturnValueError;
