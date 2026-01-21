@@ -64,6 +64,15 @@ class Receiver(QObject):
             QCoreApplication.instance().exit()
 
 
+class ResultReceiver(QObject):
+    def __init__(self):
+        super().__init__()
+
+    @Slot(result=int)
+    def slotWithResult(self):
+        return 3
+
+
 class ObjectSenderTest(unittest.TestCase):
     '''Test case for QObject.sender() method.'''
 
@@ -149,6 +158,16 @@ class SameNameSenderTest(UsesQApplication):
         sender.signal2.emit()
         sender.signal3.emit()
         self.assertTrue(sender.slot3_invoked)
+
+
+class ResultSlotTest(UsesQApplication):
+    '''PYSIDE-3266: Test that a slot declaring a result type does not cause crashes
+       in signal connections due to args[0] == 0.'''
+    def test(self):
+        sender = Sender()
+        recv = ResultReceiver()
+        sender.foo.connect(recv.slotWithResult)
+        sender.foo.emit()
 
 
 if __name__ == '__main__':
