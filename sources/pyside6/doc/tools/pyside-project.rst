@@ -75,7 +75,8 @@ It is also possible to specify a directory containing the project file.
     (see :ref:`tutorial_uifiles`, :ref:`tutorial_qrcfiles`).
 
 *run*
-    Builds the project and runs the main.
+    Builds the project and runs the main. Additional command line arguments
+    can be passed following the project file argument.
 
 *deploy*
     Deploys the application (see see :ref:`pyside6-deploy`).

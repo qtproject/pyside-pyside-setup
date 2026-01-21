@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 import os
 from pathlib import Path
-from argparse import ArgumentParser, RawTextHelpFormatter
+from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
 
 from project_lib import (QmlProjectData, check_qml_decorators, is_python_file, migrate_pyproject,
                          QMLDIR_FILE, MOD_CMD, METATYPES_JSON_SUFFIX, SHADER_SUFFIXES,
@@ -186,10 +186,11 @@ class Project:
 
         self._regenerate_qmldir()
 
-    def run(self) -> int:
+    def run(self, args: list) -> int:
         """Runs the project"""
         self.build()
         cmd = [sys.executable, str(self.project.main_file)]
+        cmd.extend(args)
         return run_command(cmd, cwd=self.project.project_file.parent)
 
     def _clean_file(self, source: Path):
@@ -266,11 +267,13 @@ class Project:
                 run_command(cmd, cwd=project_dir)
 
 
-def main(mode: str = None, dry_run: bool = False, quiet: bool = False, force: bool = False,
-         qml_module: bool = None, project_dir: str = None, project_path: str = None,
-         legacy_pyproject: bool = False):
-    cl_options = ClOptions(dry_run=dry_run, quiet=quiet,  # noqa: F841
-                           force=force, qml_module=qml_module)
+def main(args: Namespace):
+    mode = args.mode
+    project_dir = getattr(args, "project_dir", None)
+    project_path = getattr(args, "project_path", None)
+    legacy_pyproject = getattr(args, "legacy_pyproject", False)
+    cl_options = ClOptions(dry_run=args.dry_run, quiet=args.quiet,  # noqa: F841
+                           force=args.force, qml_module=args.qml_module)
 
     if new_project_type := NewProjectTypes.find_by_command(mode):
         if not project_dir:
@@ -301,7 +304,7 @@ def main(mode: str = None, dry_run: bool = False, quiet: bool = False, force: bo
     if mode == "build":
         project.build()
     elif mode == "run":
-        sys.exit(project.run())
+        sys.exit(project.run(args.arguments))
     elif mode == "clean":
         project.clean()
     elif mode == "qmllint":
@@ -340,9 +343,7 @@ if __name__ == "__main__":
     for op_mode, op_help in OPERATION_HELP.items():
         op_parser = subparsers.add_parser(op_mode, help=op_help)
         op_parser.add_argument("project_path", nargs="?", type=str, help="Path to the project file")
+        if op_mode == "run":
+            op_parser.add_argument('arguments', nargs='*', help="Arguments")
 
-    args = parser.parse_args()
-
-    main(args.mode, args.dry_run, args.quiet, args.force, args.qml_module,
-         getattr(args, "project_dir", None), getattr(args, "project_path", None),
-         getattr(args, "legacy_pyproject", None))
+    main(parser.parse_args())
