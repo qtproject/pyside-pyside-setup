@@ -80,8 +80,8 @@ More examples can be found in the `Qt Style Sheet Examples`_ documentation
 page.
 
 
-.. _`Qt Style Sheets Reference`: https://doc.qt.io/qt-5/stylesheet-reference.html
-.. _`Qt Style Sheet Examples`: https://doc.qt.io/qt-5/stylesheet-examples.html
+.. _`Qt Style Sheets Reference`: https://doc.qt.io/qt-6/stylesheet-reference.html
+.. _`Qt Style Sheet Examples`: https://doc.qt.io/qt-6/stylesheet-examples.html
 
 Qt Style Sheets
 ---------------

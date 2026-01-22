@@ -126,18 +126,18 @@ so this results in each item consuming the entire width of the layout.
 On the other hand, the `Layout.fillHeight`_ statement in the `ListView`_ enables it to occupy the
 remaining space that is left after accommodating the Pane.
 
-.. _Item Positioners: https://doc.qt.io/qt-5/qtquick-positioning-layouts.html
-.. _Qt Quick Layouts: https://doc.qt.io/qt-5/qtquicklayouts-index.html
-.. _Row: https://doc.qt.io/qt-5/qml-qtquick-row.html
-.. _Column: https://doc.qt.io/qt-5/qml-qtquick-column.html
-.. _ColumnLayout: https://doc.qt.io/qt-5/qml-qtquick-layouts-columnlayout.html
-.. _ListView: https://doc.qt.io/qt-5/qml-qtquick-listview.html
-.. _Pane: https://doc.qt.io/qt-5/qml-qtquick-controls2-pane.html
-.. _Frame: https://doc.qt.io/qt-5/qml-qtquick-controls2-frame.html
-.. _attached properties: https://doc.qt.io/qt-5/qml-qtquick-layouts-layout.html
-.. _Layout.fillWidth: https://doc.qt.io/qt-5/qml-qtquick-layouts-layout.html#fillWidth-attached-prop
-.. _Layout.fillHeight: https://doc.qt.io/qt-5/qml-qtquick-layouts-layout.html#fillHeight-attached-prop
-.. _Qt Quick QML Types: https://doc.qt.io/qt-5/qtquick-qmlmodule.html
+.. _Item Positioners: https://doc.qt.io/qt-6/qtquick-positioning-layouts.html
+.. _Qt Quick Layouts: https://doc.qt.io/qt-6/qtquicklayouts-index.html
+.. _Row: https://doc.qt.io/qt-6/qml-qtquick-row.html
+.. _Column: https://doc.qt.io/qt-6/qml-qtquick-column.html
+.. _ColumnLayout: https://doc.qt.io/qt-6/qml-qtquick-layouts-columnlayout.html
+.. _ListView: https://doc.qt.io/qt-6/qml-qtquick-listview.html
+.. _Pane: https://doc.qt.io/qt-6/qml-qtquick-controls2-pane.html
+.. _Frame: https://doc.qt.io/qt-6/qml-qtquick-controls2-frame.html
+.. _attached properties: https://doc.qt.io/qt-6/qml-qtquick-layouts-layout.html
+.. _Layout.fillWidth: https://doc.qt.io/qt-6/qml-qtquick-layouts-layout.html#fillWidth-attached-prop
+.. _Layout.fillHeight: https://doc.qt.io/qt-6/qml-qtquick-layouts-layout.html#fillHeight-attached-prop
+.. _Qt Quick QML Types: https://doc.qt.io/qt-6/qtquick-qmlmodule.html
 
 Let's look at the ``Listview`` in detail:
 
@@ -183,9 +183,9 @@ Lastly, we have a button that allows us to call the ``send_message`` method we d
 ``sqlDialog.py``, since we're just having a mock up example here and there is only one possible
 recipient and one possible sender for this conversation we're just using strings here.
 
-.. _displayMarginBeginning: https://doc.qt.io/qt-5/qml-qtquick-listview.html#displayMarginBeginning-prop
-.. _displayMarginEnd: https://doc.qt.io/qt-5/qml-qtquick-listview.html#displayMarginEnd-prop
-.. _TextArea: https://doc.qt.io/qt-5/qml-qtquick-controls2-textarea.html
+.. _displayMarginBeginning: https://doc.qt.io/qt-6/qml-qtquick-listview.html#displayMarginBeginning-prop
+.. _displayMarginEnd: https://doc.qt.io/qt-6/qml-qtquick-listview.html#displayMarginEnd-prop
+.. _TextArea: https://doc.qt.io/qt-6/qml-qtquick-controls2-textarea.html
 
 ``Main.qml`` needs to be put into a directory named :code:`App` along
 with a file named ``qmldir`` to describe a basic QML module:

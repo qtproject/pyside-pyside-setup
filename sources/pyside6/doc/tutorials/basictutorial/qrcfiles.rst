@@ -177,4 +177,4 @@ Run the application by calling ``python main.py`` to checkout the new icon-set:
 .. image:: player-new.png
    :alt: New Multimedia Player Qt Example
 
-.. _`Qt Resource System`: https://doc.qt.io/qt-5/resources.html
+.. _`Qt Resource System`: https://doc.qt.io/qt-6/resources.html

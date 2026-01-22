@@ -76,7 +76,7 @@ Empty widget and data
 ---------------------
 
 The `QMainWindow` enables us to set a central widget that will be displayed when showing the window
-(`read more <https://doc.qt.io/qt-5/qmainwindow.html#details>`_).
+(`read more <https://doc.qt.io/qt-6/qmainwindow.html#details>`_).
 This central widget could be another class derived from `QWidget`.
 
 Additionally, you will define example data to visualize later.

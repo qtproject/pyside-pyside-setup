@@ -127,7 +127,7 @@ application and PySide6 integration:
       :emphasize-lines: 8
 
    You can read more about this configuration file
-   `here <https://doc.qt.io/qt-5/qtquickcontrols2-configuration.html>`_.
+   `here <https://doc.qt.io/qt-6/qtquickcontrols2-configuration.html>`_.
 
    The final look of your application will be:
 
