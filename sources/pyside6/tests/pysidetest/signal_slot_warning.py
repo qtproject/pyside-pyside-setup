@@ -3,8 +3,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 from __future__ import annotations
 
-''' PYSIDE-315: https://bugreports.qt.io/browse/PYSIDE-315
-    Test that creating a signal in the wrong order triggers a warning. '''
+''' PYSIDE-315: Test that creating a signal in the wrong order triggers a warning. '''
 
 import os
 import sys

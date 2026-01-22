@@ -116,7 +116,7 @@ PyObjectWrapper::PyObjectWrapper()
 {
     // PYSIDE-813: When PYSIDE-164 was solved by adding some thread allowance,
     // this code was no longer protected. It was hard to find this connection.
-    // See the website https://bugreports.qt.io/browse/PYSIDE-813 for details.
+    // See PYSIDE-813 for details.
     Shiboken::GilState gil;
     Py_XINCREF(m_me);
 }

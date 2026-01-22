@@ -5,8 +5,7 @@ from __future__ import annotations
 """
 emoji-string-test.py
 
-This is the original code from the bug report
-https://bugreports.qt.io/browse/PYSIDE-336
+This is the original code from the bug report PYSIDE-336
 
 The only changes are the emoji constant creation which avoids unicode in the
 source itself, utf8 encoding in line 1 and a short plausibility test to make

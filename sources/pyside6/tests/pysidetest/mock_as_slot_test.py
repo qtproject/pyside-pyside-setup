@@ -3,8 +3,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 from __future__ import annotations
 
-""" PYSIDE-1755: https://bugreports.qt.io/projects/PYSIDE/issues/PYSIDE-1755
-    Tests that a unittest.mock.MagicMock() can be used as a slot for quick
+""" PYSIDE-1755: Tests that a unittest.mock.MagicMock() can be used as a slot for quick
     prototyping. """
 
 import os

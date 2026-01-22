@@ -18,7 +18,7 @@ You can find more information about the PySide6 module API in the
 [official Qt for Python documentation](https://doc.qt.io/qtforpython/).
 
 If you come across any issue, please file a bug report at our
-[JIRA tracker](https://bugreports.qt.io/projects/PYSIDE) following
+[JIRA tracker](https://qt-project.atlassian.net/browse/PYSIDE) following
 our [guidelines](https://wiki.qt.io/Qt_for_Python/Reporting_Bugs).
 
 ### Community

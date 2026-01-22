@@ -5,8 +5,7 @@ from __future__ import annotations
 '''
 Unit tests for attribute cache in Python 3
 
-This is the original code from the bug report
-https://bugreports.qt.io/browse/PYSIDE-60
+This is the original code from the bug report PYSIDE-60
 '''
 
 import os

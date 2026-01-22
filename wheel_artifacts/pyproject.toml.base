@@ -48,7 +48,7 @@ Homepage = "https://pyside.org"
 Documentation = "https://doc.qt.io/qtforpython"
 Repository = "https://code.qt.io/cgit/pyside/pyside-setup.git/"
 Changelog = "https://code.qt.io/cgit/pyside/pyside-setup.git/tree/doc/changelogs"
-Tracker = "https://bugreports.qt.io/projects/PYSIDE"
+Tracker = "https://qt-project.atlassian.net/browse/PYSIDE"
 
 # PROJECT_SCRIPTS
 

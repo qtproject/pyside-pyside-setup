@@ -667,8 +667,7 @@ class PysideBuild(_build, CommandMixin, BuildInfoCollectorMixin):
 
         # Use Legacy OpenGL to avoid issues on systems like Ubuntu 20.04
         # which require to manually install the libraries which
-        # were previously linked to the QtGui module in 6.1
-        # https://bugreports.qt.io/browse/QTBUG-89754
+        # were previously linked to the QtGui module in 6.1 (QTBUG-89754).
         cmake_cmd.append("-DOpenGL_GL_PREFERENCE=LEGACY")
 
         if OPTION['AVOID_PROTECTED_HACK']:

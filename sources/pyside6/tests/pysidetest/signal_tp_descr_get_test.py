@@ -9,8 +9,7 @@ PYSIDE-68: Test that signals have a `__get__` function after all.
 We supply a `tp_descr_get` slot for the signal type.
 That creates the `__get__` method via `PyType_Ready`.
 
-The original test script was converted to a unittest.
-See https://bugreports.qt.io/browse/PYSIDE-68 .
+The original test script was converted to a unittest (see PYSIDE-68).
 
 Created:    16 May '12 21:25
 Updated:    17 Sep '20 17:02

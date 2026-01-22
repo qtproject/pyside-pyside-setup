@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 """
-This is the example from https://bugreports.qt.io/browse/PYSIDE-772
-with no interaction as a unittest.
+This is the example from PYSIDE-772 with no interaction as a unittest.
 """
 
 import os

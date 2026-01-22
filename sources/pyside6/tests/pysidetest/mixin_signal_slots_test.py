@@ -3,8 +3,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 from __future__ import annotations
 
-''' PYSIDE-315: https://bugreports.qt.io/browse/PYSIDE-315
-    Test that all signals and slots of a class (including any mixin classes)
+''' PYSIDE-315: Test that all signals and slots of a class (including any mixin classes)
     are registered at type parsing time. Also test that the signal and slot
     indices do not change after signal connection or emission. '''
 

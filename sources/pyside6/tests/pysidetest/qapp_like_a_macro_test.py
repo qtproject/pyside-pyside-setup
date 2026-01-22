@@ -52,7 +52,7 @@ class qAppMacroTest(unittest.TestCase):
 
     def test_1093(self):
         # Test that without creating a QApplication staticMetaObject still exists.
-        # Please see https://bugreports.qt.io/browse/PYSIDE-1093 for explanation.
+        # Please see PYSIDE-1093 for explanation.
         # Note: This test must run first, otherwise we would be mislead!
         assert self._test_1093_is_first
         from PySide6 import QtCore

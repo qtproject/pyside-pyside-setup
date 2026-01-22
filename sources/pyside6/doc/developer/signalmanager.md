@@ -39,10 +39,10 @@ kept for `self`.
 
 ## Issues
 
-- [Receiver Leak PYSIDE-1057](https://bugreports.qt.io/browse/PYSIDE-1057)
-- [Partial function receiver Leak PYSIDE-2793](https://bugreports.qt.io/browse/PYSIDE-2793)
+- [Receiver Leak PYSIDE-1057](https://qt-project.atlassian.net/browse/PYSIDE-1057)
+- [Partial function receiver Leak PYSIDE-2793](https://qt-project.atlassian.net/browse/PYSIDE-2793)
 - Various issues related to threading and object deletion, solved by workarounds
-  ([PYSIDE-2646](https://bugreports.qt.io/browse/PYSIDE-2646))
+  ([PYSIDE-2646](https://qt-project.atlassian.net/browse/PYSIDE-2646))
 - Complicated code, hard to maintain
 - Disconnect does not work for `QObject.connect()` with context argument; it also
   leaks methods
