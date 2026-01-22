@@ -222,7 +222,7 @@ class PaginatedResource(AbstractResource):
     @Slot("QVariantMap", int)
     def update(self, data, id):
         request = self.m_api.createRequest(f"{self.m_path}/{id}")
-        self.m_manager.put(request, self, self.updateReply)
+        self.m_manager.put(request, data, self, self.updateReply)
 
     def updateReply(self, reply):
         if reply.isSuccess():
