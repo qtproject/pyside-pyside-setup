@@ -8,10 +8,10 @@ Due to the nature of Qt, :class:`~PySide6.QtCore.QObject`\s
 require a way to communicate, and that's the reason for this mechanism to
 be a **central feature of Qt**.
 
-In simple terms, you can understand **Signal and Slots** in the same way you
+
+In simple terms, you can understand **Signals and Slots** in the same way you
 interact with the lights in your house. When you move the light switch
-(signal) you get a result which may be that your light bulbs are switched
-on/off (slot).
+(signal), the result is that your light bulbs are switched on or off (slot).
 
 While developing interfaces, you can get a real example by the effect of
 clicking a button: the 'click' will be the signal, and the slot will be what
@@ -51,9 +51,9 @@ has a ``clicked()`` signal and :class:`~PySide6.QtWidgets.QLineEdit`
 (single line input field) has a slot named ``clear()``.
 So, a text input field with a button to clear the text
 could be implemented by placing a :class:`~PySide6.QtWidgets.QToolButton`
-to the right of the ``QLineEdit`` and connecting its ``clicked()`` signal to the slot
-``clear()``. This is done using the :meth:`~PySide6.QtCore.Signal.connect`
-method of the signal:
+to the right of the ``QLineEdit`` and connecting its ``clicked()`` signal to
+the slot ``clear()``. This is done using the
+:meth:`~PySide6.QtCore.Signal.connect` method of the signal:
 
 .. code-block:: python
 
@@ -130,7 +130,6 @@ as the variable that it is being assigned to.
 
 .. code-block:: python
 
-    # TODO
     signal5 = Signal(int, name='rangeChanged')
     # ...
     rangeChanged.emit(...)
@@ -179,8 +178,8 @@ due to the method being added to the ``QMetaObject`` when creating the connectio
 This is particularly important for ``QObject`` classes registered with QML, where
 missing decorators can introduce bugs.
 
-Missing decorators can be diagnosed by setting activating warnings of the
-logging category ``qt.pyside.libpyside``; for example by setting the
+Missing decorators can be diagnosed by activating warnings of the
+logging category ``qt.pyside.libpyside``; for example, by setting the
 environment variable:
 
 .. code-block:: bash
@@ -211,9 +210,10 @@ main thread.
 Overloading Signals and Slots with Different Types
 --------------------------------------------------
 
-It is actually possible to use signals and slots of the same name with different
-parameter type lists. This is legacy from Qt 5 and not recommended for new code.
-In Qt 6, signals have distinct names for different types.
+
+It is possible to use signals and slots of the same name with different
+parameter type lists. This is legacy from Qt 5 and is not recommended for new code.
+In Qt 6, signals should have distinct names for different types.
 
 The following example uses two handlers for a Signal and a Slot to showcase
 the different functionality.
@@ -272,9 +272,10 @@ strings passed through the ``SIGNAL()`` and/or ``SLOT()`` functions:
     button.connect(SIGNAL("clicked(Qt::MouseButton)"),
                    action_handler, SLOT("action1(Qt::MouseButton)"))
 
+
 This is not normally recommended; it is only needed
 for a few cases where signals are only accessible via ``QMetaObject``
-(``QAxObject``, ``QAxWidget``, ``QDBusInterface`` or ``QWizardPage::registerField()``):
+(``QAxObject``, ``QAxWidget``, ``QDBusInterface``, or ``QWizardPage::registerField()``):
 
 .. code-block:: python
 
