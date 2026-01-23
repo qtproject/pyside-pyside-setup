@@ -2,11 +2,10 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
 from pathlib import Path
 import sys
-from PySide6.QtCore import QAbstractListModel, Qt, QUrl, QByteArray
+from PySide6.QtCore import QAbstractListModel, Qt, QByteArray
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView
 from PySide6.QtQml import QmlElement, QmlSingleton
@@ -61,9 +60,8 @@ if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
     view = QQuickView()
     view.setResizeMode(QQuickView.ResizeMode.SizeRootObjectToView)
-
-    qml_file = os.fspath(Path(__file__).resolve().parent / 'view.qml')
-    view.setSource(QUrl.fromLocalFile(qml_file))
+    view.engine().addImportPath(Path(__file__).parent)
+    view.loadFromModule("UsingModel", "Main")
     if view.status() == QQuickView.Status.Error:
         sys.exit(-1)
     view.show()
