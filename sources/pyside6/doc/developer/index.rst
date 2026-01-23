@@ -16,6 +16,7 @@ Development Topics
    add_module.rst
    add_port_example.rst
    add_tool.rst
+   maintenance.md
    pythonversions.md
    documentation.rst
    adapt_qt.rst
