@@ -17,8 +17,6 @@ public:
 
     void testFunction1();
 
-    static constexpr auto TEST = QLatin1StringView("test");
-
 private Q_SLOTS:
     void slotCursorChanged();
     void slotRunScript();
