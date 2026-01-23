@@ -28,37 +28,24 @@ class Bridge(QObject):
             return "#a5d6a7"
         elif s.lower() == "blue":
             return "#90caf9"
-        else:
-            return "white"
+        return "white"
 
     @Slot(float, result=int)
     def getSize(self, s):
         size = int(s * 34)
-        if size <= 0:
-            return 1
-        else:
-            return size
+        return max(1, size)
 
     @Slot(str, result=bool)
     def getItalic(self, s):
-        if s.lower() == "italic":
-            return True
-        else:
-            return False
+        return s.lower() == "italic"
 
     @Slot(str, result=bool)
     def getBold(self, s):
-        if s.lower() == "bold":
-            return True
-        else:
-            return False
+        return s.lower() == "bold"
 
     @Slot(str, result=bool)
     def getUnderline(self, s):
-        if s.lower() == "underline":
-            return True
-        else:
-            return False
+        return s.lower() == "underline"
 
 
 if __name__ == '__main__':
@@ -66,10 +53,8 @@ if __name__ == '__main__':
     QQuickStyle.setStyle("Material")
     engine = QQmlApplicationEngine()
 
-    # Get the path of the current directory, and then add the name
-    # of the QML file, to load it.
-    qml_file = Path(__file__).parent / 'view.qml'
-    engine.load(qml_file)
+    engine.addImportPath(Path(__file__).parent)
+    engine.loadFromModule("TextProperties", "Main")
 
     if not engine.rootObjects():
         sys.exit(-1)
