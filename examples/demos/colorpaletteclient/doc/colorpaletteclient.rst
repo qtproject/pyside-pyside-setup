@@ -13,6 +13,7 @@ Application functionality
 -------------------------
 
 The example provides the following basic functionalities:
+
 * Select the server to communicate with
 * List users and colors
 * Login and logout users
@@ -25,7 +26,7 @@ At start the application presents the options for the color palette server to co
 with. The predefined options are:
 
 * ``https://reqres.in``, a publicly available REST API test service
-* A Qt-based REST API server example in ``QtHttpServer``
+* A `Qt-based REST API server C++ example`_ in the `QtHttpServer Module`_
 
 Once selected, the RESTful API client issues a test HTTP GET to the color API
 to check if the service is accessible.
@@ -70,10 +71,14 @@ authorization token.
 
 The actual communication is done with a rest access manager which implements
 some convenience functionality to deal specifically with HTTP REST APIs and
-effectively deals with sending and receiving the ``QNetworkRequest`` and
-``QNetworkReply`` as needed.
+effectively deals with sending and receiving the
+:class:`~PySide6.QtNetwork.QNetworkRequest` and
+:class:`~PySide6.QtNetwork.QNetworkReply` as needed.
 
 .. image:: colorpaletteclient.webp
-   :width: 90%
    :align: center
    :alt: RESTful API client
+
+.. _`Qt-based REST API server C++ example`: https://doc.qt.io/qt-6/qthttpserver-colorpalette-example.html
+.. _`QtHttpServer Module`: https://doc.qt.io/qt-6/qthttpserver-index.html
+.. _`QML views`: https://doc.qt.io/qt-6/qml-qtquick-listview.html
