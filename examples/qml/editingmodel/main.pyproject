@@ -1,3 +1,4 @@
 {
-    "files": ["model.py","main.qml","main.py","MovingRectangle.qml"]
+    "files": ["main.py", "model.py", "EditingModel/Main.qml",
+              "EditingModel/MovingRectangle.qml", "EditingModel/qmldir"]
 }

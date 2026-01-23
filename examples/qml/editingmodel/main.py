@@ -5,7 +5,6 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QUrl
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
@@ -14,8 +13,8 @@ from model import BaseModel  # noqa: F401
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
-    qml_file = Path(__file__).parent / "main.qml"
-    engine.load(QUrl.fromLocalFile(qml_file))
+    engine.addImportPath(Path(__file__).parent)
+    engine.loadFromModule("EditingModel", "Main")
     if not engine.rootObjects():
         sys.exit(-1)
 

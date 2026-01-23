@@ -264,6 +264,7 @@ class TestPySide6DeployQml(DeployTestBase):
                             "xcbglintegrations"]
         # Plugins that needs to be passed to Nuitka
         plugins_nuitka = "networkinformation,platforminputcontexts,qml,qmltooling"
+        data_dir = str(self.temp_example_qml / "EditingModel")
         self.expected_run_cmd = (
             f"{sys.executable} -m nuitka {str(self.main_file)} --follow-imports"
             f" --enable-plugin=pyside6 --output-dir={str(self.deployment_files)} --quiet"
@@ -271,9 +272,7 @@ class TestPySide6DeployQml(DeployTestBase):
             f" {self.dlls_ignore_nuitka}"
             " --noinclude-dlls=*/qml/QtQuickEffectMaker/*"
             f" --include-qt-plugins={plugins_nuitka}"
-            f" --include-data-files={str(self.temp_example_qml / self.first_qml_file)}="
-            f"./main.qml --include-data-files="
-            f"{str(self.temp_example_qml / self.second_qml_file)}=./MovingRectangle.qml"
+            f" --include-data-dir={data_dir}=./EditingModel"
         )
 
         if sys.platform != "win32":
@@ -318,8 +317,8 @@ class TestPySide6DeployQml(DeployTestBase):
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
         self.assertEqual(config_obj.get_value("python", "packages"),
                          "Nuitka==2.7.11")
-        self.assertEqual(config_obj.get_value("qt", "qml_files"),
-                         "MovingRectangle.qml,main.qml")
+        expected_qml_files = f"EditingModel{os.sep}Main.qml,EditingModel{os.sep}MovingRectangle.qml"
+        self.assertEqual(config_obj.get_value("qt", "qml_files"), expected_qml_files)
         equ_base = "--quiet --noinclude-qt-translations"
         equ_value = equ_base + " --static-libpython=no" if is_pyenv_python() else equ_base
         self.assertEqual(config_obj.get_value("nuitka", "extra_args"), equ_value)
@@ -500,7 +499,7 @@ class TestLongCommand(DeployTestBase):
         with open(self.temp_example_qml / "deploy_main.py", "r") as file:
             # check if 516 lines start with # nuitka-project:
             self.assertEqual(len([line for line in file.readlines()
-                                  if line.startswith("# nuitka-project:")]), 516)
+                                  if line.startswith("# nuitka-project:")]), 517)
 
 
 @unittest.skipIf(sys.platform == "darwin" and int(platform.mac_ver()[0].split('.')[0]) <= 11,
