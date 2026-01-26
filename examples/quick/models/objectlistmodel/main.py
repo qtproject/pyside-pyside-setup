@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import sys
-from PySide6.QtCore import QObject, QUrl, Property, Signal
+from PySide6.QtCore import QObject, Property, Signal
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView
 
@@ -54,7 +54,8 @@ if __name__ == '__main__':
     view.setInitialProperties({"model": dataList})
 
     qml_file = Path(__file__).parent / "view.qml"
-    view.setSource(QUrl.fromLocalFile(qml_file))
+    view.engine().addImportPath(Path(__file__).parent)
+    view.loadFromModule("ObjectListModel", "Main")
     view.show()
 
     r = app.exec()
