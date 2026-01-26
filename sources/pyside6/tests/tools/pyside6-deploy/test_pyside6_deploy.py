@@ -383,13 +383,13 @@ class TestPySide6DeployWebEngine(DeployTestBase):
         # Plugins that needs to be passed to Nuitka
         plugins_nuitka = "networkinformation,platforminputcontexts,qml,qmltooling"
         qml_files = [
-            "ApplicationRoot.qml",
-            "BrowserDialog.qml",
-            "BrowserWindow.qml",
-            "DownloadView.qml",
-            "FindBar.qml",
-            "FullScreenNotification.qml",
-            "WebAuthDialog.qml"
+            f"BrowserUtils{os.sep}ApplicationRoot.qml",
+            f"BrowserUtils{os.sep}BrowserDialog.qml",
+            f"BrowserUtils{os.sep}BrowserWindow.qml",
+            f"BrowserUtils{os.sep}DownloadView.qml",
+            f"BrowserUtils{os.sep}FindBar.qml",
+            f"BrowserUtils{os.sep}FullScreenNotification.qml",
+            f"BrowserUtils{os.sep}WebAuthDialog.qml"
         ]
         data_files_cmd = " ".join(
             [

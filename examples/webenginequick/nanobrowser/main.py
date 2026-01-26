@@ -4,7 +4,6 @@ from __future__ import annotations
 
 """PySide6 WebEngine QtQuick 2 Example"""
 
-import os
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 from pathlib import Path
@@ -61,8 +60,8 @@ if __name__ == '__main__':
         app_args.extend(["--webEngineArgs", "--single-process"])
     app = QGuiApplication(app_args)
     engine = QQmlApplicationEngine()
-    qml_file = os.fspath(Path(__file__).resolve().parent / 'ApplicationRoot.qml')
-    engine.load(QUrl.fromLocalFile(qml_file))
+    engine.addImportPath(Path(__file__).parent)
+    engine.loadFromModule("BrowserUtils", "ApplicationRoot")
     if not engine.rootObjects():
         sys.exit(-1)
 
