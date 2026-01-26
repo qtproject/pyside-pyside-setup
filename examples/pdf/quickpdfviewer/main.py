@@ -40,8 +40,8 @@ if __name__ == "__main__":
 
     engine = QQmlApplicationEngine()
     engine.setInitialProperties({"source": url})
-
-    engine.load(QUrl.fromLocalFile(os.fspath(dir / "viewer.qml")))
+    engine.addImportPath(Path(__file__).parent)
+    engine.loadFromModule("SinglePageModule", "Viewer")
     if not engine.rootObjects():
         sys.exit(-1)
 

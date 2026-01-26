@@ -1,3 +1,4 @@
 {
-    "files": ["main.py", "viewer.qml", "viewer.qrc", "resources/test.pdf"]
+    "files": ["main.py", "SinglePageModule/Viewer.qml", "SinglePageModule/qmldir",
+              "viewer.qrc", "resources/test.pdf"]
 }
