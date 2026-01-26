@@ -586,7 +586,8 @@ def module_QtQuick() -> ModuleData:
         "libQt6QuickTimeline",
         "libQt6QuickTimelineBlendTrees",
         "libQt6QuickVectorImage",
-        "libQt6QuickVectorImageGenerator"
+        "libQt6QuickVectorImageGenerator",
+        "libQt6QuickVectorImageHelpers"
     ]
 
     data.qtlib.extend(_qtlib)
