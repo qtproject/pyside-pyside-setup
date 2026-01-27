@@ -26,6 +26,7 @@
                      snippet="qhttpserver-addafterrequesthandler"/>
       </add-function>
   </object-type>
+  <value-type name="QHttpServerConfiguration" since="6.9"/>
   <object-type name="QHttpServerResponder">
       <enum-type name="StatusCode"/>
   </object-type>

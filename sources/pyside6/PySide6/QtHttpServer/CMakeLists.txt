@@ -5,6 +5,7 @@ project(QtHttpServer)
 
 set(QtHttpServer_SRC
     ${QtHttpServer_GEN_DIR}/qabstracthttpserver_wrapper.cpp
+    ${QtHttpServer_GEN_DIR}/qhttpserverconfiguration_wrapper.cpp
     ${QtHttpServer_GEN_DIR}/qfuturehttpserverresponse_wrapper.cpp
     ${QtHttpServer_GEN_DIR}/qhttpserver_wrapper.cpp
     ${QtHttpServer_GEN_DIR}/qhttpserverresponder_wrapper.cpp
