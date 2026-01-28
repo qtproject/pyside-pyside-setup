@@ -378,6 +378,7 @@ instructions:
 
     - type: ExecuteCommand
       command: "sudo subscription-manager refresh"
+      ignoreExitCode: true
       maxTimeInSeconds: 6000
       maxTimeBetweenOutput: 1200
       enable_if:
