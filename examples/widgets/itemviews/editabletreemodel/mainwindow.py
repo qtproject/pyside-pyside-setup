@@ -106,8 +106,7 @@ class MainWindow(QMainWindow):
         model: QAbstractItemModel = self.view.model()
         column: int = self.view.selectionModel().currentIndex().column()
 
-        changed: bool = model.insertColumn(column + 1)
-        if changed:
+        if model.insertColumn(column + 1):
             model.setHeaderData(column + 1, Qt.Orientation.Horizontal, "[No header]",
                                 Qt.ItemDataRole.EditRole)
 

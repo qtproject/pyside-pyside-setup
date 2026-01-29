@@ -341,9 +341,7 @@ class SpreadSheet(QMainWindow):
             col_first = self._table.column(first)
             col_last = self._table.column(last)
 
-        current = self._table.currentItem()
-
-        if current:
+        if current := self._table.currentItem():
             row_cur = self._table.row(current)
             col_cur = self._table.column(current)
 
@@ -364,8 +362,7 @@ class SpreadSheet(QMainWindow):
         cell2 = "C2"
         out = "C3"
 
-        current = self._table.currentItem()
-        if current:
+        if self._table.currentItem():
             out = SpreadSheetItem.encode_pos(self._table.currentRow(), self._table.currentColumn())
 
         if self.run_input_dialog(title, "Cell 1", "Cell 2", op, "Output to:", cell1, cell2, out):

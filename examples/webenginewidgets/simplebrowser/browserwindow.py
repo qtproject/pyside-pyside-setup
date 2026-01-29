@@ -204,20 +204,17 @@ class BrowserWindow(QMainWindow):
 
     @Slot()
     def _zoom_in(self):
-        tab = self.current_tab()
-        if tab:
+        if tab := self.current_tab():
             tab.setZoomFactor(tab.zoomFactor() + 0.1)
 
     @Slot()
     def _zoom_out(self):
-        tab = self.current_tab()
-        if tab:
+        if tab := self.current_tab():
             tab.setZoomFactor(tab.zoomFactor() - 0.1)
 
     @Slot()
     def _reset_zoom(self):
-        tab = self.current_tab()
-        if tab:
+        if tab := self.current_tab():
             tab.setZoomFactor(1)
 
     @Slot()
@@ -476,8 +473,7 @@ class BrowserWindow(QMainWindow):
             self._progress_bar.setValue(0)
 
     def handle_show_window_triggered(self):
-        action = self.sender()
-        if action:
+        if action := self.sender():
             offset = action.data()
             window = self._browser.windows()[offset]
             window.activateWindow()

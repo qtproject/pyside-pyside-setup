@@ -133,8 +133,7 @@ class ListChooser(QGroupBox):
 
     @Slot()
     def _add(self):
-        new_item = self._create_new_item()
-        if new_item:
+        if new_item := self._create_new_item():
             self._list.addItem(new_item)
 
     def _create_new_item(self):

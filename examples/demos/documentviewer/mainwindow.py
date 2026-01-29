@@ -52,8 +52,7 @@ class MainWindow(QMainWindow):
         menu = RecentFileMenu(self, self._recentFiles)
         self.ui.actionRecent.setMenu(menu)
         menu.fileOpened.connect(self.openFile)
-        button = self.ui.mainToolBar.widgetForAction(self.ui.actionRecent)
-        if button:
+        if button := self.ui.mainToolBar.widgetForAction(self.ui.actionRecent):
             self.ui.actionRecent.triggered.connect(button.showMenu)
 
     @Slot(int)

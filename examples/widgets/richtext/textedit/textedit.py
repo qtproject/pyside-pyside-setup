@@ -188,8 +188,7 @@ class TextEdit(QMainWindow):
         self._action_paste.setShortcut(QKeySequence.StandardKey.Paste)
         tb.addAction(self._action_paste)
 
-        md = QGuiApplication.clipboard().mimeData()
-        if md:
+        if md := QGuiApplication.clipboard().mimeData():
             self._action_paste.setEnabled(md.hasText())
 
     def setup_text_actions(self):
@@ -648,9 +647,8 @@ class TextEdit(QMainWindow):
     @Slot()
     def cursor_position_changed(self):
         self.alignment_changed(self._text_edit.alignment())
-        list = self._text_edit.textCursor().currentList()
-        if list:
-            style = list.format().style()
+        if current_list := self._text_edit.textCursor().currentList():
+            style = current_list.format().style()
             if style == QTextListFormat.ListDisc:
                 self._combo_style.setCurrentIndex(1)
             elif style == QTextListFormat.ListCircle:

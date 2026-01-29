@@ -44,8 +44,7 @@ if __name__ == '__main__':
 
     src_dir = Path(__file__).resolve().parent
     try:
-        translation = gettext.translation('example', localedir=src_dir / 'locales')
-        if translation:
+        if translation := gettext.translation('example', localedir=src_dir / 'locales'):
             translation.install()
             _ = translation.gettext
             ngettext = translation.ngettext

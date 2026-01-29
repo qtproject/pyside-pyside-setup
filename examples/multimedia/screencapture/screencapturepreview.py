@@ -90,8 +90,7 @@ class ScreenCapturePreview(QWidget):
     @Slot(QItemSelection)
     def on_current_screen_selection_changed(self, selection):
         self.clear_error_string()
-        indexes = selection.indexes()
-        if indexes:
+        if indexes := selection.indexes():
             self._screen_capture.setScreen(self._screen_list_model.screen(indexes[0]))
             self.update_active(SourceType.Screen, self.is_active())
             self._window_list_view.clearSelection()
@@ -101,8 +100,7 @@ class ScreenCapturePreview(QWidget):
     @Slot(QItemSelection)
     def on_current_window_selection_changed(self, selection):
         self.clear_error_string()
-        indexes = selection.indexes()
-        if indexes:
+        if indexes := selection.indexes():
             window = self._window_list_model.window(indexes[0])
             if not window.isValid():
                 m = "The window is no longer valid. Update the list of windows?"

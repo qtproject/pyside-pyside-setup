@@ -578,8 +578,7 @@ class SettingsTree(QTreeWidget):
             else:
                 # Try to convert to type unless a QByteArray is received
                 if isinstance(value, str):
-                    value_type = self._type_checker.type_from_text(value)
-                    if value_type:
+                    if value_type := self._type_checker.type_from_text(value):
                         value = self.settings.value(key, type=value_type)
                 child.setText(1, value.__class__.__name__)
             child.setText(2, VariantDelegate.display_text(value))
@@ -666,8 +665,7 @@ class VariantDelegate(QItemDelegate):
         else:
             editor = QLineEdit(parent)
             editor.setFrame(False)
-            validator = self._type_checker.create_validator(original_value, editor)
-            if validator:
+            if validator := self._type_checker.create_validator(original_value, editor):
                 editor.setValidator(validator)
         return editor
 

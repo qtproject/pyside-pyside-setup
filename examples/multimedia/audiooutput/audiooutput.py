@@ -212,8 +212,7 @@ class AudioTest(QMainWindow):
     def pull_timer_expired(self):
         if self.m_audioSink is not None and self.m_audioSink.state() != QtAudio.State.StoppedState:
             bytes_free = self.m_audioSink.bytesFree()
-            data = self.m_generator.read(bytes_free)
-            if data:
+            if data := self.m_generator.read(bytes_free):
                 self.m_output.write(data)
 
     @Slot()

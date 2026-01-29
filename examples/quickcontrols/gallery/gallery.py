@@ -29,8 +29,7 @@ if __name__ == "__main__":
 
     settings = QSettings()
     if not os.environ.get("QT_QUICK_CONTROLS_STYLE"):
-        style_name = settings.value("style")
-        if style_name:
+        if style_name := settings.value("style"):
             QQuickStyle.setStyle(style_name)
 
     engine = QQmlApplicationEngine()

@@ -21,8 +21,7 @@ if __name__ == '__main__':
     component = QQmlComponent(engine)
     component.loadFromModule("People", "Main")
 
-    person = component.create()
-    if person:
+    if person := component.create():
         print(f"The person's name is {person.name}")
         print(f"They wear a {person.shoe_size} sized shoe")
     else:

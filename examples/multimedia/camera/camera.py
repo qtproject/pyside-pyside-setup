@@ -344,8 +344,7 @@ class Camera(QMainWindow):
     def saveMetaData(self):
         data = QMediaMetaData()
         for i in range(0, QMediaMetaData.NumMetaData):
-            val = self.m_metaDataDialog.m_metaDataFields[i].text()
-            if val:
+            if val := self.m_metaDataDialog.m_metaDataFields[i].text():
                 key = QMediaMetaData.Key(i)
                 if key == QMediaMetaData.Key.CoverArtImage:
                     cover_art = QImage(val)

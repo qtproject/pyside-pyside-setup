@@ -22,8 +22,7 @@ if __name__ == '__main__':
     component = QQmlComponent(engine)
     component.loadFromModule("People", "Main")
 
-    party = component.create()
-    if party:
+    if party := component.create():
         print(f"{party.host} is having a birthday!\nThey are inviting:")
         for g in range(party.guestCount()):
             name = party.guest(g).name

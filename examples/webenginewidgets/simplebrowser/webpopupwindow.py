@@ -46,8 +46,7 @@ class WebPopupWindow(QWidget):
         return self._view
 
     def handle_geometry_change_requested(self, newGeometry):
-        window = self.windowHandle()
-        if window:
+        if window := self.windowHandle():
             self.setGeometry(newGeometry.marginsRemoved(window.frameMargins()))
         self.show()
         self._view.setFocus()

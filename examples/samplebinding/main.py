@@ -44,9 +44,8 @@ if __name__ == '__main__':
 
     truck.arrive()
     truck.printAvailableFlavors()
-    result = truck.deliver()
 
-    if result:
+    if result := truck.deliver():
         print("All the kids got some icecream!")
     else:
         print("Aww, someone didn't get the flavor they wanted...")

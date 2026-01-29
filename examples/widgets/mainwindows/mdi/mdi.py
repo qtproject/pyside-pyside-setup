@@ -165,8 +165,7 @@ class MainWindow(QMainWindow):
     def open(self):
         file_name, _ = QFileDialog.getOpenFileName(self)
         if file_name:
-            existing = self.find_mdi_child(file_name)
-            if existing:
+            if existing := self.find_mdi_child(file_name):
                 self._mdi_area.setActiveSubWindow(existing)
             else:
                 self.load(file_name)
@@ -399,8 +398,7 @@ class MainWindow(QMainWindow):
         settings.setValue('geometry', self.saveGeometry())
 
     def active_mdi_child(self):
-        active_sub_window = self._mdi_area.activeSubWindow()
-        if active_sub_window:
+        if active_sub_window := self._mdi_area.activeSubWindow():
             return active_sub_window.widget()
         return None
 

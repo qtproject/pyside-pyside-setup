@@ -98,8 +98,7 @@ class MimeTypeModel(QStandardItemModel):
     @staticmethod
     def formatMimeTypeInfo(t: QMimeType):
         out = f"<html><head/><body><h3><center>{t.name()}</center></h3><br><table>"
-        aliases_str = ", ".join(t.aliases())
-        if aliases_str:
+        if aliases_str := ", ".join(t.aliases()):
             out += f"<tr><td>Aliases:</td><td> ({aliases_str})"
 
         out += (
@@ -108,23 +107,18 @@ class MimeTypeModel(QStandardItemModel):
             f"<tr><td>Generic icon name</td><td>{t.genericIconName()}</td></tr>"
         )
 
-        filter_str = t.filterString()
-        if filter_str:
+        if filter_str := t.filterString():
             out += f"<tr><td>Filter:</td><td>{filter_str}</td></tr>"
 
-        patterns_str = ", ".join(t.globPatterns())
-        if patterns_str:
+        if patterns_str := ", ".join(t.globPatterns()):
             out += f"<tr><td>Glob patterns:</td><td>{patterns_str}</td></tr>"
 
-        parentMimeTypes_str = ", ".join(t.parentMimeTypes())
-        if parentMimeTypes_str:
+        if parentMimeTypes_str := ", ".join(t.parentMimeTypes()):
             out += f"<tr><td>Parent types:</td><td>{parentMimeTypes_str}</td></tr>"
 
-        suffixes = t.suffixes()
-        if suffixes:
+        if suffixes := t.suffixes():
             out += "<tr><td>Suffixes:</td><td>"
-            preferredSuffix = t.preferredSuffix()
-            if preferredSuffix:
+            if preferredSuffix := t.preferredSuffix():
                 suffixes.remove(preferredSuffix)
                 out += f"<b>{preferredSuffix}</b> "
             suffixes_str = ", ".join(suffixes)

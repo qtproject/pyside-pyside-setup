@@ -196,8 +196,7 @@ class TabWidget(QTabWidget):
             self.close_tab(i)
 
     def close_tab(self, index):
-        view = self.web_view(index)
-        if view:
+        if view := self.web_view(index):
             has_focus = view.hasFocus()
             self.removeTab(index)
             if has_focus and self.count() > 0:
@@ -207,20 +206,17 @@ class TabWidget(QTabWidget):
             view.deleteLater()
 
     def clone_tab(self, index):
-        view = self.web_view(index)
-        if view:
+        if view := self.web_view(index):
             tab = self.create_tab()
             tab.setUrl(view.url())
 
     def set_url(self, url):
-        view = self.current_web_view()
-        if view:
+        if view := self.current_web_view():
             view.setUrl(url)
             view.setFocus()
 
     def trigger_web_page_action(self, action):
-        web_view = self.current_web_view()
-        if web_view:
+        if web_view := self.current_web_view():
             web_view.triggerPageAction(action)
             web_view.setFocus()
 
@@ -237,6 +233,5 @@ class TabWidget(QTabWidget):
         self.setCurrentIndex(next)
 
     def reload_tab(self, index):
-        view = self.web_view(index)
-        if view:
+        if view := self.web_view(index):
             view.reload()

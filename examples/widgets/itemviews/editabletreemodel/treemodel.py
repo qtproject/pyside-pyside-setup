@@ -59,8 +59,7 @@ class TreeModel(QAbstractItemModel):
         if not parent_item:
             return QModelIndex()
 
-        child_item: TreeItem = parent_item.child(row)
-        if child_item:
+        if child_item := parent_item.child(row):
             return self.createIndex(row, column, child_item)
         return QModelIndex()
 
@@ -89,8 +88,7 @@ class TreeModel(QAbstractItemModel):
         if not index.isValid():
             return QModelIndex()
 
-        child_item: TreeItem = self.get_item(index)
-        if child_item:
+        if child_item := self.get_item(index):
             parent_item: TreeItem = child_item.parent()
         else:
             parent_item = None

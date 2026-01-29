@@ -95,8 +95,7 @@ class ClassWizard(QWizard):
                 return class_str
             module = class_str[0:dot]
             class_name = class_str[dot + 1:]
-            class_list = module_imports.get(module)
-            if class_list:
+            if class_list := module_imports.get(module):
                 if class_name not in class_list:
                     class_list.append(class_name)
             else:
@@ -114,8 +113,7 @@ class ClassWizard(QWizard):
         if base_class:
             base_class = add_import(base_class)
 
-        signals = self.field('signals')
-        if signals:
+        if signals := self.field('signals'):
             add_import('PySide6.QtCore.Signal')
 
         property_types = []
@@ -130,8 +128,7 @@ class ClassWizard(QWizard):
         if property_names:
             add_import('PySide6.QtCore.Property')
 
-        signals = self.field('signals')
-        if signals:
+        if signals := self.field('signals'):
             add_import('PySide6.QtCore.Signal')
 
         property_types = []
@@ -160,8 +157,7 @@ class ClassWizard(QWizard):
         if base_class:
             block += f'({base_class})'
         block += ':\n'
-        description = self.field('description')
-        if description:
+        if description := self.field('description'):
             block += f'    """{description}"""\n'
 
         if signals:

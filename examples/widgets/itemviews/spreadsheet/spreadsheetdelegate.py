@@ -57,11 +57,9 @@ class SpreadSheetDelegate(QStyledItemDelegate):
 
     def set_model_data(self, editor: QWidget,
                        model: QAbstractItemModel, index: QModelIndex) -> None:
-        edit = QLineEdit(editor)
-        if edit:
+        if edit := QLineEdit(editor):
             model.setData(index, edit.text())
             return
 
-        dateEditor = QDateTimeEdit(editor)
-        if dateEditor:
+        if dateEditor := QDateTimeEdit(editor):
             model.setData(index, dateEditor.date().toString("dd/M/yyyy"))

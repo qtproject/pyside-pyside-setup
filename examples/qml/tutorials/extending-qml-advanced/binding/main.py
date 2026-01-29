@@ -37,8 +37,7 @@ if __name__ == "__main__":
         name = guest.name
 
         rsvp_date = None
-        attached = qmlAttachedPropertiesObject(BirthdayParty, guest, False)
-        if attached:
+        if attached := qmlAttachedPropertiesObject(BirthdayParty, guest, False):
             rsvp_date = attached.rsvp.toString()
         if rsvp_date:
             print(f"    {name} RSVP date: {rsvp_date}")

@@ -178,10 +178,7 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def on_color_clicked(self):
-
-        color = QColorDialog.getColor(self.color, self)
-
-        if color:
+        if color := QColorDialog.getColor(self.color, self):
             self.set_color(color)
 
     def set_color(self, color: QColor = Qt.GlobalColor.black):

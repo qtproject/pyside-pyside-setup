@@ -286,9 +286,8 @@ class Dialog(QDialog):
         options_value = self._font_options.value()
         options = QFontDialog.FontDialogOptions(options_value)
 
-        description = self._font_label.text()
         default_font = QFont()
-        if description:
+        if description := self._font_label.text():
             default_font.fromString(description)
 
         ok, font = QFontDialog.getFont(default_font, self, "Select Font", options)

@@ -75,8 +75,7 @@ class BasicLogin(AbstractResource):
         (json, error) = reply.readJson()
         if json and json.isObject():
             json_object = json.object()
-            token = json_object.get(tokenField)
-            if token:
+            if token := json_object.get(tokenField):
                 email = data[emailField]
                 token = json_object[tokenField]
                 id = data[idField]

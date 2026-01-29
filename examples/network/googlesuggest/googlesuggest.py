@@ -103,8 +103,7 @@ class GSuggestCompletion(QObject):
         self.timer.stop()
         self.popup.hide()
         self.editor.setFocus()
-        item = self.popup.currentItem()
-        if item:
+        if item := self.popup.currentItem():
             self.editor.setText(item.text(0))
             self.editor.returnPressed.emit()
 
