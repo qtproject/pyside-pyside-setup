@@ -8,9 +8,9 @@ import sys
 
 from PySide6.QtCore import (QDir, QPoint, QRect, QStandardPaths, Qt, QTimer,
                             Slot)
-from PySide6.QtGui import QGuiApplication, QImageWriter
+from PySide6.QtGui import QImageWriter
 from PySide6.QtWidgets import (QApplication, QCheckBox, QDialog, QFileDialog,
-                               QGridLayout, QGroupBox, QHBoxLayout, QLabel,
+                               QFrame, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
                                QMessageBox, QPushButton, QSizePolicy, QSpinBox,
                                QVBoxLayout, QWidget)
 
@@ -29,6 +29,7 @@ class Screenshot(QWidget):
         self.screenshot_label.setMinimumSize(
             screen_geometry.width() / 8, screen_geometry.height() / 8
         )
+        self.screenshot_label.setFrameShape(QFrame.Shape.Box)
 
         main_layout = QVBoxLayout(self)
         main_layout.addWidget(self.screenshot_label)
@@ -53,9 +54,9 @@ class Screenshot(QWidget):
         self.new_screenshot_button = QPushButton("New Screenshot", self)
         self.new_screenshot_button.clicked.connect(self.new_screenshot)
         buttons_layout.addWidget(self.new_screenshot_button)
-        save_screenshot_button = QPushButton("Save Screenshot", self)
-        save_screenshot_button.clicked.connect(self.save_screenshot)
-        buttons_layout.addWidget(save_screenshot_button)
+        self.save_screenshot_button = QPushButton("Save Screenshot", self)
+        self.save_screenshot_button.clicked.connect(self.save_screenshot)
+        buttons_layout.addWidget(self.save_screenshot_button)
         quit_screenshot_button = QPushButton("Quit", self)
         quit_screenshot_button.setShortcut(Qt.Modifier.CTRL | Qt.Key.Key_Q)
         quit_screenshot_button.clicked.connect(self.close)
@@ -70,10 +71,11 @@ class Screenshot(QWidget):
         self.resize(300, 200)
 
     def resizeEvent(self, event):
-        scaled_size = self.original_pixmap.size()
-        scaled_size.scale(self.screenshot_label.size(), Qt.AspectRatioMode.KeepAspectRatio)
-        if scaled_size != self.screenshot_label.pixmap().size():
-            self.update_screenshot_label()
+        if not self.original_pixmap.isNull():
+            scaled_size = self.original_pixmap.size()
+            scaled_size.scale(self.screenshot_label.size(), Qt.AspectRatioMode.KeepAspectRatio)
+            if scaled_size != self.screenshot_label.pixmap().size():
+                self.update_screenshot_label()
 
     @Slot()
     def new_screenshot(self):
@@ -115,17 +117,10 @@ class Screenshot(QWidget):
             )
 
     def shoot_screen(self):
-        screen = QGuiApplication.primaryScreen()
-        window = self.windowHandle()
-        if window:
-            screen = window.screen()
-        if not screen:
-            return
-
         if self.delay_spinbox.value() != 0:
             QApplication.beep()
 
-        self.original_pixmap = screen.grabWindow(0)
+        self.original_pixmap = self.screen().grabWindow(0)
         self.update_screenshot_label()
 
         self.new_screenshot_button.setDisabled(False)
@@ -141,13 +136,18 @@ class Screenshot(QWidget):
             self.hide_this_window_checkbox.setDisabled(False)
 
     def update_screenshot_label(self):
-        self.screenshot_label.setPixmap(
-            self.original_pixmap.scaled(
-                self.screenshot_label.size(),
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation,
+        if self.original_pixmap.isNull():
+            self.save_screenshot_button.setEnabled(False)
+            self.screenshot_label.setText(f'Grabbing "{self.screen().name()}" failed.')
+        else:
+            self.save_screenshot_button.setEnabled(True)
+            self.screenshot_label.setPixmap(
+                self.original_pixmap.scaled(
+                    self.screenshot_label.size(),
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                )
             )
-        )
 
 
 if __name__ == "__main__":
