@@ -128,11 +128,11 @@ ApplicationWindow {
                 }
             }
             Shortcut {
-                sequence: StandardKey.Find
+                sequences: [ StandardKey.Find ]
                 onActivated: searchField.forceActiveFocus()
             }
             Shortcut {
-                sequence: StandardKey.Quit
+                sequences: [ StandardKey.Quit ]
                 onActivated: Qt.quit()
             }
         }
