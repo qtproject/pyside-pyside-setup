@@ -9,16 +9,16 @@ interface. Usually, a QWidget is used to display data in most data-driven
 applications. Use a table view to display your data.
 
 The first step is to add a horizontal layout with just a
-class:`~PySide6.QtWidgets.QTableView`. You can create a QTableView object
-and place it inside a class:`~PySide6.QtWidgets.QHBoxLayout`. Once the
+:class:`~PySide6.QtWidgets.QTableView`. You can create a QTableView object
+and place it inside a :class:`~PySide6.QtWidgets.QHBoxLayout`. Once the
 QWidget is properly built, pass the object to the QMainWindow as its central
 widget.
 
 Remember that a QTableView needs a model to display information. In this case,
-you can use a class:`~PySide6.QtCore.QAbstractTableModel` instance.
+you can use a :class:`~PySide6.QtCore.QAbstractTableModel` instance.
 
 .. note:: You could also use the default item model that comes with a
-   class:`~PySide6.QtWidgets.QTableWidget` instead. QTableWidget is a
+   :class:`~PySide6.QtWidgets.QTableWidget` instead. QTableWidget is a
    convenience class that reduces your codebase considerably as you don't need
    to implement a data model. However, it's less flexible than a QTableView,
    as QTableWidget cannot be used with just any data. For more insight about

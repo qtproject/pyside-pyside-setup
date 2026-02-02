@@ -18,7 +18,7 @@ avoid faulty data or unexpected behavior.
 
 The Date column provides data in UTC format (for example,
 2018-12-11T21:14:44.682Z), so you could easily map it to a
-class:`~PySide6.QtCore.QDateTime` object
+:class:`~PySide6.QtCore.QDateTime` object
 defining the structure of the string. Additionally, you can adapt the time
 based on the timezone you are in, using QTimeZone.
 
