@@ -14,8 +14,9 @@ QML applications with Python code.
 .. note:: A set of Qt Quick-based UI controls is also available to create user interfaces.
           See :mod:`PySide6.QtQuickControls2` for more information.
 
-If you're new to QML and Qt Quick, please see :ref:`QML-Applications` for an
-introduction to writing QML applications.
+If you're new to QML and Qt Quick, please see
+:ref:`Getting started with Qt Quick applications <Getting-started-with-Qt-Quick-applications>`
+for an introduction to writing QML applications.
 
 Using the Module
 ^^^^^^^^^^^^^^^^
