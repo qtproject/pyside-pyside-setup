@@ -55,6 +55,8 @@ NoneType = type(None)
 # Later it will be bound to a QObject, within the QtCore types extensions
 PlaceholderType = TypeVar("PlaceholderType")
 
+_SlotFunc = TypeVar("_SlotFunc")
+
 _S = TypeVar("_S")
 
 MultiMap = typing.DefaultDict[str, typing.List[str]]

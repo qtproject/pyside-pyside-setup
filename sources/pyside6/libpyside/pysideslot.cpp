@@ -173,7 +173,7 @@ DataList *dataListFromCapsule(PyObject *capsule)
 
 static const char *Slot_SignatureStrings[] = {
     "PySide6.QtCore.Slot(self,*types:typing.Union[type,str],name:str=nullptr,result:typing.Union[type,str]=nullptr)",
-    "PySide6.QtCore.Slot.__call__(self,function:collections.abc.Callable[...,typing.Any])->typing.Any",
+    "PySide6.QtCore.Slot.__call__(self,function:_SlotFunc)->_SlotFunc",
     nullptr}; // Sentinel
 
 void init(PyObject *module)

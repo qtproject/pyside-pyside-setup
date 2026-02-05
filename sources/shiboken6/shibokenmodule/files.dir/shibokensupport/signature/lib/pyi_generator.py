@@ -166,6 +166,8 @@ class Formatter(Writer):
         # PlaceholderType fix to avoid the '~' from TypeVar.__repr__
         if "~PlaceholderType" in source:
             source = source.replace("~PlaceholderType", "PlaceholderType")
+        if "~_SlotFunc" in source:
+            source = source.replace("~_SlotFunc", "_SlotFunc")
         # Replace all "NoneType" strings by "None" which is a typing convention.
         return source.replace("NoneType", "None")
 
@@ -176,6 +178,9 @@ class Formatter(Writer):
         # PlaceholderType fix to avoid the '~' from TypeVar.__repr__
         if "~PlaceholderType" in source:
             source = source.replace("~PlaceholderType", "PlaceholderType")
+        if "~_SlotFunc" in source:
+            source = source.replace("~_SlotFunc", "_SlotFunc")
+
 
         while match := cls.opt_uni_searcher.search(source):
             start = match.start()
@@ -415,6 +420,8 @@ def generate_pyi(import_name, outpath, options):
                 if import_name == "PySide6.QtCore":
                     wr.print("PlaceholderType = typing.TypeVar(\"PlaceholderType\", "
                              "bound=PySide6.QtCore.QObject)")
+                    wr.print("_SlotFunc = typing.TypeVar(\"_SlotFunc\", "
+                             "bound=collections.abc.Callable[..., object])")
                 wr.print()
             else:
                 wr.print(line)
