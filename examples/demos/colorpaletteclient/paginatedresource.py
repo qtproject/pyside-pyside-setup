@@ -190,19 +190,30 @@ class PaginatedResource(AbstractResource):
         self.m_manager.get(request, self, self.refreshCurrentPageReply)
 
     def refreshCurrentPageReply(self, reply):
-        if not reply.isSuccess():
-            print("PaginatedResource: ", reply.errorString(), file=sys.stderr)
-        (json, error) = reply.readJson()
-        if json:
-            self.refreshRequestFinished(json)
+        error = ""
+        if reply.isSuccess():
+            (json, jsonError) = reply.readJson()
+            if json:
+                self.refreshRequestFinished(json)
+            else:
+                error = jsonError.errorString()
         else:
+            reply_error = reply.errorString()
+            error = reply_error if reply_error else "Network error"
+
+        if error:
+            url = reply.networkReply().url().toString()
+            print(f'PaginatedResource: request "{url}" failed: "{error}"', file=sys.stderr)
             self.refreshRequestFailed()
 
     def refreshRequestFinished(self, json):
         json_object = json.object()
-        self._populateModel(json_object["data"])
-        self.m_pages = int(json_object[totalPagesField])
-        self.m_currentPage = int(json_object[currentPageField])
+        data = json_object.get("data")
+        totalPages = json_object.get(totalPagesField)
+        currentPage = json_object.get(currentPageField)
+        self._populateModel(data if data else [])
+        self.m_pages = int(totalPages) if totalPages else 1
+        self.m_currentPage = int(currentPage) if currentPage else 1
         self.pageUpdated.emit()
         self.pagesUpdated.emit()
         self.dataUpdated.emit()
