@@ -24,7 +24,7 @@ icon =
 python_path =
 
 # Python packages to install
-packages = Nuitka==2.7.11
+packages = Nuitka==4.0
 
 # Buildozer: for deploying Android application
 android_packages = buildozer==1.5.0,cython==0.29.33

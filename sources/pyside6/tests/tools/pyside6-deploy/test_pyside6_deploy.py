@@ -172,7 +172,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
         self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
         self.assertEqual(config_obj.get_value("python", "packages"),
-                         "Nuitka==2.7.11")
+                         "Nuitka==4.0")
         self.assertEqual(config_obj.get_value("qt", "qml_files"), "")
         equ_base = "--quiet --noinclude-qt-translations"
         equ_value = equ_base + " --static-libpython=no" if is_pyenv_python() else equ_base
@@ -336,7 +336,7 @@ class TestPySide6DeployQml(DeployTestBase):
         self.assertEqual(config_obj.get_value("app", "project_dir"), ".")
         self.assertEqual(config_obj.get_value("app", "exec_directory"), ".")
         self.assertEqual(config_obj.get_value("python", "packages"),
-                         "Nuitka==2.7.11")
+                         "Nuitka==4.0")
         expected_qml_files = f"EditingModel{os.sep}Main.qml,EditingModel{os.sep}MovingRectangle.qml"
         self.assertEqual(config_obj.get_value("qt", "qml_files"), expected_qml_files)
         equ_base = "--quiet --noinclude-qt-translations"
