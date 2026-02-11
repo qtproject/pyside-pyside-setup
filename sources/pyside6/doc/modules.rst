@@ -16,8 +16,8 @@ Qt Modules Supported by Qt for Python
 
     .. grid-item-card:: :mod:`Qt Charts <PySide6.QtCharts>`
 
-        UI Components for displaying visually pleasing charts,
-        driven by static or dynamic data models.
+        Deprecated since Qt 6.10 in favor of :mod:`Qt Graphs <PySide6.QtGraphs>`.
+        UI Components for displaying charts.
 
     .. grid-item-card:: :mod:`Qt Concurrent <PySide6.QtConcurrent>`
 
@@ -30,7 +30,8 @@ Qt Modules Supported by Qt for Python
 
     .. grid-item-card:: :mod:`Qt Data Visualization <PySide6.QtDataVisualization>`
 
-        UI Components for creating stunning 3D data visualizations.
+        Deprecated since Qt 6.10 in favor of :mod:`Qt Graphs <PySide6.QtGraphs>`.
+        UI Components for creating 3D data visualizations.
 
     .. grid-item-card:: :mod:`Qt D-Bus <PySide6.QtDBus>`
 
