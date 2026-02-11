@@ -658,6 +658,7 @@
     <enum-type name="MaskMode"/>
     <enum-type name="MatchFlag" flags="MatchFlags"/>
     <enum-type name="Modifier" python-type="Flag"/>
+    <enum-type name="MotionPreference" since="6.12"/>
     <enum-type name="MouseButton" flags="MouseButtons"/>
     <enum-type name="MouseEventFlag" flags="MouseEventFlags"/>
     <enum-type name="MouseEventSource"/>
@@ -1773,6 +1774,7 @@
       <include file-name="pysidevariantutils.h" location="global"/>
       <include file-name="vector" location="global"/>
     </extra-includes>
+    <enum-type name="DropOperation" since="6.12"/>
     <enum-type name="RowCategory"/>
     <enum-type name="AutoConnectPolicy" since="6.11"/>
     <inject-code class="native" position="wrapper-declaration"
@@ -1835,6 +1837,7 @@
       <include file-name="QSize" location="global"/>
     </extra-includes>
     <enum-type name="Direction" flags="Directions" since="6.10"/>
+    <enum-type name="DataChangeRelevanceFlag" flags="DataChangeRelevanceFlags" since="6.12"/>
     <modify-function signature="setSourceModel(QAbstractItemModel*)">
       <modify-argument index="1">
         <reference-count action="set"/>
@@ -3687,6 +3690,7 @@
   </object-type>
   <object-type name="QStringConverter">
      <enum-type name="Encoding"/>
+     <enum-type name="FinalizeResultError" since="6.12"/>
   </object-type>
   <object-type name="QStringEncoder">
     <modify-function signature="appendToBuffer(char*,QStringView)" remove="all"/>

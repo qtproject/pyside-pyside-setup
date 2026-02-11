@@ -59,6 +59,7 @@
         <enum-type name="Flag" flags="Flags"/>
         <enum-type name="ItemChange"/>
         <enum-type name="TransformOrigin"/>
+        <enum-type name="MutabilityGroup" since="6.12"/>
         <modify-function signature="itemTransform(QQuickItem*,bool*)const" allow-thread="yes">
             <modify-argument index="2">
                 <remove-argument />

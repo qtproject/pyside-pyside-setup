@@ -49,6 +49,7 @@ ${QtNetwork_GEN_DIR}/qssl_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qsslcertificate_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qsslcertificateextension_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qsslellipticcurve_wrapper.cpp
+${QtNetwork_GEN_DIR}/qsslkeyingmaterial_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qtcpserver_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qtcpsocket_wrapper.cpp
 ${QtNetwork_GEN_DIR}/qudpsocket_wrapper.cpp

@@ -546,7 +546,9 @@ def init_PySide6_QtCore():
         "QVariantMap": typing.Dict[str, Variant],
         "std.chrono.seconds{5}" : ellipsis,
         "Internal.defaultTryTimeout": 5000,
-        "static_cast<int>(Internal.defaultTryTimeout.count())": 5000
+        "static_cast<int>(Internal.defaultTryTimeout.count())": 5000,
+        "sizeof(QRhiIndirectDrawCommand)": 16,
+        "sizeof(QRhiIndexedIndirectDrawCommand)": 20
     })
     from shibokensupport.signature.parser import using_snake_case
     if using_snake_case():

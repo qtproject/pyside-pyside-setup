@@ -27,6 +27,7 @@
     <object-type name="QPdfPageNavigator"/>
     <object-type name="QPdfSearchModel">
         <enum-type name="Role"/>
+        <enum-type name="Status" since="6.12"/>
     </object-type>
     <object-type name="QPdfLinkModel" since="6.6">
         <enum-type name="Role"/>

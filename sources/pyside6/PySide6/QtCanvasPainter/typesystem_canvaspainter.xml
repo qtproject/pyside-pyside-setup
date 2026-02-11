@@ -34,7 +34,7 @@
         <enum-type name="CompositeOperation"/>
         <enum-type name="WrapMode"/>
         <enum-type name="ImageFlag" flags="ImageFlags"/>
-        <enum-type name="RenderHint" flags="RenderHints"/>
+        <enum-type name="FillRule" since="6.12"/>
     </object-type>
     <object-type name="QCanvasPainterFactory"/>
     <value-type name="QCanvasPath"/>

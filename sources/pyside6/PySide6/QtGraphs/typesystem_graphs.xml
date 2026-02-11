@@ -159,6 +159,7 @@
     <enum-type name="AxisType"/>
   </object-type>
   <object-type name="QValueAxis"/>
+  <object-type name="QLogValueAxis" since="6.12"/>
   <object-type name="QBarSeries">
     <enum-type name="LabelsPosition"/>
     <enum-type name="BarsType" since="6.8"/>
@@ -197,6 +198,7 @@
       <extra-includes>
           <include file-name="pyside_numpy.h" location="global"/>
       </extra-includes>
+      <enum-type name="ValueMapping" since="6.12"/>
       <add-function signature="appendNp(PyArrayObject *@x@, PyArrayObject *@y@)">
           <inject-code file="../glue/qtcharts.cpp" snippet="qxyseries-appendnp-numpy-x-y"/>
           <inject-documentation format="target" mode="append">

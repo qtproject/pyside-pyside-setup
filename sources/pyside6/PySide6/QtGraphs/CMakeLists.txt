@@ -48,6 +48,7 @@ ${QtGraphs_GEN_DIR}/qbarseries_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qbarset_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qdatetimeaxis_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qlineseries_wrapper.cpp
+${QtGraphs_GEN_DIR}/qlogvalueaxis_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qpiemodelmapper_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qpieseries_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qpieslice_wrapper.cpp

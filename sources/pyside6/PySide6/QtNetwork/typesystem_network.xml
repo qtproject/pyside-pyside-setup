@@ -104,6 +104,8 @@
     <value-type name="QHttpPart"/>
     <value-type name="QHttp2Configuration"/>
 
+    <value-type name="QSslKeyingMaterial" since="6.12"/>
+
     <object-type name="QTcpServer">
         <modify-function signature="waitForNewConnection(int,bool*)" allow-thread="yes">
             <!-- FIXME removing default expression means user will always have to pass a value, but he wouldn't have to -->
