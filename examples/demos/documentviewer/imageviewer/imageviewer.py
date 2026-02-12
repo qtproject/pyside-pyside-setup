@@ -18,7 +18,7 @@ def imageFormats():
 
     for format_bytes in all_formats:
         format_str = bytes(format_bytes).decode("utf-8")  # Convert QByteArray to str
-        if format_str not in ["tif", "cur"]:  # Exclude duplicate/non-existent formats
+        if format_str not in ["pdf", "tif", "cur"]:  # Exclude duplicate/non-existent formats
             result.append(f"image/{format_str}")
 
     return result
