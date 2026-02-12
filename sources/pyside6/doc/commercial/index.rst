@@ -107,7 +107,8 @@ be installed into a virtual environment rather than the default interpreter.
 A ``requirements.txt`` file will be provided alongside the wheels, in order to
 simplify the installation step::
 
-   pip install -r /path/to/Qt/QtForPython/6.6.0/requirements.txt
+   cd /path/to/Qt/QtForPython/6.6.0/
+   pip install --no-index --find-links=. -r requirements.txt
 
 Complementary to the wheels, you will be able to download the sources
 as well.
