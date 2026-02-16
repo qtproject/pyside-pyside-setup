@@ -29,7 +29,7 @@ PySide2 applications.
 This project is available under the LGPLv3/GPLv3 and the `Qt commercial license`_.
 
 .. _Qt: https://doc.qt.io
-.. _`Qt commercial license`: https://www.qt.io/licensing/`
+.. _`Qt commercial license`: https://www.qt.io/licensing/
 
 Quick Start
 ===========
