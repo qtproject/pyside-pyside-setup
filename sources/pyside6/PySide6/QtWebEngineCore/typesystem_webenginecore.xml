@@ -52,7 +52,7 @@
     <enum-type name="SavePageFormat"/>
   </object-type>
 
-  <object-type name="QWebEngineExtensionInfo" since="6.10"/>
+  <value-type name="QWebEngineExtensionInfo" since="6.10"/>
   <object-type name="QWebEngineExtensionManager" since="6.10"/>
 
   <value-type name="QWebEngineFileSystemAccessRequest">
