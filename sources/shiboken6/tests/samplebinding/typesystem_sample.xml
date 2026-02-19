@@ -356,6 +356,7 @@
     <function signature="transmuteComplexIntoPoint(const Complex&amp;)" />
     <function signature="transmutePointIntoComplex(const Point&amp;)" />
     <function signature="sumComplexPair(std::pair&lt;Complex, Complex>)" />
+    <function signature="asciiCode(char)"/>
     <function signature="doubleUnsignedInt(unsigned int)" />
     <function signature="doubleLongLong(long long)" />
     <function signature="doubleUnsignedLongLong(unsigned long long)" />

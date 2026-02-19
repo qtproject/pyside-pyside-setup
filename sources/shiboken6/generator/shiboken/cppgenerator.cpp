@@ -3799,9 +3799,9 @@ void CppGenerator::writeNamedArgumentResolution(TextStream &s,
         const auto &type = arg.modifiedType();
         const QString pyArgName = pythonArgsAt(pyArgIndex);
         s << "\n|| ";
-        s << '(' << pyArgName << " != nullptr && !";
+        s << '(' << pyArgName << " != nullptr && !(";
         writeTypeCheck(s, type, pyArgName, isNumber(type.typeEntry()), {});
-        s << ')';
+        s << "))";
     }
     s << outdent << ") {\n" << indent
         << "Py_XINCREF(errInfo.object());\n" // PYSIDE-3133, 0 if conversion fails

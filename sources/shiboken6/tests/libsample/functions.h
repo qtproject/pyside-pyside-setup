@@ -47,6 +47,7 @@ LIBSAMPLE_API Event *returnNullValueTypePointer();
 LIBSAMPLE_API GlobalOverloadFuncEnum overloadedFunc(int val);
 LIBSAMPLE_API GlobalOverloadFuncEnum overloadedFunc(double val);
 
+LIBSAMPLE_API int asciiCode(char character = 'a');
 LIBSAMPLE_API unsigned int doubleUnsignedInt(unsigned int value);
 LIBSAMPLE_API long long doubleLongLong(long long value);
 LIBSAMPLE_API unsigned long long doubleUnsignedLongLong(unsigned long long value);

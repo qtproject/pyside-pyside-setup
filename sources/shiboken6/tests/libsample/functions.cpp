@@ -89,6 +89,11 @@ Event *returnNullValueTypePointer()
     return nullptr;
 }
 
+int asciiCode(char character)
+{
+    return character;
+}
+
 unsigned int doubleUnsignedInt(unsigned int value)
 {
     return value * 2;

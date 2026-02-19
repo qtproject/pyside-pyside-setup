@@ -14,7 +14,7 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from shiboken_paths import init_paths
 init_paths()
 
-from sample import SampleNamespace, Point, ObjectType, ObjectModel
+from sample import asciiCode, SampleNamespace, Point, ObjectType, ObjectModel
 
 
 class DecisorTest(unittest.TestCase):
@@ -47,6 +47,13 @@ class DecisorTest(unittest.TestCase):
                          ObjectModel.MethodCalled.ObjectModelCalled)
         self.assertNotEqual(ObjectModel.receivesObjectTypeFamily(objectmodel),
                             ObjectModel.MethodCalled.ObjectTypeCalled)
+
+    def testKeywordArguments(self):
+        '''PYSIDE-3281: Test the complex SbkChar type check expression in conjunction with
+           keyword arguments.'''
+        self.assertEqual(asciiCode("a"), ord('a'))  # Default parameter "a"
+        self.assertEqual(asciiCode("b"), ord('b'))  # Positional
+        self.assertEqual(asciiCode(character="b"), ord('b'))  # Keyword
 
 
 if __name__ == '__main__':
