@@ -436,38 +436,6 @@ void MetaObjectBuilder::removeProperty(int index)
 // become distorted if the class is modified after creation. In that
 // case, we give a warning.
 
-static QString msgMethodSortOrder(const QMetaObject *mo, int offendingIndex)
-{
-    QString result;
-    QTextStream str(&result);
-    str << "\n\nlibpyside: *** Sort Warning ***\nSignals and slots in QMetaObject '"
-        << mo->className()
-        << "' are not ordered correctly, this may lead to issues.\n";
-    const int methodOffset = mo->methodOffset();
-    for (int m = methodOffset, methodCount = mo->methodCount(); m < methodCount; ++m) {
-        const auto method = mo->method(m);
-        str << (m - methodOffset + 1) << (m > offendingIndex ? '!' : ' ')
-            << (method.methodType() == QMetaMethod::Signal ? " Signal " : " Slot   ")
-            << method.methodSignature() << '\n';
-    }
-    return result;
-}
-
-static void checkMethodOrder(const QMetaObject *metaObject)
-{
-    const int lastMethod = metaObject->methodCount() - 1;
-    for (int m = metaObject->methodOffset(); m < lastMethod; ++m)  {
-        if (metaObject->method(m).methodType() == QMetaMethod::Slot
-            && metaObject->method(m + 1).methodType() == QMetaMethod::Signal) {
-            const auto message = msgMethodSortOrder(metaObject, m);
-            PyErr_WarnEx(PyExc_RuntimeWarning, qPrintable(message), 0);
-            // Prevent a warning from being turned into an error. We cannot easily unwind.
-            PyErr_Clear();
-            break;
-        }
-    }
-}
-
 const QMetaObject *MetaObjectBuilderPrivate::update()
 {
     if (!m_builder)
@@ -478,7 +446,6 @@ const QMetaObject *MetaObjectBuilderPrivate::update()
         // which is only the update in "return builder->update()".
         Shiboken::GilState gil;
         m_cachedMetaObjects.push_back(m_builder->toMetaObject());
-        checkMethodOrder(m_cachedMetaObjects.back());
         m_dirty = false;
     }
     return m_cachedMetaObjects.back();
