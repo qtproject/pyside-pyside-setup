@@ -17,6 +17,7 @@ init_test_paths(False)
 from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import QTimer
+from PySide6.QtGui import QGuiApplication  # noqa: F401
 
 try:
     from PySide6.QtTextToSpeech import QTextToSpeech
