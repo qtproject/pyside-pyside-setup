@@ -909,6 +909,8 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
         const auto &basicName = type.basicPrimitiveName();
         if (AbstractMetaType::cppSignedIntTypes().contains(basicName)
             || AbstractMetaType::cppUnsignedIntTypes().contains(basicName)) {
+            if (basicName == charT)
+                return u"single character string"_s;
             return intT;
         }
         if (AbstractMetaType::cppFloatTypes().contains(basicName))
