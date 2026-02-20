@@ -1,0 +1,4 @@
+module GraphPrintingExample
+Main 1.0 Main.qml
+Graph2D 1.0 Graph2D.qml
+Graph3D 1.0 Graph3D.qml

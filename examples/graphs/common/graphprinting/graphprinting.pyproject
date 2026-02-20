@@ -1,0 +1,18 @@
+{
+    "files": ["main.py", "graphprinter.py",
+              "GraphPrintingExample/qmldir",
+              "GraphPrintingExample/Main.qml",
+              "GraphPrintingExample/Graph2D.qml",
+              "GraphPrintingExample/Graph3D.qml",
+              "GraphPrintingExample/Main.qml",
+              "GraphPrintingExample/box_left.svg",
+              "GraphPrintingExample/box_left_fill.svg",
+              "GraphPrintingExample/documents.svg",
+              "GraphPrintingExample/documents_fill.svg",
+              "GraphPrintingExample/flatten.svg",
+              "GraphPrintingExample/flatten_square_fill.svg",
+              "GraphPrintingExample/folder.svg",
+              "GraphPrintingExample/folder_fill.svg",
+              "GraphPrintingExample/print.svg",
+              "GraphPrintingExample/print_fill.svg"]
+}
