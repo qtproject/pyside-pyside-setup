@@ -46,7 +46,8 @@ HELP_EXTRA_MODULES = dedent("""
 
 # plugins to be removed from the --include-qt-plugins option because these plugins
 # don't exist in site-package under PySide6/Qt/plugins
-PLUGINS_TO_REMOVE = ["accessiblebridge", "platforms/darwin", "networkaccess", "scenegraph"]
+PLUGINS_TO_REMOVE = ["accessiblebridge", "platforms/darwin", "networkaccess",
+                     "scenegraph", "wayland-inputdevice-integration"]
 
 
 def get_all_pyside_modules():
