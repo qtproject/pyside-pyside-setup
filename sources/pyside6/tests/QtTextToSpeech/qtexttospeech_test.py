@@ -18,6 +18,7 @@ from helper.usesqapplication import UsesQApplication
 
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QGuiApplication  # noqa: F401
+from PySide6.QtMultimedia import QMediaDevices
 
 try:
     from PySide6.QtTextToSpeech import QTextToSpeech
@@ -34,6 +35,8 @@ class QTextToSpeechTestCase(UsesQApplication):
             engines[0], engines[1] = engines[1], engines[0]
         if not engines:
             print('No QTextToSpeech engines available')
+        elif not QMediaDevices.audioOutputs():
+            print('No audio outputs available')
         else:
             speech = QTextToSpeech(engines[0])
             speech.stateChanged.connect(self._slotStateChanged)
