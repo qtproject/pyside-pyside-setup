@@ -6320,7 +6320,7 @@ void CppGenerator::writeSetattroFunction(TextStream &s, AttroCheck attroCheck,
                                          const GeneratorContext &context) const
 {
     Q_ASSERT(!context.forSmartPointer());
-    const auto metaClass = context.metaClass();
+    const auto &metaClass = context.metaClass();
     writeSetattroDefinition(s, metaClass);
 
     // PYSIDE-1019: Switch tp_dict before doing tp_setattro.
