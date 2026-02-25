@@ -895,13 +895,8 @@ bool OverloadData::hasArgumentWithDefaultValue(const AbstractMetaFunctionCPtr &f
 AbstractMetaArgumentList OverloadData::getArgumentsWithDefaultValues(const AbstractMetaFunctionCPtr &func)
 {
     AbstractMetaArgumentList args;
-    const AbstractMetaArgumentList &arguments = func->arguments();
-    for (const AbstractMetaArgument &arg : arguments) {
-        if (!arg.hasDefaultValueExpression()
-            || arg.isModifiedRemoved())
-            continue;
-        args << arg;
-    }
+    std::copy_if(func->arguments().cbegin(), func->arguments().cend(),
+                 std::back_inserter(args), isArgumentWithDefaultValue);
     return args;
 }
 

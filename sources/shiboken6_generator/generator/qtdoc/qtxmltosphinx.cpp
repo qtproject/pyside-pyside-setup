@@ -1424,19 +1424,19 @@ void QtXmlToSphinx::Table::normalize()
     if (maxCols <= 0)
         return;
     // add col spans
-    for (qsizetype row = 0; row < m_rows.size(); ++row) {
-        for (qsizetype col = 0; col < m_rows.at(row).size(); ++col) {
-            QtXmlToSphinx::TableCell& cell = m_rows[row][col];
+    for (auto &row : m_rows) {
+        for (qsizetype col = 0; col < row.size(); ++col) {
+            QtXmlToSphinx::TableCell& cell = row[col];
             bool mergeCols = (col >= maxCols);
             if (cell.colSpan > 0) {
                 QtXmlToSphinx::TableCell newCell;
                 newCell.colSpan = -1;
                 for (int i = 0, max = cell.colSpan-1; i < max; ++i)
-                    m_rows[row].insert(col + 1, newCell);
+                    row.insert(col + 1, newCell);
                 cell.colSpan = 0;
                 col++;
             } else if (mergeCols) {
-                m_rows[row][maxCols - 1].data += u' ' + cell.data;
+                row[maxCols - 1].data += u' ' + cell.data;
             }
         }
     }
