@@ -3,6 +3,8 @@
 
 #include "polygon.h"
 
+#include <algorithm>
+
 Polygon::Polygon(double x, double y) : m_points({Point(x, y)})
 {
 }
@@ -36,4 +38,9 @@ void Polygon::stealOwnershipFromPython(Point *point)
 void Polygon::stealOwnershipFromPython(Polygon *polygon)
 {
     delete polygon;
+}
+
+bool Polygon::contains(Point needle) const
+{
+    return std::find(m_points.cbegin(), m_points.cend(), needle) != m_points.cend();
 }

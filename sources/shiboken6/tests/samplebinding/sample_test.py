@@ -86,6 +86,16 @@ class ModuleTest(unittest.TestCase):
         self.assertIsNone(sample.SampleNamespace.optionalMultiply(v1, None))
         self.assertIsNone(sample.SampleNamespace.optionalMultiply(None, v2))
 
+    def testSequenceProtocol(self):
+        """Test slot Py_sq_contains of Polygon."""
+        point1 = sample.Point(1, 2)
+        point2 = sample.Point(3, 4)
+        polygon = sample.Polygon()
+        polygon.addPoint(point1)
+        polygon.addPoint(point2)
+        self.assertTrue(point1 in polygon)
+        self.assertFalse(sample.Point(5, 6) in polygon)
+
 
 if __name__ == '__main__':
     unittest.main()

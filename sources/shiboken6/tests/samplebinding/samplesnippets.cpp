@@ -302,3 +302,8 @@ PyObject *type = PyObject_Type(%PYSELF);
 PyObject *args = Py_BuildValue("(dd)", %CPPSELF.x(), %CPPSELF.y());
 %PYARG_0 = Py_BuildValue("(OO)", type, args);
 // @snippet point-reduce
+
+// @snippet polygon-contains
+auto needle = %CONVERTTOCPP[Point](_value);
+return %CPPSELF.contains(needle) ? 1 : 0;
+// @snippet polygon-contains

@@ -32,6 +32,8 @@ public:
     // This method invalidates the argument to be used in a call to doublePolygonScale(Polygon).
     static void stealOwnershipFromPython(Polygon *polygon);
 
+    bool contains(Point needle) const;
+
 private:
     PointList m_points;
 };
