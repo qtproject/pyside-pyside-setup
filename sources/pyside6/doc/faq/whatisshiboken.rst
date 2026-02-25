@@ -5,16 +5,17 @@ Binding Generation: What Is Shiboken?
 
 When you install ``PySide6`` you might have notice that also ``Shiboken6``
 is installed as a dependency::
+https://download.qt.io/snapshots/ci/pyside/6.10/latest/pyside6/shiboken6-6.10.0a1.dev1771851518-cp39-abi3-manylinux_2_34_x86_64.whl
 
     $ pip install pyside6
     Collecting pyside6
-      Downloading PySide6-6.0.0-6.0.0-cp36.cp37.cp38.cp39-abi3-manylinux1_x86_64.whl (170.5 MB)
+      Downloading PySide6-6.10.0-cp39-abi3-manylinux_2_34_x86_64.whl (170.5 MB)
          |████████████████████████████████| 170.5 MB 42 kB/s
-    Collecting shiboken6==6.0.0
-      Downloading shiboken6-6.0.0-6.0.0-cp36.cp37.cp38.cp39-abi3-manylinux1_x86_64.whl (964 kB)
+    Collecting shiboken6==6.10.0
+      Downloading shiboken6-6.10.0-cp39-abi3-manylinux_2_34_x86_64.whl (964 kB)
          |████████████████████████████████| 964 kB 29.3 MB/s
     Installing collected packages: shiboken6, pyside6
-    Successfully installed pyside6-6.0.0 shiboken6-6.0.0
+    Successfully installed pyside6-6.10.0 shiboken6-6.10.0
 
 That installed package is also called **Shiboken Module**, and it contains
 some utilities for PySide to properly work.

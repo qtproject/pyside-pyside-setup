@@ -107,7 +107,7 @@ be installed into a virtual environment rather than the default interpreter.
 A ``requirements.txt`` file will be provided alongside the wheels, in order to
 simplify the installation step::
 
-   cd /path/to/Qt/QtForPython/6.6.0/
+   cd /path/to/Qt/QtForPython/6.10.0/
    pip install --no-index --find-links=. -r requirements.txt
 
 Complementary to the wheels, you will be able to download the sources
@@ -134,8 +134,7 @@ There are two options that will list a different set of packages:
   Additionally, here is where you can find the *Qt for automation (M2M
   Protocols)* packages.
 
-* **Qt for Python (Commercial LTS)** where you will find the 5.15.x LTS and 6.2.x
-  LTS releases.
+* **Qt for Python (Commercial LTS)** where you will find the 6.8.x LTS releases.
 
 Once you select any of those, you will be able to select the version of the
 packages you want to download for the **Qt for Python Commercial wheels** packages:
@@ -171,7 +170,7 @@ Alternatively for Windows, you can specify the following command which includes
 the version, and assumes that you are running it on the same directory where
 the wheels are::
 
-    pip install --no-index --find-links=. PySide6==6.4.0.commercial
+    pip install --no-index --find-links=. PySide6==6.10.0.commercial
 
 .. note:: As described in the :ref:`package_details` page, the dependency
    of the packages requires you to first install the ``shiboken6``

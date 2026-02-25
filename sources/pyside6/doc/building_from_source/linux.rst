@@ -56,9 +56,9 @@ Cloning the official repository can be done by::
 
     git clone https://code.qt.io/pyside/pyside-setup
 
-Checking out the version that we want to build, for example 6.8::
+Checking out the version that we want to build, for example 6.10::
 
-    cd pyside-setup && git checkout 6.8
+    cd pyside-setup && git checkout 6.10
 
 Install the general dependencies::
 
@@ -69,7 +69,7 @@ For building the documentation::
     pip install -r requirements-doc.txt
 
 .. note:: Keep in mind you need to use the same version as your Qt installation.
-          Additionally, :command:`git checkout -b 6.8 --track origin/6.8` could be a better option
+          Additionally, :command:`git checkout -b 6.10 --track origin/6.10` could be a better option
           in case you want to work on it.
 
 .. note:: With `uv`_, use `uv pip install ...`
@@ -82,15 +82,15 @@ uses `create_wheels.py`_ to create the wheels. Once the wheels are created, you 
 wheels using the `pip` command.
 
 Check your Qt installation path, to specifically use that version of qtpaths to build PySide.
-for example, :command:`/opt/Qt/6.8.0/gcc_64/bin/qtpaths`.
+for example, :command:`/opt/Qt/6.10.0/gcc_64/bin/qtpaths`.
 
 Build can take a few minutes, so it is recommended to use more than one CPU core::
 
-    python setup.py build --qtpaths=/opt/Qt/6.8.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
+    python setup.py build --qtpaths=/opt/Qt/6.10.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
 With `uv`_, the build command becomes::
 
-    uv run setup.py build --qtpaths=/opt/Qt/6.8.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
+    uv run setup.py build --qtpaths=/opt/Qt/6.10.0/gcc_64/bin/qtpaths --build-tests --ignore-git --parallel=8
 
 To create the wheels, just run::
 

@@ -55,16 +55,16 @@ directory as a directory called ``.pyside6-android-deploy``. ``pyside6-android-d
 automatically detect the NDK and SDK from this cache directory.
 
 If you want to try to download the NDK and SDK manually, you can do so from the following steps
-(for Qt 6.8):
+(for Qt 6.10):
 
 1. Download the sdkmanager using the instructions provided in the `Android Studio
    documentation <https://developer.android.com/studio/command-line/sdkmanager>`_.
 
-2. Using the sdkmanager download the following packages (for Qt 6.8)::
+2. Using the sdkmanager download the following packages (for Qt 6.10)::
 
    "platform-tools", "platforms;android-34", "build-tools;35.0.0"
 
-  and install the NDK using the following command (for Qt 6.8)::
+  and install the NDK using the following command (for Qt 6.10)::
 
    "ndk;26.1.10909125"
 
@@ -268,10 +268,10 @@ to cross-compile Qt for Python Android wheels.
 
     git clone https://code.qt.io/pyside/pyside-setup
 
-#. Check out the version that you want to build, for example 6.7. The version checked out has
+#. Check out the version that you want to build, for example 6.10. The version checked out has
    to correspond to the Qt version downloaded in Step 1::
 
-    cd pyside-setup && git checkout 6.7
+    cd pyside-setup && git checkout 6.10
 
 #. Installing the dependencies::
 
@@ -280,10 +280,10 @@ to cross-compile Qt for Python Android wheels.
 
 #. Run the cross-compilation Python script.::
 
-    python tools/cross_compile_android/main.py --plat-name=aarch64 --qt-install-path=/opt/Qt/6.7.0
+    python tools/cross_compile_android/main.py --plat-name=aarch64 --qt-install-path=/opt/Qt/6.10.0
     --auto-accept-license --skip-update
 
-   *--qt-install-path* refers to the path where Qt 6.7.0 is installed. *--auto-accept-license* and
+   *--qt-install-path* refers to the path where Qt 6.10.0 is installed. *--auto-accept-license* and
    *--skip-update* are required for downloading and installing Android NDK and SDK if not already
    specified through command line options or if they don't already exist in the
    ``pyside6-android-deploy`` cache. Use --help to see all the other available options::

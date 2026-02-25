@@ -28,10 +28,10 @@ you might get them with ``brew``, and on **Windows** you can download the instal
 website.
 
 * **Python**: 3.9+ `[official Python website] <https://www.python.org/downloads/>`_
-* **Qt:** 6.8+ `[online installer] <https://download.qt.io/official_releases/online_installers/>`_
+* **Qt:** 6.10+ `[online installer] <https://download.qt.io/official_releases/online_installers/>`_
 * **CMake:** 3.18+ `[official CMake website] <https://cmake.org/download/>`_
 * **Git:** 2.0+. `[official Git website] <https://git-scm.com/downloads>`_
-* **libclang:** The libclang library, recommended: version 18+ for 6.8+.
+* **libclang:** The libclang library, recommended: version 18+ for 6.10+.
   Prebuilt versions for each OS can be `downloaded here`_.
 * Check the `Supported Platforms of Qt`_
 
@@ -128,7 +128,7 @@ Using the ``--build-tests`` option will enable us to run all the auto tests insi
   python testrunner.py test > testlog.txt
 
 .. note:: On Windows, don't forget to have qtpaths in your path
-   (:command:`set PATH=C:\\\Path\\\to\\\Qt\\\6.4.0\\\msvc2019_64\\\bin;%PATH%`)
+   (:command:`set PATH=C:\\\Path\\\to\\\Qt\\\6.10.0\\\msvc2022_64\\\bin;%PATH%`)
 
 You can also run a specific test (for example ``qpainter_test``) by running::
 
@@ -177,8 +177,8 @@ First and foremost, you need to have access to the target device because you
 need to copy several system files (sysroot). We recommend a Linux OS that has
 the latest Qt versions, like `Manjaro ARM`_ or `Archlinux ARM`_.
 
-* (target) Install Qt 6.3+ on the system using the package manager.
-* (host) Install Qt 6.3+ on the system using the package manager or Qt
+* (target) Install Qt 6.10+ on the system using the package manager.
+* (host) Install Qt 6.10+ on the system using the package manager or Qt
   Installer.
 * (target, host) Install the library and development packages that provide
   C++ headers, linkers, libraries, and compilers.
@@ -354,7 +354,7 @@ An example of the ``setup.py`` invocation might look like the following:
     python setup.py bdist_wheel \
         --parallel=8 --ignore-git --reuse-build --standalone --limited-api=yes \
         --cmake-toolchain-file=/opt/toolchain-aarch64.cmake \
-        --qt-host-path=/opt/Qt/6.3.0/gcc_64 \
+        --qt-host-path=/opt/Qt/6.10.0/gcc_64 \
         --plat-name=linux_aarch64
 
 Depending on the target platform, you could use ``linux_armv7``,
@@ -369,8 +369,8 @@ directory, for example:
 
 .. code-block:: bash
 
-    PySide6-6.3.0-6.3.0-cp36-abi3-manylinux2014_aarch64.whl
-    shiboken6-6.3.0-6.3.0-cp36-abi3-manylinux2014_aarch64.whl
+    PySide6-6.10.0-cp310-abi3-manylinux_2_42_aarch64.whl
+    shiboken6-6.10.0cp310-abi3-manylinux_2_42_aarch64.whl
 
 
 Troubleshooting
@@ -536,7 +536,7 @@ A set of tools can be found under the ``tools/`` directory inside the ``pyside-s
 * ``create_changelog.py``: Script used to create the CHANGELOG that you can find in the ``dist/``
   directory. Usage::
 
-    python create_changelog.py -r 6.0.1 -v v6.0.0..6.0 -t bug-fix
+    python create_changelog.py -r 6.10.1
 
 * ``debug_windows.py``: This script can be used to find out why PySide modules
   fail to load with various DLL errors like Missing DLL or Missing symbol in DLL.
@@ -558,7 +558,7 @@ A set of tools can be found under the ``tools/`` directory inside the ``pyside-s
   regarding available modules and classses. This content is displayed in our `wiki page`_,
   and can be used as follows::
 
-    python missing_bindings.py --qt-version 6.0.1 -w all
+    python missing_bindings.py --qt-version 6.10.0 -w all
 
 .. note:: The script relies on BeautifulSoup to parse the content and generate a list of the
    missing bindings.

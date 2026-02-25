@@ -61,14 +61,14 @@ Installation
 
         pip install pyside6
 
-  * For a specific version, like 6.4.1::
+  * For a specific version, like 6.10.1::
 
-        pip install pyside6==6.4.1
+        pip install pyside6==6.10.1
 
   * It is also possible to install a specific snapshot from our servers.
     To do so, you can use the following command::
 
-      pip install --index-url=https://download.qt.io/snapshots/ci/pyside/6.4/latest pyside6 --trusted-host download.qt.io
+      pip install --index-url=https://download.qt.io/snapshots/ci/pyside/6.10/latest pyside6 --trusted-host download.qt.io
 
 * **Test your installation**
 
