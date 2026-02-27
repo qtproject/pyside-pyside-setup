@@ -15,7 +15,7 @@ Requirements
 
 Before you can install |project|, first you must install the following software:
 
-* `Official <https://www.python.org/downloads/>`_ Python 3.8+
+* `Official <https://www.python.org/downloads/>`_ Python 3.9+
 * We **highly** recommend using a virtual environment, such as
   `venv <https://docs.python.org/3/library/venv.html>`_ or
   `virtualenv <https://virtualenv.pypa.io/en/latest>`_

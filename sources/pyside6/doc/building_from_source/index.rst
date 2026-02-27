@@ -182,7 +182,7 @@ the latest Qt versions, like `Manjaro ARM`_ or `Archlinux ARM`_.
   Installer.
 * (target, host) Install the library and development packages that provide
   C++ headers, linkers, libraries, and compilers.
-* (target, host) Install Python interpreter v3.7 or later
+* (target, host) Install Python interpreter v3.9 or later
 * (target, host) Install CMake 3.17+
 
 After installing these prerequisites, copy the ``target`` sysroot to your

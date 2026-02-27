@@ -15,7 +15,6 @@
     darwin ci
 # PYSIDE-474
 [QtWebEngineWidgets::pyside-474-qtwebengineview]
-    py2
     py3
 [QtCore::qthread_test]
 # PYSIDE-754
