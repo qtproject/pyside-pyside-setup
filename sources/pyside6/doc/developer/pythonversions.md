@@ -61,3 +61,5 @@ have some test failures; but it should not assert.
 It should also be checked whether PySide compiles when raising the Limited API
 minimum version to the new version (although the change can only be submitted
 much later).
+
+Also, the documentation should be checked for outdated version information.

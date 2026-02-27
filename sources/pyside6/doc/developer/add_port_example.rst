@@ -76,9 +76,19 @@ Port a Qt example
 
 - Add a ``.pyproject`` file (verify later on that docs build).
 - Add a ``doc`` directory and descriptive ``.md`` or ``.rst`` file,
-  and a screenshot if suitable (use ``optipng`` to reduce file size).
+  and a screenshot if suitable.
 - Add the ``"""Port of the ... example from Qt 6"""`` doc string.
 - Remove C++ documentation from ``sources/pyside6/doc/additionaldocs.lst``.
 
-.. note:: Example screenshots in ``.png`` should be optimized by
-          running ``optipng -o 7 -strip all``. Alternatively, the ``.webp`` format can be used.
+Creating example screenshots
+++++++++++++++++++++++++++++
+
+For the screenshot, try whether the ``.png`` format (stripped by
+``optipng -o 7 -strip all``) or the ``.webp`` format results in a smaller file.
+Ideally, a non- High DPI screen should be used. If that is not possible,
+scaling should be offset by setting the environment variable
+``QT_SCALE_FACTOR`` (see `High DPI`_). For example,
+``QT_SCALE_FACTOR=0.5`` compensates 2px scaling (at the cost of the
+title bar appearing too large).
+
+.. _High DPI: https://doc.qt.io/qt-6/highdpi.html

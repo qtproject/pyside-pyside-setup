@@ -52,3 +52,5 @@ To instruct ``COIN`` to use the next version of Qt, adapt the files
 ``coin/dependencies.yaml`` and/or ``product_dependencies.yaml`` accordingly.
 Next, the wheel names should be changed by adapting
 ``sources/shiboken6/.cmake.conf`` and ``sources/pyside6/.cmake.conf``.
+
+Also, the documentation should be checked for outdated version information.
