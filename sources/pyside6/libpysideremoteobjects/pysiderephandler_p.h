@@ -6,19 +6,7 @@
 
 #include <sbkpython.h>
 
-#include <QtRemoteObjects/repparser.h>
-
-#include <QtCore/qstringlist.h>
-
-struct PySideRepFilePrivate
-{
-    AST ast;
-    PyObject *podDict{};
-    PyObject *replicaDict{};
-    PyObject *sourceDict{};
-    QStringList classes;
-    QStringList pods;
-};
+struct PySideRepFilePrivate;
 
 extern "C"
 {

@@ -17,6 +17,7 @@
 #include <QtCore/qbuffer.h>
 #include <QtCore/qiodevice.h>
 #include <QtCore/qmetaobject.h>
+#include <QtCore/qstringlist.h>
 
 #include <QtRemoteObjects/qremoteobjectreplica.h>
 #include <QtRemoteObjects/qremoteobjectpendingcall.h>
@@ -46,6 +47,16 @@ using namespace Shiboken;
  * properties is also created, populated with default values if set in the input
  * .rep file.
 */
+
+struct PySideRepFilePrivate
+{
+    AST ast;
+    PyObject *podDict{};
+    PyObject *replicaDict{};
+    PyObject *sourceDict{};
+    QStringList classes;
+    QStringList pods;
+};
 
 static QVariantList generateProperties(QMetaObject *meta, const ASTClass &astClass);
 
