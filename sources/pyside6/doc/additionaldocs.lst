@@ -19,6 +19,7 @@ qtconcurrent/webxml/qtconcurrentrun.webxml
 qtconcurrent/webxml/qtconcurrenttask.webxml
 qtcore/webxml/animation-overview.webxml
 qtcore/webxml/bindableproperties.webxml
+qtcore/webxml/cbor.webxml
 qtcore/webxml/custom-types.webxml
 qtcore/webxml/datastreamformat.webxml
 qtcore/webxml/eventsandfilters.webxml
@@ -26,6 +27,7 @@ qtcore/webxml/implicit-sharing.webxml
 qtcore/webxml/io-functions.webxml
 qtcore/webxml/ipc.webxml
 qtcore/webxml/java-style-iterators.webxml
+qtcore/webxml/json.webxml
 qtcore/webxml/metaobjects.webxml
 qtcore/webxml/native-ipc-keys.webxml
 qtcore/webxml/object.webxml
