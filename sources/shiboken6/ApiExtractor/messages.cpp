@@ -645,7 +645,10 @@ QString msgFallbackForDocumentation(const QString &fileName,
 
 static QString functionDescription(const AbstractMetaFunction *function)
 {
-    QString result = u'"' + function->classQualifiedSignature() + u'"';
+    QString result(1, u'"');
+    if (function->isDeprecated())
+        result += "[[deprecated]] "_L1;
+    result += function->classQualifiedSignature() + u'"';
     if (function->flags().testFlag(AbstractMetaFunction::Flag::HiddenFriend))
         result += u" (hidden friend)"_s;
     if (function->flags().testFlag(AbstractMetaFunction::Flag::InheritedFromTemplate))
