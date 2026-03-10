@@ -4,7 +4,8 @@
 #ifndef CLANGUTILS_H
 #define CLANGUTILS_H
 
-#include <clang-c/Index.h>
+#include "clang_typedefs.h"
+
 #include <QtCore/qstring.h>
 #include <QtCore/qstringlist.h>
 #include <QtCore/qcompare.h>
@@ -26,14 +27,10 @@ namespace clang {
 QString getCursorKindName(CXCursorKind cursorKind);
 QString getCursorSpelling(const CXCursor &cursor);
 QString getCursorDisplayName(const CXCursor &cursor);
-QString getTypeName(const CXType &type);
+QString getTypeName(const CXType &type, PrintingPolicy p);
 bool hasScopeResolution(const CXType &type);
 CXType fullyResolveType(const CXType &type);
-QString getResolvedTypeName(const CXType &type);
-inline QString getCursorTypeName(const CXCursor &cursor)
-    { return getTypeName(clang_getCursorType(cursor)); }
-inline QString getCursorResultTypeName(const CXCursor &cursor)
-    { return getTypeName(clang_getCursorResultType(cursor)); }
+QString getResolvedTypeName(const CXType &type, PrintingPolicy p);
 
 inline bool isCursorValid(const CXCursor &c)
 {

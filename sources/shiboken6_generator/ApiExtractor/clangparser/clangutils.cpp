@@ -10,6 +10,8 @@
 
 #include <string_view>
 
+using namespace Qt::StringLiterals;
+
 bool operator==(const CXCursor &c1, const CXCursor &c2) noexcept
 {
     return c1.kind == c2.kind
@@ -137,11 +139,18 @@ CXType fullyResolveType(const CXType &type)
     return resolveTypedef(resolveElaboratedType(type));
 }
 
-QString getTypeName(const CXType &type)
+QString getTypeName(const CXType &type, [[maybe_unused]] PrintingPolicy p)
 {
+    // Behavioral change, clang_getTypeSpelling() may no longer return the qualified name in 22.1
+#if LLVM_VERSION >= 22
+    CXString qualName = clang_getFullyQualifiedName(type, p, 0);
+    QString result = QString::fromUtf8(clang_getCString(qualName));
+    clang_disposeString(qualName);
+#else
     CXString typeSpelling = clang_getTypeSpelling(type);
     const QString result = QString::fromUtf8(clang_getCString(typeSpelling));
     clang_disposeString(typeSpelling);
+#endif
     return result;
 }
 
@@ -157,9 +166,9 @@ bool hasScopeResolution(const CXType &type)
 }
 
 // Resolve elaborated types occurring with clang 16
-QString getResolvedTypeName(const CXType &type)
+QString getResolvedTypeName(const CXType &type, PrintingPolicy p)
 {
-    return getTypeName(resolveElaboratedType(type));
+    return getTypeName(resolveElaboratedType(type), p);
 }
 
 Diagnostic::Diagnostic(const QString &m, const CXCursor &c, CXDiagnosticSeverity s)

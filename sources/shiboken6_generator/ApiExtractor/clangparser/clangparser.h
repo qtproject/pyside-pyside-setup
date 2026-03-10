@@ -4,7 +4,7 @@
 #ifndef CLANGPARSER_H
 #define CLANGPARSER_H
 
-#include <clang-c/Index.h>
+#include "clang_typedefs.h"
 
 #include <QtCore/qbytearraylist.h>
 #include <QtCore/qhash.h>
@@ -72,10 +72,14 @@ public:
     // For usage by the parser
     bool _handleVisitLocation( const CXSourceLocation &location);
 
+    PrintingPolicy printingPolicy() const { return m_printingPolicy; }
+    void setPrintingPolicy(CXPrintingPolicy p) { m_printingPolicy = p; }
+
 private:
     SourceFileCache m_fileCache;
     Diagnostics m_diagnostics;
     CXFile m_currentCxFile{};
+    PrintingPolicy m_printingPolicy = nullptr;
     bool m_visitCurrent = true;
 };
 

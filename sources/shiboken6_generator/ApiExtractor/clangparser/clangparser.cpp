@@ -321,8 +321,18 @@ bool parse(const QByteArrayList  &clangArgs, bool addCompilerSupportArguments,
     setupTarget(translationUnit);
 
     CXCursor rootCursor = clang_getTranslationUnitCursor(translationUnit);
+#if LLVM_VERSION >= 22
+    CXPrintingPolicy printingPolicy = clang_getCursorPrintingPolicy(rootCursor);
+    clang_PrintingPolicy_setProperty(printingPolicy, CXPrintingPolicy_IncludeNewlines, 0);
+    bv.setPrintingPolicy(printingPolicy);
+#endif
 
     clang_visitChildren(rootCursor, visitorCallback, reinterpret_cast<CXClientData>(&bv));
+
+#if LLVM_VERSION >= 22
+    bv.setPrintingPolicy(nullptr);
+    clang_PrintingPolicy_dispose(printingPolicy);
+#endif
 
     QList<Diagnostic> diagnostics = getDiagnostics(translationUnit);
     diagnostics.append(bv.diagnostics());

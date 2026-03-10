@@ -623,7 +623,8 @@ std::optional<TypeInfo>
     typeInfo.setConstant(clang_isConstQualifiedType(nestedType) != 0);
     typeInfo.setVolatile(clang_isVolatileQualifiedType(nestedType) != 0);
 
-    QString typeName = fixTypeName(getResolvedTypeName(nestedType));
+    QString typeName = fixTypeName(getResolvedTypeName(nestedType,
+                                                       m_baseVisitor->printingPolicy()));
 
     if (!checkTypeName(typeName)) {
         m_rejectedTypes.insert(typeName);
@@ -776,7 +777,7 @@ std::pair<QString, ClassModelItem> BuilderPrivate::getBaseClass(CXType type) con
 {
     const auto decl = resolveBaseClassType(type);
     // Note: spelling has "struct baseClass", use type
-    QString baseClassName = getTypeName(decl.type);
+    QString baseClassName = getTypeName(decl.type, m_baseVisitor->printingPolicy());
     if (baseClassName.startsWith(u"std::")) { // Simplify "std::" types
         if (auto typeO = createTypeInfo(decl.type))
             baseClassName = typeO.value().toString();
@@ -995,7 +996,7 @@ static NamespaceType namespaceType(const CXCursor &cursor)
     return NamespaceType::Default;
 }
 
-static QString enumType(const CXCursor &cursor)
+static QString enumType(const CXCursor &cursor, PrintingPolicy p)
 {
     QString name = getCursorSpelling(cursor); // "enum Foo { v1, v2 };"
     if (name.contains(u"unnamed enum")) // Clang 16.0
@@ -1003,7 +1004,7 @@ static QString enumType(const CXCursor &cursor)
     if (name.isEmpty()) {
         // PYSIDE-1228: For "typedef enum { v1, v2 } Foo;", type will return
         // "Foo" as expected. Care must be taken to exclude real anonymous enums.
-        name = getTypeName(clang_getCursorType(cursor));
+        name = getTypeName(clang_getCursorType(cursor), p);
         if (name.contains(u"(unnamed") // Clang 12.0.1
             || name.contains(u"(anonymous")) { // earlier
             name.clear();
@@ -1061,7 +1062,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         d->m_scope.back() += "<>"_L1;
         break;
     case CXCursor_EnumDecl: {
-        QString name = enumType(cursor);
+        QString name = enumType(cursor, printingPolicy());
         EnumKind kind = CEnum;
         if (name.isEmpty()) {
             kind = AnonymousEnum;
@@ -1081,7 +1082,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
             d->m_currentEnum->setDeprecated(true);
         const auto enumType = fullyResolveType(clang_getEnumDeclIntegerType(cursor));
         d->m_currentEnum->setSigned(isSigned(enumType.kind));
-        d->m_currentEnum->setUnderlyingType(getTypeName(enumType));
+        d->m_currentEnum->setUnderlyingType(getTypeName(enumType, printingPolicy()));
         if (std::dynamic_pointer_cast<_ClassModelItem>(d->m_scopeStack.back()))
             d->m_currentEnum->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
     }
