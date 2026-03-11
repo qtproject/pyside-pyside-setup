@@ -529,7 +529,7 @@ void setHeuristicOptions(const QByteArrayList &clangOptions)
                     _optionsTriplet.setArchitecture(triplet.architecture());
                 if (!setOptions.testFlag(PlatformOption))
                     _optionsTriplet.setPlatform(triplet.platform());
-                if (!setOptions.testFlag(PlatformVersionOption) && triplet.hasPlatformVersion())
+                if (!setOptions.testFlag(PlatformVersionOption))
                     _optionsTriplet.setPlatformVersion(triplet.platformVersion());
             } else {
                 qCWarning(lcShiboken, "Unable to parse triplet \"%s\".", qPrintable(tripletString));
