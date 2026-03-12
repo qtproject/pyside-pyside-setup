@@ -394,6 +394,21 @@ def generate_pyi(import_name, outpath, options):
                              "bound=PySide6.QtCore.QObject)")
                     wr.print("_SlotFunc = typing.TypeVar(\"_SlotFunc\", "
                              "bound=collections.abc.Callable[..., object])")
+                    wr.print()
+                    # PYSIDE-2516: Qt.KeyboardModifier and Qt.Modifier support cross-type | with
+                    # Qt.Key producing QKeyCombination, which enum.Flag.__or__ cannot express.
+                    # Therefore these overloads must be injected manually.
+                    wr.print(dedent("""\
+                        class _SupportsOrKey(enum.Flag): # type: ignore[misc]
+                            @typing.overload
+                            def __or__(self, other: typing.Self) -> Qt.KeyboardModifier: ...
+                            @typing.overload
+                            def __or__(self, other: Qt.Key) -> QKeyCombination: ...
+                            @typing.overload
+                            def __ror__(self, other: typing.Self) -> Qt.KeyboardModifier: ...
+                            @typing.overload
+                            def __ror__(self, other: Qt.Key) -> QKeyCombination: ...
+                    """))
                 wr.print()
             else:
                 wr.print(line)

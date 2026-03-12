@@ -149,6 +149,9 @@ class ExactEnumerator:
                 name = base.__module__ + "." + name
             bases_list.append(name)
         bases_str = ', '.join(bases_list)
+        # PYSIDE-2516: see pyi_generator.
+        if class_name in ("Qt.KeyboardModifier", "Qt.Modifier"):
+            bases_str = "_SupportsOrKey"
         class_str = f"{class_name}" if bases_str == "object" else f"{class_name}({bases_str})"
         # class_members = inspect.getmembers(klass)
         # gives us also the inherited things.
