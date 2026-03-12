@@ -98,7 +98,7 @@ static Compiler hostCompiler()
 
 static Platform hostPlatform()
 {
-#if defined (Q_OS_DARWIN)
+#if defined (Q_OS_APPLE)
     return Platform::macOS;
 #elif defined (Q_OS_WIN)
     return Platform::Windows;
