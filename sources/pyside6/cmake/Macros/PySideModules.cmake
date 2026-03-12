@@ -221,7 +221,8 @@ macro(create_pyside_module)
         # CMAKE_CXX_COMPILER is the generic clang++; for finding the include paths,
         # it needs "--target".
         list(APPEND shiboken_command
-             "--compiler-argument=--target=${CMAKE_ANDROID_ARCH_LLVM_TRIPLE}")
+             "--compiler-argument=--target=${CMAKE_ANDROID_ARCH_LLVM_TRIPLE}"
+             "--clang-option=--target=${CMAKE_ANDROID_ARCH_LLVM_TRIPLE}")
     endif()
 
     if(CMAKE_HOST_APPLE)
