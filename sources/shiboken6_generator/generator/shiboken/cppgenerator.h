@@ -447,8 +447,10 @@ private:
                             const GeneratorContext &classContext,
                             const QString &signatures) const;
     static QStringList pyBaseTypes(const AbstractMetaClassCPtr &metaClass);
-    static QString destructorClassName(const AbstractMetaClassCPtr &metaClass,
-                                       const GeneratorContext &classContext);
+    static QString callCppDestructor(const GeneratorContext &classContext,
+                                     const QString &dtorClassName);
+    static QString destructorFunction(const AbstractMetaClassCPtr &metaClass,
+                                      const GeneratorContext &classContext);
     static void writeStaticFieldInitialization(TextStream &s,
                                                const AbstractMetaClassCPtr &metaClass);
     void writeClassDefinition(TextStream &s,

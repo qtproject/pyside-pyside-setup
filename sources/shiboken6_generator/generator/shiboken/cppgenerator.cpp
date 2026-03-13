@@ -5858,23 +5858,33 @@ void CppGenerator::writeSignatureStrings(TextStream &s,
         << "#endif\n\n";
 }
 
-// Return the class name for which to invoke the destructor
-QString CppGenerator::destructorClassName(const AbstractMetaClassCPtr &metaClass,
-                                          const GeneratorContext &classContext)
+QString CppGenerator::callCppDestructor(const GeneratorContext &classContext,
+                                        const QString &dtorClassName)
+{
+    return "&Shiboken::callCppDestructor< "_L1
+            + Generator::globalScopePrefix(classContext)
+            + dtorClassName + " >"_L1;
+}
+
+// Return the function to invoke the destructor
+QString CppGenerator::destructorFunction(const AbstractMetaClassCPtr &metaClass,
+                                         const GeneratorContext &classContext)
 {
     if (metaClass->isNamespace() || metaClass->hasPrivateDestructor())
-        return {};
+        return NULL_PTR;
     if (classContext.forSmartPointer())
-        return classContext.effectiveClassName();
-    const bool isValue = metaClass->typeEntry()->isValue();
-    const bool hasProtectedDestructor = metaClass->hasProtectedDestructor();
-    if (((avoidProtectedHack() && hasProtectedDestructor) || isValue)
-        && classContext.useWrapper()) {
-        return classContext.wrapperName();
+        return callCppDestructor(classContext, classContext.effectiveClassName());
+
+    if (metaClass->typeEntry()->isValue() && classContext.useWrapper())
+        return callCppDestructor(classContext, classContext.wrapperName());
+
+    if (avoidProtectedHack() && metaClass->hasProtectedDestructor()) {
+        return classContext.useWrapper()
+            ? callCppDestructor(classContext, classContext.wrapperName())
+            : QString{NULL_PTR}; // Cannot call (happens with "disable-wrapper").
     }
-    if (avoidProtectedHack() && hasProtectedDestructor)
-        return {}; // Cannot call (happens with "disable-wrapper").
-    return metaClass->qualifiedCppName();
+
+    return callCppDestructor(classContext, metaClass->qualifiedCppName());
 }
 
 // Return the base type entries for introduceWrapperType()
@@ -5990,12 +6000,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     s << '&' << pyTypePrefix << "_spec,\n";
 
     // 5:cppObjDtor
-    QString dtorClassName = destructorClassName(metaClass, classContext);
-    if (dtorClassName.isEmpty())
-        s << "nullptr,\n";
-    else
-        s << "&Shiboken::callCppDestructor< " << globalScopePrefix(classContext)
-            << dtorClassName << " >,\n";
+    s << destructorFunction(metaClass, classContext) << ",\n";
 
     // 7:baseTypes
     s << pyTypeBasesVariable << ".object()," << '\n';
