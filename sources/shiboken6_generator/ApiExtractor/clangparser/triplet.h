@@ -70,7 +70,7 @@ public:
     QByteArray toByteArray() const;
     QString toString() const { return QLatin1StringView(toByteArray()); }
 
-    static Triplet fromHost();
+    static Triplet fromHost(bool detectVersion);
     static std::optional<Triplet> fromString(QStringView name);
 
 private:

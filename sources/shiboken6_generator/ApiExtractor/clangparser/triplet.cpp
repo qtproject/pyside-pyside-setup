@@ -314,15 +314,16 @@ std::optional<Triplet> Triplet::fromString(QStringView name)
     return result;
 }
 
-Triplet Triplet::fromHost()
+Triplet Triplet::fromHost(bool detectVersion)
 {
     Triplet result;
     result.setArchitecture(hostArchitecture());
     result.setPlatform(hostPlatform());
     result.setCompiler(hostCompiler());
-    const auto hv = hostPlatformVersion();
-    if (!hv.isNull())
-        result.setPlatformVersion(hv);
+    if (detectVersion) {
+        if (const auto hv = hostPlatformVersion(); !hv.isNull())
+            result.setPlatformVersion(hv);
+    }
     return result;
 }
 

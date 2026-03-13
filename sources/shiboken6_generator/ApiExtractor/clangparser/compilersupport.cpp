@@ -50,7 +50,7 @@ QVersionNumber libClangVersion()
     return QVersionNumber(CINDEX_VERSION_MAJOR, CINDEX_VERSION_MINOR);
 }
 
-static const Triplet _hostTriplet = Triplet::fromHost();
+static const Triplet _hostTriplet = Triplet::fromHost(/* detectVersion */ false);
 static Triplet _optionsTriplet = _hostTriplet;
 
 const Triplet &optionsTriplet()
