@@ -4716,39 +4716,20 @@ void CppGenerator::writeClassTypeFunction(TextStream &s,
         << outdent << "}\n" << closeExternC;
 }
 
-void CppGenerator::writeClassDefinition(TextStream &s,
-                                        const AbstractMetaClassCPtr &metaClass,
-                                        const GeneratorContext &classContext)
+static QString getTpDealloc(const AbstractMetaClassCPtr &metaClass, bool isQApp)
 {
-    QString tp_new;
-    QString tp_dealloc;
-    QString tp_hash;
-    QString tp_call;
-    const QString className = cpythonBaseName(metaClass);
+    if (metaClass->isNamespace())
+        return u"Sbk_object_dealloc /* PYSIDE-832: Prevent replacement of \"0\" with subtype_dealloc. */"_s;
+    if (metaClass->hasPrivateDestructor())
+        return u"SbkDeallocWrapperWithPrivateDtor"_s;
+    if (isQApp)
+        return u"&SbkDeallocQAppWrapper"_s;
+    return u"&SbkDeallocWrapper"_s;
+}
 
-    bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
-
-    const bool isQApp = usePySideExtensions()
-        && inheritsFrom(metaClass, u"QCoreApplication"_s);
-
-    QString tp_flags = u"Py_TPFLAGS_DEFAULT"_s;
-    if (!metaClass->attributes().testFlag(AbstractMetaClass::FinalCppClass))
-        tp_flags += u"|Py_TPFLAGS_BASETYPE"_s;
-    if (metaClass->isNamespace() || metaClass->hasPrivateDestructor()) {
-        tp_dealloc = metaClass->hasPrivateDestructor() ?
-                     u"SbkDeallocWrapperWithPrivateDtor"_s :
-                     u"Sbk_object_dealloc /* PYSIDE-832: Prevent replacement of \"0\" with subtype_dealloc. */"_s;
-    } else {
-        tp_dealloc = isQApp
-            ? u"&SbkDeallocQAppWrapper"_s : u"&SbkDeallocWrapper"_s;
-    }
-
-    const AttroCheck attroCheck = checkAttroFunctionNeeds(metaClass);
-    const QString tp_getattro = (attroCheck & AttroCheckFlag::GetattroMask) != 0
-        ? cpythonGetattroFunctionName(metaClass) : QString();
-    const QString tp_setattro = (attroCheck & AttroCheckFlag::SetattroMask) != 0
-        ? cpythonSetattroFunctionName(metaClass) : QString();
-
+static QString getTpNew(const AbstractMetaClassCPtr &metaClass, bool isQApp)
+{
+    const bool onlyPrivCtor = !metaClass->hasNonPrivateConstructor();
     if (metaClass->hasPrivateDestructor() || onlyPrivCtor) {
         // tp_flags = u"Py_TPFLAGS_DEFAULT"_s;
         // This is not generally possible, because PySide does not care about
@@ -4759,19 +4740,42 @@ void CppGenerator::writeClassDefinition(TextStream &s,
             // PYSIDE-595: No idea how to do non-inheritance correctly.
             // Since that is only relevant in shiboken, I used a shortcut for
             // PySide.
-            tp_new = u"SbkObject_tp_new"_s;
+            return u"SbkObject_tp_new"_s;
         }
-        else {
-            tp_new = u"SbkDummyNew /* PYSIDE-595: Prevent replacement "
-                      "of \"0\" with base->tp_new. */"_s;
-        }
+        return u"SbkDummyNew /* PYSIDE-595: Prevent replacement of \"0\" with base->tp_new. */"_s;
     }
-    else if (isQApp) {
-        tp_new = u"SbkQApp_tp_new"_s; // PYSIDE-571: need singleton app
-    }
-    else {
-        tp_new = u"SbkObject_tp_new"_s;
-    }
+
+    if (isQApp)
+        return u"SbkQApp_tp_new"_s; // PYSIDE-571: need singleton app
+
+    return u"SbkObject_tp_new"_s;
+}
+
+void CppGenerator::writeClassDefinition(TextStream &s,
+                                        const AbstractMetaClassCPtr &metaClass,
+                                        const GeneratorContext &classContext)
+{
+    QString tp_hash;
+    QString tp_call;
+    const QString className = cpythonBaseName(metaClass);
+
+    const bool isQApp = usePySideExtensions()
+        && inheritsFrom(metaClass, u"QCoreApplication"_s);
+
+    const QString tp_dealloc = getTpDealloc(metaClass, isQApp);
+
+    QString tp_flags = u"Py_TPFLAGS_DEFAULT"_s;
+    if (!metaClass->attributes().testFlag(AbstractMetaClass::FinalCppClass))
+        tp_flags += u"|Py_TPFLAGS_BASETYPE"_s;
+
+    const AttroCheck attroCheck = checkAttroFunctionNeeds(metaClass);
+    const QString tp_getattro = (attroCheck & AttroCheckFlag::GetattroMask) != 0
+        ? cpythonGetattroFunctionName(metaClass) : QString();
+    const QString tp_setattro = (attroCheck & AttroCheckFlag::SetattroMask) != 0
+        ? cpythonSetattroFunctionName(metaClass) : QString();
+
+    const QString tp_new = getTpNew(metaClass, isQApp);
+
     tp_flags.append(u"|Py_TPFLAGS_HAVE_GC"_s);
 
     QString tp_richcompare;
