@@ -1511,8 +1511,7 @@ public:
         ConfigurableTypeEntryPrivate(entryName, t, vr, parent),
         m_qualifiedCppName(buildName(entryName, parent)),
         m_polymorphicBase(false),
-        m_genericClass(false),
-        m_deleteInMainThread(false)
+        m_genericClass(false)
     {
     }
 
@@ -1530,9 +1529,10 @@ public:
     QString m_qualifiedCppName;
     QString m_docFile;
 
+    TypeSystem::DeletionMode m_deletionMode = TypeSystem::DeletionMode::Default;
+
     uint m_polymorphicBase : 1;
     uint m_genericClass : 1;
-    uint m_deleteInMainThread : 1;
 
     QString m_polymorphicIdValue;
     QString m_polymorphicNameFunction;
@@ -1832,16 +1832,16 @@ void ComplexTypeEntry::setGenericClass(bool isGeneric)
     d->m_genericClass = isGeneric;
 }
 
-bool ComplexTypeEntry::deleteInMainThread() const
+TypeSystem::DeletionMode ComplexTypeEntry::deletionMode() const
 {
     S_D(const ComplexTypeEntry);
-    return d->m_deleteInMainThread;
+    return d->m_deletionMode;
 }
 
-void ComplexTypeEntry::setDeleteInMainThread(bool dmt)
+void ComplexTypeEntry::setDeletionMode(TypeSystem::DeletionMode dm)
 {
     S_D(ComplexTypeEntry);
-    d->m_deleteInMainThread = dmt;
+    d->m_deletionMode = dm;
 }
 
 QString ComplexTypeEntry::hashFunction() const
@@ -2715,7 +2715,8 @@ void ComplexTypeEntry::formatDebug(QDebug &debug) const
     TypeEntry::formatDebug(debug);
     FORMAT_BOOL("polymorphicBase", d->m_polymorphicBase)
     FORMAT_BOOL("genericClass", d->m_genericClass)
-    FORMAT_BOOL("deleteInMainThread", d->m_deleteInMainThread)
+    if (d->m_deletionMode != TypeSystem::DeletionMode::Default)
+        debug << ", deletionMode=" << unsigned(d->m_deletionMode);
     if (d->m_typeFlags != 0)
         debug << ", typeFlags=" << d->m_typeFlags;
     debug << ", except=" << int(d->m_exceptionHandling)

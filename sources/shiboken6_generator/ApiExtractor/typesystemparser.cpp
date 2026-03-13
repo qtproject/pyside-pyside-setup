@@ -62,6 +62,7 @@ constexpr auto sinceAttribute = "since"_L1;
 constexpr auto untilAttribute = "until"_L1;
 constexpr auto defaultSuperclassAttribute = "default-superclass"_L1;
 constexpr auto deleteInMainThreadAttribute = "delete-in-main-thread"_L1;
+constexpr auto deleteInOwnerThreadAttribute = "delete-in-owner-thread"_L1;
 constexpr auto deprecatedAttribute = "deprecated"_L1;
 constexpr auto disableWrapperAttribute = "disable-wrapper"_L1;
 constexpr auto docFileAttribute = "doc-file"_L1;
@@ -1929,7 +1930,10 @@ bool TypeSystemParser::applyComplexTypeAttributes(const ConditionalStreamReader 
                 ctype->setTypeFlags(ctype->typeFlags() | ComplexTypeEntry::DisableWrapper);
         } else if (name == deleteInMainThreadAttribute) {
             if (convertBoolean(attributes->takeAt(i).value(), deleteInMainThreadAttribute, false))
-                ctype->setDeleteInMainThread(true);
+                ctype->setDeletionMode(TypeSystem::DeletionMode::DeleteInMainThread);
+        } else if (name == deleteInOwnerThreadAttribute) {
+            if (convertBoolean(attributes->takeAt(i).value(), deleteInOwnerThreadAttribute, false))
+                ctype->setDeletionMode(TypeSystem::DeletionMode::DeleteInQObjectOwnerThread);
         } else if (name == qtMetaObjectFunctionsAttribute) {
             if (!convertBoolean(attributes->takeAt(i).value(),
                                 qtMetaObjectFunctionsAttribute, true))  {

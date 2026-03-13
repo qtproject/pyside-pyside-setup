@@ -120,8 +120,8 @@ public:
     bool isGenericClass() const;
     void setGenericClass(bool isGeneric);
 
-    bool deleteInMainThread() const;
-    void setDeleteInMainThread(bool d);
+    TypeSystem::DeletionMode deletionMode() const;
+    void setDeletionMode(TypeSystem::DeletionMode dm);
 
     QString hashFunction() const;
     void setHashFunction(const QString &hashFunction);

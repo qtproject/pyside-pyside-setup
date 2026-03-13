@@ -7,6 +7,7 @@
 #include "abstractmetalang_enums.h"
 #include "abstractmetalang_typedefs.h"
 #include "enclosingclassmixin.h"
+#include "typesystem_enums.h"
 #include "typesystem_typedefs.h"
 
 #include <QtCore/qobjectdefs.h>
@@ -321,7 +322,7 @@ public:
 
     uint toStringCapabilityIndirections() const;
 
-    bool deleteInMainThread() const;
+    TypeSystem::DeletionMode deletionMode() const;
 
     // Query functions for generators
     bool isObjectType() const;

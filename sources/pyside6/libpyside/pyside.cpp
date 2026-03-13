@@ -39,6 +39,7 @@
 #include <sbkfeature_base.h>
 #include <sbkmodule.h>
 
+#include <QtCore/qabstracteventdispatcher.h>
 #include <QtCore/qbytearray.h>
 #include <QtCore/qcoreapplication.h>
 #include <QtCore/qdebug.h>
@@ -1306,3 +1307,39 @@ QDebug operator<<(QDebug debug, const PySide::debugQObject &qo)
 }
 
 } // namespace PySide
+
+void deferredDeleteQObject(void *cppSelf)
+{
+    if (cppSelf == nullptr)
+        return;
+    auto *qobject = reinterpret_cast<QObject *>(cppSelf);
+    auto *ownerThread = qobject->thread();
+    const auto *currentThread = QThread::currentThread();
+    // Directly delete when called from ownerThread
+    if (ownerThread == nullptr || ownerThread == currentThread
+        || QCoreApplication::closingDown()) {
+        delete qobject;
+        return;
+    }
+
+    qCWarning(lcPySide).noquote().nospace()
+        << "libpyside: Deferred deletion of " << PySide::debugQObject(qobject)
+        << "(owner thread: " << PySide::debugQObject(ownerThread)
+        << "), GC thread: " << PySide::debugQObject(currentThread);
+
+    // Owner thread has event loop: Schedule deleteLater()
+    if (QAbstractEventDispatcher::instance(ownerThread) != nullptr) {
+        qobject->deleteLater();
+        return;
+    }
+
+    // No event loop: Fall back to deletion in main thread
+    if (QThread::isMainThread()) {
+        delete qobject;
+        return;
+    }
+
+    auto &bm = Shiboken::BindingManager::instance();
+    bm.addToDeletionInMainThread({Shiboken::callCppDestructor<QObject>, cppSelf});
+    bm.runDeletionInMainThread();
+}

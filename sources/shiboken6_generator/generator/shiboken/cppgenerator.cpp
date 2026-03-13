@@ -5884,6 +5884,13 @@ QString CppGenerator::destructorFunction(const AbstractMetaClassCPtr &metaClass,
             : QString{NULL_PTR}; // Cannot call (happens with "disable-wrapper").
     }
 
+    if (usePySideExtensions()
+            && metaClass->deletionMode() == TypeSystem::DeletionMode::DeleteInQObjectOwnerThread) {
+        if (!isQObject(metaClass))
+            throw Exception(msgOwnerThreadForNonQObject(metaClass));
+         return u"deferredDeleteQObject"_s;
+    }
+
     return callCppDestructor(classContext, metaClass->qualifiedCppName());
 }
 
@@ -6009,7 +6016,7 @@ void CppGenerator::writeClassRegister(TextStream &s,
     QByteArrayList wrapperFlags;
     if (enc)
         wrapperFlags.append("Shiboken::ObjectType::WrapperFlags::InnerClass"_ba);
-    if (metaClass->deleteInMainThread())
+    if (metaClass->deletionMode() == TypeSystem::DeletionMode::DeleteInMainThread)
         wrapperFlags.append("Shiboken::ObjectType::WrapperFlags::DeleteInMainThread"_ba);
     if (classTypeEntry->isValue())
         wrapperFlags.append("Shiboken::ObjectType::WrapperFlags::Value"_ba);

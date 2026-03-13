@@ -1168,3 +1168,9 @@ QString msgSynthesizedFunction(const AbstractMetaFunctionCPtr &newFunction,
     const QString why = "from: \""_L1 + oldFunction->classQualifiedSignature() + u'"';
     return msgSynthesizedFunction(newFunction, why);
 }
+
+QString msgOwnerThreadForNonQObject(const AbstractMetaClassCPtr &metaClass)
+{
+    return "shiboken: delete-in-owner-thread specified for non-QObject class \""_L1
+           + metaClass->name() + u'"';
+}

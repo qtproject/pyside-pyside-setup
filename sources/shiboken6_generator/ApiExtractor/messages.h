@@ -297,4 +297,6 @@ QString msgSynthesizedFunction(const AbstractMetaFunctionCPtr &newFunction,
 QString msgSynthesizedFunction(const AbstractMetaFunctionCPtr &newFunction,
                                const FunctionModelItem &oldFunction);
 
+QString msgOwnerThreadForNonQObject(const AbstractMetaClassCPtr &metaClass);
+
 #endif // MESSAGES_H

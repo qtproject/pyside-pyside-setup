@@ -502,6 +502,7 @@ contain :ref:`add-function`, :ref:`add-pymethoddef`,
          copyable="yes | no"
          allow-thread="..."
          delete-in-main-thread="yes | no"
+         delete-in-owner-thread="yes | no"
          disable-wrapper="yes | no"
          exception-handling="..."
          generate-functions="..."
@@ -536,6 +537,11 @@ destructor is called in the main thread (scheduled via
 ``Py_AddPendingCall()``). This is intended to ensure that Qt's Widget classes
 are deleted in the main GUI thread even when a garbage collection running in a
 different thread cleans them up.
+
+The *optional* **delete-in-owner-thread** attribute (applicable to Qt's
+``QObject``-derived types only) specifies that destruction is deferred by
+calling ``deleteLater()`` in case a garbage collection running in a thread
+different from the owner thread of the instance cleans them up.
 
 The *optional* **force-abstract** attribute forces the class to be
 abstract, disabling its instantiation. The generator will normally detect

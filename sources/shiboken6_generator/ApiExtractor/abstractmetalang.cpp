@@ -780,11 +780,13 @@ uint AbstractMetaClass::toStringCapabilityIndirections() const
     return d->m_toStringCapabilityIndirections;
 }
 
-// Does any of the base classes require deletion in the main thread?
-bool AbstractMetaClass::deleteInMainThread() const
+// Does any of the base classes require special handling?
+TypeSystem::DeletionMode AbstractMetaClass::deletionMode() const
 {
-    return typeEntry()->deleteInMainThread()
-            || (!d->m_baseClasses.isEmpty() && d->m_baseClasses.constFirst()->deleteInMainThread());
+    auto result = typeEntry()->deletionMode();
+    if (result == TypeSystem::DeletionMode::Default && !d->m_baseClasses.isEmpty())
+        result = d->m_baseClasses.constFirst()->deletionMode();
+    return result;
 }
 
 bool AbstractMetaClassPrivate::hasConstructors() const

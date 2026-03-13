@@ -76,4 +76,7 @@ PYSIDE_API PyTypeObject *getTypeForQObject(const QObject *cppSelf);
 
 } //namespace PySide
 
+/// Deletion handler for "delete-in-owner-thread"
+extern "C" PYSIDE_API void deferredDeleteQObject(void *cppSelf);
+
 #endif // PYSIDEQOBJECT_H

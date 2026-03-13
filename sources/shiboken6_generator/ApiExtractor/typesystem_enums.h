@@ -42,6 +42,12 @@ enum CodeSnipPosition : std::uint8_t {
     CodeSnipPositionAny
 };
 
+enum class DeletionMode : std::uint8_t {
+    Default,
+    DeleteInMainThread, // libshiboken
+    DeleteInQObjectOwnerThread, // libpyside for QObjects
+};
+
 enum DocModificationMode : std::uint8_t {
     DocModificationAppend,
     DocModificationPrepend,
