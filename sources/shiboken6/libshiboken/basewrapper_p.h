@@ -127,17 +127,6 @@ struct SbkObjectTypePrivate
 
 namespace Shiboken
 {
-
-/**
- * \internal
- * Data required to invoke a C++ destructor
- */
-struct DestructorEntry
-{
-    ObjectDestructor destructor;
-    void *cppInstance;
-};
-
 /**
  * Utility function used to transform a PyObject that implements sequence protocol into a std::list.
  **/

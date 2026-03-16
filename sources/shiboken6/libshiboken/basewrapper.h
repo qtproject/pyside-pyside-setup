@@ -6,6 +6,7 @@
 
 #include "sbkpython.h"
 #include "shibokenmacros.h"
+#include "sbkdestructorentry.h"
 
 #include <vector>
 #include <string>
@@ -59,8 +60,6 @@ using TypeDiscoveryFuncV2 = void *(*)(void *, PyTypeObject *);
 
 // Used in userdata dealloc function
 using DeleteUserDataFunc = void (*)(void *);
-
-using ObjectDestructor = void (*)(void *);
 
 using SubTypeInitHook = void (*)(PyTypeObject *, PyObject *, PyObject *);
 

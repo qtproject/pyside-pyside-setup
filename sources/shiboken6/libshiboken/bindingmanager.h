@@ -6,6 +6,7 @@
 
 #include "sbkpython.h"
 #include "shibokenmacros.h"
+#include "sbkdestructorentry.h"
 
 #include <set>
 #include <utility>
@@ -18,8 +19,6 @@ namespace Shiboken
 namespace Module {
 struct TypeInitStruct;
 }
-
-struct DestructorEntry;
 
 using ObjectVisitor = void (*)(SbkObject *, void *);
 

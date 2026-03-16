@@ -72,6 +72,7 @@ sbkbindingutils.cpp sbkbindingutils.h
 sbkcontainer.cpp sbkcontainer.h
 sbkconverter.cpp sbkconverter.h sbkconverter_p.h
 sbkcppstring.cpp sbkcppstring.h sbkcpptonumpy.h
+sbkdestructorentry.h
 sbkenum.cpp sbkenum.h sbkenum_p.h
 sbkerrors.cpp sbkerrors.h
 sbkfeature_base.cpp sbkfeature_base.h
@@ -170,6 +171,7 @@ install(FILES
         sbkcontainer.h
         sbkconverter.h
         sbkcpptonumpy.h
+        sbkdestructorentry.h
         sbkenum.h
         sbkenum_p.h
         sbkerrors.h
