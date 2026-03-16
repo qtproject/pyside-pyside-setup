@@ -196,7 +196,7 @@ static bool checkMethodSignature(const QByteArray &signature)
     const bool ok = openParen != -1 && closingParen != -1 && openParen < closingParen;
     if (!ok) {
          const QByteArray message =
-             "MetaObjectBuilder::addMethod: Invalid method signature provided for \""
+             "libpyside: MetaObjectBuilder::addMethod: Invalid method signature provided for \""
                  + signature + '"';
          PyErr_WarnEx(PyExc_RuntimeWarning, message.constData(), 0);
     }
@@ -287,7 +287,7 @@ static QByteArray msgInvalidPropertyType(const QByteArray &className,
                                          const QByteArray &propertyName,
                                          const QByteArray &propertyType)
 {
-    return "QMetaObjectBuilder: Failed to add property \""_ba + propertyName
+    return "libpyside: QMetaObjectBuilder: Failed to add property \""_ba + propertyName
            + "\" to \""_ba + className + "\": Invalid property type \""
            + propertyType + "\"."_ba;
 }
@@ -438,7 +438,7 @@ static QString msgMethodSortOrder(const QMetaObject *mo, int offendingIndex)
 {
     QString result;
     QTextStream str(&result);
-    str << "\n\n*** Sort Warning ***\nSignals and slots in QMetaObject '"
+    str << "\n\nlibpyside: *** Sort Warning ***\nSignals and slots in QMetaObject '"
         << mo->className()
         << "' are not ordered correctly, this may lead to issues.\n";
     const int methodOffset = mo->methodOffset();

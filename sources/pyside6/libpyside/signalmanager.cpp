@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "signalmanager.h"
+#include "pysideqobject_p.h"
 #include "pysidesignal.h"
 #include "pysidelogging_p.h"
 #include "pysideproperty.h"
@@ -194,7 +195,7 @@ int PyObjectWrapper::toInt() const
 QDataStream &operator<<(QDataStream &out, const PyObjectWrapper &myObj)
 {
     if (Py_IsInitialized() == 0) {
-        qWarning() << "Stream operator for PyObject called without python interpreter.";
+        qWarning("libpyside: Stream operator for PyObject called without python interpreter.");
         return out;
     }
 
@@ -226,7 +227,7 @@ QDataStream &operator<<(QDataStream &out, const PyObjectWrapper &myObj)
 QDataStream &operator>>(QDataStream &in, PyObjectWrapper &myObj)
 {
     if (Py_IsInitialized() == 0) {
-        qWarning() << "Stream operator for PyObject called without python interpreter.";
+        qWarning("libpyside: Stream operator for PyObject called without python interpreter.");
         return in;
     }
 
@@ -400,7 +401,7 @@ int SignalManagerPrivate::qtPropertyMetacall(QObject *object,
     Shiboken::AutoDecRef pp_name(Shiboken::String::fromCString(mp.name()));
     PySideProperty *pp = Property::getObject(pySelf, pp_name);
     if (!pp) {
-        qWarning("Invalid property: %s.", mp.name());
+        qWarning("libpyside: Invalid property: %s.", mp.name());
         return false;
     }
     pp->d->metaCall(pySelf, call, args);
@@ -411,8 +412,8 @@ int SignalManagerPrivate::qtPropertyMetacall(QObject *object,
             Shiboken::Errors::Stash errorStash;
             bool ign = call == QMetaObject::WriteProperty;
             PyErr_WarnFormat(PyExc_RuntimeWarning, 0,
-                ign ? "Unknown property type '%s' of QObject '%s' used in fset"
-                    : "Unknown property type '%s' of QObject '%s' used in fget with %R",
+                ign ? "libpyside: Unknown property type '%s' of QObject '%s' used in fset"
+                    : "libpyside: Unknown property type '%s' of QObject '%s' used in fget with %R",
                 pp->d->typeName().constData(), metaObject->className(), errorStash.getException());
             if (PyErr_Occurred())
                 Shiboken::Errors::storeErrorOrPrint();
@@ -421,8 +422,9 @@ int SignalManagerPrivate::qtPropertyMetacall(QObject *object,
         }
 
         qWarning().noquote().nospace()
-            << "An error occurred executing the property metacall " << metaObjectCallName(call)
-            << " on property \"" << mp.name() << "\" of " << object;
+            << "libpyside: An error occurred executing the property metacall "
+            << metaObjectCallName(call) << " on property \"" << mp.name()
+            << "\" of " << PySide::debugQObject(object);
         handleMetaCallError(object, &result);
     }
     return result;
@@ -719,9 +721,9 @@ static int addMetaMethod(QObject *source, const QByteArray &signature,
     const QMetaObject *metaObject = source->metaObject();
     SbkObject *self = Shiboken::BindingManager::instance().retrieveWrapper(source);
     if (!Shiboken::Object::hasCppWrapper(self)) {
-        qWarning().noquote().nospace() << __FUNCTION__
+        qWarning().noquote().nospace() << "libpyside: " << __FUNCTION__
             << ": Cannot add dynamic method \"" << signature << "\" (" << type
-            << ") to " << source << ": No Wrapper found.";
+            << ") to " << PySide::debugQObject(source) << ": No Wrapper found.";
         return -1;
     }
 
@@ -738,9 +740,9 @@ static int addMetaMethod(QObject *source, const QByteArray &signature,
 
     if (type == QMetaMethod::Slot) {
         qCWarning(lcPySide).noquote().nospace()
-            << "Warning: Registering dynamic slot \""
-            << signature << "\" on \"" << source->metaObject()->className()
-            << "\". Consider annotating with " << slotSignature(signature);
+            << "libpyside: Warning: Registering dynamic slot \""
+            << signature << "\" on " << PySide::debugQObject(source)
+            << ". Consider annotating with " << slotSignature(signature);
     }
 
     return type == QMetaMethod::Signal ? dmo->addSignal(signature) : dmo->addSlot(signature);
@@ -748,7 +750,7 @@ static int addMetaMethod(QObject *source, const QByteArray &signature,
 
 static inline void warnNullSource(const char *signature)
 {
-    qWarning("SignalManager::registerMetaMethodGetIndex(\"%s\") called with source=nullptr.",
+    qWarning("libpyside: SignalManager::registerMetaMethodGetIndex(\"%s\") called with source=nullptr.",
              signature);
 }
 

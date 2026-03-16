@@ -34,7 +34,7 @@ set(libpyside_HEADERS # installed below
     pysideqapp.h
     pysideqenum.h
     pysideqhash.h
-    pysideqobject.h
+    pysideqobject.h pysideqobject_p.h
     pysideqslotobject_p.h
     pysidesignal.h
     pysidesignal_p.h

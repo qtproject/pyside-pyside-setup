@@ -671,10 +671,12 @@ static inline void warnDisconnectFailed(PyObject *aSlot, const QByteArray &signa
 {
     if (PyErr_Occurred() != nullptr) { // avoid "%S" invoking str() when an error is set.
         Shiboken::Errors::Stash errorStash;
-        PyErr_WarnFormat(PyExc_RuntimeWarning, 0, "Failed to disconnect (%s) from signal \"%s\".",
+        PyErr_WarnFormat(PyExc_RuntimeWarning, 0,
+                         "libpyside: Failed to disconnect (%s) from signal \"%s\".",
                          Py_TYPE(aSlot)->tp_name, signature.constData());
     } else {
-        PyErr_WarnFormat(PyExc_RuntimeWarning, 0, "Failed to disconnect (%S) from signal \"%s\".",
+        PyErr_WarnFormat(PyExc_RuntimeWarning, 0,
+                         "libpyside: Failed to disconnect (%S) from signal \"%s\".",
                          aSlot, signature.constData());
     }
 }

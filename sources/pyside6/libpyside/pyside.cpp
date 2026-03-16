@@ -7,6 +7,7 @@
 #include "pysidemetatype.h"
 #include "pysideqapp.h"
 #include "pysideqobject.h"
+#include "pysideqobject_p.h"
 #include "pysideutils.h"
 #include "pyside_p.h"
 #include "signalmanager.h"
@@ -523,8 +524,8 @@ void initQObjectSubType(PyTypeObject *type, PyObject *args, PyObject * /* kwds *
     }
     if (!userData) {
         const char *className = Shiboken::String::toCString(PyTuple_GetItem(args, 0));
-        qWarning("Sub class of QObject not inheriting QObject!? Crash will happen when using %s.",
-                 className);
+        qWarning("libpyside: A subclass of QObject is not inheriting QObject."
+                 " A crash might happen when using %s.", className);
         return;
     }
     // PYSIDE-1463: Don't change feature selection durin subtype initialization.
@@ -1285,5 +1286,23 @@ PYSIDE_API QDebug operator<<(QDebug debug, const debugPyBuffer &b)
     return debug;
 }
 #endif // !Py_LIMITED_API || >= 3.11
+
+QDebug operator<<(QDebug debug, const PySide::debugQObject &qo)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+
+    if (qo.m_qobject == nullptr) {
+        debug << "QObject(0)";
+    } else {
+        debug << qo.m_qobject->metaObject()->className() << '/';
+        if (const auto &on = qo.m_qobject->objectName(); !on.isEmpty())
+            debug << '"' << on << '"';
+        else
+            debug << static_cast<const void *>(qo.m_qobject);
+    }
+    return debug;
+}
 
 } // namespace PySide

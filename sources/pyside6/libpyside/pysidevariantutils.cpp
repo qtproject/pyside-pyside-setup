@@ -17,7 +17,7 @@ static const char qVariantTypeName[] = "QVariant";
 
 static void warnConverter(const char *name)
 {
-    qWarning("Type converter for: %s not registered.", name);
+    qWarning("libpyside: Type converter for: %s not registered.", name);
 }
 
 // Helper converting each item of a non-empty list using the "QVariant" converter
