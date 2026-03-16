@@ -501,6 +501,7 @@ contain :ref:`add-function`, :ref:`add-pymethoddef`,
          since="..."
          copyable="yes | no"
          allow-thread="..."
+         delete-in-main-thread="yes | no"
          disable-wrapper="yes | no"
          exception-handling="..."
          generate-functions="..."
@@ -529,6 +530,12 @@ The *optional* **default-superclass** attribute can be used to specify a
 superclass for the given type in the generated target language API.
 This can be useful if the C++ base class is not exposed. The specified
 super class needs to be a direct base class of the class in question.
+
+The *optional* **delete-in-main-thread** attribute specifies that the
+destructor is called in the main thread (scheduled via
+``Py_AddPendingCall()``). This is intended to ensure that Qt's Widget classes
+are deleted in the main GUI thread even when a garbage collection running in a
+different thread cleans them up.
 
 The *optional* **force-abstract** attribute forces the class to be
 abstract, disabling its instantiation. The generator will normally detect
