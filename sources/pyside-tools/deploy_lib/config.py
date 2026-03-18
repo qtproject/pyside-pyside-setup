@@ -154,7 +154,7 @@ class Config(BaseConfig):
 
         self._qml_files = []
         # Design Studio projects include the qml files using Qt resources
-        if source_file and not DesignStudioProject.is_ds_project(source_file):
+        if self.source_file and not DesignStudioProject.is_ds_project(self.source_file):
             config_qml_files = self.get_value("qt", "qml_files")
             if config_qml_files and self.project_dir and self.existing_config_file:
                 self._qml_files = [Path(self.project_dir)
