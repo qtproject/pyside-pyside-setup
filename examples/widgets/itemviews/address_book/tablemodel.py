@@ -10,11 +10,7 @@ class TableModel(QAbstractTableModel):
 
     def __init__(self, addresses=None, parent=None):
         super().__init__(parent)
-
-        if addresses is None:
-            self.addresses = []
-        else:
-            self.addresses = addresses
+        self.addresses = addresses if addresses is not None else []
 
     def rowCount(self, index=QModelIndex()):
         """ Returns the number of rows the model holds. """
@@ -26,37 +22,27 @@ class TableModel(QAbstractTableModel):
 
     def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         """ Depending on the index and role given, return data. If not
-            returning data, return None (PySide equivalent of QT's
+            returning data, return None (PySide equivalent of Qt's
             "invalid QVariant").
         """
-        if not index.isValid():
-            return None
-
-        if not 0 <= index.row() < len(self.addresses):
-            return None
-
-        if role == Qt.ItemDataRole.DisplayRole:
-            name = self.addresses[index.row()]["name"]
-            address = self.addresses[index.row()]["address"]
-
-            if index.column() == 0:
-                return name
-            elif index.column() == 1:
-                return address
-
+        if index.isValid() and role == Qt.ItemDataRole.DisplayRole:
+            row = index.row()
+            if 0 <= row < len(self.addresses):
+                match index.column():
+                    case 0:
+                        return self.addresses[row]["name"]
+                    case 1:
+                        return self.addresses[row]["address"]
         return None
 
     def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
         """ Set the headers to be displayed. """
-        if role != Qt.ItemDataRole.DisplayRole:
-            return None
-
-        if orientation == Qt.Orientation.Horizontal:
-            if section == 0:
-                return "Name"
-            elif section == 1:
-                return "Address"
-
+        if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal:
+            match section:
+                case 0:
+                    return "Name"
+                case 1:
+                    return "Address"
         return None
 
     def insertRows(self, position, rows=1, index=QModelIndex()):
@@ -82,19 +68,18 @@ class TableModel(QAbstractTableModel):
         """ Adjust the data (set it to <value>) depending on the given
             index and role.
         """
-        if role != Qt.ItemDataRole.EditRole:
+        if not index.isValid() or role != Qt.ItemDataRole.EditRole:
             return False
 
-        if index.isValid() and 0 <= index.row() < len(self.addresses):
-            address = self.addresses[index.row()]
-            if index.column() == 0:
-                address["name"] = value
-            elif index.column() == 1:
-                address["address"] = value
-            else:
-                return False
-
-            self.dataChanged.emit(index, index, 0)
+        row = index.row()
+        if 0 <= row < len(self.addresses):
+            address = self.addresses[row]
+            match index.column():
+                case 0:
+                    address["name"] = value
+                case 1:
+                    address["address"] = value
+            self.dataChanged.emit(index, index, [Qt.ItemDataRole.EditRole.value])
             return True
 
         return False

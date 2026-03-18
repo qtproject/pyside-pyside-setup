@@ -3,10 +3,8 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
 
-from PySide6.QtCore import (Qt, Signal)
-from PySide6.QtWidgets import (QWidget, QLabel, QPushButton, QVBoxLayout)
-
-from adddialogwidget import AddDialogWidget
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QVBoxLayout
 
 
 class NewAddressTab(QWidget):
@@ -14,7 +12,7 @@ class NewAddressTab(QWidget):
         To be displayed only when there are no contacts in the model.
     """
 
-    send_details = Signal(str, str)
+    triggered = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -24,34 +22,8 @@ class NewAddressTab(QWidget):
 
         add_button = QPushButton("Add")
 
-        layout = QVBoxLayout()
-        layout.addWidget(description_label)
+        layout = QVBoxLayout(self)
+        layout.addWidget(description_label, 0, Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(add_button, 0, Qt.AlignmentFlag.AlignCenter)
 
-        self.setLayout(layout)
-
-        add_button.clicked.connect(self.add_entry)
-
-    def add_entry(self):
-        add_dialog = AddDialogWidget()
-
-        if add_dialog.exec():
-            name = add_dialog.name
-            address = add_dialog.address
-            self.send_details.emit(name, address)
-
-
-if __name__ == "__main__":
-
-    def print_address(name, address):
-        print(f"Name: {name}")
-        print(f"Address: {address}")
-
-    import sys
-    from PySide6.QtWidgets import QApplication
-
-    app = QApplication(sys.argv)
-    new_address_tab = NewAddressTab()
-    new_address_tab.send_details.connect(print_address)
-    new_address_tab.show()
-    sys.exit(app.exec())
+        add_button.clicked.connect(self.triggered)
