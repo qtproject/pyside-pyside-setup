@@ -1,4 +1,4 @@
 {
-    "files": ["tablemodel.py", "address_book.py", "adddialogwidget.py",
+    "files": ["main.py", "tablemodel.py", "adddialogwidget.py",
               "addresswidget.py", "newaddresstab.py"]
 }

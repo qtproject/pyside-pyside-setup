@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QDialog, QLabel, QTextEdit, QLineEdit,
-                               QDialogButtonBox, QGridLayout, QVBoxLayout)
+from PySide6.QtCore import Slot
+from PySide6.QtWidgets import (QDialog, QFormLayout, QPlainTextEdit, QLineEdit,
+                               QDialogButtonBox, QVBoxLayout)
 
 
 class AddDialogWidget(QDialog):
@@ -14,31 +14,35 @@ class AddDialogWidget(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        name_label = QLabel("Name")
-        address_label = QLabel("Address")
-        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok
-                                      | QDialogButtonBox.StandardButton.Cancel)
+        self._button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok
+                                            | QDialogButtonBox.StandardButton.Cancel)
 
         self._name_text = QLineEdit()
-        self._address_text = QTextEdit()
+        self._address_text = QPlainTextEdit()
 
-        grid = QGridLayout()
-        grid.setColumnStretch(1, 2)
-        grid.addWidget(name_label, 0, 0)
-        grid.addWidget(self._name_text, 0, 1)
-        grid.addWidget(address_label, 1, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
-        grid.addWidget(self._address_text, 1, 1, Qt.AlignmentFlag.AlignLeft)
+        formLayout = QFormLayout()
+        formLayout.addRow("Name", self._name_text)
+        formLayout.addRow("Address", self._address_text)
 
-        layout = QVBoxLayout()
-        layout.addLayout(grid)
-        layout.addWidget(button_box)
-
-        self.setLayout(layout)
+        layout = QVBoxLayout(self)
+        layout.addLayout(formLayout)
+        layout.addWidget(self._button_box)
 
         self.setWindowTitle("Add a Contact")
 
-        button_box.accepted.connect(self.accept)
-        button_box.rejected.connect(self.reject)
+        self._button_box.accepted.connect(self.accept)
+        self._button_box.rejected.connect(self.reject)
+        self._name_text.textChanged.connect(self._updateEnabled)
+        self._address_text.textChanged.connect(self._updateEnabled)
+
+        self._updateEnabled()
+
+    @Slot()
+    def _updateEnabled(self):
+        name = self.name
+        address = self.address
+        enabled = bool(name) and name[:1].isalpha() and bool(address)
+        self._button_box.button(QDialogButtonBox.StandardButton.Ok).setEnabled(enabled)
 
     # These properties make using this dialog a little cleaner. It's much
     # nicer to type "addDialog.address" to retrieve the address as compared
@@ -47,20 +51,22 @@ class AddDialogWidget(QDialog):
     def name(self):
         return self._name_text.text()
 
+    @name.setter
+    def name(self, n):
+        self._name_text.setText(n)
+
+    @property
+    def name_enabled(self):
+        return self._name_text.isEnabled()
+
+    @name_enabled.setter
+    def name_enabled(self, e):
+        self._name_text.setEnabled(e)
+
     @property
     def address(self):
         return self._address_text.toPlainText()
 
-
-if __name__ == "__main__":
-    import sys
-    from PySide6.QtWidgets import QApplication
-
-    app = QApplication(sys.argv)
-
-    dialog = AddDialogWidget()
-    if (dialog.exec()):
-        name = dialog.name
-        address = dialog.address
-        print(f"Name: {name}")
-        print(f"Address: {address}")
+    @address.setter
+    def address(self, a):
+        self._address_text.setPlainText(a)
