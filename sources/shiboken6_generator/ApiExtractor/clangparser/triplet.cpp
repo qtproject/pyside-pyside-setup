@@ -112,7 +112,7 @@ static Platform hostPlatform()
 static QVersionNumber hostPlatformVersion()
 {
     auto ov = QOperatingSystemVersion::current();
-    return ov.type() != QOperatingSystemVersionBase::Unknown ? ov.version() : QVersionNumber{};
+    return ov.type() != QOperatingSystemVersion::Unknown ? ov.version() : QVersionNumber{};
 }
 
 Triplet::Triplet() = default;
