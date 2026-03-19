@@ -33,6 +33,8 @@ public:
 
     FileModelItem dom() const;
 
+    QStringList rejectedTypes() const;
+
 private:
     BuilderPrivate *d;
 };

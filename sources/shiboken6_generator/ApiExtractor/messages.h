@@ -299,4 +299,6 @@ QString msgSynthesizedFunction(const AbstractMetaFunctionCPtr &newFunction,
 
 QString msgOwnerThreadForNonQObject(const AbstractMetaClassCPtr &metaClass);
 
+QString msgRejectedTypes(const QStringList &rejectedTypes);
+
 #endif // MESSAGES_H

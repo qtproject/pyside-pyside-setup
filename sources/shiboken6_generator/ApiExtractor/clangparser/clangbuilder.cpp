@@ -19,6 +19,10 @@
 #include <QtCore/qstack.h>
 #include <QtCore/qlist.h>
 
+#include <algorithm>
+#include <optional>
+#include <set>
+
 using namespace Qt::StringLiterals;
 
 namespace clang {
@@ -159,10 +163,10 @@ public:
     FunctionModelItem createMemberFunction(const CXCursor &cursor,
                                            bool isTemplateCode = false);
     void qualifyConstructor(const CXCursor &cursor);
-    TypeInfo createTypeInfoUncached(const CXType &type,
-                                    bool *cacheable = nullptr) const;
-    TypeInfo createTypeInfo(const CXType &type) const;
-    TypeInfo createTypeInfo(const CXCursor &cursor) const
+    std::optional<TypeInfo> createTypeInfoUncached(const CXType &type,
+                                                   bool *cacheable = nullptr) const;
+    std::optional<TypeInfo> createTypeInfo(const CXType &type) const;
+    std::optional<TypeInfo> createTypeInfo(const CXCursor &cursor) const
     { return createTypeInfo(clang_getCursorType(cursor)); }
     void addTemplateInstantiations(const CXType &type,
                                    QString *typeName,
@@ -176,7 +180,7 @@ public:
 
     TemplateParameterModelItem createTemplateParameter(const CXCursor &cursor) const;
     TemplateParameterModelItem createNonTypeTemplateParameter(const CXCursor &cursor) const;
-    void addField(const CXCursor &cursor);
+    void addField(const CXCursor &cursor, bool staticField = false);
 
     static QString cursorValueExpression(BaseVisitor *bv, const CXCursor &cursor);
     std::pair<QString, ClassModelItem> getBaseClass(CXType type) const;
@@ -215,6 +219,7 @@ public:
     CodeModel::FunctionType m_currentFunctionType = CodeModel::Normal;
     bool m_withinFriendDecl = false;
     mutable QHash<QString, SpecialSystemHeader> m_systemHeaders;
+    mutable std::set<QString> m_rejectedTypes;
 };
 
 bool BuilderPrivate::addClass(const CXCursor &cursor, CodeModel::ClassType t)
@@ -328,7 +333,10 @@ FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
     auto result = std::make_shared<_FunctionModelItem>(name);
     setFileName(cursor, result.get());
     const auto type = clang_getCursorResultType(cursor);
-    result->setType(createTypeInfo(type));
+    auto resultTypeO = createTypeInfo(type);
+    if (!resultTypeO.has_value())
+        return {};
+    result->setType(resultTypeO.value());
     result->setScopeResolution(hasScopeResolution(type));
     result->setFunctionType(t);
     result->setScope(m_scope);
@@ -387,6 +395,8 @@ FunctionModelItem BuilderPrivate::createMemberFunction(const CXCursor &cursor,
         : functionTypeFromCursor(cursor);
     isTemplateCode |= m_currentClass->name().endsWith(u'>');
     auto result = createFunction(cursor, functionType, isTemplateCode);
+    if (!result)
+        return result;
     result->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
     result->setConstant(clang_CXXMethod_isConst(cursor) != 0);
     result->setAttribute(FunctionAttribute::Static, clang_CXXMethod_isStatic(cursor) != 0);
@@ -420,19 +430,26 @@ TemplateParameterModelItem BuilderPrivate::createTemplateParameter(const CXCurso
 
 TemplateParameterModelItem BuilderPrivate::createNonTypeTemplateParameter(const CXCursor &cursor) const
 {
+    auto typeO = createTypeInfo(clang_getCursorType(cursor));
+    if (!typeO.has_value())
+        return {};
     TemplateParameterModelItem result = createTemplateParameter(cursor);
-    result->setType(createTypeInfo(clang_getCursorType(cursor)));
+    result->setType(typeO.value());
     return result;
 }
 
 // CXCursor_VarDecl, CXCursor_FieldDecl cursors
-void BuilderPrivate::addField(const CXCursor &cursor)
+void BuilderPrivate::addField(const CXCursor &cursor, bool staticField)
 {
+    auto typeO = createTypeInfo(cursor);
+    if (!typeO.has_value())
+        return;
     auto field = std::make_shared<_VariableModelItem>(getCursorSpelling(cursor));
     field->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
     field->setScope(m_scope);
-    field->setType(createTypeInfo(cursor));
+    field->setType(typeO.value());
     field->setMutable(clang_CXXField_isMutable(cursor) != 0);
+    field->setStatic(staticField);
     setFileName(cursor, field.get());
     m_currentField = field;
     m_scopeStack.back()->addVariable(field);
@@ -484,7 +501,10 @@ bool BuilderPrivate::addTemplateInstantiationsRecursion(const CXType &type, Type
                 // of a non-type template (template <int v>).
                 if (argType.kind == CXType_Invalid)
                     return false;
-                t->addInstantiation(createTypeInfoUncached(argType));
+                auto typeO = createTypeInfoUncached(argType);
+                if (!typeO.has_value())
+                    return false;
+                t->addInstantiation(typeO.value());
             }
         }
         break;
@@ -553,20 +573,26 @@ static QString fixTypeName(QString typeName)
     return typeName;
 }
 
-TypeInfo BuilderPrivate::createTypeInfoUncached(const CXType &type,
-                                                bool *cacheable) const
+std::optional<TypeInfo>
+    BuilderPrivate::createTypeInfoUncached(const CXType &type, bool *cacheable) const
 {
     if (type.kind == CXType_Pointer) { // Check for function pointers, first.
         const CXType pointeeType = clang_getPointeeType(type);
         const int argCount = clang_getNumArgTypes(pointeeType);
         if (argCount >= 0) {
-            TypeInfo result = createTypeInfoUncached(clang_getResultType(pointeeType),
-                                                     cacheable);
+            auto resultO = createTypeInfoUncached(clang_getResultType(pointeeType), cacheable);
+            if (!resultO.has_value())
+                return std::nullopt;
+            auto result = resultO.value();
             result.setTypeCategory(TypeCategory::Pointer);
             result.setFunctionPointer(true);
-            for (int a = 0; a < argCount; ++a)
-                result.addArgument(createTypeInfoUncached(clang_getArgType(pointeeType, unsigned(a)),
-                                                          cacheable));
+            for (int a = 0; a < argCount; ++a) {
+                auto argTypeInfoO =
+                    createTypeInfoUncached(clang_getArgType(pointeeType, unsigned(a)), cacheable);
+                if (!argTypeInfoO.has_value())
+                    return std::nullopt;
+                result.addArgument(argTypeInfoO.value());
+            }
             return result;
         }
     }
@@ -632,24 +658,27 @@ TypeInfo BuilderPrivate::createTypeInfoUncached(const CXType &type,
     return typeInfo;
 }
 
-TypeInfo BuilderPrivate::createTypeInfo(const CXType &type) const
+std::optional<TypeInfo> BuilderPrivate::createTypeInfo(const CXType &type) const
 {
     const auto it = m_typeInfoHash.constFind(type);
     if (it != m_typeInfoHash.constEnd())
         return it.value();
     bool cacheable = true;
-    TypeInfo result = createTypeInfoUncached(type, &cacheable);
-    if (cacheable)
-        m_typeInfoHash.insert(type, result);
-    return result;
+    auto resultO = createTypeInfoUncached(type, &cacheable);
+    if (resultO.has_value() && cacheable)
+        m_typeInfoHash.insert(type, resultO.value());
+    return resultO;
 }
 
 void BuilderPrivate::addTypeDef(const CXCursor &cursor, const CXType &cxType)
 {
     const QString target = getCursorSpelling(cursor);
+    auto typeInfoO = createTypeInfo(cxType);
+    if (!typeInfoO.has_value())
+        return;
     auto item = std::make_shared<_TypeDefModelItem>(target);
     setFileName(cursor, item.get());
-    item->setType(createTypeInfo(cxType));
+    item->setType(typeInfoO.value());
     item->setScope(m_scope);
     item->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
     m_scopeStack.back()->addTypeDef(item);
@@ -679,8 +708,10 @@ void BuilderPrivate::endTemplateTypeAlias(const CXCursor &typeAliasCursor)
     // Usually "<elaborated>std::list<T>" or "<unexposed>Container1<T>",
     // as obtained with parser of PYSIDE-323
     if (type.kind == CXType_Unexposed || type.kind == CXType_Elaborated) {
-        m_currentTemplateTypeAlias->setType(createTypeInfo(type));
-        m_scopeStack.back()->addTemplateTypeAlias(m_currentTemplateTypeAlias);
+        if (auto typeO = createTypeInfo(type)) {
+            m_currentTemplateTypeAlias->setType(typeO.value());
+            m_scopeStack.back()->addTemplateTypeAlias(m_currentTemplateTypeAlias);
+        }
     }
     m_currentTemplateTypeAlias.reset();
 }
@@ -738,8 +769,10 @@ std::pair<QString, ClassModelItem> BuilderPrivate::getBaseClass(CXType type) con
     const auto decl = resolveBaseClassType(type);
     // Note: spelling has "struct baseClass", use type
     QString baseClassName = getTypeName(decl.type);
-    if (baseClassName.startsWith(u"std::")) // Simplify "std::" types
-        baseClassName = createTypeInfo(decl.type).toString();
+    if (baseClassName.startsWith(u"std::")) { // Simplify "std::" types
+        if (auto typeO = createTypeInfo(decl.type))
+            baseClassName = typeO.value().toString();
+    }
 
     auto it = m_cursorClassHash.constFind(decl.declaration);
     // Not found: Set unqualified name. This happens in cases like
@@ -921,6 +954,11 @@ FileModelItem Builder::dom() const
     return std::dynamic_pointer_cast<_FileModelItem>(rootScope);
 }
 
+QStringList Builder::rejectedTypes() const
+{
+    return {d->m_rejectedTypes.cbegin(), d->m_rejectedTypes.cend()};
+}
+
 static QString msgOutOfOrder(const CXCursor &cursor, const char *expectedScope)
 {
     return getCursorKindName(cursor.kind) + u' '
@@ -1063,10 +1101,8 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         break;
     case CXCursor_VarDecl:
         // static class members are seen as CXCursor_VarDecl
-        if (isClassOrNamespaceCursor(clang_getCursorSemanticParent(cursor))) {
-             d->addField(cursor);
-             d->m_currentField->setStatic(true);
-        }
+        if (isClassOrNamespaceCursor(clang_getCursorSemanticParent(cursor)))
+            d->addField(cursor, true);
         break;
     case CXCursor_FieldDecl:
         d->addField(cursor);
@@ -1077,12 +1113,16 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
     case CXCursor_Constructor:
     case CXCursor_Destructor: // Note: Also use clang_CXXConstructor_is..Constructor?
     case CXCursor_CXXMethod:
-    case CXCursor_ConversionFunction:
+    case CXCursor_ConversionFunction: {
         // Member functions of other classes can be declared to be friends.
         // Skip inline member functions outside class, only go by declarations inside class
         if (d->m_withinFriendDecl || !withinClassDeclaration(cursor))
             return Skip;
-        d->m_currentFunction = d->createMemberFunction(cursor, false);
+        auto func = d->createMemberFunction(cursor, false);
+        if (!func)
+            return Skip;
+        d->m_currentFunction = func;
+    }
         break;
     // Not fully supported, currently, seen as normal function
     // Note: May appear inside class (member template) or outside (free template).
@@ -1090,21 +1130,29 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         const CXCursor semParent = clang_getCursorSemanticParent(cursor);
         if (isClassCursor(semParent)) {
             if (semParent == clang_getCursorLexicalParent(cursor)) {
-                d->m_currentFunction = d->createMemberFunction(cursor, true);
-                break;
+                if (auto func = d->createMemberFunction(cursor, true)) {
+                    d->m_currentFunction = func;
+                    break;
+                }
             }
             return Skip; // inline member functions outside class
         }
-    }
-        d->m_currentFunction = d->createFunction(cursor, CodeModel::Normal, true);
+        auto func = d->createFunction(cursor, CodeModel::Normal, true);
+        if (!func)
+            return Skip;
+        d->m_currentFunction = func;
         d->setFileName(cursor, d->m_currentFunction.get());
+    }
         break;
     case CXCursor_FunctionDecl:
         // Free functions or functions completely defined within "friend" (class
         // operators). Note: CXTranslationUnit_SkipFunctionBodies must be off for
         // clang_isCursorDefinition() to work here.
         if (!d->m_withinFriendDecl || clang_isCursorDefinition(cursor) != 0) {
-            d->m_currentFunction = d->createFunction(cursor, CodeModel::Normal, false);
+            auto func = d->createFunction(cursor, CodeModel::Normal, false);
+            if (!func)
+                return Skip;
+            d->m_currentFunction = func;
             d->m_currentFunction->setHiddenFriend(d->m_withinFriendDecl);
         }
         break;
@@ -1135,10 +1183,15 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         // and function pointer typedefs.
         if (!d->m_currentArgument && d->m_currentFunction) {
             const QString name = getCursorSpelling(cursor);
-            d->m_currentArgument = std::make_shared<_ArgumentModelItem>(name);
             const auto type = clang_getCursorType(cursor);
+            auto typeO = d->createTypeInfo(type);
+            if (!typeO.has_value()) {
+                d->m_currentFunction.reset();
+                return Skip;
+            }
+            d->m_currentArgument = std::make_shared<_ArgumentModelItem>(name);
             d->m_currentArgument->setScopeResolution(hasScopeResolution(type));
-            d->m_currentArgument->setType(d->createTypeInfo(type));
+            d->m_currentArgument->setType(typeO.value());
             d->m_currentFunction->addArgument(d->m_currentArgument);
             QString defaultValueExpression = BuilderPrivate::cursorValueExpression(this, cursor);
             if (!defaultValueExpression.isEmpty()) {
@@ -1155,10 +1208,30 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
             ? d->createTemplateParameter(cursor) : d->createNonTypeTemplateParameter(cursor);
         // Apply to function/member template?
         if (d->m_currentFunction) {
+            if (!tItem) {
+                d->m_currentFunction.reset();
+                return Skip;
+            }
             d->m_currentFunction->addTemplateParameter(tItem);
         } else if (d->m_currentTemplateTypeAlias) {
+            if (!tItem) {
+                d->m_currentTemplateTypeAlias.reset();
+                return Skip;
+            }
             d->m_currentTemplateTypeAlias->addTemplateParameter(tItem);
         } else if (d->m_currentClass) { // Apply to class
+            if (!tItem) {
+                // Failure is fatal if the first parameter cannot be determined, trailing
+                // parameters will be warned about.
+                const bool fatal = d->m_currentClass->templateParameters().isEmpty();
+                const QString message = "Failed to determine template parameter of "_L1
+                                        + d->m_currentClass->name();
+                const Diagnostic d(message, cursor,
+                                   fatal ? CXDiagnostic_Error : CXDiagnostic_Warning);
+                qWarning() << d;
+                appendDiagnostic(d);
+                return fatal ? Error : Skip;
+            }
             const QString &tplParmName = tItem->name();
             if (Q_UNLIKELY(!insertTemplateParameterIntoClassName(tplParmName, d->m_currentClass)
                            || !insertTemplateParameterIntoClassName(tplParmName, &d->m_scope.back()))) {

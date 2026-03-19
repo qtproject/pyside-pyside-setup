@@ -535,6 +535,10 @@ FileModelItem AbstractMetaBuilderPrivate::buildDom(QByteArrayList arguments,
         for (qsizetype i = 0; i < diagnosticsCount; ++i)
             d << "  " << diagnostics.at(i) << '\n';
     }
+
+    if (const auto rejectedTypes = builder.rejectedTypes(); !rejectedTypes.isEmpty())
+        ReportHandler::addGeneralMessage(msgRejectedTypes(rejectedTypes));
+
     return result;
 }
 
