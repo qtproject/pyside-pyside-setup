@@ -4,12 +4,49 @@
 #include "testclangparser.h"
 #include <abstractmetabuilder_testutil.h>
 
+#include <clangparser/clangtype.h>
 #include <clangparser/triplet.h>
+
 #include <parser/codemodel.h>
 
 #include <QtTest/qtest.h>
 
 using namespace Qt::StringLiterals;
+
+void TestClangParser::testClangTypeParsing_data()
+{
+    QTest::addColumn<QString>("typeString");
+    QTest::addColumn<bool>("expectedSuccess");
+    QTest::addColumn<QString>("expectedTypeName");
+    QTest::addColumn<QString>("expectedTemplateParameters");
+
+    QTest::newRow("list")
+        << QString(u"std::list<int, std::allocator<int>>::value_type"_s)
+        << true << QString(u"std::list::value_type"_s) << QString{};
+
+    QTest::newRow("mapData")
+        << QString(u"QMapData<std::map<QString, QVariant, std::less<QString>, std::allocator<std::pair<const QString, QVariant>>>>::const_iterator<U, V>"_s)
+        << true << QString(u"QMapData::const_iterator"_s) << QString(u"<U, V>"_s);
+
+    QTest::newRow("fail") // unbalanced '>'
+        << QString(u"__optional_relop_t<decltype(std::declval<const _Tp &>() > std::declval<const _Up &>())>"_s)
+        << false << QString{} <<  QString{};
+}
+
+void TestClangParser::testClangTypeParsing()
+{
+    QFETCH(QString, typeString);
+    QFETCH(bool, expectedSuccess);
+    QFETCH(QString, expectedTypeName);
+    QFETCH(QString, expectedTemplateParameters);
+
+    auto typeNameO = clang::parseTypeName(typeString);
+    QCOMPARE(typeNameO.has_value(), expectedSuccess);
+    if (typeNameO.has_value()) {
+        QCOMPARE(typeNameO->name, expectedTypeName);
+        QCOMPARE(typeNameO->templateParameters, expectedTemplateParameters);
+    }
+}
 
 void TestClangParser::testParseTriplet_data()
 {

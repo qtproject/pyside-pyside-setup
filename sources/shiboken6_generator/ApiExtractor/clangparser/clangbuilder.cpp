@@ -4,6 +4,7 @@
 #include "clangbuilder.h"
 #include "compilersupport.h"
 #include "clangutils.h"
+#include "clangtype.h"
 #include "clangdebugutils.h"
 
 #include <codemodel.h>
@@ -171,7 +172,7 @@ public:
     std::optional<TypeInfo> createFunctionTypeInfo(const CXType &type, TypeCategory cat,
                                                    bool *cacheable) const;
     void addTemplateInstantiations(const CXType &type,
-                                   QString *typeName,
+                                   const QString &templateParameters,
                                    TypeInfo *t) const;
     bool addTemplateInstantiationsRecursion(const CXType &type, TypeInfo *t) const;
 
@@ -457,27 +458,6 @@ void BuilderPrivate::addField(const CXCursor &cursor, bool staticField)
     m_scopeStack.back()->addVariable(field);
 }
 
-// Create qualified name "std::list<std::string>" -> ("std", "list<std::string>")
-static QStringList qualifiedName(const QString &t)
-{
-    QStringList result;
-    auto end = t.indexOf(u'<');
-    if (end == -1)
-        end = t.indexOf(u'(');
-    if (end == -1)
-        end = t.size();
-    qsizetype lastPos = 0;
-    while (true) {
-        const auto nextPos = t.indexOf(u"::"_s, lastPos);
-        if (nextPos < 0 || nextPos >= end)
-            break;
-        result.append(t.mid(lastPos, nextPos - lastPos));
-        lastPos = nextPos + 2;
-    }
-    result.append(t.right(t.size() - lastPos));
-    return result;
-}
-
 static bool isArrayType(CXTypeKind k)
 {
     return k == CXType_ConstantArray || k == CXType_IncompleteArray
@@ -516,10 +496,8 @@ bool BuilderPrivate::addTemplateInstantiationsRecursion(const CXType &type, Type
     return true;
 }
 
-static void dummyTemplateArgumentHandler(int, QStringView) {}
-
 void BuilderPrivate::addTemplateInstantiations(const CXType &type,
-                                               QString *typeName,
+                                               const QString &templateParameters,
                                                TypeInfo *t) const
 {
     // In most cases, for templates like "Vector<A>", Clang will give us the
@@ -530,16 +508,12 @@ void BuilderPrivate::addTemplateInstantiations(const CXType &type,
     //    Vector(const Vector&);
     // };
     // In that case, have TypeInfo parse the list from the spelling.
-    // Finally, remove the list "<>" from the type name.
     const bool parsed = addTemplateInstantiationsRecursion(type, t)
         && !t->instantiations().isEmpty();
-    if (!parsed)
+    if (!parsed) {
         t->setInstantiations({});
-    const auto pos = parsed
-        ? parseTemplateArgumentList(*typeName, dummyTemplateArgumentHandler)
-        : t->parseTemplateArgumentList(*typeName);
-    if (pos.first != -1 && pos.second != -1 && pos.second > pos.first)
-        typeName->remove(pos.first, pos.second - pos.first);
+        t->parseTemplateArgumentList(templateParameters);
+    }
 }
 
 static TypeCategory typeCategoryFromClang(CXTypeKind k)
@@ -675,10 +649,18 @@ std::optional<TypeInfo>
 
     // Obtain template instantiations if the name has '<' (thus excluding
     // typedefs like "std::string".
-    if (typeName.contains(u'<'))
-        addTemplateInstantiations(nestedType, &typeName, &typeInfo);
 
-    typeInfo.setQualifiedName(qualifiedName(typeName));
+    auto clangTypeNameO = clang::parseTypeName(typeName);
+    if (!clangTypeNameO.has_value()) {
+        m_rejectedTypes.insert(typeName);
+        return std::nullopt;
+    }
+
+    const auto &clangTypeName = clangTypeNameO.value();
+    if (!clangTypeName.templateParameters.isEmpty())
+        addTemplateInstantiations(nestedType, clangTypeName.templateParameters, &typeInfo);
+
+    typeInfo.setQualifiedName(clangTypeName.name.split("::"_L1));
     // 3320:CINDEX_LINKAGE int clang_getNumArgTypes(CXType T); function ptr types?
     typeInfo.simplifyStdType();
     return typeInfo;

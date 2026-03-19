@@ -78,6 +78,7 @@ xmlutils.cpp xmlutils.h xmlutils_libxslt.h xmlutils_qt.h
 clangparser/clangbuilder.cpp clangparser/clangbuilder.h
 clangparser/clangdebugutils.cpp clangparser/clangdebugutils.h
 clangparser/clangparser.cpp clangparser/clangparser.h
+clangparser/clangtype.cpp clangparser/clangtype.h
 clangparser/clangutils.cpp clangparser/clangutils.h
 clangparser/compilersupport.cpp clangparser/compilersupport.h
 clangparser/triplet.cpp clangparser/triplet.h
