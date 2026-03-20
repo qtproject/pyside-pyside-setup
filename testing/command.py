@@ -142,9 +142,9 @@ def main():
     global COIN_THRESHOLD
     # create the top-level command parser
     start_time = timer()
-    all_projects = "shiboken6 pyside6".split()
-    tested_projects = "shiboken6 pyside6".split()
-    tested_projects_quoted = " ".join("'i'" for i in tested_projects)
+    all_projects = ["shiboken6_generator", "shiboken6", "pyside6"]
+    tested_projects = all_projects
+    tested_projects_quoted = " ".join(f'"{i}"' for i in tested_projects)
     runs = COIN_TESTING
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
