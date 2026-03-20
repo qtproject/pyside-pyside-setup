@@ -14,6 +14,8 @@
 
 #include <algorithm>
 
+using namespace Qt::StringLiterals;
+
 void TestReverseOperators::testReverseSum()
 {
     const char cppCode[] = "struct A {\n\
@@ -92,11 +94,12 @@ void TestReverseOperators::testReverseSumWithAmbiguity()
     QVERIFY(normalOp);
     QVERIFY(!normalOp->isReverseOperator());
     QCOMPARE(normalOp->arguments().size(), 1);
-    QCOMPARE(normalOp->minimalSignature(), u"operator+(B,A)");
+    constexpr auto expectedSignature = "operator+(A)"_L1;
+    QCOMPARE(normalOp->minimalSignature(), expectedSignature);
     QVERIFY(reverseOp);
     QVERIFY(reverseOp->isReverseOperator());
     QCOMPARE(reverseOp->arguments().size(), 1);
-    QCOMPARE(reverseOp->minimalSignature(), u"operator+(A,B)");
+    QCOMPARE(reverseOp->minimalSignature(), expectedSignature);
 }
 
 void  TestReverseOperators::testSpaceshipOperator()
