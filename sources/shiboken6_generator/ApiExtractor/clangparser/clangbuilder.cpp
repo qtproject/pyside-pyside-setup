@@ -563,6 +563,18 @@ static TypeCategory typeCategoryFromClang(CXTypeKind k)
     return TypeCategory::Other;
 }
 
+// Reject decltype() expressions, template parameter packs, etc.
+static inline bool checkTypeName(const QString &name)
+{
+    static constexpr QLatin1StringView exclusions[] = {
+        "decltype("_L1, "std::declval"_L1, "::detail::"_L1, "std::enable_if<"_L1,
+        "template "_L1, "..."_L1
+    };
+
+    auto excludedPred = [&name](QLatin1StringView ex) { return name.contains(ex); };
+    return std::none_of(std::begin(exclusions), std::end(exclusions), excludedPred);
+}
+
 static QString fixTypeName(QString typeName)
 {
     while (TypeInfo::stripLeadingConst(&typeName) || TypeInfo::stripLeadingVolatile(&typeName)) {
@@ -638,6 +650,11 @@ std::optional<TypeInfo>
     typeInfo.setVolatile(clang_isVolatileQualifiedType(nestedType) != 0);
 
     QString typeName = fixTypeName(getResolvedTypeName(nestedType));
+
+    if (!checkTypeName(typeName)) {
+        m_rejectedTypes.insert(typeName);
+        return std::nullopt;
+    }
 
     // For typedefs within templates or nested classes within templates (iterators):
     // "template <class T> class QList { using Value=T; .."
