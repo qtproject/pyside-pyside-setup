@@ -816,6 +816,7 @@ void AbstractMetaBuilderPrivate::addAbstractMetaClass(const AbstractMetaClassPtr
     }
 }
 
+// Returns newly created or continued namespace meta class
 AbstractMetaClassPtr
     AbstractMetaBuilderPrivate::traverseNamespace(const FileModelItem &dom,
                                                   const NamespaceModelItem &namespaceItem)
@@ -902,7 +903,7 @@ AbstractMetaClassPtr
     // Traverse namespaces recursively
     for (const NamespaceModelItem &ni : namespaceItem->namespaces()) {
         const auto mjc = traverseNamespace(dom, ni);
-        if (mjc) {
+        if (mjc && !metaClass->innerClasses().contains(mjc)) { // continued namspace?
             metaClass->addInnerClass(mjc);
             mjc->setEnclosingClass(metaClass);
             m_classToItem.insert(mjc, ni.get()); // Add for enum lookup.
