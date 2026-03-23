@@ -1083,7 +1083,6 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         if (d->m_withinFriendDecl || !withinClassDeclaration(cursor))
             return Skip;
         d->m_currentFunction = d->createMemberFunction(cursor, false);
-        d->m_scopeStack.back()->addFunction(d->m_currentFunction);
         break;
     // Not fully supported, currently, seen as normal function
     // Note: May appear inside class (member template) or outside (free template).
@@ -1092,7 +1091,6 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         if (isClassCursor(semParent)) {
             if (semParent == clang_getCursorLexicalParent(cursor)) {
                 d->m_currentFunction = d->createMemberFunction(cursor, true);
-                d->m_scopeStack.back()->addFunction(d->m_currentFunction);
                 break;
             }
             return Skip; // inline member functions outside class
@@ -1100,22 +1098,14 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
     }
         d->m_currentFunction = d->createFunction(cursor, CodeModel::Normal, true);
         d->setFileName(cursor, d->m_currentFunction.get());
-        d->m_scopeStack.back()->addFunction(d->m_currentFunction);
         break;
     case CXCursor_FunctionDecl:
         // Free functions or functions completely defined within "friend" (class
         // operators). Note: CXTranslationUnit_SkipFunctionBodies must be off for
         // clang_isCursorDefinition() to work here.
         if (!d->m_withinFriendDecl || clang_isCursorDefinition(cursor) != 0) {
-            auto scope = d->m_scopeStack.size() - 1; // enclosing class
-            if (d->m_withinFriendDecl) {
-                // Friend declaration: go back to namespace or file scope.
-                for (--scope;  d->m_scopeStack.at(scope)->kind() == _CodeModelItem::Kind_Class; --scope) {
-                }
-            }
             d->m_currentFunction = d->createFunction(cursor, CodeModel::Normal, false);
             d->m_currentFunction->setHiddenFriend(d->m_withinFriendDecl);
-            d->m_scopeStack.at(scope)->addFunction(d->m_currentFunction);
         }
         break;
     case CXCursor_Namespace: {
@@ -1290,9 +1280,10 @@ bool Builder::endToken(const CXCursor &cursor)
         d->m_currentField.reset();
         break;
     case CXCursor_Constructor:
-        d->qualifyConstructor(cursor);
         if (d->m_currentFunction) {
+            d->qualifyConstructor(cursor);
             d->m_currentFunction->_determineType();
+            d->m_scopeStack.back()->addFunction(d->m_currentFunction);
             d->m_currentFunction.reset();
         }
         break;
@@ -1302,12 +1293,28 @@ bool Builder::endToken(const CXCursor &cursor)
     case CXCursor_FunctionTemplate:
         if (d->m_currentFunction) {
             d->m_currentFunction->_determineType();
+            auto scope = d->m_scopeStack.size() - 1; // enclosing class
+            if (cursor.kind == CXCursor_FunctionDecl) {
+                // Free functions or functions completely defined within "friend" (class
+                // operators).
+                if (!d->m_withinFriendDecl || clang_isCursorDefinition(cursor) != 0) {
+                    if (d->m_withinFriendDecl) {
+                        // Friend declaration: go back to namespace or file scope.
+                        for (--scope;
+                             d->m_scopeStack.at(scope)->kind() == _CodeModelItem::Kind_Class;
+                             --scope) {
+                        }
+                    }
+                }
+            }
+            d->m_scopeStack.at(scope)->addFunction(d->m_currentFunction);
             d->m_currentFunction.reset();
         }
         break;
     case CXCursor_ConversionFunction:
         if (d->m_currentFunction) {
             d->m_currentFunction->setFunctionType(CodeModel::ConversionOperator);
+            d->m_scopeStack.back()->addFunction(d->m_currentFunction);
             d->m_currentFunction.reset();
         }
         break;
