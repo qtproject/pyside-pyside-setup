@@ -40,7 +40,7 @@ static inline bool withinClassDeclaration(const CXCursor &cursor)
     return isClassCursor(clang_getCursorLexicalParent(cursor));
 }
 
-static QString fixTypeName(QString t)
+static QString fixOperatorTypeName(QString t)
 {
     // Fix "Foo &" -> "Foo&", similarly "Bar **" -> "Bar**"
     auto pos = t.size() - 1;
@@ -324,7 +324,7 @@ FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
     QString name = getCursorSpelling(cursor);
     // Apply type fixes to "operator X &" -> "operator X&"
     if (name.startsWith(u"operator "))
-        name = fixTypeName(name);
+        name = fixOperatorTypeName(name);
     auto result = std::make_shared<_FunctionModelItem>(name);
     setFileName(cursor, result.get());
     const auto type = clang_getCursorResultType(cursor);
@@ -541,6 +541,18 @@ static TypeCategory typeCategoryFromClang(CXTypeKind k)
     return TypeCategory::Other;
 }
 
+static QString fixTypeName(QString typeName)
+{
+    while (TypeInfo::stripLeadingConst(&typeName) || TypeInfo::stripLeadingVolatile(&typeName)) {
+    }
+    static constexpr auto leadingTypename = "typename "_L1;
+    if (typeName.startsWith(leadingTypename))
+        typeName.remove(0, leadingTypename.size());
+    typeName.replace("<typename "_L1, "<"_L1);
+    typeName.replace(", typename "_L1, ", "_L1);
+    return typeName;
+}
+
 TypeInfo BuilderPrivate::createTypeInfoUncached(const CXType &type,
                                                 bool *cacheable) const
 {
@@ -590,10 +602,7 @@ TypeInfo BuilderPrivate::createTypeInfoUncached(const CXType &type,
     typeInfo.setConstant(clang_isConstQualifiedType(nestedType) != 0);
     typeInfo.setVolatile(clang_isVolatileQualifiedType(nestedType) != 0);
 
-    QString typeName = getResolvedTypeName(nestedType);
-    while (TypeInfo::stripLeadingConst(&typeName)
-           || TypeInfo::stripLeadingVolatile(&typeName)) {
-    }
+    QString typeName = fixTypeName(getResolvedTypeName(nestedType));
 
     // For typedefs within templates or nested classes within templates (iterators):
     // "template <class T> class QList { using Value=T; .."
