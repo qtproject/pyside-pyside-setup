@@ -36,8 +36,11 @@ compute_config_py_values(shiboken6_VERSION)
 
 shiboken_internal_set_python_site_packages()
 
+string(REGEX REPLACE "\\.[0-9]+\\.[0-9]+$" "" LLVM_VERSION "${LLVM_PACKAGE_VERSION}")
+
 set_cmake_cxx_flags()
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D QT_NO_CAST_FROM_ASCII -D QT_NO_CAST_TO_ASCII")
+set(CMAKE_CXX_FLAGS
+    "${CMAKE_CXX_FLAGS} -D QT_NO_CAST_FROM_ASCII -D QT_NO_CAST_TO_ASCII -D LLVM_VERSION=${LLVM_VERSION}")
 
 # Force usage of the C++17 standard
 set(CMAKE_CXX_STANDARD 17)

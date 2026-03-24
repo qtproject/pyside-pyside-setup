@@ -285,7 +285,8 @@ static void setupTarget(CXTranslationUnit translationUnit)
     QString message;
     {
         QTextStream str(&message);
-        str << "CLANG v" << CINDEX_VERSION_MAJOR << '.' << CINDEX_VERSION_MINOR
+        str << "CLANG v" << LLVM_VERSION << '/'
+            << CINDEX_VERSION_MAJOR << '.' << CINDEX_VERSION_MINOR
             << " targeting \"" << targetTriple << "\"/"
             << optionsTriplet().compilerTripletValue()
             << ", " << pointerSize << "bit";
