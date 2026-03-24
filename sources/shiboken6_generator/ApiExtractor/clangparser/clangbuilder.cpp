@@ -1156,7 +1156,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
             ? d->createTemplateParameter(cursor) : d->createNonTypeTemplateParameter(cursor);
         // Apply to function/member template?
         if (d->m_currentFunction) {
-            d->m_currentFunction->setTemplateParameters(d->m_currentFunction->templateParameters() << tItem);
+            d->m_currentFunction->addTemplateParameter(tItem);
         } else if (d->m_currentTemplateTypeAlias) {
             d->m_currentTemplateTypeAlias->addTemplateParameter(tItem);
         } else if (d->m_currentClass) { // Apply to class
@@ -1170,7 +1170,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
                 appendDiagnostic(d);
                 return Error;
             }
-            d->m_currentClass->setTemplateParameters(d->m_currentClass->templateParameters() << tItem);
+            d->m_currentClass->addTemplateParameter(tItem);
         }
     }
         break;

@@ -279,9 +279,9 @@ TemplateParameterList _ClassModelItem::templateParameters() const
     return m_templateParameters;
 }
 
-void _ClassModelItem::setTemplateParameters(const TemplateParameterList &templateParameters)
+void _ClassModelItem::addTemplateParameter(const TemplateParameterModelItem &templateParameter)
 {
-    m_templateParameters = templateParameters;
+    m_templateParameters.append(templateParameter);
 }
 
 bool _ClassModelItem::extendsClass(const QString &name) const
@@ -992,7 +992,8 @@ QString _FunctionModelItem::classQualifiedSignature() const
     QTextStream str(&result);
     if (m_attributes.testFlag(FunctionAttribute::Virtual))
         str << "virtual ";
-    str << type().toString() << ' ';
+    if (m_functionType != CodeModel::FunctionType::Constructor)
+        str << type().toString() << ' ';
     const auto &scopeList = scope();
     for (const auto &scope : scopeList)
         str << scope << "::";
@@ -1499,6 +1500,11 @@ _MemberModelItem::~_MemberModelItem() = default;
 void _MemberModelItem::setAccessPolicy(Access accessPolicy)
 {
     m_accessPolicy = accessPolicy;
+}
+
+void _MemberModelItem::addTemplateParameter(const TemplateParameterModelItem &templateParameter)
+{
+    m_templateParameters.append(templateParameter);
 }
 
 bool _MemberModelItem::isStatic() const

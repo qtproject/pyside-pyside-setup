@@ -259,7 +259,7 @@ public:
     void addBaseClass(const BaseClass &b) { m_baseClasses.append(b); }
 
     TemplateParameterList templateParameters() const;
-    void setTemplateParameters(const TemplateParameterList &templateParameters);
+    void addTemplateParameter(const TemplateParameterModelItem &templateParameter);
 
     bool extendsClass(const QString &name) const;
 
@@ -400,7 +400,7 @@ public:
     void setAccessPolicy(Access accessPolicy);
 
     TemplateParameterList templateParameters() const { return m_templateParameters; }
-    void setTemplateParameters(const TemplateParameterList &templateParameters) { m_templateParameters = templateParameters; }
+    void addTemplateParameter(const TemplateParameterModelItem &templateParameter);
 
     TypeInfo type() const;
     void setType(const TypeInfo &type);
