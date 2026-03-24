@@ -71,7 +71,6 @@ public:
     void setIndirections(int indirections);
 
     bool isFunctionPointer() const;
-    void setFunctionPointer(bool is);
 
     const QStringList &arrayElements() const;
     void setArrayElements(const QStringList &arrayElements);

@@ -168,6 +168,8 @@ public:
     std::optional<TypeInfo> createTypeInfo(const CXType &type) const;
     std::optional<TypeInfo> createTypeInfo(const CXCursor &cursor) const
     { return createTypeInfo(clang_getCursorType(cursor)); }
+    std::optional<TypeInfo> createFunctionTypeInfo(const CXType &type, TypeCategory cat,
+                                                   bool *cacheable) const;
     void addTemplateInstantiations(const CXType &type,
                                    QString *typeName,
                                    TypeInfo *t) const;
@@ -574,27 +576,34 @@ static QString fixTypeName(QString typeName)
 }
 
 std::optional<TypeInfo>
+    BuilderPrivate::createFunctionTypeInfo(const CXType &type, TypeCategory cat, bool *cacheable) const
+{
+    const int argCount = clang_getNumArgTypes(type);
+    if (argCount < 0)
+        return std::nullopt;
+    auto resultO = createTypeInfoUncached(clang_getResultType(type), cacheable);
+    if (!resultO.has_value())
+        return std::nullopt;
+    resultO->setTypeCategory(cat);
+    for (int a = 0; a < argCount; ++a) {
+        auto argTypeO = createTypeInfoUncached(clang_getArgType(type, unsigned(a)), cacheable);
+        if (!argTypeO.has_value())
+            return std::nullopt;
+        resultO->addArgument(argTypeO.value());
+    }
+    return resultO;
+}
+
+std::optional<TypeInfo>
     BuilderPrivate::createTypeInfoUncached(const CXType &type, bool *cacheable) const
 {
+    if (type.kind == CXType_FunctionProto)
+        return createFunctionTypeInfo(type, TypeCategory::Function, cacheable);
+
     if (type.kind == CXType_Pointer) { // Check for function pointers, first.
         const CXType pointeeType = clang_getPointeeType(type);
-        const int argCount = clang_getNumArgTypes(pointeeType);
-        if (argCount >= 0) {
-            auto resultO = createTypeInfoUncached(clang_getResultType(pointeeType), cacheable);
-            if (!resultO.has_value())
-                return std::nullopt;
-            auto result = resultO.value();
-            result.setTypeCategory(TypeCategory::Pointer);
-            result.setFunctionPointer(true);
-            for (int a = 0; a < argCount; ++a) {
-                auto argTypeInfoO =
-                    createTypeInfoUncached(clang_getArgType(pointeeType, unsigned(a)), cacheable);
-                if (!argTypeInfoO.has_value())
-                    return std::nullopt;
-                result.addArgument(argTypeInfoO.value());
-            }
-            return result;
-        }
+        if (pointeeType.kind == CXType_FunctionProto)
+            return createFunctionTypeInfo(pointeeType, TypeCategory::FunctionPointer, cacheable);
     }
 
     TypeInfo typeInfo;

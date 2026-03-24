@@ -5,6 +5,7 @@
 #include <abstractmetabuilder_testutil.h>
 
 #include <clangparser/triplet.h>
+#include <parser/codemodel.h>
 
 #include <QtTest/qtest.h>
 
@@ -96,6 +97,26 @@ void TestClangParser::testParseTriplet()
         if (expectedCompilerPresent)
             QCOMPARE(triplet.compiler(), expectedCompiler);
         QCOMPARE(triplet.toByteArray(), expectedConverted);
+    }
+}
+
+void TestClangParser::testFunctionPointers()
+{
+    static const char cppCode[] =R"(
+using FunctionType = void(int);
+using FunctionPointerType = void(*)(int);
+)";
+
+    auto dom = TestUtil::buildDom(cppCode);
+    QVERIFY(dom);
+    const auto &typeDefs = dom->typeDefs();
+    QCOMPARE(typeDefs.size(), 2);
+    for (const auto &typeDef : typeDefs) {
+        const auto &type = typeDef->type();
+        const auto expectedCategory = typeDef->name() == "FunctionType"_L1
+                                          ? TypeCategory::Function : TypeCategory::FunctionPointer;
+        QCOMPARE(type.arguments().size(), 1);
+        QCOMPARE(type.typeCategory(), expectedCategory);
     }
 }
 

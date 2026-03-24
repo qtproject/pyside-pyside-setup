@@ -59,13 +59,14 @@ enum class FunctionAttribute : std::uint8_t {
 Q_DECLARE_FLAGS(FunctionAttributes, FunctionAttribute)
 Q_DECLARE_OPERATORS_FOR_FLAGS(FunctionAttributes)
 
-// C++ type category for TypeInfo, reflecting clang's CXTypeKind
+// C++ type category for TypeInfo, roughly reflecting clang's CXTypeKind
 enum class TypeCategory : unsigned char {
     Other,
     Builtin,
     Enum,
     Pointer,
     Function,
+    FunctionPointer, // not present in clang
     Void
 };
 

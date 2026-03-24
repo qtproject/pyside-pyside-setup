@@ -2879,7 +2879,7 @@ std::optional<AbstractMetaType>
         newInfo.setIndirectionsV(typeInfo.indirectionsV());
         newInfo.setConstant(typeInfo.isConstant());
         newInfo.setVolatile(typeInfo.isVolatile());
-        newInfo.setFunctionPointer(typeInfo.isFunctionPointer());
+        newInfo.setTypeCategory(typeInfo.typeCategory());
         newInfo.setQualifiedName(typeInfo.qualifiedName());
         newInfo.setReferenceType(typeInfo.referenceType());
         newInfo.setVolatile(typeInfo.isVolatile());

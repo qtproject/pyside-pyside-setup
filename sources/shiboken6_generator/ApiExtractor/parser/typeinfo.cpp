@@ -41,8 +41,7 @@ public:
         struct {
             uint m_constant: 1;
             uint m_volatile: 1;
-            uint m_functionPointer: 1;
-            uint m_padding: 29;
+            uint m_padding: 30;
         };
     };
 
@@ -223,13 +222,7 @@ void TypeInfo::addIndirection(Indirection i)
 
 bool TypeInfo::isFunctionPointer() const
 {
-    return d->m_functionPointer;
-}
-
-void TypeInfo::setFunctionPointer(bool is)
-{
-    if (d->m_functionPointer != is)
-        d->m_functionPointer = is;
+    return d->m_category == TypeCategory::FunctionPointer;
 }
 
 const QStringList &TypeInfo::arrayElements() const
@@ -426,8 +419,11 @@ QString TypeInfo::toString() const
         break;
     }
 
-    if (isFunctionPointer()) {
-        tmp += u" (*)("_s;
+    if (d->m_category == TypeCategory::Function || d->m_category == TypeCategory::FunctionPointer) {
+        tmp += u' ';
+        if (d->m_category == TypeCategory::FunctionPointer)
+            tmp += "(*)"_L1;
+        tmp += u'(';
         for (qsizetype i = 0; i < d->m_arguments.size(); ++i) {
             if (i != 0)
                 tmp += u", "_s;
@@ -461,7 +457,7 @@ bool TypeInfoData::equals(const TypeInfoData &other) const
     return flags == other.flags
            && m_qualifiedName == other.m_qualifiedName
            && m_category == other.m_category
-           && (!m_functionPointer || m_arguments == other.m_arguments)
+           && m_arguments == other.m_arguments
            && m_instantiations == other.m_instantiations;
 }
 
@@ -602,8 +598,14 @@ void TypeInfo::formatDebug(QDebug &debug) const
         debug << ", [pointer]";
         break;
     case TypeCategory::Function:
-        debug << ", [function";
+        debug << ", [function]";
         break;
+    case TypeCategory::FunctionPointer:
+        debug << ", [function-ptr]";
+        break;
+    default:
+        break;
+
     }
     if (!d->m_indirections.isEmpty()) {
         debug << ", indirections=";
@@ -625,8 +627,12 @@ void TypeInfo::formatDebug(QDebug &debug) const
         formatSequence(debug, d->m_instantiations.begin(), d->m_instantiations.end());
         debug << '>';
     }
-    if (d->m_functionPointer) {
-        debug << ", function ptr(";
+
+    if (d->m_category == TypeCategory::Function || d->m_category == TypeCategory::FunctionPointer) {
+        debug << ", function";
+        if (d->m_category == TypeCategory::FunctionPointer)
+            debug << "_ptr";
+        debug << '(';
         formatSequence(debug, d->m_arguments.begin(), d->m_arguments.end());
         debug << ')';
     }
