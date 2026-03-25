@@ -45,6 +45,13 @@ log.setLevel(logging.DEBUG)
 NEW_WHEELS = False
 
 
+def is_pyenv_python():
+    pyenv_root = os.environ.get("PYENV_ROOT")
+    if pyenv_root and (resolved_exe := str(Path(sys.executable).resolve())):
+        return resolved_exe.startswith(pyenv_root)
+    return False
+
+
 def find_executable(executable, command_line_value):
     value = command_line_value
     option_str = f"--{executable}"
@@ -206,14 +213,16 @@ def run_nuitka_test(example):
         raise RuntimeError(f"Failure running {example} with Nuitka.")
 
 
-def _run_deploy_test(example, tmpdirname):
+def _run_deploy_test(example, tmpdirname, python_executable=None):
     """Helper for running deployment and example."""
+    if python_executable is None:
+        python_executable = sys.executable
     main_file = None
     for py_file in example.glob("*.py"):
         shutil.copy(py_file, tmpdirname)
         if not main_file or py_file.name == "main.py":
             main_file = py_file
-    deploy_tool = Path(sys.executable).parent / "pyside6-deploy"
+    deploy_tool = Path(python_executable).parent / "pyside6-deploy"
     cmd = [os.fspath(deploy_tool), "-f", main_file.name, "--init"]
     if run_process(cmd) != 0:
         raise RuntimeError("Error creating pysidedeploy.spec")
@@ -243,7 +252,7 @@ def _run_deploy_test(example, tmpdirname):
     return True
 
 
-def run_deploy_test(example):
+def run_deploy_test(example, python_executable=None):
     """Test pyside6-deploy."""
     log.info(f"Running deploy test of {example}")
     current_dir = Path.cwd()
@@ -251,7 +260,7 @@ def run_deploy_test(example):
     with tempfile.TemporaryDirectory() as tmpdirname:
         try:
             os.chdir(tmpdirname)
-            result = _run_deploy_test(example, tmpdirname)
+            result = _run_deploy_test(example, tmpdirname, python_executable)
         except RuntimeError as e:
             log.error(str(e))
             raise e
@@ -328,8 +337,18 @@ def try_build_examples():
     # disable for windows as it Nuitka --onefile deployment in Windows
     # requires DependencyWalker. Download and installing will slow down
     # Coin
-    if sys.platform != "win32":
+    # Skip on macOS with pyenv Python: Nuitka 2.8+ fails to scan OpenSSL
+    # dependencies of pyenv-built _hashlib. Homebrew Python works.
+    # See https://github.com/Nuitka/Nuitka/issues/3777
+    if sys.platform != "win32" and not (sys.platform == "darwin" and is_pyenv_python()):
         run_deploy_test(src_path)
+    elif sys.platform == "darwin" and is_pyenv_python():
+        alt_python = os.environ.get("ALTERNATIVE_PYTHON3_PATH")
+        if alt_python:
+            log.info(f"Using alternative Python for deploy test on macOS: {alt_python}")
+            run_deploy_test(src_path, python_executable=alt_python)
+        else:
+            log.info("Skipping deploy test on macOS with pyenv Python (Nuitka OpenSSL issue).")
 
     if False:  # pre 6.4.1, kept for reference
         # Nuitka is loaded by coin_build_instructions.py, but not when
