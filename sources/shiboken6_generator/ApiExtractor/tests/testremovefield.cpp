@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "testremovefield.h"
-#include "testutil.h"
 
 #include <abstractmetaargument.h>
+#include <abstractmetabuilder.h>
+#include <abstractmetabuilder_testutil.h>
 #include <abstractmetafield.h>
 #include <abstractmetafunction.h>
-#include <abstractmetatype.h>
 #include <abstractmetalang.h>
+#include <abstractmetatype.h>
 #include <typesystem.h>
 
 #include <QtTest/qtest.h>

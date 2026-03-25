@@ -2,16 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "testabstractmetatype.h"
-#include "testutil.h"
 #include <abstractmetaargument.h>
+#include <abstractmetabuilder.h>
+#include <abstractmetabuilder_testutil.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <abstractmetatype.h>
-#include <typesystem.h>
 #include <parser/codemodel.h>
 #include <typeparser.h>
-
-#include <qtcompat.h>
+#include <typesystem.h>
 
 #include <QtTest/qtest.h>
 

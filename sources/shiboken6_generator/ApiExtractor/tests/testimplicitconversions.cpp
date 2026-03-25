@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "testimplicitconversions.h"
-#include "testutil.h"
 
 #include <abstractmetaargument.h>
+#include <abstractmetabuilder.h>
+#include <abstractmetabuilder_testutil.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <abstractmetatype.h>

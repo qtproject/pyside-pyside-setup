@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "testmultipleinheritance.h"
-#include "testutil.h"
-
+#include <abstractmetabuilder_testutil.h>
+#include <abstractmetabuilder.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <typesystem.h>

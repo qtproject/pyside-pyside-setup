@@ -12,6 +12,7 @@ set(apiextractor_SRC
 abstractmetaargument.cpp abstractmetaargument.h
 abstractmetabuilder.cpp abstractmetabuilder.h abstractmetabuilder_p.h
 abstractmetabuilder_helpers.cpp
+abstractmetabuilder_testutil.cpp abstractmetabuilder_testutil.h
 abstractmetaenum.cpp abstractmetaenum.h
 abstractmetafield.cpp abstractmetafield.h
 abstractmetafunction.cpp abstractmetafunction.h

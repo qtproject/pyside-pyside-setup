@@ -2,16 +2,16 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "testarrayargument.h"
-#include "testutil.h"
+
 #include <abstractmetaargument.h>
+#include <abstractmetabuilder.h>
+#include <abstractmetabuilder_testutil.h>
 #include <abstractmetaenum.h>
 #include <abstractmetafunction.h>
 #include <abstractmetalang.h>
 #include <abstractmetatype.h>
 #include <primitivetypeentry.h>
 #include <parser/enumvalue.h>
-
-#include <qtcompat.h>
 
 #include <QtTest/qtest.h>
 

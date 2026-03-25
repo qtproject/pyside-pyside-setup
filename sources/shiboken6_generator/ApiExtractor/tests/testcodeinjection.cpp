@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "testcodeinjection.h"
-#include "testutil.h"
+
+#include <abstractmetabuilder.h>
+#include <abstractmetabuilder_testutil.h>
 #include <abstractmetalang.h>
 #include <codesnip.h>
+#include <complextypeentry.h>
 #include <modifications.h>
 #include <textstream.h>
-#include <complextypeentry.h>
 #include <valuetypeentry.h>
-
-#include <qtcompat.h>
 
 #include <QtCore/qdir.h>
 #include <QtCore/qfileinfo.h>
