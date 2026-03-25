@@ -3243,7 +3243,7 @@ QString AbstractMetaBuilder::fixDefaultValue(const QString &expr, const Abstract
 bool AbstractMetaBuilderPrivate::isEnum(const FileModelItem &dom, const QStringList& qualified_name)
 {
     CodeModelItem item = CodeModel::findItem(qualified_name, dom);
-    return item && item->kind() == _EnumModelItem::__node_kind;
+    return item && item->kind() == _CodeModelItem::Kind_Enum;
 }
 
 AbstractMetaClassPtr
@@ -3842,8 +3842,7 @@ void AbstractMetaBuilderPrivate::pushScope(const NamespaceModelItem &item)
         }
     }
     if (candidates.size() > 1) {
-        auto joined = std::make_shared<_NamespaceModelItem>(m_scopes.constLast()->model(),
-                                                            name, _CodeModelItem::Kind_Namespace);
+        auto joined = std::make_shared<_NamespaceModelItem>(name);
         joined->setScope(item->scope());
         for (const auto &n : candidates)
             joined->appendNamespace(*n);

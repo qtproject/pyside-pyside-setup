@@ -28,27 +28,6 @@ static std::shared_ptr<T> findModelItem(const QList<std::shared_ptr<T> > &list,
 
 // ---------------------------------------------------------------------------
 
-CodeModel::CodeModel() : m_globalNamespace(new _NamespaceModelItem(this))
-{
-}
-
-CodeModel::~CodeModel() = default;
-
-NamespaceModelItem CodeModel::globalNamespace() const
-{
-    return m_globalNamespace;
-}
-
-void CodeModel::addFile(const FileModelItem &item)
-{
-    m_files.append(item);
-}
-
-FileModelItem CodeModel::findFile(QAnyStringView name) const
-{
-    return findModelItem(m_files, name);
-}
-
 static CodeModelItem findRecursion(const ScopeModelItem &scope,
                                    const QStringList &qualifiedName, int segment = 0)
 {
@@ -102,44 +81,14 @@ QDebug operator<<(QDebug d, Access a)
     }
     return d;
 }
-
-QDebug operator<<(QDebug d, const CodeModel *m)
-{
-    QDebugStateSaver s(d);
-    d.noquote();
-    d.nospace();
-    d << "CodeModel(";
-    if (m) {
-        const NamespaceModelItem globalNamespaceP = m->globalNamespace();
-        if (globalNamespaceP)
-            globalNamespaceP->formatDebug(d);
-    } else {
-        d << '0';
-    }
-    d << ')';
-    return d;
-}
 #endif // !QT_NO_DEBUG_STREAM
 
 // ---------------------------------------------------------------------------
-_CodeModelItem::_CodeModelItem(CodeModel *model, int kind)
-        : m_model(model),
-        m_kind(kind),
-        m_startLine(0),
-        m_startColumn(0),
-        m_endLine(0),
-        m_endColumn(0)
+_CodeModelItem::_CodeModelItem(Kind kind) : m_kind(kind)
 {
 }
 
-_CodeModelItem::_CodeModelItem(CodeModel *model, const QString &name, int kind)
-    : m_model(model),
-    m_kind(kind),
-    m_startLine(0),
-    m_startColumn(0),
-    m_endLine(0),
-    m_endColumn(0),
-    m_name(name)
+_CodeModelItem::_CodeModelItem(const QString &name, Kind kind) : m_name(name), m_kind(kind)
 {
 }
 
@@ -195,11 +144,6 @@ void _CodeModelItem::setFileName(const QString &fileName)
     m_fileName = fileName;
 }
 
-FileModelItem _CodeModelItem::file() const
-{
-    return model()->findFile(fileName());
-}
-
 void _CodeModelItem::getStartPosition(int *line, int *column) const
 {
     *line = m_startLine;
@@ -237,16 +181,6 @@ const _ScopeModelItem *_CodeModelItem::enclosingScope() const
 void _CodeModelItem::setEnclosingScope(const _ScopeModelItem *s)
 {
     m_enclosingScope = s;
-}
-
-_ScopeModelItem::_ScopeModelItem(CodeModel *model, int kind)
-    : _CodeModelItem(model, kind)
-{
-}
-
-_ScopeModelItem::_ScopeModelItem(CodeModel *model, const QString &name, int kind)
-    : _CodeModelItem(model, name, kind)
-{
 }
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -358,13 +292,11 @@ bool _ClassModelItem::extendsClass(const QString &name) const
                        });
 }
 
-_ClassModelItem::_ClassModelItem(CodeModel *model, int kind)
-    : _ScopeModelItem(model, kind)
+_ClassModelItem::_ClassModelItem() : _ScopeModelItem(_CodeModelItem::Kind_Class)
 {
 }
 
-_ClassModelItem::_ClassModelItem(CodeModel *model, const QString &name, int kind)
-    : _ScopeModelItem(model, name, kind)
+_ClassModelItem::_ClassModelItem(const QString &name) : _ScopeModelItem(name, _CodeModelItem::Kind_Class)
 {
 }
 
@@ -754,13 +686,16 @@ FunctionList _ScopeModelItem::findFunctions(QAnyStringView name) const
 }
 
 // ---------------------------------------------------------------------------
-_NamespaceModelItem::_NamespaceModelItem(CodeModel *model, int kind)
-    : _ScopeModelItem(model, kind)
+_NamespaceModelItem::_NamespaceModelItem() : _ScopeModelItem(_CodeModelItem::Kind_Namespace)
 {
 }
 
-_NamespaceModelItem::_NamespaceModelItem(CodeModel *model, const QString &name, int kind)
-    : _ScopeModelItem(model, name, kind)
+_NamespaceModelItem::_NamespaceModelItem(const QString &name) :
+    _ScopeModelItem(name, _CodeModelItem::Kind_Namespace)
+{
+}
+
+_NamespaceModelItem::_NamespaceModelItem(Kind kind) : _ScopeModelItem(kind)
 {
 }
 
@@ -775,6 +710,10 @@ void _NamespaceModelItem::addNamespace(const NamespaceModelItem &item)
 NamespaceModelItem _NamespaceModelItem::findNamespace(QAnyStringView name) const
 {
     return findModelItem(m_namespaces, name);
+}
+
+_FileModelItem::_FileModelItem() : _NamespaceModelItem(_CodeModelItem::Kind_File)
+{
 }
 
 _FileModelItem::~_FileModelItem() = default;
@@ -804,13 +743,12 @@ void _NamespaceModelItem::formatDebug(QDebug &d) const
 #endif // !QT_NO_DEBUG_STREAM
 
 // ---------------------------------------------------------------------------
-_ArgumentModelItem::_ArgumentModelItem(CodeModel *model, int kind)
-    : _CodeModelItem(model, kind)
+_ArgumentModelItem::_ArgumentModelItem() : _CodeModelItem(_CodeModelItem::Kind_Argument)
 {
 }
 
-_ArgumentModelItem::_ArgumentModelItem(CodeModel *model, const QString &name, int kind)
-    : _CodeModelItem(model, name, kind)
+_ArgumentModelItem::_ArgumentModelItem(const QString &name)
+     : _CodeModelItem(name, _CodeModelItem::Kind_Argument)
 {
 }
 
@@ -894,13 +832,13 @@ bool _FunctionModelItem::isSimilar(const FunctionModelItem &other) const
     return true;
 }
 
-_FunctionModelItem::_FunctionModelItem(CodeModel *model, int kind)
-    : _MemberModelItem(model, kind), m_flags(0)
+_FunctionModelItem::_FunctionModelItem()
+    : _MemberModelItem(_CodeModelItem::Kind_Function), m_flags(0)
 {
 }
 
-_FunctionModelItem::_FunctionModelItem(CodeModel *model, const QString &name, int kind)
-    : _MemberModelItem(model, name, kind), m_flags(0)
+_FunctionModelItem::_FunctionModelItem(const QString &name)
+    : _MemberModelItem(name, _CodeModelItem::Kind_Function), m_flags(0)
 {
 }
 
@@ -1257,16 +1195,28 @@ void _FunctionModelItem::formatDebug(QDebug &d) const
 }
 #endif // !QT_NO_DEBUG_STREAM
 
-// ---------------------------------------------------------------------------
-_TypeDefModelItem::_TypeDefModelItem(CodeModel *model, int kind)
-    : _CodeModelItem(model, kind)
+_VariableModelItem::_VariableModelItem() : _MemberModelItem(_CodeModelItem::Kind_Variable)
 {
 }
 
-_TypeDefModelItem::_TypeDefModelItem(CodeModel *model, const QString &name, int kind)
-    : _CodeModelItem(model, name, kind)
+_VariableModelItem::_VariableModelItem(const QString &name)
+     : _MemberModelItem(name, _CodeModelItem::Kind_Variable)
 {
 }
+
+_VariableModelItem::~_VariableModelItem() = default;
+
+// ---------------------------------------------------------------------------
+_TypeDefModelItem::_TypeDefModelItem() : _CodeModelItem(_CodeModelItem::Kind_TypeDef)
+{
+}
+
+_TypeDefModelItem::_TypeDefModelItem(const QString &name)
+    : _CodeModelItem(name, _CodeModelItem::Kind_TypeDef)
+{
+}
+
+_TypeDefModelItem::~_TypeDefModelItem() = default;
 
 TypeInfo _TypeDefModelItem::type() const
 {
@@ -1303,11 +1253,17 @@ void _TypeDefModelItem::formatDebug(QDebug &d) const
 
 // ---------------------------------------------------------------------------
 
-_TemplateTypeAliasModelItem::_TemplateTypeAliasModelItem(CodeModel *model, int kind)
-    : _CodeModelItem(model, kind) {}
+_TemplateTypeAliasModelItem::_TemplateTypeAliasModelItem()
+    : _CodeModelItem(_CodeModelItem::Kind_TemplateTypeAlias)
+{
+}
 
-_TemplateTypeAliasModelItem::_TemplateTypeAliasModelItem(CodeModel *model, const QString &name, int kind)
-    : _CodeModelItem(model, name, kind) {}
+_TemplateTypeAliasModelItem::_TemplateTypeAliasModelItem(const QString &name)
+    : _CodeModelItem(name, _CodeModelItem::Kind_TemplateTypeAlias)
+{
+}
+
+_TemplateTypeAliasModelItem::~_TemplateTypeAliasModelItem() = default;
 
 TemplateParameterList _TemplateTypeAliasModelItem::templateParameters() const
 {
@@ -1344,13 +1300,12 @@ void _TemplateTypeAliasModelItem::formatDebug(QDebug &d) const
 #endif // !QT_NO_DEBUG_STREAM
 
 // ---------------------------------------------------------------------------
-_EnumModelItem::_EnumModelItem(CodeModel *model, const QString &name, int kind)
-    : _CodeModelItem(model, name, kind)
+_EnumModelItem::_EnumModelItem(const QString &name)
+    : _CodeModelItem(name, _CodeModelItem::Kind_Enum)
 {
 }
 
-_EnumModelItem::_EnumModelItem(CodeModel *model, int kind)
-    : _CodeModelItem(model, kind)
+_EnumModelItem::_EnumModelItem() : _CodeModelItem(_CodeModelItem::Kind_Enum)
 {
 }
 
@@ -1440,13 +1395,13 @@ void _EnumModelItem::formatDebug(QDebug &d) const
 // ---------------------------------------------------------------------------
 _EnumeratorModelItem::~_EnumeratorModelItem() = default;
 
-_EnumeratorModelItem::_EnumeratorModelItem(CodeModel *model, int kind)
-    : _CodeModelItem(model, kind)
+_EnumeratorModelItem::_EnumeratorModelItem()
+    : _CodeModelItem(_CodeModelItem::Kind_Enumerator)
 {
 }
 
-_EnumeratorModelItem::_EnumeratorModelItem(CodeModel *model, const QString &name, int kind)
-    : _CodeModelItem(model, name, kind)
+_EnumeratorModelItem::_EnumeratorModelItem(const QString &name)
+    : _CodeModelItem(name, _CodeModelItem::Kind_Enumerator)
 {
 }
 
@@ -1483,14 +1438,13 @@ void _EnumeratorModelItem::formatDebug(QDebug &d) const
 // ---------------------------------------------------------------------------
 _TemplateParameterModelItem::~_TemplateParameterModelItem() = default;
 
-_TemplateParameterModelItem::_TemplateParameterModelItem(CodeModel *model, int kind)
-    : _CodeModelItem(model, kind)
+_TemplateParameterModelItem::_TemplateParameterModelItem()
+    : _CodeModelItem(_CodeModelItem::Kind_TemplateParameter)
 {
 }
 
-_TemplateParameterModelItem::_TemplateParameterModelItem(CodeModel *model,
-                                                         const QString &name, int kind)
-    : _CodeModelItem(model, name, kind)
+_TemplateParameterModelItem::_TemplateParameterModelItem(const QString &name)
+    : _CodeModelItem(name, _CodeModelItem::Kind_TemplateParameter)
 {
 }
 
@@ -1557,13 +1511,13 @@ void _MemberModelItem::setStatic(bool isStatic)
     m_isStatic = isStatic;
 }
 
-_MemberModelItem::_MemberModelItem(CodeModel *model, int kind)
-    : _CodeModelItem(model, kind), m_flags(0)
+_MemberModelItem::_MemberModelItem(Kind kind)
+    : _CodeModelItem(kind), m_flags(0)
 {
 }
 
-_MemberModelItem::_MemberModelItem(CodeModel *model, const QString &name, int kind)
-    : _CodeModelItem(model, name, kind), m_flags(0)
+_MemberModelItem::_MemberModelItem(const QString &name, Kind kind)
+    : _CodeModelItem(name, kind), m_flags(0)
 {
 }
 

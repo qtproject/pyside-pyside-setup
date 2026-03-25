@@ -123,13 +123,9 @@ public:
     using CursorClassHash = QHash<CXCursor, ClassModelItem>;
     using TypeInfoHash = QHash<CXType, TypeInfo>;
 
-    explicit BuilderPrivate(BaseVisitor *bv) : m_baseVisitor(bv), m_model(new CodeModel)
+    explicit BuilderPrivate(BaseVisitor *bv) : m_baseVisitor(bv)
     {
-       m_scopeStack.push(NamespaceModelItem(new _FileModelItem(m_model)));
-    }
-    ~BuilderPrivate()
-    {
-        delete m_model;
+       m_scopeStack.push(std::make_shared<_FileModelItem>());
     }
 
     // Determine scope from top item. Note that the scope list does not necessarily
@@ -193,7 +189,6 @@ public:
     void setFileName(const CXCursor &cursor, _CodeModelItem *item) const;
 
     BaseVisitor *m_baseVisitor;
-    CodeModel *m_model;
 
     QStack<ScopeModelItem> m_scopeStack;
     QStringList m_scope;
@@ -225,7 +220,7 @@ public:
 bool BuilderPrivate::addClass(const CXCursor &cursor, CodeModel::ClassType t)
 {
     QString className = getCursorSpelling(cursor);
-    m_currentClass = std::make_shared<_ClassModelItem>(m_model, className);
+    m_currentClass = std::make_shared<_ClassModelItem>(className);
     setFileName(cursor, m_currentClass.get());
     m_currentClass->setClassType(t);
     // Some inner class? Note that it does not need to be (lexically) contained in a
@@ -330,7 +325,7 @@ FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
     // Apply type fixes to "operator X &" -> "operator X&"
     if (name.startsWith(u"operator "))
         name = fixTypeName(name);
-    auto result = std::make_shared<_FunctionModelItem>(m_model, name);
+    auto result = std::make_shared<_FunctionModelItem>(name);
     setFileName(cursor, result.get());
     const auto type = clang_getCursorResultType(cursor);
     result->setType(createTypeInfo(type));
@@ -420,7 +415,7 @@ void BuilderPrivate::qualifyConstructor(const CXCursor &cursor)
 
 TemplateParameterModelItem BuilderPrivate::createTemplateParameter(const CXCursor &cursor) const
 {
-    return std::make_shared<_TemplateParameterModelItem>(m_model, getCursorSpelling(cursor));
+    return std::make_shared<_TemplateParameterModelItem>(getCursorSpelling(cursor));
 }
 
 TemplateParameterModelItem BuilderPrivate::createNonTypeTemplateParameter(const CXCursor &cursor) const
@@ -433,7 +428,7 @@ TemplateParameterModelItem BuilderPrivate::createNonTypeTemplateParameter(const 
 // CXCursor_VarDecl, CXCursor_FieldDecl cursors
 void BuilderPrivate::addField(const CXCursor &cursor)
 {
-    auto field = std::make_shared<_VariableModelItem>(m_model, getCursorSpelling(cursor));
+    auto field = std::make_shared<_VariableModelItem>(getCursorSpelling(cursor));
     field->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
     field->setScope(m_scope);
     field->setType(createTypeInfo(cursor));
@@ -643,7 +638,7 @@ TypeInfo BuilderPrivate::createTypeInfo(const CXType &type) const
 void BuilderPrivate::addTypeDef(const CXCursor &cursor, const CXType &cxType)
 {
     const QString target = getCursorSpelling(cursor);
-    auto item = std::make_shared<_TypeDefModelItem>(m_model, target);
+    auto item = std::make_shared<_TypeDefModelItem>(target);
     setFileName(cursor, item.get());
     item->setType(createTypeInfo(cxType));
     item->setScope(m_scope);
@@ -664,7 +659,7 @@ ClassModelItem BuilderPrivate::currentTemplateClass() const
 void BuilderPrivate::startTemplateTypeAlias(const CXCursor &cursor)
 {
     const QString target = getCursorSpelling(cursor);
-    m_currentTemplateTypeAlias = std::make_shared<_TemplateTypeAliasModelItem>(m_model, target);
+    m_currentTemplateTypeAlias = std::make_shared<_TemplateTypeAliasModelItem>(target);
     setFileName(cursor, m_currentTemplateTypeAlias.get());
     m_currentTemplateTypeAlias->setScope(m_scope);
 }
@@ -1023,7 +1018,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
 #endif
             kind = EnumClass;
         }
-        d->m_currentEnum = std::make_shared<_EnumModelItem>(d->m_model, name);
+        d->m_currentEnum = std::make_shared<_EnumModelItem>(name);
         d->setFileName(cursor, d->m_currentEnum.get());
         d->m_currentEnum->setScope(d->m_scope);
         d->m_currentEnum->setEnumKind(kind);
@@ -1049,7 +1044,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
             enumValue.setValue(clang_getEnumConstantDeclValue(cursor));
         else
             enumValue.setUnsignedValue(clang_getEnumConstantDeclUnsignedValue(cursor));
-        auto enumConstant = std::make_shared<_EnumeratorModelItem>(d->m_model, name);
+        auto enumConstant = std::make_shared<_EnumeratorModelItem>(name);
         enumConstant->setStringValue(BuilderPrivate::cursorValueExpression(this, cursor));
         enumConstant->setValue(enumValue);
         if (clang_getCursorAvailability(cursor) == CXAvailability_Deprecated)
@@ -1128,10 +1123,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
             appendDiagnostic(d);
             return Error;
         }
-        // Treat namespaces separately to allow for extending namespaces
-        // in subsequent modules.
-        NamespaceModelItem namespaceItem = parentNamespaceItem->findNamespace(name);
-        namespaceItem = std::make_shared<_NamespaceModelItem>(d->m_model, name);
+        auto namespaceItem = std::make_shared<_NamespaceModelItem>(name);
         d->setFileName(cursor, namespaceItem.get());
         namespaceItem->setScope(d->m_scope);
         namespaceItem->setType(type);
@@ -1144,7 +1136,7 @@ BaseVisitor::StartTokenResult Builder::startToken(const CXCursor &cursor)
         // and function pointer typedefs.
         if (!d->m_currentArgument && d->m_currentFunction) {
             const QString name = getCursorSpelling(cursor);
-            d->m_currentArgument = std::make_shared<_ArgumentModelItem>(d->m_model, name);
+            d->m_currentArgument = std::make_shared<_ArgumentModelItem>(name);
             const auto type = clang_getCursorType(cursor);
             d->m_currentArgument->setScopeResolution(hasScopeResolution(type));
             d->m_currentArgument->setType(d->createTypeInfo(type));

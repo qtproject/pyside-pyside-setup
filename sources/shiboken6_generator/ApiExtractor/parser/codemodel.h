@@ -22,9 +22,6 @@
 
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
-#define DECLARE_MODEL_NODE(k) \
-    enum { __node_kind = Kind_##k };
-
 class SourceLocation;
 
 class CodeModel
@@ -67,26 +64,14 @@ public:
     };
     Q_ENUM(ClassType)
 
-    CodeModel();
-    virtual ~CodeModel();
-
-    FileList files() const { return m_files; }
-    NamespaceModelItem globalNamespace() const;
-
-    void addFile(const FileModelItem &item);
-    FileModelItem findFile(QAnyStringView name) const;
+    CodeModel() = delete;
 
     static CodeModelItem findItem(const QStringList &qualifiedName,
                                   const ScopeModelItem &scope);
-
-private:
-    FileList m_files;
-    NamespaceModelItem m_globalNamespace;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, Access a);
-QDebug operator<<(QDebug d, const CodeModel *m);
 #endif
 
 class _CodeModelItem
@@ -131,8 +116,6 @@ public:
     QString fileName() const;
     void setFileName(const QString &fileName);
 
-    FileModelItem file() const;
-
     void getStartPosition(int *line, int *column) const;
     int startLine() const { return m_startLine; }
     void setStartPosition(int line, int column);
@@ -141,8 +124,6 @@ public:
     void setEndPosition(int line, int column);
 
     SourceLocation sourceLocation() const;
-
-    inline CodeModel *model() const { return m_model; }
 
     const _ScopeModelItem *enclosingScope() const;
     void setEnclosingScope(const _ScopeModelItem *s);
@@ -153,20 +134,19 @@ public:
 #endif
 
 protected:
-    explicit _CodeModelItem(CodeModel *model, int kind);
-    explicit _CodeModelItem(CodeModel *model, const QString &name, int kind);
+    explicit _CodeModelItem(Kind kind);
+    explicit _CodeModelItem(const QString &name, Kind kind);
 
 private:
-    CodeModel *m_model;
     const _ScopeModelItem *m_enclosingScope = nullptr;
-    int m_kind;
-    int m_startLine;
-    int m_startColumn;
-    int m_endLine;
-    int m_endColumn;
     QString m_name;
     QString m_fileName;
     QStringList m_scope;
+    int m_startLine = 0;
+    int m_startColumn = 0;
+    int m_endLine = 0;
+    int m_endColumn = 0;
+    Kind m_kind;
 };
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -177,7 +157,6 @@ class _ScopeModelItem: public _CodeModelItem
 {
 public:
     Q_DISABLE_COPY_MOVE(_ScopeModelItem)
-    DECLARE_MODEL_NODE(Scope)
 
     ~_ScopeModelItem() override;
 
@@ -222,9 +201,7 @@ public:
 #endif
 
 protected:
-    explicit _ScopeModelItem(CodeModel *model, int kind = __node_kind);
-    explicit _ScopeModelItem(CodeModel *model, const QString &name,
-                             int kind = __node_kind);
+    using _CodeModelItem::_CodeModelItem;
 
     void appendScope(const _ScopeModelItem &other);
 
@@ -254,7 +231,6 @@ class _ClassModelItem: public _ScopeModelItem
 {
 public:
     Q_DISABLE_COPY_MOVE(_ClassModelItem)
-    DECLARE_MODEL_NODE(Class)
 
     struct BaseClass
     {
@@ -270,9 +246,8 @@ public:
         Access access = Access::Public;
     };
 
-    explicit _ClassModelItem(CodeModel *model, int kind = __node_kind);
-    explicit _ClassModelItem(CodeModel *model, const QString &name,
-                             int kind = __node_kind);
+    _ClassModelItem();
+    explicit _ClassModelItem(const QString &name);
     ~_ClassModelItem() override;
 
     const QList<BaseClass> &baseClasses() const { return m_baseClasses; }
@@ -318,11 +293,9 @@ class _NamespaceModelItem: public _ScopeModelItem
 {
 public:
     Q_DISABLE_COPY_MOVE(_NamespaceModelItem)
-    DECLARE_MODEL_NODE(Namespace)
 
-    explicit _NamespaceModelItem(CodeModel *model, int kind = __node_kind);
-    explicit _NamespaceModelItem(CodeModel *model, const QString &name,
-                                 int kind = __node_kind);
+    _NamespaceModelItem();
+    explicit _NamespaceModelItem(const QString &name);
     ~_NamespaceModelItem() override;
 
     const NamespaceList &namespaces() const { return m_namespaces; }
@@ -340,6 +313,9 @@ public:
     void formatDebug(QDebug &d) const override;
 #endif
 
+protected:
+    explicit _NamespaceModelItem(Kind kind);
+
 private:
     NamespaceList m_namespaces;
     NamespaceType m_type = NamespaceType::Default;
@@ -349,10 +325,8 @@ class _FileModelItem: public _NamespaceModelItem
 {
 public:
     Q_DISABLE_COPY_MOVE(_FileModelItem)
-    DECLARE_MODEL_NODE(File)
 
-    using _NamespaceModelItem::_NamespaceModelItem;
-
+    _FileModelItem();
     ~_FileModelItem() override;
 };
 
@@ -360,11 +334,9 @@ class _ArgumentModelItem: public _CodeModelItem
 {
 public:
     Q_DISABLE_COPY_MOVE(_ArgumentModelItem)
-    DECLARE_MODEL_NODE(Argument)
 
-    explicit _ArgumentModelItem(CodeModel *model, int kind = __node_kind);
-    explicit _ArgumentModelItem(CodeModel *model, const QString &name,
-                                int kind = __node_kind);
+    _ArgumentModelItem();
+    explicit _ArgumentModelItem(const QString &name);
     ~_ArgumentModelItem() override;
 
     TypeInfo type() const;
@@ -397,11 +369,7 @@ class _MemberModelItem: public _CodeModelItem
 {
 public:
     Q_DISABLE_COPY_MOVE(_MemberModelItem)
-    DECLARE_MODEL_NODE(Member)
 
-    explicit _MemberModelItem(CodeModel *model, int kind = __node_kind);
-    explicit _MemberModelItem(CodeModel *model, const QString &name,
-                              int kind = __node_kind);
     ~_MemberModelItem() override;
 
     bool isConstant() const;
@@ -441,6 +409,10 @@ public:
     void formatDebug(QDebug &d) const override;
 #endif
 
+protected:
+    explicit _MemberModelItem(Kind kind);
+    explicit _MemberModelItem(const QString &name, Kind kind);
+
 private:
     TemplateParameterList m_templateParameters;
     TypeInfo m_type;
@@ -465,12 +437,10 @@ class _FunctionModelItem: public _MemberModelItem
 {
 public:
     Q_DISABLE_COPY_MOVE(_FunctionModelItem)
-    DECLARE_MODEL_NODE(Function)
 
-    explicit _FunctionModelItem(CodeModel *model, int kind = __node_kind);
-    explicit _FunctionModelItem(CodeModel *model, const QString &name,
-                                int kind = __node_kind);
-    ~_FunctionModelItem();
+    _FunctionModelItem();
+    explicit _FunctionModelItem(const QString &name);
+    ~_FunctionModelItem() override;
 
     ArgumentList arguments() const;
 
@@ -551,19 +521,21 @@ private:
 class _VariableModelItem: public _MemberModelItem
 {
 public:
-    DECLARE_MODEL_NODE(Variable)
+    Q_DISABLE_COPY_MOVE(_VariableModelItem)
 
-    using _MemberModelItem::_MemberModelItem;
+    _VariableModelItem();
+    explicit _VariableModelItem(const QString &name);
+    ~_VariableModelItem() override;
 };
 
 class _TypeDefModelItem: public _CodeModelItem
 {
 public:
-    DECLARE_MODEL_NODE(TypeDef)
+    Q_DISABLE_COPY_MOVE(_TypeDefModelItem)
 
-    explicit _TypeDefModelItem(CodeModel *model, int kind = __node_kind);
-    explicit _TypeDefModelItem(CodeModel *model, const QString &name,
-                               int kind = __node_kind);
+    _TypeDefModelItem();
+    explicit _TypeDefModelItem(const QString &name);
+    ~_TypeDefModelItem() override;
 
     TypeInfo type() const;
     void setType(const TypeInfo &type);
@@ -578,18 +550,18 @@ public:
 #endif
 
 private:
-    Access m_accessPolicy = Access::Public;
     TypeInfo m_type;
+    Access m_accessPolicy = Access::Public;
 };
 
 class _TemplateTypeAliasModelItem : public _CodeModelItem
 {
 public:
-    DECLARE_MODEL_NODE(TemplateTypeAlias)
+    Q_DISABLE_COPY_MOVE(_TemplateTypeAliasModelItem)
 
-    explicit _TemplateTypeAliasModelItem(CodeModel *model, int kind = __node_kind);
-    explicit _TemplateTypeAliasModelItem(CodeModel *model, const QString &name,
-                                         int kind = __node_kind);
+    _TemplateTypeAliasModelItem();
+    explicit _TemplateTypeAliasModelItem(const QString &name);
+    ~_TemplateTypeAliasModelItem() override;
 
     TemplateParameterList templateParameters() const;
     void addTemplateParameter(const TemplateParameterModelItem &templateParameter);
@@ -610,10 +582,9 @@ class _EnumModelItem: public _CodeModelItem
 {
 public:
     Q_DISABLE_COPY_MOVE(_EnumModelItem)
-    DECLARE_MODEL_NODE(Enum)
 
-    explicit _EnumModelItem(CodeModel *model, const QString &name, int kind = __node_kind);
-    explicit _EnumModelItem(CodeModel *model, int kind = __node_kind);
+    explicit _EnumModelItem(const QString &name);
+    _EnumModelItem();
     ~_EnumModelItem() override;
 
     Access accessPolicy() const;
@@ -643,9 +614,9 @@ public:
 
 private:
     QString m_underlyingType;
-    Access m_accessPolicy = Access::Public;
     EnumeratorList m_enumerators;
     EnumKind m_enumKind = CEnum;
+    Access m_accessPolicy = Access::Public;
     bool m_deprecated = false;
     bool m_signed = true;
 };
@@ -654,11 +625,9 @@ class _EnumeratorModelItem: public _CodeModelItem
 {
 public:
     Q_DISABLE_COPY_MOVE(_EnumeratorModelItem)
-    DECLARE_MODEL_NODE(Enumerator)
 
-    explicit _EnumeratorModelItem(CodeModel *model, int kind = __node_kind);
-    explicit _EnumeratorModelItem(CodeModel *model, const QString &name,
-                                  int kind = __node_kind);
+    _EnumeratorModelItem();
+    explicit _EnumeratorModelItem(const QString &name);
     ~_EnumeratorModelItem() override;
 
     QString stringValue() const;
@@ -684,11 +653,9 @@ class _TemplateParameterModelItem: public _CodeModelItem
 {
 public:
     Q_DISABLE_COPY_MOVE(_TemplateParameterModelItem)
-    DECLARE_MODEL_NODE(TemplateParameter)
 
-    explicit _TemplateParameterModelItem(CodeModel *model, int kind = __node_kind);
-    explicit _TemplateParameterModelItem(CodeModel *model, const QString &name,
-                                         int kind = __node_kind);
+    _TemplateParameterModelItem();
+    explicit _TemplateParameterModelItem(const QString &name);
     ~_TemplateParameterModelItem() override;
 
     TypeInfo type() const;
