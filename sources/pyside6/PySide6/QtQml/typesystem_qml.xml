@@ -196,8 +196,7 @@
         <!-- createWithInitialProperties_withownership: like createWithInitialProperties() but
              the returned QObject is Python owned -->
         <add-function signature="createWithInitialProperties_withownership(QVariantMap@initialProperties@)"
-                      return-type="QObject*"
-                      allow-thread="yes">
+                      return-type="QObject*">
             <modify-argument index="return">
                 <define-ownership class="target" owner="target"/>
             </modify-argument>
@@ -209,8 +208,7 @@
         </add-function>
         <!-- create_withownership: like create() but the returned QObject is Python owned -->
         <add-function signature="create_withownership(QQmlContext*@context@=nullptr)"
-                      return-type="QObject*"
-                      allow-thread="yes">
+                      return-type="QObject*">
             <modify-argument index="return">
                 <define-ownership class="target" owner="target"/>
             </modify-argument>

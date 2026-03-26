@@ -78,7 +78,9 @@ if (instance.isNull()) {
 
 // @snippet qqmlcomponent-createwithinitialpropertieswithownership
 // Like createWithInitialProperties() but with Python ownership on the returned object.
+PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
 QObject *%0 = %CPPSELF.createWithInitialProperties(%1);
+PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
 %PYARG_0 = %CONVERTTOPYTHON[QObject*](%0);
 // @snippet qqmlcomponent-createwithinitialpropertieswithownership
 
@@ -86,7 +88,9 @@ QObject *%0 = %CPPSELF.createWithInitialProperties(%1);
 // Create a QML component instance and transfer ownership to Python,
 // so no manual keep-alive bookkeeping is needed.
 // This is specifically created and useful for QtBridges
+PyThreadState *_save = PyEval_SaveThread(); // Py_BEGIN_ALLOW_THREADS
 QObject *%0 = %CPPSELF.create(%1);
+PyEval_RestoreThread(_save); // Py_END_ALLOW_THREADS
 %PYARG_0 = %CONVERTTOPYTHON[QObject*](%0);
 // @snippet qqmlcomponent-createwithownership
 
