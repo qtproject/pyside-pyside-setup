@@ -7,6 +7,7 @@
 #include <QtCore/QVariant>
 
 #include <sbkpep.h>
+#include <pep384ext.h>
 #include <autodecref.h>
 #include <basewrapper.h>
 #include <bindingmanager.h>
@@ -50,9 +51,12 @@ class PyDesignerCustomWidget : public QDesignerCustomWidgetInterface
 {
 public:
     explicit PyDesignerCustomWidget(PyObject *pyTypeObject) :
-        m_pyTypeObject(pyTypeObject) {}
+        m_name(QString::fromUtf8(PepExt_TypeGetQualName(reinterpret_cast<PyTypeObject *>(pyTypeObject)))),
+        m_pyTypeObject(pyTypeObject)
+    {
+    }
 
-    QString name() const override;
+    QString name() const override { return m_name; }
     QString group() const override { return m_group; }
     QString toolTip() const override { return m_toolTip; }
     QString whatsThis() const  override { return toolTip(); }
@@ -75,9 +79,8 @@ public:
     void setContainer(bool container) { m_container = container; }
 
 private:
-    const char *utf8Name() const;
-
     QDesignerFormEditorInterface *m_core = nullptr;
+    QString m_name;
     QString m_group;
     QString m_toolTip;
     QString m_includeFile;
@@ -86,16 +89,6 @@ private:
     PyObject *m_pyTypeObject = nullptr;
     bool m_container = false;
 };
-
-const char *PyDesignerCustomWidget::utf8Name() const
-{
-    return reinterpret_cast<PyTypeObject *>(m_pyTypeObject)->tp_name;
-}
-
-QString PyDesignerCustomWidget::name() const
-{
-    return QString::fromUtf8(utf8Name());
-}
 
 QWidget *PyDesignerCustomWidget::createWidget(QWidget *parent)
 {
@@ -124,7 +117,7 @@ QWidget *PyDesignerCustomWidget::createWidget(QWidget *parent)
     // Call python constructor
     auto *obResult = PyObject_CallObject(m_pyTypeObject, pyArgs);
     if (obResult == nullptr) {
-        qWarning("Unable to create a Python custom widget of type \"%s\".", utf8Name());
+        qWarning("Unable to create a Python custom widget of type \"%s\".", qPrintable(m_name));
         PyErr_Print();
         return nullptr;
     }
