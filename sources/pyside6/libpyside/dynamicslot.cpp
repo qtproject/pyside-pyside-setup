@@ -346,7 +346,8 @@ static void disconnectReceiver(PyObject *pythonSelf)
         for (auto it = connectionHash.begin(); it != connectionHash.end(); ) {
             if (it.key().object == pythonSelf) {
                 const auto oldSize = connectionHash.size();
-                QObject::disconnect(it.value());
+                auto connId = it.value(); // QTBUG-144929, take copy
+                QObject::disconnect(connId);
                 it = connectionHash.erase(it);
                 // Check for a disconnection causing deletion of further objects
                 // by a re-entrant call.
@@ -394,7 +395,8 @@ bool disconnectSlot(QObject *source, int signalIndex, PyObject *callback)
     auto it = connectionHash.find(connectionKey(source, signalIndex, callback));
     const bool ok = it != connectionHash.end();
     if (ok) {
-        QObject::disconnect(it.value());
+        auto connId = it.value(); // QTBUG-144929, take copy
+        QObject::disconnect(connId);
         connectionHash.erase(it);
     }
     return ok;
