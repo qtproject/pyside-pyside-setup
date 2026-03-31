@@ -44,6 +44,33 @@ class ImageViewer(AbstractViewer):
         self.uiInitialized.connect(self.setupImageUi)
         QImageReader.setAllocationLimit(1024)  # MB
 
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomIn,
+                               QIcon(":/demos/documentviewer/images/zoom-in.png"))
+        self.zoom_in_act = QAction(self)
+        self.zoom_in_act.setIcon(icon)
+        self.zoom_in_act.setText(self.tr("Zoom &In"))
+        self.zoom_in_act.setShortcut(QKeySequence.StandardKey.ZoomIn)
+        self.zoom_in_act.triggered.connect(self.zoomIn)
+
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomOut,
+                               QIcon(":/demos/documentviewer/images/zoom-out.png"))
+        self.zoom_out_act = QAction(self)
+        self.zoom_out_act.setText(self.tr("Zoom &Out"))
+        self.zoom_out_act.setIcon(icon)
+        self.zoom_out_act.setShortcut(QKeySequence.StandardKey.ZoomOut)
+        self.zoom_out_act.triggered.connect(self.zoomOut)
+
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomFitBest,
+                               QIcon(":/demos/documentviewer/images/zoom-fit-best.png"))
+        self.reset_zoom_act = QAction(self)
+        self.reset_zoom_act.setText(self.tr("Reset Zoom"))
+        self.reset_zoom_act.setIcon(icon)
+        self.reset_zoom_act.setShortcut(QKeySequence
+                                        (Qt.KeyboardModifier.ControlModifier | Qt.Key.Key_0))
+        self.reset_zoom_act.triggered.connect(self.resetZoom)
+
+        self.image_label = None
+
     def init(self, file, parent, mainWindow):
         self.image_label = QLabel(parent)
         self.image_label.setFrameShape(QLabel.Box)
@@ -53,29 +80,10 @@ class ImageViewer(AbstractViewer):
         # AbstractViewer.init(file, self.image_label, mainWindow)
         super().init(file, self.image_label, mainWindow)
 
-        self.tool_bar = self.addToolBar(self.tr("Images"))
-
-        icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomIn,
-                               QIcon(":/demos/documentviewer/images/zoom-in.png"))
-        self.zoom_in_act = QAction(icon, "Zoom &In", self)
-        self.zoom_in_act.setShortcut(QKeySequence.StandardKey.ZoomIn)
-        self.zoom_in_act.triggered.connect(self.zoomIn)
-        self.tool_bar.addAction(self.zoom_in_act)
-
-        icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomOut,
-                               QIcon(":/demos/documentviewer/images/zoom-out.png"))
-        self.zoom_out_act = QAction(icon, "Zoom &Out", self)
-        self.zoom_out_act.setShortcut(QKeySequence.StandardKey.ZoomOut)
-        self.zoom_out_act.triggered.connect(self.zoomOut)
-        self.tool_bar.addAction(self.zoom_out_act)
-
-        icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomFitBest,
-                               QIcon(":/demos/documentviewer/images/zoom-fit-best.png"))
-        self.reset_zoom_act = QAction(icon, "Reset Zoom", self)
-        self.reset_zoom_act.setShortcut(QKeySequence
-                                        (Qt.KeyboardModifier.ControlModifier | Qt.Key.Key_0))
-        self.reset_zoom_act.triggered.connect(self.resetZoom)
-        self.tool_bar.addAction(self.reset_zoom_act)
+        tool_bar = self.addToolBar(self.tr("Images"))
+        tool_bar.addAction(self.zoom_in_act)
+        tool_bar.addAction(self.zoom_out_act)
+        tool_bar.addAction(self.reset_zoom_act)
 
     def supportedMimeTypes(self):
         return self.formats
@@ -163,11 +171,11 @@ class ImageViewer(AbstractViewer):
         if not self.hasContent():
             return
 
-        painter = QPainter(printer)
-        pixmap = self.image_label.pixmap()
-        rect = painter.viewport()
-        size = pixmap.size()
-        size.scale(rect.size(), Qt.KeepAspectRatio)
-        painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
-        painter.setWindow(pixmap.rect())
-        painter.drawPixmap(0, 0, pixmap)
+        with QPainter(printer) as painter:
+            pixmap = self.image_label.pixmap()
+            rect = painter.viewport()
+            size = pixmap.size()
+            size.scale(rect.size(), Qt.KeepAspectRatio)
+            painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
+            painter.setWindow(pixmap.rect())
+            painter.drawPixmap(0, 0, pixmap)

@@ -5,7 +5,7 @@ from __future__ import annotations
 from math import sqrt
 
 from PySide6.QtWidgets import (QListView, QTreeView)
-from PySide6.QtGui import QIcon, QKeySequence, QPainter
+from PySide6.QtGui import QAction, QIcon, QKeySequence, QPainter
 from PySide6.QtCore import (QDir, QIODevice, QModelIndex,
                             QPointF, Slot)
 from PySide6.QtPrintSupport import QPrinter
@@ -24,7 +24,6 @@ class PdfViewer(AbstractViewer):
     def __init__(self):
         super().__init__()
         self.uiInitialized.connect(self.initPdfViewer)
-        self._toolBar = None
         self._zoomSelector = None
         self._pageSelector = None
         self._document = None
@@ -33,6 +32,24 @@ class PdfViewer(AbstractViewer):
         self._actionBack = None
         self._bookmarks = None
         self._pages = None
+
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomIn,
+                               QIcon(":/demos/documentviewer/images/zoom-in.png"))
+        self._actionZoomIn = QAction(self)
+        self._actionZoomIn.setText(self.tr("Zoom in"))
+        self._actionZoomIn.setIcon(icon)
+        self._actionZoomIn.setShortcut(QKeySequence.StandardKey.ZoomIn)
+        self._actionZoomIn.setToolTip(self.tr("Increase zoom level"))
+        self._actionZoomIn.triggered.connect(self.onActionZoomInTriggered)
+
+        icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomOut,
+                               QIcon(":/demos/documentviewer/images/zoom-out.png"))
+        self._actionZoomOut = QAction(self)
+        self._actionZoomOut.setText(self.tr("Zoom in"))
+        self._actionZoomOut.setIcon(icon)
+        self._actionZoomOut.setShortcut(QKeySequence.StandardKey.ZoomOut)
+        self._actionZoomOut.setToolTip(self.tr("Decrease zoom level"))
+        self._actionZoomOut.triggered.connect(self.onActionZoomOutTriggered)
 
     def init(self, file, parent, mainWindow):
         self._pdfView = QPdfView(parent)
@@ -43,12 +60,12 @@ class PdfViewer(AbstractViewer):
         return ["application/pdf"]
 
     def initPdfViewer(self):
-        self._toolBar = self.addToolBar("PDF")
-        self._zoomSelector = ZoomSelector(self._toolBar)
+        toolBar = self.addToolBar("PDF")
+        self._zoomSelector = ZoomSelector(toolBar)
 
         nav = self._pdfView.pageNavigator()
-        self._pageSelector = QPdfPageSelector(self._toolBar)
-        self._toolBar.insertWidget(self._uiAssets_forward, self._pageSelector)
+        self._pageSelector = QPdfPageSelector(toolBar)
+        toolBar.insertWidget(self._uiAssets_forward, self._pageSelector)
         self._pageSelector.setDocument(self._document)
         self._pageSelector.currentPageChanged.connect(self.pageSelected)
         nav.currentPageChanged.connect(self._pageSelector.setCurrentPage)
@@ -58,20 +75,11 @@ class PdfViewer(AbstractViewer):
         self._uiAssets_back.triggered.connect(self.onActionBackTriggered)
         self._uiAssets_forward.triggered.connect(self.onActionForwardTriggered)
 
-        self._toolBar.addSeparator()
-        self._toolBar.addWidget(self._zoomSelector)
+        toolBar.addSeparator()
+        toolBar.addWidget(self._zoomSelector)
 
-        icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomIn,
-                               QIcon(":/demos/documentviewer/images/zoom-in.png"))
-        actionZoomIn = self._toolBar.addAction(icon, "Zoom in", QKeySequence.StandardKey.ZoomIn)
-        actionZoomIn.setToolTip("Increase zoom level")
-        actionZoomIn.triggered.connect(self.onActionZoomInTriggered)
-
-        icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomOut,
-                               QIcon(":/demos/documentviewer/images/zoom-out.png"))
-        actionZoomOut = self._toolBar.addAction(icon, "Zoom out", QKeySequence.StandardKey.ZoomOut)
-        actionZoomOut.setToolTip("Decrease zoom level")
-        actionZoomOut.triggered.connect(self.onActionZoomOutTriggered)
+        toolBar.addAction(self._actionZoomIn)
+        toolBar.addAction(self._actionZoomOut)
 
         nav.backAvailableChanged.connect(self._actionBack.setEnabled)
         nav.forwardAvailableChanged.connect(self._actionForward.setEnabled)
@@ -79,6 +87,7 @@ class PdfViewer(AbstractViewer):
         self._zoomSelector.zoomModeChanged.connect(self._pdfView.setZoomMode)
         self._zoomSelector.zoomFactorChanged.connect(self._pdfView.setZoomFactor)
         self._zoomSelector.reset()
+        self._pdfView.zoomFactorChanged.connect(self._zoomSelector.setZoomFactor)
 
         bookmarkModel = QPdfBookmarkModel(self)
         bookmarkModel.setDocument(self._document)

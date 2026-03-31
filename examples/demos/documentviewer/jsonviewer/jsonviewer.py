@@ -4,13 +4,9 @@ from __future__ import annotations
 
 import json
 
-from PySide6.QtWidgets import (QLabel, QLineEdit, QListWidget,
-                               QListWidgetItem, QMenu, QTreeView)
-from PySide6.QtGui import (QAction, QIcon, QKeySequence,
-                           QPixmap, QTextDocument)
-from PySide6.QtCore import (QAbstractItemModel, QDir,
-                            QIODevice, QModelIndex,
-                            QPoint, QSize, Qt, Slot)
+from PySide6.QtWidgets import QListWidget, QListWidgetItem, QMenu, QTreeView
+from PySide6.QtGui import QAction, QIcon, QTextDocument
+from PySide6.QtCore import QAbstractItemModel, QDir, QIODevice, QModelIndex, QPoint, Qt, Slot
 
 from abstractviewer import AbstractViewer
 
@@ -166,14 +162,23 @@ class JsonViewer(AbstractViewer):
 
     def __init__(self):
         super().__init__()
-        self._tree = QTreeView()
+        self._tree = None
         self._toplevel = None
         self._text = ""
-        self._searchKey = None
         self.uiInitialized.connect(self.setupJsonUi)
+
+        self._expand_all_act = QAction(self)
+        self._expand_all_act.setText(self.tr("&+Expand all"))
+        self._expand_all_act.setIcon(QIcon.fromTheme(QIcon.ThemeIcon.ZoomIn))
+
+        self._collapse_all_act = QAction(self)
+        self._collapse_all_act.setText(self.tr("&-Collapse all"))
+        self._collapse_all_act.setIcon(QIcon.fromTheme(QIcon.ThemeIcon.ZoomOut))
 
     def init(self, file, parent, mainWindow):
         self._tree = QTreeView(parent)
+        self._expand_all_act.triggered.connect(self._tree.expandAll)
+        self._collapse_all_act.triggered.connect(self._tree.collapseAll)
         super().init(file, self._tree, mainWindow)
 
     def viewerName(self):
@@ -185,30 +190,12 @@ class JsonViewer(AbstractViewer):
     @Slot()
     def setupJsonUi(self):
         # Build Menus and toolbars
-        menu = self.addMenu("Json")
-        tb = self.addToolBar("Json Actions")
-
-        zoomInIcon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomIn)
-        a = menu.addAction(zoomInIcon, "&+Expand all", self._tree.expandAll)
-        tb.addAction(a)
-        a.setPriority(QAction.Priority.LowPriority)
-        a.setShortcut(QKeySequence.StandardKey.New)
-
-        zoomOutIcon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomOut)
-        a = menu.addAction(zoomOutIcon, "&-Collapse all", self._tree.collapseAll)
-        tb.addAction(a)
-        a.setPriority(QAction.Priority.LowPriority)
-        a.setShortcut(QKeySequence.StandardKey.New)
-
-        if not self._searchKey:
-            self._searchKey = QLineEdit(tb)
-
-        label = QLabel(tb)
-        magnifier = QPixmap(":/icons/images/magnifier.png").scaled(QSize(28, 28))
-        label.setPixmap(magnifier)
-        tb.addWidget(label)
-        tb.addWidget(self._searchKey)
-        self._searchKey.textEdited.connect(self._tree.keyboardSearch)
+        menu = self.addMenu(self.tr("Json"))
+        tb = self.addToolBar(self.tr("Json Actions"))
+        menu.addAction(self._expand_all_act)
+        tb.addAction(self._expand_all_act)
+        menu.addAction(self._collapse_all_act)
+        tb.addAction(self._collapse_all_act)
 
         if not self.openJsonFile():
             return

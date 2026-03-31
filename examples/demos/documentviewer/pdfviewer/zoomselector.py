@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 from PySide6.QtWidgets import QComboBox
-from PySide6.QtCore import Signal, Slot
+from PySide6.QtCore import QLocale, Signal, Slot
 from PySide6.QtPdfWidgets import QPdfView
 
 
-ZOOM_LEVELS = ["Fit Width", "Fit Page", "12%", "25%", "33%", "50%", "66%",
-               "75%", "100%", "125%", "150%", "200%", "400%"]
+ZOOM_LEVELS = [12, 25, 33, 50, 66, 75, 100, 125, 150, 200, 400]
 
 
 class ZoomSelector(QComboBox):
@@ -17,13 +16,29 @@ class ZoomSelector(QComboBox):
 
     def __init__(self, parent):
         super().__init__(parent)
+
+        self.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToContents)
         self.setEditable(True)
 
-        for z in ZOOM_LEVELS:
-            self.addItem(z)
+        # ZoomMode::FitToWidth, ZoomMode::FitInView + factors
+        for i in range(2 + len(ZOOM_LEVELS)):
+            self.addItem("")
+
+        self.retranslate()
 
         self.currentTextChanged.connect(self.onCurrentTextChanged)
         self.lineEdit().editingFinished.connect(self._editingFinished)
+
+    def retranslate(self):
+        i = 0
+        self.setItemText(i, self.tr("Fit Width"))
+        i += 1
+        self.setItemText(i, self.tr("Fit Page"))
+        i += 1
+        percent = QLocale().percent()
+        for z in ZOOM_LEVELS:
+            self.setItemText(i, f"{z}{percent}")
+            i += 1
 
     @Slot()
     def _editingFinished(self):
@@ -40,13 +55,13 @@ class ZoomSelector(QComboBox):
 
     @Slot(str)
     def onCurrentTextChanged(self, text):
-        if text == "Fit Width":
+        if text == self.itemText(0):
             self.zoomModeChanged.emit(QPdfView.ZoomMode.FitToWidth)
-        elif text == "Fit Page":
+        elif text == self.itemText(1):
             self.zoomModeChanged.emit(QPdfView.ZoomMode.FitInView)
         else:
             factor = 1.0
-            withoutPercent = text.replace('%', '')
+            withoutPercent = text.replace(QLocale().percent(), '')
             zoomLevel = int(withoutPercent)
             if zoomLevel:
                 factor = zoomLevel / 100.0

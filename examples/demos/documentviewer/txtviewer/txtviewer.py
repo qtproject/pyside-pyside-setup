@@ -15,6 +15,30 @@ class TxtViewer(AbstractViewer):
         super().__init__()
         self.uiInitialized.connect(self.setupTxtUi)
 
+        cutIcon = QIcon.fromTheme(QIcon.ThemeIcon.EditCut,
+                                  QIcon(":/demos/documentviewer/images/cut.png"))
+        self._cutAct = QAction(self)
+        self._cutAct.setText(self.tr("Cut"))
+        self._cutAct.setIcon(cutIcon)
+        self._cutAct.setShortcuts(QKeySequence.StandardKey.Cut)
+        self._cutAct.setStatusTip(self.tr("Cut the current selection's contents to the clipboard"))
+
+        copyIcon = QIcon.fromTheme(QIcon.ThemeIcon.EditCopy,
+                                   QIcon(":/demos/documentviewer/images/copy.png"))
+        self._copyAct = QAction(self)
+        self._copyAct.setText(self.tr("Copy"))
+        self._copyAct.setIcon(copyIcon)
+        self._copyAct.setShortcuts(QKeySequence.StandardKey.Copy)
+        self._copyAct.setStatusTip(self.tr("Copy the current selection's contents to the clipboard"))  # noqa: E501
+
+        pasteIcon = QIcon.fromTheme(QIcon.ThemeIcon.EditPaste,
+                                    QIcon(":/demos/documentviewer/images/paste.png"))
+        self._pasteAct = QAction(self)
+        self._pasteAct.setText(self.tr("Paste"))
+        self._pasteAct.setIcon(pasteIcon)
+        self._pasteAct.setShortcuts(QKeySequence.StandardKey.Paste)
+        self._pasteAct.setStatusTip(self.tr("Paste the clipboard's contents into the current selection"))  # noqa: E501
+
     def init(self, file, parent, mainWindow):
         self._textEdit = QPlainTextEdit(parent)
         super().init(file, self._textEdit, mainWindow)
@@ -29,39 +53,22 @@ class TxtViewer(AbstractViewer):
     def setupTxtUi(self):
         editMenu = self.addMenu("Edit")
         editToolBar = self.addToolBar("Edit")
-        cutIcon = QIcon.fromTheme(QIcon.ThemeIcon.EditCut,
-                                  QIcon(":/demos/documentviewer/images/cut.png"))
-        cutAct = QAction(cutIcon, "Cut", self)
-        cutAct.setShortcuts(QKeySequence.StandardKey.Cut)
-        cutAct.setStatusTip("Cut the current selection's contents to the clipboard")
-        cutAct.triggered.connect(self._textEdit.cut)
-        editMenu.addAction(cutAct)
-        editToolBar.addAction(cutAct)
-
-        copyIcon = QIcon.fromTheme(QIcon.ThemeIcon.EditCopy,
-                                   QIcon(":/demos/documentviewer/images/copy.png"))
-        copyAct = QAction(copyIcon, "Copy", self)
-        copyAct.setShortcuts(QKeySequence.StandardKey.Copy)
-        copyAct.setStatusTip("Copy the current selection's contents to the clipboard")
-        copyAct.triggered.connect(self._textEdit.copy)
-        editMenu.addAction(copyAct)
-        editToolBar.addAction(copyAct)
-
-        pasteIcon = QIcon.fromTheme(QIcon.ThemeIcon.EditPaste,
-                                    QIcon(":/demos/documentviewer/images/paste.png"))
-        pasteAct = QAction(pasteIcon, "Paste", self)
-        pasteAct.setShortcuts(QKeySequence.StandardKey.Paste)
-        pasteAct.setStatusTip("Paste the clipboard's contents into the current selection")
-        pasteAct.triggered.connect(self._textEdit.paste)
-        editMenu.addAction(pasteAct)
-        editToolBar.addAction(pasteAct)
+        editMenu.addAction(self._cutAct)
+        editToolBar.addAction(self._cutAct)
+        editMenu.addAction(self._copyAct)
+        editToolBar.addAction(self._copyAct)
+        editMenu.addAction(self._pasteAct)
+        editToolBar.addAction(self._pasteAct)
 
         self.menuBar().addSeparator()
 
-        cutAct.setEnabled(False)
-        copyAct.setEnabled(False)
-        self._textEdit.copyAvailable.connect(cutAct.setEnabled)
-        self._textEdit.copyAvailable.connect(copyAct.setEnabled)
+        self._cutAct.setEnabled(False)
+        self._copyAct.setEnabled(False)
+        self._cutAct.triggered.connect(self._textEdit.cut)
+        self._copyAct.triggered.connect(self._textEdit.copy)
+        self._pasteAct.triggered.connect(self._textEdit.paste)
+        self._textEdit.copyAvailable.connect(self._cutAct.setEnabled)
+        self._textEdit.copyAvailable.connect(self._copyAct.setEnabled)
 
         self.openFile()
 

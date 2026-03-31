@@ -41,7 +41,7 @@ class AbstractViewer(QObject):
     def restoreState(self, state):
         return False
 
-    def supportedMimeTypes():
+    def supportedMimeTypes(self):
         return []
 
     def init(self, file, widget, mainWindow):
@@ -109,14 +109,13 @@ class AbstractViewer(QObject):
 
     def addToolBar(self, title):
         bar = self.mainWindow().addToolBar(title)
-        name = title.replace(' ', '')
-        bar.setObjectName(name)
+        bar.setObjectName(self.viewerName() + "ToolBar")
         self._toolBars.append(bar)
         return bar
 
     def addMenu(self, title):
         menu = QMenu(title, self.menuBar())
-        menu.setObjectName(title)
+        menu.setObjectName(self.viewerName() + "Menu")
         self.menuBar().insertMenu(self._uiAssets_help, menu)
         self._menus.append(menu)
         return menu
