@@ -711,6 +711,15 @@ const char *PepType_GetFullyQualifiedNameStr(PyTypeObject *type)
 #endif
 }
 
+PyObject *PepType_GetQualName(PyTypeObject *type)
+{
+#if !defined(PYPY_VERSION) && ((!defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030B0000) || (defined(Py_LIMITED_API) && Py_LIMITED_API >= 0x030B0000))
+    return PyType_GetQualName(type);
+#else
+    return PyObject_GetAttr(reinterpret_cast<PyObject *>(type), Shiboken::PyMagicName::qualname());
+#endif
+}
+
 // PYSIDE-2264: Find the _functools or functools module and retrieve the
 //              partial function. This can be tampered with, check carefully.
 PyObject *

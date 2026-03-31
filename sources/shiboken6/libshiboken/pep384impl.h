@@ -165,6 +165,8 @@ LIBSHIBOKEN_API const char *PepType_GetNameStr(PyTypeObject *type);
 /// as C-string
 LIBSHIBOKEN_API const char *PepType_GetFullyQualifiedNameStr(PyTypeObject *type);
 
+LIBSHIBOKEN_API PyObject *PepType_GetQualName(PyTypeObject *type);
+
 LIBSHIBOKEN_API PyObject *Pep_GetPartialFunction(void);
 
 /*****************************************************************************

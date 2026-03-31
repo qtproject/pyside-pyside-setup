@@ -86,4 +86,6 @@ inline void PepExt_TypeCallFree(PyObject *object)
     PepExt_Type_GetFreeSlot(Py_TYPE(object))(object);
 }
 
+LIBSHIBOKEN_API const char *PepExt_TypeGetQualName(PyTypeObject *type);
+
 #endif // PEP384EXT_H

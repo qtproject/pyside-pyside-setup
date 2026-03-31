@@ -65,6 +65,7 @@ bufferprocs_py37.cpp bufferprocs_py37.h
 debugfreehook.cpp debugfreehook.h
 gilstate.cpp gilstate.h
 helper.cpp helper.h
+pep384ext.cpp pep384ext.h
 pep384impl.cpp pep384impl.h
 pyobjectholder.h
 sbkarrayconverter.cpp sbkarrayconverter.h sbkarrayconverter_p.h
