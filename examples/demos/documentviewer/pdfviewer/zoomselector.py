@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from PySide6.QtWidgets import QComboBox
-from PySide6.QtCore import QLocale, Signal, Slot
+from PySide6.QtCore import QEvent, QLocale, Signal, Slot
 from PySide6.QtPdfWidgets import QPdfView
 
 
@@ -28,6 +28,11 @@ class ZoomSelector(QComboBox):
 
         self.currentTextChanged.connect(self.onCurrentTextChanged)
         self.lineEdit().editingFinished.connect(self._editingFinished)
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.LanguageChange:
+            self.retranslate()
+        super().changeEvent(event)
 
     def retranslate(self):
         i = 0

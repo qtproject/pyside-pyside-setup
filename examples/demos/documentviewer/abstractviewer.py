@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from PySide6.QtCore import QObject
 
-from PySide6.QtWidgets import (QDialog, QMenu)
-from PySide6.QtCore import Signal, Slot
+from PySide6.QtWidgets import QDialog, QMenu, QToolBar
+from PySide6.QtCore import QEvent, Signal, Slot
 from PySide6.QtPrintSupport import QPrinter, QPrintDialog
 
 
@@ -23,6 +23,7 @@ class AbstractViewer(QObject):
         super().__init__()
         self._file = None
         self._widget = None
+        self._uiAssets_mainWindow = None
         self._menus = []
         self._toolBars = []
         self._printingEnabled = False
@@ -34,6 +35,14 @@ class AbstractViewer(QObject):
 
     def viewerName(self):
         return ""
+
+    def eventFilter(self, watched, event):
+        if event.type() == QEvent.Type.LanguageChange:
+            self.retranslate()
+        return False
+
+    def retranslate(self):
+        pass
 
     def saveState(self):
         return False
@@ -48,6 +57,7 @@ class AbstractViewer(QObject):
         self._file = file
         self._widget = widget
         self._uiAssets_mainWindow = mainWindow
+        mainWindow.installEventFilter(self)
 
     def isEmpty(self):
         return not self.hasContent()
@@ -107,14 +117,15 @@ class AbstractViewer(QObject):
         msg += ": " + message
         self.showMessage.emit(msg, timeout)
 
-    def addToolBar(self, title):
-        bar = self.mainWindow().addToolBar(title)
+    def addToolBar(self):
+        bar = QToolBar()
         bar.setObjectName(self.viewerName() + "ToolBar")
+        self.mainWindow().addToolBar(bar)
         self._toolBars.append(bar)
         return bar
 
-    def addMenu(self, title):
-        menu = QMenu(title, self.menuBar())
+    def addMenu(self):
+        menu = QMenu(self.menuBar())
         menu.setObjectName(self.viewerName() + "Menu")
         self.menuBar().insertMenu(self._uiAssets_help, menu)
         self._menus.append(menu)
@@ -127,6 +138,8 @@ class AbstractViewer(QObject):
             self._file = None
         self._menus.clear()
         self._toolBars.clear()
+        if self._uiAssets_mainWindow:
+            self._uiAssets_mainWindow.removeEventFilter(self)
 
     def fileMenu(self):
         if self._fileMenu:

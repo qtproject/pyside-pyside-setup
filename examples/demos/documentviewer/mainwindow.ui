@@ -104,8 +104,16 @@
     <property name="title">
      <string>Help</string>
     </property>
+    <widget class="QMenu" name="menuLanguage">
+     <property name="title">
+      <string>Language</string>
+     </property>
+     <addaction name="actionEnglish"/>
+     <addaction name="actionDeutsch"/>
+    </widget>
     <addaction name="actionAbout"/>
     <addaction name="actionAboutQt"/>
+    <addaction name="menuLanguage"/>
    </widget>
    <addaction name="qtFileMenu"/>
    <addaction name="menuHelp"/>
@@ -241,6 +249,16 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionEnglish">
+   <property name="text">
+    <string>&amp;English</string>
+   </property>
+  </action>
+  <action name="actionDeutsch">
+   <property name="text">
+    <string>&amp;Deutsch</string>
    </property>
   </action>
  </widget>

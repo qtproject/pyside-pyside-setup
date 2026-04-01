@@ -168,11 +168,9 @@ class JsonViewer(AbstractViewer):
         self.uiInitialized.connect(self.setupJsonUi)
 
         self._expand_all_act = QAction(self)
-        self._expand_all_act.setText(self.tr("&+Expand all"))
         self._expand_all_act.setIcon(QIcon.fromTheme(QIcon.ThemeIcon.ZoomIn))
 
         self._collapse_all_act = QAction(self)
-        self._collapse_all_act.setText(self.tr("&-Collapse all"))
         self._collapse_all_act.setIcon(QIcon.fromTheme(QIcon.ThemeIcon.ZoomOut))
 
     def init(self, file, parent, mainWindow):
@@ -187,11 +185,24 @@ class JsonViewer(AbstractViewer):
     def supportedMimeTypes(self):
         return ["application/json"]
 
+    def retranslate(self):
+        if not self._toolBars:
+            return
+        self._menus[0].setTitle(self.tr("Json"))
+        self._toolBars[0].setWindowTitle(self.tr("Json Actions"))
+        self._expand_all_act.setText(self.tr("&+Expand all"))
+        self._collapse_all_act.setText(self.tr("&-Collapse all"))
+        tabIndex = self._uiAssets_tabs.indexOf(self._toplevel)
+        if tabIndex >= 0:
+            self._uiAssets_tabs.setTabText(tabIndex, self.tr("Bookmarks"))
+        for i in range(self._toplevel.count()):
+            self._toplevel.item(i).setToolTip(self.tr("Toplevel Item {}").format(i))
+
     @Slot()
     def setupJsonUi(self):
         # Build Menus and toolbars
-        menu = self.addMenu(self.tr("Json"))
-        tb = self.addToolBar(self.tr("Json Actions"))
+        menu = self.addMenu()
+        tb = self.addToolBar()
         menu.addAction(self._expand_all_act)
         tb.addAction(self._expand_all_act)
         menu.addAction(self._collapse_all_act)
@@ -203,13 +214,12 @@ class JsonViewer(AbstractViewer):
         # Populate bookmarks with toplevel
         self._uiAssets_tabs.clear()
         self._toplevel = QListWidget(self._uiAssets_tabs)
-        self._uiAssets_tabs.addTab(self._toplevel, self.tr("Bookmarks"))
+        self._uiAssets_tabs.addTab(self._toplevel, "")
         for i in range(0, self._tree.model().rowCount()):
             index = self._tree.model().index(i, 0)
             self._toplevel.addItem(index.data())
             item = self._toplevel.item(i)
             item.setData(Qt.ItemDataRole.UserRole, index)
-            item.setToolTip(f"Toplevel Item {i}")
 
         self._toplevel.setAcceptDrops(True)
         self._tree.setDragEnabled(True)
@@ -224,6 +234,8 @@ class JsonViewer(AbstractViewer):
         # Connect back and forward
         self._uiAssets_back.triggered.connect(self._back)
         self._uiAssets_forward.triggered.connect(self._forward)
+
+        self.retranslate()
 
     @Slot()
     def _back(self):

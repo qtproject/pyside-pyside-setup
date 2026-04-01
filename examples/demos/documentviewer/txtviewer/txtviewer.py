@@ -49,10 +49,19 @@ class TxtViewer(AbstractViewer):
     def supportedMimeTypes(self):
         return ["text/plain"]
 
+    def retranslate(self):
+        if not self._toolBars:
+            return
+        self._menus[0].setTitle(self.tr("Edit"))
+        self._toolBars[0].setWindowTitle(self.tr("Edit"))
+        self._cutAct.setText(self.tr("C&ut"))
+        self._copyAct.setText(self.tr("&Copy"))
+        self._pasteAct.setText(self.tr("&Paste"))
+
     @Slot()
     def setupTxtUi(self):
-        editMenu = self.addMenu(self.tr("Edit"))
-        editToolBar = self.addToolBar(self.tr("Edit"))
+        editMenu = self.addMenu()
+        editToolBar = self.addToolBar()
         editMenu.addAction(self._cutAct)
         editToolBar.addAction(self._cutAct)
         editMenu.addAction(self._copyAct)
@@ -70,6 +79,7 @@ class TxtViewer(AbstractViewer):
         self._textEdit.copyAvailable.connect(self._cutAct.setEnabled)
         self._textEdit.copyAvailable.connect(self._copyAct.setEnabled)
 
+        self.retranslate()
         self.openFile()
 
         self._textEdit.textChanged.connect(self._textChanged)

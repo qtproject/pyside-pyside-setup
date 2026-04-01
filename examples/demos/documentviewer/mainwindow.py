@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from PySide6.QtWidgets import (QDialog, QFileDialog, QMainWindow, QMessageBox)
-from PySide6.QtCore import (QDir, QFile, QFileInfo, QSettings, Slot)
+from PySide6.QtCore import (QCoreApplication, QDir, QEvent, QFile, QFileInfo, QLocale,
+                            QSettings, Slot)
 
 from ui_mainwindow import Ui_MainWindow
 from viewerfactory import ViewerFactory
 from recentfiles import RecentFiles
 from recentfilemenu import RecentFileMenu
+from translator import Translator
 
 
 settingsDir = "WorkingDir"
@@ -32,6 +34,10 @@ class MainWindow(QMainWindow):
         super().__init__(parent)
         self.ui = Ui_MainWindow()
 
+        self._translator = Translator()
+        self._translator.setBaseName("documentviewer")
+        self._translator.install()
+
         self._currentDir = QDir()
         self._viewer = None
         self._recentFiles = RecentFiles()
@@ -40,6 +46,10 @@ class MainWindow(QMainWindow):
         self.ui.actionOpen.triggered.connect(self.onActionOpenTriggered)
         self.ui.actionAbout.triggered.connect(self.onActionAboutTriggered)
         self.ui.actionAboutQt.triggered.connect(self.onActionAboutQtTriggered)
+        self.ui.actionDeutsch.setData(QLocale.Language.German)
+        self.ui.actionDeutsch.triggered.connect(self.onActionSwitchLanguage)
+        self.ui.actionEnglish.setData(QLocale.Language.English)
+        self.ui.actionEnglish.triggered.connect(self.onActionSwitchLanguage)
 
         self._recentFiles = RecentFiles(self.ui.actionRecent)
         self._recentFiles.countChanged.connect(self._recentFilesCountChanged)
@@ -61,6 +71,23 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         self.saveSettings()
+
+    def changeEvent(self, event):
+        match event.type():
+            case QEvent.Type.LanguageChange:
+                self.ui.retranslateUi(self)
+                self.statusBar().clearMessage()
+            case QEvent.Type.LocaleChange:
+                self._translator.setLanguage(QLocale().language())
+                self._translator.install()
+        super().changeEvent(event)
+
+    @Slot()
+    def onActionSwitchLanguage(self):
+        lang = self.sender().data()
+        QLocale.setDefault(QLocale(lang))
+        event = QEvent(QEvent.Type.LocaleChange)
+        QCoreApplication.sendEvent(self, event)
 
     @Slot(int)
     def onActionOpenTriggered(self):

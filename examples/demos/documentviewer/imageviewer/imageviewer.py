@@ -49,14 +49,12 @@ class ImageViewer(AbstractViewer):
                                QIcon(":/demos/documentviewer/images/zoom-in.png"))
         self.zoom_in_act = QAction(self)
         self.zoom_in_act.setIcon(icon)
-        self.zoom_in_act.setText(self.tr("Zoom &In"))
         self.zoom_in_act.setShortcut(QKeySequence.StandardKey.ZoomIn)
         self.zoom_in_act.triggered.connect(self.zoomIn)
 
         icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomOut,
                                QIcon(":/demos/documentviewer/images/zoom-out.png"))
         self.zoom_out_act = QAction(self)
-        self.zoom_out_act.setText(self.tr("Zoom &Out"))
         self.zoom_out_act.setIcon(icon)
         self.zoom_out_act.setShortcut(QKeySequence.StandardKey.ZoomOut)
         self.zoom_out_act.triggered.connect(self.zoomOut)
@@ -64,13 +62,20 @@ class ImageViewer(AbstractViewer):
         icon = QIcon.fromTheme(QIcon.ThemeIcon.ZoomFitBest,
                                QIcon(":/demos/documentviewer/images/zoom-fit-best.png"))
         self.reset_zoom_act = QAction(self)
-        self.reset_zoom_act.setText(self.tr("Reset Zoom"))
         self.reset_zoom_act.setIcon(icon)
         self.reset_zoom_act.setShortcut(QKeySequence
                                         (Qt.KeyboardModifier.ControlModifier | Qt.Key.Key_0))
         self.reset_zoom_act.triggered.connect(self.resetZoom)
 
         self.image_label = None
+
+    def retranslate(self):
+        if not self._toolBars:
+            return
+        self._toolBars[0].setWindowTitle(self.tr("Images"))
+        self.zoom_in_act.setText(self.tr("Zoom &In"))
+        self.zoom_out_act.setText(self.tr("Zoom &Out"))
+        self.reset_zoom_act.setText(self.tr("Reset Zoom"))
 
     def init(self, file, parent, mainWindow):
         self.image_label = QLabel(parent)
@@ -81,7 +86,7 @@ class ImageViewer(AbstractViewer):
         # AbstractViewer.init(file, self.image_label, mainWindow)
         super().init(file, self.image_label, mainWindow)
 
-        tool_bar = self.addToolBar(self.tr("Images"))
+        tool_bar = self.addToolBar()
         tool_bar.addAction(self.zoom_in_act)
         tool_bar.addAction(self.zoom_out_act)
         tool_bar.addAction(self.reset_zoom_act)

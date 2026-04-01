@@ -3,6 +3,7 @@
               "documentviewer.qrc",
               "main.py",
               "mainwindow.py",
+              "translator.py",
               "mainwindow.ui",
               "imageviewer/imageviewer.py",
               "jsonviewer/jsonviewer.py",
