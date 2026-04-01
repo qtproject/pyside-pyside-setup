@@ -13,4 +13,7 @@
         <file>images/zoom-out@2x.png</file>
         <file>images/zoom-out.png</file>
     </qresource>
+    <qresource prefix="/i18n">
+        <file>documentviewer_de.qm</file>
+    </qresource>
 </RCC>

@@ -11,5 +11,7 @@
               "txtviewer/txtviewer.py",
               "recentfilemenu.py",
               "recentfiles.py",
-              "viewerfactory.py"]
+              "viewerfactory.py",
+              "documentviewer_en.ts",
+              "documentviewer_de.ts"]
 }
