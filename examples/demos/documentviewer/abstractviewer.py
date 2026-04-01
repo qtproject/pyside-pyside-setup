@@ -137,34 +137,34 @@ class AbstractViewer(QObject):
             if menu.objectName() == MENU_NAME:
                 self._fileMenu = menu
                 return self._fileMenu
-        self._fileMenu = self.addMenu("File")
+        self._fileMenu = self.addMenu(self.tr("&File"))
         self._fileMenu.setObjectName(MENU_NAME)
         return self._fileMenu
 
     @Slot()
     def print_(self):
-        type = "Printing"
+        type = self.tr("Printing")
         if not self.hasContent():
-            self.statusMessage("No content to print.", type)
+            self.statusMessage(self.tr("No content to print."), type)
             return
         printer = QPrinter(QPrinter.PrinterMode.HighResolution)
         dlg = QPrintDialog(printer, self.mainWindow())
-        dlg.setWindowTitle("Print Document")
+        dlg.setWindowTitle(self.tr("Print Document"))
         if dlg.exec() == QDialog.DialogCode.Accepted:
             self.printDocument(printer)
         else:
-            self.statusMessage("Printing canceled!", type)
+            self.statusMessage(self.tr("Printing canceled!"), type)
             return
         message = self.viewerName() + " :"
         match printer.printerState():
             case QPrinter.PrinterState.Aborted:
-                message += "Printing aborted."
+                message += self.tr("Printing aborted.")
             case QPrinter.PrinterState.Active:
-                message += "Printing active."
+                message += self.tr("Printing active.")
             case QPrinter.PrinterState.Idle:
-                message += "Printing completed."
+                message += self.tr("Printing completed.")
             case QPrinter.PrinterState.Error:
-                message += "Printing error."
+                message += self.tr("Printing error.")
         self.statusMessage(message, type)
 
     def maybeSetPrintingEnabled(self, enabled):

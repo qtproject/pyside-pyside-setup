@@ -203,7 +203,7 @@ class JsonViewer(AbstractViewer):
         # Populate bookmarks with toplevel
         self._uiAssets_tabs.clear()
         self._toplevel = QListWidget(self._uiAssets_tabs)
-        self._uiAssets_tabs.addTab(self._toplevel, "Bookmarks")
+        self._uiAssets_tabs.addTab(self._toplevel, self.tr("Bookmarks"))
         for i in range(0, self._tree.model().rowCount()):
             index = self._tree.model().index(i, 0)
             self._toplevel.addItem(index.data())
@@ -316,7 +316,7 @@ class JsonViewer(AbstractViewer):
                 return
 
         menu = QMenu(self._tree)
-        action = QAction("Add bookmark")
+        action = QAction(self.tr("Add bookmark"))
         action.setData(index)
         menu.addAction(action)
         action.triggered.connect(self.onBookmarkAdded)
@@ -334,7 +334,7 @@ class JsonViewer(AbstractViewer):
             return
 
         menu = QMenu()
-        action = QAction("Delete bookmark")
+        action = QAction(self.tr("Delete bookmark"))
         action.setData(self._toplevel.row(item))
         menu.addAction(action)
         action.triggered.connect(self.onBookmarkDeleted)

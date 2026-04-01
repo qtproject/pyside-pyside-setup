@@ -57,14 +57,14 @@ class MainWindow(QMainWindow):
 
     @Slot(int)
     def _recentFilesCountChanged(self, count):
-        self.ui.actionRecent.setText(f"{count} recent files")
+        self.ui.actionRecent.setText(self.tr("%n recent files", None, count))
 
     def closeEvent(self, event):
         self.saveSettings()
 
     @Slot(int)
     def onActionOpenTriggered(self):
-        fileDialog = QFileDialog(self, "Open Document",
+        fileDialog = QFileDialog(self, self.tr("Open Document"),
                                  self._currentDir.absolutePath())
         while (fileDialog.exec() == QDialog.DialogCode.Accepted
                and not self.openFile(fileDialog.selectedFiles()[0])):
@@ -115,7 +115,7 @@ class MainWindow(QMainWindow):
             n = defaultViewer.viewerName()
             text += f"\n\nOther mime types will be displayed with {n}."
 
-        QMessageBox.about(self, "About Document Viewer Demo", text)
+        QMessageBox.about(self, self.tr("About Document Viewer Demo"), text)
 
     @Slot()
     def onActionAboutQtTriggered(self):

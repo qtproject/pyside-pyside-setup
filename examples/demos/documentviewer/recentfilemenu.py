@@ -22,7 +22,7 @@ class RecentFileMenu(QMenu):
             del a
 
         if not self._recentFiles:
-            self.addAction("<no recent files>")
+            self.addAction(self.tr("<no recent files>"))
             return
 
         for fileName in self._recentFiles.recentFiles():

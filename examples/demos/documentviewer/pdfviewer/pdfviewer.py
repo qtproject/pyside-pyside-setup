@@ -60,7 +60,7 @@ class PdfViewer(AbstractViewer):
         return ["application/pdf"]
 
     def initPdfViewer(self):
-        toolBar = self.addToolBar("PDF")
+        toolBar = self.addToolBar(self.tr("PDF"))
         self._zoomSelector = ZoomSelector(toolBar)
 
         nav = self._pdfView.pageNavigator()
@@ -108,8 +108,8 @@ class PdfViewer(AbstractViewer):
         self._pages.selectionModel().currentRowChanged.connect(self._currentRowChanged)
         self._pdfView.pageNavigator().currentPageChanged.connect(self._pageChanged)
 
-        self._uiAssets_tabs.addTab(self._pages, "Pages")
-        self._uiAssets_tabs.addTab(self._bookmarks, "Bookmarks")
+        self._uiAssets_tabs.addTab(self._pages, self.tr("Pages"))
+        self._uiAssets_tabs.addTab(self._bookmarks, self.tr("Bookmarks"))
 
     def viewerName(self):
         return "PdfViewer"
@@ -140,7 +140,7 @@ class PdfViewer(AbstractViewer):
 
         documentTitle = self._document.metaData(QPdfDocument.MetaDataField.Title)
         if not documentTitle:
-            documentTitle = "PDF Viewer"
+            documentTitle = self.tr("PDF Viewer")
         self.statusMessage(documentTitle)
         self.pageSelected(0)
 

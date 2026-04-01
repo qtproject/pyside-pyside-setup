@@ -25,7 +25,8 @@ def imageFormats():
 
 
 def msgOpen(name, image):
-    description = image.colorSpace().description() if image.colorSpace().isValid() else "unknown"
+    description = (image.colorSpace().description() if image.colorSpace().isValid()
+                   else ImageViewer.tr("unknown"))
     return 'Opened "{0}", {1}x{2}, Depth: {3} ({4})'.format(
         QDir.toNativeSeparators(name),
         image.width(),

@@ -51,8 +51,8 @@ class TxtViewer(AbstractViewer):
 
     @Slot()
     def setupTxtUi(self):
-        editMenu = self.addMenu("Edit")
-        editToolBar = self.addToolBar("Edit")
+        editMenu = self.addMenu(self.tr("Edit"))
+        editToolBar = self.addToolBar(self.tr("Edit"))
         editMenu.addAction(self._cutAct)
         editToolBar.addAction(self._cutAct)
         editMenu.addAction(self._copyAct)
