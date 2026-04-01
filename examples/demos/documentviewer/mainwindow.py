@@ -75,7 +75,7 @@ class MainWindow(QMainWindow):
         file = QFile(fileName)
         if not file.exists():
             nf = QDir.toNativeSeparators(fileName)
-            self.statusBar().showMessage(f"File {nf} could not be opened")
+            self.statusBar().showMessage(self.tr("File {} could not be opened").format(nf))
             return False
 
         fileInfo = QFileInfo(file)
@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
         self._viewer = self._factory.viewer(file)
         if not self._viewer:
             nf = QDir.toNativeSeparators(fileName)
-            self.statusBar().showMessage(f"File {nf} can't be opened.")
+            self.statusBar().showMessage(self.tr("File {} can't be opened.").format(nf))
             return False
 
         self.ui.actionPrint.setEnabled(self._viewer.hasContent())

@@ -95,7 +95,7 @@ class ViewerFactory:
             mbox.setIcon(QMessageBox.Warning)
             name = mimeType.name()
             viewer_name = viewer.viewerName()
-            m = f"Mime type {name} not supported. Falling back to {viewer_name}."
+            m = self.tr("Mime type {} not supported. Falling back to {}.").format(name, viewer_name)
             mbox.setText(m)
             mbox.setStandardButtons(QMessageBox.Ok)
             QTimer.singleShot(8000, mbox.close)

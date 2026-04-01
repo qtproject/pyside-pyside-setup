@@ -106,7 +106,8 @@ class ImageViewer(AbstractViewer):
         orig_image = reader.read()
 
         if orig_image.isNull():
-            self.statusMessage(f"Cannot read file {name}:\n{reader.errorString()}", "open")
+            msg = self.tr("Cannot read file {}:\n{}").format(name, reader.errorString())
+            self.statusMessage(msg, "open")
             self.disablePrinting()
             QGuiApplication.restoreOverrideCursor()
             return

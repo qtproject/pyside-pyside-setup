@@ -257,11 +257,11 @@ class JsonViewer(AbstractViewer):
         message = None
         try:
             data = json.loads(self._text)
-            message = f"Json document {file_name} opened"
+            message = self.tr("Json document {} opened").format(file_name)
             model = JsonItemModel(data, self)
             self._tree.setModel(model)
         except ValueError as e:
-            message = f"Unable to parse Json document from {file_name}: {e}"
+            message = self.tr("Unable to parse Json document from {}: {}").format(file_name, e)
         self.statusMessage(message, type)
         self.maybeEnablePrinting()
 

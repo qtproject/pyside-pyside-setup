@@ -98,7 +98,8 @@ class TxtViewer(AbstractViewer):
         if not self._file.open(QFile.OpenModeFlag.ReadOnly
                                | QFile.OpenModeFlag.Text):
             err = self._file.errorString()
-            self.statusMessage(f"Cannot read file {file_name}:\n{err}.", type)
+            message = self.tr("Cannot read file {}:\n{}.").format(file_name, err)
+            self.statusMessage(message, type)
             return
 
         in_str = QTextStream(self._file)
@@ -110,7 +111,7 @@ class TxtViewer(AbstractViewer):
         self._textEdit.setPlainText(in_str.readAll())
         QGuiApplication.restoreOverrideCursor()
 
-        self.statusMessage(f"File {file_name} loaded.", type)
+        self.statusMessage(self.tr("File {} loaded.").format(file_name), type)
         self.maybeEnablePrinting()
 
     def hasContent(self):
@@ -131,14 +132,14 @@ class TxtViewer(AbstractViewer):
             out << self._textEdit.toPlainText()
         else:
             error = file.errorString()
-            errorMessage = f"Cannot open file {file_name} for writing:\n{error}."
+            errorMessage = self.tr("Cannot open file {} for writing:\n{}.").format(file_name, error)
         QGuiApplication.restoreOverrideCursor()
 
         if errorMessage:
             self.statusMessage(errorMessage)
             return False
 
-        self.statusMessage(f"File {file_name} saved")
+        self.statusMessage(self.tr("File {} saved").format(file_name))
         return True
 
     def saveDocumentAs(self):

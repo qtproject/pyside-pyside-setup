@@ -145,7 +145,7 @@ class PdfViewer(AbstractViewer):
         self.pageSelected(0)
 
         file_name = QDir.toNativeSeparators(self._file.fileName())
-        self.statusMessage(f"Opened PDF file {file_name}")
+        self.statusMessage(self.tr("Opened PDF file {}").format(file_name))
         self.maybeEnablePrinting()
 
     def hasContent(self):
