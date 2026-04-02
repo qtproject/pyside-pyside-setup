@@ -160,15 +160,27 @@ configure_package_config_file(
     INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
-# Install-tree / wheel configuration
-set(PYSIDE_PYTHONPATH "")
-set(PYSIDE_TYPESYSTEMS "typesystems")
-set(PYSIDE_GLUE "glue")
+# Install-tree configuration (for downstream CMake projects using a regular cmake install)
+set(PYSIDE_PYTHONPATH "${PYTHON_SITE_PACKAGES}/PySide6")
+set(PYSIDE_TYPESYSTEMS "${CMAKE_INSTALL_PREFIX}/share/PySide6${pyside6_SUFFIX}/typesystems")
+set(PYSIDE_GLUE "${CMAKE_INSTALL_PREFIX}/share/PySide6${pyside6_SUFFIX}/glue")
 set(PYSIDE_SOVERSION "${pyside6_library_so_version}")
 
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/PySide6Config-spec.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/install/PySide6Config${SHIBOKEN_PYTHON_CONFIG_SUFFIX}.cmake"
+    INSTALL_DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6"
+    PATH_VARS PYSIDE_PYTHONPATH PYSIDE_TYPESYSTEMS PYSIDE_GLUE
+)
+
+# Wheel configuration (typesystems/glue sit directly inside the PySide6 Python package)
+set(PYSIDE_PYTHONPATH "")
+set(PYSIDE_TYPESYSTEMS "typesystems")
+set(PYSIDE_GLUE "glue")
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/PySide6Config-spec.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/wheel/PySide6Config${SHIBOKEN_PYTHON_CONFIG_SUFFIX}.cmake"
     INSTALL_DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6"
     PATH_VARS PYSIDE_PYTHONPATH PYSIDE_TYPESYSTEMS PYSIDE_GLUE
 )
@@ -206,6 +218,9 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PySide6Config.cmake"
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/install/PySide6Config${SHIBOKEN_PYTHON_CONFIG_SUFFIX}.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6")
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/wheel/PySide6Config${SHIBOKEN_PYTHON_CONFIG_SUFFIX}.cmake"
+        DESTINATION "${LIB_INSTALL_DIR}/wheels/cmake/PySide6")
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PySide6ConfigVersion.cmake"
         DESTINATION "${LIB_INSTALL_DIR}/cmake/PySide6")
