@@ -13,6 +13,7 @@ from abstractviewer import AbstractViewer
 class TxtViewer(AbstractViewer):
     def __init__(self):
         super().__init__()
+        self._textEdit = None
         self.uiInitialized.connect(self.setupTxtUi)
 
         cutIcon = QIcon.fromTheme(QIcon.ThemeIcon.EditCut,
@@ -45,6 +46,11 @@ class TxtViewer(AbstractViewer):
 
     def viewerName(self):
         return "TxtViewer"
+
+    def cleanup(self):
+        del self._textEdit
+        self._textEdit = None
+        super().cleanup()
 
     def supportedMimeTypes(self):
         return ["text/plain"]

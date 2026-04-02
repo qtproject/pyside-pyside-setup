@@ -57,6 +57,19 @@ class PdfViewer(AbstractViewer):
     def supportedMimeTypes(self):
         return ["application/pdf"]
 
+    def cleanup(self):
+        super().cleanup()
+        del self._pageSelector
+        self._pageSelector = None
+        del self._zoomSelector
+        self._zoomSelector = None
+        del self._pages
+        self._pages = None
+        del self._bookmarks
+        self._bookmarks = None
+        del self._document
+        self._document = None
+
     def retranslate(self):
         if not self._toolBars:
             return

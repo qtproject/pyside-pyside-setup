@@ -91,6 +91,11 @@ class ImageViewer(AbstractViewer):
         tool_bar.addAction(self.zoom_out_act)
         tool_bar.addAction(self.reset_zoom_act)
 
+    def cleanup(self):
+        del self.image_label
+        self.image_label = None
+        super().cleanup()
+
     def supportedMimeTypes(self):
         return self.formats
 

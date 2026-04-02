@@ -30,9 +30,6 @@ class AbstractViewer(QObject):
         self._actions = []
         self._fileMenu = None
 
-    def __del__(self):
-        self.cleanup()
-
     def viewerName(self):
         return ""
 
@@ -136,8 +133,11 @@ class AbstractViewer(QObject):
         # and therefore parented on MainWindow
         if self._file:
             self._file = None
-        self._menus.clear()
-        self._toolBars.clear()
+        while self._menus:
+            del self._menus[0]
+        while self._toolBars:
+            self.mainWindow().removeToolBar(self._toolBars[0])
+            del self._toolBars[0]
         if self._uiAssets_mainWindow:
             self._uiAssets_mainWindow.removeEventFilter(self)
 
