@@ -465,9 +465,13 @@ def module_QtQml() -> ModuleData:
     _qtlib = [
         "libQt6LabsAnimation",
         "libQt6LabsFolderListModel",
+        "libQt6LabsPlatform",
         "libQt6LabsQmlModels*",
         "libQt6LabsSettings",
         "libQt6LabsSharedImage",
+        "libQt6LabsStyleKit",
+        "libQt6LabsStyleKitImpl",
+        "libQt6LabsSynchronizer",
         "libQt6LabsWavefrontMesh",
         "libQt6QmlCore",
         "libQt6QmlLocalStorage",
@@ -489,9 +493,13 @@ def module_QtQml() -> ModuleData:
     _metatypes = [
         "qt6labsanimation_metatypes.json",
         "qt6labsfolderlistmodel_metatypes.json",
+        "qt6labsplatform_metatypes.json",
         "qt6labsqmlmodels_metatypes.json",
         "qt6labssettings_metatypes.json",
         "qt6labssharedimage_metatypes.json",
+        "qt6labsstylekit_metatypes.json",
+        "qt6labsstylekitimpl_metatypes.json",
+        "qt6labssynchronizer_metatypes.json",
         "qt6labswavefrontmesh_metatypes.json",
         "qt6packetprotocolprivate_metatypes.json",
         "qt6qmlcompilerprivate_metatypes.json",
@@ -509,13 +517,16 @@ def module_QtQml() -> ModuleData:
     ]
 
     _qml = [
+        "Qt/labs/StyleKit",
         "Qt/labs/animation",
+        "Qt/labs/assetdownloader",
         "Qt/labs/folderlistmodel",
-        "Qt/labs/sharedimage",
-        "Qt/labs/wavefrontmesh",
-        "Qt/labs/qmlmodels",
         "Qt/labs/platform",
+        "Qt/labs/qmlmodels",
         "Qt/labs/settings",
+        "Qt/labs/sharedimage",
+        "Qt/labs/synchronizer",
+        "Qt/labs/wavefrontmesh"
     ]
 
     data.lib.append("libpyside6qml")
