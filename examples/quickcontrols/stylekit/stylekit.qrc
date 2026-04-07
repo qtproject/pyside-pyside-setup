@@ -1,0 +1,6 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+  <file alias="effects/noise.qsb">shaders/prebuilt/noise.qsb</file>
+  <file alias="effects/wave.qsb">shaders/prebuilt/wave.qsb</file>
+</qresource>
+</RCC>

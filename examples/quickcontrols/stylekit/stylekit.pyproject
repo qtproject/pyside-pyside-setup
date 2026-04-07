@@ -1,0 +1,10 @@
+{
+    "files": ["main.py", 
+              "shaders/noise.frag", "shaders/wave.frag",
+              "stylekit.qrc",
+              "StyleKitExampleModule/Main.qml",
+              "StyleKitExampleModule/styles/CustomDelegates.qml",
+              "StyleKitExampleModule/styles/Haze.qml",
+              "StyleKitExampleModule/styles/Plain.qml",
+              "StyleKitExampleModule/styles/Vitrum.qml"]
+}
