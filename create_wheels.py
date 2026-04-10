@@ -176,7 +176,12 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData) -> str:
 
     # Installing dependencies
     _dependencies = []
-    if _name in ("PySide6", "PySide6_Examples"):
+    if _name == "PySide6":
+        _dependencies.append(f"shiboken6=={setup.version[0]}")
+        _dependencies.append(f"PySide6_Essentials=={setup.version[0]}")
+        _dependencies.append(f"PySide6_Addons=={setup.version[0]}")
+        _dependencies.append('tomli>=2.0.1; python_version < "3.11"')
+    elif _name == "PySide6_Examples":
         _dependencies.append(f"shiboken6=={setup.version[0]}")
         _dependencies.append(f"PySide6_Essentials=={setup.version[0]}")
         _dependencies.append(f"PySide6_Addons=={setup.version[0]}")

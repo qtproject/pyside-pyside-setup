@@ -4,49 +4,16 @@ from __future__ import annotations
 
 import os
 import sys
-# TODO: Remove this import when Python 3.11 is the minimum supported version
-if sys.version_info >= (3, 11):
-    import tomllib
 from pathlib import Path
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib  # type: ignore[no-redef]
 
 from . import PYPROJECT_JSON_PATTERN
 from .pyproject_parse_result import PyProjectParseResult
 from .pyproject_json import parse_pyproject_json
-
-
-def _parse_toml_content(content: str) -> dict:
-    """
-    Parse TOML content for project name and files list only.
-    """
-    result = {"project": {}, "tool": {"pyside6-project": {}}}
-    current_section = None
-
-    for line in content.splitlines():
-        line = line.strip()
-        if not line or line.startswith('#'):
-            continue
-
-        if line == '[project]':
-            current_section = 'project'
-        elif line == '[tool.pyside6-project]':
-            current_section = 'tool.pyside6-project'
-        elif '=' in line and current_section:
-            key, value = [part.strip() for part in line.split('=', 1)]
-
-            # Handle string values - name of the project
-            if value.startswith('"') and value.endswith('"'):
-                value = value[1:-1]
-            # Handle array of strings - files names
-            elif value.startswith('[') and value.endswith(']'):
-                items = value[1:-1].split(',')
-                value = [item.strip().strip('"') for item in items if item.strip()]
-
-            if current_section == 'project':
-                result['project'][key] = value
-            else:  # tool.pyside6-project
-                result['tool']['pyside6-project'][key] = value
-
-    return result
 
 
 def _write_base_toml_content(data: dict) -> str:
@@ -81,12 +48,7 @@ def parse_pyproject_toml(pyproject_toml_file: Path) -> PyProjectParseResult:
 
     try:
         content = pyproject_toml_file.read_text(encoding='utf-8')
-        # TODO: Remove the manual parsing when Python 3.11 is the minimum supported version
-        if sys.version_info >= (3, 11):
-            root_table = tomllib.loads(content)  # Use tomllib for Python >= 3.11
-            print("Using tomllib for parsing TOML content")
-        else:
-            root_table = _parse_toml_content(content)  # Fallback to manual parsing
+        root_table = tomllib.loads(content)
     except Exception as e:
         result.errors.append(str(e))
         return result

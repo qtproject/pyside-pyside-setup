@@ -182,7 +182,8 @@ class Config(metaclass=Singleton):
                 "Python bindings for the Qt cross-platform application and UI framework"
             )
             self.setup_kwargs['install_requires'] = [
-                f"{self.shiboken_module_st_name}=={package_version}"
+                f"{self.shiboken_module_st_name}=={package_version}",
+                'tomli>=2.0.1; python_version < "3.11"',
             ]
             if qt_install_dir:
                 _pyside_tools = available_pyside_tools(qt_tools_path=Path(qt_install_dir))
