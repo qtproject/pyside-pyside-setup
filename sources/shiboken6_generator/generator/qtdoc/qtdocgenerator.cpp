@@ -889,6 +889,13 @@ bool QtDocGenerator::writeInjectDocumentation(TextStream &s,
     return didSomething;
 }
 
+// Reference with a custom name
+static QString inline toRef(const QString &fullName, const QString &displayName)
+{
+    return ":class:`"_L1 +  displayName + u'<' + fullName + ">`"_L1;
+}
+
+// Standard reference using unqualified class name
 static QString inline toRef(const QString &t)
 {
     return ":class:`~"_L1 + t + u'`';
@@ -970,6 +977,18 @@ QString QtDocGenerator::translateToPythonType(const AbstractMetaType &type,
                       .arg(types[0], types[1]);
         }
         return strType;
+    }
+
+    if (type.typeUsagePattern() == AbstractMetaType::SmartPointerPattern) {
+        auto ste = std::static_pointer_cast<const SmartPointerTypeEntry>(type.typeEntry());
+        const auto &instantiation = type.instantiations().constFirst();
+        auto instantiationTe = instantiation.typeEntry();
+        if (auto instantiationO = api().findSmartPointerInstantiation(ste, instantiation.typeEntry())) {
+            const QString &name = instantiationO->specialized->name();
+            return createRef
+                ? toRef(instantiation.fullName(), name) // link to the pointee
+                : name;
+        }
     }
 
     if (auto k = AbstractMetaClass::findClass(api().classes(), type.typeEntry()))
