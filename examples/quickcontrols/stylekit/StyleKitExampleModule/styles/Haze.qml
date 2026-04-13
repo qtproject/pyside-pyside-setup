@@ -256,13 +256,12 @@ Style {
         }
     }
 
-    /* You can also set one or more StyleVariations on a control type. Unlike Instance
-     * variations—which apply only to specific control instances—type variations are applied
-     * to *all* instances of a control type without requiring the application to use attached
-     * properties.
-     *
-     * In this example, we specify that all Buttons that are children of a Frame
-     * should receive alternative styling, differentiating them from other Buttons. */
+    // You can also set one or more StyleVariations on a control type. Unlike Instance
+    // variations—which apply only to specific control instances—type variations are applied
+    // to *all* instances of a control type without requiring the application to use attached
+    // properties.
+    // In this example, we specify that all Buttons that are children of a Frame
+    // should receive alternative styling, differentiating them from other Buttons.
     frame {
         background {
             border.width: 1
@@ -276,10 +275,10 @@ Style {
             }
         }
     }
-    /* Because 'groupBox' falls back to 'frame', any StyleVariation applied to a frame
-     * is automatically inherited by a groupBox as well. Since I in this example only want the
-     * different styling on frames, not group boxes, I can simply unset the variation
-     * for group boxes. */
+    // Because 'groupBox' falls back to 'frame', any StyleVariation applied to a frame
+    // is automatically inherited by a groupBox as well. Since I in this example only want the
+    // different styling on frames, not group boxes, I can simply unset the variation
+    // for group boxes.
     groupBox.variations: []
 
     readonly property int fancyButton: 0
@@ -527,8 +526,8 @@ Style {
         }
 
         pane {
-            /* The controls change background color on states like hover, but panes
-             * should not. Override the property here to disable that behavior for panes. */
+            // The controls change background color on states like hover, but panes
+            // should not. Override the property here to disable that behavior for panes.
             background.color: Qt.lighter("#544e52", 1.3)
             background.border.color: "#3d373b"
             background.shadow.visible: false

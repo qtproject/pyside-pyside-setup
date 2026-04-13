@@ -100,8 +100,8 @@ Style {
     }
 
     pane {
-        /* The controls change background color on states like hover, but panes
-         * should not. Override the property here to disable that behavior for panes. */
+        // The controls change background color on states like hover, but panes
+        // should not. Override the property here to disable that behavior for panes.
         background.color: "white"
     }
 

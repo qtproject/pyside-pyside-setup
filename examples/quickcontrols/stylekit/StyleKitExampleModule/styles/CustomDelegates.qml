@@ -7,11 +7,7 @@ import QtQuick.Templates as T
 import Qt.labs.StyleKit
 
 Style {
-
-    /******************************************************************
-     * Defining some helper types for the custom delegates further down
-     ******************************************************************/
-
+    // Defining some helper types for the custom delegates further down
     component Star : Shape {
         id: star
         ShapePath {
@@ -41,15 +37,13 @@ Style {
         property real overlayScale: 1
     }
 
-    /******************************************************************
-     * Define custom delegates. These replace the default StyledItem
-     * for selected controls in the style definition below.
-     ******************************************************************/
+    // Define custom delegates. These replace the default StyledItem
+    // for selected controls in the style definition below.
 
     component OverlayDelegate : StyledItem {
-        /* Using StyledItem as the base type is the easiest approach when creating
-         * a custom delegate. A StyledItem will draw the delegate as configured by
-         * the style, and give you the opportunity to place your own items on top. */
+        // Using StyledItem as the base type is the easiest approach when creating
+        // a custom delegate. A StyledItem will draw the delegate as configured by
+        // the style, and give you the opportunity to place your own items on top.
         id: delegate
         width: parent.width
         height: parent.height
@@ -75,10 +69,10 @@ Style {
     }
 
     component UnderlayDelegate : Item {
-        /* Custom delegates that don't inherit from StyledItem needs to define
-         * 'delegateStyle' and 'control' properties, which are assinged to by StyleKit.
-         * Use 'delegateStyle' to bind to style attributes like color, radius, and opacity.
-         * Use 'control' to access the Quick Control the owns the delegate. */
+        // Custom delegates that don't inherit from StyledItem needs to define
+        // 'delegateStyle' and 'control' properties, which are assinged to by StyleKit.
+        // Use 'delegateStyle' to bind to style attributes like color, radius, and opacity.
+        // Use 'control' to access the Quick Control the owns the delegate.
         id: delegate
         required property DelegateStyle delegateStyle
         required property QtObject control
@@ -112,10 +106,10 @@ Style {
     }
 
     component SliderHandle : StyledItem {
-        /* Unlike the 'data' property, which varies per state, you can use regular
-         * QML properties to pass static information to a delegate. Here, 'isFirstHandle'
-         * distinguishes the first from the second handle in a RangeSlider, and
-         * 'control' gives access to the slider's current value(s). */
+        // Unlike the 'data' property, which varies per state, you can use regular
+        // QML properties to pass static information to a delegate. Here, 'isFirstHandle'
+        // distinguishes the first from the second handle in a RangeSlider, and
+        // 'control' gives access to the slider's current value(s).
         id: sliderHandle
         property bool isFirstHandle: false
         required property QtObject control
@@ -139,8 +133,8 @@ Style {
     }
 
     component NoiseDelegate : ShaderEffect {
-        /* Use graphical effects in combination with StyledItem to create more
-         * complex delegate appearances. In this delegate, we create a noise overlay. */
+        // Use graphical effects in combination with StyledItem to create more
+        // complex delegate appearances. In this delegate, we create a noise overlay.
         implicitWidth: unifiedSourceItem.implicitWidth
         implicitHeight: unifiedSourceItem.implicitHeight
         width: parent.width
@@ -244,10 +238,8 @@ Style {
         }
     }
 
-    /******************************************************************
-     * Define the style, assigning the custom delegates above to specific
-     * controls in place of the default StyledItem:
-     ******************************************************************/
+     // Define the style, assigning the custom delegates above to specific
+     // controls in place of the default StyledItem:
 
     applicationWindow {
         background.color: "#544e52"
