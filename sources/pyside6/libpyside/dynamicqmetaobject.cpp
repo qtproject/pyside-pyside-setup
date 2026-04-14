@@ -489,6 +489,17 @@ const QMetaObject *MetaObjectBuilder::update()
     return m_d->update();
 }
 
+void MetaObjectBuilder::reparseType(PyTypeObject *type)
+{
+    // Clear the existing builder so parsePythonType starts fresh
+    delete m_d->m_builder;
+    m_d->m_builder = new QMetaObjectBuilder();
+    m_d->m_builder->setClassName(PepExt_TypeGetQualName(type));
+    m_d->m_builder->setSuperClass(m_d->m_baseObject);
+    m_d->m_dirty = true;
+    m_d->parsePythonType(type);
+}
+
 static void formatEnum(QTextStream &str, const QMetaEnum &e)
 {
     str << '"' << e.name() << "\" {";

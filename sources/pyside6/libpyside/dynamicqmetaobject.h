@@ -46,6 +46,10 @@ public:
 
     const QMetaObject *update();
 
+    // Re-parse a Python type after new Signal/Property objects have been
+    // added to its class dict (e.g. by @auto_properties).
+    void reparseType(PyTypeObject *type);
+
     static QString formatMetaObject(const QMetaObject *metaObject);
 
 private:
