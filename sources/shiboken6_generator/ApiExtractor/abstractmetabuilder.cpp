@@ -2241,10 +2241,10 @@ AbstractMetaFunctionPtr
     if (functionItem->isConstant())
         signatures.append(signatures.constFirst().left(signatures.constFirst().size() - 5));
     for (qsizetype i = 0, size = signatures.size(); i < size; ++i) {
-        const QString normalized =
-            QString::fromUtf8(QMetaObject::normalizedSignature(signatures.at(i).toUtf8()));
-        if (normalized != signatures.at(i))
-            signatures.append(normalized);
+        const QByteArray &signatureBA = signatures.at(i).toUtf8();
+        const QByteArray &normalizedBA = QMetaObject::normalizedSignature(signatureBA.constData());
+        if (normalizedBA != signatureBA)
+            signatures.append(QString::fromUtf8(normalizedBA));
     }
 
     for (const auto &signature : std::as_const(signatures)) {

@@ -4550,7 +4550,7 @@ QString CppGenerator::writeContainerConverterInitialization(TextStream &s,
                                                             const ApiExtractorResult &api)
 {
     const auto cppSignature =
-        QString::fromUtf8(QMetaObject::normalizedSignature(type.cppSignature().toUtf8()));
+        QString::fromUtf8(QMetaObject::normalizedSignature(type.cppSignature().toUtf8().constData()));
     s << "// Register converter for type '" << cppSignature << "'.\n";
     const QString converter = converterObject(type);
     s << converter << " = Shiboken::Conversions::createConverter(";
