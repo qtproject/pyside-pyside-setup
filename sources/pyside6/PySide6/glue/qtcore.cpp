@@ -777,7 +777,11 @@ static int SbkQByteArray_getbufferproc(PyObject *obj, Py_buffer *view, int flags
 
     QByteArray * cppSelf = %CONVERTTOCPP[QByteArray *](obj);
     //XXX      /|\ omitting this space crashes shiboken!
-#ifdef Py_LIMITED_API
+
+#if !defined(Py_LIMITED_API) || Py_LIMITED_API >= 0x030B0000
+    return PyBuffer_FillInfo(view, obj, reinterpret_cast<void *>(cppSelf->data()),
+                             cppSelf->size(), 0, flags);
+#else
     view->obj = obj;
     view->buf = reinterpret_cast<void *>(cppSelf->data());
     view->len = cppSelf->size();
@@ -792,21 +796,15 @@ static int SbkQByteArray_getbufferproc(PyObject *obj, Py_buffer *view, int flags
 
     Py_XINCREF(obj);
     return 0;
-#else // Py_LIMITED_API
-    const int result = PyBuffer_FillInfo(view, obj, reinterpret_cast<void *>(cppSelf->data()),
-                                         cppSelf->size(), 0, flags);
-    if (result == 0)
-        Py_XINCREF(obj);
-    return result;
 #endif
 }
 
 static PyBufferProcs SbkQByteArrayBufferProc = {
-    /*bf_getbuffer*/  (getbufferproc)SbkQByteArray_getbufferproc,
-    /*bf_releasebuffer*/ (releasebufferproc)0,
+    /*bf_getbuffer*/  SbkQByteArray_getbufferproc,
+    /*bf_releasebuffer*/ nullptr,
 };
 
-}
+} // extern "C"
 // @snippet qbytearray-bufferprotocol
 
 // @snippet qbytearray-operatorplus-1
