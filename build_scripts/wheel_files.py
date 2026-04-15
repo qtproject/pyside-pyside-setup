@@ -584,6 +584,9 @@ def module_QtQuick() -> ModuleData:
         "qt6quicktimeline_metatypes.json",
         "qt6quickvectorimage_metatypes.json",
         "qt6quickvectorimagegeneratorprivate_metatypes.json",
+        "qt6lottie_metatypes.json",
+        "qt6lottievectorimagegeneratorprivate_metatypes.json",
+        "qt6lottievectorimagehelpers_metatypes.json",
     ]
     _qtlib = [
         "libQt6QuickEffects",
@@ -599,7 +602,10 @@ def module_QtQuick() -> ModuleData:
         "libQt6QuickTimelineBlendTrees",
         "libQt6QuickVectorImage",
         "libQt6QuickVectorImageGenerator",
-        "libQt6QuickVectorImageHelpers"
+        "libQt6QuickVectorImageHelpers",
+        "libQt6Lottie",
+        "libQt6LottieVectorImageGenerator",
+        "libQt6LottieVectorImageHelpers",
     ]
 
     data.qtlib.extend(_qtlib)

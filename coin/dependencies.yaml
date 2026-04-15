@@ -16,6 +16,7 @@ dependencies: [
       "../../qt/qtgraphs",
       "../../qt/qthttpserver",
       "../../qt/qtimageformats",
+      "../../qt/qtlottie",
       "../../qt/qtlocation",
       "../../qt/qtpositioning",
       "../../qt/qtmultimedia",
