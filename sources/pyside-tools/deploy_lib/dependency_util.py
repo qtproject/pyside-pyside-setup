@@ -202,7 +202,6 @@ class QtDependencyReader:
         self.lib_reader_name = None
         self.qt_module_path_pattern = None
         self.lib_pattern = None
-        self.command = None
         self.qt_libs_dir = None
 
         if sys.platform == "linux":

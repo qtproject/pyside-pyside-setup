@@ -73,7 +73,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
     logging.basicConfig(level=loglevel)
 
     # In case pyside6-deploy is run from a completely different location than the project directory
-    if main_file and main_file.exists():
+    if main_file and main_file.exists() and not config_file:
         config_file = main_file.parent / "pysidedeploy.spec"
 
     if config_file and not config_file.exists() and not main_file.exists():
@@ -89,14 +89,8 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
     if extra_ignore_dirs:
         extra_ignore_dirs = extra_ignore_dirs.split(",")
 
-    extra_modules = []
-    if extra_modules_grouped:
-        tmp_extra_modules = extra_modules_grouped.split(",")
-        for extra_module in tmp_extra_modules:
-            if extra_module.startswith("Qt"):
-                extra_modules.append(extra_module[2:])
-            else:
-                extra_modules.append(extra_module)
+    extra_modules = [m[2:] if m.startswith("Qt") else m
+                     for m in extra_modules_grouped.split(",")] if extra_modules_grouped else []
 
     python = PythonExecutable(dry_run=dry_run, init=init, force=force)
     config_file_exists = config_file and config_file.exists()

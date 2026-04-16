@@ -52,7 +52,7 @@ class PythonExecutable:
     @staticmethod
     def is_venv():
         venv = os.environ.get("VIRTUAL_ENV")
-        return True if venv else False
+        return bool(venv)
 
     def is_pyenv_python(self):
         pyenv_root = os.environ.get("PYENV_ROOT")
