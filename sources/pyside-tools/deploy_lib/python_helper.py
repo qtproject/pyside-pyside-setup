@@ -7,7 +7,7 @@ import os
 import sys
 
 from importlib import util
-from importlib.metadata import version
+from importlib.metadata import distributions as _distributions, version
 from pathlib import Path
 
 from . import Config, run_command
@@ -65,9 +65,8 @@ class PythonExecutable:
         return False
 
     def install(self, packages: list = None):
-        _, installed_packages = run_command(command=[str(self.exe), "-m", "pip", "freeze"],
-                                            dry_run=False, fetch_output=True)
-        installed_packages = [p.decode().split('==')[0] for p in installed_packages.split()]
+        installed_packages = {d.metadata['Name'].lower() for d in _distributions()
+                              if d.metadata['Name']}
         for package in packages:
             package_info = package.split('==')
             package_components_len = len(package_info)
@@ -79,7 +78,8 @@ class PythonExecutable:
                 package_version = package_info[1]
             else:
                 raise ValueError(f"{package} should be of the format 'package_name'=='version'")
-            if (package_name not in installed_packages) and (not self.is_installed(package_name)):
+            if (package_name.lower() not in installed_packages
+                    and not self.is_installed(package_name)):
                 logging.info(f"[DEPLOY] Installing package: {package}")
                 run_command(
                     command=[self.exe, "-m", "pip", "install", package],

@@ -13,6 +13,7 @@ import shutil
 import sys
 from pathlib import Path
 from functools import lru_cache
+from importlib.metadata import distributions as _distributions
 
 from . import IMPORT_WARNING_PYSIDE, DEFAULT_IGNORE_DIRS, run_command
 
@@ -302,16 +303,13 @@ class QtDependencyReader:
         else:
             logging.info(f"[DEPLOY] No Qt dependencies found for {module}")
 
-    def find_plugin_dependencies(self, used_modules: list[str], python_exe: Path) -> list[str]:
+    def find_plugin_dependencies(self, used_modules: list[str]) -> list[str]:
         """
         Given the modules used by the application, returns all the required plugins
         """
         plugins = set()
         pyside_wheels = ["PySide6_Essentials", "PySide6_Addons"]
-        # TODO from 3.12 use list(dist.name for dist in importlib.metadata.distributions())
-        _, installed_packages = run_command(command=[str(python_exe), "-m", "pip", "freeze"],
-                                            dry_run=False, fetch_output=True)
-        installed_packages = [p.decode().split('==')[0] for p in installed_packages.split()]
+        installed_packages = {d.metadata['Name'] for d in _distributions() if d.metadata['Name']}
         for pyside_wheel in pyside_wheels:
             if pyside_wheel not in installed_packages:
                 # the wheel is not installed and hence no plugins are checked for its modules
