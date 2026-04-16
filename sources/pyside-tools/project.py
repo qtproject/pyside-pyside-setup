@@ -12,6 +12,7 @@ from project_lib import (QmlProjectData, check_qml_decorators, is_python_file, m
                          TRANSLATION_SUFFIX, requires_rebuild, run_command, remove_path,
                          ProjectData, resolve_valid_project_file, new_project, NewProjectTypes,
                          ClOptions, DesignStudioProject)
+from deploy_lib import add_deploy_arguments
 
 DESCRIPTION = """
 pyside6-project is a command line tool for creating, building and deploying Qt for Python
@@ -244,10 +245,29 @@ class Project:
             Project(project_file=sub_project_file)._qmllint()
         self._qmllint()
 
-    def deploy(self):
+    def deploy(self, args: Namespace):
         """Deploys the application"""
-        cmd = [DEPLOY_CMD]
-        cmd.extend([str(self.project.main_file), "-f"])
+        cmd = [DEPLOY_CMD, str(self.project.main_file)]
+        if args.config_file is not None:
+            cmd.extend(["-c", str(args.config_file)])
+        if args.init:
+            cmd.append("--init")
+        if args.loglevel is not None:
+            cmd.append("--verbose")
+        if args.dry_run:
+            cmd.append("--dry-run")
+        if args.keep_deployment_files:
+            cmd.append("--keep-deployment-files")
+        if args.force:
+            cmd.append("--force")
+        if args.name:
+            cmd.extend(["--name", args.name])
+        if args.extra_ignore_dirs:
+            cmd.extend(["--extra-ignore-dirs", args.extra_ignore_dirs])
+        if args.extra_modules:
+            cmd.extend(["--extra-modules", args.extra_modules])
+        if args.mode is not None:
+            cmd.extend(["--mode", args.mode])
         run_command(cmd, cwd=self.project.project_file.parent)
 
     def lupdate(self):
@@ -274,7 +294,7 @@ class Project:
 
 
 def main(args: Namespace):
-    mode = args.mode
+    mode = args.subcommand
     project_dir = getattr(args, "project_dir", None)
     project_path = getattr(args, "project_path", None)
     legacy_pyproject = getattr(args, "legacy_pyproject", False)
@@ -316,7 +336,7 @@ def main(args: Namespace):
     elif mode == "qmllint":
         project.qmllint()
     elif mode == "deploy":
-        project.deploy()
+        project.deploy(args)
     elif mode == "lupdate":
         project.lupdate()
     else:
@@ -333,7 +353,7 @@ if __name__ == "__main__":
                         help="Perform check for QML module")
 
     # Create subparsers for the two different command branches
-    subparsers = parser.add_subparsers(dest='mode', required=True)
+    subparsers = parser.add_subparsers(dest='subcommand', required=True)
 
     # Add subparser for project creation commands
     for project_type in NewProjectTypes:
@@ -351,5 +371,7 @@ if __name__ == "__main__":
         op_parser.add_argument("project_path", nargs="?", type=str, help="Path to the project file")
         if op_mode == "run":
             op_parser.add_argument('arguments', nargs='*', help="Arguments")
+        if op_mode == "deploy":
+            add_deploy_arguments(op_parser, include_main_file=False)
 
     main(parser.parse_args())

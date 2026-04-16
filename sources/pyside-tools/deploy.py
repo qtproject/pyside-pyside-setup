@@ -1,6 +1,5 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
-from __future__ import annotations
 
 """ pyside6-deploy deployment tool
 
@@ -28,16 +27,17 @@ from __future__ import annotations
         Note: This file is used by both pyside6-deploy and pyside6-android-deploy
 """
 
-import sys
+from __future__ import annotations
+
 import argparse
 import logging
+import sys
 import traceback
 from pathlib import Path
 from textwrap import dedent
 
-from deploy_lib import (MAJOR_VERSION, DesktopConfig, cleanup, config_option_exists,
-                        finalize, create_config_file, PythonExecutable, Nuitka,
-                        HELP_EXTRA_MODULES, HELP_EXTRA_IGNORE_DIRS)
+from deploy_lib import (MAJOR_VERSION, DesktopConfig, cleanup, finalize, create_config_file,
+                        PythonExecutable, Nuitka, add_deploy_arguments)
 
 
 TOOL_DESCRIPTION = dedent(f"""
@@ -49,15 +49,6 @@ TOOL_DESCRIPTION = dedent(f"""
                           macOS = .app
                           Linux = .bin
                           """)
-
-HELP_MODE = dedent("""
-                   The mode in which the application is deployed. The options are: onefile,
-                   standalone. The default value is onefile.
-
-                   This options translates to the mode Nuitka uses to create the executable.
-
-                   macOS by default uses the --standalone option.
-                   """)
 
 
 def main(main_file: Path = None, name: str = None, config_file: Path = None, init: bool = False,
@@ -171,40 +162,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=TOOL_DESCRIPTION)
-
-    parser.add_argument("-c", "--config-file", type=lambda p: Path(p).absolute(),
-                        default=(Path.cwd() / "pysidedeploy.spec"),
-                        help="Path to the .spec config file")
-
-    parser.add_argument(
-        type=lambda p: Path(p).absolute(),
-        help="Path to main python file", nargs="?", dest="main_file",
-        default=None if config_option_exists() else Path.cwd() / "main.py")
-
-    parser.add_argument(
-        "--init", action="store_true",
-        help="Create pysidedeploy.spec file, if it doesn't already exists")
-
-    parser.add_argument(
-        "-v", "--verbose", help="Run in verbose mode", action="store_const",
-        dest="loglevel", const=logging.INFO)
-
-    parser.add_argument("--dry-run", action="store_true", help="Show the commands to be run")
-
-    parser.add_argument(
-        "--keep-deployment-files", action="store_true",
-        help="Keep the generated deployment files generated")
-
-    parser.add_argument("-f", "--force", action="store_true", help="Force all input prompts")
-
-    parser.add_argument("--name", type=str, help="Application name")
-
-    parser.add_argument("--extra-ignore-dirs", type=str, help=HELP_EXTRA_IGNORE_DIRS)
-
-    parser.add_argument("--extra-modules", type=str, help=HELP_EXTRA_MODULES)
-
-    parser.add_argument("--mode", choices=["onefile", "standalone"], default="onefile",
-                        help=HELP_MODE)
+    add_deploy_arguments(parser)
 
     parser.add_argument("--nuitka-version", type=str, default=None,
                         help=("Override the Nuitka version to install for deployment, "
