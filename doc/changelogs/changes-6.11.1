@@ -1,0 +1,55 @@
+Qt for Python 6.11.1 is a bug-fix release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - [PYSIDE-1612]  Nuitka dependency of pyside6-deploy is updated to 4.0.
+ - [PYSIDE-3288]  It is now possible to defer deletion of QObjects in case
+                  they get garbage-collected by a thread different from their
+                  owner thread and thus ensure the correct thread affinity.
+ - [PYSIDE-3031]  A memory leak in buffer protocol handling of QByteArray
+                  has been fixed (Non-Limited API only).
+ - [PYSIDE-3051]  The mappings and type hints for the division operator
+                  have been fixed.
+ - [PYSIDE-3105]  Cross compilation support has been improved.
+ - [PYSIDE-3243]  A missing library error occurring in the PySidePlugin
+                  on Windows has been fixed (Non-Limited API only).
+ - [PYSIDE-3288]  libpyside: Warning messages are now prefixed.
+ - [PYSIDE-3290]  Deployment: QML files not being included in deployment
+                  have been fixed.
+ - [PYSIDE-3294]  Qt Widgets Designer plugin: It is now possible to use
+                  inner classes as custom widgets. The interoperability
+                  between Python custom widgets and C++ custom widgets
+                  (with or without namespaces) has been improved.
+ - [PYSIDE-3295]  The CMake build has been fixed.
+ - [PYSIDE-3297]  Qt Labs libraries new in 6.11.have been added.
+ - [PYSIDE-3299]  Deployment: Multi-line arrays in the TOML config file are
+                  now also properly parsed when using Python <3.11.
+ - [PYSIDE-3304]  type hints: The type hints for QMetaObject.invokeMethod()
+                  have been fixed.
+ - [PYSIDE-3307]  A crash occurring when using unittest.mock/patch on
+                  slot receivers has been fixed.
+ - [QTBUG-71856]  The document viewer demo has been updated, now featuring
+                  switching UI language changes at runtime.
+ - [QTBUG-130067] An example demoing the newly added Qt Quick Controls
+                  StyleKit example has been added.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-3286] Clang version 22 is now supported.
