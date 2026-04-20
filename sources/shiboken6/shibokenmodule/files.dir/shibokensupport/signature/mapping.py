@@ -555,6 +555,7 @@ def init_PySide6_QtCore():
         })
     # special case - char* can either be 'bytes' or 'str'. The default is 'bytes'.
     # Here we manually set it to map to 'str'.
+    type_map_tuple.update({("PySide6.QtCore.QMetaObject.invokeMethod", "char*"): str})
     type_map_tuple.update({("PySide6.QtCore.QObject.setProperty", "char*"): str})
     type_map_tuple.update({("PySide6.QtCore.QObject.property", "char*"): str})
     type_map_tuple.update({("PySide6.QtCore.QObject.inherits", "char*"): str})
