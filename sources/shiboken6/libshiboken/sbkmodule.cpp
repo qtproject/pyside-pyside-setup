@@ -315,20 +315,65 @@ static int constexpr IMPORT_NAME_OpCode(long pyVersion)
     return 108;
 }
 
-static bool isImportStar(PyObject *module)
+static bool detectImportStar(PyObject *dec_frame, PyObject *module)
 {
-    // Find out whether we have a star import. This must work even
-    // when we have no import support from feature.
     static PyObject *const _f_code = Shiboken::String::createStaticString("f_code");
     static PyObject *const _f_lasti = Shiboken::String::createStaticString("f_lasti");
-    static PyObject *const _f_back = Shiboken::String::createStaticString("f_back");
     static PyObject *const _co_code = Shiboken::String::createStaticString("co_code");
     static PyObject *const _co_consts = Shiboken::String::createStaticString("co_consts");
     static PyObject *const _co_names = Shiboken::String::createStaticString("co_names");
 
+    static const long pyVersion = _PepRuntimeVersion();
+    static const int LOAD_CONST = LOAD_CONST_OpCode(pyVersion);
+    static const int IMPORT_NAME = IMPORT_NAME_OpCode(pyVersion);
 
-    static const int LOAD_CONST = LOAD_CONST_OpCode(_PepRuntimeVersion());
-    static const int IMPORT_NAME = IMPORT_NAME_OpCode(_PepRuntimeVersion());
+    AutoDecRef dec_f_code(PyObject_GetAttr(dec_frame, _f_code));
+    AutoDecRef dec_co_code(PyObject_GetAttr(dec_f_code, _co_code));
+    AutoDecRef dec_f_lasti(PyObject_GetAttr(dec_frame, _f_lasti));
+    if (dec_f_code.isNull() || dec_co_code.isNull() || dec_f_lasti.isNull())
+        return false;
+
+    Py_ssize_t code_len{};
+    char *co_code{};
+    if (PyBytes_AsStringAndSize(dec_co_code, &co_code, &code_len) != 0)
+        return false;
+
+    const Py_ssize_t f_lasti = PyLong_AsSsize_t(dec_f_lasti);
+    if (f_lasti < 2 || f_lasti >= code_len - 1
+        || co_code[f_lasti] != IMPORT_NAME || co_code[f_lasti - 2] != LOAD_CONST) {
+        return false;
+    }
+
+    const Py_ssize_t oparg1 = uint8_t(co_code[f_lasti - 1]);
+    AutoDecRef dec_co_consts(PyObject_GetAttr(dec_f_code, _co_consts));
+    if (dec_co_consts.isNull() || PyTuple_Check(dec_co_consts.object()) == 0
+        || oparg1 >= PyTuple_Size(dec_co_consts.object())) {
+        return false;
+    }
+
+    auto *fromlist = PyTuple_GetItem(dec_co_consts, oparg1);
+    if (PyTuple_Check(fromlist) == 0 || PyTuple_Size(fromlist) != 1
+        || Shiboken::String::toCString(PyTuple_GetItem(fromlist, 0))[0] != '*') {
+        return false;
+    }
+
+    Py_ssize_t oparg2 = uint8_t(co_code[f_lasti + 1]);
+    AutoDecRef dec_co_names(PyObject_GetAttr(dec_f_code, _co_names));
+    if (dec_co_names.isNull() || PyTuple_Check(dec_co_names.object()) == 0
+        || oparg2 >= PyTuple_Size(dec_co_names.object())) {
+        return false;
+    }
+    const char *name = String::toCString(PyTuple_GetItem(dec_co_names, oparg2));
+    const char *modName = PyModule_GetName(module);
+    return std::strcmp(name, modName) == 0;
+}
+
+static bool isImportStar(PyObject *module)
+{
+    // Find out whether we have a star import. This must work even
+    // when we have no import support from feature.
+
+    static PyObject *const _f_back = Shiboken::String::createStaticString("f_back");
 
     auto *obFrame = reinterpret_cast<PyObject *>(PyEval_GetFrame());
     if (obFrame == nullptr)
@@ -340,29 +385,8 @@ static bool isImportStar(PyObject *module)
     // Calculate the offset of the running import_name opcode on the stack.
     // Right before that there must be a load_const with the tuple `("*",)`.
     while (dec_frame.object() != Py_None) {
-        AutoDecRef dec_f_code(PyObject_GetAttr(dec_frame, _f_code));
-        AutoDecRef dec_co_code(PyObject_GetAttr(dec_f_code, _co_code));
-        AutoDecRef dec_f_lasti(PyObject_GetAttr(dec_frame, _f_lasti));
-        Py_ssize_t f_lasti = PyLong_AsSsize_t(dec_f_lasti);
-        Py_ssize_t code_len{};
-        char *co_code{};
-        PyBytes_AsStringAndSize(dec_co_code, &co_code, &code_len);
-        uint8_t opcode2 = co_code[f_lasti];
-        uint8_t opcode1 = co_code[f_lasti - 2];
-        if (opcode1 == LOAD_CONST && opcode2 == IMPORT_NAME) {
-            uint8_t oparg1 = co_code[f_lasti - 1];
-            uint8_t oparg2 = co_code[f_lasti + 1];
-            AutoDecRef dec_co_consts(PyObject_GetAttr(dec_f_code, _co_consts));
-            auto *fromlist = PyTuple_GetItem(dec_co_consts, oparg1);
-            if (PyTuple_Check(fromlist) && PyTuple_Size(fromlist) == 1
-                    && Shiboken::String::toCString(PyTuple_GetItem(fromlist, 0))[0] == '*') {
-                AutoDecRef dec_co_names(PyObject_GetAttr(dec_f_code, _co_names));
-                const char *name = String::toCString(PyTuple_GetItem(dec_co_names, oparg2));
-                const char *modName = PyModule_GetName(module);
-                if (std::strcmp(name, modName) == 0)
-                    return true;
-            }
-        }
+        if (detectImportStar(dec_frame.object(), module))
+            return true;
         dec_frame.reset(PyObject_GetAttr(dec_frame, _f_back));
     }
     return false;
