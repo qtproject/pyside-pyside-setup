@@ -2484,8 +2484,7 @@ static bool skipOperatorFunc(const AbstractMetaFunctionCPtr &func)
         if (func->isModifiedRemoved() || func->usesRValueReferences())
             return true;
         const auto &name = func->name();
-        return name == u"operator[]" || name == u"operator->" || name == u"operator!"
-               || name == u"operator/="; // __idiv__ is not needed in Python3
+        return name == u"operator[]" || name == u"operator->" || name == u"operator!";
 }
 
 QList<AbstractMetaFunctionCList>

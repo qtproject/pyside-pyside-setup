@@ -16,10 +16,21 @@ from sample import Point
 
 class TestNewDivision(unittest.TestCase):
 
-    def testIt(self):
+    def testTruedivSlot(self):
+        self.assertTrue(hasattr(Point, '__truediv__'))
+
+    def testItruedivSlot(self):
+        self.assertTrue(hasattr(Point, '__itruediv__'))
+
+    def testTruediv(self):
         p = Point(4, 4)
         p2 = p / 2
         self.assertEqual(p2, Point(2, 2))
+
+    def testItruediv(self):
+        p = Point(4, 6)
+        p /= 2
+        self.assertEqual(p, Point(2, 3))
 
 
 if __name__ == "__main__":

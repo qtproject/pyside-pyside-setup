@@ -639,7 +639,7 @@ static const QHash<QString, QString> &pythonOperators()
         {u"operator+"_s, u"__add__"_s},
         {u"operator-"_s, u"__sub__"_s},
         {u"operator*"_s, u"__mul__"_s},
-        {u"operator/"_s, u"__div__"_s},
+        {u"operator/"_s, u"__truediv__"_s},
         {u"operator%"_s, u"__mod__"_s},
         // Inplace arithmetic operators
         {u"operator+="_s, u"__iadd__"_s},
@@ -647,6 +647,7 @@ static const QHash<QString, QString> &pythonOperators()
         {u"operator++"_s, u"__iadd__"_s},
         {u"operator--"_s, u"__isub__"_s},
         {u"operator*="_s, u"__imul__"_s},
+        {u"operator/="_s, u"__itruediv__"_s},
         {u"operator%="_s, u"__imod__"_s},
         // Bitwise operators
         {u"operator&"_s, u"__and__"_s},

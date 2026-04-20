@@ -63,6 +63,13 @@ Point &Point::operator-=(Point &other)
     return *this;
 }
 
+Point &Point::operator/=(int operand)
+{
+    m_x /= operand;
+    m_y /= operand;
+    return *this;
+}
+
 Point operator*(const Point &pt, double mult)
 {
     return Point(pt.m_x * mult, pt.m_y * mult);

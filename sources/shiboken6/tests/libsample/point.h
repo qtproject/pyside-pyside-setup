@@ -53,6 +53,7 @@ public:
 
     Point &operator+=(Point &other);
     Point &operator-=(Point &other);
+    Point &operator/=(int operand);
 
     void show() const;
 
