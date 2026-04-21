@@ -328,8 +328,14 @@ def try_build_examples():
     # disable for windows as it Nuitka --onefile deployment in Windows
     # requires DependencyWalker. Download and installing will slow down
     # Coin
-    if sys.platform != "win32":
+    # Skip on macOS: Nuitka 4.0 fails to scan OpenSSL dependencies of _hashlib
+    # regardless of the Python distribution. Fixed in Nuitka 4.1.
+    # See https://github.com/Nuitka/Nuitka/issues/3777
+    # TODO: Fix the issue when Nuitka 4.1 is released
+    if sys.platform != "win32" and sys.platform != "darwin":
         run_deploy_test(src_path)
+    elif sys.platform == "darwin":
+        log.info("Skipping deploy test on macOS (Nuitka OpenSSL issue, fixed in Nuitka 4.1).")
 
     if False:  # pre 6.4.1, kept for reference
         # Nuitka is loaded by coin_build_instructions.py, but not when
