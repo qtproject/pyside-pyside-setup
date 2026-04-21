@@ -20,8 +20,23 @@ The removal of Python versions is tied to their lifetime
 - Check the usages of `_PepRuntimeVersion()` for outdated versions
 - Run the tests and some examples. There might actually
   some version checks in Python code that trigger
-  (see for example 
+  (see for example
    `sources/shiboken6/shibokenmodule/files.dir/shibokensupport/signature/parser.py:70`).
+
+## Byte code checks
+
+There are 2 places where the Python byte code is checked:
+
+1st, there is a check for constructing an enum value without parameters (legacy
+forgiveness feature `ENOPT_NO_ZERODEFAULT` at
+`sources/pyside6/tests/pysidetest/enum_test.py:212`,
+`sources/shiboken6/libshiboken/sbkfeature_base.cpp:118`).
+
+2nd, there is a check for star imports (required for lazy initialization) at
+`sources/shiboken6/libshiboken/sbkmodule.cpp:300`.
+
+This needs to be adapted when the byte code changes in Python
+(see code comments).
 
 ## Adapting to new Python versions
 
