@@ -204,10 +204,10 @@ class PropertyTests(unittest.TestCase):
         @support.refcount_test
         def test_refleaks_in___init__(self):
             gettotalrefcount = support.get_attribute(sys, 'gettotalrefcount')
-            fake_prop = Property(object, 'fget', 'fset', "freset", 'fdel', 'doc')
+            fake_prop = Property(object, None, None, None, None, 'doc')
             refs_before = gettotalrefcount()
             for i in range(100):
-                fake_prop.__init__(object, 'fget', 'fset', "freset", 'fdel', 'doc')
+                fake_prop.__init__(object, None, None, None, None, 'doc')
             self.assertAlmostEqual(gettotalrefcount() - refs_before, 0, delta=10)
 
 
