@@ -15,7 +15,6 @@ import BrowserUtils
 
 ApplicationWindow {
     id: win
-    required property ApplicationRoot applicationRoot
     property WebEngineView currentWebView: tabBar.currentIndex < tabBar.count ? tabLayout.children[tabBar.currentIndex] : null
     property int previousVisibility: Window.Windowed
     property bool lastTabClosing: false
@@ -38,18 +37,18 @@ ApplicationWindow {
     Settings {
         id : appSettings
         property alias autoLoadImages: loadImages.checked
-        property alias javaScriptEnabled: javaScriptEnabled.checked
-        property alias errorPageEnabled: errorPageEnabled.checked
-        property alias pluginsEnabled: pluginsEnabled.checked
-        property alias fullScreenSupportEnabled: fullScreenSupportEnabled.checked
-        property alias autoLoadIconsForPage: autoLoadIconsForPage.checked
-        property alias touchIconsEnabled: touchIconsEnabled.checked
-        property alias webRTCPublicInterfacesOnly : webRTCPublicInterfacesOnly.checked
-        property alias devToolsEnabled: devToolsEnabled.checked
-        property alias pdfViewerEnabled: pdfViewerEnabled.checked
+        property alias javaScriptEnabled: javaScriptEnabledMenuItem.checked
+        property alias errorPageEnabled: errorPageEnabledMenuItem.checked
+        property alias pluginsEnabled: pluginsEnabledMenuItem.checked
+        property alias fullScreenSupportEnabled: fullScreenSupportEnabledMenuItem.checked
+        property alias autoLoadIconsForPage: autoLoadIconsForPageMenuItem.checked
+        property alias touchIconsEnabled: touchIconsEnabledMenuItem.checked
+        property alias webRTCPublicInterfacesOnly : webRTCPublicInterfacesOnlyMenuItem.checked
+        property alias devToolsEnabled: devToolsEnabledMenuItem.checked
+        property alias pdfViewerEnabled: pdfViewerEnabledMenuItem.checked
         property int imageAnimationPolicy: WebEngineSettings.ImageAnimationPolicy.Allow
-        property alias javascriptCanAccessClipboard: javascriptCanAccessClipboard.checked
-        property alias javascriptCanPaste: javascriptCanPaste.checked
+        property alias javascriptCanAccessClipboard: javascriptCanAccessClipboardMenuItem.checked
+        property alias javascriptCanPaste: javascriptCanPasteMenuItem.checked
     }
 
     Action {
@@ -59,7 +58,7 @@ ApplicationWindow {
         }
     }
     Action {
-        id: focus
+        id: focusAction
         shortcut: "Ctrl+L"
         onTriggered: {
             addressBar.forceActiveFocus();
@@ -78,7 +77,7 @@ ApplicationWindow {
         onTriggered: {
             tabBar.createTab(tabBar.count !== 0
                              ? win.currentWebView.profile
-                             : win.applicationRoot.defaultProfilePrototype.instance());
+                             : BrowserManager.defaultProfilePrototype.instance());
             addressBar.forceActiveFocus();
             addressBar.selectAll();
         }
@@ -301,25 +300,25 @@ ApplicationWindow {
                         checked: WebEngine.settings.autoLoadImages
                     }
                     MenuItem {
-                        id: javaScriptEnabled
+                        id: javaScriptEnabledMenuItem
                         text: "JavaScript On"
                         checkable: true
                         checked: WebEngine.settings.javascriptEnabled
                     }
                     MenuItem {
-                        id: errorPageEnabled
+                        id: errorPageEnabledMenuItem
                         text: "ErrorPage On"
                         checkable: true
                         checked: WebEngine.settings.errorPageEnabled
                     }
                     MenuItem {
-                        id: pluginsEnabled
+                        id: pluginsEnabledMenuItem
                         text: "Plugins On"
                         checkable: true
                         checked: true
                     }
                     MenuItem {
-                        id: fullScreenSupportEnabled
+                        id: fullScreenSupportEnabledMenuItem
                         text: "FullScreen On"
                         checkable: true
                         checked: WebEngine.settings.fullScreenSupportEnabled
@@ -328,12 +327,12 @@ ApplicationWindow {
                         id: offTheRecordEnabled
                         text: "Off The Record"
                         checkable: true
-                        checked: win.currentWebView?.profile === win.applicationRoot.otrPrototype.instance()
+                        checked: win.currentWebView?.profile === BrowserManager.otrPrototype.instance()
                         onToggled: function() {
                             if (win.currentWebView) {
                                 win.currentWebView.profile = offTheRecordEnabled.checked
-                                        ? win.applicationRoot.otrPrototype.instance()
-                                        : win.applicationRoot.defaultProfilePrototype.instance();
+                                        ? BrowserManager.otrPrototype.instance()
+                                        : BrowserManager.defaultProfilePrototype.instance();
                             }
                         }
                     }
@@ -351,38 +350,38 @@ ApplicationWindow {
                         }
                     }
                     MenuItem {
-                        id: autoLoadIconsForPage
+                        id: autoLoadIconsForPageMenuItem
                         text: "Icons On"
                         checkable: true
                         checked: WebEngine.settings.autoLoadIconsForPage
                     }
                     MenuItem {
-                        id: touchIconsEnabled
+                        id: touchIconsEnabledMenuItem
                         text: "Touch Icons On"
                         checkable: true
                         checked: WebEngine.settings.touchIconsEnabled
-                        enabled: autoLoadIconsForPage.checked
+                        enabled: autoLoadIconsForPageMenuItem.checked
                     }
                     MenuItem {
-                        id: webRTCPublicInterfacesOnly
+                        id: webRTCPublicInterfacesOnlyMenuItem
                         text: "WebRTC Public Interfaces Only"
                         checkable: true
                         checked: WebEngine.settings.webRTCPublicInterfacesOnly
                     }
                     MenuItem {
-                        id: devToolsEnabled
+                        id: devToolsEnabledMenuItem
                         text: "Open DevTools"
                         checkable: true
                         checked: false
                     }
                     MenuItem {
-                        id: pdfViewerEnabled
+                        id: pdfViewerEnabledMenuItem
                         text: "PDF Viewer Enabled"
                         checkable: true
                         checked: WebEngine.settings.pdfViewerEnabled
                     }
                     Menu {
-                        id: imageAnimationPolicy
+                        id: imageAnimationPolicyMenu
                         title: "Image Animation Policy"
 
                         MenuItem {
@@ -420,13 +419,13 @@ ApplicationWindow {
                     }
 
                     MenuItem {
-                        id: javascriptCanAccessClipboard
+                        id: javascriptCanAccessClipboardMenuItem
                         text: "JavaScript can access clipboard"
                         checkable: true
                         checked: WebEngine.settings.javascriptCanAccessClipboard
                     }
                     MenuItem {
-                        id: javascriptCanPaste
+                        id: javascriptCanPasteMenuItem
                         text: "JavaScript can paste"
                         checkable: true
                         checked: WebEngine.settings.javascriptCanPaste
@@ -457,7 +456,7 @@ ApplicationWindow {
         currentIndex: tabBar.currentIndex
 
         anchors.top: tabBar.bottom
-        anchors.bottom: devToolsView.top
+        anchors.bottom: devToolsWebEngineView.top
         anchors.left: parent.left
         anchors.right: parent.right
     }
@@ -477,13 +476,13 @@ ApplicationWindow {
                 color: tabButton.down ? tabButton.fillColor : tabButton.nonSelectedColor
                 border.width: 1
                 border.color: tabButton.frameColor
-                implicitWidth: Math.max(text.width + 30, 80)
-                implicitHeight: Math.max(text.height + 10, 20)
+                implicitWidth: Math.max(tabText.width + 30, 80)
+                implicitHeight: Math.max(tabText.height + 10, 20)
                 Rectangle { height: 1 ; width: parent.width ; color: tabButton.frameColor}
                 Rectangle { height: parent.height ; width: 1; color: tabButton.frameColor}
                 Rectangle { x: parent.width - 2; height: parent.height ; width: 1; color: tabButton.frameColor}
                 Text {
-                    id: text
+                    id: tabText
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.leftMargin: 6
@@ -520,7 +519,7 @@ ApplicationWindow {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        Component.onCompleted: createTab(win.applicationRoot.defaultProfilePrototype.instance())
+        Component.onCompleted: createTab(BrowserManager.defaultProfilePrototype.instance())
 
         function createTab(profile, focusOnNewTab = true, url = undefined) {
             var webview = tabComponent.createObject(tabLayout, {profile: profile});
@@ -571,13 +570,9 @@ ApplicationWindow {
                     State {
                         name: "FullScreen"
                         PropertyChanges {
-                            target: tabBar
-                            visible: false
-                            height: 0
-                        }
-                        PropertyChanges {
-                            target: navigationBar
-                            visible: false
+                            tabBar.visible: false
+                            tabBar.height: 0
+                            navigationBar.visible: false
                         }
                     }
                 ]
@@ -615,17 +610,17 @@ ApplicationWindow {
                     if (!request.userInitiated)
                         console.warn("Blocked a popup window.");
                     else if (request.destination === WebEngineNewWindowRequest.InNewTab) {
-                        var tab = tabBar.createTab(win.currentWebView.profile, true, request.requestedUrl);
+                        let tab = tabBar.createTab(win.currentWebView.profile, true, request.requestedUrl);
                         tab.acceptAsNewWindow(request);
                     } else if (request.destination === WebEngineNewWindowRequest.InNewBackgroundTab) {
-                        var backgroundTab = tabBar.createTab(win.currentWebView.profile, false);
+                        let backgroundTab = tabBar.createTab(win.currentWebView.profile, false);
                         backgroundTab.acceptAsNewWindow(request);
                     } else if (request.destination === WebEngineNewWindowRequest.InNewDialog) {
-                        var dialog = win.applicationRoot.createDialog(win.currentWebView.profile);
-                        dialog.win.currentWebView.acceptAsNewWindow(request);
+                        let dialog = BrowserManager.createDialog(win.currentWebView.profile);
+                        dialog.currentWebView.acceptAsNewWindow(request);
                     } else {
-                        var window = win.applicationRoot.createWindow(win.currentWebView.profile);
-                        window.win.currentWebView.acceptAsNewWindow(request);
+                        let window = BrowserManager.createWindow(win.currentWebView.profile);
+                        window.currentWebView.acceptAsNewWindow(request);
                     }
                 }
 
@@ -672,7 +667,7 @@ ApplicationWindow {
                     }
 
                     print("Render process exited with code " + exitCode + " " + status);
-                    reloadTimer.running = true;
+                    Qt.callLater(function() { win.currentWebView.reload() })
                 }
 
                 onSelectClientCertificate: function(selection) {
@@ -699,20 +694,12 @@ ApplicationWindow {
                 onWebAuthUxRequested: function(request) {
                     webAuthDialog.init(request);
                 }
-
-                Timer {
-                    id: reloadTimer
-                    interval: 0
-                    running: false
-                    repeat: false
-                    onTriggered: win.currentWebView.reload()
-                }
             }
         }
     }
     WebEngineView {
-        id: devToolsView
-        visible: devToolsEnabled.checked
+        id: devToolsWebEngineView
+        visible: devToolsEnabledMenuItem.checked
         height: visible ? 400 : 0
         inspectedView: visible && tabBar.currentIndex < tabBar.count ? tabLayout.children[tabBar.currentIndex] : null
         anchors.left: parent.left
@@ -723,16 +710,9 @@ ApplicationWindow {
             request.openIn(tab);
         }
 
-        Timer {
-            id: hideTimer
-            interval: 0
-            running: false
-            repeat: false
-            onTriggered: devToolsEnabled.checked = false
-        }
         onWindowCloseRequested: function() {
             // Delay hiding for keep the inspectedView set to receive the ACK message of close.
-            hideTimer.running = true;
+            Qt.callLater(function() { devToolsEnabledMenuItem.checked = false })
         }
     }
     Dialog {
@@ -860,7 +840,7 @@ ApplicationWindow {
     WebAuthDialog {
         id: webAuthDialog
         visible: false
-        browserWindow: win
+        width: Math.min(win.width, win.height) / 3 * 2
     }
 
     MessageDialog {
@@ -942,7 +922,7 @@ ApplicationWindow {
            return;
        }
        closeEvent.accepted = false
-       for (var i = 0; i < tabBar.count; i++)  {
+       for (let i = 0; i < tabBar.count; i++)  {
            tabBar.tryCloseView(i);
        }
     }

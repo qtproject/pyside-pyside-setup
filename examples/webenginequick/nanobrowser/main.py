@@ -8,8 +8,8 @@ import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 from pathlib import Path
 
-from PySide6.QtCore import (QCoreApplication, QFileInfo, QMetaObject, QObject,
-                            QUrl, Slot, Q_ARG)
+from PySide6.QtCore import (QCoreApplication, QFileInfo, QObject,
+                            QUrl, Slot)
 from PySide6.QtQml import QQmlApplicationEngine, QmlElement, QmlSingleton
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWebEngineQuick import QtWebEngineQuick
@@ -60,12 +60,11 @@ if __name__ == '__main__':
         app_args.extend(["--webEngineArgs", "--single-process"])
     app = QGuiApplication(app_args)
     engine = QQmlApplicationEngine()
+    engine.setInitialProperties({"startupUrl": url})
     engine.addImportPath(Path(__file__).parent)
     engine.loadFromModule("BrowserUtils", "ApplicationRoot")
     if not engine.rootObjects():
         sys.exit(-1)
-
-    QMetaObject.invokeMethod(engine.rootObjects()[0], "load", Q_ARG("QVariant", url))
 
     exit_code = app.exec()
     del engine
