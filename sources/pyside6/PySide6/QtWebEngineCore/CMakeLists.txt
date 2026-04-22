@@ -10,6 +10,8 @@ set(QtWebEngineCore_static_sources
     "${QtWebEngineCore_SOURCE_DIR}/glue/webengineframe.h"
 )
 
+set(QtWebEngineCore_DROPPED_ENTRIES)
+
 set(QtWebEngineCore_SRC
 ${QtWebEngineCore_GEN_DIR}/qwebenginecertificateerror_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineclientcertificateselection_wrapper.cpp
@@ -20,8 +22,6 @@ ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginecookiestore_filterrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginedesktopmediarequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginedownloadrequest_wrapper.cpp
-${QtWebEngineCore_GEN_DIR}/qwebengineextensioninfo_wrapper.cpp
-${QtWebEngineCore_GEN_DIR}/qwebengineextensionmanager_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefilesystemaccessrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebenginefindtextresult_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qwebengineframe_wrapper.cpp
@@ -56,6 +56,17 @@ ${QtWebEngineCore_GEN_DIR}/qwebenginewebauthuxrequest_wrapper.cpp
 ${QtWebEngineCore_GEN_DIR}/qtwebenginecore_module_wrapper.cpp
 )
 
+get_property(QtWebEngineCore_enabled_features TARGET Qt${QT_MAJOR_VERSION}::WebEngineCore
+             PROPERTY QT_ENABLED_PUBLIC_FEATURES)
+
+if("webengine_extensions" IN_LIST QtWebEngineCore_enabled_features)
+    list(APPEND QtWebEngineCore_SRC
+         ${QtWebEngineCore_GEN_DIR}/qwebengineextensioninfo_wrapper.cpp
+         ${QtWebEngineCore_GEN_DIR}/qwebengineextensionmanager_wrapper.cpp)
+else()
+    list(APPEND QtWebEngineCore_DROPPED_ENTRIES QWebEngineExtensionInfo QWebEngineExtensionManager)
+endif()
+
 set(QtWebEngineCore_include_dirs
                             ${QtWebEngineCore_SOURCE_DIR}
                             ${QtWebEngineCore_BINARY_DIR}
@@ -84,4 +95,5 @@ create_pyside_module(NAME QtWebEngineCore
                      LIBRARIES QtWebEngineCore_libraries
                      DEPS QtWebEngineCore_deps
                      TYPESYSTEM_PATH QtWebEngineCore_SOURCE_DIR
-                     SOURCES QtWebEngineCore_SRC)
+                     SOURCES QtWebEngineCore_SRC
+                     DROPPED_ENTRIES QtWebEngineCore_DROPPED_ENTRIES)
