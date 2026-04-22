@@ -18,12 +18,9 @@
 
 #include <QtCore/qdir.h>
 #include <QtCore/qfile.h>
-#include <QtCore/qlibrary.h>
 #include <QtCore/qversionnumber.h>
 #include <QtCore/qscopeguard.h>
-#include <QtCore/qvariant.h>
 
-#include "qtcompat.h"
 
 #include <exception>
 #include <iostream>

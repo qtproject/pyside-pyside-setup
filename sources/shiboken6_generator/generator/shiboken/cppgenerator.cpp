@@ -42,7 +42,6 @@
 #include <valuetypeentry.h>
 #include <parser/enumvalue.h>
 
-#include "qtcompat.h"
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qdir.h>

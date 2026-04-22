@@ -7,8 +7,6 @@
 #include "enumtypeentry.h"
 #include "parser/enumvalue.h"
 
-#include "qtcompat.h"
-
 #include <QtCore/qdebug.h>
 
 #include <algorithm>

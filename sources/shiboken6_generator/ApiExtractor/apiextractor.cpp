@@ -25,8 +25,6 @@
 #include "namespacetypeentry.h"
 #include "typesystemtypeentry.h"
 
-#include "qtcompat.h"
-
 #include <QtCore/qdir.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/qtemporaryfile.h>

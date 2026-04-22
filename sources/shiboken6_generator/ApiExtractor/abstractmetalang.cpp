@@ -21,8 +21,6 @@
 #include "namespacetypeentry.h"
 #include "usingmember.h"
 
-#include "qtcompat.h"
-
 #include <QtCore/qdebug.h>
 
 #include <algorithm>

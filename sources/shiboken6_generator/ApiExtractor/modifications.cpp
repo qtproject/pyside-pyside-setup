@@ -4,8 +4,6 @@
 #include "modifications.h"
 #include "codesnip.h"
 
-#include "qtcompat.h"
-
 #include <QtCore/qdebug.h>
 #include <QtCore/qregularexpression.h>
 

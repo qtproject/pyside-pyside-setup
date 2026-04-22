@@ -33,7 +33,6 @@
 #include <qtdocparser.h>
 #include <doxygenparser.h>
 
-#include "qtcompat.h"
 
 #include <QtCore/qtextstream.h>
 #include <QtCore/qfile.h>

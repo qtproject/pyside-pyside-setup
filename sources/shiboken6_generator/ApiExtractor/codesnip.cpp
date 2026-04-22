@@ -3,7 +3,6 @@
 
 #include "codesnip.h"
 
-#include "qtcompat.h"
 #include "exception.h"
 #include "typedatabase.h"
 

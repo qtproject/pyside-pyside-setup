@@ -10,8 +10,6 @@
 #include "complextypeentry.h"
 #include "typeinfo.h"
 
-#include "qtcompat.h"
-
 #include <QtCore/qhash.h>
 
 #ifndef QT_NO_DEBUG_STREAM

@@ -12,7 +12,6 @@
 #include "cpptypeentry.h"
 #include "primitivetypeentry.h"
 
-#include "qtcompat.h"
 #include "typeinfo.h"
 
 #ifndef QT_NO_DEBUG_STREAM

@@ -11,8 +11,6 @@
 #include "typesystemtypeentry.h"
 #include "parser/codemodel.h"
 
-#include "qtcompat.h"
-
 #include <QtCore/qdebug.h>
 
 #include <algorithm>

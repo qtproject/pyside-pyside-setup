@@ -9,8 +9,6 @@
 #include <QtCore/qhash.h>
 #include <QtCore/qtextstream.h>
 
-#include "qtcompat.h"
-
 #include <algorithm>
 
 using namespace Qt::StringLiterals;

@@ -27,7 +27,6 @@
 #include "sourcelocation.h"
 #include "conditionalstreamreader.h"
 
-#include "qtcompat.h"
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qdir.h>

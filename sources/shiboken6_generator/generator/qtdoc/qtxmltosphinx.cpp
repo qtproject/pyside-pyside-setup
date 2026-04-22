@@ -7,7 +7,6 @@
 #include <codesniphelpers.h>
 #include "rstformat.h"
 
-#include "qtcompat.h"
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qdir.h>

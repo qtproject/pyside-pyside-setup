@@ -9,8 +9,6 @@
 #include <clangparser/clangutils.h>
 #include <debughelpers_p.h>
 
-#include "qtcompat.h"
-
 #include <QtCore/qdebug.h>
 #include <QtCore/qstack.h>
 #include <QtCore/qtextstream.h>

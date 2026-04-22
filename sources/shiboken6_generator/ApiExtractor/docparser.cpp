@@ -19,8 +19,6 @@
 #include <QtCore/qdir.h>
 #include <QtCore/qtextstream.h>
 
-#include "qtcompat.h"
-
 #include <cstdlib>
 
 #include <algorithm>

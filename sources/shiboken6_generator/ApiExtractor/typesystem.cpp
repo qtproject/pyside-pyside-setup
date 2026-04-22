@@ -32,7 +32,6 @@
 #include "modifications.h"
 #include "sourcelocation.h"
 
-#include "qtcompat.h"
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qregularexpression.h>

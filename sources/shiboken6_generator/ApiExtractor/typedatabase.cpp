@@ -27,10 +27,8 @@
 #include "voidtypeentry.h"
 #include "conditionalstreamreader.h"
 #include "predefined_templates.h"
-#include "clangparser/compilersupport.h"
 #include "modifications.h"
 
-#include "qtcompat.h"
 
 #include <QtCore/qbuffer.h>
 #include <QtCore/qfile.h>

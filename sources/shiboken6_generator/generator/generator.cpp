@@ -21,7 +21,6 @@
 #include "typesystemtypeentry.h"
 #include <typedatabase.h>
 
-#include "qtcompat.h"
 
 #include <QtCore/qdir.h>
 #include <QtCore/qfile.h>

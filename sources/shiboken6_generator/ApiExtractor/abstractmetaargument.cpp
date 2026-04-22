@@ -5,8 +5,6 @@
 #include "abstractmetatype.h"
 #include "documentation.h"
 
-#include "qtcompat.h"
-
 #include <QtCore/qdebug.h>
 #include <QtCore/qshareddata.h>
 

@@ -5,7 +5,6 @@
 
 #include "xmlutils_libxslt.h"
 
-#include "qtcompat.h"
 
 using namespace Qt::StringLiterals;
 

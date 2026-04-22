@@ -40,7 +40,6 @@
 
 #include <iostream>
 
-#include "qtcompat.h"
 
 #include <QtCore/qdir.h>
 #include <QtCore/qdebug.h>

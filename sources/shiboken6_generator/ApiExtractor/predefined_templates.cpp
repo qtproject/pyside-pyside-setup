@@ -3,8 +3,6 @@
 
 #include "predefined_templates.h"
 
-#include "qtcompat.h"
-
 using namespace Qt::StringLiterals;
 
 static QString pySequenceToCppContainer(const QString &insertFunc,

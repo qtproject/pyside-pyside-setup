@@ -10,8 +10,6 @@
 #include <codemodel.h>
 #include <reporthandler.h>
 
-#include "qtcompat.h"
-
 #include <QtCore/qdebug.h>
 #include <QtCore/qdir.h>
 #include <QtCore/qhash.h>

@@ -4,7 +4,6 @@
 #include "xmlutils_libxslt.h"
 #include "xmlutils.h"
 
-#include "qtcompat.h"
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qcoreapplication.h>

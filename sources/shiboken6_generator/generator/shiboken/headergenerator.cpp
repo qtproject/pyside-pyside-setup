@@ -27,7 +27,6 @@
 #include "typedefentry.h"
 #include "typesystemtypeentry.h"
 
-#include "qtcompat.h"
 
 #include <algorithm>
 #include <set>

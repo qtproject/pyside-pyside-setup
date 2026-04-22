@@ -17,7 +17,6 @@
 #include "textstream.h"
 #include "exception.h"
 
-#include "qtcompat.h"
 
 #include <QtCore/qdir.h>
 #include <QtCore/qfile.h>

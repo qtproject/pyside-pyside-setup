@@ -23,8 +23,6 @@
 #include "primitivetypeentry.h"
 #include "typesystemtypeentry.h"
 
-#include "qtcompat.h"
-
 #include <QtCore/qdebug.h>
 #include <QtCore/qregularexpression.h>
 

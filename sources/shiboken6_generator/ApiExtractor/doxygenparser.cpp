@@ -16,8 +16,6 @@
 #include "complextypeentry.h"
 #include "xmlutils.h"
 
-#include "qtcompat.h"
-
 #include <QtCore/qfile.h>
 #include <QtCore/qdir.h>
 

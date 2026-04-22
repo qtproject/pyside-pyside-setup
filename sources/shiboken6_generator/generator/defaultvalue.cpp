@@ -3,7 +3,6 @@
 
 #include "defaultvalue.h"
 
-#include "qtcompat.h"
 
 #include <QtCore/qdebug.h>
 

@@ -15,8 +15,6 @@
 #include "smartpointertypeentry.h"
 #include <codemodel.h>
 
-#include "qtcompat.h"
-
 #include <QtCore/qdebug.h>
 #include <QtCore/qdir.h>
 #include <QtCore/qfile.h>
