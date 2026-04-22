@@ -44,6 +44,13 @@ def dump_erroneous_pyi_files(err_lines, pyi_dir):
                 print()
 
 
+def msg_fail(cmd, dt, ret):
+    result = ' '.join(cmd) + f" failed after {dt}:"
+    for line in ret.stderr.decode("utf-8").split("\n"):
+        result += "\n" + line
+    return result
+
+
 @unittest.skipIf(not USE_MYPY, "The mypy test was skipped because mypy is not installed")
 @unittest.skipIf(SKIP_MYPY_TEST, "The mypy test was disabled")
 class MypyCorrectnessTest(unittest.TestCase):
@@ -70,18 +77,19 @@ class MypyCorrectnessTest(unittest.TestCase):
         self.assertTrue(HAVE_MYPY)
         insert_version = ["--python-version", "3.11"] if sys.version_info[:2] < (3, 11) else []
         exclusion = ["--exclude", "QtAsyncio"]
-        cmd = ([sys.executable, "-m", "mypy", "--pretty", "--cache-dir", self.cache_dir]
-               + exclusion + insert_version + [self.pyside_dir])
+        cmd = ([sys.executable, "-m", "mypy", "--pretty", "--cache-dir", os.fspath(self.cache_dir)]
+               + exclusion + insert_version + [os.fspath(self.pyside_dir)])
         time_pre = time.time()
         ret = subprocess.run(cmd, capture_output=True)
         time_post = time.time()
         err_lines = ret.stdout.decode("utf-8").split("\n")
         for line in err_lines:
             print(line)
-        print(f"Time used for mypy test = {(time_post - time_pre):.5} s")
+        dt = f"{(time_post - time_pre):.5} s"
+        print(f"Time used for mypy test = {dt}")
         if ret.returncode != 0 and os.environ.get("QTEST_ENVIRONMENT", "") == "ci":
             dump_erroneous_pyi_files(err_lines, self.pyside_dir)
-        self.assertEqual(ret.returncode, 0)
+        self.assertEqual(ret.returncode, 0, msg_fail(cmd, dt, ret))
 
 
 if __name__ == '__main__':
