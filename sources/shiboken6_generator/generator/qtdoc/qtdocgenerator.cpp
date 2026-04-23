@@ -28,6 +28,7 @@
 #include <complextypeentry.h>
 #include <flagstypeentry.h>
 #include <primitivetypeentry.h>
+#include <smartpointertypeentry.h>
 #include <typesystemtypeentry.h>
 #include <qtdocparser.h>
 #include <doxygenparser.h>
