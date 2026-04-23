@@ -669,10 +669,12 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
                 // Register slots.
                 if (PyObject_HasAttr(value, slotAttrName)) {
                     auto *capsule = PyObject_GetAttr(value, slotAttrName);
-                    const auto *entryList = PySide::Slot::dataListFromCapsule(capsule);
-                    for (const auto &e : *entryList) {
-                        if (m_baseObject->indexOfSlot(e.signature) == -1)
-                            addSlot(e.signature, e.resultType, e.tag);
+                    // PYSIDE-3307: Check since unittest.mock/patch might interfere.
+                    if (const auto *entryList = PySide::Slot::dataListFromCapsule(capsule)) {
+                        for (const auto &e : *entryList) {
+                            if (m_baseObject->indexOfSlot(e.signature) == -1)
+                                addSlot(e.signature, e.resultType, e.tag);
+                        }
                     }
                 }
             }

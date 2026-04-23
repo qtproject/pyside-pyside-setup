@@ -144,7 +144,8 @@ PyObject *slotCall(PyObject *self, PyObject *args, PyObject * /* kw */)
         if (PyObject_HasAttr(callback, pySlotName)) {
             auto *capsule = PyObject_GetAttr(callback, pySlotName);
             entryList = PySide::Slot::dataListFromCapsule(capsule);
-        } else {
+        }
+        if (entryList == nullptr) { // PYSIDE-3307: unittest.mock/patch might interfere.
             entryList = new PySide::Slot::DataList{};
             auto *capsule = PyCapsule_New(entryList, nullptr /* name */, slotDataListDestructor);
             Py_INCREF(capsule);
