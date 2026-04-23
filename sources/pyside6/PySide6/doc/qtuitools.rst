@@ -65,4 +65,7 @@ A simple use case is::
     form.setupUi(widget)
     # form.a_widget_member.a_method_of_member()
     widget.show()
+
+.. note:: This function should not be used in security-critical environments.
+
 // @snippet loaduitype
