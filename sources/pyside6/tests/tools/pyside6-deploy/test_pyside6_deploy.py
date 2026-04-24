@@ -254,6 +254,19 @@ class TestPySide6DeployWidgets(DeployTestBase):
         project_file = self.temp_example_widgets / "tetrix.pyproject.bak"
         project_file.rename(self.temp_example_widgets / "tetrix.pyproject")
 
+    @patch("deploy_lib.python_helper.PythonExecutable.install")
+    def testNuitkaVersionOption(self, mock_install, mock_plugins):
+        mock_plugins.return_value = self.all_plugins
+        self.deploy.main(self.main_file, dry_run=True, force=True, nuitka_version="2.5.8")
+        nuitka_calls = [
+            call for call in mock_install.call_args_list
+            if any(p.lower().startswith("nuitka") for p in (call[1].get("packages") or []))
+        ]
+        self.assertTrue(nuitka_calls, "install() was never called with a Nuitka package")
+        nuitka_entry = next(p for p in nuitka_calls[0][1]["packages"]
+                            if p.lower().startswith("nuitka"))
+        self.assertEqual(nuitka_entry, "Nuitka==2.5.8")
+
 
 @unittest.skipIf(sys.platform == "darwin" and int(platform.mac_ver()[0].split('.')[0]) <= 11,
                  "Test only works on macOS version 12+")
