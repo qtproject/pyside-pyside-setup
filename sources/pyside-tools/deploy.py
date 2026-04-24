@@ -63,7 +63,7 @@ HELP_MODE = dedent("""
 def main(main_file: Path = None, name: str = None, config_file: Path = None, init: bool = False,
          loglevel=logging.WARNING, dry_run: bool = False, keep_deployment_files: bool = False,
          force: bool = False, extra_ignore_dirs: str = None, extra_modules_grouped: str = None,
-         mode: str = None) -> str | None:
+         mode: str = None, nuitka_version: str = None) -> str | None:
     """
     Entry point for pyside6-deploy command.
 
@@ -106,7 +106,8 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
 
     cleanup(config=config)
 
-    python.install_dependencies(config=config, packages="packages")
+    python.install_dependencies(config=config, packages="packages",
+                                nuitka_version=nuitka_version)
 
     # required by Nuitka for pyenv Python
     add_arg = " --static-libpython=no"
@@ -205,8 +206,12 @@ if __name__ == "__main__":
     parser.add_argument("--mode", choices=["onefile", "standalone"], default="onefile",
                         help=HELP_MODE)
 
+    parser.add_argument("--nuitka-version", type=str, default=None,
+                        help=("Override the Nuitka version to install for deployment, "
+                              "e.g. --nuitka-version=4.0"))
+
     args = parser.parse_args()
 
     main(args.main_file, args.name, args.config_file, args.init, args.loglevel, args.dry_run,
          args.keep_deployment_files, args.force, args.extra_ignore_dirs, args.extra_modules,
-         args.mode)
+         args.mode, args.nuitka_version)

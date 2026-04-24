@@ -103,11 +103,17 @@ class PythonExecutable:
     def is_installed(self, package):
         return bool(util.find_spec(package))
 
-    def install_dependencies(self, config: Config, packages: str, is_android: bool = False):
+    def install_dependencies(self, config: Config, packages: str, is_android: bool = False,
+                             nuitka_version: str = None):
         """
         Installs the python package dependencies for the target deployment platform
         """
         packages = config.get_value("python", packages).split(",")
+        if nuitka_version:
+            packages = [
+                f"Nuitka=={nuitka_version}" if p.strip().lower().startswith("nuitka") else p
+                for p in packages
+            ]
         if not self.init:
             # install packages needed for deployment
             logging.info("[DEPLOY] Installing dependencies")
