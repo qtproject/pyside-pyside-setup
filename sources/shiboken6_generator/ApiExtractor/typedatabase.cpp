@@ -269,7 +269,7 @@ struct TypeDatabasePrivate : public TypeDatabaseOptions
     void formatBuiltinTypes(QDebug &d) const;
 
     TypeEntryMultiMap m_entries; // Contains duplicate entries (cf addInlineNamespaceLookups).
-    TypeEntryMap m_flagsEntries;
+    QMap<QString, FlagsTypeEntryPtr> m_flagsEntries;
     TypedefEntryMap m_typedefEntries;
     TemplateEntryMap m_templates;
     QList<SuppressedWarning> m_suppressedWarnings;
@@ -646,6 +646,10 @@ static bool useCppType(const TypeEntryCPtr &t)
     case TypeEntry::CustomType:
     case TypeEntry::SmartPointerType:
     case TypeEntry::TypedefType:
+    case TypeEntry::PythonType:
+    case TypeEntry::VarargsType:
+    case TypeEntry::EnumValue:
+    case TypeEntry::ConstantValueType:
         result = useType(t);
         break;
     default:
@@ -846,23 +850,35 @@ bool TypeDatabase::isReturnTypeRejected(const QString& className, const QString&
     return findRejection(d->m_rejections, TypeRejection::ReturnType, className, typeName, reason);
 }
 
+static bool matchesUnqualifiedFlagName(const QString &candidate, const QString &name)
+{
+    return candidate.size() > name.size()
+        && candidate.endsWith(name)
+        && candidate.at(candidate.size() - name.size() -1) == u':';
+}
+
 FlagsTypeEntryPtr TypeDatabase::findFlagsType(const QString &name) const
 {
-    TypeEntryPtr fte = findType(name);
-    if (!fte) {
-        fte = d->m_flagsEntries.value(name);
-        if (!fte) {
-            //last hope, search for flag without scope  inside of flags hash
-            const auto end = d->m_flagsEntries.cend();
-            for (auto it = d->m_flagsEntries.cbegin(); it != end; ++it) {
-                if (it.key().endsWith(name)) {
-                    fte = it.value();
+    FlagsTypeEntryPtr result;
+    const auto end = d->m_flagsEntries.cend();
+    auto it = d->m_flagsEntries.constFind(name);
+    if (it != end) {
+        result = it.value();
+    } else {
+        // Last hope, search for flag without scope  inside of flags hash.
+        // This is mostly triggered by parseQ_Properties() for unqualified flags.
+        int matchCount = 0;
+        for (it = d->m_flagsEntries.cbegin(); it != end; ++it) {
+            if (matchesUnqualifiedFlagName(it.key(), name)) {
+                result = it.value();
+                if (++matchCount > 1) { // ambiguous, like "Flags"
+                    result.reset();
                     break;
                 }
             }
         }
     }
-    return std::static_pointer_cast<FlagsTypeEntry>(fte);
+    return result;
 }
 
 void TypeDatabase::addFlagsType(const FlagsTypeEntryPtr &fte)

@@ -3630,7 +3630,8 @@ void AbstractMetaBuilderPrivate::inheritTemplateFunctions(const AbstractMetaClas
 void AbstractMetaBuilderPrivate::parseQ_Properties(const AbstractMetaClassPtr &metaClass,
                                                    const QStringList &declarations)
 {
-    const QStringList scopes = currentScope()->qualifiedName();
+    QStringList scopes = currentScope()->qualifiedName();
+    scopes.append(metaClass->name());
     QString errorMessage;
     int i = 0;
     for (; i < declarations.size(); ++i) {
