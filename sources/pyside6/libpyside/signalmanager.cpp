@@ -301,6 +301,14 @@ static PyObject *CopyCppToPythonPyObject(const void *cppIn)
 
 void SignalManager::init()
 {
+    // Force the metaObject attribute into existence. This fixes an
+    // exit crash (Python 3.15/allocation asserting since GIL is not held)
+    // when connections done in Qt C++ are disconnected by the destructor,
+    // triggering disconnectNotify()/metaObject().
+    // Note: SbkDeallocWrapperCommon() temporarily releases the GIL for
+    // legacy bug 500 (~QPrintDialog hanging).
+    [[maybe_unused]] auto *mo = metaObjectAttr();
+
     // Register Qt primitive typedefs used on signals.
     using namespace Shiboken;
 
