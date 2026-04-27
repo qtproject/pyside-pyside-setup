@@ -124,7 +124,7 @@ class Config(BaseConfig):
 
         proj_dir = self.get_value("app", "project_dir")
         if proj_dir:
-            self._project_dir = Path(proj_dir).resolve()
+            self._project_dir = (self.config_file.parent / proj_dir).resolve()
         else:
             self.project_dir = self._find_project_dir()
 

@@ -108,7 +108,11 @@ class PythonExecutable:
         """
         Installs the python package dependencies for the target deployment platform
         """
-        packages = config.get_value("python", packages).split(",")
+        packages_str = config.get_value("python", packages)
+        if not packages_str:
+            logging.warning(f"[DEPLOY] No packages found in config for '{packages}', skipping")
+            return
+        packages = packages_str.split(",")
         if nuitka_version:
             # Explicit version requested via cli. Install it.
             packages = [
