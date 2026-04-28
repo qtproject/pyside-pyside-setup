@@ -2686,6 +2686,7 @@ void TypeEntry::formatDebug(QDebug &debug) const
 
 void CppTypeEntry::formatDebug(QDebug &debug) const
 {
+    TypeEntry::formatDebug(debug);
     S_D(const CppTypeEntry);
     if (d->m_viewOn)
         debug << ", views=" << d->m_viewOn->name();
@@ -2771,6 +2772,14 @@ void EnumTypeEntry::formatDebug(QDebug &debug) const
         debug << ", python-type=" << int(d->m_pythonEnumType);
     if (d->m_flags)
         debug << ", flags=(" << d->m_flags << ')';
+}
+
+void FlagsTypeEntry::formatDebug(QDebug &debug) const
+{
+    S_D(const FlagsTypeEntry);
+
+    TypeEntry::formatDebug(debug);
+    debug << ", \"" << d->m_originalName << "\", flags of \"" << d->m_enum->qualifiedCppName() << '"';
 }
 
 void NamespaceTypeEntry::formatDebug(QDebug &debug) const

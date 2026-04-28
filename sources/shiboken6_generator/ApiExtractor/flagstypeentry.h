@@ -27,6 +27,8 @@ public:
 
     TypeEntry *clone() const override;
 
+    void formatDebug(QDebug &debug) const override;
+
 protected:
     explicit FlagsTypeEntry(FlagsTypeEntryPrivate *d);
 
