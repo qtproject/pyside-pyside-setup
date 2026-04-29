@@ -5587,7 +5587,6 @@ void CppGenerator::writeEnumsInitialization(TextStream &s,
     if (enums.isEmpty())
         return;
     bool preambleWritten = false;
-    bool etypeUsed = false;
 
     for (const AbstractMetaEnum &cppEnum : enums) {
         if (cppEnum.isPrivate())
@@ -5599,7 +5598,7 @@ void CppGenerator::writeEnumsInitialization(TextStream &s,
             preambleWritten = true;
         }
         ConfigurableScope configScope(s, cppEnum.typeEntry());
-        etypeUsed |= writeEnumInitialization(s, enclosing, cppEnum);
+        writeEnumInitialization(s, enclosing, cppEnum);
     }
 }
 
