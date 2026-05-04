@@ -3392,9 +3392,9 @@ static void writeDeprecationWarning(TextStream &s,
                                     const AbstractMetaFunctionCPtr &func,
                                     CppGenerator::ErrorReturn errorReturn)
 {
-    s << "Shiboken::Warnings::warnDeprecated(\"";
-    if (const auto cls = context.metaClass())
-        s << cls->name() << "\", ";
+    s << "Shiboken::Warnings::warnDeprecated(";
+    if (context.hasClass())
+        s << '"' << context.metaClass()->name() << "\", ";
     // Check error in case "warning-as-error" is set.
     s << '"' << func->signature().replace(u"::"_s, u"."_s) << "\");\n"
         << "if (" << shibokenErrorsOccurred << ")\n"

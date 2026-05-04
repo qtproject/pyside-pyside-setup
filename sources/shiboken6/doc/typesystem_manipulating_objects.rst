@@ -283,7 +283,8 @@ logic. This can be done using the :ref:`inject-code` node.
                        overload-number="number"
                        static="yes | no" classmethod="yes | no"
                        python-override ="yes | no"
-                       since="..."/>
+                       since="..."
+                       deprecated = "true | false" />
      </object-type>
 
 The ``return-type`` attribute defaults to *void*, the ``access`` to *public* and the ``static`` one to *no*.
@@ -324,6 +325,9 @@ See :ref:`sequence-protocol` for adding the respective functions.
 The *optional* attribute ``python-override`` indicates a special type
 of added function, a python-override that will be generated into
 the native wrapper (see :ref:`modifying-virtual-functions`).
+
+The *optional* **deprecated** attribute can be used to mark the
+function as deprecated.
 
 .. _declare-function:
 

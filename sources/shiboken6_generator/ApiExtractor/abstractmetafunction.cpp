@@ -774,8 +774,9 @@ static bool modifiedUndeprecated(const FunctionModification &mod)
 
 bool AbstractMetaFunction::isDeprecated() const
 {
-    const auto &mods = modifications(declaringClass());
-
+    const auto &mods = isUserAdded()
+        ? d->m_addedFunction->modifications()
+        : modifications(declaringClass());
     return d->m_cppAttributes.testFlag(FunctionAttribute::Deprecated)
            ? std::none_of(mods.cbegin(), mods.cend(), modifiedUndeprecated)
            : std::any_of(mods.cbegin(), mods.cend(), modifiedDeprecated);
