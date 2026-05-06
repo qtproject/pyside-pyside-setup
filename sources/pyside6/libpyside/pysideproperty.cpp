@@ -64,11 +64,11 @@ static PyMethodDef PySidePropertyMethods[] = {
 static PyGetSetDef PySidePropertyType_getset[] = {
     // Note: we could not use `PyMemberDef` like Python's properties,
     // because of the indirection of PySidePropertyPrivate.
-    {const_cast<char *>("fget"), qProperty_fget, nullptr, nullptr, nullptr},
-    {const_cast<char *>("fset"), qProperty_fset, nullptr, nullptr, nullptr},
-    {const_cast<char *>("freset"), qProperty_freset, nullptr, nullptr, nullptr},
-    {const_cast<char *>("fdel"), qProperty_fdel, nullptr, nullptr, nullptr},
-    {const_cast<char *>("__doc__"), qPropertyDocGet, qPropertyDocSet, nullptr, nullptr},
+    {"fget", qProperty_fget, nullptr, nullptr, nullptr},
+    {"fset", qProperty_fset, nullptr, nullptr, nullptr},
+    {"freset", qProperty_freset, nullptr, nullptr, nullptr},
+    {"fdel", qProperty_fdel, nullptr, nullptr, nullptr},
+    {"__doc__", qPropertyDocGet, qPropertyDocSet, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 

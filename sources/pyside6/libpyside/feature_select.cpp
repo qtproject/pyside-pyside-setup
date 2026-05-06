@@ -764,7 +764,7 @@ static int property_doc_set(PyObject *self, PyObject *value, void *)
 
 static PyGetSetDef property_getset[] = {
     // This gets added to the existing getsets
-    {const_cast<char *>("__doc__"), property_doc_get, property_doc_set, nullptr, nullptr},
+    {"__doc__", property_doc_get, property_doc_set, nullptr, nullptr},
     {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
