@@ -273,7 +273,6 @@ type_map.update({
     "QStringList": StringList,
     "quint16": int,
     "quint32": int,
-    "quint32": int,
     "quint64": int,
     "quint8": int,
     "uint16_t": int,
