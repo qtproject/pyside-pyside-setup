@@ -1,7 +1,6 @@
 {
     "files": ["__init__.py",
               "feature.py",
-              "fix-complaints.py",
               "signature/__init__.py",
               "signature/errorhandler.py",
               "signature/importhandler.py",

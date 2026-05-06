@@ -113,7 +113,6 @@ the ``signature`` Python package. It has the following structure::
     sources/shiboken6/shibokenmodule/files.dir/shibokensupport
     ├── __init__.py
     ├── feature.py
-    ├── fix-complaints.py
     ├── shibokensupport.pyproject
     └── signature
         ├── PSF-3.7.0.txt
