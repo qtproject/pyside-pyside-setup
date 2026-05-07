@@ -141,7 +141,7 @@ _empty                   = inspect.Parameter.empty                  # noqa E:201
 # of methods there is completely different and unrelated to this mypy sorting.
 default_weights = {
     typing.Any: 1000,   # noqa E:241
-    Iterable:    500,   # noqa E:241
+    Iterable:    401,   # noqa E:241
     Sequence:    400,   # noqa E:241
     bool:        101,   # noqa E:241
     int:         102,   # noqa E:241
