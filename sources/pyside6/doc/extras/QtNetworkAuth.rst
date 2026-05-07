@@ -27,8 +27,8 @@ There are several authentication systems, including:
 
     * `OAuth 1 <https://datatracker.ietf.org/doc/html/rfc5849>`_
     * `OAuth 2 <https://datatracker.ietf.org/doc/html/rfc6749>`_
-    * `OpenID <http://openid.net>`_
-    * `OpenID Connect <http://openid.net/connect/>`_
+    * `OpenID <https://openid.net/>`_
+    * `OpenID Connect <https://openid.net/developers/how-connect-works/>`_
 
 These systems allow the application developers to create applications which use
 external authentication servers provided by an *Authorization Server*\. Users

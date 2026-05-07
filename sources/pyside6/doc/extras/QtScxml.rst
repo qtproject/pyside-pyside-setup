@@ -1,7 +1,7 @@
 Provides functionality to create state machines from SCXML files.
 
 The Qt SCXML module provides functionality to create state machines from
-`SCXML <http://www.w3.org/TR/scxml/>`_ files. This includes both dynamically
+`SCXML <https://www.w3.org/TR/scxml/>`_ files. This includes both dynamically
 creating state machines (loading the SCXML file and instantiating states and
 transitions) and generating a C++ file that has a class implementing the state
 machine. It also contains functionality to support data models and executable

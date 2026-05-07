@@ -31,7 +31,7 @@ below:
 .. _fbs: https://build-system.fman.io/
 .. _PyInstaller: https://www.pyinstaller.org/
 .. _cx_Freeze: https://marcelotduarte.github.io/cx_Freeze/
-.. _py2exe: http://www.py2exe.org/
+.. _py2exe: https://www.py2exe.org/
 .. _py2app: https://py2app.readthedocs.io/en/latest/
 .. _briefcase: https://briefcase.readthedocs.io
 

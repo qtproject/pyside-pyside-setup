@@ -2,7 +2,7 @@
 ##################
 
 Deploying an application using py2exe requires writing a small ``setup.py`` file.
-It is explained in the `Tutorial <http://www.py2exe.org/index.cgi/Tutorial>`_.
+It is explained in the `Tutorial <https://www.py2exe.org/index.cgi/Tutorial>`_.
 
 py2exe is not generally aware of Qt. It merely copies the dependent libraries
 of the application to the ``dist`` directory, so, the plugins, QML imports

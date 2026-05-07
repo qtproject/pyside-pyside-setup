@@ -14,7 +14,7 @@ from PySide6.QtGui import QGuiApplication
 if __name__ == '__main__':
 
     # get our data
-    url = "http://country.io/names.json"
+    url = "https://country.io/names.json"
     response = urllib.request.urlopen(url)
     data = json.loads(response.read().decode('utf-8'))
 
