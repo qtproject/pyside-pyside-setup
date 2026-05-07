@@ -308,12 +308,7 @@ def create_signature_union(props, key):
 
     # this is the basic layout of a signature
     varnames = props["varnames"]
-    if layout.definition:
-        # PYSIDE-1328: We no longer use info from the sig_kind which is
-        # more complex for multiple signatures. We now get `self` from the
-        # parser.
-        pass
-    else:
+    if not layout.definition:
         if varnames and varnames[0] in ("self", "cls"):
             varnames = varnames[1:]
 
