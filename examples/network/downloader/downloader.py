@@ -48,7 +48,7 @@ class DownloaderWidget(QWidget):
 
         #  Default http url
         self.link_box.setText(
-            "http://master.qt.io/archive/qt/6.0/6.0.1/single/qt-everywhere-src-6.0.1.zip"
+            "https://download.qt.io/archive/qt/6.11/6.11.0/single/qt-everywhere-src-6.11.0.zip"
         )
 
         #  Default destination dir

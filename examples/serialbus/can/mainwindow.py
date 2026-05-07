@@ -25,7 +25,7 @@ def frame_flags(frame):
 
 
 def show_help():
-    url = "http://doc.qt.io/qt-6/qtcanbus-backends.html#can-bus-plugins"
+    url = "https://doc.qt.io/qt-6/qtcanbus-backends.html#can-bus-plugins"
     QDesktopServices.openUrl(QUrl(url))
 
 

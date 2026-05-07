@@ -109,7 +109,7 @@ if __name__ == "__main__":
     # Graph is based on data of:
     #    'Total consumption of energy increased by 10 per cent in 2010'
     # Statistics Finland, 13 December 2011
-    # http://www.stat.fi/til/ekul/2010/ekul_2010_2011-12-13_tie_001_en.html
+    # https://stat.fi/til/ekul/2010/ekul_2010_2011-12-13_tie_001_en.html
     series1 = QPieSeries()
     series1.setName("Fossil fuels")
     series1.append("Oil", 353295)

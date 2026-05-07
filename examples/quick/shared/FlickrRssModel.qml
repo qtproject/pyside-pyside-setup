@@ -6,7 +6,7 @@ import QtQuick
 ListModel {
     id: flickrImages
     property string tags : ""
-    readonly property string queryUrl : "http://api.flickr.com/services/feeds/photos_public.gne?"
+    readonly property string queryUrl : "https://api.flickr.com/services/feeds/photos_public.gne?"
 
     function encodeParams(x) {
         return encodeURIComponent(x.replace(" ",","));
