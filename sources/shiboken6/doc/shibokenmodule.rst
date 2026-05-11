@@ -174,3 +174,16 @@
             :rtype: bytes
 
             Returns the contents as ``bytes``.
+
+        Security Considerations
+        -----------------------
+
+        Since VoidPtr accepts any address, it can be used to retrieve
+        memory contents or even modify it (similar to the `ctypes`_
+        module).
+
+        In an application that accepts Python code from an external source,
+        this can lead to security threats impacting confidentiality
+        and/or integrity.
+
+.. _ctypes: https://docs.python.org/3/library/ctypes.html
