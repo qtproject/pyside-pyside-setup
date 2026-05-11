@@ -66,6 +66,16 @@ A simple use case is::
     # form.a_widget_member.a_method_of_member()
     widget.show()
 
-.. note:: This function should not be used in security-critical environments.
 
+Security
+++++++++
+
+We strongly advise against using this function in security-critical environments.
+
+The function runs the external tool :ref:`pyside6-uic` to convert the ``.ui``
+files into Python code, which is then executed to create the return types.
+
+Manipulation of the executable or loading ``.ui`` files from untrusted sources
+can lead to security threats in your application, such as denial of service
+attacks, UI deception, or the loading of unexpected plugins.
 // @snippet loaduitype
