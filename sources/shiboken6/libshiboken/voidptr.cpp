@@ -56,20 +56,27 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
                                      &addressObject, &size, &isWritable))
         return -1;
 
-    // Void pointer.
+    if (addressObject == Py_None) {
+        sbkSelf->cptr = nullptr;
+        sbkSelf->size = 0;
+        sbkSelf->isWritable = false;
+        return 0;
+    }
+    // Void pointer (copy).
     if (SbkVoidPtr_Check(addressObject)) {
         auto *sbkOther = reinterpret_cast<SbkVoidPtrObject *>(addressObject);
         sbkSelf->cptr = sbkOther->cptr;
         sbkSelf->size = sbkOther->size;
         sbkSelf->isWritable = sbkOther->isWritable;
+        return 0;
     }
     // Python buffer interface.
-    else if (PyObject_CheckBuffer(addressObject)) {
+    if (PyObject_CheckBuffer(addressObject)) {
         Py_buffer bufferView;
 
         // Bail out if the object can't provide a simple contiguous buffer.
         if (PyObject_GetBuffer(addressObject, &bufferView, PyBUF_SIMPLE) < 0)
-            return 0;
+            return -1;
 
         sbkSelf->cptr = bufferView.buf;
         sbkSelf->size = bufferView.len > 0 ? bufferView.len : size;
@@ -77,37 +84,30 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
 
         // Release the buffer.
         PyBuffer_Release(&bufferView);
+        return 0;
     }
     // Shiboken::Object wrapper.
-    else if (Shiboken::Object::checkType(addressObject)) {
+    if (Shiboken::Object::checkType(addressObject)) {
         auto *sbkOther = reinterpret_cast<SbkObject *>(addressObject);
         sbkSelf->cptr = sbkOther->d->cptr[0];
         sbkSelf->size = size;
         sbkSelf->isWritable = isWritable > 0;
+        return 0;
     }
-    // An integer representing an address.
-    else {
-        if (addressObject == Py_None) {
-            sbkSelf->cptr = nullptr;
-            sbkSelf->size = 0;
-            sbkSelf->isWritable = false;
-        }
 
-        else {
-            void *cptr = PyLong_AsVoidPtr(addressObject);
-            if (PyErr_Occurred()) {
-                PyErr_SetString(PyExc_TypeError,
-                                "Creating a VoidPtr object requires an address of a C++ object, "
-                                "a wrapped Shiboken Object type, "
-                                "an object implementing the Python Buffer interface, "
-                                "or another VoidPtr object.");
-                return -1;
-            }
-            sbkSelf->cptr = cptr;
-            sbkSelf->size = size;
-            sbkSelf->isWritable = isWritable > 0;
-        }
+    // An integer representing an address.
+    void *cptr = PyLong_AsVoidPtr(addressObject);
+    if (PyErr_Occurred() != nullptr) {
+        PyErr_SetString(PyExc_TypeError,
+                        "Creating a VoidPtr object requires an address of a C++ object, "
+                        "a wrapped Shiboken Object type, "
+                        "an object implementing the Python Buffer interface, "
+                        "or another VoidPtr object.");
+        return -1;
     }
+    sbkSelf->cptr = cptr;
+    sbkSelf->size = size;
+    sbkSelf->isWritable = isWritable > 0;
 
     return 0;
 }
@@ -253,8 +253,8 @@ static int SbkVoidPtrObject_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 }
 
 static PyBufferProcs SbkVoidPtrObjectBufferProc = {
-    (getbufferproc)SbkVoidPtrObject_getbuffer,   // bf_getbuffer
-    (releasebufferproc)nullptr                         // bf_releasebuffer
+    SbkVoidPtrObject_getbuffer, // bf_getbuffer
+    nullptr                     // bf_releasebuffer
 };
 
 static PyTypeObject *createVoidPtrType()
