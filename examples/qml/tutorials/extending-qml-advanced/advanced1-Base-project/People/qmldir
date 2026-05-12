@@ -1,3 +1,4 @@
 module People
-typeinfo coercion.qmltypes
 Main 1.0 Main.qml
+typeinfo person.qmltypes
+typeinfo birthdayparty.qmltypes
