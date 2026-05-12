@@ -5,3 +5,4 @@ ContactDelegate 1.0 ContactDelegate.ui.qml
 ContactForm 1.0 ContactForm.ui.qml
 ContactView 1.0 ContactView.ui.qml
 SectionDelegate 1.0 SectionDelegate.ui.qml
+typeinfo contactmodel.qmltypes

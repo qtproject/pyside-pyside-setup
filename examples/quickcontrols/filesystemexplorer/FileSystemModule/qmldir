@@ -10,3 +10,4 @@ singleton Colors 1.0 qml/Colors.qml
 ResizeButton 1.0 qml/ResizeButton.qml
 FileSystemView 1.0 qml/FileSystemView.qml
 WindowDragHandler 1.0 qml/WindowDragHandler.qml
+typeinfo editormodels.qmltypes
