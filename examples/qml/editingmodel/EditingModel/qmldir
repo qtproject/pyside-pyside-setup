@@ -1,3 +1,4 @@
 module UsingModel
 Main 1.0 Main.qml
 MovingRectangle 1.0 MovingRectangle.qml
+typeinfo model.qmltypes
