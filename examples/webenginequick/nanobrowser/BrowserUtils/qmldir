@@ -11,3 +11,4 @@ SslDialog 254.0 SslDialog.qml
 WebAuthDialog 254.0 WebAuthDialog.qml
 WebToolBar 254.0 WebToolBar.qml
 depends QtQuick
+typeinfo main.qmltypes

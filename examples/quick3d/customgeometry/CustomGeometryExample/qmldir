@@ -1,3 +1,5 @@
 module CustomGeometryExample
 Main 1.0 Main.qml
 TorusMesh 1.0 TorusMesh.qml
+typeinfo exampletriangle.qmltypes
+typeinfo examplepoint.qmltypes

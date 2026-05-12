@@ -1,2 +1,3 @@
 module ProceduralTextureModule
 Main 1.0 Main.qml
+typeinfo gradienttexture.qmltypes

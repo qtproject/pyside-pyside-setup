@@ -1,5 +1,4 @@
 module Scanner
-typeinfo scanner.qmltypes
 Characteristics 1.0 Characteristics.qml
 Devices 1.0 Devices.qml
 Dialog 1.0 Dialog.qml
@@ -8,3 +7,4 @@ Label 1.0 Label.qml
 Main 1.0 Main.qml
 Menu 1.0 Menu.qml
 Services 1.0 Services.qml
+typeinfo device.qmltypes

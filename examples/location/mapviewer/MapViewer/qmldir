@@ -1,5 +1,4 @@
 module MapViewer
-typeinfo mapviewer.qmltypes
 Main 1.0 Main.qml
 Helper 1.0 helper.js
 MapComponent 1.0 map/MapComponent.qml

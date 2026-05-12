@@ -12,3 +12,7 @@ Stats 1.0 Stats.qml
 StatsLabel 1.0 StatsLabel.qml
 TitleBar 1.0 TitleBar.qml
 Main 1.0 Main.qml
+typeinfo devicehandler.qmltypes
+typeinfo connectionhandler.qmltypes
+typeinfo bluetoothbaseclass.qmltypes
+typeinfo devicefinder.qmltypes
