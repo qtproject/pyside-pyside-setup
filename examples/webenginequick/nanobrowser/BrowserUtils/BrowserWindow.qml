@@ -31,25 +31,27 @@ ApplicationWindow {
         findBar.reset();
     }
 
-    // When using style "mac", ToolButtons are not supposed to accept focus.
-    property bool platformIsMac: Qt.platform.os === "osx"
-
     Settings {
         id : appSettings
-        property alias autoLoadImages: loadImages.checked
-        property alias javaScriptEnabled: javaScriptEnabledMenuItem.checked
-        property alias errorPageEnabled: errorPageEnabledMenuItem.checked
-        property alias pluginsEnabled: pluginsEnabledMenuItem.checked
-        property alias fullScreenSupportEnabled: fullScreenSupportEnabledMenuItem.checked
-        property alias autoLoadIconsForPage: autoLoadIconsForPageMenuItem.checked
-        property alias touchIconsEnabled: touchIconsEnabledMenuItem.checked
-        property alias webRTCPublicInterfacesOnly : webRTCPublicInterfacesOnlyMenuItem.checked
-        property alias devToolsEnabled: devToolsEnabledMenuItem.checked
-        property alias pdfViewerEnabled: pdfViewerEnabledMenuItem.checked
-        property int imageAnimationPolicy: WebEngineSettings.ImageAnimationPolicy.Allow
-        property alias javascriptCanAccessClipboard: javascriptCanAccessClipboardMenuItem.checked
-        property alias javascriptCanPaste: javascriptCanPasteMenuItem.checked
-    }
+        property alias autoLoadImages: navigationBar.loadImagesChecked
+        property alias javaScriptEnabled: navigationBar.javaScriptEnabledChecked
+        property alias errorPageEnabled: navigationBar.errorPageEnabledChecked
+        property alias pluginsEnabled: navigationBar.pluginsEnabledChecked
+        property alias fullScreenSupportEnabled: navigationBar.fullScreenSupportEnabledChecked
+        property alias autoLoadIconsForPage: navigationBar.autoLoadIconsForPageChecked
+        property alias touchIconsEnabled: navigationBar.touchIconsEnabledChecked
+        property alias webRTCPublicInterfacesOnly : navigationBar.webRTCPublicInterfacesOnlyChecked
+        property alias devToolsEnabled: navigationBar.devToolsEnabledChecked
+        property alias pdfViewerEnabled: navigationBar.pdfViewerEnabledChecked
+        property alias javascriptCanAccessClipboard: navigationBar.javascriptCanAccessClipboardChecked
+        property alias javascriptCanPaste: navigationBar.javascriptCanPasteChecked
+        property int imageAnimationPolicy: {
+           return navigationBar.animateImageOnceChecked ? WebEngineSettings.ImageAnimationPolicy.AnimateOnce :
+                  navigationBar.allowImageAnimationChecked ? WebEngineSettings.ImageAnimationPolicy.Allow :
+                  navigationBar.disableImageAnimationChecked ? WebEngineSettings.ImageAnimationPolicy.Disallow :
+                  WebEngineSettings.ImageAnimationPolicy.AnimateOnce
+          }
+        }
 
     Action {
         shortcut: "Ctrl+D"
@@ -61,8 +63,8 @@ ApplicationWindow {
         id: focusAction
         shortcut: "Ctrl+L"
         onTriggered: {
-            addressBar.forceActiveFocus();
-            addressBar.selectAll();
+            navigationBar.addressBar.forceActiveFocus();
+            navigationBar.addressBar.selectAll();
         }
     }
     Action {
@@ -78,8 +80,8 @@ ApplicationWindow {
             tabBar.createTab(tabBar.count !== 0
                              ? win.currentWebView.profile
                              : BrowserManager.defaultProfilePrototype.instance());
-            addressBar.forceActiveFocus();
-            addressBar.selectAll();
+            navigationBar.addressBar.forceActiveFocus();
+            navigationBar.addressBar.selectAll();
         }
     }
     Action {
@@ -170,285 +172,9 @@ ApplicationWindow {
         onTriggered: findBar.findPrevious()
     }
 
-    menuBar: ToolBar {
+    menuBar: WebToolBar {
         id: navigationBar
-        RowLayout {
-            anchors.fill: parent
-            ToolButton {
-                enabled: win.currentWebView?.canGoBack || win.currentWebView?.canGoForward
-                onClicked: historyMenu.open()
-                text: qsTr("▼")
-                Menu {
-                    id: historyMenu
-                    Instantiator {
-                        model: win.currentWebView?.history?.items
-                        MenuItem {
-                            required property var model
-                            text: model.title
-                            onTriggered: win.currentWebView.goBackOrForward(model.offset)
-                            checkable: !enabled
-                            checked: !enabled
-                            enabled: model.offset
-                        }
-
-                        onObjectAdded: function(index, object) {
-                            historyMenu.insertItem(index, object)
-                        }
-                        onObjectRemoved: function(index, object) {
-                            historyMenu.removeItem(object)
-                        }
-                    }
-                }
-            }
-
-            ToolButton {
-                id: backButton
-                icon.source: "qrc:///icons/3rdparty/go-previous.png"
-                onClicked: win.currentWebView.goBack()
-                enabled: win.currentWebView?.canGoBack ?? false
-                activeFocusOnTab: !win.platformIsMac
-            }
-            ToolButton {
-                id: forwardButton
-                icon.source: "qrc:///icons/3rdparty/go-next.png"
-                onClicked: win.currentWebView.goForward()
-                enabled: win.currentWebView?.canGoForward ?? false
-                activeFocusOnTab: !win.platformIsMac
-            }
-            ToolButton {
-                id: reloadButton
-                icon.source: win.currentWebView?.loading
-                             ? "qrc:///icons/3rdparty/process-stop.png"
-                             : "qrc:///icons/3rdparty/view-refresh.png"
-                onClicked: win.currentWebView?.loading ? win.currentWebView.stop() : win.currentWebView.reload()
-                activeFocusOnTab: !win.platformIsMac
-            }
-            TextField {
-                id: addressBar
-                Image {
-                    anchors.verticalCenter: addressBar.verticalCenter;
-                    x: 5
-                    z: 2
-                    id: faviconImage
-                    width: 16; height: 16
-                    sourceSize: Qt.size(width, height)
-                    source: win.currentWebView?.icon ? win.currentWebView.icon : ''
-                }
-                MouseArea {
-                    id: textFieldMouseArea
-                    acceptedButtons: Qt.RightButton
-                    anchors.fill: parent
-                    onClicked: {
-                        var textSelectionStartPos = addressBar.selectionStart;
-                        var textSelectionEndPos = addressBar.selectionEnd;
-                        textFieldContextMenu.open();
-                        addressBar.select(textSelectionStartPos, textSelectionEndPos);
-                    }
-                    Menu {
-                        id: textFieldContextMenu
-                        x: textFieldMouseArea.mouseX
-                        y: textFieldMouseArea.mouseY
-                        MenuItem {
-                            text: qsTr("Cut")
-                            onTriggered: addressBar.cut()
-                            enabled: addressBar.selectedText.length > 0
-                        }
-                        MenuItem {
-                            text: qsTr("Copy")
-                            onTriggered: addressBar.copy()
-                            enabled: addressBar.selectedText.length > 0
-                        }
-                        MenuItem {
-                            text: qsTr("Paste")
-                            onTriggered: addressBar.paste()
-                            enabled: addressBar.canPaste
-                        }
-                        MenuItem {
-                            text: qsTr("Delete")
-                            onTriggered: addressBar.text = qsTr("")
-                            enabled: addressBar.selectedText.length > 0
-                        }
-                        MenuSeparator {}
-                        MenuItem {
-                            text: qsTr("Select All")
-                            onTriggered: addressBar.selectAll()
-                            enabled: addressBar.text.length > 0
-                        }
-                    }
-                }
-                leftPadding: 26
-                focus: true
-                Layout.fillWidth: true
-                Binding on text {
-                    when: win.currentWebView
-                    value: win.currentWebView.url
-                }
-                onAccepted: win.currentWebView.url = Utils.fromUserInput(text)
-                selectByMouse: true
-            }
-            ToolButton {
-                id: settingsMenuButton
-                text: qsTr("⋮")
-                onClicked: settingsMenu.open()
-                Menu {
-                    id: settingsMenu
-                    y: settingsMenuButton.height
-                    MenuItem {
-                        id: loadImages
-                        text: "Autoload images"
-                        checkable: true
-                        checked: WebEngine.settings.autoLoadImages
-                    }
-                    MenuItem {
-                        id: javaScriptEnabledMenuItem
-                        text: "JavaScript On"
-                        checkable: true
-                        checked: WebEngine.settings.javascriptEnabled
-                    }
-                    MenuItem {
-                        id: errorPageEnabledMenuItem
-                        text: "ErrorPage On"
-                        checkable: true
-                        checked: WebEngine.settings.errorPageEnabled
-                    }
-                    MenuItem {
-                        id: pluginsEnabledMenuItem
-                        text: "Plugins On"
-                        checkable: true
-                        checked: true
-                    }
-                    MenuItem {
-                        id: fullScreenSupportEnabledMenuItem
-                        text: "FullScreen On"
-                        checkable: true
-                        checked: WebEngine.settings.fullScreenSupportEnabled
-                    }
-                    MenuItem {
-                        id: offTheRecordEnabled
-                        text: "Off The Record"
-                        checkable: true
-                        checked: win.currentWebView?.profile === BrowserManager.otrPrototype.instance()
-                        onToggled: function() {
-                            if (win.currentWebView) {
-                                win.currentWebView.profile = offTheRecordEnabled.checked
-                                        ? BrowserManager.otrPrototype.instance()
-                                        : BrowserManager.defaultProfilePrototype.instance();
-                            }
-                        }
-                    }
-                    MenuItem {
-                        id: httpDiskCacheEnabled
-                        text: "HTTP Disk Cache"
-                        checkable: !win.currentWebView?.profile?.offTheRecord ?? false
-                        checked: win.currentWebView?.profile.httpCacheType === WebEngineProfile.DiskHttpCache
-                        onToggled: function() {
-                            if (win.currentWebView) {
-                                win.currentWebView.profile.httpCacheType = httpDiskCacheEnabled.checked
-                                        ? WebEngineProfile.DiskHttpCache
-                                        : WebEngineProfile.MemoryHttpCache;
-                            }
-                        }
-                    }
-                    MenuItem {
-                        id: autoLoadIconsForPageMenuItem
-                        text: "Icons On"
-                        checkable: true
-                        checked: WebEngine.settings.autoLoadIconsForPage
-                    }
-                    MenuItem {
-                        id: touchIconsEnabledMenuItem
-                        text: "Touch Icons On"
-                        checkable: true
-                        checked: WebEngine.settings.touchIconsEnabled
-                        enabled: autoLoadIconsForPageMenuItem.checked
-                    }
-                    MenuItem {
-                        id: webRTCPublicInterfacesOnlyMenuItem
-                        text: "WebRTC Public Interfaces Only"
-                        checkable: true
-                        checked: WebEngine.settings.webRTCPublicInterfacesOnly
-                    }
-                    MenuItem {
-                        id: devToolsEnabledMenuItem
-                        text: "Open DevTools"
-                        checkable: true
-                        checked: false
-                    }
-                    MenuItem {
-                        id: pdfViewerEnabledMenuItem
-                        text: "PDF Viewer Enabled"
-                        checkable: true
-                        checked: WebEngine.settings.pdfViewerEnabled
-                    }
-                    Menu {
-                        id: imageAnimationPolicyMenu
-                        title: "Image Animation Policy"
-
-                        MenuItem {
-                            id: disableImageAnimation
-                            text: "Disable All Image Animation"
-                            checkable: true
-                            autoExclusive: true
-                            checked: WebEngine.settings.imageAnimationPolicy === WebEngineSettings.ImageAnimationPolicy.Disallow
-                            onTriggered: {
-                                appSettings.imageAnimationPolicy = WebEngineSettings.ImageAnimationPolicy.Disallow
-                            }
-                        }
-
-                        MenuItem {
-                            id: allowImageAnimation
-                            text: "Allow All Animated Images"
-                            checkable: true
-                            autoExclusive: true
-                            checked: WebEngine.settings.imageAnimationPolicy === WebEngineSettings.ImageAnimationPolicy.Allow
-                            onTriggered : {
-                                appSettings.imageAnimationPolicy = WebEngineSettings.ImageAnimationPolicy.Allow
-                            }
-                        }
-
-                        MenuItem {
-                            id: animateImageOnce
-                            text: "Animate Image Once"
-                            checkable: true
-                            autoExclusive: true
-                            checked: WebEngine.settings.imageAnimationPolicy === WebEngineSettings.ImageAnimationPolicy.AnimateOnce
-                            onTriggered : {
-                                appSettings.imageAnimationPolicy = WebEngineSettings.ImageAnimationPolicy.AnimateOnce
-                            }
-                        }
-                    }
-
-                    MenuItem {
-                        id: javascriptCanAccessClipboardMenuItem
-                        text: "JavaScript can access clipboard"
-                        checkable: true
-                        checked: WebEngine.settings.javascriptCanAccessClipboard
-                    }
-                    MenuItem {
-                        id: javascriptCanPasteMenuItem
-                        text: "JavaScript can paste"
-                        checkable: true
-                        checked: WebEngine.settings.javascriptCanPaste
-                    }
-                }
-            }
-        }
-        ProgressBar {
-            id: progressBar
-            height: 3
-            anchors {
-                left: parent.left
-                top: parent.bottom
-                right: parent.right
-                leftMargin: parent.anchors.leftMargin
-                rightMargin: parent.anchors.rightMargin
-            }
-            background: Item {}
-            z: -2
-            from: 0
-            to: 100
-            value: (win.currentWebView?.loadProgress < 100) ? win.currentWebView.loadProgress : 0
-        }
+        currentWebView: win.currentWebView
     }
 
     StackLayout {
@@ -507,7 +233,7 @@ ApplicationWindow {
                 }
             }
 
-            onClicked: addressBar.text = (tabLayout.itemAt(TabBar.index) as WebEngineView).url;
+            onClicked: navigationBar.addressBar.text = (tabLayout.itemAt(TabBar.index) as WebEngineView).url;
             function closeTab() {
                 tabBar.tryCloseView(TabBar.index);
             }
@@ -699,7 +425,7 @@ ApplicationWindow {
     }
     WebEngineView {
         id: devToolsWebEngineView
-        visible: devToolsEnabledMenuItem.checked
+        visible: appSettings.devToolsEnabled
         height: visible ? 400 : 0
         inspectedView: visible && tabBar.currentIndex < tabBar.count ? tabLayout.children[tabBar.currentIndex] : null
         anchors.left: parent.left
@@ -712,119 +438,17 @@ ApplicationWindow {
 
         onWindowCloseRequested: function() {
             // Delay hiding for keep the inspectedView set to receive the ACK message of close.
-            Qt.callLater(function() { devToolsEnabledMenuItem.checked = false })
+            Qt.callLater(function() { appSettings.devToolsEnabled = false })
         }
     }
-    Dialog {
+    SslDialog {
         id: sslDialog
         anchors.centerIn: parent
-        contentWidth: Math.max(mainTextForSSLDialog.width, detailedTextForSSLDialog.width)
-        contentHeight: mainTextForSSLDialog.height + detailedTextForSSLDialog.height
-        property var certErrors: []
-        // fixme: icon!
-        // icon: StandardIcon.Warning
-        standardButtons: Dialog.No | Dialog.Yes
-        title: "Server's certificate not trusted"
-        contentItem: Item {
-            Label {
-                id: mainTextForSSLDialog
-                text: "Do you wish to continue?"
-            }
-            Text {
-                id: detailedTextForSSLDialog
-                anchors.top: mainTextForSSLDialog.bottom
-                text: "If you wish so, you may continue with an unverified certificate.\n" +
-                      "Accepting an unverified certificate means\n" +
-                      "you may not be connected with the host you tried to connect to.\n" +
-                      "Do you wish to override the security check and continue?"
-            }
-        }
-
-        onAccepted: {
-            certErrors.shift().acceptCertificate();
-            presentError();
-        }
-        onRejected: reject()
-
-        function reject(){
-            certErrors.shift().rejectCertificate();
-            presentError();
-        }
-        function enqueue(error){
-            certErrors.push(error);
-            presentError();
-        }
-        function presentError(){
-            visible = certErrors.length > 0
-        }
     }
-    Dialog {
+    PermissionDialog {
         id: permissionDialog
         anchors.centerIn: parent
         width: Math.min(win.width, win.height) / 3 * 2
-        contentWidth: mainTextForPermissionDialog.width
-        contentHeight: mainTextForPermissionDialog.height
-        standardButtons: Dialog.No | Dialog.Yes
-        title: "Permission Request"
-
-        property var permission;
-
-        contentItem: Item {
-            Label {
-                id: mainTextForPermissionDialog
-            }
-        }
-
-        onAccepted: permission.grant()
-        onRejected: permission.deny()
-        onVisibleChanged: {
-            if (visible) {
-                mainTextForPermissionDialog.text = questionForPermissionType();
-                width = contentWidth + 20;
-            }
-        }
-
-        function questionForPermissionType() {
-            var question = "Allow " + permission.origin + " to "
-
-            switch (permission.permissionType) {
-            case WebEnginePermission.PermissionType.Geolocation:
-                question += "access your location information?";
-                break;
-            case WebEnginePermission.PermissionType.MediaAudioCapture:
-                question += "access your microphone?";
-                break;
-            case WebEnginePermission.PermissionType.MediaVideoCapture:
-                question += "access your webcam?";
-                break;
-            case WebEnginePermission.PermissionType.MediaAudioVideoCapture:
-                question += "access your microphone and webcam?";
-                break;
-            case WebEnginePermission.PermissionType.MouseLock:
-                question += "lock your mouse cursor?";
-                break;
-            case WebEnginePermission.PermissionType.DesktopVideoCapture:
-                question += "capture video of your desktop?";
-                break;
-            case WebEnginePermission.PermissionType.DesktopAudioVideoCapture:
-                question += "capture audio and video of your desktop?";
-                break;
-            case WebEnginePermission.PermissionType.Notifications:
-                question += "show notification on your desktop?";
-                break;
-            case WebEnginePermission.PermissionType.ClipboardReadWrite:
-                question += "read from and write to your clipboard?";
-                break;
-            case WebEnginePermission.PermissionType.LocalFontsAccess:
-                question += "access the fonts stored on your machine?";
-                break;
-            default:
-                question += "access unknown or unsupported permission type [" + permission.permissionType + "] ?";
-                break;
-            }
-
-            return question;
-        }
     }
 
     FullScreenNotification {

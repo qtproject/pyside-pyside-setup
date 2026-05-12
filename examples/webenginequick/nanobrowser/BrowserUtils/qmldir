@@ -6,5 +6,8 @@ BrowserWindow 254.0 BrowserWindow.qml
 DownloadView 254.0 DownloadView.qml
 FindBar 254.0 FindBar.qml
 FullScreenNotification 254.0 FullScreenNotification.qml
+PermissionDialog 254.0 PermissionDialog.qml
+SslDialog 254.0 SslDialog.qml
 WebAuthDialog 254.0 WebAuthDialog.qml
+WebToolBar 254.0 WebToolBar.qml
 depends QtQuick
