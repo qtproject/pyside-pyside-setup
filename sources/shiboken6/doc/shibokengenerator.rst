@@ -479,6 +479,8 @@ When passing the target triplet:
                                      "--compiler-path=${CMAKE_CXX_COMPILER}")
     endif()
 
+.. _Shiboken6Tools:
+
 ***********
 CMake Usage
 ***********

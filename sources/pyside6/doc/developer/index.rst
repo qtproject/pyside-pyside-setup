@@ -22,6 +22,7 @@ Development Topics
    extras.rst
    qtasyncio.rst
    signalmanager.md
+   pythonlibraries.md
 
 Implementation details
 ----------------------
