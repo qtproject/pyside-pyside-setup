@@ -26,7 +26,7 @@ The example demonstrates, among other things, how to:
 * Interact with a style at runtime, for example to change the theme or adjust style
   properties like the background radius.
 
-.. image:: qtquickcontrols-stylekit.webp
+.. image:: stylekit.webp
    :alt: StyleKit Screenshot
 
 .. _`StyleKit Example`: https://doc.qt.io/qt-6/qtlabsstylekit-stylekit-example.html
