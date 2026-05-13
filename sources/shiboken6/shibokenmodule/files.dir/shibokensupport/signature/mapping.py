@@ -746,7 +746,6 @@ def init_testbinding():
 
 # Functions which should return Optional(result) but don't.
 missing_optional_return = {
-    "PySide6.QtCore.QObject.parent",
     "PySide6.QtCore.QTranslator.translate",
     "PySide6.QtGui.QGuiApplication.modalWindow",
     "PySide6.QtGui.QGuiApplication.screenAt",

@@ -1866,7 +1866,7 @@
     </modify-function>
     <!-- End of Invalidate-after-use fix -->
     <modify-function signature="parent()const">
-      <modify-argument index="return">
+      <modify-argument index="return" pyi-type="Optional[PySide6.QtCore.QObject]">
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
