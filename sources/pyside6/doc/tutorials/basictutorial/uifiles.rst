@@ -317,7 +317,7 @@ corresponding C++
 .. _QDesignerCustomWidgetInterface: https://doc.qt.io/qt-6/qdesignercustomwidgetinterface.html
 
 Writing Custom Widgets
-++++++++++++++++++++++
+----------------------
 
 For properties to become visible in *Qt Widgets Designer*, they need to be
 declared using :class:`PySide6.QtCore.Property`.
@@ -351,7 +351,7 @@ is not known when specifying :class:`PySide6.QtCore.Property`:
 
 
 Troubleshooting the Qt Widgets Designer Plugin
-++++++++++++++++++++++++++++++++++++++++++++++
+----------------------------------------------
 
 - The launcher ``pyside6-designer`` must be used. The standalone
   *Qt Widgets Designer* will not load the plugin.
