@@ -5,25 +5,16 @@ from __future__ import annotations
 
 import importlib
 import os
+import shutil
 import subprocess
 import sys
 import sysconfig
+import tempfile
 from pathlib import Path
 
 import PySide6 as ref_mod
 
 VIRTUAL_ENV = "VIRTUAL_ENV"
-
-
-def is_pyenv_python():
-    pyenv_root = os.environ.get("PYENV_ROOT")
-
-    if pyenv_root:
-        resolved_exe = Path(sys.executable).resolve()
-        if str(resolved_exe).startswith(pyenv_root):
-            return True
-
-    return False
 
 
 def is_virtual_env():
@@ -138,6 +129,32 @@ def _extend_path_var(var, value, prepend=False):
     os.environ[var] = env_value
 
 
+def _prepare_designer_app(app_path: Path) -> Path:
+    """Copy Designer.app to a temp dir, strip com.apple.provenance, re-sign
+    ad-hoc, and return the binary path inside the prepared copy.
+
+    Only called when com.apple.provenance is detected on the app bundle, which
+    happens when Designer.app originates from an internet download (e.g. Qt
+    installed via the Qt Maintenance Tool). The provenance attribute causes the
+    codesign subsystem to lock _CodeSignature/*, preventing in-place re-signing
+    even by the owner. Copying to /tmp gives us unconditional ownership of the
+    inodes, so xattr and codesign always succeed there.
+    """
+    temp_app = Path(tempfile.mkdtemp()) / app_path.name
+    shutil.copytree(app_path, temp_app)
+    # Strip provenance from the copy (succeeds because we own it).
+    subprocess.call(['xattr', '-dr', 'com.apple.provenance', os.fspath(temp_app)],
+                    stderr=subprocess.DEVNULL)
+    # Re-sign ad-hoc to drop Qt's Library Validation entitlement, which would
+    # cause macOS to SIGKILL Designer when DYLD_INSERT_LIBRARIES injects
+    # libpython (not signed by Qt). Safe because Designer has no network access;
+    # the only remaining risk is a compromised libpython on disk, which is a
+    # general risk for any Python package and cannot be mitigated here.
+    subprocess.call(['codesign', '--force', '--deep', '--sign', '-',
+                     os.fspath(temp_app)], stderr=subprocess.DEVNULL)
+    return temp_app / 'Contents' / 'MacOS' / app_path.stem
+
+
 def designer():
     init_virtual_env()
 
@@ -156,8 +173,11 @@ def designer():
         # Determine library name (examples/utils/pyside_config.py)
         version = f'{major_version}.{minor_version}'
         library_name = f'libpython{version}{sys.abiflags}.so'
-        if is_pyenv_python():
-            library_name = str(Path(sysconfig.get_config_var('LIBDIR')) / library_name)
+        # Non-system Pythons (pyenv, uv, etc.) are not on the default ld.so search path;
+        # resolve to an absolute path so LD_PRELOAD can find the library.
+        libdir = sysconfig.get_config_var('LIBDIR')
+        if libdir and Path(libdir, library_name).exists():
+            library_name = str(Path(libdir) / library_name)
         os.environ['LD_PRELOAD'] = library_name
     elif sys.platform == 'darwin':
         library_name = sysconfig.get_config_var("LDLIBRARY")
@@ -165,15 +185,40 @@ def designer():
         lib_path = None
         if framework_prefix:
             lib_path = os.fspath(Path(framework_prefix) / library_name)
-        elif is_pyenv_python():
-            lib_path = str(Path(sysconfig.get_config_var('LIBDIR')) / library_name)
         else:
-            # ideally this should never be reached because the system Python and Python installed
-            # from python.org are all framework builds
+            # Non-framework Pythons (pyenv, uv, Homebrew, conda, etc.) ship a dylib in LIBDIR.
+            libdir = sysconfig.get_config_var('LIBDIR')
+            if libdir and Path(libdir, library_name).exists():
+                lib_path = str(Path(libdir) / library_name)
+        if not lib_path:
             print("Unable to find Python library directory. Use a framework build of Python.",
                   file=sys.stderr)
             sys.exit(0)
         os.environ['DYLD_INSERT_LIBRARIES'] = lib_path
+        pyside_dir = Path(ref_mod.__file__).resolve().parent
+        _extend_path_var('DYLD_FRAMEWORK_PATH', os.fspath(pyside_dir / 'Qt' / 'lib'))
+        designer_app = pyside_dir / 'Designer.app'
+        # com.apple.provenance is only present on apps that originated from an
+        # internet download (e.g. Qt installed via the Qt Maintenance Tool).
+        # PyPI wheels are built from source in COIN and carry no provenance, so
+        # the copy-and-re-sign step is unnecessary.
+        # Note: this is not a CRA violation since for wheel case we do not do the copy-and-re-sign
+        # step at all
+        has_provenance = subprocess.call(
+            ['xattr', '-p', 'com.apple.provenance', os.fspath(designer_app)],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+        if has_provenance:
+            # The temp copy's @rpath entries are relative and won't resolve to Qt
+            # frameworks that live in the original PySide6 directory.  Point dyld
+            # at the real Qt lib directory so framework loading succeeds.
+            designer_binary = _prepare_designer_app(designer_app)
+        else:
+            designer_binary = designer_app / 'Contents' / 'MacOS' / designer_app.stem
+        cmd = [os.fspath(designer_binary), "--python-help"] + sys.argv[1:]
+        returncode = subprocess.call(cmd)
+        if returncode != 0:
+            print(f"'{' '.join(cmd)}' returned {returncode}", file=sys.stderr)
+        sys.exit(returncode)
     elif sys.platform == 'win32':
         # Find Python DLLs from the base installation
         if is_virtual_env():
