@@ -67,8 +67,8 @@ A simple use case is::
     widget.show()
 
 
-Security
-++++++++
+Security Considerations
++++++++++++++++++++++++
 
 We strongly advise against using this function in security-critical environments.
 
