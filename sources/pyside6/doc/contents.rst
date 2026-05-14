@@ -5,16 +5,17 @@
 
     gettingstarted.rst
     commercial/index.rst
-    building_from_source/index.rst
     package_details.rst
     api.rst
     tools/index.rst
+    security/index.rst
     tutorials/index.rst
     examples/index.rst
     videos.rst
     deployment/index.rst
     considerations.rst
     developer/index.rst
+    building_from_source/index.rst
     release_notes/index.rst
 
 ..

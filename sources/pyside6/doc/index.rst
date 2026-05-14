@@ -61,19 +61,6 @@ Documentation
             Start here!
 
     .. grid-item-card::
-        :img-top: images/Support.svg
-        :class-item: text-center
-
-        Building from Source.
-        +++
-        .. button-ref:: building_from_source/index
-            :color: primary
-            :outline:
-            :expand:
-
-            Build Instructions
-
-    .. grid-item-card::
         :img-top: images/Commercial.svg
         :class-item: text-center
 
@@ -152,6 +139,19 @@ Documentation
             Tooling
 
     .. grid-item-card::
+        :img-top: images/Development.svg
+        :class-item: text-center
+
+        Security Considerations.
+        +++
+        .. button-ref:: security/index
+            :color: primary
+            :outline:
+            :expand:
+
+            Security
+
+    .. grid-item-card::
         :img-top: images/Deployment.svg
         :class-item: text-center
 
@@ -189,6 +189,19 @@ Documentation
             :expand:
 
             Considerations
+
+    .. grid-item-card::
+        :img-top: images/Support.svg
+        :class-item: text-center
+
+        Building from Source.
+        +++
+        .. button-ref:: building_from_source/index
+            :color: primary
+            :outline:
+            :expand:
+
+            Build Instructions
 
     .. grid-item-card::
         :img-top: images/Development.svg

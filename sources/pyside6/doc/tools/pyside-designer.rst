@@ -48,6 +48,7 @@ more details of this process in: :ref:`tutorial_uifiles`.
 If you are interested in more functionality of the tool, you can check
 the official `Qt Widgets Designer Manual`_.
 
+.. _designer-tool-custom-widgets:
 
 Custom Widgets
 --------------
