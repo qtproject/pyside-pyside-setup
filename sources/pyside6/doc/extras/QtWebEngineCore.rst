@@ -1,7 +1,7 @@
 Provides common API shared by Qt WebEngine and Qt WebEngine Widgets.
 
-Qt WebEngine Core provides API shared by :ref:`Qt WebEngine<Qt-WebEngine>`
-and :ref:`Qt WebEngine Widgets<Qt-WebEngine-Widgets>` .
+Qt WebEngine Core provides API shared by :mod:`PySide6.QtWebEngineQuick`
+and :mod:`PySide6.QtWebEngineWidgets`.
 
 Getting Started
 ^^^^^^^^^^^^^^^
@@ -13,7 +13,3 @@ directive:
 
     import PySide6.QtWebEngineCore
 
-Articles and Guides
-^^^^^^^^^^^^^^^^^^^
-
-    * `Qt WebEngine Overview <https://doc.qt.io/qt-6/qtwebengine-overview.html>`_

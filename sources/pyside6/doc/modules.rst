@@ -208,18 +208,9 @@ Qt Modules Supported by Qt for Python
         Provides access to QObject or QML objects from HTML clients for
         seamless integration of Qt applications with HTML/JavaScript clients.
 
-    .. grid-item-card:: :mod:`QtWebEngine Core Classes <PySide6.QtWebEngineCore>`
+    .. grid-item-card:: :ref:`Qt-WebEngine`
 
-        Provides public API shared by both QtWebEngine and QtWebEngineWidgets.
-
-    .. grid-item-card:: :mod:`QtWebEngine Widgets Classes <PySide6.QtWebEngineWidgets>`
-
-        Provides Python classes for rendering web content in a QWidget based
-        application.
-
-    .. grid-item-card:: :mod:`QtWebEngine QML Types <PySide6.QtWebEngineQuick>`
-
-        Provides QML types for rendering web content within a QML application.
+        Provides functionality for rendering regions of dynamic web content.
 
     .. grid-item-card:: :mod:`Qt WebSockets <PySide6.QtWebSockets>`
 

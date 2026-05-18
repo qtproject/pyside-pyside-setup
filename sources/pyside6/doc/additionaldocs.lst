@@ -503,7 +503,9 @@ qttestlib/webxml/qttestlib-tutorial6.webxml
 qttexttospeech/webxml/qttexttospeech-engines.webxml
 qtwebchannel/webxml/qtwebchannel-javascript.webxml
 qtwebengine/webxml/qt-add-webengine-dictionary.webxml
+qtwebengine/webxml/qtwebengine-debugging.webxml
 qtwebengine/webxml/qtwebengine-features.webxml
+qtwebengine/webxml/qtwebengine-licensing.webxml
 qtwebengine/webxml/qtwebengine-modules.webxml
 qtwebengine/webxml/qtwebengine-overview.webxml
 qtwebengine/webxml/qtwebengine-security.webxml
