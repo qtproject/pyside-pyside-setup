@@ -85,6 +85,17 @@ directive:
 
     import PySide6.QtWidgets
 
+
+Articles and Guides
+^^^^^^^^^^^^^^^^^^^
+
+* :ref:`Widgets-Tutorial`
+* :ref:`Getting-Started-Programming-with-Qt-Widgets`
+* `Tutorial: Qt Widgets application`_
+* :ref:`Model-View-Tutorial`
+
+.. _`Tutorial: Qt Widgets application`: https://doc.qt.io/qtcreator/creator-writing-program.html
+
 List of Classes by Function
 ---------------------------
 
