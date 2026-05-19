@@ -300,7 +300,8 @@ QString webXmlModuleDescription(const QString &fileName, QString *errorMessage)
     file.close();
     static const QByteArrayList cppSectionIds{
         "api-reference"_ba, "building-with-cmake"_ba, "building-with-qmake"_ba,
-        "c-api"_ba, "c-classes"_ba, "examples"_ba, "qml-api"_ba, "reference"_ba,
+        "class-reference"_ba, "c-api"_ba, "c-classes"_ba, "examples"_ba,
+        "licenses-and-attributions"_ba, "qml-api"_ba, "reference"_ba,
         "reference-and-examples"_ba, "using-the-module"_ba
     };
     for (const auto &cppSectionId : cppSectionIds)
