@@ -537,7 +537,6 @@ def init_PySide6_QtCore():
         "Flag.Default": Instance("PySide6.QtCore.QStringConverterBase.Flags"),
         "QStringList()": [],
         "QStringRef": str,
-        "QStringRef": str,
         "Qt.HANDLE": int,  # be more explicit with some constants?
         "QUrl.FormattingOptions(QUrl.ComponentFormattingOption.PrettyDecoded)":
             PySide6.QtCore.QUrl.ComponentFormattingOption.PrettyDecoded,
