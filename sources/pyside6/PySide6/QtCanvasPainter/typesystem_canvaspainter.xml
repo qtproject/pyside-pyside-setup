@@ -15,6 +15,7 @@
     <value-type name="QCanvasConicalGradient"/>
     <value-type name="QCanvasCustomBrush"/>
     <value-type name="QCanvasGradient"/>
+    <value-type name="QCanvasGradientStop"/>
     <value-type name="QCanvasGridPattern"/>
     <value-type name="QCanvasImage"/>
     <value-type name="QCanvasImagePattern"/>

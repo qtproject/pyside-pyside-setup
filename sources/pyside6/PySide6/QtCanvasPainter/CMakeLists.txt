@@ -12,6 +12,7 @@ ${QtCanvasPainter_GEN_DIR}/qcanvasbrush_wrapper.cpp
 ${QtCanvasPainter_GEN_DIR}/qcanvasconicalgradient_wrapper.cpp
 ${QtCanvasPainter_GEN_DIR}/qcanvascustombrush_wrapper.cpp
 ${QtCanvasPainter_GEN_DIR}/qcanvasgradient_wrapper.cpp
+${QtCanvasPainter_GEN_DIR}/qcanvasgradientstop_wrapper.cpp
 ${QtCanvasPainter_GEN_DIR}/qcanvasgridpattern_wrapper.cpp
 ${QtCanvasPainter_GEN_DIR}/qcanvasimage_wrapper.cpp
 ${QtCanvasPainter_GEN_DIR}/qcanvasimagepattern_wrapper.cpp
