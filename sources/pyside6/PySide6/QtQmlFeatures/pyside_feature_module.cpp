@@ -2,10 +2,22 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 // Qt-Security score:significant reason:default
 
+#include "pysidechange.h"
+
 #include <sbkpython.h>
-#include <pysideqmlmacros.h>
+
+extern "C" {
+
+static int exec_QtQmlFeatures(PyObject *module)
+{
+    PySide::Change::init(module);
+    return 0;
+}
+
+} // extern "C"
 
 static PyModuleDef_Slot PySideQtQmlFeatures_Slots[] = {
+    {Py_mod_exec, reinterpret_cast<void *>(exec_QtQmlFeatures)},
 #if !defined(PYPY_VERSION) && ((!defined(Py_LIMITED_API) && PY_VERSION_HEX >= 0x030C0000) || (defined(Py_LIMITED_API) && Py_LIMITED_API >= 0x030C0000))
     {Py_mod_multiple_interpreters, Py_MOD_MULTIPLE_INTERPRETERS_NOT_SUPPORTED},
 #endif

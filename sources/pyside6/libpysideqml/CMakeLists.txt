@@ -6,6 +6,7 @@ find_package(Qt6 COMPONENTS Core CorePrivate Qml QmlPrivate)
 set(libpysideqml_libraries Qt::Core Qt::CorePrivate Qt::Qml Qt::QmlPrivate)
 
 set(libpysideqml_HEADERS # installed below
+    pysidechange.h
     pysideqmlattached.h
     pysideqmlattached_p.h
     pysideqmlextended_p.h
@@ -23,6 +24,7 @@ set(libpysideqml_HEADERS # installed below
 )
 
 set(libpysideqml_SRC
+    pysidechange.cpp
     pysideqml.cpp
     pysideqmlattached.cpp
     pysideqmlforeign.cpp
