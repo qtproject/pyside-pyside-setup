@@ -2,7 +2,7 @@ An add-on module which provides multimedia-related widgets.
 
 Qt Multimedia Widgets provides additional multimedia-related widgets and
 controls. The classes expand the capabilities of the
-:ref:`Qt Multimedia<Qt-Multimedia>` and :ref:`Qt Widgets<Qt-Widgets>` modules.
+:mod:`PySide6.QtMultimedia` and :mod:`PySide6.QtWidgets` modules.
 
 Getting Started
 ^^^^^^^^^^^^^^^

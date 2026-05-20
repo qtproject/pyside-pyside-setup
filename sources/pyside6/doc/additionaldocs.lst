@@ -225,6 +225,7 @@ qtnfc/webxml/qtnfc-features.webxml
 qtnfc/webxml/qtnfc-overview.webxml
 qtnfc/webxml/qtnfc-pcsc.webxml
 qtpdf/webxml/qtpdf-platformnotes.webxml
+qtpositioning/webxml/location-positioning-cpp.webxml
 qtpositioning/webxml/location-positioning-qml.webxml
 qtpositioning/webxml/position-plugin-android.webxml
 qtpositioning/webxml/position-plugin-geoclue2.webxml

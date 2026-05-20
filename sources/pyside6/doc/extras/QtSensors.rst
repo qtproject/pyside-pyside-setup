@@ -15,3 +15,13 @@ directive:
 ::
 
     import PySide6.QtSensors
+
+
+Articles and Guides
+^^^^^^^^^^^^^^^^^^^
+
+    * :ref:`Qt-Sensors-C---Overview`
+    * :ref:`Generic-Backend`
+    * :ref:`Qt-Sensors-Backend`
+    * :ref:`Compatibility-Map`
+    * :ref:`How-to-create-your-own-Sensor`

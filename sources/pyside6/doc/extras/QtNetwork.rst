@@ -20,14 +20,12 @@ Articles and Guides
 These articles contain information about Qt Network setup and about applications with networking capabilities.
 
 
-    * :ref:`Network Programming with Qt<Network-Programming-with-Qt>` - Programming applications
-      with networking capabilities
-    * :ref:`Secure Sockets Layer (SSL) Classes<Secure-Sockets-Layer--SSL--Classes>` - Classes
-      for secure communication over network sockets
+    * :ref:`Network-Programming-with-Qt`
+    * :ref:`Secure-Sockets-Layer--SSL--Classes`
 
-Also note shipping OpenSSL might cause
-`Import and Export Restrictions <https://doc.qt.io/qt-6/ssl.html#import-and-export-restrictions>`_
-to apply.
+Also note shipping OpenSSL might cause `Import and Export Restrictions`_. to apply.
+
+.. _`Import and Export Restrictions`: https://doc.qt.io/qt-6/ssl.html#import-and-export-restrictions
 
 List of Classes by Function
 ---------------------------

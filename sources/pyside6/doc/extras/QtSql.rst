@@ -20,7 +20,12 @@ directive:
 
     import PySide6.QtSql
 
+Articles and Guides
+^^^^^^^^^^^^^^^^^^^
+
+    * :ref:`SQL-Programming`
+
 List of Classes by Function
----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     * :ref:`Database-Classes`

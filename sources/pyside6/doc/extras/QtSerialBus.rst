@@ -14,8 +14,8 @@ directive:
 Supported Buses and Protocols
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    * Qt CAN Bus
-    * Qt Modbus
+* :ref:`Qt-CAN-Bus`
+* :ref:`Qt-Modbus`
 
 Logging Categories
 ^^^^^^^^^^^^^^^^^^
