@@ -156,6 +156,16 @@ qtdoc/webxml/windows-graphics.webxml
 qtdoc/webxml/windows-issues.webxml
 qtdoc/webxml/windows.webxml
 qtdoc/webxml/xml-processing.webxml
+qtgraphs/webxml/graphs-2d.webxml
+qtgraphs/webxml/graphs-3d-widgets.webxml
+qtgraphs/webxml/graphs-3d-widgets.webxml
+qtgraphs/webxml/graphs-3d.webxml
+qtgraphs/webxml/graphs-common.webxml
+qtgraphs/webxml/graphs-qml-2d.webxml
+qtgraphs/webxml/graphs-qml-3d.webxml
+qtgraphs/webxml/graphs-qml-common.webxml
+qtgraphs/webxml/graphs-qml.webxml
+qtgraphs/webxml/graphs.webxml
 qtgraphs/webxml/qtgraphs-and-qtquick3d-integration-guide.webxml
 qtgraphs/webxml/qtgraphs-configure-options.webxml
 qtgraphs/webxml/qtgraphs-data-handling.webxml
