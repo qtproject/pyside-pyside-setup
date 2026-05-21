@@ -174,6 +174,8 @@ TextStream &operator<<(TextStream &str, const QtXmlToSphinxLink &linkContext)
               ? toRstLabel(linkContext.linkRef) : linkContext.linkRef;
 
     if (linkContext.linkText.isEmpty()) {
+        if ((linkContext.type & QtXmlToSphinxLink::CodeMask) != 0)
+            str << '~';
         str << ref;
     } else {
         writeEscapedRstText(str, linkContext.linkText);
@@ -1176,21 +1178,30 @@ static QString fixLinkText(const QtXmlToSphinxLink &linkContext,
 {
     if (linkContext.type == QtXmlToSphinxLink::External
         || linkContext.type == QtXmlToSphinxLink::Reference) {
-        return linktext;
+        // Clear the link text if that matches the reference (to be converted to a .rst label)
+        return linktext == linkContext.linkRef ? QString{} : linktext;
     }
-    // For the language reference documentation, strip the module name.
-    // Clear the link text if that matches the function/class/enumeration name.
+
+    // For the language reference documentation, strip the module name off the link text.
     const auto lastSep = linktext.lastIndexOf(u"::");
     if (lastSep != -1)
         linktext.remove(0, lastSep + 2);
     else
          QtXmlToSphinx::stripPythonQualifiers(&linktext);
-    if (linkContext.linkRef == linktext)
-         return {};
-    if ((linkContext.type & QtXmlToSphinxLink::FunctionMask) != 0
-        && (linkContext.linkRef + u"()"_s) == linktext) {
-        return {};
+
+    // Clear the link text if that matches the function/class/enumeration name.
+    auto text = QStringView{linktext};
+    if ((linkContext.type & QtXmlToSphinxLink::FunctionMask) != 0) {
+        if (const auto paren = text.indexOf(u'('); paren != -1)
+            text.truncate(paren);
     }
+
+    const auto dot = linkContext.linkRef.lastIndexOf(u'.');
+    auto ref = dot != -1 ? QStringView{linkContext.linkRef}.sliced(dot + 1)
+                         : QStringView{linkContext.linkRef};
+    if (ref == text)
+         return {};
+
     return  linktext;
 }
 
