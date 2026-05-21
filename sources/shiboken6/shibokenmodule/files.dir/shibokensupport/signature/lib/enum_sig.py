@@ -84,13 +84,12 @@ class ExactEnumerator:
     mypy_misc_class_errors.add("QPyDesignerPropertySheetExtension")
 
     def __init__(self, formatter, result_type=dict):
-        global EnumMeta, Signal, SignalInstance
+        global Signal, SignalInstance
         try:
             # Lazy import
-            from PySide6.QtCore import Qt, Signal, SignalInstance
-            EnumMeta = type(Qt.Key)
+            from PySide6.QtCore import Signal, SignalInstance
         except ImportError:
-            EnumMeta = Signal = SignalInstance = None
+            Signal = SignalInstance = None
 
         self.fmt = formatter
         self.result_type = result_type
@@ -179,7 +178,7 @@ class ExactEnumerator:
             elif inspect.isroutine(thing):
                 func_name = thing_name.split(".")[0]   # remove ".overload"
                 functions.append((func_name, thing))
-            elif type(type(thing)) is EnumMeta:
+            elif isinstance(thing, Enum):
                 # take the real enum name, not what is in the dict
                 if not thing_name.startswith("_"):
                     enums.append((thing_name, type(thing).__qualname__, thing))
