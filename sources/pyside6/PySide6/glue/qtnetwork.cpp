@@ -40,6 +40,63 @@ void QHostInfoFunctor::operator()(const QHostInfo &hostInfo)
 %CPPSELF.%FUNCTION_NAME(%1, QHostInfoFunctor(%PYARG_2));
 // @snippet qhostinfo-lookuphost-callable
 
+// @snippet qhttpheaderrange-from-sequence
+using RangeType = qint64;
+
+static std::optional<RangeType> rangeValueFromPython(PyObject *t)
+{
+    if (PyLong_Check(t) != 0)
+        return PyLong_AsLongLong(t);
+    return std::nullopt;
+}
+
+static QHttpHeaderRange qHttpHeaderRangeFromSequence(PyObject *t)
+{
+    if (PySequence_Check(t) == 0 || PySequence_Size(t) != 2)
+        return {};
+
+    Shiboken::AutoDecRef start(PySequence_GetItem(t, 0));
+    Shiboken::AutoDecRef end(PySequence_GetItem(t, 1));
+    return {rangeValueFromPython(start), rangeValueFromPython(end)};
+}
+
+static PyObject *rangeValueToPython(const std::optional<RangeType> &v)
+{
+    if (v.has_value())
+        return PyLong_FromLongLong(v.value());
+    Py_RETURN_NONE;
+}
+// @snippet qhttpheaderrange-from-sequence
+
+// @snippet qhttpheaders-rangevalues
+bool ok{};
+const auto ranges = %CPPSELF.%FUNCTION_NAME(&ok);
+if (ok) {
+    const auto size = ranges.size();
+    %PYARG_0 = PyList_New(size);
+    for (Py_ssize_t i = 0; i < size; ++i) {
+        const auto &range = ranges.at(i);
+        PyObject *ob = PyTuple_Pack(2, rangeValueToPython(range.start()),
+                                    rangeValueToPython(range.end()));
+        PyList_SetItem(%PYARG_0, i, ob);
+    }
+} else {
+    %PYARG_0 = Py_None;
+    Py_INCREF(Py_None);
+}
+// @snippet qhttpheaders-rangevalues
+
+// @snippet qhttpheaders-setrangevalues
+const auto size = PySequence_Size(%PYARG_1);
+QList<QHttpHeaderRange> values;
+values.reserve(size);
+for (Py_ssize_t i = 0; i < size; ++i) {
+    Shiboken::AutoDecRef start(PySequence_GetItem(%PYARG_1, i));
+    values.append(qHttpHeaderRangeFromSequence(start.object()));
+}
+%CPPSELF.%FUNCTION_NAME(values);
+// @snippet qhttpheaders-setrangevalues
+
 // @snippet qipv6address-len
 return 16;
 // @snippet qipv6address-len

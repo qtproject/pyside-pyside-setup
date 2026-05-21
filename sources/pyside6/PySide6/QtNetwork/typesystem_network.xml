@@ -96,7 +96,19 @@
     </value-type>
     <value-type name="QHttp1Configuration"/>
     <value-type name="QHttpHeaders" since="6.7">
+        <inject-code class="native" position="beginning"
+                     file="../glue/qtnetwork.cpp" snippet="qhttpheaderrange-from-sequence"/>
         <enum-type name="WellKnownHeader"/>
+        <add-function signature="setRangeValues(PySequence@list@)">
+            <inject-documentation format="target" mode="append" file="../doc/qtnetwork.rst"
+                                  snippet="qhttpheaders-setrangevalues"/>
+            <inject-code file="../glue/qtnetwork.cpp" snippet="qhttpheaders-setrangevalues"/>
+        </add-function>
+        <add-function signature="rangeValues()" return-type="PySequence">
+            <inject-documentation format="target" mode="append" file="../doc/qtnetwork.rst"
+                                  snippet="qhttpheaders-rangevalues"/>
+            <inject-code file="../glue/qtnetwork.cpp" snippet="qhttpheaders-rangevalues"/>
+        </add-function>
     </value-type>
     <object-type name="QHttpMultiPart">
         <enum-type name="ContentType"/>
