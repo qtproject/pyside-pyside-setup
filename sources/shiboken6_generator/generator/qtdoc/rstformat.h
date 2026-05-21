@@ -74,9 +74,9 @@ inline bool isValidRstLabelChar(QChar c)
 
 inline QString toRstLabel(QString s)
 {
-    for (int i = 0, size = s.size(); i < size; ++i) {
-        if (!isValidRstLabelChar(s.at(i)))
-            s[i] = u'-';
+    for (QChar &c : s) {
+        if (!isValidRstLabelChar(c))
+            c = u'-';
     }
     return s;
 }

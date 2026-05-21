@@ -6,6 +6,8 @@
 
 #include <QtCore/qstringlist.h>
 
+#include <cstdint>
+
 QT_FORWARD_DECLARE_CLASS(QLoggingCategory)
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
@@ -33,22 +35,23 @@ struct QtXmlToSphinxParameters
 
 struct QtXmlToSphinxLink
 {
-    enum Type
+    enum Type : std::uint16_t
     {
         Method = 0x1, Function = 0x2,
         FunctionMask = Method | Function,
         Class = 0x4, Attribute = 0x8, Module = 0x10,
-        Reference = 0x20, External= 0x40
+        CodeMask = 0xFF,
+        Reference = 0x100, External= 0x200
     };
 
-    enum Flags { InsideBold = 0x1, InsideItalic = 0x2 };
+    enum Flags : std::uint8_t { InsideBold = 0x1, InsideItalic = 0x2 };
 
-    explicit QtXmlToSphinxLink(const QString &ref) : linkRef(ref) {}
+    explicit QtXmlToSphinxLink(QString ref) : linkRef(std::move(ref)) {}
 
     QString linkRef;
     QString linkText;
     Type type = Reference;
-    int flags = 0;
+    std::underlying_type_t<Flags> flags = 0;
 };
 
 class QtXmlToSphinxDocGeneratorInterface

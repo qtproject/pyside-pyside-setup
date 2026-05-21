@@ -154,41 +154,42 @@ static const char *linkKeyWord(QtXmlToSphinxLink::Type type)
         return ":mod:";
     case QtXmlToSphinxLink::Reference:
         return ":ref:";
-    case QtXmlToSphinxLink::External:
+    default:
         break;
-    case QtXmlToSphinxLink::FunctionMask:
-        break;
-     }
+    }
     return "";
 }
 
 TextStream &operator<<(TextStream &str, const QtXmlToSphinxLink &linkContext)
 {
     // Temporarily turn off bold/italic since links do not work within
-    if (linkContext.flags & QtXmlToSphinxLink::InsideBold)
+    if ((linkContext.flags & QtXmlToSphinxLink::InsideBold) != 0)
         str << "**";
-    else if (linkContext.flags & QtXmlToSphinxLink::InsideItalic)
+    else if ((linkContext.flags & QtXmlToSphinxLink::InsideItalic) != 0)
         str << '*';
     str << ' ' << linkKeyWord(linkContext.type) << '`';
-    const bool isExternal = linkContext.type == QtXmlToSphinxLink::External;
-    if (!linkContext.linkText.isEmpty()) {
-        writeEscapedRstText(str, linkContext.linkText);
-        if (isExternal && !linkContext.linkText.endsWith(u' '))
-            str << ' ';
-        str << '<';
-    }
+
     // Convert page titles to RST labels
-    str << (linkContext.type == QtXmlToSphinxLink::Reference
-        ? toRstLabel(linkContext.linkRef) : linkContext.linkRef);
-    if (!linkContext.linkText.isEmpty())
-        str << '>';
+    const  QString &ref = linkContext.type == QtXmlToSphinxLink::Reference
+              ? toRstLabel(linkContext.linkRef) : linkContext.linkRef;
+
+    if (linkContext.linkText.isEmpty()) {
+        str << ref;
+    } else {
+        writeEscapedRstText(str, linkContext.linkText);
+        if (linkContext.type == QtXmlToSphinxLink::External && !linkContext.linkText.endsWith(u' '))
+            str << ' ';
+        str << '<' << ref  << '>';
+    }
+
     str << '`';
-    if (isExternal)
+    if (linkContext.type == QtXmlToSphinxLink::External)
         str << '_';
     str << ' ';
-    if (linkContext.flags & QtXmlToSphinxLink::InsideBold)
+
+    if ((linkContext.flags & QtXmlToSphinxLink::InsideBold) != 0)
         str << "**";
-    else if (linkContext.flags & QtXmlToSphinxLink::InsideItalic)
+    else if ((linkContext.flags & QtXmlToSphinxLink::InsideItalic) != 0)
         str << '*';
     return str;
 }
