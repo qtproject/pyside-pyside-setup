@@ -127,6 +127,7 @@ qtdoc/webxml/restoring-geometry.webxml
 qtdoc/webxml/scalability.webxml
 qtdoc/webxml/security.webxml
 qtdoc/webxml/session.webxml
+qtdoc/webxml/shared-security-model.webxml
 qtdoc/webxml/sharedlibrary.webxml
 qtdoc/webxml/signalsandslots-syntaxes.webxml
 qtdoc/webxml/solutions-for-application-development.webxml
@@ -138,6 +139,7 @@ qtdoc/webxml/threads-reentrancy.webxml
 qtdoc/webxml/threads-synchronizing.webxml
 qtdoc/webxml/threads-technologies.webxml
 qtdoc/webxml/threads.webxml
+qtdoc/webxml/untrusteddata.qdoc
 qtdoc/webxml/tools-for-qt-quick-uis.webxml
 qtdoc/webxml/topics-app-development.webxml
 qtdoc/webxml/topics-core.webxml
