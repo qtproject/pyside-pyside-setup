@@ -25,6 +25,13 @@ import snake_case_imported
 import snake_case_imported_no_snake_case
 
 
+class TrWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+        t = self.tr("bla")
+        self.set_window_title(t)
+
+
 @unittest.skipIf(is_pypy, "__feature__ cannot yet be used with PyPy")
 class SnakeCaseNoPropagateTest(UsesQApplication):
 
@@ -34,6 +41,10 @@ class SnakeCaseNoPropagateTest(UsesQApplication):
         r1 = widget.size_hint()
         r2 = snake_case_imported.test()
         self.assertEqual(r1, r2)
+
+    def testSnakeCaseClassMethod(self):
+        """PYSIDE-3353: Test that snake case works also with class methods."""
+        widget = TrWidget()  # noqa: F841
 
     def testSnakeCaseImportNoSnakeCase(self):
         """PYSIDE-2029: Tests that snake_case is isolated from imported modules."""

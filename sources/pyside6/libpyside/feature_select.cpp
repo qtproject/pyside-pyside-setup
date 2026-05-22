@@ -464,17 +464,13 @@ static PyObject *methodWithNewName(PyTypeObject *type,
     new_meth->ml_meth = meth->ml_meth;
     new_meth->ml_flags = meth->ml_flags;
     new_meth->ml_doc = meth->ml_doc;
-    PyObject *descr = nullptr;
-    if (new_meth->ml_flags & METH_STATIC) {
+    if ((new_meth->ml_flags & METH_STATIC) != 0) {
         AutoDecRef cfunc(PyCFunction_NewEx(new_meth, obtype, nullptr));
-        if (cfunc.isNull())
-            return nullptr;
-        descr = PyStaticMethod_New(cfunc);
+        return cfunc.isNull() ? nullptr : PyStaticMethod_New(cfunc);
     }
-    else {
-        descr = PyDescr_NewMethod(type, new_meth);
-    }
-    return descr;
+    if ((new_meth->ml_flags & METH_CLASS) != 0)
+        return PyDescr_NewClassMethod(type, new_meth);
+    return PyDescr_NewMethod(type, new_meth);
 }
 
 static bool feature_01_addLowerNames(PyTypeObject *type, PyObject *prev_dict, int /* id */)
