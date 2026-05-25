@@ -1804,6 +1804,8 @@ auto cppCallback = [callable]()
     Shiboken::AutoDecRef arglist(PyTuple_New(0));
     Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
     Py_DECREF(callable);
+    if (ret.isNull())
+        PyErr_Print();
 };
 // @snippet std-function-void-lambda
 
