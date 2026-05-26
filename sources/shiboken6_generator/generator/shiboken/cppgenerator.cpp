@@ -2250,7 +2250,7 @@ void CppGenerator::writeMethodWrapperPreamble(TextStream &s,
 
     // PYSIDE-2335: Mark blocking calls like `exec` or `run` as such.
     bool isBlockingFunction = rfunc->name() == u"exec"_s || rfunc->name() == u"exec_"_s
-                              || rfunc->name() == u"run"_s;
+                              || rfunc->name() == u"run"_s || rfunc->name() == u"processEvents"_s;
     if (isBlockingFunction)
         s << "pcm.setBlocking();\n";
 
