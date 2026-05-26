@@ -556,10 +556,10 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
         return PyErr_Format(PyExc_RuntimeError, "cannot connect uninitialized SignalInstance");
 
     if (Py_TYPE(slot) == PySideSignalInstance_TypeF()) { // Connect signal to signal
+        auto *firstTarget = reinterpret_cast<PySideSignalInstance *>(slot);
         // find best match
         for (PySideSignalInstance *sourceWalk = source; sourceWalk != nullptr; ) {
-            for (auto *targetWalk = reinterpret_cast<PySideSignalInstance *>(slot);
-                 targetWalk != nullptr; ) {
+            for (auto *targetWalk = firstTarget; targetWalk != nullptr; ) {
                 if (QMetaObject::checkConnectArgs(sourceWalk->d->signature,
                                                   targetWalk->d->signature)) {
                     if (isSourceDeleted(sourceWalk))
@@ -578,8 +578,8 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
             }
             sourceWalk = sourceWalk->d->next;
         }
-        return PyErr_Format(PyExc_RuntimeError, "Failed to connect signal %s.",
-                            source->d->signature.constData());
+        return PyErr_Format(PyExc_RuntimeError, "Failed to connect signal \"%s\" to signal \"%s\".",
+                            source->d->signature.constData(), firstTarget->d->signature.constData());
     }
 
     if (PyCallable_Check(slot) == 0) {
