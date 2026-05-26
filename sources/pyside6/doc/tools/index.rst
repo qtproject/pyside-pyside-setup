@@ -29,7 +29,7 @@ Project development
 
         to build *Qt Widgets Designer* forms (``.ui`` files),
         resource files (``.qrc``) and QML type files (``.qmltype``)
-        from a ``.pyproject`` file.
+        from a ``pyproject.toml`` file.
 
 Widget Development
 ~~~~~~~~~~~~~~~~~~

@@ -125,8 +125,20 @@ message on it.
         }
     }
 
-Qt Creator Python Project File ``.pyproject``
----------------------------------------------
+.. _python_project_file:
+
+Python Project File ``pyproject.toml``
+--------------------------------------
+
+*Qt Creator* 16.0 added support for the ``pyproject.toml`` file format, which
+is the modern standard for Python projects. PySide6 6.9.0 introduced support
+for this format, and it is recommended to use it. In order to migrate a
+``.pyproject file``, see :ref:`migrating_from_pyproject_to_pyproject_toml`.
+
+.. _qt_creator_pyproject_file:
+
+Qt Creator Python Project File ``.pyproject`` (deprecated)
+----------------------------------------------------------
 
 For *Qt Creator* to load and handle Python based projects, a special file is
 needed, because C++ based projects could be handle from ``.qmake`` or
@@ -140,13 +152,6 @@ Here is an example of such file:
     {
         "files": ["library/server.py", "library/client.py", "logger.py"]
     }
-
-*Qt Creator* 16.0 added support for the pyproject.toml file format, which
-is the modern standard for Python projects. PySide6 6.9.0 introduced support
-for this format, and it is recommended to use it. In order to migrate a
-.pyproject file, see `Migrating from *.pyproject to pyproject.toml`
-<https://doc.qt.io/qtforpython-6/tools/pyside6-project.html
-#migrating_from_pyproject_to_pyproject_toml>`_
 
 Old versions of *Qt Creator*, provided a simple format with the ``.pyqtc``
 extension, which were plain-text files with one-file-per-line::

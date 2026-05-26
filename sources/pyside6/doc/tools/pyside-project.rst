@@ -103,7 +103,7 @@ It is also possible to specify a directory containing the project file.
 
 *migrate-pyproject*
     Migrates the content of one or more ``*.pyproject`` files to a ``pyproject.toml`` file.
-    See :ref:`Migrating from *.pyproject to pyproject.toml <migrating_from_pyproject_to_pyproject_toml>`.
+    See :ref:`migrating_from_pyproject_to_pyproject_toml`.
 
 Considerations
 --------------
