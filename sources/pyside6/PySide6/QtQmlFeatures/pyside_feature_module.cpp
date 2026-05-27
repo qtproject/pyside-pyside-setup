@@ -3,6 +3,7 @@
 // Qt-Security score:significant reason:default
 
 #include "pysidechange.h"
+#include "pysidecomputed_p.h"
 #include "pysidewatch_p.h"
 
 #include <sbkpython.h>
@@ -12,6 +13,7 @@ extern "C" {
 static int exec_QtQmlFeatures(PyObject *module)
 {
     PySide::Change::init(module);
+    PySide::Computed::init(module);
     PySide::Watch::init(module);
     return 0;
 }

@@ -7,6 +7,7 @@ set(libpysideqml_libraries Qt::Core Qt::CorePrivate Qt::Qml Qt::QmlPrivate)
 
 set(libpysideqml_HEADERS # installed below
     pysidechange.h
+    pysidecomputed_p.h
     pysidewatch_p.h
     pysideqmlattached.h
     pysideqmlattached_p.h
@@ -26,6 +27,7 @@ set(libpysideqml_HEADERS # installed below
 
 set(libpysideqml_SRC
     pysidechange.cpp
+    pysidecomputed.cpp
     pysidewatch.cpp
     pysideqml.cpp
     pysideqmlattached.cpp

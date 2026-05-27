@@ -104,3 +104,50 @@ QML:
 
 A ``@watch`` callback is only invoked when the value actually changes; setting
 a property to its current value does not trigger it.
+
+The @computed decorator
+=======================
+
+``@computed`` turns a method into a derived, read-only property. The method
+computes a value from one or more other properties, named as the decorator's
+arguments. The result is cached and recomputed only when one of those
+dependencies changes.
+
+.. decorator:: computed(*dep_names)
+
+    :param str dep_names: the names of the properties this value depends on.
+        At least one name is required.
+
+    Returns a decorator that registers the method as a computed property whose
+    value depends on *dep_names*. Reading the property returns the cached value,
+    recomputing it when any dependency has changed since the last read.
+
+Like ``@watch``, ``@computed`` records its metadata on the method; the
+dependency tracking is wired up by the ``@auto_properties`` class decorator.
+
+When a dependency changes, the computed property's ``Changed`` signal is
+emitted automatically. This means QML bindings that read the computed
+property are notified and re-evaluated just like any other Qt property.
+
+Python::
+
+    @QmlElement
+    @auto_properties
+    class Cart(QObject):
+        def __init__(self, parent=None):
+            super().__init__(parent)
+            self.price = 10
+            self.quantity = 2
+
+        @computed("price", "quantity")
+        def total(self):
+            return self.price * self.quantity
+
+QML:
+
+.. code-block:: javascript
+
+    Cart { id: cart }
+    // Automatically re-evaluates whenever price or quantity changes
+    Text { text: "Total: " + cart.total }
+    Button { onClicked: cart.price += 1 }
