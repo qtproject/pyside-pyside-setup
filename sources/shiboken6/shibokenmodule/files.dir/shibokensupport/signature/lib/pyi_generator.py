@@ -27,7 +27,14 @@ from pathlib import Path
 from contextlib import contextmanager
 from textwrap import dedent
 
-from shibokensupport.signature.lib.enum_sig import HintingEnumerator
+from shibokensupport.signature.lib.enum_sig import (
+    HintingEnumerator,
+    BaseFormatter,
+    EnumFormatter,
+    SignalFormatter,
+    AttributeFormatter,
+    SectionFormatter
+)
 from shibokensupport.signature.lib.tool import build_brace_pattern
 
 indent = " " * 4
@@ -84,7 +91,7 @@ class Writer:
                 self.history.append(False)
 
 
-class Formatter(Writer):
+class Formatter(Writer, BaseFormatter, EnumFormatter, SignalFormatter, AttributeFormatter, SectionFormatter):
     """
     Formatter is formatting the signature listing of an enumerator.
 
@@ -95,6 +102,7 @@ class Formatter(Writer):
 
     def __init__(self, outfile, options, *args):
         self.options = options
+        BaseFormatter.__init__(self)
         Writer.__init__(self, outfile, *args)
 
     # Re-add the `typing` prefix that inspect would throw away.
