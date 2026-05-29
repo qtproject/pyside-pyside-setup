@@ -17,6 +17,7 @@ import inspect
 import sys
 import types
 import collections
+from abc import ABC, abstractmethod
 from shibokensupport.signature import get_signature as get_sig
 from shibokensupport.signature.layout import DEFAULT_PARAM_KIND
 from enum import Enum
@@ -60,6 +61,44 @@ def is_relevant_type(thing):
             and "QMetaObject" not in t)
 
 
+class BaseFormatter(ABC):
+    @abstractmethod
+    def module(self, mod_name):
+        ...
+
+    @abstractmethod
+    def klass(self, class_name, class_str, has_misc_error=False):
+        ...
+
+    @abstractmethod
+    def function(self, func_name, signature, decorator=None, aug_ass=None, incon_err=None):
+        ...
+
+
+class SectionFormatter(ABC):
+    @abstractmethod
+    def section(self) -> None:
+        ...
+
+
+class EnumFormatter(ABC):
+    @abstractmethod
+    def enum(self, class_name, enum_name, value):
+        ...
+
+
+class AttributeFormatter(ABC):
+    @abstractmethod
+    def attribute(self, attr_name, attr_value):
+        ...
+
+
+class SignalFormatter(ABC):
+    @abstractmethod
+    def signal(self, class_name, sig_name, sig_str):
+        ...
+
+
 class ExactEnumerator:
     """
     ExactEnumerator enumerates all signatures in a module as they are.
@@ -83,7 +122,7 @@ class ExactEnumerator:
     mypy_misc_class_errors = set()
     mypy_misc_class_errors.add("QPyDesignerPropertySheetExtension")
 
-    def __init__(self, formatter, result_type=dict):
+    def __init__(self, formatter: BaseFormatter, result_type=dict):
         global Signal, SignalInstance
         try:
             # Lazy import
@@ -107,7 +146,7 @@ class ExactEnumerator:
         return tp not in _normal_functions
 
     def section(self):
-        if hasattr(self.fmt, "section"):
+        if isinstance(self.fmt, SectionFormatter):
             self.fmt.section()
 
     def module(self, mod_name):
@@ -236,14 +275,14 @@ class ExactEnumerator:
         with self.fmt.klass(class_name, class_str, has_misc_error):
             self.fmt.level += 1
             self.fmt.class_name = class_name
-            if hasattr(self.fmt, "enum"):
+            if isinstance(self.fmt, EnumFormatter):
                 # this is an optional feature
                 if len(enums):
                     self.section()
                 for enum_name, enum_class_name, value in enums:
                     with self.fmt.enum(enum_class_name, enum_name, value.value):
                         pass
-            if hasattr(self.fmt, "signal"):
+            if isinstance(self.fmt, SignalFormatter):
                 # this is an optional feature
                 if len(signals):
                     self.section()
@@ -253,7 +292,7 @@ class ExactEnumerator:
                     sig_str = str(signal)
                     with self.fmt.signal(sig_class_name, signal_name, sig_str):
                         pass
-            if hasattr(self.fmt, "attribute"):
+            if isinstance(self.fmt, AttributeFormatter):
                 if len(attributes):
                     self.section()
                 for class_name, attrs in attributes.items():
