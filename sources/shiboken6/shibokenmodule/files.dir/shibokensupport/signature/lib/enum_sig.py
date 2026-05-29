@@ -335,7 +335,7 @@ class SimplifyingEnumerator(ExactEnumerator):
     is desired.
     """
 
-    def function(self, func_name, func):
+    def function(self, func_name, func, decorator=None):
         ret = self.result_type()
         signature = get_sig(func, 'existence')
         sig = stringify(signature) if signature is not None else None
