@@ -18,11 +18,6 @@ Qt Modules Supported by Qt for Python
 
         Provides an API for accelerated, imperative 2D painting.
 
-    .. grid-item-card:: :mod:`Qt Charts <PySide6.QtCharts>`
-
-        Deprecated since Qt 6.10 in favor of :mod:`Qt Graphs <PySide6.QtGraphs>`.
-        UI Components for displaying charts.
-
     .. grid-item-card:: :mod:`Qt Concurrent <PySide6.QtConcurrent>`
 
         Classes for writing multi-threaded programs without using low-level
@@ -31,11 +26,6 @@ Qt Modules Supported by Qt for Python
     .. grid-item-card:: :mod:`Qt Core <PySide6.QtCore>`
 
         Core non-graphical classes used by other modules.
-
-    .. grid-item-card:: :mod:`Qt Data Visualization <PySide6.QtDataVisualization>`
-
-        Deprecated since Qt 6.10 in favor of :mod:`Qt Graphs <PySide6.QtGraphs>`.
-        UI Components for creating 3D data visualizations.
 
     .. grid-item-card:: :mod:`Qt D-Bus <PySide6.QtDBus>`
 
@@ -229,33 +219,36 @@ Qt Modules Supported by Qt for Python
 
         Handling of XML in a Document Object Model (DOM) API.
 
-    .. grid-item-card:: :mod:`Qt 3D Animation Classes <PySide6.Qt3DAnimation>`
-
-        The Qt 3D Animation modules provides a set of prebuilt elements to
-        help you get started with Qt 3D.
-
-    .. grid-item-card:: :mod:`Qt 3D Core Classes <PySide6.Qt3DCore>`
-
-        The Qt 3D module contains functionality to support near-realtime
-        simulation systems.
-
-    .. grid-item-card:: :mod:`Qt 3D Extras Classes <PySide6.Qt3DExtras>`
-
-        Provides a set of prebuilt elements to help you get started with Qt 3D.
-
-    .. grid-item-card:: :mod:`Qt 3D Input Classes<PySide6.Qt3DInput>`
-
-        Provides classes for handling user input in
-        applications using Qt3D.
-
-    .. grid-item-card:: :mod:`Qt 3D Logic Classes <PySide6.Qt3DLogic>`
-
-        Enables synchronizing frames with the Qt 3D backend.
-
-    .. grid-item-card:: :mod:`Qt 3D Render Classes <PySide6.Qt3DRender>`
-
-        Contains functionality to support 2D and 3D rendering using Qt 3D.
-
     .. grid-item-card:: :mod:`QtAsyncio <PySide6.QtAsyncio>`
 
         Provides integration between asyncio and Qt's event loop.
+
+Deprecated Modules
+------------------
+
+The following Qt modules are now obsolete. They are provided to keep old source
+code working, but they are no longer maintained, and can be removed in a future
+major Qt release. We advise against using these modules in new code.
+
+Each obsolete module comes with documentation that helps with porting existing
+code to actively maintained alternatives.
+
++--------------------------------------------------------+----------------------------------------+--------------------------------------------------------+
+| Obsolete module                                        |Alternative module                      | Migration guide                                        |
++========================================================+========================================+========================================================+
+| Qt Charts                                              | :mod:`Qt Graphs <PySide6.QtGraphs>`    | :ref:`Qt-Graphs-Migration-from-Qt-Charts`              |
++--------------------------------------------------------+----------------------------------------+--------------------------------------------------------+
+| Qt Data Visualization                                  | :mod:`Qt Graphs <PySide6.QtGraphs>`    | :ref:`Qt-Graphs-Migration-from-Qt-DataVisualization`   |
++--------------------------------------------------------+----------------------------------------+--------------------------------------------------------+
+| :mod:`Qt 3D Animation Classes <PySide6.Qt3DAnimation>` | :mod:`Qt Quick 3D <PySide6.QtQuick3D>` | :ref:`Porting-Qt-3D-to-Qt-Quick-3D--A-Migration-Guide` |
++--------------------------------------------------------+                                        |                                                        |
+| :mod:`Qt 3D Core Classes <PySide6.Qt3DCore>`           |                                        |                                                        |
++--------------------------------------------------------+                                        |                                                        |
+| :mod:`Qt 3D Extras Classes <PySide6.Qt3DExtras>`       |                                        |                                                        |
++--------------------------------------------------------+                                        |                                                        |
+| :mod:`Qt 3D Input Classes<PySide6.Qt3DInput>`          |                                        |                                                        |
++--------------------------------------------------------+                                        |                                                        |
+| :mod:`Qt 3D Logic Classes <PySide6.Qt3DLogic>`         |                                        |                                                        |
++--------------------------------------------------------+                                        |                                                        |
+| :mod:`Qt 3D Render Classes <PySide6.Qt3DRender>`       |                                        |                                                        |
++--------------------------------------------------------+----------------------------------------+--------------------------------------------------------+
