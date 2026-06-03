@@ -832,13 +832,25 @@ bool _FunctionModelItem::isSimilar(const FunctionModelItem &other) const
     return true;
 }
 
-_FunctionModelItem::_FunctionModelItem()
-    : _MemberModelItem(_CodeModelItem::Kind_Function), m_flags(0)
+_FunctionModelItem::_FunctionModelItem() :
+    _MemberModelItem(_CodeModelItem::Kind_Function),
+    m_isDeleted(0),
+    m_isInline(0),
+    m_isVariadics(0),
+    m_isHiddenFriend(0),
+    m_isInvokable (0),
+    m_scopeResolution(0)
 {
 }
 
-_FunctionModelItem::_FunctionModelItem(const QString &name)
-    : _MemberModelItem(name, _CodeModelItem::Kind_Function), m_flags(0)
+_FunctionModelItem::_FunctionModelItem(const QString &name) :
+    _MemberModelItem(name, _CodeModelItem::Kind_Function),
+    m_isDeleted(0),
+    m_isInline(0),
+    m_isVariadics(0),
+    m_isHiddenFriend(0),
+    m_isInvokable (0),
+    m_scopeResolution(0)
 {
 }
 
@@ -1517,13 +1529,29 @@ void _MemberModelItem::setStatic(bool isStatic)
     m_isStatic = isStatic;
 }
 
-_MemberModelItem::_MemberModelItem(Kind kind)
-    : _CodeModelItem(kind), m_flags(0)
+_MemberModelItem::_MemberModelItem(Kind kind) :
+    _CodeModelItem(kind),
+    m_isConstant(0),
+    m_isVolatile(0),
+    m_isStatic(0),
+    m_isAuto(0),
+    m_isFriend(0),
+    m_isRegister(0),
+    m_isExtern(0),
+    m_isMutable(0)
 {
 }
 
-_MemberModelItem::_MemberModelItem(const QString &name, Kind kind)
-    : _CodeModelItem(name, kind), m_flags(0)
+_MemberModelItem::_MemberModelItem(const QString &name, Kind kind) :
+    _CodeModelItem(name, kind),
+    m_isConstant(0),
+    m_isVolatile(0),
+    m_isStatic(0),
+    m_isAuto(0),
+    m_isFriend(0),
+    m_isRegister(0),
+    m_isExtern(0),
+    m_isMutable(0)
 {
 }
 

@@ -33,21 +33,14 @@ public:
     TypeInfo::TypeInfoList m_instantiations;
     TypeInfo::Indirections m_indirections;
 
-    union {
-        uint flags;
-
-        struct {
-            uint m_constant: 1;
-            uint m_volatile: 1;
-            uint m_padding: 30;
-        };
-    };
-
     ReferenceType m_referenceType = NoReference;
     TypeCategory m_category = TypeCategory::Other;
+
+    uint m_constant: 1;
+    uint m_volatile: 1;
 };
 
-TypeInfoData::TypeInfoData() : flags(0)
+TypeInfoData::TypeInfoData() : m_constant(0), m_volatile(0)
 {
 }
 
@@ -452,7 +445,8 @@ bool TypeInfoData::equals(const TypeInfoData &other) const
     }
 #endif
 
-    return flags == other.flags
+    return m_constant == other.m_constant
+           && m_volatile == other.m_volatile
            && m_qualifiedName == other.m_qualifiedName
            && m_category == other.m_category
            && m_arguments == other.m_arguments

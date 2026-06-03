@@ -417,20 +417,14 @@ private:
     TemplateParameterList m_templateParameters;
     TypeInfo m_type;
     Access m_accessPolicy = Access::Public;
-    union {
-        struct {
-            uint m_isConstant: 1;
-            uint m_isVolatile: 1;
-            uint m_isStatic: 1;
-            uint m_isAuto: 1;
-            uint m_isFriend: 1;
-            uint m_isRegister: 1;
-            uint m_isExtern: 1;
-            uint m_isMutable: 1;
-        };
-        uint m_flags;
-    };
-
+    uint m_isConstant: 1;
+    uint m_isVolatile: 1;
+    uint m_isStatic: 1;
+    uint m_isAuto: 1;
+    uint m_isFriend: 1;
+    uint m_isRegister: 1;
+    uint m_isExtern: 1;
+    uint m_isMutable: 1;
 };
 
 class _FunctionModelItem: public _MemberModelItem
@@ -504,18 +498,14 @@ private:
     ArgumentList m_arguments;
     FunctionAttributes m_attributes;
     CodeModel::FunctionType m_functionType = CodeModel::Normal;
-    union {
-        struct {
-            uint m_isDeleted: 1;
-            uint m_isInline: 1;
-            uint m_isVariadics: 1;
-            uint m_isHiddenFriend: 1;
-            uint m_isInvokable : 1; // Qt
-            uint m_scopeResolution: 1;
-        };
-        uint m_flags;
-    };
     ExceptionSpecification m_exceptionSpecification = ExceptionSpecification::Unknown;
+
+    uint m_isDeleted: 1;
+    uint m_isInline: 1;
+    uint m_isVariadics: 1;
+    uint m_isHiddenFriend: 1;
+    uint m_isInvokable : 1; // Qt
+    uint m_scopeResolution: 1;
 };
 
 class _VariableModelItem: public _MemberModelItem
