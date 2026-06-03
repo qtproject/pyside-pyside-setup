@@ -168,7 +168,7 @@ static void formatXmlOutput(const FileModelItem &dom)
     writer.writeAttribute(u"package"_s, u"insert_name"_s);
     writer.writeComment(u"Auto-generated "_s +
                         QDateTime::currentDateTime().toString(Qt::ISODate));
-    for (auto p : primitiveTypes) {
+    for (const auto *p : primitiveTypes) {
         writer.writeStartElement(u"primitive-type"_s);
         writer.writeAttribute(nameAttribute, QLatin1StringView(p));
         writer.writeEndElement();

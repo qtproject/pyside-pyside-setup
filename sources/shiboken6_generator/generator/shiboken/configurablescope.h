@@ -11,6 +11,8 @@
 class ConfigurableScope
 {
 public:
+    Q_DISABLE_COPY_MOVE(ConfigurableScope)
+
     explicit ConfigurableScope(TextStream &s, const ConfigurableTypeEntryCPtr &t) :
         m_stream(s),
         m_hasConfigCondition(t->hasConfigCondition())

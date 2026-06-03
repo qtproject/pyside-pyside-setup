@@ -447,7 +447,6 @@ PyErr_Format(PyExc_AttributeError,
 QString CppGenerator::writeSmartPointerReprFunction(TextStream &s,
                                                     const GeneratorContext &context)
 {
-    const auto metaClass = context.metaClass();
     QString funcName = writeReprFunctionHeader(s, context);
     s << "Shiboken::AutoDecRef pointee(" << callGetter(context) << ");\n"
         << "return Shiboken::SmartPointer::repr(self, pointee);\n";

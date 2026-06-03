@@ -2988,7 +2988,7 @@ static inline QString arrayHandleType(const AbstractMetaTypeList &nestedArrayTyp
 template <class Type> // AbstractMetaType/TypeEntry
 static void writeMinimalConstructorExpression(TextStream &s,
                                               const ApiExtractorResult &api,
-                                              Type type,
+                                              const Type &type,
                                               bool isPrimitive,
                                               const QString &defaultValue)
 {
@@ -3809,7 +3809,7 @@ void CppGenerator::writeConstructorsNameArgumentResolution(TextStream &s,
                                                            const OverloadData &overloadData,
                                                            NamedArgumentFlags flags,
                                                            const GeneratorContext &context,
-                                                           ErrorReturn errorReturn) const
+                                                           ErrorReturn errorReturn)
 {
     const AbstractMetaFunctionCList &overloads = overloadData.overloads();
     s << "// Resolve keyword arguments\n";
@@ -5301,7 +5301,7 @@ void CppGenerator::writeRichCompareFunctionHeader(TextStream &s,
 void CppGenerator::writeRichCompareFunction(TextStream &s, TextStream &t,
                                             const GeneratorContext &context) const
 {
-    const auto metaClass = context.metaClass();
+    const auto &metaClass = context.metaClass();
     QString baseName = cpythonBaseName(metaClass);
     writeRichCompareFunctionHeader(s, baseName, context);
 
@@ -6197,7 +6197,7 @@ QtRegisterMetaType qtMetaTypeRegistration(const AbstractMetaClassCPtr &c)
 
 void CppGenerator::writeInitQtMetaTypeFunctionBody(TextStream &s, const GeneratorContext &context)
 {
-    const auto metaClass = context.metaClass();
+    const auto &metaClass = context.metaClass();
     // Gets all class name variants used on different possible scopes
     QStringList nameVariants;
     if (!context.forSmartPointer())
@@ -6381,7 +6381,7 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
                                          const GeneratorContext &context) const
 {
     Q_ASSERT(!context.forSmartPointer());
-    const auto metaClass = context.metaClass();
+    const auto &metaClass = context.metaClass();
     writeGetattroDefinition(s, metaClass);
 
     // PYSIDE-1019: Switch tp_dict before doing tp_getattro.
@@ -7252,7 +7252,7 @@ void CppGenerator::writeReturnValueHeuristics(TextStream &s, const AbstractMetaF
 
 void CppGenerator::writeHashFunction(TextStream &s, TextStream &t, const GeneratorContext &context)
 {
-    const auto metaClass = context.metaClass();
+    const auto &metaClass = context.metaClass();
     t << fullPythonClassName(metaClass) << ".__hash__(self)->int\n";
     const char hashType[] = "Py_hash_t";
     s << "static " << hashType << ' ' << cpythonBaseName(metaClass)

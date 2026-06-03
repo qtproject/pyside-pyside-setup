@@ -1260,7 +1260,7 @@ bool AbstractMetaFunction::hasInjectedCode() const
 
 // Traverse the code snippets, return true if predicate returns true
 template <class Predicate>
-bool AbstractMetaFunction::traverseCodeSnips(Predicate predicate,
+bool AbstractMetaFunction::traverseCodeSnips(const Predicate &predicate,
                                              TypeSystem::CodeSnipPosition position,
                                              TypeSystem::Language language) const
 {

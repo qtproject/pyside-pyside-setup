@@ -3335,7 +3335,7 @@ std::optional<TemplateInstance>
 bool TypeSystemParser::parseReplace(const ConditionalStreamReader &,
                            StackElement topElement, QXmlStreamAttributes *attributes)
 {
-    if (topElement != StackElement::InsertTemplate) {
+    if (topElement != StackElement::InsertTemplate || !m_templateInstance.has_value()) {
         m_error = u"Can only insert replace rules into insert-template."_s;
         return false;
     }

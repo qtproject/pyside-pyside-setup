@@ -271,7 +271,7 @@ static QString queryLlvmConfigDir(const QString &arg)
     QByteArray stdOut;
     if (!runProcess(llvmConfig, QStringList{arg}, &stdOut))
         return {};
-    const QString path = QFile::decodeName(stdOut.trimmed());
+    QString path = QFile::decodeName(stdOut.trimmed());
     if (!QFileInfo::exists(path)) {
         qCWarning(lcShiboken, R"(%s: "%s" as returned by llvm-config "%s" does not exist.)",
                   __FUNCTION__, qPrintable(QDir::toNativeSeparators(path)), qPrintable(arg));

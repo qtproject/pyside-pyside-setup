@@ -432,7 +432,7 @@ public:
 
 private:
     template <class Predicate>
-    bool traverseCodeSnips(Predicate predicate,
+    bool traverseCodeSnips(const Predicate &predicate,
                            TypeSystem::CodeSnipPosition position = TypeSystem::CodeSnipPositionAny,
                            TypeSystem::Language language = TypeSystem::All) const;
     bool autoDetectAllowThread() const;

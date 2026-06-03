@@ -57,6 +57,10 @@ struct QtXmlToSphinxLink
 class QtXmlToSphinxDocGeneratorInterface
 {
 public:
+    Q_DISABLE_COPY_MOVE(QtXmlToSphinxDocGeneratorInterface)
+
+    QtXmlToSphinxDocGeneratorInterface() noexcept = default;
+
     virtual QString expandFunction(const QString &function) const = 0;
     virtual QString expandClass(const QString &context,
                                 const QString &name) const = 0;

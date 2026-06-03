@@ -130,6 +130,7 @@ public:
     {
        m_scopeStack.push(std::make_shared<_FileModelItem>());
     }
+    ~BuilderPrivate() = default;
 
     // Determine scope from top item. Note that the scope list does not necessarily
     // match the scope stack in case of forward-declared inner classes whose definition
@@ -158,7 +159,7 @@ public:
     bool addClass(const CXCursor &cursor, CodeModel::ClassType t);
     FunctionModelItem createFunction(const CXCursor &cursor,
                                      CodeModel::FunctionType t = CodeModel::Normal,
-                                     bool isTemplateCode = false);
+                                     bool isTemplateCode = false) const;
     FunctionModelItem createMemberFunction(const CXCursor &cursor,
                                            bool isTemplateCode = false);
     void qualifyConstructor(const CXCursor &cursor);
@@ -179,7 +180,7 @@ public:
     void startTemplateTypeAlias(const CXCursor &cursor);
     void endTemplateTypeAlias(const CXCursor &typeAliasCursor);
 
-    TemplateParameterModelItem createTemplateParameter(const CXCursor &cursor) const;
+    static TemplateParameterModelItem createTemplateParameter(const CXCursor &cursor);
     TemplateParameterModelItem createNonTypeTemplateParameter(const CXCursor &cursor) const;
     void addField(const CXCursor &cursor, bool staticField = false);
 
@@ -325,7 +326,7 @@ static ExceptionSpecification exceptionSpecificationFromClang(BaseVisitor *bv,
 
 FunctionModelItem BuilderPrivate::createFunction(const CXCursor &cursor,
                                                  CodeModel::FunctionType t,
-                                                 bool isTemplateCode)
+                                                 bool isTemplateCode) const
 {
     QString name = getCursorSpelling(cursor);
     // Apply type fixes to "operator X &" -> "operator X&"
@@ -424,7 +425,7 @@ void BuilderPrivate::qualifyConstructor(const CXCursor &cursor)
     }
 }
 
-TemplateParameterModelItem BuilderPrivate::createTemplateParameter(const CXCursor &cursor) const
+TemplateParameterModelItem BuilderPrivate::createTemplateParameter(const CXCursor &cursor)
 {
     return std::make_shared<_TemplateParameterModelItem>(getCursorSpelling(cursor));
 }

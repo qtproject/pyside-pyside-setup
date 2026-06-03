@@ -482,7 +482,7 @@ OverloadDataNode *OverloadDataRootNode::addOverloadDataNode(const AbstractMetaFu
 
     if (!overloadData) {
         const int argpos = argPos() + 1;
-        overloadData.reset(new OverloadDataNode(func, this, arg, argpos));
+        overloadData = std::make_shared<OverloadDataNode>(func, this, arg, argpos);
         m_children.append(overloadData);
     }
 

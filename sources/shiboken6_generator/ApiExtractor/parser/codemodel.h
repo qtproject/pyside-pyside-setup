@@ -162,7 +162,7 @@ public:
 
     ClassList classes() const { return m_classes; }
     const EnumList &enums() const { return m_enums; }
-    inline const FunctionList &functions() const { return m_functions; }
+    const FunctionList &functions() const { return m_functions; }
     TypeDefList typeDefs() const { return m_typeDefs; }
     TemplateTypeAliasList templateTypeAliases() const { return m_templateTypeAliases; }
     VariableList variables() const { return m_variables; }

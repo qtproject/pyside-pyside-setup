@@ -51,7 +51,7 @@ static QString fragmentToCodeHelper(const TemplateInstance &p)
 
 static QString fragmentToCode(const CodeSnipFragment &codeFrag)
 {
-    return std::visit([](auto f) { return fragmentToCodeHelper(f); }, codeFrag);
+    return std::visit([](const auto &f) { return fragmentToCodeHelper(f); }, codeFrag);
 }
 
 static bool isEmptyFragmentHelper(const QString &c)
@@ -66,7 +66,7 @@ static bool isEmptyFragmentHelper(const TemplateInstance &)
 
 static bool isEmptyFragment(const CodeSnipFragment &codeFrag)
 {
-    return std::visit([](auto f) { return isEmptyFragmentHelper(f); }, codeFrag);
+    return std::visit([](const auto &f) { return isEmptyFragmentHelper(f); }, codeFrag);
 }
 
 static size_t hashHelper(const QString &c, size_t seed) noexcept
@@ -81,7 +81,7 @@ static size_t hashHelper(const TemplateInstance &t, size_t seed) noexcept
 
 size_t qHash(const CodeSnipFragment &codeFrag, size_t seed) noexcept
 {
-    return std::visit([seed](auto f) { return hashHelper(f, seed); }, codeFrag);
+    return std::visit([seed](const auto &f) { return hashHelper(f, seed); }, codeFrag);
 }
 
 static void formatDebugHelper(QDebug &d, const QString &code)
@@ -104,7 +104,7 @@ QDebug operator<<(QDebug d, const CodeSnipFragment &codeFrag)
     QDebugStateSaver saver(d);
     d.noquote();
     d.nospace();
-    std::visit([&d](auto f) { formatDebugHelper(d, f); }, codeFrag);
+    std::visit([&d](const auto &f) { formatDebugHelper(d, f); }, codeFrag);
     return d;
 }
 

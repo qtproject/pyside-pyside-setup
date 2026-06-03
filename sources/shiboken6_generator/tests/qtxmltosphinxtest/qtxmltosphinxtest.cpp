@@ -413,7 +413,7 @@ void QtXmlToSphinxTest::testTableFormatting_data()
 
     QTest::newRow("normal") << table << QString::fromLatin1(expected);
 
-    table.reset(new QtXmlToSphinx::Table);
+    table = std::make_shared<QtXmlToSphinx::Table>();
     table->appendRow({TableCell("item11"), TableCell("item12\nline2")});
     table->appendRow({TableCell(""), TableCell("item22\nline2\nline3")});
     table->normalize();

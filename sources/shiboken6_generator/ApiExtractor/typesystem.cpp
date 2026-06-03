@@ -545,7 +545,7 @@ bool TypeEntry::isComplex() const
 
 TypeEntry *TypeEntry::clone() const
 {
-    return new TypeEntry(new TypeEntryPrivate(*m_d.get()));
+    return new TypeEntry(new TypeEntryPrivate(*m_d));
 }
 
 // Take over parameters relevant for typedefs
@@ -1250,7 +1250,7 @@ void EnumTypeEntry::setPythonEnumType(TypeSystem::PythonEnumType t)
 
 QString EnumTypeEntry::targetLangQualifier() const
 {
-    const QString q = qualifier();
+    QString q = qualifier();
     if (!q.isEmpty()) {
         if (auto te = TypeDatabase::instance()->findType(q))
             return te->targetLangName();
@@ -2700,7 +2700,7 @@ void CppTypeEntry::formatDebug(QDebug &debug) const
 
 void PrimitiveTypeEntry::formatDebug(QDebug &debug) const
 {
-    TypeEntry::formatDebug(debug);
+    CppTypeEntry::formatDebug(debug);
     if (auto e = referencedTypeEntry()) {
         debug << ", references";
         for (; e ; e = e->referencedTypeEntry())
@@ -2712,7 +2712,7 @@ void ComplexTypeEntry::formatDebug(QDebug &debug) const
 {
     S_D(const ComplexTypeEntry);
 
-    TypeEntry::formatDebug(debug);
+    ConfigurableTypeEntry::formatDebug(debug);
     FORMAT_BOOL("polymorphicBase", d->m_polymorphicBase)
     FORMAT_BOOL("genericClass", d->m_genericClass)
     if (d->m_deletionMode != TypeSystem::DeletionMode::Default)
@@ -2734,7 +2734,7 @@ void ComplexTypeEntry::formatDebug(QDebug &debug) const
 void CustomTypeEntry::formatDebug(QDebug &debug) const
 {
     S_D(const CustomTypeEntry);
-    TypeEntry::formatDebug(debug);
+    CppTypeEntry::formatDebug(debug);
     debug << ", checkFunction=" << d->m_checkFunction;
 }
 
@@ -2767,7 +2767,7 @@ void EnumTypeEntry::formatDebug(QDebug &debug) const
 {
     S_D(const EnumTypeEntry);
 
-    TypeEntry::formatDebug(debug);
+    ConfigurableTypeEntry::formatDebug(debug);
     if (d->m_pythonEnumType != TypeSystem::PythonEnumType::Unspecified)
         debug << ", python-type=" << int(d->m_pythonEnumType);
     if (d->m_flags)
@@ -2778,7 +2778,7 @@ void FlagsTypeEntry::formatDebug(QDebug &debug) const
 {
     S_D(const FlagsTypeEntry);
 
-    TypeEntry::formatDebug(debug);
+    CppTypeEntry::formatDebug(debug);
     debug << ", \"" << d->m_originalName << "\", flags of \"" << d->m_enum->qualifiedCppName() << '"';
 }
 

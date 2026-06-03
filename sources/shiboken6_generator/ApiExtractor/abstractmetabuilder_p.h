@@ -46,7 +46,7 @@ public:
 
     using TranslateTypeFlags = AbstractMetaBuilder::TranslateTypeFlags;
 
-    Q_DISABLE_COPY(AbstractMetaBuilderPrivate)
+    Q_DISABLE_COPY_MOVE(AbstractMetaBuilderPrivate)
 
     AbstractMetaBuilderPrivate();
 
@@ -102,10 +102,10 @@ public:
     std::optional<AbstractMetaEnum>
         traverseTypedefedEnum(const FileModelItem &dom, const TypeDefModelItem &typeDefItem,
                               const AbstractMetaClassPtr &enclosing);
-    void traverseClassFunction(const ScopeModelItem& scopeItem,
+    static void traverseClassFunction(const ScopeModelItem& scopeItem,
                                       const FunctionModelItem &function,
                                       const AbstractMetaFunctionPtr &metaFunction,
-                                      const AbstractMetaClassPtr &metaClass) const;
+                                      const AbstractMetaClassPtr &metaClass);
     static void traverseClassFunction(const AbstractMetaFunctionPtr &metaFunction,
                                       const AbstractMetaClassPtr &metaClass);
     void traverseNameSpaceFunctions(const ScopeModelItem& scopeItem,

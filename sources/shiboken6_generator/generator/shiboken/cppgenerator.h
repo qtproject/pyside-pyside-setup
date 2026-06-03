@@ -328,11 +328,11 @@ private:
                                               const OverloadData &overloadData,
                                               const OverloadDataRootNode *node) const;
 
-    void writeConstructorsNameArgumentResolution(TextStream &s,
-                                                 const OverloadData &overloadData,
-                                                 NamedArgumentFlags flags,
-                                                 const GeneratorContext &context,
-                                                 ErrorReturn errorReturn) const;
+    static void writeConstructorsNameArgumentResolution(TextStream &s,
+                                                        const OverloadData &overloadData,
+                                                        NamedArgumentFlags flags,
+                                                        const GeneratorContext &context,
+                                                        ErrorReturn errorReturn);
 
     /// Writes calls to all the possible method/function overloads.
     void writeFunctionCalls(TextStream &s,

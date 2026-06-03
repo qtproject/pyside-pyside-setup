@@ -7,7 +7,7 @@
 #include <QtCore/qbytearray.h>
 #include <QtCore/qlist.h>
 
-enum class HeaderType
+enum class HeaderType : quint8
 {
     Standard,
     System,         // -isystem

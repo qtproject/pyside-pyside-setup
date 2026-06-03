@@ -22,7 +22,7 @@ QString XQuery::evaluate(QString xPathExpression, QString *errorMessage)
 
 std::shared_ptr<XQuery> XQuery::create(const QString &focus, QString *errorMessage)
 {
-#if defined(HAVE_LIBXSLT)
+#ifdef HAVE_LIBXSLT
     return libXml_createXQuery(focus, errorMessage);
 #else
     Q_UNUSED(focus);
@@ -33,7 +33,7 @@ std::shared_ptr<XQuery> XQuery::create(const QString &focus, QString *errorMessa
 
 QString xsl_transform(const QString &xml, const QString &xsl, QString *errorMessage)
 {
-#if defined(HAVE_LIBXSLT)
+#ifdef HAVE_LIBXSLT
     return libXslt_transform(xml, xsl, errorMessage);
 #else
     Q_UNUSED(xsl);

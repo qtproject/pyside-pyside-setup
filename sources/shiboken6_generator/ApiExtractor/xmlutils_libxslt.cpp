@@ -114,22 +114,22 @@ private:
 QString LibXmlXQuery::doEvaluate(const QString &xPathExpression, QString *errorMessage)
 {
     const QByteArray xPathExpressionB = xPathExpression.toUtf8();
-    auto xPathExpressionX = reinterpret_cast<const xmlChar *>(xPathExpressionB.constData());
+    const auto *xPathExpressionX = reinterpret_cast<const xmlChar *>(xPathExpressionB.constData());
 
     XmlPathObjectUniquePtr xPathObject(xmlXPathEvalExpression(xPathExpressionX, m_xpathContext.get()));
     if (!xPathObject) {
          *errorMessage = u"xmlXPathEvalExpression() failed for \""_s + xPathExpression
                          + u'"';
-        return QString();
+        return {};
     }
     QString result;
     if (xmlNodeSetPtr nodeSet = xPathObject->nodesetval) {
         for (int n = 0, count = nodeSet->nodeNr; n < count; ++n) {
-            auto node = nodeSet->nodeTab[n];
+            auto *node = nodeSet->nodeTab[n];
             if (node->type == XML_ELEMENT_NODE) {
                 result += QString::fromLocal8Bit(formatNode(node, errorMessage));
                 if (!errorMessage->isEmpty())
-                    return QString();
+                    return {};
             }
         }
     }
@@ -194,7 +194,7 @@ QString libXslt_transform(const QString &xml, QString xsl, QString *errorMessage
     // Apply XSL
     XmlDocUniquePtr xslResult(xsltApplyStylesheet(xslt.get(), xmlDoc.get(), nullptr));
     xmlChar *buffer = nullptr;
-    int bufferSize;
+    int bufferSize{};
     QString result;
     if (xsltSaveResultToString(&buffer, &bufferSize, xslResult.get(), xslt.get()) == 0) {
         result = QString::fromUtf8(reinterpret_cast<char*>(buffer), bufferSize);

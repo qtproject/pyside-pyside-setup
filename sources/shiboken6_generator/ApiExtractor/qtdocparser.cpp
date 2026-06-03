@@ -501,7 +501,7 @@ static std::optional<QFileInfo> qmlModuleFile(const QString &dirPath,
                                               const QString &lowerModuleName)
 {
     static constexpr auto postFix = "-qmlmodule.webxml"_L1;
-    const QFileInfo moduleFile(dirPath + u'/' + lowerModuleName + postFix);
+    QFileInfo moduleFile(dirPath + u'/' + lowerModuleName + postFix);
     if (moduleFile.exists())
         return moduleFile;
     // Some file names are irregular, fall back to using a filter
