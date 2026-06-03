@@ -52,6 +52,14 @@ it includes the following Qt modules:
 * QtAsyncio
 * QtWebView
 
+On Linux, `QtWebView` has no native backend and relies on Qt WebEngine to
+render web content. Install the optional `webengine` extra to pull in
+[PySide6_WebEngine](https://pypi.org/project/PySide6-WebEngine) alongside it:
+
+```
+pip install PySide6-Addons[webengine]
+```
+
 ### Documentation and Bugs
 
 You can find more information about the PySide6 module API in the

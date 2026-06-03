@@ -223,9 +223,6 @@ def wheel_files_pyside_addons() -> list[ModuleData]:
         module_QtTextToSpeech(),
         module_QtVirtualKeyboard(),
         module_QtWebChannel(),
-        module_QtWebEngineCore(),
-        module_QtWebEngineQuick(),
-        module_QtWebEngineWidgets(),
         module_QtWebSockets(),
         module_QtHttpServer(),
         module_QtLocation(),
@@ -234,6 +231,16 @@ def wheel_files_pyside_addons() -> list[ModuleData]:
         # This is not an actual module, but it's required in order
         # to add the 'Quick' components of the WebView.
         module_QtWebViewQuick(),
+    ]
+    return files
+
+
+# PySide WebEngine wheel
+def wheel_files_pyside_webengine() -> list[ModuleData]:
+    files = [
+        module_QtWebEngineCore(),
+        module_QtWebEngineQuick(),
+        module_QtWebEngineWidgets(),
     ]
     return files
 
