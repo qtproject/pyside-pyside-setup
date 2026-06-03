@@ -379,9 +379,8 @@ void registerSlotConnection(QObject *source, int signalIndex, PyObject *callback
         } else {
             senderSignalDeletionTracker = new SenderSignalDeletionTracker(nullptr);
             senderSignalDeletionTracker->moveToThread(app->thread());
-            senderSignalDeletionTracker->metaObject()->invokeMethod(senderSignalDeletionTracker,
-                                                                    "reparentOnQApp",
-                                                                    Qt::QueuedConnection);
+            QMetaObject::invokeMethod(senderSignalDeletionTracker, "reparentOnQApp",
+                                      Qt::QueuedConnection);
         }
         Py_AtExit(clearConnectionHash);
     }

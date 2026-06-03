@@ -1124,14 +1124,14 @@ bool connect(PyObject *source, const char *signal, PyObject *callback)
 }
 
 PySideSignalInstance *newObjectFromMethod(QObject *sourceQObject, PyObject *source,
-                                          const QList<QMetaMethod>& methodList)
+                                          const QList<QMetaMethod>& methods)
 {
     PySideSignalInstance *root = nullptr;
     PySideSignalInstance *previous = nullptr;
     auto shared = std::make_shared<PySideSignalInstanceShared>();
     shared->source = sourceQObject;
     shared->sourceType = Py_TYPE(source);
-    for (const QMetaMethod &m : methodList) {
+    for (const QMetaMethod &m : methods) {
         PySideSignalInstance *item = PyObject_New(PySideSignalInstance, PySideSignalInstance_TypeF());
         if (!root)
             root = item;
@@ -1327,14 +1327,14 @@ QByteArray getCallbackSignature(QMetaMethod signal, QObject *receiver,
     return signature;
 }
 
-bool isQtSignal(const char *signal)
+bool isQtSignal(const char *signature)
 {
-    return (signal && signal[0] == QT_SIGNAL_SENTINEL);
+    return (signature && signature[0] == QT_SIGNAL_SENTINEL);
 }
 
-bool checkQtSignal(const char *signal)
+bool checkQtSignal(const char *signature)
 {
-    if (!isQtSignal(signal)) {
+    if (!isQtSignal(signature)) {
         PyErr_SetString(PyExc_TypeError, "Use the function PySide6.QtCore.SIGNAL on signals");
         return false;
     }

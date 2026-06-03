@@ -73,7 +73,7 @@ PYSIDE_API PySideSignalInstance *newObjectFromMethod(QObject *sourceQObject, PyO
  * @param   object the PyObject where the signal will be attached
  * @return  Return a new reference to PySideSignalInstance
  **/
-PYSIDE_API PySideSignalInstance *initialize(PySideSignal *signal, PyObject *name, PyObject *object);
+PYSIDE_API PySideSignalInstance *initialize(PySideSignal *self, PyObject *name, PyObject *object);
 
 /**
  * This function is used to retrieve the object in which the signal is attached

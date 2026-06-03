@@ -32,7 +32,6 @@
 #include <QtCore/qmetatype.h>
 
 #include <climits>
-#include <memory>
 #include <optional>
 #include <utility>
 
@@ -565,7 +564,7 @@ static int callPythonMetaMethodHelper(const QByteArrayList &paramTypes,
         // Only pointer conversion available for const-ref - add indirection
         const bool valueToPtr = converter.conversionType() == SpecificConverter::PointerConversion
             && !param.endsWith('*') && param != "PyObject"_ba;
-        auto *src = valueToPtr ? &data : data;
+        auto *src = valueToPtr ? static_cast<void *>(&data) : data;
         PyTuple_SetItem(preparedArgs, i, converter.toPython(src));
     }
 

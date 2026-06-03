@@ -103,7 +103,6 @@ private:
 
 extern "C"
 {
-LIBSHIBOKEN_API void Sbk_object_dealloc(PyObject *self);
 
 /// Python type for class decorators with DecoratorPrivate
 struct PYSIDE_API PySideClassDecorator

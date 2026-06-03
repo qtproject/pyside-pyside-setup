@@ -30,11 +30,11 @@ namespace PySide::MetaFunction {
 /**
  * This function creates a MetaFunction object
  *
- * @param   obj the QObject witch this fuction is part of
+ * @param   source the QObject witch this fuction is part of
  * @param   methodIndex The index of this function on MetaObject
  * @return  Return a new reference of PySideMetaFunction
  **/
-PYSIDE_API PySideMetaFunction *newObject(QObject *obj, int methodIndex);
+PYSIDE_API PySideMetaFunction *newObject(QObject *source, int methodIndex);
 
 } //namespace PySide::MetaFunction
 
