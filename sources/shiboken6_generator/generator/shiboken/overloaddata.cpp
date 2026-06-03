@@ -737,14 +737,14 @@ void OverloadDataRootNode::dumpRootGraph(QTextStream &s, int minArgs, int maxArg
     s << "\"];\n";
 
     // Function box title
-    s << "    \"" << rfunc->name() << "\" [shape=plaintext style=\"filled,bold\" margin=0 fontname=freemono fillcolor=white penwidth=1 ";
-    s << "label=<<table border=\"0\" cellborder=\"0\" cellpadding=\"3\" bgcolor=\"white\">";
-    s << "<tr><td bgcolor=\"black\" align=\"center\" cellpadding=\"6\" colspan=\"2\"><font color=\"white\">";
+    s << "    \"" << rfunc->name() << R"(" [shape=plaintext style="filled,bold" margin=0 fontname=freemono fillcolor=white penwidth=1 )";
+    s << R"(label=<<table border="0" cellborder="0" cellpadding="3" bgcolor="white">)";
+    s << R"(<tr><td bgcolor="black" align="center" cellpadding="6" colspan="2"><font color="white">)";
     if (rfunc->ownerClass())
         s << rfunc->ownerClass()->name() << "::";
     s << toHtml(rfunc->name()) << "</font>";
     if (rfunc->isVirtual()) {
-        s << "<br/><font color=\"white\" point-size=\"10\">&lt;&lt;";
+        s << R"(<br/><font color="white" point-size="10">&lt;&lt;)";
         if (rfunc->isAbstract())
             s << "pure ";
         s << "virtual&gt;&gt;</font>";
@@ -752,7 +752,7 @@ void OverloadDataRootNode::dumpRootGraph(QTextStream &s, int minArgs, int maxArg
     s << "</td></tr>";
 
     // Function return type
-    s << "<tr><td bgcolor=\"gray\" align=\"right\">original type</td><td bgcolor=\"gray\" align=\"left\">"
+    s << R"(<tr><td bgcolor="gray" align="right">original type</td><td bgcolor="gray" align="left">)"
         << toHtml(rfunc->type().cppSignature())
         << "</td></tr>";
 
@@ -760,26 +760,26 @@ void OverloadDataRootNode::dumpRootGraph(QTextStream &s, int minArgs, int maxArg
     for (const auto &func : m_overloads) {
         if (!func->isTypeModified())
             continue;
-        s << "<tr><td bgcolor=\"gray\" align=\"right\">f" << functionNumber(func);
-        s << "-type</td><td bgcolor=\"gray\" align=\"left\">";
+        s << R"(<tr><td bgcolor="gray" align="right">f)" << functionNumber(func);
+        s << R"(-type</td><td bgcolor="gray" align="left">)";
         s << toHtml(func->modifiedTypeName()) << "</td></tr>";
     }
 
     // Minimum and maximum number of arguments
-    s << "<tr><td bgcolor=\"gray\" align=\"right\">minArgs</td><td bgcolor=\"gray\" align=\"left\">";
+    s << R"(<tr><td bgcolor="gray" align="right">minArgs</td><td bgcolor="gray" align="left">)";
     s << minArgs << "</td></tr>";
-    s << "<tr><td bgcolor=\"gray\" align=\"right\">maxArgs</td><td bgcolor=\"gray\" align=\"left\">";
+    s << R"(<tr><td bgcolor="gray" align="right">maxArgs</td><td bgcolor="gray" align="left">)";
     s << maxArgs << "</td></tr>";
 
     if (rfunc->ownerClass()) {
         if (rfunc->implementingClass() != rfunc->ownerClass())
-            s << "<tr><td align=\"right\">implementor</td><td align=\"left\">" << rfunc->implementingClass()->name() << "</td></tr>";
+            s << R"(<tr><td align="right">implementor</td><td align="left">)" << rfunc->implementingClass()->name() << "</td></tr>";
         if (rfunc->declaringClass() != rfunc->ownerClass() && rfunc->declaringClass() != rfunc->implementingClass())
-            s << "<tr><td align=\"right\">declarator</td><td align=\"left\">" << rfunc->declaringClass()->name() << "</td></tr>";
+            s << R"(<tr><td align="right">declarator</td><td align="left">)" << rfunc->declaringClass()->name() << "</td></tr>";
     }
 
     // Overloads for the signature to present point
-    s << "<tr><td bgcolor=\"gray\" align=\"right\">overloads</td><td bgcolor=\"gray\" align=\"left\">";
+    s << R"(<tr><td bgcolor="gray" align="right">overloads</td><td bgcolor="gray" align="left">)";
     for (const auto &func : m_overloads)
         s << 'f' << functionNumber(func) << ' ';
     s << "</td></tr>";
@@ -799,19 +799,19 @@ void OverloadDataNode::dumpNodeGraph(QTextStream &s) const
     QString argId = u"arg_"_s + QString::number(quintptr(this));
     s << argId << ";\n";
 
-    s << "    \"" << argId << "\" [shape=\"plaintext\" style=\"filled,bold\" margin=\"0\" fontname=\"freemono\" fillcolor=\"white\" penwidth=1 ";
-    s << "label=<<table border=\"0\" cellborder=\"0\" cellpadding=\"3\" bgcolor=\"white\">";
+    s << "    \"" << argId << R"(" [shape="plaintext" style="filled,bold" margin="0" fontname="freemono" fillcolor="white" penwidth=1 )";
+    s << R"(label=<<table border="0" cellborder="0" cellpadding="3" bgcolor="white">)";
 
     // Argument box title
-    s << "<tr><td bgcolor=\"black\" align=\"left\" cellpadding=\"2\" colspan=\"2\">";
-    s << "<font color=\"white\" point-size=\"11\">arg #" << argPos() << "</font></td></tr>";
+    s << R"(<tr><td bgcolor="black" align="left" cellpadding="2" colspan="2">)";
+    s << R"(<font color="white" point-size="11">arg #)" << argPos() << "</font></td></tr>";
 
     // Argument type information
     const QString type = modifiedArgType().cppSignature();
-    s << "<tr><td bgcolor=\"gray\" align=\"right\">type</td><td bgcolor=\"gray\" align=\"left\">";
+    s << R"(<tr><td bgcolor="gray" align="right">type</td><td bgcolor="gray" align="left">)";
     s << toHtml(type) << "</td></tr>";
     if (isTypeModified()) {
-        s << "<tr><td bgcolor=\"gray\" align=\"right\">orig. type</td><td bgcolor=\"gray\" align=\"left\">";
+        s << R"(<tr><td bgcolor="gray" align="right">orig. type</td><td bgcolor="gray" align="left">)";
         s << toHtml(argType().cppSignature()) << "</td></tr>";
     }
 
@@ -820,7 +820,7 @@ void OverloadDataNode::dumpNodeGraph(QTextStream &s) const
         root = root->parent();
 
     // Overloads for the signature to present point
-    s << "<tr><td bgcolor=\"gray\" align=\"right\">overloads</td><td bgcolor=\"gray\" align=\"left\">";
+    s << R"(<tr><td bgcolor="gray" align="right">overloads</td><td bgcolor="gray" align="left">)";
     for (const auto &func : m_overloads)
         s << 'f' << root->functionNumber(func) << ' ';
     s << "</td></tr>";
@@ -834,13 +834,13 @@ void OverloadDataNode::dumpNodeGraph(QTextStream &s) const
         QString argDefault = arg->defaultValueExpression();
         if (!argDefault.isEmpty() ||
             argDefault != arg->originalDefaultValueExpression()) {
-            s << "<tr><td bgcolor=\"gray\" align=\"right\">f" << n;
-            s << "-default</td><td bgcolor=\"gray\" align=\"left\">";
+            s << R"(<tr><td bgcolor="gray" align="right">f)" << n;
+            s << R"(-default</td><td bgcolor="gray" align="left">)";
             s << argDefault << "</td></tr>";
         }
         if (argDefault != arg->originalDefaultValueExpression()) {
-            s << "<tr><td bgcolor=\"gray\" align=\"right\">f" << n;
-            s << "-orig-default</td><td bgcolor=\"gray\" align=\"left\">";
+            s << R"(<tr><td bgcolor="gray" align="right">f)" << n;
+            s << R"(-orig-default</td><td bgcolor="gray" align="left">)";
             s << arg->originalDefaultValueExpression() << "</td></tr>";
         }
     }

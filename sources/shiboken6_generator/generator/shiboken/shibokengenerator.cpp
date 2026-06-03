@@ -1518,7 +1518,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
     } else {
         // Replaces the simplest case of attribution to a
         // Python argument on the binding virtual method.
-        static const QRegularExpression pyArgsAttributionRegex("%PYARG_(\\d+)\\s*=[^=]\\s*([^;]+)"_L1);
+        static const QRegularExpression pyArgsAttributionRegex(R"(%PYARG_(\d+)\s*=[^=]\s*([^;]+))"_L1);
         Q_ASSERT(pyArgsAttributionRegex.isValid());
         code.replace(pyArgsAttributionRegex, u"PyTuple_SetItem("_s
                      + PYTHON_ARGS + u".object(), \\1-1, \\2)"_s);
@@ -1700,7 +1700,7 @@ void ShibokenGenerator::writeCodeSnips(TextStream &s,
 // and false if it is a variable.
 static bool isVariable(const QString &code)
 {
-    static const QRegularExpression expr("^\\s*\\*?\\s*[A-Za-z_][A-Za-z_0-9.]*\\s*(?:\\[[^\\[]+\\])*$"_L1);
+    static const QRegularExpression expr(R"(^\s*\*?\s*[A-Za-z_][A-Za-z_0-9.]*\s*(?:\[[^\[]+\])*$)"_L1);
     Q_ASSERT(expr.isValid());
     return expr.match(code.trimmed()).hasMatch();
 }

@@ -97,7 +97,7 @@ QString msgModificationConstMismatch(const AbstractMetaFunctionCPtr &function,
     if (auto klazz = function->implementingClass())
         str << klazz->typeEntry()->sourceLocation();
     str << "signature \"" << modificationSignature
-        << "\" needs \"const\" to fully match \"" << function->classQualifiedSignature()
+        << R"(" needs "const" to fully match ")" << function->classQualifiedSignature()
         << "\". The partial matching will be removed in a future release.";
     return result;
 }

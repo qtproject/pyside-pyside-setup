@@ -4377,7 +4377,7 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
             if (refCount.action != ReferenceCount::Set
                 && refCount.action != ReferenceCount::Remove
                 && refCount.action != ReferenceCount::Add) {
-                qCWarning(lcShiboken) << "\"set\", \"add\" and \"remove\" are the only values supported by Shiboken for action attribute of reference-count tag.";
+                qCWarning(lcShiboken) << R"("set", "add" and "remove" are the only values supported by Shiboken for action attribute of reference-count tag.)";
                 continue;
             }
             const int argIndex = arg_mod.index();
