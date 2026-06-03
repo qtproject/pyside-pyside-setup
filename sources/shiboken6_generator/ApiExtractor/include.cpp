@@ -33,10 +33,10 @@ Qt::strong_ordering compareThreeWay(const Include &lhs, const Include &rhs) noex
     return Qt::strong_ordering::equal;
 }
 
-QTextStream& operator<<(QTextStream& out, const Include& g)
+QTextStream& operator<<(QTextStream& out, const Include& include)
 {
-    if (g.isValid())
-        out << g.toString() << Qt::endl;
+    if (include.isValid())
+        out << include.toString() << Qt::endl;
     return out;
 }
 

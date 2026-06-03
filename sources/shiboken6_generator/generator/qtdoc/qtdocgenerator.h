@@ -138,7 +138,7 @@ private:
                                          const QString &targetDir);
     static void copyParsedImages(const QtXmlToSphinxImages &images,
                                  const QStringList &sourceDocumentFiles,
-                                 const QString &targetDocumentFile);
+                                 const QString &targetDocumentDir);
     QString translateToPythonType(const AbstractMetaType &type,
                                   const AbstractMetaClassCPtr &cppClass,
                                   bool createRef = true) const;

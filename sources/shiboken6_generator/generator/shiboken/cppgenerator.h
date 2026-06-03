@@ -461,7 +461,7 @@ private:
     QByteArrayList methodDefinitionParameters(const OverloadData &overloadData) const;
     QList<PyMethodDefEntry> methodDefinitionEntries(const OverloadData &overloadData) const;
 
-    void writeSignatureInfo(TextStream &s, const OverloadData &overloads,
+    void writeSignatureInfo(TextStream &s, const OverloadData &overloadData,
                             bool useProperties=false) const;
     QString signatureParameter(const AbstractMetaArgument &arg, bool implicitConversions) const;
     QString pythonSignature(const AbstractMetaType &type) const;
@@ -518,7 +518,7 @@ private:
     static void writeEnumsInitFunc(TextStream &s, const QString &funcName,
                                    const AbstractMetaEnumList &enums);
     static bool writeEnumInitialization(TextStream &s, const char *enclosing,
-                                        const AbstractMetaEnum &metaEnum);
+                                        const AbstractMetaEnum &cppEnum);
 
     static void writeSignalInitialization(TextStream &s, const AbstractMetaClassCPtr &metaClass);
 
@@ -567,11 +567,11 @@ private:
 
     void writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                     bool usesPyArgs,
-                                    bool userHeuristicForReturn) const;
+                                    bool useHeuristicForReturn) const;
     bool writeParentChildManagement(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                     int argIndex,
                                     bool usePyArgs,
-                                    bool userHeuristicPolicy) const;
+                                    bool useHeuristicPolicy) const;
     void writeReturnValueHeuristics(TextStream &s, const AbstractMetaFunctionCPtr &func) const;
     static void writeInitQtMetaTypeFunctionBody(TextStream &s, const GeneratorContext &context);
 

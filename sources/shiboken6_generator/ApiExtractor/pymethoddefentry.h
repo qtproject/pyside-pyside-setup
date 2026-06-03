@@ -29,7 +29,7 @@ struct PyMethodDefEntry
 
 using PyMethodDefEntries = QList<PyMethodDefEntry>;
 
-TextStream &operator<<(TextStream &str, const castToPyCFunction &e);
+TextStream &operator<<(TextStream &str, const castToPyCFunction &c);
 TextStream &operator<<(TextStream &s, const PyMethodDefEntry &e);
 TextStream &operator<<(TextStream &s, const PyMethodDefEntries &e);
 

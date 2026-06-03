@@ -63,8 +63,8 @@ private:
     QString m_name;
 };
 
-QTextStream& operator<<(QTextStream& out, const Include& include);
-TextStream& operator<<(TextStream& out, const Include& include);
+QTextStream &operator<<(QTextStream &out, const Include &include);
+TextStream &operator<<(TextStream &out, const Include &include);
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const Include &i);
 #endif
@@ -88,7 +88,7 @@ struct IncludeGroup
     }
 };
 
-TextStream& operator<<(TextStream &out, const IncludeGroup& include);
+TextStream& operator<<(TextStream &out, const IncludeGroup &g);
 
 using IncludeGroupList = QList<IncludeGroup>;
 

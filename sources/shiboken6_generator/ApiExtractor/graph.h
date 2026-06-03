@@ -95,11 +95,11 @@ public:
     /// \param fileName file name where the output should be written.
     /// \param f function returning the name of a node
     template <class NameFunction>
-    bool dumpDot(const QString& fileName, NameFunction f) const;
+    bool dumpDot(const QString& fileName, NameFunction nameFunction) const;
     template <class NameFunction>
-    void formatDot(QTextStream &str, NameFunction f) const;
+    void formatDot(QTextStream &str, NameFunction nameFunction) const;
     template <class NameFunction>
-    bool showGraph(const QString &name, NameFunction f) const;
+    bool showGraph(const QString &name, NameFunction nameFunction) const;
 
     void format(QDebug &debug) const;
 
@@ -282,11 +282,11 @@ void Graph<Node>::formatDot(QTextStream &s,
 
 template <class Node>
 template <class NameFunction>
-bool Graph<Node>::showGraph(const QString &name, NameFunction f) const
+bool Graph<Node>::showGraph(const QString &name, NameFunction nameFunction) const
 {
     QString graph;
     QTextStream s(&graph);
-    formatDot(s, f);
+    formatDot(s, nameFunction);
     return showDotGraph(name, graph);
 }
 

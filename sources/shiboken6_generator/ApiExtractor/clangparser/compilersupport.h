@@ -47,8 +47,6 @@ void addCompilerArgument(const QString &arg);
 
 QString compilerFromCMake();
 
-bool isCrossCompilation();
-
 // Are there any options specifying a target
 bool hasTargetOption(const QByteArrayList &clangOptions);
 

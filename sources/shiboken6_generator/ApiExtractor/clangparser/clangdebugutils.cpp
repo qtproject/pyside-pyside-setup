@@ -21,18 +21,18 @@ static const char *baseName(const char *fileName)
     return b ? b + 1 : fileName;
 }
 
-QDebug operator<<(QDebug s, const CXString &cs)
+QDebug operator<<(QDebug debug, const CXString &cs)
 {
-    s << clang_getCString(cs);
-    return s;
+    debug << clang_getCString(cs);
+    return debug;
 }
 
-QDebug operator<<(QDebug s, CXCursorKind cursorKind) // Enum
+QDebug operator<<(QDebug debug, CXCursorKind cursorKind) // Enum
 {
     const CXString kindName = clang_getCursorKindSpelling(cursorKind);
-    s << kindName;
+    debug << kindName;
     clang_disposeString(kindName);
-    return s;
+    return debug;
 }
 
 static const char *accessSpecsStrings[]
@@ -41,10 +41,10 @@ static const char *accessSpecsStrings[]
     "invalid",  "public", "protected", "private"
 };
 
-QDebug operator<<(QDebug s, CX_CXXAccessSpecifier ac)
+QDebug operator<<(QDebug debug, CX_CXXAccessSpecifier ac)
 {
-    s << accessSpecsStrings[ac];
-    return s;
+    debug << accessSpecsStrings[ac];
+    return debug;
 }
 
 struct formatCXTypeName
@@ -142,10 +142,10 @@ QDebug operator<<(QDebug debug, const CXCursor &cursor)
     return debug;
 }
 
-QDebug operator<<(QDebug s, const CXSourceLocation &location)
+QDebug operator<<(QDebug debug, const CXSourceLocation &location)
 {
-    QDebugStateSaver saver(s);
-    s.nospace();
+    QDebugStateSaver saver(debug);
+    debug.nospace();
     CXFile file{}; // void *
     unsigned line{};
     unsigned column{};
@@ -154,22 +154,22 @@ QDebug operator<<(QDebug s, const CXSourceLocation &location)
     const CXString cxFileName = clang_getFileName(file);
     // Has been observed to be 0 for invalid locations
     if (const char *cFileName = clang_getCString(cxFileName))
-        s << baseName(cFileName) << ':';
-    s << line << ':' << column;
+        debug << baseName(cFileName) << ':';
+    debug << line << ':' << column;
     clang_disposeString(cxFileName);
-    return s;
+    return debug;
 }
 
-QDebug operator<<(QDebug s, const std::string_view &v)
+QDebug operator<<(QDebug debug, const std::string_view &v)
 {
-    QDebugStateSaver saver(s);
-    s.nospace();
-    s.noquote();
-    s << '"';
+    QDebugStateSaver saver(debug);
+    debug.nospace();
+    debug.noquote();
+    debug << '"';
     for (auto c : v)
-        s << c;
-    s << '"';
-    return s;
+        debug << c;
+    debug << '"';
+    return debug;
 }
 
 #endif // !QT_NO_DEBUG_STREAM

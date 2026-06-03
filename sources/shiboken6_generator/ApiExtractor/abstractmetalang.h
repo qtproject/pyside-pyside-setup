@@ -78,7 +78,7 @@ public:
     AbstractMetaFunctionCPtr findOperatorBool() const;
     // Find a Qt-style isNull() method suitable for nb_bool
     AbstractMetaFunctionCPtr findQtIsNullMethod() const;
-    bool hasSignal(const AbstractMetaFunction *f) const;
+    bool hasSignal(const AbstractMetaFunction *other) const;
 
     bool hasConstructors() const;
     AbstractMetaFunctionCPtr copyConstructor() const;
@@ -186,7 +186,7 @@ public:
     void addEnum(const AbstractMetaEnum &e);
 
     std::optional<AbstractMetaEnum> findEnum(const QString &enumName) const;
-    std::optional<AbstractMetaEnumValue> findEnumValue(const QString &enumName) const;
+    std::optional<AbstractMetaEnumValue> findEnumValue(const QString &enumValueName) const;
     void getEnumsToBeGenerated(AbstractMetaEnumList *enumList) const;
     void getEnumsFromInvisibleNamespacesToBeGenerated(AbstractMetaEnumList *enumList) const;
 
@@ -215,8 +215,8 @@ public:
     // Recursive list of all base classes including defaultSuperclass
     AbstractMetaClassCList allTypeSystemAncestors() const;
 
-    void addBaseClass(const AbstractMetaClassCPtr &base_class);
-    void setBaseClass(const AbstractMetaClassCPtr &base_class);
+    void addBaseClass(const AbstractMetaClassCPtr &baseClass);
+    void setBaseClass(const AbstractMetaClassCPtr &baseClass);
 
     /**
      *   \return the namespace from another package which this namespace extends.
@@ -338,7 +338,7 @@ public:
     AbstractMetaClassCPtr findBaseClass(const QString &qualifiedName) const;
 
     static std::optional<AbstractMetaEnumValue> findEnumValue(const AbstractMetaClassList &classes,
-                                                              const QString &string);
+                                                              const QString &name);
 
     SourceLocation sourceLocation() const;
     void setSourceLocation(const SourceLocation &sourceLocation);
@@ -385,7 +385,7 @@ void AbstractMetaClass::invisibleNamespaceRecursion(Function f) const
     }
 }
 
-bool inheritsFrom(const AbstractMetaClassCPtr &c, const AbstractMetaClassCPtr &other);
+bool inheritsFrom(const AbstractMetaClassCPtr &c, const AbstractMetaClassCPtr &cls);
 bool inheritsFrom(const AbstractMetaClassCPtr &c, QAnyStringView name);
 inline bool isQObject(const AbstractMetaClassCPtr &c)
 {

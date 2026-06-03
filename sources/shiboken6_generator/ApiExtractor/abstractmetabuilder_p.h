@@ -95,7 +95,7 @@ public:
                                          const NamespaceModelItem &item);
     std::optional<AbstractMetaEnum> traverseEnum(const EnumModelItem &item,
                                                  const AbstractMetaClassPtr &enclosing);
-    void traverseEnums(const ScopeModelItem &item, const AbstractMetaClassPtr &parent);
+    void traverseEnums(const ScopeModelItem &scopeItem, const AbstractMetaClassPtr &metaClass);
     std::optional<AbstractMetaEnum>
         createMetaEnum(const EnumModelItem &enumItem, const QString &qualifiedName,
                        const TypeEntryPtr &typeEntry, const AbstractMetaClassPtr &enclosing);
@@ -109,11 +109,11 @@ public:
     static void traverseClassFunction(const AbstractMetaFunctionPtr &metaFunction,
                                       const AbstractMetaClassPtr &metaClass);
     void traverseNameSpaceFunctions(const ScopeModelItem& scopeItem,
-                                    const AbstractMetaClassPtr &metaClass);
-    void traverseClassFunctions(const ScopeModelItem& item,
-                                const AbstractMetaClassPtr &parent);
+                                    const AbstractMetaClassPtr &currentClass);
+    void traverseClassFunctions(const ScopeModelItem& scopeItem,
+                                const AbstractMetaClassPtr &metaClass);
     static void applyFunctionModifications(const AbstractMetaFunctionPtr &func);
-    void traverseFields(const ScopeModelItem &item, const AbstractMetaClassPtr &parent);
+    void traverseFields(const ScopeModelItem &scopeItem, const AbstractMetaClassPtr &metaClass);
     bool traverseStreamOperator(const FunctionModelItem &functionItem,
                                 const AbstractMetaClassPtr &currentClass);
     void traverseFreeOperatorFunction(const FunctionModelItem &item, const ScopeModelItem &scope,
@@ -139,7 +139,7 @@ public:
     void checkFunctionModifications() const;
     void registerHashFunction(const FunctionModelItem &functionItem,
                               const AbstractMetaClassPtr &currentClass);
-    void registerToStringCapabilityIn(const NamespaceModelItem &namespaceItem);
+    void registerToStringCapabilityIn(const NamespaceModelItem &nsItem);
     void registerToStringCapability(const FunctionModelItem &functionItem,
                                     const AbstractMetaClassPtr &currentClass);
 
@@ -176,7 +176,7 @@ public:
         translateType(const TypeInfo &type, const AbstractMetaClassCPtr &currentClass,
                       TranslateTypeFlags flags = {}, QString *errorMessage = nullptr);
     static std::optional<AbstractMetaType>
-        translateTypeStatic(const TypeInfo &type, const AbstractMetaClassCPtr &current,
+        translateTypeStatic(const TypeInfo &_typei, const AbstractMetaClassCPtr &current,
                             AbstractMetaBuilderPrivate *d = nullptr, TranslateTypeFlags flags = {},
                             QString *errorMessageIn = nullptr);
     static TypeEntryCList findTypeEntriesHelper(const QString &qualifiedName, const QString &name,

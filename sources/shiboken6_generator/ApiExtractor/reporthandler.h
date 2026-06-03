@@ -44,7 +44,7 @@ public:
     static void dumpGeneralLogFile();
 
 private:
-    static void messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    static void messageOutput(QtMsgType type, const QMessageLogContext &context, const QString &text);
 };
 
 #endif // REPORTHANDLER_H

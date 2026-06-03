@@ -3415,8 +3415,7 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
     }
 
     if (!m_defaultPackage.isEmpty() && !versionRange.isNull()) {
-        auto *td = TypeDatabase::instance();
-        if (!td->checkApiVersion(m_defaultPackage, versionRange)) {
+        if (!TypeDatabase::checkApiVersion(m_defaultPackage, versionRange)) {
             ++m_ignoreDepth;
             return true;
         }

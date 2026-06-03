@@ -2200,10 +2200,10 @@ BoolCastFunctionOptional ShibokenGenerator::boolCast(const AbstractMetaClassCPtr
 }
 
 ShibokenGenerator::AttroCheck
-    ShibokenGenerator::checkAttroFunctionNeeds(const AbstractMetaClassCPtr &scope)
+    ShibokenGenerator::checkAttroFunctionNeeds(const AbstractMetaClassCPtr &metaClass)
 {
-    Q_ASSERT(scope);
-    return getGeneratorClassInfo(scope).attroCheck;
+    Q_ASSERT(metaClass);
+    return getGeneratorClassInfo(metaClass).attroCheck;
 }
 
 // Use non-const overloads only, for example, "foo()" and "foo()const"

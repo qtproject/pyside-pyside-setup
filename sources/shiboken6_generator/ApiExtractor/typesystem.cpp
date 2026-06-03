@@ -909,10 +909,10 @@ const QString &TypeSystemTypeEntry::namespaceBegin() const
     return d->m_namespaceBegin;
 }
 
-void TypeSystemTypeEntry::setNamespaceBegin(const QString &p)
+void TypeSystemTypeEntry::setNamespaceBegin(const QString &n)
 {
     S_D(TypeSystemTypeEntry);
-    d->m_namespaceBegin = p;
+    d->m_namespaceBegin = n;
 }
 
 const QString &TypeSystemTypeEntry::namespaceEnd() const

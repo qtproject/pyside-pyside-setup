@@ -14,13 +14,13 @@ QT_FORWARD_DECLARE_CLASS(QDebug)
 QT_FORWARD_DECLARE_CLASS(QString)
 
 #ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug s, const CXString &cs);
-QDebug operator<<(QDebug s, CXCursorKind cursorKind);
-QDebug operator<<(QDebug s, CX_CXXAccessSpecifier ac);
-QDebug operator<<(QDebug s, const CXType &t);
-QDebug operator<<(QDebug s, const CXCursor &cursor);
-QDebug operator<<(QDebug s, const CXSourceLocation &location);
-QDebug operator<<(QDebug s, const std::string_view &v); // for code snippets
+QDebug operator<<(QDebug debug, const CXString &cs);
+QDebug operator<<(QDebug debug, CXCursorKind cursorKind);
+QDebug operator<<(QDebug debug, CX_CXXAccessSpecifier ac);
+QDebug operator<<(QDebug debug, const CXType &type);
+QDebug operator<<(QDebug debug, const CXCursor &cursor);
+QDebug operator<<(QDebug debug, const CXSourceLocation &location);
+QDebug operator<<(QDebug debug, const std::string_view &v); // for code snippets
 #endif // !QT_NO_DEBUG_STREAM
 
 #endif // CLANGDEBUGUTILS_H

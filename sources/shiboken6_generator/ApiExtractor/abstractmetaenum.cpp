@@ -351,13 +351,13 @@ static void formatMetaEnumValue(QDebug &d, const AbstractMetaEnumValue &v, bool 
         d << " (deprecated)";
 }
 
-QDebug operator<<(QDebug d, const AbstractMetaEnumValue &v)
+QDebug operator<<(QDebug d, const AbstractMetaEnumValue &ae)
 {
     QDebugStateSaver saver(d);
     d.noquote();
     d.nospace();
     d << "AbstractMetaEnumValue(";
-    formatMetaEnumValue(d, v);
+    formatMetaEnumValue(d, ae);
     d << ')';
     return d;
 }

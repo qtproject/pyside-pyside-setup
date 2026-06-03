@@ -244,15 +244,15 @@ AbstractMetaClassPtr AbstractMetaBuilderPrivate::argumentToClass(const ArgumentM
 /**
  * Checks the argument of a hash function and flags the type if it is a complex type
  */
-void AbstractMetaBuilderPrivate::registerHashFunction(const FunctionModelItem &function_item,
+void AbstractMetaBuilderPrivate::registerHashFunction(const FunctionModelItem &functionItem,
                                                       const AbstractMetaClassPtr &currentClass)
 {
-    if (function_item->isDeleted())
+    if (functionItem->isDeleted())
         return;
-    ArgumentList arguments = function_item->arguments();
+    ArgumentList arguments = functionItem->arguments();
     if (!arguments.isEmpty()) { // (Class, Hash seed).
         if (AbstractMetaClassPtr cls = argumentToClass(arguments.at(0), currentClass))
-            cls->setHashFunction(function_item->name());
+            cls->setHashFunction(functionItem->name());
     }
 }
 
@@ -269,10 +269,10 @@ void AbstractMetaBuilderPrivate::registerToStringCapabilityIn(const NamespaceMod
  * Check if a class has a debug stream operator that can be used as toString
  */
 
-void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelItem &function_item,
+void AbstractMetaBuilderPrivate::registerToStringCapability(const FunctionModelItem &functionItem,
                                                             const AbstractMetaClassPtr &currentClass)
 {
-    ArgumentList arguments = function_item->arguments();
+    ArgumentList arguments = functionItem->arguments();
     if (arguments.size() == 2) {
         if (arguments.at(0)->type().toString() == u"QDebug") {
             const ArgumentModelItem &arg = arguments.at(1);
@@ -1470,10 +1470,10 @@ static bool applyFieldModifications(AbstractMetaField *f)
     return true;
 }
 
-void AbstractMetaBuilderPrivate::traverseFields(const ScopeModelItem &scope_item,
+void AbstractMetaBuilderPrivate::traverseFields(const ScopeModelItem &scopeItem,
                                                 const AbstractMetaClassPtr &metaClass)
 {
-    const VariableList &variables = scope_item->variables();
+    const VariableList &variables = scopeItem->variables();
     for (const VariableModelItem &field : variables) {
         auto metaFieldO = traverseField(field, metaClass);
         if (metaFieldO.has_value()) {
@@ -2784,12 +2784,12 @@ void AbstractMetaBuilderPrivate::fixSmartPointers()
 }
 
 std::optional<AbstractMetaType>
-    AbstractMetaBuilderPrivate::translateType(const TypeInfo &_typei,
+    AbstractMetaBuilderPrivate::translateType(const TypeInfo &type,
                                               const AbstractMetaClassCPtr &currentClass,
                                               TranslateTypeFlags flags,
                                               QString *errorMessage)
 {
-    return translateTypeStatic(_typei, currentClass, this, flags, errorMessage);
+    return translateTypeStatic(type, currentClass, this, flags, errorMessage);
 }
 
 static bool isNumber(const QString &s)
@@ -3242,9 +3242,9 @@ QString AbstractMetaBuilder::fixDefaultValue(const QString &expr, const Abstract
     return d->fixDefaultValue(expr, type, c);
 }
 
-bool AbstractMetaBuilderPrivate::isEnum(const FileModelItem &dom, const QStringList& qualified_name)
+bool AbstractMetaBuilderPrivate::isEnum(const FileModelItem &dom, const QStringList& qualifiedName)
 {
-    CodeModelItem item = CodeModel::findItem(qualified_name, dom);
+    CodeModelItem item = CodeModel::findItem(qualifiedName, dom);
     return item && item->kind() == _CodeModelItem::Kind_Enum;
 }
 

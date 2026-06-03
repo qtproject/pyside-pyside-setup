@@ -157,7 +157,7 @@ protected:
     *   \param option some extra options
     *   \return the metatype translated to binding source format
     */
-    QString translateType(AbstractMetaType metatype,
+    QString translateType(AbstractMetaType cType,
                           const AbstractMetaClassCPtr &context,
                           Options options = NoOption) const;
 

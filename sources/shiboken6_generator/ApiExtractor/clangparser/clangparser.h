@@ -85,7 +85,7 @@ private:
 
 bool parse(const QByteArrayList  &clangArgs,
            bool addCompilerSupportArguments,
-           LanguageLevel level, unsigned clangFlags, BaseVisitor &ctx);
+           LanguageLevel level, unsigned clangFlags, BaseVisitor &bv);
 
 } // namespace clang
 

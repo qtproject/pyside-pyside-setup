@@ -654,11 +654,11 @@ ArgumentOwner AbstractMetaFunction::argumentOwner(const AbstractMetaClassCPtr &c
     return {};
 }
 
-QString AbstractMetaFunction::conversionRule(TypeSystem::Language language, int key) const
+QString AbstractMetaFunction::conversionRule(TypeSystem::Language language, int idx) const
 {
     for (const auto &modification : modifications(declaringClass())) {
         for (const ArgumentModification &argumentModification : modification.argument_mods()) {
-            if (argumentModification.index() != key)
+            if (argumentModification.index() != idx)
                 continue;
 
             for (const CodeSnip &snip : argumentModification.conversionRules()) {
