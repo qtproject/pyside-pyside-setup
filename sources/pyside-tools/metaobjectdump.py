@@ -8,12 +8,20 @@ import os
 import sys
 import tokenize
 from argparse import ArgumentParser, RawTextHelpFormatter
+from enum import auto, Enum
 from pathlib import Path
 from typing import Union
 
 
 DESCRIPTION = """Parses Python source code to create QObject metatype
 information in JSON format for qmltyperegistrar."""
+
+
+class ClassType(Enum):
+    OTHER = auto()
+    QOBJECT = auto()
+    ENUM = auto()
+    FLAG = auto()
 
 
 REVISION = 68
@@ -37,6 +45,10 @@ ITEM_MODELS = ["QAbstractListModel", "QAbstractProxyModel",
 
 
 QOBJECT_DERIVED = ["QObject", "QQuickItem", "QQuickPaintedItem"] + ITEM_MODELS
+
+
+ENUM_TYPES = ["Enum", "IntEnum"]
+FLAG_TYPES = ["Flag", "IntFlag"]
 
 
 AstDecorator = ast.Name | ast.Call
@@ -191,8 +203,29 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
         elif var_name == QML_IMPORT_MINOR_VERSION:
             self._qml_import_minor_version = value
 
-    def visit_ClassDef(self, node: ast.Module):
+    def _parse_bases(self, node: ast.ClassDef) -> (ClassType, list):
+        """Parse the base classes and return the type and a JSON list."""
+        class_type = ClassType.OTHER
+        bases = []
+        for b in node.bases:
+            # PYSIDE-2202: catch weird constructs like "class C(type(Base)):"
+            if isinstance(b, ast.Name):
+                base_name = _name(b)
+                if base_name in self._context.qobject_derived:
+                    class_type = ClassType.QOBJECT
+                    self._context.qobject_derived.append(node.name)
+                elif base_name in ENUM_TYPES:
+                    class_type = ClassType.ENUM
+                elif base_name in FLAG_TYPES:
+                    class_type = ClassType.FLAG
+                bases.append({"access": "public", "name": base_name})
+        return class_type, bases
+
+    def visit_ClassDef(self, node: ast.ClassDef):
         """Visit a class definition"""
+        class_type, bases = self._parse_bases(node)
+        if class_type == ClassType.ENUM or class_type == ClassType.FLAG:
+            return
         self._properties = []
         self._signals = []
         self._slots = []
@@ -203,21 +236,9 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
                 else qualified_name)
 
         data = {"className": name,
-                "qualifiedClassName": qualified_name}
+                "qualifiedClassName": qualified_name,
+                "object": class_type == ClassType.QOBJECT}
 
-        q_object = False
-        bases = []
-        for b in node.bases:
-            # PYSIDE-2202: catch weird constructs like "class C(type(Base)):"
-            if isinstance(b, ast.Name):
-                base_name = _name(b)
-                if base_name in self._context.qobject_derived:
-                    q_object = True
-                    self._context.qobject_derived.append(name)
-                base_dict = {"access": "public", "name": base_name}
-                bases.append(base_dict)
-
-        data["object"] = q_object
         if bases:
             data["superClasses"] = bases
 
