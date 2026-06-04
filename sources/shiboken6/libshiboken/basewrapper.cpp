@@ -141,7 +141,7 @@ void Sbk_object_dealloc(PyObject *self)
     PepExt_TypeCallFree(self);
 }
 
-static void SbkObjectType_tp_dealloc(PyTypeObject *pyType);
+static void SbkObjectType_tp_dealloc(PyTypeObject *type);
 static PyTypeObject *SbkObjectType_tp_new(PyTypeObject *metatype, PyObject *args, PyObject *kwds);
 
 static DestroyQAppHook DestroyQApplication = nullptr;
@@ -493,10 +493,10 @@ void SbkDeallocWrapperWithPrivateDtor(PyObject *self)
     SbkDeallocWrapperCommon(self, false);
 }
 
-void SbkObjectType_tp_dealloc(PyTypeObject *sbkType)
+void SbkObjectType_tp_dealloc(PyTypeObject *type)
 {
-    SbkObjectTypePrivate *sotp = PepType_SOTP(sbkType);
-    auto *pyObj = reinterpret_cast<PyObject *>(sbkType);
+    SbkObjectTypePrivate *sotp = PepType_SOTP(type);
+    auto *pyObj = reinterpret_cast<PyObject *>(type);
 
     PyObject_GC_UnTrack(pyObj);
 #if !defined(Py_LIMITED_API) && !defined(PYPY_VERSION)
@@ -509,9 +509,9 @@ void SbkObjectType_tp_dealloc(PyTypeObject *sbkType)
         }
         free(sotp->original_name);
         sotp->original_name = nullptr;
-        if (!Shiboken::ObjectType::isUserType(sbkType))
+        if (!Shiboken::ObjectType::isUserType(type))
             Shiboken::Conversions::deleteConverter(sotp->converter);
-        PepType_SOTP_delete(sbkType);
+        PepType_SOTP_delete(type);
     }
 #if !defined(Py_LIMITED_API) && !defined(PYPY_VERSION)
     Py_TRASHCAN_END;
@@ -1363,23 +1363,23 @@ bool hasOwnership(SbkObject *pyObj)
     return pyObj->d->hasOwnership;
 }
 
-void getOwnership(SbkObject *self)
+void getOwnership(SbkObject *sbkObj)
 {
     // skip if already have the ownership
-    if (self->d->hasOwnership)
+    if (sbkObj->d->hasOwnership)
         return;
 
     // skip if this object has parent
-    if (self->d->parentInfo && self->d->parentInfo->parent)
+    if (sbkObj->d->parentInfo && sbkObj->d->parentInfo->parent)
         return;
 
     // Get back the ownership
-    self->d->hasOwnership = true;
+    sbkObj->d->hasOwnership = true;
 
-    if (self->d->containsCppWrapper)
-        Py_DECREF(reinterpret_cast<PyObject *>(self)); // Remove extra ref
+    if (sbkObj->d->containsCppWrapper)
+        Py_DECREF(reinterpret_cast<PyObject *>(sbkObj)); // Remove extra ref
     else
-        makeValid(self); // Make the object valid again
+        makeValid(sbkObj); // Make the object valid again
 }
 
 void getOwnership(PyObject *pyObj)
@@ -1388,27 +1388,27 @@ void getOwnership(PyObject *pyObj)
         setSequenceOwnership(pyObj, true);
 }
 
-void releaseOwnership(SbkObject *self)
+void releaseOwnership(SbkObject *sbkObj)
 {
     // skip if the ownership have already moved to c++
-    auto *ob  = reinterpret_cast<PyObject *>(self);
+    auto *ob  = reinterpret_cast<PyObject *>(sbkObj);
     auto *selfType = Py_TYPE(ob);
-    if (!self->d->hasOwnership || Shiboken::Conversions::pythonTypeIsValueType(PepType_SOTP(selfType)->converter))
+    if (!sbkObj->d->hasOwnership || Shiboken::Conversions::pythonTypeIsValueType(PepType_SOTP(selfType)->converter))
         return;
 
     // remove object ownership
-    self->d->hasOwnership = false;
+    sbkObj->d->hasOwnership = false;
 
     // If We have control over object life
-    if (self->d->containsCppWrapper)
+    if (sbkObj->d->containsCppWrapper)
         Py_INCREF(ob); // keep the python object alive until the wrapper destructor call
     else
-        invalidate(self); // If I do not know when this object will die We need to invalidate this to avoid use after
+        invalidate(sbkObj); // If I do not know when this object will die We need to invalidate this to avoid use after
 }
 
-void releaseOwnership(PyObject *self)
+void releaseOwnership(PyObject *pyObj)
 {
-    setSequenceOwnership(self, false);
+    setSequenceOwnership(pyObj, false);
 }
 
 /* Needed forward declarations */

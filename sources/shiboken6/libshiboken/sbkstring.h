@@ -15,7 +15,7 @@ namespace Shiboken::String
     /// Check for iterable function arguments (excluding enumerations)
     LIBSHIBOKEN_API bool checkIterableArgument(PyObject *obj);
     LIBSHIBOKEN_API bool checkPath(PyObject *path);
-    LIBSHIBOKEN_API bool checkType(PyTypeObject *obj);
+    LIBSHIBOKEN_API bool checkType(PyTypeObject *type);
     LIBSHIBOKEN_API bool checkChar(PyObject *obj);
     LIBSHIBOKEN_API bool isConvertible(PyObject *obj);
     LIBSHIBOKEN_API PyObject *fromCString(const char *value);

@@ -37,7 +37,7 @@ public:
     bool hasWrapper(const void *cptr) const;
 
     void registerWrapper(SbkObject *pyObj, void *cptr);
-    void releaseWrapper(SbkObject *wrapper);
+    void releaseWrapper(SbkObject *sbkObj);
 
     void runDeletionInMainThread();
     void addToDeletionInMainThread(const DestructorEntry &);

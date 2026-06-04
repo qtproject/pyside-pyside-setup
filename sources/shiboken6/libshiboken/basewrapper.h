@@ -191,12 +191,12 @@ namespace ObjectType {
 /**
 *   Returns true if the object is an instance of a type created by the Shiboken generator.
 */
-LIBSHIBOKEN_API bool checkType(PyTypeObject *pyObj);
+LIBSHIBOKEN_API bool checkType(PyTypeObject *type);
 
 /**
 *   Returns true if this object is an instance of an user defined type derived from an Shiboken type.
 */
-LIBSHIBOKEN_API bool isUserType(PyTypeObject *pyObj);
+LIBSHIBOKEN_API bool isUserType(PyTypeObject *type);
 
 /**
 *   Returns true if the constructor of \p ctorType can be called for a instance of type \p myType.
@@ -221,15 +221,15 @@ LIBSHIBOKEN_API void *cast(PyTypeObject *sourceType, SbkObject *obj, PyTypeObjec
 /// Set the C++ cast function for \p type.
 LIBSHIBOKEN_API void setCastFunction(PyTypeObject *type, SpecialCastFunction func);
 
-LIBSHIBOKEN_API void setOriginalName(PyTypeObject *self, const char *name);
-LIBSHIBOKEN_API const char *getOriginalName(PyTypeObject *self);
+LIBSHIBOKEN_API void setOriginalName(PyTypeObject *type, const char *name);
+LIBSHIBOKEN_API const char *getOriginalName(PyTypeObject *type);
 
-LIBSHIBOKEN_API void setTypeDiscoveryFunctionV2(PyTypeObject *self, TypeDiscoveryFuncV2 func);
-LIBSHIBOKEN_API void copyMultipleInheritance(PyTypeObject *self, PyTypeObject *other);
-LIBSHIBOKEN_API void setMultipleInheritanceFunction(PyTypeObject *self, MultipleInheritanceInitFunction func);
+LIBSHIBOKEN_API void setTypeDiscoveryFunctionV2(PyTypeObject *type, TypeDiscoveryFuncV2 func);
+LIBSHIBOKEN_API void copyMultipleInheritance(PyTypeObject *type, PyTypeObject *other);
+LIBSHIBOKEN_API void setMultipleInheritanceFunction(PyTypeObject *type, MultipleInheritanceInitFunction func);
 LIBSHIBOKEN_API MultipleInheritanceInitFunction getMultipleInheritanceFunction(PyTypeObject *type);
 
-LIBSHIBOKEN_API void setDestructorFunction(PyTypeObject *self, ObjectDestructor func);
+LIBSHIBOKEN_API void setDestructorFunction(PyTypeObject *type, ObjectDestructor func);
 
 enum WrapperFlags : uint8_t
 {
@@ -271,13 +271,13 @@ LIBSHIBOKEN_API PyTypeObject *introduceWrapperType(PyObject *enclosingObject,
  *  The hook gets 3 params, they are: The new type being created, args and kwds. The last two are the very
  *  same got from tp_new.
  */
-LIBSHIBOKEN_API void setSubTypeInitHook(PyTypeObject *self, SubTypeInitHook func);
+LIBSHIBOKEN_API void setSubTypeInitHook(PyTypeObject *type, SubTypeInitHook func);
 
 /**
  *  Get the user data previously set by Shiboken::Object::setTypeUserData
  */
-LIBSHIBOKEN_API void *getTypeUserData(PyTypeObject *self);
-LIBSHIBOKEN_API void setTypeUserData(PyTypeObject *self, void *userData, DeleteUserDataFunc d_func);
+LIBSHIBOKEN_API void *getTypeUserData(PyTypeObject *type);
+LIBSHIBOKEN_API void setTypeUserData(PyTypeObject *type, void *userData, DeleteUserDataFunc d_func);
 
 /**
  * Return an instance of PyTypeObject for a C++ type name as determined by
@@ -423,7 +423,7 @@ LIBSHIBOKEN_API void getOwnership(PyObject *pyObj);
 /**
  *  Sets python as responsible to delete the underlying C++ object.
  */
-LIBSHIBOKEN_API void getOwnership(SbkObject *pyObj);
+LIBSHIBOKEN_API void getOwnership(SbkObject *sbkObj);
 
 /**
  *  Release the ownership, so Python will not delete the underlying C++ object.
@@ -435,7 +435,7 @@ LIBSHIBOKEN_API void releaseOwnership(PyObject *pyObj);
 /**
  *  Release the ownership, so Python will not delete the underlying C++ object.
  */
-LIBSHIBOKEN_API void releaseOwnership(SbkObject *pyObj);
+LIBSHIBOKEN_API void releaseOwnership(SbkObject *sbkObj);
 
 /**
  *   Get the C++ pointer of type \p desiredType from a Python object.
