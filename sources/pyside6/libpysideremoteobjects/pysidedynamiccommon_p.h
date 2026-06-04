@@ -63,7 +63,7 @@ inline void Capsule_destructor<SbkConverter *>(PyObject *capsule)
 template <typename T>
 int set_cleanup_capsule_attr_for_pointer(PyTypeObject *type, const char *name, T pointer)
 {
-    static_assert(std::is_pointer<T>::value, "T must be a pointer type");
+    static_assert(std::is_pointer_v<T>, "T must be a pointer type");
 
     if (!pointer) {
         PyErr_SetString(PyExc_RuntimeError, "Pointer is null");

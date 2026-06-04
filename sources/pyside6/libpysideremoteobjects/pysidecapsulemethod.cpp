@@ -4,7 +4,7 @@
 
 #include "pysidecapsulemethod_p.h"
 
-#include <string.h>
+#include <cstring>
 #include <sbkpep.h>
 
 extern "C"

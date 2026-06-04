@@ -225,7 +225,8 @@ struct ReplicaDefs
         if (PyTuple_Size(args) == 0) {
             if (initFunc(self, args, kwds) < 0)
                 return -1;
-            Shiboken::Conversions::pythonToCppPointer(getSbkType(), self, &replica);
+            Shiboken::Conversions::pythonToCppPointer(getSbkType(), self,
+                                                      static_cast<void*>(&replica));
         } else {  // Process replica with arguments passed from the added node.acquire method
             PyObject *node = nullptr;
             PyObject *constructorType = nullptr;
@@ -244,7 +245,8 @@ struct ReplicaDefs
                 PyObject_CallMethod(self, "initializeNode", "OO", node, name);
             else
                 PyObject_CallMethod(self, "initializeNode", "O", node);
-            Shiboken::Conversions::pythonToCppPointer(getSbkType(), self, &replica);
+            Shiboken::Conversions::pythonToCppPointer(getSbkType(), self,
+                                                      static_cast<void*>(&replica));
         }
         if (!replica) {
             PyErr_SetString(PyExc_RuntimeError, "Failed to initialize replica");
@@ -274,7 +276,8 @@ struct ReplicaDefs
         }
         PyObject *self = methodData->self;
         QRemoteObjectReplica *replica = nullptr;
-        Shiboken::Conversions::pythonToCppPointer(getSbkType(), self, &replica);
+        Shiboken::Conversions::pythonToCppPointer(getSbkType(), self,
+                                                  static_cast<void*>(&replica));
         if (PyCapsule_IsValid(methodData->payload, "PropertyCapsule")) {
             auto *capsule = PyCapsule_GetPointer(methodData->payload, "PropertyCapsule");
             if (capsule) {
