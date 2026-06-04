@@ -145,6 +145,17 @@ def _parse_slot(func_name: str, call: ast.Call) -> Slot:
             "returnType": return_type}
 
 
+def _parse_enum_values(enum_node: ast.ClassDef) -> list[str]:
+    """Return enum value names (assignments in the class body)."""
+    values = []
+    for part in enum_node.body:
+        if isinstance(part, ast.Assign):
+            for target in part.targets:
+                if isinstance(target, ast.Name):
+                    values.append(target.id)
+    return values
+
+
 class VisitorContext:
     """Stores a list of QObject-derived classes encountered in order to find
        out which classes inherit QObject."""
@@ -221,14 +232,29 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
                 bases.append({"access": "public", "name": base_name})
         return class_type, bases
 
+    def _parse_enum_class(self, node: ast.ClassDef, is_flag):
+        decorator_name = "QFlag" if is_flag else "QEnum"
+        decorated = False
+        for d in node.decorator_list:
+            if isinstance(d, ast.Name):
+                if d.id == decorator_name:
+                    decorated = True
+                    break
+        if decorated:
+            enum_entry = {"name": node.name, "isClass": True, "isFlag": is_flag,
+                          "type": "int", "values": _parse_enum_values(node)}
+            self._enums.append(enum_entry)
+
     def visit_ClassDef(self, node: ast.ClassDef):
         """Visit a class definition"""
         class_type, bases = self._parse_bases(node)
         if class_type == ClassType.ENUM or class_type == ClassType.FLAG:
+            self._parse_enum_class(node, class_type == ClassType.FLAG)
             return
         self._properties = []
         self._signals = []
         self._slots = []
+        self._enums = []
         self._within_class = True
         qualified_name = node.name
         last_dot = qualified_name.rfind('.')
@@ -263,6 +289,9 @@ class MetaObjectDumpVisitor(ast.NodeVisitor):
 
         if self._slots:
             data["slots"] = self._slots
+
+        if self._enums:
+            data["enums"] = self._enums
 
         self._json_class_list.append(data)
 
