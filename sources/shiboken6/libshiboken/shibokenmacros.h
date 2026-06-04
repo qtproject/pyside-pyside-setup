@@ -6,7 +6,7 @@
 #define SHIBOKENMACROS_H
 
 // LIBSHIBOKEN_API macro is used for the public API symbols.
-#if defined _WIN32
+#ifdef _WIN32
 #  define LIBSHIBOKEN_EXPORT __declspec(dllexport)
 #  ifdef _MSC_VER
 #    define LIBSHIBOKEN_IMPORT __declspec(dllimport)

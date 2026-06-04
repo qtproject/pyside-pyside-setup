@@ -30,8 +30,8 @@
 #include <sstream>
 #include <string>
 
-#if defined(__APPLE__)
-#include <dlfcn.h>
+#ifdef __APPLE__
+#  include <dlfcn.h>
 #endif
 
 namespace {
@@ -385,7 +385,7 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
         || dealloc == SbkDeallocWrapperWithPrivateDtor
         || (pyType->tp_base->tp_flags & Py_TPFLAGS_HEAPTYPE) != 0;
 
-#if defined(__APPLE__)
+#ifdef __APPLE__
     // Just checking once that our assumptions are right.
     if (false) {
         void *p = PyType_GetSlot(pyType, Py_tp_dealloc);
@@ -656,7 +656,7 @@ static PyObject *_setupNew(PyObject *obSelf, PyTypeObject *subtype)
     int numBases = ((sotp && sotp->is_multicpp) ?
         Shiboken::getNumberOfCppBaseClasses(subtype) : 1);
     d->cptr = new void *[numBases];
-    std::memset(d->cptr, 0, sizeof(void *) *size_t(numBases));
+    std::memset(static_cast<void*>(d->cptr), 0, sizeof(void *) *size_t(numBases));
     d->hasOwnership = 1;
     d->containsCppWrapper = 0;
     d->validCppObject = 0;

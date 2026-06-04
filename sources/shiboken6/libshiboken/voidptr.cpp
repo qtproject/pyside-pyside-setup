@@ -139,10 +139,7 @@ PyObject *SbkVoidPtrObject_richcmp(PyObject *obj1, PyObject *obj2, int op)
             if (cptr1 != cptr2)
                 result = Py_True;
             break;
-        case Py_LT:
-        case Py_LE:
-        case Py_GT:
-        case Py_GE:
+        default:
             break;
         }
     }

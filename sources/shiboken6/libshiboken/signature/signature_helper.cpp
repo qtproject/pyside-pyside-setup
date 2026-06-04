@@ -119,11 +119,8 @@ static PyObject *_func_with_new_name(PyTypeObject *type,
      * XXX Maybe we can get rid of this, completely?
      */
     auto *obtype = reinterpret_cast<PyObject *>(type);
-    const size_t len = std::strlen(new_name);
-    auto *name = new char[len + 1];
-    std::strcpy(name, new_name);
     auto *new_meth = new PyMethodDef;
-    new_meth->ml_name = name;
+    new_meth->ml_name = strdup(new_name);
     new_meth->ml_meth = meth->ml_meth;
     new_meth->ml_flags = meth->ml_flags;
     new_meth->ml_doc = meth->ml_doc;

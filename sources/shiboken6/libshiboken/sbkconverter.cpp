@@ -255,7 +255,7 @@ void addPythonToCppValueConversion(SbkConverter *converter,
                                    PythonToCppFunc pythonToCppFunc,
                                    IsConvertibleToCppFunc isConvertibleToCppFunc)
 {
-    converter->toCppConversions.push_back(std::make_pair(isConvertibleToCppFunc, pythonToCppFunc));
+    converter->toCppConversions.emplace_back(std::make_pair(isConvertibleToCppFunc, pythonToCppFunc));
 }
 
 void prependPythonToCppValueConversion(SbkConverter *converter,
@@ -950,7 +950,7 @@ void SpecificConverter::toCpp(PyObject *pyIn, void *cppOut) const
         pythonToCppPointer(m_converter, pyIn, cppOut);
         break;
     case ReferenceConversion:
-        pythonToCppPointer(m_converter, pyIn, &cppOut);
+        pythonToCppPointer(m_converter, pyIn, static_cast<void*>(&cppOut));
         break;
     default:
         PyErr_SetString(PyExc_RuntimeError,

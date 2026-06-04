@@ -63,7 +63,7 @@ LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct)
     auto *modOrType = PyDict_GetItem(sysModules, modName);
     if (modOrType == nullptr) {
         PyErr_Format(PyExc_SystemError,
-                     "libshiboken: Error instantiating \"%s\": Module \"%U\" should already be in sys.modules",
+                     R"(libshiboken: Error instantiating "%s": Module "%U" should already be in sys.modules)",
                      typeStruct.fullName, modName.object());
         return nullptr;
     }

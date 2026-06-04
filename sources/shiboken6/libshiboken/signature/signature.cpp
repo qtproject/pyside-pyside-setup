@@ -377,7 +377,7 @@ static int PySide_BuildSignatureArgs(PyObject *obtype_mod, const char *signature
      * address of a string array. It will not be turned into a real
      * string list until really used by Python. This is quite optimal.
      */
-    AutoDecRef numkey(PyLong_FromVoidPtr(signatures));
+    AutoDecRef numkey(PyLong_FromVoidPtr(static_cast<void*>(signatures)));
     if (type_key.isNull() || numkey.isNull()
         || PyDict_SetItem(pyside_globals->arg_dict, type_key, numkey) < 0)
         return -1;

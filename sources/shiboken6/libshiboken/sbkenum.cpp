@@ -312,13 +312,13 @@ void setTypeConverter(PyTypeObject *type, SbkConverter *converter,
 
 SbkConverter *getConverter(SbkEnumType *type)
 {
-    SbkEnumTypePrivate *priv = PepType_SETP(reinterpret_cast<SbkEnumType *>(type));
+    SbkEnumTypePrivate *priv = PepType_SETP(type);
     return priv->converter;
 }
 
 SbkConverter *getFlagsConverter(SbkEnumType *type)
 {
-    SbkEnumTypePrivate *priv = PepType_SETP(reinterpret_cast<SbkEnumType *>(type));
+    SbkEnumTypePrivate *priv = PepType_SETP(type);
     return priv->flagsConverter;
 }
 

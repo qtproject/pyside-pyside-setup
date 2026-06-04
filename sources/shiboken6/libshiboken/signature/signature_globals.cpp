@@ -213,7 +213,7 @@ static int init_phase_2(safe_globals_struc *p, PyMethodDef *methods)
 ////////////////////////////////////////////////////////////////////////////
 // a stack trace for linux-like platforms
 #include <cstdio>
-#if defined(__GLIBC__)
+#ifdef __GLIBC__
 #  include <execinfo.h>
 #endif
 #include <signal.h>
@@ -229,7 +229,7 @@ static void handler(int sig) {
     // print out all the frames to stderr
 #endif
     std::fprintf(stderr, "Error: signal %d:\n", sig);
-#if defined(__GLIBC__)
+#ifdef __GLIBC__
     backtrace_symbols_fd(array, size, STDERR_FILENO);
 #endif
     exit(1);
