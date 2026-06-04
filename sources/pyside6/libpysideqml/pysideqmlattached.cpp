@@ -101,7 +101,7 @@ static QObject *attachedFactoryHelper(PyTypeObject *attachingType, QObject *o)
     auto *attachingTypeObj = reinterpret_cast<PyObject *>(attachingType);
     Shiboken::AutoDecRef pyResult(PyObject_CallMethodObjArgs(attachingTypeObj, pyMethodName,
                                                              attachingTypeObj /* self */,
-                                                             converter.toPython(&o),
+                                                             converter.toPython(static_cast<void*>(&o)),
                                                              nullptr));
     if (pyResult.isNull() || PyErr_Occurred()) {
         PyErr_Print();
@@ -115,7 +115,7 @@ static QObject *attachedFactoryHelper(PyTypeObject *attachingType, QObject *o)
     }
 
     QObject *result = nullptr;
-    converter.toCpp(pyResult.object(), &result);
+    converter.toCpp(pyResult.object(), static_cast<void*>(&result));
     return result;
 }
 

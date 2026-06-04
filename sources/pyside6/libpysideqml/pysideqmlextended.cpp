@@ -87,7 +87,7 @@ static QObject *extensionFactory(QObject *o)
     Shiboken::GilState gilState;
     Shiboken::Conversions::SpecificConverter converter("QObject");
     Q_ASSERT(converter);
-    PyObject *pyObj = converter.toPython(&o);
+    PyObject *pyObj = converter.toPython(static_cast<void*>(&o));
     Q_ASSERT(pyObj);
 
     // Search for the extension type and create an instance by invoking
@@ -119,7 +119,7 @@ static QObject *extensionFactory(QObject *o)
     }
 
     QObject *result = nullptr;
-    converter.toCpp(pyResult.object(), &result);
+    converter.toCpp(pyResult.object(), static_cast<void*>(&result));
     return result;
 }
 

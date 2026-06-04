@@ -30,12 +30,10 @@ using namespace Qt::StringLiterals;
 class QmlListPropertyPrivate : public PySidePropertyBase, public QmlListPropertyMixin
 {
 public:
-    QmlListPropertyPrivate(const QmlListPropertyPrivate &) = delete;
-    QmlListPropertyPrivate& operator=(const QmlListPropertyPrivate &) = delete;
-    QmlListPropertyPrivate(QmlListPropertyPrivate &&) = delete;
-    QmlListPropertyPrivate& operator=(QmlListPropertyPrivate &&) = delete;
+    Q_DISABLE_COPY_MOVE(QmlListPropertyPrivate)
 
     QmlListPropertyPrivate() : PySidePropertyBase(Type::ListProperty) {}
+    ~QmlListPropertyPrivate() override = default;
 
     void metaCall(PyObject *source, QMetaObject::Call call, void **args) override
     { handleMetaCall(source, call, args); }
@@ -322,7 +320,7 @@ QObject *QmlListPropertyPrivate::at(QQmlListProperty<QObject> *propList, qsizety
     if (PyErr_Occurred())
         PyErr_Print();
     else if (PyType_IsSubtype(Py_TYPE(retVal), elementType))
-        Shiboken::Conversions::pythonToCppPointer(qobjectType, retVal, &result);
+        Shiboken::Conversions::pythonToCppPointer(qobjectType, retVal, static_cast<void*>(&result));
     return result;
 }
 

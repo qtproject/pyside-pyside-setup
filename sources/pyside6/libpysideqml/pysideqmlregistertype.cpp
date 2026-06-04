@@ -404,7 +404,7 @@ QObject *SingletonQObjectCreationBase::handleReturnValue(PyObject *retVal)
     }
 
     QObject *obj = nullptr;
-    Shiboken::Conversions::pythonToCppPointer(qobjType, retVal, &obj);
+    Shiboken::Conversions::pythonToCppPointer(qobjType, retVal, static_cast<void*>(&obj));
     return obj;
 }
 
@@ -558,7 +558,7 @@ static int qmlRegisterSingletonType(PyObject *pyObj, const ImportData &importDat
                 }
 
                 QJSValue *val = nullptr;
-                Conversions::pythonToCppPointer(qjsvalueType, retVal, &val);
+                Conversions::pythonToCppPointer(qjsvalueType, retVal, static_cast<void*>(&val));
 
                 Py_INCREF(retVal);
 
@@ -638,7 +638,7 @@ int qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMa
 
 } // namespace PySide::Qml
 
-enum class RegisterMode {
+enum class RegisterMode : std::uint8_t {
     Normal,
     Singleton
 };
