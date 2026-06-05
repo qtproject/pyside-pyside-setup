@@ -774,6 +774,7 @@ missing_optional_return = {
     "PySide6.QtWidgets.QGridLayout.itemAtPosition",
     "PySide6.QtWidgets.QGridLayout.takeAt",
     "PySide6.QtWidgets.QLayout.itemAt",
+    "PySide6.QtWidgets.QLayout.menuBar",
     "PySide6.QtWidgets.QLayout.replaceWidget",
     "PySide6.QtWidgets.QLayout.takeAt",
     "PySide6.QtWidgets.QListWidget.itemAt",

@@ -1237,7 +1237,7 @@
       <modify-argument index="this">
         <parent index="return" action="add"/>
       </modify-argument>
-      <modify-argument index="return">
+      <modify-argument index="return" pyi-type="Optional[QWidget]">
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
