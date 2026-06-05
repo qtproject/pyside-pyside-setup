@@ -244,7 +244,7 @@
     </modify-function>
 
     <modify-function signature="layout()">
-      <modify-argument index="return">
+      <modify-argument index="return" pyi-type="Optional[QLayout]">
         <define-ownership class="target" owner="default"/>
       </modify-argument>
     </modify-function>
