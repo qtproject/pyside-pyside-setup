@@ -61,6 +61,12 @@ class TestMetaObjectDump(unittest.TestCase):
         self._examples.append((enums_sample, enums_sample_baseline, cmd))
         print(msg_regenerate(cmd, enums_sample_baseline))
 
+        property_sample = self._dir / "propertysample.py"
+        property_sample_baseline = self._dir / "baseline_propertysample.json"
+        cmd = metaobjectdump_cmd_root + [os.fspath(property_sample)]
+        self._examples.append((property_sample, property_sample_baseline, cmd))
+        print(msg_regenerate(cmd, property_sample_baseline))
+
     def testMetaObjectDump(self):
         self.assertTrue(self._examples_dir.is_dir())
         self.assertTrue(self._metaobjectdump_tool.is_file())

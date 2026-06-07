@@ -100,11 +100,21 @@ def _python_to_cpp_type(type: str) -> str:
     return c if c else type
 
 
+def _bool_value(node: ast.expr) -> bool | None:
+    """Return the value of a boolean literal node, or None if it is not a
+       boolean literal."""
+    if isinstance(node, ast.Constant) and isinstance(node.value, bool):
+        return node.value
+    return None
+
+
 def _parse_property_kwargs(keywords: list[ast.keyword], prop: PropertyEntry):
     """Parse keyword arguments of @Property"""
     for k in keywords:
         if k.arg == "notify":
             prop["notify"] = _name(k.value)
+        elif k.arg == "constant" and _bool_value(k.value):
+            prop["constant"] = True
 
 
 def _parse_assignment(node: ast.Assign) -> tuple[str | None, ast.AST | None]:
