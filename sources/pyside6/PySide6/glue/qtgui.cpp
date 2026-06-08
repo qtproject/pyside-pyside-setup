@@ -791,10 +791,9 @@ if (_i) {
 
 // @snippet qstandarditemmodel-clear
 Shiboken::BindingManager &bm = Shiboken::BindingManager::instance();
-SbkObject *pyRoot = bm.retrieveWrapper(%CPPSELF.invisibleRootItem());
-if (pyRoot) {
-  Shiboken::Object::destroy(pyRoot, %CPPSELF.invisibleRootItem());
-}
+// PYSIDE-56, invalidate root item
+if (SbkObject *pyRoot = bm.retrieveWrapper(%CPPSELF.invisibleRootItem()))
+    Shiboken::Object::destroy(pyRoot, %CPPSELF.invisibleRootItem());
 
 for (int r=0, r_max = %CPPSELF.rowCount(); r < r_max; r++) {
   QList<QStandardItem *> ri = %CPPSELF.takeRow(0);
