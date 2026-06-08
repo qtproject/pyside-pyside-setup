@@ -2040,16 +2040,21 @@ std::string info(SbkObject *self)
          "reference count... " << Py_REFCNT(reinterpret_cast<PyObject *>(self)) << '\n';
 
     if (self->d->parentInfo && self->d->parentInfo->parent) {
-        s << "parent............ ";
-        Shiboken::AutoDecRef parent(PyObject_Str(reinterpret_cast<PyObject *>(self->d->parentInfo->parent)));
-        s << String::toCString(parent) << '\n';
+        auto *obParent = reinterpret_cast<PyObject *>(self->d->parentInfo->parent);
+        s << "parent............ <" << Py_TYPE(obParent)->tp_name << " at " << obParent << ">\n";
     }
 
     if (self->d->parentInfo && !self->d->parentInfo->children.empty()) {
-        s << "children.......... ";
-        for (SbkObject *sbkChild : self->d->parentInfo->children) {
-            Shiboken::AutoDecRef child(PyObject_Str(reinterpret_cast<PyObject *>(sbkChild)));
-            s << String::toCString(child) << ' ';
+        const auto &children = self->d->parentInfo->children;
+        s << "children.......... [" << children.size() << "] ";
+        int n = 0;
+        for (SbkObject *sbkChild : children) {
+            auto *obChild = reinterpret_cast<PyObject *>(sbkChild);
+            if (n++ > 5) {
+                s << "...";
+                break;
+            }
+            s << '<' << Py_TYPE(obChild)->tp_name << " at " << obChild << "> ";
         }
         s << '\n';
     }
@@ -2065,8 +2070,7 @@ std::string info(SbkObject *self)
                 s << '"' << p.first << "\" => ";
                 lastKey = p.first;
             }
-            Shiboken::AutoDecRef obj(PyObject_Str(p.second));
-            s << String::toCString(obj) << ' ';
+            s << '<' << Py_TYPE(p.second)->tp_name << " at " << p.second << "> ";
         }
         s << '\n';
     }
