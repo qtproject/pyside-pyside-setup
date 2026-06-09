@@ -798,6 +798,8 @@ missing_optional_return = {
     "PySide6.QtWidgets.QTreeWidget.itemAt",
     "PySide6.QtWidgets.QTreeWidget.takeTopLevelItem",
     "PySide6.QtWidgets.QTreeWidget.topLevelItem",
+    "PySide6.QtWidgets.QTreeWidgetItem.takeChild",
+    "PySide6.QtWidgets.QTreeWidgetItem.parent",
     "PySide6.QtWidgets.QWidget.childAt",
     "PySide6.QtWidgets.QWidget.find",
     "PySide6.QtWidgets.QWidget.focusProxy",
