@@ -99,14 +99,20 @@
     </add-function>
 
     <add-function signature="QmlElement(PyObject*)" return-type="PyObject*">
+        <modify-argument index="1" pyi-type="_QmlType"/>
+        <modify-argument index="return" pyi-type="_QmlType"/>
         <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlelement"/>
     </add-function>
 
     <add-function signature="QmlAnonymous(PyObject*)" return-type="PyObject*">
+        <modify-argument index="1" pyi-type="_QmlType"/>
+        <modify-argument index="return" pyi-type="_QmlType"/>
         <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlanonymous"/>
     </add-function>
 
     <add-function signature="QmlSingleton(PyObject*)" return-type="PyObject*">
+        <modify-argument index="1" pyi-type="_QmlType"/>
+        <modify-argument index="return" pyi-type="_QmlType"/>
         <inject-code class="target" file="../glue/qtqml.cpp" snippet="qmlsingleton"/>
     </add-function>
 

@@ -57,6 +57,7 @@ NoneType = type(None)
 PlaceholderType = TypeVar("PlaceholderType")
 
 _SlotFunc = TypeVar("_SlotFunc")
+_QmlType  = TypeVar("_QmlType")
 
 _S = TypeVar("_S")
 

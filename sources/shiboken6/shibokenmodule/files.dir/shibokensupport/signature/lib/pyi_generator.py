@@ -168,6 +168,8 @@ class Formatter(Writer):
             source = source.replace("~PlaceholderType", "PlaceholderType")
         if "~_SlotFunc" in source:
             source = source.replace("~_SlotFunc", "_SlotFunc")
+        if "~_QmlType" in source:
+            source = source.replace("~_QmlType", "_QmlType")
         # Replace all "NoneType" strings by "None" which is a typing convention.
         return source.replace("NoneType", "None")
 
@@ -409,6 +411,9 @@ def generate_pyi(import_name, outpath, options):
                             @typing.overload
                             def __ror__(self, other: Qt.Key) -> QKeyCombination: ...
                     """))
+                elif import_name == "PySide6.QtQml":
+                    wr.print("_QmlType  = typing.TypeVar(\"_QmlType\")")
+                    wr.print()
                 wr.print()
             else:
                 wr.print(line)
