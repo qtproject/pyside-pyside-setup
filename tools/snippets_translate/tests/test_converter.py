@@ -373,6 +373,10 @@ def test_functions():
     assert st("return QModelIndex();") == "return QModelIndex()"
 
 
+def test_special_functions():
+    assert st("widget.raise()") == "widget.raise_()"
+
+
 def test_foreach():
     assert st("foreach (item, selected) {") == "for item in selected:"
     assert st("foreach (const QVariant &v, iterable) {") == "for v in iterable:"

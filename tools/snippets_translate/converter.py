@@ -161,6 +161,9 @@ def snippet_translate(x):
     if "throw" in x:
         x = handle_keywords(x, "throw", "raise")
 
+    # Special functions
+    x = x.replace(".raise()", ".raise_()")
+
     switch_match = SWITCH_PATTERN.match(x)
     if switch_match:
         indent = switch_match.group(1)
