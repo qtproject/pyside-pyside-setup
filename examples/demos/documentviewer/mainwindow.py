@@ -28,6 +28,14 @@ behavior when hovering over widgets.
 """
 
 
+def getFileUrl(mime):
+    if mime.hasUrls():
+        for url in mime.urls():
+            if url.isLocalFile():
+                return url
+    return None
+
+
 class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
@@ -71,6 +79,18 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         self.saveSettings()
+
+    def dragEnterEvent(self, event):
+        if getFileUrl(event.mimeData()):
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event):
+        event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        if fileUrl := getFileUrl(event.mimeData()):
+            if self.openFile(fileUrl.toLocalFile()):
+                event.acceptProposedAction()
 
     def changeEvent(self, event):
         match event.type():
