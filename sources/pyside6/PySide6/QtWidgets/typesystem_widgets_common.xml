@@ -867,7 +867,8 @@
       </modify-argument>
     </modify-function>
 
-    <add-function signature="addAction(QString&amp;@text@,PyObject*,QKeySequence&amp;@shortcut@)">
+    <add-function signature="addAction(QString&amp;@text@,PyObject*@callable@,QKeySequence&amp;@shortcut@)">
+      <modify-argument index="2" pyi-type="collections.abc.Callable[[], typing.Any]"/>
       <modify-argument index="3">
         <replace-default-expression with="0"/>
       </modify-argument>
@@ -2236,6 +2237,7 @@
     </modify-function>
     <add-function signature="addAction(QString&amp;@text@,PyObject*@callable@)"
                   return-type="QAction*">
+      <modify-argument index="2" pyi-type="collections.abc.Callable[[], typing.Any]"/>
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -2250,6 +2252,7 @@
     </modify-function>
     <add-function signature="addAction(QIcon&amp;@icon@,QString&amp;@text@,PyObject*@callable@)"
                   return-type="QAction*">
+      <modify-argument index="3" pyi-type="collections.abc.Callable[[], typing.Any]"/>
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -2264,6 +2267,7 @@
     </modify-function>
     <add-function signature="addAction(QString&amp;@text@,QKeySequence&amp;@shortcut@,PyObject*@callable@)"
                   return-type="QAction*">
+      <modify-argument index="3" pyi-type="collections.abc.Callable[[], typing.Any]"/>
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
@@ -2278,6 +2282,7 @@
     </modify-function>
     <add-function signature="addAction(QIcon&amp;@icon@,QString&amp;@text@,QKeySequence&amp;@shortcut@,PyObject*@callable@)"
                   return-type="QAction*">
+      <modify-argument index="4" pyi-type="collections.abc.Callable[[], typing.Any]"/>
       <modify-argument index="return">
         <parent index="this" action="add"/>
       </modify-argument>
