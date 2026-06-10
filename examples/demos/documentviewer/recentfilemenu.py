@@ -19,6 +19,7 @@ class RecentFileMenu(QMenu):
     @Slot()
     def updateList(self):
         for a in self.actions():
+            self.removeAction(a)
             del a
 
         if not self._recentFiles:

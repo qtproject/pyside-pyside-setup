@@ -58,10 +58,6 @@ class RecentFiles(QObject):
     def addFile(self, fileName):
         self._addFile(fileName, EmitPolicy.EmitWhenChanged)
 
-    def removeFile(self, fileName):
-        idx = self._files.find(fileName)
-        self._removeFile(idx, RemoveReason.Other)
-
     @Slot()
     def clear(self):
         if self.isEmpty():
@@ -81,15 +77,15 @@ class RecentFiles(QObject):
         while i < len(self._files):
             file = self._files[i]
             if not testFileAccess(file):
-                self._removeFile(file, RemoveReason.Other)
+                self._removeFile(i, RemoveReason.Other)
             elif file == fileName:
-                self._removeFile(file, RemoveReason.Duplicate)
+                self._removeFile(i, RemoveReason.Duplicate)
             else:
                 i += 1
 
         # Cut tail
         while len(self._files) > self._maxFiles:
-            self.removeFile((len(self._files) - 1), RemoveReason.Other)
+            self._removeFile(len(self._files) - 1, RemoveReason.Other)
 
         self._files.insert(0, fileName)
 
@@ -119,10 +115,7 @@ class RecentFiles(QObject):
         if len(self._files) != c:
             self.countChanged.emit(len(self._files))
 
-    def _removeFile(self, p, reason):
-        index = p
-        if isinstance(p, str):
-            index = self._files.index(p) if p in self._files else -1
+    def _removeFile(self, index, reason):
         if index < 0 or index >= len(self._files):
             return
         del self._files[index]
