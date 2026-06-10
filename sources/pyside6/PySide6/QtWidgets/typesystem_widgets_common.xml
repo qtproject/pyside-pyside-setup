@@ -2391,7 +2391,7 @@
       <inject-code class="target" position="end" file="../glue/qtcore.cpp" snippet="qstring-return"/>
     </modify-function>
     <modify-function signature="validate(QString &amp;,int &amp;)const">
-      <modify-argument index="return">
+      <modify-argument index="return" pyi-type="tuple[PySide6.QtGui.QValidator.State, str, int]">
         <replace-type modified-type="PyObject"/>
         <conversion-rule class="native">
             <insert-template name="validator_conversionrule"/>
