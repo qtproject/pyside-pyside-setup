@@ -616,26 +616,6 @@ for (int i = 0, count = %CPPSELF.count(); i < count; ++i) {
 %CPPSELF.addAction(%1);
 // @snippet qlineedit-addaction
 
-// addAction(QIcon,QString,const QObject*,const char*,Qt::ConnectionType)
-// @snippet qwidget-addaction-1
-QAction *action = %CPPSELF.addAction(%1, %2);
-%PYARG_0 = %CONVERTTOPYTHON[QAction *](action);
-Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0,
-    "connect", "OsO",
-    %PYARG_0, SIGNAL(triggered()), %PYARG_3)
-);
-// @snippet qwidget-addaction-1
-
-// addAction(QString,const QObject*,const char*,Qt::ConnectionType)
-// @snippet qwidget-addaction-2
-QAction *action = %CPPSELF.addAction(%1);
-%PYARG_0 = %CONVERTTOPYTHON[QAction *](action);
-Shiboken::AutoDecRef result(PyObject_CallMethod(%PYARG_0,
-    "connect", "OsO",
-    %PYARG_0, SIGNAL(triggered()), %PYARG_2)
-);
-// @snippet qwidget-addaction-2
-
 // @snippet qtoolbar-clear
 QList<PyObject *> lst;
 Shiboken::BindingManager &bm = Shiboken::BindingManager::instance();
