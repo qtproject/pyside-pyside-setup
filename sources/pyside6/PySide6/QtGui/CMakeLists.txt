@@ -1,9 +1,7 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtGui)
 qt_wrap_cpp(QPYTEXTOBJECT_MOC "${PYSIDE_PACKAGE_SOURCE_DIR}/qpytextobject.h")
-
 
 set(QtGui_DROPPED_ENTRIES)
 

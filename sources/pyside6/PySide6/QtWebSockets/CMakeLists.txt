@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtWebSockets)
-
 set(QtWebSockets_SRC
 ${QtWebSockets_GEN_DIR}/qmaskgenerator_wrapper.cpp
 ${QtWebSockets_GEN_DIR}/qwebsocket_wrapper.cpp

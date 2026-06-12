@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtWebEngineCore)
-
 set(QtWebEngineCore_static_sources
     "${CMAKE_CURRENT_SOURCE_DIR}/glue/webenginepage_functors.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/glue/webenginepage_functors.h"

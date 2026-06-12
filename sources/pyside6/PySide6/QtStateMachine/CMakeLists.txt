@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtStateMachine)
-
 set(QtStateMachine_SRC
 ${QtStateMachine_GEN_DIR}/qabstractstate_wrapper.cpp
 ${QtStateMachine_GEN_DIR}/qabstracttransition_wrapper.cpp

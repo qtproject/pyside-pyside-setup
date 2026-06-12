@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtCore)
-
 set(CMAKE_AUTOMOC ON)
 
 set(QtCore_DROPPED_ENTRIES )

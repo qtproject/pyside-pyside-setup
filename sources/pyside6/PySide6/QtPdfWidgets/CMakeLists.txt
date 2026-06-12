@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtPdfWidgets)
-
 set(QtPdfWidgets_SRC
 ${QtPdfWidgets_GEN_DIR}/qpdfpageselector_wrapper.cpp
 ${QtPdfWidgets_GEN_DIR}/qpdfview_wrapper.cpp

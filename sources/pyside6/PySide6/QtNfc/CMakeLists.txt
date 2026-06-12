@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtNfc)
-
 set(QtNfc_SRC
     ${QtNfc_GEN_DIR}/qndeffilter_record_wrapper.cpp
     ${QtNfc_GEN_DIR}/qndeffilter_wrapper.cpp

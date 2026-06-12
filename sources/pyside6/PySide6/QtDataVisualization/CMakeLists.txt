@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtDataVisualization)
-
 list(APPEND QtDataVisualization_src "${CMAKE_CURRENT_SOURCE_DIR}/qtdatavisualization_helper.cpp")
 
 set(QtDataVisualization_SRC

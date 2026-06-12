@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(Qt3DCore)
-
 set(Qt3DCore_SRC
 ${Qt3DCore_GEN_DIR}/qsharedpointer_qaspectjob_wrapper.cpp
 ${Qt3DCore_GEN_DIR}/qsharedpointer_qbackendnodemapper_wrapper.cpp

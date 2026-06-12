@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtSpatialAudio)
-
 set(QtSpatialAudio_SRC
 ${QtSpatialAudio_GEN_DIR}/qambientsound_wrapper.cpp
 ${QtSpatialAudio_GEN_DIR}/qaudioengine_wrapper.cpp

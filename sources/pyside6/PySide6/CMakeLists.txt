@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(pyside6)
-
 # Configure include based on platform
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in"
                "${CMAKE_CURRENT_BINARY_DIR}/__init__.py" @ONLY)

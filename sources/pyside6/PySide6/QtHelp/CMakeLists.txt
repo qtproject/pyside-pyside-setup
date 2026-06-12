@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtHelp)
-
 set(QtHelp_SRC
 ${QtHelp_GEN_DIR}/qcompressedhelpinfo_wrapper.cpp
 ${QtHelp_GEN_DIR}/qhelpcontentitem_wrapper.cpp

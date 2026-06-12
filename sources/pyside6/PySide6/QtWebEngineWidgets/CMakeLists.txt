@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtWebEngineWidgets)
-
 set(QtWebEngineWidgets_SRC
 ${QtWebEngineWidgets_GEN_DIR}/qwebengineview_wrapper.cpp
 # module is always needed

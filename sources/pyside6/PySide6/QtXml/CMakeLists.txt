@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtXml)
-
 set(QtXml_SRC
 ${QtXml_GEN_DIR}/qdomattr_wrapper.cpp
 ${QtXml_GEN_DIR}/qdomcdatasection_wrapper.cpp

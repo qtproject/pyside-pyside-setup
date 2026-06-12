@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(Qt3DAnimation)
-
 set(Qt3DAnimation_SRC
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_qabstractanimation_wrapper.cpp

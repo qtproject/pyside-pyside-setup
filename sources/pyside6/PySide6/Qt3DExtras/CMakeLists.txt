@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(Qt3DExtras)
-
 set(Qt3DExtras_SRC
 ${Qt3DExtras_GEN_DIR}/qt3dextras_wrapper.cpp
 ${Qt3DExtras_GEN_DIR}/qt3dextras_qabstractcameracontroller_inputstate_wrapper.cpp

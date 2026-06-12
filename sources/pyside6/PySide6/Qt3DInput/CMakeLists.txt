@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(Qt3DInput)
-
 set(Qt3DInput_SRC
 ${Qt3DInput_GEN_DIR}/qt3dinput_wrapper.cpp
 ${Qt3DInput_GEN_DIR}/qt3dinput_qabstractactioninput_wrapper.cpp

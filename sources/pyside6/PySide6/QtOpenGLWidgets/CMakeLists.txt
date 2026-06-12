@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtOpenGLWidgets)
-
 set(QtOpenGLWidgets_SRC
 ${QtOpenGLWidgets_GEN_DIR}/qopenglwidget_wrapper.cpp
 # module is always needed

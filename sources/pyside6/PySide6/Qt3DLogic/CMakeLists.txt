@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(Qt3DLogic)
-
 set(Qt3DLogic_SRC
 ${Qt3DLogic_GEN_DIR}/qt3dlogic_wrapper.cpp
 ${Qt3DLogic_GEN_DIR}/qt3dlogic_qframeaction_wrapper.cpp

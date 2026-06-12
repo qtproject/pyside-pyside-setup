@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtWidgets)
-
 set(QtWidgets_SRC
 ${QtWidgets_GEN_DIR}/qaccessiblewidget_wrapper.cpp
 ${QtWidgets_GEN_DIR}/qabstractbutton_wrapper.cpp

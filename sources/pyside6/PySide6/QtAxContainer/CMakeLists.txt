@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtAxContainer)
-
 set(QtAxContainer_SRC
 ${QtAxContainer_GEN_DIR}/qaxbase_wrapper.cpp
 ${QtAxContainer_GEN_DIR}/qaxbaseobject_wrapper.cpp

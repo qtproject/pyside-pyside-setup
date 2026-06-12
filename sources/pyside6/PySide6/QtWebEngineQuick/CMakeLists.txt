@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtWebEngineQuick)
-
 set(QtWebEngineQuick_SRC
 ${QtWebEngineQuick_GEN_DIR}/qquickwebenginedownloadrequest_wrapper.cpp
 ${QtWebEngineQuick_GEN_DIR}/qquickwebengineprofile_wrapper.cpp

@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtQml)
-
 qt_wrap_cpp(QPYQMLPARSERSTATUS_MOC "${PYSIDE_PACKAGE_SOURCE_DIR}/qpyqmlparserstatus.h")
 qt_wrap_cpp(QPYQMLPROPERTYVALUESOURCE_MOC "${PYSIDE_PACKAGE_SOURCE_DIR}/qpyqmlpropertyvaluesource.h")
 

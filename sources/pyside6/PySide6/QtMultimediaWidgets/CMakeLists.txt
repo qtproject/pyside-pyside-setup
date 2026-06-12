@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtMultimediaWidgets)
-
 set(QtMultimediaWidgets_SRC
 ${QtMultimediaWidgets_GEN_DIR}/qgraphicsvideoitem_wrapper.cpp
 ${QtMultimediaWidgets_GEN_DIR}/qvideowidget_wrapper.cpp

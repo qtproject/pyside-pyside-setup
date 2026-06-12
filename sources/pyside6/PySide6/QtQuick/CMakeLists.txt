@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtQuick)
-
 set(QtQuick_DROPPED_ENTRIES)
 
 set(QtQuick_registerType "${CMAKE_CURRENT_SOURCE_DIR}/pysidequickregistertype.cpp")

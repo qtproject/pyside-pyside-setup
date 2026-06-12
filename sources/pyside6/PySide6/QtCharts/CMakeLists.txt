@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtCharts)
-
 set(QtCharts_SRC
 ${QtCharts_GEN_DIR}/qabstractaxis_wrapper.cpp
 ${QtCharts_GEN_DIR}/qabstractbarseries_wrapper.cpp

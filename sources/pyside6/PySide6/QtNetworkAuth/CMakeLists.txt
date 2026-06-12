@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtNetworkAuth)
-
 set(QtNetworkAuth_SRC
 ${QtNetworkAuth_GEN_DIR}/qabstractoauth_wrapper.cpp
 ${QtNetworkAuth_GEN_DIR}/qabstractoauth2_wrapper.cpp

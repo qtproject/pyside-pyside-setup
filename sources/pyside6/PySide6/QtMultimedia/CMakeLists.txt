@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtMultimedia)
-
 set(QtMultimedia_SRC
 ${QtMultimedia_GEN_DIR}/qabstractvideobuffer_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qabstractvideobuffer_mapdata_wrapper.cpp

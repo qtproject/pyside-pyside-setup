@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtPdf)
-
 set(QtPdf_SRC
 ${QtPdf_GEN_DIR}/qpdfbookmarkmodel_wrapper.cpp
 ${QtPdf_GEN_DIR}/qpdfdocument_wrapper.cpp

@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtSql)
-
 set(QtSql_SRC
 ${QtSql_GEN_DIR}/qsql_wrapper.cpp
 ${QtSql_GEN_DIR}/qsqldatabase_wrapper.cpp

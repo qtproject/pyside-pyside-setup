@@ -1,8 +1,6 @@
 # Copyright (C) 2024 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtWebView)
-
 set(QtWebView_Src
 ${QtWebView_GEN_DIR}/qtwebview_wrapper.cpp
 ${QtWebView_GEN_DIR}/qwebview_wrapper.cpp

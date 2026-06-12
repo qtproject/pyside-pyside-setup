@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(apiextractor)
-
 cmake_minimum_required(VERSION 3.25)
 cmake_policy(VERSION 3.22)
 

@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtTextToSpeech)
-
 set(QtTextToSpeech_SRC
 ${QtTextToSpeech_GEN_DIR}/qtexttospeech_wrapper.cpp
 ${QtTextToSpeech_GEN_DIR}/qtexttospeechengine_wrapper.cpp

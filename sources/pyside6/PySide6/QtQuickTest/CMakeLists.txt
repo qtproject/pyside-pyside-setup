@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtQuickTest)
-
 set (QtQuickTest_DROPPED_ENTRIES)
 
 set(QtQuickTest_SRC

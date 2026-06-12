@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtGraphs)
-
 set(QtGraphs_DROPPED_ENTRIES)
 
 list(APPEND QtGraphs_src "${CMAKE_CURRENT_SOURCE_DIR}/qtgraphs_helper.cpp")

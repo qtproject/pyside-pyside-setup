@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtSvg)
-
 set(QtSvg_SRC
 ${QtSvg_GEN_DIR}/qsvggenerator_wrapper.cpp
 ${QtSvg_GEN_DIR}/qsvgrenderer_wrapper.cpp

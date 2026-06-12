@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtDBus)
-
 set(QtDBus_SRC
     ${QtDBus_GEN_DIR}/qdbus_wrapper.cpp
     ${QtDBus_GEN_DIR}/qdbusabstractadaptor_wrapper.cpp

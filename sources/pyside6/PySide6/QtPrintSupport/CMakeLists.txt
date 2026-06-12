@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtPrintSupport)
-
 set(QtPrintSupport_SRC
 ${QtPrintSupport_GEN_DIR}/qabstractprintdialog_wrapper.cpp
 ${QtPrintSupport_GEN_DIR}/qpagesetupdialog_wrapper.cpp

@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtTest)
-
 set(QtTest_SRC
 ${QtTest_GEN_DIR}/qtest_pysideqtoucheventsequence_wrapper.cpp
 ${QtTest_GEN_DIR}/qabstractitemmodeltester_wrapper.cpp

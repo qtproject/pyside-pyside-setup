@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtHttpServer)
-
 set(QtHttpServer_SRC
     ${QtHttpServer_GEN_DIR}/qabstracthttpserver_wrapper.cpp
     ${QtHttpServer_GEN_DIR}/qhttpserverconfiguration_wrapper.cpp

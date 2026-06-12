@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtNetwork)
-
 set(QtNetwork_DROPPED_ENTRIES )
 
 set(QtNetwork_SRC

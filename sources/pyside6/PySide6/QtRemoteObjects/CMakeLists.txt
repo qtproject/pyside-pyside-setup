@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtRemoteObjects)
-
 set(QtRemoteObjects_SRC
 ${QtRemoteObjects_GEN_DIR}/qabstractitemmodelreplica_wrapper.cpp
 ${QtRemoteObjects_GEN_DIR}/qconnectionabstractserver_wrapper.cpp

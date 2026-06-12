@@ -1,8 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-project(QtWebChannel)
-
 set(QtWebChannel_SRC
 ${QtWebChannel_GEN_DIR}/qwebchannel_wrapper.cpp
 ${QtWebChannel_GEN_DIR}/qwebchannelabstracttransport_wrapper.cpp
