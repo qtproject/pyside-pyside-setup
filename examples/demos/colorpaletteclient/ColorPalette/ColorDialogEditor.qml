@@ -26,9 +26,8 @@ Popup {
     function createNewColor() {
         newColor = true
         colorNameField.text = "cute green"
-        colorRGBField.text = "#41cd52"
+        currentColor = Qt.color("#41cd52")
         colorPantoneField.text = "PMS 802C"
-        currentColor = colorRGBField.text
         colorDialog.selectedColor = currentColor
         open()
     }
@@ -36,9 +35,10 @@ Popup {
     function updateColor(data) {
         newColor = false
         colorNameField.text = data.name
-        currentColor = data.color
+        currentColor = Qt.color(data.color)
         colorPantoneField.text = data.pantone_value
         colorId = data.id
+        colorDialog.selectedColor = currentColor
         open()
     }
 
