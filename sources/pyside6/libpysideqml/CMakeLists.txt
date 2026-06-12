@@ -6,6 +6,7 @@ find_package(Qt6 COMPONENTS Core CorePrivate Qml QmlPrivate)
 set(libpysideqml_libraries Qt::Core Qt::CorePrivate Qt::Qml Qt::QmlPrivate)
 
 set(libpysideqml_HEADERS # installed below
+    pysideautoproperties.h
     pysidechange.h
     pysidecomputed_p.h
     pysideeffect_p.h
@@ -27,6 +28,7 @@ set(libpysideqml_HEADERS # installed below
 )
 
 set(libpysideqml_SRC
+    pysideautoproperties.cpp
     pysidechange.cpp
     pysidecomputed.cpp
     pysideeffect.cpp

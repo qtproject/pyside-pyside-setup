@@ -44,6 +44,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/generate_pyi.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/generate_pyi.py" COPYONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/deprecated.py"
                "${CMAKE_CURRENT_BINARY_DIR}/support/deprecated.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/support/auto_property_helper.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/support/auto_property_helper.py" COPYONLY)
 
 # Additional (non-Qt) modules implemented in PySide only
 foreach(mod IN LISTS PURE_PYTHON_MODULES)

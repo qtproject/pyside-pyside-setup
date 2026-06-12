@@ -151,3 +151,180 @@ QML:
     // Automatically re-evaluates whenever price or quantity changes
     Text { text: "Total: " + cart.total }
     Button { onClicked: cart.price += 1 }
+
+The @effect decorator
+=====================
+
+``@effect`` marks a method as a side effect that runs whenever any of the
+named properties changes. Unlike ``@watch``, an effect does not receive a
+:class:`Change`; it is simply called with ``self`` so it can react to the new
+state, for example by updating a widget or writing a log entry.
+
+.. decorator:: effect(*property_names)
+
+    :param str property_names: the names of the properties that trigger this
+        effect. At least one name is required.
+
+    Returns a decorator that registers the method as an effect of
+    *property_names*. The method is invoked as ``method(self)`` after any of
+    those properties changes.
+
+The effect is wired up by the ``@auto_properties`` class decorator.
+
+Register the type with ``@QmlElement`` so QML can instantiate it and write
+``value``; the ``@effect`` method then runs on the Python side.
+
+Python::
+
+    from PySide6.QtCore import QObject
+    from PySide6.QtQml import QmlElement
+    from PySide6.QtQmlFeatures import effect, auto_properties
+
+    QML_IMPORT_NAME = "Shop"
+    QML_IMPORT_MAJOR_VERSION = 1
+
+    @QmlElement
+    @auto_properties
+    class Item(QObject):
+        def __init__(self, parent=None):
+            super().__init__(parent)
+            self.value = 0
+
+        @effect("value")
+        def on_value_changed(self):
+            print(f"value is now {self.value}")
+
+QML:
+
+.. code-block:: javascript
+
+    Item {
+        id: item
+        // Each slider move writes 'value' from QML; the @effect method
+        // then runs on the Python side, printing "value is now <n>".
+        Slider { onValueChanged: item.value = value }
+    }
+
+An effect that lists several properties runs once for each change to any of
+them.
+
+.. _watch-vs-effect:
+
+Comparison: ``@watch`` vs ``@effect``
+--------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 35 35
+
+   * -
+     - ``@watch``
+     - ``@effect``
+   * - Properties watched
+     - One per decorator (stack to watch more)
+     - Many, listed in a single decorator call
+   * - Method signature
+     - ``(self, change: Change)``
+     - ``(self)``
+   * - Receives old/new values
+     - Yes — via :class:`Change`
+     - No
+
+Use ``@watch`` when you need the before/after values; use ``@effect`` when you
+only need to react to the new state, for example to persist settings or update
+a derived value that does not need :class:`Change` details.
+
+The @auto_properties decorator
+==============================
+
+``@auto_properties`` is a class decorator that ties everything together. It
+makes a :class:`~PySide6.QtCore.QObject` subclass fully reactive *and*
+QML bindable: every reactive member becomes a real
+:class:`~PySide6.QtCore.Property` (a ``Q_PROPERTY``) with a change-notification
+signal, and every ``@watch``, ``@computed``, and ``@effect`` observer is wired
+so its callback runs as a side effect of a property change, including a
+change written from QML.
+
+.. decorator:: auto_properties
+
+    Class decorator for a :class:`~PySide6.QtCore.QObject` subclass. Returns
+    the same class, augmented in place. Raises :class:`TypeError` if applied to
+    a class that is not derived from :class:`~PySide6.QtCore.QObject`.
+
+It recognises three sources of reactive state on the class:
+
+* **Plain assignments in** ``__init__``. For every ``self.<name> = <value>``
+  it builds a property ``<name>`` backed by a private attribute, together with
+  a ``<name>Changed`` signal.
+* **Native Python** ``@property`` **declarations** are converted into a
+  :class:`~PySide6.QtCore.Property`, reusing your getter and setter and adding a
+  ``<name>Changed`` signal. A getter-only ``@property`` becomes a read-only
+  property: writing it (including from QML) raises, and no signal is created.
+* **Existing** :class:`~PySide6.QtCore.Property` **declarations** are left exactly
+  as you declared them. Their setter is wrapped only when a ``@watch``,
+  ``@effect``, or ``@computed`` refers to the property, so the observer
+  callbacks run on change; the notify signal stays the one you declared.
+
+The Qt type of a generated or converted property is inferred so that QML sees
+a precise type wherever possible: built-in Python types map to their Qt
+counterparts (``int``, ``float`` -> ``double``, ``bool``, ``str`` ->
+``QString``), ``list`` and ``dict`` become ``QVariantList`` and ``QVariantMap``,
+and anything else falls back to ``QVariant``. For an ``__init__`` attribute the
+type comes from the assigned default value; for a ``@property`` or ``@computed``
+it comes from the getter's ``return`` annotation.
+
+Attribute names starting with an underscore are left untouched, and a name that
+is explicitly declared as a property always wins over an ``__init__`` guess of
+the same name. Applying ``@auto_properties`` twice to the same class is a no-op.
+
+With ``@auto_properties`` you write ordinary attribute assignments on a type
+registered with ``@QmlElement``, and QML can both read and write them, with the
+observers firing on every change. Stack the decorators so ``@auto_properties``
+runs first (innermost): it must add the generated ``Q_PROPERTY`` objects to the
+``QMetaObject`` before ``@QmlElement`` registers the type with the QML engine.
+
+Python::
+
+    from PySide6.QtCore import QObject
+    from PySide6.QtQml import QmlElement
+    from PySide6.QtQmlFeatures import auto_properties, watch, computed, Change
+
+    QML_IMPORT_NAME = "Shop"
+    QML_IMPORT_MAJOR_VERSION = 1
+
+    @QmlElement
+    @auto_properties
+    class Cart(QObject):
+        def __init__(self, parent=None):
+            super().__init__(parent)
+            self.price = 10
+            self.quantity = 2
+
+        @computed("price", "quantity")
+        def total(self):
+            return self.price * self.quantity
+
+        @watch("price")
+        def on_price(self, change: Change):
+            print(f"price changed to {change.new}")
+
+QML:
+
+.. code-block:: javascript
+
+    import Shop
+
+    Cart {
+        id: cart
+        // Reads the generated 'price'/'quantity' properties and the
+        // @computed 'total'; re-evaluates whenever any of them changes.
+        Text { text: "Total: " + cart.total }
+        // Writing 'price' from QML runs the generated setter, which fires
+        // the @watch callback, invalidates 'total', and emits priceChanged.
+        Button { onClicked: cart.price += 1 }
+    }
+
+Because ``price`` and ``quantity`` are real ``Q_PROPERTY`` objects with notify
+signals, the QML binding above set on ``cart.price`` runs the generated setter,
+which fires the ``@watch`` callback, invalidates ``total``, and emits
+``priceChanged`` so any QML binding reading the value refreshes.

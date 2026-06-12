@@ -27,8 +27,8 @@ struct TypeUserData
     std::size_t cppObjSize;
 };
 
-TypeUserData *retrieveTypeUserData(PyTypeObject *pyTypeObj);
-TypeUserData *retrieveTypeUserData(PyObject *pyObj);
+PYSIDE_API TypeUserData *retrieveTypeUserData(PyTypeObject *pyTypeObj);
+PYSIDE_API TypeUserData *retrieveTypeUserData(PyObject *pyObj);
 // For QML
 PYSIDE_API const QMetaObject *retrieveMetaObject(PyTypeObject *pyTypeObj);
 PYSIDE_API const QMetaObject *retrieveMetaObject(PyObject *pyObj);

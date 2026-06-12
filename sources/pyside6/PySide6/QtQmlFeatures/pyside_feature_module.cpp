@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 // Qt-Security score:significant reason:default
 
+#include "pysideautoproperties.h"
 #include "pysidechange.h"
 #include "pysidecomputed_p.h"
 #include "pysideeffect_p.h"
@@ -13,6 +14,7 @@ extern "C" {
 
 static int exec_QtQmlFeatures(PyObject *module)
 {
+    PySide::AutoProperties::init(module);
     PySide::Change::init(module);
     PySide::Computed::init(module);
     PySide::Effect::init(module);
