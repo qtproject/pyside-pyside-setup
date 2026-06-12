@@ -1,5 +1,6 @@
 // Copyright (C) 2024 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Window
@@ -25,13 +26,14 @@ Window {
     Component {
         id: chunkModelMap
         Node {
+            id: node
             property variant mapData: null
             property int tileX: 0
             property int tileY: 0
             property int zoomLevel: 0
             Model {
                 id: basePlane
-                position: Qt.vector3d( osmManager.tileSizeX * tileX, osmManager.tileSizeY * -tileY, 0.0 )
+                position: Qt.vector3d( osmManager.tileSizeX * node.tileX, osmManager.tileSizeY * -node.tileY, 0.0 )
                 scale: Qt.vector3d( osmManager.tileSizeX / 100., osmManager.tileSizeY / 100., 0.5)
                 source: "#Rectangle"
                 materials: [
@@ -40,7 +42,7 @@ Window {
                             enabled: true
                             texture: Texture {
                                 textureData: CustomTextureData {
-                                    Component.onCompleted: setImageData( mapData )
+                                    Component.onCompleted: setImageData( node.mapData )
                                 } }
                         }
                         shadingMode: CustomMaterial.Shaded

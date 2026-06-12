@@ -30,23 +30,23 @@ Item {
     implicitHeight: parent.height
 
     Connections {
-        target: camera
+        target: root.camera
         Component.onCompleted: {
             onZChanged()
         }
 
         function onZChanged() {
             // Adjust near/far values based on distance
-            let distance = camera.z
+            let distance = root.camera.z
             if (distance < 1) {
-                camera.clipNear = 0.01
-                camera.clipFar = 100
+                root.camera.clipNear = 0.01
+                root.camera.clipFar = 100
             } else if (distance < 100) {
-                camera.clipNear = 0.1
-                camera.clipFar = 1000
+                root.camera.clipNear = 0.1
+                root.camera.clipFar = 1000
             } else {
-                camera.clipNear = 1
-                camera.clipFar = 10000
+                root.camera.clipNear = 1
+                root.camera.clipFar = 10000
             }
         }
     }
@@ -54,61 +54,61 @@ Item {
     DragHandler {
         id: dragHandler
         target: null
-        enabled: mouseEnabled
+        enabled: root.mouseEnabled
         acceptedModifiers: Qt.NoModifier
         acceptedButtons: Qt.RightButton
         onCentroidChanged: {
-            mouseMoved(Qt.vector2d(centroid.position.x, centroid.position.y), false);
+            root.mouseMoved(Qt.vector2d(centroid.position.x, centroid.position.y), false);
         }
 
         onActiveChanged: {
             if (active)
-                mousePressed(Qt.vector2d(centroid.position.x, centroid.position.y));
+                root.mousePressed(Qt.vector2d(centroid.position.x, centroid.position.y));
             else
-                mouseReleased(Qt.vector2d(centroid.position.x, centroid.position.y));
+                root.mouseReleased(Qt.vector2d(centroid.position.x, centroid.position.y));
         }
     }
 
     DragHandler {
         id: ctrlDragHandler
         target: null
-        enabled: mouseEnabled && panEnabled
+        enabled: root.mouseEnabled && root.panEnabled
         //acceptedModifiers: Qt.ControlModifier
         onCentroidChanged: {
-            panEvent(Qt.vector2d(centroid.position.x, centroid.position.y));
+            root.panEvent(Qt.vector2d(centroid.position.x, centroid.position.y));
         }
 
         onActiveChanged: {
             if (active)
-                startPan(Qt.vector2d(centroid.position.x, centroid.position.y));
+                root.startPan(Qt.vector2d(centroid.position.x, centroid.position.y));
             else
-                endPan();
+                root.endPan();
         }
     }
 
     PinchHandler {
         id: pinchHandler
         target: null
-        enabled: mouseEnabled
+        enabled: root.mouseEnabled
 
         property real distance: 0.0
         onCentroidChanged: {
-            panEvent(Qt.vector2d(centroid.position.x, centroid.position.y))
+            root.panEvent(Qt.vector2d(centroid.position.x, centroid.position.y))
         }
 
         onActiveChanged: {
             if (active) {
-                startPan(Qt.vector2d(centroid.position.x, centroid.position.y))
+                root.startPan(Qt.vector2d(centroid.position.x, centroid.position.y))
                 distance = root.camera.z
             } else {
-                endPan()
+                root.endPan()
                 distance = 0.0
             }
         }
         onScaleChanged: {
 
-            camera.z = distance * (1 / scale)
-            camera.z = Math.min(Math.max(camera.z, minimumZoom), maximumZoom)
+            root.camera.z = distance * (1 / scale)
+            root.camera.z = Math.min(Math.max(root.camera.z, root.minimumZoom), root.maximumZoom)
         }
     }
 
@@ -120,11 +120,11 @@ Item {
         id: wheelHandler
         orientation: Qt.Vertical
         target: null
-        enabled: mouseEnabled
+        enabled: root.mouseEnabled
         onWheel: event => {
             let delta = -event.angleDelta.y * 0.01;
-            camera.z += camera.z * 0.1 * delta
-            camera.z = Math.min(Math.max(camera.z, minimumZoom), maximumZoom)
+            root.camera.z += root.camera.z * 0.1 * delta
+            root.camera.z = Math.min(Math.max(root.camera.z, root.minimumZoom), root.maximumZoom)
         }
     }
 
@@ -180,26 +180,26 @@ Item {
         function processInput(frameDelta) {
             if (useMouse) {
                 // Get the delta
-                var delta = Qt.vector2d(lastPos.x - currentPos.x,
+                let delta = Qt.vector2d(lastPos.x - currentPos.x,
                                         lastPos.y - currentPos.y);
 
-                var rotateX = delta.x * xSpeed * frameDelta
-                if ( xInvert )
+                let rotateX = delta.x * root.xSpeed * frameDelta
+                if ( root.xInvert )
                     rotateX = -rotateX
                 rotateAlongZ += rotateX;
                 let rotateAlongZRad = rotateAlongZ * (Math.PI / 180.)
 
-                origin.rotate(rotateX, Qt.vector3d(0.0, 0.0, -1.0), Node.SceneSpace)
+                root.origin.rotate(rotateX, Qt.vector3d(0.0, 0.0, -1.0), Node.SceneSpace)
 
-                var rotateY = delta.y * -ySpeed * frameDelta
-                if ( yInvert )
+                let rotateY = delta.y * -root.ySpeed * frameDelta
+                if ( root.yInvert )
                     rotateY = -rotateY;
 
                 let preRotateAlongXY = rotateAlongXY + rotateY
-                if ( preRotateAlongXY <= maximumTilt && preRotateAlongXY >= minimumTilt )
+                if ( preRotateAlongXY <= root.maximumTilt && preRotateAlongXY >= root.minimumTilt )
                 {
                     rotateAlongXY = preRotateAlongXY
-                    origin.rotate(rotateY, Qt.vector3d(Math.cos(rotateAlongZRad), Math.sin(-rotateAlongZRad), 0.0), Node.SceneSpace)
+                    root.origin.rotate(rotateY, Qt.vector3d(Math.cos(rotateAlongZRad), Math.sin(-rotateAlongZRad), 0.0), Node.SceneSpace)
                 }
 
                 lastPos = currentPos;
@@ -209,22 +209,22 @@ Item {
                 let delta = currentPanPos.minus(lastPanPos);
                 delta.x = -delta.x
 
-                delta.x = (delta.x / root.width) * camera.z * frameDelta
-                delta.y = (delta.y / root.height) * camera.z * frameDelta
+                delta.x = (delta.x / root.width) * root.camera.z * frameDelta
+                delta.y = (delta.y / root.height) * root.camera.z * frameDelta
 
                 let velocity = Qt.vector3d(0, 0, 0)
                 // X Movement
-                let xDirection = origin.right
+                let xDirection = root.origin.right
                 velocity = velocity.plus(Qt.vector3d(xDirection.x * delta.x,
                                                      xDirection.y * delta.x,
                                                      xDirection.z * delta.x));
                 // Z Movement
-                let zDirection = origin.right.crossProduct(Qt.vector3d(0.0, 0.0, -1.0))
+                let zDirection = root.origin.right.crossProduct(Qt.vector3d(0.0, 0.0, -1.0))
                 velocity = velocity.plus(Qt.vector3d(zDirection.x * delta.y,
                                                      zDirection.y * delta.y,
                                                      zDirection.z * delta.y));
 
-                origin.position = origin.position.plus(velocity)
+                root.origin.position = root.origin.position.plus(velocity)
 
                 lastPanPos = currentPanPos
             }

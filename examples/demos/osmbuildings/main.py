@@ -6,7 +6,6 @@ from pathlib import Path
 
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtGui import QGuiApplication
-from PySide6.QtCore import QCoreApplication
 
 from manager import OSMManager, CustomTextureData  # noqa: F401
 
@@ -19,6 +18,6 @@ if __name__ == "__main__":
     if not engine.rootObjects():
         sys.exit(-1)
 
-    exit_code = QCoreApplication.exec()
+    exit_code = QGuiApplication.exec()
     del engine
     sys.exit(exit_code)
