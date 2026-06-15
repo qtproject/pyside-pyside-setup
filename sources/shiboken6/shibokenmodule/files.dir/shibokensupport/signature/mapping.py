@@ -748,6 +748,7 @@ missing_optional_return = {
     "PySide6.QtCore.QTranslator.translate",
     "PySide6.QtGui.QGuiApplication.modalWindow",
     "PySide6.QtGui.QGuiApplication.screenAt",
+    "PySide6.QtGui.QScreen.virtualSiblingAt",
     "PySide6.QtWidgets.QApplication.activeModalWidget",
     "PySide6.QtWidgets.QApplication.activePopupWidget",
     "PySide6.QtWidgets.QApplication.activeWindow",
