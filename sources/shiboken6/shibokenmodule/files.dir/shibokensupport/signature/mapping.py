@@ -747,6 +747,7 @@ def init_testbinding():
 missing_optional_return = {
     "PySide6.QtCore.QTranslator.translate",
     "PySide6.QtGui.QGuiApplication.modalWindow",
+    "PySide6.QtGui.QGuiApplication.overrideCursor",
     "PySide6.QtGui.QGuiApplication.screenAt",
     "PySide6.QtGui.QScreen.virtualSiblingAt",
     "PySide6.QtWidgets.QApplication.activeModalWidget",
