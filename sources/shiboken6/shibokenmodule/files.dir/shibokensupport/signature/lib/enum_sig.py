@@ -62,6 +62,13 @@ def is_relevant_type(thing):
 
 
 class BaseFormatter(ABC):
+    def __init__(self) -> None:
+        self.level: int = 0
+        self.mod_name: str = ""
+        self.class_name: str | None = None
+        self.have_body: bool = False
+        self.is_method: collections.abc.Callable[[], bool] = lambda: False
+
     @abstractmethod
     def module(self, mod_name):
         ...
