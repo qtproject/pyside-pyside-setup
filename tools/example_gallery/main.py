@@ -72,6 +72,103 @@ Examples
  directory.
 
 """
+
+INJECTED_JS = """\
+.. raw:: html
+
+    <div id="examples-filter-bar" style="margin: 1.5em 0 1em 0;">
+      <input
+        id="examples-filter-input"
+        type="search"
+        placeholder="Filter examples by title..."
+        autocomplete="off"
+        style="
+          width: 100%;
+          max-width: 480px;
+          padding: 0.5em 0.75em;
+          font-size: 1rem;
+          border: 1px solid var(--color-foreground-border, #ccc);
+          border-radius: 4px;
+          background: var(--color-background-primary, #fff);
+          color: var(--color-foreground-primary, #000);
+          box-sizing: border-box;
+        "
+      />
+      <span
+        id="examples-filter-count"
+        style="
+          display: inline-block;
+          margin-left: 0.75em;
+          font-size: 0.875rem;
+          color: var(--color-foreground-secondary, #666);
+          vertical-align: middle;
+        "
+      ></span>
+    </div>
+
+    <script>
+    (function () {
+      function initFilter() {
+        var input = document.getElementById('examples-filter-input');
+        var counter = document.getElementById('examples-filter-count');
+        if (!input) return;
+
+        input.addEventListener('input', function () {
+          var query = input.value.trim().toLowerCase();
+          var totalVisible = 0;
+
+          var dropdowns = document.querySelectorAll('details.sd-dropdown');
+
+          dropdowns.forEach(function (dropdown) {
+            var cols = dropdown.querySelectorAll('.sd-col');
+            var visibleInSection = 0;
+
+            cols.forEach(function (col) {
+              var titleEl = col.querySelector('.sd-card-title');
+              var raw = titleEl ? titleEl.textContent.trim() : '';
+              var title = raw.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[-()]/g, ' ').toLowerCase();
+              var words = query.toLowerCase().split(/\s+/).filter(Boolean);
+              var matches = !query || words.every(function(w) {
+                return title.split(/\s+/).some(function(t) { return t.indexOf(w) === 0; });
+              });
+              //var matches = !query || title.indexOf(query) !== -1;
+
+              // Use setProperty with !important to win over any flexbox/grid
+              // class-based CSS that sphinx-design may apply on the .sd-col
+              col.style.setProperty('display', matches ? '' : 'none', matches ? '' : 'important');
+              if (matches) {
+                visibleInSection++;
+                totalVisible++;
+              }
+            });
+
+            if (query) {
+              dropdown.style.display = visibleInSection > 0 ? '' : 'none';
+              // Only open if there are matches; don't close manually opened ones
+              if (visibleInSection > 0) dropdown.open = true;
+            } else {
+              dropdown.style.display = '';
+              dropdown.open = false;
+              cols.forEach(function (col) {
+                col.style.removeProperty('display');
+              });
+            }
+          });
+
+          counter.textContent = query
+            ? totalVisible + ' example' + (totalVisible !== 1 ? 's' : '') + ' found'
+            : '';
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initFilter);
+      } else {
+        initFilter();
+      }
+    })();
+    </script>
+"""
 # We generate a 'toctree' at the end of the file to include the new 'example' rst files, so we get
 # no warnings and also that users looking for them will be able to, since they are indexed
 # Notice that :hidden: will not add the list of files by the end of the main examples HTML page.
@@ -797,6 +894,7 @@ if __name__ == "__main__":
     # Write the main example .rst file and the example files
     with open(f"{EXAMPLES_DOC}/index.rst", "w") as f:
         f.write(BASE_CONTENT)
+        f.write(INJECTED_JS)
         for module_name in sorted(examples.keys(), key=module_sort_key):
             module_examples = examples.get(module_name)
             tutorial_examples: DefaultDict[str, list[ExampleData]] = defaultdict(list)
