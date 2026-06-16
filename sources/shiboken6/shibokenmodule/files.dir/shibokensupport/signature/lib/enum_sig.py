@@ -96,6 +96,7 @@ class ExactEnumerator:
         self.fmt.level = 0
         self.fmt.is_method = self.is_method
         self.collision_candidates = {"property", "overload"}
+        self.func = None
 
     def is_method(self):
         """
@@ -303,7 +304,7 @@ class ExactEnumerator:
             aug_ass = func in self.mypy_aug_ass_errors
             with self.fmt.function(func_name, signature, decorator, aug_ass, incon_err) as key:
                 ret[key] = signature
-        del self.func
+        self.func = None
         return ret
 
     def fproperty(self, prop_name, prop):
