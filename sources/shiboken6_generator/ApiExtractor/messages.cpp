@@ -806,11 +806,14 @@ QString msgCyclicDependency(const QString &funcName, const QString &graphName,
 
 // shibokengenerator.cpp
 
+static const char classNotFoundHint[] =
+    "Maybe it is only forward declared and no header containing the declaration is given.";
+
 QString msgClassNotFound(const TypeEntryCPtr &t)
 {
     return u"Could not find class \""_s
            + t->qualifiedCppName()
-           + u"\" in the code model. Maybe it is forward declared?"_s;
+           + u"\" in the code model. "_s + QLatin1StringView(classNotFoundHint);
 }
 
 QString msgEnclosingClassNotFound(const TypeEntryCPtr &t)
@@ -1002,7 +1005,8 @@ QString msgArgumentClassNotFound(const AbstractMetaFunctionCPtr &func,
 {
     QString result;
     QTextStream(&result) << "Internal Error: Class \"" <<  t->qualifiedCppName()
-        << "\" for \"" << func->classQualifiedSignature() << "\" not found!";
+        << "\" for \"" << func->classQualifiedSignature() << "\" not found. "
+        << classNotFoundHint;
     return result;
 }
 
