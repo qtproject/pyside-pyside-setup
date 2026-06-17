@@ -79,6 +79,10 @@ from Python.
         A dedicated styling API that streamlines styling Qt Quick Controls
         through a set of shared design attributes.
 
+    .. grid-item-card:: `Qt Quick Templates`_
+
+        Qt Quick Templates are the foundations of Qt Quick Controls.
+
     .. grid-item-card:: :mod:`Qt Quick Widgets <PySide6.QtQuickWidgets>`
 
         Provides a Python widget class for displaying a Qt Quick user interface.
@@ -90,6 +94,7 @@ from Python.
 .. _`Qt Quick Dialogs`: https://doc.qt.io/qt-6/qtquickdialogs-index.html
 .. _`Qt Quick Layouts`: https://doc.qt.io/qt-6/qtquicklayouts-index.html
 .. _`Qt Labs StyleKit`: https://doc.qt.io/qt-6/qtlabsstylekit-index.html
+.. _`Qt Quick Templates`: https://doc.qt.io/qt-6/qtquicktemplates2-index.html
 
 All the modules
 ---------------
