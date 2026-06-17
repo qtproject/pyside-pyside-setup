@@ -3,13 +3,20 @@
 
 include(CMakeParseArguments)
 
+# Checks whether any unparsed arguments have been passed to the function at the call site.
+# Use this right after `cmake_parse_arguments`.
+function(pyside_internal_validate_all_args_are_parsed prefix type)
+    if(DEFINED ${prefix}_UNPARSED_ARGUMENTS)
+        message(FATAL_ERROR
+            "Unknown arguments were passed to ${type}: (${${prefix}_UNPARSED_ARGUMENTS})")
+    endif()
+endfunction()
+
 # A version of cmake_parse_arguments that makes sure all arguments are processed and errors out
 # with a message about ${type} having received unknown arguments.
 macro(pyside_parse_all_arguments prefix type flags options multiopts)
     cmake_parse_arguments(${prefix} "${flags}" "${options}" "${multiopts}" ${ARGN})
-    if(DEFINED ${prefix}_UNPARSED_ARGUMENTS)
-        message(FATAL_ERROR "Unknown arguments were passed to ${type} (${${prefix}_UNPARSED_ARGUMENTS}).")
-    endif()
+    pyside_internal_validate_all_args_are_parsed("${prefix}" "${type}")
 endmacro()
 
 macro(make_path varname)
@@ -137,14 +144,29 @@ endmacro()
 #                      DROPPED_ENTRIES QtGui_DROPPED_ENTRIES
 #                      GLUE_SOURCES QtGui_glue_sources)
 macro(create_pyside_module)
-    pyside_parse_all_arguments(
-        "module" # Prefix
-        "create_pyside_module" # Macro name
-        "" # Flags
-        "NAME;TYPESYSTEM_PATH;TYPESYSTEM_NAME" # Single value
-        "INCLUDE_DIRS;LIBRARIES;DEPS;SOURCES;STATIC_SOURCES;DROPPED_ENTRIES;GLUE_SOURCES;ADDITIONAL_INCLUDE_DIRS" # Multival
-        ${ARGN} # Number of arguments given when the macros is called
-        )
+    set(opt_args "")
+    set(single_args
+        NAME
+        TYPESYSTEM_PATH
+        TYPESYSTEM_NAME
+    )
+    set(multi_args
+        INCLUDE_DIRS
+        LIBRARIES
+        DEPS
+        SOURCES
+        STATIC_SOURCES
+        DROPPED_ENTRIES
+        GLUE_SOURCES
+        ADDITIONAL_INCLUDE_DIRS
+    )
+
+    pyside_parse_all_arguments("module" "create_pyside_module"
+        "${opt_args}"
+        "${single_args}"
+        "${multi_args}"
+        ${ARGN}
+    )
 
     if ("${module_NAME}" STREQUAL "")
         message(FATAL_ERROR "create_pyside_module needs a NAME value.")
