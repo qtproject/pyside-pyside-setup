@@ -129,19 +129,14 @@ ${Qt3DRender_GEN_DIR}/qt3drender_wrapper.cpp
 ${Qt3DRender_GEN_DIR}/qt3drender_module_wrapper.cpp)
 
 set(Qt3DRender_include_dirs
-                     ${Qt3DRender_SOURCE_DIR}
-                     ${Qt3DRender_BINARY_DIR}
-                     ${pyside6_SOURCE_DIR}
-                     ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                     ${libpyside_SOURCE_DIR}
-                     ${QtCore_GEN_DIR}
-                     ${QtGui_GEN_DIR}
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${Qt3DCore_GEN_DIR}
+)
 
-                     ${Qt3DCore_GEN_DIR})
-
-set(Qt3DRender_libraries pyside6
-                     ${Qt${QT_MAJOR_VERSION}3DRender_LIBRARIES})
+set(Qt3DRender_libraries
+    Qt::3DRender
+)
 
 set(Qt3DRender_deps Qt3DCore)
 
@@ -152,7 +147,7 @@ create_pyside_module(NAME Qt3DRender
                      INCLUDE_DIRS Qt3DRender_include_dirs
                      LIBRARIES Qt3DRender_libraries
                      DEPS Qt3DRender_deps
-                     TYPESYSTEM_PATH Qt3DRender_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES Qt3DRender_SRC
-                     TYPESYSTEM_NAME ${Qt3DRender_BINARY_DIR}/typesystem_3drender.xml
+                     TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_3drender.xml"
                      DROPPED_ENTRIES Qt3DRender_DROPPED_ENTRIES)

@@ -14,24 +14,15 @@ ${QtWebEngineQuick_GEN_DIR}/qtwebenginequick_module_wrapper.cpp
 set(QtWebEngineQuick_DROPPED_ENTRIES)
 
 set(QtWebEngineQuick_include_dirs
-                            ${QtWebEngineQuick_SOURCE_DIR}
-                            ${QtWebEngineQuick_BINARY_DIR}
-                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}PrintSupport_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Qml_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}WebChannel_INCLUDE_DIRS}
-                            ${libpyside_SOURCE_DIR}
-                            ${QtCore_GEN_DIR}
-                            ${QtGui_GEN_DIR}
-                            ${QtWidgets_GEN_DIR}
-                            ${QtNetwork_GEN_DIR}
-                            ${QtWebEngineCore_GEN_DIR}
-                            ${QtPrintSupport_GEN_DIR}
-                            ${QtQml_GEN_DIR}
-                            ${QtWebChannel_GEN_DIR})
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtWidgets_GEN_DIR}
+    ${QtNetwork_GEN_DIR}
+    ${QtWebEngineCore_GEN_DIR}
+    ${QtPrintSupport_GEN_DIR}
+    ${QtQml_GEN_DIR}
+    ${QtWebChannel_GEN_DIR}
+)
 
 
 # Disable "QWebEngineExtensionManager *QQuickWebEngineProfile::extensionManager()"
@@ -42,15 +33,20 @@ if(NOT "webengine_extensions" IN_LIST QtWebEngineCore_enabled_features)
     list(APPEND QtWebEngineQuick_DROPPED_ENTRIES QWebEngineExtensionInfo QWebEngineExtensionManager)
 endif()
 
-set(QtWebEngineQuick_libraries pyside6
-                               ${Qt${QT_MAJOR_VERSION}WebEngineQuick_LIBRARIES})
+set(QtWebEngineQuick_libraries
+    Qt::PrintSupport
+    Qt::WebEngineQuick
+)
 
-set(QtWebEngineQuick_deps QtQml QtWebEngineCore)
+set(QtWebEngineQuick_deps
+    QtQml
+    QtWebEngineCore
+)
 
 create_pyside_module(NAME QtWebEngineQuick
                      INCLUDE_DIRS QtWebEngineQuick_include_dirs
                      LIBRARIES QtWebEngineQuick_libraries
                      DEPS QtWebEngineQuick_deps
-                     TYPESYSTEM_PATH QtWebEngineQuick_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtWebEngineQuick_SRC
                      DROPPED_ENTRIES QtWebEngineQuick_DROPPED_ENTRIES)

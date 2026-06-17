@@ -36,20 +36,14 @@ ${Qt3DCore_GEN_DIR}/qt3dcore_wrapper.cpp
 ${Qt3DCore_GEN_DIR}/qt3dcore_module_wrapper.cpp)
 
 set(Qt3DCore_include_dirs
-                     ${Qt3DCore_SOURCE_DIR}
-                     ${Qt3DCore_BINARY_DIR}
-                     ${pyside6_SOURCE_DIR}
-                     ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}3DCore_INCLUDE_DIRS}
-                     ${libpyside_SOURCE_DIR}
-                     ${QtCore_GEN_DIR}
-                     ${QtGui_GEN_DIR}
-                     ${QtNetwork_GEN_DIR})
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtNetwork_GEN_DIR}
+)
 
-set(Qt3DCore_libraries pyside6
-                     ${Qt${QT_MAJOR_VERSION}3DCore_LIBRARIES})
+set(Qt3DCore_libraries
+    Qt::3DCore
+)
 
 set(Qt3DCore_deps QtGui QtNetwork)
 
@@ -57,6 +51,6 @@ create_pyside_module(NAME Qt3DCore
                      INCLUDE_DIRS Qt3DCore_include_dirs
                      LIBRARIES Qt3DCore_libraries
                      DEPS Qt3DCore_deps
-                     TYPESYSTEM_PATH Qt3DCore_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES Qt3DCore_SRC
-                     TYPESYSTEM_NAME ${Qt3DCore_BINARY_DIR}/typesystem_3dcore.xml)
+                     TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_3dcore.xml")

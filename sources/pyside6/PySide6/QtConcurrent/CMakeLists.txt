@@ -13,21 +13,21 @@ ${QtConcurrent_GEN_DIR}/qfuturewatcherqstring_wrapper.cpp
 ${QtConcurrent_GEN_DIR}/qtconcurrent_module_wrapper.cpp
 )
 
-set(QtConcurrent_include_dirs   ${QtConcurrent_SOURCE_DIR}
-                                ${QtConcurrent_BINARY_DIR}
-                                ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                                ${Qt${QT_MAJOR_VERSION}Concurrent_INCLUDE_DIRS}
-                                ${libpyside_SOURCE_DIR}
-                                ${QtCore_GEN_DIR})
+set(QtConcurrent_include_dirs
+    ${QtCore_GEN_DIR}
+)
 
-set(QtConcurrent_libraries pyside6
-                           ${Qt${QT_MAJOR_VERSION}Concurrent_LIBRARIES})
+set(QtConcurrent_deps
+    QtCore
+)
 
-set(QtConcurrent_deps QtCore)
+set(QtConcurrent_libraries
+    Qt::Concurrent
+)
 
 create_pyside_module(NAME QtConcurrent
                      INCLUDE_DIRS QtConcurrent_include_dirs
                      LIBRARIES QtConcurrent_libraries
                      DEPS QtConcurrent_deps
-                     TYPESYSTEM_PATH QtConcurrent_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtConcurrent_SRC)

@@ -31,22 +31,22 @@ ${QtScxml_GEN_DIR}/qscxmlexecutablecontent_parameterinfo_wrapper.cpp
 ${QtScxml_GEN_DIR}/qtscxml_module_wrapper.cpp
 )
 
-set(QtScxml_include_dirs ${QtScxml_SOURCE_DIR}
-                         ${QtScxml_BINARY_DIR}
-                         ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                         ${Qt${QT_MAJOR_VERSION}Scxml_INCLUDE_DIRS}
-                         ${libpyside_SOURCE_DIR}
-                         ${QtCore_GEN_DIR})
+set(QtScxml_include_dirs
+    ${QtCore_GEN_DIR}
+)
 
-set(QtScxml_libraries pyside6
-                         ${Qt${QT_MAJOR_VERSION}Scxml_LIBRARIES})
+set(QtScxml_deps
+    QtCore
+)
 
-set(QtScxml_deps QtCore)
+set(QtScxml_libraries
+    Qt::Scxml
+)
 
 create_pyside_module(NAME QtScxml
                      INCLUDE_DIRS QtScxml_include_dirs
                      LIBRARIES QtScxml_libraries
                      DEPS QtScxml_deps
-                     TYPESYSTEM_PATH QtScxml_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtScxml_SRC
                      DROPPED_ENTRIES QtScxml_DROPPED_ENTRIES)

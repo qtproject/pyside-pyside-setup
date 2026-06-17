@@ -258,24 +258,17 @@ set(QtCore_glue_sources
     "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.h"
 )
 
-set(QtCore_include_dirs ${QtCore_SOURCE_DIR}
-                        ${QtCore_BINARY_DIR}
-                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                        ${pyside6_SOURCE_DIR}
-                        ${libpyside_SOURCE_DIR}
-                        )
-set(QtCore_libraries  pyside6
-                      ${Qt${QT_MAJOR_VERSION}Core_LIBRARIES}
-                      Qt::CorePrivate
-                      )
+set(QtCore_libraries
+    Qt::Core
+    Qt::CorePrivate
+)
 
 create_pyside_module(NAME QtCore
-                     INCLUDE_DIRS QtCore_include_dirs
                      LIBRARIES QtCore_libraries
-                     TYPESYSTEM_PATH QtCore_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtCore_SRC
                      STATIC_SOURCES QtCore_static_sources
-                     TYPESYSTEM_NAME ${QtCore_BINARY_DIR}/typesystem_core.xml
+                     TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_core.xml"
                      GLUE_SOURCES QtCore_glue_sources
                      DROPPED_ENTRIES QtCore_DROPPED_ENTRIES
                      )

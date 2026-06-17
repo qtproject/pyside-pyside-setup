@@ -47,24 +47,27 @@ configure_file("${QtDesigner_SOURCE_DIR}/QtDesigner_global.pre.h.in"
 configure_file("${QtDesigner_SOURCE_DIR}/QtDesigner_global.post.h.in"
                "${QtDesigner_BINARY_DIR}/QtDesigner_global.post.h" @ONLY)
 
-set(QtDesigner_include_dirs ${QtDesigner_SOURCE_DIR}
-                            ${QtDesigner_BINARY_DIR}
-                            ${QtCore_GEN_DIR}
-                            ${QtGui_GEN_DIR}
-                            ${QtWidgets_GEN_DIR})
+set(QtDesigner_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtWidgets_GEN_DIR}
+)
 
-set(QtDesigner_libraries pyside6
-                         ${Qt${QT_MAJOR_VERSION}Designer_LIBRARIES})
+set(QtDesigner_deps
+    QtWidgets
+)
 
-set(QtDesigner_deps QtWidgets)
+set(QtDesigner_libraries
+    Qt::Designer
+)
 
 create_pyside_module(NAME QtDesigner
                      INCLUDE_DIRS QtDesigner_include_dirs
                      LIBRARIES QtDesigner_libraries
                      DEPS QtDesigner_deps
-                     TYPESYSTEM_PATH QtDesigner_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtDesigner_SRC
                      STATIC_SOURCES QtDesigner_static_src
-                     TYPESYSTEM_NAME ${QtDesigner_BINARY_DIR}/typesystem_designer.xml)
+                     TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_designer.xml")
 
 install(FILES ${pyside6_SOURCE_DIR}/qpydesignerextensions.h DESTINATION include/PySide6/QtDesigner)

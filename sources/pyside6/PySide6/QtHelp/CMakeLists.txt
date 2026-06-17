@@ -30,25 +30,23 @@ ${QtHelp_GEN_DIR}/qthelp_module_wrapper.cpp
 configure_file("${QtHelp_SOURCE_DIR}/QtHelp_global.pre.h.in"
                "${QtHelp_BINARY_DIR}/QtHelp_global.pre.h" @ONLY)
 
-set(QtHelp_include_dirs ${QtHelp_SOURCE_DIR}
-                        ${QtHelp_BINARY_DIR}
-                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}Help_INCLUDE_DIRS}
-                        ${libpyside_SOURCE_DIR}
-                        ${QtWidgets_GEN_DIR}
-                        ${QtGui_GEN_DIR}
-                        ${QtCore_GEN_DIR}
-                        )
-set(QtHelp_libraries  pyside6
-                      ${Qt${QT_MAJOR_VERSION}Help_LIBRARIES})
+set(QtHelp_include_dirs
+    ${QtWidgets_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtCore_GEN_DIR}
+)
 
-set(QtHelp_deps QtWidgets)
+set(QtHelp_deps
+    QtWidgets
+)
+
+set(QtHelp_libraries
+    Qt::Help
+)
 
 create_pyside_module(NAME QtHelp
                      INCLUDE_DIRS QtHelp_include_dirs
                      LIBRARIES QtHelp_libraries
                      DEPS QtHelp_deps
-                     TYPESYSTEM_PATH QtHelp_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtHelp_SRC)

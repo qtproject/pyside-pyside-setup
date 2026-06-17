@@ -17,26 +17,23 @@ set(QtHttpServer_SRC
 # module is always needed
     ${QtHttpServer_GEN_DIR}/qthttpserver_module_wrapper.cpp)
 
-set(QtHttpServer_include_dirs ${QtHttpServer_SOURCE_DIR}
-                                ${QtHttpServer_BINARY_DIR}
-                                ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                                ${Qt${QT_MAJOR_VERSION}Concurrent_INCLUDE_DIRS}
-                                ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
-                                ${Qt${QT_MAJOR_VERSION}WebSockets_INCLUDE_DIRS}
-                                ${libpyside_SOURCE_DIR}
-                                ${QtCore_GEN_DIR}
-                                ${QtConcurrent_GEN_DIR}
-                                ${QtNetwork_GEN_DIR}
-                                ${QtWebSockets_GEN_DIR})
-
-set(QtHttpServer_libraries pyside6
-                           ${Qt${QT_MAJOR_VERSION}HttpServer_LIBRARIES})
+set(QtHttpServer_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtConcurrent_GEN_DIR}
+    ${QtNetwork_GEN_DIR}
+    ${QtWebSockets_GEN_DIR}
+)
 
 set(QtHttpServer_deps QtCore QtConcurrent QtNetwork QtWebSockets)
+
+set(QtHttpServer_libraries
+    Qt::Concurrent
+    Qt::HttpServer
+)
 
 create_pyside_module(NAME QtHttpServer
                      INCLUDE_DIRS QtHttpServer_include_dirs
                      LIBRARIES QtHttpServer_libraries
                      DEPS QtHttpServer_deps
-                     TYPESYSTEM_PATH QtHttpServer_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtHttpServer_SRC)

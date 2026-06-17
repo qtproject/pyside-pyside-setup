@@ -13,22 +13,22 @@ set(QtSerialPort_SRC
     ${QtSerialPort_GEN_DIR}/qtserialport_module_wrapper.cpp
 )
 
-set(QtSerialPort_include_dirs ${QtSerialPort_SOURCE_DIR}
-                              ${QtSerialPort_BINARY_DIR}
-                              ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                              ${Qt${QT_MAJOR_VERSION}SerialPort_INCLUDE_DIRS}
-                              ${libpyside_SOURCE_DIR}
-                              ${QtCore_GEN_DIR})
+set(QtSerialPort_include_dirs
+    ${QtCore_GEN_DIR}
+)
 
-set(QtSerialPort_libraries pyside6
-                        ${Qt${QT_MAJOR_VERSION}SerialPort_LIBRARIES})
+set(QtSerialPort_deps
+    QtCore
+)
 
-set(QtSerialPort_deps QtCore)
+set(QtSerialPort_libraries
+    Qt::SerialPort
+)
 
 create_pyside_module(NAME QtSerialPort
                      INCLUDE_DIRS QtSerialPort_include_dirs
                      LIBRARIES QtSerialPort_libraries
                      DEPS QtSerialPort_deps
-                     TYPESYSTEM_PATH QtSerialPort_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtSerialPort_SRC
                      DROPPED_ENTRIES QtSerialPort_DROPPED_ENTRIES)

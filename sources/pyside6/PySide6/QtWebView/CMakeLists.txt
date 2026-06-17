@@ -12,20 +12,19 @@ ${QtWebView_GEN_DIR}/qwebviewsettings_wrapper.cpp
 ${QtWebView_GEN_DIR}/qtwebview_module_wrapper.cpp
 )
 
-set(QtWebView_include_dirs ${QtWebView_SOURCE_DIR}
-                           ${QtWebView_BINARY_DIR}
-                           ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                           ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                           ${Qt${QT_MAJOR_VERSION}WebView_INCLUDE_DIRS}
-                           ${libpyside_SOURCE_DIR}
-                           ${QtGui_GEN_DIR}
-                           ${QtCore_GEN_DIR}
-                           ${QtWebView_GEN_DIR})
+set(QtWebView_include_dirs
+    ${QtGui_GEN_DIR}
+    ${QtCore_GEN_DIR}
+    ${QtWebView_GEN_DIR}
+)
 
-set(QtWebView_libraries pyside6
-                        ${Qt${QT_MAJOR_VERSION}WebView_LIBRARIES})
+set(QtWebView_libraries
+    Qt::WebView
+)
 
-set(QtWebView_deps QtGui)
+set(QtWebView_deps
+    QtGui
+)
 
 # for Windows and Linux, QtWebView depends on QtWebEngine to render content
 # On Android, QtWebView uses the native webview backend and does not require QtWebEngine.
@@ -37,5 +36,5 @@ create_pyside_module(NAME QtWebView
                      INCLUDE_DIRS QtWebView_include_dirs
                      LIBRARIES QtWebView_libraries
                      DEPS QtWebView_deps
-                     TYPESYSTEM_PATH QtWebView_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtWebView_Src)

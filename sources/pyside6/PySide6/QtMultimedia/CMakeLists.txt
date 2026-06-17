@@ -48,25 +48,25 @@ ${QtMultimedia_GEN_DIR}/qwindowcapture_wrapper.cpp
 ${QtMultimedia_GEN_DIR}/qtmultimedia_module_wrapper.cpp
 )
 
-set(QtMultimedia_include_dirs   ${QtMultimedia_SOURCE_DIR}
-                                ${QtMultimedia_BINARY_DIR}
-                                ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                                ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                                ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
-                                ${Qt${QT_MAJOR_VERSION}Multimedia_INCLUDE_DIRS}
-                                ${libpyside_SOURCE_DIR}
-                                ${QtCore_GEN_DIR}
-                                ${QtGui_GEN_DIR}
-                                ${QtNetwork_GEN_DIR})
+set(QtMultimedia_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtNetwork_GEN_DIR}
+)
 
-set(QtMultimedia_libraries  pyside6
-                            ${Qt${QT_MAJOR_VERSION}Multimedia_LIBRARIES})
+set(QtMultimedia_deps
+    QtCore
+    QtGui
+    QtNetwork
+)
 
-set(QtMultimedia_deps QtCore QtGui QtNetwork)
+set(QtMultimedia_libraries
+    Qt::Multimedia
+)
 
 create_pyside_module(NAME QtMultimedia
                      INCLUDE_DIRS QtMultimedia_include_dirs
                      LIBRARIES QtMultimedia_libraries
                      DEPS QtMultimedia_deps
-                     TYPESYSTEM_PATH QtMultimedia_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtMultimedia_SRC)

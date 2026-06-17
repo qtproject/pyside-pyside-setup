@@ -341,27 +341,27 @@ endif()
 configure_file("${QtGui_SOURCE_DIR}/QtGui_global.post.h.in"
                "${QtGui_BINARY_DIR}/QtGui_global.post.h" @ONLY)
 
-set(QtGui_include_dirs  ${QtGui_SOURCE_DIR}
-                        ${QtGui_BINARY_DIR}
-                        ${pyside6_SOURCE_DIR}
-                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                        ${QtGui_private_include_dirs}
-                        ${libpyside_SOURCE_DIR}
-                        ${QtCore_GEN_DIR}
-                        )
-set(QtGui_libraries   pyside6
-                      ${Qt${QT_MAJOR_VERSION}Gui_LIBRARIES})
-set(QtGui_deps QtCore)
+set(QtGui_include_dirs
+    ${QtCore_GEN_DIR}
+)
+
+set(QtGui_deps
+    QtCore
+)
+
+set(QtGui_libraries
+    Qt::Gui
+    Qt::GuiPrivate
+)
 
 create_pyside_module(NAME QtGui
                      INCLUDE_DIRS QtGui_include_dirs
                      LIBRARIES QtGui_libraries
                      DEPS QtGui_deps
-                     TYPESYSTEM_PATH QtGui_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtGui_SRC
                      STATIC_SOURCES QPYTEXTOBJECT_MOC
-                     TYPESYSTEM_NAME ${QtGui_BINARY_DIR}/typesystem_gui.xml
+                     TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_gui.xml"
                      DROPPED_ENTRIES QtGui_DROPPED_ENTRIES
                      ADDITIONAL_INCLUDE_DIRS QtGui_private_include_dirs)
 

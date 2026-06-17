@@ -14,24 +14,23 @@ ${QtWebSockets_GEN_DIR}/qwebsocketserver_wrapper.cpp
 ${QtWebSockets_GEN_DIR}/qtwebsockets_module_wrapper.cpp
 )
 
-set(QtWebSockets_include_dirs ${QtWebSockets_SOURCE_DIR}
-                        ${QtWebSockets_BINARY_DIR}
-                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}WebSockets_INCLUDE_DIRS}
-                        ${libpyside_SOURCE_DIR}
-                        ${QtCore_GEN_DIR}
-                        ${QtWebSockets_GEN_DIR}
-                        ${QtNetwork_GEN_DIR})
+set(QtWebSockets_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtWebSockets_GEN_DIR}
+    ${QtNetwork_GEN_DIR}
+)
 
-set(QtWebSockets_libraries pyside6
-                           ${Qt${QT_MAJOR_VERSION}WebSockets_LIBRARIES})
+set(QtWebSockets_deps
+    QtNetwork
+)
 
-set(QtWebSockets_deps QtNetwork)
+set(QtWebSockets_libraries
+    Qt::WebSockets
+)
 
 create_pyside_module(NAME QtWebSockets
                      INCLUDE_DIRS QtWebSockets_include_dirs
                      LIBRARIES QtWebSockets_libraries
                      DEPS QtWebSockets_deps
-                     TYPESYSTEM_PATH QtWebSockets_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtWebSockets_SRC)

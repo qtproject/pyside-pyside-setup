@@ -203,18 +203,14 @@ ${SPECIFIC_OS_FILES}
 ${QtWidgets_GEN_DIR}/qtwidgets_module_wrapper.cpp
 )
 
-set(QtWidgets_include_dirs  ${QtWidgets_SOURCE_DIR}
-                            ${QtWidgets_BINARY_DIR}
-                            ${pyside6_SOURCE_DIR}
-                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
-                            ${libpyside_SOURCE_DIR}
-                            ${QtCore_GEN_DIR}
-                            ${QtGui_GEN_DIR})
+set(QtWidgets_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+)
 
-set(QtWidgets_libraries pyside6
-                        ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES})
+set(QtWidgets_libraries
+    Qt::Widgets
+)
 
 set(QtWidgets_deps QtGui)
 
@@ -222,6 +218,6 @@ create_pyside_module(NAME QtWidgets
                      INCLUDE_DIRS QtWidgets_include_dirs
                      LIBRARIES QtWidgets_libraries
                      DEPS QtWidgets_deps
-                     TYPESYSTEM_PATH QtWidgets_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtWidgets_SRC
-                     TYPESYSTEM_NAME ${QtWidgets_BINARY_DIR}/typesystem_widgets.xml)
+                     TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_widgets.xml")

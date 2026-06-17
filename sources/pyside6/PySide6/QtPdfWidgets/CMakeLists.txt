@@ -10,30 +10,30 @@ ${QtPdfWidgets_GEN_DIR}/qpdfview_wrapper.cpp
 ${QtPdfWidgets_GEN_DIR}/qtpdfwidgets_module_wrapper.cpp
 )
 
-set(QtPdfWidgets_include_dirs ${QtPdfWidgets_SOURCE_DIR}
-                              ${QtPdfWidgets_BINARY_DIR}
-                              ${pyside6_SOURCE_DIR}
-                              ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                              ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                              ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
-                              ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
-                              ${Qt${QT_MAJOR_VERSION}Pdf_INCLUDE_DIRS}
-                              ${libpyside_SOURCE_DIR}
-                              ${QtCore_GEN_DIR}
-                              ${QtGui_GEN_DIR}
-                              ${QtNetwork_GEN_DIR}
-                              ${QtWidgets_GEN_DIR}
-                              ${QtPdf_GEN_DIR})
+set(QtPdfWidgets_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtNetwork_GEN_DIR}
+    ${QtWidgets_GEN_DIR}
+    ${QtPdf_GEN_DIR}
+)
 
-set(QtPdfWidgets_libraries pyside6
-                           ${Qt${QT_MAJOR_VERSION}PdfWidgets_LIBRARIES})
+set(QtPdfWidgets_deps
+    QtCore
+    QtGui
+    QtNetwork
+    QtWidgets
+    QtPdf
+)
 
-set(QtPdfWidgets_deps QtCore QtGui QtNetwork QtWidgets QtPdf)
+set(QtPdfWidgets_libraries
+    Qt::PdfWidgets
+)
 
 create_pyside_module(NAME QtPdfWidgets
                      INCLUDE_DIRS QtPdfWidgets_include_dirs
                      LIBRARIES QtPdfWidgets_libraries
                      DEPS QtPdfWidgets_deps
-                     TYPESYSTEM_PATH QtPdfWidgets_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtPdfWidgets_SRC
-                     TYPESYSTEM_NAME ${QtPdfWidgets_BINARY_DIR}/typesystem_pdfwidgets.xml)
+                     TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_pdfwidgets.xml")

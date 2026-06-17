@@ -18,25 +18,21 @@ set(QtUiTools_static_sources
     "${QtUiTools_SOURCE_DIR}/glue/loaduitype.cpp"
 )
 
-set(QtUiTools_include_dirs  ${QtUiTools_SOURCE_DIR}
-                            ${QtUiTools_BINARY_DIR}
-                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Xml_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Designer_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}UiTools_INCLUDE_DIRS}
-                            ${libpyside_SOURCE_DIR}
-                            ${plugins_SOURCE_DIR}
-                            ${QtCore_GEN_DIR}
-                            ${QtGui_GEN_DIR}
-                            ${QtWidgets_GEN_DIR})
+set(QtUiTools_include_dirs
+    ${plugins_SOURCE_DIR}
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtWidgets_GEN_DIR}
+)
 
-set(QtUiTools_libraries     pyside6
-                            uiplugin
-                            ${Qt${QT_MAJOR_VERSION}UiTools_LIBRARIES})
+set(QtUiTools_deps
+    QtWidgets
+)
 
-set(QtUiTools_deps QtWidgets)
+set(QtUiTools_libraries
+    uiplugin
+    Qt::UiTools
+)
 
 configure_file("${QtUiTools_SOURCE_DIR}/QtUiTools_global.pre.h.in"
                "${QtUiTools_BINARY_DIR}/QtUiTools_global.pre.h" @ONLY)
@@ -45,7 +41,7 @@ create_pyside_module(NAME QtUiTools
                      INCLUDE_DIRS QtUiTools_include_dirs
                      LIBRARIES QtUiTools_libraries
                      DEPS QtUiTools_deps
-                     TYPESYSTEM_PATH QtUiTools_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      STATIC_SOURCES QtUiTools_static_sources
                      SOURCES QtUiTools_SRC
                      GLUE_SOURCES QtUiTools_glue_sources)

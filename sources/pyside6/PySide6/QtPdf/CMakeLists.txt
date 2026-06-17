@@ -17,26 +17,26 @@ ${QtPdf_GEN_DIR}/qpdfselection_wrapper.cpp
 ${QtPdf_GEN_DIR}/qtpdf_module_wrapper.cpp
 )
 
-set(QtPdf_include_dirs ${QtPdf_SOURCE_DIR}
-                       ${QtPdf_BINARY_DIR}
-                       ${pyside6_SOURCE_DIR}
-                       ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                       ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                       ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
-                       ${libpyside_SOURCE_DIR}
-                       ${QtCore_GEN_DIR}
-                       ${QtGui_GEN_DIR}
-                       ${QtNetwork_GEN_DIR})
+set(QtPdf_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtNetwork_GEN_DIR}
+)
 
-set(QtPdf_libraries pyside6
-                    ${Qt${QT_MAJOR_VERSION}Pdf_LIBRARIES})
+set(QtPdf_deps
+    QtCore
+    QtGui
+    QtNetwork
+)
 
-set(QtPdf_deps QtCore QtGui QtNetwork)
+set(QtPdf_libraries
+    Qt::Pdf
+)
 
 create_pyside_module(NAME QtPdf
                      INCLUDE_DIRS QtPdf_include_dirs
                      LIBRARIES QtPdf_libraries
                      DEPS QtPdf_deps
-                     TYPESYSTEM_PATH QtPdf_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtPdf_SRC
-                     TYPESYSTEM_NAME ${QtPdf_BINARY_DIR}/typesystem_pdf.xml)
+                     TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_pdf.xml")

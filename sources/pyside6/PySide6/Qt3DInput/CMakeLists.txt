@@ -31,17 +31,14 @@ ${Qt3DInput_GEN_DIR}/qt3dinput_qmousehandler_wrapper.cpp
 ${Qt3DInput_GEN_DIR}/qt3dinput_module_wrapper.cpp)
 
 set(Qt3DInput_include_dirs
-                     ${Qt3DInput_SOURCE_DIR}
-                     ${Qt3DInput_BINARY_DIR}
-                     ${pyside6_SOURCE_DIR}
-                     ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                     ${libpyside_SOURCE_DIR}
-                     ${QtCore_GEN_DIR}
-                     ${QtGui_GEN_DIR}
-                     ${Qt3DCore_GEN_DIR})
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${Qt3DCore_GEN_DIR}
+)
 
-set(Qt3DInput_libraries pyside6
-                     ${Qt${QT_MAJOR_VERSION}3DInput_LIBRARIES})
+set(Qt3DInput_libraries
+    Qt::3DInput
+)
 
 set(Qt3DInput_deps Qt3DCore)
 
@@ -49,6 +46,6 @@ create_pyside_module(NAME Qt3DInput
                      INCLUDE_DIRS Qt3DInput_include_dirs
                      LIBRARIES Qt3DInput_libraries
                      DEPS Qt3DInput_deps
-                     TYPESYSTEM_PATH Qt3DInput_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES Qt3DInput_SRC
-                     TYPESYSTEM_NAME ${Qt3DInput_BINARY_DIR}/typesystem_3dinput.xml)
+                     TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_3dinput.xml")

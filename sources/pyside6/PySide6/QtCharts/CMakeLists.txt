@@ -61,25 +61,25 @@ ${QtCharts_GEN_DIR}/qxyseries_wrapper.cpp
 ${QtCharts_GEN_DIR}/qtcharts_module_wrapper.cpp
 )
 
-set(QtCharts_include_dirs ${QtCharts_SOURCE_DIR}
-                          ${QtCharts_BINARY_DIR}
-                          ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                          ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                          ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
-                          ${Qt${QT_MAJOR_VERSION}Charts_INCLUDE_DIRS}
-                          ${libpyside_SOURCE_DIR}
-                          ${QtCore_GEN_DIR}
-                          ${QtGui_GEN_DIR}
-                          ${QtWidgets_GEN_DIR})
+set(QtCharts_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtWidgets_GEN_DIR}
+)
 
-set(QtCharts_libraries    pyside6
-                          ${Qt${QT_MAJOR_VERSION}Charts_LIBRARIES})
+set(QtCharts_deps
+    QtCore
+    QtGui
+    QtWidgets
+)
 
-set(QtCharts_deps QtCore QtGui QtWidgets)
+set(QtCharts_libraries
+    Qt::Charts
+)
 
 create_pyside_module(NAME QtCharts
                      INCLUDE_DIRS QtCharts_include_dirs
                      LIBRARIES QtCharts_libraries
                      DEPS QtCharts_deps
-                     TYPESYSTEM_PATH QtCharts_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtCharts_SRC)

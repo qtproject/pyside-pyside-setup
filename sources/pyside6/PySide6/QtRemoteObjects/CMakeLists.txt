@@ -31,26 +31,25 @@ ${QtRemoteObjects_GEN_DIR}/qtremoteobjects_module_wrapper.cpp
 
 find_package(Qt6 REQUIRED COMPONENTS Core)
 
-set(QtRemoteObjects_include_dirs ${QtRemoteObjects_SOURCE_DIR}
-                                 ${QtRemoteObjects_BINARY_DIR}
-                                 ${Qt${QT_MAJOR_VERSION}RemoteObjects_INCLUDE_DIRS}
-                                 ${libpysideremoteobjects_SOURCE_DIR}
-                                 ${SHIBOKEN_INCLUDE_DIR}
-                                 ${libpyside_SOURCE_DIR}
-                                 ${SHIBOKEN_PYTHON_INCLUDE_DIR}
-                                 ${QtCore_GEN_DIR}
-                                 ${QtNetwork_GEN_DIR})
+set(QtRemoteObjects_include_dirs
+    ${SHIBOKEN_INCLUDE_DIR}
+    ${SHIBOKEN_PYTHON_INCLUDE_DIR}
+    ${QtCore_GEN_DIR}
+    ${QtNetwork_GEN_DIR}
+)
 
 set(QtRemoteObjects_deps QtCore QtNetwork)
 
-set(QtRemoteObjects_libraries    pyside6 pyside6remoteobjects
-                                 ${Qt${QT_MAJOR_VERSION}RemoteObjects_LIBRARIES})
+set(QtRemoteObjects_libraries
+    pyside6remoteobjects
+    Qt::RemoteObjects
+)
 
 create_pyside_module(NAME QtRemoteObjects
                      INCLUDE_DIRS QtRemoteObjects_include_dirs
                      LIBRARIES QtRemoteObjects_libraries
                      DEPS QtRemoteObjects_deps
-                     TYPESYSTEM_PATH QtRemoteObjects_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtRemoteObjects_SRC
-                     TYPESYSTEM_NAME ${QtRemoteObjects_BINARY_DIR}/typesystem_remoteobjects.xml
+                     TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_remoteobjects.xml"
                      )

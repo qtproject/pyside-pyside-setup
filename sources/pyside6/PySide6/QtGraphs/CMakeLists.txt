@@ -62,27 +62,27 @@ ${QtGraphs_GEN_DIR}/qxyseries_wrapper.cpp
 ${QtGraphs_GEN_DIR}/qtgraphs_module_wrapper.cpp
 )
 
-set(QtGraphs_include_dirs ${QtGraphs_SOURCE_DIR}
-                          ${QtGraphs_BINARY_DIR}
-                          ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                          ${Qt${QT_MAJOR_VERSION}QtNetwork_INCLUDE_DIRS}
-                          ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                          ${Qt${QT_MAJOR_VERSION}Qml_INCLUDE_DIRS}
-                          ${Qt${QT_MAJOR_VERSION}Quick_INCLUDE_DIRS}
-                          ${Qt${QT_MAJOR_VERSION}Graphs_INCLUDE_DIRS}
-                          ${Qt${QT_MAJOR_VERSION}Quick3D_INCLUDE_DIRS}
-                          ${libpyside_SOURCE_DIR}
-                          ${QtCore_GEN_DIR}
-                          ${QtNetwork_GEN_DIR}
-                          ${QtGui_GEN_DIR}
-                          ${QtQml_GEN_DIR}
-                          ${QtQuick_GEN_DIR}
-                          ${QtQuick3D_GEN_DIR})
+set(QtGraphs_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtNetwork_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtQml_GEN_DIR}
+    ${QtQuick_GEN_DIR}
+    ${QtQuick3D_GEN_DIR}
+)
 
-set(QtGraphs_libraries    pyside6
-                          ${Qt${QT_MAJOR_VERSION}Graphs_LIBRARIES})
+set(QtGraphs_deps
+    QtCore
+    QtNetwork
+    QtGui
+    QtQml
+    QtQuick
+    QtQuick3D
+)
 
-set(QtGraphs_deps QtCore QtNetwork QtGui QtQml QtQuick QtQuick3D)
+set(QtGraphs_libraries
+    Qt::Graphs
+)
 
 check_qt_opengl("Graphs" QtGraphs_include_dirs QtGraphs_deps
                 QtGraphs_DROPPED_ENTRIES)
@@ -91,7 +91,7 @@ create_pyside_module(NAME QtGraphs
                      INCLUDE_DIRS QtGraphs_include_dirs
                      LIBRARIES QtGraphs_libraries
                      DEPS QtGraphs_deps
-                     TYPESYSTEM_PATH QtGraphs_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtGraphs_SRC
                      STATIC_SOURCES QtGraphs_src
                      DROPPED_ENTRIES QtGraphs_DROPPED_ENTRIES)

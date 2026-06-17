@@ -28,23 +28,23 @@ ${QtPositioning_GEN_DIR}/qnmeasatelliteinfosource_wrapper.cpp
 ${QtPositioning_GEN_DIR}/qtpositioning_module_wrapper.cpp
 )
 
-set(QtPositioning_include_dirs ${QtPositioning_SOURCE_DIR}
-                               ${QtPositioning_BINARY_DIR}
-                               ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                               ${Qt${QT_MAJOR_VERSION}Positioning_INCLUDE_DIRS}
-                               ${libpyside_SOURCE_DIR}
-                               ${QtCore_GEN_DIR})
+set(QtPositioning_include_dirs
+    ${QtCore_GEN_DIR}
+)
 
-set(QtPositioning_libraries pyside6
-                            ${Qt${QT_MAJOR_VERSION}Positioning_LIBRARIES})
+set(QtPositioning_deps
+    QtCore
+)
 
-set(QtPositioning_deps QtCore)
+set(QtPositioning_libraries
+    Qt::Positioning
+)
 
 create_pyside_module(NAME QtPositioning
                      INCLUDE_DIRS QtPositioning_include_dirs
                      LIBRARIES QtPositioning_libraries
                      DEPS QtPositioning_deps
-                     TYPESYSTEM_PATH QtPositioning_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtPositioning_SRC
                      DROPPED_ENTRIES QtPositioning_DROPPED_ENTRIES)
 

@@ -21,27 +21,23 @@ configure_file("${QtAxContainer_SOURCE_DIR}/QtAxContainer_global.post.h.in"
                "${QtAxContainer_BINARY_DIR}/QtAxContainer_global.post.h" @ONLY)
 
 set(QtAxContainer_include_dirs
-                     ${QtAxContainer_SOURCE_DIR}
-                     ${QtAxContainer_BINARY_DIR}
-                     ${pyside6_SOURCE_DIR}
-                     ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
-                     ${libpyside_SOURCE_DIR}
-                     ${QtCore_GEN_DIR}
-                     ${QtGui_GEN_DIR}
-                     ${QtWidgets_GEN_DIR})
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtWidgets_GEN_DIR}
+)
 
-set(QtAxContainer_libraries pyside6
-                     ${Qt${QT_MAJOR_VERSION}AxContainer_LIBRARIES}
-                     ${Qt${QT_MAJOR_VERSION}AxBase_LIBRARIES})
+set(QtAxContainer_deps
+    QtWidgets
+)
 
-set(QtAxContainer_deps QtWidgets)
+set(QtAxContainer_libraries
+    Qt::AxContainer
+)
 
 create_pyside_module(NAME QtAxContainer
                      INCLUDE_DIRS QtAxContainer_include_dirs
                      LIBRARIES QtAxContainer_libraries
                      DEPS QtAxContainer_deps
-                     TYPESYSTEM_PATH QtAxContainer_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtAxContainer_SRC
-                     TYPESYSTEM_NAME ${QtAxContainer_BINARY_DIR}/typesystem_axcontainer.xml)
+                     TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_axcontainer.xml")

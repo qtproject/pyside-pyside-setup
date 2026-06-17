@@ -18,23 +18,23 @@ ${QtNetworkAuth_GEN_DIR}/qoauthurischemereplyhandler_wrapper.cpp
 ${QtNetworkAuth_GEN_DIR}/qtnetworkauth_module_wrapper.cpp
 )
 
-set(QtNetworkAuth_include_dirs ${QtNetworkAuth_SOURCE_DIR}
-                               ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                               ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
-                               ${Qt${QT_MAJOR_VERSION}NetworkAuth_INCLUDE_DIRS}
-                               ${libpyside_SOURCE_DIR}
-                               ${QtCore_GEN_DIR}
-                               ${QtNetwork_GEN_DIR}
-                               ${QtNetworkAuth_GEN_DIR})
+set(QtNetworkAuth_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtNetwork_GEN_DIR}
+    ${QtNetworkAuth_GEN_DIR}
+)
 
-set(QtNetworkAuth_libraries pyside6
-                            ${Qt${QT_MAJOR_VERSION}NetworkAuth_LIBRARIES})
+set(QtNetworkAuth_deps
+    QtNetwork
+)
 
-set(QtNetworkAuth_deps QtNetwork)
+set(QtNetworkAuth_libraries
+    Qt::NetworkAuth
+)
 
 create_pyside_module(NAME QtNetworkAuth
                      INCLUDE_DIRS QtNetworkAuth_include_dirs
                      LIBRARIES QtNetworkAuth_libraries
                      DEPS QtNetworkAuth_deps
-                     TYPESYSTEM_PATH QtNetworkAuth_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtNetworkAuth_SRC)

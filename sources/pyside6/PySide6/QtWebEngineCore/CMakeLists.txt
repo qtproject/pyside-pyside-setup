@@ -68,32 +68,32 @@ else()
 endif()
 
 set(QtWebEngineCore_include_dirs
-                            ${QtWebEngineCore_SOURCE_DIR}
-                            ${QtWebEngineCore_BINARY_DIR}
-                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}PrintSupport_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}WebChannel_INCLUDE_DIRS}
-                            ${libpyside_SOURCE_DIR}
-                            ${QtCore_GEN_DIR}
-                            ${QtGui_GEN_DIR}
-                            ${QtWidgets_GEN_DIR}
-                            ${QtNetwork_GEN_DIR}
-                            ${QtPrintSupport_GEN_DIR}
-                            ${QtWebChannel_GEN_DIR})
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtWidgets_GEN_DIR}
+    ${QtNetwork_GEN_DIR}
+    ${QtPrintSupport_GEN_DIR}
+    ${QtWebChannel_GEN_DIR}
+)
 
-set(QtWebEngineCore_libraries pyside6
-                              ${Qt${QT_MAJOR_VERSION}WebEngineCore_LIBRARIES})
+set(QtWebEngineCore_deps
+    QtCore
+    QtGui
+    QtNetwork
+    QtPrintSupport
+    QtWebChannel
+)
 
-set(QtWebEngineCore_deps QtCore QtGui QtNetwork QtPrintSupport QtWebChannel)
+set(QtWebEngineCore_libraries
+    Qt::PrintSupport
+    Qt::WebEngineCore
+)
 
 create_pyside_module(NAME QtWebEngineCore
                      INCLUDE_DIRS QtWebEngineCore_include_dirs
                      STATIC_SOURCES QtWebEngineCore_static_sources
                      LIBRARIES QtWebEngineCore_libraries
                      DEPS QtWebEngineCore_deps
-                     TYPESYSTEM_PATH QtWebEngineCore_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtWebEngineCore_SRC
                      DROPPED_ENTRIES QtWebEngineCore_DROPPED_ENTRIES)

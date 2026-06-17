@@ -55,24 +55,16 @@ ${Qt3DExtras_GEN_DIR}/qt3dextras_module_wrapper.cpp)
 
 
 set(Qt3DExtras_include_dirs
-                     ${Qt3DExtras_SOURCE_DIR}
-                     ${Qt3DExtras_BINARY_DIR}
-                     ${pyside6_SOURCE_DIR}
-                     ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}OpenGL_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}3DCore_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}3DRender_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}3DExtras_INCLUDE_DIRS}
-                     ${libpyside_SOURCE_DIR}
-                     ${QtCore_GEN_DIR}
-                     ${QtGui_GEN_DIR}
-                     ${QtOpenGL_GEN_DIR}
-                     ${Qt3DCore_GEN_DIR}
-                     ${Qt3DRender_GEN_DIR})
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtOpenGL_GEN_DIR}
+    ${Qt3DCore_GEN_DIR}
+    ${Qt3DRender_GEN_DIR}
+)
 
-set(Qt3DExtras_libraries pyside6
-                     ${Qt${QT_MAJOR_VERSION}3DExtras_LIBRARIES})
+set(Qt3DExtras_libraries
+    Qt::3DExtras
+)
 
 set(Qt3DExtras_deps Qt3DRender)
 
@@ -80,6 +72,6 @@ create_pyside_module(NAME Qt3DExtras
                      INCLUDE_DIRS Qt3DExtras_include_dirs
                      LIBRARIES Qt3DExtras_libraries
                      DEPS Qt3DExtras_deps
-                     TYPESYSTEM_PATH Qt3DExtras_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES Qt3DExtras_SRC
-                     TYPESYSTEM_NAME ${Qt3DExtras_BINARY_DIR}/typesystem_3dextras.xml)
+                     TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_3dextras.xml")

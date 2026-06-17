@@ -50,27 +50,26 @@ ${QtQml_GEN_DIR}/qtqml_module_wrapper.cpp
 configure_file("${QtQml_SOURCE_DIR}/QtQml_global.post.h.in"
                "${QtQml_BINARY_DIR}/QtQml_global.post.h" @ONLY)
 
-set(QtQml_include_dirs  ${QtQml_SOURCE_DIR}
-                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}Core_PRIVATE_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}Qml_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}Qml_PRIVATE_INCLUDE_DIRS}
-                        ${libpyside_SOURCE_DIR}
-                        ${libpysideqml_SOURCE_DIR}
-                        ${QtCore_GEN_DIR}
-                        ${QtNetwork_GEN_DIR}
-                        ${QtQml_GEN_DIR})
+set(QtQml_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtNetwork_GEN_DIR}
+    ${QtQml_GEN_DIR}
+)
 
-set(QtQml_libraries pyside6 pyside6qml
-                    ${Qt${QT_MAJOR_VERSION}Qml_LIBRARIES})
+set(QtQml_deps
+    QtNetwork
+)
 
-set(QtQml_deps QtNetwork)
+set(QtQml_libraries
+    PySide6::pyside6qml
+    Qt::CorePrivate
+    Qt::Qml
+)
 
 create_pyside_module(NAME QtQml
                      INCLUDE_DIRS QtQml_include_dirs
                      LIBRARIES QtQml_libraries
                      DEPS QtQml_deps
-                     TYPESYSTEM_PATH QtQml_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtQml_SRC
                      STATIC_SOURCES QtQml_static_sources)

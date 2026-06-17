@@ -33,22 +33,23 @@ set(QtDBus_SRC
 configure_file("${QtDBus_SOURCE_DIR}/QtDBus_global.post.h.in"
                "${QtDBus_BINARY_DIR}/QtDBus_global.post.h" @ONLY)
 
-set(QtDBus_include_dirs ${QtDBus_SOURCE_DIR}
-                        ${QtDBus_BINARY_DIR}
-                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}DBus_INCLUDE_DIRS}
-                        ${libpyside_SOURCE_DIR}
-                        ${QtCore_GEN_DIR})
+set(QtDBus_include_dirs
+    ${QtCore_GEN_DIR}
+)
 
-set(QtDBus_libraries pyside6 ${Qt${QT_MAJOR_VERSION}DBus_LIBRARIES})
+set(QtDBus_deps
+    QtCore
+)
 
-set(QtDBus_deps QtCore)
+set(QtDBus_libraries
+    Qt::DBus
+)
 
 create_pyside_module(NAME QtDBus
                      INCLUDE_DIRS QtDBus_include_dirs
                      LIBRARIES QtDBus_libraries
                      DEPS QtDBus_deps
-                     TYPESYSTEM_PATH QtDBus_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtDBus_SRC)
 
 install(FILES ${pyside6_SOURCE_DIR}/qtdbushelper.h DESTINATION include/PySide6/QtDBus)

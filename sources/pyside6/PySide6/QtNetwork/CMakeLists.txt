@@ -103,22 +103,22 @@ else()
     message(STATUS "Qt${QT_MAJOR_VERSION}Network: Adding SCTP classes")
 endif()
 
-set(QtNetwork_include_dirs  ${QtNetwork_SOURCE_DIR}
-                            ${QtNetwork_BINARY_DIR}
-                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
-                            ${libpyside_SOURCE_DIR}
-                            ${QtCore_GEN_DIR})
+set(QtNetwork_include_dirs
+    "${QtCore_GEN_DIR}"
+)
 
-set(QtNetwork_libraries pyside6
-                        ${Qt${QT_MAJOR_VERSION}Network_LIBRARIES})
+set(QtNetwork_deps
+    QtCore
+)
 
-set(QtNetwork_deps QtCore)
+set(QtNetwork_libraries
+    Qt::Network
+)
 
 create_pyside_module(NAME QtNetwork
                      INCLUDE_DIRS QtNetwork_include_dirs
                      LIBRARIES QtNetwork_libraries
                      DEPS QtNetwork_deps
-                     TYPESYSTEM_PATH QtNetwork_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtNetwork_SRC
                      DROPPED_ENTRIES QtNetwork_DROPPED_ENTRIES)

@@ -20,23 +20,23 @@ ${QtStateMachine_GEN_DIR}/qstatemachine_wrappedevent_wrapper.cpp
 ${QtStateMachine_GEN_DIR}/qtstatemachine_module_wrapper.cpp
 )
 
-set(QtStateMachine_include_dirs  ${QtStateMachine_SOURCE_DIR}
-                            ${QtStateMachine_BINARY_DIR}
-                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                            ${libpyside_SOURCE_DIR}
-                            ${QtCore_GEN_DIR}
-                            ${QtGui_GEN_DIR})
+set(QtStateMachine_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+)
 
-set(QtStateMachine_libraries pyside6
-                             ${Qt${QT_MAJOR_VERSION}StateMachine_LIBRARIES})
+set(QtStateMachine_deps
+    QtGui
+)
 
-set(QtStateMachine_deps QtGui)
+set(QtStateMachine_libraries
+    Qt::StateMachine
+)
 
 create_pyside_module(NAME QtStateMachine
                      INCLUDE_DIRS QtStateMachine_include_dirs
                      LIBRARIES QtStateMachine_libraries
                      DEPS QtStateMachine_deps
-                     TYPESYSTEM_PATH QtStateMachine_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtStateMachine_SRC
-                     TYPESYSTEM_NAME ${QtStateMachine_BINARY_DIR}/typesystem_statemachine.xml)
+                     TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_statemachine.xml")

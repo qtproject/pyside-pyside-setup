@@ -35,22 +35,22 @@ set(QtBluetooth_SRC
     ${QtBluetooth_GEN_DIR}/qtbluetooth_module_wrapper.cpp
 )
 
-set(QtBluetooth_include_dirs ${QtBluetooth_SOURCE_DIR}
-                             ${QtBluetooth_BINARY_DIR}
-                             ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                             ${Qt${QT_MAJOR_VERSION}Bluetooth_INCLUDE_DIRS}
-                             ${libpyside_SOURCE_DIR}
-                             ${QtCore_GEN_DIR})
+set(QtBluetooth_include_dirs
+    ${QtCore_GEN_DIR}
+)
 
-set(QtBluetooth_libraries pyside6
-                        ${Qt${QT_MAJOR_VERSION}Bluetooth_LIBRARIES})
+set(QtBluetooth_deps
+    QtCore
+)
 
-set(QtBluetooth_deps QtCore)
+set(QtBluetooth_libraries
+    Qt::Bluetooth
+)
 
 create_pyside_module(NAME QtBluetooth
                      INCLUDE_DIRS QtBluetooth_include_dirs
                      LIBRARIES QtBluetooth_libraries
                      DEPS QtBluetooth_deps
-                     TYPESYSTEM_PATH QtBluetooth_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtBluetooth_SRC
                      DROPPED_ENTRIES QtBluetooth_DROPPED_ENTRIES)

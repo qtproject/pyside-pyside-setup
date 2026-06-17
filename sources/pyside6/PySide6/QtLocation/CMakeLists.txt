@@ -49,23 +49,24 @@ ${QtLocation_GEN_DIR}/qtlocation_module_wrapper.cpp
 )
 
 
-set(QtLocation_include_dirs ${QtLocation_SOURCE_DIR}
-                            ${QtLocation_BINARY_DIR}
-                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Location_INCLUDE_DIRS}
-                            ${libpyside_SOURCE_DIR}
-                            ${QtCore_GEN_DIR}
-                            ${QtPositioning_GEN_DIR})
+set(QtLocation_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtPositioning_GEN_DIR}
+)
 
-set(QtLocation_libraries pyside6
-                         ${Qt${QT_MAJOR_VERSION}Location_LIBRARIES})
+set(QtLocation_deps
+    QtCore
+    QtPositioning
+)
 
-set(QtLocation_deps QtCore QtPositioning)
+set(QtLocation_libraries
+    Qt::Location
+)
 
 create_pyside_module(NAME QtLocation
                      INCLUDE_DIRS QtLocation_include_dirs
                      LIBRARIES QtLocation_libraries
                      DEPS QtLocation_deps
-                     TYPESYSTEM_PATH QtLocation_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtLocation_SRC
                      DROPPED_ENTRIES QtLocation_DROPPED_ENTRIES)

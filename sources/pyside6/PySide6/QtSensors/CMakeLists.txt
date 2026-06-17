@@ -73,22 +73,22 @@ set(QtSensors_SRC
     ${QtSensors_GEN_DIR}/qtsensors_module_wrapper.cpp
 )
 
-set(QtSensors_include_dirs  ${QtSensors_SOURCE_DIR}
-                            ${QtSensors_BINARY_DIR}
-                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Sensors_INCLUDE_DIRS}
-                            ${libpyside_SOURCE_DIR}
-                            ${QtCore_GEN_DIR})
+set(QtSensors_include_dirs
+    ${QtCore_GEN_DIR}
+)
 
-set(QtSensors_libraries pyside6
-                        ${Qt${QT_MAJOR_VERSION}Sensors_LIBRARIES})
+set(QtSensors_deps
+    QtCore
+)
 
-set(QtSensors_deps QtCore)
+set(QtSensors_libraries
+    Qt::Sensors
+)
 
 create_pyside_module(NAME QtSensors
                      INCLUDE_DIRS QtSensors_include_dirs
                      LIBRARIES QtSensors_libraries
                      DEPS QtSensors_deps
-                     TYPESYSTEM_PATH QtSensors_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtSensors_SRC
                      DROPPED_ENTRIES QtSensors_DROPPED_ENTRIES)

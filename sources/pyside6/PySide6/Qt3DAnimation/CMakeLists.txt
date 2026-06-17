@@ -38,25 +38,20 @@ ${Qt3DAnimation_GEN_DIR}/qt3danimation_qvertexblendanimation_wrapper.cpp
 ${Qt3DAnimation_GEN_DIR}/qt3danimation_module_wrapper.cpp)
 
 set(Qt3DAnimation_include_dirs
-                     ${Qt3DAnimation_SOURCE_DIR}
-                     ${Qt3DAnimation_BINARY_DIR}
-                     ${pyside6_SOURCE_DIR}
-                     ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIR}
-                     ${Qt${QT_MAJOR_VERSION}OpenGL_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}3DCore_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}3DRender_INCLUDE_DIRS}
-                     ${Qt${QT_MAJOR_VERSION}3DAnimation_INCLUDE_DIRS}
-                     ${libpyside_SOURCE_DIR}
-                     ${QtCore_GEN_DIR}
-                     ${QtGui_GEN_DIR}
-                     ${QtOpenGL_GEN_DIR}
-                     ${Qt3DCore_GEN_DIR}
-                     ${Qt3DRender_GEN_DIR}
-                     ${Qt3DAnimation_GEN_DIR})
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtOpenGL_GEN_DIR}
+    ${Qt3DCore_GEN_DIR}
+    ${Qt3DRender_GEN_DIR}
+    ${Qt3DAnimation_GEN_DIR}
+)
 
-set(Qt3DAnimation_libraries pyside6
-                     ${Qt${QT_MAJOR_VERSION}3DAnimation_LIBRARIES})
+set(Qt3DAnimation_libraries
+    # Core needs to come before 3DAnimation, otherwise there are issues with the wrong
+    # QAbstractAnimation type being picked up (the modules have different types with the same name).
+    Qt::Core
+    Qt::3DAnimation
+)
 
 set(Qt3DAnimation_deps Qt3DRender)
 
@@ -64,6 +59,6 @@ create_pyside_module(NAME Qt3DAnimation
                      INCLUDE_DIRS Qt3DAnimation_include_dirs
                      LIBRARIES Qt3DAnimation_libraries
                      DEPS Qt3DAnimation_deps
-                     TYPESYSTEM_PATH Qt3DAnimation_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES Qt3DAnimation_SRC
-                     TYPESYSTEM_NAME ${Qt3DAnimation_BINARY_DIR}/typesystem_3danimation.xml)
+                     TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_3danimation.xml")

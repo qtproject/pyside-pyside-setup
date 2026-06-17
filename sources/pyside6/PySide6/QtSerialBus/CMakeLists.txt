@@ -41,26 +41,26 @@ set(QtSerialBus_SRC
     ${QtSerialBus_GEN_DIR}/qtserialbus_module_wrapper.cpp
 )
 
-set(QtSerialBus_include_dirs ${QtSerialBus_SOURCE_DIR}
-                              ${QtSerialBus_BINARY_DIR}
-                              ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                              ${Qt${QT_MAJOR_VERSION}Network_INCLUDE_DIRS}
-                              ${Qt${QT_MAJOR_VERSION}SerialPort_INCLUDE_DIRS}
-                              ${Qt${QT_MAJOR_VERSION}SerialBus_INCLUDE_DIRS}
-                              ${libpyside_SOURCE_DIR}
-                              ${QtCore_GEN_DIR}
-                              ${QtNetwork_GEN_DIR}
-                              ${QtSerialPort_GEN_DIR})
+set(QtSerialBus_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtNetwork_GEN_DIR}
+    ${QtSerialPort_GEN_DIR}
+)
 
-set(QtSerialBus_libraries pyside6
-    ${Qt${QT_MAJOR_VERSION}SerialBus_LIBRARIES})
+set(QtSerialBus_deps
+    QtCore
+    QtNetwork
+    QtSerialPort
+)
 
-set(QtSerialBus_deps QtCore QtNetwork QtSerialPort)
+set(QtSerialBus_libraries
+    Qt::SerialBus
+)
 
 create_pyside_module(NAME QtSerialBus
                      INCLUDE_DIRS QtSerialBus_include_dirs
                      LIBRARIES QtSerialBus_libraries
                      DEPS QtSerialBus_deps
-                     TYPESYSTEM_PATH QtSerialBus_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtSerialBus_SRC
                      DROPPED_ENTRIES QtSerialBus_DROPPED_ENTRIES)

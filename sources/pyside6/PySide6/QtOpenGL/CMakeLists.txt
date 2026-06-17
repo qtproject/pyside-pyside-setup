@@ -77,24 +77,25 @@ endif()
 configure_file("${QtOpenGL_SOURCE_DIR}/QtOpenGL_global.post.h.in"
                "${QtOpenGL_BINARY_DIR}/QtOpenGL_global.post.h" @ONLY)
 
-set(QtOpenGL_include_dirs   ${QtOpenGL_SOURCE_DIR}
-                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}OpenGL_INCLUDE_DIRS}
-                            ${libpyside_SOURCE_DIR}
-                            ${QtCore_GEN_DIR}
-                            ${QtGui_GEN_DIR}
-                            ${QtOpenGL_GEN_DIR}
-                            )
-set(QtOpenGL_libraries      pyside6
-                            ${Qt${QT_MAJOR_VERSION}OpenGL_LIBRARIES})
-set(QtOpenGL_deps QtGui)
+set(QtOpenGL_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtOpenGL_GEN_DIR}
+)
+
+set(QtOpenGL_deps
+    QtGui
+)
+
+set(QtOpenGL_libraries
+    Qt::OpenGL
+)
 
 create_pyside_module(NAME QtOpenGL
                      INCLUDE_DIRS QtOpenGL_include_dirs
                      LIBRARIES QtOpenGL_libraries
                      DEPS QtOpenGL_deps
-                     TYPESYSTEM_PATH QtOpenGL_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtOpenGL_SRC
                      STATIC_SOURCES QtOpenGL_static_sources
                      DROPPED_ENTRIES QtOpenGL_DROPPED_ENTRIES)

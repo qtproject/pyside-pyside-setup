@@ -26,27 +26,25 @@ ${QtSql_GEN_DIR}/qtsql_module_wrapper.cpp
 configure_file("${QtSql_SOURCE_DIR}/QtSql_global.pre.h.in"
                "${QtSql_BINARY_DIR}/QtSql_global.pre.h" @ONLY)
 
-set(QtSql_include_dirs  ${QtSql_SOURCE_DIR}
-                        ${QtSql_BINARY_DIR}
-                        ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
-                        ${Qt${QT_MAJOR_VERSION}Sql_INCLUDE_DIRS}
-                        ${libpyside_SOURCE_DIR}
-                        ${QtCore_GEN_DIR}
-                        ${QtGui_GEN_DIR}
-                        ${QtWidgets_GEN_DIR})
+set(QtSql_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+    ${QtWidgets_GEN_DIR}
+)
+
+set(QtSql_deps
+    QtWidgets
+)
 
 # Link to QtWidgets to enable QSqlRelationalDelegate
-set(QtSql_libraries     pyside6
-                        ${Qt${QT_MAJOR_VERSION}Widgets_LIBRARIES}
-                        ${Qt${QT_MAJOR_VERSION}Sql_LIBRARIES})
-
-set(QtSql_deps QtWidgets)
+set(QtSql_libraries
+    Qt::Widgets
+    Qt::Sql
+)
 
 create_pyside_module(NAME QtSql
                      INCLUDE_DIRS QtSql_include_dirs
                      LIBRARIES QtSql_libraries
                      DEPS QtSql_deps
-                     TYPESYSTEM_PATH QtSql_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtSql_SRC)

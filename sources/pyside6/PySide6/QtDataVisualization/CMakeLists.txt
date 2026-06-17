@@ -45,25 +45,25 @@ ${QtDataVisualization_GEN_DIR}/q3dtheme_wrapper.cpp
 ${QtDataVisualization_GEN_DIR}/qtdatavisualization_module_wrapper.cpp
 )
 
-set(QtDataVisualization_include_dirs ${QtDataVisualization_SOURCE_DIR}
-                          ${QtDataVisualization_BINARY_DIR}
-                          ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                          ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
-                          ${Qt${QT_MAJOR_VERSION}DataVisualization_INCLUDE_DIRS}
-                          ${libpyside_SOURCE_DIR}
-                          ${QtCore_GEN_DIR}
-                          ${QtGui_GEN_DIR})
+set(QtDataVisualization_include_dirs
+    ${QtCore_GEN_DIR}
+    ${QtGui_GEN_DIR}
+)
 
-set(QtDataVisualization_libraries pyside6
-                                  ${Qt${QT_MAJOR_VERSION}DataVisualization_LIBRARIES})
+set(QtDataVisualization_deps
+    QtCore
+    QtGui
+)
 
-set(QtDataVisualization_deps QtCore QtGui)
+set(QtDataVisualization_libraries
+    Qt::DataVisualization
+)
 
 create_pyside_module(NAME QtDataVisualization
                      INCLUDE_DIRS QtDataVisualization_include_dirs
                      LIBRARIES QtDataVisualization_libraries
                      DEPS QtDataVisualization_deps
-                     TYPESYSTEM_PATH QtDataVisualization_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtDataVisualization_SRC
                      STATIC_SOURCES QtDataVisualization_src)
 

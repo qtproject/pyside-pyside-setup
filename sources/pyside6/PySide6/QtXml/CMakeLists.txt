@@ -26,20 +26,21 @@ ${QtXml_GEN_DIR}/qdomtext_wrapper.cpp
 ${QtXml_GEN_DIR}/qtxml_module_wrapper.cpp
 )
 
-set(QtXml_include_dirs      ${QtXml_SOURCE_DIR}
-                            ${QtXml_BINARY_DIR}
-                            ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
-                            ${Qt${QT_MAJOR_VERSION}Xml_INCLUDE_DIRS}
-                            ${libpyside_SOURCE_DIR}
-                            ${QtCore_GEN_DIR}
-                            )
-set(QtXml_libraries         pyside6
-                            ${Qt${QT_MAJOR_VERSION}Xml_LIBRARIES})
-set(QtXml_deps QtCore)
+set(QtXml_include_dirs
+    ${QtCore_GEN_DIR}
+)
+
+set(QtXml_deps
+    QtCore
+)
+
+set(QtXml_libraries
+    Qt::Xml
+)
 
 create_pyside_module(NAME QtXml
                      INCLUDE_DIRS QtXml_include_dirs
                      LIBRARIES QtXml_libraries
                      DEPS QtXml_deps
-                     TYPESYSTEM_PATH QtXml_SOURCE_DIR
+                     TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtXml_SRC)
