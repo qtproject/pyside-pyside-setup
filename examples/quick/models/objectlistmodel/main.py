@@ -4,41 +4,29 @@ from __future__ import annotations
 
 from pathlib import Path
 import sys
-from PySide6.QtCore import QObject, Property, Signal
+from PySide6.QtCore import QObject
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQuick import QQuickView
+from PySide6.QtQmlFeatures import auto_properties, watch, Change
 
 # This example illustrates exposing a list of QObjects as a model in QML
 
 
+# @auto_properties turns the plain "self.name = ..." / "self.color = ..."
+# assignments into real Q_PROPERTYs with nameChanged/colorChanged notify
+# signals, so QML can read them as model roles and write them back. The
+# @watch method then runs whenever the color is changed from QML.
+@auto_properties
 class DataObject(QObject):
-
-    nameChanged = Signal()
-    colorChanged = Signal()
 
     def __init__(self, name, color, parent=None):
         super().__init__(parent)
-        self._name = name
-        self._color = color
+        self.name = name
+        self.color = color
 
-    def name(self):
-        return self._name
-
-    def setName(self, name):
-        if name != self._name:
-            self._name = name
-            self.nameChanged.emit()
-
-    def color(self):
-        return self._color
-
-    def setColor(self, color):
-        if color != self._color:
-            self._color = color
-            self.colorChanged.emit()
-
-    name = Property(str, name, setName, notify=nameChanged)
-    color = Property(str, color, setColor, notify=colorChanged)
+    @watch("color")
+    def on_color_changed(self, change: Change):
+        print(f"{self.name}: color {change.old} -> {change.new}")
 
 
 if __name__ == '__main__':
