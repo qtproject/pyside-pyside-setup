@@ -122,7 +122,7 @@ macro(collect_optional_modules)
         Graphs
         GraphsWidgets
         Bluetooth)
-    find_package(Qt${QT_MAJOR_VERSION}UiTools)
+    find_package(Qt${QT_MAJOR_VERSION}UiTools QUIET)
     if(Qt${QT_MAJOR_VERSION}UiTools_FOUND)
         list(APPEND ALL_OPTIONAL_MODULES UiTools)
     else()
@@ -133,7 +133,7 @@ macro(collect_optional_modules)
     endif()
     list(APPEND ALL_OPTIONAL_MODULES WebChannel WebEngineCore WebEngineWidgets
          WebEngineQuick WebSockets HttpServer)
-    find_package(Qt${QT_MAJOR_VERSION}WebEngineQuick)
+    find_package(Qt${QT_MAJOR_VERSION}WebEngineQuick QUIET)
     # For Windows and Linux, QtWebView depends on QtWebEngine to render content.
     # On Android and Apple platforms, QtWebView uses the native webview backend and
     # does not require QtWebEngine.

@@ -198,7 +198,7 @@ foreach(m IN LISTS NON_QT_MODULES)
     list(FILTER required_modules EXCLUDE REGEX "^(Qt)?${m}$")
 endforeach()
 
-find_package(Qt6
+find_package(Qt6 QUIET
     COMPONENTS ${required_modules}
     OPTIONAL_COMPONENTS ${optional_modules}
 )
@@ -215,10 +215,10 @@ foreach(m IN LISTS DISABLED_MODULES)
 endforeach()
 
 # Whether to add libpysideqml
-find_package(Qt6 COMPONENTS Qml)
+find_package(Qt6 QUIET COMPONENTS Qml)
 
 # Whether to add libpysideremoteobjects
-find_package(Qt6 COMPONENTS RemoteObjects)
+find_package(Qt6 QUIET COMPONENTS RemoteObjects)
 
 string(REGEX MATCHALL "[0-9]+" qt_version_helper "${Qt${QT_MAJOR_VERSION}Core_VERSION}")
 
@@ -277,4 +277,4 @@ if(SANITIZE_THREAD)
     setup_sanitize_thread()
 endif()
 
-find_package(Qt6 COMPONENTS Designer)
+find_package(Qt6 QUIET COMPONENTS Designer)
