@@ -171,9 +171,6 @@ macro(create_pyside_module)
     if ("${module_NAME}" STREQUAL "")
         message(FATAL_ERROR "create_pyside_module needs a NAME value.")
     endif()
-    if ("${module_INCLUDE_DIRS}" STREQUAL "")
-        message(FATAL_ERROR "create_pyside_module needs at least one INCLUDE_DIRS value.")
-    endif()
     if ("${module_TYPESYSTEM_PATH}" STREQUAL "")
         message(FATAL_ERROR "create_pyside_module needs a TYPESYSTEM_PATH value.")
     endif()
@@ -347,10 +344,15 @@ macro(create_pyside_module)
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         COMMENT "Running generator for ${module_NAME}...")
 
-    include_directories(${module_NAME} ${${module_INCLUDE_DIRS}} ${pyside6_SOURCE_DIR})
     add_library(${module_NAME} MODULE ${${module_SOURCES}}
                                       ${${module_STATIC_SOURCES}})
 
+    target_include_directories(${module_NAME}
+        PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}"
+            "${pyside6_SOURCE_DIR}"
+            ${${module_INCLUDE_DIRS}}
+    )
     append_size_optimization_flags(${module_NAME})
 
     target_compile_definitions(${module_NAME} PRIVATE -DQT_LEAN_HEADERS=1)
