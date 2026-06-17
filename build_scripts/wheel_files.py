@@ -163,6 +163,7 @@ def wheel_files_pyside_essentials() -> list[ModuleData]:
         module_QtConcurrent(),
         module_QtDBus(),
         module_QtDesigner(),
+        module_QtLabsStyleKit(),
         module_QtOpenGL(),
         module_QtOpenGLWidgets(),
         module_QtPrintSupport(),
@@ -663,6 +664,11 @@ def module_QtQuickTest() -> ModuleData:
 
 def module_QtQuickWidgets() -> ModuleData:
     data = ModuleData("QuickWidgets")
+    return data
+
+
+def module_QtLabsStyleKit() -> ModuleData:
+    data = ModuleData("LabsStyleKit")
     return data
 
 

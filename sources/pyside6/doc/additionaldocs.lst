@@ -197,6 +197,9 @@ qtgui/webxml/richtext.webxml
 qthelp/webxml/qthelp-framework.webxml
 qthelp/webxml/qthelpproject.webxml
 qthttpserver/webxml/qthttpserver-logging.webxml
+qtlabsstylekit/webxml/qtlabsstylekit-fallbackstyle.webxml
+qtlabsstylekit/webxml/qtlabsstylekit-overview-features.webxml
+qtlabsstylekit/webxml/qtlabsstylekit-propagation.webxml
 qtlocation/webxml/location-maps-cpp.webxml
 qtlocation/webxml/location-maps-qml.webxml
 qtlocation/webxml/location-places-backend.webxml

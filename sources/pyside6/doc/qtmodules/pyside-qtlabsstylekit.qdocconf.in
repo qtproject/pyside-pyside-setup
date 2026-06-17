@@ -1,0 +1,3 @@
+include(@QT_SRC_DIR@/../qtdeclarative/src/labs/stylekit/doc/qtlabsstylekit.qdocconf)
+includepaths += -I @QT_SRC_DIR@/../qtdeclarative/src/labs/stylekit -I @QT_SRC_DIR@/../qtdeclarative/src/labs/stylekit/widgets
+include(../pyside-config.qdocconf)

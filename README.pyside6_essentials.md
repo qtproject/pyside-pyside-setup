@@ -20,6 +20,7 @@ it includes only the essentials Qt modules:
 * QtConcurrent
 * QtDBus
 * QtDesigner
+* QtLabsStyleKit
 * QtOpenGL
 * QtOpenGLWidgets
 * QtPrintSupport

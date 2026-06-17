@@ -74,7 +74,7 @@ from Python.
         Layouts are items that are used to arrange Qt Quick 2 based items
         in the user interface.
 
-    .. grid-item-card::  `Qt Labs StyleKit`_
+    .. grid-item-card:: :mod:`Qt Labs StyleKit <PySide6.QtLabsStyleKit>`
 
         A dedicated styling API that streamlines styling Qt Quick Controls
         through a set of shared design attributes.
