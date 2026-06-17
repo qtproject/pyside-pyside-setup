@@ -367,8 +367,13 @@ macro(create_pyside_module)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOMINMAX")
     endif()
 
-    target_link_libraries(${module_NAME} ${${module_LIBRARIES}})
-    target_link_libraries(${module_NAME} Shiboken6::libshiboken)
+    target_link_libraries(${module_NAME}
+        PRIVATE
+            Shiboken6::libshiboken
+            PySide6::pyside6
+            ${${module_LIBRARIES}}
+    )
+
     if(${module_DEPS})
         add_dependencies(${module_NAME} ${${module_DEPS}})
     endif()
