@@ -24,7 +24,9 @@ class MyWidget(QWidget):
         super().__init__()
 
         layout = QVBoxLayout(self)
-        layout.addWidget(QVideoWidget())
+        vw = QVideoWidget()
+        vw.setMinimumSize(100, 100)
+        layout.addWidget(vw)
 
         graphicsScene = QGraphicsScene()
         graphicsView = QGraphicsView(graphicsScene)
