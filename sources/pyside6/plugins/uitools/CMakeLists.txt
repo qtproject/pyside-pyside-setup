@@ -22,6 +22,7 @@ add_compile_definitions(QT_STATICPLUGIN)
 
 set_property(TARGET pyside6 PROPERTY CXX_STANDARD 17)
 
+target_include_directories(uiplugin INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(uiplugin
                       Qt::Core
                       Qt::Gui

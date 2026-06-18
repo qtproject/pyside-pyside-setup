@@ -19,7 +19,6 @@ set(QtUiTools_static_sources
 )
 
 set(QtUiTools_include_dirs
-    ${plugins_SOURCE_DIR}
     ${QtCore_GEN_DIR}
     ${QtGui_GEN_DIR}
     ${QtWidgets_GEN_DIR}
