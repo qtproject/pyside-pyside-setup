@@ -1,26 +1,6 @@
 # Copyright (C) 2025 Ford Motor Company
 # SPDX-License-Identifier: BSD-3-Clause
 
-if (NOT CMAKE_MINIMUM_REQUIRED_VERSION)
-    cmake_minimum_required(VERSION 3.25)
-    cmake_policy(VERSION 3.22)
-endif()
-
-project(libpysideremoteobjects LANGUAGES CXX)
-
-if (NOT libpyside_SOURCE_DIR) # Building standalone
-    message(STATUS "Building standalone. Setting C++ standard and build type.")
-    set(CMAKE_CXX_STANDARD 17)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-    if(NOT CMAKE_BUILD_TYPE)
-        set(CMAKE_BUILD_TYPE Release)
-    endif()
-    find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
-    find_package(Shiboken6 REQUIRED)
-    find_package(libpyside REQUIRED)
-    get_target_property(pyside6_SOURCE_DIR PySide6::pyside6 INTERFACE_INCLUDE_DIRECTORIES)
-endif()
-
 find_package(Qt6 REQUIRED COMPONENTS Core RepParser RemoteObjects RemoteObjectsPrivate)
 
 set(libpysideremoteobjects_HEADERS
