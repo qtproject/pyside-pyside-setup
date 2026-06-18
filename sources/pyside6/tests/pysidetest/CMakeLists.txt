@@ -111,8 +111,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${PYSIDE_PACKAGE_SOURCE_DIR}
                     ${QtCore_GEN_DIR}
                     ${QtGui_GEN_DIR}
-                    ${QtWidgets_GEN_DIR}
-                    ${libpyside_SOURCE_DIR})
+                    ${QtWidgets_GEN_DIR})
 
 add_library(pysidetest SHARED ${pysidetest_SRC})
 set_target_properties(pysidetest PROPERTIES
@@ -120,6 +119,7 @@ set_target_properties(pysidetest PROPERTIES
 
 target_link_libraries(pysidetest
                       Shiboken6::libshiboken
+                      PySide6::pyside6
                       Qt::Core Qt::Gui Qt::Widgets)
 
 add_library(testbinding MODULE ${testbinding_SRC})
