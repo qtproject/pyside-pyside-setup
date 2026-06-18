@@ -2,8 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 project(QtDesigner)
-
-qt_wrap_cpp(QtDesigner_static_src "${pyside6_SOURCE_DIR}/qpydesignerextensions.h")
+qt_wrap_cpp(QtDesigner_static_src "${PYSIDE_PACKAGE_SOURCE_DIR}/qpydesignerextensions.h")
 list(APPEND QtDesigner_static_src "${CMAKE_CURRENT_SOURCE_DIR}/qpydesignercustomwidgetcollection.cpp")
 
 set(QtDesigner_SRC
@@ -70,4 +69,4 @@ create_pyside_module(NAME QtDesigner
                      STATIC_SOURCES QtDesigner_static_src
                      TYPESYSTEM_NAME "${CMAKE_CURRENT_BINARY_DIR}/typesystem_designer.xml")
 
-install(FILES ${pyside6_SOURCE_DIR}/qpydesignerextensions.h DESTINATION include/PySide6/QtDesigner)
+install(FILES ${PYSIDE_PACKAGE_SOURCE_DIR}/qpydesignerextensions.h DESTINATION include/PySide6/QtDesigner)

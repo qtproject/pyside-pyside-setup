@@ -142,7 +142,7 @@ if (FULLDOCSBUILD)
     set(config_docconf "${CMAKE_CURRENT_LIST_DIR}/pyside-config.qdocconf")
     configure_file("pyside-config.qdocconf.in" "${config_docconf}" @ONLY)
 
-    set(global_header "${pyside6_BINARY_DIR}/qdoc.h")
+    set(global_header "${PYSIDE_PACKAGE_BINARY_DIR}/qdoc.h")
     file(READ "${CMAKE_CURRENT_LIST_DIR}/../PySide6/pyside6_global.h" docHeaderContents)
     file(WRITE ${global_header} "${docHeaderContents}")
 
@@ -178,7 +178,7 @@ if (FULLDOCSBUILD)
     configure_file("qdoc_spawner.py.in" "qdoc_spawner.py" @ONLY)
 
 
-    set(QDOC_TYPESYSTEM_PATH "${pyside6_SOURCE_DIR}${PATH_SEP}${pyside6_BINARY_DIR}")
+    set(QDOC_TYPESYSTEM_PATH "${PYSIDE_PACKAGE_SOURCE_DIR}${PATH_SEP}${PYSIDE_PACKAGE_BINARY_DIR}")
 
     if(NOT qdoc_binary)
         message(FATAL_ERROR
@@ -256,7 +256,7 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${DOC_BASE_DIR}/PySide6/Q
                        --generator-set=qtdoc
                        ${global_header}
                        --enable-pyside-extensions
-                       --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${RHI_INCLUDE_DIR}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
+                       --include-paths="${QT_INCLUDE_DIR}${PATH_SEP}${RHI_INCLUDE_DIR}${PATH_SEP}${PYSIDE_PACKAGE_SOURCE_DIR}${PATH_SEP}${TS_ROOT}"
                        --api-version=${SUPPORTED_QT_VERSION}
                        --typesystem-paths="${QDOC_TYPESYSTEM_PATH}"
                        --library-source-dir=${QT_SRC_DIR}

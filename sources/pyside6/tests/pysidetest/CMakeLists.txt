@@ -69,7 +69,7 @@ if(CMAKE_HOST_APPLE AND QtCore_is_framework)
     set(shiboken_framework_include_dirs_option "--framework-include-paths=${shiboken_framework_include_dirs}")
 endif()
 
-make_path(testbinding_include_dirs  ${pyside6_BINARY_DIR}
+make_path(testbinding_include_dirs  ${PYSIDE_PACKAGE_BINARY_DIR}
                                     ${CMAKE_CURRENT_SOURCE_DIR}
                                     ${CMAKE_CURRENT_SOURCE_DIR}/../../../shiboken6/libshiboken
                                     ${CMAKE_CURRENT_SOURCE_DIR}/../../PySide6
@@ -80,8 +80,8 @@ make_path(testbinding_include_dirs  ${pyside6_BINARY_DIR}
                                     ${Qt${QT_MAJOR_VERSION}Widgets_DIRECT_INCLUDE_DIR}
                                     )
 
-make_path(testbinding_typesystem_path ${pyside6_SOURCE_DIR}
-                                      ${pyside6_BINARY_DIR})
+make_path(testbinding_typesystem_path ${PYSIDE_PACKAGE_SOURCE_DIR}
+                                      ${PYSIDE_PACKAGE_BINARY_DIR})
 
 shiboken_get_tool_shell_wrapper(shiboken tool_wrapper)
 
@@ -108,7 +108,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${Qt${QT_MAJOR_VERSION}Core_INCLUDE_DIRS}
                     ${Qt${QT_MAJOR_VERSION}Gui_INCLUDE_DIRS}
                     ${Qt${QT_MAJOR_VERSION}Widgets_INCLUDE_DIRS}
-                    ${pyside6_SOURCE_DIR}
+                    ${PYSIDE_PACKAGE_SOURCE_DIR}
                     ${QtCore_GEN_DIR}
                     ${QtGui_GEN_DIR}
                     ${QtWidgets_GEN_DIR}

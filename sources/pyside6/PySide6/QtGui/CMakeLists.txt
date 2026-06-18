@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 project(QtGui)
+qt_wrap_cpp(QPYTEXTOBJECT_MOC "${PYSIDE_PACKAGE_SOURCE_DIR}/qpytextobject.h")
 
-qt_wrap_cpp(QPYTEXTOBJECT_MOC "${pyside6_SOURCE_DIR}/qpytextobject.h")
 
 set(QtGui_DROPPED_ENTRIES)
 
@@ -365,6 +365,6 @@ create_pyside_module(NAME QtGui
                      DROPPED_ENTRIES QtGui_DROPPED_ENTRIES
                      ADDITIONAL_INCLUDE_DIRS QtGui_private_include_dirs)
 
-install(FILES ${pyside6_SOURCE_DIR}/qpytextobject.h
-              ${pyside6_SOURCE_DIR}/qtguihelper.h
+install(FILES ${PYSIDE_PACKAGE_SOURCE_DIR}/qpytextobject.h
+              ${PYSIDE_PACKAGE_SOURCE_DIR}/qtguihelper.h
         DESTINATION include/PySide6/QtGui/)

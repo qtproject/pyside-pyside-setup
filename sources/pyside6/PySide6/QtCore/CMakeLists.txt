@@ -12,7 +12,7 @@ set(QtCore_static_sources
     "${CMAKE_CURRENT_SOURCE_DIR}/glue/core_snippets.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/glue/qtcorehelper.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/glue/qiopipe.cpp"
-    "${pyside6_SOURCE_DIR}/qiopipe.h"
+    "${PYSIDE_PACKAGE_SOURCE_DIR}/qiopipe.h"
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -299,5 +299,5 @@ if (APPLE)
     endforeach()
 endif()
 
-install(FILES ${pyside6_SOURCE_DIR}/qtcorehelper.h ${pyside6_SOURCE_DIR}/qiopipe.h
+install(FILES ${PYSIDE_PACKAGE_SOURCE_DIR}/qtcorehelper.h ${PYSIDE_PACKAGE_SOURCE_DIR}/qiopipe.h
         DESTINATION include/PySide6/QtCore/)

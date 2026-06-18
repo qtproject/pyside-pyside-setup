@@ -3,8 +3,8 @@
 
 project(QtQml)
 
-qt_wrap_cpp(QPYQMLPARSERSTATUS_MOC "${pyside6_SOURCE_DIR}/qpyqmlparserstatus.h")
-qt_wrap_cpp(QPYQMLPROPERTYVALUESOURCE_MOC "${pyside6_SOURCE_DIR}/qpyqmlpropertyvaluesource.h")
+qt_wrap_cpp(QPYQMLPARSERSTATUS_MOC "${PYSIDE_PACKAGE_SOURCE_DIR}/qpyqmlparserstatus.h")
+qt_wrap_cpp(QPYQMLPROPERTYVALUESOURCE_MOC "${PYSIDE_PACKAGE_SOURCE_DIR}/qpyqmlpropertyvaluesource.h")
 
 set(QtQml_static_sources "${CMAKE_CURRENT_SOURCE_DIR}/pysideqmlvolatilebool.cpp"
                          "${QPYQMLPARSERSTATUS_MOC}"

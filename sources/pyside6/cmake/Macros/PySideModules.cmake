@@ -216,7 +216,7 @@ macro(create_pyside_module)
     # Add QtCore since include conventions are sometimes violated for its classes
     get_target_property(qt_core_includes Qt${QT_MAJOR_VERSION}::Core
                         INTERFACE_INCLUDE_DIRECTORIES)
-    set(shiboken_include_dir_list ${pyside6_SOURCE_DIR} ${qt_platform_includes}
+    set(shiboken_include_dir_list ${PYSIDE_PACKAGE_SOURCE_DIR} ${qt_platform_includes}
         ${qt_core_includes})
     if(module_ADDITIONAL_INCLUDE_DIRS)
         list(APPEND shiboken_include_dir_list ${${module_ADDITIONAL_INCLUDE_DIRS}})
@@ -293,7 +293,7 @@ macro(create_pyside_module)
         ${GENERATOR_EXTRA_FLAGS}
         "--include-paths=${shiboken_include_dirs}"
         "${force_process_system_include_paths}"
-        "--typesystem-paths=${pyside_binary_dir}${PATH_SEP}${pyside6_SOURCE_DIR}${PATH_SEP}${${module_TYPESYSTEM_PATH}}"
+        "--typesystem-paths=${pyside_binary_dir}${PATH_SEP}${PYSIDE_PACKAGE_SOURCE_DIR}${PATH_SEP}${${module_TYPESYSTEM_PATH}}"
         --output-directory=${CMAKE_CURRENT_BINARY_DIR}
         --license-file=${CMAKE_CURRENT_SOURCE_DIR}/../licensecomment.txt
         --lean-headers
@@ -331,7 +331,7 @@ macro(create_pyside_module)
         list(APPEND shiboken_command "\"--drop-type-entries=${dropped_entries}\"")
     endif()
 
-    list(APPEND shiboken_command "${pyside6_BINARY_DIR}/${module_NAME}_global.h"
+    list(APPEND shiboken_command "${PYSIDE_PACKAGE_BINARY_DIR}/${module_NAME}_global.h"
          ${typesystem_path})
 
     add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mjb_rejected_classes.log"
@@ -350,7 +350,7 @@ macro(create_pyside_module)
     target_include_directories(${module_NAME}
         PRIVATE
             "${CMAKE_CURRENT_SOURCE_DIR}"
-            "${pyside6_SOURCE_DIR}"
+            "${PYSIDE_PACKAGE_SOURCE_DIR}"
             ${${module_INCLUDE_DIRS}}
     )
     append_size_optimization_flags(${module_NAME})
@@ -360,7 +360,7 @@ macro(create_pyside_module)
     set_target_properties(${module_NAME} PROPERTIES
                           PREFIX ""
                           OUTPUT_NAME "${module_NAME}${SHIBOKEN_PYTHON_EXTENSION_SUFFIX}"
-                          LIBRARY_OUTPUT_DIRECTORY ${pyside6_BINARY_DIR})
+                          LIBRARY_OUTPUT_DIRECTORY ${PYSIDE_PACKAGE_BINARY_DIR})
     if(WIN32)
         set_target_properties(${module_NAME} PROPERTIES SUFFIX ".pyd")
         # Sanitize windows.h as pulled by gl.h to prevent clashes with QAbstract3dAxis::min(), etc.

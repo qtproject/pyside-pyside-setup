@@ -34,7 +34,7 @@ target_include_directories(pyside6remoteobjects PRIVATE
     ${Qt${QT_VERSION_MAJOR}Core_PRIVATE_INCLUDE_DIRS}
     ${Qt${QT_MAJOR_VERSION}RemoteObjects_INCLUDE_DIRS}
     ${Qt${QT_MAJOR_VERSION}RemoteObjects_PRIVATE_INCLUDE_DIRS}
-    ${pyside6_SOURCE_DIR}                     # Added internally by the create_pyside_module function
+    ${PYSIDE_PACKAGE_SOURCE_DIR} # Added internally by the create_pyside_module function
     ${SHIBOKEN_INCLUDE_DIR}
     ${libpyside_SOURCE_DIR}
     ${SHIBOKEN_PYTHON_INCLUDE_DIR}

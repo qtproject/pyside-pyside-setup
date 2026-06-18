@@ -8,7 +8,7 @@ add_library(QtQmlFeatures MODULE pyside_feature_module.cpp)
 set_target_properties(QtQmlFeatures PROPERTIES
     PREFIX ""
     OUTPUT_NAME "QtQmlFeatures${SHIBOKEN_PYTHON_EXTENSION_SUFFIX}"
-    LIBRARY_OUTPUT_DIRECTORY ${pyside6_BINARY_DIR})
+    LIBRARY_OUTPUT_DIRECTORY ${PYSIDE_PACKAGE_BINARY_DIR})
 
 if(WIN32)
     set_target_properties(QtQmlFeatures PROPERTIES SUFFIX ".pyd")
@@ -44,7 +44,7 @@ if(NOT (PYSIDE_IS_CROSS_BUILD OR DISABLE_PYI))
         add_dependencies(QtQmlFeatures_pyi shibokenmodule)
     endif()
 
-    install(FILES "${pyside6_BINARY_DIR}/QtQmlFeatures.pyi"
+    install(FILES "${PYSIDE_PACKAGE_BINARY_DIR}/QtQmlFeatures.pyi"
             DESTINATION "${PYTHON_SITE_PACKAGES}/PySide6")
 endif()
 

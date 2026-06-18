@@ -52,4 +52,4 @@ create_pyside_module(NAME QtDBus
                      TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
                      SOURCES QtDBus_SRC)
 
-install(FILES ${pyside6_SOURCE_DIR}/qtdbushelper.h DESTINATION include/PySide6/QtDBus)
+install(FILES ${PYSIDE_PACKAGE_SOURCE_DIR}/qtdbushelper.h DESTINATION include/PySide6/QtDBus)

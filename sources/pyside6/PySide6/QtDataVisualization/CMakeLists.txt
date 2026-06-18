@@ -67,5 +67,5 @@ create_pyside_module(NAME QtDataVisualization
                      SOURCES QtDataVisualization_SRC
                      STATIC_SOURCES QtDataVisualization_src)
 
-install(FILES ${pyside6_SOURCE_DIR}/qtdatavisualization_helper.h
+install(FILES ${PYSIDE_PACKAGE_SOURCE_DIR}/qtdatavisualization_helper.h
         DESTINATION include/PySide6/QtDataVisualization)
