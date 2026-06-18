@@ -110,6 +110,8 @@ target_include_directories(apiextractor PRIVATE ${CLANG_INCLUDE_DIRS}
                                                 ${CMAKE_CURRENT_SOURCE_DIR}
                                                 ${CMAKE_CURRENT_BINARY_DIR}
                                                 ${CMAKE_CURRENT_SOURCE_DIR}/parser)
+target_include_directories(apiextractor PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
 target_link_libraries(apiextractor PUBLIC Qt::Core)
 target_link_libraries(apiextractor PRIVATE libclang)
 

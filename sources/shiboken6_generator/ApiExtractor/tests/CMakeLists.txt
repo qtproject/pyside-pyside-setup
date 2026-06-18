@@ -16,7 +16,6 @@ macro(declare_test testname)
     add_executable(${testname} ${SOURCES})
     target_include_directories(${testname} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                                                    ${CMAKE_CURRENT_BINARY_DIR}
-                                                   ${apiextractor_SOURCE_DIR}
                                                    )
     target_link_libraries(${testname} PRIVATE apiextractor Qt::Test)
     add_test(${testname} ${testname})

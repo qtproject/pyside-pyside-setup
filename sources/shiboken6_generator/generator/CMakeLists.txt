@@ -43,7 +43,6 @@ target_include_directories(shiboken6 PRIVATE
                     ${CMAKE_CURRENT_SOURCE_DIR}/qtdoc
                     ${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
-                    ${apiextractor_SOURCE_DIR}
                     )
 target_link_libraries(shiboken6 apiextractor Qt::Core)
 if (NOT DISABLE_DOCSTRINGS)
