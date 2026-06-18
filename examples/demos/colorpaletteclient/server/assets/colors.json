@@ -1,0 +1,74 @@
+[
+    {
+        "id": 1,
+        "name": "cerulean",
+        "color": "#98B2D1",
+        "pantone_value": "15-4020"
+    },
+    {
+        "id": 2,
+        "name": "fuchsia rose",
+        "color": "#C74375",
+        "pantone_value": "17-2031"
+    },
+    {
+        "id": 3,
+        "name": "true red",
+        "color": "#BF1932",
+        "pantone_value": "19-1664"
+    },
+    {
+        "id": 4,
+        "name": "aqua sky",
+        "color": "#7BC4C4",
+        "pantone_value": "14-4811"
+    },
+    {
+        "id": 5,
+        "name": "tigerlily",
+        "color": "#E2583E",
+        "pantone_value": "17-1456"
+    },
+    {
+        "id": 6,
+        "name": "blue turquoise",
+        "color": "#53B0AE",
+        "pantone_value": "15-5217"
+    },
+    {
+        "id": 7,
+        "name": "sand dollar",
+        "color": "#DECDBE",
+        "pantone_value": "13-1106"
+    },
+    {
+        "id": 8,
+        "name": "chili pepper",
+        "color": "#9B1B30",
+        "pantone_value": "19-1557"
+    },
+    {
+        "id": 9,
+        "name": "blue iris",
+        "color": "#5A5B9F",
+        "pantone_value": "18-3943"
+    },
+    {
+        "id": 10,
+        "name": "mimosa",
+        "color": "#F0C05A",
+        "pantone_value": "14-0848"
+    },
+    {
+        "id": 11,
+        "name": "turquoise",
+        "color": "#45B5AA",
+        "pantone_value": "15-5519"
+    },
+    {
+        "id": 12,
+        "name": "honeysuckle",
+        "color": "#D94F70",
+        "pantone_value": "18-2120"
+    }
+]
