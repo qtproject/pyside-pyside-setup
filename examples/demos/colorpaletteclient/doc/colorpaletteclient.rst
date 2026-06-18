@@ -39,6 +39,10 @@ connects to whichever one is running. To run the bundled FastAPI server:
     pip install -r requirements.txt
     ./start_server.sh
 
+or on Windows::
+
+    .\start_server.bat
+
 The FastAPI server is stateful: color additions, edits, and deletions persist
 for the lifetime of the server process.
 
