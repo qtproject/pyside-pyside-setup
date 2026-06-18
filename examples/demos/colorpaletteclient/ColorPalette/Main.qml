@@ -4,8 +4,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-
-import ColorPalette
+import QtQuick.Dialogs
 
 Window {
     id: window
@@ -19,27 +18,44 @@ Window {
         ColorView = 1
     }
 
-    ServerSelection {
-        id: serverview
-        anchors.fill: parent
-        onServerSelected: {colorview.visible = true; serverview.visible = false}
-        colorResources: colorPalette
-        restPalette: paletteService
-        colorUsers: users
-    }
+    // The Qt colorpalette REST API server listens here, so the client
+    // just connects on startup.
+    required property var serverUrl
 
     ColorView {
         id: colorview
         anchors.fill: parent
-        visible: false
         loginService: colorLogin
         colors: colorPalette
         colorViewUsers: users
     }
 
+    MessageDialog {
+        id: connectionErrorDialog
+        title: qsTr("Connection failed")
+        text: qsTr("Could not reach the server at %1.").arg(window.serverUrl)
+        informativeText: qsTr("Start the Qt colorpalette REST API server "
+            + "on port 49425, then retry.")
+        buttons: MessageDialog.Cancel | MessageDialog.Retry
+        onButtonClicked: function(button) {
+            if (button === MessageDialog.Retry) {
+                colorPalette.refreshCurrentPage()
+                users.refreshCurrentPage()
+            } else if (button === MessageDialog.Cancel) {
+                Qt.quit()
+            }
+        }
+    }
+
+    Connections {
+        target: colorPalette
+        function onErrorOccurred(message) { connectionErrorDialog.open() }
+    }
+
     //! [RestService QML element]
     RestService {
         id: paletteService
+        url: window.serverUrl
 
         PaginatedResource {
             id: users
@@ -59,4 +75,8 @@ Window {
     }
     //! [RestService QML element]
 
+    Component.onCompleted: {
+        colorPalette.refreshCurrentPage()
+        users.refreshCurrentPage()
+    }
 }

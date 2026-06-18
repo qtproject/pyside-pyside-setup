@@ -10,7 +10,6 @@ import QtQuick.Effects
 import QtQuick.Shapes
 
 import QtExampleStyle
-import ColorPalette
 
 Rectangle {
     id: root
