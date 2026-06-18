@@ -26,6 +26,7 @@ class PaginatedResource(AbstractResource):
     dataUpdated = Signal()
     pageUpdated = Signal()
     pagesUpdated = Signal()
+    errorOccurred = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -81,6 +82,7 @@ class PaginatedResource(AbstractResource):
         if error:
             url = reply.networkReply().url().toString()
             print(f'PaginatedResource: request "{url}" failed: "{error}"', file=sys.stderr)
+            self.errorOccurred.emit(error)
             self.refreshRequestFailed()
 
     def refreshRequestFinished(self, json):

@@ -9,7 +9,6 @@ import QtQuick.Layouts
 import QtQuick.Effects
 
 import QtExampleStyle
-import ColorPalette
 
 Popup {
     id: userMenu
