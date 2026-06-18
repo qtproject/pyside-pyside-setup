@@ -34,9 +34,7 @@ target_include_directories(pyside6remoteobjects PRIVATE
     ${Qt${QT_VERSION_MAJOR}Core_PRIVATE_INCLUDE_DIRS}
     ${Qt${QT_MAJOR_VERSION}RemoteObjects_INCLUDE_DIRS}
     ${Qt${QT_MAJOR_VERSION}RemoteObjects_PRIVATE_INCLUDE_DIRS}
-    ${PYSIDE_PACKAGE_SOURCE_DIR} # Added internally by the create_pyside_module function
     ${SHIBOKEN_INCLUDE_DIR}
-    ${libpyside_SOURCE_DIR}
     ${SHIBOKEN_PYTHON_INCLUDE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}               # Include the component-specific build directory
 )
@@ -44,6 +42,7 @@ target_include_directories(pyside6remoteobjects INTERFACE "${CMAKE_CURRENT_SOURC
 
 target_link_libraries(pyside6remoteobjects PRIVATE
     Shiboken6::libshiboken                    # Added internally by the create_pyside_module function
+    PySide6::pyside6
     Qt6::Core
     Qt6::RemoteObjectsPrivate
 )
