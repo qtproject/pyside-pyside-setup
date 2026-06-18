@@ -5,7 +5,7 @@ project(QtGraphs)
 
 set(QtGraphs_DROPPED_ENTRIES)
 
-list(APPEND QtGraphs_src "${QtGraphs_SOURCE_DIR}/qtgraphs_helper.cpp")
+list(APPEND QtGraphs_src "${CMAKE_CURRENT_SOURCE_DIR}/qtgraphs_helper.cpp")
 
 set(QtGraphs_SRC
 # 3D

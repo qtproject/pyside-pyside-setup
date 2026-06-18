@@ -6,7 +6,7 @@ project(QtQml)
 qt_wrap_cpp(QPYQMLPARSERSTATUS_MOC "${pyside6_SOURCE_DIR}/qpyqmlparserstatus.h")
 qt_wrap_cpp(QPYQMLPROPERTYVALUESOURCE_MOC "${pyside6_SOURCE_DIR}/qpyqmlpropertyvaluesource.h")
 
-set(QtQml_static_sources "${QtQml_SOURCE_DIR}/pysideqmlvolatilebool.cpp"
+set(QtQml_static_sources "${CMAKE_CURRENT_SOURCE_DIR}/pysideqmlvolatilebool.cpp"
                          "${QPYQMLPARSERSTATUS_MOC}"
                          "${QPYQMLPROPERTYVALUESOURCE_MOC}")
 
@@ -47,8 +47,8 @@ ${QtQml_GEN_DIR}/qqmlnetworkaccessmanagerfactory_wrapper.cpp
 ${QtQml_GEN_DIR}/qtqml_module_wrapper.cpp
 )
 
-configure_file("${QtQml_SOURCE_DIR}/QtQml_global.post.h.in"
-               "${QtQml_BINARY_DIR}/QtQml_global.post.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/QtQml_global.post.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/QtQml_global.post.h" @ONLY)
 
 set(QtQml_include_dirs
     ${QtCore_GEN_DIR}

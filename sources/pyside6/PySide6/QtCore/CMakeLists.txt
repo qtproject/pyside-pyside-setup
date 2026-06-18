@@ -8,10 +8,10 @@ set(CMAKE_AUTOMOC ON)
 set(QtCore_DROPPED_ENTRIES )
 
 set(QtCore_static_sources
-    "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.cpp"
-    "${QtCore_SOURCE_DIR}/glue/core_snippets.cpp"
-    "${QtCore_SOURCE_DIR}/glue/qtcorehelper.cpp"
-    "${QtCore_SOURCE_DIR}/glue/qiopipe.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glue/qeasingcurve_glue.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glue/core_snippets.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glue/qtcorehelper.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glue/qiopipe.cpp"
     "${pyside6_SOURCE_DIR}/qiopipe.h"
 )
 
@@ -250,12 +250,12 @@ else()
     list(APPEND QtCore_SRC ${QtCore_GEN_DIR}/qprocessenvironment_wrapper.cpp)
 endif()
 
-configure_file("${QtCore_SOURCE_DIR}/QtCore_global.post.h.in"
-               "${QtCore_BINARY_DIR}/QtCore_global.post.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/QtCore_global.post.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/QtCore_global.post.h" @ONLY)
 
 set(QtCore_glue_sources
-    "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.cpp"
-    "${QtCore_SOURCE_DIR}/glue/qeasingcurve_glue.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glue/qeasingcurve_glue.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glue/qeasingcurve_glue.h"
 )
 
 set(QtCore_libraries

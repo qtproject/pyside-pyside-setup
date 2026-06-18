@@ -338,8 +338,8 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Android")
     endif()
 endif()
 
-configure_file("${QtGui_SOURCE_DIR}/QtGui_global.post.h.in"
-               "${QtGui_BINARY_DIR}/QtGui_global.post.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/QtGui_global.post.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/QtGui_global.post.h" @ONLY)
 
 set(QtGui_include_dirs
     ${QtCore_GEN_DIR}

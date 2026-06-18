@@ -5,7 +5,7 @@ project(QtQuick)
 
 set(QtQuick_DROPPED_ENTRIES)
 
-set(QtQuick_registerType "${QtQuick_SOURCE_DIR}/pysidequickregistertype.cpp")
+set(QtQuick_registerType "${CMAKE_CURRENT_SOURCE_DIR}/pysidequickregistertype.cpp")
 
 # Exclude sources that have clashing static helper functions named "renderstate_..."
 set(QtQuick_SRC_UNITY_EXCLUDED_SRC

@@ -12,11 +12,11 @@ ${QtTest_GEN_DIR}/qtest_wrapper.cpp
 ${QtTest_GEN_DIR}/qttest_module_wrapper.cpp
 )
 
-configure_file("${QtTest_SOURCE_DIR}/QtTest_global.pre.h.in"
-               "${QtTest_BINARY_DIR}/QtTest_global.pre.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/QtTest_global.pre.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/QtTest_global.pre.h" @ONLY)
 
-configure_file("${QtTest_SOURCE_DIR}/QtTest_global.post.h.in"
-               "${QtTest_BINARY_DIR}/QtTest_global.post.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/QtTest_global.post.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/QtTest_global.post.h" @ONLY)
 
 set(QtTest_include_dirs
     ${QtCore_GEN_DIR}

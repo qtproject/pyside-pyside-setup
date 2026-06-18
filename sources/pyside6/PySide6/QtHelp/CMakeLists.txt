@@ -27,8 +27,8 @@ ${QtHelp_GEN_DIR}/qhelpsearchresultwidget_wrapper.cpp
 ${QtHelp_GEN_DIR}/qthelp_module_wrapper.cpp
 )
 
-configure_file("${QtHelp_SOURCE_DIR}/QtHelp_global.pre.h.in"
-               "${QtHelp_BINARY_DIR}/QtHelp_global.pre.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/QtHelp_global.pre.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/QtHelp_global.pre.h" @ONLY)
 
 set(QtHelp_include_dirs
     ${QtWidgets_GEN_DIR}

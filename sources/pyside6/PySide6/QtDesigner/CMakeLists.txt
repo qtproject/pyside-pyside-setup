@@ -4,7 +4,7 @@
 project(QtDesigner)
 
 qt_wrap_cpp(QtDesigner_static_src "${pyside6_SOURCE_DIR}/qpydesignerextensions.h")
-list(APPEND QtDesigner_static_src "${QtDesigner_SOURCE_DIR}/qpydesignercustomwidgetcollection.cpp")
+list(APPEND QtDesigner_static_src "${CMAKE_CURRENT_SOURCE_DIR}/qpydesignercustomwidgetcollection.cpp")
 
 set(QtDesigner_SRC
 ${QtDesigner_GEN_DIR}/qabstractextensionfactory_wrapper.cpp
@@ -42,10 +42,10 @@ ${QtDesigner_GEN_DIR}/qpydesignertaskmenuextension_wrapper.cpp
 ${QtDesigner_GEN_DIR}/qtdesigner_module_wrapper.cpp
 )
 
-configure_file("${QtDesigner_SOURCE_DIR}/QtDesigner_global.pre.h.in"
-               "${QtDesigner_BINARY_DIR}/QtDesigner_global.pre.h" @ONLY)
-configure_file("${QtDesigner_SOURCE_DIR}/QtDesigner_global.post.h.in"
-               "${QtDesigner_BINARY_DIR}/QtDesigner_global.post.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/QtDesigner_global.pre.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/QtDesigner_global.pre.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/QtDesigner_global.post.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/QtDesigner_global.post.h" @ONLY)
 
 set(QtDesigner_include_dirs
     ${QtCore_GEN_DIR}

@@ -30,8 +30,8 @@ set(QtDBus_SRC
     ${QtDBus_GEN_DIR}/qtdbus_module_wrapper.cpp
 )
 
-configure_file("${QtDBus_SOURCE_DIR}/QtDBus_global.post.h.in"
-               "${QtDBus_BINARY_DIR}/QtDBus_global.post.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/QtDBus_global.post.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/QtDBus_global.post.h" @ONLY)
 
 set(QtDBus_include_dirs
     ${QtCore_GEN_DIR}

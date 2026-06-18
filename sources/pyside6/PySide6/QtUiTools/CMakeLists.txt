@@ -10,12 +10,12 @@ ${QtUiTools_GEN_DIR}/qtuitools_module_wrapper.cpp
 )
 
 set(QtUiTools_glue_sources
-    "${QtUiTools_SOURCE_DIR}/glue/plugins.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glue/plugins.h"
 )
 
 set(QtUiTools_static_sources
-    "${QtUiTools_SOURCE_DIR}/glue/loaduitype.h"
-    "${QtUiTools_SOURCE_DIR}/glue/loaduitype.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glue/loaduitype.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glue/loaduitype.cpp"
 )
 
 set(QtUiTools_include_dirs
@@ -34,8 +34,8 @@ set(QtUiTools_libraries
     Qt::UiTools
 )
 
-configure_file("${QtUiTools_SOURCE_DIR}/QtUiTools_global.pre.h.in"
-               "${QtUiTools_BINARY_DIR}/QtUiTools_global.pre.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/QtUiTools_global.pre.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/QtUiTools_global.pre.h" @ONLY)
 
 create_pyside_module(NAME QtUiTools
                      INCLUDE_DIRS QtUiTools_include_dirs

@@ -34,8 +34,8 @@ set(QtGui_private_include_dirs
     ${Qt${QT_MAJOR_VERSION}Core_PRIVATE_INCLUDE_DIRS}
     ${Qt${QT_MAJOR_VERSION}Gui_PRIVATE_INCLUDE_DIRS})
 
-configure_file("${QtCanvasPainter_SOURCE_DIR}/QtCanvasPainter_global.post.h.in"
-               "${QtCanvasPainter_BINARY_DIR}/QtCanvasPainter_global.post.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/QtCanvasPainter_global.post.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/QtCanvasPainter_global.post.h" @ONLY)
 
 set(QtCanvasPainter_include_dirs
     ${QtWidgets_GEN_DIR}

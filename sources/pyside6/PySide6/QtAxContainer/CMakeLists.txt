@@ -17,8 +17,8 @@ ${QtAxContainer_GEN_DIR}/qaxwidget_wrapper.cpp
 # module is always needed
 ${QtAxContainer_GEN_DIR}/qtaxcontainer_module_wrapper.cpp)
 
-configure_file("${QtAxContainer_SOURCE_DIR}/QtAxContainer_global.post.h.in"
-               "${QtAxContainer_BINARY_DIR}/QtAxContainer_global.post.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/QtAxContainer_global.post.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/QtAxContainer_global.post.h" @ONLY)
 
 set(QtAxContainer_include_dirs
     ${QtCore_GEN_DIR}

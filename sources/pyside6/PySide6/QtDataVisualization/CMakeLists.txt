@@ -3,7 +3,7 @@
 
 project(QtDataVisualization)
 
-list(APPEND QtDataVisualization_src "${QtDataVisualization_SOURCE_DIR}/qtdatavisualization_helper.cpp")
+list(APPEND QtDataVisualization_src "${CMAKE_CURRENT_SOURCE_DIR}/qtdatavisualization_helper.cpp")
 
 set(QtDataVisualization_SRC
 ${QtDataVisualization_GEN_DIR}/qabstract3daxis_wrapper.cpp

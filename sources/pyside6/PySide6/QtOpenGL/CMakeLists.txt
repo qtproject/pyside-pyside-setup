@@ -6,7 +6,7 @@ project(QtOpenGL)
 set(QtOpenGL_DROPPED_ENTRIES)
 
 set(QtOpenGL_static_sources
-    "${QtOpenGL_SOURCE_DIR}/glue/utils.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glue/utils.cpp"
 )
 
 set(QtOpenGL_SRC
@@ -74,8 +74,8 @@ else()
 endif()
 
 
-configure_file("${QtOpenGL_SOURCE_DIR}/QtOpenGL_global.post.h.in"
-               "${QtOpenGL_BINARY_DIR}/QtOpenGL_global.post.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/QtOpenGL_global.post.h.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/QtOpenGL_global.post.h" @ONLY)
 
 set(QtOpenGL_include_dirs
     ${QtCore_GEN_DIR}

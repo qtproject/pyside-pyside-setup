@@ -4,10 +4,10 @@
 project(QtWebEngineCore)
 
 set(QtWebEngineCore_static_sources
-    "${QtWebEngineCore_SOURCE_DIR}/glue/webenginepage_functors.cpp"
-    "${QtWebEngineCore_SOURCE_DIR}/glue/webenginepage_functors.h"
-    "${QtWebEngineCore_SOURCE_DIR}/glue/webengineframe.cpp"
-    "${QtWebEngineCore_SOURCE_DIR}/glue/webengineframe.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glue/webenginepage_functors.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glue/webenginepage_functors.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glue/webengineframe.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glue/webengineframe.h"
 )
 
 set(QtWebEngineCore_DROPPED_ENTRIES)
