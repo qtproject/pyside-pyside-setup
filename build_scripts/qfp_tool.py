@@ -140,11 +140,11 @@ def expand_reference(cache_dict, value):
     """Expand references to other keys in config files $(name) by value."""
     pattern = re.compile(r"\$\([^)]+\)")
     while True:
-        match = pattern.match(value)
-        if not match:
+        m = pattern.search(value)
+        if not m:
             break
-        key = match.group(0)[2:-1]
-        value = value[:match.start(0)] + cache_dict[key] + value[match.end(0):]
+        key = m.group(0)[2:-1]
+        value = value[:m.start(0)] + cache_dict[key] + value[m.end(0):]
     return value
 
 
