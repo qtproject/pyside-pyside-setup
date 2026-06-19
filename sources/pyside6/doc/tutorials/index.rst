@@ -137,6 +137,14 @@ Quick/QML: Basic tutorials
 
         Python-QML integration
 
+    .. grid-item-card:: Reactive Properties
+        :class-item: cover-img
+        :link: tutorial_reactiveproperties
+        :link-type: ref
+        :img-top: reactiveproperties/reactiveproperties.png
+
+        Reactive properties with @auto_properties
+
     .. grid-item-card:: QML Application
         :class-item: cover-img
         :link: tutorial_qmlapplication
@@ -176,6 +184,7 @@ Quick/QML: Basic tutorials
 
     basictutorial/qml.rst
     qmlintegration/qmlintegration.rst
+    reactiveproperties/reactiveproperties.rst
     qmlapp/qmlapplication.rst
     qmlsqlintegration/qmlsqlintegration.rst
     extendedexplorer/extendedexplorer.md
