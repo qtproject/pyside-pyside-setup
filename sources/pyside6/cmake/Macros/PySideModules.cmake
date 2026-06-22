@@ -137,10 +137,10 @@ endmacro()
 #                      INCLUDE_DIRS QtGui_include_dirs
 #                      LIBRARIES QtGui_libraries
 #                      DEPS QtGui_deps
-#                      TYPESYSTEM_PATH QtGui_SOURCE_DIR
+#                      TYPESYSTEM_PATH CMAKE_CURRENT_SOURCE_DIR
 #                      SOURCES QtGui_SRC
 #                      STATIC_SOURCES QtGui_static_sources
-#                      TYPESYSTEM_NAME ${QtGui_BINARY_DIR}/typesystem_gui.xml
+#                      TYPESYSTEM_NAME ${CMAKE_CURRENT_BINARY_DIR}/typesystem_gui.xml
 #                      DROPPED_ENTRIES QtGui_DROPPED_ENTRIES
 #                      GLUE_SOURCES QtGui_glue_sources)
 macro(create_pyside_module)
