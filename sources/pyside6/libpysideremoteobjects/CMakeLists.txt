@@ -60,6 +60,7 @@ target_include_directories(pyside6remoteobjects PRIVATE
     ${SHIBOKEN_PYTHON_INCLUDE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}               # Include the component-specific build directory
 )
+target_include_directories(pyside6remoteobjects INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
 
 target_link_libraries(pyside6remoteobjects PRIVATE
     Shiboken6::libshiboken                    # Added internally by the create_pyside_module function
