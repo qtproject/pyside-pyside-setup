@@ -744,7 +744,8 @@ if (step != 1 && value_length != slicelength) {
 if (step != 1) {
     Py_ssize_t i = start;
     for (Py_ssize_t j = 0; j < slicelength; ++j) {
-        PyObject *item = PyObject_GetItem(_value, PyLong_FromSsize_t(j));
+        Shiboken::AutoDecRef key(PyLong_FromSsize_t(j));
+        Shiboken::AutoDecRef item(PyObject_GetItem(_value, key));
         QByteArray temp;
         if (PyLong_Check(item)) {
             int overflow;
