@@ -121,6 +121,7 @@ constexpr auto threadAttribute = "thread"_L1;
 constexpr auto sourceAttribute = "source"_L1;
 constexpr auto streamAttribute = "stream"_L1;
 constexpr auto privateAttribute = "private"_L1;
+constexpr auto usesGilAttribute = "module-uses-gil"_L1;
 constexpr auto xPathAttribute = "xpath"_L1;
 constexpr auto virtualSlotAttribute = "virtual-slot"_L1;
 constexpr auto visibleAttribute = "visible"_L1;
@@ -2329,6 +2330,9 @@ TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStrea
             moduleEntry->setNamespaceBegin(attributes->takeAt(i).value().toString());
         } else if (name == "namespace-end"_L1) {
             moduleEntry->setNamespaceEnd(attributes->takeAt(i).value().toString());
+        } else if (name == usesGilAttribute) {
+            moduleEntry->setUsesGil(convertBoolean(attributes->takeAt(i).value(),
+                                                   usesGilAttribute, true));
         }
     }
 

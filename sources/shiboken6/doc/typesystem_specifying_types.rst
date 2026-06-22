@@ -51,7 +51,8 @@ It can have a number of attributes, described below.
                 namespace-begin="..."
                 namespace-end="..."
                 doc-package="..."
-                doc-mode = "nested | flat" >
+                doc-mode = "nested | flat"
+                module-uses-gil="yes | no" >
     </typesystem>
 
 The **package** attribute is a string describing the package to be used,
@@ -99,6 +100,11 @@ documentation of inner classes into the outer classes' pages. Its default value
 is **nested**. It is possible to turn this off by specifying **flat** in case
 too many classes are contained in a namespace, causing excessively long pages.
 However, the referencing may then not fully work.
+
+The *optional* attribute **module-uses-gil** determines whether the module uses
+the *Global Interpreter Lock* (GIL) in a *Free Threaded* build.
+
+.. note:: *Free Threaded* builds are not supported.
 
 .. _load-typesystem:
 
