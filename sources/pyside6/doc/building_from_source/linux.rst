@@ -118,6 +118,7 @@ Assuming that Qt is in PATH, for example, the configure step can be done with::
     cmake -B /path/to/the/build/directory \
           -S /path/to/the/pyside-setup \
           -DCMAKE_INSTALL_PREFIX=/where/to/install \
+          -G Ninja \
           -DPython_EXECUTABLE=/path/to/interpreter
 
 .. note:: You can add `-DFORCE_LIMITED_API=yes` in case you want to have a
@@ -125,7 +126,7 @@ Assuming that Qt is in PATH, for example, the configure step can be done with::
 
 and then for building::
 
-    cmake --build /path/to/the/build/directory --parallel X
+    cmake --build /path/to/the/build/directory
 
 where `X` is the number of processes you want to use.
 Finally, the install step can be done with::
