@@ -19,10 +19,14 @@ target_link_libraries(QtQmlFeatures pyside6qml Shiboken6::libshiboken)
 if(NOT (PYSIDE_IS_CROSS_BUILD OR DISABLE_PYI))
     pyside_setup_ld_prefix()
 
-    set(generate_pyi_options QtQmlFeatures --sys-path
+    set(generate_pyi_sys_path
         "${pysidebindings_BINARY_DIR}"
         "${PYTHON_SITE_PACKAGES}"
         "${PYTHON_SITE_PACKAGES}/../..")
+    if(TARGET shibokenmodule)
+        list(PREPEND generate_pyi_sys_path "$<TARGET_FILE_DIR:shibokenmodule>/..")
+    endif()
+    set(generate_pyi_options QtQmlFeatures --sys-path ${generate_pyi_sys_path})
     if(QUIET_BUILD)
         list(APPEND generate_pyi_options "--quiet")
     endif()

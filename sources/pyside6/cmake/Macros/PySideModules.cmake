@@ -79,26 +79,30 @@ macro(pyside_setup_ld_prefix)
         set(_build_type "RELEASE")
     endif()
 
-    # Try to get the location for the current build type
-    get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_${_build_type})
-
-    # Fallback to RELEASE, then NONE (used by distros like Arch Linux)
-    if(NOT _shiboken_lib_location)
-        get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_RELEASE)
-    endif()
-    if(NOT _shiboken_lib_location)
-        get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_NONE)
-    endif()
-
     set(ld_prefix_list "")
     list(APPEND ld_prefix_list "${pysidebindings_BINARY_DIR}/libpyside")
     list(APPEND ld_prefix_list "${pysidebindings_BINARY_DIR}/libpysideqml")
     list(APPEND ld_prefix_list "${pysidebindings_BINARY_DIR}/libpysideremoteobjects")
 
-    # Get the directory containing the shiboken library and add it only if resolved
-    if(_shiboken_lib_location)
-        get_filename_component(SHIBOKEN_SHARED_LIBRARY_DIR "${_shiboken_lib_location}" DIRECTORY)
-        list(APPEND ld_prefix_list "${SHIBOKEN_SHARED_LIBRARY_DIR}")
+    # For imported targets (shiboken found via find_package), resolve the library directory
+    # from IMPORTED_LOCATION. Try the current build type first, then RELEASE, then NONE
+    # (NONE is used by distros like Arch Linux that build without an explicit build type).
+    # For real build targets (shiboken built from source), IMPORTED_LOCATION_* properties do
+    # not exist, but the build-tree shiboken6 Python package loads the correct libshiboken
+    # via its own RPATH, so no LD_LIBRARY_PATH entry is needed.
+    get_target_property(_shiboken_lib_is_imported Shiboken6::libshiboken IMPORTED)
+    if(_shiboken_lib_is_imported)
+        get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_${_build_type})
+        if(NOT _shiboken_lib_location)
+            get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_RELEASE)
+        endif()
+        if(NOT _shiboken_lib_location)
+            get_target_property(_shiboken_lib_location Shiboken6::libshiboken IMPORTED_LOCATION_NONE)
+        endif()
+        if(_shiboken_lib_location)
+            get_filename_component(SHIBOKEN_SHARED_LIBRARY_DIR "${_shiboken_lib_location}" DIRECTORY)
+            list(APPEND ld_prefix_list "${SHIBOKEN_SHARED_LIBRARY_DIR}")
+        endif()
     endif()
     if(WIN32)
         list(APPEND ld_prefix_list "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}")
@@ -390,10 +394,16 @@ macro(create_pyside_module)
     # TODO: Can we do something better here to still get pyi files?
     if(NOT (PYSIDE_IS_CROSS_BUILD OR DISABLE_PYI))
         set(SHIBOKEN_PYTHON_MODULE_DIR "${PYTHON_SITE_PACKAGES}/shiboken6")
-        set(generate_pyi_options ${module_NAME} --sys-path
+        set(generate_pyi_sys_path
             "${pysidebindings_BINARY_DIR}"
             "${SHIBOKEN_PYTHON_MODULE_DIR}/.."
             "${SHIBOKEN_PYTHON_MODULE_DIR}/../../..")     # use the layer above shiboken6
+        if(TARGET shibokenmodule)
+            # Prepend the build-tree parent so the freshly built shiboken6 package is found
+            # before any installed version, which may carry an older libshiboken via RPATH.
+            list(PREPEND generate_pyi_sys_path "$<TARGET_FILE_DIR:shibokenmodule>/..")
+        endif()
+        set(generate_pyi_options ${module_NAME} --sys-path ${generate_pyi_sys_path})
         if (QUIET_BUILD)
             list(APPEND generate_pyi_options "--quiet")
         endif()
