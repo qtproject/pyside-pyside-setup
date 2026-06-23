@@ -15,8 +15,7 @@ design process. We welcome any contribution conforming to the
 
 ### Installation
 
-Since the release of the [Technical Preview](https://blog.qt.io/blog/2018/06/13/qt-python-5-11-released/)
-it is possible to install via `pip`, both from Qt's servers
+It is possible to install via `pip`, both from Qt's servers
 and [PyPi](https://pypi.org/project/PySide6/):
 
 ```
@@ -31,29 +30,29 @@ pip install PySide6
 #### Dependencies
 
 PySide6 versions following 6.0 use a C++ parser based on
-[Clang](http://clang.org/). The Clang library (C-bindings), version 13.0 or
-higher is required for building. Prebuilt versions of it can be downloaded from
+[Clang](https://clang.llvm.org/). The Clang library (C-bindings),
+is required for building. Prebuilt versions of it can be downloaded from
 [download.qt.io](https://download.qt.io/development_releases/prebuilt/libclang/).
 
 After unpacking the archive, set the environment variable *LLVM_INSTALL_DIR* to
 point to the folder containing the *include* and *lib* directories of Clang:
 
 ```
-7z x .../libclang-release_100-linux-Rhel7.2-gcc5.3-x86_64-clazy.7z
+7z x .../libclang-release_22.1.8-based-linux-Rhel9.6-gcc11.4-x86_64.7z
 export LLVM_INSTALL_DIR=$PWD/libclang
 ```
 
 On Windows:
 
 ```
-7z x .../libclang-release_100-windows-vs2015_64-clazy.7z
+7z x .../libclang-release_22.1.8-based-windows-vs2022_64.7z
 SET LLVM_INSTALL_DIR=%CD%\libclang
 ```
 
 ### Building from source
 
 For building PySide6 from scratch, please read about
-[getting started](https://doc.qt.io/qtforpython/gettingstarted.html).
+[Building from Source](https://doc.qt.io/qtforpython-6/building_from_source/index.html).
 This process will include getting the code:
 
 ```
@@ -66,11 +65,11 @@ then install the dependencies, and following the instructions per platform.
 A common build command will look like:
 
 ```
-python setup.py install --qtpaths=/path/to/bin/qtpaths6 --parallel=8 --build-tests
+python setup.py install --qtpaths=/path/to/bin/qtpaths6 --build-tests
 ```
 
 You can obtain more information about the options to build PySide and Shiboken
-in [our wiki](https://wiki.qt.io/Qt_for_Python/).
+in [our wiki](https://wiki.qt.io/Qt_for_Python).
 
 ### Documentation and Bugs
 

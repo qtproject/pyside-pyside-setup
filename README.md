@@ -1,6 +1,6 @@
 # Qt For Python
 
-Qt For Python is the [Python Qt bindings project](https://wiki.qt.io/PySide6),
+Qt For Python is the [Python Qt bindings project](https://wiki.qt.io/Qt_for_Python),
 providing access to the complete Qt framework as well as to generator tools for
 rapidly generating bindings for any C++ libraries.
 
@@ -226,5 +226,5 @@ The invocation would then look like:
 ```bash
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
-# make or nmake or msbuild or jom
+# ninja
 ```
