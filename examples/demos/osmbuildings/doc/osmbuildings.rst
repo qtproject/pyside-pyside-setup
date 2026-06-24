@@ -59,6 +59,8 @@ custom material which uses a rectangle as a base to render the tilemap texture.
 
 The application uses a custom geometry to render tile buildings.
 
+The code for drawing spheres is modeled after the `OpenGL Sphere`_ example code.
+
 To render building parts such as rooftops with one draw call,
 a custom shader is used.
 
@@ -70,3 +72,4 @@ a custom shader is used.
 .. _`C++ demo`: https://doc.qt.io/qt-6/qtdoc-demos-osmbuildings-example.html
 .. _`OpenStreetMap (OSM)`: https://www.openstreetmap.org/
 .. _`mapbox_earcut`: https://pypi.org/project/mapbox-earcut/
+.. _`OpenGL Sphere`: https://www.songho.ca/opengl/gl_sphere.html

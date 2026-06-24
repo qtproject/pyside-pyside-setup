@@ -292,17 +292,18 @@ class OSMGeometry(QQuick3DGeometry):
                         z = sphereRadius * math.sin(sphereStackAngle)
 
                         for sectorIndex in range(0, SPHERE_SECTOR_COUNT + 1):
-                            if stackIndex != 0:
-                                indexData.append3(k1 + globalVertexCounter,
-                                                  k2 + globalVertexCounter,
-                                                  k1 + 1 + globalVertexCounter)
-                                globalPrimitiveCounter += 1
+                            if stackIndex != SPHERE_STACK_COUNT:
+                                if stackIndex != 0:
+                                    indexData.append3(k1 + globalVertexCounter,
+                                                      k2 + globalVertexCounter,
+                                                      k1 + 1 + globalVertexCounter)
+                                    globalPrimitiveCounter += 1
 
-                            if stackIndex != (SPHERE_STACK_COUNT - 1):
-                                indexData.append3(k1 + 1 + globalVertexCounter,
-                                                  k2 + globalVertexCounter,
-                                                  k2 + 1 + globalVertexCounter)
-                                globalPrimitiveCounter += 1
+                                if stackIndex != (SPHERE_STACK_COUNT - 1):
+                                    indexData.append3(k1 + 1 + globalVertexCounter,
+                                                      k2 + globalVertexCounter,
+                                                      k2 + 1 + globalVertexCounter)
+                                    globalPrimitiveCounter += 1
 
                             sphereSectorAngle = sectorIndex * sphereSectorStep
 
