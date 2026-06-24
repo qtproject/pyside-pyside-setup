@@ -70,8 +70,6 @@ import array
 import gc
 import sys
 import unittest
-# this comes from Python, too
-from test import support
 
 try:
     sys.getobjects

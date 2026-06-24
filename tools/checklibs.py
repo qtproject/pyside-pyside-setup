@@ -20,8 +20,6 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from pprint import pprint
-
 
 class MachOFile:
 
@@ -59,7 +57,7 @@ class MachOFile:
         output = self.shell('otool -arch {0} -l "{1}"',
             [self.arch, self.image_path.resolved_path], fatal = True)
         # skip file name on first line
-        load_commands = re.split('Load command (\d+)', output)[1:]
+        load_commands = re.split(r'Load command (\d+)', output)[1:]
         self._rpaths = []
         load_commands = collections.deque(load_commands)
         while load_commands:
@@ -68,7 +66,7 @@ class MachOFile:
             if command[0].find('LC_RPATH') == -1:
                 continue
 
-            path = re.findall('path (.+) \(offset \d+\)$', command[2])[0]
+            path = re.findall(r'path (.+) \(offset \d+\)$', command[2])[0]
             image_path = self.image_path_for_recorded_path(path)
             image_path.rpath_source = self
             self._rpaths.append(image_path)
@@ -144,7 +142,7 @@ class MachOFile:
 
         self._dependencies = []
         for line in output:
-            match = re.match('^(.+)\s+(\(.+)\)$', line)
+            match = re.match(r'^(.+)\s+(\(.+)\)$', line)
             if not match:
                 continue
             recorded_path = match.group(1)
