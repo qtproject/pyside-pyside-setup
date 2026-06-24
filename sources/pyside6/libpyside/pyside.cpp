@@ -731,10 +731,10 @@ void setNextQObjectMemoryAddr(void *addr)
 
 // A std::shared_ptr is used with a deletion function to invalidate a pointer
 // when the property value is cleared.  This should be a QSharedPointer with
-// a void *pointer, but that isn't allowed
+// a void *pointer, but that isn't allowed.
+// We used to have a Q_DECLARE_METATYPE of the QSharedPointer<any_t> but
+// it was removed due to the obsolescence of the macro.
 using any_t = char;
-Q_DECLARE_METATYPE(std::shared_ptr<any_t>);
-
 
 namespace PySide
 {
