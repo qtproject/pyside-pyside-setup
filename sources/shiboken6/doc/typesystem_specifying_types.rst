@@ -97,7 +97,7 @@ into the ``QtMultimedia`` module.
 The *optional* attribute **doc-mode** determines whether to nest the
 documentation of inner classes into the outer classes' pages. Its default value
 is **nested**. It is possible to turn this off by specifying **flat** in case
-too many classes are cointained in a namespace, causing excessively long pages.
+too many classes are contained in a namespace, causing excessively long pages.
 However, the referencing may then not fully work.
 
 .. _load-typesystem:
@@ -679,7 +679,7 @@ It is a child of the :ref:`typesystem_details` node.
 .. code-block:: xml
 
     <typesystem>
-        <oqaque-container name="..." opaque-containers ="..." />
+        <opaque-container name="..." opaque-containers ="..." />
     </typesystem>
 
 For the **name** and **opaque-containers** attributes,

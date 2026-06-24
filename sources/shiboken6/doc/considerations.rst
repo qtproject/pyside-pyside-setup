@@ -77,7 +77,7 @@ holding them as usual, but the object held is not a `CppClassWrapper`, but a reg
 `CppClass`. All virtual method calls originated in C++ will stay in C++ and never reach
 a Python virtual method overridden via duck punching.
 
-Although duck punching is an interesting Python feature, it don't mix well with wrapped
+Although duck punching is an interesting Python feature, it doesn't mix well with wrapped
 C++ virtual methods, specially when you can't tell the origin of every single wrapped
 C++ object. In summary: don't do it!
 
@@ -170,7 +170,7 @@ What do I have to do to create my bindings?
 -------------------------------------------
 
 Most of the work is already done by the API Extractor.
-The developer creates a :std:doc:`typesystem <typesystem>`
+The developer creates a :doc:`typesystem <typesystem>`
 file with any customization wanted in
 the generated code, like removing classes or changing method signatures.
 The generator will output the *.h* and *.cpp* files with the CPython code that
