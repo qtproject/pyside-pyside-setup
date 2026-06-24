@@ -38,7 +38,6 @@ The full mode can be tested locally by setting
 import argparse
 import os
 import sys
-from collections import OrderedDict
 from pathlib import Path
 from textwrap import dedent
 from timeit import default_timer as timer
@@ -274,7 +273,7 @@ def main():
         if fatal:
             runs = 1
         for idx, r in enumerate(res):
-            q = list(map(lambda x, y: x + y, r, q))
+            q = [x + y for x, y in zip(r, q)]
 
     if len(args.projects) > 1:
         print(
@@ -283,7 +282,7 @@ def main():
         )
         print()
 
-    tot_res = OrderedDict()
+    tot_res = {}
     for project in args.projects:
         for idx in range(runs):
             index = idx + 1
@@ -323,12 +322,10 @@ def main():
             continue
         empty = False
         padding = 6 * runs
-        txt = " ".join((f"{piece:<5}" for piece in res))
-        txt = (f"{txt}{padding * ' '}")[:padding]
+        txt = " ".join(f"{piece:<5}" for piece in res)
+        txt = f"{txt:<{padding}.{padding}s}"
         testpad = 36
-        if len(test) < testpad:
-            test += (testpad - len(test)) * " "
-        print(txt, decorate(test), msg)
+        print(f"{txt} {decorate(f'{test:<{testpad}}')}", msg)
     if empty:
         print("*   (empty)")
     print("*")

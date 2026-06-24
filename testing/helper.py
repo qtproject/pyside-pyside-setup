@@ -8,9 +8,9 @@ testing/helper.py
 Some tools that do not fit elsewhere.
 """
 
-import os
+from pathlib import Path
 
-script_dir = os.path.dirname(os.path.dirname(__file__))
+script_dir = Path(__file__).parent.parent
 
 
 def decorate(mod_name):
@@ -20,6 +20,5 @@ def decorate(mod_name):
     """
     if "_" not in mod_name or "::" in mod_name:
         return mod_name
-    else:
-        name, rest = mod_name.split("_", 1)
-        return f"{name}::{rest}"
+    name, rest = mod_name.split("_", 1)
+    return f"{name}::{rest}"

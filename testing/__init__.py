@@ -10,7 +10,6 @@ testing/__init__.py
 """
 
 import builtins
-import sys
 
 from . import command
 
@@ -21,13 +20,10 @@ builtins.orig_print = builtins.print
 
 
 def print_flushed(*args, **kw):
-    orig_print(*args, **kw)
-    sys.stdout.flush()
+    orig_print(*args, **kw, flush=True)
 
 
 builtins.print = print_flushed
-
-print = print_flushed
 
 # We also could use "python -u" to get unbuffered output.
 # This method is better since it needs no change of the interface.

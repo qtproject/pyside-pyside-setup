@@ -167,8 +167,4 @@ class TestParser:
             yield item
 
     def get_slowest_tests(self, max_count):
-        result = self.results.copy()
-        result.sort(key=sort_time_key, reverse=True)
-        if len(result) > max_count:
-            result = result[0:max_count - 1]
-        return result
+        return sorted(self.results, key=sort_time_key, reverse=True)[:max_count]

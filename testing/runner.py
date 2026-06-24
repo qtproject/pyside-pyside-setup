@@ -7,18 +7,12 @@ import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 from subprocess import TimeoutExpired
 from textwrap import dedent
 
 # Get the dir path to the utils module
-try:
-    this_file = __file__
-except NameError:
-    this_file = sys.argv[0]
-this_file = os.path.abspath(this_file)
-this_dir = os.path.dirname(this_file)
-build_scripts_dir = os.path.abspath(os.path.join(this_dir, ".."))
-
+build_scripts_dir = str(Path(__file__).resolve().parent.parent)
 sys.path.append(build_scripts_dir)
 from build_scripts.utils import detect_clang    # noqa: E402
 
@@ -26,13 +20,10 @@ from build_scripts.utils import detect_clang    # noqa: E402
 class TestRunner:
     def __init__(self, log_entry, project, index):
         self.log_entry = log_entry
-        built_path = log_entry.build_dir
-        self.test_dir = os.path.join(built_path, project)
-        log_dir = log_entry.log_dir
-        if index is not None:
-            self.logfile = os.path.join(log_dir, f"{project}.{index}.log")
-        else:
-            self.logfile = os.path.join(log_dir, f"{project}.log")
+        self.test_dir = str(Path(log_entry.build_dir) / project)
+        log_dir = Path(log_entry.log_dir)
+        suffix = f"{project}.{index}.log" if index is not None else f"{project}.log"
+        self.logfile = str(log_dir / suffix)
         os.environ["CTEST_OUTPUT_ON_FAILURE"] = "1"
         self._setup_clang()
         self._setup()
@@ -50,7 +41,7 @@ class TestRunner:
         This is *not* necessarily the same Python that runs this script,
         otherwise we could use the version info directly.
         """
-        look_python = os.path.join(self.test_dir, "CMakeCache.txt")
+        look_python = Path(self.test_dir) / "CMakeCache.txt"
         look_for = "PYTHON_EXECUTABLE:FILEPATH="
         with open(look_python) as f:
             for line in f:
@@ -67,7 +58,7 @@ class TestRunner:
             return
         clang_dir = detect_clang()
         if clang_dir[0]:
-            clang_bin_dir = os.path.join(clang_dir[0], "bin")
+            clang_bin_dir = str(Path(clang_dir[0]) / "bin")
             path = os.environ.get("PATH")
             if clang_bin_dir not in path:
                 os.environ["PATH"] = clang_bin_dir + os.pathsep + path
@@ -116,8 +107,8 @@ class TestRunner:
         """
         candidate_files = ["Makefile", "build.ninja"]
         for candidate in candidate_files:
-            path = os.path.join(self.test_dir, candidate)
-            if os.path.exists(path):
+            path = Path(self.test_dir) / candidate
+            if path.exists():
                 return self._find_ctest_in_file(path)
         raise RuntimeError(
             "Cannot find any of the build system files " f"{', '.join(candidate_files)}."

@@ -10,22 +10,17 @@ Take a blacklist file and build classifiers for all tests.
 find_matching_line() adds info using classifiers.
 """
 
-from io import StringIO
-
 from .buildlog import builds
 from .helper import decorate
 
 
 class BlackList:
     def __init__(self, blname):
-        if not blname:
-            f = StringIO()
-            self.raw_data = []
-        else:
+        if blname:
             with open(blname) as f:
                 self.raw_data = f.readlines()
-        # keep all lines, but see what is not relevant
-        lines = self.raw_data[:]
+        else:
+            self.raw_data = []
 
         def filtered_line(line):
             if "#" in line:
@@ -38,21 +33,8 @@ class BlackList:
             return fline and fline[0].startswith("[")
 
         self.tests = {}
-
-        if not lines:
-            # nothing supplied
-            return
-
-        for idx, line in enumerate(lines):
-            fline = filtered_line(line)
-            if not fline:
-                continue
-            if is_test(fline):
-                break
-            # we have a global section
-            name = ""
-            self.tests[name] = []
-        for idx, line in enumerate(lines):
+        name = None
+        for line in self.raw_data:
             fline = filtered_line(line)
             if is_test(fline):
                 # a new name
@@ -60,6 +42,10 @@ class BlackList:
                 # Allow for repeated sections
                 self.tests.setdefault(name, [])
             elif fline:
+                if name is None:
+                    # global section: entries before any [section] header
+                    name = ""
+                    self.tests[""] = []
                 # a known name with a new entry
                 self.tests[name].append(fline)
 
@@ -81,16 +67,11 @@ class BlackList:
                     # found a match!
                     return line
         mod_name = test.mod_name
-        if mod_name not in self.tests and decorate(mod_name) not in self.tests:
+        thing = mod_name if mod_name in self.tests else decorate(mod_name)
+        if thing not in self.tests:
             return None
-        if mod_name in self.tests:
-            thing = mod_name
-        else:
-            thing = decorate(mod_name)
         for line in self.tests[thing]:
             keys = set(line)
             if keys <= classifiers:
                 # found a match!
                 return line
-        else:
-            return None  # nothing found

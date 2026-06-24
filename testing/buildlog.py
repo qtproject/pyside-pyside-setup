@@ -15,6 +15,7 @@ import platform
 import shutil
 import sys
 from collections import namedtuple
+from pathlib import Path
 from textwrap import dedent
 
 from .helper import script_dir
@@ -33,25 +34,19 @@ class BuildLog:
     """
 
     def __init__(self):
-        history_dir = os.path.join(script_dir, "build_history")
+        history_dir = Path(script_dir) / "build_history"
         build_history = []
-        for timestamp in os.listdir(history_dir):
-            log_dir = os.path.join(history_dir, timestamp)
-            if not os.path.isdir(log_dir):
+        for log_dir in history_dir.iterdir():
+            if not log_dir.is_dir():
                 continue
-            fpath = os.path.join(log_dir, "build_dir.txt")
-            if not os.path.exists(fpath):
+            fpath = log_dir / "build_dir.txt"
+            if not fpath.exists():
                 continue
             with open(fpath) as f:
-                f_contents = f.read().strip()
-                f_contents_split = f_contents.splitlines()
+                f_contents_split = f.read().strip().splitlines()
                 try:
-                    if len(f_contents_split) == 2:
-                        build_dir = f_contents_split[0]
-                        build_classifiers = f_contents_split[1]
-                    else:
-                        build_dir = f_contents_split[0]
-                        build_classifiers = ""
+                    build_dir = f_contents_split[0]
+                    build_classifiers = f_contents_split[1] if len(f_contents_split) >= 2 else ""
                 except IndexError:
                     print(
                         dedent(
@@ -63,17 +58,17 @@ class BuildLog:
                     )
                     sys.exit(1)
 
-                if not os.path.exists(build_dir):
-                    rel_dir, low_part = os.path.split(build_dir)
-                    rel_dir, two_part = os.path.split(rel_dir)
+                if not Path(build_dir).exists():
+                    build_path = Path(build_dir)
+                    two_part, low_part = build_path.parent.name, build_path.name
                     if two_part.startswith("pyside") and two_part.endswith("build"):
-                        build_dir = os.path.abspath(os.path.join(two_part, low_part))
-                        if os.path.exists(build_dir):
+                        build_dir = str((Path(two_part) / low_part).resolve())
+                        if Path(build_dir).exists():
                             print("Note: build_dir was probably moved.")
                         else:
                             print(f"Warning: missing build dir {build_dir}")
                             continue
-            entry = LogEntry(log_dir, build_dir, build_classifiers)
+            entry = LogEntry(str(log_dir), build_dir, build_classifiers)
             build_history.append(entry)
         # we take the latest build for now.
         build_history.sort()
@@ -85,12 +80,7 @@ class BuildLog:
             self.prune_old_entries(history_dir)
 
     def prune_old_entries(self, history_dir):
-        lst = []
-        for timestamp in os.listdir(history_dir):
-            log_dir = os.path.join(history_dir, timestamp)
-            if not os.path.isdir(log_dir):
-                continue
-            lst.append(log_dir)
+        lst = sorted(p for p in Path(history_dir).iterdir() if p.is_dir())
         if lst:
 
             def warn_problem(func, path, exc_info):
@@ -100,14 +90,9 @@ class BuildLog:
                     f"{path}:\n   {cls.__name__}: {ins.args}"
                 )
 
-            lst.sort()
-            log_dir = lst[-1]
-            fname = os.path.basename(log_dir)
-            ref_date_str = fname[:10]
+            ref_date_str = lst[-1].name[:10]
             for log_dir in lst:
-                fname = os.path.basename(log_dir)
-                date_str = fname[:10]
-                if date_str != ref_date_str:
+                if log_dir.name[:10] != ref_date_str:
                     shutil.rmtree(log_dir, onerror=warn_problem)
 
     def set_buildno(self, buildno):
@@ -137,7 +122,7 @@ class BuildLog:
         else:
             # the rest must be guessed from the given filename
             path = self.selected.build_dir
-            base = os.path.basename(path)
+            base = Path(path).name
             res.extend(base.split("-"))
         # add exact Python version
         if self.python_version:
