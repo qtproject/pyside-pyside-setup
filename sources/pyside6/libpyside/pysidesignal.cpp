@@ -1309,7 +1309,6 @@ QByteArray getCallbackSignature(QMetaMethod signal, QObject *receiver,
         functionName[functionName.size() - 1] = '_';
     }
     QByteArray signature = encodeName ? codeCallbackName(callback, functionName) : functionName;
-    QByteArrayList args = signal.parameterTypes();
 
     signature.append(u'(');
 

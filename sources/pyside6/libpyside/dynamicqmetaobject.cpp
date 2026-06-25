@@ -632,7 +632,7 @@ void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
                 auto *data = reinterpret_cast<PySideSignal *>(value)->data;
                 if (data->signalName.isEmpty())
                     data->signalName = String::toCString(key);
-                for (const auto &s : data->signatures) {
+                for (const auto &s : std::as_const(data->signatures)) {
                     const auto sig = data->signalName + '(' + s.signature + ')';
                     if (m_baseObject->indexOfSignal(sig) == -1) {
                         // Registering the parameterNames to the QMetaObject (PYSIDE-634)

@@ -19,8 +19,8 @@ struct Globals // Per interpreter globals of libpyside
     int lastSelectedFeatureId = 0;
     PyTypeObject *qobjectType = nullptr;
     PyObject *emptyTuple = nullptr;
-    PyObject *pickleReduceFunc;
-    PyObject *pickleEvalFunc;
+    PyObject *pickleReduceFunc = nullptr;
+    PyObject *pickleEvalFunc = nullptr;
 };
 
 Globals *globals();
