@@ -446,7 +446,7 @@ LIBSHIBOKEN_API PyObject *PyTime_FromTime(
  */
 
 // PYSIDE-772: This function supports the fix, but is not meant as public.
-LIBSHIBOKEN_API PyObject *_Pep_PrivateMangle(PyObject *self, PyObject *name);
+[[deprecated]] LIBSHIBOKEN_API PyObject *_Pep_PrivateMangle(PyObject *self, PyObject *name);
 
 /*****************************************************************************
  *

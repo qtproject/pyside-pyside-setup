@@ -6424,19 +6424,11 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
         s << "if (auto *meth = PyDict_GetItem(ob_dict, name)) {\n" << indent
             << "Py_INCREF(meth);\nreturn meth;\n" << outdent << "}\n"
             << "// Search the method in the type dict\n"
-            << "if (Shiboken::Object::isUserType(self)) {\n" << indent;
-        // PYSIDE-772: Perform optimized name mangling.
-        s << "Shiboken::AutoDecRef tmp(_Pep_PrivateMangle(self, name));\n"
+            << "if (Shiboken::Object::isUserType(self)) {\n" << indent
             << "Shiboken::AutoDecRef tpDict(PepType_GetDict(Py_TYPE(self)));\n"
-            << "if (auto *meth = PyDict_GetItem(tpDict.object(), tmp)) {\n" << indent;
-        // PYSIDE-1523: PyFunction_Check is not accepting compiled functions.
-        s << "if (std::strcmp(Py_TYPE(meth)->tp_name, \"compiled_function\") == 0) {\n" << indent
-            << "auto descrGetFunc = "
-            << pyTypeGetSlot("descrgetfunc", "Py_TYPE(meth)", "Py_tp_descr_get") << ";\n"
-            << "return descrGetFunc(meth, self, nullptr);\n" << outdent
-            << "}\nreturn PyFunction_Check(meth) ? PyMethod_New(meth, self)\n"
-            << "                              : " << getattrFunc << ";\n" << outdent
-            << "}\n" << outdent << "}\n";
+            << "if (PyDict_Contains(tpDict.object(), name) == 1)\n"
+            << indent << "return " << getattrFunc << ";\n" << outdent
+            << outdent << "}\n";
 
         const auto &funcs = getMethodsWithBothStaticAndNonStaticMethods(metaClass);
         for (const auto &func : funcs) {

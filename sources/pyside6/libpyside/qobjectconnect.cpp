@@ -29,9 +29,12 @@
 static bool isMethodDecorator(PyObject *method, bool is_pymethod, PyObject *self)
 {
     Shiboken::AutoDecRef methodName(PyObject_GetAttr(method, Shiboken::PyMagicName::name()));
-    if (!PyObject_HasAttr(self, methodName))
+
+    Shiboken::AutoDecRef otherMethod(PySide::SignalManager::methodGetAttr(self, methodName));
+    if (otherMethod.isNull()) {
+        PyErr_Clear();
         return true;
-    Shiboken::AutoDecRef otherMethod(PyObject_GetAttr(self, methodName));
+    }
 
     // PYSIDE-1523: Each could be a compiled method or a normal method here, for the
     // compiled ones we can use the attributes.

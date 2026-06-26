@@ -24,6 +24,8 @@ namespace PySide::SignalManager
                              const char *returnType /* = nullptr */,
                              void **args, PyObject *callable);
 
+    PyObject *methodGetAttr(PyObject *self, PyObject *name);
+
     void handleMetaCallError();
 } // namespace PySide::SignalManager
 

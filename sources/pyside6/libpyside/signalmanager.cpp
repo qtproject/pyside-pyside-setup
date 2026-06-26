@@ -18,6 +18,7 @@
 #include <basewrapper.h>
 #include <bindingmanager.h>
 #include <gilstate.h>
+#include <pep384impl_p.h>
 #include <sbkconverter.h>
 #include <sbkenum.h>
 #include <sbkpep.h>
@@ -200,6 +201,32 @@ void handleMetaCallError()
     Py_SetRecursionLimit(reclimit);
 }
 
+// Special getAttr() function for function names from Qt's Meta Object system.
+// It handles "private" methods prefixed '__' which are name-mangled by Python to
+// '_ClassName__method' to hide them. In the normal case, getattr() receives
+// the mangled name, but, when used from the Meta Object system (using connect()),
+// QMetaMethod's name name will be unmangled and needs to be resolved.
+// Try to find them by looping the MRO types (PYSIDE-772, PYSIDE-3376).
+PyObject *methodGetAttr(PyObject *self, PyObject *name)
+{
+    PyObject *result = PyObject_GetAttr(self, name);
+    if (result != nullptr || !_Pep_IsPrivateName(name))
+        return result;
+
+    auto *type = Py_TYPE(self);
+    for (Py_ssize_t i = 0, size = PyTuple_Size(type->tp_mro); i < size; ++i) {
+        auto *candidate = reinterpret_cast<PyTypeObject *>(PyTuple_GetItem(type->tp_mro, i));
+        if (candidate != &PyBaseObject_Type) {
+            PyErr_Clear();
+            Shiboken::AutoDecRef mangledName(_Pep_TypePrivateMangle(candidate, name));
+            result = PyObject_GetAttr(self, mangledName.object());
+            if (result != nullptr)
+                break;
+        }
+    }
+    return result;
+}
+
 } // namespace PySide::SignalManager
 
 // Handle errors from meta calls. Requires GIL and PyErr_Occurred()
@@ -320,7 +347,8 @@ int SignalManagerPrivate::qtPythonMetacall(QObject *object, const QMetaObject *m
     auto *pySbkSelf = Shiboken::BindingManager::instance().retrieveWrapper(object);
     Q_ASSERT(pySbkSelf);
     auto *pySelf = reinterpret_cast<PyObject *>(pySbkSelf);
-    Shiboken::AutoDecRef pyMethod(PyObject_GetAttrString(pySelf, method.name().constData()));
+    Shiboken::AutoDecRef methodName(Shiboken::String::fromCString(method.name().constData()));
+    Shiboken::AutoDecRef pyMethod(PySide::SignalManager::methodGetAttr(pySelf, methodName));
     if (pyMethod.isNull()) {
         PyErr_Format(PyExc_AttributeError, "Slot '%s::%s' not found.",
                      metaObject->className(), method.methodSignature().constData());

@@ -58,6 +58,36 @@ class _Under(QObject):
         self.method___result = self.sender()
 
 
+class Sender(QObject):
+    clicked = Signal()
+
+
+class Base(QObject):
+    def __init__(self):
+        super().__init__()
+        self._sender = Sender()
+        self._sender.clicked.connect(self.method)
+        self._sender.clicked.connect(self._method)
+        self._sender.clicked.connect(self.__method)
+
+    def getSender(self):
+        return self._sender
+
+    def method(self):  # Public method
+        self.method_result = self.sender()
+
+    def _method(self):  # Private method
+        self.method__result = self.sender()
+
+    def __method(self):  # Name mangled method
+        self.method___result = self.sender()
+
+
+class Derived(Base):
+    def __init__(self):
+        super().__init__()
+
+
 class TestMangle(UsesQApplication):
 
     def testPrivateMangle(self):
@@ -70,6 +100,17 @@ class TestMangle(UsesQApplication):
         self.assertTrue("_method" in type(harness).__dict__)
         self.assertFalse("__method" in type(harness).__dict__)
         self.assertTrue("_Harness__method" in type(harness).__dict__)
+
+    def testDerivedPrivateMangle(self):
+        """PYSIDE-3376: A derived class calling the base constructor
+           connecting private methods can result in the method not
+           being found."""
+        derived = Derived()
+        sender = derived.getSender()
+        sender.clicked.emit()
+        self.assertEqual(derived.method_result, sender)
+        self.assertEqual(derived.method__result, sender)
+        self.assertEqual(derived.method___result, sender)
 
     def testPrivateMangleUnder(self):
         harness = _Under()
