@@ -15,13 +15,12 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QApplication, QWidget  # noqa F401
+from PySide6.QtCore import Signal, QObject, QCoreApplication # noqa F401
 
 from helper.usesqapplication import UsesQApplication
 
 
-class Harness(QWidget):
+class Harness(QObject):
     clicked = Signal()
 
     def __init__(self):
@@ -40,7 +39,7 @@ class Harness(QWidget):
         self.method___result = self.sender()
 
 
-class _Under(QWidget):
+class _Under(QObject):
     clicked = Signal()
 
     def __init__(self):
