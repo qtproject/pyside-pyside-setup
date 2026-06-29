@@ -30,7 +30,7 @@ def _dump_metaobject_helper(meta_obj, indent):
         for i in range(info_offset, info_count):
             name = meta_obj.classInfo(i).name()
             value = meta_obj.classInfo(i).value()
-            print(f'{indent}{i:4d} {name}+{value}')
+            print(f'{indent}{i:4d} "{name}"="{value}"')
 
     enumerator_offset = meta_obj.enumeratorOffset()
     enumerator_count = meta_obj.enumeratorCount()
@@ -91,17 +91,17 @@ def _dump_metaobject_helper(meta_obj, indent):
             method = meta_obj.method(m)
             signature = _qbytearray_to_string(method.methodSignature())
             access = ''
-            if method.access() == QMetaMethod.Protected:
+            if method.access() == QMetaMethod.Access.Protected:
                 access += 'protected '
-            elif method.access() == QMetaMethod.Private:
+            elif method.access() == QMetaMethod.Access.Private:
                 access += 'private '
             type = method.methodType()
             typeString = ''
-            if type == QMetaMethod.Signal:
+            if type == QMetaMethod.MethodType.Signal:
                 typeString = ' (Signal)'
-            elif type == QMetaMethod.Slot:
+            elif type == QMetaMethod.MethodType.Slot:
                 typeString = ' (Slot)'
-            elif type == QMetaMethod.Constructor:
+            elif type == QMetaMethod.MethodType.Constructor:
                 typeString = ' (Ct)'
             type_name = method.typeName()
             desc = f'{indent}{m:4d} {access}{type_name} "{signature}"{typeString}'
