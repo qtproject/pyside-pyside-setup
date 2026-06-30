@@ -183,7 +183,7 @@ functionality can be obtained via a function in the corresponding widget's API.
 
 
     +-------------+----------------------+-----------------------------------------+
-    |Widget       |Printing function      |Accepts                                 |
+    |Widget       |Printing function     |Accepts                                  |
     +=============+======================+=========================================+
     |QGraphicsView|QGraphicsView.render()|QPainter                                 |
     +-------------+----------------------+-----------------------------------------+

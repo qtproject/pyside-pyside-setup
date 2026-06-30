@@ -31,7 +31,7 @@ Building a widget application
 * :mod:`PySide6.QtGraphsWidgets`
 
 Articles and Guides
-^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
 Limiting Features
 -----------------
