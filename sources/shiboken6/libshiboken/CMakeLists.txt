@@ -64,7 +64,8 @@ debugfreehook.cpp debugfreehook.h
 gilstate.cpp gilstate.h
 helper.cpp helper.h
 pep384ext.cpp pep384ext.h
-pep384impl.cpp pep384impl.h
+pep384impl.cpp pep384impl.h pep384impl_p.h
+
 pyobjectholder.h
 sbkarrayconverter.cpp sbkarrayconverter.h sbkarrayconverter_p.h
 sbkbindingutils.cpp sbkbindingutils.h
@@ -192,6 +193,7 @@ install(FILES
         sbkpython.h
         sbkwindows.h
         pep384impl.h
+        pep384impl_p.h
         pep384ext.h
         voidptr.h
         bufferprocs_py37.h

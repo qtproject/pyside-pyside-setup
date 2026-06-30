@@ -9,6 +9,7 @@
 #include "gilstate.h"
 #include "helper.h"
 #include "pep384ext.h"
+#include "pep384impl_p.h"
 #include "sbkconverter.h"
 #include "sbkerrors.h"
 #include "sbkfeature_base.h"

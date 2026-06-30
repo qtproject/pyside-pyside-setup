@@ -5,6 +5,7 @@
 #define PEP384_INTERN
 
 #include "pep384impl.h"
+#include "pep384impl_p.h"
 #include "autodecref.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
@@ -785,34 +786,30 @@ PyTypeObject *PepType_Type_tp_new(PyTypeObject *metatype, PyObject *args, PyObje
 
 /*****************************************************************************
  *
- * Extra support for name mangling
- *
- */
+ * Extra support for name mangling: "__private" becomes "_classname__private".
+ * Those functions are modelled after _Py_Mangle, but are optimized a little for
+ * our purpose. */
 
-PyObject *
-_Pep_PrivateMangle(PyObject *self, PyObject *name)
+bool _Pep_IsPrivateName(PyObject *name)
 {
-    /*
-     * Name mangling: __private becomes _classname__private.
-     * This function is modelled after _Py_Mangle, but is optimized
-     * a little for our purpose.
-     */
-    if (PyUnicode_ReadChar(name, 0) != '_' ||
-        PyUnicode_ReadChar(name, 1) != '_') {
-        Py_INCREF(name);
-        return name;
-    }
+    if (PyUnicode_ReadChar(name, 0) != '_' || PyUnicode_ReadChar(name, 1) != '_')
+        return false;
     const Py_ssize_t nlen = PyUnicode_GetLength(name);
     /* Don't mangle __id__ or names with dots. */
     if ((PyUnicode_ReadChar(name, nlen-1) == '_' &&
          PyUnicode_ReadChar(name, nlen-2) == '_') ||
         PyUnicode_FindChar(name, '.', 0, nlen, 1) != -1) {
-        Py_INCREF(name);
-        return name;
+        return false;
     }
-    Shiboken::AutoDecRef privateobj(PyObject_GetAttr(
-        reinterpret_cast<PyObject *>(Py_TYPE(self)), Shiboken::PyMagicName::name()));
+    return true;
+}
 
+PyObject *_Pep_TypePrivateMangle(PyTypeObject *obType, PyObject *name)
+{
+    Shiboken::AutoDecRef privateobj(PyObject_GetAttr(
+        reinterpret_cast<PyObject *>(obType), Shiboken::PyMagicName::name()));
+
+    const Py_ssize_t nlen = PyUnicode_GetLength(name);
     // PYSIDE-1436: _Py_Mangle is no longer exposed; implement it always.
     // The rest of this function is our own implementation of _Py_Mangle.
     // Please compare the original function in compile.c .
@@ -849,6 +846,15 @@ _Pep_PrivateMangle(PyObject *self, PyObject *name)
     if (amount > big_stack)
         free(resbuf);
     return result;
+}
+
+PyObject *_Pep_PrivateMangle(PyObject *self, PyObject *name)
+{
+    if (!_Pep_IsPrivateName(name)) {
+        Py_INCREF(name);
+        return name;
+    }
+    return _Pep_TypePrivateMangle(Py_TYPE(self), name);
 }
 
 /*****************************************************************************

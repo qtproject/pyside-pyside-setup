@@ -515,14 +515,6 @@ LIBSHIBOKEN_API int PepModule_AddType(PyObject *module, PyTypeObject *type);
 
 LIBSHIBOKEN_API int PepModule_Add(PyObject *module, const char *name, PyObject *value);
 
-/*****************************************************************************
- *
- * Module Initialization
- *
- */
-
-LIBSHIBOKEN_API void Pep384_Init(void);
-
 } // extern "C"
 
 #endif // PEP384IMPL_H
