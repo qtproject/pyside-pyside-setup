@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>ClassicStyle.qml</file>
+        <file>FlatStyle.qml</file>
+        <file>NeonStyle.qml</file>
+    </qresource>
+</RCC>

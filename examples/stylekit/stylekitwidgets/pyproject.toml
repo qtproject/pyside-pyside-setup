@@ -1,0 +1,11 @@
+[project]
+name = "StyleKit Widgets Example"
+
+[tool.pyside6-rcc]
+options = ["--compress-algo", "zlib"]
+
+[tool.pyside6-project]
+files = ["main.py",
+         "ClassicStyle.qml", "FlatStyle.qml", "NeonStyle.qml",
+         "stylekitwidgets.qrc"
+]
