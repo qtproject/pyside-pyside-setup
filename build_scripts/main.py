@@ -269,9 +269,10 @@ class PysideInstallLib(_install_lib):
         or into build/wheel when command is 'bdist_wheel'.
         """
 
-        if self.build_dir.is_dir():
+        build_dir = Path(self.build_dir)
+        if build_dir.is_dir():
             # Using our own copydir makes sure to preserve symlinks.
-            outfiles = copydir(Path(self.build_dir).resolve(), Path(self.install_dir).resolve())
+            outfiles = copydir(Path(build_dir).resolve(), Path(self.install_dir).resolve())
         else:
             self.warn(f"'{self.build_dir}' does not exist -- no Python modules to install")
             return
