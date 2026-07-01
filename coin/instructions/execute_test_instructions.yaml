@@ -1,8 +1,13 @@
 type: Group
 enable_if:
-  condition: property
-  property: features
-  not_contains_value: LicenseCheck
+    condition: and
+    conditions:
+    - condition: property
+      property: features
+      not_contains_value: LicenseCheck
+    - condition: property
+      property: features
+      not_contains_value: PysideAxivion
 instructions:
   - type: ExecuteCommand
     command: "python3 -m pip install -r requirements-coin.txt"

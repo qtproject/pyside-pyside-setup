@@ -1,0 +1,36 @@
+{
+    "Project": {
+        "Git": {
+            "_active": true,
+            "author_line": "author-mail",
+            "author_format": "<(.*)>",
+            "sourceserver_gitdir": "/data/axivion/databases/pyside-setup.git",
+            "sourceserver_remote_url": "ssh://codereview.qt-project.org:29418/pyside/pyside-setup"
+        },
+        "Project-GlobalOptions": {
+            "ci_mode": {
+                "clean_before": false
+            },
+            "directory": "../work/pyside/$(env:TESTED_MODULE_COIN)",
+            "ir": "$(env:IRNAME)",
+            "name": "$(env:PACKAGE)_$(env:MODULE)_$(env:TESTED_MODULE_BRANCH_COIN)_$(env:TARGET_OS_COIN)"
+        }
+    },
+    "Results": {
+        "Dashboard": {
+            "ci_mode": {
+                "directory": "/data/axivion/databases"
+            },
+            "dashboard_url": "https://axivion-srv.ci.qt.io/axivion/"
+        }
+    },
+    "_Format": "1.0",
+    "_Version": "7.6.2",
+    "_VersionNum": [
+        7,
+        6,
+        2,
+        12725
+    ]
+}
+
