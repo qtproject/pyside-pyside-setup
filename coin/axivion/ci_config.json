@@ -1,0 +1,44 @@
+{
+    "Project": {
+        "BuildSystemIntegration": {
+            "child_order": [
+                "GCCSetup",
+                "CMake",
+                "LinkLibraries"
+            ]
+        },
+        "CMake": {
+            "_active": true,
+            "_copy_from": "CMakeIntegration",
+            "build_environment": {},
+            "build_options": "-j4",
+            "generate_options": "--fresh -DDISABLE_PYI=yes -DPython_EXECUTABLE=$(env:VENV_PYTHON_EXECUTABLE)",
+            "generator": "Ninja"
+        },
+        "GCCSetup": {
+            "_active": true,
+            "_copy_from": "Command",
+            "build_command": "gccsetup --cc gcc --cxx g++ --config ../../../axivion/"
+        },
+        "LinkLibraries": {
+            "_active": true,
+            "_copy_from": "AxivionLinker",
+            "input_files": [
+                "build/sources/*/*/lib*.so*.ir"
+            ],
+            "ir": "build/$(env:TESTED_MODULE_COIN).ir",
+            "plugin_files": [
+                "build/sources/*/plugins/*/lib*.so*.ir"
+            ]
+        }
+    },
+    "_Format": "1.0",
+    "_Version": "7.6.2",
+    "_VersionNum": [
+        7,
+        6,
+        2,
+        12725
+    ]
+}
+

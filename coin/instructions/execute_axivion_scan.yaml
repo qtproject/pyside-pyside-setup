@@ -1,0 +1,107 @@
+analysis_instructions_axivion: &analysis_instructions_axivion
+  type: Group
+  instructions:
+    - type: Group
+      instructions:
+      - type: EnvironmentVariable
+        variableName: AXIVION_CHAINLOAD_TOOLCHAIN_FILE
+        variableValue: "{{.AgentWorkingDir}}/install/lib/cmake/Qt6/qt.toolchain.cmake"
+      - type: EnvironmentVariable
+        variableName: CMAKE_PREFIX_PATH
+        variableValue: "{{.AgentWorkingDir}}/install/lib/cmake"
+      - type: EnvironmentVariable
+        variableName: TESTED_MODULE_BRANCH_COIN
+        variableValue: "unknown"
+        enable_if:
+          condition: runtime
+          env_var: TESTED_MODULE_BRANCH_COIN
+          not_equals_value: null # fixme
+    - type: Group
+      instructions:
+      - type: Rename
+        sourcePath: "{{.SourceDir}}/coin/axivion/ci_config.json"
+        targetPath: "{{.Env.HOME}}/axivion/ci_config.json"
+        userMessageOnFailure: "Moving ci_config.json failed. Make sure you have included the file in coin/axivion/ -folder"
+      - type: Rename
+        sourcePath: "{{.SourceDir}}/coin/axivion/start_analysis.sh"
+        targetPath: "{{.Env.HOME}}/axivion/start_analysis.sh"
+        userMessageOnFailure: "Moving start_analysis.sh failed. Make sure you have included the file in coin/axivion/ -folder"
+      - type: Rename
+        sourcePath: "{{.SourceDir}}/coin/axivion/ci_config_common.json"
+        targetPath: "{{.Env.HOME}}/axivion/ci_config_common.json"
+        userMessageOnFailure: "Moving ci_config_common.json failed. Make sure you have included the file in coin/axivion/ -folder"
+      - type: ExecuteCommand
+        command: ["../../../axivion/start_analysis.sh"]
+        maxTimeInSeconds: 28800
+        maxTimeBetweenOutput: 28800
+        userMessageOnFailure: "Failed to run analysis"
+
+create_venv: &create_venv
+  type: Group
+  instructions:
+    - type: SetBuildDirectory
+      directory: "{{.SourceDir}}"
+    - type: ChangeDirectory
+      directory: "{{.SourceDir}}"
+    - type: ExecuteCommand
+      command: ["python3", "-m", "venv","env"]
+      maxTimeInSeconds: 100
+      maxTimeBetweenOutput: 100
+      userMessageOnFailure: "Failed to create venv"
+    - type: ExecuteCommand
+      command: ["{{.SourceDir}}/env/bin/python", "-m", "pip", "install", "-r", "requirements.txt"]
+      maxTimeInSeconds: 100
+      maxTimeBetweenOutput: 100
+      userMessageOnFailure: "Failed to install requirements"
+    - type: EnvironmentVariable
+      variableName: VENV_PYTHON_EXECUTABLE
+      variableValue: "/home/qt/work/pyside/pyside-setup/env/bin/python3"
+
+build_environment_axivion: &build_environment_axivion
+  type: Group
+  instructions:
+    - type: ExecuteCommand
+      command: ["sudo", "mkdir", "-p","/data/axivion"]
+      maxTimeInSeconds: 100
+      maxTimeBetweenOutput: 100
+      userMessageOnFailure: "Create mount point for results failed"
+    - type: ExecuteCommand
+      command: ["sudo", "mount", "-t", "nfs", "-o", "rw,nfsvers=3", "10.212.0.93:/data/axivion", "/data/axivion"]
+      maxTimeInSeconds: 100
+      maxTimeBetweenOutput: 100
+      userMessageOnFailure: "Mount failed"
+    - type: ExecuteCommand
+      command: ["rm","-rf","{{.SourceDir}}"]
+      maxTimeInSeconds: 100
+      maxTimeBetweenOutput: 100
+      userMessageOnFailure: "Failed to remove source directory"
+    - type: MakeDirectory
+      directory: "{{.SourceDir}}"
+    - type: ChangeDirectory
+      directory: "{{.SourceDir}}"
+    - type: ExecuteCommand
+      command: ["git", "clone", "--jobs={{.NumCPU}}", "-n","--depth=50", "git://{{.Env.QT_COIN_GIT_DAEMON}}/qt-project/pyside/{{.Env.TESTED_MODULE_COIN}}","."]
+      maxTimeInSeconds: 900
+      maxTimeBetweenOutput: 900
+      userMessageOnFailure: "Failed to clone repository"
+    - type: ExecuteCommand
+      command: ["git", "fetch", "--recurse-submodules", "origin", "{{.Env.TESTED_MODULE_REVISION_COIN}}"]
+      maxTimeInSeconds: 900
+      maxTimeBetweenOutput: 900
+      userMessageOnFailure: "Failed to fetch sources"
+    - type: ExecuteCommand
+      command: ["git", "checkout", "--force", "{{.Env.TESTED_MODULE_REVISION_COIN}}"]
+      maxTimeInSeconds: 900
+      maxTimeBetweenOutput: 900
+      userMessageOnFailure: "Failed to checkout sources"
+
+type: Group
+instructions:
+  - *build_environment_axivion
+  - *create_venv
+  - *analysis_instructions_axivion
+enable_if:
+  condition: property
+  property: features
+  contains_value: PysideAxivion
+

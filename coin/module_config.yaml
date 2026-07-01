@@ -5,6 +5,9 @@ accept_configuration:
     - condition: property
       property: features
       contains_value: LicenseCheck
+    - condition: property
+      property: features
+      contains_value: PysideAxivion
     - condition: and
       conditions:
         - condition: property  # No cross compilation
