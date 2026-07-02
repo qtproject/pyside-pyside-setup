@@ -1166,14 +1166,16 @@ void ShibokenGenerator::writeFunctionArguments(TextStream &s,
         argUsed += 3;
     }
 
+    const bool isAbstractRemoved = func->isAbstract() && func->isModifiedRemoved();
+
     for (const auto &arg : func->arguments()) {
         if (options.testFlag(Generator::SkipRemovedArguments) && arg.isModifiedRemoved())
             continue;
 
         if (argUsed != 0)
             s << ", ";
-        if (options.testFlag(PythonOverrideImplementation))
-            s << "[[maybe_unused]] ";
+        if (isAbstractRemoved || options.testFlag(PythonOverrideImplementation))
+            s << maybeUnused;
         writeArgument(s, func, arg, options);
         argUsed++;
     }
