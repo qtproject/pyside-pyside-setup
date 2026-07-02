@@ -133,8 +133,6 @@ QtObject {
                 Binding on checked { value: root.testWindow.visibility === Window.FullScreen }
                 onClicked: root.testWindow.visibility = checked ? Window.FullScreen : Window.AutomaticVisibility
                 text: "⛶"
-                ToolTip.visible: hovered
-                ToolTip.delay: Qt.styleHints.mousePressAndHoldInterval
                 ToolTip.text: root.testWindow.visibility === Window.FullScreen ? qsTr("restore") : qsTr("fill screen")
             }
             Button {
@@ -145,8 +143,6 @@ QtObject {
                 width: height
                 height: fullscreenButton.height
                 onClicked: root.testWindow.close()
-                ToolTip.visible: hovered
-                ToolTip.delay: Qt.styleHints.mousePressAndHoldInterval
                 ToolTip.text: qsTr("close this window")
             }
         }
