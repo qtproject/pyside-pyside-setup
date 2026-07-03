@@ -172,6 +172,9 @@
     <!-- PYSIDE-1627 QAction::menu()/setMenu() are templates -->
     <add-function signature="menu()const" return-type="QObject*">
         <inject-code file="../glue/qtgui.cpp" snippet="qaction-menu"/>
+        <modify-argument index="return"> <!-- Suppress return value heuristics -->
+          <define-ownership class="target" owner="default"/>
+        </modify-argument>
     </add-function>
     <declare-function signature="setMenu(QObject*)">
       <modify-argument index="1">
