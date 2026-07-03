@@ -1,2 +1,3 @@
 tqdm
 certifi
+jinja2

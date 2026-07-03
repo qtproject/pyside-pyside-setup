@@ -8,9 +8,17 @@ import shutil
 import ssl
 import tarfile
 import urllib.error
+import sys
 import urllib.request
 from tqdm import tqdm
 from pathlib import Path
+
+from jinja2 import Environment, FileSystemLoader
+
+PYSIDE_SETUP_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PYSIDE_SETUP_ROOT))
+from build_scripts.utils import (configure_cmake_project,           # noqa: E402
+                                 parse_cmake_project_message_info)
 
 try:
     import certifi
@@ -19,10 +27,16 @@ except ImportError:
     pass
 
 
+log = logging.getLogger(__name__)
+
 PYTHON_VERSION = "3.14"
 BUILD_NUMBER = "b9"    # Latest
 
-CACHE_DIR = Path.home() / ".pyside6_ios" / "Python-Apple-support"
+TEMPLATES_PATH = Path(__file__).parent / "templates"
+IOS_CACHE_DIR = Path.home() / ".pyside6_ios"
+
+DEFAULT_QT_CMAKEDIR = "lib/cmake"
+TARGET_QT_INFO_DIR = PYSIDE_SETUP_ROOT / "sources" / "shiboken6" / "config.tests" / "target_qt_info"
 
 
 BEEWARE_RELEASE_URL = (
@@ -60,7 +74,7 @@ def _verify_sha256(file_path: Path, expected: str) -> None:
 def download_python_support(
     python_version: str = PYTHON_VERSION,
     build_number: str = BUILD_NUMBER,
-    cache_dir: Path = CACHE_DIR,
+    cache_dir: Path = IOS_CACHE_DIR / "Python-Apple-support",
 ) -> Path:
 
     tag = f"{python_version}-{build_number}"
@@ -106,3 +120,58 @@ def download_python_support(
         logging.info(f"Extraction complete: {extract_dir}")
 
     return extract_dir / "Python.xcframework"
+
+
+def _query_qt_install_cmakedir(
+        qt_ios: Path,
+        cmake: str = "cmake",
+) -> str | None:
+    """Query Qt's QT_INSTALL_CMAKEDIR via the target_qt_info config.tests,
+    instead of assuming the default 'lib/cmake'."""
+    cmake_cache_args = [
+        ("QFP_QT_TARGET_PATH", qt_ios),
+        ("CMAKE_SYSTEM_NAME", "iOS"),
+    ]
+    output = configure_cmake_project(
+        TARGET_QT_INFO_DIR, cmake,
+        temp_prefix_build_path=IOS_CACHE_DIR / "config.tests",
+        cmake_cache_args=cmake_cache_args)
+    return parse_cmake_project_message_info(output)["qt_info"]["QT_INSTALL_CMAKEDIR"] or None
+
+
+def generate_toolchain(
+        arch: str,
+        simulator: bool,
+        python_xcframework: Path,
+        qt_ios: Path,
+        qt_macos: Path,
+) -> Path:
+
+    try:
+        qt_install_prefix_cmakedir = _query_qt_install_cmakedir(qt_ios)
+    except (RuntimeError, OSError) as e:
+        log.warning(
+            f"Failed to find Qt's cmake dir; "
+            f"falling back to '{DEFAULT_QT_CMAKEDIR}'.\n{e}"
+        )
+        qt_install_prefix_cmakedir = None
+    qt_cmake_dir = qt_install_prefix_cmakedir or f"{qt_ios}/{DEFAULT_QT_CMAKEDIR}"
+
+    env = Environment(loader=FileSystemLoader(str(TEMPLATES_PATH)))
+    template = env.get_template("toolchain_ios.tmpl.cmake")
+
+    content = template.render(
+        arch=arch,
+        simulator=simulator,
+        python_xcframework=str(python_xcframework),
+        python_version=PYTHON_VERSION,
+        host_python=sys.executable,
+        qt_cmake_dir=qt_cmake_dir,
+    )
+
+    suffix = f"{arch}_simulator" if simulator else arch
+    toolchain_path = IOS_CACHE_DIR / f"toolchain_ios_{suffix}.cmake"
+    IOS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    toolchain_path.write_text(content)
+    log.info(f"Toolchain written: {toolchain_path}")
+    return toolchain_path
