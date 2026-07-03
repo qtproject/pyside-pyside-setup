@@ -100,7 +100,8 @@ all_modules.append("shiboken6.Shiboken")
 
 from shibokensupport.signature.lib.enum_sig import (  # noqa: E402
     SimplifyingEnumerator,
-    BaseFormatter
+    BaseFormatter,
+    stringify,
 )
 
 # Make sure not to get .pyc in Python2.
@@ -152,7 +153,7 @@ class Formatter(BaseFormatter):
             # globalX and the same with Y. The gerrit robot thinks that this
             # is a badly written "globally". Convince it by hiding this word.
             viskey = viskey[:-1] + '""Y'
-        self.print(f'    "{viskey}": {signature},')
+        self.print(f'    "{viskey}": {stringify(signature)},')
         yield key
 
 
