@@ -26,7 +26,7 @@ from typing import TypeVar, Generic
 from _imp import is_builtin
 
 
-class ellipsis:
+class Ellipsis:
     def __repr__(self):
         return "..."
 
@@ -42,7 +42,7 @@ if not hasattr(typing, "Self"):
 else:
     typing._Self = typing.Self
 
-ellipsis = ellipsis()
+ellipsis = Ellipsis()
 Point = typing.Tuple[int, int]
 Variant = typing.Any
 QImageCleanupFunction = collections.abc.Callable[..., typing.Any]
