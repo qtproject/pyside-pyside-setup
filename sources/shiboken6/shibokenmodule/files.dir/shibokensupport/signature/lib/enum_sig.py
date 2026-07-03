@@ -42,10 +42,6 @@ if hasattr(sys, "pypy_version_info"):
     _normal_functions += (type(get_sig),)
 
 
-def signal_check(thing):
-    return thing and type(thing) in (Signal, SignalInstance)
-
-
 def is_inconsistent_overload(signatures):
     if not isinstance(signatures, list):
         return False
@@ -130,12 +126,13 @@ class ExactEnumerator:
     mypy_misc_class_errors.add("QPyDesignerPropertySheetExtension")
 
     def __init__(self, formatter: BaseFormatter, result_type=dict):
-        global Signal, SignalInstance
         try:
             # Lazy import
             from PySide6.QtCore import Signal, SignalInstance
         except ImportError:
-            Signal = SignalInstance = None
+            self.SignalCls: tuple[type[Signal], type[SignalInstance]] | None = None
+        else:
+            self.SignalCls = (Signal, SignalInstance)
 
         self.fmt = formatter
         self.result_type = result_type
@@ -211,7 +208,7 @@ class ExactEnumerator:
         attributes = {}
 
         for thing_name, thing in class_members:
-            if signal_check(thing):
+            if self.SignalCls and isinstance(thing, self.SignalCls):
                 signals.append((thing_name, thing))
             elif inspect.isclass(thing):
                 # If this is the only member of the class, it causes the stub
