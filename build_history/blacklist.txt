@@ -6,7 +6,7 @@
 [QtMultimediaWidgets::qmultimediawidgets]
     darwin ci
 [QtAsyncio::qasyncio_test_chain]
-    win32
+    py3
 [QtQml::bug_825]
     py3.10.0
     py3.10.1
