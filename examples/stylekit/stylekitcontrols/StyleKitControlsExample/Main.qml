@@ -8,7 +8,7 @@ import "styles"
 
 ApplicationWindow {
     id: app
-    width: 1024
+    width: 1048
     height: 800
     visible: true
     title: qsTr("StyleKit")
@@ -20,11 +20,37 @@ ApplicationWindow {
     // at runtime, and each style provides its own set of themes.
     Haze { id: hazeStyle }
     Vitrum { id: vitrumStyle }
-    CustomDelegates { id: delegateStyle }
     Plain { id: plainStyle }
+    Fusion { id: fusionStyle }
 
     property real spacing: 10
     StyleKit.transitionsEnabled: transitionsEnabled.checked
+
+    menuBar: MenuBar {
+        id: appMenuBar
+
+        Menu {
+            title: qsTr("File")
+            Action { text: qsTr("New...") }
+            Action { text: qsTr("Open...") }
+            Action { text: qsTr("Save") }
+            Action { text: qsTr("Save As...") }
+            MenuSeparator { }
+            Action { text: qsTr("Quit") }
+        }
+
+        Menu {
+            title: qsTr("Edit")
+            Action { text: qsTr("Cut") }
+            Action { text: qsTr("Copy") }
+            Action { text: qsTr("Paste") }
+        }
+
+        Menu {
+            title: qsTr("Help")
+            Action { text: qsTr("About") }
+        }
+    }
 
     ScrollView {
         id: scrollView
@@ -60,6 +86,10 @@ ApplicationWindow {
                         text: "Flat"
                         flat: true
                         checkable: true
+                    }
+
+                    RoundButton {
+                        text: "Round"
                     }
                 }
             }
@@ -287,7 +317,7 @@ ApplicationWindow {
                         { value: hazeStyle, text: "Haze" },
                         { value: plainStyle, text: "Plain" },
                         { value: vitrumStyle, text: "Vitrum" },
-                        { value: delegateStyle, text: "CustomDelegates" }
+                        { value: fusionStyle, text: "Fusion" }
                     ]
                     onCurrentTextChanged: {
                         StyleKit.style = model[currentIndex].value;
@@ -368,8 +398,8 @@ ApplicationWindow {
     // define and style your own custom controls.
 
     component CustomButtonImplementation : Rectangle {
-        implicitWidth: fancyButton.background.implicitWidth + fancyButton.leftPadding + fancyButton.rightPadding
-        implicitHeight: fancyButton.background.implicitHeight + fancyButton.topPadding + fancyButton.bottomPadding
+        implicitWidth: fancyButton.background.width + fancyButton.leftPadding + fancyButton.rightPadding
+        implicitHeight: fancyButton.background.height + fancyButton.topPadding + fancyButton.bottomPadding
         radius: fancyButton.background.radius
         border.color: fancyButton.background.border.color
         border.width: fancyButton.background.border.width

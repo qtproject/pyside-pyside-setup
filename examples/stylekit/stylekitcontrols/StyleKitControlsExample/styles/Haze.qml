@@ -24,9 +24,15 @@ Style {
         rightPadding: 8
         bottomPadding: 2
 
+        background {
+            // Disable drop shadow on the background by default, and enable it per
+            // control type below instead
+            shadow.visible: false
+        }
+
         handle {
-            implicitWidth: 25
-            implicitHeight: 25
+            width: 25
+            height: 25
             radius: 25
             gradient: Gradient {
                 GradientStop { position: 0.0; color: Qt.alpha("black", 0.0)}
@@ -65,12 +71,13 @@ Style {
         // 'radioButton', 'switch', etc. This is a good place to style the properties they all
         // have in common. Any properties not set here will fall back to those defined in 'control'.
         background {
-            implicitWidth: 100
-            implicitHeight: 30
+            width: 100
+            height: 30
             opacity: 0.8
             radius: 8
 
             shadow {
+                visible: true
                 opacity: 0.8
                 scale: 1.1
             }
@@ -92,7 +99,6 @@ Style {
     }
 
     flatButton {
-        background.shadow.visible: false
         background.gradient: null
     }
 
@@ -115,7 +121,7 @@ Style {
     }
 
     comboBox {
-        background.implicitWidth: 200
+        background.width: 200
         pressed.background.scale: 1.0
     }
 
@@ -126,16 +132,55 @@ Style {
         padding: 20
         background {
             border.width: 0
-            implicitWidth: 200
-            implicitHeight: 200
+            width: 200
+            height: 200
             shadow.visible: false
         }
     }
 
     groupBox {
         background.topMargin: 20
-        background.implicitHeight: 30
+        background.height: 30
         text.bold: true
+    }
+
+    menu {
+        background.width: 120
+    }
+
+    menuBar {
+        padding: 1
+        background.height: 30
+    }
+
+    menuBarItem {
+        background {
+            height: 30
+            width: 30
+        }
+    }
+
+    menuItem {
+        background.height: 30
+    }
+
+    menuSeparator {
+        padding: 0
+
+        background {
+            width: 120
+            height: 1
+            border.width: 0
+        }
+
+        indicator {
+            height: 1
+            width: 120
+            border.width: 0
+
+            foreground.margins: 0
+            foreground.visible: false
+        }
     }
 
     radioButton {
@@ -146,6 +191,10 @@ Style {
                 border.width: 0
             }
         }
+    }
+
+    roundButton {
+        background.radius: 255
     }
 
     scrollBar {
@@ -159,32 +208,39 @@ Style {
     }
 
     slider {
-        background.implicitWidth: 180
+        background.width: 180
         indicator {
-            implicitHeight: 8
+            height: 8
             radius: 8
             foreground {
                 radius: 8
             }
         }
         vertical {
-            background.implicitWidth: 150
+            background {
+                width: 50
+                height: 150
+            }
+
+            indicator {
+                width: 8
+            }
         }
     }
 
     spinBox {
         padding: 4
         background {
-            implicitWidth: 100
+            width: 100
             scale: 1
         }
-        indicator.implicitHeight: 24
+        indicator.height: 24
     }
 
     switchControl {
         indicator {
-            implicitWidth: 60
-            implicitHeight: 30
+            width: 60
+            height: 30
             radius: 5
             foreground.radius: 4
         }
@@ -198,7 +254,7 @@ Style {
         // 'textInput' is the fallback for all text based controls, such as 'textField', 'textArea',
         // and 'searchField'. Any properties not set here will fall back to those defined in 'control'.
         background {
-            implicitWidth: 200
+            width: 200
         }
     }
 
@@ -218,36 +274,35 @@ Style {
         control {
             padding: 2
             background {
-                implicitHeight: 15
+                height: 15
             }
             indicator {
-                implicitWidth: 15
-                implicitHeight: 15
+                width: 15
+                height: 15
             }
             handle {
-                implicitWidth: 15
-                implicitHeight: 15
+                width: 15
+                height: 15
             }
         }
 
         textInput {
-            background.implicitWidth: 100
+            background.width: 100
         }
 
         abstractButton.background {
-            implicitWidth: 60
+            width: 60
         }
 
         switchControl {
-            background.implicitWidth: 40
-            indicator.implicitWidth: 40
-            indicator.implicitHeight: 20
+            background.width: 40
+            indicator.width: 40
+            indicator.height: 20
         }
 
         slider {
-            background.implicitWidth: 100
-            indicator.implicitHeight: 8
-            indicator.implicitWidth: Style.Stretch
+            background.width: 100
+            indicator.height: 8
         }
 
         pane {
@@ -256,16 +311,16 @@ Style {
         }
     }
 
-    // You can also set one or more StyleVariations on a control type. Unlike Instance
-    // variations—which apply only to specific control instances—type variations are applied
-    // to *all* instances of a control type without requiring the application to use attached
-    // properties.
-    // In this example, we specify that all Buttons that are children of a Frame
-    // should receive alternative styling, differentiating them from other Buttons.
+    /* You can also set one or more StyleVariations on a control type. Unlike Instance
+     * variations—which apply only to specific control instances—type variations are applied
+     * to *all* instances of a control type without requiring the application to use attached
+     * properties.
+     *
+     * In this example, we specify that all Buttons that are children of a Frame
+     * should receive alternative styling, differentiating them from other Buttons. */
     frame {
         background {
             border.width: 1
-            shadow.visible: true
         }
         variations: StyleVariation {
             button.background {
@@ -275,10 +330,10 @@ Style {
             }
         }
     }
-    // Because 'groupBox' falls back to 'frame', any StyleVariation applied to a frame
-    // is automatically inherited by a groupBox as well. Since I in this example only want the
-    // different styling on frames, not group boxes, I can simply unset the variation
-    // for group boxes.
+    /* Because 'groupBox' falls back to 'frame', any StyleVariation applied to a frame
+     * is automatically inherited by a groupBox as well. Since I in this example only want the
+     * different styling on frames, not group boxes, I can simply unset the variation
+     * for group boxes. */
     groupBox.variations: []
 
     readonly property int fancyButton: 0
@@ -290,8 +345,8 @@ Style {
         // The 'controlType' can be any number between 0 and 100000.
         controlType: fancyButton
         background {
-            implicitWidth: 120
-            implicitHeight: 30
+            width: 120
+            height: 30
             radius: 0
         }
     }
@@ -303,7 +358,7 @@ Style {
     //
     // Within a theme, you can override any properties that should have different values
     // when the theme is applied. Typically, a style configures structural properties
-    // such as implicit size, padding, and radii, while a theme specifies colors. However,
+    // such as width, height, padding, and radii, while a theme specifies colors. However,
     // this is not a limitation — any properties can be overridden by a theme. Properties
     // not set in the theme will fall back to those defined in the style.
 
@@ -341,11 +396,6 @@ Style {
             }
 
             hovered {
-                background {
-                    color: palette.accent
-                    border.color: "white"
-                    shadow.color: "white"
-                }
                 handle {
                     shadow.color: "white"
                     shadow.scale: 1.6
@@ -356,7 +406,6 @@ Style {
             disabled {
                 background {
                     opacity: 0.4
-                    shadow.visible: false
                     gradient: null
                 }
             }
@@ -367,12 +416,35 @@ Style {
                 shadow.scale: 1.05
             }
             hovered.background {
-                shadow.scale: 1.4
                 color: palette.accent
+                border.color: "white"
+                shadow.color: "white"
+                shadow.scale: 1.4
             }
             checked {
                 background.color: palette.accent
             }
+        }
+
+        comboBox {
+            hovered.background {
+                color: palette.accent
+                border.color: "white"
+                shadow.color: "white"
+                shadow.scale: 1.4
+            }
+        }
+
+        itemDelegate {
+            hovered.background.color: palette.accent
+        }
+
+        menuBarItem {
+            hovered.background.color: palette.accent
+        }
+
+        menuItem {
+            hovered.background.color: palette.accent
         }
 
         pane {
@@ -471,14 +543,6 @@ Style {
             }
 
             hovered {
-                background {
-                    border.color: "white"
-                    color: palette.accent
-                    shadow.color: "white"
-                    shadow.scale: 1.1
-                    shadow.blur: 20
-                }
-
                 handle {
                     shadow.color: "white"
                 }
@@ -505,6 +569,40 @@ Style {
                     color: "#bbbbbb"
                 }
             }
+
+            hovered {
+                background {
+                    border.color: "white"
+                    color: palette.accent
+                    shadow.color: "white"
+                    shadow.scale: 1.1
+                    shadow.blur: 20
+                }
+            }
+        }
+
+        comboBox {
+            hovered {
+                background {
+                    border.color: "white"
+                    color: palette.accent
+                    shadow.color: "white"
+                    shadow.scale: 1.1
+                    shadow.blur: 20
+                }
+            }
+        }
+
+        itemDelegate {
+            hovered.background.color: palette.accent
+        }
+
+        menuBarItem {
+            hovered.background.color: palette.accent
+        }
+
+        menuItem {
+            hovered.background.color: palette.accent
         }
 
         textInput {
@@ -512,7 +610,6 @@ Style {
         }
 
         scrollBar {
-            background.color: "#8e848a"
             indicator.foreground.color: "white"
         }
 
@@ -526,11 +623,10 @@ Style {
         }
 
         pane {
-            // The controls change background color on states like hover, but panes
-            // should not. Override the property here to disable that behavior for panes.
+            /* The controls change background color on states like hover, but panes
+             * should not. Override the property here to disable that behavior for panes. */
             background.color: Qt.lighter("#544e52", 1.3)
             background.border.color: "#3d373b"
-            background.shadow.visible: false
         }
 
         StyleVariation {
@@ -574,7 +670,7 @@ Style {
                 transition: null
 
                 background {
-                    implicitHeight: 40
+                    height: 40
                     shadow.color: "transparent"
                     color: "lightgray"
                     border.color: "black"
@@ -583,8 +679,8 @@ Style {
                 }
 
                 indicator {
-                    implicitWidth: 30
-                    implicitHeight: 30
+                    width: 30
+                    height: 30
                     color: "ghostwhite"
                     border.color: "black"
                     foreground.margins: 4
@@ -595,8 +691,8 @@ Style {
                 handle {
                     border.color: "black"
                     border.width: 2
-                    implicitWidth: 30
-                    implicitHeight: 30
+                    width: 30
+                    height: 30
                     radius: 30
                     gradient: null
                 }
@@ -628,11 +724,21 @@ Style {
 
             slider {
                 indicator {
-                    implicitWidth: 180
-                    implicitHeight: 12
+                    width: 180
+                    height: 12
                     color: "ghostwhite"
                     border.width: 1
                     foreground.color: "black"
+                }
+                vertical {
+                    background {
+                        width: 12
+                        height: 180
+                    }
+                    indicator {
+                        width: 12
+                        height: 180
+                    }
                 }
             }
 
@@ -651,14 +757,14 @@ Style {
                     radius: 16
                     margins: 0
                     border.width: 2
-                    implicitWidth: 60
-                    implicitHeight: 40
+                    width: 60
+                    height: 40
                     foreground.color: "transparent"
                 }
 
                 handle {
-                    implicitWidth: 20
-                    implicitHeight: 30
+                    width: 20
+                    height: 30
                     border.width: 2
                     color: "white"
                     margins: 6
@@ -694,12 +800,10 @@ Style {
             }
 
             scrollBar {
-                background.implicitWidth: 15
-                background.implicitHeight: 15
-                indicator.implicitWidth: 15
-                indicator.implicitHeight: 15
-                background.color: "#8e848a"
-                background.border.width: 1
+                background.width: 15
+                background.height: 15
+                indicator.width: 15
+                indicator.height: 15
                 indicator.border.width: 3
                 indicator.foreground.margins: 3
                 indicator.foreground.color: "lightgray"
@@ -791,7 +895,6 @@ Style {
             pane {
                 background.color: "#a0b1a0"
                 background.border.color: "#415a41"
-                background.shadow.visible: false
             }
 
             scrollIndicator {

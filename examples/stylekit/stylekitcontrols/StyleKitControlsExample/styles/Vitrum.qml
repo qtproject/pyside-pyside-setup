@@ -7,51 +7,6 @@ import Qt.labs.StyleKit
 Style {
     id: style
 
-    component NoiseDelegate : ShaderEffect {
-        id: noiseDelegate
-        implicitWidth: unifiedSourceItem.implicitWidth
-        implicitHeight: unifiedSourceItem.implicitHeight
-        width: parent.width
-        height: parent.height
-        scale: delegateStyle.scale
-        rotation: delegateStyle.rotation
-        visible: delegateStyle.visible
-
-        required property DelegateStyle delegateStyle
-
-        readonly property bool isDarkBg: {
-            let bgColor = delegateStyle.color
-            let luminance = (0.2126 * bgColor.r) +  (0.7152 * bgColor.g) +  (0.0722 * bgColor.b);
-            return luminance < 0.5;
-        }
-
-        // The following properties are used by the shader
-        property size sourceItemSize: Qt.size(unifiedSourceItem.width, unifiedSourceItem.height)
-        property color borderColor: delegateStyle.border.color
-        property real borderMaskEnabled: 1
-        property real borderMaskThreshold: 0.001
-        property real particleDensity: 0.2
-        property real particleSize: 0.5
-        property color particleColor: "black"
-        property Item source: ShaderEffectSource { live: true; sourceItem: unifiedSourceItem }
-        property real time: 0
-        property real particleOpacity: (delegateStyle.opacity === 1
-                                       ? (isDarkBg ? 0.15 : 0.05)
-                                       : (isDarkBg ? 0.5 : 0.1))
-
-        fragmentShader: "qrc:/effects/noise.qsb"
-
-        StyledItem {
-            id: unifiedSourceItem
-            delegateStyle: noiseDelegate.delegateStyle
-            width: parent.width
-            height: parent.height
-            visible: false
-            rotation: 0.0
-            scale: 1.0
-        }
-    }
-
     component ColorSet : QtObject {
         property color normal
         property color muted
@@ -129,9 +84,8 @@ Style {
         bottomPadding: 5
 
         background {
-            implicitHeight: myTheme.controlHeight
+            height: myTheme.controlHeight
             color: myTheme.neutralBackground.normal
-            delegate: NoiseDelegate {}
         }
 
         vertical {
@@ -140,29 +94,26 @@ Style {
         }
 
         handle {
-            implicitWidth: 36
-            implicitHeight: 36
+            width: 36
+            height: 36
             radius: 18
             border.width: 2
             border.color: myTheme.neutralStroke.normal
             color: myTheme.accentForeground.normal
-            delegate: NoiseDelegate {}
         }
 
         indicator {
-            implicitHeight: myTheme.controlHeight
+            height: myTheme.controlHeight
             radius: 25
             border.width: 3
             border.color: myTheme.neutralStroke.normal
             color: myTheme.neutralBackground.normal
-            delegate: NoiseDelegate {}
             foreground {
                 radius: 25
                 gradient: strongVerticalGradient
                 border.width: 3
                 border.color: myTheme.accentStroke.normal
                 color: myTheme.accentBackground.normal
-                delegate: NoiseDelegate {}
             }
         }
 
@@ -173,13 +124,12 @@ Style {
 
     abstractButton {
         background {
-            implicitWidth: 100
+            width: 100
             radius: 255
             border.width: 2
             border.color: myTheme.neutralStroke.normal
             color: myTheme.neutralBackground.normal
             gradient: faintVerticalGradient
-            delegate: NoiseDelegate {}
 
             shadow {
                 opacity: 0.25
@@ -223,28 +173,29 @@ Style {
 
     scrollIndicator {
         padding: 2
-        background.implicitHeight: 6
-        indicator.implicitHeight: 6
+        background.height: 6
+        indicator.height: 6
         vertical {
-            background.implicitWidth: 6
-            indicator.implicitWidth: 6
+            background.width: 6
+            indicator.width: 6
         }
     }
 
     scrollBar {
         padding: 2
-        background.implicitHeight: 20
-        indicator.implicitHeight: 20
+        background.height: 20
+        background.visible: false
+        indicator.height: 20
         vertical {
-            background.implicitWidth: 20
-            indicator.implicitWidth: 20
+            background.width: 20
+            indicator.width: 20
         }
     }
 
     checkBox {
         indicator {
-            implicitWidth: 35
-            implicitHeight: 35
+            width: 35
+            height: 35
             radius: 4
             border.width: 1.5
             foreground {
@@ -258,8 +209,8 @@ Style {
 
     radioButton {
         indicator {
-            implicitWidth: 35
-            implicitHeight: 35
+            width: 35
+            height: 35
             radius: width / 2
             border.width: 1.5
             foreground {
@@ -276,6 +227,10 @@ Style {
         }
     }
 
+    roundButton {
+        background.radius: 255
+    }
+
     popup {
         padding: 2
         topPadding: 20
@@ -284,14 +239,14 @@ Style {
 
     comboBox {
         background {
-            implicitWidth: 200
-            implicitHeight: myTheme.controlHeight
+            width: 200
+            height: myTheme.controlHeight
             radius: myTheme.controlHeight / 2
             border.color: myTheme.neutralStroke.normal
             color: myTheme.neutralBackground.normal
         }
         indicator {
-            implicitHeight: myTheme.controlHeight / 6
+            height: myTheme.controlHeight / 6
             color: "transparent"
             border.width: 0
             foreground {
@@ -316,16 +271,16 @@ Style {
             foreground.color: "transparent"
             foreground.image.color: myTheme.accentStroke.normal
             foreground.border.width: 0
-            foreground.implicitWidth: 20
-            foreground.implicitHeight: 20
+            foreground.width: 20
+            foreground.height: 20
         }
     }
 
     textField {
         background {
             radius: 9999999999
-            implicitWidth: 200
-            implicitHeight: myTheme.controlHeight
+            width: 200
+            height: myTheme.controlHeight
             border.color: myTheme.neutralStroke.normal
             color: myTheme.neutralBackground.normal
         }
@@ -335,22 +290,37 @@ Style {
 
     slider {
         spacing: 26
-        background.implicitWidth: 180
-        // indicator.implicitHeight: UnifiedStyle.Stretch
+        background.width: 180
         indicator.foreground.minimumWidth: 50
         indicator.foreground.margins: 2
-        indicator.foreground.delegate: null
         handle {
             leftMargin: 8
             rightMargin: 8
+        }
+        vertical {
+            background {
+                height: 180
+                width: myTheme.controlHeight
+            }
+            indicator {
+                width: myTheme.controlHeight
+                foreground.minimumWidth: 0
+                foreground.minimumHeight: 50
+            }
+            handle {
+                leftMargin: 0
+                rightMargin: 0
+                topMargin: 8
+                bottomMargin: 8
+            }
         }
     }
 
     switchControl {
         spacing: 8
         indicator {
-            implicitWidth: 80
-            implicitHeight: myTheme.controlHeight
+            width: 80
+            height: myTheme.controlHeight
             foreground.visible: false
         }
         handle {
@@ -376,6 +346,47 @@ Style {
 
     itemDelegate {
         hovered.background.color: myTheme.accentBackground.normal
+    }
+
+    menu {
+        padding: 2
+        background.width: 100
+    }
+
+    menuBar {
+        padding: 2
+    }
+
+    menuBarItem {
+        padding: 2
+        background.width: 100
+        hovered.background.color: myTheme.accentBackground.normal
+    }
+
+    menuItem {
+        padding: 2
+        hovered.background.color: myTheme.accentBackground.normal
+    }
+
+    menuSeparator {
+        padding: 4
+
+        background {
+            width: 100
+            height: 0
+            color: "transparent"
+            border.width: 0
+        }
+
+        indicator {
+            height: 1
+            width: 100
+            color: myTheme.neutralStroke.normal
+            border.width: 0
+
+            foreground.margins: 0
+            foreground.visible: false
+        }
     }
 
     // THEMES

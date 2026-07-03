@@ -22,7 +22,6 @@ Style {
         hovered {
             // Here we override some of the properties for the 'hovered' state. The ones
             // we don't set here will fall back to be read from the 'normal' state.
-            background.color: palette.accent
             handle.color: palette.accent.darker(1.2)
         }
 
@@ -75,6 +74,7 @@ Style {
                 verticalOffset: 2
             }
         }
+        hovered.background.color: palette.accent
     }
 
     itemDelegate {
@@ -88,9 +88,29 @@ Style {
         }
     }
 
+    menuBar {
+        padding: 0
+    }
+
+    menuBarItem {
+        hovered.background.color: palette.accent
+    }
+
+    menuItem {
+        hovered.background.color: palette.accent
+    }
+
+    menuSeparator {
+        indicator.color: palette.accent
+    }
+
     popup {
         // Remove padding so that item delegates span the full width
         padding: 0
+    }
+
+    roundButton {
+        background.radius: 255
     }
 
     scrollBar {
@@ -100,8 +120,8 @@ Style {
     }
 
     pane {
-        // The controls change background color on states like hover, but panes
-        // should not. Override the property here to disable that behavior for panes.
+        /* The controls change background color on states like hover, but panes
+         * should not. Override the property here to disable that behavior for panes. */
         background.color: "white"
     }
 
