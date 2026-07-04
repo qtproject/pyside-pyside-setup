@@ -136,7 +136,9 @@ class Formatter(BaseFormatter):
     def klass(self, class_name, class_str, *other):
         self.print()
         self.print(f"# class {self.mod_name}.{class_name}:")
+        self.level += 1
         yield
+        self.level -= 1
 
     @contextmanager
     def function(self, func_name, signature, *other):
