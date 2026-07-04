@@ -181,8 +181,6 @@ class Formatter(Writer, BaseFormatter, EnumFormatter, SignalFormatter, Attribute
     # self.is_method() is true for non-plain functions.
 
     def section(self):
-        if self.level == 0:
-            self.print()
         self.print()
 
     @contextmanager
@@ -204,18 +202,17 @@ class Formatter(Writer, BaseFormatter, EnumFormatter, SignalFormatter, Attribute
         while "." in class_name:
             class_name = class_name.split(".", 1)[-1]
             class_str = class_str.split(".", 1)[-1]
-        if self.have_body:
-            self.print(f"{spaces}class {class_str}:{opt_comment}")
-        else:
-            self.print(f"{spaces}class {class_str}: ...{opt_comment}")
+        self.print(f"{spaces}class {class_str}:{opt_comment}")
         self.level += 1
         yield
+        if not self.have_body:
+            spaces_2 = indent * self.level
+            self.print(f"{spaces_2}...")
+            self.print()
         self.level -= 1
 
     @contextmanager
     def function(self, func_name, signature, decorator=None, aug_ass=None, incon_err=None):
-        if func_name == "__init__":
-            self.print()
         key = func_name
         spaces = indent * self.level
         err_ignore = "  # type: ignore[misc]"
@@ -235,8 +232,6 @@ class Formatter(Writer, BaseFormatter, EnumFormatter, SignalFormatter, Attribute
         else:
             opt_comment = err_ignore if aug_ass else ""
             self._function(func_name, signature, spaces, decorator, opt_comment)
-        if func_name == "__init__":
-            self.print()
         yield key
 
     def _function(self, func_name, signature, spaces, decorator=None, opt_comment=""):
@@ -393,7 +388,6 @@ def generate_pyi(import_name, outpath, options):
                         wr.print(f"import {import_args}")
                     else:
                         wr.print(f"from {mod} import {import_args}")
-                wr.print()
                 wr.print()
                 # We use it only in QtCore at the moment, but this
                 # could be extended to other modules. (must import QObject then)

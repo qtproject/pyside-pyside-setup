@@ -166,11 +166,10 @@ class ExactEnumerator:
             for class_name, klass in members:
                 self.collision_track = set()
                 ret.update(self.klass(class_name, klass))
-            if len(members):
                 self.section()
             for func_name, func in functions:
                 ret.update(self.function(func_name, func))
-            if len(functions):
+            if functions or not members:
                 self.section()
             return ret
 
@@ -210,12 +209,6 @@ class ExactEnumerator:
             if self.SignalCls and isinstance(thing, self.SignalCls):
                 signals.append((thing_name, thing))
             elif inspect.isclass(thing):
-                # If this is the only member of the class, it causes the stub
-                # to be printed empty without ..., as self.fmt.have_body will
-                # then be True. (Example: QtCore.QCborTag). Skip it to avoid
-                # this problem.
-                if thing_name == "_member_type_":
-                    continue
                 subclass_name = ".".join((class_name, thing_name))
                 subclasses.append((subclass_name, thing))
             elif inspect.isroutine(thing):
@@ -251,25 +244,13 @@ class ExactEnumerator:
                         func = klass.__dict__[aug_ass]
                         self.mypy_aug_ass_errors.add(func)
 
-        init_signature = getattr(klass, "__signature__", None)
-        # PYSIDE-2752: Enums without values will not have a constructor, so
-        # we set the init_signature to None, to avoid having an empty pyi
-        # entry, like:
-        #    class QCborTag(enum.IntEnum):
-        #  or
-        #    class BeginFrameFlag(enum.Flag):
-        if issubclass(klass, Enum):
-            init_signature = None
         # sort by class then enum value
         enums.sort(key=lambda tup: (tup[1], tup[2].value))
 
         # We want to handle functions and properties together.
         func_prop = sorted(functions + properties, key=lambda tup: tup[0])
 
-        # find out how many functions create a signature
-        sigs = list(_ for _ in functions if get_sig(_[1]))
-        self.fmt.have_body = bool(subclasses or sigs or properties or enums or  # noqa W:504
-                                  init_signature or signals or attributes)
+        self.fmt.have_body = False
 
         has_misc_error = class_name in self.mypy_misc_class_errors
         if issubclass(klass, Enum) and not len(enums):
@@ -277,48 +258,62 @@ class ExactEnumerator:
             has_misc_error = True
         with self.fmt.klass(class_name, class_str, has_misc_error):
             self.fmt.class_name = class_name
-            if isinstance(self.fmt, EnumFormatter):
+
+            if isinstance(self.fmt, EnumFormatter) and enums:
                 # this is an optional feature
-                if len(enums):
-                    self.section()
                 for enum_name, enum_class_name, value in enums:
                     with self.fmt.enum(enum_class_name, enum_name, value.value):
                         pass
-            if isinstance(self.fmt, SignalFormatter):
+                self.section()
+                self.fmt.have_body = True
+
+            if isinstance(self.fmt, SignalFormatter) and signals:
                 # this is an optional feature
-                if len(signals):
-                    self.section()
                 for signal_name, signal in signals:
                     sig_class = type(signal)
                     sig_class_name = f"{sig_class.__qualname__}"
                     sig_str = str(signal)
                     with self.fmt.signal(sig_class_name, signal_name, sig_str):
                         pass
-            if isinstance(self.fmt, AttributeFormatter):
-                if len(attributes):
-                    self.section()
+                self.section()
+                self.fmt.have_body = True
+
+            if isinstance(self.fmt, AttributeFormatter) and attributes:
                 for class_name, attrs in attributes.items():
                     for attr_name, attr_value in attrs.items():
                         with self.fmt.attribute(attr_name, attr_value):
                             pass
-            if len(subclasses):
                 self.section()
+                self.fmt.have_body = True
+
             for subclass_name, subclass in subclasses:
                 save = self.collision_track.copy()
                 ret.update(self.klass(subclass_name, subclass))
                 self.collision_track = save
                 self.fmt.class_name = class_name
-            if len(subclasses):
+
+            if ret_ := self.function("__init__", klass):
+                ret.update(ret_)
                 self.section()
-            ret.update(self.function("__init__", klass))
+                self.fmt.have_body = True
+
+            has_function_section = False
             for func_name, func in func_prop:
                 if func_name != "__init__":
                     if isinstance(func, property):
-                        ret.update(self.fproperty(func_name, func))
+                        ret_ = self.fproperty(func_name, func)
                     else:
-                        ret.update(self.function(func_name, func))
-        if len(func_prop):
-            self.section()
+                        ret_ = self.function(func_name, func)
+                    has_function_section |= bool(ret_)
+                    ret.update(ret_)
+            if has_function_section:
+                self.section()
+                self.fmt.have_body = True
+
+        # If this class is a nested class, we may have clobbered the parent's class have_body value
+        # The parent class always has a body because it contains this class.
+        self.fmt.have_body = True
+
         return ret
 
     @staticmethod
