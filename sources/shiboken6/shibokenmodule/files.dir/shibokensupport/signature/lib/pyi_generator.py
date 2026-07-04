@@ -172,12 +172,9 @@ class Formatter(Writer, BaseFormatter, EnumFormatter, SignalFormatter, Attribute
     def last_fixups(cls, source):
         # PYSIDE-2517: findChild/findChildren type hints:
         # PlaceholderType fix to avoid the '~' from TypeVar.__repr__
-        if "~PlaceholderType" in source:
-            source = source.replace("~PlaceholderType", "PlaceholderType")
-        if "~_SlotFunc" in source:
-            source = source.replace("~_SlotFunc", "_SlotFunc")
-        if "~_QmlType" in source:
-            source = source.replace("~_QmlType", "_QmlType")
+        source = source.replace("~PlaceholderType", "PlaceholderType")
+        source = source.replace("~_SlotFunc", "_SlotFunc")
+        source = source.replace("~_QmlType", "_QmlType")
         # Replace all "NoneType" strings by "None" which is a typing convention.
         return source.replace("NoneType", "None")
 
