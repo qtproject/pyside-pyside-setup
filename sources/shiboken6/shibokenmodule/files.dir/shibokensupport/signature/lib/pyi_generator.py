@@ -178,7 +178,6 @@ class Formatter(Writer, BaseFormatter, EnumFormatter, SignalFormatter, Attribute
         # Replace all "NoneType" strings by "None" which is a typing convention.
         return source.replace("NoneType", "None")
 
-    # self.level is maintained by enum_sig.py
     # self.is_method() is true for non-plain functions.
 
     def section(self):
@@ -209,7 +208,9 @@ class Formatter(Writer, BaseFormatter, EnumFormatter, SignalFormatter, Attribute
             self.print(f"{spaces}class {class_str}:{opt_comment}")
         else:
             self.print(f"{spaces}class {class_str}: ...{opt_comment}")
+        self.level += 1
         yield
+        self.level -= 1
 
     @contextmanager
     def function(self, func_name, signature, decorator=None, aug_ass=None, incon_err=None):

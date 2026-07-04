@@ -136,7 +136,6 @@ class ExactEnumerator:
 
         self.fmt = formatter
         self.result_type = result_type
-        self.fmt.level = 0
         self.fmt.is_method = self.is_method
         self.collision_candidates = {"property", "overload"}
         self.func = None
@@ -277,7 +276,6 @@ class ExactEnumerator:
             # PYSIDE-2846: We keep the empty enum and ignore the error.
             has_misc_error = True
         with self.fmt.klass(class_name, class_str, has_misc_error):
-            self.fmt.level += 1
             self.fmt.class_name = class_name
             if isinstance(self.fmt, EnumFormatter):
                 # this is an optional feature
@@ -319,9 +317,8 @@ class ExactEnumerator:
                         ret.update(self.fproperty(func_name, func))
                     else:
                         ret.update(self.function(func_name, func))
-            self.fmt.level -= 1
-            if len(func_prop):
-                self.section()
+        if len(func_prop):
+            self.section()
         return ret
 
     @staticmethod
