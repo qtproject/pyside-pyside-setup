@@ -92,6 +92,10 @@ The :meth:`~PySide6.QtCore.Signal.connect` function takes an optional parameter
 of :class:`~PySide6.QtCore.Qt.ConnectionType` that specifies the behavior
 with regards to threads and event loops.
 
+.. note::
+    We recommend against using private methods (prefixed by ``__``) as slot
+    receiver functions as it incurs lookups at runtime.
+
 The Signal Class
 ----------------
 
