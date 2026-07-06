@@ -335,7 +335,7 @@ static const char includeQDebug[] =
 "#ifndef QT_NO_VERSION_TAGGING\n"
 "#  define QT_NO_VERSION_TAGGING\n"
 "#endif\n"
-"#include <QtCore/QDebug>\n";
+"#include <QtCore/qdebug.h>\n";
 
 static QString compilerOptionOptimize()
 {
@@ -533,13 +533,12 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
     if (normalClass && usePySideExtensions()) {
         s << includeQDebug;
         if (metaClass->hasToStringCapability())
-            s << "#include <QtCore/QBuffer>\n";
+            s << "#include <QtCore/qbuffer.h>\n";
         if (isQObject(metaClass)) {
             s << "#include <pysideqobject.h>\n"
                 << "#include <pysidesignal.h>\n"
                 << "#include <pysideproperty.h>\n"
-                << "#include <signalmanager.h>\n"
-                << "#include <pysidemetafunction.h>\n";
+                << "#include <signalmanager.h>\n";
         }
         s << "#include <pysideqenum.h>\n"
             << "#include <pysideutils.h>\n"
