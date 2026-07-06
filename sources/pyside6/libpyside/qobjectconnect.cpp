@@ -9,6 +9,7 @@
 #include "pysidesignal.h"
 #include "pysideutils.h"
 #include "signalmanager.h"
+#include "signalmanager_p.h"
 
 #include <sbkstring.h>
 #include <sbkpep.h>

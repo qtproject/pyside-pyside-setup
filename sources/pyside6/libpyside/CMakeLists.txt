@@ -43,7 +43,7 @@ set(libpyside_HEADERS # installed below
     pysidevariantutils.h
     pysideweakref.h
     qobjectconnect.h
-    signalmanager.h
+    signalmanager.h signalmanager_p.h
 )
 
 set(libpyside_SRC

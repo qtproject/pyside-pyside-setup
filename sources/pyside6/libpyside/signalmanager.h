@@ -8,50 +8,28 @@
 #include "pysidemacros.h"
 
 #include <sbkpython.h>
-#include <shibokenmacros.h>
 
 #include <QtCore/qmetaobject.h>
 
 #include <optional>
 
-namespace PySide
+namespace PySide::SignalManager
 {
-
-class PYSIDE_API SignalManager
-{
-public:
-    Q_DISABLE_COPY_MOVE(SignalManager)
-    ~SignalManager() = default;
-
     using QmlMetaCallErrorHandler = std::optional<int>(*)(QObject *object);
 
-    static void init();
+    PYSIDE_API void setQmlMetaCallErrorHandler(QmlMetaCallErrorHandler handler);
 
-    static void setQmlMetaCallErrorHandler(QmlMetaCallErrorHandler handler);
-
-    static bool emitSignal(QObject* source, const char* signal, PyObject* args);
-    static bool emitSignal(QObject* source, int signalIndex, PyObject* args);
-    static int qt_metacall(QObject* object, QMetaObject::Call call, int id, void** args);
+    PYSIDE_API bool emitSignal(QObject *source, const char* signal, PyObject *args);
+    PYSIDE_API bool emitSignal(QObject *source, int signalIndex, PyObject *args);
+    PYSIDE_API int qt_metacall(QObject *object, QMetaObject::Call call, int id, void **args);
 
     // Used to register a new signal/slot on QMetaobject of source.
-    static bool registerMetaMethod(QObject* source, const char* signature,
-                                   QMetaMethod::MethodType type);
-    static int registerMetaMethodGetIndex(QObject* source, const char *signature,
-                                          QMetaMethod::MethodType type);
-    static int registerMetaMethodGetIndexBA(QObject* source, const QByteArray &signature,
-                                            QMetaMethod::MethodType type);
+    PYSIDE_API bool registerMetaMethod(QObject *source, const char *signature,
+                                       QMetaMethod::MethodType type);
 
     // used to discovery metaobject
-    static const QMetaObject* retrieveMetaObject(PyObject* self);
+    PYSIDE_API const QMetaObject* retrieveMetaObject(PyObject *self);
 
-    // Utility function to call a python method using args received in qt_metacall
-    static int callPythonMetaMethod(QMetaMethod method, void **args, PyObject *callable);
-    static int callPythonMetaMethod(const QByteArrayList &parameterTypes,
-                                    const char *returnType /* = nullptr */,
-                                    void **args, PyObject *callable);
-    static void handleMetaCallError();
-};
-
-} // namespace PySide
+} // namespace PySide::SignalManager
 
 #endif // SIGNALMANAGER_H

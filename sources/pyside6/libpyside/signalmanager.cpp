@@ -3,6 +3,7 @@
 // Qt-Security score:significant reason:default
 
 #include "signalmanager.h"
+#include "signalmanager_p.h"
 #include "pyobjectwrapper.h"
 #include "pysideqobject_p.h"
 #include "pysidesignal.h"
@@ -110,11 +111,9 @@ static inline QByteArray msgCannotConvertReturn(QMetaMethod method)
     return msgCannotConvertReturn(methodSignature(method));
 }
 
-using namespace PySide;
-
 struct SignalManagerPrivate
 {
-    static SignalManager::QmlMetaCallErrorHandler m_qmlMetaCallErrorHandler;
+    static PySide::SignalManager::QmlMetaCallErrorHandler m_qmlMetaCallErrorHandler;
 
     static void handleMetaCallError(QObject *object, int *result);
     static int qtPropertyMetacall(QObject *object, QMetaObject::Call call,
@@ -125,18 +124,20 @@ struct SignalManagerPrivate
                                 const QMetaMethod &method, int id, void **args);
 };
 
-SignalManager::QmlMetaCallErrorHandler
+PySide::SignalManager::QmlMetaCallErrorHandler
     SignalManagerPrivate::m_qmlMetaCallErrorHandler = nullptr;
 
 static PyObject *CopyCppToPythonPyObject(const void *cppIn)
 {
-    const auto *wrapper = reinterpret_cast<const PyObjectWrapper *>(cppIn);
+    const auto *wrapper = reinterpret_cast<const PySide::PyObjectWrapper *>(cppIn);
     PyObject *pyOut = *wrapper;
     Py_XINCREF(pyOut);
     return pyOut;
 }
 
-void SignalManager::init()
+namespace PySide::SignalManager {
+
+void init()
 {
     // Force the metaObject attribute into existence. This fixes an
     // exit crash (Python 3.15/allocation asserting since GIL is not held)
@@ -167,12 +168,12 @@ void SignalManager::init()
     Shiboken::Conversions::registerConverterName(converter, "PySide::PyObjectWrapper");
 }
 
-void SignalManager::setQmlMetaCallErrorHandler(QmlMetaCallErrorHandler handler)
+void setQmlMetaCallErrorHandler(QmlMetaCallErrorHandler handler)
 {
     SignalManagerPrivate::m_qmlMetaCallErrorHandler = handler;
 }
 
-bool SignalManager::emitSignal(QObject *source, const char *signal, PyObject *args)
+bool emitSignal(QObject *source, const char *signal, PyObject *args)
 {
     if (!Signal::checkQtSignal(signal))
         return false;
@@ -182,24 +183,12 @@ bool SignalManager::emitSignal(QObject *source, const char *signal, PyObject *ar
     return emitSignal(source, signalIndex, args);
 }
 
-bool SignalManager::emitSignal(QObject* source, int signalIndex, PyObject* args)
+bool emitSignal(QObject* source, int signalIndex, PyObject* args)
 {
     return signalIndex != -1 && MetaFunction::call(source, signalIndex, args);
 }
 
-// Handle errors from meta calls. Requires GIL and PyErr_Occurred()
-void SignalManagerPrivate::handleMetaCallError(QObject *object, int *result)
-{
-    // Bubbles Python exceptions up to the Javascript engine, if called from one
-    if (m_qmlMetaCallErrorHandler) {
-        auto idOpt = m_qmlMetaCallErrorHandler(object);
-        if (idOpt.has_value())
-            *result = idOpt.value();
-    }
-    SignalManager::handleMetaCallError();
-}
-
-void SignalManager::handleMetaCallError()
+void handleMetaCallError()
 {
     const int reclimit = Py_GetRecursionLimit();
     // Inspired by Python's errors.c: PyErr_GivenExceptionMatches() function.
@@ -211,7 +200,21 @@ void SignalManager::handleMetaCallError()
     Py_SetRecursionLimit(reclimit);
 }
 
-const char *metaObjectCallName(QMetaObject::Call call)
+} // namespace PySide::SignalManager
+
+// Handle errors from meta calls. Requires GIL and PyErr_Occurred()
+void SignalManagerPrivate::handleMetaCallError(QObject *object, int *result)
+{
+    // Bubbles Python exceptions up to the Javascript engine, if called from one
+    if (m_qmlMetaCallErrorHandler) {
+        auto idOpt = m_qmlMetaCallErrorHandler(object);
+        if (idOpt.has_value())
+            *result = idOpt.value();
+    }
+    PySide::SignalManager::handleMetaCallError();
+}
+
+static const char *metaObjectCallName(QMetaObject::Call call)
 {
     static const char *names[] = {
         "InvokeMetaMethod", "ReadProperty", "WriteProperty", "ResetProperty",
@@ -245,7 +248,7 @@ int SignalManagerPrivate::qtPropertyMetacall(QObject *object,
     Q_ASSERT(pySbkSelf);
     auto *pySelf = reinterpret_cast<PyObject *>(pySbkSelf);
     Shiboken::AutoDecRef pp_name(Shiboken::String::fromCString(mp.name()));
-    PySideProperty *pp = Property::getObject(pySelf, pp_name);
+    PySideProperty *pp = PySide::Property::getObject(pySelf, pp_name);
     if (!pp) {
         qWarning("libpyside: Invalid property: %s.", mp.name());
         return false;
@@ -322,7 +325,7 @@ int SignalManagerPrivate::qtPythonMetacall(QObject *object, const QMetaObject *m
         PyErr_Format(PyExc_AttributeError, "Slot '%s::%s' not found.",
                      metaObject->className(), method.methodSignature().constData());
     } else {
-        SignalManager::callPythonMetaMethod(method, args, pyMethod);
+        PySide::SignalManager::callPythonMetaMethod(method, args, pyMethod);
     }
 
     // WARNING Isn't safe to call any metaObject and/or object methods beyond this point
@@ -335,7 +338,9 @@ int SignalManagerPrivate::qtPythonMetacall(QObject *object, const QMetaObject *m
     return result;
 }
 
-int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, void **args)
+namespace PySide::SignalManager {
+
+int qt_metacall(QObject *object, QMetaObject::Call call, int id, void **args)
 {
     switch (call) {
         case QMetaObject::ReadProperty:
@@ -370,6 +375,8 @@ int SignalManager::qt_metacall(QObject *object, QMetaObject::Call call, int id, 
     }
     return id;
 }
+
+} // namespace PySide::SignalManager
 
 // Helper for calling a Python pyCallable matching a Qt signal / slot.
 enum CallResult : std::uint8_t
@@ -422,7 +429,19 @@ static int callPythonMetaMethodHelper(const QByteArrayList &paramTypes,
     return CallResult::CallOk;
 }
 
-int SignalManager::callPythonMetaMethod(QMetaMethod method, void **args,
+static QByteArray signature(const char *name, const QByteArrayList &parameterTypes,
+                            const char *returnType)
+{
+    QByteArray result;
+    if (isNonVoidReturn(returnType))
+        result += QByteArray(returnType) + ' ';
+    result += QByteArray(name) + '(' + parameterTypes.join(", ") + ')';
+    return result;
+}
+
+namespace PySide::SignalManager {
+
+int callPythonMetaMethod(QMetaMethod method, void **args,
                                         PyObject *callable)
 {
     Q_ASSERT(callable);
@@ -447,17 +466,7 @@ int SignalManager::callPythonMetaMethod(QMetaMethod method, void **args,
     return 0;
 }
 
-static QByteArray signature(const char *name, const QByteArrayList &parameterTypes,
-                            const char *returnType)
-{
-    QByteArray result;
-    if (isNonVoidReturn(returnType))
-        result += QByteArray(returnType) + ' ';
-    result += QByteArray(name) + '(' + parameterTypes.join(", ") + ')';
-    return result;
-}
-
-int SignalManager::callPythonMetaMethod(const QByteArrayList &parameterTypes,
+int callPythonMetaMethod(const QByteArrayList &parameterTypes,
                                         const char *returnType,
                                         void **args, PyObject *callable)
 {
@@ -486,13 +495,15 @@ int SignalManager::callPythonMetaMethod(const QByteArrayList &parameterTypes,
     return 0;
 }
 
-bool SignalManager::registerMetaMethod(QObject *source, const char *signature, QMetaMethod::MethodType type)
+bool registerMetaMethod(QObject *source, const char *signature, QMetaMethod::MethodType type)
 {
     int ret = registerMetaMethodGetIndex(source, signature, type);
     return (ret != -1);
 }
 
-static MetaObjectBuilder *metaBuilderFromDict(PyObject *dict)
+} // namespace PySide::SignalManager
+
+static PySide::MetaObjectBuilder *metaBuilderFromDict(PyObject *dict)
 {
     // PYSIDE-803: The dict in this function is the ob_dict of an SbkObject.
     // The "metaObjectAttr" entry is only handled in this file. There is no
@@ -507,7 +518,7 @@ static MetaObjectBuilder *metaBuilderFromDict(PyObject *dict)
     // PyDict_GetItem would touch PyThreadState_GET and the global error state.
     // PyDict_GetItemWithError instead can work without GIL.
     PyObject *pyBuilder = PyDict_GetItemWithError(dict, metaObjectAttr());
-    return reinterpret_cast<MetaObjectBuilder *>(PyCapsule_GetPointer(pyBuilder, nullptr));
+    return reinterpret_cast<PySide::MetaObjectBuilder *>(PyCapsule_GetPointer(pyBuilder, nullptr));
 }
 
 // Helper to format a method signature "foo(QString)" into
@@ -575,10 +586,10 @@ static int addMetaMethod(QObject *source, const QByteArray &signature,
 
     auto *pySelf = reinterpret_cast<PyObject *>(self);
     auto *dict = SbkObject_GetDict_NoRef(pySelf);
-    MetaObjectBuilder *dmo = metaBuilderFromDict(dict);
+    PySide::MetaObjectBuilder *dmo = metaBuilderFromDict(dict);
     // Create a instance meta object
     if (dmo == nullptr) {
-        dmo = new MetaObjectBuilder(Py_TYPE(pySelf), metaObject);
+        dmo = new PySide::MetaObjectBuilder(Py_TYPE(pySelf), metaObject);
         PyObject *pyDmo = PyCapsule_New(dmo, nullptr, destroyMetaObject);
         PyObject_SetAttr(pySelf, metaObjectAttr(), pyDmo);
         Py_DECREF(pyDmo);
@@ -600,8 +611,10 @@ static inline void warnNullSource(const char *signature)
              signature);
 }
 
-int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signature,
-                                              QMetaMethod::MethodType type)
+namespace PySide::SignalManager {
+
+int registerMetaMethodGetIndex(QObject *source, const char *signature,
+                               QMetaMethod::MethodType type)
 {
     if (source == nullptr) {
         warnNullSource(signature);
@@ -614,8 +627,8 @@ int SignalManager::registerMetaMethodGetIndex(QObject *source, const char *signa
         ? methodIndex : addMetaMethod(source, QByteArray(signature), type);
 }
 
-int SignalManager::registerMetaMethodGetIndexBA(QObject* source, const QByteArray &signature,
-                                                QMetaMethod::MethodType type)
+int registerMetaMethodGetIndexBA(QObject* source, const QByteArray &signature,
+                                 QMetaMethod::MethodType type)
 {
     if (source == nullptr) {
         warnNullSource(signature.constData());
@@ -628,7 +641,7 @@ int SignalManager::registerMetaMethodGetIndexBA(QObject* source, const QByteArra
         ? methodIndex : addMetaMethod(source, signature, type);
 }
 
-const QMetaObject *SignalManager::retrieveMetaObject(PyObject *self)
+const QMetaObject *retrieveMetaObject(PyObject *self)
 {
 #ifdef Py_GIL_DISABLED
     // PYSIDE-2221: When working with disable-gil, it seems to be necessary
@@ -653,3 +666,5 @@ const QMetaObject *SignalManager::retrieveMetaObject(PyObject *self)
 
     return builder->update();
 }
+
+} // namespace PySide::SignalManager

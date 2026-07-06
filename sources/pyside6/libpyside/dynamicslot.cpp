@@ -6,7 +6,7 @@
 #include "pysidestaticstrings.h"
 #include "pysideutils.h"
 #include "pysideweakref.h"
-#include "signalmanager.h"
+#include "signalmanager_p.h"
 
 #include <autodecref.h>
 #include <helper.h>

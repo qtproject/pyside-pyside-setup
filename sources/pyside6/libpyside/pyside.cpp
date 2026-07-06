@@ -11,7 +11,7 @@
 #include "pysideqobject_p.h"
 #include "pysideutils.h"
 #include "pyside_p.h"
-#include "signalmanager.h"
+#include "signalmanager_p.h"
 #include "pysideclassinfo_p.h"
 #include "pysideglobals_p.h"
 #include "pysideproperty_p.h"
