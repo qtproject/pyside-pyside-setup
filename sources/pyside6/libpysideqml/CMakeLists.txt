@@ -42,7 +42,12 @@ set_source_files_properties(
     pysideqmlmetacallerror.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON
 )
 
-add_library(pyside6qml SHARED ${libpysideqml_SRC} ${other_files})
+if(IOS)
+    set(library_type STATIC)
+else()
+    set(library_type SHARED)
+endif()
+add_library(pyside6qml ${library_type} ${libpysideqml_SRC} ${other_files})
 add_library(PySide6::pyside6qml ALIAS pyside6qml)
 
 target_include_directories(pyside6qml PUBLIC
@@ -54,11 +59,18 @@ target_compile_definitions(pyside6qml PRIVATE -DQT_LEAN_HEADERS=1 -DQT_NO_KEYWOR
 target_link_libraries(pyside6qml
                       PRIVATE PySide6::pyside6 Shiboken6::libshiboken ${libpysideqml_libraries})
 
-set_target_properties(pyside6qml PROPERTIES
-                      VERSION ${BINDING_API_VERSION}
-                      SOVERSION "${PYSIDE_SO_VERSION}"
-                      OUTPUT_NAME "pyside6qml${pyside6_SUFFIX}${SHIBOKEN_PYTHON_SHARED_LIBRARY_SUFFIX}"
-                      DEFINE_SYMBOL BUILD_LIBPYSIDEQML)
+set(set_props_args DEFINE_SYMBOL BUILD_LIBPYSIDEQML)
+if(IOS)
+    list(APPEND set_props_args OUTPUT_NAME "pyside6qml${pyside6_SUFFIX}")
+else()
+    list(APPEND set_props_args
+        VERSION ${BINDING_API_VERSION}
+        SOVERSION "${PYSIDE_SO_VERSION}"
+        OUTPUT_NAME
+            "pyside6qml${pyside6_SUFFIX}${SHIBOKEN_PYTHON_SHARED_LIBRARY_SUFFIX}"
+    )
+endif()
+set_target_properties(pyside6qml PROPERTIES ${set_props_args})
 
 target_compile_definitions(pyside6qml PRIVATE -DQT_LEAN_HEADERS=1)
 

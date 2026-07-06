@@ -96,7 +96,12 @@ file(GLOB setup_folder_py_files "../../../*.py")
 set(other_files ${pyside_folder_py_files} ${setup_folder_py_files})
 add_other_files(${other_files})
 
-add_library(pyside6 SHARED ${libpyside_SRC} ${other_files})
+if(IOS)
+    set(library_type STATIC)
+else()
+    set(library_type SHARED)
+endif()
+add_library(pyside6 ${library_type} ${libpyside_SRC} ${other_files})
 add_library(PySide6::pyside6 ALIAS pyside6)
 
 #does nothing if QFP_NO_OVERRIDE_OPTIMIZATION_FLAGS (no-size-optimization) flag is not set
@@ -111,11 +116,18 @@ target_compile_definitions(pyside6 PRIVATE -DQT_LEAN_HEADERS=1 -DQT_NO_KEYWORDS=
 target_link_libraries(pyside6
                       PRIVATE Shiboken6::libshiboken ${libpyside_libraries})
 
-set_target_properties(pyside6 PROPERTIES
-                      VERSION ${BINDING_API_VERSION}
-                      SOVERSION "${PYSIDE_SO_VERSION}"
-                      OUTPUT_NAME "pyside6${pyside6_SUFFIX}${SHIBOKEN_PYTHON_SHARED_LIBRARY_SUFFIX}"
-                      DEFINE_SYMBOL BUILD_LIBPYSIDE)
+set(set_props_args DEFINE_SYMBOL BUILD_LIBPYSIDE)
+if(IOS)
+    list(APPEND set_props_args OUTPUT_NAME "pyside6${pyside6_SUFFIX}")
+else()
+    list(APPEND set_props_args
+        VERSION ${BINDING_API_VERSION}
+        SOVERSION "${PYSIDE_SO_VERSION}"
+        OUTPUT_NAME
+            "pyside6${pyside6_SUFFIX}${SHIBOKEN_PYTHON_SHARED_LIBRARY_SUFFIX}"
+    )
+endif()
+set_target_properties(pyside6 PROPERTIES ${set_props_args})
 
 set_property(TARGET pyside6 PROPERTY CXX_STANDARD 17)
 

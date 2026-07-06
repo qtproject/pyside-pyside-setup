@@ -23,19 +23,31 @@ add_custom_command(
     COMMENT "Running generator for 'Shiboken'..."
 )
 
-add_library(shibokenmodule MODULE ${sample_SRC})
+if(IOS)
+    set(library_type STATIC)
+else()
+    set(library_type MODULE)
+endif()
+add_library(shibokenmodule ${library_type} ${sample_SRC})
 target_include_directories(shibokenmodule PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                                                   ${CMAKE_SOURCE_DIR})
 
-set_target_properties(shibokenmodule PROPERTIES
-                      PREFIX ""
-                      OUTPUT_NAME "Shiboken${PYTHON_EXTENSION_SUFFIX}"
-                      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/.."
-                      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/..")
-
-if(WIN32)
-    set_property(TARGET shibokenmodule PROPERTY SUFFIX ".pyd")
+set(set_props_args "")
+set_target_properties(shibokenmodule PROPERTIES PREFIX "")
+if(IOS)
+    list(APPEND set_props_args
+        OUTPUT_NAME "Shiboken"
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/..")
+else()
+    list(APPEND set_props_args
+        OUTPUT_NAME "Shiboken${PYTHON_EXTENSION_SUFFIX}"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/.."
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/..")
+    if(WIN32)
+        list(APPEND set_props_args SUFFIX ".pyd")
+    endif()
 endif()
+set_target_properties(shibokenmodule PROPERTIES ${set_props_args})
 target_link_libraries(shibokenmodule PUBLIC libshiboken)
 
 create_generator_target(shibokenmodule)

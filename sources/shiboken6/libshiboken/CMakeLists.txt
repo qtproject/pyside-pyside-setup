@@ -106,7 +106,13 @@ signature/signature_helper.cpp
 # Note: This must be set on the cpp file!
 set_property(SOURCE "pep384impl.cpp" PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
 
-add_library(libshiboken SHARED ${libshiboken_SRC})
+if(IOS)
+    set(library_type STATIC)
+else()
+    set(library_type SHARED)
+endif()
+add_library(libshiboken ${library_type} ${libshiboken_SRC})
+
 if(NOT TARGET Shiboken6::libshiboken)
     add_library(Shiboken6::libshiboken ALIAS libshiboken)
 endif()
@@ -150,10 +156,17 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     target_compile_definitions(libshiboken PUBLIC "-DNDEBUG")
 endif()
 
-set_target_properties(libshiboken PROPERTIES OUTPUT_NAME "shiboken6${shiboken6_SUFFIX}${PYTHON_SHARED_LIBRARY_SUFFIX}"
-                                             VERSION ${libshiboken_VERSION}
-                                             SOVERSION ${libshiboken_SOVERSION}
-                                             DEFINE_SYMBOL BUILD_LIBSHIBOKEN)
+set(set_props_args DEFINE_SYMBOL BUILD_LIBSHIBOKEN)
+if(IOS)
+    list(APPEND set_props_args OUTPUT_NAME "shiboken6${shiboken6_SUFFIX}")
+else()
+    list(APPEND set_props_args
+        OUTPUT_NAME "shiboken6${shiboken6_SUFFIX}${PYTHON_SHARED_LIBRARY_SUFFIX}"
+        VERSION ${libshiboken_VERSION}
+        SOVERSION ${libshiboken_SOVERSION}
+    )
+endif()
+set_target_properties(libshiboken PROPERTIES ${set_props_args})
 
 qfp_strip_library("libshiboken")
 
