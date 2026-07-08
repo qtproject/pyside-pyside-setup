@@ -38,6 +38,8 @@ LIBSHIBOKEN_API void _PyObject_Dump(PyObject *);
  * When we need more fields, we replace it back and add it to the
  * validation.
  */
+
+// AXIVION DISABLE Style Qt-Generic-TypedefCheck: Within Py_LIMITED_API, CPython does not provide the type
 typedef struct _typeobject {
     PyVarObject ob_base;
     const char *tp_name;
@@ -120,6 +122,7 @@ typedef struct _typeobject {
     PyObject *tp_mro; /* method resolution order */
 
 } PyTypeObject;
+// AXIVION ENABLE Style Qt-Generic-TypedefCheck
 
 #ifndef PyObject_IS_GC
 /* Test if an object has a GC head */
