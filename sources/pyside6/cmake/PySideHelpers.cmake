@@ -69,6 +69,19 @@ function(pyside_internal_find_host_shiboken_tools)
     endif()
 endfunction()
 
+function(pyside_internal_get_ios_sdk_path out_var)
+    execute_process(
+        COMMAND xcrun --sdk ${CMAKE_OSX_SYSROOT} --show-sdk-path
+        OUTPUT_VARIABLE sdk_path
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_VARIABLE xcrun_error)
+    if(NOT sdk_path)
+        message(FATAL_ERROR
+                "Can't determine ios ${CMAKE_OSX_SYSROOT} SDK path. Error: ${xcrun_error}")
+    endif()
+    set(${out_var} "${sdk_path}" PARENT_SCOPE)
+endfunction()
+
 macro(collect_essential_modules)
     # Collect all essential modules.
     # note: the order of this list is relevant for dependencies.

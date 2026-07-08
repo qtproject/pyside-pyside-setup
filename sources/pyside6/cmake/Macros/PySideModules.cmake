@@ -324,6 +324,29 @@ macro(create_pyside_module)
              "--clang-option=--target=${CMAKE_ANDROID_ARCH_LLVM_TRIPLE}")
     endif()
 
+    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        if(CMAKE_OSX_SYSROOT STREQUAL "iphonesimulator")
+            set(ios_triple
+                "${CMAKE_SYSTEM_PROCESSOR}-apple-ios${CMAKE_OSX_DEPLOYMENT_TARGET}-simulator")
+        else()
+            set(ios_triple "${CMAKE_SYSTEM_PROCESSOR}-apple-ios${CMAKE_OSX_DEPLOYMENT_TARGET}")
+        endif()
+        set(ios_sysroot "${PYSIDE_IOS_SDK_PATH}")
+        list(APPEND shiboken_command
+             "--compiler-argument=--target=${ios_triple}"
+             "--clang-option=--target=${ios_triple}")
+        if(ios_sysroot)
+            # NOTE: OptionsParser::process() iterates options in reverse order, so paired
+            # flags must be listed with the value BEFORE the flag name here so that after
+            # reversal clang receives them in the correct order: -isysroot <path>.
+            list(APPEND shiboken_command
+                 "--compiler-argument=${ios_sysroot}"
+                 "--compiler-argument=-isysroot"
+                 "--clang-option=${ios_sysroot}"
+                 "--clang-option=-isysroot")
+        endif()
+    endif()
+
     if(CMAKE_HOST_APPLE)
         set(shiboken_framework_include_dir_list ${QT_FRAMEWORK_INCLUDE_DIR})
         make_path(shiboken_framework_include_dirs ${shiboken_framework_include_dir_list})
@@ -348,8 +371,13 @@ macro(create_pyside_module)
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         COMMENT "Running generator for ${module_NAME}...")
 
-    add_library(${module_NAME} MODULE ${${module_SOURCES}}
-                                      ${${module_STATIC_SOURCES}})
+    if(IOS)
+        set(library_type STATIC)
+    else()
+        set(library_type MODULE)
+    endif()
+    add_library(${module_NAME} ${library_type} ${${module_SOURCES}}
+                                               ${${module_STATIC_SOURCES}})
 
     target_include_directories(${module_NAME}
         PRIVATE
@@ -361,14 +389,20 @@ macro(create_pyside_module)
 
     target_compile_definitions(${module_NAME} PRIVATE -DQT_LEAN_HEADERS=1)
 
-    set_target_properties(${module_NAME} PROPERTIES
-                          PREFIX ""
-                          OUTPUT_NAME "${module_NAME}${SHIBOKEN_PYTHON_EXTENSION_SUFFIX}"
-                          LIBRARY_OUTPUT_DIRECTORY ${PYSIDE_PACKAGE_BINARY_DIR})
-    if(WIN32)
-        set_target_properties(${module_NAME} PROPERTIES SUFFIX ".pyd")
-        # Sanitize windows.h as pulled by gl.h to prevent clashes with QAbstract3dAxis::min(), etc.
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOMINMAX")
+    if(IOS)
+        set_target_properties(${module_NAME} PROPERTIES
+                              OUTPUT_NAME "${module_NAME}"
+                              ARCHIVE_OUTPUT_DIRECTORY ${PYSIDE_PACKAGE_BINARY_DIR})
+    else()
+        set_target_properties(${module_NAME} PROPERTIES
+                            PREFIX ""
+                            OUTPUT_NAME "${module_NAME}${SHIBOKEN_PYTHON_EXTENSION_SUFFIX}"
+                            LIBRARY_OUTPUT_DIRECTORY ${PYSIDE_PACKAGE_BINARY_DIR})
+        if(WIN32)
+            set_target_properties(${module_NAME} PROPERTIES SUFFIX ".pyd")
+            # Sanitize windows.h as pulled by gl.h to prevent clashes with QAbstract3dAxis::min(), etc.
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOMINMAX")
+        endif()
     endif()
 
     target_link_libraries(${module_NAME}
@@ -426,7 +460,14 @@ macro(create_pyside_module)
 
 
     # install
-    install(TARGETS ${module_NAME} LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/PySide6")
+    if(IOS)
+        set(artifact_type ARCHIVE)
+        set(install_destination "PySide6")
+    else()
+        set(artifact_type LIBRARY)
+        set(install_destination "${PYTHON_SITE_PACKAGES}/PySide6")
+    endif()
+    install(TARGETS ${module_NAME} ${artifact_type} DESTINATION ${install_destination})
 
 
 

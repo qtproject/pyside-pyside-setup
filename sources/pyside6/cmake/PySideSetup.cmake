@@ -15,6 +15,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Macros")
 include(ShibokenHelpers)
 include(PySideHelpers)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    pyside_internal_get_ios_sdk_path(ios_sdk_path)
+    set(PYSIDE_IOS_SDK_PATH "${ios_sdk_path}" CACHE STRING "iOS SDK path.")
+endif()
+
 #does nothing if QFP_NO_OVERRIDE_OPTIMIZATION_FLAGS (no-size-optimization) flag is not set
 override_release_flags_for_size_optimization()
 
