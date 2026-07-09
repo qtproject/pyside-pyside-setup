@@ -2,7 +2,6 @@
 // Copyright (C) 2002-2005 Roberto Raggi <roberto@kdevelop.org>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
-
 #ifndef CODEMODEL_H
 #define CODEMODEL_H
 
