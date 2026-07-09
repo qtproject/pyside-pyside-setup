@@ -73,7 +73,7 @@ usingmember.h
 valuetypeentry.h
 varargstypeentry.h
 voidtypeentry.h
-xmlutils.cpp xmlutils.h xmlutils_libxslt.h xmlutils_qt.h
+xmlutils.cpp xmlutils.h xmlutils_libxslt.h
 # Clang
 clangparser/clangbuilder.cpp clangparser/clangbuilder.h
 clangparser/clangdebugutils.cpp clangparser/clangdebugutils.h
