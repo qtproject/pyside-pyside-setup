@@ -254,6 +254,8 @@ QString msgUnknownTypeInArgumentTypeReplacement(const QString &typeReplaced,
 QString msgDuplicateBuiltInTypeEntry(const QString &name);
 QString msgDuplicateTypeEntry(const QString &name);
 QString msgInvalidTargetLanguageApiName(const QString &name);
+QString msgInvalidTypeName(QStringView name);
+QString msgInvalidPackageName(QStringView name);
 
 QString msgUnknownCheckFunction(const TypeEntryCPtr &t);
 

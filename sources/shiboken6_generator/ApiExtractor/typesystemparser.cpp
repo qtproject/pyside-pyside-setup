@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "typesystemparser_p.h"
+#include "typesystemparser_checks.h"
 #include "anystringview_helpers.h"
 #include "addedfunction.h"
 #include "codesnip.h"
@@ -2253,14 +2254,19 @@ bool TypeSystemParser::parseModifyDocumentation(const ConditionalStreamReader &,
 }
 
 // m_exceptionHandling
-TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStreamReader &,
+TypeSystemTypeEntryPtr TypeSystemParser::parseRootElement(const ConditionalStreamReader &reader,
                                                const QVersionNumber &since,
                                                QXmlStreamAttributes *attributes)
 {
     for (auto i = attributes->size() - 1; i >= 0; --i) {
         const auto name = attributes->at(i).qualifiedName();
         if (name == packageAttribute) {
-            m_defaultPackage = attributes->takeAt(i).value().toString();
+            const auto attribute = attributes->takeAt(i);
+            if (!isValidPackageName(attribute.value())) {
+                m_error = msgReaderError(reader, msgInvalidPackageName(attribute.value()));
+                return {};
+            }
+            m_defaultPackage = attribute.value().toString();
         } else if (name == defaultSuperclassAttribute) {
             m_defaultSuperclass = attributes->takeAt(i).value().toString();
         } else if (name == exceptionHandlingAttribute) {
@@ -3499,6 +3505,12 @@ bool TypeSystemParser::startElement(const ConditionalStreamReader &reader, Stack
             const auto nameIndex = indexOfAttribute(attributes, nameAttribute);
             if (nameIndex != -1) {
                 name = attributes.takeAt(nameIndex).value().toString();
+                if (element != StackElement::CustomTypeEntry
+                    && element != StackElement::PrimitiveTypeEntry
+                    && !isValidClassName(name)) {
+                    m_error = msgReaderError(reader, msgInvalidTypeName(name));
+                    return false;
+                }
             } else if (element != StackElement::EnumTypeEntry) { // anonymous enum?
                 m_error = msgMissingAttribute(nameAttribute);
                 return false;

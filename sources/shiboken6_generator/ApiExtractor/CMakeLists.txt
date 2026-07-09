@@ -67,6 +67,7 @@ typedefentry.h
 typeparser.cpp typeparser.h
 typesystem.cpp typesystem.h typesystem_enums.h typesystem_typedefs.h
 typesystemparser.cpp typesystemparser_p.h
+typesystemparser_checks.cpp typesystemparser_checks.h
 usingmember.h
 valuetypeentry.h
 varargstypeentry.h

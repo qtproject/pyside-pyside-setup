@@ -994,6 +994,16 @@ QString msgInvalidTargetLanguageApiName(const QString &name)
            + name + u"\"."_s;
 }
 
+QString msgInvalidTypeName(QStringView name)
+{
+    return "Invalid target type name \""_L1 + name + "\"."_L1;
+}
+
+QString msgInvalidPackageName(QStringView name)
+{
+    return "Invalid package name \""_L1 + name + "\"."_L1;
+}
+
 QString msgUnknownCheckFunction(const TypeEntryCPtr &t)
 {
      return u"Unknown check function for type: '"_s
