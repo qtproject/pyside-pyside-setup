@@ -24,6 +24,7 @@ it includes only the essentials Qt modules:
 * QtOpenGLWidgets
 * QtPrintSupport
 * QtQml
+* QtQmlFeatures
 * QtQuick
 * QtQuickControls2
 * QtQuickTest
