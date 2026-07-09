@@ -87,6 +87,11 @@ from Python.
 
         Provides a Python widget class for displaying a Qt Quick user interface.
 
+    .. grid-item-card:: :mod:`Qt QML Features <PySide6.QtQmlFeatures>`
+
+        Reactive property system for `QObject` subclasses: observe property
+        changes, derive computed values, and run reactive effects from Python.
+
 
 .. _`Qt QML Core`: https://doc.qt.io/qt-6/qtqmlcore-index.html
 .. _`Qt QML WorkerScript`: https://doc.qt.io/qt-6/qmlworkerscript-index.html
