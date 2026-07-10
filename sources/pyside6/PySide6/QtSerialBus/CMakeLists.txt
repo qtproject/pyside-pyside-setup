@@ -1,6 +1,13 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
+# The typesystem for QtSerialBus loads the QtSerialPort typesystem.
+# When QtSerialPort is absent (e.g. iOS), the module must be skipped.
+if(NOT Qt6SerialPort_FOUND)
+    message(STATUS "QtSerialBus: skipping because QtSerialPort is not available")
+    return()
+endif()
+
 set(QtSerialBus_OPTIONAL_SRC )
 set(QtSerialBus_DROPPED_ENTRIES )
 
