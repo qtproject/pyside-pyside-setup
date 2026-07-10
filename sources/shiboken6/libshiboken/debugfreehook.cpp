@@ -18,7 +18,9 @@
 #ifdef __APPLE__
 #include <malloc/malloc.h>
 #include <mach/mach.h>
+#if TARGET_OS_OSX
 #include <mach/mach_vm.h>
+#endif
 #endif
 
 #ifdef SHIBOKEN_INSTALL_FREE_DEBUG_HOOK
