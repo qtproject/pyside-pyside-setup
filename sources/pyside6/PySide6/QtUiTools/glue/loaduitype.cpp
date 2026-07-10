@@ -21,6 +21,19 @@ QT_BEGIN_NAMESPACE
 
 using namespace Qt::StringLiterals;
 
+#ifdef Q_OS_IOS
+
+PyObject *loadUiType(PyObject *obFileName, PyObject *obPathSearch)
+{
+    Q_UNUSED(obFileName);
+    Q_UNUSED(obPathSearch);
+    // QProcess is not available on iOS; loadUiType() cannot be supported.
+    qCritical("loadUiType: Not supported on iOS since QProcess is unavailable.");
+    Py_RETURN_NONE;
+}
+
+#else
+
 static QString getUicBinary()
 {
     QString binary = u"pyside6-uic"_s;
@@ -208,5 +221,7 @@ PyObject *loadUiType(PyObject *obFileName, PyObject *obPathSearch)
     }
     return result;
 }
+
+#endif // Q_OS_IOS
 
 QT_END_NAMESPACE
