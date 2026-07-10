@@ -138,8 +138,13 @@ QString LibXmlXQuery::doEvaluate(const QString &xPathExpression, QString *errorM
 
 std::shared_ptr<XQuery> libXml_createXQuery(const QString &focus, QString *errorMessage)
 {
+#if LIBXML_VERSION >= 21300
+    static constexpr int xmlParseOptions = XML_PARSE_NOENT | XML_PARSE_NO_XXE;
+#else
+    static constexpr int xmlParseOptions = 0;
+#endif
     XmlDocUniquePtr doc(xmlReadFile(QFile::encodeName(focus).constData(),
-                        "utf-8", XML_PARSE_NOENT));
+                        "utf-8", xmlParseOptions));
     if (!doc) {
         *errorMessage = u"libxml2: Cannot set focus to "_s + QDir::toNativeSeparators(focus);
         return {};
