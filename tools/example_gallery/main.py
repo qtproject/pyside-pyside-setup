@@ -193,6 +193,10 @@ class ModuleType(IntEnum):
     M2M = 2
 
 
+LICENSE_MARKERS = ("#!", "// Copyright (C)", "// SPDX-License-Identifier:",
+                   "# Copyright (C)", "# SPDX-License-Identifier:")
+
+
 def get_lexer(path: Path) -> str:
     """Given a file path, return the language lexer to use for syntax highlighting"""
     for pattern, lexer in LANGUAGE_PATTERNS.items():
@@ -437,14 +441,19 @@ def get_module_gallery(examples: list[ExampleData]) -> str:
     return f"{gallery}\n"
 
 
+def is_license_line(line):
+    return any(line.startswith(marker) for marker in LICENSE_MARKERS)
+
+
 def remove_licenses(file_content: str) -> str:
-    # Return the content of the file with the Qt license removed
-    new_s = []
-    for line in file_content.splitlines():
-        if line.strip().startswith(("/*", "**", "##")):
-            continue
-        new_s.append(line)
-    return "\n".join(new_s)
+    """Return the content of the file with the Qt license
+       and leading empty lines removed."""
+    lines = file_content.splitlines()
+    while lines and is_license_line(lines[0]):
+        del lines[0]
+    while lines and not lines[0]:
+        del lines[0]
+    return "\n".join(lines)
 
 
 def make_zip_archive(output_path: Path, src: Path, skip_dirs: list[str] = None):
