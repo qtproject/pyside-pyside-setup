@@ -11,6 +11,7 @@ set(libpysideqml_HEADERS # installed below
     pysidecomputed_p.h
     pysideeffect_p.h
     pysidewatch_p.h
+    pysideqmlcomponent.h
     pysideqmlattached.h
     pysideqmlattached_p.h
     pysideqmlextended_p.h
@@ -33,6 +34,7 @@ set(libpysideqml_SRC
     pysidecomputed.cpp
     pysideeffect.cpp
     pysidewatch.cpp
+    pysideqmlcomponent.cpp
     pysideqml.cpp
     pysideqmlattached.cpp
     pysideqmlforeign.cpp

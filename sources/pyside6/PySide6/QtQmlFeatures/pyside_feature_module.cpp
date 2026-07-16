@@ -7,6 +7,7 @@
 #include "pysidecomputed_p.h"
 #include "pysideeffect_p.h"
 #include "pysidewatch_p.h"
+#include "pysideqmlcomponent.h"
 
 #include <sbkpython.h>
 
@@ -19,6 +20,7 @@ static int exec_QtQmlFeatures(PyObject *module)
     PySide::Computed::init(module);
     PySide::Effect::init(module);
     PySide::Watch::init(module);
+    PySide::QmlComponent::init(module);
     return 0;
 }
 
