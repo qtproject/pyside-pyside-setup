@@ -90,7 +90,8 @@ from Python.
     .. grid-item-card:: :mod:`Qt QML Features <PySide6.QtQmlFeatures>`
 
         Reactive property system for `QObject` subclasses: observe property
-        changes, derive computed values, and run reactive effects from Python.
+        changes, derive computed values, run reactive effects, and load
+        QML components from Python.
 
 
 .. _`Qt QML Core`: https://doc.qt.io/qt-6/qtqmlcore-index.html

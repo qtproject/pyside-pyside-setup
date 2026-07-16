@@ -18,6 +18,7 @@ decorators: ``@watch``, ``@computed``, ``@effect``, and ``@auto_properties``.
 To use the module, import the names you need from it::
 
     from PySide6.QtQmlFeatures import Change, watch, computed, effect
+    from PySide6.QtQmlFeatures import load_qml_component
 
 The Change type
 ===============
@@ -328,3 +329,49 @@ Because ``price`` and ``quantity`` are real ``Q_PROPERTY`` objects with notify
 signals, the QML binding above set on ``cart.price`` runs the generated setter,
 which fires the ``@watch`` callback, invalidates ``total``, and emits
 ``priceChanged`` so any QML binding reading the value refreshes.
+
+Loading QML components from Python
+==================================
+
+``load_qml_component`` loads a QML component - a custom ``.qml`` file or a type
+from a QML module so it can be instantiated and driven entirely from
+Python, with no QML glue code.
+
+.. class:: load_qml_component(engine, source=None, *, module=None, type_name=None)
+
+    Loads a QML component and returns a factory for it. Pass a
+    :class:`~PySide6.QtQml.QQmlEngine` (or
+    :class:`~PySide6.QtQml.QQmlApplicationEngine`) as the first argument.
+    Supply exactly one of ``source`` (a path to a ``.qml`` file, absolute
+    or relative to the calling ``.py`` file) or both ``module`` (a QML
+    module URI such as ``"QtQuick.Controls"``) and ``type_name`` (a type
+    within it, such as ``"Slider"``). The returned object is a factory
+    whose ``create()`` builds instances.
+
+The factory is lightweight. The actual QML loading and object creation
+happens in ``create(**initial_properties)``, which returns a wrapper whose
+QML properties, signals, and methods are exposed as plain Python
+attributes::
+
+    from PySide6.QtQml import QQmlApplicationEngine
+    from PySide6.QtQmlFeatures import load_qml_component
+
+    engine = QQmlApplicationEngine()
+
+    Person = load_qml_component(engine, "person.qml")
+    alice = Person.create(name="Alice", age=28)
+
+    alice.age = 29                       # write a QML property
+    print(alice.name)                    # read a QML property
+    alice.birthdayHappened.connect(...)  # connect to a QML signal
+    alice.celebrateBirthday()            # call a QML method
+    raw = alice.qobject                  # underlying QObject escape hatch
+
+Assigning a wrapper to a QML property that expects a ``QObject`` (for
+example a parent item) unwraps it automatically.
+
+.. note:: Calling a QML method currently returns a success flag rather
+    than the method's return value.
+
+See the :ref:`example_qml_qmlcomponentloading` example for a full,
+runnable program.

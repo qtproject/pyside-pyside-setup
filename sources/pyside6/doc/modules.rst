@@ -114,7 +114,7 @@ Qt Modules Supported by Qt for Python
     .. grid-item-card:: :mod:`Qt Qml Features <PySide6.QtQmlFeatures>`
 
         A reactive property system for QObject subclasses, with observers,
-        computed values, and reactive effects.
+        computed values, reactive effects, and QML component loading.
 
     .. grid-item-card:: :mod:`Qt Quick <PySide6.QtQuick>`
 
