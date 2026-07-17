@@ -73,8 +73,8 @@ QDebug operator<<(QDebug debug, const PySideSignalInstancePrivate &d)
           << "\", \"" << d.signature << '"';
     if (d.attributes)
         debug << ", attributes=" << d.attributes;
-    if (d.homonymousMethod)
-        debug << ", homonymousMethod=" << d.homonymousMethod;
+    if (d.homonymousMethodPvt)
+        debug << ", homonymousMethod=" << d.homonymousMethodPvt;
     debug << ')';
     return debug;
 }
@@ -395,7 +395,7 @@ static void signalInstanceFree(void *vself)
 
     PySideSignalInstancePrivate *dataPvt = self->d;
     if (dataPvt) {
-        Py_XDECREF(dataPvt->homonymousMethod);
+        Py_XDECREF(dataPvt->homonymousMethodPvt);
 
         if (dataPvt->next) {
             Py_DECREF(dataPvt->next);
@@ -841,7 +841,7 @@ static inline PyObject *_getRealCallable(PyObject *func)
     // If it is a signal instance, use the (maybe empty) homonymous method.
     if (Py_TYPE(func) == SignalInstanceType) {
         auto *signalInstance = reinterpret_cast<PySideSignalInstance *>(func);
-        return signalInstance->d->homonymousMethod;
+        return signalInstance->d->homonymousMethodPvt;
     }
     return func;
 }
@@ -849,8 +849,8 @@ static inline PyObject *_getRealCallable(PyObject *func)
 // This function returns a borrowed reference.
 static PyObject *_getHomonymousMethod(PySideSignalInstance *inst)
 {
-    if (inst->d->homonymousMethod)
-        return inst->d->homonymousMethod;
+    if (inst->d->homonymousMethodPvt)
+        return inst->d->homonymousMethodPvt;
 
     // PYSIDE-1730: We are searching methods with the same name not only at the same place,
     // but walk through the whole mro to find a hidden method with the same name.
@@ -1095,10 +1095,10 @@ static void instanceInitialize(PySideSignalInstance *self, PyObject *name,
     selfPvt->signature = buildSignature(self->d->signalName, signature.signature);
     selfPvt->argCount = signature.argCount;
     selfPvt->attributes = signature.attributes;
-    selfPvt->homonymousMethod = nullptr;
+    selfPvt->homonymousMethodPvt = nullptr;
     if (signal->homonymousMethod) {
-        selfPvt->homonymousMethod = signal->homonymousMethod;
-        Py_INCREF(selfPvt->homonymousMethod);
+        selfPvt->homonymousMethodPvt = signal->homonymousMethod;
+        Py_INCREF(selfPvt->homonymousMethodPvt);
     }
 
     index++;
@@ -1171,7 +1171,7 @@ PySideSignalInstance *newObjectFromMethod(QObject *sourceQObject, PyObject *sour
         selfPvt->signature = m.methodSignature();
         selfPvt->argCount = short(m.parameterCount());
         selfPvt->attributes = m.attributes();
-        selfPvt->homonymousMethod = nullptr;
+        selfPvt->homonymousMethodPvt = nullptr;
         selfPvt->next = nullptr;
     }
     return root;

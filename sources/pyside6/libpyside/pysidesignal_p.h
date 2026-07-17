@@ -54,7 +54,7 @@ struct PySideSignalInstancePrivate
     QByteArray signalName;
     QByteArray signature;
     PySideSignalInstanceSharedPtr shared;
-    PyObject *homonymousMethod = nullptr;
+    PyObject *homonymousMethodPvt = nullptr;
     PySideSignalInstance *next = nullptr;
     unsigned short attributes = 0;
     short argCount = 0;
