@@ -392,8 +392,12 @@ static int qpropertyTpInit(PyObject *self, PyObject *args, PyObject *kwds)
         PyErr_SetString(PyExc_TypeError, "A constant property cannot have a NOTIFY signal.");
 
     if (PyErr_Occurred() != nullptr) {
+        // Nothing has been increfed yet (that happens below), so drop every
+        // borrowed argument, including the type, which tp_clear would otherwise
+        // decref without a matching incref.
         pData->fget = pData->fset = pData->freset = pData->fdel = nullptr;
         pData->setNotify(nullptr);
+        pData->setPyTypeObject(nullptr);
         return -1;
     }
 
