@@ -37,6 +37,7 @@
 
 namespace {
     void _destroyParentInfo(SbkObject *obj, bool keepReference);
+    void _detachChildren(SbkObject *obj, bool keepReference);
 }
 
 struct BaseWrapperGlobals
@@ -308,10 +309,14 @@ static int SbkObject_tp_clear(PyObject *self)
 {
     auto *sbkSelf = reinterpret_cast<SbkObject *>(self);
 
-    Shiboken::Object::removeParent(sbkSelf);
-
+    // Only the children are detached here, never the link to our own C++
+    // parent: that parent still holds this object in its C++ child list and
+    // deletes it, so handing ownership back to Python would make the wrapper
+    // delete it a second time. The reference cycle is broken by clearing the
+    // instance dict below, and the parent link is torn down when the parent
+    // itself is cleared or deallocated.
     if (sbkSelf->d->parentInfo)
-        _destroyParentInfo(sbkSelf, true);
+        _detachChildren(sbkSelf, true);
 
     Shiboken::Object::clearReferences(sbkSelf);
 
@@ -859,7 +864,9 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
 namespace
 {
 
-void _destroyParentInfo(SbkObject *obj, bool keepReference)
+// Invalidate and detach the children of obj. Their C++ instances belong to
+// obj's C++ instance and are deleted by it, so no ownership is handed back.
+void _detachChildren(SbkObject *obj, bool keepReference)
 {
     Shiboken::ParentInfo *pInfo = obj->d->parentInfo;
     if (pInfo) {
@@ -869,6 +876,13 @@ void _destroyParentInfo(SbkObject *obj, bool keepReference)
             Shiboken::Object::invalidate(first);
             Shiboken::Object::removeParent(first, false, keepReference);
         }
+    }
+}
+
+void _destroyParentInfo(SbkObject *obj, bool keepReference)
+{
+    if (obj->d->parentInfo) {
+        _detachChildren(obj, keepReference);
         Shiboken::Object::removeParent(obj, false);
     }
 }
