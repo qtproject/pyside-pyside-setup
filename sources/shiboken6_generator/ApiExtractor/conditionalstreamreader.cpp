@@ -18,8 +18,6 @@ class ProxyEntityResolver : public QXmlStreamEntityResolver
 public:
     using XmlStreamEntityResolverPtr = ConditionalStreamReader::XmlStreamEntityResolverPtr;
 
-    QString resolveEntity(const QString& publicId,
-                          const QString& systemId) override;
     QString resolveUndeclaredEntity(const QString &name) override;
 
     XmlStreamEntityResolverPtr source() const { return m_source; }
@@ -34,16 +32,6 @@ private:
     QHash<QString, QString> m_undeclaredEntityCache;
     XmlStreamEntityResolverPtr m_source;
 };
-
-QString ProxyEntityResolver::resolveEntity(const QString &publicId, const QString &systemId)
-{
-    QString result;
-    if (m_source != nullptr)
-        result = m_source->resolveEntity(publicId, systemId);
-    if (result.isEmpty())
-        result = QXmlStreamEntityResolver::resolveEntity(publicId, systemId);
-    return result;
-}
 
 QString ProxyEntityResolver::resolveUndeclaredEntity(const QString &name)
 {
