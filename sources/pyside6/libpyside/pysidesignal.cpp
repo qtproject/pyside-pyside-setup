@@ -580,8 +580,11 @@ static PyObject *signalInstanceConnect(PyObject *self, PyObject *args, PyObject 
         return nullptr;
 
     Qt::ConnectionType connectionType = Qt::AutoConnection;
+    // Compare the plain type name: the qualified one carries the enclosing
+    // enum scope ("Qt.ConnectionType"), so matching it whole silently dropped
+    // the requested connection type and fell back to Qt::AutoConnection.
     if (type != nullptr
-        && qstrcmp(PepType_GetFullyQualifiedNameStr(Py_TYPE(type)), "ConnectionType") == 0) {
+        && qstrcmp(PepType_GetNameStr(Py_TYPE(type)), "ConnectionType") == 0) {
         static SbkConverter *connectionTypeConv =
             Shiboken::Conversions::getConverter("Qt::ConnectionType");
         Q_ASSERT(connectionTypeConv);
