@@ -170,9 +170,59 @@ callbacks on the Python side, invalidates ``total``, and emits the notify
 signal so the ``Total`` label re-evaluates, all without a single hand-written
 signal connection.
 
+Step 6: Load the view from Python with ``load_qml_component``
+=============================================================
+
+Step 5 let QML own the object: ``Cart { id: cart }`` instantiates the Python
+type from QML, and :meth:`QQmlApplicationEngine.load()
+<PySide6.QtQml.QQmlApplicationEngine.load>` brings the whole UI up. This last
+step shows the mirror image. The reactive ``Cart`` stays in Python, and we pull
+a QML view *into* Python with
+:class:`~PySide6.QtQmlFeatures.load_qml_component`, then feed the reactive
+values into it.
+
+This time there is no ``@QmlElement`` on the ``Cart``: QML never creates it. The
+model is a plain Python object, and a small display-only QML component is loaded
+and driven from Python.
+
+.. literalinclude:: steps/06-load-component.py
+   :language: python
+   :linenos:
+   :lines: 5-
+
+:class:`~PySide6.QtQmlFeatures.load_qml_component` returns a factory; calling
+``create()`` on it instantiates the component and returns a Pythonic wrapper
+whose QML properties are plain attributes. That is why ``view.total`` and
+``view.price`` can be assigned directly from ``sync()``.
+
+The QML view carries no logic of its own, just three properties that Python
+writes to:
+
+.. literalinclude:: steps/cartview.qml
+   :language: javascript
+   :linenos:
+   :lines: 3-
+
+A :class:`~PySide6.QtCore.QTimer` nudges ``cart.price`` from Python. Each change
+runs the ``@watch`` and ``@effect`` callbacks (printed to the console) exactly
+as before, and ``sync()`` reads the recomputed ``total`` and pushes it into the
+QML view loaded from Python. The reactive decorators and
+``load_qml_component`` work together: the decorators keep the model consistent,
+while ``load_qml_component`` lets Python own and drive the view.
+
+.. note:: We connect to ``priceChanged`` and ``quantityChanged`` (the input
+   notify signals) rather than ``totalChanged``. A ``@computed`` value is lazy:
+   ``total`` is recomputed when it is read, so ``sync()`` reads ``cart.total``
+   on demand after either input changes.
+
+.. note:: :class:`~PySide6.QtQmlFeatures.load_qml_component` is part of the
+   :mod:`PySide6.QtQmlFeatures` technical preview. See the
+   :mod:`PySide6.QtQmlFeatures` module reference for its full description.
+
 Where to go next
 ================
 
 For the full description of each decorator, the
 :class:`~PySide6.QtQmlFeatures.Change` type, ``@auto_properties``, ``@computed``, ``@watch``, and
-``@effect``, see the :mod:`PySide6.QtQmlFeatures` module reference.
+``@effect``, as well as :class:`~PySide6.QtQmlFeatures.load_qml_component`, see
+the :mod:`PySide6.QtQmlFeatures` module reference.
