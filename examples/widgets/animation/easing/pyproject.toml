@@ -1,0 +1,5 @@
+[project]
+name = "Easing Example"
+
+[tool.pyside6-project]
+files = ["easing.py", "form.ui"]
