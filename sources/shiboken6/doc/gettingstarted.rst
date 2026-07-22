@@ -22,7 +22,7 @@ General Requirements
 Simple build
 ^^^^^^^^^^^^
 
-If you need only Shiboken Generator, a simple build run would look like this::
+If you need only |shiboken_generator|, a simple build run would look like this::
 
     # For the required libraries (this will also build the shiboken6 python module)
     python setup.py install --qtpaths=/path/to/qtpaths \

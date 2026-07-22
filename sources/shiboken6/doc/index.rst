@@ -50,7 +50,7 @@ Documentation
             :outline:
             :expand:
 
-            Shiboken Generator
+            |shiboken_generator|
 
     .. grid-item-card::
         :class-item: text-center
