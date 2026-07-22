@@ -14,6 +14,9 @@ you find ``uic.exe`` (on Windows), you should not click on that, and use
 The reason for this is the proper setup of PATHs, plugins, and more,
 to properly work with the installed Python package.
 
+Please see :ref:`Using-Qt-s-Developer-Tools-Securely` for
+security considerations using the tools.
+
 Here you can find all the tools we include in |project| starting
 from 6.3.0, grouped by different topics:
 

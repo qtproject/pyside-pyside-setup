@@ -109,5 +109,8 @@ process.  In particular, be cautious when:
 To disable plugin loading entirely, set ``PYSIDE_DISABLE_DESIGNER_PLUGINS=1``
 before launching Designer.
 
+For general security considerations, see
+:ref:`Qt-Widgets-Designer-Security-Considerations`.
+
 .. _`Qt Widgets Designer`: https://doc.qt.io/qt-6/qtdesigner-manual.html
 .. _`Qt Widgets Designer Manual`: https://doc.qt.io/qt-6/qtdesigner-manual.html

@@ -61,6 +61,7 @@ qtdbus/webxml/qdbusviewer.webxml
 qtdbus/webxml/qdbusxml2cpp.webxml
 qtdbus/webxml/qtdbus-overview.webxml
 qtdbus/webxml/usingadaptors.webxml
+qtdesigner/webxml/qt-widgets-designer-security-considerations.webxml
 qtdoc/webxml/accessible-qwidget.webxml
 qtdoc/webxml/accessible.webxml
 qtdoc/webxml/annotated.webxml
@@ -117,6 +118,7 @@ qtdoc/webxml/qt-for-education.webxml
 qtdoc/webxml/qt-intro.webxml
 qtdoc/webxml/qt-online-installation.webxml
 qtdoc/webxml/qt-releases.webxml
+qtdoc/webxml/qt-tools-security.webxml
 qtdoc/webxml/qt-tools-utilities.webxml
 qtdoc/webxml/qtlanguages.webxml
 qtdoc/webxml/qtmodules.webxml
