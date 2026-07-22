@@ -54,6 +54,7 @@ def setup(app):
 rst_epilog = """
 .. |project| replace:: Qt for Python
 .. |pymodname| replace:: Shiboken6
+.. |shiboken_generator| replace:: Shiboken Generator
 """
 
 # Add any paths that contain templates here, relative to this directory.
