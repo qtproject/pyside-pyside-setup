@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sys
 from PySide6.QtCore import (QUrlQuery, Property, Signal, Slot)
+from PySide6.QtNetwork import QNetworkReply
 from PySide6.QtQml import QmlElement
 
 from abstractresource import AbstractResource
@@ -75,9 +76,8 @@ class PaginatedResource(AbstractResource):
             else:
                 error = jsonError.errorString()
         else:
-            reply_error = reply.errorString()
-            error = reply_error if reply_error else "Network error"
-
+            error = (reply.errorString() if reply.error() != QNetworkReply.NetworkError.NoError
+                     else f"HTTP status: {reply.httpStatus()}")
         if error:
             url = reply.networkReply().url().toString()
             print(f'PaginatedResource: request "{url}" failed: "{error}"', file=sys.stderr)
