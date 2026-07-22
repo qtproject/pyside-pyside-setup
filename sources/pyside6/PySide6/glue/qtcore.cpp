@@ -403,6 +403,8 @@ static void msgHandlerCallback(QtMsgType type, const QMessageLogContext &ctx, co
     const char *data = array.constData();
     PyTuple_SetItem(arglist, 2, %CONVERTTOPYTHON[const char *](data));
     Shiboken::AutoDecRef ret(PyObject_CallObject(qtmsghandler, arglist));
+    if (Shiboken::Errors::occurred())
+        Shiboken::Errors::storeErrorOrPrint();
 }
 // @snippet qt-messagehandler
 
@@ -1080,6 +1082,8 @@ if (msec == 0) {
         Shiboken::GilState state;
         Shiboken::AutoDecRef arglist(PyTuple_New(0));
         Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
+        if (Shiboken::Errors::occurred())
+            Shiboken::Errors::storeErrorOrPrint();
         Py_DECREF(callable);
     };
 
@@ -1804,9 +1808,9 @@ auto cppCallback = [callable]()
     Shiboken::GilState state;
     Shiboken::AutoDecRef arglist(PyTuple_New(0));
     Shiboken::AutoDecRef ret(PyObject_CallObject(callable, arglist));
+    if (Shiboken::Errors::occurred())
+        Shiboken::Errors::storeErrorOrPrint();
     Py_DECREF(callable);
-    if (ret.isNull())
-        PyErr_Print();
 };
 // @snippet std-function-void-lambda
 
@@ -2151,6 +2155,8 @@ auto callback = [callable, arg_qpermission](const QPermission &permission) -> vo
     } else {
         Shiboken::AutoDecRef ret(PyObject_CallObject(callable, nullptr));
     }
+    if (Shiboken::Errors::occurred())
+        Shiboken::Errors::storeErrorOrPrint();
     Py_DECREF(callable);
 };
 Py_INCREF(callable);
