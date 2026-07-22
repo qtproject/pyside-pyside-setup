@@ -6,6 +6,36 @@ Words of Advice
 
 When writing or using Python bindings there is some things you must keep in mind.
 
+.. _shiboken generator_security considerations:
+
+Security considerations
+=======================
+
+|shiboken_generator| is a `developer tool`_ that treats its input as trusted
+and is not a security boundary.
+
+When you use |shiboken_generator|, be aware of the following risks:
+
+* There is a facility for injecting C++ code into the generated bindings via the
+  `<inject-code>` and `<template>` typesystem elements to allow for customizing
+  code. Tampered input files thus can cause arbitrary code execution on your
+  machine.
+* Instead of passing command line arguments, parameters (including output
+  directories and compiler paths) can be specified in project files. Tampered
+  project files can lead to security issues.
+* When cross-building, |shiboken_generator| may execute the compiler
+  specified to determine include paths. This can cause arbitrary binaries
+  to be executed on your machine in case of corrupted input files.
+* In documentation generation mode, image files referenced from the source
+  `.webxml` files are copied into the documentation tree for further
+  processing by the *Sphinx* tool. This can cause arbitrary files
+  to be copied.
+
+We therefore recommend you only run |shiboken_generator| on input files you
+created yourself, or that come from sources you trust.
+
+.. _`developer tool`: https://doc.qt.io/qt-6/qt-tools-security.html
+
 .. _rvalue_references:
 
 Rvalue References
