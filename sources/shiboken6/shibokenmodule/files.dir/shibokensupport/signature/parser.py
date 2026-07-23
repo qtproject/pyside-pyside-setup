@@ -359,13 +359,15 @@ def _resolve_type(thing, line, level, var_handler, func_name=None):
             thing = _resolve_arraytype(thing, line)
         # Handle a container return type. (see PYSIDE-921 in cppgenerator.cpp)
         contr, thing = re.match(r"(.*?)\[(.*?)\]$", thing).groups()
-        # Special case: Handle the generic matrices.
-        if contr == matrix_pattern:
-            return handle_matrix(thing)
-        contr = var_handler(_resolve_type(contr, line, level + 1, var_handler))
-        if isinstance(contr, _NotCalled):
-            raise SystemError("Container types must exist:", repr(contr))
-        contr = to_string(contr)
+        # contr can be empty eg. Callable[[...],
+        if contr:
+            # Special case: Handle the generic matrices.
+            if contr == matrix_pattern:
+                return handle_matrix(thing)
+            contr = var_handler(_resolve_type(contr, line, level + 1, var_handler))
+            if isinstance(contr, _NotCalled):
+                raise SystemError("Container types must exist:", repr(contr))
+            contr = to_string(contr)
         pieces = []
         for part in _parse_arglist(thing):
             part = var_handler(_resolve_type(part, line, level + 1, var_handler))
@@ -375,6 +377,10 @@ def _resolve_type(thing, line, level, var_handler, func_name=None):
             pieces.append(to_string(part))
         thing = ", ".join(pieces)
         result = f"{contr}[{thing}]"
+        if not contr:
+            # If contr is empty, pass it to the parent to handle
+            return result
+
         # PYSIDE-1538: Make sure that the eval does not crash.
         try:
             return eval(result, globals(), namespace)
