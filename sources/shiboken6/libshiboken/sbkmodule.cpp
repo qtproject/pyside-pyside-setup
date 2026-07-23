@@ -24,7 +24,7 @@ using ModuleTypesMap = std::unordered_map<PyObject *, Shiboken::Module::TypeInit
 
 struct TypeCreationStruct
 {
-    Shiboken::Module::TypeCreationFunction func;
+    Shiboken::Module::TypeCreationFunction func{nullptr};
     std::vector<std::string> subtypeNames;
 };
 

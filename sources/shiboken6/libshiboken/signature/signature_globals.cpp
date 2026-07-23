@@ -32,7 +32,7 @@ static const char *PySide_CompressedSignaturePackage[] = {
 static const unsigned char PySide_SignatureLoader[] = {
 #include "embed/signature_bootstrap_inc.h"
     };
-// AXIVION ENABLE Style Style Qt-Generic-NoIrregularInclude
+// AXIVION ENABLE Style Qt-Generic-NoIrregularInclude
 
 static void init_phase_1(safe_globals_struc *p)
 {

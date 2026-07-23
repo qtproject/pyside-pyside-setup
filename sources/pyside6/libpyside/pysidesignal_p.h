@@ -19,8 +19,8 @@ struct PySideSignalData
     struct Signature
     {
         QByteArray signature; // ','-separated list of parameter types
-        unsigned short attributes;
-        short argCount;
+        unsigned short attributes{0};
+        short argCount{0};
     };
 
     QByteArray signalName;

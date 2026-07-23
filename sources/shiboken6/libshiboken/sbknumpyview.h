@@ -35,8 +35,8 @@ struct LIBSHIBOKEN_API View
     bool sameSize(const View &rhs) const;
 
     int ndim = 0;
-    Py_ssize_t dimensions[2];
-    Py_ssize_t stride[2];
+    Py_ssize_t dimensions[2]{0, 0};
+    Py_ssize_t stride[2]{0, 0};
     void *data = nullptr;
     Type type = Int;
 };
