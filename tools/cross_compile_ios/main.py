@@ -59,7 +59,8 @@ def cmd_build(args: argparse.Namespace) -> None:
 def cmd_generate(args: argparse.Namespace) -> None:
     """ Generate subcommand """
     # TODO: Xcode project generation
-    ...
+    log.error("The 'generate' command (Xcode project generation) isn't implemented yet.")
+    sys.exit(1)
 
 
 def main():
