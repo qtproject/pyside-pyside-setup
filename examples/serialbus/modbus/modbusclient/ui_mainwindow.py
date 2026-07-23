@@ -325,7 +325,7 @@ class Ui_MainWindow(object):
     # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Modbus Client Example", None))
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Modbus Client", None))
         self.actionConnect.setText(QCoreApplication.translate("MainWindow", u"&Connect", None))
         self.actionDisconnect.setText(QCoreApplication.translate("MainWindow", u"&Disconnect", None))
         self.actionExit.setText(QCoreApplication.translate("MainWindow", u"&Quit", None))

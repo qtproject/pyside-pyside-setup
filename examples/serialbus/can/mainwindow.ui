@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>CAN Example</string>
+   <string>CAN Manager</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -25,7 +25,7 @@
     <item>
      <widget class="QGroupBox" name="receivedMessagesBox">
       <property name="title">
-       <string>Received CAN messages</string>
+       <string>Received CAN frames</string>
       </property>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">

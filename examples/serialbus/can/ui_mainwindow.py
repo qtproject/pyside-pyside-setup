@@ -148,7 +148,7 @@ class Ui_MainWindow(object):
     # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"CAN Example", None))
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"CAN Manager", None))
         self.actionConnect.setText(QCoreApplication.translate("MainWindow", u"&Connect", None))
         self.actionDisconnect.setText(QCoreApplication.translate("MainWindow", u"&Disconnect", None))
         self.actionQuit.setText(QCoreApplication.translate("MainWindow", u"&Quit", None))
@@ -164,7 +164,7 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(tooltip)
         self.actionDeviceInformation.setText(QCoreApplication.translate("MainWindow", u"Device &Information...", None))
         self.sendFrameBox.setTitle(QCoreApplication.translate("MainWindow", u"Send CAN frame", None))
-        self.receivedMessagesBox.setTitle(QCoreApplication.translate("MainWindow", u"Received CAN messages", None))
+        self.receivedMessagesBox.setTitle(QCoreApplication.translate("MainWindow", u"Received CAN frames", None))
         self.busStatus.setText("")
         self.menuCalls.setTitle(QCoreApplication.translate("MainWindow", u"&Calls", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"&Help", None))
