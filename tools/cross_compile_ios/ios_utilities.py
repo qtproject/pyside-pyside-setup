@@ -139,12 +139,16 @@ def _query_qt_install_cmakedir(
     return parse_cmake_project_message_info(output)["qt_info"]["QT_INSTALL_CMAKEDIR"] or None
 
 
+def python_xcframework_slice_dir(arch: str, simulator: bool) -> str:
+    """The simulator slice is always a single merged 'ios-arm64_x86_64-simulator'"""
+    return "ios-arm64_x86_64-simulator" if simulator else f"ios-{arch}"
+
+
 def generate_toolchain(
         arch: str,
         simulator: bool,
         python_xcframework: Path,
         qt_ios: Path,
-        qt_macos: Path,
 ) -> Path:
 
     try:
@@ -164,6 +168,7 @@ def generate_toolchain(
         arch=arch,
         simulator=simulator,
         python_xcframework=str(python_xcframework),
+        python_slice_dir=python_xcframework_slice_dir(arch, simulator),
         python_version=PYTHON_VERSION,
         host_python=sys.executable,
         qt_cmake_dir=qt_cmake_dir,

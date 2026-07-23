@@ -11,6 +11,7 @@ from pathlib import Path
 
 from ios_utilities import (download_python_support,
                            generate_toolchain,
+                           python_xcframework_slice_dir,
                            PYSIDE_SETUP_ROOT)
 
 log = logging.getLogger(__name__)
@@ -33,13 +34,12 @@ def cmd_build(args: argparse.Namespace) -> None:
         simulator=simulator,
         python_xcframework=python_xcframework,
         qt_ios=qt_ios,
-        qt_macos=qt_macos,
     )
 
     # Cross-compile PySide6
     suffix = f"{arch}_simulator" if simulator else arch
     plat_name = f"ios_{suffix}"
-    python_slice = python_xcframework / f"ios-{arch}"
+    python_slice = python_xcframework / python_xcframework_slice_dir(arch, simulator)
     cmd = [
         sys.executable, "setup.py", "build",
         "--standalone",

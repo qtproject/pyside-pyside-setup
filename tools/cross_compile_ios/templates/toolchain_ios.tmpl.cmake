@@ -18,11 +18,7 @@ set(CMAKE_OSX_ARCHITECTURES "{{ arch }}")
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "iOS requires static libs" FORCE)
 
-{% if simulator %}
-set(_PYTHON_SLICE "{{ python_xcframework }}/ios-{{ arch }}_x86_64-simulator")
-{% else %}
-set(_PYTHON_SLICE "{{ python_xcframework }}/ios-{{ arch }}")
-{% endif %}
+set(_PYTHON_SLICE "{{ python_xcframework }}/{{ python_slice_dir }}")
 
 set(Python_INCLUDE_DIR  "${_PYTHON_SLICE}/include/python{{ python_version }}"        CACHE PATH "")
 set(Python_LIBRARY      "${_PYTHON_SLICE}/lib/libpython{{ python_version }}.dylib"   CACHE FILEPATH "")
