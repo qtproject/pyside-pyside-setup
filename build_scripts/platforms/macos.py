@@ -22,8 +22,12 @@ def _macos_patch_executable(name, _vars=None):
     macos_add_rpath(rpath, binary)
 
 
-def prepare_standalone_package_macos(pyside_build, _vars, is_android=False):
+def prepare_standalone_package_macos(pyside_build, _vars, is_android=False, is_ios=False):
     built_modules = _vars['built_modules']
+
+    # An interim solution to keep the build working
+    if is_ios:
+        return
 
     constrain_modules = None
     copy_plugins = True

@@ -43,8 +43,12 @@ def _copy_gui_executable(name, _vars=None):
 
 def prepare_packages_posix(pyside_build, _vars, cross_build=False):
     is_android = False
-    if str(OPTION['PLAT_NAME']).startswith('android'):
+    is_ios = False
+    plat_name = str(OPTION['PLAT_NAME'])
+    if plat_name.startswith('android'):
         is_android = True
+    elif plat_name.startswith('ios'):
+        is_ios = True
 
     executables = []
     libexec_executables = []
@@ -67,6 +71,8 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
         postfix = ''
         if config.is_cross_compile() and is_android:
             postfix = ".so"
+        elif config.is_cross_compile() and is_ios:
+            postfix = ".a"
         elif sys.platform.startswith('linux'):
             postfix = f".so.{version}"
         elif sys.platform == 'darwin':
@@ -248,7 +254,8 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
         if config.is_internal_pyside_build() or config.is_internal_shiboken_generator_build():
             _vars['built_modules'] = generated_config['built_modules']
             if sys.platform == 'darwin':
-                prepare_standalone_package_macos(pyside_build, _vars, is_android=is_android)
+                prepare_standalone_package_macos(pyside_build, _vars,
+                                                 is_android=is_android, is_ios=is_ios)
             else:
                 prepare_standalone_package_linux(pyside_build, _vars, cross_build,
                                                  is_android=is_android)
