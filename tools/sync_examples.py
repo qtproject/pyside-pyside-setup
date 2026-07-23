@@ -61,6 +61,9 @@ EXAMPLE_MAPPING = {
 }
 
 
+EXCLUSIONS = ("build/", "/doc/", "_install_")
+
+
 file_count = 0
 updated_file_count = 0
 new_file_count = 0
@@ -90,7 +93,7 @@ def files_differ(p1, p2):
 def use_file(path):
     """Exclude C++ docs and Qt Creator builds."""
     path_str = os.fspath(path)
-    return "/doc/" not in path_str and "_install_" not in path_str
+    return not any(e in path_str for e in EXCLUSIONS)
 
 
 def example_sources(qt_example):
