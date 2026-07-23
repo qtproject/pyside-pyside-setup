@@ -14,8 +14,6 @@ from ios_utilities import (download_python_support,
                            python_xcframework_slice_dir,
                            PYSIDE_SETUP_ROOT)
 
-log = logging.getLogger(__name__)
-
 
 def cmd_build(args: argparse.Namespace) -> None:
     """ Build subcommand """
@@ -52,14 +50,14 @@ def cmd_build(args: argparse.Namespace) -> None:
     ]
 
     env = os.environ.copy()
-    log.info(f"Running bdist_wheel for platform {plat_name}")
+    logging.info(f"Running bdist_wheel for platform {plat_name}")
     subprocess.run(cmd, cwd=PYSIDE_SETUP_ROOT, env=env, check=True)
 
 
 def cmd_generate(args: argparse.Namespace) -> None:
     """ Generate subcommand """
     # TODO: Xcode project generation
-    log.error("The 'generate' command (Xcode project generation) isn't implemented yet.")
+    logging.error("The 'generate' command (Xcode project generation) isn't implemented yet.")
     sys.exit(1)
 
 

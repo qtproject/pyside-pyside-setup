@@ -27,8 +27,6 @@ except ImportError:
     pass
 
 
-log = logging.getLogger(__name__)
-
 PYTHON_VERSION = "3.14"
 BUILD_NUMBER = "b9"    # Latest
 
@@ -154,7 +152,7 @@ def generate_toolchain(
     try:
         qt_install_prefix_cmakedir = _query_qt_install_cmakedir(qt_ios)
     except (RuntimeError, OSError) as e:
-        log.warning(
+        logging.warning(
             f"Failed to find Qt's cmake dir; "
             f"falling back to '{DEFAULT_QT_CMAKEDIR}'.\n{e}"
         )
@@ -178,5 +176,5 @@ def generate_toolchain(
     toolchain_path = IOS_CACHE_DIR / f"toolchain_ios_{suffix}.cmake"
     IOS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     toolchain_path.write_text(content)
-    log.info(f"Toolchain written: {toolchain_path}")
+    logging.info(f"Toolchain written: {toolchain_path}")
     return toolchain_path
