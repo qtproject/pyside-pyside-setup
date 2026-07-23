@@ -5,9 +5,15 @@ from __future__ import annotations
 import logging
 import argparse
 import sys
+import os
+import subprocess
 from pathlib import Path
 
-from ios_utilities import download_python_support, generate_toolchain
+from ios_utilities import (download_python_support,
+                           generate_toolchain,
+                           PYSIDE_SETUP_ROOT)
+
+log = logging.getLogger(__name__)
 
 
 def cmd_build(args: argparse.Namespace) -> None:
@@ -22,13 +28,32 @@ def cmd_build(args: argparse.Namespace) -> None:
     python_xcframework = download_python_support()
 
     # Generate toolchain file
-    generate_toolchain(
+    toolchain = generate_toolchain(
         arch=arch,
         simulator=simulator,
         python_xcframework=python_xcframework,
         qt_ios=qt_ios,
         qt_macos=qt_macos,
     )
+
+    # Cross-compile PySide6
+    suffix = f"{arch}_simulator" if simulator else arch
+    plat_name = f"ios_{suffix}"
+    python_slice = python_xcframework / f"ios-{arch}"
+    cmd = [
+        sys.executable, "setup.py", "build",
+        "--standalone",
+        f"--cmake-toolchain-file={toolchain}",
+        f"--qt-host-path={qt_macos}",
+        f"--qt-target-path={qt_ios}",
+        f"--python-target-path={python_slice}",
+        f"--plat-name={plat_name}",
+        "--no-qt-tools",
+    ]
+
+    env = os.environ.copy()
+    log.info(f"Running bdist_wheel for platform {plat_name}")
+    subprocess.run(cmd, cwd=PYSIDE_SETUP_ROOT, env=env, check=True)
 
 
 def cmd_generate(args: argparse.Namespace) -> None:
