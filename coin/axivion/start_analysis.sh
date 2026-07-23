@@ -6,7 +6,7 @@ $HOME/bauhaus-suite/setup.sh --non-interactive
 export PATH=/home/qt/bauhaus-suite/bin:$PATH
 export BAUHAUS_CONFIG=$(cd $(dirname $(readlink -f $0)) && pwd)
 export AXIVION_VERSION_NAME=$(git rev-parse HEAD)
-export EXCLUDE_FILES="src/3rdparty/*:/usr/include/*"
+export EXCLUDE_FILES="build/*:/usr/include/*"
 export MODULE=$TESTED_MODULE_COIN
 export PACKAGE="Pyside"
 export IRNAME=build/$TESTED_MODULE_COIN.ir
