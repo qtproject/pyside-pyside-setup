@@ -10,11 +10,12 @@ import QtQuick3D.Helpers
 
 import OSMBuildings
 
-Window {
+ApplicationWindow {
     width: 1024
     height: 768
     visible: true
     title: qsTr("OSM Buildings")
+    id: window
 
     OSMManager {
         id: osmManager
@@ -287,7 +288,7 @@ Window {
     Action {
         id: quitAction
         shortcut: StandardKey.Quit
-        onTriggered: close()
+        onTriggered: window.close()
     }
 
     onClosing: function(close) {
