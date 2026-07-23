@@ -740,6 +740,8 @@
                snippet="qlatin1string-check"/>
   <add-function signature="qInstallMessageHandler(PyObject@callable@)" return-type="PyObject">
     <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qt-installmessagehandler"/>
+    <modify-argument index="1" pyi-type="Union[collections.abc.Callable[[PySide6.QtCore.QtMsgType, PySide6.QtCore.QMessageLogContext, str], typing.Any], None]"/>
+    <modify-argument index="return" pyi-type="Union[collections.abc.Callable[[PySide6.QtCore.QtMsgType, PySide6.QtCore.QMessageLogContext, str], typing.Any], None]"/>
   </add-function>
 
   <value-type name="QDeadlineTimer">
