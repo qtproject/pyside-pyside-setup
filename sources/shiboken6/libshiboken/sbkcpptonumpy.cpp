@@ -4,6 +4,9 @@
 
 // included by sbknumpy.cpp
 
+// AXIVION DISABLE Style Qt-Generic-MissingIncludeGuard: Included into source file to keep numpy code in one TU
+// AXIVION DISABLE Style Qt-Generic-NoFunctionDefinitionInHeader: Not included in any header
+
 namespace Shiboken::Numpy {
 
 #ifdef HAVE_NUMPY
@@ -66,3 +69,6 @@ PyObject *createIntArray1(Py_ssize_t, const int *)
 #endif // !HAVE_NUMPY
 
 } //namespace Shiboken::Numpy
+
+// AXIVION ENABLE Style Qt-Generic-NoFunctionDefinitionInHeader
+// AXIVION ENABLE Style Qt-Generic-MissingIncludeGuard
