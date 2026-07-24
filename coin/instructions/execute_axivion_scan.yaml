@@ -9,13 +9,6 @@ analysis_instructions_axivion: &analysis_instructions_axivion
       - type: EnvironmentVariable
         variableName: CMAKE_PREFIX_PATH
         variableValue: "{{.AgentWorkingDir}}/install/lib/cmake"
-      - type: EnvironmentVariable
-        variableName: TESTED_MODULE_BRANCH_COIN
-        variableValue: "unknown"
-        enable_if:
-          condition: runtime
-          env_var: TESTED_MODULE_BRANCH_COIN
-          not_equals_value: null # fixme
     - type: Group
       instructions:
       - type: Rename
