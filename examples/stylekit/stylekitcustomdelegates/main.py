@@ -2,21 +2,24 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 """
-PySide6 port of StyleKit Quick Controls example from Qt v6.x
+PySide6 port of StyleKit Custom Delegates Example example from Qt v6.x
 """
 import sys
 from pathlib import Path
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
+import rc_stylekitcustomdelegates  # noqa: F401
+
+
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
     app.setOrganizationName("QtProject")
-    app.setApplicationName("StyleKit")
+    app.setApplicationName("StyleKitCustomExample")
     engine = QQmlApplicationEngine()
 
     engine.addImportPath(Path(__file__).parent)
-    engine.loadFromModule("StyleKitControlsExample", "Main")
+    engine.loadFromModule("StyleKitCustomExampleModule", "Main")
 
     if not engine.rootObjects():
         sys.exit(-1)

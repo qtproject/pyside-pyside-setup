@@ -1,0 +1,8 @@
+{
+    "files": ["main.py",
+              "shaders/noise.frag", "shaders/wave.frag",
+              "StyleKitCustomExampleModule/CustomDelegatesStyle.qml",
+              "StyleKitCustomExampleModule/Main.qml",
+              "StyleKitCustomExampleModule/qmldir",
+              "stylekitcustomdelegates.qrc"]
+}

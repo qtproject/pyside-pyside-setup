@@ -1,9 +1,6 @@
 {
     "files": ["main.py",
-              "shaders/noise.frag", "shaders/wave.frag",
-              "stylekitcontrols.qrc",
               "StyleKitControlsExample/Main.qml",
-              "StyleKitControlsExample/styles/CustomDelegates.qml",
               "StyleKitControlsExample/styles/Haze.qml",
               "StyleKitControlsExample/styles/Plain.qml",
               "StyleKitControlsExample/styles/Vitrum.qml"]

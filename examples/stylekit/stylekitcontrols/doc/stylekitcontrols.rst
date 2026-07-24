@@ -12,15 +12,12 @@ It includes several styles that each demonstrate different aspects of styling:
 * ``Plain`` - A minimal style with only the basics
 * ``Haze`` - An advanced style with multiple themes
 * ``Vitrum`` - A style targeting VR environments
-* ``CustomDelegates`` - A style demonstrating how to create overlays, underlays, and
-  shader effects
 
 The example demonstrates, among other things, how to:
 
 * Implement and switch between different styles.
 * Implement support for light and dark themes, as well as additional themes such as high-contrast.
 * Use `StyleVariation`_ to provide alternative styling for parts of the application.
-* Implement custom delegates to add overlay and underlay effects.
 * Apply shader-based visual effects to the controls.
 * Build custom controls using `CustomControl`_ and `StyleReader`_\.
 * Interact with a style at runtime, for example to change the theme or adjust style
