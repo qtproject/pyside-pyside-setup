@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 """
-PySide6 port of Qt Quick Controls Style Kit example from Qt v6.x
+PySide6 port of StyleKit Quick Controls example from Qt v6.x
 """
 import sys
 from pathlib import Path
