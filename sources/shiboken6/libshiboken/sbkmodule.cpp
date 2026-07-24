@@ -11,10 +11,12 @@
 #include "sbkconverter_p.h"
 #include "sbkpep.h"
 
+#include <algorithm>
+#include <array>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include <cstring>
+#include <string_view>
 
 /// This hash maps module objects to arrays of converters.
 using ModuleConvertersMap = std::unordered_map<PyObject *, SbkConverter **> ;
@@ -117,7 +119,7 @@ static void incarnateHelper(PyObject *enclosing, std::string_view names,
     }
 }
 
-// Called by checkIfShouldLoadImmediately()
+// Called by shouldLoadImmediately()
 static void incarnateHelper(PyObject *module, std::string_view names,
                             const NameToTypeFunctionMap &nameToFunc)
 {
@@ -405,7 +407,7 @@ static bool isImportStar(PyObject *module)
 // PYSIDE-2404: These modules produce ambiguous names which we cannot handle, yet.
 static std::unordered_set<std::string> dontLazyLoad;
 
-static const std::unordered_set<std::string> knownModules{
+static constexpr std::array<std::string_view, 7> knownModules {
     "shiboken6.Shiboken",
     "minimal",
     "other",
@@ -415,21 +417,18 @@ static const std::unordered_set<std::string> knownModules{
     "testbinding"
 };
 
-static bool canNotLazyLoad(PyObject *module)
+static bool canNotLazyLoad(const std::string &modName)
 {
-    const char *modName = PyModule_GetName(module);
-
     // There are no more things that must be disabled :-D
     return dontLazyLoad.find(modName) != dontLazyLoad.end();
 }
 
-static bool shouldLazyLoad(PyObject *module)
+static bool shouldLazyLoad(const std::string &modName)
 {
-    const char *modName = PyModule_GetName(module);
-
-    if (knownModules.find(modName) != knownModules.end())
+    if (std::find(knownModules.cbegin(), knownModules.cend(), modName) != knownModules.cend())
         return true;
-    return std::strncmp(modName, "PySide6.", 8) == 0;
+
+    return modName.compare(0, 8, "PySide6.") == 0;
 }
 
 static int lazyLoadDefault()
@@ -444,8 +443,7 @@ static int lazyLoadDefault()
     return result;
 }
 
-void checkIfShouldLoadImmediately(PyObject *module, const std::string &name,
-                                  const NameToTypeFunctionMap &nameToFunc)
+static bool shouldLoadImmediately(PyObject *module)
 {
     static const int value = lazyLoadDefault();
 
@@ -457,12 +455,12 @@ void checkIfShouldLoadImmediately(PyObject *module, const std::string &name,
     //   3  - lazy loading for any module.
     //
     // By default we lazy load all known modules (option = 1).
-    if (value == 0                                  // completely disabled
-        || canNotLazyLoad(module)                   // for some reason we cannot lazy load
-        || (value == 1 && !shouldLazyLoad(module))  // not a known module
-        ) {
-        incarnateHelper(module, name, nameToFunc);
-    }
+    if (value == 0)
+        return true; // completely disabled
+    const std::string modName(PyModule_GetName(module));
+    if (canNotLazyLoad(modName))
+        return true; // for some reason we cannot lazy load (star import of module)
+    return value == 1 && !shouldLazyLoad(modName);
 }
 
 void AddTypeCreationFunction(PyObject *module,
@@ -481,7 +479,8 @@ void AddTypeCreationFunction(PyObject *module,
     else
         nit->second = tcStruct;
 
-    checkIfShouldLoadImmediately(module, name, nameToFunc);
+    if (shouldLoadImmediately(module))
+        incarnateHelper(module, name, nameToFunc);
 }
 
 void AddTypeCreationFunction(PyObject *module,
@@ -507,7 +506,8 @@ void AddTypeCreationFunction(PyObject *module,
     else
         nit->second = tcStruct;
 
-    checkIfShouldLoadImmediately(module, namePath, nameToFunc);
+    if (shouldLoadImmediately(module))
+        incarnateHelper(module, namePath, nameToFunc);
 }
 
 PyObject *import(const char *moduleName)
