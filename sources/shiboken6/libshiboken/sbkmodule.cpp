@@ -37,9 +37,44 @@ using NameToTypeFunctionMap = std::unordered_map<std::string, TypeCreationStruct
 using ModuleToFuncsMap = std::unordered_map<PyObject *, NameToTypeFunctionMap> ;
 
 /// All types produced in imported modules are mapped here.
-static ModuleTypesMap moduleTypes;
-static ModuleConvertersMap moduleConverters;
-static ModuleToFuncsMap moduleToFuncs;
+struct ModuleGlobalData
+{
+    ModuleTypesMap moduleTypes;
+    ModuleConvertersMap moduleConverters;
+};
+
+static ModuleGlobalData *moduleGlobalData()
+{
+    static ModuleGlobalData globals;
+    return &globals;
+}
+
+// Data that would exist per interpreter if subinterpreter support was
+// implemented.
+struct ModuleData
+{
+    ModuleToFuncsMap moduleToFuncs;
+
+    // PYSIDE-2404: These modules produce ambiguous names which we cannot handle, yet.
+    std::unordered_set<std::string> dontLazyLoad;
+
+    // PYSIDE-2404: Redirecting import for "import *" support.
+    //
+    // The first import will be handled by the isImportStar function. But the
+    // same module might be imported twice, which would give no introspection
+    // due to module caching.
+    PyObject *origImportFunc{};
+
+    PyObject *sysModules{PyImport_GetModuleDict()};
+    PyObject *partial{Pep_GetPartialFunction()};
+    bool lazy_init = false;
+};
+
+static ModuleData *moduleData()
+{
+    static ModuleData data;
+    return &data;
+}
 
 namespace Shiboken::Module
 {
@@ -51,8 +86,6 @@ LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct)
     if (typeStruct.type != nullptr)
         return typeStruct.type;
 
-    static PyObject *sysModules = PyImport_GetModuleDict();
-
     // The slow path for initialization.
     // We get the type by following the chain from the module.
     // As soon as types[index] gets filled, we can stop.
@@ -62,7 +95,7 @@ LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct)
     auto dotPos = usePySide ? names.find('.', 8) : names.find('.');
     auto startPos = dotPos + 1;
     AutoDecRef modName(String::fromCppStringView(names.substr(0, dotPos)));
-    auto *modOrType = PyDict_GetItem(sysModules, modName);
+    auto *modOrType = PyDict_GetItem(moduleData()->sysModules, modName);
     if (modOrType == nullptr) {
         PyErr_Format(PyExc_SystemError,
                      R"(libshiboken: Error instantiating "%s": Module "%U" should already be in sys.modules)",
@@ -188,7 +221,7 @@ static PyTypeObject *incarnateType(PyObject *module, const std::string &name,
 // the creation of the type(s), this is efficient.
 void loadLazyClassesWithNameStd(const std::string &name)
 {
-    for (auto const & tableIter : moduleToFuncs) {
+    for (auto const & tableIter : moduleData()->moduleToFuncs) {
         auto nameToFunc = tableIter.second;
         auto funcIter = nameToFunc.find(name);
         if (funcIter != nameToFunc.end()) {
@@ -210,6 +243,7 @@ void loadLazyClassesWithName(const char *name)
 void resolveLazyClasses(PyObject *module)
 {
     // - locate the module in the moduleTofuncs mapping
+    auto &moduleToFuncs = moduleData()->moduleToFuncs;
     auto tableIter = moduleToFuncs.find(module);
     if (tableIter == moduleToFuncs.end())
         return;
@@ -248,6 +282,7 @@ static PyObject *PyModule_lazyGetAttro(PyObject *module, PyObject *name)
 
     PyErr_Clear();
     // - locate the module in the moduleTofuncs mapping
+    auto &moduleToFuncs = moduleData()->moduleToFuncs;
     auto tableIter = moduleToFuncs.find(module);
     // - if this is not our module, use the original
     if (tableIter == moduleToFuncs.end())
@@ -277,6 +312,7 @@ static PyObject *_module_dir_template(PyObject * /* self */, PyObject *args)
     if (!PyArg_ParseTuple(args, "O", &module))
         return nullptr;
 
+    auto &moduleToFuncs = moduleData()->moduleToFuncs;
     auto tableIter = moduleToFuncs.find(module);
     assert(tableIter != moduleToFuncs.end());
     Shiboken::AutoDecRef dict(PyObject_GetAttr(module, _dict));
@@ -404,9 +440,6 @@ static bool isImportStar(PyObject *module)
     return false;
 }
 
-// PYSIDE-2404: These modules produce ambiguous names which we cannot handle, yet.
-static std::unordered_set<std::string> dontLazyLoad;
-
 static constexpr std::array<std::string_view, 7> knownModules {
     "shiboken6.Shiboken",
     "minimal",
@@ -420,6 +453,7 @@ static constexpr std::array<std::string_view, 7> knownModules {
 static bool canNotLazyLoad(const std::string &modName)
 {
     // There are no more things that must be disabled :-D
+    const auto &dontLazyLoad = moduleData()->dontLazyLoad;
     return dontLazyLoad.find(modName) != dontLazyLoad.end();
 }
 
@@ -468,6 +502,7 @@ void AddTypeCreationFunction(PyObject *module,
                              TypeCreationFunction func)
 {
     // - locate the module in the moduleTofuncs mapping
+    auto &moduleToFuncs = moduleData()->moduleToFuncs;
     auto tableIter = moduleToFuncs.find(module);
     assert(tableIter != moduleToFuncs.end());
     // - Assign the name/generating function tcStruct.
@@ -489,6 +524,7 @@ void AddTypeCreationFunction(PyObject *module,
                              const char *subTypeNamePath)
 {
     // - locate the module in the moduleTofuncs mapping
+    auto &moduleToFuncs = moduleData()->moduleToFuncs;
     auto tableIter = moduleToFuncs.find(module);
     assert(tableIter != moduleToFuncs.end());
     // - Assign the name/generating function tcStruct.
@@ -527,17 +563,9 @@ PyObject *import(const char *moduleName)
     return module;
 }
 
-// PYSIDE-2404: Redirecting import for "import *" support.
-//
-// The first import will be handled by the isImportStar function.
-// But the same module might be imported twice, which would give no
-// introspection due to module caching.
-
-static PyObject *origImportFunc{};
-
 static PyObject *lazy_import(PyObject * /* self */, PyObject *args, PyObject *kwds)
 {
-    auto *ret = PyObject_Call(origImportFunc, args, kwds);
+    auto *ret = PyObject_Call(moduleData()->origImportFunc, args, kwds);
     if (ret != nullptr) {
         // PYSIDE-2404: Support star import when lazy loading.
         if (PyTuple_Size(args) >= 4) {
@@ -584,34 +612,31 @@ PyObject *create(const char *moduleName, PyModuleDef *moduleData)
 
 void exec(PyObject *module)
 {
-    static auto *sysModules = PyImport_GetModuleDict();
-    static auto *partial = Pep_GetPartialFunction();
-    static bool lazy_init{};
-
+    auto *data = moduleData();
     // Setup of a dir function for "missing" classes.
     auto *moduleDirTemplate = PyCFunction_NewEx(module_methods, nullptr, nullptr);
     // Turn this function into a bound object, so we have access to the module.
-    auto *moduleDir = PyObject_CallFunctionObjArgs(partial, moduleDirTemplate, module, nullptr);
+    auto *moduleDir = PyObject_CallFunctionObjArgs(data->partial, moduleDirTemplate, module, nullptr);
     PepModule_Add(module, module_methods->ml_name, moduleDir);  // steals reference
     // Insert an initial empty table for the module.
     NameToTypeFunctionMap empty;
-    moduleToFuncs.insert(std::make_pair(module, empty));
+    data->moduleToFuncs.insert(std::make_pair(module, empty));
 
     // A star import must be done unconditionally. Use the complete name.
     if (isImportStar(module))
-        dontLazyLoad.insert(PyModule_GetName(module));
+        data->dontLazyLoad.insert(PyModule_GetName(module));
 
-    if (!lazy_init) {
+    if (!data->lazy_init) {
         // Install the getattr patch.
         origModuleGetattro = PyModule_Type.tp_getattro;
         PyModule_Type.tp_getattro = PyModule_lazyGetAttro;
         // Add the lazy import redirection, keeping a reference.
         Shiboken::AutoDecRef builtins(PepEval_GetFrameBuiltins());
-        origImportFunc = PyDict_GetItemString(builtins.object(), "__import__");
-        Py_INCREF(origImportFunc);
+        data->origImportFunc = PyDict_GetItemString(builtins.object(), "__import__");
+        Py_INCREF(data->origImportFunc);
         AutoDecRef func(PyCFunction_NewEx(lazy_methods, nullptr, nullptr));
         PyDict_SetItemString(builtins.object(), "__import__", func);
-        lazy_init = true;
+        data->lazy_init = true;
     }
     // PYSIDE-2404: Nuitka inserts some additional code in standalone mode
     //              in an invisible virtual module (i.e. `QtCore-postLoad`)
@@ -619,13 +644,14 @@ void exec(PyObject *module)
     //              `_PyImport_FixupExtensionObject` which does the insertion
     //              into `sys.modules`. This can cause a race condition.
     // Insert the module early into the module dict to prevent recursion.
-    PyDict_SetItemString(sysModules, PyModule_GetName(module), module);
+    PyDict_SetItemString(data->sysModules, PyModule_GetName(module), module);
     // Clear the non-existing name cache because we have a new module.
     Shiboken::Conversions::clearNegativeLazyCache();
 }
 
 void registerTypes(PyObject *module, TypeInitStruct *types)
 {
+    auto &moduleTypes = moduleGlobalData()->moduleTypes;
     auto iter = moduleTypes.find(module);
     if (iter == moduleTypes.end())
         moduleTypes.insert(std::make_pair(module, types));
@@ -633,12 +659,14 @@ void registerTypes(PyObject *module, TypeInitStruct *types)
 
 TypeInitStruct *getTypes(PyObject *module)
 {
+    auto &moduleTypes = moduleGlobalData()->moduleTypes;
     auto iter = moduleTypes.find(module);
     return (iter == moduleTypes.end()) ? 0 : iter->second;
 }
 
 void registerTypeConverters(PyObject *module, SbkConverter **converters)
 {
+    auto &moduleConverters = moduleGlobalData()->moduleConverters;
     auto iter = moduleConverters.find(module);
     if (iter == moduleConverters.end())
         moduleConverters.insert(std::make_pair(module, converters));
@@ -646,6 +674,7 @@ void registerTypeConverters(PyObject *module, SbkConverter **converters)
 
 SbkConverter **getTypeConverters(PyObject *module)
 {
+    auto &moduleConverters = moduleGlobalData()->moduleConverters;
     auto iter = moduleConverters.find(module);
     return (iter == moduleConverters.end()) ? 0 : iter->second;
 }
