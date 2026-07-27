@@ -36,7 +36,7 @@ compute_config_py_values(shiboken6_VERSION)
 
 shiboken_internal_set_python_site_packages()
 
-string(REGEX REPLACE "\\.[0-9]+\\.[0-9]+$" "" LLVM_VERSION "${LLVM_PACKAGE_VERSION}")
+string(REGEX REPLACE "\\.[0-9]+\\.[0-9]+.*$" "" LLVM_VERSION "${LLVM_PACKAGE_VERSION}")
 
 set_cmake_cxx_flags()
 set(CMAKE_CXX_FLAGS
