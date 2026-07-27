@@ -16,6 +16,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <cstring>
 #include <string_view>
 
 /// This hash maps module objects to arrays of converters.
