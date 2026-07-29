@@ -76,7 +76,11 @@ class PrivateDtorTest(unittest.TestCase):
         for i in range(1000):
             obj = PrivateDtor.instance()
             Shiboken.invalidate(obj)
+        del obj
 
+        # A free-threaded build hands the type references back deferred, so
+        # settle them before measuring.
+        gc.collect()
         after = sys.getrefcount(PrivateDtor)
 
         self.assertLess(abs(before - after), 5)

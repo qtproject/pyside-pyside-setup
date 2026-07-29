@@ -5,9 +5,11 @@ from __future__ import annotations
 
 '''Tests ObjectType class of object-type with privates copy constructor and = operator.'''
 
+import gc
 import os
 import sys
 import unittest
+import weakref
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
@@ -88,18 +90,23 @@ class ObjectTypeTest(unittest.TestCase):
 
         Shiboken.invalidate(parents)
 
-    @unittest.skipUnless(hasattr(sys, "getrefcount"), f"{sys.implementation.name} has no refcount")
     def testClassDecref(self):
-        # Bug was that class PyTypeObject wasn't decrefed when instance died
-        before = sys.getrefcount(ObjectType)
+        # Bug was that class PyTypeObject wasn't decrefed when instance died.
+        # Observe the type itself rather than its reference count: a count is
+        # not a reliable measure on builds that defer or elide reference
+        # operations, but a leaked type is still a type that stays alive.
+        class Sub(ObjectType):
+            pass
+
+        alive = weakref.ref(Sub)
 
         for i in range(1000):
-            obj = ObjectType()
+            obj = Sub()
             Shiboken.delete(obj)
+        del obj, Sub
 
-        after = sys.getrefcount(ObjectType)
-
-        self.assertLess(abs(before - after), 5)
+        gc.collect()
+        self.assertIsNone(alive())
 
     def testInvalidProperty(self):
         o = ObjectType()
