@@ -2540,6 +2540,14 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
     }
     s << ")\n{\n" << indent;
 
+    // Serialize entry into the binding layer so concurrent access to
+    // the same wrapper is safely serialized instead of crashing. No-op on
+    // GIL-enabled builds. The critical section is suspended whenever the
+    // thread detaches (ALLOW_THREADS, blocking on a Python lock).
+    s << "#ifdef Py_GIL_DISABLED\n"
+      << "Shiboken::CoarseBindingGuard graphGuard;\n"
+      << "#endif\n";
+
     writeMethodWrapperPreamble(s, overloadData, classContext);
 
     s << '\n';

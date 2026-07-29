@@ -21,6 +21,7 @@
 #include <pep384impl_p.h>
 #include <sbkconverter.h>
 #include <sbkenum.h>
+#include <sbkcoarsebindinglock.h>
 #include <sbkpep.h>
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
@@ -681,6 +682,16 @@ const QMetaObject *retrieveMetaObject(PyObject *self)
     //              to hold the GIL. Maybe that is harmless here (check later).
     // Thanks to Sam Gross who fixed most errors by pointing this out.
     Shiboken::GilState gil;
+    // Own GIL: builder->update() below builds/updates the dynamic QMetaObject
+    // through QMetaObjectBuilder, which is not thread-safe and whose builder is
+    // usually shared per type (retrieveTypeUserData). This choke point is
+    // reached both from guarded Python wrappers and directly from Qt via
+    // QObjectWrapper::metaObject(), so serialize it here. GilState above already
+    // guarantees an attached thread state, which the guard needs. Reentrant, so
+    // a call already under the guard is a cheap no-op.
+#ifdef Py_GIL_DISABLED
+    Shiboken::CoarseBindingGuard graphGuard;
+#endif
 #endif
     // PYSIDE-803: Avoid the GIL in SignalManager::retrieveMetaObject
     // This function had the GIL. We do not use the GIL unless we have to.

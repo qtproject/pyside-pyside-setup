@@ -12,6 +12,7 @@
 #include <helper.h>
 #include <gilstate.h>
 #include <pep384ext.h>
+#include <sbkcoarsebindinglock.h>
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qcompare.h>
@@ -19,6 +20,8 @@
 #include <QtCore/qhash.h>
 #include <QtCore/qpointer.h>
 #include <QtCore/qthread.h>
+
+#include <utility>
 
 namespace PySide
 {
@@ -151,9 +154,14 @@ private:
 static void onPysideReceiverSlotDestroyed(void *data)
 {
     auto *pythonSelf = reinterpret_cast<PyObject *>(data);
+#ifdef Py_GIL_DISABLED
+    // disconnectReceiver() detaches around the Qt disconnects itself.
+    disconnectReceiver(pythonSelf);
+#else
     Py_BEGIN_ALLOW_THREADS
     disconnectReceiver(pythonSelf);
     Py_END_ALLOW_THREADS
+#endif
 }
 
 PysideReceiverMethodSlot::PysideReceiverMethodSlot(PyObject *function, PyObject *pythonSelf) :
@@ -339,6 +347,13 @@ public Q_SLOTS:
 void SenderSignalDeletionTracker::senderDestroyed(QObject *o)
 {
     Shiboken::GilState gil; // PYSIDE-3072
+    // Own GIL: iterating/erasing the global connectionHash must be serialized
+    // against registerSlotConnection/disconnectSlot. This slot is invoked by Qt
+    // signal delivery (possibly on a thread not inside a guarded wrapper), so
+    // guard it here. GilState above guarantees an attached thread state.
+#ifdef Py_GIL_DISABLED
+    Shiboken::CoarseBindingGuard graphGuard;
+#endif
     for (auto it = connectionHash.begin(); it != connectionHash.end(); ) {
         if (it.key().sender == o)
             it = connectionHash.erase(it);
@@ -357,6 +372,33 @@ static QPointer<SenderSignalDeletionTracker> senderSignalDeletionTracker;
 
 static void disconnectReceiver(PyObject *pythonSelf)
 {
+#ifdef Py_GIL_DISABLED
+    // Own GIL: pull the matching entries out of the global connectionHash
+    // under the guard (pure container work, QTBUG-144929: take copies), then
+    // run the Qt disconnects with no lock held and the thread detached:
+    // QObject::disconnect takes Qt's internal signal-slot locks, whose holders
+    // may in turn enter Python and want the graph guard. Disconnecting may
+    // re-entrantly delete further receivers (PYSIDE-88); their callbacks then
+    // find a hash that no longer contains these entries, so no iterator is
+    // invalidated under our feet. Kept to free-threaded builds: the GIL build
+    // has no guard to serialize against and this code is regression-prone.
+    QList<QMetaObject::Connection> connections;
+    {
+        Shiboken::CoarseBindingGuard graphGuard;
+        for (auto it = connectionHash.begin(); it != connectionHash.end(); ) {
+            if (it.key().object == pythonSelf) {
+                connections.append(it.value());
+                it = connectionHash.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+    Py_BEGIN_ALLOW_THREADS
+    for (const auto &connection : std::as_const(connections))
+        QObject::disconnect(connection);
+    Py_END_ALLOW_THREADS
+#else
     // A check for reentrancy was added for PYSIDE-88, but has not been
     // observed yet.
     for (bool keepGoing = true; keepGoing; ) {
@@ -378,6 +420,7 @@ static void disconnectReceiver(PyObject *pythonSelf)
             }
         }
     }
+#endif
 }
 
 static void clearConnectionHash()

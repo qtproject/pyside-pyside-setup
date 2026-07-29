@@ -12,6 +12,7 @@
 #include "pep384impl_p.h"
 #include "sbkconverter.h"
 #include "sbkerrors.h"
+#include "sbkcoarsebindinglock.h"
 #include "sbkfeature_base.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
@@ -25,6 +26,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstddef>
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <set>
@@ -55,6 +57,27 @@ static BaseWrapperGlobals *baseWrapperGlobals()
 
 namespace Shiboken
 {
+#ifdef Py_GIL_DISABLED
+// The coarse binding lock, see sbkcoarsebindinglock.h. This lives here rather than
+// header so that there is exactly one mutex per process: a definition in the
+// header ends up private to each shared library that includes it, and the lock
+// would only exclude callers within the same library.
+PyMutex &coarseBindingMutex()
+{
+    static PyMutex m{};
+    return m;
+}
+
+bool coarseBindingLockEnabled()
+{
+    static const bool enabled = [] {
+        const char *e = std::getenv("PYSIDE_COARSE_BINDING_LOCK");
+        return e == nullptr || e[0] != '0';
+    }();
+    return enabled;
+}
+#endif // Py_GIL_DISABLED
+
 // Walk through the first level of non-user-type Sbk base classes relevant for
 // C++ object allocation. Return true from the predicate to terminate.
 template <class Predicate>
@@ -426,6 +449,15 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
     // progress from the first time around, resulting in a double delete and a
     // crash.
     PyObject_GC_UnTrack(pyObj);
+
+    // Only now take the lock. Acquiring it earlier is unsafe: a contended
+    // critical-section acquisition detaches the thread while this object is
+    // still tracked and already at refcount zero, so free-threaded cyclic GC
+    // can reach it and start a second deallocation. Nothing above this point
+    // touches the object graph, so there is nothing to protect there.
+#ifdef Py_GIL_DISABLED
+    Shiboken::CoarseBindingGuard graphGuard;
+#endif
 
     // Check that Python is still initialized as sometimes this is called by a static destructor
     // after Python interpeter is shutdown.
@@ -1347,24 +1379,36 @@ bool wasCreatedByPython(SbkObject *pyObj)
 
 void callCppDestructors(SbkObject *pyObj)
 {
+#ifdef Py_GIL_DISABLED
+    Shiboken::CoarseBindingGuard graphGuard;
+#endif
     auto *priv = pyObj->d;
+    // Idempotent under the guard: a concurrent Shiboken.delete() of the same
+    // object may already have claimed the C++ pointer and cleared cptr.
+    if (priv->cptr == nullptr || !priv->validCppObject)
+        return;
     if (priv->isQAppSingleton && DestroyQApplication) {
         // PYSIDE-1470: Allow to destroy the application from Shiboken.
         DestroyQApplication();
         return;
     }
     auto *sotp = PepType_SOTP(Shiboken::pyType(pyObj));
-    if (sotp->is_multicpp) {
-        callDestructor(getDestructorEntries(pyObj));
-    } else {
-        Shiboken::ThreadStateSaver threadSaver;
-        threadSaver.save();
-        sotp->cpp_dtor(pyObj->d->cptr[0]);
-    }
 
-    if (priv->validCppObject && priv->containsCppWrapper) {
+    // All bookkeeping first, while the guard cannot have been suspended; the
+    // C++ destructors run last, on a snapshot of the pointers. Running the
+    // destructor first is unsafe: ThreadStateSaver detaches the thread, which
+    // suspends the critical section, and a concurrent delete of the same
+    // object then passes the check above and destroys the C++ object a second
+    // time. Same order as the dealloc path in SbkDeallocWrapperCommon().
+    DestructorEntries entries;
+    void *cptr0 = nullptr;
+    if (sotp->is_multicpp)
+        entries = getDestructorEntries(pyObj);
+    else
+        cptr0 = priv->cptr[0];
+
+    if (priv->containsCppWrapper)
         BindingManager::instance().releaseWrapper(pyObj);
-    }
 
     /* invalidate needs to be called before deleting pointer array because
        it needs to delete entries for them from the BindingManager hash table;
@@ -1375,6 +1419,14 @@ void callCppDestructors(SbkObject *pyObj)
     delete[] priv->cptr;
     priv->cptr = nullptr;
     priv->validCppObject = false;
+
+    if (sotp->is_multicpp) {
+        callDestructor(entries);
+    } else {
+        Shiboken::ThreadStateSaver threadSaver;
+        threadSaver.save();
+        sotp->cpp_dtor(cptr0);
+    }
 }
 
 bool hasOwnership(SbkObject *pyObj)
@@ -1409,6 +1461,9 @@ void getOwnership(PyObject *pyObj)
 
 void releaseOwnership(SbkObject *sbkObj)
 {
+#ifdef Py_GIL_DISABLED
+    Shiboken::CoarseBindingGuard graphGuard;
+#endif
     // skip if the ownership have already moved to c++
     auto *ob  = reinterpret_cast<PyObject *>(sbkObj);
     auto *selfType = Py_TYPE(ob);
@@ -1435,12 +1490,18 @@ static void recursive_invalidate(PyObject *pyobj, std::set<SbkObject *> &seen);
 
 void invalidate(PyObject *pyobj)
 {
+#ifdef Py_GIL_DISABLED
+    Shiboken::CoarseBindingGuard graphGuard;
+#endif
     std::set<SbkObject *> seen;
     recursive_invalidate(pyobj, seen);
 }
 
 void invalidate(SbkObject *self)
 {
+#ifdef Py_GIL_DISABLED
+    Shiboken::CoarseBindingGuard graphGuard;
+#endif
     std::set<SbkObject *> seen;
     recursive_invalidate(self, seen);
 }
@@ -1727,6 +1788,11 @@ void destroy(SbkObject *self, void *cppData)
 
     // This can be called in c++ side
     Shiboken::GilState gil;
+    // Only below GilState: the guard's critical section needs an attached
+    // thread state.
+#ifdef Py_GIL_DISABLED
+    Shiboken::CoarseBindingGuard graphGuard;
+#endif
 
     // Remove all references attached to this object
     clearReferences(self);
@@ -1765,6 +1831,9 @@ void destroy(SbkObject *self, void *cppData)
 
 void removeParent(SbkObject *child, bool giveOwnershipBack, bool keepReference)
 {
+#ifdef Py_GIL_DISABLED
+    Shiboken::CoarseBindingGuard graphGuard;
+#endif
     ParentInfo *pInfo = child->d->parentInfo;
     if (!pInfo || !pInfo->parent) {
         if (pInfo && pInfo->hasWrapperRef) {
@@ -1803,6 +1872,9 @@ void removeParent(SbkObject *child, bool giveOwnershipBack, bool keepReference)
 
 void setParent(PyObject *parent, PyObject *child)
 {
+#ifdef Py_GIL_DISABLED
+    Shiboken::CoarseBindingGuard graphGuard;
+#endif
     if (!child || child == Py_None || child == parent)
         return;
 
@@ -1874,6 +1946,9 @@ void setParent(PyObject *parent, PyObject *child)
 
 void deallocData(SbkObject *self, bool cleanup)
 {
+#ifdef Py_GIL_DISABLED
+    Shiboken::CoarseBindingGuard graphGuard;
+#endif
     // Make cleanup if this is not a wrapper otherwise this will be done on wrapper destructor
     if(cleanup) {
         removeParent(self);

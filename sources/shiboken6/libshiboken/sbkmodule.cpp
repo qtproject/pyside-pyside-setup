@@ -9,6 +9,7 @@
 #include "sbkstring.h"
 #include "sbkcppstring.h"
 #include "sbkconverter_p.h"
+#include "sbkcoarsebindinglock.h"
 #include "sbkpep.h"
 
 #include <algorithm>
@@ -613,6 +614,23 @@ PyObject *create(const char *moduleName, PyModuleDef *moduleData)
 
 void exec(PyObject *module)
 {
+#ifdef Py_GIL_DISABLED
+    // The module declares that it does not need the GIL, which only holds
+    // while the coarse binding lock is in place. PYSIDE_COARSE_BINDING_LOCK=0 takes that
+    // lock away, leaving the bindings free-threaded with no synchronization
+    // at all. Taking the declaration back here is not possible - the GIL slot
+    // is evaluated when the module is created, before this runs - so say so
+    // instead. The switch exists for the stress harness, not for production.
+    static bool warned = false;
+    if (!coarseBindingLockEnabled() && !warned) {
+        warned = true;
+        PyErr_WarnEx(PyExc_RuntimeWarning,
+                     "PYSIDE_COARSE_BINDING_LOCK=0 disables the lock that makes the "
+                     "bindings safe without the GIL. This is meant for "
+                     "stress testing only; data races are expected.", 1);
+        PyErr_Clear(); // a warning turned into an error must not fail the import
+    }
+#endif
     auto *data = moduleData();
     // Setup of a dir function for "missing" classes.
     auto *moduleDirTemplate = PyCFunction_NewEx(module_methods, nullptr, nullptr);
