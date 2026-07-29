@@ -620,9 +620,9 @@ def init_PySide6_QtWidgets():
             "Qt.MatchFlags(Qt.MatchExactly | Qt.MatchCaseSensitive)"),
         "static_cast<Qt.MatchFlag>(Qt.MatchExactly|Qt.MatchCaseSensitive)": Instance(
             "Qt.MatchFlag(Qt.MatchExactly | Qt.MatchCaseSensitive)"),
-        "QListWidgetItem.ItemType.Type": PySide6.QtWidgets.QListWidgetItem.Type,
-        "QTableWidgetItem.ItemType.Type": PySide6.QtWidgets.QTableWidgetItem.Type,
-        "QTreeWidgetItem.ItemType.Type": PySide6.QtWidgets.QTreeWidgetItem.Type,
+        "QListWidgetItem.ItemType.Type": PySide6.QtWidgets.QListWidgetItem.ItemType.Type,
+        "QTableWidgetItem.ItemType.Type": PySide6.QtWidgets.QTableWidgetItem.ItemType.Type,
+        "QTreeWidgetItem.ItemType.Type": PySide6.QtWidgets.QTreeWidgetItem.ItemType.Type,
     })
     return locals()
 
