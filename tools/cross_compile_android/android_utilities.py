@@ -10,6 +10,7 @@ import os
 import stat
 import sys
 import subprocess
+import tarfile
 
 from urllib import request
 from pathlib import Path
@@ -25,6 +26,22 @@ ANDROID_NDK_VERSION_NUMBER_SUFFIX = "12479018"
 # Android/android.py. 32-bit Android is not a supported CPython target.
 SUPPORTED_ANDROID_PLATFORMS = ["aarch64", "x86_64"]
 
+# Android target Python. python.org ships official prebuilt Android
+# binaries from 3.14 onwards, so CPython is no longer built here. This
+# must match the python3 recipe version at the python-for-android commit
+# pinned by P4A_COMMIT in deploy_lib/android/buildozer.py, because that
+# is the interpreter which loads these wheels on the device.
+ANDROID_TARGET_PYTHON_VERSION = "3.14"
+ANDROID_TARGET_PYTHON_FULL_VERSION = "3.14.2"
+
+# Minimum Android API level, set by Qt's requirements. Update when Qt's
+# minimum API level changes.
+MIN_ANDROID_API_LEVEL = "28"
+
+# API level Qt for Python is compiled against. Higher than Qt's runtime
+# minimum for toolchain compatibility, while staying compatible with it.
+DEFAULT_ANDROID_API_LEVEL = "35"
+
 # Official SHA-1 checksums for the pinned NDK/SDK versions.
 _NDK_SHA1: dict[str, str] = {
     "linux": "090e8083a715fdb1a3e402d0763c388abb03fb4e",
@@ -35,9 +52,17 @@ _CLTOOLS_SHA1: dict[str, str] = {
     "mac": "cc27cca4b84bfdbc7df17e3d0a01d0c640d8ee71",
 }
 
+# Official SHA-256 checksums for the pinned prebuilt Python tarballs.
+# Update together with ANDROID_TARGET_PYTHON_FULL_VERSION.
+_PREBUILT_PYTHON_SHA256: dict[str, str] = {
+    "aarch64": "d842ed92a662e41f8008ad2ec6b0cb36e5872c64f073f5abfce7f8279a1c761c",
+    "x86_64": "622415c0e241fc75bf32ee87f3e0b4fd96044a372c156021191a76e651c1bef4",
+}
 
-def _verify_sha1(file_path: Path, expected: str) -> None:
-    h = hashlib.sha1()
+
+def _verify_checksum(file_path: Path, expected: str,
+                     algorithm: str = "sha1") -> None:
+    h = hashlib.new(algorithm)
     with open(file_path, "rb") as fh:
         for chunk in iter(lambda: fh.read(65536), b""):
             h.update(chunk)
@@ -236,7 +261,7 @@ def download_android_ndk(ndk_path: Path):
 
             print(f"Downloading Android Ndk version r{ANDROID_NDK_VERSION}")
             _download(url=url, destination=ndk_zip_path)
-            _verify_sha1(ndk_zip_path, _NDK_SHA1[sys.platform])
+            _verify_checksum(ndk_zip_path, _NDK_SHA1[sys.platform])
 
             print("Unpacking Android Ndk")
             if sys.platform == "darwin":
@@ -278,7 +303,7 @@ def download_android_commandlinetools(android_sdk_dir: Path):
             print("Download Android Command Line Tools: "
                   f"commandlinetools-{sys.platform}-{DEFAULT_SDK_TAG}_latest.zip")
             _download(url=url, destination=cltools_zip_path)
-            _verify_sha1(cltools_zip_path, _CLTOOLS_SHA1[sdk_platform])
+            _verify_checksum(cltools_zip_path, _CLTOOLS_SHA1[sdk_platform])
 
             print("Unpacking Android Command Line Tools")
             extract_zip(file=cltools_zip_path, destination=android_sdk_dir)
@@ -289,6 +314,54 @@ def download_android_commandlinetools(android_sdk_dir: Path):
             sys.exit(1)
 
     return android_sdk_dir
+
+
+def download_prebuilt_python_android(full_version: str, plat_name: str,
+                                     install_path: Path) -> None:
+    """
+    Downloads the official prebuilt CPython for Android from python.org,
+    verifies it and extracts it into install_path.
+
+    The tarball contains a top-level 'prefix/' directory holding the
+    include/ and lib/ layout the CMake toolchain file expects, so its
+    contents are extracted with that prefix stripped.
+    """
+    expected_sha256 = _PREBUILT_PYTHON_SHA256.get(plat_name)
+    if expected_sha256 is None:
+        raise RuntimeError(
+            f"[DEPLOY] No prebuilt Python checksum for platform "
+            f"'{plat_name}'. Supported: "
+            f"{sorted(_PREBUILT_PYTHON_SHA256)}")
+
+    archive_name = f"python-{full_version}-{plat_name}-linux-android.tar.gz"
+    url = f"https://www.python.org/ftp/python/{full_version}/{archive_name}"
+
+    install_path.parent.mkdir(parents=True, exist_ok=True)
+    archive_path = install_path.parent / archive_name
+
+    if not archive_path.exists():
+        logging.info(f"Downloading prebuilt Python {full_version} for "
+                     f"{plat_name}")
+        _download(url, archive_path)
+    else:
+        logging.info(f"Using cached prebuilt Python: {archive_path}")
+
+    _verify_checksum(archive_path, expected_sha256, algorithm="sha256")
+
+    install_path.mkdir(parents=True, exist_ok=True)
+    with tarfile.open(archive_path) as tar:
+        members = []
+        for member in tar.getmembers():
+            name = member.name.removeprefix("./")
+            if not name.startswith("prefix/"):
+                continue
+            member.name = name[len("prefix/"):]
+            if not member.name:
+                continue
+            members.append(member)
+        if not members:
+            raise RuntimeError(f"{archive_name} has no prefix/ directory")
+        tar.extractall(path=install_path, members=members, filter="data")
 
 
 def android_list_build_tools_versions(sdk_manager: SdkManager):
