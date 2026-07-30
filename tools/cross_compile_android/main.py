@@ -16,7 +16,8 @@ from tqdm import tqdm
 from jinja2 import Environment, FileSystemLoader
 
 from android_utilities import (run_command, download_android_commandlinetools,
-                               download_android_ndk, install_android_packages)
+                               download_android_ndk, install_android_packages,
+                               SUPPORTED_ANDROID_PLATFORMS)
 
 # Note: Does not work with PyEnv. Your Host Python should contain openssl.
 # also update the version in ShibokenHelpers.cmake if Python version changes.
@@ -25,6 +26,13 @@ PYTHON_VERSION = "3.11"
 # minimum Android API version support. This is set according to Qt's requiremnts and needs to
 # be updated if Qt's minimum API level is updated.
 MIN_ANDROID_API_LEVEL = "28"
+
+# Android ABI data per supported platform:
+# android_abi, qt_plat_name, gcc_march, plat_bits
+_PLATFORM_DATA = {
+    "aarch64": ("arm64-v8a", "arm64_v8a", "armv8-a", "64"),
+    "x86_64": ("x86_64", "x86_64", "x86-64", "64"),
+}
 
 SKIP_UPDATE_HELP = ("skip the updation of SDK packages build-tools, platform-tools to"
                     " latest version")
@@ -98,8 +106,9 @@ if __name__ == "__main__":
     )
 
     parser.add_argument("-p", "--plat-name", type=str, nargs="*",
-                        choices=["aarch64", "armv7a", "i686", "x86_64"],
-                        default=["aarch64", "armv7a", "i686", "x86_64"], dest="plat_names",
+                        choices=SUPPORTED_ANDROID_PLATFORMS,
+                        default=SUPPORTED_ANDROID_PLATFORMS,
+                        dest="plat_names",
                         help="Android target platforms")
 
     parser.add_argument("-v", "--verbose", help="run in verbose mode", action="store_const",
@@ -207,20 +216,9 @@ if __name__ == "__main__":
     templates_path = Path(__file__).parent / "templates"
 
     for plat_name in plat_names:
-        # for armv7a the API level dependent binaries like clang are named
-        # armv7a-linux-androideabi27-clang, as opposed to other platforms which
-        # are named like x86_64-linux-android27-clang
-        platform_data = None
-        if plat_name == "armv7a":
-            platform_data = PlatformData("armv7a", api_level, "armeabi-v7a", "armv7",
-                                         "armv7", "32")
-        elif plat_name == "aarch64":
-            platform_data = PlatformData("aarch64", api_level, "arm64-v8a", "arm64_v8a", "armv8-a",
-                                         "64")
-        elif plat_name == "i686":
-            platform_data = PlatformData("i686", api_level, "x86", "x86", "i686", "32")
-        else:  # plat_name is x86_64
-            platform_data = PlatformData("x86_64", api_level, "x86_64", "x86_64", "x86-64", "64")
+        android_abi, qt_plat_name, gcc_march, plat_bits = _PLATFORM_DATA[plat_name]
+        platform_data = PlatformData(plat_name, api_level, android_abi,
+                                     qt_plat_name, gcc_march, plat_bits)
 
         # python path is valid, if Python for android installation exists in python_path
         python_path = (pyside6_deploy_cache

@@ -11,6 +11,7 @@ from zipfile import ZipFile
 from jinja2 import Environment, FileSystemLoader
 
 from .. import run_command
+from .android_utilities import SUPPORTED_ANDROID_PLATFORMS
 
 
 @dataclass
@@ -93,7 +94,7 @@ def get_wheel_android_arch(wheel: Path):
     '''
     Get android architecture from wheel
     '''
-    supported_archs = ["aarch64", "armv7a", "i686", "x86_64"]
+    supported_archs = SUPPORTED_ANDROID_PLATFORMS
     for arch in supported_archs:
         if arch in wheel.stem:
             return arch

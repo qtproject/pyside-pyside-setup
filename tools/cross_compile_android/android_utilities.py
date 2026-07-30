@@ -21,6 +21,10 @@ DEFAULT_SDK_TAG = 14742923
 ANDROID_NDK_VERSION = "27c"
 ANDROID_NDK_VERSION_NUMBER_SUFFIX = "12479018"
 
+# CPython supports only these two Android ABIs. See HOSTS in CPython's
+# Android/android.py. 32-bit Android is not a supported CPython target.
+SUPPORTED_ANDROID_PLATFORMS = ["aarch64", "x86_64"]
+
 # Official SHA-1 checksums for the pinned NDK/SDK versions.
 _NDK_SHA1: dict[str, str] = {
     "linux": "090e8083a715fdb1a3e402d0763c388abb03fb4e",

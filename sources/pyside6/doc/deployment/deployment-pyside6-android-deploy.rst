@@ -4,7 +4,7 @@ pyside6-android-deploy: the Android deployment tool for Qt for Python
 #####################################################################
 
 ``pyside6-android-deploy`` is an easy-to-use tool for deploying PySide6 applications to different
-Android architectures, namely *arm64-v8a, x86_64, x86 and armeabi-v7a*. This tool works similarly to
+Android architectures, namely *arm64-v8a* and *x86_64*. This tool works similarly to
 the ``pyside6-deploy`` tool and uses the same configuration file ``pysidedeploy.spec`` as
 ``pyside6-deploy`` to configure the deployment process. Using the deployment configuration
 options either from the command line or from ``pysidedeploy.spec``, ``pyside6-android-deploy``
@@ -14,10 +14,6 @@ applications to Android.
 The final output is a `.apk` or a `.aab` file created within the project's source directory. The
 `mode` option specified under the :ref:`buildozer <buildozer_key>` key in ``pysidedeploy.spec``
 determines whether a `.apk` or a `.aab` is created.
-
-.. warning:: Currently, users are required to cross-compile Qt for Python to generate the wheels
-    required for `armeabi-v7a` and `x86` Android platforms. Instructions on cross-compiling
-    Qt for Python for Android can be found :ref:`here <cross_compile_android>`.
 
 .. note:: ``pyside6-android-deploy`` only works with a Unix (Linux or macOS) host at the moment.
 
@@ -201,8 +197,8 @@ The relevant parameters for ``pyside6-android-deploy`` are:
   * ``local_libs``: Specifies non-Qt plugins or other libraries compatible with the Android target
     to be loaded by the Android runtime on startup.
   * ``sdk_path``: Specifies the path to the Android SDK used for packaging the application.
-  * ``arch``: Specifies the target architecture's instruction set. This option take one of the four
-    values - *aarch64, armv7a, i686, x86_64*.
+  * ``arch``: Specifies the target architecture's instruction set. This option takes one of the
+    values - *aarch64, x86_64*.
 
 Command Line Options
 ====================

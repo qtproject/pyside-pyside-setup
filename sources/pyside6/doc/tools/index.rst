@@ -197,7 +197,7 @@ Deployment
         :link-type: ref
 
         to deploy PySide6 application as an Android app targeting different
-        Android platforms - aarch64, armv7a, i686, x86_64.
+        Android platforms - aarch64, x86_64.
 
 Shader Tools
 ~~~~~~~~~~~~

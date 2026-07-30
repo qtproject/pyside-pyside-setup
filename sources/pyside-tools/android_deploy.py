@@ -37,7 +37,7 @@ from deploy_lib.android.buildozer import Buildozer
 
     Prerequisities: Python main entrypoint file should be named "main.py"
 
-    Platforms Supported: aarch64, armv7a, i686, x86_64
+    Platforms Supported: aarch64, x86_64
 
     Config file:
         On the first run of the tool, it creates a config file called pysidedeploy.spec which

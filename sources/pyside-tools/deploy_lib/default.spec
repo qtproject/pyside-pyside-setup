@@ -94,5 +94,5 @@ sdk_path =
 local_libs =
 
 # Architecture of deployed platform
-# Possible values: ["aarch64", "armv7a", "i686", "x86_64"]
+# Possible values: ["aarch64", "x86_64"]
 arch =
