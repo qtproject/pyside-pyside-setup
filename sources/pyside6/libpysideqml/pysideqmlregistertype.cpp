@@ -42,7 +42,10 @@ using namespace Qt::StringLiterals;
 
 static PySide::Qml::QuickRegisterItemFunction quickRegisterItemFunction = nullptr;
 
-static const auto qmlElementKey = "QML.Element"_ba;
+static inline QByteArray qmlElementKey()
+{
+    return "QML.Element"_ba;
+}
 
 static void createInto(void *memory, void *type)
 {
@@ -300,7 +303,7 @@ int qmlRegisterType(PyObject *pyObj, const char *uri, int versionMajor, int vers
     // PYSIDE-2709: Use a separate QMetaObject for the class information
     // as modifying metaObject breaks inheritance.
     QMetaObjectBuilder classInfobuilder(&QObject::staticMetaObject);
-    classInfobuilder.addClassInfo(qmlElementKey, qmlName);
+    classInfobuilder.addClassInfo(qmlElementKey(), qmlName);
     if (!creatable)
         setUncreatableClassInfo(&classInfobuilder, noCreationReason);
     auto *classInfoMetaObject = classInfobuilder.toMetaObject();
@@ -630,7 +633,7 @@ int qmlRegisterSingletonInstance(PyObject *pyObj, const char *uri, int versionMa
                                  PyObject *instanceObject)
 {
     auto *type = checkTypeObject(pyObj, "qmlRegisterSingletonInstance()");
-    if (type == nullptr || !setClassInfo(type, qmlElementKey, qmlName)
+    if (type == nullptr || !setClassInfo(type, qmlElementKey(), qmlName)
         || !setSingletonClassInfo(type)) {
         return -1;
     }
@@ -687,7 +690,7 @@ PyObject *qmlElementMacro(PyObject *pyObj, const char *decoratorName,
         return nullptr;
     }
 
-    if (!setClassInfo(pyObjType, qmlElementKey, typeName))
+    if (!setClassInfo(pyObjType, qmlElementKey(), typeName))
         return nullptr;
 
     RegisterMode mode = RegisterMode::Normal;
