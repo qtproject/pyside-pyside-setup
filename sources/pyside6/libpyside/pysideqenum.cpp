@@ -17,8 +17,9 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qlist.h>
 
-#include <map>
 #include <cstring>
+#include <map>
+#include <utility>
 
 ///////////////////////////////////////////////////////////////
 //
@@ -165,7 +166,13 @@ QMetaType createEnumMetaTypeHelper(const QByteArray &name)
 
 namespace PySide::QEnum {
 
-static std::map<int, PyObject *> enumCollector;
+using EnumCollector = std::map<int, PyObject *>;
+
+static EnumCollector &getEnumCollector()
+{
+    static EnumCollector result;
+    return result;
+}
 
 int isFlag(PyObject *obType)
 {
@@ -220,8 +227,11 @@ PyObject *QEnumMacro(PyObject *pyenum, bool flag)
         return nullptr;
     // Handle the rest via line number and the meta class.
     Py_INCREF(pyenum);
-    Py_XDECREF(enumCollector[lineno]);
-    enumCollector[lineno] = pyenum;
+    auto &enumCollector = getEnumCollector();
+    if (auto it = enumCollector.find(lineno); it != enumCollector.end())
+        Py_XDECREF(std::exchange(it->second, pyenum));
+    else
+        enumCollector.insert({lineno, pyenum});
     Py_RETURN_NONE;
 }
 
@@ -233,6 +243,7 @@ std::vector<PyObject *> resolveDelayedQEnums(PyTypeObject *containerType)
      * MetaObjectBuilderPrivate::parsePythonType and resolves the collected
      * Python Enum arguments. The result is then registered.
      */
+    auto &enumCollector = getEnumCollector();
     if (enumCollector.empty())
         return {};
     auto *obContainerType = reinterpret_cast<PyObject *>(containerType);
