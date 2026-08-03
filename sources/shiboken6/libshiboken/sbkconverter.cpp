@@ -581,13 +581,20 @@ static std::string getRealTypeName(const std::string &typeName)
 //              The resulting list must be reset after each new import,
 //              because that can change results. Also clear the cache after
 //              reaching some threashold.
-static std::unordered_set<std::string> nonExistingTypeNames{};
+using NonExistingTypeNames = std::unordered_set<std::string>;
+
+static NonExistingTypeNames &getNonExistingTypeNames()
+{
+    static NonExistingTypeNames result;
+    return result;
+}
 
 // Arbitrary size limit to prevent random name overflows.
 static constexpr std::size_t negativeCacheLimit = 50;
 
 static void rememberAsNonexistent(const std::string &typeName)
 {
+    auto &nonExistingTypeNames = getNonExistingTypeNames();
     if (nonExistingTypeNames.size() > negativeCacheLimit)
         clearNegativeLazyCache();
     converters.insert(std::make_pair(typeName, nullptr));
@@ -620,6 +627,7 @@ SbkConverter *getConverter(const char *typeNameC)
 
 void clearNegativeLazyCache()
 {
+    auto &nonExistingTypeNames = getNonExistingTypeNames();
     for (const auto &typeName : nonExistingTypeNames) {
         auto it = converters.find(typeName);
         converters.erase(it);
