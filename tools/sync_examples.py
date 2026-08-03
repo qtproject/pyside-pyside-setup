@@ -45,7 +45,9 @@ EXAMPLE_MAPPING = {
                          "quick/scenegraph/scenegraph_customgeometry",
                          "quick/customitems/painteditem",
                          "quickcontrols/filesystemexplorer", "quickcontrols/gallery",
-                         "stylekit/stylekitcontrols"]),
+                         "stylekit/stylekitcontrols",
+                         "stylekit/stylekitcustomdelegates",
+                         "stylekit/stylekitwidgets"]),
     "qtgraphs": ["graphs/2d/hellographs", "graphs/3d/bars", "graphs/3d/widgetgraphgallery"],
     "qtlocation": ["location/mapviewer"],
     "qtmultimedia": ["multimedia/camera"],
@@ -120,6 +122,8 @@ def detect_qml_module(pyside_example, sources):
         return "OSMBuildings"
     if pyside_example.name == "stylekitcontrols":
         return "StyleKitControlsExample"
+    if pyside_example.name == "stylekitcustomdelegates":
+        return "StyleKitCustomExampleModule"
     qml_dir_file = None
     for source in sources:
         if source.name.startswith("qmldir"):  # "qmldir"/"qmldir.in"
