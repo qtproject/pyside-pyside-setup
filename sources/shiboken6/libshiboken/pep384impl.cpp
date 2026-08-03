@@ -990,7 +990,14 @@ void PepType_SOTP_delete(PyTypeObject *type)
 /*
  * SbkEnumType extender
  */
-static std::unordered_map<SbkEnumType *, SbkEnumTypePrivate> SETP_extender{};
+using SETP_Extender = std::unordered_map<SbkEnumType *, SbkEnumTypePrivate>;
+
+static SETP_Extender &getSETP_extender()
+{
+    static SETP_Extender result;
+    return result;
+}
+
 static thread_local SbkEnumType *SETP_key{};
 static thread_local SbkEnumTypePrivate *SETP_value{};
 
@@ -999,6 +1006,7 @@ SbkEnumTypePrivate *PepType_SETP(SbkEnumType *enumType)
     // PYSIDE-2230: This makes no sense at all for Enum types.
     if (enumType == SETP_key)
         return SETP_value;
+    auto &SETP_extender = getSETP_extender();
     auto it = SETP_extender.find(enumType);
     if (it == SETP_extender.end())
         it = SETP_extender.insert({enumType, SbkEnumTypePrivate{nullptr, nullptr}}).first;
@@ -1009,7 +1017,7 @@ SbkEnumTypePrivate *PepType_SETP(SbkEnumType *enumType)
 
 void PepType_SETP_delete(SbkEnumType *enumType)
 {
-    SETP_extender.erase(enumType);
+    getSETP_extender().erase(enumType);
     SETP_key = nullptr;
 }
 
