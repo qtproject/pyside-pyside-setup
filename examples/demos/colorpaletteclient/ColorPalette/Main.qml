@@ -10,6 +10,8 @@ Window {
     id: window
     width: 500
     height: 400
+    minimumWidth: 500
+    minimumHeight: 400
     visible: true
     title: qsTr("Color Palette Client")
 

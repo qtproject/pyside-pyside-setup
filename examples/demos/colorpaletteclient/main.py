@@ -12,6 +12,7 @@ from pathlib import Path
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QIcon, QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtQuickControls2 import QQuickStyle
 
 from basiclogin import BasicLogin  # noqa: F401
 from paginatedresource import PaginatedResource  # noqa: F401
@@ -26,6 +27,8 @@ if __name__ == "__main__":
 
     app = QGuiApplication(sys.argv)
     QIcon.setThemeName("colorpaletteclient")
+
+    QQuickStyle.setStyle("Fusion")
 
     engine = QQmlApplicationEngine()
     engine.setInitialProperties({"serverUrl": QUrl.fromUserInput(url)})
