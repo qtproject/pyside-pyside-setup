@@ -2115,16 +2115,13 @@ if (!PyCallable_Check(callable)) {
 // object
 int count = 0;
 PyObject* fc = nullptr;
-bool classMethod = false;
-Shiboken::AutoDecRef func_ob(PyObject_GetAttr(callable, Shiboken::PyMagicName::func()));
-
-if (func_ob.isNull() && PyObject_HasAttr(callable, Shiboken::PyMagicName::code())) {
+const bool classMethod = PyObject_HasAttr(callable, Shiboken::PyMagicName::func());
+if (classMethod) {
+    Shiboken::AutoDecRef func_ob(PyObject_GetAttr(callable, Shiboken::PyMagicName::func()));
+    fc = PyObject_GetAttr(func_ob, Shiboken::PyMagicName::code());
+} else if (PyObject_HasAttr(callable, Shiboken::PyMagicName::code())) {
     // variable `callable` is a function
     fc = PyObject_GetAttr(callable, Shiboken::PyMagicName::code());
-} else {
-    // variable `callable` is a class method
-    fc = PyObject_GetAttr(func_ob, Shiboken::PyMagicName::code());
-    classMethod = true;
 }
 
 if (fc) {
