@@ -61,6 +61,7 @@ set(QtQml_deps
 set(QtQml_libraries
     PySide6::pyside6qml
     Qt::CorePrivate
+    Qt::QmlIntegration
     Qt::Qml
 )
 
