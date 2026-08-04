@@ -170,6 +170,13 @@ instructions:
          equals_value: Windows
     - type: PrependToEnvironmentVariable
       variableName: PATH
+      variableValue: "{{ index .Env \"PYTHON3.10.0-64_PATH\"}}\\Scripts;"
+      enable_if:
+         condition: property
+         property: host.os
+         equals_value: Windows
+    - type: PrependToEnvironmentVariable
+      variableName: PATH
       variableValue: "/Users/qt/.local/bin/:"
       enable_if:
          condition: property
