@@ -1,0 +1,117 @@
+Qt for Python 6.12.0 is a minor release.
+
+For more details, refer to the online documentation included in this
+distribution. The documentation is also available online:
+
+https://doc.qt.io/qtforpython/
+
+Some of the changes listed in this file include issue tracking numbers
+corresponding to tasks in the Qt Bug Tracker:
+
+https://bugreports.qt.io/
+
+Each of these identifiers can be entered in the bug tracker to obtain more
+information about a particular change.
+
+****************************************************************************
+*                                  PySide6                                 *
+****************************************************************************
+
+ - [PYSIDE-3302] QtQmlFeatures, a new module providing reactive QObject
+                 properties through @auto_properties, @watch, @effect, and
+                 @computed, has been added.
+ - [PYSIDE-3294] QMetaObject::className() now returns qualified names for
+                 nested classes, separated by dots ("Outer.Inner").
+ - [PYSIDE-1612] Deployment: pyside6-deploy now supports a
+                 [tool.pyside6.deploy] section in the pyproject.toml file.
+ - [PYSIDE-1612] Deployment: pyside6-deploy, pyside6-android-deploy, and
+                 pyside6-project deploy now accept --no-install to skip
+                 automatic build-dependency installation.
+ - [PYSIDE-3459] Deployment: pyside6-deploy now creates standalone
+                 packages by default; use --onefile to retain the former
+                 default.
+ - [PYSIDE-1612] cross_compile_android: JDK lookup and NDK quarantine on
+                 macOS have been fixed.
+ - [PYSIDE-1612] Android Deployment: The NDK version in the tool has been
+                 updated to r28c. The limited API wheel tag has been raised
+                 to cp310.
+ - [PYSIDE-3425] Android Deployment now supports host Python versions 3.10
+                 through 3.14 and produces binaries compatible with Android
+                 devices using 16 KB memory pages.
+ - [PYSIDE-3425] Android Deployment now reports unmet prerequisites instead
+                 of hanging and reliably deploys applications using
+                 QtQmlFeatures.
+ - [PYSIDE-3038] Type hints: QDate and QDateTime have been fixed to accept
+                 Python datetime types.
+ - [PYSIDE-3221] Initial support for Python 3.15 has been added.
+ - [PYSIDE-3276] The stylekit examples have been updated for 6.12.
+ - [PYSIDE-3301] The colorpaletteclient example has been updated
+                 and a small server has been added.
+ - [PYSIDE-3301] Object list model example: Use @auto_properties and @watch
+ - [PYSIDE-3306] CMake build: Regressions affecting header packaging and
+                 include paths have been fixed.
+ - [PYSIDE-3314] Support for iOS has been added.
+ - [PYSIDE-3319] Security: A potential zip slip in Android deploy wheel
+                 extraction has been fixed.
+ - [PYSIDE-3319] Security: Android Deployment now verifies downloaded NDK
+                 and command-line tools before extracting them.
+ - [PYSIDE-3319] Security: pyside6-qml now warns before importing Python
+                 files adjacent to the QML source.
+ - [PYSIDE-3320] Security: A potential shell injection in pyside6-deploy
+                 on Windows has been fixed.
+ - [PYSIDE-3331] Security: Deserialization of non-trivial classes from
+                 QDataStream/QSettings is now blocked.
+ - [PYSIDE-3334] Security: Qt Widgets Designer will now request a
+                 one-time confirmation for loading Python plugins.
+ - [PYSIDE-3335] QBitArray.fromBits(PyBuffer)/QBitArray.bits() have been
+                 added.
+ - [PYSIDE-3338] Type hints: The __copy__ return type annotation has been
+                 fixed.
+ - [PYSIDE-3359] Security: QUiLoader::loadUiType() no longer searches the
+                 pyside6-uic binary in the path. This now requires an
+                 explicit opt-in via a keyword argument and will trigger
+                 a warning.
+                 We generally recommend moving away from the function in
+                 favor of using pyside6-uic at build time.
+ - [PYSIDE-3364] A warning when encountering an unknown signal parameter
+                 has been added.
+ - [PYSIDE-3365] QStandardItemModel: A memory leak when using clear()
+                 after populating using invisibleRootItem() has been fixed.
+ - [PYSIDE-3366] SBOM documents have been added. (todo done?)
+ - [PYSIDE-3367] The copy constructors of QTree/Table/ListWidgetItem
+                 have been removed.
+ - [PYSIDE-3374] Issues occuring when registering QML singletons after
+                 creating the QQmlEngine have been fixed.
+ - [PYSIDE-3376] A bug affecting connections to private methods (prefixed
+                 by "__") when invoked by derived classes has been fixed.
+ - [PYSIDE-3409] A crash retrieving the wrapper for
+                 QtWebEngineCore.ResourceRequestBody has been fixed.
+ - [PYSIDE-3423] A crash returning a class implementing the sequence
+                 protocol from QAbstractItemModel.data() has been fixed.
+ - [PYSIDE-3426] Android: The prebuilt CPython is now being used, replacing
+                 manual cross-compilation.
+ - [PYSIDE-3469] A crash caused by stale pointers to QLayoutItem instances
+                 due to incorrect parenting has been fixed.
+
+****************************************************************************
+*                                  Shiboken6                               *
+****************************************************************************
+
+ - [PYSIDE-2221] A type system attribute for GIL usage in Free Threaded
+                 builds has been added.
+ - [PYSIDE-3155] Multiphase module initialization code is now generated
+                 also for the deployed case after a related Nuitka bug has
+                 been fixed.
+ - [PYSIDE-3221] The new module initialization code is now generated
+                 within conditionals for Python 3.15.
+ - [PYSIDE-3336] The __module__ attribute of the ObjectType/Object
+                 types of shiboken6 has been fixed.
+ - [PYSIDE-3356] Blocking functions (like QEventLoop.exec()) can now
+                 be indicated by a functions modification.
+ - [PYSIDE-3396] Security: When generating doxygen documentation, XML is now
+                 parsed with option XML_PARSE_NO_XXE for libxml >= 2.13.
+                 Expanding entities is disabled for older libxml versions.
+ - [PYSIDE-3469] shibokenmodule: A recursive version of the dump() function
+                 has been added, allowing for inspecting parent/child
+                 relationships.
+
