@@ -387,7 +387,7 @@ instructions:
           conditions:
           - condition: property
             property: host.osVersion
-            equals_value: MacOS_15
+            in_values: [MacOS_15, MacOS_26]
           - condition: property
             property: host.arch
             equals_value: ARM64
@@ -401,7 +401,7 @@ instructions:
           conditions:
           - condition: property
             property: host.osVersion
-            equals_value: MacOS_15
+            in_values: [MacOS_15, MacOS_26]
           - condition: property
             property: host.arch
             equals_value: ARM64
@@ -413,7 +413,7 @@ instructions:
           conditions:
           - condition: property
             property: host.osVersion
-            equals_value: MacOS_15
+            in_values: [MacOS_15, MacOS_26]
           - condition: property
             property: host.arch
             equals_value: ARM64
