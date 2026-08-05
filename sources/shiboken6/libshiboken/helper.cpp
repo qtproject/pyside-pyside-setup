@@ -171,10 +171,10 @@ static void formatPyTuple(PyObject *obj, std::ostream &str)
         if (i)
             str << ", ";
         str << '(';
+        // PyTuple_GetItem returns a borrowed reference; must not be decremented.
         PyObject *item = PyTuple_GetItem(obj, i);
         formatPyObject(item, str);
         str << ')';
-        Py_XDECREF(item);
     }
     str << '>';
 }
