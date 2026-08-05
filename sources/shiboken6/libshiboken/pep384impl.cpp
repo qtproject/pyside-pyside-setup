@@ -772,7 +772,10 @@ PepRun_GetResult(const char *command)
     builtins.reset(nullptr);
 
     PyObject *v = PyRun_String(command, Py_file_input, d, d);
+    // PyDict_GetItem returns a borrowed reference owned by d; increment before
+    // releasing d so the returned pointer remains valid.
     PyObject *res = v ? PyDict_GetItem(d, Shiboken::PyName::result()) : nullptr;
+    Py_XINCREF(res);
     Py_XDECREF(v);
     Py_DECREF(d);
     return res;
