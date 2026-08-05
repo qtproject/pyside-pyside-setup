@@ -34,7 +34,8 @@ class _U(_P.Unpickler):
 def _safe_loads(d): return _U(_I.BytesIO(d)).load()
 )";
     Shiboken::AutoDecRef ns(PyDict_New());
-    PyDict_SetItemString(ns, "__builtins__", PyEval_GetBuiltins());
+    Shiboken::AutoDecRef builtins(PepEval_GetFrameBuiltins());
+    PyDict_SetItemString(ns, "__builtins__", builtins.object());
     Shiboken::AutoDecRef result(PyRun_String(code, Py_file_input, ns, ns));
     if (result.isNull()) {
         PyErr_Print();
