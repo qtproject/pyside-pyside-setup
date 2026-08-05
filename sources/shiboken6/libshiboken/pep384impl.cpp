@@ -1068,6 +1068,9 @@ PyObject *PepType_GetDict(PyTypeObject *type)
 int PepType_SetDict(PyTypeObject *type, PyObject *dict)
 {
     type->tp_dict = dict;
+    // Invalidate the per-type attribute cache so Python 3.12+ specialised
+    // bytecode does not continue serving stale lookups from the old dict.
+    PyType_Modified(type);
     return 0;
 }
 
