@@ -51,6 +51,7 @@ using namespace Qt::StringLiterals;
 constexpr auto allowThreadAttribute = "allow-thread"_L1;
 constexpr auto checkFunctionAttribute = "check-function"_L1;
 constexpr auto defaultConstructibleAttribute = "default-constructible"_L1;
+constexpr auto destructibleAttribute = "destructible"_L1;
 constexpr auto copyableAttribute = "copyable"_L1;
 constexpr auto smartPointerToPythonConversionAttribute = "to-python"_L1;
 constexpr auto movableAttribute = "movable"_L1;
@@ -1391,6 +1392,11 @@ bool TypeSystemParser::applyCppAttributes(const ConditionalStreamReader &reader,
                                           movableAttribute, false);
             type->setMovableFlag(v ? TypeSystem::MovableFlag::Enabled
                                    : TypeSystem::MovableFlag::Disabled);
+        } else if (name == destructibleAttribute) {
+            const bool v = convertBoolean(attributes->takeAt(i).value(),
+                                          destructibleAttribute, false);
+            type->setDestructibleFlag(v ? TypeSystem::DestructibleFlag::Enabled
+                                      : TypeSystem::DestructibleFlag::Disabled);
         } else if (name == qtMetaTypeAttribute) {
             const auto attribute = attributes->takeAt(i);
             const auto qtMetaTypeOpt = qtMetaTypeFromAttribute(attribute.value());

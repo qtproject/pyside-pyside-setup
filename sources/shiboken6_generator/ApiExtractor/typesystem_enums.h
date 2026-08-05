@@ -144,6 +144,18 @@ enum class MovableFlag : unsigned char {
     Disabled
 };
 
+enum class DestructorType : unsigned char {
+    NoDestructor,
+    ProtectedDestructor,
+    PublicDestructor
+};
+
+enum class DestructibleFlag : unsigned char {
+    Unspecified,
+    Enabled,
+    Disabled
+};
+
 enum : int { OverloadNumberUnset = -1, OverloadNumberDefault = 99999 };
 
 } // namespace TypeSystem

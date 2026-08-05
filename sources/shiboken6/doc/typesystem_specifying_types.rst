@@ -411,6 +411,7 @@ node or other type nodes and may contain :ref:`add-function`, :ref:`add-pymethod
          default-constructible="yes | no"
          copyable="yes | no"
          movable="yes | no"
+         destructible="yes | no"
          allow-thread="..."
          disable-wrapper="yes | no"
          exception-handling="..."
@@ -447,6 +448,11 @@ operator; which is important for the copy conversion.
 
 The *optional* **movable** attribute is used to specify whether the type has a
 move constructor. The default is "yes"; there is no auto-detection.
+
+The *optional* **destructible** attribute is used to override the built-in
+(simple) detection of the destructibility. Unless :ref:`avoid-protected-hack`
+is given or mandated by the compiler, classes with protected destructors
+are considered destructible.
 
 The *optional* attribute **stream** specifies whether this type will be able to
 use externally defined operators, like QDataStream << and >>. If equals to **yes**,

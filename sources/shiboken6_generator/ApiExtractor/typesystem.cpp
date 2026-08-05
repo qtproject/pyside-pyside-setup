@@ -579,6 +579,8 @@ public:
     bool m_defaultConstructibleDetected = true;
     TypeSystem::MovableFlag m_movableFlag = TypeSystem::MovableFlag::Unspecified;
     bool m_movableDetected = true;
+    TypeSystem::DestructibleFlag m_destructibleFlag = TypeSystem::DestructibleFlag::Unspecified;
+    TypeSystem::DestructorType m_detectedDestructor = TypeSystem::DestructorType::PublicDestructor;
     TypeSystem::QtMetaTypeRegistration m_qtMetaTypeRegistration =
         TypeSystem::QtMetaTypeRegistration::Unspecified;
 };
@@ -708,6 +710,38 @@ bool CppTypeEntry::isMovable() const
         break;
     }
     return d->m_movableDetected;
+}
+
+TypeSystem::DestructorType CppTypeEntry::destructorType() const
+{
+    S_D(const CppTypeEntry);
+    switch (d->m_destructibleFlag) {
+    case TypeSystem::DestructibleFlag::Enabled:
+        return TypeSystem::DestructorType::PublicDestructor;
+    case TypeSystem::DestructibleFlag::Disabled:
+        return TypeSystem::DestructorType::ProtectedDestructor;
+    case TypeSystem::DestructibleFlag::Unspecified:
+        break;
+    }
+    return d->m_detectedDestructor;
+}
+
+TypeSystem::DestructibleFlag CppTypeEntry::destructibleFlag() const
+{
+    S_D(const CppTypeEntry);
+    return d->m_destructibleFlag;
+}
+
+void CppTypeEntry::setDestructibleFlag(TypeSystem::DestructibleFlag flag)
+{
+    S_D(CppTypeEntry);
+    d->m_destructibleFlag = flag;
+}
+
+void CppTypeEntry::setDetectedDestructorType(TypeSystem::DestructorType dt)
+{
+    S_D(CppTypeEntry);
+    d->m_detectedDestructor = dt;
 }
 
 TypeSystem::QtMetaTypeRegistration CppTypeEntry::qtMetaTypeRegistration() const
@@ -2398,6 +2432,7 @@ NamespaceTypeEntry::NamespaceTypeEntry(const QString &entryName, const QVersionN
 {
     S_D(NamespaceTypeEntry);
     d->m_copyableDetected = d->m_defaultConstructibleDetected = d->m_movableDetected = false;
+    d->m_detectedDestructor = TypeSystem::DestructorType::NoDestructor;
 }
 
 TypeEntry *NamespaceTypeEntry::clone() const
@@ -2710,6 +2745,8 @@ void CppTypeEntry::formatDebug(QDebug &debug) const
         debug << ", [copyable]";
     if (isMovable())
         debug << ", [movable]";
+    if (isDestructible())
+        debug << ", [destructible]";
 }
 
 void PrimitiveTypeEntry::formatDebug(QDebug &debug) const

@@ -1741,6 +1741,13 @@ void AbstractMetaClass::fixSpecialFunctions(const AbstractMetaClassPtr &klass,
         AbstractMetaClass::addDefaultCopyConstructor(klass);
     }
     typeEntry->setCopyableDetected(d->m_isCopyConstructible);
+    // Heuristic check for destructor err'ing on the true side (not considering bases/fields)
+    TypeSystem::DestructorType destructorType = TypeSystem::DestructorType::PublicDestructor;
+    if (d->m_hasDeletedDestructor|| d->m_hasPrivateDestructor)
+        destructorType = TypeSystem::DestructorType::NoDestructor;
+    else if (d->m_hasProtectedDestructor && avoidProtectedHack)
+        destructorType = TypeSystem::DestructorType::ProtectedDestructor;
+    typeEntry->setDetectedDestructorType(destructorType);
 }
 
 bool AbstractMetaClass::needsInheritanceSetup() const
