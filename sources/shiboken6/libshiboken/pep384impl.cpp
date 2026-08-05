@@ -838,10 +838,16 @@ PyObject *_Pep_TypePrivateMangle(PyTypeObject *obType, PyObject *name)
         return nullptr;
     /* ident = "_" + priv[ipriv:] + ident # i.e. 1+plen+nlen bytes */
     resbuf[0] = '_';
-    if (PyUnicode_AsWideChar(privateobj, resbuf + 1, ipriv + plen) < 0)
+    if (PyUnicode_AsWideChar(privateobj, resbuf + 1, ipriv + plen) < 0) {
+        if (amount > big_stack)
+            free(resbuf);
         return nullptr;
-    if (PyUnicode_AsWideChar(name, resbuf + ipriv + plen + 1, nlen) < 0)
+    }
+    if (PyUnicode_AsWideChar(name, resbuf + ipriv + plen + 1, nlen) < 0) {
+        if (amount > big_stack)
+            free(resbuf);
         return nullptr;
+    }
     PyObject *result = PyUnicode_FromWideChar(resbuf + ipriv, 1 + plen + nlen);
     if (amount > big_stack)
         free(resbuf);
