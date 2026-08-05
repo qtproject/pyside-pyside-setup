@@ -2205,6 +2205,8 @@ AbstractMetaFunctionPtr
         case CodeModel::MoveAssignmentOperator:
             currentClass->setHasDeletedMoveAssignmentOperator(true);
             break;
+        case CodeModel::Destructor:
+            currentClass->setHasDeletedDestructor(true);
         default:
             break;
         }

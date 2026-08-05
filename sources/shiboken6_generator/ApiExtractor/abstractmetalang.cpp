@@ -47,6 +47,7 @@ public:
           m_hasDeletedMoveConstructor(false),
           m_hasDeletedAssigmentOperator(false),
           m_hasDeletedMoveAssigmentOperator(false),
+          m_hasDeletedDestructor(false),
           m_isDefaultConstructible(false),
           m_isCopyConstructible(false),
           m_functionsFixed(false),
@@ -91,6 +92,7 @@ public:
     uint m_hasDeletedMoveConstructor : 1;
     uint m_hasDeletedAssigmentOperator : 1;
     uint m_hasDeletedMoveAssigmentOperator : 1;
+    uint m_hasDeletedDestructor : 1;
     uint m_isDefaultConstructible : 1;
     uint m_isCopyConstructible : 1;
     uint m_functionsFixed : 1;
@@ -1038,6 +1040,16 @@ void AbstractMetaClass::setHasProtectedDestructor(bool value)
     d->m_hasProtectedDestructor = value;
 }
 
+bool AbstractMetaClass::hasDeletedDestructor() const
+{
+    return d->m_hasDeletedDestructor;
+}
+
+void AbstractMetaClass::setHasDeletedDestructor(bool value)
+{
+    d->m_hasDeletedDestructor = value;
+}
+
 bool AbstractMetaClass::hasVirtualDestructor() const
 {
     return d->m_hasVirtualDestructor;
@@ -1938,6 +1950,8 @@ void AbstractMetaClass::format(QDebug &debug) const
         debug << " [deleted assignment]";
     if (d->m_hasDeletedMoveAssigmentOperator)
         debug << " [deleted move assignment]";
+    if (d->m_hasDeletedDestructor)
+        debug << " [deleted destructor]";
     if (!d->m_baseClasses.isEmpty()) {
         debug << ", inherits ";
         for (const auto &b : std::as_const(d->m_baseClasses))

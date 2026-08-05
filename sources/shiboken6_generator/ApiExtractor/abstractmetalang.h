@@ -123,6 +123,9 @@ public:
     bool hasProtectedDestructor() const;
     void setHasProtectedDestructor(bool value);
 
+    bool hasDeletedDestructor() const;
+    void setHasDeletedDestructor(bool value);
+
     bool hasVirtualDestructor() const;
     void setHasVirtualDestructor(bool value);
 
