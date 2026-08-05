@@ -219,6 +219,11 @@ PyObject *methodGetAttr(PyObject *self, PyObject *name)
         if (candidate != &PyBaseObject_Type) {
             PyErr_Clear();
             Shiboken::AutoDecRef mangledName(_Pep_TypePrivateMangle(candidate, name));
+            // _Pep_TypePrivateMangle can return nullptr on malloc or unicode failure.
+            if (mangledName.isNull()) {
+                PyErr_Clear();
+                break;
+            }
             result = PyObject_GetAttr(self, mangledName.object());
             if (result != nullptr)
                 break;
