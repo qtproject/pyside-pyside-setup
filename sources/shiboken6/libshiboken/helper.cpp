@@ -128,11 +128,13 @@ static void formatTypeTuple(PyObject *t, const char *what, std::ostream &str)
         for (Py_ssize_t i = 0; i < size; ++i) {
             if (i != 0)
                 str << ", ";
-            Shiboken::AutoDecRef item(PyTuple_GetItem(t, i));
-            if (item.isNull()) {
+            // PyTuple_GetItem returns a borrowed reference; AutoDecRef must not be used
+            // here as it would decrement the refcount of an object still owned by the tuple.
+            PyObject *item = PyTuple_GetItem(t, i);
+            if (item == nullptr) {
                 str << '0'; // Observed with non-ready types
             } else {
-                str << '"' << PepType_GetFullyQualifiedNameStr(reinterpret_cast<PyTypeObject *>(item.object()))
+                str << '"' << PepType_GetFullyQualifiedNameStr(reinterpret_cast<PyTypeObject *>(item))
                     << '"';
             }
         }
