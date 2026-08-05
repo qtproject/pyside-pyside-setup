@@ -733,12 +733,12 @@ Pep_GetPartialFunction(void)
         Py_INCREF(result);
         return result;
     }
-    auto *functools = PyImport_ImportModule("_functools");
-    if (!functools) {
+    Shiboken::AutoDecRef functools(PyImport_ImportModule("_functools"));
+    if (functools.isNull()) {
         PyErr_Clear();
-        functools = PyImport_ImportModule("functools");
+        functools.reset(PyImport_ImportModule("functools"));
     }
-    if (!functools)
+    if (functools.isNull())
         Py_FatalError("libshiboken: functools cannot be found");
     result = PyObject_GetAttrString(functools, "partial");
     if (!result || !PyCallable_Check(result))
