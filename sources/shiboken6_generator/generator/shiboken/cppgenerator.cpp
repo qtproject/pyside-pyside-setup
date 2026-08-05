@@ -684,6 +684,11 @@ static void warnAboutTypes(const AbstractMetaClassCPtr &metaClass)
     }
 }
 
+static bool isProtectedField(const AbstractMetaField &field)
+{
+    return field.isProtected();
+}
+
 /// Function used to write the class generated binding code on the buffer
 /// \param s the output buffer
 /// \param classContext the pointer to metaclass information
@@ -919,8 +924,14 @@ void CppGenerator::generateClass(TextStream &s,
     }
 
     if (shouldGenerateGetSetList(metaClass)) {
-        const AbstractMetaFieldList &fields = metaClass->fields();
-        for (const AbstractMetaField &metaField : fields) {
+        AbstractMetaFieldList fields = metaClass->fields();
+        // If there is no wrapper, no protected fields can be generated.
+        const bool generateProtectedFields = !avoidProtectedHack() || classContext.useWrapper();
+        if (!generateProtectedFields) {
+            fields.erase(std::remove_if(fields.begin(), fields.end(), isProtectedField),
+                         fields.end());
+        }
+        for (const AbstractMetaField &metaField : std::as_const(fields)) {
             if (metaField.canGenerateGetter())
                 writeGetterFunction(s, metaField, classContext);
             if (metaField.canGenerateSetter())
@@ -939,7 +950,7 @@ void CppGenerator::generateClass(TextStream &s,
         s << "// Getters and Setters for " << metaClass->name() << '\n';
         s << "static PyGetSetDef " << cpythonGettersSettersDefinitionName(metaClass)
             << "[] = {\n" << indent;
-        for (const AbstractMetaField &metaField : fields) {
+        for (const AbstractMetaField &metaField : std::as_const(fields)) {
             const bool canGenerateGetter = metaField.canGenerateGetter();
             const bool canGenerateSetter = metaField.canGenerateSetter();
             if (canGenerateGetter || canGenerateSetter) {
