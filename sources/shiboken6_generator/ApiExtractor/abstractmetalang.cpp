@@ -1153,9 +1153,7 @@ static AbstractMetaClass::CppWrapper determineCppWrapper(const AbstractMetaClass
     }
 
 #ifndef Q_CC_MSVC
-    // PYSIDE-504: When C++ 11 is used, then the destructor must always be
-    // declared. Only MSVC can handle this, the others generate a link error.
-    // See also HeaderGenerator::generateClass().
+    // PYSIDE-504: See comment at HeaderGenerator::protectedHackDefine.
     if (metaClass->hasPrivateDestructor())
         return result;
 #endif

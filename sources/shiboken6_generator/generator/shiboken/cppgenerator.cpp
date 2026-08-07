@@ -778,6 +778,7 @@ void CppGenerator::generateClass(TextStream &s,
 
         if (shouldGenerateMetaObjectFunctions(metaClass))
             writeMetaObjectMethod(s, classContext);
+        // PYSIDE-504: See comment at HeaderGenerator::protectedHackDefine.
         if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor())
             writeDestructorNative(s, classContext);
     }

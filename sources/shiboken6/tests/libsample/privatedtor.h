@@ -23,7 +23,11 @@ public:
         return m_instantiations;
     }
 
+// PYSIDE-504: Force a wrapper when using --avoid-protected-hack.
+// This only works for MSVC (see comment at HeaderGenerator::protectedHackDefine)
+#ifdef _MSC_VER
 protected:
+#endif
     inline int protectedInstanceCalls() { return m_instantiations; }
 
 private:
