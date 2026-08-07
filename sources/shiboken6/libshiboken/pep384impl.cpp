@@ -956,7 +956,9 @@ static void *PepObject_GetTypeData(PyObject *obj, PyTypeObject *cls)
  * PyTypeObject extender
  */
 
+// AXIVION DISABLE Style Qt-NonPodGlobalStatic: STL container containing PODs
 static std::unordered_map<PyTypeObject *, SbkObjectTypePrivate > SOTP_extender{};
+// AXIVION ENABLE Style Qt-NonPodGlobalStatic
 static thread_local PyTypeObject *SOTP_key{};
 static thread_local SbkObjectTypePrivate *SOTP_value{};
 

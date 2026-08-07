@@ -25,7 +25,9 @@
 static SbkConverter **PrimitiveTypeConverters;
 
 using ConvertersMap = std::unordered_map<std::string, SbkConverter *>;
+// AXIVION DISABLE Style Qt-NonPodGlobalStatic: STL container containing STL type/POD
 static ConvertersMap converters;
+// AXIVION ENABLE Style Qt-NonPodGlobalStatic
 
 bool SbkObject_TypeCheck(PyTypeObject *tp, PyObject *ob)
 {
