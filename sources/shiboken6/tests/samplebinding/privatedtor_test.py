@@ -16,7 +16,7 @@ from shiboken_paths import init_paths
 init_paths()
 
 from shiboken6 import Shiboken
-from sample import PrivateDtor
+from sample import PrivateDtor, DeletedDtor
 
 
 class PrivateDtorTest(unittest.TestCase):
@@ -80,6 +80,10 @@ class PrivateDtorTest(unittest.TestCase):
         after = sys.getrefcount(PrivateDtor)
 
         self.assertLess(abs(before - after), 5)
+
+    def testDeletedDtor(self):
+        d = DeletedDtor()
+        self.assertEqual(d.value(), 42)
 
 
 if __name__ == '__main__':

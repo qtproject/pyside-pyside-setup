@@ -13,6 +13,7 @@ complex.cpp complex.h
 ctorconvrule.h
 ctparam.cpp ctparam.h
 cvlist.h
+deleteddtor.h
 derived.cpp derived.h
 derivedusingct.cpp derivedusingct.h
 echo.cpp echo.h

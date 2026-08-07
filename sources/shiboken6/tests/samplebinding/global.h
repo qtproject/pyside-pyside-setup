@@ -11,6 +11,7 @@
 #include "ctparam.h"
 #include "cvlist.h"
 #include "sbkdate.h"
+#include "deleteddtor.h"
 #include "derived.h"
 #include "derivedusingct.h"
 #include "echo.h"

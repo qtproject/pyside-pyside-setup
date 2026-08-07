@@ -73,11 +73,6 @@ TextStream &operator<<(TextStream &s, const IndexValue &iv)
     return s;
 }
 
-static bool alwaysGenerateDestructorDeclaration()
-{
-    return clang::optionsTriplet().compiler() == Compiler::Msvc;
-}
-
 // PYSIDE-504: The "protected hack" is the definition "#define protected public".
 // It makes protected methods accessible for wrapper generation (for example,
 // protected base class virtuals need to be called from overriding functions
@@ -321,16 +316,14 @@ void HeaderGenerator::writeSpecialFunctions(TextStream &s, const QString &wrappe
 
     // destructor
     // PYSIDE-504: When C++ 11 is used, then the destructor must always be declared.
-    if (!avoidProtectedHack() || !metaClass->hasPrivateDestructor()
-        || alwaysGenerateDestructorDeclaration()) {
-        if (avoidProtectedHack() && metaClass->hasPrivateDestructor())
-            s << "// C++11: need to declare (unimplemented) destructor because "
-                 "the base class destructor is private.\n";
-        s << '~' << wrapperName << "()";
-        if (metaClass->hasVirtualDestructor())
-            s << " override";
-        s << ";\n\n";
+    if (metaClass->typeEntry()->destructorType() == TypeSystem::DestructorType::NoDestructor) {
+        s << "// C++11: need to declare (unimplemented) destructor because "
+             "the base class destructor is inaccessible.\n";
     }
+    s << '~' << wrapperName << "()";
+    if (metaClass->hasVirtualDestructor())
+        s << " override";
+    s << ";\n\n";
 }
 
 void HeaderGenerator::writeProtectedEnums(TextStream &s,

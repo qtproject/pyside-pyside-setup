@@ -4,6 +4,7 @@
 
 #include "generatorargument.h"
 #include <abstractmetatype.h>
+#include <complextypeentry.h>
 #include <messages.h>
 #include <typesystem.h>
 
@@ -14,6 +15,12 @@ static bool isCppPrimitiveString(const AbstractMetaType &type)
 {
     return type.referenceType() == NoReference && type.indirections() == 1
         && AbstractMetaType::cppSignedCharTypes().contains(type.name());
+}
+
+static bool isDestructible(const TypeEntryCPtr &typeEntry)
+{
+    return !typeEntry->isComplex()
+           || std::static_pointer_cast<const ComplexTypeEntry>(typeEntry)->isDestructible();
 }
 
 GeneratorArgument GeneratorArgument::fromMetaType(const AbstractMetaType &type)
@@ -58,7 +65,7 @@ GeneratorArgument GeneratorArgument::fromMetaType(const AbstractMetaType &type)
     }
 
     if (result.type == Type::Other || result.type == Type::Primitive) {
-        if (type.valueTypeWithCopyConstructorOnlyPassed()) {
+        if (type.valueTypeWithCopyConstructorOnlyPassed() || !isDestructible(typeEntry)) {
             result.flags.setFlag(Flag::TreatAsPointer);
         } else if ((type.isObjectType() || type.isPointer())
                    && !type.isUserPrimitive() && !type.isExtendedCppPrimitive()) {

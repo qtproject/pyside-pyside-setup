@@ -1094,6 +1094,7 @@ bool AbstractMetaClass::canAddDefaultConstructor() const
         && !hasDeletedDefaultConstructor()
         && !attributes().testFlag(AbstractMetaClass::HasRejectedConstructor)
         && !hasPrivateDestructor()
+        && !hasDeletedDestructor()
         && !hasConstructors()
         && !hasPrivateConstructor() && d->isImplicitlyDefaultConstructible();
 }
@@ -1121,6 +1122,7 @@ bool AbstractMetaClass::canAddDefaultCopyConstructor() const
         && !hasDeletedMoveConstructor() && !hasMoveConstructor()
         && !hasDeletedMoveAssignmentOperator() && !hasMoveAssignmentOperator()
         && !hasPrivateDestructor()
+        && !hasDeletedDestructor()
         && !isAbstract()
         && d->isImplicitlyCopyConstructible();
 }
@@ -1166,7 +1168,7 @@ static AbstractMetaClass::CppWrapper determineCppWrapper(const AbstractMetaClass
 
 #ifndef Q_CC_MSVC
     // PYSIDE-504: See comment at HeaderGenerator::protectedHackDefine.
-    if (metaClass->hasPrivateDestructor())
+    if (metaClass->hasPrivateDestructor() || metaClass->hasDeletedDestructor())
         return result;
 #endif
 
