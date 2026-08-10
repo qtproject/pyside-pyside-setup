@@ -17,6 +17,12 @@ determines whether a `.apk` or a `.aab` is created.
 
 .. note:: ``pyside6-android-deploy`` only works with a Unix (Linux or macOS) host at the moment.
 
+.. note:: ``pyside6-android-deploy`` requires Python 3.10 or later on the
+   host. The Python that runs inside the deployed application is built by
+   `python-for-android`_ and is currently CPython 3.14. A JDK 17 or later
+   installation is required, because the Gradle version used by
+   `python-for-android`_ needs it.
+
 Prerequisites
 =============
 
@@ -50,19 +56,18 @@ The script will download the Android NDK and SDK packages required into your hom
 directory as a directory called ``.pyside6-android-deploy``. ``pyside6-android-deploy`` will
 automatically detect the NDK and SDK from this cache directory.
 
-If you want to try to download the NDK and SDK manually, you can do so from the following steps
-(for Qt 6.10):
+If you want to try to download the NDK and SDK manually, you can do so from the following steps:
 
 1. Download the sdkmanager using the instructions provided in the `Android Studio
    documentation <https://developer.android.com/studio/command-line/sdkmanager>`_.
 
-2. Using the sdkmanager download the following packages (for Qt 6.10)::
+2. Using the sdkmanager download the following packages::
 
-   "platform-tools", "platforms;android-34", "build-tools;35.0.0"
+   "platform-tools", "platforms;android-35", "build-tools;35.0.0"
 
-  and install the NDK using the following command (for Qt 6.10)::
+  and install the NDK using the following command::
 
-   "ndk;26.1.10909125"
+   "ndk;27.2.12479018"
 
 .. note:: The NDK version and the SDK packages required corresponds to the requirements from the
       Qt version you are using. See `Qt for Android <https://doc.qt.io/qt-6/android.html>`_ for more
@@ -147,7 +152,7 @@ The relevant parameters for ``pyside6-android-deploy`` are:
     outside the project directory so that ``pyside6-android-deploy`` does not try to package it
     as well.
   * ``android_packages``: The Python packages installed into the Python environment for deployment
-    to work. By default, the Python packages `buildozer`_ and `cpython`_ are installed.
+    to work. By default, the Python packages `buildozer`_ and `Cython`_ are installed.
 
 .. _qt_key:
 
@@ -196,9 +201,13 @@ The relevant parameters for ``pyside6-android-deploy`` are:
   * ``sdk_path``: Specifies the path to the Android SDK used for packaging the application.
   * ``local_libs``: Specifies non-Qt plugins or other libraries compatible with the Android target
     to be loaded by the Android runtime on startup.
-  * ``sdk_path``: Specifies the path to the Android SDK used for packaging the application.
   * ``arch``: Specifies the target architecture's instruction set. This option takes one of the
     values - *aarch64, x86_64*.
+
+.. note:: ``pyside6-android-deploy`` pins ``p4a.branch`` and ``p4a.commit`` in the generated
+   ``buildozer.spec``. That pin decides which CPython version `python-for-android`_ builds for
+   the device. Editing it by hand can produce an interpreter that does not match the Python
+   version the Android wheels were built against, which fails when the application starts.
 
 Command Line Options
 ====================
@@ -253,8 +262,12 @@ Cross-compile Qt for Python wheels for Android
 
 The cross-compilation of Qt for Python wheel for a specific Android target architecture needs to be
 done only once per Qt version, irrespective of the number of applications you are deploying.
-Currently, cross-compiling Qt for Python wheels only works with a Linux host. Follow these steps
-to cross-compile Qt for Python Android wheels.
+Currently, cross-compiling Qt for Python wheels only works with a Unix (Linux or macOS) host.
+Follow these steps to cross-compile Qt for Python Android wheels.
+
+The script does not build CPython. It downloads the official prebuilt CPython for Android from
+python.org and verifies it against a pinned SHA-256 checksum, so the host Python version does not
+have to match the Android target Python version. Any host Python from 3.10 to 3.14 can be used.
 
 #. `Download <qt_download_>`_ and install Qt version for which you would like to create Qt for Python
    wheels.
@@ -285,8 +298,13 @@ to cross-compile Qt for Python Android wheels.
 
      python tools/cross_compile_android/main.py --help
 
+   Use *--download-only* to fetch the Android NDK, the Android SDK and the prebuilt target Python
+   into the cache without building any wheel::
+
+     python tools/cross_compile_android/main.py --plat-name=aarch64 --download-only
+
 .. _`buildozer`: https://buildozer.readthedocs.io/en/latest/
 .. _`python-for-android`: https://python-for-android.readthedocs.io/en/latest/
 .. _`qt_download`: https://www.qt.io/download
-.. _`cpython`: https://pypi.org/project/Cython/
+.. _`Cython`: https://pypi.org/project/Cython/
 .. _`Qt for Python downloads page`: https://download.qt.io/official_releases/QtForPython/pyside6/
