@@ -779,18 +779,16 @@ static const QMetaObject *metaObjectCandidate(const QObject *o)
 // class by walking up the meta objects.
 static const char *typeName(const QObject *cppSelf)
 {
-    const char *typeName = typeid(*cppSelf).name();
-    if (!Shiboken::Conversions::getConverter(typeName)) {
-        const auto *metaObject = metaObjectCandidate(cppSelf);
-        for (; metaObject != nullptr; metaObject = metaObject->superClass()) {
-            const char *name = metaObject->className();
-            if (Shiboken::Conversions::getConverter(name)) {
-                typeName = name;
-                break;
-            }
-        }
+    for (const auto *metaObject = metaObjectCandidate(cppSelf); metaObject != nullptr;
+         metaObject = metaObject->superClass()) {
+        const char *name = metaObject->className();
+        if (Shiboken::Conversions::getConverter(name))
+            return name;
     }
-    return typeName;
+    // PYSIDE-3409: Fallback to typeid(). Note some classes in QtWebEngine
+    // do not have RTTI, so, typeid() can crash. Hence do QMetaObject lookup
+    // first.
+    return typeid(*cppSelf).name();
 }
 
 PyTypeObject *getTypeForQObject(const QObject *cppSelf)
