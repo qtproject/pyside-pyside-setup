@@ -316,14 +316,12 @@ macro(shiboken_find_required_python)
             "${_shiboken_backup_CMAKE_FIND_ROOT_PATH}")
 
         # For Android platform sometimes the FindPython module returns Python_SOABI as empty in
-        # certain scenarios eg: armv7a target, macOS host etc. This is because
+        # certain scenarios eg: macOS host etc. This is because
         # it is unable to set Python_CONFIG i.e. `python3-config` script
-        # This workaround sets the Python_SOABI manually for this Android platform.
-        # This needs to be updated manually if the Python version for Android cross compilation
-        # changes.
+        # This workaround derives the Python_SOABI from the found Python version.
         # TODO: Find a better way to set Python_SOABI for Android platform
         if(CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT Python_SOABI)
-            set(Python_SOABI "cpython-311")
+            set(Python_SOABI "cpython-${Python_VERSION_MAJOR}${Python_VERSION_MINOR}")
         endif()
     else()
         find_package(
