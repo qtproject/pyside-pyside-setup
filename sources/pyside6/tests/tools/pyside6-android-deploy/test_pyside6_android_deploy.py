@@ -192,6 +192,67 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         self.config_file.unlink()
         self.buildozer_config.unlink()
 
+    @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
+    @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
+    def test_android_api_levels_are_explicit(self, mock_qtlibs, mock_extraqtmodules,
+                                             mock_recipes_exist, mock_find_jars,
+                                             mock_extract_jar):
+        mock_extract_jar.return_value = Path("tmp/jar/PySide6/jar")
+        mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
+        mock_extraqtmodules.return_value = []
+        mock_recipes_exist.return_value = True
+        mock_find_jars.return_value = [], []
+
+        self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
+                                 pyside_wheel=self.pyside_wheel, ndk_path=self.ndk_path,
+                                 init=True, force=True, keep_deployment_files=True)
+
+        buildozer_config_obj = self.deploy_lib.BaseConfig(config_file=self.buildozer_config)
+        self.assertEqual(buildozer_config_obj.get_value("app", "android.api"), "35")
+        self.assertEqual(buildozer_config_obj.get_value("app", "android.minapi"), "28")
+        self.assertEqual(buildozer_config_obj.get_value("app", "android.ndk_api"), "28")
+
+        self.config_file.unlink()
+        self.buildozer_config.unlink()
+
+    @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
+    @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
+    def test_spec_round_trips_through_buildozer_parser(self, mock_qtlibs, mock_extraqtmodules,
+                                                       mock_recipes_exist, mock_find_jars,
+                                                       mock_extract_jar):
+        try:
+            from buildozer.specparser import SpecParser
+        except ImportError:
+            self.skipTest("buildozer 1.6.0 not installed")
+
+        mock_extract_jar.return_value = Path("tmp/jar/PySide6/jar")
+        mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
+        mock_extraqtmodules.return_value = []
+        mock_recipes_exist.return_value = True
+        mock_find_jars.return_value = [], []
+
+        self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
+                                 pyside_wheel=self.pyside_wheel, ndk_path=self.ndk_path,
+                                 init=True, force=True, keep_deployment_files=True)
+
+        # SpecParser forces allow_no_value=True itself, so it must not be
+        # passed in here.
+        parser = SpecParser()
+        parser.read(str(self.buildozer_config))
+        for key in ("p4a.bootstrap", "p4a.local_recipes", "p4a.branch",
+                    "p4a.commit", "p4a.extra_args", "android.archs",
+                    "android.api", "android.minapi", "android.ndk_api",
+                    "requirements"):
+            self.assertTrue(parser.has_option("app", key),
+                            f"buildozer's parser lost key {key}")
+
+        self.config_file.unlink()
+        self.buildozer_config.unlink()
+
     def test_errors(self, mock_extract_jar):
         # test when no shiboken wheel is passed
         with self.assertRaises(RuntimeError) as context:

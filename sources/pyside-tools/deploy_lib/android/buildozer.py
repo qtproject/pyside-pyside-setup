@@ -9,6 +9,8 @@ import zipfile
 from pathlib import Path
 
 from . import AndroidConfig
+from .android_utilities import (MIN_ANDROID_API_LEVEL,
+                                DEFAULT_ANDROID_API_LEVEL)
 from .. import BaseConfig, run_command
 
 # python-for-android is cloned by buildozer at this branch and commit.
@@ -43,6 +45,16 @@ class BuildozerConfig(BaseConfig):
             self.set_value("app", "android.sdk_path", str(pysidedeploy_config.sdk_path))
 
         self.set_value("app", "android.archs", pysidedeploy_config.arch)
+
+        # buildozer's own defaults (api 33, minapi 24) are below Qt's
+        # minimum supported Android API level, so set them explicitly.
+        # p4a derives --minsdk from ndk_api, so both must agree.
+        self.set_value("app", "android.api", DEFAULT_ANDROID_API_LEVEL,
+                       raise_warning=False)
+        self.set_value("app", "android.minapi", MIN_ANDROID_API_LEVEL,
+                       raise_warning=False)
+        self.set_value("app", "android.ndk_api", MIN_ANDROID_API_LEVEL,
+                       raise_warning=False)
 
         # p4a changes
         self.set_value("app", "p4a.bootstrap", "qt")
