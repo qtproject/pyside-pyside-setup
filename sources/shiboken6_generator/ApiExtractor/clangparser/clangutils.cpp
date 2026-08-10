@@ -146,6 +146,8 @@ QString getTypeName(const CXType &type, [[maybe_unused]] PrintingPolicy p)
 #if LLVM_VERSION >= 22
     CXString qualName = clang_getFullyQualifiedName(type, p, 0);
     QString result = QString::fromUtf8(clang_getCString(qualName));
+    if (result.startsWith("struct "_L1))
+        result.remove(0, 7);
     clang_disposeString(qualName);
 #else
     CXString typeSpelling = clang_getTypeSpelling(type);
