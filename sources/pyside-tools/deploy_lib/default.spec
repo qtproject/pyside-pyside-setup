@@ -27,7 +27,7 @@ python_path =
 packages = Nuitka==4.1.1
 
 # Buildozer: for deploying Android application
-android_packages = buildozer==1.5.0,cython==0.29.33
+android_packages = buildozer==1.6.0,cython==0.29.33
 
 [qt]
 

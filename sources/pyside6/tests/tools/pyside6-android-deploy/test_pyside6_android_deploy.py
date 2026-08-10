@@ -126,7 +126,7 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
         self.assertTrue(config_obj.get_value("app", "input_file").endswith("main.py"))
         self.assertEqual(config_obj.get_value("python", "android_packages"),
-                         "buildozer==1.5.0,cython==0.29.33")
+                         "buildozer==1.6.0,cython==0.29.33")
         self.assertEqual(config_obj.get_value("android", "wheel_pyside"),
                          str(self.pyside_wheel.resolve()))
         self.assertEqual(config_obj.get_value("android", "wheel_shiboken"),
