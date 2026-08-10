@@ -279,7 +279,7 @@ class Project:
                   file=sys.stderr)
             return
 
-        source_files = self.project.python_files + self.project.ui_files
+        source_files = self.project.python_files + self.project.ui_files + self.project.qml_files
         project_dir = self.project.project_file.parent
         cmd_prefix = [LUPDATE_CMD] + [os.fspath(p.relative_to(project_dir)) for p in source_files]
         cmd_prefix.append("-ts")
