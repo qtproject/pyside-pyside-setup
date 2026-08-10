@@ -596,6 +596,7 @@ def module_QtQuick() -> ModuleData:
         "libQt6QuickLayouts",
         "libQt6QuickParticles",
         "libQt6QuickShapes",
+        "libQt6QuickShapesDesignHelpers",
         "libQt6QuickTemplates2",
         "libQt6QuickTest",
         "libQt6QuickTimeline",
