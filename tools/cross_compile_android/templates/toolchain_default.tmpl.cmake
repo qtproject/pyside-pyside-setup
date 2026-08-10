@@ -38,11 +38,13 @@ set(QT_COMPILER_FLAGS_RELEASE "-O2 -pipe")
 # set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 # set(CMAKE_INSTALL_RPATH "$ORIGIN")
 
+# No -lpython flag here: unlike Windows, the actual link happens through
+# SHIBOKEN_PYTHON_LIBRARIES in ShibokenHelpers.cmake, which resolves the
+# right libpython for this target via Python_LIBRARY (see
+# build_scripts/main.py) rather than hardcoding a version here.
 set(QT_LINKER_FLAGS "-Wl,-O1 -Wl,--hash-style=gnu -Wl,-rpath='$ORIGIN' -Wl,-rpath='$ORIGIN/Qt/lib' \
                      -Wl,--as-needed -L{{ qt_install_path }}/android_{{ qt_plat_name }}/lib \
-                     -L{{ qt_install_path }}/android_{{ qt_plat_name }}/plugins/platforms \
-                     -L{{ target_python_path }}/lib \
-                     -lpython{{ python_version }}")
+                     -L{{ qt_install_path }}/android_{{ qt_plat_name }}/plugins/platforms")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)

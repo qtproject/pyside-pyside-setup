@@ -265,6 +265,10 @@ if __name__ == "__main__":
 
         # run the cross compile script
         logging.info(f"Running Qt for Python cross-compile for platform {platform_data.plat_name}")
+        # --limited-api=yes is passed explicitly so that bdist_wheel tags the
+        # wheel abi3. CMake already builds against the limited API by default,
+        # but setup.py only knows about it when the option is given, and would
+        # otherwise stamp the target interpreter version into the wheel name.
         qfp_ccompile_cmd = [sys.executable, "setup.py", "bdist_wheel", "--parallel=9",
                             "--standalone",
                             f"--cmake-toolchain-file={str(qfp_toolchain.resolve())}",
@@ -272,6 +276,7 @@ if __name__ == "__main__":
                             f"--plat-name=android_{platform_data.plat_name}",
                             f"--python-target-path={python_path}",
                             f"--qt-target-path={target_path}",
+                            "--limited-api=yes",
                             "--no-qt-tools"]
         run_command(qfp_ccompile_cmd, cwd=pyside_setup_dir, dry_run=dry_run, show_stdout=True)
 

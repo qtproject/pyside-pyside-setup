@@ -427,7 +427,11 @@ macro(shiboken_compute_python_libraries)
         set(SHIBOKEN_PYTHON_LIBRARIES "")
     endif()
 
-    if(WIN32 AND NOT SHIBOKEN_PYTHON_LIBRARIES)
+    # Android's Bionic linker does not resolve an undefined symbol against
+    # whatever already happens to be loaded in the process, unlike the ELF
+    # linker on desktop Linux/macOS. Every extension module needs an explicit
+    # NEEDED entry pointing at libpython, same as Windows already requires.
+    if((WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Android") AND NOT SHIBOKEN_PYTHON_LIBRARIES)
         set(SHIBOKEN_PYTHON_LIBRARIES ${Python_LIBRARIES})
     endif()
 
