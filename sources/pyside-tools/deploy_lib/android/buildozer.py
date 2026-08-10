@@ -11,6 +11,15 @@ from pathlib import Path
 from . import AndroidConfig
 from .. import BaseConfig, run_command
 
+# python-for-android is cloned by buildozer at this branch and commit.
+# Pinning a commit keeps builds reproducible; a branch alone tracks a
+# moving HEAD. This commit is tag v2026.05.09, the first release
+# containing the Qt bootstrap fix b92522fab879dbfc0028966ca3c59ef46ab7767d.
+# The Android target Python version is decided by this commit's python3
+# recipe - keep ANDROID_TARGET_PYTHON_FULL_VERSION in step when bumping.
+P4A_BRANCH = "master"
+P4A_COMMIT = "58d21141f17c889bf8585f5665921d72028f8831"
+
 
 class BuildozerConfig(BaseConfig):
     def __init__(self, buildozer_spec_file: Path, pysidedeploy_config: AndroidConfig):
@@ -39,12 +48,8 @@ class BuildozerConfig(BaseConfig):
         self.set_value("app", "p4a.bootstrap", "qt")
         self.set_value('app', "p4a.local_recipes", str(pysidedeploy_config.recipe_dir))
 
-        # add p4a branch
-        # by default the master branch is used
-        # https://github.com/kivy/python-for-android/commit/b92522fab879dbfc0028966ca3c59ef46ab7767d
-        # has not been merged to master yet. So, we use the develop branch for now
-        # TODO: remove this once the above commit is merged to master
-        self.set_value("app", "p4a.branch", "develop")
+        self.set_value("app", "p4a.branch", P4A_BRANCH)
+        self.set_value("app", "p4a.commit", P4A_COMMIT)
 
         # add permissions
         permissions = self.__find_permissions(pysidedeploy_config.dependency_files)
