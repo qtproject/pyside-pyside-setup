@@ -111,6 +111,32 @@ def get_llvm_readobj(ndk_path: Path) -> Path:
     return (ndk_path / f"toolchains/llvm/prebuilt/{sys.platform}-x86_64/bin/llvm-readobj")
 
 
+def ensure_legacy_sdk_tools_path(sdk_path: Path) -> None:
+    """
+    Expose the Sdk command line tools where buildozer and p4a look.
+
+    Current builds unpack to <sdk>/cmdline-tools, but buildozer and p4a
+    expect the tools in <sdk>/tools/bin. This creates a symlink to bridge
+    the gap. See https://github.com/kivy/buildozer/pull/1511
+    """
+    legacy_tools_dir = sdk_path / "tools"
+    cmdline_tools_dir = sdk_path / "cmdline-tools"
+
+    if legacy_tools_dir.exists() or legacy_tools_dir.is_symlink():
+        return
+
+    if not (cmdline_tools_dir / "bin" / "sdkmanager").exists():
+        return
+
+    logging.info(f"[DEPLOY] Linking {legacy_tools_dir} to {cmdline_tools_dir}, because buildozer "
+                 "and python-for-android look for the Sdk command line tools in the old SDK "
+                 "Tools location")
+    legacy_tools_dir.mkdir()
+    for entry in ("bin", "lib"):
+        (legacy_tools_dir / entry).symlink_to(cmdline_tools_dir / entry,
+                                              target_is_directory=True)
+
+
 def find_lib_dependencies(llvm_readobj: Path, lib_path: Path, used_dependencies: set[str] = None,
                           dry_run: bool = False):
     """

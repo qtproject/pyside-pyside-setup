@@ -9,6 +9,7 @@ import zipfile
 from pathlib import Path
 
 from . import AndroidConfig, PYSIDE_ONLY_MODULES
+from .android_helper import ensure_legacy_sdk_tools_path
 from .android_utilities import (MIN_ANDROID_API_LEVEL,
                                 DEFAULT_ANDROID_API_LEVEL)
 from .. import BaseConfig, run_command
@@ -42,6 +43,7 @@ class BuildozerConfig(BaseConfig):
             self.set_value("app", "android.ndk_path", str(pysidedeploy_config.ndk_path))
 
         if pysidedeploy_config.sdk_path:
+            ensure_legacy_sdk_tools_path(pysidedeploy_config.sdk_path)
             self.set_value("app", "android.sdk_path", str(pysidedeploy_config.sdk_path))
 
         self.set_value("app", "android.archs", pysidedeploy_config.arch)

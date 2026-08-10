@@ -322,6 +322,47 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         inspected = Path(mock_find_deps.call_args.kwargs["lib_path"]).name
         self.assertEqual(inspected, "libQt6Core_arm64-v8a.so")
 
+    def test_legacy_sdk_tools_path(self, mock_extract_jar):
+        """buildozer looks for sdkmanager, and python-for-android for
+        avdmanager, in the retired SDK Tools location. Both have to be
+        reachable under 'tools/bin'."""
+        ensure_legacy_sdk_tools_path = importlib.import_module(
+            "deploy_lib.android.android_helper").ensure_legacy_sdk_tools_path
+
+        # A current SDK: the tools live only under cmdline-tools.
+        sdk = Path(tempfile.mkdtemp()) / "android-sdk"
+        (sdk / "cmdline-tools" / "bin").mkdir(parents=True)
+        (sdk / "cmdline-tools" / "lib").mkdir()
+        for tool in ("sdkmanager", "avdmanager"):
+            (sdk / "cmdline-tools" / "bin" / tool).touch()
+        (sdk / "cmdline-tools" / "lib" / "sdkmanager-classpath.jar").touch()
+
+        ensure_legacy_sdk_tools_path(sdk)
+        # The launchers locate their jars next to the bin directory.
+        self.assertTrue((sdk / "tools" / "lib" / "sdkmanager-classpath.jar").exists(),
+                        "the class path directory was not made reachable")
+        self.assertTrue((sdk / "tools" / "bin" / "sdkmanager").exists(),
+                        "buildozer's sdkmanager path was not made reachable")
+        self.assertTrue((sdk / "tools" / "bin" / "avdmanager").exists(),
+                        "python-for-android's avdmanager path was not made reachable")
+        # 'tools' itself must stay a plain directory, so that the package.xml
+        # in cmdline-tools is not exposed a second time.
+        self.assertFalse((sdk / "tools").is_symlink())
+
+        # Running twice must not fail.
+        ensure_legacy_sdk_tools_path(sdk)
+
+        # An SDK that already has a real 'tools' directory must be left alone.
+        legacy_sdk = Path(tempfile.mkdtemp()) / "android-sdk"
+        (legacy_sdk / "cmdline-tools" / "bin").mkdir(parents=True)
+        (legacy_sdk / "cmdline-tools" / "bin" / "sdkmanager").touch()
+        (legacy_sdk / "tools" / "bin").mkdir(parents=True)
+        (legacy_sdk / "tools" / "bin" / "sdkmanager").write_text("original")
+
+        ensure_legacy_sdk_tools_path(legacy_sdk)
+        self.assertFalse((legacy_sdk / "tools").is_symlink())
+        self.assertEqual((legacy_sdk / "tools" / "bin" / "sdkmanager").read_text(), "original")
+
     def test_errors(self, mock_extract_jar):
         # test when no shiboken wheel is passed
         with self.assertRaises(RuntimeError) as context:
