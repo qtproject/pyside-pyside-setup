@@ -7,6 +7,7 @@ import fnmatch
 import glob
 import os
 import re
+import shlex
 import shutil
 import stat
 import subprocess
@@ -28,7 +29,6 @@ class RpathTargetType(Enum):
     plugins = "plugins"
     qml_plugins = "qml_plugins"
     qt_libraries = "qt_libraries"
-
 
 
 class Singleton(type):
@@ -396,9 +396,25 @@ def macos_get_rpaths(libpath):
     return rpaths
 
 
+def macos_codesign_adhoc(file_path):
+    """Signs file_path again with an ad-hoc signature.
+
+    A code signature stores hashes of the file contents inside the file
+    itself, so editing a Mach-O binary invalidates it. install_name_tool
+    rebuilds the signature on its own, but only when the existing one is
+    linker-signed, where there is no signer to preserve. Qt binaries from
+    the online installer are signed by The Qt Company, so they are left
+    invalid instead, and macOS refuses to run them on Apple Silicon. An
+    ad-hoc signature is enough to make them runnable again.
+    """
+    back_tick(f"codesign --force --sign - {shlex.quote(os.fspath(file_path))}")
+
+
 def macos_add_rpath(rpath, library_path):
     try:
         back_tick(f"install_name_tool -add_rpath {rpath} {library_path}")
+        # Adding the rpath above invalidated the code signature.
+        macos_codesign_adhoc(library_path)
     except RuntimeError as e:
         print(f"Exception {type(e).__name__}: {e}")
 
