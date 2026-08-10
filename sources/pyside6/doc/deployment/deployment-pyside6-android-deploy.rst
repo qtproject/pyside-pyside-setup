@@ -303,6 +303,10 @@ have to match the Android target Python version. Any host Python from 3.10 to 3.
 
      python tools/cross_compile_android/main.py --plat-name=aarch64 --download-only
 
+The finished Android wheels are written to ``dist_android/`` in the repository root, not to
+``dist/``. ``dist/`` belongs to the desktop build, which deletes the whole directory before
+regenerating it, so wheels kept there would not survive a desktop build.
+
 .. _`buildozer`: https://buildozer.readthedocs.io/en/latest/
 .. _`python-for-android`: https://python-for-android.readthedocs.io/en/latest/
 .. _`qt_download`: https://www.qt.io/download

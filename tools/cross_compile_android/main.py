@@ -127,6 +127,10 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=args.loglevel)
     pyside_setup_dir = Path(__file__).parents[2].resolve()
+    # Android wheels go into their own directory. dist/ is owned by the
+    # desktop build, which deletes it wholesale before repopulating it, and
+    # that would take the cross-compiled wheels with it.
+    android_dist_dir = pyside_setup_dir / "dist_android"
     qt_install_path = args.qt_install_path
     ndk_path = args.ndk_path
     sdk_path = args.sdk_path
@@ -276,6 +280,7 @@ if __name__ == "__main__":
                             f"--plat-name=android_{platform_data.plat_name}",
                             f"--python-target-path={python_path}",
                             f"--qt-target-path={target_path}",
+                            f"--dist-dir={str(android_dist_dir)}",
                             "--limited-api=yes",
                             "--no-qt-tools"]
         run_command(qfp_ccompile_cmd, cwd=pyside_setup_dir, dry_run=dry_run, show_stdout=True)
