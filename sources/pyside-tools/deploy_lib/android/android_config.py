@@ -51,7 +51,7 @@ class AndroidConfig(Config):
         if android_data.ndk_path:
             # from cli
             self.ndk_path = android_data.ndk_path
-        elif not existing_config_file:
+        else:
             # from config
             ndk_path_temp = self.get_value("buildozer", "ndk_path")
             if ndk_path_temp:
@@ -74,6 +74,13 @@ class AndroidConfig(Config):
 
                     logging.info("[DEPLOY] Downloading Android NDK")
                     self.ndk_path = download_android_ndk(ANDROID_DEPLOY_CACHE)
+
+        if not self.ndk_path:
+            raise RuntimeError(
+                "[DEPLOY] Unable to find the Android NDK. Pass it with --ndk-path, or set "
+                "ndk_path in the [buildozer] section of pysidedeploy.spec. The NDK is "
+                "required to inspect the Qt libraries in the wheel."
+            )
 
         self.sdk_path = None
         if android_data.sdk_path:

@@ -307,7 +307,53 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         # test config file contents
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
         self.assertEqual(config_obj.get_value("buildozer", "sdk_path"), '')
-        self.assertEqual(config_obj.get_value("buildozer", "ndk_path"), "/tmp/android_ndk")
+        # Compare resolved paths: on macOS /tmp is a symlink to /private/tmp,
+        # and the config stores the resolved path.
+        self.assertEqual(Path(config_obj.get_value("buildozer", "ndk_path")),
+                         Path("/tmp/android_ndk").resolve())
+
+    @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
+    @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
+    @patch("deploy_lib.android.android_config.download_android_ndk")
+    def test_ndk_resolved_with_existing_config_file(self, mock_ndk, mock_qtlibs,
+                                                    mock_extraqtmodules, mock_recipes_exist,
+                                                    mock_find_jars, mock_extract_jar):
+        """The Ndk has to be resolved even when a pysidedeploy.spec already
+        exists, otherwise every run after the first one fails."""
+        mock_extract_jar.return_value = Path("tmp/jar/PySide6/jar")
+        mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
+        mock_extraqtmodules.return_value = []
+        mock_recipes_exist.return_value = True
+        mock_find_jars.return_value = [], []
+        mock_ndk.return_value = Path("/tmp/android_ndk")
+
+        # First run creates pysidedeploy.spec.
+        self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
+                                 pyside_wheel=self.pyside_wheel, init=True, force=True,
+                                 keep_deployment_files=True)
+        self.assertTrue(self.config_file.exists())
+
+        # Clear the value the first run wrote, so the Ndk has to be found
+        # again. This is the state left behind when the first run fails
+        # before it gets as far as resolving the Ndk.
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
+        config_obj.set_value("buildozer", "ndk_path", "")
+        config_obj.update_config()
+
+        # Second run passes the existing config file.
+        self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
+                                 pyside_wheel=self.pyside_wheel,
+                                 config_file=self.config_file, init=True, force=True,
+                                 keep_deployment_files=True)
+
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
+        self.assertEqual(Path(config_obj.get_value("buildozer", "ndk_path")),
+                         Path("/tmp/android_ndk").resolve())
+
+        self.config_file.unlink()
+        self.buildozer_config.unlink()
 
 
 @patch("deploy_lib.config.run_qmlimportscanner")
