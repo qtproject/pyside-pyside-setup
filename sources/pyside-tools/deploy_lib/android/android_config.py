@@ -13,7 +13,7 @@ from pkginfo import Wheel
 
 from . import (extract_and_copy_jar, get_wheel_android_arch, find_lib_dependencies,
                get_llvm_readobj, find_qtlibs_in_wheel, platform_map, create_recipe,
-               ANDROID_DEPLOY_CACHE, safe_extractall)
+               ANDROID_DEPLOY_CACHE, PYSIDE_ONLY_MODULES, safe_extractall)
 from .. import (Config, get_all_pyside_modules, MAJOR_VERSION)
 from .android_utilities import (ANDROID_NDK_VERSION, ANDROID_NDK_VERSION_NUMBER_SUFFIX,
                                 download_android_ndk)
@@ -318,6 +318,12 @@ class AndroidConfig(Config):
             qt_libs_tmpdir = Path(tmpdir) / lib_path_suffix
             # find the lib folder where Qt libraries are stored
             for module_name in sorted(modules):
+                if module_name in PYSIDE_ONLY_MODULES:
+                    # No Qt library exists for these, so there is nothing to
+                    # read Qt dependencies from.
+                    logging.info(f"[DEPLOY] Skipping {module_name} while collecting Qt "
+                                 "dependencies: it has no Qt library")
+                    continue
                 qt_module_path = qt_libs_tmpdir / f"libQt6{module_name}_{self.arch}.so"
                 if not qt_module_path.exists():
                     raise FileNotFoundError(f"[DEPLOY] libQt6{module_name}_{self.arch}.so not found"

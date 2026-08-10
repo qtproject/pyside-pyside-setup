@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
-from . import AndroidConfig
+from . import AndroidConfig, PYSIDE_ONLY_MODULES
 from .android_utilities import (MIN_ANDROID_API_LEVEL,
                                 DEFAULT_ANDROID_API_LEVEL)
 from .. import BaseConfig, run_command
@@ -74,7 +74,13 @@ class BuildozerConfig(BaseConfig):
         self.set_value("app", "android.add_jars", ",".join(jars))
 
         # extra arguments specific to Qt
-        modules = ",".join(pysidedeploy_config.modules)
+        # p4a's QtLoader eagerly loads every --qt-libs entry as
+        # libQt6<name>_<arch>.so, which does not exist for PySide-only
+        # modules, and crashes the app on startup. pysidedeploy_config.modules
+        # legitimately still lists them, since the app genuinely uses them.
+        qt_libs_modules = [m for m in pysidedeploy_config.modules
+                           if m not in PYSIDE_ONLY_MODULES]
+        modules = ",".join(qt_libs_modules)
         local_libs = ",".join(pysidedeploy_config.local_libs)
         init_classes = ",".join(init_classes)
         extra_args = (f"--qt-libs={modules} --load-local-libs={local_libs}"

@@ -172,6 +172,43 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
     @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
     @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
     @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
+    def test_pyside_only_module_excluded_from_qt_libs(self, mock_qtlibs, mock_extraqtmodules,
+                                                      mock_recipes_exist, mock_find_jars,
+                                                      mock_extract_jar):
+        """A module with no Qt library, such as QtQmlFeatures, must not be
+        passed to p4a's --qt-libs. p4a's QtLoader eagerly loads every entry
+        there as libQt6<name>_<arch>.so, and there is no such file for a
+        PySide-only module, so the app crashes on startup with 'Can't find
+        libQt6QmlFeatures_<arch>.so'. The module still belongs in
+        pysidedeploy.spec's own qt.modules, since the app genuinely uses it -
+        only the p4a-facing --qt-libs argument must exclude it."""
+        jar_dir = "tmp/jar/PySide6/jar"
+        mock_extract_jar.return_value = Path(jar_dir)
+        mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
+        mock_extraqtmodules.return_value = ["QmlFeatures"]
+        mock_recipes_exist.return_value = True
+        mock_find_jars.return_value = [], []
+
+        self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
+                                 pyside_wheel=self.pyside_wheel, ndk_path=self.ndk_path,
+                                 init=True, force=True, keep_deployment_files=True)
+
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
+        obtained_modules = set(config_obj.get_value("qt", "modules").split(","))
+        self.assertIn("QmlFeatures", obtained_modules)
+
+        buildozer_config_obj = self.deploy_lib.BaseConfig(config_file=self.buildozer_config)
+        extra_args = buildozer_config_obj.get_value("app", "p4a.extra_args")
+        qt_libs = re.search(r"--qt-libs=(?P<modules>[^ ]*)", extra_args).group("modules")
+        self.assertNotIn("QmlFeatures", qt_libs.split(","))
+
+        self.config_file.unlink()
+        self.buildozer_config.unlink()
+
+    @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
+    @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
     def test_p4a_pinned_to_commit(self, mock_qtlibs, mock_extraqtmodules, mock_recipes_exist,
                                   mock_find_jars, mock_extract_jar):
         mock_extract_jar.return_value = Path("tmp/jar/PySide6/jar")
@@ -252,6 +289,38 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
 
         self.config_file.unlink()
         self.buildozer_config.unlink()
+
+    @patch("deploy_lib.android.android_config.find_lib_dependencies")
+    @patch("deploy_lib.android.android_config.get_llvm_readobj")
+    def test_pyside_only_module_is_skipped(self, mock_readobj, mock_find_deps, mock_extract_jar):
+        """PySide6 modules without a Qt library, such as QtQmlFeatures, have
+        no libQt6<name> to read dependencies from and must not be treated as
+        a missing library."""
+        import types
+        import zipfile as zf
+        android_config = importlib.import_module("deploy_lib.android.android_config")
+
+        tmpdir = Path(tempfile.mkdtemp())
+        # A fake wheel holding one real Qt library and nothing for QmlFeatures.
+        wheel = tmpdir / "pyside6-fake-android_aarch64.whl"
+        with zf.ZipFile(wheel, "w") as archive:
+            archive.writestr("PySide6/Qt/lib/libQt6Core_arm64-v8a.so", b"")
+        # get_llvm_readobj is mocked, so any existing file will do.
+        mock_readobj.return_value = wheel
+        mock_find_deps.return_value = None
+
+        stub = types.SimpleNamespace(arch="arm64-v8a", ndk_path=tmpdir, dry_run=False,
+                                     wheel_pyside=wheel,
+                                     qt_libs_path=zf.Path(wheel) / "PySide6/Qt/lib")
+
+        result = android_config.AndroidConfig._find_dependent_qt_modules(
+            stub, ["Core", "QmlFeatures"])
+
+        self.assertEqual(result, [])
+        # Only the module that has a Qt library was inspected.
+        self.assertEqual(mock_find_deps.call_count, 1)
+        inspected = Path(mock_find_deps.call_args.kwargs["lib_path"]).name
+        self.assertEqual(inspected, "libQt6Core_arm64-v8a.so")
 
     def test_errors(self, mock_extract_jar):
         # test when no shiboken wheel is passed

@@ -10,6 +10,11 @@ platform_map = {"aarch64": "arm64-v8a",
 
 ANDROID_DEPLOY_CACHE = Path.home() / ".pyside6_android_deploy"
 
+# PySide6 modules that are built from PySide sources alone and have no Qt
+# library behind them. There is no libQt6<name> to read Qt dependencies
+# from, so they are skipped when the dependent modules are collected.
+PYSIDE_ONLY_MODULES = {"Asyncio", "QmlFeatures"}
+
 from .android_helper import (create_recipe, extract_and_copy_jar, get_wheel_android_arch,
                              AndroidData, get_llvm_readobj, find_lib_dependencies,
                              find_qtlibs_in_wheel, safe_extractall)
