@@ -215,29 +215,39 @@ if __name__ == "__main__":
 
         qfp_toolchain = pyside6_deploy_cache / f"toolchain_{platform_data.plat_name}.cmake"
 
-        if not qfp_toolchain.exists():
-            template = environment.get_template("toolchain_default.tmpl.cmake")
-            content = template.render(
-                ndk_path=ndk_path,
-                sdk_path=sdk_path,
-                api_level=platform_data.api_level,
-                qt_install_path=qt_install_path,
-                plat_name=platform_data.plat_name,
-                android_abi=platform_data.android_abi,
-                qt_plat_name=platform_data.qt_plat_name,
-                gcc_march=platform_data.gcc_march,
-                plat_bits=platform_data.plat_bits,
-                python_version=ANDROID_TARGET_PYTHON_VERSION,
-                target_python_path=python_path,
-                min_android_api=MIN_ANDROID_API_LEVEL
-            )
+        template = environment.get_template("toolchain_default.tmpl.cmake")
+        content = template.render(
+            ndk_path=ndk_path,
+            sdk_path=sdk_path,
+            api_level=platform_data.api_level,
+            qt_install_path=qt_install_path,
+            plat_name=platform_data.plat_name,
+            android_abi=platform_data.android_abi,
+            qt_plat_name=platform_data.qt_plat_name,
+            gcc_march=platform_data.gcc_march,
+            plat_bits=platform_data.plat_bits,
+            python_version=ANDROID_TARGET_PYTHON_VERSION,
+            target_python_path=python_path,
+            min_android_api=MIN_ANDROID_API_LEVEL
+        )
 
+        # Render first and compare, because a cached toolchain file is only
+        # valid for the inputs it was generated from. The Python version, NDK,
+        # SDK, Qt path and API level can all differ from the previous run, and
+        # reusing the file merely because it exists silently cross-compiles
+        # against the old ones.
+        cached_content = (qfp_toolchain.read_text(encoding="utf-8")
+                          if qfp_toolchain.exists() else None)
+
+        if cached_content != content:
             logging.info(f"Writing Qt for Python toolchain file into {qfp_toolchain}")
             with open(qfp_toolchain, mode="w", encoding="utf-8") as ccompile_script:
                 ccompile_script.write(content)
 
             # give run permission to cross compile script
             qfp_toolchain.chmod(qfp_toolchain.stat().st_mode | stat.S_IEXEC)
+        else:
+            logging.info(f"Reusing Qt for Python toolchain file {qfp_toolchain}")
 
         if sys.platform == "linux":
             host_qt_install_suffix = "gcc_64"
