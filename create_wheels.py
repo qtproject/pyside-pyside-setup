@@ -38,7 +38,7 @@ class SetupData:
 def get_version_from_package(name: str, package_path: Path) -> tuple[str, str]:
     # Get version from the already configured '__init__.py' file
     version = ""
-    with open(package_path / name / "__init__.py") as f:
+    with open(package_path / name / "__init__.py", encoding="utf-8") as f:
         for line in f:
             if line.strip().startswith("__version__"):
                 version = line.split("=")[1].strip().replace('"', "")
@@ -56,7 +56,7 @@ def create_module_plugin_json(wheel_name: str, data: list[ModuleData], package_p
     # This file is picked up by the deployment tool to figure out the plugin dependencies
     # of a PySide6 application
     if all_plugins:
-        with open(f"{package_path}/PySide6/{wheel_name}.json", 'w') as fp:
+        with open(f"{package_path}/PySide6/{wheel_name}.json", 'w', encoding="utf-8") as fp:
             json.dump(all_plugins, fp, indent=4)
 
 
@@ -191,7 +191,7 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Pat
         _dependencies.append(f"shiboken6=={setup.version[0]}")
         _dependencies.append(f"PySide6_Essentials=={setup.version[0]}")
 
-    with open(artifacts / "pyproject.toml.base") as f:
+    with open(artifacts / "pyproject.toml.base", encoding="utf-8") as f:
         content = (
             f.read()
             .replace('"PROJECT_NAME"', f'"{setup.name}"')
@@ -226,7 +226,7 @@ def generate_setup_py(artifacts: Path, setup: SetupData):
     if setup.name in ("PySide6_Essentials", "PySide6_Addons", "PySide6_Examples"):
         _name = "PySide6"
 
-    with open(artifacts / "setup.py.base") as f:
+    with open(artifacts / "setup.py.base", encoding="utf-8") as f:
         content = f.read().format(
             name=_name,
             fake_ext=fext,
@@ -386,7 +386,7 @@ def check_modules_consistency():
     # Check READMEs
     readme_modules = set()
     for r in Path(".").glob("README.pyside6*"):
-        with open(r) as f:
+        with open(r, encoding="utf-8") as f:
             for line in f:
                 if line.startswith("* Qt"):
                     readme_modules.add(line.strip().replace("* ", ""))
@@ -471,13 +471,13 @@ if __name__ == "__main__":
         # 1. Generate 'setup.py'
         print("-- Generating setup.py")
         setup_py_content = generate_setup_py(artifacts_path, setup)
-        with open(setup_py_path, "w") as f:
+        with open(setup_py_path, "w", encoding="utf-8") as f:
             f.write(setup_py_content)
 
         # 2. Generate 'pyproject.toml'
         print("-- Generating pyproject.toml")
         pyproject_toml_content = generate_pyproject_toml(artifacts_path, setup, package_path)
-        with open(pyproject_toml_path, "w") as f:
+        with open(pyproject_toml_path, "w", encoding="utf-8") as f:
             f.write(pyproject_toml_content)
 
         # 3. Create PySide_Essentials.json and PySide_Addons.json
@@ -495,7 +495,7 @@ if __name__ == "__main__":
             manifest_content = get_simple_manifest(name)
         else:
             manifest_content = get_manifest(name, data, package_path, verbose)
-        with open(package_path / "MANIFEST.in", "w") as f:
+        with open(package_path / "MANIFEST.in", "w", encoding="utf-8") as f:
             f.write(manifest_content)
 
         # 5. copy configuration files to create the wheel
