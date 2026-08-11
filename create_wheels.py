@@ -354,7 +354,7 @@ def get_build_directory(options: Namespace):
             if result.is_dir():
                 return result
     if options.env:
-        raise Exception(f'Invalid environment "{options.env}" passed')
+        raise ValueError(f'Invalid environment "{options.env}" passed')
     # Try explicit build-dir
     if options.build_dir and (Path(options.build_dir) / PACKAGE_FOR_WHEELS).is_dir():
         return Path(options.build_dir)
@@ -367,7 +367,8 @@ def get_build_directory(options: Namespace):
                 "want, use the --env or --build-dir options to provide it explicitly."
             )
             return d
-    raise Exception("Unable to determine build directory, no matching virtual environment found")
+    raise FileNotFoundError(
+        "Unable to determine build directory, no matching virtual environment found")
 
 
 def check_modules_consistency():
