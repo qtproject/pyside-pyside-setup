@@ -110,7 +110,7 @@ def get_simple_manifest(name: str) -> str:
     return f"graft {name}\n"
 
 
-def get_platform_tag() -> str:
+def get_platform_tag(package_path: Path) -> str:
     _os = sys.platform
     arch = platform.machine()
 
@@ -163,11 +163,11 @@ def get_platform_tag() -> str:
     return _tag
 
 
-def generate_pyproject_toml(artifacts: Path, setup: SetupData) -> str:
+def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Path) -> str:
     content = None
 
     _name = setup.name
-    _tag = get_platform_tag()
+    _tag = get_platform_tag(package_path)
 
     _console_scripts = ""
     if setup.console_scripts:
@@ -473,7 +473,7 @@ if __name__ == "__main__":
 
         # 2. Generate 'pyproject.toml'
         print("-- Generating pyproject.toml")
-        pyproject_toml_content = generate_pyproject_toml(artifacts_path, setup)
+        pyproject_toml_content = generate_pyproject_toml(artifacts_path, setup, package_path)
         with open(pyproject_toml_path, "w") as f:
             f.write(pyproject_toml_content)
 
