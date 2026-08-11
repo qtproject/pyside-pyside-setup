@@ -54,7 +54,7 @@ def create_module_plugin_json(wheel_name: str, data: list[ModuleData], package_p
     all_plugins = {}
 
     for module in data:
-        all_plugins[module.name] = getattr(module, "plugins")
+        all_plugins[module.name] = module.plugins
 
     # write the dictionary modules->plugins dictionary to a .json file and include this .json file
     # This file is picked up by the deployment tool to figure out the plugin dependencies
@@ -81,7 +81,7 @@ def get_manifest(wheel_name: str, data: list[ModuleData], package_path: Path, ve
                 continue
             for line in getattr(module, field):
                 file = f"PySide6/{line}"
-                if verbose > 0 and "*" not in file and not Path(package_path / file).exists():
+                if verbose > 0 and "*" not in file and not (package_path / file).exists():
                     log.warning(f"{file} does not exist.")
                 if field in ("extra_dirs", "qml", "plugins"):
                     lines.append(f"graft {file}")
@@ -129,12 +129,12 @@ def get_platform_tag(package_path: Path) -> str:
         target = None
         config_py = package_path / "shiboken6" / "_config.py"
         if not config_py.exists():
-            raise RuntimeError(f"Unable to find {str(config_py)}")
+            raise RuntimeError(f"Unable to find {config_py}")
 
         module_name = config_py.name[:-3]
         _spec = importlib.util.spec_from_file_location(f"{module_name}", config_py)
         if _spec is None:
-            raise RuntimeError(f"Unable to create ModuleSpec from {str(config_py)}")
+            raise RuntimeError(f"Unable to create ModuleSpec from {config_py}")
         _module = importlib.util.module_from_spec(_spec)
         if _spec.loader is None:
             raise RuntimeError(f"ModuleSpec for {module_name} has no valid loader.")
@@ -168,8 +168,6 @@ def get_platform_tag(package_path: Path) -> str:
 
 
 def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Path) -> str:
-    content = None
-
     _name = setup.name
     _tag = get_platform_tag(package_path)
 
@@ -210,7 +208,6 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Pat
 
 
 def generate_setup_py(artifacts: Path, setup: SetupData):
-    content = None
     _name = setup.name
 
     # To get the 'abi3' tag on the wheel name, we need to use
@@ -383,7 +380,7 @@ def check_modules_consistency():
 
     missing_modules = set(sources) - set(functions)
 
-    if len(missing_modules):
+    if missing_modules:
         log.warning("The following modules don't have a function "
                     f"in 'build_scripts/wheel_files.py':\n  {missing_modules}")
 
@@ -397,7 +394,7 @@ def check_modules_consistency():
 
     missing_modules_readme = set(sources) - readme_modules
 
-    if len(missing_modules_readme):
+    if missing_modules_readme:
         log.warning(f"The following modules are not in READMEs:\n  {missing_modules_readme}")
 
 
@@ -439,8 +436,8 @@ if __name__ == "__main__":
 
     # Check for 'package_for_wheels' directory
     if not package_path.is_dir():
-        log.error(f"Couldn't find the directory: {package_path}"
-                  "Maybe your build used '--skip-packaging'? Exiting.")
+        log.error(f"Couldn't find the directory: {package_path}")
+        log.error("Maybe your build used '--skip-packaging'? Exiting.")
         sys.exit(-1)
 
     setup_py_path = package_path / "setup.py"
