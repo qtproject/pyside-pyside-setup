@@ -19,6 +19,7 @@ from build_scripts.wheel_files import (ModuleData,  # type: ignore
                                        set_pyside_package_path,
                                        wheel_files_pyside_addons,
                                        wheel_files_pyside_essentials)
+from build_scripts.log import log
 from build_scripts.utils import available_pyside_tools
 
 
@@ -81,7 +82,7 @@ def get_manifest(wheel_name: str, data: list[ModuleData], package_path: Path, ve
             for line in getattr(module, field):
                 file = f"PySide6/{line}"
                 if verbose > 0 and "*" not in file and not Path(package_path / file).exists():
-                    print(f"Warning: {file} does not exist.", file=sys.stderr)
+                    log.warning(f"{file} does not exist.")
                 if field in ("extra_dirs", "qml", "plugins"):
                     lines.append(f"graft {file}")
                 elif field == "qtlib" and sys.platform == "darwin":
@@ -141,8 +142,8 @@ def get_platform_tag(package_path: Path) -> str:
         target = _module.__qt_macos_min_deployment_target__
 
         if not target:
-            print("Error: couldn't get the value from MACOSX_DEPLOYMENT_TARGET. "
-                  "Falling back to local platform version.")
+            log.error("Couldn't get the value from MACOSX_DEPLOYMENT_TARGET. "
+                      "Falling back to local platform version.")
             mac_ver, _, _ = platform.mac_ver()
             # We get 10.14.2 for example, and transform into 10_14
             target = "_".join(mac_ver.split(".")[:2])
@@ -338,7 +339,7 @@ def copy_examples_for_wheel(package_path: Path):
     try:
         copytree("examples", package_path / "PySide6" / "examples", dirs_exist_ok=True)
     except OSError as e:
-        print("Error trying to copy the examples directory:", e, file=sys.stderr)
+        log.error(f"Error trying to copy the examples directory: {e}")
         sys.exit(-1)
 
 
@@ -364,7 +365,7 @@ def get_build_directory(options: Namespace):
     # Fallback to existing dirs (skip "config.tests")
     for d in build_dir.glob("*"):
         if (d / PACKAGE_FOR_WHEELS).is_dir():
-            print(
+            log.warning(
                 "No valid environment or build directory was specified, so create_wheels is using "
                 "the first valid directory it could find on its own. If this is not the one you "
                 "want, use the --env or --build-dir options to provide it explicitly."
@@ -383,8 +384,8 @@ def check_modules_consistency():
     missing_modules = set(sources) - set(functions)
 
     if len(missing_modules):
-        print("Warning: the following modules don't have a function "
-              f"in 'build_scripts/wheel_files.py':\n  {missing_modules}", file=sys.stderr)
+        log.warning("The following modules don't have a function "
+                    f"in 'build_scripts/wheel_files.py':\n  {missing_modules}")
 
     # Check READMEs
     readme_modules = set()
@@ -397,8 +398,7 @@ def check_modules_consistency():
     missing_modules_readme = set(sources) - readme_modules
 
     if len(missing_modules_readme):
-        print("Warning: the following modules are not in READMEs :"
-              f"\n  {missing_modules_readme}", file=sys.stderr)
+        log.warning(f"The following modules are not in READMEs:\n  {missing_modules_readme}")
 
 
 if __name__ == "__main__":
@@ -435,12 +435,12 @@ if __name__ == "__main__":
     # the extra 'a' is for compatibility with the build_scripts
     # notation that adds an 'a' when using limited-api
     package_path = build_directory / PACKAGE_FOR_WHEELS
-    print(f'Using build dir "{build_directory.name}"')
+    log.info(f'Using build dir "{build_directory.name}"')
 
     # Check for 'package_for_wheels' directory
     if not package_path.is_dir():
-        print(f"Couldn't find the directory: {package_path}")
-        print("Maybe your build used '--skip-packaging'?. Exiting")
+        log.error(f"Couldn't find the directory: {package_path}"
+                  "Maybe your build used '--skip-packaging'? Exiting.")
         sys.exit(-1)
 
     setup_py_path = package_path / "setup.py"
@@ -468,17 +468,17 @@ if __name__ == "__main__":
 
     for name, wheel_info in wheels.items():
 
-        print(f"Starting process for: {name}")
+        log.info(f"Starting process for: {name}")
         setup, data = wheel_info(package_path)
 
         # 1. Generate 'setup.py'
-        print("-- Generating setup.py")
+        log.info("-- Generating setup.py")
         setup_py_content = generate_setup_py(artifacts_path, setup)
         with open(setup_py_path, "w", encoding="utf-8") as f:
             f.write(setup_py_content)
 
         # 2. Generate 'pyproject.toml'
-        print("-- Generating pyproject.toml")
+        log.info("-- Generating pyproject.toml")
         pyproject_toml_content = generate_pyproject_toml(artifacts_path, setup, package_path)
         with open(pyproject_toml_path, "w", encoding="utf-8") as f:
             f.write(pyproject_toml_content)
@@ -486,14 +486,14 @@ if __name__ == "__main__":
         # 3. Create PySide_Essentials.json and PySide_Addons.json
         # creates a json file mapping each Qt module to the possible plugin dependencies
         if data is not None:
-            print(f"-- Creating {name}.json")
+            log.info(f"-- Creating {name}.json")
             create_module_plugin_json(name, data, package_path)
 
         # 4. Create the 'MANIFEST.in'
         # Special case for shiboken and shiboken_generator
         # so we copy the whole directory, only PySide and derivatives
         # will need to have specific information
-        print("-- Creating MANIFEST.in")
+        log.info("-- Creating MANIFEST.in")
         if data is None:
             manifest_content = get_simple_manifest(name)
         else:
@@ -502,7 +502,7 @@ if __name__ == "__main__":
             f.write(manifest_content)
 
         # 5. copy configuration files to create the wheel
-        print("-- Copy configuration files to create the wheel")
+        log.info("-- Copy configuration files to create the wheel")
         if name == "PySide6_Examples":
             copy_examples_for_wheel(package_path)
         _files: list[Path] = base_files + [Path(setup.readme)]
@@ -510,7 +510,7 @@ if __name__ == "__main__":
             copy(fname, package_path)
 
         # 6. call the build module to create the wheel
-        print("-- Creating wheels")
+        log.info("-- Creating wheels")
         if verbose < 2:
             _runner = pyproject_hooks.quiet_subprocess_runner
         else:
@@ -519,7 +519,7 @@ if __name__ == "__main__":
         builder.build("wheel", "dist")
 
         # 7. Copy wheels back
-        print("-- Copying wheels to dist/")
+        log.info("-- Copying wheels to dist/")
         dist_path = Path("dist")
         if not dist_path.is_dir():
             dist_path.mkdir()
@@ -527,7 +527,7 @@ if __name__ == "__main__":
             copy(wheel, dist_path / wheel.name)
 
         # 8. Remove leftover files
-        print("-- Removing leftover files")
+        log.info("-- Removing leftover files")
         all_files = set(package_path.glob("*"))
         files_to_remove = all_files - {
             package_path / i for i in ("PySide6", "shiboken6", "shiboken6_generator")
