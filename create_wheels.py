@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import platform
 import sys
-import importlib
+import importlib.util
 import json
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
