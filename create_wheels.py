@@ -523,7 +523,7 @@ if __name__ == "__main__":
         dist_path = Path("dist")
         if not dist_path.is_dir():
             dist_path.mkdir()
-        for wheel in Path(package_path / "dist").glob("*.whl"):
+        for wheel in (package_path / "dist").glob("*.whl"):
             copy(wheel, dist_path / wheel.name)
 
         # 8. Remove leftover files
