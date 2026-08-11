@@ -37,12 +37,15 @@ class SetupData:
 
 def get_version_from_package(name: str, package_path: Path) -> tuple[str, str]:
     # Get version from the already configured '__init__.py' file
+    init_file = package_path / name / "__init__.py"
     version = ""
-    with open(package_path / name / "__init__.py", encoding="utf-8") as f:
+    with open(init_file, encoding="utf-8") as f:
         for line in f:
             if line.strip().startswith("__version__"):
                 version = line.split("=")[1].strip().replace('"', "")
                 break
+    if not version:
+        raise ValueError(f"Unable to find '__version__' in {init_file}")
     return version, f"{name}.__init__.__version__"
 
 
