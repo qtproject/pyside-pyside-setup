@@ -26,6 +26,18 @@ from build_scripts.utils import available_pyside_tools
 PACKAGE_FOR_WHEELS = "package_for_wheels"
 PYSIDE_DESCRIPTION = "Python bindings for the Qt cross-platform application and UI framework"
 
+# Maps each wheel to the other wheels it depends on, version-pinned to the same
+# release. Wheels like shiboken6 and shiboken6_generator have no
+# dependencies, add for completeness.
+WHEEL_DEPENDENCIES: dict[str, list[str]] = {
+    "shiboken6": [],
+    "shiboken6_generator": [],
+    "PySide6": ["shiboken6", "PySide6_Essentials", "PySide6_Addons"],
+    "PySide6_Examples": ["shiboken6", "PySide6_Essentials", "PySide6_Addons"],
+    "PySide6_Essentials": ["shiboken6"],
+    "PySide6_Addons": ["shiboken6", "PySide6_Essentials"],
+}
+
 
 @dataclass
 class SetupData:
@@ -177,21 +189,9 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Pat
         _console_scripts = f"[project.scripts]\n{_formatted_console_scripts}"
 
     # Installing dependencies
-    _dependencies = []
+    _dependencies = [f"{dep}=={setup.version[0]}" for dep in WHEEL_DEPENDENCIES[_name]]
     if _name == "PySide6":
-        _dependencies.append(f"shiboken6=={setup.version[0]}")
-        _dependencies.append(f"PySide6_Essentials=={setup.version[0]}")
-        _dependencies.append(f"PySide6_Addons=={setup.version[0]}")
         _dependencies.append('tomli>=2.0.1; python_version < "3.11"')
-    elif _name == "PySide6_Examples":
-        _dependencies.append(f"shiboken6=={setup.version[0]}")
-        _dependencies.append(f"PySide6_Essentials=={setup.version[0]}")
-        _dependencies.append(f"PySide6_Addons=={setup.version[0]}")
-    elif _name == "PySide6_Essentials":
-        _dependencies.append(f"shiboken6=={setup.version[0]}")
-    elif _name == "PySide6_Addons":
-        _dependencies.append(f"shiboken6=={setup.version[0]}")
-        _dependencies.append(f"PySide6_Essentials=={setup.version[0]}")
 
     with open(artifacts / "pyproject.toml.base", encoding="utf-8") as f:
         content = (
