@@ -270,9 +270,11 @@ def wheel_pyside6_essentials(package_path: Path) -> tuple[SetupData, list[Module
     # replacing pyside6-android_deploy by pyside6-android-deploy for consistency
     # Also, the tool should not exist in any other platform than Linux and macOS
     _console_scripts = []
-    if ("android_deploy" in _pyside_tools) and sys.platform in ("linux", "darwin"):
-        _console_scripts = ['pyside6-android-deploy = "PySide6.scripts.pyside_tool:android_deploy"']
-    _pyside_tools.remove("android_deploy")
+    if "android_deploy" in _pyside_tools:
+        if sys.platform in ("linux", "darwin"):
+            _console_scripts = ['pyside6-android-deploy = '
+                                '"PySide6.scripts.pyside_tool:android_deploy"']
+        _pyside_tools.remove("android_deploy")
 
     _console_scripts.extend([f'pyside6-{tool} = "PySide6.scripts.pyside_tool:{tool}"'
                             for tool in _pyside_tools])
