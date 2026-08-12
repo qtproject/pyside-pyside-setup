@@ -3,12 +3,18 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 from __future__ import annotations
 
-''' PYSIDE-315: Test that creating a signal in the wrong order triggers a warning. '''
+''' PYSIDE-315: Test that adding a signal after class creation is rejected.
+
+Signals are named and registered while the type is parsed. A Signal assigned
+to the class afterwards never reaches the meta object: it used to bind to an
+instance with the signature "()", which Qt connects by index without checking
+arguments, so emitting it read arguments that were never written. Binding such
+a signal must fail instead.
+'''
 
 import os
 import sys
 import unittest
-import warnings
 
 from pathlib import Path
 sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
@@ -29,21 +35,21 @@ class Whatever(QtCore.QObject):
         pass
 
 
-class WarningTest(unittest.TestCase):
-    def testSignalSlotWarning(self):
-        # we create an object. This gives no warning.
+class LateSignalTest(unittest.TestCase):
+    def testLateSignalRejected(self):
         obj = Whatever()
-        # then we insert a signal after slots have been created.
+        # Insert a signal after the type has been parsed.
         setattr(Whatever, "foo", QtCore.Signal())
-        with warnings.catch_warnings(record=True) as w:
-            # Cause all warnings to always be triggered.
-            warnings.simplefilter("always")
-            # Trigger a warning.
-            obj.foo.connect(obj.mySlot)
-            # Verify some things
-            assert issubclass(w[-1].category, RuntimeWarning)
-            assert "*** Sort Warning ***" in str(w[-1].message)
-            # note that this warning cannot be turned into an error (too hard)
+        with self.assertRaises(RuntimeError) as cm:
+            obj.foo
+        self.assertIn("added after the class was created", str(cm.exception))
+
+    def testDeclaredSignalStillWorks(self):
+        obj = Whatever()
+        received = []
+        obj.echoSignal.connect(received.append)
+        obj.echoSignal.emit("hello")
+        self.assertEqual(received, ["hello"])
 
 
 if __name__ == "__main__":

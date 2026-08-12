@@ -793,6 +793,18 @@ static PyObject *signalDescrGet(PyObject *self, PyObject *obj, PyObject * /*type
         return self;
     }
 
+    // Signals are named and registered when the type is parsed. An empty name
+    // means this Signal was attached to the type afterwards, so it never
+    // reached the meta object. Binding it anyway used to build an instance
+    // with the signature "()", which Qt then connects by index without an
+    // argument check - emitting it reads arguments that were never written.
+    if (signal->data->signalName.isEmpty()) {
+        return PyErr_Format(PyExc_RuntimeError,
+                            "Signal object of type '%.200s' was added after the class was created "
+                            "and is therefore not registered. Declare signals in the class body.",
+                            Py_TYPE(obj)->tp_name);
+    }
+
     // PYSIDE-68-bis: It is important to respect the already cached instance.
     Shiboken::AutoDecRef name(Py_BuildValue("s", signal->data->signalName.data()));
     auto *dict = SbkObject_GetDict_NoRef(obj);
