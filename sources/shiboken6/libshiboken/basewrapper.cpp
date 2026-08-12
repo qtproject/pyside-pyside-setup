@@ -1301,20 +1301,13 @@ Py_hash_t hash(PyObject *pyObj)
 
 static void setSequenceOwnership(PyObject *pyObj, bool owner)
 {
-
-    bool has_length = true;
-
     if (!pyObj)
         return;
 
-    if (PySequence_Size(pyObj) < 0) {
-        PyErr_Clear();
-        has_length = false;
-    }
-
-    if (PySequence_Check(pyObj) && has_length) {
-        Py_ssize_t size = PySequence_Size(pyObj);
-        if (size > 0) {
+    const Py_ssize_t length = PyList_Check(pyObj) != 0 || PyTuple_Check(pyObj)  != 0
+                                  ? PySequence_Size(pyObj) : -1;
+    if (length >= 0) {
+        if (length > 0) {
             const auto objs = splitPyObject(pyObj);
             if (owner) {
                 for (SbkObject *o : objs)
