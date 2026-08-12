@@ -142,7 +142,10 @@ class PysideReceiverMethodSlot : public MethodDynamicSlot
 public:
     explicit PysideReceiverMethodSlot(PyObject *function, PyObject *pythonSelf);
 
-    ~PysideReceiverMethodSlot() override = default;
+    ~PysideReceiverMethodSlot() override;
+
+private:
+    PyObject *m_weakRef;
 };
 
 static void onPysideReceiverSlotDestroyed(void *data)
@@ -154,14 +157,28 @@ static void onPysideReceiverSlotDestroyed(void *data)
 }
 
 PysideReceiverMethodSlot::PysideReceiverMethodSlot(PyObject *function, PyObject *pythonSelf) :
-    MethodDynamicSlot(function, pythonSelf)
+    MethodDynamicSlot(function, pythonSelf),
+    // PYSIDE-3148: fire onPysideReceiverSlotDestroyed() when pythonSelf dies while
+    // still connected. Own the returned reference (keepReference) for the whole
+    // life of the slot, so the destructor can release it on an ordinary disconnect
+    // too. Previously the reference was discarded and only reclaimed if the weakref
+    // ever fired, leaking one weakref per connect otherwise (PYSIDE-79).
+    m_weakRef(WeakRef::create(pythonSelf, onPysideReceiverSlotDestroyed, pythonSelf, true))
 {
-    // PYSIDE-3148: The weakref is automatically deleted when the notification triggers.
-    // Note that notifications may trigger after deletion of TrackingMethodDynamicSlot in case
-    // of multiple connections to the same receiver, so, &DynamicSlot must not be used as user
-    // data. Also trying to actively deref a pending weak ref from ~TrackingMethodDynamicSlot()
-    // does not reliably prevent the notification from being triggered.
-    WeakRef::create(pythonSelf, onPysideReceiverSlotDestroyed, pythonSelf);
+}
+
+PysideReceiverMethodSlot::~PysideReceiverMethodSlot()
+{
+    if (m_weakRef == nullptr)
+        return;
+    // The slot is the sole owner of the weakref (WeakRef::create kept the
+    // reference and the callback does not drop it), so releasing it here is safe
+    // whether this is an ordinary disconnect or the deferred teardown of an
+    // orphaned connection after pythonSelf already died -- nothing else frees it,
+    // so there is no dangling access (PYSIDE-3148).
+    Shiboken::GilState gil;
+    Py_DECREF(m_weakRef);
+    m_weakRef = nullptr;
 }
 
 DynamicSlot* DynamicSlot::create(PyObject *callback)

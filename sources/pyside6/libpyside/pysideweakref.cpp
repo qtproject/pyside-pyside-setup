@@ -12,6 +12,7 @@ struct PySideCallableObject {
     /* Type-specific fields go here. */
     PySideWeakRefFunction weakref_func;
     void *user_data;
+    bool keep_reference;
 };
 
 static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, PyObject *kw);
@@ -46,13 +47,17 @@ static PyObject *CallableObject_call(PyObject *callable_object, PyObject *args, 
     auto *obj = reinterpret_cast<PySideCallableObject *>(callable_object);
     obj->weakref_func(obj->user_data);
 
-    Py_XDECREF(PyTuple_GetItem(args, 0)); //kill weak ref object
+    // Unless the caller owns the returned reference, drop the weak ref object here
+    // (it was created with a discarded reference). When the caller keeps it, it is
+    // responsible for releasing it, so leave it untouched to avoid a double free.
+    if (!obj->keep_reference)
+        Py_XDECREF(PyTuple_GetItem(args, 0)); // kill weak ref object
     Py_RETURN_NONE;
 }
 
 namespace PySide::WeakRef {
 
-PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData)
+PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData, bool keepReference)
 {
     if (obj == Py_None)
         return nullptr;
@@ -75,6 +80,7 @@ PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData)
 
     callable->weakref_func = func;
     callable->user_data = userData;
+    callable->keep_reference = keepReference;
     Py_DECREF(callable); // PYSIDE-79: after decref the callable is undefined (theoretically)
 
     return weak;
