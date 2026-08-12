@@ -1,6 +1,8 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
+import os
+import subprocess
 import sys
 import logging
 import zipfile
@@ -12,6 +14,10 @@ from jinja2 import Environment, FileSystemLoader
 
 from .. import run_command
 from .android_utilities import SUPPORTED_ANDROID_PLATFORMS
+
+# The only Jdk major version python-for-android accepts. See
+# JDKPrerequisite in pythonforandroid/prerequisites.py.
+P4A_REQUIRED_JDK_VERSION = 17
 
 
 @dataclass
@@ -109,6 +115,54 @@ def get_llvm_readobj(ndk_path: Path) -> Path:
     # TODO: Requires change if Windows platform supports Android Deployment or if we
     # support host other than linux-x86_64
     return (ndk_path / f"toolchains/llvm/prebuilt/{sys.platform}-x86_64/bin/llvm-readobj")
+
+
+def check_jdk_version() -> None:
+    """
+    Fail early if the Jdk is not the one python-for-android requires.
+
+    p4a accepts exactly one Jdk major version and checks it on every run,
+    including 'p4a aab -h', which buildozer calls to probe for features.
+    When the check fails p4a asks whether to install a Jdk itself, and
+    buildozer hides that prompt, so the build stops with no output until
+    the question is answered. Report it here instead.
+
+    Only enforced on macOS, where p4a treats the Jdk as mandatory.
+    """
+    if sys.platform != "darwin":
+        return
+
+    # Resolve the same Jdk p4a would, see JDKPrerequisite.darwin_checker().
+    jdk_path = os.environ.get("JAVA_HOME")
+    if jdk_path:
+        logging.info(f"[DEPLOY] Checking the Jdk from JAVA_HOME: {jdk_path}")
+    else:
+        jdk_path = subprocess.run(["/usr/libexec/java_home"], capture_output=True,
+                                  text=True).stdout.strip()
+
+    major_version = None
+    javac = Path(jdk_path) / "bin" / "javac" if jdk_path else None
+    if javac and javac.exists():
+        # Older javac reports the version on stderr, newer ones on stdout.
+        result = subprocess.run([str(javac), "-version"], capture_output=True, text=True)
+        version_output = (result.stdout or result.stderr).strip()
+        try:
+            major_version = int(version_output.split(" ")[-1].split(".")[0])
+        except (IndexError, ValueError):
+            logging.warning(f"[DEPLOY] Unable to read the Jdk version from '{version_output}'")
+
+    if major_version == P4A_REQUIRED_JDK_VERSION:
+        return
+
+    found = f"Jdk {major_version}" if major_version else "no usable Jdk"
+    raise RuntimeError(
+        f"[DEPLOY] python-for-android requires Jdk {P4A_REQUIRED_JDK_VERSION}, but "
+        f"{found} was found at '{jdk_path or 'no path'}'. Install Jdk "
+        f"{P4A_REQUIRED_JDK_VERSION} and point JAVA_HOME at it, for example:\n"
+        f"    export JAVA_HOME=$(/usr/libexec/java_home -v {P4A_REQUIRED_JDK_VERSION})\n"
+        "Without it the build stops without printing a reason, because "
+        "python-for-android waits for an answer to a prompt that buildozer hides."
+    )
 
 
 def ensure_legacy_sdk_tools_path(sdk_path: Path) -> None:

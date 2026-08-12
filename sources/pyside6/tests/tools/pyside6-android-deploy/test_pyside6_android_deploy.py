@@ -363,6 +363,33 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         self.assertFalse((legacy_sdk / "tools").is_symlink())
         self.assertEqual((legacy_sdk / "tools" / "bin" / "sdkmanager").read_text(), "original")
 
+    @unittest.skipUnless(sys.platform == "darwin", "the Jdk check only applies to macOS")
+    def test_jdk_version_check(self, mock_extract_jar):
+        """A Jdk other than the one python-for-android accepts has to be
+        reported here, because p4a itself stops without printing a reason."""
+        android_helper = importlib.import_module("deploy_lib.android.android_helper")
+        required = android_helper.P4A_REQUIRED_JDK_VERSION
+
+        def fake_jdk(version: str) -> Path:
+            jdk = Path(tempfile.mkdtemp()) / "jdk"
+            (jdk / "bin").mkdir(parents=True)
+            javac = jdk / "bin" / "javac"
+            javac.write_text(f'#!/bin/sh\necho "javac {version}"\n')
+            javac.chmod(0o755)
+            return jdk
+
+        # A supported Jdk passes.
+        with mock.patch.dict(os.environ, {"JAVA_HOME": str(fake_jdk(f"{required}.0.2"))}):
+            android_helper.check_jdk_version()
+
+        # An unsupported one fails with a message naming the version and the fix.
+        with mock.patch.dict(os.environ, {"JAVA_HOME": str(fake_jdk("26"))}):
+            with self.assertRaises(RuntimeError) as context:
+                android_helper.check_jdk_version()
+        message = str(context.exception)
+        self.assertIn(f"requires Jdk {required}", message)
+        self.assertIn("JAVA_HOME", message)
+
     def test_errors(self, mock_extract_jar):
         # test when no shiboken wheel is passed
         with self.assertRaises(RuntimeError) as context:

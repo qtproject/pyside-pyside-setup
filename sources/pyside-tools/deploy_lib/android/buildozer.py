@@ -9,7 +9,7 @@ import zipfile
 from pathlib import Path
 
 from . import AndroidConfig, PYSIDE_ONLY_MODULES
-from .android_helper import ensure_legacy_sdk_tools_path
+from .android_helper import check_jdk_version, ensure_legacy_sdk_tools_path
 from .android_utilities import (MIN_ANDROID_API_LEVEL,
                                 DEFAULT_ANDROID_API_LEVEL)
 from .. import BaseConfig, run_command
@@ -151,6 +151,10 @@ class Buildozer:
 
     @staticmethod
     def initialize(pysidedeploy_config: AndroidConfig):
+        # Checked before anything is built, because python-for-android
+        # otherwise stops mid-build with no output.
+        check_jdk_version()
+
         project_dir = Path(pysidedeploy_config.project_dir)
         buildozer_spec = project_dir / "buildozer.spec"
         if buildozer_spec.exists():
