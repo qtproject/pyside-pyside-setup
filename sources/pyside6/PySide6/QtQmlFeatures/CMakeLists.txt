@@ -39,10 +39,14 @@ if(NOT (PYSIDE_IS_CROSS_BUILD OR DISABLE_PYI))
                           ${generate_pyi_options})
     add_dependencies(QtQmlFeatures_pyi QtQmlFeatures)
     # QtQmlFeatures_pyi runs generate_pyi.py which imports PySide6.QtCore via
-    # feature.__init__(). Add explicit dependencies so that the Python extension
-    # modules are built before pyi generation starts
+    # feature.__init__(), and PySide6.QtQml for resolving the QQmlEngine
+    # reference in load_qml_component's signature. Add explicit dependencies so
+    # that the Python extension modules are built before pyi generation starts
     if(TARGET QtCore)
         add_dependencies(QtQmlFeatures_pyi QtCore)
+    endif()
+    if(TARGET QtQml)
+        add_dependencies(QtQmlFeatures_pyi QtQml)
     endif()
     if(TARGET shibokenmodule)
         add_dependencies(QtQmlFeatures_pyi shibokenmodule)

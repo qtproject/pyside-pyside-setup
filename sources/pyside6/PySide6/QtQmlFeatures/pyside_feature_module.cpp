@@ -9,6 +9,7 @@
 #include "pysidewatch_p.h"
 #include "pysideqmlcomponent.h"
 
+#include <autodecref.h>
 #include <sbkpython.h>
 
 extern "C" {
@@ -20,6 +21,9 @@ static int exec_QtQmlFeatures(PyObject *module)
     PySide::Computed::init(module);
     PySide::Effect::init(module);
     PySide::Watch::init(module);
+    Shiboken::AutoDecRef qtQml(PyImport_ImportModule("PySide6.QtQml"));
+    if (qtQml.isNull())
+        return -1;
     PySide::QmlComponent::init(module);
     return 0;
 }
