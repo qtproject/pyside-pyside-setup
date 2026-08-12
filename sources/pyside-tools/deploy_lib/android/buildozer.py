@@ -3,6 +3,7 @@
 # Qt-Security score:critical reason:execute-external-code,handling-untrusted-data
 from __future__ import annotations
 
+import os
 import sys
 import logging
 import xml.etree.ElementTree as ET
@@ -155,6 +156,8 @@ class Buildozer:
         # Checked before anything is built, because python-for-android
         # otherwise stops mid-build with no output.
         check_jdk_version()
+        # Prevents p4a from blocking on an install prompt that buildozer hides.
+        os.environ.setdefault("PYTHONFORANDROID_PREREQUISITES_INSTALL_INTERACTIVE", "0")
 
         project_dir = Path(pysidedeploy_config.project_dir)
         buildozer_spec = project_dir / "buildozer.spec"
