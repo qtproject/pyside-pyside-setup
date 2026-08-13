@@ -1207,6 +1207,13 @@ introduceWrapperType(PyObject *enclosingObject,
     typeSpec->slots[0].pfunc = PySequence_GetItem(bases, 0);
 
     auto *type = SbkType_FromSpecBasesMeta(typeSpec, bases, SbkObjectType_TypeF());
+    if (type == nullptr) {
+        // Reporting the failure beats crashing in PepType_SOTP() below: a
+        // failure here means the type spec or one of its bases is unusable,
+        // and the traceback names the type instead of a null dereference.
+        PyErr_Format(PyExc_SystemError, "libshiboken: Cannot create type '%s'", typeName);
+        return nullptr;
+    }
 
     auto *sotp = PepType_SOTP(type);
     if (wrapperFlags & DeleteInMainThread)
