@@ -138,7 +138,16 @@ def find_init_attributes(cls, exclude: Optional[Set[str]] = None) -> Dict[str, A
     try:
         source = textwrap.dedent(inspect.getsource(cls.__init__))
         tree = ast.parse(source)
-    except (OSError, TypeError, SyntaxError):
+    except OSError:
+        # The .py file is not on disk, so the assignments cannot be read.
+        # Deployed applications hit this when only .pyc files are shipped,
+        # which silently leaves the class without any of its properties.
+        _logger.warning("@auto_properties: no source available for %s.__init__, "
+                        "so no properties were created from its assignments. "
+                        "Ship the .py files alongside the .pyc ones to fix this.",
+                        getattr(cls, "__qualname__", cls))
+        return {}
+    except (TypeError, SyntaxError):
         return {}
 
     finder = InitAttributeFinder()
