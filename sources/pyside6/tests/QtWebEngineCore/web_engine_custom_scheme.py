@@ -33,6 +33,7 @@ class TestSchemeHandler(QWebEngineUrlSchemeHandler):
 class MainTest(unittest.TestCase):
     def test_SchemeHandlerRedirect(self):
         self._loaded = False
+        self._ok = False
         QApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
         app = QApplication([])
 
@@ -52,17 +53,19 @@ class MainTest(unittest.TestCase):
         layout.addWidget(view)
 
         view.loadFinished.connect(self._slot_loaded)
-        QTimer.singleShot(5000, app.quit)
+        QTimer.singleShot(10000, app.quit)
 
         top_level_widget.show()
         view.load("testpy:hello")
         app.exec()
 
-        self.assertTrue(self._loaded)
+        self.assertTrue(self._loaded, "Time out")
+        self.assertTrue(self._ok, "Load error")
         self.assertEqual(view.url(), "testpy:goodbye")
 
-    def _slot_loaded(self):
+    def _slot_loaded(self, ok):
         self._loaded = True
+        self._ok = ok
         QApplication.quit()
 
 
