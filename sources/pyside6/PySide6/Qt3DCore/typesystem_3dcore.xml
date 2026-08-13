@@ -5,6 +5,7 @@
 -->
 
 <typesystem package="PySide6.Qt3DCore" doc-package="PySide6.Qt3D" doc-mode="flat"
+            module-uses-gil="false"
             namespace-begin="QT_BEGIN_NAMESPACE" namespace-end="QT_END_NAMESPACE">
     <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
     <smart-pointer-type name="QSharedPointer" type="shared" getter="data"

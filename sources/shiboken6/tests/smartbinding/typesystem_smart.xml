@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<typesystem package="smart">
+<typesystem package="smart" module-uses-gil="false">
     <rejection class="*" argument-type="^std::nullptr_t&amp;?$"/>
 
     <!-- Used in tests to check what C++ objects are allocated. -->

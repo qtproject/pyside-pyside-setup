@@ -5,6 +5,7 @@
 -->
 
 <typesystem package="PySide6.Qt3DLogic" doc-package="PySide6.Qt3D" doc-mode="flat"
+            module-uses-gil="false"
             namespace-begin="QT_BEGIN_NAMESPACE" namespace-end="QT_END_NAMESPACE">
     <load-typesystem name="Qt3DCore/typesystem_3dcore.xml" generate="no"/>
     <namespace-type name="Qt3DLogic">

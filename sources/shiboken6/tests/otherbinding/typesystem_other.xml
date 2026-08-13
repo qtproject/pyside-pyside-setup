@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<typesystem package="other">
+<typesystem package="other" module-uses-gil="false">
     <load-typesystem name="typesystem_sample.xml" generate="no" />
     <load-typesystem name="typesystem_smart.xml" generate="no" />
 

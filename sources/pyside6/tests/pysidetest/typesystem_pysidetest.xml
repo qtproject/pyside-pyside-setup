@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<typesystem package="testbinding">
+<typesystem package="testbinding" module-uses-gil="false">
     <load-typesystem name="QtWidgets/typesystem_widgets.xml" generate="no"/>
     <value-type name="Connection"/>
     <value-type name="IntValue"/>

@@ -83,6 +83,9 @@ public:
     bool m_stream = false;
     bool m_private = false;
     bool m_builtin = false;
+    // A module declares Py_MOD_GIL_NOT_USED only when its type system says so
+    // ("module-uses-gil" = false). Defaulting the other way would hand that
+    // claim to every binding generated with shiboken, audited or not.
     bool m_usesGil = true;
 };
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<typesystem package="sample">
+<typesystem package="sample" module-uses-gil="false">
 
      <inject-code class="native" position="beginning"
                   file="samplesnippets.cpp" snippet="module-helpers"/>
