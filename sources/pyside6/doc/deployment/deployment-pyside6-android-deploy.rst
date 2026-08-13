@@ -33,8 +33,9 @@ Before using ``pyside6-android-deploy``, ensure that the following prerequisites
 Download Android NDK and SDK
 ----------------------------
 
-The NDK required corresponds to the NDK version required by the Qt version you are using. See
-`Qt for Android <https://doc.qt.io/qt-6/android.html>`_ for more information.
+``pyside6-android-deploy`` requires NDK r28c (``28.2.13676358``). This is newer than the NDK
+that Qt itself documents, because r28c is the first version whose Clang defaults to 16 KB
+page-aligned ELF segments, which Android 15 and later devices require.
 
 The easiest way to download the Android NDK is through a script located in the Qt for Python
 repository. To run the script, follow these steps:
@@ -67,11 +68,11 @@ If you want to try to download the NDK and SDK manually, you can do so from the 
 
   and install the NDK using the following command::
 
-   "ndk;27.2.12479018"
+   "ndk;28.2.13676358"
 
-.. note:: The NDK version and the SDK packages required corresponds to the requirements from the
-      Qt version you are using. See `Qt for Android <https://doc.qt.io/qt-6/android.html>`_ for more
-      information.
+.. note:: NDK r28c (``28.2.13676358``) is required because it is the first NDK version whose
+   Clang defaults to 16 KB page-aligned ELF segments, which Android 15 and later devices require.
+   Qt's own Android documentation references an older NDK; use the version above regardless.
 
 Download the Qt for Python Android wheels
 -----------------------------------------

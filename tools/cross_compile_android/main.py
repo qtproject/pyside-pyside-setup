@@ -16,6 +16,7 @@ from jinja2 import Environment, FileSystemLoader
 from android_utilities import (run_command, download_android_commandlinetools,
                                download_android_ndk, install_android_packages,
                                download_prebuilt_python_android,
+                               ANDROID_NDK_VERSION,
                                MIN_ANDROID_API_LEVEL,
                                DEFAULT_ANDROID_API_LEVEL,
                                ANDROID_TARGET_PYTHON_VERSION,
@@ -95,7 +96,10 @@ if __name__ == "__main__":
     parser.add_argument("--api-level", type=str,
                         default=DEFAULT_ANDROID_API_LEVEL,
                         help="Minimum Android API level to use")
-    parser.add_argument("--ndk-path", type=str, help="Path to Android NDK (Preferred r26b)")
+    parser.add_argument("--ndk-path", type=str,
+                        help="Path to an existing Android NDK. Omit to download "
+                             f"r{ANDROID_NDK_VERSION}, which is the version "
+                             "this tool is tested against")
     # sdk path is needed to compile all the Qt Java Acitivity files into Qt6AndroidBindings.jar
     parser.add_argument("--sdk-path", type=str, help="Path to Android SDK")
     parser.add_argument(
