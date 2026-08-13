@@ -113,6 +113,14 @@ else()
 endif()
 add_library(libshiboken ${library_type} ${libshiboken_SRC})
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+    # Android requires 16 KB aligned LOAD segments for Play Store submission.
+    # Targets that link against Qt inherit this from Qt6::Platform's
+    # INTERFACE_LINK_OPTIONS; libshiboken has no Qt dependency, so the NDK
+    # linker falls back to its 4 KB default unless asked explicitly.
+    target_link_options(libshiboken PRIVATE "-Wl,-z,max-page-size=16384")
+endif()
+
 if(NOT TARGET Shiboken6::libshiboken)
     add_library(Shiboken6::libshiboken ALIAS libshiboken)
 endif()

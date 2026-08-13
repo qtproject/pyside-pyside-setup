@@ -16,6 +16,12 @@ endif()
 
 target_link_libraries(QtQmlFeatures pyside6qml Shiboken6::libshiboken)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+    # See libshiboken/CMakeLists.txt: QtQmlFeatures has no Qt dependency
+    # either, so it needs the same 16 KB alignment flag directly.
+    target_link_options(QtQmlFeatures PRIVATE "-Wl,-z,max-page-size=16384")
+endif()
+
 if(NOT (PYSIDE_IS_CROSS_BUILD OR DISABLE_PYI))
     pyside_setup_ld_prefix()
 
