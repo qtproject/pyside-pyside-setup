@@ -68,6 +68,7 @@ public:
 
     static CodeModelItem findItem(const QStringList &qualifiedName,
                                   const ScopeModelItem &scope);
+    static const char *classTypeName(ClassType ct);
 };
 
 #ifndef QT_NO_DEBUG_STREAM
@@ -260,6 +261,8 @@ public:
 
     TemplateParameterList templateParameters() const;
     void addTemplateParameter(const TemplateParameterModelItem &templateParameter);
+
+    bool isAnonymous() const { return name().isEmpty(); }
 
     bool extendsClass(const QString &name) const;
 

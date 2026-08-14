@@ -228,6 +228,10 @@ public:
 bool BuilderPrivate::addClass(const CXCursor &cursor, CodeModel::ClassType t)
 {
     QString className = getCursorSpelling(cursor);
+    // Clang 22 reports the with markers like "(anonymous " and file location
+    // instead of an empty string.
+    if (className.startsWith("(anonymous "_L1) || className.startsWith("(unnamed "_L1))
+        className.clear();
     m_currentClass = std::make_shared<_ClassModelItem>(className);
     setFileName(cursor, m_currentClass.get());
     m_currentClass->setClassType(t);

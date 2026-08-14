@@ -1212,6 +1212,14 @@ AbstractMetaClassPtr AbstractMetaBuilderPrivate::traverseClass(const FileModelIt
                                                              const ClassModelItem &classItem,
                                                              const AbstractMetaClassPtr &currentClass)
 {
+    if (classItem->isAnonymous()) {
+        QString name;
+        QTextStream(&name) << "anonymous " << CodeModel::classTypeName(classItem->classType())
+            << " at " << classItem->fileName() << ':' << classItem->startLine();
+        m_rejectedClasses.insert({AbstractMetaBuilder::NotInTypeSystem, name, name, {}});
+        return nullptr;
+    }
+
     QString className = stripTemplateArgs(classItem->name());
     QString fullClassName = className;
 
@@ -1240,10 +1248,6 @@ AbstractMetaClassPtr AbstractMetaBuilderPrivate::traverseClass(const FileModelIt
         reason = AbstractMetaBuilder::GenerationDisabled;
     }
     if (reason != AbstractMetaBuilder::NoReason) {
-        if (fullClassName.isEmpty()) {
-            QTextStream(&fullClassName) << "anonymous struct at " << classItem->fileName()
-                << ':' << classItem->startLine();
-        }
         m_rejectedClasses.insert({reason, fullClassName, fullClassName, QString{}});
         return nullptr;
     }

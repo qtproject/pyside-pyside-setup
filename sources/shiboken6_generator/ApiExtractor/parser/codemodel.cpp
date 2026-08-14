@@ -61,6 +61,19 @@ CodeModelItem CodeModel::findItem(const QStringList &qualifiedName, const ScopeM
     return findRecursion(scope, qualifiedName);
 }
 
+const char *CodeModel::classTypeName(ClassType ct)
+{
+    switch (ct) {
+    case Struct:
+        return "struct";
+    case Union:
+        return "union";
+    case Class:
+        break;
+    }
+    return "class";
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 
 QDebug operator<<(QDebug d, Access a)
