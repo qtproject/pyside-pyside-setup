@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import shutil
+import re
 import os
 import stat
 import sys
@@ -34,9 +35,18 @@ SUPPORTED_ANDROID_PLATFORMS = ["aarch64", "x86_64"]
 # binaries from 3.14 onwards, so CPython is no longer built here. This
 # must match the python3 recipe version at the python-for-android commit
 # pinned by P4A_COMMIT in deploy_lib/android/buildozer.py, because that
-# is the interpreter which loads these wheels on the device.
+# is the interpreter which loads these wheels on the device. Used only as
+# a fallback when that version cannot be fetched at runtime (see
+# resolve_target_python_version below) - keep it roughly in step anyway.
 ANDROID_TARGET_PYTHON_VERSION = "3.14"
 ANDROID_TARGET_PYTHON_FULL_VERSION = "3.14.2"
+
+_BUILDOZER_PY_PATH = (Path(__file__).resolve().parents[2]
+                      / "sources/pyside-tools/deploy_lib/android/buildozer.py")
+_P4A_PYTHON_RECIPE_URL_TEMPLATE = (
+    "https://raw.githubusercontent.com/kivy/python-for-android/"
+    "{commit}/pythonforandroid/recipes/python3/__init__.py"
+)
 
 # Minimum Android API level, set by Qt's requirements. Update when Qt's
 # minimum API level changes.
@@ -294,6 +304,62 @@ def download_android_commandlinetools(android_sdk_dir: Path):
             sys.exit(1)
 
     return android_sdk_dir
+
+
+def get_p4a_commit() -> str:
+    """Reads the pinned python-for-android commit straight out of
+    buildozer.py, so this tool and the deploy tool never drift apart."""
+    content = _BUILDOZER_PY_PATH.read_text(encoding="utf-8")
+    match = re.search(r'^P4A_COMMIT\s*=\s*"([0-9a-fA-F]+)"', content, re.MULTILINE)
+    if not match:
+        raise RuntimeError(f"Unable to find P4A_COMMIT in {_BUILDOZER_PY_PATH}")
+    return match.group(1)
+
+
+def fetch_p4a_target_python_version(p4a_commit: str) -> str:
+    """Returns the CPython version p4a's python3 recipe builds, at the
+    given p4a commit. That is the interpreter which will load these
+    wheels on-device, so it is what they must be cross-compiled against."""
+    url = _P4A_PYTHON_RECIPE_URL_TEMPLATE.format(commit=p4a_commit)
+    with request.urlopen(url) as response:
+        content = response.read().decode("utf-8")
+    match = re.search(r"^\s*version\s*=\s*['\"]([\d.]+)['\"]", content, re.MULTILINE)
+    if not match:
+        raise RuntimeError(f"Unable to find the python3 recipe version at {url}")
+    return match.group(1)
+
+
+def resolve_target_python_version() -> tuple[str, str]:
+    """
+    Returns (major.minor, full_version) for the Android target Python.
+
+    Fetched live from the python3 recipe at the pinned p4a commit, so
+    ANDROID_TARGET_PYTHON_FULL_VERSION never silently drifts out of sync
+    with it. Falls back to the hardcoded default, with a warning, if the
+    commit or the network is unavailable - callers still need to add a
+    matching _PREBUILT_PYTHON_SHA256 entry by hand for any new version,
+    since a checksum can never be trusted from an unauthenticated fetch.
+    """
+    try:
+        p4a_commit = get_p4a_commit()
+        full_version = fetch_p4a_target_python_version(p4a_commit)
+    except (OSError, RuntimeError) as e:
+        logging.warning(
+            f"[DEPLOY] Unable to auto-detect the p4a target Python version "
+            f"({e}). Falling back to the pinned default "
+            f"{ANDROID_TARGET_PYTHON_FULL_VERSION}")
+        return ANDROID_TARGET_PYTHON_VERSION, ANDROID_TARGET_PYTHON_FULL_VERSION
+
+    if full_version != ANDROID_TARGET_PYTHON_FULL_VERSION:
+        logging.warning(
+            f"[DEPLOY] p4a commit {p4a_commit} now targets Python "
+            f"{full_version}, not the pinned default "
+            f"{ANDROID_TARGET_PYTHON_FULL_VERSION}. Using {full_version}; "
+            "update ANDROID_TARGET_PYTHON_FULL_VERSION and add a matching "
+            "_PREBUILT_PYTHON_SHA256 entry.")
+
+    short_version = ".".join(full_version.split(".")[:2])
+    return short_version, full_version
 
 
 def download_prebuilt_python_android(full_version: str, plat_name: str,
