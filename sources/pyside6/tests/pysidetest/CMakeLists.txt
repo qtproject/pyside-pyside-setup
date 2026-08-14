@@ -52,11 +52,10 @@ ${CMAKE_CURRENT_BINARY_DIR}/testbinding/qvariantholder_wrapper.cpp
 )
 
 # Get per module include dirs.
-# There are usually 3 paths there:
-# ./qt/include/; ./qt/include/QtCore ; ./qt/mkspecs/linux-g++
+# There are usually 2 paths there:
+# ./qt/include/QtCore ; ./qt/mkspecs/linux-g++
 # on framework build they are:
-# ./qt/lib/QtCore.framework; ./qt/lib/QtCore.framework/Headers ; ./qt/mkspecs/macx-clang
-# Thus we use the second direct path, which contains the actual header files.
+# ./qt/include/QtCore ; ./qt/lib/QtCore.framework ; ./qt/mkspecs/macx-clang
 
 set(Qt6Core_DIRECT_INCLUDE_DIR ${Qt6Core_INCLUDE_DIRS})
 set(Qt6Gui_DIRECT_INCLUDE_DIR ${Qt6Gui_INCLUDE_DIRS})
@@ -64,21 +63,40 @@ set(Qt6Widgets_DIRECT_INCLUDE_DIR ${Qt6Widgets_INCLUDE_DIRS})
 
 # Adjust include headers paths for frameworks.
 set(shiboken_framework_include_dirs_option "")
+set(shiboken_dir_after_include_dirs_option "")
+set(force_process_system_include_paths_option "")
 if(CMAKE_HOST_APPLE AND QtCore_is_framework)
     set(shiboken_framework_include_dirs "${QT_FRAMEWORK_INCLUDE_DIR}")
     set(shiboken_framework_include_dirs_option "--framework-include-paths=${shiboken_framework_include_dirs}")
+
+    # Handle -idirafter option. See create_pyside_module() for details.
+    make_path(shiboken_dir_after_include_dirs ${QT_INCLUDE_DIR})
+    set(shiboken_dir_after_include_dirs_option
+        "--dir-after-include-paths=${shiboken_dir_after_include_dirs}")
+
+    make_path(force_process_system_include_paths
+        ${QT_INCLUDE_DIR}
+        ${QT_FRAMEWORK_INCLUDE_DIR}
+    )
+    set(force_process_system_include_paths_option
+        "--force-process-system-include-paths=${force_process_system_include_paths}")
 endif()
 
-make_path(testbinding_include_dirs  ${PYSIDE_PACKAGE_BINARY_DIR}
-                                    ${CMAKE_CURRENT_SOURCE_DIR}
-                                    ${CMAKE_CURRENT_SOURCE_DIR}/../../../shiboken6/libshiboken
-                                    ${CMAKE_CURRENT_SOURCE_DIR}/../../PySide6
-                                    ${CMAKE_CURRENT_SOURCE_DIR}/../../libpyside
-                                    ${QT_INCLUDE_DIR}
-                                    ${Qt${QT_MAJOR_VERSION}Core_DIRECT_INCLUDE_DIR}
-                                    ${Qt${QT_MAJOR_VERSION}Gui_DIRECT_INCLUDE_DIR}
-                                    ${Qt${QT_MAJOR_VERSION}Widgets_DIRECT_INCLUDE_DIR}
-                                    )
+set(testbinding_include_dir_list
+    ${PYSIDE_PACKAGE_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../shiboken6/libshiboken
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../PySide6
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../libpyside
+    ${Qt${QT_MAJOR_VERSION}Core_DIRECT_INCLUDE_DIR}
+    ${Qt${QT_MAJOR_VERSION}Gui_DIRECT_INCLUDE_DIR}
+    ${Qt${QT_MAJOR_VERSION}Widgets_DIRECT_INCLUDE_DIR}
+ )
+# Add the qt include dir only for non-framework builds.
+if(NOT shiboken_dir_after_include_dirs_option)
+    list(APPEND testbinding_include_dir_list ${QT_INCLUDE_DIR})
+endif()
+make_path(testbinding_include_dirs ${testbinding_include_dir_list})
 
 make_path(testbinding_typesystem_path ${PYSIDE_PACKAGE_SOURCE_DIR}
                                       ${PYSIDE_PACKAGE_BINARY_DIR})
@@ -94,6 +112,8 @@ add_custom_command(
         ${GENERATOR_EXTRA_FLAGS}
         ${CMAKE_CURRENT_SOURCE_DIR}/pysidetest_global.h
         --include-paths=${testbinding_include_dirs}
+        ${shiboken_dir_after_include_dirs_option}
+        ${force_process_system_include_paths_option}
         ${shiboken_framework_include_dirs_option}
         --typesystem-paths=${testbinding_typesystem_path}
         --output-directory=${CMAKE_CURRENT_BINARY_DIR}

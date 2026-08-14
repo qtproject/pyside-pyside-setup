@@ -3916,6 +3916,26 @@ static bool matchHeader(const QString &headerPath, const QString &fileName)
         && fileName.startsWith(headerPath, caseSensitivity);
 }
 
+// macOS: Headers of a framework are reported as
+// <dir>/QtCore.framework/Headers/qfoo.h (or .../Versions/A/Headers/qfoo.h), but
+// must be included as <QtCore/qfoo.h> since the framework bundle is entered via
+// the framework search path (-F) and not by an include path pointing into it.
+static QString frameworkInclude(const QString &path)
+{
+    constexpr auto frameworkDir = ".framework/"_L1;
+    constexpr auto headersDir = "/Headers/"_L1;
+    const auto frameworkPos = path.lastIndexOf(frameworkDir);
+    if (frameworkPos < 0)
+        return {};
+    const auto headersPos = path.indexOf(headersDir, frameworkPos + frameworkDir.size() - 1);
+    if (headersPos < 0)
+        return {};
+    const auto namePos = path.lastIndexOf(u'/', frameworkPos) + 1;
+    const QString frameworkName = path.sliced(namePos, frameworkPos - namePos);
+    const QString headerName = path.sliced(headersPos + headersDir.size());
+    return frameworkName + u'/' + headerName;
+}
+
 void AbstractMetaBuilderPrivate::setInclude(const TypeEntryPtr &te, const QString &path) const
 {
     auto it = m_resolveIncludeHash.find(path);
@@ -3926,6 +3946,13 @@ void AbstractMetaBuilderPrivate::setInclude(const TypeEntryPtr &te, const QStrin
             && std::any_of(m_globalHeaders.cbegin(), m_globalHeaders.cend(),
                            [fileName] (const QFileInfo &fi) {
                                return fi.fileName() == fileName; })) {
+            return;
+        }
+
+        const QString frameworkPath = frameworkInclude(path);
+        if (!frameworkPath.isEmpty()) {
+            it = m_resolveIncludeHash.insert(path, {Include::IncludePath, frameworkPath});
+            te->setInclude(it.value());
             return;
         }
 

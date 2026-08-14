@@ -244,6 +244,13 @@ Options
 ``-isystem<path>, --system-include-paths=<path>[:<path>:...]``
     System include paths used by the C++ parser
 
+.. _dir-after-include-paths:
+
+``-idirafter<path>, --dir-after-include-paths=<path>[:<path>:...]``
+    Include paths searched after the system paths by the C++ parser. Note that
+    the C++ parser considers headers found there to be system headers; use
+    :ref:`force-process-system-include-paths` to extract types from them.
+
 .. _framework-include-paths:
 
 ``-F<path>, --framework-include-paths=<path>[:<path>:...]``

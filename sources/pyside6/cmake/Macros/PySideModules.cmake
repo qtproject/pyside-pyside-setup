@@ -182,8 +182,8 @@ macro(create_pyside_module)
         message(FATAL_ERROR "create_pyside_module needs at least one SOURCES value.")
     endif()
 
-    string(TOLOWER ${module_NAME} _module)
-    string(REGEX REPLACE ^qt "" _module ${_module})
+    string(REGEX REPLACE ^Qt "" _module_suffix ${module_NAME})
+    string(TOLOWER ${_module_suffix} _module)
 
     if(${module_GLUE_SOURCES})
         set (module_GLUE_SOURCES "${${module_GLUE_SOURCES}}")
@@ -220,8 +220,30 @@ macro(create_pyside_module)
     # Add QtCore since include conventions are sometimes violated for its classes
     get_target_property(qt_core_includes Qt${QT_MAJOR_VERSION}::Core
                         INTERFACE_INCLUDE_DIRECTORIES)
-    set(shiboken_include_dir_list ${PYSIDE_PACKAGE_SOURCE_DIR} ${qt_platform_includes}
-        ${qt_core_includes})
+    # Module includes
+    get_target_property(qt_module_includes Qt${QT_MAJOR_VERSION}::${_module_suffix}
+                        INTERFACE_INCLUDE_DIRECTORIES)
+
+    # For Apple framework builds, Qt 6.12 no longer passes $prefix/include dir (which holds the
+    # forwarding headers and the headers of the header-only modules) as an include directory,
+    # but as an "-idirafter" compile option on the Platform target, so that a prefixed include
+    # resolves to the framework instead of to a forwarding header.
+    # Extract the option path, strip the SHELL prefix, and pass it to shiboken.
+    get_target_property(qt_platform_compile_options Qt${QT_MAJOR_VERSION}::Platform
+                        INTERFACE_COMPILE_OPTIONS)
+    set(qt_dir_after_includes "")
+    foreach(compile_option IN LISTS qt_platform_compile_options)
+        if(compile_option MATCHES "^SHELL:-idirafter +(.*)$")
+            list(APPEND qt_dir_after_includes "${CMAKE_MATCH_1}")
+        endif()
+    endforeach()
+
+    set(shiboken_include_dir_list
+        ${PYSIDE_PACKAGE_SOURCE_DIR}
+        ${qt_platform_includes}
+        ${qt_core_includes}
+        ${qt_module_includes}
+    )
     if(module_ADDITIONAL_INCLUDE_DIRS)
         list(APPEND shiboken_include_dir_list ${${module_ADDITIONAL_INCLUDE_DIRS}})
     endif()
@@ -248,6 +270,15 @@ macro(create_pyside_module)
         list(APPEND force_process_system_include_paths_list
             ${qt_platform_includes}
             ${qt_core_includes})
+    endif()
+
+    # clang considers headers found via -idirafter to be system headers, and marks the headers
+    # they pull in as system headers as well. Since the header-only modules (QtUiPlugin,
+    # QtQmlIntegration) live there, that would drop their types and the types of
+    # the frameworks they include first, so process all of Qt's headers.
+    if(qt_dir_after_includes)
+        list(APPEND force_process_system_include_paths_list
+            ${qt_dir_after_includes} ${QT_FRAMEWORK_INCLUDE_DIR})
     endif()
 
     # Allow passing extra non system inlcude dirs.
@@ -302,6 +333,12 @@ macro(create_pyside_module)
         --license-file=${CMAKE_CURRENT_SOURCE_DIR}/../licensecomment.txt
         --lean-headers
         --api-version=${SUPPORTED_QT_VERSION})
+
+    if(qt_dir_after_includes)
+        make_path(shiboken_dir_after_include_dirs ${qt_dir_after_includes})
+        list(APPEND shiboken_command
+             "--dir-after-include-paths=${shiboken_dir_after_include_dirs}")
+    endif()
 
     # check if building for Android with a macOS host
     # This is not needed for Linux because OpenGLES2 development binaries in

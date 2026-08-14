@@ -12,6 +12,7 @@ enum class HeaderType : quint8
 {
     Standard,
     System,         // -isystem
+    DirAfter,       // -idirafter
     Framework,      // macOS framework path
     FrameworkSystem // macOS framework system path
 };
@@ -30,6 +31,9 @@ public:
             break;
         case HeaderType::System:
             option = QByteArrayLiteral("-isystem");
+            break;
+        case HeaderType::DirAfter:
+            option = QByteArrayLiteral("-idirafter");
             break;
         case HeaderType::Framework:
             option = QByteArrayLiteral("-F");
