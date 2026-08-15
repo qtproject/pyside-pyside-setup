@@ -34,6 +34,7 @@ many features and implementation details that the project has:
    :maxdepth: 2
 
    enumfeatures_doc.rst
+   freethreading.md
    limited_api.rst
    signature_doc.rst
    mypy-correctness.rst
