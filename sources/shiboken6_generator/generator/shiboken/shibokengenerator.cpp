@@ -94,6 +94,23 @@ const char *const richCompareComment =
     "// PYSIDE-74: By default, we redirect to object's tp_richcompare (which is `==`, `!=`).\n";
 const char *const maybeUnused = "[[maybe_unused]] ";
 
+const char *const clangBeginSuppressWarnings = R"(#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
+#endif
+)";
+
+const char *const clangEndSuppressWarnings = R"(#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
+)";
+
+const char *const clangQtBeginSuppressWarnings = R"(QT_WARNING_PUSH
+QT_WARNING_DISABLE_CLANG("-Wcast-function-type-mismatch")
+)";
+
+const char *const clangQtEndSuppressWarnings = "QT_WARNING_POP\n";
+
 struct ShibokenGeneratorOptions
 {
     bool useCtorHeuristic = false;
