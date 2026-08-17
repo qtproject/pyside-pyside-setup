@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (QApplication, QButtonGroup, QCheckBox, QComboBox,
                                QRadioButton, QScrollArea, QSizePolicy, QSlider, QSpinBox,
                                QVBoxLayout, QWidget)
 from PySide6.QtCore import Qt, QSignalBlocker, Slot
-from PySide6.QtGui import QAction, QIcon, QKeySequence
+from PySide6.QtGui import QIcon, QKeySequence
 
 import rc_stylekitwidgets  # noqa: F401
 
@@ -75,11 +75,12 @@ class StyleControl(QGroupBox):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
-        file_menu = self.menuBar().addMenu("&File")
+        menu_bar = self.menuBar()
+        menu_bar.setNativeMenuBar(False)
+        file_menu = menu_bar.addMenu("&File")
         file_menu.addAction(QIcon.fromTheme(QIcon.ThemeIcon.ApplicationExit), "Quit",
                             QKeySequence(QKeySequence.StandardKey.Quit), self.close)
-        help_menu = self.menuBar().addMenu("&Help")
+        help_menu = menu_bar.addMenu("&Help")
         help_menu.addAction(QIcon.fromTheme(QIcon.ThemeIcon.HelpAbout), "About Qt",
                             QKeySequence(QKeySequence.StandardKey.HelpContents),
                             QApplication.aboutQt)
