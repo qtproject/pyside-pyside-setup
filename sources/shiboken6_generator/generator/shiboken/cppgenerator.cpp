@@ -593,23 +593,6 @@ void CppGenerator::generateIncludes(TextStream &s, const GeneratorContext &class
         s << "#include <" << i << ">\n";
 }
 
-static const char clangBeginSuppressWarnings[] = R"(#ifdef __clang__
-#  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
-#endif
-)";
-
-static const char clangEndSuppressWarnings[] = R"(#ifdef __clang__
-#  pragma clang diagnostic pop
-#endif
-)";
-
-static const char clangQtBeginSuppressWarnings[] = R"(QT_WARNING_PUSH
-QT_WARNING_DISABLE_CLANG("-Wcast-function-type-mismatch")
-)";
-
-static const char clangQtEndSuppressWarnings[] = "QT_WARNING_POP\n";
-
 // Write methods definition
 void CppGenerator::writePyMethodDefs(TextStream &s, const QString &className,
                                      const QString &methodsDefinitions)

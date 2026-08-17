@@ -39,4 +39,9 @@ extern const char *const closeExternC;
 extern const char *const richCompareComment;
 extern const char *const maybeUnused;
 
+extern const char *const clangBeginSuppressWarnings;
+extern const char *const clangEndSuppressWarnings;
+extern const char *const clangQtBeginSuppressWarnings;
+extern const char *const clangQtEndSuppressWarnings;
+
 #endif // GENERATORSTRINGS_H

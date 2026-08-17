@@ -190,7 +190,9 @@ CppGenerator::OpaqueContainerData
     const auto kind = containerTypeEntry->containerKind();
     const bool isFixed = kind == ContainerTypeEntry::SpanContainer || containerName == u"std::array";
     const QString methods = result.name + u"_methods"_s;
-    s << "static PyMethodDef " << methods << "[] = {\n" << indent;
+    const bool usePySide = CppGenerator::usePySideExtensions();
+    s << (usePySide ? clangQtBeginSuppressWarnings : clangBeginSuppressWarnings)
+        << "static PyMethodDef " << methods << "[] = {\n" << indent;
     if (!isFixed) {
         writeMethod(s, privateObjType, u"push_back"_s);
         writeMethod(s, privateObjType, u"push_back"_s, u"append"_s); // Qt convention
@@ -209,7 +211,8 @@ CppGenerator::OpaqueContainerData
     writeNoArgsMethod(s, privateObjType, u"data"_s);
     writeNoArgsMethod(s, privateObjType, u"constData"_s);
     s << "{nullptr, nullptr, 0, nullptr} // Sentinel\n"
-        << outdent << "};\n\n";
+        << outdent << "};\n"
+        << (usePySide ? clangQtEndSuppressWarnings : clangEndSuppressWarnings) << '\n';
 
     // slots
     const QString slotsList = result.name + u"_slots"_s;
