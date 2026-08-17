@@ -371,7 +371,7 @@ def get_module_gallery(examples: list[ExampleData]) -> str:
                 if ((example.file_format == Format.MD and first_line.startswith('(')
                      and first_line.endswith(')='))
                         or (example.file_format == Format.RST and first_line.startswith('.. ')
-                            and first_line.endswith('::'))):
+                            and first_line.endswith(':'))):
                     # The first line is a reference, so read the next lines until a non-empty line
                     # is found
                     while True:
@@ -395,7 +395,7 @@ def get_module_gallery(examples: list[ExampleData]) -> str:
 
                 if line != "":
                     raise RuntimeError(
-                        f"{line} was expected to be empty. Doc file: {example.src_doc_file}")
+                        f'"{line}" was expected to be empty. Doc file: {example.src_doc_file}')
 
                 # Now read until another empty line
                 lines = []
