@@ -11,6 +11,30 @@ const auto size = %CPPSELF.mappedBytes(%1);
 %PYARG_0 = Shiboken::Buffer::newObject(%0, size, Shiboken::Buffer::ReadWrite);
 // @snippet qvideoframe-bits
 
+// @snippet capture-maximumframerate
+const std::optional<qreal> result = %CPPSELF.%FUNCTION_NAME();
+if (result.has_value()) {
+    %PYARG_0 = PyFloat_FromDouble(result.value());
+} else {
+    Py_INCREF(Py_None);
+    %PYARG_0 = Py_None;
+}
+// @snippet capture-maximumframerate
+
+// @snippet capture-setmaximumframerate
+if (%PYARG_1 == Py_None) {
+    %CPPSELF.%FUNCTION_NAME({});
+} else if (PyFloat_Check(%PYARG_1) != 0) {
+    const auto value = qreal(PyFloat_AsDouble(%PYARG_1));
+    %CPPSELF.%FUNCTION_NAME(value);
+} else if (PyLong_Check(%PYARG_1) != 0) {
+    const auto value = qreal( PyLong_AsDouble(%PYARG_1));
+    %CPPSELF.%FUNCTION_NAME(value);
+} else {
+    PyErr_SetString(PyExc_TypeError, "parameter must be float or None");
+}
+// @snippet capture-setmaximumframerate
+
 // @snippet qaudiobuffer-data
 unsigned char *data = %CPPSELF.%FUNCTION_NAME<unsigned char>();
 const auto size = %CPPSELF.byteCount();
