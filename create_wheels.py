@@ -161,10 +161,7 @@ def get_platform_tag(package_path: Path) -> str:
             target = "_".join(mac_ver.split(".")[:2])
         else:
             version = target.split(".")
-            if len(version) > 1:
-                target = "_".join(version)
-            else:
-                target = f"{version[0]}_0"
+            target = f"{version[0]}_0"
         # TODO: Make it general
         # To check if is compatible with 64bit on multi-arch systems
         # is_64bits = sys.maxsize > 2**32
