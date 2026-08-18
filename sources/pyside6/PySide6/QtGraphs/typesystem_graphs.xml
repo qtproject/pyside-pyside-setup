@@ -16,6 +16,7 @@
 
    <namespace-type name="QtGraphs3D">
      <enum-type name="ElementType"/>
+     <enum-type name="DragMode" since="6.12"/>
      <enum-type name="GridLineType"/>
      <enum-type name="OptimizationHint" flags="OptimizationHints"/>
      <enum-type name="RenderingMode"/>
