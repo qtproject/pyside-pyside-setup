@@ -83,6 +83,14 @@ accept_configuration:
       conditions:
         - condition: property
           property: target.os
+          equals_value: IOS
+        - condition: property
+          property: features
+          contains_value: Packaging
+    - condition: and
+      conditions:
+        - condition: property
+          property: target.os
           equals_value: MacOS
         - condition: property
           property: features

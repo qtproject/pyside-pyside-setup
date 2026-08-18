@@ -9,6 +9,13 @@ instructions:
       equals_value: Android
   - type: Group
     instructions:
+      - !include "{{pyside/pyside-setup}}/execute_ios_instructions.yaml"
+    enable_if:
+      condition: property
+      property: target.os
+      equals_value: IOS
+  - type: Group
+    instructions:
       - !include "{{pyside/pyside-setup}}/execute_desktop_instructions.yaml"
     enable_if:
         condition: and
@@ -19,6 +26,9 @@ instructions:
         - condition: property
           property: target.os
           not_equals_value: Android
+        - condition: property
+          property: target.os
+          not_equals_value: IOS
         - condition: property
           property: features
           not_contains_value: PysideAxivion

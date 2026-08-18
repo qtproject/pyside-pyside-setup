@@ -14,14 +14,25 @@ from ios_utilities import (download_python_support,
                            python_xcframework_slice_dir,
                            PYSIDE_SETUP_ROOT)
 
+COIN_RUN_HELP = ('''
+When run by Qt's continuos integration system COIN. This option is irrelevant to user building
+their own wheels.
+''')
+
 
 def cmd_build(args: argparse.Namespace) -> None:
     """ Build subcommand """
     simulator = args.simulator or (args.arch == "x86_64")
     arch = args.arch
+    coin = args.coin
     qt_install_path = args.qt_install_path.expanduser().resolve()
-    qt_ios = qt_install_path / "ios"
-    qt_macos = qt_install_path / "macos"
+
+    if coin:
+        qt_ios = qt_install_path / "target"
+        qt_macos = qt_install_path
+    else:
+        qt_ios = qt_install_path / "ios"
+        qt_macos = qt_install_path / "macos"
 
     # Download BeeWare Python.xcframework
     python_xcframework = download_python_support()
@@ -87,6 +98,10 @@ def main():
     build_p.add_argument(
         "--simulator", action="store_true",
         help="Build for iOS Simulator (device is the default)",
+    )
+    build_p.add_argument(
+        "--coin", action="store_true",
+        help=COIN_RUN_HELP,
     )
 
     # --- generate ---
