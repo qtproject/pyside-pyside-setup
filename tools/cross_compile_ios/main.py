@@ -34,7 +34,7 @@ def cmd_build(args: argparse.Namespace) -> None:
         qt_ios = qt_install_path / "ios"
         qt_macos = qt_install_path / "macos"
 
-    # Download BeeWare Python.xcframework
+    # Download the official python.org Python.xcframework
     python_xcframework = download_python_support()
 
     # Generate toolchain file
