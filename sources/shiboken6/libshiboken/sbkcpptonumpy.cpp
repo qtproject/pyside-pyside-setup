@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 // Qt-Security score:significant reason:default
 
-// included by sbknumpy.cpp
+// included by sbknumpy.cpp to keep the numpy code in one TU
 
-// AXIVION DISABLE Style Qt-Generic-MissingIncludeGuard: Included into source file to keep numpy code in one TU
+# pragma once // Silence Axivion
 // AXIVION DISABLE Style Qt-Generic-NoFunctionDefinitionInHeader: Not included in any header
 
 namespace Shiboken::Numpy {
