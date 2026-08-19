@@ -3,7 +3,7 @@
 // Qt-Security score:significant reason:build-tool
 
 #include "addedfunction.h"
-#include "addedfunction_p.h"
+#include "addedfunctionparser.h"
 #include "typeparser.h"
 
 #include <QtCore/qdebug.h>
