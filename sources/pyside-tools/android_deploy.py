@@ -12,7 +12,8 @@ from pathlib import Path
 from textwrap import dedent
 
 from deploy_lib import (create_config_file, cleanup, config_option_exists, PythonExecutable,
-                        MAJOR_VERSION, HELP_EXTRA_IGNORE_DIRS, HELP_EXTRA_MODULES)
+                        MAJOR_VERSION, HELP_EXTRA_IGNORE_DIRS, HELP_EXTRA_MODULES,
+                        HELP_NO_INSTALL)
 from deploy_lib.android import AndroidData, AndroidConfig
 from deploy_lib.android.buildozer import Buildozer
 
@@ -53,7 +54,8 @@ from deploy_lib.android.buildozer import Buildozer
 def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = None,
          ndk_path: Path = None, sdk_path: Path = None, config_file: Path = None, init: bool = False,
          loglevel=logging.WARNING, dry_run: bool = False, keep_deployment_files: bool = False,
-         force: bool = False, extra_ignore_dirs: str = None, extra_modules_grouped: str = None):
+         force: bool = False, extra_ignore_dirs: str = None, extra_modules_grouped: str = None,
+         no_install: bool = False):
 
     logging.basicConfig(level=loglevel)
 
@@ -79,7 +81,8 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
     android_data = AndroidData(wheel_pyside=pyside_wheel, wheel_shiboken=shiboken_wheel,
                                ndk_path=ndk_path, sdk_path=sdk_path)
 
-    python = PythonExecutable(dry_run=dry_run, init=init, force=force)
+    python = PythonExecutable(dry_run=dry_run, init=init, force=force,
+                              no_install=no_install)
 
     config_file_exists = config_file and Path(config_file).exists()
 
@@ -204,6 +207,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--extra-modules", type=str, help=HELP_EXTRA_MODULES)
 
+    parser.add_argument("--no-install", action="store_true", help=HELP_NO_INSTALL)
+
     args = parser.parse_args()
 
     # check if the Python version is greater than 3.12
@@ -213,4 +218,4 @@ if __name__ == "__main__":
 
     main(args.name, args.wheel_pyside, args.wheel_shiboken, args.ndk_path, args.sdk_path,
          args.config_file, args.init, args.loglevel, args.dry_run, args.keep_deployment_files,
-         args.force, args.extra_ignore_dirs, args.extra_modules)
+         args.force, args.extra_ignore_dirs, args.extra_modules, args.no_install)

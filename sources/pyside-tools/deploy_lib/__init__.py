@@ -55,6 +55,16 @@ HELP_MODE = dedent("""
                    macOS by default uses the --standalone option.
                    """)
 
+HELP_NO_INSTALL = dedent("""
+                         Do not install any Python package needed for deployment.
+
+                         The packages listed in the 'packages' option of
+                         pysidedeploy.spec have to be present already, otherwise
+                         the deployment stops with an error naming them. Use this
+                         for offline builds, or when the environment is managed
+                         elsewhere.
+                         """)
+
 # plugins to be removed from the --include-qt-plugins option because these plugins
 # don't exist in site-package under PySide6/Qt/plugins
 PLUGINS_TO_REMOVE = ["accessiblebridge", "platforms/darwin", "networkaccess",
@@ -112,6 +122,8 @@ def add_deploy_arguments(parser, include_main_file=True):
 
     parser.add_argument("--mode", choices=["onefile", "standalone"], default=None,
                         help=HELP_MODE)
+
+    parser.add_argument("--no-install", action="store_true", help=HELP_NO_INSTALL)
 
 
 from .commands import (  # noqa: F401, E402

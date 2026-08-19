@@ -7,8 +7,8 @@ import logging
 import os
 import sys
 
-from importlib import util
-from importlib.metadata import distributions as _distributions, version
+from importlib.metadata import (PackageNotFoundError, distributions as _distributions,
+                                version)
 from pathlib import Path
 
 from . import Config, run_command
@@ -20,14 +20,17 @@ class PythonExecutable:
     """
 
     def __init__(self, python_path: Path = None, dry_run: bool = False, init: bool = False,
-                 force: bool = False):
+                 force: bool = False, no_install: bool = False):
 
         self.dry_run = dry_run
         self.init = init
+        self.no_install = no_install
         if not python_path:
             response = "yes"
-            # checking if inside virtual environment
-            if not self.is_venv() and not force and not self.dry_run and not self.init:
+            # checking if inside virtual environment. Not needed with no_install,
+            # because then nothing is ever installed into it.
+            if (not self.is_venv() and not force and not self.dry_run and not self.init
+                    and not self.no_install):
                 response = input(("You are not using a virtual environment. pyside6-deploy needs "
                                   "to install a few Python packages for deployment to work "
                                   "seamlessly. \n Proceed? [Y/n]"))
@@ -65,7 +68,30 @@ class PythonExecutable:
 
         return False
 
+    def verify_installed(self, packages: list):
+        """
+        Check that 'packages' are already available, without installing
+        anything. Used by --no-install so that a deployment fails early and
+        names what is missing, instead of failing later inside Nuitka.
+        """
+        missing = []
+        for package in packages:
+            name = package.split("==")[0]
+            if not self.is_installed(name):
+                missing.append(name)
+        if missing:
+            raise RuntimeError(
+                "[DEPLOY] --no-install was given, but the following packages "
+                f"required for deployment are not installed: {', '.join(missing)}."
+                " Install them manually, or run without --no-install."
+            )
+        logging.info("[DEPLOY] All deployment dependencies are already installed")
+
     def install(self, packages: list = None):
+        if self.no_install:
+            self.verify_installed(packages)
+            return
+
         installed_packages = {d.metadata['Name'].lower() for d in _distributions()
                               if d.metadata['Name']}
         for package in packages:
@@ -81,7 +107,9 @@ class PythonExecutable:
                 raise ValueError(f"{package} should be of the format 'package_name'=='version'")
             if (package_name.lower() not in installed_packages
                     and not self.is_installed(package_name)):
-                logging.info(f"[DEPLOY] Installing package: {package}")
+                # printed rather than logged, so that changes to the user's
+                # environment are visible at the default log level
+                print(f"[DEPLOY] Installing package: {package}")
                 run_command(
                     command=[self.exe, "-m", "pip", "install", package],
                     dry_run=self.dry_run,
@@ -89,8 +117,8 @@ class PythonExecutable:
             elif package_version:
                 installed_version = version(package_name)
                 if package_version != installed_version:
-                    logging.info(f"[DEPLOY] Installing package: {package_name}"
-                                 f"version: {package_version}")
+                    print(f"[DEPLOY] Installing package: {package_name}"
+                          f" version: {package_version}")
                     run_command(
                         command=[self.exe, "-m", "pip", "install", "--force", package],
                         dry_run=self.dry_run,
@@ -102,7 +130,14 @@ class PythonExecutable:
                 logging.info(f"[DEPLOY] package: {package_name} already installed")
 
     def is_installed(self, package):
-        return bool(util.find_spec(package))
+        # pysidedeploy.spec lists distribution names, e.g. "Nuitka", which need
+        # not match the import name, e.g. "nuitka". Query the distribution
+        # metadata, which normalizes the name, instead of the import system.
+        try:
+            version(package)
+        except PackageNotFoundError:
+            return False
+        return True
 
     def install_dependencies(self, config: Config, packages: str, is_android: bool = False,
                              nuitka_version: str = None):
