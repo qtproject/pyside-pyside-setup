@@ -94,7 +94,7 @@ class Config(BaseConfig):
     creation
     """
 
-    def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
+    def __init__(self, config_file: Path, source_file: Path, dry_run: bool,
                  existing_config_file: bool = False, extra_ignore_dirs: list[str] = None,
                  name: str = None):
         super().__init__(config_file=config_file, existing_config_file=existing_config_file)
@@ -106,14 +106,6 @@ class Config(BaseConfig):
         self.source_file = Path(
             self.set_or_fetch(property_value=source_file, property_key="input_file")
         ).resolve()
-
-        self.python_path = Path(
-            self.set_or_fetch(
-                property_value=python_exe,
-                property_key="python_path",
-                property_group="python",
-            )
-        )
 
         self.title = self.set_or_fetch(property_value=name, property_key="title")
 
@@ -269,14 +261,6 @@ class Config(BaseConfig):
         self.set_value("app", "input_file", str(rel_path))
 
     @property
-    def python_path(self) -> Path:
-        return self._python_path
-
-    @python_path.setter
-    def python_path(self, python_path: Path):
-        self._python_path = python_path
-
-    @property
     def extra_args(self) -> str:
         return self.get_value("nuitka", "extra_args")
 
@@ -415,10 +399,10 @@ class DesktopConfig(Config):
         ONEFILE = "onefile"
         STANDALONE = "standalone"
 
-    def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
+    def __init__(self, config_file: Path, source_file: Path, dry_run: bool,
                  existing_config_file: bool = False, extra_ignore_dirs: list[str] = None,
                  mode: str = "onefile", name: str = None):
-        super().__init__(config_file, source_file, python_exe, dry_run, existing_config_file,
+        super().__init__(config_file, source_file, dry_run, existing_config_file,
                          extra_ignore_dirs, name=name)
         self.dependency_reader = QtDependencyReader(dry_run=self.dry_run)
         modules = self.get_value("qt", "modules")

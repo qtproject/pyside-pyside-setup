@@ -24,10 +24,10 @@ class AndroidConfig(Config):
     """
     Wrapper class around pysidedeploy.spec file for pyside6-android-deploy
     """
-    def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
+    def __init__(self, config_file: Path, source_file: Path, dry_run: bool,
                  android_data, existing_config_file: bool = False,
                  extra_ignore_dirs: list[str] = None, name: str = None):
-        super().__init__(config_file=config_file, source_file=source_file, python_exe=python_exe,
+        super().__init__(config_file=config_file, source_file=source_file,
                          dry_run=dry_run, existing_config_file=existing_config_file, name=name)
 
         self.extra_ignore_dirs = extra_ignore_dirs

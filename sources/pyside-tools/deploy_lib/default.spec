@@ -20,9 +20,6 @@ icon =
 
 [python]
 
-# Python path
-python_path =
-
 # Python packages to install
 packages = Nuitka==4.1.1
 
