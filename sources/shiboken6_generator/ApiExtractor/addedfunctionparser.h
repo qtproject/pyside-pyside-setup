@@ -10,6 +10,8 @@
 #include <QtCore/qstring.h>
 #include <QtCore/qstringview.h>
 
+#include <optional>
+
 QT_BEGIN_NAMESPACE
 class QDebug;
 QT_END_NAMESPACE
@@ -35,11 +37,21 @@ struct Argument
 
 using Arguments = QList<Argument>;
 
+struct ParsedFunction
+{
+    QString name;
+    Arguments arguments;
+    bool constant{false};
+};
+
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const Argument &a);
+QDebug operator<<(QDebug d, const ParsedFunction &f);
 #endif
 
 Arguments splitParameters(QStringView paramString, QString *errorMessage = nullptr);
+
+std::optional<ParsedFunction> parse(QStringView signature, QString *errorMessage);
 
 } // namespace AddedFunctionParser
 
