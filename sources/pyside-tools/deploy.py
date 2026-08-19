@@ -55,7 +55,8 @@ TOOL_DESCRIPTION = dedent(f"""
 def main(main_file: Path = None, name: str = None, config_file: Path = None, init: bool = False,
          loglevel=logging.WARNING, dry_run: bool = False, keep_deployment_files: bool = False,
          force: bool = False, extra_ignore_dirs: str = None, extra_modules_grouped: str = None,
-         mode: str = None, nuitka_version: str = None) -> str | None:
+         mode: str = None, nuitka_version: str = None,
+         no_install: bool = False) -> str | None:
     """
     Entry point for pyside6-deploy command.
 
@@ -84,7 +85,8 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
     extra_modules = [m[2:] if m.startswith("Qt") else m
                      for m in extra_modules_grouped.split(",")] if extra_modules_grouped else []
 
-    python = PythonExecutable(dry_run=dry_run, init=init, force=force)
+    python = PythonExecutable(dry_run=dry_run, init=init, force=force,
+                              no_install=no_install)
     config_file_exists = config_file and config_file.exists()
 
     if config_file_exists:
@@ -173,4 +175,4 @@ if __name__ == "__main__":
 
     main(args.main_file, args.name, args.config_file, args.init, args.loglevel, args.dry_run,
          args.keep_deployment_files, args.force, args.extra_ignore_dirs, args.extra_modules,
-         args.mode, args.nuitka_version)
+         args.mode, args.nuitka_version, args.no_install)

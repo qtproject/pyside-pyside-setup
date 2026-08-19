@@ -269,6 +269,8 @@ class Project:
             cmd.extend(["--extra-modules", args.extra_modules])
         if args.mode is not None:
             cmd.extend(["--mode", args.mode])
+        if args.no_install:
+            cmd.append("--no-install")
         run_command(cmd, cwd=self.project.project_file.parent)
 
     def lupdate(self):

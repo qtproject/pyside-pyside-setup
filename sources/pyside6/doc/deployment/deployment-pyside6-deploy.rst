@@ -246,6 +246,25 @@ Here are all the command line options of ``pyside6-deploy``:
   in case they are not found automatically. The module name can either be specified
   by omitting the prefix of Qt or including it eg: both Network and QtNetwork works.
 
+* **--no-install**: Do not install any Python package needed for deployment. The packages listed
+  in the ``packages`` option of ``pysidedeploy.spec`` have to be present already, otherwise
+  ``pyside6-deploy`` stops with an error naming the missing ones. Use this for offline builds, or
+  when the Python environment is managed elsewhere.
+
+What pyside6-deploy runs
+========================
+
+``pyside6-deploy`` is a build tool, and two parts of its behavior are worth knowing about.
+
+It installs the Python packages listed in the ``packages`` option of ``pysidedeploy.spec``, by
+default ``Nuitka``, into the active Python environment. Pass ``--no-install`` to prevent this and
+require those packages to be present already.
+
+Nuitka compiles the project and follows its imports, which executes module-level code of the
+project at build time. Deploying a project therefore runs that project's code, just as building it
+would. Only deploy projects that you trust, and treat ``pysidedeploy.spec`` as part of the project:
+it selects the packages to install and the arguments passed to Nuitka.
+
 Considerations
 ===============
 
