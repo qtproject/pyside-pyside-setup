@@ -94,7 +94,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
     else:
         config_file = create_config_file(main_file=main_file, dry_run=dry_run)
 
-    config = DesktopConfig(config_file=config_file, source_file=main_file, python_exe=python.exe,
+    config = DesktopConfig(config_file=config_file, source_file=main_file,
                            dry_run=dry_run, existing_config_file=config_file_exists,
                            extra_ignore_dirs=extra_ignore_dirs, mode=mode, name=name)
 

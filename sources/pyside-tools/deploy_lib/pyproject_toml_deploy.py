@@ -16,7 +16,7 @@ except ModuleNotFoundError:
 
 # Mapping from [tool.pyside6.deploy] TOML key → (spec section, spec key).
 # Only user-intent keys are listed here;
-# auto-derived fields (modules, plugins, qml_files, python_path, ...) are intentionally
+# auto-derived fields (modules, plugins, qml_files, ...) are intentionally
 # excluded because they are generated during the deployment process
 _TOML_TO_SPEC: dict[str, tuple[str, str]] = {
     "title": ("app", "title"),

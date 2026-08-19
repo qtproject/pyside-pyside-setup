@@ -98,7 +98,7 @@ def main(name: str = None, pyside_wheel: Path = None, shiboken_wheel: Path = Non
         config_file = create_config_file(main_file=main_file, dry_run=dry_run)
 
     config = AndroidConfig(config_file=config_file, source_file=main_file,
-                           python_exe=python.exe, dry_run=dry_run, android_data=android_data,
+                           dry_run=dry_run, android_data=android_data,
                            existing_config_file=config_file_exists,
                            extra_ignore_dirs=extra_ignore_dirs, name=name)
 
