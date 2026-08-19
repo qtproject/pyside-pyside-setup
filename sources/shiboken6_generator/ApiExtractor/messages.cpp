@@ -652,6 +652,10 @@ static QString functionDescription(const AbstractMetaFunction *function)
         result += u" (hidden friend)"_s;
     if (function->flags().testFlag(InternalFunctionFlag::InheritedFromTemplate))
         result += u" (inherited from template)"_s;
+    if (function->isUserAdded())
+        result += u" (user added)"_s;
+    if (function->isUserDeclared())
+        result += u" (user declared)"_s;
     return result;
 }
 

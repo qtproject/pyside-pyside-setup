@@ -9,6 +9,7 @@
 #include "abstractmetafunction.h"
 #include "abstractmetaenum.h"
 #include "abstractmetatype.h"
+#include "addedfunctionparser.h"
 #include "documentation.h"
 #include "messages.h"
 #include "modifications.h"
@@ -40,9 +41,19 @@ static QString typeSignature(const AbstractMetaArgument &arg)
     return arg.type().cppSignature();
 }
 
+static QString typeSignature(const AddedFunctionParser::Argument &arg)
+{
+    return arg.type;
+}
+
 static bool isPrimitiveType(const AbstractMetaArgument &arg)
 {
     return arg.type().isPrimitive();
+}
+
+static bool isPrimitiveType(const AddedFunctionParser::Argument &arg)
+{
+    return AbstractMetaType::cppPrimitiveTypes().contains(arg.type);
 }
 
 template <class ArgsIterator>
@@ -74,6 +85,22 @@ static QString functionQueryHelper(const QString &name,
 static inline QString functionQuery(const AbstractMetaFunctionCPtr &func)
 {
     const QString &sectionKindAttr = getSectionKindAttr(func);
+
+    if (const QString &docSignature = func->addedFunctionDocSignature(); !docSignature.isEmpty()) {
+        QString errorMessage;
+        auto parsedFunctionOpt = AddedFunctionParser::parse(docSignature, &errorMessage);
+        if (parsedFunctionOpt.has_value()) {
+            const auto &parsedFunction = parsedFunctionOpt.value();
+            return functionQueryHelper(parsedFunction.name, sectionKindAttr,
+                                       parsedFunction.constant,
+                                       parsedFunction.arguments.cbegin(),
+                                       parsedFunction.arguments.cend());
+
+            return {};
+        }
+        qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
+    }
+
     const AbstractMetaArgumentList &arguments = func->arguments();
     return functionQueryHelper(func->originalName(), sectionKindAttr,
                                func->isConstant(), arguments.cbegin(), arguments.cend());

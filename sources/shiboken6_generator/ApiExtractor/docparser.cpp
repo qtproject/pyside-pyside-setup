@@ -106,7 +106,8 @@ bool DocParser::skipForDocumentation(const AbstractMetaFunctionCPtr &func)
 // Functions to skip when querying documentation from WebXML
 bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
 {
-    return skipForDocumentation(func) || func->isUserAdded();
+    return skipForDocumentation(func)
+           || (func->isUserAdded() && func->addedFunctionDocSignature().isEmpty());
 }
 
 DocModificationList DocParser::getDocModifications(const AbstractMetaClassCPtr &cppClass)

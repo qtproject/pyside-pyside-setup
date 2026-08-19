@@ -3,6 +3,7 @@
 // Qt-Security score:significant reason:build-tool
 
 #include "qtdocparser.h"
+#include "addedfunctionparser.h"
 #include "classdocumentation.h"
 #include "abstractmetaargument.h"
 #include "abstractmetaenum.h"
@@ -180,28 +181,28 @@ QtDocParser::FunctionDocumentationOpt
     return modified;
 }
 
-QtDocParser::FunctionDocumentationOpt
-    QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
-                                            const ClassDocumentation &classDocumentation,
-                                            const AbstractMetaClassCPtr &metaClass,
-                                            const AbstractMetaFunctionCPtr &func, QString *errorMessage)
+static QString argType(const AddedFunctionParser::Argument &a) { return a.type; }
+
+static FunctionDocumentationQuery queryFromFunction(const AbstractMetaClassCPtr &metaClass,
+                                                    const AbstractMetaFunctionCPtr &func)
 {
-    // Search candidates by name and const-ness
-    FunctionDocumentationList candidates =
-        classDocumentation.findFunctionCandidates(func->name(), func->isConstant());
-    if (candidates.isEmpty()) {
-        *errorMessage = msgCannotFindDocumentation(sourceFileName, func.get())
-                        + u" (no matches)"_s;
-        return std::nullopt;
+    if (const QString &docSignature = func->addedFunctionDocSignature(); !docSignature.isEmpty()) {
+        QString errorMessage;
+        auto parsedFunctionOpt = AddedFunctionParser::parse(docSignature, &errorMessage);
+        if (parsedFunctionOpt.has_value()) {
+            const auto &parsedFunction = parsedFunctionOpt.value();
+            QStringList argumentTypes;
+            std::transform(parsedFunction.arguments.cbegin(), parsedFunction.arguments.cend(),
+                           std::back_inserter(argumentTypes), argType);
+            return {parsedFunction.name, argumentTypes, parsedFunction.constant};
+        }
+        qCWarning(lcShibokenDoc, "%s", qPrintable(errorMessage));
     }
 
-    // Try an exact query
-    FunctionDocumentationQuery fq;
-    fq.name = func->name();
-    fq.constant = func->isConstant();
+    FunctionDocumentationQuery result{func->name(), {}, func->isConstant()};
     for (const auto &arg : func->arguments())
-        fq.parameters.append(formatFunctionArgTypeQuery(arg.type()));
-
+        result.parameters.append(formatFunctionArgTypeQuery(arg.type()));
+    // Try an exact query
     const auto funcFlags = func->flags();
     // Re-add arguments removed by the metabuilder to binary operator functions
     if (funcFlags.testFlag(InternalFunctionFlag::OperatorLeadingClassArgumentRemoved)
@@ -212,15 +213,34 @@ QtDocParser::FunctionDocumentationOpt
             classType.append(u" &"_s);
         }
         if (funcFlags.testFlag(InternalFunctionFlag::OperatorLeadingClassArgumentRemoved))
-            fq.parameters.prepend(classType);
+            result.parameters.prepend(classType);
         else
-            fq.parameters.append(classType);
+            result.parameters.append(classType);
+    }
+    return result;
+}
+
+QtDocParser::FunctionDocumentationOpt
+    QtDocParser::queryFunctionDocumentation(const QString &sourceFileName,
+                                            const ClassDocumentation &classDocumentation,
+                                            const AbstractMetaClassCPtr &metaClass,
+                                            const AbstractMetaFunctionCPtr &func,
+                                            QString *errorMessage)
+{
+    // Search candidates by name and const-ness
+    const FunctionDocumentationQuery fq = queryFromFunction(metaClass, func);
+    FunctionDocumentationList candidates =
+        classDocumentation.findFunctionCandidates(fq.name, fq.constant);
+    if (candidates.isEmpty()) {
+        *errorMessage = msgCannotFindDocumentation(sourceFileName, func.get())
+                        + u" (no matches)"_s;
+        return std::nullopt;
     }
 
     const qsizetype index = ClassDocumentation::indexOfFunction(candidates, fq);
 
     if (debugFunctionSearch) {
-        qDebug() << __FUNCTION__ << metaClass->name() << fq << funcFlags << "returns"
+        qDebug() << __FUNCTION__ << metaClass->name() << fq << "returns"
             << index << "\n  " << candidates.value(index) << "\n  " << candidates;
     }
 
