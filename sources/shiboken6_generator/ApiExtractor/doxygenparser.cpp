@@ -35,6 +35,50 @@ static QString getSectionKindAttr(const AbstractMetaFunctionCPtr &func)
     return kind;
 }
 
+static QString typeSignature(const AbstractMetaArgument &arg)
+{
+    return arg.type().cppSignature();
+}
+
+static bool isPrimitiveType(const AbstractMetaArgument &arg)
+{
+    return arg.type().isPrimitive();
+}
+
+template <class ArgsIterator>
+static QString functionQueryHelper(const QString &name,
+                                   const QString &sectionKindAttr,
+                                   bool isConstant,
+                                   ArgsIterator a1, ArgsIterator a2)
+{
+    QString result;
+    QTextStream str(&result);
+    str << "[@kind=\"" << sectionKindAttr << "-func\"]/memberdef/name[text()=\"" << name << "\"]";
+
+    if (a1 == a2) {
+        str << "/../argsstring[text()=\"" << (isConstant ? "() const" : "()") << "\"]";
+    } else {
+        int i = 1;
+        for (; a1 != a2; ++a1) {
+            const QString &type = typeSignature(*a1).toHtmlEscaped();
+            str << "/../param[" << i++ << "]/type";
+            if (isPrimitiveType(*a1))
+                str << "[text(), \"" << type << "\"]/..";
+            else
+                str << "/ref[text()=\"" << type << "\"]/../..";
+        }
+    }
+    return result;
+}
+
+static inline QString functionQuery(const AbstractMetaFunctionCPtr &func)
+{
+    const QString &sectionKindAttr = getSectionKindAttr(func);
+    const AbstractMetaArgumentList &arguments = func->arguments();
+    return functionQueryHelper(func->originalName(), sectionKindAttr,
+                               func->isConstant(), arguments.cbegin(), arguments.cend());
+}
+
 QString DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
 {
     if (!metaClass)
@@ -107,32 +151,7 @@ QString DoxygenParser::fillDocumentation(const AbstractMetaClassPtr &metaClass)
                      + prop.name() + u"\"]"_s;
             isProperty = true;
         } else { // normal methods
-            QString kind = getSectionKindAttr(func);
-            query += u"[@kind=\""_s + kind
-                     + u"-func\"]/memberdef/name[text()=\""_s
-                     + func->originalName() + u"\"]"_s;
-
-            if (func->arguments().isEmpty()) {
-                QString args = func->isConstant() ? u"() const"_s : u"()"_s;
-                query += u"/../argsstring[text()=\""_s + args + u"\"]"_s;
-            } else {
-                int i = 1;
-                const AbstractMetaArgumentList &arguments = func->arguments();
-                for (const AbstractMetaArgument &arg : arguments) {
-                    if (!arg.type().isPrimitive()) {
-                        query += u"/../param["_s + QString::number(i)
-                                 + u"]/type/ref[text()=\""_s
-                                 + arg.type().cppSignature().toHtmlEscaped()
-                                 + u"\"]/../.."_s;
-                    } else {
-                        query += u"/../param["_s + QString::number(i)
-                                 + u"]/type[text(), \""_s
-                                 + arg.type().cppSignature().toHtmlEscaped()
-                                 + u"\"]/.."_s;
-                    }
-                    ++i;
-                }
-            }
+            query += functionQuery(func);
         }
         Documentation funcDoc;
         funcDoc.setSourceFile(doxyFilePath);
