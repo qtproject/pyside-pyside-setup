@@ -37,7 +37,5 @@ dependencies: [
       "../../qt/qtvirtualkeyboard",
       "../../qt/qtwayland",
       "../../qt/qtwebchannel",
-      "../../qt/qtwebengine",
       "../../qt/qtwebsockets",
-      "../../qt/qtwebview",
       ]
