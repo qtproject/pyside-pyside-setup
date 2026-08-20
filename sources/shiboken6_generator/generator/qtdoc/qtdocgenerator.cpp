@@ -1063,6 +1063,17 @@ void QtDocGenerator::writeFunctions(TextStream &s, const AbstractMetaFunctionCLi
     }
 }
 
+static const char *funcDirective(const AbstractMetaFunctionCPtr &func)
+{
+    if (func->ownerClass() == nullptr)
+        return ".. py:function::";
+    if (func->isStatic())
+        return ".. py:staticmethod::";
+    if (func->isClassMethod())
+        return ".. py:classmethod::";
+    return ".. py:method::";
+}
+
 void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    QtXmlToSphinxImages *images,
                                    const AbstractMetaClassCPtr &cppClass,
@@ -1072,11 +1083,7 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr
 
     // Enable injecting parameter documentation by adding a complete function directive.
     if (std::none_of(modifications.cbegin(), modifications.cend(), containsFunctionDirective)) {
-        if (func->ownerClass() == nullptr)
-            s << ".. py:function:: ";
-        else
-            s << (func->isStatic() ? ".. py:staticmethod:: " : ".. py:method:: ");
-        s << getFuncName(func) << formatArgs(func);
+        s << funcDirective(func) << ' ' << getFuncName(func) << formatArgs(func);
         Indentation indentation(s);
         if (!indexed)
             s << "\n:noindex:";
