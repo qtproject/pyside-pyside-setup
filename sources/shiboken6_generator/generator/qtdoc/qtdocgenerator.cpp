@@ -104,6 +104,7 @@ struct GeneratorDocumentation
     AbstractMetaFunctionCList tocVirtuals;
     AbstractMetaFunctionCList tocSignalFunctions;
     AbstractMetaFunctionCList tocSlotFunctions;
+    AbstractMetaFunctionCList tocClassFunctions;
     AbstractMetaFunctionCList tocStaticFunctions;
 
     QList<Property> properties;
@@ -595,6 +596,7 @@ void QtDocGenerator::doGenerateClass(TextStream &s, const QString &targetDir,
         writeFunctionToc(s, u"Virtual methods"_s, doc.tocVirtuals);
         writeFunctionToc(s, u"Slots"_s, doc.tocSlotFunctions);
         writeFunctionToc(s, u"Signals"_s, doc.tocSignalFunctions);
+        writeFunctionToc(s, u"Class methods"_s, doc.tocClassFunctions);
         writeFunctionToc(s, u"Static functions"_s, doc.tocStaticFunctions);
     }
 
@@ -1734,6 +1736,8 @@ GeneratorDocumentation
     for (const auto &func : std::as_const(result.allFunctions)) {
         if (func->isStatic())
             result.tocStaticFunctions.append(func);
+        if (func->isClassMethod())
+            result.tocClassFunctions.append(func);
         else if (func->isVirtual())
             result.tocVirtuals.append(func);
         else if (func->isSignal())
