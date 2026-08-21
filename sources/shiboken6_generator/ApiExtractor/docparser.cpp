@@ -78,7 +78,7 @@ static bool usesRValueReference(const AbstractMetaArgument &a)
     return a.type().referenceType() == RValueReference;
 }
 
-bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
+bool DocParser::skipForDocumentation(const AbstractMetaFunctionCPtr &func)
 {
     // Skip private functions and copies created by AbstractMetaClass::fixFunctions()
     // Note: Functions inherited from templates will cause warnings about missing
@@ -101,6 +101,12 @@ bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
 
     return std::any_of(func->arguments().cbegin(), func->arguments().cend(),
                        usesRValueReference);
+}
+
+// Functions to skip when querying documentation from WebXML
+bool DocParser::skipForQuery(const AbstractMetaFunctionCPtr &func)
+{
+    return skipForDocumentation(func) || func->isUserAdded();
 }
 
 DocModificationList DocParser::getDocModifications(const AbstractMetaClassCPtr &cppClass)
@@ -177,10 +183,8 @@ QString DocParser::enumBaseClass(const AbstractMetaEnum &e)
 AbstractMetaFunctionCList DocParser::documentableFunctions(const AbstractMetaClassCPtr &metaClass)
 {
     auto result = metaClass->functionsInTargetLang();
-    for (auto i = result.size() - 1; i >= 0; --i)  {
-        if (DocParser::skipForQuery(result.at(i)) || result.at(i)->isUserAdded())
-            result.removeAt(i);
-    }
+    result.erase(std::remove_if(result.begin(), result.end(), DocParser::skipForQuery),
+                 result.end());
     result.append(metaClass->cppSignalFunctions());
     return result;
 }

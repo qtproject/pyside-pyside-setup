@@ -148,7 +148,7 @@ constexpr auto none = "None"_L1;
 
 static bool shouldSkip(const AbstractMetaFunctionCPtr &func)
 {
-    if (DocParser::skipForQuery(func))
+    if (DocParser::skipForDocumentation(func))
         return true;
 
     // Search a const clone (QImage::bits() vs QImage::bits() const)
