@@ -427,6 +427,17 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
     // crash.
     PyObject_GC_UnTrack(pyObj);
 
+    // Take the object out of the wrapper map before anything below can run
+    // Python code. The refcount is already zero here, but the map used to keep
+    // the entry until deallocData(), several steps down. A lookup in between -
+    // a weakref callback, a __del__, C++ re-entering the binding - was handed
+    // this very wrapper and increfed it back to life, while the deallocation
+    // carried on and freed it underneath. The invariant callers rely on is
+    // "in the map implies alive", and this is where it has to be restored.
+    // Only the entry goes; the flags stay, canDelete below still reads them.
+    auto &bindingManager = Shiboken::BindingManager::instance();
+    bindingManager.unregisterWrapper(sbkObj);
+
     // Check that Python is still initialized as sometimes this is called by a static destructor
     // after Python interpeter is shutdown.
     if (sbkObj->weakreflist && Py_IsInitialized())
@@ -437,7 +448,6 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
     canDelete &= sbkObj->d->hasOwnership && sbkObj->d->validCppObject;
     if (canDelete) {
         if (sotp->delete_in_main_thread && Shiboken::currentThreadId() != Shiboken::mainThreadId()) {
-            auto &bindingManager = Shiboken::BindingManager::instance();
             if (sotp->is_multicpp) {
                  const auto entries = Shiboken::getDestructorEntries(sbkObj);
                  for (const auto &e : entries)
