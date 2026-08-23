@@ -8,6 +8,9 @@
 #include "sbkpython.h"
 #include "shibokenmacros.h"
 #include "sbkdestructorentry.h"
+#ifdef Py_GIL_DISABLED
+#  include "sbkacquiredwrapper.h"
+#endif
 
 #include <set>
 #include <utility>
@@ -46,6 +49,30 @@ public:
     void runDeletionInMainThread();
     void addToDeletionInMainThread(const DestructorEntry &);
 
+#ifdef Py_GIL_DISABLED
+    /// Look up a wrapper and take a reference to it in one step. Returns an
+    /// empty AcquiredWrapper when there is no wrapper for cptr, or when the one
+    /// there is has already started to be deallocated. This is what call
+    /// sites should use; see sbkacquiredwrapper.h for why.
+    [[nodiscard]] AcquiredWrapper acquireWrapper(const void *cptr, PyTypeObject *typeObject) const;
+    [[nodiscard]] AcquiredWrapper acquireWrapper(const void *cptr) const;
+
+    /// Register \a pyObj for \a cptr unless another thread got there first,
+    /// under one hold of the map lock. An empty return means this wrapper is
+    /// the registered one; a non-empty return is the wrapper that won, and
+    /// the caller has to discard its own.
+    ///
+    /// Looking up and registering as two steps leaves a gap in which two
+    /// threads both find nothing and both register, which gives one C++
+    /// object two wrappers - two destructors, and `a is b` false where PySide
+    /// promises true.
+    [[nodiscard]] AcquiredWrapper registerWrapperUnlessPresent(SbkObject *pyObj, void *cptr,
+                                                               PyTypeObject *typeObject);
+
+#endif // Py_GIL_DISABLED
+    /// \deprecated Hands out the borrowed reference the map holds, which the
+    /// caller cannot safely increment. Being replaced by acquireWrapper() one
+    /// call site at a time; this declaration goes away with the last of them.
     SbkObject *retrieveWrapper(const void *cptr, PyTypeObject *typeObject) const;
     SbkObject *retrieveWrapper(const void *cptr) const;
     static PyObject *getOverride(SbkObject *wrapper, PyObject *pyMethodName);

@@ -22,6 +22,20 @@
 #include <string_view>
 #include <unordered_map>
 #include <unordered_set>
+#ifdef Py_GIL_DISABLED
+#  include <cassert>
+#  include <utility>
+
+// Taking a reference needs an attached thread state: PyUnstable_TryIncRef
+// touches the interpreter's refcount bookkeeping. The precondition used to be
+// documentation only, which is how it got broken once already. PyGILState_Check
+// is not in the limited API, so the check only exists where we develop.
+#  if !defined(Py_LIMITED_API) && !defined(NDEBUG)
+#    define SBK_ASSERT_ATTACHED() assert(PyGILState_Check())
+#  else
+#    define SBK_ASSERT_ATTACHED() ((void)0)
+#  endif
+#endif // Py_GIL_DISABLED
 
 // GraphNode for the dependency graph. It keeps a pointer to
 // the TypeInitStruct to be able to lazily create the type and hashes
@@ -49,9 +63,58 @@ struct std::hash<GraphNode> {
 namespace Shiboken
 {
 
+#ifdef Py_GIL_DISABLED
+// What the wrapper map stores.
+//
+// The map is weak on purpose: strong references would make every wrapper
+// immortal, because for a Python-owned object the entry is only dropped once
+// the C++ object goes away, and that happens when the wrapper dies. So a
+// lookup has to upgrade a weak reference to a strong one, and "increment, but
+// only if the count is not zero" cannot be assembled from two steps - under
+// free threading Py_REFCNT() is computed from ob_ref_local / ob_ref_shared /
+// ob_tid rather than being a field to compare-and-swap, and the decref that
+// reaches zero happens inside CPython, out of reach of any lock of ours.
+//
+// PyUnstable_TryIncRef() is that upgrade. It is not in the limited API, so
+// an abi3t build will have to do it with a weakref instead.
+class WrapperEntry
+{
+public:
+    explicit WrapperEntry(SbkObject *obj) : m_obj(obj)
+    {
+        // Without this, TryIncRef fails for every object no other thread has
+        // touched yet, which looks just like "already dying".
+        PyUnstable_EnableTryIncRef(reinterpret_cast<PyObject *>(obj));
+    }
+
+    /// The borrowed reference the map holds. Unsafe by nature; only read
+    /// under the wrapper map lock, never handed out.
+    SbkObject *borrowed() const { return m_obj; }
+
+    /// A *new* reference, or nullptr when the wrapper is already on its way
+    /// out - "the entry exists" and "the object is alive" in one statement.
+    SbkObject *acquire() const
+    {
+        if (PyUnstable_TryIncRef(reinterpret_cast<PyObject *>(m_obj)) == 0)
+            return nullptr;
+        return m_obj;
+    }
+
+    /// Identity check that does not acquire, for findSbkObject().
+    bool refersTo(SbkObject *obj) const { return m_obj == obj; }
+
+private:
+    SbkObject *m_obj = nullptr;   // borrowed, as before
+};
+
+// Mapping of C++ address to wrapper. We use a multimap to allow for co-located
+// objects, which happens for example for the first field of a struct.
+using WrapperMap = std::unordered_multimap<const void *, WrapperEntry>;
+#else // Py_GIL_DISABLED
 // Mapping of C++ address to wrapper. We use a multimap to allow for co-located
 // objects, which happens for example for the first field of a struct.
 using WrapperMap = std::unordered_multimap<const void *, SbkObject *>;
+#endif // Py_GIL_DISABLED
 
 template <class NodeType>
 class BaseGraph
@@ -196,7 +259,11 @@ WrapperMap::const_iterator
     const auto end = wrapperMapper.cend();
     auto it = wrapperMapper.find(cptr);
     for (; it != end && it->first == cptr; ++it) {
+#ifdef Py_GIL_DISABLED
+        if (it->second.refersTo(wrapper))
+#else
         if (it->second == wrapper)
+#endif
             return it;
     }
     return end;
@@ -210,7 +277,11 @@ WrapperMap::const_iterator
     const auto end = wrapperMapper.cend();
     auto it = wrapperMapper.find(cptr);
     for (; it != end && it->first == cptr; ++it) {
+#ifdef Py_GIL_DISABLED
+        auto *foundType = Py_TYPE(reinterpret_cast<PyObject *>(it->second.borrowed()));
+#else
         auto *foundType = Py_TYPE(reinterpret_cast<PyObject *>(it->second));
+#endif
         if (foundType == desiredType || PyType_IsSubtype(foundType, desiredType) != 0)
             return it;
     }
@@ -249,7 +320,11 @@ inline void BindingManager::BindingManagerPrivate::assignWrapperHelper(SbkObject
 {
     const auto it = findSbkObject(cptr, wrapper);
     if (it == wrapperMapper.cend())
+#ifdef Py_GIL_DISABLED
+        wrapperMapper.insert(std::make_pair(cptr, WrapperEntry(wrapper)));
+#else
         wrapperMapper.insert(std::make_pair(cptr, wrapper));
+#endif
 }
 
 void BindingManager::BindingManagerPrivate::assignWrapper(SbkObject *wrapper, const void *cptr,
@@ -286,10 +361,36 @@ BindingManager::~BindingManager()
      * the BindingManager is being destroyed the interpreter is alredy
      * shutting down. */
     if (Py_IsInitialized()) {  // ensure the interpreter is still valid
+#ifdef Py_GIL_DISABLED
+        // One entry at a time, and destroy() outside the lock - the same rule
+        // visitAllPyObjects() follows: destroy() runs Python and C++
+        // destructors, which take this lock again, and a decref underneath a
+        // non-detaching mutex can stall a stop-the-world pause.
+        while (true) {
+            AcquiredWrapper wrapper;
+            const void *key = nullptr;
+            {
+                std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+                if (m_d->wrapperMapper.empty())
+                    break;
+                const auto it = m_d->wrapperMapper.begin();
+                key = it->first;
+                wrapper = AcquiredWrapper::fromOwned(it->second.acquire());
+                if (wrapper.isNull()) {
+                    // Being deallocated elsewhere; destroy() would not reach
+                    // it and the loop would never end.
+                    m_d->wrapperMapper.erase(it);
+                    continue;
+                }
+            }
+            Object::destroy(wrapper.object(), const_cast<void *>(key));
+        }
+#else // Py_GIL_DISABLED
         std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
         while (!m_d->wrapperMapper.empty()) {
             Object::destroy(m_d->wrapperMapper.begin()->second, const_cast<void *>(m_d->wrapperMapper.begin()->first));
         }
+#endif // Py_GIL_DISABLED
         assert(m_d->wrapperMapper.empty());
     }
     delete m_d;
@@ -359,20 +460,97 @@ void BindingManager::addToDeletionInMainThread(const DestructorEntry &e)
     m_d->deleteInMainThread.push_back(e);
 }
 
+#ifdef Py_GIL_DISABLED
+AcquiredWrapper BindingManager::acquireWrapper(const void *cptr) const
+{
+    SBK_ASSERT_ATTACHED();
+    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+    // The map is a multimap for co-located objects, so a key can carry more
+    // than one entry. Stopping at the first one that fails to acquire would
+    // report "no wrapper" while a live sibling sits right behind it - and the
+    // callers answer that by registering yet another wrapper for the same
+    // pointer.
+    const auto range = m_d->wrapperMapper.equal_range(cptr);
+    for (auto it = range.first; it != range.second; ++it) {
+        if (auto *wrapper = it->second.acquire())
+            return AcquiredWrapper::fromOwned(wrapper);
+    }
+    return {};
+}
+
+AcquiredWrapper BindingManager::acquireWrapper(const void *cptr, PyTypeObject *typeObject) const
+{
+    SBK_ASSERT_ATTACHED();
+    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+    // Same as above: keep looking past an entry that cannot be acquired.
+    // Reading the type through the borrowed pointer is sound here: taking an
+    // entry out of the map is the first thing deallocation does, and it needs
+    // this very lock, so nothing in the map has been freed yet.
+    const auto range = m_d->wrapperMapper.equal_range(cptr);
+    for (auto it = range.first; it != range.second; ++it) {
+        auto *found = reinterpret_cast<PyObject *>(it->second.borrowed());
+        auto *foundType = Py_TYPE(found);
+        if (foundType != typeObject && PyType_IsSubtype(foundType, typeObject) == 0)
+            continue;
+        if (auto *wrapper = it->second.acquire())
+            return AcquiredWrapper::fromOwned(wrapper);
+    }
+    return {};
+}
+
+AcquiredWrapper BindingManager::registerWrapperUnlessPresent(SbkObject *pyObj, void *cptr,
+                                                             PyTypeObject *typeObject)
+{
+    SBK_ASSERT_ATTACHED();
+    auto *instanceType = Shiboken::pyType(pyObj);
+    auto *d = PepType_SOTP(instanceType);
+    if (d == nullptr)
+        return {};
+
+    // The lookup and the insertion have to be one hold of the lock. It is
+    // recursive, so the two steps below may take it again; what matters is
+    // that nothing between them can slip in and register the same pointer.
+    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+
+    if (auto winner = acquireWrapper(cptr, typeObject))
+        return winner;
+
+    // The registration registerWrapper() does. mi_init() computes offsets
+    // from the C++ pointer and runs no Python, so it may run under the lock.
+    if (d->mi_init && !d->mi_offsets)
+        d->mi_offsets = d->mi_init(cptr);
+    m_d->assignWrapper(pyObj, cptr, d->mi_offsets);
+    return {};
+}
+
+#endif // Py_GIL_DISABLED
 SbkObject *BindingManager::retrieveWrapper(const void *cptr) const
 {
     std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
     auto iter = m_d->wrapperMapper.find(cptr);
     if (iter == m_d->wrapperMapper.end())
         return nullptr;
+#ifdef Py_GIL_DISABLED
+    // The map holds an entry rather than a pointer now; this one hands out
+    // the borrowed pointer it always did. Callers move to acquireWrapper()
+    // two commits from here, and then this goes away.
+    return iter->second.borrowed();
+#else
     return iter->second;
+#endif
 }
 
 SbkObject *BindingManager::retrieveWrapper(const void *cptr, PyTypeObject *typeObject) const
 {
     std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
     const auto it = m_d->findByType(cptr, typeObject);
-    return it != m_d->wrapperMapper.cend() ? it->second : nullptr;
+    if (it == m_d->wrapperMapper.cend())
+        return nullptr;
+#ifdef Py_GIL_DISABLED
+    return it->second.borrowed();
+#else
+    return it->second;
+#endif
 }
 
 PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *pyMethodName)
@@ -451,8 +629,14 @@ std::set<PyObject *> BindingManager::getAllPyObjects()
     std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
     const WrapperMap &wrappersMap = m_d->wrapperMapper;
     auto it = wrappersMap.begin();
-    for (; it != wrappersMap.end(); ++it)
-        pyObjects.insert(reinterpret_cast<PyObject *>(it->second));
+    for (; it != wrappersMap.end(); ++it) {
+#ifdef Py_GIL_DISABLED
+        auto *wrapper = it->second.borrowed();
+#else
+        auto *wrapper = it->second;
+#endif
+        pyObjects.insert(reinterpret_cast<PyObject *>(wrapper));
+    }
 
     return pyObjects;
 }
@@ -468,15 +652,20 @@ void BindingManager::visitAllPyObjects(ObjectVisitor visitor, void *data)
         copy = m_d->wrapperMapper;
     }
     for (const auto &p : copy) {
+#ifdef Py_GIL_DISABLED
+        auto *o = p.second.borrowed();
+#else
+        auto *o = p.second;
+#endif
         bool present = false;
         {
             std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
-            present = m_d->findSbkObject(p.first, p.second) != m_d->wrapperMapper.cend();
+            present = m_d->findSbkObject(p.first, o) != m_d->wrapperMapper.cend();
         }
         // Outside the lock: the visitor runs Python and C++ destructors, which
         // take it again and mutate the map.
         if (present)
-            visitor(p.second, data);
+            visitor(o, data);
     }
 }
 
@@ -493,7 +682,12 @@ void BindingManager::dumpWrapperMap()
         << "WrapperMap size: " << wrapperMap.size() << " Types: "
         << m_d->classHierarchy.nodeSet().size() << '\n';
     for (auto it : wrapperMap) {
+#ifdef Py_GIL_DISABLED
+        // Borrowed, but under the lock and only read - see acquireWrapper().
+        auto *ob = reinterpret_cast<PyObject *>(it.second.borrowed());
+#else
         auto *ob = reinterpret_cast<PyObject *>(it.second);
+#endif
         std::cerr << "key: " << it.first << ", value: "
             << static_cast<const void *>(ob) << " ("
             << PepType_GetFullyQualifiedNameStr(Py_TYPE(ob)) << ", refcnt: "

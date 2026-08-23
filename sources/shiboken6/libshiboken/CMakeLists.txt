@@ -67,6 +67,7 @@ pep384ext.cpp pep384ext.h
 pep384impl.cpp pep384impl.h pep384impl_p.h
 
 pyobjectholder.h
+sbkacquiredwrapper.h
 sbkarrayconverter.cpp sbkarrayconverter.h sbkarrayconverter_p.h
 sbkbindingutils.cpp sbkbindingutils.h
 sbkcontainer.cpp sbkcontainer.h
@@ -187,6 +188,7 @@ install(FILES
         gilstate.h
         helper.h
         pyobjectholder.h
+        sbkacquiredwrapper.h
         sbkarrayconverter.h
         sbkbindingutils.h
         sbkcontainer.h
