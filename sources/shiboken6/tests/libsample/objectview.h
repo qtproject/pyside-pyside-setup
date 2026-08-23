@@ -16,6 +16,9 @@ public:
     explicit ObjectView(ObjectModel *model = nullptr, ObjectType *parent = nullptr)
         : ObjectType(parent), m_model(model) {}
 
+    // Create from C++, so the object gets no C++ wrapper class.
+    inline static ObjectView *create() { return new ObjectView(); }
+
     inline void setModel(ObjectModel *model) { m_model = model; }
     inline ObjectModel *model() const { return m_model; }
 

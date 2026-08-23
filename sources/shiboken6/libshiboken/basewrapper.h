@@ -508,6 +508,10 @@ LIBSHIBOKEN_API void makeValid(SbkObject *self);
 
 /**
  * Destroy any data in Shiboken structure and c++ pointer if the pyboject has the ownership
+ *
+ * On a free-threaded build the caller must hold a reference to self: this drops
+ * the one the C++ side held, and the code after it still uses the object. The
+ * build with a GIL does not, and does not need to.
  */
 LIBSHIBOKEN_API void destroy(SbkObject *self, void *cppData);
 

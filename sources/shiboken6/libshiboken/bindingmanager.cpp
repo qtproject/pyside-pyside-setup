@@ -240,6 +240,12 @@ struct BindingManager::BindingManagerPrivate {
     std::recursive_mutex wrapperMapLock;
     Graph classHierarchy;
     DestructorEntries deleteInMainThread;
+#ifdef Py_GIL_DISABLED
+    // Nothing serializes the two users of the list above once the GIL is gone:
+    // it is filled from every thread that deallocates a delete-in-main-thread
+    // wrapper - QWidget, QWindow, QQuickItem and everything below them.
+    std::mutex deleteInMainThreadLock;
+#endif
 
     WrapperMap::const_iterator findSbkObject(const void *cptr, SbkObject *wrapper) const;
     WrapperMap::const_iterator findByType(const void *cptr, PyTypeObject *desiredType) const;
@@ -473,6 +479,26 @@ void BindingManager::releaseWrapper(SbkObject *sbkObj)
 }
 #endif // Py_GIL_DISABLED
 
+#ifdef Py_GIL_DISABLED
+void BindingManager::runDeletionInMainThread()
+{
+    BindingManagerPrivate::DestructorEntries pending;
+    {
+        std::lock_guard<std::mutex> guard(m_d->deleteInMainThreadLock);
+        pending.swap(m_d->deleteInMainThread);
+    }
+    // With the list taken over, not iterated in place: a destructor can
+    // deallocate further wrappers and queue them here.
+    for (const DestructorEntry &e : pending)
+        e.destructor(e.cppInstance);
+}
+
+void BindingManager::addToDeletionInMainThread(const DestructorEntry &e)
+{
+    std::lock_guard<std::mutex> guard(m_d->deleteInMainThreadLock);
+    m_d->deleteInMainThread.push_back(e);
+}
+#else // Py_GIL_DISABLED
 void BindingManager::runDeletionInMainThread()
 {
     for (const DestructorEntry &e : m_d->deleteInMainThread)
@@ -484,6 +510,7 @@ void BindingManager::addToDeletionInMainThread(const DestructorEntry &e)
 {
     m_d->deleteInMainThread.push_back(e);
 }
+#endif // Py_GIL_DISABLED
 
 #ifdef Py_GIL_DISABLED
 AcquiredWrapper BindingManager::acquireWrapper(const void *cptr) const

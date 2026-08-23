@@ -423,6 +423,19 @@ static void destructionVisitor(SbkObject *pyObj, void *data)
 
     auto *ob = reinterpret_cast<PyObject *>(pyObj);
     if (pyObj != pyQApp && PyObject_TypeCheck(ob, pyQObjectType)) {
+#ifdef Py_GIL_DISABLED
+        // Teardown reaches every wrapper, and other threads may still be
+        // calling into them. The lease refuses while a call is in flight, and
+        // an object left standing at shutdown is the better outcome: the
+        // alternative is destroying it under a running call. No guard - the
+        // destructor runs with the thread state released, and holding a
+        // critical section across that is what the guard must not do.
+        Shiboken::Object::CallLease lease{ob, Shiboken::Object::CallLease::Guard::Omit};
+        if (!lease) {
+            PyErr_Clear();   // the lease set a RuntimeError; teardown ignores it
+            return;
+        }
+#endif // Py_GIL_DISABLED
         if (Shiboken::Object::hasOwnership(pyObj) && Shiboken::Object::isValid(pyObj, false)) {
             Shiboken::Object::setValidCpp(pyObj, false);
 
