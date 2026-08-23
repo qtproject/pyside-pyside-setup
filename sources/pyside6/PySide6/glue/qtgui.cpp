@@ -792,8 +792,13 @@ if (_i) {
 // @snippet qstandarditemmodel-clear
 Shiboken::BindingManager &bm = Shiboken::BindingManager::instance();
 // PYSIDE-56, invalidate root item
+#ifdef Py_GIL_DISABLED
+if (auto pyRoot = bm.acquireWrapper(%CPPSELF.invisibleRootItem()))
+    Shiboken::Object::destroy(pyRoot.object(), %CPPSELF.invisibleRootItem());
+#else
 if (SbkObject *pyRoot = bm.retrieveWrapper(%CPPSELF.invisibleRootItem()))
     Shiboken::Object::destroy(pyRoot, %CPPSELF.invisibleRootItem());
+#endif
 // @snippet qstandarditemmodel-clear
 
 // @snippet qclipboard-text

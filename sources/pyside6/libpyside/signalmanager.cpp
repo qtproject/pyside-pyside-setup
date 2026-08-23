@@ -54,9 +54,16 @@ static void destroyMetaObject(PyObject *obj)
 {
     void *ptr = PyCapsule_GetPointer(obj, nullptr);
     auto *meta = reinterpret_cast<PySide::MetaObjectBuilder *>(ptr);
+#ifdef Py_GIL_DISABLED
+    auto &bindingManager = Shiboken::BindingManager::instance();
+    auto wrapper = bindingManager.acquireWrapper(meta);
+    if (!wrapper.isNull())
+        bindingManager.releaseWrapper(wrapper.object());
+#else
     SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(meta);
     if (wrapper)
         Shiboken::BindingManager::instance().releaseWrapper(wrapper);
+#endif
     delete meta;
 }
 
@@ -277,9 +284,19 @@ int SignalManagerPrivate::qtPropertyMetacall(QObject *object,
         return result;
 
     Shiboken::GilState gil;
+#ifdef Py_GIL_DISABLED
+    // The property call below runs Python code, so the wrapper has to be held
+    // for its duration. An empty result now also means "already dying", which
+    // the old borrow could not tell apart from a live one.
+    auto sbkSelf = Shiboken::BindingManager::instance().acquireWrapper(object);
+    if (sbkSelf.isNull())
+        return result;   // the wrapper is already being deallocated
+    auto *pySelf = sbkSelf.pyObject();
+#else
     auto *pySbkSelf = Shiboken::BindingManager::instance().retrieveWrapper(object);
     Q_ASSERT(pySbkSelf);
     auto *pySelf = reinterpret_cast<PyObject *>(pySbkSelf);
+#endif // Py_GIL_DISABLED
     Shiboken::AutoDecRef pp_name(Shiboken::String::fromCString(mp.name()));
     PySideProperty *pp = PySide::Property::getObject(pySelf, pp_name);
     if (!pp) {
@@ -350,9 +367,19 @@ int SignalManagerPrivate::qtPythonMetacall(QObject *object, const QMetaObject *m
         << " \"" << method.methodSignature() << '"';
 
     Shiboken::GilState gil;
+#ifdef Py_GIL_DISABLED
+    // The slot below runs Python code, so the wrapper has to be held for its
+    // duration. An empty result now also means "already dying", which the old
+    // borrow could not tell apart from a live one.
+    auto sbkSelf = Shiboken::BindingManager::instance().acquireWrapper(object);
+    if (sbkSelf.isNull())
+        return id - metaObject->methodCount();   // already being deallocated
+    auto *pySelf = sbkSelf.pyObject();
+#else
     auto *pySbkSelf = Shiboken::BindingManager::instance().retrieveWrapper(object);
     Q_ASSERT(pySbkSelf);
     auto *pySelf = reinterpret_cast<PyObject *>(pySbkSelf);
+#endif // Py_GIL_DISABLED
     Shiboken::AutoDecRef methodName(Shiboken::String::fromCString(method.name().constData()));
     Shiboken::AutoDecRef pyMethod(PySide::SignalManager::methodGetAttr(pySelf, methodName));
     if (pyMethod.isNull()) {
@@ -610,15 +637,26 @@ static int addMetaMethod(QObject *source, const QByteArray &signature,
                          QMetaMethod::MethodType type)
 {
     const QMetaObject *metaObject = source->metaObject();
+#ifdef Py_GIL_DISABLED
+    auto self = Shiboken::BindingManager::instance().acquireWrapper(source);
+    const bool noWrapper = self.isNull()
+        || !Shiboken::Object::hasCppWrapper(self.object());
+#else
     SbkObject *self = Shiboken::BindingManager::instance().retrieveWrapper(source);
-    if (!Shiboken::Object::hasCppWrapper(self)) {
+    const bool noWrapper = !Shiboken::Object::hasCppWrapper(self);
+#endif
+    if (noWrapper) {
         qWarning().noquote().nospace() << "libpyside: " << __FUNCTION__
             << ": Cannot add dynamic method \"" << signature << "\" (" << type
             << ") to " << PySide::debugQObject(source) << ": No Wrapper found.";
         return -1;
     }
 
+#ifdef Py_GIL_DISABLED
+    auto *pySelf = self.pyObject();
+#else
     auto *pySelf = reinterpret_cast<PyObject *>(self);
+#endif
     auto *dict = SbkObject_GetDict_NoRef(pySelf);
     PySide::MetaObjectBuilder *dmo = metaBuilderFromDict(dict);
     // Create a instance meta object

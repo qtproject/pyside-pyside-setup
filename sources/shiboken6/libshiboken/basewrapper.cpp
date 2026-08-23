@@ -851,6 +851,31 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
         return nullptr; // Bail out, execute C++ call (wrappers may outlive Python).
 
     auto &bindingManager = Shiboken::BindingManager::instance();
+#ifdef Py_GIL_DISABLED
+    // Cheap and without touching a reference count, so it needs no thread
+    // state - we may have none yet. It is also the answer for a C++ object
+    // never handed out to Python, which keeps that case as cheap as it was.
+    // Not free, though: with a type it walks the bucket and asks
+    // PyType_IsSubtype, so the positive case looks the map up twice. That is
+    // why this is not done on a build with a GIL, where a borrow is safe.
+    if (!bindingManager.hasWrapper(voidThis, typeObject))
+        return nullptr;
+
+    gil.acquire();
+
+    // A virtual call can arrive from a C++ destructor, so the wrapper may
+    // already be dying; an empty result covers that as well as "gone in the
+    // meantime". Needs the thread state taken just above, and for the same
+    // reason every path below that calls gil.release() has to reset() this
+    // first - letting it go is a decref.
+    auto wrapperRef = bindingManager.acquireWrapper(voidThis, typeObject);
+    if (wrapperRef.isNull()) {
+        gil.release();
+        return nullptr;
+    }
+    auto *wrapper = wrapperRef.object();
+    auto *pySelf = wrapperRef.pyObject();
+#else // Py_GIL_DISABLED
     SbkObject *wrapper = bindingManager.retrieveWrapper(voidThis, typeObject);
     // The refcount can be 0 if the object is dieing and someone called
     // a virtual method from the destructor
@@ -861,7 +886,11 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
         return nullptr;
 
     gil.acquire();
+#endif // Py_GIL_DISABLED
     if (resultCache == Py_None) { // PYSIDE 3246, some other thread may have determined the override
+#ifdef Py_GIL_DISABLED
+        wrapperRef.reset();
+#endif
         gil.release();
         return nullptr;
     }
@@ -884,6 +913,9 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
     if (pyOverride == nullptr) {
         resultCache = Py_None;
         Py_INCREF(resultCache);
+#ifdef Py_GIL_DISABLED
+        wrapperRef.reset();
+#endif
         gil.release();
         return nullptr; // No override, execute C++ call
     }
@@ -893,6 +925,9 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
         Py_XDECREF(pyOverride);
         resultCache = Py_None;
         Py_INCREF(resultCache);
+#ifdef Py_GIL_DISABLED
+        wrapperRef.reset();
+#endif
         gil.release();
         return nullptr; // // Give up.
     }
@@ -1783,6 +1818,33 @@ PyObject *newObjectWithHeuristics(PyTypeObject *instanceType,
 PyObject *newObjectForType(PyTypeObject *instanceType, void *cptr, bool hasOwnership)
 {
     auto &bindingManager = BindingManager::instance();
+#ifdef Py_GIL_DISABLED
+    if (auto existing = bindingManager.acquireWrapper(cptr, instanceType))
+        return reinterpret_cast<PyObject *>(existing.release());
+
+    auto *self = reinterpret_cast<SbkObject *>(SbkObject_tp_new(instanceType, nullptr, nullptr));
+    self->d->cptr[0] = cptr;
+    self->d->hasOwnership = hasOwnership;
+    self->d->validCppObject = 1;
+
+    // Creating the wrapper runs Python, so it cannot happen under the map
+    // lock; another thread may have registered one for the same pointer
+    // meanwhile. Registering asks and inserts in one hold, and hands back the
+    // winner if it is not ours.
+    if (auto winner = bindingManager.registerWrapperUnlessPresent(self, cptr, instanceType)) {
+        // Detach ours before dropping it: it never reached the map, and with
+        // the pointer cleared its deallocation leaves the C++ object alone.
+        // Ownership goes with the wrapper that won. If it has none and we
+        // were given some, the C++ object outlives both - a leak, where
+        // keeping ownership here would be the second delete.
+        self->d->cptr[0] = nullptr;
+        self->d->hasOwnership = false;
+        self->d->validCppObject = false;
+        Py_DECREF(reinterpret_cast<PyObject *>(self));
+        return reinterpret_cast<PyObject *>(winner.release());
+    }
+    return reinterpret_cast<PyObject *>(self);
+#else // Py_GIL_DISABLED
     SbkObject *self = bindingManager.retrieveWrapper(cptr, instanceType);
     if (self != nullptr) {
         Py_IncRef(reinterpret_cast<PyObject *>(self));
@@ -1794,6 +1856,7 @@ PyObject *newObjectForType(PyTypeObject *instanceType, void *cptr, bool hasOwner
         bindingManager.registerWrapper(self, cptr);
     }
     return reinterpret_cast<PyObject *>(self);
+#endif // Py_GIL_DISABLED
 }
 
 void destroy(SbkObject *self, void *cppData)

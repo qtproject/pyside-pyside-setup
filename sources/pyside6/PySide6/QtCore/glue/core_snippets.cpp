@@ -57,8 +57,12 @@ void addPostRoutine(PyObject *callback)
 
 static bool _findChildTypeMatch(const QObject *child, PyTypeObject *desiredType)
 {
+#ifdef Py_GIL_DISABLED
+    return PySide::qObjectTypeMatches(child, desiredType);
+#else
     auto *pyChildType = PySide::getTypeForQObject(child);
     return pyChildType != nullptr && PyType_IsSubtype(pyChildType, desiredType);
+#endif
 }
 
 static inline bool _findChildrenComparator(const QObject *child,

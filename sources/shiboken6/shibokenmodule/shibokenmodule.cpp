@@ -11,12 +11,20 @@ bool isValid = Shiboken::Object::isValid(%1, false);
 auto *pyType = reinterpret_cast<PyTypeObject *>(%2);
 if (Shiboken::ObjectType::checkType(pyType)) {
     auto *ptr = reinterpret_cast<void *>(%1);
+#ifdef Py_GIL_DISABLED
+    if (auto wrapper = Shiboken::BindingManager::instance().acquireWrapper(ptr)) {
+        %PYARG_0 = reinterpret_cast<PyObject *>(wrapper.release());
+    } else {
+        %PYARG_0 = Shiboken::Object::newObject(pyType, ptr, false, true);
+    }
+#else
     if (auto *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(ptr)) {
         %PYARG_0 = reinterpret_cast<PyObject *>(wrapper);
         Py_INCREF(%PYARG_0);
     } else {
         %PYARG_0 = Shiboken::Object::newObject(pyType, ptr, false, true);
     }
+#endif // Py_GIL_DISABLED
 } else {
     PyErr_SetString(PyExc_TypeError, "You need a shiboken-based type.");
 }
@@ -86,6 +94,16 @@ const auto setAll = Shiboken::BindingManager::instance().getAllPyObjects();
 PyObject* listAll = PyList_New(0);
 if (listAll == nullptr)
     return nullptr;
+#ifdef Py_GIL_DISABLED
+// PyList_Append() takes its own reference, so the ones held here are dropped
+// when the vector goes out of scope.
+for (const auto &wrapper : setAll) {
+    if (PyList_Append(listAll, wrapper.pyObject()) != 0) {
+        Py_DECREF(listAll);
+        return nullptr;
+    }
+}
+#else
 for (auto *o : setAll) {
     if (o != nullptr) {
         if (PyList_Append(listAll, o) != 0) {
@@ -94,6 +112,7 @@ for (auto *o : setAll) {
         }
     }
 }
+#endif // Py_GIL_DISABLED
 return listAll;
 // @snippet getallvalidwrappers
 

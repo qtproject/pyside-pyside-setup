@@ -70,10 +70,20 @@ PYSIDE_API void setNextQObjectMemoryAddr(void *addr);
 
 PYSIDE_API PyObject *getWrapperForQObject(QObject *cppSelf, PyTypeObject *sbk_type);
 
+#ifdef Py_GIL_DISABLED
+/// Check whether a QObject's type is desiredType or derived from it
+/// (Helper for QObject.findChild(ren)()). Unlike getTypeForQObject() below,
+/// the type is not handed out, so it cannot outlive the wrapper it belongs
+/// to - which is why the twin is not available under free threading.
+/// \param cppSelf QObject instance
+/// \param desiredType type to match against
+PYSIDE_API bool qObjectTypeMatches(const QObject *cppSelf, PyTypeObject *desiredType);
+#else
 /// Return the best-matching type for a QObject (Helper for QObject.findType())
 /// \param cppSelf QObject instance
 /// \return type object
 PYSIDE_API PyTypeObject *getTypeForQObject(const QObject *cppSelf);
+#endif // Py_GIL_DISABLED
 
 } //namespace PySide
 

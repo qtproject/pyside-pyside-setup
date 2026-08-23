@@ -30,10 +30,16 @@ static int testPointerBeingFreed(void *ptr)
 {
     // It is an error for a deleted pointer address to still be registered
     // in the BindingManager
-    if (Shiboken::BindingManager::instance().hasWrapper(ptr)) {
+    auto &bindingManager = Shiboken::BindingManager::instance();
+    if (bindingManager.hasWrapper(ptr)) {
         Shiboken::GilState state;
 
-        SbkObject *wrapper = Shiboken::BindingManager::instance().retrieveWrapper(ptr);
+#ifdef Py_GIL_DISABLED
+        auto wrapperRef = bindingManager.acquireWrapper(ptr);
+        auto *wrapper = wrapperRef.object();
+#else
+        SbkObject *wrapper = bindingManager.retrieveWrapper(ptr);
+#endif
 
         fprintf(stderr, "SbkObject still in binding map when deleted: ");
         PyObject_Print(reinterpret_cast<PyObject *>(wrapper), stderr, 0);

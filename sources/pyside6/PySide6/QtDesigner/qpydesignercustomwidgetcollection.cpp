@@ -99,10 +99,16 @@ QWidget *PyDesignerCustomWidget::createWidget(QWidget *parent)
     PyObject *pyParent = nullptr;
     bool unknownParent = false;
     if (parent) {
+#ifdef Py_GIL_DISABLED
+        // The tuple below steals the reference, so hand ours over.
+        auto wrapper = Shiboken::BindingManager::instance().acquireWrapper(parent);
+        if (!wrapper.isNull())
+            pyParent = reinterpret_cast<PyObject *>(wrapper.release());
+#else
         pyParent = reinterpret_cast<PyObject *>(Shiboken::BindingManager::instance().retrieveWrapper(parent));
-        if (pyParent) {
-            Py_INCREF(pyParent);
-        } else {
+        Py_XINCREF(pyParent);
+#endif
+        if (pyParent == nullptr) {
             static Shiboken::Conversions::SpecificConverter converter("QWidget*");
             pyParent = converter.toPython(&parent);
             unknownParent = true;

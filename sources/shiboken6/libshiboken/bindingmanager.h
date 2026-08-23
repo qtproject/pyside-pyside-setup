@@ -14,6 +14,7 @@
 
 #include <set>
 #include <utility>
+#include <vector>
 
 struct SbkObject;
 
@@ -68,8 +69,8 @@ public:
     /// promises true.
     [[nodiscard]] AcquiredWrapper registerWrapperUnlessPresent(SbkObject *pyObj, void *cptr,
                                                                PyTypeObject *typeObject);
-
 #endif // Py_GIL_DISABLED
+
     /// \deprecated Hands out the borrowed reference the map holds, which the
     /// caller cannot safely increment. Being replaced by acquireWrapper() one
     /// call site at a time; this declaration goes away with the last of them.
@@ -95,7 +96,15 @@ public:
      */
     [[deprecated]] PyTypeObject *resolveType(void **cptr, PyTypeObject *type);
 
+#ifdef Py_GIL_DISABLED
+    /// Every live wrapper, each with a reference taken. Wrappers that are
+    /// already being deallocated are left out rather than handed over: the
+    /// caller could not tell them apart, and incrementing one afterwards is
+    /// the resurrection this class exists to prevent.
+    std::vector<AcquiredWrapper> getAllPyObjects();
+#else
     std::set<PyObject *> getAllPyObjects();
+#endif
 
     /**
      * Calls the function \p visitor for each object registered on binding manager.

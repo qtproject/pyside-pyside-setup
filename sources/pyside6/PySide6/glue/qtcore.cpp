@@ -1175,6 +1175,18 @@ if (!PyTuple_SetItem(empty, 0, PyList_New(0))) {
 
 // @snippet qcoreapplication-instance
 PyObject *pyApp = Py_None;
+#ifdef Py_GIL_DISABLED
+Shiboken::AcquiredWrapper appRef;
+if (qApp) {
+    appRef = Shiboken::BindingManager::instance().acquireWrapper(qApp);
+    if (appRef.isNull()) {
+        pyApp = %CONVERTTOPYTHON[QCoreApplication *](qApp);
+        // this will keep app live after python exit (extra ref)
+    } else {
+        pyApp = appRef.pyObject();
+    }
+}
+#else
 if (qApp) {
     pyApp = reinterpret_cast<PyObject *>(
         Shiboken::BindingManager::instance().retrieveWrapper(qApp));
@@ -1182,6 +1194,7 @@ if (qApp) {
         pyApp = %CONVERTTOPYTHON[QCoreApplication *](qApp);
         // this will keep app live after python exit (extra ref)
 }
+#endif // Py_GIL_DISABLED
 // PYSIDE-571: make sure that we return the singleton "None"
 if (Py_TYPE(pyApp) == Py_TYPE(Py_None))
     Py_DECREF(MakeQAppWrapper(nullptr));

@@ -312,11 +312,16 @@ PyObject *referenceToPython(const SbkConverter *converter, const void *cppIn)
 {
     assert(cppIn);
 
+#ifdef Py_GIL_DISABLED
+    if (auto sbkOut = BindingManager::instance().acquireWrapper(cppIn, converter->pythonType))
+        return reinterpret_cast<PyObject *>(sbkOut.release());
+#else
     if (auto *sbkOut = BindingManager::instance().retrieveWrapper(cppIn, converter->pythonType)) {
         auto *pyOut = reinterpret_cast<PyObject *>(sbkOut);
         Py_INCREF(pyOut);
         return pyOut;
     }
+#endif
     if (!converter->pointerToPython) {
         warning(PyExc_RuntimeWarning, 0, "referenceToPython(): SbkConverter::pointerToPython is null for \"%s\".",
                 converter->pythonType->tp_name);
