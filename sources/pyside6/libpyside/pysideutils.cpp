@@ -5,6 +5,10 @@
 #include "pysideutils.h"
 
 #include <autodecref.h>
+#ifdef Py_GIL_DISABLED
+#  include <bindingmanager.h>
+#  include <gilstate.h>
+#endif
 #include <helper.h>
 #include <pep384ext.h>
 #include <sbkpep.h>
@@ -36,6 +40,23 @@ bool inherits(PyTypeObject *objType, const char *class_name)
 
     return inherits(base, class_name);
 }
+
+#ifdef Py_GIL_DISABLED
+bool wrapperInherits(const void *cppSelf, const char *class_name)
+{
+    auto &bindingManager = Shiboken::BindingManager::instance();
+    // hasWrapper() is pointer comparisons only: no thread state needed,
+    // and Qt calls qt_metacast() with none.
+    if (!bindingManager.hasWrapper(cppSelf))
+        return false;
+
+    // Reading the type through a borrowed reference is a use after free
+    // waiting to happen; take one instead, which needs a thread state.
+    Shiboken::GilState gil;
+    auto wrapper = bindingManager.acquireWrapper(cppSelf);
+    return !wrapper.isNull() && inherits(Py_TYPE(wrapper.pyObject()), class_name);
+}
+#endif // Py_GIL_DISABLED
 
 QString pyUnicodeToQString(PyObject *str)
 {

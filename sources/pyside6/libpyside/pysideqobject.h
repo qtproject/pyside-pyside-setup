@@ -71,6 +71,18 @@ PYSIDE_API void setNextQObjectMemoryAddr(void *addr);
 PYSIDE_API PyObject *getWrapperForQObject(QObject *cppSelf, PyTypeObject *sbk_type);
 
 #ifdef Py_GIL_DISABLED
+/// The dynamic meta object of a QObject, from the C++ pointer, for the
+/// generated metaObject(). nullptr when there is no Python wrapper.
+///
+/// Takes a void pointer, not a QObject one: it is a wrapper map key, and
+/// under multiple inheritance the QObject subobject does not sit at the
+/// address the wrapper was registered with.
+/// \param cppSelf the address the wrapper was registered with
+/// \return the meta object, or nullptr
+PYSIDE_API const QMetaObject *retrieveMetaObjectForCppObject(const void *cppSelf);
+#endif
+
+#ifdef Py_GIL_DISABLED
 /// Check whether a QObject's type is desiredType or derived from it
 /// (Helper for QObject.findChild(ren)()). Unlike getTypeForQObject() below,
 /// the type is not handed out, so it cannot outlive the wrapper it belongs

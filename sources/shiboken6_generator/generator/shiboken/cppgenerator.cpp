@@ -89,6 +89,26 @@ TextStream &operator<<(TextStream &str, const sbkUnusedVariableCast &c)
     return str;
 }
 
+// Look the wrapper up and take a reference. Needs an attached thread state
+// at the call site.
+struct acquireWrapper
+{
+    explicit acquireWrapper(const AbstractMetaClassCPtr &klass,
+                            QAnyStringView instanceName = "this")
+        : m_klass(klass), m_instanceName(instanceName) {}
+
+    const AbstractMetaClassCPtr m_klass;
+    const QAnyStringView m_instanceName;
+};
+
+TextStream &operator<<(TextStream &str, const acquireWrapper &aw)
+{
+    str << "Shiboken::BindingManager::instance().acquireWrapper(" << aw.m_instanceName
+        << ", " << CppGenerator::cpythonTypeName(aw.m_klass) << ')';
+    return str;
+}
+
+// The borrowed lookup the build with a GIL keeps, unchanged.
 struct retrieveWrapper
 {
     explicit retrieveWrapper(const AbstractMetaClassCPtr &klass,
@@ -1043,9 +1063,20 @@ void CppGenerator::writeDestructorNative(TextStream &s,
         << classContext.wrapperName() << "()\n{\n" << indent;
     if (wrapperDiagnostics())
         s << R"(std::cerr << __FUNCTION__ << ' ' << this << '\n';)" << '\n';
-    // kill pyobject
-    s << "auto *wrapper = " << retrieveWrapper(classContext.metaClass())
-      << ";\nShiboken::Object::destroy(wrapper, this);\n" << outdent << "}\n";
+    // kill pyobject. Most instances never had a wrapper, so ask before taking
+    // a thread state. SbkDeallocWrapperCommon() drops the thread state around
+    // the C++ destructor, so the lookup needs one of its own; Object::destroy()
+    // takes one a statement later anyway.
+    s << "#ifdef Py_GIL_DISABLED\n"
+         "if (!Shiboken::BindingManager::instance().hasWrapper(this))\n"
+      << indent << "return;\n" << outdent
+      << "Shiboken::GilState gil;\n"
+         "auto wrapper = " << acquireWrapper(classContext.metaClass())
+      << ";\nShiboken::Object::destroy(wrapper.object(), this);\n"
+         "#else\n"
+         "auto *wrapper = " << retrieveWrapper(classContext.metaClass())
+      << ";\nShiboken::Object::destroy(wrapper, this);\n"
+         "#endif\n" << outdent << "}\n";
 }
 
 // Return type for error messages when getting invalid types from virtual
@@ -1464,7 +1495,12 @@ void CppGenerator::writeVirtualMethodPythonOverride(TextStream &s,
 
     if (!snips.isEmpty()) {
         if (func->injectedCodeUsesPySelf())
-            s << "PyObject *pySelf = " << retrieveWrapper(func->ownerClass()) << ";\n";
+            s << "#ifdef Py_GIL_DISABLED\n"
+                 "auto pySelfRef = " << acquireWrapper(func->ownerClass()) << ";\n"
+                 "PyObject *pySelf = pySelfRef.pyObject();\n"
+                 "#else\n"
+                 "PyObject *pySelf = " << retrieveWrapper(func->ownerClass()) << ";\n"
+                 "#endif\n";
 
         const AbstractMetaArgument *lastArg = func->arguments().isEmpty()
                                             ? nullptr : &func->arguments().constLast();
@@ -1642,11 +1678,18 @@ void CppGenerator::writeMetaObjectMethod(TextStream &s,
     s << "const QMetaObject *" << wrapperClassName << "::metaObject() const\n{\n";
     s << indent << "if (QObject::d_ptr->metaObject != nullptr)\n"
         << indent << "return QObject::d_ptr->dynamicMetaObject();\n" << outdent
+        << "#ifdef Py_GIL_DISABLED\n"
+        << "if (const QMetaObject *mo = "
+           "PySide::retrieveMetaObjectForCppObject(this))\n"
+        << indent << "return mo;\n" << outdent
+        << "return " << qualifiedCppName << "::metaObject();\n"
+        << "#else\n"
         << "SbkObject *pySelf = Shiboken::BindingManager::instance().retrieveWrapper(this);\n"
         << "if (pySelf == nullptr)\n"
         << indent << "return " << qualifiedCppName << "::metaObject();\n" << outdent
         << "return PySide::SignalManager::retrieveMetaObject("
                 "reinterpret_cast<PyObject *>(pySelf));\n"
+        << "#endif\n"
         << outdent << "}\n\n";
 
     // qt_metacall function
@@ -1684,11 +1727,17 @@ void CppGenerator::writeMetaCast(TextStream &s,
     const QString qualifiedCppName = classContext.metaClass()->qualifiedCppName();
     s << "void *" << wrapperClassName << "::qt_metacast(const char *_clname)\n{\n"
         << indent << "if (_clname == nullptr)\n" << indent << "return {};\n" << outdent
+        << "#ifdef Py_GIL_DISABLED\n"
+        << "if (PySide::wrapperInherits(this, _clname))\n"
+        << indent << "return static_cast<void *>(const_cast< "
+        << wrapperClassName << " *>(this));\n" << outdent
+        << "#else\n"
         << "if (SbkObject *pySelf = Shiboken::BindingManager::instance().retrieveWrapper(this)) {\n" << indent
         << "auto *obSelf = reinterpret_cast<PyObject *>(pySelf);\n"
         << "if (PySide::inherits(Py_TYPE(obSelf), _clname))\n"
         << indent << "return static_cast<void *>(const_cast< "
         << wrapperClassName << " *>(this));\n" << outdent << outdent << "}\n"
+        << "#endif\n"
         << "return " << qualifiedCppName << "::qt_metacast(_clname);\n"
         << outdent << "}\n\n";
 }
@@ -1806,10 +1855,15 @@ void CppGenerator::writePointerToPythonConverter(TextStream &c,
                                                  const QString &cpythonType)
 {
     const auto &metaClass = context.metaClass();
-    c << "auto *pyOut = reinterpret_cast<PyObject *>(" << retrieveWrapper(metaClass, "cppIn") << ");\n"
+    c << "#ifdef Py_GIL_DISABLED\n"
+        << "if (auto wrapper = " << acquireWrapper(metaClass, "cppIn") << ")\n" << indent
+        << "return reinterpret_cast<PyObject *>(wrapper.release());\n" << outdent
+        << "#else\n"
+        << "auto *pyOut = reinterpret_cast<PyObject *>(" << retrieveWrapper(metaClass, "cppIn") << ");\n"
         << "if (pyOut) {\n" << indent
         << "Py_INCREF(pyOut);\nreturn pyOut;\n" << outdent
-        << "}\n";
+        << "}\n"
+        << "#endif\n";
 
     QString instanceCast = "auto *tCppIn = reinterpret_cast<const "_L1 + getFullTypeName(context)
                            + " *>(cppIn);\n"_L1;
@@ -5216,10 +5270,17 @@ void CppGenerator::writeGetterFunction(TextStream &s,
         // "foo.list_of_structs[2].field".
         s << "PyObject *pyOut = {};\n"
             << "auto *fieldTypeObject = " << cpythonTypeNameExt(fieldType) << ";\n"
+            << "#ifdef Py_GIL_DISABLED\n"
+            << "if (auto sbkOut = Shiboken::BindingManager::instance().acquireWrapper("
+            << cppField << ", fieldTypeObject)) {\n" << indent
+            << "pyOut = reinterpret_cast<PyObject *>(sbkOut.release());\n"
+            << outdent << "} else {\n" << indent
+            << "#else\n" << outdent
             << "if (auto *sbkOut = Shiboken::BindingManager::instance().retrieveWrapper("
             << cppField << ", fieldTypeObject)) {\n" << indent
             << "pyOut = reinterpret_cast<PyObject *>(sbkOut);\n"
             << "Py_INCREF(pyOut);\n" << outdent << "} else {\n" << indent
+            << "#endif\n"
             << "pyOut = Shiboken::Object::newObject(fieldTypeObject, "
             << cppField << ", false, true);\n"
             << "Shiboken::Object::setParent(self, pyOut);\n"

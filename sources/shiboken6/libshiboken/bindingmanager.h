@@ -51,10 +51,9 @@ public:
     void addToDeletionInMainThread(const DestructorEntry &);
 
 #ifdef Py_GIL_DISABLED
-    /// Look up a wrapper and take a reference to it in one step. Returns an
-    /// empty AcquiredWrapper when there is no wrapper for cptr, or when the one
-    /// there is has already started to be deallocated. This is what call
-    /// sites should use; see sbkacquiredwrapper.h for why.
+    /// Look up a wrapper and take a reference to it in one step. Empty when
+    /// there is no wrapper for cptr, or when it is already being deallocated.
+    /// This is what call sites should use; see sbkacquiredwrapper.h.
     [[nodiscard]] AcquiredWrapper acquireWrapper(const void *cptr, PyTypeObject *typeObject) const;
     [[nodiscard]] AcquiredWrapper acquireWrapper(const void *cptr) const;
 
@@ -71,11 +70,15 @@ public:
                                                                PyTypeObject *typeObject);
 #endif // Py_GIL_DISABLED
 
+#ifndef Py_GIL_DISABLED
     /// \deprecated Hands out the borrowed reference the map holds, which the
-    /// caller cannot safely increment. Being replaced by acquireWrapper() one
-    /// call site at a time; this declaration goes away with the last of them.
+    /// caller cannot safely increment. Gone under free threading. What is
+    /// left are the two Qt callbacks, metaObject() and qt_metacast(), that
+    /// PYSIDE-803 keeps out of the GIL on a build that has one - where the
+    /// borrow is no worse than it always was.
     SbkObject *retrieveWrapper(const void *cptr, PyTypeObject *typeObject) const;
     SbkObject *retrieveWrapper(const void *cptr) const;
+#endif
     static PyObject *getOverride(SbkObject *wrapper, PyObject *pyMethodName);
 
     void addClassInheritance(Module::TypeInitStruct *parent, Module::TypeInitStruct *child);

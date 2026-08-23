@@ -429,9 +429,9 @@ Shiboken::BindingManager &bm = Shiboken::BindingManager::instance();
 for (auto *item : items) {
 #ifdef Py_GIL_DISABLED
     if (auto obj = bm.acquireWrapper(item)) {
-        // If the refcnt is 1 the object will vannish anyway. Two, because the
-        // lookup above now holds one of them.
-        if (Py_REFCNT(obj.pyObject()) > 2)
+        // If the parent holds the only reference left, removeParent() makes
+        // the object vanish anyway and invalidating it is pointless.
+        if (obj.otherReferences() > 1)
             Shiboken::Object::invalidate(obj.object());
         Shiboken::Object::removeParent(obj.object());
     }

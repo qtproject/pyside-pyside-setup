@@ -56,6 +56,12 @@ public:
     { return reinterpret_cast<PyObject *>(m_obj); }
     PyObject *pyObject() const && = delete;
     [[nodiscard]] bool isNull() const noexcept { return m_obj == nullptr; }
+
+    /// How many references there are besides this one, for the one call site
+    /// that decides by how widely an object is held.
+    [[nodiscard]] Py_ssize_t otherReferences() const & { return Py_REFCNT(pyObject()) - 1; }
+    Py_ssize_t otherReferences() const && = delete;
+
     explicit operator bool() const noexcept { return m_obj != nullptr; }
 
     /// Hand the reference on to the caller, leaving this empty. For functions

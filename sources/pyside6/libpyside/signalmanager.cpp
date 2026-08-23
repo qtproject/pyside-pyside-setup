@@ -5,6 +5,7 @@
 #include "signalmanager.h"
 #include "signalmanager_p.h"
 #include "pyobjectwrapper.h"
+#include "pysideqobject.h"
 #include "pysideqobject_p.h"
 #include "pysidesignal.h"
 #include "pysidelogging_p.h"
@@ -749,4 +750,34 @@ const QMetaObject *retrieveMetaObject(PyObject *self)
     return builder->update();
 }
 
+
 } // namespace PySide::SignalManager
+
+#ifdef Py_GIL_DISABLED
+namespace PySide {
+
+// Note: the QMetaObject returned here belongs to the MetaObjectBuilder in the
+// wrapper's instance dict and dies with the wrapper. Holding a reference for
+// the duration of the lookup does not change that - metaObject() returns a
+// raw pointer by Qt's signature, so the caller is on its own afterwards. That
+// window predates free threading and is not addressed here.
+const QMetaObject *retrieveMetaObjectForCppObject(const void *cppSelf)
+{
+    auto &bindingManager = Shiboken::BindingManager::instance();
+    // hasWrapper() is pointer comparisons only: no thread state needed,
+    // and Qt calls metaObject() with none.
+    if (!bindingManager.hasWrapper(cppSelf))
+        return nullptr;
+
+    // The wrapper can reach zero between the lookup and the use. Take a
+    // reference; the thread state that needs is the one retrieveMetaObject()
+    // acquires anyway on this build.
+    Shiboken::GilState gil;
+    auto wrapper = bindingManager.acquireWrapper(cppSelf);
+    if (wrapper.isNull())
+        return nullptr;
+    return SignalManager::retrieveMetaObject(wrapper.pyObject());
+}
+
+} // namespace PySide
+#endif // Py_GIL_DISABLED

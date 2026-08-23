@@ -34,6 +34,15 @@ namespace PySide
 /// \param class_name strict with the class name
 /// \return Returns true if self object inherits from class_name, otherwise returns false
 PYSIDE_API bool inherits(PyTypeObject *self, const char *class_name);
+#ifdef Py_GIL_DISABLED
+/// The same asked about the Python wrapper of a C++ object, for the
+/// generated qt_metacast(). False when there is no wrapper. Takes a void
+/// pointer, not a QObject one: it is a wrapper map key, and under multiple
+/// inheritance the QObject subobject is not at the registered address.
+/// \param cppSelf the C++ pointer the wrapper was registered with
+/// \param class_name strict with the class name
+PYSIDE_API bool wrapperInherits(const void *cppSelf, const char *class_name);
+#endif
 
 /// Given A PyObject representing Unicode data, returns an equivalent QString.
 PYSIDE_API QString pyUnicodeToQString(PyObject *str);
