@@ -89,6 +89,17 @@ TextStream &operator<<(TextStream &str, const sbkUnusedVariableCast &c)
     return str;
 }
 
+// Name of the lease variable for a wrapper expression ("self", "pyArgs[0]").
+static QString leaseVariableName(const QString &pyObj)
+{
+    QString result = "sbkLease_"_L1 + pyObj;
+    for (QChar &c : result) {
+        if (!c.isLetterOrNumber())
+            c = u'_';
+    }
+    return result;
+}
+
 // Look the wrapper up and take a reference. Needs an attached thread state
 // at the call site.
 struct acquireWrapper
@@ -1992,11 +2003,32 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
     QString pyInVariable = u"pyIn"_s;
     const QString outPtr = u"reinterpret_cast<"_s + typeName + u" *>(cppOut)"_s;
     if (!classContext.forSmartPointer()) {
+        // The lease keeps the source object alive across the copy. Callers
+        // that pass a wrapper as an argument already hold one, but the
+        // converter is also reached from container conversions and from the
+        // signal code, where nothing does. It returns void, so the only error
+        // path is the exception the lease raises.
+        // A failure here is only noticed by the return error check, after
+        // the C++ call ran with a default-constructed argument.
+        c << "#ifdef Py_GIL_DISABLED\n"
+            << "Shiboken::Object::CallLease " << leaseVariableName(pyInVariable)
+            << '{' << pyInVariable << "};\n"
+            << "if (!" << leaseVariableName(pyInVariable) << ")\n" << indent
+            << "return;\n" << outdent
+            << "#endif\n";
         QString value = u'*' + cpythonWrapperCPtr(typeEntry, pyInVariable);
         c << '*' << outPtr << " = " << (needsMove ? stdMove(value) : value) << ';';
     } else {
         auto ste = std::static_pointer_cast<const SmartPointerTypeEntry>(typeEntry);
         const QString resetMethod = ste->resetMethod();
+        // Same lease as above. Py_None takes the reset branch and needs none,
+        // but CallLease accepts it anyway - it only leases wrapper instances.
+        c << "#ifdef Py_GIL_DISABLED\n"
+            << "Shiboken::Object::CallLease " << leaseVariableName(pyInVariable)
+            << '{' << pyInVariable << "};\n"
+            << "if (!" << leaseVariableName(pyInVariable) << ")\n" << indent
+            << "return;\n" << outdent
+            << "#endif\n";
         c << "auto *ptr = " << outPtr << ";\n";
         c << "if (" << pyInVariable << " == Py_None)\n" << indent;
         if (resetMethod.isEmpty())
@@ -2594,14 +2626,6 @@ void CppGenerator::writeMethodWrapper(TextStream &s, const OverloadData &overloa
     }
     s << ")\n{\n" << indent;
 
-    // Serialize entry into the binding layer so concurrent access to
-    // the same wrapper is safely serialized instead of crashing. No-op on
-    // GIL-enabled builds. The critical section is suspended whenever the
-    // thread detaches (ALLOW_THREADS, blocking on a Python lock).
-    s << "#ifdef Py_GIL_DISABLED\n"
-      << "Shiboken::CoarseBindingGuard graphGuard;\n"
-      << "#endif\n";
-
     writeMethodWrapperPreamble(s, overloadData, classContext);
 
     s << '\n';
@@ -2797,7 +2821,8 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
     const QString className = useWrapperClass
         ? context.wrapperName() : getFullTypeName(metaClass);
 
-    writeInvalidPyObjectCheck(s, PYTHON_SELF_VAR, errorReturn);
+    // Lease the C++ object for the rest of this wrapper's scope.
+    writeCallLease(s, PYTHON_SELF_VAR, errorReturn);
 
     if (flags.testFlag(CppSelfAsReference)) {
          writeCppSelfVarDef(s, flags | CppSelfDefinitionFlag::MaybeUnused);
@@ -2897,11 +2922,30 @@ void CppGenerator::writeFunctionReturnErrorCheckSection(TextStream &s,
     s << errorReturn << outdent << "}\n";
 }
 
-void CppGenerator::writeInvalidPyObjectCheck(TextStream &s, const QString &pyObj,
-                                             ErrorReturn errorReturn)
+void CppGenerator::writeCallLease(TextStream &s, const QString &pyObj,
+                                  ErrorReturn errorReturn, LeaseGuard guard)
 {
-    s << "if (!Shiboken::Object::isValid(" << pyObj << "))\n"
-        << indent << errorReturn << outdent;
+    // The lease replaces "if (!Shiboken::Object::isValid(x)) return ...". The
+    // check alone was only sufficient while one coarse lock was held from
+    // wrapper entry to wrapper exit; without it, a concurrent Shiboken.delete()
+    // could free the C++ object between the check and the call. The lease is
+    // declared in the same scope as the call that uses the pointer, so it is
+    // released by its destructor on every exit path.
+    const QString leaseVar = leaseVariableName(pyObj);
+    // Arguments lease without the guard: a nested PyCriticalSection does not
+    // lock two objects, it suspends the outer one - which would leave the
+    // receiver unguarded for the duration of the call.
+    const auto guardArg = guard == LeaseGuard::Omit
+        ? ", Shiboken::Object::CallLease::Guard::Omit"_L1 : ""_L1;
+    s << "#ifdef Py_GIL_DISABLED\n"
+        << "Shiboken::Object::CallLease " << leaseVar << '{' << pyObj
+        << guardArg << "};\n"
+        << "if (!" << leaseVar << ")\n"
+        << indent << errorReturn << outdent
+        << "#else\n"
+        << "if (!Shiboken::Object::isValid(" << pyObj << "))\n"
+        << indent << errorReturn << outdent
+        << "#endif\n";
 }
 
 static QString pythonToCppConverterForArgumentName(const QString &argumentName)
@@ -3040,7 +3084,7 @@ qsizetype CppGenerator::writeArgumentConversion(TextStream &s,
     if (argType.typeEntry()->isCustom() || argType.typeEntry()->isVarargs())
         return result;
     if (argType.isWrapperType())
-        writeInvalidPyObjectCheck(s, pyArgName, errorReturn);
+        writeCallLease(s, pyArgName, errorReturn, LeaseGuard::Omit);
     result = writePythonToCppTypeConversion(s, argType, pyArgName, argName, context, defaultValue);
     if (castArgumentAsUnused)
         s << sbkUnusedVariableCast(argName);
@@ -3748,6 +3792,29 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
     StringStream c(TextStream::Language::Cpp);
     if (conversion.isEmpty())
         conversion = u'*' + cpythonWrapperCPtr(sourceType, u"pyIn"_s);
+    if (sourceType.isWrapperType()) {
+        // Reading the source wrapper's C++ pointer needs a lease, the same
+        // way the copy converters do: an argument passed to a wrapped
+        // function is covered by the caller, but container conversions and
+        // the signal code reach this without one. void return, so the
+        // exception the lease raises is the error path.
+        const QString pyInLeaseVar = leaseVariableName(u"pyIn"_s);
+        c << "#ifdef Py_GIL_DISABLED\n"
+            // The lease keeps the C++ object alive, not the wrapper, and
+            // no caller's reference covers this one: container conversions
+            // hand in an element borrowed out of the container, which
+            // another thread can drop. Pin the wrapper for the lease's
+            // lifetime - ~CallLease writes to it.
+            << "Py_INCREF(pyIn);\n"
+            << "Shiboken::AutoDecRef sbkPin_pyIn{pyIn};\n"
+            // No guard: this only copies the object out, and a guard here
+            // would nest inside the receiver's and suspend it.
+            << "Shiboken::Object::CallLease " << pyInLeaseVar
+            << "{pyIn, Shiboken::Object::CallLease::Guard::Omit};\n"
+            << "if (!" << pyInLeaseVar << ")\n" << indent
+            << "return;\n" << outdent
+            << "#endif\n";
+    }
     if (!preConversion.isEmpty())
         c << preConversion << '\n';
     const QString fullTypeName = targetType.isSmartPointer()
@@ -6433,11 +6500,30 @@ void CppGenerator::writeSetattroFunction(TextStream &s, AttroCheck attroCheck,
     // PYSIDE-803: Detect duck-punching; clear cache if a method is set.
     if (attroCheck.testFlag(AttroCheckFlag::SetattroMethodOverride)
             && context.useWrapper()) {
+        // The lease keeps the C++ object alive while the cache is reset. It
+        // is a plain condition, not an error return: setting a python
+        // attribute on a wrapper whose C++ side is gone stays legal, there is
+        // simply no method cache left to clear.
+        const QString leaseVar = leaseVariableName(PYTHON_SELF_VAR);
         s << "if (value != nullptr && PyCallable_Check(value) != 0) {\n" << indent
+            << "#ifdef Py_GIL_DISABLED\n"
+            << "Shiboken::Object::CallLease " << leaseVar
+            << '{' << PYTHON_SELF_VAR << "};\n"
+            << "if (" << leaseVar << ") {\n" << indent
             << "auto plain_inst = " << cpythonWrapperCPtr(metaClass, PYTHON_SELF_VAR) << ";\n"
             << "auto *inst = dynamic_cast<" << context.wrapperName() << " *>(plain_inst);\n"
             << "if (inst != nullptr)\n" << indent
             << "inst->resetPyMethodCache();\n" << outdent << outdent
+            << "} else {\n" << indent
+            // The lease raised "already deleted"; here that is not an error.
+            << "PyErr_Clear();\n" << outdent
+            << "}\n"
+            << "#else\n"
+            << "auto plain_inst = " << cpythonWrapperCPtr(metaClass, PYTHON_SELF_VAR) << ";\n"
+            << "auto *inst = dynamic_cast<" << context.wrapperName() << " *>(plain_inst);\n"
+            << "if (inst != nullptr)\n" << indent
+            << "inst->resetPyMethodCache();\n" << outdent
+            << "#endif\n" << outdent
             << "}\n";
     }
     if (attroCheck.testFlag(AttroCheckFlag::SetattroQObject)) {
@@ -6451,7 +6537,16 @@ void CppGenerator::writeSetattroFunction(TextStream &s, AttroCheck attroCheck,
         auto func = AbstractMetaClass::queryFirstFunction(metaClass->functions(),
                                                           FunctionQueryOption::SetAttroFunction);
         Q_ASSERT(func);
+        // Unlike the method cache reset above, the injected code cannot do its
+        // job without the C++ object, so a missing lease is an error here.
+        const QString leaseVar = leaseVariableName(u"user"_s);
         s << "{\n" << indent
+            << "#ifdef Py_GIL_DISABLED\n"
+            << "Shiboken::Object::CallLease " << leaseVar
+            << '{' << PYTHON_SELF_VAR << "};\n"
+            << "if (!" << leaseVar << ")\n" << indent
+            << "return -1;\n" << outdent
+            << "#endif\n"
             << "auto " << CPP_SELF_VAR << " = "
             << cpythonWrapperCPtr(metaClass, PYTHON_SELF_VAR) << ";\n";
         writeClassCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionAny,
@@ -6492,7 +6587,25 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
     if (usePySideExtensions())
         s << "PySide::Feature::Select(self);\n";
 
-    const QString getattrFunc = usePySideExtensions() && isQObject(metaClass)
+    const bool needsCppSelf = usePySideExtensions() && isQObject(metaClass);
+    if (needsCppSelf) {
+        // The QObject path below reads the C++ object. Without a lease it can
+        // be destroyed while we read it, and this entry point comes straight
+        // from Python, so nobody holds one. Falling back to the generic
+        // lookup keeps attribute access on an invalidated wrapper working,
+        // which it has to - repr() and introspection use it. The user
+        // getattro path further down reads it too and leases separately.
+        const QString leaseVar = leaseVariableName(u"self"_s);
+        s << "#ifdef Py_GIL_DISABLED\n"
+            << "Shiboken::Object::CallLease " << leaseVar << "{self};\n"
+            << "if (!" << leaseVar << ") {\n" << indent
+            << "PyErr_Clear();\n"
+            << "return PyObject_GenericGetAttr(self, name);\n" << outdent
+            << "}\n"
+            << "#endif\n";
+    }
+
+    const QString getattrFunc = needsCppSelf
         ? qObjectGetAttroFunction() : u"PyObject_GenericGetAttr(self, name)"_s;
 
     if (attroCheck.testFlag(AttroCheckFlag::GetattroOverloads)) {
@@ -6527,8 +6640,21 @@ void CppGenerator::writeGetattroFunction(TextStream &s, AttroCheck attroCheck,
         auto func = AbstractMetaClass::queryFirstFunction(metaClass->functions(),
                                                           FunctionQueryOption::GetAttroFunction);
         Q_ASSERT(func);
-        s << "{\n" << indent
-            << "auto " << CPP_SELF_VAR << " = "
+        s << "{\n" << indent;
+        // The injected code works on the C++ object, so it needs a lease of
+        // its own unless the QObject path above already took one. Here a
+        // missing lease is an error: unlike the generic lookup, this code
+        // cannot do its job without the C++ side.
+        if (!needsCppSelf) {
+            const QString leaseVar = leaseVariableName(u"user"_s);
+            s << "#ifdef Py_GIL_DISABLED\n"
+                << "Shiboken::Object::CallLease " << leaseVar
+                << '{' << PYTHON_SELF_VAR << "};\n"
+                << "if (!" << leaseVar << ")\n" << indent
+                << "return nullptr;\n" << outdent
+                << "#endif\n";
+        }
+        s << "auto " << CPP_SELF_VAR << " = "
             << cpythonWrapperCPtr(metaClass, PYTHON_SELF_VAR) << ";\n";
         writeClassCodeSnips(s, func->injectedCodeSnips(), TypeSystem::CodeSnipPositionAny,
                             TypeSystem::TargetLangCode, context);

@@ -493,6 +493,18 @@ void pythonToCppPointer(PyTypeObject *type, PyObject *pyIn, void *cppOut)
     assert(type);
     assert(pyIn);
     assert(cppOut);
+#ifdef Py_GIL_DISABLED
+    // A lease, like the copy converter next to it: an argument is covered by
+    // its caller, but container conversions and the signal code reach this
+    // without one. No guard - the pointer is only copied out. A failed lease
+    // has set the RuntimeError, and the null written here is what the
+    // caller's error check sees, after the call ran with it.
+    Shiboken::Object::CallLease lease{pyIn, Shiboken::Object::CallLease::Guard::Omit};
+    if (!lease) {
+        *reinterpret_cast<void **>(cppOut) = nullptr;
+        return;
+    }
+#endif
     *reinterpret_cast<void **>(cppOut) = pyIn == Py_None
         ? nullptr
         : cppPointer(type, reinterpret_cast<SbkObject *>(pyIn));
@@ -503,6 +515,14 @@ void pythonToCppPointer(const SbkConverter *converter, PyObject *pyIn, void *cpp
     assert(converter);
     assert(pyIn);
     assert(cppOut);
+#ifdef Py_GIL_DISABLED
+    // As the overload above.
+    Shiboken::Object::CallLease lease{pyIn, Shiboken::Object::CallLease::Guard::Omit};
+    if (!lease) {
+        *reinterpret_cast<void **>(cppOut) = nullptr;
+        return;
+    }
+#endif
     *reinterpret_cast<void **>(cppOut) = pyIn == Py_None
         ? nullptr
         : cppPointer(converter->pythonType, reinterpret_cast<SbkObject *>(pyIn));

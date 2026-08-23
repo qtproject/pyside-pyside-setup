@@ -426,11 +426,23 @@ void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
     m_d->assignWrapper(pyObj, cptr, d->mi_offsets);
 }
 
+#ifdef Py_GIL_DISABLED
+void BindingManager::unregisterWrapper(SbkObject *sbkObj, void * const *cptrs)
+{
+    if (cptrs == nullptr)
+        cptrs = sbkObj->d->cptr;
+    // The pointers may already be detached: invalidate() runs after the
+    // destruction transaction has taken them out of the object. Nothing is
+    // left to look up then.
+    if (cptrs == nullptr)
+        return;
+#else
 void BindingManager::unregisterWrapper(SbkObject *sbkObj)
 {
     void **cptrs = sbkObj->d->cptr;
     if (cptrs == nullptr)
         return;
+#endif // Py_GIL_DISABLED
     auto *sbkType = Shiboken::pyType(sbkObj);
     auto *d = PepType_SOTP(sbkType);
     int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(sbkType) : 1);
@@ -442,11 +454,24 @@ void BindingManager::unregisterWrapper(SbkObject *sbkObj)
     }
 }
 
+#ifdef Py_GIL_DISABLED
+// The flag is cleared without the state lock on purpose. This runs from
+// runInvalidationPlan(), which asserts the state lock is *not* held: it takes
+// the wrapper map lock, and a transaction must not take another lock. The
+// write therefore travels with that step rather than with the transaction
+// that decided it.
+void BindingManager::releaseWrapper(SbkObject *sbkObj, void * const *cptrs)
+{
+    unregisterWrapper(sbkObj, cptrs);
+    sbkObj->d->validCppObject = false;
+}
+#else
 void BindingManager::releaseWrapper(SbkObject *sbkObj)
 {
     unregisterWrapper(sbkObj);
     sbkObj->d->validCppObject = false;
 }
+#endif // Py_GIL_DISABLED
 
 void BindingManager::runDeletionInMainThread()
 {
@@ -522,9 +547,7 @@ AcquiredWrapper BindingManager::registerWrapperUnlessPresent(SbkObject *pyObj, v
     m_d->assignWrapper(pyObj, cptr, d->mi_offsets);
     return {};
 }
-#endif // Py_GIL_DISABLED
-
-#ifndef Py_GIL_DISABLED
+#else // Py_GIL_DISABLED
 SbkObject *BindingManager::retrieveWrapper(const void *cptr) const
 {
     std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
@@ -540,7 +563,7 @@ SbkObject *BindingManager::retrieveWrapper(const void *cptr, PyTypeObject *typeO
     const auto it = m_d->findByType(cptr, typeObject);
     return it != m_d->wrapperMapper.cend() ? it->second : nullptr;
 }
-#endif // !Py_GIL_DISABLED
+#endif // Py_GIL_DISABLED
 
 PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *pyMethodName)
 {

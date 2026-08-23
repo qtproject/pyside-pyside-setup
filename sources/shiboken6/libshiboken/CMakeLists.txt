@@ -70,6 +70,8 @@ pyobjectholder.h
 sbkacquiredwrapper.h
 sbkarrayconverter.cpp sbkarrayconverter.h sbkarrayconverter_p.h
 sbkbindingutils.cpp sbkbindingutils.h
+sbkcallguard.cpp sbkcallguard.h
+sbkcalllease.h
 sbkcontainer.cpp sbkcontainer.h
 sbkconverter.cpp sbkconverter.h sbkconverter_p.h
 sbkcppstring.cpp sbkcppstring.h sbkcpptonumpy.h
@@ -84,7 +86,9 @@ sbknumpyview.h
 sbkpep.h
 sbkpepbuffer.h
 sbkpython.h
+sbkrelaxedflag.h
 sbksmartpointer.cpp sbksmartpointer.h
+sbkstatelock.cpp sbkstatelock.h
 sbkstaticstrings.cpp sbkstaticstrings.h sbkstaticstrings_p.h
 sbkstring.cpp sbkstring.h
 sbktypefactory.cpp sbktypefactory.h
@@ -191,6 +195,8 @@ install(FILES
         sbkacquiredwrapper.h
         sbkarrayconverter.h
         sbkbindingutils.h
+        sbkcallguard.h
+        sbkcalllease.h
         sbkcontainer.h
         sbkconverter.h
         sbkcpptonumpy.h
@@ -205,9 +211,11 @@ install(FILES
         sbkmodule_p.h
         sbknumpycheck.h
         sbknumpyview.h
+        sbkrelaxedflag.h
         sbkstring.h
         sbkcppstring.h
         sbksmartpointer.h
+        sbkstatelock.h
         sbkstaticstrings.h
         sbktypefactory.h
         shiboken.h

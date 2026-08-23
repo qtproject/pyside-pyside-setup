@@ -89,6 +89,14 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
     // Shiboken::Object wrapper.
     if (Shiboken::Object::checkType(addressObject)) {
         auto *sbkOther = reinterpret_cast<SbkObject *>(addressObject);
+#ifdef Py_GIL_DISABLED
+        // Reading cptr needs a lease like every other reader: another thread
+        // may be deleting the wrapper. No guard - nothing is called on the
+        // object, the pointer is only copied out.
+        Shiboken::Object::CallLease lease{addressObject, Shiboken::Object::CallLease::Guard::Omit};
+        if (!lease)
+            return -1;
+#endif
         sbkSelf->cptr = sbkOther->d->cptr[0];
         sbkSelf->size = size;
         sbkSelf->isWritable = isWritable > 0;
@@ -354,6 +362,16 @@ static PythonToCppFunc VoidPtrToCppIsConvertible(PyObject *pyIn)
 static void SbkObjectToCpp(PyObject *pyIn, void *cppOut)
 {
     auto *sbkIn = reinterpret_cast<SbkObject *>(pyIn);
+#ifdef Py_GIL_DISABLED
+    // As above: the converter reaches cptr from any thread, so it takes a
+    // lease. A failed lease has set the RuntimeError; the null it writes is
+    // what the caller's error check sees.
+    Shiboken::Object::CallLease lease{pyIn, Shiboken::Object::CallLease::Guard::Omit};
+    if (!lease) {
+        *reinterpret_cast<void **>(cppOut) = nullptr;
+        return;
+    }
+#endif
     *reinterpret_cast<void **>(cppOut) = sbkIn->d->cptr[0];
 }
 

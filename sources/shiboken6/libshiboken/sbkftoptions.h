@@ -16,24 +16,24 @@ namespace Shiboken::FreeThreading {
 /// Kill switches for the locks that free-threaded builds add, as bit flags in
 /// one variable, in the style of PYSIDE6_OPTION_PYTHON_ENUM:
 ///
-///     PYSIDE6_OPTION_FT=0b11      all of them (the default)
-///     PYSIDE6_OPTION_FT=0b01      without the lazy type lock
+///     PYSIDE6_OPTION_FT=0b1111    all of them (the default)
+///     PYSIDE6_OPTION_FT=0b0111    without the per-object call guard
+///     PYSIDE6_OPTION_FT=0b0011    without the state lock either
 ///     PYSIDE6_OPTION_FT=off       without any of them
 ///
 /// A set bit keeps its lock, a cleared bit takes it away. Unset means all of
 /// them, and that is the only supported configuration - clearing a bit is a
 /// testing device, not a tuning knob.
 ///
-/// It exists because a lock that is never removed proves nothing. The A/B
-/// harness in tests/manually/freethreading runs each scenario twice against
-/// the same binary, once with its lock and once without: the run without has
-/// to crash, the run with has to stay clean. A scenario that passes either
-/// way may simply never reach the race.
+/// It exists because a lock that is never removed proves nothing; the A/B
+/// harness in tests/manually/freethreading runs each scenario against the same
+/// binary once with its lock and once without.
 enum Option : int
 {
     CoarseBindingLock = 0x1, ///< the coarse guard around the object graph
     LazyTypeLock      = 0x2, ///< serializes lazy type creation
-    AllLocks          = CoarseBindingLock | LazyTypeLock
+    StateLock         = 0x4, ///< the short-lived lock on the binding state
+    CallGuard         = 0x8  ///< serializes calls reaching one C++ object
 };
 
 /// Whether opt is enabled. The environment is read once, on first use.

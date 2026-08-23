@@ -8,6 +8,8 @@
 #include "sbkpython.h"
 #include "shibokenmacros.h"
 #include "sbkdestructorentry.h"
+#include "sbkcallguard.h"
+#include "sbkcalllease.h"
 
 #include <vector>
 #include <string>
@@ -305,6 +307,7 @@ LIBSHIBOKEN_API bool canDowncastTo(PyTypeObject *baseType, PyTypeObject *targetT
 
 namespace Object {
 
+
 /**
  *  Returns a string with information about the internal state of the instance object, useful for debug purposes.
  */
@@ -329,8 +332,10 @@ LIBSHIBOKEN_API Py_hash_t hash(PyObject *pyObj);
 /**
  * Find a child of given wrapper having same address having the specified type.
  */
+#ifndef Py_GIL_DISABLED
 LIBSHIBOKEN_API SbkObject *findColocatedChild(SbkObject *wrapper,
                                               const PyTypeObject *instanceType);
+#endif
 
 /**
  *  Bind a C++ object to Python. Forwards to

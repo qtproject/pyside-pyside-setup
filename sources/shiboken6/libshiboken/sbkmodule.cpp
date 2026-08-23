@@ -99,7 +99,7 @@ static ModuleData *moduleData()
 //   QSGDynamicTexture incarnates QSGTexture, and creating the enums calls back
 //   into Python.
 // - A thread that has to wait detaches first. It therefore holds nothing while
-//   it waits - in particular the object graph guard is suspended and its mutex
+//   it waits - in particular the per-object call guard is suspended and its mutex
 //   released - so it cannot take part in a cycle, and it does not stall a
 //   stop-the-world pause.
 #ifdef Py_GIL_DISABLED

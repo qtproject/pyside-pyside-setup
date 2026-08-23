@@ -220,9 +220,20 @@ private:
                                                      ErrorReturn errorReturn,
                                                      bool hasReturnValue = true);
 
-    /// Writes the check section for the validity of wrapped C++ objects.
-    static void writeInvalidPyObjectCheck(TextStream &s, const QString &pyObj,
-                                          ErrorReturn errorReturn);
+    /// Whether a lease also takes the per-object guard. Only the receiver
+    /// does: nesting critical sections does not lock two objects.
+    enum class LeaseGuard
+    {
+        Take,
+        Omit
+    };
+
+    /// Writes the lease on the C++ object of a wrapper, held for the rest of
+    /// the enclosing scope. Replaces the plain validity check: it both
+    /// validates and keeps the C++ object alive across the call.
+    static void writeCallLease(TextStream &s, const QString &pyObj,
+                               ErrorReturn errorReturn,
+                               LeaseGuard guard = LeaseGuard::Take);
 
     static void writeTypeCheck(TextStream &s, const AbstractMetaType &argType,
                                const QString &argumentName,

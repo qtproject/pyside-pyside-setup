@@ -262,7 +262,7 @@ void CppGenerator::writeSmartPointerCppSelfDefinition(TextStream &s,
                                                       CppSelfDefinitionFlags flags)
 {
     Q_ASSERT(context.forSmartPointer());
-    writeInvalidPyObjectCheck(s, u"self"_s, errorReturn);
+    writeCallLease(s, u"self"_s, errorReturn);
     writeCppSelfVarDef(s, flags);
     writeSmartPointerCppSelfConversion(s, context);
     s << ";\n";
