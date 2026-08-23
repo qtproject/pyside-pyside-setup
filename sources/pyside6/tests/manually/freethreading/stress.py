@@ -5,9 +5,16 @@
 Free-threading stress worker (PoC).
 
 Runs ONE scenario as hard as possible from many threads with the real GIL
-disabled, exercising exactly the shiboken per-object state that the
-CoarseBindingGuard protects: the parent-child graph and wrapper
-destruction.
+disabled, exercising exactly the shiboken per-object state that the state
+lock protects: the wrapper lifecycle, ownership flags and call leases.
+
+A scenario belongs here only if it races shiboken's own bookkeeping on a
+SHARED wrapper. Racing a shared C++ user object does not: mutating a
+std::list from several threads is a defect in the calling code, and no
+binding-level lock is meant to make it safe. Two such scenarios
+(shared_parent, reparent, both hammering ObjectType::children) were dropped
+for that reason - the coarse lock used to serialize them as a side effect,
+which made them look like binding coverage.
 
 Contract:
   * exit 0   -> survived cleanly
@@ -15,8 +22,9 @@ Contract:
   * killed by signal (SIGSEGV/SIGABRT) -> the C++ raced; the parent runner
     sees this as a negative return code == the real defect we hunt.
 
-The locks are toggled at runtime via the flags in env PYSIDE6_OPTION_FT. This worker
-does not know or care which mode it runs in; run.py drives the A/B.
+The locks are bits in PYSIDE6_OPTION_FT; which one a run clears depends on
+the scenario, see run.py. This worker does not know or care which mode it
+runs in; run.py drives the A/B.
 
 Usage:  stress.py <scenario>   (THREADS / ITERS come from env)
 """
@@ -65,23 +73,6 @@ def _spin(fn) -> None:
 # --- scenarios --------------------------------------------------------------
 # Each hammers a different guarded code path in basewrapper.cpp.
 
-def scenario_shared_parent(_shared=[]) -> None:  # noqa: B006
-    """Many threads insert AND remove children on the SAME parent.
-    Races Object::setParent / removeParent / takeChild on one child list."""
-    if not _shared:
-        _shared.append(ObjectType())
-    parent = _shared[0]
-
-    def work(_idx: int) -> None:
-        for _ in range(ITERS):
-            c = ObjectType()
-            c.setParent(parent)     # concurrent insert into parent->m_children
-            parent.children()       # concurrent read of the list
-            parent.takeChild(c)     # concurrent remove
-            Shiboken.delete(c)
-    _spin(work)
-
-
 def scenario_destroy_race() -> None:
     """Many threads destroy parent objects that own a child.
     Races Object::destroy / deallocData / removeParent under the destructor."""
@@ -91,23 +82,6 @@ def scenario_destroy_race() -> None:
             c = ObjectType()
             c.setParent(o)          # child owned by parent
             Shiboken.delete(o)      # destroy parent -> must tear down child
-    _spin(work)
-
-
-def scenario_reparent(_p=[]) -> None:  # noqa: B006
-    """Many threads move children between two shared parents.
-    Races two child lists + ownership transfer simultaneously."""
-    if not _p:
-        _p.extend([ObjectType(), ObjectType()])
-    a, b = _p
-
-    def work(idx: int) -> None:
-        for i in range(ITERS):
-            c = ObjectType()
-            c.setParent(a)
-            c.setParent(b)          # reparent: remove from a, insert into b
-            b.takeChild(c)          # c is in b now -> detach from the RIGHT parent
-            Shiboken.delete(c)      # no dangling child left in any parent
     _spin(work)
 
 
@@ -135,11 +109,143 @@ def scenario_shared_delete(_pool=[]) -> None:  # noqa: B006
     _spin(work)
 
 
+def scenario_call_vs_delete(_pool=[]) -> None:  # noqa: B006
+    """Many threads call methods on the SAME wrapper while others destroy it.
+    This is what the call lease exists for: a call that has passed the
+    validity check must keep the C++ object alive until it returns, and the
+    destruction must be deferred until the last lease is back. Calling a
+    destroyed wrapper must raise RuntimeError, never crash."""
+    # Small pool and every thread deleting: the point is that a call and a
+    # destruction of the SAME wrapper overlap as often as possible.
+    POOL = 32
+    if not _pool:
+        _pool.extend(ObjectType() for _ in range(POOL))
+    pool = _pool
+
+    def work(idx: int) -> None:
+        for i in range(ITERS):
+            slot = (i * 13 + idx) % POOL
+            obj = pool[slot]
+            try:
+                obj.objectName()         # takes a call lease
+                obj.setObjectName("x")
+            except RuntimeError:
+                pass                     # already deleted: the correct answer
+            if i % 8 == idx % 8:
+                Shiboken.delete(obj)     # races the callers above
+                pool[slot] = ObjectType()  # list assignment is atomic
+    _spin(work)
+
+
+def scenario_child_delete_vs_call() -> None:
+    """A parent is deleted, which deletes its child in C++; the child's wrapper
+    enters Object::destroy() from that C++ destructor while other threads still
+    call methods on the same child. Each producer owns its pair, so nothing of
+    libsample is shared - only the child wrapper, which is the point."""
+    SLOTS = 32
+    kids: list[object] = [None] * SLOTS
+
+    def work(idx: int) -> None:
+        if idx % 2 == 0:
+            for i in range(ITERS):
+                slot = (i * 7 + idx) % SLOTS
+                parent = ObjectType()
+                child = ObjectType()
+                child.setParent(parent)
+                kids[slot] = child         # publish, then pull it away in C++
+                Shiboken.delete(parent)
+        else:
+            for i in range(ITERS):
+                child = kids[(i * 11 + idx) % SLOTS]
+                if child is not None:
+                    try:
+                        child.objectName()
+                        child.setObjectName("x")
+                    except RuntimeError:
+                        pass               # already destroyed: the right answer
+    _spin(work)
+
+
+def scenario_signal_race() -> None:
+    """Threads connect Python slots to a few shared senders and let the
+    receivers die again. connect() and the receiver teardown are hand-written
+    libpyside code that no generated boundary guard reaches, so they take the
+    coarse binding guard themselves; behind them is one global connection hash
+    that is inserted into and erased from here at the same time."""
+    from PySide6.QtCore import QObject, Signal
+
+    class Emitter(QObject):
+        fired = Signal(int)
+
+    class Receiver(QObject):
+        def on_fired(self, value: int) -> None:
+            pass
+
+    SENDERS = 4
+    emitters = [Emitter() for _ in range(SENDERS)]
+
+    def work(idx: int) -> None:
+        for i in range(ITERS // 4):
+            slot = (i + idx) % SENDERS
+            # Replacing a sender erases its connections while others insert.
+            if idx % 3 == 0:
+                emitters[slot] = Emitter()
+                continue
+            emitter = emitters[slot]
+            receiver = Receiver()
+            try:
+                emitter.fired.connect(receiver.on_fired)
+                emitter.fired.emit(i)
+            except RuntimeError:
+                pass
+            del receiver          # tears the connection out of the hash again
+    _spin(work)
+
+
+def scenario_lookup_vs_last_decref() -> None:
+    """One thread drops the last reference to a wrapper while another looks the
+    same C++ pointer up in the map, targeting the gap between the refcount
+    reaching zero and tp_dealloc getting there. Before acquireWrapper() it
+    crashed 30 times out of 30, clean since.
+
+    Unlike the other scenarios the A/B here is the interpreter, not a lock: the
+    decref that reaches zero happens in CPython, so no lock of ours could have
+    closed the gap - it took a lookup that increments atomically. Nothing C++
+    is shared; only an integer address travels between the threads.
+
+    A crash inside libsample means the C++ object was gone before the lookup,
+    which is a limit of the scenario rather than a defect.
+    """
+    SLOTS = 64
+    addr: list[int] = [0] * SLOTS
+    hold: list[object] = [None] * SLOTS
+
+    def work(idx: int) -> None:
+        if idx % 2 == 0:                      # produce and drop
+            for i in range(ITERS):
+                s = (i * 7 + idx) % SLOTS
+                o = ObjectType.create()
+                addr[s] = Shiboken.getCppPointer(o)[0]
+                hold[s] = o
+                hold[s] = None                # the last reference goes here
+        else:                                 # look up the same address
+            for i in range(ITERS):
+                a = addr[(i * 11 + idx) % SLOTS]
+                if a:
+                    try:
+                        Shiboken.wrapInstance(a, ObjectType)
+                    except Exception:
+                        pass
+    _spin(work)
+
+
 SCENARIOS = {
-    "shared_parent": scenario_shared_parent,
     "destroy_race": scenario_destroy_race,
-    "reparent": scenario_reparent,
     "shared_delete": scenario_shared_delete,
+    "call_vs_delete": scenario_call_vs_delete,
+    "child_delete_vs_call": scenario_child_delete_vs_call,
+    "lookup_vs_last_decref": scenario_lookup_vs_last_decref,
+    "signal_race": scenario_signal_race,
 }
 
 
@@ -147,9 +253,13 @@ def main() -> int:
     if len(sys.argv) != 2 or sys.argv[1] not in SCENARIOS:
         print(f"usage: stress.py {{{'|'.join(SCENARIOS)}}}", file=sys.stderr)
         return 64
-    gil = "off" if not sys._is_gil_enabled() else "ON"
-    locks = os.environ.get("PYSIDE6_OPTION_FT", "default")
-    sys.stderr.write(f"[stress] {sys.argv[1]} gil={gil} locks={locks} "
+    # sys._is_gil_enabled() only exists from 3.13 on; older interpreters
+    # always have it, and are useful here as the serialized reference run.
+    gil_enabled = getattr(sys, "_is_gil_enabled", lambda: True)()
+    gil = "ON" if gil_enabled else "off"
+    ft = os.environ.get("PYSIDE6_OPTION_FT")
+    locks = f"PYSIDE6_OPTION_FT={ft}" if ft else ""
+    sys.stderr.write(f"[stress] {sys.argv[1]} gil={gil} {locks or 'all locks on'} "
                      f"threads={THREADS} iters={ITERS}\n")
     SCENARIOS[sys.argv[1]]()
     if _failures:

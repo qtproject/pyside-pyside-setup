@@ -2,11 +2,16 @@
 # Copyright (C) 2026 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
-"""Stress the object graph from many threads with the GIL disabled.
+"""Stress the binding bookkeeping from many threads with the GIL disabled.
 
-Each scenario hammers one of the paths that the coarse binding lock protects:
-the parent/child bookkeeping and wrapper destruction. Without that lock these
+Each scenario hammers a path that the state lock protects: the wrapper
+lifecycle, the ownership flags and the call leases. Without that lock these
 scenarios segfault reliably, so a clean run is what keeps the lock honest.
+
+Scenarios that race a shared C++ user object do not belong here. Mutating
+ObjectType::children from several threads is a defect in the calling code,
+and no binding-level lock is meant to make it safe; the coarse lock used to
+serialize it as a side effect, which made it look like binding coverage.
 
 The defaults are sized for CI. Set PYSIDE_STRESS_THREADS / PYSIDE_STRESS_ITERS
 to hunt for races locally; tests/manually/freethreading/run.py drives the same
@@ -64,20 +69,6 @@ class ObjectGraphStressTest(unittest.TestCase):
 
         self.assertEqual(failures, [], f"Exceptions in worker threads: {failures}")
 
-    def test_shared_parent(self):
-        """Insert and remove children on the same parent from every thread."""
-        parent = ObjectType()
-
-        def work(idx):
-            for _ in range(ITERS):
-                child = ObjectType()
-                child.setParent(parent)
-                parent.children()
-                parent.takeChild(child)
-                Shiboken.delete(child)
-
-        self.spin(work)
-
     def test_destroy_race(self):
         """Destroy parents that still own a child."""
         def work(idx):
@@ -89,17 +80,28 @@ class ObjectGraphStressTest(unittest.TestCase):
 
         self.spin(work)
 
-    def test_reparent(self):
-        """Move children between two shared parents."""
-        first, second = ObjectType(), ObjectType()
+    def test_call_vs_delete(self):
+        """Call methods on a wrapper while other threads destroy it.
+
+        This is what the call lease exists for: a call that passed the
+        validity check must keep the C++ object alive until it returns, and a
+        call on a destroyed wrapper must raise RuntimeError, never crash.
+        """
+        pool_size = 32
+        pool = [ObjectType() for _ in range(pool_size)]
 
         def work(idx):
-            for _ in range(ITERS):
-                child = ObjectType()
-                child.setParent(first)
-                child.setParent(second)
-                second.takeChild(child)
-                Shiboken.delete(child)
+            for i in range(ITERS):
+                slot = (i * 13 + idx) % pool_size
+                obj = pool[slot]
+                try:
+                    obj.objectName()
+                    obj.setObjectName("x")
+                except RuntimeError:
+                    pass                       # already deleted: correct
+                if i % 8 == idx % 8:
+                    Shiboken.delete(obj)
+                    pool[slot] = ObjectType()  # list assignment is atomic
 
         self.spin(work)
 
