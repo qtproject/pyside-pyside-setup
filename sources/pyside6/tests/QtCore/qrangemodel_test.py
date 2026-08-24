@@ -36,6 +36,13 @@ class QRangeModelTest(unittest.TestCase):
         self.assertEqual(model.columnCount(), 2)
         self.assertEqual(model.data(model.createIndex(1, 1)), 4)
 
+    def test_pystringtable(self):
+        test_table = [["item11", "item12"], ["item21", "item22"]]
+        model = QRangeModel(test_table)
+        self.assertEqual(model.rowCount(), 2)
+        self.assertEqual(model.columnCount(), 2)
+        self.assertEqual(model.data(model.createIndex(1, 1)), "item22")
+
     @unittest.skipUnless(HAVE_NUMPY, "requires numpy")
     def test_numpy_list(self):
         test_array = np.array([1, 2, 3])

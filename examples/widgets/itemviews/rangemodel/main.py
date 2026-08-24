@@ -12,6 +12,7 @@ from PySide6.QtWidgets import QApplication, QListView, QMainWindow, QTableView, 
 STRING_LIST = ["item1", "item2", "item3", "item4"]
 INT_LIST = [1, 2, 3]
 INT_TABLE = [[1, 2], [3, 4], [5, 6]]
+STRING_TABLE = [["item11", "item12"], ["item21", "item22"]]
 
 NP_INT_ARRAY = numpy.array([1, 2, 3], dtype=numpy.int32)
 NP_DOUBLE_ARRAY = numpy.array([1.1, 2.2, 3.3], dtype=numpy.double)
@@ -56,6 +57,11 @@ if __name__ == '__main__':
     model = QRangeModel(INT_TABLE)
     table_view.setModel(model)
     tab_widget.addTab(table_view, "Python Int Table")
+
+    table_view = QTableView()
+    model = QRangeModel(STRING_TABLE)
+    table_view.setModel(model)
+    tab_widget.addTab(table_view, "Python String Table")
 
     list_view = QListView()
     model = QRangeModel(NP_INT_ARRAY)
