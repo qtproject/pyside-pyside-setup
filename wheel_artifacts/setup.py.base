@@ -22,5 +22,11 @@ setup_args = dict(
     packages = ["{name}"],
     ext_modules = [Extension("{fake_ext}", [], py_limited_api=True)],
     cmdclass=dict([("build_ext", build_ext)]),
+    # setuptools implicitly globs and bundles every '*.pyi' file found in a
+    # package directory (see setuptools.command.build_py._IMPLICIT_DATA_FILES),
+    # regardless of what MANIFEST.in/package_data declare. Since the wheels
+    # share the same 'PySide6' directory, the '.pyi' stubs belonging to
+    # modules of *other* wheels have to be excluded explicitly here.
+    exclude_package_data={exclude_package_data},
 )
 setup(**setup_args)

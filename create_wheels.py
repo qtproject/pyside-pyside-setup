@@ -204,7 +204,8 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Pat
     return content
 
 
-def generate_setup_py(artifacts: Path, setup: SetupData):
+def generate_setup_py(artifacts: Path, setup: SetupData,
+                      exclude_package_data: dict[str, list[str]] | None = None):
     _name = setup.name
 
     # To get the 'abi3' tag on the wheel name, we need to use
@@ -228,9 +229,34 @@ def generate_setup_py(artifacts: Path, setup: SetupData):
         content = f.read().format(
             name=_name,
             fake_ext=fext,
+            exclude_package_data=exclude_package_data or {},
         )
 
     return content
+
+
+def get_unwanted_pyi_files(data: list[ModuleData] | None, package_path: Path) -> list[str]:
+    """Return the '.pyi' stub file names present in the 'PySide6' package
+    directory that don't belong to the given wheel's modules.
+
+    setuptools implicitly globs and bundles *every* '*.pyi' file it finds in
+    a package directory (see
+    'setuptools.command.build_py._IMPLICIT_DATA_FILES'), no matter what
+    'MANIFEST.in'/'package_data' declare. Because 'PySide6_Essentials',
+    'PySide6_Addons' and 'PySide6_WebEngine' are all built from the same
+    'PySide6' directory, every wheel would otherwise end up bundling the
+    '.pyi' stubs that belong to modules packaged in a *different* wheel.
+    """
+    if data is None:
+        return []
+
+    wanted = set()
+    for module in data:
+        wanted.update(module.pyi)
+        wanted.update(f for f in module.extra_files if f.endswith(".pyi"))
+
+    all_pyi = {f.name for f in (package_path / "PySide6").glob("*.pyi")}
+    return sorted(all_pyi - wanted)
 
 
 def wheel_shiboken_generator(package_path: Path) -> tuple[SetupData, None]:
@@ -467,7 +493,12 @@ if __name__ == "__main__":
 
         # 1. Generate 'setup.py'
         log.info("-- Generating setup.py")
-        setup_py_content = generate_setup_py(artifacts_path, setup)
+        exclude_package_data = None
+        if data is not None:
+            unwanted_pyi = get_unwanted_pyi_files(data, package_path)
+            if unwanted_pyi:
+                exclude_package_data = {"PySide6": unwanted_pyi}
+        setup_py_content = generate_setup_py(artifacts_path, setup, exclude_package_data)
         with open(setup_py_path, "w", encoding="utf-8") as f:
             f.write(setup_py_content)
 
