@@ -2,53 +2,17 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 from __future__ import annotations
 
-import subprocess
 import sys
-import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from . import (QTPATHS_CMD, PYPROJECT_JSON_PATTERN, PYPROJECT_TOML_PATTERN, PYPROJECT_FILE_PATTERNS,
                ClOptions)
+from .commands import qtpaths
 from .pyproject_toml import parse_pyproject_toml
 from .pyproject_json import parse_pyproject_json
+from .qrc import qrc_file_requires_rebuild
 
-
-def run_command(command: list[str], cwd: str = None, ignore_fail: bool = False) -> int:
-    """
-    Run a command using a subprocess.
-    If dry run is enabled, the command will be printed to stdout instead of being executed.
-
-    :param command: The command to run including the arguments
-    :param cwd: The working directory to run the command in
-    :param ignore_fail: If True, the current process will not exit if the command fails
-
-    :return: The exit code of the command
-    """
-    cloptions = ClOptions()
-    if not cloptions.quiet or cloptions.dry_run:
-        print(" ".join(command))
-    if cloptions.dry_run:
-        return 0
-
-    ex = subprocess.call(command, cwd=cwd)
-    if ex != 0 and not ignore_fail:
-        sys.exit(ex)
-    return ex
-
-
-def qrc_file_requires_rebuild(resources_file_path: Path, compiled_resources_path: Path) -> bool:
-    """Returns whether a compiled qrc file needs to be rebuilt based on the files that references"""
-    root_element = ET.parse(resources_file_path).getroot()
-    project_root = resources_file_path.parent
-
-    files = [project_root / file.text for file in root_element.findall(".//file")]
-
-    compiled_resources_time = compiled_resources_path.stat().st_mtime
-    # If any of the resource files has been modified after the compiled qrc file, the compiled qrc
-    # file needs to be rebuilt
-    if any(file.is_file() and file.stat().st_mtime > compiled_resources_time for file in files):
-        return True
-    return False
+_qt_metatype_json_dir: Path | None = None
 
 
 def requires_rebuild(sources: list[Path], artifact: Path) -> bool:
@@ -91,24 +55,6 @@ def remove_path(path: Path):
 def package_dir() -> Path:
     """Return the PySide6 root."""
     return Path(__file__).resolve().parents[2]
-
-
-_qtpaths_info: dict[str, str] = {}
-
-
-def qtpaths() -> dict[str, str]:
-    """Run qtpaths and return a dict of values."""
-    global _qtpaths_info
-    if not _qtpaths_info:
-        output = subprocess.check_output([QTPATHS_CMD, "--query"])
-        for line in output.decode("utf-8").split("\n"):
-            tokens = line.strip().split(":", maxsplit=1)  # "Path=C:\..."
-            if len(tokens) == 2:
-                _qtpaths_info[tokens[0]] = tokens[1]
-    return _qtpaths_info
-
-
-_qt_metatype_json_dir: Path | None = None
 
 
 def qt_metatype_json_dir() -> Path:

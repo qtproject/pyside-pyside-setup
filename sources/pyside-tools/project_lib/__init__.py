@@ -43,7 +43,8 @@ class ClOptions(metaclass=Singleton):
     qml_module: bool
 
 
-from .utils import (run_command, requires_rebuild, remove_path, package_dir, qtpaths,
+from .commands import run_command, qtpaths
+from .utils import (requires_rebuild, remove_path, package_dir,
                     qt_metatype_json_dir, resolve_valid_project_file)
 from .project_data import (is_python_file, ProjectData, QmlProjectData,
                            check_qml_decorators)
