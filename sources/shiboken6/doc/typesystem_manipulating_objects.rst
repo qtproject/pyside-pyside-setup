@@ -341,6 +341,10 @@ only) to retrieve the documentation from an existing C++ function.
 This is useful when for example adding a function taking a Python
 callable replacing a C++ function taking a C++ callable.
 
+.. note:: In the case of `qdoc`_-generated documentation, functions
+          marked as ``\\overload`` or property getter/setter functions
+          do not have documentation.
+
 The *optional* **deprecated** attribute can be used to mark the
 function as deprecated.
 
@@ -576,3 +580,6 @@ snippet then converts the arguments and return values and returns after that:
            return;
            </inject-code>
        </modify-function>
+
+
+.. _`qdoc`: https://doc.qt.io/qt-6/qdoc-index.html

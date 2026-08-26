@@ -244,8 +244,16 @@ QtDocParser::FunctionDocumentationOpt
             << index << "\n  " << candidates.value(index) << "\n  " << candidates;
     }
 
-    if (index != -1)
-        return candidates.at(index);
+    if (index != -1) {
+        const auto &result = candidates.at(index);
+        if (func->isUserAdded()
+            && (result.description.isEmpty() || result.description == "<description/>"_L1)) {
+            qCWarning(lcShibokenDoc,
+                      R"(Empty documentation found for user-added function "%s" (\overload or property function?))",
+                      qPrintable(func->classQualifiedSignature()));
+        }
+        return result;
+    }
 
     // Fallback: Try matching by argument count
     const auto parameterCount = func->arguments().size();
