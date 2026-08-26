@@ -5,10 +5,9 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from functools import cache
 
 from . import QTPATHS_CMD, ClOptions
-
-_qtpaths_info: dict[str, str] = {}
 
 
 def run_command(command: list[str], cwd: str = None, ignore_fail: bool = False) -> int:
@@ -34,13 +33,13 @@ def run_command(command: list[str], cwd: str = None, ignore_fail: bool = False) 
     return ex
 
 
+@cache
 def qtpaths() -> dict[str, str]:
     """Run qtpaths and return a dict of values."""
-    global _qtpaths_info
-    if not _qtpaths_info:
-        output = subprocess.check_output([QTPATHS_CMD, "--query"])
-        for line in output.decode("utf-8").split("\n"):
-            tokens = line.strip().split(":", maxsplit=1)  # "Path=C:\..."
-            if len(tokens) == 2:
-                _qtpaths_info[tokens[0]] = tokens[1]
-    return _qtpaths_info
+    info: dict[str, str] = {}
+    output = subprocess.check_output([QTPATHS_CMD, "--query"])
+    for line in output.decode("utf-8").split("\n"):
+        tokens = line.strip().split(":", maxsplit=1)  # "Path=C:\..."
+        if len(tokens) == 2:
+            info[tokens[0]] = tokens[1]
+    return info
