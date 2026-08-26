@@ -27,3 +27,21 @@ const auto size = %CPPSELF.byteCount();
 const float result = QtAudio::convertVolume(%1, %2, %3);
 %PYARG_0 = %CONVERTTOPYTHON[float](result);
 // @snippet qaudio-convertvolume
+
+// @snippet optional-qreal-to-pyfloat
+if (!%in.has_value())
+    Py_RETURN_NONE;
+return PyFloat_FromDouble(%in.value());
+// @snippet optional-qreal-to-pyfloat
+
+// @snippet pyfloat-to-optional-qreal
+%out = PyFloat_AsDouble(%in);
+// @snippet pyfloat-to-optional-qreal
+
+// @snippet pylong-to-optional-qreal
+%out = PyLong_AsDouble(%in);
+// @snippet pylong-to-optional-qreal
+
+// @snippet pynone-to-optional
+%out = std::nullopt;
+// @snippet pynone-to-optional
