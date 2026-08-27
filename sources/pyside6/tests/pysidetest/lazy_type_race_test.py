@@ -12,7 +12,8 @@ process dies. Qt reaches this through its own worker threads - the QML loader
 calling a Python network factory was the first case seen - but the window is
 reachable from plain Python, which is what this test does.
 
-With PYSIDE_LAZY_LOCK=0 this test segfaults; that is what makes it a test.
+Clear the LazyTypeLock bit of PYSIDE6_OPTION_FT and this test segfaults;
+that is what makes it a test.
 """
 
 import os

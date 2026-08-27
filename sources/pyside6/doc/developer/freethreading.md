@@ -101,7 +101,7 @@ guard is not held across the part that matters.
 Lazy type creation is such a case. A type is incarnated on first attribute
 access, from whichever thread happens to need it first, and building it
 creates enum types through Python. It is serialized by a separate recursive
-lock (`PYSIDE_LAZY_LOCK=0` takes it away for the A/B proof), entered with the
+lock (clearing its `PYSIDE6_OPTION_FT` bit takes it away for the A/B proof), entered with the
 thread detached so that a waiting thread holds nothing. Similar one-time
 initializations should follow that pattern rather than rely on the guard.
 
@@ -121,7 +121,7 @@ been reviewed for free-threaded execution opts out in its type system:
 The PySide modules do this; a binding generated with shiboken does not inherit
 the claim.
 
-`PYSIDE_COARSE_BINDING_LOCK=0` disables the guard. It exists for stress testing - it is
+Clearing its `PYSIDE6_OPTION_FT` bit disables the guard. It exists for stress testing - it is
 what makes the A/B comparison possible that shows the object graph racing
 without the lock - and it is not a supported production setting: the modules
 still declare that they do not need the GIL, while the synchronization backing
@@ -136,7 +136,7 @@ disabled. Two are worth knowing about:
 
 `sources/shiboken6/tests/samplebinding/free_threading_stress_test.py`
 : hammers the shared parent graph, reparenting and racing wrapper deletion.
-  With `PYSIDE_COARSE_BINDING_LOCK=0` it crashes, which is what makes it evidence.
+  Without that bit it crashes, which is what makes it evidence.
 
 `sources/pyside6/tests/pysidetest/signal_slot_lock_inversion_test.py`
 : drives the classic AB-BA shape: a thread holding a Python lock enters a

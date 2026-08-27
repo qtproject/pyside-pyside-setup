@@ -8,8 +8,11 @@ Runs every scenario twice against the SAME free-threaded binary, once with
 the synchronization it needs and once without. Which one is switched off
 depends on the scenario:
 
-  * the object graph scenarios toggle the CoarseBindingGuard (PYSIDE_COARSE_BINDING_LOCK)
-  * lazy_types toggles the lazy type creation lock (PYSIDE_LAZY_LOCK)
+  * the object graph scenarios clear the CoarseBindingGuard bit
+  * lazy_types clears the lazy type creation bit
+
+All of them go through PYSIDE6_OPTION_FT, the flags variable in
+sbkftoptions.h; a run clears exactly the one bit its scenario is about.
 
 Each scenario is launched as a fresh subprocess REPEATS times. A subprocess
 that dies from a signal (SIGSEGV/SIGABRT -> negative return code) is a real
@@ -35,6 +38,7 @@ import os
 import signal
 import subprocess
 import sys
+from enum import IntFlag
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[5]
@@ -69,24 +73,36 @@ PKG = BUILD.parent / "package_for_wheels"
 
 REPEATS = int(os.environ.get("REPEATS", "10"))
 TIMEOUT = int(os.environ.get("STRESS_TIMEOUT", "120"))
-MODES = [("unlocked", "0"), ("locked", "1")]
+MODES = ["unlocked", "locked"]
 
-# scenario -> (script to run, argument, environment switch it toggles)
+
+class Lock(IntFlag):
+    """The bits of PYSIDE6_OPTION_FT, mirroring sbkftoptions.h.
+
+    A scenario runs twice: once with ALL, once with its own bit cleared.
+    """
+
+    COARSE_BINDING = 0x1
+    LAZY_TYPE = 0x2
+    ALL = COARSE_BINDING | LAZY_TYPE
+
+
+# scenario -> (script to run, argument, the lock bit it clears)
 QQML_TEST = (REPO / "sources" / "pyside6" / "tests" / "QtQml"
              / "qqmlnetwork_test.py")
 SCENARIOS = {
-    "shared_parent": (WORKER, "shared_parent", "PYSIDE_COARSE_BINDING_LOCK"),
-    "destroy_race": (WORKER, "destroy_race", "PYSIDE_COARSE_BINDING_LOCK"),
-    "reparent": (WORKER, "reparent", "PYSIDE_COARSE_BINDING_LOCK"),
-    "shared_delete": (WORKER, "shared_delete", "PYSIDE_COARSE_BINDING_LOCK"),
+    "shared_parent": (WORKER, "shared_parent", Lock.COARSE_BINDING),
+    "destroy_race": (WORKER, "destroy_race", Lock.COARSE_BINDING),
+    "reparent": (WORKER, "reparent", Lock.COARSE_BINDING),
+    "shared_delete": (WORKER, "shared_delete", Lock.COARSE_BINDING),
     # Qt calls the network access manager factory from its QML loader thread,
     # so this incarnates types there while the main thread incarnates others.
-    "lazy_types": (QQML_TEST, None, "PYSIDE_LAZY_LOCK"),
+    "lazy_types": (QQML_TEST, None, Lock.LAZY_TYPE),
 }
 ALL_SCENARIOS = list(SCENARIOS)
 
 
-def base_env(switch: str, value: str) -> dict:
+def base_env(lock_bit: Lock, mode: str) -> dict:
     env = dict(os.environ)
     env.update(
         BUILD_DIR=os.fspath(BUILD),
@@ -94,7 +110,11 @@ def base_env(switch: str, value: str) -> dict:
         QT_NO_GLIB="1",
         PYTHONPATH=os.fspath(PKG),
     )
-    env[switch] = value
+    flags = Lock.ALL if mode == "locked" else Lock.ALL & ~lock_bit
+    # Binary on purpose: the variable is read as flags, so it should look
+    # like flags in a log. sbkftoptions.h understands 0b, 0x and plain
+    # decimal, like PYSIDE6_OPTION_PYTHON_ENUM does.
+    env["PYSIDE6_OPTION_FT"] = bin(int(flags))
     if QT_DIR:
         env["QT_DIR"] = QT_DIR
     return env
@@ -112,14 +132,14 @@ def classify(rc: int) -> str:
     return f"exit{rc}"
 
 
-def run_one(scenario: str, value: str) -> str:
-    script, argument, switch = SCENARIOS[scenario]
+def run_one(scenario: str, mode: str) -> str:
+    script, argument, lock_bit = SCENARIOS[scenario]
     command = [PY, os.fspath(script)]
     if argument:
         command.append(argument)
     try:
         p = subprocess.run(
-            command, env=base_env(switch, value), cwd=os.fspath(REPO),
+            command, env=base_env(lock_bit, mode), cwd=os.fspath(REPO),
             capture_output=True, timeout=TIMEOUT)
         return classify(p.returncode)
     except subprocess.TimeoutExpired:
@@ -140,15 +160,15 @@ def main() -> int:
           f"threads: {os.environ.get('STRESS_THREADS', '8')}  "
           f"iters: {os.environ.get('STRESS_ITERS', '6000')}")
     print()
-    header = f"{'scenario':<16}" + "".join(f"{m:<12}" for m, _ in MODES)
+    header = f"{'scenario':<16}" + "".join(f"{m:<12}" for m in MODES)
     print(header)
     print("-" * len(header))
 
     verdicts = {}
     for scenario in scenarios:
         cells = []
-        for mode, own in MODES:
-            results = [run_one(scenario, own) for _ in range(REPEATS)]
+        for mode in MODES:
+            results = [run_one(scenario, mode) for _ in range(REPEATS)]
             crashes = sum(1 for r in results if r.startswith("CRASH")
                           or r == "HANG")
             others = sum(1 for r in results if r not in ("ok",)

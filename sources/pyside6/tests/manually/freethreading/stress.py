@@ -15,7 +15,7 @@ Contract:
   * killed by signal (SIGSEGV/SIGABRT) -> the C++ raced; the parent runner
     sees this as a negative return code == the real defect we hunt.
 
-The lock is toggled at runtime via env PYSIDE_COARSE_BINDING_LOCK (0 = off). This worker
+The locks are toggled at runtime via the flags in env PYSIDE6_OPTION_FT. This worker
 does not know or care which mode it runs in; run.py drives the A/B.
 
 Usage:  stress.py <scenario>   (THREADS / ITERS come from env)
@@ -148,8 +148,8 @@ def main() -> int:
         print(f"usage: stress.py {{{'|'.join(SCENARIOS)}}}", file=sys.stderr)
         return 64
     gil = "off" if not sys._is_gil_enabled() else "ON"
-    own = os.environ.get("PYSIDE_COARSE_BINDING_LOCK", "1")
-    sys.stderr.write(f"[stress] {sys.argv[1]} gil={gil} own_gil={own} "
+    locks = os.environ.get("PYSIDE6_OPTION_FT", "default")
+    sys.stderr.write(f"[stress] {sys.argv[1]} gil={gil} locks={locks} "
                      f"threads={THREADS} iters={ITERS}\n")
     SCENARIOS[sys.argv[1]]()
     if _failures:

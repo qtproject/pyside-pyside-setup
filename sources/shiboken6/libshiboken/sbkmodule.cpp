@@ -11,6 +11,9 @@
 #include "sbkconverter_p.h"
 #include "sbkcoarsebindinglock.h"
 #include "sbkpep.h"
+#ifdef Py_GIL_DISABLED
+#  include "sbkftoptions.h"
+#endif
 
 #include <algorithm>
 #include <array>
@@ -107,17 +110,10 @@ static std::recursive_mutex &lazyInitMutex()
     return mutex;
 }
 
-// Runtime kill switch, read once. Set PYSIDE_LAZY_LOCK=0 to take the
-// serialization away, which is what makes the A/B proof in
-// tests/manually/freethreading possible: without it the type creation must
-// crash, with it it must survive. Not a supported production setting.
 static bool lazyInitLockEnabled()
 {
-    static const bool enabled = [] {
-        const char *e = std::getenv("PYSIDE_LAZY_LOCK");
-        return e == nullptr || e[0] != '0';
-    }();
-    return enabled;
+    return Shiboken::FreeThreading::optionEnabled(
+        Shiboken::FreeThreading::LazyTypeLock);
 }
 
 class LazyInitLock
@@ -711,7 +707,7 @@ void exec(PyObject *module)
 {
 #ifdef Py_GIL_DISABLED
     // The module declares that it does not need the GIL, which only holds
-    // while the coarse binding lock is in place. PYSIDE_COARSE_BINDING_LOCK=0 takes that
+    // while the coarse binding lock is in place. Clearing its PYSIDE6_OPTION_FT bit takes that
     // lock away, leaving the bindings free-threaded with no synchronization
     // at all. Taking the declaration back here is not possible - the GIL slot
     // is evaluated when the module is created, before this runs - so say so
@@ -720,9 +716,10 @@ void exec(PyObject *module)
     if (!coarseBindingLockEnabled() && !warned) {
         warned = true;
         PyErr_WarnEx(PyExc_RuntimeWarning,
-                     "PYSIDE_COARSE_BINDING_LOCK=0 disables the lock that makes the "
-                     "bindings safe without the GIL. This is meant for "
-                     "stress testing only; data races are expected.", 1);
+                     "Clearing the CoarseBindingLock bit of PYSIDE6_OPTION_FT "
+                     "disables the lock that makes the bindings safe without "
+                     "the GIL. This is meant for stress testing only; data "
+                     "races are expected.", 1);
         PyErr_Clear(); // a warning turned into an error must not fail the import
     }
 #endif

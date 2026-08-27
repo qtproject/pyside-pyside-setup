@@ -76,6 +76,7 @@ sbkdestructorentry.h
 sbkenum.cpp sbkenum.h sbkenum_p.h
 sbkerrors.cpp sbkerrors.h
 sbkfeature_base.cpp sbkfeature_base.h
+sbkftoptions.cpp sbkftoptions.h
 sbkmodule.cpp sbkmodule.h sbkmodule_p.h
 sbknumpy.cpp sbknumpycheck.h
 sbknumpyview.h
@@ -197,6 +198,7 @@ install(FILES
         sbkerrors.h
         sbkfeature_base.h
         sbkcoarsebindinglock.h
+        sbkftoptions.h
         sbkmodule.h
         sbkmodule_p.h
         sbknumpycheck.h

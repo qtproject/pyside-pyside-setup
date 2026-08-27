@@ -22,6 +22,9 @@
 #include "signature_p.h"
 #include "threadstatesaver.h"
 #include "voidptr.h"
+#ifdef Py_GIL_DISABLED
+#  include "sbkftoptions.h"
+#endif
 
 #include <algorithm>
 #include <cctype>
@@ -70,11 +73,7 @@ PyMutex &coarseBindingMutex()
 
 bool coarseBindingLockEnabled()
 {
-    static const bool enabled = [] {
-        const char *e = std::getenv("PYSIDE_COARSE_BINDING_LOCK");
-        return e == nullptr || e[0] != '0';
-    }();
-    return enabled;
+    return FreeThreading::optionEnabled(FreeThreading::CoarseBindingLock);
 }
 #endif // Py_GIL_DISABLED
 

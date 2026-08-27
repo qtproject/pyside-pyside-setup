@@ -1,5 +1,6 @@
 // Copyright (C) 2026 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+// Qt-Security score:significant reason:default
 
 #ifndef SBK_COARSEBINDINGLOCK_H
 #define SBK_COARSEBINDINGLOCK_H
@@ -76,9 +77,10 @@ namespace Shiboken {
 // and exported.
 LIBSHIBOKEN_API PyMutex &coarseBindingMutex();
 
-// Runtime kill switch (read once). Set PYSIDE_COARSE_BINDING_LOCK=0 to disable the lock,
-// which is what the free-threading stress harness uses for its A/B proof:
-// without the lock the stress must crash, with it it must survive.
+// Runtime kill switch. Clear the CoarseBindingLock bit of PYSIDE6_OPTION_FT
+// (see sbkftoptions.h) to disable the lock, which is what the free-threading
+// stress harness uses for its A/B proof: without the lock the stress must
+// crash, with it it must survive.
 LIBSHIBOKEN_API bool coarseBindingLockEnabled();
 
 class CoarseBindingGuard
