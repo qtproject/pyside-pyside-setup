@@ -2383,9 +2383,9 @@ AbstractMetaFunctionPtr
                 && !functionItem->attributes().testFlag(FunctionAttribute::Virtual)) {
                 if (!currentClass || currentClass->typeEntry()->generateCode()) {
                     const QString signature = qualifiedFunctionSignatureWithType(functionItem, className);
-                    qCWarning(lcShiboken, "%s",
-                              qPrintable(msgStrippingArgument(functionItem, i, signature,
-                                                              arg, errorMessage)));
+                    const QString message = msgStrippingArgument(functionItem, i, signature,
+                                                                 arg, errorMessage);
+                    ReportHandler::addGeneralMessage(message);
                 }
                 break;
             }
