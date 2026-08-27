@@ -459,9 +459,23 @@ std::set<PyObject *> BindingManager::getAllPyObjects()
 
 void BindingManager::visitAllPyObjects(ObjectVisitor visitor, void *data)
 {
-    WrapperMap copy = m_d->wrapperMapper;
+    // The map has its own lock because C++ touches it without a thread state -
+    // releaseWrapper() runs from destructors. This was the one place that read
+    // it without taking that lock, both for the copy and for the check below.
+    WrapperMap copy;
+    {
+        std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+        copy = m_d->wrapperMapper;
+    }
     for (const auto &p : copy) {
-        if (m_d->findSbkObject(p.first, p.second) != m_d->wrapperMapper.cend())
+        bool present = false;
+        {
+            std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+            present = m_d->findSbkObject(p.first, p.second) != m_d->wrapperMapper.cend();
+        }
+        // Outside the lock: the visitor runs Python and C++ destructors, which
+        // take it again and mutate the map.
+        if (present)
             visitor(p.second, data);
     }
 }
@@ -473,6 +487,7 @@ bool BindingManager::dumpTypeGraph(const char *fileName) const
 
 void BindingManager::dumpWrapperMap()
 {
+    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
     const auto &wrapperMap = m_d->wrapperMapper;
     std::cerr <<  "-------------------------------\n"
         << "WrapperMap size: " << wrapperMap.size() << " Types: "

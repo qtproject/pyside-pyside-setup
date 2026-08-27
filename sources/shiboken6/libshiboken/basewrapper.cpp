@@ -1904,9 +1904,23 @@ void setParent(PyObject *parent, PyObject *child)
      * follows the sequence protocol.
      */
     if (PySequence_Check(child) && !Object::checkType(child)) {
+        // The sequence typically comes from a container conversion that may
+        // have failed - a concurrent destruction of an element is enough.
+        // Calling into Python with an exception set aborts the interpreter
+        // ("succeeded with an exception set"), so check before and after
+        // instead of walking on. The exception is left for the caller.
+        if (PyErr_Occurred() != nullptr)
+            return;
         Shiboken::AutoDecRef seq(PySequence_Fast(child, nullptr));
-        for (Py_ssize_t i = 0, max = PySequence_Size(seq); i < max; ++i) {
+        if (seq.isNull())
+            return;
+        const Py_ssize_t max = PySequence_Size(seq);
+        if (max < 0)
+            return;
+        for (Py_ssize_t i = 0; i < max; ++i) {
             Shiboken::AutoDecRef obj(PySequence_GetItem(seq.object(), i));
+            if (obj.isNull())
+                return;
             setParent(parent, obj);
         }
         return;
