@@ -3,7 +3,7 @@
 // Qt-Security score:significant reason:build-tool
 
 #include "addedfunction.h"
-#include "addedfunction_p.h"
+#include "addedfunctionparser.h"
 #include "typeparser.h"
 
 #include <QtCore/qdebug.h>
@@ -29,6 +29,26 @@ QDebug operator<<(QDebug d, const Argument &a)
         d << ", defaultValue=\"" << a.defaultValue << '"';
     d << ')';
     return d;
+}
+
+QDebug operator<<(QDebug debug, const ParsedFunction &f)
+{
+    QDebugStateSaver saver(debug);
+    debug.noquote();
+    debug.nospace();
+    debug << "ParsedFunction(name=\"" << f.name << '"';
+    if (f.constant)
+        debug << ", [const]";
+    if (!f.arguments.isEmpty()) {
+        debug << ", arguments=";
+        for (qsizetype i = 0, size = f.arguments.size(); i < size; ++i) {
+            if (i > 0)
+                debug << ", ";
+            debug << f.arguments.at(i);
+        }
+    }
+    debug << ')';
+    return debug;
 }
 
 // Helper for finding the end of a function parameter, observing
@@ -114,6 +134,44 @@ Arguments splitParameters(QStringView paramString, QString *errorMessage)
     return result;
 }
 
+std::optional<ParsedFunction> parse(QStringView signatureIn, QString *errorMessage)
+{
+    ParsedFunction result;
+    QStringView signature = signatureIn.trimmed();
+
+    // Skip past "operator()(...)"
+    const auto parenSearchStartPos = signature.startsWith(callOperator)
+                                         ? callOperator.size() : 0;
+    const auto openParenPos = signature.indexOf(u'(', parenSearchStartPos);
+    if (openParenPos < 0) {
+        result.name = signature.toString();
+        return result;
+    }
+
+    result.name = signature.left(openParenPos).trimmed().toString();
+    const auto closingParenPos = signature.lastIndexOf(u')');
+    if (closingParenPos < 0) {
+        *errorMessage = u"Missing closing parenthesis"_s;
+        return std::nullopt;
+    }
+
+    // Check for "foo() const"
+    const auto signatureLength = signature.length();
+    const auto qualifierLength = signatureLength - closingParenPos - 1;
+    if (qualifierLength >= 5
+        && signature.right(qualifierLength).contains(u"const")) {
+        result.constant = true;
+    }
+
+    const auto paramString = signature.mid(openParenPos + 1, closingParenPos - openParenPos - 1);
+    result.arguments = AddedFunctionParser::splitParameters(paramString, errorMessage);
+    if (result.arguments.isEmpty() && !errorMessage->isEmpty())
+        return std::nullopt;
+    if (result.arguments.size() == 1 && result.arguments.constFirst().type == "void"_L1)
+        result.arguments.clear(); // "void foo(void)" -> ""void foo()"
+    return result;
+}
+
 } // namespace AddedFunctionParser
 
 AddedFunction::AddedFunction(const QString &name, const QList<Argument> &arguments,
@@ -138,40 +196,12 @@ AddedFunction::AddedFunctionPtr
     if (!errorMessage->isEmpty())
         return {};
 
-    QStringView signature = QStringView{signatureIn}.trimmed();
-
-    // Skip past "operator()(...)"
-    const auto parenSearchStartPos = signature.startsWith(callOperator)
-        ? callOperator.size() : 0;
-    const auto openParenPos = signature.indexOf(u'(', parenSearchStartPos);
-    if (openParenPos < 0) {
-        return std::make_shared<AddedFunction>(signature.toString(),
-                                               arguments, returnType);
-    }
-
-    const QString name = signature.left(openParenPos).trimmed().toString();
-    const auto closingParenPos = signature.lastIndexOf(u')');
-    if (closingParenPos < 0) {
-        *errorMessage = u"Missing closing parenthesis"_s;
+    const auto parsedFunctionOpt = AddedFunctionParser::parse(signatureIn, errorMessage);
+    if (!parsedFunctionOpt.has_value())
         return {};
-    }
 
-    // Check for "foo() const"
-    bool isConst = false;
-    const auto signatureLength = signature.length();
-    const auto qualifierLength = signatureLength - closingParenPos - 1;
-    if (qualifierLength >= 5
-        && signature.right(qualifierLength).contains(u"const")) {
-        isConst = true;
-    }
-
-    const auto paramString = signature.mid(openParenPos + 1, closingParenPos - openParenPos - 1);
-    auto params = AddedFunctionParser::splitParameters(paramString, errorMessage);
-    if (params.isEmpty() && !errorMessage->isEmpty())
-        return {};
-    if (params.size() == 1 && params.constFirst().type == "void"_L1)
-        params.clear(); // "void foo(void)" -> ""void foo()"
-    for (const auto &p : std::as_const(params)) {
+    // Convert arguments to typeinfo
+    for (const auto &p : std::as_const(parsedFunctionOpt->arguments)) {
         TypeInfo type = p.type == u"..."
             ? TypeInfo::varArgsType() : TypeParser::parse(p.type, errorMessage);
         if (!errorMessage->isEmpty()) {
@@ -182,8 +212,8 @@ AddedFunction::AddedFunctionPtr
         arguments.append({type, p.name, p.defaultValue});
     }
 
-    auto result = std::make_shared<AddedFunction>(name, arguments, returnType);
-    result->setConstant(isConst);
+    auto result = std::make_shared<AddedFunction>(parsedFunctionOpt->name, arguments, returnType);
+    result->setConstant(parsedFunctionOpt->constant);
     return result;
 }
 

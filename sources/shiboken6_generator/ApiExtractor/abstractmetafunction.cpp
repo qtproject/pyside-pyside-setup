@@ -1199,6 +1199,12 @@ void AbstractMetaFunction::clearModificationsCache()
     d->m_modificationCache.clear();
 }
 
+QString AbstractMetaFunction::addedFunctionDocSignature() const
+{
+    return  d->m_addedFunction
+               ? d->m_addedFunction->docSignature() : QString{};
+}
+
 DocModificationList AbstractMetaFunction::addedFunctionDocModifications() const
 {
     return d->m_addedFunction

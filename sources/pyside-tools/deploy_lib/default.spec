@@ -27,7 +27,7 @@ python_path =
 packages = Nuitka==4.1.1
 
 # Buildozer: for deploying Android application
-android_packages = buildozer==1.5.0,cython==0.29.33
+android_packages = buildozer==1.6.0,cython==0.29.33
 
 [qt]
 
@@ -94,5 +94,5 @@ sdk_path =
 local_libs =
 
 # Architecture of deployed platform
-# Possible values: ["aarch64", "armv7a", "i686", "x86_64"]
+# Possible values: ["aarch64", "x86_64"]
 arch =

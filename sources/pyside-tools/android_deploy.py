@@ -1,5 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+# Qt-Security score:significant reason:build-tool
 from __future__ import annotations
 
 import sys
@@ -13,7 +14,13 @@ from textwrap import dedent
 from deploy_lib import (create_config_file, cleanup, config_option_exists, PythonExecutable,
                         MAJOR_VERSION, HELP_EXTRA_IGNORE_DIRS, HELP_EXTRA_MODULES)
 from deploy_lib.android import AndroidData, AndroidConfig
+from deploy_lib.android.android_utilities import ANDROID_NDK_VERSION
 from deploy_lib.android.buildozer import Buildozer
+
+# buildozer 1.6.0 allows Python 3.8+ and python-for-android at the pinned
+# commit allows 3.6+, so neither of them is the binding constraint. Use
+# PySide6's own floor from requires-python instead.
+MIN_HOST_PYTHON_VERSION = (3, 10)
 
 
 """ pyside6-android-deploy deployment tool
@@ -37,7 +44,7 @@ from deploy_lib.android.buildozer import Buildozer
 
     Prerequisities: Python main entrypoint file should be named "main.py"
 
-    Platforms Supported: aarch64, armv7a, i686, x86_64
+    Platforms Supported: aarch64, x86_64
 
     Config file:
         On the first run of the tool, it creates a config file called pysidedeploy.spec which
@@ -188,9 +195,10 @@ if __name__ == "__main__":
                         required=not config_option_exists())
 
     parser.add_argument("--ndk-path", type=lambda p: Path(p).resolve(),
-                        help=("Path to Android NDK. The required version is r26b."
-                              "If not provided, the tool will check its cache at "
-                              ".pyside6_android_deploy to find the NDK.")
+                        help=(f"Path to Android NDK. The required version is "
+                              f"r{ANDROID_NDK_VERSION}. If not provided, the tool "
+                              "will check its cache at .pyside6_android_deploy to "
+                              "find the NDK.")
                         )
 
     parser.add_argument("--sdk-path", type=lambda p: Path(p).resolve(),
@@ -205,10 +213,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # check if the Python version is greater than 3.12
-    if sys.version_info >= (3, 12):
-        raise RuntimeError("[DEPLOY] Android deployment requires Python version 3.11 or lower. "
-                           "This is due to a restriction in buildozer.")
+    if sys.version_info < MIN_HOST_PYTHON_VERSION:
+        version_str = ".".join(str(v) for v in MIN_HOST_PYTHON_VERSION)
+        raise RuntimeError(f"[DEPLOY] Android deployment requires Python "
+                           f"{version_str} or higher.")
 
     main(args.name, args.wheel_pyside, args.wheel_shiboken, args.ndk_path, args.sdk_path,
          args.config_file, args.init, args.loglevel, args.dry_run, args.keep_deployment_files,

@@ -5,11 +5,7 @@
 cmake_minimum_required(VERSION 3.23)
 include_guard(GLOBAL)
 set(CMAKE_SYSTEM_NAME Android)
-{% if plat_name == "armv7a" -%}
-set(CMAKE_SYSTEM_PROCESSOR armv7-a)
-{% else %}
 set(CMAKE_SYSTEM_PROCESSOR {{ plat_name }})
-{% endif %}
 set(CMAKE_ANDROID_API {{ api_level }})
 set(CMAKE_ANDROID_NDK {{ ndk_path }})
 set(CMAKE_ANDROID_ARCH_ABI {{ android_abi }})
@@ -19,11 +15,7 @@ if(NOT DEFINED ANDROID_PLATFORM AND NOT DEFINED ANDROID_NATIVE_API_LEVEL)
     set(ANDROID_PLATFORM "android-{{ min_android_api }}" CACHE STRING "")
 endif()
 set(ANDROID_SDK_ROOT {{ sdk_path }})
-{% if plat_name == "armv7a" -%}
-set(_TARGET_NAME_ENDING "eabi{{ api_level }}")
-{% else %}
 set(_TARGET_NAME_ENDING "{{ api_level }}")
-{% endif %}
 set(QT_COMPILER_FLAGS "--target={{ plat_name }}-linux-android${_TARGET_NAME_ENDING} \
                        -fomit-frame-pointer \
                        -march={{ gcc_march }} \
@@ -46,11 +38,13 @@ set(QT_COMPILER_FLAGS_RELEASE "-O2 -pipe")
 # set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 # set(CMAKE_INSTALL_RPATH "$ORIGIN")
 
+# No -lpython flag here: unlike Windows, the actual link happens through
+# SHIBOKEN_PYTHON_LIBRARIES in ShibokenHelpers.cmake, which resolves the
+# right libpython for this target via Python_LIBRARY (see
+# build_scripts/main.py) rather than hardcoding a version here.
 set(QT_LINKER_FLAGS "-Wl,-O1 -Wl,--hash-style=gnu -Wl,-rpath='$ORIGIN' -Wl,-rpath='$ORIGIN/Qt/lib' \
                      -Wl,--as-needed -L{{ qt_install_path }}/android_{{ qt_plat_name }}/lib \
-                     -L{{ qt_install_path }}/android_{{ qt_plat_name }}/plugins/platforms \
-                     -L{{ target_python_path }}/lib \
-                     -lpython{{ python_version }}")
+                     -L{{ qt_install_path }}/android_{{ qt_plat_name }}/plugins/platforms")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)

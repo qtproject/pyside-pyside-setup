@@ -76,8 +76,8 @@ if (ok) {
     %PYARG_0 = PyList_New(size);
     for (Py_ssize_t i = 0; i < size; ++i) {
         const auto &range = ranges.at(i);
-        PyObject *ob = PyTuple_Pack(2, rangeValueToPython(range.start()),
-                                    rangeValueToPython(range.end()));
+        PyObject *ob = PyTuple_Pack(2, rangeValueToPython(range.start),
+                                    rangeValueToPython(range.end));
         PyList_SetItem(%PYARG_0, i, ob);
     }
 } else {

@@ -10,7 +10,7 @@
 #include <abstractmetalang.h>
 #include <abstractmetatype.h>
 #include <addedfunction.h>
-#include <addedfunction_p.h>
+#include <addedfunctionparser.h>
 #include <codesnip.h>
 #include <complextypeentry.h>
 #include <primitivetypeentry.h>

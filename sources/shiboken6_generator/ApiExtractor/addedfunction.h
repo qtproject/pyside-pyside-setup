@@ -93,6 +93,9 @@ struct AddedFunction
     QString targetLangPackage() const { return m_targetLangPackage; }
     void setTargetLangPackage(const QString &p) { m_targetLangPackage = p; }
 
+    QString docSignature() const { return m_docSignature; }
+    void setDocSignature(const QString &s) { m_docSignature = s; }
+
 private:
     QString m_name;
     QList<Argument> m_arguments;
@@ -100,6 +103,7 @@ private:
     FunctionModificationList m_modifications;
     DocModificationList m_docModifications;
     QString m_targetLangPackage;
+    QString m_docSignature;
     Access m_access = Public;
     bool m_isConst = false;
     bool m_isClassMethod = false;

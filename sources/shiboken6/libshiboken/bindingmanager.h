@@ -37,6 +37,10 @@ public:
     bool hasWrapper(const void *cptr) const;
 
     void registerWrapper(SbkObject *pyObj, void *cptr);
+    /// Take the object out of the wrapper map, leaving its flags alone.
+    /// Deallocation uses this to make the wrapper unreachable before it runs
+    /// any Python code; releaseWrapper() below is the same plus invalidation.
+    void unregisterWrapper(SbkObject *sbkObj);
     void releaseWrapper(SbkObject *sbkObj);
 
     void runDeletionInMainThread();

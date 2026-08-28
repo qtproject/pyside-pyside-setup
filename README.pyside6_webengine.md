@@ -1,4 +1,4 @@
-# PySide6 Examples
+# PySide6 WebEngine
 
 PySide6 is the official Python module from the
 [Qt for Python project](https://wiki.qt.io/Qt_for_Python),
@@ -9,14 +9,13 @@ from any modern OSS project such as all code in a git repository and an open
 design process. We welcome any contribution conforming to the
 [Qt Contribution Agreement](https://www.qt.io/contributionagreement/).
 
-This is a wheel containing the [PySide6](https://pypi.org/project/PySide6)
-examples, from all the modules.
+This is a complementary wheel for [PySide6](https://pypi.org/project/PySide6),
+it includes the following Qt modules:
 
-Because some examples exercise Qt WebEngine, this wheel depends on
-[PySide6_Essentials](https://pypi.org/project/PySide6_Essentials),
-[PySide6_Addons](https://pypi.org/project/PySide6_Addons), and
-[PySide6_WebEngine](https://pypi.org/project/PySide6_WebEngine), and installing
-it will pull in all three.
+* QtWebEngineCore
+* QtWebEngineQuick
+* QtWebEngineWidgets
+* QtWebView
 
 ### Documentation and Bugs
 
@@ -35,6 +34,6 @@ and [join our community](https://wiki.qt.io/Qt_for_Python#Community)!
 ### Licensing
 
 PySide6 is available under both Open Source (LGPLv3 or GPLv2 or GPLv3) and commercial
-licenses. Using PyPi is the recommended installation source, because the
+license. Using PyPi is the recommended installation source, because the
 content of the wheels is valid for both cases. For more information, refer to
 the [Qt Licensing page](https://www.qt.io/licensing/).

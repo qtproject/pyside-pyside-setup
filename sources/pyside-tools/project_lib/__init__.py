@@ -1,5 +1,6 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+# Qt-Security score:significant reason:build-tool
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -43,7 +44,8 @@ class ClOptions(metaclass=Singleton):
     qml_module: bool
 
 
-from .utils import (run_command, requires_rebuild, remove_path, package_dir, qtpaths,
+from .commands import run_command, qtpaths
+from .utils import (requires_rebuild, remove_path, package_dir,
                     qt_metatype_json_dir, resolve_valid_project_file)
 from .project_data import (is_python_file, ProjectData, QmlProjectData,
                            check_qml_decorators)

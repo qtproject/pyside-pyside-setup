@@ -1986,7 +1986,9 @@
         </modify-argument>
     </add-function>
 
-    <add-function signature="tr(const char *@sourceText@, const char *@disambiguation@=nullptr, int @n@=-1)" return-type="QString" classmethod="yes">
+    <add-function signature="tr(const char *@sourceText@, const char *@disambiguation@=nullptr, int @n@=-1)"
+                  doc-signature="tr(const char *, const char *,int)"
+                  return-type="QString" classmethod="yes">
         <inject-code class="target" position="beginning" file="../glue/qtcore.cpp" snippet="qobject-tr"/>
         <modify-argument index="1" pyi-type="str"/>
         <modify-argument index="2" pyi-type="Optional[str]">
@@ -2831,7 +2833,9 @@
     <declare-function signature="checkPermission(const QContactsPermission &amp; @permission@)" return-type="Qt::PermissionStatus" since="6.5" />
     <declare-function signature="checkPermission(const QLocationPermission &amp; @permission@)" return-type="Qt::PermissionStatus" since="6.5" />
     <declare-function signature="checkPermission(const QMicrophonePermission &amp; @permission@)" return-type="Qt::PermissionStatus" since="6.5" />
-    <add-function signature="requestPermission(const QBluetoothPermission &amp; @permission@, const QObject* @context@, PyCallable* @functor@)" since="6.5">
+    <add-function signature="requestPermission(const QBluetoothPermission &amp; @permission@, const QObject* @context@, PyCallable* @functor@)"
+                  doc-signature="requestPermission(const QPermission &amp;, Functor &amp;&amp;)"
+                  since="6.5">
       <inject-code class="target" position="beginning" file="../glue/qtcore.cpp"
               snippet="qcoreapplication-requestpermission"/>
     </add-function>

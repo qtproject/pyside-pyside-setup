@@ -1,5 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+# Qt-Security score:critical reason:handling-untrusted-data
 from __future__ import annotations
 import re
 import sys
@@ -13,7 +14,7 @@ from pkginfo import Wheel
 
 from . import (extract_and_copy_jar, get_wheel_android_arch, find_lib_dependencies,
                get_llvm_readobj, find_qtlibs_in_wheel, platform_map, create_recipe,
-               ANDROID_DEPLOY_CACHE, safe_extractall)
+               ANDROID_DEPLOY_CACHE, PYSIDE_ONLY_MODULES, safe_extractall)
 from .. import (Config, get_all_pyside_modules, MAJOR_VERSION)
 from .android_utilities import (ANDROID_NDK_VERSION, ANDROID_NDK_VERSION_NUMBER_SUFFIX,
                                 download_android_ndk)
@@ -51,7 +52,7 @@ class AndroidConfig(Config):
         if android_data.ndk_path:
             # from cli
             self.ndk_path = android_data.ndk_path
-        elif not existing_config_file:
+        else:
             # from config
             ndk_path_temp = self.get_value("buildozer", "ndk_path")
             if ndk_path_temp:
@@ -74,6 +75,13 @@ class AndroidConfig(Config):
 
                     logging.info("[DEPLOY] Downloading Android NDK")
                     self.ndk_path = download_android_ndk(ANDROID_DEPLOY_CACHE)
+
+        if not self.ndk_path:
+            raise RuntimeError(
+                "[DEPLOY] Unable to find the Android NDK. Pass it with --ndk-path, or set "
+                "ndk_path in the [buildozer] section of pysidedeploy.spec. The NDK is "
+                "required to inspect the Qt libraries in the wheel."
+            )
 
         self.sdk_path = None
         if android_data.sdk_path:
@@ -311,6 +319,12 @@ class AndroidConfig(Config):
             qt_libs_tmpdir = Path(tmpdir) / lib_path_suffix
             # find the lib folder where Qt libraries are stored
             for module_name in sorted(modules):
+                if module_name in PYSIDE_ONLY_MODULES:
+                    # No Qt library exists for these, so there is nothing to
+                    # read Qt dependencies from.
+                    logging.info(f"[DEPLOY] Skipping {module_name} while collecting Qt "
+                                 "dependencies: it has no Qt library")
+                    continue
                 qt_module_path = qt_libs_tmpdir / f"libQt6{module_name}_{self.arch}.so"
                 if not qt_module_path.exists():
                     raise FileNotFoundError(f"[DEPLOY] libQt6{module_name}_{self.arch}.so not found"

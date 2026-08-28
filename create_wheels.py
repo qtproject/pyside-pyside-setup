@@ -18,7 +18,8 @@ import build_scripts.wheel_files
 from build_scripts.wheel_files import (ModuleData,  # type: ignore
                                        set_pyside_package_path,
                                        wheel_files_pyside_addons,
-                                       wheel_files_pyside_essentials)
+                                       wheel_files_pyside_essentials,
+                                       wheel_files_pyside_webengine)
 from build_scripts.log import log
 from build_scripts.utils import available_pyside_tools
 
@@ -30,12 +31,36 @@ PYSIDE_DESCRIPTION = "Python bindings for the Qt cross-platform application and 
 # release. Wheels like shiboken6 and shiboken6_generator have no
 # dependencies, add for completeness.
 WHEEL_DEPENDENCIES: dict[str, list[str]] = {
+    "PySide6": ["PySide6_Essentials", "PySide6_Addons"],
+    "PySide6_Examples": ["PySide6_Essentials", "PySide6_Addons", "PySide6_WebEngine"],
+    "PySide6_WebEngine": ["PySide6_Addons"],
+    "PySide6_Addons": ["PySide6_Essentials"],
+    "PySide6_Essentials": ["shiboken6"],
     "shiboken6": [],
     "shiboken6_generator": [],
-    "PySide6": ["shiboken6", "PySide6_Essentials", "PySide6_Addons"],
-    "PySide6_Examples": ["shiboken6", "PySide6_Essentials", "PySide6_Addons"],
-    "PySide6_Essentials": ["shiboken6"],
-    "PySide6_Addons": ["shiboken6", "PySide6_Essentials"],
+}
+
+# Maps a wheel to optional ('extras') dependencies, version-pinned to the
+# same release, that are not required for the wheel to work but unlock
+# additional functionality when installed, e.g.:
+#   pip install PySide6-Addons[webengine]
+#   pip install PySide6[full]
+#
+# Each extra maps to (dependencies, platforms), where 'platforms' restricts
+# it to specific sys.platform values, or None to apply on every platform.
+#
+# On Linux, QtWebView (packaged in PySide6_Addons) only ships the
+# 'webengine' backend plugin (there is no native OS web view like on
+# Android/iOS/Windows/macOS), so it is unusable there without
+# PySide6_WebEngine installed; elsewhere it would be a no-op, so it's not
+# advertised there.
+WHEEL_OPTIONAL_DEPENDENCIES: dict[str, dict[str, tuple[list[str], tuple[str, ...] | None]]] = {
+    "PySide6_Addons": {
+        "webengine": (["PySide6_WebEngine"], ("linux",)),
+    },
+    "PySide6": {
+        "full": (["PySide6_Examples", "shiboken6_generator"], None),
+    },
 }
 
 
@@ -190,6 +215,22 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Pat
     if _name == "PySide6":
         _dependencies.append('tomli>=2.0.1; python_version < "3.11"')
 
+    # Optional ('extras') dependencies, e.g. PySide6_Addons[webengine] or
+    # PySide6[full]. Some are restricted to specific platforms; see
+    # WHEEL_OPTIONAL_DEPENDENCIES.
+    _optional_deps_block = ""
+    _extras = {
+        extra_name: deps
+        for extra_name, (deps, platforms) in WHEEL_OPTIONAL_DEPENDENCIES.get(_name, {}).items()
+        if platforms is None or sys.platform in platforms
+    }
+    if _extras:
+        _lines = ["[project.optional-dependencies]"]
+        for extra_name, deps in _extras.items():
+            _pinned = [f'"{dep}=={setup.version[0]}"' for dep in deps]
+            _lines.append(f"{extra_name} = [{', '.join(_pinned)}]")
+        _optional_deps_block = "\n".join(_lines)
+
     with open(artifacts / "pyproject.toml.base", encoding="utf-8") as f:
         content = (
             f.read()
@@ -200,11 +241,13 @@ def generate_pyproject_toml(artifacts: Path, setup: SetupData, package_path: Pat
             .replace('"PROJECT_TAG"', f'"{_tag}"')
             .replace('# PROJECT_SCRIPTS', _console_scripts)
             .replace('"PROJECT_DEPENDENCIES"', f"{_dependencies}")
+            .replace('# PROJECT_OPTIONAL_DEPENDENCIES', _optional_deps_block)
         )
     return content
 
 
-def generate_setup_py(artifacts: Path, setup: SetupData):
+def generate_setup_py(artifacts: Path, setup: SetupData,
+                      exclude_package_data: dict[str, list[str]] | None = None):
     _name = setup.name
 
     # To get the 'abi3' tag on the wheel name, we need to use
@@ -215,22 +258,50 @@ def generate_setup_py(artifacts: Path, setup: SetupData):
         fext = "PySide6/QtCore"
     elif _name == "PySide6_Addons":
         fext = "PySide6/Qt3DCore"
+    elif _name == "PySide6_WebEngine":
+        fext = "PySide6/WebEngineCore"
     else:
         fext = "Shiboken"
 
     # For special wheels based on 'PySide6'
     # we force the name to be PySide6 for the package_name,
     # so we can take the files from that packaged-directory
-    if setup.name in ("PySide6_Essentials", "PySide6_Addons", "PySide6_Examples"):
+    if setup.name in ("PySide6_Essentials", "PySide6_Addons",
+                      "PySide6_Examples", "PySide6_WebEngine"):
         _name = "PySide6"
 
     with open(artifacts / "setup.py.base", encoding="utf-8") as f:
         content = f.read().format(
             name=_name,
             fake_ext=fext,
+            exclude_package_data=exclude_package_data or {},
         )
 
     return content
+
+
+def get_unwanted_pyi_files(data: list[ModuleData] | None, package_path: Path) -> list[str]:
+    """Return the '.pyi' stub file names present in the 'PySide6' package
+    directory that don't belong to the given wheel's modules.
+
+    setuptools implicitly globs and bundles *every* '*.pyi' file it finds in
+    a package directory (see
+    'setuptools.command.build_py._IMPLICIT_DATA_FILES'), no matter what
+    'MANIFEST.in'/'package_data' declare. Because 'PySide6_Essentials',
+    'PySide6_Addons' and 'PySide6_WebEngine' are all built from the same
+    'PySide6' directory, every wheel would otherwise end up bundling the
+    '.pyi' stubs that belong to modules packaged in a *different* wheel.
+    """
+    if data is None:
+        return []
+
+    wanted = set()
+    for module in data:
+        wanted.update(module.pyi)
+        wanted.update(f for f in module.extra_files if f.endswith(".pyi"))
+
+    all_pyi = {f.name for f in (package_path / "PySide6").glob("*.pyi")}
+    return sorted(all_pyi - wanted)
 
 
 def wheel_shiboken_generator(package_path: Path) -> tuple[SetupData, None]:
@@ -300,6 +371,20 @@ def wheel_pyside6_addons(package_path: Path) -> tuple[SetupData, list[ModuleData
     )
 
     data = wheel_files_pyside_addons()
+
+    return setup, data
+
+
+def wheel_pyside6_webengine(package_path: Path) -> tuple[SetupData, list[ModuleData]]:
+    setup = SetupData(
+        name="PySide6_WebEngine",
+        version=get_version_from_package("PySide6", package_path),  # we use 'PySide6' here
+        description=f"{PYSIDE_DESCRIPTION} (WebEngine)",
+        readme="README.pyside6_webengine.md",
+        console_scripts=[],
+    )
+
+    data = wheel_files_pyside_webengine()
 
     return setup, data
 
@@ -455,6 +540,7 @@ if __name__ == "__main__":
         "shiboken6_generator": wheel_shiboken_generator,
         "PySide6_Essentials": wheel_pyside6_essentials,
         "PySide6_Addons": wheel_pyside6_addons,
+        "PySide6_WebEngine": wheel_pyside6_webengine,
         "PySide6": wheel_pyside6,
     }
     if not options.no_examples:
@@ -467,7 +553,12 @@ if __name__ == "__main__":
 
         # 1. Generate 'setup.py'
         log.info("-- Generating setup.py")
-        setup_py_content = generate_setup_py(artifacts_path, setup)
+        exclude_package_data = None
+        if data is not None:
+            unwanted_pyi = get_unwanted_pyi_files(data, package_path)
+            if unwanted_pyi:
+                exclude_package_data = {"PySide6": unwanted_pyi}
+        setup_py_content = generate_setup_py(artifacts_path, setup, exclude_package_data)
         with open(setup_py_path, "w", encoding="utf-8") as f:
             f.write(setup_py_content)
 

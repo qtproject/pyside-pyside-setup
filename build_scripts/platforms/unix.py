@@ -123,7 +123,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
             _vars=_vars)
 
     if config.is_internal_pyside_build():
-        if not is_android:
+        if not is_android and not is_ios:
             makefile(
                 "{st_build_dir}/{st_package_name}/scripts/__init__.py",
                 _vars=_vars)
@@ -212,7 +212,7 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
                 target = "{st_build_dir}/{st_package_name}/" + glue
                 copydir(source, target, _vars=_vars)
 
-        if not is_android:
+        if not is_android and not is_ios:
             # <source>/pyside6/{st_package_name}/support/* ->
             #   <setup>/{st_package_name}/support/*
             copydir(
@@ -240,6 +240,13 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
                 "{install_dir}/lib/jar",
                 "{st_build_dir}/{st_package_name}/jar",
                 _vars=_vars)
+
+        if is_ios:
+            # Copy the per-module static libraries
+            copydir(
+                "{install_dir}/{cmake_package_name}", destination_dir,
+                _filter=["libQt*.a"],
+                recursive=False, _vars=_vars)
 
     # Some libraries specific to Linux/Android from 6.8
     # eg: the libav* libraries are required for the multimedia module
@@ -285,7 +292,8 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
         )
 
     # Update rpath to $ORIGIN
-    if (sys.platform.startswith('linux') or sys.platform.startswith('darwin')) and not is_android:
+    if ((sys.platform.startswith('linux') or sys.platform.startswith('darwin'))
+            and not (is_android or is_ios)):
         pyside_build.update_rpath(executables)
         if libexec_executables:
             pyside_build.update_rpath(libexec_executables, libexec=True)

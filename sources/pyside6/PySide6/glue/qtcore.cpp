@@ -2491,6 +2491,12 @@ static bool isVariantList(const QVariant &v)
 {
     return v.typeId() == QMetaType::QVariantList;
 };
+
+static bool isStringList(const QVariant &v)
+{
+    return v.typeId() == QMetaType::QStringList;
+};
+
 // @snippet qrangemodel-helper-functions
 
 // @snippet qrangemodel-numpy-constructor
@@ -2515,6 +2521,12 @@ if (!vList.isEmpty() && std::all_of(vList.cbegin(),  vList.cend(), isVariantList
     for (const auto &rowV : vList)
         variantTable.append(rowV.value<QVariantList>());
     %0 = new %TYPE(variantTable, %2);
+} else if (!vList.isEmpty() && std::all_of(vList.cbegin(),  vList.cend(), isStringList)) {
+    QList<QStringList> stringTable;
+    stringTable.reserve(vList.size());
+    for (const auto &rowV : vList)
+        stringTable.append(rowV.value<QStringList>());
+    %0 = new %TYPE(stringTable, %2);
 } else {
     %0 = new %TYPE(vList, %2);
 }

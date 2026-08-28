@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 // Qt-Security score:significant reason:build-tool
 
-#ifndef ADDEDFUNCTION_P_H
-#define ADDEDFUNCTION_P_H
+#ifndef ADDEDFUNCTIONPARSER_H
+#define ADDEDFUNCTIONPARSER_H
 
 #include <QtCore/qcompare.h>
 #include <QtCore/qlist.h>
 #include <QtCore/qstring.h>
 #include <QtCore/qstringview.h>
+
+#include <optional>
 
 QT_BEGIN_NAMESPACE
 class QDebug;
@@ -35,12 +37,22 @@ struct Argument
 
 using Arguments = QList<Argument>;
 
+struct ParsedFunction
+{
+    QString name;
+    Arguments arguments;
+    bool constant{false};
+};
+
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug d, const Argument &a);
+QDebug operator<<(QDebug d, const ParsedFunction &f);
 #endif
 
 Arguments splitParameters(QStringView paramString, QString *errorMessage = nullptr);
 
+std::optional<ParsedFunction> parse(QStringView signature, QString *errorMessage);
+
 } // namespace AddedFunctionParser
 
-#endif // MODIFICATIONS_P_H
+#endif // ADDEDFUNCTIONPARSER_H

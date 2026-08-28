@@ -65,7 +65,9 @@ public:
     */
     virtual ModuleDocumentation retrieveModuleDocumentation(const QString &name) = 0;
 
+    static bool skipForDocumentation(const AbstractMetaFunctionCPtr &func);
     static bool skipForQuery(const AbstractMetaFunctionCPtr &func);
+
 
     /// Helper to return the documentation modifications for a class
     /// or a member function.

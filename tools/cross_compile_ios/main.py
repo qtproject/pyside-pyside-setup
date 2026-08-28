@@ -34,7 +34,7 @@ def cmd_build(args: argparse.Namespace) -> None:
         qt_ios = qt_install_path / "ios"
         qt_macos = qt_install_path / "macos"
 
-    # Download BeeWare Python.xcframework
+    # Download the official python.org Python.xcframework
     python_xcframework = download_python_support()
 
     # Generate toolchain file
@@ -50,7 +50,7 @@ def cmd_build(args: argparse.Namespace) -> None:
     plat_name = f"ios_{suffix}"
     python_slice = python_xcframework / python_xcframework_slice_dir(arch, simulator)
     cmd = [
-        sys.executable, "setup.py", "build",
+        sys.executable, "setup.py", "bdist_wheel",
         "--standalone",
         f"--cmake-toolchain-file={toolchain}",
         f"--qt-host-path={qt_macos}",

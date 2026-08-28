@@ -1,5 +1,6 @@
 # Copyright (C) 2023 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+# Qt-Security score:critical reason:execute-external-code,handling-untrusted-data
 from __future__ import annotations
 
 import sys
@@ -8,8 +9,20 @@ import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
-from . import AndroidConfig
+from . import AndroidConfig, PYSIDE_ONLY_MODULES
+from .android_helper import check_jdk_version, ensure_legacy_sdk_tools_path
+from .android_utilities import (MIN_ANDROID_API_LEVEL,
+                                DEFAULT_ANDROID_API_LEVEL)
 from .. import BaseConfig, run_command
+
+# python-for-android is cloned by buildozer at this branch and commit.
+# Pinning a commit keeps builds reproducible; a branch alone tracks a
+# moving HEAD. This commit is tag v2026.05.09, the first release
+# containing the Qt bootstrap fix b92522fab879dbfc0028966ca3c59ef46ab7767d.
+# The Android target Python version is decided by this commit's python3
+# recipe - keep ANDROID_TARGET_PYTHON_FULL_VERSION in step when bumping.
+P4A_BRANCH = "master"
+P4A_COMMIT = "58d21141f17c889bf8585f5665921d72028f8831"
 
 
 class BuildozerConfig(BaseConfig):
@@ -31,20 +44,27 @@ class BuildozerConfig(BaseConfig):
             self.set_value("app", "android.ndk_path", str(pysidedeploy_config.ndk_path))
 
         if pysidedeploy_config.sdk_path:
+            ensure_legacy_sdk_tools_path(pysidedeploy_config.sdk_path)
             self.set_value("app", "android.sdk_path", str(pysidedeploy_config.sdk_path))
 
         self.set_value("app", "android.archs", pysidedeploy_config.arch)
+
+        # buildozer's own defaults (api 33, minapi 24) are below Qt's
+        # minimum supported Android API level, so set them explicitly.
+        # p4a derives --minsdk from ndk_api, so both must agree.
+        self.set_value("app", "android.api", DEFAULT_ANDROID_API_LEVEL,
+                       raise_warning=False)
+        self.set_value("app", "android.minapi", MIN_ANDROID_API_LEVEL,
+                       raise_warning=False)
+        self.set_value("app", "android.ndk_api", MIN_ANDROID_API_LEVEL,
+                       raise_warning=False)
 
         # p4a changes
         self.set_value("app", "p4a.bootstrap", "qt")
         self.set_value('app', "p4a.local_recipes", str(pysidedeploy_config.recipe_dir))
 
-        # add p4a branch
-        # by default the master branch is used
-        # https://github.com/kivy/python-for-android/commit/b92522fab879dbfc0028966ca3c59ef46ab7767d
-        # has not been merged to master yet. So, we use the develop branch for now
-        # TODO: remove this once the above commit is merged to master
-        self.set_value("app", "p4a.branch", "develop")
+        self.set_value("app", "p4a.branch", P4A_BRANCH)
+        self.set_value("app", "p4a.commit", P4A_COMMIT)
 
         # add permissions
         permissions = self.__find_permissions(pysidedeploy_config.dependency_files)
@@ -57,7 +77,13 @@ class BuildozerConfig(BaseConfig):
         self.set_value("app", "android.add_jars", ",".join(jars))
 
         # extra arguments specific to Qt
-        modules = ",".join(pysidedeploy_config.modules)
+        # p4a's QtLoader eagerly loads every --qt-libs entry as
+        # libQt6<name>_<arch>.so, which does not exist for PySide-only
+        # modules, and crashes the app on startup. pysidedeploy_config.modules
+        # legitimately still lists them, since the app genuinely uses them.
+        qt_libs_modules = [m for m in pysidedeploy_config.modules
+                           if m not in PYSIDE_ONLY_MODULES]
+        modules = ",".join(qt_libs_modules)
         local_libs = ",".join(pysidedeploy_config.local_libs)
         init_classes = ",".join(init_classes)
         extra_args = (f"--qt-libs={modules} --load-local-libs={local_libs}"
@@ -126,6 +152,10 @@ class Buildozer:
 
     @staticmethod
     def initialize(pysidedeploy_config: AndroidConfig):
+        # Checked before anything is built, because python-for-android
+        # otherwise stops mid-build with no output.
+        check_jdk_version()
+
         project_dir = Path(pysidedeploy_config.project_dir)
         buildozer_spec = project_dir / "buildozer.spec"
         if buildozer_spec.exists():

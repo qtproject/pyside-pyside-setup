@@ -126,7 +126,7 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
         self.assertTrue(config_obj.get_value("app", "input_file").endswith("main.py"))
         self.assertEqual(config_obj.get_value("python", "android_packages"),
-                         "buildozer==1.5.0,cython==0.29.33")
+                         "buildozer==1.6.0,cython==0.29.33")
         self.assertEqual(config_obj.get_value("android", "wheel_pyside"),
                          str(self.pyside_wheel.resolve()))
         self.assertEqual(config_obj.get_value("android", "wheel_shiboken"),
@@ -167,6 +167,228 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
 
         self.config_file.unlink()
         self.buildozer_config.unlink()
+
+    @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
+    @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
+    def test_pyside_only_module_excluded_from_qt_libs(self, mock_qtlibs, mock_extraqtmodules,
+                                                      mock_recipes_exist, mock_find_jars,
+                                                      mock_extract_jar):
+        """A module with no Qt library, such as QtQmlFeatures, must not be
+        passed to p4a's --qt-libs. p4a's QtLoader eagerly loads every entry
+        there as libQt6<name>_<arch>.so, and there is no such file for a
+        PySide-only module, so the app crashes on startup with 'Can't find
+        libQt6QmlFeatures_<arch>.so'. The module still belongs in
+        pysidedeploy.spec's own qt.modules, since the app genuinely uses it -
+        only the p4a-facing --qt-libs argument must exclude it."""
+        jar_dir = "tmp/jar/PySide6/jar"
+        mock_extract_jar.return_value = Path(jar_dir)
+        mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
+        mock_extraqtmodules.return_value = ["QmlFeatures"]
+        mock_recipes_exist.return_value = True
+        mock_find_jars.return_value = [], []
+
+        self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
+                                 pyside_wheel=self.pyside_wheel, ndk_path=self.ndk_path,
+                                 init=True, force=True, keep_deployment_files=True)
+
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
+        obtained_modules = set(config_obj.get_value("qt", "modules").split(","))
+        self.assertIn("QmlFeatures", obtained_modules)
+
+        buildozer_config_obj = self.deploy_lib.BaseConfig(config_file=self.buildozer_config)
+        extra_args = buildozer_config_obj.get_value("app", "p4a.extra_args")
+        qt_libs = re.search(r"--qt-libs=(?P<modules>[^ ]*)", extra_args).group("modules")
+        self.assertNotIn("QmlFeatures", qt_libs.split(","))
+
+        self.config_file.unlink()
+        self.buildozer_config.unlink()
+
+    @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
+    @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
+    def test_p4a_pinned_to_commit(self, mock_qtlibs, mock_extraqtmodules, mock_recipes_exist,
+                                  mock_find_jars, mock_extract_jar):
+        mock_extract_jar.return_value = Path("tmp/jar/PySide6/jar")
+        mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
+        mock_extraqtmodules.return_value = []
+        mock_recipes_exist.return_value = True
+        mock_find_jars.return_value = [], []
+
+        self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
+                                 pyside_wheel=self.pyside_wheel, ndk_path=self.ndk_path,
+                                 init=True, force=True, keep_deployment_files=True)
+
+        buildozer_config_obj = self.deploy_lib.BaseConfig(config_file=self.buildozer_config)
+        self.assertEqual(buildozer_config_obj.get_value("app", "p4a.branch"), "master")
+        self.assertEqual(buildozer_config_obj.get_value("app", "p4a.commit"),
+                         "58d21141f17c889bf8585f5665921d72028f8831")
+
+        self.config_file.unlink()
+        self.buildozer_config.unlink()
+
+    @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
+    @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
+    def test_android_api_levels_are_explicit(self, mock_qtlibs, mock_extraqtmodules,
+                                             mock_recipes_exist, mock_find_jars,
+                                             mock_extract_jar):
+        mock_extract_jar.return_value = Path("tmp/jar/PySide6/jar")
+        mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
+        mock_extraqtmodules.return_value = []
+        mock_recipes_exist.return_value = True
+        mock_find_jars.return_value = [], []
+
+        self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
+                                 pyside_wheel=self.pyside_wheel, ndk_path=self.ndk_path,
+                                 init=True, force=True, keep_deployment_files=True)
+
+        buildozer_config_obj = self.deploy_lib.BaseConfig(config_file=self.buildozer_config)
+        self.assertEqual(buildozer_config_obj.get_value("app", "android.api"), "35")
+        self.assertEqual(buildozer_config_obj.get_value("app", "android.minapi"), "28")
+        self.assertEqual(buildozer_config_obj.get_value("app", "android.ndk_api"), "28")
+
+        self.config_file.unlink()
+        self.buildozer_config.unlink()
+
+    @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
+    @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
+    def test_spec_round_trips_through_buildozer_parser(self, mock_qtlibs, mock_extraqtmodules,
+                                                       mock_recipes_exist, mock_find_jars,
+                                                       mock_extract_jar):
+        try:
+            from buildozer.specparser import SpecParser
+        except ImportError:
+            self.skipTest("buildozer 1.6.0 not installed")
+
+        mock_extract_jar.return_value = Path("tmp/jar/PySide6/jar")
+        mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
+        mock_extraqtmodules.return_value = []
+        mock_recipes_exist.return_value = True
+        mock_find_jars.return_value = [], []
+
+        self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
+                                 pyside_wheel=self.pyside_wheel, ndk_path=self.ndk_path,
+                                 init=True, force=True, keep_deployment_files=True)
+
+        # SpecParser forces allow_no_value=True itself, so it must not be
+        # passed in here.
+        parser = SpecParser()
+        parser.read(str(self.buildozer_config))
+        for key in ("p4a.bootstrap", "p4a.local_recipes", "p4a.branch",
+                    "p4a.commit", "p4a.extra_args", "android.archs",
+                    "android.api", "android.minapi", "android.ndk_api",
+                    "requirements"):
+            self.assertTrue(parser.has_option("app", key),
+                            f"buildozer's parser lost key {key}")
+
+        self.config_file.unlink()
+        self.buildozer_config.unlink()
+
+    @patch("deploy_lib.android.android_config.find_lib_dependencies")
+    @patch("deploy_lib.android.android_config.get_llvm_readobj")
+    def test_pyside_only_module_is_skipped(self, mock_readobj, mock_find_deps, mock_extract_jar):
+        """PySide6 modules without a Qt library, such as QtQmlFeatures, have
+        no libQt6<name> to read dependencies from and must not be treated as
+        a missing library."""
+        import types
+        import zipfile as zf
+        android_config = importlib.import_module("deploy_lib.android.android_config")
+
+        tmpdir = Path(tempfile.mkdtemp())
+        # A fake wheel holding one real Qt library and nothing for QmlFeatures.
+        wheel = tmpdir / "pyside6-fake-android_aarch64.whl"
+        with zf.ZipFile(wheel, "w") as archive:
+            archive.writestr("PySide6/Qt/lib/libQt6Core_arm64-v8a.so", b"")
+        # get_llvm_readobj is mocked, so any existing file will do.
+        mock_readobj.return_value = wheel
+        mock_find_deps.return_value = None
+
+        stub = types.SimpleNamespace(arch="arm64-v8a", ndk_path=tmpdir, dry_run=False,
+                                     wheel_pyside=wheel,
+                                     qt_libs_path=zf.Path(wheel) / "PySide6/Qt/lib")
+
+        result = android_config.AndroidConfig._find_dependent_qt_modules(
+            stub, ["Core", "QmlFeatures"])
+
+        self.assertEqual(result, [])
+        # Only the module that has a Qt library was inspected.
+        self.assertEqual(mock_find_deps.call_count, 1)
+        inspected = Path(mock_find_deps.call_args.kwargs["lib_path"]).name
+        self.assertEqual(inspected, "libQt6Core_arm64-v8a.so")
+
+    def test_legacy_sdk_tools_path(self, mock_extract_jar):
+        """buildozer looks for sdkmanager, and python-for-android for
+        avdmanager, in the retired SDK Tools location. Both have to be
+        reachable under 'tools/bin'."""
+        ensure_legacy_sdk_tools_path = importlib.import_module(
+            "deploy_lib.android.android_helper").ensure_legacy_sdk_tools_path
+
+        # A current SDK: the tools live only under cmdline-tools.
+        sdk = Path(tempfile.mkdtemp()) / "android-sdk"
+        (sdk / "cmdline-tools" / "bin").mkdir(parents=True)
+        (sdk / "cmdline-tools" / "lib").mkdir()
+        for tool in ("sdkmanager", "avdmanager"):
+            (sdk / "cmdline-tools" / "bin" / tool).touch()
+        (sdk / "cmdline-tools" / "lib" / "sdkmanager-classpath.jar").touch()
+
+        ensure_legacy_sdk_tools_path(sdk)
+        # The launchers locate their jars next to the bin directory.
+        self.assertTrue((sdk / "tools" / "lib" / "sdkmanager-classpath.jar").exists(),
+                        "the class path directory was not made reachable")
+        self.assertTrue((sdk / "tools" / "bin" / "sdkmanager").exists(),
+                        "buildozer's sdkmanager path was not made reachable")
+        self.assertTrue((sdk / "tools" / "bin" / "avdmanager").exists(),
+                        "python-for-android's avdmanager path was not made reachable")
+        # 'tools' itself must stay a plain directory, so that the package.xml
+        # in cmdline-tools is not exposed a second time.
+        self.assertFalse((sdk / "tools").is_symlink())
+
+        # Running twice must not fail.
+        ensure_legacy_sdk_tools_path(sdk)
+
+        # An SDK that already has a real 'tools' directory must be left alone.
+        legacy_sdk = Path(tempfile.mkdtemp()) / "android-sdk"
+        (legacy_sdk / "cmdline-tools" / "bin").mkdir(parents=True)
+        (legacy_sdk / "cmdline-tools" / "bin" / "sdkmanager").touch()
+        (legacy_sdk / "tools" / "bin").mkdir(parents=True)
+        (legacy_sdk / "tools" / "bin" / "sdkmanager").write_text("original")
+
+        ensure_legacy_sdk_tools_path(legacy_sdk)
+        self.assertFalse((legacy_sdk / "tools").is_symlink())
+        self.assertEqual((legacy_sdk / "tools" / "bin" / "sdkmanager").read_text(), "original")
+
+    @unittest.skipUnless(sys.platform == "darwin", "the Jdk check only applies to macOS")
+    def test_jdk_version_check(self, mock_extract_jar):
+        """A Jdk other than the one python-for-android accepts has to be
+        reported here, because p4a itself stops without printing a reason."""
+        android_helper = importlib.import_module("deploy_lib.android.android_helper")
+        required = android_helper.P4A_REQUIRED_JDK_VERSION
+
+        def fake_jdk(version: str) -> Path:
+            jdk = Path(tempfile.mkdtemp()) / "jdk"
+            (jdk / "bin").mkdir(parents=True)
+            javac = jdk / "bin" / "javac"
+            javac.write_text(f'#!/bin/sh\necho "javac {version}"\n')
+            javac.chmod(0o755)
+            return jdk
+
+        # A supported Jdk passes.
+        with mock.patch.dict(os.environ, {"JAVA_HOME": str(fake_jdk(f"{required}.0.2"))}):
+            android_helper.check_jdk_version()
+
+        # An unsupported one fails with a message naming the version and the fix.
+        with mock.patch.dict(os.environ, {"JAVA_HOME": str(fake_jdk("26"))}):
+            with self.assertRaises(RuntimeError) as context:
+                android_helper.check_jdk_version()
+        message = str(context.exception)
+        self.assertIn(f"requires Jdk {required}", message)
+        self.assertIn("JAVA_HOME", message)
 
     def test_errors(self, mock_extract_jar):
         # test when no shiboken wheel is passed
@@ -222,7 +444,53 @@ class TestPySide6AndroidDeployWidgets(DeployTestBase):
         # test config file contents
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
         self.assertEqual(config_obj.get_value("buildozer", "sdk_path"), '')
-        self.assertEqual(config_obj.get_value("buildozer", "ndk_path"), "/tmp/android_ndk")
+        # Compare resolved paths: on macOS /tmp is a symlink to /private/tmp,
+        # and the config stores the resolved path.
+        self.assertEqual(Path(config_obj.get_value("buildozer", "ndk_path")),
+                         Path("/tmp/android_ndk").resolve())
+
+    @patch("deploy_lib.android.buildozer.BuildozerConfig._BuildozerConfig__find_jars")
+    @patch("deploy_lib.android.android_config.AndroidConfig.recipes_exist")
+    @patch("deploy_lib.android.android_config.AndroidConfig._find_dependent_qt_modules")
+    @patch("deploy_lib.android.android_config.find_qtlibs_in_wheel")
+    @patch("deploy_lib.android.android_config.download_android_ndk")
+    def test_ndk_resolved_with_existing_config_file(self, mock_ndk, mock_qtlibs,
+                                                    mock_extraqtmodules, mock_recipes_exist,
+                                                    mock_find_jars, mock_extract_jar):
+        """The Ndk has to be resolved even when a pysidedeploy.spec already
+        exists, otherwise every run after the first one fails."""
+        mock_extract_jar.return_value = Path("tmp/jar/PySide6/jar")
+        mock_qtlibs.return_value = self.pyside_wheel / "PySide6/Qt/lib"
+        mock_extraqtmodules.return_value = []
+        mock_recipes_exist.return_value = True
+        mock_find_jars.return_value = [], []
+        mock_ndk.return_value = Path("/tmp/android_ndk")
+
+        # First run creates pysidedeploy.spec.
+        self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
+                                 pyside_wheel=self.pyside_wheel, init=True, force=True,
+                                 keep_deployment_files=True)
+        self.assertTrue(self.config_file.exists())
+
+        # Clear the value the first run wrote, so the Ndk has to be found
+        # again. This is the state left behind when the first run fails
+        # before it gets as far as resolving the Ndk.
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
+        config_obj.set_value("buildozer", "ndk_path", "")
+        config_obj.update_config()
+
+        # Second run passes the existing config file.
+        self.android_deploy.main(name="android_app", shiboken_wheel=self.shiboken_wheel,
+                                 pyside_wheel=self.pyside_wheel,
+                                 config_file=self.config_file, init=True, force=True,
+                                 keep_deployment_files=True)
+
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
+        self.assertEqual(Path(config_obj.get_value("buildozer", "ndk_path")),
+                         Path("/tmp/android_ndk").resolve())
+
+        self.config_file.unlink()
+        self.buildozer_config.unlink()
 
 
 @patch("deploy_lib.config.run_qmlimportscanner")

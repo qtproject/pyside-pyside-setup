@@ -353,6 +353,7 @@ public:
         modifications(const AbstractMetaClassCPtr &implementor = {}) const;
     void clearModificationsCache();
 
+    QString addedFunctionDocSignature() const;
     DocModificationList addedFunctionDocModifications() const;
 
     // For AbstractMetaBuilder only.

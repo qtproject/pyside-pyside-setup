@@ -316,14 +316,12 @@ macro(shiboken_find_required_python)
             "${_shiboken_backup_CMAKE_FIND_ROOT_PATH}")
 
         # For Android platform sometimes the FindPython module returns Python_SOABI as empty in
-        # certain scenarios eg: armv7a target, macOS host etc. This is because
+        # certain scenarios eg: macOS host etc. This is because
         # it is unable to set Python_CONFIG i.e. `python3-config` script
-        # This workaround sets the Python_SOABI manually for this Android platform.
-        # This needs to be updated manually if the Python version for Android cross compilation
-        # changes.
+        # This workaround derives the Python_SOABI from the found Python version.
         # TODO: Find a better way to set Python_SOABI for Android platform
         if(CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT Python_SOABI)
-            set(Python_SOABI "cpython-311")
+            set(Python_SOABI "cpython-${Python_VERSION_MAJOR}${Python_VERSION_MINOR}")
         endif()
     else()
         find_package(
@@ -429,7 +427,11 @@ macro(shiboken_compute_python_libraries)
         set(SHIBOKEN_PYTHON_LIBRARIES "")
     endif()
 
-    if(WIN32 AND NOT SHIBOKEN_PYTHON_LIBRARIES)
+    # Android's Bionic linker does not resolve an undefined symbol against
+    # whatever already happens to be loaded in the process, unlike the ELF
+    # linker on desktop Linux/macOS. Every extension module needs an explicit
+    # NEEDED entry pointing at libpython, same as Windows already requires.
+    if((WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Android") AND NOT SHIBOKEN_PYTHON_LIBRARIES)
         set(SHIBOKEN_PYTHON_LIBRARIES ${Python_LIBRARIES})
     endif()
 

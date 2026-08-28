@@ -150,6 +150,11 @@ class SetupRunner:
             if self.cmd_line_argument_is_in_args("build-tests", host_cmd):
                 host_cmd = self.remove_cmd_line_argument_in_args("build-tests", host_cmd)
 
+            # Drop the dist-dir arg if there is one. This invocation runs the
+            # build command rather than bdist_wheel, which does not have it.
+            if self.cmd_line_argument_is_in_args("dist-dir", host_cmd):
+                host_cmd = self.remove_cmd_line_argument_in_args("dist-dir", host_cmd)
+
             # Make sure to pass the qt host path as the target path
             # when doing the host build. And make sure to remove any
             # existing qt target path.

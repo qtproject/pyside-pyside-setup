@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import re
 import shutil
 import ssl
 import tarfile
@@ -27,8 +28,8 @@ except ImportError:
     pass
 
 
-PYTHON_VERSION = "3.14"
-BUILD_NUMBER = "b9"    # Latest
+PYTHON_VERSION = "3.15"       # major.minor -- used for stdlib paths (lib/pythonX.Y)
+PYTHON_RELEASE = "3.15.0rc1"  # exact python.org release tag for the iOS XCframework
 
 TEMPLATES_PATH = Path(__file__).parent / "templates"
 IOS_CACHE_DIR = Path.home() / ".pyside6_ios"
@@ -37,15 +38,13 @@ DEFAULT_QT_CMAKEDIR = "lib/cmake"
 TARGET_QT_INFO_DIR = PYSIDE_SETUP_ROOT / "sources" / "shiboken6" / "config.tests" / "target_qt_info"
 
 
-BEEWARE_RELEASE_URL = (
-    "https://github.com/beeware/Python-Apple-support/releases/download"
-    "/{tag}/Python-{python_version}-iOS-support.{build}.tar.gz"
+PYTHON_ORG_IOS_URL = (
+    "https://www.python.org/ftp/python/{base_version}/python-{release}-iOS-XCframework.tar.gz"
 )
 
-# beeware does not publish official checksums, so this is SHA-256 sum
-# computed from that specific file
-_PYTHON_SUPPORT_SHA256: dict[str, str] = {
-    "3.14-b9": "8e4123b543bf17fdae2e2c6c033434487752438431014eb12e6d833aa35927a8",
+# published directly on the python.org release page
+_PYTHON_IOS_SHA256: dict[str, str] = {
+    "3.15.0rc1": "178bf7bef9cd0f18b27cacb98b14332a5ba44c9427543ffb71f8809bc1f11c3c",
 }
 
 
@@ -70,24 +69,22 @@ def _verify_sha256(file_path: Path, expected: str) -> None:
 
 
 def download_python_support(
-    python_version: str = PYTHON_VERSION,
-    build_number: str = BUILD_NUMBER,
-    cache_dir: Path = IOS_CACHE_DIR / "Python-Apple-support",
+    release: str = PYTHON_RELEASE,
+    cache_dir: Path = IOS_CACHE_DIR / "Python-iOS",
 ) -> Path:
 
-    tag = f"{python_version}-{build_number}"
-    archive_name = f"Python-{python_version}-iOS-support.{build_number}.tar.gz"
+    base_version = re.match(r"^\d+\.\d+\.\d+", release).group()
+    archive_name = f"python-{release}-iOS-XCframework.tar.gz"
     archive_path = cache_dir / archive_name
-    extract_dir = cache_dir / tag
+    extract_dir = cache_dir / release
 
-    url = BEEWARE_RELEASE_URL.format(
-        tag=tag, python_version=python_version, build=build_number
-    )
+    url = PYTHON_ORG_IOS_URL.format(base_version=base_version, release=release)
+    expected_sha256 = _PYTHON_IOS_SHA256.get(release)
 
     archive_path.parent.mkdir(parents=True, exist_ok=True)
     if archive_path.exists():
         logging.info(f"Using cached archive: {archive_path}")
-        _verify_sha256(archive_path, _PYTHON_SUPPORT_SHA256.get(tag))
+        _verify_sha256(archive_path, expected_sha256)
     else:
         logging.info(f"Downloading {url} -> {archive_path}")
         try:
@@ -98,7 +95,7 @@ def download_python_support(
                 urllib.request.urlretrieve(url,
                                            archive_path,
                                            reporthook=bar.update_to)
-            _verify_sha256(archive_path, _PYTHON_SUPPORT_SHA256.get(tag))
+            _verify_sha256(archive_path, expected_sha256)
         except (urllib.error.URLError, OSError, RuntimeError) as e:
             archive_path.unlink(missing_ok=True)
             raise RuntimeError(f"Failed to download {url}: {e}") from e

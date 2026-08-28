@@ -22,7 +22,9 @@ try:
     from wheel import __version__ as wheel_version  # type: ignore[import-untyped]
     from setuptools.command.bdist_wheel import bdist_wheel as _bdist_wheel
     from setuptools.command.bdist_wheel import get_abi_tag, get_platform
-    from setuptools.command.bdist_wheel import safer_name as _safer_name  # type: ignore[attr-defined]
+    from setuptools.command.bdist_wheel import (  # type: ignore[attr-defined]
+        safer_name as _safer_name
+    )
 
     wheel_module_exists = True
 except Exception as e:
@@ -37,8 +39,9 @@ def get_bdist_wheel_override():
 
 class PysideBuildWheel(_bdist_wheel, CommandMixin):
 
-    user_options = (_bdist_wheel.user_options + CommandMixin.mixin_user_options  # type: ignore[assignment]
-                    if wheel_module_exists else None)
+    user_options = (  # type: ignore[assignment]
+        _bdist_wheel.user_options + CommandMixin.mixin_user_options
+        if wheel_module_exists else None)
 
     def __init__(self, *args, **kwargs):
         self.command_name = "bdist_wheel"
@@ -56,10 +59,12 @@ class PysideBuildWheel(_bdist_wheel, CommandMixin):
 
         # When limited API is requested, notify bdist_wheel to
         # create a properly named package, which will contain
-        # the initial cpython version we support.
+        # the initial cpython version we support. This must match the
+        # Py_LIMITED_API level the sources are compiled against, which is
+        # 0x030a0000, and PySide6's own requires-python floor.
         limited_api_enabled = OPTION["LIMITED_API"] == 'yes'
         if limited_api_enabled:
-            self.py_limited_api = "cp37"
+            self.py_limited_api = "cp310"
 
         self._package_version = get_package_version()
 
@@ -91,7 +96,9 @@ class PysideBuildWheel(_bdist_wheel, CommandMixin):
         # Compute tag from the python version that the build command
         # queried.
         build_command = self.get_finalized_command('build')
-        python_target_info = build_command.python_target_info['python_info']  # type: ignore[attr-defined]
+        python_target_info = (
+            build_command.python_target_info['python_info']  # type: ignore[attr-defined]
+        )
 
         impl = 'no-py-ver-impl-available'
         abi = 'no-abi-tag-info-available'

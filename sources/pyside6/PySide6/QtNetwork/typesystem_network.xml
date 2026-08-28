@@ -282,7 +282,8 @@
         <inject-code class="native" position="beginning" file="../glue/qtnetwork.cpp"
                      snippet="qhostinfo-lookuphost-functor"/>
         <enum-type name="HostInfoError"/>
-        <add-function signature="lookupHost(const QString &amp;@name@,PyCallable@callable@)">
+        <add-function signature="lookupHost(const QString &amp;@name@,PyCallable@callable@)"
+                      doc-signature="lookupHost(const QString &amp;, Functor &amp;&amp;)">
             <inject-code class="target" position="beginning"
                          file="../glue/qtnetwork.cpp"
                          snippet="qhostinfo-lookuphost-callable"/>
@@ -370,12 +371,14 @@
                          snippet="qrestaccessmanager-data-callback"/>
         </add-function>
         <add-function signature="get(QNetworkRequest@request@,QJsonDocument@data@,QObject*@context@,PyCallable*@slot@)"
+                      doc-signature="get(const QNetworkRequest &amp;, const QJsonDocument &amp;, const QRestAccessManager::ContextTypeForFunctor&lt;Functor&gt; *, Functor &amp;&amp;)"
                       return-type="QNetworkReply*">
             <inject-code class="target" position="beginning" file="../glue/qtnetwork.cpp"
                          snippet="qrestaccessmanager-data-callback"/>
         </add-function>
 
         <add-function signature="head(QNetworkRequest@request@,QObject*@context@,PyCallable*@slot@)"
+                      doc-signature="head(const QNetworkRequest &amp;, const QRestAccessManager::ContextTypeForFunctor&lt;Functor&gt; *, Functor &amp;&amp;)"
                       return-type="QNetworkReply*">
             <inject-code class="target" position="beginning" file="../glue/qtnetwork.cpp"
                          snippet="qrestaccessmanager-callback"/>
@@ -392,6 +395,7 @@
                          snippet="qrestaccessmanager-data-callback"/>
         </add-function>
         <add-function signature="patch(QNetworkRequest@request@,QJsonDocument@data@,QObject*@context@,PyCallable*@slot@)"
+                      doc-signature="patch(const QNetworkRequest &amp;, const QJsonDocument &amp;, const QRestAccessManager::ContextTypeForFunctor&lt;Functor&gt; *, Functor &amp;&amp;)"
                       return-type="QNetworkReply*">
             <inject-code class="target" position="beginning" file="../glue/qtnetwork.cpp"
                          snippet="qrestaccessmanager-data-callback"/>
@@ -418,6 +422,7 @@
                          snippet="qrestaccessmanager-data-callback"/>
         </add-function>
         <add-function signature="post(QNetworkRequest@request@,QJsonDocument@data@,QObject*@context@,PyCallable*@slot@)"
+                      doc-signature="post(const QNetworkRequest &amp;, const QJsonDocument &amp;, const QRestAccessManager::ContextTypeForFunctor&lt;Functor&gt; *, Functor &amp;&amp;)"
                       return-type="QNetworkReply*">
             <inject-code class="target" position="beginning" file="../glue/qtnetwork.cpp"
                          snippet="qrestaccessmanager-data-callback"/>
@@ -444,6 +449,7 @@
                          snippet="qrestaccessmanager-data-callback"/>
         </add-function>
         <add-function signature="put(QNetworkRequest@request@,QJsonDocument@data@,QObject*@context@,PyCallable*@slot@)"
+                      doc-signature="put(const QNetworkRequest &amp;, const QJsonDocument &amp;, const QRestAccessManager::ContextTypeForFunctor&lt;Functor&gt; *, Functor &amp;&amp;)"
                       return-type="QNetworkReply*">
             <inject-code class="target" position="beginning" file="../glue/qtnetwork.cpp"
                          snippet="qrestaccessmanager-data-callback"/>
@@ -455,6 +461,7 @@
         </add-function>
 
         <add-function signature="sendCustomRequest(QNetworkRequest@request@,QByteArray@method@,QByteArray@data@,QObject*@context@,PyCallable*@slot@)"
+                      doc-signature="sendCustomRequest(const QNetworkRequest &amp;, const QByteArray &amp;, const QByteArray &amp;, const QRestAccessManager::ContextTypeForFunctor&lt;Functor&gt; *, Functor &amp;&amp;)"
                       return-type="QNetworkReply*">
             <inject-code class="target" position="beginning" file="../glue/qtnetwork.cpp"
                          snippet="qrestaccessmanager-method-data-callback"/>
@@ -472,7 +479,8 @@
     </object-type>
 
     <object-type name="QRestReply" since="6.7">
-        <add-function signature="readJson()" return-type="PyObject">
+        <add-function signature="readJson()" return-type="PyObject"
+                      doc-signature="readJson(QJsonParseError *)">
             <modify-argument index="return"
                              pyi-type="Tuple[Optional[PySide6.QtCore.QJsonDocument],PySide6.QtCore.QJsonParseError]"/>
             <inject-code class="target" position="beginning" file="../glue/qtnetwork.cpp"

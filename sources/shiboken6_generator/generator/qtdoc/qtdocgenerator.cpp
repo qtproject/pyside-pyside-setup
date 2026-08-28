@@ -104,6 +104,7 @@ struct GeneratorDocumentation
     AbstractMetaFunctionCList tocVirtuals;
     AbstractMetaFunctionCList tocSignalFunctions;
     AbstractMetaFunctionCList tocSlotFunctions;
+    AbstractMetaFunctionCList tocClassFunctions;
     AbstractMetaFunctionCList tocStaticFunctions;
 
     QList<Property> properties;
@@ -147,7 +148,7 @@ constexpr auto none = "None"_L1;
 
 static bool shouldSkip(const AbstractMetaFunctionCPtr &func)
 {
-    if (DocParser::skipForQuery(func))
+    if (DocParser::skipForDocumentation(func))
         return true;
 
     // Search a const clone (QImage::bits() vs QImage::bits() const)
@@ -595,6 +596,7 @@ void QtDocGenerator::doGenerateClass(TextStream &s, const QString &targetDir,
         writeFunctionToc(s, u"Virtual methods"_s, doc.tocVirtuals);
         writeFunctionToc(s, u"Slots"_s, doc.tocSlotFunctions);
         writeFunctionToc(s, u"Signals"_s, doc.tocSignalFunctions);
+        writeFunctionToc(s, u"Class methods"_s, doc.tocClassFunctions);
         writeFunctionToc(s, u"Static functions"_s, doc.tocStaticFunctions);
     }
 
@@ -1063,6 +1065,17 @@ void QtDocGenerator::writeFunctions(TextStream &s, const AbstractMetaFunctionCLi
     }
 }
 
+static const char *funcDirective(const AbstractMetaFunctionCPtr &func)
+{
+    if (func->ownerClass() == nullptr)
+        return ".. py:function::";
+    if (func->isStatic())
+        return ".. py:staticmethod::";
+    if (func->isClassMethod())
+        return ".. py:classmethod::";
+    return ".. py:method::";
+}
+
 void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr &func,
                                    QtXmlToSphinxImages *images,
                                    const AbstractMetaClassCPtr &cppClass,
@@ -1072,11 +1085,7 @@ void QtDocGenerator::writeFunction(TextStream &s, const AbstractMetaFunctionCPtr
 
     // Enable injecting parameter documentation by adding a complete function directive.
     if (std::none_of(modifications.cbegin(), modifications.cend(), containsFunctionDirective)) {
-        if (func->ownerClass() == nullptr)
-            s << ".. py:function:: ";
-        else
-            s << (func->isStatic() ? ".. py:staticmethod:: " : ".. py:method:: ");
-        s << getFuncName(func) << formatArgs(func);
+        s << funcDirective(func) << ' ' << getFuncName(func) << formatArgs(func);
         Indentation indentation(s);
         if (!indexed)
             s << "\n:noindex:";
@@ -1727,6 +1736,8 @@ GeneratorDocumentation
     for (const auto &func : std::as_const(result.allFunctions)) {
         if (func->isStatic())
             result.tocStaticFunctions.append(func);
+        if (func->isClassMethod())
+            result.tocClassFunctions.append(func);
         else if (func->isVirtual())
             result.tocVirtuals.append(func);
         else if (func->isSignal())

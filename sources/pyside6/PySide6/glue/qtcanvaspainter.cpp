@@ -3,7 +3,7 @@
 // Qt-Security score:significant reason:default
 
 // @snippet qcpainterwidget-grabcanvas
-auto callable = %PYARG_2;
+auto callable = %PYARG_3;
 auto callback = [callable](const QImage &result)
 {
     Shiboken::GilState state;
@@ -14,5 +14,5 @@ auto callback = [callable](const QImage &result)
 
 };
 Py_INCREF(callable);
-%CPPSELF.%FUNCTION_NAME(%1, callback);
+%CPPSELF.%FUNCTION_NAME(%1, %2, callback);
 // @snippet qcpainterwidget-grabcanvas
