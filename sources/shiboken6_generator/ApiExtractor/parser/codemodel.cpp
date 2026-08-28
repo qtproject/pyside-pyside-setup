@@ -1224,6 +1224,16 @@ void _FunctionModelItem::formatDebug(QDebug &d) const
         d << " [invokable]";
     if (m_scopeResolution)
         d << " [scope resolution]";
+    switch (m_refQualified) {
+    case NoReference:
+        break;
+    case LValueReference:
+        d << " [lvalue overload]";
+        break;
+    case RValueReference:
+        d << " [rvalue overload]";
+        break;
+    }
     formatModelItemList(d, ", arguments=", m_arguments);
     if (m_isVariadics)
         d << ",...";

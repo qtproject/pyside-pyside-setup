@@ -2216,6 +2216,13 @@ AbstractMetaFunctionPtr
         }
         return {};
     }
+
+    if (functionItem->refQualified() == RValueReference) {
+        rejectFunction(functionItem, currentClass,
+                       AbstractMetaBuilder::GenerationDisabled, u"rvalue overload"_s);
+        return {};
+    }
+
     const QString &functionName = functionItem->name();
     const QString className = currentClass != nullptr ?
         currentClass->typeEntry()->qualifiedCppName() : QString{};
