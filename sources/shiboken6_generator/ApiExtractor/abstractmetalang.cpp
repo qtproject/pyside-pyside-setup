@@ -207,26 +207,40 @@ AbstractMetaFunctionCList AbstractMetaClass::functionsInTargetLang() const
     return returned;
 }
 
+// Basic conversion check: Exclude anything that uses rvalue references, be it a move
+// constructor "QPolygon(QPolygon &&)" or something else like
+// "QPolygon(QVector<QPoint> &&)".
+static bool conversionCheck(const AbstractMetaFunctionCPtr &f)
+{
+    return !f->isExplicit() && !f->usesRValueReferences() && !f->isModifiedRemoved()
+           && f->wasPublic();
+}
+
+static bool useConvertingConstructor(const AbstractMetaFunctionCPtr &f)
+{
+    return conversionCheck(f)
+           && (f->actualMinimumArgumentCount() == 1 || f->arguments().size() == 1);
+}
+
+static bool useConversionOperator(const AbstractMetaFunctionCPtr &f)
+{
+    return f->isConversionOperator() && conversionCheck(f);
+}
+
 AbstractMetaFunctionCList AbstractMetaClass::implicitConversions() const
 {
     if (!isCopyConstructible() && !hasExternalConversionOperators())
         return {};
 
     AbstractMetaFunctionCList returned;
-    const auto list = queryFunctions(FunctionQueryOption::Constructors) + externalConversionOperators();
+    const auto constructors = queryFunctions(FunctionQueryOption::Constructors);
+    std::copy_if(constructors.cbegin(), constructors.cend(), std::back_inserter(returned),
+                 useConvertingConstructor);
 
-    // Exclude anything that uses rvalue references, be it a move
-    // constructor "QPolygon(QPolygon &&)" or something else like
-    // "QPolygon(QVector<QPoint> &&)".
-    for (const auto &f : list) {
-        if ((f->actualMinimumArgumentCount() == 1 || f->arguments().size() == 1 || f->isConversionOperator())
-            && !f->isExplicit()
-            && !f->usesRValueReferences()
-            && !f->isModifiedRemoved()
-            && f->wasPublic()) {
-            returned += f;
-        }
-    }
+    const auto converters = externalConversionOperators();
+    std::copy_if(converters.cbegin(), converters.cend(), std::back_inserter(returned),
+                 useConversionOperator);
+
     return returned;
 }
 
