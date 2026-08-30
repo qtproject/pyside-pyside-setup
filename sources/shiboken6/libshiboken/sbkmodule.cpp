@@ -9,7 +9,6 @@
 #include "sbkstring.h"
 #include "sbkcppstring.h"
 #include "sbkconverter_p.h"
-#include "sbkcoarsebindinglock.h"
 #include "sbkpep.h"
 #ifdef Py_GIL_DISABLED
 #  include "sbkftoptions.h"
@@ -749,19 +748,19 @@ void exec(PyObject *module)
 {
 #ifdef Py_GIL_DISABLED
     // The module declares that it does not need the GIL, which only holds
-    // while the coarse binding lock is in place. Clearing its PYSIDE6_OPTION_FT bit takes that
-    // lock away, leaving the bindings free-threaded with no synchronization
-    // at all. Taking the declaration back here is not possible - the GIL slot
-    // is evaluated when the module is created, before this runs - so say so
-    // instead. The switch exists for the stress harness, not for production.
+    // while the state lock is in place. Clearing its PYSIDE6_OPTION_FT bit
+    // takes that lock away, leaving the binding state unsynchronized. Taking
+    // the declaration back here is not possible - the GIL slot is evaluated
+    // when the module is created, before this runs - so say so instead. The
+    // switch exists for the stress harness, not for production.
     static bool warned = false;
-    if (!coarseBindingLockEnabled() && !warned) {
+    if (!FreeThreading::optionEnabled(FreeThreading::StateLock) && !warned) {
         warned = true;
         PyErr_WarnEx(PyExc_RuntimeWarning,
-                     "Clearing the CoarseBindingLock bit of PYSIDE6_OPTION_FT "
-                     "disables the lock that makes the bindings safe without "
-                     "the GIL. This is meant for stress testing only; data "
-                     "races are expected.", 1);
+                     "Clearing the StateLock bit of PYSIDE6_OPTION_FT disables "
+                     "the lock that makes the bindings safe without the GIL. "
+                     "This is meant for stress testing only; data races are "
+                     "expected.", 1);
         PyErr_Clear(); // a warning turned into an error must not fail the import
     }
 #endif

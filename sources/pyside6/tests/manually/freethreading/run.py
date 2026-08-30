@@ -95,10 +95,10 @@ class Lock(IntFlag):
     A scenario runs twice: once with ALL, once with its own bit cleared.
     """
 
-    COARSE_BINDING = 0x1
-    LAZY_TYPE = 0x2
-    STATE = 0x4
-    ALL = COARSE_BINDING | LAZY_TYPE | STATE
+    LAZY_TYPE = 0x1
+    STATE = 0x2
+    CALL_GUARD = 0x4
+    ALL = LAZY_TYPE | STATE | CALL_GUARD
 
 
 MODES = ["unlocked", "locked"]
@@ -121,11 +121,12 @@ SCENARIOS = {
     # cover transitively: not the object being deleted, but everything that
     # deletion takes with it.
     "child_delete_vs_call": Scenario(WORKER, "child_delete_vs_call", Lock.STATE, True),
-    # Signal connect/emit/disconnect: hand-written libpyside code, still
-    # behind the coarse guard. Not marked as a proof - it stays clean in both
-    # columns up to 12 threads and 6000 rounds, so it is a regression guard
-    # over the signal machinery, not evidence for the lock.
-    "signal_race": Scenario(WORKER, "signal_race", Lock.COARSE_BINDING, False),
+    # Signal connect/emit/disconnect in hand-written libpyside code. It was a
+    # regression guard while the coarse lock covered these paths, and became a
+    # proof when that lock went: the signal machinery reaches the wrapper
+    # lookups, the parent/child graph and destruction, and those are the state
+    # lock's. 15 crashes out of 15 without it, clean with it.
+    "signal_race": Scenario(WORKER, "signal_race", Lock.STATE, True),
     # Guards the map lookup against handing out a dying wrapper. Not marked
     # as a proof: what fixed it was acquireWrapper(), not the state lock, so
     # both modes are expected clean. Read its docstring before believing a
@@ -139,10 +140,18 @@ SCENARIOS = {
     "destroy_race": Scenario(WORKER, "destroy_race", Lock.STATE, False),
     # The one-time incarnation of a type, raced by every thread at once.
     # Cheaper and far more reliable than lazy_types, and it needs no QML.
-    "lazy_converter": Scenario(WORKER, "lazy_converter", Lock.LAZY_TYPE, True),
+    # The call guard has to come out with it: it serializes calls on one
+    # object as a side effect, which hides this race and made the scenario
+    # inconclusive once CallGuard entered ALL. What is proven is still the
+    # lazy lock - the guard is only kept out of the way.
+    "lazy_converter": Scenario(WORKER, "lazy_converter",
+                               Lock.LAZY_TYPE | Lock.CALL_GUARD, True),
     # Qt calls the network access manager factory from its QML loader thread,
     # so this incarnates types there while the main thread incarnates others.
     "lazy_types": Scenario(QQML_TEST, None, Lock.LAZY_TYPE, True),
+    # Every thread inside one C++ object at once - what the GIL used to
+    # prevent by accident and the per-object call guard now does on purpose.
+    "shared_setter": Scenario(WORKER, "shared_setter", Lock.CALL_GUARD, True),
 }
 ALL_SCENARIOS = list(SCENARIOS)
 

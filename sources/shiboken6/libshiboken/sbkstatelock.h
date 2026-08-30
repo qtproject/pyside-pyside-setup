@@ -24,11 +24,10 @@ namespace Shiboken {
 // binding bookkeeping: the parent/child graph, the ownership and validity
 // flags, the referred-object map and the wrapper lifecycle state.
 //
-// It differs from the coarse "own GIL" (sbkcoarsebindinglock.h) only in where
-// it is held: the coarse lock is taken at wrapper entry and kept until the wrapper
-// returns, so arbitrary Python, Qt and third-party code runs beneath it and the
-// lock joins the lock order of the whole process. The state lock is held only
-// across a short, bounded state transaction.
+// It replaced a coarse lock that was taken at wrapper entry and kept until
+// the wrapper returned, so arbitrary Python, Qt and third-party code ran
+// beneath it and it joined the lock order of the whole process. This one is
+// held only across a short, bounded state transaction.
 //
 // Contract - code holding the state lock must not:
 //

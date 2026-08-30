@@ -9,7 +9,6 @@
 #include "autodecref.h"
 #include "basewrapper.h"
 #include "bindingmanager.h"
-#include "sbkcoarsebindinglock.h"
 #include "gilstate.h"
 #include "threadstatesaver.h"
 #include "helper.h"

@@ -12,7 +12,6 @@
 #include <helper.h>
 #include <gilstate.h>
 #include <pep384ext.h>
-#include <sbkcoarsebindinglock.h>
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qcompare.h>
@@ -21,6 +20,7 @@
 #include <QtCore/qpointer.h>
 #include <QtCore/qthread.h>
 
+#include <mutex>
 #include <utility>
 
 namespace PySide
@@ -300,6 +300,22 @@ using ConnectionHash = QHash<ConnectionKey, QMetaObject::Connection>;
 
 static ConnectionHash connectionHash;
 
+#ifdef Py_GIL_DISABLED
+// The hash is global and reached from every thread that connects, disconnects
+// or lets a sender die, so it needs a lock of its own. Container work only:
+// nothing calls Qt or Python while it is held, because QObject::disconnect
+// takes Qt's own signal-slot locks and can re-enter here through a destroyed()
+// delivery. Every user below takes the entries out under the lock and does the
+// Qt part after it.
+static std::mutex &connectionHashMutex()
+{
+    static std::mutex mutex;
+    return mutex;
+}
+
+using ConnectionHashLock = std::lock_guard<std::mutex>;
+#endif // Py_GIL_DISABLED
+
 static ConnectionKey connectionKey(const QObject *sender, int senderIndex,
                                    PyObject *callback)
 {
@@ -347,12 +363,11 @@ public Q_SLOTS:
 void SenderSignalDeletionTracker::senderDestroyed(QObject *o)
 {
     Shiboken::GilState gil; // PYSIDE-3072
-    // Own GIL: iterating/erasing the global connectionHash must be serialized
-    // against registerSlotConnection/disconnectSlot. This slot is invoked by Qt
-    // signal delivery (possibly on a thread not inside a guarded wrapper), so
-    // guard it here. GilState above guarantees an attached thread state.
+    // Qt delivers destroyed() from whichever thread the sender died on, so
+    // this races registerSlotConnection() and disconnectSlot(). Erasing is all
+    // it does, so the hash lock is the whole story.
 #ifdef Py_GIL_DISABLED
-    Shiboken::CoarseBindingGuard graphGuard;
+    ConnectionHashLock hashLock(connectionHashMutex());
 #endif
     for (auto it = connectionHash.begin(); it != connectionHash.end(); ) {
         if (it.key().sender == o)
@@ -373,18 +388,18 @@ static QPointer<SenderSignalDeletionTracker> senderSignalDeletionTracker;
 static void disconnectReceiver(PyObject *pythonSelf)
 {
 #ifdef Py_GIL_DISABLED
-    // Own GIL: pull the matching entries out of the global connectionHash
-    // under the guard (pure container work, QTBUG-144929: take copies), then
-    // run the Qt disconnects with no lock held and the thread detached:
-    // QObject::disconnect takes Qt's internal signal-slot locks, whose holders
-    // may in turn enter Python and want the graph guard. Disconnecting may
-    // re-entrantly delete further receivers (PYSIDE-88); their callbacks then
-    // find a hash that no longer contains these entries, so no iterator is
-    // invalidated under our feet. Kept to free-threaded builds: the GIL build
-    // has no guard to serialize against and this code is regression-prone.
+    // Pull the matching entries out of the hash under its lock (container work
+    // only, QTBUG-144929: take copies), then run the Qt disconnects with no
+    // lock held and the thread detached: QObject::disconnect takes Qt's
+    // internal signal-slot locks and can come back here through a destroyed()
+    // delivery. Disconnecting may re-entrantly delete further receivers
+    // (PYSIDE-88); their callbacks then find a hash that no longer contains
+    // these entries, so no iterator is invalidated under our feet. Kept to
+    // free-threaded builds: the GIL build serializes itself and this code is
+    // regression-prone.
     QList<QMetaObject::Connection> connections;
     {
-        Shiboken::CoarseBindingGuard graphGuard;
+        ConnectionHashLock hashLock(connectionHashMutex());
         for (auto it = connectionHash.begin(); it != connectionHash.end(); ) {
             if (it.key().object == pythonSelf) {
                 connections.append(it.value());
@@ -425,13 +440,22 @@ static void disconnectReceiver(PyObject *pythonSelf)
 
 static void clearConnectionHash()
 {
+#ifdef Py_GIL_DISABLED
+    ConnectionHashLock hashLock(connectionHashMutex());
+#endif
     connectionHash.clear();
 }
 
 void registerSlotConnection(QObject *source, int signalIndex, PyObject *callback,
                             const QMetaObject::Connection &connection)
 {
-    connectionHash.insert(connectionKey(source, signalIndex, callback), connection);
+    {
+#ifdef Py_GIL_DISABLED
+        ConnectionHashLock hashLock(connectionHashMutex());
+#endif
+        connectionHash.insert(connectionKey(source, signalIndex, callback), connection);
+    }
+
     if (senderSignalDeletionTracker.isNull()) {
         auto *app = QCoreApplication::instance();
         if (app == nullptr || QThread::currentThread() == app->thread()) {
@@ -452,13 +476,23 @@ void registerSlotConnection(QObject *source, int signalIndex, PyObject *callback
 
 bool disconnectSlot(QObject *source, int signalIndex, PyObject *callback)
 {
-    auto it = connectionHash.find(connectionKey(source, signalIndex, callback));
-    const bool ok = it != connectionHash.end();
-    if (ok) {
-        auto connId = it.value(); // QTBUG-144929, take copy
-        QObject::disconnect(connId);
-        connectionHash.erase(it);
+    QMetaObject::Connection connId;
+    bool ok = false;
+    {
+#ifdef Py_GIL_DISABLED
+        ConnectionHashLock hashLock(connectionHashMutex());
+#endif
+        auto it = connectionHash.find(connectionKey(source, signalIndex, callback));
+        ok = it != connectionHash.end();
+        if (ok) {
+            connId = it.value(); // QTBUG-144929, take copy
+            connectionHash.erase(it);
+        }
     }
+    // Outside the lock, like disconnectReceiver(): the disconnect can re-enter
+    // through destroyed().
+    if (ok)
+        QObject::disconnect(connId);
     return ok;
 }
 

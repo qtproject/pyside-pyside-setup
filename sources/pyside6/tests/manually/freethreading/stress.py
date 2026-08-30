@@ -87,9 +87,9 @@ def scenario_destroy_race() -> None:
 
 def scenario_shared_delete(_pool=[]) -> None:  # noqa: B006
     """Many threads race to destroy the SAME wrapper objects.
-    This hits shiboken's own guarded paths (Object::destroy / deallocData /
+    This hits shiboken's own locked paths (Object::destroy / deallocData /
     invalidate) on shared wrappers -- NOT libsample's C++ members -- so it is
-    the honest test of the CoarseBindingGuard. Deleting an already-invalidated
+    the honest test of the state lock. Deleting an already-invalidated
     wrapper must be a safe no-op; two threads doing it at once must not
     double-free."""
     POOL = 400
@@ -169,9 +169,9 @@ def scenario_child_delete_vs_call() -> None:
 def scenario_signal_race() -> None:
     """Threads connect Python slots to a few shared senders and let the
     receivers die again. connect() and the receiver teardown are hand-written
-    libpyside code that no generated boundary guard reaches, so they take the
-    coarse binding guard themselves; behind them is one global connection hash
-    that is inserted into and erased from here at the same time."""
+    libpyside code, so no generated call guard covers them; what protects the
+    one global connection hash behind them is its own lock, and this inserts
+    into it and erases from it at the same time."""
     from PySide6.QtCore import QObject, Signal
 
     class Emitter(QObject):
@@ -254,7 +254,34 @@ def scenario_lookup_vs_last_decref() -> None:
     _spin(work)
 
 
+def scenario_shared_setter() -> None:
+    """Every thread calls a setter on one shared object, and reads it back.
+
+    Qt is not thread-safe per object and neither is libsample: two threads
+    inside one C++ object at the same time is undefined, and with a GIL it
+    simply never happened. The per-object call guard is what restores that,
+    so this is the scenario for CallGuard - it has to crash with the guard
+    switched off, or the guard is proving nothing.
+
+    A QObject, not a libsample type: what has to be serialized is a Qt
+    setter, and libsample's ObjectType is too simple to break. No
+    wrapper-typed arguments on purpose - those take a lease without a guard,
+    and this is about the receiver.
+    """
+    from PySide6.QtCore import QObject
+
+    shared = QObject()
+
+    def hammer(idx: int) -> None:
+        for i in range(ITERS):
+            shared.setObjectName(f"n{idx}-{i}")
+            shared.objectName()
+
+    _spin(hammer)
+
+
 SCENARIOS = {
+    "shared_setter": scenario_shared_setter,
     "destroy_race": scenario_destroy_race,
     "shared_delete": scenario_shared_delete,
     "call_vs_delete": scenario_call_vs_delete,

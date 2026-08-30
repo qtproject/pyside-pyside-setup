@@ -22,7 +22,6 @@
 #include <pep384impl_p.h>
 #include <sbkconverter.h>
 #include <sbkenum.h>
-#include <sbkcoarsebindinglock.h>
 #include <sbkpep.h>
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
@@ -36,6 +35,7 @@
 #include <QtCore/qmetatype.h>
 
 #include <climits>
+#include <mutex>
 #include <optional>
 #include <utility>
 
@@ -634,6 +634,38 @@ QDebug operator<<(QDebug debug, const slotSignature &sig)
     return debug;
 }
 
+#ifdef Py_GIL_DISABLED
+
+// Recursive, because building a meta object runs Python that can come back
+// here for the same type. A thread that has to wait detaches first: update()
+// calls into the interpreter, so a waiter must not sit on a thread state - it
+// would stall a stop-the-world pause and could not be joined by the builder.
+static std::recursive_mutex &metaObjectBuilderMutex()
+{
+    static std::recursive_mutex mutex;
+    return mutex;
+}
+
+class MetaObjectBuilderLock
+{
+public:
+    MetaObjectBuilderLock(const MetaObjectBuilderLock &) = delete;
+    MetaObjectBuilderLock &operator=(const MetaObjectBuilderLock &) = delete;
+
+    MetaObjectBuilderLock()
+    {
+        // Uncontended, and re-entry from the owning thread, take no detour.
+        if (!metaObjectBuilderMutex().try_lock()) {
+            Py_BEGIN_ALLOW_THREADS
+            metaObjectBuilderMutex().lock();
+            Py_END_ALLOW_THREADS
+        }
+    }
+    ~MetaObjectBuilderLock() { metaObjectBuilderMutex().unlock(); }
+};
+
+#endif // Py_GIL_DISABLED
+
 static int addMetaMethod(QObject *source, const QByteArray &signature,
                          QMetaMethod::MethodType type)
 {
@@ -655,6 +687,11 @@ static int addMetaMethod(QObject *source, const QByteArray &signature,
 
 #ifdef Py_GIL_DISABLED
     auto *pySelf = self.pyObject();
+    // The same lock retrieveMetaObject() takes, for the other half: this adds
+    // methods to the builder and can create it, and two threads registering on
+    // one object would otherwise build two. Recursive, so a caller that
+    // already holds it pays nothing.
+    MetaObjectBuilderLock builderLock;
 #else
     auto *pySelf = reinterpret_cast<PyObject *>(self);
 #endif
@@ -721,16 +758,12 @@ const QMetaObject *retrieveMetaObject(PyObject *self)
     //              to hold the GIL. Maybe that is harmless here (check later).
     // Thanks to Sam Gross who fixed most errors by pointing this out.
     Shiboken::GilState gil;
-    // Own GIL: builder->update() below builds/updates the dynamic QMetaObject
-    // through QMetaObjectBuilder, which is not thread-safe and whose builder is
-    // usually shared per type (retrieveTypeUserData). This choke point is
-    // reached both from guarded Python wrappers and directly from Qt via
-    // QObjectWrapper::metaObject(), so serialize it here. GilState above already
-    // guarantees an attached thread state, which the guard needs. Reentrant, so
-    // a call already under the guard is a cheap no-op.
-#ifdef Py_GIL_DISABLED
-    Shiboken::CoarseBindingGuard graphGuard;
-#endif
+    // builder->update() below builds the dynamic QMetaObject through
+    // QMetaObjectBuilder, which is not thread-safe and is shared per type
+    // (retrieveTypeUserData). This is the one choke point for it, reached both
+    // from Python wrappers and directly from Qt via
+    // QObjectWrapper::metaObject(), so it gets a lock of its own.
+    MetaObjectBuilderLock builderLock;
 #endif
     // PYSIDE-803: Avoid the GIL in SignalManager::retrieveMetaObject
     // This function had the GIL. We do not use the GIL unless we have to.

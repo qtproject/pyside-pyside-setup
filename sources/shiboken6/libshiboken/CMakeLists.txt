@@ -205,7 +205,6 @@ install(FILES
         sbkenum_p.h
         sbkerrors.h
         sbkfeature_base.h
-        sbkcoarsebindinglock.h
         sbkftoptions.h
         sbkmodule.h
         sbkmodule_p.h

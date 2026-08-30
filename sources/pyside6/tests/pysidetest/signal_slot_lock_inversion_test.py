@@ -20,10 +20,11 @@ def run_scenario():
     thread B: enters the binding through setParent (not allow-thread), which
               delivers childEvent to a Python override that wants A's lock
 
-    On a free-threaded build with a lock held across the Python callback this
-    is an AB-BA deadlock. The graph guard is entered through a Python critical
-    section, which is suspended while B waits for the Python lock, so both
-    threads must complete. On GIL builds the scenario is trivially safe.
+    On a free-threaded build with a binding lock held across the Python
+    callback this is an AB-BA deadlock. No binding lock is held across the
+    callback - the state lock covers a short transaction and is released
+    before anything calls into Python - so both threads must complete. On GIL
+    builds the scenario is trivially safe.
     """
     import threading
 

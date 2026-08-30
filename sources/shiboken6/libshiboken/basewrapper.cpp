@@ -12,7 +12,6 @@
 #include "pep384impl_p.h"
 #include "sbkconverter.h"
 #include "sbkerrors.h"
-#include "sbkcoarsebindinglock.h"
 #include "sbkfeature_base.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
@@ -61,23 +60,6 @@ static BaseWrapperGlobals *baseWrapperGlobals()
 
 namespace Shiboken
 {
-#ifdef Py_GIL_DISABLED
-// The coarse binding lock, see sbkcoarsebindinglock.h. This lives here rather than
-// header so that there is exactly one mutex per process: a definition in the
-// header ends up private to each shared library that includes it, and the lock
-// would only exclude callers within the same library.
-PyMutex &coarseBindingMutex()
-{
-    static PyMutex m{};
-    return m;
-}
-
-bool coarseBindingLockEnabled()
-{
-    return FreeThreading::optionEnabled(FreeThreading::CoarseBindingLock);
-}
-#endif // Py_GIL_DISABLED
-
 // Walk through the first level of non-user-type Sbk base classes relevant for
 // C++ object allocation. Return true from the predicate to terminate.
 template <class Predicate>
