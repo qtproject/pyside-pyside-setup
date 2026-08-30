@@ -1182,14 +1182,14 @@ void setErrorAboutWrongArguments(PyObject *args, const char *funcName, PyObject 
 }
 
 PyObject *returnWrongArguments(PyObject *args, const char *memberName, PyObject *info,
-                               Module::TypeInitStruct initStruct)
+                               const Module::TypeInitStruct &initStruct)
 {
     setErrorAboutWrongArguments(args, memberName, info, initStruct.fullName);
     return {};
 }
 
 PyObject *returnWrongArguments(PyObject *args, const char *memberName,
-                               Module::TypeInitStruct initStruct)
+                               const Module::TypeInitStruct &initStruct)
 {
     setErrorAboutWrongArguments(args, memberName, nullptr, initStruct.fullName);
     return {};
@@ -1208,7 +1208,7 @@ PyObject *returnWrongArguments(PyObject *args, const char *globalFuncName)
 }
 
 int returnWrongArguments_Zero(PyObject *args, const char *memberName, PyObject *info,
-                              Module::TypeInitStruct initStruct)
+                              const Module::TypeInitStruct &initStruct)
 {
     setErrorAboutWrongArguments(args, memberName, info, initStruct.fullName);
     return 0;
@@ -1221,14 +1221,14 @@ int returnWrongArguments_Zero(PyObject *args, const char *globalFuncName, PyObje
 }
 
 int returnWrongArguments_MinusOne(PyObject *args, const char *memberName, PyObject *info,
-                                  Module::TypeInitStruct initStruct)
+                                  const Module::TypeInitStruct &initStruct)
 {
     setErrorAboutWrongArguments(args, memberName, info, initStruct.fullName);
     return -1;
 }
 
 int returnWrongArguments_MinusOne(PyObject *args, const char *memberName,
-                                  Module::TypeInitStruct initStruct)
+                                  const Module::TypeInitStruct &initStruct)
 {
     setErrorAboutWrongArguments(args, memberName, nullptr, initStruct.fullName);
     return -1;

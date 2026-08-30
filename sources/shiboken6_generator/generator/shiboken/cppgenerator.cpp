@@ -2001,34 +2001,36 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
     c.clear();
 
     QString pyInVariable = u"pyIn"_s;
+    const QString leaseVar = leaseVariableName(pyInVariable);
     const QString outPtr = u"reinterpret_cast<"_s + typeName + u" *>(cppOut)"_s;
+    // The lease keeps the source object alive across the copy. Callers that
+    // pass a wrapper as an argument already hold one, but the converter is
+    // also reached from container conversions and from the signal code, where
+    // nothing does. It returns void, so the only error path is the exception
+    // the lease raises, and that is noticed by the return error check - after
+    // the C++ call ran with a default-constructed argument. A smart pointer
+    // needs none for Py_None, which takes the reset branch below, but the
+    // lease accepts it anyway: it only leases wrapper instances.
+    c << "#ifdef Py_GIL_DISABLED\n"
+        // The same pin the implicit conversion below takes, for the same
+        // reason: the lease writes to the wrapper and does not hold it.
+        << "Py_INCREF(" << pyInVariable << ");\n"
+        << "Shiboken::AutoDecRef sbkPin_" << pyInVariable
+        << '{' << pyInVariable << "};\n"
+        // No guard. This is an argument, and the receiver's guard is already
+        // open: a nested critical section suspends the outer one, so taking
+        // it here would leave the receiver unguarded for the whole call.
+        << "Shiboken::Object::CallLease " << leaseVar << '{' << pyInVariable
+        << ", Shiboken::Object::CallLease::Guard::Omit};\n"
+        << "if (!" << leaseVar << ")\n" << indent
+        << "return;\n" << outdent
+        << "#endif\n";
     if (!classContext.forSmartPointer()) {
-        // The lease keeps the source object alive across the copy. Callers
-        // that pass a wrapper as an argument already hold one, but the
-        // converter is also reached from container conversions and from the
-        // signal code, where nothing does. It returns void, so the only error
-        // path is the exception the lease raises.
-        // A failure here is only noticed by the return error check, after
-        // the C++ call ran with a default-constructed argument.
-        c << "#ifdef Py_GIL_DISABLED\n"
-            << "Shiboken::Object::CallLease " << leaseVariableName(pyInVariable)
-            << '{' << pyInVariable << "};\n"
-            << "if (!" << leaseVariableName(pyInVariable) << ")\n" << indent
-            << "return;\n" << outdent
-            << "#endif\n";
         QString value = u'*' + cpythonWrapperCPtr(typeEntry, pyInVariable);
         c << '*' << outPtr << " = " << (needsMove ? stdMove(value) : value) << ';';
     } else {
         auto ste = std::static_pointer_cast<const SmartPointerTypeEntry>(typeEntry);
         const QString resetMethod = ste->resetMethod();
-        // Same lease as above. Py_None takes the reset branch and needs none,
-        // but CallLease accepts it anyway - it only leases wrapper instances.
-        c << "#ifdef Py_GIL_DISABLED\n"
-            << "Shiboken::Object::CallLease " << leaseVariableName(pyInVariable)
-            << '{' << pyInVariable << "};\n"
-            << "if (!" << leaseVariableName(pyInVariable) << ")\n" << indent
-            << "return;\n" << outdent
-            << "#endif\n";
         c << "auto *ptr = " << outPtr << ";\n";
         c << "if (" << pyInVariable << " == Py_None)\n" << indent;
         if (resetMethod.isEmpty())
@@ -5794,6 +5796,7 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const char *enclosing,
 {
     const auto enclosingClass = cppEnum.targetLangEnclosingClass();
     EnumTypeEntryCPtr enumTypeEntry = cppEnum.typeEntry();
+    const auto flags = enumTypeEntry->flags();
 
     s << "// Initialization of ";
     s << (cppEnum.isAnonymous() ? "anonymous enum identified by enum value" : "enum");
@@ -5903,15 +5906,28 @@ bool CppGenerator::writeEnumInitialization(TextStream &s, const char *enclosing,
         etypeUsed = true;
     }
 
-    if (cppEnum.typeEntry()->flags()) {
+    // Guarded like the setReady() below: without EType there is nothing to
+    // map, and filling a struct that is never readied would send every get()
+    // on it through the lazy lock for good.
+    if (etypeUsed && flags) {
         s << "// PYSIDE-1735: Mapping the flags class to the same enum class.\n"
-            << typeInitStruct(cppEnum.typeEntry()->flags()) << ".type =\n"
+            << typeInitStruct(flags) << ".type =\n"
             << indent << "EType;\n" << outdent;
     }
     writeEnumConverterInitialization(s, cppEnum);
 
+    // The converter is registered now, so the enum - and the flags class that
+    // shares its type - may be handed out - see Shiboken::Module::get().
+    if (etypeUsed) {
+        s << "#ifdef Py_GIL_DISABLED\n"
+            << "Shiboken::Module::setReady(" << typeInitStruct(enumTypeEntry) << ");\n";
+        if (flags)
+            s << "Shiboken::Module::setReady(" << typeInitStruct(flags) << ");\n";
+        s << "#endif\n";
+    }
+
     s << "// End of '" << cppEnum.name() << "' enum";
-    if (cppEnum.typeEntry()->flags())
+    if (flags)
         s << "/flags";
     s << ".\n\n";
 
@@ -6281,6 +6297,13 @@ void CppGenerator::writeClassRegister(TextStream &s,
             << "));\n";
     }
 
+    // The type has been published to its TypeInitStruct much earlier, as the
+    // re-entrancy guard for an initialization that nests on this thread. Only
+    // here is it actually finished, and only now may another thread be handed
+    // it - see Shiboken::Module::get().
+    s << "\n#ifdef Py_GIL_DISABLED\n"
+         "Shiboken::Module::setReady(typeStruct);\n"
+         "#endif\n";
     s << "\nreturn pyType;\n" << outdent << "}\n";
 }
 

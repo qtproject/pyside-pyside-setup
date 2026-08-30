@@ -8,6 +8,8 @@
 #include "sbkpython.h"
 #include "shibokenmacros.h"
 
+#include <atomic>
+
 extern "C"
 {
 struct SbkConverter;
@@ -15,14 +17,61 @@ struct SbkConverter;
 
 namespace Shiboken::Module {
 
+#ifdef Py_GIL_DISABLED
+/// A one-way flag: false until something is finished, true from then on. The
+/// store is a release and the load an acquire, so whoever sees it set also
+/// sees everything that was stored before it.
+///
+/// Not copyable, and that is what keeps TypeInitStruct out of a by-value
+/// parameter: a copy of a registry entry carries a flag that nothing will
+/// ever set, and a copied atomic changes how the struct is passed.
+class ReadyFlag
+{
+public:
+    ReadyFlag() noexcept = default;
+    ReadyFlag(const ReadyFlag &) = delete;
+    ReadyFlag &operator=(const ReadyFlag &) = delete;
+
+    bool isSet() const noexcept { return m_value.load(std::memory_order_acquire); }
+    void set() noexcept { m_value.store(true, std::memory_order_release); }
+
+private:
+    std::atomic<bool> m_value;
+};
+#endif // Py_GIL_DISABLED
+
 struct TypeInitStruct
 {
     PyTypeObject *type;
     const char *fullName;
+#ifdef Py_GIL_DISABLED
+    /// Set at the end of the generated type initialization, once the
+    /// converter is registered. `type` is published earlier than that on
+    /// purpose - it is the re-entrancy guard for an initialization that
+    /// nests on the same thread - so the pointer alone does not mean the
+    /// type can be converted. get() hands the type out from its unlocked
+    /// fast path only once this is set.
+    ///
+    /// It does not cover what the module does with the type afterwards:
+    /// incarnateType() adds it to its module and creates its subtypes, and
+    /// the static fields of a class are filled from exec_<module>(). A
+    /// caller that needs those has to go through the attribute, as it
+    /// always had to.
+    ///
+    /// Braced, because the generated type array initializes the first two
+    /// members only.
+    ReadyFlag ready{};
+#endif // Py_GIL_DISABLED
 };
 
 /// PYSIDE-2404: Replacing the arguments in cpythonTypeNameExt by a function.
 LIBSHIBOKEN_API PyTypeObject *get(TypeInitStruct &typeStruct);
+
+#ifdef Py_GIL_DISABLED
+/// End of the generated type initialization: everything stored before this
+/// is visible to whoever sees the type through get().
+LIBSHIBOKEN_API void setReady(TypeInitStruct &typeStruct);
+#endif
 
 /// PYSIDE-2404: Make sure that mentioned classes really exist.
 LIBSHIBOKEN_API void loadLazyClassesWithName(const char *name);

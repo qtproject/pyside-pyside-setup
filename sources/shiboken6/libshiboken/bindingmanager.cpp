@@ -178,12 +178,8 @@ Graph::TypeCptrPair Graph::identifyType(void *cptr,
         }
     }
 
-    if (type == nullptr) {
-        if (typeNode.initStruct->type == nullptr) // Layzily create type
-            type = Shiboken::Module::get(*typeNode.initStruct);
-        else
-            type = typeNode.initStruct->type;
-    }
+    if (type == nullptr) // Lazily create the type
+        type = Shiboken::Module::get(*typeNode.initStruct);
 
     auto *sotp = PepType_SOTP(type);
     if (sotp->type_discovery != nullptr) {
@@ -761,7 +757,7 @@ static bool isPythonType(PyTypeObject *type)
 }
 
 bool callInheritedInit(PyObject *self, PyObject *args, PyObject *kwds,
-                       Module::TypeInitStruct typeStruct)
+                       const Module::TypeInitStruct &typeStruct)
 {
     using Shiboken::AutoDecRef;
 

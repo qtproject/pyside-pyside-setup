@@ -27,7 +27,8 @@ namespace Shiboken::FreeThreading {
 ///
 /// It exists because a lock that is never removed proves nothing; the A/B
 /// harness in tests/manually/freethreading runs each scenario against the same
-/// binary once with its lock and once without.
+/// binary once with its lock and once without. A mechanism that no scenario
+/// can take away does not belong here.
 enum Option : int
 {
     CoarseBindingLock = 0x1, ///< the coarse guard around the object graph

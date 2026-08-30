@@ -276,7 +276,7 @@ void addPythonToCppValueConversion(PyTypeObject *type,
     addPythonToCppValueConversion(sotp->converter, pythonToCppFunc, isConvertibleToCppFunc);
 }
 
-void addPythonToCppValueConversion(Shiboken::Module::TypeInitStruct typeStruct,
+void addPythonToCppValueConversion(const Shiboken::Module::TypeInitStruct &typeStruct,
                                    PythonToCppFunc pythonToCppFunc,
                                    IsConvertibleToCppFunc isConvertibleToCppFunc)
 {
@@ -370,7 +370,7 @@ PythonToCppConversion pythonToCppPointerConversion(PyTypeObject *type, PyObject 
     return {};
 }
 
-PythonToCppConversion pythonToCppPointerConversion(Module::TypeInitStruct typeStruct, PyObject *pyIn)
+PythonToCppConversion pythonToCppPointerConversion(const Module::TypeInitStruct &typeStruct, PyObject *pyIn)
 {
     return pythonToCppPointerConversion(typeStruct.type, pyIn);
 }

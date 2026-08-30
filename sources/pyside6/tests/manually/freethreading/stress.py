@@ -202,6 +202,21 @@ def scenario_signal_race() -> None:
     _spin(work)
 
 
+def scenario_lazy_converter() -> None:
+    """Every thread converts a Str for the very first time at the same
+    instant. The generated type initialization publishes the type into its
+    TypeInitStruct before it registers the converter - deliberately, as the
+    re-entrancy guard - so a second thread used to be handed a type whose
+    converter was still null and died in copyToPython(). One round is enough:
+    the window exists only while the type is being built."""
+    obj = ObjectType()
+
+    def work(_idx: int) -> None:
+        for _ in range(20):
+            obj.objectName()          # the first one incarnates Str
+    _spin(work)
+
+
 def scenario_lookup_vs_last_decref() -> None:
     """One thread drops the last reference to a wrapper while another looks the
     same C++ pointer up in the map, targeting the gap between the refcount
@@ -243,6 +258,7 @@ SCENARIOS = {
     "destroy_race": scenario_destroy_race,
     "shared_delete": scenario_shared_delete,
     "call_vs_delete": scenario_call_vs_delete,
+    "lazy_converter": scenario_lazy_converter,
     "child_delete_vs_call": scenario_child_delete_vs_call,
     "lookup_vs_last_decref": scenario_lookup_vs_last_decref,
     "signal_race": scenario_signal_race,
@@ -258,8 +274,8 @@ def main() -> int:
     gil_enabled = getattr(sys, "_is_gil_enabled", lambda: True)()
     gil = "ON" if gil_enabled else "off"
     ft = os.environ.get("PYSIDE6_OPTION_FT")
-    locks = f"PYSIDE6_OPTION_FT={ft}" if ft else ""
-    sys.stderr.write(f"[stress] {sys.argv[1]} gil={gil} {locks or 'all locks on'} "
+    locks = f"PYSIDE6_OPTION_FT={ft}" if ft else "all locks on"
+    sys.stderr.write(f"[stress] {sys.argv[1]} gil={gil} {locks} "
                      f"threads={THREADS} iters={ITERS}\n")
     SCENARIOS[sys.argv[1]]()
     if _failures:

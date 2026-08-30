@@ -46,6 +46,7 @@ import subprocess
 import sys
 from enum import IntFlag
 from pathlib import Path
+from typing import NamedTuple
 
 REPO = Path(__file__).resolve().parents[5]
 WORKER = Path(__file__).resolve().parent / "stress.py"
@@ -102,37 +103,46 @@ class Lock(IntFlag):
 
 MODES = ["unlocked", "locked"]
 
-# scenario -> (script to run, argument, the lock bit it clears, proof)
+
+class Scenario(NamedTuple):
+    script: Path
+    argument: str | None
+    lock: Lock          # the bit its A/B clears
+    proof: bool         # must crash without that bit, or it shows nothing
+
+
 QQML_TEST = (REPO / "sources" / "pyside6" / "tests" / "QtQml"
              / "qqmlnetwork_test.py")
 SCENARIOS = {
-    "shared_delete": (WORKER, "shared_delete", Lock.STATE, True),
-    "call_vs_delete": (WORKER, "call_vs_delete", Lock.STATE, True),
+    "shared_delete": Scenario(WORKER, "shared_delete", Lock.STATE, True),
+    "call_vs_delete": Scenario(WORKER, "call_vs_delete", Lock.STATE, True),
     # A wrapper enters Object::destroy() from the C++ destructor of its owner
-    # while other threads are calling into it. Crashes in BOTH columns right
-    # now: a lease covers Shiboken.delete() of its own object, not the
-    # destruction of the object that owns it. Clean before the coarse guard
-    # was taken out of the generated wrapper entry.
-    "child_delete_vs_call": (WORKER, "child_delete_vs_call", Lock.STATE, True),
+    # while other threads are calling into it. This is what the lease has to
+    # cover transitively: not the object being deleted, but everything that
+    # deletion takes with it.
+    "child_delete_vs_call": Scenario(WORKER, "child_delete_vs_call", Lock.STATE, True),
     # Signal connect/emit/disconnect: hand-written libpyside code, still
     # behind the coarse guard. Not marked as a proof - it stays clean in both
     # columns up to 12 threads and 6000 rounds, so it is a regression guard
     # over the signal machinery, not evidence for the lock.
-    "signal_race": (WORKER, "signal_race", Lock.COARSE_BINDING, False),
+    "signal_race": Scenario(WORKER, "signal_race", Lock.COARSE_BINDING, False),
     # Guards the map lookup against handing out a dying wrapper. Not marked
     # as a proof: what fixed it was acquireWrapper(), not the state lock, so
     # both modes are expected clean. Read its docstring before believing a
     # crash here - it can also die on a dangling C++ pointer, which says
     # nothing.
-    "lookup_vs_last_decref": (WORKER, "lookup_vs_last_decref",
-                              Lock.STATE, False),
+    "lookup_vs_last_decref": Scenario(WORKER, "lookup_vs_last_decref",
+                                      Lock.STATE, False),
     # Kept as a regression guard: it races destruction, but every thread owns
     # its objects, so nothing the state lock protects is contended and it
     # stays clean either way.
-    "destroy_race": (WORKER, "destroy_race", Lock.STATE, False),
+    "destroy_race": Scenario(WORKER, "destroy_race", Lock.STATE, False),
+    # The one-time incarnation of a type, raced by every thread at once.
+    # Cheaper and far more reliable than lazy_types, and it needs no QML.
+    "lazy_converter": Scenario(WORKER, "lazy_converter", Lock.LAZY_TYPE, True),
     # Qt calls the network access manager factory from its QML loader thread,
     # so this incarnates types there while the main thread incarnates others.
-    "lazy_types": (QQML_TEST, None, Lock.LAZY_TYPE, True),
+    "lazy_types": Scenario(QQML_TEST, None, Lock.LAZY_TYPE, True),
 }
 ALL_SCENARIOS = list(SCENARIOS)
 
@@ -168,13 +178,13 @@ def classify(rc: int) -> str:
 
 
 def run_one(scenario: str, mode: str) -> str:
-    script, argument, lock_bit, _proof = SCENARIOS[scenario]
-    command = [PY, os.fspath(script)]
-    if argument:
-        command.append(argument)
+    sc = SCENARIOS[scenario]
+    command = [PY, os.fspath(sc.script)]
+    if sc.argument:
+        command.append(sc.argument)
     try:
         p = subprocess.run(
-            command, env=base_env(lock_bit, mode), cwd=os.fspath(REPO),
+            command, env=base_env(sc.lock, mode), cwd=os.fspath(REPO),
             capture_output=True, timeout=TIMEOUT)
         return classify(p.returncode)
     except subprocess.TimeoutExpired:
@@ -218,7 +228,7 @@ def main() -> int:
                      f"{others}err" if others else ""]
             tag = "+".join(p for p in parts if p) or "ok"
             cells.append(f"{tag}/{REPEATS}")
-        kind = "proof" if SCENARIOS[scenario][3] else "regression"
+        kind = "proof" if SCENARIOS[scenario].proof else "regression"
         print(f"{scenario:<22}" + "".join(f"{c:<12}" for c in cells) + kind)
 
     # verdict
@@ -226,7 +236,7 @@ def main() -> int:
     dirty = [s for s in scenarios
              if verdicts[(s, "locked")][0] or verdicts[(s, "locked")][1]]
     silent = [s for s in scenarios
-              if SCENARIOS[s][3] and verdicts[(s, "unlocked")][0] == 0]
+              if SCENARIOS[s].proof and verdicts[(s, "unlocked")][0] == 0]
 
     if dirty:
         print("FAILED: not clean with the lock -> " + " ".join(dirty))
@@ -237,7 +247,7 @@ def main() -> int:
         print("Raise STRESS_ITERS/STRESS_THREADS/REPEATS, or the scenario "
               "does not actually share what the lock protects.")
         return 1
-    proofs = [s for s in scenarios if SCENARIOS[s][3]]
+    proofs = [s for s in scenarios if SCENARIOS[s].proof]
     print(f"PROVEN ({len(proofs)}): crashes without the lock, clean with it -> "
           + " ".join(proofs))
     return 0

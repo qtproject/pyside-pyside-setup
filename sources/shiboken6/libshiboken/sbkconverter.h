@@ -160,7 +160,7 @@ LIBSHIBOKEN_API void prependPythonToCppValueConversion(SbkConverter *converter,
 LIBSHIBOKEN_API void addPythonToCppValueConversion(PyTypeObject *type,
                                                    PythonToCppFunc pythonToCppFunc,
                                                    IsConvertibleToCppFunc isConvertibleToCppFunc);
-LIBSHIBOKEN_API void addPythonToCppValueConversion(Shiboken::Module::TypeInitStruct typeStruct,
+LIBSHIBOKEN_API void addPythonToCppValueConversion(const Shiboken::Module::TypeInitStruct &typeStruct,
                                                    PythonToCppFunc pythonToCppFunc,
                                                    IsConvertibleToCppFunc isConvertibleToCppFunc);
 
@@ -220,7 +220,8 @@ struct PythonToCppConversion
  */
 LIBSHIBOKEN_API PythonToCppFunc isPythonToCppPointerConvertible(PyTypeObject *type, PyObject *pyIn);
 LIBSHIBOKEN_API PythonToCppConversion pythonToCppPointerConversion(PyTypeObject *type, PyObject *pyIn);
-LIBSHIBOKEN_API PythonToCppConversion pythonToCppPointerConversion(Module::TypeInitStruct typeStruct, PyObject *pyIn);
+LIBSHIBOKEN_API PythonToCppConversion
+    pythonToCppPointerConversion(const Module::TypeInitStruct &typeStruct, PyObject *pyIn);
 
 /**
  *  Returns a Python to C++ conversion function if the Python object is convertible to a C++ value.
