@@ -484,6 +484,7 @@ def module_QtQml() -> ModuleData:
         "libQt6LabsSynchronizer",
         "libQt6LabsWavefrontMesh",
         "libQt6QmlCore",
+        "libQt6QmlDesignSupport",
         "libQt6QmlLocalStorage",
         "libQt6QmlModels",
         "libQt6QmlNetwork",
