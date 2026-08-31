@@ -636,24 +636,23 @@ def module_QtQuick() -> ModuleData:
 
 
 def module_QtQuickControls2() -> ModuleData:
+    QUICK_STYLE_LIBS = ["libQt6QuickControls2", "libQt6QuickControls2Basic",
+                        "libQt6QuickControls2BasicStyleImpl",
+                        "libQt6QuickControls2Fusion", "libQt6QuickControls2FusionStyleImpl",
+                        "libQt6QuickControls2Imagine", "libQt6QuickControls2ImagineStyleImpl",
+                        "libQt6QuickControls2Impl",
+                        "libQt6QuickControls2Material", "libQt6QuickControls2MaterialStyleImpl",
+                        "libQt6QuickControls2Universal", "libQt6QuickControls2UniversalStyleImpl",
+                        "libQt6LabsStyleKit"]
     data = ModuleData("QuickControls2")
-    data.qtlib.append("libQt6QuickControls2")
-    data.qtlib.append("libQt6QuickControls2Basic")
-    data.qtlib.append("libQt6QuickControls2BasicStyleImpl")
-    data.qtlib.append("libQt6QuickControls2Fusion")
-    data.qtlib.append("libQt6QuickControls2FusionStyleImpl")
-    data.qtlib.append("libQt6QuickControls2Imagine")
-    data.qtlib.append("libQt6QuickControls2ImagineStyleImpl")
-    data.qtlib.append("libQt6QuickControls2Impl")
-    data.qtlib.append("libQt6QuickControls2Material")
-    data.qtlib.append("libQt6QuickControls2MaterialStyleImpl")
-    data.qtlib.append("libQt6QuickControls2Universal")
-    data.qtlib.append("libQt6QuickControls2UniversalStyleImpl")
+    data.qtlib.extend(QUICK_STYLE_LIBS)
     # FluentWinUI3 Style is available for all platforms, even if it
     # was originally intended for Windows.
     data.qtlib.append("libQt6QuickControls2FluentWinUI3StyleImpl")
     if sys.platform == "win32":
+        data.qtlib.append("libQt6QuickControls2Windows")
         data.qtlib.append("libQt6QuickControls2WindowsStyleImpl")
+        data.qtlib.append("libQt6QuickNativeStyle")
     elif sys.platform == "darwin":
         data.qtlib.append("libQt6QuickControls2IOSStyleImpl")
         data.qtlib.append("libQt6QuickControls2MacOSStyleImpl")
