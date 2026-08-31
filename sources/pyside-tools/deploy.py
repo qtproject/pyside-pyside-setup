@@ -133,6 +133,7 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
         return
 
     command_str = None
+    deploy_succeeded = False
     try:
         # Run the Nuitka command to create the executable
         if not dry_run:
@@ -150,16 +151,23 @@ def main(main_file: Path = None, name: str = None, config_file: Path = None, ini
                                                mode=config.mode)
         if not dry_run:
             logging.info("[DEPLOY] Successfully deployed application")
+        deploy_succeeded = True
     except Exception:
         print(f"[DEPLOY] Exception occurred: {traceback.format_exc()}")
     finally:
         if config.generated_files_path:
-            if not dry_run:
+            # finalize() reports the executable it copies, so only run it when
+            # the deployment actually produced one
+            if not dry_run and deploy_succeeded:
                 finalize(config=config)
             if not keep_deployment_files:
                 cleanup(config=config)
 
     logging.info("[DEPLOY] End")
+
+    if not deploy_succeeded:
+        sys.exit(1)
+
     return command_str
 
 
