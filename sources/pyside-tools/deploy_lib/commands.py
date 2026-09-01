@@ -7,7 +7,7 @@ import json
 import shutil
 import subprocess
 from pathlib import Path
-from functools import lru_cache
+from functools import cache
 from . import DEFAULT_IGNORE_DIRS
 
 
@@ -49,7 +49,7 @@ def run_command(command, dry_run: bool, fetch_output: bool = False):
     return command_str, output
 
 
-@lru_cache
+@cache
 def run_qmlimportscanner(project_dir: Path, dry_run: bool):
     """
         Runs pyside6-qmlimportscanner to find all the imported qml modules in project_dir

@@ -52,12 +52,29 @@ class DeployTestBase(unittest.TestCase):
         # print no outputs to stdout
         sys.stdout = mock.MagicMock()
 
+        # Buildozer.initialize() rejects any Jdk other than 17, which is
+        # what python-for-android needs to build. These tests only write
+        # the configuration files and never build, so the check would
+        # only tie them to the Jdk the developer happens to have.
+        cls._jdk_check_patcher = patch("deploy_lib.android.buildozer.check_jdk_version")
+        cls._jdk_check_patcher.start()
+
+        # The Ndk and the Sdk are looked up in ~/.pyside6_android_deploy
+        # before anything is downloaded. Point that at an empty directory,
+        # so the tests take the download path they already mock instead of
+        # picking up whatever the developer happens to have cached.
+        cls._cache_patcher = patch("deploy_lib.android.android_config.ANDROID_DEPLOY_CACHE",
+                                   Path(cls.temp_dir) / "android_cache")
+        cls._cache_patcher.start()
+
     def tearDown(self) -> None:
         super().tearDown()
         os.chdir(self.current_dir)
 
     @classmethod
     def tearDownClass(cls) -> None:
+        cls._cache_patcher.stop()
+        cls._jdk_check_patcher.stop()
         shutil.rmtree(Path(cls.temp_dir))
 
 

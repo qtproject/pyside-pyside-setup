@@ -3,7 +3,6 @@
 # Qt-Security score:critical reason:handling-untrusted-data
 from __future__ import annotations
 import re
-import sys
 import tempfile
 import logging
 import zipfile
@@ -16,18 +15,17 @@ from . import (extract_and_copy_jar, get_wheel_android_arch, find_lib_dependenci
                get_llvm_readobj, find_qtlibs_in_wheel, platform_map, create_recipe,
                ANDROID_DEPLOY_CACHE, PYSIDE_ONLY_MODULES, safe_extractall)
 from .. import (Config, get_all_pyside_modules, MAJOR_VERSION)
-from .android_utilities import (ANDROID_NDK_VERSION, ANDROID_NDK_VERSION_NUMBER_SUFFIX,
-                                download_android_ndk)
+from .android_utilities import ANDROID_NDK_VERSION, download_android_ndk
 
 
 class AndroidConfig(Config):
     """
     Wrapper class around pysidedeploy.spec file for pyside6-android-deploy
     """
-    def __init__(self, config_file: Path, source_file: Path, python_exe: Path, dry_run: bool,
+    def __init__(self, config_file: Path, source_file: Path, dry_run: bool,
                  android_data, existing_config_file: bool = False,
                  extra_ignore_dirs: list[str] = None, name: str = None):
-        super().__init__(config_file=config_file, source_file=source_file, python_exe=python_exe,
+        super().__init__(config_file=config_file, source_file=source_file,
                          dry_run=dry_run, existing_config_file=existing_config_file, name=name)
 
         self.extra_ignore_dirs = extra_ignore_dirs
@@ -60,11 +58,6 @@ class AndroidConfig(Config):
             else:
                 ndk_path_temp = (ANDROID_DEPLOY_CACHE / "android-ndk"
                                  / f"android-ndk-r{ANDROID_NDK_VERSION}")
-                if sys.platform == "darwin":
-                    ndk_path_temp = (
-                        ANDROID_DEPLOY_CACHE / "android-ndk"
-                        / f"AndroidNDK{ANDROID_NDK_VERSION_NUMBER_SUFFIX}.app/Contents/NDK"
-                    )
                 if ndk_path_temp.exists():
                     self.ndk_path = ndk_path_temp
                 else:

@@ -452,6 +452,9 @@ public:
     void setAttributes(FunctionAttributes a) { m_attributes = a; }
     void setAttribute(FunctionAttribute a, bool on = true) { m_attributes.setFlag(a, on); }
 
+    ReferenceType refQualified() const { return m_refQualified; }
+    void setRefQualified(ReferenceType rt) { m_refQualified = rt; };
+
     bool isDeleted() const;
     void setDeleted(bool d);
 
@@ -502,6 +505,7 @@ private:
     FunctionAttributes m_attributes;
     CodeModel::FunctionType m_functionType = CodeModel::Normal;
     ExceptionSpecification m_exceptionSpecification = ExceptionSpecification::Unknown;
+    ReferenceType m_refQualified = ReferenceType::NoReference;
 
     uint m_isDeleted: 1;
     uint m_isInline: 1;

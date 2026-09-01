@@ -9,6 +9,27 @@
     <load-typesystem name="QtGui/typesystem_gui.xml" generate="no"/>
     <load-typesystem name="QtNetwork/typesystem_network.xml" generate="no"/>
 
+    <primitive-type name="std::optional&lt;qreal&gt;" target-lang-api-name="PyFloat">
+      <extra-includes>
+          <include file-name="optional" location="global"/>
+      </extra-includes>
+      <conversion-rule>
+          <native-to-target file="../glue/qtmultimedia.cpp" snippet="optional-qreal-to-pyfloat"/>
+          <target-to-native>
+              <add-conversion type="PyFloat" file="../glue/qtmultimedia.cpp"
+                              snippet="pyfloat-to-optional-qreal"/>
+          </target-to-native>
+          <target-to-native>
+              <add-conversion type="PyLong" file="../glue/qtmultimedia.cpp"
+                              snippet="pylong-to-optional-qreal"/>
+          </target-to-native>
+          <target-to-native>
+              <add-conversion type="PyNone" file="../glue/qtmultimedia.cpp"
+                              snippet="pynone-to-optional"/>
+          </target-to-native>
+      </conversion-rule>
+    </primitive-type>
+
     <namespace-type name="QAudio">
         <enum-type name="Error"/>
         <enum-type name="State"/>
@@ -171,18 +192,6 @@
 
     <object-type name="QScreenCapture" since="6.5">
         <enum-type name="Error"/>
-        <add-function signature="maximumFrameRate()const" return-type="double">
-            <inject-code file="../glue/qtmultimedia.cpp" snippet="capture-maximumframerate"/>
-            <modify-argument index="return" pyi-type="Union[float, None]"/>
-            <inject-documentation format="target" mode="append" file="../doc/qtmultimedia.rst"
-                                  snippet="capture-maximumframerate"/>
-        </add-function>
-        <add-function signature="setMaximumFrameRate(PyObject@maximumFrameRate@)">
-            <inject-code file="../glue/qtmultimedia.cpp" snippet="capture-setmaximumframerate"/>
-            <modify-argument index="1" pyi-type="Union[float, int, None]"/>
-            <inject-documentation format="target" mode="append" file="../doc/qtmultimedia.rst"
-                                  snippet="capture-setmaximumframerate"/>
-        </add-function>
     </object-type>
 
     <object-type name="QSoundEffect">
@@ -219,18 +228,6 @@
 
     <object-type name="QWindowCapture" since="6.6">
         <enum-type name="Error"/>
-        <add-function signature="maximumFrameRate()const" return-type="double">
-            <inject-code file="../glue/qtmultimedia.cpp" snippet="capture-maximumframerate"/>
-            <modify-argument index="return" pyi-type="Union[float, None]"/>
-            <inject-documentation format="target" mode="append" file="../doc/qtmultimedia.rst"
-                                  snippet="capture-maximumframerate"/>
-        </add-function>
-        <add-function signature="setMaximumFrameRate(PyObject@maximumFrameRate@)">
-            <inject-code file="../glue/qtmultimedia.cpp" snippet="capture-setmaximumframerate"/>
-            <modify-argument index="1" pyi-type="Union[float, int, None]"/>
-            <inject-documentation format="target" mode="append" file="../doc/qtmultimedia.rst"
-                                  snippet="capture-setmaximumframerate"/>
-        </add-function>
     </object-type>
 
     <object-type name="QVideoSink" since="6.1"/>

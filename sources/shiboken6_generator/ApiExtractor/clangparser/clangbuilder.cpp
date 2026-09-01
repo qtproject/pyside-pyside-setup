@@ -404,6 +404,16 @@ FunctionModelItem BuilderPrivate::createMemberFunction(const CXCursor &cursor,
     auto result = createFunction(cursor, functionType, isTemplateCode);
     if (!result)
         return result;
+    switch (clang_Type_getCXXRefQualifier(clang_getCursorType(cursor))) {
+    case CXRefQualifier_None:
+        break;
+    case CXRefQualifier_LValue:
+        result->setRefQualified(ReferenceType::LValueReference);
+        break;
+    case CXRefQualifier_RValue:
+        result->setRefQualified(ReferenceType::RValueReference);
+        break;
+    }
     result->setAccessPolicy(accessPolicy(clang_getCXXAccessSpecifier(cursor)));
     result->setConstant(clang_CXXMethod_isConst(cursor) != 0);
     result->setAttribute(FunctionAttribute::Static, clang_CXXMethod_isStatic(cursor) != 0);

@@ -16,10 +16,10 @@ from jinja2 import Environment, FileSystemLoader
 from android_utilities import (run_command, download_android_commandlinetools,
                                download_android_ndk, install_android_packages,
                                download_prebuilt_python_android,
+                               resolve_target_python_version,
+                               ANDROID_NDK_VERSION,
                                MIN_ANDROID_API_LEVEL,
                                DEFAULT_ANDROID_API_LEVEL,
-                               ANDROID_TARGET_PYTHON_VERSION,
-                               ANDROID_TARGET_PYTHON_FULL_VERSION,
                                SUPPORTED_ANDROID_PLATFORMS)
 
 # Android ABI data per supported platform:
@@ -95,7 +95,10 @@ if __name__ == "__main__":
     parser.add_argument("--api-level", type=str,
                         default=DEFAULT_ANDROID_API_LEVEL,
                         help="Minimum Android API level to use")
-    parser.add_argument("--ndk-path", type=str, help="Path to Android NDK (Preferred r26b)")
+    parser.add_argument("--ndk-path", type=str,
+                        help="Path to an existing Android NDK. Omit to download "
+                             f"r{ANDROID_NDK_VERSION}, which is the version "
+                             "this tool is tested against")
     # sdk path is needed to compile all the Qt Java Acitivity files into Qt6AndroidBindings.jar
     parser.add_argument("--sdk-path", type=str, help="Path to Android SDK")
     parser.add_argument(
@@ -186,6 +189,8 @@ if __name__ == "__main__":
     templates_path = Path(__file__).parent / "templates"
     environment = Environment(loader=FileSystemLoader(templates_path))
 
+    target_python_version, target_python_full_version = resolve_target_python_version()
+
     for plat_name in plat_names:
         android_abi, qt_plat_name, gcc_march, plat_bits = _PLATFORM_DATA[plat_name]
         platform_data = PlatformData(plat_name, api_level, android_abi,
@@ -193,7 +198,7 @@ if __name__ == "__main__":
 
         # python path is valid, if Python for android installation exists in python_path
         python_path = (pyside6_deploy_cache
-                       / f"Python-{ANDROID_TARGET_PYTHON_VERSION}"
+                       / f"Python-{target_python_version}"
                          f"-{platform_data.plat_name}-linux-android"
                        / "_install")
         valid_python_path = python_path.exists()
@@ -210,7 +215,7 @@ if __name__ == "__main__":
 
         if not valid_python_path:
             download_prebuilt_python_android(
-                full_version=ANDROID_TARGET_PYTHON_FULL_VERSION,
+                full_version=target_python_full_version,
                 plat_name=platform_data.plat_name,
                 install_path=python_path)
 
@@ -230,7 +235,7 @@ if __name__ == "__main__":
             qt_plat_name=platform_data.qt_plat_name,
             gcc_march=platform_data.gcc_march,
             plat_bits=platform_data.plat_bits,
-            python_version=ANDROID_TARGET_PYTHON_VERSION,
+            python_version=target_python_version,
             target_python_path=python_path,
             min_android_api=MIN_ANDROID_API_LEVEL
         )

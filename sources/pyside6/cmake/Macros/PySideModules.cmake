@@ -356,9 +356,14 @@ macro(create_pyside_module)
         message(STATUS "Building for Android with arch ${CMAKE_ANDROID_ARCH_LLVM_TRIPLE}")
         # CMAKE_CXX_COMPILER is the generic clang++; for finding the include paths,
         # it needs "--target".
+        # The API level has to be part of the triple, exactly as it is for the
+        # actual compile. Without it the NDK headers fall back to the minimum
+        # API, hiding declarations the NDK's own libc++ headers then call, such
+        # as pthread_cond_clockwait, which is gated on API 30 from NDK r28 on.
+        set(android_triple "${CMAKE_ANDROID_ARCH_LLVM_TRIPLE}${CMAKE_ANDROID_API}")
         list(APPEND shiboken_command
-             "--compiler-argument=--target=${CMAKE_ANDROID_ARCH_LLVM_TRIPLE}"
-             "--clang-option=--target=${CMAKE_ANDROID_ARCH_LLVM_TRIPLE}")
+             "--compiler-argument=--target=${android_triple}"
+             "--clang-option=--target=${android_triple}")
     endif()
 
     if(CMAKE_SYSTEM_NAME STREQUAL "iOS")

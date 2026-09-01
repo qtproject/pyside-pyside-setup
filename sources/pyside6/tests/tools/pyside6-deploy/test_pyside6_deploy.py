@@ -153,6 +153,27 @@ class TestPySide6DeployWidgets(DeployTestBase):
         original_output = self.deploy.main(self.main_file, dry_run=True, force=True)
         self.assertCmdEqual(self.expected_run_cmd, original_output)
 
+    def testWidgetDryRunNoInstall(self, mock_plugins):
+        """--no-install must not run any pip command, not even pip freeze."""
+        mock_plugins.return_value = self.all_plugins
+        with patch("deploy_lib.python_helper.run_command") as mock_run_command, \
+                patch("deploy_lib.python_helper.PythonExecutable.is_installed",
+                      return_value=True):
+            original_output = self.deploy.main(self.main_file, dry_run=True, force=True,
+                                               no_install=True)
+        mock_run_command.assert_not_called()
+        self.assertCmdEqual(self.expected_run_cmd, original_output)
+
+    def testNoInstallFailsOnMissingDependency(self, mock_plugins):
+        """--no-install must fail early and name the missing package."""
+        mock_plugins.return_value = self.all_plugins
+        with patch("deploy_lib.python_helper.PythonExecutable.is_installed",
+                   return_value=False):
+            with self.assertRaises(RuntimeError) as context:
+                self.deploy.main(self.main_file, dry_run=True, force=True,
+                                 no_install=True)
+        self.assertIn("Nuitka", str(context.exception))
+
     @patch("deploy_lib.dependency_util.QtDependencyReader.get_qt_libs_dir")
     def testWidgetConfigFile(self, mock_sitepackages, mock_plugins):
         mock_sitepackages.return_value = Path(_get_qt_lib_dir())

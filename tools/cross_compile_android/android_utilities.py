@@ -20,8 +20,12 @@ from tqdm import tqdm
 
 # the tag number does not matter much since we update the sdk later
 DEFAULT_SDK_TAG = 14742923
-ANDROID_NDK_VERSION = "27c"
-ANDROID_NDK_VERSION_NUMBER_SUFFIX = "12479018"
+# r28c is the first NDK whose Clang defaults to 16 KB page-aligned LOAD
+# segments, which recent Android versions require. Everything p4a builds
+# itself (libpython, libsqlite3, libssl, libffi) picks up that default;
+# those come from p4a's own autotools recipes, which we cannot pass
+# linker flags to. Note Qt documents r27c for its own Android libraries.
+ANDROID_NDK_VERSION = "28c"
 
 # CPython supports only these two Android ABIs. See HOSTS in CPython's
 # Android/android.py. 32-bit Android is not a supported CPython target.
@@ -31,9 +35,18 @@ SUPPORTED_ANDROID_PLATFORMS = ["aarch64", "x86_64"]
 # binaries from 3.14 onwards, so CPython is no longer built here. This
 # must match the python3 recipe version at the python-for-android commit
 # pinned by P4A_COMMIT in deploy_lib/android/buildozer.py, because that
-# is the interpreter which loads these wheels on the device.
+# is the interpreter which loads these wheels on the device. Used only as
+# a fallback when that version cannot be fetched at runtime (see
+# resolve_target_python_version below) - keep it roughly in step anyway.
 ANDROID_TARGET_PYTHON_VERSION = "3.14"
 ANDROID_TARGET_PYTHON_FULL_VERSION = "3.14.2"
+
+_BUILDOZER_PY_PATH = (Path(__file__).resolve().parents[2]
+                      / "sources/pyside-tools/deploy_lib/android/buildozer.py")
+_P4A_PYTHON_RECIPE_URL_TEMPLATE = (
+    "https://raw.githubusercontent.com/kivy/python-for-android/"
+    "{commit}/pythonforandroid/recipes/python3/__init__.py"
+)
 
 # Minimum Android API level, set by Qt's requirements. Update when Qt's
 # minimum API level changes.
@@ -43,10 +56,12 @@ MIN_ANDROID_API_LEVEL = "28"
 # minimum for toolchain compatibility, while staying compatible with it.
 DEFAULT_ANDROID_API_LEVEL = "35"
 
-# Official SHA-1 checksums for the pinned NDK/SDK versions.
+# Official SHA-1 checksums for the pinned NDK/SDK versions, taken from
+# dl.google.com/android/repository/repository2-3.xml. The NDK entry is
+# ndk;28.2.13676358 (r28c).
 _NDK_SHA1: dict[str, str] = {
-    "linux": "090e8083a715fdb1a3e402d0763c388abb03fb4e",
-    "darwin": "04d8c43eb4e884c4b16bbf7733ac9179a13b7b20",
+    "linux": "a7b54a5de87fecd125a17d54f73c446199e72a64",
+    "darwin": "fc20a6bf15a30fb3428c9b60a7308793a362dc6d",
 }
 _CLTOOLS_SHA1: dict[str, str] = {
     "linux": "48833c34b761c10cb20bcd16582129395d121b27",
@@ -199,27 +214,6 @@ def extract_zip(file: Path, destination: Path):
     run_command(command=command, show_stdout=True)
 
 
-def extract_dmg(file: Path, destination: Path):
-    output = run_command(['hdiutil', 'attach', '-nobrowse', '-readonly', str(file)],
-                         show_stdout=True, capture_stdout=True)
-
-    # find the mounted volume
-    result = re.search(r'/Volumes/(.*)', output)
-    if not result:
-        raise RuntimeError(f"Unable to find mounted volume for file {file}")
-    mounted_vol_name = result.group(1)
-    if not mounted_vol_name:
-        raise RuntimeError(f"Unable to find mounted volume for file {file}")
-
-    # Copy files with `ditto --noqtn` so the destination .app does not inherit
-    # com.apple.quarantine from the mounted DMG
-    run_command(['ditto', '--noqtn',
-                 f'/Volumes/{mounted_vol_name}/', str(destination)])
-
-    # Detach mounted volume
-    run_command(['hdiutil', 'detach', f'/Volumes/{mounted_vol_name}'])
-
-
 def _download(url: str, destination: Path):
     """
     Download url to destination
@@ -240,17 +234,15 @@ def download_android_ndk(ndk_path: Path):
     """
     Downloads the given ndk_version into ndk_path
     """
-    ndk_path = ndk_path / "android-ndk"
-    ndk_extension = "dmg" if sys.platform == "darwin" else "zip"
-    ndk_zip_path = ndk_path / f"android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.{ndk_extension}"
-    ndk_version_path = ""
-    if sys.platform == "linux":
-        ndk_version_path = ndk_path / f"android-ndk-r{ANDROID_NDK_VERSION}"
-    elif sys.platform == "darwin":
-        ndk_version_path = (ndk_path
-                            / f"AndroidNDK{ANDROID_NDK_VERSION_NUMBER_SUFFIX}.app/Contents/NDK")
-    else:
+    if sys.platform not in ("linux", "darwin"):
         raise RuntimeError(f"Unsupported platform {sys.platform}")
+
+    ndk_path = ndk_path / "android-ndk"
+    # Since r28c, the macOS NDK is a plain zip unpacking to a flat
+    # android-ndk-r<version>/ directory, same as Linux. Earlier versions
+    # shipped a .dmg holding an AndroidNDK<build>.app bundle instead.
+    ndk_zip_path = ndk_path / f"android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.zip"
+    ndk_version_path = ndk_path / f"android-ndk-r{ANDROID_NDK_VERSION}"
 
     if ndk_version_path.exists():
         print(f"NDK path found in {str(ndk_version_path)}")
@@ -258,17 +250,14 @@ def download_android_ndk(ndk_path: Path):
         try:
             ndk_path.mkdir(parents=True, exist_ok=True)
             url = (f"https://dl.google.com/android/repository"
-                   f"/android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.{ndk_extension}")
+                   f"/android-ndk-r{ANDROID_NDK_VERSION}-{sys.platform}.zip")
 
             print(f"Downloading Android Ndk version r{ANDROID_NDK_VERSION}")
             _download(url=url, destination=ndk_zip_path)
             _verify_checksum(ndk_zip_path, _NDK_SHA1[sys.platform])
 
             print("Unpacking Android Ndk")
-            if sys.platform == "darwin":
-                extract_dmg(file=ndk_zip_path, destination=ndk_path)
-            else:
-                extract_zip(file=ndk_zip_path, destination=ndk_path)
+            extract_zip(file=ndk_zip_path, destination=ndk_path)
         except Exception as e:
             print(f"Error occurred while downloading and unpacking Android NDK: {e}")
             if ndk_path.exists():
@@ -315,6 +304,62 @@ def download_android_commandlinetools(android_sdk_dir: Path):
             sys.exit(1)
 
     return android_sdk_dir
+
+
+def get_p4a_commit() -> str:
+    """Reads the pinned python-for-android commit straight out of
+    buildozer.py, so this tool and the deploy tool never drift apart."""
+    content = _BUILDOZER_PY_PATH.read_text(encoding="utf-8")
+    match = re.search(r'^P4A_COMMIT\s*=\s*"([0-9a-fA-F]+)"', content, re.MULTILINE)
+    if not match:
+        raise RuntimeError(f"Unable to find P4A_COMMIT in {_BUILDOZER_PY_PATH}")
+    return match.group(1)
+
+
+def fetch_p4a_target_python_version(p4a_commit: str) -> str:
+    """Returns the CPython version p4a's python3 recipe builds, at the
+    given p4a commit. That is the interpreter which will load these
+    wheels on-device, so it is what they must be cross-compiled against."""
+    url = _P4A_PYTHON_RECIPE_URL_TEMPLATE.format(commit=p4a_commit)
+    with request.urlopen(url) as response:
+        content = response.read().decode("utf-8")
+    match = re.search(r"^\s*version\s*=\s*['\"]([\d.]+)['\"]", content, re.MULTILINE)
+    if not match:
+        raise RuntimeError(f"Unable to find the python3 recipe version at {url}")
+    return match.group(1)
+
+
+def resolve_target_python_version() -> tuple[str, str]:
+    """
+    Returns (major.minor, full_version) for the Android target Python.
+
+    Fetched live from the python3 recipe at the pinned p4a commit, so
+    ANDROID_TARGET_PYTHON_FULL_VERSION never silently drifts out of sync
+    with it. Falls back to the hardcoded default, with a warning, if the
+    commit or the network is unavailable - callers still need to add a
+    matching _PREBUILT_PYTHON_SHA256 entry by hand for any new version,
+    since a checksum can never be trusted from an unauthenticated fetch.
+    """
+    try:
+        p4a_commit = get_p4a_commit()
+        full_version = fetch_p4a_target_python_version(p4a_commit)
+    except (OSError, RuntimeError) as e:
+        logging.warning(
+            f"[DEPLOY] Unable to auto-detect the p4a target Python version "
+            f"({e}). Falling back to the pinned default "
+            f"{ANDROID_TARGET_PYTHON_FULL_VERSION}")
+        return ANDROID_TARGET_PYTHON_VERSION, ANDROID_TARGET_PYTHON_FULL_VERSION
+
+    if full_version != ANDROID_TARGET_PYTHON_FULL_VERSION:
+        logging.warning(
+            f"[DEPLOY] p4a commit {p4a_commit} now targets Python "
+            f"{full_version}, not the pinned default "
+            f"{ANDROID_TARGET_PYTHON_FULL_VERSION}. Using {full_version}; "
+            "update ANDROID_TARGET_PYTHON_FULL_VERSION and add a matching "
+            "_PREBUILT_PYTHON_SHA256 entry.")
+
+    short_version = ".".join(full_version.split(".")[:2])
+    return short_version, full_version
 
 
 def download_prebuilt_python_android(full_version: str, plat_name: str,

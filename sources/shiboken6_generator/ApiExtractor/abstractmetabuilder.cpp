@@ -2216,6 +2216,13 @@ AbstractMetaFunctionPtr
         }
         return {};
     }
+
+    if (functionItem->refQualified() == RValueReference) {
+        rejectFunction(functionItem, currentClass,
+                       AbstractMetaBuilder::GenerationDisabled, u"rvalue overload"_s);
+        return {};
+    }
+
     const QString &functionName = functionItem->name();
     const QString className = currentClass != nullptr ?
         currentClass->typeEntry()->qualifiedCppName() : QString{};
@@ -2383,9 +2390,9 @@ AbstractMetaFunctionPtr
                 && !functionItem->attributes().testFlag(FunctionAttribute::Virtual)) {
                 if (!currentClass || currentClass->typeEntry()->generateCode()) {
                     const QString signature = qualifiedFunctionSignatureWithType(functionItem, className);
-                    qCWarning(lcShiboken, "%s",
-                              qPrintable(msgStrippingArgument(functionItem, i, signature,
-                                                              arg, errorMessage)));
+                    const QString message = msgStrippingArgument(functionItem, i, signature,
+                                                                 arg, errorMessage);
+                    ReportHandler::addGeneralMessage(message);
                 }
                 break;
             }

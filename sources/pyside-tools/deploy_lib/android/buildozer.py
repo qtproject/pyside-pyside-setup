@@ -3,6 +3,7 @@
 # Qt-Security score:critical reason:execute-external-code,handling-untrusted-data
 from __future__ import annotations
 
+import os
 import sys
 import logging
 import xml.etree.ElementTree as ET
@@ -57,6 +58,13 @@ class BuildozerConfig(BaseConfig):
         self.set_value("app", "android.minapi", MIN_ANDROID_API_LEVEL,
                        raise_warning=False)
         self.set_value("app", "android.ndk_api", MIN_ANDROID_API_LEVEL,
+                       raise_warning=False)
+
+        # python-for-android replaces every .py with a .pyc by default.
+        # PySide features such as @auto_properties read the class source
+        # back at runtime through inspect.getsource(), which then finds
+        # nothing and silently creates no properties, so keep the sources.
+        self.set_value("app", "android.no-byte-compile-python", "True",
                        raise_warning=False)
 
         # p4a changes
@@ -155,6 +163,8 @@ class Buildozer:
         # Checked before anything is built, because python-for-android
         # otherwise stops mid-build with no output.
         check_jdk_version()
+        # Prevents p4a from blocking on an install prompt that buildozer hides.
+        os.environ.setdefault("PYTHONFORANDROID_PREREQUISITES_INSTALL_INTERACTIVE", "0")
 
         project_dir = Path(pysidedeploy_config.project_dir)
         buildozer_spec = project_dir / "buildozer.spec"
