@@ -31,7 +31,7 @@ PERMISSION_MAP = {"Bluetooth": "NSBluetoothAlwaysUsageDescription:BluetoothAcces
                   "Location": "NSLocationUsageDescription:LocationAccess",
                   }
 
-DEFAULT_NUITKA_MODE = "onefile"
+DEFAULT_NUITKA_MODE = "standalone"
 
 
 class BaseConfig:

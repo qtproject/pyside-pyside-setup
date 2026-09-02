@@ -95,8 +95,10 @@ header_search_paths =
 # eg: NSCameraUsageDescription:CameraAccess
 macos.permissions =
 
-# Mode of using Nuitka. Accepts standalone or onefile. Default: onefile
-mode = onefile
+# Mode of using Nuitka. Accepts standalone or onefile. Default: standalone
+# standalone creates a folder with the executable and its dependencies.
+# onefile creates a single executable that unpacks itself at every start.
+mode = standalone
 
 # Specify any extra nuitka arguments
 # eg: extra_args = --show-modules --follow-stdlib

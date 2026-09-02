@@ -233,10 +233,10 @@ def _run_deploy_test(example, tmpdirname):
 
     # fetch app->title from the config
     app_title = parser.get("app", "title")
-    if sys.platform != "darwin":
-        binary = f"{tmpdirname}/{app_title}.{suffix}"
-    else:
+    if sys.platform == "darwin":
         binary = f"{tmpdirname}/pyside_app_demo.app/Contents/MacOS/{main_file.stem}"
+    else:
+        binary = f"{tmpdirname}/{app_title}.dist/{main_file.stem}.{suffix}"
 
     if run_process([binary]) != 0:
         raise RuntimeError("Error running the deployed example")

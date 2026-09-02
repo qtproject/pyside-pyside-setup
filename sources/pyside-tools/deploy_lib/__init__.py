@@ -47,12 +47,16 @@ HELP_EXTRA_MODULES = dedent("""
                             """)
 
 HELP_MODE = dedent("""
-                   The mode in which the application is deployed. The options are: onefile,
-                   standalone. The default value is onefile.
+                   The mode in which the application is deployed. The options are:
+                   standalone, onefile. The default value is standalone.
 
-                   This options translates to the mode Nuitka uses to create the executable.
+                   standalone creates a folder containing the executable and all its
+                   dependencies. onefile creates a single executable file which unpacks
+                   itself into a temporary folder each time it starts.
 
-                   macOS by default uses the --standalone option.
+                   This option translates to the mode Nuitka uses to create the
+                   executable. macOS always uses standalone, because the output is an
+                   application bundle.
                    """)
 
 HELP_NO_INSTALL = dedent("""

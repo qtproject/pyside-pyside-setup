@@ -7,8 +7,14 @@ pyside6-deploy: the deployment tool for Qt for Python
 platforms. It is a wrapper around `Nuitka <https://nuitka.net/>`_, a Python compiler that
 compiles your Python code to C code, and links with libpython to produce the final executable.
 
-The final executable produced has a ``.exe`` suffix on Windows, ``.bin`` on Linux and ``.app`` on
-macOS.
+By default, the tool produces a folder containing the executable and everything it depends on:
+``<name>.dist`` containing ``<name>.exe`` on Windows, ``<name>.dist`` containing ``<name>.bin`` on
+Linux, and ``<name>.app`` on macOS. Pass ``--mode onefile`` to get a single executable file instead
+(``.exe`` on Windows, ``.bin`` on Linux; macOS always produces an application bundle).
+
+.. note:: The default packaging mode changed from ``onefile`` to ``standalone`` from 6.12.
+    Existing ``pysidedeploy.spec`` files that already set ``mode = onefile`` keep working
+    unchanged. See the ``mode`` parameter below and the ``--no-warn`` option.
 
 .. note:: The default version of Nuitka used with the tool is version ``4.1.1``. This can be
     updated to a newer version by updating your ``pysidedeploy.spec`` file.
@@ -96,7 +102,7 @@ Supported keys:
 - ``input_file`` — path to main Python entry point (relative to project root)
 - ``exec_directory`` — directory where the final executable is generated
 - ``icon`` — path to application icon
-- ``mode`` — ``onefile`` or ``standalone`` (Nuitka mode)
+- ``mode`` — ``onefile`` or ``standalone`` (Nuitka mode). Default: ``standalone``
 - ``extra_args`` — extra Nuitka CLI arguments (space-separated string)
 - ``macos_permissions`` — macOS usage description strings (comma-separated)
 
@@ -190,11 +196,13 @@ The relevant parameters for ``pyside6-deploy`` are:
 
       NSCameraUsageDescription:CameraAccess
 
-  * ``mode``: Accepts one of the options: ``onefile`` or ``standalone``. The default is ``onefile``.
-    This option corresponds to the mode in which Nuitka is run. The onefile mode creates a single
-    executable file, while the standalone mode creates a directory with the executable and all the
-    necessary files. The standalone mode is useful when you want to distribute the application as a
-    directory with dependencies and other files required by the app.
+  * ``mode``: Accepts one of the options: ``onefile`` or ``standalone``. The default is
+    ``standalone``. This option corresponds to the mode in which Nuitka is run. The standalone mode
+    creates a ``<title>.dist`` directory containing the executable (``<main_module>.bin`` on Linux,
+    ``<main_module>.exe`` on Windows) and all the necessary files. The onefile mode creates a single
+    executable file (``<title>.bin`` on Linux, ``<title>.exe`` on Windows) that unpacks itself into
+    a temporary folder each time it starts. macOS always uses standalone mode, since its output is
+    an application bundle.
 
   * ``extra_args``: Any extra Nuitka arguments specified. It is specified as space-separated
     command line arguments i.e. just like how you would specify it when you use Nuitka through
@@ -250,6 +258,10 @@ Here are all the command line options of ``pyside6-deploy``:
   in the ``packages`` option of ``pysidedeploy.spec`` have to be present already, otherwise
   ``pyside6-deploy`` stops with an error naming the missing ones. Use this for offline builds, or
   when the Python environment is managed elsewhere.
+
+* **--mode**: The packaging mode, ``onefile`` or ``standalone``. See the ``mode`` parameter in
+  `pysidedeploy`_ for details. Defaults to whatever is set in ``pysidedeploy.spec``, or
+  ``standalone`` if nothing is set.
 
 What pyside6-deploy runs
 ========================

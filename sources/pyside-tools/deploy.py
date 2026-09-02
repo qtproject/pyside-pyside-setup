@@ -43,12 +43,15 @@ from deploy_lib import (MAJOR_VERSION, DesktopConfig, cleanup, finalize, create_
 
 TOOL_DESCRIPTION = dedent(f"""
                           This tool deploys PySide{MAJOR_VERSION} to desktop (Windows, Linux,
-                          macOS) platforms. The following types of executables are produced as per
-                          the platform:
+                          macOS) platforms. By default it produces a folder containing the
+                          executable and its dependencies:
 
-                          Windows = .exe
-                          macOS = .app
-                          Linux = .bin
+                          Windows = <name>.dist containing <name>.exe
+                          Linux   = <name>.dist containing <name>.bin
+                          macOS   = <name>.app
+
+                          Use --mode onefile to get a single executable file instead
+                          (<name>.exe on Windows, <name>.bin on Linux).
                           """)
 
 

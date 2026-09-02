@@ -23,6 +23,11 @@ init_test_paths(False)
 
 import PySide6
 
+tools_path = Path(__file__).resolve().parents[5] / "sources" / "pyside-tools"
+if tools_path not in sys.path:
+    sys.path.append(str(tools_path))
+from deploy_lib.config import DEFAULT_NUITKA_MODE  # noqa: E402
+
 QML_MODULES = {"Core", "Gui", "Qml", "Quick", "Network", "OpenGL"}
 WEBENGINE_MODULES = {"Core", "Gui", "Quick", "Qml", "WebEngineQuick", "Network",
                      "OpenGL", "Positioning", "WebEngineCore", "WebChannel",
@@ -135,12 +140,14 @@ class TestPySide6DeployWidgets(DeployTestBase):
             f" {self.dlls_ignore_nuitka}"
         )
         if sys.platform.startswith("linux"):
-            self.expected_run_cmd += f" --linux-icon={str(self.linux_icon)} --onefile"
+            self.expected_run_cmd += (f" --linux-icon={str(self.linux_icon)}"
+                                      f" --{DEFAULT_NUITKA_MODE}")
         elif sys.platform == "darwin":
             self.expected_run_cmd += (f" --macos-app-icon={str(self.macos_icon)}"
-                                      " --macos-create-app-bundle --standalone")
+                                      f" --macos-create-app-bundle --{DEFAULT_NUITKA_MODE}")
         elif sys.platform == "win32":
-            self.expected_run_cmd += f" --windows-icon-from-ico={str(self.win_icon)} --onefile"
+            self.expected_run_cmd += (f" --windows-icon-from-ico={str(self.win_icon)}"
+                                      f" --{DEFAULT_NUITKA_MODE}")
 
         if is_pyenv_python():
             self.expected_run_cmd += " --static-libpython=no"
@@ -199,6 +206,7 @@ class TestPySide6DeployWidgets(DeployTestBase):
         equ_value = equ_base + " --static-libpython=no" if is_pyenv_python() else equ_base
         self.assertEqual(config_obj.get_value("nuitka", "extra_args"), equ_value)
         self.assertEqual(config_obj.get_value("qt", "excluded_qml_plugins"), "")
+        self.assertEqual(config_obj.get_value("nuitka", "mode"), "standalone")
         expected_modules = {"Core", "Gui", "Widgets"}
         if sys.platform != "win32":
             expected_modules.add("DBus")
@@ -239,12 +247,14 @@ class TestPySide6DeployWidgets(DeployTestBase):
         self.assertEqual(reloaded.get_value("nuitka", "mode"), expected_mode)
         self.config_file.unlink()
 
-    def testStandaloneMode(self, mock_plugins):
+    def testOnefileMode(self, mock_plugins):
         mock_plugins.return_value = self.all_plugins
-        # Remove --onefile from self.expected_run_cmd and replace it with --standalone
-        self.expected_run_cmd = self.expected_run_cmd.replace(" --onefile", " --standalone")
-        # Test standalone mode
-        original_output = self.deploy.main(self.main_file, mode="standalone", dry_run=True,
+        # macOS always builds standalone, regardless of the requested mode
+        if sys.platform != "darwin":
+            self.expected_run_cmd = self.expected_run_cmd.replace(
+                f" --{DEFAULT_NUITKA_MODE}", " --onefile")
+        # Test onefile mode
+        original_output = self.deploy.main(self.main_file, mode="onefile", dry_run=True,
                                            force=True)
 
         self.assertCmdEqual(self.expected_run_cmd, original_output)
@@ -393,12 +403,14 @@ class TestPySide6DeployQml(DeployTestBase):
             )
 
         if sys.platform.startswith("linux"):
-            self.expected_run_cmd += f" --linux-icon={str(self.linux_icon)} --onefile"
+            self.expected_run_cmd += (f" --linux-icon={str(self.linux_icon)}"
+                                      f" --{DEFAULT_NUITKA_MODE}")
         elif sys.platform == "darwin":
             self.expected_run_cmd += (f" --macos-app-icon={str(self.macos_icon)}"
-                                      " --macos-create-app-bundle --standalone")
+                                      f" --macos-create-app-bundle --{DEFAULT_NUITKA_MODE}")
         elif sys.platform == "win32":
-            self.expected_run_cmd += f" --windows-icon-from-ico={str(self.win_icon)} --onefile"
+            self.expected_run_cmd += (f" --windows-icon-from-ico={str(self.win_icon)}"
+                                      f" --{DEFAULT_NUITKA_MODE}")
 
         if is_pyenv_python():
             self.expected_run_cmd += " --static-libpython=no"
@@ -526,12 +538,14 @@ class TestPySide6DeployWebEngine(DeployTestBase):
             )
 
         if sys.platform.startswith("linux"):
-            expected_run_cmd += f" --linux-icon={str(self.linux_icon)} --onefile"
+            expected_run_cmd += (f" --linux-icon={str(self.linux_icon)}"
+                                 f" --{DEFAULT_NUITKA_MODE}")
         elif sys.platform == "darwin":
             expected_run_cmd += (f" --macos-app-icon={str(self.macos_icon)}"
-                                 " --macos-create-app-bundle --standalone")
+                                 f" --macos-create-app-bundle --{DEFAULT_NUITKA_MODE}")
         elif sys.platform == "win32":
-            expected_run_cmd += f" --windows-icon-from-ico={str(self.win_icon)} --onefile"
+            expected_run_cmd += (f" --windows-icon-from-ico={str(self.win_icon)}"
+                                 f" --{DEFAULT_NUITKA_MODE}")
 
         config_file = self.temp_example_webenginequick / "pysidedeploy.spec"
 
@@ -671,12 +685,14 @@ class TestEmptyDSProject(DeployTestBase):
             )
 
         if sys.platform.startswith("linux"):
-            self.expected_run_cmd += f" --linux-icon={str(self.linux_icon)} --onefile"
+            self.expected_run_cmd += (f" --linux-icon={str(self.linux_icon)}"
+                                      f" --{DEFAULT_NUITKA_MODE}")
         elif sys.platform == "darwin":
             self.expected_run_cmd += (f" --macos-app-icon={str(self.macos_icon)}"
-                                      " --macos-create-app-bundle --standalone")
+                                      f" --macos-create-app-bundle --{DEFAULT_NUITKA_MODE}")
         elif sys.platform == "win32":
-            self.expected_run_cmd += f" --windows-icon-from-ico={str(self.win_icon)} --onefile"
+            self.expected_run_cmd += (f" --windows-icon-from-ico={str(self.win_icon)}"
+                                      f" --{DEFAULT_NUITKA_MODE}")
 
         if is_pyenv_python():
             self.expected_run_cmd += " --static-libpython=no"
