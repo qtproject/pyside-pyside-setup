@@ -216,6 +216,29 @@ class TestPySide6DeployWidgets(DeployTestBase):
             self.deploy.main(main_file=fake_main_file, config_file=self.config_file)
         self.assertTrue("Directory does not contain main.py file." in str(context.exception))
 
+    def testCliModeOverridesSpec(self, mock_plugins):
+        """--mode on the CLI must win over a spec file that already sets a mode."""
+        mock_plugins.return_value = self.all_plugins
+        init_result = self.deploy.main(self.main_file, init=True, force=True)
+        self.assertEqual(None, init_result)
+
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
+        config_obj.set_value("nuitka", "mode", "standalone")
+        config_obj.update_config()
+
+        # Construct DesktopConfig directly (as deploy.main() would) to check mode
+        # resolution and persistence without invoking Nuitka.
+        desktop_config = self.deploy_lib.DesktopConfig(
+            config_file=self.config_file, source_file=self.main_file, dry_run=True,
+            existing_config_file=True, mode="onefile")
+        expected_mode = "standalone" if sys.platform == "darwin" else "onefile"
+        self.assertEqual(desktop_config.mode.value, expected_mode)
+
+        desktop_config.update_config()
+        reloaded = self.deploy_lib.BaseConfig(config_file=self.config_file)
+        self.assertEqual(reloaded.get_value("nuitka", "mode"), expected_mode)
+        self.config_file.unlink()
+
     def testStandaloneMode(self, mock_plugins):
         mock_plugins.return_value = self.all_plugins
         # Remove --onefile from self.expected_run_cmd and replace it with --standalone

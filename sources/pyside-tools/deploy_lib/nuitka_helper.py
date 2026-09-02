@@ -85,15 +85,13 @@ class Nuitka:
         qt_plugins = [plugin for plugin in qt_plugins if plugin not in self.qt_plugins_to_ignore]
         extra_args = shlex.split(extra_args)
 
-        # macOS uses the --standalone option by default to create an app bundle
+        extra_args.append(f"--{mode.value}")
         if sys.platform == "darwin":
             # create an app bundle
-            extra_args.extend(["--standalone", "--macos-create-app-bundle"])
+            extra_args.append("--macos-create-app-bundle")
             permission_pattern = "--macos-app-protected-resource={permission}"
             for permission in permissions:
                 extra_args.append(permission_pattern.format(permission=permission))
-        else:
-            extra_args.append(f"--{mode.value}")
 
         qml_args = []
         if qml_files:
