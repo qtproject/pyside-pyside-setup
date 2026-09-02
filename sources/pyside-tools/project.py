@@ -271,6 +271,8 @@ class Project:
             cmd.extend(["--mode", args.mode])
         if args.no_install:
             cmd.append("--no-install")
+        if args.no_warn:
+            cmd.append("--no-warn")
         run_command(cmd, cwd=self.project.project_file.parent)
 
     def lupdate(self):

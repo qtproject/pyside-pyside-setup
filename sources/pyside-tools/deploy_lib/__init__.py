@@ -69,6 +69,24 @@ HELP_NO_INSTALL = dedent("""
                          elsewhere.
                          """)
 
+HELP_NO_WARN = dedent("""
+                      Do not print advisory messages about changed
+                      defaults. Errors and warnings about the
+                      deployment itself are still shown.
+                      """)
+
+MSG_MODE_DEFAULT_CHANGED = dedent("""
+    [DEPLOY] The default packaging mode changed from 'onefile' to
+    'standalone'. Your application is now created as a folder holding
+    the executable and everything it needs, instead of a single file.
+
+    To get a single file again, run pyside6-deploy with
+    '--mode onefile', or set 'mode = onefile' in the [nuitka] section
+    of pysidedeploy.spec.
+
+    Pass --no-warn to hide this message.
+    """)
+
 # plugins to be removed from the --include-qt-plugins option because these plugins
 # don't exist in site-package under PySide6/Qt/plugins
 PLUGINS_TO_REMOVE = ["accessiblebridge", "platforms/darwin", "networkaccess",
@@ -128,6 +146,8 @@ def add_deploy_arguments(parser, include_main_file=True):
                         help=HELP_MODE)
 
     parser.add_argument("--no-install", action="store_true", help=HELP_NO_INSTALL)
+
+    parser.add_argument("--no-warn", action="store_true", help=HELP_NO_WARN)
 
 
 from .commands import (  # noqa: F401, E402

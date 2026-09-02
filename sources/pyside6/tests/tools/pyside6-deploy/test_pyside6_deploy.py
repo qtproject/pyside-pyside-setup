@@ -108,6 +108,14 @@ class DeployTestBase(unittest.TestCase):
         super().tearDown()
         os.chdir(self.current_dir)
 
+    @staticmethod
+    def _captured_output(mock_print):
+        """setUpClass replaces sys.stdout with a MagicMock, so redirect_stdout
+        does not capture anything. Patch builtins.print instead and join what
+        was printed."""
+        return "\n".join(str(call.args[0]) for call in mock_print.call_args_list
+                         if call.args)
+
 
 @unittest.skipIf(sys.platform == "darwin" and int(platform.mac_ver()[0].split('.')[0]) <= 11,
                  "Test only works on macOS version 12+")
@@ -258,6 +266,59 @@ class TestPySide6DeployWidgets(DeployTestBase):
                                            force=True)
 
         self.assertCmdEqual(self.expected_run_cmd, original_output)
+
+    def testModeChangeWarning(self, mock_plugins):
+        mock_plugins.return_value = self.all_plugins
+        with patch("builtins.print") as mock_print:
+            self.deploy.main(self.main_file, dry_run=True, force=True)
+        output = self._captured_output(mock_print)
+        if sys.platform == "darwin":
+            self.assertNotIn("default packaging mode changed", output)
+        else:
+            self.assertIn("default packaging mode changed", output)
+
+    def testModeChangeWarningSuppressed(self, mock_plugins):
+        mock_plugins.return_value = self.all_plugins
+        with patch("builtins.print") as mock_print:
+            self.deploy.main(self.main_file, dry_run=True, force=True, no_warn=True)
+        output = self._captured_output(mock_print)
+        self.assertNotIn("default packaging mode changed", output)
+
+    def testNoWarningWhenModeGiven(self, mock_plugins):
+        mock_plugins.return_value = self.all_plugins
+        with patch("builtins.print") as mock_print:
+            self.deploy.main(self.main_file, mode="standalone", dry_run=True, force=True)
+        output = self._captured_output(mock_print)
+        self.assertNotIn("default packaging mode changed", output)
+
+    def testNoWarningWithExistingSpec(self, mock_plugins):
+        mock_plugins.return_value = self.all_plugins
+        init_result = self.deploy.main(self.main_file, init=True, force=True)
+        self.assertEqual(None, init_result)
+
+        with patch("builtins.print") as mock_print:
+            self.deploy.main(config_file=self.config_file, dry_run=True, force=True)
+        output = self._captured_output(mock_print)
+        self.assertNotIn("default packaging mode changed", output)
+        self.config_file.unlink()
+
+    def testWarningWithSpecMissingModeKey(self, mock_plugins):
+        mock_plugins.return_value = self.all_plugins
+        init_result = self.deploy.main(self.main_file, init=True, force=True)
+        self.assertEqual(None, init_result)
+
+        config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
+        config_obj.parser.remove_option("nuitka", "mode")
+        config_obj.update_config()
+
+        with patch("builtins.print") as mock_print:
+            self.deploy.main(config_file=self.config_file, dry_run=True, force=True)
+        output = self._captured_output(mock_print)
+        if sys.platform == "darwin":
+            self.assertNotIn("default packaging mode changed", output)
+        else:
+            self.assertIn("default packaging mode changed", output)
+        self.config_file.unlink()
 
     @patch("deploy_lib.dependency_util.QtDependencyReader.get_qt_libs_dir")
     def testExtraModules(self, mock_sitepackages, mock_plugins):

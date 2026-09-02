@@ -447,7 +447,14 @@ class DesktopConfig(Config):
         # pyproject.toml overrides are already merged into self.parser above, so
         # spec_mode already reflects a pyproject value when one was set.
         spec_mode = self.get_value("nuitka", "mode")
-        self._mode_explicit = bool(mode or spec_mode)
+        # A spec_mode read from a freshly created spec is just the built-in default
+        # copied from default.spec, not a choice the user made. Only a mode coming
+        # from the CLI, pyproject.toml, or an existing (previously written) spec
+        # counts as explicit.
+        self._mode_explicit = bool(
+            mode
+            or ("nuitka", "mode") in _pyproject_overrides
+            or (existing_config_file and spec_mode))
         resolved = mode or spec_mode or DEFAULT_NUITKA_MODE
         try:
             self._mode = self.NuitkaMode(resolved)
@@ -502,6 +509,10 @@ class DesktopConfig(Config):
     def mode(self, mode: NuitkaMode):
         self._mode = mode
         self.set_value("nuitka", "mode", mode.value)
+
+    @property
+    def mode_explicitly_set(self) -> bool:
+        return self._mode_explicit
 
     def _find_dependent_qt_modules(self, modules: list[str]) -> list[str]:
         """

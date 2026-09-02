@@ -263,6 +263,10 @@ Here are all the command line options of ``pyside6-deploy``:
   `pysidedeploy`_ for details. Defaults to whatever is set in ``pysidedeploy.spec``, or
   ``standalone`` if nothing is set.
 
+* **--no-warn**: Do not print advisory messages about changed defaults, such as the notice shown
+  when relying on the default packaging mode. Errors and warnings about the deployment itself are
+  still shown.
+
 What pyside6-deploy runs
 ========================
 
