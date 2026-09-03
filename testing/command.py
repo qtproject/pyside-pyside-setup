@@ -177,11 +177,18 @@ def main():
     parser_test.add_argument(
         "--environ", nargs="+", help="use name=value ... to set environment variables"
     )
-    parser_test.add_argument(
+    build_group_test = parser_test.add_mutually_exclusive_group()
+    build_group_test.add_argument(
         "--buildno",
         default=-1,
         type=int,
         help="use build number n (0-based), latest = -1 (default)",
+    )
+    build_group_test.add_argument(
+        "--build",
+        type=str,
+        help="use the newest build whose configuration or path contains this, "
+             "for example 'py3.12' (default: the newest build of all)",
     )
     parser_test.add_argument("--reruns", "-r", default=COIN_TESTING, type=int,
                              help=f"Number of re-runs (defaults to {COIN_TESTING})")
@@ -197,15 +204,28 @@ def main():
     parser_getcwd.add_argument(
         "filename", type=str, help="write the build dir name into a file"
     )
-    parser_getcwd.add_argument(
+    build_group_getcwd = parser_getcwd.add_mutually_exclusive_group()
+    build_group_getcwd.add_argument(
         "--buildno",
         default=-1,
         type=int,
         help="use build number n (0-based), latest = -1 (default)",
     )
+    build_group_getcwd.add_argument(
+        "--build",
+        type=str,
+        help="use the newest build whose configuration or path contains this, "
+             "for example 'py3.12' (default: the newest build of all)",
+    )
     args = parser.parse_args()
 
-    if hasattr(args, "buildno"):
+    if getattr(args, "build", None):
+        try:
+            builds.set_build(args.build)
+        except ValueError as error:
+            print(f"{error}. Try '{__file__} list'")
+            sys.exit(1)
+    elif hasattr(args, "buildno"):
         try:
             builds.set_buildno(args.buildno)
         except IndexError:

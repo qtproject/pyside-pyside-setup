@@ -158,7 +158,9 @@ class PythonExecutable:
             # No explicit version: if Nuitka is already installed, use that. Otherwise, the one
             # from pysidedeploy.spec
             packages = [
-                p.split("==")[0] if p.strip().lower().startswith("nuitka") else p
+                p.split("==")[0]
+                if p.strip().lower().startswith("nuitka") and self.is_installed("Nuitka")
+                else p
                 for p in packages
             ]
         if not self.init:

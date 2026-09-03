@@ -268,6 +268,8 @@ if __name__ == "__main__":
         if coin:
             target_path = str(Path(qt_install_path) / "target")
             qt_host_install_path = qt_install_path
+            # Qt CI release automation is expecting to find the wheels from dist directory
+            android_dist_dir = pyside_setup_dir / "dist"
         else:
             target_path = str(Path(qt_install_path) / f"android_{platform_data.qt_plat_name}")
             qt_host_install_path = str(Path(qt_install_path) / host_qt_install_suffix)

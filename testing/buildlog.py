@@ -99,6 +99,23 @@ class BuildLog:
         self.history[buildno]  # test
         self._buildno = buildno
 
+    def set_build(self, pattern):
+        """Select the newest build that pattern matches.
+
+        The default is the newest build of all, which is the intended one
+        only as long as nothing else has been built since. Anything that
+        builds more than one configuration - a matrix run, or a change that
+        has to be tested with and without free threading - therefore has to
+        say which build it means. The pattern is matched against the
+        classifier string recorded in build_dir.txt, for example
+        "py3.12-qt6.9.0-64bit-debug", and against the build directory.
+        """
+        for buildno, entry in reversed(list(enumerate(self.history))):
+            if pattern in entry.build_classifiers or pattern in entry.build_dir:
+                self._buildno = buildno
+                return
+        raise ValueError(f"No build matching '{pattern}' in the build history")
+
     @property
     def selected(self):
         if self._buildno is None:

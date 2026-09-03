@@ -65,13 +65,6 @@ def cmd_build(args: argparse.Namespace) -> None:
     subprocess.run(cmd, cwd=PYSIDE_SETUP_ROOT, env=env, check=True)
 
 
-def cmd_generate(args: argparse.Namespace) -> None:
-    """ Generate subcommand """
-    # TODO: Xcode project generation
-    logging.error("The 'generate' command (Xcode project generation) isn't implemented yet.")
-    sys.exit(1)
-
-
 def main():
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
@@ -89,7 +82,7 @@ def main():
     )
     build_p.add_argument(
         "--qt-install-path", required=True, type=Path,
-        help="Qt installation root, e.g. ~/Qt/6.11.0",
+        help="Qt installation root, e.g. ~/Qt/6.12.0",
     )
     build_p.add_argument(
         "--arch", choices=["arm64", "x86_64"], default="arm64",
@@ -104,22 +97,10 @@ def main():
         help=COIN_RUN_HELP,
     )
 
-    # --- generate ---
-    gen_p = subparsers.add_parser(
-        "generate",
-        help="Generate an Xcode project from a pyside6-ios.toml config",
-    )
-    gen_p.add_argument(
-        "-c", "--config", required=True, type=Path,
-        help="Path to the app config file (pyside6-ios.toml)",
-    )
-
     args = parser.parse_args()
 
     if args.command == "build":
         cmd_build(args)
-    elif args.command == "generate":
-        cmd_generate(args)
     else:
         parser.print_help()
         sys.exit(1)
