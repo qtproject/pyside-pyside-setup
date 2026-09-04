@@ -66,7 +66,7 @@ def get_qtci_virtualenv(python_ver, log, host, host_arch, target_arch):
     _exe = "python"
     _env = os.environ.get("PYSIDE_VIRTUALENV") or f"env{python_ver}"
     env_python = f"{_env}/bin/python"
-    env_pip = f"{_env}/bin/pip"
+    env_pip = f"{_env}/bin/pip3"
 
     if host == "Windows":
         log.info("New virtualenv to build {target_arch} in {host_arch} host")
@@ -134,7 +134,7 @@ def get_python_version(ci):
     if ci.HOST_OS_VER in ["macos_13", "macos_14"]:
         python_ver = "3.11"
     if ci.TARGET_OS == "Linux" and ci.HOST_ARCH != "aarch64":
-        python_ver = "3.11"
+        python_ver = "3.12"
     elif ci.TARGET_OS == "Windows":
         python_ver = "3.10.0"
     return python_ver
@@ -174,11 +174,6 @@ def setup_virtualenv(python, exe, env, pip, log, ci):
         log.info(f"{type(e).__name__}: {e}")
         v_env = "virtualenv"
     run_instruction([str(v_env), "-p", str(exe), str(env)], "Failed to create virtualenv")
-    # Pip is always upgraded when CI template is provisioned,
-    # upgrading it in later phase may cause perm issue
-    run_instruction(
-        [str(pip), "install", "-r", "requirements.txt"], "Failed to install dependencies"
-    )
 
 
 def call_setup(python_ver, ci, phase, log, buildnro=0):
@@ -201,6 +196,13 @@ def call_setup(python_ver, ci, phase, log, buildnro=0):
 
     if phase == "BUILD":
         setup_virtualenv(python, exe, env, pip, log, ci)
+        # rhel 9.6 creates somewhat broken pip installation, ensure it's upgraded
+        run_instruction([str(env_python), "-m", "ensurepip", "--upgrade"], "Failed to fix pip")
+        run_instruction(
+            [str(env_python), "-m", "pip", "install", "-r", "requirements.txt"],
+            "Failed to install dependencies"
+        )
+
     elif phase == "TEST":
 
         if ci.HOST_OS == "MacOS" and ci.HOST_ARCH == "ARM64":
@@ -211,8 +213,12 @@ def call_setup(python_ver, ci, phase, log, buildnro=0):
             )
         else:
             setup_virtualenv(python, exe, env, pip, log, ci)
-            # Install distro to replace missing platform.linux_distribution() in python3.8
-            run_instruction([pip, "install", "distro"], "Failed to install distro")
+            # rhel 9.6 creates somewhat broken pip installation, ensure it's upgraded
+            run_instruction([str(env_python), "-m", "ensurepip", "--upgrade"], "Failed to fix pip")
+            run_instruction(
+                [str(env_python), "-m", "pip", "install", "-r", "requirements.txt"],
+                "Failed to install dependencies"
+            )
 
     if phase == "BUILD":
         cmd = [

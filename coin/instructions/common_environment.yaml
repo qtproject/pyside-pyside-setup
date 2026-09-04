@@ -438,7 +438,7 @@ instructions:
         Failed to refresh subscription.
 
     - type: ExecuteCommand
-      command: "sudo yum -y install python3.11-devel python3.11-pip"
+      command: "sudo yum -y install python3.12-devel python3.12-pip"
       maxTimeInSeconds: 14400
       maxTimeBetweenOutput: 1200
       enable_if:
@@ -446,11 +446,11 @@ instructions:
           property: host.osVersion
           in_values: [RHEL_9_4, RHEL_9_6]
       userMessageOnFailure: >
-          Failed to install python 3.11
+          Failed to install python 3.12
 
     - type: EnvironmentVariable
       variableName: interpreter
-      variableValue: "python3.11"
+      variableValue: "python3.12"
       enable_if:
           condition: property
           property: host.osVersion
