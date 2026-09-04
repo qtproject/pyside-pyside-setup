@@ -192,9 +192,16 @@ def prepare_standalone_package_macos(pyside_build, _vars, is_android=False, is_i
                     _vars=_vars)
 
     if copy_qml:
+        # Some QML plugins (eg. Qt.labs.assetdownloader) ship a static archive
+        # alongside their dylib as a CMake build artifact. Nuitka mishandles .a
+        # files it encounters while walking dependencies, so keep them out of
+        # the wheel just like the Qt/lib and Qt/plugins copies already do.
+        qml_ignore = ["*.la", "*.pc"] if is_ios else ["*.la", "*.a", "*.cmake", "*.pc", "*.prl"]
+
         # <qt>/qml/* -> <setup>/{st_package_name}/Qt/qml
         copydir("{qt_qml_dir}", destination_qt_dir / "qml",
                 _filter=None,
+                ignore=qml_ignore,
                 recursive=True,
                 force=False,
                 dir_filter_function=general_dir_filter,
