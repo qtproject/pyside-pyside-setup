@@ -52,7 +52,11 @@ from .runner import TestRunner
 COIN_RERUN_FAILED_ONLY = True
 COIN_THRESHOLD = 3  # report error if >=
 COIN_TESTING = 5  # number of runs
-TIMEOUT = 20 * 60
+# Per-project time limit. Overridable because a run under a sanitizer is
+# roughly ten times slower and silently loses the second half of the suite
+# otherwise: the runner kills ctest, prints "aborted, partial result" and
+# still exits 0.
+TIMEOUT = int(os.environ.get("PYSIDE_TEST_TIMEOUT", 20 * 60))
 
 if os.environ.get("COIN_RERUN_FAILED_ONLY", "1").lower() in "0 f false n no".split():
     COIN_RERUN_FAILED_ONLY = False
