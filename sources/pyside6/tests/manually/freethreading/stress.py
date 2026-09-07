@@ -280,6 +280,180 @@ def scenario_shared_setter() -> None:
     _spin(hammer)
 
 
+# --- scenarios for what applications actually do -----------------------
+# The eight above race the bookkeeping directly. These five come from the
+# shapes real code uses - a worker thread emitting into the GUI thread, an
+# object handed to another thread, converters and properties under load -
+# and they were added because ThreadSanitizer found nothing in phase 1 and
+# the question was whether the scenarios simply never went there.
+
+
+def scenario_queued_signal() -> None:
+    """A worker thread emits into an object living in another thread.
+
+    The connection is queued, so libpyside has to copy the arguments out of
+    the emitting thread and deliver them in the receiving one - it packs
+    Python objects into a QVariant-ish carrier, hands them across, and
+    unpacks them again. Every step of that touches the wrapper map from two
+    threads at once, and none of it is the generated code the call guard
+    covers.
+
+    The receiving side runs a real event loop; without one the queued
+    delivery never happens and the scenario measures nothing.
+    """
+    from PySide6.QtCore import (QCoreApplication, QObject, Qt, QTimer,
+                                Signal, Slot)
+
+    app = QCoreApplication.instance() or QCoreApplication([])
+
+    class Receiver(QObject):
+        @Slot(object)
+        def take(self, payload) -> None:
+            # Touch the payload so the wrapper is really resolved here.
+            if isinstance(payload, QObject):
+                payload.objectName()
+
+    class Emitter(QObject):
+        fired = Signal(object)
+
+    receiver = Receiver()
+    emitters = []
+
+    def work(idx: int) -> None:
+        emitter = Emitter()
+        emitters.append(emitter)
+        emitter.fired.connect(receiver.take, Qt.QueuedConnection)
+        for _ in range(ITERS // 8):
+            emitter.fired.emit(QObject())
+        emitter.fired.disconnect(receiver.take)
+
+    # The event loop has to drain what the threads queue up, or the payloads
+    # pile up and are destroyed at exit instead of while the race is on.
+    QTimer.singleShot(0, lambda: None)
+    spinner = threading.Thread(target=_spin, args=(work,))
+    spinner.start()
+    while spinner.is_alive():
+        app.processEvents()
+    spinner.join()
+    app.processEvents()
+
+
+def scenario_move_to_thread() -> None:
+    """Objects change thread affinity while other threads use them.
+
+    moveToThread() rewrites Qt's own bookkeeping for the object and its
+    children, and the binding has to keep its parent/child graph and its
+    ownership flags consistent with that - from a thread that is not the
+    one the object is moving to. This is the shape a worker-object design
+    produces on every start and stop.
+    """
+    from PySide6.QtCore import QObject, QThread
+
+    POOL = 32
+    threads = [QThread() for _ in range(4)]
+    for t in threads:
+        t.start()
+    pool = [QObject() for _ in range(POOL)]
+    for obj in pool:
+        QObject(obj)          # a child, so the move has to carry something
+
+    def work(idx: int) -> None:
+        for i in range(ITERS // 8):
+            slot = (i * 11 + idx) % POOL
+            obj = pool[slot]
+            try:
+                obj.moveToThread(threads[i % len(threads)])
+                obj.objectName()
+            except RuntimeError:
+                pass          # moved out from under us, which is the point
+
+    _spin(work)
+    for t in threads:
+        t.quit()
+        t.wait()
+
+
+def scenario_container_convert() -> None:
+    """Converting containers back and forth from many threads.
+
+    Every list that crosses the boundary walks the converter machinery,
+    which looks types up and creates wrappers for the elements. That is the
+    same map the state lock protects, reached from a path with no lease of
+    its own.
+    """
+    from PySide6.QtCore import QObject, QPointF, QSize
+
+    def work(idx: int) -> None:
+        for i in range(ITERS // 4):
+            # A list of value types out, and back in again.
+            points = [QPointF(float(n), float(idx)) for n in range(8)]
+            sizes = [QSize(n, idx) for n in range(8)]
+            obj = QObject()
+            obj.setProperty("points", points)
+            obj.setProperty("sizes", sizes)
+            back = obj.property("points")
+            if back is not None and len(back) != 8:
+                raise AssertionError(f"container came back as {back!r}")
+
+    _spin(work)
+
+
+def scenario_dynamic_property() -> None:
+    """Dynamic properties on one shared object, from every thread.
+
+    setProperty on a name Qt does not know adds it to the object's dynamic
+    property table, and the binding converts the value and keeps a reference
+    to the Python object behind it. Two threads adding different names to the
+    same object at the same time is a plain application pattern, and it goes
+    through the referred-object map rather than through a generated setter.
+    """
+    from PySide6.QtCore import QObject
+
+    shared = QObject()
+
+    def work(idx: int) -> None:
+        for i in range(ITERS // 2):
+            name = f"p{idx}_{i % 16}"
+            shared.setProperty(name, QObject())
+            shared.property(name)
+            shared.setProperty(name, None)     # drops the reference again
+
+    _spin(work)
+
+
+def scenario_virtual_override() -> None:
+    """Many threads enter a Python override of a virtual method at once.
+
+    The generated code caches the resolved method name and the override
+    itself in static slots (overrideMethodName / Sbk_GetPyOverride,
+    basewrapper.cpp). ThreadSanitizer reports both as written without
+    synchronisation; this is the scenario that goes there on purpose, with
+    fresh types so the caches start empty and every thread races to fill
+    them.
+    """
+    from PySide6.QtCore import QObject
+
+    made = []
+
+    def work(idx: int) -> None:
+        for i in range(ITERS // 20):
+            # A fresh subclass per round: its caches have never been filled,
+            # so the first call from each thread races the others.
+            cls = type(f"Ov{idx}_{i}", (QObject,), {
+                "eventFilter": lambda self, obj, ev: False,
+                "childEvent": lambda self, ev: None,
+            })
+            obj = cls()
+            made.append(obj)
+            watched = QObject()
+            watched.installEventFilter(obj)
+            QObject(obj)            # childEvent, the other override
+            if len(made) > 2000:
+                del made[:1000]
+
+    _spin(work)
+
+
 SCENARIOS = {
     "shared_setter": scenario_shared_setter,
     "destroy_race": scenario_destroy_race,
@@ -289,6 +463,11 @@ SCENARIOS = {
     "child_delete_vs_call": scenario_child_delete_vs_call,
     "lookup_vs_last_decref": scenario_lookup_vs_last_decref,
     "signal_race": scenario_signal_race,
+    "queued_signal": scenario_queued_signal,
+    "move_to_thread": scenario_move_to_thread,
+    "container_convert": scenario_container_convert,
+    "dynamic_property": scenario_dynamic_property,
+    "virtual_override": scenario_virtual_override,
 }
 
 

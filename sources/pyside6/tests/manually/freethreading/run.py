@@ -152,6 +152,29 @@ SCENARIOS = {
     # Every thread inside one C++ object at once - what the GIL used to
     # prevent by accident and the per-object call guard now does on purpose.
     "shared_setter": Scenario(WORKER, "shared_setter", Lock.CALL_GUARD, True),
+    # The five below come from what applications do rather than from a code
+    # path we wanted to prove. Two of them earned a proof mark on 04.09.,
+    # measured with ft-apps/killswitch.sh - each lock switched off on its
+    # own, five rounds per column:
+    #
+    #                      all on  no lazy  no state  no guard  all off
+    #   move_to_thread       0/5      0/5      5/5       0/5      5/5
+    #   container_convert    0/5      5/5      0/5       0/5      5/5
+    #
+    # container_convert was entered under Lock.STATE by assumption; the
+    # measurement says the lazy type lock is what carries it.
+    "queued_signal": Scenario(WORKER, "queued_signal", Lock.STATE, False),
+    # An object handed to another thread while the first one still uses it.
+    "move_to_thread": Scenario(WORKER, "move_to_thread", Lock.STATE, True),
+    # Converting a container incarnates the element type on first use.
+    "container_convert": Scenario(WORKER, "container_convert",
+                                  Lock.LAZY_TYPE, True),
+    # No proof mark, and it never will be one: this crashes with the GIL as
+    # well and on a released wheel. It is an ordinary PySide bug that the
+    # scenario happens to hit - ft-apps/property_qobject_crash.py has it in
+    # three lines. Kept so the crash stays visible until it is fixed.
+    "dynamic_property": Scenario(WORKER, "dynamic_property", Lock.STATE, False),
+    "virtual_override": Scenario(WORKER, "virtual_override", Lock.STATE, False),
 }
 ALL_SCENARIOS = list(SCENARIOS)
 
