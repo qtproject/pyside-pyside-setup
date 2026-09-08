@@ -153,6 +153,31 @@ this you will need use the new style class:
 All classes used for multiple inheritance with other PySide types need to have
 'object' as base class.
 
+.. _free-threaded-python:
+
+Free-threaded Python
+====================
+
+On a free-threaded build (PEP 703), several threads can enter the bindings
+at once, and the per-object bookkeeping libshiboken keeps - ownership and
+validity, the parent/child graph, the referred-object map, the wrapper
+lifecycle - is no longer protected by the GIL. libshiboken replaces that
+protection with a short-lived lock over that bookkeeping, a per-object call
+guard, and a lease that defers destruction until a call has finished. Which
+locks exist, in what order they may be taken, and what none of them may span
+is written down once, together with the PySide side of the same contract:
+
+.. ifconfig:: output_format == 'html'
+
+   `Free-Threaded Python (PEP 703) <../developer/freethreading.html>`__
+
+.. ifconfig:: output_format == 'qthelp'
+
+   `Free-Threaded Python (PEP 703) <../pyside6/developer/freethreading.html>`__
+
+The sources it describes are ``sbkstatelock.h``, ``sbkheldlocks.h`` and
+``sbkftoptions.h``.
+
 **************************
 Frequently Asked Questions
 **************************

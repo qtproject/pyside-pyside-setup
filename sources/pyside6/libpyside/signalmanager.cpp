@@ -3,6 +3,8 @@
 // Qt-Security score:significant reason:default
 
 #include "signalmanager.h"
+
+#include <sbkheldlocks.h>
 #include "signalmanager_p.h"
 #include "pyobjectwrapper.h"
 #include "pysideqobject.h"
@@ -654,14 +656,20 @@ public:
 
     MetaObjectBuilderLock()
     {
+        Shiboken::checkLockRank(Shiboken::RawLock::MetaObject);
         // Uncontended, and re-entry from the owning thread, take no detour.
         if (!metaObjectBuilderMutex().try_lock()) {
             Py_BEGIN_ALLOW_THREADS
             metaObjectBuilderMutex().lock();
             Py_END_ALLOW_THREADS
         }
+        Shiboken::noteLockAcquired(Shiboken::RawLock::MetaObject);
     }
-    ~MetaObjectBuilderLock() { metaObjectBuilderMutex().unlock(); }
+    ~MetaObjectBuilderLock()
+    {
+        Shiboken::noteLockReleased(Shiboken::RawLock::MetaObject);
+        metaObjectBuilderMutex().unlock();
+    }
 };
 
 #endif // Py_GIL_DISABLED

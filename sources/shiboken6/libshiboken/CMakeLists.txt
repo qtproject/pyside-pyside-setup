@@ -80,6 +80,7 @@ sbkenum.cpp sbkenum.h sbkenum_p.h
 sbkerrors.cpp sbkerrors.h
 sbkfeature_base.cpp sbkfeature_base.h
 sbkftoptions.cpp sbkftoptions.h
+sbkheldlocks.cpp sbkheldlocks.h
 sbkmodule.cpp sbkmodule.h sbkmodule_p.h
 sbknumpy.cpp sbknumpycheck.h
 sbknumpyview.h
@@ -206,6 +207,7 @@ install(FILES
         sbkerrors.h
         sbkfeature_base.h
         sbkftoptions.h
+        sbkheldlocks.h
         sbkmodule.h
         sbkmodule_p.h
         sbknumpycheck.h
@@ -241,6 +243,16 @@ install(TARGETS libshiboken EXPORT Shiboken6Targets
                             ARCHIVE DESTINATION "${LIB_INSTALL_DIR}"
                             RUNTIME DESTINATION bin
                             INCLUDES DESTINATION "include/shiboken6")
+# The written half of the state-lock contract: no CPython API in, or
+# reachable from, a transaction. The runtime assertions cover what a run
+# takes; this covers what is written, including the paths no test reaches.
+# It reads sources only, so it needs nothing built.
+add_custom_target(check_state_lock_scope
+    COMMAND ${Python_EXECUTABLE}
+            "${CMAKE_CURRENT_SOURCE_DIR}/check_state_lock_scope.py"
+    COMMENT "Checking the state-lock transaction scope"
+    VERBATIM)
+
 install(EXPORT Shiboken6Targets NAMESPACE Shiboken6::
         DESTINATION ${LIB_INSTALL_DIR}/cmake/Shiboken6)
 

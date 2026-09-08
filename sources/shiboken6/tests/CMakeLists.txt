@@ -7,6 +7,13 @@ if(BUILD_TESTS)
     find_package(Qt${QT_MAJOR_VERSION}Test 6.0 REQUIRED)
 endif()
 
+# The written half of the state-lock contract, checked on the sources. It
+# lives next to libshiboken but is registered here: that directory is added
+# before enable_testing(), so an add_test() there would never reach ctest.
+add_test(NAME state_lock_scope
+         COMMAND ${Python_EXECUTABLE}
+                 "${CMAKE_CURRENT_SOURCE_DIR}/../libshiboken/check_state_lock_scope.py")
+
 add_subdirectory(libminimal)
 if(NOT DEFINED MINIMAL_TESTS)
     add_subdirectory(libsample)

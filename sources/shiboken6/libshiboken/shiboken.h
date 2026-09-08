@@ -18,6 +18,7 @@
 #include "sbkconverter.h"
 #include "sbkenum.h"
 #include "sbkerrors.h"
+#include "sbkheldlocks.h"
 #include "sbkmodule.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"

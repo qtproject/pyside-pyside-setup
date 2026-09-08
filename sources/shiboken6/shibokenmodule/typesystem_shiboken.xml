@@ -53,6 +53,35 @@
         <inject-code file="shibokenmodule.cpp" snippet="getallvalidwrappers"/>
     </add-function>
 
+    <!-- Which binding raw locks this thread holds. Empty in a release build.
+         A test uses it from a callback to prove that no lock is held while
+         Python runs. -->
+    <add-function signature="heldRawLocks()" return-type="const char *">
+        <inject-code file="shibokenmodule.cpp" snippet="heldrawlocks"/>
+    </add-function>
+
+    <!-- How many call leases are open on an object. A generated entry point
+         takes one before it touches cppSelf and returns it on every exit, so
+         a test can assert that no path leaks one. Always 0 with a GIL. -->
+    <add-function signature="activeCalls(PyObject*@object@)" return-type="size_t">
+        <inject-code file="shibokenmodule.cpp" snippet="activecalls"/>
+    </add-function>
+
+    <!-- How often a raw lock was held where the contract says none may be,
+         at a place that is a known exception rather than a defect. Today
+         that is the lazy-type lock, which spans type creation. -->
+    <add-function signature="contractExceptions()" return-type="const char *">
+        <inject-code file="shibokenmodule.cpp" snippet="contractexceptions"/>
+    </add-function>
+
+    <!-- Which pairs of binding raw locks this run ever held at once, as
+         "outer -> inner" lines. The rank is asserted at every acquisition;
+         this is what says which nestings actually occur. Empty in a release
+         build and in a run that never nested two of them. -->
+    <add-function signature="lockNestings()" return-type="const char *">
+        <inject-code file="shibokenmodule.cpp" snippet="locknestings"/>
+    </add-function>
+
     <add-function signature="dumpTypeGraph(const char *@fileName@)" return-type="bool">
         <inject-code file="shibokenmodule.cpp" snippet="dumptypegraph"/>
     </add-function>

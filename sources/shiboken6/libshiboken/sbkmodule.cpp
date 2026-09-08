@@ -3,6 +3,7 @@
 // Qt-Security score:significant reason:default
 
 #include "sbkmodule.h"
+#include "sbkheldlocks.h"
 #include "autodecref.h"
 #include "basewrapper.h"
 #include "bindingmanager.h"
@@ -125,17 +126,22 @@ public:
 
     LazyInitLock() : m_active(lazyInitLockEnabled())
     {
+        Shiboken::checkLockRank(Shiboken::RawLock::LazyType);
         // Uncontended, and re-entry from the owning thread, take no detour.
         if (m_active && !lazyInitMutex().try_lock()) {
             Py_BEGIN_ALLOW_THREADS
             lazyInitMutex().lock();
             Py_END_ALLOW_THREADS
         }
+        // Noted even when the mutex is off, the way the state lock notes its
+        // own: the tracked region must not depend on the A/B setting.
+        Shiboken::noteLockAcquired(Shiboken::RawLock::LazyType);
         ++depth();
     }
     ~LazyInitLock()
     {
         --depth();
+        Shiboken::noteLockReleased(Shiboken::RawLock::LazyType);
         if (m_active)
             lazyInitMutex().unlock();
     }

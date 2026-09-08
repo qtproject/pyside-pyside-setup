@@ -554,6 +554,13 @@ LIBSHIBOKEN_API void removeReference(SbkObject *self, const char *key, PyObject 
 
 LIBSHIBOKEN_API SbkConverter *getConverter(PyTypeObject *type);
 
+/// How many call leases are open on \a pyObj right now. A generated entry
+/// point takes one before it touches cppSelf and gives it back on every
+/// exit, so a test can assert that no path leaks one: exceptions, a failed
+/// conversion, an allow-thread detach. Always zero in a build with a GIL,
+/// which has no leases.
+LIBSHIBOKEN_API size_t activeCalls(SbkObject *pyObj);
+
 } // namespace Object
 
 } // namespace Shiboken

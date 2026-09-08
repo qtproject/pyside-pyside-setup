@@ -7,6 +7,7 @@
 #ifdef Py_GIL_DISABLED
 
 #include "sbkstatelock.h"
+#include "sbkheldlocks.h"
 #include "threadstatesaver.h"
 #include "sbkftoptions.h"
 
@@ -29,23 +30,10 @@ static bool stateLockEnabled()
     return FreeThreading::optionEnabled(FreeThreading::StateLock);
 }
 
-#ifndef NDEBUG
-static bool &stateLockHeld()
-{
-    static thread_local bool held = false;
-    return held;
-}
-
 bool stateLockHeldByCurrentThread()
 {
-    return stateLockHeld();
+    return holdsLock(RawLock::State);
 }
-#else
-bool stateLockHeldByCurrentThread()
-{
-    return false;
-}
-#endif
 
 void stateLockAcquire()
 {
@@ -53,19 +41,16 @@ void stateLockAcquire()
     // boundary is unclear, and unclear boundaries are how call-outs end up
     // beneath the lock.
     assert(!stateLockHeldByCurrentThread());
+    checkLockRank(RawLock::State);
     if (stateLockEnabled())
         stateMutex().lock();
-#ifndef NDEBUG
-    stateLockHeld() = true;
-#endif
+    noteLockAcquired(RawLock::State);
 }
 
 void stateLockRelease()
 {
     assert(stateLockHeldByCurrentThread());
-#ifndef NDEBUG
-    stateLockHeld() = false;
-#endif
+    noteLockReleased(RawLock::State);
     if (stateLockEnabled())
         stateMutex().unlock();
 }
@@ -93,7 +78,10 @@ void DeferredActions::addDestructor(ObjectDestructor destructor, void *cppInstan
 
 void DeferredActions::run()
 {
-    SBK_ASSERT_STATE_UNLOCKED();
+    // Not just the state lock: an action runs decrefs and native destructors,
+    // so it reaches Python, Qt and user code. Holding any binding raw lock
+    // here is what deadlocks against stop-the-world and re-entrant calls.
+    SBK_ASSERT_NO_RAW_LOCK();
     // Index-based: an action can run arbitrary code, but it cannot reach this
     // list, which is a local of the transaction that created it.
     for (size_t i = 0, size = m_actions.size(); i < size; ++i) {

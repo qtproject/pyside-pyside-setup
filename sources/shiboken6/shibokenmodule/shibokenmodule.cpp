@@ -116,6 +116,28 @@ for (auto *o : setAll) {
 return listAll;
 // @snippet getallvalidwrappers
 
+// @snippet heldrawlocks
+const char *held = Shiboken::heldLockNames();
+%PYARG_0 = %CONVERTTOPYTHON[const char *](held);
+// @snippet heldrawlocks
+
+// @snippet contractexceptions
+const char *taken = Shiboken::contractExceptions();
+%PYARG_0 = %CONVERTTOPYTHON[const char *](taken);
+// @snippet contractexceptions
+
+// @snippet locknestings
+const char *nestings = Shiboken::lockNestings();
+%PYARG_0 = %CONVERTTOPYTHON[const char *](nestings);
+// @snippet locknestings
+
+// @snippet activecalls
+size_t count = 0;
+if (Shiboken::Object::checkType(%1))
+    count = Shiboken::Object::activeCalls(reinterpret_cast<SbkObject *>(%1));
+%PYARG_0 = %CONVERTTOPYTHON[size_t](count);
+// @snippet activecalls
+
 // @snippet dumptypegraph
 const bool ok = Shiboken::BindingManager::instance().dumpTypeGraph(%1);
 %PYARG_0 = %CONVERTTOPYTHON[bool](ok);

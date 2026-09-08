@@ -3,6 +3,8 @@
 // Qt-Security score:significant reason:default
 
 #include "dynamicslot_p.h"
+
+#include <sbkheldlocks.h>
 #include "pysidestaticstrings.h"
 #include "pysideutils.h"
 #include "pysideweakref.h"
@@ -313,40 +315,70 @@ static std::mutex &connectionHashMutex()
     return mutex;
 }
 
-using ConnectionHashLock = std::lock_guard<std::mutex>;
+using ConnectionHashLock =
+    Shiboken::TrackedGuard<std::mutex, Shiboken::RawLock::ConnectionHash>;
 #endif // Py_GIL_DISABLED
 
-static ConnectionKey connectionKey(const QObject *sender, int senderIndex,
-                                   PyObject *callback)
+/// The hash key, and whatever had to be created to compute it.
+///
+/// Computing it runs Python: slotType() asks the callback for three
+/// attributes, and a callback that is itself a QObject answers through the
+/// meta-object machinery, which takes a lock and a call lease of its own.
+/// None of that may happen under the hash mutex - a mutex held across
+/// Python deadlocks against stop-the-world, and the lease it takes can
+/// start a deferred destructor while the mutex is held. So the key is built
+/// first and the mutex only sees a finished one.
+///
+/// The two references the compiled-method case creates are kept here rather
+/// than dropped where they were read: they are what the key's addresses
+/// point at, and letting them die before the entry goes in would leave a
+/// key made of addresses that anything may reuse. They outlive the
+/// transaction. Outliving the *stored entry* is a different question - it
+/// needs a slot owner that knows about Python lifetimes, and that belongs
+/// with the signal and slot work; holding these references in the hash
+/// instead would keep receivers alive for as long as the connection and
+/// trade a stale address for a leak.
+class PreparedConnectionKey
 {
-    PyObject *object{};
-    void *method{};
+public:
+    PreparedConnectionKey(const QObject *sender, int senderIndex,
+                          PyObject *callback)
+    {
+        PyObject *object{};
+        void *method{};
 
-    switch (DynamicSlot::slotType(callback)) {
-    case DynamicSlot::SlotType::Method:
-        // PYSIDE-1422: Avoid hash on self which might be unhashable.
-        object = PyMethod_GET_SELF(callback);
-        method = PyMethod_GET_FUNCTION(callback);
-        break;
-    case DynamicSlot::SlotType::CompiledMethod: {
-        // PYSIDE-1589: Fix for slots in compiled functions
-        Shiboken::AutoDecRef self(PyObject_GetAttr(callback, PySide::PySideName::im_self()));
-        Shiboken::AutoDecRef func(PyObject_GetAttr(callback, PySide::PySideName::im_func()));
-        object = self.object();
-        method = func.object();
-        break;
-    }
-    case DynamicSlot::SlotType::Callable:
-        method = callback;
-        break;
-    case DynamicSlot::SlotType::C_Function:
-        object = PyCFunction_GetSelf(callback);
-        method = reinterpret_cast<void *>(PyCFunction_GetFunction(callback));
-        break;
+        switch (DynamicSlot::slotType(callback)) {
+        case DynamicSlot::SlotType::Method:
+            // PYSIDE-1422: Avoid hash on self which might be unhashable.
+            object = PyMethod_GET_SELF(callback);
+            method = PyMethod_GET_FUNCTION(callback);
+            break;
+        case DynamicSlot::SlotType::CompiledMethod:
+            // PYSIDE-1589: Fix for slots in compiled functions
+            m_self.reset(PyObject_GetAttr(callback, PySide::PySideName::im_self()));
+            m_func.reset(PyObject_GetAttr(callback, PySide::PySideName::im_func()));
+            object = m_self.object();
+            method = m_func.object();
+            break;
+        case DynamicSlot::SlotType::Callable:
+            method = callback;
+            break;
+        case DynamicSlot::SlotType::C_Function:
+            object = PyCFunction_GetSelf(callback);
+            method = reinterpret_cast<void *>(PyCFunction_GetFunction(callback));
+            break;
+        }
+
+        m_key = {sender, senderIndex, object, method};
     }
 
-    return {sender, senderIndex, object, method};
-}
+    const ConnectionKey &key() const { return m_key; }
+
+private:
+    Shiboken::AutoDecRef m_self;
+    Shiboken::AutoDecRef m_func;
+    ConnectionKey m_key;
+};
 
 // Listens to QObject::destroyed of senders and removes them from the hash.
 class SenderSignalDeletionTracker : public QObject
@@ -449,11 +481,12 @@ static void clearConnectionHash()
 void registerSlotConnection(QObject *source, int signalIndex, PyObject *callback,
                             const QMetaObject::Connection &connection)
 {
+    const PreparedConnectionKey prepared(source, signalIndex, callback);
     {
 #ifdef Py_GIL_DISABLED
         ConnectionHashLock hashLock(connectionHashMutex());
 #endif
-        connectionHash.insert(connectionKey(source, signalIndex, callback), connection);
+        connectionHash.insert(prepared.key(), connection);
     }
 
     if (senderSignalDeletionTracker.isNull()) {
@@ -476,13 +509,14 @@ void registerSlotConnection(QObject *source, int signalIndex, PyObject *callback
 
 bool disconnectSlot(QObject *source, int signalIndex, PyObject *callback)
 {
+    const PreparedConnectionKey prepared(source, signalIndex, callback);
     QMetaObject::Connection connId;
     bool ok = false;
     {
 #ifdef Py_GIL_DISABLED
         ConnectionHashLock hashLock(connectionHashMutex());
 #endif
-        auto it = connectionHash.find(connectionKey(source, signalIndex, callback));
+        auto it = connectionHash.find(prepared.key());
         ok = it != connectionHash.end();
         if (ok) {
             connId = it.value(); // QTBUG-144929, take copy

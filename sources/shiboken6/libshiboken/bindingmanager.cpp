@@ -3,6 +3,7 @@
 // Qt-Security score:significant reason:default
 
 #include "bindingmanager.h"
+#include "sbkheldlocks.h"
 
 #include "autodecref.h"
 #include "basewrapper.h"
@@ -225,6 +226,14 @@ bool Graph::dumpTypeGraph(const char *fileName) const
     return true;
 }
 
+// Tracked guards: the held-lock set the contract asserts against is complete
+// only if every acquisition notes itself, so the plain lock_guard is not
+// used here.
+using WrapperMapGuard =
+    Shiboken::TrackedGuard<std::recursive_mutex, Shiboken::RawLock::WrapperMap>;
+using MainThreadDeleteGuard =
+    Shiboken::TrackedGuard<std::mutex, Shiboken::RawLock::MainThreadDelete>;
+
 struct BindingManager::BindingManagerPrivate {
     using DestructorEntries = std::vector<DestructorEntry>;
 
@@ -284,7 +293,12 @@ WrapperMap::const_iterator
 #else
         auto *foundType = Py_TYPE(reinterpret_cast<PyObject *>(it->second));
 #endif
-        if (foundType == desiredType || PyType_IsSubtype(foundType, desiredType) != 0)
+        if (foundType == desiredType)
+            return it;
+        // Same exception as in acquireWrapper(): Python-owned type state read
+        // under the map lock, counted where it is taken.
+        Shiboken::noteContractException(Shiboken::RawLock::WrapperMap);
+        if (PyType_IsSubtype(foundType, desiredType) != 0)
             return it;
     }
     return end;
@@ -307,7 +321,7 @@ bool BindingManager::BindingManagerPrivate::releaseWrapper(void *cptr, SbkObject
                                                            const int *bases)
 {
     assert(cptr);
-    std::lock_guard<std::recursive_mutex> guard(wrapperMapLock);
+    WrapperMapGuard guard(wrapperMapLock);
     const bool result = releaseWrapperHelper(cptr, wrapper);
     if (bases != nullptr) {
         auto *base = static_cast<uint8_t *>(cptr);
@@ -333,7 +347,7 @@ void BindingManager::BindingManagerPrivate::assignWrapper(SbkObject *wrapper, co
                                                           const int *bases)
 {
     assert(cptr);
-    std::lock_guard<std::recursive_mutex> guard(wrapperMapLock);
+    WrapperMapGuard guard(wrapperMapLock);
     assignWrapperHelper(wrapper, cptr);
     if (bases != nullptr) {
         const auto *base = static_cast<const uint8_t *>(cptr);
@@ -372,7 +386,7 @@ BindingManager::~BindingManager()
             AcquiredWrapper wrapper;
             const void *key = nullptr;
             {
-                std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+                WrapperMapGuard guard(m_d->wrapperMapLock);
                 if (m_d->wrapperMapper.empty())
                     break;
                 const auto it = m_d->wrapperMapper.begin();
@@ -388,7 +402,11 @@ BindingManager::~BindingManager()
             Object::destroy(wrapper.object(), const_cast<void *>(key));
         }
 #else // Py_GIL_DISABLED
-        std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+        // Destroying under the lock, as this branch always did: with a GIL
+        // nothing else reaches the map, and this runs at interpreter
+        // shutdown. The branch above may not do it, and that difference is
+        // what the contract buys.
+        WrapperMapGuard guard(m_d->wrapperMapLock);
         while (!m_d->wrapperMapper.empty()) {
             Object::destroy(m_d->wrapperMapper.begin()->second, const_cast<void *>(m_d->wrapperMapper.begin()->first));
         }
@@ -405,13 +423,13 @@ BindingManager &BindingManager::instance() {
 
 bool BindingManager::hasWrapper(const void *cptr) const
 {
-    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+    WrapperMapGuard guard(m_d->wrapperMapLock);
     return m_d->wrapperMapper.find(cptr) != m_d->wrapperMapper.end();
 }
 
 bool BindingManager::hasWrapper(const void *cptr, PyTypeObject *typeObject) const
 {
-    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+    WrapperMapGuard guard(m_d->wrapperMapLock);
     return m_d->findByType(cptr, typeObject) != m_d->wrapperMapper.cend();
 }
 
@@ -480,9 +498,10 @@ void BindingManager::runDeletionInMainThread()
 {
     BindingManagerPrivate::DestructorEntries pending;
     {
-        std::lock_guard<std::mutex> guard(m_d->deleteInMainThreadLock);
+        MainThreadDeleteGuard guard(m_d->deleteInMainThreadLock);
         pending.swap(m_d->deleteInMainThread);
     }
+    SBK_ASSERT_NO_RAW_LOCK();
     // With the list taken over, not iterated in place: a destructor can
     // deallocate further wrappers and queue them here.
     for (const DestructorEntry &e : pending)
@@ -491,12 +510,13 @@ void BindingManager::runDeletionInMainThread()
 
 void BindingManager::addToDeletionInMainThread(const DestructorEntry &e)
 {
-    std::lock_guard<std::mutex> guard(m_d->deleteInMainThreadLock);
+    MainThreadDeleteGuard guard(m_d->deleteInMainThreadLock);
     m_d->deleteInMainThread.push_back(e);
 }
 #else // Py_GIL_DISABLED
 void BindingManager::runDeletionInMainThread()
 {
+    SBK_ASSERT_NO_RAW_LOCK();
     for (const DestructorEntry &e : m_d->deleteInMainThread)
         e.destructor(e.cppInstance);
     m_d->deleteInMainThread.clear();
@@ -512,7 +532,7 @@ void BindingManager::addToDeletionInMainThread(const DestructorEntry &e)
 AcquiredWrapper BindingManager::acquireWrapper(const void *cptr) const
 {
     SBK_ASSERT_ATTACHED();
-    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+    WrapperMapGuard guard(m_d->wrapperMapLock);
     // The map is a multimap for co-located objects, so a key can carry more
     // than one entry. Stopping at the first one that fails to acquire would
     // report "no wrapper" while a live sibling sits right behind it - and the
@@ -529,7 +549,7 @@ AcquiredWrapper BindingManager::acquireWrapper(const void *cptr) const
 AcquiredWrapper BindingManager::acquireWrapper(const void *cptr, PyTypeObject *typeObject) const
 {
     SBK_ASSERT_ATTACHED();
-    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+    WrapperMapGuard guard(m_d->wrapperMapLock);
     // Same as above: keep looking past an entry that cannot be acquired.
     // Reading the type through the borrowed pointer is sound here: taking an
     // entry out of the map is the first thing deallocation does, and it needs
@@ -538,7 +558,16 @@ AcquiredWrapper BindingManager::acquireWrapper(const void *cptr, PyTypeObject *t
     for (auto it = range.first; it != range.second; ++it) {
         auto *found = reinterpret_cast<PyObject *>(it->second.borrowed());
         auto *foundType = Py_TYPE(found);
-        if (foundType != typeObject && PyType_IsSubtype(foundType, typeObject) == 0)
+        if (foundType == typeObject) {
+            if (auto *wrapper = it->second.acquire())
+                return AcquiredWrapper::fromOwned(wrapper);
+            continue;
+        }
+        // Reading Python-owned type state under the lock: the contract's
+        // second exception, counted like the first one and where it is
+        // really taken, not once per call.
+        Shiboken::noteContractException(Shiboken::RawLock::WrapperMap);
+        if (PyType_IsSubtype(foundType, typeObject) == 0)
             continue;
         if (auto *wrapper = it->second.acquire())
             return AcquiredWrapper::fromOwned(wrapper);
@@ -558,7 +587,7 @@ AcquiredWrapper BindingManager::registerWrapperUnlessPresent(SbkObject *pyObj, v
     // The lookup and the insertion have to be one hold of the lock. It is
     // recursive, so the two steps below may take it again; what matters is
     // that nothing between them can slip in and register the same pointer.
-    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+    WrapperMapGuard guard(m_d->wrapperMapLock);
 
     if (auto winner = acquireWrapper(cptr, typeObject))
         return winner;
@@ -573,7 +602,7 @@ AcquiredWrapper BindingManager::registerWrapperUnlessPresent(SbkObject *pyObj, v
 #else // Py_GIL_DISABLED
 SbkObject *BindingManager::retrieveWrapper(const void *cptr) const
 {
-    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+    WrapperMapGuard guard(m_d->wrapperMapLock);
     auto iter = m_d->wrapperMapper.find(cptr);
     if (iter == m_d->wrapperMapper.end())
         return nullptr;
@@ -582,7 +611,7 @@ SbkObject *BindingManager::retrieveWrapper(const void *cptr) const
 
 SbkObject *BindingManager::retrieveWrapper(const void *cptr, PyTypeObject *typeObject) const
 {
-    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+    WrapperMapGuard guard(m_d->wrapperMapLock);
     const auto it = m_d->findByType(cptr, typeObject);
     return it != m_d->wrapperMapper.cend() ? it->second : nullptr;
 }
@@ -592,6 +621,9 @@ PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *pyMethodName
 {
     auto *obWrapper = reinterpret_cast<PyObject *>(wrapper);
 
+    // Two PyObject_GetAttr() calls below, plus an mro walk: attribute access
+    // runs descriptors and can re-enter the bindings.
+    SBK_ASSERT_NO_RAW_LOCK();
     Shiboken::AutoDecRef method(PyObject_GetAttr(obWrapper, pyMethodName));
     if (method.isNull())
         return nullptr;
@@ -673,7 +705,7 @@ std::vector<AcquiredWrapper> BindingManager::getAllPyObjects()
     // so the same wrapper can be met more than once. The set the build with a
     // GIL returns does that for free.
     std::set<const SbkObject *> seen;
-    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+    WrapperMapGuard guard(m_d->wrapperMapLock);
     for (const auto &entry : m_d->wrapperMapper) {
         // Taking a reference under the lock is allowed - it runs no Python.
         auto ref = AcquiredWrapper::fromOwned(entry.second.acquire());
@@ -687,7 +719,7 @@ std::vector<AcquiredWrapper> BindingManager::getAllPyObjects()
 std::set<PyObject *> BindingManager::getAllPyObjects()
 {
     std::set<PyObject *> pyObjects;
-    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+    WrapperMapGuard guard(m_d->wrapperMapLock);
     const WrapperMap &wrappersMap = m_d->wrapperMapper;
     auto it = wrappersMap.begin();
     for (; it != wrappersMap.end(); ++it)
@@ -705,6 +737,7 @@ void BindingManager::visitAllPyObjects(ObjectVisitor visitor, void *data)
     // not run underneath it - and the references taken here are what keeps
     // the collected wrappers alive until their turn comes.
     std::vector<AcquiredWrapper> wrappers = getAllPyObjects();
+    SBK_ASSERT_NO_RAW_LOCK();
     for (const auto &wrapper : wrappers)
         visitor(wrapper.object(), data);
 #else
@@ -713,14 +746,15 @@ void BindingManager::visitAllPyObjects(ObjectVisitor visitor, void *data)
     // runs Python and C++ destructors, which take it again and mutate the map.
     WrapperMap copy;
     {
-        std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+        WrapperMapGuard guard(m_d->wrapperMapLock);
         copy = m_d->wrapperMapper;
     }
     for (const auto &p : copy) {
         auto *o = p.second;
         bool present = false;
+        SBK_ASSERT_NO_RAW_LOCK();
         {
-            std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+            WrapperMapGuard guard(m_d->wrapperMapLock);
             present = m_d->findSbkObject(p.first, o) != m_d->wrapperMapper.cend();
         }
         if (present)
@@ -736,7 +770,7 @@ bool BindingManager::dumpTypeGraph(const char *fileName) const
 
 void BindingManager::dumpWrapperMap()
 {
-    std::lock_guard<std::recursive_mutex> guard(m_d->wrapperMapLock);
+    WrapperMapGuard guard(m_d->wrapperMapLock);
     const auto &wrapperMap = m_d->wrapperMapper;
     std::cerr <<  "-------------------------------\n"
         << "WrapperMap size: " << wrapperMap.size() << " Types: "

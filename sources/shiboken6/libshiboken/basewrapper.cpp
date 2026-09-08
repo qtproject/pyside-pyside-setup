@@ -21,6 +21,10 @@
 #include "signature_p.h"
 #include "threadstatesaver.h"
 #include "voidptr.h"
+// Not under Py_GIL_DISABLED: the wrapper map, the connection hash and the
+// meta-object builder have their locks in either build, and the type helpers
+// below state the state lock's leaf property in code the two builds share.
+#include "sbkheldlocks.h"
 #ifdef Py_GIL_DISABLED
 #  include "sbkftoptions.h"
 #  include "sbkstatelock.h"
@@ -65,6 +69,11 @@ namespace Shiboken
 template <class Predicate>
 bool walkThroughBases(PyTypeObject *currentType, Predicate predicate)
 {
+    // Reads tp_bases and calls PyType_IsSubtype(). The state lock is a leaf,
+    // and every lease and lifecycle transaction rests on that; a path that
+    // reaches here from inside one aborts rather than waiting for the next
+    // review to find it.
+    SBK_ASSERT_LOCK_NOT_HELD(State);
     PyObject *bases = currentType->tp_bases;
     const Py_ssize_t numBases = PyTuple_Size(bases);
     bool result = false;
@@ -109,6 +118,23 @@ std::vector<PyTypeObject *> getCppBaseClasses(PyTypeObject *baseType)
 }
 
 using DestructorEntries = std::vector<DestructorEntry>;
+
+// The destructor functions of one type, in the order the cptr array uses.
+// Type-invariant: only the instance pointers differ, so this can be gathered
+// before a state-lock transaction and zipped with cptr inside it. That is
+// what keeps walkThroughBases() - which reads tp_bases and calls
+// PyType_IsSubtype() - off the locked path.
+using DestructorFunctions = std::vector<ObjectDestructor>;
+
+static DestructorFunctions getDestructorFunctions(PyTypeObject *type)
+{
+    DestructorFunctions result;
+    walkThroughBases(type, [&result](PyTypeObject *node) {
+        result.push_back(PepType_SOTP(node)->cpp_dtor);
+        return false;
+    });
+    return result;
+}
 
 DestructorEntries getDestructorEntries(SbkObject *o)
 {
@@ -398,6 +424,7 @@ static int mainThreadDeletionHandler(void *)
 static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
 {
     SBK_ASSERT_STATE_UNLOCKED();
+    SBK_ASSERT_NO_RAW_LOCK();
     auto *sbkObj = reinterpret_cast<SbkObject *>(pyObj);
     PyTypeObject *pyType = Py_TYPE(pyObj);
 
@@ -441,23 +468,30 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
     auto *sotp = PepType_SOTP(pyType);
     Shiboken::DestructorEntries entries;
     void *cptr = nullptr;
+    // Gathered before the lock: the walk reads tp_bases and calls
+    // PyType_IsSubtype(), and the state lock stays a leaf.
+    const auto dtors = sotp->is_multicpp ? Shiboken::getDestructorFunctions(pyType)
+                                         : Shiboken::DestructorFunctions{};
     {
         // Read-only: at refcount zero nobody else is here, but the lock owns
-        // these fields. getDestructorEntries() below is the same exemption
-        // extractDestructionLocked() takes - it reads tp_bases and the type
-        // extension, runs no user code and allocates nothing through Python.
+        // these fields. Only the instance pointers are read here; the
+        // destructors come from the list gathered above.
         Shiboken::StateLockGuard guard;
         auto *priv = sbkObj->d;
         // destroy() and callCppDestructors() detach cptr under this lock, so a
         // wrapper that went through them arrives with none.
         canDelete &= priv->hasOwnership && priv->validCppObject && priv->cptr != nullptr;
         if (canDelete) {
-            if (sotp->is_multicpp)
-                entries = Shiboken::getDestructorEntries(sbkObj);
-            else
+            if (sotp->is_multicpp) {
+                entries.reserve(dtors.size());
+                for (size_t i = 0; i < dtors.size(); ++i)
+                    entries.push_back(Shiboken::DestructorEntry{dtors[i], priv->cptr[i]});
+            } else {
                 cptr = priv->cptr[0];
+            }
         }
     }
+
 
     if (canDelete && sotp->delete_in_main_thread
         && Shiboken::currentThreadId() != Shiboken::mainThreadId()) {
@@ -1277,6 +1311,7 @@ namespace ObjectType
 
 bool checkType(PyTypeObject *type)
 {
+    SBK_ASSERT_LOCK_NOT_HELD(State);
     return PyType_IsSubtype(type, SbkObject_TypeF()) != 0;
 }
 
@@ -2322,16 +2357,20 @@ void clearReferences(SbkObject *self)
 // destructor, no other lock. Anything of that kind goes into the
 // DeferredActions list and runs after the unlock.
 
-static void **extractDestructionLocked(SbkObject *self, DeferredActions &deferred)
+static void **extractDestructionLocked(SbkObject *self, DeferredActions &deferred,
+                                       const DestructorFunctions &dtors)
 {
     SBK_ASSERT_STATE_LOCKED();
     auto *priv = self->d;
     auto *sotp = PepType_SOTP(Shiboken::pyType(self));
-    // getDestructorEntries() only reads tp_bases and the type extension; no
-    // user code runs and nothing is allocated through Python.
+    // The destructors were gathered before the lock; only the instance
+    // pointers are read here. The type cannot have changed under a wrapper,
+    // so the check is that the gathered list still fits what is being
+    // destroyed.
     if (sotp->is_multicpp) {
-        for (const auto &e : getDestructorEntries(self))
-            deferred.addDestructor(e.destructor, e.cppInstance);
+        assert(!dtors.empty());
+        for (size_t i = 0; i < dtors.size(); ++i)
+            deferred.addDestructor(dtors[i], priv->cptr[i]);
     } else {
         deferred.addDestructor(sotp->cpp_dtor, priv->cptr[0]);
     }
@@ -2352,6 +2391,7 @@ static void finishDestruction(SbkObject *pyObj, DeferredActions &deferred,
                               void **cptrs)
 {
     SBK_ASSERT_STATE_UNLOCKED();
+    SBK_ASSERT_NO_RAW_LOCK();
     // releaseWrapper() looks the C++ pointers up in the wrapper map, so it
     // gets the snapshot: the object no longer carries them. This runs for
     // every object, not just for those with a C++ wrapper: for the others
@@ -2442,10 +2482,14 @@ static std::vector<SbkObject *> takeReadyRootsLocked()
 void callCppDestructors(SbkObject *pyObj)
 {
     SBK_ASSERT_STATE_UNLOCKED();
+    SBK_ASSERT_NO_RAW_LOCK();
     DeferredActions deferred;
     void **cptrs = nullptr;
     bool destroyQApp = false;
     bool leftToLease = false;
+    // Gathered here, outside the lock: it walks tp_bases and calls
+    // PyType_IsSubtype(), which reads Python-owned type state.
+    const auto dtors = getDestructorFunctions(Shiboken::pyType(pyObj));
 
     {
         StateLockGuard guard;
@@ -2465,7 +2509,7 @@ void callCppDestructors(SbkObject *pyObj)
             pendingRoots().push_back(pyObj);
             leftToLease = true;
         } else {
-            cptrs = extractDestructionLocked(pyObj, deferred);
+            cptrs = extractDestructionLocked(pyObj, deferred, dtors);
         }
     }
 
@@ -2491,6 +2535,8 @@ void callCppDestructors(SbkObject *pyObj)
 void destroy(SbkObject *self, void *cppData)
 {
     SBK_ASSERT_STATE_UNLOCKED();
+    SBK_ASSERT_NO_RAW_LOCK();
+    // External destruction arriving while a call may be in flight.
     // Skip if this is called with NULL pointer this can happen in derived classes
     if (!self)
         return;
@@ -2559,6 +2605,7 @@ void destroy(SbkObject *self, void *cppData)
 void deallocData(SbkObject *self, bool cleanup)
 {
     SBK_ASSERT_STATE_UNLOCKED();
+    SBK_ASSERT_NO_RAW_LOCK();
     // Make cleanup if this is not a wrapper otherwise this will be done on
     // wrapper destructor. All three take the state lock themselves.
     if (cleanup) {
@@ -2609,8 +2656,15 @@ static LeaseFailure acquireCallLeaseLocked(SbkObject *self, void **cppObject)
 {
     SBK_ASSERT_STATE_LOCKED();
     auto *priv = self->d;
-    if (!priv->cppObjectCreated && isUserType(reinterpret_cast<PyObject *>(self)))
+    // Read the flag, do not walk the type. isUserType() would call
+    // checkType() and so PyType_IsSubtype(), which reads Python-owned type
+    // state under our lock; the state lock has to stay a leaf. CallLease has
+    // already established that the metatype is SbkObjectType_TypeF(), so the
+    // subtype walk is redundant here anyway.
+    if (!priv->cppObjectCreated
+        && PepType_SOTP(Py_TYPE(reinterpret_cast<PyObject *>(self)))->is_user_type) {
         return LeaseFailure::NotInitialized;
+    }
     if (!priv->validCppObject || priv->pendingDestruction || priv->cptr == nullptr)
         return LeaseFailure::Deleted;
     ++priv->activeCalls;
@@ -2621,6 +2675,9 @@ static LeaseFailure acquireCallLeaseLocked(SbkObject *self, void **cppObject)
 static void releaseCallLease(SbkObject *self)
 {
     SBK_ASSERT_STATE_UNLOCKED();
+    SBK_ASSERT_NO_RAW_LOCK();
+    // The window a lease exists for: another thread may reach the same
+    // wrapper between the native call and the lease coming back.
     std::vector<SbkObject *> ready;
 
     {
@@ -2643,13 +2700,14 @@ static void releaseCallLease(SbkObject *self)
     for (SbkObject *root : ready) {
         DeferredActions deferred;
         void **cptrs = nullptr;
+        const auto dtors = getDestructorFunctions(Shiboken::pyType(root));
         {
             StateLockGuard guard;
             // The same test the immediate path makes: collectInvalidateLocked()
             // can have cleared validCppObject without detaching the pointers,
             // and destroying those again would be a double free.
             if (root->d->validCppObject && root->d->cptr != nullptr)
-                cptrs = extractDestructionLocked(root, deferred);
+                cptrs = extractDestructionLocked(root, deferred, dtors);
         }
         if (cptrs != nullptr)
             finishDestruction(root, deferred, cptrs);
@@ -2861,6 +2919,8 @@ static void runInvalidationPlan(const InvalidationPlan &plan)
 static void invalidateRoots(std::vector<SbkObject *> roots)
 {
     SBK_ASSERT_STATE_UNLOCKED();
+    // The pins are dropped at the end, and the last one can run a destructor.
+    SBK_ASSERT_NO_RAW_LOCK();
     std::set<SbkObject *> seen;
     // Held until the whole walk is over, not per round: the objects a round
     // reaches through plan.referred become the next round's roots, so dropping
@@ -2902,42 +2962,142 @@ void invalidate(SbkObject *self)
     invalidateRoots({self});
 }
 
-// Counterpart of collectInvalidateLocked(): it walks the same containers -
-// parentInfo->children and referredObjects - so it moves to the state lock
-// together with invalidate(). It qualifies as a transaction: it only sets
-// flags and calls checkType() (PyType_IsSubtype), no decref, no Python
-// protocol, no second lock.
-static void makeValidLocked(SbkObject *self)
+// A referred object waiting to be classified. Deciding whether it is a
+// wrapper means PyType_IsSubtype(), which the state lock may not span, so
+// the decision happens between two rounds - and the entry it came from can
+// change while it does. Owner and key are what the next transaction checks
+// it against; the object itself is pinned, so the pointer stays readable.
+struct ReferredCandidate
+{
+    SbkObject *owner;
+    std::string key;
+    PyObject *object;
+};
+
+// Whether the entry this candidate came from is still there and still points
+// at the same object. What it rejects is a reference dropped between two
+// rounds - clearReferencesLocked() and removeRefCountKeyLocked() erase under
+// the lock - so the walk does not follow a link that no longer exists.
+//
+// What it does not do is ask whether the object itself is still alive:
+// invalidation and destruction leave the owner's entry in place, and marking
+// a destroyed wrapper valid again is what makeValid() has always done, with
+// a GIL as without one. That belongs to the destruction work, not here.
+static bool referredEntryStillValid(const ReferredCandidate &candidate)
 {
     SBK_ASSERT_STATE_LOCKED();
-    // Skip if this object not is a valid object
-    if (!self || reinterpret_cast<PyObject *>(self) == Py_None || self->d->validCppObject)
+    const RefCountMap *map = candidate.owner->d->referredObjects;
+    if (map == nullptr)
+        return false;
+    const auto range = map->equal_range(candidate.key);
+    for (auto it = range.first; it != range.second; ++it) {
+        if (it->second == candidate.object)
+            return true;
+    }
+    return false;
+}
+
+// Counterpart of collectInvalidateLocked(): it walks the same containers -
+// parentInfo->children and referredObjects - in the same rounds, and for the
+// same reason. It qualifies as a transaction: it sets a flag, walks two
+// plain containers and pins what the next round has to look at. No decref,
+// no Python protocol, no second lock.
+//
+// `seen` and not validCppObject alone: the GIL twin can use the flag as its
+// visited marker because nothing else runs, but here another thread clears
+// it between two rounds, and the walk would find work again every time it
+// did. `seen` only grows, so the round loop ends whatever the other thread
+// does. This is what invalidateRoots() carries for the same reason.
+static void collectMakeValidLocked(SbkObject *self, std::set<SbkObject *> &seen,
+                                   std::vector<ReferredCandidate> &referred,
+                                   std::vector<PyObject *> &pins)
+{
+    SBK_ASSERT_STATE_LOCKED();
+    // Skip if this object not is a valid object or if it's already been seen
+    if (!self || reinterpret_cast<PyObject *>(self) == Py_None
+        || self->d->validCppObject || seen.find(self) != seen.end()) {
         return;
+    }
+    seen.insert(self);
 
     // Mark object as invalid only if this is not a wrapper class
     self->d->validCppObject = true;
+    // Every object visited here is an owner of the entries collected below,
+    // and referredEntryStillValid() reads its map in a later round.
+    pinForPlan(reinterpret_cast<PyObject *>(self), pins);
 
     // If it is a parent make  all children valid
     if (self->d->parentInfo) {
         for (SbkObject *child : self->d->parentInfo->children)
-            makeValidLocked(child);
+            collectMakeValidLocked(child, seen, referred, pins);
     }
 
     // If has ref to other objects make all valid again
     if (self->d->referredObjects) {
         const RefCountMap &refCountMap = *(self->d->referredObjects);
         for (const auto &p : refCountMap) {
-            if (Shiboken::Object::checkType(p.second))
-                makeValidLocked(reinterpret_cast<SbkObject *>(p.second));
+            referred.push_back({self, p.first, p.second});
+            pinForPlan(p.second, pins);
         }
     }
 }
 
+// Revive an object invalidation marked, and everything it reaches.
+//
+// No test in this tree drives the referred-object half of this walk, and none
+// can: getOwnership() is the only caller, the generator emits it for a return
+// value only (owner="target"; no typesystem in the tree puts it on an input
+// argument), and a return value is a fresh conversion from a C++ pointer. An
+// object can only be invalid if invalidate() marked it, which it does only
+// for a wrapper it unregisters in the same transaction - so the conversion
+// cannot find that wrapper again and hands out a new, valid one, which leaves
+// here at the first line. The walk below is therefore correct by construction
+// rather than by measurement, and it is written to match the pre-free-
+// threading semantics exactly for that reason.
 void makeValid(SbkObject *self)
 {
     SBK_ASSERT_STATE_UNLOCKED();
-    StateLockGuard guard;
-    makeValidLocked(self);
+    // The pins are dropped at the end, and the last one can run a destructor.
+    SBK_ASSERT_NO_RAW_LOCK();
+    // Walk the graph in rounds, the way invalidateRoots() does: a round
+    // marks under the lock and collects the referred objects it found, they
+    // are classified outside it, and the next round revalidates the entries
+    // they came from before it follows them.
+    std::vector<SbkObject *> roots{self};
+    std::set<SbkObject *> seen;
+    std::vector<ReferredCandidate> pending;
+    // Held to the end of the walk, for the reason invalidateRoots() gives.
+    std::vector<PyObject *> pins;
+    while (!roots.empty() || !pending.empty()) {
+        std::vector<ReferredCandidate> referred;
+        {
+            StateLockGuard guard;
+            for (const ReferredCandidate &candidate : pending) {
+                if (referredEntryStillValid(candidate)) {
+                    collectMakeValidLocked(reinterpret_cast<SbkObject *>(candidate.object),
+                                           seen, referred, pins);
+                }
+            }
+            for (SbkObject *o : roots)
+                collectMakeValidLocked(o, seen, referred, pins);
+        }
+
+        // Classified with no lock held: checkType() walks the type
+        // hierarchy, which the state lock may not span. It has to stay
+        // checkType() - a metatype identity test answers "not a wrapper"
+        // for class Meta(type(QObject), ABCMeta) and leaves the object
+        // invalidated for good.
+        roots.clear();
+        pending.clear();
+        for (const ReferredCandidate &candidate : referred) {
+            if (Object::checkType(candidate.object))
+                pending.push_back(candidate);
+        }
+    }
+    // No lock held: the last reference can be here, and dropping it runs a
+    // destructor that re-enters the binding layer.
+    for (PyObject *o : pins)
+        Py_DECREF(o);
 }
 
 static void removeParentLocked(SbkObject *child, bool giveOwnershipBack,
@@ -3206,6 +3366,17 @@ void clearReferences(SbkObject *self)
 }
 
 #endif // Py_GIL_DISABLED
+
+size_t activeCalls(SbkObject *pyObj)
+{
+#ifdef Py_GIL_DISABLED
+    StateLockGuard guard;
+    return pyObj->d->activeCalls;
+#else
+    SBK_UNUSED(pyObj);
+    return 0;
+#endif
+}
 
 SbkConverter *getConverter(PyTypeObject *type)
 {

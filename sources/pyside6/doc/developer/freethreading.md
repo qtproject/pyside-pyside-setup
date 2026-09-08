@@ -13,10 +13,27 @@ The lease covers the destructions the binding performs itself: a
 `delete` issued by C++ or by Qt: by the time the wrapper hears about that,
 the object is already gone. A build with a GIL has a smaller window there,
 not the same one - the destructor has to take the GIL and therefore cannot
-run between the lease and the pointer read the way it can here. This document
-describes
-both, the locks that are deliberately separate from them, and what it all
-means for application code.
+run between the lease and the pointer read the way it can here. This
+document describes both, the locks that are deliberately separate from them,
+and what it all means for application code.
+
+## Where the `Bn-m` and `FTn` names come from
+
+A few passages here, and a few comments in the sources, name a finding as
+`B9-1` or a work package as `FT8`. They come from an external free-threading
+review of this branch: `Bn-m` is finding *m* of its review step *n*, `FTn` is
+the work package those findings were grouped into, and an `FT8 invariant`,
+`design` or `validation row` is a numbered item inside that package's
+handoff. The names this change uses:
+
+| Name | What it is |
+|---|---|
+| B9-1 | Python type and MRO access under the state mutex |
+| B13-5 | the lazy-type lock spanning type creation and import work |
+| FT8 | restoring the short raw-lock contract - this series |
+
+Every statement stands without them. They are here so that a reader who has
+the review can find the passage a sentence came from.
 
 ## The state lock
 
@@ -110,6 +127,185 @@ forbids. Four places have a lock of their own:
 
 Qt's own connect, disconnect and emit are thread-safe and are left to Qt.
 
+### The complete inventory
+
+Every raw lock the binding owns, what it may do while held, and whether a
+receiver guard can be active at the same time. Qt's and the application's
+locks are not in here: they are not ours, and no order over them is claimed.
+
+| Lock | Rank | Type | Taken in | May be held across | Guard active? |
+|---|---|---|---|---|---|
+| State | 7 | `std::mutex`, non-recursive | `sbkstatelock.cpp` | binding state only: validity, ownership, the parent and referred graph, `activeCalls` | yes, a lease takes the guard after the transaction |
+| Wrapper map | 5 | `std::recursive_mutex` | `bindingmanager.cpp`, 16 sites in the file, 11 of them in a free-threaded build | map operations; visitors and destructors run outside. Still inside: `PyType_IsSubtype()` in the type-narrowing lookup, an identity question that waits on the immutable class hierarchy. `mi_init()` also runs there and is not an exception: it computes offsets from the C++ pointer and calls nothing | yes |
+| Main-thread deletion | 6 | `std::mutex` | `bindingmanager.cpp`, 2 sites | one vector push or swap | no |
+| Lazy type | 1 | `std::recursive_mutex`, waiter detaches | `sbkmodule.cpp` | type creation, which calls Python - the exception, owned by the lazy protocol | no |
+| `ModuleData` static | 2 | C++ function-local static guard | `sbkmodule.cpp` | Python during first initialization - to be replaced by native-only storage | no |
+| Connection hash | 4 | `std::mutex` | `dynamicslot.cpp`, 5 sites | container operations only: the key is built before the lock, and `QObject::disconnect()` runs after it | no |
+| Meta-object builder | 3 | `std::recursive_mutex`, waiter detaches | `signalmanager.cpp` | builder construction, which reaches Python - to be narrowed to a generation commit | yes |
+
+The `ModuleData` guard is the one row the tracking cannot see: a
+compiler-generated guard has no acquisition site to wrap, so it is ranked
+with the rest for the inventory's sake and `holdsLock()` always answers false
+for it. Every other row is noted where it is acquired.
+
+The rank is the order they may be taken in: a thread may only take a lock
+that ranks above every one it already holds, so any two of them are always
+taken the same way round and no pair of threads can hold them crosswise. The
+state lock ranks highest because it is the leaf - nothing may be acquired
+while it is held, which is what lets a transaction end without waiting for
+anything. The lazy-type lock ranks lowest because it is the one that
+legitimately spans other work.
+
+A rank is a claim, so it is checked and not merely written here:
+`checkLockRank()` asserts it before every acquisition, and `lockNestings()`
+reports which pairs a run actually produced. Measured over the whole pyside6
+suite - 484 processes that used the bindings - there are two:
+
+| Nesting | Processes |
+|---|---|
+| `lazy type -> wrapper map` | 483 |
+| `lazy type -> state` | 1 |
+
+Both have the lazy-type lock on the outside, which is why it ranks lowest.
+Note what such a measurement cannot see: a process that aborts never
+reports, so a nesting that occurs only on a path which trips an assertion is
+missing from the table and shows up in the assertion instead. That is how
+`connection hash -> meta-object` was found, and it is gone now - the key is
+built before the lock.
+
+Two places take something the contract otherwise forbids, and both are
+counted rather than asserted, so `Shiboken.contractExceptions()` reports how
+often each was taken and neither can grow unnoticed.
+
+The first is the lazy-type lock held where none may be: `Module::get()` holds
+it across `PyObject_GetAttr()`, so a refcount can reach zero underneath and a
+deferred C++ destructor can run inside it. That is the same finding as "the
+lazy lock spans Python", seen from the destruction end, and it belongs to the
+lazy protocol's replacement.
+
+The second is `PyType_IsSubtype()` under the wrapper-map lock, in the three
+lookups that narrow a pointer to a type - `acquireWrapper()` in the
+free-threaded build, `findByType()` in both. It reads Python-owned type
+state, which is the same class of thing as the locked paths this change
+took out of the state lock (B9-1), and it waits on the immutable class
+hierarchy for the same reason. Unlike the first it is not
+rare: a suite run takes it a few hundred thousand times, in almost every
+process, because it sits in the lookup every wrapper conversion makes.
+
+Debug builds track which of these the current thread holds
+(`sbkheldlocks.h`). `SBK_ASSERT_NO_RAW_LOCK()` states the other end of the
+contract at a place that runs Python, a decref, a destructor or an unbounded
+wait; `SBK_ASSERT_LOCK_NOT_HELD(State)` sits on the CPython type helpers, so
+a path that reaches `PyType_IsSubtype()` from a transaction aborts instead of
+being found again by the next review; `SBK_ASSERT_STATE_LOCKED()` says the
+other half in every `...Locked()` helper. In a release build the tracking
+compiles away completely, as the state lock's own flag always did.
+
+Every acquisition of a lock in the table above notes itself - through
+`TrackedGuard`, or by hand in the three places that cannot use it because
+they detach while waiting or switch the mutex off for an A/B run
+(`sbkstatelock.cpp`, `sbkmodule.cpp`, `signalmanager.cpp`). The one row that
+is not covered is the `ModuleData` guard above, which has no acquisition site
+to wrap.
+
+The written form of the same rule is checked without running anything:
+`sources/shiboken6/libshiboken/check_state_lock_scope.py` reads the direct
+body of every locked region - a `StateLockGuard` scope and every `...Locked()`
+function - and refuses any CPython call in it. Its allowlist is short and each
+entry carries its reason; a pinning increment is in it because an increment
+cannot run a destructor, block, or need a safe point, and `Py_DECREF` is
+deliberately not. It follows calls as well as reading the direct body, so a
+helper that calls a helper that reaches `PyObject_GetAttr()` is reported with
+the path that leads to it. What it cannot see is a call through a function
+pointer or a virtual - `cpp_dtor`, `mi_init` and the type-discovery hooks are
+exactly that - and anything outside the files it is given. `ctest -R
+state_lock_scope` runs it.
+
+### Function-local statics whose initializer calls Python
+
+A C++ function-local static has a compiler-generated guard, and a second
+thread blocks in it while the first initializes. Where that initialization
+calls Python, the guard is a raw lock across Python by another name. The
+audit found these classes:
+
+- **Interned strings**, the large majority. Counted rather than estimated,
+  with the commands that produce the number, because the previous figure in
+  this file was neither: `grep -rn "static .*createStaticString" sources/
+  --include=*.cpp --include=*.h` gives 46 lines, one of them commented out,
+  so 45 function-local statics; `grep -rn "STATIC_STRING_IMPL("` gives 74
+  uses on top of that, in `sbkstaticstrings.cpp` and
+  `pysidestaticstrings.cpp`. One more interns without the helper
+  (`pysideproperty.cpp`, `getDataFromKwArgs()`), so "all of them go through
+  `createStaticString()`" is not true. Each interns one string once.
+  Bounded, no user code, no callback; kept.
+- **Type objects**, `createVoidPtrType()`, `createSignalType()`,
+  `createMetaSignalType()`, `createSignalInstanceType()`. These build types
+  through Python while holding the guard. Each is reached from its module's
+  own init function - `VoidPtr::init()` and `Signal::init()` call the
+  accessors themselves - so the guard is taken and released during module
+  initialization, before another thread can call in.
+- **Converter and type lookups**, `getConverter()`,
+  `getPythonTypeObject("QQmlEngine*")` in `pysideqmlregistertype.cpp`. Table
+  lookups, no Python execution.
+- **`PyTuple_New(0)`** in `pysidesignal.cpp`, one allocation.
+
+None of them is reached with another binding lock held, which is what makes
+them acceptable rather than the absence of a callback today. A new
+Python-calling static needs the same check.
+
+### The guard's reach in generated code
+
+Checked against the generated wrappers rather than the templates, because
+that is where a missing lease would sit. Over all 1872 of them:
+
+| Entry kind | with `cppSelf` | without a lease |
+|---|---|---|
+| methods | 36673 | 0 |
+| rich comparison | 287 | 0 |
+| number, sequence and mapping slots | 539 | 0 |
+| property getters and setters | 574 | 0 |
+| entries with an `allow-thread` detach | 249 | 0 |
+
+The table counts generated entry points, and that is also its limit. It is
+not a statement about every way a C++ pointer is dereferenced: hand-written
+snippets are outside it, and so is the buffer protocol -
+`qbytearray-bufferprotocol` in `qtcore.cpp` reads `cppSelf` with no lease and
+hands out a pointer into the object's memory. That is older than any of this
+and belongs to the lease work; it is named here so the table is not read as a
+completeness argument it does not make.
+
+`CallLease{self}` takes the guard, arguments are constructed with
+`Guard::Omit`. That is deliberate: a contended inner guard would run the
+native call with the receiver's own guard suspended, so two nested guards are
+never a two-object transaction. Where the generator emits
+`Py_BEGIN_ALLOW_THREADS` or `ThreadStateSaver`, the lease is always
+constructed before the detach region and outlives it - the guard is suspended
+there, the lease is not.
+
+### What the lock contract does not promise
+
+No general freedom from deadlock. The contract covers the locks listed above:
+none of them is held across Python, Qt, a decref, a destructor or an
+unbounded wait, except where this document names the exception. It says
+nothing about locks the application or a third-party library holds while
+calling in, and nothing about Qt's own locks. A native lock taken in the
+opposite order to a binding lock can still deadlock - that was true with the
+GIL and stays true.
+
+Nor is the type hierarchy promised to hold still. CPython accepts
+`__bases__` assignment on wrapper types, and even across layouts - a QObject
+subclass can be given a QTimer subclass as its base while instances of it
+exist. What keeps destruction correct is the shape of the transaction rather
+than any refusal by CPython: the destructor list is taken once, before the
+state lock, and the locked part only zips it with `cptr`. An immutable
+per-type list published when the type is readied would make this an
+invariant instead of a property of the code as written; that belongs with
+the identity and hierarchy snapshots.
+
+`abi3t` is not supported, and behaviour after `fork()` is undefined for a
+process that has used the bindings; use `spawn`, or `fork` followed by
+`exec`.
+
 ## What this does not give you
 
 Qt itself does not become thread-safe. The call guard serializes two threads
@@ -201,3 +397,4 @@ Run it with the free-threaded interpreter; `REPEATS`, `STRESS_THREADS` and
 `STRESS_ITERS` size the run, and naming scenarios restricts it. Never run a
 single scenario alone to judge a lock: rare races show up only over the whole
 set, and a scenario on its own can stay clean hundreds of times.
+
