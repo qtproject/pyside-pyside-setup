@@ -26,6 +26,7 @@
 // below state the state lock's leaf property in code the two builds share.
 #include "sbkheldlocks.h"
 #ifdef Py_GIL_DISABLED
+#  include "sbkfailpoint.h"
 #  include "sbkftoptions.h"
 #  include "sbkstatelock.h"
 #endif
@@ -461,6 +462,7 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
 
     // Check that Python is still initialized as sometimes this is called by a static destructor
     // after Python interpeter is shutdown.
+    SBK_FAILPOINT("dealloc-before-weakrefs");
     if (sbkObj->weakreflist && Py_IsInitialized())
         PyObject_ClearWeakRefs(pyObj);
 
@@ -492,6 +494,7 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
         }
     }
 
+    SBK_FAILPOINT("dealloc-before-destroy");
 
     if (canDelete && sotp->delete_in_main_thread
         && Shiboken::currentThreadId() != Shiboken::mainThreadId()) {
@@ -2539,6 +2542,7 @@ void destroy(SbkObject *self, void *cppData)
     SBK_ASSERT_STATE_UNLOCKED();
     SBK_ASSERT_NO_RAW_LOCK();
     // External destruction arriving while a call may be in flight.
+    SBK_FAILPOINT("destroy-before-detach");
     // Skip if this is called with NULL pointer this can happen in derived classes
     if (!self)
         return;
@@ -2680,6 +2684,7 @@ static void releaseCallLease(SbkObject *self)
     SBK_ASSERT_NO_RAW_LOCK();
     // The window a lease exists for: another thread may reach the same
     // wrapper between the native call and the lease coming back.
+    SBK_FAILPOINT("lease-before-release");
     std::vector<SbkObject *> ready;
 
     {
@@ -2749,6 +2754,9 @@ CallLease::CallLease(PyObject *pyObj, Guard guardMode)
             m_guard.acquire(cppObject);
 
         m_valid = true;
+        // Lease and guard are in place, the native call has not run yet:
+        // the point where a test lets destruction reach the same wrapper.
+        SBK_FAILPOINT("lease-after-acquire");
         return;
     }
 

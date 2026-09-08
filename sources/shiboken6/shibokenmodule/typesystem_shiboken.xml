@@ -60,6 +60,30 @@
         <inject-code file="shibokenmodule.cpp" snippet="heldrawlocks"/>
     </add-function>
 
+    <!-- Failpoints: debug builds only, for tests that need two threads in a
+         particular order rather than by chance. Always present so a test can
+         ask; armFailpoint() answers false when the build has no failpoints. -->
+    <add-function signature="armFailpoint(const char *@name@, int @timeoutMs@ = 5000)"
+                  return-type="bool">
+        <inject-code file="shibokenmodule.cpp" snippet="armfailpoint"/>
+    </add-function>
+
+    <add-function signature="releaseFailpoint(const char *@name@)" return-type="bool">
+        <inject-code file="shibokenmodule.cpp" snippet="releasefailpoint"/>
+    </add-function>
+
+    <add-function signature="failpointReached(const char *@name@)" return-type="bool">
+        <inject-code file="shibokenmodule.cpp" snippet="failpointreached"/>
+    </add-function>
+
+    <add-function signature="clearFailpoints()">
+        <inject-code file="shibokenmodule.cpp" snippet="clearfailpoints"/>
+    </add-function>
+
+    <add-function signature="failpointNames()" return-type="const char *">
+        <inject-code file="shibokenmodule.cpp" snippet="failpointnames"/>
+    </add-function>
+
     <!-- How many call leases are open on an object. A generated entry point
          takes one before it touches cppSelf and returns it on every exit, so
          a test can assert that no path leaks one. Always 0 with a GIL. -->
@@ -98,6 +122,7 @@
         <include file-name="sbkversion.h" location="local"/>
         <include file-name="voidptr.h" location="local"/>
         <include file-name="sbkconverter_p.h" location="local"/>
+        <include file-name="sbkfailpoint.h" location="local"/>
     </extra-includes>
      <inject-code position="end" file="shibokenmodule.cpp" snippet="init"/>
 </typesystem>

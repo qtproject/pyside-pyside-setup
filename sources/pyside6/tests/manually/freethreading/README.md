@@ -1,0 +1,286 @@
+# Deterministic lifetime races
+
+The A/B harness in this directory reaches a race by repetition: it starts
+threads and hopes they collide, which takes tens of runs to hit a window of a
+few instructions once. `failpoints.py` arms a named point in libshiboken
+instead, so the two threads meet in the order the test wants, every time. That
+is what makes a test fail on an unfixed revision rather than one run in
+fourteen.
+
+A failpoint is compiled into debug builds only. Against a release build every
+test skips - `Shiboken.failpointNames()` comes back empty.
+
+Names like `B7-2` or `FT8 invariant 2` below are the review's; what they
+stand for is in `sources/pyside6/doc/developer/freethreading.md`.
+
+    BUILD_DIR=<build> python failpoints.py
+    BUILD_DIR=<build> python failpoints.py weakrefs
+
+`failpoint_matrix.py` is the other way in. It runs each test in its own
+subprocess on the three interpreters the validation plan names - traditional
+CPython, a free-threaded binary with `PYTHON_GIL=1`, and the same binary with
+`PYTHON_GIL=0` - which is what makes a passing test evidence rather than an
+observation.
+
+Exit codes, which the matrix reads: 0 clean, 1 a test failed, 2 the setup is
+wrong, 77 nothing to test because this build has no failpoints.
+
+`fpharness.py` holds the machinery; this file holds the reasoning.
+
+## What a test here has to earn
+
+A test that passes with and without the code it is named after proves
+nothing, and two of the tests in this directory were exactly that until a
+review found them. So each measure FT8 added can be switched off at runtime
+through `PYSIDE6_OPTION_FT` (`sbkftoptions.h`), and the tests named
+`proof-*` run their subject in a child process with one bit cleared and
+require it to fail there. If it still passes, the test is not testing what
+its name says and the `proof-*` cell is what says so.
+
+Three tests are expected to FAIL. They hold findings that belong to other
+work packages; the day one of them passes, that package is done and the line
+comes out of the registry.
+
+## The tests
+
+One section below has no test at all, and says why. That is deliberate: a
+finding whose code path nothing can reach is worth writing down and worth
+repairing, but inventing a test for it would only look like evidence.
+
+### weakrefs
+
+B7-2: the deallocator clears weakrefs while another thread holds references.
+One thread drops the last strong reference and parks inside deallocation,
+just before the weakrefs are cleared. A second thread then operates on every
+kind of reference to the dying object. Every callback must run at most once,
+and the referent must be dead when it does.
+
+The object is created in the worker, not in the test body: CPython's biased
+reference counting makes the creating thread the owner, and a `del` in
+another thread only decrements the shared count, so the deallocation would
+not run where the test waits for it.
+
+### lease-vs-destroy - expected FAIL
+
+The lease window: destruction arriving while a call holds a lease. A thread
+takes a lease and parks; another destroys the same object. The destruction
+has to be deferred until the lease comes back, and the call must not see a
+detached pointer.
+
+Open, and owned by FT4: the generated code re-reads `cppSelf` after the lease
+was granted. The lease does hold the C++ destructor off - ASan finds no
+use-after-free - but the call refuses.
+
+### no-lock-in-python
+
+FT8 invariant 2: no binding raw lock spans Python. A Python `__del__` is the
+shortest way to ask. It runs from the middle of a wrapper's destruction,
+which is exactly where the state lock and the wrapper-map lock are taken. If
+either were held across the callback the `__del__` would see it, and a real
+Python call under a lock deadlocks against stop-the-world.
+
+### no-lock-in-conversion
+
+The same invariant where an argument conversion calls back into Python. An
+earlier version of this test ran its probe from a plain dict lookup and
+proved nothing: that is ordinary Python, outside any call. The probe has to
+run *inside* a generated entry point, and `__index__` on an integer argument
+is the shortest way in - shiboken asks for it while converting, with the
+receiver guard taken and the lease held.
+
+That is what the second half of the measurement is for: `activeCalls()` on
+the receiver says the probe really is inside the call, so a "no lock held" is
+about the conversion path and not about some quiet moment elsewhere.
+
+### state-lock-leaf
+
+FT8 invariant 7: a state-lock holder needs nothing before it can let go. One
+thread parks in the middle of a call, holding its lease and its receiver
+guard. With it standing there, everything the state lock protects has to keep
+working in other threads: wrapper creation, the parent graph, destruction. If
+a transaction needed the parked thread's guard, or if a guard holder still
+held the state lock, this would not come back - which is why it runs in a
+subprocess with a timeout rather than trusting a join.
+
+### no-leaked-lease
+
+Invariants 9 and 10: every generated exit gives the lease back. The lease is
+what holds the C++ destructor off, so one that survives its call would pin
+the object for good and say nothing while doing it. Every shape of exit is
+asked afterwards: the ordinary return, an argument that fails to convert, an
+exception out of an override, a comparison, an attribute, and a method that
+detaches around the native call - the detach suspends the guard, and the
+lease has to outlive that.
+
+### guard-vs-python-lock, guard-vs-annotated-lock
+
+Two threads in opposite order: one holds a lock and then wants the receiver
+guard, the other holds the guard and then wants the lock. Whether both come
+back is the whole question. A wait that detaches suspends the receiver's
+critical section and lets the other thread through; a wait that does not is
+the deadlock a GIL build has for a method without `allow-thread`.
+
+Invariant 8 seen from the outside: nothing may assume the receiver guard is
+continuously held, and here it visibly is not. `QRecursiveMutex::lock()` is
+annotated in `typesystem_core_common.xml`, so the generated code detaches
+around it and the inversion resolves exactly as with a Python lock.
+
+### guard-spans-native-wait
+
+The documented boundary, measured instead of deadlocked. The two tests above
+pass because their waits detach. A native call that blocks with the thread
+attached does not, and neither does it reach a safe point where the runtime
+could suspend it - so the guard is held for the whole wait and every other
+thread reaching that receiver waits with it.
+
+That is the deadlock a GIL build has for a method without `allow-thread`,
+kept rather than removed, and this is where it shows. Written as a
+measurement and not as a deliberate deadlock: the boundary is just as visible
+in two seconds of waiting, and the test still ends. `ctypes.PyDLL` stands in
+for the unannotated blocking method - it is the one way to call something
+native from Python without letting go of the thread state.
+
+With the GIL the measurement cannot tell the guard apart from the GIL, so
+that row skips. The boundary holds there by construction; it is where it
+comes from.
+
+### qml-placement
+
+FT8 finding 4 (B15-4): the placement context has to nest. QML constructs a
+registered type into memory it allocated itself. The old code stored that
+address in one thread-local slot behind a process-wide `QMutex` held across
+`PyObject_CallObject()`: the mutex protected nothing another thread could
+read, deadlocked a same-thread nested creation outright, and one slot cannot
+hold two addresses.
+
+The registered type creates another QObject before its own construction
+finishes, which is what needs the addresses to nest. That inner object is of
+a different type, and the type test on the address is what turns it away.
+
+What the type test cannot turn away is a second object of the **same** type
+built there before the awaited one; that one still takes the address. Telling
+the two apart needs the address to travel with the object being constructed
+rather than with the thread, which belongs to the wrapper-identity work.
+
+Counterproof: `proof-qml-type` clears `QmlPlacementType` and the test
+segfaults, because QML then holds the inner object.
+
+### qml-placement-parallel
+
+Two threads inside QML construction at the same time. It fails on the
+revision before the fix by construction rather than by timing: the registered
+type does not finish its `__init__` until the other thread has reached the
+same point. With the `QMutex` still spanning `PyObject_CallObject()` the
+second thread cannot enter `createInto()` while the first is in Python, the
+first waits for the second, and the barrier times out.
+
+Counterproof: `proof-qml-scope` clears `QmlPlacementFree`, which puts that
+mutex back, and the test hangs until the runner kills it.
+
+### qml-placement-unwinds
+
+A guard, not a proof, and labelled as one: the placement context is popped by
+a destructor, so it was popped on the old revision too and this test passes
+there as well. What it holds is that the error path keeps working - the next
+construction on the same thread gets its own address and its own object
+rather than the one the failed construction left behind.
+
+The registered type raises *after* `super().__init__()`, deliberately.
+Raising before it leaves QML's memory unconstructed and QML then uses it;
+that segfault is the caller's mistake and says nothing about the placement
+context.
+
+### makeValid() and referred objects - no test
+
+The regress a review found in `makeValid()`. FT8 moved the walk under the
+state lock and replaced `Object::checkType()` with a metatype identity test,
+because the state lock has to stay a leaf and `PyType_IsSubtype()` reads
+Python-owned type state. The two are not the same question: a type whose
+metaclass merely derives from `SbkObjectType` - the ordinary result of
+`class Meta(type(QObject), ABCMeta)` - passes the old test and fails the new
+one. The walk is pruned there and everything below it stays invalidated.
+
+The repair is the second half of FT8 design B: classify outside the lock, in
+rounds, and revalidate the referred-map entry under it.
+
+**There is no test here, and there cannot be one.** `makeValid()` has one
+caller, `getOwnership()`; the generator emits that for a return value only
+(`owner="target"`, and no typesystem in the tree puts it on an input
+argument); and a return value is a fresh conversion from a C++ pointer. An
+object is only invalid if `invalidate()` marked it, which it does only for a
+wrapper it unregisters in the same transaction - so the conversion cannot
+find that wrapper again, hands out a new and valid one, and `makeValid()`
+returns at its first line. Measured as well as argued: over a full suite run
+the two classifications never disagreed once.
+
+The fix stays, because the code is wrong either way and the repair costs
+nothing. What does not stay is a switch to turn it off: a bit no test can
+observe is exactly the kind of dead mechanism this directory exists to
+prevent.
+
+### type-mutation
+
+FT8 validation row "state lock": mutate a type's bases at a barrier.
+`getDestructorFunctions()` walks `tp_bases` before the state-lock transaction
+now, so the question is what can move between that walk and the commit.
+CPython turns out to allow `__bases__` assignment on these types, and even
+across layouts - a QObject subclass to a QTimer subclass - so the stability
+does not come from CPython refusing.
+
+What it does come from is the shape of the transaction: the list is taken
+once, and the locked part only zips it with `cptr`. An immutable per-type
+list published at type-ready time would make this an invariant instead of a
+property of the code as written; that belongs with the identity and hierarchy
+snapshots. Until then this is the guard rail that says the window stayed
+harmless.
+
+### lock-order
+
+FT8 invariant 1: every raw lock has a rank, and the rank is kept.
+`checkLockRank()` asserts it before every acquisition - a lock may only be
+taken while holding locks that rank below it - so taking one the other way
+round aborts a debug build here rather than deadlocking somewhere else later.
+
+A rank violation therefore shows as a crash, not as a failure. What this test
+compares is the other half: which pairs are held at once at all. The
+inventory in `doc/developer/freethreading.md` names them, and a pair that is
+not in it is a finding - a lock order nobody has argued for - not a detail to
+print and move on from.
+
+### lazy-lock-spans-destruction - expected FAIL
+
+Open, and owned by the lazy protocol: B13-5 from the other end.
+`Module::get()` holds the lazy-type mutex across `PyObject_GetAttr()`, so
+arbitrary Python runs under it - and with it a refcount reaching zero, a
+wrapper being destroyed, a deferred C++ destructor running. That last one is
+what the state lock's own rule forbids for every other lock: a destructor
+reaches Qt and user code, so a raw lock held across it deadlocks against
+stop-the-world and against a re-entrant call.
+
+Found by the assertion in `DeferredActions::run()` when two of the tests here
+ran in the same process, and it fires every time they do - which is why this
+one runs them rather than trying to rebuild the state they leave behind.
+Neither of them reaches it alone: it needs the wrappers the first one leaves
+for the collector and the type incarnation the second one causes.
+
+Counted rather than asserted, because aborting on it would mean nobody can
+run a debug build until the lazy protocol is replaced. Only the lazy line of
+`contractExceptions()` is read: the wrapper-map exception is a different,
+documented one, taken on every type-narrowed lookup, so counting it in here
+would mean this test could never pass again.
+
+### metaobject-lifetime - expected FAIL
+
+Open: `metaObject()` hands out a wrapper it does not keep alive. Found while
+driving the lock-order test. Four threads doing nothing but
+`metaObject().className()` on their own objects, and three of them get
+"Internal C++ object (QMetaObject) already deleted". Measured on the same
+binary: 3 errors free-threaded, 0 with `PYTHON_GIL=1`, 0 on traditional
+CPython - so it is not an old bug that free-threading happens to show, it is
+one free-threading introduces.
+
+`retrieveMetaObjectForCppObject()` returns a `QMetaObject *` whose wrapper
+reference is dropped by the same line; with a GIL nothing runs between the
+drop and the use. It is a lifetime question about a returned wrapper, so it
+belongs with the lease work rather than here, and this test holds the finding
+until then.

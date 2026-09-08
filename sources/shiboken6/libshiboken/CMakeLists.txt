@@ -78,6 +78,7 @@ sbkcppstring.cpp sbkcppstring.h sbkcpptonumpy.h
 sbkdestructorentry.h
 sbkenum.cpp sbkenum.h sbkenum_p.h
 sbkerrors.cpp sbkerrors.h
+sbkfailpoint.cpp sbkfailpoint.h
 sbkfeature_base.cpp sbkfeature_base.h
 sbkftoptions.cpp sbkftoptions.h
 sbkheldlocks.cpp sbkheldlocks.h
@@ -205,6 +206,7 @@ install(FILES
         sbkenum.h
         sbkenum_p.h
         sbkerrors.h
+        sbkfailpoint.h
         sbkfeature_base.h
         sbkftoptions.h
         sbkheldlocks.h

@@ -3,6 +3,7 @@
 // Qt-Security score:significant reason:default
 
 #include "sbkmodule.h"
+#include "sbkfailpoint.h"
 #include "sbkheldlocks.h"
 #include "autodecref.h"
 #include "basewrapper.h"

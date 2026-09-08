@@ -30,6 +30,9 @@ handoff. The names this change uses:
 |---|---|
 | B9-1 | Python type and MRO access under the state mutex |
 | B13-5 | the lazy-type lock spanning type creation and import work |
+| B7-2 | the deallocator clearing weakrefs while another thread has references |
+| B15-4 | arbitrary Python construction under the QML placement mutex |
+| FT4 | carrying leases and pointer snapshots to their final use |
 | FT8 | restoring the short raw-lock contract - this series |
 
 Every statement stands without them. They are here so that a reader who has
@@ -181,7 +184,8 @@ The first is the lazy-type lock held where none may be: `Module::get()` holds
 it across `PyObject_GetAttr()`, so a refcount can reach zero underneath and a
 deferred C++ destructor can run inside it. That is the same finding as "the
 lazy lock spans Python", seen from the destruction end, and it belongs to the
-lazy protocol's replacement.
+lazy protocol's replacement. `failpoints.py lazy-lock-spans-destruction`
+holds it as a test that is expected to fail.
 
 The second is `PyType_IsSubtype()` under the wrapper-map lock, in the three
 lookups that narrow a pointer to a type - `acquireWrapper()` in the
@@ -206,7 +210,11 @@ Every acquisition of a lock in the table above notes itself - through
 they detach while waiting or switch the mutex off for an A/B run
 (`sbkstatelock.cpp`, `sbkmodule.cpp`, `signalmanager.cpp`). The one row that
 is not covered is the `ModuleData` guard above, which has no acquisition site
-to wrap.
+to wrap. It is not a claim about every mutex in the sources: the failpoint
+machinery in `sbkfailpoint.cpp` has one of its own, which is deliberately
+untracked and deliberately spans a timed wait. It is test scaffolding, exists
+only in a debug build, protects no binding state, and a thread that parks
+under it holds nothing else - the failpoint asserts that before it waits.
 
 The written form of the same rule is checked without running anything:
 `sources/shiboken6/libshiboken/check_state_lock_scope.py` reads the direct
@@ -281,6 +289,35 @@ never a two-object transaction. Where the generator emits
 `Py_BEGIN_ALLOW_THREADS` or `ThreadStateSaver`, the lease is always
 constructed before the detach region and outlives it - the guard is suspended
 there, the lease is not.
+
+### How far the guard actually reaches
+
+The guard is a CPython critical section, and a critical section ends at every
+detach. That is not a caveat to work around, it is what makes the guard
+usable at all, and it is measurable from Python:
+
+| While one thread is here | A second call on the same receiver |
+|---|---|
+| in a Python override called back from C++, busy-waiting | waits |
+| in a native call that blocks with the thread attached | waits, for as long as the call takes |
+| waiting for a `threading.Lock` | goes through |
+| waiting in `QRecursiveMutex::lock()`, which is `allow-thread` | goes through |
+| waiting in any wait that detaches | goes through |
+
+So the lock inversion "guard first, then a lock" against "lock first, then the
+guard" resolves by itself whenever the wait detaches - the receiver's section
+is suspended for the duration and the other thread gets in. It does not
+resolve when the wait keeps the thread attached, and that is the boundary
+below. `sources/pyside6/tests/manually/freethreading/failpoints.py` measures
+both halves rather than asserting them: `guard-vs-python-lock` and
+`guard-vs-annotated-lock` for the resolving case, `guard-spans-native-wait`
+for the other.
+
+Two consequences worth stating. A blocking Qt method needs its `allow-thread`
+annotation more under free-threading than it did with the GIL: without it the
+call blocks every other thread that reaches the same receiver, and it blocks
+stop-the-world for everyone. And nothing may be built on the guard being
+continuously held across a Python C API call, because it is not.
 
 ### What the lock contract does not promise
 
@@ -407,3 +444,52 @@ Run it with the free-threaded interpreter; `REPEATS`, `STRESS_THREADS` and
 single scenario alone to judge a lock: rare races show up only over the whole
 set, and a scenario on its own can stay clean hundreds of times.
 
+### Deterministic races: failpoints
+
+Repetition is a poor way to reach a window of a few instructions. A failpoint
+is a named place in libshiboken where a test stops one thread, so the second
+one arrives in the order the test wants, every time - a test that fails on an
+unfixed revision rather than in one run out of fourteen. Five of them exist,
+either side of the windows that matter: before weakrefs are cleared and
+before the C++ destructor runs, after a lease is taken and before it is
+handed back, and before `destroy()` detaches `cptr`.
+`Shiboken.failpointNames()` lists what a build has; a release build has none
+and the tests skip.
+
+Two properties are what make them usable rather than merely present. A parked
+thread waits **detached**, so it blocks neither stop-the-world nor, on a
+build running with the GIL, everyone else. And an armed point stops exactly
+one thread: the arming goes with the first one through, so a test can park a
+call and then drive the same code path from another thread to reach the
+object the parked one holds.
+
+`sources/pyside6/tests/manually/freethreading/failpoints.py` holds the tests.
+They are not run directly for evidence, because a test that only ever ran
+free-threaded shows that the code works there, not that the synchronization
+is what makes it work. `failpoint_matrix.py` next to it runs each one in its
+own subprocess, with a hard timeout and its own process group, on every
+interpreter the argument needs:
+
+| Row | Interpreter |
+|---|---|
+| `classic` | traditional CPython, its own debug build |
+| `ft-gil-on` | free-threaded binary, `PYTHON_GIL=1` |
+| `ft-gil-off` | the same binary, `PYTHON_GIL=0` |
+
+Each child verifies the GIL state it was asked for **after** importing
+PySide, because that import is what can turn the GIL back on; a row that
+silently ran in the wrong mode would be a second measurement of the first.
+A build directory carries the Python version but not whether that Python was
+free-threaded - `qfpdp-py3.15-...` is the same name for 3.15.0b3 and
+3.15.0b3t - so each row names its interpreter and its build and the two are
+checked against each other through the extension suffix. A row without a
+build is reported as missing and the run ends as partial, never as green.
+
+    FT_PYTHON, FT_BUILD_DIR      the free-threaded row, defaults to the
+                                 interpreter running the script
+    GIL_PYTHON, GIL_BUILD_DIR    the traditional row, no default
+
+A test may declare that its expected outcome is not "ok": `lease-vs-destroy`
+is listed as failing while the lease-duration work (FT4) is open, and the
+runner can treat a deliberate deadlock's timeout as the pass. Both mean the same thing - the day the cell
+changes, the entry comes out.

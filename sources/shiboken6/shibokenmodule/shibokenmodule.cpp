@@ -116,6 +116,30 @@ for (auto *o : setAll) {
 return listAll;
 // @snippet getallvalidwrappers
 
+// @snippet armfailpoint
+const bool ok = Shiboken::armFailpoint(%1, %2);
+%PYARG_0 = %CONVERTTOPYTHON[bool](ok);
+// @snippet armfailpoint
+
+// @snippet releasefailpoint
+const bool ok = Shiboken::releaseFailpoint(%1);
+%PYARG_0 = %CONVERTTOPYTHON[bool](ok);
+// @snippet releasefailpoint
+
+// @snippet failpointreached
+const bool ok = Shiboken::failpointReached(%1);
+%PYARG_0 = %CONVERTTOPYTHON[bool](ok);
+// @snippet failpointreached
+
+// @snippet clearfailpoints
+Shiboken::clearFailpoints();
+// @snippet clearfailpoints
+
+// @snippet failpointnames
+const char *names = Shiboken::failpointNames();
+%PYARG_0 = %CONVERTTOPYTHON[const char *](names);
+// @snippet failpointnames
+
 // @snippet heldrawlocks
 const char *held = Shiboken::heldLockNames();
 %PYARG_0 = %CONVERTTOPYTHON[const char *](held);
