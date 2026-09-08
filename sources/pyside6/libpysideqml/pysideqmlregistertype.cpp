@@ -18,6 +18,7 @@
 #include <autodecref.h>
 #include <gilstate.h>
 #include <sbkconverter.h>
+#include <sbkftoptions.h>
 #include <sbkpep.h>
 #include <sbkstring.h>
 #include <sbktypefactory.h>
@@ -47,15 +48,35 @@ static inline QByteArray qmlElementKey()
     return "QML.Element"_ba;
 }
 
+#ifdef Py_GIL_DISABLED
+// The lock this function used to hold across PyObject_CallObject(): a raw
+// lock over arbitrary Python that guarded a thread-local slot, so it
+// protected nothing another thread could read, serialized unrelated QML
+// creation, and deadlocked outright on a same-thread nested one. It is kept
+// only so the A/B harness can put it back and show the deadlock returning -
+// PYSIDE6_OPTION_FT with QmlPlacementFree cleared. Nothing else takes it.
+static QMutex &retiredPlacementMutex()
+{
+    static QMutex mutex;
+    return mutex;
+}
+#endif
+
 static void createInto(void *memory, void *type)
 {
-    QMutexLocker locker(&PySide::nextQObjectMemoryAddrMutex());
-    PySide::setNextQObjectMemoryAddr(memory);
+    // The retired mutex is taken only when the A/B switch puts it back,
+    // see retiredPlacementMutex() above. The scope below nests.
+    std::optional<QMutexLocker<QMutex>> retired;
+#ifdef Py_GIL_DISABLED
+    if (!Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::QmlPlacementFree))
+        retired.emplace(&retiredPlacementMutex());
+#endif
     Shiboken::GilState state;
+    auto *pyType = reinterpret_cast<PyTypeObject *>(type);
+    PySide::QmlPlacement placement(memory, pyType);
     PyObject *obj = PyObject_CallObject(reinterpret_cast<PyObject *>(type), nullptr);
     if (!obj || PyErr_Occurred())
         PyErr_Print();
-    PySide::setNextQObjectMemoryAddr(nullptr);
 }
 
 static PyTypeObject *qQmlEngineType()

@@ -35,6 +35,7 @@
 #include <pep384ext.h>
 #include <sbkconverter.h>
 #include <sbkerrors.h>
+#include <sbkftoptions.h>
 #include <sbkpep.h>
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
@@ -58,6 +59,7 @@
 #include <cstring>
 #include <cctype>
 #include <memory>
+#include <vector>
 #include <optional>
 #include <typeinfo>
 
@@ -72,9 +74,40 @@ using namespace Qt::StringLiterals;
 
 static QStack<PySide::CleanupFunction> cleanupFunctionList;
 
-// Used by QML (main thread), but needs to be protected against other
-// threads constructing QObject's.
-static void thread_local *qobjectNextAddr;
+// Placement addresses handed to a generated QObject constructor by QML.
+// A stack, not one slot: a metaclass or __new__ can create another QObject
+// before the outer generated constructor consumes its address, and one
+// scalar loses the outer context when that happens. Thread-local by
+// construction - consumption happens on the calling thread, inside the
+// PyObject_CallObject() that createInto() makes.
+struct PlacementEntry
+{
+    void *address;
+    PyTypeObject *expectedType;
+    bool consumed;
+    // Owned by a QmlPlacement, which pops it; a plain
+    // setNextQObjectMemoryAddr() entry pops itself on its matching null.
+    bool scoped;
+};
+
+static std::vector<PlacementEntry> &placementStack()
+{
+    static thread_local std::vector<PlacementEntry> stack;
+    return stack;
+}
+
+// Whether only the type QML asked for may take the address. The A/B harness
+// can take that away to show what happens without it; a build with a GIL has
+// no such option and always keeps it.
+static bool placementTypeGate()
+{
+#ifdef Py_GIL_DISABLED
+    return Shiboken::FreeThreading::optionEnabled(
+        Shiboken::FreeThreading::QmlPlacementType);
+#else
+    return true;
+#endif
+}
 
 QT_BEGIN_NAMESPACE
 extern bool qRegisterResourceData(int, const unsigned char *, const unsigned char *,
@@ -102,7 +135,7 @@ namespace PySide
 
 void init(PyObject *module)
 {
-    qobjectNextAddr = nullptr;
+    placementStack().clear();
     ClassInfo::init(module);
     Signal::init(module);
     Slot::init(module);
@@ -720,20 +753,75 @@ PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *n
     return attr;
 }
 
-QMutex &nextQObjectMemoryAddrMutex()
+void *nextQObjectMemoryAddr(PyTypeObject *forType)
 {
-    static QMutex mutex;
-    return mutex;
-}
-
-void *nextQObjectMemoryAddr()
-{
-    return qobjectNextAddr;
+    auto &stack = placementStack();
+    if (stack.empty() || stack.back().consumed)
+        return nullptr;
+    const auto &top = stack.back();
+    // Only the type QML asked for may take the address. Everything else
+    // reaching this - a QObject created inside __init__, a metaclass, a
+    // __new__ - gets nullptr and allocates on the heap as usual. Without
+    // this the first constructor to run wins the memory, whoever it is.
+    //
+    // Identity, not PyType_IsSubtype(): QML calls the registered type itself,
+    // so the awaited constructor sees exactly that type. What it cannot turn
+    // away is a second object of the *same* type, built there before the
+    // awaited one - see the QML paragraph in doc/developer/freethreading.md.
+    if (forType != nullptr && top.expectedType != nullptr
+        && forType != top.expectedType && placementTypeGate()) {
+        return nullptr;
+    }
+    return top.address;
 }
 
 void setNextQObjectMemoryAddr(void *addr)
 {
-    qobjectNextAddr = addr;
+    auto &stack = placementStack();
+    if (addr == nullptr) {
+        // The generated constructor reports that it took the address.
+        if (stack.empty())
+            return;
+        auto &top = stack.back();
+        top.consumed = true;
+        // An entry this API pushed ends here, with the null that closes it.
+        // A scoped one belongs to its QmlPlacement and is popped there.
+        if (!top.scoped)
+            stack.pop_back();
+        return;
+    }
+    // A caller outside QmlPlacement still setting an address: keep it working
+    // by pushing an entry it owns until its matching null arrives.
+    stack.push_back({addr, nullptr, false, false});
+}
+
+QmlPlacement::QmlPlacement(void *memory, PyTypeObject *expectedType)
+{
+    placementStack().push_back({memory, expectedType, false, true});
+}
+
+QmlPlacement::~QmlPlacement()
+{
+    auto &stack = placementStack();
+    // Only our own entry. A caller of setNextQObjectMemoryAddr() whose
+    // matching null never arrived left an entry on top of ours, and popping
+    // that one would leave QML's address staged for the next construction.
+    while (!stack.empty() && !stack.back().scoped)
+        stack.pop_back();
+    if (stack.empty())
+        return;
+    const auto entry = stack.back();
+    stack.pop_back();
+    // Diagnose rather than leave a stale address behind: an unconsumed one
+    // means the Python type never reached the generated constructor - a
+    // Python error, an exception, or a type that is not what QML registered.
+    if (!entry.consumed) {
+        const char *name = entry.expectedType != nullptr
+                           ? entry.expectedType->tp_name : "<unknown>";
+        qWarning("PySide6: QML placement address for %s was not consumed; "
+                 "the object was not constructed into the memory QML provided.",
+                 name);
+    }
 }
 
 } // namespace PySide

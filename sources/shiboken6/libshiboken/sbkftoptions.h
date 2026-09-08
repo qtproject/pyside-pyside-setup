@@ -13,27 +13,35 @@
 
 namespace Shiboken::FreeThreading {
 
-/// Kill switches for the locks that free-threaded builds add, as bit flags in
-/// one variable, in the style of PYSIDE6_OPTION_PYTHON_ENUM:
+/// Kill switches for what free-threaded builds add, as bit flags in one
+/// variable, in the style of PYSIDE6_OPTION_PYTHON_ENUM:
 ///
-///     PYSIDE6_OPTION_FT=0b111     all of them (the default)
-///     PYSIDE6_OPTION_FT=0b011     without the per-object call guard
-///     PYSIDE6_OPTION_FT=0b001     without the state lock either
+///     PYSIDE6_OPTION_FT=0b11111   all of them (the default)
+///     PYSIDE6_OPTION_FT=0b01111   without the QML placement scope
+///     PYSIDE6_OPTION_FT=0b00011   the locks only
 ///     PYSIDE6_OPTION_FT=off       without any of them
 ///
-/// A set bit keeps its lock, a cleared bit takes it away. Unset means all of
-/// them, and that is the only supported configuration - clearing a bit is a
-/// testing device, not a tuning knob.
+/// A set bit keeps the measure, a cleared bit takes it away and puts back
+/// what was there before it. Unset means all of them, and that is the only
+/// supported configuration - clearing a bit is a testing device, not a
+/// tuning knob.
 ///
-/// It exists because a lock that is never removed proves nothing; the A/B
-/// harness in tests/manually/freethreading runs each scenario against the same
-/// binary once with its lock and once without. A mechanism that no scenario
-/// can take away does not belong here.
+/// It exists because a measure that cannot be removed proves nothing. Every
+/// test in tests/manually/freethreading that claims to demonstrate a fix
+/// runs the same scenario twice against the same binary, once with the bit
+/// and once without, and has to see the failure return. A mechanism no
+/// scenario can take away does not belong here.
 enum Option : int
 {
-    LazyTypeLock = 0x1, ///< serializes lazy type creation
-    StateLock    = 0x2, ///< the short-lived lock on the binding state
-    CallGuard    = 0x4  ///< serializes calls reaching one C++ object
+    LazyTypeLock     = 0x01, ///< serializes lazy type creation
+    StateLock        = 0x02, ///< the short-lived lock on the binding state
+    CallGuard        = 0x04, ///< serializes calls reaching one C++ object
+    /// Only the type QML asked for may take the placement address. Cleared,
+    /// the first constructor to run takes it, whoever it is.
+    QmlPlacementType = 0x08,
+    /// No process-wide lock spans QML construction. Cleared, one is taken
+    /// across the Python call, as it was before the placement context.
+    QmlPlacementFree = 0x10
 };
 
 /// Whether opt is enabled. The environment is read once, on first use.

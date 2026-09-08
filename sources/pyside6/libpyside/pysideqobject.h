@@ -62,11 +62,29 @@ PYSIDE_API QObject *convertToQObject(PyObject *object, bool raiseError);
 /// method pulled out of a Python property.
 PYSIDE_API PyObject *getHiddenDataFromQObject(QObject *cppSelf, PyObject *self, PyObject *name);
 
-/// Mutex for accessing QObject memory helpers from multiple threads
-PYSIDE_API QMutex &nextQObjectMemoryAddrMutex();
-PYSIDE_API void *nextQObjectMemoryAddr();
-/// Set the address where to allocate the next QObject (for QML)
+/// The address the next generated QObject constructor should construct into,
+/// or nullptr. Read by generated constructors; the null store below reports
+/// that the address was taken.
+PYSIDE_API void *nextQObjectMemoryAddr(PyTypeObject *forType = nullptr);
 PYSIDE_API void setNextQObjectMemoryAddr(void *addr);
+
+/// Scope of one QML placement address.
+///
+/// QML hands a generated constructor the memory to construct into. This used
+/// to be one thread-local slot guarded by a process-wide QMutex held across
+/// PyObject_CallObject() - a raw lock spanning arbitrary Python, which
+/// deadlocks on same-thread nested creation and protects nothing, the slot
+/// being thread-local already. The scope replaces both: no lock, and the
+/// addresses nest, so a metaclass creating another QObject cannot lose the
+/// outer one. Unconsumed addresses are diagnosed instead of left behind.
+class PYSIDE_API QmlPlacement
+{
+public:
+    explicit QmlPlacement(void *memory, PyTypeObject *expectedType);
+    ~QmlPlacement();
+    QmlPlacement(const QmlPlacement &) = delete;
+    QmlPlacement &operator=(const QmlPlacement &) = delete;
+};
 
 PYSIDE_API PyObject *getWrapperForQObject(QObject *cppSelf, PyTypeObject *sbk_type);
 

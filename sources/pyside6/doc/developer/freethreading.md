@@ -302,6 +302,15 @@ per-type list published when the type is readied would make this an
 invariant instead of a property of the code as written; that belongs with
 the identity and hierarchy snapshots.
 
+Nor is QML construction promised to survive every nesting. QML allocates
+the memory for a registered type and the generated constructor places the
+object into it; a second QObject built inside `__init__` before that happens
+would take the address instead, so only the type QML asked for may consume
+it. A second object of the *same* type built there still passes that test
+and still takes the address. Telling those apart needs the address to travel
+with the object being constructed rather than with the thread, which belongs
+to the wrapper-identity work.
+
 `abi3t` is not supported, and behaviour after `fork()` is undefined for a
 process that has used the bindings; use `spawn`, or `fork` followed by
 `exec`.

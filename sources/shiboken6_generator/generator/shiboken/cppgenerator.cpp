@@ -4307,7 +4307,12 @@ void CppGenerator::writeMethodCall(TextStream &s, const AbstractMetaFunctionCPtr
                     const QString ctorCall = context.effectiveClassName() + u'('
                                              + userArgs.join(u", "_s) + u')';
                     if (usePySideExtensions() && isQObject(owner)) {
-                        s << "void *addr = PySide::nextQObjectMemoryAddr();\n";
+                        // The type is passed so that only the constructor QML
+                        // asked for can consume the address: a nested
+                        // construction inside __init__ reaches this line too,
+                        // and taking the address there puts the wrong object
+                        // into QML's memory.
+                        s << "void *addr = PySide::nextQObjectMemoryAddr(Py_TYPE(self));\n";
                         uva << "if (addr != nullptr) {\n" << indent
                             << "cptr = new (addr) " << globalScopePrefix(context) << ctorCall
                             << ";\nPySide::setNextQObjectMemoryAddr(nullptr);\n" << outdent
