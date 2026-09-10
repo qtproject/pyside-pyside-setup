@@ -384,6 +384,8 @@ because there is no surrounding PySide class that provides the forgiving mode
 implementation. Typically, the needed changes are easily found because they often occur
 in an import statement.
 
+.. _permission-considerations:
+
 Permission API
 --------------
 
@@ -395,8 +397,8 @@ Calendar. More about permission API can be read in this `Blog post`_.
 When a PySide6 application that uses the permission API is run in interpreted mode, i.e.,
 ``python <main_file>.py``, the code implementing the permission API *will not work*. The only way
 to make your PySide6 application using permission API work is to bundle the application. For Android,
-this means using the :ref:`pyside6-android-deploy` tool and for macOS, this means using the
-:ref:`pyside6-deploy` tool.
+this means using the :ref:`pyside6-android-deploy` tool, for macOS the :ref:`pyside6-deploy` tool,
+and for iOS the :ref:`pyside6-ios-deploy` tool.
 
 When running in interpreted mode, you can skip over the permission check/request using the following
 *if* condition
@@ -434,6 +436,13 @@ contain the *usage description* strings for the permissions required. You can ce
 a PySide6 application from the terminal. However, this is not recommended. Therefore, the only
 viable solution is to bundle the PySide6 application as a macOS application bundle using
 :ref:`pyside6-deploy`. This macOS application bundle will have its own Info.plist file.
+
+iOS
+~~~
+
+For iOS, :ref:`pyside6-ios-deploy` writes the usage description strings for the permissions
+PySide6 supports into the generated *Info.plist*. See :ref:`ios_permissions` for why all of them
+are always present.
 
 .. _`Blog post`: https://www.qt.io/blog/permission-apis-in-qt-6.5
 .. _`Camera Example`: https://doc.qt.io/qtforpython-6/examples/example_multimedia_camera.html#camera-example
