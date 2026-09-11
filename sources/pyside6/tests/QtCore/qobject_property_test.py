@@ -4,9 +4,11 @@ from __future__ import annotations
 
 '''Test cases for QObject property and setProperty'''
 
+import gc
 import os
 import sys
 import unittest
+import weakref
 
 from pathlib import Path
 from typing import NamedTuple
@@ -131,6 +133,46 @@ class VariantPropertyTest(unittest.TestCase):
         # Named Tuple (PYSIDE-3244)
         to.setProperty("testProperty", [Point(1, 2)])
         self.assertEqual(type(to.get_property()[0]), Point)
+
+
+class DynamicPropertyLifetimeTest(unittest.TestCase):
+    """A QObject stored in a dynamic property has to be kept alive."""
+
+    def testStoredObjectIsKeptAlive(self):
+        holder, value = QObject(), QObject()
+        value.setObjectName("kept")
+        holder.setProperty("x", value)
+        del value
+        self.assertEqual(holder.property("x").objectName(), "kept")
+
+    def testStoredObjectInContainerIsKeptAlive(self):
+        holder, value = QObject(), QObject()
+        value.setObjectName("kept")
+        holder.setProperty("x", [value])
+        del value
+        self.assertEqual(holder.property("x")[0].objectName(), "kept")
+
+    def testReplacedValueIsLetGo(self):
+        holder, value = QObject(), QObject()
+        holder.setProperty("x", value)
+        seen = weakref.ref(value)
+        del value
+        gc.collect()
+        self.assertIsNotNone(seen(), "the property must hold the value")
+        holder.setProperty("x", 42)
+        gc.collect()
+        self.assertIsNone(seen(), "the old value must be released")
+
+    def testRemovedPropertyIsLetGo(self):
+        holder, value = QObject(), QObject()
+        holder.setProperty("x", value)
+        seen = weakref.ref(value)
+        del value
+        gc.collect()
+        self.assertIsNotNone(seen(), "the property must hold the value")
+        holder.setProperty("x", None)
+        gc.collect()
+        self.assertIsNone(seen(), "the old value must be released")
 
 
 if __name__ == '__main__':

@@ -620,6 +620,17 @@ pyResult = %PYSELF;
 qRegisterMetaType<QList<int> >("QList<int>");
 // @snippet qabstractitemmodel
 
+// @snippet qobject-setproperty
+// %FUNCTION_NAME() - disable generation of function call.
+%RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME(%1, %2);
+%PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
+// The variant holds only a raw pointer to the wrapper, so keep the value
+// itself - a container keeps its elements - or the property dangles.
+const QByteArray refKey = QByteArrayLiteral("__property_") + %1;
+Shiboken::Object::keepReference(reinterpret_cast<SbkObject *>(%PYSELF),
+                                refKey.constData(), %PYARG_2);
+// @snippet qobject-setproperty
+
 // @snippet qobject-metaobject
 %RETURN_TYPE %0 = %CPPSELF.%FUNCTION_NAME();
 %PYARG_0 = %CONVERTTOPYTHON[%RETURN_TYPE](%0);
