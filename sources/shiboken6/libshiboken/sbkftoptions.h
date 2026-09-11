@@ -16,9 +16,9 @@ namespace Shiboken::FreeThreading {
 /// Kill switches for what free-threaded builds add, as bit flags in one
 /// variable, in the style of PYSIDE6_OPTION_PYTHON_ENUM:
 ///
-///     PYSIDE6_OPTION_FT=0b11111111111  all of them (the default)
-///     PYSIDE6_OPTION_FT=0b01111111111  without the external tombstones
-///     PYSIDE6_OPTION_FT=0b00000000011  the locks only
+///     PYSIDE6_OPTION_FT=0b1111111111111  all of them (the default)
+///     PYSIDE6_OPTION_FT=0b0111111111111  without the constructor's slot claim
+///     PYSIDE6_OPTION_FT=0b0000000000011  the locks only
 ///     PYSIDE6_OPTION_FT=off       without any of them
 ///
 /// A set bit keeps the measure, a cleared bit takes it away and puts back
@@ -72,7 +72,16 @@ enum Option : int
     /// delete is what says so. Cleared, the entry is simply removed where
     /// Object::destroy() always removed it, and the stretch from there to
     /// the last base destructor is open again.
-    ExternalTombstones = 0x400
+    ExternalTombstones = 0x400,
+    /// A generated constructor claims its native slot in one transaction.
+    /// Cleared, the check and the write are two steps again, and two threads
+    /// initializing the same object both believe they won.
+    ConstructorCommit = 0x800,
+    /// A generated constructor reserves its pointer slot before it builds
+    /// anything. Cleared, the slot is claimed after the C++ constructor as
+    /// it was, and the thread that loses has already built its object and,
+    /// for a QObject, hung it in Qt's tree.
+    ConstructorClaim = 0x1000
 };
 
 /// Whether opt is enabled. The environment is read once, on first use.

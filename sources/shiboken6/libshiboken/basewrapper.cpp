@@ -25,8 +25,10 @@
 // meta-object builder have their locks in either build, and the type helpers
 // below state the state lock's leaf property in code the two builds share.
 #include "sbkheldlocks.h"
+// Same reason: a failpoint in code the two builds share has to compile in
+// both, where the macro expands to nothing.
+#include "sbkfailpoint.h"
 #ifdef Py_GIL_DISABLED
-#  include "sbkfailpoint.h"
 #  include "sbkftoptions.h"
 #  include "sbkstatelock.h"
 #endif
@@ -939,6 +941,7 @@ static PyObject *_setupNew(PyObject *obSelf, PyTypeObject *subtype)
 #ifdef Py_GIL_DISABLED
     d->pendingDestruction = false;
     d->activeCalls = 0;
+    d->constructingSlots = 0;
 #endif
     self->ob_dict = nullptr;
     self->weakreflist = nullptr;
@@ -1944,11 +1947,41 @@ bool setCppPointer(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr)
     if (PepType_SOTP(type)->is_multicpp)
         idx = getTypeIndexOnHierarchy(type, desiredType);
 
-    // The array can already be detached: another thread called
-    // Shiboken.delete() on self before the base __init__ ran. Reported
-    // after the read, like the refusal below.
-    const bool detached = sbkObj->d->cptr == nullptr;
-    const bool alreadyInitialized = detached || sbkObj->d->cptr[idx] != nullptr;
+    // The slot is claimed in one transaction. Read and write used to be two
+    // steps, and a Python subclass can hand self to another thread before it
+    // calls the base __init__: both threads then saw an empty slot, both
+    // constructed a C++ object, and both reported success. One of the two
+    // objects was left with nobody to delete it.
+    bool alreadyInitialized = true;
+    bool detached = false;
+#ifdef Py_GIL_DISABLED
+    if (Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::ConstructorCommit)) {
+        // Before the transaction, which is where a second thread has to be
+        // able to get in: the point of the test is that it changes nothing.
+        SBK_FAILPOINT("ctor-before-publish");
+        StateLockGuard guard;
+        // The array can already be detached: another thread called
+        // Shiboken.delete() on self before the base __init__ ran. Reported
+        // after the transaction, like the refusal below.
+        detached = sbkObj->d->cptr == nullptr;
+        alreadyInitialized = detached || sbkObj->d->cptr[idx] != nullptr;
+        if (!alreadyInitialized) {
+            sbkObj->d->cptr[idx] = cptr;
+            sbkObj->d->cppObjectCreated = true;
+        }
+    } else
+#endif
+    {
+        // The A/B side: the two steps as they were, with the same point
+        // between them - where a second thread turns one winner into two.
+        alreadyInitialized = sbkObj->d->cptr[idx] != nullptr;
+        SBK_FAILPOINT("ctor-before-publish");
+        if (!alreadyInitialized)
+            sbkObj->d->cptr[idx] = cptr;
+        sbkObj->d->cppObjectCreated = true;
+    }
+
+    // Raising is a Python call-out and happens after the transaction.
     if (detached) {
         PyErr_Format(PyExc_RuntimeError,
                      "libshiboken: The %s object in class %s was destroyed while it "
@@ -1958,12 +1991,107 @@ bool setCppPointer(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr)
         PyErr_Format(PyExc_RuntimeError,
                      "libshiboken: You can't initialize an %s object in class %s twice!",
                      desiredType->tp_name, type->tp_name);
-    } else {
-        sbkObj->d->cptr[idx] = cptr;
+    }
+    return !alreadyInitialized;
+}
+
+ConstructionGuard::ConstructionGuard([[maybe_unused]] SbkObject *sbkObj,
+                                     [[maybe_unused]] PyTypeObject *desiredType)
+{
+#ifdef Py_GIL_DISABLED
+    m_obj = sbkObj;
+    if (!Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::ConstructorClaim)) {
+        // The A/B side: nothing is reserved, and the race the reservation
+        // closes is back - both threads build, one of the two objects is
+        // left with nobody to delete it.
+        m_claimed = true;
+        return;
     }
 
-    sbkObj->d->cppObjectCreated = true;
-    return !alreadyInitialized;
+    PyTypeObject *type = Shiboken::pyType(sbkObj);
+    int idx = 0;
+    if (PepType_SOTP(type)->is_multicpp)
+        idx = getTypeIndexOnHierarchy(type, desiredType);
+    // One bit per C++ base. No binding we generate comes near this many, and
+    // a type that did would go unreserved rather than shift out of range.
+    if (idx >= int(sizeof(unsigned int) * 8)) {
+        m_claimed = true;
+        return;
+    }
+
+    const unsigned int bit = 1u << unsigned(idx);
+    bool detached = false;
+    bool constructing = false;
+    bool initialized = false;
+    {
+        StateLockGuard guard;
+        auto *priv = sbkObj->d;
+        // Shiboken.delete() from another thread may have detached the array
+        // before this __init__ got here. Reported after the transaction, as
+        // the refusals below are.
+        detached = priv->cptr == nullptr;
+        if (!detached) {
+            initialized = priv->cptr[idx] != nullptr;
+            constructing = (priv->constructingSlots & bit) != 0;
+            if (!initialized && !constructing) {
+                priv->constructingSlots |= bit;
+                m_index = idx;
+                m_claimed = true;
+            }
+        }
+    }
+
+    // Raising is a Python call-out and happens after the transaction.
+    if (detached) {
+        PyErr_Format(PyExc_RuntimeError,
+                     "libshiboken: The %s object in class %s was destroyed while it "
+                     "was being initialized",
+                     desiredType->tp_name, type->tp_name);
+    } else if (constructing) {
+        PyErr_Format(PyExc_RuntimeError,
+                     "libshiboken: The %s object in class %s is already being "
+                     "initialized by another thread",
+                     desiredType->tp_name, type->tp_name);
+    } else if (initialized) {
+        PyErr_Format(PyExc_RuntimeError,
+                     "libshiboken: You can't initialize an %s object in class %s twice!",
+                     desiredType->tp_name, type->tp_name);
+    }
+#else
+    // With a GIL there is no second thread in here, and commitConstruction()
+    // catches a second __init__ on its own.
+    m_claimed = true;
+#endif // Py_GIL_DISABLED
+}
+
+ConstructionGuard::~ConstructionGuard()
+{
+#ifdef Py_GIL_DISABLED
+    if (m_index < 0)
+        return;
+    // Unconditional: the slot is given back whether this call published or
+    // bailed out, and the object being published has its pointer by now, so
+    // the next caller is refused by that instead.
+    StateLockGuard guard;
+    m_obj->d->constructingSlots &= ~(1u << unsigned(m_index));
+#endif
+}
+
+bool commitConstruction(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr,
+                        bool hasCppWrapper)
+{
+    // The map first, the flags after: the state lock is the leaf, so nothing
+    // may be taken while it is held. Both are short, and between them the
+    // object is registered but not yet marked valid - a lookup finds it and
+    // a call on it refuses, which is the safe half of the window and the one
+    // the "__init__ not called" error already covers.
+    if (!setCppPointer(sbkObj, desiredType, cptr))
+        return false;
+    BindingManager::instance().registerWrapper(sbkObj, cptr);
+    setValidCpp(sbkObj, true);
+    if (hasCppWrapper)
+        setHasCppWrapper(sbkObj, true);
+    return true;
 }
 
 bool isValid(PyObject *pyObj)

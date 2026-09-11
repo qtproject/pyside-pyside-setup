@@ -2549,27 +2549,41 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
 
     const QString typeName = classContext.forSmartPointer()
         ? classContext.preciseType().cppSignature() : metaClass->qualifiedCppName();
-    s << "if (" << shibokenErrorsOccurred
-        << " || !Shiboken::Object::setCppPointer(sbkSelf, Shiboken::SbkType< "
-        << globalScopePrefix(classContext) << typeName << " >(), cptr)) {\n"
-        <<  indent;
-    if (canCallDestructor(classContext))
-        s << "delete cptr;\n";
-    s << errorReturn << outdent
-        << "}\n";
+    const QString sbkTypeExpr = u"Shiboken::SbkType< "_s
+        + globalScopePrefix(classContext) + typeName + u" >()"_s;
+
+    // Before anything is built: the slot used to be claimed after the C++
+    // constructor, so the thread that lost had built its object anyway and,
+    // for a QObject, hung it in Qt's tree before it found out.
+    s << "\n// One thread builds this object, not two\n"
+        << "Shiboken::Object::ConstructionGuard sbkCtorGuard(sbkSelf, "
+        << sbkTypeExpr << ");\n"
+        << "if (!sbkCtorGuard.claimed())\n" << indent << errorReturn << outdent
+        << '\n';
+
+    writeFunctionCalls(s, overloadData, namedArgumentFlags, classContext, errorReturn);
+    s << '\n';
+    // One call, not four: claiming the slot, registering and marking valid
+    // used to be separate steps here, and every other thread could see the
+    // object between two of them.
+    const bool hasCppWrapper =
+        shouldGenerateCppWrapper(overloadData.referenceFunction()->ownerClass());
+    const auto writeBailOut = [&](QAnyStringView condition) {
+        s << "if (" << condition << ") {\n" << indent;
+        if (canCallDestructor(classContext))
+            s << "delete cptr;\n";
+        s << errorReturn << outdent << "}\n";
+    };
+    writeBailOut(shibokenErrorsOccurred);
+    // The wrong-arguments case first: there is nothing to publish then, and
+    // committing a null pointer would put the wrapper in the map under a null
+    // key that nothing takes out again.
     if (overloadData.maxArgs() > 0)
         s << "if (cptr == nullptr)\n" << indent
             << returnErrorWrongArguments(overloadData, classContext, errorReturn)
             << outdent << '\n';
-    s << "Shiboken::Object::setValidCpp(sbkSelf, true);\n";
-    // If the created C++ object has a C++ wrapper the ownership is assigned to Python
-    // (first "1") and the flag indicating that the Python wrapper holds an C++ wrapper
-    // is marked as true (the second "1"). Otherwise the default values apply:
-    // Python owns it and C++ wrapper is false.
-    if (shouldGenerateCppWrapper(overloadData.referenceFunction()->ownerClass()))
-        s << "Shiboken::Object::setHasCppWrapper(sbkSelf, true);\n";
-
-    s << "Shiboken::BindingManager::instance().registerWrapper(sbkSelf, cptr);\n";
+    writeBailOut(u"!Shiboken::Object::commitConstruction(sbkSelf, "_s + sbkTypeExpr
+                 + u", cptr, "_s + (hasCppWrapper ? u"true"_s : u"false"_s) + u')');
 
     // Create metaObject and register signal/slot
     if (needsMetaObject) {

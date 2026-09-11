@@ -51,6 +51,9 @@ public:
     bool hasWrapper(const void *cptr, PyTypeObject *typeObject) const;
     bool hasWrapper(const void *cptr) const;
 
+    /// Enter a wrapper in the map. One step of a publication: generated code
+    /// goes through Shiboken::Object::commitConstruction(), which takes the
+    /// slot and enters the map as one operation.
     void registerWrapper(SbkObject *pyObj, void *cptr);
     /// Take the object out of the wrapper map, leaving its flags alone.
     /// Deallocation uses this to make the wrapper unreachable before it runs

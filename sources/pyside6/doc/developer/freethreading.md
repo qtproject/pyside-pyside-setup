@@ -36,6 +36,7 @@ handoff. The names this change uses:
 | B4-2 | the virtual-call preflight reading type state with no thread state |
 | B4-3 | the multiple-inheritance offsets filled behind a sentinel check |
 | B4-4 | the class hierarchy mutated while another thread walks it |
+| B5-3 | a generated constructor publishing itself in separate steps |
 | FT4 | carrying leases and pointer snapshots to their final use |
 | FT8 | restoring the short raw-lock contract - this series |
 
@@ -412,6 +413,56 @@ not enough: `dealloc-before-destroy` is before the wrapper is taken apart,
 one sees the window this section is about - the first is inside a stretch
 where removing the entry early already held.
 
+### Claiming a native slot is one transaction
+
+A generated constructor writes the C++ pointer into the slot of the wrapper
+it belongs to. Reading the slot and writing it used to be two steps, and a
+Python subclass can put `self` where another thread finds it before it calls
+the base initializer - both threads then saw an empty slot, both constructed
+a C++ object, and both reported success (B5-3). One of the two objects was
+left with nobody to delete it, and validity, ownership and registry identity
+described whichever write landed last.
+
+The claim happens in one state-lock transaction now, so exactly one thread
+takes the slot and the other is told that the object is already initialized -
+the error that already existed for a second `__init__` from one thread. The
+loser destroys the candidate it built and nothing else. Raising happens
+after the transaction, because it is a Python call-out.
+
+One transaction is still only the second half. The slot was claimed *after*
+the C++ constructor, so the thread that loses has built its object anyway -
+and, for a QObject, hung it in Qt's tree - before it hears that it lost. The
+generated constructor now reserves the slot before it builds anything:
+`Shiboken::Object::ConstructionGuard` takes it, `claimed()` says whether this
+thread has it, and the destructor gives it back, which is what makes it
+usable in code that bails out of a dozen places.
+
+The slot in `cptr` stays null while it is reserved. A sentinel value there
+would have to mean something to the forty-odd places that read `cptr` - one
+of them compares two objects through `cptr[0]`, where two objects under
+construction would be the same object. The reservation is a bit beside it,
+in `SbkObjectPrivate::constructingSlots`, and only the construction path asks
+about it.
+
+What the constructor then publishes used to be four calls - claim the slot,
+mark valid, mark wrapper, register - and every other thread could meet the
+object between two of them. `Shiboken::Object::commitConstruction()` does
+the three that matter in the one order the lock contract allows: the state
+lock is the leaf, so the map may not be taken while it is held, which puts
+the registration first. What is visible in between is an object that is
+registered and not yet valid, on which a call refuses - the safe half, and
+the one the "`__init__` not called" error already covers. The reverse order
+would leave a valid object that is not in the map, and a conversion of the
+same pointer would publish a second wrapper for it. The generator emits that
+one call, so `setCppPointer()` and `registerWrapper()` no longer appear in
+generated code.
+
+`ConstructorClaim` is the bit. Cleared, the slot is claimed after the
+constructor as it was, and `constructor-claim` sees two C++ objects built for
+one wrapper: it parks the first thread where it is about to publish and
+counts the parent's children while it is there. That is
+`proof-constructor-claim`.
+
 ### The class hierarchy publishes snapshots
 
 `addClassInheritance()` mutated the graph under no lock while
@@ -753,14 +804,15 @@ set, and a scenario on its own can stay clean hundreds of times.
 Repetition is a poor way to reach a window of a few instructions. A failpoint
 is a named place in libshiboken where a test stops one thread, so the second
 one arrives in the order the test wants, every time - a test that fails on an
-unfixed revision rather than in one run out of fourteen. Ten of them exist,
-either side of the windows that matter: before weakrefs are cleared, before
-the C++ destructor runs, once the wrapper is gone and only that destructor is
-left, once the destructor is past and the tombstone is still standing, before
-a parent's destructor deletes the children it has just handed back, after a
-lease is taken and before it is handed back, before `destroy()` detaches
-`cptr` and again where `destroy()` is past but the memory is not, and inside
-a traversal of the class-inheritance graph with one iterator alive.
+unfixed revision rather than in one run out of fourteen. Eleven of them
+exist, either side of the windows that matter: before weakrefs are cleared,
+before the C++ destructor runs, once the wrapper is gone and only that
+destructor is left, once the destructor is past and the tombstone is still
+standing, before a parent's destructor deletes the children it has just
+handed back, after a lease is taken and before it is handed back, before
+`destroy()` detaches `cptr` and again where `destroy()` is past but the
+memory is not, between the check and the write in `setCppPointer()`, and
+inside a traversal of the class-inheritance graph with one iterator alive.
 `Shiboken.failpointNames()` lists what a build has; a release build has none
 and the tests skip.
 

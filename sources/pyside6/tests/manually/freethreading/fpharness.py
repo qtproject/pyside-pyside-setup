@@ -258,7 +258,7 @@ def _run_without(cleared: list[str], test: str) -> tuple[int, str]:
     return rc, out
 
 
-def counterproof(option: str, test: str) -> str:
+def counterproof(option: str, test: str, context: str = "") -> str:
     """Assert that test fails once option is taken away.
 
     This is what separates a test from a habit: one that passes with and
@@ -269,11 +269,25 @@ def counterproof(option: str, test: str) -> str:
     by crashing, or by not coming back at all - and neither may take this
     one with it. The group is killed on a timeout, as the matrix runner
     kills its own children.
+
+    `context` names a measure that has to be off in *both* runs. Measures
+    nest: a later one can cover the window an earlier one was made for, and
+    the earlier one then looks untested because nothing can reach it any
+    more. Clearing the outer one in both runs puts the question back where
+    it can be answered, and the pass run is then a subprocess too - it is no
+    longer the same configuration this process runs in.
     """
     if not FREE_THREADED:
         return "skipped: the option bits exist only in a free-threaded build"
-    rc, out = _run_without([option], test)
-    without = option
+    cleared = [context] if context else []
+    if context:
+        rc, out = _run_without(cleared, test)
+        if rc != 0:
+            tail = out.strip().splitlines()[-1] if out.strip() else ""
+            return (f"FAIL: {test} does not even pass without {context}, so "
+                    f"nothing here is about {option}: {tail[:60]}")
+    rc, out = _run_without(cleared + [option], test)
+    without = option + (f" (and without {context})" if context else "")
     # A subject that skipped is not a subject that failed. main() answers
     # SKIP for "nothing here ran", and SKIP is non-zero: read as a failure it
     # turns this row green in exactly the builds where it demonstrates

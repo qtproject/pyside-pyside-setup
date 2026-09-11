@@ -211,6 +211,71 @@ def test_replacement_wrapper_for_child_in_dealloc() -> str:
     return "ok - the child's tombstone holds in the deallocator too"
 
 
+def test_constructor_claim() -> str:
+    """B5-3, the half `two-thread-ctor` cannot reach: claiming comes first.
+
+    That test shows exactly one thread taking the slot. But the claim happens
+    *after* the C++ constructor, so the loser has built its object anyway -
+    and, for a QObject, hung it in Qt's tree - before it hears that it lost.
+
+    The first thread parks where it is about to publish its pointer; by then
+    it has built its object. The second runs the same base `__init__` right
+    there, and the parent's children are counted while the first is still
+    parked: released, it finds the slot taken and deletes what it built, and
+    both outcomes look alike again.
+
+    sample.ObjectType rather than a QObject because Qt refuses to parent
+    across threads, so a QObject built on a worker never reaches the tree and
+    the count cannot see the second object at all.
+
+    What the A/B side actually reports is a crash, not this test's message:
+    the loser's object is hung in the parent and then deleted by the
+    constructor's own bail-out, so the parent is left with a dangling child
+    and the process dies clearing the frame. The count below is the check
+    that would speak if it got that far, and it is the reason the count is
+    taken while the first thread is still parked.
+    """
+    try:
+        import sample
+    except ImportError:
+        return "skipped: the sample binding is not in this build"
+
+    holder = sample.ObjectType()
+    victim = sample.ObjectType.__new__(sample.ObjectType)
+    errors = {}
+
+    def initialize(which: str) -> None:
+        try:
+            sample.ObjectType.__init__(victim, holder)
+        except RuntimeError as exc:
+            errors[which] = str(exc)
+
+    with Failpoint("ctor-before-publish") as point:
+        winner = threading.Thread(target=initialize, args=("first",))
+        winner.start()
+        if not point.wait_until_reached():
+            return "FAIL: the first constructor never reached the failpoint"
+
+        loser = threading.Thread(target=initialize, args=("second",))
+        loser.start()
+        loser.join(timeout=5)
+        if loser.is_alive():
+            return "FAIL: the second constructor did not come back"
+
+        children = len(holder.children())
+
+        point.release()
+        winner.join(timeout=5)
+        if winner.is_alive():
+            return "FAIL: the first constructor did not come back"
+
+    if "second" not in errors:
+        return f"FAIL: the second __init__ reported success ({children} children)"
+    if children != 1:
+        return f"FAIL: {children} C++ objects were built for one wrapper"
+    return "ok - the second thread was refused before it built anything"
+
+
 def test_replacement_wrapper_for_owned_child() -> str:
     """B4-1 one level down: the children a destructor takes with it.
 
@@ -440,6 +505,43 @@ def test_destroy_while_call_in_flight() -> str:
     if result.get("name") != "leased":
         return f"FAIL: the leased call returned {result.get('name')!r}"
     return "ok"
+
+
+def test_two_threads_one_constructor() -> str:
+    """B5-3: two threads run the same base __init__ on one object."""
+    class Sub(QObject):
+        pass
+
+    obj = Sub.__new__(Sub)
+    results = []
+
+    def initialize():
+        try:
+            QObject.__init__(obj)
+            results.append("won")
+        except RuntimeError as error:
+            results.append(f"lost: {error}")
+
+    # A Python subclass can hand self to another thread before it calls the
+    # base initializer, which is how two of them arrive at the same slot.
+    with Failpoint("ctor-before-publish") as point:
+        first = threading.Thread(target=initialize)
+        first.start()
+        if not point.wait_until_reached():
+            return "FAIL: the constructor never reached the failpoint"
+        second = threading.Thread(target=initialize)
+        second.start()
+        second.join(timeout=5)
+        point.release()
+        first.join(timeout=5)
+        if first.is_alive() or second.is_alive():
+            return "FAIL: an initializing thread did not come back"
+
+    winners = results.count("won")
+    if winners != 1:
+        return (f"FAIL: {winners} of {len(results)} threads claimed the slot; "
+                "each of them constructed a C++ object")
+    return "ok - one thread claimed the slot, the other was refused"
 
 
 def test_no_raw_lock_while_python_runs() -> str:
@@ -958,6 +1060,13 @@ TESTS = {
     # Was an expected FAIL on a wrong explanation; see the docstring.
     "lease-vs-destroy": Test(test_destroy_while_call_in_flight),
     "replacement-while-dying": Test(test_replacement_wrapper_while_dying),
+    "two-thread-ctor": Test(test_two_threads_one_constructor),
+    # Asked with the reservation off: ConstructorClaim now refuses the second
+    # thread before it ever reaches the transaction, so with everything on
+    # there is nothing left for this one to see.
+    "proof-ctor-commit": Test(lambda: counterproof("ConstructorCommit",
+                                                   "two-thread-ctor",
+                                                   context="ConstructorClaim")),
     "replacement-before-cpp-dtor": Test(test_replacement_wrapper_before_cpp_dtor),
     "dying-qobject-argument": Test(test_dying_qobject_argument),
     "proof-tombstones": Test(lambda: counterproof("Tombstones",
@@ -969,6 +1078,9 @@ TESTS = {
         Test(test_replacement_wrapper_for_child_in_dealloc),
     "proof-tombstones-dealloc-children": Test(lambda: counterproof(
         "Tombstones", "replacement-of-child-in-dealloc")),
+    "constructor-claim": Test(test_constructor_claim),
+    "proof-constructor-claim": Test(lambda: counterproof(
+        "ConstructorClaim", "constructor-claim")),
     "proof-tombstones-children": Test(lambda: counterproof(
         "Tombstones", "replacement-of-owned-child")),
     # The exception the tombstone makes for QObject is a measure like any

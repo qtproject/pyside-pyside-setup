@@ -460,8 +460,68 @@ LIBSHIBOKEN_API std::vector<void *>cppPointers(SbkObject *pyObj);
 
 /**
  *   Set the C++ pointer of type \p desiredType of a Python object.
+ *
+ *   One step of a publication, not a publication. Generated code calls
+ *   commitConstruction() below, which is the only place that takes the slot
+ *   and enters the map together.
  */
 LIBSHIBOKEN_API bool setCppPointer(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr);
+
+/// Publish a freshly constructed C++ object on \a sbkObj: claim the pointer
+/// slot, register it, then mark it valid. False when another thread claimed
+/// the slot first, with the error set; the caller then owns nothing and
+/// destroys the object it built.
+///
+/// The order is the one the lock contract allows - the state lock is the
+/// leaf, so the map cannot be taken while it is held. What is visible in
+/// between is an object that is registered and not yet valid, on which a
+/// call refuses; the reverse order would leave a valid object that is not in
+/// the map, and a conversion of the same pointer would publish a second
+/// wrapper for it.
+///
+/// This is what a generated constructor calls instead of setCppPointer(),
+/// setValidCpp(), setHasCppWrapper() and registerWrapper() one after the
+/// other, which made a half-published object visible to every other thread.
+LIBSHIBOKEN_API bool commitConstruction(SbkObject *sbkObj, PyTypeObject *desiredType,
+                                        void *cptr, bool hasCppWrapper);
+
+/// Reserve the pointer slot of \a desiredType on \a sbkObj for this thread,
+/// before the C++ object exists.
+///
+/// commitConstruction() is only the second half. It claims the slot once the
+/// object is built, so the thread that loses has built one anyway - and, for
+/// a QObject, hung it in Qt's tree - before it learns that it lost. The
+/// reservation moves the decision in front of the constructor: the loser
+/// builds nothing.
+///
+/// The slot itself stays null while it is reserved. A sentinel value there
+/// would have to mean something to the forty-odd places that read cptr; the
+/// reservation is a bit beside it that only this path asks about.
+///
+/// Given back by the destructor, which is what makes it usable in generated
+/// code: a constructor bails out of a dozen places, and every one of them
+/// has to leave the slot free for the next caller.
+class LIBSHIBOKEN_API ConstructionGuard
+{
+public:
+    ConstructionGuard(SbkObject *sbkObj, PyTypeObject *desiredType);
+    ~ConstructionGuard();
+
+    ConstructionGuard(const ConstructionGuard &) = delete;
+    ConstructionGuard &operator=(const ConstructionGuard &) = delete;
+
+    /// Whether this thread holds the slot. False with a Python error set:
+    /// another thread is constructing it, it is constructed already, or it
+    /// was destroyed while this call was on its way in.
+    bool claimed() const { return m_claimed; }
+
+private:
+#ifdef Py_GIL_DISABLED
+    SbkObject *m_obj = nullptr;
+    int m_index = -1;         ///< -1: nothing to give back
+#endif
+    bool m_claimed = false;
+};
 
 /**
  * Returns false and sets a Python RuntimeError if the Python wrapper is not marked as valid.

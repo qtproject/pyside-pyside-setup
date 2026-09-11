@@ -88,6 +88,12 @@ struct SbkObjectPrivate
     /// object is not destroyed while this is non-zero; the last lease release
     /// runs a destruction that was requested meanwhile. State lock.
     unsigned int activeCalls;
+    /// One bit per C++ base whose pointer slot a thread has reserved and not
+    /// filled yet - between beginning a construction and publishing it. The
+    /// slot in cptr stays null meanwhile, on purpose: some forty places read
+    /// cptr, and a sentinel value there would have to mean something to every
+    /// one of them. Only the construction path asks about this. State lock.
+    unsigned int constructingSlots;
 #else // Py_GIL_DISABLED
     /// True when Python is responsible for freeing the used memory.
     unsigned int hasOwnership : 1;

@@ -38,6 +38,7 @@ static constexpr std::array KnownFailpoints = {
     "lease-before-release",      // native call done, before giving the lease back
     "destroy-before-detach",     // Object::destroy(), before cptr is detached
     "destroy-after-tombstone",   // Object::destroy() is past, the memory is not
+    "ctor-before-publish",       // setCppPointer(), between the check and the write
     "hierarchy-mid-traversal",   // in the class graph, one iterator alive
 };
 #else

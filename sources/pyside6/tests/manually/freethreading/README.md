@@ -199,6 +199,22 @@ refuse that address for the rest of the process.
 `proof-external-tombstones` clears `ExternalTombstones` and requires the
 failure back.
 
+### constructor-claim, proof-constructor-claim
+
+B5-3 again, the half `two-thread-ctor` cannot reach. That one shows the slot
+being claimed by exactly one thread - but the claim happens *after* the C++
+constructor, so the loser has built its object anyway and, for a QObject,
+hung it in Qt's tree before it hears that it lost.
+
+The first thread parks at `ctor-before-publish`, where it has built its
+object and is about to publish it. The second runs the same base `__init__`
+right then, and the parent's children are counted while the first thread is
+still parked - once it is released it finds the slot taken and deletes what it
+built, and both outcomes look alike again.
+
+`proof-constructor-claim` clears `ConstructorClaim` and requires the second
+object back.
+
 ### metaobject-lifetime - expected FAIL, and not ours
 
 Every QObject answers `metaObject()` with the same `&QObject::staticMetaObject`,
@@ -251,6 +267,20 @@ in flight. A GIL build divides the expression in exactly the same place.
 The method is therefore bound before the failpoint is armed, and then the
 test parks where it always meant to: inside the call, with the lease held.
 The destruction is deferred, the call returns its value.
+
+### two-thread-ctor, proof-ctor-commit
+
+B5-3: two threads run the same base `__init__` on one object. One parks
+between reading the native slot and writing it, the second one runs the
+whole initializer, and then the first continues. Without the transaction
+both are told they won, and each of them has constructed a C++ object.
+
+`proof-ctor-commit` clears `ConstructorCommit` in a child and requires two
+winners to come back - and it clears `ConstructorClaim` in *both* runs. The
+reservation refuses the second thread before it ever reaches the transaction,
+so with everything on there is nothing left here to see. Measures nest, and a
+counterproof for the inner one has to switch the outer one off to ask its
+question at all.
 
 ### no-lock-in-python
 
