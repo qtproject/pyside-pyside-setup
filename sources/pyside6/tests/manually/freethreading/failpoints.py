@@ -999,7 +999,18 @@ def test_lock_order() -> str:
 
 
 def test_lazy_lock_spans_destruction() -> str:
-    """Open, owned by the lazy protocol: B13-5 from the destruction end."""
+    """Open, owned by the lazy protocol: B13-5 from the destruction end.
+
+    Module::get() holds the lazy-type mutex across PyObject_GetAttr(), so
+    arbitrary Python runs under it - and with it a refcount reaching zero, a
+    wrapper being destroyed, a deferred C++ destructor running, which is what
+    DeferredActions::run() declares no raw lock may span.
+
+    The two drivers below reached that shape when this was written and no
+    longer do; the defect did not go away with them. So a run without a
+    recorded exception has measured nothing, and says so rather than green -
+    the one thing this test must not do is claim the lazy protocol is sound.
+    """
     if not FREE_THREADED:
         return "skipped: a build with a GIL takes no lazy-type lock"
 
@@ -1010,35 +1021,36 @@ def test_lazy_lock_spans_destruction() -> str:
     # one, taken on every type-narrowed lookup.
     taken = [line for line in Shiboken.contractExceptions().split("\n")
              if line.startswith("lazy type")]
-    if not taken:
-        return "ok - no raw lock is held where the contract forbids one"
-    return f"FAIL: the contract's exception was taken -> {'; '.join(taken)}"
+    if taken:
+        return f"FAIL: the contract's exception was taken -> {'; '.join(taken)}"
+    return "skipped: nothing was destroyed under the lazy-type lock in this run"
 
 
 def test_metaobject_lifetime() -> str:
-    """Open, and NOT free-threading: a shared wrapper invalidated by a
-    stranger's destruction.
+    """A shared wrapper invalidated by a stranger's destruction.
 
     Every QObject answers metaObject() with the same &QObject::staticMetaObject,
     so the map holds exactly one wrapper for it and every instance hands out
-    that one. Destroying any single QObject invalidates it, and every other
-    holder is hit. The C++ object behind it is static and never dies; the
-    invalidation is a guess PySide makes because it does not know when the
-    referent dies.
+    that one. Destroying any single QObject invalidated it, and every other
+    holder was hit.
 
-    That is reproducible with a GIL, in four lines and without threads:
+    Not free-threading: five lines with a GIL and no threads. The third line
+    is the whole test - without it the shared wrapper is not among b's
+    referred objects, nothing touches it, and the four remaining lines pass
+    on a broken build:
 
         a, b = QObject(), QObject()
         ma = a.metaObject()
+        mb = b.metaObject()         # the SAME wrapper, fetched through b
         Shiboken.delete(b)          # a stranger
         ma.className()              # RuntimeError: already deleted
 
     Bisected to 4c1d56fb6 (29.07.2026), which moved the bookkeeping in
     callCppDestructors() ahead of the C++ destructors - before that,
     clearReferences() had taken the referred objects out before invalidate()
-    ran. The move is right and free-threading-only in its reason, but it sits
-    in common code, so a GIL build gets the side effect and none of the
-    benefit. The fix belongs on the free-threading branch, not in this series.
+    ran. That only exposed it: invalidate() had walked referred objects since
+    2011, and a referred object is by definition one the holder does not own.
+    The walk is gone now, in both twins.
     """
     if not FREE_THREADED or gil_enabled():
         return "skipped: the race needs the GIL off"
@@ -1123,11 +1135,12 @@ TESTS = {
                                                  "qml-placement-parallel")),
     "proof-native-preflight": Test(lambda: counterproof("NativePreflight",
                                                         "native-preflight")),
-    # Known open, and not free-threading: the same defect is four lines with
-    # a GIL, see the docstring. Kept because this is where it was found.
-    "metaobject-lifetime": Test(test_metaobject_lifetime, "FAIL"),
+    # Not free-threading: the same defect is five lines with a GIL, see the
+    # docstring. Kept because this is where it was found.
+    "metaobject-lifetime": Test(test_metaobject_lifetime),
     # Known open, owned by the lazy protocol's replacement: the lazy-type lock
-    # spans type creation, and a deferred destructor runs under it.
+    # spans type creation, and a deferred destructor runs under it. A run that
+    # does not reach that shape skips, see the docstring.
     "lazy-lock-spans-destruction": Test(test_lazy_lock_spans_destruction, "FAIL"),
 }
 

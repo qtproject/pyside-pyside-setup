@@ -37,9 +37,9 @@ through `PYSIDE6_OPTION_FT` (`sbkftoptions.h`), and the tests named
 require it to fail there. If it still passes, the test is not testing what
 its name says and the `proof-*` cell is what says so.
 
-Three tests are expected to FAIL. They hold findings that belong to other
-work packages; the day one of them passes, that package is done and the line
-comes out of the registry.
+One test is expected to FAIL. It holds a finding that belongs to another
+work package, and the line comes out of the registry the day that package is
+done. A run that does not reach the defect reports *skipped*, not ok.
 
 ## The tests
 
@@ -215,17 +215,20 @@ built, and both outcomes look alike again.
 `proof-constructor-claim` clears `ConstructorClaim` and requires the second
 object back.
 
-### metaobject-lifetime - expected FAIL, and not ours
+### metaobject-lifetime
 
 Every QObject answers `metaObject()` with the same `&QObject::staticMetaObject`,
 so the wrapper map holds one wrapper for it and hands that one to everybody.
-Destroying any single QObject invalidates it and hits every other holder,
+Destroying any single QObject invalidated it and hit every other holder,
 although the C++ object behind it is static and never dies.
 
-Four lines, with a GIL, no threads:
+Five lines, with a GIL, no threads. The third one is the whole test - leave it
+out and the shared wrapper is not among `b`'s referred objects, nothing
+touches it, and the remaining four pass on a broken build:
 
     a, b = QObject(), QObject()
     ma = a.metaObject()
+    mb = b.metaObject()         # the SAME wrapper, fetched through b
     Shiboken.delete(b)          # a stranger
     ma.className()              # RuntimeError: already deleted
 
@@ -233,18 +236,14 @@ Bisected to `4c1d56fb6` (29.07.2026, "Add a coarse lock for free-threaded
 builds"), which moved the bookkeeping in `callCppDestructors()` ahead of the
 C++ destructors. Before that, `~Wrapper() -> Object::destroy() ->
 clearReferences()` had already taken the referred objects out by the time
-`invalidate()` ran, so it found nothing to mark dead. Now it runs while they
-are still attached.
+`invalidate()` ran, so it found nothing to mark dead.
 
-The move itself is right and its reason is in the code: `ThreadStateSaver`
-detaches the thread, which suspends the critical section, and a second thread
-then destroys the same C++ object again. But it sits in **common** code with
-a free-threading-only justification, so a GIL build gets the side effect and
-none of the benefit. Not on dev, and not in this series either - the fix
-belongs on the free-threading branch, where that commit lives.
-
-Free threading only changes how often it is met: 139 of 600 without the GIL
-against 3 of 600 with it.
+That commit only exposed it. The defect is in the walk: `invalidate()` had
+marked referred objects invalid since 2011, and a referred object is the one
+case where the holder is *not* the owner - the `reference-count` tag exists
+because a parent link would be wrong there. The walk is gone from both twins;
+`ownership_invalidate_referred_test.py` in the sample binding is the
+regression test, and it runs under ctest with the GIL as without it.
 
 ### lease-vs-destroy
 
@@ -535,29 +534,20 @@ reaches Qt and user code, so a raw lock held across it deadlocks against
 stop-the-world and against a re-entrant call.
 
 Found by the assertion in `DeferredActions::run()` when two of the tests here
-ran in the same process, and it fires every time they do - which is why this
-one runs them rather than trying to rebuild the state they leave behind.
-Neither of them reaches it alone: it needs the wrappers the first one leaves
-for the collector and the type incarnation the second one causes.
+ran in the same process, which is why this one runs them rather than trying
+to rebuild the state they leave behind. Neither of them reaches it alone: it
+needs the wrappers the first one leaves for the collector and the type
+incarnation the second one causes.
+
+It no longer fires on either interpreter: a run that drops two hundred
+wrappers into the collector and then walks six uncreated types records no
+exception either. `Module::get()` still takes the mutex around the walk, so
+the drivers changed, not the protocol - hence *skipped*, never ok. Making it
+deterministic again needs a failpoint inside `Module::get()`, which belongs
+with the replacement of that protocol.
 
 Counted rather than asserted, because aborting on it would mean nobody can
 run a debug build until the lazy protocol is replaced. Only the lazy line of
 `contractExceptions()` is read: the wrapper-map exception is a different,
 documented one, taken on every type-narrowed lookup, so counting it in here
 would mean this test could never pass again.
-
-### metaobject-lifetime - expected FAIL
-
-Open: `metaObject()` hands out a wrapper it does not keep alive. Found while
-driving the lock-order test. Four threads doing nothing but
-`metaObject().className()` on their own objects, and three of them get
-"Internal C++ object (QMetaObject) already deleted". Measured on the same
-binary: 3 errors free-threaded, 0 with `PYTHON_GIL=1`, 0 on traditional
-CPython - so it is not an old bug that free-threading happens to show, it is
-one free-threading introduces.
-
-`retrieveMetaObjectForCppObject()` returns a `QMetaObject *` whose wrapper
-reference is dropped by the same line; with a GIL nothing runs between the
-drop and the use. It is a lifetime question about a returned wrapper, so it
-belongs with the lease work rather than here, and this test holds the finding
-until then.
