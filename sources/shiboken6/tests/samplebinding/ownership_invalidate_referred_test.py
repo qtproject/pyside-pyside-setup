@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 from __future__ import annotations
 
-'''Tests invalidating a parent whose child holds the last reference to another object.'''
+'''Tests what an invalidation walk may and may not reach through a reference.'''
 
 import gc
 import os
@@ -20,31 +20,39 @@ from sample import ObjectModel, ObjectType, ObjectView
 
 
 class InvalidateReferredTest(unittest.TestCase):
-    '''The invalidation walk collects the objects it has to visit, then runs the
-    collected work with no lock held. Detaching a child hands the parent
-    reference back, and that decref can be the last one: the child dies, its
-    referred objects die with it, and anything the walk still had to visit
-    through them is gone. This is a plain single-threaded crash, not a race.
-    '''
+    '''An invalidated holder takes its children with it, not what it refers to.'''
 
-    def testInvalidateParentOfReferenceHolder(self):
-        '''The referred object must survive until the walk is done with it.'''
-        # Both have to come from C++: an object constructed in Python carries a
-        # C++ wrapper, and the invalidation walk skips those - it would never
-        # reach the case under test.
+    def testReferredObjectSurvivesItsHolder(self):
+        '''A child dies with its parent, a referred object does not.'''
+        # All three come from C++: an object constructed in Python carries a
+        # C++ wrapper, and invalidation never marks those - the difference
+        # would not be visible.
         parent = ObjectType.create()
         view = ObjectView.create()
         view.setParent(parent)
-        view.setModel(ObjectModel())
-        # Neither the view nor the model is kept on the Python side from here
-        # on: the view lives on its parent's reference, the model on the view's
-        # reference map. Both are the last ones.
+        model = ObjectModel.create()
+        view.setModel(model)
+
+        Shiboken.invalidate(parent)
+
+        self.assertFalse(Shiboken.isValid(parent))
+        self.assertFalse(Shiboken.isValid(view))
+        self.assertTrue(Shiboken.isValid(model))
+
+    def testInvalidateParentOfReferenceHolder(self):
+        '''The walk must survive a decref cascade it sets off itself.'''
+        # Detaching a child hands the parent reference back, and that decref
+        # can be the last one. The child has to stay readable until the walk
+        # is done with it, which is what the plan pins it for.
+        parent = ObjectType.create()
+        view = ObjectView.create()
+        view.setParent(parent)
+        view.setModel(ObjectModel.create())
+        # The view is not kept on the Python side from here on: it lives on
+        # its parent's reference, and that is the last one.
         del view
         self.assertTrue(Shiboken.isValid(parent))
 
-        # Walks parent -> view -> model, detaches the view (dropping the last
-        # reference to it, hence to the model), and then still has to visit
-        # the model. Reaching the assertion at all is the point of the test.
         Shiboken.invalidate(parent)
         gc.collect()
 

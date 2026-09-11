@@ -13,6 +13,9 @@ public:
     explicit ObjectModel(ObjectType *parent = nullptr)
         : ObjectType(parent) {}
 
+    // Create from C++, so the object gets no C++ wrapper class.
+    inline static ObjectModel *create() { return new ObjectModel(); }
+
     void setData(ObjectType *data);
     virtual ObjectType *data() const;
 

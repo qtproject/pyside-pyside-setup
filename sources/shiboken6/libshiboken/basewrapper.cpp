@@ -1718,6 +1718,14 @@ static void recursive_invalidate(PyObject *pyobj, std::set<SbkObject *> &seen)
         recursive_invalidate(o, seen);
 }
 
+// The object and its children, and deliberately not what it refers to. The
+// tag that fills referredObjects exists for the case where a parent link
+// would be wrong: "our hypothetical view cannot become a parent of the model,
+// since the said model could be used by other views as well"
+// (typesystem_arguments.rst). A referred object outlives the holder's C++
+// instance, so marking it invalid claims an address the binding never had -
+// the shared &QObject::staticMetaObject is referred to by every QObject that
+// ever asked for its metaObject().
 static void recursive_invalidate(SbkObject *self, std::set<SbkObject *> &seen)
 {
     // Skip if this object not is a valid object or if it's already been seen
@@ -1743,12 +1751,6 @@ static void recursive_invalidate(SbkObject *self, std::set<SbkObject *> &seen)
             if (!self->d->validCppObject)
                 removeParent(child, true, true);
         }
-    }
-
-    // If has ref to other objects invalidate all
-    if (auto *rInfo = self->d->referredObjects) {
-        for (const auto &p : *rInfo)
-            recursive_invalidate(p.second, seen);
     }
 }
 
