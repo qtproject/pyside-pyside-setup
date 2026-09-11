@@ -16,9 +16,9 @@ namespace Shiboken::FreeThreading {
 /// Kill switches for what free-threaded builds add, as bit flags in one
 /// variable, in the style of PYSIDE6_OPTION_PYTHON_ENUM:
 ///
-///     PYSIDE6_OPTION_FT=0b11111   all of them (the default)
-///     PYSIDE6_OPTION_FT=0b01111   without the QML placement scope
-///     PYSIDE6_OPTION_FT=0b00011   the locks only
+///     PYSIDE6_OPTION_FT=0b111111  all of them (the default)
+///     PYSIDE6_OPTION_FT=0b011111  without the MI offsets measure
+///     PYSIDE6_OPTION_FT=0b000011  the locks only
 ///     PYSIDE6_OPTION_FT=off       without any of them
 ///
 /// A set bit keeps the measure, a cleared bit takes it away and puts back
@@ -41,7 +41,12 @@ enum Option : int
     QmlPlacementType = 0x08,
     /// No process-wide lock spans QML construction. Cleared, one is taken
     /// across the Python call, as it was before the placement context.
-    QmlPlacementFree = 0x10
+    QmlPlacementFree = 0x10,
+    /// The multiple-inheritance offsets of a type are computed once, by the
+    /// initializer of a function-local static. Cleared, the sentinel check
+    /// that used to guard them is back, and two threads reaching a type for
+    /// the first time sort and move the same array at the same time.
+    MiOffsetsOnce    = 0x20
 };
 
 /// Whether opt is enabled. The environment is read once, on first use.

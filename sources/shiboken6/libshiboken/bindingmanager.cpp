@@ -3,6 +3,8 @@
 // Qt-Security score:significant reason:default
 
 #include "bindingmanager.h"
+#include "sbkfailpoint.h"
+#include "sbkftoptions.h"
 #include "sbkheldlocks.h"
 
 #include "autodecref.h"
@@ -15,18 +17,18 @@
 #include "sbkstaticstrings.h"
 #include "sbkstring.h"
 
+#include <cassert>
 #include <cstddef>
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <mutex>
 #include <string_view>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #ifdef Py_GIL_DISABLED
-#  include <cassert>
-#  include <utility>
-
 // Taking a reference needs an attached thread state: PyUnstable_TryIncRef
 // touches the interpreter's refcount bookkeeping. The precondition used to be
 // documentation only, which is how it got broken once already. PyGILState_Check
@@ -117,6 +119,12 @@ using WrapperMap = std::unordered_multimap<const void *, WrapperEntry>;
 using WrapperMap = std::unordered_multimap<const void *, SbkObject *>;
 #endif // Py_GIL_DISABLED
 
+using ClassHierarchyGuard =
+    Shiboken::TrackedGuard<std::mutex, Shiboken::RawLock::ClassHierarchy>;
+
+// The class hierarchy: modules add edges, conversions read them. A reader
+// cannot hold a lock - identifyType() creates types and calls discovery
+// functions - so the edges are immutable and a writer publishes a new map.
 template <class NodeType>
 class BaseGraph
 {
@@ -125,26 +133,52 @@ public:
     using NodeSet = std::unordered_set<NodeType>;
 
     using Edges = std::unordered_map<NodeType, NodeList>;
+    using EdgesPtr = std::shared_ptr<const Edges>;
 
-    Edges m_edges;
+    BaseGraph() : m_edges(std::make_shared<const Edges>()) {}
 
-    BaseGraph() = default;
+    using Edge = std::pair<NodeType, NodeType>;
 
-    void addEdge(NodeType from, NodeType to)
+    /// A module's edges, in one publication. Publishing means copying the
+    /// map, so one call per edge copies it once per edge - a full build has
+    /// 436 of them, and the graph grows by a module at a time, never by an
+    /// edge at a time.
+    void addEdges(const std::vector<Edge> &edges)
     {
-        m_edges[from].push_back(to);
+        if (edges.empty())
+            return;
+        // The copy under the lock as well: two modules publishing at once
+        // would otherwise start from the same map and one would lose its
+        // edges. Module initialization is the only writer.
+        ClassHierarchyGuard guard(m_mutex);
+        auto next = std::make_shared<Edges>(*m_edges);
+        for (const auto &[from, to] : edges)
+            (*next)[from].push_back(to);
+        m_edges = std::move(next);
     }
 
-    NodeSet nodeSet() const
+    // The edges as they are now. Held by the caller for as long as it walks
+    // them, which is why the lock is not.
+    EdgesPtr edges() const
+    {
+        ClassHierarchyGuard guard(m_mutex);
+        return m_edges;
+    }
+
+    static NodeSet nodeSet(const Edges &snapshot)
     {
         NodeSet result;
-        for (const auto &p : m_edges) {
+        for (const auto &p : snapshot) {
             result.insert(p.first);
             for (const auto node2 : p.second)
                 result.insert(node2);
         }
         return result;
     }
+
+private:
+    EdgesPtr m_edges;
+    mutable std::mutex m_mutex;
 };
 
 class Graph : public BaseGraph<GraphNode>
@@ -156,27 +190,32 @@ public:
     // its type discovery function, return type and cptr cast to derived class.
     TypeCptrPair identifyType(void *cptr, PyTypeObject *type, PyTypeObject *baseType) const
     {
-        return identifyType(cptr, GraphNode(type->tp_name), type, baseType);
+        // One snapshot for the whole traversal: a later round must not see a
+        // different graph from the one it started on.
+        const auto snapshot = edges();
+        return identifyType(*snapshot, cptr, GraphNode(type->tp_name), type,
+                            baseType);
     }
 
     bool dumpTypeGraph(const char *fileName) const;
 
 private:
-    TypeCptrPair identifyType(void *cptr, GraphNode typeNode, PyTypeObject *type,
+    TypeCptrPair identifyType(const Edges &snapshot, void *cptr,
+                              GraphNode typeNode, PyTypeObject *type,
                               PyTypeObject *baseType) const;
 };
 
-Graph::TypeCptrPair Graph::identifyType(void *cptr,
+Graph::TypeCptrPair Graph::identifyType(const Edges &snapshot, void *cptr,
                                         GraphNode typeNode, PyTypeObject *type,
                                         PyTypeObject *baseType) const
 {
     assert(typeNode.initStruct != nullptr || type != nullptr);
-    auto edgesIt = m_edges.find(typeNode);
-    if (edgesIt != m_edges.end()) {
+    auto edgesIt = snapshot.find(typeNode);
+    if (edgesIt != snapshot.end()) {
         typeNode = edgesIt->first;
         const NodeList &adjNodes = edgesIt->second;
         for (const auto &node : adjNodes) {
-            auto newType = identifyType(cptr, node, nullptr, baseType);
+            auto newType = identifyType(snapshot, cptr, node, nullptr, baseType);
             if (newType.first != nullptr)
                 return newType;
         }
@@ -205,6 +244,10 @@ static void formatDotNode(std::string_view name, std::ostream &file)
 
 bool Graph::dumpTypeGraph(const char *fileName) const
 {
+    // Snapshot first: the file is written with no lock held, and the writer
+    // must not see the graph change halfway through.
+    const auto snapshot = edges();
+
     std::ofstream file(fileName);
     if (!file.good())
         return false;
@@ -212,14 +255,16 @@ bool Graph::dumpTypeGraph(const char *fileName) const
     file << "digraph D {\n";
 
     // Define nodes with short names
-    for (const auto &node : nodeSet())
+    for (const auto &node : nodeSet(*snapshot))
         formatDotNode(node.name, file);
 
-    // Write edges
-    for (const auto &p : m_edges) {
-        const auto &node1 = p.first;
-        const NodeList &nodeList = p.second;
-        for (const auto &node2 : nodeList)
+    // Write edges. One iterator alive across the failpoint: a test stops here
+    // and lets a module publish, which is the race made deterministic.
+    auto it = snapshot->cbegin();
+    SBK_FAILPOINT("hierarchy-mid-traversal");
+    for (; it != snapshot->cend(); ++it) {
+        const auto &node1 = it->first;
+        for (const auto &node2 : it->second)
             file << "    \"" << node2.name << "\" -> \"" << node1.name << "\"\n";
     }
     file << "}\n";
@@ -433,6 +478,18 @@ bool BindingManager::hasWrapper(const void *cptr, PyTypeObject *typeObject) cons
     return m_d->findByType(cptr, typeObject) != m_d->wrapperMapper.cend();
 }
 
+// The MI aliases of one identity. Asked of the generated mi_init() every
+// time rather than cached in the type: the function computes the offsets on
+// its first call and hands out the same array afterwards, so there is
+// nothing to save, and the three writers that used to fill and copy
+// SbkObjectTypePrivate::mi_offsets - here, in the constructor and in type
+// creation - wrote it while other threads were reading it.
+static const int *miOffsets(SbkObjectTypePrivate *d, const void *cptr)
+{
+    return (d != nullptr && d->mi_init != nullptr && cptr != nullptr)
+        ? d->mi_init(cptr) : nullptr;
+}
+
 void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
 {
     auto *instanceType = Shiboken::pyType(pyObj);
@@ -441,9 +498,7 @@ void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
     if (!d)
         return;
 
-    if (d->mi_init && !d->mi_offsets)
-        d->mi_offsets = d->mi_init(cptr);
-    m_d->assignWrapper(pyObj, cptr, d->mi_offsets);
+    m_d->assignWrapper(pyObj, cptr, miOffsets(d, cptr));
 }
 
 #ifdef Py_GIL_DISABLED
@@ -467,7 +522,7 @@ void BindingManager::unregisterWrapper(SbkObject *sbkObj)
     auto *d = PepType_SOTP(sbkType);
     int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(sbkType) : 1);
 
-    const int *mi_offsets = d != nullptr ? d->mi_offsets : nullptr;
+    const int *mi_offsets = miOffsets(d, cptrs[0]);
     for (int i = 0; i < numBases; ++i) {
         if (cptrs[i] != nullptr)
             m_d->releaseWrapper(cptrs[i], sbkObj, mi_offsets);
@@ -594,9 +649,7 @@ AcquiredWrapper BindingManager::registerWrapperUnlessPresent(SbkObject *pyObj, v
 
     // The registration registerWrapper() does. mi_init() computes offsets
     // from the C++ pointer and runs no Python, so it may run under the lock.
-    if (d->mi_init && !d->mi_offsets)
-        d->mi_offsets = d->mi_init(cptr);
-    m_d->assignWrapper(pyObj, cptr, d->mi_offsets);
+    m_d->assignWrapper(pyObj, cptr, miOffsets(d, cptr));
     return {};
 }
 #else // Py_GIL_DISABLED
@@ -670,10 +723,13 @@ PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *pyMethodName
     return nullptr;
 }
 
-void BindingManager::addClassInheritance(Module::TypeInitStruct *parent,
-                                         Module::TypeInitStruct *child)
+void BindingManager::addClassInheritance(const InheritanceEdge *edges, std::size_t count)
 {
-    m_d->classHierarchy.addEdge(GraphNode(parent), GraphNode(child));
+    std::vector<Graph::Edge> nodes;
+    nodes.reserve(count);
+    for (std::size_t i = 0; i < count; ++i)
+        nodes.emplace_back(GraphNode(edges[i].parent), GraphNode(edges[i].child));
+    m_d->classHierarchy.addEdges(nodes);
 }
 
 BindingManager::TypeCptrPair BindingManager::findDerivedType(void *cptr, PyTypeObject *type) const
@@ -770,11 +826,16 @@ bool BindingManager::dumpTypeGraph(const char *fileName) const
 
 void BindingManager::dumpWrapperMap()
 {
+    // The hierarchy before the map lock: the two locks have a rank each, and
+    // taking the lower-ranked one underneath would be the inversion the rank
+    // exists to prevent.
+    const auto typeCount = Graph::nodeSet(*m_d->classHierarchy.edges()).size();
+
     WrapperMapGuard guard(m_d->wrapperMapLock);
     const auto &wrapperMap = m_d->wrapperMapper;
     std::cerr <<  "-------------------------------\n"
         << "WrapperMap size: " << wrapperMap.size() << " Types: "
-        << m_d->classHierarchy.nodeSet().size() << '\n';
+        << typeCount << '\n';
     for (auto it : wrapperMap) {
 #ifdef Py_GIL_DISABLED
         // Borrowed, but under the lock and only read - see acquireWrapper().

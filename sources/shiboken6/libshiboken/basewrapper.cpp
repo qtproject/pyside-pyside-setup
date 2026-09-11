@@ -782,7 +782,6 @@ static PyTypeObject *SbkObjectType_tp_new(PyTypeObject *metatype, PyObject *args
     const auto bases = Shiboken::getCppBaseClasses(newType);
     if (bases.size() == 1) {
         SbkObjectTypePrivate *parentType = PepType_SOTP(bases.front());
-        sotp->mi_offsets = parentType->mi_offsets;
         sotp->mi_init = parentType->mi_init;
         sotp->mi_specialcast = parentType->mi_specialcast;
         sotp->type_discovery = parentType->type_discovery;
@@ -790,7 +789,6 @@ static PyTypeObject *SbkObjectType_tp_new(PyTypeObject *metatype, PyObject *args
         sotp->is_multicpp = 0;
         sotp->converter = parentType->converter;
     } else {
-        sotp->mi_offsets = nullptr;
         sotp->mi_init = nullptr;
         sotp->mi_specialcast = nullptr;
         sotp->type_discovery = nullptr;
@@ -947,7 +945,7 @@ PyObject *Sbk_ReturnFromPython_Self(PyObject *self)
 // Determine name of a Python override of a virtual method according to features
 // and populate name cache.
 static PyObject *overrideMethodName(PyObject *pySelf, const char *methodName,
-                                    PyObject **nameCache)
+                                    Shiboken::CacheSlot *nameCache)
 {
     // PYSIDE-1626: Touch the type to initiate switching early.
     auto *obType = Py_TYPE(pySelf);
@@ -956,12 +954,16 @@ static PyObject *overrideMethodName(PyObject *pySelf, const char *methodName,
     const int flag = currentSelectId(obType);
     const int propFlag = isdigit(methodName[0]) ? methodName[0] - '0' : 0;
     const bool is_snake = flag & 0x01;
-    PyObject *pyMethodName = nameCache[is_snake];  // borrowed
+    PyObject *pyMethodName = nameCache[is_snake].get();  // borrowed
     if (pyMethodName == nullptr) {
         if (propFlag)
             methodName += 2; // skip the propFlag and ':'
-        pyMethodName = Shiboken::String::getSnakeCaseName(methodName, is_snake);
-        nameCache[is_snake] = pyMethodName;
+        // getSnakeCaseName() interns, and interning hands out a new
+        // reference every time: threads that lose the race here used to drop
+        // theirs on the floor. publish() gives the slot to one of them and
+        // releases the rest.
+        pyMethodName = nameCache[is_snake].publish(
+            Shiboken::String::getSnakeCaseName(methodName, is_snake));
     }
     return pyMethodName;
 }
@@ -969,9 +971,10 @@ static PyObject *overrideMethodName(PyObject *pySelf, const char *methodName,
 // The virtual function call
 PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
                             Shiboken::GilState &gil, const char *funcName,
-                            PyObject *&resultCache, PyObject **nameCache)
+                            Shiboken::CacheSlot &resultCache,
+                            Shiboken::CacheSlot *nameCache)
 {
-    if (Py_IsInitialized() == 0 || resultCache == Py_None)
+    if (Py_IsInitialized() == 0 || resultCache.get() == Py_None)
         return nullptr; // Bail out, execute C++ call (wrappers may outlive Python).
 
     auto &bindingManager = Shiboken::BindingManager::instance();
@@ -1011,7 +1014,8 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
 
     gil.acquire();
 #endif // Py_GIL_DISABLED
-    if (resultCache == Py_None) { // PYSIDE 3246, some other thread may have determined the override
+    PyObject *cached = resultCache.get();
+    if (cached == Py_None) { // PYSIDE 3246, some other thread may have determined the override
 #ifdef Py_GIL_DISABLED
         wrapperRef.reset();
 #endif
@@ -1019,8 +1023,8 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
         return nullptr;
     }
 
-    if (resultCache != nullptr) // recreate the callable from function/self
-        return PepExt_Type_CallDescrGet(resultCache, pySelf, nullptr);
+    if (cached != nullptr) // recreate the callable from function/self
+        return PepExt_Type_CallDescrGet(cached, pySelf, nullptr);
 
     PyObject *pyMethodName = overrideMethodName(pySelf, funcName, nameCache);
     auto *wrapper_dict = SbkObject_GetDict_NoRef(pySelf);
@@ -1035,8 +1039,8 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
 
     auto *pyOverride = Shiboken::BindingManager::getOverride(wrapper, pyMethodName);
     if (pyOverride == nullptr) {
-        resultCache = Py_None;
-        Py_INCREF(resultCache);
+        Py_INCREF(Py_None);
+        resultCache.publish(Py_None);
 #ifdef Py_GIL_DISABLED
         wrapperRef.reset();
 #endif
@@ -1047,8 +1051,8 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
     if (Shiboken::Errors::occurred() != nullptr) {
         // Give up.
         Py_XDECREF(pyOverride);
-        resultCache = Py_None;
-        Py_INCREF(resultCache);
+        Py_INCREF(Py_None);
+        resultCache.publish(Py_None);
 #ifdef Py_GIL_DISABLED
         wrapperRef.reset();
 #endif
@@ -1056,9 +1060,11 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
         return nullptr; // // Give up.
     }
 
-    resultCache = pyOverride;
+    // The loser of this race hands back the same override the winner found,
+    // and publish() drops the reference it no longer needs.
+    PyObject *winner = resultCache.publish(pyOverride);
     // recreate the callable from function/self
-    return PepExt_Type_CallDescrGet(resultCache, pySelf, nullptr);
+    return PepExt_Type_CallDescrGet(winner, pySelf, nullptr);
 }
 
 namespace
@@ -1374,8 +1380,12 @@ void copyMultipleInheritance(PyTypeObject *type, PyTypeObject *other)
     auto *sotp_type = PepType_SOTP(type);
     auto *sotp_other = PepType_SOTP(other);
     sotp_type->mi_init = sotp_other->mi_init;
-    sotp_type->mi_offsets = sotp_other->mi_offsets;
     sotp_type->mi_specialcast = sotp_other->mi_specialcast;
+    // mi_offsets is not copied any more. It used to be filled lazily by the
+    // first registration and copied here on every constructor call, which is
+    // a write to type state while other threads read it. The offsets come
+    // from mi_init() at the point of use now, which computes them once and
+    // returns the same array afterwards.
 }
 
 void setMultipleInheritanceFunction(PyTypeObject *type, MultipleInheritanceInitFunction function)

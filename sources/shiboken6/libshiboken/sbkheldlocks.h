@@ -36,6 +36,7 @@ enum class RawLock : unsigned
     ModuleData      = 1u << 4,  ///< sbkmodule.cpp, compiler-generated guard, never noted
     ConnectionHash  = 1u << 5,  ///< dynamicslot.cpp
     MetaObject      = 1u << 6,  ///< signalmanager.cpp, recursive
+    ClassHierarchy  = 1u << 7,  ///< bindingmanager.cpp, publishes a snapshot
 };
 
 /// The order they may be taken in. A thread may only take a lock whose rank
@@ -54,7 +55,7 @@ enum class RawLock : unsigned
 /// in the documentation says what happened and not what was intended.
 enum class LockRank : int
 {
-    LazyType = 1, ModuleData, MetaObject, ConnectionHash,
+    LazyType = 1, ClassHierarchy, ModuleData, MetaObject, ConnectionHash,
     WrapperMap, MainThreadDelete, State,
 };
 

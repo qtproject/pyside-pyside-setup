@@ -405,6 +405,65 @@ def test_qml_placement_unwinds() -> str:
     return "ok (10 failed QML constructions, the next one is intact)"
 
 
+def test_hierarchy_snapshot() -> str:
+    """A module publishes edges while a traversal holds an iterator.
+
+    A guard, not a proof - see README.md. It makes the race deterministic,
+    which is what a sanitizer needs, but it cannot fail on its own.
+    """
+    import importlib
+    import tempfile
+    qt_app()
+
+    # Each import runs the module's generated initInheritance(), which adds
+    # one edge per class - enough insertions to grow the map the traversal
+    # below is standing in the middle of. Module init is the only thing that
+    # adds edges at all, so without at least one import that goes through,
+    # this test watches an idle map and reports success either way.
+    #
+    # The shiboken test modules are in the list because a build that is not a
+    # full one has no other PySide6 modules to import - a Core subset with
+    # --build-tests, which is what the sanitizer trees are, would otherwise
+    # find nothing here.
+    modules = ["PySide6.QtGui", "PySide6.QtNetwork", "PySide6.QtXml",
+               "PySide6.QtSql", "PySide6.QtSvg", "PySide6.QtTest",
+               "PySide6.QtWidgets", "PySide6.QtPrintSupport",
+               "PySide6.QtOpenGL", "PySide6.QtUiTools",
+               "sample", "other", "minimal", "smart"]
+    outcome = {}
+    imported = []
+
+    with tempfile.NamedTemporaryFile(suffix=".dot") as out:
+        with Failpoint("hierarchy-mid-traversal", timeout_ms=30000) as point:
+            def traverse():
+                outcome["written"] = Shiboken.dumpTypeGraph(out.name)
+
+            reader = threading.Thread(target=traverse)
+            reader.start()
+            if not point.wait_until_reached():
+                return "FAIL: the traversal never reached the failpoint"
+
+            for name in modules:
+                try:
+                    importlib.import_module(name)
+                    imported.append(name)
+                except ImportError:
+                    pass
+
+            point.release()
+            reader.join(timeout=30)
+            if reader.is_alive():
+                return "FAIL: the traversal did not come back"
+
+    if not imported:
+        return ("FAIL: no module could be imported, so no edge was ever added "
+                "and the traversal raced nothing")
+    if not outcome.get("written"):
+        return "FAIL: the traversal did not finish its file"
+    return ("ok (a traversal survived the init of "
+            f"{', '.join(imported)} under it)")
+
+
 def test_type_mutation_during_destruction() -> str:
     """FT8 validation row "state lock": __bases__ swaps race destruction."""
     class Mutable(QObject):
@@ -433,9 +492,11 @@ def test_type_mutation_during_destruction() -> str:
     return "ok (200 bases swaps raced against destruction, no failure)"
 
 
-# The lock pairs the inventory in doc/developer/freethreading.md names. Both
-# have the lazy-type lock on the outside, which is why it ranks lowest.
-KNOWN_NESTINGS = {"lazy type -> wrapper map", "lazy type -> state"}
+# The lock pairs the inventory in doc/developer/freethreading.md names. All
+# of them have the lazy-type lock on the outside, which is why it ranks
+# lowest.
+KNOWN_NESTINGS = {"lazy type -> wrapper map", "lazy type -> state",
+                  "lazy type -> class hierarchy"}
 
 
 def test_lock_order() -> str:
@@ -527,6 +588,7 @@ TESTS = {
     "qml-placement": Test(test_qml_placement_nests),
     "qml-placement-parallel": Test(test_qml_placement_in_parallel),
     "qml-placement-unwinds": Test(test_qml_placement_unwinds),
+    "hierarchy-snapshot": Test(test_hierarchy_snapshot),
     "type-mutation": Test(test_type_mutation_during_destruction),
     "lock-order": Test(test_lock_order),
     # The two above have to fail once their measure is taken away, or they are

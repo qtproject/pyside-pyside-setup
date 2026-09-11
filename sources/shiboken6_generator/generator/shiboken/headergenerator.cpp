@@ -284,11 +284,10 @@ void *qt_metacast(const char *_clname) override;
     }
 
     if (needsMethodCache) {
-        s << "mutable std::array<PyObject *, " << maxOverrides
-            << "> m_PyMethodCache = {nullptr";
-        for (int i = 1; i < maxOverrides; ++i)
-            s << ", nullptr";
-        s << "};\n";
+        // Default-constructed to null. CacheSlot cannot be copied, so there
+        // is no initializer list here and nothing to fill.
+        s << "mutable std::array<Shiboken::CacheSlot, " << maxOverrides
+            << "> m_PyMethodCache;\n";
     }
 
     s << outdent << "};\n\n";

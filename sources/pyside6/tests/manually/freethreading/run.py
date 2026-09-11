@@ -48,6 +48,8 @@ from enum import IntFlag
 from pathlib import Path
 from typing import NamedTuple
 
+import ftoptions
+
 REPO = Path(__file__).resolve().parents[5]
 WORKER = Path(__file__).resolve().parent / "stress.py"
 
@@ -57,6 +59,18 @@ def has_sample(build: Path) -> bool:
     there is no sample module, and every scenario fails to import - a full run
     of failed starts, which reads like a result."""
     return bool(list(build.glob("shiboken6/tests/samplebinding/sample.*")))
+
+
+def tree_sanitizer(build: Path) -> str:
+    """Which sanitizer the tree was built with, asked of the tree itself."""
+    libshiboken = build / "shiboken6" / "libshiboken"
+    libs = sorted(libshiboken.glob("libshiboken6*.dylib")) \
+        + sorted(libshiboken.glob("libshiboken6*.so"))
+    if not libs:
+        return "none"
+    undefined = subprocess.run(["nm", "-u", os.fspath(libs[0])],
+                               capture_output=True, text=True).stdout
+    return next((t for t in ("tsan", "asan") if t in undefined), "none")
 
 
 def latest_build_dir() -> Path:
@@ -83,23 +97,25 @@ BUILD = Path(os.environ["BUILD_DIR"]) if "BUILD_DIR" in os.environ \
 # the variants leaves this directory holding a subset build without tests.
 if not has_sample(BUILD):
     sys.exit(f"No sample binding under {BUILD} - rebuild with --build-tests.")
+# A sanitizer-built tree cannot be measured here. It kills the process at its
+# first report - abort_on_error is 1 on Darwin - so every scenario the tool
+# has anything to say about reads as a crash in both columns. Turning that
+# off is worse: with exitcode=0 a real SIGSEGV exits 0, and dynamic_property,
+# which segfaults, reported ok/10. A sanitizer run is a different question
+# and wants a runner that counts reports.
+built_with = tree_sanitizer(BUILD)
+if built_with != "none":
+    sys.exit(f"{BUILD} is built with {built_with}. This harness counts "
+             "crashes and cannot tell a sanitizer's abort from one.")
 PKG = BUILD.parent / "package_for_wheels"
 
 REPEATS = int(os.environ.get("REPEATS", "10"))
 TIMEOUT = int(os.environ.get("STRESS_TIMEOUT", "120"))
 
 
-class Lock(IntFlag):
-    """The bits of PYSIDE6_OPTION_FT, mirroring sbkftoptions.h.
-
-    A scenario runs twice: once with ALL, once with its own bit cleared.
-    """
-
-    LAZY_TYPE = 0x1
-    STATE = 0x2
-    CALL_GUARD = 0x4
-    ALL = LAZY_TYPE | STATE | CALL_GUARD
-
+BITS = ftoptions.option_bits()
+Lock = IntFlag("Lock", BITS)
+ALL_BITS = ftoptions.all_bits(BITS)
 
 MODES = ["unlocked", "locked"]
 
@@ -114,30 +130,30 @@ class Scenario(NamedTuple):
 QQML_TEST = (REPO / "sources" / "pyside6" / "tests" / "QtQml"
              / "qqmlnetwork_test.py")
 SCENARIOS = {
-    "shared_delete": Scenario(WORKER, "shared_delete", Lock.STATE, True),
-    "call_vs_delete": Scenario(WORKER, "call_vs_delete", Lock.STATE, True),
+    "shared_delete": Scenario(WORKER, "shared_delete", Lock.StateLock, True),
+    "call_vs_delete": Scenario(WORKER, "call_vs_delete", Lock.StateLock, True),
     # A wrapper enters Object::destroy() from the C++ destructor of its owner
     # while other threads are calling into it. This is what the lease has to
     # cover transitively: not the object being deleted, but everything that
     # deletion takes with it.
-    "child_delete_vs_call": Scenario(WORKER, "child_delete_vs_call", Lock.STATE, True),
+    "child_delete_vs_call": Scenario(WORKER, "child_delete_vs_call", Lock.StateLock, True),
     # Signal connect/emit/disconnect in hand-written libpyside code. It was a
     # regression guard while the coarse lock covered these paths, and became a
     # proof when that lock went: the signal machinery reaches the wrapper
     # lookups, the parent/child graph and destruction, and those are the state
     # lock's. 15 crashes out of 15 without it, clean with it.
-    "signal_race": Scenario(WORKER, "signal_race", Lock.STATE, True),
+    "signal_race": Scenario(WORKER, "signal_race", Lock.StateLock, True),
     # Guards the map lookup against handing out a dying wrapper. Not marked
     # as a proof: what fixed it was acquireWrapper(), not the state lock, so
     # both modes are expected clean. Read its docstring before believing a
     # crash here - it can also die on a dangling C++ pointer, which says
     # nothing.
     "lookup_vs_last_decref": Scenario(WORKER, "lookup_vs_last_decref",
-                                      Lock.STATE, False),
+                                      Lock.StateLock, False),
     # Kept as a regression guard: it races destruction, but every thread owns
     # its objects, so nothing the state lock protects is contended and it
     # stays clean either way.
-    "destroy_race": Scenario(WORKER, "destroy_race", Lock.STATE, False),
+    "destroy_race": Scenario(WORKER, "destroy_race", Lock.StateLock, False),
     # The one-time incarnation of a type, raced by every thread at once.
     # Cheaper and far more reliable than lazy_types, and it needs no QML.
     # The call guard has to come out with it: it serializes calls on one
@@ -145,36 +161,40 @@ SCENARIOS = {
     # inconclusive once CallGuard entered ALL. What is proven is still the
     # lazy lock - the guard is only kept out of the way.
     "lazy_converter": Scenario(WORKER, "lazy_converter",
-                               Lock.LAZY_TYPE | Lock.CALL_GUARD, True),
+                               Lock.LazyTypeLock | Lock.CallGuard, True),
     # Qt calls the network access manager factory from its QML loader thread,
     # so this incarnates types there while the main thread incarnates others.
-    "lazy_types": Scenario(QQML_TEST, None, Lock.LAZY_TYPE, True),
+    "lazy_types": Scenario(QQML_TEST, None, Lock.LazyTypeLock, True),
     # Every thread inside one C++ object at once - what the GIL used to
     # prevent by accident and the per-object call guard now does on purpose.
-    "shared_setter": Scenario(WORKER, "shared_setter", Lock.CALL_GUARD, True),
+    "shared_setter": Scenario(WORKER, "shared_setter", Lock.CallGuard, True),
     # The five below come from what applications do rather than from a code
     # path we wanted to prove. Two of them earned a proof mark on 04.09.,
-    # measured with ft-apps/killswitch.sh - each lock switched off on its
-    # own, five rounds per column:
+    # each lock switched off on its own, five rounds per column:
     #
     #                      all on  no lazy  no state  no guard  all off
     #   move_to_thread       0/5      0/5      5/5       0/5      5/5
     #   container_convert    0/5      5/5      0/5       0/5      5/5
     #
-    # container_convert was entered under Lock.STATE by assumption; the
+    # container_convert was entered under Lock.StateLock by assumption; the
     # measurement says the lazy type lock is what carries it.
-    "queued_signal": Scenario(WORKER, "queued_signal", Lock.STATE, False),
+    "queued_signal": Scenario(WORKER, "queued_signal", Lock.StateLock, False),
     # An object handed to another thread while the first one still uses it.
-    "move_to_thread": Scenario(WORKER, "move_to_thread", Lock.STATE, True),
+    "move_to_thread": Scenario(WORKER, "move_to_thread", Lock.StateLock, True),
     # Converting a container incarnates the element type on first use.
     "container_convert": Scenario(WORKER, "container_convert",
-                                  Lock.LAZY_TYPE, True),
+                                  Lock.LazyTypeLock, True),
+    # Not a proof: the threads that lose the race write the same offsets, so
+    # nothing crashes either way. It is here so a sanitizer run has the two
+    # sides to compare - see the scenario's docstring in stress.py.
+    "mi_first_instance": Scenario(WORKER, "mi_first_instance",
+                                  Lock.MiOffsetsOnce, False),
     # No proof mark, and it never will be one: this crashes with the GIL as
     # well and on a released wheel. It is an ordinary PySide bug that the
-    # scenario happens to hit - ft-apps/property_qobject_crash.py has it in
-    # three lines. Kept so the crash stays visible until it is fixed.
-    "dynamic_property": Scenario(WORKER, "dynamic_property", Lock.STATE, False),
-    "virtual_override": Scenario(WORKER, "virtual_override", Lock.STATE, False),
+    # scenario happens to hit, and it takes three lines to reproduce.
+    # Kept so the crash stays visible until it is fixed.
+    "dynamic_property": Scenario(WORKER, "dynamic_property", Lock.StateLock, False),
+    "virtual_override": Scenario(WORKER, "virtual_override", Lock.StateLock, False),
 }
 ALL_SCENARIOS = list(SCENARIOS)
 
@@ -187,11 +207,17 @@ def base_env(lock_bit: Lock, mode: str) -> dict:
         QT_NO_GLIB="1",
         PYTHONPATH=os.fspath(PKG),
     )
-    flags = Lock.ALL if mode == "locked" else Lock.ALL & ~lock_bit
-    # Binary on purpose: the variable is read as flags, so it should look
-    # like flags in a log. sbkftoptions.h understands 0b, 0x and plain
-    # decimal, like PYSIDE6_OPTION_PYTHON_ENUM does.
-    env["PYSIDE6_OPTION_FT"] = bin(int(flags))
+    if mode == "locked":
+        # Left unset, which sbkftoptions.h reads as every bit there is -
+        # including one this file has never heard of. A number here would be
+        # a second copy of the inventory, and the second copy is the one that
+        # goes stale.
+        env.pop("PYSIDE6_OPTION_FT", None)
+    else:
+        # Binary on purpose: the variable is read as flags, so it should look
+        # like flags in a log. sbkftoptions.h understands 0b, 0x and plain
+        # decimal, like PYSIDE6_OPTION_PYTHON_ENUM does.
+        env["PYSIDE6_OPTION_FT"] = bin(int(ALL_BITS & ~lock_bit))
     if QT_DIR:
         env["QT_DIR"] = QT_DIR
     return env

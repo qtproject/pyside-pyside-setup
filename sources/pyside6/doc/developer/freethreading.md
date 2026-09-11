@@ -32,6 +32,8 @@ handoff. The names this change uses:
 | B13-5 | the lazy-type lock spanning type creation and import work |
 | B7-2 | the deallocator clearing weakrefs while another thread has references |
 | B15-4 | arbitrary Python construction under the QML placement mutex |
+| B4-3 | the multiple-inheritance offsets filled behind a sentinel check |
+| B4-4 | the class hierarchy mutated while another thread walks it |
 | FT4 | carrying leases and pointer snapshots to their final use |
 | FT8 | restoring the short raw-lock contract - this series |
 
@@ -138,13 +140,14 @@ locks are not in here: they are not ours, and no order over them is claimed.
 
 | Lock | Rank | Type | Taken in | May be held across | Guard active? |
 |---|---|---|---|---|---|
-| State | 7 | `std::mutex`, non-recursive | `sbkstatelock.cpp` | binding state only: validity, ownership, the parent and referred graph, `activeCalls` | yes, a lease takes the guard after the transaction |
-| Wrapper map | 5 | `std::recursive_mutex` | `bindingmanager.cpp`, 16 sites in the file, 11 of them in a free-threaded build | map operations; visitors and destructors run outside. Still inside: `PyType_IsSubtype()` in the type-narrowing lookup, an identity question that waits on the immutable class hierarchy. `mi_init()` also runs there and is not an exception: it computes offsets from the C++ pointer and calls nothing | yes |
-| Main-thread deletion | 6 | `std::mutex` | `bindingmanager.cpp`, 2 sites | one vector push or swap | no |
+| State | 8 | `std::mutex`, non-recursive | `sbkstatelock.cpp` | binding state only: validity, ownership, the parent and referred graph, `activeCalls` | yes, a lease takes the guard after the transaction |
+| Wrapper map | 6 | `std::recursive_mutex` | `bindingmanager.cpp`, 16 sites in the file, 11 of them in a free-threaded build | map operations; visitors and destructors run outside. Still inside: `PyType_IsSubtype()` in the type-narrowing lookup, an identity question that waits on the immutable hierarchy snapshots. `mi_init()` also runs there and is not an exception: it computes offsets from the C++ pointer and calls nothing | yes |
+| Main-thread deletion | 7 | `std::mutex` | `bindingmanager.cpp`, 2 sites | one vector push or swap | no |
 | Lazy type | 1 | `std::recursive_mutex`, waiter detaches | `sbkmodule.cpp` | type creation, which calls Python - the exception, owned by the lazy protocol | no |
-| `ModuleData` static | 2 | C++ function-local static guard | `sbkmodule.cpp` | Python during first initialization - to be replaced by native-only storage | no |
-| Connection hash | 4 | `std::mutex` | `dynamicslot.cpp`, 5 sites | container operations only: the key is built before the lock, and `QObject::disconnect()` runs after it | no |
-| Meta-object builder | 3 | `std::recursive_mutex`, waiter detaches | `signalmanager.cpp` | builder construction, which reaches Python - to be narrowed to a generation commit | yes |
+| Class hierarchy | 2 | `std::mutex` | `bindingmanager.cpp`, 2 sites | taking or publishing the edge snapshot. A traversal walks its snapshot with the lock released, because it creates types and calls discovery functions | no |
+| `ModuleData` static | 3 | C++ function-local static guard | `sbkmodule.cpp` | Python during first initialization - to be replaced by native-only storage | no |
+| Connection hash | 5 | `std::mutex` | `dynamicslot.cpp`, 5 sites | container operations only: the key is built before the lock, and `QObject::disconnect()` runs after it | no |
+| Meta-object builder | 4 | `std::recursive_mutex`, waiter detaches | `signalmanager.cpp` | builder construction, which reaches Python - to be narrowed to a generation commit | yes |
 
 The `ModuleData` guard is the one row the tracking cannot see: a
 compiler-generated guard has no acquisition site to wrap, so it is ranked
@@ -162,14 +165,17 @@ legitimately spans other work.
 A rank is a claim, so it is checked and not merely written here:
 `checkLockRank()` asserts it before every acquisition, and `lockNestings()`
 reports which pairs a run actually produced. Measured over the whole pyside6
-suite - 484 processes that used the bindings - there are two:
+suite - 518 processes that used the bindings, the same numbers on two
+machines - there are three:
 
 | Nesting | Processes |
 |---|---|
 | `lazy type -> wrapper map` | 483 |
 | `lazy type -> state` | 1 |
+| `lazy type -> class hierarchy` | 518 |
 
-Both have the lazy-type lock on the outside, which is why it ranks lowest.
+All three have the lazy-type lock on the outside, which is why it ranks
+lowest.
 Note what such a measurement cannot see: a process that aborts never
 reports, so a nesting that occurs only on a path which trips an assertion is
 missing from the table and shows up in the assertion instead. That is how
@@ -190,11 +196,11 @@ holds it as a test that is expected to fail.
 The second is `PyType_IsSubtype()` under the wrapper-map lock, in the three
 lookups that narrow a pointer to a type - `acquireWrapper()` in the
 free-threaded build, `findByType()` in both. It reads Python-owned type
-state, which is the same class of thing as the locked paths this change
-took out of the state lock (B9-1), and it waits on the immutable class
-hierarchy for the same reason. Unlike the first it is not
-rare: a suite run takes it a few hundred thousand times, in almost every
-process, because it sits in the lookup every wrapper conversion makes.
+state, which is the same class of thing as the locked paths FT8 took out of
+the state lock (B9-1), and it waits on the immutable hierarchy snapshots for
+the same reason. Unlike the first it is not rare: a suite run takes it about
+6400 times, in almost every process, because it sits in the lookup every
+wrapper conversion makes.
 
 Debug builds track which of these the current thread holds
 (`sbkheldlocks.h`). `SBK_ASSERT_NO_RAW_LOCK()` states the other end of the
@@ -229,6 +235,75 @@ pointer or a virtual - `cpp_dtor`, `mi_init` and the type-discovery hooks are
 exactly that - and anything outside the files it is given. `ctest -R
 state_lock_scope` runs it.
 
+### The class hierarchy publishes snapshots
+
+`addClassInheritance()` mutated the graph under no lock while
+`findDerivedType()` and `dumpTypeGraph()` were walking it (B4-4). A lock
+around both ends is not available here: the traversal creates types through
+`Module::get()` and calls generated discovery functions in the middle of
+itself, so it runs arbitrary Python and cannot hold one.
+
+The edges are immutable instead. A writer copies the map and publishes the
+copy; a reader takes the current snapshot under a short lock and walks it
+with none held. What a traversal sees is therefore one graph from beginning
+to end, even when a module publishes hundreds of edges underneath it. The
+lock is `ClassHierarchy`, rank 2, and the inventory above says what may be
+held across it.
+
+A module hands its edges over as one table for the same reason the snapshot
+exists: publishing copies the map, so one call per edge copied it once per
+edge, and a full build has 436 of them. The generated `initInheritance()`
+calls `addClassInheritance()` once.
+
+There is no counterproof. `failpoints.py hierarchy-snapshot` parks a
+traversal with one iterator alive and imports fourteen modules under it,
+which makes the race deterministic - but with the snapshot taken away it
+still passes four runs out of five, because libc++ keeps `unordered_map`
+nodes alive across a rehash. A one-in-five crash is not a proof, and the
+test says so rather than claiming to be one.
+
+### MI offsets are computed once, and not cached
+
+A type with more than one C++ base is registered under one address per base,
+and the generated `mi_init()` computes those offsets. It used to fill a
+static array behind a sentinel check: two threads reaching it together both
+saw the sentinel, and both sorted, uniqued and `memmove`d the same array
+(B4-3). The
+initializer of a function-local static does that exactly once, whoever
+arrives, and that is what the generator emits now.
+
+The offsets were also cached in the type, filled by whichever registration
+came first and copied into every Python subclass on every constructor call -
+three writers to type state that readers walk without a lock. There is
+nothing to cache: `mi_init()` computes on its first call and hands out the
+same array afterwards, so the aliases are asked of it where they are used.
+`SbkObjectTypePrivate::mi_offsets` is gone.
+
+The offsets are a property of the layout, not of an instance. Virtual
+inheritance is not modelled by them and is not supported.
+
+The class graph is published the same way and for the same reason. It is
+immutable, so a writer copies it, and a module used to add its edges one call
+at a time - one copy of the whole map per edge, 436 of them in a full build.
+A module's generated `initInheritance()` now hands over a table and the map
+is copied once.
+
+There is no deterministic test for this one, and there cannot be: the race is
+inside generated code, where a failpoint cannot be placed, and the threads
+that lose it all write the same offsets, so nothing crashes either way. What
+carries it instead is a sanitizer, and for that both sides have to exist. The
+generator emits the sentinel version as well, behind `MiOffsetsOnce`, and
+`stress.py mi_first_instance` builds the first instance of every
+multiple-inheritance type in the sample binding from eight threads at once.
+With the bit cleared TSan has a race to report there; with it set it has
+none. That is the whole evidence for this measure, and it is a weaker kind
+than a counterproof - it is what the shape of the defect allows.
+
+Measured, on the sanitizer tree: nothing with every measure on, and two to
+six reports with `MiOffsetsOnce` cleared, in `Sbk_MDerived1_mi_init` and its
+siblings - the sentinel read against the write of the offsets, reached
+through `miOffsets()` from `registerWrapper()`.
+
 ### Function-local statics whose initializer calls Python
 
 A C++ function-local static has a compiler-generated guard, and a second
@@ -260,6 +335,42 @@ audit found these classes:
 None of them is reached with another binding lock held, which is what makes
 them acceptable rather than the absence of a callback today. A new
 Python-calling static needs the same check.
+
+### The two caches on a virtual call
+
+A generated virtual override caches two things: the name of the Python method
+to look for, in a function-local `nameCache[2]`, and the override it found, in
+`m_PyMethodCache[i]` on the wrapper instance. Both were plain pointers written
+by whichever thread reached the virtual first, and read by all the others.
+
+The value is never wrong. Every thread computes the same name and finds the
+same override, so a lost race costs a reference and not correctness: only the
+pointer that ends up in the slot is ever owned by anybody, and the names come
+from `PyUnicode_InternFromString()`, which hands out a new reference on every
+call. What it also costs is a data race that a sanitizer reports on every
+single run - seven of them out of the `signal_race` scenario alone on
+03.09., which is the kind of noise a real finding hides in.
+
+`Shiboken::CacheSlot` is the replacement: one pointer, `get()`, `publish()`
+and `reset()`. Under free threading it is a `std::atomic<PyObject *>` with a
+compare-exchange, and `publish()` returns what the slot holds afterwards and
+drops the reference that lost. With a GIL it is the plain pointer it always
+was. It is the size and alignment of the pointer it replaces, and a
+`static_assert` says so.
+
+There is no bit and no counterproof for this one, and there should not be: it
+takes nothing away and adds no window. What it fixes is a reference leak that
+no test can see and sanitizer noise that only a sanitizer can - so a
+sanitizer is what says whether it worked.
+
+Measured, same machine and same scenarios: `signal_race` reported **seven**
+races on 04.09. and **six** as late as 09.09., in `overrideMethodName()`,
+`Sbk_GetPyOverride()` and the two generated cache slots they are handed. It
+now reports **none**. Across all fourteen scenarios twelve reports remain,
+every one of them in the feature system - `sbkfeature_base`,
+`initSelectableFeature()` around the subtype walk, `class_property` - which
+is the finding this work package does not own. Not one report names either
+cache any more.
 
 ### The guard's reach in generated code
 
@@ -387,27 +498,43 @@ the claim.
 
 ## Switching the locks off
 
-`PYSIDE6_OPTION_FT` is a bit per lock, and clearing one takes that lock away:
+`PYSIDE6_OPTION_FT` is a bit per measure, and clearing one puts back what was
+there before it:
 
 ```
-PYSIDE6_OPTION_FT=0b111   all of them (the default, and what an unset
-                          variable means)
-PYSIDE6_OPTION_FT=0b101   without the state lock
-PYSIDE6_OPTION_FT=0b011   without the per-object call guard
-PYSIDE6_OPTION_FT=off     without any of them
+PYSIDE6_OPTION_FT             unset, and that is the only supported setting:
+                              it means every bit there is, including the ones
+                              added after whatever is reading this
+PYSIDE6_OPTION_FT=0b011       the two locks only
+PYSIDE6_OPTION_FT=off         without any of them
 ```
 
-`LazyTypeLock` is `0x1`, `StateLock` is `0x2`, `CallGuard` is `0x4`. This
-exists for stress testing
-and is not a supported production setting: the modules still declare that they
-do not need the GIL while the synchronization backing that declaration is
-gone. Taking the declaration back at runtime is not possible, because the GIL
-slot is evaluated when the module object is created, before any binding code
-runs, so clearing `StateLock` warns instead.
+The inventory lives in `sbkftoptions.h` and nowhere else - a copy of it goes
+stale, and a stale copy is invisible in a result, because the run simply
+describes different code than the one it names. `ftoptions.py` in the test
+directory reads the enum out of the header at runtime for the same reason.
+
+This exists for stress testing and is not a supported production setting: the
+modules still declare that they do not need the GIL while the synchronization
+backing that declaration is gone. Taking the declaration back at runtime is
+not possible, because the GIL slot is evaluated when the module object is
+created, before any binding code runs, so clearing `StateLock` warns instead.
+
+How each measure is demonstrated is not uniform, and saying so is part of the
+claim:
+
+  - Most of them have a `proof-*` in `failpoints.py`: the subject runs in a
+    child process with the bit cleared and has to fail there.
+  - The three locks - `LazyTypeLock`, `StateLock`, `CallGuard` - have their
+    A/B in `run.py`'s scenario table instead, one lock switched off per
+    column, five rounds each. Their subjects are stress scenarios, not
+    deterministic ones.
+  - `MiOffsetsOnce` has a sanitizer A/B and can have nothing else; the
+    section above says why.
 
 A mechanism that no scenario can take away does not get a bit. The readiness
-flag on lazily created types is one such: it is covered by the suites, not by
-the A/B harness.
+flag on lazily created types is one such, and so is `Shiboken::CacheSlot`:
+they are covered by the suites, not by the A/B harness.
 
 ## Testing
 
@@ -449,10 +576,11 @@ set, and a scenario on its own can stay clean hundreds of times.
 Repetition is a poor way to reach a window of a few instructions. A failpoint
 is a named place in libshiboken where a test stops one thread, so the second
 one arrives in the order the test wants, every time - a test that fails on an
-unfixed revision rather than in one run out of fourteen. Five of them exist,
+unfixed revision rather than in one run out of fourteen. Six of them exist,
 either side of the windows that matter: before weakrefs are cleared and
 before the C++ destructor runs, after a lease is taken and before it is
-handed back, and before `destroy()` detaches `cptr`.
+handed back, before `destroy()` detaches `cptr`, and inside a traversal of
+the class-inheritance graph with one iterator alive.
 `Shiboken.failpointNames()` lists what a build has; a release build has none
 and the tests skip.
 

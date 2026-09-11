@@ -126,7 +126,6 @@ struct SbkObjectPrivate
 struct SbkObjectTypePrivate
 {
     SbkConverter *converter;
-    int *mi_offsets;
     MultipleInheritanceInitFunction mi_init;
 
     /// Special cast function, null if this class doesn't have multiple inheritance.

@@ -17,6 +17,7 @@
 #include "sbkbindingutils.h"
 #include "sbkconverter.h"
 #include "sbkenum.h"
+#include "sbkftoptions.h"
 #include "sbkerrors.h"
 #include "sbkheldlocks.h"
 #include "sbkmodule.h"

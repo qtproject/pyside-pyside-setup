@@ -22,6 +22,8 @@ import threading
 from pathlib import Path
 from typing import Callable, NamedTuple
 
+import ftoptions
+
 REPO = Path(__file__).resolve().parents[5]
 SELF = Path(__file__).resolve().parent / "failpoints.py"
 
@@ -43,6 +45,15 @@ def build_dir() -> Path:
 
 BUILD = build_dir()
 sys.path.insert(0, os.fspath(BUILD.parent / "package_for_wheels"))
+# The shiboken test bindings, where the build has them. Only module init adds
+# edges to the class graph, and a Core subset - which is what the sanitizer
+# trees are - has no second PySide6 module to import; these are the modules
+# that let the hierarchy test race anything at all.
+for _binding in ("samplebinding", "otherbinding", "minimalbinding",
+                 "smartbinding"):
+    _path = BUILD / "shiboken6" / "tests" / _binding
+    if _path.is_dir():
+        sys.path.append(os.fspath(_path))
 
 from shiboken6 import Shiboken  # noqa: E402
 from PySide6.QtCore import QObject, QUrl  # noqa: E402
@@ -211,14 +222,40 @@ def qml_create(engine, element: str):
 
 # ------------------------------------------------------------ counterproofs
 
-# The measures a run can take away, from sbkftoptions.h. Keep in step with it:
-# a name that no longer exists there switches nothing off, and the test that
-# uses it would report a pass it did not earn.
-OPTIONS = {
-    "LazyTypeLock": 0x01, "StateLock": 0x02, "CallGuard": 0x04,
-    "QmlPlacementType": 0x08, "QmlPlacementFree": 0x10,
-}
-ALL_OPTIONS = 0x1F
+# The measures a run can take away, read out of sbkftoptions.h rather than
+# copied. The copy that used to stand here went stale and cleared a measure
+# no counterproof had asked for.
+OPTIONS = ftoptions.option_bits()
+ALL_OPTIONS = ftoptions.all_bits(OPTIONS)
+
+
+# How long a counterproof waits for its child. Deliberately a fraction of the
+# matrix runner's own per-test budget: a counterproof whose subject is meant
+# to hang would otherwise outlast the cell that started it, and the matrix
+# would report the *counterproof* as a hang - which is the one thing it must
+# not say, because that cell is green when the subject hangs. A hang is a
+# hang after twenty seconds as well as after a hundred.
+CHILD_TIMEOUT = max(20, int(os.environ.get("FAILPOINT_TIMEOUT", "60")) // 3)
+
+
+def _run_without(cleared: list[str], test: str) -> tuple[int, str]:
+    """Run one test in its own process with those measures switched off."""
+    bits = ALL_OPTIONS
+    for name in cleared:
+        bits &= ~OPTIONS[name]
+    env = dict(os.environ, PYSIDE6_OPTION_FT=hex(bits))
+    env.pop("FAILPOINT_EXPECT_GIL", None)
+    proc = subprocess.Popen([sys.executable, os.fspath(SELF), test], env=env,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            text=True, start_new_session=True)
+    try:
+        out, _ = proc.communicate(timeout=CHILD_TIMEOUT)
+        rc = proc.returncode
+    except subprocess.TimeoutExpired:
+        os.killpg(proc.pid, signal.SIGKILL)
+        out, _ = proc.communicate()
+        rc = 124
+    return rc, out
 
 
 def counterproof(option: str, test: str) -> str:
@@ -235,18 +272,15 @@ def counterproof(option: str, test: str) -> str:
     """
     if not FREE_THREADED:
         return "skipped: the option bits exist only in a free-threaded build"
-    env = dict(os.environ, PYSIDE6_OPTION_FT=hex(ALL_OPTIONS & ~OPTIONS[option]))
-    env.pop("FAILPOINT_EXPECT_GIL", None)
-    proc = subprocess.Popen([sys.executable, os.fspath(SELF), test], env=env,
-                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                            text=True, start_new_session=True)
-    try:
-        out, _ = proc.communicate(timeout=120)
-        rc = proc.returncode
-    except subprocess.TimeoutExpired:
-        os.killpg(proc.pid, signal.SIGKILL)
-        out, _ = proc.communicate()
-        rc = 124
+    rc, out = _run_without([option], test)
+    # A subject that skipped is not a subject that failed. main() answers
+    # SKIP for "nothing here ran", and SKIP is non-zero: read as a failure it
+    # turns this row green in exactly the builds where it demonstrates
+    # nothing - a release build with no failpoints, a tree without the sample
+    # binding, a tree without QtQml.
+    if rc == SKIP:
+        tail = out.strip().splitlines()[-1] if out.strip() else ""
+        return f"skipped: {test} did not run ({tail[:60]})"
     if rc == 0:
         return (f"FAIL: {test} still passes without {option}, so it does not "
                 f"test it")

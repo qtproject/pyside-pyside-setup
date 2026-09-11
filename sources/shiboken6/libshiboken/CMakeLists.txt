@@ -70,6 +70,7 @@ pyobjectholder.h
 sbkacquiredwrapper.h
 sbkarrayconverter.cpp sbkarrayconverter.h sbkarrayconverter_p.h
 sbkbindingutils.cpp sbkbindingutils.h
+sbkcacheslot.h
 sbkcallguard.cpp sbkcallguard.h
 sbkcalllease.h
 sbkcontainer.cpp sbkcontainer.h
@@ -197,6 +198,7 @@ install(FILES
         sbkacquiredwrapper.h
         sbkarrayconverter.h
         sbkbindingutils.h
+        sbkcacheslot.h
         sbkcallguard.h
         sbkcalllease.h
         sbkcontainer.h

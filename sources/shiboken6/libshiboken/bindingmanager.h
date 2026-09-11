@@ -88,7 +88,18 @@ public:
 
     static PyObject *getOverride(SbkObject *wrapper, PyObject *pyMethodName);
 
-    void addClassInheritance(Module::TypeInitStruct *parent, Module::TypeInitStruct *child);
+    /// One edge of the class hierarchy, the way a module's generated
+    /// initInheritance() lists them.
+    struct InheritanceEdge
+    {
+        Module::TypeInitStruct *parent;
+        Module::TypeInitStruct *child;
+    };
+
+    /// Publish a module's inheritance edges, all of them in one step. The
+    /// graph is immutable, so publishing copies it; one call per edge copied
+    /// it once per edge.
+    void addClassInheritance(const InheritanceEdge *edges, std::size_t count);
     /// Try to find the correct type of cptr via type discovery knowing that it's at least
     /// of type \p type. If a derived class is found, it returns a cptr cast to the type
     /// (which may be different in case of  multiple inheritance.

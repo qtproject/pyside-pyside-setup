@@ -1039,7 +1039,8 @@ void CppGenerator::writeCacheResetNative(TextStream &s, const GeneratorContext &
 {
     s << "void " << classContext.wrapperName()
         << "::resetPyMethodCache()\n{\n" << indent
-        << "std::fill(m_PyMethodCache.begin(), m_PyMethodCache.end(), nullptr);\n"
+        << "for (auto &slot : m_PyMethodCache)\n" << indent << "slot.reset();\n"
+        << outdent
         << outdent << "}\n\n";
 }
 
@@ -1404,10 +1405,10 @@ void CppGenerator::writeVirtualMethodNative(TextStream &s,
 #endif
         s  << R"(__FUNCTION__ << ' ' << this << " m_PyMethodCache[" << )"
            << cacheIndex << R"( << "]=" << m_PyMethodCache[)" << cacheIndex
-           << R"(] << '\n';)" << '\n';
+           << R"(].get() << '\n';)" << '\n';
     }
     writeFuncNameVar(s, func, funcName);
-    s << "static PyObject *nameCache[2] = {};\n"
+    s << "static Shiboken::CacheSlot nameCache[2];\n"
       << "Shiboken::GilState gil(false);\n"
       << "Shiboken::AutoDecRef " << PYTHON_OVERRIDE_VAR << "(Sbk_GetPyOverride("
       << "this, " << CppGenerator::cpythonTypeName(owner) << ", gil, funcName, m_PyMethodCache["
@@ -4609,11 +4610,13 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(TextStream &s,
     s  << "int *\n"
         << multipleInheritanceInitializerFunctionName(metaClass) << "(const void *cptr)\n"
         << "{\n" << indent;
-    s << "static int mi_offsets[] = {-2";
-    for (qsizetype i = 0; i < ancestors.size(); i++)
-        s << ", 0";
-    s << "};\n"
-        << "if (mi_offsets[0] == -2) {\n" << indent
+    // The offsets are a property of the layout, so they are computed once.
+    // The initializer of a function-local static runs exactly once even when
+    // several threads arrive together, which the sentinel check it replaces
+    // did not: two of them could sort and memmove the same array at once.
+    // The sentinel is still written, because the A/B side below needs it.
+    s << "static int mi_offsets[" << (ancestors.size() + 1) << "] = {-2};\n"
+        << "const auto mi_fill = [cptr]() {\n" << indent
         << "const auto *class_ptr = reinterpret_cast<const " << className << " *>(cptr);\n"
         << "const auto base = reinterpret_cast<uintptr_t>(class_ptr);\n"
         << "int *p = mi_offsets;\n";
@@ -4626,8 +4629,10 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(TextStream &s,
         << "if (mi_offsets[0] == 0)\n"
         << indent
         << "std::memmove(&mi_offsets[0], &mi_offsets[1], (end - mi_offsets  - 1) * sizeof(int));\n"
-        << outdent << outdent
-        << "}\nreturn mi_offsets;\n" << outdent << "}\n";
+        << outdent
+        << "return true;\n"
+        << outdent << "}();\n"
+        << "return mi_offsets;\n" << outdent << "}\n";
 }
 
 void CppGenerator::writeSpecialCastFunction(TextStream &s, const AbstractMetaClassCPtr &metaClass)
@@ -6122,22 +6127,35 @@ QStringList CppGenerator::pyBaseTypes(const AbstractMetaClassCPtr &metaClass)
 
 void CppGenerator::writeInitInheritance(TextStream &s) const
 {
-    s << "static void " << initInheritanceFunction << "()\n{\n" << indent
-        << maybeUnused << "auto &bm = Shiboken::BindingManager::instance();\n";
+    // One table and one call, not one call per edge: the class graph is
+    // immutable, so every publication copies it, and a module has hundreds
+    // of edges.
+    QStringList edges;
     for (const auto &cls : api().classes()){
         auto te = cls->typeEntry();
         if (shouldGenerate(te)) {
             const auto &baseEntries = pyBaseTypeEntries(cls);
-            if (!baseEntries.isEmpty()) {
-                const QString childTypeInitStruct = typeInitStruct(cls->typeEntry());
-                for (const auto &baseEntry : baseEntries) {
-                    s << "bm.addClassInheritance(&" << typeInitStruct(baseEntry) << ",\n"
-                      << Pad(' ', 23) << '&' << childTypeInitStruct << ");\n";
-                }
+            const QString childTypeInitStruct = typeInitStruct(cls->typeEntry());
+            for (const auto &baseEntry : baseEntries) {
+                edges.append(u"{&"_s + typeInitStruct(baseEntry) + u", &"_s
+                             + childTypeInitStruct + u'}');
             }
         }
     }
-    s << outdent << "}\n\n";
+
+    s << "static void " << initInheritanceFunction << "()\n{\n" << indent;
+    if (edges.isEmpty()) {
+        s << outdent << "}\n\n";
+        return;
+    }
+    s << "static const Shiboken::BindingManager::InheritanceEdge edges[] = {\n"
+        << indent;
+    for (const auto &edge : edges)
+        s << edge << ",\n";
+    s << outdent << "};\n"
+        << "Shiboken::BindingManager::instance().addClassInheritance(edges, "
+           "std::size(edges));\n"
+        << outdent << "}\n\n";
 }
 
 void CppGenerator::writeClassRegister(TextStream &s,
@@ -6914,6 +6932,7 @@ bool CppGenerator::finishGeneration()
 #include <shiboken.h>
 #include <sbkbindingutils.h>
 #include <algorithm>
+#include <iterator>
 #include <signature.h>
 )";
 

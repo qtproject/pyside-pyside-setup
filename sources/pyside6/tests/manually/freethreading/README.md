@@ -218,6 +218,55 @@ nothing. What does not stay is a switch to turn it off: a bit no test can
 observe is exactly the kind of dead mechanism this directory exists to
 prevent.
 
+### MI offsets - no test, and why
+
+The generated `mi_init()` used to fill a static array behind a sentinel, and
+two threads reaching it together both sorted and moved the same array. No
+failpoint can be placed there: it is generated code, and the generator emits
+both sides rather than one with a hook in it. Nor does anything crash - the
+threads that lose the race write the same offsets.
+
+What carries `MiOffsetsOnce` instead is a sanitizer A/B: `stress.py
+mi_first_instance` builds the first instance of every multiple-inheritance
+type in the sample binding from eight threads at once, and TSan reports two
+to six races in `Sbk_MDerived*_mi_init` with the bit cleared and none with it
+set. That is weaker than a counterproof, and it is what the shape of the
+defect allows. The developer documentation has the numbers.
+
+### hierarchy-snapshot - a guard, and why it is only that
+
+`addClassInheritance()` mutated the class graph with no lock while
+`findDerivedType()` and `dumpTypeGraph()` were walking it. The repair: edges
+are published as an immutable snapshot, a reader takes the snapshot under a
+short lock and walks it with none held, because the traversal creates types
+through `Module::get()` and calls generated discovery functions in the middle
+of itself.
+
+The test parks a traversal with one iterator alive - the failpoint
+`hierarchy-mid-traversal` - and imports fourteen modules under it, each of
+which publishes hundreds of edges. That makes the race deterministic rather
+than a matter of scheduling.
+
+It still cannot fail. Measured both ways: with the snapshot taken away the
+same test passes four runs out of five and segfaults on the fifth, and with
+the iterator parked it passes every time - libc++ keeps `unordered_map` nodes
+alive across a rehash and relinks them, so the iteration survives an
+invalidation that is undefined behaviour all the same. A one-in-five crash is
+not a counterproof, and this file does not pretend otherwise: there is no
+`proof-hierarchy`.
+
+**TSan reports nothing here.** On the sanitizer tree, this test - the traversal
+parked with a live iterator while four modules enter their edges - reports
+nothing. That is what stands in for the counterproof this test cannot be.
+
+Two things had to be fixed before the run said anything at all. Edges are
+added by module init and by nothing else, so a run that imports no module
+watches an idle map and passes either way; the list therefore includes the
+shiboken test bindings, which a Core subset - what the sanitizer trees are -
+does have. And the result line used to count the length of the wish list
+rather than the imports that went through, which read as fourteen module
+inits where there had been four.
+
 ### type-mutation
 
 FT8 validation row "state lock": mutate a type's bases at a barrier.

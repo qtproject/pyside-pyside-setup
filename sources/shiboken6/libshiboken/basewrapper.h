@@ -9,6 +9,7 @@
 #include "shibokenmacros.h"
 #include "sbkdestructorentry.h"
 #include "sbkcallguard.h"
+#include "sbkcacheslot.h"
 #include "sbkcalllease.h"
 
 #include <vector>
@@ -133,7 +134,8 @@ LIBSHIBOKEN_API PyObject *Sbk_ReturnFromPython_Self(PyObject *self);
 
 LIBSHIBOKEN_API PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
                                             Shiboken::GilState &gil, const char *funcName,
-                                            PyObject *&resultCache, PyObject **nameCache);
+                                            Shiboken::CacheSlot &resultCache,
+                                            Shiboken::CacheSlot *nameCache);
 
 namespace Shiboken
 {

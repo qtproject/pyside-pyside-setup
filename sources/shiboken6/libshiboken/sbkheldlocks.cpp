@@ -16,6 +16,7 @@ int lockRank(RawLock lock)
 {
     switch (lock) {
     case RawLock::LazyType:         return int(LockRank::LazyType);
+    case RawLock::ClassHierarchy:   return int(LockRank::ClassHierarchy);
     case RawLock::ModuleData:       return int(LockRank::ModuleData);
     case RawLock::MetaObject:       return int(LockRank::MetaObject);
     case RawLock::ConnectionHash:   return int(LockRank::ConnectionHash);
@@ -30,7 +31,7 @@ int lockRank(RawLock lock)
 
 // One counter per lock rather than one bit: three of the locks are recursive,
 // and a nested acquisition has to survive the inner release.
-static constexpr size_t LockCount = 7;
+static constexpr size_t LockCount = 8;
 
 static std::array<unsigned, LockCount> &heldCounts()
 {
@@ -51,19 +52,19 @@ static const char *lockName(size_t index)
 {
     static const char *names[LockCount] = {
         "state", "wrapper map", "main-thread deletion", "lazy type",
-        "module data", "connection hash", "meta-object"
+        "module data", "connection hash", "meta-object", "class hierarchy"
     };
     return names[index];
 }
 
-// Every pair this process ever held at once, one bit per (outer, inner).
-// Eight locks fit in a 64-bit word, so recording a nesting is one atomic or
-// and needs no lock of its own - which it must not have: this runs while a
-// raw lock is held, and a mutex here would sit below the state lock and take
-// away the leaf property the rank exists to state.
-static std::atomic<uint64_t> &nestingBits()
+// Every pair this process ever held at once: one word per outer lock, one
+// bit per inner. Recording a nesting is one atomic or on a word the hardware
+// handles, and needs no lock of its own - which it must not have: this runs
+// while a raw lock is held, and a mutex here would sit below the state lock
+// and take away the leaf property the rank exists to state.
+static std::array<std::atomic<uint64_t>, LockCount> &nestingBits()
 {
-    static std::atomic<uint64_t> bits{0};
+    static std::array<std::atomic<uint64_t>, LockCount> bits{};
     return bits;
 }
 
@@ -80,8 +81,7 @@ void checkLockRank(RawLock lock)
         // than deadlocking somewhere else later.
         assert(lockRank(RawLock(1u << i)) < lockRank(lock)
                || reportLocksHeld(lockName(index), "taken out of rank order"));
-        nestingBits().fetch_or(uint64_t(1) << (i * LockCount + index),
-                               std::memory_order_relaxed);
+        nestingBits()[i].fetch_or(uint64_t(1) << index, std::memory_order_relaxed);
     }
 }
 
@@ -192,10 +192,11 @@ const char *lockNestings()
     // Per thread, as in contractExceptions().
     static thread_local std::string report;
     report.clear();
-    const uint64_t bits = nestingBits().load(std::memory_order_relaxed);
+    const auto &bits = nestingBits();
     for (size_t outer = 0; outer < LockCount; ++outer) {
+        const uint64_t inners = bits[outer].load(std::memory_order_relaxed);
         for (size_t inner = 0; inner < LockCount; ++inner) {
-            if ((bits & (uint64_t(1) << (outer * LockCount + inner))) == 0)
+            if ((inners & (uint64_t(1) << inner)) == 0)
                 continue;
             if (!report.empty())
                 report += '\n';

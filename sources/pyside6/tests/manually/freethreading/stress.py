@@ -217,6 +217,32 @@ def scenario_lazy_converter() -> None:
     _spin(work)
 
 
+def scenario_mi_first_instance() -> None:
+    """Every thread builds the first instance of a multiple-inheritance type
+    at the same instant.
+
+    The offsets of such a type are computed by its generated mi_init(), and
+    only on the way through the wrapper map - so the first instance of a type
+    is the only one that computes them. Guarded by a sentinel, several threads
+    could pass it together and sort and memmove the same static array at once;
+    guarded by the initializer of a function-local static, exactly one does.
+
+    There is no crash to count here: the values all threads write are the
+    same, so the loser of the race usually gets away with it. What the
+    scenario is for is the sanitizer - with MiOffsetsOnce cleared it has a
+    data race to report, with the bit set it has none. Every MI type the
+    sample binding has is taken, because each one is one shot per process.
+    """
+    from sample import MDerived1, MDerived2, MDerived3, MDerived4, MDerived5
+
+    types = [MDerived1, MDerived2, MDerived3, MDerived4, MDerived5]
+
+    def work(_idx: int) -> None:
+        for cls in types:
+            cls()
+    _spin(work)
+
+
 def scenario_lookup_vs_last_decref() -> None:
     """One thread drops the last reference to a wrapper while another looks the
     same C++ pointer up in the map, targeting the gap between the refcount
@@ -468,6 +494,7 @@ SCENARIOS = {
     "container_convert": scenario_container_convert,
     "dynamic_property": scenario_dynamic_property,
     "virtual_override": scenario_virtual_override,
+    "mi_first_instance": scenario_mi_first_instance,
 }
 
 

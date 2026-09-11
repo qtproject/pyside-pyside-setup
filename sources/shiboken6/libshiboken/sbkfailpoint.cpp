@@ -34,6 +34,7 @@ static constexpr std::array KnownFailpoints = {
     "lease-after-acquire",       // lease taken, before the native call
     "lease-before-release",      // native call done, before giving the lease back
     "destroy-before-detach",     // Object::destroy(), before cptr is detached
+    "hierarchy-mid-traversal",   // in the class graph, one iterator alive
 };
 #else
 // A build with a GIL has none of these windows: no lease, and a deallocator
