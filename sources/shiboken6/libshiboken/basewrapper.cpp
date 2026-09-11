@@ -2840,21 +2840,19 @@ void releaseOwnership(SbkObject *sbkObj)
 }
 
 // What invalidation decides under the state lock but must not do there:
-// releasing wrappers takes the wrapper map lock, detaching children takes the
-// state lock again (it is not recursive), and referred objects have to go
-// through the sequence protocol first.
+// releasing wrappers takes the wrapper map lock, and detaching children takes
+// the state lock again (it is not recursive).
 struct InvalidationPlan
 {
     std::vector<SbkObject *> releaseWrappers;
     std::vector<SbkObject *> detachChildren;
-    std::vector<PyObject *> referred;   // to be split outside the lock
 };
 
-// Pin an object the plan has to survive the unlock. Running the plan decrefs
+// Pin an object the walk has to survive the unlock. Running the plan decrefs
 // (removeParent() hands the parent reference back), and that cascade can free
-// an object a later step - or a later round - still has to touch. Increments
-// are permitted inside the transaction, decrements are not, so the pins are
-// released in invalidateRoots() with no lock held.
+// an object a later step - or, in makeValid(), a later round - still has to
+// touch. Increments are permitted inside the transaction, decrements are not,
+// so the caller drops the pins with no lock held.
 static void pinForPlan(PyObject *pyObj, std::vector<PyObject *> &pins)
 {
     SBK_ASSERT_STATE_LOCKED();
@@ -2862,6 +2860,8 @@ static void pinForPlan(PyObject *pyObj, std::vector<PyObject *> &pins)
     pins.push_back(pyObj);
 }
 
+// The object and its children, and deliberately not what it refers to, for
+// the reason the GIL twin recursive_invalidate() spells out.
 static void collectInvalidateLocked(SbkObject *self, std::set<SbkObject *> &seen,
                                     InvalidationPlan &plan,
                                     std::vector<PyObject *> &pins)
@@ -2893,14 +2893,6 @@ static void collectInvalidateLocked(SbkObject *self, std::set<SbkObject *> &seen
             }
         }
     }
-
-    // If has ref to other objects invalidate all
-    if (auto *rInfo = self->d->referredObjects) {
-        for (const auto &p : *rInfo) {
-            plan.referred.push_back(p.second);
-            pinForPlan(p.second, pins);
-        }
-    }
 }
 
 // Run what the transaction collected, with no lock held.
@@ -2914,37 +2906,22 @@ static void runInvalidationPlan(const InvalidationPlan &plan)
         removeParent(child, true, true);
 }
 
-// Walk the graph in rounds: a round collects under the lock, the referred
-// objects it found are split outside it (that runs the sequence protocol),
-// and the objects behind them feed the next round. Terminates because `seen`
-// only grows.
-static void invalidateRoots(std::vector<SbkObject *> roots)
+// One transaction - the parent/child walk is plain recursion under the lock -
+// then the part that may not run under it.
+static void invalidateRoots(const std::vector<SbkObject *> &roots)
 {
     SBK_ASSERT_STATE_UNLOCKED();
     // The pins are dropped at the end, and the last one can run a destructor.
     SBK_ASSERT_NO_RAW_LOCK();
-    std::set<SbkObject *> seen;
-    // Held until the whole walk is over, not per round: the objects a round
-    // reaches through plan.referred become the next round's roots, so dropping
-    // the pins early would just move the dangling pointer one round on.
     std::vector<PyObject *> pins;
-    while (!roots.empty()) {
-        InvalidationPlan plan;
-        {
-            StateLockGuard guard;
-            for (SbkObject *o : roots)
-                collectInvalidateLocked(o, seen, plan, pins);
-        }
-        runInvalidationPlan(plan);
-
-        roots.clear();
-        for (PyObject *ref : plan.referred) {
-            for (SbkObject *o : splitPyObject(ref)) {
-                if (seen.find(o) == seen.end())
-                    roots.push_back(o);
-            }
-        }
+    InvalidationPlan plan;
+    {
+        StateLockGuard guard;
+        std::set<SbkObject *> seen;
+        for (SbkObject *o : roots)
+            collectInvalidateLocked(o, seen, plan, pins);
     }
+    runInvalidationPlan(plan);
     // No lock held: these decrefs may run destructors that re-enter the
     // binding layer.
     for (PyObject *o : pins)
@@ -2999,17 +2976,18 @@ static bool referredEntryStillValid(const ReferredCandidate &candidate)
     return false;
 }
 
-// Counterpart of collectInvalidateLocked(): it walks the same containers -
-// parentInfo->children and referredObjects - in the same rounds, and for the
-// same reason. It qualifies as a transaction: it sets a flag, walks two
-// plain containers and pins what the next round has to look at. No decref,
-// no Python protocol, no second lock.
+// Counterpart of collectInvalidateLocked() for parentInfo->children, and it
+// also follows referredObjects, which is what makes it run in rounds:
+// deciding what a referred PyObject is runs the sequence protocol, which the
+// state lock may not span. It qualifies as a transaction: it sets a flag,
+// walks two plain containers and pins what the next round has to look at.
+// No decref, no Python protocol, no second lock.
 //
 // `seen` and not validCppObject alone: the GIL twin can use the flag as its
 // visited marker because nothing else runs, but here another thread clears
 // it between two rounds, and the walk would find work again every time it
 // did. `seen` only grows, so the round loop ends whatever the other thread
-// does. This is what invalidateRoots() carries for the same reason.
+// does.
 static void collectMakeValidLocked(SbkObject *self, std::set<SbkObject *> &seen,
                                    std::vector<ReferredCandidate> &referred,
                                    std::vector<PyObject *> &pins)
@@ -3061,14 +3039,15 @@ void makeValid(SbkObject *self)
     SBK_ASSERT_STATE_UNLOCKED();
     // The pins are dropped at the end, and the last one can run a destructor.
     SBK_ASSERT_NO_RAW_LOCK();
-    // Walk the graph in rounds, the way invalidateRoots() does: a round
-    // marks under the lock and collects the referred objects it found, they
-    // are classified outside it, and the next round revalidates the entries
-    // they came from before it follows them.
+    // Walk the graph in rounds: a round marks under the lock and collects the
+    // referred objects it found, they are classified outside it, and the next
+    // round revalidates the entries they came from before it follows them.
     std::vector<SbkObject *> roots{self};
     std::set<SbkObject *> seen;
     std::vector<ReferredCandidate> pending;
-    // Held to the end of the walk, for the reason invalidateRoots() gives.
+    // Held to the end of the walk, not per round: the objects a round reaches
+    // through the referred entries become the next round's roots, so dropping
+    // the pins early would move the dangling pointer one round on.
     std::vector<PyObject *> pins;
     while (!roots.empty() || !pending.empty()) {
         std::vector<ReferredCandidate> referred;
