@@ -18,6 +18,13 @@
 
 // @snippet libpyside-set-qobject-type
 PySide::setQObjectType(pyType);
+#ifdef Py_GIL_DISABLED
+// A QObject may be converted while it is being destroyed: destroyed(QObject *)
+// carries it, and PySide invalidates the wrapper right after the signal.
+Shiboken::setDyingConversionPredicate([](PyTypeObject *type) {
+    return PySide::isQObjectDerived(type, false);
+});
+#endif
 // @snippet libpyside-set-qobject-type
 
 // @snippet qarg_helper

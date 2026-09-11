@@ -43,9 +43,10 @@ comes out of the registry.
 
 ## The tests
 
-One section below has no test at all, and says why. That is deliberate: a
-finding whose code path nothing can reach is worth writing down and worth
-repairing, but inventing a test for it would only look like evidence.
+Two sections below have no test, and say why. That is deliberate: a finding
+whose code path nothing can reach, or a race that is inside generated code
+where no failpoint can be placed, is worth writing down and worth repairing,
+but inventing a test for it would only look like evidence.
 
 ### weakrefs
 
@@ -60,16 +61,196 @@ reference counting makes the creating thread the owner, and a `del` in
 another thread only decrements the shared count, so the deallocation would
 not run where the test waits for it.
 
-### lease-vs-destroy - expected FAIL
+### replacement-while-dying, proof-tombstones
+
+B4-1: a lookup between unregistering the entry and the C++ destructor. One
+thread drops the last reference and parks in the deallocator, past the point
+where the map entry used to be removed and before the destructor runs. The
+test then converts the same address, which is what `destroyed(QObject *)`
+delivery and a parent conversion do in an application.
+
+Removing the entry early - which the lock-scope work did - closes only half
+of the window. In the other half a lookup sees true absence and publishes a
+second wrapper, and that one is marked valid while the destructor is about
+to run underneath it. The entry now stays as a tombstone until the
+destruction can no longer reach the address, and a conversion that meets one
+gets a wrapper that is not marked valid instead of one that points at freed
+memory.
+
+`QRecursiveMutex` and not `QObject`: a QObject's `destroyed()` signal
+invalidates a stray wrapper afterwards, which hides the window. That is why
+this went unnoticed - it only bites the object types that have no such
+signal.
+
+`proof-tombstones` clears `Tombstones` in a child and requires the failure
+to come back.
+
+### replacement-before-cpp-dtor, proof-tombstones-late
+
+The half the test above cannot see. It parks at `dealloc-before-destroy`,
+which is before `deallocData()` - and `deallocData()` goes through the
+wrapper map on its way out, so until this test existed it took the tombstone
+with it. Between that point and the C++ destructor a lookup saw true absence
+again, which is the very thing the tombstone was introduced to end.
+
+The new failpoint `dealloc-before-cpp-dtor` sits after the wrapper is taken
+apart and before the destructor, which is the window B4-1 is about. Two
+failpoints, because one of them stands in a stretch where removing the entry
+early already held: a test parked there passes either way.
+
+`proof-tombstones-late` clears `Tombstones` and requires the failure back.
+
+### replacement-of-owned-child, proof-tombstones-children
+
+The same window one level down. A tombstone covers the object being
+destroyed; it did not cover what that object owns. `invalidate()` hands the
+owned children back blank, their entries leave the map, and the parent's C++
+destructor deletes them a line later - and in between a lookup on a child
+address saw true absence.
+
+The test parks at `delete-before-owned-dtor`, which is exactly that gap, and
+asks for a wrapper on the child. `sample.ObjectType` rather than a QObject on
+purpose: a QObject is the one type the tombstone makes an exception for, so
+it cannot show this.
+
+`proof-tombstones-children` clears `Tombstones` and requires the failure back.
+
+### replacement-of-child-in-dealloc, proof-tombstones-dealloc-children
+
+The same window, reached the other way. The test above drives it with
+`Shiboken.delete()`, which goes through `finishDestruction()`; dropping the
+last reference goes through the deallocator instead, which carries its own
+copy of the same sequence and did not have the child tombstones - a review
+found that after the first half was written and green.
+
+The failpoint parks in the *child's* deallocation, which runs inside the
+parent's: both wrappers are gone and neither C++ destructor has run.
+
+`proof-tombstones-dealloc-children` clears `Tombstones` and requires the
+failure back.
+
+### dying-qobject-argument, proof-dying-qobject
+
+The exception the tombstone makes for QObject, from both sides. A tombstone
+refuses to hand out a wrapper for an address being destroyed;
+`destroyed(QObject *)` is emitted from inside that destruction and its
+argument is meant to be used. PySide invalidates that wrapper right after the
+signal, so the refusal does not apply to a type that does this - libshiboken
+asks a predicate PySide installs with QtCore.
+
+Both halves are the claim: usable in the handler, dead afterwards. The second
+half is the load-bearing one. If it stopped holding, the exception would hand
+out a wrapper nobody ever invalidates, which is the defect the tombstone
+exists for - and `signals/signal2signal_connect_test` in the ordinary suite
+only measures the first half.
+
+`proof-dying-qobject` clears `DyingConversionException`: the tombstone then
+refuses every dying identity, and the handler is handed an argument it cannot
+use. The exception is a measure, so it has a switch like the rest of them.
+
+The predicate is asked about the type, not about the moment, so for a QObject
+the whole destruction is open and not just the stretch around the signal. What
+follows from that is the next test.
+
+### stray-outlives-tombstone, proof-dying-strays
+
+The other end of the exception. Since it is asked per type, a conversion may
+also land *after* the signal - past the C++ destructor, before the tombstone
+falls. Such a wrapper used to be registered like any other: it said "valid",
+it pointed at freed memory, and when the tombstone fell it stayed behind as
+the wrapper for whatever the allocator put at that address next. Nothing
+invalidated it, because the path that invalidates the handler's argument -
+PySide's `_PySideInvalidatePtr` property - runs earlier, with the property
+data.
+
+The failpoint `dealloc-before-retire` parks the deallocating thread in exactly
+that stretch, and the test converts the address from another thread. What it
+gets back is usable, and has to be dead once the parked thread is released:
+the wrapper now stays out of the map and belongs to the tombstone, which
+invalidates it on the way out.
+
+That makes the second half of `dying-qobject-argument` ours rather than
+PySide's. Both are checked, because the two paths are independent and either
+one holding is not the other one holding.
+
+`proof-dying-strays` clears `DyingStrays`: the wrapper is registered as any
+other and is still valid when the test looks again.
+
+### external-destruction, proof-external-tombstones
+
+The destruction the binding does not drive. The deallocator and
+`Shiboken.delete()` run the C++ destructor themselves and know when it is
+past; here foreign C++ deletes an object Python knows, the generated wrapper
+destructor reports it through `Object::destroy()`, and nothing calls the
+binding again.
+
+`sample.ObjectType` built **from Python**, so it is an `ObjectTypeWrapper`
+whose destructor reports at all - `ObjectType.create()` hands out a plain C++
+instance with no wrapper, and deleting one of those is a window nothing can
+see. The parent's `killChild()` is a plain `delete`, and the failpoint
+`destroy-after-tombstone` parks the thread there, past the tombstone and
+before the memory goes back.
+
+Both halves, and the second is what keeps the first from being a leak: a
+conversion in that stretch has to be refused, and the address has to be free
+again once `operator delete` has run. A tombstone that never fell would
+refuse that address for the rest of the process.
+
+`proof-external-tombstones` clears `ExternalTombstones` and requires the
+failure back.
+
+### metaobject-lifetime - expected FAIL, and not ours
+
+Every QObject answers `metaObject()` with the same `&QObject::staticMetaObject`,
+so the wrapper map holds one wrapper for it and hands that one to everybody.
+Destroying any single QObject invalidates it and hits every other holder,
+although the C++ object behind it is static and never dies.
+
+Four lines, with a GIL, no threads:
+
+    a, b = QObject(), QObject()
+    ma = a.metaObject()
+    Shiboken.delete(b)          # a stranger
+    ma.className()              # RuntimeError: already deleted
+
+Bisected to `4c1d56fb6` (29.07.2026, "Add a coarse lock for free-threaded
+builds"), which moved the bookkeeping in `callCppDestructors()` ahead of the
+C++ destructors. Before that, `~Wrapper() -> Object::destroy() ->
+clearReferences()` had already taken the referred objects out by the time
+`invalidate()` ran, so it found nothing to mark dead. Now it runs while they
+are still attached.
+
+The move itself is right and its reason is in the code: `ThreadStateSaver`
+detaches the thread, which suspends the critical section, and a second thread
+then destroys the same C++ object again. But it sits in **common** code with
+a free-threading-only justification, so a GIL build gets the side effect and
+none of the benefit. Not on dev, and not in this series either - the fix
+belongs on the free-threading branch, where that commit lives.
+
+Free threading only changes how often it is met: 139 of 600 without the GIL
+against 3 of 600 with it.
+
+### lease-vs-destroy
 
 The lease window: destruction arriving while a call holds a lease. A thread
 takes a lease and parks; another destroys the same object. The destruction
 has to be deferred until the lease comes back, and the call must not see a
-detached pointer.
+detached pointer. It passes, and the reason it did not is worth keeping.
 
-Open, and owned by FT4: the generated code re-reads `cppSelf` after the lease
-was granted. The lease does hold the C++ destructor off - ASan finds no
-use-after-free - but the call refuses.
+It was written as `obj.objectName()` and stood as an expected FAIL for days,
+with the explanation that the generated code re-reads `cppSelf` after the
+lease was granted. That explanation was wrong, and a stack at the raise says
+so: the failing lease is the *first* one that call ever takes.
+
+`obj.objectName()` is two leases. `tp_getattro` takes one to hand out the
+bound method, the call takes another, and Python bytecode runs in between.
+The thread parked in the first, the destruction landed in the gap, and the
+second lease was refused - which is correct, because in that gap no call is
+in flight. A GIL build divides the expression in exactly the same place.
+
+The method is therefore bound before the failpoint is armed, and then the
+test parks where it always meant to: inside the call, with the lease held.
+The destruction is deferred, the call returns its value.
 
 ### no-lock-in-python
 
@@ -217,6 +398,23 @@ The fix stays, because the code is wrong either way and the repair costs
 nothing. What does not stay is a switch to turn it off: a bit no test can
 observe is exactly the kind of dead mechanism this directory exists to
 prevent.
+
+### native-preflight, proof-native-preflight
+
+B4-2: a virtual call can arrive from a Qt thread that has no Python thread
+state at all. The preflight that asks "is this address wrapped?" used to
+narrow by type first, and narrowing by type means reading `Py_TYPE` and
+walking `tp_mro` - Python-owned state, read without a thread state. The
+untyped question is an address comparison and needs none; the typed one
+happens after the attach, in `acquireWrapper()`.
+
+`proof-native-preflight` clears `NativePreflight` and the subject aborts.
+What it aborts on is `SBK_ASSERT_ATTACHED()` inside the typed `hasWrapper()`,
+so this counterproof discriminates through an assertion, and assertions are
+compiled out under `NDEBUG`. On a free-threaded release build the A/B side
+would do the unsafe read silently and the row would read "still passes". The
+measure is real either way; what is debug-only is the ability to show it
+here.
 
 ### MI offsets - no test, and why
 

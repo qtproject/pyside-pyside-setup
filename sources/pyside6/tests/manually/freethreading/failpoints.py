@@ -16,6 +16,7 @@ interpreters the validation plan names.
 from __future__ import annotations
 
 import ctypes
+import gc
 import threading
 import time
 import weakref
@@ -75,16 +76,350 @@ def test_weakrefs_while_deallocating() -> str:
     return f"ok (alive during dealloc: {seen}, proxy: {proxy_alive})"
 
 
+def test_replacement_wrapper_while_dying() -> str:
+    """B4-1: a lookup between unregistering and the C++ destructor."""
+    state = {}
+    ready = threading.Event()
+
+    # In the worker, for the reason test_weakrefs_while_deallocating gives.
+    # QRecursiveMutex and not QObject: a QObject's destroyed() signal
+    # invalidates a stray wrapper afterwards and hides the window.
+    def drop():
+        obj = QRecursiveMutex()
+        state["addr"] = Shiboken.getCppPointer(obj)[0]
+        state["id"] = id(obj)
+        ready.set()
+        del obj
+
+    with Failpoint("dealloc-before-destroy") as point:
+        worker = threading.Thread(target=drop)
+        worker.start()
+        if not ready.wait(timeout=5):
+            return "FAIL: the worker never created the object"
+        if not point.wait_until_reached():
+            return "FAIL: deallocation never reached the failpoint"
+
+        # The entry is gone, the C++ object is not destroyed yet. A lookup
+        # here sees true absence, which is what has to stop being enough.
+        replacement = Shiboken.wrapInstance(state["addr"], QRecursiveMutex)
+        fresh = id(replacement) != state["id"]
+
+        point.release()
+        worker.join(timeout=5)
+        if worker.is_alive():
+            return "FAIL: the deallocating thread did not come back"
+
+    if Shiboken.isValid(replacement):
+        return ("FAIL: the replacement wrapper outlived the C++ object and is "
+                f"still valid (a second wrapper was made: {fresh})")
+    return "ok - no wrapper was published for a dying object"
+
+
+def test_replacement_wrapper_before_cpp_dtor() -> str:
+    """B4-1, the half the test above cannot see.
+
+    `replacement-while-dying` parks before deallocData(), where the tombstone
+    has just been set. The window that matters opens after it: deallocData()
+    goes through the wrapper map on its way out, and until this test existed
+    it took the tombstone with it - so between that point and the C++
+    destructor a lookup saw true absence again, which is the very thing the
+    tombstone was introduced to end.
+    """
+    state = {}
+    ready = threading.Event()
+
+    def drop():
+        obj = QRecursiveMutex()
+        state["addr"] = Shiboken.getCppPointer(obj)[0]
+        state["id"] = id(obj)
+        ready.set()
+        del obj
+
+    with Failpoint("dealloc-before-cpp-dtor") as point:
+        worker = threading.Thread(target=drop)
+        worker.start()
+        if not ready.wait(timeout=5):
+            return "FAIL: the worker never created the object"
+        if not point.wait_until_reached():
+            return "FAIL: deallocation never reached the failpoint"
+
+        # The wrapper is gone, the C++ object is not. Only the tombstone
+        # stands between this lookup and a wrapper for a doomed address.
+        replacement = Shiboken.wrapInstance(state["addr"], QRecursiveMutex)
+        fresh = id(replacement) != state["id"]
+
+        point.release()
+        worker.join(timeout=5)
+        if worker.is_alive():
+            return "FAIL: the deallocating thread did not come back"
+
+    if Shiboken.isValid(replacement):
+        return ("FAIL: a wrapper was published after the wrapper was freed and "
+                f"before the C++ destructor ran (second wrapper: {fresh})")
+    return "ok - the tombstone holds until the destructor is past"
+
+
+def test_replacement_wrapper_for_child_in_dealloc() -> str:
+    """The child window again, reached through the deallocator this time.
+
+    `replacement-of-owned-child` drives it with `Shiboken.delete()`, which
+    goes through finishDestruction(). Dropping the last reference does not:
+    the deallocator has its own copy of the same sequence, and it did not
+    have the child tombstones - `deallocData()` releases the owned children
+    and the parent's C++ destructor deletes them a step later, which is the
+    same window one function further along.
+
+    The failpoint parks in the child's own deallocation, which runs inside
+    the parent's. Both are past their wrappers and neither C++ destructor has
+    run, so the tombstone the parent laid for the child is all that stands
+    between the lookup below and a doomed address.
+    """
+    try:
+        import sample
+    except ImportError:
+        return "skipped: the sample binding is not in this build"
+
+    state = {}
+    ready = threading.Event()
+
+    def drop():
+        parent = sample.ObjectType()
+        child = sample.ObjectType.create()
+        child.setParent(parent)
+        state["addr"] = Shiboken.getCppPointer(child)[0]
+        ready.set()
+        del child          # the parent holds it, so this frees nothing
+        del parent
+
+    with Failpoint("dealloc-before-cpp-dtor") as point:
+        worker = threading.Thread(target=drop)
+        worker.start()
+        if not ready.wait(timeout=5):
+            return "FAIL: the worker never built the pair"
+        if not point.wait_until_reached():
+            return "FAIL: deallocation never reached the failpoint"
+
+        replacement = Shiboken.wrapInstance(state["addr"], sample.ObjectType)
+
+        point.release()
+        worker.join(timeout=5)
+        if worker.is_alive():
+            return "FAIL: the deallocating thread did not come back"
+
+    if Shiboken.isValid(replacement):
+        return "FAIL: a wrapper was published for a child the parent deletes"
+    return "ok - the child's tombstone holds in the deallocator too"
+
+
+def test_replacement_wrapper_for_owned_child() -> str:
+    """B4-1 one level down: the children a destructor takes with it.
+
+    A tombstone covers the object being destroyed. It does not cover what the
+    object owns: invalidate() hands the owned children back blank, their
+    entries leave the map, and the parent's C++ destructor deletes them a line
+    later. In between, a lookup on a child address sees true absence - the
+    same defect the tombstone was introduced to end, only one level down.
+
+    sample.ObjectType rather than a QObject on purpose: a QObject is the one
+    type the tombstone makes an exception for, so it cannot show this.
+    """
+    try:
+        import sample
+    except ImportError:
+        return "skipped: the sample binding is not in this build"
+
+    parent = sample.ObjectType()
+    child = sample.ObjectType.create()
+    child.setParent(parent)
+    address = Shiboken.getCppPointer(child)[0]
+
+    with Failpoint("delete-before-owned-dtor") as point:
+        worker = threading.Thread(target=lambda: Shiboken.delete(parent))
+        worker.start()
+        if not point.wait_until_reached():
+            return "FAIL: the deletion never reached the failpoint"
+
+        # The child is blank and the destructor that frees it has not run.
+        replacement = Shiboken.wrapInstance(address, sample.ObjectType)
+
+        point.release()
+        worker.join(timeout=5)
+        if worker.is_alive():
+            return "FAIL: the deleting thread did not come back"
+
+    if Shiboken.isValid(replacement):
+        return "FAIL: a wrapper was published for a child the parent deletes"
+    return "ok - the child's tombstone holds until the parent's destructor is past"
+
+
+def test_dying_qobject_argument() -> str:
+    """The exception the tombstone makes for QObject, from both sides.
+
+    A tombstone refuses to hand out a wrapper for an address that is being
+    destroyed. `destroyed(QObject *)` is emitted from inside that very
+    destruction and its argument is meant to be used, so the refusal does not
+    apply to a type that invalidates such wrappers itself - which is what
+    PySide does right after the signal. Both halves are the claim: usable in
+    the handler, dead afterwards. If the second half ever stopped holding,
+    the exception would be handing out a wrapper nobody ever invalidates,
+    which is the defect the tombstone exists for.
+    """
+    seen = {}
+    kept = []
+
+    obj = QObject()
+    obj.setObjectName("victim")
+
+    def on_destroyed(argument):
+        kept.append(argument)
+        try:
+            seen["name"] = argument.objectName()
+        except RuntimeError as exc:
+            seen["error"] = repr(exc)
+
+    obj.destroyed.connect(on_destroyed)
+    del obj
+    gc.collect()
+
+    if not kept:
+        return "FAIL: destroyed() never ran"
+    if "error" in seen:
+        return f"FAIL: the argument was unusable inside the handler: {seen['error']}"
+    if seen.get("name") != "victim":
+        return f"FAIL: the argument was not the object: {seen.get('name')!r}"
+    if Shiboken.isValid(kept[0]):
+        return "FAIL: the wrapper handed to the handler is still valid afterwards"
+    return "ok - usable in the handler, invalid once the signal is past"
+
+
+def test_external_destruction_leaves_a_tombstone() -> str:
+    """A destruction C++ started, from both ends.
+
+    The deallocator and Shiboken.delete() run the C++ destructor themselves,
+    so they know when it is past. This one does not: foreign C++ deletes an
+    object Python knows, the generated wrapper destructor reports it through
+    Object::destroy(), and nothing calls the binding again. Removing the map
+    entry there leaves true absence for every base destructor still to come.
+
+    Both halves are the claim, and the second is what keeps the first from
+    being a leak: refused while the destruction runs, and free again once the
+    memory has gone back - which the wrapper's operator delete is what says.
+    """
+    try:
+        import sample
+    except ImportError:
+        return "skipped: the sample binding is not in this build"
+
+    ready = threading.Event()
+    parent = sample.ObjectType()
+    # Built from Python, so it is an ObjectTypeWrapper and its destructor
+    # reports to the binding. ObjectType.create() hands out a plain C++
+    # instance with no wrapper at all, and deleting one of those is a window
+    # nothing can see - not this one.
+    child = sample.ObjectType()
+    child.setObjectName("victim")
+    child.setParent(parent)
+    address = Shiboken.getCppPointer(child)[0]
+    del child                      # the parent holds it; nothing is destroyed
+
+    with Failpoint("destroy-after-tombstone") as point:
+        def kill():
+            ready.set()
+            parent.killChild("victim")   # plain C++ delete, parks in destroy()
+
+        killer = threading.Thread(target=kill)
+        killer.start()
+        if not ready.wait(timeout=5):
+            return "FAIL: the worker never started"
+        if not point.wait_until_reached():
+            return "FAIL: the destruction never reached the failpoint"
+
+        during = Shiboken.wrapInstance(address, sample.ObjectType)
+        if Shiboken.isValid(during):
+            return "FAIL: a valid wrapper was published while C++ destroyed the object"
+
+        point.release()
+        killer.join(timeout=5)
+        if killer.is_alive():
+            return "FAIL: the destroying thread did not come back"
+
+    # The memory has gone back, so the address is nobody's identity any more
+    # and the tombstone has to be gone with it. Still standing, it would
+    # refuse this address for the rest of the process.
+    after = Shiboken.wrapInstance(address, sample.ObjectType)
+    if not Shiboken.isValid(after):
+        return "FAIL: the tombstone outlived the memory it stood for"
+    return "ok - refused while destroying, gone once the memory went back"
+
+
+def test_stray_wrapper_outlives_the_tombstone() -> str:
+    """The other end of the exception: what it let through, it takes back.
+
+    The exception is asked per type, not per moment, so for a QObject the
+    whole destruction is open, not just the destroyed() emit. A conversion
+    that lands after the signal - here, past the C++ destructor and before
+    the tombstone falls - used to get a wrapper that was registered in the
+    map, said "valid", and pointed at freed memory. Nothing invalidated it:
+    PySide's own path runs earlier, with the property data.
+
+    Now such a wrapper stays out of the map and belongs to the tombstone,
+    which invalidates it on the way out. Both halves are the claim: usable
+    while the destruction runs, dead once it cannot reach the address.
+    """
+    shared = {}
+    ready = threading.Event()
+
+    with Failpoint("dealloc-before-retire") as point:
+        # Created in the worker for the reason the weakref test gives: biased
+        # reference counting makes the creating thread the owner.
+        def drop():
+            obj = QObject()
+            obj.setObjectName("victim")
+            shared["address"] = Shiboken.getCppPointer(obj)[0]
+            ready.set()
+            del obj          # last strong reference, parks past the destructor
+
+        dropper = threading.Thread(target=drop)
+        dropper.start()
+        if not ready.wait(timeout=5):
+            return "FAIL: the worker never created the object"
+        if not point.wait_until_reached():
+            return "FAIL: deallocation never reached the failpoint"
+
+        stray = Shiboken.wrapInstance(shared["address"], QObject)
+        if not Shiboken.isValid(stray):
+            return "FAIL: the exception did not hand out a usable wrapper"
+
+        point.release()
+        dropper.join(timeout=5)
+        if dropper.is_alive():
+            return "FAIL: the deallocating thread did not come back"
+
+    if Shiboken.isValid(stray):
+        return "FAIL: the wrapper is still valid after the tombstone fell"
+    return "ok - the tombstone invalidated what it let through"
+
+
 def test_destroy_while_call_in_flight() -> str:
-    """The lease window: destruction arriving while a call holds a lease."""
+    """The lease window: destruction arriving while a call holds a lease.
+
+    The method is bound *before* the failpoint is armed, and that is the
+    whole test. `obj.objectName()` is two leases, not one: `tp_getattro`
+    takes one to hand out the bound method, and the call takes another.
+    Written as one expression the thread parks in the first of them, the
+    destruction lands in the gap between the two, and the *second* lease is
+    refused - correctly, because at that moment no call is in flight. That
+    is what this test measured for days, and it is not what it claims.
+    """
     obj = QObject()
     obj.setObjectName("leased")
+    bound = obj.objectName
     result = {}
 
     with Failpoint("lease-after-acquire") as point:
         def call():
             try:
-                result["name"] = obj.objectName()
+                result["name"] = bound()
             except BaseException as exc:      # noqa: BLE001
                 result["error"] = repr(exc)
 
@@ -405,6 +740,29 @@ def test_qml_placement_unwinds() -> str:
     return "ok (10 failed QML constructions, the next one is intact)"
 
 
+def test_native_preflight() -> str:
+    """An unattached thread does address checks only, never type state."""
+    from PySide6.QtCore import QRunnable, QThreadPool
+    qt_app()
+
+    ran = threading.Event()
+
+    class Work(QRunnable):
+        def run(self):              # a virtual, called from a pool thread
+            ran.set()
+
+    pool = QThreadPool.globalInstance()
+    for _ in range(50):
+        ran.clear()
+        work = Work()
+        work.setAutoDelete(False)
+        pool.start(work)
+        if not ran.wait(timeout=10):
+            return "FAIL: the override never ran on a pool thread"
+    pool.waitForDone(10000)
+    return "ok (50 virtuals entered from threads with no thread state)"
+
+
 def test_hierarchy_snapshot() -> str:
     """A module publishes edges while a traversal holds an iterator.
 
@@ -556,7 +914,30 @@ def test_lazy_lock_spans_destruction() -> str:
 
 
 def test_metaobject_lifetime() -> str:
-    """Open: metaObject() hands out a wrapper it does not keep alive."""
+    """Open, and NOT free-threading: a shared wrapper invalidated by a
+    stranger's destruction.
+
+    Every QObject answers metaObject() with the same &QObject::staticMetaObject,
+    so the map holds exactly one wrapper for it and every instance hands out
+    that one. Destroying any single QObject invalidates it, and every other
+    holder is hit. The C++ object behind it is static and never dies; the
+    invalidation is a guess PySide makes because it does not know when the
+    referent dies.
+
+    That is reproducible with a GIL, in four lines and without threads:
+
+        a, b = QObject(), QObject()
+        ma = a.metaObject()
+        Shiboken.delete(b)          # a stranger
+        ma.className()              # RuntimeError: already deleted
+
+    Bisected to 4c1d56fb6 (29.07.2026), which moved the bookkeeping in
+    callCppDestructors() ahead of the C++ destructors - before that,
+    clearReferences() had taken the referred objects out before invalidate()
+    ran. The move is right and free-threading-only in its reason, but it sits
+    in common code, so a GIL build gets the side effect and none of the
+    benefit. The fix belongs on the free-threading branch, not in this series.
+    """
     if not FREE_THREADED or gil_enabled():
         return "skipped: the race needs the GIL off"
     qt_app()
@@ -574,10 +955,38 @@ def test_metaobject_lifetime() -> str:
 
 TESTS = {
     "weakrefs": Test(test_weakrefs_while_deallocating),
-    # Known open: FT4 owns the lease duration, and the generated code re-reads
-    # cppSelf after the lease was granted. The lease does hold the C++
-    # destructor off - ASan finds no use-after-free - but the call refuses.
-    "lease-vs-destroy": Test(test_destroy_while_call_in_flight, "FAIL"),
+    # Was an expected FAIL on a wrong explanation; see the docstring.
+    "lease-vs-destroy": Test(test_destroy_while_call_in_flight),
+    "replacement-while-dying": Test(test_replacement_wrapper_while_dying),
+    "replacement-before-cpp-dtor": Test(test_replacement_wrapper_before_cpp_dtor),
+    "dying-qobject-argument": Test(test_dying_qobject_argument),
+    "proof-tombstones": Test(lambda: counterproof("Tombstones",
+                                                  "replacement-while-dying")),
+    "proof-tombstones-late": Test(lambda: counterproof(
+        "Tombstones", "replacement-before-cpp-dtor")),
+    "replacement-of-owned-child": Test(test_replacement_wrapper_for_owned_child),
+    "replacement-of-child-in-dealloc":
+        Test(test_replacement_wrapper_for_child_in_dealloc),
+    "proof-tombstones-dealloc-children": Test(lambda: counterproof(
+        "Tombstones", "replacement-of-child-in-dealloc")),
+    "proof-tombstones-children": Test(lambda: counterproof(
+        "Tombstones", "replacement-of-owned-child")),
+    # The exception the tombstone makes for QObject is a measure like any
+    # other: without the bit the tombstone refuses every dying identity, and
+    # the destroyed() handler is handed a wrapper it cannot use.
+    "proof-dying-qobject": Test(lambda: counterproof(
+        "DyingConversionException", "dying-qobject-argument")),
+    "external-destruction": Test(test_external_destruction_leaves_a_tombstone),
+    # Without the bit Object::destroy() removes the entry as it always did,
+    # and the stretch from there to the last base destructor is open.
+    "proof-external-tombstones": Test(lambda: counterproof(
+        "ExternalTombstones", "external-destruction")),
+    "stray-outlives-tombstone": Test(test_stray_wrapper_outlives_the_tombstone),
+    # Without the bit the wrapper the exception let through is registered as
+    # any other, and the second half of the claim - dead once the destruction
+    # is past - has nobody left to keep it.
+    "proof-dying-strays": Test(lambda: counterproof(
+        "DyingStrays", "stray-outlives-tombstone")),
     "no-lock-in-python": Test(test_no_raw_lock_while_python_runs),
     "no-lock-in-conversion": Test(test_lock_free_during_conversion),
     "state-lock-leaf": Test(test_state_lock_is_a_leaf),
@@ -588,6 +997,7 @@ TESTS = {
     "qml-placement": Test(test_qml_placement_nests),
     "qml-placement-parallel": Test(test_qml_placement_in_parallel),
     "qml-placement-unwinds": Test(test_qml_placement_unwinds),
+    "native-preflight": Test(test_native_preflight),
     "hierarchy-snapshot": Test(test_hierarchy_snapshot),
     "type-mutation": Test(test_type_mutation_during_destruction),
     "lock-order": Test(test_lock_order),
@@ -599,8 +1009,10 @@ TESTS = {
                                                 "qml-placement")),
     "proof-qml-scope": Test(lambda: counterproof("QmlPlacementFree",
                                                  "qml-placement-parallel")),
-    # Known open, free-threading-specific: 3 failures out of 600 without the
-    # GIL, 0 with it on the same binary. The lease work owns it.
+    "proof-native-preflight": Test(lambda: counterproof("NativePreflight",
+                                                        "native-preflight")),
+    # Known open, and not free-threading: the same defect is four lines with
+    # a GIL, see the docstring. Kept because this is where it was found.
     "metaobject-lifetime": Test(test_metaobject_lifetime, "FAIL"),
     # Known open, owned by the lazy protocol's replacement: the lazy-type lock
     # spans type creation, and a deferred destructor runs under it.

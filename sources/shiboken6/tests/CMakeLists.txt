@@ -14,6 +14,11 @@ add_test(NAME state_lock_scope
          COMMAND ${Python_EXECUTABLE}
                  "${CMAKE_CURRENT_SOURCE_DIR}/../libshiboken/check_state_lock_scope.py")
 
+# Likewise: the failpoint names in the code and in the registry have to agree.
+add_test(NAME failpoint_names
+         COMMAND ${Python_EXECUTABLE}
+                 "${CMAKE_CURRENT_SOURCE_DIR}/../libshiboken/check_failpoint_names.py")
+
 add_subdirectory(libminimal)
 if(NOT DEFINED MINIMAL_TESTS)
     add_subdirectory(libsample)

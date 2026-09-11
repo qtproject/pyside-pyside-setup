@@ -257,6 +257,14 @@ add_custom_target(check_state_lock_scope
     COMMENT "Checking the state-lock transaction scope"
     VERBATIM)
 
+# A failpoint whose name is not registered cannot be armed, and the test that
+# wants it reports a skip - green in the one place where it shows nothing.
+add_custom_target(check_failpoint_names
+    COMMAND ${Python_EXECUTABLE}
+            "${CMAKE_CURRENT_SOURCE_DIR}/check_failpoint_names.py"
+    COMMENT "Checking that every failpoint name is registered"
+    VERBATIM)
+
 install(EXPORT Shiboken6Targets NAMESPACE Shiboken6::
         DESTINATION ${LIB_INSTALL_DIR}/cmake/Shiboken6)
 

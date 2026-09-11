@@ -16,9 +16,9 @@ namespace Shiboken::FreeThreading {
 /// Kill switches for what free-threaded builds add, as bit flags in one
 /// variable, in the style of PYSIDE6_OPTION_PYTHON_ENUM:
 ///
-///     PYSIDE6_OPTION_FT=0b111111  all of them (the default)
-///     PYSIDE6_OPTION_FT=0b011111  without the MI offsets measure
-///     PYSIDE6_OPTION_FT=0b000011  the locks only
+///     PYSIDE6_OPTION_FT=0b11111111111  all of them (the default)
+///     PYSIDE6_OPTION_FT=0b01111111111  without the external tombstones
+///     PYSIDE6_OPTION_FT=0b00000000011  the locks only
 ///     PYSIDE6_OPTION_FT=off       without any of them
 ///
 /// A set bit keeps the measure, a cleared bit takes it away and puts back
@@ -46,7 +46,33 @@ enum Option : int
     /// initializer of a function-local static. Cleared, the sentinel check
     /// that used to guard them is back, and two threads reaching a type for
     /// the first time sort and move the same array at the same time.
-    MiOffsetsOnce    = 0x20
+    MiOffsetsOnce    = 0x20,
+    /// A thread with no thread state does address checks only. Cleared, the
+    /// virtual-call preflight narrows by type before it attaches, which
+    /// reads Py_TYPE and walks tp_mro with no thread state.
+    NativePreflight  = 0x40,
+    /// A retired identity stays in the wrapper map as a tombstone until the
+    /// destruction that retires it can no longer reach the address. Cleared,
+    /// the entry is removed where it always was, and a lookup in the window
+    /// that follows publishes a wrapper for an object about to be destroyed.
+    Tombstones       = 0x80,
+    /// A type that invalidates such wrappers itself may still be converted
+    /// while it is being destroyed - what destroyed(QObject *) needs, since
+    /// its argument is meant to be used. Cleared, the tombstone refuses
+    /// every dying identity and the handler gets a dead wrapper.
+    DyingConversionException = 0x100,
+    /// A wrapper handed out under that exception belongs to the tombstone
+    /// that let it through: it stays out of the wrapper map, and the
+    /// tombstone invalidates it when it falls. Cleared, it is registered
+    /// like any other wrapper and stays valid over an address whose object
+    /// is already gone.
+    DyingStrays      = 0x200,
+    /// A destruction that C++ started leaves a tombstone too, and it stands
+    /// until the memory is handed back - the generated wrapper's operator
+    /// delete is what says so. Cleared, the entry is simply removed where
+    /// Object::destroy() always removed it, and the stretch from there to
+    /// the last base destructor is open again.
+    ExternalTombstones = 0x400
 };
 
 /// Whether opt is enabled. The environment is read once, on first use.

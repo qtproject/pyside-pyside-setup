@@ -273,6 +273,7 @@ def counterproof(option: str, test: str) -> str:
     if not FREE_THREADED:
         return "skipped: the option bits exist only in a free-threaded build"
     rc, out = _run_without([option], test)
+    without = option
     # A subject that skipped is not a subject that failed. main() answers
     # SKIP for "nothing here ran", and SKIP is non-zero: read as a failure it
     # turns this row green in exactly the builds where it demonstrates
@@ -282,11 +283,11 @@ def counterproof(option: str, test: str) -> str:
         tail = out.strip().splitlines()[-1] if out.strip() else ""
         return f"skipped: {test} did not run ({tail[:60]})"
     if rc == 0:
-        return (f"FAIL: {test} still passes without {option}, so it does not "
+        return (f"FAIL: {test} still passes without {without}, so it does not "
                 f"test it")
     how = ("crashed" if rc < 0 else "hung" if rc == 124 else f"failed (rc {rc})")
     tail = out.strip().splitlines()[-1] if out.strip() else ""
-    return f"ok ({test} {how} without {option}: {tail[:60]})"
+    return f"ok ({test} {how} without {without}: {tail[:60]})"
 
 
 # ------------------------------------------------------------------- driver

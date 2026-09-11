@@ -1089,6 +1089,25 @@ void CppGenerator::writeDestructorNative(TextStream &s,
          "auto *wrapper = " << retrieveWrapper(classContext.metaClass())
       << ";\nShiboken::Object::destroy(wrapper, this);\n"
          "#endif\n" << outdent << "}\n";
+
+    // The other half: ~Wrapper() reports that a destruction has started, and
+    // this reports that it is over - the memory goes back here, after every
+    // base destructor. The tombstone Object::destroy() laid may fall now.
+    // The probe first, because this runs on whatever thread C++ deleted on
+    // and taking a thread state for the usual case - no tombstone - would
+    // cost every deletion in the process.
+    if (classContext.metaClass()->hasVirtualDestructor()) {
+        s << "\n#ifdef Py_GIL_DISABLED\n"
+          << "void " << classContext.wrapperName() << "::operator delete(void *ptr)\n{\n"
+          << indent
+          << "auto &bindingManager = Shiboken::BindingManager::instance();\n"
+             "if (bindingManager.hasExternallyDying(ptr)) {\n"
+          << indent << "Shiboken::GilState gil;\n"
+          << "bindingManager.retireExternallyDying(ptr);\n"
+          << outdent << "}\n"
+             "::operator delete(ptr);\n"
+          << outdent << "}\n#endif\n";
+    }
 }
 
 // Return type for error messages when getting invalid types from virtual
@@ -2528,9 +2547,6 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
         << "if (" << shibokenErrorsOccurred << ")\n"
         << indent << errorReturn << outdent << "\n";
 
-    writeFunctionCalls(s, overloadData, namedArgumentFlags, classContext, errorReturn);
-    s << '\n';
-
     const QString typeName = classContext.forSmartPointer()
         ? classContext.preciseType().cppSignature() : metaClass->qualifiedCppName();
     s << "if (" << shibokenErrorsOccurred
@@ -2545,7 +2561,6 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
         s << "if (cptr == nullptr)\n" << indent
             << returnErrorWrongArguments(overloadData, classContext, errorReturn)
             << outdent << '\n';
-
     s << "Shiboken::Object::setValidCpp(sbkSelf, true);\n";
     // If the created C++ object has a C++ wrapper the ownership is assigned to Python
     // (first "1") and the flag indicating that the Python wrapper holds an C++ wrapper
@@ -4631,7 +4646,18 @@ void CppGenerator::writeMultipleInheritanceInitializerFunction(TextStream &s,
         << "std::memmove(&mi_offsets[0], &mi_offsets[1], (end - mi_offsets  - 1) * sizeof(int));\n"
         << outdent
         << "return true;\n"
-        << outdent << "}();\n"
+        << outdent << "};\n"
+        << "#ifdef Py_GIL_DISABLED\n"
+        << "if (!Shiboken::FreeThreading::optionEnabled("
+           "Shiboken::FreeThreading::MiOffsetsOnce)) {\n" << indent
+        << "// The A/B side: the sentinel check as it was, which two threads\n"
+           "// reaching this type first can pass together.\n"
+        << "if (mi_offsets[0] == -2)\n" << indent
+        << "mi_fill();\n" << outdent
+        << "return mi_offsets;\n" << outdent
+        << "}\n"
+        << "#endif\n"
+        << "[[maybe_unused]] static const bool mi_ready = mi_fill();\n"
         << "return mi_offsets;\n" << outdent << "}\n";
 }
 

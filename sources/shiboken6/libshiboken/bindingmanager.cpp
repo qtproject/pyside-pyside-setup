@@ -17,6 +17,7 @@
 #include "sbkstaticstrings.h"
 #include "sbkstring.h"
 
+#include <atomic>
 #include <cassert>
 #include <cstddef>
 #include <cstring>
@@ -28,17 +29,17 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
-#ifdef Py_GIL_DISABLED
-// Taking a reference needs an attached thread state: PyUnstable_TryIncRef
-// touches the interpreter's refcount bookkeeping. The precondition used to be
-// documentation only, which is how it got broken once already. PyGILState_Check
-// is not in the limited API, so the check only exists where we develop.
-#  if !defined(Py_LIMITED_API) && !defined(NDEBUG)
-#    define SBK_ASSERT_ATTACHED() assert(PyGILState_Check())
-#  else
-#    define SBK_ASSERT_ATTACHED() ((void)0)
-#  endif
-#endif // Py_GIL_DISABLED
+
+// Taking a reference, or reading type state, needs an attached thread state.
+// The precondition used to be documentation only, which is how it got broken
+// once already. PyGILState_Check is not in the limited API, so the check only
+// exists where we develop. Defined in both builds: the typed lookups it
+// guards are compiled in both.
+#if !defined(Py_LIMITED_API) && !defined(NDEBUG)
+#  define SBK_ASSERT_ATTACHED() assert(PyGILState_Check())
+#else
+#  define SBK_ASSERT_ATTACHED() ((void)0)
+#endif
 
 // GraphNode for the dependency graph. It keeps a pointer to
 // the TypeInitStruct to be able to lazily create the type and hashes
@@ -96,8 +97,17 @@ public:
 
     /// A *new* reference, or nullptr when the wrapper is already on its way
     /// out - "the entry exists" and "the object is alive" in one statement.
+    ///
+    /// A tombstone answers nullptr without touching m_obj, and that is not a
+    /// convenience: the wrapper is freed while the tombstone still stands, so
+    /// even asking TryIncRef would read freed memory - and if the block has
+    /// been recycled into another object, it would succeed and hand out a
+    /// stranger. The guard belongs here rather than in the callers, because
+    /// every caller needs it and two of them did not have it.
     SbkObject *acquire() const
     {
+        if (m_dying)
+            return nullptr;
         if (PyUnstable_TryIncRef(reinterpret_cast<PyObject *>(m_obj)) == 0)
             return nullptr;
         return m_obj;
@@ -106,8 +116,90 @@ public:
     /// Identity check that does not acquire, for findSbkObject().
     bool refersTo(SbkObject *obj) const { return m_obj == obj; }
 
+    /// The type a tombstone stands for, null while the entry is live.
+    PyTypeObject *typeKey() const { return m_typeKey; }
+
+    /// Whether the C++ object behind this entry is on its way out. A
+    /// tombstone answers "not absent" without exposing a wrapper: publishing
+    /// a replacement here would hand out a pointer the destructor is about
+    /// to invalidate.
+    bool isDying() const { return m_dying; }
+
+    /// Become a tombstone, and take a reference to the type while doing so:
+    /// the wrapper is about to be freed, and the type is what a later lookup
+    /// classifies against. Only a tombstone holds one - a live entry can read
+    /// Py_TYPE() off the wrapper, and a reference here would outlive every
+    /// removal path that does not go through retirement. The increment may
+    /// happen under the lock; the decref may not, and it happens where the
+    /// tombstone falls.
+    void markDying()
+    {
+        if (m_dying)
+            return;
+        m_dying = true;
+        m_typeKey = Py_TYPE(reinterpret_cast<PyObject *>(m_obj));
+        Py_INCREF(reinterpret_cast<PyObject *>(m_typeKey));
+    }
+
+    /// The type reference the entry holds, handed over so the caller can
+    /// drop it outside the lock.
+    PyTypeObject *takeTypeKey()
+    {
+        auto *type = m_typeKey;
+        m_typeKey = nullptr;
+        return type;
+    }
+
+    /// Take in a wrapper the dying-conversion exception let through. It is
+    /// deliberately not in the map - a lookup must not find it - so the
+    /// tombstone is the only thing that still knows about it, and holds a
+    /// reference for as long as it does.
+    void addStray(SbkObject *obj)
+    {
+        Py_INCREF(reinterpret_cast<PyObject *>(obj));
+        m_strays.push_back(obj);
+    }
+
+    /// A stray of this identity that fits \a typeObject, with a reference
+    /// taken, or nullptr. Two conversions inside one destruction window used
+    /// to meet in the map and come back with the same wrapper; they still do.
+    /// Plain Py_INCREF: this entry holds a reference, so the object cannot be
+    /// in deallocation.
+    SbkObject *acquireStray(PyTypeObject *typeObject) const
+    {
+        for (SbkObject *stray : m_strays) {
+            auto *found = reinterpret_cast<PyObject *>(stray);
+            auto *foundType = Py_TYPE(found);
+            if (foundType != typeObject) {
+                // The contract's type-state exception, as in acquireWrapper().
+                Shiboken::noteContractException(Shiboken::RawLock::WrapperMap);
+                if (PyType_IsSubtype(foundType, typeObject) == 0)
+                    continue;
+            }
+            Py_INCREF(found);
+            return stray;
+        }
+        return nullptr;
+    }
+
+    /// How many wrappers this tombstone is holding, for the map dump.
+    std::size_t strayCount() const { return m_strays.size(); }
+
+    /// The strays, handed over so the caller can invalidate them outside the
+    /// lock - that walks the object graph and takes the state lock - and drop
+    /// the references there as well.
+    std::vector<SbkObject *> takeStrays()
+    {
+        auto result = std::move(m_strays);
+        m_strays.clear();
+        return result;
+    }
+
 private:
     SbkObject *m_obj = nullptr;   // borrowed, as before
+    PyTypeObject *m_typeKey = nullptr;  // owned
+    std::vector<SbkObject *> m_strays;  // owned; only a tombstone has any
+    bool m_dying = false;
 };
 
 // Mapping of C++ address to wrapper. We use a multimap to allow for co-located
@@ -297,14 +389,48 @@ struct BindingManager::BindingManagerPrivate {
     std::mutex deleteInMainThreadLock;
 #endif
 
+#ifdef Py_GIL_DISABLED
+    /// What retirement needs for a destruction C++ started, kept because the
+    /// object it would have been read from is gone by then. Keyed by the
+    /// primary C++ address, which is all operator delete knows.
+    struct ExternalDestruction
+    {
+        SbkObject *wrapper;      ///< a key, never dereferenced
+        void **cptrs;            ///< owned
+        PyTypeObject *type;      ///< owned reference
+    };
+    std::unordered_map<const void *, ExternalDestruction> externalDying;
+#endif
+
     WrapperMap::const_iterator findSbkObject(const void *cptr, SbkObject *wrapper) const;
     WrapperMap::const_iterator findByType(const void *cptr, PyTypeObject *desiredType) const;
 
-    bool releaseWrapper(void *cptr, SbkObject *wrapper, const int *bases = nullptr);
+    bool releaseWrapper(void *cptr, SbkObject *wrapper, const int *bases);
     bool releaseWrapperHelper(void *cptr, SbkObject *wrapper);
 
     void assignWrapper(SbkObject *wrapper, const void *cptr, const int *bases = nullptr);
     void assignWrapperHelper(SbkObject *wrapper, const void *cptr);
+#ifdef Py_GIL_DISABLED
+    /// What a registration meets at an address: nothing that is dying, a
+    /// dying identity that refuses to be replaced, or one that lets the
+    /// conversion through because it invalidates the result itself.
+    enum class DyingIdentity { None, Refuse, Exempt };
+    DyingIdentity classifyDyingIdentity(const void *cptr, PyTypeObject *typeObject,
+                                        WrapperMap::iterator *exempt);
+    void markDying(void *cptr, SbkObject *wrapper, const int *bases);
+    void markDyingHelper(void *cptr, SbkObject *wrapper);
+    /// Type references taken from the tombstones this retires, dropped by the
+    /// caller once the lock is gone. Per call, never a member: two threads
+    /// retire entries at the same time.
+    using TypeRefs = std::vector<PyTypeObject *>;
+    /// The wrappers the tombstones handed out while they stood, for the same
+    /// reason and with the same rule: taken out under the lock, invalidated
+    /// and dropped outside it.
+    using StrayList = std::vector<SbkObject *>;
+    void retire(void *cptr, SbkObject *wrapper, const int *bases, TypeRefs &types,
+                StrayList &strays);
+    void retireHelper(void *cptr, SbkObject *wrapper, TypeRefs &types, StrayList &strays);
+#endif
 };
 
 // Find wrapper map entry by Python instance
@@ -334,6 +460,10 @@ WrapperMap::const_iterator
     auto it = wrapperMapper.find(cptr);
     for (; it != end && it->first == cptr; ++it) {
 #ifdef Py_GIL_DISABLED
+        // Same as in acquireWrapper(): a dying identity is not offered, and
+        // its wrapper may already be freed, so Py_TYPE() must not touch it.
+        if (it->second.isDying())
+            continue;
         auto *foundType = Py_TYPE(reinterpret_cast<PyObject *>(it->second.borrowed()));
 #else
         auto *foundType = Py_TYPE(reinterpret_cast<PyObject *>(it->second));
@@ -354,13 +484,150 @@ bool BindingManager::BindingManagerPrivate::releaseWrapperHelper(void *cptr, Sbk
     // The wrapper argument is checked to ensure that the correct wrapper is released.
     // Returns true if the correct wrapper is found and released.
     // If wrapper argument is NULL, no such check is performed.
-    const auto it = wrapper != nullptr ? findSbkObject(cptr, wrapper) : wrapperMapper.find(cptr);
-    if (it != wrapperMapper.cend()) {
-        wrapperMapper.erase(it);
+    const auto cit = wrapper != nullptr ? findSbkObject(cptr, wrapper) : wrapperMapper.find(cptr);
+    if (cit != wrapperMapper.cend()) {
+#ifdef Py_GIL_DISABLED
+        // A tombstone is not released here. deallocData() comes through on
+        // its way to the C++ destructor, and removing the entry there would
+        // reopen exactly the window the tombstone exists for: between that
+        // point and the destructor a lookup would see true absence. It falls
+        // in retireWrapper(), once the destruction can no longer reach the
+        // address - and with it the type reference, which is why nothing is
+        // handed back here: the only entry that holds one is a tombstone, and
+        // a tombstone never gets past the line above.
+        if (cit->second.isDying())
+            return false;
+#endif
+        wrapperMapper.erase(cit);
         return true;
     }
     return false;
 }
+
+#ifdef Py_GIL_DISABLED
+// Installed by PySide for QObject; see the declaration for why. Atomic for
+// the memory model rather than for the machine: the write happens in QtCore's
+// module init, the reads happen under the wrapper map lock on other threads,
+// and nothing makes those two agree. Relaxed is enough - the value points at
+// code, so there is no data behind it that would need ordering.
+static std::atomic<DyingConversionPredicate> dyingConversionPredicate{nullptr};
+
+void setDyingConversionPredicate(DyingConversionPredicate predicate)
+{
+    dyingConversionPredicate.store(predicate, std::memory_order_relaxed);
+}
+
+// Invalidate and let go of the wrappers a falling tombstone kept. No lock may
+// be held here: invalidate() walks the object graph and takes the state lock,
+// and the last reference can run a destructor.
+static void invalidateStrays(const std::vector<SbkObject *> &strays)
+{
+    for (SbkObject *stray : strays) {
+        Object::invalidate(stray);
+        Py_DECREF(reinterpret_cast<PyObject *>(stray));
+    }
+}
+
+// Whether a compatible identity at cptr is being destroyed, and if so on
+// which terms. Called with the lock held, from the registration that would
+// otherwise publish a wrapper for it. \a exempt is written only for the
+// Exempt answer, and names the tombstone that gave it.
+BindingManager::BindingManagerPrivate::DyingIdentity
+    BindingManager::BindingManagerPrivate::classifyDyingIdentity(const void *cptr,
+                                                                 PyTypeObject *typeObject,
+                                                                 WrapperMap::iterator *exempt)
+{
+    // Asked of the dying type, not of the one being published: what decides
+    // is whether the destruction that is running invalidates what a
+    // conversion hands out.
+    const auto predicate =
+        Shiboken::FreeThreading::optionEnabled(
+            Shiboken::FreeThreading::DyingConversionException)
+        ? dyingConversionPredicate.load(std::memory_order_relaxed) : nullptr;
+    auto answer = DyingIdentity::None;
+    const auto range = wrapperMapper.equal_range(cptr);
+    for (auto it = range.first; it != range.second; ++it) {
+        if (!it->second.isDying())
+            continue;
+        auto *key = it->second.typeKey();
+        if (key != nullptr && key != typeObject) {
+            // The same question acquireWrapper() asks, from the type the
+            // entry kept rather than from the wrapper, which may be gone.
+            Shiboken::noteContractException(Shiboken::RawLock::WrapperMap);
+            if (PyType_IsSubtype(key, typeObject) == 0)
+                continue;
+        }
+        if (key != nullptr && predicate != nullptr) {
+            Shiboken::noteContractException(Shiboken::RawLock::WrapperMap);
+            if (predicate(key)) {
+                // Remember the first one, but keep looking: a co-located
+                // identity that refuses outweighs one that does not.
+                if (answer == DyingIdentity::None) {
+                    answer = DyingIdentity::Exempt;
+                    *exempt = it;
+                }
+                continue;
+            }
+        }
+        return DyingIdentity::Refuse;
+    }
+    return answer;
+}
+
+void BindingManager::BindingManagerPrivate::markDyingHelper(void *cptr, SbkObject *wrapper)
+{
+    const auto range = wrapperMapper.equal_range(cptr);
+    for (auto it = range.first; it != range.second; ++it) {
+        if (it->second.refersTo(wrapper))
+            it->second.markDying();
+    }
+}
+
+void BindingManager::BindingManagerPrivate::markDying(void *cptr, SbkObject *wrapper,
+                                                      const int *bases)
+{
+    assert(cptr);
+    markDyingHelper(cptr, wrapper);
+    if (bases != nullptr) {
+        auto *base = static_cast<uint8_t *>(cptr);
+        for (const auto *offset = bases; *offset != -1; ++offset)
+            markDyingHelper(base + *offset, wrapper);
+    }
+}
+
+// The wrapper is a key here and nothing else: it is freed by the time this
+// runs. Filtering by it matters because the map is a multimap for co-located
+// objects - two identities can share an address, and only the tombstones this
+// destruction laid down may fall with it.
+void BindingManager::BindingManagerPrivate::retireHelper(void *cptr, SbkObject *wrapper,
+                                                         TypeRefs &types, StrayList &strays)
+{
+    const auto range = wrapperMapper.equal_range(cptr);
+    for (auto it = range.first; it != range.second; ) {
+        if (it->second.isDying() && it->second.refersTo(wrapper)) {
+            types.push_back(it->second.takeTypeKey());
+            const auto entryStrays = it->second.takeStrays();
+            strays.insert(strays.end(), entryStrays.cbegin(), entryStrays.cend());
+            it = wrapperMapper.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void BindingManager::BindingManagerPrivate::retire(void *cptr, SbkObject *wrapper,
+                                                   const int *bases, TypeRefs &types,
+                                                   StrayList &strays)
+{
+    assert(cptr);
+    retireHelper(cptr, wrapper, types, strays);
+    if (bases != nullptr) {
+        auto *base = static_cast<uint8_t *>(cptr);
+        for (const auto *offset = bases; *offset != -1; ++offset)
+            retireHelper(base + *offset, wrapper, types, strays);
+    }
+}
+#endif // Py_GIL_DISABLED
 
 bool BindingManager::BindingManagerPrivate::releaseWrapper(void *cptr, SbkObject *wrapper,
                                                            const int *bases)
@@ -430,6 +697,8 @@ BindingManager::~BindingManager()
         while (true) {
             AcquiredWrapper wrapper;
             const void *key = nullptr;
+            PyTypeObject *released = nullptr;
+            BindingManagerPrivate::StrayList strays;
             {
                 WrapperMapGuard guard(m_d->wrapperMapLock);
                 if (m_d->wrapperMapper.empty())
@@ -438,11 +707,23 @@ BindingManager::~BindingManager()
                 key = it->first;
                 wrapper = AcquiredWrapper::fromOwned(it->second.acquire());
                 if (wrapper.isNull()) {
-                    // Being deallocated elsewhere; destroy() would not reach
-                    // it and the loop would never end.
+                    // Being deallocated elsewhere, or a tombstone; destroy()
+                    // would not reach either and the loop would never end.
+                    // A tombstone holds a reference to its type and the
+                    // wrappers it let through, and this is the third and last
+                    // way an entry leaves the map - the one that runs when a
+                    // retirement never came.
+                    released = it->second.takeTypeKey();
+                    strays = it->second.takeStrays();
                     m_d->wrapperMapper.erase(it);
-                    continue;
                 }
+            }
+            if (wrapper.isNull()) {
+                // Outside the lock: invalidation takes the state lock, and a
+                // decref may run a destructor.
+                invalidateStrays(strays);
+                Py_XDECREF(reinterpret_cast<PyObject *>(released));
+                continue;
             }
             Object::destroy(wrapper.object(), const_cast<void *>(key));
         }
@@ -469,11 +750,30 @@ BindingManager &BindingManager::instance() {
 bool BindingManager::hasWrapper(const void *cptr) const
 {
     WrapperMapGuard guard(m_d->wrapperMapLock);
+#ifdef Py_GIL_DISABLED
+    // A tombstone is not a wrapper. The question every caller asks is whether
+    // Python holds an identity for this address that it may still use, and
+    // for an identity on its way out the answer is no - the conversion that
+    // follows a true here would build a wrapper for an address the destructor
+    // is about to invalidate. Only a bool is read, so this stays usable from
+    // a thread with no thread state.
+    const auto range = m_d->wrapperMapper.equal_range(cptr);
+    for (auto it = range.first; it != range.second; ++it) {
+        if (!it->second.isDying())
+            return true;
+    }
+    return false;
+#else
     return m_d->wrapperMapper.find(cptr) != m_d->wrapperMapper.end();
+#endif
 }
 
 bool BindingManager::hasWrapper(const void *cptr, PyTypeObject *typeObject) const
 {
+    // Narrowing by type reads Py_TYPE and walks tp_mro, so it needs the
+    // thread attached. The untyped overload above is the one an unattached
+    // caller may use: it compares addresses and nothing else.
+    SBK_ASSERT_ATTACHED();
     WrapperMapGuard guard(m_d->wrapperMapLock);
     return m_d->findByType(cptr, typeObject) != m_d->wrapperMapper.cend();
 }
@@ -498,6 +798,16 @@ void BindingManager::registerWrapper(SbkObject *pyObj, void *cptr)
     if (!d)
         return;
 
+#ifdef Py_GIL_DISABLED
+    // The second ending an external tombstone can get, and the only one that
+    // reaches a placement-constructed object: this is the publication of a
+    // *newly built* object at that address, which the allocator cannot hand
+    // out before the previous destruction is over. Conversions do not count
+    // and do not come through here - they go through
+    // registerWrapperUnlessPresent(), where meeting a tombstone is exactly
+    // what has to be refused.
+    retireExternallyDying(cptr);
+#endif
     m_d->assignWrapper(pyObj, cptr, miOffsets(d, cptr));
 }
 
@@ -568,6 +878,40 @@ void BindingManager::addToDeletionInMainThread(const DestructorEntry &e)
     MainThreadDeleteGuard guard(m_d->deleteInMainThreadLock);
     m_d->deleteInMainThread.push_back(e);
 }
+
+// A retirement travels in the destructor queue rather than beside it, so that
+// it keeps its place: the entries run in order, and the tombstone has to fall
+// after the destructor it was waiting for.
+namespace {
+struct PendingRetirement
+{
+    SbkObject *wrapper;
+    std::vector<void *> cptrs;
+    PyTypeObject *type;
+};
+
+void runPendingRetirement(void *data)
+{
+    auto *pending = static_cast<PendingRetirement *>(data);
+    BindingManager::instance().retireWrapper(pending->wrapper,
+                                             pending->cptrs.data(), pending->type);
+    Py_DECREF(reinterpret_cast<PyObject *>(pending->type));
+    delete pending;
+}
+} // namespace
+
+void BindingManager::retireAfterDeletionInMainThread(SbkObject *sbkObj,
+                                                     const std::vector<void *> &cptrs,
+                                                     PyTypeObject *type)
+{
+    // Its own reference on the type: retireWrapper() reads the type layout,
+    // and the tombstone that would otherwise be holding it is not something
+    // this can check - markDying() takes one only for an entry that is in
+    // the map, and the caller does not know that it was.
+    Py_INCREF(reinterpret_cast<PyObject *>(type));
+    addToDeletionInMainThread({runPendingRetirement,
+                               new PendingRetirement{sbkObj, cptrs, type}});
+}
 #else // Py_GIL_DISABLED
 void BindingManager::runDeletionInMainThread()
 {
@@ -595,6 +939,8 @@ AcquiredWrapper BindingManager::acquireWrapper(const void *cptr) const
     // pointer.
     const auto range = m_d->wrapperMapper.equal_range(cptr);
     for (auto it = range.first; it != range.second; ++it) {
+        if (it->second.isDying())
+            continue;
         if (auto *wrapper = it->second.acquire())
             return AcquiredWrapper::fromOwned(wrapper);
     }
@@ -611,6 +957,8 @@ AcquiredWrapper BindingManager::acquireWrapper(const void *cptr, PyTypeObject *t
     // this very lock, so nothing in the map has been freed yet.
     const auto range = m_d->wrapperMapper.equal_range(cptr);
     for (auto it = range.first; it != range.second; ++it) {
+        if (it->second.isDying())
+            continue;
         auto *found = reinterpret_cast<PyObject *>(it->second.borrowed());
         auto *foundType = Py_TYPE(found);
         if (foundType == typeObject) {
@@ -630,8 +978,9 @@ AcquiredWrapper BindingManager::acquireWrapper(const void *cptr, PyTypeObject *t
     return {};
 }
 
-AcquiredWrapper BindingManager::registerWrapperUnlessPresent(SbkObject *pyObj, void *cptr,
-                                                             PyTypeObject *typeObject)
+BindingManager::Registration
+    BindingManager::registerWrapperUnlessPresent(SbkObject *pyObj, void *cptr,
+                                                 PyTypeObject *typeObject)
 {
     SBK_ASSERT_ATTACHED();
     auto *instanceType = Shiboken::pyType(pyObj);
@@ -645,12 +994,143 @@ AcquiredWrapper BindingManager::registerWrapperUnlessPresent(SbkObject *pyObj, v
     WrapperMapGuard guard(m_d->wrapperMapLock);
 
     if (auto winner = acquireWrapper(cptr, typeObject))
-        return winner;
+        return {std::move(winner), false};
+
+    // A tombstone for a compatible identity: the C++ object is still there,
+    // but its destructor is going to run, and a wrapper published now would
+    // outlive it. This is the half that removing the entry early does not
+    // fix - the window between the removal and the destructor.
+    WrapperMap::iterator exempt;
+    switch (m_d->classifyDyingIdentity(cptr, typeObject, &exempt)) {
+    case BindingManagerPrivate::DyingIdentity::None:
+        break;
+    case BindingManagerPrivate::DyingIdentity::Refuse:
+        return {{}, true};
+    case BindingManagerPrivate::DyingIdentity::Exempt:
+        // The exception destroyed(QObject *) needs. The wrapper is handed out
+        // but stays out of the map: an entry here would survive the tombstone
+        // and become the canonical wrapper for whatever the allocator puts at
+        // this address next. The tombstone keeps it instead, and invalidates
+        // it when it falls, so the conversion is usable exactly as long as
+        // the destruction it belongs to is running.
+        if (Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::DyingStrays)) {
+            if (auto *stray = exempt->second.acquireStray(typeObject))
+                return {AcquiredWrapper::fromOwned(stray), false};
+            exempt->second.addStray(pyObj);
+            return {};
+        }
+        break;
+    }
 
     // The registration registerWrapper() does. mi_init() computes offsets
     // from the C++ pointer and runs no Python, so it may run under the lock.
     m_d->assignWrapper(pyObj, cptr, miOffsets(d, cptr));
     return {};
+}
+
+void BindingManager::markWrapperDying(SbkObject *sbkObj, void * const *cptrs)
+{
+    if (cptrs == nullptr)
+        cptrs = sbkObj->d->cptr;
+    if (cptrs == nullptr)
+        return;
+    auto *sbkType = Shiboken::pyType(sbkObj);
+    auto *d = PepType_SOTP(sbkType);
+    const int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(sbkType) : 1);
+    const int *mi_offsets = miOffsets(d, cptrs[0]);
+
+    // One hold for every alias of the identity, so no reader can see half of
+    // it converted.
+    WrapperMapGuard guard(m_d->wrapperMapLock);
+    for (int i = 0; i < numBases; ++i) {
+        if (cptrs[i] != nullptr)
+            m_d->markDying(cptrs[i], sbkObj, mi_offsets);
+    }
+}
+
+// A destruction C++ started. The binding hears it begin, in the generated
+// wrapper destructor, and is never called again - so nothing can take the
+// tombstone away the way the deallocator does, and everything retirement
+// needs has to be kept here instead of read off an object that is gone.
+void BindingManager::markExternallyDying(SbkObject *sbkObj, void **cptrs,
+                                         PyTypeObject *type)
+{
+    if (cptrs == nullptr)
+        return;
+    if (cptrs[0] == nullptr) {
+        delete[] cptrs;
+        return;
+    }
+    // An address that already carries one: the previous destruction never
+    // got either of its two endings. Retire it now - a second destruction at
+    // the same address is proof that the first one is over.
+    retireExternallyDying(cptrs[0]);
+
+    markWrapperDying(sbkObj, cptrs);
+    Py_INCREF(reinterpret_cast<PyObject *>(type));
+    WrapperMapGuard guard(m_d->wrapperMapLock);
+    m_d->externalDying.insert({cptrs[0], {sbkObj, cptrs, type}});
+}
+
+bool BindingManager::hasExternallyDying(const void *cptr) const
+{
+    WrapperMapGuard guard(m_d->wrapperMapLock);
+    return m_d->externalDying.find(cptr) != m_d->externalDying.end();
+}
+
+void BindingManager::retireExternallyDying(void *cptr)
+{
+    if (cptr == nullptr)
+        return;
+    BindingManagerPrivate::ExternalDestruction pending{};
+    {
+        WrapperMapGuard guard(m_d->wrapperMapLock);
+        const auto it = m_d->externalDying.find(cptr);
+        if (it == m_d->externalDying.end())
+            return;
+        pending = it->second;
+        m_d->externalDying.erase(it);
+    }
+    // Outside that hold, because retireWrapper() takes the lock itself and
+    // invalidates strays with none held.
+    retireWrapper(pending.wrapper, pending.cptrs, pending.type);
+    delete[] pending.cptrs;
+    Py_DECREF(reinterpret_cast<PyObject *>(pending.type));
+}
+
+void BindingManager::retireWrapper(SbkObject *sbkObj, void * const *cptrs,
+                                   PyTypeObject *type)
+{
+    if (cptrs == nullptr)
+        return;
+    auto *d = PepType_SOTP(type);
+    const int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(type) : 1);
+    // cptrs[0] may point at freed memory by now - that is the whole point of
+    // retirement. mi_init() does not read it: it computed the offsets once,
+    // at registration, and every call after that returns the same array. The
+    // pointer is passed, never dereferenced.
+    const int *mi_offsets = miOffsets(d, cptrs[0]);
+
+    // The entries hold a reference to their type, and a tombstone also holds
+    // the wrappers it let through. Collected under the lock, dealt with after
+    // it: invalidation walks the object graph and takes the state lock, and a
+    // decref can run a destructor.
+    BindingManagerPrivate::TypeRefs types;
+    BindingManagerPrivate::StrayList strays;
+    {
+        WrapperMapGuard guard(m_d->wrapperMapLock);
+        for (int i = 0; i < numBases; ++i) {
+            if (cptrs[i] != nullptr)
+                m_d->retire(cptrs[i], sbkObj, mi_offsets, types, strays);
+        }
+    }
+    // This is the other end of the dying-conversion exception: the address is
+    // out of reach for good now, so what was handed out over it may no longer
+    // claim to be valid. Nothing else can do it - a stray was never in the
+    // map, which is where every other invalidation path looks.
+    invalidateStrays(strays);
+    for (auto *t : types)
+        Py_XDECREF(reinterpret_cast<PyObject *>(t));
 }
 #else // Py_GIL_DISABLED
 SbkObject *BindingManager::retrieveWrapper(const void *cptr) const
@@ -675,7 +1155,9 @@ PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *pyMethodName
     auto *obWrapper = reinterpret_cast<PyObject *>(wrapper);
 
     // Two PyObject_GetAttr() calls below, plus an mro walk: attribute access
-    // runs descriptors and can re-enter the bindings.
+    // runs descriptors and can re-enter the bindings, and none of it may be
+    // reached from a thread that has no thread state.
+    SBK_ASSERT_ATTACHED();
     SBK_ASSERT_NO_RAW_LOCK();
     Shiboken::AutoDecRef method(PyObject_GetAttr(obWrapper, pyMethodName));
     if (method.isNull())
@@ -725,11 +1207,11 @@ PyObject *BindingManager::getOverride(SbkObject *wrapper, PyObject *pyMethodName
 
 void BindingManager::addClassInheritance(const InheritanceEdge *edges, std::size_t count)
 {
-    std::vector<Graph::Edge> nodes;
-    nodes.reserve(count);
+    std::vector<Graph::Edge> graphEdges;
+    graphEdges.reserve(count);
     for (std::size_t i = 0; i < count; ++i)
-        nodes.emplace_back(GraphNode(edges[i].parent), GraphNode(edges[i].child));
-    m_d->classHierarchy.addEdges(nodes);
+        graphEdges.emplace_back(GraphNode(edges[i].parent), GraphNode(edges[i].child));
+    m_d->classHierarchy.addEdges(graphEdges);
 }
 
 BindingManager::TypeCptrPair BindingManager::findDerivedType(void *cptr, PyTypeObject *type) const
@@ -838,6 +1320,18 @@ void BindingManager::dumpWrapperMap()
         << typeCount << '\n';
     for (auto it : wrapperMap) {
 #ifdef Py_GIL_DISABLED
+        // A tombstone is printed from what the entry kept, never from the
+        // wrapper: that one is freed while the entry still stands.
+        if (it.second.isDying()) {
+            auto *key = it.second.typeKey();
+            std::cerr << "key: " << it.first << ", tombstone ("
+                << (key != nullptr ? PepType_GetFullyQualifiedNameStr(key)
+                                   : "<no type>") << ')';
+            if (const auto strays = it.second.strayCount())
+                std::cerr << ", " << strays << " stray(s)";
+            std::cerr << '\n';
+            continue;
+        }
         // Borrowed, but under the lock and only read - see acquireWrapper().
         auto *ob = reinterpret_cast<PyObject *>(it.second.borrowed());
 #else

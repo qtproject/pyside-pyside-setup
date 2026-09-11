@@ -127,6 +127,9 @@ using DestructorEntries = std::vector<DestructorEntry>;
 // PyType_IsSubtype() - off the locked path.
 using DestructorFunctions = std::vector<ObjectDestructor>;
 
+#ifdef Py_GIL_DISABLED
+// Only the free-threaded destruction path gathers them ahead of its
+// transaction; with a GIL the destructors are read where they are used.
 static DestructorFunctions getDestructorFunctions(PyTypeObject *type)
 {
     DestructorFunctions result;
@@ -136,6 +139,7 @@ static DestructorFunctions getDestructorFunctions(PyTypeObject *type)
     });
     return result;
 }
+#endif // Py_GIL_DISABLED
 
 DestructorEntries getDestructorEntries(SbkObject *o)
 {
@@ -418,6 +422,23 @@ static int mainThreadDeletionHandler(void *)
 }
 
 #ifdef Py_GIL_DISABLED
+namespace Shiboken::Object {
+// A child whose C++ instance the parent's destructor is about to delete, and
+// what a tombstone for it needs. Both the wrapper and its type are pinned:
+// running the invalidation plan decrefs, and the child can otherwise be gone
+// before the destructor that frees its C++ instance has even run.
+struct DyingChild
+{
+    SbkObject *wrapper;
+    PyTypeObject *type;
+    std::vector<void *> cptrs;
+};
+
+// Defined with the other state-lock transactions, declared here: both
+// destruction paths need it, and this is the first of them.
+static std::vector<DyingChild> collectDyingChildren(SbkObject *root);
+} // namespace Shiboken::Object
+
 // Free-threaded twin of the deallocation path. Kept here, not in the
 // state-lock chapter, because it is static and used a few lines down. It
 // follows the twin below step for step, apart from the transactions and the
@@ -449,31 +470,21 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
     // crash.
     PyObject_GC_UnTrack(pyObj);
 
-    // Take the object out of the wrapper map before anything below can run
-    // Python code. The refcount is already zero here, but the map used to keep
-    // the entry until deallocData(), several steps down. A lookup in between -
-    // a weakref callback, a __del__, C++ re-entering the binding - was handed
-    // this very wrapper and increfed it back to life, while the deallocation
-    // carried on and freed it underneath. The invariant callers rely on is
-    // "in the map implies alive", and this is where it has to be restored.
-    // Only the entry goes; the flags stay, canDelete below still reads them.
+    // What this deallocation is going to destroy, decided before anything
+    // below can run Python. It used to be read further down, after the map
+    // entry was already dealt with, and the entry cannot be dealt with
+    // correctly without knowing it.
     auto &bindingManager = Shiboken::BindingManager::instance();
-    bindingManager.unregisterWrapper(sbkObj);
-
-    // Check that Python is still initialized as sometimes this is called by a static destructor
-    // after Python interpeter is shutdown.
-    SBK_FAILPOINT("dealloc-before-weakrefs");
-    if (sbkObj->weakreflist && Py_IsInitialized())
-        PyObject_ClearWeakRefs(pyObj);
-
-    // If I have ownership and is valid delete C++ pointer
     auto *sotp = PepType_SOTP(pyType);
-    Shiboken::DestructorEntries entries;
-    void *cptr = nullptr;
+    const int numBases = sotp->is_multicpp
+        ? Shiboken::getNumberOfCppBaseClasses(pyType) : 1;
     // Gathered before the lock: the walk reads tp_bases and calls
     // PyType_IsSubtype(), and the state lock stays a leaf.
     const auto dtors = sotp->is_multicpp ? Shiboken::getDestructorFunctions(pyType)
                                          : Shiboken::DestructorFunctions{};
+    Shiboken::DestructorEntries entries;
+    void *cptr = nullptr;
+    std::vector<void *> retiredCptrs;
     {
         // Read-only: at refcount zero nobody else is here, but the lock owns
         // these fields. Only the instance pointers are read here; the
@@ -484,6 +495,7 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
         // wrapper that went through them arrives with none.
         canDelete &= priv->hasOwnership && priv->validCppObject && priv->cptr != nullptr;
         if (canDelete) {
+            retiredCptrs.assign(priv->cptr, priv->cptr + numBases);
             if (sotp->is_multicpp) {
                 entries.reserve(dtors.size());
                 for (size_t i = 0; i < dtors.size(); ++i)
@@ -494,8 +506,47 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
         }
     }
 
+    // Take the object out of the wrapper map before anything below can run
+    // Python code. The refcount is already zero here, but the map used to keep
+    // the entry until deallocData(), several steps down. A lookup in between -
+    // a weakref callback, a __del__, C++ re-entering the binding - was handed
+    // this very wrapper and increfed it back to life, while the deallocation
+    // carried on and freed it underneath. The invariant callers rely on is
+    // "in the map implies alive", and this is where it has to be restored.
+    //
+    // Where a C++ object is going to be destroyed, the entry does not go: it
+    // becomes a tombstone, because between removing it and the destructor
+    // below a lookup saw true absence and published a wrapper for an object
+    // about to die. A tombstone stands for a destruction that is going to
+    // happen - a wrapper that owns nothing destroys nothing, and there the
+    // entry is removed the way it always was, so a conversion of that address
+    // gets the fresh, valid wrapper it should. The same goes for the owned
+    // children: their entries are released inside deallocData() and the
+    // destructor deletes them a step later.
+    std::vector<Shiboken::Object::DyingChild> children;
+    const bool tombstones = canDelete
+        && Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::Tombstones);
+    if (tombstones) {
+        children = Shiboken::Object::collectDyingChildren(sbkObj);
+        bindingManager.markWrapperDying(sbkObj);
+        for (const auto &child : children)
+            bindingManager.markWrapperDying(child.wrapper, child.cptrs.data());
+    } else {
+        // Also the A/B side: with Tombstones cleared the entry goes the way
+        // it went before, so a test can watch the window come back.
+        retiredCptrs.clear();
+        bindingManager.unregisterWrapper(sbkObj);
+    }
+
+    // Check that Python is still initialized as sometimes this is called by a static destructor
+    // after Python interpeter is shutdown.
+    SBK_FAILPOINT("dealloc-before-weakrefs");
+    if (sbkObj->weakreflist && Py_IsInitialized())
+        PyObject_ClearWeakRefs(pyObj);
+
     SBK_FAILPOINT("dealloc-before-destroy");
 
+    bool deferredDeletion = false;
     if (canDelete && sotp->delete_in_main_thread
         && Shiboken::currentThreadId() != Shiboken::mainThreadId()) {
         if (sotp->is_multicpp) {
@@ -504,8 +555,21 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
         } else {
             bindingManager.addToDeletionInMainThread({sotp->cpp_dtor, cptr});
         }
+        // The retirements go into the same queue right here, directly behind
+        // the destructors they wait for. Queued after deallocData() they can
+        // miss it altogether: deallocData() runs Python, and the main thread
+        // may drain everything queued so far while it does - the tombstone
+        // would then stand over an address whose destructor has already run,
+        // and refuse it until a second drain comes past.
+        if (!retiredCptrs.empty())
+            bindingManager.retireAfterDeletionInMainThread(sbkObj, retiredCptrs, pyType);
+        for (const auto &child : children) {
+            bindingManager.retireAfterDeletionInMainThread(child.wrapper, child.cptrs,
+                                                           child.type);
+        }
         Py_AddPendingCall(mainThreadDeletionHandler, nullptr);
         canDelete = false;
+        deferredDeletion = true;
     }
 
     /* Save the current exception, if any. */
@@ -514,6 +578,10 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
     // deallocData() frees the wrapper, so everything the destructors need was
     // read above.
     Shiboken::Object::deallocData(sbkObj, true);
+
+    // The tombstone's window: the wrapper is gone, the C++ object is not.
+    SBK_FAILPOINT("dealloc-before-cpp-dtor");
+
     if (canDelete) {
         if (sotp->is_multicpp) {
             callDestructor(entries);
@@ -527,6 +595,34 @@ static void SbkDeallocWrapperCommon(PyObject *pyObj, bool canDelete)
 
     /* Restore the saved exception. */
     errorStash.restore();
+
+    // The tombstones fall here: past the destructor for an owning wrapper,
+    // past deallocData() for a non-owning one. Either way this lifecycle can
+    // no longer destroy anything at those addresses, so a wrapper published
+    // from now on is a wrapper for whatever lives there next. The exception
+    // is a destructor handed to the main thread - that one has not run yet,
+    // so its tombstone travels with it. sbkObj is a key from here on, and is
+    // not dereferenced: deallocData() freed it.
+    // The other side of the window above: the C++ object is gone, the
+    // tombstone still stands, and a conversion that the dying-conversion
+    // exception lets through here is one nothing outside this file could
+    // ever invalidate.
+    SBK_FAILPOINT("dealloc-before-retire");
+
+    if (!deferredDeletion) {
+        if (!retiredCptrs.empty())
+            bindingManager.retireWrapper(sbkObj, retiredCptrs.data(), pyType);
+        for (const auto &child : children)
+            bindingManager.retireWrapper(child.wrapper, child.cptrs.data(), child.type);
+    }
+    // The child pins go back last and with no lock held: this can be a
+    // child's final reference, and its deallocator re-enters the binding
+    // layer. Its own entry is a tombstone by then and it owns nothing, so
+    // that deallocation takes neither of the two branches above.
+    for (const auto &child : children) {
+        Py_DECREF(reinterpret_cast<PyObject *>(child.wrapper));
+        Py_DECREF(reinterpret_cast<PyObject *>(child.type));
+    }
 
     if (needTypeDecref)
         Py_DECREF(pyType);
@@ -968,7 +1064,18 @@ static PyObject *overrideMethodName(PyObject *pySelf, const char *methodName,
     return pyMethodName;
 }
 
+#ifdef Py_GIL_DISABLED
+// Whether an unattached thread does address checks only. The A/B harness can
+// take that away to show what happens without it.
+static bool nativePreflight()
+{
+    return Shiboken::FreeThreading::optionEnabled(
+        Shiboken::FreeThreading::NativePreflight);
+}
+#endif
+
 // The virtual function call
+
 PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
                             Shiboken::GilState &gil, const char *funcName,
                             Shiboken::CacheSlot &resultCache,
@@ -979,13 +1086,14 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
 
     auto &bindingManager = Shiboken::BindingManager::instance();
 #ifdef Py_GIL_DISABLED
-    // Cheap and without touching a reference count, so it needs no thread
-    // state - we may have none yet. It is also the answer for a C++ object
-    // never handed out to Python, which keeps that case as cheap as it was.
-    // Not free, though: with a type it walks the bucket and asks
-    // PyType_IsSubtype, so the positive case looks the map up twice. That is
-    // why this is not done on a build with a GIL, where a borrow is safe.
-    if (!bindingManager.hasWrapper(voidThis, typeObject))
+    // Address comparison only, so it needs no thread state - a virtual
+    // arriving from a Qt thread has none yet. Narrowing by type happens after
+    // the attach, in acquireWrapper() below. Not done on a build with a GIL,
+    // where a borrow is safe.
+    const bool present = nativePreflight()
+        ? bindingManager.hasWrapper(voidThis)
+        : bindingManager.hasWrapper(voidThis, typeObject);
+    if (!present)
         return nullptr;
 
     gil.acquire();
@@ -1060,11 +1168,18 @@ PyObject *Sbk_GetPyOverride(const void *voidThis, PyTypeObject *typeObject,
         return nullptr; // // Give up.
     }
 
-    // The loser of this race hands back the same override the winner found,
-    // and publish() drops the reference it no longer needs.
-    PyObject *winner = resultCache.publish(pyOverride);
+    // This call uses what it found, whoever wins the slot. They normally
+    // agree, but not always: the attribute can be duck-punched or switched
+    // between another thread's lookup and this one, and then the slot may
+    // end up holding Py_None or a different callable. publish() takes the
+    // reference from getOverride() and drops it again if it loses, so the
+    // one taken here is what keeps the override alive across the call.
+    Py_INCREF(pyOverride);
+    resultCache.publish(pyOverride);
     // recreate the callable from function/self
-    return PepExt_Type_CallDescrGet(winner, pySelf, nullptr);
+    PyObject *result = PepExt_Type_CallDescrGet(pyOverride, pySelf, nullptr);
+    Py_DECREF(pyOverride);
+    return result;
 }
 
 namespace
@@ -1381,11 +1496,7 @@ void copyMultipleInheritance(PyTypeObject *type, PyTypeObject *other)
     auto *sotp_other = PepType_SOTP(other);
     sotp_type->mi_init = sotp_other->mi_init;
     sotp_type->mi_specialcast = sotp_other->mi_specialcast;
-    // mi_offsets is not copied any more. It used to be filled lazily by the
-    // first registration and copied here on every constructor call, which is
-    // a write to type state while other threads read it. The offsets come
-    // from mi_init() at the point of use now, which computes them once and
-    // returns the same array afterwards.
+    // mi_offsets is not copied: mi_init() computes it at the point of use.
 }
 
 void setMultipleInheritanceFunction(PyTypeObject *type, MultipleInheritanceInitFunction function)
@@ -1833,8 +1944,17 @@ bool setCppPointer(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr)
     if (PepType_SOTP(type)->is_multicpp)
         idx = getTypeIndexOnHierarchy(type, desiredType);
 
-    const bool alreadyInitialized = sbkObj->d->cptr[idx] != nullptr;
-    if (alreadyInitialized) {
+    // The array can already be detached: another thread called
+    // Shiboken.delete() on self before the base __init__ ran. Reported
+    // after the read, like the refusal below.
+    const bool detached = sbkObj->d->cptr == nullptr;
+    const bool alreadyInitialized = detached || sbkObj->d->cptr[idx] != nullptr;
+    if (detached) {
+        PyErr_Format(PyExc_RuntimeError,
+                     "libshiboken: The %s object in class %s was destroyed while it "
+                     "was being initialized",
+                     desiredType->tp_name, type->tp_name);
+    } else if (alreadyInitialized) {
         PyErr_Format(PyExc_RuntimeError,
                      "libshiboken: You can't initialize an %s object in class %s twice!",
                      desiredType->tp_name, type->tp_name);
@@ -2045,17 +2165,24 @@ PyObject *newObjectForType(PyTypeObject *instanceType, void *cptr, bool hasOwner
     // lock; another thread may have registered one for the same pointer
     // meanwhile. Registering asks and inserts in one hold, and hands back the
     // winner if it is not ours.
-    if (auto winner = bindingManager.registerWrapperUnlessPresent(self, cptr, instanceType)) {
-        // Detach ours before dropping it: it never reached the map, and with
-        // the pointer cleared its deallocation leaves the C++ object alone.
-        // Ownership goes with the wrapper that won. If it has none and we
-        // were given some, the C++ object outlives both - a leak, where
-        // keeping ownership here would be the second delete.
+    if (auto reg = bindingManager.registerWrapperUnlessPresent(self, cptr, instanceType)) {
+        // Detach ours before dropping it or handing it out: it never reached
+        // the map, and with the pointer cleared its deallocation leaves the
+        // C++ object alone. Ownership goes with the wrapper that won. If it
+        // has none and we were given some, the C++ object outlives both - a
+        // leak, where keeping ownership here would be the second delete.
         self->d->cptr[0] = nullptr;
         self->d->hasOwnership = false;
         self->d->validCppObject = false;
-        Py_DECREF(reinterpret_cast<PyObject *>(self));
-        return reinterpret_cast<PyObject *>(winner.release());
+        if (reg.winner) {
+            Py_DECREF(reinterpret_cast<PyObject *>(self));
+            return reinterpret_cast<PyObject *>(reg.winner.release());
+        }
+        // Otherwise a tombstone: the identity is being destroyed. The caller
+        // gets a wrapper it can hold, but not one that claims the C++ object
+        // is there - every use of it raises instead of reading freed memory.
+        // That is the policy for a conversion that meets a dying identity;
+        // the QObject destroyed() argument is the case it is written for.
     }
     return reinterpret_cast<PyObject *>(self);
 #else // Py_GIL_DISABLED
@@ -2399,25 +2526,6 @@ static void **extractDestructionLocked(SbkObject *self, DeferredActions &deferre
     return cptrs;
 }
 
-// Finish a destruction that extractDestructionLocked() has prepared. Runs with
-// no state lock held: releaseWrapper() takes the wrapper map lock and
-// invalidate() walks the object graph.
-static void finishDestruction(SbkObject *pyObj, DeferredActions &deferred,
-                              void **cptrs)
-{
-    SBK_ASSERT_STATE_UNLOCKED();
-    SBK_ASSERT_NO_RAW_LOCK();
-    // releaseWrapper() looks the C++ pointers up in the wrapper map, so it
-    // gets the snapshot: the object no longer carries them. This runs for
-    // every object, not just for those with a C++ wrapper: for the others
-    // invalidate() used to do it, and it cannot any more - by the time it
-    // runs, the pointers are detached.
-    BindingManager::instance().releaseWrapper(pyObj, cptrs);
-    invalidate(pyObj);
-    deferred.run();  // the C++ destructors
-    delete[] cptrs;
-}
-
 // Everything a C++ destructor takes with it, as far as the binding knows it:
 // the object and, transitively, its children. _detachChildren() treats the
 // same set as "their C++ instances belong to obj's C++ instance and are
@@ -2442,6 +2550,118 @@ static std::vector<SbkObject *> collectOwnedLocked(SbkObject *root)
     std::vector<SbkObject *> owned;
     collectOwnedLocked(root, seen, owned);
     return owned;
+}
+
+// A destruction covers the object, not what it owns. invalidate() hands the
+// owned children back blank - their entries leave the map - and the parent's
+// C++ destructor deletes them a line later: the same window the object itself
+// has, one level down. The children that invalidate() releases get their own
+// tombstone here, retired together with the parent's.
+//
+// Children that carry a C++ wrapper are not in this set on purpose: nothing
+// releases their entry here. Their own C++ destructor calls Object::destroy()
+// and that is what takes it out - with the window Object::destroy() has and
+// cannot close, which the tombstone chapter of freethreading.md declares.
+//
+// Two more things this does not cover, both stated rather than guessed at.
+// It is a snapshot taken before the destructors run, so a child reparented
+// into or out of the dying object by something those destructors call is
+// tracked wrongly - the first gets no tombstone, the second keeps one until
+// the parent is done. And a child that is already invalid gets none either:
+// the binding has disclaimed that address, and refusing it would mean
+// standing over memory that may belong to something else by now.
+static std::vector<DyingChild> collectDyingChildren(SbkObject *root)
+{
+    SBK_ASSERT_STATE_UNLOCKED();
+    // Two transactions with a walk between them, not one: counting the C++
+    // bases of a type goes through tp_bases, and the state lock is a leaf.
+    // Increments only inside them - a decref could run a destructor there.
+    std::vector<SbkObject *> candidates;
+    {
+        StateLockGuard guard;
+        for (SbkObject *child : collectOwnedLocked(root)) {
+            auto *priv = child->d;
+            if (child == root || priv->cptr == nullptr || !priv->validCppObject
+                || priv->containsCppWrapper) {
+                continue;
+            }
+            Py_INCREF(reinterpret_cast<PyObject *>(child));
+            candidates.push_back(child);
+        }
+    }
+
+    std::vector<DyingChild> children;
+    children.reserve(candidates.size());
+    for (SbkObject *child : candidates) {
+        auto *type = Shiboken::pyType(child);
+        auto *sotp = PepType_SOTP(type);
+        const int numBases = ((sotp != nullptr && sotp->is_multicpp)
+                              ? Shiboken::getNumberOfCppBaseClasses(type) : 1);
+        std::vector<void *> cptrs;
+        {
+            StateLockGuard guard;
+            auto *priv = child->d;
+            // Asked again: the child may have been destroyed while the walk
+            // above ran, and then there is nothing left to leave behind.
+            if (priv->cptr != nullptr && priv->validCppObject)
+                cptrs.assign(priv->cptr, priv->cptr + numBases);
+        }
+        if (cptrs.empty()) {
+            Py_DECREF(reinterpret_cast<PyObject *>(child));
+            continue;
+        }
+        Py_INCREF(reinterpret_cast<PyObject *>(type));
+        children.push_back({child, type, std::move(cptrs)});
+    }
+    return children;
+}
+
+// Finish a destruction that extractDestructionLocked() has prepared. Runs with
+// no state lock held: releaseWrapper() takes the wrapper map lock and
+// invalidate() walks the object graph.
+static void finishDestruction(SbkObject *pyObj, DeferredActions &deferred,
+                              void **cptrs)
+{
+    SBK_ASSERT_STATE_UNLOCKED();
+    SBK_ASSERT_NO_RAW_LOCK();
+    // releaseWrapper() looks the C++ pointers up in the wrapper map, so it
+    // gets the snapshot: the object no longer carries them. This runs for
+    // every object, not just for those with a C++ wrapper: for the others
+    // invalidate() used to do it, and it cannot any more - by the time it
+    // runs, the pointers are detached.
+    auto &bindingManager = BindingManager::instance();
+    // The same window the deallocator has, and the same answer: between
+    // taking the entry out and running the destructors a lookup would see
+    // true absence and publish a wrapper for an address about to die. The
+    // entry stays as a tombstone; releaseWrapper() steps over it.
+    const bool tombstones =
+        Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::Tombstones);
+    auto *pyType = Py_TYPE(reinterpret_cast<PyObject *>(pyObj));
+    std::vector<DyingChild> children;
+    if (tombstones) {
+        children = collectDyingChildren(pyObj);
+        bindingManager.markWrapperDying(pyObj, cptrs);
+        for (const auto &child : children)
+            bindingManager.markWrapperDying(child.wrapper, child.cptrs.data());
+    }
+    bindingManager.releaseWrapper(pyObj, cptrs);
+    invalidate(pyObj);
+    // The children are blank now and the destructor that deletes them has not
+    // run: the window a child tombstone has to cover.
+    SBK_FAILPOINT("delete-before-owned-dtor");
+    deferred.run();  // the C++ destructors
+    if (tombstones) {
+        bindingManager.retireWrapper(pyObj, cptrs, pyType);
+        for (const auto &child : children)
+            bindingManager.retireWrapper(child.wrapper, child.cptrs.data(), child.type);
+    }
+    // Last, and with no lock held: this can be the child's final reference,
+    // and its deallocator re-enters the binding layer.
+    for (const auto &child : children) {
+        Py_DECREF(reinterpret_cast<PyObject *>(child.wrapper));
+        Py_DECREF(reinterpret_cast<PyObject *>(child.type));
+    }
+    delete[] cptrs;
 }
 
 // Destruction roots whose owned set still has a lease open. Guarded by the
@@ -2556,6 +2776,7 @@ void destroy(SbkObject *self, void *cppData)
     // Skip if this is called with NULL pointer this can happen in derived classes
     if (!self)
         return;
+    SBK_UNUSED(cppData);
 
     // This can be called in c++ side
     Shiboken::GilState gil;
@@ -2592,27 +2813,43 @@ void destroy(SbkObject *self, void *cppData)
         Py_DECREF(reinterpret_cast<PyObject *>(self));
     }
 
-    //Python Object is not destroyed yet
-    auto &bindingManager = BindingManager::instance();
-    if (cppData != nullptr && bindingManager.hasWrapper(cppData)) {
-        void **cptrs = nullptr;
-        {
-            StateLockGuard guard;
-            auto *priv = self->d;
-            // the cpp object instance was deleted
-            cptrs = priv->cptr;
-            priv->cptr = nullptr;
-            priv->hasOwnership = false;
-            priv->validCppObject = false;
-        }
-        // Like finishDestruction(): the registry entry goes after the unlock
-        // and with the detached pointers, because the map lock must not be
-        // taken inside a transaction.
-        if (cptrs != nullptr) {
+    // Python Object is not destroyed yet. The detach used to be gated on
+    // hasWrapper(cppData), which no longer means "is this registered": it
+    // steps over tombstones now. Read as the old question it would leave the
+    // wrapper valid over a pointer whose C++ object is gone, which is the
+    // state this block exists to prevent - so the pointers themselves decide.
+    void **cptrs = nullptr;
+    {
+        StateLockGuard guard;
+        auto *priv = self->d;
+        // the cpp object instance was deleted
+        cptrs = priv->cptr;
+        priv->cptr = nullptr;
+        priv->hasOwnership = false;
+        priv->validCppObject = false;
+    }
+    // Like finishDestruction(): the registry entry goes after the unlock
+    // and with the detached pointers, because the map lock must not be
+    // taken inside a transaction.
+    if (cptrs != nullptr) {
+        auto &bindingManager = BindingManager::instance();
+        if (Shiboken::FreeThreading::optionEnabled(
+                Shiboken::FreeThreading::ExternalTombstones)) {
+            // Removing the entry here would leave true absence for the rest
+            // of the destruction - every base destructor still to come - and
+            // a conversion in that stretch gets a valid wrapper over an
+            // object that is being taken apart. A tombstone instead; it
+            // takes the pointer array over and falls when the memory does.
+            bindingManager.markExternallyDying(self, cptrs,
+                                               Py_TYPE(reinterpret_cast<PyObject *>(self)));
+        } else {
             bindingManager.unregisterWrapper(self, cptrs);
             delete[] cptrs;
         }
     }
+    // The external tombstone stands from here until the memory goes back,
+    // which is a stretch nothing in the binding runs through.
+    SBK_FAILPOINT("destroy-after-tombstone");
 }
 
 // Free everything the wrapper owns and the wrapper itself. Reached only from

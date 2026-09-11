@@ -32,6 +32,8 @@ handoff. The names this change uses:
 | B13-5 | the lazy-type lock spanning type creation and import work |
 | B7-2 | the deallocator clearing weakrefs while another thread has references |
 | B15-4 | arbitrary Python construction under the QML placement mutex |
+| B4-1 | a lookup publishing a replacement for an identity being destroyed |
+| B4-2 | the virtual-call preflight reading type state with no thread state |
 | B4-3 | the multiple-inheritance offsets filled behind a sentinel check |
 | B4-4 | the class hierarchy mutated while another thread walks it |
 | FT4 | carrying leases and pointer snapshots to their final use |
@@ -141,7 +143,7 @@ locks are not in here: they are not ours, and no order over them is claimed.
 | Lock | Rank | Type | Taken in | May be held across | Guard active? |
 |---|---|---|---|---|---|
 | State | 8 | `std::mutex`, non-recursive | `sbkstatelock.cpp` | binding state only: validity, ownership, the parent and referred graph, `activeCalls` | yes, a lease takes the guard after the transaction |
-| Wrapper map | 6 | `std::recursive_mutex` | `bindingmanager.cpp`, 16 sites in the file, 11 of them in a free-threaded build | map operations; visitors and destructors run outside. Still inside: `PyType_IsSubtype()` in the type-narrowing lookup, an identity question that waits on the immutable hierarchy snapshots. `mi_init()` also runs there and is not an exception: it computes offsets from the C++ pointer and calls nothing | yes |
+| Wrapper map | 6 | `std::recursive_mutex` | `bindingmanager.cpp`, 18 sites in the file, 11 of them also in a build with a GIL | map operations; visitors and destructors run outside. Still inside: `PyType_IsSubtype()` in the type-narrowing lookup, an identity question that waits on the immutable hierarchy snapshots. `mi_init()` also runs there and is not an exception: it computes offsets from the C++ pointer and calls nothing | yes |
 | Main-thread deletion | 7 | `std::mutex` | `bindingmanager.cpp`, 2 sites | one vector push or swap | no |
 | Lazy type | 1 | `std::recursive_mutex`, waiter detaches | `sbkmodule.cpp` | type creation, which calls Python - the exception, owned by the lazy protocol | no |
 | Class hierarchy | 2 | `std::mutex` | `bindingmanager.cpp`, 2 sites | taking or publishing the edge snapshot. A traversal walks its snapshot with the lock released, because it creates types and calls discovery functions | no |
@@ -199,8 +201,12 @@ free-threaded build, `findByType()` in both. It reads Python-owned type
 state, which is the same class of thing as the locked paths FT8 took out of
 the state lock (B9-1), and it waits on the immutable hierarchy snapshots for
 the same reason. Unlike the first it is not rare: a suite run takes it about
-6400 times, in almost every process, because it sits in the lookup every
-wrapper conversion makes.
+3600 times across 218 of those 518 processes, because it sits in every
+wrapper lookup that has to narrow by type. Only that case is counted: a
+lookup whose candidate is already the exact type asks nothing of the
+hierarchy. It used to be about 6400, and the difference is the virtual-call
+preflight, which asked the typed question before it attached and now asks
+the untyped one.
 
 Debug builds track which of these the current thread holds
 (`sbkheldlocks.h`). `SBK_ASSERT_NO_RAW_LOCK()` states the other end of the
@@ -234,6 +240,177 @@ the path that leads to it. What it cannot see is a call through a function
 pointer or a virtual - `cpp_dtor`, `mi_init` and the type-discovery hooks are
 exactly that - and anything outside the files it is given. `ctest -R
 state_lock_scope` runs it.
+
+### The preflight in front of a virtual call
+
+A virtual reaching Python starts with one question: is this C++ address
+wrapped at all? It has to be answerable from a thread that has no Python
+thread state, because that is what a Qt worker thread entering a virtual
+looks like, and it has to stay cheap for the common case of a C++ object
+Python never saw.
+
+It used to narrow by type at the same time, and narrowing by type reads
+`Py_TYPE` and walks `tp_mro` - Python-owned state, read with no thread state
+to read it under (B4-2). The untyped overload is an address comparison and
+needs none, so that is what runs first; narrowing happens after the attach,
+in `acquireWrapper()`. Both typed lookups now assert that the thread is
+attached, so the next caller that gets this wrong aborts in a debug build
+instead of being found by the next review.
+
+`NativePreflight` is the bit, and `proof-native-preflight` discriminates
+through that assertion - which means it says nothing in a release build,
+where the unsafe read would simply happen. The measure is real either way;
+what is debug-only is the ability to show it.
+
+### A retired identity leaves a tombstone
+
+The wrapper map answers "which Python object stands for this C++ address".
+Removing an entry when a wrapper dies is not enough to keep that answer
+right: the destructor has not run yet, and a lookup in between sees an empty
+map, decides the address is free, and publishes a second wrapper for an
+object that is about to be destroyed (B4-1). That wrapper is marked valid
+and its pointer goes stale a moment later.
+
+An entry therefore does not leave the map when the wrapper dies. It is
+marked dying and stays until the destruction that retires it can no longer
+reach the address - past the C++ destructor for an owning wrapper, past the
+deallocation for a non-owning one. Until then the entry carries a reference
+to the type it was registered for, so a lookup can tell whether a dying
+identity is the one it is asking about without touching a wrapper that may
+already be freed. The reference is taken under the map lock, which an
+increment may span, and dropped when the tombstone falls, which a decref
+may not span.
+
+The wrapper the entry points at is *not* readable any more, and that is the
+whole point of the type reference. `acquire()` is the only place that may
+turn the map's borrowed pointer into a reference, and it asks
+`PyUnstable_TryIncRef()` - which reads the object. On a tombstone that is
+freed memory, and where the allocator had already recycled the block the
+increment succeeded and handed out a stranger. The guard belongs in
+`acquire()` and nowhere else: two of the five readers carried their own and
+three did not.
+
+A conversion that meets a tombstone gets a wrapper with no C++ pointer and
+no validity, so every use of it raises rather than reading freed memory -
+unless the dying type invalidates such wrappers itself.
+
+That exception is `destroyed(QObject *)`, and it is not a convenience. Qt
+emits the signal from `~QObject`, the argument is meant to be used there, and
+PySide invalidates whatever wrapper the conversion produced right after the
+signal. A tombstone that refused the conversion would hand the handler an
+argument it cannot touch, which `signals/signal2signal_connect_test`
+measures. A plain C++ class has no such mechanism - `QRecursiveMutex`, the
+type this whole finding was made on, would keep the stray wrapper valid
+forever - so it keeps the tombstone.
+
+libshiboken does not know what a QObject is. PySide installs a predicate
+(`setDyingConversionPredicate`) when QtCore is initialized, and the map asks
+it about the *dying* type, not about the one being looked up: what decides is
+whether the destruction that is running will invalidate what the conversion
+hands out. `PYSIDE6_OPTION_FT` with `Tombstones` cleared removes the entry
+the way it was removed before, which is what `failpoints.py
+proof-tombstones` requires in order to see the window return.
+
+The exception is a measure like any other and carries its own bit,
+`DyingConversionException`. Cleared, the tombstone refuses every dying
+identity, and `dying-qobject-argument` fails in its first half: the handler
+is handed an argument it cannot use. That is `proof-dying-qobject`.
+
+The question is asked per type, not per moment, so for a QObject the whole
+destruction is open, not just the stretch around the `destroyed()` emit. What
+closes that is not a narrower question - the moment PySide's invalidation runs
+is not something the binding is told - but the other end of the same
+transaction: **a wrapper the exception lets through belongs to the tombstone
+that let it through.** It is not entered in the map, so no later lookup can
+find it and no invalidation path outside libshiboken can be expected to reach
+it; the tombstone holds a reference to it, and invalidates it when it falls.
+Usable exactly as long as the destruction it was made for is running.
+
+That the map does not carry it is the load-bearing half. An entry would
+outlive the tombstone and become the canonical wrapper for whatever the
+allocator puts at that address next - the third and worst of the three
+damages, after "says valid over freed memory" and "says valid over a
+stranger". Two conversions inside one window still get the same wrapper: the
+tombstone is asked first, and hands its stray back the way the map would
+have.
+
+Which means the tombstone has to fall, on every path. It does: the
+deallocator retires it after the C++ destructor, a deferred destruction
+retires it from the same queue, and `~BindingManager` takes over whatever is
+left at shutdown. All three go through `retireWrapper()` or the shutdown
+sweep, and both take the strays out under the map lock and invalidate them
+outside it - invalidation walks the object graph and takes the state lock,
+which the map lock may not span.
+
+The bit is `DyingStrays`; cleared, such a wrapper is registered like any
+other, and `stray-outlives-tombstone` sees it still valid after the
+destruction is past. That is `proof-dying-strays`.
+
+Which paths lay one down is part of the claim, and it is not all of them.
+The deallocator does, and so does `Shiboken.delete()`, because both run the
+C++ destructor themselves and know when it is past; a destruction handed to
+the main thread carries its tombstone in the same queue, so it falls after
+the destructor rather than after the hand-off. That ordering is not
+cosmetic: the retirement used to be posted behind `deallocData()`, which
+runs Python, and the main thread could drain the queue in that window - the
+tombstone then stayed for good, and the address with it.
+
+`Object::destroy()` is the hard one and it does too, differently. It is
+called *from* the C++ destructor of a wrapper the C++ side owns, so the
+binding hears a destruction begin and is never called again to say it is
+over - there is no moment to take the tombstone away at. Removing the entry
+there, which is what used to happen, leaves true absence for every base
+destructor still to come.
+
+So the tombstone is laid anyway, and what retirement needs is kept with it:
+the pointer array, which the object no longer carries, and a reference on the
+type. It then waits for one of the two moments that do come back:
+
+  * **the generated wrapper's `operator delete`.** That is the point the
+    language guarantees after the last destructor - the memory is going back
+    - and because the wrapper's destructor is virtual it is found through the
+    vtable even when foreign code deletes through a base pointer. This is the
+    ordinary ending.
+  * **a construction publishing at the same address.** `registerWrapper()`,
+    the constructor path, and only that one: the allocator cannot hand an
+    address out again before the previous destruction is over, so a *newly
+    built* object there is proof. It exists for the case the first ending
+    misses - a placement-constructed object, destroyed by an explicit
+    destructor call with no `operator delete` to follow.
+
+A conversion is deliberately not such a proof and does not come through
+`registerWrapper()`: meeting a tombstone is what a conversion has to be
+refused for. The bit is `ExternalTombstones`; cleared, the entry is removed
+the way it always was, and `external-destruction` sees a valid wrapper
+published over an object C++ is taking apart.
+
+What a destruction takes with it is covered too. `invalidate()` releases the
+owned children plainly and the parent's destructor - one line later - is what
+deletes them, so each child had the same window its parent no longer has. The
+owned set is collected before the children are released, every child in it
+gets its own tombstone, and they are retired with the parent's, after the
+destructor. Children that carry a C++ wrapper are not in that set on purpose:
+nothing releases their entry here - their own C++ destructor calls
+`Object::destroy()`, and that keeps the window `Object::destroy()` has and
+cannot close, which the paragraph above declares.
+`delete-before-owned-dtor` is the failpoint in that window and
+`replacement-of-owned-child` the test that walks into it.
+
+Both destruction paths do it, and that took a second pass to get right: the
+deallocator carries its own copy of this sequence, and the first version of
+the child tombstones was only in `finishDestruction()`, so dropping the last
+reference to a parent still handed the children back blank. The deallocator
+also decides differently now: it works out whether it is going to destroy
+anything *before* it touches the map, because a tombstone stands for a
+destruction that is going to happen. A wrapper that owns nothing destroys
+nothing, and its entry is removed the way it always was.
+`replacement-of-child-in-dealloc` is that half.
+
+Two failpoints stand either side of the deallocator's window, because one is
+not enough: `dealloc-before-destroy` is before the wrapper is taken apart,
+`dealloc-before-cpp-dtor` after it and before the destructor. Only the second
+one sees the window this section is about - the first is inside a stretch
+where removing the entry early already held.
 
 ### The class hierarchy publishes snapshots
 
@@ -576,13 +753,23 @@ set, and a scenario on its own can stay clean hundreds of times.
 Repetition is a poor way to reach a window of a few instructions. A failpoint
 is a named place in libshiboken where a test stops one thread, so the second
 one arrives in the order the test wants, every time - a test that fails on an
-unfixed revision rather than in one run out of fourteen. Six of them exist,
-either side of the windows that matter: before weakrefs are cleared and
-before the C++ destructor runs, after a lease is taken and before it is
-handed back, before `destroy()` detaches `cptr`, and inside a traversal of
-the class-inheritance graph with one iterator alive.
+unfixed revision rather than in one run out of fourteen. Ten of them exist,
+either side of the windows that matter: before weakrefs are cleared, before
+the C++ destructor runs, once the wrapper is gone and only that destructor is
+left, once the destructor is past and the tombstone is still standing, before
+a parent's destructor deletes the children it has just handed back, after a
+lease is taken and before it is handed back, before `destroy()` detaches
+`cptr` and again where `destroy()` is past but the memory is not, and inside
+a traversal of the class-inheritance graph with one iterator alive.
 `Shiboken.failpointNames()` lists what a build has; a release build has none
 and the tests skip.
+
+The registry and the call sites are held together by
+`libshiboken/check_failpoint_names.py`, which ctest runs. A name a test arms
+but no `SBK_FAILPOINT()` carries lets that test run into its timeout; a name
+in the code but not in `KnownFailpoints` cannot be armed at all, and the test
+that wants it reports a skip - which is green. Both directions have cost a
+day, which is why this is a check and not a convention.
 
 Two properties are what make them usable rather than merely present. A parked
 thread waits **detached**, so it blocks neither stop-the-world nor, on a

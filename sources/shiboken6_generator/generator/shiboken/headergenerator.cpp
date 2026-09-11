@@ -323,6 +323,18 @@ void HeaderGenerator::writeSpecialFunctions(TextStream &s, const QString &wrappe
     if (metaClass->hasVirtualDestructor())
         s << " override";
     s << ";\n\n";
+
+    // The destructor tells the binding that a destruction has begun; nothing
+    // tells it that one is over, and the tombstone it leaves has to stand
+    // until the memory is handed back. This is that moment. It is only
+    // reachable through the vtable, so it is only worth having where the
+    // destructor is virtual - which is also the only case where foreign code
+    // deleting through a base pointer reaches ours at all.
+    if (metaClass->hasVirtualDestructor()) {
+        s << "#ifdef Py_GIL_DISABLED\n"
+             "static void operator delete(void *ptr);\n"
+             "#endif\n\n";
+    }
 }
 
 void HeaderGenerator::writeProtectedEnums(TextStream &s,

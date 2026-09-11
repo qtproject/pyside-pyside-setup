@@ -31,9 +31,13 @@ namespace Shiboken
 static constexpr std::array KnownFailpoints = {
     "dealloc-before-weakrefs",   // in the deallocator, before clearing weakrefs
     "dealloc-before-destroy",    // after the state snapshot, before the C++ dtor
+    "dealloc-before-cpp-dtor",   // wrapper freed, C++ destructor still to come
+    "dealloc-before-retire",     // C++ destructor past, tombstone still standing
+    "delete-before-owned-dtor",  // children handed back, parent dtor still to come
     "lease-after-acquire",       // lease taken, before the native call
     "lease-before-release",      // native call done, before giving the lease back
     "destroy-before-detach",     // Object::destroy(), before cptr is detached
+    "destroy-after-tombstone",   // Object::destroy() is past, the memory is not
     "hierarchy-mid-traversal",   // in the class graph, one iterator alive
 };
 #else
