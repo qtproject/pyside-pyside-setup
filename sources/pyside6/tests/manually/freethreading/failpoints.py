@@ -25,7 +25,7 @@ import fpharness as fp
 from fpharness import (FREE_THREADED, Failpoint, Shiboken, Test, counterproof,
                        gil_enabled, qml_create, qml_engine, qt_app,
                        run_threads)
-from PySide6.QtCore import QByteArray, QObject, QRecursiveMutex
+from PySide6.QtCore import QByteArray, QObject, QRecursiveMutex, SIGNAL, SLOT
 
 
 def test_weakrefs_while_deallocating() -> str:
@@ -1067,6 +1067,70 @@ def test_metaobject_lifetime() -> str:
     return "ok - the returned metaObject wrapper now survives its use"
 
 
+def test_metaobject_commit_race() -> str:
+    """B15-1/B15-2: two threads build one object's instance meta object.
+
+    Parsing the Python type moved out of the meta-object lock, which opens a
+    window between the lookup that misses and the commit that publishes: both
+    threads build a candidate there, and one of them has to give its own back
+    and continue with the winner's. Without the failpoint that window is a
+    few microseconds wide and a stress run reaches it by luck.
+
+    What this can see afterwards: both signals in one meta object, at
+    distinct indexes, and exactly two methods added to the class - which is
+    what a second surviving builder would break, because the loser would
+    carry its own signal and the winner would not have it.
+
+    What it cannot see: whether the loser's candidate was freed. That is a
+    heap question, and this harness counts crashes.
+    """
+    class Sender(QObject):
+        pass
+
+    class Receiver(QObject):
+        def receiver(self):
+            pass
+
+    sender = Sender()
+    receiver = Receiver()
+    # The class meta object, before any instance added to it.
+    base_methods = Sender.staticMetaObject.methodCount()
+    connected: dict[str, bool] = {}
+
+    def connect(name: str) -> None:
+        connected[name] = QObject.connect(sender, SIGNAL(f"{name}()"),
+                                          receiver, SLOT("receiver()"))
+
+    with Failpoint("metaobject-before-commit") as point:
+        parked = threading.Thread(target=connect, args=("alpha",))
+        parked.start()
+        if not point.wait_until_reached():
+            return "FAIL: no thread parked before the commit"
+        # The arming goes with the first thread, so this one runs through,
+        # builds its own candidate and publishes it.
+        connect("beta")
+        if not point.release():
+            return "FAIL: nobody was parked to release"
+        parked.join(timeout=10)
+        if parked.is_alive():
+            return "FAIL: the parked thread did not come back"
+
+    if not all(connected.values()):
+        return f"FAIL: a connection did not take: {connected}"
+    meta = sender.metaObject()
+    indexes = {name: meta.indexOfSignal(f"{name}()") for name in connected}
+    if any(index < 0 for index in indexes.values()):
+        return f"FAIL: a signal is not in the meta object: {indexes}"
+    if len(set(indexes.values())) != len(indexes):
+        return f"FAIL: two signals share one index: {indexes}"
+    added = meta.methodCount() - base_methods
+    if added != len(connected):
+        return (f"FAIL: {added} method(s) added for {len(connected)} "
+                "signal(s) - a candidate was registered twice, or a "
+                "second builder survived")
+    return f"ok (both signals in one meta object, {indexes})"
+
+
 TESTS = {
     "weakrefs": Test(test_weakrefs_while_deallocating),
     # Was an expected FAIL on a wrong explanation; see the docstring.
@@ -1142,6 +1206,13 @@ TESTS = {
     # spans type creation, and a deferred destructor runs under it. A run that
     # does not reach that shape skips, see the docstring.
     "lazy-lock-spans-destruction": Test(test_lazy_lock_spans_destruction, "FAIL"),
+    "metaobject-commit-race": Test(test_metaobject_commit_race),
+    # Without the bit the parse goes back under the meta-object lock, and the
+    # contract assertion at the top of parsePythonType() aborts before the
+    # failpoint is ever reached. The abort is the answer: it says this path
+    # runs the interpreter with a binding raw lock held.
+    "proof-metaobject-parse": Test(lambda: counterproof(
+        "MetaObjectParseOutsideLock", "metaobject-commit-race")),
 }
 
 

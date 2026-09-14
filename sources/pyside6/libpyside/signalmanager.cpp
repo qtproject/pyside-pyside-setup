@@ -28,6 +28,7 @@
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
 #include <sbkerrors.h>
+#include <sbkfailpoint.h>
 #include <sbkftoptions.h>
 
 #include <QtCore/qbytearrayview.h>
@@ -703,6 +704,10 @@ static PySide::MetaObjectBuilder *instanceBuilder(PyObject *pySelf,
         delete candidate;
         return nullptr;
     }
+
+    // The window this split opens: a second thread reaching the same object
+    // here builds its own candidate, and one of the two has to lose.
+    SBK_FAILPOINT("metaobject-before-commit");
 
     // Look and publish in one step, which is why no lock is taken around it:
     // the dictionary decides who wins. PyDict_SetDefaultRef() stores the

@@ -40,6 +40,7 @@ static constexpr std::array KnownFailpoints = {
     "destroy-after-tombstone",   // Object::destroy() is past, the memory is not
     "ctor-before-publish",       // setCppPointer(), between the check and the write
     "hierarchy-mid-traversal",   // in the class graph, one iterator alive
+    "metaobject-before-commit",  // instance builder built, not committed yet
 };
 #else
 // A build with a GIL has none of these windows: no lease, and a deallocator

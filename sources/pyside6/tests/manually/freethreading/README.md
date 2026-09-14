@@ -2,8 +2,9 @@
 
 The A/B harness in this directory reaches a race by repetition: it starts
 threads and hopes they collide, which takes tens of runs to hit a window of a
-few instructions once. `failpoints.py` arms a named point in libshiboken
-instead, so the two threads meet in the order the test wants, every time. That
+few instructions once. `failpoints.py` arms a named point in the runtime
+libraries instead, so the two threads meet in the order the test wants, every
+time. That
 is what makes a test fail on an unfixed revision rather than one run in
 fourteen.
 
@@ -551,3 +552,44 @@ run a debug build until the lazy protocol is replaced. Only the lazy line of
 `contractExceptions()` is read: the wrapper-map exception is a different,
 documented one, taken on every type-narrowed lookup, so counting it in here
 would mean this test could never pass again.
+
+### metaobject-commit-race, proof-metaobject-parse
+
+B15-2. `addMetaMethod()` held the meta-object lock across the construction of
+the instance `MetaObjectBuilder`, and constructing one parses the Python
+type: attribute lookup on every class member, warnings, delayed enum
+resolution. A raw lock held across that is the inversion the review
+describes - a member with a custom `__getattribute__` runs application code
+under it.
+
+The parse moved out of the lock, which splits the operation into a lookup
+that misses, a candidate built with no lock held, and a commit that publishes
+one winner. That split is the new window this test is about: the parked
+thread has built its candidate and is about to commit when the second one
+runs the same path, builds its own and publishes first. The loser gives its
+candidate back - the capsule owns it, so dropping the last reference frees it
+below the lock - and continues with the winner's builder. Both signals have
+to end up in one meta object, at different indexes.
+
+`proof-metaobject-parse` clears `MetaObjectParseOutsideLock`. The parse then
+goes back under the lock and `SBK_ASSERT_NO_RAW_LOCK()` at the top of
+`parsePythonType()` aborts before the failpoint is reached at all. The abort
+is the measurement: it says this path reaches the interpreter with a binding
+raw lock held.
+
+Debug builds only, and the reason is worth stating: `checkNoRawLock()` is
+empty under `NDEBUG`, so a release build answers ok in both columns. The fix
+works there, the proof does not - a green row in a release build says
+nothing about this.
+
+What is *not* shown here: that the inversion becomes a deadlock. That needs
+the blocking-`__getattribute__` scenario the review names, and it is not
+written. Nor is B15-3 touched - `metaBuilderFromDict()` still returns a
+pointer nobody owns, and `PyObject_SetAttr()` still publishes the capsule
+under the raw lock, because that is the transaction that picks the winner.
+Taking the lifetime authority out of `__dict__` is what removes both.
+
+`metaobject_lock.py` next to this file is the same question with one thread
+and no failpoint: it is the `metaobject_lock` scenario in `run.py`, kept
+because a single-threaded reproducer is worth more than a race when the
+answer is an assertion.

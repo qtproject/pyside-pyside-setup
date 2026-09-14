@@ -31,6 +31,9 @@ handoff. The names this change uses:
 | B9-1 | Python type and MRO access under the state mutex |
 | B13-5 | the lazy-type lock spanning type creation and import work |
 | B7-2 | the deallocator clearing weakrefs while another thread has references |
+| B15-1 | two threads building one object's instance meta object |
+| B15-2 | the Python type parsed with the meta-object lock held |
+| B15-3 | the builder's lifetime authority living in `__dict__` |
 | B15-4 | arbitrary Python construction under the QML placement mutex |
 | B4-1 | a lookup publishing a replacement for an identity being destroyed |
 | B4-2 | the virtual-call preflight reading type state with no thread state |
@@ -769,6 +772,11 @@ claim:
     deterministic ones.
   - `MiOffsetsOnce` has a sanitizer A/B and can have nothing else; the
     section above says why.
+  - `MetaObjectParseOutsideLock` has both: a `proof-*` for the race the
+    split opens, and a `run.py` scenario for the contract assertion the
+    cleared bit trips. That scenario needs a build with the assertions in
+    it, and `run.py` skips it where they are absent rather than reading
+    the silence as a result.
 
 A mechanism that no scenario can take away does not get a bit. The readiness
 flag on lazily created types is one such, and so is `Shiboken::CacheSlot`:
@@ -799,8 +807,8 @@ half needs the locks switched off, which produces crashing processes and
 therefore cannot be part of the automatic suite. It lives in
 `sources/pyside6/tests/manually/freethreading/run.py`, which runs each
 scenario twice, with and without the lock it depends on, and only calls a
-scenario a proof when it crashes without it. Six of the eight are proofs at
-the moment; `signal_race` became one when the coarse lock went, because the
+scenario a proof when it crashes without it. Ten of the sixteen are proofs
+at the moment; `signal_race` became one when the coarse lock went, because the
 signal machinery reaches the wrapper lookups, the parent/child graph and
 destruction, and the coarse lock had been covering that.
 
@@ -812,17 +820,19 @@ set, and a scenario on its own can stay clean hundreds of times.
 ### Deterministic races: failpoints
 
 Repetition is a poor way to reach a window of a few instructions. A failpoint
-is a named place in libshiboken where a test stops one thread, so the second
-one arrives in the order the test wants, every time - a test that fails on an
-unfixed revision rather than in one run out of fourteen. Eleven of them
-exist, either side of the windows that matter: before weakrefs are cleared,
-before the C++ destructor runs, once the wrapper is gone and only that
-destructor is left, once the destructor is past and the tombstone is still
-standing, before a parent's destructor deletes the children it has just
-handed back, after a lease is taken and before it is handed back, before
-`destroy()` detaches `cptr` and again where `destroy()` is past but the
-memory is not, between the check and the write in `setCppPointer()`, and
-inside a traversal of the class-inheritance graph with one iterator alive.
+is a named place where a test stops one thread, so the second one arrives in
+the order the test wants, every time - a test that fails on an unfixed
+revision rather than in one run out of fourteen. Twelve of them exist, eleven
+in libshiboken and one in libpyside, either side of the windows that matter:
+before weakrefs are cleared, before the C++ destructor runs, once the wrapper
+is gone and only that destructor is left, once the destructor is past and the
+tombstone is still standing, before a parent's destructor deletes the children
+it has just handed back, after a lease is taken and before it is handed back,
+before `destroy()` detaches `cptr` and again where `destroy()` is past but
+the memory is not, between the check and the write in `setCppPointer()`,
+inside a traversal of the class-inheritance graph with one iterator alive,
+and between the lookup that misses an instance meta object and the commit
+that publishes one.
 `Shiboken.failpointNames()` lists what a build has; a release build has none
 and the tests skip.
 
