@@ -149,6 +149,7 @@ from .config import (  # noqa: F401, E402
 
 from .python_helper import (  # noqa: F401, E402
     PythonExecutable,
+    safe_extractall
 )
 
 from .deploy_util import (  # noqa: F401, E402

@@ -8,10 +8,9 @@ import subprocess
 from pathlib import Path
 from zipfile import ZipFile
 
-from .. import Config
+from .. import Config, safe_extractall
 from ..dependency_util import get_py_files
-from .ios_helper import (IOSData, get_wheel_ios_target, get_xcframework_python_version,
-                         safe_extractall)
+from .ios_helper import IOSData, get_wheel_ios_target, get_xcframework_python_version
 from .python_xcframework import download_python_support
 
 

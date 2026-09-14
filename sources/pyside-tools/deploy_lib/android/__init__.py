@@ -18,5 +18,5 @@ PYSIDE_ONLY_MODULES = {"Asyncio", "QmlFeatures"}
 
 from .android_helper import (create_recipe, extract_and_copy_jar, get_wheel_android_arch,
                              AndroidData, get_llvm_readobj, find_lib_dependencies,
-                             find_qtlibs_in_wheel, safe_extractall)
+                             find_qtlibs_in_wheel)
 from .android_config import AndroidConfig

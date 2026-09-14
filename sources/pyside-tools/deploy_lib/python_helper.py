@@ -1,6 +1,6 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
-# Qt-Security score:critical reason:execute-external-code
+# Qt-Security score:critical reason:execute-external-code,handling-untrusted-data
 from __future__ import annotations
 
 import logging
@@ -9,6 +9,7 @@ import sys
 
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
+from zipfile import ZipFile
 
 from . import Config, run_command
 
@@ -176,3 +177,19 @@ class PythonExecutable:
             buildozer_package_with_version = ([package for package in packages
                                                if package.startswith("buildozer")])
             self.install(packages=list(buildozer_package_with_version))
+
+
+def safe_extractall(archive: ZipFile, target_path: Path) -> None:
+    """
+    Extract all members of a zip archive into target_path, checking that each entry
+    resolves inside target_path to prevent path traversal attacks.
+    """
+    resolved_target = target_path.resolve()
+    for member in archive.infolist():
+        member_path = (target_path / member.filename).resolve()
+        if not member_path.is_relative_to(resolved_target):
+            raise RuntimeError(
+                f"[DEPLOY] Refusing to extract '{member.filename}': "
+                f"path resolves outside the extraction directory"
+            )
+        archive.extract(member, target_path)

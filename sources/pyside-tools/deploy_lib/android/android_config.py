@@ -13,8 +13,8 @@ from pkginfo import Wheel
 
 from . import (extract_and_copy_jar, get_wheel_android_arch, find_lib_dependencies,
                get_llvm_readobj, find_qtlibs_in_wheel, platform_map, create_recipe,
-               ANDROID_DEPLOY_CACHE, PYSIDE_ONLY_MODULES, safe_extractall)
-from .. import (Config, get_all_pyside_modules, MAJOR_VERSION)
+               ANDROID_DEPLOY_CACHE, PYSIDE_ONLY_MODULES)
+from .. import Config, get_all_pyside_modules, MAJOR_VERSION, safe_extractall
 from .android_utilities import ANDROID_NDK_VERSION, download_android_ndk
 
 
