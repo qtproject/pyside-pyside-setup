@@ -57,7 +57,7 @@ def python_example_snippet_mapping():
         result = _PYTHON_EXAMPLE_SNIPPET_MAPPING
 
         qt_path = "qtbase/src/widgets/doc/snippets/simplemodel-use/main.cpp"
-        pyside_path = TUTORIAL_EXAMPLES_PATH / "modelviewprogramming" / "stringlistmodel.py"
+        pyside_path = TUTORIAL_EXAMPLES_PATH / "modelviewprogramming" / "simplemodel-use.py"
         for i in range(3):
             snippet_id = str(i)
             result[(qt_path, snippet_id)] = pyside_path, snippet_id
