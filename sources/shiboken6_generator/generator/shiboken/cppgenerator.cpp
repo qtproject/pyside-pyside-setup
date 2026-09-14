@@ -60,6 +60,7 @@
 using namespace Qt::StringLiterals;
 
 static const char shibokenErrorsOccurred[] = "Shiboken::Errors::occurred() != nullptr";
+static const char shibokenConversionFailed[] = "Shiboken::Errors::conversionFailed()";
 
 static constexpr auto virtualMethodStaticReturnVar = "result"_L1;
 static constexpr auto initFuncPrefix = "init_"_L1;
@@ -2601,6 +2602,34 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
     writeBailOut(u"!Shiboken::Object::commitConstruction(sbkSelf, "_s + sbkTypeExpr
                  + u", cptr, "_s + (hasCppWrapper ? u"true"_s : u"false"_s) + u')');
 
+    // Constructor code injections, position=end
+    bool hasCodeInjectionsAtEnd = false;
+    for (const auto &func : overloadData.overloads()) {
+        const CodeSnipList &injectedCodeSnips = func->injectedCodeSnips();
+        for (const CodeSnip &cs : injectedCodeSnips) {
+            if (cs.position == TypeSystem::CodeSnipPositionEnd) {
+                hasCodeInjectionsAtEnd = true;
+                break;
+            }
+        }
+    }
+
+    // Once published, the object can be deleted by another thread; the rest
+    // of the constructor still uses cptr.
+    // See "A constructor holds a lease past the commit" in the free-threading notes.
+    if (needsMetaObject || hasCodeInjectionsAtEnd) {
+        const QString leaseVar = leaseVariableName(PYTHON_SELF_VAR);
+        s << "#ifdef Py_GIL_DISABLED\n"
+            << "std::optional<Shiboken::Object::CallLease> " << leaseVar << ";\n"
+            << "if (Shiboken::FreeThreading::optionEnabled("
+               "Shiboken::FreeThreading::ConstructorTailLease)) {\n" << indent
+            << leaseVar << ".emplace(" << PYTHON_SELF_VAR << ");\n"
+            << "if (!*" << leaseVar << ")\n"
+            << indent << errorReturn << outdent
+            << outdent << "}\n"
+            << "#endif\n";
+    }
+
     // Create metaObject and register signal/slot
     if (needsMetaObject) {
         s << "\n// QObject setup\n"
@@ -2615,17 +2644,6 @@ void CppGenerator::writeConstructorWrapper(TextStream &s, const OverloadData &ov
         }
     }
 
-    // Constructor code injections, position=end
-    bool hasCodeInjectionsAtEnd = false;
-    for (const auto &func : overloadData.overloads()) {
-        const CodeSnipList &injectedCodeSnips = func->injectedCodeSnips();
-        for (const CodeSnip &cs : injectedCodeSnips) {
-            if (cs.position == TypeSystem::CodeSnipPositionEnd) {
-                hasCodeInjectionsAtEnd = true;
-                break;
-            }
-        }
-    }
     if (hasCodeInjectionsAtEnd) {
         // FIXME: C++ arguments are not available in code injection on constructor when position = end.
         s << "switch (overloadId) {\n";
@@ -3013,6 +3031,26 @@ void CppGenerator::writeFunctionReturnErrorCheckSection(TextStream &s,
     if (hasReturnValue)
         s << "Py_XDECREF(" << PYTHON_RETURN_VAR << ");\n";
     s << errorReturn << outdent << "}\n";
+}
+
+void CppGenerator::writeConversionErrorCheck(TextStream &s, ErrorReturn errorReturn,
+                                             ConversionGuard guard)
+{
+    // For entries that use a conversion's output at once: rich comparison,
+    // sequence assignment, setters. Calls through writeSingleFunctionCall()
+    // have their own gate.
+    //
+    // Under Py_GIL_DISABLED only: a build with a GIL walked into the native
+    // statement with the exception still set, and it has to keep doing that.
+    // Stopping it there is a fix for that build and belongs in a change of
+    // its own, not in this series.
+    // See "A failed conversion stops the entry" in the free-threading notes.
+    if (guard == ConversionGuard::Emit)
+        s << "#ifdef Py_GIL_DISABLED\n";
+    s << "if (" << shibokenConversionFailed << ")\n"
+        << indent << errorReturn << outdent;
+    if (guard == ConversionGuard::Emit)
+        s << "#endif\n";
 }
 
 void CppGenerator::writeCallLease(TextStream &s, const QString &pyObj,
@@ -5597,19 +5635,59 @@ void CppGenerator::writeSetterFunction(TextStream &s,
 
     const QString cppField = cppFieldAccess(metaField, context);
 
-    if (fieldType.isCppIntegralPrimitive() || fieldType.typeEntry()->isEnum()
-               || fieldType.typeEntry()->isFlags()) {
-        s << "auto cppOut_local = " << cppField << ";\n"
-            << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut_local);\n"
-            << cppField << " = cppOut_local";
-    } else {
+    // The reference the converter writes through, as a build with a GIL has
+    // always used it. Staging into a local is the free-threaded half: it is
+    // what lets the gate below leave the field untouched.
+    const auto writeTargetReference = [&] {
         if (fieldType.isPointerToConst())
             s << "const ";
         s << "auto " << QByteArray(fieldType.indirections(), '*')
-          << "&cppOut_ptr = " << cppField << ";\n"
-          << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut_ptr)";
+            << "&cppOut_ptr = " << cppField << ";\n"
+            << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut_ptr);\n";
+    };
+
+    if (fieldType.isCppIntegralPrimitive() || fieldType.typeEntry()->isEnum()
+               || fieldType.typeEntry()->isFlags()) {
+        // Integral, enum and flags fields were staged before this series;
+        // only the gate is new.
+        s << "auto cppOut_local = " << cppField << ";\n"
+            << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut_local);\n";
+        writeConversionErrorCheck(s, ErrorReturn::MinusOne);
+        s << cppField << " = cppOut_local;\n\n";
+    } else if (fieldType.indirections() != 0) {
+        // Pointer fields: write only after the gate, a failed conversion
+        // writes null.
+        s << "#ifdef Py_GIL_DISABLED\n";
+        if (fieldType.isPointerToConst())
+            s << "const ";
+        s << "auto " << QByteArray(fieldType.indirections(), '*')
+            << "cppOut_local = " << cppField << ";\n"
+            << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut_local);\n";
+        writeConversionErrorCheck(s, ErrorReturn::MinusOne, ConversionGuard::Omit);
+        s << cppField << " = cppOut_local;\n"
+            << "#else\n";
+        writeTargetReference();
+        s << "#endif\n\n";
+    } else if (fieldType.isContainer()) {
+        // A container converter clears its target and inserts every element,
+        // failed ones included: convert into a local, move it in after the gate.
+        // See "A failed conversion stops the entry" in the free-threading notes.
+        s << "#ifdef Py_GIL_DISABLED\n"
+            << getFullTypeNameWithoutModifiers(fieldType) << " cppOut_local;\n"
+            << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut_local);\n";
+        writeConversionErrorCheck(s, ErrorReturn::MinusOne, ConversionGuard::Omit);
+        s << cppField << " = std::move(cppOut_local);\n"
+            << "#else\n";
+        writeTargetReference();
+        s << "#endif\n\n";
+    } else {
+        // A value field stays the converter's target: a failed copy
+        // conversion writes nothing, and staging would need a copy
+        // constructor for every wrapped value type.
+        writeTargetReference();
+        writeConversionErrorCheck(s, ErrorReturn::MinusOne);
+        s << '\n';
     }
-    s << ";\n\n";
 
     if (fieldType.isPointerToWrapperType()) {
         s << "Shiboken::Object::keepReference(reinterpret_cast<SbkObject *>(self), \""
@@ -5629,6 +5707,9 @@ void CppGenerator::writeSetterFunction(TextStream &s,
                                 cpythonSetterFunctionName(property, context.metaClass()),
                                 property.type(), context);
 
+    // This setter has always stopped on a pending error. Routing it through
+    // the gate would put a check that predates the series under an option
+    // bit, so it stays as it was.
     s << "auto cppOut = " << CPP_SELF_VAR << "->" << property.read() << "();\n"
         << PYTHON_TO_CPP_VAR << "(pyIn, &cppOut);\n"
         << "if (" << shibokenErrorsOccurred << ")\n" << indent
@@ -5697,6 +5778,8 @@ void CppGenerator::writeRichCompareFunction(TextStream &s, TextStream &t,
                                     PYTHON_ARG, ErrorReturn::Default,
                                     metaClass,
                                     QString(), func->isUserAdded());
+            // Stop before the operator runs on a failed conversion's output.
+            writeConversionErrorCheck(s, ErrorReturn::Default);
             // If the function is user added, use the inject code
             bool generateOperatorCode = true;
             if (func->isUserAdded()) {
@@ -7811,6 +7894,7 @@ void CppGenerator::writeDefaultSequenceMethods(TextStream &s,
         << "return -1;\n" << outdent << "}\n";
     writeArgumentConversion(s, itemType, u"cppValue"_s,
                             u"pyArg"_s, errorReturn, metaClass);
+    writeConversionErrorCheck(s, errorReturn);
 
     s << metaClass->qualifiedCppName() << "::iterator _item = "
         << CPP_SELF_VAR << "->begin();\n"

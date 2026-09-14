@@ -16,6 +16,7 @@
 #include <condition_variable>
 #include <cstring>
 #include <mutex>
+#include <new>
 #include <string>
 
 namespace Shiboken
@@ -42,6 +43,9 @@ static constexpr std::array KnownFailpoints = {
     "hierarchy-mid-traversal",   // in the class graph, one iterator alive
     "metaobject-before-commit",  // instance builder built, not committed yet
     "parent-before-commit",      // leases held, the new edge not published yet
+    "convert-before-lease",      // in a pointer conversion, before its own lease
+    "detach-mid-round",          // _detachChildren(), a child picked, the round not done
+    "ctor-after-publish",        // updateSourceObject(), object published, setup to come
     "dict-before-publish",       // instance dict found missing, not created yet
     "clear-before-dict",         // tp_clear, children detached, the dict to come
 };
@@ -49,6 +53,17 @@ static constexpr std::array KnownFailpoints = {
 // A build with a GIL has none of these windows: no lease, and a deallocator
 // the free-threading branch replaces wholesale.
 static constexpr std::array<const char *, 0> KnownFailpoints = {};
+#endif
+
+// The points that throw instead of parking. A separate inventory: a parking
+// point asserts that no binding lock is held, a throwing point sits under the
+// lock on purpose.
+#ifdef Py_GIL_DISABLED
+static constexpr std::array KnownThrowFailpoints = {
+    "deferred-slot-alloc",       // DeferredActions::grow(), before the vector allocates
+};
+#else
+static constexpr std::array<const char *, 0> KnownThrowFailpoints = {};
 #endif
 
 struct FailpointState
@@ -80,13 +95,24 @@ static FailpointState &state()
 // arm before starting the thread they want to park.
 static std::atomic<bool> anyArmed{false};
 
+// The armed throwing point, as the pointer to its entry in the array above.
+// An atomic, no mutex: it is read inside a transaction.
+static std::atomic<const char *> armedThrow{nullptr};
+
+// Returns the entry itself, which armFailpointThrow() stores.
+template <typename Names>
+static const char *findIn(const Names &names, const char *name)
+{
+    for (const char *known : names) {
+        if (std::strcmp(known, name) == 0)
+            return known;
+    }
+    return nullptr;
+}
+
 static bool isKnown(const char *name)
 {
-    for (const char *known : KnownFailpoints) {
-        if (std::strcmp(known, name) == 0)
-            return true;
-    }
-    return false;
+    return findIn(KnownFailpoints, name) != nullptr;
 }
 
 bool armFailpoint(const char *name, int timeoutMs)
@@ -130,9 +156,11 @@ bool failpointReached(const char *name)
     return s.parked == name;
 }
 
+// Both kinds, between tests; see disarmFailpointThrow().
 void clearFailpoints()
 {
     auto &s = state();
+    armedThrow.store(nullptr, std::memory_order_release);
     {
         std::lock_guard<std::mutex> guard(s.mutex);
         s.armed.clear();
@@ -146,14 +174,43 @@ const char *failpointNames()
 {
     static std::string all = [] {
         std::string result;
-        for (const char *name : KnownFailpoints) {
+        const auto append = [&result](const char *name) {
             if (!result.empty())
                 result += ',';
             result += name;
-        }
+        };
+        for (const char *name : KnownFailpoints)
+            append(name);
+        // Both kinds: a test asks whether its point is in the build.
+        for (const char *name : KnownThrowFailpoints)
+            append(name);
         return result;
     }();
     return all.c_str();
+}
+
+bool armFailpointThrow(const char *name)
+{
+    const char *known = findIn(KnownThrowFailpoints, name);
+    if (known == nullptr)
+        return false;
+    armedThrow.store(known, std::memory_order_release);
+    return true;
+}
+
+void disarmFailpointThrow()
+{
+    armedThrow.store(nullptr, std::memory_order_release);
+}
+
+void failpointThrow(const char *name)
+{
+    const char *armed = armedThrow.load(std::memory_order_acquire);
+    if (armed == nullptr || std::strcmp(armed, name) != 0)
+        return;
+    // One shot, like failpoint(): the test's retry has to get through.
+    armedThrow.store(nullptr, std::memory_order_release);
+    throw std::bad_alloc{};
 }
 
 void failpoint(const char *name)

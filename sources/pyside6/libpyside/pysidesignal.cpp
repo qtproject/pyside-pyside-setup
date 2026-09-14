@@ -19,6 +19,7 @@
 #include <sbkconverter.h>
 #include <sbkenum.h>
 #include <sbkerrors.h>
+#include <sbkfailpoint.h>
 #include <sbkstaticstrings.h>
 #include <sbkstring.h>
 #include <sbktypefactory.h>
@@ -990,6 +991,11 @@ void updateSourceObject(PyObject *source)
 
     if (source == nullptr)      // Bad input
        return;
+
+    // Called only from a generated constructor, right after the commit: the
+    // object is published, and whatever keeps it alive from here is the
+    // constructor's own lease. See ConstructorTailLease.
+    SBK_FAILPOINT("ctor-after-publish");
 
     Shiboken::AutoDecRef mroIterator(PyObject_GetIter(source->ob_type->tp_mro));
 

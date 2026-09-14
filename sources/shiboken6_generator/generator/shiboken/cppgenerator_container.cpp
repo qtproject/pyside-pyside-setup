@@ -157,6 +157,9 @@ void CppGenerator::writeOpaqueContainerValueConverter(TextStream &s,
         << "Shiboken::Errors::setWrongContainerType();\n"
         << "return {};\n" << outdent << "}\n";
     writePythonToCppTypeConversion(s, valueType, PYTHON_ARG, CPP_ARG, nullptr, {});
+    // The type check does not rule out a failed conversion, which would
+    // return the local uninitialized.
+    writeConversionErrorCheck(s, ErrorReturn::Default);
     s << "return " << CPP_ARG << ";\n" << outdent << "}\n" << outdent << "};\n\n";
 }
 

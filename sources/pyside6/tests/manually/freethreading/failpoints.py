@@ -25,9 +25,9 @@ import time
 import weakref
 
 import fpharness as fp
-from fpharness import (FREE_THREADED, Failpoint, Shiboken, Test, counterproof,
-                       gil_enabled, qml_create, qml_engine, qt_app,
-                       run_threads)
+from fpharness import (FREE_THREADED, Failpoint, FailpointThrow, Shiboken,
+                       Test, counterproof, gil_enabled, qml_create, qml_engine,
+                       qt_app, run_threads)
 from PySide6.QtCore import (QByteArray, QObject, QRecursiveMutex, SIGNAL,
                             Qt, SLOT)
 
@@ -967,6 +967,100 @@ def test_claim_survives_a_teardown_detach() -> str:
     return "ok"
 
 
+def test_setter_conversion_fails() -> str:
+    """B10-3: a field setter whose argument dies during the conversion. See README."""
+    try:
+        from sample import Derived, ObjectType
+    except ImportError:
+        return "skipped: the sample binding is not in this build"
+
+    holder = Derived()
+    kept = ObjectType()
+    holder.objectTypeField = kept
+    doomed = ObjectType()
+    outcome = {}
+
+    with Failpoint("convert-before-lease") as point:
+        def assign():
+            try:
+                holder.objectTypeField = doomed
+            except BaseException as exc:          # noqa: BLE001
+                outcome["error"] = repr(exc)
+
+        setter = threading.Thread(target=assign)
+        setter.start()
+        if not point.wait_until_reached():
+            return "FAIL: the setter never reached the failpoint"
+
+        Shiboken.delete(doomed)
+
+        point.release()
+        setter.join(timeout=5)
+        if setter.is_alive():
+            return "FAIL: the setting thread did not come back"
+
+    now = holder.objectTypeField
+    if now is not kept:
+        return f"FAIL: the field became {now!r} although the conversion failed"
+    if "error" not in outcome:
+        return "FAIL: the setter reported success with the conversion failed"
+    return f"ok - the field kept its value, {outcome['error'][:44]}"
+
+
+def test_owned_child_is_claimed_while_the_parent_dies() -> str:
+    """A child with a C++ wrapper must be refused while its parent dies. See README."""
+    qt_app()
+    parent = QObject()
+    child = QObject(parent)
+    child.setObjectName("owned")
+
+    seen = None
+    with Failpoint("delete-before-owned-dtor") as point:
+        worker = threading.Thread(target=lambda: Shiboken.delete(parent))
+        worker.start()
+        if not point.wait_until_reached():
+            return "FAIL: the deletion never reached the failpoint"
+
+        # Detached, not yet destroyed: only the claim refuses the child here.
+        seen = Shiboken.isValid(child)
+
+        point.release()
+        worker.join(timeout=5)
+        if worker.is_alive():
+            return "FAIL: the deleting thread did not come back"
+
+    if seen:
+        return ("FAIL: the child was usable while its parent's destructor "
+                "was still to run - the owned set carries no claim")
+    return "ok - the child is refused while the parent dies"
+
+
+def test_parent_removal_allocation_fails() -> str:
+    """B6-4: the deferred slot of a parent removal fails to allocate. See README."""
+    parent = QObject()
+    child = QObject(parent)
+    if Shiboken.ownedByPython(child):
+        return "FAIL: the child was not owned by its parent to begin with"
+
+    error = None
+    with FailpointThrow("deferred-slot-alloc"):
+        try:
+            child.setParent(None)
+        except BaseException as exc:          # noqa: BLE001
+            error = repr(exc)
+
+    if error is None:
+        return "FAIL: the failing allocation was not reported"
+    if Shiboken.ownedByPython(child):
+        return (f"FAIL: ownership moved although the transaction failed "
+                f"({error[:40]})")
+    # Unarmed now: a transaction that left nothing behind runs again.
+    child.setParent(None)
+    if not Shiboken.ownedByPython(child):
+        return "FAIL: the retry did not hand ownership back"
+    return f"ok - ownership survived the failure, {error[:40]}"
+
+
 def test_two_threads_one_constructor() -> str:
     """B5-3: two threads run the same base __init__ on one object."""
     class Sub(QObject):
@@ -1597,6 +1691,14 @@ def _cpp_deleted(obj) -> bool:
     return "<<Deleted>>" in Shiboken.dump(obj)
 
 
+def _binding_parent(obj) -> str | None:
+    """The address of the parent in the binding graph, as dump() prints it."""
+    for line in Shiboken.dump(obj).splitlines():
+        if line.startswith("parent"):
+            return line.rsplit(" at ", 1)[1].rstrip(">")
+    return None
+
+
 def test_container_element_lease_is_kept() -> str:
     """An element of a container argument is deleted mid-call. See README."""
     if not FREE_THREADED:
@@ -1767,6 +1869,123 @@ def test_dealloc_claim_releases_a_survivor() -> str:
     return "ok - both survivors are usable once the destructor is past"
 
 
+def test_teardown_detaches_only_its_own_edge() -> str:
+    """A child is reparented in the middle of its parent's teardown. See README."""
+    try:
+        import sample
+    except ImportError:
+        return "skipped: the sample binding is not in this build"
+
+    root = sample.ObjectType()
+    # Built from Python, so its destructor reports through Object::destroy().
+    doomed = sample.ObjectType()
+    doomed.setObjectName("doomed")
+    doomed.setParent(root)
+    child = sample.ObjectType()
+    child.setParent(doomed)
+    rescuer = sample.ObjectType()
+    del doomed                     # root holds it
+    # Bound before arming, as lease-vs-destroy explains.
+    move = child.setParent
+
+    with Failpoint("detach-mid-round") as point:
+        killer = threading.Thread(target=lambda: root.killChild("doomed"))
+        killer.start()
+        if not point.wait_until_reached():
+            return "FAIL: the teardown never reached the failpoint"
+
+        # In C++ as well: the destructor still to run no longer takes it.
+        move(rescuer)
+
+        point.release()
+        killer.join(timeout=5)
+        if killer.is_alive():
+            return "FAIL: the tearing-down thread did not come back"
+
+    parent = _binding_parent(child)
+    if parent != hex(id(rescuer)):
+        return (f"FAIL: the teardown removed the child's new edge (binding "
+                f"parent {parent}, rescuer {hex(id(rescuer))})")
+
+    # What the edge is for: deleting the new parent waits for a call on it.
+    with Failpoint("lease-after-acquire") as point:
+        reader = threading.Thread(target=lambda: Shiboken.VoidPtr(child))
+        reader.start()
+        if not point.wait_until_reached():
+            return "FAIL: the read never reached the failpoint"
+        Shiboken.delete(rescuer)
+        early = _cpp_deleted(child)
+        point.release()
+        reader.join(timeout=5)
+        if reader.is_alive():
+            return "FAIL: the reading thread did not come back"
+
+    if early:
+        return "FAIL: deleting the new parent did not wait for the child's lease"
+    if not _cpp_deleted(child):
+        return "FAIL: the child outlived the deferred delete of its parent"
+    return "ok - the new edge survived the teardown and still defers a delete"
+
+
+def test_constructor_leases_its_tail() -> str:
+    """A delete between a constructor's commit and its QObject setup. See README."""
+    shared: list[QObject] = []
+    seen: dict[str, object] = {}
+
+    class Published(QObject):
+        def __init__(self):
+            # Where another thread finds it before the base __init__ is done.
+            shared.append(self)
+            try:
+                # A keyword, so the setup also reads metaObject() and fills
+                # properties. Not objectName: its generated setter takes a
+                # lease, which the waiting delete refuses.
+                super().__init__(tag="published")
+            except BaseException as exc:      # noqa: BLE001
+                seen["error"] = repr(exc)
+                return
+            seen["done"] = True
+
+        def setTag(self, value):
+            # Called by fillQtProperties(), under the constructor's lease.
+            seen["alive in setup"] = not _cpp_deleted(self)
+
+    name = "ctor-after-publish"
+    # Armed by hand, not with Failpoint: on the failing path the constructor
+    # has to stay parked, and the timeout has to outlast the process.
+    if not Shiboken.armFailpoint(name, 120_000):
+        raise fp.FailpointMissing(name)
+    # A daemon, because the failure below leaves it parked on purpose.
+    builder = threading.Thread(target=Published, daemon=True)
+    builder.start()
+    if not Failpoint(name).wait_until_reached():
+        Shiboken.clearFailpoints()
+        return "FAIL: the constructor never reached the failpoint"
+
+    victim = shared[0]
+    Shiboken.delete(victim)
+    if _cpp_deleted(victim):
+        # Not released: the setup would read metaObject() from freed memory.
+        return ("FAIL: the object was destroyed while its constructor was "
+                "parked - no lease covers the QObject setup")
+
+    Shiboken.releaseFailpoint(name)
+    builder.join(timeout=5)
+    Shiboken.clearFailpoints()
+    if builder.is_alive():
+        return "FAIL: the constructing thread did not come back"
+    if "error" in seen:
+        return f"FAIL: __init__ raised {seen['error']}"
+    if not seen.get("done"):
+        return "FAIL: __init__ did not complete"
+    if not seen.get("alive in setup"):
+        return (f"FAIL: the property setup ran on a destroyed object "
+                f"(alive {seen.get('alive in setup')})")
+    if not _cpp_deleted(victim):
+        return "FAIL: the deferred delete never ran after the constructor"
+    return "ok - the delete waited for the constructor's QObject setup"
+
+
 TESTS = {
     "weakrefs": Test(test_weakrefs_while_deallocating),
     # Was an expected FAIL on a wrong explanation; see the docstring.
@@ -1789,6 +2008,15 @@ TESTS = {
     "proof-claim-teardown": Test(lambda: counterproof("ClaimThroughTeardown",
                                                       "claim-survives-teardown")),
     "replacement-while-dying": Test(test_replacement_wrapper_while_dying),
+    "setter-conversion-fails": Test(test_setter_conversion_fails),
+    "proof-conversion-gate": Test(lambda: counterproof(
+        "ConversionGate", "setter-conversion-fails")),
+    # No proof-* row, on purpose.
+    # See the README.
+    "owned-child-claimed": Test(test_owned_child_is_claimed_while_the_parent_dies),
+    "parent-removal-alloc": Test(test_parent_removal_allocation_fails),
+    "proof-transaction-prepare": Test(lambda: counterproof(
+        "TransactionPrepare", "parent-removal-alloc")),
     "two-thread-ctor": Test(test_two_threads_one_constructor),
     "lease-snapshot": Test(test_lease_carries_the_pointer_it_validated),
     "proof-lease-snapshot": Test(lambda: counterproof(
@@ -1887,6 +2115,12 @@ TESTS = {
     # No proof-* row, on purpose.
     # See the README.
     "dealloc-claim-survivor": Test(test_dealloc_claim_releases_a_survivor),
+    "teardown-detach-edge": Test(test_teardown_detaches_only_its_own_edge),
+    "proof-detach-checked-parent": Test(lambda: counterproof(
+        "DetachCheckedParent", "teardown-detach-edge")),
+    "constructor-tail-lease": Test(test_constructor_leases_its_tail),
+    "proof-constructor-tail-lease": Test(lambda: counterproof(
+        "ConstructorTailLease", "constructor-tail-lease")),
 }
 
 

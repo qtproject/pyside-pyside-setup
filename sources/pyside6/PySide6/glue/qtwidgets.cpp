@@ -429,10 +429,9 @@ Shiboken::BindingManager &bm = Shiboken::BindingManager::instance();
 for (auto *item : items) {
 #ifdef Py_GIL_DISABLED
     if (auto obj = bm.acquireWrapper(item)) {
-        // If the parent holds the only reference left, removeParent() makes
-        // the object vanish anyway and invalidating it is pointless.
-        if (obj.otherReferences() > 1)
-            Shiboken::Object::invalidate(obj.object());
+        // Invalidate every item, as qlistwidget-clear does: without a GIL the
+        // reference count does not say how widely an object is held.
+        Shiboken::Object::invalidate(obj.object());
         Shiboken::Object::removeParent(obj.object());
     }
 #else

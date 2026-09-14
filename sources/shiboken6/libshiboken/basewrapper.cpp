@@ -40,6 +40,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <iterator>
+#include <new>
 #include <set>
 #include <sstream>
 #include <string>
@@ -84,6 +86,7 @@ static std::atomic<int> &waitingClaims()
 namespace Shiboken::Object
 {
 static std::vector<SbkObject *> collectOwnedLocked(SbkObject *root);
+static bool detachFirstChild(SbkObject *parent, bool keepReference);
 } // namespace Shiboken::Object
 
 static SbkObject *parentOfLocked(SbkObject *self)
@@ -1413,6 +1416,14 @@ namespace
 void _detachChildren(SbkObject *obj, bool keepReference)
 {
     SBK_ASSERT_STATE_UNLOCKED();
+    // See "A teardown detaches the edge it read" in the free-threading notes.
+    if (Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::DetachCheckedParent)) {
+        while (Shiboken::Object::detachFirstChild(obj, keepReference)) {
+        }
+        return;
+    }
+    // DetachCheckedParent cleared: the pick and the removal are two
+    // transactions, and a reparent in between loses its new edge.
     // One child per round, read inside a transaction: the container is the
     // one setParentLocked() and removeParentLocked() mutate. The loop body
     // must stay outside, because invalidate() and removeParent() take the
@@ -1434,6 +1445,7 @@ void _detachChildren(SbkObject *obj, bool keepReference)
         }
         // Mark child as invalid
         Shiboken::Object::invalidate(first);
+        SBK_FAILPOINT("detach-mid-round");
         Shiboken::Object::removeParent(first, false, keepReference);
         Py_DECREF(reinterpret_cast<PyObject *>(first));
     }
@@ -1614,7 +1626,14 @@ PyObject *returnFromRichCompare(PyObject *result)
 {
     if (result && !PyErr_Occurred())
         return result;
-    Shiboken::Errors::setOperatorNotImplemented();
+    // Keep the exception of a failed argument conversion instead of guessing
+    // that no operator matched. Under Py_GIL_DISABLED only: replacing it is
+    // what a build with a GIL has always done here.
+    // See "A failed conversion stops the entry" in the free-threading notes.
+#ifdef Py_GIL_DISABLED
+    if (!Shiboken::Errors::conversionFailed())
+#endif
+        Shiboken::Errors::setOperatorNotImplemented();
     return {};
 }
 
@@ -2862,10 +2881,14 @@ static void **extractDestructionLocked(SbkObject *self, DeferredActions &deferre
 {
     SBK_ASSERT_STATE_LOCKED();
     auto *priv = self->d;
+    auto *sotp = PepType_SOTP(Shiboken::pyType(self));
+    // Room for the destructors before the stamp, which is one-way: a failure
+    // after it would leave the owned set claimed and never destroyed.
+    if (Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::TransactionPrepare))
+        deferred.reserve(sotp->is_multicpp ? dtors.size() : 1);
     // The claim covers exactly what is about to be destroyed, and from here it
     // is no longer derived from edges that may still move.
     stampOwnedSetLocked(self);
-    auto *sotp = PepType_SOTP(Shiboken::pyType(self));
     // The destructors were gathered before the lock; only the instance
     // pointers are read here. The type cannot have changed under a wrapper,
     // so the check is that the gathered list still fits what is being
@@ -3291,6 +3314,7 @@ static void callCppDestructorsImpl(SbkObject *pyObj, bool onlyIfOwned)
         } else {
             cptrs = extractDestructionLocked(pyObj, deferred, dtors);
         }
+        deferred.commit();
     }
 
     if (destroyQApp) {
@@ -3521,6 +3545,8 @@ static void finishReadyRoot(SbkObject *root)
         // the extraction has stamped the members, they still inherit it
         // from this root.
         waitingClaims().fetch_sub(1, std::memory_order_relaxed);
+        // Last, after every write, the count above included.
+        deferred.commit();
     }
     if (cptrs != nullptr)
         finishDestruction(root, deferred, cptrs);
@@ -3795,6 +3821,14 @@ void getOwnership(SbkObject *sbkObj)
         if (priv->parentInfo && priv->parentInfo->parent)
             return;
 
+        // Room for the one action below, before the flag is written.
+        // See "Prepare, then commit" in the free-threading notes.
+        if (priv->containsCppWrapper
+            && Shiboken::FreeThreading::optionEnabled(
+                   Shiboken::FreeThreading::TransactionPrepare)) {
+            deferred.reserve(1);
+        }
+
         // Get back the ownership
         priv->hasOwnership = true;
 
@@ -3802,6 +3836,7 @@ void getOwnership(SbkObject *sbkObj)
             deferred.addDecref(sbkObj);  // Remove extra ref
         else
             revalidate = true;
+        deferred.commit();
     }
 
     if (revalidate)
@@ -3851,9 +3886,17 @@ void releaseOwnership(SbkObject *sbkObj)
 // the state lock again (it is not recursive).
 struct InvalidationPlan
 {
+    struct Detach
+    {
+        SbkObject *parent;
+        SbkObject *child;
+    };
     std::vector<SbkObject *> releaseWrappers;
-    std::vector<SbkObject *> detachChildren;
+    std::vector<Detach> detachChildren;
 };
+
+static void removeParentFrom(SbkObject *parent, SbkObject *child, bool giveOwnershipBack,
+                             bool keepReference);
 
 // Pin an object the walk has to survive the unlock. Running the plan decrefs
 // (removeParent() hands the parent reference back), and that cascade can free
@@ -3896,7 +3939,7 @@ static void collectInvalidateLocked(SbkObject *self, std::set<SbkObject *> &seen
             // if the parent not is a wrapper class, then remove children from him, because We do not know when this object will be destroyed
             if (!self->d->validCppObject) {
                 keepClaimThroughTeardownLocked(child);
-                plan.detachChildren.push_back(child);
+                plan.detachChildren.push_back({self, child});
                 pinForPlan(reinterpret_cast<PyObject *>(child), pins);
             }
         }
@@ -3910,8 +3953,9 @@ static void runInvalidationPlan(const InvalidationPlan &plan)
     auto &bindingManager = BindingManager::instance();
     for (SbkObject *o : plan.releaseWrappers)
         bindingManager.releaseWrapper(o);
-    for (SbkObject *child : plan.detachChildren)
-        removeParent(child, true, true);
+    // Collected in an earlier transaction: the child may have a new parent.
+    for (const auto &edge : plan.detachChildren)
+        removeParentFrom(edge.parent, edge.child, true, true);
 }
 
 // One transaction - the parent/child walk is plain recursion under the lock -
@@ -4107,6 +4151,11 @@ static void removeParentLocked(SbkObject *child, bool giveOwnershipBack,
     if (iChild == oldBrothers.end())
         return;
 
+    // Prepare, then commit: room for the one deferred action below, the edge
+    // reference in either branch, before anything is written.
+    if (Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::TransactionPrepare))
+        deferred.reserve(1);
+
     oldBrothers.erase(iChild);
 
     pInfo->parent = nullptr;
@@ -4137,8 +4186,73 @@ void removeParent(SbkObject *child, bool giveOwnershipBack, bool keepReference)
     {
         StateLockGuard guard;
         removeParentLocked(child, giveOwnershipBack, keepReference, deferred);
+        deferred.commit();
     }
     deferred.run();
+}
+
+// removeParent() for a teardown that read the edge in an earlier transaction:
+// only the edge from \a parent goes. A child reparented in between keeps its
+// new one.
+// See "A teardown detaches the edge it read" in the free-threading notes.
+static void removeParentFrom(SbkObject *parent, SbkObject *child, bool giveOwnershipBack,
+                             bool keepReference)
+{
+    SBK_ASSERT_STATE_UNLOCKED();
+    if (!Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::DetachCheckedParent)) {
+        removeParent(child, giveOwnershipBack, keepReference);
+        return;
+    }
+    DeferredActions deferred;
+    {
+        StateLockGuard guard;
+        auto *pInfo = child->d->parentInfo;
+        if (pInfo == nullptr || pInfo->parent != parent)
+            return;
+        removeParentLocked(child, giveOwnershipBack, keepReference, deferred);
+        deferred.commit();
+    }
+    deferred.run();
+}
+
+// One round of _detachChildren(): the child is invalidated and its edge
+// removed in the transaction that picked it, so no reparent can come in
+// between. Returns false once parent has no child left.
+// See "A teardown detaches the edge it read" in the free-threading notes.
+static bool detachFirstChild(SbkObject *parent, bool keepReference)
+{
+    SBK_ASSERT_STATE_UNLOCKED();
+    // The pins are dropped at the end, and the last one can run a destructor.
+    SBK_ASSERT_NO_RAW_LOCK();
+    InvalidationPlan plan;
+    std::vector<PyObject *> pins;
+    DeferredActions deferred;
+    {
+        StateLockGuard guard;
+        ParentInfo *pInfo = parent->d->parentInfo;
+        if (pInfo == nullptr || pInfo->children.empty())
+            return false;
+        SbkObject *first = *pInfo->children.begin();
+        // Room for removeParentLocked()'s decref before the first write.
+        // See "Prepare, then commit" in the free-threading notes.
+        if (Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::TransactionPrepare))
+            deferred.reserve(1);
+        // Nothing else keeps the child alive once the edge reference is back.
+        pinForPlan(reinterpret_cast<PyObject *>(first), pins);
+        keepClaimThroughTeardownLocked(first);
+        std::set<SbkObject *> seen;
+        collectInvalidateLocked(first, seen, plan, pins);
+        removeParentLocked(first, false, keepReference, deferred);
+        deferred.commit();
+    }
+    // Where the cleared path stands between picking and removing; here the
+    // edge is already gone.
+    SBK_FAILPOINT("detach-mid-round");
+    runInvalidationPlan(plan);
+    deferred.run();
+    for (PyObject *o : pins)
+        Py_DECREF(o);
+    return true;
 }
 
 // Result of the setParent() transaction, for the diagnostics that must not be
@@ -4168,6 +4282,20 @@ static SetParentResult setParentLocked(SbkObject *parent, SbkObject *child,
 
     ParentInfo *pInfo = child->d->parentInfo;
     const bool hasAnotherParent = pInfo && pInfo->parent && pInfo->parent != parent;
+    const bool prepareFirst =
+        Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::TransactionPrepare);
+
+    // Prepare, then commit: every allocation (deferred slot, ParentInfo, set
+    // insert) before the old edge is touched.
+    // See "Prepare, then commit" in the free-threading notes.
+    if (!parentIsNull && prepareFirst) {
+        // Covers removeParentLocked()'s add below; its own reserve(1) then
+        // finds the room and cannot throw.
+        deferred.reserve(1);
+        if (!pInfo)
+            pInfo = child->d->parentInfo = new ParentInfo;
+        parent->d->parentInfo->children.insert(child);
+    }
 
     // check if we need to remove this child from the old parent.
     // giveOwnershipBack must stay true: this is what removeParent()'s default
@@ -4177,14 +4305,19 @@ static SetParentResult setParentLocked(SbkObject *parent, SbkObject *child,
     if (parentIsNull || hasAnotherParent)
         removeParentLocked(child, true, false, deferred);
 
-    // Add the child to the new parent
+    // Add the child to the new parent. removeParentLocked() keeps
+    // parentInfo, so the re-read is harmless.
     pInfo = child->d->parentInfo;
     if (!parentIsNull) {
         if (!pInfo)
             pInfo = child->d->parentInfo = new ParentInfo;
 
         pInfo->parent = parent;
-        parent->d->parentInfo->children.insert(child);
+        if (!prepareFirst) {
+            // TransactionPrepare cleared: the insert after the pointer write,
+            // where a failure leaves a one-sided edge.
+            parent->d->parentInfo->children.insert(child);
+        }
 
         // Add Parent ref (pinning increment, see releaseOwnership())
         Py_INCREF(reinterpret_cast<PyObject *>(child));
@@ -4237,8 +4370,9 @@ void setParent(PyObject *parent, PyObject *child)
     auto *parent_ = parentIsNull ? nullptr : reinterpret_cast<SbkObject *>(parent);
     auto *child_ = reinterpret_cast<SbkObject *>(child);
 
-    //Avoid destroy child during reparent operation
-    Py_INCREF(child);
+    // Keep the child alive through the reparent; RAII, as the out-of-memory
+    // path returns early.
+    Shiboken::AutoDecRef pin(Py_NewRef(child));
 
     // Leases held, native parent changed, the binding graph still shows the
     // old edge. No test arms this yet (B6-2).
@@ -4247,9 +4381,20 @@ void setParent(PyObject *parent, PyObject *child)
 
     DeferredActions deferred;
     SetParentResult result{};
-    {
+    bool outOfMemory = false;
+    try {
         StateLockGuard guard;
         result = setParentLocked(parent_, child_, deferred);
+        deferred.commit();
+    } catch (const std::bad_alloc &) {
+        // Only a flag: reporting it calls CPython, after the unlock.
+        outOfMemory = true;
+    }
+    if (outOfMemory) {
+        // Nothing was run or written (unless TransactionPrepare is cleared).
+        // See "Prepare, then commit" in the free-threading notes.
+        PyErr_NoMemory();
+        return;
     }
     deferred.run();
 
@@ -4259,9 +4404,6 @@ void setParent(PyObject *parent, PyObject *child)
                   << child << '/' << Py_TYPE(child)->tp_name << " to parent "
                   << parent << '/' << Py_TYPE(parent)->tp_name << '\n';
     }
-
-    // Remove previous safe ref
-    Py_DECREF(child);
 }
 
 static void removeRefCountKeyLocked(SbkObject *self, const std::string &key,
@@ -4270,6 +4412,7 @@ static void removeRefCountKeyLocked(SbkObject *self, const std::string &key,
     SBK_ASSERT_STATE_LOCKED();
     if (self->d->referredObjects) {
         const auto iterPair = self->d->referredObjects->equal_range(key);
+        deferred.reserve(std::distance(iterPair.first, iterPair.second));
         for (auto it = iterPair.first; it != iterPair.second; ++it)
             deferred.addDecref(it->second);
         self->d->referredObjects->erase(iterPair.first, iterPair.second);
@@ -4296,9 +4439,13 @@ static void keepReferenceLocked(SbkObject *self, const std::string &key,
     }
 
     if (!append && iterPair.first != iterPair.second) {
+        deferred.reserve(std::distance(iterPair.first, iterPair.second));
         for (auto it = iterPair.first; it != iterPair.second; ++it)
             deferred.addDecref(it->second);
         refCountMap.erase(iterPair.first, iterPair.second);
+        // Committed here: the map has given these references up, and the
+        // insert below can still throw, which would drop an uncommitted list.
+        deferred.commit();
     }
 
     refCountMap.insert(RefCountMap::value_type{key, referredObject});
@@ -4317,6 +4464,7 @@ void keepReference(SbkObject *self, const char *keyC, PyObject *referredObject, 
             removeRefCountKeyLocked(self, key, deferred);
         else
             keepReferenceLocked(self, key, referredObject, append, deferred);
+        deferred.commit();
     }
     deferred.run();
 }
@@ -4332,6 +4480,7 @@ void removeReference(SbkObject *self, const char *key, PyObject *referredObject)
     {
         StateLockGuard guard;
         removeRefCountKeyLocked(self, keyString, deferred);
+        deferred.commit();
     }
     deferred.run();
 }
@@ -4343,6 +4492,7 @@ static void clearReferencesLocked(SbkObject *self, DeferredActions &deferred)
         return;
 
     RefCountMap &refCountMap = *(self->d->referredObjects);
+    deferred.reserve(refCountMap.size());
     for (const auto &p : refCountMap)
         deferred.addDecref(p.second);
     refCountMap.clear();
@@ -4355,6 +4505,7 @@ void clearReferences(SbkObject *self)
     {
         StateLockGuard guard;
         clearReferencesLocked(self, deferred);
+        deferred.commit();
     }
     deferred.run();
 }

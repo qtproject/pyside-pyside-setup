@@ -5,6 +5,7 @@
 #include "sbkerrors.h"
 #include "autodecref.h"
 #include "sbkpep.h"
+#include "sbkftoptions.h"
 #include "sbkstring.h"
 #include "helper.h"
 
@@ -222,6 +223,15 @@ PyObject *occurred()
     if (savedError)
         restoreError(savedError);
     return PyErr_Occurred();
+}
+
+bool conversionFailed()
+{
+#ifdef Py_GIL_DISABLED
+    if (!FreeThreading::optionEnabled(FreeThreading::ConversionGate))
+        return false;
+#endif
+    return occurred() != nullptr;
 }
 
 Stash::Stash() : m_store(std::make_unique<ErrorStore>())

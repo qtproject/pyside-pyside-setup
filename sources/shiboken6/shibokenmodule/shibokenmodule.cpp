@@ -137,6 +137,15 @@ const bool ok = Shiboken::armFailpoint(%1, %2);
 %PYARG_0 = %CONVERTTOPYTHON[bool](ok);
 // @snippet armfailpoint
 
+// @snippet armfailpointthrow
+const bool ok = Shiboken::armFailpointThrow(%1);
+%PYARG_0 = %CONVERTTOPYTHON[bool](ok);
+// @snippet armfailpointthrow
+
+// @snippet disarmfailpointthrow
+Shiboken::disarmFailpointThrow();
+// @snippet disarmfailpointthrow
+
 // @snippet releasefailpoint
 const bool ok = Shiboken::releaseFailpoint(%1);
 %PYARG_0 = %CONVERTTOPYTHON[bool](ok);

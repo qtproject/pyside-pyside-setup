@@ -415,6 +415,50 @@ The harness needs per-point arming, parking and release first. A short
 timeout on the first point is no substitute: it enforces the order but hands
 the result to a deadline.
 
+### setter-conversion-fails, proof-conversion-gate
+
+B10-3: a generated direct entry running on the output of a failed
+conversion. A thread assigning to `Derived.objectTypeField` parks in the
+pointer converter before the converter's own lease (`convert-before-lease`).
+The test deletes the argument, so that lease refuses, writes null and sets a
+RuntimeError. The test expects the field to keep its value and the setter to
+raise.
+
+The setter and not rich comparison, because the setter leaves the damage
+readable. A comparison on a null operand crashes, which shows that the gate
+matters but not what was left behind.
+
+`proof-conversion-gate` clears `ConversionGate`: the null reaches the field,
+which then reads `None`.
+
+### owned-child-claimed - a guard, no proof row
+
+A child built from Python has a C++ wrapper, and keeps `validCppObject` and
+`cptr` after its parent's destruction has detached it, until its own
+destructor runs. `Shiboken.delete(parent)` parks at
+`delete-before-owned-dtor`, in that window, and the test expects the child to
+be refused there. Only the claim stamped at extraction refuses it.
+
+There is no `proof-*` row. Clearing `ClaimByAncestry` hides the defect rather
+than restoring it: the request then marks the whole set, and the stamp has
+nothing to add.
+
+### parent-removal-alloc, proof-transaction-prepare
+
+B6-4: a state transaction that fails halfway. `setParent(None)` reaches
+`removeParentLocked()`, which erases the edge, hands ownership back and then
+defers the decref of the edge reference - the last allocation, after every
+write. The throwing failpoint `deferred-slot-alloc` fails that allocation. It
+throws instead of parking, because a thread inside a transaction holds the
+state lock.
+
+The test expects the call to raise with ownership unchanged, and a retry to
+succeed. It checks ownership and not `parent()`, because Qt has reparented
+the object before the binding transaction runs.
+
+`proof-transaction-prepare` clears `TransactionPrepare`: the room is taken
+after the erase, and ownership has moved although the call raised.
+
 ### two-thread-ctor, proof-ctor-commit
 
 B5-3: two threads run the same base `__init__` on one object. One parks
@@ -790,4 +834,38 @@ and answering their name.
 No `proof-*` row: the take-back has no bit, and clearing `DeallocClaim` drops
 the waiting path with the stamp, so the test would fail because nothing was
 refused - `dealloc-waits-for-lease`'s question, not this one.
+
+### teardown-detach-edge, proof-detach-checked-parent
+
+A child reparented in the middle of its parent's teardown. `killChild()`
+deletes a Python-built `sample.ObjectType`, whose destructor detaches its
+children in `_detachChildren()`. That thread parks at `detach-mid-round`,
+a child picked; the main thread then moves the child to a new parent, in
+C++ as well, so the destructor still to run leaves it alone.
+
+Expected: the child's binding parent is the new one, read from
+`Shiboken.dump()`. A `VoidPtr` lease on the child is then parked while
+`Shiboken.delete()` destroys the new parent, and the delete has to wait.
+Not covered: `runInvalidationPlan()`, the other site; it needs its own point.
+
+`proof-detach-checked-parent` clears `DetachCheckedParent`: pick and removal
+are two transactions with the point between them, and the removal takes the
+new parent's edge. With the bit set the point sits after the single
+transaction, where a reparent is harmless.
+
+### constructor-tail-lease, proof-constructor-tail-lease
+
+A generated constructor publishes the object and then still works on it, so
+`Shiboken.delete()` can reach it from the commit on. A `QObject` subclass
+puts `self` into a list and calls `super().__init__(tag=...)`, which
+`fillQtProperties()` hands to its Python `setTag()`; the thread parks at
+`ctor-after-publish` in `updateSourceObject()` and the main thread deletes
+it. Not `objectName`, whose setter takes a lease the waiting delete refuses.
+
+Expected: the delete is deferred while the constructor waits, the object is
+alive inside `setTag()`, `__init__` completes, and it is destroyed after.
+
+`proof-constructor-tail-lease` clears `ConstructorTailLease`: the delete runs
+at once and the constructor stays parked on a daemon thread - released, the
+setup would read `metaObject()` from freed memory.
 

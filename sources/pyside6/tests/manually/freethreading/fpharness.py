@@ -147,6 +147,29 @@ class Failpoint:
         return Shiboken.releaseFailpoint(self.name)
 
 
+class FailpointThrow:
+    """Arm a point that throws where a failing allocation would.
+
+    It parks nobody and fires once: arm, make one call, look at what the
+    failed call left behind.
+    See README.
+    """
+
+    def __init__(self, name: str):
+        self.name = name
+
+    def __enter__(self):
+        if not Shiboken.armFailpointThrow(self.name):
+            raise FailpointMissing(self.name)
+        return self
+
+    def __exit__(self, *exc):
+        # Only this kind: clearFailpoints() would also disarm a Failpoint
+        # around this one.
+        Shiboken.disarmFailpointThrow()
+        return False
+
+
 # --------------------------------------------------------------- QML fixtures
 
 QML_IMPORT_NAME = "FailpointTest"
@@ -226,7 +249,6 @@ def qml_create(engine, element: str):
 # copied. The copy that used to stand here went stale and cleared a measure
 # no counterproof had asked for.
 OPTIONS = ftoptions.option_bits()
-ALL_OPTIONS = ftoptions.all_bits(OPTIONS)
 
 
 # How long a counterproof waits for its child. Deliberately a fraction of the
@@ -240,10 +262,10 @@ CHILD_TIMEOUT = max(20, int(os.environ.get("FAILPOINT_TIMEOUT", "60")) // 3)
 
 def _run_without(cleared: list[str], test: str) -> tuple[int, str]:
     """Run one test in its own process with those measures switched off."""
-    bits = ALL_OPTIONS
+    bits = 0
     for name in cleared:
-        bits &= ~OPTIONS[name]
-    env = dict(os.environ, PYSIDE6_OPTION_FT=hex(bits))
+        bits |= OPTIONS[name]
+    env = dict(os.environ, PYSIDE6_OPTION_FT=f"~{bits:#x}")
     env.pop("FAILPOINT_EXPECT_GIL", None)
     proc = subprocess.Popen([sys.executable, os.fspath(SELF), test], env=env,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,

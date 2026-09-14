@@ -230,6 +230,21 @@ private:
                                                      ErrorReturn errorReturn,
                                                      bool hasReturnValue = true);
 
+    /// Whether the gate below writes its own conditional. Omit is for the
+    /// call sites that already stand inside one.
+    enum class ConversionGuard
+    {
+        Emit,
+        Omit
+    };
+
+    /// Writes the gate that a direct entry needs between a Python to C++
+    /// conversion and the first native statement that uses its output.
+    /// The gate belongs to the free-threaded build alone, so it is written
+    /// under Py_GIL_DISABLED.
+    static void writeConversionErrorCheck(TextStream &s, ErrorReturn errorReturn,
+                                          ConversionGuard guard = ConversionGuard::Emit);
+
     /// Whether a lease also takes the per-object guard. Only the receiver
     /// does: nesting critical sections does not lock two objects.
     enum class LeaseGuard

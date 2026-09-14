@@ -16,15 +16,14 @@ namespace Shiboken::FreeThreading {
 /// Kill switches for what free-threaded builds add, as bit flags in one
 /// variable, in the style of PYSIDE6_OPTION_PYTHON_ENUM:
 ///
-///     PYSIDE6_OPTION_FT unset     all of them (the default)
-///     PYSIDE6_OPTION_FT=on        the same, spelled out
-///     PYSIDE6_OPTION_FT=0b11      the locks only
-///     PYSIDE6_OPTION_FT=off       without any of them
+///     PYSIDE6_OPTION_FT unset       all of them (the default)
+///     PYSIDE6_OPTION_FT=on          the same, spelled out
+///     PYSIDE6_OPTION_FT="~0x1000"   all of them except ConstructorClaim
+///     PYSIDE6_OPTION_FT=0b11        the locks only
+///     PYSIDE6_OPTION_FT=off         without any of them
 ///
-/// Taking one measure away means setting every other bit, and how many
-/// there are grows with the enum below - which is why no example here
-/// spells that number out. It went stale twice. The tests build the mask
-/// from this header (ftoptions.py), and so should anything else.
+/// A leading "~" takes away only the bits it names, however the enum below
+/// grows. The tests read the bit names from this header (ftoptions.py).
 ///
 /// A set bit keeps the measure, a cleared bit takes it away and puts back
 /// what was there before it. Unset means all of them, and that is the only
@@ -112,6 +111,17 @@ enum Option : int
     /// validCppObject is callable while the parent's destructor frees it.
     /// Only meaningful with ClaimByAncestry.
     ClaimThroughTeardown = 0x20000,
+    /// A generated direct entry - rich comparison, sequence assignment, a
+    /// field or a property setter - stops at a failed conversion before its
+    /// first native statement. Cleared, the entry runs on the conversion's
+    /// output, null or default-constructed, and rich comparison reports that
+    /// no operator matched. The QProperty setter loses its check too.
+    ConversionGate = 0x40000,
+    /// A lifecycle transaction makes room for its deferred actions before its
+    /// first semantic write. Cleared, the room is taken after the parent edge
+    /// is gone, and a failing allocation leaves a child with no parent and an
+    /// edge reference nobody releases.
+    TransactionPrepare = 0x80000,
     /// A lease taken inside an argument's conversion - on a container
     /// element, on a wrapper passed as void * - is kept until the native call
     /// has returned. Cleared, it ends with the conversion, and a concurrent
@@ -122,6 +132,16 @@ enum Option : int
     /// still open. Cleared, it destroys the owned set without looking, and a
     /// child is freed under a call in flight.
     DeallocClaim = 0x2000000,
+    /// A teardown detaches a child only from the parent it tears down.
+    /// Cleared, the child is picked in one transaction and detached from
+    /// whatever parent it has in a later one, and a reparent in between
+    /// loses its new edge.
+    DetachCheckedParent = 0x4000000,
+    /// A generated constructor leases self from the commit to its end, over
+    /// the QObject setup and injected code that still use the C++ object.
+    /// Cleared, it runs them with no lease, and a concurrent
+    /// Shiboken.delete() frees the object under them.
+    ConstructorTailLease = 0x8000000,
     /// The instance dict is created under the object's critical section, as
     /// CPython creates it, and never replaced: tp_clear empties it. Cleared,
     /// a first access can overwrite a dict another thread created, and

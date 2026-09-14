@@ -12,6 +12,8 @@
 
 #include "sbkcallguard.h"
 
+#include <optional> // generated constructors hold std::optional<CallLease>
+
 struct SbkObject;
 
 namespace Shiboken::Object {

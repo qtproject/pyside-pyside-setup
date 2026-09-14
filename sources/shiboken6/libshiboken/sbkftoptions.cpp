@@ -21,11 +21,16 @@ static int parseOption(const char *e)
     if (e == nullptr || *e == '\0')
         return ~0;
 
-    const std::string_view v{e};
+    std::string_view v{e};
     if (v == "yes" || v == "on" || v == "true")
         return ~0;
     if (v == "no" || v == "off" || v == "false")
         return 0;
+
+    // A leading "~" means all of them except these.
+    const bool invert = v.front() == '~';
+    if (invert)
+        v.remove_prefix(1);
 
     int base = 10;
     std::size_t offset = 0;
@@ -38,7 +43,8 @@ static int parseOption(const char *e)
             offset = 2;
         }
     }
-    return static_cast<int>(std::strtol(e + offset, nullptr, base));
+    const auto flags = static_cast<int>(std::strtol(v.data() + offset, nullptr, base));
+    return invert ? ~flags : flags;
 }
 
 bool optionEnabled(Option opt)

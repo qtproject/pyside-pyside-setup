@@ -334,6 +334,9 @@ void CppGenerator::writeSmartPointerRichCompareFunction(TextStream &s,
     s << ") {\n" << indent;
     writeArgumentConversion(s, context.preciseType(), CPP_ARG0,
                             PYTHON_ARG, ErrorReturn::Default, metaClass);
+    // Same gate as the plain rich comparison: the getter below would run on
+    // a default-constructed smart pointer.
+    writeConversionErrorCheck(s, ErrorReturn::Default);
 
     const auto te = context.preciseType().typeEntry();
     Q_ASSERT(te->isSmartPointer());

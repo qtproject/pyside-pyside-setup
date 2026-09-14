@@ -44,20 +44,6 @@ def option_bits(header: Path = HEADER) -> dict[str, int]:
     return bits
 
 
-def all_bits(bits: dict[str, int] | None = None) -> int:
-    """Every measure there is.
-
-    Leaving PYSIDE6_OPTION_FT unset means the same to the header and is the
-    better way to say it; this is for the places that need a number, which is
-    only ever "all except one".
-    """
-    values = (bits or option_bits()).values()
-    result = 0
-    for value in values:
-        result |= value
-    return result
-
-
 if __name__ == "__main__":
     for name, bit in option_bits().items():
         print(f"{name:20} {bit:#06x}")

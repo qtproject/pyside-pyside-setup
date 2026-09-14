@@ -46,6 +46,8 @@ package's handoff. The names this change uses:
 | B6-1 | a child moved out of a pending parent refused for good |
 | B6-2 | a child moved into a pending parent left unclaimed |
 | FT7 | pending destruction that stays right while the graph changes |
+| B6-4 | a failed allocation leaving a transaction half written |
+| B10-3 | direct entries running on the output of a failed conversion |
 
 Every statement stands without them. They are here so that a reader who has
 the review can find the passage a sentence came from.
@@ -77,6 +79,32 @@ One lock still spans a call, and deliberately so - the per-object call guard
 below. It is a `PyCriticalSection`, so a thread that has to wait underneath it
 detaches and the guard is suspended; that is what keeps it out of the lock
 order the coarse lock joined.
+
+### Prepare, then commit
+
+A transaction can still fail while it holds the state lock: a container
+insert or the growth of the `DeferredActions` list may throw `std::bad_alloc`,
+and whatever it has written by then stays written (B6-4). A transaction
+therefore makes every allocation it needs - room for its deferred actions, a
+set insert - before its first semantic write. What follows are pointer and
+flag writes and transfers into room that already exists, and
+`DeferredActions::commit()` marks the end.
+
+The commit also decides what the list does when it is destroyed. A committed
+list owns its references and runs them, even where `run()` was not reached.
+An uncommitted list is dropped: the transaction unwound before the transfer,
+the protected state still owns those references, and releasing them would
+release them twice. A leak is the side an unwind has to fall on.
+`keepReferenceLocked()` commits early, once the map has given its references
+up, because the insert after that can still throw.
+
+`setParentLocked()` takes `removeParentLocked()`'s slot before it inserts the
+child into the new parent's set. In the other order a failed reserve would
+leave the child in both sets, and `_detachChildren()` on the new parent would
+never finish. `setParent()` turns `std::bad_alloc` into `MemoryError` after
+the unlock, because the generated caller has no handler for a C++ exception.
+
+Bit `TransactionPrepare`; cleared, the room is taken after the edge is gone.
 
 ## The call guard
 
@@ -540,6 +568,24 @@ one wrapper: it parks the first thread where it is about to publish and
 counts the parent's children while it is there. That is
 `proof-constructor-claim`.
 
+### A constructor holds a lease past the commit
+
+Publishing is where the reservation stops protecting anything:
+`Shiboken.delete()` does not ask about it, so from the commit on another
+thread can destroy the object - while the constructor still uses it. The
+QObject setup reads `cptr->metaObject()` and fills properties, and injected
+code at the end works on `cptr`.
+
+A generated constructor with a QObject setup, or with injected code at the
+end, therefore takes a lease on `self` right after the commit and holds it
+to the end of the body. A delete in between is deferred to that lease's
+release; one that got in before the lease makes it refuse, and `__init__`
+raises instead of running on a destroyed object.
+
+Bit `ConstructorTailLease`; cleared, the setup runs with no lease, and
+`constructor-tail-lease` sees the object destroyed while its constructor is
+parked at `ctor-after-publish`.
+
 ### Destruction claims follow the parent graph
 
 `Shiboken.delete()` claims the object it names and everything its C++
@@ -589,6 +635,23 @@ a reparent, so it cannot tell them apart. That also keeps B6-1 safe, since a
 reparent has no way to keep the claim.
 
 Bit `ClaimThroughTeardown`; cleared, the claim goes with the edge.
+
+### A teardown detaches the edge it read
+
+`removeParentLocked()` removes the *current* parent, and `_detachChildren()`
+picked a child in one transaction and removed its parent in another. A
+thread holding a lease on an unclaimed child could reparent it in between;
+the teardown then erased the new edge, and a later `Shiboken.delete()` of
+the new parent no longer saw the child's leases.
+
+`_detachChildren()` now invalidates and detaches in the transaction that
+picks the child. The invalidation plan cannot, because releasing wrappers
+takes the map lock, so it remembers the parent and detaches only from that
+one.
+
+Bit `DetachCheckedParent`; cleared, the removal takes the current parent
+again, and `teardown-detach-edge` sees the reparented child's new edge
+erased.
 
 ### The deallocator claims the owned set
 
@@ -939,6 +1002,30 @@ call blocks every other thread that reaches the same receiver, and it blocks
 stop-the-world for everyone. And nothing may be built on the guard being
 continuously held across a Python C API call, because it is not.
 
+### A failed conversion stops the entry
+
+Under free threading a Python to C++ conversion can fail at any time: a
+concurrent `Shiboken.delete()` makes the converter's own lease refuse, and
+the converter leaves null or its untouched output behind, with an exception
+set. Generated calls check for that before the native call. Without a check
+a direct entry runs on that output (B10-3): rich comparison and the default
+`__setitem__` use it, and a field setter writes it into the live field,
+hands it to `keepReference()` and returns success with the exception
+pending.
+
+These entries, and the value converter of opaque containers, call
+`Shiboken::Errors::conversionFailed()` before their first native statement.
+A pointer field is converted into a local and written only after that check;
+so is a container field, whose converter clears the target and inserts every
+element, the failed ones as null or default-constructed items, so the live
+field would be lost before the check could refuse. A value field stays the
+conversion target, since a failed copy conversion writes nothing.
+`returnFromRichCompare()` keeps the conversion's exception instead of
+reporting that no operator matched.
+
+Bit `ConversionGate`; cleared, the entries run on the conversion's output,
+and so does the check in the QProperty setter.
+
 ### What the lock contract does not promise
 
 No general freedom from deadlock. The contract covers the locks listed above:
@@ -1014,9 +1101,14 @@ there before it:
 PYSIDE6_OPTION_FT             unset, and that is the only supported setting:
                               it means every bit there is, including the ones
                               added after whatever is reading this
+PYSIDE6_OPTION_FT="~0x1000"   all of them except ConstructorClaim
 PYSIDE6_OPTION_FT=0b011       the two locks only
 PYSIDE6_OPTION_FT=off         without any of them
 ```
+
+A leading `~` means "all of them except these", so a counterproof names
+only the measure it takes away. The quotes are for zsh, which rejects a bare
+`~0x1000` as a user name.
 
 The inventory lives in `sbkftoptions.h` and nowhere else - a copy of it goes
 stale, and a stale copy is invisible in a result, because the run simply
@@ -1117,6 +1209,14 @@ build running with the GIL, everyone else. And an armed point stops exactly
 one thread: the arming goes with the first one through, so a test can park a
 call and then drive the same code path from another thread to reach the
 object the parked one holds.
+
+A second kind throws instead of parking. `SBK_FAILPOINT_THROW()` stands
+where a transaction allocates under the state lock - for example
+`deferred-slot-alloc` - and, once armed, throws `std::bad_alloc` a single
+time, so a test can see what a failed transaction leaves behind. It cannot park,
+because the thread holds the lock. The kinds are armed separately and have
+separate inventories, `KnownFailpoints` and `KnownThrowFailpoints`, which
+the name check keeps apart.
 
 `sources/pyside6/tests/manually/freethreading/failpoints.py` holds the tests.
 They are not run directly for evidence, because a test that only ever ran

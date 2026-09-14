@@ -151,7 +151,6 @@ TIMEOUT = int(os.environ.get("STRESS_TIMEOUT", "120"))
 
 BITS = ftoptions.option_bits()
 Lock = IntFlag("Lock", BITS)
-ALL_BITS = ftoptions.all_bits(BITS)
 
 MODES = ["unlocked", "locked"]
 
@@ -260,10 +259,8 @@ def base_env(lock_bit: Lock, mode: str) -> dict:
         # goes stale.
         env.pop("PYSIDE6_OPTION_FT", None)
     else:
-        # Binary on purpose: the variable is read as flags, so it should look
-        # like flags in a log. sbkftoptions.h understands 0b, 0x and plain
-        # decimal, like PYSIDE6_OPTION_PYTHON_ENUM does.
-        env["PYSIDE6_OPTION_FT"] = bin(int(ALL_BITS & ~lock_bit))
+        # All of them except this one, see sbkftoptions.h.
+        env["PYSIDE6_OPTION_FT"] = f"~{lock_bit:#x}"
     if QT_DIR:
         env["QT_DIR"] = QT_DIR
     return env

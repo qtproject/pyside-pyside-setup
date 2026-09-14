@@ -12,6 +12,7 @@
 #include "helper.h"
 #include "sbkstring.h"
 #include "sbkpep.h"
+#include "sbkfailpoint.h"
 #include "voidptr.h"
 
 #include <string>
@@ -503,6 +504,8 @@ void pythonToCppPointer(PyTypeObject *type, PyObject *pyIn, void *cppOut)
         // conversion hands in a borrowed element another thread can drop.
         Py_INCREF(pyIn);
         Shiboken::AutoDecRef pin{pyIn};
+        // Before the lease, so that a test can make this lease refuse.
+        SBK_FAILPOINT("convert-before-lease");
         // A generated call collecting for this argument keeps the lease
         // until the native call has returned.
         // See "Leases taken inside a conversion" in the free-threading notes.

@@ -93,6 +93,12 @@ LIBSHIBOKEN_API void storePythonOverrideErrorOrPrint(const char *className, cons
 /// To be used in normal error checks.
 LIBSHIBOKEN_API PyObject *occurred();
 
+/// Whether the preceding Python to C++ conversion failed, that is, whether
+/// an error is set. Generated direct entries test it before the first native
+/// statement that uses the conversion's output. On a free-threaded build it
+/// is always false with FreeThreading::ConversionGate cleared.
+LIBSHIBOKEN_API bool conversionFailed();
+
 } // namespace Errors
 
 namespace Warnings

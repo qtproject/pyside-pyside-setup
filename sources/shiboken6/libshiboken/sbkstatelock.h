@@ -85,6 +85,11 @@ public:
 //
 // The list must only contain owning references (the transaction transfers a
 // reference into it), never borrowed ones.
+//
+// A list that was never committed runs nothing: a transaction that unwinds
+// has not made that transfer, and releasing the references would release
+// them twice. Dropping them leaks instead.
+// See "Prepare, then commit" in the free-threading notes.
 class LIBSHIBOKEN_API DeferredActions
 {
 public:
@@ -94,20 +99,40 @@ public:
     DeferredActions &operator=(DeferredActions &&) = delete;
 
     DeferredActions() noexcept = default;
-    /// Runs anything left over; a transaction should call run() explicitly.
+    /// Runs a committed list that run() did not reach, and drops an
+    /// uncommitted one. A transaction should call run() explicitly.
     ~DeferredActions();
 
+    /// Make room for \a n more actions, or throw std::bad_alloc. Called under
+    /// the lock before the transaction's first semantic write; that many adds
+    /// then cannot allocate.
+    void reserve(std::size_t n);
+
     /// Transfer an owning reference into the list, to be released after unlock.
+    /// May throw std::bad_alloc unless reserve() made room. Not noexcept, so
+    /// that an unprepared transaction unwinds instead of terminating.
     void addDecref(PyObject *o);
     void addDecref(SbkObject *o) { addDecref(reinterpret_cast<PyObject *>(o)); }
     /// Record a C++ destructor call. It is run with the thread state released,
     /// like the ThreadStateSaver in the current destruction paths.
     void addDestructor(ObjectDestructor destructor, void *cppInstance);
 
+    /// Mark the transaction committed: the list now owns what it releases, the
+    /// protected state no longer does. Called under the lock, as the last
+    /// step.
+    void commit() noexcept { m_committed = true; }
+
     /// Run and clear the list. Asserts that the state lock is not held.
     void run();
 
 private:
+    /// Make the vector hold \a needed actions, or throw. The one place this
+    /// class allocates.
+    void grow(std::size_t needed);
+    /// Room for one more, growing geometrically. For the adds that were not
+    /// prepared; reserve() is exact because its caller knows the count.
+    void makeRoom();
+
     struct Action
     {
         // Null means: Py_DECREF(static_cast<PyObject *>(arg)); anything else
@@ -116,10 +141,10 @@ private:
         void *arg;
     };
 
-    // No reserve(): the common transaction defers nothing, and the vector must
-    // not allocate on that path. Growth under the lock is plain malloc, which
-    // the contract allows.
+    // Empty for the common transaction, which defers nothing and allocates
+    // nothing.
     std::vector<Action> m_actions;
+    bool m_committed = false;
 };
 
 } // namespace Shiboken

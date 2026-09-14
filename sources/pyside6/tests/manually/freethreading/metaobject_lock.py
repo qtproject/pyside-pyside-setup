@@ -14,8 +14,8 @@ held and SBK_ASSERT_NO_RAW_LOCK() at the top of parsePythonType() is
 satisfied. Cleared, the parse goes back under the meta-object lock and the
 assertion aborts the process.
 
-    PYSIDE6_OPTION_FT unset                  ->  ok
-    PYSIDE6_OPTION_FT=<all but 0x2000>       ->  CRASH(SIGABRT)
+    PYSIDE6_OPTION_FT unset       ->  ok
+    PYSIDE6_OPTION_FT="~0x2000"   ->  CRASH(SIGABRT)
 
 The abort proves the premise of B15-2 - that this path reaches the
 interpreter with a binding raw lock held - and nothing more. It is not the
