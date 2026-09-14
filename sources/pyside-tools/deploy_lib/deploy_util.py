@@ -14,7 +14,7 @@ from .config import Config, DesktopConfig
 
 def config_option_exists():
     for argument in sys.argv:
-        if any(item in argument for item in ["--config-file", "-c"]):
+        if argument in ("-c", "--config-file") or argument.startswith("--config-file="):
             return True
 
     return False

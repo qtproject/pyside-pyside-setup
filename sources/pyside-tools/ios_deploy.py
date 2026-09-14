@@ -9,8 +9,7 @@ import traceback
 from pathlib import Path
 from textwrap import dedent
 
-from deploy_lib import (create_config_file, config_option_exists, PythonExecutable,
-                        MAJOR_VERSION)
+from deploy_lib import create_config_file, config_option_exists, MAJOR_VERSION
 from deploy_lib.ios import IOSConfig, IOSData
 from deploy_lib.ios import pbxproj, main_mm, info_plist, ios_dependency
 
@@ -51,8 +50,6 @@ def main(name: str = None, wheel_pyside: Path = None, wheel_shiboken: Path = Non
     ios_data = IOSData(wheel_pyside=wheel_pyside, wheel_shiboken=wheel_shiboken,
                        xcframework_path=xcframework_path)
 
-    python = PythonExecutable(dry_run=dry_run, init=init, force=force)
-
     config_file_exists = config_file and Path(config_file).exists()
 
     if config_file_exists:
@@ -61,9 +58,8 @@ def main(name: str = None, wheel_pyside: Path = None, wheel_shiboken: Path = Non
         config_file = create_config_file(main_file=main_file, dry_run=dry_run)
 
     try:
-        config = IOSConfig(config_file=config_file, source_file=main_file, python_exe=python.exe,
-                           dry_run=dry_run, ios_data=ios_data,
-                           existing_config_file=config_file_exists, name=name,
+        config = IOSConfig(config_file=config_file, source_file=main_file, dry_run=dry_run,
+                           ios_data=ios_data, existing_config_file=config_file_exists, name=name,
                            bundle_id=bundle_id, team_id=team_id, app_version=app_version)
     except RuntimeError as e:
         print(e)
@@ -80,7 +76,10 @@ def main(name: str = None, wheel_pyside: Path = None, wheel_shiboken: Path = Non
         out_dir = config.output_dir
         product_name = config.name.replace(" ", "")
         proj_dir = out_dir / f"{product_name}.xcodeproj"
-        proj_dir.mkdir(parents=True, exist_ok=True)
+        if dry_run:
+            print(f"mkdir {proj_dir}")
+        else:
+            proj_dir.mkdir(parents=True, exist_ok=True)
 
         qml_plugins = ios_dependency.resolve_qml_plugins(config, config.qml_qt_modules)
         plugins = ios_dependency.enabled_plugins(config)
@@ -92,22 +91,34 @@ def main(name: str = None, wheel_pyside: Path = None, wheel_shiboken: Path = Non
         )
 
         main_mm_path = out_dir / "main.mm"
-        main_mm_path.write_text(main_mm.generate(config, qml_plugins, qt_deps))
-        logging.info(f"[DEPLOY] Wrote {main_mm_path}")
+        if dry_run:
+            print(f"write {main_mm_path}")
+        else:
+            main_mm_path.write_text(main_mm.generate(config, qml_plugins, qt_deps))
+            logging.info(f"[DEPLOY] Wrote {main_mm_path}")
 
         info_plist_path = out_dir / "Info.plist"
-        info_plist_path.write_bytes(info_plist.generate(config))
-        logging.info(f"[DEPLOY] Wrote {info_plist_path}")
+        if dry_run:
+            print(f"write {info_plist_path}")
+        else:
+            info_plist_path.write_bytes(info_plist.generate(config))
+            logging.info(f"[DEPLOY] Wrote {info_plist_path}")
 
         if config.entitlements:
             entitlements_src = config.project_root / config.entitlements
             entitlements_dest = out_dir / Path(config.entitlements).name
-            shutil.copyfile(entitlements_src, entitlements_dest)
-            logging.info(f"[DEPLOY] Copied {entitlements_src} -> {entitlements_dest}")
+            if dry_run:
+                print(f"copy {entitlements_src} -> {entitlements_dest}")
+            else:
+                shutil.copyfile(entitlements_src, entitlements_dest)
+                logging.info(f"[DEPLOY] Copied {entitlements_src} -> {entitlements_dest}")
 
         pbxproj_path = proj_dir / "project.pbxproj"
-        pbxproj_path.write_text(pbxproj.generate(config, qml_plugins, qt_deps))
-        logging.info(f"[DEPLOY] Wrote {pbxproj_path}")
+        if dry_run:
+            print(f"write {pbxproj_path}")
+        else:
+            pbxproj_path.write_text(pbxproj.generate(config, qml_plugins, qt_deps))
+            logging.info(f"[DEPLOY] Wrote {pbxproj_path}")
 
         logging.info(f"[DEPLOY] Done. Open with:\n  open {proj_dir}")
     except Exception:
@@ -156,8 +167,8 @@ if __name__ == "__main__":
                         required=not config_option_exists())
 
     parser.add_argument("--xcframework-path", type=lambda p: Path(p).resolve(),
-                        help="Path to Python's iOS Python.xcframework",
-                        required=not config_option_exists())
+                        help=("Path to Python's iOS Python.xcframework. If not provided,"
+                              "the tool will check its cache at .pyside6_ios."))
 
     parser.add_argument("--bundle-id", type=str,
                         help="Reverse-DNS bundle identifier, eg: com.example.myapp. Default: "

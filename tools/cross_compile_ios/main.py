@@ -9,10 +9,10 @@ import os
 import subprocess
 from pathlib import Path
 
-from ios_utilities import (download_python_support,
-                           generate_toolchain,
+from ios_utilities import (generate_toolchain,
                            python_xcframework_slice_dir,
                            PYSIDE_SETUP_ROOT)
+from python_xcframework import download_python_support
 
 COIN_RUN_HELP = ('''
 When run by Qt's continuos integration system COIN. This option is irrelevant to user building
@@ -20,22 +20,28 @@ their own wheels.
 ''')
 
 
-def cmd_build(args: argparse.Namespace) -> None:
-    """ Build subcommand """
+def cross_compile(args: argparse.Namespace) -> None:
+    """Cross compile PySide6 for iOS"""
     simulator = args.simulator or (args.arch == "x86_64")
     arch = args.arch
     coin = args.coin
     qt_install_path = args.qt_install_path.expanduser().resolve()
+    dry_run = args.dry_run
+    # iOS wheels go into their own directory. dist/ is owned by the
+    # desktop build, which deletes it wholesale before repopulating it, and
+    # that would take the cross-compiled wheels with it.
+    ios_dist_dir = PYSIDE_SETUP_ROOT / "dist_ios"
 
     if coin:
         qt_ios = qt_install_path / "target"
         qt_macos = qt_install_path
+        ios_dist_dir = PYSIDE_SETUP_ROOT / "dist"
     else:
-        qt_ios = qt_install_path / "ios"
+        qt_ios = qt_install_path / (f"ios_simulator_{arch}" if simulator else "ios_device")
         qt_macos = qt_install_path / "macos"
 
     # Download the official python.org Python.xcframework
-    python_xcframework = download_python_support()
+    python_xcframework = download_python_support(dry_run=dry_run)
 
     # Generate toolchain file
     toolchain = generate_toolchain(
@@ -43,6 +49,7 @@ def cmd_build(args: argparse.Namespace) -> None:
         simulator=simulator,
         python_xcframework=python_xcframework,
         qt_ios=qt_ios,
+        dry_run=dry_run,
     )
 
     # Cross-compile PySide6
@@ -57,8 +64,13 @@ def cmd_build(args: argparse.Namespace) -> None:
         f"--qt-target-path={qt_ios}",
         f"--python-target-path={python_slice}",
         f"--plat-name={plat_name}",
+        f"--dist-dir={str(ios_dist_dir)}",
         "--no-qt-tools",
     ]
+
+    if dry_run:
+        print(" ".join(cmd))
+        return
 
     env = os.environ.copy()
     logging.info(f"Running bdist_wheel for platform {plat_name}")
@@ -72,38 +84,29 @@ def main():
         description="PySide6 iOS cross-compilation tools",
         formatter_class=argparse.RawTextHelpFormatter,
     )
-    subparsers = parser.add_subparsers(dest="command")
 
-    # --- build ---
-    build_p = subparsers.add_parser(
-        "build",
-        help="Cross-compile PySide6 for iOS",
-        formatter_class=argparse.RawTextHelpFormatter,
-    )
-    build_p.add_argument(
+    parser.add_argument(
         "--qt-install-path", required=True, type=Path,
         help="Qt installation root, e.g. ~/Qt/6.12.0",
     )
-    build_p.add_argument(
+    parser.add_argument(
         "--arch", choices=["arm64", "x86_64"], default="arm64",
         help="Target CPU architecture (default: arm64; x86_64 implies --simulator)",
     )
-    build_p.add_argument(
+    parser.add_argument(
         "--simulator", action="store_true",
         help="Build for iOS Simulator (device is the default)",
     )
-    build_p.add_argument(
+    parser.add_argument(
         "--coin", action="store_true",
         help=COIN_RUN_HELP,
     )
 
+    parser.add_argument("--dry-run", action="store_true", help="show the commands to be run")
+
     args = parser.parse_args()
 
-    if args.command == "build":
-        cmd_build(args)
-    else:
-        parser.print_help()
-        sys.exit(1)
+    cross_compile(args)
 
 
 if __name__ == "__main__":

@@ -292,6 +292,24 @@ def android_deploy():
         pyside_script_wrapper("android_deploy.py")
 
 
+def ios_deploy():
+    if sys.platform in ["linux", "win32"]:
+        print("pyside6-ios-deploy only works from a macOS host and not a Windows or Linux host",
+              file=sys.stderr)
+    else:
+        ios_requirements_file = Path(__file__).parent / "requirements-ios.txt"
+        if ios_requirements_file.exists():
+            missing_packages = _check_requirements(ios_requirements_file)
+            if missing_packages:
+                print("The following packages are required but not installed:")
+                for package in missing_packages:
+                    print(f"  - {package}")
+                print("Please install them using:")
+                print(f"  pip install -r {ios_requirements_file}")
+                sys.exit(1)
+        pyside_script_wrapper("ios_deploy.py")
+
+
 def qsb():
     qt_tool_wrapper("qsb", sys.argv[1:])
 

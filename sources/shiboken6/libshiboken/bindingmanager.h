@@ -97,6 +97,13 @@ public:
     using TypeCptrPair = std::pair<PyTypeObject *, void *>;
     TypeCptrPair findDerivedType(void *cptr, PyTypeObject *type) const;
 
+    /// If \p probeType has a type discovery function, run it passing \p type
+    /// and return the (cast'ed) pointer or nullptr.
+    /// \param cptr a pointer to the instance of type \p type
+    /// \param probeType type to run the check with
+    /// \param type type of cptr
+    static void *runTypeDiscovery(void *cptr, PyTypeObject *probeType, PyTypeObject *type);
+
     /**
      * Try to find the correct type of *cptr knowing that it's at least of type \p type.
      * In case of multiple inheritance this function may change the contents of cptr.

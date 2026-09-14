@@ -13,6 +13,7 @@
 #include <QtCore/QMetaType>
 #include <QtCore/QVariant>
 
+QT_FORWARD_DECLARE_CLASS(QGraphicsItem)
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
 using IntList = QList<int>;
@@ -60,6 +61,9 @@ public:
 
     void setQLatin1String(QLatin1String v);
     QString qLatin1String() const;
+
+    virtual void graphicsEventFilter(QGraphicsItem *item);
+    void sendGraphicsProxyWidgetThroughEventFilter();
 
 signals:
     void idValue(int newValue);

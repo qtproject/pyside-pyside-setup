@@ -11,6 +11,7 @@ SHIBOKEN_GENERATOR = 'shiboken6_generator'
 PYSIDE_PYTHON_TOOLS = ["metaobjectdump",
                        "deploy",
                        "android_deploy",
+                       "ios_deploy",
                        "project",
                        "qml",
                        "qtpy2cpp",

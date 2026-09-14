@@ -139,6 +139,10 @@ def prepare_packages_posix(pyside_build, _vars, cross_build=False):
                 script_dirs.extend(["deploy_lib/android",
                                     "deploy_lib/android/recipes/PySide6",
                                     "deploy_lib/android/recipes/shiboken6",])
+                if sys.platform == "darwin":
+                    scripts.append("ios_deploy.py")
+                    scripts.append("requirements-ios.txt")
+                    script_dirs.extend(["deploy_lib/ios"])
 
             # For setting up setuptools entry points
             for script in scripts:

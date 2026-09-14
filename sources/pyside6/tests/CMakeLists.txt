@@ -77,4 +77,5 @@ endforeach()
 #platform specific
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     add_subdirectory(mac)
+    add_subdirectory(tools/pyside6-ios-deploy)
 endif ()

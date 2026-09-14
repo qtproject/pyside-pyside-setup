@@ -1933,24 +1933,32 @@ PyObject *newObject(PyTypeObject *instanceType,
 }
 
 static PyObject *newObjectWithHeuristicsHelper(PyTypeObject *instanceType,
-                                               PyTypeObject *exactType,
+                                               const char *cppTypeIdName,
                                                void *cptr,
                                                bool hasOwnership)
 {
-    // Try to find the exact type of cptr. For hierarchies with
-    // non-virtual destructors, typeid() will return the base name.
-    // Try type discovery in these cases.
+    // Try to find the exact type of cptr via the name obtained from "typeId(ptr).name()"
+    // as registered with the shiboken converters.
+    PyTypeObject *exactType = ObjectType::typeForTypeName(cppTypeIdName);
+
+    // Nothing found or same name returned (in case of a hierarchy with non-virtual destructors
+    // like QStyleOption). Try type discovery in these cases.
     if (exactType == nullptr || exactType == instanceType) {
-        auto resolved = BindingManager::instance().findDerivedType(cptr, instanceType);
-        if (resolved.first != nullptr
-            && Shiboken::ObjectType::canDowncastTo(instanceType, resolved.first)) {
-            exactType = resolved.first;
-            cptr = resolved.second;
+        if (auto resolved = BindingManager::instance().findDerivedType(cptr, instanceType);
+            resolved.first != nullptr) {
+            return newObjectForType(resolved.first, resolved.second, hasOwnership);
         }
+    } else {
+        // Direct, single line inheritance: Use exactType
+        if (Shiboken::ObjectType::canDowncastTo(instanceType, exactType))
+            return newObjectForType(exactType, cptr, hasOwnership);
+        // Multiple inheritance: Try to run type discovery on the type found to cast cptr
+        if (auto *derivedCptr = BindingManager::runTypeDiscovery(cptr, exactType, instanceType))
+            return newObjectForType(exactType, derivedCptr, hasOwnership);
     }
 
-    return newObjectForType(exactType != nullptr ? exactType : instanceType,
-                            cptr, hasOwnership);
+    // Fall back to base type
+    return newObjectForType(instanceType, cptr, hasOwnership);
 }
 
 PyObject *newObjectForPointer(PyTypeObject *instanceType,
@@ -1958,14 +1966,7 @@ PyObject *newObjectForPointer(PyTypeObject *instanceType,
                               bool hasOwnership,
                               const char *typeName)
 {
-    // Try to find the exact type of cptr.
-    PyTypeObject *exactType = ObjectType::typeForTypeName(typeName);
-    // PYSIDE-868: In case of multiple inheritance, (for example,
-    // a function returning a QPaintDevice * from a QWidget *),
-    // use instance type to avoid pointer offset errors.
-    return exactType != nullptr && !Shiboken::ObjectType::canDowncastTo(instanceType, exactType)
-        ? newObjectForType(instanceType, cptr, hasOwnership)
-        : newObjectWithHeuristicsHelper(instanceType, exactType, cptr, hasOwnership);
+    return newObjectWithHeuristicsHelper(instanceType, typeName, cptr, hasOwnership);
 }
 
 
@@ -1974,8 +1975,7 @@ PyObject *newObjectWithHeuristics(PyTypeObject *instanceType,
                                   bool hasOwnership,
                                   const char *typeName)
 {
-    return newObjectWithHeuristicsHelper(instanceType,
-                                         ObjectType::typeForTypeName(typeName),
+    return newObjectWithHeuristicsHelper(instanceType, typeName,
                                          cptr, hasOwnership);
 }
 

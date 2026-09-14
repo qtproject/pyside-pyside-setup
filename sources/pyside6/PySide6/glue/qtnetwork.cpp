@@ -69,9 +69,9 @@ static PyObject *rangeValueToPython(const std::optional<RangeType> &v)
 // @snippet qhttpheaderrange-from-sequence
 
 // @snippet qhttpheaders-rangevalues
-bool ok{};
-const auto ranges = %CPPSELF.%FUNCTION_NAME(&ok);
-if (ok) {
+const std::optional<QList<QHttpHeaderRange>> rangesOpt = %CPPSELF.%FUNCTION_NAME();
+if (rangesOpt.has_value()) {
+    const QList<QHttpHeaderRange> &ranges = rangesOpt.value();
     const auto size = ranges.size();
     %PYARG_0 = PyList_New(size);
     for (Py_ssize_t i = 0; i < size; ++i) {

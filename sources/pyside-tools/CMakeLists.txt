@@ -26,7 +26,9 @@ else()
             ${CMAKE_CURRENT_SOURCE_DIR}/qtpy2cpp.py
             ${CMAKE_CURRENT_SOURCE_DIR}/deploy.py
             ${CMAKE_CURRENT_SOURCE_DIR}/android_deploy.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/requirements-android.txt)
+            ${CMAKE_CURRENT_SOURCE_DIR}/requirements-android.txt
+            ${CMAKE_CURRENT_SOURCE_DIR}/ios_deploy.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/requirements-ios.txt)
 
     set(directories ${CMAKE_CURRENT_SOURCE_DIR}/deploy_lib
                     ${CMAKE_CURRENT_SOURCE_DIR}/project_lib)
@@ -85,7 +87,8 @@ else()
                 OWNER_EXECUTE OWNER_WRITE OWNER_READ
                 GROUP_EXECUTE GROUP_READ
                 WORLD_EXECUTE WORLD_READ
-                PATTERN "android_utilities.py" EXCLUDE) # excluding the symlink
+                PATTERN "android_utilities.py" EXCLUDE   # excluding the symlink
+                PATTERN "python_xcframework.py" EXCLUDE) # excluding the symlink
     endforeach()
 
     # dealing with android_utilities.py
@@ -94,6 +97,17 @@ else()
     message(STATUS "Installing ${ANDROID_UTILITIES_REALPATH}")
     install(FILES "${ANDROID_UTILITIES_REALPATH}"
             DESTINATION bin/deploy_lib/android
+            PERMISSIONS
+                OWNER_EXECUTE OWNER_WRITE OWNER_READ
+                GROUP_EXECUTE GROUP_READ
+                WORLD_EXECUTE WORLD_READ)
+
+    # dealing with python_xcframework.py
+    set(PYTHON_XCFRAMEWORK_REALPATH
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/cross_compile_ios/python_xcframework.py")
+    message(STATUS "Installing ${PYTHON_XCFRAMEWORK_REALPATH}")
+    install(FILES "${PYTHON_XCFRAMEWORK_REALPATH}"
+            DESTINATION bin/deploy_lib/ios
             PERMISSIONS
                 OWNER_EXECUTE OWNER_WRITE OWNER_READ
                 GROUP_EXECUTE GROUP_READ

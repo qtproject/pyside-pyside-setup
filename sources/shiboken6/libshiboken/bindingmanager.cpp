@@ -151,6 +151,8 @@ class Graph : public BaseGraph<GraphNode>
 public:
     using TypeCptrPair = BindingManager::TypeCptrPair;
 
+    // Find derived class by trying to find a child node that accepts the base class in
+    // its type discovery function, return type and cptr cast to derived class.
     TypeCptrPair identifyType(void *cptr, PyTypeObject *type, PyTypeObject *baseType) const
     {
         return identifyType(cptr, GraphNode(type->tp_name), type, baseType);
@@ -159,17 +161,18 @@ public:
     bool dumpTypeGraph(const char *fileName) const;
 
 private:
-    TypeCptrPair identifyType(void *cptr, const GraphNode &typeNode, PyTypeObject *type,
+    TypeCptrPair identifyType(void *cptr, GraphNode typeNode, PyTypeObject *type,
                               PyTypeObject *baseType) const;
 };
 
 Graph::TypeCptrPair Graph::identifyType(void *cptr,
-                                        const GraphNode &typeNode, PyTypeObject *type,
+                                        GraphNode typeNode, PyTypeObject *type,
                                         PyTypeObject *baseType) const
 {
     assert(typeNode.initStruct != nullptr || type != nullptr);
     auto edgesIt = m_edges.find(typeNode);
     if (edgesIt != m_edges.end()) {
+        typeNode = edgesIt->first;
         const NodeList &adjNodes = edgesIt->second;
         for (const auto &node : adjNodes) {
             auto newType = identifyType(cptr, node, nullptr, baseType);
@@ -181,11 +184,8 @@ Graph::TypeCptrPair Graph::identifyType(void *cptr,
     if (type == nullptr) // Lazily create the type
         type = Shiboken::Module::get(*typeNode.initStruct);
 
-    auto *sotp = PepType_SOTP(type);
-    if (sotp->type_discovery != nullptr) {
-        if (void *derivedCPtr = sotp->type_discovery(cptr, baseType))
-            return {type, derivedCPtr};
-    }
+    if (void *derivedCPtr = BindingManager::runTypeDiscovery(cptr, type, baseType))
+        return {type, derivedCPtr};
     return {nullptr, nullptr};
 }
 
@@ -647,6 +647,13 @@ void BindingManager::addClassInheritance(Module::TypeInitStruct *parent,
 BindingManager::TypeCptrPair BindingManager::findDerivedType(void *cptr, PyTypeObject *type) const
 {
     return m_d->classHierarchy.identifyType(cptr, type, type);
+}
+
+void *BindingManager::runTypeDiscovery(void *cptr, PyTypeObject *probeType, PyTypeObject *type)
+{
+    auto *sotp = PepType_SOTP(probeType);
+    assert(sotp != nullptr);
+    return sotp->type_discovery != nullptr ? sotp->type_discovery(cptr, type) : nullptr;
 }
 
 // FIXME PYSIDE7: remove, just for compatibility

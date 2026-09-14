@@ -54,6 +54,40 @@ wheel_shiboken =
 # Plugins to be copied to libs folder of the packaged application. Comma separated
 plugins =
 
+[ios]
+
+# Path to PySide wheel
+wheel_pyside =
+
+# Path to Shiboken wheel
+wheel_shiboken =
+
+# Path to Python.xcframework
+xcframework_path =
+
+# Reverse-DNS bundle identifier, eg: com.example.myapp
+# Default (like Xcode's own placeholder): com.example.<app name, alphanumeric only>
+bundle_id =
+
+# Apple Developer Team ID, used for code signing. Only required for device builds
+team_id =
+
+# App version (CFBundleShortVersionString)
+version = 1.0
+
+# Minimum iOS deployment target. Default: read from the PySide6 wheel's embedded
+# Qt-for-iOS kit
+deployment_target =
+
+# Path to an .entitlements file, relative to project_dir
+entitlements =
+
+# Code signing style. Possible values: [Automatic, Manual]
+signing_style = Automatic
+
+# Extra header search paths, relative to project_dir. Comma separated
+header_search_paths =
+
 [nuitka]
 
 # Usage description for permissions requested by the app as found in the Info.plist file

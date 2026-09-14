@@ -195,6 +195,13 @@ class Config(metaclass=Singleton):
                                         " PySide6.scripts.pyside_tool:android_deploy")]
                 _pyside_tools.remove("android_deploy")
 
+                # replacing pyside6-ios_deploy by pyside6-ios-deploy for consistency
+                # Also, the tool should not exist in any other platform than macOS
+                if ("ios_deploy" in _pyside_tools) and sys.platform == "darwin":
+                    _console_scripts.append(f"{PYSIDE}-ios-deploy ="
+                                            " PySide6.scripts.pyside_tool:ios_deploy")
+                _pyside_tools.remove("ios_deploy")
+
                 _console_scripts.extend([f'{PYSIDE}-{tool} = {package_name}.scripts.pyside_tool:'
                                          f'{tool}' for tool in _pyside_tools])
 

@@ -5,6 +5,7 @@
 #include "connection.h"
 
 #include <QtCore/QDebug>
+#include <QtWidgets/qgraphicsproxywidget.h>
 
 void TestObject::emitIdValueSignal()
 {
@@ -60,6 +61,17 @@ void TestObject::setQLatin1String(QLatin1String v)
 QString TestObject::qLatin1String() const
 {
     return m_qLatin1String;
+}
+
+void TestObject::graphicsEventFilter(QGraphicsItem *item)
+{
+    qDebug() << Q_FUNC_INFO << item;
+}
+
+void TestObject::sendGraphicsProxyWidgetThroughEventFilter()
+{
+    QGraphicsProxyWidget gw;
+    graphicsEventFilter(&gw);
 }
 
 QDebug operator<<(QDebug dbg, TestObject& testObject)

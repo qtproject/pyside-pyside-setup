@@ -76,6 +76,7 @@ build/
 develop-eggs/
 dist/
 dist_android/
+dist_ios/
 downloads/
 eggs/
 .eggs/

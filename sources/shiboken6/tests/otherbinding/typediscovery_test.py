@@ -44,10 +44,9 @@ class TypeDiscoveryTest(unittest.TestCase):
         obj = OtherMultipleDerived.createObject("MDerived3")
         self.assertEqual(type(obj), MDerived3)
         # PYSIDE-868: OtherMultipleDerived inherits
-        # OtherBase, Base1. In this case, a factory
-        # function will return the base class wrapper.
+        # OtherBase, Base1. Adapt the pointer via type discovery.
         obj = OtherMultipleDerived.createObject("OtherMultipleDerived")
-        self.assertEqual(type(obj), Base1)
+        self.assertEqual(type(obj), OtherMultipleDerived)
 
 
 if __name__ == '__main__':
