@@ -20,11 +20,13 @@ from deploy_lib.ios import pbxproj, main_mm, info_plist, ios_dependency
     linked against a cross-compiled PySide6/shiboken6 iOS wheel and BeeWare's
     Python-Apple-support Python.xcframework.
 
-    Command: pyside6-ios-deploy --wheel-pyside=<pyside_wheel_path>
+    Command: pyside6-ios-deploy [path/to/main_file]
+                                --wheel-pyside=<pyside_wheel_path>
                                 --wheel-shiboken=<shiboken_wheel_path>
                                 --xcframework-path=<python_xcframework_path>
 
-    Prerequisities: Python main entrypoint file should be named "main.py"
+             The entrypoint file defaults to main.py in the current directory, and is read from
+             the config file's "input_file" when -c/--config-file is given.
 
     Config file:
         On the first run of the tool, it creates a config file called pysidedeploy.spec which
@@ -33,19 +35,30 @@ from deploy_lib.ios import pbxproj, main_mm, info_plist, ios_dependency
 """
 
 
-def main(name: str = None, wheel_pyside: Path = None, wheel_shiboken: Path = None,
-         xcframework_path: Path = None, bundle_id: str = None, team_id: str = None,
-         app_version: str = None, config_file: Path = None, init: bool = False,
-         loglevel=logging.WARNING, dry_run: bool = False, force: bool = False):
+def main(main_file: Path = None, name: str = None, wheel_pyside: Path = None,
+         wheel_shiboken: Path = None, xcframework_path: Path = None, bundle_id: str = None,
+         team_id: str = None, app_version: str = None, config_file: Path = None,
+         init: bool = False, loglevel=logging.WARNING, dry_run: bool = False,
+         force: bool = False):
 
     logging.basicConfig(level=loglevel)
 
-    main_file = Path.cwd() / "main.py"
-    if not main_file.exists():
-        raise RuntimeError(
-            "[DEPLOY] For iOS deployment to work, the main entrypoint Python file should be "
-            "named 'main.py' and it should be run from the application directory"
-        )
+    # In case pyside6-ios-deploy is run from a completely different location than the project
+    # directory
+    if main_file and main_file.exists() and not config_file:
+        config_file = main_file.parent / "pysidedeploy.spec"
+
+    # The entrypoint can have any name, as long as it is either given on the command line or
+    # recorded as "input_file" in an existing config file.
+    if not (config_file and config_file.exists()) and not (main_file and main_file.exists()):
+        raise RuntimeError(dedent("""
+            [DEPLOY] No Python entrypoint file found.
+            Either pass the path to the entrypoint file (eg. "pyside6-ios-deploy my_app.py"), or run
+            the tool from a directory containing main.py, or point to an existing config file with
+            -c/--config-file.
+            Run "pyside6-ios-deploy --help" to see info about CLI options.
+
+            pyside6-ios-deploy exiting..."""))
 
     ios_data = IOSData(wheel_pyside=wheel_pyside, wheel_shiboken=wheel_shiboken,
                        xcframework_path=xcframework_path)
@@ -133,14 +146,19 @@ if __name__ == "__main__":
                            This tool generates an Xcode project to deploy PySide{MAJOR_VERSION}
                            applications to iOS.
 
-                           Note: The main python entrypoint should be named main.py
+                           The main python entrypoint can have any name; if none is given,
+                           main.py in the current directory is used.
                            """),
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
     parser.add_argument("-c", "--config-file", type=lambda p: Path(p).absolute(),
-                        default=(Path.cwd() / "pysidedeploy.spec"),
+                        default=None,
                         help="Path to the .spec config file")
+
+    parser.add_argument(type=lambda p: Path(p).absolute(),
+                        help="Path to main python file", nargs="?", dest="main_file",
+                        default=None if config_option_exists() else Path.cwd() / "main.py")
 
     parser.add_argument(
         "--init", action="store_true",
@@ -182,6 +200,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    main(args.name, args.wheel_pyside, args.wheel_shiboken, args.xcframework_path,
+    main(args.main_file, args.name, args.wheel_pyside, args.wheel_shiboken, args.xcframework_path,
          args.bundle_id, args.team_id, args.app_version, args.config_file, args.init,
          args.loglevel, args.dry_run, args.force)

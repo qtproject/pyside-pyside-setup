@@ -328,6 +328,7 @@ class TestPySide6IosDeployWidgets(DeployTestBase):
     def setUp(self):
         os.chdir(self.temp_example)
         self.config_file = self.temp_example / "pysidedeploy.spec"
+        self.main_file = self.temp_example / "main.py"
 
     @patch("deploy_lib.ios.ios_dependency.resolve_qml_plugins")
     @patch("deploy_lib.ios.ios_dependency.enabled_plugins")
@@ -344,8 +345,8 @@ class TestPySide6IosDeployWidgets(DeployTestBase):
         mock_info_plist.return_value = b"<plist/>"
         mock_pbxproj.return_value = "// generated project.pbxproj"
 
-        self.ios_deploy.main(name="iosApp", wheel_pyside=self.pyside_wheel,
-                             wheel_shiboken=self.shiboken_wheel,
+        self.ios_deploy.main(main_file=self.main_file, name="iosApp",
+                             wheel_pyside=self.pyside_wheel, wheel_shiboken=self.shiboken_wheel,
                              xcframework_path=self.xcframework_path)
 
         self.assertEqual(mock_check_binary.call_count, 1)
@@ -382,8 +383,9 @@ class TestPySide6IosDeployWidgets(DeployTestBase):
     def test_downloads_xcframework_when_not_provided(self, mock_check_binary):
         with patch("deploy_lib.ios.ios_config.download_python_support") as mock_download:
             mock_download.return_value = self.xcframework_path
-            self.ios_deploy.main(name="iosApp", wheel_pyside=self.pyside_wheel,
-                                 wheel_shiboken=self.shiboken_wheel, init=True)
+            self.ios_deploy.main(main_file=self.main_file, name="iosApp",
+                                 wheel_pyside=self.pyside_wheel, wheel_shiboken=self.shiboken_wheel,
+                                 init=True)
             self.assertEqual(mock_download.call_count, 1)
 
         config_obj = self.deploy_lib.BaseConfig(config_file=self.config_file)
@@ -393,7 +395,8 @@ class TestPySide6IosDeployWidgets(DeployTestBase):
 
     def test_missing_wheel_shiboken(self, mock_check_binary):
         with patch("builtins.print") as mock_print:
-            self.ios_deploy.main(name="iosApp", wheel_pyside=self.pyside_wheel,
+            self.ios_deploy.main(main_file=self.main_file, name="iosApp",
+                                 wheel_pyside=self.pyside_wheel,
                                  xcframework_path=self.xcframework_path, init=True)
         printed = " ".join(str(call) for call in mock_print.call_args_list)
         self.assertIn("Unable to find shiboken6 iOS wheel", printed)
@@ -401,11 +404,20 @@ class TestPySide6IosDeployWidgets(DeployTestBase):
 
     def test_missing_wheel_pyside(self, mock_check_binary):
         with patch("builtins.print") as mock_print:
-            self.ios_deploy.main(name="iosApp", wheel_shiboken=self.shiboken_wheel,
+            self.ios_deploy.main(main_file=self.main_file, name="iosApp",
+                                 wheel_shiboken=self.shiboken_wheel,
                                  xcframework_path=self.xcframework_path, init=True)
         printed = " ".join(str(call) for call in mock_print.call_args_list)
         self.assertIn("Unable to find PySide6 iOS wheel", printed)
         self.config_file.unlink()
+
+    def test_no_entrypoint_file(self, mock_check_binary):
+        with self.assertRaises(RuntimeError) as context:
+            self.ios_deploy.main(name="iosApp", wheel_pyside=self.pyside_wheel,
+                                 wheel_shiboken=self.shiboken_wheel,
+                                 xcframework_path=self.xcframework_path, init=True)
+
+        self.assertIn("No Python entrypoint file found", str(context.exception))
 
 
 @patch("deploy_lib.config.run_qmlimportscanner")
@@ -422,6 +434,7 @@ class TestPySide6IosDeployQml(DeployTestBase):
     def setUp(self):
         os.chdir(self.temp_example)
         self.config_file = self.temp_example / "pysidedeploy.spec"
+        self.main_file = self.temp_example / "main.py"
 
     @patch("deploy_lib.ios.ios_dependency.resolve_qml_plugins")
     @patch("deploy_lib.ios.ios_dependency.enabled_plugins")
@@ -439,8 +452,8 @@ class TestPySide6IosDeployQml(DeployTestBase):
         mock_info_plist.return_value = b"<plist/>"
         mock_pbxproj.return_value = "// generated project.pbxproj"
 
-        self.ios_deploy.main(name="iosApp", wheel_pyside=self.pyside_wheel,
-                             wheel_shiboken=self.shiboken_wheel,
+        self.ios_deploy.main(main_file=self.main_file, name="iosApp",
+                             wheel_pyside=self.pyside_wheel, wheel_shiboken=self.shiboken_wheel,
                              xcframework_path=self.xcframework_path)
 
         self.assertEqual(mock_check_binary.call_count, 1)
