@@ -13,6 +13,7 @@ is a point tests can arm and no thread will ever reach, so a test parked on
 it waits out its timeout and calls that a hang.
 
     check_failpoint_names.py [files...]      defaults to libshiboken
+                                             and libpyside
 
 Exit 0 when the two sides agree, 1 when they do not.
 """
@@ -23,7 +24,7 @@ import re
 import sys
 from pathlib import Path
 
-HERE = Path(__file__).parent
+HERE = Path(__file__).resolve().parent
 REGISTRY = HERE / "sbkfailpoint.cpp"
 
 # The array literal, and the string literals inside it. Deliberately not a
@@ -52,9 +53,24 @@ def called(files: list[Path]) -> dict[str, str]:
     return used
 
 
+def default_files() -> list[Path]:
+    """Every runtime library, not just the one the registry lives in.
+
+    A file the check does not read looks like a name nobody reaches, so a
+    failpoint placed in a library nobody listed ships unarmable - which is
+    the thing this script exists to prevent. The set is therefore globbed
+    rather than named: a list written out, here or in CMake, goes stale
+    the next time a library is added, and a stale list fails silently.
+    """
+    sources = HERE.parents[1]
+    return sorted(f
+                  for directory in sorted(sources.glob("*/lib*"))
+                  if directory.is_dir()
+                  for f in directory.glob("*.cpp"))
+
+
 def main() -> int:
-    args = sys.argv[1:]
-    files = [Path(a) for a in args] if args else sorted(HERE.glob("*.cpp"))
+    files = [Path(a) for a in sys.argv[1:]] or default_files()
 
     known = registered()
     used = called(files)
