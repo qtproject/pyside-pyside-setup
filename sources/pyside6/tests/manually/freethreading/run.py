@@ -56,6 +56,7 @@ WORKER = HERE.parent / "stress.py"
 METAOBJECT = HERE.parent / "metaobject_lock.py"
 POST_ROUTINE = HERE.parent / "post_routine_batch.py"
 POST_RAISES = HERE.parent / "post_routine_raises.py"
+RECEIVER = HERE.parent / "method_receiver_dead.py"
 
 
 def has_sample(build: Path) -> bool:
@@ -252,6 +253,10 @@ SCENARIOS = {
     "post_routine_raises": Scenario(POST_RAISES, None,
                                     Lock.PostRoutineBatch, True,
                                     needs_contract=True),
+    # B12-4/B14-4, a delivery to a dead receiver.
+    # See README.
+    "method_receiver_dead": Scenario(RECEIVER, None,
+                                     Lock.MethodReceiverUpgrade, True),
 }
 ALL_SCENARIOS = list(SCENARIOS)
 

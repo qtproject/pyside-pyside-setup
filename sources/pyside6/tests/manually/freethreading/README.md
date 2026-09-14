@@ -987,6 +987,41 @@ registration lock, and `failpoint()` refuses to park while a lock is held.
 A bit that no scenario can clear is not kept.
 See "QObject-pointer metatypes" in the free-threading notes.
 
+### method_receiver_dead (run.py)
+
+B12-4, B14-4. `method_receiver_dead.py`, run by `run.py`, asks whether a
+method slot delivers to a receiver that is gone. One thread and no
+failpoint: connecting the same bound method twice gives both connections
+one registry key, so the second row replaces the first while Qt keeps both.
+The weakref callback removes the one row it finds, and the other connection
+survives the receiver.
+
+With `MethodReceiverUpgrade` the delivery upgrades the slot's weak
+reference, finds nothing and makes no call. Cleared, it binds the raw
+receiver pointer and the process dies on freed storage; a delivery that
+survives counts as a failure too.
+
+This shows the premise, a delivery binding a receiver it does not own, not
+the two-thread race. The defect is not specific to free threading and
+reproduces with a GIL. The orphaned connection itself is B14-5 and stays.
+
+### receiver-dies-mid-delivery, proof-method-receiver-upgrade
+
+B12-4 with the two-thread window. `method-receiver-before-bind` in
+`MethodDynamicSlot::deliver()` parks a delivery between reading the
+receiver and binding the descriptor; the thread that owns the receiver
+then drops its last reference.
+
+The test expects the receiver to be alive while the delivery waits, the
+handler to run once, and the receiver to be gone after the call.
+`proof-method-receiver-upgrade` clears `MethodReceiverUpgrade`: the delivery
+holds a raw pointer, the drop deallocates, and the bind reads freed storage.
+
+Each thread creates the object it is about. The receiver, because biased
+reference counting makes the creating thread the owner, and a `del`
+elsewhere would not deallocate. The sender, because a signal emitted from
+another thread is queued and, with no event loop, never delivered.
+
 ### container-element-lease, proof-conversion-leases
 
 An element of a container argument is deleted while the call runs: the call

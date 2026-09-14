@@ -21,6 +21,14 @@ namespace PySide::WeakRef {
 PYSIDE_API PyObject* create(PyObject* ob, PySideWeakRefFunction func, void* userData,
                             bool keepReference = false);
 
+#ifdef Py_GIL_DISABLED
+/// Upgrade a weak reference to a strong one. Returns a new reference, or
+/// nullptr when the referent is gone (no error set) or on error (error set).
+/// A referent being destroyed is already gone: its weak references are
+/// cleared before any callback runs.
+PYSIDE_API PyObject* deref(PyObject* weakRef);
+#endif
+
 } // namespace PySide::WeakRef
 
 #endif // PYSIDEWEAKREF_H

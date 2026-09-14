@@ -4,6 +4,8 @@
 
 #include "dynamicslot_p.h"
 
+#include <sbkfailpoint.h>
+#include <sbkftoptions.h>
 #include <sbkheldlocks.h>
 #include "pysidestaticstrings.h"
 #include "pysideutils.h"
@@ -88,44 +90,101 @@ void CallbackDynamicSlot::formatDebug(QDebug &debug) const
 // callable/partial function where self is bound as a first parameter.
 // It can be split into self and the function. Keeping a reference on
 // the callable itself would prevent object deletion. Instead, keep a
-// reference on the function.
+// reference on the function and a weak reference on the receiver.
+//
+// PYSIDE-3148: the weak reference is the slot's only authority over the
+// receiver. Its callback disconnects when the receiver dies, and call()
+// upgrades it for the delivery.
+// See "Method slots own their receiver for the call" in the free-threading notes.
 class MethodDynamicSlot : public DynamicSlot
 {
     Q_DISABLE_COPY_MOVE(MethodDynamicSlot)
 public:
-
-    explicit MethodDynamicSlot(PyObject *function, PyObject *pythonSelf);
+    // function and receiverRef are transferred, rawReceiver is borrowed and
+    // required: receiverRef may be null, the receiver itself never is.
+    MethodDynamicSlot(PyObject *function, PyObject *receiverRef,
+                      PyObject *rawReceiver) noexcept;
     ~MethodDynamicSlot() override;
-
-    PyObject *pythonSelf() const { return m_pythonSelf; }
 
     void call(const QByteArrayList &parameterTypes, const char *returnType,
               void **cppArgs) override;
     void formatDebug(QDebug &debug) const override;
 
 private:
+    // receiver is borrowed and must outlive the call; the caller owns it.
+    void deliver(const QByteArrayList &parameterTypes, const char *returnType,
+                 void **cppArgs, PyObject *receiver);
+
     PyObject *m_function;
-    PyObject *m_pythonSelf;
+    PyObject *m_receiverRef;
+    // Borrowed. A build with a GIL binds it for every delivery, as it always
+    // did; free-threaded it is read only with MethodReceiverUpgrade cleared.
+    PyObject *m_rawReceiver;
 };
 
-MethodDynamicSlot::MethodDynamicSlot(PyObject *function, PyObject *pythonSelf) :
+MethodDynamicSlot::MethodDynamicSlot(PyObject *function, PyObject *receiverRef,
+                                     PyObject *rawReceiver) noexcept :
     m_function(function),
-    m_pythonSelf(pythonSelf)
+    m_receiverRef(receiverRef)
 {
+#ifndef Py_GIL_DISABLED
+    // The receiver the delivery binds, as this slot always bound it. The
+    // weakref is what disconnects when the receiver dies, and with a GIL
+    // nothing runs between that callback and a delivery.
+    m_rawReceiver = rawReceiver;
+#else
+    // Only with MethodReceiverUpgrade cleared; filling it costs an upgrade.
+    m_rawReceiver = nullptr;
+    if (!Shiboken::FreeThreading::optionEnabled(
+            Shiboken::FreeThreading::MethodReceiverUpgrade)) {
+        m_rawReceiver = rawReceiver;
+    }
+#endif
 }
 
 MethodDynamicSlot::~MethodDynamicSlot()
 {
+    // The slot is the sole owner of the weakref, on a disconnect as after the
+    // receiver died (PYSIDE-3148).
     Shiboken::GilState gil;
     Py_DECREF(m_function);
+    Py_XDECREF(m_receiverRef); // null only with MethodReceiverUpgrade cleared
 }
 
 void MethodDynamicSlot::call(const QByteArrayList &parameterTypes, const char *returnType,
                              void **cppArgs)
 {
+#ifndef Py_GIL_DISABLED
+    // Bound raw, the way this slot always bound it: no upgrade per delivery.
+    deliver(parameterTypes, returnType, cppArgs, m_rawReceiver);
+#else
+    // Cleared, bind the raw pointer without touching the refcount:
+    // an upgrade and release here could deallocate inside the delivery.
+    if (!Shiboken::FreeThreading::optionEnabled(
+            Shiboken::FreeThreading::MethodReceiverUpgrade)) {
+        deliver(parameterTypes, returnType, cppArgs, m_rawReceiver);
+        return;
+    }
+    // A delivery already inside QSlotObjectBase::Call keeps running while
+    // another thread drops the receiver. Own the receiver for the whole call.
+    Shiboken::AutoDecRef pythonSelf(WeakRef::deref(m_receiverRef));
+    deliver(parameterTypes, returnType, cppArgs, pythonSelf.object());
+#endif
+}
+
+void MethodDynamicSlot::deliver(const QByteArrayList &parameterTypes, const char *returnType,
+                                void **cppArgs, PyObject *receiver)
+{
+    if (receiver == nullptr) {
+        if (PyErr_Occurred() != nullptr)
+            SignalManager::handleMetaCallError();
+        return; // The receiver is gone; its disconnect is under way.
+    }
+    // B12-4: a test drops the receiver from another thread here.
+    SBK_FAILPOINT("method-receiver-before-bind");
     // create a callback based on method data
     Shiboken::AutoDecRef callable(PepExt_Type_CallDescrGet(m_function,
-                                                           m_pythonSelf, nullptr));
+                                                           receiver, nullptr));
     SignalManager::callPythonMetaMethod(parameterTypes, returnType,
                                         cppArgs, callable.object());
     // SignalManager::callPythonMetaMethod might have failed, in that case we have to print the
@@ -136,22 +195,14 @@ void MethodDynamicSlot::call(const QByteArrayList &parameterTypes, const char *r
 
 void MethodDynamicSlot::formatDebug(QDebug &debug) const
 {
-    debug << "MethodDynamicSlot(self=" << PySide::debugPyObject(m_pythonSelf)
+#ifndef Py_GIL_DISABLED
+    debug << "MethodDynamicSlot(self=" << PySide::debugPyObject(m_rawReceiver)
         << ", function=" << PySide::debugPyObject(m_function) << ')';
+#else
+    debug << "MethodDynamicSlot(receiverRef=" << PySide::debugPyObject(m_receiverRef)
+        << ", function=" << PySide::debugPyObject(m_function) << ')';
+#endif
 }
-
-// Delete the connection on receiver deletion by weakref
-class PysideReceiverMethodSlot : public MethodDynamicSlot
-{
-    Q_DISABLE_COPY_MOVE(PysideReceiverMethodSlot)
-public:
-    explicit PysideReceiverMethodSlot(PyObject *function, PyObject *pythonSelf);
-
-    ~PysideReceiverMethodSlot() override;
-
-private:
-    PyObject *m_weakRef;
-};
 
 static void onPysideReceiverSlotDestroyed(void *data)
 {
@@ -166,29 +217,35 @@ static void onPysideReceiverSlotDestroyed(void *data)
 #endif
 }
 
-PysideReceiverMethodSlot::PysideReceiverMethodSlot(PyObject *function, PyObject *pythonSelf) :
-    MethodDynamicSlot(function, pythonSelf),
-    // PYSIDE-3148: fire onPysideReceiverSlotDestroyed() when pythonSelf dies while
-    // still connected. Own the returned reference (keepReference) for the whole
-    // life of the slot, so the destructor can release it on an ordinary disconnect
-    // too. Previously the reference was discarded and only reclaimed if the weakref
-    // ever fired, leaking one weakref per connect otherwise (PYSIDE-79).
-    m_weakRef(WeakRef::create(pythonSelf, onPysideReceiverSlotDestroyed, pythonSelf, true))
+// \a function is handed over, \a pythonSelf is borrowed. Returns nullptr only
+// on a free-threaded build, for a receiver that supports no weak reference:
+// there the slot has nothing to upgrade for the delivery.
+static DynamicSlot *createMethodSlot(PyObject *function, PyObject *pythonSelf)
 {
-}
-
-PysideReceiverMethodSlot::~PysideReceiverMethodSlot()
-{
-    if (m_weakRef == nullptr)
-        return;
-    // The slot is the sole owner of the weakref (WeakRef::create kept the
-    // reference and the callback does not drop it), so releasing it here is safe
-    // whether this is an ordinary disconnect or the deferred teardown of an
-    // orphaned connection after pythonSelf already died -- nothing else frees it,
-    // so there is no dangling access (PYSIDE-3148).
-    Shiboken::GilState gil;
-    Py_DECREF(m_weakRef);
-    m_weakRef = nullptr;
+    // PYSIDE-3148: the slot owns the returned reference (keepReference) for its
+    // whole life, so the destructor releases it on an ordinary disconnect too.
+    PyObject *weakRef = WeakRef::create(pythonSelf, onPysideReceiverSlotDestroyed,
+                                        pythonSelf, true);
+    if (weakRef == nullptr) {
+#ifdef Py_GIL_DISABLED
+        // Only the TypeError of a receiver without __weakref__ selects the
+        // fallback silently; any other error (e.g. MemoryError) is reported.
+        if (PyErr_Occurred() != nullptr && !PyErr_ExceptionMatches(PyExc_TypeError))
+            PyErr_WriteUnraisable(pythonSelf);
+        PyErr_Clear();
+        if (Shiboken::FreeThreading::optionEnabled(
+                Shiboken::FreeThreading::MethodReceiverUpgrade)) {
+            Py_DECREF(function);
+            return nullptr;
+        }
+#endif
+        // A build with a GIL builds the slot anyway and binds the raw
+        // receiver, as it always has. That the connection then outlives the
+        // receiver, and that WeakRef::create() left its exception behind, are
+        // that build's own defects and are fixed in a change of their own.
+        return new MethodDynamicSlot(function, nullptr, pythonSelf);
+    }
+    return new MethodDynamicSlot(function, weakRef, pythonSelf);
 }
 
 DynamicSlot* DynamicSlot::create(PyObject *callback)
@@ -199,15 +256,33 @@ DynamicSlot* DynamicSlot::create(PyObject *callback)
         PyObject *function = PyMethod_GET_FUNCTION(callback);
         Py_INCREF(function);
         PyObject *pythonSelf = PyMethod_GET_SELF(callback);
-        return new PysideReceiverMethodSlot(function, pythonSelf);
+        if (auto *slot = createMethodSlot(function, pythonSelf))
+            return slot;
+        break;
     }
     case SlotType::CompiledMethod: {
         // PYSIDE-1523: PyMethod_Check is not accepting compiled form, we just go by attributes.
+#ifdef Py_GIL_DISABLED
+        Shiboken::AutoDecRef function(PyObject_GetAttr(callback, PySide::PySideName::im_func()));
+        Shiboken::AutoDecRef pythonSelf(PyObject_GetAttr(callback, PySide::PySideName::im_self()));
+        if (function.isNull() || pythonSelf.isNull()) {
+            PyErr_Clear();
+            break;
+        }
+        if (auto *slot = createMethodSlot(Py_NewRef(function.object()), pythonSelf))
+            return slot;
+#else
+        // The references are dropped at once and the slot then runs on what
+        // the callback holds - unbalanced, and left that way on purpose: it
+        // is this build's own defect and is fixed in a change of its own.
         PyObject *function = PyObject_GetAttr(callback, PySide::PySideName::im_func());
         Py_DECREF(function);
         PyObject *pythonSelf = PyObject_GetAttr(callback, PySide::PySideName::im_self());
         Py_DECREF(pythonSelf);
-        return new PysideReceiverMethodSlot(function, pythonSelf);
+        if (auto *slot = createMethodSlot(function, pythonSelf))
+            return slot;
+#endif
+        break;
     }
     case SlotType::C_Function: // Treat C-function as normal callables
     case SlotType::Callable:

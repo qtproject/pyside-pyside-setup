@@ -135,6 +135,11 @@ enum Option : int
     /// live container, and a registration during the run can move it under
     /// the iterator.
     PostRoutineBatch = 0x400000,
+    /// A method slot upgrades its weak receiver and owns it for the whole
+    /// Python call. Cleared, the delivery binds the raw receiver pointer,
+    /// which is freed storage once the receiver is gone; a receiver without
+    /// weak reference support is kept the same way.
+    MethodReceiverUpgrade = 0x800000,
     /// A lease taken inside an argument's conversion - on a container
     /// element, on a wrapper passed as void * - is kept until the native call
     /// has returned. Cleared, it ends with the conversion, and a concurrent

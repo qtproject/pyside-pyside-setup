@@ -47,6 +47,7 @@ static constexpr std::array KnownFailpoints = {
     "mro-after-snapshot",        // mro taken, the walk over it still to come
     "bases-after-snapshot",      // bases taken, the recursion into them to come
     "doc-before-helptext",       // handle_doc(), depth raised, help text to come
+    "method-receiver-before-bind",  // slot delivery, receiver read, not bound
     "detach-mid-round",          // _detachChildren(), a child picked, the round not done
     "ctor-after-publish",        // updateSourceObject(), object published, setup to come
     "dict-before-publish",       // instance dict found missing, not created yet

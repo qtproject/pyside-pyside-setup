@@ -4,6 +4,7 @@
 
 #include "pysideweakref.h"
 
+#include <autodecref.h>
 #include <basewrapper.h>
 #include <sbktypefactory.h>
 
@@ -70,20 +71,33 @@ PyObject *create(PyObject *obj, PySideWeakRefFunction func, void *userData, bool
     }
 
     PyTypeObject *type = PySideCallableObject_TypeF();
-    PySideCallableObject *callable = PyObject_New(PySideCallableObject, type);
-    if (!callable || PyErr_Occurred())
+    Shiboken::AutoDecRef callable(reinterpret_cast<PyObject *>(
+        PyObject_New(PySideCallableObject, type)));
+    if (callable.isNull() || PyErr_Occurred() != nullptr)
         return nullptr;
 
-    PyObject *weak = PyWeakref_NewRef(obj, reinterpret_cast<PyObject *>(callable));
-    if (!weak || PyErr_Occurred())
+    // Owned here until the weak reference exists, so a failure releases it.
+    PyObject *weak = PyWeakref_NewRef(obj, callable.object());
+    if (weak == nullptr || PyErr_Occurred() != nullptr)
         return nullptr;
 
-    callable->weakref_func = func;
-    callable->user_data = userData;
-    callable->keep_reference = keepReference;
-    Py_DECREF(callable); // PYSIDE-79: after decref the callable is undefined (theoretically)
+    auto *cb = reinterpret_cast<PySideCallableObject *>(callable.object());
+    cb->weakref_func = func;
+    cb->user_data = userData;
+    cb->keep_reference = keepReference;
+    // PYSIDE-79: after the AutoDecRef goes out of scope the callable belongs
+    // to the weak reference alone, and is undefined here (theoretically).
 
     return weak;
 }
+
+#ifdef Py_GIL_DISABLED
+PyObject *deref(PyObject *weakRef)
+{
+    PyObject *obj{};
+    PyWeakref_GetRef(weakRef, &obj); // 0 dead, -1 error: obj is null either way
+    return obj;
+}
+#endif
 
 } // namespace PySide::WeakRef

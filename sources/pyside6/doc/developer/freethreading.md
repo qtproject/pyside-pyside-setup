@@ -57,6 +57,10 @@ package's handoff. The names this change uses:
 | B16-3 | the QObject-pointer metatype registration and its global hash |
 | B16-5 | the process-global `__doc__` recursion counter |
 | FT9 | synchronizing the converter and runtime global registries |
+| B12-4 | a method slot delivering through a receiver pointer it does not own |
+| B14-4 | method delivery to a dead weak receiver |
+| B14-5 | a single-value hash losing earlier equal connections |
+| FT5 | virtual callback and signal/slot ownership |
 
 Every statement stands without them. They are here so that a reader who has
 the review can find the passage a sentence came from.
@@ -1276,6 +1280,48 @@ reporting that no operator matched.
 
 Bit `ConversionGate`; cleared, the entries run on the conversion's output,
 and so does the check in the QProperty setter.
+
+### Method slots own their receiver for the call
+
+A slot for a bound method keeps a reference on the function and a weak
+reference on the receiver, so that the connection does not keep the
+receiver alive. Delivering through a raw receiver pointer beside it binds a
+receiver the slot does not own (B12-4, B14-4). The weakref callback that
+disconnects is cleanup after the fact: a delivery already running keeps
+going while another thread drops the receiver's last reference.
+
+The weak reference is now the slot's only authority over the receiver.
+Each delivery upgrades it with `WeakRef::deref()` and owns the receiver
+until the Python call returns. A receiver being destroyed has its weak
+references cleared before any callback runs, so the upgrade answers a live
+object or nothing, and nothing means no call.
+
+A receiver whose type has no weak reference support - `__slots__` without
+`__weakref__` - gets a strong reference on the whole bound method instead.
+That keeps the receiver alive as long as the connection. The cost: a
+receiver that owns its sender forms a cycle through `PySideQSlotObject`,
+which the collector cannot walk, and is never freed. Making it collectable
+would mean giving the reference to the sender's wrapper, whose
+`referredObjects` the traversal already visits; what stands in the way is
+the disconnect, because `PySideQSlotObject` does not know its sender and Qt
+destroys slot objects while the sender is dying.
+`slot_weakrefless_receiver_test.py` measures the cycle and has to be turned
+around when that changes. Any other failure to create the weak reference,
+for example a `MemoryError`, takes the same fallback but is reported as
+unraisable.
+
+Not repaired: connecting the same bound method twice still leaves one
+registry row for two Qt connections (B14-5), so the weakref callback
+disconnects only one of them. Representing equal connections needs the
+record model of the FT5 handoff. The surviving connection does not deliver
+to the dead receiver.
+
+`WeakRef::deref()` exists in the free-threaded build only, where
+`PyWeakref_GetRef()` is always available; a build with a GIL has no caller.
+
+The bit is `MethodReceiverUpgrade`; cleared, a delivery binds the raw
+receiver pointer without touching its refcount, and a receiver without weak
+reference support is held as a raw pointer.
 
 ### What the lock contract does not promise
 

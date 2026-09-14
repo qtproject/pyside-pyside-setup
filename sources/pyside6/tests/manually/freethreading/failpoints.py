@@ -2262,6 +2262,76 @@ def test_doc_recursion_per_thread() -> str:
     return "ok (the generated text survived a second thread's request)"
 
 
+def test_method_receiver_dies_mid_delivery() -> str:
+    """B12-4: the receiver's last reference goes mid-delivery. See README."""
+    class Sender(QObject):
+        fired = Signal()
+
+    class Receiver:
+        """Not a QObject, which would bypass the dynamic slot."""
+
+        def handler(self):
+            delivered.append("ran")
+
+    delivered: list[str] = []
+    handed: dict[str, object] = {}
+    created = threading.Event()
+    connected = threading.Event()
+    drop_now = threading.Event()
+    dropped = threading.Event()
+
+    def owner():
+        receiver = Receiver()
+        handed["receiver"] = receiver
+        created.set()
+        drop_now.wait(timeout=20)
+        del handed["receiver"]
+        del receiver
+        dropped.set()
+
+    def deliver():
+        sender = Sender()
+        sender.fired.connect(handed["receiver"].handler)
+        connected.set()
+        sender.fired.emit()
+
+    owner_thread = threading.Thread(target=owner)
+    owner_thread.start()
+    if not created.wait(timeout=5):
+        return "FAIL: the owner thread never created the receiver"
+    alive = weakref.ref(handed["receiver"])
+
+    # Longer than the default park: the drop has to happen while it waits.
+    with Failpoint("method-receiver-before-bind", timeout_ms=20000) as point:
+        deliverer = threading.Thread(target=deliver)
+        deliverer.start()
+        if not connected.wait(timeout=5):
+            drop_now.set()
+            return "FAIL: the delivering thread never connected"
+        if not point.wait_until_reached():
+            drop_now.set()
+            return "FAIL: the delivery never reached the failpoint"
+        drop_now.set()
+        if not dropped.wait(timeout=5):
+            return "FAIL: the owner thread did not drop the receiver"
+        owner_thread.join(timeout=5)
+        held = alive() is not None
+        if not point.release():
+            return "FAIL: nobody was parked to release"
+        deliverer.join(timeout=10)
+        if deliverer.is_alive():
+            return "FAIL: the delivering thread did not come back"
+
+    if not held:
+        return "FAIL: the receiver was deallocated while a delivery held it"
+    if delivered != ["ran"]:
+        return f"FAIL: the handler ran {len(delivered)} times, expected once"
+    gc.collect()
+    if alive() is not None:
+        return "FAIL: the delivery kept the receiver past its own end"
+    return "ok (owned through the call, gone after it)"
+
+
 def _cpp_deleted(obj) -> bool:
     """Whether the wrapper has lost its C++ object. Takes no lease, so it
     answers for a claimed object too, where isValid() says False either way."""
@@ -2711,6 +2781,9 @@ TESTS = {
     "doc-recursion-per-thread": Test(test_doc_recursion_per_thread),
     "proof-doc-recursion": Test(lambda: counterproof(
         "DocRecursionPerThread", "doc-recursion-per-thread")),
+    "receiver-dies-mid-delivery": Test(test_method_receiver_dies_mid_delivery),
+    "proof-method-receiver-upgrade": Test(lambda: counterproof(
+        "MethodReceiverUpgrade", "receiver-dies-mid-delivery")),
     "container-element-lease": Test(test_container_element_lease_is_kept),
     "proof-conversion-leases": Test(lambda: counterproof(
         "ConversionLeasesKept", "container-element-lease")),
