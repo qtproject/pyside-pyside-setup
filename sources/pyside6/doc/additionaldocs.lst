@@ -546,6 +546,7 @@ qtwidgets/webxml/modelview.webxml
 qtwidgets/webxml/qdrawutil-h.webxml
 qtwidgets/webxml/qt-add-ui.webxml
 qtwidgets/webxml/qt-wrap-ui.webxml
+qtwidgets/webxml/qtwidgets-styling-approaches.webxml
 qtwidgets/webxml/qwidget-styling.webxml
 qtwidgets/webxml/style-reference.webxml
 qtwidgets/webxml/stylesheet-customizing.webxml

@@ -37,9 +37,10 @@ widgets use the :class:`~PySide6.QtWidgets.QStyle` class to
 perform nearly all of their drawing, ensuring that they look exactly
 like the equivalent native widgets.
 
-:ref:`Qt-Style-Sheets`  are a powerful mechanism that
-allows you to customize the appearance of widgets, in addition to what
-is already possible by subclassing :class:`~PySide6.QtWidgets.QStyle` .
+:ref:`Qt-Style-Sheets` customize the appearance of widgets with CSS-like
+rules. :ref:`Styling-Approaches-for-Qt-Widgets` explains when to use a
+subclass of :class:`~PySide6.QtWidgets.QStyle`,
+:mod:`Qt Labs StyleKit <PySide6.QtLabsStyleKit>`, or a style sheet.
 
 Layouts
 ^^^^^^^
@@ -92,20 +93,6 @@ Articles and Guides
 * :ref:`Getting-Started-Programming-with-Qt-Widgets`
 * `Tutorial: Qt Widgets application`_
 * :ref:`Model-View-Tutorial`
+* :ref:`Styling-Approaches-for-Qt-Widgets`
 
 .. _`Tutorial: Qt Widgets application`: https://doc.qt.io/qtcreator/creator-writing-program.html
-
-List of Classes by Function
----------------------------
-
-    * :ref:`Widgets-Classes`
-
-Articles and Guides
-^^^^^^^^^^^^^^^^^^^
-
-* :ref:`Widgets-Tutorial`
-* :ref:`Getting-Started-Programming-with-Qt-Widgets`
-* `Qt Creator: Tutorial: Qt Widgets application`_
-* :ref:`Model-View-Tutorial`
-
-.. _`Qt Creator: Tutorial: Qt Widgets application`: https://doc.qt.io/qtcreator/creator-writing-program.html

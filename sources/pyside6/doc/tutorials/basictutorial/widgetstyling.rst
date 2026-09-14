@@ -30,8 +30,9 @@ center, and with a placeholder text.
 .. image:: widgetstyling-simple-no.png
    :alt: Simple Widget with no style
 
-You can style your application using the CSS-like syntax.
-For more information, see `Qt Style Sheets Reference`_.
+:ref:`Styling-Approaches-for-Qt-Widgets` explains the options for styling
+Qt widgets. This tutorial focuses on style sheets, which provide
+a CSS-like syntax (see `Qt Style Sheets Reference`_).
 
 A ``QLabel`` can be styled differently by setting some of its CSS
 properties, such as ``background-color`` and ``font-family``,
