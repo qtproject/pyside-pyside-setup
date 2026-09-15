@@ -126,6 +126,15 @@ enum Option : int
     /// lookup handed it. Cleared, it borrows the type's own tuple, which an
     /// assignment to __bases__ can release underneath it.
     MroSnapshot = 0x100000,
+    /// The signature machinery counts its __doc__ recursion per thread.
+    /// Cleared, one process-wide counter is back, and a thread asking for a
+    /// __doc__ while another builds help text gets the raw descriptor.
+    DocRecursionPerThread = 0x200000,
+    /// The post-routine runner takes the pending callbacks out of the queue
+    /// as a batch and calls them after the lock. Cleared, it iterates the
+    /// live container, and a registration during the run can move it under
+    /// the iterator.
+    PostRoutineBatch = 0x400000,
     /// A lease taken inside an argument's conversion - on a container
     /// element, on a wrapper passed as void * - is kept until the native call
     /// has returned. Cleared, it ends with the conversion, and a concurrent

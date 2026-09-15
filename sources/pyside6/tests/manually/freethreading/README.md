@@ -917,6 +917,76 @@ call - armed only after the class and its instance exist, since creating
 either reads `__mro__`. The test runs the virtual twice and expects the
 override to have run. There is no bit. Free-threaded builds only.
 
+### post-routine-owned - a guard, no proof row
+
+A2: a worker registers a post routine and parks at
+`post-routine-after-append`, right after the queue took it; the main thread
+runs the batch with `QCoreApplication::shutdown()`. The reference count must
+still cover the frame and the thread's argument tuple. Registered in the old
+order, the runner released a reference the queue did not own yet and the
+count fell below its holders. It runs in a child process, since the runner is
+the application's teardown.
+See "Post routines run from a batch" in the free-threading notes.
+
+### post_routine_batch (run.py)
+
+B16-2. A post routine registers another post routine. One thread and no
+timing window, so it lives in `run.py`, like `metaobject_lock`. With
+`PostRoutineBatch` the registration lands in the next batch and both
+callbacks run. Cleared, the runner walks the live queue and the assertion
+in `addPostRoutine()` aborts:
+
+    PYSIDE6_OPTION_FT unset                   ->  ok
+    PYSIDE6_OPTION_FT="~0x400000"             ->  CRASH(SIGABRT)
+
+The abort shows that the path reaches a registration during the walk.
+Whether the append would have moved the container on a given run depends
+on QList's spare capacity; the assertion replaces that question.
+
+Debug build only: `NDEBUG` removes the assertion, and `run.py` skips the
+scenario there (`needs_contract`).
+
+### post_routine_raises (run.py)
+
+B16-2, the same bit: without the batch, a raising callback leaves its
+exception pending for the next call. CPython's own assertion reports it:
+
+    PYSIDE6_OPTION_FT unset                   ->  ok
+    PYSIDE6_OPTION_FT="~0x400000"             ->  CRASH(SIGABRT)
+        Assertion failed: (!_PyErr_Occurred(tstate)),
+        function PyObject_CallObject, call.c
+
+Debug build only: `NDEBUG` removes CPython's assertion. A release build
+without the bit still mishandles the exception, silently.
+
+### doc-recursion-per-thread, proof-doc-recursion
+
+B16-5. `handle_doc()` suppresses the generated help text while it builds
+one, and with the bit cleared the depth is one process-wide counter.
+`doc-before-helptext` parks a thread with the depth raised, and a
+second thread asks for the `__doc__` of another method. The test expects
+the text the same question returns on a quiet process; with the shared
+counter it gets the raw descriptor. A wrong string is not a crash, so the
+test compares.
+
+`proof-doc-recursion` clears `DocRecursionPerThread` and expects the
+mismatch. Not covered: two threads losing an increment of the shared
+counter.
+
+### B16-3 - no test and no bit
+
+Parking a thread between `QMetaType::fromName()` and the registration in
+`createQObjectPtrMetaType()`, while a second thread registers the same
+name, reproduces the defect without the lock, every time:
+
+    FAIL: the thread that asked first lost the name - it carries 5
+          methods, not 4
+
+The locked path cannot be reached: the window is under the
+registration lock, and `failpoint()` refuses to park while a lock is held.
+A bit that no scenario can clear is not kept.
+See "QObject-pointer metatypes" in the free-threading notes.
+
 ### container-element-lease, proof-conversion-leases
 
 An element of a container argument is deleted while the call runs: the call

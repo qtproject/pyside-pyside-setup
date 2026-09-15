@@ -46,11 +46,13 @@ static constexpr std::array KnownFailpoints = {
     "convert-before-lease",      // in a pointer conversion, before its own lease
     "mro-after-snapshot",        // mro taken, the walk over it still to come
     "bases-after-snapshot",      // bases taken, the recursion into them to come
+    "doc-before-helptext",       // handle_doc(), depth raised, help text to come
     "detach-mid-round",          // _detachChildren(), a child picked, the round not done
     "ctor-after-publish",        // updateSourceObject(), object published, setup to come
     "dict-before-publish",       // instance dict found missing, not created yet
     "clear-before-dict",         // tp_clear, children detached, the dict to come
     "source-property-after-read", // QtRO source getter, value read, not converted
+    "post-routine-after-append", // qAddPostRoutine, published, the call not back
     "signal-homonym-before-bind", // signal call, method found, not bound yet
 };
 #else

@@ -17,6 +17,15 @@
 #include "autodecref.h"
 #include "gilstate.h"
 #include "pysideutils.h"
+#ifdef Py_GIL_DISABLED
+#  include "sbkfailpoint.h"
+#  include "sbkftoptions.h"
+#  include "sbkheldlocks.h"
+#  include <atomic>
+#  include <cassert>
+#  include <cstdio>
+#  include <mutex>
+#endif
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
@@ -33,24 +42,150 @@ namespace PySide {
 
 static QStack<PyObject *> globalPostRoutineFunctions;
 
+#ifdef Py_GIL_DISABLED
+// Container work only; the callbacks run after the lock.
+// See "Post routines run from a batch" in the free-threading notes.
+static std::mutex &postRoutineMutex()
+{
+    static std::mutex mutex;
+    return mutex;
+}
+
+using PostRoutineLock =
+    Shiboken::TrackedGuard<std::mutex, Shiboken::RawLock::PostRoutine>;
+
+static bool batchedPostRoutines()
+{
+    return Shiboken::FreeThreading::optionEnabled(
+        Shiboken::FreeThreading::PostRoutineBatch);
+}
+
+#ifndef NDEBUG
+// Depth of live-queue walks; addPostRoutine() asserts zero. A depth, so a
+// nested run cannot disarm the outer one.
+static std::atomic_int walkingLiveQueue{0};
+
+static bool reportLiveWalk()
+{
+    std::fprintf(stderr, "qAddPostRoutine() was called while the post-routine "
+                         "queue was being walked live\n");
+    return false;
+}
+#endif // NDEBUG
+
+// Batches per runner call; bounds only a routine that re-registers itself
+// forever.
+static constexpr int MaxPostRoutineRounds = 1024;
+
+// The pending callbacks, taken out whole; the queue stays free for the
+// registrations the callbacks make.
+static QStack<PyObject *> takePostRoutines()
+{
+    QStack<PyObject *> batch;
+    PostRoutineLock lock(postRoutineMutex());
+    batch.swap(globalPostRoutineFunctions);
+    return batch;
+}
+#endif // Py_GIL_DISABLED
+
 void globalPostRoutineCallback()
 {
     Shiboken::GilState state;
+
+#ifndef Py_GIL_DISABLED
+    // The walk a build with a GIL always had: one pass, and a registration
+    // made while it runs is cleared unrun. The rounds below are the answer
+    // to that, and they are the free-threaded build's alone.
     for (auto *callback : globalPostRoutineFunctions) {
         Shiboken::AutoDecRef result(PyObject_CallObject(callback, nullptr));
         Py_DECREF(callback);
     }
     globalPostRoutineFunctions.clear();
+#else
+    if (!batchedPostRoutines()) {
+        // PostRoutineBatch cleared: walk the live queue.
+#  ifndef NDEBUG
+        walkingLiveQueue.fetch_add(1, std::memory_order_relaxed);
+#  endif
+        for (auto *callback : globalPostRoutineFunctions) {
+            Shiboken::AutoDecRef result(PyObject_CallObject(callback, nullptr));
+            Py_DECREF(callback);
+        }
+        globalPostRoutineFunctions.clear();
+#  ifndef NDEBUG
+        walkingLiveQueue.fetch_sub(1, std::memory_order_relaxed);
+#  endif
+        return;
+    }
+
+    // Registrations made by a callback go into the next batch; the loop ends
+    // on an empty one. Within a batch the order is the registration order.
+    for (int round = 0; round < MaxPostRoutineRounds; ++round) {
+        auto batch = takePostRoutines();
+        if (batch.isEmpty())
+            break;
+        for (auto *callback : batch) {
+            Shiboken::AutoDecRef result(PyObject_CallObject(callback, nullptr));
+            // Report a raising callback and run the rest of the batch.
+            if (result.isNull())
+                PyErr_WriteUnraisable(callback);
+            Py_DECREF(callback);
+        }
+    }
+
+    // What a runaway registrar left behind is reported and released, not run.
+    if (auto leftovers = takePostRoutines(); !leftovers.isEmpty()) {
+        PyErr_Format(PyExc_RuntimeWarning,
+                     "qAddPostRoutine: %lld routine(s) still queued after %d "
+                     "rounds; abandoning them",
+                     static_cast<long long>(leftovers.size()),
+                     MaxPostRoutineRounds);
+        PyErr_WriteUnraisable(nullptr);
+        for (auto *callback : leftovers)
+            Py_DECREF(callback);
+    }
+#endif
 }
 
 void addPostRoutine(PyObject *callback)
 {
+#ifndef Py_GIL_DISABLED
     if (PyCallable_Check(callback)) {
         globalPostRoutineFunctions << callback;
         Py_INCREF(callback);
     } else {
         PyErr_SetString(PyExc_TypeError, "qAddPostRoutine: The argument must be a callable object.");
     }
+#else
+    if (!PyCallable_Check(callback)) {
+        PyErr_SetString(PyExc_TypeError, "qAddPostRoutine: The argument must be a callable object.");
+        return;
+    }
+
+#  ifndef NDEBUG
+    // A registration during a live walk aborts, whether or not the append
+    // would have reallocated.
+    assert(walkingLiveQueue.load(std::memory_order_relaxed) == 0
+           || reportLiveWalk());
+#  endif
+
+    if (!batchedPostRoutines()) {
+        globalPostRoutineFunctions << callback;  // published before it is owned
+        Py_INCREF(callback);
+        return;
+    }
+
+    // Owned before it is published: a runner on another thread may take the
+    // batch and release this reference as soon as the lock is gone.
+    // See "Post routines run from a batch" in the free-threading notes.
+    // No try/catch: the modules may be built with -fno-exceptions.
+    Py_INCREF(callback);
+    {
+        PostRoutineLock lock(postRoutineMutex());
+        globalPostRoutineFunctions << callback;
+    }
+    SBK_FAILPOINT("post-routine-after-append");
+#endif
 }
 } // namespace PySide
 

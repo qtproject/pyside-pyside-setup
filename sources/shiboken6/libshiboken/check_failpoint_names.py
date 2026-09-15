@@ -62,20 +62,24 @@ def called(files: list[Path]) -> dict[str, dict[str, str]]:
     return used
 
 
-def default_files() -> list[Path]:
-    """Every runtime library, not just the one the registry lives in.
+# Directories that hold no shipped runtime code. An exclusion list on
+# purpose: a directory forgotten here costs a few files read for nothing, one
+# forgotten in an inclusion list is silently not checked.
+NOT_RUNTIME = {"tests", "doc", "shiboken6_generator"}
 
-    A file the check does not read looks like a name nobody reaches, so a
-    failpoint placed in a library nobody listed ships unarmable - which is
-    the thing this script exists to prevent. The set is therefore globbed
-    rather than named: a list written out, here or in CMake, goes stale
-    the next time a library is added, and a stale list fails silently.
+
+def default_files() -> list[Path]:
+    """Everything under sources/ the runtime is built from, headers included.
+
+    A file the check does not read hides its failpoints, which then ship
+    unarmable. Headers count: SBK_FAILPOINT() in an inline function is a
+    call site like any other.
     """
     sources = HERE.parents[1]
     return sorted(f
-                  for directory in sorted(sources.glob("*/lib*"))
-                  if directory.is_dir()
-                  for f in directory.glob("*.cpp"))
+                  for pattern in ("*.cpp", "*.h")
+                  for f in sources.rglob(pattern)
+                  if not NOT_RUNTIME & set(f.relative_to(sources).parts))
 
 
 def main() -> int:

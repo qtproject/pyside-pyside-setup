@@ -222,6 +222,48 @@ def test_source_without_property_list() -> str:
     return "ok"
 
 
+def test_post_routine_owned_when_published() -> str:
+    """A2: a runner takes a post routine the queue has just published. See README."""
+    if not FREE_THREADED:
+        return "skipped: a build with a GIL has no batch"
+    # The runner is the application's teardown, so this runs on its own.
+    if os.environ.get("FAILPOINT_POST_ROUTINE_CHILD") != "1":
+        env = dict(os.environ, FAILPOINT_POST_ROUTINE_CHILD="1")
+        proc = subprocess.run([sys.executable, __file__, "post-routine-owned"],
+                              env=env, capture_output=True, text=True,
+                              timeout=fp.CHILD_TIMEOUT)
+        if proc.returncode == 0:
+            return "ok"
+        return fp._reason(proc.stdout + proc.stderr) or f"FAIL: rc {proc.returncode}"
+
+    from PySide6.QtCore import qAddPostRoutine
+    app = qt_app()
+    ran = []
+
+    def routine():
+        ran.append(True)
+
+    with Failpoint("post-routine-after-append") as point:
+        registrar = threading.Thread(target=qAddPostRoutine, args=(routine,))
+        # Held from here on: this frame and the thread's argument tuple.
+        holders = sys.getrefcount(routine) - 1
+        registrar.start()
+        if not point.wait_until_reached():
+            return "FAIL: the registration never reached the failpoint"
+        app.shutdown()             # runs the batch and releases its reference
+        after_run = sys.getrefcount(routine) - 1
+        point.release()
+        registrar.join(timeout=10)
+        if registrar.is_alive():
+            return "FAIL: the registering thread did not come back"
+    if ran != [True]:
+        return f"FAIL: the routine ran {len(ran)} times"
+    if after_run < holders:
+        return (f"FAIL: the runner released a reference the queue did not own "
+                f"yet ({after_run} counted, {holders} held)")
+    return "ok"
+
+
 def test_metaclass_tuples_are_checked() -> str:
     """A3: a metaclass answers __mro__ and __bases__ with nonsense. See README."""
     if not FREE_THREADED:
@@ -2186,6 +2228,40 @@ def test_a_failed_override_lookup_is_not_cached() -> str:
             f"time(s) afterwards)")
 
 
+def test_doc_recursion_per_thread() -> str:
+    """B16-5: help text is suppressed per thread. See README."""
+    # The answer with nobody inside, to compare against.
+    quiet = QObject.blockSignals.__doc__
+    if not quiet:
+        return "skipped: this build generates no help text to suppress"
+
+    parked_doc: dict[str, object] = {}
+
+    with Failpoint("doc-before-helptext") as point:
+        def park():
+            # A different method, so no descriptor cache is involved.
+            parked_doc["value"] = QObject.setObjectName.__doc__
+
+        worker = threading.Thread(target=park)
+        worker.start()
+        if not point.wait_until_reached():
+            return "FAIL: no thread parked inside the help text"
+        # The arming goes with the first thread, so this one runs through.
+        during = QObject.blockSignals.__doc__
+        if not point.release():
+            return "FAIL: nobody was parked to release"
+        worker.join(timeout=10)
+        if worker.is_alive():
+            return "FAIL: the parked thread did not come back"
+
+    if during != quiet:
+        return ("FAIL: the other thread's request suppressed this one - "
+                f"got {during!r}, expected {quiet!r}")
+    if not parked_doc.get("value"):
+        return "FAIL: the parked thread came back without its help text"
+    return "ok (the generated text survived a second thread's request)"
+
+
 def _cpp_deleted(obj) -> bool:
     """Whether the wrapper has lost its C++ object. Takes no lease, so it
     answers for a claimed object too, where isValid() says False either way."""
@@ -2533,6 +2609,8 @@ TESTS = {
     "proof-source-property-copy": Test(lambda: counterproof(
         "SourcePropertyCopy", "source-property-copy")),
     "source-property-missing": Test(test_source_without_property_list),
+    # A guard, no proof row: the order is not a measure that can be cleared.
+    "post-routine-owned": Test(test_post_routine_owned_when_published),
     "metaclass-tuples": Test(test_metaclass_tuples_are_checked),
     "signal-homonym": Test(test_signal_homonym_owned),
     "leased-receiver": Test(test_generated_call_uses_the_leased_pointer),
@@ -2630,6 +2708,9 @@ TESTS = {
     # runs the interpreter with a binding raw lock held.
     "proof-metaobject-parse": Test(lambda: counterproof(
         "MetaObjectParseOutsideLock", "metaobject-commit-race")),
+    "doc-recursion-per-thread": Test(test_doc_recursion_per_thread),
+    "proof-doc-recursion": Test(lambda: counterproof(
+        "DocRecursionPerThread", "doc-recursion-per-thread")),
     "container-element-lease": Test(test_container_element_lease_is_kept),
     "proof-conversion-leases": Test(lambda: counterproof(
         "ConversionLeasesKept", "container-element-lease")),

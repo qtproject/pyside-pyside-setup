@@ -24,9 +24,13 @@
 
 #include "autodecref.h"
 #include "sbkpep.h"
+#include "sbkfailpoint.h"
 #include "sbkstring.h"
 #include "sbkstaticstrings.h"
 #include "sbkstaticstrings_p.h"
+#ifdef Py_GIL_DISABLED
+#  include "sbkftoptions.h"
+#endif
 
 #include "signature_p.h"
 
@@ -118,7 +122,31 @@ static PyObject *old_md_doc_descr = nullptr;
 static PyObject *old_tp_doc_descr = nullptr;
 static PyObject *old_wd_doc_descr = nullptr;
 
-static int handle_doc_in_progress = 0;
+// Per thread on a free-threaded build: make_helptext() runs Python, so two
+// threads can be inside it at once and one process-wide counter makes them
+// see each other's recursion. A build with a GIL keeps the single counter it
+// has always had - the same interleaving is possible there, but curing it is
+// a change of its own and not this series' business.
+// See "Documentation recursion" in the free-threading notes.
+#ifdef Py_GIL_DISABLED
+static thread_local int handle_doc_depth = 0;
+
+// The process-wide counter, used with DocRecursionPerThread cleared.
+static int handle_doc_depth_shared = 0;
+#else
+static int handle_doc_depth = 0;
+#endif
+
+static int &handleDocDepth()
+{
+#ifdef Py_GIL_DISABLED
+    if (!Shiboken::FreeThreading::optionEnabled(
+            Shiboken::FreeThreading::DocRecursionPerThread)) {
+        return handle_doc_depth_shared;
+    }
+#endif
+    return handle_doc_depth;
+}
 
 static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
 {
@@ -129,13 +157,15 @@ static PyObject *handle_doc(PyObject *ob, PyObject *old_descr)
         : PepType_GetFullyQualifiedNameStr(reinterpret_cast<PyTypeObject *>(ob_type_mod.object()));
     PyObject *res{};
 
-    if (handle_doc_in_progress || name == nullptr
+    int &depth = handleDocDepth();
+    if (depth != 0 || name == nullptr
         || (isModule && std::strncmp(name, "PySide6.", 8) != 0)) {
         res = PyObject_CallMethodObjArgs(old_descr, PyMagicName::get(), ob, nullptr);
     } else {
-        handle_doc_in_progress++;
+        ++depth;
+        SBK_FAILPOINT("doc-before-helptext");
         res = PyObject_CallFunction(signatureGlobals()->make_helptext_func, "(O)", ob);
-        handle_doc_in_progress--;
+        --depth;
     }
 
     if (res)

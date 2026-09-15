@@ -302,12 +302,18 @@ def counterproof(option: str, test: str, context: str = "") -> str:
     if not FREE_THREADED:
         return "skipped: the option bits exist only in a free-threaded build"
     cleared = [context] if context else []
-    if context:
-        rc, out = _run_without(cleared, test)
-        if rc != 0:
-            tail = out.strip().splitlines()[-1] if out.strip() else ""
-            return (f"FAIL: {test} does not even pass without {context}, so "
-                    f"nothing here is about {option}: {tail[:60]}")
+    # The subject has to pass first - without the context, if there is one -
+    # or its failure with the bit cleared says nothing. With no context this
+    # clears nothing ("~0x0").
+    rc, out = _run_without(cleared, test)
+    if rc == SKIP:
+        tail = out.strip().splitlines()[-1] if out.strip() else ""
+        return f"skipped: {test} did not run ({tail[:60]})"
+    if rc != 0:
+        tail = out.strip().splitlines()[-1] if out.strip() else ""
+        where = f" without {context}" if context else ""
+        return (f"FAIL: {test} does not even pass{where}, so nothing here "
+                f"is about {option}: {tail[:60]}")
     rc, out = _run_without(cleared + [option], test)
     without = option + (f" (and without {context})" if context else "")
     # A subject that skipped is not a subject that failed. main() answers

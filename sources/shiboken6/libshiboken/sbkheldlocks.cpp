@@ -23,6 +23,8 @@ int lockRank(RawLock lock)
     case RawLock::WrapperMap:       return int(LockRank::WrapperMap);
     case RawLock::MainThreadDelete: return int(LockRank::MainThreadDelete);
     case RawLock::State:            return int(LockRank::State);
+    case RawLock::PostRoutine:      return int(LockRank::PostRoutine);
+    case RawLock::QObjectMetaType:  return int(LockRank::QObjectMetaType);
     }
     return 0;
 }
@@ -31,7 +33,7 @@ int lockRank(RawLock lock)
 
 // One counter per lock rather than one bit: three of the locks are recursive,
 // and a nested acquisition has to survive the inner release.
-static constexpr size_t LockCount = 8;
+static constexpr size_t LockCount = 10;
 
 static std::array<unsigned, LockCount> &heldCounts()
 {
@@ -52,7 +54,8 @@ static const char *lockName(size_t index)
 {
     static const char *names[LockCount] = {
         "state", "wrapper map", "main-thread deletion", "lazy type",
-        "module data", "connection hash", "meta-object", "class hierarchy"
+        "module data", "connection hash", "meta-object", "class hierarchy",
+        "post routines", "qobject-pointer metatype"
     };
     return names[index];
 }

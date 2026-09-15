@@ -36,6 +36,7 @@
 #include <sbkconverter.h>
 #include <sbkerrors.h>
 #include <sbkftoptions.h>
+#include <sbkheldlocks.h>
 #include <sbkpep.h>
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
@@ -56,11 +57,14 @@
 #include <QtCore/private/qobject_p.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstring>
 #include <cctype>
 #include <memory>
+#include <mutex>
 #include <vector>
 #include <optional>
+#include <type_traits>
 #include <typeinfo>
 
 #ifdef Q_OS_WIN
@@ -1151,6 +1155,38 @@ QObject *convertToQObject(PyObject *object, bool raiseError)
     return reinterpret_cast<QObject*>(ptr);
 }
 
+#ifdef Py_GIL_DISABLED
+// The meta-object travels with the interface: Qt hands the interface pointer
+// back to metaObjectFunc(), so that path needs no lookup and no lock. The
+// hash below cannot give that - it is read from Qt threads with no thread
+// state while another registration writes it.
+// See "QObject-pointer metatypes" in the free-threading notes.
+struct QObjectPtrMetaTypeRecord
+{
+    QtPrivate::QMetaTypeInterface iface;  // must stay first
+    const QMetaObject *metaObject;
+};
+
+static_assert(std::is_standard_layout_v<QObjectPtrMetaTypeRecord>);
+static_assert(offsetof(QObjectPtrMetaTypeRecord, iface) == 0);
+
+// Equal names must have one winner.
+// See "QObject-pointer metatypes" in the free-threading notes;
+// the rank is in sbkheldlocks.h.
+static std::mutex &qObjectPtrMetaTypeMutex()
+{
+    static std::mutex mutex;
+    return mutex;
+}
+
+using QObjectMetaTypeLock =
+    Shiboken::TrackedGuard<std::mutex, Shiboken::RawLock::QObjectMetaType>;
+
+static const QMetaObject *metaObjectFunc(const QtPrivate::QMetaTypeInterface *mif)
+{
+    return reinterpret_cast<const QObjectPtrMetaTypeRecord *>(mif)->metaObject;
+}
+#else // Py_GIL_DISABLED
 using MetaTypeIf2QMetaObjectHash = QHash<const QtPrivate::QMetaTypeInterface *, const QMetaObject *>;
 
 Q_GLOBAL_STATIC(MetaTypeIf2QMetaObjectHash, metaTypeIf2QMetaObjectHash);
@@ -1159,6 +1195,7 @@ static const QMetaObject *metaObjectFunc(const QtPrivate::QMetaTypeInterface *mi
 {
     return metaTypeIf2QMetaObjectHash()->value(mif);
 }
+#endif // Py_GIL_DISABLED
 
 QMetaType createQObjectPtrMetaType(const QMetaObject *metaObject)
 {
@@ -1169,11 +1206,42 @@ QMetaType createQObjectPtrMetaType(const QMetaObject *metaObject)
     ptrName[nameLen] = '*';
     ptrName[nameLen + 1] = '\0';
 
+#ifdef Py_GIL_DISABLED
+    // The claim and the registration are one transaction.
+    QObjectMetaTypeLock lock(qObjectPtrMetaTypeMutex());
+#endif
     if (auto existing = QMetaType::fromName(ptrName); existing.isValid()) {
         delete [] ptrName;
         return existing;
     }
 
+#ifdef Py_GIL_DISABLED
+    // Never freed: Qt keeps the interface pointer and may call back through it.
+    auto *record = new QObjectPtrMetaTypeRecord {
+        {
+            1,       // revision
+            ushort(std::alignment_of<QObject*>()),
+            sizeof(QObject*),
+            uint(QMetaType::IsPointer | QMetaType::RelocatableType | QMetaType::PointerToQObject),
+            {},      // typeId
+            metaObjectFunc,
+            ptrName,
+            nullptr, // ctr
+            nullptr, // copyCtr
+            nullptr, // moveCtr
+            nullptr, // dtor
+            QtPrivate::QEqualityOperatorForType<QObject*>::equals,
+            QtPrivate::QLessThanOperatorForType<QObject*>::lessThan,
+            nullptr, // qDebug
+            nullptr, // dataStreamOut
+            nullptr, // dataStreamIn
+            nullptr  // legacyRegisterOp
+        },
+        metaObject
+    };
+
+    QMetaType metaType(&record->iface);
+#else
     auto *mti = new QtPrivate::QMetaTypeInterface {
         1,       // revision
         ushort(std::alignment_of<QObject*>()),
@@ -1197,6 +1265,7 @@ QMetaType createQObjectPtrMetaType(const QMetaObject *metaObject)
     metaTypeIf2QMetaObjectHash()->insert(mti, metaObject);
 
     QMetaType metaType(mti);
+#endif
     [[maybe_unused]] const int id = metaType.id(); // enforce registration
     return metaType;
 }

@@ -37,17 +37,24 @@ enum class RawLock : unsigned
     ConnectionHash  = 1u << 5,  ///< dynamicslot.cpp
     MetaObject      = 1u << 6,  ///< signalmanager.cpp, recursive
     ClassHierarchy  = 1u << 7,  ///< bindingmanager.cpp, publishes a snapshot
+    PostRoutine     = 1u << 8,  ///< core_snippets.cpp, one container operation
+    QObjectMetaType = 1u << 9,  ///< pyside.cpp, one name registration
 };
 
 /// The order they may be taken in. A thread may only take a lock whose rank
 /// is higher than every rank it already holds, so any two of them are always
 /// taken in the same order and no pair of threads can hold them crosswise.
 ///
-/// The state lock has the highest rank because it is the leaf: nothing may
-/// be acquired while it is held, which is what lets every lease and
-/// lifecycle transaction end without waiting for anything. The lazy-type
-/// lock has the lowest because it is the one that legitimately spans other
-/// work, type creation included.
+/// The lazy-type lock has the lowest rank because it is the one that
+/// legitimately spans other work, type creation included.
+///
+/// The leaves share the highest rank. The check is a strict "<", so nothing
+/// may be acquired while a leaf is held - which lets every lease and
+/// lifecycle transaction end without waiting - and two leaves cannot nest
+/// either way.
+///
+/// The QObject-pointer metatype lock is held across QMetaType::id().
+/// See "QObject-pointer metatypes" in the free-threading notes.
 ///
 /// A rank is a claim about the code, and this one is checked rather than
 /// written down: checkLockRank() asserts it at every acquisition, and
@@ -56,7 +63,9 @@ enum class RawLock : unsigned
 enum class LockRank : int
 {
     LazyType = 1, ClassHierarchy, ModuleData, MetaObject, ConnectionHash,
-    WrapperMap, MainThreadDelete, State,
+    WrapperMap, MainThreadDelete,
+    /// The leaves.
+    State, PostRoutine = State, QObjectMetaType = State,
 };
 
 /// The rank of \a lock. Defined in both builds: the order is a property of

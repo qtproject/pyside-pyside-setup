@@ -54,6 +54,8 @@ HERE = Path(__file__).resolve()
 REPO = HERE.parents[5]
 WORKER = HERE.parent / "stress.py"
 METAOBJECT = HERE.parent / "metaobject_lock.py"
+POST_ROUTINE = HERE.parent / "post_routine_batch.py"
+POST_RAISES = HERE.parent / "post_routine_raises.py"
 
 
 def has_sample(build: Path) -> bool:
@@ -240,6 +242,16 @@ SCENARIOS = {
     "metaobject_lock": Scenario(METAOBJECT, None,
                                 Lock.MetaObjectParseOutsideLock, True,
                                 needs_contract=True),
+    # B16-2. Debug build only, like metaobject_lock.
+    # See README.
+    "post_routine_batch": Scenario(POST_ROUTINE, None,
+                                   Lock.PostRoutineBatch, True,
+                                   needs_contract=True),
+    # B16-2, the pending exception. Debug build only.
+    # See README.
+    "post_routine_raises": Scenario(POST_RAISES, None,
+                                    Lock.PostRoutineBatch, True,
+                                    needs_contract=True),
 }
 ALL_SCENARIOS = list(SCENARIOS)
 

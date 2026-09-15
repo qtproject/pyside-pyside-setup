@@ -52,6 +52,11 @@ package's handoff. The names this change uses:
 | FT3 | owning Python references and synchronized mutable layout |
 | FT10 | dynamic meta-object publication and lifetime |
 | FT12 | GC, shutdown, finalization and fork boundaries |
+| B16-1 | the signature and converter bootstrap publishing process globals |
+| B16-2 | the `qAddPostRoutine` callback queue, unsynchronized |
+| B16-3 | the QObject-pointer metatype registration and its global hash |
+| B16-5 | the process-global `__doc__` recursion counter |
+| FT9 | synchronizing the converter and runtime global registries |
 
 Every statement stands without them. They are here so that a reader who has
 the review can find the passage a sentence came from.
@@ -255,6 +260,8 @@ locks are not in here: they are not ours, and no order over them is claimed.
 | `ModuleData` static | 3 | C++ function-local static guard | `sbkmodule.cpp` | Python during first initialization - to be replaced by native-only storage | no |
 | Connection hash | 5 | `std::mutex` | `dynamicslot.cpp`, 5 sites | container operations only: the key is built before the lock, and `QObject::disconnect()` runs after it | no |
 | Meta-object builder | 4 | `std::recursive_mutex`, waiter detaches | `signalmanager.cpp` | `PyErr_WarnEx()`, reached from the method signature check - the parse and the publication are both outside now, and what is left is B15-3 | yes |
+| Post-routine queue | 8 | `std::mutex` | `core_snippets.cpp`, 2 sites | container operations only: the reference is taken after the append, and the batch runs after the lock | no |
+| QObject-pointer metatype | 8 | `std::mutex` | `pyside.cpp`, 1 site | `QMetaType::fromName()` and `QMetaType::id()`, Qt's registration; as a leaf, a lock of ours reached from there trips rather than deadlocks | no |
 
 The `ModuleData` guard is the one row the tracking cannot see: a
 compiler-generated guard has no acquisition site to wrap, so it is ranked
@@ -264,10 +271,12 @@ for it. Every other row is noted where it is acquired.
 The rank is the order they may be taken in: a thread may only take a lock
 that ranks above every one it already holds, so any two of them are always
 taken the same way round and no pair of threads can hold them crosswise. The
-state lock ranks highest because it is the leaf - nothing may be acquired
-while it is held, which is what lets a transaction end without waiting for
-anything. The lazy-type lock ranks lowest because it is the one that
-legitimately spans other work.
+leaves share the highest rank - nothing may be acquired while one is held,
+which is what lets a transaction end without waiting for anything. They share
+it rather than queue above one another on purpose: the check is a strict
+"<", so equal ranks refuse to nest in either direction, while distinct ones
+would quietly permit the lower leaf under the higher. The lazy-type lock
+ranks lowest because it is the one that legitimately spans other work.
 
 A rank is a claim, so it is checked and not merely written here:
 `checkLockRank()` asserts it before every acquisition, and `lockNestings()`
@@ -904,6 +913,69 @@ None of them is reached with another binding lock held, which is what makes
 them acceptable rather than the absence of a callback today. A new
 Python-calling static needs the same check.
 
+### Post routines run from a batch
+
+`qAddPostRoutine()` queues callbacks from any thread, and they run at Qt's
+teardown or in `QCoreApplication::shutdown()` (B16-2). A runner that walks
+the live queue lets a callback append under the iterator, and a raising
+callback leaves its exception pending for the next call.
+
+The runner takes the pending callbacks out as a batch under a short
+lock and calls them with no lock held: a Python call under a raw lock
+deadlocks against stop-the-world. Registrations made meanwhile go into the
+next batch, and the loop ends on an empty one. A raised exception is
+reported through `PyErr_WriteUnraisable()` and the batch goes on. A
+registration owns its callback before it publishes it: a runner may take
+the batch and release that reference as soon as the lock is gone.
+
+The loop stops after 1024 batches per run. A routine that re-registers
+itself would otherwise hang shutdown, and a build with a GIL has no other
+path.
+What is left after the limit is reported and released, not run.
+
+Bit `PostRoutineBatch`; cleared, the runner walks the live queue, and a
+debug build asserts on a registration during the walk.
+
+### QObject-pointer metatypes
+
+`createQObjectPtrMetaType()` asks `QMetaType::fromName()` whether the
+pointer name is taken and registers an interface if not (B16-3). Two
+threads registering the same name can both get "not taken". Qt does not reject
+the second registration: `registerCustomType()` in `qmetatype.cpp` finds the
+name among its aliases, stores the existing id into the new interface and
+returns it. The caller gets a valid `QMetaType` whose meta-object is the
+other class's, with no error. This applies to any code registering custom
+metatypes by name from more than one thread.
+
+The question and the registration run under one lock. It is a leaf and
+held across `QMetaType::id()`: a lock of ours reached from Qt's
+registration aborts a debug build instead of deadlocking. Qt's own locks
+are outside the ranks; for those the claim is that Qt's registration never
+calls back into `createQObjectPtrMetaType()`.
+
+The meta-object sits in a record next to the interface, and the record is
+never freed. `metaObjectFunc()` reads it through the interface pointer Qt
+hands back, so a Qt callback reads nothing another thread inserts.
+
+There is no bit and no test for the lock: a failpoint in the window would
+park under the lock, which `failpoint()` refuses. Claiming the name under
+a short lock (FT9), running `fromName()` and `id()` unlocked and publishing
+the result would take `QMetaType::id()` out of the lock and make the window
+testable.
+
+### Documentation recursion
+
+`handle_doc()` suppresses the generated help text while it builds one,
+because `make_helptext()` asks the object for its own `__doc__` (B16-5).
+With one process-wide counter, a thread asking for an unrelated `__doc__`
+while another builds help text gets the raw descriptor, and two threads
+losing an increment can leave it nonzero for good. The depth is per thread
+in the free-threaded build. A build with a GIL keeps its one counter,
+although `make_helptext()` runs Python and can switch threads there too.
+The globals the signature bootstrap publishes (B16-1) are not covered.
+
+Bit `DocRecursionPerThread`; cleared, the shared counter is back.
+
 ### The two caches on a virtual call
 
 A generated virtual override caches two things: the name of the Python method
@@ -1316,6 +1388,10 @@ claim:
     cleared bit trips. That scenario needs a build with the assertions in
     it, and `run.py` skips it where they are absent rather than reading
     the silence as a result.
+  - `PostRoutineBatch` has two `run.py` scenarios and no `proof-*`:
+    `post_routine_batch` for the live-queue walk, `post_routine_raises` for
+    the pending exception, which CPython's own assertion reports. Both need
+    the assertions compiled in, and `run.py` skips them otherwise.
 
 A mechanism that no scenario can take away does not get a bit. The readiness
 flag on lazily created types is one such, and so is `Shiboken::CacheSlot`:
