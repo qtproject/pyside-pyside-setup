@@ -12,17 +12,19 @@ sys.path.append(os.fspath(Path(__file__).resolve().parents[1]))
 from init_paths import init_test_paths
 init_test_paths(False)
 
-from PySide6.QtNetwork import QHttpHeaders
+from PySide6.QtNetwork import QHttpHeaders, QHttpHeaderRangeSet
 
 
 class QHttpHeadersTest(unittest.TestCase):
     '''Test case for QHttpHeaders.'''
 
     def testRange(self):
-        h = QHttpHeaders()
+        hs = QHttpHeaderRangeSet()
         r = [(1, 2), (3, 4), (5, None)]
-        h.setRangeValues(r)
-        self.assertEqual(h.rangeValues(), r)
+        hs.setRanges(r)
+        h = QHttpHeaders()
+        h.setRangeValues(hs)
+        self.assertEqual(h.rangeValues().ranges(), r)
 
 
 if __name__ == '__main__':
