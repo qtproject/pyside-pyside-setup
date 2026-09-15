@@ -15,6 +15,7 @@
 #include <autodecref.h>
 #include <basewrapper.h>
 #include <gilstate.h>
+#include <sbkheldlocks.h>
 #include <sbkpep.h>
 #include <pep384ext.h>
 #include <sbkstaticstrings.h>
@@ -572,6 +573,11 @@ using namespace Shiboken;
 
 void MetaObjectBuilderPrivate::parsePythonType(PyTypeObject *type)
 {
+    // Application code runs below: attribute lookup on every class member,
+    // warnings, delayed enum resolution. None of it may run with a binding
+    // raw lock held, so this is where the contract is asked.
+    SBK_ASSERT_NO_RAW_LOCK();
+
     // Get all non-QObject-derived base types in method resolution order, filtering out the types
     // that can't have signals, slots or properties.
     // This enforces registering of all signals and slots at type parsing time, and not later at

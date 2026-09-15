@@ -50,8 +50,10 @@ from typing import NamedTuple
 
 import ftoptions
 
-REPO = Path(__file__).resolve().parents[5]
-WORKER = Path(__file__).resolve().parent / "stress.py"
+HERE = Path(__file__).resolve()
+REPO = HERE.parents[5]
+WORKER = HERE.parent / "stress.py"
+METAOBJECT = HERE.parent / "metaobject_lock.py"
 
 
 def has_sample(build: Path) -> bool:
@@ -61,16 +63,49 @@ def has_sample(build: Path) -> bool:
     return bool(list(build.glob("shiboken6/tests/samplebinding/sample.*")))
 
 
+def built_lib(build: Path, where: str, name: str) -> Path | None:
+    """One built library, which is what the tree is asked about below."""
+    directory = build / where
+    libs = sorted(directory.glob(f"{name}*.dylib")) \
+        + sorted(directory.glob(f"{name}*.so"))
+    return libs[0] if libs else None
+
+
+def undefined_symbols(lib: Path) -> str:
+    """What the library calls and does not define. Raises when nm does not
+    answer: an empty result is indistinguishable from a clean one, and both
+    callers below read a blank as the absence of what they look for."""
+    nm = subprocess.run(["nm", "-u", os.fspath(lib)],
+                        capture_output=True, text=True)
+    if nm.returncode != 0:
+        sys.exit(f"nm failed on {lib}: {nm.stderr.strip()}")
+    return nm.stdout
+
+
 def tree_sanitizer(build: Path) -> str:
     """Which sanitizer the tree was built with, asked of the tree itself."""
-    libshiboken = build / "shiboken6" / "libshiboken"
-    libs = sorted(libshiboken.glob("libshiboken6*.dylib")) \
-        + sorted(libshiboken.glob("libshiboken6*.so"))
-    if not libs:
+    lib = built_lib(build, "shiboken6/libshiboken", "libshiboken6")
+    if lib is None:
         return "none"
-    undefined = subprocess.run(["nm", "-u", os.fspath(libs[0])],
-                               capture_output=True, text=True).stdout
+    undefined = undefined_symbols(lib)
     return next((t for t in ("tsan", "asan") if t in undefined), "none")
+
+
+def contract_checked(build: Path) -> bool:
+    """Whether the lock contract assertions are compiled in, asked of the
+    tree itself. Under NDEBUG checkNoRawLock() is an inline no-op, so a
+    scenario that proves itself by tripping it stays clean in both columns
+    - a skip that reads like a pass.
+
+    libpyside is the one to ask, not libshiboken: the assertion the
+    meta-object scenario trips sits in parsePythonType(), and whether that
+    call survived the preprocessor is libpyside's NDEBUG, not the one the
+    function was declared under. A call that is there shows up as an
+    undefined symbol."""
+    lib = built_lib(build, "pyside6/libpyside", "libpyside6")
+    if lib is None:
+        return False
+    return "checkNoRawLock" in undefined_symbols(lib)
 
 
 def latest_build_dir() -> Path:
@@ -108,6 +143,7 @@ if built_with != "none":
     sys.exit(f"{BUILD} is built with {built_with}. This harness counts "
              "crashes and cannot tell a sanitizer's abort from one.")
 PKG = BUILD.parent / "package_for_wheels"
+CONTRACT = contract_checked(BUILD)
 
 REPEATS = int(os.environ.get("REPEATS", "10"))
 TIMEOUT = int(os.environ.get("STRESS_TIMEOUT", "120"))
@@ -125,6 +161,7 @@ class Scenario(NamedTuple):
     argument: str | None
     lock: Lock          # the bit its A/B clears
     proof: bool         # must crash without that bit, or it shows nothing
+    needs_contract: bool = False   # nothing to say without the assertions
 
 
 QQML_TEST = (REPO / "sources" / "pyside6" / "tests" / "QtQml"
@@ -195,6 +232,15 @@ SCENARIOS = {
     # Kept so the crash stays visible until it is fixed.
     "dynamic_property": Scenario(WORKER, "dynamic_property", Lock.StateLock, False),
     "virtual_override": Scenario(WORKER, "virtual_override", Lock.StateLock, False),
+    # The odd one out: one thread, one subprocess, no timing window, so a
+    # single repeat says as much as fifty. Adding a dynamic signal parses the
+    # Python type, and the contract assertion at the top of parsePythonType()
+    # aborts when the parse is put back under the meta-object lock. It needs
+    # a debug build - under NDEBUG the assertion is empty and both columns
+    # read ok, which is a skip wearing a pass.
+    "metaobject_lock": Scenario(METAOBJECT, None,
+                                Lock.MetaObjectParseOutsideLock, True,
+                                needs_contract=True),
 }
 ALL_SCENARIOS = list(SCENARIOS)
 
@@ -268,6 +314,13 @@ def main() -> int:
     print(header)
     print("-" * len(header))
 
+    # Before the table, not after it: a scenario this build cannot answer
+    # would otherwise be launched 2 x REPEATS times to have its result
+    # thrown away.
+    skipped = [] if CONTRACT else [s for s in scenarios
+                                   if SCENARIOS[s].needs_contract]
+    scenarios = [s for s in scenarios if s not in skipped]
+
     verdicts = {}
     for scenario in scenarios:
         cells = []
@@ -305,6 +358,10 @@ def main() -> int:
         print("Raise STRESS_ITERS/STRESS_THREADS/REPEATS, or the scenario "
               "does not actually share what the lock protects.")
         return 1
+    if skipped:
+        print("SKIPPED: no contract assertions in this build, so these prove "
+              "nothing here -> " + " ".join(skipped))
+        print("Build with --debug to run them.")
     proofs = [s for s in scenarios if SCENARIOS[s].proof]
     print(f"PROVEN ({len(proofs)}): crashes without the lock, clean with it -> "
           + " ".join(proofs))

@@ -28,6 +28,7 @@
 #include <sbkstring.h>
 #include <sbkstaticstrings.h>
 #include <sbkerrors.h>
+#include <sbkftoptions.h>
 
 #include <QtCore/qbytearrayview.h>
 #include <QtCore/qcoreapplication.h>
@@ -672,6 +673,63 @@ public:
     }
 };
 
+// The instance builder of an object that is getting its first dynamic method.
+// Building one parses the Python type, which runs application code, so the
+// candidate is built with no lock held and published in one atomic step.
+// The loser's candidate is deleted below.
+static PySide::MetaObjectBuilder *instanceBuilder(PyObject *pySelf,
+                                                  const QMetaObject *metaObject)
+{
+    {
+        MetaObjectBuilderLock builderLock;
+        if (auto *dmo = metaBuilderFromDict(SbkObject_GetDict_NoRef(pySelf)))
+            return dmo;
+    }
+
+    // The bit cleared puts the parse back under the lock, where the
+    // assertion in parsePythonType() finds it.
+    std::optional<MetaObjectBuilderLock> parseLock;
+    if (!Shiboken::FreeThreading::optionEnabled(
+            Shiboken::FreeThreading::MetaObjectParseOutsideLock)) {
+        parseLock.emplace();
+    }
+
+    auto *candidate = new PySide::MetaObjectBuilder(Py_TYPE(pySelf), metaObject);
+    // The capsule owns the candidate from here on. Dropping the last
+    // reference runs destroyMetaObject() and frees the builder, which is how
+    // a losing candidate is given back.
+    PyObject *pyDmo = PyCapsule_New(candidate, nullptr, destroyMetaObject);
+    if (pyDmo == nullptr) {
+        delete candidate;
+        return nullptr;
+    }
+
+    // Look and publish in one step, which is why no lock is taken around it:
+    // the dictionary decides who wins. PyDict_SetDefaultRef() stores the
+    // capsule only if the key is free, hands back whichever capsule is in
+    // there afterwards, and reaches no interpreter code on either path.
+    PyObject *published = nullptr;
+    const int rc = PyDict_SetDefaultRef(SbkObject_GetDict_NoRef(pySelf),
+                                        metaObjectAttr(), pyDmo, &published);
+    parseLock.reset();
+
+    // Won: the instance dictionary holds the reference that keeps it. Lost or
+    // failed: this was the last one, and the builder goes with it, below the
+    // lock where a destructor belongs.
+    Py_DECREF(pyDmo);
+    if (rc < 0) {
+        Py_XDECREF(published);
+        return nullptr;
+    }
+
+    // The dictionary keeps the capsule alive from here; this reference was
+    // only needed to read it.
+    auto *winner = reinterpret_cast<PySide::MetaObjectBuilder *>(
+        PyCapsule_GetPointer(published, nullptr));
+    Py_DECREF(published);
+    return winner;
+}
+
 #endif // Py_GIL_DISABLED
 
 static int addMetaMethod(QObject *source, const QByteArray &signature,
@@ -693,16 +751,23 @@ static int addMetaMethod(QObject *source, const QByteArray &signature,
         return -1;
     }
 
+    // Before the builder is looked up: a message handler installed from
+    // Python runs inside this, and nothing borrowed may be in hand while it
+    // does.
+    if (type == QMetaMethod::Slot) {
+        qCWarning(lcPySide).noquote().nospace()
+            << "libpyside: Warning: Registering dynamic slot \""
+            << signature << "\" on " << PySide::debugQObject(source)
+            << ". Consider annotating with " << slotSignature(signature);
+    }
+
 #ifdef Py_GIL_DISABLED
     auto *pySelf = self.pyObject();
-    // The same lock retrieveMetaObject() takes, for the other half: this adds
-    // methods to the builder and can create it, and two threads registering on
-    // one object would otherwise build two. Recursive, so a caller that
-    // already holds it pays nothing.
-    MetaObjectBuilderLock builderLock;
+    PySide::MetaObjectBuilder *dmo = instanceBuilder(pySelf, metaObject);
+    if (dmo == nullptr)
+        return -1;
 #else
     auto *pySelf = reinterpret_cast<PyObject *>(self);
-#endif
     auto *dict = SbkObject_GetDict_NoRef(pySelf);
     PySide::MetaObjectBuilder *dmo = metaBuilderFromDict(dict);
     // Create a instance meta object
@@ -712,14 +777,14 @@ static int addMetaMethod(QObject *source, const QByteArray &signature,
         PyObject_SetAttr(pySelf, metaObjectAttr(), pyDmo);
         Py_DECREF(pyDmo);
     }
+#endif
 
-    if (type == QMetaMethod::Slot) {
-        qCWarning(lcPySide).noquote().nospace()
-            << "libpyside: Warning: Registering dynamic slot \""
-            << signature << "\" on " << PySide::debugQObject(source)
-            << ". Consider annotating with " << slotSignature(signature);
-    }
-
+#ifdef Py_GIL_DISABLED
+    // The mutation, under the same lock retrieveMetaObject() takes: two
+    // threads would otherwise write one QMetaObjectBuilder at once. That dmo
+    // stays valid across the gap is an argument, not a guarantee - B15-3.
+    MetaObjectBuilderLock builderLock;
+#endif
     return type == QMetaMethod::Signal ? dmo->addSignal(signature) : dmo->addSlot(signature);
 }
 

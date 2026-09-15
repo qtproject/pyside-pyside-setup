@@ -16,10 +16,15 @@ namespace Shiboken::FreeThreading {
 /// Kill switches for what free-threaded builds add, as bit flags in one
 /// variable, in the style of PYSIDE6_OPTION_PYTHON_ENUM:
 ///
-///     PYSIDE6_OPTION_FT=0b1111111111111  all of them (the default)
-///     PYSIDE6_OPTION_FT=0b0111111111111  without the constructor's slot claim
-///     PYSIDE6_OPTION_FT=0b0000000000011  the locks only
+///     PYSIDE6_OPTION_FT unset     all of them (the default)
+///     PYSIDE6_OPTION_FT=on        the same, spelled out
+///     PYSIDE6_OPTION_FT=0b11      the locks only
 ///     PYSIDE6_OPTION_FT=off       without any of them
+///
+/// Taking one measure away means setting every other bit, and how many
+/// there are grows with the enum below - which is why no example here
+/// spells that number out. It went stale twice. The tests build the mask
+/// from this header (ftoptions.py), and so should anything else.
 ///
 /// A set bit keeps the measure, a cleared bit takes it away and puts back
 /// what was there before it. Unset means all of them, and that is the only
@@ -81,7 +86,12 @@ enum Option : int
     /// anything. Cleared, the slot is claimed after the C++ constructor as
     /// it was, and the thread that loses has already built its object and,
     /// for a QObject, hung it in Qt's tree.
-    ConstructorClaim = 0x1000
+    ConstructorClaim = 0x1000,
+    /// Parsing a Python type for a dynamic meta-object happens with no
+    /// binding lock held. Cleared, the instance builder is built under the
+    /// meta-object lock as it was, and the attribute lookups, warnings and
+    /// enum resolution of parsePythonType() run with a raw lock held.
+    MetaObjectParseOutsideLock = 0x2000
 };
 
 /// Whether opt is enabled. The environment is read once, on first use.

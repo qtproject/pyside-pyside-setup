@@ -120,8 +120,18 @@ forbids. Four places have a lock of their own:
 
 `SignalManager::retrieveMetaObject()`, the dynamic meta object
 : `QMetaObjectBuilder` is not thread-safe and its builder is shared per type.
-  Both the update and the methods added by `addMetaMethod()` take one
-  recursive lock, again entered detached.
+  The update and the methods added by `addMetaMethod()` take one recursive
+  lock, again entered detached. Building an instance's first builder does
+  not: the parse runs application code, so the candidate is built with no
+  lock held and published with `PyDict_SetDefaultRef()` - one atomic step
+  that is the whole transaction, which is why no lock is taken around it.
+  `PyObject_SetAttr()` could not stay there: it reaches `SelectFeatureSet()`,
+  which compiles a class statement and clears a live type dictionary, and a
+  finalizer running under a raw lock that defines a QObject subtype arrives
+  back in `parsePythonType()` and trips the contract assertion.
+  `__METAOBJECT__` is an internal key no feature set has anything to say
+  about, so the attribute machinery was a detour - the lookup beside it read
+  the dictionary directly all along.
 
 `dynamicslot.cpp`, the connection hash
 : A plain mutex over a global container. Entries are taken out under it and
@@ -150,7 +160,7 @@ locks are not in here: they are not ours, and no order over them is claimed.
 | Class hierarchy | 2 | `std::mutex` | `bindingmanager.cpp`, 2 sites | taking or publishing the edge snapshot. A traversal walks its snapshot with the lock released, because it creates types and calls discovery functions | no |
 | `ModuleData` static | 3 | C++ function-local static guard | `sbkmodule.cpp` | Python during first initialization - to be replaced by native-only storage | no |
 | Connection hash | 5 | `std::mutex` | `dynamicslot.cpp`, 5 sites | container operations only: the key is built before the lock, and `QObject::disconnect()` runs after it | no |
-| Meta-object builder | 4 | `std::recursive_mutex`, waiter detaches | `signalmanager.cpp` | builder construction, which reaches Python - to be narrowed to a generation commit | yes |
+| Meta-object builder | 4 | `std::recursive_mutex`, waiter detaches | `signalmanager.cpp` | `PyErr_WarnEx()`, reached from the method signature check - the parse and the publication are both outside now, and what is left is B15-3 | yes |
 
 The `ModuleData` guard is the one row the tracking cannot see: a
 compiler-generated guard has no acquisition site to wrap, so it is ranked
