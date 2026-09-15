@@ -407,13 +407,18 @@ stranger". Two conversions inside one window still get the same wrapper: the
 tombstone is asked first, and hands its stray back the way the map would
 have.
 
-Which means the tombstone has to fall, on every path. It does: the
-deallocator retires it after the C++ destructor, a deferred destruction
-retires it from the same queue, and `~BindingManager` takes over whatever is
-left at shutdown. All three go through `retireWrapper()` or the shutdown
-sweep, and both take the strays out under the map lock and invalidate them
-outside it - invalidation walks the object graph and takes the state lock,
-which the map lock may not span.
+Which means the tombstone has to fall while anything can still observe it.
+It does: the deallocator retires it after the C++ destructor, and a deferred
+destruction retires it from the same queue. Both go through
+`retireWrapper()`, which takes the strays out under the map lock and
+invalidates them outside it - invalidation walks the object graph and takes
+the state lock, which the map lock may not span.
+
+What is left when `~BindingManager` runs is abandoned, tombstones included.
+Static destruction runs on whichever thread unloads the image, possibly
+after finalization has begun, so it must not run Python. Nothing is lost:
+`Object::destroy()` only detaches a wrapper from its C++ object and never
+runs the destructor.
 
 The bit is `DyingStrays`; cleared, such a wrapper is registered like any
 other, and `stray-outlives-tombstone` sees it still valid after the

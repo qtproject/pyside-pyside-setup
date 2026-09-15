@@ -3318,10 +3318,10 @@ void callCppDestructorsIfOwned(SbkObject *pyObj)
 }
 
 // The C++ side gave up the object: the wrapper's C++ instance is gone or is
-// about to be. Called from the generated wrapper destructor and, at shutdown,
-// from ~BindingManager. Every caller holds a reference to the wrapper (an
-// AcquiredWrapper on this build), so the decref below is never the last one
-// and self stays valid to the end.
+// about to be. Called from the generated wrapper destructor and from the
+// qstandarditemmodel-clear snippet. Every caller holds a reference to the
+// wrapper (an AcquiredWrapper on this build), so the decref below is never
+// the last one and self stays valid to the end.
 void destroy(SbkObject *self, void *cppData)
 {
     SBK_ASSERT_STATE_UNLOCKED();

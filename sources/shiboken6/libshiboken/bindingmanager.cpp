@@ -681,64 +681,29 @@ BindingManager::~BindingManager()
 #ifdef SHIBOKEN_INSTALL_FREE_DEBUG_HOOK
     debugRemoveFreeHook();
 #endif
-#ifndef NDEBUG
+#ifdef Py_GIL_DISABLED
+    // No Python work here: a static destructor may run on any thread after
+    // finalization has begun. Entries still in the map are abandoned.
+    // See "A retired identity leaves a tombstone" in the free-threading notes.
+#else
+#  ifndef NDEBUG
     if (Shiboken::pyVerbose() > 0)
         dumpWrapperMap();
-#endif
+#  endif
     /* Cleanup hanging references. We just invalidate them as when
      * the BindingManager is being destroyed the interpreter is alredy
      * shutting down. */
     if (Py_IsInitialized()) {  // ensure the interpreter is still valid
-#ifdef Py_GIL_DISABLED
-        // One entry at a time, and destroy() outside the lock - the same rule
-        // visitAllPyObjects() follows: destroy() runs Python and C++
-        // destructors, which take this lock again, and a decref underneath a
-        // non-detaching mutex can stall a stop-the-world pause.
-        while (true) {
-            AcquiredWrapper wrapper;
-            const void *key = nullptr;
-            PyTypeObject *released = nullptr;
-            BindingManagerPrivate::StrayList strays;
-            {
-                WrapperMapGuard guard(m_d->wrapperMapLock);
-                if (m_d->wrapperMapper.empty())
-                    break;
-                const auto it = m_d->wrapperMapper.begin();
-                key = it->first;
-                wrapper = AcquiredWrapper::fromOwned(it->second.acquire());
-                if (wrapper.isNull()) {
-                    // Being deallocated elsewhere, or a tombstone; destroy()
-                    // would not reach either and the loop would never end.
-                    // A tombstone holds a reference to its type and the
-                    // wrappers it let through, and this is the third and last
-                    // way an entry leaves the map - the one that runs when a
-                    // retirement never came.
-                    released = it->second.takeTypeKey();
-                    strays = it->second.takeStrays();
-                    m_d->wrapperMapper.erase(it);
-                }
-            }
-            if (wrapper.isNull()) {
-                // Outside the lock: invalidation takes the state lock, and a
-                // decref may run a destructor.
-                invalidateStrays(strays);
-                Py_XDECREF(reinterpret_cast<PyObject *>(released));
-                continue;
-            }
-            Object::destroy(wrapper.object(), const_cast<void *>(key));
-        }
-#else // Py_GIL_DISABLED
         // Destroying under the lock, as this branch always did: with a GIL
         // nothing else reaches the map, and this runs at interpreter
-        // shutdown. The branch above may not do it, and that difference is
-        // what the contract buys.
+        // shutdown.
         WrapperMapGuard guard(m_d->wrapperMapLock);
         while (!m_d->wrapperMapper.empty()) {
             Object::destroy(m_d->wrapperMapper.begin()->second, const_cast<void *>(m_d->wrapperMapper.begin()->first));
         }
-#endif // Py_GIL_DISABLED
         assert(m_d->wrapperMapper.empty());
     }
+#endif // Py_GIL_DISABLED
     delete m_d;
 }
 
