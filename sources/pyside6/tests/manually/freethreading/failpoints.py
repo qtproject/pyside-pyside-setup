@@ -507,6 +507,169 @@ def test_destroy_while_call_in_flight() -> str:
     return "ok"
 
 
+def test_multiple_inheritance_pointer() -> str:
+    """The lease's multiple-inheritance pointer arithmetic. See README."""
+    try:
+        import sample
+    except ImportError:
+        return "skipped: the sample binding is not in this build"
+
+    obj = sample.MDerived1()
+
+    # Converted as a Base2: dynamic_cast finds MDerived1 again only if the
+    # pointer it was handed really is the Base2 subobject of this object.
+    if sample.MDerived1.transformFromBase2(obj) is not obj:
+        return "FAIL: converted as Base2, C++ did not find the same object"
+    if sample.MDerived1.transformFromBase1(obj) is not obj:
+        return "FAIL: converted as Base1, C++ did not find the same object"
+
+    # Received as a base: each base's own member, not the other's.
+    for owner, method, want in ((sample.Base1, "base1Method", 1),
+                                (sample.Base2, "base2Method", 2)):
+        got = getattr(owner, method)(obj)
+        if got != want:
+            return (f"FAIL: {owner.__name__}.{method}() on an MDerived1 "
+                    f"answered {got}, not {want}")
+
+    # And the derived override still wins where it should.
+    if obj.base2Method() != 20:
+        return f"FAIL: the override answered {obj.base2Method()}, not 20"
+    return "ok"
+
+
+def test_lease_carries_the_pointer_it_validated() -> str:
+    """B5-1: C++ deletes the object while a lease is out. See README."""
+    try:
+        import sample
+    except ImportError:
+        return "skipped: the sample binding is not in this build"
+
+    parent = sample.ObjectType()
+    # Built from Python, so its destructor reports through Object::destroy().
+    child = sample.ObjectType()
+    child.setObjectName("leased")
+    child.setParent(parent)
+    address = Shiboken.getCppPointer(child)[0]
+    result = {}
+
+    with Failpoint("lease-after-acquire") as point:
+        def read():
+            try:
+                result["address"] = int(Shiboken.VoidPtr(child))
+            except BaseException as exc:      # noqa: BLE001
+                result["error"] = repr(exc)
+
+        reader = threading.Thread(target=read)
+        reader.start()
+        if not point.wait_until_reached():
+            return "FAIL: the read never reached the failpoint"
+
+        # An armed point stops one thread; this call passes it.
+        parent.killChild("leased")
+
+        point.release()
+        reader.join(timeout=5)
+        if reader.is_alive():
+            return "FAIL: the reading thread did not come back"
+
+    if "error" in result:
+        return f"FAIL: the leased read raised {result['error']}"
+    got = result.get("address")
+    if got != address:
+        return (f"FAIL: the lease handed out {got:#x}, not the {address:#x} "
+                "its transaction validated")
+    return "ok"
+
+
+def test_generated_call_uses_the_leased_pointer() -> str:
+    """B5-1 on the receiver of a generated call. See README."""
+    try:
+        import sample
+    except ImportError:
+        return "skipped: the sample binding is not in this build"
+
+    parent = sample.ObjectType()
+    child = sample.ObjectType()
+    child.setObjectName("leased")
+    child.setParent(parent)
+    # objectTypeHash() hands back an unsigned int, so the comparison is
+    # against the low half of the address, not the whole of it.
+    address = Shiboken.getCppPointer(child)[0] & 0xffffffff
+    result = {}
+
+    with Failpoint("lease-after-acquire") as point:
+        def call():
+            try:
+                result["hash"] = hash(child)
+            except BaseException as exc:      # noqa: BLE001
+                result["error"] = repr(exc)
+
+        caller = threading.Thread(target=call)
+        caller.start()
+        if not point.wait_until_reached():
+            return "FAIL: the call never reached the failpoint"
+
+        parent.killChild("leased")
+
+        point.release()
+        caller.join(timeout=5)
+        if caller.is_alive():
+            return "FAIL: the calling thread did not come back"
+
+    if "error" in result:
+        return f"FAIL: the leased call raised {result['error']}"
+    got = result.get("hash")
+    if got != address:
+        return (f"FAIL: the call ran on {got:#x}, not on the {address:#x} "
+                "its lease validated")
+    return "ok"
+
+
+# Objects that have to outlive the test that made them.
+_KEEP_ALIVE = []
+
+
+def test_derived_metatype_takes_a_lease() -> str:
+    """A wrapper whose class brings a metaclass of its own. See README."""
+    class OwnMeta(type(QObject)):
+        pass
+
+    class Subclassed(QObject, metaclass=OwnMeta):
+        pass
+
+    obj = Subclassed()
+    # Kept alive on purpose: destroying such a type crashes.
+    # See README.
+    _KEEP_ALIVE.append(obj)
+    address = Shiboken.getCppPointer(obj)[0]
+    result = {}
+
+    with Failpoint("lease-after-acquire") as point:
+        def read():
+            try:
+                result["address"] = int(Shiboken.VoidPtr(obj))
+            except BaseException as exc:      # noqa: BLE001
+                result["error"] = repr(exc)
+
+        reader = threading.Thread(target=read)
+        reader.start()
+        reached = point.wait_until_reached()
+        point.release()
+        reader.join(timeout=5)
+        if reader.is_alive():
+            return "FAIL: the reading thread did not come back"
+
+    if not reached:
+        return "FAIL: the read took no lease, so it never reached the failpoint"
+    if "error" in result:
+        return f"FAIL: the leased read raised {result['error']}"
+    got = result.get("address")
+    if got != address:
+        return (f"FAIL: the lease handed out {got:#x}, not the {address:#x} "
+                "the wrapper holds")
+    return "ok"
+
+
 def test_two_threads_one_constructor() -> str:
     """B5-3: two threads run the same base __init__ on one object."""
     class Sub(QObject):
@@ -1131,12 +1294,94 @@ def test_metaobject_commit_race() -> str:
     return f"ok (both signals in one meta object, {indexes})"
 
 
+def _cpp_deleted(obj) -> bool:
+    """Whether the wrapper has lost its C++ object. Takes no lease, so it
+    answers for a claimed object too, where isValid() says False either way."""
+    return "<<Deleted>>" in Shiboken.dump(obj)
+
+
+def test_container_element_lease_is_kept() -> str:
+    """An element of a container argument is deleted mid-call. See README."""
+    if not FREE_THREADED:
+        return "skipped: a build with a GIL has no conversion leases"
+    try:
+        import sample
+    except ImportError:
+        return "skipped: the sample binding is not in this build"
+
+    parked = threading.Event()
+    go = threading.Event()
+    seen: dict[str, object] = {}
+
+    class Parker(sample.ObjectType):
+        def event(self, event):
+            parked.set()
+            # No timeout: a parker that gave up would run the victim's call
+            # on freed memory.
+            go.wait()
+            return True
+
+    class Victim(sample.ObjectType):
+        def event(self, event):
+            seen["alive"] = not _cpp_deleted(self)
+            return True
+
+    parker, victim = Parker(), Victim()
+
+    def call():
+        try:
+            seen["count"] = sample.ObjectType.processEvent(
+                [parker, victim], sample.Event(sample.Event.BASIC_EVENT))
+        except BaseException as exc:      # noqa: BLE001
+            seen["error"] = repr(exc)
+
+    # A daemon, because the failure below leaves it parked on purpose.
+    caller = threading.Thread(target=call, daemon=True)
+    caller.start()
+    if not parked.wait(timeout=5):
+        go.set()
+        return "FAIL: the first element's event() never ran"
+
+    # The list was converted; only the kept leases stand between this delete
+    # and the pointer processEvent() calls next.
+    Shiboken.delete(victim)
+    if _cpp_deleted(victim):
+        # Not released: the native loop would call event() on freed memory.
+        return ("FAIL: the element was destroyed while the call still held "
+                "its pointer - its lease ended with the conversion")
+
+    go.set()
+    caller.join(timeout=5)
+    if caller.is_alive():
+        return "FAIL: the calling thread did not come back"
+    if "error" in seen:
+        return f"FAIL: processEvent() raised {seen['error']}"
+    if seen.get("count") != 2 or not seen.get("alive"):
+        return (f"FAIL: the second element was not called on a live object "
+                f"(count {seen.get('count')}, alive {seen.get('alive')})")
+    if not _cpp_deleted(victim):
+        return "FAIL: the deferred delete never ran after the call"
+    return "ok - the delete waited for the call that held the element"
+
+
 TESTS = {
     "weakrefs": Test(test_weakrefs_while_deallocating),
     # Was an expected FAIL on a wrong explanation; see the docstring.
     "lease-vs-destroy": Test(test_destroy_while_call_in_flight),
     "replacement-while-dying": Test(test_replacement_wrapper_while_dying),
     "two-thread-ctor": Test(test_two_threads_one_constructor),
+    "lease-snapshot": Test(test_lease_carries_the_pointer_it_validated),
+    "proof-lease-snapshot": Test(lambda: counterproof(
+        "LeaseSnapshot", "lease-snapshot")),
+    # No proof-* row, on purpose.
+    # See the README.
+    "mi-pointer": Test(test_multiple_inheritance_pointer),
+    "leased-receiver": Test(test_generated_call_uses_the_leased_pointer),
+    "proof-leased-receiver": Test(lambda: counterproof(
+        "LeaseSnapshot", "leased-receiver")),
+    "metatype-subclass": Test(test_derived_metatype_takes_a_lease),
+    "proof-metatype-subclass": Test(lambda: counterproof(
+        "MetatypeSubclassLease", "metatype-subclass")),
     # Asked with the reservation off: ConstructorClaim now refuses the second
     # thread before it ever reaches the transaction, so with everything on
     # there is nothing left for this one to see.
@@ -1213,6 +1458,9 @@ TESTS = {
     # runs the interpreter with a binding raw lock held.
     "proof-metaobject-parse": Test(lambda: counterproof(
         "MetaObjectParseOutsideLock", "metaobject-commit-race")),
+    "container-element-lease": Test(test_container_element_lease_is_kept),
+    "proof-conversion-leases": Test(lambda: counterproof(
+        "ConversionLeasesKept", "container-element-lease")),
 }
 
 

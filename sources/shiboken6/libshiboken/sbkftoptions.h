@@ -91,7 +91,22 @@ enum Option : int
     /// binding lock held. Cleared, the instance builder is built under the
     /// meta-object lock as it was, and the attribute lookups, warnings and
     /// enum resolution of parsePythonType() run with a raw lock held.
-    MetaObjectParseOutsideLock = 0x2000
+    MetaObjectParseOutsideLock = 0x2000,
+    /// A lease asks the instance whether it is a wrapper. Cleared, it
+    /// compares the metatype for identity, and a class that brings a
+    /// metaclass of its own - class Meta(type(QObject), ABCMeta) - is not
+    /// recognized as one: the call runs with no lease at all.
+    MetatypeSubclassLease = 0x4000,
+    /// A lease carries the C++ pointer it copied in the transaction that
+    /// granted it, and its holder uses that copy. Cleared, the holder reads
+    /// the wrapper's pointer array a second time, after the transaction -
+    /// where a concurrent Object::destroy() has already detached it.
+    LeaseSnapshot = 0x8000,
+    /// A lease taken inside an argument's conversion - on a container
+    /// element, on a wrapper passed as void * - is kept until the native call
+    /// has returned. Cleared, it ends with the conversion, and a concurrent
+    /// Shiboken.delete() frees the element before the call uses its pointer.
+    ConversionLeasesKept = 0x1000000
 };
 
 /// Whether opt is enabled. The environment is read once, on first use.

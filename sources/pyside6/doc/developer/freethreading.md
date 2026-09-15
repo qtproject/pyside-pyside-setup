@@ -20,11 +20,11 @@ and what it all means for application code.
 ## Where the `Bn-m` and `FTn` names come from
 
 A few passages here, and a few comments in the sources, name a finding as
-`B9-1` or a work package as `FT8`. They come from an external free-threading
-review of this branch: `Bn-m` is finding *m* of its review step *n*, `FTn` is
-the work package those findings were grouped into, and an `FT8 invariant`,
-`design` or `validation row` is a numbered item inside that package's
-handoff. The names this change uses:
+`B9-1` or a work package as `FT8`. They come from Neil Schemenauer's
+free-threading review of this branch: `Bn-m` is finding *m* of its review
+step *n*, `FTn` is the work package those findings were grouped into, and an
+`FT8 invariant`, `design` or `validation row` is a numbered item inside that
+package's handoff. The names this change uses:
 
 | Name | What it is |
 |---|---|
@@ -42,6 +42,7 @@ handoff. The names this change uses:
 | B5-3 | a generated constructor publishing itself in separate steps |
 | FT4 | carrying leases and pointer snapshots to their final use |
 | FT8 | restoring the short raw-lock contract - this series |
+| B5-1 | a lease holder reading the pointer array after its transaction |
 
 Every statement stands without them. They are here so that a reader who has
 the review can find the passage a sentence came from.
@@ -106,6 +107,61 @@ and its children, so a child cannot be freed under a call in flight.
 The mark is one-way. A wrapper whose C++ side is being destroyed is refused
 for good, where a build with a GIL would let the call through into freed
 memory.
+
+### What a lease hands out
+
+A lease copies the C++ pointer in the transaction that validates the
+wrapper, and the holder uses that copy. Reading the wrapper's pointer array
+again after the transaction would be a read with no lock, and
+`Object::destroy()` may detach the array in between. Generated receivers,
+copy and implicit converters, smart-pointer receivers, `VoidPtr` and
+`pythonToCppPointer()` all take `lease.pointer()`.
+
+A caller that asks for a particular base gets that base's pointer: the
+multiple-inheritance slot is read in the transaction, the special cast is
+applied to the copy afterwards. The slot index is computed before the lock,
+because `getTypeIndexOnHierarchy()` calls `PyType_IsSubtype()` and the state
+lock has to stay a leaf. The call guard stays keyed on the canonical
+pointer, so two bases of one object share one guard.
+
+The limit: a lease defers only the destruction the binding drives. A delete
+issued by C++ reaches `Object::destroy(SbkObject *, void *)`, which does not
+consult `activeCalls`. There the lease guarantees the pointer, not the
+object - no holder reads the array while another thread detaches it, but
+the object behind the copy may already be gone.
+
+The bit is `LeaseSnapshot`; cleared, holders read the array again.
+
+### Which objects a lease accepts
+
+The lease asks the instance whether it is a wrapper (`Object::checkType()`),
+not whether its metatype is `SbkObjectType` itself. A class may bring its
+own metaclass as long as it derives from ours - an abstract base class over
+`QObject` does, `class Meta(type(QObject), ABCMeta)` - and an identity test
+does not recognize such objects, so their calls would take no lease.
+
+The bit is `MetatypeSubclassLease`; cleared, the identity test is back.
+
+### Leases taken inside a conversion
+
+Generated code leases an argument that is a wrapper, but not the wrappers an
+argument only carries: the elements of a `QList<QAction *>`, or a wrapper
+passed as `void *`. Their converters lease each one and hand out a pointer,
+so the lease ends inside the converter, and a concurrent `Shiboken.delete()`
+frees the object before the native call reads it.
+
+Such an argument now gets a `Shiboken::Object::ConversionLeases` holder next
+to it: while it is converted the holder collects on its thread - each
+converter's lease, plus a reference on the wrapper, since the container may
+drop the element - and releases them after the native call has returned.
+Collecting nests per thread: an iterator's `__next__` fills a holder of its
+own, while every other lease it takes joins the outer one and waits for it.
+
+Not covered: a pointer converted in an injected snippet, and a container of
+pointers a Python override returns, which the native side keeps.
+
+The bit is `ConversionLeasesKept`; cleared, each lease ends with its
+converter, and `container-element-lease` sees its element freed mid-call.
 
 ## Locks that are deliberately separate
 
@@ -634,7 +690,15 @@ hands out a pointer into the object's memory. That is older than any of this
 and belongs to the lease work; it is named here so the table is not read as a
 completeness argument it does not make.
 
-`CallLease{self}` takes the guard, arguments are constructed with
+Not every reader takes its pointer from the lease yet (see "What a lease
+hands out"):
+
+- `tp_getattro` and `tp_setattro` take a lease and then read the pointer
+  again. They do not dereference it on the spot.
+- `Object::cppPointers()`, `PySide::convertToQObject()` and the property
+  setter of QtRemoteObjects' dynamic classes take no lease at all.
+
+`CallLease{self, <type>}` takes the guard, arguments are constructed with
 `Guard::Omit`. That is deliberate: a contended inner guard would run the
 native call with the receiver's own guard suspended, so two nested guards are
 never a two-object transaction. Where the generator emits
@@ -876,7 +940,7 @@ build is reported as missing and the run ends as partial, never as green.
                                  interpreter running the script
     GIL_PYTHON, GIL_BUILD_DIR    the traditional row, no default
 
-A test may declare that its expected outcome is not "ok": `lease-vs-destroy`
-is listed as failing while the lease-duration work (FT4) is open, and the
-runner can treat a deliberate deadlock's timeout as the pass. Both mean the same thing - the day the cell
-changes, the entry comes out.
+A test may declare that its expected outcome is not "ok":
+`lazy-lock-spans-destruction` is listed as failing while B13-5 is open, and
+the runner can treat a deliberate deadlock's timeout as the pass. Both mean
+the same thing - the day the cell changes, the entry comes out.

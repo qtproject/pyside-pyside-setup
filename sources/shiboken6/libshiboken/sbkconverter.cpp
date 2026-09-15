@@ -494,14 +494,32 @@ void pythonToCppPointer(PyTypeObject *type, PyObject *pyIn, void *cppOut)
 #ifdef Py_GIL_DISABLED
     // A lease, like the copy converter next to it: an argument is covered by
     // its caller, but container conversions and the signal code reach this
-    // without one. No guard - the pointer is only copied out. A failed lease
-    // has set the RuntimeError, and the null written here is what the
-    // caller's error check sees, after the call ran with it.
-    Shiboken::Object::CallLease lease{pyIn, Shiboken::Object::CallLease::Guard::Omit};
-    if (!lease) {
-        *reinterpret_cast<void **>(cppOut) = nullptr;
+    // without one. No guard - the pointer is only copied out, and it is the
+    // lease's copy for type. None gives an inactive lease and a null. A
+    // failed lease has set the RuntimeError, and the null written here is
+    // what the caller's error check sees, after the call ran with it.
+    if (ObjectType::checkType(type)) {
+        // Pinned: ~CallLease writes to the wrapper, and a container
+        // conversion hands in a borrowed element another thread can drop.
+        Py_INCREF(pyIn);
+        Shiboken::AutoDecRef pin{pyIn};
+        // A generated call collecting for this argument keeps the lease
+        // until the native call has returned.
+        // See "Leases taken inside a conversion" in the free-threading notes.
+        auto *kept = Shiboken::Object::ConversionLeases::collecting();
+        if (kept != nullptr && pyIn != Py_None) {
+            kept->add(pyIn, type, reinterpret_cast<void **>(cppOut));
+            return;
+        }
+        Shiboken::Object::CallLease lease{pyIn, type, Shiboken::Object::CallLease::Guard::Omit};
+        if (!lease) {
+            *reinterpret_cast<void **>(cppOut) = nullptr;
+            return;
+        }
+        *reinterpret_cast<void **>(cppOut) = lease.pointer();
         return;
     }
+    // Not a wrapper type: nothing to lease.
 #endif
     *reinterpret_cast<void **>(cppOut) = pyIn == Py_None
         ? nullptr
@@ -513,17 +531,11 @@ void pythonToCppPointer(const SbkConverter *converter, PyObject *pyIn, void *cpp
     assert(converter);
     assert(pyIn);
     assert(cppOut);
-#ifdef Py_GIL_DISABLED
-    // As the overload above.
-    Shiboken::Object::CallLease lease{pyIn, Shiboken::Object::CallLease::Guard::Omit};
-    if (!lease) {
+    if (pyIn == Py_None) {
         *reinterpret_cast<void **>(cppOut) = nullptr;
         return;
     }
-#endif
-    *reinterpret_cast<void **>(cppOut) = pyIn == Py_None
-        ? nullptr
-        : cppPointer(converter->pythonType, reinterpret_cast<SbkObject *>(pyIn));
+    pythonToCppPointer(converter->pythonType, pyIn, cppOut);
 }
 
 static void _pythonToCppCopy(const SbkConverter *converter, PyObject *pyIn, void *cppOut)

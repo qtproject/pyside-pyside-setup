@@ -3,6 +3,7 @@
 // Qt-Security score:significant reason:default
 
 #include "voidptr.h"
+#include "autodecref.h"
 #include "pep384ext.h"
 #include "sbkconverter.h"
 #include "basewrapper.h"
@@ -88,16 +89,21 @@ int SbkVoidPtrObject_init(PyObject *self, PyObject *args, PyObject *kwds)
     }
     // Shiboken::Object wrapper.
     if (Shiboken::Object::checkType(addressObject)) {
-        auto *sbkOther = reinterpret_cast<SbkObject *>(addressObject);
 #ifdef Py_GIL_DISABLED
         // Reading cptr needs a lease like every other reader: another thread
         // may be deleting the wrapper. No guard - nothing is called on the
-        // object, the pointer is only copied out.
+        // object, the lease's copy is only stored. Pinned: ~CallLease writes
+        // to the wrapper and does not hold it.
+        Py_INCREF(addressObject);
+        Shiboken::AutoDecRef pin{addressObject};
         Shiboken::Object::CallLease lease{addressObject, Shiboken::Object::CallLease::Guard::Omit};
         if (!lease)
             return -1;
-#endif
+        sbkSelf->cptr = lease.pointer();
+#else
+        auto *sbkOther = reinterpret_cast<SbkObject *>(addressObject);
         sbkSelf->cptr = sbkOther->d->cptr[0];
+#endif
         sbkSelf->size = size;
         sbkSelf->isWritable = isWritable > 0;
         return 0;
@@ -361,18 +367,27 @@ static PythonToCppFunc VoidPtrToCppIsConvertible(PyObject *pyIn)
 
 static void SbkObjectToCpp(PyObject *pyIn, void *cppOut)
 {
-    auto *sbkIn = reinterpret_cast<SbkObject *>(pyIn);
 #ifdef Py_GIL_DISABLED
-    // As above: the converter reaches cptr from any thread, so it takes a
-    // lease. A failed lease has set the RuntimeError; the null it writes is
-    // what the caller's error check sees.
+    // As above. A failed lease has set the RuntimeError; the null it writes
+    // is what the caller's error check sees.
+    Py_INCREF(pyIn);
+    Shiboken::AutoDecRef pin{pyIn};
+    // A void * argument keeps the lease until the native call has returned.
+    // See "Leases taken inside a conversion" in the free-threading notes.
+    if (auto *kept = Shiboken::Object::ConversionLeases::collecting()) {
+        kept->add(pyIn, nullptr, reinterpret_cast<void **>(cppOut));
+        return;
+    }
     Shiboken::Object::CallLease lease{pyIn, Shiboken::Object::CallLease::Guard::Omit};
     if (!lease) {
         *reinterpret_cast<void **>(cppOut) = nullptr;
         return;
     }
-#endif
+    *reinterpret_cast<void **>(cppOut) = lease.pointer();
+#else
+    auto *sbkIn = reinterpret_cast<SbkObject *>(pyIn);
     *reinterpret_cast<void **>(cppOut) = sbkIn->d->cptr[0];
+#endif
 }
 
 static PythonToCppFunc SbkObjectToCppIsConvertible(PyObject *pyIn)

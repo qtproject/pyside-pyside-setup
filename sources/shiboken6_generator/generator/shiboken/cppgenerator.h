@@ -193,6 +193,16 @@ private:
                                                    const GeneratorContext &context);
 
     static void writeCppSelfVarDef(TextStream &s, CppSelfDefinitionFlags flags = {});
+    static void writeLeasedCppSelf(TextStream &s,
+                                   const GeneratorContext &context,
+                                   const QString &className,
+                                   bool useWrapperClass,
+                                   CppSelfDefinitionFlags flags);
+    static void writeConvertedCppSelf(TextStream &s,
+                                      const GeneratorContext &context,
+                                      const QString &className,
+                                      bool useWrapperClass,
+                                      CppSelfDefinitionFlags flags);
     static void writeSmartPointerCppSelfDefinition(TextStream &s,
                                                    const GeneratorContext &,
                                                    ErrorReturn errorReturn = ErrorReturn::Default,
@@ -228,12 +238,19 @@ private:
         Omit
     };
 
+    /// Name of the lease variable for a wrapper expression ("self",
+    /// "pyArgs[0]"). The smart pointer generator writes one too.
+    static QString leaseVariableName(const QString &pyObj);
+
     /// Writes the lease on the C++ object of a wrapper, held for the rest of
     /// the enclosing scope. Replaces the plain validity check: it both
     /// validates and keeps the C++ object alive across the call.
+    /// With desiredType, the lease also carries the pointer for that type,
+    /// taken in the transaction that granted it.
     static void writeCallLease(TextStream &s, const QString &pyObj,
                                ErrorReturn errorReturn,
-                               LeaseGuard guard = LeaseGuard::Take);
+                               LeaseGuard guard = LeaseGuard::Take,
+                               const QString &desiredType = {});
 
     static void writeTypeCheck(TextStream &s, const AbstractMetaType &argType,
                                const QString &argumentName,

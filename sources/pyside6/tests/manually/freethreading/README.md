@@ -268,6 +268,56 @@ The method is therefore bound before the failpoint is armed, and then the
 test parks where it always meant to: inside the call, with the lease held.
 The destruction is deferred, the call returns its value.
 
+### mi-pointer - an equivalence, and no proof row
+
+A lease asked for a base type computes that base's pointer itself: the
+multiple-inheritance slot, then the special cast. Single inheritance never
+reaches either. `sample.MDerived1` has two C++ bases and a cast function,
+and the test converts and calls it as each base.
+
+There is no `proof-*` row. Clearing `LeaseSnapshot` puts back
+`Conversions::cppPointer()`, the function this arithmetic has to
+reproduce, so both must answer the same. The row guards the arithmetic
+against drift; it is not a measure.
+
+### lease-snapshot, proof-lease-snapshot
+
+B5-1: C++ deletes an object while a lease on it is out, and
+`Object::destroy()` detaches the pointer array without consulting
+`activeCalls`. The lease cannot defer that, but its holder must not read
+the array a second time.
+
+`Shiboken.VoidPtr(obj)` takes a lease, parks at `lease-after-acquire` and
+copies the pointer out; the parent's `killChild()` runs in between. The
+test expects the address the lease validated.
+
+`proof-lease-snapshot` clears `LeaseSnapshot` and expects zero: the holder
+reads the detached array again. The re-read tests for null, so the window
+shows as a value rather than a crash.
+
+### leased-receiver, proof-leased-receiver
+
+The same window for the receiver of a generated call. `hash()` on
+`sample.ObjectType` returns the receiver pointer without dereferencing it,
+so the test can report the pointer of an object that is already gone
+without touching freed memory. It expects the address the lease validated;
+`proof-leased-receiver` clears `LeaseSnapshot` and expects the null that
+`Conversions::cppPointer()` reads.
+
+### metatype-subclass, proof-metatype-subclass
+
+A class with a metaclass derived from the binding's, as in
+`class Meta(type(QObject), ABCMeta)`. The test needs two answers: reaching
+`lease-after-acquire` shows that a lease was taken at all, and the address
+from `Shiboken.VoidPtr()` shows it is the right one.
+`proof-metatype-subclass` clears `MetatypeSubclassLease`; the object then
+takes no lease and never reaches the failpoint.
+
+The object is kept alive until the process ends. Destroying a wrapper type
+with its own metaclass crashes the interpreter, with a GIL and with every
+bit cleared - a separate defect that would otherwise end the run before it
+reports.
+
 ### two-thread-ctor, proof-ctor-commit
 
 B5-3: two threads run the same base `__init__` on one object. One parks
@@ -593,3 +643,21 @@ Taking the lifetime authority out of `__dict__` is what removes both.
 and no failpoint: it is the `metaobject_lock` scenario in `run.py`, kept
 because a single-threaded reproducer is worth more than a race when the
 answer is an assertion.
+
+### container-element-lease, proof-conversion-leases
+
+An element of a container argument is deleted while the call runs: the call
+leases an argument that is a wrapper, not the wrappers a list carries, and
+each element's lease is taken inside its converter. `processEvent([parker,
+victim], event)` on a `sample.ObjectType` calls `event()` on each element in
+order; the parker's override waits while another thread calls
+`Shiboken.delete(victim)`.
+
+Expected: the delete is deferred while the parker waits, the victim's
+`event()` runs on a live object, and the delete has run after the call.
+`Shiboken.dump()` separates destroyed from claimed, `isValid()` does not.
+
+`proof-conversion-leases` clears `ConversionLeasesKept`: the delete runs at
+once and the parker is left on a daemon thread - released, the native loop
+would call `event()` on freed memory.
+

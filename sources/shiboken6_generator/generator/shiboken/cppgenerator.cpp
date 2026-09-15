@@ -89,8 +89,7 @@ TextStream &operator<<(TextStream &str, const sbkUnusedVariableCast &c)
     return str;
 }
 
-// Name of the lease variable for a wrapper expression ("self", "pyArgs[0]").
-static QString leaseVariableName(const QString &pyObj)
+QString CppGenerator::leaseVariableName(const QString &pyObj)
 {
     QString result = "sbkLease_"_L1 + pyObj;
     for (QChar &c : result) {
@@ -2023,6 +2022,13 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
     QString pyInVariable = u"pyIn"_s;
     const QString leaseVar = leaseVariableName(pyInVariable);
     const QString outPtr = u"reinterpret_cast<"_s + typeName + u" *>(cppOut)"_s;
+    const bool smartPointer = classContext.forSmartPointer();
+    const QString sourceType = smartPointer
+        ? cpythonTypeNameExt(classContext.preciseType())
+        : cpythonTypeNameExt(typeEntry);
+    const QString leasedValue = u'*' + leaseVar + u".pointer<"_s
+        + (smartPointer ? getFullTypeName(classContext.preciseType())
+                        : getFullTypeName(typeEntry)) + u">()"_s;
     // The lease keeps the source object alive across the copy. Callers that
     // pass a wrapper as an argument already hold one, but the converter is
     // also reached from container conversions and from the signal code, where
@@ -2041,13 +2047,22 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
         // open: a nested critical section suspends the outer one, so taking
         // it here would leave the receiver unguarded for the whole call.
         << "Shiboken::Object::CallLease " << leaseVar << '{' << pyInVariable
-        << ", Shiboken::Object::CallLease::Guard::Omit};\n"
+        << ", " << sourceType << ", Shiboken::Object::CallLease::Guard::Omit};\n"
         << "if (!" << leaseVar << ")\n" << indent
         << "return;\n" << outdent
         << "#endif\n";
-    if (!classContext.forSmartPointer()) {
-        QString value = u'*' + cpythonWrapperCPtr(typeEntry, pyInVariable);
-        c << '*' << outPtr << " = " << (needsMove ? stdMove(value) : value) << ';';
+    // The lease's copy without a GIL, the read through the wrapper with one.
+    const auto assign = [&](const QString &target, const QString &read) {
+        c << "#ifdef Py_GIL_DISABLED\n"
+            << target << " = "
+            << (needsMove ? stdMove(leasedValue) : leasedValue) << ";\n"
+            << "#else\n"
+            << target << " = " << (needsMove ? stdMove(read) : read) << ";\n"
+            << "#endif\n";
+    };
+    if (!smartPointer) {
+        const QString value = u'*' + cpythonWrapperCPtr(typeEntry, pyInVariable);
+        assign(u'*' + outPtr, value);
     } else {
         auto ste = std::static_pointer_cast<const SmartPointerTypeEntry>(typeEntry);
         const QString resetMethod = ste->resetMethod();
@@ -2058,8 +2073,9 @@ void CppGenerator::writeConverterFunctions(TextStream &s, const AbstractMetaClas
         else
             c << "ptr->" << resetMethod << "();\n";
         const QString value = u'*' + cpythonWrapperCPtr(classContext.preciseType(), pyInVariable);
-        c << outdent << "else\n" << indent
-            << "*ptr = " << (needsMove ? stdMove(value) : value) << ';';
+        c << outdent << "else\n" << indent;
+        assign(u"*ptr"_s, value);
+        c << outdent;
     }
 
     writePythonToCppFunction(s, c.toString(), sourceTypeName, targetTypeName);
@@ -2853,23 +2869,68 @@ void CppGenerator::writeCppSelfDefinition(TextStream &s,
     const QString className = useWrapperClass
         ? context.wrapperName() : getFullTypeName(metaClass);
 
-    // Lease the C++ object for the rest of this wrapper's scope.
-    writeCallLease(s, PYTHON_SELF_VAR, errorReturn);
+    // PYSIDE-131: A class method writes no cppSelf - tr() is the single
+    // case for now. It keeps the lease, but has no type to point it at.
+    const bool writesCppSelf = flags.testFlag(CppSelfAsReference)
+        || flags.testFlag(HasStaticOverload)
+        || !flags.testFlag(HasClassMethodOverload);
 
-    if (flags.testFlag(CppSelfAsReference)) {
-         writeCppSelfVarDef(s, flags | CppSelfDefinitionFlag::MaybeUnused);
-         writeCppSelfConversion(s, context, className, useWrapperClass);
-         s << ";\n";
-         return;
+    // Lease the C++ object for the rest of this wrapper's scope; cppSelf is
+    // the lease's pointer for this class.
+    writeCallLease(s, PYTHON_SELF_VAR, errorReturn, LeaseGuard::Take,
+                   writesCppSelf ? cpythonTypeNameExt(metaClass->typeEntry())
+                                 : QString{});
+    if (!writesCppSelf)
+        return;
+
+    s << "#ifdef Py_GIL_DISABLED\n";
+    writeLeasedCppSelf(s, context, className, useWrapperClass, flags);
+    s << "#else\n";
+    writeConvertedCppSelf(s, context, className, useWrapperClass, flags);
+    s << "#endif\n";
+}
+
+/// cppSelf from the lease's copy.
+/// See "What a lease hands out" in the free-threading notes.
+void CppGenerator::writeLeasedCppSelf(TextStream &s,
+                                      const GeneratorContext &context,
+                                      const QString &className,
+                                      bool useWrapperClass,
+                                      CppSelfDefinitionFlags flags)
+{
+    if (flags.testFlag(HasStaticOverload)) {
+        // No "if (self)": a static overload is called without a receiver, and
+        // the inactive lease that gives it hands out a null pointer.
+        s << maybeUnused << className << " *" << CPP_SELF_VAR << " = ";
+    } else {
+        writeCppSelfVarDef(s, flags | CppSelfDefinitionFlag::MaybeUnused);
     }
 
-    if (!flags.testFlag(HasStaticOverload)) {
-        if (!flags.testFlag(HasClassMethodOverload)) {
-            // PYSIDE-131: The single case of a class method for now: tr().
-            writeCppSelfVarDef(s, flags | CppSelfDefinitionFlag::MaybeUnused);
-            writeCppSelfConversion(s, context, className, useWrapperClass);
-            s << ";\n";
-        }
+    // With the protected hack, className is the wrapper's name and the
+    // lease still hands out the real type.
+    const QString targetName = useWrapperClass
+        ? getFullTypeName(context.metaClass()) : className;
+    if (useWrapperClass)
+        s << "static_cast<" << className << " *>(";
+    s << leaseVariableName(PYTHON_SELF_VAR) << ".pointer<" << targetName << ">()";
+    if (useWrapperClass)
+        s << ')';
+    s << ";\n";
+}
+
+/// cppSelf read from the wrapper, as a build with a GIL does.
+void CppGenerator::writeConvertedCppSelf(TextStream &s,
+                                         const GeneratorContext &context,
+                                         const QString &className,
+                                         bool useWrapperClass,
+                                         CppSelfDefinitionFlags flags)
+{
+    // Reference form first: the flags exclude each other only through a
+    // Q_ASSERT.
+    if (flags.testFlag(CppSelfAsReference) || !flags.testFlag(HasStaticOverload)) {
+        writeCppSelfVarDef(s, flags | CppSelfDefinitionFlag::MaybeUnused);
+        writeCppSelfConversion(s, context, className, useWrapperClass);
+        s << ";\n";
         return;
     }
 
@@ -2955,7 +3016,8 @@ void CppGenerator::writeFunctionReturnErrorCheckSection(TextStream &s,
 }
 
 void CppGenerator::writeCallLease(TextStream &s, const QString &pyObj,
-                                  ErrorReturn errorReturn, LeaseGuard guard)
+                                  ErrorReturn errorReturn, LeaseGuard guard,
+                                  const QString &desiredType)
 {
     // The lease replaces "if (!Shiboken::Object::isValid(x)) return ...". The
     // check alone was only sufficient while one coarse lock was held from
@@ -2969,9 +3031,11 @@ void CppGenerator::writeCallLease(TextStream &s, const QString &pyObj,
     // receiver unguarded for the duration of the call.
     const auto guardArg = guard == LeaseGuard::Omit
         ? ", Shiboken::Object::CallLease::Guard::Omit"_L1 : ""_L1;
+    const QString typeArg = desiredType.isEmpty()
+        ? QString{} : ", "_L1 + desiredType;
     s << "#ifdef Py_GIL_DISABLED\n"
         << "Shiboken::Object::CallLease " << leaseVar << '{' << pyObj
-        << guardArg << "};\n"
+        << typeArg << guardArg << "};\n"
         << "if (!" << leaseVar << ")\n"
         << indent << errorReturn << outdent
         << "#else\n"
@@ -3103,6 +3167,20 @@ void CppGenerator::writeTypeCheck(TextStream &s,
     writeTypeCheck(s, argType, argumentName, numberType, rejectNull);
 }
 
+// Whether converting a value of type reads C++ pointers out of wrappers the
+// argument lease does not cover: pointer elements of a container, at any
+// depth, or a wrapper passed as void *.
+static bool convertsWrapperPointers(const AbstractMetaType &type)
+{
+    if (type.isVoidPointer())
+        return true;
+    for (const auto &instantiation : type.instantiations()) {
+        if (instantiation.isPointerToWrapperType() || convertsWrapperPointers(instantiation))
+            return true;
+    }
+    return false;
+}
+
 qsizetype CppGenerator::writeArgumentConversion(TextStream &s,
                                                 const AbstractMetaType &argType,
                                                 const QString &argName,
@@ -3115,9 +3193,25 @@ qsizetype CppGenerator::writeArgumentConversion(TextStream &s,
     qsizetype result = 0;
     if (argType.typeEntry()->isCustom() || argType.typeEntry()->isVarargs())
         return result;
-    if (argType.isWrapperType())
+    // The converter leases each wrapper it reads a pointer from; the holder
+    // keeps those leases until the call has returned.
+    // See "Leases taken inside a conversion" in the free-threading notes.
+    const bool keepLeases = !argType.isWrapperType() && convertsWrapperPointers(argType);
+    QString keptLeasesVar;
+    if (argType.isWrapperType()) {
         writeCallLease(s, pyArgName, errorReturn, LeaseGuard::Omit);
+    } else if (keepLeases) {
+        keptLeasesVar = leaseVariableName(pyArgName) + "_kept"_L1;
+        s << "#ifdef Py_GIL_DISABLED\n"
+            << "Shiboken::Object::ConversionLeases " << keptLeasesVar << ";\n"
+            << "#endif\n";
+    }
     result = writePythonToCppTypeConversion(s, argType, pyArgName, argName, context, defaultValue);
+    if (keepLeases) {
+        s << "#ifdef Py_GIL_DISABLED\n"
+            << keptLeasesVar << ".endCollect();\n"
+            << "#endif\n";
+    }
     if (castArgumentAsUnused)
         s << sbkUnusedVariableCast(argName);
     return result;
@@ -3811,6 +3905,10 @@ void CppGenerator::writeIsPythonConvertibleToCppFunction(TextStream &s,
     s << "return {};\n" << outdent << "}\n";
 }
 
+// How cpythonWrapperCPtr() spells a read, split where the type sits.
+static const auto castToWrapper = u"reinterpret_cast< "_s;
+static const auto castToCppPointer = u" *>(Shiboken::Conversions::cppPointer("_s;
+
 void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
                                                        const AbstractMetaType &sourceType,
                                                        const AbstractMetaType &targetType,
@@ -3824,13 +3922,35 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
     StringStream c(TextStream::Language::Cpp);
     if (conversion.isEmpty())
         conversion = u'*' + cpythonWrapperCPtr(sourceType, u"pyIn"_s);
+
+    // The same conversion on the lease's copy. Only reads this generator
+    // wrote are replaced; a typesystem snippet stays as it is spelled.
+    const QString pyInLeaseVar = leaseVariableName(u"pyIn"_s);
+    QString leasedConversion = conversion;
+    if (sourceType.isWrapperType()) {
+        for (const QString &read : {cpythonWrapperCPtr(sourceType, u"pyIn"_s),
+                                    cpythonWrapperCPtr(sourceType.typeEntry(),
+                                                       u"pyIn"_s)}) {
+            if (read.isEmpty() || !leasedConversion.contains(read))
+                continue;
+            // Take the type from the read itself: a smart pointer spells out
+            // its instantiation, a plain wrapper does not.
+            const auto typeEnd = read.indexOf(castToCppPointer);
+            if (typeEnd < 0)
+                continue;
+            const QString castType =
+                read.mid(castToWrapper.size(), typeEnd - castToWrapper.size());
+            leasedConversion.replace(read, pyInLeaseVar + u".pointer<"_s
+                                           + castType + u">()"_s);
+            break;
+        }
+    }
     if (sourceType.isWrapperType()) {
         // Reading the source wrapper's C++ pointer needs a lease, the same
         // way the copy converters do: an argument passed to a wrapped
         // function is covered by the caller, but container conversions and
         // the signal code reach this without one. void return, so the
         // exception the lease raises is the error path.
-        const QString pyInLeaseVar = leaseVariableName(u"pyIn"_s);
         c << "#ifdef Py_GIL_DISABLED\n"
             // The lease keeps the C++ object alive, not the wrapper, and
             // no caller's reference covers this one: container conversions
@@ -3842,7 +3962,8 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
             // No guard: this only copies the object out, and a guard here
             // would nest inside the receiver's and suspend it.
             << "Shiboken::Object::CallLease " << pyInLeaseVar
-            << "{pyIn, Shiboken::Object::CallLease::Guard::Omit};\n"
+            << "{pyIn, " << sourcePyType
+            << ", Shiboken::Object::CallLease::Guard::Omit};\n"
             << "if (!" << pyInLeaseVar << ")\n" << indent
             << "return;\n" << outdent
             << "#endif\n";
@@ -3852,10 +3973,19 @@ void CppGenerator::writePythonToCppConversionFunctions(TextStream &s,
     const QString fullTypeName = targetType.isSmartPointer()
         ? targetType.cppSignature()
         : getFullTypeName(targetType.typeEntry());
-    c << "*reinterpret_cast<" << fullTypeName << " *>(cppOut) = "
-        << fullTypeName << '('
+    const QString target = u"*reinterpret_cast<"_s + fullTypeName
+        + u" *>(cppOut) = "_s + fullTypeName + u'(';
+    if (leasedConversion != conversion) {
+        c << "#ifdef Py_GIL_DISABLED\n" << target
+            << (sourceType.useStdMove() ? stdMove(leasedConversion)
+                                        : leasedConversion)
+            << ");\n#else\n";
+    }
+    c << target
         << (sourceType.useStdMove() ? stdMove(conversion) : conversion)
         << ");";
+    if (leasedConversion != conversion)
+        c << "\n#endif\n";
     QString sourceTypeName = fixedCppTypeName(sourceType);
     QString targetTypeName = fixedCppTypeName(targetType);
     writePythonToCppFunction(s, c.toString(), sourceTypeName, targetTypeName);

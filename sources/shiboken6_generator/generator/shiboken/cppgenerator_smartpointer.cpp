@@ -262,10 +262,18 @@ void CppGenerator::writeSmartPointerCppSelfDefinition(TextStream &s,
                                                       CppSelfDefinitionFlags flags)
 {
     Q_ASSERT(context.forSmartPointer());
-    writeCallLease(s, u"self"_s, errorReturn);
+    // cppSelf is the lease's copy, as for any other receiver.
+    writeCallLease(s, u"self"_s, errorReturn, LeaseGuard::Take,
+                   cpythonTypeNameExt(context.preciseType()));
+
+    s << "#ifdef Py_GIL_DISABLED\n";
+    writeCppSelfVarDef(s, flags);
+    s << leaseVariableName(u"self"_s) << ".pointer<::"
+        << context.preciseType().cppSignature() << ">();\n"
+        << "#else\n";
     writeCppSelfVarDef(s, flags);
     writeSmartPointerCppSelfConversion(s, context);
-    s << ";\n";
+    s << ";\n#endif\n";
 }
 
 void CppGenerator::writeSmartPointerConverterInitialization(TextStream &s,

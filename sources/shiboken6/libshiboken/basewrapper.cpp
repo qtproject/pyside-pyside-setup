@@ -2689,7 +2689,8 @@ static std::vector<SbkObject *> collectOwnedLocked(SbkObject *root)
 // Children that carry a C++ wrapper are not in this set on purpose: nothing
 // releases their entry here. Their own C++ destructor calls Object::destroy()
 // and that is what takes it out - with the window Object::destroy() has and
-// cannot close, which the tombstone chapter of freethreading.md declares.
+// cannot close, which the tombstone chapter of the free-threading notes
+// declares.
 //
 // Two more things this does not cover, both stated rather than guessed at.
 // It is a snapshot taken before the destructors run, so a child reparented
@@ -3033,15 +3034,16 @@ enum class LeaseFailure
 /// has to leave the transaction with the lease: Object::destroy() clears
 /// cptr under the lock without consulting activeCalls, so re-reading it
 /// after the unlock can find a null pointer the lease was granted against.
-static LeaseFailure acquireCallLeaseLocked(SbkObject *self, void **cppObject)
+static LeaseFailure acquireCallLeaseLocked(SbkObject *self, int slot,
+                                           void **canonical, void **adjusted)
 {
     SBK_ASSERT_STATE_LOCKED();
     auto *priv = self->d;
     // Read the flag, do not walk the type. isUserType() would call
     // checkType() and so PyType_IsSubtype(), which reads Python-owned type
     // state under our lock; the state lock has to stay a leaf. CallLease has
-    // already established that the metatype is SbkObjectType_TypeF(), so the
-    // subtype walk is redundant here anyway.
+    // already established that this is a wrapper instance, so the subtype
+    // walk is redundant here anyway.
     if (!priv->cppObjectCreated
         && PepType_SOTP(Py_TYPE(reinterpret_cast<PyObject *>(self)))->is_user_type) {
         return LeaseFailure::NotInitialized;
@@ -3049,8 +3051,26 @@ static LeaseFailure acquireCallLeaseLocked(SbkObject *self, void **cppObject)
     if (!priv->validCppObject || priv->pendingDestruction || priv->cptr == nullptr)
         return LeaseFailure::Deleted;
     ++priv->activeCalls;
-    *cppObject = priv->cptr[0];
+    // The canonical pointer keys the call guard, the adjusted one is what
+    // the holder uses.
+    *canonical = priv->cptr[0];
+    *adjusted = priv->cptr[slot];
     return LeaseFailure::None;
+}
+
+/// Reads the pointer array again after the lease, as a holder without the
+/// copy does; used only with LeaseSnapshot cleared. Tests for null, so the
+/// window reads as zero instead of crashing.
+static void *rereadPointerAfterLease(SbkObject *self, PyTypeObject *desiredType)
+{
+    if (desiredType == nullptr) { // what voidptr.cpp read
+        auto *cptr = self->d->cptr;
+        return cptr != nullptr ? cptr[0] : nullptr;
+    }
+    auto *sourceType = Py_TYPE(reinterpret_cast<PyObject *>(self));
+    if (ObjectType::hasCast(sourceType)) // what Conversions::cppPointer() read
+        return ObjectType::cast(sourceType, self, desiredType);
+    return cppPointer(self, desiredType);
 }
 
 static void releaseCallLease(SbkObject *self)
@@ -3098,40 +3118,77 @@ static void releaseCallLease(SbkObject *self)
     }
 }
 
+/// Whether pyObj is a wrapper instance and needs a lease.
+/// See "Which objects a lease accepts" in the free-threading notes;
+/// MetatypeSubclassLease.
+static bool needsCallLease(PyObject *pyObj)
+{
+    if (Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::MetatypeSubclassLease))
+        return Object::checkType(pyObj);
+    return Py_TYPE(reinterpret_cast<PyObject *>(Py_TYPE(pyObj))) == SbkObjectType_TypeF();
+}
+
 CallLease::CallLease(PyObject *pyObj, Guard guardMode)
 {
-    // Same acceptance as isValid(PyObject *): anything that is not a wrapper
-    // instance needs no lease.
-    if (pyObj == nullptr || pyObj == Py_None || PyType_Check(pyObj) != 0
-        || Py_TYPE(reinterpret_cast<PyObject *>(Py_TYPE(pyObj))) != SbkObjectType_TypeF()) {
+    acquire(pyObj, nullptr, guardMode);
+}
+
+CallLease::CallLease(PyObject *pyObj, PyTypeObject *desiredType, Guard guardMode)
+{
+    acquire(pyObj, desiredType, guardMode);
+}
+
+void CallLease::acquire(PyObject *pyObj, PyTypeObject *desiredType, Guard guardMode)
+{
+    // Same acceptance as isValid(PyObject *, bool): anything that is not a
+    // wrapper instance needs no lease. A type object is not a wrapper
+    // instance, so it needs none either.
+    if (pyObj == nullptr || pyObj == Py_None || !needsCallLease(pyObj)) {
         m_valid = true;
         return;
     }
 
     auto *self = reinterpret_cast<SbkObject *>(pyObj);
+    auto *sourceType = Py_TYPE(pyObj);
+    auto *sotp = PepType_SOTP(sourceType);
+
+    // Before the lock: getTypeIndexOnHierarchy() calls PyType_IsSubtype(),
+    // and the state lock has to stay a leaf.
+    int slot = 0;
+    if (desiredType != nullptr && sotp->is_multicpp)
+        slot = getTypeIndexOnHierarchy(sourceType, desiredType);
+
     LeaseFailure failure = LeaseFailure::None;
-    void *cppObject = nullptr;
+    void *canonical = nullptr;
+    void *adjusted = nullptr;
     {
         StateLockGuard guard;
-        failure = acquireCallLeaseLocked(self, &cppObject);
+        failure = acquireCallLeaseLocked(self, slot, &canonical, &adjusted);
     }
 
     if (failure == LeaseFailure::None) {
         m_self = self;
+        m_pointer = adjusted;
+        // The special cast depends on the pointer alone and runs on the copy.
+        if (desiredType != nullptr && sotp->mi_specialcast != nullptr)
+            m_pointer = sotp->mi_specialcast(m_pointer, desiredType);
 
         // Qt is not thread-safe per object, and without a GIL nothing else
         // serializes two threads that reach the same one. Taken outside the
-        // state lock, because it spans the C++ call.
+        // state lock, because it spans the C++ call. Keyed on the canonical
+        // pointer, so that two bases of one object share one guard.
         //
         // Only for the receiver: nesting critical sections does not lock two
         // objects, the inner one suspends the outer - see Guard in the header.
         if (guardMode == Guard::Take)
-            m_guard.acquire(cppObject);
+            m_guard.acquire(canonical);
 
         m_valid = true;
         // Lease and guard are in place, the native call has not run yet:
         // the point where a test lets destruction reach the same wrapper.
         SBK_FAILPOINT("lease-after-acquire");
+        if (!Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::LeaseSnapshot))
+            m_pointer = rereadPointerAfterLease(self, desiredType);
         return;
     }
 
@@ -3153,6 +3210,76 @@ CallLease::~CallLease()
     m_guard.release();
     if (m_self != nullptr)
         releaseCallLease(m_self);
+}
+
+struct ConversionLeases::Entry
+{
+    Entry(PyObject *pyObj, PyTypeObject *desiredType, Entry *following)
+        : pin(Py_NewRef(pyObj)),
+          lease(pyObj, desiredType, CallLease::Guard::Omit),
+          next(following)
+    {
+    }
+
+    // Declared before the lease, so it is released after it: ~CallLease
+    // writes to the wrapper, and the container may have dropped the element.
+    AutoDecRef pin;
+    CallLease lease;
+    Entry *next;
+};
+
+static thread_local ConversionLeases *collectingConversionLeases = nullptr;
+
+ConversionLeases::ConversionLeases()
+    : m_previous(collectingConversionLeases)
+{
+    collectingConversionLeases = this;
+}
+
+ConversionLeases::~ConversionLeases()
+{
+    endCollect();
+    // With no lock held: the last lease may run a deferred C++ destructor.
+    while (m_entries != nullptr) {
+        auto *entry = m_entries;
+        m_entries = entry->next;
+        delete entry;
+    }
+}
+
+void ConversionLeases::endCollect()
+{
+    if (!m_collecting)
+        return;
+    assert(collectingConversionLeases == this);
+    collectingConversionLeases = m_previous;
+    m_collecting = false;
+}
+
+ConversionLeases *ConversionLeases::collecting()
+{
+    // See "Leases taken inside a conversion" in the free-threading notes;
+    // ConversionLeasesKept.
+    if (!Shiboken::FreeThreading::optionEnabled(Shiboken::FreeThreading::ConversionLeasesKept))
+        return nullptr;
+    return collectingConversionLeases;
+}
+
+bool ConversionLeases::add(PyObject *pyObj, PyTypeObject *desiredType, void **cppOut)
+{
+    *cppOut = nullptr;
+    auto *entry = new (std::nothrow) Entry(pyObj, desiredType, m_entries);
+    if (entry == nullptr) {
+        PyErr_NoMemory();
+        return false;
+    }
+    if (!entry->lease) {
+        delete entry;
+        return false;
+    }
+    m_entries = entry;
+    *cppOut = entry->lease.pointer();
+    return true;
 }
 
 void getOwnership(SbkObject *sbkObj)
