@@ -73,19 +73,21 @@ bool walkThroughBases(PyTypeObject *currentType, Predicate predicate)
     return result;
 }
 
-int getTypeIndexOnHierarchy(PyTypeObject *baseType, PyTypeObject *desiredType)
+static unsigned getTypeIndexOnHierarchy(PyTypeObject *baseType, PyTypeObject *desiredType)
 {
-    int index = -1;
+    unsigned index = 0;
     walkThroughBases(baseType, [&index, desiredType](PyTypeObject *node) {
+        if (PyType_IsSubtype(node, desiredType) != 0)
+            return true;
         ++index;
-        return PyType_IsSubtype(node, desiredType) != 0;
+        return false;
     });
     return index;
 }
 
-int getNumberOfCppBaseClasses(PyTypeObject *baseType)
+unsigned getNumberOfCppBaseClasses(PyTypeObject *baseType)
 {
-    int count = 0;
+    unsigned count = 0;
     walkThroughBases(baseType, [&count](PyTypeObject *) {
         ++count;
         return false;
@@ -680,10 +682,11 @@ static PyObject *_setupNew(PyObject *obSelf, PyTypeObject *subtype)
     auto *d = new SbkObjectPrivate;
 
     auto *sotp = PepType_SOTP(sbkSubtype);
-    int numBases = ((sotp && sotp->is_multicpp) ?
-        Shiboken::getNumberOfCppBaseClasses(subtype) : 1);
+    const bool is_multicpp = sotp != nullptr && sotp->is_multicpp;
+    const unsigned numBases = is_multicpp ? Shiboken::getNumberOfCppBaseClasses(subtype) : 1U;
+
     d->cptr = new void *[numBases];
-    std::memset(static_cast<void*>(d->cptr), 0, sizeof(void *) *size_t(numBases));
+    std::memset(static_cast<void*>(d->cptr), 0, sizeof(void *) * numBases);
     d->hasOwnership = 1;
     d->containsCppWrapper = 0;
     d->validCppObject = 0;
@@ -1506,7 +1509,7 @@ void *cppPointer(SbkObject *pyObj, PyTypeObject *desiredType)
 {
     PyTypeObject *pyType = Shiboken::pyType(pyObj);
     auto *sotp = PepType_SOTP(pyType);
-    int idx = 0;
+    unsigned idx = 0;
     if (sotp->is_multicpp)
         idx = getTypeIndexOnHierarchy(pyType, desiredType);
     if (pyObj->d->cptr)
@@ -1516,9 +1519,9 @@ void *cppPointer(SbkObject *pyObj, PyTypeObject *desiredType)
 
 std::vector<void *> cppPointers(SbkObject *pyObj)
 {
-    int n = getNumberOfCppBaseClasses(Shiboken::pyType(pyObj));
+    const unsigned n = getNumberOfCppBaseClasses(Shiboken::pyType(pyObj));
     std::vector<void *> ptrs(n);
-    for (int i = 0; i < n; ++i)
+    for (unsigned i = 0; i < n; ++i)
         ptrs[i] = pyObj->d->cptr[i];
     return ptrs;
 }
@@ -1527,7 +1530,7 @@ std::vector<void *> cppPointers(SbkObject *pyObj)
 bool setCppPointer(SbkObject *sbkObj, PyTypeObject *desiredType, void *cptr)
 {
     PyTypeObject *type = Shiboken::pyType(sbkObj);
-    int idx = 0;
+    unsigned idx = 0;
     if (PepType_SOTP(type)->is_multicpp)
         idx = getTypeIndexOnHierarchy(type, desiredType);
 

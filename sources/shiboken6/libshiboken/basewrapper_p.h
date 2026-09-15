@@ -127,7 +127,7 @@ struct SbkObjectTypePrivate
 
 namespace Shiboken
 {
-int getNumberOfCppBaseClasses(PyTypeObject *baseType);
+unsigned getNumberOfCppBaseClasses(PyTypeObject *baseType);
 
 std::vector<PyTypeObject *> getCppBaseClasses(PyTypeObject *baseType);
 

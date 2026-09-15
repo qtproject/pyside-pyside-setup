@@ -332,10 +332,10 @@ void BindingManager::unregisterWrapper(SbkObject *sbkObj)
         return;
     auto *sbkType = Shiboken::pyType(sbkObj);
     auto *d = PepType_SOTP(sbkType);
-    int numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(sbkType) : 1);
+    const unsigned numBases = ((d && d->is_multicpp) ? getNumberOfCppBaseClasses(sbkType) : 1u);
 
     const int *mi_offsets = d != nullptr ? d->mi_offsets : nullptr;
-    for (int i = 0; i < numBases; ++i) {
+    for (unsigned i = 0; i < numBases; ++i) {
         if (cptrs[i] != nullptr)
             m_d->releaseWrapper(cptrs[i], sbkObj, mi_offsets);
     }
