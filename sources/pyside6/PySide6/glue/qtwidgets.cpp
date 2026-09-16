@@ -275,14 +275,6 @@ inline void addLayoutOwnership(QLayout *layout, QLayout *other)
                                         pyChild, true);
         return;
     }
-
-    for (int i = 0, i_max = other->count(); i < i_max; ++i) {
-        QLayoutItem *item = other->itemAt(i);
-        if (PyErr_Occurred() || !item)
-            return;
-        addLayoutOwnership(layout, item);
-    }
-
     Shiboken::AutoDecRef pyParent(%CONVERTTOPYTHON[QLayout *](layout));
     Shiboken::AutoDecRef pyChild(%CONVERTTOPYTHON[QLayout *](other));
     Shiboken::Object::setParent(pyParent, pyChild);
