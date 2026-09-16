@@ -38,8 +38,7 @@ from deploy_lib.ios import pbxproj, main_mm, info_plist, ios_dependency
 def main(main_file: Path = None, name: str = None, wheel_pyside: Path = None,
          wheel_shiboken: Path = None, xcframework_path: Path = None, bundle_id: str = None,
          team_id: str = None, app_version: str = None, config_file: Path = None,
-         init: bool = False, loglevel=logging.WARNING, dry_run: bool = False,
-         force: bool = False):
+         init: bool = False, loglevel=logging.WARNING, dry_run: bool = False):
 
     logging.basicConfig(level=loglevel)
 
@@ -172,8 +171,6 @@ if __name__ == "__main__":
 
     parser.add_argument("--dry-run", action="store_true", help="show the commands to be run")
 
-    parser.add_argument("-f", "--force", action="store_true", help="force all input prompts")
-
     parser.add_argument("--name", type=str, help="Application name")
 
     parser.add_argument("--wheel-pyside", type=lambda p: Path(p).resolve(),
@@ -202,4 +199,4 @@ if __name__ == "__main__":
 
     main(args.main_file, args.name, args.wheel_pyside, args.wheel_shiboken, args.xcframework_path,
          args.bundle_id, args.team_id, args.app_version, args.config_file, args.init,
-         args.loglevel, args.dry_run, args.force)
+         args.loglevel, args.dry_run)
