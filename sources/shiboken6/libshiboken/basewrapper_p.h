@@ -6,6 +6,7 @@
 #define BASEWRAPPER_P_H
 
 #include "sbkpython.h"
+#include "shibokenclasshelpermacros.h"
 #include "basewrapper.h"
 
 #include <unordered_map>
@@ -50,11 +51,9 @@ extern "C"
  */
 struct SbkObjectPrivate
 {
+    LIBSHIBOKEN_DISABLE_COPY_MOVE(SbkObjectPrivate)
+
     SbkObjectPrivate() noexcept = default;
-    SbkObjectPrivate(const SbkObjectPrivate &) = delete;
-    SbkObjectPrivate(SbkObjectPrivate &&o) = delete;
-    SbkObjectPrivate &operator=(const SbkObjectPrivate &) = delete;
-    SbkObjectPrivate &operator=(SbkObjectPrivate &&o) = delete;
 
     /// Pointer to the C++ class.
     void ** cptr;

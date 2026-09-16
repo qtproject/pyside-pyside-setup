@@ -6,6 +6,7 @@
 #define GILSTATE_H
 
 #include <shibokenmacros.h>
+#include "shibokenclasshelpermacros.h"
 #include "sbkpython.h"
 
 namespace Shiboken
@@ -14,10 +15,7 @@ namespace Shiboken
 class LIBSHIBOKEN_API GilState
 {
 public:
-    GilState(const GilState &) = delete;
-    GilState(GilState &&) = delete;
-    GilState &operator=(const GilState &) = delete;
-    GilState &operator=(GilState &&) = delete;
+    LIBSHIBOKEN_DISABLE_COPY_MOVE(GilState)
 
     explicit GilState(bool acquire=true);
     ~GilState();

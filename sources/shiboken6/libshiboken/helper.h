@@ -7,6 +7,7 @@
 
 #include "sbkpython.h"
 #include "shibokenmacros.h"
+#include "shibokenclasshelpermacros.h"
 
 #include <iosfwd>
 
@@ -58,10 +59,7 @@ template<class T>
 class ArrayPointer
 {
     public:
-        ArrayPointer(const ArrayPointer &) = delete;
-        ArrayPointer(ArrayPointer &&) = delete;
-        ArrayPointer &operator=(const ArrayPointer &) = delete;
-        ArrayPointer &operator=(ArrayPointer &&) = delete;
+        LIBSHIBOKEN_DISABLE_COPY_MOVE(ArrayPointer)
 
         explicit ArrayPointer(Py_ssize_t size) : data(new T[size]) {}
         T &operator[](Py_ssize_t pos) { return data[pos]; }

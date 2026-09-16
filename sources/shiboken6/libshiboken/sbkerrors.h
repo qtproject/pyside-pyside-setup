@@ -7,6 +7,7 @@
 
 #include "sbkpython.h"
 #include "shibokenmacros.h"
+#include "shibokenclasshelpermacros.h"
 
 #include <memory>
 
@@ -25,10 +26,7 @@ namespace Shiboken
 struct LIBSHIBOKEN_API PythonContextMarker
 {
 public:
-    PythonContextMarker(const PythonContextMarker &) = delete;
-    PythonContextMarker(PythonContextMarker &&) = delete;
-    PythonContextMarker &operator=(const PythonContextMarker &) = delete;
-    PythonContextMarker &operator=(PythonContextMarker &&) = delete;
+    LIBSHIBOKEN_DISABLE_COPY_MOVE(PythonContextMarker)
 
     explicit PythonContextMarker();
     ~PythonContextMarker();
@@ -44,10 +42,7 @@ struct ErrorStore;
 class Stash
 {
 public:
-    Stash(const Stash &) = delete;
-    Stash &operator=(const Stash &) = delete;
-    Stash(Stash &&) = delete;
-    Stash &operator=(Stash &&) = delete;
+    LIBSHIBOKEN_DISABLE_COPY_MOVE(Stash)
 
     LIBSHIBOKEN_API Stash();
     LIBSHIBOKEN_API ~Stash();

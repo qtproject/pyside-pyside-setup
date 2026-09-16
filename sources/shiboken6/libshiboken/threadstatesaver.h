@@ -7,6 +7,7 @@
 
 #include "sbkpython.h"
 #include <shibokenmacros.h>
+#include "shibokenclasshelpermacros.h"
 
 namespace Shiboken
 {
@@ -14,10 +15,7 @@ namespace Shiboken
 class LIBSHIBOKEN_API ThreadStateSaver
 {
 public:
-    ThreadStateSaver(const ThreadStateSaver &) = delete;
-    ThreadStateSaver(ThreadStateSaver &&) = delete;
-    ThreadStateSaver &operator=(const ThreadStateSaver &) = delete;
-    ThreadStateSaver &operator=(ThreadStateSaver &&) = delete;
+    LIBSHIBOKEN_DISABLE_COPY_MOVE(ThreadStateSaver)
 
     ThreadStateSaver();
     ~ThreadStateSaver();

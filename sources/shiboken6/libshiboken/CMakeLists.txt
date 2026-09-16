@@ -90,7 +90,7 @@ sbktypefactory.cpp sbktypefactory.h
 sbkwindows.h
 shiboken.h
 shibokenbuffer.cpp shibokenbuffer.h
-shibokenmacros.h
+shibokenmacros.h shibokenclasshelpermacros.h
 threadstatesaver.cpp threadstatesaver.h
 voidptr.cpp voidptr.h
 
@@ -208,6 +208,7 @@ install(FILES
         sbktypefactory.h
         shiboken.h
         shibokenmacros.h
+        shibokenclasshelpermacros.h
         threadstatesaver.h
         shibokenbuffer.h
         sbkpep.h

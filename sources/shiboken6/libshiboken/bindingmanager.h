@@ -6,6 +6,7 @@
 #define BINDINGMANAGER_H
 
 #include "sbkpython.h"
+#include "shibokenclasshelpermacros.h"
 #include "shibokenmacros.h"
 #include "sbkdestructorentry.h"
 
@@ -26,10 +27,7 @@ using ObjectVisitor = void (*)(SbkObject *, void *);
 class LIBSHIBOKEN_API BindingManager
 {
 public:
-    BindingManager(const BindingManager &) = delete;
-    BindingManager(BindingManager &&) = delete;
-    BindingManager &operator=(const BindingManager &) = delete;
-    BindingManager &operator=(BindingManager &&) = delete;
+    LIBSHIBOKEN_DISABLE_COPY_MOVE(BindingManager)
 
     static BindingManager &instance();
 

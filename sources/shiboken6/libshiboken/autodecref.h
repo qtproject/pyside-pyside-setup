@@ -6,6 +6,7 @@
 #define AUTODECREF_H
 
 #include "sbkpython.h"
+#include "shibokenclasshelpermacros.h"
 
 #include <utility>
 
@@ -19,9 +20,9 @@ namespace Shiboken
 struct AutoDecRef
 {
 public:
-    AutoDecRef(const AutoDecRef &) = delete;
+    LIBSHIBOKEN_DISABLE_COPY(AutoDecRef)
+
     AutoDecRef(AutoDecRef &&o) noexcept : m_pyObj{std::exchange(o.m_pyObj, nullptr)} {}
-    AutoDecRef &operator=(const AutoDecRef &) = delete;
     AutoDecRef &operator=(AutoDecRef &&o) noexcept
     {
         m_pyObj = std::exchange(o.m_pyObj, nullptr);

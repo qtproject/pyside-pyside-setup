@@ -7,6 +7,7 @@
 
 #include "sbkpython.h"
 #include "shibokenmacros.h"
+#include "shibokenclasshelpermacros.h"
 
 extern "C" {
 struct SbkArrayConverter;
@@ -38,10 +39,7 @@ template <class T>
 class ArrayHandle
 {
 public:
-    ArrayHandle(const ArrayHandle &) = delete;
-    ArrayHandle& operator=(const ArrayHandle &) = delete;
-    ArrayHandle(ArrayHandle &&) = delete;
-    ArrayHandle& operator=(ArrayHandle &&) = delete;
+    LIBSHIBOKEN_DISABLE_COPY_MOVE(ArrayHandle)
 
     ArrayHandle() = default;
     ~ArrayHandle() { destroy(); }
